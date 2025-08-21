@@ -14,10 +14,6 @@
 #include "flutter/display_list/utils/dl_comparable.h"
 #include "flutter/fml/macros.h"
 
-namespace impeller {
-class TextFrame;
-}
-
 // NOLINTBEGIN(clang-analyzer-core.CallAndMessage)
 
 namespace flutter {

@@ -92,7 +92,7 @@ class DisplayListGLComplexityCalculator
 
    private:
     unsigned int save_layer_count_ = 0;
-    unsigned int draw_text_blob_count_ = 0;
+    unsigned int draw_text_count_ = 0;
   };
 
   DisplayListGLComplexityCalculator()

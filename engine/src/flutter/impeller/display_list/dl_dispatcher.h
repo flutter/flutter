@@ -339,19 +339,22 @@ class FirstPassDispatcher : public flutter::IgnoreAttributeDispatchHelper,
   // 2x3 2D affine subset of a 4x4 transform in row major order
   void transform2DAffine(DlScalar mxx, DlScalar mxy, DlScalar mxt,
                          DlScalar myx, DlScalar myy, DlScalar myt) override;
+  // clang-format on
 
+  // clang-format off
   // full 4x4 transform in row major order
   void transformFullPerspective(
       DlScalar mxx, DlScalar mxy, DlScalar mxz, DlScalar mxt,
       DlScalar myx, DlScalar myy, DlScalar myz, DlScalar myt,
       DlScalar mzx, DlScalar mzy, DlScalar mzz, DlScalar mzt,
       DlScalar mwx, DlScalar mwy, DlScalar mwz, DlScalar mwt) override;
+  // clang-format on
 
   void transformReset() override;
 
   void drawText(const std::shared_ptr<flutter::DlText>& text,
-                     DlScalar x,
-                     DlScalar y) override;
+                DlScalar x,
+                DlScalar y) override;
 
   void drawDisplayList(const sk_sp<flutter::DisplayList> display_list,
                        DlScalar opacity) override;
@@ -377,7 +380,8 @@ class FirstPassDispatcher : public flutter::IgnoreAttributeDispatchHelper,
   // |flutter::DlOpReceiver|
   void setImageFilter(const flutter::DlImageFilter* filter) override;
 
-  std::pair<std::unordered_map<int64_t, BackdropData>, size_t> TakeBackdropData();
+  std::pair<std::unordered_map<int64_t, BackdropData>, size_t>
+  TakeBackdropData();
 
  private:
   const Rect GetCurrentLocalCullingBounds() const;
@@ -405,11 +409,12 @@ std::shared_ptr<Texture> DisplayListToTexture(
 ///
 /// If [is_onscreen] is true, then the onscreen command buffer will be
 /// submitted via Context::SubmitOnscreen.
-bool RenderToTarget(ContentContext& context, RenderTarget render_target,
-                         const sk_sp<flutter::DisplayList>& display_list,
-                         Rect cull_rect,
-                         bool reset_host_buffer,
-                         bool is_onscreen = true);
+bool RenderToTarget(ContentContext& context,
+                    RenderTarget render_target,
+                    const sk_sp<flutter::DisplayList>& display_list,
+                    Rect cull_rect,
+                    bool reset_host_buffer,
+                    bool is_onscreen = true);
 
 }  // namespace impeller
 

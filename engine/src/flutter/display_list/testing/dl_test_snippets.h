@@ -230,6 +230,9 @@ SkFont CreateTestFontOfSize(DlScalar scalar);
 sk_sp<SkTextBlob> GetTestTextBlob(const std::string& str,
                                   DlScalar font_size = 20.0f);
 sk_sp<SkTextBlob> GetTestTextBlob(int index);
+#if IMPELLER_SUPPORTS_RENDERING
+std::shared_ptr<impeller::TextFrame> GetTestTextFrame(int index);
+#endif
 
 struct DisplayListInvocation {
   // ----------------------------------

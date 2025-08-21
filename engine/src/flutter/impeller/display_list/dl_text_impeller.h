@@ -8,18 +8,19 @@
 #include "flutter/display_list/dl_text.h"
 #include "flutter/impeller/typographer/text_frame.h"
 
+class SkTextBlob;
+
 namespace flutter {
 class DlTextImpeller : public DlText {
  public:
   static std::shared_ptr<DlTextImpeller> Make(
-      const std::shared_ptr<impeller::TextFrame>& frame) {
-    return std::make_shared<DlTextImpeller>(frame);
-  }
+      const std::shared_ptr<impeller::TextFrame>& frame);
+  static std::shared_ptr<DlTextImpeller> MakeFromBlob(
+      const sk_sp<SkTextBlob>& blob);
 
   ~DlTextImpeller() = default;
 
-  explicit DlTextImpeller(const std::shared_ptr<impeller::TextFrame>& frame)
-      : frame_(frame) {}
+  explicit DlTextImpeller(const std::shared_ptr<impeller::TextFrame>& frame);
 
   DlRect getBounds() const { return frame_->GetBounds(); }
 

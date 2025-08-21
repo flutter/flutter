@@ -11,6 +11,9 @@ namespace flutter {
 
 class DlRuntimeEffectImpeller final : public DlRuntimeEffect {
  public:
+  // |DlRuntimeEffect|
+  ~DlRuntimeEffectImpeller() override;
+
   static sk_sp<DlRuntimeEffect> Make(
       std::shared_ptr<impeller::RuntimeStage> runtime_stage);
 
@@ -25,8 +28,6 @@ class DlRuntimeEffectImpeller final : public DlRuntimeEffect {
 
  private:
   DlRuntimeEffectImpeller() = delete;
-  // |DlRuntimeEffect|
-  ~DlRuntimeEffectImpeller() override;
 
   std::shared_ptr<impeller::RuntimeStage> runtime_stage_;
 

@@ -36,6 +36,7 @@ impeller_component("display_list") {
     "dl_image_impeller.h",
     "dl_runtime_effect_impeller.cc",
     "dl_runtime_effect_impeller.h",
+    "dl_text_impeller.cc",
     "dl_text_impeller.h",
     "dl_vertices_geometry.cc",
     "dl_vertices_geometry.h",

@@ -1225,7 +1225,7 @@ void BM_DrawTextBlob(benchmark::State& state,
   DisplayListBuilder builder;
   DlPaint paint = GetPaintForRun(attributes);
 
-  AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawTextBlobFlags);
+  AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawTextFlags);
 
   size_t draw_calls = state.range(0);
   size_t canvas_size = kFixedCanvasSize;

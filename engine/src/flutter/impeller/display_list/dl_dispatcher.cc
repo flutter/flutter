@@ -366,56 +366,42 @@ void DlDispatcherBase::skew(DlScalar sx, DlScalar sy) {
   GetCanvas().Skew(sx, sy);
 }
 
+// clang-format off
 // |flutter::DlOpReceiver|
-void DlDispatcherBase::transform2DAffine(DlScalar mxx,
-                                         DlScalar mxy,
-                                         DlScalar mxt,
-                                         DlScalar myx,
-                                         DlScalar myy,
-                                         DlScalar myt) {
+void DlDispatcherBase::transform2DAffine(
+  DlScalar mxx, DlScalar mxy, DlScalar mxt,
+  DlScalar myx, DlScalar myy, DlScalar myt) {
   AUTO_DEPTH_WATCHER(0u);
 
-  // clang-format off
   transformFullPerspective(
     mxx, mxy,  0, mxt,
     myx, myy,  0, myt,
     0  ,   0,  1,   0,
     0  ,   0,  0,   1
   );
-  // clang-format on
 }
+// clang-format on
 
+// clang-format off
 // |flutter::DlOpReceiver|
-void DlDispatcherBase::transformFullPerspective(DlScalar mxx,
-                                                DlScalar mxy,
-                                                DlScalar mxz,
-                                                DlScalar mxt,
-                                                DlScalar myx,
-                                                DlScalar myy,
-                                                DlScalar myz,
-                                                DlScalar myt,
-                                                DlScalar mzx,
-                                                DlScalar mzy,
-                                                DlScalar mzz,
-                                                DlScalar mzt,
-                                                DlScalar mwx,
-                                                DlScalar mwy,
-                                                DlScalar mwz,
-                                                DlScalar mwt) {
+void DlDispatcherBase::transformFullPerspective(
+  DlScalar mxx, DlScalar mxy, DlScalar mxz, DlScalar mxt,
+  DlScalar myx, DlScalar myy, DlScalar myz, DlScalar myt,
+  DlScalar mzx, DlScalar mzy, DlScalar mzz, DlScalar mzt,
+  DlScalar mwx, DlScalar mwy, DlScalar mwz, DlScalar mwt) {
   AUTO_DEPTH_WATCHER(0u);
 
   // The order of arguments is row-major but Impeller matrices are
   // column-major.
-  // clang-format off
   auto transform = Matrix{
     mxx, myx, mzx, mwx,
     mxy, myy, mzy, mwy,
     mxz, myz, mzz, mwz,
     mxt, myt, mzt, mwt
   };
-  // clang-format on
   GetCanvas().Transform(transform);
 }
+// clang-format on
 
 // |flutter::DlOpReceiver|
 void DlDispatcherBase::transformReset() {
@@ -859,12 +845,12 @@ void DlDispatcherBase::drawText(const std::shared_ptr<flutter::DlText>& text,
                                 DlScalar y) {
   AUTO_DEPTH_WATCHER(1u);
 
-  auto textFrame = text->getTextFrame();
+  auto text_frame = text->getTextFrame();
 
   // When running with Impeller enabled Skia text blobs are converted to
   // Impeller text frames in paragraph_skia.cc
-  FML_CHECK(textFrame != nullptr);
-  GetCanvas().DrawTextFrame(textFrame,              //
+  FML_CHECK(text_frame != nullptr);
+  GetCanvas().DrawTextFrame(text_frame,             //
                             impeller::Point{x, y},  //
                             paint_                  //
   );
@@ -1057,30 +1043,33 @@ void FirstPassDispatcher::skew(DlScalar sx, DlScalar sy) {
 }
 
 // clang-format off
-  // 2x3 2D affine subset of a 4x4 transform in row major order
-  void FirstPassDispatcher::transform2DAffine(DlScalar mxx, DlScalar mxy, DlScalar mxt,
-                                              DlScalar myx, DlScalar myy, DlScalar myt) {
-    matrix_ = matrix_ * Matrix::MakeColumn(
-        mxx,  myx,  0.0f, 0.0f,
-        mxy,  myy,  0.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        mxt,  myt,  0.0f, 1.0f
-    );
-  }
+// 2x3 2D affine subset of a 4x4 transform in row major order
+void FirstPassDispatcher::transform2DAffine(
+  DlScalar mxx, DlScalar mxy, DlScalar mxt,
+  DlScalar myx, DlScalar myy, DlScalar myt) {
+  matrix_ = matrix_ * Matrix::MakeColumn(
+      mxx,  myx,  0.0f, 0.0f,
+      mxy,  myy,  0.0f, 0.0f,
+      0.0f, 0.0f, 1.0f, 0.0f,
+      mxt,  myt,  0.0f, 1.0f
+  );
+}
+// clang-format on
 
-  // full 4x4 transform in row major order
-  void FirstPassDispatcher::transformFullPerspective(
-      DlScalar mxx, DlScalar mxy, DlScalar mxz, DlScalar mxt,
-      DlScalar myx, DlScalar myy, DlScalar myz, DlScalar myt,
-      DlScalar mzx, DlScalar mzy, DlScalar mzz, DlScalar mzt,
-      DlScalar mwx, DlScalar mwy, DlScalar mwz, DlScalar mwt) {
-    matrix_ = matrix_ * Matrix::MakeColumn(
-        mxx, myx, mzx, mwx,
-        mxy, myy, mzy, mwy,
-        mxz, myz, mzz, mwz,
-        mxt, myt, mzt, mwt
-    );
-  }
+// clang-format off
+// full 4x4 transform in row major order
+void FirstPassDispatcher::transformFullPerspective(
+  DlScalar mxx, DlScalar mxy, DlScalar mxz, DlScalar mxt,
+  DlScalar myx, DlScalar myy, DlScalar myz, DlScalar myt,
+  DlScalar mzx, DlScalar mzy, DlScalar mzz, DlScalar mzt,
+  DlScalar mwx, DlScalar mwy, DlScalar mwz, DlScalar mwt) {
+  matrix_ = matrix_ * Matrix::MakeColumn(
+    mxx, myx, mzx, mwx,
+    mxy, myy, mzy, mwy,
+    mxz, myz, mzz, mwz,
+    mxt, myt, mzt, mwt
+  );
+}
 // clang-format on
 
 void FirstPassDispatcher::transformReset() {

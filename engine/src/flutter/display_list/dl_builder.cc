@@ -1699,18 +1699,10 @@ void DisplayListBuilder::DrawDisplayList(const sk_sp<DisplayList> display_list,
   }
 }
 
-void DisplayListBuilder::DrawText(const std::shared_ptr<DlText>& text,
-                                  DlScalar x,
-                                  DlScalar y,
-                                  const DlPaint& paint) {
-  SetAttributesFromPaint(paint, DisplayListOpFlags::kDrawTextBlobFlags);
-  drawText(text, x, y);
-}
-
 void DisplayListBuilder::drawText(const std::shared_ptr<DlText>& text,
                                   DlScalar x,
                                   DlScalar y) {
-  DisplayListAttributeFlags flags = kDrawTextBlobFlags;
+  DisplayListAttributeFlags flags = kDrawTextFlags;
   OpResult result = PaintResult(current_, flags);
   if (result == OpResult::kNoEffect) {
     return;
@@ -1734,6 +1726,14 @@ void DisplayListBuilder::drawText(const std::shared_ptr<DlText>& text,
     UpdateLayerOpacityCompatibility(false);
     UpdateLayerResult(result);
   }
+}
+
+void DisplayListBuilder::DrawText(const std::shared_ptr<DlText>& text,
+                                  DlScalar x,
+                                  DlScalar y,
+                                  const DlPaint& paint) {
+  SetAttributesFromPaint(paint, DisplayListOpFlags::kDrawTextFlags);
+  drawText(text, x, y);
 }
 
 void DisplayListBuilder::DrawShadow(const DlPath& path,

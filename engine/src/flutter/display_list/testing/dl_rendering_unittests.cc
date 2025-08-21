@@ -3903,7 +3903,7 @@ TEST_F(DisplayListRendering, DrawTextBlob) {
                                  paint);
           },
 #endif  // IMPELLER_SUPPORTS_RENDERING
-          kDrawTextBlobFlags)
+          kDrawTextFlags)
           .set_draw_text_blob(),
       // From examining the bounds differential for the "Default" case, the
       // SkTextBlob adds a padding of ~32 on the left, ~30 on the right,

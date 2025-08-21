@@ -11,6 +11,9 @@ namespace flutter {
 
 class DlRuntimeEffectSkia final : public DlRuntimeEffect {
  public:
+  // |DlRuntimeEffect|
+  ~DlRuntimeEffectSkia() override;
+
   static sk_sp<DlRuntimeEffect> Make(
       const sk_sp<SkRuntimeEffect>& runtime_effect);
 
@@ -24,8 +27,6 @@ class DlRuntimeEffectSkia final : public DlRuntimeEffect {
 
  private:
   DlRuntimeEffectSkia() = delete;
-  // |DlRuntimeEffect|
-  ~DlRuntimeEffectSkia() override;
 
   sk_sp<SkRuntimeEffect> skia_runtime_effect_;
 

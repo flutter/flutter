@@ -12,13 +12,11 @@
 namespace flutter {
 class DlTextSkia : public DlText {
  public:
-  static std::shared_ptr<DlTextSkia> Make(const sk_sp<SkTextBlob>& blob) {
-    return std::make_shared<DlTextSkia>(blob);
-  }
+  static std::shared_ptr<DlTextSkia> Make(const sk_sp<SkTextBlob>& blob);
 
   ~DlTextSkia() = default;
 
-  explicit DlTextSkia(const sk_sp<SkTextBlob>& blob) : blob_(blob) {}
+  explicit DlTextSkia(const sk_sp<SkTextBlob>& blob);
 
   DlRect getBounds() const { return ToDlRect(blob_->bounds()); }
 

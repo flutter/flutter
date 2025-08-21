@@ -15,12 +15,6 @@
 #include "flutter/display_list/geometry/dl_path.h"
 #include "flutter/display_list/image/dl_image.h"
 
-#include "third_party/skia/include/core/SkTextBlob.h"
-
-namespace impeller {
-class TextFrame;
-}
-
 namespace flutter {
 
 //------------------------------------------------------------------------------

@@ -37,12 +37,12 @@ unsigned int DisplayListGLComplexityCalculator::GLHelper::BatchedComplexity() {
   }
 
   unsigned int draw_text_blob_complexity;
-  if (draw_text_blob_count_ == 0) {
+  if (draw_text_count_ == 0) {
     draw_text_blob_complexity = 0;
   } else {
     // m = 1/240
     // c = 0.25
-    draw_text_blob_complexity = (draw_text_blob_count_ + 60) * 2500 / 3;
+    draw_text_blob_complexity = (draw_text_count_ + 60) * 2500 / 3;
   }
 
   return save_layer_complexity + draw_text_blob_complexity;
@@ -655,8 +655,8 @@ void DisplayListGLComplexityCalculator::GLHelper::drawText(
   // per frame, that fixed cost is greatly reduced per subsequent call. This
   // is likely because there is batching being done in SkCanvas.
 
-  // Increment draw_text_blob_count_ and calculate the cost at the end.
-  draw_text_blob_count_++;
+  // Increment draw_text_count_ and calculate the cost at the end.
+  draw_text_count_++;
 }
 
 void DisplayListGLComplexityCalculator::GLHelper::drawShadow(
