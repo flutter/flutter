@@ -1901,13 +1901,33 @@ class _OverlayPortalState extends State<OverlayPortal> {
         locationCache._theater == marker.theater;
   }
 
-  OverlayState _getOverlayState() {
-    return widget.targetsOverlay ?? Overlay.of(context, rootOverlay: widget._targetRootOverlay);
+  OverlayState? _getOverlayState() {
+    return widget.targetsOverlay ??
+        Overlay.maybeOf(context, rootOverlay: widget._targetRootOverlay);
   }
 
   _OverlayEntryLocation _getLocation(int zOrderIndex) {
     final _OverlayEntryLocation? cachedLocation = _locationCache;
-    late final _RenderTheaterMarker marker = _RenderTheaterMarker.of(context, _getOverlayState());
+    final OverlayState? state = _getOverlayState();
+    _RenderTheaterMarker? marker;
+    if (state != null) {
+      marker = _RenderTheaterMarker.of(context, state);
+    }
+    if (marker == null) {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('No Overlay widget found.'),
+        ErrorDescription(
+          '${context.widget.runtimeType} widgets require an Overlay widget ancestor.\n'
+          'An overlay lets widgets float on top of other widget children.',
+        ),
+        ErrorHint(
+          'To introduce an Overlay widget, you can either directly '
+          'include one, or use a widget that contains an Overlay itself, '
+          'such as a Navigator, WidgetApp, MaterialApp, or CupertinoApp.',
+        ),
+        ...context.describeMissingAncestor(expectedAncestorType: Overlay),
+      ]);
+    }
     final bool isCacheValid =
         cachedLocation != null &&
         (!_childModelMayHaveChanged || _isTheSameLocation(cachedLocation, marker));
@@ -1960,7 +1980,9 @@ class _OverlayPortalState extends State<OverlayPortal> {
   void didUpdateWidget(OverlayPortal oldWidget) {
     super.didUpdateWidget(oldWidget);
     _childModelMayHaveChanged =
-        _childModelMayHaveChanged || oldWidget._targetRootOverlay != widget._targetRootOverlay;
+        _childModelMayHaveChanged ||
+        oldWidget._targetRootOverlay != widget._targetRootOverlay ||
+        oldWidget.targetsOverlay != widget.targetsOverlay;
     if (oldWidget.controller != widget.controller) {
       oldWidget.controller._attachTarget = null;
       _setupController(widget.controller);
@@ -2179,32 +2201,22 @@ class _RenderTheaterMarker extends InheritedWidget {
         oldWidget.overlayEntryWidgetState != overlayEntryWidgetState;
   }
 
-  static _RenderTheaterMarker of(BuildContext context, OverlayState targetsOverlay) {
+  /// Finding the theater marker that holds by the `targetsOverlay`
+  static _RenderTheaterMarker? of(BuildContext context, OverlayState targetsOverlay) {
     InheritedElement? element = context
         .getElementForInheritedWidgetOfExactType<_RenderTheaterMarker>();
     _RenderTheaterMarker? marker = element?.widget as _RenderTheaterMarker?;
     while (marker != null && marker.theater.overlay != targetsOverlay) {
-      element = context.getElementForInheritedWidgetOfExactType<_RenderTheaterMarker>();
+      element!.visitAncestorElements((Element ancestor) {
+        element = ancestor.getElementForInheritedWidgetOfExactType<_RenderTheaterMarker>();
+        return false;
+      });
       marker = element?.widget as _RenderTheaterMarker?;
     }
     if (marker != null) {
       context.dependOnInheritedElement(element!);
-      return marker;
     }
-
-    throw FlutterError.fromParts(<DiagnosticsNode>[
-      ErrorSummary('No Overlay widget found.'),
-      ErrorDescription(
-        '${context.widget.runtimeType} widgets require an Overlay widget ancestor.\n'
-        'An overlay lets widgets float on top of other widget children.',
-      ),
-      ErrorHint(
-        'To introduce an Overlay widget, you can either directly '
-        'include one, or use a widget that contains an Overlay itself, '
-        'such as a Navigator, WidgetApp, MaterialApp, or CupertinoApp.',
-      ),
-      ...context.describeMissingAncestor(expectedAncestorType: Overlay),
-    ]);
+    return marker;
   }
 }
 

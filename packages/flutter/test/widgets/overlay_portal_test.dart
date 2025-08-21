@@ -1235,7 +1235,6 @@ void main() {
   testWidgets('Can target the root overlay', (WidgetTester tester) async {
     final GlobalKey widgetKey = GlobalKey(debugLabel: 'widget outer');
     final GlobalKey rootOverlayKey = GlobalKey(debugLabel: 'root overlay');
-    final GlobalKey localOverlayKey = GlobalKey(debugLabel: 'local overlay');
     final RenderBox childBox = RenderConstrainedBox(additionalConstraints: const BoxConstraints());
     final RenderBox overlayChildBox = RenderConstrainedBox(
       additionalConstraints: const BoxConstraints(),
@@ -1267,7 +1266,6 @@ void main() {
                       initialEntries: <OverlayEntry>[
                         _buildOverlayEntry((BuildContext context) {
                           return Overlay(
-                            key: localOverlayKey,
                             initialEntries: <OverlayEntry>[
                               // Overlay.performLayout calls layoutCounter.layout.
                               _buildOverlayEntry(
@@ -1340,6 +1338,113 @@ void main() {
     expect(
       _ancestorRenderTheaters(overlayChildBox).single,
       tester.renderObject(find.byKey(rootOverlayKey)),
+    );
+    verifyTreeIsClean();
+  });
+
+  testWidgets('Can target the arbitrary overlay', (WidgetTester tester) async {
+    final GlobalKey widgetKey = GlobalKey(debugLabel: 'widget outer');
+    final GlobalKey<OverlayState> targetOverlayKey = GlobalKey<OverlayState>(
+      debugLabel: 'target overlay',
+    );
+    final RenderBox childBox = RenderConstrainedBox(additionalConstraints: const BoxConstraints());
+    final RenderBox overlayChildBox = RenderConstrainedBox(
+      additionalConstraints: const BoxConstraints(),
+    );
+    final _RenderLayoutCounter overlayLayoutCounter = _RenderLayoutCounter();
+    int layoutCount = 0;
+    // Starts with closest overlay
+    OverlayState? state;
+    late StateSetter setState;
+
+    // This tree has 3 nested Overlays.
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter stateSetter) {
+          setState = stateSetter;
+          return Center(
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Overlay(
+                initialEntries: <OverlayEntry>[
+                  _buildOverlayEntry((BuildContext context) {
+                    return Overlay(
+                      key: targetOverlayKey,
+                      initialEntries: <OverlayEntry>[
+                        _buildOverlayEntry((BuildContext context) {
+                          return Overlay(
+                            initialEntries: <OverlayEntry>[
+                              // Overlay.performLayout calls layoutCounter.layout.
+                              _buildOverlayEntry(
+                                (BuildContext context) =>
+                                    WidgetToRenderBoxAdapter(renderBox: overlayLayoutCounter),
+                              ),
+                              _buildOverlayEntry((BuildContext outerEntryContext) {
+                                return Center(
+                                  child: Builder(
+                                    builder: (BuildContext context) {
+                                      return OverlayPortal(
+                                        key: widgetKey,
+                                        controller: controller1,
+                                        targetsOverlay: state,
+                                        overlayChildBuilder: (BuildContext context) {
+                                          return LayoutBuilder(
+                                            builder:
+                                                (BuildContext context, BoxConstraints constraints) {
+                                                  layoutCount += 1;
+                                                  // Both overlays need to be clean at this point.
+                                                  expect(
+                                                    tester.renderObjectList(find.byType(Overlay)),
+                                                    everyElement(
+                                                      wrapMatcher(
+                                                        (RenderObject object) =>
+                                                            !object.debugNeedsLayout ||
+                                                            object.debugDoingThisLayout,
+                                                      ),
+                                                    ),
+                                                  );
+                                                  return WidgetToRenderBoxAdapter(
+                                                    renderBox: overlayChildBox,
+                                                  );
+                                                },
+                                          );
+                                        },
+                                        child: WidgetToRenderBoxAdapter(renderBox: childBox),
+                                      );
+                                    },
+                                  ),
+                                );
+                              }),
+                            ],
+                          );
+                        }),
+                      ],
+                    );
+                  }),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+    expect(layoutCount, 1);
+    expect(overlayLayoutCounter.layoutCount, 1);
+    expect(_ancestorRenderTheaters(overlayChildBox).length, 3);
+
+    verifyTreeIsClean();
+
+    // Now targets the root overlay.
+    setState(() {
+      state = targetOverlayKey.currentState;
+    });
+    await tester.pump();
+    expect(layoutCount, 2);
+    expect(overlayLayoutCounter.layoutCount, 1);
+    expect(
+      _ancestorRenderTheaters(overlayChildBox).first,
+      tester.renderObject(find.byKey(targetOverlayKey)),
     );
     verifyTreeIsClean();
   });
