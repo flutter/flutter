@@ -93,17 +93,12 @@ abstract class SemanticsEvent {
 /// [1]: https://developer.android.com/reference/android/view/View#announceForAccessibility(java.lang.CharSequence)
 ///
 class AnnounceSemanticsEvent extends SemanticsEvent {
-  /// Constructs an event that triggers an announcement by the platform
-  /// for the provided view.
+  /// Constructs an event that triggers an announcement by the platform.
   const AnnounceSemanticsEvent(
     this.message,
-    this.textDirection,
-    this.viewId, {
+    this.textDirection, {
     this.assertiveness = Assertiveness.polite,
   }) : super('announce');
-
-  /// The view that this announcement is on.
-  final int viewId;
 
   /// The message to announce.
   final String message;
@@ -122,7 +117,6 @@ class AnnounceSemanticsEvent extends SemanticsEvent {
   @override
   Map<String, dynamic> getDataMap() {
     return <String, dynamic>{
-      'viewId': viewId,
       'message': message,
       'textDirection': textDirection.index,
       if (assertiveness != Assertiveness.polite) 'assertiveness': assertiveness.index,
