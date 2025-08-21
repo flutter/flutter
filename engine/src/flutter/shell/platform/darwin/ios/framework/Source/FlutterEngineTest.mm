@@ -191,14 +191,12 @@ FLUTTER_ASSERT_ARC
 
 - (void)testGetViewControllerFromRegistrar {
   FlutterDartProject* project = [[FlutterDartProject alloc] init];
-  FlutterViewController* flutterViewController =
-      [[FlutterViewController alloc] initWithProject:project nibName:nil bundle:nil];
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"engine" project:project];
   id mockEngine = OCMPartialMock(engine);
-  NSObject<FlutterPluginRegistrar>* registrar = [engine registrarForPlugin:@"plugin"];
+  NSObject<FlutterPluginRegistrar>* registrar = [mockEngine registrarForPlugin:@"plugin"];
 
   registrar.viewController;
-  OCMVerify(times(1), [engine viewController]);
+  OCMVerify(times(1), [mockEngine viewController]);
 }
 
 - (void)testSetBinaryMessengerToSameBinaryMessenger {
