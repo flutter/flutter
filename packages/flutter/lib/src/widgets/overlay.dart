@@ -1811,8 +1811,8 @@ class OverlayPortal extends StatefulWidget {
   /// builds on the root [Overlay] when [OverlayPortalController.show] is
   /// called.
   @Deprecated(
-    'Use OverlayPortal(targetsOverlay: Overlay.of(context, rootOverlay: true)) '
-    'instead. This feature was deprecated after v3.33.0-0.0.pre.',
+    'Use OverlayPortal with root overlay instead. '
+    'This feature was deprecated after v3.33.0-0.0.pre.',
   )
   const OverlayPortal.targetsRootOverlay({
     super.key,
