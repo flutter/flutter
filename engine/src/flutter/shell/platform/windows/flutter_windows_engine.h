@@ -160,7 +160,7 @@ class FlutterWindowsEngine {
     return message_dispatcher_.get();
   }
 
-  DisplayMonitor* display_monitor() { return display_monitor_.get(); }
+  std::shared_ptr<DisplayMonitor> display_monitor() { return display_monitor_; }
 
   // Notifies the engine about a display update.
   void UpdateDisplay(const std::vector<FlutterEngineDisplay>& displays);
@@ -425,7 +425,7 @@ class FlutterWindowsEngine {
   mutable std::shared_mutex views_mutex_;
 
   // The display monitor.
-  std::unique_ptr<DisplayMonitor> display_monitor_;
+  std::shared_ptr<DisplayMonitor> display_monitor_;
 
   // Task runner for tasks posted from the engine.
   std::unique_ptr<TaskRunner> task_runner_;

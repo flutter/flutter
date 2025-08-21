@@ -31,6 +31,9 @@ class DisplayMonitor {
                            LPARAM lparam,
                            LRESULT* result);
 
+  // Finds the display information associated with the id.
+  std::optional<FlutterEngineDisplay> FindById(FlutterEngineDisplayId id);
+
   // Get the display information for all displays
   std::vector<FlutterEngineDisplay> GetDisplays() const;
 
@@ -40,6 +43,10 @@ class DisplayMonitor {
                                            HDC hdc,
                                            LPRECT rect,
                                            LPARAM data);
+
+  // Helper method that creates a |FlutterEngineDisplay| from the
+  // provided |monitor|.
+  std::optional<FlutterEngineDisplay> FromMonitor(HMONITOR monitor) const;
 
   FlutterWindowsEngine* engine_;
 

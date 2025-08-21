@@ -76,6 +76,7 @@ class MockWindow : public FlutterWindow {
               OnImeComposition,
               (UINT const, WPARAM const, LPARAM const),
               (override));
+  MOCK_METHOD(FlutterEngineDisplayId, GetDisplayId, (), (override));
 
   MOCK_METHOD(void, OnThemeChange, (), (override));
 
