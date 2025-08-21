@@ -289,11 +289,11 @@ std::ostream& operator<<(std::ostream& os, DlImageSampling sampling) {
 }
 
 static std::ostream& operator<<(std::ostream& os, const flutter::DlText* text) {
-  auto blob = text->getTextBlob();
+  auto blob = text->GetTextBlob();
   if (blob != nullptr) {
     return os << "&SkTextBlob(ID: " << blob->uniqueID() << ", " << blob->bounds() << ")";
   }
-  auto frame = text->getTextFrame();
+  auto frame = text->GetTextFrame();
   if (frame != nullptr) {
     auto bounds = frame->GetBounds();
     return os << "&TextFrame("

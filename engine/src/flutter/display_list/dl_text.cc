@@ -6,6 +6,6 @@
 
 namespace flutter {
 
-// Only exists to verify that the header can be cleanly included.
+bool DlText::operator==(const DlText& other) const {}
 
 }  // namespace flutter

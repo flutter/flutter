@@ -119,14 +119,16 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
       paint.setMaskFilter(&filter);
     }
     std::shared_ptr<DlText> text;
-    if (impeller_enabled_) {
 #if IMPELLER_SUPPORTS_RENDERING
+    if (impeller_enabled_) {
       text =
           DlTextImpeller::Make(impeller::MakeTextFrameFromTextBlobSkia(blob));
-#endif
     } else {
       text = DlTextSkia::Make(blob);
     }
+#else
+    text = DlTextSkia::Make(blob);
+#endif
     builder_->DrawText(text, x, y, paint);
   }
 

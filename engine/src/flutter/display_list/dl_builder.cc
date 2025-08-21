@@ -1707,7 +1707,7 @@ void DisplayListBuilder::drawText(const std::shared_ptr<DlText>& text,
   if (result == OpResult::kNoEffect) {
     return;
   }
-  DlRect bounds = text->getBounds().Shift(x, y);
+  DlRect bounds = text->GetBounds().Shift(x, y);
   bool unclipped = AccumulateOpBounds(bounds, flags);
   // TODO(https://github.com/flutter/flutter/issues/82202): Remove once the
   // unit tests can use Fuchsia's font manager instead of the empty default.

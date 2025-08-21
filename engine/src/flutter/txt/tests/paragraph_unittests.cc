@@ -63,11 +63,11 @@ class DlOpRecorder final : public virtual DlOpReceiver,
   void drawText(const std::shared_ptr<DlText>& text,
                 SkScalar x,
                 SkScalar y) override {
-    auto blob = text->getTextBlob();
+    auto blob = text->GetTextBlob();
     if (blob) {
-      blobs_.push_back(blob);
+      blobs_.push_back(sk_ref_sp(blob));
     } else {
-      auto frame = text->getTextFrame();
+      auto frame = text->GetTextFrame();
       FML_CHECK(frame);
       text_frames_.push_back(frame);
     }

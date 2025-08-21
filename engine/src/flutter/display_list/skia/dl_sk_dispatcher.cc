@@ -318,7 +318,7 @@ void DlSkCanvasDispatcher::drawDisplayList(
 void DlSkCanvasDispatcher::drawText(const std::shared_ptr<DlText>& text,
                                     DlScalar x,
                                     DlScalar y) {
-  auto blob = text->getTextBlob();
+  auto blob = text->GetTextBlob();
   FML_CHECK(blob) << "Impeller DlText cannot be drawn to a Skia canvas.";
   canvas_->drawTextBlob(blob, x, y, paint());
 }

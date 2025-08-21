@@ -1107,10 +1107,7 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
             [](DlOpReceiver& r) {
               r.drawText(DlTextSkia::Make(GetTestTextBlob(2)), 10, 10);
             }},
-       }},
 #if IMPELLER_SUPPORTS_RENDERING
-      {"DrawText",
-       {
            {1, 32, 1,
             [](DlOpReceiver& r) {
               r.drawText(DlTextImpeller::Make(GetTestTextFrame(1)), 10, 10);
@@ -1127,8 +1124,8 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
             [](DlOpReceiver& r) {
               r.drawText(DlTextImpeller::Make(GetTestTextFrame(2)), 10, 10);
             }},
-       }},
 #endif
+       }},
       {"DrawShadow",
        {
            {1, 56, 1,

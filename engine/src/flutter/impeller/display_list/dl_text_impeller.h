@@ -22,11 +22,11 @@ class DlTextImpeller : public DlText {
 
   explicit DlTextImpeller(const std::shared_ptr<impeller::TextFrame>& frame);
 
-  DlRect getBounds() const { return frame_->GetBounds(); }
+  DlRect GetBounds() const { return frame_->GetBounds(); }
 
-  std::shared_ptr<impeller::TextFrame> getTextFrame() const { return frame_; }
+  std::shared_ptr<impeller::TextFrame> GetTextFrame() const { return frame_; }
 
-  sk_sp<SkTextBlob> getTextBlob() const { return nullptr; }
+  const SkTextBlob* GetTextBlob() const { return nullptr; }
 
  private:
   std::shared_ptr<impeller::TextFrame> frame_;

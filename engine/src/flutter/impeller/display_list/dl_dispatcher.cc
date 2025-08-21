@@ -374,10 +374,10 @@ void DlDispatcherBase::transform2DAffine(
   AUTO_DEPTH_WATCHER(0u);
 
   transformFullPerspective(
-    mxx, mxy,  0, mxt,
-    myx, myy,  0, myt,
-    0  ,   0,  1,   0,
-    0  ,   0,  0,   1
+      mxx, mxy,  0, mxt,
+      myx, myy,  0, myt,
+      0  ,   0,  1,   0,
+      0  ,   0,  0,   1
   );
 }
 // clang-format on
@@ -394,10 +394,10 @@ void DlDispatcherBase::transformFullPerspective(
   // The order of arguments is row-major but Impeller matrices are
   // column-major.
   auto transform = Matrix{
-    mxx, myx, mzx, mwx,
-    mxy, myy, mzy, mwy,
-    mxz, myz, mzz, mwz,
-    mxt, myt, mzt, mwt
+      mxx, myx, mzx, mwx,
+      mxy, myy, mzy, mwy,
+      mxz, myz, mzz, mwz,
+      mxt, myt, mzt, mwt
   };
   GetCanvas().Transform(transform);
 }
@@ -845,7 +845,7 @@ void DlDispatcherBase::drawText(const std::shared_ptr<flutter::DlText>& text,
                                 DlScalar y) {
   AUTO_DEPTH_WATCHER(1u);
 
-  auto text_frame = text->getTextFrame();
+  auto text_frame = text->GetTextFrame();
 
   // When running with Impeller enabled Skia text blobs are converted to
   // Impeller text frames in paragraph_skia.cc
@@ -1064,10 +1064,10 @@ void FirstPassDispatcher::transformFullPerspective(
   DlScalar mzx, DlScalar mzy, DlScalar mzz, DlScalar mzt,
   DlScalar mwx, DlScalar mwy, DlScalar mwz, DlScalar mwt) {
   matrix_ = matrix_ * Matrix::MakeColumn(
-    mxx, myx, mzx, mwx,
-    mxy, myy, mzy, mwy,
-    mxz, myz, mzz, mwz,
-    mxt, myt, mzt, mwt
+      mxx, myx, mzx, mwx,
+      mxy, myy, mzy, mwy,
+      mxz, myz, mzz, mwz,
+      mxt, myt, mzt, mwt
   );
 }
 // clang-format on
@@ -1080,7 +1080,7 @@ void FirstPassDispatcher::drawText(const std::shared_ptr<flutter::DlText>& text,
                                    DlScalar x,
                                    DlScalar y) {
   GlyphProperties properties;
-  auto text_frame = text->getTextFrame();
+  auto text_frame = text->GetTextFrame();
   if (text_frame == nullptr) {
     return;
   }

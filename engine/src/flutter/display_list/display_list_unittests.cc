@@ -1232,6 +1232,9 @@ TEST_F(DisplayListTest, SingleOpsMightSupportGroupOpacityBlendMode) {
   }
   RUN_TESTS2(canvas.DrawText(DlTextSkia::Make(GetTestTextBlob(1)), 0, 0, paint);
              , false);
+  RUN_TESTS2(
+      canvas.DrawText(DlTextImpeller::Make(GetTestTextFrame(1)), 0, 0, paint);
+      , false);
   RUN_TESTS2(canvas.DrawShadow(kTestPath1, DlColor::kBlack(), 1.0, false, 1.0);
              , false);
 
@@ -3524,6 +3527,8 @@ TEST_F(DisplayListTest, NopOperationsOmittedFromRecords) {
                             DlBlendMode::kSrcOver, DlImageSampling::kLinear,
                             nullptr, &paint);
           builder.DrawText(DlTextSkia::Make(GetTestTextBlob(1)), 10, 10, paint);
+          builder.DrawText(DlTextImpeller::Make(GetTestTextFrame(1)), 10, 10,
+                           paint);
 
           // Dst mode eliminates most rendering ops except for
           // the following two, so we'll prune those manually...
@@ -5508,13 +5513,12 @@ TEST_F(DisplayListTest, BoundedRenderOpsDoNotReportUnbounded) {
 #if IMPELLER_SUPPORTS_RENDERING
   test_bounded("DrawTextFrame", [](DlCanvas& builder) {
     auto blob = GetTestTextBlob("Hello");
-    auto frame = impeller::MakeTextFrameFromTextBlobSkia(blob);
 
     // Make sure the blob fits within the draw_rect bounds.
     ASSERT_LT(blob->bounds().width(), draw_rect.GetWidth());
     ASSERT_LT(blob->bounds().height(), draw_rect.GetHeight());
 
-    auto text = DlTextImpeller::Make(frame);
+    auto text = DlTextImpeller::MakeFromBlob(blob);
 
     // Draw once at upper left and again at lower right to fill the bounds.
     builder.DrawText(text, draw_rect.GetLeft() - blob->bounds().left(),

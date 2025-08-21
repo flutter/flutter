@@ -18,11 +18,11 @@ class DlTextSkia : public DlText {
 
   explicit DlTextSkia(const sk_sp<SkTextBlob>& blob);
 
-  DlRect getBounds() const { return ToDlRect(blob_->bounds()); }
+  DlRect GetBounds() const { return ToDlRect(blob_->bounds()); }
 
-  std::shared_ptr<impeller::TextFrame> getTextFrame() const { return nullptr; }
+  std::shared_ptr<impeller::TextFrame> GetTextFrame() const { return nullptr; }
 
-  sk_sp<SkTextBlob> getTextBlob() const { return blob_; }
+  const SkTextBlob* GetTextBlob() const { return blob_.get(); }
 
  private:
   sk_sp<SkTextBlob> blob_;

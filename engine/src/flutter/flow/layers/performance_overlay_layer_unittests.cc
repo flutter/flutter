@@ -223,7 +223,7 @@ TEST_F(PerformanceOverlayLayerTest, SimpleRasterizerStatistics) {
   ASSERT_EQ(inspector.texts().size(), 1u);
   ASSERT_EQ(inspector.text_positions().size(), 1u);
   auto text_data =
-      inspector.texts().front()->getTextBlob()->serialize(SkSerialProcs{});
+      inspector.texts().front()->GetTextBlob()->serialize(SkSerialProcs{});
   EXPECT_TRUE(text_data->equals(overlay_text_data.get()));
   EXPECT_EQ(inspector.text_positions().front(), text_position);
 }
