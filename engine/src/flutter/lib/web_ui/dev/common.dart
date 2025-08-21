@@ -250,17 +250,18 @@ final String contentHash = () {
     args = <String>[path.join('bin', 'internal', 'content_aware_hash.ps1')];
   } else {
     executable = path.join('bin', 'internal', 'content_aware_hash.sh');
+    args = <String>[];
   }
   final result = io.Process.runSync(
-    executable
+    executable,
     args,
-    workingDirectory: environment.flutterRoot,
+    workingDirectory: environment.flutterRootDir,
     stderrEncoding: utf8,
     stdoutEncoding: utf8,
   );
   if (result.exitCode != 0) {
     throw ToolExit(
-      'Failed to get cotnent hash. Exit code: ${result.exitCode} Error: ${result.stderr}',
+      'Failed to get content hash. Exit code: ${result.exitCode} Error: ${result.stderr}',
     );
   }
   return (result.stdout as String).trim();

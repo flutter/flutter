@@ -141,7 +141,7 @@ class Environment {
   );
 
   /// Path to the root flutter directory (which itself contains `engine/src/flutter`).
-  final io.Directory flutterRoot;
+  final io.Directory flutterRootDir;
 
   /// Path to where github.com/flutter/engine is checked out inside the engine workspace.
   io.Directory get flutterDirectory => io.Directory(pathlib.join(engineSrcDir.path, 'flutter'));
