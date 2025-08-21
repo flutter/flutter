@@ -300,7 +300,7 @@ typedef enum {
 /**
  * Returns the `UIViewController` whose view is displaying Flutter content.
  *
- * The returned `UIViewController` may hold a strong reference to registered
+ * The returned `UIViewController` may hold strong references to registered
  * plugins. To prevent retain cycles, the plugin must not store a strong
  * reference to this view controller.
  *
