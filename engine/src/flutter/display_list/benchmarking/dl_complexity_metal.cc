@@ -585,8 +585,8 @@ void DisplayListMetalComplexityCalculator::MetalHelper::drawDisplayList(
   AccumulateComplexity(helper.ComplexityScore());
 }
 
-void DisplayListMetalComplexityCalculator::MetalHelper::drawTextBlob(
-    const sk_sp<SkTextBlob> blob,
+void DisplayListMetalComplexityCalculator::MetalHelper::drawText(
+    const std::shared_ptr<DlText>& text,
     DlScalar x,
     DlScalar y) {
   if (IsComplex()) {
@@ -600,11 +600,6 @@ void DisplayListMetalComplexityCalculator::MetalHelper::drawTextBlob(
   // Increment draw_text_blob_count_ and calculate the cost at the end.
   draw_text_blob_count_++;
 }
-
-void DisplayListMetalComplexityCalculator::MetalHelper::drawTextFrame(
-    const std::shared_ptr<impeller::TextFrame>& text_frame,
-    DlScalar x,
-    DlScalar y) {}
 
 void DisplayListMetalComplexityCalculator::MetalHelper::drawShadow(
     const DlPath& path,

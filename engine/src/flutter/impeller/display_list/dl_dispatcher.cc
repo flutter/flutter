@@ -18,6 +18,7 @@
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/canvas.h"
 #include "impeller/display_list/dl_atlas_geometry.h"
+#include "impeller/display_list/dl_text_impeller.h"
 #include "impeller/display_list/dl_vertices_geometry.h"
 #include "impeller/display_list/nine_patch_converter.h"
 #include "impeller/display_list/skia_conversions.h"
@@ -853,22 +854,17 @@ void DlDispatcherBase::drawDisplayList(
 }
 
 // |flutter::DlOpReceiver|
-void DlDispatcherBase::drawTextBlob(const sk_sp<SkTextBlob> blob,
-                                    DlScalar x,
-                                    DlScalar y) {
-  // When running with Impeller enabled Skia text blobs are converted to
-  // Impeller text frames in paragraph_skia.cc
-  UNIMPLEMENTED;
-}
-
-// |flutter::DlOpReceiver|
-void DlDispatcherBase::drawTextFrame(
-    const std::shared_ptr<TextFrame>& text_frame,
-    DlScalar x,
-    DlScalar y) {
+void DlDispatcherBase::drawText(const std::shared_ptr<flutter::DlText>& text,
+                                DlScalar x,
+                                DlScalar y) {
   AUTO_DEPTH_WATCHER(1u);
 
-  GetCanvas().DrawTextFrame(text_frame,             //
+  auto textFrame = text->getTextFrame();
+
+  // When running with Impeller enabled Skia text blobs are converted to
+  // Impeller text frames in paragraph_skia.cc
+  FML_CHECK(textFrame != nullptr);
+  GetCanvas().DrawTextFrame(textFrame,              //
                             impeller::Point{x, y},  //
                             paint_                  //
   );
@@ -1091,14 +1087,19 @@ void FirstPassDispatcher::transformReset() {
   matrix_ = Matrix();
 }
 
-void FirstPassDispatcher::drawTextFrame(
-    const std::shared_ptr<impeller::TextFrame>& text_frame,
-    DlScalar x,
-    DlScalar y) {
+void FirstPassDispatcher::drawText(const std::shared_ptr<flutter::DlText>& text,
+                                   DlScalar x,
+                                   DlScalar y) {
   GlyphProperties properties;
+  auto text_frame = text->getTextFrame();
+  if (text_frame == nullptr) {
+    return;
+  }
+
   if (paint_.style == Paint::Style::kStroke) {
     properties.stroke = paint_.stroke;
   }
+
   if (text_frame->HasColor()) {
     // Alpha is always applied when rendering, remove it here so
     // we do not double-apply the alpha.

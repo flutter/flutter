@@ -4,6 +4,7 @@
 
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/dl_builder.h"
+#include "flutter/display_list/dl_text_skia.h"
 #include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/display_list/testing/dl_test_snippets.h"
 #include "flutter/shell/common/dl_op_spy.h"
@@ -544,7 +545,7 @@ TEST(DlOpSpy, DrawTextBlob) {
     DisplayListBuilder builder;
     DlPaint paint(DlColor::kBlack());
     std::string string = "xx";
-    builder.DrawTextBlob(GetTestTextBlob(42), 1, 1, paint);
+    builder.DrawText(DlTextSkia::Make(GetTestTextBlob(42)), 1, 1, paint);
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
@@ -554,7 +555,7 @@ TEST(DlOpSpy, DrawTextBlob) {
     DisplayListBuilder builder;
     DlPaint paint(DlColor::kTransparent());
     std::string string = "xx";
-    builder.DrawTextBlob(GetTestTextBlob(43), 1, 1, paint);
+    builder.DrawText(DlTextSkia::Make(GetTestTextBlob(43)), 1, 1, paint);
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);

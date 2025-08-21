@@ -45,8 +45,7 @@ class DlOpRecorder final : public virtual DlOpReceiver,
   int dashedLineCount() const { return dashed_lines_.size(); }
   int rectCount() const { return rects_.size(); }
   int pathCount() const { return paths_.size(); }
-  int textFrameCount() const { return text_frames_.size(); }
-  int blobCount() const { return blobs_.size(); }
+  int textCount() const { return texts_.size(); }
 
  private:
   void drawLine(const DlPoint& p0, const DlPoint& p1) override {
@@ -60,24 +59,17 @@ class DlOpRecorder final : public virtual DlOpReceiver,
     dashed_lines_.emplace_back(p0, p1, DlPoint(on_length, off_length));
   }
 
-  void drawTextFrame(const std::shared_ptr<impeller::TextFrame>& text_frame,
-                     SkScalar x,
-                     SkScalar y) override {
-    text_frames_.push_back(text_frame);
-  }
-
-  void drawTextBlob(const sk_sp<SkTextBlob> blob,
-                    SkScalar x,
-                    SkScalar y) override {
-    blobs_.push_back(blob);
+  void drawText(const std::shared_ptr<DlText>& text,
+                SkScalar x,
+                SkScalar y) override {
+    texts_.push_back(text);
   }
 
   void drawRect(const DlRect& rect) override { rects_.push_back(rect); }
 
   void drawPath(const DlPath& path) override { paths_.push_back(path); }
 
-  std::vector<std::shared_ptr<impeller::TextFrame>> text_frames_;
-  std::vector<sk_sp<SkTextBlob>> blobs_;
+  std::vector<std::shared_ptr<DlText>> texts_;
   std::vector<std::pair<DlPoint, DlPoint>> lines_;
   std::vector<std::tuple<DlPoint, DlPoint, DlPoint>> dashed_lines_;
   std::vector<DlRect> rects_;
@@ -232,14 +224,13 @@ TEST_F(PainterTest, DrawDashedLineImpeller) {
   EXPECT_EQ(recorder.dashedLineCount(), 1);
 }
 
-TEST_F(PainterTest, DrawTextFrameImpeller) {
+TEST_F(PainterTest, DrawTextImpeller) {
   PretendImpellerIsEnabled(true);
 
   auto recorder = DlOpRecorder();
   draw(makeStyle())->Dispatch(recorder);
 
-  EXPECT_EQ(recorder.textFrameCount(), 1);
-  EXPECT_EQ(recorder.blobCount(), 0);
+  EXPECT_EQ(recorder.textCount(), 1);
 }
 
 TEST_F(PainterTest, DrawStrokedTextImpeller) {
@@ -254,8 +245,7 @@ TEST_F(PainterTest, DrawStrokedTextImpeller) {
   auto recorder = DlOpRecorder();
   draw(style)->Dispatch(recorder);
 
-  EXPECT_EQ(recorder.textFrameCount(), 1);
-  EXPECT_EQ(recorder.blobCount(), 0);
+  EXPECT_EQ(recorder.textCount(), 1);
   EXPECT_EQ(recorder.pathCount(), 0);
 }
 
@@ -271,8 +261,7 @@ TEST_F(PainterTest, DrawStrokedTextWithLargeWidthImpeller) {
   auto recorder = DlOpRecorder();
   draw(style)->Dispatch(recorder);
 
-  EXPECT_EQ(recorder.textFrameCount(), 0);
-  EXPECT_EQ(recorder.blobCount(), 0);
+  EXPECT_EQ(recorder.textCount(), 0);
   EXPECT_EQ(recorder.pathCount(), 1);
 }
 
@@ -292,8 +281,7 @@ TEST_F(PainterTest, DrawTextWithGradientImpeller) {
   auto recorder = DlOpRecorder();
   draw(style)->Dispatch(recorder);
 
-  EXPECT_EQ(recorder.textFrameCount(), 0);
-  EXPECT_EQ(recorder.blobCount(), 0);
+  EXPECT_EQ(recorder.textCount(), 0);
   EXPECT_EQ(recorder.pathCount(), 1);
 }
 
@@ -313,8 +301,7 @@ TEST_F(PainterTest, DrawEmojiTextWithGradientImpeller) {
   auto recorder = DlOpRecorder();
   drawText(style, u"😀 😃 😄 😁 😆 😅 😂 🤣 🥲 😊")->Dispatch(recorder);
 
-  EXPECT_EQ(recorder.textFrameCount(), 1);
-  EXPECT_EQ(recorder.blobCount(), 0);
+  EXPECT_EQ(recorder.textCount(), 1);
   EXPECT_EQ(recorder.pathCount(), 0);
 }
 
@@ -324,8 +311,7 @@ TEST_F(PainterTest, DrawTextBlobNoImpeller) {
   auto recorder = DlOpRecorder();
   draw(makeStyle())->Dispatch(recorder);
 
-  EXPECT_EQ(recorder.textFrameCount(), 0);
-  EXPECT_EQ(recorder.blobCount(), 1);
+  EXPECT_EQ(recorder.textCount(), 1);
 }
 #endif  // IMPELLER_SUPPORTS_RENDERING
 

@@ -9,11 +9,14 @@
 #include "flutter/display_list/dl_blend_mode.h"
 #include "flutter/display_list/dl_op_receiver.h"
 #include "flutter/display_list/dl_sampling_options.h"
+#include "flutter/display_list/dl_text.h"
 #include "flutter/display_list/effects/dl_color_sources.h"
 #include "flutter/display_list/utils/dl_comparable.h"
 #include "flutter/fml/macros.h"
 
-#include "flutter/impeller/typographer/text_frame.h"
+namespace impeller {
+class TextFrame;
+}
 
 // NOLINTBEGIN(clang-analyzer-core.CallAndMessage)
 
@@ -1001,35 +1004,24 @@ struct DrawDisplayListOp final : DrawOpBase {
 
 // 4 byte header + 8 payload bytes + an aligned pointer take 24 bytes
 // (4 unused to align the pointer)
-struct DrawTextBlobOp final : DrawOpBase {
-  static constexpr auto kType = DisplayListOpType::kDrawTextBlob;
+struct DrawTextOp final : DrawOpBase {
+  static constexpr auto kType = DisplayListOpType::kDrawText;
 
-  DrawTextBlobOp(const sk_sp<SkTextBlob>& blob, DlScalar x, DlScalar y)
-      : DrawOpBase(kType), x(x), y(y), blob(blob) {}
-
-  const DlScalar x;
-  const DlScalar y;
-  const sk_sp<SkTextBlob> blob;
-
-  void dispatch(DlOpReceiver& receiver) const {
-    receiver.drawTextBlob(blob, x, y);
-  }
-};
-
-struct DrawTextFrameOp final : DrawOpBase {
-  static constexpr auto kType = DisplayListOpType::kDrawTextFrame;
-
-  DrawTextFrameOp(const std::shared_ptr<impeller::TextFrame>& text_frame,
-                  DlScalar x,
-                  DlScalar y)
-      : DrawOpBase(kType), x(x), y(y), text_frame(text_frame) {}
+  DrawTextOp(const std::shared_ptr<DlText>& text, DlScalar x, DlScalar y)
+      : DrawOpBase(kType), x(x), y(y), text(text) {}
 
   const DlScalar x;
   const DlScalar y;
-  const std::shared_ptr<impeller::TextFrame> text_frame;
+  const std::shared_ptr<DlText> text;
 
-  void dispatch(DlOpReceiver& receiver) const {
-    receiver.drawTextFrame(text_frame, x, y);
+  void dispatch(DlOpReceiver& receiver) const { receiver.drawText(text, x, y); }
+
+  DisplayListCompare equals(const DrawTextOp* other) const {
+    return text->getTextBlob() == other->text->getTextBlob() &&
+                   text->getTextFrame() == other->text->getTextFrame() &&
+                   x == other->x && y == other->y
+               ? DisplayListCompare::kEqual
+               : DisplayListCompare::kNotEqual;
   }
 };
 
