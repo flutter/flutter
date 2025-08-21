@@ -40,7 +40,7 @@ class SemanticsUpdateBuilder
       int platformViewId,
       int scrollChildren,
       int scrollIndex,
-      int overlayPortalParent,
+      int traversalOwner,
       double scrollPosition,
       double scrollExtentMax,
       double scrollExtentMin,

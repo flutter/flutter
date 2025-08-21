@@ -244,7 +244,7 @@ class SemanticsNodeUpdate {
     required this.platformViewId,
     required this.scrollChildren,
     required this.scrollIndex,
-    required this.overlayPortalParent,
+    required this.traversalOwner,
     required this.scrollPosition,
     required this.scrollExtentMax,
     required this.scrollExtentMin,
@@ -306,8 +306,8 @@ class SemanticsNodeUpdate {
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final int scrollIndex;
 
-  /// See [ui.SemanticsUpdateBUilder.overlayPortalParent].
-  final int? overlayPortalParent;
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final int? traversalOwner;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final double scrollPosition;
@@ -1515,16 +1515,16 @@ class SemanticsObject {
   }
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
-  int? get overlayPortalParent => _overlayPortalParent;
-  int? _overlayPortalParent;
+  int? get traversalOwner => _traversalOwner;
+  int? _traversalOwner;
 
-  static const int _overlayPortalParentIndex = 1 << 29;
+  static const int _traversalOwnerIndex = 1 << 29;
 
-  /// Whether the [overlayPortalParent] field has been updated but has not been
+  /// Whether the [traversalOwner] field has been updated but has not been
   /// applied to the DOM yet.
-  bool get isOverlayPortalParentDirty => _isDirty(_overlayPortalParentIndex);
-  void _markOverlayPortalParentDirty() {
-    _dirtyFields |= _overlayPortalParentIndex;
+  bool get isTraversalOwnerDirty => _isDirty(_traversalOwnerIndex);
+  void _markTraversalOwnerDirty() {
+    _dirtyFields |= _traversalOwnerIndex;
   }
 
   /// Bitfield showing which fields have been updated but have not yet been
@@ -1714,17 +1714,15 @@ class SemanticsObject {
       _markScrollIndexDirty();
     }
 
-    if (_overlayPortalParent != update.overlayPortalParent) {
-      if (_overlayPortalParent != null &&
-          _overlayPortalParent != -1 &&
-          update.overlayPortalParent == -1) {
-        SemanticsObject? parent = owner._semanticsTree[_overlayPortalParent!];
+    if (_traversalOwner != update.traversalOwner) {
+      if (_traversalOwner != null && _traversalOwner != -1 && update.traversalOwner == -1) {
+        SemanticsObject? parent = owner._semanticsTree[_traversalOwner!];
         if (parent != null && parent.semanticRole != null) {
           parent.element.removeAttribute('aria-owns');
         }
       }
-      _overlayPortalParent = update.overlayPortalParent;
-      _markOverlayPortalParentDirty();
+      _traversalOwner = update.traversalOwner;
+      _markTraversalOwnerDirty();
     }
 
     if (_scrollExtentMax != update.scrollExtentMax) {
@@ -1830,8 +1828,8 @@ class SemanticsObject {
     _updateRole();
 
     // Set up aria-owns relationship for overlay portal children.
-    if (overlayPortalParent != -1) {
-      SemanticsObject? parent = owner._semanticsTree[overlayPortalParent!];
+    if (traversalOwner != -1) {
+      SemanticsObject? parent = owner._semanticsTree[traversalOwner!];
       if (parent != null && parent.semanticRole != null) {
         parent.element.setAttribute('aria-owns', '$kFlutterSemanticNodePrefix${id}');
       }
