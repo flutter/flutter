@@ -112,10 +112,8 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
   // The task runners.
   const TaskRunners task_runners_;
 
-  // If the overlay layer has content that should be displayed. Determines the
-  // visibility of the overlay layer in combination with
-  // previous_frame_view_count_.
-  bool overlay_layer_has_content_ = false;
+  // If the overlay layer is currently shown.
+  bool overlay_layer_is_shown_ = false;
 
   // The size of the root canvas.
   DlISize frame_size_;
@@ -136,9 +134,6 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
   // The params for a platform view, which contains the size, position and
   // mutation stack.
   std::unordered_map<int64_t, EmbeddedViewParams> view_params_;
-
-  // The number of platform views in the previous frame.
-  int64_t previous_frame_view_count_;
 
   // Destroys the surfaces created from the surface factory.
   // This method schedules a task on the platform thread, and waits for

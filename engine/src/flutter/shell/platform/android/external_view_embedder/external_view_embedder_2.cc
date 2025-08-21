@@ -73,14 +73,11 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
   if (!FrameHasPlatformLayers()) {
     frame->Submit();
     // If the previous frame had platform views, hide the overlay surface.
-    if (previous_frame_view_count_ > 0) {
-      jni_facade_->hideOverlaySurface2();
-    }
+    HideOverlayLayerIfNeeded();
     jni_facade_->applyTransaction();
     return;
   }
 
-  bool prev_frame_no_platform_views = previous_frame_view_count_ == 0;
   std::unordered_map<int64_t, DlRect> view_rects;
   for (auto platform_id : composition_order_) {
     view_rects[platform_id] = GetViewRect(platform_id, view_params_);
@@ -158,12 +155,8 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
   task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
       [&, composition_order = composition_order_, view_params = view_params_,
        jni_facade = jni_facade_, device_pixel_ratio = device_pixel_ratio_,
-       slices = std::move(slices_), prev_frame_no_platform_views]() -> void {
+       slices = std::move(slices_)]() -> void {
         jni_facade->swapTransaction();
-
-        if (prev_frame_no_platform_views && overlay_layer_has_content_) {
-          jni_facade_->showOverlaySurface2();
-        }
 
         for (int64_t view_id : composition_order) {
           DlRect view_rect = GetViewRect(view_id, view_params);
@@ -200,8 +193,6 @@ DlCanvas* AndroidExternalViewEmbedder2::GetRootCanvas() {
 }
 
 void AndroidExternalViewEmbedder2::Reset() {
-  previous_frame_view_count_ = composition_order_.size();
-
   composition_order_.clear();
   slices_.clear();
 }
@@ -260,20 +251,20 @@ void AndroidExternalViewEmbedder2::DestroySurfaces() {
                                       latch.Signal();
                                     });
   latch.Wait();
-  overlay_layer_has_content_ = false;
+  overlay_layer_is_shown_ = false;
 }
 
 void AndroidExternalViewEmbedder2::ShowOverlayLayerIfNeeded() {
-  if (!overlay_layer_has_content_) {
+  if (!overlay_layer_is_shown_) {
     jni_facade_->showOverlaySurface2();
-    overlay_layer_has_content_ = true;
+    overlay_layer_is_shown_ = true;
   }
 }
 
 void AndroidExternalViewEmbedder2::HideOverlayLayerIfNeeded() {
-  if (overlay_layer_has_content_) {
+  if (overlay_layer_is_shown_) {
     jni_facade_->hideOverlaySurface2();
-    overlay_layer_has_content_ = false;
+    overlay_layer_is_shown_ = false;
   }
 }
 
