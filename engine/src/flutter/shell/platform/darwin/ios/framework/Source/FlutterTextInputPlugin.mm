@@ -1045,6 +1045,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   _isSystemKeyboardEnabled = ShouldShowSystemKeyboard(inputType);
   self.keyboardType = ToUIKeyboardType(inputType);
   self.returnKeyType = ToUIReturnKeyType(configuration[kInputAction]);
+  _originalAutocapitalizationType = ToUITextAutoCapitalizationType(configuration);
   self.autocapitalizationType = ToUITextAutoCapitalizationType(configuration);
   _enableInteractiveSelection = [configuration[kEnableInteractiveSelection] boolValue];
   NSString* smartDashesType = configuration[kSmartDashesType];
@@ -1381,7 +1382,29 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
       _selectedTextRange = [selectedTextRange copy];
     }
   }
+
+  if (_originalAutocapitalizationType == UITextAutocapitalizationTypeWords) {
+    NSRange selection = ((FlutterTextRange*)_selectedTextRange).range;
+    BOOL shouldCapitalize = NO;
+    if (self.text.length == 0 || selection.location == 0) {
+      shouldCapitalize = YES;
+    } else if (selection.location <= self.text.length) {
+      unichar previousChar = [self.text characterAtIndex:selection.location - 1];
+      if ([[NSCharacterSet whitespaceAndNewlineCharacterSet] characterIsMember:previousChar]) {
+        shouldCapitalize = YES;
+      }
+    }
+
+    UITextAutocapitalizationType newCapitalizationType =
+        shouldCapitalize ? UITextAutocapitalizationTypeWords : UITextAutocapitalizationTypeNone;
+
+    if (self.autocapitalizationType != newCapitalizationType) {
+      self.autocapitalizationType = newCapitalizationType;
+      [self reloadInputViews];
+    }
+  }
 }
+
 
 - (void)setSelectedTextRange:(UITextRange*)selectedTextRange {
   if (!_enableInteractiveSelection) {

@@ -150,6 +150,7 @@ FLUTTER_DARWIN_EXPORT
 
 // UITextInputTraits
 @property(nonatomic) UITextAutocapitalizationType autocapitalizationType;
+@property(nonatomic) UITextAutocapitalizationType originalAutocapitalizationType;
 @property(nonatomic) UITextAutocorrectionType autocorrectionType;
 @property(nonatomic) UITextSpellCheckingType spellCheckingType;
 @property(nonatomic) BOOL enablesReturnKeyAutomatically;
