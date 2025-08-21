@@ -56,6 +56,7 @@ class SkwasmOffscreenCanvasViewRasterizer extends ViewRasterizer {
   void prepareToDraw() {
     // No need to do anything here. Skwasm sizes the surface in the `rasterize`
     // call below.
+    rasterizer.offscreenSurface.resize(currentFrameSize);
   }
 
   @override

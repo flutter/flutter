@@ -116,10 +116,14 @@ void Surface::_init() {
 }
 
 // Worker thread only
-void Surface::_resizeCanvasToFit(int width, int height) {
-  if (!_surface || width > _canvasWidth || height > _canvasHeight) {
-    _canvasWidth = std::max(width, _canvasWidth);
-    _canvasHeight = std::max(height, _canvasHeight);
+void Surface::resize(int width, int height) {
+  if (!_isInitialized) {
+    _init();
+  }
+
+  if (!_surface || width != _canvasWidth || height != _canvasHeight) {
+    _canvasWidth = width;
+    _canvasHeight = height;
     _recreateSurface();
   }
 }
@@ -146,25 +150,17 @@ void Surface::renderPicturesOnWorker(sk_sp<SkPicture>* pictures,
 
   // This is populated by the `captureImageBitmap` call the first time it is
   // passed in.
-  SkwasmObject imagePromiseArray = __builtin_wasm_ref_null_extern();
+  SkwasmObject imageBitmapArray = __builtin_wasm_ref_null_extern();
   for (int i = 0; i < pictureCount; i++) {
     sk_sp<SkPicture> picture = pictures[i];
-    SkRect pictureRect = picture->cullRect();
-    SkIRect roundedOutRect;
-    pictureRect.roundOut(&roundedOutRect);
-    _resizeCanvasToFit(roundedOutRect.width(), roundedOutRect.height());
-    SkMatrix matrix =
-        SkMatrix::Translate(-roundedOutRect.fLeft, -roundedOutRect.fTop);
     makeCurrent(_glContext);
     auto canvas = _surface->getCanvas();
     canvas->drawColor(SK_ColorTRANSPARENT, SkBlendMode::kSrc);
-    canvas->drawPicture(picture, &matrix, nullptr);
+    canvas->drawPicture(picture);
     _grContext->flush(_surface.get());
-    imagePromiseArray =
-        skwasm_captureImageBitmap(_glContext, roundedOutRect.width(),
-                                  roundedOutRect.height(), imagePromiseArray);
+    imageBitmapArray = skwasm_captureImageBitmap(_glContext, imageBitmapArray);
   }
-  skwasm_resolveAndPostImages(this, imagePromiseArray, rasterStart, callbackId);
+  skwasm_resolveAndPostImages(this, imageBitmapArray, rasterStart, callbackId);
 }
 
 // Worker thread only
@@ -197,7 +193,7 @@ void Surface::rasterizeImageOnWorker(SkImage* image,
   // `glReadPixels`. Once the skia bug is fixed, we should switch back to using
   // `SkImage::readPixels` instead.
   // See https://g-issues.skia.org/issues/349201915
-  _resizeCanvasToFit(image->width(), image->height());
+  resize(image->width(), image->height());
   auto canvas = _surface->getCanvas();
   canvas->drawColor(SK_ColorTRANSPARENT, SkBlendMode::kSrc);
 
@@ -265,6 +261,18 @@ SKWASM_EXPORT void surface_destroy(Surface* surface) {
 SKWASM_EXPORT void surface_dispose(Surface* surface) {
   // This should be called directly only on the worker
   surface->dispose();
+}
+
+SKWASM_EXPORT void surface_resize(Surface* surface, int width, int height) {
+  // This should be called directly only on the worker
+  surface->resize(width, height);
+}
+
+SKWASM_EXPORT void surface_resizeSurface(Surface* surface,
+                                         int width,
+                                         int height) {
+  // Dispatch to the worker
+  skwasm_dispatchResizeSurface(surface->getThreadId(), surface, width, height);
 }
 
 SKWASM_EXPORT void surface_setResourceCacheLimitBytes(Surface* surface,

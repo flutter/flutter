@@ -91,6 +91,9 @@ mergeInto(LibraryManager.library, {
           return;
         }
         switch (skwasmMessage) {
+          case 'resizeSurface':
+            _surface_resize(data.surface, data.width, data.height);
+            return;
           case 'renderPictures':
             _surface_renderPicturesOnWorker(
               data.surface,
@@ -176,14 +179,16 @@ mergeInto(LibraryManager.library, {
       canvas.width = width;
       canvas.height = height;
     };
-    _skwasm_captureImageBitmap = function(contextHandle, width, height, imagePromises) {
-      if (!imagePromises) imagePromises = Array();
+    _skwasm_captureImageBitmap = function (contextHandle, imageBitmaps) {
+      if (!imageBitmaps) imageBitmaps = Array();
       const canvas = handleToCanvasMap.get(contextHandle);
-      imagePromises.push(createImageBitmap(canvas, 0, 0, width, height));
-      return imagePromises;
+      imageBitmaps.push(canvas.transferToImageBitmap());
+      return imageBitmaps;
     };
-    _skwasm_resolveAndPostImages = async function(surfaceHandle, imagePromises, rasterStart, callbackId) {
-      const imageBitmaps = imagePromises ? await Promise.all(imagePromises) : [];
+    _skwasm_resolveAndPostImages = async function (surfaceHandle, imageBitmaps, rasterStart, callbackId) {
+      if (!imageBitmaps) {
+        imageBitmaps = [];
+      }
       const rasterEnd = skwasm_getCurrentTimestamp();
       skwasm_postMessage({
         skwasmMessage: 'onRenderComplete',
@@ -213,6 +218,14 @@ mergeInto(LibraryManager.library, {
       skwasm_postMessage({
         skwasmMessage: 'disposeAssociatedObject',
         pointer,
+      }, [], threadId);
+    };
+    _skwasm_dispatchResizeSurface = function (threadId, surfaceHandle, width, height) {
+      skwasm_postMessage({
+        skwasmMessage: 'resizeSurface',
+        surface: surfaceHandle,
+        width,
+        height,
       }, [], threadId);
     };
     _skwasm_dispatchDisposeSurface = function(threadId, surface) {
@@ -261,6 +274,8 @@ mergeInto(LibraryManager.library, {
   skwasm_createOffscreenCanvas__deps: ['$skwasm_support_setup'],
   skwasm_resizeCanvas: function () {},
   skwasm_resizeCanvas__deps: ['$skwasm_support_setup'],
+  skwasm_dispatchResizeSurface: function () { },
+  skwasm_dispatchResizeSurface__deps: ['$skwasm_support_setup'],
   skwasm_captureImageBitmap: function () {},
   skwasm_captureImageBitmap__deps: ['$skwasm_support_setup'],
   skwasm_resolveAndPostImages: function () {},

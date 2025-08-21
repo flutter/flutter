@@ -33,6 +33,9 @@ external void surfaceSetCallbackHandler(SurfaceHandle surface, OnRenderCallbackH
 @Native<Void Function(SurfaceHandle)>(symbol: 'surface_destroy', isLeaf: true)
 external void surfaceDestroy(SurfaceHandle surface);
 
+@Native<Void Function(SurfaceHandle, Int, Int)>(symbol: 'surface_resizeSurface', isLeaf: true)
+external void surfaceResize(SurfaceHandle handle, int width, int height);
+
 @Native<Void Function(SurfaceHandle, Int)>(
   symbol: 'surface_setResourceCacheLimitBytes',
   isLeaf: true,

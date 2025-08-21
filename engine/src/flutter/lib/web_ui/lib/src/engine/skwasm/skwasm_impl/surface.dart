@@ -93,6 +93,10 @@ class SkwasmSurface {
     surfaceSetCallbackHandler(handle, SkwasmCallbackHandler.instance.callbackPointer);
   }
 
+  void resize(BitmapSize size) {
+    surfaceResize(handle, size.width, size.height);
+  }
+
   Future<RenderResult> renderPictures(List<SkwasmPicture> pictures) =>
       withStackScope((StackScope scope) async {
         final Pointer<PictureHandle> pictureHandles = scope
