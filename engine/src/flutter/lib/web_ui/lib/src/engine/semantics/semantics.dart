@@ -1715,7 +1715,9 @@ class SemanticsObject {
     }
 
     if (_overlayPortalParent != update.overlayPortalParent) {
-      if (_overlayPortalParent != null && _overlayPortalParent != -1 && update.overlayPortalParent == -1) {
+      if (_overlayPortalParent != null &&
+          _overlayPortalParent != -1 &&
+          update.overlayPortalParent == -1) {
         SemanticsObject? parent = owner._semanticsTree[_overlayPortalParent!];
         if (parent != null && parent.semanticRole != null) {
           parent.element.removeAttribute('aria-owns');
