@@ -4,6 +4,8 @@
 
 #include "flutter/display_list/dl_text.h"
 
+#include <memory>
+
 namespace flutter {
 
 bool DlText::operator==(const DlText& other) const {
