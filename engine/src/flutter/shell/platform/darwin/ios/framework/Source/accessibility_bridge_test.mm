@@ -2391,6 +2391,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
 
     platform_view->SetOwnerViewController(mockFlutterViewController);
     platform_view->SetSemanticsEnabled(true);
+    platform_view->SetSemanticsTreeEnabled(true);
 
     OCMExpect([mockFlutterView setAccessibilityElements:[OCMArg isNil]]);
     platform_view->OnPreEngineRestart();
