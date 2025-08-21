@@ -41,8 +41,8 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample> {
               tween: Tween<double>(begin: 0.0, end: 1.0),
               duration: const Duration(seconds: 5),
               reverse: true,
-              builder: (BuildContext context, double value, Widget? child) {
-                return LinearProgressIndicator(year2023: year2023, value: value);
+              builder: (BuildContext context, Animation<double> animation, Widget? child) {
+                return LinearProgressIndicator(year2023: year2023, value: animation.value);
               },
             ),
           ),
