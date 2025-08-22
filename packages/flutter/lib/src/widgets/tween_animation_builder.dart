@@ -311,61 +311,23 @@ class _RepeatingTweenAnimationBuilderState<T extends Object>
   late final AnimationController _controller;
   late Animation<T> _animation;
   CurvedAnimation? _curvedAnimation;
-  bool _isRepeating = false;
 
   @override
   void initState() {
     super.initState();
     // Validate inputs early to provide clear error messages
-    assert(widget.tween.begin != null && widget.tween.end != null,
+    assert(
+      widget.tween.begin != null && widget.tween.end != null,
       'Tween provided to RepeatingTweenAnimationBuilder must have non-null begin and end values.',
     );
 
     _controller = AnimationController(duration: widget.duration, vsync: this);
     _updateAnimation();
-    _setupStatusListener();
 
     // Start the animation if not paused and begin != end
     if (!widget.paused && widget.tween.begin != widget.tween.end) {
-      _startRepeating();
+      _controller.repeat(reverse: widget.reverse);
     }
-  }
-
-  void _setupStatusListener() {
-    _controller.addStatusListener(_handleAnimationStatus);
-  }
-
-  void _handleAnimationStatus(AnimationStatus status) {
-    if (!widget.paused && _isRepeating) {
-      if (status == AnimationStatus.completed) {
-        if (widget.reverse) {
-          _controller.reverse();
-        } else {
-          _controller.forward(from: 0);
-        }
-      } else if (status == AnimationStatus.dismissed && widget.reverse) {
-        _controller.forward();
-      }
-    }
-  }
-
-  void _startRepeating() {
-    _isRepeating = true;
-    if (_controller.value == 0 || _controller.value == 1) {
-      _controller.forward();
-    } else {
-      // Continue from current position
-      if (_controller.status == AnimationStatus.reverse) {
-        _controller.reverse();
-      } else {
-        _controller.forward();
-      }
-    }
-  }
-
-  void _stopRepeating() {
-    _isRepeating = false;
-    _controller.stop(canceled: false);
   }
 
   void _updateAnimation() {
@@ -383,10 +345,9 @@ class _RepeatingTweenAnimationBuilderState<T extends Object>
       _controller.duration = widget.duration;
     }
 
-    // Update animation if curve or tween values actually changed
-    // Compare values not object identity since tests may create new instances
-    final bool tweenChanged = widget.tween.begin != oldWidget.tween.begin ||
-                              widget.tween.end != oldWidget.tween.end;
+    // Update animation if curve or tween changed
+    final bool tweenChanged =
+        widget.tween.begin != oldWidget.tween.begin || widget.tween.end != oldWidget.tween.end;
     if (widget.curve != oldWidget.curve || tweenChanged) {
       _updateAnimation();
     }
@@ -394,16 +355,16 @@ class _RepeatingTweenAnimationBuilderState<T extends Object>
     // Handle pause/resume or reverse change
     if (widget.paused != oldWidget.paused || widget.reverse != oldWidget.reverse) {
       if (widget.paused) {
-        _stopRepeating();
+        _controller.stop(canceled: false);
       } else if (widget.tween.begin != widget.tween.end) {
-        _startRepeating();
+        // Resume animation - continue from current position
+        _controller.repeat(reverse: widget.reverse);
       }
     }
   }
 
   @override
   void dispose() {
-    _controller.removeStatusListener(_handleAnimationStatus);
     _curvedAnimation?.dispose();
     _controller.dispose();
     super.dispose();
