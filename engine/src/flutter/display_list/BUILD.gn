@@ -62,6 +62,10 @@ source_set("display_list") {
     "dl_sampling_options.h",
     "dl_storage.cc",
     "dl_storage.h",
+    "dl_text.cc",
+    "dl_text.h",
+    "dl_text_skia.cc",
+    "dl_text_skia.h",
     "dl_tile_mode.h",
     "dl_types.cc",
     "dl_types.h",
@@ -100,6 +104,8 @@ source_set("display_list") {
     "effects/dl_mask_filter.h",
     "effects/dl_runtime_effect.cc",
     "effects/dl_runtime_effect.h",
+    "effects/dl_runtime_effect_skia.cc",
+    "effects/dl_runtime_effect_skia.h",
     "effects/image_filters/dl_blur_image_filter.cc",
     "effects/image_filters/dl_blur_image_filter.h",
     "effects/image_filters/dl_color_filter_image_filter.cc",
@@ -146,8 +152,6 @@ source_set("display_list") {
   public_deps = [
     ":dl_path",
     "//flutter/fml",
-    "//flutter/impeller/runtime_stage",
-    "//flutter/impeller/typographer",
     "//flutter/skia",
   ]
 
