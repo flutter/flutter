@@ -877,9 +877,8 @@ const float kFloatCompareEpsilon = 0.001;
 
   // Handle initial setting of node with header.
   flutter::SemanticsNode node;
-  node.flags.hasToggledState = true;
-  node.flags.isToggled = true;
-  node.flags.isEnabled = true;
+  node.flags.isToggled = flutter::SemanticsTristate::kTrue;
+  node.flags.isEnabled = flutter::SemanticsTristate::kTrue;
   node.label = "foo";
   [object setSemanticsNode:&node];
   // Create ab real UISwitch to compare the FlutterSwitchSemanticsObject with.
@@ -891,9 +890,8 @@ const float kFloatCompareEpsilon = 0.001;
 
   // Set the toggled to false;
   flutter::SemanticsNode update;
-  update.flags.hasToggledState = true;
-  update.flags.isToggled = false;
-  update.flags.isEnabled = true;
+  update.flags.isToggled = flutter::SemanticsTristate::kFalse;
+  update.flags.isEnabled = flutter::SemanticsTristate::kTrue;
 
   update.label = "foo";
   [object setSemanticsNode:&update];
@@ -913,9 +911,8 @@ const float kFloatCompareEpsilon = 0.001;
   // Handle initial setting of node with header.
   flutter::SemanticsNode node;
   node.flags.isInMutuallyExclusiveGroup = true;
-  node.flags.hasCheckedState = true;
-  node.flags.hasEnabledState = true;
-  node.flags.isEnabled = true;
+  node.flags.isChecked = flutter::SemanticsCheckState::kFalse;
+  node.flags.isEnabled = flutter::SemanticsTristate::kTrue;
   node.label = "foo";
   [object setSemanticsNode:&node];
   XCTAssertTrue((object.accessibilityTraits & UIAccessibilityTraitButton) > 0);
@@ -931,8 +928,7 @@ const float kFloatCompareEpsilon = 0.001;
 
   // Handle initial setting of node with header.
   flutter::SemanticsNode node;
-  node.flags.hasToggledState = true;
-  node.flags.isToggled = true;
+  node.flags.isToggled = flutter::SemanticsTristate::kTrue;
   node.label = "foo";
   [object setSemanticsNode:&node];
   // Create ab real UISwitch to compare the FlutterSwitchSemanticsObject with.

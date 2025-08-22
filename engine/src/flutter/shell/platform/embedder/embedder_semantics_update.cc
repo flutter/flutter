@@ -5,49 +5,40 @@
 #include "flutter/shell/platform/embedder/embedder_semantics_update.h"
 
 namespace {
-
-// TODO(hangyujin): Update these two functions once the SemanticsFlags in
-// dart:ui are updated to use tristate/quad-state flags for properties like
-// isChecked and isSelected.
-FlutterCheckState ToFlutterCheckState(bool is_not_none,
-                                      bool is_true,
-                                      bool is_mixed) {
-  if (!is_not_none) {
-    return kFlutterCheckStateNone;
+FlutterCheckState ToFlutterCheckState(flutter::SemanticsCheckState state) {
+  switch (state) {
+    case flutter::SemanticsCheckState::kNone:
+      return kFlutterCheckStateNone;
+    case flutter::SemanticsCheckState::kTrue:
+      return kFlutterCheckStateTrue;
+    case flutter::SemanticsCheckState::kFalse:
+      return kFlutterCheckStateFalse;
+    case flutter::SemanticsCheckState::kMixed:
+      return kFlutterCheckStateMixed;
   }
-  if (is_true) {
-    return kFlutterCheckStateTrue;
-  }
-  if (is_mixed) {
-    return kFlutterCheckStateMixed;
-  }
-  return kFlutterCheckStateFalse;
 }
 
-FlutterTristate ToFlutterTristate(bool is_not_none, bool is_true) {
-  if (!is_not_none) {
-    return kFlutterTristateNone;
+FlutterTristate ToFlutterTristate(flutter::SemanticsTristate state) {
+  switch (state) {
+    case flutter::SemanticsTristate::kNone:
+      return kFlutterTristateNone;
+    case flutter::SemanticsTristate::kTrue:
+      return kFlutterTristateTrue;
+    case flutter::SemanticsTristate::kFalse:
+      return kFlutterTristateFalse;
   }
-  if (is_true) {
-    return kFlutterTristateTrue;
-  }
-  return kFlutterTristateFalse;
 }
 
 std::unique_ptr<FlutterSemanticsFlags> ConvertToFlutterSemanticsFlags(
     const flutter::SemanticsFlags& source) {
   return std::make_unique<FlutterSemanticsFlags>(FlutterSemanticsFlags{
-      .is_checked = ToFlutterCheckState(
-          source.hasCheckedState, source.isChecked, source.isCheckStateMixed),
-      .is_selected =
-          ToFlutterTristate(source.hasSelectedState, source.isSelected),
-      .is_enabled = ToFlutterTristate(source.hasEnabledState, source.isEnabled),
-      .is_toggled = ToFlutterTristate(source.hasToggledState, source.isToggled),
-      .is_expanded =
-          ToFlutterTristate(source.hasExpandedState, source.isExpanded),
-      .is_required =
-          ToFlutterTristate(source.hasRequiredState, source.isRequired),
-      .is_focused = ToFlutterTristate(source.isFocusable, source.isFocused),
+      .is_checked = ToFlutterCheckState(source.isChecked),
+      .is_selected = ToFlutterTristate(source.isSelected),
+      .is_enabled = ToFlutterTristate(source.isEnabled),
+      .is_toggled = ToFlutterTristate(source.isToggled),
+      .is_expanded = ToFlutterTristate(source.isExpanded),
+      .is_required = ToFlutterTristate(source.isRequired),
+      .is_focused = ToFlutterTristate(source.isFocused),
       .is_button = source.isButton,
       .is_text_field = source.isTextField,
       .is_in_mutually_exclusive_group = source.isInMutuallyExclusiveGroup,
@@ -97,13 +88,13 @@ EmbedderSemanticsUpdate::EmbedderSemanticsUpdate(
 FlutterSemanticsFlag SemanticsFlagsToInt(const SemanticsFlags& flags) {
   int result = 0;
 
-  if (flags.hasCheckedState) {
+  if (flags.isChecked != SemanticsCheckState::kNone) {
     result |= (1 << 0);
   }
-  if (flags.isChecked) {
+  if (flags.isChecked == SemanticsCheckState::kTrue) {
     result |= (1 << 1);
   }
-  if (flags.isSelected) {
+  if (flags.isSelected == SemanticsTristate::kTrue) {
     result |= (1 << 2);
   }
   if (flags.isButton) {
@@ -112,13 +103,13 @@ FlutterSemanticsFlag SemanticsFlagsToInt(const SemanticsFlags& flags) {
   if (flags.isTextField) {
     result |= (1 << 4);
   }
-  if (flags.isFocused) {
+  if (flags.isFocused == SemanticsTristate::kTrue) {
     result |= (1 << 5);
   }
-  if (flags.hasEnabledState) {
+  if (flags.isEnabled != SemanticsTristate::kNone) {
     result |= (1 << 6);
   }
-  if (flags.isEnabled) {
+  if (flags.isEnabled == SemanticsTristate::kTrue) {
     result |= (1 << 7);
   }
   if (flags.isInMutuallyExclusiveGroup) {
@@ -145,10 +136,10 @@ FlutterSemanticsFlag SemanticsFlagsToInt(const SemanticsFlags& flags) {
   if (flags.isLiveRegion) {
     result |= (1 << 15);
   }
-  if (flags.hasToggledState) {
+  if (flags.isToggled != SemanticsTristate::kNone) {
     result |= (1 << 16);
   }
-  if (flags.isToggled) {
+  if (flags.isToggled == SemanticsTristate::kTrue) {
     result |= (1 << 17);
   }
   if (flags.hasImplicitScrolling) {
@@ -160,7 +151,7 @@ FlutterSemanticsFlag SemanticsFlagsToInt(const SemanticsFlags& flags) {
   if (flags.isReadOnly) {
     result |= (1 << 20);
   }
-  if (flags.isFocusable) {
+  if (flags.isFocused != SemanticsTristate::kNone) {
     result |= (1 << 21);
   }
   if (flags.isLink) {
@@ -172,22 +163,22 @@ FlutterSemanticsFlag SemanticsFlagsToInt(const SemanticsFlags& flags) {
   if (flags.isKeyboardKey) {
     result |= (1 << 24);
   }
-  if (flags.isCheckStateMixed) {
+  if (flags.isChecked == SemanticsCheckState::kMixed) {
     result |= (1 << 25);
   }
-  if (flags.hasExpandedState) {
+  if (flags.isExpanded != SemanticsTristate::kNone) {
     result |= (1 << 26);
   }
-  if (flags.isExpanded) {
+  if (flags.isExpanded == SemanticsTristate::kTrue) {
     result |= (1 << 27);
   }
-  if (flags.hasSelectedState) {
+  if (flags.isSelected != SemanticsTristate::kNone) {
     result |= (1 << 28);
   }
-  if (flags.hasRequiredState) {
+  if (flags.isRequired != SemanticsTristate::kNone) {
     result |= (1 << 29);
   }
-  if (flags.isRequired) {
+  if (flags.isRequired == SemanticsTristate::kTrue) {
     result |= (1 << 30);
   }
 
