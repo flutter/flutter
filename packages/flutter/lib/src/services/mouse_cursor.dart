@@ -202,6 +202,9 @@ abstract class MouseCursor with Diagnosticable {
   @factory
   MouseCursorSession createSession(int device);
 
+  @protected
+  bool get shouldDefer => false;
+
   /// A very short description of the mouse cursor.
   ///
   /// The [debugDescription] should be a few words that can describe this cursor
@@ -243,7 +246,7 @@ abstract class MouseCursor with Diagnosticable {
   /// that might overwrite the system request upon pointer entering; the cursor
   /// must not be null either, since that allows the widgets behind the region to
   /// change cursors.
-  static const MouseCursor uncontrolled = _NoopMouseCursor._();
+  static const MouseCursor uncontrolled = _UncontrolledMouseCursor._();
 }
 
 class _DeferringMouseCursor extends MouseCursor {
@@ -256,12 +259,15 @@ class _DeferringMouseCursor extends MouseCursor {
   }
 
   @override
+  bool get shouldDefer => true;
+
+  @override
   String get debugDescription => 'defer';
 
   /// Returns the first cursor that is not a [MouseCursor.defer].
   static MouseCursor? firstNonDeferred(Iterable<MouseCursor> cursors) {
     for (final MouseCursor cursor in cursors) {
-      if (cursor != MouseCursor.defer) {
+      if (!cursor.shouldDefer) {
         return cursor;
       }
     }
@@ -270,7 +276,7 @@ class _DeferringMouseCursor extends MouseCursor {
 }
 
 class _NoopMouseCursorSession extends MouseCursorSession {
-  _NoopMouseCursorSession(_NoopMouseCursor super.cursor, super.device);
+  _NoopMouseCursorSession(_UncontrolledMouseCursor super.cursor, super.device);
 
   @override
   Future<void> activate() async {
@@ -292,14 +298,24 @@ class _NoopMouseCursorSession extends MouseCursorSession {
 ///
 /// To use this class, use [MouseCursor.uncontrolled]. Directly
 /// instantiating this class is not allowed.
-class _NoopMouseCursor extends MouseCursor {
+class _UncontrolledMouseCursor extends MouseCursor {
   // Application code shouldn't directly instantiate this class, since its only
   // instance is accessible at [SystemMouseCursors.releaseControl].
-  const _NoopMouseCursor._();
+  const _UncontrolledMouseCursor._();
 
   @override
   @protected
-  _NoopMouseCursorSession createSession(int device) => _NoopMouseCursorSession(this, device);
+  MouseCursorSession createSession(int device) {
+    if (kIsWeb) {
+      assert(false, '_UncontrolledMouseCursor can not create a session on Web');
+      throw UnimplementedError();
+    } else {
+      return _NoopMouseCursorSession(this, device);
+    }
+  }
+
+  @override
+  bool get shouldDefer => kIsWeb;
 
   @override
   String get debugDescription => 'uncontrolled';
