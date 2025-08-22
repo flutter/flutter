@@ -39,11 +39,12 @@ void main() {
   testWithoutContext('flutter run on web respects --dds-port', () async {
     // Regression test for https://github.com/flutter/flutter/issues/159157
     Future<int> getFreePort() async {
-      var port = 0;
       final ServerSocket serverSocket = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
-      port = serverSocket.port;
-      await serverSocket.close();
-      return port;
+      try {
+        return serverSocket.port;
+      } finally {
+        await serverSocket.close();
+      }
     }
 
     final int ddsPort = await getFreePort();
