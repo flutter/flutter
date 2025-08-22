@@ -9,6 +9,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
@@ -2069,6 +2070,50 @@ public class AccessibilityBridgeTest {
     assertEquals(nodeInfo.isClickable(), true);
     List<AccessibilityNodeInfo.AccessibilityAction> actions = nodeInfo.getActionList();
     assertTrue(actions.contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK));
+  }
+
+  @Test
+  public void itAddsCollectionInfo() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.addFlag(AccessibilityBridge.Flag.HAS_IMPLICIT_SCROLLING);
+    // test with 1 scrollChild
+    testSemanticsNode.scrollChildren = 1;
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertNull(nodeInfo.getCollectionInfo());
+    // test with 2 scrollChildren
+    testSemanticsNode.scrollChildren = 2;
+    testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertNotNull(nodeInfo.getCollectionInfo());
+  }
+
+  @Test
+  public void itAddsCollectionItemInfo() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+
+    TestSemanticsNode parentTestSemanticsNode = new TestSemanticsNode();
+    parentTestSemanticsNode.addFlag(AccessibilityBridge.Flag.HAS_IMPLICIT_SCROLLING);
+    parentTestSemanticsNode.scrollChildren = 2;
+    parentTestSemanticsNode.id = 0;
+
+    // add children to parentTestSemanticsNode
+    for (int index = 0; index < parentTestSemanticsNode.scrollChildren; index++) {
+      TestSemanticsNode childNode = new TestSemanticsNode();
+      childNode.id = index + 1;
+      childNode.label = "child test node " + index + 1;
+      parentTestSemanticsNode.addChild(childNode);
+    }
+    TestSemanticsNode lastChild = parentTestSemanticsNode.children.getLast();
+    TestSemanticsUpdate testSemanticsUpdate = lastChild.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo =
+        accessibilityBridge.createAccessibilityNodeInfo(parentTestSemanticsNode.scrollChildren);
+    assertNotNull(nodeInfo.getCollectionItemInfo());
   }
 
   AccessibilityBridge setUpBridge() {
