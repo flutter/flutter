@@ -1232,9 +1232,11 @@ TEST_F(DisplayListTest, SingleOpsMightSupportGroupOpacityBlendMode) {
   }
   RUN_TESTS2(canvas.DrawText(DlTextSkia::Make(GetTestTextBlob(1)), 0, 0, paint);
              , false);
+#if IMPELLER_SUPPORTS_RENDERING
   RUN_TESTS2(
       canvas.DrawText(DlTextImpeller::Make(GetTestTextFrame(1)), 0, 0, paint);
       , false);
+#endif
   RUN_TESTS2(canvas.DrawShadow(kTestPath1, DlColor::kBlack(), 1.0, false, 1.0);
              , false);
 
@@ -3527,8 +3529,10 @@ TEST_F(DisplayListTest, NopOperationsOmittedFromRecords) {
                             DlBlendMode::kSrcOver, DlImageSampling::kLinear,
                             nullptr, &paint);
           builder.DrawText(DlTextSkia::Make(GetTestTextBlob(1)), 10, 10, paint);
+#if IMPELLER_SUPPORTS_RENDERING
           builder.DrawText(DlTextImpeller::Make(GetTestTextFrame(1)), 10, 10,
                            paint);
+#endif
 
           // Dst mode eliminates most rendering ops except for
           // the following two, so we'll prune those manually...
