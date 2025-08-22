@@ -1778,7 +1778,18 @@ class Transform extends SingleChildRenderObjectWidget {
   /// [Directionality.of] returns [TextDirection.rtl].
   final AlignmentGeometry? alignment;
 
-  /// Whether to apply the transformation when performing hit tests.
+  /// Whether to transform registered hits into the child's resulting coordinate system.
+  ///
+  /// When `true`: Hit coordinates within the parent's bounds are transformed to match
+  /// where the child appears visually after any transformation such as (translation, rotation, scaling, or skewing etc).
+  ///
+  /// When `false`: Hit coordinates are not transformed, potentially causing taps to
+  /// register in the wrong location relative to the child's visual position.
+  ///
+  /// **Important:** Only hits within the parent's bounds can be registered and transformed,
+  /// part of the child extending outside the parent will not receive touch events.
+  ///
+  /// For interactive elements outside parent bounds, consider using an [Overlay].
   final bool transformHitTests;
 
   /// The filter quality with which to apply the transform as a bitmap operation.
@@ -2974,9 +2985,10 @@ class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
 
-    final String? debugTransformLabel = _debugTransformLabel.isNotEmpty
-        ? _debugTransformLabel
-        : _debugKnownTransforms[constraintsTransform];
+    final String? debugTransformLabel =
+        _debugTransformLabel.isNotEmpty
+            ? _debugTransformLabel
+            : _debugKnownTransforms[constraintsTransform];
 
     if (debugTransformLabel != null) {
       properties.add(DiagnosticsProperty<String>('constraints transform', debugTransformLabel));
@@ -4071,9 +4083,10 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
            onSetSelection: onSetSelection,
            onSetText: onSetText,
            customSemanticsActions: customSemanticsActions,
-           hintOverrides: onTapHint != null || onLongPressHint != null
-               ? SemanticsHintOverrides(onTapHint: onTapHint, onLongPressHint: onLongPressHint)
-               : null,
+           hintOverrides:
+               onTapHint != null || onLongPressHint != null
+                   ? SemanticsHintOverrides(onTapHint: onTapHint, onLongPressHint: onLongPressHint)
+                   : null,
            role: role,
            controlsNodes: controlsNodes,
            validationResult: validationResult,
@@ -4644,9 +4657,10 @@ class Stack extends MultiChildRenderObjectWidget {
         debugCheckHasDirectionality(
           context,
           why: "to resolve the 'alignment' argument",
-          hint: alignment == AlignmentDirectional.topStart
-              ? "The default value for 'alignment' is AlignmentDirectional.topStart, which requires a text direction."
-              : null,
+          hint:
+              alignment == AlignmentDirectional.topStart
+                  ? "The default value for 'alignment' is AlignmentDirectional.topStart, which requires a text direction."
+                  : null,
           alternative:
               "Instead of providing a Directionality widget, another solution would be passing a non-directional 'alignment', or an explicit 'textDirection', to the $runtimeType.",
         ),
@@ -6877,9 +6891,8 @@ class RawImage extends LeafRenderObjectWidget {
       repeat: repeat,
       centerSlice: centerSlice,
       matchTextDirection: matchTextDirection,
-      textDirection: matchTextDirection || alignment is! Alignment
-          ? Directionality.of(context)
-          : null,
+      textDirection:
+          matchTextDirection || alignment is! Alignment ? Directionality.of(context) : null,
       invertColors: invertColors,
       isAntiAlias: isAntiAlias,
       filterQuality: filterQuality,
@@ -6907,9 +6920,8 @@ class RawImage extends LeafRenderObjectWidget {
       ..repeat = repeat
       ..centerSlice = centerSlice
       ..matchTextDirection = matchTextDirection
-      ..textDirection = matchTextDirection || alignment is! Alignment
-          ? Directionality.of(context)
-          : null
+      ..textDirection =
+          matchTextDirection || alignment is! Alignment ? Directionality.of(context) : null
       ..invertColors = invertColors
       ..isAntiAlias = isAntiAlias
       ..filterQuality = filterQuality;
@@ -7014,8 +7026,8 @@ class DefaultAssetBundle extends InheritedWidget {
   /// AssetBundle bundle = DefaultAssetBundle.of(context);
   /// ```
   static AssetBundle of(BuildContext context) {
-    final DefaultAssetBundle? result = context
-        .dependOnInheritedWidgetOfExactType<DefaultAssetBundle>();
+    final DefaultAssetBundle? result =
+        context.dependOnInheritedWidgetOfExactType<DefaultAssetBundle>();
     return result?.bundle ?? rootBundle;
   }
 
