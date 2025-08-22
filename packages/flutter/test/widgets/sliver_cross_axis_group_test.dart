@@ -1055,6 +1055,7 @@ void main() {
     expect(counter, equals(2));
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/174262.
   testWidgets('SliverCrossAxisGroup pointer event positions', (WidgetTester tester) async {
     final List<({int index, TapDownDetails details})> tapDownLog =
         <({int index, TapDownDetails details})>[];

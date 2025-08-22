@@ -1198,6 +1198,7 @@ void main() {
     },
   );
 
+  // Regression test for https://github.com/flutter/flutter/issues/173029.
   testWidgets('SliverMainAxisGroup pointer event positions', (WidgetTester tester) async {
     final List<({int index, TapDownDetails details})> tapDownLog =
         <({int index, TapDownDetails details})>[];
