@@ -24,7 +24,8 @@ void putStringAttributesIntoBuffer(
     buffer_int32[position++] = static_cast<int32_t>(attribute->type);
     switch (attribute->type) {
       case StringAttributeType::kSpellOut:
-        buffer_int32[position++] = PlatformViewAndroidDelegate::kEmptyStringIndex;
+        buffer_int32[position++] =
+            PlatformViewAndroidDelegate::kEmptyStringIndex;
         break;
       case StringAttributeType::kLocale:
         buffer_int32[position++] = string_attribute_args.size();
