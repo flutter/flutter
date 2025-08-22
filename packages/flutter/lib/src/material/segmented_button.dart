@@ -521,7 +521,7 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
     }
 
     P? resolve<P>(
-      MaterialStateProperty<P>? Function(ButtonStyle? style) getProperty, [
+      WidgetStateProperty<P>? Function(ButtonStyle? style) getProperty, [
       Set<MaterialState>? states,
     ]) {
       return effectiveValue((ButtonStyle? style) => getProperty(style)?.resolve(states ?? _states));
