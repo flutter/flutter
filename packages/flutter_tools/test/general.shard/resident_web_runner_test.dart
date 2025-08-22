@@ -652,6 +652,7 @@ name: my_app
         'Launching lib/main.dart on FakeDevice in debug mode...\n'
         'Waiting for connection from debug service on FakeDevice...\n'
         'Debug service listening on ws://127.0.0.1/abcd/\n'
+        'A Dart VM Service on FakeDevice is available at: http://127.0.0.1/abcd/\n'
         '\n'
         'first\n'
         '\n'
