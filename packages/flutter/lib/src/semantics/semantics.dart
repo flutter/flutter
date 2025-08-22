@@ -956,6 +956,8 @@ class SemanticsData with Diagnosticable {
     required this.flagsCollection,
     required this.actions,
     required this.identifier,
+    required this.traversalParentIdentifier,
+    required this.traversalChildIdentifier,
     required this.attributedLabel,
     required this.attributedValue,
     required this.attributedIncreasedValue,
@@ -1028,6 +1030,9 @@ class SemanticsData with Diagnosticable {
 
   /// {@macro flutter.semantics.SemanticsProperties.identifier}
   final String identifier;
+
+  final String? traversalParentIdentifier;
+  final String? traversalChildIdentifier;
 
   /// A textual description for the current label of the node.
   ///
@@ -1282,6 +1287,12 @@ class SemanticsData with Diagnosticable {
     final List<String> flagSummary = flagsCollection.toStrings();
     properties.add(IterableProperty<String>('flags', flagSummary, ifEmpty: null));
     properties.add(StringProperty('identifier', identifier, defaultValue: ''));
+    properties.add(
+      StringProperty('traversalParentIdentifier', traversalParentIdentifier, defaultValue: null),
+    );
+    properties.add(
+      StringProperty('traversalChildIdentifier', traversalChildIdentifier, defaultValue: null),
+    );
     properties.add(AttributedStringProperty('label', attributedLabel));
     properties.add(AttributedStringProperty('value', attributedValue));
     properties.add(AttributedStringProperty('increasedValue', attributedIncreasedValue));
@@ -1327,6 +1338,8 @@ class SemanticsData with Diagnosticable {
         other.flags == flags &&
         other.actions == actions &&
         other.identifier == identifier &&
+        other.traversalParentIdentifier == traversalParentIdentifier &&
+        other.traversalChildIdentifier == traversalChildIdentifier &&
         other.attributedLabel == attributedLabel &&
         other.attributedValue == attributedValue &&
         other.attributedIncreasedValue == attributedIncreasedValue &&
@@ -1387,6 +1400,8 @@ class SemanticsData with Diagnosticable {
       validationResult,
       controlsNodes == null ? null : Object.hashAll(controlsNodes!),
       inputType,
+      traversalParentIdentifier,
+      traversalChildIdentifier,
     ),
   );
 
@@ -1523,6 +1538,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.maxValueLength,
     this.currentValueLength,
     this.identifier,
+    this.traversalParentIdentifier,
     this.label,
     this.attributedLabel,
     this.value,
@@ -1855,6 +1871,10 @@ class SemanticsProperties extends DiagnosticableTree {
   /// that corresponds to the semantics node.
   /// {@endtemplate}
   final String? identifier;
+
+  final String? traversalParentIdentifier;
+
+  final String? traversalChildIdentifier;
 
   /// Provides a textual description of the widget.
   ///
@@ -2454,6 +2474,12 @@ class SemanticsProperties extends DiagnosticableTree {
     properties.add(DiagnosticsProperty<bool>('selected', selected, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('isRequired', isRequired, defaultValue: null));
     properties.add(StringProperty('identifier', identifier, defaultValue: null));
+    properties.add(
+      StringProperty('traversalParentIdentifier', traversalParentIdentifier, defaultValue: null),
+    );
+    properties.add(
+      StringProperty('traversalChildIdentifier', traversalChildIdentifier, defaultValue: null),
+    );
     properties.add(StringProperty('label', label, defaultValue: null));
     properties.add(
       AttributedStringProperty('attributedLabel', attributedLabel, defaultValue: null),
@@ -3117,8 +3143,14 @@ class SemanticsNode with DiagnosticableTreeMixin {
   String get identifier => _identifier;
   String _identifier = _kEmptyConfig.identifier;
 
-  bool get _isOverlayPortalParent => getSemanticsData().identifier.endsWith('parent');
-  bool get _isOverlayPortalChild => getSemanticsData().identifier.endsWith('child');
+  String? get traversalParentIdentifier => _traversalParentIdentifier;
+  String? _traversalParentIdentifier;
+
+  String? get traversalChildIdentifier => _traversalChildIdentifier;
+  String? _traversalChildIdentifier;
+
+  bool get _isOverlayPortalParent => getSemanticsData().traversalParentIdentifier != null;
+  bool get _isOverlayPortalChild => getSemanticsData().traversalChildIdentifier != null;
 
   /// A textual description of this node.
   ///
@@ -3408,6 +3440,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
         _mergeAllDescendantsIntoThisNode != config.isMergingSemanticsOfDescendants;
 
     _identifier = config.identifier;
+    _traversalParentIdentifier = config.traversalParentIdentifier;
+    _traversalChildIdentifier = config.traversalChildIdentifier;
     _attributedLabel = config.attributedLabel;
     _attributedValue = config.attributedValue;
     _attributedIncreasedValue = config.attributedIncreasedValue;
@@ -3471,6 +3505,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
     // must be done after the merging the its descendants.
     int actions = _actionsAsBits;
     String identifier = _identifier;
+    String? traversalParentIdentifier = _traversalParentIdentifier;
+    String? traversalChildIdentifier = _traversalChildIdentifier;
     AttributedString attributedLabel = _attributedLabel;
     AttributedString attributedValue = _attributedValue;
     AttributedString attributedIncreasedValue = _attributedIncreasedValue;
@@ -3540,6 +3576,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
         if (identifier == '') {
           identifier = node._identifier;
         }
+        traversalParentIdentifier ??= node.traversalParentIdentifier;
+        traversalChildIdentifier ??= node.traversalChildIdentifier;
         if (attributedValue.string == '') {
           attributedValue = node._attributedValue;
         }
@@ -3619,6 +3657,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
       flagsCollection: flags,
       actions: _areUserActionsBlocked ? actions & _kUnblockedUserActions : actions,
       identifier: identifier,
+      traversalParentIdentifier: traversalParentIdentifier,
+      traversalChildIdentifier: traversalChildIdentifier,
       attributedLabel: attributedLabel,
       attributedValue: attributedValue,
       attributedIncreasedValue: attributedIncreasedValue,
@@ -3709,6 +3749,15 @@ class SemanticsNode with DiagnosticableTreeMixin {
     return transform;
   }
 
+  Int32List _childrenIdInTraversalOrder() {
+    final List<SemanticsNode> sortedChildren = _childrenInTraversalOrder();
+    final Int32List childrenInTraversalOrder = Int32List(sortedChildren.length);
+    for (int i = 0; i < sortedChildren.length; i += 1) {
+      childrenInTraversalOrder[i] = sortedChildren[i].id;
+    }
+    return childrenInTraversalOrder;
+  }
+
   void _addToUpdate(SemanticsUpdateBuilder builder, Set<int> customSemanticsActionIdsUpdate) {
     assert(_dirty || _isOverlayPortalParent);
     final SemanticsData data = getSemanticsData();
@@ -3723,22 +3772,15 @@ class SemanticsNode with DiagnosticableTreeMixin {
     final Int32List childrenInHitTestOrder;
     if (!hasChildren || mergeAllDescendantsIntoThisNode) {
       if (_isOverlayPortalParent) {
-        final List<SemanticsNode> sortedChildren = _childrenInTraversalOrder();
-        childrenInTraversalOrder = Int32List(sortedChildren.length);
-        for (int i = 0; i < sortedChildren.length; i += 1) {
-          childrenInTraversalOrder[i] = sortedChildren[i].id;
-        }
+        childrenInTraversalOrder = _childrenIdInTraversalOrder();
         childrenInHitTestOrder = _kEmptyChildList;
       } else {
         childrenInTraversalOrder = _kEmptyChildList;
         childrenInHitTestOrder = _kEmptyChildList;
       }
     } else {
-      final List<SemanticsNode> sortedChildren = _childrenInTraversalOrder();
-      childrenInTraversalOrder = Int32List(sortedChildren.length);
-      for (int i = 0; i < sortedChildren.length; i += 1) {
-        childrenInTraversalOrder[i] = sortedChildren[i].id;
-      }
+      childrenInTraversalOrder = _childrenIdInTraversalOrder();
+
       final int childCount = _children!.length;
       // _children is sorted in paint order, so we invert it to get the hit test
       // order.
@@ -3757,7 +3799,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     }
 
     if (_isOverlayPortalChild) {
-      traversalOwner = owner!._overlayPortalParentNodes[identifier.split(' ')[0]];
+      traversalOwner = owner!._overlayPortalParentNodes[traversalParentIdentifier];
       transform = _computeChildGeometry(
         parentPaintClipRect: traversalOwner!.parentPaintClipRect,
         parentSemanticsClipRect: traversalOwner!.parentSemanticsClipRect,
@@ -3767,9 +3809,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
       );
     }
 
-    int? overlayPortalParent;
-    if (data.identifier.endsWith('child')) {
-      overlayPortalParent = owner!._overlayPortalParentNodes[data.identifier.split(' ')[0]]?.id;
+    int? traversalOwnerId;
+    if (data.traversalChildIdentifier != null) {
+      traversalOwnerId = owner!._overlayPortalParentNodes[data.traversalChildIdentifier]?.id;
     }
 
     builder.updateNode(
@@ -3803,7 +3845,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       transform: kIsWeb
           ? data.transform?.storage ?? _kIdentityTransform
           : transform?.storage ?? data.transform?.storage ?? _kIdentityTransform,
-      traversalOwner: overlayPortalParent ?? -1,
+      traversalOwner: traversalOwnerId ?? -1,
       hitTestTransform: data.transform?.storage ?? _kIdentityTransform,
       childrenInTraversalOrder: childrenInTraversalOrder,
       childrenInHitTestOrder: childrenInHitTestOrder,
@@ -3850,9 +3892,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
     // portal child from _overlayPortalChildNodes and add it to the children list
     // of this current node.
     if (_isOverlayPortalParent) {
-      final String parentIdentifier = identifier.split(' ')[0];
-      if (owner != null && owner!._overlayPortalChildNodes.containsKey(parentIdentifier)) {
-        final SemanticsNode overlayChildNode = owner!._overlayPortalChildNodes[parentIdentifier]!;
+      if (owner != null && owner!._overlayPortalChildNodes.containsKey(traversalParentIdentifier)) {
+        final SemanticsNode overlayChildNode =
+            owner!._overlayPortalChildNodes[traversalParentIdentifier]!;
         if (overlayChildNode.attached) {
           updatedChildren.add(overlayChildNode);
         }
@@ -4020,6 +4062,12 @@ class SemanticsNode with DiagnosticableTreeMixin {
     properties.add(FlagProperty('isInvisible', value: isInvisible, ifTrue: 'invisible'));
     properties.add(FlagProperty('isHidden', value: flagsCollection.isHidden, ifTrue: 'HIDDEN'));
     properties.add(StringProperty('identifier', _identifier, defaultValue: ''));
+    properties.add(
+      StringProperty('traveralParentIdentifier', traversalParentIdentifier, defaultValue: null),
+    );
+    properties.add(
+      StringProperty('traveralChildIdentifier', traversalChildIdentifier, defaultValue: null),
+    );
     properties.add(AttributedStringProperty('label', _attributedLabel));
     properties.add(AttributedStringProperty('value', _attributedValue));
     properties.add(AttributedStringProperty('increasedValue', _attributedIncreasedValue));
@@ -4550,10 +4598,9 @@ class SemanticsOwner extends ChangeNotifier {
     final List<SemanticsNode> updatedVisitedNodes = <SemanticsNode>[];
 
     for (final SemanticsNode node in visitedNodes) {
-      final String identifier = node.identifier.split(' ')[0];
-
       final bool isOverlayPortalParent = node._isOverlayPortalParent;
       final bool isOverlayPortalChild = node._isOverlayPortalChild;
+
       if (kIsWeb) {
         updatedVisitedNodes.add(node);
       } else {
@@ -4566,7 +4613,8 @@ class SemanticsOwner extends ChangeNotifier {
           // If the node is a child of an overlay portal, we add its parent
           // node in the `updatedVisitedNodes` list for later grafting to generate
           // a correct traversal order.
-          final SemanticsNode? parentNode = _overlayPortalParentNodes[identifier];
+          final SemanticsNode? parentNode =
+              _overlayPortalParentNodes[node.traversalChildIdentifier];
           if (parentNode != null && !updatedVisitedNodes.contains(parentNode)) {
             updatedVisitedNodes.add(parentNode);
           }
@@ -4579,16 +4627,15 @@ class SemanticsOwner extends ChangeNotifier {
       // _overlayPortalParentNodes map. Similarly, add the node to the
       // _overlayPortalChildNodes map if it is an overlay portal child.
       if (isOverlayPortalParent) {
-        _overlayPortalParentNodes[identifier] = node;
+        _overlayPortalParentNodes[node.traversalParentIdentifier!] = node;
       } else if (isOverlayPortalChild) {
-        _overlayPortalChildNodes[identifier] = node;
+        _overlayPortalChildNodes[node.traversalChildIdentifier!] = node;
       }
     }
 
     for (final SemanticsNode node in updatedVisitedNodes) {
-      final bool isOverlayPortalParent = node._isOverlayPortalParent;
       assert(
-        node.parent?._dirty != true || isOverlayPortalParent,
+        node.parent?._dirty != true || node._isOverlayPortalParent,
       ); // could be null (no parent) or false (not dirty)
       // The _serialize() method marks the node as not dirty, and
       // recurses through the tree to do a deep serialization of all
@@ -4600,7 +4647,7 @@ class SemanticsOwner extends ChangeNotifier {
       // calls reset() on its SemanticsNode if onlyChanges isn't set,
       // which happens e.g. when the node is no longer contributing
       // semantics).
-      if ((node._dirty || isOverlayPortalParent) && node.attached) {
+      if ((node._dirty || node._isOverlayPortalParent) && node.attached) {
         node._addToUpdate(builder, customSemanticsActionIds);
       }
     }
@@ -5479,6 +5526,20 @@ class SemanticsConfiguration {
   String _identifier = '';
   set identifier(String identifier) {
     _identifier = identifier;
+    _hasBeenAnnotated = true;
+  }
+
+  String? get traversalParentIdentifier => _traversalParentIdentifier;
+  String? _traversalParentIdentifier;
+  set traversalParentIdentifier(String? value) {
+    _traversalParentIdentifier = value;
+    _hasBeenAnnotated = true;
+  }
+
+  String? get traversalChildIdentifier => _traversalChildIdentifier;
+  String? _traversalChildIdentifier;
+  set traversalChildIdentifier(String? value) {
+    _traversalChildIdentifier = value;
     _hasBeenAnnotated = true;
   }
 
