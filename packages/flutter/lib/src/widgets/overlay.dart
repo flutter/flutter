@@ -536,11 +536,15 @@ class Overlay extends StatefulWidget {
   /// OverlayState overlay = Overlay.of(context);
   /// ```
   ///
+  /// {@template flutter.widgets.Overlay.of}
   /// If `rootOverlay` is set to true, the state from the furthest instance of
   /// this class is given instead. Useful for installing overlay entries above
   /// all subsequent instances of [Overlay].
   ///
-  /// This method can be expensive (it walks the element tree).
+  /// This method register dependency on the Overlay element. A rebuild on the
+  /// [BuildContext] is triggered if the [OverlayState] changes. This can happen
+  /// when global key reparenting.
+  /// {@endtemplate}
   ///
   /// See also:
   ///
@@ -599,11 +603,7 @@ class Overlay extends StatefulWidget {
   /// OverlayState? overlay = Overlay.maybeOf(context);
   /// ```
   ///
-  /// If `rootOverlay` is set to true, the state from the furthest instance of
-  /// this class is given instead. Useful for installing overlay entries above
-  /// all subsequent instances of [Overlay].
-  ///
-  /// This method can be expensive (it walks the element tree).
+  /// {@macro flutter.widgets.Overlay.of}
   ///
   /// See also:
   ///
@@ -611,9 +611,24 @@ class Overlay extends StatefulWidget {
   ///    and throws if an [Overlay] is not found.
 
   static OverlayState? maybeOf(BuildContext context, {bool rootOverlay = false}) {
-    return rootOverlay
-        ? LookupBoundary.findRootAncestorStateOfType<OverlayState>(context)
-        : LookupBoundary.findAncestorStateOfType<OverlayState>(context);
+    InheritedElement? element =
+        LookupBoundary.getElementForInheritedWidgetOfExactType<_OverlayScope>(context);
+    if (rootOverlay) {
+      InheritedElement? walker = element;
+      while (walker != null) {
+        element = walker;
+        walker!.visitAncestorElements((Element ancestor) {
+          walker = LookupBoundary.getElementForInheritedWidgetOfExactType<_OverlayScope>(ancestor);
+          return false;
+        });
+        assert(element != walker); // can only happen if overlay entry element is the root.
+      }
+    }
+    if (element != null) {
+      return (context.dependOnInheritedElement(element) as _OverlayScope).state;
+    }
+
+    return null;
   }
 
   @override
@@ -886,10 +901,13 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
         );
       }
     }
-    return _Theater(
-      skipCount: children.length - onstageCount,
-      clipBehavior: widget.clipBehavior,
-      children: children.reversed.toList(growable: false),
+    return _OverlayScope(
+      state: this,
+      child: _Theater(
+        skipCount: children.length - onstageCount,
+        clipBehavior: widget.clipBehavior,
+        children: children.reversed.toList(growable: false),
+      ),
     );
   }
 
@@ -939,6 +957,16 @@ class _WrappingOverlayState extends State<_WrappingOverlay> {
   @override
   Widget build(BuildContext context) {
     return Overlay(clipBehavior: widget.clipBehavior, initialEntries: <OverlayEntry>[_entry]);
+  }
+}
+
+class _OverlayScope extends InheritedWidget {
+  _OverlayScope({required this.state, required super.child});
+  OverlayState state;
+
+  @override
+  bool updateShouldNotify(covariant _OverlayScope oldWidget) {
+    return state != oldWidget.state;
   }
 }
 

@@ -104,6 +104,53 @@ void main() {
     );
   });
 
+  testWidgets('Listens to overlay changes', (WidgetTester tester) async {
+    final GlobalKey container = GlobalKey();
+    final OverlayEntry overlayEntry1 = OverlayEntry(
+      builder: (BuildContext context) {
+        // Use global key to ensure `OverlayCatcher` will be reparented instead
+        // of destroyed when Overlay gets swapped.
+        return Container(key: container, child: const OverlayCatcher());
+      },
+    );
+    addTearDown(
+      () => overlayEntry1
+        ..remove()
+        ..dispose(),
+    );
+    final OverlayEntry overlayEntry2 = OverlayEntry(
+      builder: (BuildContext context) {
+        // Use global key to ensure `OverlayCatcher` will be reparented instead
+        // of destroyed when Overlay gets swapped.
+        return Container(key: container, child: const OverlayCatcher());
+      },
+    );
+    addTearDown(
+      () => overlayEntry2
+        ..remove()
+        ..dispose(),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: OverlaySwaps(overlayEntry1, overlayEntry2),
+      ),
+    );
+
+    final OverlayState state = tester.state<OverlayState>(find.byType(Overlay));
+
+    expect(find.text(state.hashCode.toString()), findsOneWidget);
+
+    final OverlaySwapsState swaps = tester.state<OverlaySwapsState>(find.byType(OverlaySwaps));
+    swaps.swaps();
+    await tester.pumpAndSettle();
+
+    final OverlayState newState = tester.state<OverlayState>(find.byType(Overlay));
+    expect(state != newState, isTrue);
+    expect(find.text(newState.hashCode.toString()), findsOneWidget);
+  });
+
   testWidgets('Offstage overlay', (WidgetTester tester) async {
     final GlobalKey overlayKey = GlobalKey();
     late final OverlayEntry overlayEntry1;
@@ -1953,6 +2000,48 @@ class StatefulTestState extends State<StatefulTestWidget> {
   Widget build(BuildContext context) {
     rebuildCount += 1;
     return Container();
+  }
+}
+
+class OverlaySwaps extends StatefulWidget {
+  const OverlaySwaps(this.entry, this.entryAfterSwap, {super.key});
+
+  final OverlayEntry entry;
+  final OverlayEntry entryAfterSwap;
+  @override
+  State<StatefulWidget> createState() => OverlaySwapsState();
+}
+
+class OverlaySwapsState extends State<OverlaySwaps> {
+  late UniqueKey overlayKey;
+  late OverlayEntry entry;
+
+  @override
+  void initState() {
+    super.initState();
+    overlayKey = UniqueKey();
+    entry = widget.entry;
+  }
+
+  void swaps() {
+    setState(() {
+      overlayKey = UniqueKey();
+      entry = widget.entryAfterSwap;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Overlay(key: overlayKey, initialEntries: <OverlayEntry>[entry]);
+  }
+}
+
+class OverlayCatcher extends StatelessWidget {
+  const OverlayCatcher({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(Overlay.of(context).hashCode.toString());
   }
 }
 
