@@ -36,7 +36,7 @@ object DeepLinkJsonFromManifestTaskHelper {
      *     ]
      * }
      */
-    public fun createAppLinkSettingsFile(
+    fun createAppLinkSettingsFile(
         applicationId: String,
         manifestFile: RegularFileProperty,
         deepLinkJson: RegularFileProperty
