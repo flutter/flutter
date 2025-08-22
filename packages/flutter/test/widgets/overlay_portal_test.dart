@@ -1386,7 +1386,7 @@ void main() {
                                       return OverlayPortal(
                                         key: widgetKey,
                                         controller: controller1,
-                                        targetsOverlay: state,
+                                        targetOverlay: state,
                                         overlayChildBuilder: (BuildContext context) {
                                           return LayoutBuilder(
                                             builder:

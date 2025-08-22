@@ -1728,11 +1728,12 @@ class OverlayPortalController {
 /// states as a result.
 ///
 /// {@template flutter.widgets.overlayPortal.targetsOverlay}
-/// Use [targetsOverlay] to choose which [Overlay] this overlay portal
-/// attaches to. Consider using [GlobalKey] or [Overlay.of] with appropriate
-/// [BuildContext] to get the [OverlayState]. One can also use
-/// `Overlay.of(context, rootOverlay: true)` to pick the root [Overlay]. If
-/// not provided, the closest ancestor [Overlay] is chosen.
+/// Use [targetOverlay] to choose which [Overlay] this overlay portal
+/// attaches to. Consider using [GlobalKey.currentState] or [Overlay.of] with
+/// appropriate [BuildContext] to get the [OverlayState]. One can also use
+/// `Overlay.of(context, rootOverlay: true)` to pick the root [Overlay].
+///
+/// If not provided, the nearest ancestor [Overlay] is chosen.
 /// {@endtemplate}
 ///
 /// {@tool dartpad}
@@ -1803,7 +1804,7 @@ class OverlayPortal extends StatefulWidget {
     super.key,
     required this.controller,
     required this.overlayChildBuilder,
-    this.targetsOverlay,
+    this.targetOverlay,
     this.child,
   }) : _targetRootOverlay = false;
 
@@ -1820,7 +1821,7 @@ class OverlayPortal extends StatefulWidget {
     required this.overlayChildBuilder,
     this.child,
   }) : _targetRootOverlay = true,
-       targetsOverlay = null;
+       targetOverlay = null;
 
   /// Creates an [OverlayPortal] that renders the widget `overlayChildBuilder`
   /// builds on the closest [Overlay] when [OverlayPortalController.show] is
@@ -1855,7 +1856,7 @@ class OverlayPortal extends StatefulWidget {
          key: key,
          controller: controller,
          overlayChildBuilder: (_) => _OverlayChildLayoutBuilder(builder: overlayChildBuilder),
-         targetsOverlay: targetsOverlay,
+         targetOverlay: targetsOverlay,
          child: child,
        );
 
@@ -1884,7 +1885,7 @@ class OverlayPortal extends StatefulWidget {
   final Widget? child;
 
   /// The [Overlay] this overlay portal will be attached to.
-  final OverlayState? targetsOverlay;
+  final OverlayState? targetOverlay;
 
   // TODO(chunhtai): remove this once OverlayPortal.targetsRootOverlay is
   // removed.
@@ -1914,8 +1915,7 @@ class _OverlayPortalState extends State<OverlayPortal> {
   }
 
   OverlayState? _getOverlayState() {
-    return widget.targetsOverlay ??
-        Overlay.maybeOf(context, rootOverlay: widget._targetRootOverlay);
+    return widget.targetOverlay ?? Overlay.maybeOf(context, rootOverlay: widget._targetRootOverlay);
   }
 
   _OverlayEntryLocation _getLocation(int zOrderIndex) {
@@ -1994,7 +1994,7 @@ class _OverlayPortalState extends State<OverlayPortal> {
     _childModelMayHaveChanged =
         _childModelMayHaveChanged ||
         oldWidget._targetRootOverlay != widget._targetRootOverlay ||
-        oldWidget.targetsOverlay != widget.targetsOverlay;
+        oldWidget.targetOverlay != widget.targetOverlay;
     if (oldWidget.controller != widget.controller) {
       oldWidget.controller._attachTarget = null;
       _setupController(widget.controller);
