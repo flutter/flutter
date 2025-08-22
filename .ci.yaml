@@ -5438,7 +5438,6 @@ targets:
 
   - name: Mac_ios ios_debug_workflow
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
