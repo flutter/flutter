@@ -6,8 +6,11 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:web_engine_tester/golden_tester.dart';
 
-import 'common.dart';
+import '../common/rendering.dart';
+import '../common/test_initialization.dart';
+import 'utils.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -17,23 +20,23 @@ const ui.Rect region = ui.Rect.fromLTRB(0, 0, 500, 250);
 
 void testMain() {
   group('ColorFilter', () {
-    setUpCanvasKitTest(withImplicitView: true);
+    setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
 
     test('ColorFilter.matrix applies a color filter', () async {
-      final LayerSceneBuilder builder = LayerSceneBuilder();
+      final ui.SceneBuilder builder = ui.SceneBuilder();
 
       builder.pushOffset(0, 0);
 
       // Draw a red circle and apply it to the scene.
-      final CkPictureRecorder recorder = CkPictureRecorder();
-      final CkCanvas canvas = recorder.beginRecording(region);
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final ui.Canvas canvas = ui.Canvas(recorder, region);
 
       canvas.drawCircle(
         const ui.Offset(75, 125),
         50,
-        CkPaint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
+        ui.Paint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
       );
-      final CkPicture redCircle = recorder.endRecording();
+      final ui.Picture redCircle = recorder.endRecording();
 
       builder.addPicture(ui.Offset.zero, redCircle);
 
@@ -49,59 +52,63 @@ void testMain() {
 
       // Draw another red circle and apply it to the scene.
       // This one should be grey since we have the color filter.
-      final CkPictureRecorder recorder2 = CkPictureRecorder();
-      final CkCanvas canvas2 = recorder2.beginRecording(region);
+      final ui.PictureRecorder recorder2 = ui.PictureRecorder();
+      final ui.Canvas canvas2 = ui.Canvas(recorder2, region);
 
       canvas2.drawCircle(
         const ui.Offset(425, 125),
         50,
-        CkPaint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
+        ui.Paint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
       );
-      final CkPicture greyCircle = recorder2.endRecording();
+      final ui.Picture greyCircle = recorder2.endRecording();
 
       builder.addPicture(ui.Offset.zero, greyCircle);
 
-      await matchSceneGolden('canvaskit_colorfilter.png', builder.build(), region: region);
+      await renderScene(builder.build());
+
+      await matchGoldenFile('ui_colorfilter.png', region: region);
     });
 
     test('invertColors inverts the colors', () async {
-      final LayerSceneBuilder builder = LayerSceneBuilder();
+      final ui.SceneBuilder builder = ui.SceneBuilder();
 
       builder.pushOffset(0, 0);
 
       // Draw a red circle and apply it to the scene.
-      final CkPictureRecorder recorder = CkPictureRecorder();
-      final CkCanvas canvas = recorder.beginRecording(region);
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final ui.Canvas canvas = ui.Canvas(recorder, region);
 
       canvas.drawCircle(
         const ui.Offset(75, 125),
         50,
-        CkPaint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
+        ui.Paint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
       );
-      final CkPicture redCircle = recorder.endRecording();
+      final ui.Picture redCircle = recorder.endRecording();
 
       builder.addPicture(ui.Offset.zero, redCircle);
 
       // Draw another red circle with invertColors.
-      final CkPictureRecorder recorder2 = CkPictureRecorder();
-      final CkCanvas canvas2 = recorder2.beginRecording(region);
+      final ui.PictureRecorder recorder2 = ui.PictureRecorder();
+      final ui.Canvas canvas2 = ui.Canvas(recorder2, region);
 
       canvas2.drawCircle(
         const ui.Offset(425, 125),
         50,
-        CkPaint()
+        ui.Paint()
           ..color = const ui.Color.fromARGB(255, 255, 0, 0)
           ..invertColors = true,
       );
-      final CkPicture invertedCircle = recorder2.endRecording();
+      final ui.Picture invertedCircle = recorder2.endRecording();
 
       builder.addPicture(ui.Offset.zero, invertedCircle);
 
-      await matchSceneGolden('canvaskit_invertcolors.png', builder.build(), region: region);
+      await renderScene(builder.build());
+
+      await matchGoldenFile('ui_invertcolors.png', region: region);
     });
 
     test('ColorFilter.matrix works for inverse matrix', () async {
-      final LayerSceneBuilder builder = LayerSceneBuilder();
+      final ui.SceneBuilder builder = ui.SceneBuilder();
 
       builder.pushOffset(0, 0);
 
@@ -115,40 +122,41 @@ void testMain() {
         ]),
       );
 
-      final CkPictureRecorder recorder = CkPictureRecorder();
-
-      final CkCanvas canvas = recorder.beginRecording(region);
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final ui.Canvas canvas = ui.Canvas(recorder, region);
       canvas.drawRect(
         const ui.Rect.fromLTWH(50, 50, 100, 100),
-        CkPaint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
+        ui.Paint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
       );
       canvas.drawRect(
         const ui.Rect.fromLTWH(200, 50, 100, 100),
-        CkPaint()..color = const ui.Color.fromARGB(255, 0, 255, 0),
+        ui.Paint()..color = const ui.Color.fromARGB(255, 0, 255, 0),
       );
       canvas.drawRect(
         const ui.Rect.fromLTWH(350, 50, 100, 100),
-        CkPaint()..color = const ui.Color.fromARGB(255, 0, 0, 255),
+        ui.Paint()..color = const ui.Color.fromARGB(255, 0, 0, 255),
       );
-      final CkPicture invertedSquares = recorder.endRecording();
+      final ui.Picture invertedSquares = recorder.endRecording();
 
       builder.addPicture(ui.Offset.zero, invertedSquares);
 
-      await matchSceneGolden('canvaskit_inverse_colormatrix.png', builder.build(), region: region);
+      await renderScene(builder.build());
+
+      await matchGoldenFile('ui_inverse_colormatrix.png', region: region);
     });
 
     test('ColorFilter color with 0 opacity', () async {
-      final LayerSceneBuilder builder = LayerSceneBuilder();
+      final ui.SceneBuilder builder = ui.SceneBuilder();
       builder.pushOffset(0, 0);
-      final CkPictureRecorder recorder = CkPictureRecorder();
-      final CkCanvas canvas = recorder.beginRecording(region);
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final ui.Canvas canvas = ui.Canvas(recorder, region);
 
       canvas.drawCircle(
         const ui.Offset(75, 125),
         50,
-        CkPaint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
+        ui.Paint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
       );
-      final CkPicture redCircle1 = recorder.endRecording();
+      final ui.Picture redCircle1 = recorder.endRecording();
       builder.addPicture(ui.Offset.zero, redCircle1);
 
       builder.pushColorFilter(
@@ -157,36 +165,34 @@ void testMain() {
 
       // Draw another red circle and apply it to the scene.
       // This one should also be red with the color filter doing nothing
-      final CkPictureRecorder recorder2 = CkPictureRecorder();
-      final CkCanvas canvas2 = recorder2.beginRecording(region);
+      final ui.PictureRecorder recorder2 = ui.PictureRecorder();
+      final ui.Canvas canvas2 = ui.Canvas(recorder2, region);
       canvas2.drawCircle(
         const ui.Offset(425, 125),
         50,
-        CkPaint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
+        ui.Paint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
       );
-      final CkPicture redCircle2 = recorder2.endRecording();
+      final ui.Picture redCircle2 = recorder2.endRecording();
 
       builder.addPicture(ui.Offset.zero, redCircle2);
 
-      await matchSceneGolden(
-        'canvaskit_transparent_colorfilter.png',
-        builder.build(),
-        region: region,
-      );
+      await renderScene(builder.build());
+
+      await matchGoldenFile('ui_transparent_colorfilter.png', region: region);
     });
 
     test('ColorFilter with dst blend mode', () async {
-      final LayerSceneBuilder builder = LayerSceneBuilder();
+      final ui.SceneBuilder builder = ui.SceneBuilder();
       builder.pushOffset(0, 0);
-      final CkPictureRecorder recorder = CkPictureRecorder();
-      final CkCanvas canvas = recorder.beginRecording(region);
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final ui.Canvas canvas = ui.Canvas(recorder, region);
 
       canvas.drawCircle(
         const ui.Offset(75, 125),
         50,
-        CkPaint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
+        ui.Paint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
       );
-      final CkPicture redCircle1 = recorder.endRecording();
+      final ui.Picture redCircle1 = recorder.endRecording();
       builder.addPicture(ui.Offset.zero, redCircle1);
 
       // Push dst color filter
@@ -194,35 +200,37 @@ void testMain() {
 
       // Draw another red circle and apply it to the scene.
       // This one should also be red with the color filter doing nothing
-      final CkPictureRecorder recorder2 = CkPictureRecorder();
-      final CkCanvas canvas2 = recorder2.beginRecording(region);
+      final ui.PictureRecorder recorder2 = ui.PictureRecorder();
+      final ui.Canvas canvas2 = ui.Canvas(recorder2, region);
       canvas2.drawCircle(
         const ui.Offset(425, 125),
         50,
-        CkPaint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
+        ui.Paint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
       );
-      final CkPicture redCircle2 = recorder2.endRecording();
+      final ui.Picture redCircle2 = recorder2.endRecording();
 
       builder.addPicture(ui.Offset.zero, redCircle2);
 
-      await matchSceneGolden('canvaskit_dst_colorfilter.png', builder.build(), region: region);
+      await renderScene(builder.build());
+
+      await matchGoldenFile('ui_dst_colorfilter.png', region: region);
     });
 
     test('ColorFilter only applies to child bounds', () async {
-      final LayerSceneBuilder builder = LayerSceneBuilder();
+      final ui.SceneBuilder builder = ui.SceneBuilder();
 
       builder.pushOffset(0, 0);
 
       // Draw a red circle and add it to the scene.
-      final CkPictureRecorder recorder = CkPictureRecorder();
-      final CkCanvas canvas = recorder.beginRecording(region);
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final ui.Canvas canvas = ui.Canvas(recorder, region);
 
       canvas.drawCircle(
         const ui.Offset(75, 125),
         50,
-        CkPaint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
+        ui.Paint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
       );
-      final CkPicture redCircle = recorder.endRecording();
+      final ui.Picture redCircle = recorder.endRecording();
 
       builder.addPicture(ui.Offset.zero, redCircle);
 
@@ -230,36 +238,38 @@ void testMain() {
       builder.pushColorFilter(const ui.ColorFilter.mode(ui.Color(0xff00ff00), ui.BlendMode.color));
       // Draw another red circle and apply it to the scene.
       // This one should be green since we have the color filter.
-      final CkPictureRecorder recorder2 = CkPictureRecorder();
-      final CkCanvas canvas2 = recorder2.beginRecording(region);
+      final ui.PictureRecorder recorder2 = ui.PictureRecorder();
+      final ui.Canvas canvas2 = ui.Canvas(recorder2, region);
 
       canvas2.drawCircle(
         const ui.Offset(425, 125),
         50,
-        CkPaint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
+        ui.Paint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
       );
-      final CkPicture greenCircle = recorder2.endRecording();
+      final ui.Picture greenCircle = recorder2.endRecording();
 
       builder.addPicture(ui.Offset.zero, greenCircle);
 
-      await matchSceneGolden('canvaskit_colorfilter_bounds.png', builder.build(), region: region);
+      await renderScene(builder.build());
+
+      await matchGoldenFile('ui_colorfilter_bounds.png', region: region);
     });
 
     test('ColorFilter works as an ImageFilter', () async {
-      final LayerSceneBuilder builder = LayerSceneBuilder();
+      final ui.SceneBuilder builder = ui.SceneBuilder();
 
       builder.pushOffset(0, 0);
 
       // Draw a red circle and add it to the scene.
-      final CkPictureRecorder recorder = CkPictureRecorder();
-      final CkCanvas canvas = recorder.beginRecording(region);
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final ui.Canvas canvas = ui.Canvas(recorder, region);
 
       canvas.drawCircle(
         const ui.Offset(75, 125),
         50,
-        CkPaint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
+        ui.Paint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
       );
-      final CkPicture redCircle = recorder.endRecording();
+      final ui.Picture redCircle = recorder.endRecording();
 
       builder.addPicture(ui.Offset.zero, redCircle);
 
@@ -267,24 +277,24 @@ void testMain() {
       builder.pushImageFilter(const ui.ColorFilter.mode(ui.Color(0xff00ff00), ui.BlendMode.color));
       // Draw another red circle and apply it to the scene.
       // This one should be green since we have the color filter.
-      final CkPictureRecorder recorder2 = CkPictureRecorder();
-      final CkCanvas canvas2 = recorder2.beginRecording(region);
+      final ui.PictureRecorder recorder2 = ui.PictureRecorder();
+      final ui.Canvas canvas2 = ui.Canvas(recorder2, region);
 
       canvas2.drawCircle(
         const ui.Offset(425, 125),
         50,
-        CkPaint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
+        ui.Paint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
       );
-      final CkPicture greenCircle = recorder2.endRecording();
+      final ui.Picture greenCircle = recorder2.endRecording();
 
       builder.addPicture(ui.Offset.zero, greenCircle);
 
-      await matchSceneGolden(
-        'canvaskit_colorfilter_as_imagefilter.png',
-        builder.build(),
-        region: region,
-      );
-    });
+      await renderScene(builder.build());
+
+      await matchGoldenFile('ui_colorfilter_as_imagefilter.png', region: region);
+      // Unskip when Skwasm and CanvasKit are unified:
+      // https://github.com/flutter/flutter/issues/172311
+    }, skip: isSkwasm);
     // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
   }, skip: isSafari || isFirefox);
 }

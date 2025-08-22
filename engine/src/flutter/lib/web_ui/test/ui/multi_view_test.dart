@@ -9,35 +9,35 @@ import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../common/matchers.dart';
-import 'common.dart';
+import '../common/test_initialization.dart';
+import 'utils.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
 void testMain() {
-  group('CanvasKit', () {
-    setUpCanvasKitTest(withImplicitView: true);
+  group('MultiView', () {
+    setUpUnitTests(withImplicitView: true);
 
-    late LayerScene scene;
+    late ui.Scene scene;
 
     setUp(() {
       // Create a scene to use in tests.
-      final CkPicture picture = paintPicture(const ui.Rect.fromLTRB(0, 0, 60, 60), (
-        CkCanvas canvas,
-      ) {
-        canvas.drawRect(
-          const ui.Rect.fromLTRB(0, 0, 60, 60),
-          CkPaint()..style = ui.PaintingStyle.fill,
-        );
-      });
-      final LayerSceneBuilder sb = LayerSceneBuilder();
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final ui.Canvas canvas = ui.Canvas(recorder, const ui.Rect.fromLTRB(0, 0, 60, 60));
+      canvas.drawRect(
+        const ui.Rect.fromLTRB(0, 0, 60, 60),
+        ui.Paint()..style = ui.PaintingStyle.fill,
+      );
+      final ui.Picture picture = recorder.endRecording();
+      final ui.SceneBuilder sb = ui.SceneBuilder();
       sb.addPicture(ui.Offset.zero, picture);
       scene = sb.build();
     });
 
     test('can render into arbitrary views', () async {
-      await CanvasKitRenderer.instance.renderScene(scene, implicitView);
+      await renderer.renderScene(scene, implicitView as EngineFlutterView);
 
       final EngineFlutterView anotherView = EngineFlutterView(
         EnginePlatformDispatcher.instance,
@@ -45,7 +45,7 @@ void testMain() {
       );
       EnginePlatformDispatcher.instance.viewManager.registerView(anotherView);
 
-      await CanvasKitRenderer.instance.renderScene(scene, anotherView);
+      await renderer.renderScene(scene, anotherView);
     });
 
     test('will error if trying to render into an unregistered view', () async {
@@ -53,11 +53,10 @@ void testMain() {
         EnginePlatformDispatcher.instance,
         createDomElement('unregistered-view'),
       );
-      expect(
-        () => CanvasKitRenderer.instance.renderScene(scene, unregisteredView),
-        throwsAssertionError,
-      );
-    });
+      expect(() => renderer.renderScene(scene, unregisteredView), throwsAssertionError);
+      // Unskip when Skwasm and CanvasKit are unified:
+      // https://github.com/flutter/flutter/issues/172311
+    }, skip: isSkwasm);
 
     test('will dispose the Rasterizer for a disposed view', () async {
       final EngineFlutterView view = EngineFlutterView(
@@ -65,10 +64,10 @@ void testMain() {
         createDomElement('multi-view'),
       );
       EnginePlatformDispatcher.instance.viewManager.registerView(view);
-      expect(CanvasKitRenderer.instance.rasterizers[view.viewId], isNotNull);
+      expect(renderer.rasterizers[view.viewId], isNotNull);
 
       EnginePlatformDispatcher.instance.viewManager.disposeAndUnregisterView(view.viewId);
-      expect(CanvasKitRenderer.instance.rasterizers[view.viewId], isNull);
+      expect(renderer.rasterizers[view.viewId], isNull);
     });
 
     // Issue https://github.com/flutter/flutter/issues/142094
@@ -80,10 +79,10 @@ void testMain() {
         createDomElement('multi-view'),
       );
       EnginePlatformDispatcher.instance.viewManager.registerView(view);
-      expect(CanvasKitRenderer.instance.rasterizers[view.viewId], isNotNull);
+      expect(renderer.rasterizers[view.viewId], isNotNull);
 
       EnginePlatformDispatcher.instance.viewManager.disposeAndUnregisterView(view.viewId);
-      expect(CanvasKitRenderer.instance.rasterizers[view.viewId], isNull);
+      expect(renderer.rasterizers[view.viewId], isNull);
 
       expect(
         PlatformViewManager.instance.knowsViewType(
