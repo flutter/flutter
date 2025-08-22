@@ -13,11 +13,6 @@ import 'framework.dart';
 import 'ticker_provider.dart';
 
 /// A base class for progress indicators.
-///
-/// See also:
-///
-///  * [MaterialProgressIndicator], which is a base class for Material Design progress indicators.
-///  * [CupertinoProgressIndicator] which is a base class for Cupertino progress indicators.
 abstract class ProgressIndicator extends StatefulWidget {
   /// Creates a progress indicator.
   ///
@@ -34,7 +29,6 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// {@endtemplate}
   const ProgressIndicator({super.key, this.value, this.semanticsLabel, this.semanticsValue});
 
-  // cupertino.
   /// If non-null, the value of this progress indicator.
   ///
   /// A value of 0.0 means no progress and 1.0 means that progress is complete.
