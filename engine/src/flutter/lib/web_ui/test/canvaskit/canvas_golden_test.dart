@@ -337,12 +337,7 @@ void drawTestPicture(CkCanvas canvas) {
   //                will ensure it's fixed when we have the fix.
   canvas.drawPoints(
     ui.PointMode.polygon,
-    const <ui.Offset>[
-      ui.Offset(10, 10),
-      ui.Offset(20, 10),
-      ui.Offset(30, 20),
-      ui.Offset(40, 20),
-    ],
+    const <ui.Offset>[ui.Offset(10, 10), ui.Offset(20, 10), ui.Offset(30, 20), ui.Offset(40, 20)],
     CkPaint()
       ..color = const ui.Color(0xFF0000FF)
       ..strokeWidth = 5
