@@ -60,6 +60,7 @@ void main() {
     process = null;
     await dtdLauncher?.dispose();
     await devtoolsLauncher?.close();
+    devtoolsLauncher = null;
     dtdLauncher = null;
     tryToDelete(tempDir);
   });
