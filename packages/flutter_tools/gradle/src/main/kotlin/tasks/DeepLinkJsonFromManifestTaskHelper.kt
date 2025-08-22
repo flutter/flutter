@@ -50,7 +50,7 @@ object DeepLinkJsonFromManifestTaskHelper {
      * an AppLinkSettings object.
      *
      * @param applicationId The application ID or the namespace of the variant.
-     * @param manifest the Android manifest to be parsed.
+     * @param manifestFile the Android manifest file to be parsed.
      */
     @VisibleForTesting
     fun createAppLinkSettings(
