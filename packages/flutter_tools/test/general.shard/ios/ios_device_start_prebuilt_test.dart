@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -1197,7 +1196,7 @@ void main() {
           deviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:456');
         });
 
-        final shutDownHooks = FakeShutDownHooks();
+        final shutDownHooks = FakeShutdownHooks();
 
         final LaunchResult launchResult = await device.startApp(
           iosApp,
@@ -1208,7 +1207,7 @@ void main() {
         );
 
         expect(launchResult.started, true);
-        expect(shutDownHooks.hooks.length, 1);
+        expect(shutDownHooks.registeredHooks.length, 1);
         expect(fakeAnalytics.sentEvents, [
           Event.appleUsageEvent(
             workflow: 'ios-physical-deployment',
@@ -1686,14 +1685,6 @@ class FakeXcodeDebug extends Fake implements XcodeDebug {
 }
 
 class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {}
-
-class FakeShutDownHooks extends Fake implements ShutdownHooks {
-  var hooks = <ShutdownHook>[];
-  @override
-  void addShutdownHook(ShutdownHook shutdownHook) {
-    hooks.add(shutdownHook);
-  }
-}
 
 class FakeXcode extends Fake implements Xcode {
   FakeXcode({this.currentVersion});

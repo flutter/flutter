@@ -18,9 +18,9 @@ import '../utils/preview_project.dart';
 // directories for changes. This can be slow on heavily loaded machines and cause
 // flaky failures.
 
-/// Creates a project with files containing invalid preview applications.
-class BasicProjectWithInvalidPreviews extends WidgetPreviewProject with ProjectWithPreviews {
-  BasicProjectWithInvalidPreviews._({
+/// Creates a project with files containing preview applications that have non-const parameters.
+class ProjectWithPreviewsWithNonConstParams extends WidgetPreviewProject with ProjectWithPreviews {
+  ProjectWithPreviewsWithNonConstParams._({
     required super.projectRoot,
     required List<String> pathsWithPreviews,
     required List<String> pathsWithoutPreviews,
@@ -28,12 +28,12 @@ class BasicProjectWithInvalidPreviews extends WidgetPreviewProject with ProjectW
     initialize(pathsWithPreviews: pathsWithPreviews, pathsWithoutPreviews: pathsWithoutPreviews);
   }
 
-  static Future<BasicProjectWithInvalidPreviews> create({
+  static Future<ProjectWithPreviewsWithNonConstParams> create({
     required Directory projectRoot,
     required List<String> pathsWithPreviews,
     required List<String> pathsWithoutPreviews,
   }) async {
-    final project = BasicProjectWithInvalidPreviews._(
+    final project = ProjectWithPreviewsWithNonConstParams._(
       projectRoot: projectRoot,
       pathsWithPreviews: pathsWithPreviews,
       pathsWithoutPreviews: pathsWithoutPreviews,
@@ -49,39 +49,26 @@ void main() {}
 
   @override
   final previewContainingFileContents = '''
+import 'package:flutter/widget_previews.dart';
+
+class BrightnessPreview extends MultiPreview {
+  const BrightnessPreview();
+
+  final List<Preview> previews = <Preview>[
+    Preview(name: 'Light', brightness: Brightness.light, wrapper: (child) => child),
+    Preview(name: 'Dark', brightness: Brightness.dark, wrapper: (child) => child),
+  ];
+}
 
 
-@Preview(name: 'Invalid preview on class declaration')
 class ClassDeclaration extends StatelessWidget {
-  @Preview(name: 'Invalid preview on constructor with required parameters')
-  ClassDeclaration(int i);
-
-  @Preview(name: 'Invalid preview on getter');
-  int get foo => 1;
-
-  @Preview(name: 'Invalid preview on setter');
-  set foo(x) {
-    print('foo set');
-  };
-
-  @Preview(name: 'Invalid preview on field')
-  final int bar = 2;
-
-  @Preview(name: 'Invalid preview on member function')
-  Widget memberFunction() => Text('Member');
+  @BrightnessPreview()
+  @Preview(theme: () => PreviewThemeData())
+  ClassDeclaration();
 
   @override
   Widget build(BuildContext context) => Text('Foo');
 }
-
-@Preview(name: 'Invalid preview on function with void return')
-void previews() => Text('Foo');
-
-@Preview(name: 'Invalid preview on function with parameter')
-Widget foo(int bar) => Text('Foo');
-
-@Preview(name: 'Invalid preview on extension')
-extension on ClassDeclaration {}
 ''';
 
   @override
@@ -95,7 +82,7 @@ void main() {
     // provide it to package:analyzer APIs without writing a significant amount
     // of wrapper logic.
     late PreviewDetector previewDetector;
-    late BasicProjectWithInvalidPreviews project;
+    late ProjectWithPreviewsWithNonConstParams project;
 
     setUp(() {
       previewDetector = createTestPreviewDetector();
@@ -105,8 +92,8 @@ void main() {
       await previewDetector.dispose();
     });
 
-    testUsingContext('ignores invalid previews in existing files', () async {
-      project = await BasicProjectWithInvalidPreviews.create(
+    testUsingContext('ignores previews with non-const parameters in existing files', () async {
+      project = await ProjectWithPreviewsWithNonConstParams.create(
         projectRoot: previewDetector.projectRoot,
         pathsWithPreviews: <String>['foo.dart'],
         pathsWithoutPreviews: <String>[],
@@ -115,8 +102,8 @@ void main() {
       expectContainsPreviews(mapping, project.matcherMapping);
     });
 
-    testUsingContext('ignores invalid previews in updated files', () async {
-      project = await BasicProjectWithInvalidPreviews.create(
+    testUsingContext('ignores previews with non-const parameters in updated files', () async {
+      project = await ProjectWithPreviewsWithNonConstParams.create(
         projectRoot: previewDetector.projectRoot,
         pathsWithPreviews: <String>[],
         pathsWithoutPreviews: <String>['foo.dart'],
@@ -135,8 +122,8 @@ void main() {
       );
     });
 
-    testUsingContext('ignores invalid previews in newly added files', () async {
-      project = await BasicProjectWithInvalidPreviews.create(
+    testUsingContext('ignores previews with non-const parameters in newly added files', () async {
+      project = await ProjectWithPreviewsWithNonConstParams.create(
         projectRoot: previewDetector.projectRoot,
         pathsWithPreviews: <String>[],
         pathsWithoutPreviews: <String>[],
