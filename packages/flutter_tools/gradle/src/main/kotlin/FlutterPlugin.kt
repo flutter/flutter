@@ -621,7 +621,14 @@ class FlutterPlugin : Plugin<Project> {
                     //    https://github.com/flutter/flutter/issues/166550
                     @Suppress("DEPRECATION")
                     output as com.android.build.gradle.api.ApkVariantOutput
-                    val versionCodeIfPresent: Int? = if (variant is ApkVariant) variant.versionCode else null
+                    //val versionCodeIfPresent: Int? = if (variant is ApkVariant) variant.versionCode else null
+                    val versionCodeIfPresent: Int? = when (variant) {
+                        is com.android.build.api.variant.ApplicationVariant -> {
+                            // Access via new API
+                            variant.outputs.single().versionCode.get()
+                        }
+                        else -> null
+                    }
 
                     // TODO(gmackall): Migrate to AGPs variant api.
                     //    https://github.com/flutter/flutter/issues/166550
