@@ -1197,6 +1197,139 @@ void main() {
       expect(tester.getBottomRight(find.byKey(key)), offset - const Offset(0.0, 20.0));
     },
   );
+
+  testWidgets('SliverMainAxisGroup pointer event positions', (WidgetTester tester) async {
+    final List<({int index, TapDownDetails details})> tapDownLog =
+        <({int index, TapDownDetails details})>[];
+
+    Widget buildItem(int index) {
+      return SliverToBoxAdapter(
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTapDown: (TapDownDetails details) => tapDownLog.add((index: index, details: details)),
+          child: const SizedBox(height: 20),
+        ),
+      );
+    }
+
+    Future<void> checkTapDown({
+      required Offset tapAt,
+      required int expectedIndex,
+      required Offset expectedLocalPosition,
+    }) async {
+      await tester.tapAt(tapAt);
+      expect(tapDownLog.last.index, expectedIndex);
+      expect(tapDownLog.last.details.localPosition, expectedLocalPosition);
+      expect(tapDownLog.last.details.globalPosition, tapAt);
+    }
+
+    // Forward direction.
+    final ScrollController controller1 = ScrollController();
+    addTearDown(controller1.dispose);
+    await tester.pumpWidget(
+      KeyedSubtree(
+        key: const ObjectKey('froward'),
+        child: _buildSliverMainAxisGroup(
+          // x1.5 of item height, so only half of the second item is visible.
+          viewportHeight: 30,
+          viewportWidth: 30,
+          controller: controller1,
+          slivers: <Widget>[buildItem(0), buildItem(1)],
+        ),
+      ),
+    );
+
+    await checkTapDown(
+      tapAt: const Offset(15, 5),
+      expectedIndex: 0,
+      expectedLocalPosition: const Offset(15, 5),
+    );
+    await checkTapDown(
+      tapAt: const Offset(15, 15),
+      expectedIndex: 0,
+      expectedLocalPosition: const Offset(15, 15),
+    );
+    await checkTapDown(
+      tapAt: const Offset(15, 25),
+      expectedIndex: 1,
+      expectedLocalPosition: const Offset(15, 5),
+    );
+
+    // Scroll to the end to fully reveal the second item.
+    controller1.jumpTo(10);
+    await tester.pump();
+
+    await checkTapDown(
+      tapAt: const Offset(15, 5),
+      expectedIndex: 0,
+      expectedLocalPosition: const Offset(15, 15),
+    );
+    await checkTapDown(
+      tapAt: const Offset(15, 15),
+      expectedIndex: 1,
+      expectedLocalPosition: const Offset(15, 5),
+    );
+    await checkTapDown(
+      tapAt: const Offset(15, 25),
+      expectedIndex: 1,
+      expectedLocalPosition: const Offset(15, 15),
+    );
+
+    tapDownLog.clear();
+
+    // Reverse direction.
+    final ScrollController controller2 = ScrollController();
+    addTearDown(controller2.dispose);
+    await tester.pumpWidget(
+      KeyedSubtree(
+        key: const ObjectKey('reverse'),
+        child: _buildSliverMainAxisGroup(
+          reverse: true,
+          // x1.5 of item height, so only half of the second item is visible.
+          viewportHeight: 30,
+          viewportWidth: 30,
+          controller: controller2,
+          slivers: <Widget>[buildItem(0), buildItem(1)],
+        ),
+      ),
+    );
+
+    await checkTapDown(
+      tapAt: const Offset(15, 5),
+      expectedIndex: 1,
+      expectedLocalPosition: const Offset(15, 15),
+    );
+    await checkTapDown(
+      tapAt: const Offset(15, 15),
+      expectedIndex: 0,
+      expectedLocalPosition: const Offset(15, 5),
+    );
+    await checkTapDown(
+      tapAt: const Offset(15, 25),
+      expectedIndex: 0,
+      expectedLocalPosition: const Offset(15, 15),
+    );
+
+    // Scroll to the end to fully reveal the second item.
+    controller2.jumpTo(10);
+    await tester.pump();
+
+    await checkTapDown(
+      tapAt: const Offset(15, 5),
+      expectedIndex: 1,
+      expectedLocalPosition: const Offset(15, 5),
+    );
+    await checkTapDown(
+      tapAt: const Offset(15, 15),
+      expectedIndex: 1,
+      expectedLocalPosition: const Offset(15, 15),
+    );
+    await checkTapDown(
+      tapAt: const Offset(15, 25),
+      expectedIndex: 0,
+      expectedLocalPosition: const Offset(15, 5),
+    );
+  });
 }
 
 Widget _buildSliverList({
