@@ -48,14 +48,14 @@ extension AnnotationExtension on Annotation {
   }
 
   List<DartObject> findMultiPreviewPreviewNodes({required AnalysisContext context}) {
-    final DartObject evaluatedAnnotation = elementAnnotation!.computeConstantValue()!;
-    final Element element = evaluatedAnnotation.type!.element!;
+    final DartObject? evaluatedAnnotation = elementAnnotation!.computeConstantValue();
+    final Element? element = evaluatedAnnotation?.type?.element;
     if (element is ClassElement) {
       final InterfaceType type = element.supertype!;
       if (type.getDisplayString() != 'MultiPreview') {
         throw StateError('$element is not a MultiPreview!');
       }
-      final DartObject? previewsField = evaluatedAnnotation.getField('previews');
+      final DartObject? previewsField = evaluatedAnnotation!.getField('previews');
       return previewsField?.toListValue() ?? <DartObject>[];
     }
     // Invalid preview.
