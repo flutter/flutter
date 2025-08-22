@@ -242,6 +242,25 @@ bool get isLuci => io.Platform.environment['LUCI_CONTEXT'] != null;
 /// environements.
 bool get isCi => isLuci;
 
+/// Whether the felt command is running on LUCI postsubmit.
+bool get isPostsubmit => isLuci && io.Platform.environment['LUCI_PR'] == '';
+
+final String gitRevision = () {
+  final result = io.Process.runSync(
+    'git',
+    <String>['rev-parse', 'HEAD'],
+    workingDirectory: path.join(environment.engineSrcDir.path, 'flutter'),
+    stderrEncoding: utf8,
+    stdoutEncoding: utf8,
+  );
+  if (result.exitCode != 0) {
+    throw ToolExit(
+      'Failed to get git revision. Exit code: ${result.exitCode} Error: ${result.stderr}',
+    );
+  }
+  return (result.stdout as String).trim();
+}();
+
 final String contentHash = () {
   final String executable;
   final List<String> args;
