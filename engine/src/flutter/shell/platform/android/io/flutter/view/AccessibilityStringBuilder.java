@@ -109,4 +109,5 @@ public class AccessibilityStringBuilder {
     }
 
     return spannableString;
-  }}
+  }
+}
