@@ -348,7 +348,7 @@ class Stepper extends StatefulWidget {
   ///
   /// If not set then the widget will use default colors, primary for selected state
   /// and grey.shade400 for disabled state.
-  final MaterialStateProperty<Color>? connectorColor;
+  final WidgetStateProperty<Color>? connectorColor;
 
   /// The thickness of the connecting lines.
   final double? connectorThickness;
@@ -617,14 +617,14 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
             TextButton(
               onPressed: widget.onStepContinue,
               style: ButtonStyle(
-                foregroundColor: MaterialStateProperty.resolveWith<Color?>((
+                foregroundColor: WidgetStateProperty.resolveWith<Color?>((
                   Set<MaterialState> states,
                 ) {
                   return states.contains(MaterialState.disabled)
                       ? null
                       : (_isDark() ? colorScheme.onSurface : colorScheme.onPrimary);
                 }),
-                backgroundColor: MaterialStateProperty.resolveWith<Color?>((
+                backgroundColor: WidgetStateProperty.resolveWith<Color?>((
                   Set<MaterialState> states,
                 ) {
                   return _isDark() || states.contains(MaterialState.disabled)

@@ -53,7 +53,7 @@ import 'material_state.dart';
 @optionalTypeArgs
 mixin MaterialStateMixin<T extends StatefulWidget> on State<T> {
   /// Managed set of active [MaterialState] values; designed to be passed to
-  /// [MaterialStateProperty.resolve] methods.
+  /// [WidgetStateProperty.resolve] methods.
   ///
   /// To mutate and have [setState] called automatically for you, use
   /// [setMaterialState], [addMaterialState], or [removeMaterialState]. Directly

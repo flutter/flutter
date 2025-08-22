@@ -1521,7 +1521,7 @@ class SubmenuButton extends StatefulWidget {
   /// If this is null, then the value of [MenuThemeData.submenuIcon] is used.
   /// If that is also null, then defaults to a right arrow icon with the size
   /// of 24 pixels.
-  final MaterialStateProperty<Widget?>? submenuIcon;
+  final WidgetStateProperty<Widget?>? submenuIcon;
 
   /// An optional icon to display after the [child].
   final Widget? trailingIcon;
@@ -1907,7 +1907,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
   }
 
   EdgeInsets _computeMenuPadding(BuildContext context) {
-    final MaterialStateProperty<EdgeInsetsGeometry?> insets =
+    final WidgetStateProperty<EdgeInsetsGeometry?> insets =
         widget.menuStyle?.padding ??
         MenuTheme.of(context).style?.padding ??
         _MenuDefaultsM3(context).padding!;
@@ -3151,7 +3151,7 @@ class _MenuPanelState extends State<_MenuPanel> {
       return getProperty(widgetStyle) ?? getProperty(themeStyle) ?? getProperty(defaultStyle);
     }
 
-    T? resolve<T>(MaterialStateProperty<T>? Function(MenuStyle? style) getProperty) {
+    T? resolve<T>(WidgetStateProperty<T>? Function(MenuStyle? style) getProperty) {
       return effectiveValue((MenuStyle? style) {
         return getProperty(style)?.resolve(<MaterialState>{});
       });
@@ -3314,7 +3314,7 @@ class _Submenu extends StatelessWidget {
       return getProperty(menuStyle) ?? getProperty(themeStyle) ?? getProperty(defaultStyle);
     }
 
-    T? resolve<T>(MaterialStateProperty<T>? Function(MenuStyle? style) getProperty) {
+    T? resolve<T>(WidgetStateProperty<T>? Function(MenuStyle? style) getProperty) {
       return effectiveValue((MenuStyle? style) {
         return getProperty(style)?.resolve(<MaterialState>{});
       });
