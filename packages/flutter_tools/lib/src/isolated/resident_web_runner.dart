@@ -297,6 +297,7 @@ class ResidentWebRunner extends ResidentRunner {
           buildInfo: debuggingOptions.buildInfo,
           enableDwds: supportsServiceProtocol,
           enableDds: debuggingOptions.enableDds,
+          ddsPort: debuggingOptions.ddsPort,
           entrypoint: _fileSystem.file(target).uri,
           expressionCompiler: expressionCompiler,
           chromiumLauncher: _chromiumLauncher,
