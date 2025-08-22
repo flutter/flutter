@@ -914,6 +914,9 @@ class ResidentWebRunner extends ResidentRunner {
 
 Uri _httpUriFromWebsocketUri(Uri websocketUri) {
   const wsPath = '/ws';
-  final String path = websocketUri.path;
-  return websocketUri.replace(scheme: 'http', path: path.substring(0, path.length - wsPath.length));
+  String path = websocketUri.path;
+  if (path.endsWith(wsPath)) {
+    path = path.substring(0, path.length - wsPath.length);
+  }
+  return websocketUri.replace(scheme: 'http', path: path);
 }
