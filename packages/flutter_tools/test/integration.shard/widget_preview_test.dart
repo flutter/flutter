@@ -10,12 +10,16 @@ import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/widget_preview.dart';
+import 'package:flutter_tools/src/devtools_launcher.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/widget_preview/dtd_services.dart';
 import 'package:process/process.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
 import 'test_data/basic_project.dart';
 import 'test_utils.dart';
 
@@ -41,6 +45,7 @@ void main() {
   Process? process;
   Logger? logger;
   DtdLauncher? dtdLauncher;
+  DevtoolsLauncher? devtoolsLauncher;
   final project = BasicProject();
   const ProcessManager processManager = LocalProcessManager();
 
@@ -54,6 +59,7 @@ void main() {
     process?.kill();
     process = null;
     await dtdLauncher?.dispose();
+    await devtoolsLauncher?.close();
     dtdLauncher = null;
     tryToDelete(tempDir);
   });
@@ -62,6 +68,7 @@ void main() {
     required List<Pattern> expectedMessages,
     Uri? dtdUri,
     bool useWebServer = false,
+    Uri? devToolsServerAddress,
   }) async {
     expect(expectedMessages, isNotEmpty);
     var i = 0;
@@ -73,6 +80,8 @@ void main() {
       '--${WidgetPreviewStartCommand.kHeadless}',
       if (useWebServer) '--${WidgetPreviewStartCommand.kWebServer}',
       if (dtdUri != null) '--${WidgetPreviewStartCommand.kDtdUrl}=$dtdUri',
+      if (devToolsServerAddress != null)
+        '--${FlutterCommand.kDevToolsServerAddress}=$devToolsServerAddress',
     ], workingDirectory: tempDir.path);
 
     final completer = Completer<void>();
@@ -150,6 +159,26 @@ void main() {
       // Start the widget preview and wait for the 'Connected' event.
       await runWidgetPreview(expectedMessages: firstLaunchMessagesWeb, dtdUri: dtdUri);
       await completer.future;
+    });
+
+    testUsingContext('can connect to an existing DevTools instance', () async {
+      devtoolsLauncher = DevtoolsServerLauncher(
+        processManager: processManager,
+        logger: logger!,
+        botDetector: const FakeBotDetector(true),
+        artifacts: globals.artifacts!,
+      );
+
+      // Start a DevTools instance.
+      final Uri devtoolsUri = (await devtoolsLauncher!.serve())!.uri!;
+
+      // Start the widget preview and wait for the DevTools message.
+      await runWidgetPreview(
+        expectedMessages: [
+          'The Flutter DevTools debugger and profiler on Chrome is available at: $devtoolsUri',
+        ],
+        devToolsServerAddress: devtoolsUri,
+      );
     });
   });
 }
