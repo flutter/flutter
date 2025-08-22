@@ -35,11 +35,11 @@ enum _ActivityIndicatorType { material, adaptive }
 /// See also:
 ///
 ///  * <https://material.io/components/progress-indicators>
-abstract class MaterialProgressIndicator extends ProgressIndicator {
+abstract class _MaterialProgressIndicator extends ProgressIndicator {
   /// Creates a progress indicator.
   ///
   /// {@macro flutter.widget.ProgressIndicator.ProgressIndicator}
-  const MaterialProgressIndicator({
+  const _MaterialProgressIndicator({
     super.key,
     super.value,
     this.backgroundColor,
@@ -328,7 +328,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 ///  * [RefreshIndicator], which automatically displays a [CircularProgressIndicator]
 ///    when the underlying vertical scrollable is overscrolled.
 ///  * <https://material.io/design/components/progress-indicators.html#linear-progress-indicators>
-class LinearProgressIndicator extends MaterialProgressIndicator {
+class LinearProgressIndicator extends _MaterialProgressIndicator {
   /// Creates a linear progress indicator.
   ///
   /// {@macro flutter.widget.ProgressIndicator.ProgressIndicator}
@@ -681,7 +681,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 ///  * [RefreshIndicator], which automatically displays a [CircularProgressIndicator]
 ///    when the underlying vertical scrollable is overscrolled.
 ///  * <https://material.io/design/components/progress-indicators.html#circular-progress-indicators>
-class CircularProgressIndicator extends MaterialProgressIndicator {
+class CircularProgressIndicator extends _MaterialProgressIndicator {
   /// Creates a circular progress indicator.
   ///
   /// {@macro flutter.widget.ProgressIndicator.ProgressIndicator}

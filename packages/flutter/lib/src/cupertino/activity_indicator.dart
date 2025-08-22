@@ -22,13 +22,13 @@ const Color _kActiveTickColor = CupertinoDynamicColor.withBrightness(
 /// This widget cannot be instantiated directly. For a linear activity
 /// indicator, see [CupertinoLinearActivityIndicator]. For a circular activity
 /// indicator, see [CupertinoActivityIndicator].
-abstract class CupertinoProgressIndicator extends ProgressIndicator {
+abstract class _CupertinoProgressIndicator extends ProgressIndicator {
   /// A base class for Cupertino progress indicators.
   ///
   /// This widget cannot be instantiated directly. For a linear activity
   /// indicator, see [CupertinoLinearActivityIndicator]. For a circular activity
   /// indicator, see [CupertinoActivityIndicator].
-  const CupertinoProgressIndicator({
+  const _CupertinoProgressIndicator({
     super.key,
     double progress = 1,
     super.semanticsLabel,
@@ -65,13 +65,15 @@ abstract class CupertinoProgressIndicator extends ProgressIndicator {
 ///
 ///  * [CupertinoLinearActivityIndicator], which displays progress along a line.
 ///  * <https://developer.apple.com/design/human-interface-guidelines/progress-indicators/>
-class CupertinoActivityIndicator extends CupertinoProgressIndicator {
+class CupertinoActivityIndicator extends _CupertinoProgressIndicator {
   /// Creates an iOS-style activity indicator that spins clockwise.
   const CupertinoActivityIndicator({
     super.key,
     super.color,
     this.animating = true,
     this.radius = _kDefaultIndicatorRadius,
+    super.semanticsLabel,
+    super.semanticsValue,
   }) : assert(radius > 0.0);
 
   /// Creates a non-animated iOS-style activity indicator that displays
@@ -219,13 +221,15 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
 ///
 ///  * [CupertinoActivityIndicator], which is an iOS-style activity indicator that spins clockwise.
 ///  * <https://developer.apple.com/design/human-interface-guidelines/progress-indicators/>
-class CupertinoLinearActivityIndicator extends CupertinoProgressIndicator {
+class CupertinoLinearActivityIndicator extends _CupertinoProgressIndicator {
   /// Creates a linear iOS-style activity indicator.
   const CupertinoLinearActivityIndicator({
     super.key,
     required super.progress,
     this.height = 4.5,
     super.color,
+    super.semanticsLabel,
+    super.semanticsValue,
   }) : assert(height > 0),
        assert(progress >= 0.0 && progress <= 1.0);
 
