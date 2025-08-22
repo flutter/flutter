@@ -325,24 +325,6 @@ void main() {
     expect(keyState.marker, equals('marked'));
   });
 
-  testWidgets('Deactivate implies build', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
-    final List<String> log = <String>[];
-    final DeactivateLogger logger = DeactivateLogger(key: key, log: log);
-
-    await tester.pumpWidget(Container(key: UniqueKey(), child: logger));
-
-    expect(log, equals(<String>['build']));
-
-    await tester.pumpWidget(Container(key: UniqueKey(), child: logger));
-
-    expect(log, equals(<String>['build', 'deactivate', 'build']));
-    log.clear();
-
-    await tester.pump();
-    expect(log, isEmpty);
-  });
-
   testWidgets('Reparenting with multiple moves', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();

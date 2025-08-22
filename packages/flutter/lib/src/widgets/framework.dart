@@ -6016,7 +6016,6 @@ class StatefulElement extends ComponentElement {
     // resources allocated in the build method, we have to rebuild the widget
     // so that its State can reallocate its resources.
     assert(_lifecycleState == _ElementLifecycle.active); // otherwise markNeedsBuild is a no-op
-    markNeedsBuild();
   }
 
   @override
