@@ -2110,7 +2110,7 @@ class _InactiveElements {
       }
       return true;
     }());
-    //assert(element._debugVerifyVisitChildrenImplementation());
+    assert(element._debugVerifyVisitChildrenImplementation());
     element.visitChildren((Element child) {
       assert(child._parent == element);
       _unmount(child);
