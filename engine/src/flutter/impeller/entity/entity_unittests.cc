@@ -2583,9 +2583,9 @@ TEST_P(EntityTest, GiantStrokePathAllocation) {
   EXPECT_NEAR(point.y, expected[4].y, 0.1);
 }
 
-class FlushTestFakeDeviceBuffer : public DeviceBuffer {
+class FlushTestDeviceBuffer : public DeviceBuffer {
  public:
-  FlushTestFakeDeviceBuffer(const DeviceBufferDescriptor& desc)
+  FlushTestDeviceBuffer(const DeviceBufferDescriptor& desc)
       : DeviceBuffer(desc), storage_(desc.size) {}
 
   bool SetLabel(std::string_view label) override { return true; }
@@ -2619,12 +2619,11 @@ class FlushTestAllocator : public Allocator {
 
   std::shared_ptr<DeviceBuffer> OnCreateBuffer(
       const DeviceBufferDescriptor& desc) override {
-    return std::make_shared<FlushTestFakeDeviceBuffer>(desc);
+    return std::make_shared<FlushTestDeviceBuffer>(desc);
   };
 
-  virtual std::shared_ptr<Texture> OnCreateTexture(
-      const TextureDescriptor& desc,
-      bool threadsafe) override {
+  std::shared_ptr<Texture> OnCreateTexture(const TextureDescriptor& desc,
+                                           bool threadsafe) override {
     return nullptr;
   }
 };
@@ -2653,7 +2652,7 @@ TEST_P(EntityTest, RoundSuperellipseGetPositionBufferFlushes) {
       Geometry::MakeRoundSuperellipse(Rect::MakeLTRB(0, 0, 100, 100), 5);
   auto result = geometry->GetPositionBuffer(*content_context, {}, mock_pass);
 
-  auto device_buffer = reinterpret_cast<const FlushTestFakeDeviceBuffer*>(
+  auto device_buffer = reinterpret_cast<const FlushTestDeviceBuffer*>(
       result.vertex_buffer.vertex_buffer.GetBuffer());
   EXPECT_TRUE(device_buffer->flush_called());
 }
