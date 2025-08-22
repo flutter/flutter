@@ -537,6 +537,7 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
     bool structuredErrors = false,
     bool noDevtools = false,
     bool verbose = false,
+    int? ddsPort,
     String? script,
     List<String>? additionalCommandArgs,
   }) async {
@@ -559,6 +560,7 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
         if (device != GoogleChromeDevice.kChromeDeviceId) '--disable-service-auth-codes',
         '--machine',
         if (!spawnDdsInstance) '--no-dds',
+        if (ddsPort != null) '--dds-port=$ddsPort',
         if (noDevtools) '--no-devtools',
         ...getLocalEngineArguments(),
         '-d',
