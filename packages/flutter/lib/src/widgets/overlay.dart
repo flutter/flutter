@@ -1869,8 +1869,6 @@ class OverlayPortal extends StatefulWidget {
 
 class _OverlayPortalState extends State<OverlayPortal> {
   final String identifier = UniqueKey().toString();
-  late final String parentIdentifier;
-  late final String childIdentifier;
 
   int? _zOrderIndex;
   // The location of the overlay child within the overlay. This object will be
@@ -1920,8 +1918,6 @@ class _OverlayPortalState extends State<OverlayPortal> {
   void initState() {
     super.initState();
     _setupController(widget.controller);
-    parentIdentifier = '$identifier parent';
-    childIdentifier = '$identifier child';
   }
 
   void _setupController(OverlayPortalController controller) {
@@ -1999,16 +1995,16 @@ class _OverlayPortalState extends State<OverlayPortal> {
       return _OverlayPortal(
         overlayLocation: null,
         overlayChild: null,
-        child: Semantics(identifier: parentIdentifier, child: widget.child),
+        child: Semantics(traversalParentIdentifier: identifier, child: widget.child),
       );
     }
     return _OverlayPortal(
       overlayLocation: _getLocation(zOrderIndex, widget._targetRootOverlay),
       overlayChild: _DeferredLayout(
-        childIdentifier: childIdentifier,
+        childIdentifier: identifier,
         child: Builder(builder: widget.overlayChildBuilder),
       ),
-      child: Semantics(identifier: parentIdentifier, child: widget.child),
+      child: Semantics(traversalParentIdentifier: identifier, child: widget.child),
     );
   }
 }
@@ -2570,7 +2566,7 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     if (childIdentifier != null) {
-      config.identifier = childIdentifier!;
+      config.traversalChildIdentifier = childIdentifier;
     }
   }
 
