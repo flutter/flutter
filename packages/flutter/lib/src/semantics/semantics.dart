@@ -1507,6 +1507,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.currentValueLength,
     this.identifier,
     this.traversalParentIdentifier,
+    this.traversalChildIdentifier,
     this.label,
     this.attributedLabel,
     this.value,
