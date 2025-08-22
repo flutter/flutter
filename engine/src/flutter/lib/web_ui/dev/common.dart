@@ -242,9 +242,6 @@ bool get isLuci => io.Platform.environment['LUCI_CONTEXT'] != null;
 /// environements.
 bool get isCi => isLuci;
 
-/// Whether the felt command is running on LUCI postsubmit.
-bool get isPostsubmit => isLuci && io.Platform.environment['LUCI_PR'] == '';
-
 final String gitRevision = () {
   final result = io.Process.runSync(
     'git',
