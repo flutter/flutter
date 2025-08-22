@@ -358,7 +358,7 @@ class RangeSlider extends StatefulWidget {
   /// an opacity of 0.12. If null, [SliderThemeData.overlayColor]
   /// will be used, otherwise defaults to [ColorScheme.primary] with
   /// an opacity of 0.12.
-  final MaterialStateProperty<Color?>? overlayColor;
+  final WidgetStateProperty<Color?>? overlayColor;
 
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
@@ -369,7 +369,7 @@ class RangeSlider extends StatefulWidget {
   /// See also:
   ///
   ///  * [WidgetStateMouseCursor], which can be used to create a [MouseCursor].
-  final MaterialStateProperty<MouseCursor?>? mouseCursor;
+  final WidgetStateProperty<MouseCursor?>? mouseCursor;
 
   /// The callback used to create a semantic value from the slider's values.
   ///
@@ -692,7 +692,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     Color? effectiveOverlayColor() {
       return widget.overlayColor?.resolve(states) ??
           widget.activeColor?.withOpacity(0.12) ??
-          MaterialStateProperty.resolveAs<Color?>(sliderTheme.overlayColor, states) ??
+          WidgetStateProperty.resolveAs<Color?>(sliderTheme.overlayColor, states) ??
           defaults.overlayColor;
     }
 
