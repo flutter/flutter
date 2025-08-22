@@ -492,6 +492,7 @@ class CanvasKitRenderer extends Renderer {
     recorder?.recordRasterFinish();
     recorder?.submitTimings();
   }
+
   @override
   void clearFragmentProgramCache() {
     _programs.clear();

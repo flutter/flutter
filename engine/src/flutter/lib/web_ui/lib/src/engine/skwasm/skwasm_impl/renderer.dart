@@ -640,8 +640,7 @@ class NoopViewRasterizer implements ViewRasterizer {
   void releaseOverlays() {}
 
   @override
-  void removeOverlaysFromDom() {
-  }
+  void removeOverlaysFromDom() {}
 
   @override
   DomElement get sceneElement => throw UnimplementedError();

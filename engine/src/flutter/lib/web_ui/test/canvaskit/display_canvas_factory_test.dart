@@ -89,9 +89,8 @@ void testMain() {
 
       final EngineFlutterView implicitView = EnginePlatformDispatcher.instance.implicitView!;
 
-      final DisplayCanvasFactory<DisplayCanvas> originalFactory = CanvasKitRenderer.instance
-          .rasterizers[implicitView.viewId]!
-          .displayFactory;
+      final DisplayCanvasFactory<DisplayCanvas> originalFactory =
+          CanvasKitRenderer.instance.rasterizers[implicitView.viewId]!.displayFactory;
 
       // Cause the surface and its canvas to be attached to the page
       implicitView.dom.sceneHost.prepend(originalFactory.baseCanvas.hostElement);
