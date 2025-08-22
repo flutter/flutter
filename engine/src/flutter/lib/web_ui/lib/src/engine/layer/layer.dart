@@ -20,7 +20,7 @@ abstract class Layer implements ui.EngineLayer {
   bool get needsPainting => !paintBounds.isEmpty;
 
   /// Implement layer visitor.
-  void accept(LayerVisitor visitor);
+  R accept<R>(LayerVisitor<R> visitor);
 
   // TODO(dnfield): Implement ui.EngineLayer.dispose for CanvasKit.
   // https://github.com/flutter/flutter/issues/82878
@@ -50,8 +50,8 @@ abstract class ContainerLayer extends Layer {
 /// to [LayerSceneBuilder] without requiring a [ContainerLayer].
 class RootLayer extends ContainerLayer {
   @override
-  void accept(LayerVisitor visitor) {
-    visitor.visitRoot(this);
+  R accept<R>(LayerVisitor<R> visitor) {
+    return visitor.visitRoot(this);
   }
 }
 
@@ -62,8 +62,8 @@ class BackdropFilterEngineLayer extends ContainerLayer implements ui.BackdropFil
   final ui.BlendMode blendMode;
 
   @override
-  void accept(LayerVisitor visitor) {
-    visitor.visitBackdropFilter(this);
+  R accept<R>(LayerVisitor<R> visitor) {
+    return visitor.visitBackdropFilter(this);
   }
 
   // TODO(dnfield): dispose of the _filter
@@ -79,8 +79,8 @@ class ClipPathEngineLayer extends ContainerLayer implements ui.ClipPathEngineLay
   final ui.Clip clipBehavior;
 
   @override
-  void accept(LayerVisitor visitor) {
-    visitor.visitClipPath(this);
+  R accept<R>(LayerVisitor<R> visitor) {
+    return visitor.visitClipPath(this);
   }
 }
 
@@ -93,8 +93,8 @@ class ClipRectEngineLayer extends ContainerLayer implements ui.ClipRectEngineLay
   final ui.Clip clipBehavior;
 
   @override
-  void accept(LayerVisitor visitor) {
-    visitor.visitClipRect(this);
+  R accept<R>(LayerVisitor<R> visitor) {
+    return visitor.visitClipRect(this);
   }
 }
 
@@ -107,8 +107,8 @@ class ClipRRectEngineLayer extends ContainerLayer implements ui.ClipRRectEngineL
   final ui.Clip? clipBehavior;
 
   @override
-  void accept(LayerVisitor visitor) {
-    visitor.visitClipRRect(this);
+  R accept<R>(LayerVisitor<R> visitor) {
+    return visitor.visitClipRRect(this);
   }
 }
 
@@ -123,8 +123,8 @@ class ClipRSuperellipseEngineLayer extends ContainerLayer
   final ui.Clip? clipBehavior;
 
   @override
-  void accept(LayerVisitor visitor) {
-    visitor.visitClipRSuperellipse(this);
+  R accept<R>(LayerVisitor<R> visitor) {
+    return visitor.visitClipRSuperellipse(this);
   }
 }
 
@@ -136,8 +136,8 @@ class OpacityEngineLayer extends ContainerLayer implements ui.OpacityEngineLayer
   final ui.Offset offset;
 
   @override
-  void accept(LayerVisitor visitor) {
-    visitor.visitOpacity(this);
+  R accept<R>(LayerVisitor<R> visitor) {
+    return visitor.visitOpacity(this);
   }
 }
 
@@ -149,8 +149,8 @@ class TransformEngineLayer extends ContainerLayer implements ui.TransformEngineL
   final Matrix4 transform;
 
   @override
-  void accept(LayerVisitor visitor) {
-    visitor.visitTransform(this);
+  R accept<R>(LayerVisitor<R> visitor) {
+    return visitor.visitTransform(this);
   }
 }
 
@@ -163,8 +163,8 @@ class OffsetEngineLayer extends TransformEngineLayer implements ui.OffsetEngineL
   OffsetEngineLayer(double dx, double dy) : super(Matrix4.translationValues(dx, dy, 0.0));
 
   @override
-  void accept(LayerVisitor visitor) {
-    visitor.visitOffset(this);
+  R accept<R>(LayerVisitor<R> visitor) {
+    return visitor.visitOffset(this);
   }
 }
 
@@ -173,11 +173,11 @@ class ImageFilterEngineLayer extends ContainerLayer implements ui.ImageFilterEng
   ImageFilterEngineLayer(this.filter, this.offset);
 
   final ui.Offset offset;
-  final ui.ImageFilter filter;
+  final LayerImageFilter filter;
 
   @override
-  void accept(LayerVisitor visitor) {
-    visitor.visitImageFilter(this);
+  R accept<R>(LayerVisitor<R> visitor) {
+    return visitor.visitImageFilter(this);
   }
 
   // TODO(dnfield): dispose of the _filter
@@ -193,8 +193,8 @@ class ShaderMaskEngineLayer extends ContainerLayer implements ui.ShaderMaskEngin
   final ui.FilterQuality filterQuality;
 
   @override
-  void accept(LayerVisitor visitor) {
-    visitor.visitShaderMask(this);
+  R accept<R>(LayerVisitor<R> visitor) {
+    return visitor.visitShaderMask(this);
   }
 }
 
@@ -203,7 +203,7 @@ class PictureLayer extends Layer {
   PictureLayer(this.picture, this.offset, this.isComplex, this.willChange);
 
   /// The picture to paint into the canvas.
-  final CkPicture picture;
+  final LayerPicture picture;
 
   /// The offset at which to paint the picture.
   final ui.Offset offset;
@@ -222,8 +222,8 @@ class PictureLayer extends Layer {
   bool isCulled = false;
 
   @override
-  void accept(LayerVisitor visitor) {
-    visitor.visitPicture(this);
+  R accept<R>(LayerVisitor<R> visitor) {
+    return visitor.visitPicture(this);
   }
 
   @override
@@ -237,8 +237,8 @@ class ColorFilterEngineLayer extends ContainerLayer implements ui.ColorFilterEng
   final ui.ColorFilter filter;
 
   @override
-  void accept(LayerVisitor visitor) {
-    visitor.visitColorFilter(this);
+  R accept<R>(LayerVisitor<R> visitor) {
+    return visitor.visitColorFilter(this);
   }
 }
 
@@ -252,7 +252,7 @@ class PlatformViewLayer extends Layer {
   final double height;
 
   @override
-  void accept(LayerVisitor visitor) {
-    visitor.visitPlatformView(this);
+  R accept<R>(LayerVisitor<R> visitor) {
+    return visitor.visitPlatformView(this);
   }
 }
