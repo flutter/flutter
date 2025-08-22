@@ -55,6 +55,7 @@ class Surface {
 
   // Main thread only
   void dispose();
+  void setResourceCacheLimit(int bytes);
   uint32_t renderPictures(SkPicture** picture, int count);
   uint32_t rasterizeImage(SkImage* image, ImageByteFormat format);
   void setCallbackHandler(CallbackHandler* callbackHandler);
@@ -66,6 +67,7 @@ class Surface {
       SkwasmObject textureSource);
 
   // Worker thread
+  void resize(int width, int height);
   void renderPicturesOnWorker(sk_sp<SkPicture>* picture,
                               int pictureCount,
                               uint32_t callbackId,
@@ -76,7 +78,6 @@ class Surface {
 
  private:
   void _init();
-  void _resizeCanvasToFit(int width, int height);
   void _recreateSurface();
 
   CallbackHandler* _callbackHandler = nullptr;

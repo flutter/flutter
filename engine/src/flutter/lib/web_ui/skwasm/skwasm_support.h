@@ -29,17 +29,19 @@ extern void skwasm_dispatchRenderPictures(unsigned long threadId,
 extern uint32_t skwasm_createOffscreenCanvas(int width, int height);
 extern void skwasm_resizeCanvas(uint32_t contextHandle, int width, int height);
 extern SkwasmObject skwasm_captureImageBitmap(uint32_t contextHandle,
-                                              int width,
-                                              int height,
-                                              SkwasmObject imagePromises);
+                                              SkwasmObject imageBitmaps);
 extern void skwasm_resolveAndPostImages(Skwasm::Surface* surface,
-                                        SkwasmObject imagePromises,
+                                        SkwasmObject imageBitmaps,
                                         double rasterStart,
                                         uint32_t callbackId);
 extern unsigned int skwasm_createGlTextureFromTextureSource(
     SkwasmObject textureSource,
     int width,
     int height);
+extern void skwasm_dispatchResizeSurface(unsigned long threadId,
+                                         Skwasm::Surface* surface,
+                                         int width,
+                                         int height);
 extern void skwasm_dispatchDisposeSurface(unsigned long threadId,
                                           Skwasm::Surface* surface);
 extern void skwasm_dispatchRasterizeImage(unsigned long threadId,

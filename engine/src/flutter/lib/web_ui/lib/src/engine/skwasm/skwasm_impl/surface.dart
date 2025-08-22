@@ -68,6 +68,12 @@ class SkwasmCallbackHandler {
   }
 }
 
+typedef RenderResult = ({
+  List<DomImageBitmap> imageBitmaps,
+  int rasterStartMicros,
+  int rasterEndMicros,
+});
+
 class SkwasmSurface {
   factory SkwasmSurface() {
     final SurfaceHandle surfaceHandle = withStackScope((StackScope scope) {
@@ -85,6 +91,10 @@ class SkwasmSurface {
 
   void _initialize() {
     surfaceSetCallbackHandler(handle, SkwasmCallbackHandler.instance.callbackPointer);
+  }
+
+  void resize(BitmapSize size) {
+    surfaceResize(handle, size.width, size.height);
   }
 
   Future<RenderResult> renderPictures(List<SkwasmPicture> pictures) =>
@@ -119,6 +129,10 @@ class SkwasmSurface {
     }
     skDataDispose(dataHandle);
     return ByteData.sublistView(output);
+  }
+
+  void setSkiaResourceCacheMaxBytes(int bytes) {
+    surfaceSetResourceCacheLimitBytes(handle, bytes);
   }
 
   void dispose() {
