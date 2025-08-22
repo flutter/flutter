@@ -133,8 +133,7 @@ namespace flutter {
   V(DrawAtlasCulled)                 \
                                      \
   V(DrawDisplayList)                 \
-  V(DrawTextBlob)                    \
-  V(DrawTextFrame)                   \
+  V(DrawText)                        \
                                      \
   V(DrawShadow)                      \
   V(DrawShadowTransparentOccluder)

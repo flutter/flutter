@@ -13,7 +13,7 @@
 #include "flutter/fml/macros.h"
 
 #if defined(FML_OS_WIN)
-#include <windows.h>
+#include "flutter/fml/platform/win/windows_shim.h"
 #else
 #include <pthread.h>
 #endif
