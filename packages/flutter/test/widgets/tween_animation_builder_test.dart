@@ -397,11 +397,12 @@ void main() {
   group('RepeatingTweenAnimationBuilder', () {
     testWidgets('Repeats animation continuously', (WidgetTester tester) async {
       final List<double> values = <double>[];
+      const Duration duration = Duration(milliseconds: 100);
 
       await tester.pumpWidget(
         RepeatingTweenAnimationBuilder<double>(
-          duration: const Duration(milliseconds: 100), // Short duration for testing
-          tween: Tween<double>(begin: 0, end: 1),
+          duration: duration,
+          tween: Tween<double>(begin: 0.0, end: 1.0),
           builder: (BuildContext context, Animation<double> animation, Widget? child) {
             values.add(animation.value);
             return const Placeholder();
@@ -409,26 +410,18 @@ void main() {
         ),
       );
 
-      // Let it run for several cycles
-      for (int i = 0; i < 10; i++) {
-        await tester.pump(const Duration(milliseconds: 50));
-      }
+      // Initial value should be 0.0
+      expect(values.last, 0.0);
 
-      // Should have values showing repeating pattern
-      expect(values.first, 0.0);
-      expect(values.any((double v) => v == 1.0), isTrue, reason: 'Should reach end value');
-      expect(values.length, greaterThan(5), reason: 'Should have multiple animation frames');
+      // Pump to a frame just before the end of the first cycle.
+      await tester.pump(const Duration(milliseconds: 99));
+      // The value should be very close to 1.0
+      expect(values.last, moreOrLessEquals(0.99));
 
-      // Check for repeating: values should go up, then reset and go up again
-      bool foundRepeat = false;
-      for (int i = 2; i < values.length; i++) {
-        // Look for a drop from near 1 back to near 0
-        if (values[i - 1] > 0.8 && values[i] < 0.2) {
-          foundRepeat = true;
-          break;
-        }
-      }
-      expect(foundRepeat, isTrue, reason: 'Should show repeating pattern');
+      // Pump past the cycle boundary (1ms to complete the cycle + 50ms into the next).
+      await tester.pump(const Duration(milliseconds: 51));
+      // The animation should have wrapped around and be at the halfway point of the next cycle.
+      expect(values.last, moreOrLessEquals(0.5));
     });
 
     testWidgets('Reverses animation when reverse is true', (WidgetTester tester) async {
@@ -484,16 +477,14 @@ void main() {
       await tester.pumpWidget(buildWidget(paused: false));
       await tester.pump(const Duration(milliseconds: 500));
       expect(values, <int>[0, 50]);
-
       // Pause mid-animation
       await tester.pumpWidget(buildWidget(paused: true));
       final int pausedValue = values.last;
       await tester.pump(const Duration(seconds: 2));
       expect(values.last, pausedValue); // Should stay paused
-
       // Resume animation
       await tester.pumpWidget(buildWidget(paused: false));
-      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 400));
       expect(values.last, greaterThan(pausedValue)); // Should resume from where it paused
     });
 
