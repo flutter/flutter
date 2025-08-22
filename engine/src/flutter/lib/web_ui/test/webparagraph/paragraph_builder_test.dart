@@ -9,10 +9,6 @@ import 'package:ui/ui.dart';
 
 import '../common/test_initialization.dart';
 
-extension on StyledTextRange {
-  TextRange get textRange => TextRange(start: start, end: end);
-}
-
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
@@ -38,10 +34,8 @@ Future<void> testMain() async {
     expect(paragraph.paragraphStyle, paragraphStyle);
     expect(paragraph.styledTextRanges.length, 1);
     expect(paragraph.styledTextRanges.last.style, paragraphStyle.getTextStyle());
-    expect(
-      paragraph.styledTextRanges.last.textRange,
-      TextRange(start: 0, end: paragraph.text.length),
-    );
+    expect(paragraph.styledTextRanges.last.start, 0);
+    expect(paragraph.styledTextRanges.last.end, paragraph.text.length);
   });
 
   test('Build paragraph without any text but with a style', () {
@@ -71,10 +65,8 @@ Future<void> testMain() async {
     expect(paragraph.paragraphStyle, paragraphStyle);
     expect(paragraph.styledTextRanges.length, 1);
     expect(paragraph.styledTextRanges.first.style, textStyle1);
-    expect(
-      paragraph.styledTextRanges.first.textRange,
-      TextRange(start: 0, end: paragraph.text.length),
-    );
+    expect(paragraph.styledTextRanges.last.start, 0);
+    expect(paragraph.styledTextRanges.last.end, paragraph.text.length);
   });
 
   test('Build paragraph with a few styles at the beginning and without some text', () {
@@ -93,10 +85,8 @@ Future<void> testMain() async {
     expect(paragraph.paragraphStyle, paragraphStyle);
     expect(paragraph.styledTextRanges.length, 1);
     expect(paragraph.styledTextRanges[0].style, textStyle3);
-    expect(
-      paragraph.styledTextRanges[0].textRange,
-      TextRange(start: 0, end: paragraph.text.length),
-    );
+    expect(paragraph.styledTextRanges.last.start, 0);
+    expect(paragraph.styledTextRanges.last.end, paragraph.text.length);
   });
 
   test('Build paragraph with a nested styles [1] [2] [3]', () {
@@ -122,9 +112,12 @@ Future<void> testMain() async {
     expect(paragraph.styledTextRanges[0].style, textStyle1);
     expect(paragraph.styledTextRanges[1].style, textStyle2);
     expect(paragraph.styledTextRanges[2].style, textStyle3);
-    expect(paragraph.styledTextRanges[0].textRange, const TextRange(start: 0, end: 3));
-    expect(paragraph.styledTextRanges[1].textRange, const TextRange(start: 3, end: 6));
-    expect(paragraph.styledTextRanges[2].textRange, const TextRange(start: 6, end: 9));
+    expect(paragraph.styledTextRanges[0].start, 0);
+    expect(paragraph.styledTextRanges[0].end, 3);
+    expect(paragraph.styledTextRanges[1].start, 3);
+    expect(paragraph.styledTextRanges[1].end, 6);
+    expect(paragraph.styledTextRanges[2].start, 6);
+    expect(paragraph.styledTextRanges[2].end, 9);
   });
 
   test('Build paragraph with nested styles [1[2[3]]]', () {
@@ -147,9 +140,12 @@ Future<void> testMain() async {
     expect(paragraph.styledTextRanges[0].style, textStyle1);
     expect(paragraph.styledTextRanges[1].style, textStyle2);
     expect(paragraph.styledTextRanges[2].style, textStyle3);
-    expect(paragraph.styledTextRanges[0].textRange, const TextRange(start: 0, end: 2));
-    expect(paragraph.styledTextRanges[1].textRange, const TextRange(start: 2, end: 4));
-    expect(paragraph.styledTextRanges[2].textRange, const TextRange(start: 4, end: 9));
+    expect(paragraph.styledTextRanges[0].start, 0);
+    expect(paragraph.styledTextRanges[0].end, 2);
+    expect(paragraph.styledTextRanges[1].start, 2);
+    expect(paragraph.styledTextRanges[1].end, 4);
+    expect(paragraph.styledTextRanges[2].start, 4);
+    expect(paragraph.styledTextRanges[2].end, 9);
   });
 
   test('Build paragraph with complex nested styles [1[11[111][112]]][2[21[221][222]]]', () {
@@ -184,5 +180,54 @@ Future<void> testMain() async {
     expect(paragraph.text, '[1[11[111][112]]][2[21[211][212]]]');
     expect(paragraph.paragraphStyle, paragraphStyle);
     expect(paragraph.styledTextRanges.length, 8);
+  });
+
+  final String placeholderChar = String.fromCharCode(0xFFFC);
+
+  test('Build paragraph with a placeholder', () {
+    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
+    final WebTextStyle textStyle1 = WebTextStyle(fontFamily: 'Roboto', fontSize: 10);
+    final WebTextStyle textStyle2 = WebTextStyle(fontFamily: 'Roboto', fontSize: 20);
+    final WebTextStyle textStyle3 = WebTextStyle(fontFamily: 'Roboto', fontSize: 30);
+    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    builder.pushStyle(textStyle1);
+    builder.addText('textStyle1. ');
+    builder.pop();
+    builder.pushStyle(textStyle2);
+    builder.addPlaceholder(
+      20,
+      20,
+      PlaceholderAlignment.baseline,
+      scale: 2.0,
+      baselineOffset: 0.0,
+      baseline: TextBaseline.ideographic,
+    );
+    builder.pop();
+    builder.pushStyle(textStyle3);
+    builder.addText('textStyle3. ');
+    builder.pop();
+    builder.pushStyle(textStyle2);
+    builder.addPlaceholder(
+      20,
+      20,
+      PlaceholderAlignment.baseline,
+      scale: 4.0,
+      baselineOffset: 0.0,
+      baseline: TextBaseline.alphabetic,
+    );
+    builder.pop();
+    final WebParagraph paragraph = builder.build();
+    expect(paragraph.text, 'textStyle1. ${placeholderChar}textStyle3. $placeholderChar');
+    expect(paragraph.paragraphStyle, paragraphStyle);
+    expect(paragraph.styledTextRanges.length, 4);
+    for (final tr in paragraph.styledTextRanges) {
+      print('$tr');
+    }
+    expect(paragraph.styledTextRanges[0].placeholder == null, true);
+    expect(paragraph.styledTextRanges[1].placeholder != null, true);
+    expect(paragraph.styledTextRanges[2].placeholder == null, true);
+    expect(paragraph.styledTextRanges[3].placeholder != null, true);
+    expect(paragraph.styledTextRanges[1].placeholder!.baseline, TextBaseline.ideographic);
+    expect(paragraph.styledTextRanges[3].placeholder!.baseline, TextBaseline.alphabetic);
   });
 }
