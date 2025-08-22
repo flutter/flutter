@@ -2133,7 +2133,7 @@ void main() {
               body: Center(
                 child: IconButton(
                   style: ButtonStyle(
-                    foregroundColor: MaterialStateProperty.resolveWith<Color>(getIconColor),
+                    foregroundColor: WidgetStateProperty.resolveWith<Color>(getIconColor),
                   ),
                   isSelected: isSelected,
                   onPressed: () {

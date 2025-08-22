@@ -1343,7 +1343,7 @@ void main() {
       return activeEnabledFillColor;
     }
 
-    final MaterialStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
+    final WidgetStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
 
     Widget buildFrame({required bool enabled}) {
       return Material(
@@ -1395,7 +1395,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final MaterialStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
+    final WidgetStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
 
     Widget buildFrame() {
       return Material(
@@ -1680,7 +1680,7 @@ void main() {
             value: active,
             onChanged: (_) {},
             fillColor: const MaterialStatePropertyAll<Color>(fillColor),
-            overlayColor: useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
+            overlayColor: useOverlay ? WidgetStateProperty.resolveWith(getOverlayColor) : null,
             hoverColor: hoverColor,
             focusColor: focusColor,
             splashRadius: splashRadius,
@@ -1795,7 +1795,7 @@ void main() {
                     value = v;
                   });
                 },
-                overlayColor: MaterialStateProperty.resolveWith(getOverlayColor),
+                overlayColor: WidgetStateProperty.resolveWith(getOverlayColor),
                 splashRadius: splashRadius,
               );
             },
@@ -2401,7 +2401,7 @@ void main() {
         home: Material(
           child: Center(
             child: Checkbox(
-              fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              fillColor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
                 if (states.contains(MaterialState.selected)) {
                   return activeBackgroundColor;
                 }
@@ -2444,7 +2444,7 @@ void main() {
         home: Material(
           child: Center(
             child: Checkbox(
-              fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              fillColor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
                 if (states.contains(MaterialState.selected)) {
                   return activeBackgroundColor;
                 }

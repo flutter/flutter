@@ -965,7 +965,7 @@ void main() {
   testWidgets('DatePickerDialog resolves DatePickerTheme.dayOverlayColor states', (
     WidgetTester tester,
   ) async {
-    final MaterialStateProperty<Color> dayOverlayColor = MaterialStateProperty.resolveWith<Color>((
+    final WidgetStateProperty<Color> dayOverlayColor = WidgetStateProperty.resolveWith<Color>((
       Set<MaterialState> states,
     ) {
       if (states.contains(MaterialState.hovered)) {
@@ -1068,7 +1068,7 @@ void main() {
   testWidgets('DatePickerDialog resolves DatePickerTheme.yearOverlayColor states', (
     WidgetTester tester,
   ) async {
-    final MaterialStateProperty<Color> yearOverlayColor = MaterialStateProperty.resolveWith<Color>((
+    final WidgetStateProperty<Color> yearOverlayColor = WidgetStateProperty.resolveWith<Color>((
       Set<MaterialState> states,
     ) {
       if (states.contains(MaterialState.hovered)) {
@@ -1147,8 +1147,8 @@ void main() {
   testWidgets('DateRangePickerDialog resolves DatePickerTheme.rangeSelectionOverlayColor states', (
     WidgetTester tester,
   ) async {
-    final MaterialStateProperty<Color> rangeSelectionOverlayColor =
-        MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+    final WidgetStateProperty<Color> rangeSelectionOverlayColor =
+        WidgetStateProperty.resolveWith<Color>((Set<MaterialState> states) {
           if (states.contains(MaterialState.hovered)) {
             return const Color(0xff00ff00);
           }
@@ -1302,7 +1302,7 @@ void main() {
       MaterialApp(
         theme: ThemeData(
           datePickerTheme: datePickerTheme.copyWith(
-            yearShape: MaterialStateProperty.all<OutlinedBorder>(yearShpae),
+            yearShape: WidgetStateProperty.all<OutlinedBorder>(yearShpae),
           ),
         ),
         home: Directionality(

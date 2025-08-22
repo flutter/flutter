@@ -144,25 +144,25 @@ void main() {
     const Color defaultOverlayColor = Color(0xffffff00);
 
     final ButtonStyle customButtonStyle = ButtonStyle(
-      backgroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      backgroundColor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
         if (states.contains(MaterialState.focused)) {
           return focusedBackgroundColor;
         }
         return defaultBackgroundColor;
       }),
-      foregroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      foregroundColor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
         if (states.contains(MaterialState.focused)) {
           return focusedForegroundColor;
         }
         return defaultForegroundColor;
       }),
-      iconColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      iconColor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
         if (states.contains(MaterialState.focused)) {
           return focusedIconColor;
         }
         return defaultIconColor;
       }),
-      overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      overlayColor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
         if (states.contains(MaterialState.focused)) {
           return focusedOverlayColor;
         }
@@ -378,10 +378,10 @@ void main() {
 
       const Color luckyColor = Color(0xff777777);
       final ButtonStyle singleColorButtonStyle = ButtonStyle(
-        backgroundColor: MaterialStateProperty.all(luckyColor),
-        foregroundColor: MaterialStateProperty.all(luckyColor),
-        iconColor: MaterialStateProperty.all(luckyColor),
-        overlayColor: MaterialStateProperty.all(luckyColor),
+        backgroundColor: WidgetStateProperty.all(luckyColor),
+        foregroundColor: WidgetStateProperty.all(luckyColor),
+        iconColor: WidgetStateProperty.all(luckyColor),
+        overlayColor: WidgetStateProperty.all(luckyColor),
       );
 
       await tester.pumpWidget(
@@ -442,8 +442,8 @@ void main() {
 
       const Color luckyColor = Color(0xff777777);
       final ButtonStyle partialButtonStyle = ButtonStyle(
-        backgroundColor: MaterialStateProperty.all(luckyColor),
-        foregroundColor: MaterialStateProperty.all(luckyColor),
+        backgroundColor: WidgetStateProperty.all(luckyColor),
+        foregroundColor: WidgetStateProperty.all(luckyColor),
       );
 
       final List<DropdownMenuEntry<TestMenu>> partiallyStyledMenuEntries =

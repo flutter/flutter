@@ -506,7 +506,7 @@ void main() {
                 menuChildren: <Widget>[
                   MenuItemButton(
                     style: ButtonStyle(
-                      minimumSize: MaterialStateProperty.all<Size>(const Size.fromHeight(1000)),
+                      minimumSize: WidgetStateProperty.all<Size>(const Size.fromHeight(1000)),
                     ),
                     onPressed: () {},
                     child: const Text('Category'),
@@ -544,7 +544,7 @@ void main() {
                   menuChildren: <Widget>[
                     MenuItemButton(
                       style: ButtonStyle(
-                        minimumSize: MaterialStateProperty.all<Size>(const Size.fromHeight(1000)),
+                        minimumSize: WidgetStateProperty.all<Size>(const Size.fromHeight(1000)),
                       ),
                       onPressed: () {},
                       child: const Text('Category'),
@@ -1097,7 +1097,7 @@ void main() {
                     Expanded(
                       child: MenuBar(
                         style: MenuStyle(
-                          elevation: MaterialStateProperty.all<double?>(10),
+                          elevation: WidgetStateProperty.all<double?>(10),
                           backgroundColor: const MaterialStatePropertyAll<Color>(Colors.red),
                         ),
                         children: createTestMenus(onPressed: onPressed),
@@ -2992,13 +2992,13 @@ void main() {
 
     testWidgets('diagnostics', (WidgetTester tester) async {
       final ButtonStyle style = ButtonStyle(
-        shape: MaterialStateProperty.all<OutlinedBorder?>(const StadiumBorder()),
-        elevation: MaterialStateProperty.all<double?>(10.0),
+        shape: WidgetStateProperty.all<OutlinedBorder?>(const StadiumBorder()),
+        elevation: WidgetStateProperty.all<double?>(10.0),
         backgroundColor: const MaterialStatePropertyAll<Color>(Colors.red),
       );
       final MenuStyle menuStyle = MenuStyle(
-        shape: MaterialStateProperty.all<OutlinedBorder?>(const RoundedRectangleBorder()),
-        elevation: MaterialStateProperty.all<double?>(20.0),
+        shape: WidgetStateProperty.all<OutlinedBorder?>(const RoundedRectangleBorder()),
+        elevation: WidgetStateProperty.all<double?>(20.0),
         backgroundColor: const MaterialStatePropertyAll<Color>(Colors.green),
       );
       await tester.pumpWidget(

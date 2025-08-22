@@ -101,19 +101,19 @@ void main() {
         theme: ThemeData(
           checkboxTheme: CheckboxThemeData(
             mouseCursor: const MaterialStatePropertyAll<MouseCursor?>(mouseCursor),
-            fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            fillColor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
                 return selectedFillColor;
               }
               return defaultFillColor;
             }),
-            checkColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            checkColor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
               if (states.contains(MaterialState.focused)) {
                 return focusedCheckColor;
               }
               return defaultCheckColor;
             }),
-            overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            overlayColor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
               if (states.contains(MaterialState.focused)) {
                 return focusOverlayColor;
               }
@@ -207,14 +207,14 @@ void main() {
         theme: ThemeData(
           checkboxTheme: CheckboxThemeData(
             mouseCursor: const MaterialStatePropertyAll<MouseCursor?>(themeMouseCursor),
-            fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            fillColor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
                 return themeSelectedFillColor;
               }
               return themeDefaultFillColor;
             }),
             checkColor: const MaterialStatePropertyAll<Color?>(themeCheckColor),
-            overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            overlayColor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
               if (states.contains(MaterialState.focused)) {
                 return themeFocusOverlayColor;
               }
@@ -234,7 +234,7 @@ void main() {
             value: selected,
             autofocus: autofocus,
             mouseCursor: mouseCursor,
-            fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            fillColor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
                 return selectedFillColor;
               }
@@ -297,7 +297,7 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           checkboxTheme: CheckboxThemeData(
-            fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            fillColor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
                 return themeSelectedFillColor;
               }
@@ -348,7 +348,7 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           checkboxTheme: CheckboxThemeData(
-            overlayColor: MaterialStateProperty.resolveWith(getOverlayColor),
+            overlayColor: WidgetStateProperty.resolveWith(getOverlayColor),
             splashRadius: splashRadius,
           ),
         ),
@@ -437,9 +437,9 @@ void main() {
 
   test('CheckboxThemeData lerp from populated to null parameters', () {
     final CheckboxThemeData theme = CheckboxThemeData(
-      fillColor: MaterialStateProperty.all(const Color(0xfffffff0)),
-      checkColor: MaterialStateProperty.all(const Color(0xfffffff1)),
-      overlayColor: MaterialStateProperty.all(const Color(0xfffffff2)),
+      fillColor: WidgetStateProperty.all(const Color(0xfffffff0)),
+      checkColor: WidgetStateProperty.all(const Color(0xfffffff1)),
+      overlayColor: WidgetStateProperty.all(const Color(0xfffffff2)),
       splashRadius: 3.0,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       visualDensity: const VisualDensity(vertical: 1.0, horizontal: 1.0),
@@ -464,9 +464,9 @@ void main() {
 
   test('CheckboxThemeData lerp from null to populated parameters', () {
     final CheckboxThemeData theme = CheckboxThemeData(
-      fillColor: MaterialStateProperty.all(const Color(0xfffffff0)),
-      checkColor: MaterialStateProperty.all(const Color(0xfffffff1)),
-      overlayColor: MaterialStateProperty.all(const Color(0xfffffff2)),
+      fillColor: WidgetStateProperty.all(const Color(0xfffffff0)),
+      checkColor: WidgetStateProperty.all(const Color(0xfffffff1)),
+      overlayColor: WidgetStateProperty.all(const Color(0xfffffff2)),
       splashRadius: 4.0,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       visualDensity: const VisualDensity(vertical: 1.0, horizontal: 1.0),
@@ -500,9 +500,9 @@ void main() {
 
   test('CheckboxThemeData lerp from populated parameters', () {
     final CheckboxThemeData themeA = CheckboxThemeData(
-      fillColor: MaterialStateProperty.all(const Color(0xfffffff0)),
-      checkColor: MaterialStateProperty.all(const Color(0xfffffff1)),
-      overlayColor: MaterialStateProperty.all(const Color(0xfffffff2)),
+      fillColor: WidgetStateProperty.all(const Color(0xfffffff0)),
+      checkColor: WidgetStateProperty.all(const Color(0xfffffff1)),
+      overlayColor: WidgetStateProperty.all(const Color(0xfffffff2)),
       splashRadius: 3.0,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       visualDensity: const VisualDensity(vertical: 1.0, horizontal: 1.0),
@@ -510,9 +510,9 @@ void main() {
       side: const BorderSide(width: 4.0),
     );
     final CheckboxThemeData themeB = CheckboxThemeData(
-      fillColor: MaterialStateProperty.all(const Color(0xfffffff3)),
-      checkColor: MaterialStateProperty.all(const Color(0xfffffff4)),
-      overlayColor: MaterialStateProperty.all(const Color(0xfffffff5)),
+      fillColor: WidgetStateProperty.all(const Color(0xfffffff3)),
+      checkColor: WidgetStateProperty.all(const Color(0xfffffff4)),
+      overlayColor: WidgetStateProperty.all(const Color(0xfffffff5)),
       splashRadius: 9.0,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       visualDensity: const VisualDensity(vertical: 2.0, horizontal: 2.0),
