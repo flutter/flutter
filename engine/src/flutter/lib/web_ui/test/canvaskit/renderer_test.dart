@@ -186,9 +186,9 @@ void testMain() {
       'defaults to OffscreenCanvasRasterizer on Chrome and MultiSurfaceRasterizer on Firefox and Safari',
       () {
         if (isChromium) {
-          expect(CanvasKitRenderer.instance.debugGetRasterizer(), isA<OffscreenCanvasRasterizer>());
+          expect(CanvasKitRenderer.instance.rasterizer, isA<OffscreenCanvasRasterizer>());
         } else {
-          expect(CanvasKitRenderer.instance.debugGetRasterizer(), isA<MultiSurfaceRasterizer>());
+          expect(CanvasKitRenderer.instance.rasterizer, isA<MultiSurfaceRasterizer>());
         }
       },
     );
@@ -199,7 +199,7 @@ void testMain() {
             as JsFlutterConfiguration?,
       );
       CanvasKitRenderer.instance.debugResetRasterizer();
-      expect(CanvasKitRenderer.instance.debugGetRasterizer(), isA<MultiSurfaceRasterizer>());
+      expect(CanvasKitRenderer.instance.rasterizer, isA<MultiSurfaceRasterizer>());
     });
   });
 }

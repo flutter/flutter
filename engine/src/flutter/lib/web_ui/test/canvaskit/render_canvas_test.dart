@@ -74,7 +74,7 @@ void testMain() {
       await renderScene(scene);
 
       expect(
-        CanvasKitRenderer.instance.debugGetRasterizerForView(implicitView)!.currentFrameSize,
+        CanvasKitRenderer.instance.rasterizers[implicitView.viewId]!.currentFrameSize,
         const BitmapSize(200, 200),
       );
 
