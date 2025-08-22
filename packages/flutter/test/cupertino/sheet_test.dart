@@ -1141,6 +1141,69 @@ void main() {
       await tester.pumpAndSettle();
     });
 
+    testWidgets('drag dismiss uses route navigator instead of root navigator', (WidgetTester tester) async {
+      final GlobalKey homeKey = GlobalKey();
+      final GlobalKey sheetKey = GlobalKey();
+      bool wasPopped = false;
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            key: homeKey,
+            child: Center(
+              child: Column(
+                children: <Widget>[
+                  const Text('Page 1'),
+                  CupertinoButton(
+                    onPressed: () {
+                      Navigator.push<void>(
+                        homeKey.currentContext!,
+                        CupertinoSheetRoute<void>(
+                          builder: (BuildContext context) {
+                            return PopScope(
+                              onPopInvokedWithResult: (bool didPop, Object? result) {
+                                if (didPop) {
+                                  wasPopped = true;
+                                }
+                              },
+                              child: CupertinoPageScaffold(
+                                key: sheetKey,
+                                child: const Center(child: Text('Page 2')),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                    child: const Text('Push Page 2'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Push Page 2'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Page 2'), findsOneWidget);
+      expect(wasPopped, false);
+
+      // Start drag gesture and drag down far enough to trigger dismissal
+      final TestGesture gesture = await tester.startGesture(const Offset(100, 200));
+      await gesture.moveBy(const Offset(0, 350));
+      await tester.pump();
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Verify the sheet was dismissed and the PopScope callback was triggered
+      expect(find.text('Page 2'), findsNothing);
+      expect(find.text('Page 1'), findsOneWidget);
+      expect(wasPopped, true);
+    });
+
     testWidgets('dragging does not move the sheet when enableDrag is false', (
       WidgetTester tester,
     ) async {
