@@ -39,13 +39,13 @@ void putStringAttributesIntoBuffer(
 
 int64_t flagsToInt64(flutter::SemanticsFlags flags) {
   int64_t result = 0;
-  if (flags.hasCheckedState) {
+  if (flags.isChecked != flutter::SemanticsCheckState::kNone) {
     result |= (INT64_C(1) << 0);
   }
-  if (flags.isChecked) {
+  if (flags.isChecked == flutter::SemanticsCheckState::kTrue) {
     result |= (INT64_C(1) << 1);
   }
-  if (flags.isSelected) {
+  if (flags.isSelected == flutter::SemanticsTristate::kTrue) {
     result |= (INT64_C(1) << 2);
   }
   if (flags.isButton) {
@@ -54,13 +54,13 @@ int64_t flagsToInt64(flutter::SemanticsFlags flags) {
   if (flags.isTextField) {
     result |= (INT64_C(1) << 4);
   }
-  if (flags.isFocused) {
+  if (flags.isFocused == flutter::SemanticsTristate::kTrue) {
     result |= (INT64_C(1) << 5);
   }
-  if (flags.hasEnabledState) {
+  if (flags.isEnabled != flutter::SemanticsTristate::kNone) {
     result |= (INT64_C(1) << 6);
   }
-  if (flags.isEnabled) {
+  if (flags.isEnabled == flutter::SemanticsTristate::kTrue) {
     result |= (INT64_C(1) << 7);
   }
   if (flags.isInMutuallyExclusiveGroup) {
@@ -87,10 +87,10 @@ int64_t flagsToInt64(flutter::SemanticsFlags flags) {
   if (flags.isLiveRegion) {
     result |= (INT64_C(1) << 15);
   }
-  if (flags.hasToggledState) {
+  if (flags.isToggled != flutter::SemanticsTristate::kNone) {
     result |= (INT64_C(1) << 16);
   }
-  if (flags.isToggled) {
+  if (flags.isToggled == flutter::SemanticsTristate::kTrue) {
     result |= (INT64_C(1) << 17);
   }
   if (flags.hasImplicitScrolling) {
@@ -102,7 +102,7 @@ int64_t flagsToInt64(flutter::SemanticsFlags flags) {
   if (flags.isReadOnly) {
     result |= (INT64_C(1) << 20);
   }
-  if (flags.isFocusable) {
+  if (flags.isFocused != flutter::SemanticsTristate::kNone) {
     result |= (INT64_C(1) << 21);
   }
   if (flags.isLink) {
@@ -114,22 +114,22 @@ int64_t flagsToInt64(flutter::SemanticsFlags flags) {
   if (flags.isKeyboardKey) {
     result |= (INT64_C(1) << 24);
   }
-  if (flags.isCheckStateMixed) {
+  if (flags.isChecked == flutter::SemanticsCheckState::kMixed) {
     result |= (INT64_C(1) << 25);
   }
-  if (flags.hasExpandedState) {
+  if (flags.isExpanded != flutter::SemanticsTristate::kNone) {
     result |= (INT64_C(1) << 26);
   }
-  if (flags.isExpanded) {
+  if (flags.isExpanded == flutter::SemanticsTristate::kTrue) {
     result |= (INT64_C(1) << 27);
   }
-  if (flags.hasSelectedState) {
+  if (flags.isSelected != flutter::SemanticsTristate::kNone) {
     result |= (INT64_C(1) << 28);
   }
-  if (flags.hasRequiredState) {
+  if (flags.isRequired != flutter::SemanticsTristate::kNone) {
     result |= (INT64_C(1) << 29);
   }
-  if (flags.isRequired) {
+  if (flags.isRequired == flutter::SemanticsTristate::kTrue) {
     result |= (INT64_C(1) << 30);
   }
   return result;
