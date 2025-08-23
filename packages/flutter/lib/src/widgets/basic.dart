@@ -1806,10 +1806,10 @@ class Transform extends SingleChildRenderObjectWidget {
   ///     height: 100.0,
   ///     child: Transform.scale(
   ///       scale: 2.0,
-  ///       child: Container(
-  ///         color: Colors.purple,
-  ///         child: GestureDetector(
-  ///           onTap: () => print('Tapped!'),
+  ///       child: GestureDetector(
+  ///         onTap: () => debugPrint('Tapped!'),
+  ///         child: const ColoredBox(
+  ///           color: Colors.purple,
   ///         ),
   ///       ),
   ///     ),
