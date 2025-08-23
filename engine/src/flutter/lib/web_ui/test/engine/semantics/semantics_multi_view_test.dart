@@ -76,9 +76,8 @@ Future<void> testMain() async {
         tester1.updateNode(
           id: 1,
           flags: const ui.SemanticsFlags(
-            isFocusable: true,
-            hasEnabledState: true,
-            isEnabled: true,
+            isFocused: ui.Tristate.isFalse,
+            isEnabled: ui.Tristate.isTrue,
             isButton: true,
           ),
           hasTap: true,

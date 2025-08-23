@@ -122,7 +122,7 @@ void main() {
         child: Theme(
           data: ThemeData(
             checkboxTheme: CheckboxThemeData(
-              fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+              fillColor: WidgetStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
                 return states.contains(MaterialState.selected) ? themeColor : null;
               }),
             ),
@@ -356,7 +356,7 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           checkboxTheme: CheckboxThemeData(
-            fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+            fillColor: WidgetStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
               return states.contains(MaterialState.selected) ? fillColor : null;
             }),
           ),
@@ -647,7 +647,7 @@ void main() {
       return activeEnabledFillColor;
     }
 
-    final MaterialStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
+    final WidgetStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
 
     Widget buildFrame({required bool enabled}) {
       return wrap(
@@ -683,7 +683,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final MaterialStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
+    final WidgetStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
 
     Widget buildFrame() {
       return wrap(
@@ -802,7 +802,7 @@ void main() {
               value: active,
               onChanged: (_) {},
               fillColor: const MaterialStatePropertyAll<Color>(fillColor),
-              overlayColor: useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
+              overlayColor: useOverlay ? WidgetStateProperty.resolveWith(getOverlayColor) : null,
               hoverColor: hoverColor,
               splashRadius: splashRadius,
             ),
@@ -924,7 +924,7 @@ void main() {
               value: active,
               onChanged: (_) {},
               fillColor: const MaterialStatePropertyAll<Color>(fillColor),
-              overlayColor: useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
+              overlayColor: useOverlay ? WidgetStateProperty.resolveWith(getOverlayColor) : null,
               hoverColor: hoverColor,
               splashRadius: splashRadius,
             ),
