@@ -290,6 +290,62 @@ void testMain() {
       expect(ui.PlatformDispatcher.instance.textScaleFactor, findBrowserTextScaleFactor());
     });
 
+    test('calls onMetricsChanged when the typography measurement element size changes', () async {
+      final DomElement root = domDocument.documentElement!;
+      final DomElement style = createDomHTMLStyleElement(null);
+      final ui.VoidCallback? oldCallback = ui.PlatformDispatcher.instance.onMetricsChanged;
+
+      // Wait for next frame.
+      Future<void> waitForResizeObserver() {
+        final Completer<void> completer = Completer<void>();
+        domWindow.requestAnimationFrame((_) {
+          Timer.run(completer.complete);
+        });
+        return completer.future;
+      }
+
+      addTearDown(() {
+        style.text = null;
+        style.remove();
+        ui.PlatformDispatcher.instance.onMetricsChanged = oldCallback;
+      });
+
+      bool isCalled = false;
+      ui.PlatformDispatcher.instance.onMetricsChanged = () {
+        isCalled = true;
+      };
+
+      const ui.TypographySettings expectedTypographySettings = ui.TypographySettings(
+        lineHeight: 2.0,
+        letterSpacing: 1.0,
+        wordSpacing: 4.0,
+        paragraphSpacing: 10.0,
+      );
+      style.text =
+          'html *{ line-height: 2 !important; word-spacing: 4px !important; letter-spacing: 1px !important; margin-bottom: 10px !important; }';
+      root.append(style);
+      await waitForResizeObserver();
+      expect(root.contains(style), isTrue);
+      expect(isCalled, isTrue);
+      expect(ui.PlatformDispatcher.instance.typographySettings, expectedTypographySettings);
+
+      isCalled = false;
+
+      style.remove();
+      await waitForResizeObserver();
+      expect(root.contains(style), isFalse);
+      expect(isCalled, isTrue);
+      expect(ui.PlatformDispatcher.instance.typographySettings, const ui.TypographySettings());
+
+      isCalled = false;
+
+      root.append(style);
+      await waitForResizeObserver();
+      expect(root.contains(style), isTrue);
+      expect(isCalled, isTrue);
+      expect(ui.PlatformDispatcher.instance.typographySettings, expectedTypographySettings);
+    });
+
     test('disposes all its views', () {
       final EngineFlutterView view1 = EngineFlutterView(dispatcher, createDomHTMLDivElement());
       final EngineFlutterView view2 = EngineFlutterView(dispatcher, createDomHTMLDivElement());
