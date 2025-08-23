@@ -17,7 +17,8 @@ import 'theme.dart';
 // late BuildContext context;
 
 @immutable
-/// Defines the visual properties of [_MaterialProgressIndicator] widgets.
+/// Defines the visual properties of [CircularProgressIndicator] and
+/// [LinearProgressIndicator] widgets.
 ///
 /// Used by [ProgressIndicatorTheme] to control the visual properties of
 /// progress indicators in a widget subtree.
@@ -32,7 +33,8 @@ import 'theme.dart';
 ///  * [ThemeData.progressIndicatorTheme], which describes the defaults for
 ///    any progress indicators as part of the application's [ThemeData].
 class ProgressIndicatorThemeData with Diagnosticable {
-  /// Creates the set of properties used to configure [_MaterialProgressIndicator] widgets.
+  /// Creates the set of properties used to configure
+  /// [CircularProgressIndicator] and [LinearProgressIndicator] widgets.
   const ProgressIndicatorThemeData({
     this.color,
     this.linearTrackColor,
@@ -56,17 +58,22 @@ class ProgressIndicatorThemeData with Diagnosticable {
     this.year2023,
   });
 
-  /// The color of the [_MaterialProgressIndicator]'s indicator.
+  /// The color of the [CircularProgressIndicator] and
+  /// [LinearProgressIndicator]'s indicator.
   ///
   /// If null, then it will use [ColorScheme.primary] of the ambient
   /// [ThemeData.colorScheme].
   ///
   /// See also:
   ///
-  ///  * [_MaterialProgressIndicator.color], which specifies the indicator color for a
-  ///    specific progress indicator.
-  ///  * [_MaterialProgressIndicator.valueColor], which specifies the indicator color
-  ///    a an animated color.
+  ///  * [CircularProgressIndicator.color], which specifies the indicator color
+  ///    for a specific circular progress indicator.
+  ///  * [CircularProgressIndicator.valueColor], which specifies the circular
+  ///    indicator color a an animated color.
+  ///  * [LinearProgressIndicator.color], which specifies the linear indicator
+  ///    color for a specific progress indicator.
+  ///  * [LinearProgressIndicator.valueColor], which specifies the linear
+  ///    indicator color a an animated color.
   final Color? color;
 
   /// {@macro flutter.material.LinearProgressIndicator.trackColor}
@@ -81,7 +88,8 @@ class ProgressIndicatorThemeData with Diagnosticable {
   /// {@macro flutter.material.RefreshProgressIndicator.backgroundColor}
   final Color? refreshBackgroundColor;
 
-  /// Overrides the border radius of the [_MaterialProgressIndicator].
+  /// Overrides the border radius of the [CircularProgressIndicator] and
+  /// [LinearProgressIndicator].
   final BorderRadiusGeometry? borderRadius;
 
   /// Overrides the stop indicator color of the [LinearProgressIndicator].
@@ -289,10 +297,12 @@ class ProgressIndicatorThemeData with Diagnosticable {
 }
 
 /// An inherited widget that defines the configuration for
-/// [_MaterialProgressIndicator]s in this widget's subtree.
+/// [CircularProgressIndicator] and [LinearProgressIndicator] in this widget's
+/// subtree.
 ///
-/// Values specified here are used for [_MaterialProgressIndicator] properties that are not
-/// given an explicit non-null value.
+/// Values specified here are used for [CircularProgressIndicator] and
+/// [LinearProgressIndicator] properties that are not given an explicit non-null
+/// value.
 ///
 /// {@tool snippet}
 ///
@@ -309,11 +319,12 @@ class ProgressIndicatorThemeData with Diagnosticable {
 /// ```
 /// {@end-tool}
 class ProgressIndicatorTheme extends InheritedTheme {
-  /// Creates a theme that controls the configurations for [_MaterialProgressIndicator]
-  /// widgets.
+  /// Creates a theme that controls the configurations for
+  /// [CircularProgressIndicator] and [LinearProgressIndicator] widgets.
   const ProgressIndicatorTheme({super.key, required this.data, required super.child});
 
-  /// The properties for descendant [_MaterialProgressIndicator] widgets.
+  /// The properties for descendant [CircularProgressIndicator] and
+  /// [LinearProgressIndicator] widgets.
   final ProgressIndicatorThemeData data;
 
   /// Returns the [data] from the closest [ProgressIndicatorTheme] ancestor. If
