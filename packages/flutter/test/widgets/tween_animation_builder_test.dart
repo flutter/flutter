@@ -546,6 +546,9 @@ void main() {
       // The assertion error is thrown but caught by the framework and displayed as an error widget
       expect(tester.takeException(), isAssertionError);
 
+      // Clear the widget tree to avoid leaks
+      await tester.pumpWidget(const SizedBox.shrink());
+
       // Test with null end value - should throw assertion error
       await tester.pumpWidget(
         RepeatingTweenAnimationBuilder<double>(
@@ -559,6 +562,9 @@ void main() {
 
       expect(tester.takeException(), isAssertionError);
 
+      // Clear the widget tree to avoid leaks
+      await tester.pumpWidget(const SizedBox.shrink());
+
       // Test with both null - should also throw assertion error
       await tester.pumpWidget(
         RepeatingTweenAnimationBuilder<double>(
@@ -571,6 +577,9 @@ void main() {
       );
 
       expect(tester.takeException(), isAssertionError);
+
+      // Clear the widget tree to avoid leaks
+      await tester.pumpWidget(const SizedBox.shrink());
 
       // Test with both begin and end non-null - should work fine
       await tester.pumpWidget(
