@@ -961,8 +961,8 @@ class _WrappingOverlayState extends State<_WrappingOverlay> {
 }
 
 class _OverlayScope extends InheritedWidget {
-  _OverlayScope({required this.state, required super.child});
-  OverlayState state;
+  const _OverlayScope({required this.state, required super.child});
+  final OverlayState state;
 
   @override
   bool updateShouldNotify(covariant _OverlayScope oldWidget) {

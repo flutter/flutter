@@ -105,12 +105,14 @@ void main() {
   });
 
   testWidgets('Listens to overlay changes', (WidgetTester tester) async {
-    final GlobalKey container = GlobalKey();
+    // Use global key to ensure `OverlayCatcher` will be reparented instead
+    // of destroyed when Overlay gets swapped.
+    const GlobalObjectKey container = GlobalObjectKey('container');
+    const Widget overlayBody = SizedBox(child: OverlayCatcher());
+
     final OverlayEntry overlayEntry1 = OverlayEntry(
       builder: (BuildContext context) {
-        // Use global key to ensure `OverlayCatcher` will be reparented instead
-        // of destroyed when Overlay gets swapped.
-        return Container(key: container, child: const OverlayCatcher());
+        return Container(key: container, child: overlayBody);
       },
     );
     addTearDown(
@@ -120,9 +122,7 @@ void main() {
     );
     final OverlayEntry overlayEntry2 = OverlayEntry(
       builder: (BuildContext context) {
-        // Use global key to ensure `OverlayCatcher` will be reparented instead
-        // of destroyed when Overlay gets swapped.
-        return Container(key: container, child: const OverlayCatcher());
+        return Container(key: container, child: overlayBody);
       },
     );
     addTearDown(
@@ -139,7 +139,7 @@ void main() {
     );
 
     final OverlayState state = tester.state<OverlayState>(find.byType(Overlay));
-
+    final Element catcher = tester.element(find.byType(OverlayCatcher));
     expect(find.text(state.hashCode.toString()), findsOneWidget);
 
     final OverlaySwapsState swaps = tester.state<OverlaySwapsState>(find.byType(OverlaySwaps));
@@ -147,7 +147,9 @@ void main() {
     await tester.pumpAndSettle();
 
     final OverlayState newState = tester.state<OverlayState>(find.byType(Overlay));
+    final Element newCatcher = tester.element(find.byType(OverlayCatcher));
     expect(state != newState, isTrue);
+    expect(newCatcher == catcher, isTrue);
     expect(find.text(newState.hashCode.toString()), findsOneWidget);
   });
 
