@@ -104,6 +104,7 @@ export 'src/widgets/platform_menu_bar.dart';
 export 'src/widgets/platform_selectable_region_context_menu.dart';
 export 'src/widgets/platform_view.dart';
 export 'src/widgets/pop_scope.dart';
+export 'src/widgets/predictive_back_builder.dart';
 export 'src/widgets/preferred_size.dart';
 export 'src/widgets/primary_scroll_controller.dart';
 export 'src/widgets/radio_group.dart';
