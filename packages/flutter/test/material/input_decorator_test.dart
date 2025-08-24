@@ -10125,7 +10125,7 @@ void main() {
     const Color iconErrorColor = Color(0xffff0000);
     const Color iconColor = Color(0xff00ff00);
     final ButtonStyle iconButtonStyle = ButtonStyle(
-      foregroundColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+      foregroundColor: WidgetStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
         if (states.contains(MaterialState.error)) {
           return iconErrorColor;
         }
@@ -10167,7 +10167,7 @@ void main() {
     const Color iconErrorColor = Color(0xffff0000);
     const Color iconColor = Color(0xff00ff00);
     final ButtonStyle iconButtonStyle = ButtonStyle(
-      foregroundColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+      foregroundColor: WidgetStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
         if (states.contains(MaterialState.error)) {
           return iconErrorColor;
         }

@@ -1698,52 +1698,16 @@ void DisplayListBuilder::DrawDisplayList(const sk_sp<DisplayList> display_list,
     current_layer().contains_backdrop_filter = true;
   }
 }
-void DisplayListBuilder::drawTextBlob(const sk_sp<SkTextBlob> blob,
-                                      DlScalar x,
-                                      DlScalar y) {
-  DisplayListAttributeFlags flags = kDrawTextBlobFlags;
-  OpResult result = PaintResult(current_, flags);
-  if (result == OpResult::kNoEffect) {
-    return;
-  }
-  DlRect bounds = ToDlRect(blob->bounds().makeOffset(x, y));
-  bool unclipped = AccumulateOpBounds(bounds, flags);
-  // TODO(https://github.com/flutter/flutter/issues/82202): Remove once the
-  // unit tests can use Fuchsia's font manager instead of the empty default.
-  // Until then we might encounter empty bounds for otherwise valid text and
-  // thus we ignore the results from AccumulateOpBounds.
-#if defined(OS_FUCHSIA)
-  unclipped = true;
-#endif  // OS_FUCHSIA
-  if (unclipped) {
-    Push<DrawTextBlobOp>(0, blob, x, y);
-    // There is no way to query if the glyphs of a text blob overlap and
-    // there are no current guarantees from either Skia or Impeller that
-    // they will protect overlapping glyphs from the effects of overdraw
-    // so we must make the conservative assessment that this DL layer is
-    // not compatible with group opacity inheritance.
-    UpdateLayerOpacityCompatibility(false);
-    UpdateLayerResult(result);
-  }
-}
-void DisplayListBuilder::DrawTextBlob(const sk_sp<SkTextBlob>& blob,
-                                      DlScalar x,
-                                      DlScalar y,
-                                      const DlPaint& paint) {
-  SetAttributesFromPaint(paint, DisplayListOpFlags::kDrawTextBlobFlags);
-  drawTextBlob(blob, x, y);
-}
 
-void DisplayListBuilder::drawTextFrame(
-    const std::shared_ptr<impeller::TextFrame>& text_frame,
-    DlScalar x,
-    DlScalar y) {
-  DisplayListAttributeFlags flags = kDrawTextBlobFlags;
+void DisplayListBuilder::drawText(const std::shared_ptr<DlText>& text,
+                                  DlScalar x,
+                                  DlScalar y) {
+  DisplayListAttributeFlags flags = kDrawTextFlags;
   OpResult result = PaintResult(current_, flags);
   if (result == OpResult::kNoEffect) {
     return;
   }
-  DlRect bounds = text_frame->GetBounds().Shift(x, y);
+  DlRect bounds = text->GetBounds().Shift(x, y);
   bool unclipped = AccumulateOpBounds(bounds, flags);
   // TODO(https://github.com/flutter/flutter/issues/82202): Remove once the
   // unit tests can use Fuchsia's font manager instead of the empty default.
@@ -1753,7 +1717,7 @@ void DisplayListBuilder::drawTextFrame(
   unclipped = true;
 #endif  // OS_FUCHSIA
   if (unclipped) {
-    Push<DrawTextFrameOp>(0, text_frame, x, y);
+    Push<DrawTextOp>(0, text, x, y);
     // There is no way to query if the glyphs of a text blob overlap and
     // there are no current guarantees from either Skia or Impeller that
     // they will protect overlapping glyphs from the effects of overdraw
@@ -1764,13 +1728,12 @@ void DisplayListBuilder::drawTextFrame(
   }
 }
 
-void DisplayListBuilder::DrawTextFrame(
-    const std::shared_ptr<impeller::TextFrame>& text_frame,
-    DlScalar x,
-    DlScalar y,
-    const DlPaint& paint) {
-  SetAttributesFromPaint(paint, DisplayListOpFlags::kDrawTextBlobFlags);
-  drawTextFrame(text_frame, x, y);
+void DisplayListBuilder::DrawText(const std::shared_ptr<DlText>& text,
+                                  DlScalar x,
+                                  DlScalar y,
+                                  const DlPaint& paint) {
+  SetAttributesFromPaint(paint, DisplayListOpFlags::kDrawTextFlags);
+  drawText(text, x, y);
 }
 
 void DisplayListBuilder::DrawShadow(const DlPath& path,

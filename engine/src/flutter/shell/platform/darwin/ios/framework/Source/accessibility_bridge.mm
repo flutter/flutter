@@ -268,7 +268,8 @@ static SemanticsObject* CreateObject(const flutter::SemanticsNode& node,
     // Text fields are backed by objects that implement UITextInput.
     return [[TextInputSemanticsObject alloc] initWithBridge:weak_ptr uid:node.id];
   } else if (!node.flags.isInMutuallyExclusiveGroup &&
-             (node.flags.hasToggledState || node.flags.hasCheckedState)) {
+             (node.flags.isToggled != flutter::SemanticsTristate::kNone ||
+              node.flags.isChecked != flutter::SemanticsCheckState::kNone)) {
     return [[FlutterSwitchSemanticsObject alloc] initWithBridge:weak_ptr uid:node.id];
   } else if (node.flags.hasImplicitScrolling) {
     return [[FlutterScrollableSemanticsObject alloc] initWithBridge:weak_ptr uid:node.id];
@@ -299,8 +300,10 @@ SemanticsObject* AccessibilityBridge::GetOrCreateObject(int32_t uid,
       flutter::SemanticsNode node = nodeEntry->second;
       if (object.node.flags.isTextField != node.flags.isTextField ||
           object.node.flags.isReadOnly != node.flags.isReadOnly ||
-          object.node.flags.hasCheckedState != node.flags.hasCheckedState ||
-          object.node.flags.hasToggledState != node.flags.hasToggledState ||
+          (object.node.flags.isChecked == flutter::SemanticsCheckState::kNone) !=
+              (node.flags.isChecked == flutter::SemanticsCheckState::kNone) ||
+          ((object.node.flags.isToggled == flutter::SemanticsTristate::kNone) !=
+           (node.flags.isToggled == flutter::SemanticsTristate::kNone)) ||
           object.node.flags.hasImplicitScrolling != node.flags.hasImplicitScrolling
 
       ) {

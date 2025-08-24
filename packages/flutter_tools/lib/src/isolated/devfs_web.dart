@@ -68,6 +68,7 @@ class WebDevFS implements DevFS {
     required this.buildInfo,
     required this.enableDwds,
     required this.enableDds,
+    this.ddsPort,
     required this.entrypoint,
     required this.expressionCompiler,
     required this.chromiumLauncher,
@@ -101,6 +102,7 @@ class WebDevFS implements DevFS {
   final BuildInfo buildInfo;
   final bool enableDwds;
   final bool enableDds;
+  final int? ddsPort;
   final bool testMode;
   final bool ddcModuleSystem;
   final bool canaryFeatures;
@@ -207,6 +209,7 @@ class WebDevFS implements DevFS {
       buildInfo,
       enableDwds,
       enableDds,
+      ddsPort,
       entrypoint,
       expressionCompiler,
       webRenderer: webRenderer,

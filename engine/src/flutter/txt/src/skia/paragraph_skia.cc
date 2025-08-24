@@ -7,8 +7,10 @@
 #include <algorithm>
 #include <numeric>
 #include "display_list/dl_paint.h"
+#include "display_list/dl_text_skia.h"
 #include "display_list/geometry/dl_geometry_conversions.h"
 #include "fml/logging.h"
+#include "impeller/display_list/dl_text_impeller.h"
 #include "impeller/typographer/backends/skia/text_frame_skia.h"
 #include "include/core/SkMatrix.h"
 #include "third_party/skia/src/core/SkTextBlobPriv.h"  // nogncheck
@@ -81,8 +83,9 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
         // If there is no path, this is an emoji and should be drawn as is,
         // ignoring the color source.
         if (path.isEmpty()) {
-          builder_->DrawTextFrame(impeller::MakeTextFrameFromTextBlobSkia(blob),
-                                  x, y, dl_paints_[paint_id]);
+          builder_->DrawText(DlTextImpeller::Make(
+                                 impeller::MakeTextFrameFromTextBlobSkia(blob)),
+                             x, y, dl_paints_[paint_id]);
 
           return;
         }
@@ -92,12 +95,13 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
         builder_->DrawPath(DlPath(transformed), dl_paints_[paint_id]);
         return;
       }
-      builder_->DrawTextFrame(impeller::MakeTextFrameFromTextBlobSkia(blob), x,
-                              y, dl_paints_[paint_id]);
+      builder_->DrawText(
+          DlTextImpeller::Make(impeller::MakeTextFrameFromTextBlobSkia(blob)),
+          x, y, dl_paints_[paint_id]);
       return;
     }
 #endif  // IMPELLER_SUPPORTS_RENDERING
-    builder_->DrawTextBlob(blob, x, y, dl_paints_[paint_id]);
+    builder_->DrawText(DlTextSkia::Make(blob), x, y, dl_paints_[paint_id]);
   }
 
   void drawTextShadow(const sk_sp<SkTextBlob>& blob,
@@ -114,12 +118,18 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
       DlBlurMaskFilter filter(DlBlurStyle::kNormal, blur_sigma, false);
       paint.setMaskFilter(&filter);
     }
+    std::shared_ptr<DlText> text;
+#if IMPELLER_SUPPORTS_RENDERING
     if (impeller_enabled_) {
-      builder_->DrawTextFrame(impeller::MakeTextFrameFromTextBlobSkia(blob), x,
-                              y, paint);
-      return;
+      text =
+          DlTextImpeller::Make(impeller::MakeTextFrameFromTextBlobSkia(blob));
+    } else {
+      text = DlTextSkia::Make(blob);
     }
-    builder_->DrawTextBlob(blob, x, y, paint);
+#else
+    text = DlTextSkia::Make(blob);
+#endif
+    builder_->DrawText(text, x, y, paint);
   }
 
   void drawRect(const SkRect& rect, const SkPaintOrID& paint) override {

@@ -8,6 +8,7 @@
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_op_flags.h"
 #include "flutter/display_list/dl_sampling_options.h"
+#include "flutter/display_list/dl_text_skia.h"
 #include "flutter/display_list/effects/color_filters/dl_matrix_color_filter.h"
 #include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/display_list/geometry/dl_geometry_conversions.h"
@@ -23,7 +24,8 @@
 #include "flutter/testing/display_list_testing.h"
 #include "flutter/testing/testing.h"
 #ifdef IMPELLER_SUPPORTS_RENDERING
-#include "flutter/impeller/typographer/backends/skia/text_frame_skia.h"
+#include "flutter/impeller/display_list/dl_text_impeller.h"  // nogncheck
+#include "flutter/impeller/typographer/backends/skia/text_frame_skia.h"  // nogncheck
 #endif  // IMPELLER_SUPPORTS_RENDERING
 
 #include "third_party/skia/include/core/SkBBHFactory.h"
@@ -3869,8 +3871,10 @@ TEST_F(DisplayListRendering, DrawTextBlob) {
 #else
   sk_sp<SkTextBlob> blob =
       CanvasCompareTester::MakeTextBlob("Testing", kRenderHeight * 0.33f);
+  std::shared_ptr<DlText> skiaText = DlTextSkia::Make(blob);
 #ifdef IMPELLER_SUPPORTS_RENDERING
   auto frame = impeller::MakeTextFrameFromTextBlobSkia(blob);
+  std::shared_ptr<DlText> impellerText = DlTextImpeller::Make(frame);
 #endif  // IMPELLER_SUPPORTS_RENDERING
   DlScalar render_y_1_3 = kRenderTop + kRenderHeight * 0.3;
   DlScalar render_y_2_3 = kRenderTop + kRenderHeight * 0.6;
@@ -3884,19 +3888,22 @@ TEST_F(DisplayListRendering, DrawTextBlob) {
           },
           [=](const DlRenderContext& ctx) {
             auto paint = ctx.paint;
-            ctx.canvas->DrawTextBlob(blob, kRenderLeft, render_y_1_3, paint);
-            ctx.canvas->DrawTextBlob(blob, kRenderLeft, render_y_2_3, paint);
-            ctx.canvas->DrawTextBlob(blob, kRenderLeft, kRenderBottom, paint);
+            ctx.canvas->DrawText(skiaText, kRenderLeft, render_y_1_3, paint);
+            ctx.canvas->DrawText(skiaText, kRenderLeft, render_y_2_3, paint);
+            ctx.canvas->DrawText(skiaText, kRenderLeft, kRenderBottom, paint);
           },
 #ifdef IMPELLER_SUPPORTS_RENDERING
           [=](const DlRenderContext& ctx) {
             auto paint = ctx.paint;
-            ctx.canvas->DrawTextFrame(frame, kRenderLeft, render_y_1_3, paint);
-            ctx.canvas->DrawTextFrame(frame, kRenderLeft, render_y_2_3, paint);
-            ctx.canvas->DrawTextFrame(frame, kRenderLeft, kRenderBottom, paint);
+            ctx.canvas->DrawText(impellerText, kRenderLeft, render_y_1_3,
+                                 paint);
+            ctx.canvas->DrawText(impellerText, kRenderLeft, render_y_2_3,
+                                 paint);
+            ctx.canvas->DrawText(impellerText, kRenderLeft, kRenderBottom,
+                                 paint);
           },
 #endif  // IMPELLER_SUPPORTS_RENDERING
-          kDrawTextBlobFlags)
+          kDrawTextFlags)
           .set_draw_text_blob(),
       // From examining the bounds differential for the "Default" case, the
       // SkTextBlob adds a padding of ~32 on the left, ~30 on the right,

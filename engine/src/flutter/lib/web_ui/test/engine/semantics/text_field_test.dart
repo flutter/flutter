@@ -451,9 +451,9 @@ void testMain() {
           builder.updateNode(
             id: 1,
             flags: ui.SemanticsFlags(
-              isEnabled: true,
+              isEnabled: ui.Tristate.isTrue,
               isTextField: true,
-              isFocused: focusFieldId == 1,
+              isFocused: focusFieldId == 1 ? ui.Tristate.isTrue : ui.Tristate.isFalse,
             ),
             value: 'Hello',
 
@@ -462,9 +462,9 @@ void testMain() {
           builder.updateNode(
             id: 2,
             flags: ui.SemanticsFlags(
-              isEnabled: true,
+              isEnabled: ui.Tristate.isTrue,
               isTextField: true,
-              isFocused: focusFieldId == 2,
+              isFocused: focusFieldId == 2 ? ui.Tristate.isTrue : ui.Tristate.isFalse,
             ),
             value: 'World',
             rect: const ui.Rect.fromLTRB(0, 20, 50, 10),
@@ -530,13 +530,14 @@ SemanticsObject createTextFieldSemantics({
     label: label,
     value: value,
     flags: ui.SemanticsFlags(
-      isEnabled: isEnabled,
+      isEnabled: isEnabled ? ui.Tristate.isTrue : ui.Tristate.none,
       isTextField: true,
-      isFocused: isFocused,
+      isFocused: isFocused ? ui.Tristate.isTrue : ui.Tristate.isFalse,
       isMultiline: isMultiline,
       isObscured: isObscured,
-      hasRequiredState: isRequired != null,
-      isRequired: isRequired ?? false,
+      isRequired: isRequired == null
+          ? ui.Tristate.none
+          : (isRequired ? ui.Tristate.isTrue : ui.Tristate.isFalse),
     ),
     hasTap: true,
     rect: rect,

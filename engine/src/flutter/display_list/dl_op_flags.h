@@ -405,7 +405,7 @@ class DisplayListOpFlags : DisplayListFlags {
   static constexpr DisplayListAttributeFlags kDrawDisplayListFlags{
       kIgnoresPaint  //
   };
-  static constexpr DisplayListAttributeFlags kDrawTextBlobFlags{
+  static constexpr DisplayListAttributeFlags kDrawTextFlags{
       DisplayListAttributeFlags(kBasePaintFlags |         //
                                 kBaseStrokeOrFillFlags |  //
                                 kMayHaveJoins)            //

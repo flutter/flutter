@@ -178,6 +178,7 @@ class WebAssetServer implements AssetReader {
     BuildInfo buildInfo,
     bool enableDwds,
     bool enableDds,
+    int? ddsPort,
     Uri entrypoint,
     ExpressionCompiler? expressionCompiler, {
     required WebDevServerConfig webDevServerConfig,
@@ -362,6 +363,7 @@ class WebAssetServer implements AssetReader {
           useSseForInjectedClient: useSseForInjectedClient,
           expressionCompiler: expressionCompiler,
           spawnDds: enableDds,
+          ddsPort: ddsPort,
         ),
         appMetadata: AppMetadata(hostname: hostname),
       ),
