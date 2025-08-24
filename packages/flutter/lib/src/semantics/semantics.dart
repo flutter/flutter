@@ -2941,7 +2941,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   SemanticsNode? get parent => _parent;
   SemanticsNode? _parent;
 
-  /// The parent of this node in the semantics tree.
+  /// The real parent of this node in traversal order.
   ///
   /// If this node indicates an overlay portal child, this is its overlay portal
   /// parent node in traversal order. Otherwise, it is the same as [parent].
@@ -3185,8 +3185,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
   String? get traversalChildIdentifier => _traversalChildIdentifier;
   String? _traversalChildIdentifier;
 
-  bool get _isOverlayPortalParent => getSemanticsData().traversalParentIdentifier != null;
-  bool get _isOverlayPortalChild => getSemanticsData().traversalChildIdentifier != null;
+  bool get _isTraversalParent => getSemanticsData().traversalParentIdentifier != null;
+  bool get _isTraversalChild => getSemanticsData().traversalChildIdentifier != null;
 
   /// A textual description of this node.
   ///
@@ -3733,7 +3733,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   static final Int32List _kEmptyCustomSemanticsActionsList = Int32List(0);
   static final Float64List _kIdentityTransform = _initIdentityTransform();
 
-  static Matrix4 _computeChildGeometry({
+  static Matrix4 _computeChildTransform({
     required Matrix4? parentTransform,
     required Rect? parentPaintClipRect,
     required Rect? parentSemanticsClipRect,
@@ -3795,7 +3795,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   }
 
   void _addToUpdate(SemanticsUpdateBuilder builder, Set<int> customSemanticsActionIdsUpdate) {
-    assert(_dirty || _isOverlayPortalParent);
+    assert(_dirty || _isTraversalParent);
     final SemanticsData data = getSemanticsData();
     assert(() {
       final FlutterError? error = _DebugSemanticsRoleChecks._checkSemanticsData(this);
@@ -3807,7 +3807,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     final Int32List childrenInTraversalOrder;
     final Int32List childrenInHitTestOrder;
     if (!hasChildren || mergeAllDescendantsIntoThisNode) {
-      if (_isOverlayPortalParent) {
+      if (_isTraversalParent) {
         childrenInTraversalOrder = _childrenIdInTraversalOrder();
         childrenInHitTestOrder = _kEmptyChildList;
       } else {
@@ -3834,9 +3834,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
       }
     }
 
-    if (_isOverlayPortalChild) {
-      traversalOwner = owner!._overlayPortalParentNodes[traversalChildIdentifier];
-      transform = _computeChildGeometry(
+    if (_isTraversalChild) {
+      traversalOwner = owner!._traversalParentNodes[traversalChildIdentifier];
+      transform = _computeChildTransform(
         parentPaintClipRect: traversalOwner!.parentPaintClipRect,
         parentSemanticsClipRect: traversalOwner!.parentSemanticsClipRect,
         parentTransform: null,
@@ -3847,7 +3847,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
     int? traversalOwnerId;
     if (data.traversalChildIdentifier != null) {
-      traversalOwnerId = owner!._overlayPortalParentNodes[data.traversalChildIdentifier]?.id;
+      traversalOwnerId = owner!._traversalParentNodes[data.traversalChildIdentifier]?.id;
     }
 
     builder.updateNode(
@@ -3911,7 +3911,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
     final List<SemanticsNode> updatedChildren = <SemanticsNode>[];
     for (final SemanticsNode child in _children!) {
-      if (child._isOverlayPortalChild && !_isOverlayPortalParent) {
+      if (child._isTraversalChild && !_isTraversalParent) {
         // If the child node is an overlay portal child, but the current node is
         // not an overlay portal parent, it means the child node should be
         // grafted to be a child of an overlay portal parent node that has the
@@ -3925,12 +3925,12 @@ class SemanticsNode with DiagnosticableTreeMixin {
     }
 
     // If the current node is an overlay portal parent, get the according overlay
-    // portal child from _overlayPortalChildNodes and add it to the children list
+    // portal child from _traversalChildNodes and add it to the children list
     // of this current node.
-    if (_isOverlayPortalParent) {
-      if (owner != null && owner!._overlayPortalChildNodes.containsKey(traversalParentIdentifier)) {
+    if (_isTraversalParent) {
+      if (owner != null && owner!._traversalChildNodes.containsKey(traversalParentIdentifier)) {
         final SemanticsNode overlayChildNode =
-            owner!._overlayPortalChildNodes[traversalParentIdentifier]!;
+            owner!._traversalChildNodes[traversalParentIdentifier]!;
         if (overlayChildNode.attached) {
           updatedChildren.add(overlayChildNode);
         }
@@ -4520,8 +4520,8 @@ class SemanticsOwner extends ChangeNotifier {
   final Set<SemanticsNode> _dirtyNodes = <SemanticsNode>{};
   final Map<int, SemanticsNode> _nodes = <int, SemanticsNode>{};
   final Set<SemanticsNode> _detachedNodes = <SemanticsNode>{};
-  final Map<String, SemanticsNode> _overlayPortalParentNodes = <String, SemanticsNode>{};
-  final Map<String, SemanticsNode> _overlayPortalChildNodes = <String, SemanticsNode>{};
+  final Map<String, SemanticsNode> _traversalParentNodes = <String, SemanticsNode>{};
+  final Map<String, SemanticsNode> _traversalChildNodes = <String, SemanticsNode>{};
 
   /// The root node of the semantics tree, if any.
   ///
@@ -4634,23 +4634,22 @@ class SemanticsOwner extends ChangeNotifier {
     final List<SemanticsNode> updatedVisitedNodes = <SemanticsNode>[];
 
     for (final SemanticsNode node in visitedNodes) {
-      final bool isOverlayPortalParent = node._isOverlayPortalParent;
-      final bool isOverlayPortalChild = node._isOverlayPortalChild;
+      final bool isTraversalParent = node._isTraversalParent;
+      final bool isTraversalChild = node._isTraversalChild;
 
       if (kIsWeb) {
         updatedVisitedNodes.add(node);
       } else {
-        if (!isOverlayPortalParent && !isOverlayPortalChild) {
+        if (!isTraversalParent && !isTraversalChild) {
           updatedVisitedNodes.add(node);
           continue;
         }
 
-        if (isOverlayPortalChild) {
+        if (isTraversalChild) {
           // If the node is a child of an overlay portal, we add its parent
           // node in the `updatedVisitedNodes` list for later grafting to generate
           // a correct traversal order.
-          final SemanticsNode? parentNode =
-              _overlayPortalParentNodes[node.traversalChildIdentifier];
+          final SemanticsNode? parentNode = _traversalParentNodes[node.traversalChildIdentifier];
           if (parentNode != null && !updatedVisitedNodes.contains(parentNode)) {
             updatedVisitedNodes.add(parentNode);
           }
@@ -4660,18 +4659,18 @@ class SemanticsOwner extends ChangeNotifier {
       }
 
       // If the node is an overlay portal parent, then add it to the
-      // _overlayPortalParentNodes map. Similarly, add the node to the
-      // _overlayPortalChildNodes map if it is an overlay portal child.
-      if (isOverlayPortalParent) {
-        _overlayPortalParentNodes[node.traversalParentIdentifier!] = node;
-      } else if (isOverlayPortalChild) {
-        _overlayPortalChildNodes[node.traversalChildIdentifier!] = node;
+      // _traversalParentNodes map. Similarly, add the node to the
+      // _traversalChildNodes map if it is an overlay portal child.
+      if (isTraversalParent) {
+        _traversalParentNodes[node.traversalParentIdentifier!] = node;
+      } else if (isTraversalChild) {
+        _traversalChildNodes[node.traversalChildIdentifier!] = node;
       }
     }
 
     for (final SemanticsNode node in updatedVisitedNodes) {
       assert(
-        node.parent?._dirty != true || node._isOverlayPortalParent,
+        node.parent?._dirty != true || node._isTraversalParent,
       ); // could be null (no parent) or false (not dirty)
       // The _serialize() method marks the node as not dirty, and
       // recurses through the tree to do a deep serialization of all
@@ -4683,7 +4682,7 @@ class SemanticsOwner extends ChangeNotifier {
       // calls reset() on its SemanticsNode if onlyChanges isn't set,
       // which happens e.g. when the node is no longer contributing
       // semantics).
-      if ((node._dirty || node._isOverlayPortalParent) && node.attached) {
+      if ((node._dirty || node._isTraversalParent) && node.attached) {
         node._addToUpdate(builder, customSemanticsActionIds);
       }
     }
