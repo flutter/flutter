@@ -1,0 +1,64 @@
+import React, { useState, useEffect } from "react"; import { Card, CardContent } from "@/components/ui/card"; import { Button } from "@/components/ui/button"; import { Input } from "@/components/ui/input"; import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"; import { motion } from "framer-motion";
+
+export default function Tracker() { const [entries, setEntries] = useState(() => { const saved = localStorage.getItem("trackerEntries"); return saved ? JSON.parse(saved) : []; });
+
+const [caffeine, setCaffeine] = useState(0); const [sugar, setSugar] = useState(0);
+
+useEffect(() => { localStorage.setItem("trackerEntries", JSON.stringify(entries)); }, [entries]);
+
+const addEntry = () => { if (caffeine === 0 && sugar === 0) return; const newEntry = { caffeine: Number(caffeine), sugar: Number(sugar), time: new Date().toLocaleTimeString(), date: new Date().toLocaleDateString() }; setEntries([newEntry, ...entries]); setCaffeine(0); setSugar(0); };
+
+// Filter today's entries const today = new Date().toLocaleDateString(); const todayEntries = entries.filter(e => e.date === today);
+
+const totalCaffeine = todayEntries.reduce((sum, e) => sum + e.caffeine, 0); const totalSugar = todayEntries.reduce((sum, e) => sum + e.sugar, 0);
+
+const chartData = todayEntries.map((e, i) => ({ name: e.time, Caffeine: e.caffeine, Sugar: e.sugar })).reverse();
+
+return ( <div className="p-6 max-w-2xl mx-auto space-y-6"> <motion.h1 initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-2xl font-bold text-center" > ☕🍬 Caffeine & Sugar Tracker </motion.h1>
+
+<Card className="p-4">
+    <CardContent className="space-y-3">
+      <div className="flex gap-2">
+        <Input
+          type="number"
+          placeholder="Caffeine (mg)"
+          value={caffeine}
+          onChange={e => setCaffeine(e.target.value)}
+        />
+        <Input
+          type="number"
+          placeholder="Sugar (g)"
+          value={sugar}
+          onChange={e => setSugar(e.target.value)}
+        />
+        <Button onClick={addEntry}>Add</Button>
+      </div>
+
+      <div className="flex justify-around font-semibold">
+        <p>Total Caffeine: {totalCaffeine} mg</p>
+        <p>Total Sugar: {totalSugar} g</p>
+      </div>
+    </CardContent>
+  </Card>
+
+  <Card className="p-4">
+    <CardContent>
+      <h2 className="text-lg font-semibold mb-3">Today's Intake</h2>
+      {todayEntries.length === 0 ? (
+        <p className="text-gray-500">No entries yet.</p>
+      ) : (
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={chartData}>
+            <XAxis dataKey="name" />
+            <YAxis />
+            <Tooltip />
+            <Bar dataKey="Caffeine" fill="#3b82f6" radius={[6, 6, 0, 0]} />
+            <Bar dataKey="Sugar" fill="#f59e0b" radius={[6, 6, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      )}
+    </CardContent>
+  </Card>
+</div>
+
+); }
