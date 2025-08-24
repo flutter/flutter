@@ -4871,6 +4871,12 @@ mixin SemanticsAnnotationsMixin on RenderObject {
     if (_properties.identifier != null) {
       config.identifier = _properties.identifier!;
     }
+    if (_properties.traversalParentIdentifier != null) {
+      config.traversalParentIdentifier = _properties.traversalParentIdentifier;
+    }
+    if (_properties.traversalChildIdentifier != null) {
+      config.traversalChildIdentifier = _properties.traversalChildIdentifier;
+    }
     if (_attributedLabel != null) {
       config.attributedLabel = _attributedLabel!;
     }
