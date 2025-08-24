@@ -1031,7 +1031,10 @@ class SemanticsData with Diagnosticable {
   /// {@macro flutter.semantics.SemanticsProperties.identifier}
   final String identifier;
 
+  /// {@macro flutter.semantics.SemanticsProperties.traversalParentIdentifier}
   final String? traversalParentIdentifier;
+
+  /// {@macro flutter.semantics.SemanticsProperties.traversalChildIdentifier}
   final String? traversalChildIdentifier;
 
   /// A textual description for the current label of the node.
@@ -1873,8 +1876,38 @@ class SemanticsProperties extends DiagnosticableTree {
   /// {@endtemplate}
   final String? identifier;
 
+  /// {@template flutter.semantics.SemanticsProperties.traversalParentIdentifier}
+  /// Provides an identifier for establishing parent-child relationships in the semantics
+  /// traversal tree.
+  ///
+  /// This property is used to create a logical parent-child relationship between
+  /// semantics nodes that may not be directly connected in the widget tree. It's
+  /// primarily used with [OverlayPortal] to ensure proper accessibility traversal
+  /// order when overlay content needs to be semantically connected to its parent
+  /// widget.
+  ///
+  /// When a semantics node has a [traversalParentIdentifier], it indicates that
+  /// this node can act as a parent for other nodes that reference this identifier
+  /// in their [traversalChildIdentifier]. This allows assistive technologies
+  /// to navigate the UI in the correct logical order.
+  /// {@endtemplate}
   final String? traversalParentIdentifier;
 
+  /// {@template flutter.semantics.SemanticsProperties.traversalChildIdentifier}
+  /// Provides an identifier for establishing parent-child relationships in the semantics
+  /// traversal tree.
+  ///
+  /// This property is used to create a logical parent-child relationship between
+  /// semantics nodes that may not be directly connected in the widget tree. It's
+  /// primarily used with [OverlayPortal] to ensure proper accessibility traversal
+  /// order when overlay content needs to be semantically connected to its parent
+  /// widget.
+  ///
+  /// When a semantics node has a [traversalChildIdentifier], it indicates that
+  /// this node should be treated as a child of another node that has this same
+  /// identifier as its [traversalParentIdentifier]. This allows assistive technologies
+  /// to navigate the UI in the correct logical order.
+  /// {@endtemplate}
   final String? traversalChildIdentifier;
 
   /// Provides a textual description of the widget.
@@ -3144,9 +3177,11 @@ class SemanticsNode with DiagnosticableTreeMixin {
   String get identifier => _identifier;
   String _identifier = _kEmptyConfig.identifier;
 
+  /// {@macro flutter.semantics.SemanticsProperties.traversalParentIdentifier}
   String? get traversalParentIdentifier => _traversalParentIdentifier;
   String? _traversalParentIdentifier;
 
+  /// {@macro flutter.semantics.SemanticsProperties.traversalChildIdentifier}
   String? get traversalChildIdentifier => _traversalChildIdentifier;
   String? _traversalChildIdentifier;
 
@@ -5530,6 +5565,7 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
+  /// {@macro flutter.semantics.SemanticsProperties.traversalParentIdentifier}
   String? get traversalParentIdentifier => _traversalParentIdentifier;
   String? _traversalParentIdentifier;
   set traversalParentIdentifier(String? value) {
@@ -5537,6 +5573,7 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
+  /// {@macro flutter.semantics.SemanticsProperties.traversalChildIdentifier}
   String? get traversalChildIdentifier => _traversalChildIdentifier;
   String? _traversalChildIdentifier;
   set traversalChildIdentifier(String? value) {
