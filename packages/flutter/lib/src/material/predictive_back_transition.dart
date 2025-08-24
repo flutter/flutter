@@ -126,7 +126,7 @@ class PredictiveBackSharedElementTransition extends StatelessWidget {
 
   double _calcScale() => 1 - (1 - _kMinScale) * _gestureProgress;
 
-  Matrix4 _createTransformMatrix(BuildContext context, double animationValue) {
+  Matrix4 _createTransformMatrix(BuildContext context) {
     final double scale = _calcScale();
     final double xShift = useXShift ? _calcXShift(context) : 0;
     final double yShift = useYShift ? _calcYShift(context) : 0;
@@ -141,7 +141,7 @@ class PredictiveBackSharedElementTransition extends StatelessWidget {
     return MatrixTransition(
       animation: progress,
       alignment: alignment ?? Alignment.center,
-      onTransform: (double animationValue) => _createTransformMatrix(context, animationValue),
+      onTransform: (_) => _createTransformMatrix(context),
       child: child,
     );
   }
