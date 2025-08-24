@@ -3800,7 +3800,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     }
 
     if (_isOverlayPortalChild) {
-      traversalOwner = owner!._overlayPortalParentNodes[traversalParentIdentifier];
+      traversalOwner = owner!._overlayPortalParentNodes[traversalChildIdentifier];
       transform = _computeChildGeometry(
         parentPaintClipRect: traversalOwner!.parentPaintClipRect,
         parentSemanticsClipRect: traversalOwner!.parentSemanticsClipRect,
@@ -4064,10 +4064,10 @@ class SemanticsNode with DiagnosticableTreeMixin {
     properties.add(FlagProperty('isHidden', value: flagsCollection.isHidden, ifTrue: 'HIDDEN'));
     properties.add(StringProperty('identifier', _identifier, defaultValue: ''));
     properties.add(
-      StringProperty('traveralParentIdentifier', traversalParentIdentifier, defaultValue: null),
+      StringProperty('traversalParentIdentifier', traversalParentIdentifier, defaultValue: null),
     );
     properties.add(
-      StringProperty('traveralChildIdentifier', traversalChildIdentifier, defaultValue: null),
+      StringProperty('traversalChildIdentifier', traversalChildIdentifier, defaultValue: null),
     );
     properties.add(AttributedStringProperty('label', _attributedLabel));
     properties.add(AttributedStringProperty('value', _attributedValue));
@@ -6408,6 +6408,8 @@ class SemanticsConfiguration {
       .._textDirection = _textDirection
       .._sortKey = _sortKey
       .._identifier = _identifier
+      .._traversalParentIdentifier = _traversalParentIdentifier
+      .._traversalChildIdentifier = _traversalChildIdentifier
       .._attributedLabel = _attributedLabel
       .._attributedIncreasedValue = _attributedIncreasedValue
       .._attributedValue = _attributedValue
