@@ -24,7 +24,7 @@ void main() {
     const StadiumBorder c10 = StadiumBorder(side: BorderSide(width: 10.0));
     const StadiumBorder c15 = StadiumBorder(side: BorderSide(width: 15.0));
     const StadiumBorder c20 = StadiumBorder(side: BorderSide(width: 20.0));
-    expect(c10.dimensions, const EdgeInsets.all(10.0));
+    expect(c10.dimensions, EdgeInsets.zero);
     expect(c10.scale(2.0), c20);
     expect(c20.scale(0.5), c10);
     expect(ShapeBorder.lerp(c10, c20, 0.0), c10);
@@ -49,14 +49,16 @@ void main() {
   });
 
   test('StadiumBorder with StrokeAlign', () {
+    const StadiumBorder inside = StadiumBorder(side: BorderSide(width: 10.0));
     const StadiumBorder center = StadiumBorder(
       side: BorderSide(width: 10.0, strokeAlign: BorderSide.strokeAlignCenter),
     );
     const StadiumBorder outside = StadiumBorder(
       side: BorderSide(width: 10.0, strokeAlign: BorderSide.strokeAlignOutside),
     );
+    expect(inside.dimensions, EdgeInsets.zero);
     expect(center.dimensions, const EdgeInsets.all(5.0));
-    expect(outside.dimensions, EdgeInsets.zero);
+    expect(outside.dimensions, const EdgeInsets.all(10.0));
 
     const Rect rect = Rect.fromLTRB(10.0, 20.0, 100.0, 200.0);
 
