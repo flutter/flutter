@@ -1,0 +1,237 @@
+import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+void main() {
+  runApp(const JobApp());
+}
+
+class JobApp extends StatefulWidget {
+  const JobApp({super.key});
+
+  @override
+  State<JobApp> createState() => _JobAppState();
+}
+
+class _JobAppState extends State<JobApp> {
+  bool isHindi = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: "SS Solution Services",
+      theme: ThemeData(primarySwatch: Colors.indigo),
+      home: HomeScreen(
+        isHindi: isHindi,
+        onToggleLang: () {
+          setState(() {
+            isHindi = !isHindi;
+          });
+        },
+      ),
+    );
+  }
+}
+
+class HomeScreen extends StatelessWidget {
+  final bool isHindi;
+  final VoidCallback onToggleLang;
+
+  const HomeScreen({super.key, required this.isHindi, required this.onToggleLang});
+
+  final List<Map<String, String>> videos = [
+    {
+      "title": "Flipkart Delivery Boy Jobs - Jaipur",
+      "thumbnail": "https://img.youtube.com/vi/ysz5S6PUM-U/0.jpg",
+      "url": "https://www.youtube.com/watch?v=ysz5S6PUM-U"
+    },
+    {
+      "title": "Amazon Warehouse Jobs - Delhi",
+      "thumbnail": "https://img.youtube.com/vi/ScMzIvxBSi4/0.jpg",
+      "url": "https://www.youtube.com/watch?v=ScMzIvxBSi4"
+    },
+  ];
+
+  final List<String> vacancyUpdates = [
+    "🔹 Flipkart Hiring in Jaipur - 12th Pass Eligible",
+    "🔹 Amazon Warehouse Jobs in Delhi - 10th/12th Pass",
+    "🔹 Paytm Customer Support Jobs in Noida",
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(isHindi ? "SS सॉल्यूशन सर्विसेज़" : "SS Solution Services"),
+        actions: [
+          IconButton(
+            onPressed: onToggleLang,
+            icon: const Icon(Icons.language),
+            tooltip: "Change Language",
+          ),
+        ],
+      ),
+      body: ListView(
+        children: [
+          // Vacancy Updates
+          Container(
+            padding: const EdgeInsets.all(10),
+            color: Colors.yellow[100],
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(isHindi ? "नवीनतम वैकेंसी" : "Latest Vacancies",
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 10),
+                for (var v in vacancyUpdates)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Text("• $v"),
+                  ),
+              ],
+            ),
+          ),
+
+          const Divider(),
+
+          // YouTube Video Thumbnails
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: Text(
+              isHindi ? "जॉब वीडियो" : "Job Videos",
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+          for (var video in videos)
+            Card(
+              margin: const EdgeInsets.all(8),
+              child: InkWell(
+                onTap: () async {
+                  final url = Uri.parse(video["url"]!);
+                  if (await canLaunchUrl(url)) {
+                    await launchUrl(url, mode: LaunchMode.externalApplication);
+                  }
+                },
+                child: Column(
+                  children: [
+                    Image.network(video["thumbnail"]!),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(video["title"]!,
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+          const Divider(),
+
+          // Apply Form Button
+          Center(
+            child: ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (_) => ApplyForm(isHindi: isHindi)));
+              },
+              icon: const Icon(Icons.app_registration),
+              label: Text(isHindi ? "आवेदन करें" : "Apply Now"),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class ApplyForm extends StatefulWidget {
+  final bool isHindi;
+  const ApplyForm({super.key, required this.isHindi});
+
+  @override
+  State<ApplyForm> createState() => _ApplyFormState();
+}
+
+class _ApplyFormState extends State<ApplyForm> {
+  final _formKey = GlobalKey<FormState>();
+
+  String name = "", mobile = "", dob = "", qualification = "", experience = "", company = "";
+  bool consent = false;
+
+  Future<void> launchUPIPayment() async {
+    final upiUrl = Uri.parse("upi://pay?pa=9509299870@ybl&pn=SSSolution&am=50&cu=INR");
+    if (await canLaunchUrl(upiUrl)) {
+      await launchUrl(upiUrl);
+    } else {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text("UPI App not found")));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.isHindi ? "आवेदन फॉर्म" : "Application Form"),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              TextFormField(
+                decoration: InputDecoration(labelText: widget.isHindi ? "नाम" : "Name"),
+                onSaved: (v) => name = v ?? "",
+              ),
+              TextFormField(
+                decoration: InputDecoration(labelText: widget.isHindi ? "मोबाइल नंबर" : "Mobile"),
+                keyboardType: TextInputType.phone,
+                onSaved: (v) => mobile = v ?? "",
+              ),
+              TextFormField(
+                decoration: InputDecoration(labelText: widget.isHindi ? "जन्म तिथि" : "Date of Birth"),
+                onSaved: (v) => dob = v ?? "",
+              ),
+              TextFormField(
+                decoration:
+                    InputDecoration(labelText: widget.isHindi ? "योग्यता" : "Qualification"),
+                onSaved: (v) => qualification = v ?? "",
+              ),
+              TextFormField(
+                decoration: InputDecoration(labelText: widget.isHindi ? "अनुभव" : "Experience"),
+                onSaved: (v) => experience = v ?? "",
+              ),
+              TextFormField(
+                decoration: InputDecoration(labelText: widget.isHindi ? "कंपनी" : "Company"),
+                onSaved: (v) => company = v ?? "",
+              ),
+              CheckboxListTile(
+                title: Text(widget.isHindi
+                    ? "मैं भुगतान और आवेदन से सहमत हूँ"
+                    : "I agree to payment & application"),
+                value: consent,
+                onChanged: (v) => setState(() => consent = v ?? false),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    _formKey.currentState!.save();
+                    if (!consent) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                          content: Text("Please accept consent before applying")));
+                      return;
+                    }
+                    launchUPIPayment();
+                  }
+                },
+                child: Text(widget.isHindi ? "पेमेंट करें और सबमिट करें" : "Pay & Submit"),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
