@@ -555,8 +555,10 @@ The relevant error-causing widget was:
       ], eagerError: true);
 
       // We should not have stopped on the original thread, but the new thread
-      // from after the restart.
-      expect(newThreadId, isNot(equals(originalThreadId)));
+      // from after the restart. However, the DAP reuses thread IDs once freed,
+      // so the new thread ID should match the original thread ID due to the
+      // original isolate being killed before the new one starts.
+      expect(newThreadId, equals(originalThreadId));
 
       await dap.client.terminate();
     });
