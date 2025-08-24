@@ -58,10 +58,11 @@ abstract class _MaterialProgressIndicator extends ProgressIndicator {
   /// {@template flutter.progress_indicator.ProgressIndicator.color}
   /// The progress indicator's color.
   ///
-  /// This is only used if [ProgressIndicator.valueColor] is null.
-  /// If [ProgressIndicator.color] is also null, then the ambient
-  /// [ProgressIndicatorThemeData.color] will be used. If that
-  /// is null then the current theme's [ColorScheme.primary] will
+  /// This is only used if [CircularProgressIndicator.valueColor] or
+  /// [LinearProgressIndicator.valueColor] is null. If
+  /// [CircularProgressIndicator.color] or [LinearProgressIndicator.color] is
+  /// also null, then the ambient [ProgressIndicatorThemeData.color] will be
+  /// used. If that is null then the current theme's [ColorScheme.primary] will
   /// be used by default.
   /// {@endtemplate}
   final Color? color;
