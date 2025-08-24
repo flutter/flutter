@@ -89,8 +89,8 @@ class PredictiveBackSharedElementTransition extends StatelessWidget {
       useInterpolation ? kCurve.transform(progress.value) : progress.value;
 
   double _calcXShift(BuildContext context) {
-    final RenderBox? renderObject = context.findRenderObject() as RenderBox?;
-    final double width = renderObject?.size.width ?? MediaQuery.widthOf(context);
+    final RenderObject? renderObject = context.findRenderObject();
+    final double width = renderObject is RenderBox ? renderObject.size.width : MediaQuery.widthOf(context);
 
     final double maxShift = (width / _kDivisionFactor) - _kMargin;
 
