@@ -31,6 +31,7 @@ void VsyncWaiterAndroid::AwaitVSync() {
       impeller::android::Choreographer::IsAvailableOnPlatform();
   if (use_choreographer) {
     auto* weak_this = new std::weak_ptr<VsyncWaiter>(shared_from_this());
+    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
     fml::TaskRunner::RunNowOrPostTask(
         task_runners_.GetUITaskRunner(), [weak_this]() {
           const auto& choreographer =
@@ -48,6 +49,7 @@ void VsyncWaiterAndroid::AwaitVSync() {
     // devices.
     auto* weak_this = new std::weak_ptr<VsyncWaiter>(shared_from_this());
     jlong java_baton = reinterpret_cast<jlong>(weak_this);
+    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
     task_runners_.GetPlatformTaskRunner()->PostTask([java_baton]() {
       JNIEnv* env = fml::jni::AttachCurrentThread();
       env->CallStaticVoidMethod(g_vsync_waiter_class->obj(),     //

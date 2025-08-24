@@ -1699,6 +1699,46 @@ void main() {
         expect(minuteSize.width, greaterThanOrEqualTo(48));
         expect(minuteSize.height, greaterThanOrEqualTo(48));
       });
+
+      testWidgets(
+        'Period selector touch target respects accessibility guidelines - Portrait mode',
+        (WidgetTester tester) async {
+          final SemanticsTester semantics = SemanticsTester(tester);
+          const Size minInteractiveSize = Size(kMinInteractiveDimension, kMinInteractiveDimension);
+
+          // Ensure picker is displayed in portrait mode.
+          tester.view.physicalSize = const Size(600, 1000);
+          addTearDown(tester.view.reset);
+
+          await mediaQueryBoilerplate(tester, materialType: materialType);
+
+          final SemanticsNode amButton = semantics.nodesWith(label: amString).single;
+          expect(amButton.rect.size >= minInteractiveSize, isTrue);
+
+          final SemanticsNode pmButton = semantics.nodesWith(label: pmString).single;
+          expect(pmButton.rect.size >= minInteractiveSize, isTrue);
+
+          semantics.dispose();
+        },
+      );
+
+      testWidgets(
+        'Period selector touch target respects accessibility guidelines - Landscape mode',
+        (WidgetTester tester) async {
+          final SemanticsTester semantics = SemanticsTester(tester);
+          const Size minInteractiveSize = Size(kMinInteractiveDimension, kMinInteractiveDimension);
+
+          await mediaQueryBoilerplate(tester, materialType: materialType);
+
+          final SemanticsNode amButton = semantics.nodesWith(label: amString).single;
+          expect(amButton.rect.size >= minInteractiveSize, isTrue);
+
+          final SemanticsNode pmButton = semantics.nodesWith(label: pmString).single;
+          expect(pmButton.rect.size >= minInteractiveSize, isTrue);
+
+          semantics.dispose();
+        },
+      );
     });
 
     group('Time picker - Input (${materialType.name})', () {
@@ -2273,6 +2313,89 @@ void main() {
         expect(result, equals(const TimeOfDay(hour: 6, minute: 45)));
       });
     });
+
+    group('Time picker - emptyInitialInput (${materialType.name})', () {
+      testWidgets('Fields are empty and show correct hints when emptyInitialInput is true', (
+        WidgetTester tester,
+      ) async {
+        await startPicker(
+          tester,
+          (_) {},
+          entryMode: TimePickerEntryMode.input,
+          materialType: materialType,
+          emptyInitialInput: true,
+        );
+        await tester.pump();
+
+        final List<TextField> textFields = tester
+            .widgetList<TextField>(find.byType(TextField))
+            .toList();
+
+        expect(textFields[0].controller?.text, isEmpty); // hour
+        expect(textFields[1].controller?.text, isEmpty); // minute
+        expect(textFields[0].decoration?.hintText, isNull);
+        expect(textFields[1].decoration?.hintText, isNull);
+        await finishPicker(tester);
+      });
+
+      testWidgets('User sets hour/minute after initially empty fields', (
+        WidgetTester tester,
+      ) async {
+        late TimeOfDay result;
+        await startPicker(
+          tester,
+          (TimeOfDay? time) {
+            result = time!;
+          },
+          entryMode: TimePickerEntryMode.input,
+          materialType: materialType,
+          emptyInitialInput: true,
+        );
+
+        final List<TextField> textFields = tester
+            .widgetList<TextField>(find.byType(TextField))
+            .toList();
+
+        expect(textFields[0].controller?.text, isEmpty); // hour
+        expect(textFields[1].controller?.text, isEmpty); // minute
+        expect(textFields[0].decoration?.hintText, isNull);
+        expect(textFields[1].decoration?.hintText, isNull);
+
+        await tester.enterText(find.byType(TextField).first, '11');
+        await tester.enterText(find.byType(TextField).last, '30');
+        await finishPicker(tester);
+
+        expect(result, equals(const TimeOfDay(hour: 11, minute: 30)));
+      });
+
+      testWidgets('User overrides default values when emptyInitialInput is false', (
+        WidgetTester tester,
+      ) async {
+        late TimeOfDay result;
+        await startPicker(
+          tester,
+          (TimeOfDay? time) {
+            result = time!;
+          },
+          entryMode: TimePickerEntryMode.input,
+          materialType: materialType,
+        );
+
+        final List<TextField> textFields = tester
+            .widgetList<TextField>(find.byType(TextField))
+            .toList();
+
+        expect(textFields[0].controller?.text, '7'); // hour
+        expect(textFields[1].controller?.text, '00'); // minute
+
+        await tester.enterText(find.byType(TextField).first, '8');
+        await tester.enterText(find.byType(TextField).last, '15');
+        await tester.pump();
+        await finishPicker(tester);
+
+        expect(result, equals(const TimeOfDay(hour: 8, minute: 15)));
+      });
+    });
   }
 
   testWidgets('Material3 - Time selector separator default text style', (
@@ -2407,8 +2530,9 @@ void main() {
     (WidgetTester tester) async {
       addTearDown(tester.view.reset);
 
-      final Finder dayPeriodControlFinder = find.byWidgetPredicate(
-        (Widget w) => '${w.runtimeType}' == '_DayPeriodControl',
+      final Finder amMaterialFinder = find.descendant(
+        of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_AmPmButton').first,
+        matching: find.byType(Material),
       );
       final Finder timeControlFinder = find
           .ancestor(of: find.text('7'), matching: find.byType(Row))
@@ -2423,10 +2547,10 @@ void main() {
         locale: const Locale('ko', 'KR'),
       );
 
+      const double dayPeriodPortraitGap = 12.0; // From Material spec.
       expect(
-        tester.getBottomLeft(timeControlFinder).dx -
-            tester.getBottomRight(dayPeriodControlFinder).dx,
-        12,
+        tester.getBottomLeft(timeControlFinder).dx - tester.getBottomRight(amMaterialFinder).dx,
+        dayPeriodPortraitGap,
       );
 
       // Dismiss the dialog.
@@ -2445,9 +2569,10 @@ void main() {
         locale: const Locale('ko', 'KR'),
       );
 
+      const double dayPeriodLandscapeGap = 16.0; // From Material spec.
       expect(
-        tester.getTopLeft(timeControlFinder).dy - tester.getBottomLeft(dayPeriodControlFinder).dy,
-        12,
+        tester.getTopLeft(timeControlFinder).dy - tester.getBottomLeft(amMaterialFinder).dy,
+        dayPeriodLandscapeGap,
       );
     },
   );
@@ -2569,6 +2694,7 @@ class _TimePickerLauncher extends StatefulWidget {
     this.restorationId,
     this.cancelText,
     this.confirmText,
+    required this.emptyInitialInput,
   });
 
   final ValueChanged<TimeOfDay?> onChanged;
@@ -2576,6 +2702,7 @@ class _TimePickerLauncher extends StatefulWidget {
   final String? restorationId;
   final String? cancelText;
   final String? confirmText;
+  final bool emptyInitialInput;
 
   @override
   _TimePickerLauncherState createState() => _TimePickerLauncherState();
@@ -2653,6 +2780,7 @@ class _TimePickerLauncherState extends State<_TimePickerLauncher> with Restorati
                       context: context,
                       initialTime: const TimeOfDay(hour: 7, minute: 0),
                       initialEntryMode: widget.entryMode,
+                      emptyInitialInput: widget.emptyInitialInput,
                     ),
                   );
                 } else {
@@ -2682,6 +2810,7 @@ Future<Offset?> startPicker(
   MaterialType? materialType,
   String? cancelText,
   String? confirmText,
+  bool emptyInitialInput = false,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
@@ -2694,6 +2823,7 @@ Future<Offset?> startPicker(
         restorationId: restorationId,
         cancelText: cancelText,
         confirmText: confirmText,
+        emptyInitialInput: emptyInitialInput,
       ),
     ),
   );
