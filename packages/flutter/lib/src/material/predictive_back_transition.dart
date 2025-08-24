@@ -102,8 +102,8 @@ class PredictiveBackSharedElementTransition extends StatelessWidget {
   }
 
   double _calcYShift(BuildContext context) {
-    final RenderBox? renderObject = context.findRenderObject() as RenderBox?;
-    final double height = renderObject?.size.height ?? MediaQuery.heightOf(context);
+    final RenderObject? renderObject = context.findRenderObject();
+    final double height = renderObject is RenderBox ? renderObject.size.height : MediaQuery.heightOf(context);
 
     final double startTouchY = startBackEvent?.touchOffset?.dy ?? 0;
     final double currentTouchY = currentBackEvent?.touchOffset?.dy ?? 0;
