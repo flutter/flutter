@@ -14,6 +14,7 @@ import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -1342,6 +1343,13 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
         onInvoke: (ButtonActivateIntent intent) => _handleTap(),
       ),
     };
+    if (widget._inputDecoration == null) {
+      // Used to detect whether a mouse or keyboard is being used. When a mouse is used
+      // it should hide its focus color, similar to what InkWell does by default for
+      // touch devices. When a keyboard is being used the focus color should be shown.
+      GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
+      HardwareKeyboard.instance.addHandler(_handleKeyMessage);
+    }
     focusNode.addListener(_handleFocusChanged);
   }
 
@@ -1351,7 +1359,49 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     _removeDropdownRoute();
     focusNode.removeListener(_handleFocusChanged);
     _internalNode?.dispose();
+    if (widget._inputDecoration == null) {
+      GestureBinding.instance.pointerRouter.removeGlobalRoute(_handlePointerEvent);
+      HardwareKeyboard.instance.removeHandler(_handleKeyMessage);
+    }
     super.dispose();
+  }
+
+  // Whether the current pointer is a mouse or trackpad.
+  bool _isTraditionalPointer = false;
+
+  void _handlePointerEvent(PointerEvent event) {
+    final bool hasFocus = focusNode.hasPrimaryFocus || focusNode.hasFocus;
+    if (!hasFocus && _dropdownRoute == null) {
+      return;
+    }
+
+    switch (event.kind) {
+      case PointerDeviceKind.mouse:
+      case PointerDeviceKind.trackpad:
+      case PointerDeviceKind.unknown:
+        if (!_isTraditionalPointer) {
+          setState(() {
+            _isTraditionalPointer = true;
+          });
+        }
+      case PointerDeviceKind.touch:
+      case PointerDeviceKind.stylus:
+      case PointerDeviceKind.invertedStylus:
+        if (_isTraditionalPointer) {
+          setState(() {
+            _isTraditionalPointer = false;
+          });
+        }
+    }
+  }
+
+  bool _handleKeyMessage(KeyEvent event) {
+    if (_isTraditionalPointer) {
+      setState(() {
+        _isTraditionalPointer = false;
+      });
+    }
+    return false;
   }
 
   void _handleFocusChanged() {
@@ -1704,6 +1754,12 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
         ),
       );
     } else {
+      // Hide focus color when using a mouse.
+      final Color focusColor = widget.focusColor ?? Theme.of(context).focusColor;
+      final int focusAlpha = (focusColor.a * 255.0).round() & 0xff;
+      final Color effectiveFocusColor = focusColor.withAlpha(
+        _isTraditionalPointer ? 0 : focusAlpha,
+      );
       result = InkWell(
         mouseCursor: effectiveMouseCursor,
         onTap: _enabled ? _handleTap : null,
@@ -1711,7 +1767,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
         borderRadius: widget.borderRadius,
         focusNode: focusNode,
         autofocus: widget.autofocus,
-        focusColor: widget.focusColor ?? Theme.of(context).focusColor,
+        focusColor: effectiveFocusColor,
         enableFeedback: false,
         child: widget.padding == null ? result : Padding(padding: widget.padding!, child: result),
       );
