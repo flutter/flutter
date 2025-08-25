@@ -25,7 +25,7 @@ void testMain() {
       expect(recorder, isA<CkPictureRecorder>());
 
       final ui.Canvas canvas = ui.Canvas(recorder);
-      expect(canvas, isA<CanvasKitCanvas>());
+      expect(canvas, isA<CkCanvas>());
 
       final ui.Paint paint = ui.Paint();
       expect(paint, isA<CkPaint>());
