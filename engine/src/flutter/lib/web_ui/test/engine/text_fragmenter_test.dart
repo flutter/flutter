@@ -9,15 +9,11 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 
-import 'common.dart';
-
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
 void testMain() {
-  setUpCanvasKitTest();
-
   group('$fragmentUsingIntlSegmenter', () {
     test('fragments text into words', () {
       final Uint32List breaks = fragmentUsingIntlSegmenter(
