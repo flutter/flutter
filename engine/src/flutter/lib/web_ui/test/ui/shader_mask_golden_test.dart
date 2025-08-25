@@ -3,12 +3,15 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:web_engine_tester/golden_tester.dart';
 
-import 'common.dart';
+import '../common/rendering.dart';
+import '../common/test_initialization.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -18,27 +21,27 @@ const ui.Rect region = ui.Rect.fromLTRB(0, 0, 500, 250);
 
 void testMain() {
   group('ShaderMask', () {
-    setUpCanvasKitTest(withImplicitView: true);
+    setUpUnitTests(withImplicitView: true);
 
     test('Renders sweep gradient with color blend', () async {
-      final LayerSceneBuilder builder = LayerSceneBuilder();
+      final ui.SceneBuilder builder = ui.SceneBuilder();
 
       builder.pushOffset(0, 0);
 
       // Draw a red circle and apply it to the scene.
-      final CkPictureRecorder recorder = CkPictureRecorder();
-      final CkCanvas canvas = recorder.beginRecording(region);
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final ui.Canvas canvas = ui.Canvas(recorder, region);
 
       canvas.drawCircle(
         const ui.Offset(425, 125),
         50,
-        CkPaint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
+        ui.Paint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
       );
-      final CkPicture redCircle = recorder.endRecording();
+      final ui.Picture redCircle = recorder.endRecording();
 
       builder.addPicture(ui.Offset.zero, redCircle);
 
-      final CkGradientSweep shader = CkGradientSweep(
+      final ui.Gradient shader = ui.Gradient.sweep(
         const ui.Offset(250, 125),
         const <ui.Color>[
           ui.Color(0xFF4285F4),
@@ -51,7 +54,6 @@ void testMain() {
         ui.TileMode.clamp,
         -(math.pi / 2),
         math.pi * 2 - (math.pi / 2),
-        null,
       );
 
       final ui.Path clipPath = ui.Path()..addOval(const ui.Rect.fromLTWH(25, 75, 100, 100));
@@ -62,41 +64,43 @@ void testMain() {
 
       // Draw another red circle and apply it to the scene.
       // This one should be grey since we have the color filter.
-      final CkPictureRecorder recorder2 = CkPictureRecorder();
-      final CkCanvas canvas2 = recorder2.beginRecording(region);
+      final ui.PictureRecorder recorder2 = ui.PictureRecorder();
+      final ui.Canvas canvas2 = ui.Canvas(recorder2, region);
 
       canvas2.drawRect(
         const ui.Rect.fromLTWH(25, 75, 100, 100),
-        CkPaint()..color = const ui.Color.fromARGB(255, 0, 255, 0),
+        ui.Paint()..color = const ui.Color.fromARGB(255, 0, 255, 0),
       );
 
-      final CkPicture sweepCircle = recorder2.endRecording();
+      final ui.Picture sweepCircle = recorder2.endRecording();
 
       builder.addPicture(ui.Offset.zero, sweepCircle);
 
-      await matchSceneGolden('canvaskit_shadermask_linear.png', builder.build(), region: region);
+      await renderScene(builder.build());
+
+      await matchGoldenFile('ui_shadermask_linear.png', region: region);
     });
 
     /// Regression test for https://github.com/flutter/flutter/issues/78959
     test('Renders sweep gradient with color blend translated', () async {
-      final LayerSceneBuilder builder = LayerSceneBuilder();
+      final ui.SceneBuilder builder = ui.SceneBuilder();
 
       builder.pushOffset(0, 0);
 
       // Draw a red circle and apply it to the scene.
-      final CkPictureRecorder recorder = CkPictureRecorder();
-      final CkCanvas canvas = recorder.beginRecording(region);
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final ui.Canvas canvas = ui.Canvas(recorder, region);
 
       canvas.drawCircle(
         const ui.Offset(425, 125),
         50,
-        CkPaint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
+        ui.Paint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
       );
-      final CkPicture redCircle = recorder.endRecording();
+      final ui.Picture redCircle = recorder.endRecording();
 
       builder.addPicture(ui.Offset.zero, redCircle);
 
-      final CkGradientSweep shader = CkGradientSweep(
+      final ui.Gradient shader = ui.Gradient.sweep(
         const ui.Offset(250, 125),
         const <ui.Color>[
           ui.Color(0xFF4285F4),
@@ -109,7 +113,6 @@ void testMain() {
         ui.TileMode.clamp,
         -(math.pi / 2),
         math.pi * 2 - (math.pi / 2),
-        null,
       );
 
       final ui.Path clipPath = ui.Path()..addOval(const ui.Rect.fromLTWH(25, 75, 100, 100));
@@ -120,23 +123,21 @@ void testMain() {
 
       // Draw another red circle and apply it to the scene.
       // This one should be grey since we have the color filter.
-      final CkPictureRecorder recorder2 = CkPictureRecorder();
-      final CkCanvas canvas2 = recorder2.beginRecording(region);
+      final ui.PictureRecorder recorder2 = ui.PictureRecorder();
+      final ui.Canvas canvas2 = ui.Canvas(recorder2, region);
 
       canvas2.drawRect(
         const ui.Rect.fromLTWH(25, 75, 100, 100),
-        CkPaint()..color = const ui.Color.fromARGB(255, 0, 255, 0),
+        ui.Paint()..color = const ui.Color.fromARGB(255, 0, 255, 0),
       );
 
-      final CkPicture sweepCircle = recorder2.endRecording();
+      final ui.Picture sweepCircle = recorder2.endRecording();
 
       builder.addPicture(ui.Offset.zero, sweepCircle);
 
-      await matchSceneGolden(
-        'canvaskit_shadermask_linear_translated.png',
-        builder.build(),
-        region: region,
-      );
+      await renderScene(builder.build());
+
+      await matchGoldenFile('ui_shadermask_linear_translated.png', region: region);
     });
     // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
   }, skip: isSafari || isFirefox);

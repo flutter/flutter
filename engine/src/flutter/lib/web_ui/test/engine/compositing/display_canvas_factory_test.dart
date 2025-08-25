@@ -6,7 +6,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 
-import 'common.dart';
+import '../../common/test_initialization.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -30,7 +30,7 @@ class DummyDisplayCanvas extends DisplayCanvas {
 
 void testMain() {
   group('$DisplayCanvasFactory', () {
-    setUpCanvasKitTest(withImplicitView: true);
+    setUpUnitTests(withImplicitView: true);
 
     test('getCanvas', () {
       final DisplayCanvasFactory<DisplayCanvas> factory = DisplayCanvasFactory<DisplayCanvas>(
@@ -90,7 +90,7 @@ void testMain() {
       final EngineFlutterView implicitView = EnginePlatformDispatcher.instance.implicitView!;
 
       final DisplayCanvasFactory<DisplayCanvas> originalFactory =
-          CanvasKitRenderer.instance.rasterizers[implicitView.viewId]!.displayFactory;
+          renderer.rasterizers[implicitView.viewId]!.displayFactory;
 
       // Cause the surface and its canvas to be attached to the page
       implicitView.dom.sceneHost.prepend(originalFactory.baseCanvas.hostElement);

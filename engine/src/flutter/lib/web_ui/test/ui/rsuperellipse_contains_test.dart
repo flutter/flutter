@@ -4,11 +4,10 @@
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 
-import 'common.dart';
+import '../common/test_initialization.dart';
 
 // Tests for `RSuperellipse.contains` are placed in the canvaskit folder instead
 // of the engine folder because `RSuperellipse.contains` is implemented with
@@ -23,10 +22,10 @@ void main() {
 
 void testMain() {
   group('RSuperellipse.contains', () {
-    setUpCanvasKitTest();
+    setUpUnitTests();
 
     tearDown(() {
-      CanvasKitRenderer.instance.debugClear();
+      renderer.debugClear();
     });
 
     test('RSuperellipse.contains is correct with no corners', () {

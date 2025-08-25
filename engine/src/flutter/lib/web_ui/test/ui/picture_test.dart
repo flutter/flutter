@@ -8,6 +8,7 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../common/test_initialization.dart';
+import 'utils.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -17,7 +18,7 @@ Future<void> testMain() async {
   setUpUnitTests();
 
   test('recorder and picture dispose underlying objects properly', () {
-    final ScenePictureRecorder recorder = ui.PictureRecorder() as ScenePictureRecorder;
+    final LayerPictureRecorder recorder = ui.PictureRecorder() as LayerPictureRecorder;
     final ui.Canvas canvas = ui.Canvas(recorder);
     const ui.Rect rect = ui.Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
     canvas.clipRect(rect);
@@ -32,7 +33,9 @@ Future<void> testMain() async {
 
     picture.dispose();
     expect(picture.debugDisposed, true);
-  });
+    // Unskip when Skwasm and CanvasKit are unified:
+    // https://github.com/flutter/flutter/issues/172311
+  }, skip: isSkwasm);
 
   test('Picture construction invokes onCreate once', () async {
     int onCreateInvokedCount = 0;
