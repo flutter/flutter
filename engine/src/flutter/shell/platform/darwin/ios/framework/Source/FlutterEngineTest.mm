@@ -5,6 +5,7 @@
 #import <Foundation/Foundation.h>
 #import <OCMock/OCMock.h>
 #import <XCTest/XCTest.h>
+#include "common/constants.h"
 
 #import <objc/runtime.h>
 
@@ -198,6 +199,20 @@ FLUTTER_ASSERT_ARC
   // Verify accessing the viewController getter calls FlutterEngine.viewController.
   (void)[registrar viewController];
   OCMVerify(times(1), [mockEngine viewController]);
+}
+
+- (void)testGetViewControllerByViewIDFromRegistrar {
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"engine" project:project];
+  id mockEngine = OCMPartialMock(engine);
+  NSObject<FlutterPluginRegistrar>* registrar = [mockEngine registrarForPlugin:@"plugin"];
+
+  // Getting the view controller of the implicit view.
+  (void)[registrar viewControllerForViewIdentifier:flutter::kFlutterImplicitViewId];
+  OCMVerify(times(1), [mockEngine viewController]);
+
+  // Getting any other view controller returns nil.
+  XCTAssertNil([registrar viewControllerForViewIdentifier:flutter::kFlutterImplicitViewId + 1]);
 }
 
 - (void)testSetBinaryMessengerToSameBinaryMessenger {

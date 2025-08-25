@@ -50,6 +50,39 @@ FLUTTER_DARWIN_EXPORT
 @property(nullable, readonly) NSView* view;
 
 /**
+ * The `NSViewController` that hosts |view|.
+ *
+ * The returned `NSViewController` may hold strong references to registered
+ * plugins. To prevent retain cycles, the plugin must not store a strong
+ * reference to this view controller.
+ *
+ * Consider using `-[FlutterPluginRegistrar viewControllerForViewIdentifier:]`
+ * when feasible. This property is provided for backwards compatibility for apps
+ * that assume a single view, and will eventually be replaced by the multi-view
+ * API variant.
+ *
+ * This property is |nil| when |view| is |nil|.
+ */
+@property(nullable, readonly) NSViewController* viewController;
+
+/**
+ * Returns the `NSViewController` whose view is displaying Flutter content and
+ * is associated with the given |viewIdentifier|, if any.
+ *
+ * The returned `NSViewController` may hold strong references to registered
+ * plugins. To prevent retain cycles, the plugin must not store a strong
+ * reference to that view controller.
+ *
+ * @param viewIdentifier The unique identifier for the view displaying Flutter
+ *   content. This is typically retrieved from the Widget tree using the Dart
+ *   API `View.of(context).viewID`.
+ * @return The `NSViewController` hosting the view, or |nil| when no Flutter view
+ *   with that |viewIdentifier| cannot be found. It also returns |nil| when in a
+ *   headless environment, or when the underlying Flutter engine is deallocated.
+ */
+- (nullable NSViewController*)viewControllerForViewIdentifier:(FlutterViewIdentifier)viewIdentifier;
+
+/**
  * Registers |delegate| to receive handleMethodCall:result: callbacks for the given |channel|.
  */
 - (void)addMethodCallDelegate:(nonnull id<FlutterPlugin>)delegate

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "common/constants.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
 
@@ -742,6 +743,26 @@ TEST_F(FlutterEngineTest, PublishedValueReturnsLastPublished) {
 
   [registrar publish:secondValue];
   EXPECT_EQ([engine valuePublishedByPlugin:pluginName], secondValue);
+}
+
+TEST_F(FlutterEngineTest, RegistrarForwardViewControllerLookUpToEngine) {
+  FlutterEngine* mockEngine = CreateMockFlutterEngine(nil);
+  __block FlutterViewIdentifier viewID = 0ll;
+
+  OCMStub([mockEngine viewControllerForViewIdentifier:[OCMArg any]])
+      .andDo((^(NSInvocation* invocation) {
+        FlutterViewIdentifier arg;
+        [invocation getArgument:&arg atIndex:2];
+        viewID = arg;
+      }));
+
+  id<FlutterPluginRegistrar> registrar = [mockEngine registrarForPlugin:pluginName];
+
+  [registrar viewControllerForViewIdentifier:3ll];
+  EXPECT_EQ(viewID, 3ll);
+
+  (void)[registrar viewController];
+  EXPECT_EQ(viewID, flutter::kFlutterImplicitViewId);
 }
 
 // If a channel overrides a previous channel with the same name, cleaning

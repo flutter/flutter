@@ -298,19 +298,39 @@ typedef enum {
 - (NSObject<FlutterTextureRegistry>*)textures;
 
 /**
- * Returns the `UIViewController` whose view is displaying Flutter content.
+ * The `UIViewController` whose view is displaying Flutter content.
  *
  * The returned `UIViewController` may hold strong references to registered
  * plugins. To prevent retain cycles, the plugin must not store a strong
  * reference to this view controller.
  *
- * This method is provided for backwards compatibility for apps that assume a
- * single view. This will eventually be replaced by a multi-view API variant.
+ * Consider using `-[FlutterPluginRegistrar viewControllerForViewIdentifier:]`
+ * when feasible. This property is provided for backwards compatibility for apps
+ * that assume a single view, and will eventually be replaced by the multi-view
+ * API variant.
  *
- * This method may return |nil|, for instance in a headless environment, or when
+ * This property may be |nil|, for instance in a headless environment, or when
  * the underlying Flutter engine is deallocated.
  */
-- (nullable UIViewController*)viewController;
+@property(nullable, readonly) UIViewController* viewController;
+
+/**
+ * Returns the `UIViewController` whose view is displaying Flutter content and
+ * is associated with the given |viewIdentifier|, if any.
+ *
+ * The returned `UIViewController` may hold strong references to registered
+ * plugins. To prevent retain cycles, the plugin must not store a strong
+ * reference to that view controller.
+ *
+ * @param viewIdentifier The unique identifier for the view displaying Flutter
+ *   content. This is typically retrieved from the Widget tree using the Dart
+ *   API `View.of(context).viewID`.
+ * @return The `UIViewController` hosting the view, or |nil| when no
+ *   Flutter view with that |viewIdentifier| cannot be found. It also returns
+ *   |nil| when in a headless environment, or when the underlying Flutter engine
+ *   is deallocated.
+ */
+- (nullable UIViewController*)viewControllerForViewIdentifier:(int64_t)viewIdentifier;
 
 /**
  * Registers a `FlutterPlatformViewFactory` for creation of platform views.
