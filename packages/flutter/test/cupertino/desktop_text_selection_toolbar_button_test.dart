@@ -127,4 +127,16 @@ void main() {
     final CupertinoButton button = tester.widget(find.byType(CupertinoButton));
     expect(button.enabled, isFalse);
   });
+
+  testWidgets('CupertinoDesktopTextSelectionToolbarButton renders at zero area', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: SizedBox.shrink(
+          child: CupertinoDesktopTextSelectionToolbarButton(onPressed: null, child: Text('X')),
+        ),
+      ),
+    );
+  });
 }
