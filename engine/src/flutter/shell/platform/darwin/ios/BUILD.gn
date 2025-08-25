@@ -55,6 +55,7 @@ source_set("InternalFlutterSwift") {
   sources = [
     "framework/Source/ConnectionCollection.swift",
     "framework/Source/UIPressProxy.swift",
+    "framework/Source/UITextInput+TextRange.swift",
   ]
   public = _flutter_framework_headers + framework_common_headers
 }
@@ -214,9 +215,13 @@ if (enable_ios_unittests) {
     testonly = true
     visibility = [ ":*" ]
     configs += [ "//flutter/shell/platform/darwin/common:test_config" ]
+    bridge_header = "framework/Source/SwiftTests-Bridging-Header.h"
+
     sources = [
       "framework/Source/ConnectionCollectionTest.swift",
       "framework/Source/FakeUIPressProxy.swift",
+      "framework/Source/UITextInputEditingStateTest+Utils.swift",
+      "framework/Source/UITextInputEditingStateTests.swift",
     ]
     frameworks = [ "XCTest.framework" ]
     deps = [ ":flutter_framework_source" ]
