@@ -573,52 +573,6 @@ static BOOL _preparedOnce = NO;
   return NO;
 }
 
-- (void)blockGesture {
-  switch (_blockingPolicy) {
-    case FlutterPlatformViewGestureRecognizersBlockingPolicyEager:
-      // We block all other gesture recognizers immediately in this policy.
-      self.delayingRecognizer.state = UIGestureRecognizerStateEnded;
-
-      // On iOS 18.2, WKWebView's internal recognizer likely caches the old state of its blocking
-      // recognizers (i.e. delaying recognizer), resulting in non-tappable links. See
-      // https://github.com/flutter/flutter/issues/158961. Removing and adding back the delaying
-      // recognizer solves the problem, possibly because UIKit notifies all the recognizers related
-      // to (blocking or blocked by) this recognizer. It is not possible to inject this workaround
-      // from the web view plugin level. Right now we only observe this issue for
-      // FlutterPlatformViewGestureRecognizersBlockingPolicyEager, but we should try it if a similar
-      // issue arises for the other policy.
-      if (@available(iOS 18.2, *)) {
-        // This workaround is designed for WKWebView only. The 1P web view plugin provides a
-        // WKWebView itself as the platform view. However, some 3P plugins provide wrappers of
-        // WKWebView instead. So we perform DFS to search the view hierarchy (with a depth limit).
-        // Passing a limit of 0 means only searching for platform view itself; Pass 1 to include its
-        // children as well, and so on. We should be conservative and start with a small number. The
-        // AdMob banner has a WKWebView at depth 7.
-        if ([self containsWebView:self.embeddedView remainingSubviewDepth:1]) {
-          [self removeGestureRecognizer:self.delayingRecognizer];
-          [self addGestureRecognizer:self.delayingRecognizer];
-        }
-      }
-
-      break;
-    case FlutterPlatformViewGestureRecognizersBlockingPolicyWaitUntilTouchesEnded:
-      if (self.delayingRecognizer.touchedEndedWithoutBlocking) {
-        // If touchesEnded of the `DelayingGesureRecognizer` has been already invoked,
-        // we want to set the state of the `DelayingGesureRecognizer` to
-        // `UIGestureRecognizerStateEnded` as soon as possible.
-        self.delayingRecognizer.state = UIGestureRecognizerStateEnded;
-      } else {
-        // If touchesEnded of the `DelayingGesureRecognizer` has not been invoked,
-        // We will set a flag to notify the `DelayingGesureRecognizer` to set the state to
-        // `UIGestureRecognizerStateEnded` when touchesEnded is called.
-        self.delayingRecognizer.shouldEndInNextTouchesEnded = YES;
-      }
-      break;
-    default:
-      break;
-  }
-}
-
 // We want the intercepting view to consume the touches and not pass the touches up to the parent
 // view. Make the touch event method not call super will not pass the touches up to the parent view.
 // Hence we overide the touch event methods and do nothing.
