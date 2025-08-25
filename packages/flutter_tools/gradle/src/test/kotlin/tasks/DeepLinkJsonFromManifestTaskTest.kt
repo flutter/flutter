@@ -62,15 +62,11 @@ class DeepLinkJsonFromManifestTaskTest {
         val json = mockk<RegularFileProperty>()
         every { json.get().asFile } returns jsonFile
 
-        try {
-            DeepLinkJsonFromManifestTaskHelper.createAppLinkSettingsFile(
-                defaultNamespace,
-                manifest,
-                json
-            )
-        } catch (e: SAXParseException) {
-            fail("Failed to parse Manifest:\n$manifestContent", e)
-        }
+        DeepLinkJsonFromManifestTaskHelper.createAppLinkSettingsFile(
+            defaultNamespace,
+            manifest,
+            json
+        )
         assertEquals(
             DeepLinkJsonFromManifestTaskHelper.createAppLinkSettings(defaultNamespace, manifestFile).toJson().toString(),
             jsonFile.readText()
@@ -79,12 +75,11 @@ class DeepLinkJsonFromManifestTaskTest {
 
     @Test
     fun noApplicationInManifest() {
-        val manifestContent = """
-            <?xml version="1.0" encoding="utf-8"?>
+        val manifestContent = """<?xml version="1.0" encoding="utf-8"?>
             <manifest xmlns:android="http://schemas.android.com/apk/res/android"
                 package="$defaultNamespace">
             </manifest>
-            """
+            """.trimIndent()
         val manifestFile = createTempManifestFile(manifestContent)
         val appLinkSettings = DeepLinkJsonFromManifestTaskHelper.createAppLinkSettings(defaultNamespace, manifestFile)
 
@@ -97,33 +92,25 @@ class DeepLinkJsonFromManifestTaskTest {
     fun applicationNoDeepLinkingElements() {
         val manifestContent = DeeplinkManifestBuilder().build()
         val manifestFile = createTempManifestFile(manifestContent)
-        try {
-            val appLinkSettings = DeepLinkJsonFromManifestTaskHelper.createAppLinkSettings(defaultNamespace, manifestFile)
-            assertEquals(defaultNamespace, appLinkSettings.applicationId)
-            assertFalse(appLinkSettings.deeplinkingFlagEnabled)
-            assertTrue(appLinkSettings.deeplinks.isEmpty())
-        } catch (e: SAXParseException) {
-            fail("Failed to parse Manifest:\n$manifestContent", e)
-        }
+        val appLinkSettings = DeepLinkJsonFromManifestTaskHelper.createAppLinkSettings(defaultNamespace, manifestFile)
+        assertEquals(defaultNamespace, appLinkSettings.applicationId)
+        assertFalse(appLinkSettings.deeplinkingFlagEnabled)
+        assertTrue(appLinkSettings.deeplinks.isEmpty())
     }
 
     @Test
     fun metaDataDeepLinkingEnabledTrue() {
         val manifestContent = DeeplinkManifestBuilder().addActivity("$defaultNamespace.MainActivity").setDeeplinkEnabled(true).build()
         val manifestFile = createTempManifestFile(manifestContent)
-        try {
-            val appLinkSettings =
-                DeepLinkJsonFromManifestTaskHelper
-                    .createAppLinkSettings(
-                        defaultNamespace,
-                        manifestFile
-                    )
-            assertEquals(defaultNamespace, appLinkSettings.applicationId)
-            assertTrue(appLinkSettings.deeplinkingFlagEnabled)
-            assertTrue(appLinkSettings.deeplinks.isEmpty())
-        } catch (e: SAXParseException) {
-            fail("Failed to parse Manifest:\n$manifestContent", e)
-        }
+        val appLinkSettings =
+            DeepLinkJsonFromManifestTaskHelper
+                .createAppLinkSettings(
+                    defaultNamespace,
+                    manifestFile
+                )
+        assertEquals(defaultNamespace, appLinkSettings.applicationId)
+        assertTrue(appLinkSettings.deeplinkingFlagEnabled)
+        assertTrue(appLinkSettings.deeplinks.isEmpty())
     }
 
     @Test
@@ -131,27 +118,22 @@ class DeepLinkJsonFromManifestTaskTest {
         val manifestContent = DeeplinkManifestBuilder().addActivity("$defaultNamespace.MainActivity").setDeeplinkEnabled(false).build()
         val manifestFile = createTempManifestFile(manifestContent)
 
-        try {
-            val appLinkSettings = DeepLinkJsonFromManifestTaskHelper.createAppLinkSettings(defaultNamespace, manifestFile)
-            assertEquals(defaultNamespace, appLinkSettings.applicationId)
-            assertFalse(appLinkSettings.deeplinkingFlagEnabled)
-            assertTrue(appLinkSettings.deeplinks.isEmpty())
-        } catch (e: SAXParseException) {
-            fail("Failed to parse Manifest:\n$manifestContent", e)
-        }
+        val appLinkSettings = DeepLinkJsonFromManifestTaskHelper.createAppLinkSettings(defaultNamespace, manifestFile)
+        assertEquals(defaultNamespace, appLinkSettings.applicationId)
+        assertFalse(appLinkSettings.deeplinkingFlagEnabled)
+        assertTrue(appLinkSettings.deeplinks.isEmpty())
     }
 
     @Test
     fun metaDataDeepLinkingEnabledInvalidValue() {
-        val manifestContent = """
-            <?xml version="1.0" encoding="utf-8"?>
+        val manifestContent = """<?xml version="1.0" encoding="utf-8"?>
             <manifest xmlns:android="http://schemas.android.com/apk/res/android"
                 package="$defaultNamespace">
                 <application android:label="Test App">
                     <meta-data android:name="flutter_deeplinking_enabled" android:value="not_a_boolean" />
                 </application>
             </manifest>
-            """
+            """.trimIndent()
         val manifestFile = createTempManifestFile(manifestContent)
         val appLinkSettings = DeepLinkJsonFromManifestTaskHelper.createAppLinkSettings(defaultNamespace, manifestFile)
 
@@ -162,15 +144,14 @@ class DeepLinkJsonFromManifestTaskTest {
 
     @Test
     fun metaDataDeepLinkingNoValue() {
-        val manifestContent = """
-            <?xml version="1.0" encoding="utf-8"?>
+        val manifestContent = """<?xml version="1.0" encoding="utf-8"?>
             <manifest xmlns:android="http://schemas.android.com/apk/res/android"
                 package="$defaultNamespace">
                 <application android:label="Test App">
                     <meta-data android:name="flutter_deeplinking_enabled" />
                 </application>
             </manifest>
-            """
+            """.trimIndent()
         val manifestFile = createTempManifestFile(manifestContent)
         val appLinkSettings = DeepLinkJsonFromManifestTaskHelper.createAppLinkSettings(defaultNamespace, manifestFile)
 
@@ -192,24 +173,20 @@ class DeepLinkJsonFromManifestTaskTest {
                 ).addDeeplinks(defaultActivity, listOf(expectedDeeplink))
                 .build()
         val manifestFile = createTempManifestFile(manifestContent)
-        try {
-            val appLinkSettings =
-                DeepLinkJsonFromManifestTaskHelper.createAppLinkSettings(
-                    defaultNamespace,
-                    manifestFile
-                )
-
-            assertEquals(defaultNamespace, appLinkSettings.applicationId)
-            assertTrue(appLinkSettings.deeplinkingFlagEnabled)
-            assertEquals(1, appLinkSettings.deeplinks.size)
-            assertContains(
-                appLinkSettings.deeplinks,
-                expectedDeeplink,
-                "Did not find $expectedDeeplink in ${appLinkSettings.deeplinks.joinToString { it.toJson().toString() }}"
+        val appLinkSettings =
+            DeepLinkJsonFromManifestTaskHelper.createAppLinkSettings(
+                defaultNamespace,
+                manifestFile
             )
-        } catch (e: SAXParseException) {
-            fail("Failed to parse Manifest:\n$manifestContent", e)
-        }
+
+        assertEquals(defaultNamespace, appLinkSettings.applicationId)
+        assertTrue(appLinkSettings.deeplinkingFlagEnabled)
+        assertEquals(1, appLinkSettings.deeplinks.size)
+        assertContains(
+            appLinkSettings.deeplinks,
+            expectedDeeplink,
+            "Did not find $expectedDeeplink in ${appLinkSettings.deeplinks.joinToString { it.toJson().toString() }}"
+        )
     }
 
     @Test
@@ -265,26 +242,22 @@ class DeepLinkJsonFromManifestTaskTest {
                 ).addDeeplinks(defaultActivity, listOf(expectedLink1, expectedLink2))
                 .build()
         val manifestFile = createTempManifestFile(manifestContent)
-        try {
-            val appLinkSettings =
-                DeepLinkJsonFromManifestTaskHelper.createAppLinkSettings(
-                    defaultNamespace,
-                    manifestFile
-                )
-            assertEquals(2, appLinkSettings.deeplinks.size)
-            assertContains(
-                appLinkSettings.deeplinks,
-                expectedLink1,
-                "Did not find $expectedLink1 in ${appLinkSettings.deeplinks.joinToString { it.toJson().toString() }}"
+        val appLinkSettings =
+            DeepLinkJsonFromManifestTaskHelper.createAppLinkSettings(
+                defaultNamespace,
+                manifestFile
             )
-            assertContains(
-                appLinkSettings.deeplinks,
-                expectedLink2,
-                "Did not find $expectedLink2 in ${appLinkSettings.deeplinks.joinToString { it.toJson().toString() }}"
-            )
-        } catch (e: SAXParseException) {
-            fail("Failed to parse Manifest:\n$manifestContent", e)
-        }
+        assertEquals(2, appLinkSettings.deeplinks.size)
+        assertContains(
+            appLinkSettings.deeplinks,
+            expectedLink1,
+            "Did not find $expectedLink1 in ${appLinkSettings.deeplinks.joinToString { it.toJson().toString() }}"
+        )
+        assertContains(
+            appLinkSettings.deeplinks,
+            expectedLink2,
+            "Did not find $expectedLink2 in ${appLinkSettings.deeplinks.joinToString { it.toJson().toString() }}"
+        )
     }
 
     @Test
@@ -312,27 +285,23 @@ class DeepLinkJsonFromManifestTaskTest {
                 .addDeeplinks(otherActivity, listOf(expectedDeeplink2))
                 .build()
         val manifestFile = createTempManifestFile(manifestContent)
-        try {
-            val appLinkSettings =
-                DeepLinkJsonFromManifestTaskHelper.createAppLinkSettings(
-                    defaultNamespace,
-                    manifestFile
-                )
-            assertEquals(2, appLinkSettings.deeplinks.size)
-            assertContains(
-                appLinkSettings.deeplinks,
-                // Path when not set is assumed to be ".*"
-                Deeplink(expectedDeeplink1.scheme, expectedDeeplink1.host, ".*", expectedDeeplink1.intentFilterCheck),
-                "Did not find $expectedDeeplink1 in ${appLinkSettings.deeplinks.joinToString { it.toJson().toString() }}"
+        val appLinkSettings =
+            DeepLinkJsonFromManifestTaskHelper.createAppLinkSettings(
+                defaultNamespace,
+                manifestFile
             )
-            assertContains(
-                appLinkSettings.deeplinks,
-                expectedDeeplink2,
-                "Did not find $expectedDeeplink2 in ${appLinkSettings.deeplinks.joinToString { it.toJson().toString() }}"
-            )
-        } catch (e: SAXParseException) {
-            fail("Failed to parse Manifest:\n$manifestContent", e)
-        }
+        assertEquals(2, appLinkSettings.deeplinks.size)
+        assertContains(
+            appLinkSettings.deeplinks,
+            // Path when not set is assumed to be ".*"
+            Deeplink(expectedDeeplink1.scheme, expectedDeeplink1.host, ".*", expectedDeeplink1.intentFilterCheck),
+            "Did not find $expectedDeeplink1 in ${appLinkSettings.deeplinks.joinToString { it.toJson().toString() }}"
+        )
+        assertContains(
+            appLinkSettings.deeplinks,
+            expectedDeeplink2,
+            "Did not find $expectedDeeplink2 in ${appLinkSettings.deeplinks.joinToString { it.toJson().toString() }}"
+        )
     }
 
     @Test
@@ -418,38 +387,34 @@ class DeepLinkJsonFromManifestTaskTest {
                 .setDeeplinkPathOverride(pathOverride)
                 .build()
         val manifestFile = createTempManifestFile(manifestContent)
-        try {
-            val appLinkSettings =
-                DeepLinkJsonFromManifestTaskHelper.createAppLinkSettings(
-                    defaultNamespace,
-                    manifestFile
-                )
-            assertEquals(4, appLinkSettings.deeplinks.size)
-            assertContains(
-                appLinkSettings.deeplinks,
-                expectedLink1,
-                "Did not find $expectedLink1 in ${appLinkSettings.deeplinks.joinToString { it.toJson().toString() }}"
+        val appLinkSettings =
+            DeepLinkJsonFromManifestTaskHelper.createAppLinkSettings(
+                defaultNamespace,
+                manifestFile
             )
-            assertContains(
-                appLinkSettings.deeplinks,
-                expectedLink2,
-                "Did not find $expectedLink2 in ${appLinkSettings.deeplinks.joinToString { it.toJson().toString() }}"
-            )
-            val prefix = Deeplink(expectedLink3.scheme, expectedLink3.host, "${expectedLink3.path}.*", expectedLink1.intentFilterCheck)
-            assertContains(
-                appLinkSettings.deeplinks,
-                prefix,
-                "Did not find $prefix in ${appLinkSettings.deeplinks.joinToString { it.toJson().toString() }}"
-            )
-            val suffix = Deeplink(expectedLink4.scheme, expectedLink4.host, ".*${expectedLink4.path}", expectedLink4.intentFilterCheck)
-            assertContains(
-                appLinkSettings.deeplinks,
-                suffix,
-                "Did not find $suffix in ${appLinkSettings.deeplinks.joinToString { it.toJson().toString() }}"
-            )
-        } catch (e: SAXParseException) {
-            fail("Failed to parse Manifest:\n$manifestContent", e)
-        }
+        assertEquals(4, appLinkSettings.deeplinks.size)
+        assertContains(
+            appLinkSettings.deeplinks,
+            expectedLink1,
+            "Did not find $expectedLink1 in ${appLinkSettings.deeplinks.joinToString { it.toJson().toString() }}"
+        )
+        assertContains(
+            appLinkSettings.deeplinks,
+            expectedLink2,
+            "Did not find $expectedLink2 in ${appLinkSettings.deeplinks.joinToString { it.toJson().toString() }}"
+        )
+        val prefix = Deeplink(expectedLink3.scheme, expectedLink3.host, "${expectedLink3.path}.*", expectedLink1.intentFilterCheck)
+        assertContains(
+            appLinkSettings.deeplinks,
+            prefix,
+            "Did not find $prefix in ${appLinkSettings.deeplinks.joinToString { it.toJson().toString() }}"
+        )
+        val suffix = Deeplink(expectedLink4.scheme, expectedLink4.host, ".*${expectedLink4.path}", expectedLink4.intentFilterCheck)
+        assertContains(
+            appLinkSettings.deeplinks,
+            suffix,
+            "Did not find $suffix in ${appLinkSettings.deeplinks.joinToString { it.toJson().toString() }}"
+        )
     }
 
     /**
@@ -544,14 +509,23 @@ class DeepLinkJsonFromManifestTaskTest {
                 }
             }
 
-            return """
-<?xml version="1.0" encoding="utf-8"?>
+            val manifestContent = """<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="$namespace">
     <application android:label="Test App">
     $activitySection
     </application>
 </manifest>
 """
+            try {
+                // Debugging malformed xml data from a SAXParseException log only
+                // is difficult. Print the manifest content to aid in debugging.
+                groovy.xml
+                    .XmlParser(false, false)
+                    .parseText(manifestContent)
+            } catch (e: SAXParseException) {
+                fail("Failed to parse Manifest:\n$manifestContent", e)
+            }
+            return manifestContent
         }
     }
 }
