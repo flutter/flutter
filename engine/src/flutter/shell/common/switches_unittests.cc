@@ -149,6 +149,18 @@ TEST(SwitchesTest, EnableAsserts) {
 }
 #endif
 
+TEST(SwitchesTest, RequireMergedPlatformUIThread) {
+  fml::CommandLine command_line = fml::CommandLineFromInitializerList(
+      {"command", "--merged-platform-ui-thread=disabled"});
+  Settings settings = SettingsFromCommandLine(command_line);
+  EXPECT_EQ(settings.merged_platform_ui_thread,
+            Settings::MergedPlatformUIThread::kDisabled);
+
+  EXPECT_DEATH_IF_SUPPORTED(SettingsFromCommandLine(command_line, true),
+                            "This platform does not support the "
+                            "merged-platform-ui-thread=disabled flag");
+}
+
 }  // namespace testing
 }  // namespace flutter
 
