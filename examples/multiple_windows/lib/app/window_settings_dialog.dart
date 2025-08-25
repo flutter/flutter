@@ -14,11 +14,12 @@ Future<void> windowSettingsDialog(
     context: context,
     builder: (BuildContext ctx) {
       return _WindowSettingsEditor(
-          settings: WindowSettings.clone(settings),
-          onClose: (WindowSettings newSettings) {
-            settings.from(newSettings);
-            Navigator.of(context, rootNavigator: true).pop();
-          });
+        settings: WindowSettings.clone(settings),
+        onClose: (WindowSettings newSettings) {
+          settings.from(newSettings);
+          Navigator.of(context, rootNavigator: true).pop();
+        },
+      );
     },
   );
 }
@@ -51,31 +52,31 @@ class _WindowSettingsEditor extends StatelessWidget {
                           children: [
                             Expanded(
                               child: TextFormField(
-                                initialValue:
-                                    settings.regularSize.width.toString(),
+                                initialValue: settings.regularSize.width
+                                    .toString(),
                                 decoration: const InputDecoration(
                                   labelText: 'Initial width',
                                 ),
                                 onChanged: (String value) =>
                                     settings.regularSize = Size(
-                                  double.tryParse(value) ?? 0,
-                                  settings.regularSize.height,
-                                ),
+                                      double.tryParse(value) ?? 0,
+                                      settings.regularSize.height,
+                                    ),
                               ),
                             ),
                             const SizedBox(width: 20),
                             Expanded(
                               child: TextFormField(
-                                initialValue:
-                                    settings.regularSize.height.toString(),
+                                initialValue: settings.regularSize.height
+                                    .toString(),
                                 decoration: const InputDecoration(
                                   labelText: 'Initial height',
                                 ),
                                 onChanged: (String value) =>
                                     settings.regularSize = Size(
-                                  settings.regularSize.width,
-                                  double.tryParse(value) ?? 0,
-                                ),
+                                      settings.regularSize.width,
+                                      double.tryParse(value) ?? 0,
+                                    ),
                               ),
                             ),
                           ],
@@ -97,7 +98,7 @@ class _WindowSettingsEditor extends StatelessWidget {
             },
             child: const Text('Apply'),
           ),
-        )
+        ),
       ],
     );
   }

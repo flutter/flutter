@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 
 class WindowSettings extends ChangeNotifier {
   WindowSettings({Size regularSize = const Size(400, 300)})
-      : _regularSize = regularSize;
+    : _regularSize = regularSize;
 
   WindowSettings.clone(WindowSettings other)
-      : this(regularSize: other.regularSize);
+    : this(regularSize: other.regularSize);
 
   Size _regularSize;
   Size get regularSize => _regularSize;

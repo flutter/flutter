@@ -31,14 +31,14 @@ class WindowControllerRender extends StatelessWidget {
   Widget build(BuildContext context) {
     return switch (controller) {
       final RegularWindowController regular => RegularWindow(
-          key: key,
-          controller: regular,
-          child: RegularWindowContent(
-            window: regular,
-            windowSettings: windowSettings,
-            windowManagerModel: windowManagerModel,
-          ),
+        key: key,
+        controller: regular,
+        child: RegularWindowContent(
+          window: regular,
+          windowSettings: windowSettings,
+          windowManagerModel: windowManagerModel,
         ),
+      ),
     };
   }
 }

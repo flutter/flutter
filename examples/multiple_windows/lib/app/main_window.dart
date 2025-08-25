@@ -65,9 +65,7 @@ class MainWindow extends StatelessWidget {
               flex: 60,
               child: SingleChildScrollView(
                 scrollDirection: Axis.vertical,
-                child: _WindowsTable(
-                  windowManagerModel: windowManagerModel,
-                ),
+                child: _WindowsTable(windowManagerModel: windowManagerModel),
               ),
             ),
             Expanded(
@@ -164,15 +162,6 @@ class _WindowsTable extends StatelessWidget {
                           controller.controller.destroy();
                         },
                       ),
-                      if (controller.controller is RegularWindowController)
-                        IconButton(
-                          icon: const Icon(Icons.fullscreen),
-                          onPressed: () async {
-                            final RegularWindowController regular = controller
-                                .controller as RegularWindowController;
-                            regular.setFullscreen(!regular.isFullscreen);
-                          },
-                        ),
                     ],
                   ),
                 ),
@@ -190,9 +179,9 @@ class _WindowsTable extends StatelessWidget {
   ) {
     return switch (controller.controller) {
       final RegularWindowController regular => showRegularWindowEditDialog(
-          context: context,
-          controller: regular,
-        ),
+        context: context,
+        controller: regular,
+      ),
     };
   }
 
