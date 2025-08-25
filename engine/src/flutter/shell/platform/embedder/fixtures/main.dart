@@ -198,6 +198,8 @@ Future<void> a11y_main() async {
       controlsNodes: null,
       inputType: SemanticsInputType.none,
       locale: null,
+      minValue: '0.0',
+      maxValue: '0.0',
     )
     ..updateNode(
       id: 84,
@@ -234,6 +236,8 @@ Future<void> a11y_main() async {
       controlsNodes: null,
       inputType: SemanticsInputType.none,
       locale: null,
+      minValue: '0.0',
+      maxValue: '0.0',
     )
     ..updateNode(
       id: 96,
@@ -270,6 +274,8 @@ Future<void> a11y_main() async {
       controlsNodes: null,
       inputType: SemanticsInputType.none,
       locale: null,
+      minValue: '0.0',
+      maxValue: '0.0',
     )
     ..updateNode(
       id: 128,
@@ -306,6 +312,8 @@ Future<void> a11y_main() async {
       controlsNodes: null,
       inputType: SemanticsInputType.none,
       locale: null,
+      minValue: '0.0',
+      maxValue: '0.0',
     )
     ..updateCustomAction(id: 21, label: 'Archive', hint: 'archive message');
 
@@ -388,6 +396,8 @@ Future<void> a11y_string_attributes() async {
       controlsNodes: null,
       inputType: SemanticsInputType.none,
       locale: null,
+      minValue: '0.0',
+      maxValue: '0.0',
     );
 
   PlatformDispatcher.instance.views.first.updateSemantics(builder.build());
@@ -1676,6 +1686,8 @@ Future<void> a11y_main_multi_view() async {
       controlsNodes: null,
       inputType: SemanticsInputType.none,
       locale: null,
+      minValue: '0.0',
+      maxValue: '0.0',
     );
   }
 
