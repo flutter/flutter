@@ -48,8 +48,6 @@ Future<void> main() async {
         await _tryMacOSLint(macosintegrationTestPodspec, <String>[]);
       });
 
-      section('Create Objective-C plugin');
-
       const String objcPluginName = 'test_plugin_objc';
       await inDirectory(tempDir, () async {
         await flutter(

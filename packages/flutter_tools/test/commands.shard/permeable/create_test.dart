@@ -697,8 +697,6 @@ void main() {
           '--template=plugin',
           '-a',
           'kotlin',
-          '--ios-language',
-          'swift',
           '--platforms',
           'android,ios,macos',
         ],
