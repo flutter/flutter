@@ -8,27 +8,29 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:web_engine_tester/golden_tester.dart';
 
-import 'common.dart';
+import '../common/rendering.dart';
+import '../common/test_initialization.dart';
+import 'utils.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
 void testMain() {
-  group('CanvasKit', () {
-    setUpCanvasKitTest(withImplicitView: true);
+  group('LayerScene', () {
+    setUpUnitTests(withImplicitView: true);
 
     // Regression test for https://github.com/flutter/flutter/issues/63715
     test('TransformLayer prerolls correctly', () async {
-      final CkPicture picture = paintPicture(const ui.Rect.fromLTRB(0, 0, 60, 60), (
-        CkCanvas canvas,
-      ) {
-        canvas.drawRect(
-          const ui.Rect.fromLTRB(0, 0, 60, 60),
-          CkPaint()..style = ui.PaintingStyle.fill,
-        );
-      });
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final ui.Canvas canvas = ui.Canvas(recorder, const ui.Rect.fromLTRB(0, 0, 60, 60));
+      canvas.drawRect(
+        const ui.Rect.fromLTRB(0, 0, 60, 60),
+        ui.Paint()..style = ui.PaintingStyle.fill,
+      );
+      final ui.Picture picture = recorder.endRecording();
 
       final LayerSceneBuilder sb = LayerSceneBuilder();
       sb.pushClipRect(const ui.Rect.fromLTRB(15, 15, 30, 30));
@@ -50,8 +52,9 @@ void testMain() {
     });
 
     test('can push a leaf layer without a container layer', () async {
-      final CkPictureRecorder recorder = CkPictureRecorder();
-      recorder.beginRecording(ui.Rect.zero);
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      // Create a canvas just to start the recorder recording.
+      final ui.Canvas _ = ui.Canvas(recorder);
       LayerSceneBuilder().addPicture(ui.Offset.zero, recorder.endRecording());
     });
 
@@ -65,25 +68,23 @@ void testMain() {
       final LayerScene layerScene = sb.build();
       final ui.Image testImage = await layerScene.toImage(100, 100);
 
-      final CkPictureRecorder recorder = CkPictureRecorder();
-      final CkCanvas canvas = recorder.beginRecording(kDefaultRegion);
-      canvas.drawImage(testImage as CkImage, ui.Offset.zero, CkPaint());
-      await matchPictureGolden(
-        'canvaskit_null_viewembedder_with_platformview.png',
-        recorder.endRecording(),
-        region: kDefaultRegion,
-      );
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final ui.Canvas canvas = ui.Canvas(recorder, kDefaultRegion);
+      canvas.drawImage(testImage, ui.Offset.zero, ui.Paint());
+
+      await drawPictureUsingCurrentRenderer(recorder.endRecording());
+
+      await matchGoldenFile('ui_null_viewembedder_with_platformview.png', region: kDefaultRegion);
     });
 
     test('ImageFilter layer applies matrix in preroll', () async {
-      final CkPicture picture = paintPicture(const ui.Rect.fromLTRB(0, 0, 100, 100), (
-        CkCanvas canvas,
-      ) {
-        canvas.drawRect(
-          const ui.Rect.fromLTRB(0, 0, 100, 100),
-          CkPaint()..style = ui.PaintingStyle.fill,
-        );
-      });
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final ui.Canvas canvas = ui.Canvas(recorder, const ui.Rect.fromLTRB(0, 0, 100, 100));
+      canvas.drawRect(
+        const ui.Rect.fromLTRB(0, 0, 100, 100),
+        ui.Paint()..style = ui.PaintingStyle.fill,
+      );
+      final ui.Picture picture = recorder.endRecording();
 
       final LayerSceneBuilder sb = LayerSceneBuilder();
       sb.pushImageFilter(
@@ -107,14 +108,13 @@ void testMain() {
 
     test('Opacity layer works correctly with Scene.toImage', () async {
       // This is a regression test for https://github.com/flutter/flutter/issues/138009
-      final CkPicture picture = paintPicture(const ui.Rect.fromLTRB(0, 0, 100, 100), (
-        CkCanvas canvas,
-      ) {
-        canvas.drawRect(
-          const ui.Rect.fromLTRB(0, 0, 100, 100),
-          CkPaint()..style = ui.PaintingStyle.fill,
-        );
-      });
+      final ui.PictureRecorder testRecorder = ui.PictureRecorder();
+      final ui.Canvas testCanvas = ui.Canvas(testRecorder, const ui.Rect.fromLTRB(0, 0, 100, 100));
+      testCanvas.drawRect(
+        const ui.Rect.fromLTRB(0, 0, 100, 100),
+        ui.Paint()..style = ui.PaintingStyle.fill,
+      );
+      final ui.Picture picture = testRecorder.endRecording();
 
       final LayerSceneBuilder sb = LayerSceneBuilder();
       sb.pushTransform(Matrix4.identity().toFloat64());
@@ -124,14 +124,18 @@ void testMain() {
       final LayerScene scene = sb.build();
       final ui.Image testImage = await scene.toImage(200, 200);
 
-      final CkPictureRecorder recorder = CkPictureRecorder();
-      final CkCanvas canvas = recorder.beginRecording(const ui.Rect.fromLTRB(0, 0, 200, 200));
-      canvas.drawImage(testImage as CkImage, ui.Offset.zero, CkPaint());
-      await matchPictureGolden(
-        'canvaskit_scene_toimage_opacity_layer.png',
-        recorder.endRecording(),
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final ui.Canvas canvas = ui.Canvas(recorder, const ui.Rect.fromLTRB(0, 0, 200, 200));
+      canvas.drawImage(testImage, ui.Offset.zero, ui.Paint());
+
+      await drawPictureUsingCurrentRenderer(recorder.endRecording());
+
+      await matchGoldenFile(
+        'ui_scene_toimage_opacity_layer.png',
         region: const ui.Rect.fromLTRB(0, 0, 200, 200),
       );
     });
-  });
+    // Unskip when Skwasm and CanvasKit are unified:
+    // https://github.com/flutter/flutter/issues/172311
+  }, skip: isSkwasm);
 }
