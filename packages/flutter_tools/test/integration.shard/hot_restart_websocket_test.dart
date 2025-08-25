@@ -21,17 +21,17 @@ void main() {
 }
 
 void testAll({List<String> additionalCommandArgs = const <String>[]}) {
-  group('WebSocket DWDS connection'
+  group('WebSocket DWDS connection for hot restart'
       '${additionalCommandArgs.isEmpty ? '' : ' with args: $additionalCommandArgs'}', () {
     // Test configuration constants
-    const hotReloadTimeout = Duration(seconds: 10);
+    const hotRestartTimeout = Duration(seconds: 15);
 
     late Directory tempDir;
     final project = HotReloadProject();
     late FlutterRunTestDriver flutter;
 
     setUp(() async {
-      tempDir = createResolvedTempDirectorySync('hot_reload_websocket_test.');
+      tempDir = createResolvedTempDirectorySync('hot_restart_websocket_test.');
       await project.setUpIn(tempDir);
       flutter = FlutterRunTestDriver(tempDir);
     });
@@ -42,9 +42,9 @@ void testAll({List<String> additionalCommandArgs = const <String>[]}) {
     });
 
     testWithoutContext(
-      'hot reload with headless Chrome WebSocket connection',
+      'hot restart with headless Chrome WebSocket connection',
       () async {
-        debugPrint('Starting WebSocket DWDS test with headless Chrome for hot reload...');
+        debugPrint('Starting WebSocket DWDS test with headless Chrome for hot restart...');
 
         // Set up WebSocket connection
         final WebSocketDwdsTestSetup setup = await WebSocketDwdsTestUtils.setupWebSocketConnection(
@@ -53,12 +53,12 @@ void testAll({List<String> additionalCommandArgs = const <String>[]}) {
         );
 
         try {
-          // Test hot reload functionality
-          debugPrint('Step 6: Testing hot reload with WebSocket connection...');
-          await flutter.hotReload().timeout(
-            hotReloadTimeout,
+          // Test hot restart functionality
+          debugPrint('Step 6: Testing hot restart with WebSocket connection...');
+          await flutter.hotRestart().timeout(
+            hotRestartTimeout,
             onTimeout: () {
-              throw Exception('Hot reload timed out');
+              throw Exception('Hot restart timed out');
             },
           );
 
@@ -66,14 +66,18 @@ void testAll({List<String> additionalCommandArgs = const <String>[]}) {
           await Future<void>.delayed(const Duration(seconds: 2));
 
           final output = setup.stdout.toString();
-          expect(output, contains('Reloaded'), reason: 'Hot reload should complete successfully');
-          debugPrint('✓ Hot reload completed successfully with WebSocket connection');
+          expect(
+            output,
+            contains('Restarted application'),
+            reason: 'Hot restart should complete successfully',
+          );
+          debugPrint('✓ Hot restart completed successfully with WebSocket connection');
 
           // Verify the correct infrastructure was used
           WebSocketDwdsTestUtils.verifyWebSocketInfrastructure(output);
 
           debugPrint('✓ WebSocket DWDS test completed successfully');
-          debugPrint('✓ Verified: web-server device + DWDS + WebSocket connection + hot reload');
+          debugPrint('✓ Verified: web-server device + DWDS + WebSocket connection + hot restart');
         } finally {
           await cleanupWebSocketTestResources(setup.chromeProcess, setup.subscription);
         }
