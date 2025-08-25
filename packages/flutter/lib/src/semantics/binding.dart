@@ -39,7 +39,6 @@ mixin SemanticsBinding on BindingBase {
         }
       };
     _handleSemanticsEnabledChanged();
-    addSemanticsEnabledListener(_handleFrameworkSemanticsEnabledChanged);
   }
 
   /// The current [SemanticsBinding], if one has been created.
@@ -163,29 +162,6 @@ mixin SemanticsBinding on BindingBase {
       }
     }
     performSemanticsAction(decodedAction);
-  }
-
-  void _handleFrameworkSemanticsEnabledChanged() {
-    // Try to call setSemanticsTreeEnabled if it's available (mainly for tests)
-    final dynamic dispatcher = platformDispatcher;
-    try {
-      // Use dynamic invocation to avoid compilation errors
-      if (dispatcher.runtimeType.toString().contains('Test')) {
-        // Prefer a property-style setter if available.
-        try {
-          // ignore: avoid_dynamic_calls
-          dispatcher.semanticsTreeEnabled = semanticsEnabled;
-        } catch (_) {
-          // Fallback to the legacy method form if provided by the spy.
-
-          // ignore: avoid_dynamic_calls
-          dispatcher.setSemanticsTreeEnabled(semanticsEnabled);
-        }
-      }
-    } catch (e) {
-      // Method not available or failed, ignore
-      // This is expected in production as the method is not yet available in dart:ui
-    }
   }
 
   /// Called whenever the platform requests an action to be performed on a

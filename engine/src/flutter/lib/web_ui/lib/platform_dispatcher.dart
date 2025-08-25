@@ -85,8 +85,6 @@ abstract class PlatformDispatcher {
 
   void scheduleWarmUpFrame({required VoidCallback beginFrame, required VoidCallback drawFrame});
 
-  void setSemanticsTreeEnabled(bool enabled) {}
-
   AccessibilityFeatures get accessibilityFeatures;
 
   VoidCallback? get onAccessibilityFeaturesChanged;

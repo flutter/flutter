@@ -360,12 +360,12 @@ class _HourMinuteControl extends StatelessWidget {
     final ShapeBorder shape = timePickerTheme.hourMinuteShape ?? defaultTheme.hourMinuteShape;
 
     final Set<MaterialState> states = <MaterialState>{if (isSelected) MaterialState.selected};
-    final Color effectiveTextColor = MaterialStateProperty.resolveAs<Color>(
+    final Color effectiveTextColor = WidgetStateProperty.resolveAs<Color>(
       _TimePickerModel.themeOf(context).hourMinuteTextColor ??
           _TimePickerModel.defaultThemeOf(context).hourMinuteTextColor,
       states,
     );
-    final TextStyle effectiveStyle = MaterialStateProperty.resolveAs<TextStyle>(
+    final TextStyle effectiveStyle = WidgetStateProperty.resolveAs<TextStyle>(
       timePickerTheme.hourMinuteTextStyle ?? defaultTheme.hourMinuteTextStyle,
       states,
     ).copyWith(color: effectiveTextColor);
@@ -383,7 +383,7 @@ class _HourMinuteControl extends StatelessWidget {
     return SizedBox(
       height: height,
       child: Material(
-        color: MaterialStateProperty.resolveAs(backgroundColor, states),
+        color: WidgetStateProperty.resolveAs(backgroundColor, states),
         clipBehavior: Clip.antiAlias,
         shape: shape,
         child: InkWell(
@@ -497,14 +497,14 @@ class _TimeSelectorSeparator extends StatelessWidget {
         : _TimePickerDefaultsM2(context);
     final Set<MaterialState> states = <MaterialState>{};
 
-    final Color effectiveTextColor = MaterialStateProperty.resolveAs<Color>(
+    final Color effectiveTextColor = WidgetStateProperty.resolveAs<Color>(
       timePickerTheme.timeSelectorSeparatorColor?.resolve(states) ??
           timePickerTheme.hourMinuteTextColor ??
           defaultTheme.timeSelectorSeparatorColor?.resolve(states) ??
           defaultTheme.hourMinuteTextColor,
       states,
     );
-    final TextStyle effectiveStyle = MaterialStateProperty.resolveAs<TextStyle>(
+    final TextStyle effectiveStyle = WidgetStateProperty.resolveAs<TextStyle>(
       timePickerTheme.timeSelectorSeparatorTextStyle?.resolve(states) ??
           timePickerTheme.hourMinuteTextStyle ??
           defaultTheme.timeSelectorSeparatorTextStyle?.resolve(states) ??
@@ -791,15 +791,15 @@ class _AmPmButton extends StatelessWidget {
     final Set<MaterialState> states = <MaterialState>{if (selected) MaterialState.selected};
     final TimePickerThemeData timePickerTheme = _TimePickerModel.themeOf(context);
     final _TimePickerDefaults defaultTheme = _TimePickerModel.defaultThemeOf(context);
-    final Color resolvedBackgroundColor = MaterialStateProperty.resolveAs<Color>(
+    final Color resolvedBackgroundColor = WidgetStateProperty.resolveAs<Color>(
       timePickerTheme.dayPeriodColor ?? defaultTheme.dayPeriodColor,
       states,
     );
-    final Color resolvedTextColor = MaterialStateProperty.resolveAs<Color>(
+    final Color resolvedTextColor = WidgetStateProperty.resolveAs<Color>(
       timePickerTheme.dayPeriodTextColor ?? defaultTheme.dayPeriodTextColor,
       states,
     );
-    final TextStyle? resolvedTextStyle = MaterialStateProperty.resolveAs<TextStyle?>(
+    final TextStyle? resolvedTextStyle = WidgetStateProperty.resolveAs<TextStyle?>(
       timePickerTheme.dayPeriodTextStyle ?? defaultTheme.dayPeriodTextStyle,
       states,
     )?.copyWith(color: resolvedTextColor);
@@ -1623,11 +1623,11 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
         timePickerTheme.dialBackgroundColor ?? defaultTheme.dialBackgroundColor;
     final Color dialHandColor = timePickerTheme.dialHandColor ?? defaultTheme.dialHandColor;
     final TextStyle labelStyle = timePickerTheme.dialTextStyle ?? defaultTheme.dialTextStyle;
-    final Color dialTextUnselectedColor = MaterialStateProperty.resolveAs<Color>(
+    final Color dialTextUnselectedColor = WidgetStateProperty.resolveAs<Color>(
       timePickerTheme.dialTextColor ?? defaultTheme.dialTextColor,
       <MaterialState>{},
     );
-    final Color dialTextSelectedColor = MaterialStateProperty.resolveAs<Color>(
+    final Color dialTextSelectedColor = WidgetStateProperty.resolveAs<Color>(
       timePickerTheme.dialTextColor ?? defaultTheme.dialTextColor,
       <MaterialState>{MaterialState.selected},
     );
@@ -2236,7 +2236,7 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
         defaultTheme.hourMinuteColor;
     final Color fillColor;
     if (theme.useMaterial3) {
-      fillColor = MaterialStateProperty.resolveAs<Color>(startingFillColor, <MaterialState>{
+      fillColor = WidgetStateProperty.resolveAs<Color>(startingFillColor, <MaterialState>{
         if (focusNode.hasFocus) MaterialState.focused,
         if (focusNode.hasFocus) MaterialState.selected,
       });
@@ -2250,11 +2250,11 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
       if (focusNode.hasFocus) MaterialState.focused,
       if (focusNode.hasFocus) MaterialState.selected,
     };
-    final Color effectiveTextColor = MaterialStateProperty.resolveAs<Color>(
+    final Color effectiveTextColor = WidgetStateProperty.resolveAs<Color>(
       timePickerTheme.hourMinuteTextColor ?? defaultTheme.hourMinuteTextColor,
       states,
     );
-    final TextStyle effectiveStyle = MaterialStateProperty.resolveAs<TextStyle>(
+    final TextStyle effectiveStyle = WidgetStateProperty.resolveAs<TextStyle>(
       widget.style,
       states,
     ).copyWith(color: effectiveTextColor);
