@@ -578,6 +578,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
             'FLUTTER_GIT_URL': 'https://github.com/flutter/flutter.git',
             'FLUTTER_FRAMEWORK_REVISION': '11111',
             'FLUTTER_ENGINE_REVISION': 'abcde',
+            'FLUTTER_CONTENT_HASH': '12345',
             'FLUTTER_DART_VERSION': '12',
           })}"',
           r'  "DART_OBFUSCATION=true"',

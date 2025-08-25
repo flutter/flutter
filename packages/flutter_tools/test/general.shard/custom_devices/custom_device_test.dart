@@ -543,12 +543,14 @@ void main() {
           r'--buildMode=${buildMode}',
           r'--icuDataPath=${icuDataPath}',
           r'--engineRevision=${engineRevision}',
+          r'--contentHash=${contentHash}',
         ],
         runDebugCommand: const <String>[
           'testrundebug',
           r'--buildMode=${buildMode}',
           r'--icuDataPath=${icuDataPath}',
           r'--engineRevision=${engineRevision}',
+          r'--contentHash=${contentHash}',
         ],
       );
 
@@ -556,6 +558,7 @@ void main() {
         RegExp(r'--buildMode=.*'),
         RegExp(r'--icuDataPath=.*'),
         RegExp(r'--engineRevision=.*'),
+        RegExp(r'--contentHash=.*'),
       ];
 
       final String expectedIcuDataPath = globals.artifacts!.getArtifactPath(
@@ -563,11 +566,13 @@ void main() {
         platform: config.platform,
       );
       final String expectedEngineRevision = globals.flutterVersion.engineRevision;
+      final String expectedContentHash = globals.flutterVersion.engineContentHash!;
 
       final expectedCommandArguments = <String>[
         '--buildMode=debug',
         '--icuDataPath=$expectedIcuDataPath',
         '--engineRevision=$expectedEngineRevision',
+        '--contentHash=$expectedContentHash',
       ];
 
       final expectedRunDebugCommand = <String>['testrundebug', ...expectedCommandArguments];

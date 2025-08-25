@@ -116,7 +116,7 @@ abstract class Dart2WebTarget extends Target {
       );
       if (!canvasKitUrlAlreadySet) {
         dartDefines.add(
-          'FLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/${globals.flutterVersion.engineRevision}/',
+          'FLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/${globals.flutterVersion.engineContentHash}/',
         );
       }
     }
@@ -590,8 +590,10 @@ class WebTemplatedFiles extends Target {
   }
 
   String buildConfigString(Environment environment) {
+    final String? contentHash = globals.flutterVersion.engineContentHash;
     final buildConfig = <String, Object>{
       'engineRevision': globals.flutterVersion.engineRevision,
+      if (contentHash != null) 'contentHash': contentHash,
       'builds': buildDescriptions,
       if (environment.defines[kUseLocalCanvasKitFlag] == 'true') 'useLocalCanvasKit': true,
     };

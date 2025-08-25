@@ -1482,6 +1482,22 @@ flutter:
       );
 
       testUsingContext(
+        'FLUTTER_CONTENT_HASH is set in dartDefines',
+        () async {
+          final flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
+          final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
+            forcedBuildMode: BuildMode.debug,
+          );
+
+          expect(buildInfo.dartDefines, contains('FLUTTER_CONTENT_HASH=12345'));
+        },
+        overrides: <Type, Generator>{
+          ProcessManager: () => FakeProcessManager.any(),
+          FlutterVersion: () => FakeFlutterVersion(),
+        },
+      );
+
+      testUsingContext(
         'FLUTTER_DART_VERSION is set in dartDefines',
         () async {
           final flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
