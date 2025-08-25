@@ -326,7 +326,18 @@ class RenderSliverMainAxisGroup extends RenderSliver
         ),
         parentUsesSize: true,
       );
+
       final SliverGeometry childLayoutGeometry = child.geometry!;
+
+      if (childLayoutGeometry case SliverGeometry(
+        :final double scrollOffsetCorrection,
+      ) when scrollOffsetCorrection != 0) {
+        geometry = SliverGeometry(scrollOffsetCorrection: scrollOffsetCorrection);
+        return;
+      }
+
+      assert(childLayoutGeometry.debugAssertIsValid());
+
       final double childPaintOffset = layoutOffset + childLayoutGeometry.paintOrigin;
       final SliverPhysicalParentData childParentData =
           child.parentData! as SliverPhysicalParentData;
