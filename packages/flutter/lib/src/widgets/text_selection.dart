@@ -107,13 +107,18 @@ abstract class TextSelectionControls {
     BuildContext context,
     TextSelectionHandleType type,
     double textLineHeight, [
+    double? cursorWidth,
     VoidCallback? onTap,
   ]);
 
   /// Get the anchor point of the handle relative to itself. The anchor point is
   /// the point that is aligned with a specific point in the text. A handle
   /// often visually "points to" that location.
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight);
+  Offset getHandleAnchor(
+    TextSelectionHandleType type,
+    double textLineHeight, {
+    bool isEditText = true,
+  });
 
   /// Builds a toolbar near a text selection.
   ///
@@ -299,13 +304,18 @@ class EmptyTextSelectionControls extends TextSelectionControls {
     BuildContext context,
     TextSelectionHandleType type,
     double textLineHeight, [
+    double? cursorWidth,
     VoidCallback? onTap,
   ]) {
     return const SizedBox.shrink();
   }
 
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+  Offset getHandleAnchor(
+    TextSelectionHandleType type,
+    double textLineHeight, {
+    bool isEditText = true,
+  }) {
     return Offset.zero;
   }
 }
@@ -546,6 +556,7 @@ class TextSelectionOverlay {
         TextSelectionHandleType.left,
         TextSelectionHandleType.right,
       )
+      ..cursorWidth = renderObject.cursorWidth
       ..lineHeightAtStart = _getStartGlyphHeight()
       ..endHandleType = _chooseType(
         renderObject.textDirection,
@@ -1330,6 +1341,12 @@ class SelectionOverlay {
     markNeedsBuild();
   }
 
+  /// The width of the cursor.
+  ///
+  /// This value is used by [TextSelectionControls.buildHandle] for calculating
+  /// the handle offset when handle type is [TextSelectionHandleType.collapsed].
+  double cursorWidth = 2.0;
+
   /// The line height at the selection end.
   ///
   /// This value is used for calculating the size of the end selection handle.
@@ -1767,6 +1784,7 @@ class SelectionOverlay {
       handle = _SelectionHandleOverlay(
         type: _startHandleType,
         handleLayerLink: startHandleLayerLink,
+        cursorWidth: cursorWidth,
         onSelectionHandleTapped: onSelectionHandleTapped,
         onSelectionHandleDragStart: _handleStartHandleDragStart,
         onSelectionHandleDragUpdate: _handleStartHandleDragUpdate,
@@ -1795,6 +1813,7 @@ class SelectionOverlay {
       handle = _SelectionHandleOverlay(
         type: _endHandleType,
         handleLayerLink: endHandleLayerLink,
+        cursorWidth: cursorWidth,
         onSelectionHandleTapped: onSelectionHandleTapped,
         onSelectionHandleDragStart: _handleEndHandleDragStart,
         onSelectionHandleDragUpdate: _handleEndHandleDragUpdate,
@@ -1969,6 +1988,7 @@ class _SelectionHandleOverlay extends StatefulWidget {
   const _SelectionHandleOverlay({
     required this.type,
     required this.handleLayerLink,
+    required this.cursorWidth,
     this.onSelectionHandleTapped,
     this.onSelectionHandleDragStart,
     this.onSelectionHandleDragUpdate,
@@ -1980,6 +2000,7 @@ class _SelectionHandleOverlay extends StatefulWidget {
   });
 
   final LayerLink handleLayerLink;
+  final double cursorWidth;
   final VoidCallback? onSelectionHandleTapped;
   final ValueChanged<DragStartDetails>? onSelectionHandleDragStart;
   final ValueChanged<DragUpdateDetails>? onSelectionHandleDragUpdate;
@@ -2061,6 +2082,7 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay>
     final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
       widget.type,
       widget.preferredLineHeight,
+      isEditText: false,
     );
 
     // Make sure a drag is eagerly accepted. This is used on iOS to match the
@@ -2118,6 +2140,7 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay>
                   context,
                   widget.type,
                   widget.preferredLineHeight,
+                  widget.cursorWidth,
                   widget.onSelectionHandleTapped,
                 ),
               ),

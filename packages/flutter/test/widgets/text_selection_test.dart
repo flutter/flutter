@@ -2100,6 +2100,7 @@ class TextSelectionControlsSpy extends TextSelectionControls {
     BuildContext context,
     TextSelectionHandleType type,
     double textLineHeight, [
+    double? cursorWidth,
     VoidCallback? onTap,
   ]) {
     return ElevatedButton(
@@ -2130,7 +2131,11 @@ class TextSelectionControlsSpy extends TextSelectionControls {
   }
 
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+  Offset getHandleAnchor(
+    TextSelectionHandleType type,
+    double textLineHeight, {
+    bool isEditText = true,
+  }) {
     return Offset.zero;
   }
 

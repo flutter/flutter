@@ -63,6 +63,7 @@ class CupertinoDesktopTextSelectionControls extends TextSelectionControls {
     BuildContext context,
     TextSelectionHandleType type,
     double textLineHeight, [
+    double? cursorWidth,
     VoidCallback? onTap,
   ]) {
     return const SizedBox.shrink();
@@ -70,7 +71,11 @@ class CupertinoDesktopTextSelectionControls extends TextSelectionControls {
 
   /// Gets the position for the text selection handles, but desktop has none.
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+  Offset getHandleAnchor(
+    TextSelectionHandleType type,
+    double textLineHeight, {
+    bool isEditText = true,
+  }) {
     return Offset.zero;
   }
 

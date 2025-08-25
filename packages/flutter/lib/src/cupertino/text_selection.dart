@@ -114,6 +114,7 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
     BuildContext context,
     TextSelectionHandleType type,
     double textLineHeight, [
+    double? cursorWidth,
     VoidCallback? onTap,
   ]) {
     // iOS selection handles do not respond to taps.
@@ -155,7 +156,11 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
   ///
   /// See [TextSelectionControls.getHandleAnchor].
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+  Offset getHandleAnchor(
+    TextSelectionHandleType type,
+    double textLineHeight, {
+    bool isEditText = true,
+  }) {
     final Size handleSize = getHandleSize(textLineHeight);
 
     switch (type) {
