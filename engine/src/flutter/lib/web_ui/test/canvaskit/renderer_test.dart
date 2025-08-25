@@ -54,13 +54,17 @@ class TestViewRasterizer extends ViewRasterizer {
   }
 
   @override
-  Future<void> draw(LayerTree tree) async {
+  Future<void> draw(LayerTree tree, FrameTimingRecorder? recorder) async {
     treesRendered.add(tree);
     return Future<void>.value();
   }
 
   @override
-  Future<void> rasterizeToCanvas(DisplayCanvas canvas, List<CkPicture> pictures) {
+  Future<void> rasterize(
+    List<DisplayCanvas> canvases,
+    List<ui.Picture> pictures,
+    FrameTimingRecorder? recorder,
+  ) {
     // No-op
     return Future<void>.value();
   }

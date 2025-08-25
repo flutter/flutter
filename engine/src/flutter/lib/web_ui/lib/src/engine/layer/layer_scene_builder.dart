@@ -4,8 +4,13 @@
 
 import 'dart:typed_data';
 
-import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+
+import '../lazy_path.dart';
+import '../vector_math.dart';
+import 'layer.dart';
+import 'layer_painting.dart';
+import 'layer_tree.dart';
 
 class LayerScene implements ui.Scene {
   LayerScene(RootLayer rootLayer) : layerTree = LayerTree(rootLayer);
@@ -49,7 +54,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     bool isComplexHint = false,
     bool willChangeHint = false,
   }) {
-    currentLayer.add(PictureLayer(picture as CkPicture, offset, isComplexHint, willChangeHint));
+    currentLayer.add(PictureLayer(picture as LayerPicture, offset, isComplexHint, willChangeHint));
   }
 
   @override
@@ -155,7 +160,9 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     ui.ImageFilterEngineLayer? oldLayer,
     ui.Offset offset = ui.Offset.zero,
   }) {
-    return pushLayer<ImageFilterEngineLayer>(ImageFilterEngineLayer(filter, offset));
+    return pushLayer<ImageFilterEngineLayer>(
+      ImageFilterEngineLayer(filter as LayerImageFilter, offset),
+    );
   }
 
   @override

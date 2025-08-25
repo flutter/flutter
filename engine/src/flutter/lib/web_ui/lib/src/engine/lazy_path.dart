@@ -8,7 +8,7 @@ import 'dart:typed_data';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-abstract class DisposablePath implements ScenePath {
+abstract class DisposablePath implements ScenePath, LayerPath {
   @override
   DisposablePathMetrics computeMetrics({bool forceClosed = false});
 
@@ -355,7 +355,7 @@ abstract class DisposablePathConstructors {
   );
 }
 
-class LazyPath implements ScenePath, Collectable {
+class LazyPath implements ScenePath, LayerPath, Collectable {
   factory LazyPath(DisposablePathConstructors constructors) =>
       LazyPath._(constructors, ui.PathFillType.nonZero, () => constructors.createNew());
   LazyPath._(this.constructors, this._fillType, this.initializer) : _commands = [];

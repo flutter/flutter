@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import '../canvaskit/canvaskit_api.dart';
-import '../canvaskit/text_fragmenter.dart';
+import '../text_fragmenter.dart';
 import 'paragraph.dart';
 
 class CodeUnitFlags {

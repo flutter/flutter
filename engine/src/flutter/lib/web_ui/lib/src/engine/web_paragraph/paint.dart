@@ -4,8 +4,8 @@
 
 import 'package:ui/ui.dart' as ui;
 
+import '../canvaskit/canvas.dart';
 import '../canvaskit/canvaskit_api.dart';
-import '../canvaskit/canvaskit_canvas.dart';
 import '../canvaskit/image.dart';
 import '../dom.dart';
 import 'debug.dart';
@@ -39,13 +39,7 @@ class TextPaint {
     }
   }
 
-  void paintLineOnCanvasKit(
-    CanvasKitCanvas canvas,
-    TextLayout layout,
-    TextLine line,
-    double x,
-    double y,
-  ) {
+  void paintLineOnCanvasKit(CkCanvas canvas, TextLayout layout, TextLine line, double x, double y) {
     for (final BidiRun run in line.visualRuns) {
       for (int i = run.clusterRange.start; i < run.clusterRange.end; ++i) {
         final clusterText = layout.textClusters[i];
@@ -63,7 +57,7 @@ class TextPaint {
   }
 
   void paintCluster(
-    CanvasKitCanvas canvas,
+    CkCanvas canvas,
     ExtendedTextCluster webTextCluster,
     ui.Offset clusterOffset,
     ui.Offset lineOffset,
