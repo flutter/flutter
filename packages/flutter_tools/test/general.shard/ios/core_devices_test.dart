@@ -1911,7 +1911,7 @@ This log happens after the application is launched and should be sent to FakeIOS
 10:04:12  Acquired usage assertion.
 This log happens before the application is launched and should not be sent to FakeIOSCoreDeviceLogForwarder
 Launched application with com.example.my_app bundle identifier.
-Waiting for the application to terminate…
+Waiting for the application to terminate...
 [PreviewsAgentExecutorLibrary] This log happens after the application is launched but matches an ignore pattern and should be skipped
 '''),
         );
