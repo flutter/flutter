@@ -48,6 +48,13 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     }
 }
 
+val bundleToolOnly: Configuration by configurations.creating
+
+tasks.register<JavaExec>("bundleTool") {
+    mainClass.set("com.android.tools.build.bundletool.BundleToolMain")
+    classpath = bundleToolOnly
+}
+
 dependencies {
     // Versions available https://mvnrepository.com/artifact/androidx.annotation/annotation-jvm.
     // Version release notes https://developer.android.com/jetpack/androidx/releases/annotation
@@ -63,6 +70,7 @@ dependencies {
     //  * ndkVersion constant in packages/flutter_tools/lib/src/android/gradle_utils.dart
     //  * ndkVersion in FlutterExtension in packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt
     compileOnly("com.android.tools.build:gradle:8.9.1")
+    bundleToolOnly("com.android.tools.build:bundletool:1.18.1")
 
     testImplementation(kotlin("test"))
     testImplementation("com.android.tools.build:gradle:8.9.1")
