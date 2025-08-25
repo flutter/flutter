@@ -52,8 +52,8 @@ class _${blockName}DefaultsM3 extends CheckboxThemeData {
   }
 
   @override
-  MaterialStateProperty<Color> get fillColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color> get fillColor {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         if (states.contains(MaterialState.selected)) {
           return ${componentColor('md.comp.checkbox.selected.disabled.container')};
@@ -71,8 +71,8 @@ class _${blockName}DefaultsM3 extends CheckboxThemeData {
   }
 
   @override
-  MaterialStateProperty<Color> get checkColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color> get checkColor {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         if (states.contains(MaterialState.selected)) {
           return ${componentColor('md.comp.checkbox.selected.disabled.icon')};
@@ -90,8 +90,8 @@ class _${blockName}DefaultsM3 extends CheckboxThemeData {
   }
 
   @override
-  MaterialStateProperty<Color> get overlayColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color> get overlayColor {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.error)) {
         if (states.contains(MaterialState.pressed)) {
           return ${componentColor('md.comp.checkbox.error.pressed.state-layer')};

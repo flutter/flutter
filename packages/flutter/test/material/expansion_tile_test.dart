@@ -1690,7 +1690,9 @@ void main() {
       );
 
       final Size materialAppSize = tester.getSize(find.byType(MaterialApp));
-      final Size titleSize = tester.getSize(find.byType(ColoredBox));
+      final Size titleSize = tester.getSize(
+        find.descendant(of: find.byType(ExpansionTile), matching: find.byType(ColoredBox)),
+      );
 
       expect(titleSize.width, materialAppSize.width);
     },
@@ -1713,7 +1715,9 @@ void main() {
       );
 
       final Size materialAppSize = tester.getSize(find.byType(MaterialApp));
-      final Size titleSize = tester.getSize(find.byType(ColoredBox));
+      final Size titleSize = tester.getSize(
+        find.descendant(of: find.byType(ExpansionTile), matching: find.byType(ColoredBox)),
+      );
 
       expect(titleSize.width, materialAppSize.width - 32.0);
     },

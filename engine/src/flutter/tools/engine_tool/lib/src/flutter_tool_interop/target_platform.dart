@@ -23,6 +23,9 @@ final class TargetPlatform {
   /// Android ARM64.
   static const androidArm64 = TargetPlatform._('android-arm64');
 
+  /// Android RISCV64.
+  static const androidRiscv64 = TargetPlatform._('android-riscv64');
+
   /// Android x64.
   static const androidX64 = TargetPlatform._('android-x64');
 
@@ -87,6 +90,7 @@ final class TargetPlatform {
     androidUnspecified,
     androidArm,
     androidArm64,
+    androidRiscv64,
     androidX64,
     androidX86,
     linuxArm64,

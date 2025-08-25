@@ -17,12 +17,12 @@
 #include "flutter/display_list/effects/dl_mask_filter.h"
 #include "flutter/display_list/geometry/dl_path.h"
 #include "flutter/display_list/image/dl_image.h"
-#include "flutter/impeller/typographer/text_frame.h"
 #include "flutter/third_party/skia/include/core/SkTextBlob.h"
 
 namespace flutter {
 
 class DisplayList;
+class DlText;
 
 //------------------------------------------------------------------------------
 /// @brief      Internal API for rendering recorded display lists to backends.
@@ -357,13 +357,9 @@ class DlOpReceiver {
                          bool render_with_attributes) = 0;
   virtual void drawDisplayList(const sk_sp<DisplayList> display_list,
                                DlScalar opacity = SK_Scalar1) = 0;
-  virtual void drawTextBlob(const sk_sp<SkTextBlob> blob,
-                            DlScalar x,
-                            DlScalar y) = 0;
-  virtual void drawTextFrame(
-      const std::shared_ptr<impeller::TextFrame>& text_frame,
-      DlScalar x,
-      DlScalar y) = 0;
+  virtual void drawText(const std::shared_ptr<DlText>& text,
+                        DlScalar x,
+                        DlScalar y) = 0;
   virtual void drawShadow(const DlPath& path,
                           const DlColor color,
                           const DlScalar elevation,
