@@ -24,7 +24,7 @@ void main() {
 }
 
 void testMain() {
-  group('$HtmlViewEmbedder', () {
+  group('$PlatformViewEmbedder', () {
     setUpCanvasKitTest(withImplicitView: true);
 
     setUp(() {
@@ -83,12 +83,10 @@ void testMain() {
       sb.addPlatformView(0, width: 10, height: 10);
       await renderScene(sb.build());
 
-      expect(sceneHost.querySelectorAll('#sk_path_defs').single, isNotNull);
       expect(
-        sceneHost.querySelectorAll('#sk_path_defs').single.querySelectorAll('clipPath').single,
-        isNotNull,
+        sceneHost.querySelectorAll('flt-clip').single.style.clipPath,
+        'rect(0px 10px 10px 0px round 3px)',
       );
-      expect(sceneHost.querySelectorAll('flt-clip').single.style.clipPath, 'url("#svgClip1")');
       expect(sceneHost.querySelectorAll('flt-clip').single.style.width, '100%');
       expect(sceneHost.querySelectorAll('flt-clip').single.style.height, '100%');
     });
@@ -633,35 +631,6 @@ void testMain() {
       expect(platformViewsHost.querySelectorAll('flt-platform-view'), hasLength(2));
     });
 
-    test('removes old SVG clip definitions from the DOM when the view is recomposited', () async {
-      ui_web.platformViewRegistry.registerViewFactory(
-        'test-platform-view',
-        (int viewId) => createDomHTMLDivElement()..id = 'test-view',
-      );
-      await createPlatformView(0, 'test-platform-view');
-
-      Future<void> renderTestScene() async {
-        final LayerSceneBuilder sb = LayerSceneBuilder();
-        sb.pushOffset(0, 0);
-        sb.pushClipRRect(ui.RRect.fromLTRBR(0, 0, 10, 10, const ui.Radius.circular(3)));
-        sb.addPlatformView(0, width: 10, height: 10);
-        await renderScene(sb.build());
-      }
-
-      final DomNode skPathDefs = sceneHost.querySelector('#sk_path_defs')!;
-
-      expect(skPathDefs.childNodes, hasLength(0));
-
-      await renderTestScene();
-      expect(skPathDefs.childNodes, hasLength(1));
-
-      await renderTestScene();
-      expect(skPathDefs.childNodes, hasLength(1));
-
-      await renderTestScene();
-      expect(skPathDefs.childNodes, hasLength(1));
-    });
-
     test('does not crash when a prerolled platform view is not composited', () async {
       ui_web.platformViewRegistry.registerViewFactory(
         'test-platform-view',
@@ -944,7 +913,7 @@ void testMain() {
       _expectSceneMatches(<_EmbeddedViewMarker>[_platformView, _platformView, _platformView]);
 
       expect(() {
-        final HtmlViewEmbedder embedder =
+        final PlatformViewEmbedder embedder =
             (renderer as CanvasKitRenderer).rasterizers[implicitView.viewId]!.viewEmbedder;
         // The following line used to cause a "Concurrent modification during iteration"
         embedder.dispose();
@@ -1120,13 +1089,13 @@ void testMain() {
       await renderScene(scene);
       _expectSceneMatches(<_EmbeddedViewMarker>[_overlay, _platformView, _platformView, _overlay]);
 
-      final Rendering rendering = CanvasKitRenderer
+      final Composition rendering = CanvasKitRenderer
           .instance
           .rasterizers[implicitView.viewId]!
           .viewEmbedder
-          .debugActiveRendering;
+          .debugActiveComposition;
       final List<int> picturesPerCanvas = rendering.canvases
-          .map((RenderingRenderCanvas canvas) => canvas.pictures.length)
+          .map((CompositionCanvas canvas) => canvas.pictures.length)
           .toList();
       expect(picturesPerCanvas, <int>[1, 2]);
     });
@@ -1357,13 +1326,13 @@ void testMain() {
       ]);
 
       // The second-to-last canvas should have all the extra pictures.
-      final Rendering rendering = CanvasKitRenderer
+      final Composition rendering = CanvasKitRenderer
           .instance
           .rasterizers[implicitView.viewId]!
           .viewEmbedder
-          .debugActiveRendering;
+          .debugActiveComposition;
       final List<int> numPicturesPerCanvas = rendering.canvases
-          .map((RenderingRenderCanvas canvas) => canvas.pictures.length)
+          .map((CompositionCanvas canvas) => canvas.pictures.length)
           .toList();
       expect(numPicturesPerCanvas, <int>[1, 1, 1, 1, 1, 1, 12, 1]);
 
@@ -1419,13 +1388,13 @@ void testMain() {
       ]);
 
       // The last canvas should have all the pictures.
-      final Rendering secondRendering = CanvasKitRenderer
+      final Composition secondRendering = CanvasKitRenderer
           .instance
           .rasterizers[implicitView.viewId]!
           .viewEmbedder
-          .debugActiveRendering;
+          .debugActiveComposition;
       final List<int> picturesPerCanvasInSecondRendering = secondRendering.canvases
-          .map((RenderingRenderCanvas canvas) => canvas.pictures.length)
+          .map((CompositionCanvas canvas) => canvas.pictures.length)
           .toList();
       expect(picturesPerCanvasInSecondRendering, <int>[19]);
       debugOverrideJsConfiguration(null);
