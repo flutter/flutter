@@ -11,5 +11,7 @@
   "searchWebButtonLabel": "Sök på webben",
   "shareButtonLabel": "Dela",
   "pasteButtonLabel": "Klistra in",
-  "selectAllButtonLabel": "Markera allt"
+  "selectAllButtonLabel": "Markera allt",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found"
 }

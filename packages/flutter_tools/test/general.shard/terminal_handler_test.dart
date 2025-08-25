@@ -1415,7 +1415,6 @@ class TestRunner extends Fake implements ResidentRunner {
   Future<int?> attach({
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
-    bool allowExistingDdsInstance = false,
     bool enableDevTools = false,
     bool needsFullRestart = true,
   }) async => null;

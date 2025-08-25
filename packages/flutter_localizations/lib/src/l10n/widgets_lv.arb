@@ -11,5 +11,7 @@
   "searchWebButtonLabel": "Meklēt tīmeklī",
   "shareButtonLabel": "Kopīgot",
   "pasteButtonLabel": "Ielīmēt",
-  "selectAllButtonLabel": "Atlasīt visu"
+  "selectAllButtonLabel": "Atlasīt visu",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found"
 }

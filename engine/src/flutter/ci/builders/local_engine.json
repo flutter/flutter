@@ -273,6 +273,32 @@
       "gn": [
         "--runtime-mode",
         "debug",
+        "--android",
+        "--android-cpu=riscv64",
+        "--no-stripped",
+        "--no-lto",
+        "--rbe",
+        "--no-goma"
+      ],
+      "name": "linux/android_debug_riscv64",
+      "description": "Builds a debug mode engine that targets riscv64 Android from a Linux host.",
+      "ninja": {
+        "config": "android_debug_riscv64",
+        "targets": []
+      }
+    },
+    {
+      "cas_archive": false,
+      "drone_dimensions": [
+        "os=Linux",
+        "device_type=none"
+      ],
+      "gclient_variables": {
+        "use_rbe": true
+      },
+      "gn": [
+        "--runtime-mode",
+        "debug",
         "--unoptimized",
         "--android",
         "--android-cpu=arm64",

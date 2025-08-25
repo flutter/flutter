@@ -537,7 +537,7 @@ void ImageDecoderImpeller::Decode(fml::RefPtr<ImageDescriptor> descriptor,
   ImageResult result = [p_result,                               //
                         raw_descriptor,                         //
                         ui_runner = runners_.GetUITaskRunner()  //
-  ](auto image, auto decode_error) {
+  ](const auto& image, const auto& decode_error) {
     ui_runner->PostTask([raw_descriptor, p_result, image, decode_error]() {
       raw_descriptor->Release();
       p_result(std::move(image), decode_error);
