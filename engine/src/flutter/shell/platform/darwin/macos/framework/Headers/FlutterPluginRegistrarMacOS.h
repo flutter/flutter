@@ -80,7 +80,7 @@ FLUTTER_DARWIN_EXPORT
  *   with that |viewIdentifier| cannot be found. It also returns |nil| when in a
  *   headless environment, or when the underlying Flutter engine is deallocated.
  */
-- (nullable NSViewController*)viewControllerForViewIdentifier:(FlutterViewIdentifier)viewIdentifier;
+- (nullable NSViewController*)viewControllerForViewIdentifier:(int64_t)viewIdentifier;
 
 /**
  * Registers |delegate| to receive handleMethodCall:result: callbacks for the given |channel|.

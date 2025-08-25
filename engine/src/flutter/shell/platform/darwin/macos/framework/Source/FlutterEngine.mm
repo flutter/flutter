@@ -370,7 +370,7 @@ constexpr char kTextPlainFormat[] = "text/plain";
   return [self viewControllerForViewIdentifier:kFlutterImplicitViewId];
 }
 
-- (NSViewController*)viewControllerForViewIdentifier:(FlutterViewIdentifier)viewIdentifier {
+- (NSViewController*)viewControllerForViewIdentifier:(int64_t)viewIdentifier {
   return [_flutterEngine viewControllerForIdentifier:viewIdentifier];
 }
 
