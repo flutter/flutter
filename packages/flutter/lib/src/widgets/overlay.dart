@@ -886,6 +886,9 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
         );
       }
     }
+    print('children.length: ${children.length}');
+    print('onstageCount: $onstageCount');
+    print('skipCount: ${children.length - onstageCount}');
     return _Theater(
       skipCount: children.length - onstageCount,
       clipBehavior: widget.clipBehavior,
@@ -963,6 +966,7 @@ class _Theater extends MultiChildRenderObjectWidget {
 
   @override
   _RenderTheater createRenderObject(BuildContext context) {
+    print('Creating _RenderTheater: skipCount: $skipCount');
     return _RenderTheater(
       skipCount: skipCount,
       textDirection: Directionality.of(context),
@@ -1422,11 +1426,13 @@ class _RenderTheater extends RenderBox
       _layingOutSizeDeterminingChild = false;
       size = sizeDeterminingChild.size;
     }
+    print('perform layout: $size, ${describeIdentity(this)}');
 
     // Equivalent to BoxConstraints used by RenderStack for StackFit.expand.
     final BoxConstraints nonPositionedChildConstraints = BoxConstraints.tight(size);
     for (final RenderBox child in _childrenInPaintOrder()) {
       if (child != sizeDeterminingChild) {
+        print('npcc:' + nonPositionedChildConstraints.toString());
         layoutChild(child, nonPositionedChildConstraints);
       }
     }
