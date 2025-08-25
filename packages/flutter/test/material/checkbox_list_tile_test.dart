@@ -1843,6 +1843,24 @@ void main() {
     expect(checkboxOffset.dy - tileOffset.dy, bottomPositionCheckbox);
     expect(secondaryOffset.dy - tileOffset.dy, bottomPositionSecondary);
   });
+
+  testWidgets('CheckboxListTile renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: Scaffold(
+              body: wrap(
+                child: CheckboxListTile(value: true, onChanged: (_) {}, title: const Text('X')),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    final Finder xText = find.text('X');
+    expect(tester.getSize(xText).isEmpty, isTrue);
+  });
 }
 
 class _SelectedGrabMouseCursor extends MaterialStateMouseCursor {
