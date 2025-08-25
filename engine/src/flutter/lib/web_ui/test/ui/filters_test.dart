@@ -486,7 +486,9 @@ Future<void> testMain() async {
     await renderScene(builder.build());
 
     await matchGoldenFile('ui_zero_sigma_blur.png', region: region);
-  });
+    // Unskip when Skwasm and CanvasKit are unified:
+    // https://github.com/flutter/flutter/issues/172311
+  }, skip: isSkwasm);
 
   test('== operator', () {
     final List<ui.ImageFilter> filters1 = <ui.ImageFilter>[

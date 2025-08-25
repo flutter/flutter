@@ -294,7 +294,7 @@ void testMain() {
       await matchGoldenFile('ui_colorfilter_as_imagefilter.png', region: region);
       // Unskip when Skwasm and CanvasKit are unified:
       // https://github.com/flutter/flutter/issues/172311
-    }, skip: isSkwasm);
+    }, skip: isSkwasm || isSafari || isFirefox);
     // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
   }, skip: isSafari || isFirefox);
 }
