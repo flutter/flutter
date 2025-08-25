@@ -289,6 +289,7 @@ class SnackBar extends StatefulWidget {
     this.showCloseIcon,
     this.closeIconColor,
     this.duration = _snackBarDisplayDuration,
+    bool? persist,
     this.animation,
     this.onVisible,
     this.dismissDirection,
@@ -299,7 +300,8 @@ class SnackBar extends StatefulWidget {
          actionOverflowThreshold == null ||
              (actionOverflowThreshold >= 0 && actionOverflowThreshold <= 1),
          'Action overflow threshold must be between 0 and 1 inclusive',
-       );
+       ),
+       persist = persist ?? action != null;
 
   /// The primary content of the snack bar.
   ///
@@ -459,6 +461,17 @@ class SnackBar extends StatefulWidget {
   ///  * <https://material.io/design/components/snackbars.html>
   final Duration duration;
 
+  /// Whether the snack bar will stay or auto-dismiss after timeout.
+  ///
+  /// If true, the snack bar remains visible even after the timeout, until the
+  /// user taps the action button or the close icon.
+  ///
+  /// If false, the snack bar will be dismissed after the timeout.
+  ///
+  /// If not provided, but the snackbar action is not null, the snackbar will
+  /// persist as well.
+  final bool persist;
+
   /// The animation driving the entrance and exit of the snack bar.
   final Animation<double>? animation;
 
@@ -521,6 +534,7 @@ class SnackBar extends StatefulWidget {
       showCloseIcon: showCloseIcon,
       closeIconColor: closeIconColor,
       duration: duration,
+      persist: persist,
       animation: newAnimation,
       onVisible: onVisible,
       dismissDirection: dismissDirection,
