@@ -7,12 +7,16 @@ import 'dart:async';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/async_guard.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/version.dart' as base;
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/ios/core_devices.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
+import 'package:flutter_tools/src/ios/lldb.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart';
@@ -74,6 +78,7 @@ Runner(UIKit)[297] <Notice>: E is for enpitsu"
             cache: fakeCache,
             logger: logger,
           ),
+          xcode: FakeXcode(),
         );
         final List<String> lines = await logReader.logLines.toList();
 
@@ -103,6 +108,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
             cache: fakeCache,
             logger: logger,
           ),
+          xcode: FakeXcode(),
         );
         final List<String> lines = await logReader.logLines.toList();
 
@@ -136,6 +142,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           cache: fakeCache,
           logger: logger,
         ),
+        xcode: FakeXcode(),
       );
       final List<String> lines = await logReader.logLines.toList();
 
@@ -186,6 +193,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           cache: fakeCache,
           logger: logger,
         ),
+        xcode: FakeXcode(),
       );
       await logReader.provideVmService(vmService);
 
@@ -238,6 +246,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
             cache: fakeCache,
             logger: logger,
           ),
+          xcode: FakeXcode(),
         );
         await logReader.provideVmService(vmService);
 
@@ -275,6 +284,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           cache: fakeCache,
           logger: logger,
         ),
+        xcode: FakeXcode(),
         useSyslog: false,
       );
       final iosDeployDebugger = FakeIOSDeployDebugger();
@@ -299,6 +309,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           cache: fakeCache,
           logger: logger,
         ),
+        xcode: FakeXcode(),
         useSyslog: false,
       );
       final streamComplete = Completer<void>();
@@ -318,6 +329,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           cache: fakeCache,
           logger: logger,
         ),
+        xcode: FakeXcode(),
         useSyslog: false,
       );
       final iosDeployDebugger = FakeIOSDeployDebugger();
@@ -342,6 +354,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           cache: fakeCache,
           logger: logger,
         ),
+        xcode: FakeXcode(),
         useSyslog: false,
       );
       Object? exception;
@@ -372,6 +385,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           cache: fakeCache,
           logger: logger,
         ),
+        xcode: FakeXcode(),
         majorSdkVersion: 17,
         isCoreDevice: true,
       );
@@ -379,6 +393,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       expect(logReader.useSyslogLogging, isTrue);
       expect(logReader.useUnifiedLogging, isTrue);
       expect(logReader.useIOSDeployLogging, isFalse);
+      expect(logReader.useCoreDeviceLogging, isFalse);
       expect(logReader.logSources.primarySource, IOSDeviceLogSource.idevicesyslog);
       expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.unifiedLogging);
     });
@@ -391,6 +406,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           cache: fakeCache,
           logger: logger,
         ),
+        xcode: FakeXcode(),
         majorSdkVersion: 17,
         isCoreDevice: true,
         isWirelesslyConnected: true,
@@ -399,6 +415,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       expect(logReader.useSyslogLogging, isFalse);
       expect(logReader.useUnifiedLogging, isTrue);
       expect(logReader.useIOSDeployLogging, isFalse);
+      expect(logReader.useCoreDeviceLogging, isFalse);
       expect(logReader.logSources.primarySource, IOSDeviceLogSource.unifiedLogging);
       expect(logReader.logSources.fallbackSource, isNull);
     });
@@ -411,12 +428,14 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           cache: fakeCache,
           logger: logger,
         ),
+        xcode: FakeXcode(),
         majorSdkVersion: 12,
       );
 
       expect(logReader.useSyslogLogging, isTrue);
       expect(logReader.useUnifiedLogging, isFalse);
       expect(logReader.useIOSDeployLogging, isFalse);
+      expect(logReader.useCoreDeviceLogging, isFalse);
       expect(logReader.logSources.primarySource, IOSDeviceLogSource.idevicesyslog);
       expect(logReader.logSources.fallbackSource, isNull);
     });
@@ -431,12 +450,14 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
             cache: fakeCache,
             logger: logger,
           ),
+          xcode: FakeXcode(),
           majorSdkVersion: 13,
         );
 
         expect(logReader.useSyslogLogging, isFalse);
         expect(logReader.useUnifiedLogging, isTrue);
         expect(logReader.useIOSDeployLogging, isTrue);
+        expect(logReader.useCoreDeviceLogging, isFalse);
         expect(logReader.logSources.primarySource, IOSDeviceLogSource.iosDeploy);
         expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.unifiedLogging);
       },
@@ -452,6 +473,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
             cache: fakeCache,
             logger: logger,
           ),
+          xcode: FakeXcode(),
           majorSdkVersion: 13,
         );
 
@@ -477,6 +499,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         expect(logReader.useSyslogLogging, isFalse);
         expect(logReader.useUnifiedLogging, isTrue);
         expect(logReader.useIOSDeployLogging, isTrue);
+        expect(logReader.useCoreDeviceLogging, isFalse);
         expect(logReader.logSources.primarySource, IOSDeviceLogSource.unifiedLogging);
         expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.iosDeploy);
       },
@@ -492,6 +515,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
             cache: fakeCache,
             logger: logger,
           ),
+          xcode: FakeXcode(),
           majorSdkVersion: 13,
         );
 
@@ -521,6 +545,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         expect(logReader.useSyslogLogging, isFalse);
         expect(logReader.useUnifiedLogging, isTrue);
         expect(logReader.useIOSDeployLogging, isTrue);
+        expect(logReader.useCoreDeviceLogging, isFalse);
         expect(logReader.logSources.primarySource, IOSDeviceLogSource.iosDeploy);
         expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.unifiedLogging);
       },
@@ -534,6 +559,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           cache: fakeCache,
           logger: logger,
         ),
+        xcode: FakeXcode(),
         majorSdkVersion: 16,
       );
 
@@ -544,6 +570,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       expect(logReader.useSyslogLogging, isFalse);
       expect(logReader.useUnifiedLogging, isTrue);
       expect(logReader.useIOSDeployLogging, isTrue);
+      expect(logReader.useCoreDeviceLogging, isFalse);
       expect(logReader.logSources.primarySource, IOSDeviceLogSource.iosDeploy);
       expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.unifiedLogging);
     });
@@ -556,6 +583,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           cache: fakeCache,
           logger: logger,
         ),
+        xcode: FakeXcode(),
         usingCISystem: true,
         majorSdkVersion: 16,
       );
@@ -563,8 +591,30 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       expect(logReader.useSyslogLogging, isTrue);
       expect(logReader.useUnifiedLogging, isFalse);
       expect(logReader.useIOSDeployLogging, isTrue);
+      expect(logReader.useCoreDeviceLogging, isFalse);
       expect(logReader.logSources.primarySource, IOSDeviceLogSource.iosDeploy);
       expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.idevicesyslog);
+    });
+
+    testWithoutContext('for CoreDevice and Xcode 26', () {
+      final logReader = IOSDeviceLogReader.test(
+        iMobileDevice: IMobileDevice(
+          artifacts: artifacts,
+          processManager: processManager,
+          cache: fakeCache,
+          logger: logger,
+        ),
+        xcode: FakeXcode(version: base.Version(26, 0, 0)),
+        majorSdkVersion: 17,
+        isCoreDevice: true,
+      );
+
+      expect(logReader.useSyslogLogging, isFalse);
+      expect(logReader.useUnifiedLogging, isTrue);
+      expect(logReader.useIOSDeployLogging, isFalse);
+      expect(logReader.useCoreDeviceLogging, isTrue);
+      expect(logReader.logSources.primarySource, IOSDeviceLogSource.devicectlAndLldb);
+      expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.unifiedLogging);
     });
 
     group('when useSyslogLogging', () {
@@ -588,6 +638,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
             cache: fakeCache,
             logger: logger,
           ),
+          xcode: FakeXcode(),
           usingCISystem: true,
           majorSdkVersion: 16,
         );
@@ -609,6 +660,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
             cache: fakeCache,
             logger: logger,
           ),
+          xcode: FakeXcode(),
           majorSdkVersion: 16,
         );
 
@@ -633,6 +685,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
             cache: fakeCache,
             logger: logger,
           ),
+          xcode: FakeXcode(),
           majorSdkVersion: 16,
         );
 
@@ -658,6 +711,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
             cache: fakeCache,
             logger: logger,
           ),
+          xcode: FakeXcode(),
           majorSdkVersion: 12,
         );
 
@@ -714,6 +768,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
             cache: fakeCache,
             logger: logger,
           ),
+          xcode: FakeXcode(),
         );
         await logReader.provideVmService(vmService);
 
@@ -765,6 +820,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
             cache: fakeCache,
             logger: logger,
           ),
+          xcode: FakeXcode(),
           majorSdkVersion: 12,
         );
         await logReader.provideVmService(vmService);
@@ -775,6 +831,66 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         expect(logReader.useUnifiedLogging, isFalse);
         expect(processManager, hasNoRemainingExpectations);
         expect(lines, isEmpty);
+      });
+    });
+
+    group('when useCoreDeviceLogging', () {
+      testWithoutContext('is true devicectl and lldb sends messages to stream', () async {
+        final logReader = IOSDeviceLogReader.test(
+          iMobileDevice: IMobileDevice(
+            artifacts: artifacts,
+            processManager: FakeProcessManager.any(),
+            cache: fakeCache,
+            logger: logger,
+          ),
+          xcode: FakeXcode(version: base.Version(26, 0, 0)),
+          majorSdkVersion: 17,
+          isCoreDevice: true,
+        );
+
+        final coreDeviceLauncher = FakeIOSCoreDeviceLauncher();
+        await logReader.listenToCoreDeviceLauncher(coreDeviceLauncher);
+
+        const deviceCtlLog = 'A log from devicectl\n';
+        const lldbLog = 'A log from LLDB\n';
+
+        coreDeviceLauncher.coreDeviceLogForwarder.addLog(deviceCtlLog);
+        coreDeviceLauncher.lldbLogForwarder.addLog(lldbLog);
+
+        expect(logReader.useCoreDeviceLogging, isTrue);
+        await expectLater(
+          logReader.logLines,
+          emitsInAnyOrder(<Matcher>[equals(deviceCtlLog), equals(lldbLog)]),
+        );
+      });
+
+      testWithoutContext('is false devicectl and lldb do not sends messages to stream', () async {
+        final logReader = IOSDeviceLogReader.test(
+          iMobileDevice: IMobileDevice(
+            artifacts: artifacts,
+            processManager: FakeProcessManager.any(),
+            cache: fakeCache,
+            logger: logger,
+          ),
+          xcode: FakeXcode(version: base.Version(16, 0, 0)),
+          majorSdkVersion: 17,
+          isCoreDevice: true,
+        );
+
+        final coreDeviceLauncher = FakeIOSCoreDeviceLauncher();
+        await logReader.listenToCoreDeviceLauncher(coreDeviceLauncher);
+
+        const deviceCtlLog = 'A log from devicectl\n';
+        const lldbLog = 'A log from LLDB\n';
+
+        coreDeviceLauncher.coreDeviceLogForwarder.addLog(deviceCtlLog);
+        coreDeviceLauncher.lldbLogForwarder.addLog(lldbLog);
+
+        expect(logReader.useCoreDeviceLogging, isFalse);
+        await expectLater(logReader.logLines, neverEmits(deviceCtlLog));
+
+        expect(logReader.useCoreDeviceLogging, isFalse);
+        await expectLater(logReader.logLines, neverEmits(lldbLog));
       });
     });
 
@@ -789,6 +905,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
               cache: fakeCache,
               logger: logger,
             ),
+            xcode: FakeXcode(),
             usingCISystem: true,
             majorSdkVersion: 16,
           );
@@ -838,6 +955,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
             cache: fakeCache,
             logger: logger,
           ),
+          xcode: FakeXcode(),
           majorSdkVersion: 12,
         );
 
@@ -885,6 +1003,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
               cache: fakeCache,
               logger: logger,
             ),
+            xcode: FakeXcode(),
             usingCISystem: true,
             majorSdkVersion: 16,
           );
@@ -948,6 +1067,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
               cache: fakeCache,
               logger: logger,
             ),
+            xcode: FakeXcode(),
             usingCISystem: true,
             majorSdkVersion: 16,
           );
@@ -1006,6 +1126,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
             cache: fakeCache,
             logger: logger,
           ),
+          xcode: FakeXcode(),
           usingCISystem: true,
           majorSdkVersion: 16,
         );
@@ -1045,4 +1166,22 @@ class FakeIOSDeployDebugger extends Fake implements IOSDeployDebugger {
   Future<void> detach() async {
     detached = true;
   }
+}
+
+@override
+class FakeXcode extends Fake implements Xcode {
+  FakeXcode({this.version});
+
+  base.Version? version;
+
+  @override
+  base.Version? get currentVersion => version ?? base.Version(16, 0, 0);
+}
+
+class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {
+  @override
+  final coreDeviceLogForwarder = IOSCoreDeviceLogForwarder();
+
+  @override
+  final lldbLogForwarder = LLDBLogForwarder();
 }

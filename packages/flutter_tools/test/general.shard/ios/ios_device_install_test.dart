@@ -398,8 +398,14 @@ class FakeXcodeDebug extends Fake implements XcodeDebug {}
 
 class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
   @override
-  Future<bool> installApp({required String deviceId, required String bundlePath}) async {
-    return true;
+  Future<(bool, IOSCoreDeviceInstallResult?)> installApp({
+    required String deviceId,
+    required String bundlePath,
+  }) async {
+    final result = IOSCoreDeviceInstallResult.fromJson(<String, Object?>{
+      'info': <String, Object?>{'outcome': 'success'},
+    });
+    return (true, result);
   }
 
   @override
