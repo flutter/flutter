@@ -302,12 +302,14 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
   late CurvedAnimation _heightFactor;
   Timer? _timer;
 
+  bool get _isExpanded => widget.controller.isExpanded;
+
   @override
   void initState() {
     super.initState();
     _animationController = AnimationController(duration: widget.duration, vsync: this);
     final bool initiallyExpanded =
-        PageStorage.maybeOf(context)?.readState(context) as bool? ?? widget.controller.isExpanded;
+        PageStorage.maybeOf(context)?.readState(context) as bool? ?? _isExpanded;
     if (initiallyExpanded) {
       _animationController.value = 1.0;
       widget.controller.expand();
@@ -359,9 +361,7 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
       return;
     }
     final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
-    final String stateHint = widget.controller.isExpanded
-        ? localizations.collapsedHint
-        : localizations.expandedHint;
+    final String stateHint = _isExpanded ? localizations.collapsedHint : localizations.expandedHint;
 
     if (defaultTargetPlatform == TargetPlatform.iOS) {
       // TODO(tahatesser): This is a workaround for VoiceOver interrupting
@@ -380,7 +380,7 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
   void _toggleExpansion() {
     setState(() {
       // Rebuild with the header and the animating body.
-      if (widget.controller.isExpanded) {
+      if (_isExpanded) {
         _animationController.forward();
       } else {
         _animationController.reverse().then<void>((void value) {
@@ -392,15 +392,15 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
           });
         });
       }
-      PageStorage.maybeOf(context)?.writeState(context, widget.controller.isExpanded);
+      PageStorage.maybeOf(context)?.writeState(context, _isExpanded);
       _announceSemantics();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    assert(!_animationController.isDismissed || !widget.controller.isExpanded);
-    final bool closed = !widget.controller.isExpanded && _animationController.isDismissed;
+    assert(!_isExpanded || !_animationController.isDismissed);
+    final bool closed = !_isExpanded && _animationController.isDismissed;
     final bool shouldRemoveBody = closed && !widget.maintainState;
 
     final Widget result = Offstage(
