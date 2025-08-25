@@ -2,15 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'page.dart';
+/// @docImport 'package:flutter/material.dart';
 library;
 
 import 'dart:ui' show clampDouble;
 
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
-
-import 'page_transitions_theme.dart';
+import 'basic.dart';
+import 'binding.dart';
+import 'framework.dart';
+import 'implicit_animations.dart';
+import 'media_query.dart';
+import 'page_transitions_builder.dart';
+import 'pages.dart';
+import 'ticker_provider.dart';
+import 'transitions.dart';
 
 /// Used by [PageTransitionsTheme] to define a [MaterialPageRoute] page
 /// transition animation that looks like the default page transition used on
