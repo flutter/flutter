@@ -180,7 +180,7 @@ class ChoiceChip extends StatelessWidget
   @override
   final bool autofocus;
   @override
-  final MaterialStateProperty<Color?>? color;
+  final WidgetStateProperty<Color?>? color;
   @override
   final Color? backgroundColor;
   @override
@@ -306,8 +306,8 @@ class _ChoiceChipDefaultsM3 extends ChipThemeData {
   );
 
   @override
-  MaterialStateProperty<Color?>? get color =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color?>? get color =>
+    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected) && states.contains(MaterialState.disabled)) {
         return _chipVariant == _ChipVariant.flat
           ? _colors.onSurface.withOpacity(0.12)

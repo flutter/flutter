@@ -7,6 +7,7 @@ import 'dart:js_interop';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart'
     if (dart.library.html) 'package:ui/src/engine/skwasm/skwasm_stub.dart';
@@ -22,6 +23,9 @@ Renderer get renderer => _renderer;
 /// primitives of the dart:ui library, as well as other backend-specific pieces
 /// of functionality needed by the rest of the generic web engine code.
 abstract class Renderer {
+  // Abstract generative constructor to allow extending this renderer.
+  Renderer();
+
   factory Renderer._internal() {
     if (FlutterConfiguration.flutterWebUseSkwasm) {
       return SkwasmRenderer();
@@ -38,7 +42,49 @@ abstract class Renderer {
   String get rendererTag;
   FlutterFontCollection get fontCollection;
 
-  FutureOr<void> initialize();
+  late Rasterizer rasterizer;
+
+  /// Resets the [Rasterizer] to the default value. Used in tests.
+  @visibleForTesting
+  void debugResetRasterizer();
+
+  /// Override the rasterizer with the given [_rasterizer]. Used in tests.
+  @visibleForTesting
+  void debugOverrideRasterizer(Rasterizer testRasterizer) {
+    rasterizer = testRasterizer;
+  }
+
+  // Listens for view creation events from the view manager.
+  late StreamSubscription<int> _onViewCreatedListener;
+  // Listens for view disposal events from the view manager.
+  late StreamSubscription<int> _onViewDisposedListener;
+
+  @mustCallSuper
+  FutureOr<void> initialize() {
+    // Views may have been registered before this renderer was initialized.
+    // Create rasterizers for them and then start listening for new view
+    // creation/disposal events.
+    final FlutterViewManager viewManager = EnginePlatformDispatcher.instance.viewManager;
+    for (final EngineFlutterView view in viewManager.views) {
+      _onViewCreated(view.viewId);
+    }
+    _onViewCreatedListener = viewManager.onViewCreated.listen(_onViewCreated);
+    _onViewDisposedListener = viewManager.onViewDisposed.listen(_onViewDisposed);
+  }
+
+  void _onViewCreated(int viewId) {
+    final EngineFlutterView view = EnginePlatformDispatcher.instance.viewManager[viewId]!;
+    rasterizers[view.viewId] = rasterizer.createViewRasterizer(view);
+  }
+
+  void _onViewDisposed(int viewId) {
+    // The view has already been disposed.
+    if (!rasterizers.containsKey(viewId)) {
+      return;
+    }
+    final ViewRasterizer rasterizer = rasterizers.remove(viewId)!;
+    rasterizer.dispose();
+  }
 
   ui.Paint createPaint();
 
@@ -226,10 +272,30 @@ abstract class Renderer {
 
   ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style);
 
+  /// Map from view id to the associated [ViewRasterizer] for that view.
+  final Map<int, ViewRasterizer> rasterizers = <int, ViewRasterizer>{};
+
   Future<void> renderScene(ui.Scene scene, EngineFlutterView view);
 
   void dumpDebugInfo();
 
+  /// Disposes this renderer.
+  @mustCallSuper
+  void dispose() {
+    _onViewCreatedListener.cancel();
+    _onViewDisposedListener.cancel();
+    for (final ViewRasterizer rasterizer in rasterizers.values) {
+      rasterizer.dispose();
+    }
+    rasterizers.clear();
+    rasterizer.dispose();
+  }
+
   /// Clears the state of this renderer. Used in tests.
-  void debugClear();
+  @mustCallSuper
+  void debugClear() {
+    for (final ViewRasterizer rasterizer in rasterizers.values) {
+      rasterizer.debugClear();
+    }
+  }
 }

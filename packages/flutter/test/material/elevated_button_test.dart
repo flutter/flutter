@@ -468,7 +468,7 @@ void main() {
             child: ElevatedButtonTheme(
               data: ElevatedButtonThemeData(
                 style: ButtonStyle(
-                  foregroundColor: MaterialStateProperty.resolveWith<Color>(getTextColor),
+                  foregroundColor: WidgetStateProperty.resolveWith<Color>(getTextColor),
                 ),
               ),
               child: Builder(
@@ -544,8 +544,8 @@ void main() {
             child: ElevatedButtonTheme(
               data: ElevatedButtonThemeData(
                 style: ButtonStyle(
-                  foregroundColor: MaterialStateProperty.resolveWith<Color>(getTextColor),
-                  iconColor: MaterialStateProperty.resolveWith<Color>(getTextColor),
+                  foregroundColor: WidgetStateProperty.resolveWith<Color>(getTextColor),
+                  iconColor: WidgetStateProperty.resolveWith<Color>(getTextColor),
                 ),
               ),
               child: Builder(
@@ -863,7 +863,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ElevatedButton(
           style: ButtonStyle(
-            overlayColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+            overlayColor: WidgetStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
               return states.contains(MaterialState.hovered) ? hoverColor : null;
             }),
           ),
@@ -893,7 +893,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ElevatedButton(
           style: ButtonStyle(
-            overlayColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+            overlayColor: WidgetStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
               return states.contains(MaterialState.focused) ? focusColor : null;
             }),
           ),
@@ -930,7 +930,7 @@ void main() {
         child: ElevatedButton(
           autofocus: true,
           style: ButtonStyle(
-            overlayColor: MaterialStateProperty.resolveWith<Color?>(getOverlayColor),
+            overlayColor: WidgetStateProperty.resolveWith<Color?>(getOverlayColor),
           ),
           focusNode: focusNode,
           onPressed: () {},

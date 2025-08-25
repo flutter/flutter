@@ -352,8 +352,8 @@ Map<String, dynamic> getDesiredCapabilities(
             'v8,blink.console,benchmark,blink,'
             'blink.user_timing',
       },
-      if (chromeBinary != null) 'binary': chromeBinary,
-      if (mobileEmulation != null) 'mobileEmulation': mobileEmulation,
+      'binary': ?chromeBinary,
+      'mobileEmulation': ?mobileEmulation,
     },
   },
   Browser.firefox => <String, dynamic>{

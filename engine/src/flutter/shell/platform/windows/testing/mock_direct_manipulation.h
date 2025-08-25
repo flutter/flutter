@@ -16,7 +16,7 @@ namespace testing {
 class MockDirectManipulationOwner : public DirectManipulationOwner {
  public:
   explicit MockDirectManipulationOwner(FlutterWindow* window)
-      : DirectManipulationOwner(window){};
+      : DirectManipulationOwner(window) {};
   virtual ~MockDirectManipulationOwner() = default;
 
   MOCK_METHOD(void, SetContact, (UINT contact_id), (override));

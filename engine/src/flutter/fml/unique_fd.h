@@ -9,10 +9,10 @@
 #include "flutter/fml/unique_object.h"
 
 #if FML_OS_WIN
-#include <windows.h>
 #include <map>
 #include <mutex>
 #include <optional>
+#include "flutter/fml/platform/win/windows_shim.h"
 #else  // FML_OS_WIN
 #include <dirent.h>
 #include <unistd.h>

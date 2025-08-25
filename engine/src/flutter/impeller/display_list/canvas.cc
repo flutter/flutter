@@ -1089,6 +1089,7 @@ void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
           Rect::MakeOriginSize(texture_coverage->GetOrigin(),
                                texture_coverage->GetSize().Max({1, 1}));
     } else {
+      // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
       src_coverage = cvg.value();
     }
   }
@@ -1405,7 +1406,7 @@ void Canvas::SaveLayer(const Paint& paint,
       std::optional<Snapshot> maybe_snapshot =
           backdrop_data->shared_filter_snapshot;
       if (maybe_snapshot.has_value()) {
-        Snapshot snapshot = maybe_snapshot.value();
+        const Snapshot& snapshot = maybe_snapshot.value();
         std::shared_ptr<TextureContents> contents = TextureContents::MakeRect(
             subpass_coverage.Shift(-GetGlobalPassPosition()));
         auto scaled =

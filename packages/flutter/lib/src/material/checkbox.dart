@@ -225,7 +225,7 @@ class Checkbox extends StatefulWidget {
   /// Checkbox(
   ///   value: true,
   ///   onChanged: (_){},
-  ///   fillColor: MaterialStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+  ///   fillColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
   ///     if (states.contains(WidgetState.disabled)) {
   ///       return Colors.orange.withOpacity(.32);
   ///     }
@@ -242,7 +242,7 @@ class Checkbox extends StatefulWidget {
   /// the disabled state, [ColorScheme.secondary] is used in the
   /// selected state, and [ThemeData.unselectedWidgetColor] is used in the
   /// default state.
-  final MaterialStateProperty<Color?>? fillColor;
+  final WidgetStateProperty<Color?>? fillColor;
 
   /// {@template flutter.material.checkbox.checkColor}
   /// The color to use for the check icon when this checkbox is checked.
@@ -333,7 +333,7 @@ class Checkbox extends StatefulWidget {
   /// also null, then the value of [ColorScheme.secondary] with alpha
   /// [kRadialReactionAlpha], [ThemeData.focusColor] and [ThemeData.hoverColor]
   /// is used in the pressed, focused and hovered state.
-  final MaterialStateProperty<Color?>? overlayColor;
+  final WidgetStateProperty<Color?>? overlayColor;
 
   /// {@template flutter.material.checkbox.splashRadius}
   /// The splash radius of the circular [Material] ink response.
@@ -449,8 +449,8 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
   @override
   Duration? get reactionAnimationDuration => kRadialReactionDuration;
 
-  MaterialStateProperty<Color?> get _widgetFillColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color?> get _widgetFillColor {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return null;
       }
@@ -463,7 +463,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
 
   BorderSide? _resolveSide(BorderSide? side, Set<MaterialState> states) {
     if (side is MaterialStateBorderSide) {
-      return MaterialStateProperty.resolveAs<BorderSide?>(side, states);
+      return WidgetStateProperty.resolveAs<BorderSide?>(side, states);
     }
     if (!states.contains(MaterialState.selected)) {
       return side;
@@ -527,9 +527,9 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
     };
     size += effectiveVisualDensity.baseSizeAdjustment;
 
-    final MaterialStateProperty<MouseCursor> effectiveMouseCursor =
-        MaterialStateProperty.resolveWith<MouseCursor>((Set<MaterialState> states) {
-          return MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
+    final WidgetStateProperty<MouseCursor> effectiveMouseCursor =
+        WidgetStateProperty.resolveWith<MouseCursor>((Set<MaterialState> states) {
+          return WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
               checkboxTheme.mouseCursor?.resolve(states) ??
               MaterialStateMouseCursor.clickable.resolve(states);
         });
@@ -862,8 +862,8 @@ class _CheckboxDefaultsM2 extends CheckboxThemeData {
   }
 
   @override
-  MaterialStateProperty<Color> get fillColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color> get fillColor {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         if (states.contains(MaterialState.selected)) {
           return _theme.disabledColor;
@@ -878,13 +878,13 @@ class _CheckboxDefaultsM2 extends CheckboxThemeData {
   }
 
   @override
-  MaterialStateProperty<Color> get checkColor {
-    return MaterialStateProperty.all<Color>(const Color(0xFFFFFFFF));
+  WidgetStateProperty<Color> get checkColor {
+    return WidgetStateProperty.all<Color>(const Color(0xFFFFFFFF));
   }
 
   @override
-  MaterialStateProperty<Color?> get overlayColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color?> get overlayColor {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
         return fillColor.resolve(states).withAlpha(kRadialReactionAlpha);
       }
@@ -957,8 +957,8 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
   }
 
   @override
-  MaterialStateProperty<Color> get fillColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color> get fillColor {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         if (states.contains(MaterialState.selected)) {
           return _colors.onSurface.withOpacity(0.38);
@@ -976,8 +976,8 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
   }
 
   @override
-  MaterialStateProperty<Color> get checkColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color> get checkColor {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         if (states.contains(MaterialState.selected)) {
           return _colors.surface;
@@ -995,8 +995,8 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
   }
 
   @override
-  MaterialStateProperty<Color> get overlayColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color> get overlayColor {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.error)) {
         if (states.contains(MaterialState.pressed)) {
           return _colors.error.withOpacity(0.1);

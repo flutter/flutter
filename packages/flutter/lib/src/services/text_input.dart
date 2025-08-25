@@ -791,7 +791,7 @@ class TextInputConfiguration {
       'keyboardAppearance': keyboardAppearance.toString(),
       'enableIMEPersonalizedLearning': enableIMEPersonalizedLearning,
       'contentCommitMimeTypes': allowedMimeTypes,
-      if (autofill != null) 'autofill': autofill,
+      'autofill': ?autofill,
       'enableDeltaModel': enableDeltaModel,
       'hintLocales': hintLocales?.map((Locale locale) => locale.toLanguageTag()).toList(),
     };
@@ -2866,11 +2866,7 @@ sealed class IOSSystemContextMenuItemData {
   /// Returns json for use in method channel calls, specifically
   /// `ContextMenu.showSystemContextMenu`.
   Map<String, dynamic> get _json {
-    return <String, dynamic>{
-      'callbackId': hashCode,
-      if (title != null) 'title': title,
-      'type': _jsonType,
-    };
+    return <String, dynamic>{'callbackId': hashCode, 'title': ?title, 'type': _jsonType};
   }
 
   @override
