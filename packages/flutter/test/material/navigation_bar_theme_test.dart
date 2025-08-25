@@ -112,7 +112,7 @@ void main() {
                 elevation: elevation,
                 indicatorColor: indicatorColor,
                 indicatorShape: indicatorShape,
-                iconTheme: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+                iconTheme: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
                   if (states.contains(MaterialState.selected)) {
                     return const IconThemeData(
                       size: selectedIconSize,
@@ -126,7 +126,7 @@ void main() {
                     opacity: unselectedIconOpacity,
                   );
                 }),
-                labelTextStyle: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+                labelTextStyle: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
                   if (states.contains(MaterialState.selected)) {
                     return const TextStyle(fontSize: selectedLabelFontSize);
                   }
@@ -248,7 +248,7 @@ void main() {
       const Color hoverColor = Color(0xff0000ff);
       const Color focusColor = Color(0xff00ffff);
       const Color pressedColor = Color(0xffff00ff);
-      final MaterialStateProperty<Color?> overlayColor = MaterialStateProperty.resolveWith<Color>((
+      final WidgetStateProperty<Color?> overlayColor = WidgetStateProperty.resolveWith<Color>((
         Set<MaterialState> states,
       ) {
         if (states.contains(MaterialState.hovered)) {

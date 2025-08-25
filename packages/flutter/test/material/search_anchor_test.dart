@@ -384,7 +384,7 @@ void main() {
       MaterialApp(
         home: Center(
           child: Material(
-            child: SearchBar(elevation: MaterialStateProperty.resolveWith<double>(getElevation)),
+            child: SearchBar(elevation: WidgetStateProperty.resolveWith<double>(getElevation)),
           ),
         ),
       ),
@@ -424,7 +424,7 @@ void main() {
       MaterialApp(
         home: Center(
           child: Material(
-            child: SearchBar(backgroundColor: MaterialStateProperty.resolveWith<Color>(_getColor)),
+            child: SearchBar(backgroundColor: WidgetStateProperty.resolveWith<Color>(_getColor)),
           ),
         ),
       ),
@@ -464,7 +464,7 @@ void main() {
       MaterialApp(
         home: Center(
           child: Material(
-            child: SearchBar(shadowColor: MaterialStateProperty.resolveWith<Color>(_getColor)),
+            child: SearchBar(shadowColor: WidgetStateProperty.resolveWith<Color>(_getColor)),
           ),
         ),
       ),
@@ -504,7 +504,7 @@ void main() {
       MaterialApp(
         home: Center(
           child: Material(
-            child: SearchBar(surfaceTintColor: MaterialStateProperty.resolveWith<Color>(_getColor)),
+            child: SearchBar(surfaceTintColor: WidgetStateProperty.resolveWith<Color>(_getColor)),
           ),
         ),
       ),
@@ -549,7 +549,7 @@ void main() {
           child: Material(
             child: SearchBar(
               focusNode: focusNode,
-              overlayColor: MaterialStateProperty.resolveWith<Color>(_getColor),
+              overlayColor: WidgetStateProperty.resolveWith<Color>(_getColor),
             ),
           ),
         ),
@@ -638,8 +638,8 @@ void main() {
         home: Center(
           child: Material(
             child: SearchBar(
-              side: MaterialStateProperty.resolveWith<BorderSide>(getSide),
-              shape: MaterialStateProperty.resolveWith<OutlinedBorder>(getShape),
+              side: WidgetStateProperty.resolveWith<BorderSide>(getSide),
+              shape: WidgetStateProperty.resolveWith<OutlinedBorder>(getShape),
             ),
           ),
         ),
@@ -708,7 +708,7 @@ void main() {
           child: Material(
             child: SearchBar(
               hintText: 'hint text',
-              hintStyle: MaterialStateProperty.resolveWith<TextStyle?>(_getTextStyle),
+              hintStyle: WidgetStateProperty.resolveWith<TextStyle?>(_getTextStyle),
             ),
           ),
         ),
@@ -747,7 +747,7 @@ void main() {
           child: Material(
             child: SearchBar(
               controller: controller,
-              textStyle: MaterialStateProperty.resolveWith<TextStyle?>(_getTextStyle),
+              textStyle: WidgetStateProperty.resolveWith<TextStyle?>(_getTextStyle),
             ),
           ),
         ),
@@ -1007,7 +1007,7 @@ void main() {
           child: Material(
             child: SearchBar(
               hintText: 'hint text',
-              hintStyle: MaterialStateProperty.resolveWith<TextStyle?>(_getTextStyle),
+              hintStyle: WidgetStateProperty.resolveWith<TextStyle?>(_getTextStyle),
               textStyle: const MaterialStatePropertyAll<TextStyle>(TextStyle(color: Colors.pink)),
             ),
           ),

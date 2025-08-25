@@ -1264,7 +1264,7 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return Stepper(
                   type: StepperType.horizontal,
-                  connectorColor: MaterialStateProperty.resolveWith<Color>(
+                  connectorColor: WidgetStateProperty.resolveWith<Color>(
                     (Set<MaterialState> states) =>
                         states.contains(MaterialState.selected) ? selectedColor : disabledColor,
                   ),

@@ -711,7 +711,7 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           radioTheme: RadioThemeData(
-            fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+            fillColor: WidgetStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
               return states.contains(MaterialState.selected) ? fillColor : null;
             }),
           ),
@@ -903,7 +903,7 @@ void main() {
       return inactiveEnabledFillColor;
     }
 
-    final MaterialStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
+    final WidgetStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
 
     int? groupValue = 0;
     Widget buildApp({required bool enabled}) {
@@ -989,7 +989,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final MaterialStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
+    final WidgetStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
 
     int? groupValue = 0;
     Widget buildApp() {
@@ -1136,7 +1136,7 @@ void main() {
             groupValue: true,
             onChanged: (_) {},
             fillColor: const MaterialStatePropertyAll<Color>(fillColor),
-            overlayColor: useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
+            overlayColor: useOverlay ? WidgetStateProperty.resolveWith(getOverlayColor) : null,
             hoverColor: hoverColor,
           ),
         ),
@@ -1430,9 +1430,7 @@ void main() {
                 groupValue: true,
                 onChanged: (_) {},
                 fillColor: const MaterialStatePropertyAll<Color>(fillColor),
-                overlayColor: useOverlay
-                    ? MaterialStateProperty.resolveWith(getOverlayColor)
-                    : null,
+                overlayColor: useOverlay ? WidgetStateProperty.resolveWith(getOverlayColor) : null,
                 hoverColor: hoverColor,
               ),
             ),
@@ -2158,7 +2156,7 @@ void main() {
       return inactiveEnabledBackgroundColor;
     }
 
-    final MaterialStateProperty<Color> backgroundColor = MaterialStateColor.resolveWith(
+    final WidgetStateProperty<Color> backgroundColor = MaterialStateColor.resolveWith(
       getBackgroundColor,
     );
 
@@ -2245,7 +2243,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final MaterialStateProperty<Color> backgroundColor = MaterialStateColor.resolveWith(
+    final WidgetStateProperty<Color> backgroundColor = MaterialStateColor.resolveWith(
       getBackgroundColor,
     );
 
@@ -2296,7 +2294,7 @@ void main() {
   });
 
   testWidgets('radioInnerRadius is passed to the Radio', (WidgetTester tester) async {
-    final WidgetStateProperty<double?> innerRadius = MaterialStateProperty.all(6);
+    final WidgetStateProperty<double?> innerRadius = WidgetStateProperty.all(6);
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
