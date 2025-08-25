@@ -308,6 +308,7 @@ class CupertinoDatePicker extends StatefulWidget {
     this.showTimeSeparator = false,
     this.itemExtent = _kItemExtent,
     this.selectionOverlayBuilder,
+    this.selectableDayPredicate,
     this.changeReportingBehavior = ChangeReportingBehavior.onScrollUpdate,
   }) : initialDateTime = initialDateTime ?? DateTime.now(),
        assert(itemExtent > 0, 'item extent should be greater than 0'),
@@ -363,6 +364,12 @@ class CupertinoDatePicker extends StatefulWidget {
              mode == CupertinoDatePickerMode.dateAndTime ||
              mode == CupertinoDatePickerMode.time,
          'showTimeSeparator is only supported in time or dateAndTime modes',
+       ),
+       assert(
+         selectableDayPredicate == null ||
+             initialDateTime == null ||
+             selectableDayPredicate(initialDateTime!),
+         '${initialDateTime ?? DateTime.now()} must satisfy provided selectableDayPredicate.',
        );
 
   /// The mode of the date picker as one of [CupertinoDatePickerMode]. Defaults
@@ -456,6 +463,9 @@ class CupertinoDatePicker extends StatefulWidget {
   ///
   /// Defaults to false.
   final bool showTimeSeparator;
+
+  /// Function to provide full control over which [DateTime] can be selected.
+  final SelectableDayPredicate? selectableDayPredicate;
 
   /// {@macro flutter.cupertino.picker.itemExtent}
   ///
@@ -823,9 +833,16 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
     if (isDateInvalid) {
       return;
+    } else if (widget.selectableDayPredicate?.call(selected) == false) {
+      return;
     }
 
     widget.onDateTimeChanged(selected);
+  }
+
+  /// Returns whether the given date is selectable.
+  bool _isSelectableDate(DateTime date) {
+    return widget.selectableDayPredicate?.call(date) ?? true;
   }
 
   // Builds the date column. The date is displayed in medium date format (e.g. Fri Aug 31).
@@ -884,7 +901,10 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
               ? localizations.todayLabel
               : localizations.datePickerMediumDate(rangeStart);
 
-          return itemPositioningBuilder(context, Text(dateText, style: _themeTextStyle(context)));
+          return itemPositioningBuilder(
+            context,
+            Text(dateText, style: _themeTextStyle(context, isValid: _isSelectableDate(rangeStart))),
+          );
         },
         selectionOverlay: selectionOverlay,
       ),
@@ -1104,6 +1124,23 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     );
   }
 
+  void _checkOnCustomDaysDisplay() {
+    final DateTime selectedDate = selectedDateTime;
+    final bool minCheck = widget.minimumDate?.isAfter(selectedDate) ?? false;
+
+    if (!_isSelectableDate(selectedDate)) {
+      const int daysThreshold = 1;
+      final DateTime targetDate = selectedDate.add(const Duration(days: daysThreshold));
+
+      _scrollToDate(
+        targetDate,
+        selectedDate,
+        minCheck,
+        focusedIndex: dateController.selectedItem + daysThreshold,
+      );
+    }
+  }
+
   // One or more pickers have just stopped scrolling.
   void _pickerDidStopScrolling() {
     // Call setState to update the greyed out date/hour/minute/meridiem.
@@ -1120,6 +1157,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     final bool minCheck = widget.minimumDate?.isAfter(selectedDate) ?? false;
     final bool maxCheck = widget.maximumDate?.isBefore(selectedDate) ?? false;
 
+    _checkOnCustomDaysDisplay();
     if (minCheck || maxCheck) {
       // We have minCheck === !maxCheck.
       final DateTime targetDate = minCheck ? widget.minimumDate! : widget.maximumDate!;
@@ -1127,12 +1165,12 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     }
   }
 
-  void _scrollToDate(DateTime newDate, DateTime fromDate, bool minCheck) {
+  void _scrollToDate(DateTime newDate, DateTime fromDate, bool minCheck, {int? focusedIndex}) {
     SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
       if (fromDate.year != newDate.year ||
           fromDate.month != newDate.month ||
           fromDate.day != newDate.day) {
-        _animateColumnControllerToItem(dateController, selectedDayFromInitial);
+        _animateColumnControllerToItem(dateController, focusedIndex ?? selectedDayFromInitial);
       }
 
       if (fromDate.hour != newDate.hour) {
