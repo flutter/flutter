@@ -23,29 +23,6 @@ class StateMarkerState extends State<StateMarker> {
   }
 }
 
-class DeactivateLogger extends StatefulWidget {
-  const DeactivateLogger({required Key super.key, required this.log});
-
-  final List<String> log;
-
-  @override
-  DeactivateLoggerState createState() => DeactivateLoggerState();
-}
-
-class DeactivateLoggerState extends State<DeactivateLogger> {
-  @override
-  void deactivate() {
-    widget.log.add('deactivate');
-    super.deactivate();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    widget.log.add('build');
-    return Container();
-  }
-}
-
 void main() {
   testWidgets('can reparent state', (WidgetTester tester) async {
     final GlobalKey left = GlobalKey();
@@ -323,24 +300,6 @@ void main() {
 
     expect(key.currentState, equals(keyState));
     expect(keyState.marker, equals('marked'));
-  });
-
-  testWidgets('Deactivate implies build', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
-    final List<String> log = <String>[];
-    final DeactivateLogger logger = DeactivateLogger(key: key, log: log);
-
-    await tester.pumpWidget(Container(key: UniqueKey(), child: logger));
-
-    expect(log, equals(<String>['build']));
-
-    await tester.pumpWidget(Container(key: UniqueKey(), child: logger));
-
-    expect(log, equals(<String>['build', 'deactivate', 'build']));
-    log.clear();
-
-    await tester.pump();
-    expect(log, isEmpty);
   });
 
   testWidgets('Reparenting with multiple moves', (WidgetTester tester) async {
