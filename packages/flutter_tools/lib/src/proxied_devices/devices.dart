@@ -127,7 +127,6 @@ class ProxiedDevices extends PollingDeviceDiscovery {
       supportsHotRestart: _cast<bool>(capabilities['hotRestart']),
       supportsFlutterExit: _cast<bool>(capabilities['flutterExit']),
       supportsScreenshot: _cast<bool>(capabilities['screenshot']),
-      supportsFastStart: _cast<bool>(capabilities['fastStart']),
       supportsHardwareRendering: _cast<bool>(capabilities['hardwareRendering']),
       logger: _logger,
       fileTransfer: _fileTransfer,
@@ -184,7 +183,6 @@ class ProxiedDevice extends Device {
     required this.supportsHotRestart,
     required this.supportsFlutterExit,
     required this.supportsScreenshot,
-    required this.supportsFastStart,
     required bool supportsHardwareRendering,
     required super.logger,
     FileTransfer fileTransfer = const FileTransfer(),
@@ -386,9 +384,6 @@ class ProxiedDevice extends Device {
 
   @override
   final bool supportsScreenshot;
-
-  @override
-  final bool supportsFastStart;
 
   @override
   Future<bool> stopApp(covariant PrebuiltApplicationPackage? app, {String? userIdentifier}) async {

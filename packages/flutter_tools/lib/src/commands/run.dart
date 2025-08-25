@@ -364,10 +364,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webRenderer: webRenderer,
         webUseWasm: useWasm,
         vmserviceOutFile: stringArg('vmservice-out-file'),
-        fastStart:
-            argParser.options.containsKey('fast-start') &&
-            boolArg('fast-start') &&
-            !runningWithPrebuiltApplication,
         nativeNullAssertions: boolArg('native-null-assertions'),
         enableImpeller: enableImpeller,
         enableFlutterGpu: enableFlutterGpu,
@@ -464,17 +460,6 @@ class RunCommand extends RunCommandBase {
             'measure the startup time and the app restart time, write the '
             'results out to "refresh_benchmark.json", and exit. This flag is '
             'intended for use in generating automated flutter benchmarks.',
-      )
-      // TODO(zanderso): Off by default with investigating whether this
-      // is slower for certain use cases.
-      // See: https://github.com/flutter/flutter/issues/49499
-      ..addFlag(
-        'fast-start',
-        help:
-            'Whether to quickly bootstrap applications with a minimal app. '
-            'Currently this is only supported on Android devices. This option '
-            'cannot be paired with "--${FlutterOptions.kUseApplicationBinary}".',
-        hide: !verboseHelp,
       );
   }
 
