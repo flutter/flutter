@@ -160,10 +160,11 @@ class RenderSliverCrossAxisGroup extends RenderSliver
   }) {
     RenderSliver? child = lastChild;
     while (child != null) {
+      final Offset paintOffset = (child.parentData! as SliverPhysicalParentData).paintOffset;
       final bool isHit = result.addWithAxisOffset(
         mainAxisPosition: mainAxisPosition,
         crossAxisPosition: crossAxisPosition,
-        paintOffset: null,
+        paintOffset: paintOffset,
         mainAxisOffset: childMainAxisPosition(child),
         crossAxisOffset: childCrossAxisPosition(child),
         hitTest: child.hitTest,
@@ -441,10 +442,11 @@ class RenderSliverMainAxisGroup extends RenderSliver
   }) {
     RenderSliver? child = firstChild;
     while (child != null) {
+      final Offset paintOffset = (child.parentData! as SliverPhysicalParentData).paintOffset;
       final bool isHit = result.addWithAxisOffset(
         mainAxisPosition: mainAxisPosition,
         crossAxisPosition: crossAxisPosition,
-        paintOffset: null,
+        paintOffset: paintOffset,
         mainAxisOffset: childMainAxisPosition(child),
         crossAxisOffset: childCrossAxisPosition(child),
         hitTest: child.hitTest,
