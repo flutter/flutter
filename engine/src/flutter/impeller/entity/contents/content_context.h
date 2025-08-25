@@ -301,7 +301,7 @@ class ContentContext {
  protected:
   // Visible for testing.
   void SetTransientsBuffer(std::shared_ptr<HostBuffer> host_buffer) {
-    host_buffer_ = host_buffer;
+    host_buffer_ = std::move(host_buffer);
   }
 
  private:

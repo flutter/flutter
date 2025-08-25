@@ -2585,7 +2585,7 @@ TEST_P(EntityTest, GiantStrokePathAllocation) {
 
 class FlushTestDeviceBuffer : public DeviceBuffer {
  public:
-  FlushTestDeviceBuffer(const DeviceBufferDescriptor& desc)
+  explicit FlushTestDeviceBuffer(const DeviceBufferDescriptor& desc)
       : DeviceBuffer(desc), storage_(desc.size) {}
 
   bool SetLabel(std::string_view label) override { return true; }
@@ -2631,9 +2631,9 @@ class FlushTestAllocator : public Allocator {
 class FlushTestContentContext : public ContentContext {
  public:
   FlushTestContentContext(
-      std::shared_ptr<Context> context,
-      std::shared_ptr<TypographerContext> typographer_context,
-      std::shared_ptr<Allocator> allocator)
+      const std::shared_ptr<Context>& context,
+      const std::shared_ptr<TypographerContext>& typographer_context,
+      const std::shared_ptr<Allocator>& allocator)
       : ContentContext(context, typographer_context) {
     SetTransientsBuffer(HostBuffer::Create(
         allocator, context->GetIdleWaiter(),
