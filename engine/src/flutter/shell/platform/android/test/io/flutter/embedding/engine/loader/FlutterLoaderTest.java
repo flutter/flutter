@@ -9,17 +9,18 @@ import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
 
 import android.app.ActivityManager;
@@ -573,11 +574,14 @@ public class FlutterLoaderTest {
     flutterLoader.startInitialization(ctx);
 
     File realSoFile = File.createTempFile("real", ".so", internalStorageDir);
-    File symlinkFile = new File(internalStorageDir, "symlink_to_real.so");
-    Files.deleteIfExists(symlinkFile.toPath());
-    Files.createSymbolicLink(symlinkFile.toPath(), realSoFile.toPath());
+    File spySymlinkFile = spy(new File(internalStorageDir, "symlink_to_real.so"));
+    Files.deleteIfExists(spySymlinkFile.toPath());
 
-    String symlinkArg = FlutterLoader.aotSharedLibraryNameFlag + symlinkFile.getAbsolutePath();
+    // Simulate a symlink since some filesystems do not support symlinks.
+    when(flutterLoader.getFileFromPath(spySymlinkFile.getPath())).thenReturn(spySymlinkFile);
+    doReturn(realSoFile.getCanonicalPath()).when(spySymlinkFile).getCanonicalPath();
+
+    String symlinkArg = FlutterLoader.aotSharedLibraryNameFlag + spySymlinkFile.getPath();
     String[] args = {symlinkArg};
     flutterLoader.ensureInitializationComplete(ctx, args);
 
@@ -599,7 +603,7 @@ public class FlutterLoaderTest {
         FlutterLoader.aotSharedLibraryNameFlag + canonicalSymlinkCanonicalizedPath;
     assertFalse(
         "Args sent to FlutterJni.init incorrectly included absolute symlink path: "
-            + symlinkFile.getAbsolutePath(),
+            + spySymlinkFile.getAbsolutePath(),
         actualArgs.contains(symlinkArg));
     assertTrue(
         "Args sent to FlutterJni.init incorrectly did not include canonicalized path of symlink: "
@@ -607,7 +611,7 @@ public class FlutterLoaderTest {
         actualArgs.contains(canonicalAotSharedLibraryNameArg));
 
     // Clean up created files.
-    symlinkFile.delete();
+    spySymlinkFile.delete();
     realSoFile.delete();
   }
 
@@ -627,22 +631,17 @@ public class FlutterLoaderTest {
     File nonSoFile = File.createTempFile("real", ".somethingElse", internalStorageDir);
     File fileJustOutsideInternalStorage =
         new File(internalStorageDir.getParentFile(), "not_in_internal_storage.so");
-    File symlinkFile = new File(internalStorageDir, "symlink.so");
+    File spySymlinkFile = spy(new File(internalStorageDir, "symlink.so"));
     List<File> unsafeFiles = Arrays.asList(nonSoFile, fileJustOutsideInternalStorage);
-    Files.deleteIfExists(symlinkFile.toPath());
+    Files.deleteIfExists(spySymlinkFile.toPath());
 
-    String symlinkArg = FlutterLoader.aotSharedLibraryNameFlag + symlinkFile.getAbsolutePath();
+    String symlinkArg = FlutterLoader.aotSharedLibraryNameFlag + spySymlinkFile.getAbsolutePath();
     String[] args = {symlinkArg};
 
     for (File unsafeFile : unsafeFiles) {
-      try {
-        Files.createSymbolicLink(symlinkFile.toPath(), unsafeFile.toPath());
-        assumeTrue(
-            "Symlink was not created successfully", Files.isSymbolicLink(symlinkFile.toPath()));
-      } catch (Exception e) {
-        // Skip test case if symlink creation is not supported.
-        assumeTrue("Symlink creation not supported: " + e.getMessage(), false);
-      }
+      // Simulate a symlink since some filesystems do not support symlinks.
+      when(flutterLoader.getFileFromPath(spySymlinkFile.getPath())).thenReturn(spySymlinkFile);
+      doReturn(unsafeFile.getCanonicalPath()).when(spySymlinkFile).getCanonicalPath();
 
       flutterLoader.ensureInitializationComplete(ctx, args);
 
@@ -668,11 +667,11 @@ public class FlutterLoaderTest {
           actualArgs.contains(canonicalAotSharedLibraryNameArg));
       assertFalse(
           "Args sent to FlutterJni.init incorrectly included absolute path of symlink: "
-              + symlinkFile.getAbsolutePath(),
+              + spySymlinkFile.getAbsolutePath(),
           actualArgs.contains(symlinkArg));
 
       // Clean up created files.
-      symlinkFile.delete();
+      spySymlinkFile.delete();
       unsafeFile.delete();
 
       // Reset FlutterLoader and mockFlutterJNI to make more calls to

@@ -208,7 +208,7 @@ public class FlutterLoader {
                     // cpu architecture.
 
                     String cpuArch = System.getProperty("os.arch");
-                    File nativeLibsDir = new File(flutterApplicationInfo.nativeLibraryDir);
+                    File nativeLibsDir = getFileFromPath(flutterApplicationInfo.nativeLibraryDir);
                     String[] nativeLibsContents = nativeLibsDir.list();
 
                     // To gather more information for
@@ -495,7 +495,7 @@ public class FlutterLoader {
         aotSharedLibraryNameArg.substring(aotSharedLibraryNameFlag.length());
 
     // Canocalize path for safety analysis.
-    File aotSharedLibraryFile = new File(aotSharedLibraryPath);
+    File aotSharedLibraryFile = getFileFromPath(aotSharedLibraryPath);
     String aotSharedLibraryPathCanonicalPath = aotSharedLibraryFile.getCanonicalPath();
 
     // Check if library lives within application's internal storage.
@@ -516,6 +516,11 @@ public class FlutterLoader {
             + aotSharedLibraryPathCanonicalPath
             + " rejected; not overriding aot-shared-library-name.");
     return null;
+  }
+
+  @VisibleForTesting
+  File getFileFromPath(String path) {
+    return new File(path);
   }
 
   private static boolean isLeakVM(@Nullable Bundle metaData) {
