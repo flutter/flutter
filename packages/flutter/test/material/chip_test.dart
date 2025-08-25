@@ -6375,6 +6375,20 @@ void main() {
     },
   );
 
+  testWidgets('Chip renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: Scaffold(body: Chip(label: Text('X'))),
+          ),
+        ),
+      ),
+    );
+    final Finder xText = find.text('X');
+    expect(tester.getSize(xText).isEmpty, isTrue);
+  });
+
   testWidgets('RawChip renders at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
