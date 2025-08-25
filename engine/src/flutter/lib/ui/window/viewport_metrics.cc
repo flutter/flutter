@@ -18,6 +18,10 @@ ViewportMetrics::ViewportMetrics(double p_device_pixel_ratio,
     : device_pixel_ratio(p_device_pixel_ratio),
       physical_width(p_physical_width),
       physical_height(p_physical_height),
+      physical_min_width_constraint(p_physical_width),
+      physical_max_width_constraint(p_physical_width),
+      physical_min_height_constraint(p_physical_height),
+      physical_max_height_constraint(p_physical_height),
       physical_touch_slop(p_physical_touch_slop),
       display_id(p_display_id) {}
 ViewportMetrics::ViewportMetrics(
