@@ -1045,6 +1045,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   _isSystemKeyboardEnabled = ShouldShowSystemKeyboard(inputType);
   self.keyboardType = ToUIKeyboardType(inputType);
   self.returnKeyType = ToUIReturnKeyType(configuration[kInputAction]);
+  _originalAutocapitalizationType = ToUITextAutoCapitalizationType(configuration);
   self.autocapitalizationType = ToUITextAutoCapitalizationType(configuration);
   _enableInteractiveSelection = [configuration[kEnableInteractiveSelection] boolValue];
   NSString* smartDashesType = configuration[kSmartDashesType];
@@ -1379,6 +1380,26 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
           rangeWithNSRange:fml::RangeForCharactersInRange(self.text, flutterTextRange.range)] copy];
     } else {
       _selectedTextRange = [selectedTextRange copy];
+    }
+  }
+
+  if (_originalAutocapitalizationType == UITextAutocapitalizationTypeWords) {
+    NSRange selection = ((FlutterTextRange*)_selectedTextRange).range;
+    BOOL shouldCapitalize = NO;
+    if (selection.location == 0) {
+      shouldCapitalize = YES;
+    } else if (selection.location <= self.text.length) {
+      unichar previousChar = [self.text characterAtIndex:selection.location - 1];
+      shouldCapitalize =
+          [[NSCharacterSet whitespaceAndNewlineCharacterSet] characterIsMember:previousChar];
+    }
+
+    UITextAutocapitalizationType newCapitalizationType =
+        shouldCapitalize ? UITextAutocapitalizationTypeWords : UITextAutocapitalizationTypeNone;
+
+    if (self.autocapitalizationType != newCapitalizationType) {
+      self.autocapitalizationType = newCapitalizationType;
+      [self reloadInputViews];
     }
   }
 }
