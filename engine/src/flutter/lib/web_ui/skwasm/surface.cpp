@@ -3,18 +3,22 @@
 // found in the LICENSE file.
 
 #include "surface.h"
-#include <emscripten/wasm_worker.h>
-#include <algorithm>
 #include "live_objects.h"
-
 #include "skwasm_support.h"
+
+#include "flutter/display_list/display_list.h"
+#include "flutter/display_list/skia/dl_sk_dispatcher.h"
 #include "third_party/skia/include/gpu/ganesh/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 #include "third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h"
 #include "third_party/skia/include/gpu/ganesh/gl/GrGLDirectContext.h"
 #include "third_party/skia/include/gpu/ganesh/gl/GrGLMakeWebGLInterface.h"
 
+#include <emscripten/wasm_worker.h>
+#include <algorithm>
+
 using namespace Skwasm;
+using namespace flutter;
 
 Surface::Surface() {
   if (skwasm_isSingleThreaded()) {
@@ -39,11 +43,11 @@ void Surface::dispose() {
 }
 
 // Main thread only
-uint32_t Surface::renderPictures(SkPicture** pictures, int count) {
+uint32_t Surface::renderPictures(DisplayList** pictures, int count) {
   assert(emscripten_is_main_browser_thread());
   uint32_t callbackId = ++_currentCallbackId;
-  std::unique_ptr<sk_sp<SkPicture>[]> picturePointers =
-      std::make_unique<sk_sp<SkPicture>[]>(count);
+  std::unique_ptr<sk_sp<DisplayList>[]> picturePointers =
+      std::make_unique<sk_sp<DisplayList>[]>(count);
   for (int i = 0; i < count; i++) {
     picturePointers[i] = sk_ref_sp(pictures[i]);
   }
@@ -131,7 +135,7 @@ void Surface::_recreateSurface() {
 }
 
 // Worker thread only
-void Surface::renderPicturesOnWorker(sk_sp<SkPicture>* pictures,
+void Surface::renderPicturesOnWorker(sk_sp<DisplayList>* pictures,
                                      int pictureCount,
                                      uint32_t callbackId,
                                      double rasterStart) {
@@ -143,21 +147,23 @@ void Surface::renderPicturesOnWorker(sk_sp<SkPicture>* pictures,
   // passed in.
   SkwasmObject imagePromiseArray = __builtin_wasm_ref_null_extern();
   for (int i = 0; i < pictureCount; i++) {
-    sk_sp<SkPicture> picture = pictures[i];
-    SkRect pictureRect = picture->cullRect();
-    SkIRect roundedOutRect;
-    pictureRect.roundOut(&roundedOutRect);
-    _resizeCanvasToFit(roundedOutRect.width(), roundedOutRect.height());
-    SkMatrix matrix =
-        SkMatrix::Translate(-roundedOutRect.fLeft, -roundedOutRect.fTop);
+    sk_sp<DisplayList> picture = pictures[i];
+    DlRect pictureRect = picture->GetBounds();
+    DlIRect roundedOutRect = DlIRect::RoundOut(pictureRect);
+    _resizeCanvasToFit(roundedOutRect.GetWidth(), roundedOutRect.GetHeight());
     makeCurrent(_glContext);
     auto canvas = _surface->getCanvas();
     canvas->drawColor(SK_ColorTRANSPARENT, SkBlendMode::kSrc);
-    canvas->drawPicture(picture, &matrix, nullptr);
+    auto dispatcher = DlSkCanvasDispatcher(canvas);
+    dispatcher.save();
+    dispatcher.translate(-roundedOutRect.GetLeft(), -roundedOutRect.GetTop());
+    dispatcher.drawDisplayList(picture, 1.0f);
+    dispatcher.restore();
+
     _grContext->flush(_surface.get());
-    imagePromiseArray =
-        skwasm_captureImageBitmap(_glContext, roundedOutRect.width(),
-                                  roundedOutRect.height(), imagePromiseArray);
+    imagePromiseArray = skwasm_captureImageBitmap(
+        _glContext, roundedOutRect.GetWidth(), roundedOutRect.GetHeight(),
+        imagePromiseArray);
   }
   skwasm_resolveAndPostImages(this, imagePromiseArray, rasterStart, callbackId);
 }
@@ -263,19 +269,19 @@ SKWASM_EXPORT void surface_dispose(Surface* surface) {
 }
 
 SKWASM_EXPORT uint32_t surface_renderPictures(Surface* surface,
-                                              SkPicture** pictures,
+                                              DisplayList** pictures,
                                               int count) {
   return surface->renderPictures(pictures, count);
 }
 
 SKWASM_EXPORT void surface_renderPicturesOnWorker(Surface* surface,
-                                                  sk_sp<SkPicture>* pictures,
+                                                  sk_sp<DisplayList>* pictures,
                                                   int pictureCount,
                                                   uint32_t callbackId,
                                                   double rasterStart) {
   // This will release the pictures when they leave scope.
-  std::unique_ptr<sk_sp<SkPicture>[]> picturesPointer =
-      std::unique_ptr<sk_sp<SkPicture>[]>(pictures);
+  std::unique_ptr<sk_sp<DisplayList>[]> picturesPointer =
+      std::unique_ptr<sk_sp<DisplayList>[]>(pictures);
   surface->renderPicturesOnWorker(pictures, pictureCount, callbackId,
                                   rasterStart);
 }
