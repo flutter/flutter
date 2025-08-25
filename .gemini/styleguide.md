@@ -5,6 +5,7 @@ flutter/flutter repository. It is based on the more comprehensive official
 [style guide for the Flutter repository](https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md).
 
 ## Best Practices
+
 - Code should follow the guidance and principles described in
   [the Flutter contribution guide](https://github.com/flutter/flutter/blob/main/CONTRIBUTING.md).
 - Code should be tested and follow the guidance described in the [writing effective tests guide](https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Writing-Effective-Tests.md) and the [running and writing tests guide](https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Running-and-writing-tests.md).
@@ -12,6 +13,16 @@ flutter/flutter repository. It is based on the more comprehensive official
 - PR descriptions should include the Pre-launch Checklist from
   [the PR template](https://github.com/flutter/flutter/blob/main/.github/PULL_REQUEST_TEMPLATE.md),
   with all of the steps completed.
+- The most relevant guidelines should take precedence over less relevant
+  guidelines. For Flutter code, the
+  [Flutter styleguide](https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md)
+  should be followed as the first priority, and
+  [Effective Dart: Style](https://dart.dev/effective-dart/style)
+  should only be followed when it does not conflict with the former.
+
+## Review Agent Guidelines
+
+- Only review changes to the `master` branch. Other changes have already been reviewed (and are being cherrypicked).
 
 ## General Philosophy
 
@@ -49,6 +60,16 @@ flutter/flutter repository. It is based on the more comprehensive official
     - Do not confuse this format with `/// See also:` sections of the documentation, which provide helpful breadcrumbs to developers.
 - **Provide illustrations or screenshots** for widgets.
 - Use `///` for public-quality documentation, even on private members.
+
+## Review Agent Guidelines
+
+When providing a summary, the review agent must adhere to the following principles:
+- **Be Objective:** Focus on a neutral, descriptive summary of the changes. Avoid subjective value judgments
+  like "good," "bad," "positive," or "negative." The goal is to report what the code does, not to evaluate it.
+- **Use Code as the Source of Truth:** Base all summaries on the code diff. Do not trust or rephrase the PR
+  description, which may be outdated or inaccurate. A summary must reflect the actual changes in the code.
+- **Be Concise:** Generate summaries that are brief and to the point. Focus on the most significant changes,
+  and avoid unnecessary details or verbose explanations. This ensures the feedback is easy to scan and understand.
 
 ## Further Reading
 

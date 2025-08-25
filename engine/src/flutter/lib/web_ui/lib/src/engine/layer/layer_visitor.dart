@@ -7,21 +7,21 @@ import 'dart:typed_data';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-abstract class LayerVisitor {
-  void visitRoot(RootLayer root);
-  void visitBackdropFilter(BackdropFilterEngineLayer backdropFilter);
-  void visitClipPath(ClipPathEngineLayer clipPath);
-  void visitClipRect(ClipRectEngineLayer clipRect);
-  void visitClipRRect(ClipRRectEngineLayer clipRRect);
-  void visitClipRSuperellipse(ClipRSuperellipseEngineLayer clipRSuperellipse);
-  void visitOpacity(OpacityEngineLayer opacity);
-  void visitTransform(TransformEngineLayer transform);
-  void visitOffset(OffsetEngineLayer offset);
-  void visitImageFilter(ImageFilterEngineLayer imageFilter);
-  void visitShaderMask(ShaderMaskEngineLayer shaderMask);
-  void visitPicture(PictureLayer picture);
-  void visitColorFilter(ColorFilterEngineLayer colorFilter);
-  void visitPlatformView(PlatformViewLayer platformView);
+abstract class LayerVisitor<R> {
+  R visitRoot(RootLayer root);
+  R visitBackdropFilter(BackdropFilterEngineLayer backdropFilter);
+  R visitClipPath(ClipPathEngineLayer clipPath);
+  R visitClipRect(ClipRectEngineLayer clipRect);
+  R visitClipRRect(ClipRRectEngineLayer clipRRect);
+  R visitClipRSuperellipse(ClipRSuperellipseEngineLayer clipRSuperellipse);
+  R visitOpacity(OpacityEngineLayer opacity);
+  R visitTransform(TransformEngineLayer transform);
+  R visitOffset(OffsetEngineLayer offset);
+  R visitImageFilter(ImageFilterEngineLayer imageFilter);
+  R visitShaderMask(ShaderMaskEngineLayer shaderMask);
+  R visitPicture(PictureLayer picture);
+  R visitColorFilter(ColorFilterEngineLayer colorFilter);
+  R visitPlatformView(PlatformViewLayer platformView);
 }
 
 /// Pre-process the layer tree before painting.
@@ -29,13 +29,13 @@ abstract class LayerVisitor {
 /// In this step, we compute the estimated [paintBounds] as well as
 /// apply heuristics to prepare the render cache for pictures that
 /// should be cached.
-class PrerollVisitor extends LayerVisitor {
+class PrerollVisitor extends LayerVisitor<void> {
   PrerollVisitor(this.viewEmbedder);
 
   final MutatorsStack mutatorsStack = MutatorsStack();
 
   /// A compositor for embedded HTML views.
-  final HtmlViewEmbedder? viewEmbedder;
+  final PlatformViewEmbedder? viewEmbedder;
 
   ui.Rect get cullRect {
     ui.Rect cullRect = ui.Rect.largest;
@@ -142,12 +142,6 @@ class PrerollVisitor extends LayerVisitor {
     mutatorsStack.pushTransform(
       Matrix4.translationValues(imageFilter.offset.dx, imageFilter.offset.dy, 0.0),
     );
-    final CkManagedSkImageFilterConvertible convertible;
-    if (imageFilter.filter is ui.ColorFilter) {
-      convertible = createCkColorFilter(imageFilter.filter as EngineColorFilter)!;
-    } else {
-      convertible = imageFilter.filter as CkManagedSkImageFilterConvertible;
-    }
     ui.Rect childPaintBounds = prerollChildren(imageFilter);
     childPaintBounds = childPaintBounds.translate(imageFilter.offset.dx, imageFilter.offset.dy);
     if (imageFilter.filter is ui.ColorFilter) {
@@ -155,11 +149,7 @@ class PrerollVisitor extends LayerVisitor {
       // entire screen, which is not what we want.
       imageFilter.paintBounds = childPaintBounds;
     } else {
-      convertible.withSkImageFilter((SkImageFilter skFilter) {
-        imageFilter.paintBounds = rectFromSkIRect(
-          skFilter.getOutputBounds(toSkRect(childPaintBounds)),
-        );
-      });
+      imageFilter.paintBounds = imageFilter.filter.filterBounds(childPaintBounds);
     }
     mutatorsStack.pop();
   }
@@ -226,26 +216,27 @@ class PrerollVisitor extends LayerVisitor {
 
 /// A layer visitor which measures the pictures that make up the scene and
 /// prepares for them to be optimized into few canvases.
-class MeasureVisitor extends LayerVisitor {
-  MeasureVisitor(BitmapSize size, this.viewEmbedder) : measuringRecorder = CkPictureRecorder() {
-    measuringCanvas = measuringRecorder.beginRecording(ui.Offset.zero & size.toSize());
+class MeasureVisitor extends LayerVisitor<void> {
+  MeasureVisitor(BitmapSize size, this.viewEmbedder)
+    : measuringRecorder = ui.PictureRecorder() as LayerPictureRecorder {
+    measuringCanvas = ui.Canvas(measuringRecorder, ui.Offset.zero & size.toSize()) as LayerCanvas;
   }
 
   /// A stack of image filters which apply their transforms to measured bounds.
-  List<CkManagedSkImageFilterConvertible> imageFilterStack = <CkManagedSkImageFilterConvertible>[];
+  List<LayerImageFilter> imageFilterStack = <LayerImageFilter>[];
 
-  final CkPictureRecorder measuringRecorder;
+  final LayerPictureRecorder measuringRecorder;
 
   /// A Canvas which records the scene operations. Used to measure pictures
   /// in the scene.
-  late final CkCanvas measuringCanvas;
+  late final LayerCanvas measuringCanvas;
 
   /// A compositor for embedded HTML views.
-  final HtmlViewEmbedder viewEmbedder;
+  final PlatformViewEmbedder? viewEmbedder;
 
   /// Clean up the measuring picture recorder and the picture it recorded.
   void dispose() {
-    final CkPicture picture = measuringRecorder.endRecording();
+    final ui.Picture picture = measuringRecorder.endRecording();
     picture.dispose();
   }
 
@@ -262,7 +253,11 @@ class MeasureVisitor extends LayerVisitor {
 
   @override
   void visitRoot(RootLayer root) {
-    measureChildren(root);
+    // If all children of the root are clipped out, then `measureChildren` will
+    // crash since the root doesn't need painting.
+    if (root.needsPainting) {
+      measureChildren(root);
+    }
   }
 
   @override
@@ -276,12 +271,12 @@ class MeasureVisitor extends LayerVisitor {
 
     measuringCanvas.save();
     measuringCanvas.clipPath(
-      clipPath.clipPath.builtPath as CkPath,
-      clipPath.clipBehavior != ui.Clip.hardEdge,
+      clipPath.clipPath,
+      doAntiAlias: clipPath.clipBehavior != ui.Clip.hardEdge,
     );
 
     if (clipPath.clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
-      measuringCanvas.saveLayer(clipPath.paintBounds, null);
+      measuringCanvas.saveLayer(clipPath.paintBounds, ui.Paint());
     }
     measureChildren(clipPath);
     if (clipPath.clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
@@ -297,11 +292,10 @@ class MeasureVisitor extends LayerVisitor {
     measuringCanvas.save();
     measuringCanvas.clipRect(
       clipRect.clipRect,
-      ui.ClipOp.intersect,
-      clipRect.clipBehavior != ui.Clip.hardEdge,
+      doAntiAlias: clipRect.clipBehavior != ui.Clip.hardEdge,
     );
     if (clipRect.clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
-      measuringCanvas.saveLayer(clipRect.clipRect, null);
+      measuringCanvas.saveLayer(clipRect.clipRect, ui.Paint());
     }
     measureChildren(clipRect);
     if (clipRect.clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
@@ -315,9 +309,12 @@ class MeasureVisitor extends LayerVisitor {
     assert(clipRRect.needsPainting);
 
     measuringCanvas.save();
-    measuringCanvas.clipRRect(clipRRect.clipRRect, clipRRect.clipBehavior != ui.Clip.hardEdge);
+    measuringCanvas.clipRRect(
+      clipRRect.clipRRect,
+      doAntiAlias: clipRRect.clipBehavior != ui.Clip.hardEdge,
+    );
     if (clipRRect.clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
-      measuringCanvas.saveLayer(clipRRect.paintBounds, null);
+      measuringCanvas.saveLayer(clipRRect.paintBounds, ui.Paint());
     }
     measureChildren(clipRRect);
     if (clipRRect.clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
@@ -333,10 +330,10 @@ class MeasureVisitor extends LayerVisitor {
     measuringCanvas.save();
     measuringCanvas.clipRSuperellipse(
       clipRSuperellipse.clipRSuperellipse,
-      clipRSuperellipse.clipBehavior != ui.Clip.hardEdge,
+      doAntiAlias: clipRSuperellipse.clipBehavior != ui.Clip.hardEdge,
     );
     if (clipRSuperellipse.clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
-      measuringCanvas.saveLayer(clipRSuperellipse.paintBounds, null);
+      measuringCanvas.saveLayer(clipRSuperellipse.paintBounds, ui.Paint());
     }
     measureChildren(clipRSuperellipse);
     if (clipRSuperellipse.clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
@@ -349,7 +346,7 @@ class MeasureVisitor extends LayerVisitor {
   void visitOpacity(OpacityEngineLayer opacity) {
     assert(opacity.needsPainting);
 
-    final CkPaint paint = CkPaint();
+    final ui.Paint paint = ui.Paint();
     paint.color = ui.Color.fromARGB(opacity.alpha, 0, 0, 0);
 
     measuringCanvas.save();
@@ -367,7 +364,7 @@ class MeasureVisitor extends LayerVisitor {
     assert(transform.needsPainting);
 
     measuringCanvas.save();
-    measuringCanvas.transform(transform.transform.storage);
+    measuringCanvas.transform(transform.transform.toFloat64());
     measureChildren(transform);
     measuringCanvas.restore();
   }
@@ -383,12 +380,12 @@ class MeasureVisitor extends LayerVisitor {
     final ui.Rect offsetPaintBounds = imageFilter.paintBounds.shift(-imageFilter.offset);
     measuringCanvas.save();
     measuringCanvas.translate(imageFilter.offset.dx, imageFilter.offset.dy);
-    measuringCanvas.clipRect(offsetPaintBounds, ui.ClipOp.intersect, false);
-    final CkPaint paint = CkPaint();
+    measuringCanvas.clipRect(offsetPaintBounds, doAntiAlias: false);
+    final ui.Paint paint = ui.Paint();
     paint.imageFilter = imageFilter.filter;
     measuringCanvas.saveLayer(offsetPaintBounds, paint);
     if (imageFilter.filter is! ui.ColorFilter) {
-      imageFilterStack.add(imageFilter.filter as CkManagedSkImageFilterConvertible);
+      imageFilterStack.add(imageFilter.filter);
     }
     measureChildren(imageFilter);
     if (imageFilter.filter is! ui.ColorFilter) {
@@ -402,7 +399,7 @@ class MeasureVisitor extends LayerVisitor {
   void visitShaderMask(ShaderMaskEngineLayer shaderMask) {
     assert(shaderMask.needsPainting);
 
-    measuringCanvas.saveLayer(shaderMask.paintBounds, null);
+    measuringCanvas.saveLayer(shaderMask.paintBounds, ui.Paint());
     measureChildren(shaderMask);
 
     measuringCanvas.restore();
@@ -416,15 +413,13 @@ class MeasureVisitor extends LayerVisitor {
     measuringCanvas.translate(picture.offset.dx, picture.offset.dy);
 
     // Get the picture bounds using the measuring canvas.
-    final Float32List localTransform = measuringCanvas.getLocalToDevice();
+    final Float32List localTransform = Float32List.fromList(measuringCanvas.getTransform());
     ui.Rect transformedBounds = Matrix4.fromFloat32List(
       localTransform,
     ).transformRect(picture.picture.cullRect);
     // Modify the bounds with the image filters.
-    for (final CkManagedSkImageFilterConvertible convertible in imageFilterStack.reversed) {
-      convertible.withSkImageFilter((SkImageFilter skFilter) {
-        transformedBounds = rectFromSkIRect(skFilter.getOutputBounds(toSkRect(transformedBounds)));
-      }, defaultBlurTileMode: ui.TileMode.decal);
+    for (final LayerImageFilter imageFilter in imageFilterStack.reversed) {
+      transformedBounds = imageFilter.filterBounds(transformedBounds);
     }
     picture.sceneBounds = transformedBounds;
 
@@ -432,14 +427,14 @@ class MeasureVisitor extends LayerVisitor {
 
     measuringCanvas.restore();
 
-    viewEmbedder.addPictureToUnoptimizedScene(picture);
+    viewEmbedder?.addPictureToUnoptimizedScene(picture);
   }
 
   @override
   void visitColorFilter(ColorFilterEngineLayer colorFilter) {
     assert(colorFilter.needsPainting);
 
-    final CkPaint paint = CkPaint();
+    final ui.Paint paint = ui.Paint();
     paint.colorFilter = colorFilter.filter;
 
     // We need to clip because if the ColorFilter affects transparent black,
@@ -449,7 +444,7 @@ class MeasureVisitor extends LayerVisitor {
     measuringCanvas.save();
 
     // TODO(hterkelsen): Only clip if the ColorFilter affects transparent black.
-    measuringCanvas.clipRect(colorFilter.paintBounds, ui.ClipOp.intersect, false);
+    measuringCanvas.clipRect(colorFilter.paintBounds, doAntiAlias: false);
 
     measuringCanvas.saveLayer(colorFilter.paintBounds, paint);
     measureChildren(colorFilter);
@@ -461,7 +456,7 @@ class MeasureVisitor extends LayerVisitor {
   void visitPlatformView(PlatformViewLayer platformView) {
     // TODO(harryterkelsen): Warn if we are a child of a backdrop filter or
     // shader mask.
-    viewEmbedder.compositeEmbeddedView(platformView.viewId);
+    viewEmbedder?.compositeEmbeddedView(platformView.viewId);
   }
 }
 
@@ -469,25 +464,25 @@ class MeasureVisitor extends LayerVisitor {
 ///
 /// The canvases are the optimized canvases that were created when the view
 /// embedder optimized the canvases after the measure step.
-class PaintVisitor extends LayerVisitor {
-  PaintVisitor(this.nWayCanvas, HtmlViewEmbedder this.viewEmbedder) : toImageCanvas = null;
+class PaintVisitor extends LayerVisitor<void> {
+  PaintVisitor(this.nWayCanvas, PlatformViewEmbedder this.viewEmbedder) : toImageCanvas = null;
 
   PaintVisitor.forToImage(this.nWayCanvas, this.toImageCanvas) : viewEmbedder = null;
 
   /// A multi-canvas that applies clips, transforms, and opacity
   /// operations to all canvases (root canvas and overlay canvases for the
   /// platform views).
-  CkNWayCanvas nWayCanvas;
+  NWayCanvas nWayCanvas;
 
   /// A compositor for embedded HTML views.
-  final HtmlViewEmbedder? viewEmbedder;
+  final PlatformViewEmbedder? viewEmbedder;
 
   final List<ShaderMaskEngineLayer> shaderMaskStack = <ShaderMaskEngineLayer>[];
 
   final Map<ShaderMaskEngineLayer, List<PictureLayer>> picturesUnderShaderMask =
       <ShaderMaskEngineLayer, List<PictureLayer>>{};
 
-  final CkCanvas? toImageCanvas;
+  final ui.Canvas? toImageCanvas;
 
   /// Calls [paint] on all child layers that need painting.
   void paintChildren(ContainerLayer container) {
@@ -507,7 +502,7 @@ class PaintVisitor extends LayerVisitor {
 
   @override
   void visitBackdropFilter(BackdropFilterEngineLayer backdropFilter) {
-    final CkPaint paint = CkPaint()..blendMode = backdropFilter.blendMode;
+    final ui.Paint paint = ui.Paint()..blendMode = backdropFilter.blendMode;
 
     nWayCanvas.saveLayerWithFilter(backdropFilter.paintBounds, backdropFilter.filter, paint);
     paintChildren(backdropFilter);
@@ -519,10 +514,7 @@ class PaintVisitor extends LayerVisitor {
     assert(clipPath.needsPainting);
 
     nWayCanvas.save();
-    nWayCanvas.clipPath(
-      clipPath.clipPath.builtPath as CkPath,
-      clipPath.clipBehavior != ui.Clip.hardEdge,
-    );
+    nWayCanvas.clipPath(clipPath.clipPath, clipPath.clipBehavior != ui.Clip.hardEdge);
 
     if (clipPath.clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
       nWayCanvas.saveLayer(clipPath.paintBounds, null);
@@ -592,7 +584,7 @@ class PaintVisitor extends LayerVisitor {
   void visitOpacity(OpacityEngineLayer opacity) {
     assert(opacity.needsPainting);
 
-    final CkPaint paint = CkPaint();
+    final ui.Paint paint = ui.Paint();
     paint.color = ui.Color.fromARGB(opacity.alpha, 0, 0, 0);
 
     nWayCanvas.save();
@@ -627,7 +619,7 @@ class PaintVisitor extends LayerVisitor {
     nWayCanvas.save();
     nWayCanvas.translate(imageFilter.offset.dx, imageFilter.offset.dy);
     nWayCanvas.clipRect(offsetPaintBounds, ui.ClipOp.intersect, false);
-    final CkPaint paint = CkPaint();
+    final ui.Paint paint = ui.Paint();
     paint.imageFilter = imageFilter.filter;
     nWayCanvas.saveLayer(offsetPaintBounds, paint);
     paintChildren(imageFilter);
@@ -643,14 +635,14 @@ class PaintVisitor extends LayerVisitor {
     nWayCanvas.saveLayer(shaderMask.paintBounds, null);
     paintChildren(shaderMask);
 
-    final CkPaint paint = CkPaint();
+    final ui.Paint paint = ui.Paint();
     paint.shader = shaderMask.shader;
     paint.blendMode = shaderMask.blendMode;
     paint.filterQuality = shaderMask.filterQuality;
 
-    late List<CkCanvas> canvasesToApplyShaderMask;
+    late List<ui.Canvas> canvasesToApplyShaderMask;
     if (viewEmbedder != null) {
-      final Set<CkCanvas> canvases = <CkCanvas>{};
+      final Set<ui.Canvas> canvases = <ui.Canvas>{};
       final List<PictureLayer>? pictureChildren = picturesUnderShaderMask[shaderMask];
       if (pictureChildren != null) {
         for (final PictureLayer picture in pictureChildren) {
@@ -659,10 +651,10 @@ class PaintVisitor extends LayerVisitor {
       }
       canvasesToApplyShaderMask = canvases.toList();
     } else {
-      canvasesToApplyShaderMask = <CkCanvas>[toImageCanvas!];
+      canvasesToApplyShaderMask = <ui.Canvas>[toImageCanvas!];
     }
 
-    for (final CkCanvas canvas in canvasesToApplyShaderMask) {
+    for (final ui.Canvas canvas in canvasesToApplyShaderMask) {
       canvas.save();
       canvas.translate(shaderMask.maskRect.left, shaderMask.maskRect.top);
 
@@ -687,7 +679,7 @@ class PaintVisitor extends LayerVisitor {
       picturesUnderShaderMask[shaderMask]!.add(picture);
     }
 
-    late CkCanvas pictureRecorderCanvas;
+    late ui.Canvas pictureRecorderCanvas;
     if (viewEmbedder != null) {
       pictureRecorderCanvas = viewEmbedder!.getOptimizedCanvasFor(picture);
     } else {
@@ -705,7 +697,7 @@ class PaintVisitor extends LayerVisitor {
   void visitColorFilter(ColorFilterEngineLayer colorFilter) {
     assert(colorFilter.needsPainting);
 
-    final CkPaint paint = CkPaint();
+    final ui.Paint paint = ui.Paint();
     paint.colorFilter = colorFilter.filter;
 
     // We need to clip because if the ColorFilter affects transparent black,
@@ -727,5 +719,206 @@ class PaintVisitor extends LayerVisitor {
   void visitPlatformView(PlatformViewLayer platformView) {
     // Do nothing. The platform view was already measured and placed in the
     // optimized rendering in the measure step.
+  }
+}
+
+class DebugInfoVisitor extends LayerVisitor<Map<String, dynamic>> {
+  List<Map<String, dynamic>> debugChildren(ContainerLayer container) {
+    final List<Map<String, dynamic>> children = <Map<String, dynamic>>[];
+
+    for (final Layer layer in container.children) {
+      children.add(layer.accept(this));
+    }
+    return children;
+  }
+
+  @override
+  Map<String, dynamic> visitRoot(RootLayer root) {
+    return <String, dynamic>{'type': 'root', 'children': debugChildren(root)};
+  }
+
+  @override
+  Map<String, dynamic> visitBackdropFilter(BackdropFilterEngineLayer backdropFilter) {
+    return <String, dynamic>{
+      'type': 'backdropFilter',
+      'filter': backdropFilter.filter.toString(),
+      'blendMode': backdropFilter.blendMode.toString(),
+      'children': debugChildren(backdropFilter),
+    };
+  }
+
+  @override
+  Map<String, dynamic> visitClipPath(ClipPathEngineLayer clipPath) {
+    final ui.Rect bounds = clipPath.clipPath.getBounds();
+    return <String, dynamic>{
+      'type': 'clipPath',
+      'pathBounds': {
+        'left': bounds.left,
+        'top': bounds.top,
+        'right': bounds.right,
+        'bottom': bounds.bottom,
+      },
+      'clip': clipPath.clipBehavior.name,
+      'children': debugChildren(clipPath),
+    };
+  }
+
+  @override
+  Map<String, dynamic> visitClipRect(ClipRectEngineLayer clipRect) {
+    final ui.Rect rect = clipRect.clipRect;
+    return <String, dynamic>{
+      'type': 'clipRect',
+      'rect': {'left': rect.left, 'top': rect.top, 'right': rect.right, 'bottom': rect.bottom},
+      'clip': clipRect.clipBehavior.name,
+      'children': debugChildren(clipRect),
+    };
+  }
+
+  @override
+  Map<String, dynamic> visitClipRRect(ClipRRectEngineLayer clipRRect) {
+    final ui.RRect rrect = clipRRect.clipRRect;
+    return <String, dynamic>{
+      'type': 'clipRRect',
+      'rrect': {
+        'left': rrect.left,
+        'top': rrect.top,
+        'right': rrect.right,
+        'bottom': rrect.bottom,
+        'tlRadiusX': rrect.tlRadiusX,
+        'tlRadiusY': rrect.tlRadiusY,
+        'trRadiusX': rrect.trRadiusX,
+        'trRadiusY': rrect.trRadiusY,
+        'brRadiusX': rrect.brRadiusX,
+        'brRadiusY': rrect.brRadiusY,
+        'blRadiusX': rrect.blRadiusX,
+        'blRadiusY': rrect.blRadiusY,
+      },
+      'clip': clipRRect.clipBehavior?.name,
+      'children': debugChildren(clipRRect),
+    };
+  }
+
+  @override
+  Map<String, dynamic> visitClipRSuperellipse(ClipRSuperellipseEngineLayer clipRSuperellipse) {
+    final ui.RSuperellipse rsuperellipse = clipRSuperellipse.clipRSuperellipse;
+    return <String, dynamic>{
+      'type': 'clipRSuperellipse',
+      'rsuperellipse': {
+        'left': rsuperellipse.left,
+        'top': rsuperellipse.top,
+        'right': rsuperellipse.right,
+        'bottom': rsuperellipse.bottom,
+        'tlRadiusX': rsuperellipse.tlRadiusX,
+        'tlRadiusY': rsuperellipse.tlRadiusY,
+        'trRadiusX': rsuperellipse.trRadiusX,
+        'trRadiusY': rsuperellipse.trRadiusY,
+        'brRadiusX': rsuperellipse.brRadiusX,
+        'brRadiusY': rsuperellipse.brRadiusY,
+        'blRadiusX': rsuperellipse.blRadiusX,
+        'blRadiusY': rsuperellipse.blRadiusY,
+      },
+      'clip': clipRSuperellipse.clipBehavior?.name,
+      'children': debugChildren(clipRSuperellipse),
+    };
+  }
+
+  @override
+  Map<String, dynamic> visitOpacity(OpacityEngineLayer opacity) {
+    return <String, dynamic>{
+      'type': 'opacity',
+      'alpha': opacity.alpha,
+      'offset': {'x': opacity.offset.dx, 'y': opacity.offset.dy},
+      'children': debugChildren(opacity),
+    };
+  }
+
+  @override
+  Map<String, dynamic> visitTransform(TransformEngineLayer transform) {
+    return <String, dynamic>{
+      'type': 'transform',
+      'matrix': transform.transform.storage.toList(),
+      'children': debugChildren(transform),
+    };
+  }
+
+  @override
+  Map<String, dynamic> visitOffset(OffsetEngineLayer offset) {
+    final translation = offset.transform.getTranslation();
+    return <String, dynamic>{
+      'type': 'offset',
+      'offset': {'x': translation.x, 'y': translation.y},
+      'children': debugChildren(offset),
+    };
+  }
+
+  @override
+  Map<String, dynamic> visitImageFilter(ImageFilterEngineLayer imageFilter) {
+    return <String, dynamic>{
+      'type': 'imageFilter',
+      'filter': imageFilter.filter.toString(),
+      'offset': {'x': imageFilter.offset.dx, 'y': imageFilter.offset.dy},
+      'children': debugChildren(imageFilter),
+    };
+  }
+
+  @override
+  Map<String, dynamic> visitShaderMask(ShaderMaskEngineLayer shaderMask) {
+    final ui.Rect maskRect = shaderMask.maskRect;
+    return <String, dynamic>{
+      'type': 'shaderMask',
+      'shader': shaderMask.shader.toString(),
+      'maskRect': {
+        'left': maskRect.left,
+        'top': maskRect.top,
+        'right': maskRect.right,
+        'bottom': maskRect.bottom,
+      },
+      'blendMode': shaderMask.blendMode.toString(),
+      'children': debugChildren(shaderMask),
+    };
+  }
+
+  @override
+  Map<String, dynamic> visitPicture(PictureLayer picture) {
+    final ui.Rect cullRect = picture.picture.cullRect;
+    return <String, dynamic>{
+      'type': 'picture',
+      'offset': {'x': picture.offset.dx, 'y': picture.offset.dy},
+      'localBounds': {
+        'left': cullRect.left,
+        'top': cullRect.top,
+        'right': cullRect.right,
+        'bottom': cullRect.bottom,
+      },
+    };
+  }
+
+  @override
+  Map<String, dynamic> visitColorFilter(ColorFilterEngineLayer colorFilter) {
+    return <String, dynamic>{
+      'type': 'colorFilter',
+      'filter': colorFilter.filter.toString(),
+      'children': debugChildren(colorFilter),
+    };
+  }
+
+  @override
+  Map<String, dynamic> visitPlatformView(PlatformViewLayer platformView) {
+    final ui.Rect bounds = ui.Rect.fromLTWH(
+      platformView.offset.dx,
+      platformView.offset.dy,
+      platformView.width,
+      platformView.height,
+    );
+    return <String, dynamic>{
+      'type': 'platformView',
+      'localBounds': {
+        'left': bounds.left,
+        'top': bounds.top,
+        'right': bounds.right,
+        'bottom': bounds.bottom,
+      },
+      'viewId': platformView.viewId,
+    };
   }
 }

@@ -223,16 +223,15 @@ void drawTestPicture(CkCanvas canvas) {
   canvas.save();
 
   canvas.save();
-  canvas.clipRect(const ui.Rect.fromLTRB(0, 0, 45, 45), ui.ClipOp.intersect, true);
-  canvas.clipRRect(ui.RRect.fromLTRBR(5, 5, 50, 50, const ui.Radius.circular(8)), true);
+  canvas.clipRect(const ui.Rect.fromLTRB(0, 0, 45, 45));
+  canvas.clipRRect(ui.RRect.fromLTRBR(5, 5, 50, 50, const ui.Radius.circular(8)));
   canvas.clipPath(
-    CkPath()
+    ui.Path()
       ..moveTo(5, 5)
       ..lineTo(25, 5)
       ..lineTo(45, 45)
       ..lineTo(5, 45)
       ..close(),
-    true,
   );
   canvas.drawColor(const ui.Color.fromARGB(255, 100, 100, 0), ui.BlendMode.srcOver);
   canvas.restore(); // remove clips
@@ -261,8 +260,7 @@ void drawTestPicture(CkCanvas canvas) {
     translateX: 0,
     translateY: 0,
   );
-  canvas.drawAtlasRaw(
-    CkPaint(),
+  canvas.drawRawAtlas(
     generateTestImage(),
     Float32List(4)
       ..[0] = transform.scos
@@ -274,8 +272,10 @@ void drawTestPicture(CkCanvas canvas) {
       ..[1] = 0
       ..[2] = 15
       ..[3] = 15,
-    Uint32List.fromList(<int>[0x00000000]),
+    Int32List.fromList(<int>[0x00000000]),
     ui.BlendMode.srcOver,
+    null,
+    CkPaint(),
   );
 
   canvas.translate(60, 0);
@@ -314,7 +314,7 @@ void drawTestPicture(CkCanvas canvas) {
 
   canvas.translate(60, 0);
   canvas.save();
-  canvas.clipRect(const ui.Rect.fromLTRB(0, 0, 50, 30), ui.ClipOp.intersect, true);
+  canvas.clipRect(const ui.Rect.fromLTRB(0, 0, 50, 30));
   canvas.drawPaint(CkPaint()..color = const ui.Color(0xFF6688AA));
   canvas.restore();
 
@@ -336,17 +336,12 @@ void drawTestPicture(CkCanvas canvas) {
   //                But keeping this anyway as it's a good test-case that
   //                will ensure it's fixed when we have the fix.
   canvas.drawPoints(
+    ui.PointMode.polygon,
+    const <ui.Offset>[ui.Offset(10, 10), ui.Offset(20, 10), ui.Offset(30, 20), ui.Offset(40, 20)],
     CkPaint()
       ..color = const ui.Color(0xFF0000FF)
       ..strokeWidth = 5
       ..strokeCap = ui.StrokeCap.round,
-    ui.PointMode.polygon,
-    offsetListToFloat32List(const <ui.Offset>[
-      ui.Offset(10, 10),
-      ui.Offset(20, 10),
-      ui.Offset(30, 20),
-      ui.Offset(40, 20),
-    ]),
   );
 
   canvas.translate(60, 0);
@@ -357,7 +352,7 @@ void drawTestPicture(CkCanvas canvas) {
 
   canvas.translate(60, 0);
   canvas.drawShadow(
-    CkPath()..addRect(const ui.Rect.fromLTRB(0, 0, 40, 30)),
+    ui.Path()..addRect(const ui.Rect.fromLTRB(0, 0, 40, 30)),
     const ui.Color(0xFF00FF00),
     4,
     true,
@@ -422,6 +417,7 @@ void drawTestPicture(CkCanvas canvas) {
   {
     canvas.saveLayerWithFilter(
       kDefaultRegion,
+      CkPaint(),
       ui.ImageFilter.blur(sigmaX: 5, sigmaY: 10, tileMode: ui.TileMode.clamp),
     );
     canvas.drawCircle(const ui.Offset(10, 10), 10, CkPaint());
@@ -454,7 +450,7 @@ void drawTestPicture(CkCanvas canvas) {
   final Matrix4 matrix = Matrix4.identity();
   matrix.translate(30, 30);
   matrix.scale(2, 1.5);
-  canvas.transform(matrix.storage);
+  canvas.transform(matrix.toFloat64());
   canvas.drawCircle(ui.Offset.zero, 10, CkPaint());
   canvas.restore();
 
@@ -464,7 +460,7 @@ void drawTestPicture(CkCanvas canvas) {
 
   canvas.translate(60, 0);
   canvas.drawPath(
-    CkPath()
+    ui.Path()
       ..moveTo(30, 20)
       ..lineTo(50, 50)
       ..lineTo(10, 50)
