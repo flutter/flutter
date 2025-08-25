@@ -42,7 +42,7 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 - [flutter/171992](https://github.com/flutter/flutter/issues/171992) - Blocks `exynos9820` chip from using the Impeller Vulkan backend.
 - [flutter/173959](https://github.com/flutter/flutter/issues/173959) - Fixes a null assertion when trying to add `@Preview()` to invalid nodes.
 - [flutter/174184](https://github.com/flutter/flutter/pull/174184) - Skips WASM builds when dry run is disabled and `--wasm` is not specified.
-- [flutter/171758](https://github.com/flutter/flutter/issues/171758) - Fixes a bug where `ExistingDartDevelopmentServiceException` would be thrown.
+- [flutter/171758](https://github.com/flutter/flutter/issues/171758) - Fixes an ExistingDartDevelopmentServiceException that could be thrown when running flutter run on a device with an existing Dart development service.
 
 ### [3.35.1](https://github.com/flutter/flutter/releases/tag/3.35.1)
 
