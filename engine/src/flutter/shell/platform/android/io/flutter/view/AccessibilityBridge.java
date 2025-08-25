@@ -19,11 +19,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
-import android.text.SpannableString;
 import android.text.TextUtils;
-import android.text.style.LocaleSpan;
-import android.text.style.TtsSpan;
-import android.text.style.URLSpan;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -41,6 +37,10 @@ import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
 import io.flutter.plugin.platform.PlatformViewsAccessibilityDelegate;
 import io.flutter.util.Predicate;
 import io.flutter.util.ViewUtils;
+import io.flutter.view.AccessibilityStringBuilder.LocaleStringAttribute;
+import io.flutter.view.AccessibilityStringBuilder.SpellOutStringAttribute;
+import io.flutter.view.AccessibilityStringBuilder.StringAttribute;
+import io.flutter.view.AccessibilityStringBuilder.StringAttributeType;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
@@ -133,6 +133,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
   /// Value is derived from ACTION_TYPE_MASK in AccessibilityNodeInfo.java
   private static int FIRST_RESOURCE_ID = 267386881;
+
+  /// The index value that indicates no string is specified.
+  private static int EMPTY_STRING_INDEX = -1;
 
   // Real Android View, which internally holds a Flutter UI.
   @NonNull private final View rootAccessibilityView;
@@ -504,6 +507,54 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     }
 
     platformViewsAccessibilityDelegate.attachAccessibilityBridge(this);
+  }
+
+  private static List<StringAttribute> getStringAttributesFromBuffer(
+      @NonNull ByteBuffer buffer, @NonNull ByteBuffer[] stringAttributeArgs) {
+    final int attributesCount = buffer.getInt();
+    if (attributesCount == -1) {
+      return null;
+    }
+    final List<StringAttribute> result = new ArrayList<>(attributesCount);
+    for (int i = 0; i < attributesCount; ++i) {
+      final int start = buffer.getInt();
+      final int end = buffer.getInt();
+      final StringAttributeType type = StringAttributeType.values()[buffer.getInt()];
+      switch (type) {
+        case SPELLOUT:
+          {
+            // Pops the -1 size.
+            buffer.getInt();
+            SpellOutStringAttribute attribute = new SpellOutStringAttribute();
+            attribute.start = start;
+            attribute.end = end;
+            attribute.type = type;
+            result.add(attribute);
+            break;
+          }
+        case LOCALE:
+          {
+            final int argsIndex = buffer.getInt();
+            final ByteBuffer args = stringAttributeArgs[argsIndex];
+            LocaleStringAttribute attribute = new LocaleStringAttribute();
+            attribute.start = start;
+            attribute.end = end;
+            attribute.type = type;
+            attribute.locale = Charset.forName("UTF-8").decode(args).toString();
+            result.add(attribute);
+            break;
+          }
+        default:
+          break;
+      }
+    }
+    return result;
+  }
+
+  private static String getStringFromBuffer(@NonNull ByteBuffer buffer, @NonNull String[] strings) {
+    int stringIndex = buffer.getInt();
+
+    return stringIndex == EMPTY_STRING_INDEX ? null : strings[stringIndex];
   }
 
   /**
@@ -1615,10 +1666,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       int id = buffer.getInt();
       CustomAccessibilityAction action = getOrCreateAccessibilityAction(id);
       action.overrideId = buffer.getInt();
-      int stringIndex = buffer.getInt();
-      action.label = stringIndex == -1 ? null : strings[stringIndex];
-      stringIndex = buffer.getInt();
-      action.hint = stringIndex == -1 ? null : strings[stringIndex];
+      action.label = getStringFromBuffer(buffer, strings);
+      action.hint = getStringFromBuffer(buffer, strings);
     }
   }
 
@@ -2253,34 +2302,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     private String hint;
   }
 
-  // When adding a new StringAttributeType, the classes in these file must be
-  // updated as well.
-  //  * engine/src/flutter/lib/ui/semantics.dart
-  //  * engine/src/flutter/lib/web_ui/lib/semantics.dart
-  //  * engine/src/flutter/lib/ui/semantics/string_attribute.h
-
-  private enum StringAttributeType {
-    SPELLOUT,
-    LOCALE,
-    URL
-  }
-
-  private static class StringAttribute {
-    int start;
-    int end;
-    StringAttributeType type;
-  }
-
-  private static class SpellOutStringAttribute extends StringAttribute {}
-
-  private static class LocaleStringAttribute extends StringAttribute {
-    String locale;
-  }
-
-  private static class UrlStringAttribute extends StringAttribute {
-    String url;
-  }
-
   /**
    * Flutter {@code SemanticsNode} represented in Java/Android.
    *
@@ -2335,8 +2356,11 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     // API level >= 28; otherwise, this is attached to the end of content description.
     @Nullable private String tooltip;
 
-    // The Url the widget's points to.
+    // The Url this node points to.
     @Nullable private String linkUrl;
+
+    // The locale of the content of this node.
+    @Nullable private String locale;
 
     // The id of the sibling node that is before this node in traversal
     // order.
@@ -2517,40 +2541,26 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       scrollExtentMax = buffer.getFloat();
       scrollExtentMin = buffer.getFloat();
 
-      int stringIndex = buffer.getInt();
+      identifier = getStringFromBuffer(buffer, strings);
 
-      identifier = stringIndex == -1 ? null : strings[stringIndex];
-      stringIndex = buffer.getInt();
-
-      label = stringIndex == -1 ? null : strings[stringIndex];
-
+      label = getStringFromBuffer(buffer, strings);
       labelAttributes = getStringAttributesFromBuffer(buffer, stringAttributeArgs);
 
-      stringIndex = buffer.getInt();
-      value = stringIndex == -1 ? null : strings[stringIndex];
-
+      value = getStringFromBuffer(buffer, strings);
       valueAttributes = getStringAttributesFromBuffer(buffer, stringAttributeArgs);
 
-      stringIndex = buffer.getInt();
-      increasedValue = stringIndex == -1 ? null : strings[stringIndex];
-
+      increasedValue = getStringFromBuffer(buffer, strings);
       increasedValueAttributes = getStringAttributesFromBuffer(buffer, stringAttributeArgs);
 
-      stringIndex = buffer.getInt();
-      decreasedValue = stringIndex == -1 ? null : strings[stringIndex];
-
+      decreasedValue = getStringFromBuffer(buffer, strings);
       decreasedValueAttributes = getStringAttributesFromBuffer(buffer, stringAttributeArgs);
 
-      stringIndex = buffer.getInt();
-      hint = stringIndex == -1 ? null : strings[stringIndex];
-
+      hint = getStringFromBuffer(buffer, strings);
       hintAttributes = getStringAttributesFromBuffer(buffer, stringAttributeArgs);
 
-      stringIndex = buffer.getInt();
-      tooltip = stringIndex == -1 ? null : strings[stringIndex];
-
-      stringIndex = buffer.getInt();
-      linkUrl = stringIndex == -1 ? null : strings[stringIndex];
+      tooltip = getStringFromBuffer(buffer, strings);
+      linkUrl = getStringFromBuffer(buffer, strings);
+      locale = getStringFromBuffer(buffer, strings);
 
       textDirection = TextDirection.fromInt(buffer.getInt());
 
@@ -2840,29 +2850,28 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     }
 
     private CharSequence getValue() {
-      return createSpannableString(value, valueAttributes);
+      return new AccessibilityStringBuilder()
+          .addString(value)
+          .addAttributes(valueAttributes)
+          .addLocale(locale)
+          .build();
     }
 
     private CharSequence getLabel() {
-      List<StringAttribute> attributes = labelAttributes;
-      if (linkUrl != null && linkUrl.length() > 0) {
-        if (attributes == null) {
-          attributes = new ArrayList<StringAttribute>();
-        } else {
-          attributes = new ArrayList<StringAttribute>(attributes);
-        }
-        UrlStringAttribute uriStringAttribute = new UrlStringAttribute();
-        uriStringAttribute.start = 0;
-        uriStringAttribute.end = label.length();
-        uriStringAttribute.url = linkUrl;
-        uriStringAttribute.type = StringAttributeType.URL;
-        attributes.add(uriStringAttribute);
-      }
-      return createSpannableString(label, attributes);
+      return new AccessibilityStringBuilder()
+          .addString(label)
+          .addAttributes(labelAttributes)
+          .addUrl(linkUrl)
+          .addLocale(locale)
+          .build();
     }
 
     private CharSequence getHint() {
-      return createSpannableString(hint, hintAttributes);
+      return new AccessibilityStringBuilder()
+          .addString(hint)
+          .addAttributes(hintAttributes)
+          .addLocale(locale)
+          .build();
     }
 
     private CharSequence getValueLabelHint() {
@@ -2893,41 +2902,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         }
       }
       return result;
-    }
-
-    private SpannableString createSpannableString(String string, List<StringAttribute> attributes) {
-      if (string == null) {
-        return null;
-      }
-      final SpannableString spannableString = new SpannableString(string);
-      if (attributes != null) {
-        for (StringAttribute attribute : attributes) {
-          switch (attribute.type) {
-            case SPELLOUT:
-              {
-                final TtsSpan ttsSpan = new TtsSpan.Builder<>(TtsSpan.TYPE_VERBATIM).build();
-                spannableString.setSpan(ttsSpan, attribute.start, attribute.end, 0);
-                break;
-              }
-            case LOCALE:
-              {
-                LocaleStringAttribute localeAttribute = (LocaleStringAttribute) attribute;
-                Locale locale = Locale.forLanguageTag(localeAttribute.locale);
-                final LocaleSpan localeSpan = new LocaleSpan(locale);
-                spannableString.setSpan(localeSpan, attribute.start, attribute.end, 0);
-                break;
-              }
-            case URL:
-              {
-                UrlStringAttribute uriAttribute = (UrlStringAttribute) attribute;
-                final URLSpan urlSpan = new URLSpan(uriAttribute.url);
-                spannableString.setSpan(urlSpan, attribute.start, attribute.end, 0);
-                break;
-              }
-          }
-        }
-      }
-      return spannableString;
     }
   }
 
