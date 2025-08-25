@@ -1227,10 +1227,24 @@ class _DayState extends State<_Day> {
     if (Theme.of(context).useMaterial3 && orientation == Orientation.portrait) {
       dayWidget = Padding(padding: const EdgeInsets.all(4.0), child: dayWidget);
     }
+    dayWidget = Semantics(
+      // We want the day of month to be spoken first irrespective of the
+      // locale-specific preferences or TextDirection. This is because
+      // an accessibility user is more likely to be interested in the
+      // day of month before the rest of the date, as they are looking
+      // for the day of month. To do that we prepend day of month to the
+      // formatted full date.
+      label:
+          '${localizations.formatDecimal(widget.day.day)}, ${widget.calendarDelegate.formatFullDate(widget.day, localizations)}$semanticLabelSuffix',
+      // Set button to true to make the date selectable.
+      button: true,
+      selected: widget.isSelectedDay,
+      enabled: !widget.isDisabled,
+      excludeSemantics: true,
+      child: dayWidget,
+    );
 
-    if (widget.isDisabled) {
-      dayWidget = ExcludeSemantics(child: dayWidget);
-    } else {
+    if (!widget.isDisabled) {
       dayWidget = InkResponse(
         focusNode: widget.focusNode,
         onTap: () => widget.onChanged(widget.day),
@@ -1238,21 +1252,7 @@ class _DayState extends State<_Day> {
         overlayColor: dayOverlayColor,
         customBorder: dayShape,
         containedInkWell: true,
-        child: Semantics(
-          // We want the day of month to be spoken first irrespective of the
-          // locale-specific preferences or TextDirection. This is because
-          // an accessibility user is more likely to be interested in the
-          // day of month before the rest of the date, as they are looking
-          // for the day of month. To do that we prepend day of month to the
-          // formatted full date.
-          label:
-              '${localizations.formatDecimal(widget.day.day)}, ${widget.calendarDelegate.formatFullDate(widget.day, localizations)}$semanticLabelSuffix',
-          // Set button to true to make the date selectable.
-          button: true,
-          selected: widget.isSelectedDay,
-          excludeSemantics: true,
-          child: dayWidget,
-        ),
+        child: dayWidget,
       );
     }
 
@@ -1487,15 +1487,14 @@ class _YearPickerState extends State<YearPicker> {
         alignment: Alignment.center,
         child: Semantics(
           selected: isSelected,
+          enabled: !isDisabled,
           button: true,
           child: Text(widget.calendarDelegate.formatYear(year, localizations), style: itemStyle),
         ),
       ),
     );
 
-    if (isDisabled) {
-      yearItem = ExcludeSemantics(child: yearItem);
-    } else {
+    if (!isDisabled) {
       DateTime date = widget.calendarDelegate.getMonth(
         year,
         widget.selectedDate?.month ?? DateTime.january,
