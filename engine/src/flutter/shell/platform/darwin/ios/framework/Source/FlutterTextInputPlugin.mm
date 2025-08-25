@@ -787,6 +787,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 @interface FlutterTextInputPlugin ()
 @property(nonatomic, readonly, weak) id<FlutterTextInputDelegate> textInputDelegate;
 @property(nonatomic, readonly) UIView* hostView;
+@property(nonatomic, assign, readwrite) BOOL preventUnfocusOnNextResign;
 @end
 
 @interface FlutterTextInputView ()
@@ -1302,6 +1303,10 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 }
 
 - (BOOL)resignFirstResponder {
+  if (self.textInputPlugin.preventUnfocusOnNextResign) {
+    self.textInputPlugin.preventUnfocusOnNextResign = NO;
+    return [super resignFirstResponder];
+  }
   BOOL success = [super resignFirstResponder];
   if (success) {
     if (!_preventCursorDismissWhenResignFirstResponder) {
@@ -2509,6 +2514,10 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   }
 
   return self;
+}
+
+- (void)prepareForLookUp {
+  self.preventUnfocusOnNextResign = YES;
 }
 
 - (void)handleKeyboardWillShow:(NSNotification*)notification {
