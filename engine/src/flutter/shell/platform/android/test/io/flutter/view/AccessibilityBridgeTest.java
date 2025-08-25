@@ -2100,19 +2100,18 @@ public class AccessibilityBridgeTest {
     parentTestSemanticsNode.addFlag(AccessibilityBridge.Flag.HAS_IMPLICIT_SCROLLING);
     parentTestSemanticsNode.scrollChildren = 2;
     parentTestSemanticsNode.id = 0;
-
     // add children to parentTestSemanticsNode
-    for (int index = 0; index < parentTestSemanticsNode.scrollChildren; index++) {
-      TestSemanticsNode childNode = new TestSemanticsNode();
-      childNode.id = index + 1;
-      childNode.label = "child test node " + index + 1;
-      parentTestSemanticsNode.addChild(childNode);
-    }
-    TestSemanticsNode lastChild = parentTestSemanticsNode.children.getLast();
-    TestSemanticsUpdate testSemanticsUpdate = lastChild.toUpdate();
+    TestSemanticsNode childNode1 = new TestSemanticsNode();
+    childNode1.id = 1;
+    childNode1.label = "Test 1";
+    TestSemanticsNode childNode2 = new TestSemanticsNode();
+    childNode2.id = 2;
+    childNode2.label = "Test 2";
+    parentTestSemanticsNode.addChild(childNode1);
+    parentTestSemanticsNode.addChild(childNode2);
+    TestSemanticsUpdate testSemanticsUpdate = parentTestSemanticsNode.toUpdate();
     testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
-    AccessibilityNodeInfo nodeInfo =
-        accessibilityBridge.createAccessibilityNodeInfo(parentTestSemanticsNode.scrollChildren);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(1);
     assertNotNull(nodeInfo.getCollectionItemInfo());
   }
 
