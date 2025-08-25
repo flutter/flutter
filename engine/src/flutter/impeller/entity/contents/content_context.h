@@ -298,6 +298,12 @@ class ContentContext {
 
   TextShadowCache& GetTextShadowCache() const { return *text_shadow_cache_; }
 
+ protected:
+  // Visible for testing.
+  void SetTransientsBuffer(std::shared_ptr<HostBuffer> host_buffer) {
+    host_buffer_ = host_buffer;
+  }
+
  private:
   std::shared_ptr<Context> context_;
   std::shared_ptr<LazyGlyphAtlas> lazy_glyph_atlas_;

@@ -421,6 +421,7 @@ GeometryResult RoundSuperellipseGeometry::GetPositionBuffer(
       reinterpret_cast<Point*>(vertex_buffer.GetBuffer()->OnGetContents() +
                                vertex_buffer.GetRange().offset);
   rearranger->RearrangeIntoTriangleStrip(vertex_data);
+  vertex_buffer.GetBuffer()->Flush(vertex_buffer.GetRange());
 
   return GeometryResult{
       .type = PrimitiveType::kTriangleStrip,
