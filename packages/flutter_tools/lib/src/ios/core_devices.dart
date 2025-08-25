@@ -68,7 +68,7 @@ class IOSCoreDeviceLauncher {
     final (bool installStatus, IOSCoreDeviceInstallResult? installResult) = await _coreDeviceControl
         .installApp(deviceId: deviceId, bundlePath: bundlePath);
     if (!installStatus) {
-      return installStatus;
+      return false;
     }
 
     // Launch app to device
@@ -240,8 +240,7 @@ class IOSCoreDeviceLauncher {
     }
 
     // Then kill the attached launch process first so it doesn't process any additional logs when you terminate the app
-    await coreDeviceLogForwarder.exit();
-    await lldbLogForwarder.exit();
+    await Future.wait([coreDeviceLogForwarder.exit(), lldbLogForwarder.exit()]);
 
     if (processToStop == null) {
       return false;
@@ -652,8 +651,7 @@ class IOSCoreDeviceControl {
     }
 
     final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('core_devices.');
-    final File output = tempDirectory.childFile('launch_results.json');
-    output.createSync();
+    final File output = tempDirectory.childFile('launch_results.json')..createSync();
 
     final List<String> command = _launchAppCommand(
       bundleId: bundleId,
@@ -835,8 +833,7 @@ class IOSCoreDeviceControl {
     }
 
     final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('core_devices.');
-    final File output = tempDirectory.childFile('core_device_process_list.json');
-    output.createSync();
+    final File output = tempDirectory.childFile('core_device_process_list.json')..createSync();
 
     final command = <String>[
       ..._xcode.xcrunCommand(),
@@ -856,12 +853,10 @@ class IOSCoreDeviceControl {
       final String stringOutput = output.readAsStringSync();
 
       try {
-        final Object? decodeResult = (json.decode(stringOutput) as Map<String, Object?>)['result'];
-        if (decodeResult is Map<String, Object?>) {
-          final Object? decodeProcesses = decodeResult['runningProcesses'];
-          if (decodeProcesses is List<Object?>) {
-            return decodeProcesses;
-          }
+        if (json.decode(stringOutput) case <String, Object?>{
+          'result': <String, Object?>{'runningProcesses': final List<Object?> decodedProcesses},
+        }) {
+          return decodedProcesses;
         }
         _logger.printTrace('devicectl returned unexpected JSON response: $stringOutput');
         return <Object?>[];
