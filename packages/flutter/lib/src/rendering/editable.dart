@@ -280,7 +280,7 @@ class RenderEditable extends RenderBox
   /// If [showCursor] is not specified, then it defaults to hiding the cursor.
   ///
   /// The [maxLines] property can be set to null to remove the restriction on
-  /// the number of lines. By default, it is 1, meaning this is a single-line
+  /// the number of lines. By default, it is 1.0, meaning this is a single-line
   /// text field. If it is not null, it must be greater than zero.
   ///
   /// Use [ViewportOffset.zero] for the [offset] if there is no need for
@@ -295,7 +295,7 @@ class RenderEditable extends RenderBox
     bool? hasFocus,
     required LayerLink startHandleLayerLink,
     required LayerLink endHandleLayerLink,
-    int? maxLines = 1,
+    double? maxLines = 1.0,
     int? minLines,
     bool expands = false,
     StrutStyle? strutStyle,
@@ -334,7 +334,7 @@ class RenderEditable extends RenderBox
     RenderEditablePainter? painter,
     RenderEditablePainter? foregroundPainter,
     List<RenderBox>? children,
-  }) : assert(maxLines == null || maxLines > 0),
+  }) : assert(maxLines == null || maxLines > 0.0),
        assert(minLines == null || minLines > 0),
        assert(
          (maxLines == null) || (minLines == null) || (maxLines >= minLines),
@@ -359,7 +359,7 @@ class RenderEditable extends RenderBox
              ? TextScaler.linear(textScaleFactor)
              : textScaler,
          locale: locale,
-         maxLines: maxLines == 1 ? 1 : null,
+         maxLines: maxLines == 1.0 ? 1 : null,
          strutStyle: strutStyle,
          textHeightBehavior: textHeightBehavior,
          textWidthBasis: textWidthBasis,
@@ -963,7 +963,7 @@ class RenderEditable extends RenderBox
 
   /// The maximum number of lines for the text to span, wrapping if necessary.
   ///
-  /// If this is 1 (the default), the text will not wrap, but will extend
+  /// If this is 1.0 (the default), the text will not wrap, but will extend
   /// indefinitely instead.
   ///
   /// If this is null, there is no limit to the number of lines.
@@ -971,21 +971,21 @@ class RenderEditable extends RenderBox
   /// When this is not null, the intrinsic height of the render object is the
   /// height of one line of text multiplied by this value. In other words, this
   /// also controls the height of the actual editing widget.
-  int? get maxLines => _maxLines;
-  int? _maxLines;
+  double? get maxLines => _maxLines;
+  double? _maxLines;
 
   /// The value may be null. If it is not null, then it must be greater than zero.
-  set maxLines(int? value) {
-    assert(value == null || value > 0);
+  set maxLines(double? value) {
+    assert(value == null || value > 0.0);
     if (maxLines == value) {
       return;
     }
     _maxLines = value;
 
-    // Special case maxLines == 1 to keep only the first line so we can get the
+    // Special case maxLines == 1.0 to keep only the first line so we can get the
     // height of the first line in case there are hard line breaks in the text.
     // See the `_preferredHeight` method.
-    _textPainter.maxLines = value == 1 ? 1 : null;
+    _textPainter.maxLines = value == 1.0 ? 1 : null;
     markNeedsLayout();
   }
 
@@ -1699,7 +1699,7 @@ class RenderEditable extends RenderBox
     super.visitChildren(visitor);
   }
 
-  bool get _isMultiline => maxLines != 1;
+  bool get _isMultiline => maxLines != 1.0;
 
   Axis get _viewportAxis => _isMultiline ? Axis.vertical : Axis.horizontal;
 
@@ -1931,10 +1931,10 @@ class RenderEditable extends RenderBox
   }
 
   double _preferredHeight(double width) {
-    final int? maxLines = this.maxLines;
-    final int? minLines = this.minLines ?? maxLines;
+    final double? maxLines = this.maxLines;
+    final int? minLines = this.minLines ?? maxLines?.floor();
     final double minHeight = preferredLineHeight * (minLines ?? 0);
-    assert(maxLines != 1 || _textIntrinsics.maxLines == 1);
+    assert(maxLines != 1.0 || _textIntrinsics.maxLines == 1);
 
     if (maxLines == null) {
       final double estimatedHeight;
@@ -1947,12 +1947,12 @@ class RenderEditable extends RenderBox
       return math.max(estimatedHeight, minHeight);
     }
 
-    // Special case maxLines == 1 since it forces the scrollable direction
+    // Special case maxLines == 1.0 since it forces the scrollable direction
     // to be horizontal. Report the real height to prevent the text from being
     // clipped.
-    if (maxLines == 1) {
+    if (maxLines == 1.0) {
       // The _layoutText call lays out the paragraph using infinite width when
-      // maxLines == 1. Also _textPainter.maxLines will be set to 1 so should
+      // maxLines == 1.0. Also _textPainter.maxLines will be set to 1 so should
       // there be any line breaks only the first line is shown.
       final (double minWidth, double maxWidth) = _adjustConstraints(maxWidth: width);
       return (_textIntrinsics..layout(minWidth: minWidth, maxWidth: maxWidth)).height;
@@ -2422,11 +2422,11 @@ class RenderEditable extends RenderBox
     final double width = forceLine
         ? constraints.maxWidth
         : constraints.constrainWidth(_textPainter.width + _caretMargin);
-    assert(maxLines != 1 || _textPainter.maxLines == 1);
+    assert(maxLines != 1.0 || _textPainter.maxLines == 1);
     final double preferredHeight = switch (maxLines) {
       null => math.max(_textPainter.height, preferredLineHeight * (minLines ?? 0)),
-      1 => _textPainter.height,
-      final int maxLines => clampDouble(
+      1.0 => _textPainter.height,
+      final double maxLines => clampDouble(
         _textPainter.height,
         preferredLineHeight * (minLines ?? maxLines),
         preferredLineHeight * maxLines,
@@ -2728,7 +2728,7 @@ class RenderEditable extends RenderBox
     super.debugFillProperties(properties);
     properties.add(ColorProperty('cursorColor', cursorColor));
     properties.add(DiagnosticsProperty<ValueNotifier<bool>>('showCursor', showCursor));
-    properties.add(IntProperty('maxLines', maxLines));
+    properties.add(DoubleProperty('maxLines', maxLines));
     properties.add(IntProperty('minLines', minLines));
     properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
     properties.add(ColorProperty('selectionColor', selectionColor));
