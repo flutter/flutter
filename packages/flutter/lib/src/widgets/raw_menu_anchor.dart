@@ -781,7 +781,7 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
     }
   }
 
-  Widget _buildOverlay(BuildContext context) {
+  RawMenuOverlayInfo _getRawMenuOverlayInfo(BuildContext context) {
     final BuildContext anchorContext = _anchorKey.currentContext!;
     final RenderBox overlay =
         Overlay.of(anchorContext, rootOverlay: useRootOverlay).context.findRenderObject()!
@@ -799,6 +799,22 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
       position: _menuPosition,
       tapRegionGroupId: root.menuController,
     );
+
+    return info;
+  }
+
+  Widget _buildOverlay(BuildContext context) {
+    final RawMenuOverlayInfo info = _getRawMenuOverlayInfo(context);
+    SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
+      if (!mounted || !_overlayController.isShowing) {
+        return;
+      }
+      if (info != _getRawMenuOverlayInfo(context)) {
+        // Rebuild overlayBuilder
+        _overlayController.hide();
+        _overlayController.show();
+      }
+    });
 
     return widget.overlayBuilder(context, info);
   }
