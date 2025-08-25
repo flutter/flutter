@@ -348,6 +348,7 @@ class LinearProgressIndicator extends ProgressIndicator {
       'This feature was deprecated after v3.26.0-0.1.pre.',
     )
     this.year2023,
+    this.controller,
   }) : assert(minHeight == null || minHeight > 0);
 
   /// {@template flutter.material.LinearProgressIndicator.trackColor}
@@ -427,22 +428,56 @@ class LinearProgressIndicator extends ProgressIndicator {
   )
   final bool? year2023;
 
+  /// ## Animation synchronization
+  ///
+  /// When multiple [ProgressIndicator] widgets are animating on screen
+  /// simultaneously (e.g., in a list of loading items), their uncoordinated
+  /// animations can appear visually cluttered. To address this, the animation of
+  /// an indicator can be driven by a custom [AnimationController].
+  ///
+  /// This allows multiple indicators to be synchronized to a single animation
+  /// source. The most convenient way to achieve this for a group of indicators is
+  /// by providing a controller via [ProgressIndicatorTheme]. All
+  /// [ProgressIndicator] widgets within that theme's subtree will then share
+  /// the same animation, resulting in a more coordinated and visually pleasing
+  /// effect.
+  ///
+  /// Alternatively, a specific [AnimationController] can be passed directly to the
+  /// [controller] property of an individual indicator.
+  final AnimationController? controller;
+
+  /// The default duration for [LinearProgressIndicator] animation.
+  static const Duration defaultAnimationDuration = Duration(
+    milliseconds: _kIndeterminateLinearDuration,
+  );
+
   @override
   State<LinearProgressIndicator> createState() => _LinearProgressIndicatorState();
 }
 
 class _LinearProgressIndicatorState extends State<LinearProgressIndicator>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
+  late AnimationController _internalController;
+  AnimationController? _inheritedController;
+
+  AnimationController get _controller =>
+      widget.controller ?? _inheritedController ?? _internalController;
+
+  bool get _usingInternalController => _controller == _internalController;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: _kIndeterminateLinearDuration),
+    _inheritedController =
+        context.getInheritedWidgetOfExactType<ProgressIndicatorTheme>()?.data.controller ??
+        context.findAncestorWidgetOfExactType<Theme>()?.data.progressIndicatorTheme.controller;
+
+    _internalController = AnimationController(
+      duration: LinearProgressIndicator.defaultAnimationDuration,
       vsync: this,
     );
-    if (widget.value == null) {
+
+    if (_usingInternalController && widget.value == null) {
       _controller.repeat();
     }
   }
@@ -450,16 +485,24 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator>
   @override
   void didUpdateWidget(LinearProgressIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.value == null && !_controller.isAnimating) {
-      _controller.repeat();
-    } else if (widget.value != null && _controller.isAnimating) {
-      _controller.stop();
+    if (_usingInternalController) {
+      if (widget.value == null && !_controller.isAnimating) {
+        _controller.repeat();
+      } else if (widget.value != null && _controller.isAnimating) {
+        _controller.stop();
+      }
     }
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _inheritedController = ProgressIndicatorTheme.of(context).controller;
+  }
+
+  @override
   void dispose() {
-    _controller.dispose();
+    _internalController.dispose();
     super.dispose();
   }
 
@@ -722,6 +765,7 @@ class CircularProgressIndicator extends ProgressIndicator {
     )
     this.year2023,
     this.padding,
+    this.controller,
   }) : _indicatorType = _ActivityIndicatorType.material;
 
   /// Creates an adaptive progress indicator that is a
@@ -753,6 +797,7 @@ class CircularProgressIndicator extends ProgressIndicator {
     )
     this.year2023,
     this.padding,
+    this.controller,
   }) : _indicatorType = _ActivityIndicatorType.adaptive;
 
   final _ActivityIndicatorType _indicatorType;
@@ -844,6 +889,24 @@ class CircularProgressIndicator extends ProgressIndicator {
   /// padding. Otherwise, defaults to zero padding.
   final EdgeInsetsGeometry? padding;
 
+  /// ## Animation synchronization
+  ///
+  /// When multiple [ProgressIndicator] widgets are animating on screen
+  /// simultaneously (e.g., in a list of loading items), their uncoordinated
+  /// animations can appear visually cluttered. To address this, the animation of
+  /// an indicator can be driven by a custom [AnimationController].
+  ///
+  /// This allows multiple indicators to be synchronized to a single animation
+  /// source. The most convenient way to achieve this for a group of indicators is
+  /// by providing a controller via [ProgressIndicatorTheme]. All
+  /// [ProgressIndicator] widgets within that theme's subtree will then share
+  /// the same animation, resulting in a more coordinated and visually pleasing
+  /// effect.
+  ///
+  /// Alternatively, a specific [AnimationController] can be passed directly to the
+  /// [controller] property of an individual indicator.
+  final AnimationController? controller;
+
   /// The indicator stroke is drawn fully inside of the indicator path.
   ///
   /// This is a constant for use with [strokeAlign].
@@ -862,6 +925,11 @@ class CircularProgressIndicator extends ProgressIndicator {
   ///
   /// This is a constant for use with [strokeAlign].
   static const double strokeAlignOutside = 1.0;
+
+  /// The default duration for [CircularProgressIndicator] animation.
+  static const Duration defaultAnimationDuration = Duration(
+    milliseconds: _kIndeterminateCircularDuration,
+  );
 
   @override
   State<CircularProgressIndicator> createState() => _CircularProgressIndicatorState();
@@ -883,16 +951,27 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
     curve: const SawTooth(_rotationCount),
   );
 
-  late AnimationController _controller;
+  late AnimationController _internalController;
+  AnimationController? _inheritedController;
+
+  AnimationController get _controller =>
+      widget.controller ?? _inheritedController ?? _internalController;
+
+  bool get _usingInternalController => _controller == _internalController;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: _kIndeterminateCircularDuration),
+    _inheritedController =
+        context.getInheritedWidgetOfExactType<ProgressIndicatorTheme>()?.data.controller ??
+        context.findAncestorWidgetOfExactType<Theme>()?.data.progressIndicatorTheme.controller;
+
+    _internalController = AnimationController(
+      duration: CircularProgressIndicator.defaultAnimationDuration,
       vsync: this,
     );
-    if (widget.value == null) {
+
+    if (_usingInternalController && widget.value == null) {
       _controller.repeat();
     }
   }
@@ -900,16 +979,24 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
   @override
   void didUpdateWidget(CircularProgressIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.value == null && !_controller.isAnimating) {
-      _controller.repeat();
-    } else if (widget.value != null && _controller.isAnimating) {
-      _controller.stop();
+    if (_usingInternalController) {
+      if (widget.value == null && !_controller.isAnimating) {
+        _controller.repeat();
+      } else if (widget.value != null && _controller.isAnimating) {
+        _controller.stop();
+      }
     }
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _inheritedController = ProgressIndicatorTheme.of(context).controller;
+  }
+
+  @override
   void dispose() {
-    _controller.dispose();
+    _internalController.dispose();
     super.dispose();
   }
 
