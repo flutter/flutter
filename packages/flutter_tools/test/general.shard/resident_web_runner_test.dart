@@ -1143,6 +1143,47 @@ name: my_app
   );
 
   testUsingContext(
+    'Does not fail hot restart when not attached',
+    () async {
+      final logger = BufferLogger.test();
+      final ResidentRunner residentWebRunner = setUpResidentRunner(
+        flutterDevice,
+        logger: logger,
+        systemClock: SystemClock.fixed(DateTime(2001)),
+      );
+      fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          ...kAttachExpectations,
+          const FakeVmServiceRequest(method: 'hotRestart'),
+        ],
+      );
+      flutterDevice.device = WebServerDevice(logger: BufferLogger.test());
+      webDevFS.report = UpdateFSReport(success: true);
+      debugConnection.fakeVmServiceHost = () => fakeVmServiceHost;
+      webDevFS.result = ConnectionResult(appConnection, debugConnection, debugConnection.vmService);
+      debugConnection.uri = 'ws://127.0.0.1/abcd/';
+
+      await residentWebRunner.run();
+
+      late final OperationResult result;
+
+      await expectReturnsNormallyLater(() async {
+        result = await residentWebRunner.restart(fullRestart: true);
+      }());
+
+      expect(result.code, 0);
+      expect(result.isOk, isTrue);
+      expect(logger.statusText, contains('Recompile complete. No client connected.'));
+    },
+    overrides: <Type, Generator>{
+      Analytics: () => fakeAnalytics,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+    },
+  );
+
+  testUsingContext(
     'web resident runner is debuggable',
     () {
       final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
