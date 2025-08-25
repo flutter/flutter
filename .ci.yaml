@@ -376,7 +376,7 @@ targets:
 
   - name: Linux coverage
     # Because this only runs every 6 commits, it being flaky takes a long time to recover.
-    bringup: true 
+    bringup: true
     presubmit: false
     recipe: flutter/coverage
     timeout: 90
@@ -5438,7 +5438,6 @@ targets:
 
   - name: Mac_ios ios_debug_workflow
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:

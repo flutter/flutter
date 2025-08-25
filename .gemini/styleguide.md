@@ -5,6 +5,7 @@ flutter/flutter repository. It is based on the more comprehensive official
 [style guide for the Flutter repository](https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md).
 
 ## Best Practices
+
 - Code should follow the guidance and principles described in
   [the Flutter contribution guide](https://github.com/flutter/flutter/blob/main/CONTRIBUTING.md).
 - Code should be tested and follow the guidance described in the [writing effective tests guide](https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Writing-Effective-Tests.md) and the [running and writing tests guide](https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Running-and-writing-tests.md).
@@ -12,6 +13,16 @@ flutter/flutter repository. It is based on the more comprehensive official
 - PR descriptions should include the Pre-launch Checklist from
   [the PR template](https://github.com/flutter/flutter/blob/main/.github/PULL_REQUEST_TEMPLATE.md),
   with all of the steps completed.
+- The most relevant guidelines should take precedence over less relevant
+  guidelines. For Flutter code, the
+  [Flutter styleguide](https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md)
+  should be followed as the first priority, and
+  [Effective Dart: Style](https://dart.dev/effective-dart/style)
+  should only be followed when it does not conflict with the former.
+
+## Review Agent Guidelines
+
+- Only review changes to the `master` branch. Other changes have already been reviewed (and are being cherrypicked).
 
 ## General Philosophy
 
