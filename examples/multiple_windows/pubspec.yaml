@@ -6,6 +6,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  vector_math: ^2.2.0
 
 dev_dependencies:
   flutter_test:
@@ -14,4 +15,4 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-# PUBSPEC CHECKSUM: moe6md
+# PUBSPEC CHECKSUM: lkvhan
