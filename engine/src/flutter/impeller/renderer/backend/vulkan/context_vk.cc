@@ -695,14 +695,15 @@ void ContextVK::InitializeCommonlyUsedShadersIfNeeded() const {
         return true;
       });
 
-  if (auto depth = render_target.GetDepthAttachment(); depth.has_value()) {
+  if (const auto& depth = render_target.GetDepthAttachment();
+      depth.has_value()) {
     builder.SetDepthStencilAttachment(
         depth->texture->GetTextureDescriptor().format,        //
         depth->texture->GetTextureDescriptor().sample_count,  //
         depth->load_action,                                   //
         depth->store_action                                   //
     );
-  } else if (auto stencil = render_target.GetStencilAttachment();
+  } else if (const auto& stencil = render_target.GetStencilAttachment();
              stencil.has_value()) {
     builder.SetStencilAttachment(
         stencil->texture->GetTextureDescriptor().format,        //

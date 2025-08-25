@@ -329,6 +329,9 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
     if (widget.controller != oldWidget.controller) {
       oldWidget.controller.removeListener(_toggleExpansion);
       widget.controller.addListener(_toggleExpansion);
+      if (oldWidget.controller.isExpanded != widget.controller.isExpanded) {
+        _toggleExpansion();
+      }
     }
   }
 

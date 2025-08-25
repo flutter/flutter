@@ -582,6 +582,9 @@ abstract class WidgetStateBorderSide extends BorderSide
     if (a == null && b == null) {
       return null;
     }
+    if (identical(a, b)) {
+      return a;
+    }
     return _LerpSides(a, b, t);
   }
 }

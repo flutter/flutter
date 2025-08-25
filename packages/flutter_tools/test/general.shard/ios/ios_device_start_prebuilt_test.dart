@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -23,6 +22,7 @@ import 'package:flutter_tools/src/ios/core_devices.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
 import 'package:flutter_tools/src/ios/iproxy.dart';
+import 'package:flutter_tools/src/ios/lldb.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcode_debug.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
@@ -177,7 +177,7 @@ void main() {
     },
   );
 
-  testWithoutContext(
+  testUsingContext(
     'IOSDevice.startApp twice in a row where ios-deploy fails the first time',
     () async {
       final logger = BufferLogger.test();
@@ -429,7 +429,7 @@ void main() {
     overrides: <Type, Generator>{MDnsVmServiceDiscovery: () => FakeMDnsVmServiceDiscovery()},
   );
 
-  testWithoutContext(
+  testUsingContext(
     'IOSDevice.startApp retries when ios-deploy loses connection the first time in CI',
     () async {
       final logger = BufferLogger.test();
@@ -490,7 +490,7 @@ void main() {
     },
   );
 
-  testWithoutContext(
+  testUsingContext(
     'IOSDevice.startApp does not retry when ios-deploy loses connection if not in CI',
     () async {
       final logger = BufferLogger.test();
@@ -862,15 +862,21 @@ void main() {
             uncompressedBundle: bundleLocation,
             applicationPackage: bundleLocation,
           );
-          final deviceLogReader = FakeDeviceLogReader();
+          final DeviceLogReader deviceLogReader = IOSDeviceLogReader.test(
+            iMobileDevice: FakeIMobileDevice(),
+            xcode: FakeXcode(currentVersion: Version(26, 0, 0)),
+            isCoreDevice: true,
+          );
 
           device.portForwarder = const NoOpDevicePortForwarder();
           device.setLogReader(iosApp, deviceLogReader);
 
           // Start writing messages to the log reader.
           Timer.run(() {
-            deviceLogReader.addLine('Foo');
-            deviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:456');
+            fakeLauncher.coreDeviceLogForwarder.addLog('Foo');
+            fakeLauncher.coreDeviceLogForwarder.addLog(
+              'The Dart VM service is listening on http://127.0.0.1:456',
+            );
           });
 
           final LaunchResult launchResult = await device.startApp(
@@ -881,6 +887,7 @@ void main() {
           );
 
           expect(launchResult.started, true);
+          expect(launchResult.hasVmService, true);
           expect(fakeLauncher.launchedWithLLDB, true);
           expect(fakeLauncher.launchedWithXcode, false);
           expect(fakeAnalytics.sentEvents, [
@@ -1197,7 +1204,7 @@ void main() {
           deviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:456');
         });
 
-        final shutDownHooks = FakeShutDownHooks();
+        final shutDownHooks = FakeShutdownHooks();
 
         final LaunchResult launchResult = await device.startApp(
           iosApp,
@@ -1208,7 +1215,7 @@ void main() {
         );
 
         expect(launchResult.started, true);
-        expect(shutDownHooks.hooks.length, 1);
+        expect(shutDownHooks.registeredHooks.length, 1);
         expect(fakeAnalytics.sentEvents, [
           Event.appleUsageEvent(
             workflow: 'ios-physical-deployment',
@@ -1687,14 +1694,6 @@ class FakeXcodeDebug extends Fake implements XcodeDebug {
 
 class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {}
 
-class FakeShutDownHooks extends Fake implements ShutdownHooks {
-  var hooks = <ShutdownHook>[];
-  @override
-  void addShutdownHook(ShutdownHook shutdownHook) {
-    hooks.add(shutdownHook);
-  }
-}
-
 class FakeXcode extends Fake implements Xcode {
   FakeXcode({this.currentVersion});
 
@@ -1710,6 +1709,12 @@ class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {
   var launchedWithXcode = false;
 
   Completer<void>? xcodeCompleter;
+
+  @override
+  final coreDeviceLogForwarder = IOSCoreDeviceLogForwarder();
+
+  @override
+  final lldbLogForwarder = LLDBLogForwarder();
 
   @override
   Future<bool> launchAppWithLLDBDebugger({
@@ -1753,3 +1758,5 @@ class FakeAnalytics extends Fake implements Analytics {
     sentEvents.add(event);
   }
 }
+
+class FakeIMobileDevice extends Fake implements IMobileDevice {}

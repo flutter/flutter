@@ -16,6 +16,12 @@ import '../gradle_utils.dart';
 const replacementMinSdkText = 'minSdkVersion flutter.minSdkVersion';
 
 @visibleForTesting
+const groovyReplacementWithEquals = 'minSdkVersion = flutter.minSdkVersion';
+
+@visibleForTesting
+const kotlinReplacementMinSdkText = 'minSdk = flutter.minSdkVersion';
+
+@visibleForTesting
 const appGradleNotFoundWarning =
     'Module level build.gradle file not found, skipping minSdkVersion migration.';
 
@@ -40,6 +46,14 @@ class MinSdkVersionMigration extends ProjectMigrator {
 
   @override
   String migrateFileContents(String fileContents) {
-    return fileContents.replaceAll(tooOldMinSdkVersionMatch, replacementMinSdkText);
+    if (_project.appGradleFile.path.endsWith('.kts')) {
+      // For Kotlin Gradle files, only the equals syntax is valid and we should use 'minSdk'.
+      return fileContents.replaceAll(tooOldMinSdkVersionEqualsMatch, kotlinReplacementMinSdkText);
+    }
+
+    // For Groovy Gradle files, both space and equals syntax are valid, and the property name is 'minSdkVersion'.
+    return fileContents
+        .replaceAll(tooOldMinSdkVersionSpaceMatch, replacementMinSdkText)
+        .replaceAll(tooOldMinSdkVersionEqualsMatch, groovyReplacementWithEquals);
   }
 }

@@ -14,15 +14,15 @@
 namespace vulkan {
 
 // static
-VKAPI_ATTR VkBool32 VulkanApplication::DebugReportCallback(
-    VkDebugReportFlagsEXT flags,
-    VkDebugReportObjectTypeEXT objectType,
-    uint64_t object,
-    size_t location,
-    int32_t messageCode,
-    const char* pLayerPrefix,
-    const char* pMessage,
-    void* pUserData) {
+VKAPI_ATTR VkBool32
+VulkanApplication::DebugReportCallback(VkDebugReportFlagsEXT flags,
+                                       VkDebugReportObjectTypeEXT objectType,
+                                       uint64_t object,
+                                       size_t location,
+                                       int32_t messageCode,
+                                       const char* pLayerPrefix,
+                                       const char* pMessage,
+                                       void* pUserData) {
   auto application = static_cast<VulkanApplication*>(pUserData);
   if (application->initialization_logs_enabled_) {
     application->initialization_logs_ += pMessage;
@@ -71,6 +71,7 @@ VulkanApplication::VulkanApplication(
 
   std::vector<const char*> extensions;
 
+  extensions.reserve(enabled_extensions.size());
   for (size_t i = 0; i < enabled_extensions.size(); i++) {
     extensions.push_back(enabled_extensions[i].c_str());
   }
@@ -82,6 +83,7 @@ VulkanApplication::VulkanApplication(
 
   std::vector<const char*> layers;
 
+  layers.reserve(enabled_layers.size());
   for (size_t i = 0; i < enabled_layers.size(); i++) {
     layers.push_back(enabled_layers[i].c_str());
   }

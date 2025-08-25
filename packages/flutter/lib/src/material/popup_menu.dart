@@ -331,7 +331,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   /// If [PopupMenuThemeData.labelTextStyle] is also null, then [TextTheme.labelLarge]
   /// is used with the [ColorScheme.onSurface] color when popup menu item is enabled and
   /// the [ColorScheme.onSurface] color with 0.38 opacity when the popup menu item is disabled.
-  final MaterialStateProperty<TextStyle?>? labelTextStyle;
+  final WidgetStateProperty<TextStyle?>? labelTextStyle;
 
   /// {@template flutter.material.popupmenu.mouseCursor}
   /// The cursor for a mouse pointer when it enters or is hovering over the
@@ -642,7 +642,7 @@ class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMe
         ? _PopupMenuDefaultsM3(context)
         : _PopupMenuDefaultsM2(context);
     final Set<MaterialState> states = <MaterialState>{if (widget.checked) MaterialState.selected};
-    final MaterialStateProperty<TextStyle?>? effectiveLabelTextStyle =
+    final WidgetStateProperty<TextStyle?>? effectiveLabelTextStyle =
         widget.labelTextStyle ?? popupMenuTheme.labelTextStyle ?? defaults.labelTextStyle;
     return IgnorePointer(
       child: ListTileTheme.merge(
@@ -1794,18 +1794,18 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
   }
 }
 
-// This MaterialStateProperty is passed along to the menu item's InkWell which
+// This WidgetStateProperty is passed along to the menu item's InkWell which
 // resolves the property against MaterialState.disabled, MaterialState.hovered,
 // MaterialState.focused.
 class _EffectiveMouseCursor extends MaterialStateMouseCursor {
   const _EffectiveMouseCursor(this.widgetCursor, this.themeCursor);
 
   final MouseCursor? widgetCursor;
-  final MaterialStateProperty<MouseCursor?>? themeCursor;
+  final WidgetStateProperty<MouseCursor?>? themeCursor;
 
   @override
   MouseCursor resolve(Set<MaterialState> states) {
-    return MaterialStateProperty.resolveAs<MouseCursor?>(widgetCursor, states) ??
+    return WidgetStateProperty.resolveAs<MouseCursor?>(widgetCursor, states) ??
         themeCursor?.resolve(states) ??
         MaterialStateMouseCursor.clickable.resolve(states);
   }
@@ -1847,8 +1847,8 @@ class _PopupMenuDefaultsM3 extends PopupMenuThemeData {
   late final ColorScheme _colors = _theme.colorScheme;
   late final TextTheme _textTheme = _theme.textTheme;
 
-  @override MaterialStateProperty<TextStyle?>? get labelTextStyle {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  @override WidgetStateProperty<TextStyle?>? get labelTextStyle {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
     // TODO(quncheng): Update this hard-coded value to use the latest tokens.
     final TextStyle style = _textTheme.labelLarge!;
       if (states.contains(MaterialState.disabled)) {

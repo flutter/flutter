@@ -27,7 +27,7 @@
 namespace flutter {
 
 int32_t DirectManipulationEventHandler::GetDeviceId() {
-  return (int32_t) reinterpret_cast<int64_t>(this);
+  return (int32_t)reinterpret_cast<int64_t>(this);
 }
 
 STDMETHODIMP DirectManipulationEventHandler::QueryInterface(REFIID iid,

@@ -15,7 +15,7 @@ enum ColorFilterType { mode, matrix, linearToSrgbGamma, srgbToLinearGamma }
 ///
 /// Instances of this class are used with [Paint.colorFilter] on [Paint]
 /// objects.
-class EngineColorFilter implements SceneImageFilter, ui.ColorFilter {
+class EngineColorFilter implements SceneImageFilter, LayerImageFilter, ui.ColorFilter {
   /// Creates a color filter that applies the blend mode given as the second
   /// argument. The source color is the one given as the first argument, and the
   /// destination color is the one from the layer being composited.

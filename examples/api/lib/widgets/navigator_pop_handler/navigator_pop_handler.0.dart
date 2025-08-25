@@ -84,8 +84,8 @@ class _NestedNavigatorsPageState extends State<_NestedNavigatorsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return NavigatorPopHandler(
-      onPop: () {
+    return NavigatorPopHandler<void>(
+      onPopWithResult: (void result) {
         _nestedNavigatorKey.currentState!.maybePop();
       },
       child: Navigator(
