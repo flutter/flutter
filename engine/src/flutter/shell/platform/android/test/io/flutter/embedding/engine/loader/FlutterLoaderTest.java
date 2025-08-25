@@ -9,6 +9,7 @@ import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyLong;
@@ -634,7 +635,14 @@ public class FlutterLoaderTest {
     String[] args = {symlinkArg};
 
     for (File unsafeFile : unsafeFiles) {
-      Files.createSymbolicLink(symlinkFile.toPath(), unsafeFile.toPath());
+      try {
+        Files.createSymbolicLink(symlinkFile.toPath(), unsafeFile.toPath());
+        assumeTrue(
+            "Symlink was not created successfully", Files.isSymbolicLink(symlinkFile.toPath()));
+      } catch (Exception e) {
+        // Skip test case if symlink creation is not supported.
+        assumeTrue("Symlink creation not supported: " + e.getMessage(), false);
+      }
 
       flutterLoader.ensureInitializationComplete(ctx, args);
 
