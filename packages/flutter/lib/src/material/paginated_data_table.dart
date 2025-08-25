@@ -22,7 +22,6 @@ import 'icon_button.dart';
 import 'icons.dart';
 import 'ink_decoration.dart';
 import 'material_localizations.dart';
-import 'material_state.dart';
 import 'progress_indicator.dart';
 import 'theme.dart';
 
@@ -320,7 +319,7 @@ class PaginatedDataTable extends StatefulWidget {
   final bool? primary;
 
   /// {@macro flutter.material.dataTable.headingRowColor}
-  final MaterialStateProperty<Color?>? headingRowColor;
+  final WidgetStateProperty<Color?>? headingRowColor;
 
   /// Controls the visibility of empty rows on the last page of a
   /// [PaginatedDataTable].
