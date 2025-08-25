@@ -399,72 +399,36 @@ class SystemUiOverlayStyle with Diagnosticable {
   }
 
   @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'SystemUiOverlayStyle({'
-        'systemNavigationBarColor: $systemNavigationBarColor, '
-        'systemNavigationBarDividerColor: $systemNavigationBarDividerColor, '
-        'systemStatusBarContrastEnforced: $systemStatusBarContrastEnforced, '
-        'statusBarColor: $statusBarColor, '
-        'statusBarBrightness: $statusBarBrightness, '
-        'statusBarIconBrightness: $statusBarIconBrightness, '
-        'systemNavigationBarIconBrightness: $systemNavigationBarIconBrightness, '
-        'systemNavigationBarContrastEnforced: $systemNavigationBarContrastEnforced})';
-  }
-
-  @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(
-      DiagnosticsProperty<Color>(
-        'systemNavigationBarColor',
-        systemNavigationBarColor,
-        defaultValue: null,
-      ),
+      DiagnosticsProperty<Color>('systemNavigationBarColor', systemNavigationBarColor),
     );
     properties.add(
       DiagnosticsProperty<Color>(
         'systemNavigationBarDividerColor',
         systemNavigationBarDividerColor,
-        defaultValue: null,
       ),
     );
     properties.add(
       DiagnosticsProperty<Brightness>(
         'systemNavigationBarIconBrightness',
         systemNavigationBarIconBrightness,
-        defaultValue: null,
       ),
     );
     properties.add(
       DiagnosticsProperty<bool>(
         'systemNavigationBarContrastEnforced',
         systemNavigationBarContrastEnforced,
-        defaultValue: null,
       ),
     );
+    properties.add(DiagnosticsProperty<Color>('statusBarColor', statusBarColor));
+    properties.add(DiagnosticsProperty<Brightness>('statusBarBrightness', statusBarBrightness));
     properties.add(
-      DiagnosticsProperty<Color>('statusBarColor', statusBarColor, defaultValue: null),
+      DiagnosticsProperty<Brightness>('statusBarIconBrightness', statusBarIconBrightness),
     );
     properties.add(
-      DiagnosticsProperty<Brightness>(
-        'statusBarBrightness',
-        statusBarBrightness,
-        defaultValue: null,
-      ),
-    );
-    properties.add(
-      DiagnosticsProperty<Brightness>(
-        'statusBarIconBrightness',
-        statusBarIconBrightness,
-        defaultValue: null,
-      ),
-    );
-    properties.add(
-      DiagnosticsProperty<bool>(
-        'systemStatusBarContrastEnforced',
-        systemStatusBarContrastEnforced,
-        defaultValue: null,
-      ),
+      DiagnosticsProperty<bool>('systemStatusBarContrastEnforced', systemStatusBarContrastEnforced),
     );
   }
 }

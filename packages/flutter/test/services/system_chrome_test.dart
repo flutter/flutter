@@ -230,18 +230,16 @@ void main() {
     test('toString default values should be null', () async {
       const SystemUiOverlayStyle systemUiOverlayStyle = SystemUiOverlayStyle();
 
-      expect(
-        systemUiOverlayStyle.toString(),
-        'SystemUiOverlayStyle({'
-        'systemNavigationBarColor: null, '
-        'systemNavigationBarDividerColor: null, '
-        'systemStatusBarContrastEnforced: null, '
-        'statusBarColor: null, '
-        'statusBarBrightness: null, '
-        'statusBarIconBrightness: null, '
-        'systemNavigationBarIconBrightness: null, '
-        'systemNavigationBarContrastEnforced: null})',
-      );
+      final String result = systemUiOverlayStyle.toString();
+      expect(result, startsWith('SystemUiOverlayStyle#'));
+      expect(result, contains('systemNavigationBarColor: null'));
+      expect(result, contains('systemNavigationBarDividerColor: null'));
+      expect(result, contains('systemStatusBarContrastEnforced: null'));
+      expect(result, contains('statusBarColor: null'));
+      expect(result, contains('statusBarBrightness: null'));
+      expect(result, contains('statusBarIconBrightness: null'));
+      expect(result, contains('systemNavigationBarIconBrightness: null'));
+      expect(result, contains('systemNavigationBarContrastEnforced: null'));
     });
 
     test('toString works as intended with actual values', () {
@@ -256,18 +254,31 @@ void main() {
         systemNavigationBarContrastEnforced: false,
       );
 
+      final String result = style.toString();
+      expect(result, startsWith('SystemUiOverlayStyle#'));
       expect(
-        style.toString(),
-        'SystemUiOverlayStyle({'
-        'systemNavigationBarColor: Color(alpha: 1.0000, red: 0.0706, green: 0.2039, blue: 0.3373, colorSpace: ColorSpace.sRGB), '
-        'systemNavigationBarDividerColor: Color(alpha: 1.0000, red: 0.3961, green: 0.2627, blue: 0.1294, colorSpace: ColorSpace.sRGB), '
-        'systemStatusBarContrastEnforced: true, '
-        'statusBarColor: Color(alpha: 1.0000, red: 0.6706, green: 0.8039, blue: 0.9373, colorSpace: ColorSpace.sRGB), '
-        'statusBarBrightness: Brightness.dark, '
-        'statusBarIconBrightness: Brightness.light, '
-        'systemNavigationBarIconBrightness: Brightness.dark, '
-        'systemNavigationBarContrastEnforced: false})',
+        result,
+        contains(
+          'systemNavigationBarColor: Color(alpha: 1.0000, red: 0.0706, green: 0.2039, blue: 0.3373, colorSpace: ColorSpace.sRGB)',
+        ),
       );
+      expect(
+        result,
+        contains(
+          'systemNavigationBarDividerColor: Color(alpha: 1.0000, red: 0.3961, green: 0.2627, blue: 0.1294, colorSpace: ColorSpace.sRGB)',
+        ),
+      );
+      expect(result, contains('systemStatusBarContrastEnforced: true'));
+      expect(
+        result,
+        contains(
+          'statusBarColor: Color(alpha: 1.0000, red: 0.6706, green: 0.8039, blue: 0.9373, colorSpace: ColorSpace.sRGB)',
+        ),
+      );
+      expect(result, contains('statusBarBrightness: Brightness.dark'));
+      expect(result, contains('statusBarIconBrightness: Brightness.light'));
+      expect(result, contains('systemNavigationBarIconBrightness: Brightness.dark'));
+      expect(result, contains('systemNavigationBarContrastEnforced: false'));
     });
 
     test('==, hashCode basics', () {
