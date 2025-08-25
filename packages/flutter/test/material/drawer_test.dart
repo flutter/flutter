@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
@@ -483,9 +484,7 @@ void main() {
     expect(find.text('Drawer'), findsNothing);
   });
 
-  testWidgets('ScaffoldState close drawer do not crash if drawer is already closed', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('ScaffoldState close drawer do not crash if drawer is already closed', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(
@@ -500,9 +499,7 @@ void main() {
     expect(find.text('Drawer'), findsNothing);
   });
 
-  testWidgets('Disposing drawer does not crash if drawer is open and framework is locked', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Disposing drawer does not crash if drawer is open and framework is locked', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/34978
     addTearDown(tester.view.reset);
     tester.view.physicalSize = const Size(1800.0, 2400.0);
@@ -537,9 +534,7 @@ void main() {
     expect(find.byType(BackButton), findsNothing);
   });
 
-  testWidgets('Disposing endDrawer does not crash if endDrawer is open and framework is locked', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Disposing endDrawer does not crash if endDrawer is open and framework is locked', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/34978
     addTearDown(tester.view.reset);
     tester.view.physicalSize = const Size(1800.0, 2400.0);
@@ -798,8 +793,11 @@ void main() {
     final Scaffold scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
     expect(scaffold.drawerBarrierDismissible, true);
 
-    // Open the drawer initially.
+    // Verify whether the drawer barrier is dimissible by default via the state
     final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+    expect(state.isDrawerBarrierDismissible, true);
+
+    // Open the drawer initially.
     state.openEndDrawer();
 
     await tester.pumpAndSettle();
@@ -861,9 +859,12 @@ void main() {
     // Make sure the flag is set to false at the Scaffold level.
     final Scaffold scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
     expect(scaffold.drawerBarrierDismissible, false);
+    
+    // Verify the drawer barrier is not dimissible by checking the state's getter
+    final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+    expect(state.isDrawerBarrierDismissible, false);
 
     // Open the drawer initially.
-    final ScaffoldState state = tester.firstState(find.byType(Scaffold));
     state.openEndDrawer();
 
     await tester.pumpAndSettle();
@@ -901,6 +902,55 @@ void main() {
     // Make sure the drawer is still present, and that tapping on the modal barrier
     // didn't dismiss it, since the drawerBarrierDismissible property is set to false.
     expect(find.byType(Drawer), findsExactly(1));
+  });
+
+  testWidgets('Drawer can be dismissed with the escape key by default', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
+    // Test with drawerBarrierDismissible: true (default)
+    await tester.pumpWidget(
+      MaterialApp(home: Scaffold(key: scaffoldKey, drawer: const Drawer(child: Text('drawer')))),
+    );
+
+    final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+    expect(state.isDrawerBarrierDismissible, isTrue);
+
+    // Open the drawer.
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pumpAndSettle();
+    expect(find.text('drawer'), findsOneWidget);
+
+    // Close the drawer with the escape key.
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(find.text('drawer'), findsNothing);
+  });
+
+  testWidgets('Drawer cannot be dismissed with the escape key when drawerBarrierDismissible is false', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          key: scaffoldKey,
+          drawer: const Drawer(child: Text('drawer')),
+          drawerBarrierDismissible: false,
+        ),
+      ),
+    );
+
+    // Verify that the [Scaffold.drawerBarrierDismissible] flag is false
+    final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+    expect(state.isDrawerBarrierDismissible, isFalse);
+
+    // Open the drawer.
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pumpAndSettle();
+    expect(find.text('drawer'), findsOneWidget);
+
+    // Try to close the drawer with the escape key, and verify it does not close.
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(find.text('drawer'), findsOneWidget);
   });
 
   group('Material 2', () {
