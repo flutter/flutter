@@ -127,4 +127,19 @@ void main() {
       greaterThan(anchor),
     );
   });
+
+  testWidgets('CupertinoDesktopTextSelectionToolbar renders at zero area', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: SizedBox.shrink(
+          child: CupertinoDesktopTextSelectionToolbar(
+            anchor: const Offset(10, 10),
+            children: const <Widget>[Text('X')],
+          ),
+        ),
+      ),
+    );
+  });
 }
