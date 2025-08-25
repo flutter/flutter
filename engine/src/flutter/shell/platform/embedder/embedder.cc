@@ -2829,6 +2829,9 @@ FlutterEngineResult FlutterEngineSendPointerEvent(
     pointer_data.pan_delta_y = 0.0;
     pointer_data.scale = SAFE_ACCESS(current, scale, 0.0);
     pointer_data.rotation = SAFE_ACCESS(current, rotation, 0.0);
+    pointer_data.pressure = SAFE_ACCESS(current, pressure, 0.0);
+    pointer_data.pressure_min = SAFE_ACCESS(current, pressure_min, 0.0);
+    pointer_data.pressure_max = SAFE_ACCESS(current, pressure_max, 0.0);
     pointer_data.view_id =
         SAFE_ACCESS(current, view_id, kFlutterImplicitViewId);
     packet->SetPointerData(i, pointer_data);
