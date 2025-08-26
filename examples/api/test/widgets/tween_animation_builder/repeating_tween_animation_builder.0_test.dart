@@ -15,7 +15,7 @@ void main() {
     final Transform initial = tester.widget(find.byType(Transform).first);
     await tester.pump(const Duration(milliseconds: 500));
     final Transform after = tester.widget(find.byType(Transform).first);
-    
+
     expect(initial.transform, isNot(equals(after.transform)));
   });
 
@@ -24,18 +24,18 @@ void main() {
 
     // Initially playing (pause icon visible)
     expect(find.byIcon(Icons.pause), findsOneWidget);
-    
+
     // Tap to pause
     await tester.tap(find.byType(InkWell).first);
     await tester.pump();
     expect(find.byIcon(Icons.play_arrow), findsOneWidget);
-    
+
     // Verify animation stopped
     final Transform paused = tester.widget(find.byType(Transform).first);
     await tester.pump(const Duration(milliseconds: 500));
     final Transform stillPaused = tester.widget(find.byType(Transform).first);
     expect(paused.transform, equals(stillPaused.transform));
-    
+
     // Resume animation
     await tester.tap(find.byType(InkWell).first);
     await tester.pump();
@@ -48,11 +48,11 @@ void main() {
     // Check initial state
     Switch switchWidget = tester.widget(find.byType(Switch));
     expect(switchWidget.value, false);
-    
+
     // Toggle reverse
     await tester.tap(find.byType(Switch));
     await tester.pump();
-    
+
     // Verify toggled
     switchWidget = tester.widget(find.byType(Switch));
     expect(switchWidget.value, true);
