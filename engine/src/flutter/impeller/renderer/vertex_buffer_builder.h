@@ -25,9 +25,10 @@ VertexBuffer CreateVertexBuffer(std::array<VertexType, size> input,
                                 HostBuffer& host_buffer) {
   return VertexBuffer{
       .vertex_buffer = host_buffer.Emplace(
-          input.data(), sizeof(VertexType) * size, alignof(VertexType)),  //
-      .vertex_count = size,                                               //
-      .index_type = IndexType::kNone,                                     //
+          input.data(), sizeof(VertexType) * size, alignof(VertexType),
+          HostBuffer::BufferCategory::kData),
+      .vertex_count = size,
+      .index_type = IndexType::kNone,
   };
 }
 
@@ -123,9 +124,9 @@ class VertexBufferBuilder {
   std::string label_;
 
   BufferView CreateVertexBufferView(HostBuffer& buffer) const {
-    return buffer.Emplace(vertices_.data(),
-                          vertices_.size() * sizeof(VertexType),
-                          alignof(VertexType));
+    return buffer.Emplace(
+        vertices_.data(), vertices_.size() * sizeof(VertexType),
+        alignof(VertexType), HostBuffer::BufferCategory::kData);
   }
 
   BufferView CreateVertexBufferView(Allocator& allocator) const {
@@ -148,9 +149,9 @@ class VertexBufferBuilder {
     if (index_buffer.size() == 0) {
       return {};
     }
-    return buffer.Emplace(index_buffer.data(),
-                          index_buffer.size() * sizeof(IndexType),
-                          alignof(IndexType));
+    return buffer.Emplace(
+        index_buffer.data(), index_buffer.size() * sizeof(IndexType),
+        alignof(IndexType), HostBuffer::BufferCategory::kIndexes);
   }
 
   BufferView CreateIndexBufferView(Allocator& allocator) const {

@@ -516,7 +516,9 @@ TEST_P(RendererTest, CanRenderInstanced) {
     frame_info.mvp =
         pass.GetOrthographicTransform() * Matrix::MakeScale(GetContentScale());
     VS::BindFrameInfo(pass, host_buffer->EmplaceUniform(frame_info));
-    VS::BindInstanceInfo(pass, host_buffer->EmplaceStorageBuffer(instances));
+    VS::BindInstanceInfo(pass,
+                         host_buffer->EmplaceStorageBuffer(
+                             instances, HostBuffer::BufferCategory::kData));
     pass.SetVertexBuffer(builder.CreateVertexBuffer(*host_buffer));
 
     pass.SetInstanceCount(kInstancesCount);

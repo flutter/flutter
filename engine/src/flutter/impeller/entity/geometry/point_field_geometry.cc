@@ -58,7 +58,8 @@ GeometryResult PointFieldGeometry::GetPositionBuffer(
 
     vertex_count = (circle_vertices.size() + 2) * point_count_ - 2;
     buffer_view = host_buffer.Emplace(
-        vertex_count * sizeof(Point), alignof(Point), [&](uint8_t* data) {
+        vertex_count * sizeof(Point), alignof(Point),
+        HostBuffer::BufferCategory::kData, [&](uint8_t* data) {
           Point* output = reinterpret_cast<Point*>(data);
           size_t offset = 0;
 
@@ -83,7 +84,8 @@ GeometryResult PointFieldGeometry::GetPositionBuffer(
   } else {
     vertex_count = 6 * point_count_ - 2;
     buffer_view = host_buffer.Emplace(
-        vertex_count * sizeof(Point), alignof(Point), [&](uint8_t* data) {
+        vertex_count * sizeof(Point), alignof(Point),
+        HostBuffer::BufferCategory::kData, [&](uint8_t* data) {
           Point* output = reinterpret_cast<Point*>(data);
           size_t offset = 0;
 

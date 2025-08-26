@@ -54,7 +54,8 @@ BufferView RuntimeEffectContents::EmplaceVulkanUniform(
 
   return host_buffer.Emplace(
       reinterpret_cast<const void*>(uniform_buffer.data()),
-      sizeof(float) * uniform_buffer.size(), alignment);
+      sizeof(float) * uniform_buffer.size(), alignment,
+      HostBuffer::BufferCategory::kData);
 }
 
 void RuntimeEffectContents::SetRuntimeStage(
@@ -280,9 +281,9 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
 
           size_t alignment = std::max(uniform.bit_width / 8,
                                       host_buffer.GetMinimumUniformAlignment());
-          BufferView buffer_view =
-              host_buffer.Emplace(uniform_data_->data() + buffer_offset,
-                                  uniform.GetSize(), alignment);
+          BufferView buffer_view = host_buffer.Emplace(
+              uniform_data_->data() + buffer_offset, uniform.GetSize(),
+              alignment, HostBuffer::BufferCategory::kData);
 
           ShaderUniformSlot uniform_slot;
           uniform_slot.name = uniform.name.c_str();

@@ -320,11 +320,12 @@ VertexBuffer Tessellator::TessellateConvex(const PathSource& path,
     // Primitive Restart.
     const auto [point_count, contour_count] =
         PathTessellator::CountFillStorage(path, tolerance);
-    BufferView point_buffer = host_buffer.Emplace(
-        nullptr, sizeof(Point) * point_count, alignof(Point));
+    BufferView point_buffer =
+        host_buffer.Emplace(nullptr, sizeof(Point) * point_count,
+                            alignof(Point), HostBuffer::BufferCategory::kData);
     BufferView index_buffer = host_buffer.Emplace(
         nullptr, sizeof(uint16_t) * (point_count + contour_count),
-        alignof(uint16_t));
+        alignof(uint16_t), HostBuffer::BufferCategory::kIndexes);
 
     if (supports_triangle_fan) {
       FanPathVertexWriter writer(
@@ -382,11 +383,11 @@ VertexBuffer Tessellator::TessellateConvex(const PathSource& path,
 
   BufferView vertex_buffer = host_buffer.Emplace(
       point_buffer_->data(), sizeof(Point) * point_buffer_->size(),
-      alignof(Point));
+      alignof(Point), HostBuffer::BufferCategory::kData);
 
   BufferView index_buffer = host_buffer.Emplace(
       index_buffer_->data(), sizeof(uint16_t) * index_buffer_->size(),
-      alignof(uint16_t));
+      alignof(uint16_t), HostBuffer::BufferCategory::kIndexes);
 
   return VertexBuffer{
       .vertex_buffer = std::move(vertex_buffer),

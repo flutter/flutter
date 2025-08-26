@@ -118,7 +118,8 @@ GeometryResult DlVerticesGeometry::GetPositionBuffer(
     RenderPass& pass) const {
   int vertex_count = vertices_->vertex_count();
   BufferView vertex_buffer = renderer.GetTransientsBuffer().Emplace(
-      vertices_->vertex_data(), vertex_count * sizeof(Point), alignof(Point));
+      vertices_->vertex_data(), vertex_count * sizeof(Point), alignof(Point),
+      HostBuffer::BufferCategory::kData);
 
   BufferView index_buffer = {};
   auto index_count =
@@ -127,7 +128,8 @@ GeometryResult DlVerticesGeometry::GetPositionBuffer(
       performed_normalization_ ? indices_.data() : vertices_->indices();
   if (index_count) {
     index_buffer = renderer.GetTransientsBuffer().Emplace(
-        indices_data, index_count * sizeof(uint16_t), alignof(uint16_t));
+        indices_data, index_count * sizeof(uint16_t), alignof(uint16_t),
+        HostBuffer::BufferCategory::kIndexes);
   }
 
   return GeometryResult{
@@ -163,7 +165,7 @@ GeometryResult DlVerticesGeometry::GetPositionUVColorBuffer(
                                  : vertices_->vertex_data();
   BufferView vertex_buffer = renderer.GetTransientsBuffer().Emplace(
       vertex_count * sizeof(VS::PerVertexData), alignof(VS::PerVertexData),
-      [&](uint8_t* data) {
+      HostBuffer::BufferCategory::kData, [&](uint8_t* data) {
         VS::PerVertexData* vtx_contents =
             reinterpret_cast<VS::PerVertexData*>(data);
         const Point* vertex_points = vertices_->vertex_data();
@@ -188,7 +190,8 @@ GeometryResult DlVerticesGeometry::GetPositionUVColorBuffer(
       performed_normalization_ ? indices_.data() : vertices_->indices();
   if (index_count) {
     index_buffer = renderer.GetTransientsBuffer().Emplace(
-        indices_data, index_count * sizeof(uint16_t), alignof(uint16_t));
+        indices_data, index_count * sizeof(uint16_t), alignof(uint16_t),
+        HostBuffer::BufferCategory::kIndexes);
   }
 
   return GeometryResult{

@@ -25,12 +25,17 @@ static const constexpr size_t kHostBufferArenaSize = 4u;
 /// These are reset per-frame.
 class HostBuffer {
  public:
+  enum class BufferCategory {
+    kIndexes,
+    kData,
+  };
+
   static std::shared_ptr<HostBuffer> Create(
       const std::shared_ptr<Allocator>& allocator,
       const std::shared_ptr<const IdleWaiter>& idle_waiter,
       size_t minimum_uniform_alignment);
 
-  ~HostBuffer();
+  virtual ~HostBuffer() = default;
 
   //----------------------------------------------------------------------------
   /// @brief      Emplace uniform data onto the host buffer. Ensure that backend
@@ -49,8 +54,8 @@ class HostBuffer {
         std::max(alignof(UniformType), GetMinimumUniformAlignment());
     return Emplace(reinterpret_cast<const void*>(&uniform),  // buffer
                    sizeof(UniformType),                      // size
-                   alignment                                 // alignment
-    );
+                   alignment,                                // alignment
+                   BufferCategory::kData);
   }
 
   //----------------------------------------------------------------------------
@@ -66,13 +71,14 @@ class HostBuffer {
   template <
       class StorageBufferType,
       class = std::enable_if_t<std::is_standard_layout_v<StorageBufferType>>>
-  [[nodiscard]] BufferView EmplaceStorageBuffer(
-      const StorageBufferType& buffer) {
+  [[nodiscard]] BufferView EmplaceStorageBuffer(const StorageBufferType& buffer,
+                                                BufferCategory category) {
     const auto alignment =
         std::max(alignof(StorageBufferType), GetMinimumUniformAlignment());
     return Emplace(&buffer,                    // buffer
                    sizeof(StorageBufferType),  // size
-                   alignment                   // alignment
+                   alignment,                  // alignment
+                   category                    // category
     );
   }
 
@@ -90,16 +96,19 @@ class HostBuffer {
   template <class BufferType,
             class = std::enable_if_t<std::is_standard_layout_v<BufferType>>>
   [[nodiscard]] BufferView Emplace(const BufferType& buffer,
+                                   BufferCategory category,
                                    size_t alignment = 0) {
-    return Emplace(reinterpret_cast<const void*>(&buffer),   // buffer
-                   sizeof(BufferType),                       // size
-                   std::max(alignment, alignof(BufferType))  // alignment
+    return Emplace(reinterpret_cast<const void*>(&buffer),    // buffer
+                   sizeof(BufferType),                        // size
+                   std::max(alignment, alignof(BufferType)),  // alignment
+                   category                                   // category
     );
   }
 
-  [[nodiscard]] BufferView Emplace(const void* buffer,
-                                   size_t length,
-                                   size_t align);
+  [[nodiscard]] virtual BufferView Emplace(const void* buffer,
+                                           size_t length,
+                                           size_t align,
+                                           BufferCategory category) = 0;
 
   using EmplaceProc = std::function<void(uint8_t* buffer)>;
 
@@ -115,15 +124,18 @@ class HostBuffer {
   ///
   /// @return     The buffer view.
   ///
-  BufferView Emplace(size_t length, size_t align, const EmplaceProc& cb);
+  virtual BufferView Emplace(size_t length,
+                             size_t align,
+                             BufferCategory category,
+                             const EmplaceProc& cb) = 0;
 
   /// Retrieve the minimum uniform buffer alignment in bytes.
-  size_t GetMinimumUniformAlignment() const;
+  virtual size_t GetMinimumUniformAlignment() const = 0;
 
   //----------------------------------------------------------------------------
   /// @brief Resets the contents of the HostBuffer to nothing so it can be
   ///        reused.
-  void Reset();
+  virtual void Reset() = 0;
 
   /// Test only internal state.
   struct TestStateQuery {
@@ -133,46 +145,14 @@ class HostBuffer {
   };
 
   /// @brief Retrieve internal buffer state for test expectations.
-  TestStateQuery GetStateForTest();
+  virtual TestStateQuery GetStateForTest(BufferCategory category) = 0;
+
+ protected:
+  HostBuffer() = default;
 
  private:
-  [[nodiscard]] std::tuple<Range, std::shared_ptr<DeviceBuffer>, DeviceBuffer*>
-  EmplaceInternal(const void* buffer, size_t length);
-
-  std::tuple<Range, std::shared_ptr<DeviceBuffer>, DeviceBuffer*>
-  EmplaceInternal(size_t length, size_t align, const EmplaceProc& cb);
-
-  std::tuple<Range, std::shared_ptr<DeviceBuffer>, DeviceBuffer*>
-  EmplaceInternal(const void* buffer, size_t length, size_t align);
-
-  size_t GetLength() const { return offset_; }
-
-  /// Attempt to create a new internal buffer if the existing capacity is not
-  /// sufficient.
-  ///
-  /// A false return value indicates an unrecoverable allocation failure.
-  [[nodiscard]] bool MaybeCreateNewBuffer();
-
-  const std::shared_ptr<DeviceBuffer>& GetCurrentBuffer() const;
-
-  [[nodiscard]] BufferView Emplace(const void* buffer, size_t length);
-
-  explicit HostBuffer(const std::shared_ptr<Allocator>& allocator,
-                      const std::shared_ptr<const IdleWaiter>& idle_waiter,
-                      size_t minimum_uniform_alignment);
-
   HostBuffer(const HostBuffer&) = delete;
-
   HostBuffer& operator=(const HostBuffer&) = delete;
-
-  std::shared_ptr<Allocator> allocator_;
-  std::shared_ptr<const IdleWaiter> idle_waiter_;
-  std::array<std::vector<std::shared_ptr<DeviceBuffer>>, kHostBufferArenaSize>
-      device_buffers_;
-  size_t current_buffer_ = 0u;
-  size_t offset_ = 0u;
-  size_t frame_index_ = 0u;
-  size_t minimum_uniform_alignment_ = 0u;
 };
 
 }  // namespace impeller

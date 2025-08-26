@@ -132,7 +132,8 @@ GeometryResult LineGeometry::GetPositionBuffer(const ContentContext& renderer,
 
   size_t count = 4;
   BufferView vertex_buffer = host_buffer.Emplace(
-      count * sizeof(VT), alignof(VT), [&corners](uint8_t* buffer) {
+      count * sizeof(VT), alignof(VT), HostBuffer::BufferCategory::kData,
+      [&corners](uint8_t* buffer) {
         auto vertices = reinterpret_cast<VT*>(buffer);
         for (auto& corner : corners) {
           *vertices++ = {

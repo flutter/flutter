@@ -297,7 +297,7 @@ bool TextContents::Render(const ContentContext& renderer,
 
   BufferView buffer_view = host_buffer.Emplace(
       vertex_count * sizeof(VS::PerVertexData), alignof(VS::PerVertexData),
-      [&](uint8_t* data) {
+      HostBuffer::BufferCategory::kData, [&](uint8_t* data) {
         VS::PerVertexData* vtx_contents =
             reinterpret_cast<VS::PerVertexData*>(data);
         ComputeVertexData(/*vtx_contents=*/vtx_contents,
@@ -309,7 +309,8 @@ bool TextContents::Render(const ContentContext& renderer,
                           /*atlas=*/atlas);
       });
   BufferView index_buffer_view = host_buffer.Emplace(
-      index_count * sizeof(uint16_t), alignof(uint16_t), [&](uint8_t* data) {
+      index_count * sizeof(uint16_t), alignof(uint16_t),
+      HostBuffer::BufferCategory::kIndexes, [&](uint8_t* data) {
         uint16_t* indices = reinterpret_cast<uint16_t*>(data);
         size_t j = 0;
         for (auto i = 0u; i < glyph_count; i++) {

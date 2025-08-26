@@ -73,7 +73,7 @@ VertexBuffer DlAtlasGeometry::CreateSimpleVertexBuffer(
 
   BufferView buffer_view = host_buffer.Emplace(
       sizeof(VS::PerVertexData) * count_ * 6, alignof(VS::PerVertexData),
-      [&](uint8_t* raw_data) {
+      HostBuffer::BufferCategory::kData, [&](uint8_t* raw_data) {
         VS::PerVertexData* data =
             reinterpret_cast<VS::PerVertexData*>(raw_data);
         int offset = 0;
@@ -105,7 +105,7 @@ VertexBuffer DlAtlasGeometry::CreateBlendVertexBuffer(
 
   BufferView buffer_view = host_buffer.Emplace(
       sizeof(VS::PerVertexData) * count_ * 6, alignof(VS::PerVertexData),
-      [&](uint8_t* raw_data) {
+      HostBuffer::BufferCategory::kData, [&](uint8_t* raw_data) {
         VS::PerVertexData* data =
             reinterpret_cast<VS::PerVertexData*>(raw_data);
         int offset = 0;

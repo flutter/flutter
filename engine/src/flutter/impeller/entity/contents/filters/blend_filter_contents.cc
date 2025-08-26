@@ -870,7 +870,8 @@ std::optional<Entity> BlendFilterContents::CreateFramebufferAdvancedBlend(
     }
     std::shared_ptr<BlitPass> blit_pass = cmd_buffer->CreateBlitPass();
     auto buffer_view = renderer.GetTransientsBuffer().Emplace(
-        foreground_color->Premultiply().ToR8G8B8A8(), /*alignment=*/4);
+        foreground_color->Premultiply().ToR8G8B8A8(),
+        HostBuffer::BufferCategory::kData, /*alignment=*/4);
 
     blit_pass->AddCopy(std::move(buffer_view), foreground_texture);
     if (!blit_pass->EncodeCommands()) {

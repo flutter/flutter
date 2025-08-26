@@ -33,6 +33,8 @@ impeller_component("core") {
     "sampler_descriptor.h",
     "shader_types.cc",
     "shader_types.h",
+    "simple_host_buffer.cc",
+    "simple_host_buffer.h",
     "texture.cc",
     "texture.h",
     "texture_descriptor.cc",

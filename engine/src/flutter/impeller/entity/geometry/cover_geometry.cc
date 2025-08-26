@@ -23,9 +23,11 @@ GeometryResult CoverGeometry::GetPositionBuffer(const ContentContext& renderer,
               .vertex_buffer = host_buffer.Emplace(
                   rect.GetTransformedPoints(entity.GetTransform().Invert())
                       .data(),
-                  8 * sizeof(float), alignof(float)),
+                  8 * sizeof(float), alignof(float),
+                  HostBuffer::BufferCategory::kData),
               .index_buffer = host_buffer.Emplace(
-                  kRectIndicies, 4 * sizeof(uint16_t), alignof(uint16_t)),
+                  kRectIndicies, 4 * sizeof(uint16_t), alignof(uint16_t),
+                  HostBuffer::BufferCategory::kIndexes),
               .vertex_count = 4,
               .index_type = IndexType::k16bit,
           },

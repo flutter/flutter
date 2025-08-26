@@ -313,7 +313,8 @@ static bool BulkUpdateAtlasBitmap(const GlyphAtlas& atlas,
       texture->GetSize().Area() *
           BytesPerPixelForPixelFormat(
               atlas.GetTexture()->GetTextureDescriptor().format),
-      host_buffer.GetMinimumUniformAlignment());
+      host_buffer.GetMinimumUniformAlignment(),
+      HostBuffer::BufferCategory::kData);
 
   return blit_pass->AddCopy(std::move(buffer_view),  //
                             texture,                 //
@@ -374,7 +375,8 @@ static bool UpdateAtlasBitmap(const GlyphAtlas& atlas,
         bitmap.getAddr(0, 0),
         size.Area() * BytesPerPixelForPixelFormat(
                           atlas.GetTexture()->GetTextureDescriptor().format),
-        host_buffer.GetMinimumUniformAlignment());
+        host_buffer.GetMinimumUniformAlignment(),
+        HostBuffer::BufferCategory::kData);
 
     // convert_to_read is set to false so that the texture remains in a transfer
     // dst layout until we finish writing to it below. This only has an impact

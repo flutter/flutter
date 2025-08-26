@@ -576,7 +576,8 @@ ContentContext::ContentContext(
         GetContext()->CreateCommandBuffer();
     std::shared_ptr<BlitPass> blit_pass = cmd_buffer->CreateBlitPass();
     HostBuffer& host_buffer = GetTransientsBuffer();
-    BufferView buffer_view = host_buffer.Emplace(data);
+    BufferView buffer_view =
+        host_buffer.Emplace(data, HostBuffer::BufferCategory::kData);
     blit_pass->AddCopy(buffer_view, empty_texture_);
 
     if (!blit_pass->EncodeCommands() || !GetContext()

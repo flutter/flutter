@@ -64,6 +64,7 @@ std::pair<LineContents::EffectiveLineParameters, GeometryResult> CreateGeometry(
       LineContents::EffectiveLineParameters{.width = 0, .radius = 0};
   BufferView vertex_buffer = host_buffer.Emplace(
       count * sizeof(PerVertexData), alignof(PerVertexData),
+      HostBuffer::BufferCategory::kData,
       [line_geometry, &transform, &calculate_status](uint8_t* buffer) {
         auto vertices = reinterpret_cast<PerVertexData*>(buffer);
         calculate_status = LineContents::CalculatePerVertex(

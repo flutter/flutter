@@ -38,6 +38,7 @@ GeometryResult Geometry::ComputePositionGeometry(
           {
               .vertex_buffer = renderer.GetTransientsBuffer().Emplace(
                   count * sizeof(VT), alignof(VT),
+                  HostBuffer::BufferCategory::kData,
                   [&generator](uint8_t* buffer) {
                     auto vertices = reinterpret_cast<VT*>(buffer);
                     generator.GenerateVertices([&vertices](const Point& p) {

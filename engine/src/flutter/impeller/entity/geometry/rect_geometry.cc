@@ -20,7 +20,8 @@ GeometryResult FillRectGeometry::GetPositionBuffer(
       .vertex_buffer =
           {
               .vertex_buffer = host_buffer.Emplace(
-                  rect_.GetPoints().data(), 8 * sizeof(float), alignof(float)),
+                  rect_.GetPoints().data(), 8 * sizeof(float), alignof(float),
+                  HostBuffer::BufferCategory::kData),
               .vertex_count = 4,
               .index_type = IndexType::kNone,
           },
@@ -97,6 +98,7 @@ GeometryResult StrokeRectGeometry::GetPositionBuffer(
               {
                   .vertex_buffer = host_buffer.Emplace(
                       vertex_count * sizeof(Point), alignof(Point),
+                      HostBuffer::BufferCategory::kData,
                       [hsw = half_stroke_width, &rect, vertex_count,
                        &trigs](uint8_t* buffer) {
                         auto vertices = reinterpret_cast<Point*>(buffer);
@@ -138,6 +140,7 @@ GeometryResult StrokeRectGeometry::GetPositionBuffer(
               {
                   .vertex_buffer = host_buffer.Emplace(
                       17 * sizeof(Point), alignof(Point),
+                      HostBuffer::BufferCategory::kData,
                       [hsw = half_stroke_width, &rect](uint8_t* buffer) {
                         Scalar left = rect.GetLeft();
                         Scalar top = rect.GetTop();
@@ -176,6 +179,7 @@ GeometryResult StrokeRectGeometry::GetPositionBuffer(
               {
                   .vertex_buffer = host_buffer.Emplace(
                       10 * sizeof(Point), alignof(Point),
+                      HostBuffer::BufferCategory::kData,
                       [hsw = half_stroke_width, &rect](uint8_t* buffer) {
                         Scalar left = rect.GetLeft();
                         Scalar top = rect.GetTop();

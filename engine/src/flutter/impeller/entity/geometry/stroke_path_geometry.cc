@@ -764,9 +764,9 @@ GeometryResult StrokeSegmentsGeometry::GetPositionBuffer(
 
   const auto [arena_length, oversized_length] = position_writer.GetUsedSize();
   if (!position_writer.HasOversizedBuffer()) {
-    BufferView buffer_view =
-        host_buffer.Emplace(tessellator.GetStrokePointCache().data(),
-                            arena_length * sizeof(Point), alignof(Point));
+    BufferView buffer_view = host_buffer.Emplace(
+        tessellator.GetStrokePointCache().data(), arena_length * sizeof(Point),
+        alignof(Point), HostBuffer::BufferCategory::kData);
 
     return GeometryResult{.type = PrimitiveType::kTriangleStrip,
                           .vertex_buffer =
@@ -783,7 +783,8 @@ GeometryResult StrokeSegmentsGeometry::GetPositionBuffer(
   BufferView buffer_view = host_buffer.Emplace(
       /*buffer=*/nullptr,                                 //
       (arena_length + oversized_length) * sizeof(Point),  //
-      alignof(Point)                                      //
+      alignof(Point),                                     //
+      HostBuffer::BufferCategory::kData                   //
   );
   memcpy(buffer_view.GetBuffer()->OnGetContents() +
              buffer_view.GetRange().offset,         //

@@ -310,7 +310,8 @@ bool LinearGradientContents::RenderSSBO(const ContentContext& renderer,
         frag_info.colors_length = colors.size();
         auto color_buffer =
             host_buffer.Emplace(colors.data(), colors.size() * sizeof(StopData),
-                                host_buffer.GetMinimumUniformAlignment());
+                                host_buffer.GetMinimumUniformAlignment(),
+                                HostBuffer::BufferCategory::kData);
 
         pass.SetCommandLabel("LinearGradientSSBOFill");
 
