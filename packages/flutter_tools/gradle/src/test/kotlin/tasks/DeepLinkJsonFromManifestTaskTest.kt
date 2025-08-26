@@ -75,7 +75,9 @@ class DeepLinkJsonFromManifestTaskTest {
 
     @Test
     fun noApplicationInManifest() {
-        val manifestContent = """<?xml version="1.0" encoding="utf-8"?>
+        val manifestContent =
+            """
+            <?xml version="1.0" encoding="utf-8"?>
             <manifest xmlns:android="http://schemas.android.com/apk/res/android"
                 package="$defaultNamespace">
             </manifest>
@@ -126,7 +128,9 @@ class DeepLinkJsonFromManifestTaskTest {
 
     @Test
     fun metaDataDeepLinkingEnabledInvalidValue() {
-        val manifestContent = """<?xml version="1.0" encoding="utf-8"?>
+        val manifestContent =
+            """
+            <?xml version="1.0" encoding="utf-8"?>
             <manifest xmlns:android="http://schemas.android.com/apk/res/android"
                 package="$defaultNamespace">
                 <application android:label="Test App">
@@ -144,7 +148,9 @@ class DeepLinkJsonFromManifestTaskTest {
 
     @Test
     fun metaDataDeepLinkingNoValue() {
-        val manifestContent = """<?xml version="1.0" encoding="utf-8"?>
+        val manifestContent =
+            """
+            <?xml version="1.0" encoding="utf-8"?>
             <manifest xmlns:android="http://schemas.android.com/apk/res/android"
                 package="$defaultNamespace">
                 <application android:label="Test App">
