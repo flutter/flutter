@@ -755,7 +755,7 @@ TEST_F(FlutterEngineTest, RegistrarForwardViewControllerLookUpToEngine) {
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
                                                                                 nibName:nil
                                                                                  bundle:nil];
-  id<FlutterPluginRegistrar> registrar = [mockEngine registrarForPlugin:@"MyPlugin"];
+  id<FlutterPluginRegistrar> registrar = [engine registrarForPlugin:@"MyPlugin"];
 
   EXPECT_EQ([registrar viewController], viewController);
 }
