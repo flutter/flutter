@@ -236,7 +236,7 @@ void main() {
               width: 100,
               height: 100,
               child: InkWell(
-                overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+                overlayColor: WidgetStateProperty.resolveWith<Color>((Set<MaterialState> states) {
                   if (states.contains(MaterialState.hovered)) {
                     return const Color(0xff00ff00);
                   }
@@ -329,7 +329,7 @@ void main() {
               height: 100,
               child: InkWell(
                 focusNode: focusNode,
-                overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+                overlayColor: WidgetStateProperty.resolveWith<Color>((Set<MaterialState> states) {
                   if (states.contains(MaterialState.hovered)) {
                     return const Color(0xff00ff00);
                   }
@@ -381,7 +381,7 @@ void main() {
               height: 100,
               child: InkWell(
                 splashFactory: NoSplash.splashFactory,
-                overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+                overlayColor: WidgetStateProperty.resolveWith<Color>((Set<MaterialState> states) {
                   if (states.contains(MaterialState.pressed)) {
                     return pressedColor;
                   }
@@ -571,7 +571,7 @@ void main() {
                   width: 100,
                   height: 100,
                   child: InkWell(
-                    overlayColor: MaterialStateProperty.resolveWith<Color>((
+                    overlayColor: WidgetStateProperty.resolveWith<Color>((
                       Set<MaterialState> states,
                     ) {
                       if (states.contains(MaterialState.hovered)) {
@@ -2420,9 +2420,7 @@ void main() {
               width: 100,
               height: 100,
               child: InkWell(
-                overlayColor: MaterialStateProperty.resolveWith<Color?>((
-                  Set<MaterialState> states,
-                ) {
+                overlayColor: WidgetStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
                   if (states.contains(MaterialState.hovered)) {
                     return const Color(0xff00ff00);
                   }

@@ -4,23 +4,20 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:js_interop_unsafe';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
-import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import 'browser_detection.dart' show isIOS15, isMacOrIOS;
 import 'dom.dart';
-import 'services.dart';
 import 'vector_math.dart';
 
-/// Generic callback signature, used by [_futurize].
+/// Generic callback signature, used by [futurize].
 typedef Callback<T> = void Function(T result);
 
-/// Signature for a method that receives a [_Callback].
+/// Signature for a method that receives a [Callback].
 ///
 /// Return value should be null on success, and a string error message on
 /// failure.
@@ -75,15 +72,6 @@ Future<T> futurize<T>(Callbacker<T> callbacker) {
 /// Converts [matrix] to CSS transform value.
 String matrix4ToCssTransform(Matrix4 matrix) {
   return float64ListToCssTransform(matrix.storage);
-}
-
-/// Applies a transform to the [element].
-///
-/// See [float64ListToCssTransform] for details on how the CSS value is chosen.
-void setElementTransform(DomElement element, Float32List matrix4) {
-  element.style
-    ..transformOrigin = '0 0 0'
-    ..transform = float64ListToCssTransform(matrix4);
 }
 
 /// Converts [matrix] to CSS transform value.
@@ -369,16 +357,6 @@ String colorValueToCssString(int value) {
   }
 }
 
-/// Converts color components to a CSS compatible attribute value.
-String colorComponentsToCssString(int r, int g, int b, int a) {
-  if (a == 255) {
-    return 'rgb($r,$g,$b)';
-  } else {
-    final double alphaRatio = a / 255;
-    return 'rgba($r,$g,$b,${alphaRatio.toStringAsFixed(2)})';
-  }
-}
-
 /// From: https://developer.mozilla.org/en-US/docs/Web/CSS/font-family#Syntax
 ///
 /// Generic font families are a fallback mechanism, a means of preserving some
@@ -456,31 +434,6 @@ Float32List offsetListToFloat32List(List<ui.Offset> offsetList) {
   return floatList;
 }
 
-/// Apply this function to container elements in the HTML render tree (this is
-/// not relevant to semantics tree).
-///
-/// On WebKit browsers this will apply `z-order: 0` to ensure that clips are
-/// applied correctly. Otherwise, the browser will refuse to clip its contents.
-///
-/// Other possible fixes that were rejected:
-///
-/// * Use 3D transform instead of 2D: this does not work because it causes text
-///   blurriness: https://github.com/flutter/flutter/issues/32274
-void applyWebkitClipFix(DomElement? containerElement) {
-  if (ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit) {
-    containerElement!.style.zIndex = '0';
-  }
-}
-
-/// Roughly the inverse of [ui.Shadow.convertRadiusToSigma].
-///
-/// This does not inverse [ui.Shadow.convertRadiusToSigma] exactly, because on
-/// the Web the difference between sigma and blur radius is different from
-/// Flutter mobile.
-double convertSigmaToRadius(double sigma) {
-  return sigma * 2.0;
-}
-
 int clampInt(int value, int min, int max) {
   assert(min <= max);
   if (value < min) {
@@ -497,20 +450,6 @@ int clampInt(int value, int min, int max) {
 /// This function can be overridden in tests. This could be useful, for example,
 /// to verify that warnings are printed under certain circumstances.
 void Function(String) printWarning = domWindow.console.warn;
-
-/// Converts a 4x4 matrix into a human-readable String.
-String matrixString(List<num> matrix) {
-  final StringBuffer sb = StringBuffer();
-  for (int i = 0; i < 16; i++) {
-    sb.write(matrix[i]);
-    if ((i + 1) % 4 == 0) {
-      sb.write('\n');
-    } else {
-      sb.write(' ');
-    }
-  }
-  return sb.toString();
-}
 
 /// Determines if lists [a] and [b] are deep equivalent.
 ///
@@ -581,13 +520,6 @@ bool unorderedListEqual<T>(List<T>? a, List<T>? b) {
     }
   }
   return wordCounts.isEmpty;
-}
-
-// HTML only supports a single radius, but Flutter ImageFilter supports separate
-// horizontal and vertical radii. The best approximation we can provide is to
-// average the two radii together for a single compromise value.
-String blurSigmasToCssString(double sigmaX, double sigmaY) {
-  return 'blur(${(sigmaX + sigmaY) * 0.5}px)';
 }
 
 /// Extensions to [Map] that make it easier to treat it as a JSON object. The
@@ -664,27 +596,6 @@ extension JsonExtensions on Map<dynamic, dynamic> {
   }
 }
 
-/// Extracts view ID from the [MethodCall.arguments] map.
-///
-/// Throws if the view ID is not present or if [arguments] is not a map.
-int readViewId(Object? arguments) {
-  final int? viewId = tryViewId(arguments);
-  if (viewId == null) {
-    throw Exception('Could not find a `viewId` in the arguments: $arguments');
-  }
-  return viewId;
-}
-
-/// Extracts view ID from the [MethodCall.arguments] map.
-///
-/// Returns null if the view ID is not present or if [arguments] is not a map.
-int? tryViewId(Object? arguments) {
-  if (arguments is Map) {
-    return arguments.tryInt('viewId');
-  }
-  return null;
-}
-
 /// Prints a list of bytes in hex format.
 ///
 /// Bytes are separated by one space and are padded on the left to always show
@@ -707,21 +618,6 @@ void setElementStyle(DomElement element, String name, String? value) {
     element.style.removeProperty(name);
   } else {
     element.style.setProperty(name, value);
-  }
-}
-
-void setClipPath(DomElement element, String? value) {
-  if (ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit) {
-    if (value == null) {
-      element.style.removeProperty('-webkit-clip-path');
-    } else {
-      element.style.setProperty('-webkit-clip-path', value);
-    }
-  }
-  if (value == null) {
-    element.style.removeProperty('clip-path');
-  } else {
-    element.style.setProperty('clip-path', value);
   }
 }
 
@@ -750,49 +646,6 @@ void ensureMetaTag(String name, String content) {
       ..name = name
       ..content = content;
     domDocument.head!.append(meta);
-  }
-}
-
-bool? _ellipseFeatureDetected;
-
-/// Draws CanvasElement ellipse with fallback.
-void drawEllipse(
-  DomCanvasRenderingContext2D context,
-  double centerX,
-  double centerY,
-  double radiusX,
-  double radiusY,
-  double rotation,
-  double startAngle,
-  double endAngle,
-  bool antiClockwise,
-) {
-  _ellipseFeatureDetected ??= context['ellipse'] != null;
-  if (_ellipseFeatureDetected!) {
-    context.ellipse(
-      centerX,
-      centerY,
-      radiusX,
-      radiusY,
-      rotation,
-      startAngle,
-      endAngle,
-      antiClockwise,
-    );
-  } else {
-    context.save();
-    context.translate(centerX, centerY);
-    context.rotate(rotation);
-    context.scale(radiusX, radiusY);
-    context.arc(0, 0, 1, startAngle, endAngle, antiClockwise);
-    context.restore();
-  }
-}
-
-/// Removes all children of a DOM node.
-void removeAllChildren(DomNode node) {
-  while (node.lastChild != null) {
-    node.lastChild!.remove();
   }
 }
 
