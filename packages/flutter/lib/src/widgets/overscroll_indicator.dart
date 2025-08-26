@@ -17,8 +17,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart' show Tolerance, nearEqual;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/physics.dart';
 
-import '../physics/spring_simulation.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'media_query.dart';
