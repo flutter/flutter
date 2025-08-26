@@ -11,30 +11,22 @@ void main() {
   testWidgets('RepeatingTweenAnimationBuilder continuously animates', (WidgetTester tester) async {
     await tester.pumpWidget(const example.RepeatingTweenAnimationBuilderExampleApp());
 
-    // Find the container which is being rotated
-    final Finder containerFinder = find.byType(Container);
-    expect(containerFinder, findsOneWidget);
-
-    // Find the Transform widget that wraps the container
-    final Finder transformFinder = find.ancestor(
-      of: containerFinder,
-      matching: find.byType(Transform),
-    );
-    expect(transformFinder, findsOneWidget);
+    // Find the Transform widget that rotates - there should be at least one
+    final Finder transformFinder = find.byType(Transform);
+    expect(transformFinder, findsWidgets);
 
     // The animation should continuously repeat
     // Let's verify it animates through multiple cycles
     final List<Matrix4> transforms = <Matrix4>[];
 
-    // Capture initial transform
-    Transform transform = tester.widget(transformFinder);
-    transforms.add(transform.transform);
+    // Get the first transform widget (the rotating one)
+    final Transform firstTransform = tester.widget(transformFinder.first);
+    transforms.add(firstTransform.transform);
 
     // Advance through animation cycles
-    const Duration animationDuration = Duration(seconds: 2);
     for (int i = 0; i < 5; i++) {
-      await tester.pump(animationDuration ~/ 4);
-      transform = tester.widget(transformFinder);
+      await tester.pump(const Duration(milliseconds: 500));
+      final Transform transform = tester.widget(transformFinder.first);
       transforms.add(transform.transform);
     }
 
@@ -54,12 +46,18 @@ void main() {
     final Transform transformBeforePause = tester.widget(transformFinder);
     final Matrix4 beforePause = transformBeforePause.transform;
 
-    // Tap pause button
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Pause'));
+    // Find the InkWell play/pause button
+    final Finder playPauseButton = find.byType(InkWell).first;
+    expect(playPauseButton, findsOneWidget);
+
+    // Tap pause button (find icon to verify state)
+    expect(find.byIcon(Icons.pause), findsOneWidget);
+    await tester.tap(playPauseButton);
     await tester.pump();
 
-    // Verify button text changed to "Resume"
-    expect(find.widgetWithText(ElevatedButton, 'Resume'), findsOneWidget);
+    // Verify icon changed to play
+    expect(find.byIcon(Icons.play_arrow), findsOneWidget);
+    expect(find.byIcon(Icons.pause), findsNothing);
 
     // Pump time and verify animation is paused (transform stays the same)
     await tester.pump(const Duration(milliseconds: 200));
@@ -67,11 +65,12 @@ void main() {
     expect(transformWhilePaused.transform, equals(beforePause));
 
     // Resume the animation
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Resume'));
+    await tester.tap(playPauseButton);
     await tester.pump();
 
-    // Verify button text changed back to "Pause"
-    expect(find.widgetWithText(ElevatedButton, 'Pause'), findsOneWidget);
+    // Verify icon changed back to pause
+    expect(find.byIcon(Icons.pause), findsOneWidget);
+    expect(find.byIcon(Icons.play_arrow), findsNothing);
 
     // Let animation run and verify it resumed (transform changed)
     await tester.pump(const Duration(milliseconds: 200));
@@ -82,21 +81,31 @@ void main() {
   testWidgets('Reverse button toggles animation direction', (WidgetTester tester) async {
     await tester.pumpWidget(const example.RepeatingTweenAnimationBuilderExampleApp());
 
-    // Initially shows "Reverse" button
-    expect(find.widgetWithText(ElevatedButton, 'Reverse'), findsOneWidget);
+    // Find the Switch widget for reverse toggle
+    final Finder switchFinder = find.byType(Switch);
+    expect(switchFinder, findsOneWidget);
+
+    // Initially, reverse should be off
+    Switch switchWidget = tester.widget(switchFinder);
+    expect(switchWidget.value, false);
+
+    // Find the GestureDetector that wraps the reverse toggle
+    final Finder reverseToggleFinder = find.byType(GestureDetector).last;
 
     // Tap to enable reverse mode
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Reverse'));
+    await tester.tap(reverseToggleFinder);
     await tester.pump();
 
-    // Verify button text changed to "Forward Only"
-    expect(find.widgetWithText(ElevatedButton, 'Forward Only'), findsOneWidget);
+    // Verify switch is now on
+    switchWidget = tester.widget(switchFinder);
+    expect(switchWidget.value, true);
 
     // Toggle back to forward-only mode
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Forward Only'));
+    await tester.tap(reverseToggleFinder);
     await tester.pump();
 
-    // Verify button text changed back to "Reverse"
-    expect(find.widgetWithText(ElevatedButton, 'Reverse'), findsOneWidget);
+    // Verify switch is off again
+    switchWidget = tester.widget(switchFinder);
+    expect(switchWidget.value, false);
   });
 }
