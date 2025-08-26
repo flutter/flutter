@@ -322,6 +322,8 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> with TickerProv
         controller.dispose();
       }
       _initializeControllers();
+    } else {
+      _syncAnimationControllers();
     }
 
     if (oldWidget.animationDuration != widget.animationDuration) {
@@ -372,6 +374,19 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> with TickerProv
     for (int i = 0; i < widget.children.length; i++) {
       if (_isChildExpanded(i)) {
         _animationControllers[i].value = 1.0;
+      }
+    }
+  }
+
+  void _syncAnimationControllers() {
+    for (int i = 0; i < widget.children.length; i++) {
+      final bool shouldBeExpanded = _isChildExpanded(i);
+      final double currentValue = _animationControllers[i].value;
+
+      if (shouldBeExpanded && currentValue != 1.0) {
+        _animationControllers[i].forward();
+      } else if (!shouldBeExpanded && currentValue != 0.0) {
+        _animationControllers[i].reverse();
       }
     }
   }
