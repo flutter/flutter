@@ -180,9 +180,9 @@ object DependencyVersionChecker {
 
     private fun generateMinSdkCheckTaskName(it: Variant) = "${FlutterPluginUtils.capitalize(it.name)}$MIN_SDK_CHECK_TASK_POSTFIX"
 
-    private fun getMinSdkVersion(
-        it: Variant
-    ): MinSdkVersion = MinSdkVersion(it.name, it.minSdk.apiLevel)
+  private fun getMinSdkVersion(
+    it: Variant
+  ): MinSdkVersion = MinSdkVersion(it.name, it.minSdk.apiLevel)
 
     @VisibleForTesting internal fun getErrorMessage(
         dependencyName: String,
