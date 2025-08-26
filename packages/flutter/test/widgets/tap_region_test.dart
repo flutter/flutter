@@ -1201,17 +1201,18 @@ void main() {
                   Navigator.push(
                     tester.element(find.byType(GestureDetector)),
                     MaterialPageRoute<void>(
-                      builder: (BuildContext context) => Scaffold(
-                        body: Center(
-                          child: ElevatedButton(
-                            key: buttonKey,
-                            onPressed: () {
-                              buttonTapped = true;
-                            },
-                            child: const Text('Test Button'),
+                      builder:
+                          (BuildContext context) => Scaffold(
+                            body: Center(
+                              child: ElevatedButton(
+                                key: buttonKey,
+                                onPressed: () {
+                                  buttonTapped = true;
+                                },
+                                child: const Text('Test Button'),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
                     ),
                   );
                 },
