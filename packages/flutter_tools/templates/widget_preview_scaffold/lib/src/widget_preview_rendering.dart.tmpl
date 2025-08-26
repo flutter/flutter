@@ -17,10 +17,10 @@ import 'package:stack_trace/stack_trace.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'controls.dart';
-import 'dtd/dtd_services.dart';
 import 'generated_preview.dart';
 import 'utils.dart';
 import 'widget_preview.dart';
+import 'widget_preview_scaffold_controller.dart';
 
 /// Displayed when an unhandled exception is thrown when initializing the widget
 /// tree for a preview (i.e., before the build phase).
@@ -758,52 +758,86 @@ Future<void> mainImpl() async {
   // individual preview so the widget inspector won't allow for users to select
   // widgets that make up the widget preview scaffolding.
   binding.debugExcludeRootWidgetInspector = true;
-  final WidgetPreviewScaffoldDtdServices dtdServices =
-      WidgetPreviewScaffoldDtdServices();
-  await dtdServices.connect();
+  final controller = WidgetPreviewScaffoldController(previews: previews);
+  await controller.initialize();
   runWidget(
     DisableWidgetInspectorScope(
       child: binding.wrapWithDefaultView(
-        WidgetPreviewScaffold(previews: previews, dtdServices: dtdServices),
+        // Forces the set of previews to be recalculated after a hot reload.
+        HotReloadListener(
+          onHotReload: controller.onHotReload,
+          child: WidgetPreviewScaffold(controller: controller),
+        ),
       ),
     ),
   );
 }
 
-/// Define the Enum for Layout Types
-enum LayoutType { gridView, listView }
-
 class WidgetPreviewScaffold extends StatelessWidget {
-  WidgetPreviewScaffold({
-    super.key,
-    required this.previews,
-    required this.dtdServices,
-  });
+  const WidgetPreviewScaffold({super.key, required this.controller});
 
-  final List<WidgetPreview> Function() previews;
-  final WidgetPreviewScaffoldDtdServices dtdServices;
+  final WidgetPreviewScaffoldController controller;
 
-  // Positioning values for positioning the previewer
-  final double _previewLeftPadding = 60.0;
-  final double _previewRightPadding = 20.0;
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Material(
+        color: Colors.transparent,
+        child: Column(
+          children: [
+            // Display the previewer
+            Expanded(
+              child: Container(
+                padding: EdgeInsets.all(8.0),
+                child: WidgetPreviews(controller: controller),
+              ),
+            ),
+            WidgetPreviewControls(controller: controller),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
-  // Positioning values for the toggle layout buttons
-  final double _toggleButtonsTopPadding = 20.0;
-  final double _toggleButtonsLeftPadding = 20.0;
+/// The set of controls used to control the preview environment.
+class WidgetPreviewControls extends StatelessWidget {
+  const WidgetPreviewControls({super.key, required this.controller});
+
+  static const _controlsPadding = 20.0;
+  final WidgetPreviewScaffoldController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.only(
+        bottom: _controlsPadding,
+        left: _controlsPadding,
+        right: _controlsPadding,
+      ),
+      child: Row(
+        children: [
+          LayoutTypeSelector(controller: controller),
+          HorizontalSpacer(),
+          FilterBySelectedFileToggle(controller: controller),
+          Spacer(),
+          WidgetPreviewerRestartButton(controller: controller),
+        ],
+      ),
+    );
+  }
+}
+
+/// Renders the set of currently selected widget previews.
+class WidgetPreviews extends StatelessWidget {
+  const WidgetPreviews({super.key, required this.controller});
+
+  final WidgetPreviewScaffoldController controller;
 
   // Spacing values for the grid layout
-  final double _gridSpacing = 8.0;
-  final double _gridRunSpacing = 8.0;
-
-  // Notifier to manage layout state, default to GridView
-  final ValueNotifier<LayoutType> _selectedLayout = ValueNotifier<LayoutType>(
-    LayoutType.gridView,
-  );
-
-  // Function to toggle layouts based on enum value
-  void _toggleLayout(LayoutType layout) {
-    _selectedLayout.value = layout;
-  }
+  static const _gridSpacing = 8.0;
+  static const _gridRunSpacing = 8.0;
 
   Widget _buildGridViewFlex(List<WidgetPreview> previewList) {
     return SingleChildScrollView(
@@ -829,105 +863,39 @@ class WidgetPreviewScaffold extends StatelessWidget {
     );
   }
 
-  Widget _displayToggleLayoutButtons() {
-    return Positioned(
-      top: _toggleButtonsTopPadding,
-      left: _toggleButtonsLeftPadding,
-      child: Container(
-        padding: EdgeInsets.all(8.0),
-        decoration: BoxDecoration(
-          color: Colors.grey[300],
-          borderRadius: BorderRadius.circular(8.0),
-        ),
-        child: ValueListenableBuilder<LayoutType>(
-          valueListenable: _selectedLayout,
-          builder: (context, selectedLayout, _) {
-            return Column(
-              children: [
-                IconButton(
-                  onPressed: () => _toggleLayout(LayoutType.gridView),
-                  icon: Icon(Icons.grid_on),
-                  color: selectedLayout == LayoutType.gridView
-                      ? Colors.blue
-                      : Colors.black,
-                ),
-                IconButton(
-                  onPressed: () => _toggleLayout(LayoutType.listView),
-                  icon: Icon(Icons.view_list),
-                  color: selectedLayout == LayoutType.listView
-                      ? Colors.blue
-                      : Colors.black,
-                ),
-              ],
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _hotRestartPreviewerButton() {
-    return Container(
-      alignment: Alignment.topRight,
-      padding: EdgeInsets.only(
-        top: _toggleButtonsTopPadding,
-        right: _toggleButtonsLeftPadding,
-      ),
-      child: WidgetPreviewerRestartButton(dtdServices: dtdServices),
-    );
-  }
-
-  Widget _displayPreviewer(Widget previewView) {
-    return Positioned.fill(
-      left: _previewLeftPadding,
-      right: _previewRightPadding,
-      child: Container(padding: EdgeInsets.all(8.0), child: previewView),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final List<WidgetPreview> previewList = previews();
-    Widget previewView;
-    if (previewList.isEmpty) {
-      previewView = Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[NoPreviewsDetectedWidget()],
-      );
-    } else {
-      previewView = LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          return WidgetPreviewerWindowConstraints(
-            constraints: constraints,
-            child: ValueListenableBuilder<LayoutType>(
-              valueListenable: _selectedLayout,
-              builder: (context, selectedLayout, _) {
-                return switch (selectedLayout) {
-                  LayoutType.gridView => _buildGridViewFlex(previewList),
-                  LayoutType.listView => _buildVerticalListView(previewList),
-                };
-              },
-            ),
+    return ValueListenableBuilder<List<WidgetPreview>>(
+      valueListenable: controller.filteredPreviewSetListenable,
+      builder: (context, previewList, _) {
+        Widget previewView;
+        if (previewList.isEmpty) {
+          previewView = Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[NoPreviewsDetectedWidget()],
           );
-        },
-      );
-    }
-
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Material(
-        color: Colors.transparent,
-        child: Stack(
-          children: [
-            // Display the previewer
-            _displayPreviewer(previewView),
-            // Display the layout toggle buttons
-            _displayToggleLayoutButtons(),
-            // Display the global hot restart button
-            _hotRestartPreviewerButton(),
-          ],
-        ),
-      ),
+        } else {
+          previewView = LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints constraints) {
+              return WidgetPreviewerWindowConstraints(
+                constraints: constraints,
+                child: ValueListenableBuilder<LayoutType>(
+                  valueListenable: controller.layoutTypeListenable,
+                  builder: (context, selectedLayout, _) {
+                    return switch (selectedLayout) {
+                      LayoutType.gridView => _buildGridViewFlex(previewList),
+                      LayoutType.listView => _buildVerticalListView(
+                        previewList,
+                      ),
+                    };
+                  },
+                ),
+              );
+            },
+          );
+        }
+        return previewView;
+      },
     );
   }
 }
