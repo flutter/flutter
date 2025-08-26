@@ -198,7 +198,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
       Queue<ScaffoldFeatureController<SnackBar, SnackBarClosedReason>>();
   AnimationController? _snackBarController;
   Timer? _snackBarTimer;
-  late bool? _accessibleNavigation;
+  late bool _accessibleNavigation;
 
   @protected
   @override
