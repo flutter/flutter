@@ -132,62 +132,53 @@ void main() {
     });
 
     for (final buildConfiguration in <String>['Debug', 'Profile']) {
-      test('add keys in $buildConfiguration without verbose mode', () async {
-        infoPlist.writeAsStringSync(emptyPlist);
+      for (final verbose in <bool>[true, false]) {
+        test(
+          'add keys in $buildConfiguration under ${verbose ? 'verbose' : 'non-verbose'} mode',
+          () async {
+            infoPlist.writeAsStringSync(emptyPlist);
+            final File pipe = fileSystem.file('/tmp/pipe')..createSync(recursive: true);
 
-        final ProcessResult result = await Process.run(
-          xcodeBackendPath,
-          <String>['test_vm_service_bonjour_service'],
-          environment: <String, String>{
-            'CONFIGURATION': buildConfiguration,
-            'BUILT_PRODUCTS_DIR': buildDirectory.path,
-            'INFOPLIST_PATH': 'Info.plist',
+            final ProcessResult result = await Process.run(
+              xcodeBackendPath,
+              <String>['test_vm_service_bonjour_service'],
+              environment: <String, String>{
+                'CONFIGURATION': buildConfiguration,
+                'BUILT_PRODUCTS_DIR': buildDirectory.path,
+                'INFOPLIST_PATH': 'Info.plist',
+                if (verbose) 'VERBOSE_SCRIPT_LOGGING': 'YES',
+                'SCRIPT_OUTPUT_STREAM_FILE': pipe.path,
+              },
+            );
+
+            final String actualInfoPlist = infoPlist.readAsStringSync();
+            expect(actualInfoPlist, contains('NSBonjourServices'));
+            expect(actualInfoPlist, contains('dartVmService'));
+            expect(actualInfoPlist, contains('NSLocalNetworkUsageDescription'));
+
+            // Make sure no Xcode compilation error.
+            expect(result.stderr, isNot(startsWith('error:')));
+
+            const plutilErrorMessage =
+                'Could not extract value, error: No value at that key path or invalid key path: NSBonjourServices';
+            expect(pipe.readAsStringSync(), isNot(contains(plutilErrorMessage)));
+            expect(result.stderr, isNot(contains(plutilErrorMessage)));
+            if (verbose) {
+              expect(result.stdout, contains(plutilErrorMessage));
+            } else {
+              expect(result.stdout, isNot(contains(plutilErrorMessage)));
+            }
+
+            expect(result, const ProcessResultMatcher());
           },
         );
-
-        final String actualInfoPlist = infoPlist.readAsStringSync();
-        expect(actualInfoPlist, contains('NSBonjourServices'));
-        expect(actualInfoPlist, contains('dartVmService'));
-        expect(actualInfoPlist, contains('NSLocalNetworkUsageDescription'));
-
-        expect(result.stderr, isNot(startsWith('error:')));
-        const plutilErrorMessage =
-            'Could not extract value, error: No value at that key path or invalid key path: NSBonjourServices';
-        expect(result.stderr, isNot(contains(plutilErrorMessage)));
-        expect(result.stdout, isNot(contains(plutilErrorMessage)));
-        expect(result, const ProcessResultMatcher());
-      });
-
-      test('add keys in $buildConfiguration under verbose mode', () async {
-        infoPlist.writeAsStringSync(emptyPlist);
-
-        final ProcessResult result = await Process.run(
-          xcodeBackendPath,
-          <String>['test_vm_service_bonjour_service'],
-          environment: <String, String>{
-            'CONFIGURATION': buildConfiguration,
-            'BUILT_PRODUCTS_DIR': buildDirectory.path,
-            'INFOPLIST_PATH': 'Info.plist',
-            'VERBOSE_SCRIPT_LOGGING': 'YES',
-          },
-        );
-
-        final String actualInfoPlist = infoPlist.readAsStringSync();
-        expect(actualInfoPlist, contains('NSBonjourServices'));
-        expect(actualInfoPlist, contains('dartVmService'));
-        expect(actualInfoPlist, contains('NSLocalNetworkUsageDescription'));
-
-        expect(result.stderr, isNot(startsWith('error:')));
-        const plutilErrorMessage =
-            'Could not extract value, error: No value at that key path or invalid key path: NSBonjourServices';
-        expect(result.stderr, isNot(contains(plutilErrorMessage)));
-        expect(result.stdout, contains(plutilErrorMessage));
-        expect(result, const ProcessResultMatcher());
-      });
+      }
     }
 
-    test('adds to existing Bonjour services, does not override network usage description', () async {
-      infoPlist.writeAsStringSync('''
+    test(
+      'adds to existing Bonjour services, does not override network usage description',
+      () async {
+        infoPlist.writeAsStringSync('''
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -201,17 +192,17 @@ void main() {
 </dict>
 </plist>''');
 
-      final ProcessResult result = await Process.run(
-        xcodeBackendPath,
-        <String>['test_vm_service_bonjour_service'],
-        environment: <String, String>{
-          'CONFIGURATION': 'Debug',
-          'BUILT_PRODUCTS_DIR': buildDirectory.path,
-          'INFOPLIST_PATH': 'Info.plist',
-        },
-      );
+        final ProcessResult result = await Process.run(
+          xcodeBackendPath,
+          <String>['test_vm_service_bonjour_service'],
+          environment: <String, String>{
+            'CONFIGURATION': 'Debug',
+            'BUILT_PRODUCTS_DIR': buildDirectory.path,
+            'INFOPLIST_PATH': 'Info.plist',
+          },
+        );
 
-      expect(infoPlist.readAsStringSync(), '''
+        expect(infoPlist.readAsStringSync(), '''
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -227,13 +218,10 @@ void main() {
 </plist>
 ''');
 
-      const plutilErrorMessage =
-          'Could not extract value, error: No value at that key path or invalid key path: NSLocalNetworkUsageDescription';
-      expect(result.stderr, isNot(startsWith('error:')));
-      expect(result.stderr, isNot(contains(plutilErrorMessage)));
-      expect(result.stdout, isNot(contains(plutilErrorMessage)));
-      expect(result, const ProcessResultMatcher());
-    });
+        expect(result.stderr, isNot(startsWith('error:')));
+        expect(result, const ProcessResultMatcher());
+      },
+    );
 
     test('does not add bonjour settings when port publication is disabled', () async {
       infoPlist.writeAsStringSync('''

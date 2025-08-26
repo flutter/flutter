@@ -958,7 +958,7 @@ class ListTile extends StatelessWidget {
       if (!enabled || (onTap == null && onLongPress == null)) MaterialState.disabled,
     };
     final MouseCursor effectiveMouseCursor =
-        MaterialStateProperty.resolveAs<MouseCursor?>(mouseCursor, mouseStates) ??
+        WidgetStateProperty.resolveAs<MouseCursor?>(mouseCursor, mouseStates) ??
         tileTheme.mouseCursor?.resolve(mouseStates) ??
         MaterialStateMouseCursor.clickable.resolve(mouseStates);
 
@@ -1136,7 +1136,7 @@ class ListTile extends StatelessWidget {
   }
 }
 
-class _IndividualOverrides extends MaterialStateProperty<Color?> {
+class _IndividualOverrides extends WidgetStateProperty<Color?> {
   _IndividualOverrides({
     this.explicitColor,
     this.enabledColor,
@@ -1152,7 +1152,7 @@ class _IndividualOverrides extends MaterialStateProperty<Color?> {
   @override
   Color? resolve(Set<MaterialState> states) {
     if (explicitColor is MaterialStateColor) {
-      return MaterialStateProperty.resolveAs<Color?>(explicitColor, states);
+      return WidgetStateProperty.resolveAs<Color?>(explicitColor, states);
     }
     if (states.contains(MaterialState.disabled)) {
       return disabledColor;

@@ -86,12 +86,7 @@ Future<void> main(List<String> args) async {
   final bool muteCommandLogging = (help || doctor) && !veryVerbose;
   final bool verboseHelp = help && verbose;
   final bool daemon = args.contains('daemon');
-  final bool runMachine =
-      (args.contains('--machine') && args.contains('run')) ||
-      (args.contains('--machine') && args.contains('attach')) ||
-      // `flutter widget-preview start` starts an application that requires a logger
-      // to be setup for machine mode.
-      (args.contains('widget-preview') && args.contains('start'));
+  final bool runMachine = args.contains('--machine');
 
   // Cache.flutterRoot must be set early because other features use it (e.g.
   // enginePath's initializer uses it). This can only work with the real

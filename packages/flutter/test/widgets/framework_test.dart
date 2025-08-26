@@ -2075,6 +2075,71 @@ The findRenderObject() method was called for the following element:
       ),
     );
   });
+
+  testWidgets(
+    'widget is not active if throw in deactivated',
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
+    (WidgetTester tester) async {
+      final FlutterExceptionHandler? onError = FlutterError.onError;
+      FlutterError.onError = (_) {};
+      const Widget child = Placeholder();
+      await tester.pumpWidget(
+        StatefulWidgetSpy(onDeactivate: (_) => throw StateError('kaboom'), child: child),
+      );
+      final Element element = tester.element(find.byWidget(child));
+      assert(element.debugIsActive);
+
+      await tester.pumpWidget(const SizedBox());
+      FlutterError.onError = onError;
+      expect(element.debugIsActive, false);
+      expect(element.debugIsDefunct, false);
+    },
+  );
+
+  testWidgets(
+    'widget is not active if throw in activated',
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
+    (WidgetTester tester) async {
+      final FlutterExceptionHandler? onError = FlutterError.onError;
+      FlutterError.onError = (_) {};
+      const Widget child = Placeholder();
+      final Widget widget = StatefulWidgetSpy(
+        key: GlobalKey(),
+        onActivate: (_) => throw StateError('kaboom'),
+        child: child,
+      );
+      await tester.pumpWidget(widget);
+      final Element element = tester.element(find.byWidget(child));
+
+      await tester.pumpWidget(MetaData(child: widget));
+      FlutterError.onError = onError;
+      expect(element.debugIsActive, false);
+      expect(element.debugIsDefunct, false);
+    },
+  );
+
+  testWidgets(
+    'widget is unmounted if throw in dispose',
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
+    (WidgetTester tester) async {
+      final FlutterExceptionHandler? onError = FlutterError.onError;
+      FlutterError.onError = (_) {};
+      const Widget child = Placeholder();
+      final Widget widget = StatefulWidgetSpy(
+        onDispose: (_) => throw StateError('kaboom'),
+        child: child,
+      );
+      await tester.pumpWidget(widget);
+      final Element element = tester.element(find.byWidget(child));
+      await tester.pumpWidget(child);
+
+      FlutterError.onError = onError;
+      expect(element.debugIsDefunct, true);
+    },
+  );
 }
 
 class _TestInheritedElement extends InheritedElement {
@@ -2323,6 +2388,7 @@ class StatefulWidgetSpy extends StatefulWidget {
     this.onDeactivate,
     this.onActivate,
     this.onDidUpdateWidget,
+    this.child = const SizedBox(),
   });
 
   final void Function(BuildContext)? onBuild;
@@ -2332,6 +2398,7 @@ class StatefulWidgetSpy extends StatefulWidget {
   final void Function(BuildContext)? onDeactivate;
   final void Function(BuildContext)? onActivate;
   final void Function(BuildContext)? onDidUpdateWidget;
+  final Widget child;
 
   @override
   State<StatefulWidgetSpy> createState() => _StatefulWidgetSpyState();
@@ -2377,7 +2444,7 @@ class _StatefulWidgetSpyState extends State<StatefulWidgetSpy> {
   @override
   Widget build(BuildContext context) {
     widget.onBuild?.call(context);
-    return Container();
+    return widget.child;
   }
 }
 

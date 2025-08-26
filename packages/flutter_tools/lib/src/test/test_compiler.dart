@@ -195,6 +195,7 @@ class TestCompiler {
       fileSystem: globals.fs,
       fileSystemRoots: buildInfo.fileSystemRoots,
       fileSystemScheme: buildInfo.fileSystemScheme,
+      shutdownHooks: globals.shutdownHooks,
     );
     return residentCompiler;
   }
