@@ -164,7 +164,9 @@ class FlutterView {
   /// See also:
   ///
   ///  * [physicalSize], which returns the current size of the view.
-  ViewConstraints get physicalConstraints => _viewConfiguration.viewConstraints;
+  ViewConstraints get physicalConstraints => _viewConfiguration.viewConstraints.isEmpty()
+      ? ViewConstraints.tight(physicalSize)
+      : _viewConfiguration.viewConstraints;
 
   /// The current dimensions of the rectangle as last reported by the platform
   /// into which scenes rendered in this view are drawn.
