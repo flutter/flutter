@@ -23,7 +23,7 @@ class StubPictureRenderer implements PictureRenderer {
   final DomHTMLCanvasElement scratchCanvasElement = createDomCanvasElement(width: 500, height: 500);
 
   @override
-  Future<RenderResult> renderPictures(List<ScenePicture> pictures) async {
+  Future<RenderResult> renderPictures(List<ScenePicture> pictures, int width, int height) async {
     renderedPictures.addAll(pictures);
     final List<DomImageBitmap> bitmaps = await Future.wait(
       pictures.map((ScenePicture picture) {

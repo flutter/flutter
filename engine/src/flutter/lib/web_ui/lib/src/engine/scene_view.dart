@@ -19,7 +19,7 @@ typedef RenderResult = ({
 // It is optionally asynchronous. It is required for the `EngineSceneView` to
 // composite pictures into the canvases in the DOM tree it builds.
 abstract class PictureRenderer {
-  FutureOr<RenderResult> renderPictures(List<ScenePicture> picture);
+  FutureOr<RenderResult> renderPictures(List<ScenePicture> picture, int width, int height);
   ScenePicture clipPicture(ScenePicture picture, ui.Rect clip);
 }
 
@@ -119,7 +119,11 @@ class EngineSceneView {
     }
     final Map<ScenePicture, DomImageBitmap> renderMap;
     if (picturesToRender.isNotEmpty) {
-      final RenderResult renderResult = await pictureRenderer.renderPictures(picturesToRender);
+      final RenderResult renderResult = await pictureRenderer.renderPictures(
+        picturesToRender,
+        screenBounds.width.ceil(),
+        screenBounds.height.ceil(),
+      );
       renderMap = <ScenePicture, DomImageBitmap>{
         for (int i = 0; i < picturesToRender.length; i++)
           originalPicturesToRender[i]: renderResult.imageBitmaps[i],
@@ -155,11 +159,10 @@ class EngineSceneView {
           }
         }
 
-        final ui.Rect clippedBounds = slice.picture.cullRect.intersect(screenBounds);
         if (container != null) {
-          container.bounds = clippedBounds;
+          container.bounds = screenBounds;
         } else {
-          container = PictureSliceContainer(clippedBounds);
+          container = PictureSliceContainer(screenBounds);
         }
         container.updateContents();
         container.renderBitmap(bitmap);
