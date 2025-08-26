@@ -129,6 +129,8 @@ typedef struct MouseState {
 /// the same with frame rate of rendering.
 @property(nonatomic, strong) VSyncClient* touchRateCorrectionVSyncClient;
 
+@property(nonatomic, assign) CGSize sizeBeforeAutoResized;
+
 /*
  * Mouse and trackpad gesture recognizers
  */
@@ -167,6 +169,8 @@ typedef struct MouseState {
 // Synthesize properties with an overridden getter/setter.
 @synthesize viewOpaque = _viewOpaque;
 @synthesize displayingFlutterUI = _displayingFlutterUI;
+
+@synthesize autoResizable = _autoResizable;
 
 // TODO(dkwingsmt): https://github.com/flutter/flutter/issues/138168
 // No backing ivar is currently required; when multiple views are supported, we'll need to
@@ -1435,6 +1439,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   _viewportMetrics.device_pixel_ratio = scale;
   [self setViewportMetricsSize];
   [self setViewportMetricsPaddings];
+  [self updateAutoResizeConstraints];
   [self updateViewportMetricsIfNeeded];
 
   // There is no guarantee that UIKit will layout subviews when the application/scene is active.
@@ -1460,6 +1465,61 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
                        }
                      }];
   }
+  }
+}
+
+- (BOOL)isAutoResizable {
+  return _autoResizable;
+}
+
+- (void)setAutoResizable:(BOOL)value {
+  _autoResizable = value;
+  self.flutterView.autoResizable = value;
+}
+
+- (void)updateAutoResizeConstraints {
+  if (!self.isAutoResizable) {
+    return;
+  }
+
+  // When viewDidLayoutSubviews is called (which is where this method is called),
+  // the view has finished laying out its subviews and has applied any auto layout constraints.
+  // Therefore, we're able to use the frame to determine what size is allowed by layout constraints.
+  // However, we're only able to use this value if Flutter hasn't already applied any
+  // FlutterAutoResizeLayoutConstraint constraints. Once Flutter applies constraints, that will
+  // determine the frame. This imposes a limitation on content resizing that layout constraints
+  // updated after an auto-resize has been applied may not work properly.
+  BOOL hasBeenAutoResized = NO;
+  for (NSLayoutConstraint* constraint in self.view.constraints) {
+    if ([constraint isKindOfClass:[FlutterAutoResizeLayoutConstraint class]]) {
+      hasBeenAutoResized = YES;
+      break;
+    }
+  }
+  if (!hasBeenAutoResized) {
+    self.sizeBeforeAutoResized = self.view.frame.size;
+  }
+
+  CGFloat maxWidth = self.sizeBeforeAutoResized.width;
+  CGFloat maxHeight = self.sizeBeforeAutoResized.height;
+  CGFloat minWidth = self.sizeBeforeAutoResized.width;
+  CGFloat minHeight = self.sizeBeforeAutoResized.height;
+
+  // maxWidth or maxHeight may be 0 when the width/height are ambiguous.
+  if (maxWidth == 0) {
+    maxWidth = DBL_MAX;
+  }
+  if (maxHeight == 0) {
+    maxHeight = DBL_MAX;
+  }
+  _viewportMetrics.physical_min_width_constraint = minWidth * _viewportMetrics.device_pixel_ratio;
+  _viewportMetrics.physical_max_width_constraint = maxWidth * _viewportMetrics.device_pixel_ratio;
+  _viewportMetrics.physical_min_height_constraint = minHeight * _viewportMetrics.device_pixel_ratio;
+  _viewportMetrics.physical_max_height_constraint = maxHeight * _viewportMetrics.device_pixel_ratio;
+
+  // NSLog(@"Updated auto-resize constraints: maxWidth = %f, maxHeight = %f,  minWidth = %f, "
+  //       @"minHeight = %f",
+  //       maxWidth, maxHeight, minWidth, minHeight);
 }
 
 - (void)viewSafeAreaInsetsDidChange {
@@ -2201,6 +2261,11 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 - (void)traitCollectionDidChange:(UITraitCollection*)previousTraitCollection {
   [super traitCollectionDidChange:previousTraitCollection];
   [self onUserSettingsChanged:nil];
+
+  // Size changes when certain traits change, such as orientation or scale.
+  if (self.isAutoResizable) {
+    [self.flutterView resetIntrinsicContentSize];
+  }
 }
 
 - (void)onUserSettingsChanged:(NSNotification*)notification {

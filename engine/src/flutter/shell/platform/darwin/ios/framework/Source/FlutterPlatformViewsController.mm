@@ -667,6 +667,21 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 
   // No platform views to render; we're done.
   if (self.flutterView == nil || (self.compositionOrder.empty() && !self.hadPlatformViews)) {
+    // No platform views to render but there is a Flutter view and therefore may have a resize
+    if (self.flutterView != nil) {
+      // If the raster thread isn't merged, resize the view on the platform thread and block until
+      // complete.
+      auto latch = std::make_shared<fml::CountDownLatch>(1u);
+      fml::TaskRunner::RunNowOrPostTask(self.platformTaskRunner,
+                                        [self, frameSize = self.frameSize, latch]() mutable {
+                                          [self performResize:frameSize];
+                                          latch->CountDown();
+                                        });
+      if (![[NSThread currentThread] isMainThread]) {
+        latch->Wait();
+      }
+    }
+    // No platform views to render; we're done.
     self.hadPlatformViews = NO;
     return background_frame->Submit();
   }
@@ -753,13 +768,16 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
       self.layerPool->RemoveUnusedLayers();
   self.layerPool->RecycleLayers();
 
+  // If the raster thread isn't merged, wait for the platform thread to finish submitting the frame.
+  auto latch = std::make_shared<fml::CountDownLatch>(1u);
   auto task = [self,                                                      //
                platformViewLayers = std::move(platformViewLayers),        //
                currentCompositionParams = self.currentCompositionParams,  //
                viewsToRecomposite = self.viewsToRecomposite,              //
                compositionOrder = self.compositionOrder,                  //
                unusedLayers = std::move(unusedLayers),                    //
-               surfaceFrames = std::move(surfaceFrames)                   //
+               surfaceFrames = std::move(surfaceFrames),                  //
+               latch                                                      //
   ]() mutable {
     [self performSubmit:platformViewLayers
         currentCompositionParams:currentCompositionParams
@@ -767,10 +785,14 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
                 compositionOrder:compositionOrder
                     unusedLayers:unusedLayers
                    surfaceFrames:surfaceFrames];
+    latch->CountDown();
   };
 
   fml::TaskRunner::RunNowOrPostTask(self.platformTaskRunner, fml::MakeCopyable(std::move(task)));
 
+  if (![[NSThread currentThread] isMainThread]) {
+    latch->Wait();
+  }
   return didEncode;
 }
 
@@ -796,6 +818,17 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
       });
   if (![[NSThread currentThread] isMainThread]) {
     latch->Wait();
+  }
+}
+
+- (void)performResize:(const flutter::DlISize&)frameSize {
+  TRACE_EVENT0("flutter", "PlatformViewsController::PerformResize");
+  FML_DCHECK([[NSThread currentThread] isMainThread]);
+  if (self.flutterView != nil) {
+    FML_LOG(ERROR) << "RESIZE RENDER STEP 9: \n  setIntrinsicContentSize " << frameSize.width << "x"
+                   << frameSize.height;
+    [(FlutterView*)self.flutterView
+        setIntrinsicContentSize:CGSizeMake(frameSize.width, frameSize.height)];
   }
 }
 
