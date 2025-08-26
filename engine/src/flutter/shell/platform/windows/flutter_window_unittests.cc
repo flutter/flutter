@@ -68,7 +68,7 @@ class MockFlutterWindow : public FlutterWindow {
               (override));
   MOCK_METHOD(float, GetScrollOffsetMultiplier, (), (override));
   MOCK_METHOD(float, GetDpiScale, (), (override));
-  MOCK_METHOD(void, UpdateCursorRect, (const Rect&), (override));
+  MOCK_METHOD(void, UpdateCursorRect, (const fml::Rect&), (override));
   MOCK_METHOD(void, OnResetImeComposing, (), (override));
   MOCK_METHOD(UINT, Win32DispatchMessage, (UINT, WPARAM, LPARAM), (override));
   MOCK_METHOD(BOOL, Win32PeekMessage, (LPMSG, UINT, UINT, UINT), (override));
@@ -145,7 +145,7 @@ TEST_F(FlutterWindowTest, OnCursorRectUpdatedRegularDPI) {
   MockFlutterWindow win32window;
   EXPECT_CALL(win32window, GetDpiScale()).WillOnce(Return(1.0));
 
-  Rect cursor_rect(Point(10, 20), Size(30, 40));
+  fml::Rect cursor_rect(Point(10, 20), Size(30, 40));
   EXPECT_CALL(win32window, UpdateCursorRect(cursor_rect)).Times(1);
 
   win32window.OnCursorRectUpdated(cursor_rect);
@@ -158,10 +158,10 @@ TEST_F(FlutterWindowTest, OnCursorRectUpdatedHighDPI) {
   MockFlutterWindow win32window;
   EXPECT_CALL(win32window, GetDpiScale()).WillOnce(Return(1.5));
 
-  Rect expected_cursor_rect(Point(15, 30), Size(45, 60));
+  fml::Rect expected_cursor_rect(Point(15, 30), Size(45, 60));
   EXPECT_CALL(win32window, UpdateCursorRect(expected_cursor_rect)).Times(1);
 
-  Rect cursor_rect(Point(10, 20), Size(30, 40));
+  fml::Rect cursor_rect(Point(10, 20), Size(30, 40));
   win32window.OnCursorRectUpdated(cursor_rect);
 }
 
