@@ -16,9 +16,11 @@ import '../src/common.dart';
 import '../src/context.dart';
 import 'test_data/integration_tests_project.dart';
 
-/// Tests that [`TestGoldenComparator`] can handle a failure gracefully.
+/// Tests that [`TestGoldenComparator`] is working end-to-end-ish.
 ///
-/// Regression test for https://github.com/flutter/flutter/issues/174267.
+/// Spawns `flutter_tester`, and asks it to compare (using the default
+/// `LocalFileComparator`) two images, one that will be an exact match, and one
+/// that is very different.
 void main() {
   final (File testPng1, File testPng2) = () {
     final Directory testData = globals.localFileSystem
@@ -53,7 +55,6 @@ void main() {
     printOnFailure(logger.errorText);
   });
 
-  // Cannot be in 'setUp' because it implicitly uses [global] state that comes from 'testUsingContext'.
   TestGoldenComparator createComparator() {
     final File packageConfig = tmpDir.childDirectory('.dart_tool').childFile('package_config.json');
     expect(packageConfig, exists);
@@ -86,6 +87,7 @@ void main() {
     expect(result, isA<TestGoldenComparisonDone>());
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/174267.
   testUsingContext('failed comparison is failed but not crashed', () async {
     final TestGoldenComparator comparator = createComparator();
     final TestGoldenComparison result = await comparator.compare(

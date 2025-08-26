@@ -349,7 +349,7 @@ void main() async {
         try {
           bool success = await goldenFileComparator.compare(bytes, goldenKey);
           print(jsonEncode({'success': success}));
-        } on Object? catch (e) {
+        } on /*FlutterError*/ Object? catch (e) {
           print(jsonEncode({'success': false, 'message': '\$e'}));
         }
       }
