@@ -95,16 +95,16 @@ class MockDevice final {
   MockDevice& operator=(const MockDevice&) = delete;
 
   Mutex called_functions_mutex_;
-  std::shared_ptr<std::vector<std::string>> called_functions_
-      IPLR_GUARDED_BY(called_functions_mutex_);
+  std::shared_ptr<std::vector<std::string>> called_functions_ IPLR_GUARDED_BY(
+      called_functions_mutex_);
 
   Mutex command_buffers_mutex_;
   std::vector<std::unique_ptr<MockCommandBuffer>> command_buffers_
       IPLR_GUARDED_BY(command_buffers_mutex_);
 
   Mutex commmand_pools_mutex_;
-  std::vector<std::unique_ptr<MockCommandPool>> command_pools_
-      IPLR_GUARDED_BY(commmand_pools_mutex_);
+  std::vector<std::unique_ptr<MockCommandPool>> command_pools_ IPLR_GUARDED_BY(
+      commmand_pools_mutex_);
 };
 
 void noop() {}
