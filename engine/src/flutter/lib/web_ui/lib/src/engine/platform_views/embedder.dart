@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 import 'dart:math' as math;
 
+import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
@@ -15,6 +16,10 @@ class PlatformViewEmbedder {
 
   /// The context for the current frame.
   EmbedderFrameContext _context = EmbedderFrameContext();
+
+  /// The context for the current frame. Should only be used in tests.
+  @visibleForTesting
+  EmbedderFrameContext get debugContext => _context;
 
   /// The most recent composition parameters for a given view id.
   ///
