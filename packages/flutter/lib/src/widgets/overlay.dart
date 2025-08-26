@@ -609,11 +609,7 @@ class Overlay extends StatefulWidget {
   ///
   ///  * [Overlay.of] for a similar function that returns a non-nullable result
   ///    and throws if an [Overlay] is not found.
-  static OverlayState? maybeOf(
-    BuildContext context, {
-    bool rootOverlay = false,
-    bool createDependency = true,
-  }) {
+  static OverlayState? maybeOf(BuildContext context, {bool rootOverlay = false}) {
     InheritedElement? element =
         LookupBoundary.getElementForInheritedWidgetOfExactType<_OverlayScope>(context);
     if (rootOverlay) {
@@ -624,7 +620,7 @@ class Overlay extends StatefulWidget {
           walker = LookupBoundary.getElementForInheritedWidgetOfExactType<_OverlayScope>(ancestor);
           return false;
         });
-        assert(element != walker); // can only happen if overlay entry element is the root.
+        assert(element != walker); // can only happen if Overlay element is the root.
       }
     }
     if (element != null) {
