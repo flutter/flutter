@@ -282,7 +282,9 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
       );
     }
 
-    // Draw the track between line 1 and line 2.
+    // Draw the track between line 1 and line 2. Assuming text direction is
+    // LTR, this track appears on the left side of line 1 and on the right side
+    // of line 2.
     if (firstLineTail > trackGapFraction) {
       final double trackStartFraction = secondLineHead > 0
           ? secondLineHead + getEffectiveTrackGapFraction(secondLineHead, trackGapFraction)
