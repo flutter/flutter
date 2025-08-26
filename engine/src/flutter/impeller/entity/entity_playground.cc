@@ -20,6 +20,11 @@ void EntityPlayground::SetTypographerContext(
   typographer_context_ = std::move(typographer_context);
 }
 
+std::shared_ptr<TypographerContext> EntityPlayground::GetTypographerContext()
+    const {
+  return typographer_context_;
+}
+
 std::shared_ptr<ContentContext> EntityPlayground::GetContentContext() const {
   return std::make_shared<ContentContext>(GetContext(), typographer_context_);
 }
