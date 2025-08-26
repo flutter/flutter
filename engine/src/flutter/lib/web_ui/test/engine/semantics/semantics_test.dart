@@ -4403,7 +4403,6 @@ void _testLink() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    // felt test test/engine/semantics/semantics_test.dart --browser chrome
     final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
