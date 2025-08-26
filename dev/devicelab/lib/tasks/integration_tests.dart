@@ -22,7 +22,10 @@ TaskFunction createPlatformInteractionTest() {
   ).call;
 }
 
-TaskFunction createFlavorsTest({Map<String, String>? environment, List<String>? extraOptions}) {
+TaskFunction createFlavorsTest({
+  Map<String, String>? environment,
+  List<String>? extraOptions,
+}) {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/flavors',
     'lib/main.dart',
@@ -31,7 +34,9 @@ TaskFunction createFlavorsTest({Map<String, String>? environment, List<String>? 
   ).call;
 }
 
-TaskFunction createIntegrationTestFlavorsTest({Map<String, String>? environment}) {
+TaskFunction createIntegrationTestFlavorsTest({
+  Map<String, String>? environment,
+}) {
   return IntegrationTest(
     '${flutterDirectory.path}/dev/integration_tests/flavors',
     'integration_test/integration_test.dart',
@@ -152,8 +157,12 @@ TaskFunction createDisplayCutoutTest() {
         throw TaskResult.failure('This test should only target android');
       }
       // Test requires developer settings added in 28 and behavior added in 30.
-      final String sdkResult = await device.shellEval('getprop', <String>['ro.build.version.sdk']);
-      if (sdkResult.startsWith('2') || sdkResult.startsWith('1') || sdkResult.length == 1) {
+      final String sdkResult = await device.shellEval('getprop', <String>[
+        'ro.build.version.sdk',
+      ]);
+      if (sdkResult.startsWith('2') ||
+          sdkResult.startsWith('1') ||
+          sdkResult.length == 1) {
         throw TaskResult.failure('This test should only target android 30+.');
       }
       print('Adding Synthetic notch...');
@@ -218,6 +227,13 @@ TaskFunction createWindowsStartupDriverTest({String? deviceIdOverride}) {
     '${flutterDirectory.path}/dev/integration_tests/windows_startup_test',
     'lib/main.dart',
     deviceIdOverride: deviceIdOverride,
+  ).call;
+}
+
+TaskFunction createWindowingDriverTest() {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/windows_startup_test',
+    'lib/main.dart',
   ).call;
 }
 
@@ -307,7 +323,12 @@ class IntegrationTest {
       if (createPlatforms.isNotEmpty) {
         await flutter(
           'create',
-          options: <String>['--platforms', createPlatforms.join(','), '--no-overwrite', '.'],
+          options: <String>[
+            '--platforms',
+            createPlatforms.join(','),
+            '--no-overwrite',
+            '.',
+          ],
         );
       }
 
@@ -320,7 +341,13 @@ class IntegrationTest {
         await enableTalkBack();
       }
 
-      final List<String> options = <String>['-v', '-d', deviceId, testTarget, ...extraOptions];
+      final List<String> options = <String>[
+        '-v',
+        '-d',
+        deviceId,
+        testTarget,
+        ...extraOptions,
+      ];
       await flutter('test', options: options, environment: environment);
       await tearDown?.call(await devices.workingDevice);
 
