@@ -1295,7 +1295,6 @@ void main() {
     final Completer<void> completer = Completer<void>();
 
     await tester.pumpWidget(MaterialApp(home: _AsyncImageScheme()));
-    // completer.complete();
 
     FlutterError.onError = oldHandler;
 
