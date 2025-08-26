@@ -1901,7 +1901,7 @@ class OverlayPortal extends StatefulWidget {
 }
 
 class _OverlayPortalState extends State<OverlayPortal> {
-  final String identifier = UniqueKey().toString();
+  late final String identifier;
 
   int? _zOrderIndex;
   // The location of the overlay child within the overlay. This object will be
@@ -1950,6 +1950,7 @@ class _OverlayPortalState extends State<OverlayPortal> {
   @override
   void initState() {
     super.initState();
+    identifier = '\$OverlayPortal$hashCode';
     _setupController(widget.controller);
   }
 
