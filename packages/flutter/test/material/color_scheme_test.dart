@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1259,6 +1262,48 @@ void main() {
     expect(colorSchemeOfTheme, colorScheme);
     expect(colorSchemeFromContext, colorScheme);
   });
+
+  testWidgets('ColorScheme.of(context) is equivalent to Theme.of(context).colorScheme', (
+    WidgetTester tester,
+  ) async {
+    const Key sizedBoxKey = Key('sizedBox');
+    final ColorScheme colorScheme = ColorScheme.fromSeed(seedColor: Colors.red);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(colorScheme: colorScheme),
+        home: const SizedBox(key: sizedBoxKey),
+      ),
+    );
+
+    final BuildContext context = tester.element(find.byKey(sizedBoxKey));
+    final ColorScheme colorSchemeOfTheme = Theme.of(context).colorScheme;
+    final ColorScheme colorSchemeFromContext = ColorScheme.of(context);
+
+    expect(colorSchemeOfTheme, colorScheme);
+    expect(colorSchemeFromContext, colorScheme);
+  });
+
+  testWidgets('ColorScheme from an invalid network image should only throw one error', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/170413
+    final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
+
+    final Completer<void> completer = Completer<void>();
+
+    await tester.pumpWidget(
+      MaterialApp(home: _AsyncImageScheme()),
+    );
+    // completer.complete();
+
+    FlutterError.onError = oldHandler;
+
+    expect(errors.length, 1);
+    expect(errors[0].exception, isA<TimeoutException>());
+  });
 }
 
 Future<void> _testFilledButtonColor(
@@ -1282,4 +1327,46 @@ Future<void> _testFilledButtonColor(
   final Material material = tester.widget<Material>(buttonMaterial);
 
   expect(material.color, expectation);
+}
+
+class _AsyncImageScheme extends StatefulWidget {
+  const _AsyncImageScheme();
+
+  @override
+  _AsyncImageSchemeState createState() => _AsyncImageSchemeState();
+}
+
+class _AsyncImageSchemeState extends State<_AsyncImageScheme> {
+  Color? _textColors;
+
+  @override
+  void initState() {
+    super.initState();
+    _init();
+  }
+
+  Future<void> _init() async {
+    try {
+      final ColorScheme dynamicColorScheme = await ColorScheme.fromImageProvider(
+        provider: const NetworkImage('random_non_exist_image.png'),
+      );
+      setState(() {
+        _textColors = dynamicColorScheme.primary;
+      });
+    } catch (e) {
+      FlutterError.reportError(FlutterErrorDetails(exception: e));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Text(
+          style: TextStyle(color: _textColors ?? Colors.black),
+          'Dynamic color text',
+        ),
+      ),
+    );
+  }
 }
