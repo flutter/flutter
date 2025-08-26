@@ -135,42 +135,37 @@ void testMain() {
       false,
     );
 
+    void renderAndCheck(ui.Rect clipRect, {required bool isComposited}) {
+      final ClipRectEngineLayer clipRectLayer = ClipRectEngineLayer(clipRect, ui.Clip.hardEdge);
+      // IMPORTANT: we are reusing the same pictureLayer instance.
+      clipRectLayer.children.add(pictureLayer);
+      final RootLayer rootLayer = RootLayer();
+      rootLayer.children.add(clipRectLayer);
+      final PlatformViewEmbedder embedder = createPlatformViewEmbedder();
+
+      final PrerollVisitor prerollVisitor = PrerollVisitor(embedder);
+      rootLayer.accept(prerollVisitor);
+      final MeasureVisitor measureVisitor = MeasureVisitor(const BitmapSize(100, 100), embedder);
+      rootLayer.accept(measureVisitor);
+
+      embedder.optimizeComposition();
+      expect(
+        embedder.debugContext.pictureToOptimizedCanvasMap!.containsKey(pictureLayer),
+        isComposited,
+      );
+    }
+
     // Frame 1: The picture is outside the clip, so it should be culled and not composited.
-    final ClipRectEngineLayer clipRectLayer1 = ClipRectEngineLayer(
+    renderAndCheck(
       const ui.Rect.fromLTWH(0, 0, 20, 20), // Clip rect is at the top-left.
-      ui.Clip.hardEdge,
+      isComposited: false,
     );
-    clipRectLayer1.children.add(pictureLayer);
-    final RootLayer rootLayer1 = RootLayer();
-    rootLayer1.children.add(clipRectLayer1);
-    final PlatformViewEmbedder embedder1 = createPlatformViewEmbedder();
-
-    final PrerollVisitor prerollVisitor1 = PrerollVisitor(embedder1);
-    rootLayer1.accept(prerollVisitor1);
-    final MeasureVisitor measureVisitor1 = MeasureVisitor(const BitmapSize(100, 100), embedder1);
-    rootLayer1.accept(measureVisitor1);
-
-    embedder1.optimizeComposition();
-    expect(embedder1.debugContext.pictureToOptimizedCanvasMap!.containsKey(pictureLayer), isFalse);
 
     // Frame 2: The clip is moved to contain the picture. It should not be culled.
-    final ClipRectEngineLayer clipRectLayer2 = ClipRectEngineLayer(
+    renderAndCheck(
       const ui.Rect.fromLTWH(0, 0, 40, 40), // Clip rect now contains the picture.
-      ui.Clip.hardEdge,
+      isComposited: true,
     );
-    // IMPORTANT: we are reusing the same pictureLayer instance.
-    clipRectLayer2.children.add(pictureLayer);
-    final RootLayer rootLayer2 = RootLayer();
-    rootLayer2.children.add(clipRectLayer2);
-    final PlatformViewEmbedder embedder2 = createPlatformViewEmbedder();
-
-    final PrerollVisitor prerollVisitor2 = PrerollVisitor(embedder2);
-    rootLayer2.accept(prerollVisitor2);
-    final MeasureVisitor measureVisitor2 = MeasureVisitor(const BitmapSize(100, 100), embedder2);
-    rootLayer2.accept(measureVisitor2);
-
-    embedder2.optimizeComposition();
-    expect(embedder2.debugContext.pictureToOptimizedCanvasMap!.containsKey(pictureLayer), isTrue);
   });
 }
 
