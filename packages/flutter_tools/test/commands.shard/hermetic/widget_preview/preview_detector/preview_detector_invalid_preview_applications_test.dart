@@ -19,22 +19,13 @@ import '../utils/preview_project.dart';
 // flaky failures.
 
 /// Creates a project with files containing invalid preview applications.
-class BasicProjectWithInvalidPreviews extends WidgetPreviewProject {
+class BasicProjectWithInvalidPreviews extends WidgetPreviewProject with ProjectWithPreviews {
   BasicProjectWithInvalidPreviews._({
     required super.projectRoot,
     required List<String> pathsWithPreviews,
     required List<String> pathsWithoutPreviews,
   }) {
-    final initialSources = <WidgetPreviewSourceFile>[];
-    for (final path in pathsWithPreviews) {
-      initialSources.add((path: path, source: _invalidPreviewContainingFileContents));
-      librariesWithPreviews.add(toPreviewPath(path));
-    }
-    for (final path in pathsWithoutPreviews) {
-      initialSources.add((path: path, source: _emptySource));
-      librariesWithoutPreviews.add(toPreviewPath(path));
-    }
-    initialSources.forEach(writeFile);
+    initialize(pathsWithPreviews: pathsWithPreviews, pathsWithoutPreviews: pathsWithoutPreviews);
   }
 
   static Future<BasicProjectWithInvalidPreviews> create({
@@ -51,27 +42,13 @@ class BasicProjectWithInvalidPreviews extends WidgetPreviewProject {
     return project;
   }
 
-  final librariesWithPreviews = <PreviewPath>{};
-  final librariesWithoutPreviews = <PreviewPath>{};
-
-  /// Adds a file containing previews at [path].
-  void addPreviewContainingFile({required String path}) {
-    writeFile((path: path, source: _invalidPreviewContainingFileContents));
-    final PreviewPath previewPath = toPreviewPath(path);
-    librariesWithoutPreviews.remove(previewPath);
-    librariesWithPreviews.add(previewPath);
-  }
-
-  Map<PreviewPath, List<PreviewDetailsMatcher>> get matcherMapping =>
-      <PreviewPath, List<PreviewDetailsMatcher>>{
-        for (final PreviewPath path in librariesWithPreviews) path: [],
-      };
-
-  static const _emptySource = '''
+  @override
+  final nonPreviewContainingFileContents = '''
 void main() {}
 ''';
 
-  static const _invalidPreviewContainingFileContents = '''
+  @override
+  final previewContainingFileContents = '''
 
 
 @Preview(name: 'Invalid preview on class declaration')
@@ -106,6 +83,9 @@ Widget foo(int bar) => Text('Foo');
 @Preview(name: 'Invalid preview on extension')
 extension on ClassDeclaration {}
 ''';
+
+  @override
+  List<PreviewDetailsMatcher> get expectedPreviewDetails => [];
 }
 
 void main() {

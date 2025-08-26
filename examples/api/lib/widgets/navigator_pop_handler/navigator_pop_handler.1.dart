@@ -192,8 +192,8 @@ class _BottomNavTabState extends State<_BottomNavTab> {
 
   @override
   Widget build(BuildContext context) {
-    return NavigatorPopHandler(
-      onPop: () {
+    return NavigatorPopHandler<void>(
+      onPopWithResult: (void result) {
         _navigatorKey.currentState?.maybePop();
       },
       child: Navigator(

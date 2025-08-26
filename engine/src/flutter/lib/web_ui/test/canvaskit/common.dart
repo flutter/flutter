@@ -4,10 +4,8 @@
 
 import 'dart:async';
 import 'dart:js_interop';
-import 'dart:typed_data';
 
 import 'package:test/test.dart';
-
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
@@ -70,23 +68,6 @@ Future<void> matchPictureGolden(
   sb.addPicture(ui.Offset.zero, picture);
   await renderScene(sb.build());
   await matchGoldenFile(goldenFile, region: region);
-}
-
-Future<bool> matchImage(ui.Image left, ui.Image right) async {
-  if (left.width != right.width || left.height != right.height) {
-    return false;
-  }
-  int getPixel(ByteData data, int x, int y) => data.getUint32((x + y * left.width) * 4);
-  final ByteData leftData = (await left.toByteData())!;
-  final ByteData rightData = (await right.toByteData())!;
-  for (int y = 0; y < left.height; y++) {
-    for (int x = 0; x < left.width; x++) {
-      if (getPixel(leftData, x, y) != getPixel(rightData, x, y)) {
-        return false;
-      }
-    }
-  }
-  return true;
 }
 
 /// Sends a platform message to create a Platform View with the given id and viewType.
