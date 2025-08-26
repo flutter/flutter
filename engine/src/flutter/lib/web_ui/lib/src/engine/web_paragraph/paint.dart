@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:ui/ui.dart' as ui;
-
-import '../canvaskit/canvaskit_canvas.dart';
 import '../dom.dart';
 import 'debug.dart';
 import 'layout.dart';
@@ -12,12 +10,12 @@ import 'painter.dart';
 import 'paragraph.dart';
 
 typedef PaintBlock =
-    void Function(CanvasKitCanvas canvas, LineBlock block, ui.Rect sourceRect, ui.Rect targetRect);
+    void Function(ui.Canvas canvas, LineBlock block, ui.Rect sourceRect, ui.Rect targetRect);
 
 // TODO(jlavrova): switch to abstract
 typedef PaintCluster =
     void Function(
-      CanvasKitCanvas canvas,
+      ui.Canvas canvas,
       ExtendedTextCluster cluster,
       bool isDefaultLtr,
       ui.Rect sourceRect,

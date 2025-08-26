@@ -4,7 +4,6 @@
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/src/engine.dart' as engine;
 import 'package:ui/src/engine/web_paragraph/paragraph.dart';
 import 'package:ui/ui.dart';
 import 'package:web_engine_tester/golden_tester.dart';
@@ -23,8 +22,6 @@ Future<void> testMain() async {
   test('Draw WebParagraph LTR text 1 line', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
-    expect(recorder, isA<engine.CkPictureRecorder>());
-    expect(canvas, isA<engine.CanvasKitCanvas>());
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
     final Paint redPaint = Paint()..color = const Color(0xFFFF0000);
     final Paint bluePaint = Paint()..color = const Color(0xFF0000FF);
@@ -60,8 +57,6 @@ Future<void> testMain() async {
   test('Draw WebParagraph RTL text 1 line', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
-    expect(recorder, isA<engine.CkPictureRecorder>());
-    expect(canvas, isA<engine.CanvasKitCanvas>());
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
 
     final WebParagraphStyle arialStyle = WebParagraphStyle(
@@ -192,9 +187,6 @@ Future<void> testMain() async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
-
-    expect(recorder, isA<engine.CkPictureRecorder>());
-    expect(canvas, isA<engine.CanvasKitCanvas>());
     final Paint blackPaint = Paint()..color = const Color(0xFF000000);
     final Paint redPaint = Paint()..color = const Color(0xFFFF0000);
     final Paint bluePaint = Paint()..color = const Color(0xFF0000FF);
@@ -249,9 +241,6 @@ Future<void> testMain() async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
-
-    expect(recorder, isA<engine.CkPictureRecorder>());
-    expect(canvas, isA<engine.CanvasKitCanvas>());
     final Paint blackPaint = Paint()..color = const Color(0xFF000000);
     final Paint redPaint = Paint()..color = const Color(0xFFFF0000);
     final Paint bluePaint = Paint()..color = const Color(0xFF0000FF);
@@ -312,9 +301,6 @@ Future<void> testMain() async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
-
-    expect(recorder, isA<engine.CkPictureRecorder>());
-    expect(canvas, isA<engine.CanvasKitCanvas>());
     final Paint blackPaint = Paint()..color = const Color(0xFF000000);
 
     final WebParagraphStyle paragraphStyle = WebParagraphStyle(
@@ -390,9 +376,6 @@ Future<void> testMain() async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
-
-    expect(recorder, isA<engine.CkPictureRecorder>());
-    expect(canvas, isA<engine.CanvasKitCanvas>());
     final Paint blackPaint = Paint()..color = const Color(0xFF000000);
 
     final WebParagraphStyle paragraphStyle = WebParagraphStyle(
@@ -466,9 +449,6 @@ Future<void> testMain() async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
-
-    expect(recorder, isA<engine.CkPictureRecorder>());
-    expect(canvas, isA<engine.CanvasKitCanvas>());
     final Paint blackPaint = Paint()..color = const Color(0xFF000000);
     const Color redColor = Color(0xFFFF0000);
     const Color blueColor = Color(0xFF0000FF);
@@ -546,9 +526,6 @@ Future<void> testMain() async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
-
-    expect(recorder, isA<engine.CkPictureRecorder>());
-    expect(canvas, isA<engine.CanvasKitCanvas>());
     final Paint blackPaint = Paint()..color = const Color(0xFF000000);
     final Paint redPaint = Paint()..color = const Color(0xFFFF0000);
     final Paint bluePaint = Paint()..color = const Color(0xFF0000FF);
@@ -633,9 +610,6 @@ Future<void> testMain() async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
-
-    expect(recorder, isA<engine.CkPictureRecorder>());
-    expect(canvas, isA<engine.CanvasKitCanvas>());
     final Paint blackPaint = Paint()..color = const Color(0xFF000000);
 
     final WebParagraphStyle blackStyle = WebParagraphStyle(
@@ -673,8 +647,6 @@ Future<void> testMain() async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
-    expect(recorder, isA<engine.CkPictureRecorder>());
-    expect(canvas, isA<engine.CanvasKitCanvas>());
 
     final Paint redPaint = Paint()
       ..color = const Color(0xFFFF0000)
@@ -741,8 +713,6 @@ Future<void> testMain() async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
-    expect(recorder, isA<engine.CkPictureRecorder>());
-    expect(canvas, isA<engine.CanvasKitCanvas>());
 
     final WebParagraphStyle paragraphStyle = WebParagraphStyle(
       fontFamily: 'Roboto',
@@ -852,9 +822,6 @@ Future<void> testMain() async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
-
-    expect(recorder, isA<engine.CkPictureRecorder>());
-    expect(canvas, isA<engine.CanvasKitCanvas>());
     final Paint blackPaint = Paint()..color = const Color(0xFF000000);
 
     final WebParagraphStyle blackStyle = WebParagraphStyle(
@@ -894,9 +861,6 @@ Future<void> testMain() async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
-
-    expect(recorder, isA<engine.CkPictureRecorder>());
-    expect(canvas, isA<engine.CanvasKitCanvas>());
     final Paint blackPaint = Paint()..color = const Color(0xFF000000);
 
     final WebParagraphStyle blackStyle = WebParagraphStyle(
