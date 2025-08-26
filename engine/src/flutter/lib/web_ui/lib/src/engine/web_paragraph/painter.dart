@@ -45,6 +45,9 @@ abstract class Painter {
   void paintDecorations(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect);
 }
 
+// TODO(jlavrova): precalculate the size of the canvas based on the text to be painted
+// (including shadows, decorations, etc) and make sure it does not exceed the maximum canvas size
+// supported by the browser.
 final DomOffscreenCanvas _paintCanvas = createDomOffscreenCanvas(500, 500);
 final paintContext = _paintCanvas.getContext('2d')! as DomCanvasRenderingContext2D;
 
@@ -168,6 +171,7 @@ class CanvasKitPainter extends Painter {
       /*left:*/ 0,
       /*top:*/ webTextCluster.fontBoundingBoxAscent,
       /*ignore the text cluster shift from the text run*/ {
+        // TODO(jlavrova): calculate the proper shift for the shadow
         'x': (isDefaultLtr ? 0 : webTextCluster.advance.width) + 100,
         'y': 100,
       },

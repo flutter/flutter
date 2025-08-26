@@ -105,7 +105,16 @@ class WebParagraphStyle implements ui.ParagraphStyle {
   }
 }
 
-enum StyleElements { background, shadows, decorations, text }
+enum StyleElements {
+  // Background for a text clusters block
+  background,
+  // Shadows for a single text cluster
+  shadows,
+  // Text decorations for a text clusters block
+  decorations,
+  // Text cluster
+  text,
+}
 
 @immutable
 class WebTextStyle implements ui.TextStyle {
@@ -381,23 +390,29 @@ abstract class _RangeStartEnd {
   }
 
   _RangeStartEnd.collapsed(int offset) : this(offset, offset);
+
   _RangeStartEnd.zero() : this.collapsed(0);
 
   int _start = -1;
+
   int get start => _start;
+
   set start(int value) {
     assert(value >= -1, 'Start index cannot be negative: $value');
     _start = value;
   }
 
   int _end = -1;
+
   int get end => _end;
+
   set end(int value) {
     assert(value >= -1, 'End index cannot be negative: $value');
     _end = value;
   }
 
   int get size => _end - _start;
+
   bool get isEmpty => _start == _end;
 
   @override
