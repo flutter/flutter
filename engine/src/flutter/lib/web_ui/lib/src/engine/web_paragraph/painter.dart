@@ -14,15 +14,23 @@ import 'debug.dart';
 import 'layout.dart';
 import 'paragraph.dart';
 
+/// Abstracts the interface for painting text clusters, shadows, and decorations.
 abstract class Painter {
   Painter();
 
+  /// Fills out the information needed to paint the text cluster.
   void fillTextCluster(ExtendedTextCluster webTextCluster, bool isDefaultLtr);
+
+  /// Paints the text cluster previously filled by [fillTextCluster].
   void paintTextCluster(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect);
 
+  /// Fills out the information needed to paint the text cluster shadow.
   void fillShadow(ExtendedTextCluster webTextCluster, ui.Shadow shadow, bool isDefaultLtr);
+
+  /// Paints the text cluster shadow previously filled by [fillShadow].
   void paintShadow(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect);
 
+  /// Fills out the information needed to paint the background.
   void paintBackground(
     ui.Canvas canvas,
     LineClusterBlock block,
@@ -30,7 +38,10 @@ abstract class Painter {
     ui.Rect targetRect,
   );
 
+  /// Fills out the information needed to paint the decorations.
   void fillDecorations(LineClusterBlock block, ui.Rect sourceRect);
+
+  /// Paints the decorations previously filled by [fillDecorations].
   void paintDecorations(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect);
 }
 

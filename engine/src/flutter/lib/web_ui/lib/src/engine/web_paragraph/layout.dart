@@ -249,6 +249,10 @@ class TextLayout {
   }
 
   ClusterRange convertTextToClusterRange(TextRange textRange) {
+    if (textRange.isEmpty) {
+      final int clusterIndex = textToClusterMap[textRange.start]!;
+      return ClusterRange(start: clusterIndex, end: clusterIndex);
+    }
     final int clusterStart = textToClusterMap[textRange.start]!;
     final int clusterEnd = textToClusterMap[textRange.end - 1]!;
     return ClusterRange(start: clusterStart, end: clusterEnd + 1);

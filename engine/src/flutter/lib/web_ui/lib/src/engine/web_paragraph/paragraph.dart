@@ -450,7 +450,11 @@ class ClusterRange extends _RangeStartEnd {
   }
 }
 
-// TODO(jlvrova): either rename it or remove it
+/// A range of text, represented by its start (inclusive) and end (exclusive) indices.
+/// The indices point to the UTF-16 code units of the text string.
+/// Notice that this is different from ClusterRange, which points to the textCluster list.
+/// The main source of confusion is that these two ranges are often look identical but really are not
+/// (in case of one codepoint = one text cluster, often happens in English text).
 class TextRange extends _RangeStartEnd {
   TextRange({required int start, required int end}) : super(start, end);
 
@@ -486,6 +490,7 @@ class TextRange extends _RangeStartEnd {
   }
 }
 
+/// A [TextRange] with an associated [WebTextStyle].
 class StyledTextRange extends TextRange {
   StyledTextRange(int start, int end, this.style) : super(start: start, end: end);
 
