@@ -349,8 +349,8 @@ void main() async {
         try {
           bool success = await goldenFileComparator.compare(bytes, goldenKey);
           print(jsonEncode({'success': success}));
-        } on Exception catch (ex) {
-          print(jsonEncode({'success': false, 'message': '\$ex'}));
+        } on Object? catch (e) {
+          print(jsonEncode({'success': false, 'message': '\$e'}));
         }
       }
     } else {
