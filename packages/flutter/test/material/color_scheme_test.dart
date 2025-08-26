@@ -1263,27 +1263,6 @@ void main() {
     expect(colorSchemeFromContext, colorScheme);
   });
 
-  testWidgets('ColorScheme.of(context) is equivalent to Theme.of(context).colorScheme', (
-    WidgetTester tester,
-  ) async {
-    const Key sizedBoxKey = Key('sizedBox');
-    final ColorScheme colorScheme = ColorScheme.fromSeed(seedColor: Colors.red);
-
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData.from(colorScheme: colorScheme),
-        home: const SizedBox(key: sizedBoxKey),
-      ),
-    );
-
-    final BuildContext context = tester.element(find.byKey(sizedBoxKey));
-    final ColorScheme colorSchemeOfTheme = Theme.of(context).colorScheme;
-    final ColorScheme colorSchemeFromContext = ColorScheme.of(context);
-
-    expect(colorSchemeOfTheme, colorScheme);
-    expect(colorSchemeFromContext, colorScheme);
-  });
-
   testWidgets('ColorScheme from an invalid network image should only throw one error', (
     WidgetTester tester,
   ) async {
