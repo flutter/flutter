@@ -141,4 +141,58 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('LinkUri from child is passed up to the parent when merging nodes', (
+      WidgetTester tester,
+      ) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final Uri uri = Uri.parse('https://flutter.com');
+    const String label = 'test1';
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MergeSemantics(
+          child: Semantics(
+            linkUrl: uri,
+            link: true,
+            child: ElevatedButton(
+              onPressed: () {},
+              child: const Text(label),
+              onFocusChange: (bool value) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics.rootChild(
+              id: 1,
+              linkUrl: uri,
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isButton,
+                SemanticsFlag.hasEnabledState,
+                SemanticsFlag.isEnabled,
+                SemanticsFlag.isFocusable,
+                SemanticsFlag.isLink,
+              ],
+              actions: <SemanticsAction>[
+                SemanticsAction.tap,
+                SemanticsAction.focus,
+              ],
+              label: label,
+            ),
+          ],
+        ),
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+
+    semantics.dispose();
+  });
 }
