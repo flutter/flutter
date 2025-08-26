@@ -4,6 +4,7 @@
 
 #include "impeller/core/host_buffer.h"
 
+#include "impeller/core/partitioned_host_buffer.h"
 #include "impeller/core/simple_host_buffer.h"
 
 namespace impeller {
@@ -11,7 +12,12 @@ namespace impeller {
 std::shared_ptr<HostBuffer> HostBuffer::Create(
     const std::shared_ptr<Allocator>& allocator,
     const std::shared_ptr<const IdleWaiter>& idle_waiter,
-    size_t minimum_uniform_alignment) {
+    size_t minimum_uniform_alignment,
+    bool partitionByCategory) {
+  if (partitionByCategory) {
+    return std::shared_ptr<PartitionedHostBuffer>(new PartitionedHostBuffer(
+        allocator, idle_waiter, minimum_uniform_alignment));
+  }
   return std::shared_ptr<HostBuffer>(
       new SimpleHostBuffer(allocator, idle_waiter, minimum_uniform_alignment));
 }

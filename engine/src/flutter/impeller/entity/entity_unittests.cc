@@ -2637,7 +2637,8 @@ class FlushTestContentContext : public ContentContext {
       : ContentContext(context, typographer_context) {
     SetTransientsBuffer(HostBuffer::Create(
         allocator, context->GetIdleWaiter(),
-        context->GetCapabilities()->GetMinimumUniformAlignment()));
+        context->GetCapabilities()->GetMinimumUniformAlignment(),
+        context->GetCapabilities()->NeedsPartitionedHostBuffer()));
   }
 };
 

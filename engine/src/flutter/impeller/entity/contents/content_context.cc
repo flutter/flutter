@@ -558,7 +558,8 @@ ContentContext::ContentContext(
       host_buffer_(HostBuffer::Create(
           context_->GetResourceAllocator(),
           context_->GetIdleWaiter(),
-          context_->GetCapabilities()->GetMinimumUniformAlignment())),
+          context_->GetCapabilities()->GetMinimumUniformAlignment(),
+          context_->GetCapabilities()->NeedsPartitionedHostBuffer())),
       text_shadow_cache_(std::make_unique<TextShadowCache>()) {
   if (!context_ || !context_->IsValid()) {
     return;

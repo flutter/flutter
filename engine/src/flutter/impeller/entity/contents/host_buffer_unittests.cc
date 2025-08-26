@@ -28,7 +28,7 @@ TEST_P(HostBufferTest, IdleWaiter) {
   auto mock_idle_waiter = std::make_shared<MockIdleWaiter>();
   {
     auto buffer = HostBuffer::Create(GetContext()->GetResourceAllocator(),
-                                     mock_idle_waiter, 256);
+                                     mock_idle_waiter, 256, false);
     EXPECT_CALL(*mock_idle_waiter, WaitIdle());
   }
 }
@@ -40,7 +40,7 @@ TEST_P(HostBufferTest, CanEmplace) {
   static_assert(sizeof(Length2) == 2u);
 
   auto buffer = HostBuffer::Create(GetContext()->GetResourceAllocator(),
-                                   GetContext()->GetIdleWaiter(), 256);
+                                   GetContext()->GetIdleWaiter(), 256, false);
 
   for (size_t i = 0; i < 12500; i++) {
     auto view = buffer->Emplace(Length2{}, HostBuffer::BufferCategory::kData);
@@ -61,7 +61,7 @@ TEST_P(HostBufferTest, CanEmplaceWithAlignment) {
   static_assert(sizeof(Align16) == 16);
 
   auto buffer = HostBuffer::Create(GetContext()->GetResourceAllocator(),
-                                   GetContext()->GetIdleWaiter(), 256);
+                                   GetContext()->GetIdleWaiter(), 256, false);
   ASSERT_TRUE(buffer);
 
   {
@@ -92,7 +92,7 @@ TEST_P(HostBufferTest, CanEmplaceWithAlignment) {
 
 TEST_P(HostBufferTest, HostBufferInitialState) {
   auto buffer = HostBuffer::Create(GetContext()->GetResourceAllocator(),
-                                   GetContext()->GetIdleWaiter(), 256);
+                                   GetContext()->GetIdleWaiter(), 256, false);
 
   EXPECT_EQ(
       buffer->GetStateForTest(HostBuffer::BufferCategory::kData).current_buffer,
@@ -117,7 +117,7 @@ TEST_P(HostBufferTest, HostBufferInitialState) {
 
 TEST_P(HostBufferTest, ResetIncrementsFrameCounter) {
   auto buffer = HostBuffer::Create(GetContext()->GetResourceAllocator(),
-                                   GetContext()->GetIdleWaiter(), 256);
+                                   GetContext()->GetIdleWaiter(), 256, false);
 
   EXPECT_EQ(
       buffer->GetStateForTest(HostBuffer::BufferCategory::kData).current_frame,
@@ -147,7 +147,7 @@ TEST_P(HostBufferTest, ResetIncrementsFrameCounter) {
 TEST_P(HostBufferTest,
        EmplacingLargerThanBlockSizeCreatesOneOffBufferCallback) {
   auto buffer = HostBuffer::Create(GetContext()->GetResourceAllocator(),
-                                   GetContext()->GetIdleWaiter(), 256);
+                                   GetContext()->GetIdleWaiter(), 256, false);
 
   // Emplace an amount larger than the block size, to verify that the host
   // buffer does not create a buffer.
@@ -167,7 +167,7 @@ TEST_P(HostBufferTest,
 
 TEST_P(HostBufferTest, EmplacingLargerThanBlockSizeCreatesOneOffBuffer) {
   auto buffer = HostBuffer::Create(GetContext()->GetResourceAllocator(),
-                                   GetContext()->GetIdleWaiter(), 256);
+                                   GetContext()->GetIdleWaiter(), 256, false);
 
   // Emplace an amount larger than the block size, to verify that the host
   // buffer does not create a buffer.
@@ -187,7 +187,7 @@ TEST_P(HostBufferTest, EmplacingLargerThanBlockSizeCreatesOneOffBuffer) {
 
 TEST_P(HostBufferTest, UnusedBuffersAreDiscardedWhenResetting) {
   auto buffer = HostBuffer::Create(GetContext()->GetResourceAllocator(),
-                                   GetContext()->GetIdleWaiter(), 256);
+                                   GetContext()->GetIdleWaiter(), 256, false);
 
   // Emplace two large allocations to force the allocation of a second buffer.
   auto buffer_view_a = buffer->Emplace(
@@ -239,7 +239,7 @@ TEST_P(HostBufferTest, UnusedBuffersAreDiscardedWhenResetting) {
 
 TEST_P(HostBufferTest, EmplaceWithProcIsAligned) {
   auto buffer = HostBuffer::Create(GetContext()->GetResourceAllocator(),
-                                   GetContext()->GetIdleWaiter(), 256);
+                                   GetContext()->GetIdleWaiter(), 256, false);
 
   BufferView view = buffer->Emplace(std::array<char, 21>(),
                                     HostBuffer::BufferCategory::kData);
@@ -286,7 +286,7 @@ TEST_P(HostBufferTest, EmplaceWithFailingAllocationDoesntCrash) {
   std::shared_ptr<FailingAllocator> allocator =
       std::make_shared<FailingAllocator>(GetContext()->GetResourceAllocator());
   auto buffer =
-      HostBuffer::Create(allocator, GetContext()->GetIdleWaiter(), 256);
+      HostBuffer::Create(allocator, GetContext()->GetIdleWaiter(), 256, false);
 
   auto view = buffer->Emplace(nullptr, kMagicFailingAllocation, 0,
                               HostBuffer::BufferCategory::kData);

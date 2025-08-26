@@ -33,7 +33,8 @@ class HostBuffer {
   static std::shared_ptr<HostBuffer> Create(
       const std::shared_ptr<Allocator>& allocator,
       const std::shared_ptr<const IdleWaiter>& idle_waiter,
-      size_t minimum_uniform_alignment);
+      size_t minimum_uniform_alignment,
+      bool partitionByCategory);
 
   virtual ~HostBuffer() = default;
 

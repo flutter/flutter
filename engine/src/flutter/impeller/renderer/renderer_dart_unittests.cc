@@ -226,7 +226,8 @@ class RendererDartTest : public PlaygroundTest,
 
       auto buffer = HostBuffer::Create(
           context->GetResourceAllocator(), context->GetIdleWaiter(),
-          context->GetCapabilities()->GetMinimumUniformAlignment());
+          context->GetCapabilities()->GetMinimumUniformAlignment(),
+          context->GetCapabilities()->NeedsPartitionedHostBuffer());
 
       pass.SetVertexBuffer(texture_vtx_builder.CreateVertexBuffer(
           *context->GetResourceAllocator()));

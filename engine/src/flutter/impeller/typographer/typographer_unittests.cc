@@ -83,7 +83,8 @@ TEST_P(TypographerTest, CanCreateGlyphAtlas) {
       context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
   auto host_buffer = HostBuffer::Create(
       GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
-      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment(),
+      GetContext()->GetCapabilities()->NeedsPartitionedHostBuffer());
   ASSERT_TRUE(context && context->IsValid());
   SkFont sk_font = flutter::testing::CreateTestFontOfSize(12);
   auto blob = SkTextBlob::MakeFromString("hello", sk_font);
@@ -120,7 +121,8 @@ TEST_P(TypographerTest, CanCreateGlyphAtlas) {
 TEST_P(TypographerTest, LazyAtlasTracksColor) {
   auto host_buffer = HostBuffer::Create(
       GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
-      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment(),
+      GetContext()->GetCapabilities()->NeedsPartitionedHostBuffer());
 #if FML_OS_MACOSX
   auto mapping = flutter::testing::OpenFixtureAsSkData("Apple Color Emoji.ttc");
 #else
@@ -164,7 +166,8 @@ TEST_P(TypographerTest, GlyphAtlasWithOddUniqueGlyphSize) {
       context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
   auto host_buffer = HostBuffer::Create(
       GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
-      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment(),
+      GetContext()->GetCapabilities()->NeedsPartitionedHostBuffer());
   ASSERT_TRUE(context && context->IsValid());
   SkFont sk_font = flutter::testing::CreateTestFontOfSize(12);
   auto blob = SkTextBlob::MakeFromString("AGH", sk_font);
@@ -186,7 +189,8 @@ TEST_P(TypographerTest, GlyphAtlasIsRecycledIfUnchanged) {
       context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
   auto host_buffer = HostBuffer::Create(
       GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
-      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment(),
+      GetContext()->GetCapabilities()->NeedsPartitionedHostBuffer());
   ASSERT_TRUE(context && context->IsValid());
   SkFont sk_font = flutter::testing::CreateTestFontOfSize(12);
   auto blob = SkTextBlob::MakeFromString("spooky skellingtons", sk_font);
@@ -212,7 +216,8 @@ TEST_P(TypographerTest, GlyphAtlasIsRecycledIfUnchanged) {
 TEST_P(TypographerTest, GlyphAtlasWithLotsOfdUniqueGlyphSize) {
   auto host_buffer = HostBuffer::Create(
       GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
-      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment(),
+      GetContext()->GetCapabilities()->NeedsPartitionedHostBuffer());
   auto context = TypographerContextSkia::Make();
   auto atlas_context =
       context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
@@ -262,7 +267,8 @@ TEST_P(TypographerTest, GlyphAtlasWithLotsOfdUniqueGlyphSize) {
 TEST_P(TypographerTest, GlyphAtlasTextureIsRecycledIfUnchanged) {
   auto host_buffer = HostBuffer::Create(
       GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
-      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment(),
+      GetContext()->GetCapabilities()->NeedsPartitionedHostBuffer());
   auto context = TypographerContextSkia::Make();
   auto atlas_context =
       context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
@@ -301,7 +307,8 @@ TEST_P(TypographerTest, GlyphAtlasTextureIsRecycledIfUnchanged) {
 TEST_P(TypographerTest, GlyphColorIsPartOfCacheKey) {
   auto host_buffer = HostBuffer::Create(
       GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
-      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment(),
+      GetContext()->GetCapabilities()->NeedsPartitionedHostBuffer());
 #if FML_OS_MACOSX
   auto mapping = flutter::testing::OpenFixtureAsSkData("Apple Color Emoji.ttc");
 #else
@@ -337,7 +344,8 @@ TEST_P(TypographerTest, GlyphColorIsPartOfCacheKey) {
 TEST_P(TypographerTest, GlyphColorIsIgnoredForNonEmojiFonts) {
   auto host_buffer = HostBuffer::Create(
       GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
-      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment(),
+      GetContext()->GetCapabilities()->NeedsPartitionedHostBuffer());
   sk_sp<SkFontMgr> font_mgr = txt::GetDefaultFontManager();
   sk_sp<SkTypeface> typeface =
       font_mgr->matchFamilyStyle("Arial", SkFontStyle::Normal());
@@ -438,7 +446,8 @@ TEST_P(TypographerTest, GlyphAtlasTextureWillGrowTilMaxTextureSize) {
 
   auto host_buffer = HostBuffer::Create(
       GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
-      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment(),
+      GetContext()->GetCapabilities()->NeedsPartitionedHostBuffer());
   auto context = TypographerContextSkia::Make();
   auto atlas_context =
       context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
@@ -516,7 +525,8 @@ TEST_P(TypographerTest, TextFrameInitialBoundsArePlaceholder) {
       context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
   auto host_buffer = HostBuffer::Create(
       GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
-      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment(),
+      GetContext()->GetCapabilities()->NeedsPartitionedHostBuffer());
 
   auto atlas = CreateGlyphAtlas(*GetContext(), context.get(), *host_buffer,
                                 GlyphAtlas::Type::kAlphaBitmap,
@@ -550,7 +560,8 @@ TEST_P(TypographerTest, TextFrameInvalidationWithScale) {
       context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
   auto host_buffer = HostBuffer::Create(
       GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
-      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment(),
+      GetContext()->GetCapabilities()->NeedsPartitionedHostBuffer());
 
   auto atlas = CreateGlyphAtlas(*GetContext(), context.get(), *host_buffer,
                                 GlyphAtlas::Type::kAlphaBitmap,
@@ -586,7 +597,8 @@ TEST_P(TypographerTest, TextFrameAtlasGenerationTracksState) {
       context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
   auto host_buffer = HostBuffer::Create(
       GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
-      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment(),
+      GetContext()->GetCapabilities()->NeedsPartitionedHostBuffer());
 
   auto atlas = CreateGlyphAtlas(*GetContext(), context.get(), *host_buffer,
                                 GlyphAtlas::Type::kAlphaBitmap,
@@ -639,7 +651,8 @@ TEST_P(TypographerTest, InvalidAtlasForcesRepopulation) {
       context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
   auto host_buffer = HostBuffer::Create(
       GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
-      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment(),
+      GetContext()->GetCapabilities()->NeedsPartitionedHostBuffer());
 
   auto atlas = CreateGlyphAtlas(*GetContext(), context.get(), *host_buffer,
                                 GlyphAtlas::Type::kAlphaBitmap,

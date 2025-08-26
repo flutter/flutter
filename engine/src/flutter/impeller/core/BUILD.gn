@@ -19,6 +19,8 @@ impeller_component("core") {
     "host_buffer.cc",
     "host_buffer.h",
     "idle_waiter.h",
+    "partitioned_host_buffer.cc",
+    "partitioned_host_buffer.h",
     "range.cc",
     "range.h",
     "raw_ptr.cc",

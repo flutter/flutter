@@ -80,7 +80,8 @@ TEST_P(RendererTest, CanCreateBoxPrimitive) {
 
   auto host_buffer = HostBuffer::Create(
       context->GetResourceAllocator(), context->GetIdleWaiter(),
-      context->GetCapabilities()->GetMinimumUniformAlignment());
+      context->GetCapabilities()->GetMinimumUniformAlignment(),
+      context->GetCapabilities()->NeedsPartitionedHostBuffer());
   SinglePassCallback callback = [&](RenderPass& pass) {
     ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     static bool wireframe;
@@ -147,7 +148,8 @@ TEST_P(RendererTest, BabysFirstTriangle) {
   // Create a host side buffer to build the vertex and uniform information.
   auto host_buffer = HostBuffer::Create(
       context->GetResourceAllocator(), context->GetIdleWaiter(),
-      context->GetCapabilities()->GetMinimumUniformAlignment());
+      context->GetCapabilities()->GetMinimumUniformAlignment(),
+      context->GetCapabilities()->NeedsPartitionedHostBuffer());
 
   // Specify the vertex buffer information.
   VertexBufferBuilder<VS::PerVertexData> vertex_buffer_builder;
@@ -169,7 +171,8 @@ TEST_P(RendererTest, BabysFirstTriangle) {
 
     auto host_buffer = HostBuffer::Create(
         context->GetResourceAllocator(), context->GetIdleWaiter(),
-        context->GetCapabilities()->GetMinimumUniformAlignment());
+        context->GetCapabilities()->GetMinimumUniformAlignment(),
+        context->GetCapabilities()->NeedsPartitionedHostBuffer());
     FS::BindFragInfo(pass, host_buffer->EmplaceUniform(frag_info));
 
     return pass.Draw().ok();
@@ -246,7 +249,8 @@ TEST_P(RendererTest, CanRenderPerspectiveCube) {
   Vector3 euler_angles;
   auto host_buffer = HostBuffer::Create(
       context->GetResourceAllocator(), context->GetIdleWaiter(),
-      context->GetCapabilities()->GetMinimumUniformAlignment());
+      context->GetCapabilities()->GetMinimumUniformAlignment(),
+      context->GetCapabilities()->NeedsPartitionedHostBuffer());
   SinglePassCallback callback = [&](RenderPass& pass) {
     static Degrees fov_y(60);
     static Scalar distance = 10;
@@ -327,7 +331,8 @@ TEST_P(RendererTest, CanRenderMultiplePrimitives) {
 
   auto host_buffer = HostBuffer::Create(
       context->GetResourceAllocator(), context->GetIdleWaiter(),
-      context->GetCapabilities()->GetMinimumUniformAlignment());
+      context->GetCapabilities()->GetMinimumUniformAlignment(),
+      context->GetCapabilities()->NeedsPartitionedHostBuffer());
   SinglePassCallback callback = [&](RenderPass& pass) {
     for (size_t i = 0; i < 1; i++) {
       for (size_t j = 0; j < 1; j++) {
@@ -382,7 +387,8 @@ TEST_P(RendererTest, CanRenderToTexture) {
   ASSERT_TRUE(box_pipeline);
   auto host_buffer = HostBuffer::Create(
       context->GetResourceAllocator(), context->GetIdleWaiter(),
-      context->GetCapabilities()->GetMinimumUniformAlignment());
+      context->GetCapabilities()->GetMinimumUniformAlignment(),
+      context->GetCapabilities()->NeedsPartitionedHostBuffer());
 
   VertexBufferBuilder<VS::PerVertexData> vertex_builder;
   vertex_builder.SetLabel("Box");
@@ -505,7 +511,8 @@ TEST_P(RendererTest, CanRenderInstanced) {
 
   auto host_buffer = HostBuffer::Create(
       GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
-      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment(),
+      GetContext()->GetCapabilities()->NeedsPartitionedHostBuffer());
   ASSERT_TRUE(OpenPlaygroundHere([&](RenderPass& pass) -> bool {
     pass.SetPipeline(pipeline);
     pass.SetCommandLabel("InstancedDraw");
@@ -579,7 +586,8 @@ TEST_P(RendererTest, CanBlitTextureToTexture) {
 
   auto host_buffer = HostBuffer::Create(
       context->GetResourceAllocator(), context->GetIdleWaiter(),
-      context->GetCapabilities()->GetMinimumUniformAlignment());
+      context->GetCapabilities()->GetMinimumUniformAlignment(),
+      context->GetCapabilities()->NeedsPartitionedHostBuffer());
   Playground::RenderCallback callback = [&](RenderTarget& render_target) {
     auto buffer = context->CreateCommandBuffer();
     if (!buffer) {
@@ -696,7 +704,8 @@ TEST_P(RendererTest, CanBlitTextureToBuffer) {
 
   auto host_buffer = HostBuffer::Create(
       context->GetResourceAllocator(), context->GetIdleWaiter(),
-      context->GetCapabilities()->GetMinimumUniformAlignment());
+      context->GetCapabilities()->GetMinimumUniformAlignment(),
+      context->GetCapabilities()->NeedsPartitionedHostBuffer());
   Playground::RenderCallback callback = [&](RenderTarget& render_target) {
     {
       auto buffer = context->CreateCommandBuffer();
@@ -811,7 +820,8 @@ TEST_P(RendererTest, CanGenerateMipmaps) {
   bool first_frame = true;
   auto host_buffer = HostBuffer::Create(
       context->GetResourceAllocator(), context->GetIdleWaiter(),
-      context->GetCapabilities()->GetMinimumUniformAlignment());
+      context->GetCapabilities()->GetMinimumUniformAlignment(),
+      context->GetCapabilities()->NeedsPartitionedHostBuffer());
   Playground::RenderCallback callback = [&](RenderTarget& render_target) {
     const char* mip_filter_names[] = {"Base", "Nearest", "Linear"};
     const MipFilter mip_filters[] = {MipFilter::kBase, MipFilter::kNearest,
@@ -925,7 +935,8 @@ TEST_P(RendererTest, TheImpeller) {
       context->GetSamplerLibrary()->GetSampler({});
   auto host_buffer = HostBuffer::Create(
       context->GetResourceAllocator(), context->GetIdleWaiter(),
-      context->GetCapabilities()->GetMinimumUniformAlignment());
+      context->GetCapabilities()->GetMinimumUniformAlignment(),
+      context->GetCapabilities()->NeedsPartitionedHostBuffer());
 
   SinglePassCallback callback = [&](RenderPass& pass) {
     auto size = pass.GetRenderTargetSize();
@@ -976,7 +987,8 @@ TEST_P(RendererTest, Planet) {
 
   auto host_buffer = HostBuffer::Create(
       context->GetResourceAllocator(), context->GetIdleWaiter(),
-      context->GetCapabilities()->GetMinimumUniformAlignment());
+      context->GetCapabilities()->GetMinimumUniformAlignment(),
+      context->GetCapabilities()->NeedsPartitionedHostBuffer());
 
   SinglePassCallback callback = [&](RenderPass& pass) {
     static Scalar speed = 0.1;
@@ -1044,7 +1056,8 @@ TEST_P(RendererTest, ArrayUniforms) {
 
   auto host_buffer = HostBuffer::Create(
       context->GetResourceAllocator(), context->GetIdleWaiter(),
-      context->GetCapabilities()->GetMinimumUniformAlignment());
+      context->GetCapabilities()->GetMinimumUniformAlignment(),
+      context->GetCapabilities()->NeedsPartitionedHostBuffer());
   SinglePassCallback callback = [&](RenderPass& pass) {
     auto size = pass.GetRenderTargetSize();
 
@@ -1103,7 +1116,8 @@ TEST_P(RendererTest, InactiveUniforms) {
 
   auto host_buffer = HostBuffer::Create(
       context->GetResourceAllocator(), context->GetIdleWaiter(),
-      context->GetCapabilities()->GetMinimumUniformAlignment());
+      context->GetCapabilities()->GetMinimumUniformAlignment(),
+      context->GetCapabilities()->NeedsPartitionedHostBuffer());
   SinglePassCallback callback = [&](RenderPass& pass) {
     auto size = pass.GetRenderTargetSize();
 
@@ -1269,7 +1283,8 @@ TEST_P(RendererTest, StencilMask) {
 
   auto host_buffer = HostBuffer::Create(
       context->GetResourceAllocator(), context->GetIdleWaiter(),
-      context->GetCapabilities()->GetMinimumUniformAlignment());
+      context->GetCapabilities()->GetMinimumUniformAlignment(),
+      context->GetCapabilities()->NeedsPartitionedHostBuffer());
   Playground::RenderCallback callback = [&](RenderTarget& render_target) {
     auto buffer = context->CreateCommandBuffer();
     if (!buffer) {
@@ -1484,7 +1499,8 @@ TEST_P(RendererTest, CanSepiaToneWithSubpasses) {
   SinglePassCallback callback = [&](RenderPass& pass) {
     auto buffer = HostBuffer::Create(
         context->GetResourceAllocator(), context->GetIdleWaiter(),
-        context->GetCapabilities()->GetMinimumUniformAlignment());
+        context->GetCapabilities()->GetMinimumUniformAlignment(),
+        context->GetCapabilities()->NeedsPartitionedHostBuffer());
 
     // Draw the texture.
     {
@@ -1579,7 +1595,8 @@ TEST_P(RendererTest, CanSepiaToneThenSwizzleWithSubpasses) {
   SinglePassCallback callback = [&](RenderPass& pass) {
     auto buffer = HostBuffer::Create(
         context->GetResourceAllocator(), context->GetIdleWaiter(),
-        context->GetCapabilities()->GetMinimumUniformAlignment());
+        context->GetCapabilities()->GetMinimumUniformAlignment(),
+        context->GetCapabilities()->NeedsPartitionedHostBuffer());
 
     // Draw the texture.
     {
