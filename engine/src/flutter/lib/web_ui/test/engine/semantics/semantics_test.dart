@@ -4396,13 +4396,14 @@ void _testLink() {
     final SemanticsObject object = pumpSemantics();
     expect(object.element.tagName.toLowerCase(), 'a');
     expect(object.element.getAttribute('href'), 'https://flutter.dev');
-  })
+  });
 
   test('a node that is both a link and a button is rendered as a link', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
+    // felt test test/engine/semantics/semantics_test.dart --browser chrome
     final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
@@ -4421,8 +4422,8 @@ void _testLink() {
     );
 
     semantics().semanticsEnabled = false;
-  });;
-  }
+  });
+}
 
 void _testTabs() {
   test('nodes with tab role', () {
