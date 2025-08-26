@@ -2093,4 +2093,64 @@ void main() {
     final IgnorePointer ignorePointerTrue = tester.widget(ignorePointerFinder);
     expect(ignorePointerTrue.ignoring, isTrue);
   });
+
+  testWidgets(
+    'Performance optimization: individual animation controllers enable concurrent panel animations',
+    (WidgetTester tester) async {
+      final List<bool> panelStates = <bool>[false, false, false];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return SingleChildScrollView(
+                child: ExpansionPanelList(
+                  expansionCallback: (int index, bool isExpanded) {
+                    setState(() {
+                      panelStates[index] = !isExpanded;
+                    });
+                  },
+                  children: <ExpansionPanel>[
+                    ExpansionPanel(
+                      headerBuilder: (BuildContext context, bool isExpanded) =>
+                          const Text('Panel 1'),
+                      body: const SizedBox(height: 100.0),
+                      isExpanded: panelStates[0],
+                    ),
+                    ExpansionPanel(
+                      headerBuilder: (BuildContext context, bool isExpanded) =>
+                          const Text('Panel 2'),
+                      body: const SizedBox(height: 100.0),
+                      isExpanded: panelStates[1],
+                    ),
+                    ExpansionPanel(
+                      headerBuilder: (BuildContext context, bool isExpanded) =>
+                          const Text('Panel 3'),
+                      body: const SizedBox(height: 100.0),
+                      isExpanded: panelStates[2],
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(ExpandIcon).at(0));
+      await tester.tap(find.byType(ExpandIcon).at(1));
+      await tester.pump();
+
+      await tester.pump(const Duration(milliseconds: 150));
+      expect(panelStates[0], isTrue);
+      expect(panelStates[1], isTrue);
+      expect(panelStates[2], isFalse);
+
+      await tester.pumpAndSettle();
+
+      expect(panelStates[0], isTrue);
+      expect(panelStates[1], isTrue);
+      expect(panelStates[2], isFalse);
+    },
+  );
 }
