@@ -746,20 +746,18 @@ TEST_F(FlutterEngineTest, PublishedValueReturnsLastPublished) {
 }
 
 TEST_F(FlutterEngineTest, RegistrarForwardViewControllerLookUpToEngine) {
-  FlutterEngine* mockEngine = CreateMockFlutterEngine(nil);
-  __block FlutterViewIdentifier viewID = 0ll;
+  NSString* fixtures = @(flutter::testing::GetFixturesPath());
+  FlutterDartProject* project = [[FlutterDartProject alloc]
+      initWithAssetsPath:fixtures
+             ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:project];
 
-  OCMStub([mockEngine viewControllerForViewIdentifier:[OCMArg any]])
-      .andDo((^(NSInvocation* invocation) {
-        FlutterViewIdentifier arg;
-        [invocation getArgument:&arg atIndex:2];
-        viewID = arg;
-      }));
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  id<FlutterPluginRegistrar> registrar = [mockEngine registrarForPlugin:@"MyPlugin"];
 
-  id<FlutterPluginRegistrar> registrar = [mockEngine registrarForPlugin:pluginName];
-
-  (void)[registrar viewController];
-  EXPECT_EQ(viewID, flutter::kFlutterImplicitViewId);
+  EXPECT_EQ([registrar viewController], viewController);
 }
 
 // If a channel overrides a previous channel with the same name, cleaning
