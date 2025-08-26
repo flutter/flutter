@@ -2964,8 +2964,8 @@ class _MenuLayout extends SingleChildLayoutDelegate {
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
-    // The menu can be at most the size of the overlay minus _kMenuViewPadding
-    // pixels in each direction.
+    // The menu can be at most the size of the overlay minus the view padding
+    // in each direction.
     return BoxConstraints.loose(constraints.biggest).deflate(viewPadding);
   }
 
