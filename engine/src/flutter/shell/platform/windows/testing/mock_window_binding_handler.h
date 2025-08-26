@@ -23,7 +23,7 @@ class MockWindowBindingHandler : public WindowBindingHandler {
   MOCK_METHOD(HWND, GetWindowHandle, (), (override));
   MOCK_METHOD(float, GetDpiScale, (), (override));
   MOCK_METHOD(PhysicalWindowBounds, GetPhysicalWindowBounds, (), (override));
-  MOCK_METHOD(void, OnCursorRectUpdated, (const Rect& rect), (override));
+  MOCK_METHOD(void, OnCursorRectUpdated, (const fml::Rect& rect), (override));
   MOCK_METHOD(void, OnResetImeComposing, (), (override));
   MOCK_METHOD(bool, OnBitmapSurfaceCleared, (), (override));
   MOCK_METHOD(bool,
