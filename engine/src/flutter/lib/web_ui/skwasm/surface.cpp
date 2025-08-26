@@ -118,7 +118,7 @@ void Surface::_init() {
 }
 
 // Worker thread only
-void Surface::_resize(int width, int height) {
+void Surface::_resizeSurface(int width, int height) {
   if (!_surface || width != _canvasWidth || height != _canvasHeight) {
     _canvasWidth = width;
     _canvasHeight = height;
@@ -153,7 +153,7 @@ void Surface::renderPicturesOnWorker(sk_sp<DisplayList>* pictures,
   SkwasmObject imageBitmapArray = __builtin_wasm_ref_null_extern();
   for (int i = 0; i < pictureCount; i++) {
     sk_sp<DisplayList> picture = pictures[i];
-    _resize(width, height);
+    _resizeSurface(width, height);
     makeCurrent(_glContext);
     auto canvas = _surface->getCanvas();
     canvas->drawColor(SK_ColorTRANSPARENT, SkBlendMode::kSrc);
@@ -198,7 +198,7 @@ void Surface::rasterizeImageOnWorker(SkImage* image,
   // `glReadPixels`. Once the skia bug is fixed, we should switch back to using
   // `SkImage::readPixels` instead.
   // See https://g-issues.skia.org/issues/349201915
-  _resize(image->width(), image->height());
+  _resizeSurface(image->width(), image->height());
   auto canvas = _surface->getCanvas();
   canvas->drawColor(SK_ColorTRANSPARENT, SkBlendMode::kSrc);
 
