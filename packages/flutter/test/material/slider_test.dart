@@ -5419,7 +5419,7 @@ void main() {
     expect(log.last, const Offset(400.0, 300.0));
   });
 
-  // Regression test for hhttps://github.com/flutter/flutter/issues/161805
+  // Regression test for https://github.com/flutter/flutter/issues/161805
   testWidgets('Discrete Slider does not apply thumb padding in a non-rounded track shape', (
     WidgetTester tester,
   ) async {
@@ -5459,5 +5459,22 @@ void main() {
       material,
       paints..circle(x: 800.0 - sliderPadding, y: 300.0, color: theme.colorScheme.primary),
     );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/174133
+  testWidgets('Value indicator crash', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Table(
+            children: const <TableRow>[
+              TableRow(children: <Widget>[Slider(value: 0.0, onChanged: null)]),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
   });
 }
