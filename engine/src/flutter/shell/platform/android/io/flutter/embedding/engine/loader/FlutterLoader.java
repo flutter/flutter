@@ -496,7 +496,18 @@ public class FlutterLoader {
 
     // Canocalize path for safety analysis.
     File aotSharedLibraryFile = getFileFromPath(aotSharedLibraryPath);
-    String aotSharedLibraryPathCanonicalPath = aotSharedLibraryFile.getCanonicalPath();
+
+    String aotSharedLibraryPathCanonicalPath;
+    try {
+      aotSharedLibraryPathCanonicalPath = aotSharedLibraryFile.getCanonicalPath();
+    } catch (IOException e) {
+      Log.e(
+          TAG,
+          "External path "
+              + aotSharedLibraryFile.getPath()
+              + " is not a valid path. Please ensure this shared AOT library exists.");
+      return null;
+    }
 
     // Check if library lives within application's internal storage.
     File internalStorageDirectory = applicationContext.getApplicationContext().getFilesDir();

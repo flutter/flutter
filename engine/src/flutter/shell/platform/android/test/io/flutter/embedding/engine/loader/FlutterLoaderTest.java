@@ -449,7 +449,6 @@ public class FlutterLoaderTest {
       String aotSharedLibraryNameArg = FlutterLoader.aotSharedLibraryNameFlag + path;
       String[] args = {aotSharedLibraryNameArg};
       flutterLoader.ensureInitializationComplete(ctx, args);
-      shadowOf(getMainLooper()).idle();
 
       ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
       verify(mockFlutterJNI)
@@ -527,7 +526,6 @@ public class FlutterLoaderTest {
       String aotSharedLibraryNameArg = FlutterLoader.aotSharedLibraryNameFlag + path;
       String[] args = {aotSharedLibraryNameArg};
       flutterLoader.ensureInitializationComplete(ctx, args);
-      shadowOf(getMainLooper()).idle();
 
       ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
       verify(mockFlutterJNI)
@@ -556,6 +554,47 @@ public class FlutterLoaderTest {
       // FlutterLoader.ensureInitialized and mockFlutterJNI.init for testing.
       flutterLoader.initialized = false;
       clearInvocations(mockFlutterJNI);
+    }
+  }
+
+  @Test
+  public void itDoesNotSetAotSharedLibraryNameIfPathIsInvalid() throws IOException {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = spy(new FlutterLoader(mockFlutterJNI));
+    Context mockApplicationContext = mock(Context.class);
+    File internalStorageDir = ctx.getFilesDir();
+    Path internalStorageDirAsPathObj = internalStorageDir.toPath();
+
+    ctx.getApplicationInfo().nativeLibraryDir =
+        Paths.get("some", "path", "doesnt", "matter").toString();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx);
+
+    String invalidFilePath = "my\0file.so";
+
+    String[] args = {FlutterLoader.aotSharedLibraryNameFlag + invalidFilePath};
+    flutterLoader.ensureInitializationComplete(ctx, args);
+
+    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterJNI)
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
+
+    List<String> actualArgs = Arrays.asList(shellArgsCaptor.getValue());
+
+    // This check works because the tests run in debug mode. If run in release (or JIT release)
+    // mode, actualArgs would contain the default arguments for AOT shared library name on top
+    // of aotSharedLibraryNameArg.
+    for (String arg : actualArgs) {
+      if (arg.startsWith(FlutterLoader.aotSharedLibraryNameFlag)) {
+        fail();
+      }
     }
   }
 
