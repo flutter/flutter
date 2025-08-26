@@ -2583,6 +2583,80 @@ TEST_P(EntityTest, GiantStrokePathAllocation) {
   EXPECT_NEAR(point.y, expected[4].y, 0.1);
 }
 
+class FlushTestDeviceBuffer : public DeviceBuffer {
+ public:
+  explicit FlushTestDeviceBuffer(const DeviceBufferDescriptor& desc)
+      : DeviceBuffer(desc), storage_(desc.size) {}
+
+  bool SetLabel(std::string_view label) override { return true; }
+  bool SetLabel(std::string_view label, Range range) override { return true; }
+  bool OnCopyHostBuffer(const uint8_t* source,
+                        Range source_range,
+                        size_t offset) {
+    return true;
+  }
+
+  uint8_t* OnGetContents() const override {
+    return const_cast<uint8_t*>(storage_.data());
+  }
+
+  void Flush(std::optional<Range> range) const override {
+    flush_called_ = true;
+  }
+
+  bool flush_called() const { return flush_called_; }
+
+ private:
+  std::vector<uint8_t> storage_;
+  mutable bool flush_called_ = false;
+};
+
+class FlushTestAllocator : public Allocator {
+ public:
+  ISize GetMaxTextureSizeSupported() const override {
+    return ISize(1024, 1024);
+  };
+
+  std::shared_ptr<DeviceBuffer> OnCreateBuffer(
+      const DeviceBufferDescriptor& desc) override {
+    return std::make_shared<FlushTestDeviceBuffer>(desc);
+  };
+
+  std::shared_ptr<Texture> OnCreateTexture(const TextureDescriptor& desc,
+                                           bool threadsafe) override {
+    return nullptr;
+  }
+};
+
+class FlushTestContentContext : public ContentContext {
+ public:
+  FlushTestContentContext(
+      const std::shared_ptr<Context>& context,
+      const std::shared_ptr<TypographerContext>& typographer_context,
+      const std::shared_ptr<Allocator>& allocator)
+      : ContentContext(context, typographer_context) {
+    SetTransientsBuffer(HostBuffer::Create(
+        allocator, context->GetIdleWaiter(),
+        context->GetCapabilities()->GetMinimumUniformAlignment()));
+  }
+};
+
+TEST_P(EntityTest, RoundSuperellipseGetPositionBufferFlushes) {
+  RenderTarget target;
+  testing::MockRenderPass mock_pass(GetContext(), target);
+
+  auto content_context = std::make_shared<FlushTestContentContext>(
+      GetContext(), GetTypographerContext(),
+      std::make_shared<FlushTestAllocator>());
+  auto geometry =
+      Geometry::MakeRoundSuperellipse(Rect::MakeLTRB(0, 0, 100, 100), 5);
+  auto result = geometry->GetPositionBuffer(*content_context, {}, mock_pass);
+
+  auto device_buffer = reinterpret_cast<const FlushTestDeviceBuffer*>(
+      result.vertex_buffer.vertex_buffer.GetBuffer());
+  EXPECT_TRUE(device_buffer->flush_called());
+}
+
 }  // namespace testing
 }  // namespace impeller
 
