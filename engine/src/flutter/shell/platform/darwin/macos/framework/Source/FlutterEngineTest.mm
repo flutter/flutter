@@ -758,9 +758,6 @@ TEST_F(FlutterEngineTest, RegistrarForwardViewControllerLookUpToEngine) {
 
   id<FlutterPluginRegistrar> registrar = [mockEngine registrarForPlugin:pluginName];
 
-  [registrar viewControllerForViewIdentifier:3ll];
-  EXPECT_EQ(viewID, 3ll);
-
   (void)[registrar viewController];
   EXPECT_EQ(viewID, flutter::kFlutterImplicitViewId);
 }

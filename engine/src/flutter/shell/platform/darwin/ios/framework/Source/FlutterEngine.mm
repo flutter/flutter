@@ -1519,10 +1519,6 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   return _flutterEngine.viewController;
 }
 
-- (nullable UIViewController*)viewControllerForViewIdentifier:(int64_t)viewIdentifier {
-  return viewIdentifier == flutter::kFlutterImplicitViewId ? self.viewController : nil;
-}
-
 - (void)publish:(NSObject*)value {
   _flutterEngine.pluginPublications[_pluginKey] = value;
 }

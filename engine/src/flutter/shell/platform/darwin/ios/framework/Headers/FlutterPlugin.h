@@ -304,33 +304,13 @@ typedef enum {
  * plugins. To prevent retain cycles, the plugin must not store a strong
  * reference to this view controller.
  *
- * Consider using `-[FlutterPluginRegistrar viewControllerForViewIdentifier:]`
- * when feasible. This property is provided for backwards compatibility for apps
- * that assume a single view, and will eventually be replaced by the multi-view
- * API variant.
+ * This property is provided for backwards compatibility for apps that assume
+ * a single view, and will eventually be replaced by the multi-view API variant.
  *
  * This property may be |nil|, for instance in a headless environment, or when
  * the underlying Flutter engine is deallocated.
  */
 @property(nullable, readonly) UIViewController* viewController;
-
-/**
- * Returns the `UIViewController` whose view is displaying Flutter content and
- * is associated with the given |viewIdentifier|, if any.
- *
- * The returned `UIViewController` may hold strong references to registered
- * plugins. To prevent retain cycles, the plugin must not store a strong
- * reference to that view controller.
- *
- * @param viewIdentifier The unique identifier for the view displaying Flutter
- *   content. This is typically retrieved from the Widget tree using the Dart
- *   API `View.of(context).viewID`.
- * @return The `UIViewController` hosting the view, or |nil| when no
- *   Flutter view with that |viewIdentifier| cannot be found. It also returns
- *   |nil| when in a headless environment, or when the underlying Flutter engine
- *   is deallocated.
- */
-- (nullable UIViewController*)viewControllerForViewIdentifier:(int64_t)viewIdentifier;
 
 /**
  * Registers a `FlutterPlatformViewFactory` for creation of platform views.

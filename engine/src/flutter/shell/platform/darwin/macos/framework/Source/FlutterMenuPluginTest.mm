@@ -58,10 +58,6 @@
                            fromPackage:(nonnull NSString*)package {
   return @"";
 }
-- (id)viewControllerForViewIdentifier:(int64_t)viewIdentifier {
-  return nil;
-}
-
 @end
 
 namespace flutter::testing {
