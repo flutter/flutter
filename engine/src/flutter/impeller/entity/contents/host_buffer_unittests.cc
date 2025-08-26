@@ -296,5 +296,77 @@ TEST_P(HostBufferTest, EmplaceWithFailingAllocationDoesntCrash) {
   EXPECT_EQ(view.GetRange().length, 0u);
 }
 
+TEST_P(HostBufferTest, SimpleBufferUsesTheSameBufferPoolForIndexes) {
+  auto buffer = HostBuffer::Create(GetContext()->GetResourceAllocator(),
+                                   GetContext()->GetIdleWaiter(), 256, false);
+  // This pushes 1296000 bytes into the host buffer, which is more than a block.
+  std::array<float, 32> vertex_data;
+  std::array<uint16_t, 8> index_data;
+  for (int i = 0; i < 9000; i++) {
+    auto vertex_buffer =
+        buffer->Emplace(vertex_data.data(), vertex_data.size() * sizeof(float),
+                        sizeof(float), HostBuffer::BufferCategory::kData);
+    ASSERT_TRUE(vertex_buffer);
+    auto index_buffer =
+        buffer->Emplace(index_data.data(), index_data.size() * sizeof(uint16_t),
+                        sizeof(uint16_t), HostBuffer::BufferCategory::kIndexes);
+    ASSERT_TRUE(index_buffer);
+  }
+
+  // Since data and indexes use the same buffer, this should spill into the
+  // second block.
+  EXPECT_EQ(
+      buffer->GetStateForTest(HostBuffer::BufferCategory::kData).current_buffer,
+      1u);
+  EXPECT_EQ(buffer->GetStateForTest(HostBuffer::BufferCategory::kData)
+                .total_buffer_count,
+            2u);
+
+  // Both categories should reflect the same thing since they share the same
+  // buffer.
+  EXPECT_EQ(buffer->GetStateForTest(HostBuffer::BufferCategory::kIndexes)
+                .current_buffer,
+            1u);
+  EXPECT_EQ(buffer->GetStateForTest(HostBuffer::BufferCategory::kIndexes)
+                .total_buffer_count,
+            2u);
+}
+
+TEST_P(HostBufferTest, PartitionedBufferUsesSeparateBufferPoolForIndexes) {
+  auto buffer = HostBuffer::Create(GetContext()->GetResourceAllocator(),
+                                   GetContext()->GetIdleWaiter(), 256, true);
+  // This pushes 1152000 bytes into the data buffer and 144000 bytes into the
+  // index buffer.
+  std::array<float, 32> vertex_data;
+  std::array<uint16_t, 8> index_data;
+  for (int i = 0; i < 9000; i++) {
+    auto vertex_buffer =
+        buffer->Emplace(vertex_data.data(), vertex_data.size() * sizeof(float),
+                        sizeof(float), HostBuffer::BufferCategory::kData);
+    ASSERT_TRUE(vertex_buffer);
+    auto index_buffer =
+        buffer->Emplace(index_data.data(), index_data.size() * sizeof(uint16_t),
+                        sizeof(uint16_t), HostBuffer::BufferCategory::kIndexes);
+    ASSERT_TRUE(index_buffer);
+  }
+
+  // Data buffer is more than a block, so it should spill into the second block.
+  EXPECT_EQ(
+      buffer->GetStateForTest(HostBuffer::BufferCategory::kData).current_buffer,
+      1u);
+  EXPECT_EQ(buffer->GetStateForTest(HostBuffer::BufferCategory::kData)
+                .total_buffer_count,
+            2u);
+
+  // The indexes only have 144000 bytes and are tracked separately, so it should
+  // still all fit into the first block.
+  EXPECT_EQ(buffer->GetStateForTest(HostBuffer::BufferCategory::kIndexes)
+                .current_buffer,
+            0u);
+  EXPECT_EQ(buffer->GetStateForTest(HostBuffer::BufferCategory::kIndexes)
+                .total_buffer_count,
+            1u);
+}
+
 }  // namespace  testing
 }  // namespace impeller
