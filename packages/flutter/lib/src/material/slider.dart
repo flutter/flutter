@@ -668,7 +668,6 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   FocusNode? _focusNode;
   FocusNode get focusNode => widget.focusNode ?? _focusNode!;
 
-  // Always keep the ValueIndicator visible on the Overlay; otherwise, it cannot be updated during the build phase.
   final OverlayPortalController _valueIndicatorOverlayPortalController = OverlayPortalController(
     debugLabel: 'Slider ValueIndicator',
   );
