@@ -1294,9 +1294,7 @@ void main() {
 
     final Completer<void> completer = Completer<void>();
 
-    await tester.pumpWidget(
-      MaterialApp(home: _AsyncImageScheme()),
-    );
+    await tester.pumpWidget(MaterialApp(home: _AsyncImageScheme()));
     // completer.complete();
 
     FlutterError.onError = oldHandler;
@@ -1362,10 +1360,7 @@ class _AsyncImageSchemeState extends State<_AsyncImageScheme> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Text(
-          style: TextStyle(color: _textColors ?? Colors.black),
-          'Dynamic color text',
-        ),
+        child: Text(style: TextStyle(color: _textColors ?? Colors.black), 'Dynamic color text'),
       ),
     );
   }
