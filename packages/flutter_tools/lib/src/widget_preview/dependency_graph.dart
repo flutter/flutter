@@ -35,7 +35,8 @@ typedef PreviewDependencyGraph = Map<PreviewPath, LibraryPreviewNode>;
 class _PreviewVisitor extends RecursiveAstVisitor<void> {
   _PreviewVisitor({required LibraryElement2 lib})
     : packageName = lib.uri.scheme == 'package' ? lib.uri.pathSegments.first : null,
-      _context = lib.session.analysisContext;
+      _context = lib.session.analysisContext,
+      _currentScriptUri = null;
 
   late final String? packageName;
 

@@ -18,7 +18,7 @@ class WidgetPreviewScaffoldController {
     required PreviewsCallback previews,
     @visibleForTesting WidgetPreviewScaffoldDtdServices? dtdServicesOverride,
   }) : _previews = previews,
-       dtdServices = dtdServicesOverride ?? WidgetPreviewScaffoldDtdServices();
+       _dtdServices = dtdServicesOverride ?? WidgetPreviewScaffoldDtdServices();
 
   /// Initializes the controller by establishing a connection to DTD and
   /// listening for events.
@@ -39,7 +39,8 @@ class WidgetPreviewScaffoldController {
   }
 
   /// The active DTD connection used to communicate with other developer tooling.
-  final WidgetPreviewScaffoldDtdServices dtdServices;
+  WidgetPreviewScaffoldDtdServices get dtdServices => _dtdServices;
+  final WidgetPreviewScaffoldDtdServices _dtdServices;
 
   final List<WidgetPreview> Function() _previews;
 
