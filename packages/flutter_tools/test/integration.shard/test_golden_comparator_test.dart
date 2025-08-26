@@ -48,19 +48,17 @@ void main() {
     testPng1.copySync(tmpDir.childDirectory('integration_test').childFile('test.png').path);
   });
 
-  late TestCompiler compiler;
-  late TestGoldenComparator comparator;
-
   tearDown(() {
     printOnFailure(logger.warningText);
     printOnFailure(logger.errorText);
   });
 
-  testUsingContext('successful comparison is successful', () async {
+  // Cannot be in 'setUp' because it implicitly uses [global] state that comes from 'testUsingContext'.
+  TestGoldenComparator createComparator() {
     final File packageConfig = tmpDir.childDirectory('.dart_tool').childFile('package_config.json');
     expect(packageConfig, exists);
 
-    compiler = TestCompiler(
+    final compiler = TestCompiler(
       BuildInfo(
         BuildMode.debug,
         null,
@@ -69,14 +67,17 @@ void main() {
       ),
       project,
     );
-    comparator = TestGoldenComparator(
+    return TestGoldenComparator(
       flutterTesterBinPath: globals.artifacts!.getArtifactPath(Artifact.flutterTester),
       compilerFactory: () => compiler,
       logger: logger,
       fileSystem: globals.fs,
       processManager: globals.processManager,
     );
+  }
 
+  testUsingContext('successful comparison is successful', () async {
+    final TestGoldenComparator comparator = createComparator();
     final TestGoldenComparison result = await comparator.compare(
       Uri(path: testProject.testFilePath),
       testPng1.readAsBytesSync(),
@@ -86,26 +87,7 @@ void main() {
   });
 
   testUsingContext('failed comparison is failed but not crashed', () async {
-    final File packageConfig = tmpDir.childDirectory('.dart_tool').childFile('package_config.json');
-    expect(packageConfig, exists);
-
-    compiler = TestCompiler(
-      BuildInfo(
-        BuildMode.debug,
-        null,
-        treeShakeIcons: false,
-        packageConfigPath: packageConfig.path,
-      ),
-      project,
-    );
-    comparator = TestGoldenComparator(
-      flutterTesterBinPath: globals.artifacts!.getArtifactPath(Artifact.flutterTester),
-      compilerFactory: () => compiler,
-      logger: logger,
-      fileSystem: globals.fs,
-      processManager: globals.processManager,
-    );
-
+    final TestGoldenComparator comparator = createComparator();
     final TestGoldenComparison result = await comparator.compare(
       Uri(path: testProject.testFilePath),
       testPng2.readAsBytesSync(),
