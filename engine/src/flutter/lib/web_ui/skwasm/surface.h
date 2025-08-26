@@ -84,7 +84,7 @@ class Surface {
 
  private:
   void _init();
-  void _resize(int width, int height);
+  void _resizeSurface(int width, int height);
   void _recreateSurface();
 
   CallbackHandler* _callbackHandler = nullptr;

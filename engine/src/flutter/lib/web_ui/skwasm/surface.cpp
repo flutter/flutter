@@ -148,8 +148,8 @@ void Surface::renderPicturesOnWorker(sk_sp<DisplayList>* pictures,
     _init();
   }
 
-  // This is populated by the `captureImageBitmap` call the first time it is
-  // passed in.
+  // This is initialized on the first call to `skwasm_captureImageBitmap` and
+  // then populated with more bitmaps on subsequent calls.
   SkwasmObject imageBitmapArray = __builtin_wasm_ref_null_extern();
   for (int i = 0; i < pictureCount; i++) {
     sk_sp<DisplayList> picture = pictures[i];
