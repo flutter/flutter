@@ -230,13 +230,14 @@ class BuildWebCommand extends BuildSubCommand {
           sourceMaps: sourceMaps,
           renderer: webRenderer,
         ),
-        WasmCompilerConfig(
-          optimizationLevel: optimizationLevel,
-          stripWasm: boolArg('strip-wasm'),
-          sourceMaps: sourceMaps,
-          minify: minifyWasm,
-          dryRun: boolArg('wasm-dry-run'),
-        ),
+        if (boolArg('wasm-dry-run'))
+          WasmCompilerConfig(
+            optimizationLevel: optimizationLevel,
+            stripWasm: boolArg('strip-wasm'),
+            sourceMaps: sourceMaps,
+            minify: minifyWasm,
+            dryRun: true,
+          ),
       ];
     }
 
