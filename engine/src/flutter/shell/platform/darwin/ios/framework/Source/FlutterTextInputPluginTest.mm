@@ -3015,6 +3015,51 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   }
 }
 
+- (void)testCapitalizationTurnsOff_WhenSelectionIsMidWord {
+  NSMutableDictionary* config = self.mutableTemplateCopy;
+  [config setValue:@"TextCapitalization.words" forKey:@"textCapitalization"];
+
+  FlutterMethodCall* setClientCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                        arguments:@[ @(1), config ]];
+  [textInputPlugin handleMethodCall:setClientCall result:nil];
+
+  FlutterTextInputView* activeView = textInputPlugin.activeView;
+  FlutterTextInputView* mockView = OCMPartialMock(activeView);
+  OCMStub([mockView reloadInputViews]);  // Stub to prevent test side-effects.
+
+  [mockView setTextInputState:@{@"text" : @"Hello"}];
+  XCTAssertEqual(mockView.autocapitalizationType, UITextAutocapitalizationTypeWords);
+
+  [mockView setSelectedTextRangeLocal:[FlutterTextRange
+                                          rangeWithNSRange:NSMakeRange(2, 2)]];  // Select "ll"
+
+  XCTAssertEqual(mockView.autocapitalizationType, UITextAutocapitalizationTypeNone);
+  OCMVerify([mockView reloadInputViews]);
+}
+
+- (void)testCapitalizationTurnsOn_WhenCursorIsAtWordBoundary {
+  NSMutableDictionary* config = self.mutableTemplateCopy;
+  [config setValue:@"TextCapitalization.words" forKey:@"textCapitalization"];
+  FlutterMethodCall* setClientCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                        arguments:@[ @(1), config ]];
+  [textInputPlugin handleMethodCall:setClientCall result:nil];
+
+  FlutterTextInputView* activeView = textInputPlugin.activeView;
+  FlutterTextInputView* mockView = OCMPartialMock(activeView);
+  OCMStub([mockView reloadInputViews]);
+
+  [mockView setTextInputState:@{@"text" : @"Hello world"}];
+  [mockView setSelectedTextRangeLocal:[FlutterTextRange rangeWithNSRange:NSMakeRange(2, 0)]];
+  XCTAssertEqual(mockView.autocapitalizationType, UITextAutocapitalizationTypeNone);
+
+  [mockView setSelectedTextRangeLocal:[FlutterTextRange rangeWithNSRange:NSMakeRange(6, 0)]];
+
+  XCTAssertEqual(mockView.autocapitalizationType, UITextAutocapitalizationTypeWords);
+  OCMVerify([mockView reloadInputViews]);
+}
+
 - (void)testEditMenu_shouldPresentEditMenuWithCorrectConfiguration {
   if (@available(iOS 16.0, *)) {
     FlutterTextInputPlugin* myInputPlugin =

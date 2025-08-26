@@ -1066,7 +1066,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   _isSystemKeyboardEnabled = ShouldShowSystemKeyboard(inputType);
   self.keyboardType = ToUIKeyboardType(inputType);
   self.returnKeyType = ToUIReturnKeyType(configuration[kInputAction]);
-  _originalAutocapitalizationType = ToUITextAutoCapitalizationType(configuration);
+  self.originalAutocapitalizationType = ToUITextAutoCapitalizationType(configuration);
   self.autocapitalizationType = ToUITextAutoCapitalizationType(configuration);
   _enableInteractiveSelection = [configuration[kEnableInteractiveSelection] boolValue];
   NSString* smartDashesType = configuration[kSmartDashesType];
@@ -1404,7 +1404,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
     }
   }
 
-  if (_originalAutocapitalizationType == UITextAutocapitalizationTypeWords) {
+  if (self.originalAutocapitalizationType == UITextAutocapitalizationTypeWords) {
     NSRange selection = ((FlutterTextRange*)_selectedTextRange).range;
     BOOL shouldCapitalize = NO;
     if (selection.location == 0) {

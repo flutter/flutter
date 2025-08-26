@@ -150,7 +150,10 @@ FLUTTER_DARWIN_EXPORT
 
 // UITextInputTraits
 @property(nonatomic) UITextAutocapitalizationType autocapitalizationType;
+// Stores the original capitalization intent from the framework.
+// Used to preserve the desired behavior while `autocapitalizationType` is dynamically changed.
 @property(nonatomic) UITextAutocapitalizationType originalAutocapitalizationType;
+
 @property(nonatomic) UITextAutocorrectionType autocorrectionType;
 @property(nonatomic) UITextSpellCheckingType spellCheckingType;
 @property(nonatomic) BOOL enablesReturnKeyAutomatically;
