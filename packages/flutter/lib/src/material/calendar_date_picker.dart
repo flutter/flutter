@@ -236,8 +236,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
       _announcedInitialDate = true;
       final bool isToday = widget.calendarDelegate.isSameDay(widget.currentDate, _selectedDate);
       final String semanticLabelSuffix = isToday ? ', ${_localizations.currentDateLabel}' : '';
-      SemanticsService.sendAnnouncement(
-        View.of(context),
+      SemanticsService.announce(
         '${_localizations.formatFullDate(_selectedDate!)}$semanticLabelSuffix',
         _textDirection,
       );
@@ -266,7 +265,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
           DatePickerMode.day => widget.calendarDelegate.formatMonthYear(selected, _localizations),
           DatePickerMode.year => widget.calendarDelegate.formatYear(selected.year, _localizations),
         };
-        SemanticsService.sendAnnouncement(View.of(context), message, _textDirection);
+        SemanticsService.announce(message, _textDirection);
       }
     });
   }
@@ -316,8 +315,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
         case TargetPlatform.windows:
           final bool isToday = widget.calendarDelegate.isSameDay(widget.currentDate, _selectedDate);
           final String semanticLabelSuffix = isToday ? ', ${_localizations.currentDateLabel}' : '';
-          SemanticsService.sendAnnouncement(
-            View.of(context),
+          SemanticsService.announce(
             '${_localizations.selectedDateLabel} ${widget.calendarDelegate.formatFullDate(_selectedDate!, _localizations)}$semanticLabelSuffix',
             _textDirection,
           );
@@ -667,8 +665,7 @@ class _MonthPickerState extends State<_MonthPicker> {
           // the same day of the month.
           _focusedDay = _focusableDayForMonth(_currentMonth, _focusedDay!.day);
         }
-        SemanticsService.sendAnnouncement(
-          View.of(context),
+        SemanticsService.announce(
           widget.calendarDelegate.formatMonthYear(_currentMonth, _localizations),
           _textDirection,
         );
@@ -1167,7 +1164,7 @@ class _DayState extends State<_Day> {
     }
 
     T? resolve<T>(
-      MaterialStateProperty<T>? Function(DatePickerThemeData? theme) getProperty,
+      WidgetStateProperty<T>? Function(DatePickerThemeData? theme) getProperty,
       Set<MaterialState> states,
     ) {
       return effectiveValue((DatePickerThemeData? theme) {
@@ -1195,7 +1192,7 @@ class _DayState extends State<_Day> {
           widget.isToday ? theme?.todayBackgroundColor : theme?.dayBackgroundColor,
       states,
     );
-    final MaterialStateProperty<Color?> dayOverlayColor = MaterialStateProperty.resolveWith<Color?>(
+    final WidgetStateProperty<Color?> dayOverlayColor = WidgetStateProperty.resolveWith<Color?>(
       (Set<MaterialState> states) =>
           effectiveValue((DatePickerThemeData? theme) => theme?.dayOverlayColor?.resolve(states)),
     );
@@ -1420,7 +1417,7 @@ class _YearPickerState extends State<YearPicker> {
     }
 
     T? resolve<T>(
-      MaterialStateProperty<T>? Function(DatePickerThemeData? theme) getProperty,
+      WidgetStateProperty<T>? Function(DatePickerThemeData? theme) getProperty,
       Set<MaterialState> states,
     ) {
       return effectiveValue((DatePickerThemeData? theme) {
@@ -1456,7 +1453,7 @@ class _YearPickerState extends State<YearPicker> {
           isCurrentYear ? theme?.todayBackgroundColor : theme?.yearBackgroundColor,
       states,
     );
-    final MaterialStateProperty<Color?> overlayColor = MaterialStateProperty.resolveWith<Color?>(
+    final WidgetStateProperty<Color?> overlayColor = WidgetStateProperty.resolveWith<Color?>(
       (Set<MaterialState> states) =>
           effectiveValue((DatePickerThemeData? theme) => theme?.yearOverlayColor?.resolve(states)),
     );
@@ -1566,9 +1563,11 @@ class _YearPickerGridDelegate extends SliverGridDelegate {
     final int scaledYearPickerColumnCount = textScaleFactor > 1.65
         ? _yearPickerColumnCount - 1
         : _yearPickerColumnCount;
-    final double tileWidth =
-        (constraints.crossAxisExtent - (scaledYearPickerColumnCount - 1) * _yearPickerRowSpacing) /
-        scaledYearPickerColumnCount;
+    final double tileWidth = math.max(
+      (constraints.crossAxisExtent - (scaledYearPickerColumnCount - 1) * _yearPickerRowSpacing) /
+          scaledYearPickerColumnCount,
+      0.0,
+    );
     final double scaledYearPickerRowHeight = textScaleFactor > 1
         ? _yearPickerRowHeight + ((textScaleFactor - 1) * 9)
         : _yearPickerRowHeight;
