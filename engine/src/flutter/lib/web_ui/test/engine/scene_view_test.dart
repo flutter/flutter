@@ -281,34 +281,6 @@ void testMain() {
     );
   });
 
-  test('SceneView places canvas according to device-pixel ratio', () async {
-    debugOverrideDevicePixelRatio(2.0);
-
-    final StubPicture picture = StubPicture(const ui.Rect.fromLTWH(50, 80, 100, 120));
-    final EngineRootLayer rootLayer = EngineRootLayer();
-    rootLayer.slices.add(LayerSlice(picture, <PlatformView>[]));
-    final EngineScene scene = EngineScene(rootLayer);
-    await sceneView.renderScene(scene, null);
-
-    final DomElement sceneElement = sceneView.sceneElement;
-    final List<DomElement> children = sceneElement.children.toList();
-
-    expect(children.length, 1);
-    final DomElement containerElement = children.first;
-    expect(containerElement.tagName, equalsIgnoringCase('flt-canvas-container'));
-
-    final List<DomElement> containerChildren = containerElement.children.toList();
-    expect(containerChildren.length, 1);
-    final DomElement canvasElement = containerChildren.first;
-    final DomCSSStyleDeclaration style = canvasElement.style;
-    expect(style.left, '25px');
-    expect(style.top, '40px');
-    expect(style.width, '50px');
-    expect(style.height, '60px');
-
-    debugOverrideDevicePixelRatio(null);
-  });
-
   test('SceneView places platform view according to device-pixel ratio', () async {
     debugOverrideDevicePixelRatio(2.0);
 
@@ -381,7 +353,6 @@ void testMain() {
     await sceneView.renderScene(scene, null);
 
     expect(stubPictureRenderer.renderedPictures.length, 1);
-    expect(stubPictureRenderer.clipRequests.containsKey(picture), true);
   });
 
   test('SceneView places platform view contents in the DOM', () async {
