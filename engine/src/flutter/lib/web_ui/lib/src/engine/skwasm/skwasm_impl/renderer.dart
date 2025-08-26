@@ -16,8 +16,6 @@ import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 class SkwasmRenderer extends Renderer {
   late SkwasmSurface surface;
-  final Map<EngineFlutterView, EngineSceneView> _sceneViews =
-      <EngineFlutterView, EngineSceneView>{};
 
   bool get isMultiThreaded => skwasmIsMultiThreaded();
 
@@ -178,7 +176,7 @@ class SkwasmRenderer extends Renderer {
   );
 
   @override
-  ui.SceneBuilder createSceneBuilder() => EngineSceneBuilder();
+  ui.SceneBuilder createSceneBuilder() => LayerSceneBuilder();
 
   @override
   ui.StrutStyle createStrutStyle({
@@ -324,7 +322,7 @@ class SkwasmRenderer extends Renderer {
   @override
   FutureOr<void> initialize() {
     surface = SkwasmSurface();
-    rasterizer = NoopRasterizer();
+    rasterizer = SkwasmOffscreenCanvasRasterizer(surface);
     return super.initialize();
   }
 
@@ -397,25 +395,6 @@ class SkwasmRenderer extends Renderer {
         return SkwasmDomImageDecoder(blob);
       }
     }
-  }
-
-  @override
-  Future<void> renderScene(ui.Scene scene, EngineFlutterView view) {
-    final FrameTimingRecorder? recorder = FrameTimingRecorder.frameTimingsEnabled
-        ? FrameTimingRecorder()
-        : null;
-    recorder?.recordBuildFinish();
-
-    final EngineSceneView sceneView = _getSceneViewForView(view);
-    return sceneView.renderScene(scene as EngineScene, recorder);
-  }
-
-  EngineSceneView _getSceneViewForView(EngineFlutterView view) {
-    return _sceneViews.putIfAbsent(view, () {
-      final EngineSceneView sceneView = EngineSceneView(SkwasmPictureRenderer(surface), view);
-      view.dom.setScene(sceneView.sceneElement);
-      return sceneView;
-    });
   }
 
   @override
@@ -555,8 +534,8 @@ class SkwasmRenderer extends Renderer {
       });
 
       int i = 0;
-      for (final view in _sceneViews.values) {
-        final Map<String, dynamic>? debugJson = view.dumpDebugInfo();
+      for (final viewRasterizer in rasterizers.values) {
+        final Map<String, dynamic>? debugJson = viewRasterizer.dumpDebugInfo();
         if (debugJson != null) {
           _dumpDebugInfo('flutter-scene$i', debugJson);
           i++;
@@ -567,106 +546,6 @@ class SkwasmRenderer extends Renderer {
 
   @override
   void debugResetRasterizer() {
-    rasterizer = NoopRasterizer();
+    rasterizer = SkwasmOffscreenCanvasRasterizer(surface);
   }
-}
-
-// A [Rasterizer] that does nothing. A placeholder that will be fleshed out
-// when Skwasm and CanvasKit renderers are unified. See: https://github.com/flutter/flutter/issues/172311
-class NoopRasterizer implements Rasterizer {
-  @override
-  ViewRasterizer createViewRasterizer(EngineFlutterView view) {
-    return NoopViewRasterizer();
-  }
-
-  @override
-  void dispose() {
-    // Do nothing
-  }
-
-  @override
-  void setResourceCacheMaxBytes(int bytes) {
-    // Do nothing
-  }
-}
-
-// A [ViewRasterizer] that does nothing. A placeholder that will be fleshed out
-// when Skwasm and CanvasKit renderers are unified. See: https://github.com/flutter/flutter/issues/172311
-class NoopViewRasterizer implements ViewRasterizer {
-  @override
-  BitmapSize currentFrameSize = BitmapSize.zero;
-
-  @override
-  CompositorContext get context => throw UnimplementedError();
-
-  @override
-  void debugClear() {
-    // Do nothing
-  }
-
-  @override
-  DisplayCanvasFactory<DisplayCanvas> get displayFactory => throw UnimplementedError();
-
-  @override
-  void dispose() {
-    // Do nothing
-  }
-
-  @override
-  DisplayCanvas getOverlay() {
-    throw UnimplementedError();
-  }
-
-  @override
-  void prepareToDraw() {}
-
-  @override
-  RenderQueue get queue => throw UnimplementedError();
-
-  @override
-  void releaseOverlay(DisplayCanvas overlay) {}
-
-  @override
-  void releaseOverlays() {}
-
-  @override
-  void removeOverlaysFromDom() {}
-
-  @override
-  DomElement get sceneElement => throw UnimplementedError();
-
-  @override
-  EngineFlutterView get view => throw UnimplementedError();
-
-  @override
-  PlatformViewEmbedder get viewEmbedder => throw UnimplementedError();
-
-  @override
-  Map<String, dynamic>? dumpDebugInfo() {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> rasterize(
-    List<DisplayCanvas> displayCanvases,
-    List<ui.Picture> pictures,
-    FrameTimingRecorder? recorder,
-  ) {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> draw(LayerTree layerTree, FrameTimingRecorder? recorder) {
-    throw UnimplementedError();
-  }
-}
-
-class SkwasmPictureRenderer implements PictureRenderer {
-  SkwasmPictureRenderer(this.surface);
-
-  SkwasmSurface surface;
-
-  @override
-  FutureOr<RenderResult> renderPictures(List<ScenePicture> pictures, int width, int height) =>
-      surface.renderPictures(pictures.cast<SkwasmPicture>(), width, height);
 }
