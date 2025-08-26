@@ -40,14 +40,6 @@ class StubPictureRenderer implements PictureRenderer {
     return (imageBitmaps: bitmaps, rasterStartMicros: 0, rasterEndMicros: 0);
   }
 
-  @override
-  ScenePicture clipPicture(ScenePicture picture, ui.Rect clip) {
-    clipRequests[picture] = clip;
-    final clippedRect = clip.intersect(picture.cullRect);
-    final clippedPicture = StubPicture(clippedRect);
-    return clippedPicture;
-  }
-
   List<ScenePicture> renderedPictures = <ScenePicture>[];
   List<StubPicture> clippedPictures = <StubPicture>[];
   Map<ScenePicture, ui.Rect> clipRequests = <ScenePicture, ui.Rect>{};

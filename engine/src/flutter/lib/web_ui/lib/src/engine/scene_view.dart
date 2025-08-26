@@ -20,7 +20,6 @@ typedef RenderResult = ({
 // composite pictures into the canvases in the DOM tree it builds.
 abstract class PictureRenderer {
   FutureOr<RenderResult> renderPictures(List<ScenePicture> picture, int width, int height);
-  ScenePicture clipPicture(ScenePicture picture, ui.Rect clip);
 }
 
 class _SceneRender {
@@ -96,7 +95,6 @@ class EngineSceneView {
     );
     final List<LayerSlice?> slices = scene.rootLayer.slices;
     final List<ScenePicture> picturesToRender = <ScenePicture>[];
-    final List<ScenePicture> originalPicturesToRender = <ScenePicture>[];
     final List<ScenePicture> picturesToFree = <ScenePicture>[];
     for (final LayerSlice? slice in slices) {
       if (slice == null) {
@@ -106,15 +104,8 @@ class EngineSceneView {
       if (clippedRect.isEmpty) {
         // This picture is completely offscreen, so don't render it at all
         continue;
-      } else if (clippedRect == slice.picture.cullRect) {
-        // The picture doesn't need to be clipped, just render the original
-        originalPicturesToRender.add(slice.picture);
-        picturesToRender.add(slice.picture);
       } else {
-        originalPicturesToRender.add(slice.picture);
-        final clippedPicture = pictureRenderer.clipPicture(slice.picture, clippedRect);
-        picturesToRender.add(clippedPicture);
-        picturesToFree.add(clippedPicture);
+        picturesToRender.add(slice.picture);
       }
     }
     final Map<ScenePicture, DomImageBitmap> renderMap;
@@ -126,7 +117,7 @@ class EngineSceneView {
       );
       renderMap = <ScenePicture, DomImageBitmap>{
         for (int i = 0; i < picturesToRender.length; i++)
-          originalPicturesToRender[i]: renderResult.imageBitmaps[i],
+          picturesToRender[i]: renderResult.imageBitmaps[i],
       };
       recorder?.recordRasterStart(renderResult.rasterStartMicros);
       recorder?.recordRasterFinish(renderResult.rasterEndMicros);
