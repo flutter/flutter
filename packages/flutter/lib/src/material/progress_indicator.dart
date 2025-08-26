@@ -382,7 +382,7 @@ class LinearProgressIndicator extends ProgressIndicator {
 
   /// The color of the stop indicator.
   ///
-  /// If [year2023] is false or [ThemeData.useMaterial3] is false, then no stop
+  /// If [year2023] is true or [ThemeData.useMaterial3] is false, then no stop
   /// indicator will be drawn.
   ///
   /// If null, then the [ProgressIndicatorThemeData.stopIndicatorColor] will be used.
@@ -391,7 +391,7 @@ class LinearProgressIndicator extends ProgressIndicator {
 
   /// The radius of the stop indicator.
   ///
-  /// If [year2023] is false or [ThemeData.useMaterial3] is false, then no stop
+  /// If [year2023] is true or [ThemeData.useMaterial3] is false, then no stop
   /// indicator will be drawn.
   ///
   /// Set [stopIndicatorRadius] to 0 to hide the stop indicator.
@@ -402,7 +402,7 @@ class LinearProgressIndicator extends ProgressIndicator {
 
   /// The gap between the indicator and the track.
   ///
-  /// If [year2023] is false or [ThemeData.useMaterial3] is false, then no track
+  /// If [year2023] is true or [ThemeData.useMaterial3] is false, then no track
   /// gap will be drawn.
   ///
   /// Set [trackGap] to 0 to hide the track gap.
@@ -856,7 +856,7 @@ class CircularProgressIndicator extends ProgressIndicator {
 
   /// The gap between the active indicator and the background track.
   ///
-  /// If [year2023] is false or [ThemeData.useMaterial3] is false, then no track
+  /// If [year2023] is true or [ThemeData.useMaterial3] is false, then no track
   /// gap will be drawn.
   ///
   /// Set [trackGap] to 0 to hide the track gap.
