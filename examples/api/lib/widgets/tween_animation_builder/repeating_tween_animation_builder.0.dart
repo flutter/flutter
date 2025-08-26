@@ -4,15 +4,14 @@
 
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-// Assume RepeatingTweenAnimationBuilder is defined elsewhere in the project.
 
 /// Flutter code sample for [RepeatingTweenAnimationBuilder].
 void main() {
-  runApp(const RepeatingTweenAnimationBuilderSampleApp());
+  runApp(const RepeatingTweenAnimationBuilderExampleApp());
 }
 
-class RepeatingTweenAnimationBuilderSampleApp extends StatelessWidget {
-  const RepeatingTweenAnimationBuilderSampleApp({super.key});
+class RepeatingTweenAnimationBuilderExampleApp extends StatelessWidget {
+  const RepeatingTweenAnimationBuilderExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,21 +20,21 @@ class RepeatingTweenAnimationBuilderSampleApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.purple, brightness: Brightness.dark),
         useMaterial3: true,
       ),
-      home: const RepeatingTweenAnimationBuilderSample(),
+      home: const RepeatingTweenAnimationBuilderExample(),
     );
   }
 }
 
-class RepeatingTweenAnimationBuilderSample extends StatefulWidget {
-  const RepeatingTweenAnimationBuilderSample({super.key});
+class RepeatingTweenAnimationBuilderExample extends StatefulWidget {
+  const RepeatingTweenAnimationBuilderExample({super.key});
 
   @override
-  State<RepeatingTweenAnimationBuilderSample> createState() =>
-      _RepeatingTweenAnimationBuilderSampleState();
+  State<RepeatingTweenAnimationBuilderExample> createState() =>
+      _RepeatingTweenAnimationBuilderExampleState();
 }
 
-class _RepeatingTweenAnimationBuilderSampleState
-    extends State<RepeatingTweenAnimationBuilderSample> {
+class _RepeatingTweenAnimationBuilderExampleState
+    extends State<RepeatingTweenAnimationBuilderExample> {
   bool _isPaused = false;
   bool _isReversing = false;
 
@@ -142,7 +141,6 @@ class _RepeatingTweenAnimationBuilderSampleState
       right: 0,
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           _buildPlayPauseButton(colors, animation),
           const SizedBox(height: 24),

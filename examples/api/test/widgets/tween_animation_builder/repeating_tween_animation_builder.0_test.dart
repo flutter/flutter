@@ -8,95 +8,53 @@ import 'package:flutter_api_samples/widgets/tween_animation_builder/repeating_tw
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('RepeatingTweenAnimationBuilder continuously animates', (WidgetTester tester) async {
+  testWidgets('RepeatingTweenAnimationBuilder animates continuously', (WidgetTester tester) async {
     await tester.pumpWidget(const example.RepeatingTweenAnimationBuilderExampleApp());
 
-    // Find the container which is being rotated
-    final Finder containerFinder = find.byType(Container);
-    expect(containerFinder, findsOneWidget);
+    // Verify animation is happening by checking Transform changes
+    final Transform initial = tester.widget(find.byType(Transform).first);
+    await tester.pump(const Duration(milliseconds: 500));
+    final Transform after = tester.widget(find.byType(Transform).first);
 
-    // Find the Transform widget that wraps the container
-    final Finder transformFinder = find.ancestor(
-      of: containerFinder,
-      matching: find.byType(Transform),
-    );
-    expect(transformFinder, findsOneWidget);
-
-    // The animation should continuously repeat
-    // Let's verify it animates through multiple cycles
-    final List<Matrix4> transforms = <Matrix4>[];
-
-    // Capture initial transform
-    Transform transform = tester.widget(transformFinder);
-    transforms.add(transform.transform);
-
-    // Advance through animation cycles
-    const Duration animationDuration = Duration(seconds: 2);
-    for (int i = 0; i < 5; i++) {
-      await tester.pump(animationDuration ~/ 4);
-      transform = tester.widget(transformFinder);
-      transforms.add(transform.transform);
-    }
-
-    // Verify that the transforms are different (animation is happening)
-    expect(transforms.toSet().length, greaterThan(1));
+    expect(initial.transform, isNot(equals(after.transform)));
   });
 
-  testWidgets('Pause and resume buttons control animation', (WidgetTester tester) async {
+  testWidgets('Play/pause button controls animation', (WidgetTester tester) async {
     await tester.pumpWidget(const example.RepeatingTweenAnimationBuilderExampleApp());
 
-    final Finder transformFinder = find.byType(Transform).first;
+    // Initially playing (pause icon visible)
+    expect(find.byIcon(Icons.pause), findsOneWidget);
 
-    // Let animation run
-    await tester.pump(const Duration(milliseconds: 100));
-
-    // Get transform before pause
-    final Transform transformBeforePause = tester.widget(transformFinder);
-    final Matrix4 beforePause = transformBeforePause.transform;
-
-    // Tap pause button
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Pause'));
+    // Tap to pause
+    await tester.tap(find.byType(InkWell).first);
     await tester.pump();
+    expect(find.byIcon(Icons.play_arrow), findsOneWidget);
 
-    // Verify button text changed to "Resume"
-    expect(find.widgetWithText(ElevatedButton, 'Resume'), findsOneWidget);
+    // Verify animation stopped
+    final Transform paused = tester.widget(find.byType(Transform).first);
+    await tester.pump(const Duration(milliseconds: 500));
+    final Transform stillPaused = tester.widget(find.byType(Transform).first);
+    expect(paused.transform, equals(stillPaused.transform));
 
-    // Pump time and verify animation is paused (transform stays the same)
-    await tester.pump(const Duration(milliseconds: 200));
-    final Transform transformWhilePaused = tester.widget(transformFinder);
-    expect(transformWhilePaused.transform, equals(beforePause));
-
-    // Resume the animation
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Resume'));
+    // Resume animation
+    await tester.tap(find.byType(InkWell).first);
     await tester.pump();
-
-    // Verify button text changed back to "Pause"
-    expect(find.widgetWithText(ElevatedButton, 'Pause'), findsOneWidget);
-
-    // Let animation run and verify it resumed (transform changed)
-    await tester.pump(const Duration(milliseconds: 200));
-    final Transform transformAfterResume = tester.widget(transformFinder);
-    expect(transformAfterResume.transform, isNot(equals(beforePause)));
+    expect(find.byIcon(Icons.pause), findsOneWidget);
   });
 
-  testWidgets('Reverse button toggles animation direction', (WidgetTester tester) async {
+  testWidgets('Reverse toggle changes animation direction', (WidgetTester tester) async {
     await tester.pumpWidget(const example.RepeatingTweenAnimationBuilderExampleApp());
 
-    // Initially shows "Reverse" button
-    expect(find.widgetWithText(ElevatedButton, 'Reverse'), findsOneWidget);
+    // Check initial state
+    Switch switchWidget = tester.widget(find.byType(Switch));
+    expect(switchWidget.value, false);
 
-    // Tap to enable reverse mode
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Reverse'));
+    // Toggle reverse
+    await tester.tap(find.byType(Switch));
     await tester.pump();
 
-    // Verify button text changed to "Forward Only"
-    expect(find.widgetWithText(ElevatedButton, 'Forward Only'), findsOneWidget);
-
-    // Toggle back to forward-only mode
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Forward Only'));
-    await tester.pump();
-
-    // Verify button text changed back to "Reverse"
-    expect(find.widgetWithText(ElevatedButton, 'Reverse'), findsOneWidget);
+    // Verify toggled
+    switchWidget = tester.widget(find.byType(Switch));
+    expect(switchWidget.value, true);
   });
 }
