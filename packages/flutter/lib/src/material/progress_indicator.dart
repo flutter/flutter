@@ -20,6 +20,10 @@ import 'theme.dart';
 const int _kIndeterminateLinearDuration = 1800;
 const int _kIndeterminateCircularDuration = 1333 * 2222;
 
+// The progress value below which the track gap is scaled proportionally to
+// prevent a track gap from appearing at 0% progress.
+const double _kTrackGapRampDownThreshold = 0.01;
+
 enum _ActivityIndicatorType { material, adaptive }
 
 /// A base class for Material Design progress indicators.
@@ -221,12 +225,16 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
       canvas.drawCircle(position, radius, indicatorPaint);
     }
 
-    // Calculates a track gap fraction that grows smoothly with the indicator's
-    // value until it reaches the full `trackGapFraction`. This prevents an
-    // abrupt gap from appearing when the indicator length is less than the
-    // track gap.
+    // Calculates a track gap fraction that is scaled proportionally to a given
+    // value.
+    // This is used to smoothly transition the track gap's size, preventing it
+    // from appearing or disappearing abruptly. The returned value increases
+    // linearly from 0 to the full `trackGapFraction` as `currentValue`
+    // increases from 0 to `_kTrackGapRampDownThreshold`.
     double getEffectiveTrackGapFraction(double currentValue, double trackGapFraction) {
-      return math.min(currentValue, trackGapFraction);
+      return trackGapFraction *
+          clampDouble(currentValue, 0, _kTrackGapRampDownThreshold) /
+          _kTrackGapRampDownThreshold;
     }
 
     final double trackGapFraction = effectiveTrackGap / size.width;
