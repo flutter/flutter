@@ -300,18 +300,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> with TickerProv
   @override
   void initState() {
     super.initState();
-    _animationControllers = List<AnimationController>.generate(
-      widget.children.length,
-      (int index) => AnimationController(duration: widget.animationDuration, vsync: this),
-    );
-
-    _heightFactors = _animationControllers
-        .map(
-          (AnimationController controller) => controller.drive(
-            Tween<double>(begin: 0.0, end: 1.0).chain(CurveTween(curve: Curves.fastOutSlowIn)),
-          ),
-        )
-        .toList();
+    _initializeControllers();
 
     if (widget._allowOnlyOnePanelOpen) {
       assert(_allIdentifiersUnique(), 'All ExpansionPanelRadio identifier values must be unique.');
@@ -320,12 +309,6 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> with TickerProv
           widget.children.cast<ExpansionPanelRadio>(),
           widget.initialOpenPanelValue,
         );
-      }
-    }
-
-    for (int i = 0; i < widget.children.length; i++) {
-      if (_isChildExpanded(i)) {
-        _animationControllers[i].value = 1.0;
       }
     }
   }
@@ -338,25 +321,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> with TickerProv
       for (final AnimationController controller in _animationControllers) {
         controller.dispose();
       }
-
-      _animationControllers = List<AnimationController>.generate(
-        widget.children.length,
-        (int index) => AnimationController(duration: widget.animationDuration, vsync: this),
-      );
-
-      _heightFactors = _animationControllers
-          .map(
-            (AnimationController controller) => controller.drive(
-              Tween<double>(begin: 0.0, end: 1.0).chain(CurveTween(curve: Curves.fastOutSlowIn)),
-            ),
-          )
-          .toList();
-
-      for (int i = 0; i < widget.children.length; i++) {
-        if (_isChildExpanded(i)) {
-          _animationControllers[i].value = 1.0;
-        }
-      }
+      _initializeControllers();
     }
 
     if (oldWidget.animationDuration != widget.animationDuration) {
@@ -386,6 +351,29 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> with TickerProv
       controller.dispose();
     }
     super.dispose();
+  }
+
+  /// Initializes the animation controllers and height factors for all panels.
+  /// This method is called during initialization and when the number of children changes.
+  void _initializeControllers() {
+    _animationControllers = List<AnimationController>.generate(
+      widget.children.length,
+      (int index) => AnimationController(duration: widget.animationDuration, vsync: this),
+    );
+
+    _heightFactors = _animationControllers
+        .map(
+          (AnimationController controller) => controller.drive(
+            Tween<double>(begin: 0.0, end: 1.0).chain(CurveTween(curve: Curves.fastOutSlowIn)),
+          ),
+        )
+        .toList();
+
+    for (int i = 0; i < widget.children.length; i++) {
+      if (_isChildExpanded(i)) {
+        _animationControllers[i].value = 1.0;
+      }
+    }
   }
 
   bool _allIdentifiersUnique() {
