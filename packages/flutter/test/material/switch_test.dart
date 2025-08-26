@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -2272,7 +2273,7 @@ void main() {
       return inactiveEnabledThumbColor;
     }
 
-    final MaterialStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
+    final WidgetStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
 
     Widget buildSwitch({required bool enabled, required bool active}) {
       return MaterialApp(
@@ -2387,7 +2388,7 @@ void main() {
       return inactiveEnabledThumbColor;
     }
 
-    final MaterialStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
+    final WidgetStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
 
     Widget buildSwitch({required bool enabled, required bool active}) {
       return Theme(
@@ -2493,7 +2494,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final MaterialStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
+    final WidgetStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
 
     Widget buildSwitch() {
       return MaterialApp(
@@ -2575,7 +2576,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final MaterialStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
+    final WidgetStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
 
     Widget buildSwitch() {
       return MaterialApp(
@@ -2657,7 +2658,7 @@ void main() {
       return inactiveEnabledTrackColor;
     }
 
-    final MaterialStateProperty<Color> trackColor = MaterialStateColor.resolveWith(getTrackColor);
+    final WidgetStateProperty<Color> trackColor = MaterialStateColor.resolveWith(getTrackColor);
 
     Widget buildSwitch({required bool enabled, required bool active}) {
       return MaterialApp(
@@ -2744,7 +2745,7 @@ void main() {
       return inactiveEnabledTrackColor;
     }
 
-    final MaterialStateProperty<Color> trackColor = MaterialStateColor.resolveWith(getTrackColor);
+    final WidgetStateProperty<Color> trackColor = MaterialStateColor.resolveWith(getTrackColor);
 
     Widget buildSwitch({required bool enabled, required bool active}) {
       return Theme(
@@ -2830,7 +2831,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final MaterialStateProperty<Color> trackColor = MaterialStateColor.resolveWith(getTrackColor);
+    final WidgetStateProperty<Color> trackColor = MaterialStateColor.resolveWith(getTrackColor);
 
     Widget buildSwitch() {
       return MaterialApp(
@@ -2902,7 +2903,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final MaterialStateProperty<Color> trackColor = MaterialStateColor.resolveWith(getTrackColor);
+    final WidgetStateProperty<Color> trackColor = MaterialStateColor.resolveWith(getTrackColor);
 
     Widget buildSwitch() {
       return Theme(
@@ -2968,7 +2969,7 @@ void main() {
       return Colors.black;
     }
 
-    final MaterialStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
+    final WidgetStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
 
     Widget buildSwitch({required bool enabled, required bool active}) {
       return Directionality(
@@ -3025,7 +3026,7 @@ void main() {
       return Colors.black;
     }
 
-    final MaterialStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
+    final WidgetStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
 
     Widget buildSwitch({required bool enabled, required bool active}) {
       return Directionality(
@@ -3107,13 +3108,13 @@ void main() {
             autofocus: focused,
             value: active,
             onChanged: (_) {},
-            thumbColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+            thumbColor: WidgetStateProperty.resolveWith<Color>((Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
                 return activeThumbColor;
               }
               return inactiveThumbColor;
             }),
-            overlayColor: useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
+            overlayColor: useOverlay ? WidgetStateProperty.resolveWith(getOverlayColor) : null,
             hoverColor: hoverColor,
             focusColor: focusColor,
             splashRadius: splashRadius,
@@ -3652,7 +3653,7 @@ void main() {
         return inactiveEnabledTrackOutlineColor;
       }
 
-      final MaterialStateProperty<Color> trackOutlineColor = MaterialStateColor.resolveWith(
+      final WidgetStateProperty<Color> trackOutlineColor = MaterialStateColor.resolveWith(
         getTrackOutlineColor,
       );
 
@@ -3733,7 +3734,7 @@ void main() {
         return Colors.transparent;
       }
 
-      final MaterialStateProperty<Color> trackOutlineColor = MaterialStateColor.resolveWith(
+      final WidgetStateProperty<Color> trackOutlineColor = MaterialStateColor.resolveWith(
         getTrackOutlineColor,
       );
 
@@ -3804,7 +3805,7 @@ void main() {
         return inactiveEnabledTrackOutlineWidth;
       }
 
-      final MaterialStateProperty<double> trackOutlineWidth = MaterialStateProperty.resolveWith(
+      final WidgetStateProperty<double> trackOutlineWidth = WidgetStateProperty.resolveWith(
         getTrackOutlineWidth,
       );
 
@@ -3884,7 +3885,7 @@ void main() {
         return 8.0;
       }
 
-      final MaterialStateProperty<double> trackOutlineWidth = MaterialStateProperty.resolveWith(
+      final WidgetStateProperty<double> trackOutlineWidth = WidgetStateProperty.resolveWith(
         getTrackOutlineWidth,
       );
 
@@ -3939,8 +3940,8 @@ void main() {
         brightness: Brightness.light,
       );
 
-      MaterialStateProperty<Icon?> thumbIcon(Icon? activeIcon, Icon? inactiveIcon) {
-        return MaterialStateProperty.resolveWith<Icon?>((Set<MaterialState> states) {
+      WidgetStateProperty<Icon?> thumbIcon(Icon? activeIcon, Icon? inactiveIcon) {
+        return WidgetStateProperty.resolveWith<Icon?>((Set<MaterialState> states) {
           if (states.contains(MaterialState.selected)) {
             return activeIcon;
           }

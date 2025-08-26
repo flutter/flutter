@@ -3783,7 +3783,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final Key popupMenuButtonKey = UniqueKey();
-    final MaterialStateProperty<TextStyle?> labelTextStyle = MaterialStateProperty.resolveWith((
+    final WidgetStateProperty<TextStyle?> labelTextStyle = WidgetStateProperty.resolveWith((
       Set<MaterialState> states,
     ) {
       if (states.contains(MaterialState.selected)) {
