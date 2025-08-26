@@ -16,6 +16,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/src/gestures/constants.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -1153,7 +1154,7 @@ void main() {
       return inactiveEnabledFillColor;
     }
 
-    final MaterialStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
+    final WidgetStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
 
     int? groupValue = 0;
     const Key radioKey = Key('radio');
@@ -1270,7 +1271,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final MaterialStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
+    final WidgetStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
 
     int? groupValue = 0;
     const Key radioKey = Key('radio');
@@ -1362,7 +1363,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final MaterialStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
+    final WidgetStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
 
     int? groupValue = 0;
     const Key radioKey = Key('radio');
@@ -1484,7 +1485,7 @@ void main() {
             groupValue: true,
             onChanged: (_) {},
             fillColor: const MaterialStatePropertyAll<Color>(fillColor),
-            overlayColor: useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
+            overlayColor: useOverlay ? WidgetStateProperty.resolveWith(getOverlayColor) : null,
             hoverColor: hoverColor,
             focusColor: focusColor,
             splashRadius: splashRadius,
@@ -2167,7 +2168,7 @@ void main() {
       return inactiveEnabledBackgroundColor;
     }
 
-    final MaterialStateProperty<Color> backgroundColor = MaterialStateColor.resolveWith(
+    final WidgetStateProperty<Color> backgroundColor = MaterialStateColor.resolveWith(
       getBackgroundColor,
     );
 
@@ -2281,7 +2282,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final MaterialStateProperty<Color> backgroundColor = MaterialStateColor.resolveWith(
+    final WidgetStateProperty<Color> backgroundColor = MaterialStateColor.resolveWith(
       getBackgroundColor,
     );
 

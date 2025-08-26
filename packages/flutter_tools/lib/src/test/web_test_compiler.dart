@@ -32,18 +32,21 @@ class WebTestCompiler {
     required Platform platform,
     required ProcessManager processManager,
     required Config config,
+    required ShutdownHooks shutdownHooks,
   }) : _logger = logger,
        _fileSystem = fileSystem,
        _artifacts = artifacts,
        _platform = platform,
        _processManager = processManager,
-       _config = config;
+       _config = config,
+       _shutdownHooks = shutdownHooks;
 
   final Logger _logger;
   final FileSystem _fileSystem;
   final Artifacts _artifacts;
   final Platform _platform;
   final ProcessManager _processManager;
+  final ShutdownHooks _shutdownHooks;
   final Config _config;
 
   Future<File> _generateTestEntrypoint({
@@ -160,6 +163,7 @@ class WebTestCompiler {
       logger: _logger,
       platform: _platform,
       fileSystem: _fileSystem,
+      shutdownHooks: _shutdownHooks,
     );
 
     final CompilerOutput? output = await residentCompiler.recompile(
