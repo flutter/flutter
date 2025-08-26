@@ -283,7 +283,7 @@ DEF_SWITCH(MergedPlatformUIThread,
 // TODO(163064): remove this when users have been migrated.
 DEF_SWITCH(DisableMergedPlatformUIThread,
            "no-enable-merged-platform-ui-thread",
-           "Merge the ui thread and platform thread.")
+           "Disables merging of the UI and platform threads.")
 DEF_SWITCH(EnableAndroidSurfaceControl,
            "enable-surface-control",
            "Enable the SurfaceControl backed swapchain when supported.")
