@@ -141,7 +141,6 @@ class _RepeatingTweenAnimationBuilderExampleState
       right: 0,
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           _buildPlayPauseButton(colors, animation),
           const SizedBox(height: 24),
