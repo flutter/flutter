@@ -474,12 +474,17 @@ Shell::Shell(DartVMRef vm,
   FML_CHECK(!settings.enable_software_rendering || !settings.enable_impeller)
       << "Software rendering is incompatible with Impeller.";
   if (!settings.enable_impeller && settings.warn_on_impeller_opt_out) {
-    FML_LOG(IMPORTANT)
-        << "[Action Required] The application opted out of Impeller by either "
-           "using the --no-enable-impeller flag or FLTEnableImpeller=false "
-           "plist flag. This option is going to go away in an upcoming Flutter "
-           "release. Remove the explicit opt-out. If you need to opt-out, "
-           "report a bug describing the issue.";
+    FML_LOG(IMPORTANT) <<  //
+        R"warn([Action Required]: Impeller opt-out deprecated.
+    The application opted out of Impeller by either using the
+    `--no-enable-impeller` flag or the
+    `io.flutter.embedding.android.EnableImpeller` `AndroidManifest.xml` entry.
+    These options are going to go away in an upcoming Flutter release. Remove
+    the explicit opt-out. If you need to opt-out, please report a bug describing
+    the issue.
+
+    https://github.com/flutter/flutter/issues/new?template=02_bug.yml
+)warn";
   }
   FML_CHECK(vm_) << "Must have access to VM to create a shell.";
   FML_DCHECK(task_runners_.IsValid());
@@ -584,8 +589,12 @@ Shell::~Shell() {
       fml::MakeCopyable([io_manager = std::move(io_manager_),
                          platform_view = platform_view_.get(),
                          &io_latch]() mutable {
+        std::weak_ptr<ShellIOManager> weak_io_manager(io_manager);
         io_manager.reset();
-        if (platform_view) {
+
+        // If the IO manager is not being used by any other spawned shells,
+        // then detach the resource context from the IO thread.
+        if (platform_view && weak_io_manager.expired()) {
           platform_view->ReleaseResourceContext();
         }
         io_latch.Signal();
@@ -1099,7 +1108,7 @@ void Shell::OnPlatformViewSetViewportMetrics(int64_t view_id,
   {
     std::scoped_lock<std::mutex> lock(resize_mutex_);
     expected_frame_sizes_[view_id] =
-        SkISize::Make(metrics.physical_width, metrics.physical_height);
+        DlISize(metrics.physical_width, metrics.physical_height);
     device_pixel_ratio_ = metrics.device_pixel_ratio;
   }
 }
@@ -1734,8 +1743,8 @@ bool Shell::ShouldDiscardLayerTree(int64_t view_id,
                                    const flutter::LayerTree& tree) {
   std::scoped_lock<std::mutex> lock(resize_mutex_);
   auto expected_frame_size = ExpectedFrameSize(view_id);
-  return !expected_frame_size.isEmpty() &&
-         ToSkISize(tree.frame_size()) != expected_frame_size;
+  return !expected_frame_size.IsEmpty() &&
+         tree.frame_size() != expected_frame_size;
 }
 
 // |ServiceProtocol::Handler|
@@ -2338,10 +2347,10 @@ Shell::GetConcurrentWorkerTaskRunner() const {
   return vm_->GetConcurrentWorkerTaskRunner();
 }
 
-SkISize Shell::ExpectedFrameSize(int64_t view_id) {
+DlISize Shell::ExpectedFrameSize(int64_t view_id) {
   auto found = expected_frame_sizes_.find(view_id);
   if (found == expected_frame_sizes_.end()) {
-    return SkISize::MakeEmpty();
+    return DlISize();
   }
   return found->second;
 }

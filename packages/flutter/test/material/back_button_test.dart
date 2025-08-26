@@ -121,7 +121,9 @@ void main() {
 
   testWidgets('BackButton color', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: BackButton(color: Colors.red))),
+      const MaterialApp(
+        home: Material(child: BackButton(color: Colors.red)),
+      ),
     );
 
     final RichText iconText = tester.firstWidget(
@@ -256,7 +258,9 @@ void main() {
 
   testWidgets('CloseButton color', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: CloseButton(color: Colors.red))),
+      const MaterialApp(
+        home: Material(child: CloseButton(color: Colors.red)),
+      ),
     );
 
     final RichText iconText = tester.firstWidget(
@@ -331,5 +335,17 @@ void main() {
     expect(find.text('Home'), findsNothing);
     // The custom callback is called, setting customCallbackWasCalled to true.
     expect(customCallbackWasCalled, true);
+  });
+
+  testWidgets('BackButton renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: Scaffold(body: BackButton())),
+        ),
+      ),
+    );
+    final Finder backButtonIcon = find.byType(BackButtonIcon);
+    expect(tester.getSize(backButtonIcon).isEmpty, isTrue);
   });
 }

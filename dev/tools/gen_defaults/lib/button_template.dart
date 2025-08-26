@@ -19,7 +19,7 @@ class ButtonTemplate extends TokenTemplate {
     if (tokenAvailable('$tokenGroup.container.color')) {
       return '''
 
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return ${componentColor('$tokenGroup.disabled.container')};
       }
@@ -35,7 +35,7 @@ class ButtonTemplate extends TokenTemplate {
     if (tokenAvailable('$tokenGroup.container.elevation')) {
       return '''
 
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return ${elevation("$tokenGroup.disabled.container")};
       }
@@ -65,7 +65,8 @@ class ButtonTemplate extends TokenTemplate {
   }
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends ButtonStyle {
   _${blockName}DefaultsM3(this.context)
    : super(
@@ -78,15 +79,15 @@ class _${blockName}DefaultsM3 extends ButtonStyle {
   late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
-  MaterialStateProperty<TextStyle?> get textStyle =>
+  WidgetStateProperty<TextStyle?> get textStyle =>
     MaterialStatePropertyAll<TextStyle?>(${textStyle("$tokenGroup.label-text")});
 
   @override
-  MaterialStateProperty<Color?>? get backgroundColor =>${_backgroundColor()};
+  WidgetStateProperty<Color?>? get backgroundColor =>${_backgroundColor()};
 
   @override
-  MaterialStateProperty<Color?>? get foregroundColor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color?>? get foregroundColor =>
+    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return ${componentColor('$tokenGroup.disabled.label-text')};
       }
@@ -94,8 +95,8 @@ class _${blockName}DefaultsM3 extends ButtonStyle {
     });
 
   @override
-  MaterialStateProperty<Color?>? get overlayColor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color?>? get overlayColor =>
+    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
         return ${componentColor('$tokenGroup.pressed.state-layer')};
       }
@@ -109,33 +110,33 @@ class _${blockName}DefaultsM3 extends ButtonStyle {
     });
 
   @override
-  MaterialStateProperty<Color>? get shadowColor =>
+  WidgetStateProperty<Color>? get shadowColor =>
     ${_elevationColor("$tokenGroup.container.shadow-color")};
 
   @override
-  MaterialStateProperty<Color>? get surfaceTintColor =>
+  WidgetStateProperty<Color>? get surfaceTintColor =>
     ${_elevationColor("$tokenGroup.container.surface-tint-layer.color")};
 
   @override
-  MaterialStateProperty<double>? get elevation =>${_elevation()};
+  WidgetStateProperty<double>? get elevation =>${_elevation()};
 
   @override
-  MaterialStateProperty<EdgeInsetsGeometry>? get padding =>
+  WidgetStateProperty<EdgeInsetsGeometry>? get padding =>
     MaterialStatePropertyAll<EdgeInsetsGeometry>(_scaledPadding(context));
 
   @override
-  MaterialStateProperty<Size>? get minimumSize =>
+  WidgetStateProperty<Size>? get minimumSize =>
     const MaterialStatePropertyAll<Size>(Size(64.0, ${getToken("$tokenGroup.container.height")}));
 
   // No default fixedSize
 
   @override
-  MaterialStateProperty<double>? get iconSize =>
+  WidgetStateProperty<double>? get iconSize =>
     const MaterialStatePropertyAll<double>(${getToken("$tokenGroup.with-icon.icon.size")});
 
   @override
-  MaterialStateProperty<Color>? get iconColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color>? get iconColor {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return ${color('$tokenGroup.with-icon.disabled.icon.color')}.withOpacity(${opacity("$tokenGroup.with-icon.disabled.icon.opacity")});
       }
@@ -153,13 +154,13 @@ class _${blockName}DefaultsM3 extends ButtonStyle {
   }
 
   @override
-  MaterialStateProperty<Size>? get maximumSize =>
+  WidgetStateProperty<Size>? get maximumSize =>
     const MaterialStatePropertyAll<Size>(Size.infinite);
 
 ${tokenAvailable("$tokenGroup.outline.color") ? '''
   @override
-  MaterialStateProperty<BorderSide>? get side =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<BorderSide>? get side =>
+    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
       return ${border("$tokenGroup.disabled.outline")};
     }
@@ -171,12 +172,12 @@ ${tokenAvailable("$tokenGroup.outline.color") ? '''
   // No default side'''}
 
   @override
-  MaterialStateProperty<OutlinedBorder>? get shape =>
+  WidgetStateProperty<OutlinedBorder>? get shape =>
     const MaterialStatePropertyAll<OutlinedBorder>(${shape("$tokenGroup.container", '')});
 
   @override
-  MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<MouseCursor?>? get mouseCursor =>
+    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return SystemMouseCursors.basic;
       }

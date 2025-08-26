@@ -5,6 +5,7 @@
 import("//flutter/build/dart/rules.gni")
 
 tests = [
+  "microtask_profiling_test.dart",
   "skp_test.dart",
   "tracing_test.dart",
   "shader_reload_test.dart",

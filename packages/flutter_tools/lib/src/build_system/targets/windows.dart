@@ -16,7 +16,7 @@ import 'icon_tree_shaker.dart';
 import 'native_assets.dart';
 
 /// The only files/subdirectories we care about.
-const List<String> _kWindowsArtifacts = <String>[
+const _kWindowsArtifacts = <String>[
   'flutter_windows.dll',
   'flutter_windows.dll.exp',
   'flutter_windows.dll.lib',
@@ -28,7 +28,7 @@ const List<String> _kWindowsArtifacts = <String>[
   'flutter_windows.h',
 ];
 
-const String _kWindowsDepfile = 'windows_engine_sources.d';
+const _kWindowsDepfile = 'windows_engine_sources.d';
 
 /// Copies the Windows desktop embedding files to the copy directory.
 class UnpackWindows extends Target {
@@ -61,7 +61,7 @@ class UnpackWindows extends Target {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, name);
     }
-    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
+    final buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final String engineSourcePath = environment.artifacts.getArtifactPath(
       Artifact.windowsDesktopPath,
       platform: targetPlatform,
@@ -129,7 +129,7 @@ abstract class BundleWindowsAssets extends Target {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'bundle_windows_assets');
     }
-    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
+    final buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Directory outputDirectory = environment.outputDir.childDirectory('flutter_assets');
     if (!outputDirectory.existsSync()) {
       outputDirectory.createSync();

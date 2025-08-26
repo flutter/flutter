@@ -18,9 +18,9 @@ import 'icon_tree_shaker.dart';
 import 'native_assets.dart';
 
 /// The only files/subdirectories we care out.
-const List<String> _kLinuxArtifacts = <String>['libflutter_linux_gtk.so'];
+const _kLinuxArtifacts = <String>['libflutter_linux_gtk.so'];
 
-const String _kLinuxDepfile = 'linux_engine_sources.d';
+const _kLinuxDepfile = 'linux_engine_sources.d';
 
 /// Copies the Linux desktop embedding files to the copy directory.
 class UnpackLinux extends Target {
@@ -51,7 +51,7 @@ class UnpackLinux extends Target {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, name);
     }
-    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
+    final buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final String engineSourcePath = environment.artifacts.getArtifactPath(
       Artifact.linuxDesktopPath,
       mode: buildMode,
@@ -114,7 +114,7 @@ abstract class BundleLinuxAssets extends Target {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'bundle_linux_assets');
     }
-    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
+    final buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Directory outputDirectory = environment.outputDir.childDirectory('flutter_assets');
     if (!outputDirectory.existsSync()) {
       outputDirectory.createSync();
@@ -147,7 +147,7 @@ abstract class BundleLinuxAssets extends Target {
 
   /// Return json encoded string that contains data about version for package_info
   String getVersionInfo(Map<String, String> defines) {
-    final Map<String, dynamic> versionInfo =
+    final versionInfo =
         jsonDecode(FlutterProject.current().getVersionInfo()) as Map<String, dynamic>;
 
     if (defines.containsKey(kBuildNumber)) {

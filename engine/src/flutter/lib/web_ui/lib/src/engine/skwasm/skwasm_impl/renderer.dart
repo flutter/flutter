@@ -14,7 +14,7 @@ import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-class SkwasmRenderer implements Renderer {
+class SkwasmRenderer extends Renderer {
   late SkwasmSurface surface;
   final Map<EngineFlutterView, EngineSceneView> _sceneViews =
       <EngineFlutterView, EngineSceneView>{};
@@ -324,6 +324,8 @@ class SkwasmRenderer implements Renderer {
   @override
   FutureOr<void> initialize() {
     surface = SkwasmSurface();
+    rasterizer = NoopRasterizer();
+    return super.initialize();
   }
 
   @override
@@ -399,8 +401,9 @@ class SkwasmRenderer implements Renderer {
 
   @override
   Future<void> renderScene(ui.Scene scene, EngineFlutterView view) {
-    final FrameTimingRecorder? recorder =
-        FrameTimingRecorder.frameTimingsEnabled ? FrameTimingRecorder() : null;
+    final FrameTimingRecorder? recorder = FrameTimingRecorder.frameTimingsEnabled
+        ? FrameTimingRecorder()
+        : null;
     recorder?.recordBuildFinish();
 
     final EngineSceneView sceneView = _getSceneViewForView(view);
@@ -479,13 +482,12 @@ class SkwasmRenderer implements Renderer {
     required bool transferOwnership,
   }) async {
     if (!transferOwnership) {
-      textureSource =
-          (await createImageBitmap(textureSource, (
-            x: 0,
-            y: 0,
-            width: width,
-            height: height,
-          ))).toJSAnyShallow;
+      textureSource = (await createImageBitmap(textureSource, (
+        x: 0,
+        y: 0,
+        width: width,
+        height: height,
+      ))).toJSAnyShallow;
     }
     return SkwasmImage(
       imageCreateFromTextureSource(textureSource as JSObject, width, height, surface.handle),
@@ -561,6 +563,101 @@ class SkwasmRenderer implements Renderer {
         }
       }
     }
+  }
+
+  @override
+  void debugResetRasterizer() {
+    rasterizer = NoopRasterizer();
+  }
+}
+
+// A [Rasterizer] that does nothing. A placeholder that will be fleshed out
+// when Skwasm and CanvasKit renderers are unified. See: https://github.com/flutter/flutter/issues/172311
+class NoopRasterizer implements Rasterizer {
+  @override
+  ViewRasterizer createViewRasterizer(EngineFlutterView view) {
+    return NoopViewRasterizer();
+  }
+
+  @override
+  void dispose() {
+    // Do nothing
+  }
+
+  @override
+  void setResourceCacheMaxBytes(int bytes) {
+    // Do nothing
+  }
+}
+
+// A [ViewRasterizer] that does nothing. A placeholder that will be fleshed out
+// when Skwasm and CanvasKit renderers are unified. See: https://github.com/flutter/flutter/issues/172311
+class NoopViewRasterizer implements ViewRasterizer {
+  @override
+  BitmapSize currentFrameSize = BitmapSize.zero;
+
+  @override
+  CompositorContext get context => throw UnimplementedError();
+
+  @override
+  void debugClear() {
+    // Do nothing
+  }
+
+  @override
+  DisplayCanvasFactory<DisplayCanvas> get displayFactory => throw UnimplementedError();
+
+  @override
+  void dispose() {
+    // Do nothing
+  }
+
+  @override
+  DisplayCanvas getOverlay() {
+    throw UnimplementedError();
+  }
+
+  @override
+  void prepareToDraw() {}
+
+  @override
+  RenderQueue get queue => throw UnimplementedError();
+
+  @override
+  void releaseOverlay(DisplayCanvas overlay) {}
+
+  @override
+  void releaseOverlays() {}
+
+  @override
+  void removeOverlaysFromDom() {}
+
+  @override
+  DomElement get sceneElement => throw UnimplementedError();
+
+  @override
+  EngineFlutterView get view => throw UnimplementedError();
+
+  @override
+  PlatformViewEmbedder get viewEmbedder => throw UnimplementedError();
+
+  @override
+  Map<String, dynamic>? dumpDebugInfo() {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> rasterize(
+    List<DisplayCanvas> displayCanvases,
+    List<ui.Picture> pictures,
+    FrameTimingRecorder? recorder,
+  ) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> draw(LayerTree layerTree, FrameTimingRecorder? recorder) {
+    throw UnimplementedError();
   }
 }
 

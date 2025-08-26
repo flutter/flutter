@@ -37,6 +37,7 @@ class DropdownMenuThemeData with Diagnosticable {
     // TODO(bleroux): Clean this up once `InputDecorationTheme` is fully normalized.
     Object? inputDecorationTheme,
     this.menuStyle,
+    this.disabledColor,
   }) : assert(
          inputDecorationTheme == null ||
              (inputDecorationTheme is InputDecorationTheme ||
@@ -68,6 +69,10 @@ class DropdownMenuThemeData with Diagnosticable {
   /// property.
   final MenuStyle? menuStyle;
 
+  /// The color used for disabled DropdownMenu.
+  /// This color is applied to the text of the selected item on TextField.
+  final Color? disabledColor;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   DropdownMenuThemeData copyWith({
@@ -75,11 +80,13 @@ class DropdownMenuThemeData with Diagnosticable {
     // TODO(bleroux): Clean this up once `InputDecorationTheme` is fully normalized.
     Object? inputDecorationTheme,
     MenuStyle? menuStyle,
+    Color? disabledColor,
   }) {
     return DropdownMenuThemeData(
       textStyle: textStyle ?? this.textStyle,
       inputDecorationTheme: inputDecorationTheme ?? this.inputDecorationTheme,
       menuStyle: menuStyle ?? this.menuStyle,
+      disabledColor: disabledColor ?? this.disabledColor,
     );
   }
 
@@ -92,11 +99,12 @@ class DropdownMenuThemeData with Diagnosticable {
       textStyle: TextStyle.lerp(a?.textStyle, b?.textStyle, t),
       inputDecorationTheme: t < 0.5 ? a?.inputDecorationTheme : b?.inputDecorationTheme,
       menuStyle: MenuStyle.lerp(a?.menuStyle, b?.menuStyle, t),
+      disabledColor: Color.lerp(a?.disabledColor, b?.disabledColor, t),
     );
   }
 
   @override
-  int get hashCode => Object.hash(textStyle, inputDecorationTheme, menuStyle);
+  int get hashCode => Object.hash(textStyle, inputDecorationTheme, menuStyle, disabledColor);
 
   @override
   bool operator ==(Object other) {
@@ -109,7 +117,8 @@ class DropdownMenuThemeData with Diagnosticable {
     return other is DropdownMenuThemeData &&
         other.textStyle == textStyle &&
         other.inputDecorationTheme == inputDecorationTheme &&
-        other.menuStyle == menuStyle;
+        other.menuStyle == menuStyle &&
+        other.disabledColor == disabledColor;
   }
 
   @override
@@ -124,6 +133,7 @@ class DropdownMenuThemeData with Diagnosticable {
       ),
     );
     properties.add(DiagnosticsProperty<MenuStyle>('menuStyle', menuStyle, defaultValue: null));
+    properties.add(ColorProperty('disabledColor', disabledColor, defaultValue: null));
   }
 }
 

@@ -2053,13 +2053,54 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
 
 // ELEMENTS
 
-enum _ElementLifecycle { initial, active, inactive, defunct }
+enum _ElementLifecycle {
+  /// The [Element] is created but has not yet been incorporated into the element
+  /// tree.
+  initial,
+
+  /// The [Element] is incorporated into the Element tree, either via
+  /// [Element.mount] or [Element.activate].
+  active,
+
+  /// The previously `active` [Element] is removed from the Element tree via
+  /// [Element.deactivate].
+  ///
+  /// This [Element] may become `active` again if a parent reclaims it using
+  /// a [GlobalKey], or `defunct` if no parent reclaims it at the end of the
+  /// build phase.
+  inactive,
+
+  /// The [Element] encountered an unrecoverable error while being rebuilt when it
+  /// was `active` or while being incorporated in the tree.
+  ///
+  /// This indicates the [Element]'s subtree is in an inconsistent state and must
+  /// not be re-incorporated into the tree again.
+  ///
+  /// When an unrecoverable error is encountered, the framework calls
+  /// [Element.deactivate] on this [Element] and sets its state to `failed`. This
+  /// process is done on a best-effort basis and does not surface any additional
+  /// errors.
+  ///
+  /// This is one of the two final stages of the element lifecycle and is not
+  /// reversible. Reaching this state typically means that a widget implementation
+  /// is throwing unhandled exceptions that need to be properly handled.
+  failed,
+
+  /// The [Element] is disposed and should not be interacted with.
+  ///
+  /// The [Element] must be `inactive` before transitioning into this state,
+  /// and the state transition occurs in [BuildOwner.finalizeTree] which signals
+  /// the end of the build phase.
+  ///
+  /// This is the final stage of the element lifecycle and is not reversible.
+  defunct,
+}
 
 class _InactiveElements {
   bool _locked = false;
   final Set<Element> _elements = HashSet<Element>();
 
-  void _unmount(Element element) {
+  static void _unmount(Element element) {
     assert(element._lifecycleState == _ElementLifecycle.inactive);
     assert(() {
       if (debugPrintGlobalKeyedWidgetLifecycle) {
@@ -2091,8 +2132,12 @@ class _InactiveElements {
 
   static void _deactivateRecursively(Element element) {
     assert(element._lifecycleState == _ElementLifecycle.active);
-    element.deactivate();
-    assert(element._lifecycleState == _ElementLifecycle.inactive);
+    try {
+      element.deactivate();
+    } catch (_) {
+      Element._deactivateFailedSubtreeRecursively(element);
+      rethrow;
+    }
     element.visitChildren(_deactivateRecursively);
     assert(() {
       element.debugDeactivated();
@@ -2104,10 +2149,18 @@ class _InactiveElements {
     assert(!_locked);
     assert(!_elements.contains(element));
     assert(element._parent == null);
-    if (element._lifecycleState == _ElementLifecycle.active) {
-      _deactivateRecursively(element);
+
+    switch (element._lifecycleState) {
+      case _ElementLifecycle.active:
+        _deactivateRecursively(element);
+        // This element is only added to _elements if the whole subtree is
+        // successfully deactivated.
+        _elements.add(element);
+      case _ElementLifecycle.inactive:
+        _elements.add(element);
+      case _ElementLifecycle.initial || _ElementLifecycle.failed || _ElementLifecycle.defunct:
+        assert(false, '$element must not be deactivated when in ${element._lifecycleState} state.');
     }
-    _elements.add(element);
   }
 
   void remove(Element element) {
@@ -2115,7 +2168,7 @@ class _InactiveElements {
     assert(_elements.contains(element));
     assert(element._parent == null);
     _elements.remove(element);
-    assert(element._lifecycleState != _ElementLifecycle.active);
+    assert(element._lifecycleState == _ElementLifecycle.inactive);
   }
 
   bool debugContains(Element element) {
@@ -2698,11 +2751,10 @@ final class BuildScope {
         ErrorDescription('while rebuilding dirty elements'),
         e,
         stack,
-        informationCollector:
-            () => <DiagnosticsNode>[
-              if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(element)),
-              element.describeElement('The element being rebuilt at the time was'),
-            ],
+        informationCollector: () => <DiagnosticsNode>[
+          if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(element)),
+          element.describeElement('The element being rebuilt at the time was'),
+        ],
       );
     }
     if (isTimelineTracked) {
@@ -2935,7 +2987,7 @@ class BuildOwner {
     buildScope._scheduleBuildFor(element);
     assert(() {
       if (debugPrintScheduleBuildForStacks) {
-        debugPrint("...the build scope's dirty list is now: $buildScope._dirtyElements");
+        debugPrint("...the build scope's dirty list is now: ${buildScope._dirtyElements}");
       }
       return true;
     }());
@@ -3106,8 +3158,9 @@ class BuildOwner {
   // In Profile/Release mode this field is initialized to `null`. The Dart compiler can
   // eliminate unused fields, but not their initializers.
   @_debugOnly
-  final Map<Element, Map<Element, GlobalKey>>? _debugGlobalKeyReservations =
-      kDebugMode ? <Element, Map<Element, GlobalKey>>{} : null;
+  final Map<Element, Map<Element, GlobalKey>>? _debugGlobalKeyReservations = kDebugMode
+      ? <Element, Map<Element, GlobalKey>>{}
+      : null;
 
   /// The number of [GlobalKey] instances that are currently associated with
   /// [Element]s that have been built by this build owner.
@@ -3790,10 +3843,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   static DiagnosticsNode describeElements(String name, Iterable<Element> elements) {
     return DiagnosticsBlock(
       name: name,
-      children:
-          elements
-              .map<DiagnosticsNode>((Element element) => DiagnosticsProperty<Element>('', element))
-              .toList(),
+      children: elements
+          .map<DiagnosticsNode>((Element element) => DiagnosticsProperty<Element>('', element))
+          .toList(),
       allowTruncate: true,
     );
   }
@@ -4137,8 +4189,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       if (oldChild == null || !Widget.canUpdate(oldChild.widget, newWidget)) {
         break;
       }
-      final Element newChild =
-          updateChild(oldChild, newWidget, slotFor(newChildrenTop, previousChild))!;
+      final Element newChild = updateChild(
+        oldChild,
+        newWidget,
+        slotFor(newChildrenTop, previousChild),
+      )!;
       assert(newChild._lifecycleState == _ElementLifecycle.active);
       newChildren[newChildrenTop] = newChild;
       previousChild = newChild;
@@ -4198,8 +4253,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
         }
       }
       assert(oldChild == null || Widget.canUpdate(oldChild.widget, newWidget));
-      final Element newChild =
-          updateChild(oldChild, newWidget, slotFor(newChildrenTop, previousChild))!;
+      final Element newChild = updateChild(
+        oldChild,
+        newWidget,
+        slotFor(newChildrenTop, previousChild),
+      )!;
       assert(newChild._lifecycleState == _ElementLifecycle.active);
       assert(
         oldChild == newChild ||
@@ -4225,8 +4283,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       assert(oldChild._lifecycleState == _ElementLifecycle.active);
       final Widget newWidget = newWidgets[newChildrenTop];
       assert(Widget.canUpdate(oldChild.widget, newWidget));
-      final Element newChild =
-          updateChild(oldChild, newWidget, slotFor(newChildrenTop, previousChild))!;
+      final Element newChild = updateChild(
+        oldChild,
+        newWidget,
+        slotFor(newChildrenTop, previousChild),
+      )!;
       assert(newChild._lifecycleState == _ElementLifecycle.active);
       assert(oldChild == newChild || oldChild._lifecycleState != _ElementLifecycle.active);
       newChildren[newChildrenTop] = newChild;
@@ -4508,39 +4569,32 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
     try {
       final Key? key = newWidget.key;
-      if (key is GlobalKey) {
-        final Element? newChild = _retakeInactiveElement(key, newWidget);
-        if (newChild != null) {
-          assert(newChild._parent == null);
-          assert(() {
-            _debugCheckForCycles(newChild);
-            return true;
-          }());
-          try {
-            newChild._activateWithParent(this, newSlot);
-          } catch (_) {
-            // Attempt to do some clean-up if activation fails to leave tree in a reasonable state.
-            try {
-              deactivateChild(newChild);
-            } catch (_) {
-              // Clean-up failed. Only surface original exception.
-            }
-            rethrow;
-          }
-          final Element? updatedChild = updateChild(newChild, newWidget, newSlot);
-          assert(newChild == updatedChild);
-          return updatedChild!;
-        }
-      }
-      final Element newChild = newWidget.createElement();
+      final Element? inactiveChild = key is GlobalKey
+          ? _retakeInactiveElement(key, newWidget)
+          : null;
+      final Element newChild = inactiveChild ?? newWidget.createElement();
       assert(() {
         _debugCheckForCycles(newChild);
         return true;
       }());
-      newChild.mount(this, newSlot);
-      assert(newChild._lifecycleState == _ElementLifecycle.active);
-
-      return newChild;
+      try {
+        if (inactiveChild != null) {
+          assert(inactiveChild._parent == null);
+          inactiveChild._activateWithParent(this, newSlot);
+          final Element? updatedChild = updateChild(inactiveChild, newWidget, newSlot);
+          assert(inactiveChild == updatedChild);
+          return updatedChild!;
+        } else {
+          newChild.mount(this, newSlot);
+          assert(newChild._lifecycleState == _ElementLifecycle.active);
+          return newChild;
+        }
+      } catch (_) {
+        // Attempt to do some clean-up if activation or mount fails
+        // to leave tree in a reasonable state.
+        _deactivateFailedChildSilently(newChild);
+        rethrow;
+      }
     } finally {
       if (isTimelineTracked) {
         FlutterTimeline.finishSync();
@@ -4575,6 +4629,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// parent proactively calls the old parent's [deactivateChild], first using
   /// [forgetChild] to cause the old parent to update its child model.
   @protected
+  @mustCallSuper
   void deactivateChild(Element child) {
     assert(child._parent == this);
     child._parent = null;
@@ -4588,6 +4643,38 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       }
       return true;
     }());
+  }
+
+  void _deactivateFailedChildSilently(Element child) {
+    try {
+      child._parent = null;
+      child.detachRenderObject();
+      _deactivateFailedSubtreeRecursively(child);
+    } catch (_) {
+      // Do not rethrow:
+      // The subtree has already thrown a different error and the framework is
+      // cleaning up on a best-effort basis.
+    }
+  }
+
+  // This method calls _ensureDeactivated for the subtree rooted at `element`,
+  // supressing all exceptions thrown.
+  //
+  // This method will attempt to keep doing treewalk even one of the nodes
+  // failed to deactivate.
+  //
+  // The subtree has already thrown a different error and the framework is
+  // cleaning up on a best-effort basis.
+  static void _deactivateFailedSubtreeRecursively(Element element) {
+    try {
+      element.deactivate();
+    } catch (_) {
+      element._ensureDeactivated();
+    }
+    element._lifecycleState = _ElementLifecycle.failed;
+    try {
+      element.visitChildren(_deactivateFailedSubtreeRecursively);
+    } catch (_) {}
   }
 
   // The children that have been forgotten by forgetChild. This will be used in
@@ -4664,6 +4751,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// Implementations of this method should start with a call to the inherited
   /// method, as in `super.activate()`.
   @mustCallSuper
+  @visibleForOverriding
   void activate() {
     assert(_lifecycleState == _ElementLifecycle.inactive);
     assert(owner != null);
@@ -4693,18 +4781,34 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// animation frame, if the element has not be reactivated, the framework will
   /// unmount the element.
   ///
-  /// This is (indirectly) called by [deactivateChild].
+  /// In case of an uncaught exception when rebuild a widget subtree, the
+  /// framework also calls this method on the failing subtree to make sure the
+  /// widget tree is in a relatively consistent state. The deactivation of such
+  /// subtrees are performed only on a best-effort basis, and the errors thrown
+  /// during deactivation will not be rethrown.
+  ///
+  /// This is indirectly called by [deactivateChild].
   ///
   /// See the lifecycle documentation for [Element] for additional information.
   ///
   /// Implementations of this method should end with a call to the inherited
   /// method, as in `super.deactivate()`.
   @mustCallSuper
+  @visibleForOverriding
   void deactivate() {
     assert(_lifecycleState == _ElementLifecycle.active);
     assert(_widget != null); // Use the private property to avoid a CastError during hot reload.
-    if (_dependencies?.isNotEmpty ?? false) {
-      for (final InheritedElement dependency in _dependencies!) {
+    _ensureDeactivated();
+  }
+
+  /// Removes dependencies and sets the lifecycle state of this [Element] to
+  /// inactive.
+  ///
+  /// This method is immediately called after [Element.deactivate], even if that
+  /// call throws an exception.
+  void _ensureDeactivated() {
+    if (_dependencies case final Set<InheritedElement> dependencies? when dependencies.isNotEmpty) {
+      for (final InheritedElement dependency in dependencies) {
         dependency.removeDependent(this);
       }
       // For expediency, we don't actually clear the list here, even though it's
@@ -4969,8 +5073,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   @override
   InheritedWidget dependOnInheritedElement(InheritedElement ancestor, {Object? aspect}) {
-    _dependencies ??= HashSet<InheritedElement>();
-    _dependencies!.add(ancestor);
+    (_dependencies ??= HashSet<InheritedElement>()).add(ancestor);
     ancestor.updateDependencies(this, aspect);
     return ancestor.widget as InheritedWidget;
   }
@@ -5180,18 +5283,17 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     properties.add(FlagProperty('dirty', value: dirty, ifTrue: 'dirty'));
     final Set<InheritedElement>? deps = _dependencies;
     if (deps != null && deps.isNotEmpty) {
-      final List<InheritedElement> sortedDependencies =
-          deps.toList()..sort(
-            (InheritedElement a, InheritedElement b) =>
-                a.toStringShort().compareTo(b.toStringShort()),
-          );
-      final List<DiagnosticsNode> diagnosticsDependencies =
-          sortedDependencies
-              .map(
-                (InheritedElement element) =>
-                    element.widget.toDiagnosticsNode(style: DiagnosticsTreeStyle.sparse),
-              )
-              .toList();
+      final List<InheritedElement> sortedDependencies = deps.toList()
+        ..sort(
+          (InheritedElement a, InheritedElement b) =>
+              a.toStringShort().compareTo(b.toStringShort()),
+        );
+      final List<DiagnosticsNode> diagnosticsDependencies = sortedDependencies
+          .map(
+            (InheritedElement element) =>
+                element.widget.toDiagnosticsNode(style: DiagnosticsTreeStyle.sparse),
+          )
+          .toList();
       properties.add(
         DiagnosticsProperty<Set<InheritedElement>>(
           'dependencies',
@@ -5707,7 +5809,7 @@ abstract class ComponentElement extends Element {
   @override
   @pragma('vm:notify-debugger-on-exception')
   void performRebuild() {
-    Widget? built;
+    Widget built;
     try {
       assert(() {
         _debugDoingBuild = true;
@@ -5726,8 +5828,9 @@ abstract class ComponentElement extends Element {
           ErrorDescription('building $this'),
           e,
           stack,
-          informationCollector:
-              () => <DiagnosticsNode>[if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(this))],
+          informationCollector: () => <DiagnosticsNode>[
+            if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(this)),
+          ],
         ),
       );
     } finally {
@@ -5744,10 +5847,15 @@ abstract class ComponentElement extends Element {
           ErrorDescription('building $this'),
           e,
           stack,
-          informationCollector:
-              () => <DiagnosticsNode>[if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(this))],
+          informationCollector: () => <DiagnosticsNode>[
+            if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(this)),
+          ],
         ),
       );
+      // _Make sure the old child subtree are deactivated and disposed.
+      try {
+        _child?.deactivate();
+      } catch (_) {}
       _child = updateChild(null, built, slot);
     }
   }
@@ -6158,10 +6266,7 @@ class InheritedElement extends ProxyElement {
 
   @override
   void debugDeactivated() {
-    assert(() {
-      assert(_dependents.isEmpty);
-      return true;
-    }());
+    assert(_dependents.isEmpty);
     super.debugDeactivated();
   }
 
@@ -6739,6 +6844,7 @@ abstract class RenderObjectElement extends Element {
   }
 
   @override
+  @visibleForOverriding
   void deactivate() {
     super.deactivate();
     assert(
@@ -6749,6 +6855,7 @@ abstract class RenderObjectElement extends Element {
   }
 
   @override
+  @visibleForOverriding
   void unmount() {
     assert(
       !renderObject.debugDisposed!,

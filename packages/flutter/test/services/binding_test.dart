@@ -34,7 +34,8 @@ L2Paragraph2
 
 L2Paragraph3''';
 
-const String combinedLicenses = '''
+const String combinedLicenses =
+    '''
 $license1
 --------------------------------------------------------------------------------
 $license2
@@ -115,8 +116,9 @@ void main() {
     await rootBundle.loadString('test_asset2');
     expect(flutterAssetsCallCount, 2);
 
-    final ByteData message =
-        const JSONMessageCodec().encodeMessage(<String, dynamic>{'type': 'memoryPressure'})!;
+    final ByteData message = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+      'type': 'memoryPressure',
+    })!;
     await binding.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) {});
 
     await rootBundle.loadString('test_asset');
@@ -130,11 +132,10 @@ void main() {
   });
 
   test('initInstances sets a default method call handler for SystemChannels.textInput', () async {
-    final ByteData message =
-        const JSONMessageCodec().encodeMessage(<String, dynamic>{
-          'method': 'TextInput.requestElementsInRect',
-          'args': null,
-        })!;
+    final ByteData message = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+      'method': 'TextInput.requestElementsInRect',
+      'args': null,
+    })!;
     await binding.defaultBinaryMessenger.handlePlatformMessage('flutter/textinput', message, (
       ByteData? data,
     ) {

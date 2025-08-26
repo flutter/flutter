@@ -361,7 +361,9 @@ void main() {
             height: 500.0,
             child: Column(
               children: <Widget>[
-                Chip(label: SizedBox(key: labelKey, width: labelWidth, height: labelHeight)),
+                Chip(
+                  label: SizedBox(key: labelKey, width: labelWidth, height: labelHeight),
+                ),
               ],
             ),
           ),
@@ -444,7 +446,11 @@ void main() {
     chipRectContains(chipRect, labelRect);
 
     await tester.pumpWidget(
-      chipBuilder(text, avatar: const CircleAvatar(child: Text('A')), onDeleted: () {}),
+      chipBuilder(
+        text,
+        avatar: const CircleAvatar(child: Text('A')),
+        onDeleted: () {},
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -464,15 +470,8 @@ void main() {
     await tester.pumpWidget(
       wrapForChip(
         theme: ThemeData(useMaterial3: false),
-        child: const Row(children: <Widget>[Chip(label: Text('Test'), labelStyle: style)]),
-      ),
-    );
-    expect(tester.getSize(find.byType(Text)), const Size(40.0, 10.0));
-    expect(tester.getSize(find.byType(Chip)), const Size(64.0, 48.0));
-    await tester.pumpWidget(
-      wrapForChip(
         child: const Row(
-          children: <Widget>[Flexible(child: Chip(label: Text('Test'), labelStyle: style))],
+          children: <Widget>[Chip(label: Text('Test'), labelStyle: style)],
         ),
       ),
     );
@@ -481,7 +480,24 @@ void main() {
     await tester.pumpWidget(
       wrapForChip(
         child: const Row(
-          children: <Widget>[Expanded(child: Chip(label: Text('Test'), labelStyle: style))],
+          children: <Widget>[
+            Flexible(
+              child: Chip(label: Text('Test'), labelStyle: style),
+            ),
+          ],
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Text)), const Size(40.0, 10.0));
+    expect(tester.getSize(find.byType(Chip)), const Size(64.0, 48.0));
+    await tester.pumpWidget(
+      wrapForChip(
+        child: const Row(
+          children: <Widget>[
+            Expanded(
+              child: Chip(label: Text('Test'), labelStyle: style),
+            ),
+          ],
         ),
       ),
     );
@@ -493,17 +509,8 @@ void main() {
     const TextStyle style = TextStyle(fontSize: 10.0);
     await tester.pumpWidget(
       wrapForChip(
-        child: const Row(children: <Widget>[Chip(label: Text('Test'), labelStyle: style)]),
-      ),
-    );
-    expect(tester.getSize(find.byType(Text)).width, closeTo(40.4, 0.01));
-    expect(tester.getSize(find.byType(Text)).height, equals(14.0));
-    expect(tester.getSize(find.byType(Chip)).width, closeTo(74.4, 0.01));
-    expect(tester.getSize(find.byType(Chip)).height, equals(48.0));
-    await tester.pumpWidget(
-      wrapForChip(
         child: const Row(
-          children: <Widget>[Flexible(child: Chip(label: Text('Test'), labelStyle: style))],
+          children: <Widget>[Chip(label: Text('Test'), labelStyle: style)],
         ),
       ),
     );
@@ -514,7 +521,26 @@ void main() {
     await tester.pumpWidget(
       wrapForChip(
         child: const Row(
-          children: <Widget>[Expanded(child: Chip(label: Text('Test'), labelStyle: style))],
+          children: <Widget>[
+            Flexible(
+              child: Chip(label: Text('Test'), labelStyle: style),
+            ),
+          ],
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Text)).width, closeTo(40.4, 0.01));
+    expect(tester.getSize(find.byType(Text)).height, equals(14.0));
+    expect(tester.getSize(find.byType(Chip)).width, closeTo(74.4, 0.01));
+    expect(tester.getSize(find.byType(Chip)).height, equals(48.0));
+    await tester.pumpWidget(
+      wrapForChip(
+        child: const Row(
+          children: <Widget>[
+            Expanded(
+              child: Chip(label: Text('Test'), labelStyle: style),
+            ),
+          ],
         ),
       ),
     );
@@ -627,10 +653,9 @@ void main() {
     final UniqueKey iconKey = UniqueKey();
     late final OverlayEntry entry;
     addTearDown(
-      () =>
-          entry
-            ..remove()
-            ..dispose(),
+      () => entry
+        ..remove()
+        ..dispose(),
     );
     final Widget test = Overlay(
       initialEntries: <OverlayEntry>[
@@ -668,8 +693,14 @@ void main() {
         theme: ThemeData(useMaterial3: false),
         child: const Column(
           children: <Widget>[
-            Chip(avatar: CircleAvatar(child: Text('A')), label: Text('Chip A')),
-            Chip(avatar: CircleAvatar(child: Text('B')), label: Text('Chip B')),
+            Chip(
+              avatar: CircleAvatar(child: Text('A')),
+              label: Text('Chip A'),
+            ),
+            Chip(
+              avatar: CircleAvatar(child: Text('B')),
+              label: Text('Chip B'),
+            ),
           ],
         ),
       ),
@@ -685,8 +716,14 @@ void main() {
         textScaler: const TextScaler.linear(3.0),
         child: const Column(
           children: <Widget>[
-            Chip(avatar: CircleAvatar(child: Text('A')), label: Text('Chip A')),
-            Chip(avatar: CircleAvatar(child: Text('B')), label: Text('Chip B')),
+            Chip(
+              avatar: CircleAvatar(child: Text('A')),
+              label: Text('Chip A'),
+            ),
+            Chip(
+              avatar: CircleAvatar(child: Text('B')),
+              label: Text('Chip B'),
+            ),
           ],
         ),
       ),
@@ -706,7 +743,10 @@ void main() {
               avatar: CircleAvatar(child: Text('A')),
               label: Text('Chip A', textScaleFactor: 3.0),
             ),
-            Chip(avatar: CircleAvatar(child: Text('B')), label: Text('Chip B')),
+            Chip(
+              avatar: CircleAvatar(child: Text('B')),
+              label: Text('Chip B'),
+            ),
           ],
         ),
       ),
@@ -723,8 +763,14 @@ void main() {
       wrapForChip(
         child: const Column(
           children: <Widget>[
-            Chip(avatar: CircleAvatar(child: Text('A')), label: Text('Chip A')),
-            Chip(avatar: CircleAvatar(child: Text('B')), label: Text('Chip B')),
+            Chip(
+              avatar: CircleAvatar(child: Text('A')),
+              label: Text('Chip A'),
+            ),
+            Chip(
+              avatar: CircleAvatar(child: Text('B')),
+              label: Text('Chip B'),
+            ),
           ],
         ),
       ),
@@ -740,8 +786,14 @@ void main() {
         textScaler: const TextScaler.linear(3.0),
         child: const Column(
           children: <Widget>[
-            Chip(avatar: CircleAvatar(child: Text('A')), label: Text('Chip A')),
-            Chip(avatar: CircleAvatar(child: Text('B')), label: Text('Chip B')),
+            Chip(
+              avatar: CircleAvatar(child: Text('A')),
+              label: Text('Chip A'),
+            ),
+            Chip(
+              avatar: CircleAvatar(child: Text('B')),
+              label: Text('Chip B'),
+            ),
           ],
         ),
       ),
@@ -765,7 +817,10 @@ void main() {
               avatar: CircleAvatar(child: Text('A')),
               label: Text('Chip A', textScaleFactor: 3.0),
             ),
-            Chip(avatar: CircleAvatar(child: Text('B')), label: Text('Chip B')),
+            Chip(
+              avatar: CircleAvatar(child: Text('B')),
+              label: Text('Chip B'),
+            ),
           ],
         ),
       ),
@@ -789,7 +844,10 @@ void main() {
         theme: ThemeData(useMaterial3: false),
         child: Column(
           children: <Widget>[
-            Chip(avatar: const CircleAvatar(child: Text('A')), label: Text('Chip A', key: keyA)),
+            Chip(
+              avatar: const CircleAvatar(child: Text('A')),
+              label: Text('Chip A', key: keyA),
+            ),
             Chip(
               avatar: const CircleAvatar(child: Text('B')),
               label: SizedBox(key: keyB, width: 10.0, height: 10.0),
@@ -812,7 +870,10 @@ void main() {
       wrapForChip(
         child: Column(
           children: <Widget>[
-            Chip(avatar: const CircleAvatar(child: Text('A')), label: Text('Chip A', key: keyA)),
+            Chip(
+              avatar: const CircleAvatar(child: Text('A')),
+              label: Text('Chip A', key: keyA),
+            ),
             Chip(
               avatar: const CircleAvatar(child: Text('B')),
               label: SizedBox(key: keyB, width: 10.0, height: 10.0),
@@ -873,10 +934,9 @@ void main() {
 
     late final OverlayEntry entry;
     addTearDown(
-      () =>
-          entry
-            ..remove()
-            ..dispose(),
+      () => entry
+        ..remove()
+        ..dispose(),
     );
     await tester.pumpWidget(
       wrapForChip(
@@ -913,10 +973,9 @@ void main() {
 
     late final OverlayEntry entry;
     addTearDown(
-      () =>
-          entry
-            ..remove()
-            ..dispose(),
+      () => entry
+        ..remove()
+        ..dispose(),
     );
 
     await tester.pumpWidget(
@@ -1205,14 +1264,13 @@ void main() {
               StatefulBuilder(
                 builder: (BuildContext context, StateSetter setState) {
                   return RawChip(
-                    onDeleted:
-                        deletable
-                            ? () {
-                              setState(() {
-                                wasDeleted = true;
-                              });
-                            }
-                            : null,
+                    onDeleted: deletable
+                        ? () {
+                            setState(() {
+                              wasDeleted = true;
+                            });
+                          }
+                        : null,
                     deleteIcon: Container(
                       width: 40.0,
                       height: 40.0,
@@ -1331,14 +1389,13 @@ void main() {
               StatefulBuilder(
                 builder: (BuildContext context, StateSetter setState) {
                   return RawChip(
-                    onDeleted:
-                        deletable
-                            ? () {
-                              setState(() {
-                                wasDeleted = true;
-                              });
-                            }
-                            : null,
+                    onDeleted: deletable
+                        ? () {
+                            setState(() {
+                              wasDeleted = true;
+                            });
+                          }
+                        : null,
                     deleteIcon: Container(
                       width: 40.0,
                       height: 40.0,
@@ -2023,14 +2080,13 @@ void main() {
                 builder: (BuildContext context, StateSetter setState) {
                   return RawChip(
                     avatar: avatar,
-                    onSelected:
-                        selectable
-                            ? (bool value) {
-                              setState(() {
-                                selected = value;
-                              });
-                            }
-                            : null,
+                    onSelected: selectable
+                        ? (bool value) {
+                            setState(() {
+                              selected = value;
+                            });
+                          }
+                        : null,
                     selected: selected,
                     label: Text('Long Chip Label', key: labelKey),
                     shape: const StadiumBorder(),
@@ -2106,14 +2162,13 @@ void main() {
                 builder: (BuildContext context, StateSetter setState) {
                   return RawChip(
                     avatar: avatar,
-                    onSelected:
-                        selectable
-                            ? (bool value) {
-                              setState(() {
-                                selected = value;
-                              });
-                            }
-                            : null,
+                    onSelected: selectable
+                        ? (bool value) {
+                            setState(() {
+                              selected = value;
+                            });
+                          }
+                        : null,
                     selected: selected,
                     label: Text('Long Chip Label', key: labelKey),
                     shape: const StadiumBorder(),
@@ -2189,14 +2244,13 @@ void main() {
               StatefulBuilder(
                 builder: (BuildContext context, StateSetter setState) {
                   return RawChip(
-                    onSelected:
-                        selectable
-                            ? (bool value) {
-                              setState(() {
-                                selected = value;
-                              });
-                            }
-                            : null,
+                    onSelected: selectable
+                        ? (bool value) {
+                            setState(() {
+                              selected = value;
+                            });
+                          }
+                        : null,
                     selected: selected,
                     label: Text('Long Chip Label', key: labelKey),
                     shape: const StadiumBorder(),
@@ -2269,14 +2323,13 @@ void main() {
               StatefulBuilder(
                 builder: (BuildContext context, StateSetter setState) {
                   return RawChip(
-                    onSelected:
-                        selectable
-                            ? (bool value) {
-                              setState(() {
-                                selected = value;
-                              });
-                            }
-                            : null,
+                    onSelected: selectable
+                        ? (bool value) {
+                            setState(() {
+                              selected = value;
+                            });
+                          }
+                        : null,
                     selected: selected,
                     label: Text('Long Chip Label', key: labelKey),
                     shape: const StadiumBorder(),
@@ -2351,14 +2404,13 @@ void main() {
                 builder: (BuildContext context, StateSetter setState) {
                   return RawChip(
                     avatar: avatar,
-                    onSelected:
-                        selectable
-                            ? (bool value) {
-                              setState(() {
-                                selected = value;
-                              });
-                            }
-                            : null,
+                    onSelected: selectable
+                        ? (bool value) {
+                            setState(() {
+                              selected = value;
+                            });
+                          }
+                        : null,
                     selected: selected,
                     label: Text('Long Chip Label', key: labelKey),
                     shape: const StadiumBorder(),
@@ -2407,14 +2459,13 @@ void main() {
                 builder: (BuildContext context, StateSetter setState) {
                   return RawChip(
                     avatar: avatar,
-                    onSelected:
-                        selectable
-                            ? (bool value) {
-                              setState(() {
-                                selected = value;
-                              });
-                            }
-                            : null,
+                    onSelected: selectable
+                        ? (bool value) {
+                            setState(() {
+                              selected = value;
+                            });
+                          }
+                        : null,
                     selected: selected,
                     label: Text('Long Chip Label', key: labelKey),
                     shape: const StadiumBorder(),
@@ -2460,7 +2511,10 @@ void main() {
 
     Widget buildChip() {
       return wrapForChip(
-        child: Theme(data: theme, child: InputChip(label: const Text('Label'), onPressed: () {})),
+        child: Theme(
+          data: theme,
+          child: InputChip(label: const Text('Label'), onPressed: () {}),
+        ),
       );
     }
 
@@ -2553,7 +2607,9 @@ void main() {
       wrapForChip(
         child: Theme(
           data: ThemeData(useMaterial3: false, materialTapTargetSize: MaterialTapTargetSize.padded),
-          child: Center(child: RawChip(key: key1, label: const Text('test'))),
+          child: Center(
+            child: RawChip(key: key1, label: const Text('test')),
+          ),
         ),
       ),
     );
@@ -2568,7 +2624,9 @@ void main() {
             useMaterial3: false,
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
-          child: Center(child: RawChip(key: key2, label: const Text('test'))),
+          child: Center(
+            child: RawChip(key: key2, label: const Text('test')),
+          ),
         ),
       ),
     );
@@ -2584,7 +2642,9 @@ void main() {
       wrapForChip(
         child: Theme(
           data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
-          child: Center(child: RawChip(key: key1, label: const Text('test'))),
+          child: Center(
+            child: RawChip(key: key1, label: const Text('test')),
+          ),
         ),
       ),
     );
@@ -2597,7 +2657,9 @@ void main() {
       wrapForChip(
         child: Theme(
           data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
-          child: Center(child: RawChip(key: key2, label: const Text('test'))),
+          child: Center(
+            child: RawChip(key: key2, label: const Text('test')),
+          ),
         ),
       ),
     );
@@ -2645,22 +2707,20 @@ void main() {
                   shape: chipTheme?.shape,
                   selected: isSelectable && value,
                   label: Text('$value'),
-                  onSelected:
-                      isSelectable
-                          ? (bool newValue) {
-                            setState(() {
-                              value = newValue;
-                            });
-                          }
-                          : null,
-                  onPressed:
-                      isPressable
-                          ? () {
-                            setState(() {
-                              value = true;
-                            });
-                          }
-                          : null,
+                  onSelected: isSelectable
+                      ? (bool newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        }
+                      : null,
+                  onPressed: isPressable
+                      ? () {
+                          setState(() {
+                            value = true;
+                          });
+                        }
+                      : null,
                 );
               },
             ),
@@ -2737,7 +2797,9 @@ void main() {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
 
       await tester.pumpWidget(
-        const MaterialApp(home: Material(child: RawChip(label: Text('test')))),
+        const MaterialApp(
+          home: Material(child: RawChip(label: Text('test'))),
+        ),
       );
 
       expect(
@@ -2757,7 +2819,8 @@ void main() {
                             label: 'test',
                             textDirection: TextDirection.ltr,
                             flags: <SemanticsFlag>[
-                              SemanticsFlag.hasSelectedState,
+                              if (kIsWeb) SemanticsFlag.hasCheckedState,
+                              if (!kIsWeb) SemanticsFlag.hasSelectedState,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isButton,
                             ],
@@ -2782,7 +2845,11 @@ void main() {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
 
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: RawChip(label: const Text('test'), onDeleted: () {}))),
+        MaterialApp(
+          home: Material(
+            child: RawChip(label: const Text('test'), onDeleted: () {}),
+          ),
+        ),
       );
 
       expect(
@@ -2802,7 +2869,8 @@ void main() {
                             label: 'test',
                             textDirection: TextDirection.ltr,
                             flags: <SemanticsFlag>[
-                              SemanticsFlag.hasSelectedState,
+                              if (kIsWeb) SemanticsFlag.hasCheckedState,
+                              if (!kIsWeb) SemanticsFlag.hasSelectedState,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isButton,
                             ],
@@ -2841,7 +2909,11 @@ void main() {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
 
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: RawChip(label: const Text('test'), onPressed: () {}))),
+        MaterialApp(
+          home: Material(
+            child: RawChip(label: const Text('test'), onPressed: () {}),
+          ),
+        ),
       );
 
       expect(
@@ -2861,7 +2933,8 @@ void main() {
                             label: 'test',
                             textDirection: TextDirection.ltr,
                             flags: <SemanticsFlag>[
-                              SemanticsFlag.hasSelectedState,
+                              if (kIsWeb) SemanticsFlag.hasCheckedState,
+                              if (!kIsWeb) SemanticsFlag.hasSelectedState,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isButton,
                               SemanticsFlag.isEnabled,
@@ -2921,7 +2994,8 @@ void main() {
                             label: 'test',
                             textDirection: TextDirection.ltr,
                             flags: <SemanticsFlag>[
-                              SemanticsFlag.hasSelectedState,
+                              if (kIsWeb) SemanticsFlag.hasCheckedState,
+                              if (!kIsWeb) SemanticsFlag.hasSelectedState,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isButton,
                               SemanticsFlag.isEnabled,
@@ -2980,8 +3054,14 @@ void main() {
                               SemanticsFlag.isButton,
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocusable,
-                              SemanticsFlag.hasSelectedState,
-                              SemanticsFlag.isSelected,
+                              if (kIsWeb) ...<SemanticsFlag>[
+                                SemanticsFlag.hasCheckedState,
+                                SemanticsFlag.isChecked,
+                              ],
+                              if (!kIsWeb) ...<SemanticsFlag>[
+                                SemanticsFlag.hasSelectedState,
+                                SemanticsFlag.isSelected,
+                              ],
                             ],
                             actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                           ),
@@ -3030,7 +3110,8 @@ void main() {
                             label: 'test',
                             textDirection: TextDirection.ltr,
                             flags: <SemanticsFlag>[
-                              SemanticsFlag.hasSelectedState,
+                              if (kIsWeb) SemanticsFlag.hasCheckedState,
+                              if (!kIsWeb) SemanticsFlag.hasSelectedState,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isButton,
                             ],
@@ -3057,7 +3138,9 @@ void main() {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
 
       await tester.pumpWidget(
-        const MaterialApp(home: Material(child: RawChip(tapEnabled: false, label: Text('test')))),
+        const MaterialApp(
+          home: Material(child: RawChip(tapEnabled: false, label: Text('test'))),
+        ),
       );
 
       expect(
@@ -3077,7 +3160,10 @@ void main() {
                             label: 'test',
                             textDirection: TextDirection.ltr,
                             // Must not be a button when tapping is disabled.
-                            flags: <SemanticsFlag>[SemanticsFlag.hasSelectedState],
+                            flags: <SemanticsFlag>[
+                              if (kIsWeb) SemanticsFlag.hasCheckedState,
+                              if (!kIsWeb) SemanticsFlag.hasSelectedState,
+                            ],
                             actions: <SemanticsAction>[],
                           ),
                         ],
@@ -3102,7 +3188,11 @@ void main() {
 
       // These settings make a Chip which can be tapped, both in general and at this moment.
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: RawChip(onPressed: () {}, label: const Text('test')))),
+        MaterialApp(
+          home: Material(
+            child: RawChip(onPressed: () {}, label: const Text('test')),
+          ),
+        ),
       );
 
       expect(
@@ -3122,7 +3212,8 @@ void main() {
                             label: 'test',
                             textDirection: TextDirection.ltr,
                             flags: <SemanticsFlag>[
-                              SemanticsFlag.hasSelectedState,
+                              if (kIsWeb) SemanticsFlag.hasCheckedState,
+                              if (!kIsWeb) SemanticsFlag.hasSelectedState,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isButton,
                               SemanticsFlag.isEnabled,
@@ -3151,7 +3242,9 @@ void main() {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
       // These settings make a Chip which _could_ be tapped, but not currently (ensures `canTap == false`).
       await tester.pumpWidget(
-        const MaterialApp(home: Material(child: RawChip(label: Text('test')))),
+        const MaterialApp(
+          home: Material(child: RawChip(label: Text('test'))),
+        ),
       );
 
       expect(
@@ -3171,7 +3264,8 @@ void main() {
                             label: 'test',
                             textDirection: TextDirection.ltr,
                             flags: <SemanticsFlag>[
-                              SemanticsFlag.hasSelectedState,
+                              if (kIsWeb) SemanticsFlag.hasCheckedState,
+                              if (!kIsWeb) SemanticsFlag.hasSelectedState,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isButton,
                             ],
@@ -3222,7 +3316,9 @@ void main() {
 
   testWidgets('Chips can be tapped', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: RawChip(label: Text('raw chip')))),
+      const MaterialApp(
+        home: Material(child: RawChip(label: Text('raw chip'))),
+      ),
     );
 
     await tester.tap(find.byType(RawChip));
@@ -3241,7 +3337,9 @@ void main() {
     InputChip inputChip = const InputChip(label: Text('Label'));
 
     Widget buildChip() {
-      return wrapForChip(child: Theme(data: theme, child: inputChip));
+      return wrapForChip(
+        child: Theme(data: theme, child: inputChip),
+      );
     }
 
     await tester.pumpWidget(buildChip());
@@ -3371,7 +3469,9 @@ void main() {
     checkChipMaterialClipBehavior(tester, Clip.none);
 
     await tester.pumpWidget(
-      wrapForChip(child: const Chip(label: label, clipBehavior: Clip.antiAlias)),
+      wrapForChip(
+        child: const Chip(label: label, clipBehavior: Clip.antiAlias),
+      ),
     );
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
@@ -3445,7 +3545,9 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/28646
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(child: ActionChip(onPressed: () {}, label: const Text('action chip'))),
+        home: Material(
+          child: ActionChip(onPressed: () {}, label: const Text('action chip')),
+        ),
       ),
     );
     expect(find.byType(InkWell), findsOneWidget);
@@ -4785,7 +4887,7 @@ void main() {
         child: RawChip(
           isEnabled: enabled,
           selected: selected,
-          color: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+          color: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
             if (states.contains(MaterialState.disabled) &&
                 states.contains(MaterialState.selected)) {
               return disabledSelectedColor;
@@ -4944,7 +5046,9 @@ void main() {
     Widget buildChip({OutlinedBorder? shape, BorderSide? side}) {
       return MaterialApp(
         home: Material(
-          child: Center(child: RawChip(shape: shape, side: side, label: const Text('RawChip'))),
+          child: Center(
+            child: RawChip(shape: shape, side: side, label: const Text('RawChip')),
+          ),
         ),
       );
     }
@@ -5083,7 +5187,9 @@ void main() {
 
   testWidgets('Delete button is visible on disabled RawChip', (WidgetTester tester) async {
     await tester.pumpWidget(
-      wrapForChip(child: RawChip(isEnabled: false, label: const Text('Label'), onDeleted: () {})),
+      wrapForChip(
+        child: RawChip(isEnabled: false, label: const Text('Label'), onDeleted: () {}),
+      ),
     );
 
     // Delete button should be visible.
@@ -5353,7 +5459,11 @@ void main() {
 
   testWidgets('Default delete button InkWell shape', (WidgetTester tester) async {
     await tester.pumpWidget(
-      wrapForChip(child: Center(child: RawChip(onDeleted: () {}, label: const Text('RawChip')))),
+      wrapForChip(
+        child: Center(
+          child: RawChip(onDeleted: () {}, label: const Text('RawChip')),
+        ),
+      ),
     );
 
     final InkWell deleteButtonInkWell = tester.widget<InkWell>(
@@ -5366,7 +5476,9 @@ void main() {
     final ThemeData theme = ThemeData();
     await tester.pumpWidget(
       wrapForChip(
-        child: Center(child: RawChip(onDeleted: () {}, label: const Text('RawChip'))),
+        child: Center(
+          child: RawChip(onDeleted: () {}, label: const Text('RawChip')),
+        ),
         theme: theme,
       ),
     );
@@ -5531,22 +5643,20 @@ void main() {
                     shape: chipTheme?.shape,
                     selected: isSelectable && value,
                     label: Text('$value'),
-                    onSelected:
-                        isSelectable
-                            ? (bool newValue) {
-                              setState(() {
-                                value = newValue;
-                              });
-                            }
-                            : null,
-                    onPressed:
-                        isPressable
-                            ? () {
-                              setState(() {
-                                value = true;
-                              });
-                            }
-                            : null,
+                    onSelected: isSelectable
+                        ? (bool newValue) {
+                            setState(() {
+                              value = newValue;
+                            });
+                          }
+                        : null,
+                    onPressed: isPressable
+                        ? () {
+                            setState(() {
+                              value = true;
+                            });
+                          }
+                        : null,
                   );
                 },
               ),
@@ -5654,7 +5764,10 @@ void main() {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
-            children: <Widget>[text, RawChip(label: text)],
+            children: <Widget>[
+              text,
+              RawChip(label: text),
+            ],
           ),
         ),
       ),
@@ -6118,7 +6231,11 @@ void main() {
     const SystemMouseCursor customCursor = SystemMouseCursors.grab;
 
     await tester.pumpWidget(
-      wrapForChip(child: const Center(child: Chip(mouseCursor: customCursor, label: Text('Chip')))),
+      wrapForChip(
+        child: const Center(
+          child: Chip(mouseCursor: customCursor, label: Text('Chip')),
+        ),
+      ),
     );
 
     final TestGesture gesture = await tester.createGesture(
@@ -6257,6 +6374,34 @@ void main() {
       handle.dispose();
     },
   );
+
+  testWidgets('Chip renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: Scaffold(body: Chip(label: Text('X'))),
+          ),
+        ),
+      ),
+    );
+    final Finder xText = find.text('X');
+    expect(tester.getSize(xText).isEmpty, isTrue);
+  });
+
+  testWidgets('RawChip renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: Scaffold(body: RawChip(label: Text('X'))),
+          ),
+        ),
+      ),
+    );
+    final Finder xText = find.text('X');
+    expect(tester.getSize(xText).isEmpty, isTrue);
+  });
 }
 
 class _MaterialStateOutlinedBorder extends StadiumBorder implements MaterialStateOutlinedBorder {

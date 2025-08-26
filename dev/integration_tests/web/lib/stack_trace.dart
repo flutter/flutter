@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// Auto-format is disabled for this file to keep stack trace lines and columns stable.
+
+// dart format off
+
 import 'dart:js_interop';
 
 import 'package:collection/collection.dart';
@@ -12,29 +16,27 @@ import 'package:web/web.dart' as web;
 /// Expected sequence of method calls.
 const List<String> callChain = <String>['baz', 'bar', 'foo'];
 
-final List<StackFrame> expectedProfileStackFrames =
-    callChain.map<StackFrame>((String method) {
-      return StackFrame(
-        number: -1,
-        packageScheme: '<unknown>',
-        package: '<unknown>',
-        packagePath: '<unknown>',
-        line: -1,
-        column: -1,
-        className: 'Object',
-        method: method,
-        source: '',
-      );
-    }).toList();
+final List<StackFrame> expectedProfileStackFrames = callChain.map<StackFrame>((String method) {
+  return StackFrame(
+    number: -1,
+    packageScheme: '<unknown>',
+    package: '<unknown>',
+    packagePath: '<unknown>',
+    line: -1,
+    column: -1,
+    className: 'Object',
+    method: method,
+    source: '',
+  );
+}).toList();
 
-// TODO(yjbanov): fix these stack traces when https://github.com/flutter/flutter/issues/50753 is fixed.
 const List<StackFrame> expectedDebugStackFrames = <StackFrame>[
   StackFrame(
     number: -1,
     packageScheme: 'package',
     package: 'web_integration',
     packagePath: 'stack_trace.dart',
-    line: 119,
+    line: 121,
     column: 3,
     className: '<unknown>',
     method: 'baz',
@@ -45,7 +47,7 @@ const List<StackFrame> expectedDebugStackFrames = <StackFrame>[
     packageScheme: 'package',
     package: 'web_integration',
     packagePath: 'stack_trace.dart',
-    line: 114,
+    line: 116,
     column: 3,
     className: '<unknown>',
     method: 'bar',
@@ -56,7 +58,7 @@ const List<StackFrame> expectedDebugStackFrames = <StackFrame>[
     packageScheme: 'package',
     package: 'web_integration',
     packagePath: 'stack_trace.dart',
-    line: 109,
+    line: 111,
     column: 3,
     className: '<unknown>',
     method: 'foo',
@@ -125,8 +127,9 @@ void _checkStackFrameContents(
   dynamic stackTrace,
 ) {
   // Filter out stack frames outside this library so this test is less brittle.
-  final List<StackFrame> actual =
-      parsedFrames.where((StackFrame frame) => callChain.contains(frame.method)).toList();
+  final List<StackFrame> actual = parsedFrames
+      .where((StackFrame frame) => callChain.contains(frame.method))
+      .toList();
   final bool stackFramesAsExpected = ListEquality<StackFrame>(
     StackFrameEquality(),
   ).equals(actual, expectedFrames);

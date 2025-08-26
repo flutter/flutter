@@ -156,8 +156,8 @@ class ScaffoldMessenger extends StatefulWidget {
   static ScaffoldMessengerState of(BuildContext context) {
     assert(debugCheckHasScaffoldMessenger(context));
 
-    final _ScaffoldMessengerScope scope =
-        context.dependOnInheritedWidgetOfExactType<_ScaffoldMessengerScope>()!;
+    final _ScaffoldMessengerScope scope = context
+        .dependOnInheritedWidgetOfExactType<_ScaffoldMessengerScope>()!;
     return scope._scaffoldMessengerState;
   }
 
@@ -171,8 +171,8 @@ class ScaffoldMessenger extends StatefulWidget {
   ///  * [of], which is a similar function, except that it will throw an
   ///    exception if a [ScaffoldMessenger] is not found in the given context.
   static ScaffoldMessengerState? maybeOf(BuildContext context) {
-    final _ScaffoldMessengerScope? scope =
-        context.dependOnInheritedWidgetOfExactType<_ScaffoldMessengerScope>();
+    final _ScaffoldMessengerScope? scope = context
+        .dependOnInheritedWidgetOfExactType<_ScaffoldMessengerScope>();
     return scope?._scaffoldMessengerState;
   }
 
@@ -847,12 +847,11 @@ class ScaffoldGeometry {
       return ScaffoldGeometry(bottomNavigationBarTop: bottomNavigationBarTop);
     }
 
-    final Rect scaledButton =
-        Rect.lerp(
-          floatingActionButtonArea!.center & Size.zero,
-          floatingActionButtonArea,
-          scaleFactor,
-        )!;
+    final Rect scaledButton = Rect.lerp(
+      floatingActionButtonArea!.center & Size.zero,
+      floatingActionButtonArea,
+      scaleFactor,
+    )!;
     return copyWith(floatingActionButtonArea: scaledButton);
   }
 
@@ -887,6 +886,7 @@ class _ScaffoldGeometryNotifier extends ChangeNotifier
       }
       return true;
     }());
+
     return geometry._scaleFloatingActionButton(floatingActionButtonScale!);
   }
 
@@ -976,21 +976,21 @@ class _BodyBuilder extends StatelessWidget {
         final _BodyBoxConstraints bodyConstraints = constraints as _BodyBoxConstraints;
         final MediaQueryData metrics = MediaQuery.of(context);
 
-        final double bottom =
-            extendBody
-                ? math.max(metrics.padding.bottom, bodyConstraints.bottomWidgetsHeight)
-                : metrics.padding.bottom;
+        final double bottom = extendBody
+            ? math.max(metrics.padding.bottom, bodyConstraints.bottomWidgetsHeight)
+            : metrics.padding.bottom;
 
-        final double top =
-            extendBodyBehindAppBar
-                ? math.max(
-                  metrics.padding.top,
-                  bodyConstraints.appBarHeight + bodyConstraints.materialBannerHeight,
-                )
-                : metrics.padding.top;
+        final double top = extendBodyBehindAppBar
+            ? math.max(
+                metrics.padding.top,
+                bodyConstraints.appBarHeight + bodyConstraints.materialBannerHeight,
+              )
+            : metrics.padding.top;
 
         return MediaQuery(
-          data: metrics.copyWith(padding: metrics.padding.copyWith(top: top, bottom: bottom)),
+          data: metrics.copyWith(
+            padding: metrics.padding.copyWith(top: top, bottom: bottom),
+          ),
           child: body,
         );
       },
@@ -1056,8 +1056,10 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
     double? bottomNavigationBarTop;
     if (hasChild(_ScaffoldSlot.bottomNavigationBar)) {
-      final double bottomNavigationBarHeight =
-          layoutChild(_ScaffoldSlot.bottomNavigationBar, fullWidthConstraints).height;
+      final double bottomNavigationBarHeight = layoutChild(
+        _ScaffoldSlot.bottomNavigationBar,
+        fullWidthConstraints,
+      ).height;
       bottomWidgetsHeight += bottomNavigationBarHeight;
       bottomNavigationBarTop = math.max(0.0, bottom - bottomWidgetsHeight);
       positionChild(_ScaffoldSlot.bottomNavigationBar, Offset(0.0, bottomNavigationBarTop));
@@ -1068,8 +1070,10 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         maxWidth: fullWidthConstraints.maxWidth,
         maxHeight: math.max(0.0, bottom - bottomWidgetsHeight - contentTop),
       );
-      final double persistentFooterHeight =
-          layoutChild(_ScaffoldSlot.persistentFooter, footerConstraints).height;
+      final double persistentFooterHeight = layoutChild(
+        _ScaffoldSlot.persistentFooter,
+        footerConstraints,
+      ).height;
       bottomWidgetsHeight += persistentFooterHeight;
       positionChild(
         _ScaffoldSlot.persistentFooter,
@@ -1242,8 +1246,9 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         // no FAB, make sure we account for safe space when the SnackBar is
         // floating.
         final double safeYOffsetBase = size.height - minViewPadding.bottom;
-        snackBarYOffsetBase =
-            isSnackBarFloating ? math.min(contentBottom, safeYOffsetBase) : contentBottom;
+        snackBarYOffsetBase = isSnackBarFloating
+            ? math.min(contentBottom, safeYOffsetBase)
+            : contentBottom;
       }
 
       final double xOffset = hasCustomWidth ? (size.width - snackBarWidth!) / 2 : 0.0;
@@ -1371,6 +1376,9 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
       // If we start out with a child, have the child appear fully visible instead
       // of animating in.
       widget.currentController.value = 1.0;
+      // With FloatingActionButtonAnimator.noAnimation, floatingActionButtonScale is null.
+      // Default to a scale of 1.0 to ensure the button remains visible.
+      _updateGeometryScale(1.0);
     } else {
       // If we start without a child we update the geometry object with a
       // floating action button scale of 0, as it is not showing on the screen.
@@ -2113,8 +2121,8 @@ class Scaffold extends StatefulWidget {
   /// the listener, and register a listener to the new [ScaffoldGeometry]
   /// listenable.
   static ValueListenable<ScaffoldGeometry> geometryOf(BuildContext context) {
-    final _ScaffoldScope? scaffoldScope =
-        context.dependOnInheritedWidgetOfExactType<_ScaffoldScope>();
+    final _ScaffoldScope? scaffoldScope = context
+        .dependOnInheritedWidgetOfExactType<_ScaffoldScope>();
     if (scaffoldScope == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary(
@@ -2333,10 +2341,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   // This is used to update the _messengerMaterialBanner by the ScaffoldMessenger.
   void _updateMaterialBanner() {
     final ScaffoldFeatureController<MaterialBanner, MaterialBannerClosedReason>?
-    messengerMaterialBanner =
-        _scaffoldMessenger!._materialBanners.isNotEmpty
-            ? _scaffoldMessenger!._materialBanners.first
-            : null;
+    messengerMaterialBanner = _scaffoldMessenger!._materialBanners.isNotEmpty
+        ? _scaffoldMessenger!._materialBanners.first
+        : null;
 
     if (_messengerMaterialBanner != messengerMaterialBanner) {
       setState(() {
@@ -2517,16 +2524,15 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       completer.complete();
     }
 
-    final LocalHistoryEntry? entry =
-        isPersistent
-            ? null
-            : LocalHistoryEntry(
-              onRemove: () {
-                if (!removedEntry && _currentBottomSheet?._widget == bottomSheet && !doingDispose) {
-                  removeCurrentBottomSheet();
-                }
-              },
-            );
+    final LocalHistoryEntry? entry = isPersistent
+        ? null
+        : LocalHistoryEntry(
+            onRemove: () {
+              if (!removedEntry && _currentBottomSheet?._widget == bottomSheet && !doingDispose) {
+                removeCurrentBottomSheet();
+              }
+            },
+          );
 
     void removeEntryIfNeeded() {
       if (!isPersistent && !removedEntry) {
@@ -2891,7 +2897,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     }
 
     if (child != null) {
-      children.add(LayoutId(id: childId, child: MediaQuery(data: data, child: child)));
+      children.add(
+        LayoutId(
+          id: childId,
+          child: MediaQuery(data: data, child: child),
+        ),
+      );
     }
   }
 
@@ -2980,10 +2991,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       widget.body == null
           ? null
           : _BodyBuilder(
-            extendBody: widget.extendBody,
-            extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
-            body: KeyedSubtree(key: _bodyKey, child: widget.body!),
-          ),
+              extendBody: widget.extendBody,
+              extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
+              body: KeyedSubtree(key: _bodyKey, child: widget.body!),
+            ),
       _ScaffoldSlot.body,
       removeLeftPadding: false,
       removeTopPadding: widget.appBar != null,
@@ -3032,10 +3043,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     if (_currentBottomSheet != null || _dismissedBottomSheets.isNotEmpty) {
       final Widget stack = Stack(
         alignment: Alignment.bottomCenter,
-        children: <Widget>[
-          ..._dismissedBottomSheets,
-          if (_currentBottomSheet != null) _currentBottomSheet!._widget,
-        ],
+        children: <Widget>[..._dismissedBottomSheets, ?_currentBottomSheet?._widget],
       );
       _addIfNonNull(
         children,
@@ -3192,8 +3200,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     // The minimum viewPadding for interactive elements positioned by the
     // Scaffold to keep within safe interactive areas.
     final EdgeInsets minViewPadding = MediaQuery.viewPaddingOf(context).copyWith(
-      bottom:
-          _resizeToAvoidBottomInset && MediaQuery.viewInsetsOf(context).bottom != 0.0 ? 0.0 : null,
+      bottom: _resizeToAvoidBottomInset && MediaQuery.viewInsetsOf(context).bottom != 0.0
+          ? 0.0
+          : null,
     );
 
     return _ScaffoldScope(

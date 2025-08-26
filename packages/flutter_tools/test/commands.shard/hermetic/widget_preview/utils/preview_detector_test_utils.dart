@@ -4,22 +4,25 @@
 
 import 'dart:async';
 
+import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/signals.dart';
+import 'package:flutter_tools/src/widget_preview/analytics.dart';
 import 'package:flutter_tools/src/widget_preview/dependency_graph.dart';
 import 'package:flutter_tools/src/widget_preview/preview_detector.dart';
-import 'package:test/test.dart';
 
+import '../../../../src/common.dart';
+import '../../../../src/fakes.dart';
 import 'preview_project.dart';
 
-bool _stateInitialized = false;
+var _stateInitialized = false;
 
 // Global state that must be cleaned up by `tearDown` in initializeTestPreviewDetectorState.
 void Function(PreviewDependencyGraph)? _onChangeDetectedImpl;
-void Function()? _onPubspecChangeDetected;
+void Function(String path)? _onPubspecChangeDetected;
 Directory? _projectRoot;
 late FileSystem _fs;
 
@@ -47,6 +50,15 @@ PreviewDetector createTestPreviewDetector() {
   }
   _projectRoot = _fs.systemTempDirectory.createTempSync('root');
   return PreviewDetector(
+    platform: FakePlatform(),
+    previewAnalytics: WidgetPreviewAnalytics(
+      analytics: getInitializedFakeAnalyticsInstance(
+        fakeFlutterVersion: FakeFlutterVersion(),
+        // We don't care about anything written by fake analytics, so we're safe to use a different
+        // file system here.
+        fs: MemoryFileSystem.test(),
+      ),
+    ),
     projectRoot: _projectRoot!,
     logger: BufferLogger.test(),
     fs: _fs,
@@ -59,45 +71,50 @@ void _onChangeDetectedRoot(PreviewDependencyGraph mapping) {
   _onChangeDetectedImpl!(mapping);
 }
 
-void _onPubspecChangeDetectedRoot() {
-  _onPubspecChangeDetected!();
+void _onPubspecChangeDetectedRoot(String path) {
+  _onPubspecChangeDetected?.call(path);
 }
 
 /// Test the files included in [filesWithErrors] contain errors after executing [changeOperation].
 Future<void> expectHasErrors({
+  required WidgetPreviewProject project,
   required void Function() changeOperation,
   required Set<WidgetPreviewSourceFile> filesWithErrors,
 }) async {
   await waitForChangeDetected(
-    onChangeDetected:
-        (PreviewDependencyGraph updated) => expectPreviewDependencyGraphIsWellFormed(
-          updated,
-          expectedFilesWithErrors: filesWithErrors,
-        ),
+    onChangeDetected: (PreviewDependencyGraph updated) => expectPreviewDependencyGraphIsWellFormed(
+      project: project,
+      graph: updated,
+      expectedFilesWithErrors: filesWithErrors,
+    ),
     changeOperation: changeOperation,
   );
 }
 
 /// Test dependency graph generated as a result of [changeOperation] contains no compile time
 /// errors.
-Future<void> expectHasNoErrors({required void Function() changeOperation}) async {
+Future<void> expectHasNoErrors({
+  required WidgetPreviewProject project,
+  required void Function() changeOperation,
+}) async {
   await expectHasErrors(
+    project: project,
     changeOperation: changeOperation,
     filesWithErrors: const <WidgetPreviewSourceFile>{},
   );
 }
 
 /// Waits for a pubspec changed event to be detected after executing [changeOperation].
-Future<void> waitForPubspecChangeDetected({required void Function() changeOperation}) async {
-  final Completer<void> completer = Completer<void>();
-  _onPubspecChangeDetected = () {
+Future<String> waitForPubspecChangeDetected({required void Function() changeOperation}) {
+  final completer = Completer<String>();
+  _onPubspecChangeDetected = (String path) {
     if (completer.isCompleted) {
       return;
     }
-    completer.complete();
+    completer.complete(path);
   };
   changeOperation();
-  await completer.future;
+  return completer.future;
 }
 
 /// Waits for a change detected event after executing [changeOperation].
@@ -105,9 +122,9 @@ Future<void> waitForPubspecChangeDetected({required void Function() changeOperat
 /// Invokes [onChangeDetected] when a change is detected before the returned future is completed.
 Future<void> waitForChangeDetected({
   required void Function(PreviewDependencyGraph) onChangeDetected,
-  required void Function() changeOperation,
+  required FutureOr<void> Function() changeOperation,
 }) async {
-  final Completer<void> completer = Completer<void>();
+  final completer = Completer<void>();
   _onChangeDetectedImpl = (PreviewDependencyGraph updated) {
     if (completer.isCompleted) {
       return;
@@ -115,7 +132,7 @@ Future<void> waitForChangeDetected({
     onChangeDetected(updated);
     completer.complete();
   };
-  changeOperation();
+  await changeOperation();
   await completer.future;
 }
 
@@ -124,8 +141,8 @@ Future<void> waitForNChangesDetected({
   required int n,
   required void Function() changeOperation,
 }) async {
-  int changeCount = 0;
-  final Completer<void> completer = Completer<void>();
+  var changeCount = 0;
+  final completer = Completer<void>();
   _onChangeDetectedImpl = (PreviewDependencyGraph updated) {
     if (completer.isCompleted) {
       return;
@@ -139,13 +156,25 @@ Future<void> waitForNChangesDetected({
   await completer.future;
 }
 
+extension PreviewDependencyGraphExtensions on PreviewDependencyGraph {
+  /// Returns a subset of dependency graph consisting only of library nodes containing previews.
+  PreviewDependencyGraph get nodesWithPreviews {
+    return PreviewDependencyGraph.fromEntries(
+      entries.where(
+        (MapEntry<PreviewPath, LibraryPreviewNode> element) => element.value.previews.isNotEmpty,
+      ),
+    );
+  }
+}
+
 /// Walks the [graph] to verify its structure and that all files contained in
 /// [expectedFilesWithErrors] actually contain errors.
-void expectPreviewDependencyGraphIsWellFormed(
-  PreviewDependencyGraph graph, {
+void expectPreviewDependencyGraphIsWellFormed({
+  required WidgetPreviewProject project,
+  required PreviewDependencyGraph graph,
   Set<WidgetPreviewSourceFile> expectedFilesWithErrors = const <WidgetPreviewSourceFile>{},
 }) {
-  final Set<LibraryPreviewNode> nodesWithErrors = <LibraryPreviewNode>{};
+  final nodesWithErrors = <LibraryPreviewNode>{};
   for (final LibraryPreviewNode node in graph.values) {
     expect(_fs.file(node.path.path), exists);
     if (node.hasErrors) {
@@ -161,14 +190,14 @@ void expectPreviewDependencyGraphIsWellFormed(
 
   // Validates that all upstream dependencies are marked as having a transitive dependency
   // containing errors.
-  final Set<PreviewPath> filesWithTransitiveErrors = <PreviewPath>{};
+  final filesWithTransitiveErrors = <PreviewPath>{};
   void dependencyHasErrorsValidator(LibraryPreviewNode node) {
     filesWithTransitiveErrors.add(node.path);
     expect(node.dependencyHasErrors, true);
     node.dependedOnBy.forEach(dependencyHasErrorsValidator);
   }
 
-  for (final LibraryPreviewNode node in nodesWithErrors) {
+  for (final node in nodesWithErrors) {
     filesWithTransitiveErrors.add(node.path);
     node.dependedOnBy.forEach(dependencyHasErrorsValidator);
   }
@@ -177,10 +206,7 @@ void expectPreviewDependencyGraphIsWellFormed(
   expect(
     filesWithTransitiveErrors,
     expectedFilesWithErrors
-        .map(
-          (WidgetPreviewSourceFile file) =>
-              previewPathForFile(projectRoot: _projectRoot!, path: file.path),
-        )
+        .map((WidgetPreviewSourceFile file) => project.toPreviewPath(file.path))
         .toSet(),
   );
 }

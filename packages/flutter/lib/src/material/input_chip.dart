@@ -179,7 +179,7 @@ class InputChip extends StatelessWidget
   @override
   final bool autofocus;
   @override
-  final MaterialStateProperty<Color?>? color;
+  final WidgetStateProperty<Color?>? color;
   @override
   final Color? backgroundColor;
   @override
@@ -216,8 +216,9 @@ class InputChip extends StatelessWidget
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    final ChipThemeData? defaults =
-        Theme.of(context).useMaterial3 ? _InputChipDefaultsM3(context, isEnabled, selected) : null;
+    final ChipThemeData? defaults = Theme.of(context).useMaterial3
+        ? _InputChipDefaultsM3(context, isEnabled, selected)
+        : null;
     final Widget? resolvedDeleteIcon =
         deleteIcon ?? (Theme.of(context).useMaterial3 ? const Icon(Icons.clear, size: 18) : null);
     return RawChip(
@@ -296,8 +297,8 @@ class _InputChipDefaultsM3 extends ChipThemeData {
   );
 
   @override
-  MaterialStateProperty<Color?>? get color =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color?>? get color =>
+    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected) && states.contains(MaterialState.disabled)) {
         return _colors.onSurface.withOpacity(0.12);
       }

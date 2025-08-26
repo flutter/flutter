@@ -89,13 +89,12 @@ void main() {
       ),
     );
     final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
-    final int scrollableId =
-        semantics
-            .nodesWith(
-              actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollToOffset],
-            )
-            .single
-            .id;
+    final int scrollableId = semantics
+        .nodesWith(
+          actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollToOffset],
+        )
+        .single
+        .id;
 
     assert(controller.offset == 0);
     semanticsOwner.performAction(
@@ -122,16 +121,12 @@ void main() {
       ),
     );
     final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
-    final int scrollableId =
-        semantics
-            .nodesWith(
-              actions: <SemanticsAction>[
-                SemanticsAction.scrollLeft,
-                SemanticsAction.scrollToOffset,
-              ],
-            )
-            .single
-            .id;
+    final int scrollableId = semantics
+        .nodesWith(
+          actions: <SemanticsAction>[SemanticsAction.scrollLeft, SemanticsAction.scrollToOffset],
+        )
+        .single
+        .id;
 
     assert(controller.offset == 0);
     semanticsOwner.performAction(
@@ -215,8 +210,10 @@ void main() {
 
     expect(scrollController.offset, kItemHeight / 2);
 
-    final int firstContainerId =
-        tester.renderObject(find.byWidget(containers.first)).debugSemantics!.id;
+    final int firstContainerId = tester
+        .renderObject(find.byWidget(containers.first))
+        .debugSemantics!
+        .id;
     tester.binding.pipelineOwner.semanticsOwner!.performAction(
       firstContainerId,
       SemanticsAction.showOnScreen,
@@ -239,7 +236,9 @@ void main() {
 
     final List<Widget> containers = List<Widget>.generate(
       80,
-      (int i) => MergeSemantics(child: SizedBox(height: kItemHeight, child: Text('container $i'))),
+      (int i) => MergeSemantics(
+        child: SizedBox(height: kItemHeight, child: Text('container $i')),
+      ),
     );
 
     final ScrollController scrollController = ScrollController(
@@ -269,7 +268,7 @@ void main() {
                       expandedHeight: kExpandedAppBarHeight,
                       flexibleSpace: FlexibleSpaceBar(title: Text('App Bar')),
                     ),
-                    SliverList(delegate: SliverChildListDelegate(containers)),
+                    SliverList.list(children: containers),
                   ],
                 );
               },
@@ -281,8 +280,10 @@ void main() {
 
     expect(scrollController.offset, kItemHeight / 2);
 
-    final int firstContainerId =
-        tester.renderObject(find.byWidget(containers.first)).debugSemantics!.id;
+    final int firstContainerId = tester
+        .renderObject(find.byWidget(containers.first))
+        .debugSemantics!
+        .id;
     tester.binding.pipelineOwner.semanticsOwner!.performAction(
       firstContainerId,
       SemanticsAction.showOnScreen,
@@ -477,7 +478,10 @@ void main() {
       (int i) => SizedBox(height: 40.0, child: Text('Item $i')),
     );
     await tester.pumpWidget(
-      Directionality(textDirection: TextDirection.ltr, child: ListView(children: children)),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView(children: children),
+      ),
     );
 
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
@@ -559,7 +563,9 @@ void main() {
 
     setUp(() {
       children = List<Widget>.generate(10, (int i) {
-        return MergeSemantics(child: SizedBox(height: kItemHeight, child: Text('container $i')));
+        return MergeSemantics(
+          child: SizedBox(height: kItemHeight, child: Text('container $i')),
+        );
       });
 
       scrollController = ScrollController(initialScrollOffset: kItemHeight / 2);
@@ -582,8 +588,10 @@ void main() {
 
       expect(scrollController.offset, kItemHeight / 2);
 
-      final int firstContainerId =
-          tester.renderObject(find.byWidget(children.first)).debugSemantics!.id;
+      final int firstContainerId = tester
+          .renderObject(find.byWidget(children.first))
+          .debugSemantics!
+          .id;
       tester.binding.pipelineOwner.semanticsOwner!.performAction(
         firstContainerId,
         SemanticsAction.showOnScreen,
@@ -602,8 +610,10 @@ void main() {
 
       expect(scrollController.offset, kItemHeight / 2);
 
-      final int firstContainerId =
-          tester.renderObject(find.byWidget(children[2])).debugSemantics!.id;
+      final int firstContainerId = tester
+          .renderObject(find.byWidget(children[2]))
+          .debugSemantics!
+          .id;
       tester.binding.pipelineOwner.semanticsOwner!.performAction(
         firstContainerId,
         SemanticsAction.showOnScreen,
@@ -624,8 +634,10 @@ void main() {
 
       expect(scrollController.offset, kItemHeight / 2);
 
-      final int firstContainerId =
-          tester.renderObject(find.byWidget(children[1])).debugSemantics!.id;
+      final int firstContainerId = tester
+          .renderObject(find.byWidget(children[1]))
+          .debugSemantics!
+          .id;
       tester.binding.pipelineOwner.semanticsOwner!.performAction(
         firstContainerId,
         SemanticsAction.showOnScreen,
@@ -699,8 +711,10 @@ void main() {
 
       expect(scrollController.offset, -250.0);
 
-      final int firstContainerId =
-          tester.renderObject(find.byKey(const ValueKey<int>(2))).debugSemantics!.id;
+      final int firstContainerId = tester
+          .renderObject(find.byKey(const ValueKey<int>(2)))
+          .debugSemantics!
+          .id;
       tester.binding.pipelineOwner.semanticsOwner!.performAction(
         firstContainerId,
         SemanticsAction.showOnScreen,
@@ -719,8 +733,10 @@ void main() {
 
       expect(scrollController.offset, -250.0);
 
-      final int firstContainerId =
-          tester.renderObject(find.byKey(const ValueKey<int>(4))).debugSemantics!.id;
+      final int firstContainerId = tester
+          .renderObject(find.byKey(const ValueKey<int>(4)))
+          .debugSemantics!
+          .id;
       tester.binding.pipelineOwner.semanticsOwner!.performAction(
         firstContainerId,
         SemanticsAction.showOnScreen,
@@ -741,8 +757,10 @@ void main() {
 
       expect(scrollController.offset, -250.0);
 
-      final int firstContainerId =
-          tester.renderObject(find.byKey(const ValueKey<int>(3))).debugSemantics!.id;
+      final int firstContainerId = tester
+          .renderObject(find.byKey(const ValueKey<int>(3)))
+          .debugSemantics!
+          .id;
       tester.binding.pipelineOwner.semanticsOwner!.performAction(
         firstContainerId,
         SemanticsAction.showOnScreen,
@@ -773,20 +791,18 @@ void main() {
         ),
       );
 
-      final SemanticsNode rootScrollNode =
-          semantics
-              .nodesWith(
-                actions: <SemanticsAction>[
-                  SemanticsAction.scrollUp,
-                  SemanticsAction.scrollToOffset,
-                ],
-              )
-              .single;
-      final SemanticsNode innerListPane =
-          semantics.nodesWith(ancestor: rootScrollNode, scrollExtentMax: 0).single;
+      final SemanticsNode rootScrollNode = semantics
+          .nodesWith(
+            actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollToOffset],
+          )
+          .single;
+      final SemanticsNode innerListPane = semantics
+          .nodesWith(ancestor: rootScrollNode, scrollExtentMax: 0)
+          .single;
       final SemanticsNode outerListPane = innerListPane.parent!;
-      final List<SemanticsNode> hiddenNodes =
-          semantics.nodesWith(flags: <SemanticsFlag>[SemanticsFlag.isHidden]).toList();
+      final List<SemanticsNode> hiddenNodes = semantics
+          .nodesWith(flags: <SemanticsFlag>[SemanticsFlag.isHidden])
+          .toList();
 
       // This test is only valid if some children are offscreen.
       // Increase the number of Text children if this assert fails.

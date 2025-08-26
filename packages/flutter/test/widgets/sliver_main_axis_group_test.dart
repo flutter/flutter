@@ -68,8 +68,9 @@ void main() {
       const Rect.fromLTRB(0.0, 300.0, 300.0, 500.0),
     );
 
-    final List<RenderSliverList> renderSlivers =
-        tester.renderObjectList<RenderSliverList>(find.byType(SliverList)).toList();
+    final List<RenderSliverList> renderSlivers = tester
+        .renderObjectList<RenderSliverList>(find.byType(SliverList))
+        .toList();
     final RenderSliverList first = renderSlivers[0];
     final RenderSliverList second = renderSlivers[1];
 
@@ -148,8 +149,9 @@ void main() {
       const Rect.fromLTRB(0.0, 100.0, 300.0, 300.0),
     );
 
-    final List<RenderSliverList> renderSlivers =
-        tester.renderObjectList<RenderSliverList>(find.byType(SliverList)).toList();
+    final List<RenderSliverList> renderSlivers = tester
+        .renderObjectList<RenderSliverList>(find.byType(SliverList))
+        .toList();
     final RenderSliverList first = renderSlivers[0];
     final RenderSliverList second = renderSlivers[1];
 
@@ -231,10 +233,9 @@ void main() {
       const Rect.fromLTRB(0.0, 0.0, 200.0, 600.0),
     );
 
-    final List<RenderSliverList> renderSlivers =
-        tester
-            .renderObjectList<RenderSliverList>(find.byType(SliverList, skipOffstage: false))
-            .toList();
+    final List<RenderSliverList> renderSlivers = tester
+        .renderObjectList<RenderSliverList>(find.byType(SliverList, skipOffstage: false))
+        .toList();
     final RenderSliverList first = renderSlivers[0];
     final RenderSliverList second = renderSlivers[1];
 
@@ -317,10 +318,9 @@ void main() {
       const Rect.fromLTRB(100.0, 0.0, 300.0, 600.0),
     );
 
-    final List<RenderSliverList> renderSlivers =
-        tester
-            .renderObjectList<RenderSliverList>(find.byType(SliverList, skipOffstage: false))
-            .toList();
+    final List<RenderSliverList> renderSlivers = tester
+        .renderObjectList<RenderSliverList>(find.byType(SliverList, skipOffstage: false))
+        .toList();
     final RenderSliverList first = renderSlivers[0];
     final RenderSliverList second = renderSlivers[1];
 
@@ -359,25 +359,21 @@ void main() {
           _buildSliverList(
             itemMainAxisExtent: 300,
             items: items,
-            label:
-                (int item) =>
-                    tile == item && group == 0
-                        ? TextButton(
-                          onPressed: () => clickedTile = 'Group 0 Tile $item',
-                          child: Text('Group 0 Tile $item'),
-                        )
-                        : Text('Group 0 Tile $item'),
+            label: (int item) => tile == item && group == 0
+                ? TextButton(
+                    onPressed: () => clickedTile = 'Group 0 Tile $item',
+                    child: Text('Group 0 Tile $item'),
+                  )
+                : Text('Group 0 Tile $item'),
           ),
           _buildSliverList(
             items: items,
-            label:
-                (int item) =>
-                    tile == item && group == 1
-                        ? TextButton(
-                          onPressed: () => clickedTile = 'Group 1 Tile $item',
-                          child: Text('Group 1 Tile $item'),
-                        )
-                        : Text('Group 1 Tile $item'),
+            label: (int item) => tile == item && group == 1
+                ? TextButton(
+                    onPressed: () => clickedTile = 'Group 1 Tile $item',
+                    child: Text('Group 1 Tile $item'),
+                  )
+                : Text('Group 1 Tile $item'),
           ),
         ],
       ),
@@ -397,25 +393,21 @@ void main() {
           _buildSliverList(
             itemMainAxisExtent: 300,
             items: items,
-            label:
-                (int item) =>
-                    tile == item && group == 0
-                        ? TextButton(
-                          onPressed: () => clickedTile = 'Group 0 Tile $item',
-                          child: Text('Group 0 Tile $item'),
-                        )
-                        : Text('Group 0 Tile $item'),
+            label: (int item) => tile == item && group == 0
+                ? TextButton(
+                    onPressed: () => clickedTile = 'Group 0 Tile $item',
+                    child: Text('Group 0 Tile $item'),
+                  )
+                : Text('Group 0 Tile $item'),
           ),
           _buildSliverList(
             items: items,
-            label:
-                (int item) =>
-                    tile == item && group == 1
-                        ? TextButton(
-                          onPressed: () => clickedTile = 'Group 1 Tile $item',
-                          child: Text('Group 1 Tile $item'),
-                        )
-                        : Text('Group 1 Tile $item'),
+            label: (int item) => tile == item && group == 1
+                ? TextButton(
+                    onPressed: () => clickedTile = 'Group 1 Tile $item',
+                    child: Text('Group 1 Tile $item'),
+                  )
+                : Text('Group 1 Tile $item'),
           ),
         ],
       ),
@@ -1070,6 +1062,141 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('SliverMainAxisGroup reverse hitTest', (WidgetTester tester) async {
+    bool onTapCalled = false;
+    await tester.pumpWidget(
+      _buildSliverMainAxisGroup(
+        reverse: true,
+        viewportHeight: 70,
+        slivers: <Widget>[
+          SliverToBoxAdapter(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                onTapCalled = true;
+              },
+              child: const SizedBox(height: 50),
+            ),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 20)),
+        ],
+      ),
+    );
+    await tester.tapAt(const Offset(0, 10));
+    await tester.pumpAndSettle();
+    expect(onTapCalled, isFalse);
+    await tester.tapAt(const Offset(0, 69));
+    await tester.pumpAndSettle();
+    expect(onTapCalled, isTrue);
+  });
+
+  testWidgets('SliverMainAxisGroup with center', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+    const Key centerKey = Key('center');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: CustomScrollView(
+          center: centerKey,
+          controller: controller,
+          slivers: const <Widget>[
+            SliverMainAxisGroup(
+              slivers: <Widget>[
+                SliverToBoxAdapter(child: SizedBox(height: 50, child: Text('-2'))),
+                SliverToBoxAdapter(child: SizedBox(height: 50, child: Text('-1'))),
+              ],
+            ),
+            SliverMainAxisGroup(
+              key: centerKey,
+              slivers: <Widget>[
+                SliverToBoxAdapter(child: SizedBox(height: 50, child: Text('1'))),
+                SliverToBoxAdapter(child: SizedBox(height: 50, child: Text('2'))),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+    controller.jumpTo(-51);
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.text('-1')), const Offset(0, 1));
+    expect(tester.getTopLeft(find.text('1')), const Offset(0, 51));
+    expect(tester.getTopLeft(find.text('2')), const Offset(0, 101));
+    expect(tester.getTopLeft(find.text('-2')), const Offset(0, -49));
+  });
+
+  testWidgets('showOnScreen reveals the Sliver after a pinned child in SliverMainAxisGroup', (
+    WidgetTester tester,
+  ) async {
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      _buildSliverMainAxisGroup(
+        viewportHeight: 100,
+        controller: controller,
+        slivers: <Widget>[
+          const PinnedHeaderSliver(child: SizedBox(height: 50)),
+          const SliverToBoxAdapter(child: SizedBox(height: 50, child: Text('1'))),
+          const SliverToBoxAdapter(child: SizedBox(height: 400)),
+        ],
+      ),
+    );
+    controller.jumpTo(200);
+    await tester.pumpAndSettle();
+    final RenderObject renderObject = tester.renderObject(find.text('1', skipOffstage: false));
+    renderObject.showOnScreen();
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.text('1')), const Offset(0.0, 50.0));
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/173274
+  testWidgets(
+    'In multiple SliverMainAxisGroups, children after a PinnedHeaderSliver do not overscroll.',
+    (WidgetTester tester) async {
+      final ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
+      final Key key = GlobalKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              height: 100,
+              child: CustomScrollView(
+                controller: controller,
+                slivers: <Widget>[
+                  SliverMainAxisGroup(
+                    slivers: <Widget>[
+                      const PinnedHeaderSliver(child: SizedBox(height: 20)),
+                      const SliverToBoxAdapter(child: SizedBox(height: 20)),
+                      SliverToBoxAdapter(child: SizedBox(height: 60, key: key)),
+                    ],
+                  ),
+                  const SliverMainAxisGroup(
+                    slivers: <Widget>[
+                      PinnedHeaderSliver(child: SizedBox(height: 20)),
+                      SliverToBoxAdapter(child: SizedBox(height: 20)),
+                      SliverToBoxAdapter(child: SizedBox(height: 60)),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      controller.jumpTo(70);
+      await tester.pumpAndSettle();
+      final Offset offset = tester.getBottomRight(find.byKey(key));
+      controller.jumpTo(80);
+      await tester.pumpAndSettle();
+      expect(tester.getBottomRight(find.byKey(key)), offset - const Offset(0.0, 10.0));
+      controller.jumpTo(90);
+      await tester.pumpAndSettle();
+      expect(tester.getBottomRight(find.byKey(key)), offset - const Offset(0.0, 20.0));
+    },
+  );
 }
 
 Widget _buildSliverList({
@@ -1083,15 +1210,15 @@ Widget _buildSliverList({
       (BuildContext context, int i) {
         return scrollDirection == Axis.vertical
             ? SizedBox(
-              key: ValueKey<int>(items[i]),
-              height: itemMainAxisExtent,
-              child: label(items[i]),
-            )
+                key: ValueKey<int>(items[i]),
+                height: itemMainAxisExtent,
+                child: label(items[i]),
+              )
             : SizedBox(
-              key: ValueKey<int>(items[i]),
-              width: itemMainAxisExtent,
-              child: label(items[i]),
-            );
+                key: ValueKey<int>(items[i]),
+                width: itemMainAxisExtent,
+                child: label(items[i]),
+              );
       },
       findChildIndexCallback: (Key key) {
         final ValueKey<int> valueKey = key as ValueKey<int>;
@@ -1124,7 +1251,10 @@ Widget _buildSliverMainAxisGroup({
             scrollDirection: scrollDirection,
             reverse: reverse,
             controller: controller,
-            slivers: <Widget>[SliverMainAxisGroup(slivers: slivers), ...otherSlivers],
+            slivers: <Widget>[
+              SliverMainAxisGroup(slivers: slivers),
+              ...otherSlivers,
+            ],
           ),
         ),
       ),

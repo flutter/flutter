@@ -323,24 +323,22 @@ class TestSemantics {
 
     final SemanticsData nodeData = node.getSemanticsData();
 
-    final int flagsBitmask =
-        flags is int
-            ? flags as int
-            : (flags as List<SemanticsFlag>).fold<int>(
-              0,
-              (int bitmask, SemanticsFlag flag) => bitmask | flag.index,
-            );
+    final int flagsBitmask = flags is int
+        ? flags as int
+        : (flags as List<SemanticsFlag>).fold<int>(
+            0,
+            (int bitmask, SemanticsFlag flag) => bitmask | flag.index,
+          );
     if (flagsBitmask != nodeData.flags) {
       return fail('expected node id $id to have flags $flags but found flags ${nodeData.flags}.');
     }
 
-    final int actionsBitmask =
-        actions is int
-            ? actions as int
-            : (actions as List<SemanticsAction>).fold<int>(
-              0,
-              (int bitmask, SemanticsAction action) => bitmask | action.index,
-            );
+    final int actionsBitmask = actions is int
+        ? actions as int
+        : (actions as List<SemanticsAction>).fold<int>(
+            0,
+            (int bitmask, SemanticsAction action) => bitmask | action.index,
+          );
     if (actionsBitmask != nodeData.actions) {
       return fail(
         'expected node id $id to have actions $actions but found actions ${nodeData.actions}.',

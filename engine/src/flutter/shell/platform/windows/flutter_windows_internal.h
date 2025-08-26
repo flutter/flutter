@@ -71,8 +71,8 @@ FLUTTER_EXPORT void FlutterDesktopEngineRegisterPlatformViewType(
 // Identifier can be obtained from PlatformDispatcher.instance.engineId.
 //
 // This method must be called from the platform thread.
-FLUTTER_EXPORT FlutterDesktopEngineRef FlutterDesktopEngineForId(
-    int64_t engine_id);
+FLUTTER_EXPORT FlutterDesktopEngineRef
+FlutterDesktopEngineForId(int64_t engine_id);
 
 #if defined(__cplusplus)
 }

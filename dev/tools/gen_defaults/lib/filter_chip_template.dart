@@ -18,7 +18,8 @@ class FilterChipTemplate extends TokenTemplate {
   static const String elevatedVariant = '.elevated';
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends ChipThemeData {
   _${blockName}DefaultsM3(
     this.context,
@@ -55,8 +56,8 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   );
 
   @override
-  MaterialStateProperty<Color?>? get color =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color?>? get color =>
+    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected) && states.contains(MaterialState.disabled)) {
         return _chipVariant == _ChipVariant.flat
           ? ${componentColor("$tokenGroup$flatVariant.disabled.selected.container")}

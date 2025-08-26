@@ -1873,15 +1873,14 @@ void main() {
       ),
     );
 
-    final List<CupertinoScrollbar> scrollbars =
-        find
-            .descendant(
-              of: find.byType(CupertinoAlertDialog),
-              matching: find.byType(CupertinoScrollbar),
-            )
-            .evaluate()
-            .map((Element e) => e.widget as CupertinoScrollbar)
-            .toList();
+    final List<CupertinoScrollbar> scrollbars = find
+        .descendant(
+          of: find.byType(CupertinoAlertDialog),
+          matching: find.byType(CupertinoScrollbar),
+        )
+        .evaluate()
+        .map((Element e) => e.widget as CupertinoScrollbar)
+        .toList();
 
     expect(scrollbars.length, 2);
     expect(scrollbars[0].controller != scrollbars[1].controller, isTrue);
@@ -2199,7 +2198,9 @@ Widget boilerplate(Widget child) {
 }
 
 Widget createAppWithCenteredButton(Widget child) {
-  return CupertinoApp(home: Center(child: CupertinoButton(onPressed: null, child: child)));
+  return CupertinoApp(
+    home: Center(child: CupertinoButton(onPressed: null, child: child)),
+  );
 }
 
 @pragma('vm:entry-point')
@@ -2266,28 +2267,26 @@ class TestScaffoldAppState extends State<TestScaffoldApp> {
       debugShowCheckedModeBanner: false,
       theme: widget.theme,
       home: Builder(
-        builder:
-            (BuildContext context) => CupertinoPageScaffold(
-              child: Center(
-                child:
-                    _pressedButton
-                        ? Container()
-                        : CupertinoButton(
-                          onPressed: () {
-                            setState(() {
-                              _pressedButton = true;
-                            });
-                            showCupertinoDialog<void>(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return widget.dialog;
-                              },
-                            );
-                          },
-                          child: const Text('Go'),
-                        ),
-              ),
-            ),
+        builder: (BuildContext context) => CupertinoPageScaffold(
+          child: Center(
+            child: _pressedButton
+                ? Container()
+                : CupertinoButton(
+                    onPressed: () {
+                      setState(() {
+                        _pressedButton = true;
+                      });
+                      showCupertinoDialog<void>(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return widget.dialog;
+                        },
+                      );
+                    },
+                    child: const Text('Go'),
+                  ),
+          ),
+        ),
       ),
     );
   }

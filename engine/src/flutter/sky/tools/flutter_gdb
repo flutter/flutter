@@ -72,9 +72,7 @@ def _get_device_abi(adb_command):
 
 def _default_local_engine(abi):
     """Return the default Flutter build output directory for a given target ABI."""
-    if abi == 'x86':
-        return 'android_debug_unopt_x86'
-    elif abi == 'x86_64':
+    if abi == 'x86_64':
         return 'android_debug_unopt_x64'
     elif abi == 'arm64':
         return 'android_debug_unopt_arm64'

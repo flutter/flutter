@@ -994,8 +994,9 @@ Iterable<_LicenseMatch> _expand(
   String debug = '',
   required String origin,
 }) sync* {
-  final List<License> results =
-      template._expandTemplate(reformat(copyright), body, origin: origin).toList();
+  final List<License> results = template
+      ._expandTemplate(reformat(copyright), body, origin: origin)
+      .toList();
   if (results.isEmpty) {
     throw 'license could not be expanded';
   }
@@ -1024,8 +1025,9 @@ Iterable<_LicenseMatch> _tryReferenceByFilename(
   if (pattern.copyrightIndex != null) {
     for (final Match match in pattern.pattern.allMatches(body)) {
       final String copyright = match.group(pattern.copyrightIndex!)!;
-      final String? authors =
-          pattern.authorIndex != null ? match.group(pattern.authorIndex!) : null;
+      final String? authors = pattern.authorIndex != null
+          ? match.group(pattern.authorIndex!)
+          : null;
       final String filename = match.group(pattern.fileIndex)!;
       final License? template = parentDirectory.nearestLicenseWithName(filename, authors: authors);
       if (template == null) {
@@ -1133,8 +1135,9 @@ License _dereferenceLicense(
   LicenseSource parentDirectory, {
   required String origin,
 }) {
-  License? result =
-      pattern.checkLocalFirst ? parentDirectory.nearestLicenseWithName(group(groupIndex)!) : null;
+  License? result = pattern.checkLocalFirst
+      ? parentDirectory.nearestLicenseWithName(group(groupIndex)!)
+      : null;
   result ??= License.fromIdentifyingReference(group(groupIndex)!, referencer: origin);
   return result;
 }

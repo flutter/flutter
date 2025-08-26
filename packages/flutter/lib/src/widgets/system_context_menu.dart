@@ -114,8 +114,29 @@ class SystemContextMenu extends StatefulWidget {
   /// Whether the current device supports showing the system context menu.
   ///
   /// Currently, this is only supported on newer versions of iOS.
+  ///
+  /// See also:
+  ///
+  ///  * [isSupportedByField], which uses this method and determines whether an
+  ///    individual [EditableTextState] supports the system context menu.
   static bool isSupported(BuildContext context) {
-    return MediaQuery.maybeSupportsShowingSystemContextMenu(context) ?? false;
+    return defaultTargetPlatform == TargetPlatform.iOS &&
+        (MediaQuery.maybeSupportsShowingSystemContextMenu(context) ?? false);
+  }
+
+  /// Whether the given field supports showing the system context menu.
+  ///
+  /// Currently [SystemContextMenu] is only supported with an active
+  /// [TextInputConnection]. In cases where this isn't possible, such as in a
+  /// read-only field, fall back to using a Flutter-rendered context menu like
+  /// [AdaptiveTextSelectionToolbar].
+  ///
+  /// See also:
+  ///
+  ///  * [isSupported], which is used by this method and determines whether the
+  ///    platform in general supports showing the system context menu.
+  static bool isSupportedByField(EditableTextState editableTextState) {
+    return !editableTextState.widget.readOnly && isSupported(editableTextState.context);
   }
 
   /// The default [items] for the given [EditableTextState].
@@ -135,6 +156,7 @@ class SystemContextMenu extends StatefulWidget {
       if (editableTextState.selectAllEnabled) const IOSSystemContextMenuItemSelectAll(),
       if (editableTextState.lookUpEnabled) const IOSSystemContextMenuItemLookUp(),
       if (editableTextState.searchWebEnabled) const IOSSystemContextMenuItemSearchWeb(),
+      if (editableTextState.liveTextInputEnabled) const IOSSystemContextMenuItemLiveText(),
     ];
   }
 
@@ -163,8 +185,9 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
 
     if (widget.items.isNotEmpty) {
       final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
-      final List<IOSSystemContextMenuItemData> itemDatas =
-          widget.items.map((IOSSystemContextMenuItem item) => item.getData(localizations)).toList();
+      final List<IOSSystemContextMenuItemData> itemDatas = widget.items
+          .map((IOSSystemContextMenuItem item) => item.getData(localizations))
+          .toList();
       _systemContextMenuController.showWithItems(widget.anchor, itemDatas);
     }
 
@@ -411,6 +434,27 @@ final class IOSSystemContextMenuItemShare extends IOSSystemContextMenuItem with 
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('title', title));
+  }
+}
+
+/// Creates an instance of [IOSSystemContextMenuItem] for the
+/// system's built-in Live Text button.
+///
+/// The title and action are both handled by the platform.
+///
+/// See also:
+///
+///  * [SystemContextMenu], a widget that can be used to display the system
+///    context menu.
+///  * [IOSSystemContextMenuItemDataLiveText], which specifies the data to be sent
+///    to the platform for this same button.
+final class IOSSystemContextMenuItemLiveText extends IOSSystemContextMenuItem {
+  /// Creates an instance of [IOSSystemContextMenuItemLiveText].
+  const IOSSystemContextMenuItemLiveText();
+
+  @override
+  IOSSystemContextMenuItemData getData(WidgetsLocalizations localizations) {
+    return const IOSSystemContextMenuItemDataLiveText();
   }
 }
 

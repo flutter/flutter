@@ -996,6 +996,13 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
                                         type:type
                                     selector:@selector(handleLookUpAction)
                                  encodedItem:encodedItem];
+    } else if ([type isEqualToString:@"captureTextFromCamera"]) {
+      if (@available(iOS 15.0, *)) {
+        [self addBasicEditingCommandToItems:items
+                                       type:type
+                                   selector:@selector(captureTextFromCamera:)
+                              suggestedMenu:suggestedMenu];
+      }
     }
   }
   return [UIMenu menuWithChildren:items];
@@ -1314,6 +1321,11 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
     return [self textInRange:_selectedTextRange].length > 0;
   } else if (action == @selector(selectAll:)) {
     return self.hasText;
+  } else if (action == @selector(captureTextFromCamera:)) {
+    if (@available(iOS 15.0, *)) {
+      return YES;
+    }
+    return NO;
   }
   return [super canPerformAction:action withSender:sender];
 }
@@ -2815,11 +2827,8 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   [self removeEnableFlutterTextInputViewAccessibilityTimer];
   _activeView.accessibilityEnabled = NO;
   [_activeView resignFirstResponder];
-  // Removes the focus from the `_activeView` (UIView<UITextInput>)
-  // when the user stops typing (keyboard is hidden).
-  // For more details, refer to the discussion at:
-  // https://github.com/flutter/engine/pull/57209#discussion_r1905942577
-  [self cleanUpViewHierarchy:YES clearText:YES delayRemoval:NO];
+  [_activeView removeFromSuperview];
+  [_inputHider removeFromSuperview];
 }
 
 - (void)triggerAutofillSave:(BOOL)saveEntries {

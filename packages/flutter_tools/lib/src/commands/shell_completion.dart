@@ -19,10 +19,10 @@ class ShellCompletionCommand extends FlutterCommand {
   }
 
   @override
-  final String name = 'bash-completion';
+  final name = 'bash-completion';
 
   @override
-  final String description =
+  final description =
       'Output command line shell completion setup scripts.\n\n'
       'This command prints the flutter command line completion setup script for Bash and Zsh. To '
       'use it, specify an output file and follow the instructions in the generated output file to '
@@ -33,7 +33,7 @@ class ShellCompletionCommand extends FlutterCommand {
   final String category = FlutterCommandCategory.sdk;
 
   @override
-  final List<String> aliases = <String>['zsh-completion'];
+  final aliases = <String>['zsh-completion'];
 
   @override
   bool get shouldUpdateCache => false;

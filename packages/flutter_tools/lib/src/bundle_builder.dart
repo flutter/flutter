@@ -52,15 +52,16 @@ class BundleBuilder {
     buildSystem ??= globals.buildSystem;
 
     // If the precompiled flag was not passed, force us into debug mode.
-    final Environment environment = Environment(
+    final environment = Environment(
       projectDir: project.directory,
       packageConfigPath: buildInfo.packageConfigPath,
       outputDir: globals.fs.directory(assetDirPath),
       buildDir: project.dartTool.childDirectory('flutter_build'),
       cacheDir: globals.cache.getRoot(),
       flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-      engineVersion:
-          globals.artifacts!.usesLocalArtifacts ? null : globals.flutterVersion.engineRevision,
+      engineVersion: globals.artifacts!.usesLocalArtifacts
+          ? null
+          : globals.flutterVersion.engineRevision,
       defines: <String, String>{
         // used by the KernelSnapshot target
         kTargetPlatform: getNameForTargetPlatform(platform),
@@ -77,10 +78,9 @@ class BundleBuilder {
       platform: globals.platform,
       generateDartPluginRegistry: true,
     );
-    final Target target =
-        buildInfo.mode == BuildMode.debug
-            ? globals.buildTargets.copyFlutterBundle
-            : globals.buildTargets.releaseCopyFlutterBundle;
+    final Target target = buildInfo.mode == BuildMode.debug
+        ? globals.buildTargets.copyFlutterBundle
+        : globals.buildTargets.releaseCopyFlutterBundle;
     final BuildResult result = await buildSystem.build(target, environment);
 
     if (!result.success) {
@@ -92,7 +92,7 @@ class BundleBuilder {
       }
       throwToolExit('Failed to build bundle.');
     }
-    final Depfile depfile = Depfile(result.inputFiles, result.outputFiles);
+    final depfile = Depfile(result.inputFiles, result.outputFiles);
     final File outputDepfile = globals.fs.file(depfilePath);
     if (!outputDepfile.parent.existsSync()) {
       outputDepfile.parent.createSync(recursive: true);
@@ -158,14 +158,14 @@ Future<void> writeBundle(
   }
   bundleDir.createSync(recursive: true);
 
-  final ShaderCompiler shaderCompiler = ShaderCompiler(
+  final shaderCompiler = ShaderCompiler(
     processManager: processManager,
     logger: logger,
     fileSystem: fileSystem,
     artifacts: artifacts,
   );
 
-  final AssetTransformer assetTransformer = AssetTransformer(
+  final assetTransformer = AssetTransformer(
     processManager: processManager,
     fileSystem: fileSystem,
     dartBinaryPath: artifacts.getArtifactPath(Artifact.engineDartBinary),
@@ -173,7 +173,7 @@ Future<void> writeBundle(
   );
 
   // Limit number of open files to avoid running out of file descriptors.
-  final Pool pool = Pool(64);
+  final pool = Pool(64);
   await Future.wait<void>(
     assetEntries.entries.map<Future<void>>((MapEntry<String, AssetBundleEntry> entry) async {
       final PoolResource resource = await pool.request();
@@ -187,8 +187,8 @@ Future<void> writeBundle(
         file.parent.createSync(recursive: true);
         final DevFSContent devFSContent = entry.value.content;
         if (devFSContent is DevFSFileContent) {
-          final File input = devFSContent.file as File;
-          bool doCopy = true;
+          final input = devFSContent.file as File;
+          var doCopy = true;
           switch (entry.value.kind) {
             case AssetKind.regular:
               if (entry.value.transformers.isEmpty) {
@@ -211,12 +211,11 @@ Future<void> writeBundle(
             case AssetKind.font:
               break;
             case AssetKind.shader:
-              doCopy =
-                  !await shaderCompiler.compileShader(
-                    input: input,
-                    outputPath: file.path,
-                    targetPlatform: targetPlatform,
-                  );
+              doCopy = !await shaderCompiler.compileShader(
+                input: input,
+                outputPath: file.path,
+                targetPlatform: targetPlatform,
+              );
           }
           if (doCopy) {
             input.copySync(file.path);

@@ -324,8 +324,8 @@ class ClipRSuperellipseOperation implements LayerOperation {
 
   @override
   PlatformViewStyling createPlatformViewStyling() {
-    // TODO(dkwingsmt): Properly implement RSuperellipse on Web instead of falling
-    // back to RRect.  https://github.com/flutter/flutter/issues/163718
+    // RSuperellipse ops in PlatformView are approximated by RRect because they
+    // are expensive.
     return PlatformViewStyling(clip: PlatformViewRRectClip(rsuperellipse.toApproximateRRect()));
   }
 
@@ -338,7 +338,7 @@ class ClipRSuperellipseOperation implements LayerOperation {
   @override
   Map<String, Object> get debugJsonDescription {
     return <String, Object>{
-      'type': 'clipRSuperEllipse',
+      'type': 'clipRSuperellipse',
       'rsuperellipse': {
         'left': rsuperellipse.left,
         'top': rsuperellipse.top,
@@ -418,7 +418,7 @@ class ImageFilterOperation implements LayerOperation {
   final ui.Offset offset;
 
   @override
-  ui.Rect mapRect(ui.Rect contentRect) => filter.filterBounds(contentRect);
+  ui.Rect mapRect(ui.Rect contentRect) => filter.filterBounds(contentRect).shift(offset);
 
   @override
   void pre(SceneCanvas canvas) {
@@ -556,10 +556,9 @@ class OpacityOperation implements LayerOperation {
 
   @override
   PlatformViewStyling createPlatformViewStyling() => PlatformViewStyling(
-    position:
-        offset != ui.Offset.zero
-            ? PlatformViewPosition.offset(offset)
-            : const PlatformViewPosition.zero(),
+    position: offset != ui.Offset.zero
+        ? PlatformViewPosition.offset(offset)
+        : const PlatformViewPosition.zero(),
     opacity: alpha.toDouble() / 255.0,
   );
 
@@ -1357,8 +1356,9 @@ class LayerBuilder {
   }
 
   PictureEngineLayer sliceUp() {
-    final int sliceCount =
-        layer.operation.affectsBackdrop ? getCurrentSliceCount() : sliceBuilders.length;
+    final int sliceCount = layer.operation.affectsBackdrop
+        ? getCurrentSliceCount()
+        : sliceBuilders.length;
     final slices = <LayerSlice?>[];
     for (int i = 0; i < sliceCount; i++) {
       final ui.Rect? backdropRect;

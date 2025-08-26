@@ -281,17 +281,24 @@ class FormState extends State<Form> {
         break;
     }
 
+    final Widget form;
     if (widget.canPop != null || (widget.onPopInvokedWithResult ?? widget.onPopInvoked) != null) {
-      return PopScope<Object?>(
+      form = PopScope<Object?>(
         canPop: widget.canPop ?? true,
         onPopInvokedWithResult: widget._callPopInvoked,
         child: _FormScope(formState: this, generation: _generation, child: widget.child),
       );
+    } else {
+      form = WillPopScope(
+        onWillPop: widget.onWillPop,
+        child: _FormScope(formState: this, generation: _generation, child: widget.child),
+      );
     }
-
-    return WillPopScope(
-      onWillPop: widget.onWillPop,
-      child: _FormScope(formState: this, generation: _generation, child: widget.child),
+    return Semantics(
+      container: true,
+      explicitChildNodes: true,
+      role: SemanticsRole.form,
+      child: form,
     );
   }
 
@@ -774,8 +781,9 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
     Form.maybeOf(context)?._register(this);
 
     final Widget child = Semantics(
-      validationResult:
-          hasError ? SemanticsValidationResult.invalid : SemanticsValidationResult.valid,
+      validationResult: hasError
+          ? SemanticsValidationResult.invalid
+          : SemanticsValidationResult.valid,
       child: widget.builder(this),
     );
 

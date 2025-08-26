@@ -16,7 +16,8 @@ class RangeSliderTemplate extends TokenTemplate {
   final String tokenGroup;
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends SliderThemeData {
   _${blockName}DefaultsM3(this.context)
     : super(trackHeight: ${getToken('$tokenGroup.active.track.height')});
@@ -90,8 +91,8 @@ class _${blockName}DefaultsM3 extends SliderThemeData {
   double? get minThumbSeparation => 0;
 
   @override
-  MaterialStateProperty<Size?>? get thumbSize {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Size?>? get thumbSize {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return const Size(${getToken("$tokenGroup.disabled.handle.width")}, ${getToken("$tokenGroup.handle.height")});
       }

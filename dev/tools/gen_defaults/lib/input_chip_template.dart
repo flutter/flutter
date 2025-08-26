@@ -17,7 +17,8 @@ class InputChipTemplate extends TokenTemplate {
   static const String variant = '';
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends ChipThemeData {
   _${blockName}DefaultsM3(this.context, this.isEnabled, this.isSelected)
     : super(
@@ -42,8 +43,8 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   );
 
   @override
-  MaterialStateProperty<Color?>? get color =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color?>? get color =>
+    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected) && states.contains(MaterialState.disabled)) {
         return ${componentColor("$tokenGroup$variant.disabled.selected.container")};
       }

@@ -21,9 +21,9 @@ import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
 
-const String kBoundaryKey = '4d2d9609-c662-4571-afde-31410f96caa6';
-const String kElfAot = '--snapshot_kind=app-aot-elf';
-const String kAssemblyAot = '--snapshot_kind=app-aot-assembly';
+const kBoundaryKey = '4d2d9609-c662-4571-afde-31410f96caa6';
+const kElfAot = '--snapshot_kind=app-aot-elf';
+const kMachoDylibAot = '--snapshot_kind=app-aot-macho-dylib';
 
 final Platform macPlatform = FakePlatform(
   operatingSystem: 'macos',
@@ -493,8 +493,8 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
-      XcodeProjectInterpreter:
-          () => FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'chocolate']),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'chocolate']),
     },
   );
 
@@ -550,8 +550,8 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
-      XcodeProjectInterpreter:
-          () => FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'chocolate']),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'chocolate']),
     },
   );
 
@@ -616,7 +616,7 @@ void main() {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
-    final Environment testEnvironment = Environment.test(
+    final testEnvironment = Environment.test(
       fileSystem.currentDirectory,
       defines: <String, String>{
         kBuildMode: BuildMode.debug.cliName,
@@ -805,50 +805,12 @@ void main() {
             '--deterministic',
             '--write-v8-snapshot-profile-to=code_size_1/snapshot.arm64.json',
             '--trace-precompiler-to=code_size_1/trace.arm64.json',
-            kAssemblyAot,
-            '--assembly=$build/arm64/snapshot_assembly.S',
+            kMachoDylibAot,
+            '--macho=$build/arm64/App.framework/App',
+            '--macho-min-os-version=13.0',
+            '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
+            '--macho-install-name=@rpath/App.framework/App',
             '$build/app.dill',
-          ],
-        ),
-        FakeCommand(
-          command: <String>[
-            'xcrun',
-            'cc',
-            '-arch',
-            'arm64',
-            '-miphoneos-version-min=13.0',
-            '-isysroot',
-            'path/to/iPhoneOS.sdk',
-            '-c',
-            '$build/arm64/snapshot_assembly.S',
-            '-o',
-            '$build/arm64/snapshot_assembly.o',
-          ],
-        ),
-        FakeCommand(
-          command: <String>[
-            'xcrun',
-            'clang',
-            '-arch',
-            'arm64',
-            '-miphoneos-version-min=13.0',
-            '-isysroot',
-            'path/to/iPhoneOS.sdk',
-            '-dynamiclib',
-            '-Xlinker',
-            '-rpath',
-            '-Xlinker',
-            '@executable_path/Frameworks',
-            '-Xlinker',
-            '-rpath',
-            '-Xlinker',
-            '@loader_path/Frameworks',
-            '-fapplication-extension',
-            '-install_name',
-            '@rpath/App.framework/App',
-            '-o',
-            '$build/arm64/App.framework/App',
-            '$build/arm64/snapshot_assembly.o',
           ],
         ),
         FakeCommand(

@@ -155,28 +155,28 @@ void main() {
 
     // test getTangentForOffset with vertical line
     final Path simpleVerticalLine = Path()..lineTo(0.0, 10.0);
-    final PathMetrics simpleMetricsVertical =
-        simpleVerticalLine.computeMetrics()..iterator.moveNext();
+    final PathMetrics simpleMetricsVertical = simpleVerticalLine.computeMetrics()
+      ..iterator.moveNext();
     final Tangent posTanVertical = simpleMetricsVertical.iterator.current.getTangentForOffset(5.0)!;
     expect(posTanVertical.position, equals(const Offset(0.0, 5.0)));
     expect(posTanVertical.angle, closeTo(-1.5708, .0001)); // 90 degrees
 
     // test getTangentForOffset with diagonal line
     final Path simpleDiagonalLine = Path()..lineTo(10.0, 10.0);
-    final PathMetrics simpleMetricsDiagonal =
-        simpleDiagonalLine.computeMetrics()..iterator.moveNext();
+    final PathMetrics simpleMetricsDiagonal = simpleDiagonalLine.computeMetrics()
+      ..iterator.moveNext();
     final double midPoint = simpleMetricsDiagonal.iterator.current.length / 2;
-    final Tangent posTanDiagonal =
-        simpleMetricsDiagonal.iterator.current.getTangentForOffset(midPoint)!;
+    final Tangent posTanDiagonal = simpleMetricsDiagonal.iterator.current.getTangentForOffset(
+      midPoint,
+    )!;
     expect(posTanDiagonal.position, equals(const Offset(5.0, 5.0)));
     expect(posTanDiagonal.angle, closeTo(-0.7853981633974483, .00001)); // ~45 degrees
 
     // test a multi-contour path
-    final Path multiContour =
-        Path()
-          ..lineTo(0.0, 10.0)
-          ..moveTo(10.0, 10.0)
-          ..lineTo(10.0, 15.0);
+    final Path multiContour = Path()
+      ..lineTo(0.0, 10.0)
+      ..moveTo(10.0, 10.0)
+      ..lineTo(10.0, 15.0);
 
     final PathMetrics multiContourMetric = multiContour.computeMetrics();
     expect(() => multiContourMetric.iterator.current, throwsRangeError);
@@ -191,12 +191,11 @@ void main() {
   });
 
   test('PathMetrics can remember lengths and isClosed', () {
-    final Path path =
-        Path()
-          ..lineTo(0, 10)
-          ..close()
-          ..moveTo(0, 15)
-          ..lineTo(10, 15);
+    final Path path = Path()
+      ..lineTo(0, 10)
+      ..close()
+      ..moveTo(0, 15)
+      ..lineTo(10, 15);
     final List<PathMetric> metrics = path.computeMetrics().toList();
     expect(metrics.length, 2);
     expect(metrics[0].length, 20);
@@ -242,14 +241,13 @@ void main() {
   });
 
   test('PathMetrics on a mutated path', () {
-    final Path path =
-        Path()
-          ..lineTo(0, 30)
-          ..lineTo(40, 30)
-          ..moveTo(100, 0)
-          ..lineTo(100, 30)
-          ..lineTo(140, 30)
-          ..close();
+    final Path path = Path()
+      ..lineTo(0, 30)
+      ..lineTo(40, 30)
+      ..moveTo(100, 0)
+      ..lineTo(100, 30)
+      ..lineTo(140, 30)
+      ..close();
     final PathMetrics metrics = path.computeMetrics();
     expect(
       metrics.toString(),
@@ -258,7 +256,7 @@ void main() {
     );
   });
 
-  test('RSuperellipse path is correct for a slim diagnal shape', () {
+  test('RSuperellipse path is correct for a slim diagonal shape', () {
     // This test mirrors a similar test from "geometry_test.dart" and serves as
     // a smoke test.
     final RSuperellipse rsuperellipse = RSuperellipse.fromLTRBAndCorners(
@@ -271,10 +269,9 @@ void main() {
       bottomLeft: const Radius.circular(99.0),
       bottomRight: const Radius.circular(1.0),
     );
-    final Path path =
-        Path()
-          ..addRSuperellipse(rsuperellipse)
-          ..close();
+    final Path path = Path()
+      ..addRSuperellipse(rsuperellipse)
+      ..close();
 
     expect(path.contains(Offset.zero), isTrue);
     expect(path.contains(const Offset(-49.999, -49.999)), isFalse);
@@ -287,18 +284,18 @@ void main() {
     checkPointWithOffset(path, const Offset(49.70, 49.70), const Offset(0.02, 0.02));
 
     // Checks two points symmetrical to the origin.
-    void checkDiagnalPoints(Offset p) {
+    void checkDiagonalPoints(Offset p) {
       checkPointWithOffset(path, p, const Offset(0.02, -0.02));
       checkPointWithOffset(path, Offset(-p.dx, -p.dy), const Offset(-0.02, 0.02));
     }
 
     // A few other points along the edge
-    checkDiagnalPoints(const Offset(-40.0, -49.59));
-    checkDiagnalPoints(const Offset(-20.0, -45.64));
-    checkDiagnalPoints(const Offset(0.0, -37.01));
-    checkDiagnalPoints(const Offset(20.0, -21.96));
-    checkDiagnalPoints(const Offset(21.05, -20.92));
-    checkDiagnalPoints(const Offset(40.0, 5.68));
+    checkDiagonalPoints(const Offset(-40.0, -49.59));
+    checkDiagonalPoints(const Offset(-20.0, -45.64));
+    checkDiagonalPoints(const Offset(0.0, -37.01));
+    checkDiagonalPoints(const Offset(20.0, -21.96));
+    checkDiagonalPoints(const Offset(21.05, -20.92));
+    checkDiagonalPoints(const Offset(40.0, 5.68));
   });
 }
 

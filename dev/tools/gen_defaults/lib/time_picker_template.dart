@@ -20,7 +20,8 @@ class TimePickerTemplate extends TokenTemplate {
   static const String variant = '';
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends _TimePickerDefaults {
   _${blockName}DefaultsM3(this.context, { this.entryMode = TimePickerEntryMode.dial });
 
@@ -253,8 +254,8 @@ class _${blockName}DefaultsM3 extends _TimePickerDefaults {
     });
   }
 
-  MaterialStateProperty<Color> get _hourMinuteTextColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color> get _hourMinuteTextColor {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
           return ${componentColor("$hourMinuteComponent.selected.pressed.label-text")};
@@ -298,7 +299,7 @@ class _${blockName}DefaultsM3 extends _TimePickerDefaults {
   }
 
   @override
-  InputDecorationTheme get inputDecorationTheme {
+  InputDecorationThemeData get inputDecorationTheme {
     // This is NOT correct, but there's no token for
     // 'time-input.container.shape', so this is using the radius from the shape
     // for the hour/minute selector. It's a BorderRadiusGeometry, so we have to
@@ -306,7 +307,7 @@ class _${blockName}DefaultsM3 extends _TimePickerDefaults {
     final BorderRadius selectorRadius = ${shape('$hourMinuteComponent.container')}
       .borderRadius
       .resolve(Directionality.of(context));
-    return InputDecorationTheme(
+    return InputDecorationThemeData(
       contentPadding: EdgeInsets.zero,
       filled: true,
       // This should be derived from a token, but there isn't one for 'time-input'.
@@ -344,14 +345,14 @@ class _${blockName}DefaultsM3 extends _TimePickerDefaults {
   }
 
   @override
-  MaterialStateProperty<Color?>? get timeSelectorSeparatorColor {
+  WidgetStateProperty<Color?>? get timeSelectorSeparatorColor {
     // TODO(tahatesser): Update this when tokens are available.
     // This is taken from https://m3.material.io/components/time-pickers/specs.
     return MaterialStatePropertyAll<Color>(_colors.onSurface);
   }
 
   @override
-  MaterialStateProperty<TextStyle?>? get timeSelectorSeparatorTextStyle {
+  WidgetStateProperty<TextStyle?>? get timeSelectorSeparatorTextStyle {
     // TODO(tahatesser): Update this when tokens are available.
     // This is taken from https://m3.material.io/components/time-pickers/specs.
     return MaterialStatePropertyAll<TextStyle?>(_textTheme.displayLarge);

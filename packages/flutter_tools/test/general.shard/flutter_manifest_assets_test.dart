@@ -10,9 +10,9 @@ import '../src/common.dart';
 void main() {
   group('parsing of assets section in flutter manifests', () {
     testWithoutContext('ignores empty list of assets', () {
-      final BufferLogger logger = BufferLogger.test();
+      final logger = BufferLogger.test();
 
-      const String manifest = '''
+      const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -31,8 +31,8 @@ flutter:
     });
 
     testWithoutContext('parses two simple asset declarations', () async {
-      final BufferLogger logger = BufferLogger.test();
-      const String manifest = '''
+      final logger = BufferLogger.test();
+      const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -44,8 +44,10 @@ flutter:
     - a/bar
 ''';
 
-      final FlutterManifest flutterManifest =
-          FlutterManifest.createFromString(manifest, logger: logger)!;
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+        manifest,
+        logger: logger,
+      )!;
 
       expect(flutterManifest.assets, <AssetsEntry>[
         AssetsEntry(uri: Uri.parse('a/foo')),
@@ -54,8 +56,8 @@ flutter:
     });
 
     testWithoutContext('does not crash on empty entry', () {
-      final BufferLogger logger = BufferLogger.test();
-      const String manifest = '''
+      final logger = BufferLogger.test();
+      const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -73,9 +75,9 @@ flutter:
     });
 
     testWithoutContext('handles special characters in asset URIs', () {
-      final BufferLogger logger = BufferLogger.test();
+      final logger = BufferLogger.test();
 
-      const String manifest = '''
+      const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -88,20 +90,22 @@ flutter:
     - lib/gallery/aaa bbb
 ''';
 
-      final FlutterManifest flutterManifest =
-          FlutterManifest.createFromString(manifest, logger: logger)!;
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+        manifest,
+        logger: logger,
+      )!;
       final List<AssetsEntry> assets = flutterManifest.assets;
 
       expect(assets, <AssetsEntry>[
-        AssetsEntry(uri: Uri.parse('lib/gallery/abc%23xyz')),
-        AssetsEntry(uri: Uri.parse('lib/gallery/abc%3Fxyz')),
+        AssetsEntry(uri: Uri.parse('lib/gallery/abc#xyz')),
+        AssetsEntry(uri: Uri.parse('lib/gallery/abc?xyz')),
         AssetsEntry(uri: Uri.parse('lib/gallery/aaa%20bbb')),
       ]);
     });
 
     testWithoutContext('parses an asset with flavors', () async {
-      final BufferLogger logger = BufferLogger.test();
-      const String manifest = '''
+      final logger = BufferLogger.test();
+      const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -115,8 +119,10 @@ flutter:
         - strawberry
 ''';
 
-      final FlutterManifest flutterManifest =
-          FlutterManifest.createFromString(manifest, logger: logger)!;
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+        manifest,
+        logger: logger,
+      )!;
 
       expect(flutterManifest.assets, <AssetsEntry>[
         AssetsEntry(uri: Uri.parse('a/foo'), flavors: const <String>{'apple', 'strawberry'}),
@@ -124,9 +130,9 @@ flutter:
     });
 
     testWithoutContext("prints an error when an asset entry's flavor is not a string", () async {
-      final BufferLogger logger = BufferLogger.test();
+      final logger = BufferLogger.test();
 
-      const String manifest = '''
+      const manifest = '''
 name: test
 dependencies:
   flutter:

@@ -61,8 +61,9 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
       final String? secondaryLogicalName = keyNames.length == 3 ? keyNames[2] : null;
       final PhysicalKeyEntry primaryPhysical = physicalData.entryByName(primaryPhysicalName);
       final LogicalKeyEntry primaryLogical = logicalData.entryByName(primaryLogicalName);
-      final LogicalKeyEntry? secondaryLogical =
-          secondaryLogicalName == null ? null : logicalData.entryByName(secondaryLogicalName);
+      final LogicalKeyEntry? secondaryLogical = secondaryLogicalName == null
+          ? null
+          : logicalData.entryByName(secondaryLogicalName);
       if (secondaryLogical == null && secondaryLogicalName != null) {
         print(
           'Unrecognized secondary logical key $secondaryLogicalName specified for $debugFunctionName.',

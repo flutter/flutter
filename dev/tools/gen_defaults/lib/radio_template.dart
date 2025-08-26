@@ -13,7 +13,8 @@ class RadioTemplate extends TokenTemplate {
   });
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _RadioDefaultsM3 extends RadioThemeData {
   _RadioDefaultsM3(this.context);
 
@@ -22,8 +23,8 @@ class _RadioDefaultsM3 extends RadioThemeData {
   late final ColorScheme _colors = _theme.colorScheme;
 
   @override
-  MaterialStateProperty<Color> get fillColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color> get fillColor {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.disabled)) {
           return ${componentColor('md.comp.radio-button.disabled.selected.icon')};
@@ -56,8 +57,8 @@ class _RadioDefaultsM3 extends RadioThemeData {
   }
 
   @override
-  MaterialStateProperty<Color> get overlayColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color> get overlayColor {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
           return ${componentColor('md.comp.radio-button.selected.pressed.state-layer')};
@@ -88,6 +89,10 @@ class _RadioDefaultsM3 extends RadioThemeData {
 
   @override
   VisualDensity get visualDensity => _theme.visualDensity;
+
+  @override
+  WidgetStateProperty<Color> get backgroundColor =>
+      WidgetStateProperty.all<Color>(Colors.transparent);
 }
 ''';
 }

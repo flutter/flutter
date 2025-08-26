@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -713,7 +714,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
-        home: Scaffold(body: Switch(focusNode: focusNode, value: true, onChanged: (_) {})),
+        home: Scaffold(
+          body: Switch(focusNode: focusNode, value: true, onChanged: (_) {}),
+        ),
       ),
     );
 
@@ -754,7 +757,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: Scaffold(body: Switch(focusNode: focusNode, value: true, onChanged: (_) {})),
+        home: Scaffold(
+          body: Switch(focusNode: focusNode, value: true, onChanged: (_) {}),
+        ),
       ),
     );
 
@@ -1273,18 +1278,15 @@ void main() {
       TargetPlatform.macOS,
     ]) {
       // Switches have same sizes on both platform but they are more compact on macOS.
-      final RRect trackRRect =
-          platform == TargetPlatform.iOS
-              ? RRect.fromLTRBR(4.5, 8.5, 55.5, 39.5, const Radius.circular(15.5))
-              : RRect.fromLTRBR(4.5, 4.5, 55.5, 35.5, const Radius.circular(15.5));
-      final RRect inactiveThumbRRect =
-          platform == TargetPlatform.iOS
-              ? RRect.fromLTRBR(6.0, 10.0, 34.0, 38.0, const Radius.circular(14.0))
-              : RRect.fromLTRBR(6.0, 6.0, 34.0, 34.0, const Radius.circular(14.0));
-      final RRect activeThumbRRect =
-          platform == TargetPlatform.iOS
-              ? RRect.fromLTRBR(26.0, 10.0, 54.0, 38.0, const Radius.circular(14.0))
-              : RRect.fromLTRBR(26.0, 6.0, 54.0, 34.0, const Radius.circular(14.0));
+      final RRect trackRRect = platform == TargetPlatform.iOS
+          ? RRect.fromLTRBR(4.5, 8.5, 55.5, 39.5, const Radius.circular(15.5))
+          : RRect.fromLTRBR(4.5, 4.5, 55.5, 35.5, const Radius.circular(15.5));
+      final RRect inactiveThumbRRect = platform == TargetPlatform.iOS
+          ? RRect.fromLTRBR(6.0, 10.0, 34.0, 38.0, const Radius.circular(14.0))
+          : RRect.fromLTRBR(6.0, 6.0, 34.0, 34.0, const Radius.circular(14.0));
+      final RRect activeThumbRRect = platform == TargetPlatform.iOS
+          ? RRect.fromLTRBR(26.0, 10.0, 54.0, 38.0, const Radius.circular(14.0))
+          : RRect.fromLTRBR(26.0, 6.0, 54.0, 34.0, const Radius.circular(14.0));
       await tester.pumpWidget(Container());
       await tester.pumpWidget(buildAdaptiveSwitch(platform: platform, value: false));
       expect(
@@ -1669,14 +1671,13 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return Switch(
                   value: value,
-                  onChanged:
-                      enabled
-                          ? (bool newValue) {
-                            setState(() {
-                              value = newValue;
-                            });
-                          }
-                          : null,
+                  onChanged: enabled
+                      ? (bool newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        }
+                      : null,
                   focusColor: Colors.orange[500],
                   autofocus: true,
                   focusNode: focusNode,
@@ -1764,14 +1765,13 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return Switch(
                   value: value,
-                  onChanged:
-                      enabled
-                          ? (bool newValue) {
-                            setState(() {
-                              value = newValue;
-                            });
-                          }
-                          : null,
+                  onChanged: enabled
+                      ? (bool newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        }
+                      : null,
                   focusColor: Colors.orange[500],
                   autofocus: true,
                   focusNode: focusNode,
@@ -1886,14 +1886,13 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return Switch(
                   value: value,
-                  onChanged:
-                      enabled
-                          ? (bool newValue) {
-                            setState(() {
-                              value = newValue;
-                            });
-                          }
-                          : null,
+                  onChanged: enabled
+                      ? (bool newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        }
+                      : null,
                   hoverColor: Colors.orange[500],
                 );
               },
@@ -1975,14 +1974,13 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return Switch(
                   value: value,
-                  onChanged:
-                      enabled
-                          ? (bool newValue) {
-                            setState(() {
-                              value = newValue;
-                            });
-                          }
-                          : null,
+                  onChanged: enabled
+                      ? (bool newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        }
+                      : null,
                   hoverColor: Colors.orange[500],
                 );
               },
@@ -2051,14 +2049,13 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return Switch(
                   value: value,
-                  onChanged:
-                      enabled
-                          ? (bool newValue) {
-                            setState(() {
-                              value = newValue;
-                            });
-                          }
-                          : null,
+                  onChanged: enabled
+                      ? (bool newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        }
+                      : null,
                   focusColor: Colors.orange[500],
                   autofocus: true,
                 );
@@ -2215,14 +2212,13 @@ void main() {
                 child: Center(
                   child: Switch(
                     value: value,
-                    onChanged:
-                        !enabled
-                            ? null
-                            : (bool newValue) {
-                              setState(() {
-                                value = newValue;
-                              });
-                            },
+                    onChanged: !enabled
+                        ? null
+                        : (bool newValue) {
+                            setState(() {
+                              value = newValue;
+                            });
+                          },
                   ),
                 ),
               );
@@ -2277,7 +2273,7 @@ void main() {
       return inactiveEnabledThumbColor;
     }
 
-    final MaterialStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
+    final WidgetStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
 
     Widget buildSwitch({required bool enabled, required bool active}) {
       return MaterialApp(
@@ -2392,7 +2388,7 @@ void main() {
       return inactiveEnabledThumbColor;
     }
 
-    final MaterialStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
+    final WidgetStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
 
     Widget buildSwitch({required bool enabled, required bool active}) {
       return Theme(
@@ -2498,7 +2494,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final MaterialStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
+    final WidgetStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
 
     Widget buildSwitch() {
       return MaterialApp(
@@ -2580,7 +2576,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final MaterialStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
+    final WidgetStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
 
     Widget buildSwitch() {
       return MaterialApp(
@@ -2662,7 +2658,7 @@ void main() {
       return inactiveEnabledTrackColor;
     }
 
-    final MaterialStateProperty<Color> trackColor = MaterialStateColor.resolveWith(getTrackColor);
+    final WidgetStateProperty<Color> trackColor = MaterialStateColor.resolveWith(getTrackColor);
 
     Widget buildSwitch({required bool enabled, required bool active}) {
       return MaterialApp(
@@ -2749,7 +2745,7 @@ void main() {
       return inactiveEnabledTrackColor;
     }
 
-    final MaterialStateProperty<Color> trackColor = MaterialStateColor.resolveWith(getTrackColor);
+    final WidgetStateProperty<Color> trackColor = MaterialStateColor.resolveWith(getTrackColor);
 
     Widget buildSwitch({required bool enabled, required bool active}) {
       return Theme(
@@ -2835,7 +2831,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final MaterialStateProperty<Color> trackColor = MaterialStateColor.resolveWith(getTrackColor);
+    final WidgetStateProperty<Color> trackColor = MaterialStateColor.resolveWith(getTrackColor);
 
     Widget buildSwitch() {
       return MaterialApp(
@@ -2907,7 +2903,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final MaterialStateProperty<Color> trackColor = MaterialStateColor.resolveWith(getTrackColor);
+    final WidgetStateProperty<Color> trackColor = MaterialStateColor.resolveWith(getTrackColor);
 
     Widget buildSwitch() {
       return Theme(
@@ -2973,7 +2969,7 @@ void main() {
       return Colors.black;
     }
 
-    final MaterialStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
+    final WidgetStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
 
     Widget buildSwitch({required bool enabled, required bool active}) {
       return Directionality(
@@ -3030,7 +3026,7 @@ void main() {
       return Colors.black;
     }
 
-    final MaterialStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
+    final WidgetStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
 
     Widget buildSwitch({required bool enabled, required bool active}) {
       return Directionality(
@@ -3112,13 +3108,13 @@ void main() {
             autofocus: focused,
             value: active,
             onChanged: (_) {},
-            thumbColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+            thumbColor: WidgetStateProperty.resolveWith<Color>((Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
                 return activeThumbColor;
               }
               return inactiveThumbColor;
             }),
-            overlayColor: useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
+            overlayColor: useOverlay ? WidgetStateProperty.resolveWith(getOverlayColor) : null,
             hoverColor: hoverColor,
             focusColor: focusColor,
             splashRadius: splashRadius,
@@ -3542,14 +3538,13 @@ void main() {
                 builder: (BuildContext context, StateSetter setState) {
                   return Switch(
                     value: value,
-                    onChanged:
-                        enabled
-                            ? (bool newValue) {
-                              setState(() {
-                                value = newValue;
-                              });
-                            }
-                            : null,
+                    onChanged: enabled
+                        ? (bool newValue) {
+                            setState(() {
+                              value = newValue;
+                            });
+                          }
+                        : null,
                   );
                 },
               ),
@@ -3658,7 +3653,7 @@ void main() {
         return inactiveEnabledTrackOutlineColor;
       }
 
-      final MaterialStateProperty<Color> trackOutlineColor = MaterialStateColor.resolveWith(
+      final WidgetStateProperty<Color> trackOutlineColor = MaterialStateColor.resolveWith(
         getTrackOutlineColor,
       );
 
@@ -3739,7 +3734,7 @@ void main() {
         return Colors.transparent;
       }
 
-      final MaterialStateProperty<Color> trackOutlineColor = MaterialStateColor.resolveWith(
+      final WidgetStateProperty<Color> trackOutlineColor = MaterialStateColor.resolveWith(
         getTrackOutlineColor,
       );
 
@@ -3810,7 +3805,7 @@ void main() {
         return inactiveEnabledTrackOutlineWidth;
       }
 
-      final MaterialStateProperty<double> trackOutlineWidth = MaterialStateProperty.resolveWith(
+      final WidgetStateProperty<double> trackOutlineWidth = WidgetStateProperty.resolveWith(
         getTrackOutlineWidth,
       );
 
@@ -3890,7 +3885,7 @@ void main() {
         return 8.0;
       }
 
-      final MaterialStateProperty<double> trackOutlineWidth = MaterialStateProperty.resolveWith(
+      final WidgetStateProperty<double> trackOutlineWidth = WidgetStateProperty.resolveWith(
         getTrackOutlineWidth,
       );
 
@@ -3945,8 +3940,8 @@ void main() {
         brightness: Brightness.light,
       );
 
-      MaterialStateProperty<Icon?> thumbIcon(Icon? activeIcon, Icon? inactiveIcon) {
-        return MaterialStateProperty.resolveWith<Icon?>((Set<MaterialState> states) {
+      WidgetStateProperty<Icon?> thumbIcon(Icon? activeIcon, Icon? inactiveIcon) {
+        return WidgetStateProperty.resolveWith<Icon?>((Set<MaterialState> states) {
           if (states.contains(MaterialState.selected)) {
             return activeIcon;
           }
@@ -4061,14 +4056,13 @@ void main() {
               return Center(
                 child: Switch.adaptive(
                   value: value,
-                  onChanged:
-                      enabled
-                          ? (bool newValue) {
-                            setState(() {
-                              value = newValue;
-                            });
-                          }
-                          : null,
+                  onChanged: enabled
+                      ? (bool newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        }
+                      : null,
                   focusColor: focusColor,
                   focusNode: focusNode,
                   autofocus: true,
@@ -4171,7 +4165,9 @@ void main() {
     Widget buildSwitch({EdgeInsets? padding}) {
       return MaterialApp(
         home: Material(
-          child: Center(child: Switch(padding: padding, value: true, onChanged: (_) {})),
+          child: Center(
+            child: Switch(padding: padding, value: true, onChanged: (_) {}),
+          ),
         ),
       );
     }
@@ -4315,10 +4311,9 @@ void main() {
       TargetPlatform.iOS,
       TargetPlatform.macOS,
     ]) {
-      final RRect trackRRect =
-          platform == TargetPlatform.iOS
-              ? RRect.fromLTRBR(4.0, 8.5, 55.0, 39.5, const Radius.circular(15.5))
-              : RRect.fromLTRBR(4.0, 4.5, 55.0, 35.5, const Radius.circular(15.5));
+      final RRect trackRRect = platform == TargetPlatform.iOS
+          ? RRect.fromLTRBR(4.0, 8.5, 55.0, 39.5, const Radius.circular(15.5))
+          : RRect.fromLTRBR(4.0, 4.5, 55.0, 35.5, const Radius.circular(15.5));
       await tester.pumpWidget(buildFrame(platform));
       expect(
         Material.of(tester.element(find.byType(Switch))),
@@ -4340,8 +4335,8 @@ void main() {
     ]) {
       final RRect trackRRect =
           platform == TargetPlatform.fuchsia || platform == TargetPlatform.android
-              ? RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0))
-              : RRect.fromLTRBR(13.0, 13.0, 46.0, 27.0, const Radius.circular(7.0));
+          ? RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0))
+          : RRect.fromLTRBR(13.0, 13.0, 46.0, 27.0, const Radius.circular(7.0));
       await tester.pumpWidget(buildFrame(platform));
 
       expect(
@@ -4392,10 +4387,9 @@ void main() {
       TargetPlatform.iOS,
       TargetPlatform.macOS,
     ]) {
-      final RRect trackRRect =
-          platform == TargetPlatform.iOS
-              ? RRect.fromLTRBR(4.5, 8.5, 55.5, 39.5, const Radius.circular(15.5))
-              : RRect.fromLTRBR(4.5, 4.5, 55.5, 35.5, const Radius.circular(15.5));
+      final RRect trackRRect = platform == TargetPlatform.iOS
+          ? RRect.fromLTRBR(4.5, 8.5, 55.5, 39.5, const Radius.circular(15.5))
+          : RRect.fromLTRBR(4.5, 4.5, 55.5, 35.5, const Radius.circular(15.5));
       await tester.pumpWidget(buildFrame(platform));
       expect(
         Material.of(tester.element(find.byType(Switch))),
@@ -4417,8 +4411,8 @@ void main() {
     ]) {
       final RRect trackRRect =
           platform == TargetPlatform.fuchsia || platform == TargetPlatform.android
-              ? RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0))
-              : RRect.fromLTRBR(4.0, 4.0, 56.0, 36.0, const Radius.circular(16.0));
+          ? RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0))
+          : RRect.fromLTRBR(4.0, 4.0, 56.0, 36.0, const Radius.circular(16.0));
 
       await tester.pumpWidget(buildFrame(platform));
 
@@ -4526,17 +4520,17 @@ Widget buildAdaptiveSwitch({
     theme: ThemeData(
       platform: platform,
       switchTheme: overallSwitchThemeData,
-      adaptations:
-          switchThemeAdaptation == null ? null : <Adaptation<Object>>[switchThemeAdaptation],
+      adaptations: switchThemeAdaptation == null
+          ? null
+          : <Adaptation<Object>>[switchThemeAdaptation],
     ),
     home: StatefulBuilder(
       builder: (BuildContext context, StateSetter setState) {
         return Material(
           child: Center(
-            child:
-                switchThemeData == null
-                    ? adaptiveSwitch
-                    : SwitchTheme(data: switchThemeData, child: adaptiveSwitch),
+            child: switchThemeData == null
+                ? adaptiveSwitch
+                : SwitchTheme(data: switchThemeData, child: adaptiveSwitch),
           ),
         );
       },

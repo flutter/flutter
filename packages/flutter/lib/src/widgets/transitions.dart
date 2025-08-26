@@ -507,10 +507,12 @@ class SizeTransition extends AnimatedWidget {
           Axis.horizontal => AlignmentDirectional(axisAlignment, -1.0),
           Axis.vertical => AlignmentDirectional(-1.0, axisAlignment),
         },
-        heightFactor:
-            axis == Axis.vertical ? math.max(sizeFactor.value, 0.0) : fixedCrossAxisSizeFactor,
-        widthFactor:
-            axis == Axis.horizontal ? math.max(sizeFactor.value, 0.0) : fixedCrossAxisSizeFactor,
+        heightFactor: axis == Axis.vertical
+            ? math.max(sizeFactor.value, 0.0)
+            : fixedCrossAxisSizeFactor,
+        widthFactor: axis == Axis.horizontal
+            ? math.max(sizeFactor.value, 0.0)
+            : fixedCrossAxisSizeFactor,
         child: child,
       ),
     );

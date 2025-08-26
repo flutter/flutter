@@ -335,15 +335,13 @@ void main() {
 
       if (!kIsWeb) {
         // TODO(ianh): https://github.com/flutter/flutter/issues/130610
-        final ui.Image image =
-            (await tester.binding.runAsync<ui.Image>(
-              () => captureImage(find.byType(Wrap).evaluate().single),
-            ))!;
+        final ui.Image image = (await tester.binding.runAsync<ui.Image>(
+          () => captureImage(find.byType(Wrap).evaluate().single),
+        ))!;
         addTearDown(() => image.dispose());
-        final Uint8List bytes =
-            (await tester.binding.runAsync<ByteData?>(
-              () => image.toByteData(format: ui.ImageByteFormat.rawStraightRgba),
-            ))!.buffer.asUint8List();
+        final Uint8List bytes = (await tester.binding.runAsync<ByteData?>(
+          () => image.toByteData(format: ui.ImageByteFormat.rawStraightRgba),
+        ))!.buffer.asUint8List();
         expect(image.width, 792);
         expect(image.height, 48);
         expect(bytes, hasLength(image.width * image.height * 4));
@@ -840,15 +838,13 @@ void main() {
 
       if (!kIsWeb) {
         // TODO(ianh): https://github.com/flutter/flutter/issues/130610
-        final ui.Image image =
-            (await tester.binding.runAsync<ui.Image>(
-              () => captureImage(find.byType(Wrap).evaluate().single),
-            ))!;
+        final ui.Image image = (await tester.binding.runAsync<ui.Image>(
+          () => captureImage(find.byType(Wrap).evaluate().single),
+        ))!;
         addTearDown(() => image.dispose());
-        final Uint8List bytes =
-            (await tester.binding.runAsync<ByteData?>(
-              () => image.toByteData(format: ui.ImageByteFormat.rawStraightRgba),
-            ))!.buffer.asUint8List();
+        final Uint8List bytes = (await tester.binding.runAsync<ByteData?>(
+          () => image.toByteData(format: ui.ImageByteFormat.rawStraightRgba),
+        ))!.buffer.asUint8List();
         expect(image.width, 24 * 24);
         expect(image.height, 1 * 24);
         expect(bytes, hasLength(image.width * image.height * 4));

@@ -21,7 +21,7 @@ class IconButtonTemplate extends TokenTemplate {
       case 'md.comp.filled-tonal-icon-button':
         return '''
 
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return ${componentColor('$tokenGroup.disabled.container')};
       }
@@ -36,7 +36,7 @@ class IconButtonTemplate extends TokenTemplate {
       case 'md.comp.outlined-icon-button':
         return '''
 
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         if (states.contains(MaterialState.selected)) {
           return ${componentColor('$tokenGroup.disabled.selected.container')};
@@ -60,7 +60,7 @@ class IconButtonTemplate extends TokenTemplate {
       case 'md.comp.filled-tonal-icon-button':
         return '''
 
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return ${componentColor('$tokenGroup.disabled.icon')};
       }
@@ -76,7 +76,7 @@ class IconButtonTemplate extends TokenTemplate {
       case 'md.comp.icon-button':
         return '''
 
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return ${componentColor('$tokenGroup.disabled.icon')};
       }
@@ -97,7 +97,7 @@ class IconButtonTemplate extends TokenTemplate {
       case 'md.comp.filled-tonal-icon-button':
         return '''
 
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
           return ${componentColor('$tokenGroup.toggle.selected.pressed.state-layer')}.withOpacity(${opacity('$tokenGroup.pressed.state-layer.opacity')});
@@ -133,7 +133,7 @@ class IconButtonTemplate extends TokenTemplate {
     })''';
       case 'md.comp.outlined-icon-button':
         return '''
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
           return ${componentColor('$tokenGroup.selected.pressed.state-layer')}.withOpacity(${opacity('$tokenGroup.pressed.state-layer.opacity')});
@@ -159,7 +159,7 @@ class IconButtonTemplate extends TokenTemplate {
       case 'md.comp.icon-button':
         return '''
 
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
           return ${componentColor('$tokenGroup.selected.pressed.state-layer')};
@@ -217,7 +217,7 @@ class IconButtonTemplate extends TokenTemplate {
     if (tokenAvailable('$tokenGroup.unselected.outline.color')) {
       return '''
 
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         return null;
       } else {
@@ -240,7 +240,8 @@ class IconButtonTemplate extends TokenTemplate {
   }
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends ButtonStyle {
   _${blockName}DefaultsM3(this.context, this.toggleable)
     : super(
@@ -256,52 +257,52 @@ class _${blockName}DefaultsM3 extends ButtonStyle {
   // No default text style
 
   @override
-  MaterialStateProperty<Color?>? get backgroundColor =>${_backgroundColor()};
+  WidgetStateProperty<Color?>? get backgroundColor =>${_backgroundColor()};
 
   @override
-  MaterialStateProperty<Color?>? get foregroundColor =>${_foregroundColor()};
+  WidgetStateProperty<Color?>? get foregroundColor =>${_foregroundColor()};
 
  @override
-  MaterialStateProperty<Color?>? get overlayColor =>${_overlayColor()};
+  WidgetStateProperty<Color?>? get overlayColor =>${_overlayColor()};
 
   @override
-  MaterialStateProperty<double>? get elevation =>
+  WidgetStateProperty<double>? get elevation =>
     const MaterialStatePropertyAll<double>(0.0);
 
   @override
-  MaterialStateProperty<Color>? get shadowColor =>
+  WidgetStateProperty<Color>? get shadowColor =>
     ${_elevationColor("$tokenGroup.container.shadow-color")};
 
   @override
-  MaterialStateProperty<Color>? get surfaceTintColor =>
+  WidgetStateProperty<Color>? get surfaceTintColor =>
     ${_elevationColor("$tokenGroup.container.surface-tint-layer.color")};
 
   @override
-  MaterialStateProperty<EdgeInsetsGeometry>? get padding =>
+  WidgetStateProperty<EdgeInsetsGeometry>? get padding =>
     const MaterialStatePropertyAll<EdgeInsetsGeometry>(EdgeInsets.all(8.0));
 
   @override
-  MaterialStateProperty<Size>? get minimumSize =>${_minimumSize()};
+  WidgetStateProperty<Size>? get minimumSize =>${_minimumSize()};
 
   // No default fixedSize
 
   @override
-  MaterialStateProperty<Size>? get maximumSize =>
+  WidgetStateProperty<Size>? get maximumSize =>
     const MaterialStatePropertyAll<Size>(Size.infinite);
 
   @override
-  MaterialStateProperty<double>? get iconSize =>
+  WidgetStateProperty<double>? get iconSize =>
     const MaterialStatePropertyAll<double>(${getToken("$tokenGroup.icon.size")});
 
   @override
-  MaterialStateProperty<BorderSide?>? get side =>${_side()};
+  WidgetStateProperty<BorderSide?>? get side =>${_side()};
 
   @override
-  MaterialStateProperty<OutlinedBorder>? get shape =>${_shape()};
+  WidgetStateProperty<OutlinedBorder>? get shape =>${_shape()};
 
   @override
-  MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<MouseCursor?>? get mouseCursor =>
+    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return SystemMouseCursors.basic;
       }

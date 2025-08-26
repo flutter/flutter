@@ -14,7 +14,8 @@ class NavigationDrawerTemplate extends TokenTemplate {
   });
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends NavigationDrawerThemeData {
   _${blockName}DefaultsM3(this.context)
     : super(
@@ -41,8 +42,8 @@ class _${blockName}DefaultsM3 extends NavigationDrawerThemeData {
   Color? get indicatorColor => ${componentColor("md.comp.navigation-drawer.active-indicator")};
 
   @override
-  MaterialStateProperty<IconThemeData?>? get iconTheme {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<IconThemeData?>? get iconTheme {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       return IconThemeData(
         size: ${getToken("md.comp.navigation-drawer.icon.size")},
         color: states.contains(MaterialState.disabled)
@@ -55,8 +56,8 @@ class _${blockName}DefaultsM3 extends NavigationDrawerThemeData {
   }
 
   @override
-  MaterialStateProperty<TextStyle?>? get labelTextStyle {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<TextStyle?>? get labelTextStyle {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       final TextStyle style = ${textStyle("md.comp.navigation-drawer.label-text")}!;
       return style.apply(
         color: states.contains(MaterialState.disabled)

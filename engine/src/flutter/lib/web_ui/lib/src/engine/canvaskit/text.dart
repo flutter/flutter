@@ -348,8 +348,9 @@ class CkTextStyle implements ui.TextStyle {
       originalFontFamily: fontFamily,
       effectiveFontFamily: _computeEffectiveFontFamily(fontFamily),
       originalFontFamilyFallback: fontFamilyFallback,
-      effectiveFontFamilyFallback:
-          ui_web.TestEnvironment.instance.forceTestFonts ? null : fontFamilyFallback,
+      effectiveFontFamilyFallback: ui_web.TestEnvironment.instance.forceTestFonts
+          ? null
+          : fontFamilyFallback,
       fontSize: fontSize,
       letterSpacing: letterSpacing,
       wordSpacing: wordSpacing,
@@ -707,8 +708,9 @@ class CkStrutStyle implements ui.StrutStyle {
     ui.FontStyle? fontStyle,
     bool? forceStrutHeight,
   }) : _fontFamily = _computeEffectiveFontFamily(fontFamily),
-       _fontFamilyFallback =
-           ui_web.TestEnvironment.instance.forceTestFonts ? null : fontFamilyFallback,
+       _fontFamilyFallback = ui_web.TestEnvironment.instance.forceTestFonts
+           ? null
+           : fontFamilyFallback,
        _fontSize = fontSize,
        _height = height == ui.kTextHeightNone ? null : height,
        _leadingDistribution = leadingDistribution,
@@ -1136,6 +1138,22 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
   CkParagraph build() {
     final SkParagraph builtParagraph = _buildSkParagraph();
     return CkParagraph(builtParagraph, _style);
+  }
+
+  /// Injects required ICU data into the [builder].
+  ///
+  /// This should only be used with the CanvasKit Chromium variant that's compiled
+  /// without ICU data.
+  static void injectClientICU(SkParagraphBuilder builder) {
+    assert(
+      canvasKit.ParagraphBuilder.RequiresClientICU(),
+      'This method should only be used with the CanvasKit Chromium variant.',
+    );
+
+    final SegmentationResult result = segmentText(builder.getText());
+    builder.setWordsUtf16(result.words);
+    builder.setGraphemeBreaksUtf16(result.graphemes);
+    builder.setLineBreaksUtf16(result.breaks);
   }
 
   /// Builds the CkParagraph with the builder and deletes the builder.

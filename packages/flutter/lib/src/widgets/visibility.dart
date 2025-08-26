@@ -237,8 +237,8 @@ class Visibility extends StatelessWidget {
   static bool of(BuildContext context) {
     bool isVisible = true;
     BuildContext ancestorContext = context;
-    InheritedElement? ancestor =
-        ancestorContext.getElementForInheritedWidgetOfExactType<_VisibilityScope>();
+    InheritedElement? ancestor = ancestorContext
+        .getElementForInheritedWidgetOfExactType<_VisibilityScope>();
     while (isVisible && ancestor != null) {
       final _VisibilityScope scope = context.dependOnInheritedElement(ancestor) as _VisibilityScope;
       isVisible = scope.isVisible;

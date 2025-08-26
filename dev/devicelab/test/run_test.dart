@@ -135,10 +135,9 @@ void main() {
       );
       expect(result.exitCode, 0);
 
-      String sectionHeader =
-          !Platform.isWindows
-              ? '═════════════════════════╡ ••• A/B results so far ••• ╞═════════════════════════'
-              : 'A/B results so far';
+      String sectionHeader = !Platform.isWindows
+          ? '═════════════════════════╡ ••• A/B results so far ••• ╞═════════════════════════'
+          : 'A/B results so far';
       expect(
         result.stdout,
         contains(
@@ -150,10 +149,9 @@ void main() {
         ),
       );
 
-      sectionHeader =
-          !Platform.isWindows
-              ? '════════════════════════════╡ ••• Raw results ••• ╞═════════════════════════════'
-              : 'Raw results';
+      sectionHeader = !Platform.isWindows
+          ? '════════════════════════════╡ ••• Raw results ••• ╞═════════════════════════════'
+          : 'Raw results';
       expect(
         result.stdout,
         contains(
@@ -168,10 +166,9 @@ void main() {
         ),
       );
 
-      sectionHeader =
-          !Platform.isWindows
-              ? '═════════════════════════╡ ••• Final A/B results ••• ╞══════════════════════════'
-              : 'Final A/B results';
+      sectionHeader = !Platform.isWindows
+          ? '═════════════════════════╡ ••• Final A/B results ••• ╞══════════════════════════'
+          : 'Final A/B results';
       expect(
         result.stdout,
         contains(

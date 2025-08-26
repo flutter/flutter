@@ -158,16 +158,15 @@ void main() {
           initialRoute: '/',
           routes: <String, WidgetBuilder>{
             '/': (BuildContext context) => const Material(child: Text('home')),
-            '/a':
-                (BuildContext context) =>
-                    const Material(child: Hero(tag: kHeroTag, child: Text('a'))),
-            '/b':
-                (BuildContext context) => const Material(
-                  child: Padding(
-                    padding: EdgeInsets.all(100.0),
-                    child: Hero(tag: kHeroTag, child: Text('b')),
-                  ),
-                ),
+            '/a': (BuildContext context) => const Material(
+              child: Hero(tag: kHeroTag, child: Text('a')),
+            ),
+            '/b': (BuildContext context) => const Material(
+              child: Padding(
+                padding: EdgeInsets.all(100.0),
+                child: Hero(tag: kHeroTag, child: Text('b')),
+              ),
+            ),
           },
         );
 
@@ -211,17 +210,16 @@ void main() {
           ),
           initialRoute: '/',
           routes: <String, WidgetBuilder>{
-            '/':
-                (BuildContext context) =>
-                    const Material(child: Hero(tag: kHeroTag, child: Text('home'))),
+            '/': (BuildContext context) => const Material(
+              child: Hero(tag: kHeroTag, child: Text('home')),
+            ),
             '/a': (BuildContext context) => const Material(child: Text('a')),
-            '/b':
-                (BuildContext context) => const Material(
-                  child: Padding(
-                    padding: EdgeInsets.all(100.0),
-                    child: Hero(tag: kHeroTag, child: Text('b')),
-                  ),
-                ),
+            '/b': (BuildContext context) => const Material(
+              child: Padding(
+                padding: EdgeInsets.all(100.0),
+                child: Hero(tag: kHeroTag, child: Text('b')),
+              ),
+            ),
           },
         );
 

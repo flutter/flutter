@@ -609,16 +609,18 @@ def run_engine_benchmarks(build_dir, executable_filter):
 
 class FlutterTesterOptions():
 
-  def __init__(
+  def __init__( # pylint: disable=too-many-arguments
       self,
       multithreaded=False,
       enable_impeller=False,
       enable_vm_service=False,
+      enable_microtask_profiling=False,
       expect_failure=False
   ):
     self.multithreaded = multithreaded
     self.enable_impeller = enable_impeller
     self.enable_vm_service = enable_vm_service
+    self.enable_microtask_profiling = enable_microtask_profiling
     self.expect_failure = expect_failure
 
   def apply_args(self, command_args):
@@ -632,6 +634,9 @@ class FlutterTesterOptions():
 
     if self.multithreaded:
       command_args.insert(0, '--force-multithreading')
+
+    if self.enable_microtask_profiling:
+      command_args.append('--profile-microtasks')
 
   def threading_description(self):
     if self.multithreaded:
@@ -873,7 +878,8 @@ def gather_dart_tests(build_dir, test_filter):
 
   if 'release' not in build_dir:
     for dart_test_file in dart_vm_service_tests:
-      if test_filter is not None and os.path.basename(dart_test_file) not in test_filter:
+      dart_test_basename = os.path.basename(dart_test_file)
+      if test_filter is not None and dart_test_basename not in test_filter:
         logger.info("Skipping '%s' due to filter.", dart_test_file)
       else:
         logger.info("Gathering dart test '%s' with VM service enabled", dart_test_file)
@@ -884,7 +890,9 @@ def gather_dart_tests(build_dir, test_filter):
                 FlutterTesterOptions(
                     multithreaded=multithreaded,
                     enable_impeller=enable_impeller,
-                    enable_vm_service=True
+                    enable_vm_service=True,
+                    enable_microtask_profiling=dart_test_basename ==
+                    'microtask_profiling_test.dart',
                 )
             )
 

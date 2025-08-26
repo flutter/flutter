@@ -27,8 +27,10 @@ config("fontconfig") {
   libs = [ "fontconfig" ]
 }
 
-pkg_config("freetype2") {
-  packages = [ "freetype2" ]
+if (!is_minimal_linux) {
+  pkg_config("freetype2") {
+    packages = [ "freetype2" ]
+  }
 }
 
 config("x11") {

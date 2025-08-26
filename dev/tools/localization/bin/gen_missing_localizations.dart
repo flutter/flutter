@@ -126,8 +126,10 @@ void updateMissingResources(
           // Find any resources in this locale that don't appear in the
           // canonical locale, and skipping any which should not be included
           // (plurals and intentionally omitted).
-          final Set<String> extraResources =
-              localeResources.difference(requiredKeys).where(isIncluded).toSet();
+          final Set<String> extraResources = localeResources
+              .difference(requiredKeys)
+              .where(isIncluded)
+              .toSet();
 
           // Remove them.
           localeBundle.removeWhere((String key, dynamic value) {
@@ -144,15 +146,13 @@ void updateMissingResources(
 
         // Add in any resources that are in the canonical locale and not present
         // in this locale.
-        final Set<String> missingResources =
-            requiredKeys
-                .difference(localeResources)
-                .where(
-                  (String key) =>
-                      !isPluralVariation(key, localeBundle) &&
-                      !intentionallyOmitted(key, localeBundle),
-                )
-                .toSet();
+        final Set<String> missingResources = requiredKeys
+            .difference(localeResources)
+            .where(
+              (String key) =>
+                  !isPluralVariation(key, localeBundle) && !intentionallyOmitted(key, localeBundle),
+            )
+            .toSet();
         if (missingResources.isNotEmpty) {
           localeBundle.addEntries(
             missingResources.map(
