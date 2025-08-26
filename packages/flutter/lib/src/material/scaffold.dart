@@ -442,7 +442,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
       return;
     }
     final Completer<SnackBarClosedReason> completer = _snackBars.first._completer;
-    if (_accessibleNavigation!) {
+    if (_accessibleNavigation) {
       _snackBarController!.value = 0.0;
       completer.complete(reason);
     } else {
@@ -578,7 +578,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
       return;
     }
     final Completer<MaterialBannerClosedReason> completer = _materialBanners.first._completer;
-    if (_accessibleNavigation!) {
+    if (_accessibleNavigation) {
       _materialBannerController!.value = 0.0;
       completer.complete(reason);
     } else {
