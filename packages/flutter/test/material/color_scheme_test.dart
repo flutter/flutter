@@ -1271,14 +1271,12 @@ void main() {
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
 
-    final Completer<void> completer = Completer<void>();
-
-    await tester.pumpWidget(MaterialApp(home: _AsyncImageScheme()));
+    await tester.pumpWidget(const MaterialApp(home: _AsyncImageScheme()));
 
     FlutterError.onError = oldHandler;
 
-    expect(errors.length, 1);
-    expect(errors[0].exception, isA<TimeoutException>());
+    expect(errors.single.exception, isA<Exception>());
+    expect(errors.single.exception.toString(), contains('Failed to render image:'));
   });
 }
 
