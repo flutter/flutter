@@ -1271,7 +1271,9 @@ void main() {
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
 
-    await tester.pumpWidget(const MaterialApp(home: _AsyncImageScheme()));
+    await tester.pumpWidget(
+      const MaterialApp(home: _NetworkImageScheme(imageUrl: 'random_non_exist_image.png')),
+    );
 
     FlutterError.onError = oldHandler;
 
@@ -1303,14 +1305,18 @@ Future<void> _testFilledButtonColor(
   expect(material.color, expectation);
 }
 
-class _AsyncImageScheme extends StatefulWidget {
-  const _AsyncImageScheme();
+// This widget fetches a [ColorScheme] from a network image, and displays
+// its content based on the scheme's color.
+class _NetworkImageScheme extends StatefulWidget {
+  const _NetworkImageScheme({required this.imageUrl});
+
+  final String imageUrl;
 
   @override
-  _AsyncImageSchemeState createState() => _AsyncImageSchemeState();
+  _NetworkImageSchemeState createState() => _NetworkImageSchemeState();
 }
 
-class _AsyncImageSchemeState extends State<_AsyncImageScheme> {
+class _NetworkImageSchemeState extends State<_NetworkImageScheme> {
   Color? _textColors;
 
   @override
@@ -1322,7 +1328,7 @@ class _AsyncImageSchemeState extends State<_AsyncImageScheme> {
   Future<void> _init() async {
     try {
       final ColorScheme dynamicColorScheme = await ColorScheme.fromImageProvider(
-        provider: const NetworkImage('random_non_exist_image.png'),
+        provider: NetworkImage(widget.imageUrl),
       );
       setState(() {
         _textColors = dynamicColorScheme.primary;
