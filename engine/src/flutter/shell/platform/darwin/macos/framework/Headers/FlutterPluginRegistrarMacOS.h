@@ -52,9 +52,8 @@ FLUTTER_DARWIN_EXPORT
 /**
  * The `NSViewController` that hosts |view|.
  *
- * The returned `NSViewController` may hold strong references to registered
- * plugins. To prevent retain cycles, the plugin must not store a strong
- * reference to this view controller.
+ * The plugin typically should not store a strong reference to this view
+ * controller.
  *
  * This property is provided for backwards compatibility for apps that assume
  * a single view, and will eventually be replaced by the multi-view API variant.
