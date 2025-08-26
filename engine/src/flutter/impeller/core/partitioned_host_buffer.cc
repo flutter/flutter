@@ -10,8 +10,8 @@ PartitionedHostBuffer::PartitionedHostBuffer(
     const std::shared_ptr<Allocator>& allocator,
     const std::shared_ptr<const IdleWaiter>& idle_waiter,
     size_t minimum_uniform_alignment)
-    : _dataBuffer(allocator, idle_waiter, minimum_uniform_alignment),
-      _indexBuffer(allocator, idle_waiter, minimum_uniform_alignment) {}
+    : dataBuffer_(allocator, idle_waiter, minimum_uniform_alignment),
+      indexBuffer_(allocator, idle_waiter, minimum_uniform_alignment) {}
 
 BufferView PartitionedHostBuffer::Emplace(const void* buffer,
                                           size_t length,
@@ -28,12 +28,12 @@ BufferView PartitionedHostBuffer::Emplace(size_t length,
 }
 
 size_t PartitionedHostBuffer::GetMinimumUniformAlignment() const {
-  return _dataBuffer.GetMinimumUniformAlignment();
+  return dataBuffer_.GetMinimumUniformAlignment();
 }
 
 void PartitionedHostBuffer::Reset() {
-  _dataBuffer.Reset();
-  _indexBuffer.Reset();
+  dataBuffer_.Reset();
+  indexBuffer_.Reset();
 }
 
 HostBuffer::TestStateQuery PartitionedHostBuffer::GetStateForTest(
@@ -44,9 +44,9 @@ HostBuffer::TestStateQuery PartitionedHostBuffer::GetStateForTest(
 SimpleHostBuffer& PartitionedHostBuffer::_buffer(BufferCategory category) {
   switch (category) {
     case BufferCategory::kData:
-      return _dataBuffer;
+      return dataBuffer_;
     case BufferCategory::kIndexes:
-      return _indexBuffer;
+      return indexBuffer_;
   }
 }
 

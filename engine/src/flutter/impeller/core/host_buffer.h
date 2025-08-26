@@ -25,16 +25,27 @@ static const constexpr size_t kHostBufferArenaSize = 4u;
 /// These are reset per-frame.
 class HostBuffer {
  public:
+  // Specifies the type of data that the buffer will be used for
   enum class BufferCategory {
+    // Index data for an indexed draw (i.e. glDrawElements)
     kIndexes,
+
+    // Any other data
     kData,
   };
 
+  //----------------------------------------------------------------------------
+  /// @brief      Creates a new host buffer
+  ///
+  /// @param[in]  partition_by_category   Whether the buffer should keep index
+  ///                                     data separate from other data.
+  ///
+  /// @return     The created host buffer.
   static std::shared_ptr<HostBuffer> Create(
       const std::shared_ptr<Allocator>& allocator,
       const std::shared_ptr<const IdleWaiter>& idle_waiter,
       size_t minimum_uniform_alignment,
-      bool partitionByCategory);
+      bool partition_by_category);
 
   virtual ~HostBuffer() = default;
 
@@ -65,6 +76,9 @@ class HostBuffer {
   ///
   /// @param[in]  uniform     The storage buffer to emplace onto the buffer.
   ///
+  /// @param[in]  category    The category of data that will be stored in the
+  ///                         buffer view. See `BufferCategory` enum.
+  ///
   /// @tparam     StorageBufferType The type of the shader storage buffer.
   ///
   /// @return     The buffer view.
@@ -89,6 +103,8 @@ class HostBuffer {
   ///
   /// @param[in]  buffer        The buffer data.
   /// @param[in]  alignment     Minimum alignment of the data being emplaced.
+  /// @param[in]  category      The category of data that will be stored in the
+  ///                           buffer view. See `BufferCategory` enum.
   ///
   /// @tparam     BufferType    The type of the buffer data.
   ///
@@ -119,6 +135,9 @@ class HostBuffer {
   ///             buffer is guaranteed to have enough space for length bytes. It
   ///             is the responsibility of the caller to not exceed the bounds
   ///             of the buffer returned in the EmplaceProc.
+  ///
+  /// @param[in]  category      The category of data that will be stored in the
+  ///                           buffer view. See `BufferCategory` enum.
   ///
   /// @param[in]  cb            A callback that will be passed a ptr to the
   ///                           underlying host buffer.

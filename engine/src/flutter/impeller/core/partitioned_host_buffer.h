@@ -31,8 +31,8 @@ class PartitionedHostBuffer : public HostBuffer {
  private:
   SimpleHostBuffer& _buffer(BufferCategory category);
 
-  SimpleHostBuffer _dataBuffer;
-  SimpleHostBuffer _indexBuffer;
+  SimpleHostBuffer dataBuffer_;
+  SimpleHostBuffer indexBuffer_;
 };
 
 }  // namespace impeller
