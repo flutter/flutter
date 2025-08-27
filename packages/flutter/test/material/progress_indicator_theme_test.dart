@@ -627,4 +627,67 @@ void main() {
       controller.dispose();
     },
   );
+
+  testWidgets(
+    'CircularProgressIndicator paints at 50% and 80% when controller value is 0.5 and 0.8',
+    (WidgetTester tester) async {
+      final AnimationController controller = AnimationController(
+        vsync: tester,
+        duration: CircularProgressIndicator.defaultAnimationDuration,
+      );
+
+      final ThemeData theme = ThemeData(
+        progressIndicatorTheme: ProgressIndicatorThemeData(
+          color: Colors.black,
+          linearTrackColor: Colors.green,
+          controller: controller,
+        ),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: Theme(
+                data: theme,
+                child: const SizedBox(
+                  width: 200.0,
+                  height: 200.0,
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      controller.value = 0.5; // Set the progress
+
+      await tester.pump(); // Wait for all rebuilds
+
+      expect(
+        find.byType(CircularProgressIndicator),
+        paints
+          ..arc(
+            startAngle: 1.5707963267948966,
+            sweepAngle: 0.001,
+          )
+      );
+
+      controller.value = 0.8; // Set the progress
+
+      await tester.pump(); // Wait for all rebuilds
+
+      expect(
+        find.byType(CircularProgressIndicator),
+        paints
+          ..arc(
+            startAngle: 2.520489337828999,
+            sweepAngle: 4.076855234710353,
+          )
+      );
+
+      controller.dispose();
+    },
+  );
 }
