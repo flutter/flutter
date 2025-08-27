@@ -362,6 +362,9 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
     gdk_cairo_draw_from_gl(cr, window, fl_framebuffer_get_texture_id(sibling),
                            GL_TEXTURE, scale_factor, 0, 0, width, height);
   } else {
+    GLint saved_texture_binding;
+    glGetIntegerv(GL_TEXTURE_BINDING_2D, &saved_texture_binding);
+
     GLuint texture_id;
     glGenTextures(1, &texture_id);
     glBindTexture(GL_TEXTURE_2D, texture_id);
@@ -372,6 +375,8 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
                            0, width, height);
 
     glDeleteTextures(1, &texture_id);
+
+    glBindTexture(GL_TEXTURE_2D, saved_texture_binding);
   }
 
   glFlush();
