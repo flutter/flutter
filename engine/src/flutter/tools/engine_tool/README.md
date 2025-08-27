@@ -108,7 +108,7 @@ See [building a host engine](#building-a-host-engine) and
 
 > [!CAUTION]
 > Each build configuration (sometimes called a _variant_) produces a different
-> set of output files in `$ENGINE/src/out`, e.g. ``$ENGINE/src/out/host_debug`;
+> set of output files in `$ENGINE/src/out`, e.g. `$ENGINE/src/out/host_debug`;
 > these outputs can be multiple GBs, and add up quickly. Consider using
 > [`et cleanup`](#reclaiming-older-output-directories) to delete older output
 > directories automatically.
