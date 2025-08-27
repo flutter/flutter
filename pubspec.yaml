@@ -90,7 +90,7 @@ dependencies:
   checked_yaml: 2.0.4
   cli_config: 0.2.0
   clock: 1.1.2
-  code_assets: 0.19.4
+  code_assets: 0.19.6
   collection: 1.19.1
   convert: 3.1.2
   coverage: 1.15.0
@@ -114,7 +114,7 @@ dependencies:
   google_mobile_ads: 5.1.0
   googleapis: 12.0.0
   googleapis_auth: 1.6.0
-  hooks: 0.19.5
+  hooks: 0.20.1
   html: 0.15.6
   http: 1.5.0
   http_multi_server: 3.2.2
@@ -133,7 +133,7 @@ dependencies:
   meta: 1.17.0
   metrics_center: 1.0.13
   mime: 2.0.0
-  native_toolchain_c: 0.16.8
+  native_toolchain_c: 0.17.1
   nested: 1.0.0
   node_preamble: 2.0.2
   package_config: 2.2.0
@@ -212,4 +212,4 @@ dependencies:
   pedantic: 1.11.1
   quiver: 3.2.2
   yaml_edit: 2.2.2
-# PUBSPEC CHECKSUM: jbcfui
+# PUBSPEC CHECKSUM: n0dh93

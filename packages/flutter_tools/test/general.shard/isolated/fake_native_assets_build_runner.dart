@@ -77,7 +77,11 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
           outputDirectoryShared: Uri.parse('build-out-dir-shared'),
           outputFile: Uri.file('output.json'),
         )
-        ..setupLink(assets: buildResult.encodedAssets, recordedUsesFile: null);
+        ..setupLink(
+          assets: buildResult.encodedAssets,
+          recordedUsesFile: null,
+          assetsFromLinking: [],
+        );
       for (final extension in extensions) {
         extension.setupLinkInput(input);
       }
