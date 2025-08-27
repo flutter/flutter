@@ -212,7 +212,7 @@ class SearchAnchor extends StatefulWidget {
     EditableTextContextMenuBuilder contextMenuBuilder,
     bool enabled,
     SmartDashesType? smartDashesType,
-    SmartQuotesType? smartQuotesType
+    SmartQuotesType? smartQuotesType,
   }) = _SearchAnchorWithSearchBar;
 
   /// Whether the search view grows to fill the entire screen when the
@@ -509,7 +509,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
       textInputAction: widget.textInputAction,
       keyboardType: widget.keyboardType,
       smartDashesType: widget.smartDashesType,
-      smartQuotesType: widget.smartQuotesType
+      smartQuotesType: widget.smartQuotesType,
     );
     navigator.push(_route!);
   }
@@ -591,7 +591,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     this.textInputAction,
     this.keyboardType,
     this.smartDashesType,
-    this.smartQuotesType
+    this.smartQuotesType,
   });
 
   final ValueChanged<String>? viewOnChanged;
@@ -862,7 +862,7 @@ class _ViewContent extends StatefulWidget {
     this.textInputAction,
     this.keyboardType,
     this.smartDashesType,
-    this.smartQuotesType
+    this.smartQuotesType,
   });
 
   final ValueChanged<String>? viewOnChanged;
@@ -1234,7 +1234,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     EditableTextContextMenuBuilder contextMenuBuilder = SearchBar._defaultContextMenuBuilder,
     super.enabled,
     super.smartDashesType,
-    super.smartQuotesType
+    super.smartQuotesType,
   }) : super(
          viewHintText: viewHintText ?? barHintText,
          headerHeight: viewHeaderHeight,
@@ -1403,7 +1403,7 @@ class SearchBar extends StatefulWidget {
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.readOnly = false,
     this.smartDashesType,
-    this.smartQuotesType
+    this.smartQuotesType,
   });
 
   /// Controls the text being edited in the search bar's text field.

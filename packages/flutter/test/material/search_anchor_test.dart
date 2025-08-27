@@ -4270,7 +4270,9 @@ void main() {
     await tester.pumpAndSettle();
 
     final Finder viewTextFieldFinder = find.descendant(
-      of: find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_ViewContent'),
+      of: find.byWidgetPredicate(
+        (Widget widget) => widget.runtimeType.toString() == '_ViewContent',
+      ),
       matching: find.byType(TextField),
     );
     expect(viewTextFieldFinder, findsOneWidget);
