@@ -578,6 +578,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
       keyboardDismissBehavior: widget.keyboardDismissBehavior,
       restorationId: widget.restorationId,
       clipBehavior: widget.clipBehavior,
+      semanticChildCount: _hasSeparators ? widget.itemCount : null,
       slivers: <Widget>[
         if (widget.header != null)
           SliverPadding(
@@ -632,6 +633,9 @@ class _ReorderableListViewState extends State<ReorderableListView> {
             proxyDecorator: widget.proxyDecorator ?? _proxyDecorator,
             autoScrollerVelocityScalar: widget.autoScrollerVelocityScalar,
             dragBoundaryProvider: widget.dragBoundaryProvider,
+            semanticIndexCallback: _hasSeparators
+                ? (Widget widget, int index) => index.isEven ? index ~/ 2 : null
+                : null,
           ),
         ),
         if (widget.footer != null)

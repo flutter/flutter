@@ -516,6 +516,7 @@ class SliverReorderableList extends StatefulWidget {
     this.prototypeItem,
     this.proxyDecorator,
     this.dragBoundaryProvider,
+    this.semanticIndexCallback,
     double? autoScrollerVelocityScalar,
   }) : autoScrollerVelocityScalar = autoScrollerVelocityScalar ?? _kDefaultAutoScrollVelocityScalar,
        assert(itemCount >= 0),
@@ -568,6 +569,9 @@ class SliverReorderableList extends StatefulWidget {
 
   /// {@macro flutter.widgets.reorderable_list.dragBoundaryProvider}
   final ReorderDragBoundaryProvider? dragBoundaryProvider;
+
+  /// {@macro flutter.widgets.SliverChildBuilderDelegate.semanticIndexCallback}
+  final SemanticIndexCallback? semanticIndexCallback;
 
   @override
   SliverReorderableListState createState() => SliverReorderableListState();
@@ -935,7 +939,23 @@ class SliverReorderableListState extends State<SliverReorderableList>
 
   void _dragUpdateItems() {
     assert(_dragInfo != null);
-    final double gapExtent = _dragInfo!.itemExtent;
+    double gapExtent = _dragInfo!.itemExtent;
+
+    // For separated lists, the gap should include both the item and its separator
+    if (widget.semanticIndexCallback != null) {
+      // Find separator height and add it to the gap
+      for (final _ReorderableItemState separatorItem in _items.values) {
+        if (separatorItem.mounted &&
+            widget.semanticIndexCallback!(separatorItem.widget, separatorItem.index) == null) {
+          final Rect separatorGeometry = separatorItem.targetGeometry();
+          final double separatorHeight = _scrollDirection == Axis.vertical
+              ? separatorGeometry.height
+              : separatorGeometry.width;
+          gapExtent += separatorHeight;
+          break;
+        }
+      }
+    }
     final double proxyItemStart = _offsetExtent(
       _dragInfo!.dragPosition - _dragInfo!.dragOffset,
       _scrollDirection,
@@ -946,6 +966,12 @@ class SliverReorderableListState extends State<SliverReorderableList>
     int newIndex = _insertIndex!;
     for (final _ReorderableItemState item in _items.values) {
       if ((_reverse && item.index == _dragIndex!) || !item.mounted) {
+        continue;
+      }
+
+      // Skip separators in separated lists - they should not be considered for drop positioning
+      if (widget.semanticIndexCallback != null &&
+          widget.semanticIndexCallback!(item.widget, item.index) == null) {
         continue;
       }
 
@@ -1008,6 +1034,13 @@ class SliverReorderableListState extends State<SliverReorderableList>
         if (item.index == _dragIndex! || !item.mounted) {
           continue;
         }
+
+        // Skip separators in separated lists - they should not have gap animations
+        if (widget.semanticIndexCallback != null &&
+            widget.semanticIndexCallback!(item.widget, item.index) == null) {
+          continue;
+        }
+
         item.updateForGap(_dragIndex!, newIndex, gapExtent, true, _reverse);
       }
     }
@@ -1112,6 +1145,8 @@ class SliverReorderableListState extends State<SliverReorderableList>
       _itemBuilder,
       childCount: widget.itemCount,
       findChildIndexCallback: widget.findChildIndexCallback,
+      semanticIndexCallback:
+          widget.semanticIndexCallback ?? (Widget _, int localIndex) => localIndex,
     );
     if (widget.itemExtent != null) {
       return SliverFixedExtentList(delegate: childrenDelegate, itemExtent: widget.itemExtent!);

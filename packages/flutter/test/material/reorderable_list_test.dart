@@ -2696,6 +2696,94 @@ void main() {
     },
     variant: TargetPlatformVariant.desktop(),
   );
+
+  testWidgets('ReorderableListView.separated sets semanticChildCount correctly', (
+    WidgetTester tester,
+  ) async {
+    final List<String> listItems = <String>['Item 1', 'Item 2', 'Item 3'];
+    
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            height: 300,
+            child: ReorderableListView.separated(
+              itemCount: listItems.length,
+              itemBuilder: (BuildContext context, int index) {
+                return Container(
+                  key: Key(listItems[index]),
+                  height: 50,
+                  child: Text(listItems[index]),
+                );
+              },
+              separatorBuilder: (BuildContext context, int index) {
+                return const Divider();
+              },
+              onReorder: (int oldIndex, int newIndex) {
+                if (oldIndex < newIndex) {
+                  newIndex -= 1;
+                }
+                final String element = listItems.removeAt(oldIndex);
+                listItems.insert(newIndex, element);
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Find the CustomScrollView which should have semanticChildCount set
+    final CustomScrollView scrollView = tester.widget<CustomScrollView>(find.byType(CustomScrollView));
+    expect(scrollView.semanticChildCount, equals(3)); // Should equal itemCount
+  });
+
+  testWidgets('ReorderableListView.separated sets semanticIndexCallback correctly', (
+    WidgetTester tester,
+  ) async {
+    final List<String> listItems = <String>['Item 1', 'Item 2', 'Item 3'];
+    
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            height: 300,
+            child: ReorderableListView.separated(
+              itemCount: listItems.length,
+              itemBuilder: (BuildContext context, int index) {
+                return Container(
+                  key: Key(listItems[index]),
+                  height: 50,
+                  child: Text(listItems[index]),
+                );
+              },
+              separatorBuilder: (BuildContext context, int index) {
+                return const Divider();
+              },
+              onReorder: (int oldIndex, int newIndex) {
+                if (oldIndex < newIndex) {
+                  newIndex -= 1;
+                }
+                final String element = listItems.removeAt(oldIndex);
+                listItems.insert(newIndex, element);
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Find the SliverReorderableList which should have semanticIndexCallback set
+    final SliverReorderableList sliverList = tester.widget<SliverReorderableList>(find.byType(SliverReorderableList));
+    expect(sliverList.semanticIndexCallback, isNotNull);
+    
+    // Test that the callback returns correct indices for items and null for separators
+    const Widget testWidget = SizedBox();
+    expect(sliverList.semanticIndexCallback!(testWidget, 0), equals(0)); // First item
+    expect(sliverList.semanticIndexCallback!(testWidget, 1), isNull);    // First separator
+    expect(sliverList.semanticIndexCallback!(testWidget, 2), equals(1)); // Second item
+    expect(sliverList.semanticIndexCallback!(testWidget, 3), isNull);    // Second separator
+    expect(sliverList.semanticIndexCallback!(testWidget, 4), equals(2)); // Third item
+  });
 }
 
 Future<void> longPressDrag(WidgetTester tester, Offset start, Offset end) async {
