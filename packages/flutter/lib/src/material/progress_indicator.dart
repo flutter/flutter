@@ -22,6 +22,12 @@ const int _kIndeterminateCircularDuration = 1333 * 2222;
 
 enum _ActivityIndicatorType { material, adaptive }
 
+const String _kValueControllerAssertion =
+    'A progress indicator cannot have both a value and a controller.\n'
+    'The "value" property is for a determinate indicator with a specific progress, '
+    'while the "controller" is for controlling the animation of an indeterminate indicator.\n'
+    'To resolve this, provide only one of the two properties.';
+
 /// A base class for Material Design progress indicators.
 ///
 /// This widget cannot be instantiated directly. For a linear progress
@@ -429,7 +435,21 @@ class LinearProgressIndicator extends ProgressIndicator {
   )
   final bool? year2023;
 
-  /// {@macro flutter.material.ProgressIndicator.controller}
+  /// {@template flutter.material.ProgressIndicator.controller}
+  /// An optional [AnimationController] that controls the animation of this
+  /// indeterminate progress indicator.
+  ///
+  /// This controller is only used when the indicator is indeterminate (i.e.,
+  /// when [value] is null). If this property is non-null, [value] must be null.
+  ///
+  /// The controller's value is expected to be a linear progression from 0.0 to
+  /// 1.0, which represents one full cycle of the indeterminate animation.
+  ///
+  /// If this controller is null (and [value] is also null), the widget will
+  /// look for a [ProgressIndicatorTheme.controller]. If that is also null, the
+  /// widget will create and manage its own internal [AnimationController] to
+  /// drive the default indeterminate animation.
+  /// {@endtemplate}
   ///
   /// See also:
   ///
@@ -694,12 +714,6 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
   }
 }
 
-const String _kValueControllerAssertion =
-    'A progress indicator cannot have both a value and a controller.\n'
-    'The "value" property is for a determinate indicator with a specific progress, '
-    'while the "controller" is for controlling the animation of an indeterminate indicator.\n'
-    'To resolve this, provide only one of the two properties.';
-
 /// A Material Design circular progress indicator, which spins to indicate that
 /// the application is busy.
 ///
@@ -912,21 +926,7 @@ class CircularProgressIndicator extends ProgressIndicator {
   /// padding. Otherwise, defaults to zero padding.
   final EdgeInsetsGeometry? padding;
 
-  /// {@template flutter.material.ProgressIndicator.controller}
-  /// An optional [AnimationController] that controls the animation of this
-  /// indeterminate progress indicator.
-  ///
-  /// This controller is only used when the indicator is indeterminate (i.e.,
-  /// when [value] is null). If this property is non-null, [value] must be null.
-  ///
-  /// The controller's value is expected to be a linear progression from 0.0 to
-  /// 1.0, which represents one full cycle of the indeterminate animation.
-  ///
-  /// If this controller is null (and [value] is also null), the widget will
-  /// look for a [ProgressIndicatorTheme.controller]. If that is also null, the
-  /// widget will create and manage its own internal [AnimationController] to
-  /// drive the default indeterminate animation.
-  /// {@endtemplate}
+  /// {@macro flutter.material.ProgressIndicator.controller}
   ///
   /// See also:
   ///
