@@ -189,7 +189,6 @@ class ManifestAssetBundle implements AssetBundle {
   DateTime? _lastBuildTimestamp;
 
   // We assume the main asset is designed for a device pixel ratio of 1.0.
-  static const _kAssetManifestJsonFilename = 'AssetManifest.json';
   static const _kAssetManifestBinFilename = 'AssetManifest.bin';
   static const _kAssetManifestBinJsonFilename = 'AssetManifest.bin.json';
 
@@ -258,11 +257,6 @@ class ManifestAssetBundle implements AssetBundle {
     // device.
     _lastBuildTimestamp = DateTime.now();
     if (flutterManifest.isEmpty) {
-      entries[_kAssetManifestJsonFilename] = AssetBundleEntry(
-        DevFSStringContent('{}'),
-        kind: AssetKind.regular,
-        transformers: const <AssetTransformerEntry>[],
-      );
       final ByteData emptyAssetManifest = const StandardMessageCodec().encodeMessage(
         <dynamic, dynamic>{},
       )!;
@@ -528,7 +522,6 @@ class ManifestAssetBundle implements AssetBundle {
       deferredComponentsAssetVariants,
     );
     final DevFSByteContent assetManifestBinary = _createAssetManifestBinary(assetManifest);
-    final assetManifestJson = DevFSStringContent(json.encode(assetManifest));
     final fontManifest = DevFSStringContent(json.encode(fonts));
     final LicenseResult licenseResult = _licenseCollector.obtainLicenses(
       packageConfig,
@@ -556,7 +549,6 @@ class ManifestAssetBundle implements AssetBundle {
       );
     }
 
-    _setIfChanged(_kAssetManifestJsonFilename, assetManifestJson, AssetKind.regular);
     _setIfChanged(_kAssetManifestBinFilename, assetManifestBinary, AssetKind.regular);
     // Create .bin.json on web builds.
     if (targetPlatform == TargetPlatform.web_javascript) {
@@ -1023,18 +1015,11 @@ class ManifestAssetBundle implements AssetBundle {
     required List<AssetTransformerEntry> transformers,
   }) {
     final String directoryPath;
-    try {
-      directoryPath = _fileSystem.path.join(
-        assetBase,
-        assetUri.toFilePath(windows: _platform.isWindows),
-      );
-    } on UnsupportedError catch (e) {
-      throwToolExit(
-        'Unable to search for asset files in directory path "${assetUri.path}". '
-        'Please ensure that this entry in pubspec.yaml is a valid file path.\n'
-        'Error details:\n$e',
-      );
-    }
+    _ensureAssetPathIsValid(assetsBaseDir: assetBase, assetUri: assetUri);
+    directoryPath = _fileSystem.path.join(
+      assetBase,
+      assetUri.toFilePath(windows: _platform.isWindows),
+    );
 
     if (!_fileSystem.directory(directoryPath).existsSync()) {
       _logger.printError('Error: unable to find directory entry in pubspec.yaml: $directoryPath');
@@ -1190,6 +1175,27 @@ class ManifestAssetBundle implements AssetBundle {
     throwToolExit(errorMessage.toString());
   }
 
+  void _ensureAssetPathIsValid({required String assetsBaseDir, required Uri assetUri}) {
+    if (!assetUri.isScheme('file') && assetUri.scheme.isNotEmpty) {
+      throwToolExit(
+        'Asset path "$assetUri" has scheme "${assetUri.scheme}" and is not a valid file or '
+        'directory path. Please update this entry in the pubspec.yaml to point to a valid file '
+        'path.',
+      );
+    }
+    if (Uri.directory(
+          assetsBaseDir,
+          windows: _platform.isWindows,
+        ).resolveUri(assetUri).toFilePath(windows: _platform.isWindows) ==
+        assetUri.toFilePath(windows: _platform.isWindows)) {
+      throwToolExit(
+        '"${assetUri.toFilePath(windows: _platform.isWindows)}" is not a valid asset path. '
+        'Asset paths must be relative to the location of pubspec.yaml. Please update this entry '
+        'in the pubspec.yaml to use a relative path.',
+      );
+    }
+  }
+
   _Asset _resolveAsset(
     PackageConfig packageConfig,
     String assetsBaseDir,
@@ -1201,9 +1207,11 @@ class ManifestAssetBundle implements AssetBundle {
     required Set<String> flavors,
     required List<AssetTransformerEntry> transformers,
   }) {
-    final String assetPath = _fileSystem.path.fromUri(assetUri);
+    _ensureAssetPathIsValid(assetsBaseDir: assetsBaseDir, assetUri: assetUri);
     if (assetUri.pathSegments.first == 'packages' &&
-        !_fileSystem.isFileSync(_fileSystem.path.join(assetsBaseDir, assetPath))) {
+        !_fileSystem.isFileSync(
+          _fileSystem.path.join(assetsBaseDir, _fileSystem.path.fromUri(assetUri)),
+        )) {
       // The asset is referenced in the pubspec.yaml as
       // 'packages/PACKAGE_NAME/PATH/TO/ASSET .
       final _Asset? packageAsset = _resolvePackageAsset(

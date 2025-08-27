@@ -5,12 +5,12 @@
 #ifndef FLUTTER_SHELL_GPU_GPU_SURFACE_VULKAN_DELEGATE_H_
 #define FLUTTER_SHELL_GPU_GPU_SURFACE_VULKAN_DELEGATE_H_
 
+#include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/vulkan/procs/vulkan_proc_table.h"
 #include "flutter/vulkan/vulkan_device.h"
 #include "flutter/vulkan/vulkan_image.h"
-#include "third_party/skia/include/core/SkSize.h"
 
 namespace flutter {
 
@@ -37,7 +37,7 @@ class GPUSurfaceVulkanDelegate {
   /// @brief  Called by the engine to fetch a VkImage for writing the next
   ///         frame.
   ///
-  virtual FlutterVulkanImage AcquireImage(const SkISize& size) = 0;
+  virtual FlutterVulkanImage AcquireImage(const DlISize& size) = 0;
 
   /// @brief  Called by the engine once a frame has been rendered to the image
   ///         and it's ready to be bound for further reading/writing.

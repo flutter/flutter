@@ -8,7 +8,6 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
-import 'android/android_studio_validator.dart';
 import 'android/android_workflow.dart';
 import 'artifacts.dart';
 import 'base/async_guard.dart';
@@ -30,7 +29,6 @@ import 'doctor_validator.dart';
 import 'features.dart';
 import 'globals.dart' as globals;
 import 'http_host_validator.dart';
-import 'intellij/intellij_validator.dart';
 import 'linux/linux_doctor.dart';
 import 'linux/linux_workflow.dart';
 import 'macos/macos_workflow.dart';
@@ -38,7 +36,6 @@ import 'macos/xcode_validator.dart';
 import 'proxy_validator.dart';
 import 'tester/flutter_tester.dart';
 import 'version.dart';
-import 'vscode/vscode_validator.dart';
 import 'web/chrome.dart';
 import 'web/web_validator.dart';
 import 'web/workflow.dart';
@@ -49,15 +46,10 @@ import 'windows/windows_workflow.dart';
 abstract class DoctorValidatorsProvider {
   // Allow tests to construct a [_DefaultDoctorValidatorsProvider] with explicit
   // [FeatureFlags].
-  factory DoctorValidatorsProvider.test({
-    Platform? platform,
-    Logger? logger,
-    required FeatureFlags featureFlags,
-  }) {
+  factory DoctorValidatorsProvider.test({Platform? platform, required FeatureFlags featureFlags}) {
     return _DefaultDoctorValidatorsProvider(
       featureFlags: featureFlags,
       platform: platform ?? FakePlatform(),
-      logger: logger ?? BufferLogger.test(),
     );
   }
 
@@ -65,7 +57,6 @@ abstract class DoctorValidatorsProvider {
   static DoctorValidatorsProvider get _instance => context.get<DoctorValidatorsProvider>()!;
 
   static final DoctorValidatorsProvider defaultInstance = _DefaultDoctorValidatorsProvider(
-    logger: globals.logger,
     platform: globals.platform,
     featureFlags: featureFlags,
   );
@@ -75,17 +66,12 @@ abstract class DoctorValidatorsProvider {
 }
 
 class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
-  _DefaultDoctorValidatorsProvider({
-    required this.platform,
-    required this.featureFlags,
-    required Logger logger,
-  }) : _logger = logger;
+  _DefaultDoctorValidatorsProvider({required this.platform, required this.featureFlags});
 
   List<DoctorValidator>? _validators;
   List<Workflow>? _workflows;
   final Platform platform;
   final FeatureFlags featureFlags;
-  final Logger _logger;
 
   late final linuxWorkflow = LinuxWorkflow(platform: platform, featureFlags: featureFlags);
 
@@ -100,25 +86,6 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
     if (_validators != null) {
       return _validators!;
     }
-
-    final ideValidators = <DoctorValidator>[
-      if (androidWorkflow!.appliesToHostPlatform)
-        ...AndroidStudioValidator.allValidators(
-          globals.config,
-          platform,
-          globals.fs,
-          globals.userMessages,
-        ),
-      ...IntelliJValidator.installedValidators(
-        fileSystem: globals.fs,
-        platform: platform,
-        userMessages: globals.userMessages,
-        plistParser: globals.plistParser,
-        processManager: globals.processManager,
-        logger: _logger,
-      ),
-      ...VsCodeValidator.installedValidators(globals.fs, platform, globals.processManager),
-    ];
     final proxyValidator = ProxyValidator(platform: platform);
     _validators = <DoctorValidator>[
       FlutterValidator(
@@ -172,7 +139,6 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
           userMessages: globals.userMessages,
         ),
       if (windowsWorkflow!.appliesToHostPlatform) visualStudioValidator!,
-      if (ideValidators.isNotEmpty) ...ideValidators else NoIdeValidator(),
       if (proxyValidator.shouldShow) proxyValidator,
       if (globals.deviceManager?.canListAnything ?? false)
         DeviceValidator(deviceManager: globals.deviceManager, userMessages: globals.userMessages),
@@ -685,10 +651,7 @@ class FlutterValidator extends DoctorValidator {
   List<ValidationMessage> _validateRequiredBinaries(String flutterRoot) {
     final ValidationMessage? flutterWarning = _validateSdkBinary('flutter', flutterRoot);
     final ValidationMessage? dartWarning = _validateSdkBinary('dart', flutterRoot);
-    return <ValidationMessage>[
-      if (flutterWarning != null) flutterWarning,
-      if (dartWarning != null) dartWarning,
-    ];
+    return <ValidationMessage>[?flutterWarning, ?dartWarning];
   }
 
   /// Return a warning if the provided [binary] on the user's path does not

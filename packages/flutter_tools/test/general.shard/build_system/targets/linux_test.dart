@@ -147,7 +147,6 @@ void main() {
       final Directory output = testEnvironment.outputDir.childDirectory('flutter_assets');
 
       expect(output.childFile('kernel_blob.bin'), exists);
-      expect(output.childFile('AssetManifest.json'), exists);
       expect(output.childFile('version.json'), exists);
       final String versionFile = output.childFile('version.json').readAsStringSync();
       expect(versionFile, contains('"version":"2.0.0"'));
@@ -197,7 +196,6 @@ void main() {
       final Directory assetsDir = testEnvironment.outputDir.childDirectory('flutter_assets');
 
       expect(libDir.childFile('libapp.so'), exists);
-      expect(assetsDir.childFile('AssetManifest.json'), exists);
       expect(assetsDir.childFile('version.json'), exists);
       // No bundled fonts
       expect(assetsDir.childFile('FontManifest.json'), isNot(exists));
@@ -243,7 +241,6 @@ void main() {
       final Directory assetsDir = testEnvironment.outputDir.childDirectory('flutter_assets');
 
       expect(libDir.childFile('libapp.so'), exists);
-      expect(assetsDir.childFile('AssetManifest.json'), exists);
       expect(assetsDir.childFile('version.json'), exists);
       // No bundled fonts
       expect(assetsDir.childFile('FontManifest.json'), isNot(exists));

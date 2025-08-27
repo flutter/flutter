@@ -8,6 +8,7 @@ import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.LibraryExtension
+import com.android.build.gradle.api.ApkVariant
 import com.android.build.gradle.tasks.PackageAndroidArtifact
 import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.flutter.gradle.FlutterPluginUtils.readPropertiesIfExist
@@ -18,7 +19,9 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
+import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.file.Directory
+import org.gradle.api.plugins.PluginContainer
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.TaskInstantiationException
 import org.gradle.api.tasks.TaskProvider
@@ -98,12 +101,7 @@ class FlutterPlugin : Plugin<Project> {
             repositories.maven {
                 url = uri(repository!!)
             }
-            if (plugins.hasPlugin("com.android.application") && isInvokedFromAndroidStudio()) {
-                dependencies.add("compileOnly", "io.flutter:flutter_embedding_debug:$engineVersion")
-                dependencies.add("compileOnly", "io.flutter:armeabi_v7a_debug:$engineVersion")
-                dependencies.add("compileOnly", "io.flutter:arm64_v8a_debug:$engineVersion")
-                dependencies.add("compileOnly", "io.flutter:x86_64_debug:$engineVersion")
-            }
+            maybeAddAndroidStudioNativeConfiguration(plugins, dependencies)
         }
 
         project.apply {
@@ -216,8 +214,7 @@ class FlutterPlugin : Plugin<Project> {
         val shouldSkipDependencyChecks: Boolean =
             project.hasProperty("skipDependencyChecks") &&
                 (
-                    project.properties["skipDependencyChecks"] as? Boolean
-                        ?: false
+                    project.properties["skipDependencyChecks"].toString().toBoolean()
                 )
         if (!shouldSkipDependencyChecks) {
             try {
@@ -624,6 +621,8 @@ class FlutterPlugin : Plugin<Project> {
                     //    https://github.com/flutter/flutter/issues/166550
                     @Suppress("DEPRECATION")
                     output as com.android.build.gradle.api.ApkVariantOutput
+                    val versionCodeIfPresent: Int? = if (variant is ApkVariant) variant.versionCode else null
+
                     // TODO(gmackall): Migrate to AGPs variant api.
                     //    https://github.com/flutter/flutter/issues/166550
                     @Suppress("DEPRECATION")
@@ -631,7 +630,10 @@ class FlutterPlugin : Plugin<Project> {
                         output.getFilter(com.android.build.VariantOutput.FilterType.ABI)
                     val abiVersionCode: Int? = FlutterPluginConstants.ABI_VERSION[filterIdentifier]
                     if (abiVersionCode != null) {
-                        output.versionCodeOverride = abiVersionCode * 1000 + variant.mergedFlavor.versionCode as Int
+                        output.versionCodeOverride = abiVersionCode * 1000 + (
+                            versionCodeIfPresent
+                                ?: variant.mergedFlavor.versionCode as Int
+                        )
                     }
                 }
             }
@@ -708,7 +710,7 @@ class FlutterPlugin : Plugin<Project> {
                     validateDeferredComponents = validateDeferredComponentsValue
                     flavor = flavorValue
                 }
-            val compileTask: FlutterTask = compileTaskProvider.get()
+            val flutterCompileTask: FlutterTask = compileTaskProvider.get()
             val libJar: File =
                 project.file(
                     project.layout.buildDirectory.dir("${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${variant.name}/libs.jar")
@@ -720,10 +722,10 @@ class FlutterPlugin : Plugin<Project> {
                 ) {
                     destinationDirectory.set(libJar.parentFile)
                     archiveFileName.set(libJar.name)
-                    dependsOn(compileTask)
+                    dependsOn(flutterCompileTask)
                     targetPlatforms.forEach { targetPlatform ->
                         val abi: String? = FlutterPluginConstants.PLATFORM_ARCH_MAP[targetPlatform]
-                        from("${compileTask.intermediateDir}/$abi") {
+                        from("${flutterCompileTask.intermediateDir}/$abi") {
                             include("*.so")
                             // Move `app.so` to `lib/<abi>/libapp.so`
                             rename { filename: String -> "lib/$abi/lib$filename" }
@@ -753,8 +755,8 @@ class FlutterPlugin : Plugin<Project> {
                     "copyFlutterAssets${FlutterPluginUtils.capitalize(variant.name)}",
                     Copy::class.java
                 ) {
-                    dependsOn(compileTask)
-                    with(compileTask.assets)
+                    dependsOn(flutterCompileTask)
+                    with(flutterCompileTask.assets)
                     filePermissions {
                         user {
                             read = true
@@ -827,4 +829,19 @@ class FlutterPlugin : Plugin<Project> {
      * This property is set by Android Studio when it invokes a Gradle task.
      */
     private fun isInvokedFromAndroidStudio(): Boolean = project?.hasProperty("android.injected.invoked.from.ide") == true
+
+    private fun shouldAddAndroidStudioNativeConfiguration(plugins: PluginContainer): Boolean =
+        plugins.hasPlugin("com.android.application") && isInvokedFromAndroidStudio()
+
+    private fun maybeAddAndroidStudioNativeConfiguration(
+        plugins: PluginContainer,
+        dependencies: DependencyHandler
+    ) {
+        if (shouldAddAndroidStudioNativeConfiguration(plugins)) {
+            dependencies.add("compileOnly", "io.flutter:flutter_embedding_debug:$engineVersion")
+            dependencies.add("compileOnly", "io.flutter:armeabi_v7a_debug:$engineVersion")
+            dependencies.add("compileOnly", "io.flutter:arm64_v8a_debug:$engineVersion")
+            dependencies.add("compileOnly", "io.flutter:x86_64_debug:$engineVersion")
+        }
+    }
 }

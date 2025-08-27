@@ -574,6 +574,7 @@ void main() {
                             inputType: ui.SemanticsInputType.text,
                             flags: <SemanticsFlag>[
                               SemanticsFlag.isTextField,
+                              SemanticsFlag.isFocusable,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isEnabled,
                             ],
@@ -7775,6 +7776,7 @@ void main() {
       ),
       matchesSemantics(
         isTextField: true,
+        isFocusable: true,
         isEnabled: true,
         hasEnabledState: true,
         hasTapAction: true,
@@ -7801,7 +7803,12 @@ void main() {
             .descendant(of: find.byType(CupertinoTextField), matching: find.byType(Semantics))
             .first,
       ),
-      matchesSemantics(hasEnabledState: true, isTextField: true, isReadOnly: true),
+      matchesSemantics(
+        hasEnabledState: true,
+        isTextField: true,
+        isFocusable: true,
+        isReadOnly: true,
+      ),
     );
   });
 
@@ -10462,6 +10469,19 @@ void main() {
     await performBaselineAlignmentCheck(20.0, 40.0);
   });
 
+  testWidgets('Editable text in text field with placeholder is hit-testable', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(child: CupertinoTextField(placeholder: 'placeholder')),
+      ),
+    );
+
+    expect(find.byType(CupertinoTextField), findsOneWidget);
+    expect(find.byType(EditableText).hitTestable(), findsOne);
+  });
+
   testWidgets('Start the floating cursor on long tap', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
     final TextEditingController controller = TextEditingController(text: 'abcd');
@@ -10525,6 +10545,7 @@ void main() {
                           inputType: ui.SemanticsInputType.text,
                           flags: <SemanticsFlag>[
                             SemanticsFlag.isTextField,
+                            SemanticsFlag.isFocusable,
                             SemanticsFlag.hasEnabledState,
                             SemanticsFlag.isEnabled,
                           ],
@@ -10592,6 +10613,7 @@ void main() {
                             inputType: ui.SemanticsInputType.text,
                             flags: <SemanticsFlag>[
                               SemanticsFlag.isTextField,
+                              SemanticsFlag.isFocusable,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isReadOnly,
                             ],

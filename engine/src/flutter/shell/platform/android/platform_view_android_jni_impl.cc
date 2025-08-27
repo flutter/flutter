@@ -284,7 +284,7 @@ static void SurfaceChanged(JNIEnv* env,
                            jint width,
                            jint height) {
   ANDROID_SHELL_HOLDER->GetPlatformView()->NotifyChanged(
-      SkISize::Make(width, height));
+      DlISize(width, height));
 }
 
 static void SurfaceDestroyed(JNIEnv* env, jobject jcaller, jlong shell_holder) {
@@ -426,8 +426,7 @@ static jobject GetBitmap(JNIEnv* env, jobject jcaller, jlong shell_holder) {
 
   auto bitmap = env->CallStaticObjectMethod(
       g_bitmap_class->obj(), g_bitmap_create_bitmap_method,
-      screenshot.frame_size.width(), screenshot.frame_size.height(),
-      bitmap_config);
+      screenshot.frame_size.width, screenshot.frame_size.height, bitmap_config);
 
   fml::jni::ScopedJavaLocalRef<jobject> buffer(
       env,

@@ -2812,27 +2812,6 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   XCTAssertNil(textInputPlugin.activeView.textInputDelegate);
 }
 
-- (void)testAutoFillDoesNotTriggerOnHideButTriggersOnCommit {
-  // Regression test for https://github.com/flutter/flutter/issues/145681.
-  NSMutableDictionary* configuration = self.mutableTemplateCopy;
-  [configuration setValue:@{
-    @"uniqueIdentifier" : @"field1",
-    @"hints" : @[ UITextContentTypePassword ],
-    @"editingValue" : @{@"text" : @""}
-  }
-                   forKey:@"autofill"];
-  [configuration setValue:@[ [configuration copy] ] forKey:@"fields"];
-
-  [self setClientId:123 configuration:configuration];
-  XCTAssertEqual(self.viewsVisibleToAutofill.count, 1ul);
-
-  [self setTextInputHide];
-  // Before the fix in https://github.com/flutter/flutter/pull/160653, it was 0ul.
-  XCTAssertEqual(self.viewsVisibleToAutofill.count, 1ul);
-
-  [self commitAutofillContextAndVerify];
-}
-
 #pragma mark - Accessibility - Tests
 
 - (void)testUITextInputAccessibilityNotHiddenWhenShowed {
@@ -3883,6 +3862,122 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   XCTNSPredicateExpectation* expectation =
       [[XCTNSPredicateExpectation alloc] initWithPredicate:predicate object:nil];
   [self waitForExpectations:@[ expectation ] timeout:10.0];
+}
+
+- (void)testEditMenu_shouldCreateCustomMenuItemWithCorrectProperties {
+  if (@available(iOS 16.0, *)) {
+    FlutterTextInputPlugin* myInputPlugin =
+        [[FlutterTextInputPlugin alloc] initWithDelegate:OCMClassMock([FlutterEngine class])];
+    FlutterViewController* myViewController = [[FlutterViewController alloc] init];
+    myInputPlugin.viewController = myViewController;
+    [myViewController loadView];
+
+    FlutterMethodCall* setClientCall =
+        [FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                          arguments:@[ @(123), self.mutableTemplateCopy ]];
+    [myInputPlugin handleMethodCall:setClientCall
+                             result:^(id _Nullable result){
+                             }];
+
+    FlutterTextInputView* myInputView = myInputPlugin.activeView;
+    FlutterTextInputView* mockInputView = OCMPartialMock(myInputView);
+    OCMStub([mockInputView isFirstResponder]).andReturn(YES);
+
+    id mockInteraction = OCMClassMock([UIEditMenuInteraction class]);
+    OCMStub([mockInputView editMenuInteraction]).andReturn(mockInteraction);
+
+    NSDictionary<NSString*, NSNumber*>* encodedTargetRect =
+        @{@"x" : @(0), @"y" : @(0), @"width" : @(100), @"height" : @(50)};
+
+    NSArray<NSDictionary*>* encodedItems = @[
+      @{@"type" : @"custom", @"id" : @"custom-action-1", @"title" : @"Custom Action 1"},
+      @{@"type" : @"custom", @"id" : @"custom-action-2", @"title" : @"Custom Action 2"},
+    ];
+
+    BOOL shownEditMenu =
+        [myInputPlugin showEditMenu:@{@"targetRect" : encodedTargetRect, @"items" : encodedItems}];
+    XCTAssertTrue(shownEditMenu, @"Should show edit menu");
+
+    UIMenu* menu = [myInputView editMenuInteraction:mockInteraction
+                               menuForConfiguration:OCMClassMock([UIEditMenuConfiguration class])
+                                   suggestedActions:@[]];
+
+    XCTAssertEqual(menu.children.count, 2UL, @"Should create 2 custom menu items");
+    UIAction* firstAction = (UIAction*)menu.children[0];
+    UIAction* secondAction = (UIAction*)menu.children[1];
+    XCTAssertEqualObjects(firstAction.title, @"Custom Action 1",
+                          @"First action title should match");
+    XCTAssertEqualObjects(secondAction.title, @"Custom Action 2",
+                          @"Second action title should match");
+  }
+}
+
+- (void)testEditMenu_customActionShouldTriggerDelegateCallback {
+  if (@available(iOS 16.0, *)) {
+    id mockEngine = OCMClassMock([FlutterEngine class]);
+    id mockPlatformChannel = OCMClassMock([FlutterMethodChannel class]);
+    OCMStub([mockEngine platformChannel]).andReturn(mockPlatformChannel);
+
+    OCMStub([mockEngine flutterTextInputView:[OCMArg any]
+                performContextMenuCustomActionWithActionID:@"test-callback-id"
+                                           textInputClient:123])
+        .andDo((^(NSInvocation* invocation) {
+          [mockPlatformChannel invokeMethod:@"ContextMenu.onPerformCustomAction"
+                                  arguments:@[ @(123), @"test-callback-id" ]];
+        }));
+
+    FlutterTextInputPlugin* myInputPlugin =
+        [[FlutterTextInputPlugin alloc] initWithDelegate:mockEngine];
+    FlutterViewController* myViewController = [[FlutterViewController alloc] init];
+    myInputPlugin.viewController = myViewController;
+    [myViewController loadView];
+
+    FlutterMethodCall* setClientCall =
+        [FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                          arguments:@[ @(123), self.mutableTemplateCopy ]];
+    [myInputPlugin handleMethodCall:setClientCall
+                             result:^(id _Nullable result){
+                             }];
+
+    FlutterTextInputView* myInputView = myInputPlugin.activeView;
+    FlutterTextInputView* mockInputView = OCMPartialMock(myInputView);
+    OCMStub([mockInputView isFirstResponder]).andReturn(YES);
+    XCTestExpectation* expectation = [[XCTestExpectation alloc]
+        initWithDescription:@"Custom action delegate callback should be called"];
+    OCMStub(([mockPlatformChannel invokeMethod:@"ContextMenu.onPerformCustomAction"
+                                     arguments:@[ @(123), @"test-callback-id" ]]))
+        .andDo(^(NSInvocation* invocation) {
+          [expectation fulfill];
+        });
+    id mockInteraction = OCMClassMock([UIEditMenuInteraction class]);
+    OCMStub([mockInputView editMenuInteraction]).andReturn(mockInteraction);
+
+    NSDictionary<NSString*, NSNumber*>* encodedTargetRect =
+        @{@"x" : @(0), @"y" : @(0), @"width" : @(100), @"height" : @(50)};
+
+    NSArray<NSDictionary*>* encodedItems = @[
+      @{@"type" : @"custom", @"id" : @"test-callback-id", @"title" : @"Test Action"},
+    ];
+
+    BOOL shownEditMenu =
+        [myInputPlugin showEditMenu:@{@"targetRect" : encodedTargetRect, @"items" : encodedItems}];
+    XCTAssertTrue(shownEditMenu, @"Should show edit menu");
+
+    UIMenu* menu = [myInputView editMenuInteraction:mockInteraction
+                               menuForConfiguration:OCMClassMock([UIEditMenuConfiguration class])
+                                   suggestedActions:@[]];
+
+    XCTAssertEqual(menu.children.count, 1UL, @"Should have 1 custom menu item");
+    UIAction* customAction = (UIAction*)menu.children[0];
+    XCTAssertEqualObjects(customAction.title, @"Test Action", @"Action title should match");
+
+    [myInputView.textInputDelegate flutterTextInputView:myInputView
+             performContextMenuCustomActionWithActionID:@"test-callback-id"
+                                        textInputClient:123];
+
+    [self waitForExpectations:@[ expectation ] timeout:1.0];
+    OCMVerifyAll(mockPlatformChannel);
+  }
 }
 
 @end

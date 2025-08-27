@@ -14,7 +14,11 @@ import '../base/version.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 import '../ios/plist_parser.dart';
-import 'android_studio_validator.dart';
+
+const _androidStudioTitle = 'Android Studio';
+const _androidStudioId = 'AndroidStudio';
+const _androidStudioPreviewTitle = 'Android Studio Preview';
+const _androidStudioPreviewId = 'AndroidStudioPreview';
 
 // Android Studio layout:
 
@@ -351,6 +355,11 @@ class AndroidStudio {
         .toList();
   }
 
+  static const _idToTitle = <String, String>{
+    _androidStudioId: _androidStudioTitle,
+    _androidStudioPreviewId: _androidStudioPreviewTitle,
+  };
+
   static List<AndroidStudio> _allLinuxOrWindows() {
     final studios = <AndroidStudio>[];
 
@@ -415,7 +424,7 @@ class AndroidStudio {
       }
       for (final Directory dir in cacheDir.listSync().whereType<Directory>()) {
         final String name = globals.fs.path.basename(dir.path);
-        AndroidStudioValidator.idToTitle.forEach((String id, String title) {
+        _idToTitle.forEach((String id, String title) {
           if (name.startsWith(id)) {
             final String version = name.substring(id.length);
             String? installPath;

@@ -1383,7 +1383,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
           children: <Widget>[
             // Insert a prefix at the front if the prefix visibility mode matches
             // the current text state.
-            if (prefixWidget != null) prefixWidget,
+            ?prefixWidget,
             // In the middle part, stack the placeholder on top of the main EditableText
             // if needed.
             Expanded(
@@ -1397,7 +1397,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
                 ),
               ),
             ),
-            if (suffixWidget != null) suffixWidget,
+            ?suffixWidget,
           ],
         );
       },
@@ -1877,5 +1877,21 @@ class _RenderBaselineAlignedStack extends RenderBox
     final Size size = Size(width, height);
     assert(size.isFinite);
     return constraints.constrain(size);
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    final RenderBox editableText = _editableTextChild;
+    final _BaselineAlignedStackParentData editableTextParentData =
+        editableText.parentData! as _BaselineAlignedStackParentData;
+
+    return result.addWithPaintOffset(
+      offset: editableTextParentData.offset,
+      position: position,
+      hitTest: (BoxHitTestResult result, Offset transformed) {
+        assert(transformed == position - editableTextParentData.offset);
+        return editableText.hitTest(result, position: transformed);
+      },
+    );
   }
 }

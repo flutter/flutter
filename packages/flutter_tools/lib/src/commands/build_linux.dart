@@ -40,6 +40,10 @@ class BuildLinuxCommand extends BuildSubCommand {
           'the app is compiled. This option is valid only '
           'if the current host and target architectures are different.',
     );
+    argParser.addFlag(
+      'config-only',
+      help: 'Update the project configuration without performing a build.',
+    );
   }
 
   final OperatingSystemUtils _operatingSystemUtils;
@@ -57,6 +61,8 @@ class BuildLinuxCommand extends BuildSubCommand {
 
   @override
   String get description => 'Build a Linux desktop application.';
+
+  bool get configOnly => boolArg('config-only');
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -95,6 +101,7 @@ class BuildLinuxCommand extends BuildSubCommand {
       targetPlatform: targetPlatform,
       targetSysroot: stringArg('target-sysroot')!,
       logger: logger,
+      configOnly: configOnly,
     );
     return FlutterCommandResult.success();
   }

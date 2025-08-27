@@ -724,7 +724,7 @@ class _FocusState extends State<Focus> {
             ? focusNode.requestFocus
             : null,
         focusable: _couldRequestFocus,
-        focused: _hadPrimaryFocus,
+        focused: _couldRequestFocus ? _hadPrimaryFocus : null,
         child: widget.child,
       );
     }

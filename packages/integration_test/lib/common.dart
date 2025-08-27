@@ -72,7 +72,7 @@ class Response {
   String toJson() => json.encode(<String, dynamic>{
     'result': allTestsPassed.toString(),
     'failureDetails': _failureDetailsAsString(),
-    if (data != null) 'data': data,
+    'data': ?data,
   });
 
   /// Deserializes the result from JSON.
@@ -235,7 +235,7 @@ class WebDriverCommand {
   /// Constructor for [WebDriverCommandType.noop] screenshot.
   WebDriverCommand.screenshot(String screenshotName, [Map<String, Object?>? args])
     : type = WebDriverCommandType.screenshot,
-      values = <String, dynamic>{'screenshot_name': screenshotName, if (args != null) 'args': args};
+      values = <String, dynamic>{'screenshot_name': screenshotName, 'args': ?args};
 
   /// Type of the [WebDriverCommand].
   ///

@@ -99,7 +99,7 @@ void main() {
         daemon: false,
         windows: false,
       ),
-      isA<AppRunLogger>(),
+      isA<MachineOutputLogger>(),
     );
   });
 
@@ -249,7 +249,7 @@ void main() {
     expect(asLogger<VerboseLogger>(notifyingLogger), verboseLogger);
     expect(asLogger<FakeLogger>(notifyingLogger), fakeLogger);
 
-    expect(() => asLogger<AppRunLogger>(notifyingLogger), throwsStateError);
+    expect(() => asLogger<MachineOutputLogger>(notifyingLogger), throwsStateError);
   });
 
   group('AppContext', () {
@@ -796,13 +796,13 @@ void main() {
       expect(lines[3], equals('0123456789' * 3));
     });
 
-    testWithoutContext('AppRunLogger writes plain text statuses when no app is active', () async {
+    testWithoutContext('MachineFlagLogger does not output text statuses', () async {
       final buffer = BufferLogger.test();
-      final logger = AppRunLogger(parent: buffer);
+      final logger = MachineOutputLogger(parent: buffer);
 
       logger.startProgress('Test status...').stop();
 
-      expect(buffer.statusText.trim(), equals('Test status...'));
+      expect(buffer.statusText, isEmpty);
     });
 
     testWithoutContext('Error logs are wrapped and can be indented.', () async {

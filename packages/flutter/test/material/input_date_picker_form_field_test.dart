@@ -294,6 +294,7 @@ void main() {
         matchesSemantics(
           label: 'Enter Date',
           isTextField: true,
+          isFocusable: true,
           hasEnabledState: true,
           isEnabled: true,
           isFocused: true,

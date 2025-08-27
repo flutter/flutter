@@ -35,6 +35,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
+import '../foundation/_features.dart';
+import '_window.dart';
 import 'app.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
@@ -459,6 +461,7 @@ mixin WidgetsBinding
       return true;
     }());
     platformMenuDelegate = DefaultPlatformMenuDelegate();
+    _windowingOwner = WindowingOwner.createDefaultOwner();
   }
 
   /// The current [WidgetsBinding], if one has been created.
@@ -1438,6 +1441,69 @@ mixin WidgetsBinding
   Locale? computePlatformResolvedLocale(List<Locale> supportedLocales) {
     return platformDispatcher.computePlatformResolvedLocale(supportedLocales);
   }
+
+  /// The [WindowingOwner] is responsible for creating and managing [BaseWindowController]s.
+  ///
+  /// The default [WindowingOwner] supports macOS, Linux, and Windows.
+  ///
+  /// A custom [WindowingOwner] can be provided by the setter.
+  ///
+  /// {@template flutter.widgets.binding.window.experimental}
+  /// Do not use this API in production applications or packages published to
+  /// pub.dev. Flutter will make breaking changes to this API, even in patch
+  /// versions.
+  ///
+  /// This API throws an [UnsupportedError] error unless Flutter’s windowing
+  /// feature is enabled by [isWindowingEnabled].
+  ///
+  /// See: https://github.com/flutter/flutter/issues/30701.
+  /// {@endtemplate}
+  @internal
+  WindowingOwner get windowingOwner {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError('''
+Windowing APIs are not enabled.
+
+Windowing APIs are currently experimental. Do not use windowing APIs in
+production applications or plugins published to pub.dev.
+
+To try experimental windowing APIs:
+1. Switch to Flutter's main release channel.
+2. Turn on the windowing feature flag.
+
+See: https://github.com/flutter/flutter/issues/30701.
+''');
+    }
+    return _windowingOwner;
+  }
+
+  /// Sets the [WindowingOwner].
+  ///
+  /// The default [WindowingOwner] supports macOS, Linux, and Windows.
+  ///
+  /// This setter can be used to provide a custom [WindowingOwner].
+  ///
+  /// {@macro flutter.widgets.binding.window.experimental}
+  @internal
+  set windowingOwner(WindowingOwner owner) {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError('''
+Windowing APIs are not enabled.
+
+Windowing APIs are currently experimental. Do not use windowing APIs in
+production applications or plugins published to pub.dev.
+
+To try experimental windowing APIs:
+1. Switch to Flutter's main release channel.
+2. Turn on the windowing feature flag.
+
+See: https://github.com/flutter/flutter/issues/30701.
+''');
+    }
+    _windowingOwner = owner;
+  }
+
+  late WindowingOwner _windowingOwner;
 }
 
 /// Inflate the given widget and attach it to the view.

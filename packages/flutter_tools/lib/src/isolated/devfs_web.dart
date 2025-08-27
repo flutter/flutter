@@ -29,8 +29,8 @@ import '../vmservice.dart';
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
+import '../web/devfs_config.dart';
 import '../web_template.dart';
-
 import 'web_asset_server.dart';
 
 const kLuciEnvName = 'LUCI_CONTEXT';
@@ -60,10 +60,6 @@ class WebDevFS implements DevFS {
   /// [testMode] is true, do not actually initialize dwds or the shelf static
   /// server.
   WebDevFS({
-    required this.hostname,
-    required int port,
-    required this.tlsCertPath,
-    required this.tlsCertKeyPath,
     required this.packagesFilePath,
     required this.urlTunneller,
     required this.useSseForDebugProxy,
@@ -72,13 +68,14 @@ class WebDevFS implements DevFS {
     required this.buildInfo,
     required this.enableDwds,
     required this.enableDds,
+    this.ddsPort,
     required this.entrypoint,
     required this.expressionCompiler,
-    required this.extraHeaders,
     required this.chromiumLauncher,
     required this.nativeNullAssertions,
     required this.ddcModuleSystem,
     required this.canaryFeatures,
+    required this.webDevServerConfig,
     required this.webRenderer,
     required this.isWasm,
     required this.useLocalCanvasKit,
@@ -88,7 +85,7 @@ class WebDevFS implements DevFS {
     required this.logger,
     required this.platform,
     this.testMode = false,
-  }) : _port = port {
+  }) {
     // TODO(srujzs): Remove this assertion when the library bundle format is
     // supported without canary mode.
     if (ddcModuleSystem) {
@@ -97,7 +94,6 @@ class WebDevFS implements DevFS {
   }
 
   final Uri entrypoint;
-  final String hostname;
   final String packagesFilePath;
   final UrlTunneller? urlTunneller;
   final bool useSseForDebugProxy;
@@ -106,19 +102,17 @@ class WebDevFS implements DevFS {
   final BuildInfo buildInfo;
   final bool enableDwds;
   final bool enableDds;
-  final Map<String, String> extraHeaders;
+  final int? ddsPort;
   final bool testMode;
   final bool ddcModuleSystem;
   final bool canaryFeatures;
   final ExpressionCompiler? expressionCompiler;
   final ChromiumLauncher? chromiumLauncher;
   final bool nativeNullAssertions;
-  final int _port;
-  final String? tlsCertPath;
-  final String? tlsCertKeyPath;
   final WebRendererMode webRenderer;
   final bool isWasm;
   final bool useLocalCanvasKit;
+  final WebDevServerConfig webDevServerConfig;
   final bool useDwdsWebSocketConnection;
   final FileSystem fileSystem;
   final Logger logger;
@@ -202,16 +196,12 @@ class WebDevFS implements DevFS {
   Set<String> get assetPathsToEvict => const <String>{};
 
   @override
-  Uri? get baseUri => webAssetServer.baseUri;
+  Uri get baseUri => webAssetServer.baseUri;
 
   @override
   Future<Uri> create() async {
     webAssetServer = await WebAssetServer.start(
       chromiumLauncher,
-      hostname,
-      _port,
-      tlsCertPath,
-      tlsCertKeyPath,
       urlTunneller,
       useSseForDebugProxy,
       useSseForDebugBackend,
@@ -219,22 +209,23 @@ class WebDevFS implements DevFS {
       buildInfo,
       enableDwds,
       enableDds,
+      ddsPort,
       entrypoint,
       expressionCompiler,
-      extraHeaders,
       webRenderer: webRenderer,
       isWasm: isWasm,
       useLocalCanvasKit: useLocalCanvasKit,
       testMode: testMode,
       ddcModuleSystem: ddcModuleSystem,
       canaryFeatures: canaryFeatures,
+      webDevServerConfig: webDevServerConfig,
       useDwdsWebSocketConnection: useDwdsWebSocketConnection,
       fileSystem: fileSystem,
       logger: logger,
       platform: platform,
       shouldEnableMiddleware: shouldEnableMiddleware,
     );
-    return baseUri!;
+    return baseUri;
   }
 
   @override
@@ -415,13 +406,9 @@ class WebDevFS implements DevFS {
     } on FileSystemException catch (err) {
       throwToolExit('Failed to load recompiled sources:\n$err');
     }
-    if (fullRestart) {
-      webAssetServer.performRestart(
-        modules,
-        writeRestartScripts: ddcModuleSystem && !bundleFirstUpload,
-      );
-    } else {
-      webAssetServer.performReload(modules);
+    webAssetServer.updateModulesAndDigests(modules);
+    if (!bundleFirstUpload && ddcModuleSystem) {
+      webAssetServer.writeReloadedSources(modules);
     }
     return UpdateFSReport(
       success: true,

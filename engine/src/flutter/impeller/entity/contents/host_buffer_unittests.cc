@@ -206,7 +206,8 @@ class FailingAllocator : public Allocator {
     return delegate_->CreateBuffer(desc);
   }
 
-  std::shared_ptr<Texture> OnCreateTexture(const TextureDescriptor& desc) {
+  std::shared_ptr<Texture> OnCreateTexture(const TextureDescriptor& desc,
+                                           bool threadsafe) {
     return delegate_->CreateTexture(desc);
   }
 

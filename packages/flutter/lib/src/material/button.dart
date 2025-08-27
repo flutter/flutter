@@ -350,11 +350,11 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
 
   @override
   Widget build(BuildContext context) {
-    final Color? effectiveTextColor = MaterialStateProperty.resolveAs<Color?>(
+    final Color? effectiveTextColor = WidgetStateProperty.resolveAs<Color?>(
       widget.textStyle?.color,
       materialStates,
     );
-    final ShapeBorder? effectiveShape = MaterialStateProperty.resolveAs<ShapeBorder?>(
+    final ShapeBorder? effectiveShape = WidgetStateProperty.resolveAs<ShapeBorder?>(
       widget.shape,
       materialStates,
     );

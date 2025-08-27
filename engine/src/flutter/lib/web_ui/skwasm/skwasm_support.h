@@ -12,6 +12,10 @@
 
 using SkwasmObject = __externref_t;
 
+namespace flutter {
+class DisplayList;
+}
+
 extern "C" {
 extern bool skwasm_isSingleThreaded();
 extern void skwasm_setAssociatedObjectOnThread(unsigned long threadId,
@@ -23,7 +27,7 @@ extern void skwasm_disposeAssociatedObjectOnThread(unsigned long threadId,
 extern void skwasm_connectThread(pthread_t threadId);
 extern void skwasm_dispatchRenderPictures(unsigned long threadId,
                                           Skwasm::Surface* surface,
-                                          sk_sp<SkPicture>* pictures,
+                                          sk_sp<flutter::DisplayList>* pictures,
                                           int count,
                                           uint32_t callbackId);
 extern uint32_t skwasm_createOffscreenCanvas(int width, int height);

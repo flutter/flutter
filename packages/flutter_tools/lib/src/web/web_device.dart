@@ -116,8 +116,7 @@ abstract class ChromiumDevice extends Device {
     // for the web initialization and server logic.
     String url;
     if (debuggingOptions.webLaunchUrl != null) {
-      final pattern = RegExp(r'^((http)?:\/\/)[^\s]+');
-      if (pattern.hasMatch(debuggingOptions.webLaunchUrl!)) {
+      if (_isLaunchUrlValid(debuggingOptions.webLaunchUrl!)) {
         url = debuggingOptions.webLaunchUrl!;
       } else {
         throwToolExit('"${debuggingOptions.webLaunchUrl}" is not a valid HTTP URL.');
@@ -139,6 +138,11 @@ abstract class ChromiumDevice extends Device {
     }
     _logger.sendEvent('app.webLaunchUrl', <String, Object>{'url': url, 'launched': launchChrome});
     return LaunchResult.succeeded(vmServiceUri: Uri.parse(url));
+  }
+
+  bool _isLaunchUrlValid(String url) {
+    final pattern = RegExp(r'^(https?:\/\/)[^\s]+');
+    return pattern.hasMatch(url);
   }
 
   @override
@@ -183,9 +187,10 @@ class GoogleChromeDevice extends ChromiumDevice {
   final ProcessManager _processManager;
 
   static const kChromeDeviceId = 'chrome';
+  static const kChromeDeviceName = 'Chrome';
 
   @override
-  String get name => 'Chrome';
+  String get name => kChromeDeviceName;
 
   @override
   late final Future<String> sdkNameAndVersion = _computeSdkNameAndVersion();
@@ -239,9 +244,10 @@ class MicrosoftEdgeDevice extends ChromiumDevice {
   static const _kFirstChromiumEdgeMajorVersion = 79;
 
   static const kEdgeDeviceId = 'edge';
+  static const kEdgeDeviceName = 'Edge';
 
   @override
-  String get name => 'Edge';
+  String get name => kEdgeDeviceName;
 
   Future<bool> _meetsVersionConstraint() async {
     final String rawVersion = (await sdkNameAndVersion).replaceFirst('Microsoft Edge ', '');
@@ -286,7 +292,7 @@ class WebDevices extends PollingDeviceDiscovery {
     required FeatureFlags featureFlags,
   }) : _featureFlags = featureFlags,
        _webServerDevice = WebServerDevice(logger: logger),
-       super('Chrome') {
+       super(GoogleChromeDevice.kChromeDeviceName) {
     final operatingSystemUtils = OperatingSystemUtils(
       fileSystem: fileSystem,
       platform: platform,
