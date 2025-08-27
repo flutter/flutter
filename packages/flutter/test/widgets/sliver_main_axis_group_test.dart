@@ -1360,7 +1360,9 @@ void main() {
         ),
       );
       // Only even items 0~12 are on the screen.
-      expect(find.text('item0'), findsOneWidget);
+      for (int index = 0; index <= 12; index++) {
+        expect(find.text('item$index'), index.isEven ? findsOneWidget : findsNothing);
+      }
       expect(find.text('item12'), findsOneWidget);
       expect(find.text('item14'), findsNothing);
 
