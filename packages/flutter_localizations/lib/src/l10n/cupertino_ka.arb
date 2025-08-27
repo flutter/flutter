@@ -30,7 +30,7 @@
   "clearButtonLabel": "გასუფთავება",
   "cancelButtonLabel": "გაუქმება",
   "backButtonLabel": "უკან",
-  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileExpandedHint": "double tap to collapse",
   "expansionTileCollapsedHint": "double tap to expand",
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",

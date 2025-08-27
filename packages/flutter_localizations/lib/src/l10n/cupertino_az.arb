@@ -30,7 +30,7 @@
   "shareButtonLabel": "Paylaşın...",
   "cancelButtonLabel": "Ləğv edin",
   "backButtonLabel": "Geri",
-  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileExpandedHint": "double tap to collapse",
   "expansionTileCollapsedHint": "double tap to expand",
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",

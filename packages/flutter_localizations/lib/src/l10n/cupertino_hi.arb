@@ -30,7 +30,7 @@
   "clearButtonLabel": "मिटाएं",
   "cancelButtonLabel": "रद्द करें",
   "backButtonLabel": "वापस जाएं",
-  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileExpandedHint": "double tap to collapse",
   "expansionTileCollapsedHint": "double tap to expand",
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",
