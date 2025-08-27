@@ -178,8 +178,9 @@ class WebFontCollection implements FlutterFontCollection {
       // loaded. They were measured using fallback fonts, so we should clear the
       // cache.
       // TODO(rusino): https://github.com/flutter/flutter/issues/168001
-    } catch (exception) {
-      // Failures here will throw an DomException. Return false.
+    } catch (e) {
+      // Failures here will throw a DomException. Return false.
+      printWarning('Failed to load font "$family" from bytes: $e');
       return false;
     }
     return true;
