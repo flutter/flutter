@@ -1,0 +1,23 @@
+{@inject-html}
+<a name="{{id}}"></a>
+<div class="snippet snippet-container anchor-container">
+  {{description}}
+  <a class="anchor-button-overlay anchor-button" title="Copy link to clipboard" onmouseenter="fixHref(this, '{{id}}');"
+    onclick="fixHref(this, '{{id}}'); copyStringToClipboard(this.href);" href="#">
+    <i class="material-icons anchor-image">link</i>
+  </a>
+  <div class="snippet-description">
+    <p>To create a local project with this code sample, run:<br />
+      <span class="snippet-create-command">flutter create --sample={{id}} mysample</span>
+    </p>
+  </div>
+  <div class="copyable-container">
+    <button class="copy-button-overlay copy-button" title="Copy to clipboard"
+      onclick="copyTextToClipboard(longSnippet{{serial}});">
+      <i class="material-icons copy-image">content_copy</i>
+    </button>
+    <pre id="longSnippet{{serial}}"
+      class="language-{{language}}"><code class="language-{{language}}">{{app}}</code></pre>
+  </div>
+</div>
+{@end-inject-html}

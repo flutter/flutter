@@ -1,0 +1,29 @@
+name: stocks
+
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: any
+  http: any
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_driver:
+    sdk: flutter
+  test: any
+
+
+flutter:
+  generate: true
+  uses-material-design: true
+
+# PUBSPEC CHECKSUM: 69qefu

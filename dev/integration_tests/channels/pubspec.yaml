@@ -1,0 +1,26 @@
+name: channels
+description: Integration test for platform channels.
+
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+
+dev_dependencies:
+  integration_test:
+    sdk: flutter
+  flutter_driver:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+
+
+flutter:
+  uses-material-design: true
+
+# PUBSPEC CHECKSUM: fn62d1

@@ -1,0 +1,177 @@
+/* Overrides for dartdoc styles. */
+
+/* Prefer Open Sans for paragraph and other text */
+body {
+  font-family: "Open Sans", "Roboto", sans-serif;
+}
+
+/* Prefer Google Sans for headers */
+h1, h2, h3, h4, h5, h6 .h1, .h2, .h3, .h4, .h5, .h6 {
+  font-family: "Google Sans", "Roboto", sans-serif;
+}
+
+.section-title, .breadcrumbs {
+  font-family: "Google Sans", "Roboto", sans-serif;
+}
+
+/* Make all the h2 headings slightly bigger. */
+h2 {
+  font-size: 24px;
+}
+
+/* Specifically make all the Markdown h2 headings slightly
+   bigger, so the Markdown CSS doesn't override it. */
+.markdown h2 {
+  font-size: 24px;
+}
+
+section.summary h2 {
+  color: inherit;
+  border-bottom: none;
+}
+
+section.summary .name {
+  font-size: 1.5em;
+  margin-right: 0.2em;
+}
+
+section.summary .returntype {
+  font-style:italic;
+}
+
+pre {
+  margin: 0 0 15px 0;
+  padding: 8px 12px;
+  border-radius: 4px;
+}
+
+code {
+  /* Inherit the background color, otherwise all inline code blocks have a
+     different color from the rest of the paragraph */
+  background-color: inherit;
+  font-size: 1em; /* browsers default to smaller font for code */
+  padding-left: 0; /* otherwise we get ragged left margins */
+  padding-right: 0;
+}
+
+/* Otherwise the description text is limited to a particular size instead of
+   filling up the center of the page. */
+.markdown.desc {
+  max-width: inherit;
+}
+
+/* Make the search box bigger and easier to read */
+#search-box {
+  height: 24px;
+  font-size: 15px;
+  padding-left: 40px;
+}
+
+/* Make the typeahead match the search box font size */
+input.form-control.typeahead {
+  font-size: 15px;
+}
+
+/* Make description list terms not be so dim. */
+dl.dl-horizontal dt {
+  color: inherit;
+}
+
+/* Line the material icons up with their labels
+   See https://api.flutter.dev/flutter/material/Icons-class.html
+   for where this matters.
+ */
+i.md-36 {
+  vertical-align: middle;
+}
+
+/* Address a style issue with the background of code sections. Without this, the
+   code inside a code block has a different background from the rest of the box. */
+code.hljs {
+  background: inherit;
+}
+
+/* Make the footer smaller and less prominent. */
+footer {
+  font-size: 13px;
+  padding: 8px;
+}
+
+/* Override the comment color for highlight.js to make it more
+   prominent. */
+.hljs-comment {
+  color: #128c00;
+  font-style: italic;
+  font-weight: bold;
+}
+
+/* Make the summary headers contrast a bit with text. */
+.summary h2 {
+  opacity: 0.8;
+}
+
+/* Constrain the image width to the container so that images resize instead of
+   causing the page to scroll horizontally */
+img {
+  max-width: 100%
+}
+
+/* Light/Dark Theme adjustments */
+
+.light-theme {
+  /* This is the same link color as the main Flutter site */
+  --main-hyperlinks-color: rgb(19, 137, 253);
+  --main-footer-background: #eee;
+}
+
+.dark-theme {
+  --main-hyperlinks-color: rgb(81, 167, 254);
+}
+
+.light-theme footer {
+  color: rgb(74, 74, 74);
+}
+
+.dark-theme footer {
+  color:rgb(220, 220, 220);
+}
+
+body.light-theme {
+  color:rgb(74, 74, 74);
+}
+
+body.dark-theme {
+  color:rgb(220, 220, 220);
+}
+
+.dark-theme .multi-line-signature .name {
+  color: rgb(163, 163, 163);
+}
+
+.dark-theme .parameter-name {
+  color: rgb(163, 163, 163);
+}
+
+.dark-theme .parameter {
+  color: rgb(163, 163, 163);
+}
+
+.light-theme pre {
+  border: 1px solid white;
+  color: #222;
+  background-color:#eee;
+}
+
+.dark-theme pre {
+  border: 1px solid #444;
+  color: white;
+  background-color:rgb(23, 32, 43);
+}
+
+.dark-theme .hljs-string {
+  color:rgb(255, 100, 100);
+}
+
+.dark-theme .hljs-title {
+  color:rgb(192, 184, 255);
+}

@@ -1,0 +1,40 @@
+def flutterPluginVersion = "managed"
+
+apply plugin: "com.android.application"
+
+android {
+    namespace = "{{androidIdentifier}}.host"
+    compileSdk = {{compileSdkVersion}}
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    defaultConfig {
+        applicationId = "{{androidIdentifier}}.host"
+        minSdk = {{minSdkVersion}}
+        targetSdk = {{targetSdkVersion}}
+        versionCode = 1
+        versionName = "1.0"
+    }
+
+    buildTypes {
+        profile {
+            initWith debug
+        }
+        release {
+            // TODO: Add your own signing config for the release build.
+            // Signing with the debug keys for now, so `flutter run --release` works.
+            signingConfig = signingConfigs.debug
+        }
+    }
+
+}
+buildDir = new File(rootProject.projectDir, "../build/host")
+dependencies {
+    implementation(project(":flutter"))
+    implementation(fileTree(dir: "libs", include: ["*.jar"]))
+    implementation("androidx.appcompat:appcompat:1.0.2")
+    implementation("androidx.constraintlayout:constraintlayout:1.1.3")
+}

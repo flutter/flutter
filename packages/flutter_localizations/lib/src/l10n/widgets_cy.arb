@@ -1,0 +1,15 @@
+{
+  "reorderItemToStart": "Symud i'r dechrau",
+  "reorderItemToEnd": "Symud i'r diwedd",
+  "reorderItemUp": "Symud i fyny",
+  "reorderItemDown": "Symud i lawr",
+  "reorderItemLeft": "Symud i'r chwith",
+  "reorderItemRight": "Symud i'r dde",
+  "copyButtonLabel": "Copïo",
+  "cutButtonLabel": "Torri",
+  "lookUpButtonLabel": "Chwilio",
+  "searchWebButtonLabel": "Chwilio'r We",
+  "shareButtonLabel": "Rhannu",
+  "pasteButtonLabel": "Gludo",
+  "selectAllButtonLabel": "Dewis y Cyfan"
+}

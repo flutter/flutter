@@ -1,0 +1,20 @@
+name: flutter_web_plugins
+description: Library to register Flutter Web plugins
+homepage: https://flutter.dev
+
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+
+# PUBSPEC CHECKSUM: 60tfp7

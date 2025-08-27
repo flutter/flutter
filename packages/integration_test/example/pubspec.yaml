@@ -1,0 +1,36 @@
+name: integration_test_example
+description: Demonstrates how to use the integration_test plugin.
+publish_to: 'none'
+
+environment:
+  sdk: ^3.8.0-0
+  flutter: ">=1.6.7"
+resolution: workspace
+
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  web: any
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_driver:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  integration_test_macos:
+    path: ../integration_test_macos
+  test: any
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+
+flutter:
+  uses-material-design: true
+
+# PUBSPEC CHECKSUM: rhtu4l

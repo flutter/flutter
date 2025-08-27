@@ -1,0 +1,15 @@
+{
+  "reorderItemToStart": "Перамясціць у пачатак",
+  "reorderItemToEnd": "Перамясціць у канец",
+  "reorderItemUp": "Перамясціць уверх",
+  "reorderItemDown": "Перамясціць уніз",
+  "reorderItemLeft": "Перамясціць улева",
+  "reorderItemRight": "Перамясціць управа",
+  "copyButtonLabel": "Капіраваць",
+  "cutButtonLabel": "Выразаць",
+  "lookUpButtonLabel": "Знайсці",
+  "searchWebButtonLabel": "Пошук у сетцы",
+  "shareButtonLabel": "Абагуліць",
+  "pasteButtonLabel": "Уставіць",
+  "selectAllButtonLabel": "Выбраць усе"
+}

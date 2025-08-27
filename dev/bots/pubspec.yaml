@@ -1,0 +1,37 @@
+name: tests_on_bots
+description: Scripts which run on bots.
+
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+dependencies:
+  analyzer: any
+  args: any
+  crypto: any
+  intl: any
+  file: any
+  flutter_devicelab:
+    path: ../devicelab
+  meta: any
+  path: any
+  platform: any
+  process: any
+  test: any
+
+  archive: any
+  collection: any
+  convert: any
+  glob: any
+  http: any
+  pool: any
+  shelf: any
+  shelf_static: any
+  source_span: any
+  watcher: any
+  yaml: any
+  yaml_edit: any
+
+
+# PUBSPEC CHECKSUM: 8lua9g

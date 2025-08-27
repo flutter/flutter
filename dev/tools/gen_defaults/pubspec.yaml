@@ -1,0 +1,18 @@
+name: gen_defaults
+description: A command line script to generate Material component defaults from the token database.
+version: 1.0.0
+
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+dependencies:
+  args: any
+
+dev_dependencies:
+  path: any
+  test: any
+
+
+# PUBSPEC CHECKSUM: vbgshi

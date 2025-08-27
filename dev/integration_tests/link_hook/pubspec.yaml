@@ -1,0 +1,19 @@
+name: link_hook
+description: 'A new Dart FFI package project.'
+version: 0.0.1
+
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+dependencies:
+  code_assets: any
+  hooks: any
+  logging: any
+  native_toolchain_c: any
+
+dev_dependencies:
+  test: any
+
+# PUBSPEC CHECKSUM: seumf2

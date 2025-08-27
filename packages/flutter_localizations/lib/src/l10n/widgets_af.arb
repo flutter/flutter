@@ -1,0 +1,15 @@
+{
+  "reorderItemToStart": "Skuif na die begin",
+  "reorderItemToEnd": "Skuif na die einde",
+  "reorderItemUp": "Skuif op",
+  "reorderItemDown": "Skuif af",
+  "reorderItemLeft": "Skuif na links",
+  "reorderItemRight": "Skuif na regs",
+  "copyButtonLabel": "Kopieer",
+  "cutButtonLabel": "Knip",
+  "lookUpButtonLabel": "Kyk op",
+  "searchWebButtonLabel": "Deursoek web",
+  "shareButtonLabel": "Deel",
+  "pasteButtonLabel": "Plak",
+  "selectAllButtonLabel": "Kies alles"
+}

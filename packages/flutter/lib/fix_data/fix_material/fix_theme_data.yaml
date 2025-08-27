@@ -1,0 +1,1836 @@
+# Copyright 2014 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# For details regarding the *Flutter Fix* feature, see
+# https://flutter.dev/to/flutter-fix
+
+# Please add new fixes to the top of the file, separated by one blank line
+# from other fixes. In a comment, include a link to the PR where the change
+# requiring the fix was made.
+
+# Every fix must be tested. See the flutter/packages/flutter/test_fixes/README.md
+# file for instructions on testing these data driven fixes.
+
+# For documentation about this file format, see
+# https://dart.dev/go/data-driven-fixes.
+
+# * Fixes in this file are for the ThemeData class from the Material library. *
+#   For fixes to
+#     * AppBar: fix_app_bar.yaml
+#     * AppBarTheme: fix_app_bar_theme.yaml
+#     * ColorScheme: fix_color_scheme.yaml
+#     * Material (general): fix_material.yaml
+#     * SliverAppBar: fix_sliver_app_bar.yaml
+#     * TextTheme: fix_text_theme.yaml
+#     * WidgetState: fix_widget_state.yaml
+version: 1
+transforms:
+  # Changes made in https://github.com/flutter/flutter/pull/160024
+  - title: "Migrate 'ThemeData.indicatorColor' to 'TabBarThemeData.indicatorColor'"
+    date: 2025-01-03
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    oneOf:
+      - if: "indicatorColor != '' && tabBarTheme != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'indicatorColor'
+      - if: "indicatorColor != '' && tabBarTheme == ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'indicatorColor'
+          - kind: 'addParameter'
+            index: 136
+            name: 'tabBarTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'TabBarThemeData(indicatorColor: {% indicatorColor %})'
+              requiredIf: "indicatorColor != ''"
+    variables:
+      indicatorColor:
+        kind: 'fragment'
+        value: 'arguments[indicatorColor]'
+      tabBarTheme:
+        kind: 'fragment'
+        value: 'arguments[tabBarTheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/160024
+  - title: "Migrate 'ThemeData.indicatorColor' to 'TabBarThemeData.indicatorColor'"
+    date: 2025-01-03
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    oneOf:
+      - if: "indicatorColor != '' && tabBarTheme != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'indicatorColor'
+      - if: "indicatorColor != '' && tabBarTheme == ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'indicatorColor'
+          - kind: 'addParameter'
+            index: 136
+            name: 'tabBarTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'TabBarThemeData(indicatorColor: {% indicatorColor %})'
+              requiredIf: "indicatorColor != ''"
+    variables:
+      indicatorColor:
+        kind: 'fragment'
+        value: 'arguments[indicatorColor]'
+      tabBarTheme:
+        kind: 'fragment'
+        value: 'arguments[tabBarTheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/155072
+  - title: "Migrate 'ThemeData.dialogBackgroundColor' to 'DialogThemeData.backgroundColor'"
+    date: 2024-09-12
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    oneOf:
+      - if: "dialogBackgroundColor != '' && dialogTheme != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'dialogBackgroundColor'
+      - if: "dialogBackgroundColor != '' && dialogTheme == ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'dialogBackgroundColor'
+          - kind: 'addParameter'
+            index: 135
+            name: 'dialogTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'DialogThemeData(backgroundColor: {% dialogBackgroundColor %})'
+              requiredIf: "dialogBackgroundColor != ''"
+    variables:
+      dialogBackgroundColor:
+        kind: 'fragment'
+        value: 'arguments[dialogBackgroundColor]'
+      dialogTheme:
+        kind: 'fragment'
+        value: 'arguments[dialogTheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/155072
+  - title: "Migrate 'ThemeData.dialogBackgroundColor' to 'DialogThemeData.backgroundColor'"
+    date: 2024-09-12
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    oneOf:
+      - if: "dialogBackgroundColor != '' && dialogTheme != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'dialogBackgroundColor'
+      - if: "dialogBackgroundColor != '' && dialogTheme == ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'dialogBackgroundColor'
+          - kind: 'addParameter'
+            index: 135
+            name: 'dialogTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'DialogThemeData(backgroundColor: {% dialogBackgroundColor %})'
+              requiredIf: "dialogBackgroundColor != ''"
+    variables:
+      dialogBackgroundColor:
+        kind: 'fragment'
+        value: 'arguments[dialogBackgroundColor]'
+      dialogTheme:
+        kind: 'fragment'
+        value: 'arguments[dialogTheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/145523
+  - title: "Remove 'buttonBarTheme'"
+    date: 2024-04-28
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'buttonBarTheme'
+
+  # Changes made in https://github.com/flutter/flutter/pull/87281
+  - title: "Remove 'fixTextFieldOutlineLabel'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'fixTextFieldOutlineLabel'
+
+  # Changes made in https://github.com/flutter/flutter/pull/87281
+  - title: "Remove 'fixTextFieldOutlineLabel'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'fixTextFieldOutlineLabel'
+
+  # Changes made in https://github.com/flutter/flutter/pull/87281
+  - title: "Remove 'fixTextFieldOutlineLabel'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'fixTextFieldOutlineLabel'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'buttonColor'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'buttonColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'buttonColor'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'buttonColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'buttonColor'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'buttonColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentIconTheme'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentIconTheme'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentIconTheme'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentIconTheme'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentIconTheme'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentIconTheme'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentTextTheme'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentTextTheme'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentTextTheme'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentTextTheme'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentTextTheme'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentTextTheme'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentColorBrightness'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentColorBrightness'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentColorBrightness'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentColorBrightness'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentColorBrightness'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentColorBrightness'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Migrate to 'ColorScheme.secondary'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      field: 'accentColor'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'rename'
+        newName: 'colorScheme.secondary'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Migrate to 'ColorScheme.secondary'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    oneOf:
+    - if: "accentColor != '' && primarySwatch == '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.fromSwatch().copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch == '' && colorScheme ==''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+    - if: "accentColor != '' && primarySwatch != '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.fromSwatch(primarySwatch: {% primarySwatch %}).copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch != '' && colorScheme == ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    - if: "accentColor != '' && primarySwatch == '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch == '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+    - if: "accentColor != '' && primarySwatch != '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(primarySwatch: {% primarySwatch %}, secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch != '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    variables:
+      accentColor:
+        kind: 'fragment'
+        value: 'arguments[accentColor]'
+      primarySwatch:
+        kind: 'fragment'
+        value: 'arguments[primarySwatch]'
+      colorScheme:
+        kind: 'fragment'
+        value: 'arguments[colorScheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Migrate to 'ColorScheme.secondary'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    oneOf:
+    - if: "accentColor != '' && primarySwatch == '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.fromSwatch().copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch == '' && colorScheme ==''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+    - if: "accentColor != '' && primarySwatch != '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.fromSwatch(primarySwatch: {% primarySwatch %}).copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch != '' && colorScheme == ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    - if: "accentColor != '' && primarySwatch == '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch == '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+    - if: "accentColor != '' && primarySwatch != '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(primarySwatch: {% primarySwatch %}, secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch != '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    variables:
+      accentColor:
+        kind: 'fragment'
+        value: 'arguments[accentColor]'
+      primarySwatch:
+        kind: 'fragment'
+        value: 'arguments[primarySwatch]'
+      colorScheme:
+        kind: 'fragment'
+        value: 'arguments[colorScheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Migrate to 'ColorScheme.secondary'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    oneOf:
+    - if: "accentColor != '' && primarySwatch == '' && colorScheme == ''"
+      changes:
+        - kind: 'addParameter'
+          index: 56
+          name: 'colorScheme'
+          style: optional_named
+          argumentValue:
+            expression: 'ColorScheme.fromSwatch().copyWith(secondary: {% accentColor %})'
+            requiredIf: "accentColor != '' && primarySwatch == '' && colorScheme ==''"
+        - kind: 'removeParameter'
+          name: 'accentColor'
+    - if: "accentColor != '' && primarySwatch != '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.fromSwatch(primarySwatch: {% primarySwatch %}).copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch != '' && colorScheme == ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    - if: "accentColor != '' && primarySwatch == '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch == '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+    - if: "accentColor != '' && primarySwatch != '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(primarySwatch: {% primarySwatch %}, secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch != '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    variables:
+      accentColor:
+        kind: 'fragment'
+        value: 'arguments[accentColor]'
+      primarySwatch:
+        kind: 'fragment'
+        value: 'arguments[primarySwatch]'
+      colorScheme:
+        kind: 'fragment'
+        value: 'arguments[colorScheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/93396
+  - title: "Remove 'primaryColorBrightness'"
+    date: 2021-11-11
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'primaryColorBrightness'
+
+  # Changes made in https://github.com/flutter/flutter/pull/93396
+  - title: "Remove 'primaryColorBrightness'"
+    date: 2021-11-11
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'primaryColorBrightness'
+
+  # Changes made in https://github.com/flutter/flutter/pull/93396
+  - title: "Remove 'primaryColorBrightness'"
+    date: 2021-11-11
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'primaryColorBrightness'
+
+  # Changes made in https://github.com/flutter/flutter/pull/66482
+  - title: "Migrate to 'TextSelectionThemeData'"
+    date: 2020-09-24
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    oneOf:
+      - if: "textSelectionColor != '' && cursorColor != '' && textSelectionHandleColor != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 73
+            name: 'textSelectionTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'TextSelectionThemeData(cursorColor: {% cursorColor %}, selectionColor: {% textSelectionColor %}, selectionHandleColor: {% textSelectionHandleColor %},)'
+              requiredIf: "textSelectionColor != '' && cursorColor != '' && textSelectionHandleColor != ''"
+          - kind: 'removeParameter'
+            name: 'textSelectionColor'
+          - kind: 'removeParameter'
+            name: 'cursorColor'
+          - kind: 'removeParameter'
+            name: 'textSelectionHandleColor'
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+      - if: "textSelectionColor == '' && cursorColor != '' && textSelectionHandleColor != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 73
+            name: 'textSelectionTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'TextSelectionThemeData(cursorColor: {% cursorColor %}, selectionHandleColor: {% textSelectionHandleColor %},)'
+              requiredIf: "textSelectionColor == '' && cursorColor != '' && textSelectionHandleColor != ''"
+          - kind: 'removeParameter'
+            name: 'cursorColor'
+          - kind: 'removeParameter'
+            name: 'textSelectionHandleColor'
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+      - if: "textSelectionColor != '' && cursorColor != '' && textSelectionHandleColor == ''"
+        changes:
+          - kind: 'addParameter'
+            index: 73
+            name: 'textSelectionTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'TextSelectionThemeData(cursorColor: {% cursorColor %}, selectionColor: {% textSelectionColor %},)'
+              requiredIf: "textSelectionColor != '' && cursorColor != '' && textSelectionHandleColor == ''"
+          - kind: 'removeParameter'
+            name: 'textSelectionColor'
+          - kind: 'removeParameter'
+            name: 'cursorColor'
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+      - if: "textSelectionColor != '' && cursorColor == '' && textSelectionHandleColor != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 73
+            name: 'textSelectionTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'TextSelectionThemeData(selectionColor: {% textSelectionColor %}, selectionHandleColor: {% textSelectionHandleColor %},)'
+              requiredIf: "textSelectionColor != '' && cursorColor == '' && textSelectionHandleColor != ''"
+          - kind: 'removeParameter'
+            name: 'textSelectionColor'
+          - kind: 'removeParameter'
+            name: 'textSelectionHandleColor'
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+      - if: "textSelectionColor == '' && cursorColor != '' && textSelectionHandleColor == ''"
+        changes:
+          - kind: 'addParameter'
+            index: 73
+            name: 'textSelectionTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'TextSelectionThemeData(cursorColor: {% cursorColor %})'
+              requiredIf: "textSelectionColor == '' && cursorColor != '' && textSelectionHandleColor == ''"
+          - kind: 'removeParameter'
+            name: 'cursorColor'
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+      - if: "textSelectionColor != '' && cursorColor == '' && textSelectionHandleColor == ''"
+        changes:
+          - kind: 'addParameter'
+            index: 73
+            name: 'textSelectionTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'TextSelectionThemeData(selectionColor: {% textSelectionColor %})'
+              requiredIf: "textSelectionColor != '' && cursorColor == '' && textSelectionHandleColor == ''"
+          - kind: 'removeParameter'
+            name: 'textSelectionColor'
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+      - if: "textSelectionColor == '' && cursorColor == '' && textSelectionHandleColor != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 73
+            name: 'textSelectionTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'TextSelectionThemeData(selectionHandleColor: {% textSelectionHandleColor %})'
+              requiredIf: "textSelectionColor == '' && cursorColor == '' && textSelectionHandleColor != ''"
+          - kind: 'removeParameter'
+            name: 'textSelectionHandleColor'
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+      - if: "useTextSelectionTheme != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+    variables:
+      textSelectionColor:
+        kind: 'fragment'
+        value: 'arguments[textSelectionColor]'
+      cursorColor:
+        kind: 'fragment'
+        value: 'arguments[cursorColor]'
+      textSelectionHandleColor:
+        kind: 'fragment'
+        value: 'arguments[textSelectionHandleColor]'
+      useTextSelectionTheme:
+        kind: 'fragment'
+        value: 'arguments[useTextSelectionTheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/66482
+  - title: "Migrate to 'TextSelectionThemeData'"
+    date: 2020-09-24
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    oneOf:
+      - if: "textSelectionColor != '' && cursorColor != '' && textSelectionHandleColor != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 73
+            name: 'textSelectionTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'TextSelectionThemeData(cursorColor: {% cursorColor %}, selectionColor: {% textSelectionColor %}, selectionHandleColor: {% textSelectionHandleColor %},)'
+              requiredIf: "textSelectionColor != '' && cursorColor != '' && textSelectionHandleColor != ''"
+          - kind: 'removeParameter'
+            name: 'textSelectionColor'
+          - kind: 'removeParameter'
+            name: 'cursorColor'
+          - kind: 'removeParameter'
+            name: 'textSelectionHandleColor'
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+      - if: "textSelectionColor == '' && cursorColor != '' && textSelectionHandleColor != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 73
+            name: 'textSelectionTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'TextSelectionThemeData(cursorColor: {% cursorColor %}, selectionHandleColor: {% textSelectionHandleColor %},)'
+              requiredIf: "textSelectionColor == '' && cursorColor != '' && textSelectionHandleColor != ''"
+          - kind: 'removeParameter'
+            name: 'cursorColor'
+          - kind: 'removeParameter'
+            name: 'textSelectionHandleColor'
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+      - if: "textSelectionColor != '' && cursorColor != '' && textSelectionHandleColor == ''"
+        changes:
+          - kind: 'addParameter'
+            index: 73
+            name: 'textSelectionTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'TextSelectionThemeData(cursorColor: {% cursorColor %}, selectionColor: {% textSelectionColor %},)'
+              requiredIf: "textSelectionColor != '' && cursorColor != '' && textSelectionHandleColor == ''"
+          - kind: 'removeParameter'
+            name: 'textSelectionColor'
+          - kind: 'removeParameter'
+            name: 'cursorColor'
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+      - if: "textSelectionColor != '' && cursorColor == '' && textSelectionHandleColor != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 73
+            name: 'textSelectionTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'TextSelectionThemeData(selectionColor: {% textSelectionColor %}, selectionHandleColor: {% textSelectionHandleColor %},)'
+              requiredIf: "textSelectionColor != '' && cursorColor == '' && textSelectionHandleColor != ''"
+          - kind: 'removeParameter'
+            name: 'textSelectionColor'
+          - kind: 'removeParameter'
+            name: 'textSelectionHandleColor'
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+      - if: "textSelectionColor == '' && cursorColor != '' && textSelectionHandleColor == ''"
+        changes:
+          - kind: 'addParameter'
+            index: 73
+            name: 'textSelectionTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'TextSelectionThemeData(cursorColor: {% cursorColor %})'
+              requiredIf: "textSelectionColor == '' && cursorColor != '' && textSelectionHandleColor == ''"
+          - kind: 'removeParameter'
+            name: 'cursorColor'
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+      - if: "textSelectionColor != '' && cursorColor == '' && textSelectionHandleColor == ''"
+        changes:
+          - kind: 'addParameter'
+            index: 73
+            name: 'textSelectionTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'TextSelectionThemeData(selectionColor: {% textSelectionColor %})'
+              requiredIf: "textSelectionColor != '' && cursorColor == '' && textSelectionHandleColor == ''"
+          - kind: 'removeParameter'
+            name: 'textSelectionColor'
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+      - if: "textSelectionColor == '' && cursorColor == '' && textSelectionHandleColor != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 73
+            name: 'textSelectionTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'TextSelectionThemeData(selectionHandleColor: {% textSelectionHandleColor %})'
+              requiredIf: "textSelectionColor == '' && cursorColor == '' && textSelectionHandleColor != ''"
+          - kind: 'removeParameter'
+            name: 'textSelectionHandleColor'
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+      - if: "useTextSelectionTheme != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'useTextSelectionTheme'
+    variables:
+      textSelectionColor:
+        kind: 'fragment'
+        value: 'arguments[textSelectionColor]'
+      cursorColor:
+        kind: 'fragment'
+        value: 'arguments[cursorColor]'
+      textSelectionHandleColor:
+        kind: 'fragment'
+        value: 'arguments[textSelectionHandleColor]'
+      useTextSelectionTheme:
+        kind: 'fragment'
+        value: 'arguments[useTextSelectionTheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/109070
+  - title: "Remove 'selectedRowColor'"
+    date: 2022-08-05
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'selectedRowColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/109070
+  - title: "Remove 'selectedRowColor'"
+    date: 2022-08-05
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'selectedRowColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/109070
+  - title: "Remove 'selectedRowColor'"
+    date: 2022-08-05
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'selectedRowColor'
+
+ # Changes made in https://github.com/flutter/flutter/pull/97972/
+  - title: "Migrate 'ThemeData.toggleableActiveColor' to individual themes"
+    date: 2022-05-18
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+    - kind: 'removeParameter'
+      name: 'toggleableActiveColor'
+    - kind: 'addParameter'
+      index: 96
+      name: 'checkboxTheme'
+      style: optional_named
+      argumentValue:
+        expression: "CheckboxThemeData(\n
+                       fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
+                         if (states.contains(MaterialState.disabled)) {
+                           return null;
+                         }\n
+                         if (states.contains(MaterialState.selected)) {
+                           return {% toggleableActiveColor %};
+                         }\n
+                         return null;\n
+                       }),\n
+                     )"
+        requiredIf: "toggleableActiveColor != '' && checkboxTheme == ''"
+    - kind: 'addParameter'
+      index: 97
+      name: 'checkboxTheme'
+      style: optional_named
+      argumentValue:
+        expression: "{% checkboxTheme %}.copyWith(\n
+                       fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
+                         if (states.contains(MaterialState.disabled)) {
+                           return null;
+                         }\n
+                         if (states.contains(MaterialState.selected)) {
+                           return {% toggleableActiveColor %};
+                         }\n
+                         return null;\n
+                       }),\n
+                     )"
+        requiredIf: "toggleableActiveColor != '' && checkboxTheme != ''"
+    - kind: 'addParameter'
+      index: 98
+      name: 'radioTheme'
+      style: optional_named
+      argumentValue:
+        expression: "RadioThemeData(\n
+                       fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
+                         if (states.contains(MaterialState.disabled)) {
+                           return null;
+                         }\n
+                         if (states.contains(MaterialState.selected)) {
+                           return {% toggleableActiveColor %};
+                         }\n
+                         return null;\n
+                       }),\n
+                     )"
+        requiredIf:  "toggleableActiveColor != '' && radioTheme == ''"
+    - kind: 'addParameter'
+      index: 99
+      name: 'radioTheme'
+      style: optional_named
+      argumentValue:
+        expression: "{% radioTheme %}.copyWith(\n
+                       fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
+                         if (states.contains(MaterialState.disabled)) {
+                           return null;
+                         }\n
+                         if (states.contains(MaterialState.selected)) {
+                           return {% toggleableActiveColor %};
+                         }\n
+                         return null;\n
+                       }),\n
+                     )"
+        requiredIf: "toggleableActiveColor != '' && radioTheme != ''"
+    - kind: 'addParameter'
+      index: 100
+      name: 'switchTheme'
+      style: optional_named
+      argumentValue:
+        expression: "SwitchThemeData(\n
+                       thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
+                         if (states.contains(MaterialState.disabled)) {
+                           return null;
+                         }\n
+                         if (states.contains(MaterialState.selected)) {
+                           return {% toggleableActiveColor %};
+                         }\n
+                         return null;\n
+                       }),\n
+                       trackColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
+                         if (states.contains(MaterialState.disabled)) {
+                           return null;
+                         }\n
+                         if (states.contains(MaterialState.selected)) {
+                           return {% toggleableActiveColor %};
+                         }\n
+                         return null;\n
+                       }),\n
+                     )"
+        requiredIf: "toggleableActiveColor != '' && switchTheme == ''"
+    - kind: 'addParameter'
+      index: 101
+      name: 'switchTheme'
+      style: optional_named
+      argumentValue:
+        expression: "{% switchTheme %}.copyWith(\n
+                       thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
+                         if (states.contains(MaterialState.disabled)) {
+                           return null;
+                         }\n
+                         if (states.contains(MaterialState.selected)) {
+                           return {% toggleableActiveColor %};
+                         }\n
+                         return null;\n
+                       }),\n
+                       trackColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
+                         if (states.contains(MaterialState.disabled)) {
+                           return null;
+                         }\n
+                         if (states.contains(MaterialState.selected)) {
+                           return {% toggleableActiveColor %};
+                         }\n
+                         return null;\n
+                       }),\n
+                     )"
+        requiredIf: "toggleableActiveColor != '' && switchTheme != ''"
+    variables:
+      checkboxTheme:
+        kind: 'fragment'
+        value: 'arguments[checkboxTheme]'
+      radioTheme:
+        kind: 'fragment'
+        value: 'arguments[radioTheme]'
+      switchTheme:
+        kind: 'fragment'
+        value: 'arguments[switchTheme]'
+      toggleableActiveColor:
+        kind: 'fragment'
+        value: 'arguments[toggleableActiveColor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/97972/
+  - title: "Migrate 'ThemeData.raw.toggleableActiveColor' to individual themes"
+    date: 2022-05-18
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+    - kind: 'removeParameter'
+      name: 'toggleableActiveColor'
+    - kind: 'addParameter'
+      index: 96
+      name: 'checkboxTheme'
+      style: optional_named
+      argumentValue:
+        expression: "CheckboxThemeData(\n
+                       fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
+                         if (states.contains(MaterialState.disabled)) {
+                           return null;
+                         }\n
+                         if (states.contains(MaterialState.selected)) {
+                           return {% toggleableActiveColor %};
+                         }\n
+                         return null;\n
+                       }),\n
+                     )"
+        requiredIf: "toggleableActiveColor != '' && checkboxTheme == ''"
+    - kind: 'addParameter'
+      index: 97
+      name: 'checkboxTheme'
+      style: optional_named
+      argumentValue:
+        expression: "{% checkboxTheme %}.copyWith(\n
+                       fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
+                         if (states.contains(MaterialState.disabled)) {
+                           return null;
+                         }\n
+                         if (states.contains(MaterialState.selected)) {
+                           return {% toggleableActiveColor %};
+                         }\n
+                         return null;\n
+                       }),\n
+                     )"
+        requiredIf: "toggleableActiveColor != '' && checkboxTheme != ''"
+    - kind: 'addParameter'
+      index: 98
+      name: 'radioTheme'
+      style: optional_named
+      argumentValue:
+        expression: "RadioThemeData(\n
+                       fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
+                         if (states.contains(MaterialState.disabled)) {
+                           return null;
+                         }\n
+                         if (states.contains(MaterialState.selected)) {
+                           return {% toggleableActiveColor %};
+                         }\n
+                         return null;\n
+                       }),\n
+                     )"
+        requiredIf:  "toggleableActiveColor != '' && radioTheme == ''"
+    - kind: 'addParameter'
+      index: 99
+      name: 'radioTheme'
+      style: optional_named
+      argumentValue:
+        expression: "{% radioTheme %}.copyWith(\n
+                       fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
+                         if (states.contains(MaterialState.disabled)) {
+                           return null;
+                         }\n
+                         if (states.contains(MaterialState.selected)) {
+                           return {% toggleableActiveColor %};
+                         }\n
+                         return null;\n
+                       }),\n
+                     )"
+        requiredIf: "toggleableActiveColor != '' && radioTheme != ''"
+    - kind: 'addParameter'
+      index: 100
+      name: 'switchTheme'
+      style: optional_named
+      argumentValue:
+        expression: "SwitchThemeData(\n
+                       thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
+                         if (states.contains(MaterialState.disabled)) {
+                           return null;
+                         }\n
+                         if (states.contains(MaterialState.selected)) {
+                           return {% toggleableActiveColor %};
+                         }\n
+                         return null;\n
+                       }),\n
+                       trackColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
+                         if (states.contains(MaterialState.disabled)) {
+                           return null;
+                         }\n
+                         if (states.contains(MaterialState.selected)) {
+                           return {% toggleableActiveColor %};
+                         }\n
+                         return null;\n
+                       }),\n
+                     )"
+        requiredIf: "toggleableActiveColor != '' && switchTheme == ''"
+    - kind: 'addParameter'
+      index: 101
+      name: 'switchTheme'
+      style: optional_named
+      argumentValue:
+        expression: "{% switchTheme %}.copyWith(\n
+                       thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
+                         if (states.contains(MaterialState.disabled)) {
+                           return null;
+                         }\n
+                         if (states.contains(MaterialState.selected)) {
+                           return {% toggleableActiveColor %};
+                         }\n
+                         return null;\n
+                       }),\n
+                       trackColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
+                         if (states.contains(MaterialState.disabled)) {
+                           return null;
+                         }\n
+                         if (states.contains(MaterialState.selected)) {
+                           return {% toggleableActiveColor %};
+                         }\n
+                         return null;\n
+                       }),\n
+                     )"
+        requiredIf: "toggleableActiveColor != '' && switchTheme != ''"
+    variables:
+      checkboxTheme:
+        kind: 'fragment'
+        value: 'arguments[checkboxTheme]'
+      radioTheme:
+        kind: 'fragment'
+        value: 'arguments[radioTheme]'
+      switchTheme:
+        kind: 'fragment'
+        value: 'arguments[switchTheme]'
+      toggleableActiveColor:
+        kind: 'fragment'
+        value: 'arguments[toggleableActiveColor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/97972/
+  - title: "Migrate 'ThemeData.copyWith.toggleableActiveColor' to individual themes"
+    date: 2022-05-18
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+    - kind: 'removeParameter'
+      name: 'toggleableActiveColor'
+    - kind: 'addParameter'
+      index: 96
+      name: 'checkboxTheme'
+      style: optional_named
+      argumentValue:
+        expression: "CheckboxThemeData(\n
+                       fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
+                         if (states.contains(MaterialState.disabled)) {
+                           return null;
+                         }\n
+                         if (states.contains(MaterialState.selected)) {
+                           return {% toggleableActiveColor %};
+                         }\n
+                         return null;\n
+                       }),\n
+                     )"
+        requiredIf: "toggleableActiveColor != '' && checkboxTheme == ''"
+    - kind: 'addParameter'
+      index: 97
+      name: 'checkboxTheme'
+      style: optional_named
+      argumentValue:
+        expression: "{% checkboxTheme %}.copyWith(\n
+                       fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
+                         if (states.contains(MaterialState.disabled)) {
+                           return null;
+                         }\n
+                         if (states.contains(MaterialState.selected)) {
+                           return {% toggleableActiveColor %};
+                         }\n
+                         return null;\n
+                       }),\n
+                     )"
+        requiredIf: "toggleableActiveColor != '' && checkboxTheme != ''"
+    - kind: 'addParameter'
+      index: 98
+      name: 'radioTheme'
+      style: optional_named
+      argumentValue:
+        expression: "RadioThemeData(\n
+                       fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
+                         if (states.contains(MaterialState.disabled)) {
+                           return null;
+                         }\n
+                         if (states.contains(MaterialState.selected)) {
+                           return {% toggleableActiveColor %};
+                         }\n
+                         return null;\n
+                       }),\n
+                     )"
+        requiredIf:  "toggleableActiveColor != '' && radioTheme == ''"
+    - kind: 'addParameter'
+      index: 99
+      name: 'radioTheme'
+      style: optional_named
+      argumentValue:
+        expression: "{% radioTheme %}.copyWith(\n
+                       fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
+                         if (states.contains(MaterialState.disabled)) {
+                           return null;
+                         }\n
+                         if (states.contains(MaterialState.selected)) {
+                           return {% toggleableActiveColor %};
+                         }\n
+                         return null;\n
+                       }),\n
+                     )"
+        requiredIf: "toggleableActiveColor != '' && radioTheme != ''"
+    - kind: 'addParameter'
+      index: 100
+      name: 'switchTheme'
+      style: optional_named
+      argumentValue:
+        expression: "SwitchThemeData(\n
+                       thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
+                         if (states.contains(MaterialState.disabled)) {
+                           return null;
+                         }\n
+                         if (states.contains(MaterialState.selected)) {
+                           return {% toggleableActiveColor %};
+                         }\n
+                         return null;\n
+                       }),\n
+                       trackColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
+                         if (states.contains(MaterialState.disabled)) {
+                           return null;
+                         }\n
+                         if (states.contains(MaterialState.selected)) {
+                           return {% toggleableActiveColor %};
+                         }\n
+                         return null;\n
+                       }),\n
+                     )"
+        requiredIf: "toggleableActiveColor != '' && switchTheme == ''"
+    - kind: 'addParameter'
+      index: 101
+      name: 'switchTheme'
+      style: optional_named
+      argumentValue:
+        expression: "{% switchTheme %}.copyWith(\n
+                       thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
+                         if (states.contains(MaterialState.disabled)) {
+                           return null;
+                         }\n
+                         if (states.contains(MaterialState.selected)) {
+                           return {% toggleableActiveColor %};
+                         }\n
+                         return null;\n
+                       }),\n
+                       trackColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
+                         if (states.contains(MaterialState.disabled)) {
+                           return null;
+                         }\n
+                         if (states.contains(MaterialState.selected)) {
+                           return {% toggleableActiveColor %};
+                         }\n
+                         return null;\n
+                       }),\n
+                     )"
+        requiredIf: "toggleableActiveColor != '' && switchTheme != ''"
+    variables:
+      checkboxTheme:
+        kind: 'fragment'
+        value: 'arguments[checkboxTheme]'
+      radioTheme:
+        kind: 'fragment'
+        value: 'arguments[radioTheme]'
+      switchTheme:
+        kind: 'fragment'
+        value: 'arguments[switchTheme]'
+      toggleableActiveColor:
+        kind: 'fragment'
+        value: 'arguments[toggleableActiveColor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/111080
+  - title: "Migrate to 'BottomAppBarTheme.color'"
+    date: 2022-09-07
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    oneOf:
+      - if: "bottomAppBarColor != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'bottomAppBarColor'
+          - kind: 'addParameter'
+            index: 73
+            name: 'bottomAppBarTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'BottomAppBarTheme(color: {% bottomAppBarColor %})'
+              requiredIf: "bottomAppBarColor != ''"
+    variables:
+      bottomAppBarColor:
+        kind: 'fragment'
+        value: 'arguments[bottomAppBarColor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/111080
+  - title: "Migrate to 'BottomAppBarTheme.color'"
+    date: 2022-09-07
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    oneOf:
+      - if: "bottomAppBarColor != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'bottomAppBarColor'
+          - kind: 'addParameter'
+            index: 73
+            name: 'bottomAppBarTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'BottomAppBarTheme(color: {% bottomAppBarColor %})'
+              requiredIf: "bottomAppBarColor != ''"
+    variables:
+      bottomAppBarColor:
+        kind: 'fragment'
+        value: 'arguments[bottomAppBarColor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/111080
+  - title: "Migrate to 'BottomAppBarTheme.color'"
+    date: 2022-09-06
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    oneOf:
+      - if: "bottomAppBarColor != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'bottomAppBarColor'
+          - kind: 'addParameter'
+            index: 73
+            name: 'bottomAppBarTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'BottomAppBarTheme(color: {% bottomAppBarColor %})'
+              requiredIf: "bottomAppBarColor != ''"
+    variables:
+      bottomAppBarColor:
+        kind: 'fragment'
+        value: 'arguments[bottomAppBarColor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/110162
+  - title: "Migrate to 'ColorScheme.background'"
+    date: 2022-08-24
+    element:
+      uris: [ 'material.dart' ]
+      field: 'backgroundColor'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'rename'
+        newName: 'colorScheme.background'
+
+  # Changes made in https://github.com/flutter/flutter/pull/110162
+  - title: "Migrate to 'ColorScheme.background'"
+    date: 2022-08-24
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    oneOf:
+    - if: "backgroundColor != '' && primarySwatch == '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme(background: {% backgroundColor %})'
+          requiredIf: "backgroundColor != '' && primarySwatch == '' && colorScheme ==''"
+      - kind: 'removeParameter'
+        name: 'backgroundColor'
+    - if: "backgroundColor != '' && primarySwatch != '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.fromSwatch(primarySwatch: {% primarySwatch %}).copyWith(background: {% backgroundColor %})'
+          requiredIf: "backgroundColor != '' && primarySwatch != '' && colorScheme == ''"
+      - kind: 'removeParameter'
+        name: 'backgroundColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    - if: "backgroundColor != '' && primarySwatch == '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(background: {% backgroundColor %})'
+          requiredIf: "backgroundColor != '' && primarySwatch == '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'backgroundColor'
+    - if: "backgroundColor != '' && primarySwatch != '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(primarySwatch: {% primarySwatch %}, background: {% backgroundColor %})'
+          requiredIf: "backgroundColor != '' && primarySwatch != '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'backgroundColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    variables:
+      backgroundColor:
+        kind: 'fragment'
+        value: 'arguments[backgroundColor]'
+      primarySwatch:
+        kind: 'fragment'
+        value: 'arguments[primarySwatch]'
+      colorScheme:
+        kind: 'fragment'
+        value: 'arguments[colorScheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/110162
+  - title: "Migrate to 'ColorScheme.background'"
+    date: 2022-08-24
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    oneOf:
+    - if: "backgroundColor != '' && primarySwatch == '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme(background: {% backgroundColor %})'
+          requiredIf: "backgroundColor != '' && primarySwatch == '' && colorScheme ==''"
+      - kind: 'removeParameter'
+        name: 'backgroundColor'
+    - if: "backgroundColor != '' && primarySwatch != '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.fromSwatch(primarySwatch: {% primarySwatch %}).copyWith(background: {% backgroundColor %})'
+          requiredIf: "backgroundColor != '' && primarySwatch != '' && colorScheme == ''"
+      - kind: 'removeParameter'
+        name: 'backgroundColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    - if: "backgroundColor != '' && primarySwatch == '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(background: {% backgroundColor %})'
+          requiredIf: "backgroundColor != '' && primarySwatch == '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'backgroundColor'
+    - if: "backgroundColor != '' && primarySwatch != '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(primarySwatch: {% primarySwatch %}, background: {% backgroundColor %})'
+          requiredIf: "backgroundColor != '' && primarySwatch != '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'backgroundColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    variables:
+      backgroundColor:
+        kind: 'fragment'
+        value: 'arguments[backgroundColor]'
+      primarySwatch:
+        kind: 'fragment'
+        value: 'arguments[primarySwatch]'
+      colorScheme:
+        kind: 'fragment'
+        value: 'arguments[colorScheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/110162
+  - title: "Migrate to 'ColorScheme.background'"
+    date: 2022-08-24
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    oneOf:
+    - if: "backgroundColor != '' && primarySwatch == '' && colorScheme == ''"
+      changes:
+        - kind: 'addParameter'
+          index: 56
+          name: 'colorScheme'
+          style: optional_named
+          argumentValue:
+            expression: 'ColorScheme(background: {% backgroundColor %})'
+            requiredIf: "backgroundColor != '' && primarySwatch == '' && colorScheme == ''"
+        - kind: 'removeParameter'
+          name: 'backgroundColor'
+    - if: "backgroundColor != '' && primarySwatch != '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.fromSwatch(primarySwatch: {% primarySwatch %}).copyWith(background: {% backgroundColor %})'
+          requiredIf: "backgroundColor != '' && primarySwatch != '' && colorScheme == ''"
+      - kind: 'removeParameter'
+        name: 'backgroundColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    - if: "backgroundColor != '' && primarySwatch == '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(background: {% backgroundColor %})'
+          requiredIf: "backgroundColor != '' && primarySwatch == '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'backgroundColor'
+    - if: "backgroundColor != '' && primarySwatch != '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(primarySwatch: {% primarySwatch %}, background: {% backgroundColor %})'
+          requiredIf: "backgroundColor != '' && primarySwatch != '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'backgroundColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    variables:
+      backgroundColor:
+        kind: 'fragment'
+        value: 'arguments[backgroundColor]'
+      primarySwatch:
+        kind: 'fragment'
+        value: 'arguments[primarySwatch]'
+      colorScheme:
+        kind: 'fragment'
+        value: 'arguments[colorScheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/110162
+  - title: "Migrate to 'ColorScheme.error'"
+    date: 2022-08-24
+    element:
+      uris: [ 'material.dart' ]
+      field: 'errorColor'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'rename'
+        newName: 'colorScheme.error'
+
+  # Changes made in https://github.com/flutter/flutter/pull/110162
+  - title: "Migrate to 'ColorScheme.error'"
+    date: 2022-08-24
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    oneOf:
+    - if: "errorColor != '' && primarySwatch == '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme(error: {% errorColor %})'
+          requiredIf: "errorColor != '' && primarySwatch == '' && colorScheme ==''"
+      - kind: 'removeParameter'
+        name: 'errorColor'
+    - if: "errorColor != '' && primarySwatch != '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.fromSwatch(primarySwatch: {% primarySwatch %}).copyWith(error: {% errorColor %})'
+          requiredIf: "errorColor != '' && primarySwatch != '' && colorScheme == ''"
+      - kind: 'removeParameter'
+        name: 'errorColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    - if: "errorColor != '' && primarySwatch == '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(error: {% errorColor %})'
+          requiredIf: "errorColor != '' && primarySwatch == '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'errorColor'
+    - if: "errorColor != '' && primarySwatch != '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(primarySwatch: {% primarySwatch %}, error: {% errorColor %})'
+          requiredIf: "errorColor != '' && primarySwatch != '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'errorColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    variables:
+      errorColor:
+        kind: 'fragment'
+        value: 'arguments[errorColor]'
+      primarySwatch:
+        kind: 'fragment'
+        value: 'arguments[primarySwatch]'
+      colorScheme:
+        kind: 'fragment'
+        value: 'arguments[colorScheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/110162
+  - title: "Migrate to 'ColorScheme.error'"
+    date: 2022-08-24
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    oneOf:
+    - if: "errorColor != '' && primarySwatch == '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme(error: {% errorColor %})'
+          requiredIf: "errorColor != '' && primarySwatch == '' && colorScheme ==''"
+      - kind: 'removeParameter'
+        name: 'errorColor'
+    - if: "errorColor != '' && primarySwatch != '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.fromSwatch(primarySwatch: {% primarySwatch %}).copyWith(error: {% errorColor %})'
+          requiredIf: "errorColor != '' && primarySwatch != '' && colorScheme == ''"
+      - kind: 'removeParameter'
+        name: 'errorColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    - if: "errorColor != '' && primarySwatch == '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(error: {% errorColor %})'
+          requiredIf: "errorColor != '' && primarySwatch == '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'errorColor'
+    - if: "errorColor != '' && primarySwatch != '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(primarySwatch: {% primarySwatch %}, error: {% errorColor %})'
+          requiredIf: "errorColor != '' && primarySwatch != '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'errorColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    variables:
+      errorColor:
+        kind: 'fragment'
+        value: 'arguments[errorColor]'
+      primarySwatch:
+        kind: 'fragment'
+        value: 'arguments[primarySwatch]'
+      colorScheme:
+        kind: 'fragment'
+        value: 'arguments[colorScheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/110162
+  - title: "Migrate to 'ColorScheme.error'"
+    date: 2022-08-24
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    oneOf:
+    - if: "errorColor != '' && primarySwatch == '' && colorScheme == ''"
+      changes:
+        - kind: 'addParameter'
+          index: 56
+          name: 'colorScheme'
+          style: optional_named
+          argumentValue:
+            expression: 'ColorScheme(error: {% errorColor %})'
+            requiredIf: "errorColor != '' && primarySwatch == '' && colorScheme ==''"
+        - kind: 'removeParameter'
+          name: 'errorColor'
+    - if: "errorColor != '' && primarySwatch != '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.fromSwatch(primarySwatch: {% primarySwatch %}).copyWith(error: {% errorColor %})'
+          requiredIf: "errorColor != '' && primarySwatch != '' && colorScheme == ''"
+      - kind: 'removeParameter'
+        name: 'errorColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    - if: "errorColor != '' && primarySwatch == '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(error: {% errorColor %})'
+          requiredIf: "errorColor != '' && primarySwatch == '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'errorColor'
+    - if: "errorColor != '' && primarySwatch != '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(primarySwatch: {% primarySwatch %}, error: {% errorColor %})'
+          requiredIf: "errorColor != '' && primarySwatch != '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'errorColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    variables:
+      errorColor:
+        kind: 'fragment'
+        value: 'arguments[errorColor]'
+      primarySwatch:
+        kind: 'fragment'
+        value: 'arguments[primarySwatch]'
+      colorScheme:
+        kind: 'fragment'
+        value: 'arguments[colorScheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/131455
+  - title: "Remove 'useMaterial3'"
+    date: 2023-07-27
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'useMaterial3'
+
+# Before adding a new fix: read instructions at the top of this file.

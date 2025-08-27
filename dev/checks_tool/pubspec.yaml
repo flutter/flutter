@@ -1,0 +1,14 @@
+name: checks_tool
+
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+dependencies:
+  args: any
+
+dev_dependencies:
+  test: any
+
+# PUBSPEC CHECKSUM: foei0u

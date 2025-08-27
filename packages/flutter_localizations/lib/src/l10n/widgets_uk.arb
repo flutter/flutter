@@ -1,0 +1,15 @@
+{
+  "reorderItemToStart": "Перемістити на початок",
+  "reorderItemToEnd": "Перемістити в кінець",
+  "reorderItemUp": "Перемістити вгору",
+  "reorderItemDown": "Перемістити вниз",
+  "reorderItemLeft": "Перемістити ліворуч",
+  "reorderItemRight": "Перемістити праворуч",
+  "copyButtonLabel": "Копіювати",
+  "cutButtonLabel": "Вирізати",
+  "lookUpButtonLabel": "Шукати",
+  "searchWebButtonLabel": "Пошук в Інтернеті",
+  "shareButtonLabel": "Поділитися",
+  "pasteButtonLabel": "Вставити",
+  "selectAllButtonLabel": "Вибрати всі"
+}

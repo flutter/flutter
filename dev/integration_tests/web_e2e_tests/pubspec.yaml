@@ -1,0 +1,33 @@
+name: web_e2e_tests
+publish_to: none
+
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+flutter:
+  assets:
+    - packages/flutter_gallery_assets/assets/icons/material/1.5x/material.png
+    - packages/flutter_gallery_assets/assets/icons/material/material.png
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_driver:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  web: any
+
+
+dev_dependencies:
+  flutter_goldens:
+    sdk: flutter
+
+
+# PUBSPEC CHECKSUM: d6lgr

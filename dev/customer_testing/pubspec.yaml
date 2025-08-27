@@ -1,0 +1,22 @@
+name: customer_testing
+description: Tool to run the tests listed in the flutter/tests repository.
+
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+dependencies:
+  args: any
+  path: any
+  glob: any
+  meta: any
+
+  collection: any
+  file: any
+
+dev_dependencies:
+  test: any
+
+
+# PUBSPEC CHECKSUM: gdtbtj

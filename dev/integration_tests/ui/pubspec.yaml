@@ -1,0 +1,30 @@
+name: integration_ui
+description: Flutter non-plugin UI integration tests.
+
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_driver:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  test: any
+
+  path: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/foo.png
+
+# PUBSPEC CHECKSUM: 77jv2r

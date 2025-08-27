@@ -1,0 +1,24 @@
+name: web_integration
+description: Integration test for web compilation.
+
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+flutter:
+  assets:
+    - lib/a.dart
+    - lib/b.dart
+  uses-material-design: true
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  web: any
+
+  collection: any
+  meta: any
+
+# PUBSPEC CHECKSUM: 920vbf

@@ -1,0 +1,240 @@
+name: gallery
+description: A resource to help developers evaluate and use Flutter.
+repository: https://github.com/flutter/flutter/dev/integration_tests/new_gallery
+version: 2.10.2+021002 # See README.md for details on versioning.
+
+environment:
+  flutter: ^3.13.0
+  sdk: ^3.7.0-0
+resolution: workspace
+
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  adaptive_breakpoints: any
+  animations: any
+  collection: any
+  flutter_localized_locales: any
+  flutter_staggered_grid_view: any
+  google_fonts: any
+  intl: any
+  provider: any
+  scoped_model: any
+  url_launcher: any
+  vector_math: any
+
+  nested: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_driver:
+    sdk: flutter
+  test: any
+
+
+flutter:
+  uses-material-design: true
+  assets:
+    - packages/flutter_gallery_assets/crane/destinations/eat_0.jpg
+    - packages/flutter_gallery_assets/crane/destinations/eat_1.jpg
+    - packages/flutter_gallery_assets/crane/destinations/eat_2.jpg
+    - packages/flutter_gallery_assets/crane/destinations/eat_3.jpg
+    - packages/flutter_gallery_assets/crane/destinations/eat_4.jpg
+    - packages/flutter_gallery_assets/crane/destinations/eat_5.jpg
+    - packages/flutter_gallery_assets/crane/destinations/eat_6.jpg
+    - packages/flutter_gallery_assets/crane/destinations/eat_7.jpg
+    - packages/flutter_gallery_assets/crane/destinations/eat_8.jpg
+    - packages/flutter_gallery_assets/crane/destinations/eat_9.jpg
+    - packages/flutter_gallery_assets/crane/destinations/eat_10.jpg
+    - packages/flutter_gallery_assets/crane/destinations/fly_0.jpg
+    - packages/flutter_gallery_assets/crane/destinations/fly_1.jpg
+    - packages/flutter_gallery_assets/crane/destinations/fly_2.jpg
+    - packages/flutter_gallery_assets/crane/destinations/fly_3.jpg
+    - packages/flutter_gallery_assets/crane/destinations/fly_4.jpg
+    - packages/flutter_gallery_assets/crane/destinations/fly_5.jpg
+    - packages/flutter_gallery_assets/crane/destinations/fly_6.jpg
+    - packages/flutter_gallery_assets/crane/destinations/fly_7.jpg
+    - packages/flutter_gallery_assets/crane/destinations/fly_8.jpg
+    - packages/flutter_gallery_assets/crane/destinations/fly_9.jpg
+    - packages/flutter_gallery_assets/crane/destinations/fly_10.jpg
+    - packages/flutter_gallery_assets/crane/destinations/fly_11.jpg
+    - packages/flutter_gallery_assets/crane/destinations/fly_12.jpg
+    - packages/flutter_gallery_assets/crane/destinations/fly_13.jpg
+    - packages/flutter_gallery_assets/crane/destinations/sleep_0.jpg
+    - packages/flutter_gallery_assets/crane/destinations/sleep_1.jpg
+    - packages/flutter_gallery_assets/crane/destinations/sleep_2.jpg
+    - packages/flutter_gallery_assets/crane/destinations/sleep_3.jpg
+    - packages/flutter_gallery_assets/crane/destinations/sleep_4.jpg
+    - packages/flutter_gallery_assets/crane/destinations/sleep_5.jpg
+    - packages/flutter_gallery_assets/crane/destinations/sleep_6.jpg
+    - packages/flutter_gallery_assets/crane/destinations/sleep_7.jpg
+    - packages/flutter_gallery_assets/crane/destinations/sleep_8.jpg
+    - packages/flutter_gallery_assets/crane/destinations/sleep_9.jpg
+    - packages/flutter_gallery_assets/crane/destinations/sleep_10.jpg
+    - packages/flutter_gallery_assets/crane/destinations/sleep_11.jpg
+    - packages/flutter_gallery_assets/crane/logo/logo.png
+    - packages/flutter_gallery_assets/fonts/google_fonts/Raleway-Medium.ttf
+    - packages/flutter_gallery_assets/fonts/google_fonts/Raleway-SemiBold.ttf
+    - packages/flutter_gallery_assets/fonts/google_fonts/Raleway-Regular.ttf
+    - packages/flutter_gallery_assets/fonts/google_fonts/Raleway-Light.ttf
+    - packages/flutter_gallery_assets/assets/studies/shrine_card_dark.png
+    - packages/flutter_gallery_assets/assets/studies/starter_card.png
+    - packages/flutter_gallery_assets/assets/studies/starter_card_dark.png
+    - packages/flutter_gallery_assets/assets/studies/fortnightly_card_dark.png
+    - packages/flutter_gallery_assets/assets/studies/rally_card_dark.png
+    - packages/flutter_gallery_assets/assets/studies/reply_card_dark.png
+    - packages/flutter_gallery_assets/assets/studies/fortnightly_card.png
+    - packages/flutter_gallery_assets/assets/studies/crane_card.png
+    - packages/flutter_gallery_assets/assets/studies/shrine_card.png
+    - packages/flutter_gallery_assets/assets/studies/crane_card_dark.png
+    - packages/flutter_gallery_assets/assets/studies/rally_card.png
+    - packages/flutter_gallery_assets/assets/studies/reply_card.png
+    - packages/flutter_gallery_assets/assets/logo/flutter_logo.png
+    - packages/flutter_gallery_assets/assets/logo/flutter_logo_color.png
+    - packages/flutter_gallery_assets/assets/icons/cupertino/cupertino.png
+    - packages/flutter_gallery_assets/assets/icons/material/material.png
+    - packages/flutter_gallery_assets/assets/icons/reference/reference.png
+    - packages/flutter_gallery_assets/assets/demos/bottom_navigation_background.png
+    - packages/flutter_gallery_assets/fonts/GalleryIcons.ttf
+    - packages/flutter_gallery_assets/fonts/google_fonts/Merriweather-Regular.ttf
+    - packages/flutter_gallery_assets/fonts/google_fonts/Eczar-Regular.ttf
+    - packages/flutter_gallery_assets/fonts/google_fonts/Montserrat-Medium.ttf
+    - packages/flutter_gallery_assets/fonts/google_fonts/Rubik-Bold.ttf
+    - packages/flutter_gallery_assets/fonts/google_fonts/Merriweather-Light.ttf
+    - packages/flutter_gallery_assets/fonts/google_fonts/RobotoCondensed-Bold.ttf
+    - packages/flutter_gallery_assets/fonts/google_fonts/LibreFranklin-Regular.ttf
+    - packages/flutter_gallery_assets/fonts/google_fonts/RobotoMono-Regular.ttf
+    - packages/flutter_gallery_assets/fonts/google_fonts/LibreFranklin-ExtraBold.ttf
+    - packages/flutter_gallery_assets/fonts/google_fonts/LibreFranklin-Bold.ttf
+    - packages/flutter_gallery_assets/fonts/google_fonts/Oswald-SemiBold.ttf
+    - packages/flutter_gallery_assets/fonts/google_fonts/Oswald-Medium.ttf
+    - packages/flutter_gallery_assets/fonts/google_fonts/LibreFranklin-SemiBold.ttf
+    - packages/flutter_gallery_assets/fonts/google_fonts/Montserrat-Bold.ttf
+    - packages/flutter_gallery_assets/fonts/google_fonts/Merriweather-BoldItalic.ttf
+    - packages/flutter_gallery_assets/fonts/google_fonts/Rubik-Medium.ttf
+    - packages/flutter_gallery_assets/fonts/google_fonts/Montserrat-SemiBold.ttf
+    - packages/flutter_gallery_assets/fonts/google_fonts/RobotoCondensed-Regular.ttf
+    - packages/flutter_gallery_assets/fonts/google_fonts/LibreFranklin-Medium.ttf
+    - packages/flutter_gallery_assets/fonts/google_fonts/Montserrat-Regular.ttf
+    - packages/flutter_gallery_assets/fonts/google_fonts/Rubik-Regular.ttf
+    - packages/flutter_gallery_assets/fonts/google_fonts/Eczar-SemiBold.ttf
+    - packages/flutter_gallery_assets/fonts/google_fonts/WorkSans-Regular.ttf
+    - packages/flutter_gallery_assets/fonts/google_fonts/WorkSans-Medium.ttf
+    - packages/flutter_gallery_assets/fonts/google_fonts/WorkSans-Bold.ttf
+    - packages/flutter_gallery_assets/fonts/google_fonts/WorkSans-Thin.ttf
+    - packages/flutter_gallery_assets/fonts/google_fonts/WorkSans-SemiBold.ttf
+    - packages/flutter_gallery_assets/fortnightly/fortnightly_army.png
+    - packages/flutter_gallery_assets/fortnightly/fortnightly_bees.jpg
+    - packages/flutter_gallery_assets/fortnightly/fortnightly_chart.png
+    - packages/flutter_gallery_assets/fortnightly/fortnightly_fabrics.png
+    - packages/flutter_gallery_assets/fortnightly/fortnightly_feminists.jpg
+    - packages/flutter_gallery_assets/fortnightly/fortnightly_gas.png
+    - packages/flutter_gallery_assets/fortnightly/fortnightly_healthcare.jpg
+    - packages/flutter_gallery_assets/fortnightly/fortnightly_stocks.png
+    - packages/flutter_gallery_assets/fortnightly/fortnightly_title.png
+    - packages/flutter_gallery_assets/fortnightly/fortnightly_war.png
+    - packages/flutter_gallery_assets/reply/attachments/paris_1.jpg
+    - packages/flutter_gallery_assets/reply/attachments/paris_2.jpg
+    - packages/flutter_gallery_assets/reply/attachments/paris_3.jpg
+    - packages/flutter_gallery_assets/reply/attachments/paris_4.jpg
+    - packages/flutter_gallery_assets/reply/avatars/avatar_0.jpg
+    - packages/flutter_gallery_assets/reply/avatars/avatar_1.jpg
+    - packages/flutter_gallery_assets/reply/avatars/avatar_2.jpg
+    - packages/flutter_gallery_assets/reply/avatars/avatar_3.jpg
+    - packages/flutter_gallery_assets/reply/avatars/avatar_4.jpg
+    - packages/flutter_gallery_assets/reply/avatars/avatar_5.jpg
+    - packages/flutter_gallery_assets/reply/avatars/avatar_6.jpg
+    - packages/flutter_gallery_assets/reply/avatars/avatar_7.jpg
+    - packages/flutter_gallery_assets/reply/avatars/avatar_8.jpg
+    - packages/flutter_gallery_assets/reply/avatars/avatar_9.jpg
+    - packages/flutter_gallery_assets/reply/avatars/avatar_10.jpg
+    - packages/flutter_gallery_assets/reply/avatars/avatar_express.png
+    - packages/flutter_gallery_assets/reply/icons/twotone_add_circle_outline.png
+    - packages/flutter_gallery_assets/reply/icons/twotone_delete.png
+    - packages/flutter_gallery_assets/reply/icons/twotone_drafts.png
+    - packages/flutter_gallery_assets/reply/icons/twotone_error.png
+    - packages/flutter_gallery_assets/reply/icons/twotone_folder.png
+    - packages/flutter_gallery_assets/reply/icons/twotone_forward.png
+    - packages/flutter_gallery_assets/reply/icons/twotone_inbox.png
+    - packages/flutter_gallery_assets/reply/icons/twotone_send.png
+    - packages/flutter_gallery_assets/reply/icons/twotone_star_on_background.png
+    - packages/flutter_gallery_assets/reply/icons/twotone_star.png
+    - packages/flutter_gallery_assets/reply/icons/twotone_stars.png
+    - packages/flutter_gallery_assets/reply/reply_logo.png
+    - packages/flutter_gallery_assets/places/india_chennai_flower_market.png
+    - packages/flutter_gallery_assets/places/india_thanjavur_market.png
+    - packages/flutter_gallery_assets/places/india_tanjore_bronze_works.png
+    - packages/flutter_gallery_assets/places/india_tanjore_market_merchant.png
+    - packages/flutter_gallery_assets/places/india_tanjore_thanjavur_temple.png
+    - packages/flutter_gallery_assets/places/india_pondicherry_salt_farm.png
+    - packages/flutter_gallery_assets/places/india_chennai_highway.png
+    - packages/flutter_gallery_assets/places/india_chettinad_silk_maker.png
+    - packages/flutter_gallery_assets/places/india_tanjore_thanjavur_temple_carvings.png
+    - packages/flutter_gallery_assets/places/india_chettinad_produce.png
+    - packages/flutter_gallery_assets/places/india_tanjore_market_technology.png
+    - packages/flutter_gallery_assets/places/india_pondicherry_beach.png
+    - packages/flutter_gallery_assets/places/india_pondicherry_fisherman.png
+    - packages/flutter_gallery_assets/placeholders/avatar_logo.png
+    - packages/flutter_gallery_assets/placeholders/placeholder_image.png
+    - packages/flutter_gallery_assets/splash_effects/splash_effect_1.gif
+    - packages/flutter_gallery_assets/splash_effects/splash_effect_2.gif
+    - packages/flutter_gallery_assets/splash_effects/splash_effect_3.gif
+    - packages/flutter_gallery_assets/splash_effects/splash_effect_4.gif
+    - packages/flutter_gallery_assets/splash_effects/splash_effect_5.gif
+    - packages/flutter_gallery_assets/splash_effects/splash_effect_6.gif
+    - packages/flutter_gallery_assets/splash_effects/splash_effect_7.gif
+    - packages/flutter_gallery_assets/splash_effects/splash_effect_8.gif
+    - packages/flutter_gallery_assets/splash_effects/splash_effect_9.gif
+    - packages/flutter_gallery_assets/splash_effects/splash_effect_10.gif
+    - packages/rally_assets/logo.png
+    - packages/rally_assets/thumb.png
+    - packages/shrine_images/diamond.png
+    - packages/shrine_images/slanted_menu.png
+    - packages/shrine_images/0-0.jpg
+    - packages/shrine_images/1-0.jpg
+    - packages/shrine_images/2-0.jpg
+    - packages/shrine_images/3-0.jpg
+    - packages/shrine_images/4-0.jpg
+    - packages/shrine_images/5-0.jpg
+    - packages/shrine_images/6-0.jpg
+    - packages/shrine_images/7-0.jpg
+    - packages/shrine_images/8-0.jpg
+    - packages/shrine_images/9-0.jpg
+    - packages/shrine_images/10-0.jpg
+    - packages/shrine_images/11-0.jpg
+    - packages/shrine_images/12-0.jpg
+    - packages/shrine_images/13-0.jpg
+    - packages/shrine_images/14-0.jpg
+    - packages/shrine_images/15-0.jpg
+    - packages/shrine_images/16-0.jpg
+    - packages/shrine_images/17-0.jpg
+    - packages/shrine_images/18-0.jpg
+    - packages/shrine_images/19-0.jpg
+    - packages/shrine_images/20-0.jpg
+    - packages/shrine_images/21-0.jpg
+    - packages/shrine_images/22-0.jpg
+    - packages/shrine_images/23-0.jpg
+    - packages/shrine_images/24-0.jpg
+    - packages/shrine_images/25-0.jpg
+    - packages/shrine_images/26-0.jpg
+    - packages/shrine_images/27-0.jpg
+    - packages/shrine_images/28-0.jpg
+    - packages/shrine_images/29-0.jpg
+    - packages/shrine_images/30-0.jpg
+    - packages/shrine_images/31-0.jpg
+    - packages/shrine_images/32-0.jpg
+    - packages/shrine_images/33-0.jpg
+    - packages/shrine_images/34-0.jpg
+    - packages/shrine_images/35-0.jpg
+    - packages/shrine_images/36-0.jpg
+    - packages/shrine_images/37-0.jpg
+  fonts:
+    - family: GalleryIcons
+      fonts:
+        - asset: packages/flutter_gallery_assets/fonts/GalleryIcons.ttf
+
+# PUBSPEC CHECKSUM: ltolmu

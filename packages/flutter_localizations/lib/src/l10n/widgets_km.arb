@@ -1,0 +1,15 @@
+{
+  "reorderItemToStart": "ផ្លាស់ទីទៅ​ចំណុច​ចាប់ផ្ដើម",
+  "reorderItemToEnd": "ផ្លាស់ទីទៅ​ចំណុចបញ្ចប់",
+  "reorderItemUp": "ផ្លាស់ទី​ឡើង​លើ",
+  "reorderItemDown": "ផ្លាស់ទី​ចុះ​ក្រោម",
+  "reorderItemLeft": "ផ្លាស់ទី​ទៅ​ឆ្វេង",
+  "reorderItemRight": "ផ្លាស់ទីទៅ​ស្តាំ",
+  "copyButtonLabel": "ចម្លង",
+  "cutButtonLabel": "កាត់",
+  "lookUpButtonLabel": "រកមើល",
+  "searchWebButtonLabel": "ស្វែងរក​លើបណ្ដាញ",
+  "shareButtonLabel": "ចែករំលែក",
+  "pasteButtonLabel": "ដាក់​ចូល",
+  "selectAllButtonLabel": "ជ្រើសរើស​ទាំងអស់"
+}

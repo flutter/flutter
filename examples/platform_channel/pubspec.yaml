@@ -1,0 +1,24 @@
+name: platform_channel
+
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_driver:
+    sdk: flutter
+  test: any
+
+
+flutter:
+  uses-material-design: true
+
+# PUBSPEC CHECKSUM: f9g2jl

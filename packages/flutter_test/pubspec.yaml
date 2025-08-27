@@ -1,0 +1,50 @@
+name: flutter_test
+
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+dependencies:
+  # To update these, use "flutter update-packages --force-upgrade".
+  #
+  # For detailed instructions, refer to:
+  # https://github.com/flutter/flutter/blob/main/docs/infra/Updating-dependencies-in-Flutter.md
+
+  flutter:
+    sdk: flutter
+
+  # We depend on very specific internal implementation details of the
+  # 'test' package, which change between versions, so when upgrading
+  # this, make sure the tests are still running correctly.
+  test_api: 0.7.6
+  matcher: 0.12.17
+
+  # Used by golden file comparator
+  path: 1.9.1
+
+  # Testing utilities for dealing with async calls and time.
+  fake_async: 1.3.3
+  clock: 1.1.2
+
+  # We import stack_trace because the test packages uses it and we
+  # need to be able to unmangle the stack traces that it passed to
+  # stack_trace. See https://github.com/dart-lang/test/issues/590
+  stack_trace: 1.12.1
+
+  # Used by globalToLocal et al.
+  vector_math: 2.2.0
+
+  # Used to detect memory leaks with `testWidgets`.
+  leak_tracker_flutter_testing: 3.0.10
+
+  collection: 1.19.1
+  meta: 1.16.0
+  stream_channel: 2.1.4
+
+dev_dependencies:
+  file: any
+  flutter_driver:
+    sdk: flutter
+
+# PUBSPEC CHECKSUM: 9ghr

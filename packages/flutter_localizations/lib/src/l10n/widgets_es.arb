@@ -1,0 +1,15 @@
+{
+  "reorderItemToStart": "Mover al principio",
+  "reorderItemToEnd": "Mover al final",
+  "reorderItemUp": "Mover hacia arriba",
+  "reorderItemDown": "Mover hacia abajo",
+  "reorderItemLeft": "Mover hacia la izquierda",
+  "reorderItemRight": "Mover hacia la derecha",
+  "copyButtonLabel": "Copiar",
+  "cutButtonLabel": "Cortar",
+  "lookUpButtonLabel": "Buscador visual",
+  "searchWebButtonLabel": "Buscar en la Web",
+  "shareButtonLabel": "Compartir",
+  "pasteButtonLabel": "Pegar",
+  "selectAllButtonLabel": "Seleccionar todo"
+}

@@ -1,0 +1,23 @@
+name: flutter_examples_layers
+
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+
+flutter:
+  assets:
+    - services/data.json
+  uses-material-design: true
+
+# PUBSPEC CHECKSUM: 60tfp7

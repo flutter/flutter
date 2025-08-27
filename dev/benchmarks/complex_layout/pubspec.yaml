@@ -1,0 +1,37 @@
+name: complex_layout
+description: A benchmark of a relatively complex layout.
+
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_driver:
+    sdk: flutter
+
+  # To change the version of the gallery assets, edit
+  #   //packages/flutter_tools/lib/src/commands/update_packages.dart
+  # and run
+  #   flutter update-packages --force-upgrade
+  flutter_gallery_assets: any
+
+  path: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  test: any
+  integration_test:
+    sdk: flutter
+
+
+flutter:
+  uses-material-design: true
+  assets:
+    - packages/flutter_gallery_assets/people/square/ali.png
+    - packages/flutter_gallery_assets/places/india_chettinad_silk_maker.png
+
+# PUBSPEC CHECKSUM: o8fml4

@@ -1,0 +1,15 @@
+{
+  "reorderItemToStart": "Ilipat sa simula",
+  "reorderItemToEnd": "Ilipat sa dulo",
+  "reorderItemUp": "Ilipat pataas",
+  "reorderItemDown": "Ilipat pababa",
+  "reorderItemLeft": "Ilipat pakaliwa",
+  "reorderItemRight": "Ilipat pakanan",
+  "copyButtonLabel": "Kopyahin",
+  "cutButtonLabel": "I-cut",
+  "lookUpButtonLabel": "Tumingin sa Itaas",
+  "searchWebButtonLabel": "Maghanap sa Web",
+  "shareButtonLabel": "I-share",
+  "pasteButtonLabel": "I-paste",
+  "selectAllButtonLabel": "Piliin lahat"
+}

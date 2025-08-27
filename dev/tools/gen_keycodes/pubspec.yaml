@@ -1,0 +1,20 @@
+name: gen_keycodes
+description: Generates keycode source files from various resources.
+
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+dependencies:
+  args: any
+  http: any
+  meta: any
+  path: any
+
+
+dev_dependencies:
+  test: any
+
+
+# PUBSPEC CHECKSUM: mronmk

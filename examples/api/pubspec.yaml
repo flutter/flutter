@@ -1,0 +1,42 @@
+# This file is also used by dev/bots/analyze_snippet_code.dart to analyze code snippets (`{@tool snippet}` sections).
+
+name: flutter_api_samples
+description: API code samples for the Flutter repo.
+publish_to: 'none'
+
+version: 1.0.0
+
+environment:
+  sdk: ^3.8.0-0
+  flutter: ">=2.5.0-6.0.pre.30 <3.0.0"
+resolution: workspace
+
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  collection: any
+  vector_math: any
+  web: any
+  test: any
+
+dev_dependencies:
+  integration_test:
+    sdk: flutter
+  flutter_driver:
+    sdk: flutter
+  flutter_goldens:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
+
+
+flutter:
+  uses-material-design: true
+
+# PUBSPEC CHECKSUM: p9pqmd

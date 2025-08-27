@@ -1,0 +1,27 @@
+name: vitool
+description: A tool for generating Dart vector animation code from SVG sequences.
+version: 0.0.1
+homepage: https://flutter.dev
+
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  args: any
+  vector_math: any
+  xml: any
+
+  collection: any
+  meta: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  path: any
+
+# PUBSPEC CHECKSUM: rtbcae

@@ -1,0 +1,2 @@
+# The generated web assets aren't needed for widget_preview_scaffold widget tests
+/widget_preview_scaffold/web/

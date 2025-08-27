@@ -1,0 +1,36 @@
+name: flutter_devicelab
+description: Flutter continuous integration performance and correctness tests.
+homepage: https://github.com/flutter/flutter
+
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+dependencies:
+  archive: any
+  args: any
+  file: any
+  logging: any
+  meta: any
+  metrics_center: any
+  path: any
+  platform: any
+  process: any
+  shelf: any
+  shelf_static: any
+  stack_trace: any
+  vm_service: any
+  webkit_inspection_protocol: any
+  xml: any
+  standard_message_codec: any
+
+  collection: any
+  pub_semver: any
+  retry: any
+  yaml_edit: any
+
+dev_dependencies:
+  test: any
+
+# PUBSPEC CHECKSUM: 7sl1uq

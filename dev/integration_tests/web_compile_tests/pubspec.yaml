@@ -1,0 +1,12 @@
+name: web_compile_tests
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+
+# PUBSPEC CHECKSUM: h86dcv

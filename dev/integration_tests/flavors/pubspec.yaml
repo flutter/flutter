@@ -1,0 +1,35 @@
+name: flavors
+description: Integration test for build flavors.
+
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_driver:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  test: any
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/common/common.txt
+    - path: assets/paid/
+      flavors:
+        - paid
+    - path: assets/free/
+      flavors:
+        - free
+
+# PUBSPEC CHECKSUM: rnq93o

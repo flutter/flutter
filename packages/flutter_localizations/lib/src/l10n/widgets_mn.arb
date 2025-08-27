@@ -1,0 +1,15 @@
+{
+  "reorderItemToStart": "Эхлэл рүү зөөх",
+  "reorderItemToEnd": "Төгсгөл рүү зөөх",
+  "reorderItemUp": "Дээш зөөх",
+  "reorderItemDown": "Доош зөөх",
+  "reorderItemLeft": "Зүүн тийш зөөх",
+  "reorderItemRight": "Баруун тийш зөөх",
+  "copyButtonLabel": "Хуулах",
+  "cutButtonLabel": "Таслах",
+  "lookUpButtonLabel": "Дээшээ харах",
+  "searchWebButtonLabel": "Вебээс хайх",
+  "shareButtonLabel": "Хуваалцах",
+  "pasteButtonLabel": "Буулгах",
+  "selectAllButtonLabel": "Бүгдийг сонгох"
+}
