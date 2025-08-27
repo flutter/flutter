@@ -591,7 +591,10 @@ class _ReorderableListViewState extends State<ReorderableListView> {
             itemExtent: widget.itemExtent,
             itemExtentBuilder: widget.itemExtentBuilder,
             prototypeItem: widget.prototypeItem,
-            itemCount: widget.itemCount,
+            // This is necessary because the underlying SliverReorderableList
+            // needs to know the total number of items, including separators,
+            // to calculate drag positions correctly.
+            itemCount: _hasSeparators ? 2 * widget.itemCount - 1 : widget.itemCount,
             onReorder: (int oldIndex, int newIndex) {
               if (_hasSeparators) {
                 // oldIndex will be an even index (item) because separators are not draggable.
