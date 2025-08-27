@@ -153,6 +153,8 @@ class SearchAnchor extends StatefulWidget {
     this.textInputAction,
     this.keyboardType,
     this.enabled = true,
+    this.smartDashesType,
+    this.smartQuotesType,
   });
 
   /// Create a [SearchAnchor] that has a [SearchBar] which opens a search view.
@@ -407,6 +409,12 @@ class SearchAnchor extends StatefulWidget {
   /// Defaults to true.
   final bool enabled;
 
+  /// {@macro flutter.services.TextInputConfiguration.smartDashesType}
+  final SmartDashesType? smartDashesType;
+
+  /// {@macro flutter.services.TextInputConfiguration.smartQuotesType}
+  final SmartQuotesType? smartQuotesType;
+
   @override
   State<SearchAnchor> createState() => _SearchAnchorState();
 }
@@ -498,6 +506,8 @@ class _SearchAnchorState extends State<SearchAnchor> {
       capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
       textInputAction: widget.textInputAction,
       keyboardType: widget.keyboardType,
+      smartDashesType: widget.smartDashesType,
+      smartQuotesType: widget.smartQuotesType
     );
     navigator.push(_route!);
   }
@@ -578,6 +588,8 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     required this.capturedThemes,
     this.textInputAction,
     this.keyboardType,
+    this.smartDashesType,
+    this.smartQuotesType
   });
 
   final ValueChanged<String>? viewOnChanged;
@@ -611,6 +623,8 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   final CapturedThemes capturedThemes;
   final TextInputAction? textInputAction;
   final TextInputType? keyboardType;
+  final SmartDashesType? smartDashesType;
+  final SmartQuotesType? smartQuotesType;
   CurvedAnimation? curvedAnimation;
   CurvedAnimation? viewFadeOnIntervalCurve;
   bool willDisposeSearchController = false;
@@ -800,6 +814,8 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
                 textCapitalization: textCapitalization,
                 textInputAction: textInputAction,
                 keyboardType: keyboardType,
+                smartDashesType: smartDashesType,
+                smartQuotesType: smartQuotesType,
               ),
             ),
           );
@@ -843,6 +859,8 @@ class _ViewContent extends StatefulWidget {
     required this.suggestionsBuilder,
     this.textInputAction,
     this.keyboardType,
+    this.smartDashesType,
+    this.smartQuotesType
   });
 
   final ValueChanged<String>? viewOnChanged;
@@ -874,6 +892,8 @@ class _ViewContent extends StatefulWidget {
   final SuggestionsBuilder suggestionsBuilder;
   final TextInputAction? textInputAction;
   final TextInputType? keyboardType;
+  final SmartDashesType? smartDashesType;
+  final SmartQuotesType? smartQuotesType;
 
   @override
   State<_ViewContent> createState() => _ViewContentState();
@@ -1123,6 +1143,8 @@ class _ViewContentState extends State<_ViewContent> {
                             textCapitalization: widget.textCapitalization,
                             textInputAction: widget.textInputAction,
                             keyboardType: widget.keyboardType,
+                            smartDashesType: widget.smartDashesType,
+                            smartQuotesType: widget.smartQuotesType,
                           ),
                         ),
                       ),
@@ -1209,6 +1231,8 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     EdgeInsets scrollPadding = const EdgeInsets.all(20.0),
     EditableTextContextMenuBuilder contextMenuBuilder = SearchBar._defaultContextMenuBuilder,
     super.enabled,
+    super.smartDashesType,
+    super.smartQuotesType
   }) : super(
          viewHintText: viewHintText ?? barHintText,
          headerHeight: viewHeaderHeight,
@@ -1248,6 +1272,8 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
              keyboardType: keyboardType,
              scrollPadding: scrollPadding,
              contextMenuBuilder: contextMenuBuilder,
+             smartDashesType: smartDashesType,
+             smartQuotesType: smartQuotesType,
            );
          },
        );
@@ -1374,6 +1400,8 @@ class SearchBar extends StatefulWidget {
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.readOnly = false,
+    this.smartDashesType,
+    this.smartQuotesType
   });
 
   /// Controls the text being edited in the search bar's text field.
@@ -1535,6 +1563,12 @@ class SearchBar extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.readOnly}
   final bool readOnly;
+
+  /// {@macro flutter.services.TextInputConfiguration.smartDashesType}
+  final SmartDashesType? smartDashesType;
+
+  /// {@macro flutter.services.TextInputConfiguration.smartQuotesType}
+  final SmartQuotesType? smartQuotesType;
 
   static Widget _defaultContextMenuBuilder(
     BuildContext context,
@@ -1734,6 +1768,8 @@ class _SearchBarState extends State<SearchBar> {
                             keyboardType: widget.keyboardType,
                             scrollPadding: widget.scrollPadding,
                             contextMenuBuilder: widget.contextMenuBuilder,
+                            smartDashesType: widget.smartDashesType,
+                            smartQuotesType: widget.smartQuotesType,
                           ),
                         ),
                       ),
