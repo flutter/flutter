@@ -4333,12 +4333,17 @@ void main() {
               children: <TestSemantics>[
                 TestSemantics(
                   rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.hasEnabledState,
-                    SemanticsFlag.hasExpandedState,
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+                      flags: <SemanticsFlag>[
+                        SemanticsFlag.hasEnabledState,
+                        SemanticsFlag.hasExpandedState,
+                      ],
+                      label: 'ABC',
+                      textDirection: TextDirection.ltr,
+                    ),
                   ],
-                  label: 'ABC',
-                  textDirection: TextDirection.ltr,
                 ),
               ],
             ),
@@ -4376,61 +4381,68 @@ void main() {
         expect(
           semantics,
           hasSemantics(
+            childOrder: DebugSemanticsDumpOrder.traversalOrder,
             TestSemantics.root(
               children: <TestSemantics>[
                 TestSemantics(
                   id: 1,
-                  rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+                  textDirection: TextDirection.ltr,
                   children: <TestSemantics>[
                     TestSemantics(
                       id: 2,
-                      rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 3,
-                          rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
                           flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                           children: <TestSemantics>[
                             TestSemantics(
                               id: 4,
-                              flags: <SemanticsFlag>[
-                                SemanticsFlag.isFocused,
-                                SemanticsFlag.hasEnabledState,
-                                SemanticsFlag.isEnabled,
-                                SemanticsFlag.isFocusable,
-                                SemanticsFlag.hasExpandedState,
-                                SemanticsFlag.isExpanded,
-                              ],
-                              actions: <SemanticsAction>[
-                                SemanticsAction.tap,
-                                SemanticsAction.focus,
-                              ],
-                              label: 'ABC',
-                              rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
-                            ),
-                            TestSemantics(
-                              id: 6,
-                              rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 64.0),
                               children: <TestSemantics>[
                                 TestSemantics(
                                   id: 7,
-                                  rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 48.0),
-                                  flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                                   children: <TestSemantics>[
                                     TestSemantics(
                                       id: 8,
-                                      label: 'Item 0',
-                                      rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 48.0),
-                                      flags: <SemanticsFlag>[
-                                        SemanticsFlag.hasEnabledState,
-                                        SemanticsFlag.isEnabled,
-                                        SemanticsFlag.isFocusable,
-                                      ],
-                                      actions: <SemanticsAction>[
-                                        SemanticsAction.tap,
-                                        SemanticsAction.focus,
+                                      children: <TestSemantics>[
+                                        TestSemantics(
+                                          id: 9,
+                                          flags: <SemanticsFlag>[
+                                            SemanticsFlag.hasImplicitScrolling,
+                                          ],
+                                          children: <TestSemantics>[
+                                            TestSemantics(
+                                              id: 10,
+                                              label: 'Item 0',
+                                              flags: <SemanticsFlag>[
+                                                SemanticsFlag.hasEnabledState,
+                                                SemanticsFlag.isEnabled,
+                                                SemanticsFlag.isFocusable,
+                                              ],
+                                              actions: <SemanticsAction>[
+                                                SemanticsAction.tap,
+                                                SemanticsAction.focus,
+                                              ],
+                                            ),
+                                          ],
+                                        ),
                                       ],
                                     ),
+                                  ],
+                                ),
+                                TestSemantics(
+                                  id: 5,
+                                  label: 'ABC',
+                                  flags: <SemanticsFlag>[
+                                    SemanticsFlag.isFocused,
+                                    SemanticsFlag.hasEnabledState,
+                                    SemanticsFlag.isEnabled,
+                                    SemanticsFlag.isFocusable,
+                                    SemanticsFlag.hasExpandedState,
+                                    SemanticsFlag.isExpanded,
+                                  ],
+                                  actions: <SemanticsAction>[
+                                    SemanticsAction.tap,
+                                    SemanticsAction.focus,
                                   ],
                                 ),
                               ],
@@ -4444,45 +4456,51 @@ void main() {
               ],
             ),
             ignoreTransform: true,
+            ignoreRect: true,
           ),
         );
-
         // Test collapsed state.
         await tester.tap(find.text('ABC'));
         await tester.pumpAndSettle();
+
+        expect(find.byType(MenuItemButton), findsNothing);
         expect(
           semantics,
           hasSemantics(
+            childOrder: DebugSemanticsDumpOrder.traversalOrder,
             TestSemantics.root(
               children: <TestSemantics>[
                 TestSemantics(
                   id: 1,
-                  rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+                  textDirection: TextDirection.ltr,
                   children: <TestSemantics>[
                     TestSemantics(
                       id: 2,
-                      rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 3,
-                          rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
                           flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                           children: <TestSemantics>[
                             TestSemantics(
                               id: 4,
-                              flags: <SemanticsFlag>[
-                                SemanticsFlag.hasExpandedState,
-                                SemanticsFlag.isFocused,
-                                SemanticsFlag.hasEnabledState,
-                                SemanticsFlag.isEnabled,
-                                SemanticsFlag.isFocusable,
+                              children: <TestSemantics>[
+                                TestSemantics(
+                                  id: 5,
+                                  label: 'ABC',
+                                  textDirection: TextDirection.ltr,
+                                  flags: <SemanticsFlag>[
+                                    SemanticsFlag.isFocused,
+                                    SemanticsFlag.hasEnabledState,
+                                    SemanticsFlag.isEnabled,
+                                    SemanticsFlag.isFocusable,
+                                    SemanticsFlag.hasExpandedState,
+                                  ],
+                                  actions: <SemanticsAction>[
+                                    SemanticsAction.tap,
+                                    SemanticsAction.focus,
+                                  ],
+                                ),
                               ],
-                              actions: <SemanticsAction>[
-                                SemanticsAction.tap,
-                                SemanticsAction.focus,
-                              ],
-                              label: 'ABC',
-                              rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
                             ),
                           ],
                         ),
@@ -4493,6 +4511,8 @@ void main() {
               ],
             ),
             ignoreTransform: true,
+            ignoreRect: true,
+            ignoreTraversalIdentifier: true,
           ),
         );
 
