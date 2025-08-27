@@ -308,7 +308,7 @@ class TestSemantics {
     bool ignoreTransform = false,
     bool ignoreId = false,
     bool ignoreTraversalIdentifier = false,
-    DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.inverseHitTest,
+    DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.traversalOrder,
   }) {
     bool fail(String message) {
       matchState[TestSemantics] = message;
@@ -413,7 +413,14 @@ class TestSemantics {
         'expected node id $id to have scrollIndex $scrollChildren but found scrollIndex ${nodeData.scrollChildCount}.',
       );
     }
-    final int childrenCount = node.mergeAllDescendantsIntoThisNode ? 0 : node.childrenCount;
+
+    final int childCount;
+    if (childOrder == DebugSemanticsDumpOrder.traversalOrder) {
+      childCount = node.mergeAllDescendantsIntoThisNode ? 0 : node.childrenCountInTraversalOrder;
+    } else {
+      childCount = node.mergeAllDescendantsIntoThisNode ? 0 : node.childrenCount;
+    }
+    final int childrenCount = node.mergeAllDescendantsIntoThisNode ? 0 : childCount;
     if (children.length != childrenCount) {
       return fail(
         'expected node id $id to have ${children.length} child${children.length == 1 ? "" : "ren"} but found $childrenCount.',
