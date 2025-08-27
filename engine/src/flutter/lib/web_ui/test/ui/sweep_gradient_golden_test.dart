@@ -8,8 +8,10 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:web_engine_tester/golden_tester.dart';
 
-import 'common.dart';
+import '../common/test_initialization.dart';
+import 'utils.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -19,13 +21,13 @@ const ui.Rect region = ui.Rect.fromLTRB(0, 0, 500, 250);
 
 void testMain() {
   group('SweepGradient', () {
-    setUpCanvasKitTest(withImplicitView: true);
+    setUpUnitTests(withImplicitView: true);
 
     test('is correctly rendered', () async {
-      final CkPictureRecorder recorder = CkPictureRecorder();
-      final CkCanvas canvas = recorder.beginRecording(region);
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final ui.Canvas canvas = ui.Canvas(recorder, region);
 
-      final CkGradientSweep gradient = CkGradientSweep(
+      final ui.Gradient gradient = ui.Gradient.sweep(
         const ui.Offset(250, 125),
         const <ui.Color>[
           ui.Color(0xFF4285F4),
@@ -38,18 +40,15 @@ void testMain() {
         ui.TileMode.clamp,
         -(math.pi / 2),
         math.pi * 2 - (math.pi / 2),
-        null,
       );
 
-      final CkPaint paint = CkPaint()..shader = gradient;
+      final ui.Paint paint = ui.Paint()..shader = gradient;
 
       canvas.drawRect(region, paint);
 
-      await matchPictureGolden(
-        'canvaskit_sweep_gradient.png',
-        recorder.endRecording(),
-        region: region,
-      );
+      await drawPictureUsingCurrentRenderer(recorder.endRecording());
+
+      await matchGoldenFile('ui_sweep_gradient.png', region: region);
     });
     // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
   }, skip: isSafari || isFirefox);
