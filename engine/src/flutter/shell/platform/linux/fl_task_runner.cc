@@ -18,7 +18,6 @@ struct _FlTaskRunner {
 
   guint timeout_source_id;
   GList /*<FlTaskRunnerTask>*/* pending_tasks;
-  gboolean blocking_main_thread;
 };
 
 typedef struct _FlTaskRunnerTask {
@@ -107,31 +106,22 @@ static gint64 fl_task_runner_next_task_expiration_time_locked(
 }
 
 static void fl_task_runner_tasks_did_change_locked(FlTaskRunner* self) {
-  if (self->blocking_main_thread) {
-    // Wake up blocked thread
-    g_cond_signal(&self->cond);
-  } else {
-    // Reschedule timeout
-    if (self->timeout_source_id != 0) {
-      g_source_remove(self->timeout_source_id);
-      self->timeout_source_id = 0;
-    }
-    gint64 min_time = fl_task_runner_next_task_expiration_time_locked(self);
-    if (min_time != G_MAXINT64) {
-      gint64 remaining = MAX(min_time - g_get_monotonic_time(), 0);
-      self->timeout_source_id =
-          g_timeout_add(remaining / kMillisecondsPerMicrosecond + 1,
-                        fl_task_runner_on_expired_timeout, self);
-    }
+  // Reschedule timeout
+  if (self->timeout_source_id != 0) {
+    g_source_remove(self->timeout_source_id);
+    self->timeout_source_id = 0;
+  }
+  gint64 min_time = fl_task_runner_next_task_expiration_time_locked(self);
+  if (min_time != G_MAXINT64) {
+    gint64 remaining = MAX(min_time - g_get_monotonic_time(), 0);
+    self->timeout_source_id =
+        g_timeout_add(remaining / kMillisecondsPerMicrosecond + 1,
+                      fl_task_runner_on_expired_timeout, self);
   }
 }
 
 void fl_task_runner_dispose(GObject* object) {
   FlTaskRunner* self = FL_TASK_RUNNER(object);
-
-  // this should never happen because the task runner is retained while blocking
-  // main thread
-  g_assert(!self->blocking_main_thread);
 
   g_weak_ref_clear(&self->engine);
   g_mutex_clear(&self->mutex);
@@ -174,35 +164,21 @@ void fl_task_runner_post_flutter_task(FlTaskRunner* self,
 
   self->pending_tasks = g_list_append(self->pending_tasks, runner_task);
   fl_task_runner_tasks_did_change_locked(self);
+
+  // Tasks changed, so wake up anything blocking in fl_task_runner_wait.
+  g_cond_signal(&self->cond);
 }
 
-void fl_task_runner_block_main_thread(FlTaskRunner* self) {
+void fl_task_runner_wait(FlTaskRunner* self) {
   g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->mutex);
   (void)locker;  // unused variable
 
-  g_return_if_fail(self->blocking_main_thread == FALSE);
-
-  g_object_ref(self);
-
-  self->blocking_main_thread = true;
-  while (self->blocking_main_thread) {
-    g_cond_wait_until(&self->cond, &self->mutex,
-                      fl_task_runner_next_task_expiration_time_locked(self));
-    fl_task_runner_process_expired_tasks_locked(self);
-  }
-
-  // Tasks might have changed in the meanwhile, reschedule timeout
+  g_cond_wait_until(&self->cond, &self->mutex,
+                    fl_task_runner_next_task_expiration_time_locked(self));
+  fl_task_runner_process_expired_tasks_locked(self);
   fl_task_runner_tasks_did_change_locked(self);
-
-  g_object_unref(self);
 }
 
-void fl_task_runner_release_main_thread(FlTaskRunner* self) {
-  g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->mutex);
-  (void)locker;  // unused variable
-
-  g_return_if_fail(self->blocking_main_thread == TRUE);
-
-  self->blocking_main_thread = FALSE;
+void fl_task_runner_stop_wait(FlTaskRunner* self) {
   g_cond_signal(&self->cond);
 }

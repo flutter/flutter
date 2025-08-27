@@ -451,12 +451,14 @@ static void setup_opengl(FlView* self) {
   // then we have to copy the texture via the CPU.
   gboolean shareable =
       GDK_IS_WAYLAND_DISPLAY(gtk_widget_get_display(GTK_WIDGET(self)));
-  self->compositor =
-      FL_COMPOSITOR(fl_compositor_opengl_new(self->engine, shareable));
+  self->compositor = FL_COMPOSITOR(fl_compositor_opengl_new(
+      fl_engine_get_task_runner(self->engine),
+      fl_engine_get_opengl_manager(self->engine), shareable));
 }
 
 static void setup_software(FlView* self) {
-  self->compositor = FL_COMPOSITOR(fl_compositor_software_new());
+  self->compositor = FL_COMPOSITOR(
+      fl_compositor_software_new(fl_engine_get_task_runner(self->engine)));
 }
 
 static void realize_cb(FlView* self) {
