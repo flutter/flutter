@@ -2082,7 +2082,7 @@ void main() {
         scopesRoute: true,
         children: <Matcher>[
           matchesSemantics(
-            children: [
+            children: <Matcher>[
               matchesSemantics(
                 children: <Matcher>[
                   matchesSemantics(
