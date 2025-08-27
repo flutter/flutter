@@ -4242,6 +4242,60 @@ void main() {
     variant: TargetPlatformVariant.all(),
     skip: kIsWeb, // [intended] on web the browser handles the context menu.
   );
+
+  testWidgets('smartQuotesType is properly forwarded to the inner text field', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SearchAnchor.bar(
+            smartQuotesType: SmartQuotesType.disabled,
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[
+                ListTile(
+                  title: const Text('item 0'),
+                  onTap: () {
+                    controller.closeView('item 0');
+                  },
+                ),
+              ];
+            },
+          ),
+        ),
+      ),
+    );
+
+    final TextField textField = tester.widget(find.byType(TextField));
+    expect(textField.smartQuotesType, SmartQuotesType.disabled);
+  });
+
+  testWidgets('smartDashesType is properly forwarded to the inner text field', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SearchAnchor.bar(
+            smartDashesType: SmartDashesType.disabled,
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[
+                ListTile(
+                  title: const Text('item 0'),
+                  onTap: () {
+                    controller.closeView('item 0');
+                  },
+                ),
+              ];
+            },
+          ),
+        ),
+      ),
+    );
+
+    final TextField textField = tester.widget(find.byType(TextField));
+    expect(textField.smartDashesType, SmartDashesType.disabled);
+  });
 }
 
 Future<void> checkSearchBarDefaults(

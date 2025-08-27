@@ -211,6 +211,8 @@ class SearchAnchor extends StatefulWidget {
     EdgeInsets scrollPadding,
     EditableTextContextMenuBuilder contextMenuBuilder,
     bool enabled,
+    SmartDashesType? smartDashesType,
+    SmartQuotesType? smartQuotesType
   }) = _SearchAnchorWithSearchBar;
 
   /// Whether the search view grows to fill the entire screen when the
