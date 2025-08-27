@@ -1478,7 +1478,12 @@ class ListView extends BoxScrollView {
            }
            return separatorBuilder(context, itemIndex);
          },
-         findChildIndexCallback: findChildIndexCallback,
+         findChildIndexCallback: findChildIndexCallback == null
+             ? null
+             : (Key key) {
+                 final int? itemIndex = findChildIndexCallback(key);
+                 return itemIndex == null ? null : itemIndex * 2;
+               },
          childCount: _computeActualChildCount(itemCount),
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
