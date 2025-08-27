@@ -34,5 +34,11 @@
   "shareButtonLabel": "Dijeli...",
   "clearButtonLabel": "Izbriši",
   "cancelButtonLabel": "Odustani",
-  "backButtonLabel": "Natrag"
+  "backButtonLabel": "Natrag",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

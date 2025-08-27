@@ -29,5 +29,11 @@
   "shareButtonLabel": "공유...",
   "clearButtonLabel": "삭제",
   "cancelButtonLabel": "취소",
-  "backButtonLabel": "뒤로"
+  "backButtonLabel": "뒤로",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

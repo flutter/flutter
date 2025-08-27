@@ -34,5 +34,11 @@
   "shareButtonLabel": "Дели…",
   "clearButtonLabel": "Обриши",
   "cancelButtonLabel": "Откажи",
-  "backButtonLabel": "Назад"
+  "backButtonLabel": "Назад",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

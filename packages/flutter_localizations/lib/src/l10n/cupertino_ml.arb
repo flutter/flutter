@@ -29,5 +29,11 @@
   "shareButtonLabel": "പങ്കിടുക...",
   "clearButtonLabel": "മായ്ക്കുക",
   "cancelButtonLabel": "റദ്ദാക്കുക",
-  "backButtonLabel": "മടങ്ങുക"
+  "backButtonLabel": "മടങ്ങുക",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

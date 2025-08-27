@@ -39,5 +39,11 @@
   "shareButtonLabel": "Bendrinti...",
   "clearButtonLabel": "Išvalyti",
   "cancelButtonLabel": "Atšaukti",
-  "backButtonLabel": "Atgal"
+  "backButtonLabel": "Atgal",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

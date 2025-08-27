@@ -29,5 +29,11 @@
   "shareButtonLabel": "શેર કરો…",
   "clearButtonLabel": "સાફ કરો",
   "cancelButtonLabel": "રદ કરો",
-  "backButtonLabel": "પાછળ"
+  "backButtonLabel": "પાછળ",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

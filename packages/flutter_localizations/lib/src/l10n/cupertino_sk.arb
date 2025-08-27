@@ -39,5 +39,11 @@
   "shareButtonLabel": "Zdieľať…",
   "clearButtonLabel": "Vymazať",
   "cancelButtonLabel": "Zrušiť",
-  "backButtonLabel": "Späť"
+  "backButtonLabel": "Späť",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

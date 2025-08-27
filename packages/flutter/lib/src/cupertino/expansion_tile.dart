@@ -12,6 +12,7 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'icons.dart';
 import 'list_tile.dart';
+import 'localizations.dart';
 import 'theme.dart';
 
 /// The curve of the animation used to expand or collapse the
@@ -168,12 +169,26 @@ class _CupertinoExpansionTileState extends State<CupertinoExpansionTile> {
   }
 
   Widget _buildHeader(BuildContext context, Animation<double> animation) {
-    return CupertinoListTile(
-      key: _headerKey,
-      onTap: _onHeaderTap,
-      title: widget.title,
-      trailing: _buildIcon(context, animation),
-      backgroundColorActivated: CupertinoColors.transparent,
+    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
+    final String onTapHint = _tileController.isExpanded
+        ? localizations.expansionTileExpandedTapHint
+        : localizations.expansionTileCollapsedTapHint;
+    String? semanticsHint;
+    if (MediaQuery.supportsAnnounceOf(context)) {
+      semanticsHint = _tileController.isExpanded
+          ? '${localizations.collapsedHint}\n ${localizations.expansionTileExpandedHint}'
+          : '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}';
+    }
+    return Semantics(
+      hint: semanticsHint,
+      onTapHint: onTapHint,
+      child: CupertinoListTile(
+        key: _headerKey,
+        onTap: _onHeaderTap,
+        title: widget.title,
+        trailing: _buildIcon(context, animation),
+        backgroundColorActivated: CupertinoColors.transparent,
+      ),
     );
   }
 

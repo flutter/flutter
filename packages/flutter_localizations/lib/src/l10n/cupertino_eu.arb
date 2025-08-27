@@ -29,5 +29,11 @@
   "shareButtonLabel": "Partekatu...",
   "clearButtonLabel": "Garbitu",
   "cancelButtonLabel": "Utzi",
-  "backButtonLabel": "Atzera"
+  "backButtonLabel": "Atzera",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

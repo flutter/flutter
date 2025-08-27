@@ -57,6 +57,9 @@ class CupertinoLocalizationAf extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Vee uit';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopieer';
 
   @override
@@ -103,6 +106,21 @@ class CupertinoLocalizationAf extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Kyk op';
@@ -229,6 +247,9 @@ class CupertinoLocalizationAm extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'አጽዳ';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'ቅዳ';
 
   @override
@@ -275,6 +296,21 @@ class CupertinoLocalizationAm extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'ይመልከቱ';
@@ -401,6 +437,9 @@ class CupertinoLocalizationAr extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'محو';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'نسخ';
 
   @override
@@ -447,6 +486,21 @@ class CupertinoLocalizationAr extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => r'$minute دقيقة​';
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'بحث عام';
@@ -573,6 +627,9 @@ class CupertinoLocalizationAs extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'মচক';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'প্ৰতিলিপি কৰক';
 
   @override
@@ -619,6 +676,21 @@ class CupertinoLocalizationAs extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'ওপৰলৈ চাওক';
@@ -745,6 +817,9 @@ class CupertinoLocalizationAz extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Silin';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopyalayın';
 
   @override
@@ -791,6 +866,21 @@ class CupertinoLocalizationAz extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Axtarın';
@@ -917,6 +1007,9 @@ class CupertinoLocalizationBe extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Ачысціць';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Капіраваць';
 
   @override
@@ -963,6 +1056,21 @@ class CupertinoLocalizationBe extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Знайсці';
@@ -1089,6 +1197,9 @@ class CupertinoLocalizationBg extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Изчистване';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Копиране';
 
   @override
@@ -1135,6 +1246,21 @@ class CupertinoLocalizationBg extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Look Up';
@@ -1261,6 +1387,9 @@ class CupertinoLocalizationBn extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'মুছুন';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'কপি করুন';
 
   @override
@@ -1307,6 +1436,21 @@ class CupertinoLocalizationBn extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'লুক-আপ';
@@ -1433,6 +1577,9 @@ class CupertinoLocalizationBo extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'གཙང་བཟོ།';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'བཤུས།';
 
   @override
@@ -1479,6 +1626,21 @@ class CupertinoLocalizationBo extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'འཚོལ་བ།';
@@ -1605,6 +1767,9 @@ class CupertinoLocalizationBs extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Obriši';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopiraj';
 
   @override
@@ -1651,6 +1816,21 @@ class CupertinoLocalizationBs extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Pogled nagore';
@@ -1777,6 +1957,9 @@ class CupertinoLocalizationCa extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Esborra';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Copia';
 
   @override
@@ -1823,6 +2006,21 @@ class CupertinoLocalizationCa extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Mira amunt';
@@ -1949,6 +2147,9 @@ class CupertinoLocalizationCs extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Vymazat';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopírovat';
 
   @override
@@ -1995,6 +2196,21 @@ class CupertinoLocalizationCs extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Vyhledat';
@@ -2121,6 +2337,9 @@ class CupertinoLocalizationCy extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Clirio';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Copïo';
 
   @override
@@ -2167,6 +2386,21 @@ class CupertinoLocalizationCy extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => r'$minute munud';
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Chwilio';
@@ -2293,6 +2527,9 @@ class CupertinoLocalizationDa extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Ryd';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopiér';
 
   @override
@@ -2339,6 +2576,21 @@ class CupertinoLocalizationDa extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Slå op';
@@ -2465,6 +2717,9 @@ class CupertinoLocalizationDe extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Löschen';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopieren';
 
   @override
@@ -2511,6 +2766,21 @@ class CupertinoLocalizationDe extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Nachschlagen';
@@ -2665,6 +2935,9 @@ class CupertinoLocalizationEl extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Διαγραφή';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Αντιγραφή';
 
   @override
@@ -2711,6 +2984,21 @@ class CupertinoLocalizationEl extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Look Up';
@@ -2837,6 +3125,9 @@ class CupertinoLocalizationEn extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Clear';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Copy';
 
   @override
@@ -2883,6 +3174,21 @@ class CupertinoLocalizationEn extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Look Up';
@@ -3251,6 +3557,9 @@ class CupertinoLocalizationEs extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Borrar';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Copiar';
 
   @override
@@ -3297,6 +3606,21 @@ class CupertinoLocalizationEs extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Buscador visual';
@@ -4343,6 +4667,9 @@ class CupertinoLocalizationEt extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Kustutamine';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopeeri';
 
   @override
@@ -4389,6 +4716,21 @@ class CupertinoLocalizationEt extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Look Up';
@@ -4515,6 +4857,9 @@ class CupertinoLocalizationEu extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Garbitu';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopiatu';
 
   @override
@@ -4561,6 +4906,21 @@ class CupertinoLocalizationEu extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Bilatu';
@@ -4687,6 +5047,9 @@ class CupertinoLocalizationFa extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'پاک کردن';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'کپی';
 
   @override
@@ -4733,6 +5096,21 @@ class CupertinoLocalizationFa extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'جستجو';
@@ -4859,6 +5237,9 @@ class CupertinoLocalizationFi extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Tyhjennä';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopioi';
 
   @override
@@ -4905,6 +5286,21 @@ class CupertinoLocalizationFi extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Hae';
@@ -5031,6 +5427,9 @@ class CupertinoLocalizationFil extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'I-clear';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopyahin';
 
   @override
@@ -5077,6 +5476,21 @@ class CupertinoLocalizationFil extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Tumingin sa Itaas';
@@ -5203,6 +5617,9 @@ class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Effacer';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Copier';
 
   @override
@@ -5249,6 +5666,21 @@ class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Recherche visuelle';
@@ -5421,6 +5853,9 @@ class CupertinoLocalizationGa extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Glan';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Cóipeáil';
 
   @override
@@ -5467,6 +5902,21 @@ class CupertinoLocalizationGa extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Cuardaigh';
@@ -5593,6 +6043,9 @@ class CupertinoLocalizationGl extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Borrar';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Copiar';
 
   @override
@@ -5639,6 +6092,21 @@ class CupertinoLocalizationGl extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Mirar cara arriba';
@@ -5765,6 +6233,9 @@ class CupertinoLocalizationGsw extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Löschen';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopieren';
 
   @override
@@ -5811,6 +6282,21 @@ class CupertinoLocalizationGsw extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Nachschlagen';
@@ -5937,6 +6423,9 @@ class CupertinoLocalizationGu extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'સાફ કરો';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'કૉપિ કરો';
 
   @override
@@ -5983,6 +6472,21 @@ class CupertinoLocalizationGu extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'શોધો';
@@ -6109,6 +6613,9 @@ class CupertinoLocalizationHe extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'ניקוי';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'העתקה';
 
   @override
@@ -6155,6 +6662,21 @@ class CupertinoLocalizationHe extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'חיפוש';
@@ -6281,6 +6803,9 @@ class CupertinoLocalizationHi extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'मिटाएं';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'कॉपी करें';
 
   @override
@@ -6327,6 +6852,21 @@ class CupertinoLocalizationHi extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'लुक अप बटन';
@@ -6453,6 +6993,9 @@ class CupertinoLocalizationHr extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Izbriši';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopiraj';
 
   @override
@@ -6499,6 +7042,21 @@ class CupertinoLocalizationHr extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Pogled prema gore';
@@ -6625,6 +7183,9 @@ class CupertinoLocalizationHu extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Törlés';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Másolás';
 
   @override
@@ -6671,6 +7232,21 @@ class CupertinoLocalizationHu extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Felfelé nézés';
@@ -6797,6 +7373,9 @@ class CupertinoLocalizationHy extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Մաքրել';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Պատճենել';
 
   @override
@@ -6843,6 +7422,21 @@ class CupertinoLocalizationHy extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Փնտրել';
@@ -6969,6 +7563,9 @@ class CupertinoLocalizationId extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Hapus';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Salin';
 
   @override
@@ -7015,6 +7612,21 @@ class CupertinoLocalizationId extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Cari';
@@ -7141,6 +7753,9 @@ class CupertinoLocalizationIs extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Hreinsa';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Afrita';
 
   @override
@@ -7187,6 +7802,21 @@ class CupertinoLocalizationIs extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Look Up';
@@ -7313,6 +7943,9 @@ class CupertinoLocalizationIt extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Cancella';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Copia';
 
   @override
@@ -7359,6 +7992,21 @@ class CupertinoLocalizationIt extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Cerca';
@@ -7485,6 +8133,9 @@ class CupertinoLocalizationJa extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => '消去';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'コピー';
 
   @override
@@ -7531,6 +8182,21 @@ class CupertinoLocalizationJa extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => '調べる';
@@ -7657,6 +8323,9 @@ class CupertinoLocalizationKa extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'გასუფთავება';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'კოპირება';
 
   @override
@@ -7703,6 +8372,21 @@ class CupertinoLocalizationKa extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'აიხედეთ ზემოთ';
@@ -7829,6 +8513,9 @@ class CupertinoLocalizationKk extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Өшіру';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Көшіру';
 
   @override
@@ -7875,6 +8562,21 @@ class CupertinoLocalizationKk extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Іздеу';
@@ -8001,6 +8703,9 @@ class CupertinoLocalizationKm extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'សម្អាត';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'ចម្លង';
 
   @override
@@ -8047,6 +8752,21 @@ class CupertinoLocalizationKm extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'រកមើល';
@@ -8173,6 +8893,9 @@ class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => '\u{ca4}\u{cc6}\u{cb0}\u{cb5}\u{cc1}\u{c97}\u{cca}\u{cb3}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => '\u{c95}\u{cbe}\u{caa}\u{cbf}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
@@ -8219,6 +8942,21 @@ class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => '\u{cae}\u{cc7}\u{cb2}\u{cc6}\u{20}\u{ca8}\u{ccb}\u{ca1}\u{cbf}';
@@ -8345,6 +9083,9 @@ class CupertinoLocalizationKo extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => '삭제';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => '복사';
 
   @override
@@ -8391,6 +9132,21 @@ class CupertinoLocalizationKo extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => '찾기';
@@ -8517,6 +9273,9 @@ class CupertinoLocalizationKy extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Тазалоо';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Көчүрүү';
 
   @override
@@ -8563,6 +9322,21 @@ class CupertinoLocalizationKy extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Издөө';
@@ -8689,6 +9463,9 @@ class CupertinoLocalizationLo extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'ລຶບລ້າງ';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'ສຳເນົາ';
 
   @override
@@ -8735,6 +9512,21 @@ class CupertinoLocalizationLo extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'ຊອກຫາຂໍ້ມູນ';
@@ -8861,6 +9653,9 @@ class CupertinoLocalizationLt extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Išvalyti';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopijuoti';
 
   @override
@@ -8907,6 +9702,21 @@ class CupertinoLocalizationLt extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Ieškoti';
@@ -9033,6 +9843,9 @@ class CupertinoLocalizationLv extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Notīrīt';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopēt';
 
   @override
@@ -9079,6 +9892,21 @@ class CupertinoLocalizationLv extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => r'$minute minūtes';
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Meklēt';
@@ -9205,6 +10033,9 @@ class CupertinoLocalizationMk extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Избриши';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Копирај';
 
   @override
@@ -9251,6 +10082,21 @@ class CupertinoLocalizationMk extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Погледнете нагоре';
@@ -9377,6 +10223,9 @@ class CupertinoLocalizationMl extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'മായ്ക്കുക';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'പകർത്തുക';
 
   @override
@@ -9423,6 +10272,21 @@ class CupertinoLocalizationMl extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'മുകളിലേക്ക് നോക്കുക';
@@ -9549,6 +10413,9 @@ class CupertinoLocalizationMn extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Арилгах';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Хуулах';
 
   @override
@@ -9595,6 +10462,21 @@ class CupertinoLocalizationMn extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Дээшээ харах';
@@ -9721,6 +10603,9 @@ class CupertinoLocalizationMr extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'साफ करा';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'कॉपी करा';
 
   @override
@@ -9767,6 +10652,21 @@ class CupertinoLocalizationMr extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'शोध घ्या';
@@ -9893,6 +10793,9 @@ class CupertinoLocalizationMs extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Kosongkan';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Salin';
 
   @override
@@ -9939,6 +10842,21 @@ class CupertinoLocalizationMs extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Lihat ke Atas';
@@ -10065,6 +10983,9 @@ class CupertinoLocalizationMy extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'ဖယ်ရှားရန်';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'မိတ္တူကူးရန်';
 
   @override
@@ -10111,6 +11032,21 @@ class CupertinoLocalizationMy extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'အပေါ်ကြည့်ရန်';
@@ -10237,6 +11173,9 @@ class CupertinoLocalizationNb extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Slett';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopiér';
 
   @override
@@ -10283,6 +11222,21 @@ class CupertinoLocalizationNb extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Slå opp';
@@ -10409,6 +11363,9 @@ class CupertinoLocalizationNe extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'हटाउनुहोस्';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'कपी गर्नुहोस्';
 
   @override
@@ -10455,6 +11412,21 @@ class CupertinoLocalizationNe extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'माथितिर हेर्नुहोस्';
@@ -10581,6 +11553,9 @@ class CupertinoLocalizationNl extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Wissen';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopiëren';
 
   @override
@@ -10627,6 +11602,21 @@ class CupertinoLocalizationNl extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Opzoeken';
@@ -10753,6 +11743,9 @@ class CupertinoLocalizationNo extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Slett';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopiér';
 
   @override
@@ -10799,6 +11792,21 @@ class CupertinoLocalizationNo extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Slå opp';
@@ -10925,6 +11933,9 @@ class CupertinoLocalizationOr extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'ଖାଲି କରନ୍ତୁ';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'କପି କରନ୍ତୁ';
 
   @override
@@ -10971,6 +11982,21 @@ class CupertinoLocalizationOr extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'ଉପରକୁ ଦେଖନ୍ତୁ';
@@ -11097,6 +12123,9 @@ class CupertinoLocalizationPa extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'ਕਲੀਅਰ ਕਰੋ';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'ਕਾਪੀ ਕਰੋ';
 
   @override
@@ -11143,6 +12172,21 @@ class CupertinoLocalizationPa extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'ਖੋਜੋ';
@@ -11269,6 +12313,9 @@ class CupertinoLocalizationPl extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Wyczyść';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopiuj';
 
   @override
@@ -11315,6 +12362,21 @@ class CupertinoLocalizationPl extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Sprawdź';
@@ -11441,6 +12503,9 @@ class CupertinoLocalizationPt extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Limpar';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Copiar';
 
   @override
@@ -11487,6 +12552,21 @@ class CupertinoLocalizationPt extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Pesquisar';
@@ -11665,6 +12745,9 @@ class CupertinoLocalizationRo extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Ștergeți';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Copiați';
 
   @override
@@ -11711,6 +12794,21 @@ class CupertinoLocalizationRo extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Privire în sus';
@@ -11837,6 +12935,9 @@ class CupertinoLocalizationRu extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Очистить';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Копировать';
 
   @override
@@ -11883,6 +12984,21 @@ class CupertinoLocalizationRu extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Найти';
@@ -12009,6 +13125,9 @@ class CupertinoLocalizationSi extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'හිස් කරන්න';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'පිටපත් කරන්න';
 
   @override
@@ -12055,6 +13174,21 @@ class CupertinoLocalizationSi extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'උඩ බලන්න';
@@ -12181,6 +13315,9 @@ class CupertinoLocalizationSk extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Vymazať';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopírovať';
 
   @override
@@ -12227,6 +13364,21 @@ class CupertinoLocalizationSk extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Pohľad nahor';
@@ -12353,6 +13505,9 @@ class CupertinoLocalizationSl extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Počisti';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopiraj';
 
   @override
@@ -12399,6 +13554,21 @@ class CupertinoLocalizationSl extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Pogled gor';
@@ -12525,6 +13695,9 @@ class CupertinoLocalizationSq extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Pastro';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopjo';
 
   @override
@@ -12571,6 +13744,21 @@ class CupertinoLocalizationSq extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Kërko';
@@ -12697,6 +13885,9 @@ class CupertinoLocalizationSr extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Обриши';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Копирај';
 
   @override
@@ -12743,6 +13934,21 @@ class CupertinoLocalizationSr extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Поглед нагоре';
@@ -13009,6 +14215,9 @@ class CupertinoLocalizationSv extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Rensa';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopiera';
 
   @override
@@ -13055,6 +14264,21 @@ class CupertinoLocalizationSv extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Titta upp';
@@ -13181,6 +14405,9 @@ class CupertinoLocalizationSw extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Futa';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Nakili';
 
   @override
@@ -13227,6 +14454,21 @@ class CupertinoLocalizationSw extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Tafuta';
@@ -13353,6 +14595,9 @@ class CupertinoLocalizationTa extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'அழி';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'நகலெடு';
 
   @override
@@ -13399,6 +14644,21 @@ class CupertinoLocalizationTa extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'தேடு';
@@ -13525,6 +14785,9 @@ class CupertinoLocalizationTe extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'క్లియర్ చేయండి';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'కాపీ చేయి';
 
   @override
@@ -13571,6 +14834,21 @@ class CupertinoLocalizationTe extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'వెతకండి';
@@ -13697,6 +14975,9 @@ class CupertinoLocalizationTh extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'ล้าง';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'คัดลอก';
 
   @override
@@ -13743,6 +15024,21 @@ class CupertinoLocalizationTh extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'ค้นหา';
@@ -13869,6 +15165,9 @@ class CupertinoLocalizationTl extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'I-clear';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopyahin';
 
   @override
@@ -13915,6 +15214,21 @@ class CupertinoLocalizationTl extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Tumingin sa Itaas';
@@ -14041,6 +15355,9 @@ class CupertinoLocalizationTr extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Temizle';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopyala';
 
   @override
@@ -14087,6 +15404,21 @@ class CupertinoLocalizationTr extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Ara';
@@ -14213,6 +15545,9 @@ class CupertinoLocalizationUg extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'تازىلاش';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'كۆچۈرۈش';
 
   @override
@@ -14259,6 +15594,21 @@ class CupertinoLocalizationUg extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'ئىزدەش';
@@ -14385,6 +15735,9 @@ class CupertinoLocalizationUk extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Очистити';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Копіювати';
 
   @override
@@ -14431,6 +15784,21 @@ class CupertinoLocalizationUk extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Шукати';
@@ -14557,6 +15925,9 @@ class CupertinoLocalizationUr extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'صاف کریں';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'کاپی کریں';
 
   @override
@@ -14603,6 +15974,21 @@ class CupertinoLocalizationUr extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'تفصیل دیکھیں';
@@ -14729,6 +16115,9 @@ class CupertinoLocalizationUz extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Tozalash';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Nusxa olish';
 
   @override
@@ -14775,6 +16164,21 @@ class CupertinoLocalizationUz extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Tepaga qarang';
@@ -14901,6 +16305,9 @@ class CupertinoLocalizationVi extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Xoá';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Sao chép';
 
   @override
@@ -14947,6 +16354,21 @@ class CupertinoLocalizationVi extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Tra cứu';
@@ -15073,6 +16495,9 @@ class CupertinoLocalizationZh extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => '清除';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => '复制';
 
   @override
@@ -15119,6 +16544,21 @@ class CupertinoLocalizationZh extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => '查询';
@@ -15417,6 +16857,9 @@ class CupertinoLocalizationZu extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => 'Sula';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopisha';
 
   @override
@@ -15463,6 +16906,21 @@ class CupertinoLocalizationZu extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Bheka Phezulu';
