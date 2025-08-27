@@ -302,7 +302,12 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
              }
              return widget;
            },
-           findChildIndexCallback: findChildIndexCallback,
+           findChildIndexCallback: findChildIndexCallback == null
+               ? null
+               : (Key key) {
+                   final int? itemIndex = findChildIndexCallback(key);
+                   return itemIndex == null ? null : itemIndex * 2;
+                 },
            childCount: itemCount == null ? null : math.max(0, itemCount * 2 - 1),
            addAutomaticKeepAlives: addAutomaticKeepAlives,
            addRepaintBoundaries: addRepaintBoundaries,
