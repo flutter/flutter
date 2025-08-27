@@ -421,7 +421,9 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
       child: _RenderTheaterMarker(
         theater: _theater,
         overlayEntryWidgetState: this,
-        child: widget.entry.builder(context),
+        // Use a Builder so that the `widget.entry.builder` can have access to
+        // _RenderTheaterMarker.of
+        child: Builder(builder: widget.entry.builder),
       ),
     );
   }
@@ -540,10 +542,6 @@ class Overlay extends StatefulWidget {
   /// If `rootOverlay` is set to true, the state from the furthest instance of
   /// this class is given instead. Useful for installing overlay entries above
   /// all subsequent instances of [Overlay].
-  ///
-  /// This method registers dependency on the Overlay element. The widget
-  /// associated with the given context rebuilds if it's reparented to a
-  /// different Overlay.
   /// {@endtemplate}
   ///
   /// See also:
@@ -611,20 +609,22 @@ class Overlay extends StatefulWidget {
   ///    and throws if an [Overlay] is not found.
   static OverlayState? maybeOf(BuildContext context, {bool rootOverlay = false}) {
     InheritedElement? element =
-        LookupBoundary.getElementForInheritedWidgetOfExactType<_OverlayScope>(context);
+        LookupBoundary.getElementForInheritedWidgetOfExactType<_RenderTheaterMarker>(context);
     if (rootOverlay) {
       InheritedElement? walker = element;
       while (walker != null) {
         element = walker;
         walker!.visitAncestorElements((Element ancestor) {
-          walker = LookupBoundary.getElementForInheritedWidgetOfExactType<_OverlayScope>(ancestor);
+          walker = LookupBoundary.getElementForInheritedWidgetOfExactType<_RenderTheaterMarker>(
+            ancestor,
+          );
           return false;
         });
         assert(element != walker); // can only happen if Overlay element is the root.
       }
     }
     if (element != null) {
-      return (element.widget as _OverlayScope).state;
+      return (element.widget as _RenderTheaterMarker).overlayEntryWidgetState.widget.overlayState;
     }
 
     return null;
@@ -900,13 +900,10 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
         );
       }
     }
-    return _OverlayScope(
-      state: this,
-      child: _Theater(
-        skipCount: children.length - onstageCount,
-        clipBehavior: widget.clipBehavior,
-        children: children.reversed.toList(growable: false),
-      ),
+    return _Theater(
+      skipCount: children.length - onstageCount,
+      clipBehavior: widget.clipBehavior,
+      children: children.reversed.toList(growable: false),
     );
   }
 
@@ -956,16 +953,6 @@ class _WrappingOverlayState extends State<_WrappingOverlay> {
   @override
   Widget build(BuildContext context) {
     return Overlay(clipBehavior: widget.clipBehavior, initialEntries: <OverlayEntry>[_entry]);
-  }
-}
-
-class _OverlayScope extends InheritedWidget {
-  const _OverlayScope({required this.state, required super.child});
-  final OverlayState state;
-
-  @override
-  bool updateShouldNotify(covariant _OverlayScope oldWidget) {
-    return state != oldWidget.state;
   }
 }
 
