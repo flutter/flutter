@@ -2778,7 +2778,7 @@ class _MatchesSemanticsData extends Matcher {
     if (maxValueLength != null && maxValueLength != data.maxValueLength) {
       return failWithDescription(matchState, 'maxValueLength was: ${data.maxValueLength}');
     }
-    if (validationResult!= null && validationResult != data.validationResult) {
+    if (validationResult != null && validationResult != data.validationResult) {
       return failWithDescription(matchState, 'validationResult was: ${data.validationResult}');
     }
     if (inputType != null && inputType != data.inputType) {
