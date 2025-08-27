@@ -904,4 +904,40 @@ Future<void> testMain() async {
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_font_variations.png', region: region);
   });
+
+  test('Draw WebParagraph multicolored background text', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFF0000), BlendMode.src);
+    final Paint blackPaint = Paint()..color = const Color(0xFF000000);
+    final Paint whitePaint = Paint()..color = const Color(0xFFFFFFFF);
+
+    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Roboto', fontSize: 20);
+    final WebTextStyle blackStyle = WebTextStyle(
+      fontFamily: 'Roboto',
+      fontSize: 20,
+      foreground: blackPaint,
+    );
+    final WebTextStyle whiteStyle = WebTextStyle(
+      foreground: blackPaint,
+      background: whitePaint,
+      fontSize: 20,
+      fontFamily: 'Roboto',
+    );
+
+    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+
+    builder.pushStyle(blackStyle);
+    builder.addText('Black on transparent ');
+    builder.pop();
+    builder.pushStyle(whiteStyle);
+    builder.addText('Black on white ');
+    builder.pop();
+
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 250));
+    paragraph.paint(canvas, Offset.zero);
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('web_paragraph_black_and_white_background.png', region: region);
+  });
 }
