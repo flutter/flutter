@@ -2837,8 +2837,12 @@ class SemanticsNode with DiagnosticableTreeMixin {
   bool get hasChildren => _children?.isNotEmpty ?? false;
   bool _dead = false;
 
-  /// The number of children this node has.
+  /// The number of children this node has in hit-test(paint) order.
   int get childrenCount => hasChildren ? _children!.length : 0;
+
+  /// The number of children this node has in traversal order.
+  int get childrenCountInTraversalOrder => _childrenCountInTraversalOrder ?? childrenCount;
+  int? _childrenCountInTraversalOrder;
 
   /// Visits the immediate children of this node.
   ///
@@ -3890,6 +3894,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   /// Builds a new list made of [_children] sorted in semantic traversal order.
   List<SemanticsNode> _childrenInTraversalOrder() {
     final List<SemanticsNode>? updatedChildren = _updateChildrenInTraversalOrder();
+    _childrenCountInTraversalOrder = updatedChildren?.length ?? childrenCount;
 
     TextDirection? inheritedTextDirection = textDirection;
     SemanticsNode? ancestor = parent;
@@ -4130,7 +4135,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
   @override
   List<DiagnosticsNode> debugDescribeChildren({
-    DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.inverseHitTest,
+    DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.traversalOrder,
   }) {
     return debugListChildrenInOrder(childOrder)
         .map<DiagnosticsNode>(

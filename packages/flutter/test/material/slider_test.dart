@@ -1565,7 +1565,7 @@ void main() {
                         flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                         children: <TestSemantics>[
                           TestSemantics(
-                            id: 5,
+                            id: 6,
                             flags: <SemanticsFlag>[
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isSlider,
