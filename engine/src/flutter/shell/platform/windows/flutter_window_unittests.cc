@@ -145,7 +145,7 @@ TEST_F(FlutterWindowTest, OnCursorRectUpdatedRegularDPI) {
   MockFlutterWindow win32window;
   EXPECT_CALL(win32window, GetDpiScale()).WillOnce(Return(1.0));
 
-  fml::Rect cursor_rect(Point(10, 20), Size(30, 40));
+  fml::Rect cursor_rect(fml::Point(10, 20), fml::Size(30, 40));
   EXPECT_CALL(win32window, UpdateCursorRect(cursor_rect)).Times(1);
 
   win32window.OnCursorRectUpdated(cursor_rect);
@@ -158,10 +158,10 @@ TEST_F(FlutterWindowTest, OnCursorRectUpdatedHighDPI) {
   MockFlutterWindow win32window;
   EXPECT_CALL(win32window, GetDpiScale()).WillOnce(Return(1.5));
 
-  fml::Rect expected_cursor_rect(Point(15, 30), Size(45, 60));
+  fml::Rect expected_cursor_rect(fml::Point(15, 30), fml::Size(45, 60));
   EXPECT_CALL(win32window, UpdateCursorRect(expected_cursor_rect)).Times(1);
 
-  fml::Rect cursor_rect(Point(10, 20), Size(30, 40));
+  fml::Rect cursor_rect(fml::Point(10, 20), fml::Size(30, 40));
   win32window.OnCursorRectUpdated(cursor_rect);
 }
 
