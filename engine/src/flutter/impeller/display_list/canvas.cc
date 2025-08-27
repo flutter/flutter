@@ -2116,4 +2116,24 @@ void Canvas::EndReplay() {
   Initialize(initial_cull_rect_);
 }
 
+LazyRenderingConfig::LazyRenderingConfig(
+    ContentContext& renderer,
+    std::unique_ptr<EntityPassTarget> p_entity_pass_target)
+    : entity_pass_target_(std::move(p_entity_pass_target)) {
+  inline_pass_context_ =
+      std::make_unique<InlinePassContext>(renderer, *entity_pass_target_);
+}
+
+bool LazyRenderingConfig::IsApplyingClearColor() const {
+  return !inline_pass_context_->IsActive();
+}
+
+EntityPassTarget* LazyRenderingConfig::GetEntityPassTarget() const {
+  return entity_pass_target_.get();
+}
+
+InlinePassContext* LazyRenderingConfig::GetInlinePassContext() const {
+  return inline_pass_context_.get();
+}
+
 }  // namespace impeller

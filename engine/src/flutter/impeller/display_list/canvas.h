@@ -99,26 +99,16 @@ enum class ContentBoundsPromise {
 class LazyRenderingConfig {
  public:
   LazyRenderingConfig(ContentContext& renderer,
-                      std::unique_ptr<EntityPassTarget> p_entity_pass_target)
-      : entity_pass_target_(std::move(p_entity_pass_target)) {
-    inline_pass_context_ =
-        std::make_unique<InlinePassContext>(renderer, *entity_pass_target_);
-  }
+                      std::unique_ptr<EntityPassTarget> p_entity_pass_target);
 
   LazyRenderingConfig(LazyRenderingConfig&&) = default;
 
   /// Whether or not the clear color texture can still be updated.
-  bool IsApplyingClearColor() const {
-    return !inline_pass_context_->IsActive();
-  }
+  bool IsApplyingClearColor() const;
 
-  EntityPassTarget* GetEntityPassTarget() const {
-    return entity_pass_target_.get();
-  }
+  EntityPassTarget* GetEntityPassTarget() const;
 
-  InlinePassContext* GetInlinePassContext() const {
-    return inline_pass_context_.get();
-  }
+  InlinePassContext* GetInlinePassContext() const;
 
  private:
   std::unique_ptr<EntityPassTarget> entity_pass_target_;
