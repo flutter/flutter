@@ -70,9 +70,9 @@ class CreateCommand extends FlutterCommand with CreateBase {
       defaultsTo: 'swift',
       allowed: <String>['objc', 'swift'],
       help:
-          '(deprecated) The language to use for iOS-specific code, either Swift (recommended) or Objective-C (legacy). '
-          'Only supported for "--template=plugin". '
-          'This command will be removed in a future version of Flutter. Swift is now the default language for iOS plugins.',
+          '(deprecated) This option is deprecated and no longer has any effect. '
+          'Swift is always used for iOS-specific code in plugins. '
+          'This flag will be removed in a future version of Flutter.',
       hide: !verboseHelp,
     );
     argParser.addOption(
@@ -164,7 +164,7 @@ class CreateCommand extends FlutterCommand with CreateBase {
     commandHasTerminal: hasTerminal,
     createProjectType: stringArg('template'),
     createAndroidLanguage: stringArg('android-language'),
-    createIosLanguage: stringArg('ios-language'),
+    // Note: createIosLanguage removed since ios-language is deprecated and always 'swift'
   );
 
   // Lazy-initialize the net utilities with values from the context.
@@ -335,21 +335,11 @@ class CreateCommand extends FlutterCommand with CreateBase {
         exitCode: 2,
       );
     } else if (argResults!.wasParsed('ios-language')) {
-      if (generateMethodChannelsPlugin) {
-        globals.printWarning(
-          'The "ios-language" option is deprecated and will be removed in a future Flutter release.',
-        );
-        if (stringArg('ios-language') == 'objc') {
-          globals.printWarning(
-            'Please comment in https://github.com/flutter/flutter/issues/169683 describing your use-case for using Objective-C instead of Swift.',
-          );
-        }
-      } else {
-        throwToolExit(
-          'The "ios-language" option is only supported for "--template=plugin".',
-          exitCode: 2,
-        );
-      }
+      globals.printWarning(
+        'The "--ios-language" option is deprecated and no longer has any effect. '
+        'Swift is always used for iOS-specific code in plugins. '
+        'This flag will be removed in a future version of Flutter.',
+      );
     }
 
     final String organization = await getOrganization();
@@ -426,7 +416,7 @@ class CreateCommand extends FlutterCommand with CreateBase {
       withFfiPackage: generateFfiPackage,
       withEmptyMain: emptyArgument,
       androidLanguage: stringArg('android-language'),
-      iosLanguage: stringArg('ios-language'),
+      iosLanguage: 'swift', // Always Swift since ios-language is deprecated
       iosDevelopmentTeam: developmentTeam,
       ios: includeIos,
       android: includeAndroid,

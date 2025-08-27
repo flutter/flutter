@@ -222,32 +222,6 @@ void main() {
     );
 
     testUsingContext(
-      'set iOS host language type as usage value',
-      () => testbed.run(() async {
-        final command = CreateCommand();
-        final CommandRunner<void> runner = createTestCommandRunner(command);
-
-        await runner.run(<String>['create', '--no-pub', '--template=plugin', 'testy']);
-        expect(
-          (await command.unifiedAnalyticsUsageValues('create')).eventData['createIosLanguage'],
-          'swift',
-        );
-
-        await runner.run(<String>[
-          'create',
-          '--no-pub',
-          '--template=plugin',
-          'testy',
-        ]);
-        expect(
-          (await command.unifiedAnalyticsUsageValues('create')).eventData['createIosLanguage'],
-          'swift',
-        );
-      }),
-      overrides: <Type, Generator>{Java: () => FakeJava()},
-    );
-
-    testUsingContext(
       'set Android host language type as usage value',
       () => testbed.run(() async {
         final command = CreateCommand();
