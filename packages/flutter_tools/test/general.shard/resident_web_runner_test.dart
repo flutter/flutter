@@ -27,7 +27,6 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/isolated/resident_web_runner.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
@@ -368,7 +367,6 @@ name: my_app
         outputPreferences: OutputPreferences.test(),
         analytics: globals.analytics,
         systemClock: globals.systemClock,
-        devtoolsHandler: createNoOpHandler,
       );
 
       expect(await residentWebRunner.run(), 0);
@@ -398,7 +396,6 @@ name: my_app
         outputPreferences: OutputPreferences.test(),
         analytics: globals.analytics,
         systemClock: globals.systemClock,
-        devtoolsHandler: createNoOpHandler,
       );
 
       expect(await residentWebRunner.run(), 0);
@@ -428,10 +425,7 @@ name: my_app
         outputPreferences: OutputPreferences.test(),
         analytics: globals.analytics,
         systemClock: globals.systemClock,
-        devtoolsHandler: createNoOpHandler,
       );
-
-      mockDevice.dds = DartDevelopmentService(logger: logger);
 
       expect(mockDevice.isRunning, false);
       final connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -469,10 +463,7 @@ name: my_app
         outputPreferences: OutputPreferences.test(),
         analytics: globals.analytics,
         systemClock: globals.systemClock,
-        devtoolsHandler: createNoOpHandler,
       );
-
-      mockDevice.dds = DartDevelopmentService(logger: logger);
 
       expect(mockDevice.isRunning, false);
       final connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -692,7 +683,6 @@ name: my_app
         outputPreferences: OutputPreferences.test(),
         analytics: globals.analytics,
         systemClock: globals.systemClock,
-        devtoolsHandler: createNoOpHandler,
       );
       fakeVmServiceHost = FakeVmServiceHost(requests: kStartPausedAndAttachExpectations.toList());
       setupMocks();
@@ -1445,7 +1435,6 @@ name: my_app
     'cleanup of resources is safe to call multiple times',
     () async {
       final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
-      mockDevice.dds = DartDevelopmentService(logger: test_fakes.FakeLogger());
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[...kAttachExpectations],
       );
@@ -1565,7 +1554,6 @@ name: my_app
         outputPreferences: OutputPreferences.test(),
         analytics: globals.analytics,
         systemClock: globals.systemClock,
-        devtoolsHandler: createNoOpHandler,
       );
 
       final connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -1611,7 +1599,6 @@ name: my_app
         outputPreferences: OutputPreferences.test(),
         analytics: globals.analytics,
         systemClock: globals.systemClock,
-        devtoolsHandler: createNoOpHandler,
       );
 
       final connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -1654,7 +1641,6 @@ name: my_app
         outputPreferences: OutputPreferences.test(),
         analytics: globals.analytics,
         systemClock: globals.systemClock,
-        devtoolsHandler: createNoOpHandler,
       );
 
       // Create necessary files.
@@ -1933,7 +1919,6 @@ ResidentRunner setUpResidentRunner(
     terminal: Terminal.test(),
     platform: FakePlatform(),
     outputPreferences: OutputPreferences.test(),
-    devtoolsHandler: createNoOpHandler,
   );
 }
 
@@ -1954,7 +1939,7 @@ class FakeDevice extends Fake implements Device {
   Future<String> get sdkNameAndVersion async => 'SDK Name and Version';
 
   @override
-  late DartDevelopmentService dds;
+  final dds = DartDevelopmentService(logger: test_fakes.FakeLogger());
 
   @override
   bool get supportsHotRestart => true;
@@ -2280,6 +2265,9 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   Future<void> updateReloadStatus(bool wasReloadSuccessful) async {}
+
+  @override
+  Future<void> handleHotRestart() async {}
 }
 
 class FakeShaderCompiler implements DevelopmentShaderCompiler {

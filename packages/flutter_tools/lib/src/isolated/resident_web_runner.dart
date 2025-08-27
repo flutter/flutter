@@ -31,7 +31,6 @@ import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
-import '../resident_devtools_handler.dart';
 import '../resident_runner.dart';
 import '../run_hot.dart';
 import '../vmservice.dart';
@@ -104,8 +103,6 @@ class ResidentWebRunner extends ResidentRunner {
     required SystemClock systemClock,
     required Analytics analytics,
     UrlTunneller? urlTunneller,
-    // TODO(bkonyi): remove when ready to serve DevTools from DDS.
-    ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _platform = platform,
@@ -118,7 +115,6 @@ class ResidentWebRunner extends ResidentRunner {
          debuggingOptions: debuggingOptions,
          stayResident: stayResident,
          machine: machine,
-         devtoolsHandler: devtoolsHandler,
          commandHelp: CommandHelp(
            logger: logger,
            terminal: terminal,
@@ -216,8 +212,6 @@ class ResidentWebRunner extends ResidentRunner {
     if (_exited) {
       return;
     }
-    // TODO(bkonyi): remove when ready to serve DevTools from DDS.
-    await residentDevtoolsHandler!.shutdown();
     await _stdOutSub?.cancel();
     await _stdErrSub?.cancel();
     await _serviceSub?.cancel();
@@ -555,7 +549,9 @@ class ResidentWebRunner extends ResidentRunner {
     _logger.printStatus('${fullRestart ? 'Restarted' : 'Reloaded'} application in $elapsedMS.');
 
     if (fullRestart) {
-      unawaited(residentDevtoolsHandler!.hotRestart(flutterDevices));
+      for (final FlutterDevice? device in flutterDevices) {
+        unawaited(device?.handleHotRestart());
+      }
     }
 
     // Don't track restart times for dart2js builds or web-server devices.
@@ -869,16 +865,6 @@ class ResidentWebRunner extends ResidentRunner {
       );
     } else {
       connectionInfoCompleter?.complete(DebugConnectionInfo());
-    }
-    // TODO(bkonyi): remove when ready to serve DevTools from DDS.
-    if (debuggingOptions.enableDevTools) {
-      // The method below is guaranteed never to return a failing future.
-      unawaited(
-        residentDevtoolsHandler!.serveAndAnnounceDevTools(
-          devToolsServerAddress: debuggingOptions.devToolsServerAddress,
-          flutterDevices: flutterDevices,
-        ),
-      );
     }
 
     appStartedCompleter?.complete();
