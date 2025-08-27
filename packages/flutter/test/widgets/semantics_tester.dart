@@ -414,13 +414,13 @@ class TestSemantics {
       );
     }
 
-    final int childCount;
+    final int childrenCount;
     if (childOrder == DebugSemanticsDumpOrder.traversalOrder) {
-      childCount = node.mergeAllDescendantsIntoThisNode ? 0 : node.childrenCountInTraversalOrder;
+      childrenCount = node.mergeAllDescendantsIntoThisNode ? 0 : node.childrenCountInTraversalOrder;
     } else {
-      childCount = node.mergeAllDescendantsIntoThisNode ? 0 : node.childrenCount;
+      childrenCount = node.mergeAllDescendantsIntoThisNode ? 0 : node.childrenCount;
     }
-    final int childrenCount = node.mergeAllDescendantsIntoThisNode ? 0 : childCount;
+
     if (children.length != childrenCount) {
       return fail(
         'expected node id $id to have ${children.length} child${children.length == 1 ? "" : "ren"} but found $childrenCount.',
@@ -1037,7 +1037,7 @@ Matcher hasSemantics(
   bool ignoreTransform = false,
   bool ignoreId = false,
   bool ignoreTraversalIdentifier = false,
-  DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.traversalOrder,
+  DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.inverseHitTest,
 }) {
   return _HasSemantics(
     semantics,
