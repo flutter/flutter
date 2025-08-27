@@ -2841,8 +2841,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   int get childrenCount => hasChildren ? _children!.length : 0;
 
   /// The number of children this node has in traversal order.
-  int get childrenCountInTraversalOrder => _childrenCountInTraversalOrder ?? childrenCount;
-  int? _childrenCountInTraversalOrder;
+  int get childrenCountInTraversalOrder => _childrenInTraversalOrder().length;
 
   /// Visits the immediate children of this node.
   ///
@@ -3739,6 +3738,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
   Int32List _childrenIdInTraversalOrder() {
     final List<SemanticsNode> sortedChildren = _childrenInTraversalOrder();
+
     final Int32List childrenInTraversalOrder = Int32List(sortedChildren.length);
     for (int i = 0; i < sortedChildren.length; i += 1) {
       childrenInTraversalOrder[i] = sortedChildren[i].id;
@@ -3777,6 +3777,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
         childrenInHitTestOrder[i] = _children![childCount - i - 1].id;
       }
     }
+
     Int32List? customSemanticsActionIds;
     if (data.customSemanticsActionIds?.isNotEmpty ?? false) {
       customSemanticsActionIds = Int32List(data.customSemanticsActionIds!.length);
@@ -3894,7 +3895,6 @@ class SemanticsNode with DiagnosticableTreeMixin {
   /// Builds a new list made of [_children] sorted in semantic traversal order.
   List<SemanticsNode> _childrenInTraversalOrder() {
     final List<SemanticsNode>? updatedChildren = _updateChildrenInTraversalOrder();
-    _childrenCountInTraversalOrder = updatedChildren?.length ?? childrenCount;
 
     TextDirection? inheritedTextDirection = textDirection;
     SemanticsNode? ancestor = parent;
