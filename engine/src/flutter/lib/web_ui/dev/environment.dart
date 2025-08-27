@@ -24,6 +24,7 @@ class Environment {
     final io.File self = io.File.fromUri(io.Platform.script);
 
     final io.Directory engineSrcDir = self.parent.parent.parent.parent.parent;
+    final io.Directory flutterRootDir = engineSrcDir.parent.parent;
     final io.Directory engineToolsDir = io.Directory(
       pathlib.join(engineSrcDir.path, 'flutter', 'tools'),
     );
@@ -52,6 +53,7 @@ class Environment {
       isMacosArm: isMacosArm,
       webUiRootDir: webUiRootDir,
       engineSrcDir: engineSrcDir,
+      flutterRootDir: flutterRootDir,
       engineToolsDir: engineToolsDir,
       outDir: outDir,
       wasmReleaseOutDir: wasmReleaseOutDir,
@@ -67,6 +69,7 @@ class Environment {
     required this.isMacosArm,
     required this.webUiRootDir,
     required this.engineSrcDir,
+    required this.flutterRootDir,
     required this.engineToolsDir,
     required this.outDir,
     required this.wasmReleaseOutDir,
@@ -136,6 +139,9 @@ class Environment {
     'bin',
     'dart2wasm.dart',
   );
+
+  /// Path to the root flutter directory (which itself contains `engine/src/flutter`).
+  final io.Directory flutterRootDir;
 
   /// Path to where github.com/flutter/engine is checked out inside the engine workspace.
   io.Directory get flutterDirectory => io.Directory(pathlib.join(engineSrcDir.path, 'flutter'));

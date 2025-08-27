@@ -416,7 +416,7 @@ void main() {
     const Color disabledColor = Color(0xff00ff00);
     const Color backgroundColor = Color(0xff0000ff);
     const Color selectedColor = Color(0xffff0000);
-    final MaterialStateProperty<Color?> color = MaterialStateProperty.resolveWith((
+    final WidgetStateProperty<Color?> color = WidgetStateProperty.resolveWith((
       Set<MaterialState> states,
     ) {
       if (states.contains(MaterialState.disabled) && states.contains(MaterialState.selected)) {

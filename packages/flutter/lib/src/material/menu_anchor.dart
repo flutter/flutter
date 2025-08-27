@@ -3570,17 +3570,17 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
 
   @override
   WidgetStateProperty<Color?>? get foregroundColor {
-    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return _colors.onSurface.withOpacity(0.38);
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return _colors.onSurface;
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return _colors.onSurface;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return _colors.onSurface;
       }
       return _colors.onSurface;
@@ -3589,17 +3589,17 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
 
   @override
   WidgetStateProperty<Color?>? get iconColor {
-    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return _colors.onSurface.withOpacity(0.38);
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return _colors.onSurfaceVariant;
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return _colors.onSurfaceVariant;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return _colors.onSurfaceVariant;
       }
       return _colors.onSurfaceVariant;
@@ -3626,8 +3626,8 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
   @override
   WidgetStateProperty<MouseCursor?>? get mouseCursor {
     return WidgetStateProperty.resolveWith(
-      (Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
+      (Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
           return SystemMouseCursors.basic;
         }
         return SystemMouseCursors.click;
@@ -3638,14 +3638,14 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
   @override
   WidgetStateProperty<Color?>? get overlayColor {
     return WidgetStateProperty.resolveWith(
-      (Set<MaterialState> states) {
-        if (states.contains(MaterialState.pressed)) {
+      (Set<WidgetState> states) {
+        if (states.contains(WidgetState.pressed)) {
           return _colors.onSurface.withOpacity(0.1);
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return _colors.onSurface.withOpacity(0.08);
         }
-        if (states.contains(MaterialState.focused)) {
+        if (states.contains(WidgetState.focused)) {
           return _colors.onSurface.withOpacity(0.1);
         }
         return Colors.transparent;

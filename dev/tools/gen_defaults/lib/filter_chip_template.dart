@@ -57,18 +57,18 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
 
   @override
   WidgetStateProperty<Color?>? get color =>
-    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected) && states.contains(MaterialState.disabled)) {
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected) && states.contains(WidgetState.disabled)) {
         return _chipVariant == _ChipVariant.flat
           ? ${componentColor("$tokenGroup$flatVariant.disabled.selected.container")}
           : ${componentColor("$tokenGroup$elevatedVariant.disabled.container")};
       }
-      if (states.contains(MaterialState.disabled)) {
+      if (states.contains(WidgetState.disabled)) {
         return _chipVariant == _ChipVariant.flat
           ? ${componentColor("$tokenGroup$flatVariant.disabled.unselected.container")}
           : ${componentColor("$tokenGroup$elevatedVariant.disabled.container")};
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return _chipVariant == _ChipVariant.flat
           ? ${componentColor("$tokenGroup$flatVariant.selected.container")}
           : ${componentColor("$tokenGroup$elevatedVariant.selected.container")};
