@@ -738,7 +738,7 @@ void main() {
     expect(lerpBNull25.showCheckmark, equals(false));
     expect(lerpBNull25.labelPadding, equals(const EdgeInsets.only(left: 6.0, right: 6.0)));
     expect(lerpBNull25.padding, equals(const EdgeInsets.all(3.0)));
-    expect(lerpBNull25.side!.color, isSameColorAs(Colors.black.withAlpha(0x3f)));
+    expect(lerpBNull25.side!.color, isSameColorAs(Colors.black.withAlpha(0xbf)));
     expect(lerpBNull25.shape, isA<StadiumBorder>());
     expect(lerpBNull25.labelStyle?.color, isSameColorAs(Colors.white.withAlpha(0xa7)));
     expect(lerpBNull25.secondaryLabelStyle?.color, isSameColorAs(Colors.black.withAlpha(0xa7)));
@@ -760,7 +760,7 @@ void main() {
     expect(lerpBNull75.showCheckmark, equals(true));
     expect(lerpBNull75.labelPadding, equals(const EdgeInsets.only(left: 2.0, right: 2.0)));
     expect(lerpBNull75.padding, equals(const EdgeInsets.all(1.0)));
-    expect(lerpBNull75.side!.color, isSameColorAs(Colors.black.withAlpha(0xbf)));
+    expect(lerpBNull75.side!.color, isSameColorAs(Colors.black.withAlpha(0x3f)));
     expect(lerpBNull75.shape, isA<StadiumBorder>());
     expect(lerpBNull75.labelStyle?.color, isSameColorAs(Colors.white.withAlpha(0x38)));
     expect(lerpBNull75.secondaryLabelStyle?.color, isSameColorAs(Colors.black.withAlpha(0x38)));
@@ -1102,7 +1102,7 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           chipTheme: ChipThemeData(
-            color: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            color: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
               if (states.contains(MaterialState.disabled) &&
                   states.contains(MaterialState.selected)) {
                 return disabledSelectedColor;

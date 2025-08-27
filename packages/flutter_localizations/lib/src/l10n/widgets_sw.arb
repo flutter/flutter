@@ -11,5 +11,7 @@
   "searchWebButtonLabel": "Tafuta kwenye Wavuti",
   "shareButtonLabel": "Tuma",
   "pasteButtonLabel": "Bandika",
-  "selectAllButtonLabel": "Chagua vyote"
+  "selectAllButtonLabel": "Chagua vyote",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found"
 }

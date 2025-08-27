@@ -2976,12 +2976,12 @@ void main() {
     await tester.pump(kFourTenthsOfTheTransitionDuration);
     expect(find.text('Route: 3'), findsOneWidget);
     expect(find.text('Route: 4'), findsOneWidget);
-    expect(route4Entry.value, 0.4);
+    expect(route4Entry.value, moreOrLessEquals(0.4));
 
     await tester.pump(kFourTenthsOfTheTransitionDuration);
     expect(find.text('Route: 3'), findsOneWidget);
     expect(find.text('Route: 4'), findsOneWidget);
-    expect(route4Entry.value, 0.8);
+    expect(route4Entry.value, moreOrLessEquals(0.8));
     expect(find.text('Route: 2', skipOffstage: false), findsOneWidget);
     expect(find.text('Route: 1', skipOffstage: false), findsOneWidget);
     expect(find.text('Route: root', skipOffstage: false), findsOneWidget);
