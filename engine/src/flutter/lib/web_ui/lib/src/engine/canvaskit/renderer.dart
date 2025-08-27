@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:js_interop';
 import 'dart:math' as math;
 import 'dart:typed_data';
@@ -470,34 +469,13 @@ class CanvasKitRenderer extends Renderer {
     lineNumber: lineNumber,
   );
 
-  String _generateDebugFilename(String filePrefix) {
-    final now = DateTime.now();
-    final String y = now.year.toString().padLeft(4, '0');
-    final String mo = now.month.toString().padLeft(2, '0');
-    final String d = now.day.toString().padLeft(2, '0');
-    final String h = now.hour.toString().padLeft(2, '0');
-    final String mi = now.minute.toString().padLeft(2, '0');
-    final String s = now.second.toString().padLeft(2, '0');
-    return '$filePrefix-$y-$mo-$d-$h-$mi-$s.json';
-  }
-
-  void _dumpDebugInfo(String filePrefix, Map<String, dynamic> json) {
-    final String jsonString = const JsonEncoder.withIndent(' ').convert(json);
-    final blob = createDomBlob([jsonString], {'type': 'application/json'});
-    final url = domWindow.URL.createObjectURL(blob);
-    final element = domDocument.createElement('a');
-    element.setAttribute('href', url);
-    element.setAttribute('download', _generateDebugFilename(filePrefix));
-    element.click();
-  }
-
   @override
   void dumpDebugInfo() {
     int i = 0;
     for (final viewRasterizer in rasterizers.values) {
       final Map<String, dynamic>? debugJson = viewRasterizer.dumpDebugInfo();
       if (debugJson != null) {
-        _dumpDebugInfo('flutter-scene$i', debugJson);
+        downloadDebugInfo('flutter-scene$i', debugJson);
         i++;
       }
     }
