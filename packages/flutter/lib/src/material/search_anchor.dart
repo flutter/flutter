@@ -411,10 +411,18 @@ class SearchAnchor extends StatefulWidget {
   /// Defaults to true.
   final bool enabled;
 
-  /// {@macro flutter.services.TextInputConfiguration.smartDashesType}
+  /// Configures how smart dashes are handled in the text field
+  /// used by this [SearchAnchor].
+  ///
+  /// For example, when enabled, double hyphens (`--`) may be
+  /// automatically replaced with an em dash (`—`) on iOS.
   final SmartDashesType? smartDashesType;
 
-  /// {@macro flutter.services.TextInputConfiguration.smartQuotesType}
+  /// Configures how smart quotes are handled in the text field
+  /// used by this [SearchAnchor].
+  ///
+  /// For example, when enabled, straight quotes (`"`) may be
+  /// automatically replaced with curly quotes (`“ ”`) on iOS.
   final SmartQuotesType? smartQuotesType;
 
   @override
@@ -1566,10 +1574,18 @@ class SearchBar extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.readOnly}
   final bool readOnly;
 
-  /// {@macro flutter.services.TextInputConfiguration.smartDashesType}
+  /// Configures how smart dashes are handled in the text field
+  /// used by this [SearchAnchor].
+  ///
+  /// For example, when enabled, double hyphens (`--`) may be
+  /// automatically replaced with an em dash (`—`) on iOS.
   final SmartDashesType? smartDashesType;
 
-  /// {@macro flutter.services.TextInputConfiguration.smartQuotesType}
+  /// Configures how smart quotes are handled in the text field
+  /// used by this [SearchAnchor].
+  ///
+  /// For example, when enabled, straight quotes (`"`) may be
+  /// automatically replaced with curly quotes (`“ ”`) on iOS.
   final SmartQuotesType? smartQuotesType;
 
   static Widget _defaultContextMenuBuilder(
