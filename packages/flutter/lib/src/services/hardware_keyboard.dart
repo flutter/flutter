@@ -521,7 +521,7 @@ class HardwareKeyboard {
       if (event is KeyDownEvent) {
         assert(
           !_pressedKeys.containsKey(event.physicalKey),
-          'A  ${event.runtimeType}  is dispatched, but the state shows that the physical '
+          'A ${event.runtimeType} is dispatched, but the state shows that the physical '
           'key is already pressed. $common$event',
         );
       } else if (event is KeyRepeatEvent || event is KeyUpEvent) {
