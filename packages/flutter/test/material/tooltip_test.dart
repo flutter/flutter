@@ -2003,15 +2003,7 @@ void main() {
         ),
       ],
     );
-    expect(
-      semantics,
-      hasSemantics(
-        childOrder: DebugSemanticsDumpOrder.traversalOrder,
-        expected1,
-        ignoreTransform: true,
-        ignoreRect: true,
-      ),
-    );
+    expect(semantics, hasSemantics(expected1, ignoreTransform: true, ignoreRect: true));
 
     semantics.dispose();
   });
@@ -2062,7 +2054,6 @@ void main() {
     expect(
       semantics,
       hasSemantics(
-        childOrder: DebugSemanticsDumpOrder.traversalOrder,
         TestSemantics.root(
           children: <TestSemantics>[
             TestSemantics(
