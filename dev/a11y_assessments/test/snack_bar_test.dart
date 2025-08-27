@@ -1,7 +1,3 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 import 'package:a11y_assessments/use_cases/snack_bar.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,11 +8,12 @@ void main() {
 
   group('SnackBar Accessibility Tests', () {
     testWidgets('snack bar announces message', (WidgetTester tester) async {
-      final List<Map<dynamic, dynamic>> log = <Map<dynamic, dynamic>>[];
+      final List<Map<String, dynamic>> log = <Map<String, dynamic>>[];
 
       Future<dynamic> handleMessage(dynamic mockMessage) async {
         final Map<dynamic, dynamic> message = mockMessage as Map<dynamic, dynamic>;
-        log.add(message);
+        final Map<String, dynamic> castedMessage = Map<String, dynamic>.from(message);
+        log.add(castedMessage);
       }
 
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
