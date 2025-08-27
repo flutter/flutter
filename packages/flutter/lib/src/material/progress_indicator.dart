@@ -349,7 +349,8 @@ class LinearProgressIndicator extends ProgressIndicator {
     )
     this.year2023,
     this.controller,
-  }) : assert(minHeight == null || minHeight > 0);
+  }) : assert(minHeight == null || minHeight > 0),
+       assert(value == null || controller == null, _kValueControllerAssertion);
 
   /// {@template flutter.material.LinearProgressIndicator.trackColor}
   /// Color of the track being filled by the linear indicator.
@@ -428,25 +429,19 @@ class LinearProgressIndicator extends ProgressIndicator {
   )
   final bool? year2023;
 
-  /// ## Animation synchronization
+  /// {@macro flutter.material.ProgressIndicator.controller}
   ///
-  /// When multiple [ProgressIndicator] widgets are animating on screen
-  /// simultaneously (e.g., in a list of loading items), their uncoordinated
-  /// animations can appear visually cluttered. To address this, the animation of
-  /// an indicator can be driven by a custom [AnimationController].
+  /// See also:
   ///
-  /// This allows multiple indicators to be synchronized to a single animation
-  /// source. The most convenient way to achieve this for a group of indicators is
-  /// by providing a controller via [ProgressIndicatorTheme]. All
-  /// [ProgressIndicator] widgets within that theme's subtree will then share
-  /// the same animation, resulting in a more coordinated and visually pleasing
-  /// effect.
-  ///
-  /// Alternatively, a specific [AnimationController] can be passed directly to the
-  /// [controller] property of an individual indicator.
+  ///  * [LinearProgressIndicator.defaultAnimationDuration], default duration
+  ///    for one full cycle of the indeterminate animation.
   final AnimationController? controller;
 
-  /// The default duration for [LinearProgressIndicator] animation.
+  /// The default duration for one full cycle of the indeterminate animation.
+  ///
+  /// This duration is used when the widget creates its own [AnimationController]
+  /// because no [controller] was provided, either directly or through a
+  /// [ProgressIndicatorTheme].
   static const Duration defaultAnimationDuration = Duration(
     milliseconds: _kIndeterminateLinearDuration,
   );
@@ -699,6 +694,12 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
   }
 }
 
+const String _kValueControllerAssertion =
+    'A progress indicator cannot have both a value and a controller.\n'
+    'The "value" property is for a determinate indicator with a specific progress, '
+    'while the "controller" is for controlling the animation of an indeterminate indicator.\n'
+    'To resolve this, provide only one of the two properties.';
+
 /// A Material Design circular progress indicator, which spins to indicate that
 /// the application is busy.
 ///
@@ -735,6 +736,26 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 /// ** See code in examples/api/lib/material/progress_indicator/circular_progress_indicator.1.dart **
 /// {@end-tool}
 ///
+/// {@template flutter.material.ProgressIndicator.AnimationSynchronization}
+/// ## Animation synchronization
+///
+/// When multiple [CircularProgressIndicator] or [LinearProgressIndicator] are
+/// animating on screen simultaneously (e.g., in a list of loading items), their
+/// uncoordinated animations can appear visually cluttered. To address this, the
+/// animation of an indicator can be driven by a custom [AnimationController].
+///
+/// This allows multiple indicators to be synchronized to a single animation
+/// source. The most convenient way to achieve this for a group of indicators is
+/// by providing a controller via [ProgressIndicatorTheme] (see
+/// [ProgressIndicatorThemeData.controller]). All [CircularProgressIndicator]s
+/// or [LinearProgressIndicator]s within that theme's subtree will then share
+/// the same animation, resulting in a more coordinated and visually pleasing
+/// effect.
+///
+/// Alternatively, a specific [AnimationController] can be passed directly to the
+/// [controller] property of an individual indicator.
+/// {@endtemplate}
+///
 /// See also:
 ///
 ///  * [LinearProgressIndicator], which displays progress along a line.
@@ -766,7 +787,8 @@ class CircularProgressIndicator extends ProgressIndicator {
     this.year2023,
     this.padding,
     this.controller,
-  }) : _indicatorType = _ActivityIndicatorType.material;
+  }) : assert(value == null || controller == null, _kValueControllerAssertion),
+       _indicatorType = _ActivityIndicatorType.material;
 
   /// Creates an adaptive progress indicator that is a
   /// [CupertinoActivityIndicator] on [TargetPlatform.iOS] &
@@ -798,7 +820,8 @@ class CircularProgressIndicator extends ProgressIndicator {
     this.year2023,
     this.padding,
     this.controller,
-  }) : _indicatorType = _ActivityIndicatorType.adaptive;
+  }) : assert(value == null || controller == null, _kValueControllerAssertion),
+       _indicatorType = _ActivityIndicatorType.adaptive;
 
   final _ActivityIndicatorType _indicatorType;
 
@@ -889,22 +912,26 @@ class CircularProgressIndicator extends ProgressIndicator {
   /// padding. Otherwise, defaults to zero padding.
   final EdgeInsetsGeometry? padding;
 
-  /// ## Animation synchronization
+  /// {@template flutter.material.ProgressIndicator.controller}
+  /// An optional [AnimationController] that controls the animation of this
+  /// indeterminate progress indicator.
   ///
-  /// When multiple [ProgressIndicator] widgets are animating on screen
-  /// simultaneously (e.g., in a list of loading items), their uncoordinated
-  /// animations can appear visually cluttered. To address this, the animation of
-  /// an indicator can be driven by a custom [AnimationController].
+  /// This controller is only used when the indicator is indeterminate (i.e.,
+  /// when [value] is null). If this property is non-null, [value] must be null.
   ///
-  /// This allows multiple indicators to be synchronized to a single animation
-  /// source. The most convenient way to achieve this for a group of indicators is
-  /// by providing a controller via [ProgressIndicatorTheme]. All
-  /// [ProgressIndicator] widgets within that theme's subtree will then share
-  /// the same animation, resulting in a more coordinated and visually pleasing
-  /// effect.
+  /// The controller's value is expected to be a linear progression from 0.0 to
+  /// 1.0, which represents one full cycle of the indeterminate animation.
   ///
-  /// Alternatively, a specific [AnimationController] can be passed directly to the
-  /// [controller] property of an individual indicator.
+  /// If this controller is null (and [value] is also null), the widget will
+  /// look for a [ProgressIndicatorTheme.controller]. If that is also null, the
+  /// widget will create and manage its own internal [AnimationController] to
+  /// drive the default indeterminate animation.
+  /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///  * [CircularProgressIndicator.defaultAnimationDuration], default duration
+  ///    for one full cycle of the indeterminate animation.
   final AnimationController? controller;
 
   /// The indicator stroke is drawn fully inside of the indicator path.
@@ -926,7 +953,13 @@ class CircularProgressIndicator extends ProgressIndicator {
   /// This is a constant for use with [strokeAlign].
   static const double strokeAlignOutside = 1.0;
 
-  /// The default duration for [CircularProgressIndicator] animation.
+  /// The default duration for one full cycle of the indeterminate animation.
+  ///
+  /// During this period, the indicator completes several full rotations.
+  ///
+  /// This duration is used when the widget creates its own [AnimationController]
+  /// because no [controller] was provided, either directly or through a
+  /// [ProgressIndicatorTheme].
   static const Duration defaultAnimationDuration = Duration(
     milliseconds: _kIndeterminateCircularDuration,
   );

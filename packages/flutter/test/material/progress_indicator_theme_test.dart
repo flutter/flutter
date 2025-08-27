@@ -667,11 +667,7 @@ void main() {
 
       expect(
         find.byType(CircularProgressIndicator),
-        paints
-          ..arc(
-            startAngle: 1.5707963267948966,
-            sweepAngle: 0.001,
-          )
+        paints..arc(startAngle: 1.5707963267948966, sweepAngle: 0.001),
       );
 
       controller.value = 0.8; // Set the progress
@@ -680,11 +676,7 @@ void main() {
 
       expect(
         find.byType(CircularProgressIndicator),
-        paints
-          ..arc(
-            startAngle: 2.520489337828999,
-            sweepAngle: 4.076855234710353,
-          )
+        paints..arc(startAngle: 2.520489337828999, sweepAngle: 4.076855234710353),
       );
 
       controller.dispose();
