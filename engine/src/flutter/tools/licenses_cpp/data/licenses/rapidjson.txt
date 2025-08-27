@@ -1,3 +1,0 @@
-rapidjson
-(?s)^Tencent is pleased.*RapidJSON.*MIT License
-(?s)^Tencent is pleased.*RapidJSON.*MIT License.*OR OTHER DEALINGS IN THE SOFTWARE\.

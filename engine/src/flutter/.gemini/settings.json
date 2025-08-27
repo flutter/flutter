@@ -1,9 +1,0 @@
-{
-  "mcpServers": {
-    "engine_mcp": {
-      "command": "dart",
-      "args": ["run", "tools/mcp/bin/main.dart"],
-      "cwd": "."
-    }
-  }
-}
