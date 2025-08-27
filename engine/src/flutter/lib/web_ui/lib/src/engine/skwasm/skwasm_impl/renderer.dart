@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:ffi';
 import 'dart:js_interop';
 import 'dart:math' as math;
