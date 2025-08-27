@@ -211,6 +211,7 @@ void main() {
     expect(context.called, isFalse);
     expect(Overlay.maybeOf(context), isNull);
     expect(context.called, isTrue);
+    expect(context.dependsType, LookupBoundary);
   });
 
   testWidgets('insert top', (WidgetTester tester) async {
@@ -1966,6 +1967,8 @@ class StatefulTestState extends State<StatefulTestWidget> {
 class FakeBuildContext extends BuildContext {
   bool called = false;
 
+  Type? dependsType;
+
   @override
   bool get debugDoingBuild => throw UnimplementedError();
 
@@ -1976,7 +1979,8 @@ class FakeBuildContext extends BuildContext {
 
   @override
   T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({Object? aspect}) {
-    throw UnimplementedError();
+    dependsType = T;
+    return null;
   }
 
   @override

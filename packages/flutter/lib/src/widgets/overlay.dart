@@ -608,26 +608,11 @@ class Overlay extends StatefulWidget {
   ///  * [Overlay.of] for a similar function that returns a non-nullable result
   ///    and throws if an [Overlay] is not found.
   static OverlayState? maybeOf(BuildContext context, {bool rootOverlay = false}) {
-    InheritedElement? element =
-        LookupBoundary.getElementForInheritedWidgetOfExactType<_RenderTheaterMarker>(context);
-    if (rootOverlay) {
-      InheritedElement? walker = element;
-      while (walker != null) {
-        element = walker;
-        walker!.visitAncestorElements((Element ancestor) {
-          walker = LookupBoundary.getElementForInheritedWidgetOfExactType<_RenderTheaterMarker>(
-            ancestor,
-          );
-          return false;
-        });
-        assert(element != walker); // can only happen if Overlay element is the root.
-      }
-    }
-    if (element != null) {
-      return (element.widget as _RenderTheaterMarker).overlayEntryWidgetState.widget.overlayState;
-    }
-
-    return null;
+    return _RenderTheaterMarker.maybeOf(
+      context,
+      targetRootOverlay: rootOverlay,
+      createDependency: false,
+    )?.overlayEntryWidgetState.widget.overlayState;
   }
 
   @override
@@ -2176,18 +2161,7 @@ class _RenderTheaterMarker extends InheritedWidget {
   }
 
   static _RenderTheaterMarker of(BuildContext context, {bool targetRootOverlay = false}) {
-    final _RenderTheaterMarker? marker;
-    if (targetRootOverlay) {
-      final InheritedElement? ancestor = _rootRenderTheaterMarkerOf(
-        context.getElementForInheritedWidgetOfExactType<_RenderTheaterMarker>(),
-      );
-      assert(ancestor == null || ancestor.widget is _RenderTheaterMarker);
-      marker = ancestor != null
-          ? context.dependOnInheritedElement(ancestor) as _RenderTheaterMarker?
-          : null;
-    } else {
-      marker = context.dependOnInheritedWidgetOfExactType<_RenderTheaterMarker>();
-    }
+    final _RenderTheaterMarker? marker = maybeOf(context, targetRootOverlay: targetRootOverlay);
     if (marker != null) {
       return marker;
     }
@@ -2206,6 +2180,29 @@ class _RenderTheaterMarker extends InheritedWidget {
     ]);
   }
 
+  static _RenderTheaterMarker? maybeOf(
+    BuildContext context, {
+    bool targetRootOverlay = false,
+    bool createDependency = true,
+  }) {
+    if (targetRootOverlay) {
+      final InheritedElement? ancestor = _rootRenderTheaterMarkerOf(
+        LookupBoundary.getElementForInheritedWidgetOfExactType<_RenderTheaterMarker>(context),
+      );
+      assert(ancestor == null || ancestor.widget is _RenderTheaterMarker);
+      if (ancestor == null) {
+        return null;
+      }
+      return context.dependOnInheritedElement(ancestor) as _RenderTheaterMarker;
+    }
+
+    if (createDependency) {
+      return LookupBoundary.dependOnInheritedWidgetOfExactType<_RenderTheaterMarker>(context);
+    }
+
+    return LookupBoundary.getInheritedWidgetOfExactType<_RenderTheaterMarker>(context);
+  }
+
   static InheritedElement? _rootRenderTheaterMarkerOf(InheritedElement? theaterMarkerElement) {
     assert(theaterMarkerElement == null || theaterMarkerElement.widget is _RenderTheaterMarker);
     if (theaterMarkerElement == null) {
@@ -2213,7 +2210,9 @@ class _RenderTheaterMarker extends InheritedWidget {
     }
     InheritedElement? ancestor;
     theaterMarkerElement.visitAncestorElements((Element element) {
-      ancestor = element.getElementForInheritedWidgetOfExactType<_RenderTheaterMarker>();
+      ancestor = LookupBoundary.getElementForInheritedWidgetOfExactType<_RenderTheaterMarker>(
+        element,
+      );
       return false;
     });
     return ancestor == null ? theaterMarkerElement : _rootRenderTheaterMarkerOf(ancestor);
