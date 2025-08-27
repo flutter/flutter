@@ -4252,14 +4252,7 @@ void main() {
           child: SearchAnchor.bar(
             smartQuotesType: SmartQuotesType.disabled,
             suggestionsBuilder: (BuildContext context, SearchController controller) {
-              return <Widget>[
-                ListTile(
-                  title: const Text('item 0'),
-                  onTap: () {
-                    controller.closeView('item 0');
-                  },
-                ),
-              ];
+              return <Widget>[];
             },
           ),
         ),
@@ -4279,14 +4272,7 @@ void main() {
           child: SearchAnchor.bar(
             smartDashesType: SmartDashesType.disabled,
             suggestionsBuilder: (BuildContext context, SearchController controller) {
-              return <Widget>[
-                ListTile(
-                  title: const Text('item 0'),
-                  onTap: () {
-                    controller.closeView('item 0');
-                  },
-                ),
-              ];
+              return <Widget>[];
             },
           ),
         ),
