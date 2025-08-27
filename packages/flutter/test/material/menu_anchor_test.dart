@@ -4426,7 +4426,6 @@ void main() {
         expect(
           semantics,
           hasSemantics(
-            childOrder: DebugSemanticsDumpOrder.traversalOrder,
             TestSemantics.root(
               children: <TestSemantics>[
                 TestSemantics(
@@ -4514,7 +4513,6 @@ void main() {
         expect(
           semantics,
           hasSemantics(
-            childOrder: DebugSemanticsDumpOrder.traversalOrder,
             TestSemantics.root(
               children: <TestSemantics>[
                 TestSemantics(

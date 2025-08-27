@@ -311,7 +311,7 @@ class TestSemantics {
     bool ignoreTransform = false,
     bool ignoreId = false,
     bool ignoreTraversalIdentifier = false,
-    DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.traversalOrder,
+    DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.inverseHitTest,
   }) {
     bool fail(String message) {
       matchState[TestSemantics] = message;
@@ -1064,7 +1064,7 @@ Matcher hasSemantics(
   bool ignoreTransform = false,
   bool ignoreId = false,
   bool ignoreTraversalIdentifier = false,
-  DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.inverseHitTest,
+  DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.traversalOrder,
 }) {
   return _HasSemantics(
     semantics,
