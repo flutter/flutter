@@ -149,6 +149,7 @@ TEST(SwitchesTest, EnableAsserts) {
 }
 #endif
 
+#ifndef OS_FUCHSIA
 TEST(SwitchesTest, RequireMergedPlatformUIThread) {
   fml::CommandLine command_line = fml::CommandLineFromInitializerList(
       {"command", "--merged-platform-ui-thread=disabled"});
@@ -160,6 +161,7 @@ TEST(SwitchesTest, RequireMergedPlatformUIThread) {
                             "This platform does not support the "
                             "merged-platform-ui-thread=disabled flag");
 }
+#endif  // !OS_FUCHSIA
 
 }  // namespace testing
 }  // namespace flutter
