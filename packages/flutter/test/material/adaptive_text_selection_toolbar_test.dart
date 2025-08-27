@@ -26,6 +26,8 @@ void main() {
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
   });
 
+  final bool isWebExceptAndroid = kIsWeb && defaultTargetPlatform != TargetPlatform.android;
+
   testWidgets(
     'Builds the right toolbar on each platform, including web, and shows buttonItems',
     (WidgetTester tester) async {
@@ -159,7 +161,7 @@ void main() {
       controller.dispose();
       focusNode.dispose();
     },
-    skip: kIsWeb, // [intended] on web the browser handles the context menu.
+    skip: isWebExceptAndroid, // [intended] on web the browser handles the context menu except
     variant: TargetPlatformVariant.all(),
   );
 

@@ -2508,7 +2508,20 @@ class EditableTextState extends State<EditableText>
   ({TextEditingValue value, Rect selectionBounds})? _dataWhenToolbarShowScheduled;
   bool _listeningToScrollNotificationObserver = false;
 
-  bool get _webContextMenuEnabled => kIsWeb && BrowserContextMenu.enabled;
+  bool get _webContextMenuEnabled {
+    if (!kIsWeb) {
+      return false;
+    }
+
+    // See https://github.com/flutter/flutter/issues/174005#issuecomment-3200375688
+    // On Android browsers, the browser's ContextMenu cannot be displayed properly,
+    // so as a workaround, Flutter's context menu is displayed.
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return false;
+    }
+
+    return BrowserContextMenu.enabled;
+  }
 
   final GlobalKey _scrollableKey = GlobalKey();
   ScrollController? _internalScrollController;

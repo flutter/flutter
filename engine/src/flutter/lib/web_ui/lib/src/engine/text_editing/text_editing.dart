@@ -1954,6 +1954,19 @@ class AndroidTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
 
     addCompositionEventHandlers(activeDomElement);
 
+    // See https://github.com/flutter/flutter/issues/174005#issuecomment-3200375688
+    // On Android browsers, the browser's ContextMenu cannot be displayed properly,
+    // so as a workaround, Flutter's context menu is displayed.
+    subscriptions.add(
+      DomSubscription(
+        activeDomElement,
+        'contextmenu',
+        createDomEventListener((DomEvent event) {
+          event.preventDefault();
+        }),
+      ),
+    );
+
     preventDefaultForMouseEvents();
   }
 
