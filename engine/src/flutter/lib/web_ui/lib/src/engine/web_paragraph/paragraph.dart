@@ -142,7 +142,7 @@ class WebTextStyle implements ui.TextStyle {
       fontStyle: fontStyle ?? ui.FontStyle.normal,
       fontWeight: fontWeight ?? ui.FontWeight.normal,
       foreground: foreground ?? (ui.Paint()..color = const ui.Color(0xFF000000)),
-      background: background ?? (ui.Paint()..color = const ui.Color(0xFFFFFFFF)),
+      background: background ?? (ui.Paint()..color = const ui.Color(0x00000000)),
       shadows: shadows,
       decoration: decoration,
       decorationColor: decorationColor,
