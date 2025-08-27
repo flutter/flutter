@@ -13,32 +13,35 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Activity indicator animate property works', (WidgetTester tester) async {
-    await tester.pumpWidget(buildCupertinoActivityIndicator());
+    await tester.pumpWidget(_buildCupertinoActivityIndicator());
     expect(SchedulerBinding.instance.transientCallbackCount, equals(1));
 
-    await tester.pumpWidget(buildCupertinoActivityIndicator(false));
+    await tester.pumpWidget(_buildCupertinoActivityIndicator(false));
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
 
     await tester.pumpWidget(Container());
 
-    await tester.pumpWidget(buildCupertinoActivityIndicator(false));
+    await tester.pumpWidget(_buildCupertinoActivityIndicator(false));
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
 
-    await tester.pumpWidget(buildCupertinoActivityIndicator());
+    await tester.pumpWidget(_buildCupertinoActivityIndicator());
     expect(SchedulerBinding.instance.transientCallbackCount, equals(1));
   });
 
   testWidgets('Activity indicator dark mode', (WidgetTester tester) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(
-      Center(
-        child: MediaQuery(
-          data: const MediaQueryData(),
-          child: RepaintBoundary(
-            key: key,
-            child: const ColoredBox(
-              color: CupertinoColors.white,
-              child: CupertinoActivityIndicator(animating: false, radius: 35),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: MediaQuery(
+            data: const MediaQueryData(),
+            child: RepaintBoundary(
+              key: key,
+              child: const ColoredBox(
+                color: CupertinoColors.white,
+                child: CupertinoActivityIndicator(animating: false, radius: 35),
+              ),
             ),
           ),
         ),
@@ -48,14 +51,17 @@ void main() {
     await expectLater(find.byKey(key), matchesGoldenFile('activityIndicator.paused.light.png'));
 
     await tester.pumpWidget(
-      Center(
-        child: MediaQuery(
-          data: const MediaQueryData(platformBrightness: Brightness.dark),
-          child: RepaintBoundary(
-            key: key,
-            child: const ColoredBox(
-              color: CupertinoColors.black,
-              child: CupertinoActivityIndicator(animating: false, radius: 35),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: MediaQuery(
+            data: const MediaQueryData(platformBrightness: Brightness.dark),
+            child: RepaintBoundary(
+              key: key,
+              child: const ColoredBox(
+                color: CupertinoColors.black,
+                child: CupertinoActivityIndicator(animating: false, radius: 35),
+              ),
             ),
           ),
         ),
@@ -68,12 +74,15 @@ void main() {
   testWidgets('Activity indicator 0% in progress', (WidgetTester tester) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(
-      Center(
-        child: RepaintBoundary(
-          key: key,
-          child: const ColoredBox(
-            color: CupertinoColors.white,
-            child: CupertinoActivityIndicator.partiallyRevealed(progress: 0),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: RepaintBoundary(
+            key: key,
+            child: const ColoredBox(
+              color: CupertinoColors.white,
+              child: CupertinoActivityIndicator.partiallyRevealed(progress: 0),
+            ),
           ),
         ),
       ),
@@ -85,12 +94,15 @@ void main() {
   testWidgets('Activity indicator 30% in progress', (WidgetTester tester) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(
-      Center(
-        child: RepaintBoundary(
-          key: key,
-          child: const ColoredBox(
-            color: CupertinoColors.white,
-            child: CupertinoActivityIndicator.partiallyRevealed(progress: 0.5),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: RepaintBoundary(
+            key: key,
+            child: const ColoredBox(
+              color: CupertinoColors.white,
+              child: CupertinoActivityIndicator.partiallyRevealed(progress: 0.5),
+            ),
           ),
         ),
       ),
@@ -102,12 +114,15 @@ void main() {
   testWidgets('Activity indicator 100% in progress', (WidgetTester tester) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(
-      Center(
-        child: RepaintBoundary(
-          key: key,
-          child: const ColoredBox(
-            color: CupertinoColors.white,
-            child: CupertinoActivityIndicator.partiallyRevealed(),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: RepaintBoundary(
+            key: key,
+            child: const ColoredBox(
+              color: CupertinoColors.white,
+              child: CupertinoActivityIndicator.partiallyRevealed(),
+            ),
           ),
         ),
       ),
@@ -118,7 +133,12 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/41345.
   testWidgets('has the correct corner radius', (WidgetTester tester) async {
-    await tester.pumpWidget(const CupertinoActivityIndicator(animating: false, radius: 100));
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: CupertinoActivityIndicator(animating: false, radius: 100),
+      ),
+    );
 
     // An earlier implementation for the activity indicator started drawing
     // the ticks at 9 o'clock, however, in order to support partially revealed
@@ -134,12 +154,15 @@ void main() {
     final Key key = UniqueKey();
     const Color color = Color(0xFF5D3FD3);
     await tester.pumpWidget(
-      Center(
-        child: RepaintBoundary(
-          key: key,
-          child: const ColoredBox(
-            color: CupertinoColors.white,
-            child: CupertinoActivityIndicator(animating: false, color: color, radius: 100),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: RepaintBoundary(
+            key: key,
+            child: const ColoredBox(
+              color: CupertinoColors.white,
+              child: CupertinoActivityIndicator(animating: false, color: color, radius: 100),
+            ),
           ),
         ),
       ),
@@ -158,7 +181,12 @@ void main() {
 
   group('CupertinoLinearActivityIndicator', () {
     testWidgets('draws the linear activity indicator', (WidgetTester tester) async {
-      await tester.pumpWidget(const Center(child: CupertinoLinearActivityIndicator(progress: 0.2)));
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(child: CupertinoLinearActivityIndicator(progress: 0.2)),
+        ),
+      );
 
       expect(
         find.byType(CupertinoLinearActivityIndicator),
@@ -184,11 +212,14 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        const Center(
-          child: CupertinoLinearActivityIndicator(
-            progress: 0.5,
-            height: 10,
-            color: CupertinoColors.activeGreen,
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: CupertinoLinearActivityIndicator(
+              progress: 0.5,
+              height: 10,
+              color: CupertinoColors.activeGreen,
+            ),
           ),
         ),
       );
@@ -215,9 +246,12 @@ void main() {
   });
 }
 
-Widget buildCupertinoActivityIndicator([bool? animating]) {
-  return MediaQuery(
-    data: const MediaQueryData(),
-    child: CupertinoActivityIndicator(animating: animating ?? true),
+Widget _buildCupertinoActivityIndicator([bool? animating]) {
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: MediaQuery(
+      data: const MediaQueryData(),
+      child: CupertinoActivityIndicator(animating: animating ?? true),
+    ),
   );
 }
