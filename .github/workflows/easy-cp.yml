@@ -72,7 +72,7 @@ jobs:
           git push https://${{ env.GITHUB_TOKEN }}@github.com/flutteractionsbot/flutter cp-${CHANNEL}-${COMMIT_SHA}
           {
             echo 'PR_URL<<EOF'
-            gh pr create --title "[CP-${CHANNEL}]${PR_TITLE}" --body-file ../PULL_REQUEST_CP_TEMPLATE.md --base ${RELEASE_BRANCH} --label "cp: review" --repo flutter/flutter --head flutteractionsbot:cp-${CHANNEL}-${COMMIT_SHA}
+            gh pr create --title "[CP-${CHANNEL}]${PR_TITLE}" --body-file ".github/PR_TEMPLATE/PULL_REQUEST_CP_TEMPLATE.md" --base ${RELEASE_BRANCH} --label "cp: review" --repo flutter/flutter --head flutteractionsbot:cp-${CHANNEL}-${COMMIT_SHA}
             echo EOF
           } >> "$GITHUB_ENV"
         env:
