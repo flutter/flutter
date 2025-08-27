@@ -203,7 +203,7 @@ et build --config android_debug_unopt_arm64 //flutter/shell/platform:all
 
 ### Running C++ tests
 
-C++ unit tests can be simulatenously rebuilt and run using `et test`:
+C++ unit tests can be simultaneously rebuilt and run using `et test`:
 
 ```sh
 et test //flutter/impeller:impeller_unittests
@@ -382,7 +382,7 @@ We welcome contributions to improve `et` for our all developers.
   conventions that go beyond code formatting, which we'll follow even if using
   `dart format` in the future.
 - Do not call directly into `dart:io` except from `main.dart`. Instead access
-  the system only through the `Enviroment` object.
+  the system only through the `Environment` object.
 - All commands must have unit tests. If some functionality needs a fake
   implementation, then write a fake implementation.
 - When adding or changing functionality, update this README.md file.
