@@ -2706,6 +2706,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     private boolean isFocusable() {
       // We enforce in the framework that no other useful semantics are merged with these
       // nodes.
+      if (label != null && label.startsWith("T")) {
+        return false;
+      }
       if (hasFlag(Flag.SCOPES_ROUTE)) {
         return false;
       }
