@@ -121,11 +121,6 @@ class LookupBoundary extends InheritedWidget {
     BuildContext context, {
     Object? aspect,
   }) {
-    // The following call makes sure that context depends on something so
-    // Element.didChangeDependencies is called when context moves in the tree
-    // even when requested dependency remains unfulfilled (i.e. null is
-    // returned).
-    context.dependOnInheritedWidgetOfExactType<LookupBoundary>();
     final InheritedElement? candidate = getElementForInheritedWidgetOfExactType<T>(context);
     if (candidate == null) {
       return null;
