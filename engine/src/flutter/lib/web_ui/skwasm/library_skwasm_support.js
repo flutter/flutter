@@ -95,6 +95,8 @@ mergeInto(LibraryManager.library, {
             _surface_renderPicturesOnWorker(
               data.surface,
               data.pictures,
+              data.width,
+              data.height,
               data.pictureCount,
               data.callbackId,
               skwasm_getCurrentTimestamp());
@@ -144,11 +146,13 @@ mergeInto(LibraryManager.library, {
       };
       skwasm_registerMessageListener(threadId, eventListener);
     };
-    _skwasm_dispatchRenderPictures = function(threadId, surfaceHandle, pictures, pictureCount, callbackId) {
+    _skwasm_dispatchRenderPictures = function (threadId, surfaceHandle, pictures, width, height, pictureCount, callbackId) {
       skwasm_postMessage({
         skwasmMessage: 'renderPictures',
         surface: surfaceHandle,
         pictures,
+        width,
+        height,
         pictureCount,
         callbackId,
       }, [], threadId);
@@ -176,14 +180,14 @@ mergeInto(LibraryManager.library, {
       canvas.width = width;
       canvas.height = height;
     };
-    _skwasm_captureImageBitmap = function(contextHandle, width, height, imagePromises) {
-      if (!imagePromises) imagePromises = Array();
+    _skwasm_captureImageBitmap = function (contextHandle, imageBitmaps) {
+      if (!imageBitmaps) imageBitmaps = Array();
       const canvas = handleToCanvasMap.get(contextHandle);
-      imagePromises.push(createImageBitmap(canvas, 0, 0, width, height));
-      return imagePromises;
+      imageBitmaps.push(canvas.transferToImageBitmap());
+      return imageBitmaps;
     };
-    _skwasm_resolveAndPostImages = async function(surfaceHandle, imagePromises, rasterStart, callbackId) {
-      const imageBitmaps = imagePromises ? await Promise.all(imagePromises) : [];
+    _skwasm_resolveAndPostImages = async function (surfaceHandle, imageBitmaps, rasterStart, callbackId) {
+      if (!imageBitmaps) imageBitmaps = Array();
       const rasterEnd = skwasm_getCurrentTimestamp();
       skwasm_postMessage({
         skwasmMessage: 'onRenderComplete',
