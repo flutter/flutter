@@ -258,7 +258,8 @@ cd to/project/dir
 et run
 ```
 
-> [!NOTE] > `et run` will rebuild (if necessary) host and target builds, which can take
+> [!NOTE]
+> `et run` will rebuild (if necessary) host and target builds, which can take
 > a significant amount of time.
 
 ## Advanced Features
