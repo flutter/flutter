@@ -2038,7 +2038,7 @@ class _OverlayPortalState extends State<OverlayPortal> {
         childIdentifier: identifier,
         child: Builder(builder: widget.overlayChildBuilder),
       ),
-      child: Semantics(container: true, traversalParentIdentifier: identifier, child: widget.child),
+      child: Semantics(traversalParentIdentifier: identifier, child: widget.child),
     );
   }
 }
