@@ -42,7 +42,6 @@ class StubPictureRenderer implements PictureRenderer {
 
   List<ScenePicture> renderedPictures = <ScenePicture>[];
   List<StubPicture> clippedPictures = <StubPicture>[];
-  Map<ScenePicture, ui.Rect> clipRequests = <ScenePicture, ui.Rect>{};
 }
 
 class StubFlutterView implements EngineFlutterView {

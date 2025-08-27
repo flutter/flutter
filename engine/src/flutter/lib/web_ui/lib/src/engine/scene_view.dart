@@ -95,7 +95,6 @@ class EngineSceneView {
     );
     final List<LayerSlice?> slices = scene.rootLayer.slices;
     final List<ScenePicture> picturesToRender = <ScenePicture>[];
-    final List<ScenePicture> picturesToFree = <ScenePicture>[];
     for (final LayerSlice? slice in slices) {
       if (slice == null) {
         continue;
@@ -127,10 +126,6 @@ class EngineSceneView {
       recorder?.recordRasterFinish();
     }
     recorder?.submitTimings();
-
-    for (final p in picturesToFree) {
-      p.dispose();
-    }
 
     final List<SliceContainer?> reusableContainers = List<SliceContainer?>.from(containers);
     final List<SliceContainer> newContainers = <SliceContainer>[];
