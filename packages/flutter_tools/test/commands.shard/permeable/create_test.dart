@@ -735,12 +735,7 @@ void main() {
     () async {
       return _createProject(
         projectDir,
-        <String>[
-          '--no-pub',
-          '--template=plugin',
-          '--platforms',
-          'ios,macos',
-        ],
+        <String>['--no-pub', '--template=plugin', '--platforms', 'ios,macos'],
         <String>[
           'ios/flutter_project/Package.swift',
           'ios/flutter_project/Sources/flutter_project/FlutterProjectPlugin.swift',
