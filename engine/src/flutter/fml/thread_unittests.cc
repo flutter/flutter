@@ -17,7 +17,7 @@
 #endif
 
 #if defined(FML_OS_WIN)
-#include <windows.h>
+#include "flutter/fml/platform/win/windows_shim.h"
 #endif
 
 #include <algorithm>

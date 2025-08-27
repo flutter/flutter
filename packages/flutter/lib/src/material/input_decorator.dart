@@ -13,6 +13,7 @@ library;
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -1011,16 +1012,15 @@ class _RenderDecoration extends RenderBox
     final double topHeight;
     if (label != null) {
       final double suffixIconSpace = decoration.border.isOutline
-          ? lerpDouble(suffixIconSize.width, 0.0, decoration.floatingLabelProgress)!
+          ? lerpDouble(suffixIconSize.width, contentPadding.end, decoration.floatingLabelProgress)!
           : suffixIconSize.width;
       final double labelWidth = math.max(
         0.0,
         constraints.maxWidth -
             (decoration.inputGap * 2 +
                 iconWidth +
-                contentPadding.horizontal +
-                prefixIconSize.width +
-                suffixIconSpace),
+                (prefixIcon == null ? contentPadding.start : prefixIconSize.width) +
+                (suffixIcon == null ? contentPadding.end : suffixIconSpace)),
       );
 
       // Increase the available width for the label when it is scaled down.
@@ -1685,25 +1685,28 @@ class _RenderDecoration extends RenderBox
   ) {
     final ChildSemanticsConfigurationsResultBuilder builder =
         ChildSemanticsConfigurationsResultBuilder();
-    List<SemanticsConfiguration>? prefixMergeGroup;
-    List<SemanticsConfiguration>? suffixMergeGroup;
+
+    final Map<SemanticsTag, List<SemanticsConfiguration>> mergeGroups =
+        <SemanticsTag, List<SemanticsConfiguration>>{};
+    final Set<SemanticsTag> tags = <SemanticsTag>{
+      _InputDecoratorState._kPrefixSemanticsTag,
+      _InputDecoratorState._kPrefixIconSemanticsTag,
+      _InputDecoratorState._kSuffixSemanticsTag,
+      _InputDecoratorState._kSuffixIconSemanticsTag,
+    };
+
     for (final SemanticsConfiguration childConfig in childConfigs) {
-      if (childConfig.tagsChildrenWith(_InputDecoratorState._kPrefixSemanticsTag)) {
-        prefixMergeGroup ??= <SemanticsConfiguration>[];
-        prefixMergeGroup.add(childConfig);
-      } else if (childConfig.tagsChildrenWith(_InputDecoratorState._kSuffixSemanticsTag)) {
-        suffixMergeGroup ??= <SemanticsConfiguration>[];
-        suffixMergeGroup.add(childConfig);
+      final SemanticsTag? tag = tags.firstWhereOrNull(
+        (SemanticsTag tag) => childConfig.tagsChildrenWith(tag),
+      );
+      if (tag != null) {
+        mergeGroups.putIfAbsent(tag, () => <SemanticsConfiguration>[]).add(childConfig);
       } else {
         builder.markAsMergeUp(childConfig);
       }
     }
-    if (prefixMergeGroup != null) {
-      builder.markAsSiblingMergeGroup(prefixMergeGroup);
-    }
-    if (suffixMergeGroup != null) {
-      builder.markAsSiblingMergeGroup(suffixMergeGroup);
-    }
+
+    mergeGroups.values.forEach(builder.markAsSiblingMergeGroup);
     return builder.build();
   }
 
@@ -1985,7 +1988,13 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     name: hashCode.toString(),
   );
   static const SemanticsTag _kPrefixSemanticsTag = SemanticsTag('_InputDecoratorState.prefix');
+  static const SemanticsTag _kPrefixIconSemanticsTag = SemanticsTag(
+    '_InputDecoratorState.prefixIcon',
+  );
   static const SemanticsTag _kSuffixSemanticsTag = SemanticsTag('_InputDecoratorState.suffix');
+  static const SemanticsTag _kSuffixIconSemanticsTag = SemanticsTag(
+    '_InputDecoratorState.suffixIcon',
+  );
 
   @override
   void initState() {
@@ -2102,9 +2111,9 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       return Colors.transparent;
     }
     if (decoration.fillColor != null) {
-      return MaterialStateProperty.resolveAs(decoration.fillColor!, materialState);
+      return WidgetStateProperty.resolveAs(decoration.fillColor!, materialState);
     }
-    return MaterialStateProperty.resolveAs(defaults.fillColor!, materialState);
+    return WidgetStateProperty.resolveAs(defaults.fillColor!, materialState);
   }
 
   Color _getHoverColor(ThemeData themeData) {
@@ -2115,26 +2124,26 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   Color _getIconColor(ThemeData themeData, InputDecorationThemeData defaults) {
-    return MaterialStateProperty.resolveAs(decoration.iconColor, materialState) ??
-        MaterialStateProperty.resolveAs(defaults.iconColor!, materialState);
+    return WidgetStateProperty.resolveAs(decoration.iconColor, materialState) ??
+        WidgetStateProperty.resolveAs(defaults.iconColor!, materialState);
   }
 
   Color _getPrefixIconColor(
     IconButtonThemeData iconButtonTheme,
     InputDecorationThemeData defaults,
   ) {
-    return MaterialStateProperty.resolveAs(decoration.prefixIconColor, materialState) ??
+    return WidgetStateProperty.resolveAs(decoration.prefixIconColor, materialState) ??
         iconButtonTheme.style?.foregroundColor?.resolve(materialState) ??
-        MaterialStateProperty.resolveAs(defaults.prefixIconColor!, materialState);
+        WidgetStateProperty.resolveAs(defaults.prefixIconColor!, materialState);
   }
 
   Color _getSuffixIconColor(
     IconButtonThemeData iconButtonTheme,
     InputDecorationThemeData defaults,
   ) {
-    return MaterialStateProperty.resolveAs(decoration.suffixIconColor, materialState) ??
+    return WidgetStateProperty.resolveAs(decoration.suffixIconColor, materialState) ??
         iconButtonTheme.style?.foregroundColor?.resolve(materialState) ??
-        MaterialStateProperty.resolveAs(defaults.suffixIconColor!, materialState);
+        WidgetStateProperty.resolveAs(defaults.suffixIconColor!, materialState);
   }
 
   // True if the label will be shown and the hint will not.
@@ -2151,12 +2160,12 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   // The base style for the inline label when they're displayed "inline",
   // i.e. when they appear in place of the empty text field.
   TextStyle _getInlineLabelStyle(ThemeData themeData, InputDecorationThemeData defaults) {
-    final TextStyle defaultStyle = MaterialStateProperty.resolveAs(
+    final TextStyle defaultStyle = WidgetStateProperty.resolveAs(
       defaults.labelStyle!,
       materialState,
     );
 
-    final TextStyle? style = MaterialStateProperty.resolveAs(decoration.labelStyle, materialState);
+    final TextStyle? style = WidgetStateProperty.resolveAs(decoration.labelStyle, materialState);
 
     return themeData.textTheme.titleMedium!
         .merge(widget.baseStyle)
@@ -2168,12 +2177,12 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   // The base style for the inline hint when they're displayed "inline",
   // i.e. when they appear in place of the empty text field.
   TextStyle _getInlineHintStyle(ThemeData themeData, InputDecorationThemeData defaults) {
-    final TextStyle defaultStyle = MaterialStateProperty.resolveAs(
+    final TextStyle defaultStyle = WidgetStateProperty.resolveAs(
       defaults.hintStyle!,
       materialState,
     );
 
-    final TextStyle? style = MaterialStateProperty.resolveAs(decoration.hintStyle, materialState);
+    final TextStyle? style = WidgetStateProperty.resolveAs(decoration.hintStyle, materialState);
 
     return (themeData.useMaterial3
             ? themeData.textTheme.bodyLarge!
@@ -2184,7 +2193,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   TextStyle _getFloatingLabelStyle(ThemeData themeData, InputDecorationThemeData defaults) {
-    TextStyle defaultTextStyle = MaterialStateProperty.resolveAs(
+    TextStyle defaultTextStyle = WidgetStateProperty.resolveAs(
       defaults.floatingLabelStyle!,
       materialState,
     );
@@ -2195,7 +2204,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       decoration.floatingLabelStyle ?? decoration.labelStyle,
     );
 
-    final TextStyle? style = MaterialStateProperty.resolveAs(
+    final TextStyle? style = WidgetStateProperty.resolveAs(
       decoration.floatingLabelStyle,
       materialState,
     );
@@ -2208,14 +2217,14 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   TextStyle _getHelperStyle(ThemeData themeData, InputDecorationThemeData defaults) {
-    return MaterialStateProperty.resolveAs(
+    return WidgetStateProperty.resolveAs(
       defaults.helperStyle!,
       materialState,
-    ).merge(MaterialStateProperty.resolveAs(decoration.helperStyle, materialState));
+    ).merge(WidgetStateProperty.resolveAs(decoration.helperStyle, materialState));
   }
 
   TextStyle _getErrorStyle(ThemeData themeData, InputDecorationThemeData defaults) {
-    return MaterialStateProperty.resolveAs(
+    return WidgetStateProperty.resolveAs(
       defaults.errorStyle!,
       materialState,
     ).merge(decoration.errorStyle);
@@ -2230,10 +2239,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
   InputBorder _getDefaultBorder(ThemeData themeData, InputDecorationThemeData defaults) {
     final InputBorder border =
-        MaterialStateProperty.resolveAs(decoration.border, materialState) ??
+        WidgetStateProperty.resolveAs(decoration.border, materialState) ??
         const UnderlineInputBorder();
 
-    if (decoration.border is MaterialStateProperty<InputBorder>) {
+    if (decoration.border is WidgetStateProperty<InputBorder>) {
       return border;
     }
 
@@ -2245,14 +2254,14 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       if (decoration.filled!) {
         final InputDecorationThemeData decorationTheme = InputDecorationTheme.of(context);
         return border.copyWith(
-          borderSide: MaterialStateProperty.resolveAs(
+          borderSide: WidgetStateProperty.resolveAs(
             decorationTheme.activeIndicatorBorder ?? defaults.activeIndicatorBorder,
             materialState,
           ),
         );
       } else {
         return border.copyWith(
-          borderSide: MaterialStateProperty.resolveAs(defaults.outlineBorder, materialState),
+          borderSide: WidgetStateProperty.resolveAs(defaults.outlineBorder, materialState),
         );
       }
     } else {
@@ -2397,7 +2406,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
             labelIsFloating: labelShouldWithdraw,
             text: decoration.prefixText,
             style:
-                MaterialStateProperty.resolveAs(decoration.prefixStyle, materialState) ?? hintStyle,
+                WidgetStateProperty.resolveAs(decoration.prefixStyle, materialState) ?? hintStyle,
             semanticsSortKey: needsSemanticsSortOrder ? _prefixSemanticsSortOrder : null,
             semanticsTag: _kPrefixSemanticsTag,
             child: decoration.prefix,
@@ -2409,7 +2418,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
             labelIsFloating: labelShouldWithdraw,
             text: decoration.suffixText,
             style:
-                MaterialStateProperty.resolveAs(decoration.suffixStyle, materialState) ?? hintStyle,
+                WidgetStateProperty.resolveAs(decoration.suffixStyle, materialState) ?? hintStyle,
             semanticsSortKey: needsSemanticsSortOrder ? _suffixSemanticsSortOrder : null,
             semanticsTag: _kSuffixSemanticsTag,
             child: decoration.suffix,
@@ -2466,7 +2475,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
                         iconSize: WidgetStatePropertyAll<double>(iconSize),
                       ).merge(iconButtonTheme.style),
                     ),
-                    child: Semantics(child: decoration.prefixIcon),
+                    child: Semantics(
+                      tagForChildren: _kPrefixIconSemanticsTag,
+                      child: decoration.prefixIcon,
+                    ),
                   ),
                 ),
               ),
@@ -2503,7 +2515,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
                         iconSize: WidgetStatePropertyAll<double>(iconSize),
                       ).merge(iconButtonTheme.style),
                     ),
-                    child: Semantics(child: decoration.suffixIcon),
+                    child: Semantics(
+                      tagForChildren: _kSuffixIconSemanticsTag,
+                      child: decoration.suffixIcon,
+                    ),
                   ),
                 ),
               ),
@@ -2534,7 +2549,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           style: _getHelperStyle(
             themeData,
             defaults,
-          ).merge(MaterialStateProperty.resolveAs(decoration.counterStyle, materialState)),
+          ).merge(WidgetStateProperty.resolveAs(decoration.counterStyle, materialState)),
           overflow: TextOverflow.ellipsis,
           semanticsLabel: decoration.semanticCounterText,
         ),
@@ -5894,62 +5909,62 @@ class _InputDecoratorDefaultsM3 extends InputDecorationThemeData {
   // see https://github.com/flutter/flutter/pull/125905.
 
   @override
-  TextStyle? get hintStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
+  TextStyle? get hintStyle => MaterialStateTextStyle.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
       return TextStyle(color: _colors.onSurface.withOpacity(0.38));
     }
     return TextStyle(color: _colors.onSurfaceVariant);
   });
 
   @override
-  Color? get fillColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
+  Color? get fillColor => MaterialStateColor.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
       return _colors.onSurface.withOpacity(0.04);
     }
     return _colors.surfaceContainerHighest;
   });
 
   @override
-  BorderSide? get activeIndicatorBorder => MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
+  BorderSide? get activeIndicatorBorder => MaterialStateBorderSide.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
       return BorderSide(color: _colors.onSurface.withOpacity(0.38));
     }
-    if (states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.error)) {
+      if (states.contains(WidgetState.focused)) {
         return BorderSide(color: _colors.error, width: 2.0);
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return BorderSide(color: _colors.onErrorContainer);
       }
       return BorderSide(color: _colors.error);
     }
-    if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.focused)) {
       return BorderSide(color: _colors.primary, width: 2.0);
     }
-    if (states.contains(MaterialState.hovered)) {
+    if (states.contains(WidgetState.hovered)) {
       return BorderSide(color: _colors.onSurface);
     }
     return BorderSide(color: _colors.onSurfaceVariant);
     });
 
   @override
-  BorderSide? get outlineBorder => MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
+  BorderSide? get outlineBorder => MaterialStateBorderSide.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
       return BorderSide(color: _colors.onSurface.withOpacity(0.12));
     }
-    if (states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.error)) {
+      if (states.contains(WidgetState.focused)) {
         return BorderSide(color: _colors.error, width: 2.0);
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return BorderSide(color: _colors.onErrorContainer);
       }
       return BorderSide(color: _colors.error);
     }
-    if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.focused)) {
       return BorderSide(color: _colors.primary, width: 2.0);
     }
-    if (states.contains(MaterialState.hovered)) {
+    if (states.contains(WidgetState.hovered)) {
       return BorderSide(color: _colors.onSurface);
     }
     return BorderSide(color: _colors.outline);
@@ -5959,20 +5974,20 @@ class _InputDecoratorDefaultsM3 extends InputDecorationThemeData {
   Color? get iconColor => _colors.onSurfaceVariant;
 
   @override
-  Color? get prefixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
+  Color? get prefixIconColor => MaterialStateColor.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
       return _colors.onSurface.withOpacity(0.38);
     }
     return _colors.onSurfaceVariant;
   });
 
   @override
-  Color? get suffixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
+  Color? get suffixIconColor => MaterialStateColor.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
       return _colors.onSurface.withOpacity(0.38);
     }
-    if (states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.hovered)) {
+    if (states.contains(WidgetState.error)) {
+      if (states.contains(WidgetState.hovered)) {
         return _colors.onErrorContainer;
       }
       return _colors.error;
@@ -5981,64 +5996,64 @@ class _InputDecoratorDefaultsM3 extends InputDecorationThemeData {
   });
 
   @override
-  TextStyle? get labelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+  TextStyle? get labelStyle => MaterialStateTextStyle.resolveWith((Set<WidgetState> states) {
     final TextStyle textStyle = _textTheme.bodyLarge ?? const TextStyle();
-    if (states.contains(MaterialState.disabled)) {
+    if (states.contains(WidgetState.disabled)) {
       return textStyle.copyWith(color: _colors.onSurface.withOpacity(0.38));
     }
-    if (states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.error)) {
+      if (states.contains(WidgetState.focused)) {
         return textStyle.copyWith(color: _colors.error);
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return textStyle.copyWith(color: _colors.onErrorContainer);
       }
       return textStyle.copyWith(color: _colors.error);
     }
-    if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.focused)) {
       return textStyle.copyWith(color: _colors.primary);
     }
-    if (states.contains(MaterialState.hovered)) {
+    if (states.contains(WidgetState.hovered)) {
       return textStyle.copyWith(color: _colors.onSurfaceVariant);
     }
     return textStyle.copyWith(color: _colors.onSurfaceVariant);
   });
 
   @override
-  TextStyle? get floatingLabelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+  TextStyle? get floatingLabelStyle => MaterialStateTextStyle.resolveWith((Set<WidgetState> states) {
     final TextStyle textStyle = _textTheme.bodyLarge ?? const TextStyle();
-    if (states.contains(MaterialState.disabled)) {
+    if (states.contains(WidgetState.disabled)) {
       return textStyle.copyWith(color: _colors.onSurface.withOpacity(0.38));
     }
-    if (states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.error)) {
+      if (states.contains(WidgetState.focused)) {
         return textStyle.copyWith(color: _colors.error);
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return textStyle.copyWith(color: _colors.onErrorContainer);
       }
       return textStyle.copyWith(color: _colors.error);
     }
-    if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.focused)) {
       return textStyle.copyWith(color: _colors.primary);
     }
-    if (states.contains(MaterialState.hovered)) {
+    if (states.contains(WidgetState.hovered)) {
       return textStyle.copyWith(color: _colors.onSurfaceVariant);
     }
     return textStyle.copyWith(color: _colors.onSurfaceVariant);
   });
 
   @override
-  TextStyle? get helperStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+  TextStyle? get helperStyle => MaterialStateTextStyle.resolveWith((Set<WidgetState> states) {
     final TextStyle textStyle = _textTheme.bodySmall ?? const TextStyle();
-    if (states.contains(MaterialState.disabled)) {
+    if (states.contains(WidgetState.disabled)) {
       return textStyle.copyWith(color: _colors.onSurface.withOpacity(0.38));
     }
     return textStyle.copyWith(color: _colors.onSurfaceVariant);
   });
 
   @override
-  TextStyle? get errorStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+  TextStyle? get errorStyle => MaterialStateTextStyle.resolveWith((Set<WidgetState> states) {
     final TextStyle textStyle = _textTheme.bodySmall ?? const TextStyle();
     return textStyle.copyWith(color: _colors.error);
   });

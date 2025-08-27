@@ -11,5 +11,7 @@
   "searchWebButtonLabel": "Cerca sul web",
   "shareButtonLabel": "Condividi",
   "pasteButtonLabel": "Incolla",
-  "selectAllButtonLabel": "Seleziona tutto"
+  "selectAllButtonLabel": "Seleziona tutto",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found"
 }

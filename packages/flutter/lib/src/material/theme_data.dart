@@ -3153,6 +3153,10 @@ class _FifoCache<K, V> {
 /// the Material Design specification. It does not affect text sizes, icon
 /// sizes, or padding values.
 ///
+/// The default visual density varies by platform: mobile platforms (Android, iOS,
+/// Fuchsia) use [VisualDensity.standard], while desktop platforms (macOS, Windows,
+/// Linux) use [VisualDensity.compact]. See [defaultDensityForPlatform] for more details.
+///
 /// For example, for buttons, it affects the spacing around the child of the
 /// button. For lists, it affects the distance between baselines of entries in
 /// the list. For chips, it only affects the vertical size, not the horizontal
@@ -3163,6 +3167,7 @@ class _FifoCache<K, V> {
 ///  * [Checkbox]
 ///  * [Chip]
 ///  * [ElevatedButton]
+///  * [FilledButton]
 ///  * [IconButton]
 ///  * [InputDecorator] (which gives density support to [TextField], etc.)
 ///  * [ListTile]
@@ -3240,8 +3245,8 @@ class VisualDensity with Diagnosticable {
 
   /// Returns a [VisualDensity] that is adaptive based on the given [platform].
   ///
-  /// For desktop platforms, this returns [compact], and for other platforms, it
-  /// returns a default-constructed [VisualDensity].
+  /// For mobile platforms (Android, iOS, Fuchsia), this returns [VisualDensity.standard],
+  /// and for desktop platforms (macOS, Windows, Linux), it returns [VisualDensity.compact].
   ///
   /// See also:
   ///

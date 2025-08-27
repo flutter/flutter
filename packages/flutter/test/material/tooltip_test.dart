@@ -3511,6 +3511,69 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  // This is a regression test for https://github.com/flutter/flutter/issues/169741.
+  testWidgets(
+    'Tooltip does not show while transitioning from another route with secondary animation',
+    (WidgetTester tester) async {
+      final TransitionDurationObserver observer = TransitionDurationObserver();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          navigatorObservers: <NavigatorObserver>[observer],
+          home: Scaffold(
+            body: Builder(
+              builder: (BuildContext context) {
+                return TextButton(
+                  onPressed: () => Navigator.push(
+                    context,
+                    CupertinoPageRoute<void>(
+                      builder: (BuildContext context) => Scaffold(
+                        appBar: AppBar(
+                          leading: const Tooltip(message: 'Hello', child: Text('World')),
+                        ),
+                        body: TextButton(
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (BuildContext context) {
+                                  return Scaffold(appBar: AppBar(title: const Text('Third Page')));
+                                },
+                              ),
+                            );
+                          },
+                          child: const Text('Go to Third Page'),
+                        ),
+                      ),
+                    ),
+                  ),
+                  child: const Text('Go to Second Page'),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Go to Second Page'), findsOneWidget);
+      await tester.tap(find.text('Go to Second Page'));
+      await tester.pumpAndSettle();
+      expect(find.text('Go to Third Page'), findsOneWidget);
+
+      await tester.tap(find.text('Go to Third Page'));
+      await tester.pumpAndSettle();
+      expect(find.text('Third Page'), findsOneWidget);
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer();
+      await tester.tap(find.byType(BackButton));
+      await observer.pumpPastTransition(tester);
+      await gesture.moveTo(tester.getCenter(find.text('World')));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   /// This is a regression test for https://github.com/flutter/flutter/issues/168545
   testWidgets('The Tooltip on the ModalBottomSheet can still be displayed after showMenu.', (
     WidgetTester tester,
