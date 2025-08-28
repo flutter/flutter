@@ -2084,8 +2084,6 @@ void main() {
           'example/android/app/src/main/java/com/bar/foo/flutter_project_example/MainActivity.java',
           'ios/flutter_project/Sources/flutter_project/FlutterProjectPlugin.swift',
           'ios/flutter_project/Package.swift',
-
-          // 'ios/flutter_project/Sources/flutter_project/include/flutter_project/FlutterProjectPlugin.swift',
         ],
         unexpectedPaths: <String>[
           'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
