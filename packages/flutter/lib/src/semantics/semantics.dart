@@ -3136,8 +3136,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
   String? get traversalChildIdentifier => _traversalChildIdentifier;
   String? _traversalChildIdentifier;
 
-  bool get _isTraversalParent => getSemanticsData().traversalParentIdentifier != null;
-  bool get _isTraversalChild => getSemanticsData().traversalChildIdentifier != null;
+  bool get _isTraversalParent => _traversalParentIdentifier != null;
+  bool get _isTraversalChild => _traversalChildIdentifier != null;
 
   /// A textual description of this node.
   ///
