@@ -452,6 +452,7 @@ void main() {
   });
 
   testWidgets('Nav bar static components respect MediaQueryData', (WidgetTester tester) async {
+    count = 0x000000;
     const double value = 10.0;
     await tester.pumpWidget(
       CupertinoApp(
