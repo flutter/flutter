@@ -451,6 +451,33 @@ void main() {
     expect(count, 0x010101);
   });
 
+  testWidgets('Nav bar static components respect MediaQueryData', (WidgetTester tester) async {
+    const double value = 10.0;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: MediaQuery(
+          data: const MediaQueryData(
+            devicePixelRatio: value,
+            viewInsets: EdgeInsets.all(value),
+            platformBrightness: Brightness.dark,
+          ),
+          child: CupertinoNavigationBar(
+            leading: CupertinoButton(
+              onPressed: () {},
+              child: const _ExpectCustomMediaQuery(value: value, index: 0x000001),
+            ),
+            middle: const _ExpectCustomMediaQuery(value: value, index: 0x000100),
+            trailing: CupertinoButton(
+              onPressed: () {},
+              child: const _ExpectCustomMediaQuery(value: value, index: 0x010000),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(count, 0x010101);
+  });
+
   testWidgets('No slivers with no large titles', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
@@ -3182,6 +3209,22 @@ class _ExpectStyles extends StatelessWidget {
     expect(style.fontFamily, 'CupertinoSystemText');
     expect(style.fontSize, 17.0);
     expect(style.letterSpacing, -0.41);
+    count += index;
+    return Container();
+  }
+}
+
+class _ExpectCustomMediaQuery extends StatelessWidget {
+  const _ExpectCustomMediaQuery({required this.value, required this.index});
+
+  final double value;
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    expect(MediaQuery.platformBrightnessOf(context), Brightness.dark);
+    expect(MediaQuery.devicePixelRatioOf(context), value);
+    expect(MediaQuery.viewInsetsOf(context), EdgeInsets.all(value));
     count += index;
     return Container();
   }

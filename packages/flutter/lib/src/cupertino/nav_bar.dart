@@ -2022,7 +2022,7 @@ class _NavigationBarStaticComponents {
       child: Padding(
         padding: EdgeInsetsDirectional.only(start: padding?.start ?? _kNavBarEdgePadding),
         child: MediaQuery(
-          data: MediaQueryData(
+          data: MediaQuery.of(context).copyWith(
             textScaler: MediaQuery.textScalerOf(
               context,
             ).clamp(minScaleFactor: 1.0, maxScaleFactor: _kMaxScaleFactor),
@@ -2052,7 +2052,7 @@ class _NavigationBarStaticComponents {
     return KeyedSubtree(
       key: backChevronKey,
       child: MediaQuery(
-        data: MediaQueryData(
+        data: MediaQuery.of(context).copyWith(
           textScaler: MediaQuery.textScalerOf(
             context,
           ).clamp(minScaleFactor: 1.0, maxScaleFactor: _kMaxScaleFactor),
@@ -2084,7 +2084,7 @@ class _NavigationBarStaticComponents {
     return KeyedSubtree(
       key: backLabelKey,
       child: MediaQuery(
-        data: MediaQueryData(
+        data: MediaQuery.of(context).copyWith(
           textScaler: MediaQuery.textScalerOf(
             context,
           ).clamp(minScaleFactor: 1.0, maxScaleFactor: _kMaxScaleFactor),
@@ -2131,7 +2131,7 @@ class _NavigationBarStaticComponents {
     return KeyedSubtree(
       key: middleKey,
       child: MediaQuery(
-        data: MediaQueryData(
+        data: MediaQuery.of(context).copyWith(
           textScaler: MediaQuery.textScalerOf(
             context,
           ).clamp(minScaleFactor: 1.0, maxScaleFactor: _kMaxScaleFactor),
@@ -2157,7 +2157,7 @@ class _NavigationBarStaticComponents {
       child: Padding(
         padding: EdgeInsetsDirectional.only(end: padding?.end ?? _kNavBarEdgePadding),
         child: MediaQuery(
-          data: MediaQueryData(
+          data: MediaQuery.of(context).copyWith(
             textScaler: MediaQuery.textScalerOf(
               context,
             ).clamp(minScaleFactor: 1.0, maxScaleFactor: _kMaxScaleFactor),
@@ -2195,7 +2195,7 @@ class _NavigationBarStaticComponents {
     return KeyedSubtree(
       key: largeTitleKey,
       child: MediaQuery(
-        data: MediaQueryData(
+        data: MediaQuery.of(context).copyWith(
           textScaler: TextScaler.linear(
             _dampScaleFactor(
               MediaQuery.textScalerOf(context).scale(_kNavBarLargeTitleHeightExtension),
@@ -2218,7 +2218,7 @@ class _NavigationBarStaticComponents {
     return KeyedSubtree(
       key: navBarBottomKey,
       child: MediaQuery(
-        data: MediaQueryData(textScaler: MediaQuery.textScalerOf(context)),
+        data: MediaQuery.of(context).copyWith(textScaler: MediaQuery.textScalerOf(context)),
         child: userBottom ?? const SizedBox.shrink(),
       ),
     );
