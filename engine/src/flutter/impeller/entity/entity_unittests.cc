@@ -2622,8 +2622,8 @@ class FlushTestAllocator : public Allocator {
     return std::make_shared<FlushTestDeviceBuffer>(desc);
   };
 
-  std::shared_ptr<Texture> OnCreateTexture(const TextureDescriptor& desc,
-                                           bool threadsafe) override {
+  std::shared_ptr<Texture> OnCreateTexture(
+      const TextureDescriptor& desc) override {
     return nullptr;
   }
 };
