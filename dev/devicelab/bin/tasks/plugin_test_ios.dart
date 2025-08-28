@@ -8,7 +8,6 @@ import 'package:flutter_devicelab/tasks/plugin_tests.dart';
 Future<void> main() async {
   await task(
     combine(<TaskFunction>[
-      // Test basic plugin creation (defaults to Swift since ios-language is deprecated)
       PluginTest('ios', <String>['--platforms=ios']).call,
       // Test that app builds with Flutter as a transitive dependency.
       PluginTest('ios', <String>['--platforms=ios'], cocoapodsTransitiveFlutterDependency: true).call,

@@ -48,9 +48,9 @@ Future<void> main() async {
         await _tryMacOSLint(macosintegrationTestPodspec, <String>[]);
       });
 
-      section('Create Swift plugin');
+      section('Create plugin');
 
-      const String swiftPluginName = 'test_plugin_swift';
+      const String pluginName = 'test_plugin';
       await inDirectory(tempDir, () async {
         await flutter(
           'create',
@@ -59,44 +59,43 @@ Future<void> main() async {
             'io.flutter.devicelab',
             '--template=plugin',
             '--platforms=ios,macos',
-            // Note: ios-language flag removed as it's deprecated and defaults to Swift
-            swiftPluginName,
+            pluginName,
           ],
         );
       });
 
-      section('Lint Swift iOS podspec plugin as framework');
+      section('Lint iOS podspec plugin as framework');
 
-      final String swiftPluginPath = path.join(tempDir.path, swiftPluginName);
-      final String swiftPodspecPath = path.join(swiftPluginPath, 'ios', '$swiftPluginName.podspec');
+      final String pluginPath = path.join(tempDir.path, pluginName);
+      final String podspecPath = path.join(pluginPath, 'ios', '$pluginName.podspec');
       await inDirectory(tempDir, () async {
-        await exec('pod', <String>['lib', 'lint', swiftPodspecPath, '--allow-warnings']);
+        await exec('pod', <String>['lib', 'lint', podspecPath, '--allow-warnings']);
       });
 
-      section('Lint Swift iOS podspec plugin as library');
+      section('Lint iOS podspec plugin as library');
 
       await inDirectory(tempDir, () async {
         await exec('pod', <String>[
           'lib',
           'lint',
-          swiftPodspecPath,
+          podspecPath,
           '--allow-warnings',
           '--use-libraries',
         ]);
       });
 
-      section('Lint Swift macOS podspec plugin as framework');
+      section('Lint macOS podspec plugin as framework');
 
       final String macOSPodspecPath = path.join(
-        swiftPluginPath,
+        pluginPath,
         'macos',
-        '$swiftPluginName.podspec',
+        '$pluginName.podspec',
       );
       await inDirectory(tempDir, () async {
         await _tryMacOSLint(macOSPodspecPath, <String>['--allow-warnings']);
       });
 
-      section('Lint Swift macOS podspec plugin as library');
+      section('Lint macOS podspec plugin as library');
 
       await inDirectory(tempDir, () async {
         await _tryMacOSLint(macOSPodspecPath, <String>['--allow-warnings', '--use-libraries']);
@@ -112,7 +111,7 @@ Future<void> main() async {
         );
       });
 
-      section('Build iOS application with Swift plugins as frameworks');
+      section('Build iOS application with plugins as frameworks');
 
       final String appPath = path.join(tempDir.path, iosAppName);
 
@@ -120,10 +119,10 @@ Future<void> main() async {
 
       String pubspecContent = pubspec.readAsStringSync();
       // Add (randomly selected) first-party plugins that support iOS and macOS.
-      // Add the new Swift plugin we just made.
+      // Add the new plugins we just made.
       pubspecContent = pubspecContent.replaceFirst(
         '\ndependencies:\n',
-        '\ndependencies:\n  $swiftPluginName:\n    path: $swiftPluginPath\n  url_launcher: 6.0.16\n  url_launcher_macos:\n',
+        '\ndependencies:\n  $pluginName:\n    path: $pluginPath\n  url_launcher: 6.0.16\n  url_launcher_macos:\n',
       );
       pubspec.writeAsStringSync(pubspecContent, flush: true);
 
@@ -137,7 +136,7 @@ Future<void> main() async {
         return TaskResult.failure('Expected default Podfile to contain use_frameworks');
       }
 
-      section('Build iOS application with Swift plugins as libraries');
+      section('Build iOS application with plugins as libraries');
 
       iosPodfileContent = iosPodfileContent.replaceAll('use_frameworks!', '');
       iosPodfile.writeAsStringSync(iosPodfileContent, flush: true);
@@ -189,7 +188,7 @@ void _validateIosPodfile(String appPath) {
   final String podfileLockOutput = podfileLockFile.readAsStringSync();
   if (!podfileLockOutput.contains(':path: ".symlinks/plugins/url_launcher_ios/ios"') ||
       !podfileLockOutput.contains(':path: Flutter') ||
-      !podfileLockOutput.contains(':path: ".symlinks/plugins/test_plugin_swift/ios"') ||
+      !podfileLockOutput.contains(':path: ".symlinks/plugins/test_plugin/ios"') ||
       podfileLockOutput.contains('url_launcher_macos')) {
     print(podfileLockOutput);
     throw TaskResult.failure('iOS Podfile.lock does not contain expected pods');
@@ -205,7 +204,7 @@ void _validateIosPodfile(String appPath) {
 
   checkDirectoryNotExists(path.join(pluginSymlinks, 'url_launcher_macos'));
 
-  checkDirectoryExists(path.join(pluginSymlinks, 'test_plugin_swift', 'ios'));
+  checkDirectoryExists(path.join(pluginSymlinks, 'test_plugin', 'ios'));
 
   // Make sure no Xcode build settings are leaking derived data/build directory into the ios directory.
   checkDirectoryNotExists(path.join(appPath, 'ios', 'build'));
@@ -221,7 +220,7 @@ void _validateMacOSPodfile(String appPath) {
         ':path: Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos',
       ) ||
       !podfileLockOutput.contains(
-        ':path: Flutter/ephemeral/.symlinks/plugins/test_plugin_swift/macos',
+        ':path: Flutter/ephemeral/.symlinks/plugins/test_plugin/macos',
       ) ||
       podfileLockOutput.contains('url_launcher_ios/')) {
     print(podfileLockOutput);
@@ -243,7 +242,7 @@ void _validateMacOSPodfile(String appPath) {
 
   checkDirectoryNotExists(path.join(pluginSymlinks, 'url_launcher_ios'));
 
-  checkDirectoryExists(path.join(pluginSymlinks, 'test_plugin_swift', 'macos'));
+  checkDirectoryExists(path.join(pluginSymlinks, 'test_plugin', 'macos'));
 }
 
 Future<void> _tryMacOSLint(String podspecPath, List<String> extraArguments) async {

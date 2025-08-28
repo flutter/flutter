@@ -71,7 +71,7 @@ class CreateCommand extends FlutterCommand with CreateBase {
       allowed: <String>['objc', 'swift'],
       help:
           '(deprecated) This option is deprecated and no longer has any effect. '
-          'Swift is always used for iOS-specific code in plugins. '
+          'Swift is always used for iOS-specific code. '
           'This flag will be removed in a future version of Flutter.',
       hide: !verboseHelp,
     );
@@ -164,7 +164,6 @@ class CreateCommand extends FlutterCommand with CreateBase {
     commandHasTerminal: hasTerminal,
     createProjectType: stringArg('template'),
     createAndroidLanguage: stringArg('android-language'),
-    // Note: createIosLanguage removed since ios-language is deprecated and always 'swift'
   );
 
   // Lazy-initialize the net utilities with values from the context.
@@ -337,7 +336,7 @@ class CreateCommand extends FlutterCommand with CreateBase {
     } else if (argResults!.wasParsed('ios-language')) {
       globals.printWarning(
         'The "--ios-language" option is deprecated and no longer has any effect. '
-        'Swift is always used for iOS-specific code in plugins. '
+        'Swift is always used for iOS-specific code. '
         'This flag will be removed in a future version of Flutter.',
       );
     }
@@ -416,7 +415,6 @@ class CreateCommand extends FlutterCommand with CreateBase {
       withFfiPackage: generateFfiPackage,
       withEmptyMain: emptyArgument,
       androidLanguage: stringArg('android-language'),
-      iosLanguage: 'swift', // Always Swift since ios-language is deprecated
       iosDevelopmentTeam: developmentTeam,
       ios: includeIos,
       android: includeAndroid,

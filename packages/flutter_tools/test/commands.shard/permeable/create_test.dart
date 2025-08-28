@@ -207,7 +207,6 @@ void main() {
             workflow: 'create',
             commandHasTerminal: false,
             createAndroidLanguage: 'java',
-            // Note: createIosLanguage removed since ios-language is deprecated
           ),
         ),
       );
@@ -688,7 +687,7 @@ void main() {
   );
 
   testUsingContext(
-    'kotlin/swift plugin project without Swift Package Manager',
+    'plugin project with Swift Package Manager',
     () async {
       return _createProject(
         projectDir,
@@ -731,7 +730,7 @@ void main() {
   );
 
   testUsingContext(
-    'swift plugin project with Swift Package Manager',
+    'plugin project with Swift Package Manager',
     () async {
       return _createProject(
         projectDir,
@@ -1689,33 +1688,7 @@ void main() {
         logger.warningText,
         contains(
           'The "--ios-language" option is deprecated and no longer has any effect. '
-          'Swift is always used for iOS-specific code in plugins. '
-          'This flag will be removed in a future version of Flutter.',
-        ),
-      );
-    },
-    overrides: {FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
-  );
-
-  testUsingContext(
-    'should show --ios-language deprecation warning for Objective-C plugins',
-    () async {
-      final command = CreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
-
-      await runner.run(<String>[
-        'create',
-        '--no-pub',
-        '-t',
-        'plugin',
-        '--ios-language=objc',
-        projectDir.path,
-      ]);
-      expect(
-        logger.warningText,
-        contains(
-          'The "--ios-language" option is deprecated and no longer has any effect. '
-          'Swift is always used for iOS-specific code in plugins. '
+          'Swift is always used for iOS-specific code. '
           'This flag will be removed in a future version of Flutter.',
         ),
       );
@@ -2046,6 +2019,88 @@ void main() {
       'com.bar.foo.flutterProject',
     );
   });
+
+  testUsingContext(
+    'can re-gen plugin ios/ and example/ folders, reusing custom org, without Swift Package Manager',
+    () async {
+      await _createProject(projectDir, <String>[
+        '--no-pub',
+        '--template=plugin',
+        '--org',
+        'com.bar.foo',
+        '-i',
+        'objc',
+        '-a',
+        'java',
+        '--platforms',
+        'ios,android',
+      ], <String>[]);
+      projectDir.childDirectory('example').deleteSync(recursive: true);
+      projectDir.childDirectory('ios').deleteSync(recursive: true);
+      await _createProject(
+        projectDir,
+        <String>['--no-pub', '--template=plugin', '-a', 'java', '--platforms', 'ios,android'],
+        <String>[
+          'example/android/app/src/main/java/com/bar/foo/flutter_project_example/MainActivity.java',
+          'ios/Classes/FlutterProjectPlugin.swift',
+        ],
+        unexpectedPaths: <String>[
+          'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
+          'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
+          'ios/flutter_project/Sources/flutter_project/include/flutter_project/FlutterProjectPlugin.swift',
+        ],
+      );
+      final FlutterProject project = FlutterProject.fromDirectory(projectDir);
+      expect(
+        await project.example.ios.productBundleIdentifier(BuildInfo.debug),
+        'com.bar.foo.flutterProjectExample',
+      );
+    },
+    overrides: {
+      // Test flags disable Swift Package Manager.
+      FeatureFlags: () => TestFeatureFlags(),
+    },
+  );
+
+  testUsingContext(
+    'can re-gen plugin ios/ and example/ folders, reusing custom org, with Swift Package Manager',
+    () async {
+      await _createProject(projectDir, <String>[
+        '--no-pub',
+        '--template=plugin',
+        '--org',
+        'com.bar.foo',
+        '-a',
+        'java',
+        '--platforms',
+        'ios,android',
+      ], <String>[]);
+      projectDir.childDirectory('example').deleteSync(recursive: true);
+      projectDir.childDirectory('ios').deleteSync(recursive: true);
+      await _createProject(
+        projectDir,
+        <String>['--no-pub', '--template=plugin', '-a', 'java', '--platforms', 'ios,android'],
+        <String>[
+          'example/android/app/src/main/java/com/bar/foo/flutter_project_example/MainActivity.java',
+          'ios/flutter_project/Sources/flutter_project/FlutterProjectPlugin.swift',
+          'ios/flutter_project/Package.swift',
+
+          // 'ios/flutter_project/Sources/flutter_project/include/flutter_project/FlutterProjectPlugin.swift',
+        ],
+        unexpectedPaths: <String>[
+          'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
+          'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
+          'ios/Classes/FlutterProjectPlugin.swift',
+        ],
+      );
+      final FlutterProject project = FlutterProject.fromDirectory(projectDir);
+      expect(
+        await project.example.ios.productBundleIdentifier(BuildInfo.debug),
+        'com.bar.foo.flutterProjectExample',
+      );
+    },
+    overrides: {FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true)},
+  );
 
   testUsingContext('fails to re-gen without specified org when org is ambiguous', () async {
     await _createProject(projectDir, <String>[
