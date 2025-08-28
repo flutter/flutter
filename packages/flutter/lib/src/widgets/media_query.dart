@@ -660,7 +660,7 @@ class MediaQueryData {
   ///    supported.
   final bool supportsShowingSystemContextMenu;
 
-  /// The typography settings for the view this media query is derived from.
+  /// The user's preferred typography settings for the view this media query is derived from.
   ///
   /// This contains platform specific settings for typography, such a line height,
   /// word spacing, letter spacing, and paragraph spacing.
