@@ -47,7 +47,7 @@
 namespace {
 std::pair<std::shared_ptr<impeller::HostBuffer>,
           std::shared_ptr<impeller::HostBuffer>>
-createHostBuffers(std::shared_ptr<impeller::Context> context) {
+createHostBuffers(const std::shared_ptr<impeller::Context>& context) {
   auto data_host_buffer = impeller::HostBuffer::Create(
       context->GetResourceAllocator(), context->GetIdleWaiter(),
       context->GetCapabilities()->GetMinimumUniformAlignment());
