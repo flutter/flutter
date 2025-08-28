@@ -450,9 +450,9 @@ class LinearProgressIndicator extends ProgressIndicator {
   /// 1.0, which represents one full cycle of the indeterminate animation.
   ///
   /// If this controller is null (and [value] is also null), the widget will
-  /// look for a [ProgressIndicatorTheme.controller]. If that is also null, the
-  /// widget will create and manage its own internal [AnimationController] to
-  /// drive the default indeterminate animation.
+  /// look for a [ProgressIndicatorThemeData.controller]. If that is also null,
+  /// the widget will create and manage its own internal [AnimationController]
+  /// to drive the default indeterminate animation.
   /// {@endtemplate}
   ///
   /// See also:
