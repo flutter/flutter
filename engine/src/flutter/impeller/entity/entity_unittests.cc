@@ -839,7 +839,7 @@ TEST_P(EntityTest, BlendingModeOptions) {
       FS::FragInfo frag_info;
       frag_info.color = color.Premultiply();
       FS::BindFragInfo(
-          pass, context.GetTransientsDataBuffer().EmplaceUniform(frame_info));
+          pass, context.GetTransientsDataBuffer().EmplaceUniform(frag_info));
       return pass.Draw().ok();
     };
 
