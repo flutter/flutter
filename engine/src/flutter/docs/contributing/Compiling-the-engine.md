@@ -167,6 +167,9 @@ You will typically use the `host_debug_unopt` build in this setup. Modifying dar
 require adding a `dependency_override` section in you app's `pubspec.yaml` as detailed
 [here](https://github.com/flutter/flutter/blob/master/docs/tool/README.md#using-a-locally-built-engine-with-the-flutter-tool).
 
+If you have [ccache](https://ccache.dev/) installed on your system you can enable this by using `--ccache` in step 2 above.
+This will speed up building of Flutter especially when you switch branches.
+
 
 ## Compiling for Windows
 
