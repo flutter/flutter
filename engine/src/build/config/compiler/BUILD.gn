@@ -516,7 +516,7 @@ config("cxx_version_default") {
 
   if (is_clang) {
     extra_warning_flags_cc = [
-      # TODO(XXXX): Third-party dependency (Angle) needs to patched to work
+      # TODO(174665): Third-party dependency (Angle) needs to patched to work
       # around this.
       "-Wno-deprecated-this-capture",
     ]

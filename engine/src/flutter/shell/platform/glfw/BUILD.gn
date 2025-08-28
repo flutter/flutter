@@ -74,7 +74,6 @@ source_set("flutter_glfw") {
     ]
   }
 
-  # TODO(XXXX): The use of u8path is deprecated in C++20.
   cflags_cc = [ "-Wno-deprecated-declarations" ]
 }
 
