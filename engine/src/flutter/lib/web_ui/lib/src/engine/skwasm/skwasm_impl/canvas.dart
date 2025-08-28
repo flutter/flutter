@@ -9,7 +9,7 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
 
-class SkwasmCanvas implements LayerCanvas {
+class SkwasmCanvas implements SceneCanvas {
   factory SkwasmCanvas(SkwasmPictureRecorder recorder, ui.Rect cullRect) => SkwasmCanvas.fromHandle(
     withStackScope(
       (StackScope s) =>
@@ -410,18 +410,6 @@ class SkwasmCanvas implements LayerCanvas {
       final Pointer<Float> outMatrix = scope.allocFloatArray(16);
       canvasGetTransform(_handle, outMatrix);
       return scope.convertMatrix44FromNative(outMatrix);
-    });
-  }
-
-  @override
-  void clear(ui.Color color) {
-    canvasClear(_handle, color.value);
-  }
-
-  @override
-  bool quickReject(ui.Rect rect) {
-    return withStackScope((StackScope s) {
-      return canvasQuickReject(_handle, s.convertRectToNative(rect));
     });
   }
 }
