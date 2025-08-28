@@ -126,7 +126,7 @@ class CanvasKitRenderer extends Renderer {
 
   @override
   ui.Canvas createCanvas(ui.PictureRecorder recorder, [ui.Rect? cullRect]) =>
-      CanvasKitCanvas(recorder, cullRect);
+      CkCanvas(recorder, cullRect);
 
   @override
   ui.Gradient createLinearGradient(
@@ -488,7 +488,7 @@ class CanvasKitRenderer extends Renderer {
     recorder?.recordBuildFinish();
     recorder?.recordRasterStart();
 
-    await rasterizer.draw((scene as LayerScene).layerTree);
+    await rasterizer.draw((scene as LayerScene).layerTree, null);
     recorder?.recordRasterFinish();
     recorder?.submitTimings();
   }
