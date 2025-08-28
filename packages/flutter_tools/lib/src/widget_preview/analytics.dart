@@ -58,7 +58,7 @@ class WidgetPreviewAnalytics {
   ///
   /// This should be invoked when a file system event is detected in the preview detector.
   void startPreviewReloadStopwatch() {
-    assert(!_launchTimer.isRunning);
+    assert(!_reloadTimer.isRunning);
     _reloadTimer.start();
   }
 

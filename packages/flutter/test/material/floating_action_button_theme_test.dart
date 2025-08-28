@@ -547,7 +547,7 @@ void main() {
         MaterialApp(
           theme: ThemeData().copyWith(
             floatingActionButtonTheme: FloatingActionButtonThemeData(
-              mouseCursor: MaterialStateProperty.all(SystemMouseCursors.text),
+              mouseCursor: WidgetStateProperty.all(SystemMouseCursors.text),
             ),
           ),
           home: Scaffold(

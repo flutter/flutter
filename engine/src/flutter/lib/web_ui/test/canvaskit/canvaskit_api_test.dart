@@ -1559,7 +1559,7 @@ void _paragraphTests() {
     builder.pushStyle(canvasKit.TextStyle(SkTextStyleProperties()..halfLeading = true));
     builder.pop();
     if (canvasKit.ParagraphBuilder.RequiresClientICU()) {
-      injectClientICU(builder);
+      CkParagraphBuilder.injectClientICU(builder);
     }
     final SkParagraph paragraph = builder.build();
     paragraph.layout(500);
@@ -1668,7 +1668,7 @@ void _paragraphTests() {
     builder.addText('hello');
 
     if (canvasKit.ParagraphBuilder.RequiresClientICU()) {
-      injectClientICU(builder);
+      CkParagraphBuilder.injectClientICU(builder);
     }
 
     final SkParagraph paragraph = builder.build();
