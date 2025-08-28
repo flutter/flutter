@@ -117,7 +117,7 @@ class CupertinoLocalizationAf extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -307,7 +307,7 @@ class CupertinoLocalizationAm extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -497,7 +497,7 @@ class CupertinoLocalizationAr extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -687,7 +687,7 @@ class CupertinoLocalizationAs extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -877,7 +877,7 @@ class CupertinoLocalizationAz extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -1067,7 +1067,7 @@ class CupertinoLocalizationBe extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -1257,7 +1257,7 @@ class CupertinoLocalizationBg extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -1447,7 +1447,7 @@ class CupertinoLocalizationBn extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -1637,7 +1637,7 @@ class CupertinoLocalizationBo extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -1827,7 +1827,7 @@ class CupertinoLocalizationBs extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -2017,7 +2017,7 @@ class CupertinoLocalizationCa extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -2207,7 +2207,7 @@ class CupertinoLocalizationCs extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -2397,7 +2397,7 @@ class CupertinoLocalizationCy extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -2587,7 +2587,7 @@ class CupertinoLocalizationDa extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -2777,7 +2777,7 @@ class CupertinoLocalizationDe extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -2995,7 +2995,7 @@ class CupertinoLocalizationEl extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -3617,7 +3617,7 @@ class CupertinoLocalizationEs extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -4727,7 +4727,7 @@ class CupertinoLocalizationEt extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -4917,7 +4917,7 @@ class CupertinoLocalizationEu extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -5107,7 +5107,7 @@ class CupertinoLocalizationFa extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -5297,7 +5297,7 @@ class CupertinoLocalizationFi extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -5487,7 +5487,7 @@ class CupertinoLocalizationFil extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -5677,7 +5677,7 @@ class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -5913,7 +5913,7 @@ class CupertinoLocalizationGa extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -6103,7 +6103,7 @@ class CupertinoLocalizationGl extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -6293,7 +6293,7 @@ class CupertinoLocalizationGsw extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -6483,7 +6483,7 @@ class CupertinoLocalizationGu extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -6673,7 +6673,7 @@ class CupertinoLocalizationHe extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -6863,7 +6863,7 @@ class CupertinoLocalizationHi extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -7053,7 +7053,7 @@ class CupertinoLocalizationHr extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -7243,7 +7243,7 @@ class CupertinoLocalizationHu extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -7433,7 +7433,7 @@ class CupertinoLocalizationHy extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -7623,7 +7623,7 @@ class CupertinoLocalizationId extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -7813,7 +7813,7 @@ class CupertinoLocalizationIs extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -8003,7 +8003,7 @@ class CupertinoLocalizationIt extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -8193,7 +8193,7 @@ class CupertinoLocalizationJa extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -8383,7 +8383,7 @@ class CupertinoLocalizationKa extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -8573,7 +8573,7 @@ class CupertinoLocalizationKk extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -8763,7 +8763,7 @@ class CupertinoLocalizationKm extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -9143,7 +9143,7 @@ class CupertinoLocalizationKo extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -9333,7 +9333,7 @@ class CupertinoLocalizationKy extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -9523,7 +9523,7 @@ class CupertinoLocalizationLo extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -9713,7 +9713,7 @@ class CupertinoLocalizationLt extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -9903,7 +9903,7 @@ class CupertinoLocalizationLv extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -10093,7 +10093,7 @@ class CupertinoLocalizationMk extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -10283,7 +10283,7 @@ class CupertinoLocalizationMl extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -10473,7 +10473,7 @@ class CupertinoLocalizationMn extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -10663,7 +10663,7 @@ class CupertinoLocalizationMr extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -10853,7 +10853,7 @@ class CupertinoLocalizationMs extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -11043,7 +11043,7 @@ class CupertinoLocalizationMy extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -11233,7 +11233,7 @@ class CupertinoLocalizationNb extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -11423,7 +11423,7 @@ class CupertinoLocalizationNe extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -11613,7 +11613,7 @@ class CupertinoLocalizationNl extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -11803,7 +11803,7 @@ class CupertinoLocalizationNo extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -11993,7 +11993,7 @@ class CupertinoLocalizationOr extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -12183,7 +12183,7 @@ class CupertinoLocalizationPa extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -12373,7 +12373,7 @@ class CupertinoLocalizationPl extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -12563,7 +12563,7 @@ class CupertinoLocalizationPt extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -12805,7 +12805,7 @@ class CupertinoLocalizationRo extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -12995,7 +12995,7 @@ class CupertinoLocalizationRu extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -13185,7 +13185,7 @@ class CupertinoLocalizationSi extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -13375,7 +13375,7 @@ class CupertinoLocalizationSk extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -13565,7 +13565,7 @@ class CupertinoLocalizationSl extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -13755,7 +13755,7 @@ class CupertinoLocalizationSq extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -13945,7 +13945,7 @@ class CupertinoLocalizationSr extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -14275,7 +14275,7 @@ class CupertinoLocalizationSv extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -14465,7 +14465,7 @@ class CupertinoLocalizationSw extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -14655,7 +14655,7 @@ class CupertinoLocalizationTa extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -14845,7 +14845,7 @@ class CupertinoLocalizationTe extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -15035,7 +15035,7 @@ class CupertinoLocalizationTh extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -15225,7 +15225,7 @@ class CupertinoLocalizationTl extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -15415,7 +15415,7 @@ class CupertinoLocalizationTr extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -15605,7 +15605,7 @@ class CupertinoLocalizationUg extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -15795,7 +15795,7 @@ class CupertinoLocalizationUk extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -15985,7 +15985,7 @@ class CupertinoLocalizationUr extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -16175,7 +16175,7 @@ class CupertinoLocalizationUz extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -16365,7 +16365,7 @@ class CupertinoLocalizationVi extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -16555,7 +16555,7 @@ class CupertinoLocalizationZh extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -16917,7 +16917,7 @@ class CupertinoLocalizationZu extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
