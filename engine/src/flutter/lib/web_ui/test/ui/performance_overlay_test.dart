@@ -28,13 +28,13 @@ void testMain() {
     });
 
     test('does not throw and warns only once per page load', () {
-      final LayerSceneBuilder sb1 = LayerSceneBuilder();
+      final sb1 = ui.SceneBuilder();
       warnings.clear();
       expect(() => sb1.addPerformanceOverlay(0, ui.Rect.zero), returnsNormally);
       expect(warnings, hasLength(1));
       expect(warnings.single, contains('showPerformanceOverlay is not supported on Flutter Web'));
 
-      final LayerSceneBuilder sb2 = LayerSceneBuilder();
+      final sb2 = ui.SceneBuilder();
       warnings.clear();
       expect(() => sb2.addPerformanceOverlay(0, ui.Rect.zero), returnsNormally);
       expect(warnings, isEmpty, reason: 'Second call should not produce additional warnings.');
