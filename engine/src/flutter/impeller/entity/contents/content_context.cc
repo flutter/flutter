@@ -559,18 +559,21 @@ ContentContext::ContentContext(
           context_->GetResourceAllocator(),
           context_->GetIdleWaiter(),
           context_->GetCapabilities()->GetMinimumUniformAlignment())),
-      indexes_host_buffer_(
-          context_->GetCapabilities()->NeedsPartitionedHostBuffer()
-              ? HostBuffer::Create(
-                    context_->GetResourceAllocator(),
-                    context_->GetIdleWaiter(),
-                    context_->GetCapabilities()->GetMinimumUniformAlignment())
-              : data_host_buffer_),
       text_shadow_cache_(std::make_unique<TextShadowCache>()) {
   if (!context_ || !context_->IsValid()) {
     return;
   }
 
+  // On most backends, indexes and other data can be allocated into the same
+  // buffers. However, some backends (namely WebGL) require indexes used in
+  // indexed draws to be allocated separately from other data. For those
+  // backends, we allocate a separate host buffer just for indexes.
+  indexes_host_buffer_ =
+      context_->GetCapabilities()->NeedsPartitionedHostBuffer()
+          ? HostBuffer::Create(
+                context_->GetResourceAllocator(), context_->GetIdleWaiter(),
+                context_->GetCapabilities()->GetMinimumUniformAlignment())
+          : data_host_buffer_;
   {
     TextureDescriptor desc;
     desc.storage_mode = StorageMode::kDevicePrivate;
@@ -981,6 +984,17 @@ void ContentContext::ClearCachedRuntimeEffectPipeline(
     } else {
       it++;
     }
+  }
+}
+
+void ContentContext::ResetTransientsBuffers() {
+  data_host_buffer_->Reset();
+
+  // We should only reset the indexes host buffer if it is actually different
+  // from the data host buffer. Otherwise we'll end up resetting the same host
+  // buffer twice.
+  if (data_host_buffer_ != indexes_host_buffer_) {
+    indexes_host_buffer_->Reset();
   }
 }
 

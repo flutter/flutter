@@ -293,6 +293,9 @@ class ContentContext {
   /// @brief Retrieve the current host buffer for transient storage of indexes
   ///        used for indexed draws.
   ///
+  /// This may or may not return the same value as `GetTransientsDataBuffer`
+  /// depending on the backend.
+  ///
   /// This is only safe to use from the raster threads. Other threads should
   /// allocate their own device buffers.
   HostBuffer& GetTransientsIndexesBuffer() const {
@@ -305,6 +308,9 @@ class ContentContext {
   /// This is only safe to use from the raster threads. Other threads should
   /// allocate their own device buffers.
   HostBuffer& GetTransientsDataBuffer() const { return *data_host_buffer_; }
+
+  /// @brief Resets the transients buffers held onto by the content context.
+  void ResetTransientsBuffers();
 
   TextShadowCache& GetTextShadowCache() const { return *text_shadow_cache_; }
 

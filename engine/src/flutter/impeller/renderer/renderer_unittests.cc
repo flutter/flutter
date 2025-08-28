@@ -44,6 +44,23 @@
 // TODO(zanderso): https://github.com/flutter/flutter/issues/127701
 // NOLINTBEGIN(bugprone-unchecked-optional-access)
 
+namespace {
+std::pair<std::shared_ptr<impeller::HostBuffer>,
+          std::shared_ptr<impeller::HostBuffer>>
+createHostBuffers(std::shared_ptr<impeller::Context> context) {
+  auto data_host_buffer = impeller::HostBuffer::Create(
+      context->GetResourceAllocator(), context->GetIdleWaiter(),
+      context->GetCapabilities()->GetMinimumUniformAlignment());
+  auto indexes_host_buffer =
+      context->GetCapabilities()->NeedsPartitionedHostBuffer()
+          ? impeller::HostBuffer::Create(
+                context->GetResourceAllocator(), context->GetIdleWaiter(),
+                context->GetCapabilities()->GetMinimumUniformAlignment())
+          : data_host_buffer;
+  return {data_host_buffer, indexes_host_buffer};
+}
+}  // namespace
+
 namespace impeller {
 namespace testing {
 
@@ -78,10 +95,8 @@ TEST_P(RendererTest, CanCreateBoxPrimitive) {
   raw_ptr<const Sampler> sampler = context->GetSamplerLibrary()->GetSampler({});
   ASSERT_TRUE(sampler);
 
-  auto data_host_buffer = HostBuffer::Create(
-      context->GetResourceAllocator(), context->GetIdleWaiter(),
-      context->GetCapabilities()->GetMinimumUniformAlignment());
   SinglePassCallback callback = [&](RenderPass& pass) {
+    auto [data_host_buffer, indexes_host_buffer] = createHostBuffers(context);
     ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     static bool wireframe;
     ImGui::Checkbox("Wireframe", &wireframe);
@@ -162,9 +177,7 @@ TEST_P(RendererTest, BabysFirstTriangle) {
     FS::FragInfo frag_info;
     frag_info.time = fml::TimePoint::Now().ToEpochDelta().ToSecondsF();
 
-    auto data_host_buffer = HostBuffer::Create(
-        context->GetResourceAllocator(), context->GetIdleWaiter(),
-        context->GetCapabilities()->GetMinimumUniformAlignment());
+    auto [data_host_buffer, indexes_host_buffer] = createHostBuffers(context);
     FS::BindFragInfo(pass, data_host_buffer->EmplaceUniform(frag_info));
 
     return pass.Draw().ok();
@@ -239,10 +252,8 @@ TEST_P(RendererTest, CanRenderPerspectiveCube) {
   ASSERT_TRUE(sampler);
 
   Vector3 euler_angles;
-  auto data_host_buffer = HostBuffer::Create(
-      context->GetResourceAllocator(), context->GetIdleWaiter(),
-      context->GetCapabilities()->GetMinimumUniformAlignment());
   SinglePassCallback callback = [&](RenderPass& pass) {
+    auto [data_host_buffer, indexes_host_buffer] = createHostBuffers(context);
     static Degrees fov_y(60);
     static Scalar distance = 10;
 
@@ -320,10 +331,8 @@ TEST_P(RendererTest, CanRenderMultiplePrimitives) {
   raw_ptr<const Sampler> sampler = context->GetSamplerLibrary()->GetSampler({});
   ASSERT_TRUE(sampler);
 
-  auto data_host_buffer = HostBuffer::Create(
-      context->GetResourceAllocator(), context->GetIdleWaiter(),
-      context->GetCapabilities()->GetMinimumUniformAlignment());
   SinglePassCallback callback = [&](RenderPass& pass) {
+    auto [data_host_buffer, indexes_host_buffer] = createHostBuffers(context);
     for (size_t i = 0; i < 1; i++) {
       for (size_t j = 0; j < 1; j++) {
         pass.SetCommandLabel("Box");
@@ -375,9 +384,7 @@ TEST_P(RendererTest, CanRenderToTexture) {
   auto box_pipeline =
       context->GetPipelineLibrary()->GetPipeline(pipeline_desc).Get();
   ASSERT_TRUE(box_pipeline);
-  auto data_host_buffer = HostBuffer::Create(
-      context->GetResourceAllocator(), context->GetIdleWaiter(),
-      context->GetCapabilities()->GetMinimumUniformAlignment());
+  auto [data_host_buffer, indexes_host_buffer] = createHostBuffers(context);
 
   VertexBufferBuilder<VS::PerVertexData> vertex_builder;
   vertex_builder.SetLabel("Box");
@@ -498,17 +505,9 @@ TEST_P(RendererTest, CanRenderInstanced) {
     instances.colors[i] = Color::Random();
   }
 
-  auto data_host_buffer = HostBuffer::Create(
-      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
-      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
-  auto indexes_host_buffer =
-      GetContext()->GetCapabilities()->NeedsPartitionedHostBuffer()
-          ? HostBuffer::Create(
-                GetContext()->GetResourceAllocator(),
-                GetContext()->GetIdleWaiter(),
-                GetContext()->GetCapabilities()->GetMinimumUniformAlignment())
-          : data_host_buffer;
   ASSERT_TRUE(OpenPlaygroundHere([&](RenderPass& pass) -> bool {
+    auto [data_host_buffer, indexes_host_buffer] =
+        createHostBuffers(GetContext());
     pass.SetPipeline(pipeline);
     pass.SetCommandLabel("InstancedDraw");
 
@@ -579,10 +578,8 @@ TEST_P(RendererTest, CanBlitTextureToTexture) {
       vertex_builder.CreateVertexBuffer(*context->GetResourceAllocator());
   ASSERT_TRUE(vertex_buffer);
 
-  auto data_host_buffer = HostBuffer::Create(
-      context->GetResourceAllocator(), context->GetIdleWaiter(),
-      context->GetCapabilities()->GetMinimumUniformAlignment());
   Playground::RenderCallback callback = [&](RenderTarget& render_target) {
+    auto [data_host_buffer, indexes_host_buffer] = createHostBuffers(context);
     auto buffer = context->CreateCommandBuffer();
     if (!buffer) {
       return false;
@@ -696,10 +693,8 @@ TEST_P(RendererTest, CanBlitTextureToBuffer) {
       vertex_builder.CreateVertexBuffer(*context->GetResourceAllocator());
   ASSERT_TRUE(vertex_buffer);
 
-  auto data_host_buffer = HostBuffer::Create(
-      context->GetResourceAllocator(), context->GetIdleWaiter(),
-      context->GetCapabilities()->GetMinimumUniformAlignment());
   Playground::RenderCallback callback = [&](RenderTarget& render_target) {
+    auto [data_host_buffer, indexes_host_buffer] = createHostBuffers(context);
     {
       auto buffer = context->CreateCommandBuffer();
       if (!buffer) {
@@ -811,10 +806,8 @@ TEST_P(RendererTest, CanGenerateMipmaps) {
   ASSERT_TRUE(vertex_buffer);
 
   bool first_frame = true;
-  auto data_host_buffer = HostBuffer::Create(
-      context->GetResourceAllocator(), context->GetIdleWaiter(),
-      context->GetCapabilities()->GetMinimumUniformAlignment());
   Playground::RenderCallback callback = [&](RenderTarget& render_target) {
+    auto [data_host_buffer, indexes_host_buffer] = createHostBuffers(context);
     const char* mip_filter_names[] = {"Base", "Nearest", "Linear"};
     const MipFilter mip_filters[] = {MipFilter::kBase, MipFilter::kNearest,
                                      MipFilter::kLinear};
@@ -925,18 +918,9 @@ TEST_P(RendererTest, TheImpeller) {
        "table_mountain_pz.png", "table_mountain_nz.png"});
   raw_ptr<const Sampler> cube_map_sampler =
       context->GetSamplerLibrary()->GetSampler({});
-  auto data_host_buffer = HostBuffer::Create(
-      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
-      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
-  auto indexes_host_buffer =
-      GetContext()->GetCapabilities()->NeedsPartitionedHostBuffer()
-          ? HostBuffer::Create(
-                GetContext()->GetResourceAllocator(),
-                GetContext()->GetIdleWaiter(),
-                GetContext()->GetCapabilities()->GetMinimumUniformAlignment())
-          : data_host_buffer;
 
   SinglePassCallback callback = [&](RenderPass& pass) {
+    auto [data_host_buffer, indexes_host_buffer] = createHostBuffers(context);
     auto size = pass.GetRenderTargetSize();
 
     pass.SetPipeline(pipeline);
@@ -984,18 +968,8 @@ TEST_P(RendererTest, Planet) {
       context->GetPipelineLibrary()->GetPipeline(pipeline_descriptor).Get();
   ASSERT_TRUE(pipeline && pipeline->IsValid());
 
-  auto data_host_buffer = HostBuffer::Create(
-      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
-      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
-  auto indexes_host_buffer =
-      GetContext()->GetCapabilities()->NeedsPartitionedHostBuffer()
-          ? HostBuffer::Create(
-                GetContext()->GetResourceAllocator(),
-                GetContext()->GetIdleWaiter(),
-                GetContext()->GetCapabilities()->GetMinimumUniformAlignment())
-          : data_host_buffer;
-
   SinglePassCallback callback = [&](RenderPass& pass) {
+    auto [data_host_buffer, indexes_host_buffer] = createHostBuffers(context);
     static Scalar speed = 0.1;
     static Scalar planet_size = 550.0;
     static bool show_normals = false;
@@ -1060,17 +1034,8 @@ TEST_P(RendererTest, ArrayUniforms) {
       context->GetPipelineLibrary()->GetPipeline(pipeline_descriptor).Get();
   ASSERT_TRUE(pipeline && pipeline->IsValid());
 
-  auto data_host_buffer = HostBuffer::Create(
-      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
-      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
-  auto indexes_host_buffer =
-      GetContext()->GetCapabilities()->NeedsPartitionedHostBuffer()
-          ? HostBuffer::Create(
-                GetContext()->GetResourceAllocator(),
-                GetContext()->GetIdleWaiter(),
-                GetContext()->GetCapabilities()->GetMinimumUniformAlignment())
-          : data_host_buffer;
   SinglePassCallback callback = [&](RenderPass& pass) {
+    auto [data_host_buffer, indexes_host_buffer] = createHostBuffers(context);
     auto size = pass.GetRenderTargetSize();
 
     pass.SetPipeline(pipeline);
@@ -1127,17 +1092,8 @@ TEST_P(RendererTest, InactiveUniforms) {
       context->GetPipelineLibrary()->GetPipeline(pipeline_descriptor).Get();
   ASSERT_TRUE(pipeline && pipeline->IsValid());
 
-  auto data_host_buffer = HostBuffer::Create(
-      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
-      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
-  auto indexes_host_buffer =
-      GetContext()->GetCapabilities()->NeedsPartitionedHostBuffer()
-          ? HostBuffer::Create(
-                GetContext()->GetResourceAllocator(),
-                GetContext()->GetIdleWaiter(),
-                GetContext()->GetCapabilities()->GetMinimumUniformAlignment())
-          : data_host_buffer;
   SinglePassCallback callback = [&](RenderPass& pass) {
+    auto [data_host_buffer, indexes_host_buffer] = createHostBuffers(context);
     auto size = pass.GetRenderTargetSize();
 
     pass.SetPipeline(pipeline);
@@ -1301,10 +1257,8 @@ TEST_P(RendererTest, StencilMask) {
   static int current_back_compare =
       CompareFunctionUI().IndexOf(CompareFunction::kLessEqual);
 
-  auto host_buffer = HostBuffer::Create(
-      context->GetResourceAllocator(), context->GetIdleWaiter(),
-      context->GetCapabilities()->GetMinimumUniformAlignment());
   Playground::RenderCallback callback = [&](RenderTarget& render_target) {
+    auto [data_host_buffer, indexes_host_buffer] = createHostBuffers(context);
     auto buffer = context->CreateCommandBuffer();
     if (!buffer) {
       return false;
@@ -1385,7 +1339,7 @@ TEST_P(RendererTest, StencilMask) {
       if (mirror) {
         uniforms.mvp = Matrix::MakeScale(Vector2(-1, 1)) * uniforms.mvp;
       }
-      VS::BindUniformBuffer(*pass, host_buffer->EmplaceUniform(uniforms));
+      VS::BindUniformBuffer(*pass, data_host_buffer->EmplaceUniform(uniforms));
 
       FS::FrameInfo frame_info;
       frame_info.current_time = GetSecondsElapsed();
@@ -1393,7 +1347,7 @@ TEST_P(RendererTest, StencilMask) {
       frame_info.window_size.x = GetWindowSize().width;
       frame_info.window_size.y = GetWindowSize().height;
 
-      FS::BindFrameInfo(*pass, host_buffer->EmplaceUniform(frame_info));
+      FS::BindFrameInfo(*pass, data_host_buffer->EmplaceUniform(frame_info));
       FS::BindContents1(*pass, boston, sampler);
       FS::BindContents2(*pass, bridge, sampler);
       if (!pass->Draw().ok()) {
@@ -1405,7 +1359,7 @@ TEST_P(RendererTest, StencilMask) {
     if (!context->GetCommandQueue()->Submit({buffer}).ok()) {
       return false;
     }
-    host_buffer->Reset();
+    data_host_buffer->Reset();
     return true;
   };
   OpenPlaygroundHere(callback);
