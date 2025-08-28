@@ -133,11 +133,7 @@ class _RenderSliverResizingHeader extends RenderSliver
   RenderBox? get child => childForSlot(_Slot.child);
 
   @override
-  Iterable<RenderBox> get children => <RenderBox>[
-    if (minExtentPrototype != null) minExtentPrototype!,
-    if (maxExtentPrototype != null) maxExtentPrototype!,
-    if (child != null) child!,
-  ];
+  Iterable<RenderBox> get children => <RenderBox>[?minExtentPrototype, ?maxExtentPrototype, ?child];
 
   double boxExtent(RenderBox box) {
     assert(box.hasSize);

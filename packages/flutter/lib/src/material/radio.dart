@@ -293,7 +293,7 @@ class Radio<T> extends StatefulWidget {
   /// default state; if [ThemeData.useMaterial3] is true, then [ColorScheme.onSurface]
   /// is used in the disabled state, [ColorScheme.primary] is used in the
   /// selected state and [ColorScheme.onSurfaceVariant] is used in the default state.
-  final MaterialStateProperty<Color?>? fillColor;
+  final WidgetStateProperty<Color?>? fillColor;
 
   /// {@template flutter.material.radio.materialTapTargetSize}
   /// Configures the minimum size of the tap target.
@@ -370,7 +370,7 @@ class Radio<T> extends StatefulWidget {
   ///   * pressed - Theme.colorScheme.primary(0.1)
   ///   * hovered - Theme.colorScheme.onSurface(0.08)
   ///   * focused - Theme.colorScheme.onSurface(0.1)
-  final MaterialStateProperty<Color?>? overlayColor;
+  final WidgetStateProperty<Color?>? overlayColor;
 
   /// {@template flutter.material.radio.splashRadius}
   /// The splash radius of the circular [Material] ink response.
@@ -426,11 +426,14 @@ class Radio<T> extends StatefulWidget {
   ///  * [WidgetState.hovered].
   ///  * [WidgetState.focused].
   ///  * [WidgetState.disabled].
-  ///
-  /// If null, then it is transparent in all states.
   /// {@endtemplate}
+  ///
+  /// If null, then [RadioThemeData.backgroundColor] of [ThemeData.radioTheme]
+  /// is used. If that is also null the default value is transparent in all
+  /// states.
   final WidgetStateProperty<Color?>? backgroundColor;
 
+  /// {@template flutter.material.Radio.side}
   /// The side for the circular border of the radio button, in all
   /// [WidgetState]s.
   ///
@@ -442,18 +445,23 @@ class Radio<T> extends StatefulWidget {
   ///  * [WidgetState.hovered].
   ///  * [WidgetState.focused].
   ///  * [WidgetState.disabled].
+  /// {@endtemplate}
   ///
-  /// If null, then it defaults to a border using the fill color.
+  /// If null, then [RadioThemeData.side] of [ThemeData.radioTheme] is used. If
+  /// that is also null, the default value is a border using the fill color.
   final BorderSide? side;
 
+  /// {@template flutter.material.Radio.innerRadius}
   /// The radius of the inner circle of the radio button, in all [WidgetState]s.
   ///
   /// Resolves in the following states:
   ///  * [WidgetState.hovered].
   ///  * [WidgetState.focused].
   ///  * [WidgetState.disabled].
+  /// {@endtemplate}
   ///
-  /// If null, then it defaults to `4.5` in all states.
+  /// If null, then [RadioThemeData.innerRadius] of [ThemeData.radioTheme] is
+  /// used. If that is also null, the default value is `4.5` in all states.
   final WidgetStateProperty<double?>? innerRadius;
 
   @override
@@ -533,11 +541,11 @@ class _RadioState<T> extends State<Radio<T>> {
     }
 
     final RadioThemeData radioTheme = RadioTheme.of(context);
-    final MaterialStateProperty<MouseCursor> effectiveMouseCursor =
-        MaterialStateProperty.resolveWith<MouseCursor>((Set<MaterialState> states) {
-          return MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
+    final WidgetStateProperty<MouseCursor> effectiveMouseCursor =
+        WidgetStateProperty.resolveWith<MouseCursor>((Set<MaterialState> states) {
+          return WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
               radioTheme.mouseCursor?.resolve(states) ??
-              MaterialStateProperty.resolveAs<MouseCursor>(
+              WidgetStateProperty.resolveAs<MouseCursor>(
                 MaterialStateMouseCursor.clickable,
                 states,
               );
@@ -606,10 +614,10 @@ class _RadioPaint extends StatefulWidget {
 
   final ToggleableStateMixin toggleableState;
   final Color? activeColor;
-  final MaterialStateProperty<Color?>? fillColor;
+  final WidgetStateProperty<Color?>? fillColor;
   final Color? hoverColor;
   final Color? focusColor;
-  final MaterialStateProperty<Color?>? overlayColor;
+  final WidgetStateProperty<Color?>? overlayColor;
   final double? splashRadius;
   final VisualDensity? visualDensity;
   final MaterialTapTargetSize? materialTapTargetSize;
@@ -630,8 +638,8 @@ class _RadioPaintState extends State<_RadioPaint> {
     super.dispose();
   }
 
-  MaterialStateProperty<Color?> get _widgetFillColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color?> get _widgetFillColor {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return null;
       }
@@ -741,9 +749,9 @@ class _RadioPaintState extends State<_RadioPaint> {
       ),
     };
     size += effectiveVisualDensity.baseSizeAdjustment;
-    // TODO(ValentinVignal): Add side to RadioThemeData.
     final BorderSide activeSide =
         _resolveSide(widget.side, activeStates) ??
+        _resolveSide(radioTheme.side, activeStates) ??
         BorderSide(
           color: effectiveActiveColor,
           width: 2.0,
@@ -751,13 +759,17 @@ class _RadioPaintState extends State<_RadioPaint> {
         );
     final BorderSide inactiveSide =
         _resolveSide(widget.side, inactiveStates) ??
+        _resolveSide(radioTheme.side, inactiveStates) ??
         BorderSide(
           color: effectiveInactiveColor,
           width: 2.0,
           strokeAlign: BorderSide.strokeAlignCenter,
         );
 
-    final double innerRadius = widget.innerRadius?.resolve(activeStates) ?? _kInnerRadius;
+    final double innerRadius =
+        widget.innerRadius?.resolve(activeStates) ??
+        radioTheme.innerRadius?.resolve(activeStates) ??
+        _kInnerRadius;
 
     return CustomPaint(
       size: size,
@@ -876,8 +888,8 @@ class _RadioDefaultsM2 extends RadioThemeData {
   late final ColorScheme _colors = _theme.colorScheme;
 
   @override
-  MaterialStateProperty<Color> get fillColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color> get fillColor {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return _theme.disabledColor;
       }
@@ -889,8 +901,8 @@ class _RadioDefaultsM2 extends RadioThemeData {
   }
 
   @override
-  MaterialStateProperty<Color> get overlayColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color> get overlayColor {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
         return fillColor.resolve(states).withAlpha(kRadialReactionAlpha);
       }
@@ -931,33 +943,33 @@ class _RadioDefaultsM3 extends RadioThemeData {
   late final ColorScheme _colors = _theme.colorScheme;
 
   @override
-  MaterialStateProperty<Color> get fillColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
-        if (states.contains(MaterialState.disabled)) {
+  WidgetStateProperty<Color> get fillColor {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
+        if (states.contains(WidgetState.disabled)) {
           return _colors.onSurface.withOpacity(0.38);
         }
-        if (states.contains(MaterialState.pressed)) {
+        if (states.contains(WidgetState.pressed)) {
           return _colors.primary;
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return _colors.primary;
         }
-        if (states.contains(MaterialState.focused)) {
+        if (states.contains(WidgetState.focused)) {
           return _colors.primary;
         }
         return _colors.primary;
       }
-      if (states.contains(MaterialState.disabled)) {
+      if (states.contains(WidgetState.disabled)) {
         return _colors.onSurface.withOpacity(0.38);
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return _colors.onSurface;
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return _colors.onSurface;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return _colors.onSurface;
       }
       return _colors.onSurfaceVariant;
@@ -965,27 +977,27 @@ class _RadioDefaultsM3 extends RadioThemeData {
   }
 
   @override
-  MaterialStateProperty<Color> get overlayColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
-        if (states.contains(MaterialState.pressed)) {
+  WidgetStateProperty<Color> get overlayColor {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
+        if (states.contains(WidgetState.pressed)) {
           return _colors.onSurface.withOpacity(0.1);
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return _colors.primary.withOpacity(0.08);
         }
-        if (states.contains(MaterialState.focused)) {
+        if (states.contains(WidgetState.focused)) {
           return _colors.primary.withOpacity(0.1);
         }
         return Colors.transparent;
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return _colors.primary.withOpacity(0.1);
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return _colors.onSurface.withOpacity(0.08);
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return _colors.onSurface.withOpacity(0.1);
       }
       return Colors.transparent;

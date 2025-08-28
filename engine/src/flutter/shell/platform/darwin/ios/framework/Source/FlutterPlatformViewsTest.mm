@@ -3444,7 +3444,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       nullptr, framebuffer_info,
       [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return false; },
       [](const flutter::SurfaceFrame& surface_frame) { return true; },
-      /*frame_size=*/SkISize::Make(800, 600));
+      /*frame_size=*/flutter::DlISize(800, 600));
   XCTAssertFalse([flutterPlatformViewsController
          submitFrame:std::move(mock_surface)
       withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
@@ -3461,7 +3461,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       nullptr, framebuffer_info,
       [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
       [](const flutter::SurfaceFrame& surface_frame) { return true; },
-      /*frame_size=*/SkISize::Make(800, 600));
+      /*frame_size=*/flutter::DlISize(800, 600));
   XCTAssertTrue([flutterPlatformViewsController
          submitFrame:std::move(mock_surface_submit_true)
       withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
@@ -3660,7 +3660,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       nullptr, framebuffer_info,
       [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
       [](const flutter::SurfaceFrame& surface_frame) { return true; },
-      /*frame_size=*/SkISize::Make(800, 600), nullptr, /*display_list_fallback=*/true);
+      /*frame_size=*/flutter::DlISize(800, 600), nullptr, /*display_list_fallback=*/true);
   XCTAssertTrue([flutterPlatformViewsController
          submitFrame:std::move(mock_surface)
       withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
@@ -3689,7 +3689,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       nullptr, framebuffer_info,
       [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
       [](const flutter::SurfaceFrame& surface_frame) { return true; },
-      /*frame_size=*/SkISize::Make(800, 600), nullptr, /*display_list_fallback=*/true);
+      /*frame_size=*/flutter::DlISize(800, 600), nullptr, /*display_list_fallback=*/true);
   XCTAssertTrue([flutterPlatformViewsController
          submitFrame:std::move(mock_surface)
       withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
@@ -3767,7 +3767,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       nullptr, framebuffer_info,
       [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
       [](const flutter::SurfaceFrame& surface_frame) { return true; },
-      /*frame_size=*/SkISize::Make(800, 600), nullptr, /*display_list_fallback=*/true);
+      /*frame_size=*/flutter::DlISize(800, 600), nullptr, /*display_list_fallback=*/true);
   XCTAssertTrue([flutterPlatformViewsController
          submitFrame:std::move(mock_surface)
       withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
@@ -3796,7 +3796,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       nullptr, framebuffer_info,
       [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
       [](const flutter::SurfaceFrame& surface_frame) { return true; },
-      /*frame_size=*/SkISize::Make(800, 600), nullptr, /*display_list_fallback=*/true);
+      /*frame_size=*/flutter::DlISize(800, 600), nullptr, /*display_list_fallback=*/true);
   XCTAssertTrue([flutterPlatformViewsController
          submitFrame:std::move(mock_surface)
       withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
@@ -4257,7 +4257,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
         nullptr, framebuffer_info,
         [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
         [](const flutter::SurfaceFrame& surface_frame) { return true; },
-        /*frame_size=*/SkISize::Make(800, 600), nullptr,
+        /*frame_size=*/flutter::DlISize(800, 600), nullptr,
         /*display_list_fallback=*/true);
     XCTAssertTrue([flutterPlatformViewsController
            submitFrame:std::move(mock_surface)
@@ -4285,7 +4285,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
         nullptr, framebuffer_info,
         [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
         [](const flutter::SurfaceFrame& surface_frame) { return true; },
-        /*frame_size=*/SkISize::Make(800, 600), nullptr, /*display_list_fallback=*/true);
+        /*frame_size=*/flutter::DlISize(800, 600), nullptr, /*display_list_fallback=*/true);
     XCTAssertTrue([flutterPlatformViewsController
            submitFrame:std::move(mock_surface)
         withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
@@ -4354,7 +4354,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       nullptr, framebuffer_info,
       [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
       [](const flutter::SurfaceFrame& surface_frame) { return true; },
-      /*frame_size=*/SkISize::Make(800, 600), nullptr, /*display_list_fallback=*/true);
+      /*frame_size=*/flutter::DlISize(800, 600), nullptr, /*display_list_fallback=*/true);
   [flutterPlatformViewsController submitFrame:std::move(mock_surface)
                                withIosContext:std::make_shared<flutter::IOSContextNoop>()];
 
@@ -4424,7 +4424,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       nullptr, framebuffer_info,
       [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
       [](const flutter::SurfaceFrame& surface_frame) { return true; },
-      /*frame_size=*/SkISize::Make(800, 600), nullptr, /*display_list_fallback=*/true);
+      /*frame_size=*/flutter::DlISize(800, 600), nullptr, /*display_list_fallback=*/true);
   [flutterPlatformViewsController submitFrame:std::move(mock_surface)
                                withIosContext:std::make_shared<flutter::IOSContextNoop>()];
 
@@ -4497,7 +4497,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       nullptr, framebuffer_info,
       [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
       [](const flutter::SurfaceFrame& surface_frame) { return true; },
-      /*frame_size=*/SkISize::Make(800, 600), nullptr, /*display_list_fallback=*/true);
+      /*frame_size=*/flutter::DlISize(800, 600), nullptr, /*display_list_fallback=*/true);
   [flutterPlatformViewsController submitFrame:std::move(mock_surface)
                                withIosContext:std::make_shared<flutter::IOSContextNoop>()];
 
@@ -4605,19 +4605,19 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
         submit_info = surface_frame.submit_info();
         return true;
       },
-      /*frame_size=*/SkISize::Make(800, 600), nullptr,
+      /*frame_size=*/flutter::DlISize(800, 600), nullptr,
       /*display_list_fallback=*/true);
   mock_surface->set_submit_info({
-      .frame_damage = SkIRect::MakeWH(800, 600),
-      .buffer_damage = SkIRect::MakeWH(400, 600),
+      .frame_damage = flutter::DlIRect::MakeWH(800, 600),
+      .buffer_damage = flutter::DlIRect::MakeWH(400, 600),
   });
 
   [flutterPlatformViewsController submitFrame:std::move(mock_surface)
                                withIosContext:std::make_shared<flutter::IOSContextNoop>()];
 
   XCTAssertTrue(submit_info.has_value());
-  XCTAssertEqual(*submit_info->frame_damage, SkIRect::MakeWH(800, 600));
-  XCTAssertEqual(*submit_info->buffer_damage, SkIRect::MakeWH(400, 600));
+  XCTAssertEqual(*submit_info->frame_damage, flutter::DlIRect::MakeWH(800, 600));
+  XCTAssertEqual(*submit_info->buffer_damage, flutter::DlIRect::MakeWH(400, 600));
 }
 
 - (void)testClipSuperellipse {

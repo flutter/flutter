@@ -2653,6 +2653,7 @@ Future<CommandResult> _runFlutterAnalyze(
 
 // These files legitimately require executable permissions
 const Set<String> kExecutableAllowlist = <String>{
+  '.autoroller-preupload.sh',
   'bin/dart',
   'bin/flutter',
   'bin/flutter-dev',

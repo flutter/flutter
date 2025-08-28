@@ -243,6 +243,57 @@ void main() {
     expect(selection, <int>{2, 3});
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/161922.
+  testWidgets('Focused segment does not lose focus when its selection state changes', (
+    WidgetTester tester,
+  ) async {
+    int callbackCount = 0;
+    Set<int> selection = <int>{1};
+
+    Widget frameWithSelection(Set<int> selected) {
+      return Material(
+        child: boilerplate(
+          child: SegmentedButton<int>(
+            multiSelectionEnabled: true,
+            segments: const <ButtonSegment<int>>[
+              ButtonSegment<int>(value: 1, label: Text('1')),
+              ButtonSegment<int>(value: 2, label: Text('2')),
+            ],
+            selected: selected,
+            onSelectionChanged: (Set<int> selected) {
+              selection = selected;
+              callbackCount += 1;
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(frameWithSelection(selection));
+    expect(selection, <int>{1});
+    expect(callbackCount, 0);
+
+    // Select segment 2.
+    await tester.pumpWidget(frameWithSelection(<int>{1, 2}));
+    await tester.pumpAndSettle();
+
+    FocusNode getSegment2FocusNode() {
+      return Focus.of(tester.element(find.text('2')));
+    }
+
+    // Set focus on segment 2.
+    getSegment2FocusNode().requestFocus();
+    await tester.pumpAndSettle();
+    expect(getSegment2FocusNode().hasFocus, true);
+
+    // Unselect segment 2.
+    await tester.pumpWidget(frameWithSelection(<int>{1}));
+    await tester.pumpAndSettle();
+
+    // The button should still be focused.
+    expect(getSegment2FocusNode().hasFocus, true);
+  });
+
   testWidgets('SegmentedButton allows for empty selection', (WidgetTester tester) async {
     int callbackCount = 0;
     int? selectedSegment = 1;
@@ -257,7 +308,7 @@ void main() {
               ButtonSegment<int>(value: 2, label: Text('2')),
               ButtonSegment<int>(value: 3, label: Text('3')),
             ],
-            selected: <int>{if (selected != null) selected},
+            selected: <int>{?selected},
             onSelectionChanged: (Set<int> selected) {
               selectedSegment = selected.isEmpty ? null : selected.first;
               callbackCount += 1;
@@ -585,7 +636,7 @@ void main() {
     );
 
     final Material material = tester.widget<Material>(
-      find.descendant(of: find.byType(TextButton), matching: find.byType(Material)),
+      find.descendant(of: find.byType(TextButton).last, matching: find.byType(Material)),
     );
 
     // Hovered.

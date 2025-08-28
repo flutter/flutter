@@ -23,11 +23,9 @@ void main() {
                 maxExtentPrototype: maxPrototype,
                 child: const SizedBox.expand(child: Text('header')),
               ),
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) => Text('item $index'),
-                  childCount: 100,
-                ),
+              SliverList.builder(
+                itemCount: 100,
+                itemBuilder: (BuildContext context, int index) => Text('item $index'),
               ),
             ],
           ),
@@ -181,11 +179,9 @@ void main() {
                 maxExtentPrototype: SizedBox(height: 300),
                 child: SizedBox.expand(child: Text('header')),
               ),
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) => Text('item $index'),
-                  childCount: 100,
-                ),
+              SliverList.builder(
+                itemCount: 100,
+                itemBuilder: (BuildContext context, int index) => Text('item $index'),
               ),
             ],
           ),
@@ -219,11 +215,9 @@ void main() {
                   maxExtentPrototype: SizedBox(height: 100),
                   child: SizedBox.expand(child: Text('header')),
                 ),
-                SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int index) => Text('item $index'),
-                    childCount: 100,
-                  ),
+                SliverList.builder(
+                  itemCount: 100,
+                  itemBuilder: (BuildContext context, int index) => Text('item $index'),
                 ),
               ],
             ),

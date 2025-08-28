@@ -128,7 +128,7 @@ void main() {
         child: InputChip(
           onSelected: enabled ? (bool value) {} : null,
           selected: selected,
-          color: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+          color: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
             if (states.contains(MaterialState.disabled) &&
                 states.contains(MaterialState.selected)) {
               return disabledSelectedColor;

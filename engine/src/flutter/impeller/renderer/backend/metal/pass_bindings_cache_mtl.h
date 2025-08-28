@@ -75,7 +75,7 @@ struct PassBindingsCacheMTL {
 
   /// @brief Set the encoder scissor rect if the value is different from the
   ///        current encoder state.
-  void SetScissor(const IRect& scissor);
+  void SetScissor(const IRect32& scissor);
 
   /// @brief Set the encoder's stencil reference if the value is different from
   ///        the current encoder state.
@@ -97,7 +97,7 @@ struct PassBindingsCacheMTL {
   std::map<ShaderStage, TextureMap> textures_;
   std::map<ShaderStage, SamplerMap> samplers_;
   std::optional<Viewport> viewport_;
-  std::optional<IRect> scissor_;
+  std::optional<IRect32> scissor_;
   std::optional<uint32_t> stencil_ref_;
 };
 

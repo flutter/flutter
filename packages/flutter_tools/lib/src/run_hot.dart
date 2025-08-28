@@ -233,14 +233,12 @@ class HotRunner extends ResidentRunner {
   Future<int> attach({
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
-    bool allowExistingDdsInstance = false,
     bool needsFullRestart = true,
   }) async {
     stopAppDuringCleanup = false;
     return _attach(
       connectionInfoCompleter: connectionInfoCompleter,
       appStartedCompleter: appStartedCompleter,
-      allowExistingDdsInstance: allowExistingDdsInstance,
       needsFullRestart: needsFullRestart,
     );
   }
@@ -248,7 +246,6 @@ class HotRunner extends ResidentRunner {
   Future<int> _attach({
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
-    bool allowExistingDdsInstance = false,
     bool needsFullRestart = true,
   }) async {
     try {
@@ -256,7 +253,6 @@ class HotRunner extends ResidentRunner {
         reloadSources: _reloadSourcesService,
         restart: _restartService,
         compileExpression: _compileExpressionService,
-        allowExistingDdsInstance: allowExistingDdsInstance,
       );
       // Catches all exceptions, non-Exception objects are rethrown.
     } catch (error) {
