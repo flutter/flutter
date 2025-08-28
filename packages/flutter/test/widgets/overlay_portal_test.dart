@@ -212,7 +212,7 @@ void main() {
     });
     // stop before updating semantics.
     await tester.pump(null, EnginePhase.composite);
-    expect(renderObject.debugNeedsSemanticsUpdate, isFalse);
+    expect(renderObject.debugNeedsSemanticsUpdate, isTrue);
   });
 
   testWidgets('Safe to deactivate and re-activate OverlayPortal', (WidgetTester tester) async {
@@ -2866,7 +2866,7 @@ void main() {
       final Matrix4 node1Transform = Matrix4.identity()
         ..scale(3.0, 3.0, 1.0)
         ..translate(0.0, TestSemantics.fullScreen.height - 10.0);
-      final Matrix4 node4Transform = node1Transform.clone()..translate(10.0);
+      final Matrix4 node3Transform = node1Transform.clone()..translate(10.0);
 
       final TestSemantics expected = TestSemantics.root(
         children: <TestSemantics>[
@@ -2875,21 +2875,29 @@ void main() {
             rect: Offset.zero & const Size(10, 10),
             transform: node1Transform,
             children: <TestSemantics>[
-              TestSemantics(id: 2, label: 'A', rect: Offset.zero & const Size(10, 10)),
-              // The crossAxisAlignment is set to `end`. The size of node 1 is 30 x 10.
               TestSemantics(
-                id: 3,
-                label: 'BBBB',
-                rect: Offset.zero & const Size(40, 10),
-                transform: Matrix4.translationValues(0, -rowOriginY, 0),
+                id: 2,
+                label: 'A',
+                rect: Offset.zero & const Size(10, 10),
+                children: <TestSemantics>[
+                  // The crossAxisAlignment is set to `end`. The size of node 1 is 30 x 10.
+                  TestSemantics(
+                    id: 4,
+                    label: 'BBBB',
+                    rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+                    transform: Matrix4.identity()
+                      ..scale(1 / 3, 1 / 3, 1)
+                      ..setTranslationRaw(0, -rowOriginY, 0),
+                  ),
+                ],
               ),
             ],
           ),
           TestSemantics(
-            id: 4,
+            id: 3,
             label: 'CC',
             rect: Offset.zero & const Size(20, 10),
-            transform: node4Transform,
+            transform: node3Transform,
           ),
         ],
       );
