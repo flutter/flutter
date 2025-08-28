@@ -22,11 +22,10 @@ namespace impeller {
 /// @brief Create an index-less vertex buffer from a fixed size array.
 template <class VertexType, size_t size>
 VertexBuffer CreateVertexBuffer(std::array<VertexType, size> input,
-                                HostBuffer& host_buffer) {
+                                HostBuffer& data_host_buffer) {
   return VertexBuffer{
-      .vertex_buffer = host_buffer.Emplace(
-          input.data(), sizeof(VertexType) * size, alignof(VertexType),
-          HostBuffer::BufferCategory::kData),
+      .vertex_buffer = data_host_buffer.Emplace(
+          input.data(), sizeof(VertexType) * size, alignof(VertexType)),
       .vertex_count = size,
       .index_type = IndexType::kNone,
   };
@@ -93,10 +92,11 @@ class VertexBufferBuilder {
     return *this;
   }
 
-  VertexBuffer CreateVertexBuffer(HostBuffer& host_buffer) const {
+  VertexBuffer CreateVertexBuffer(HostBuffer& data_host_buffer,
+                                  HostBuffer& indexes_host_buffer) const {
     VertexBuffer buffer;
-    buffer.vertex_buffer = CreateVertexBufferView(host_buffer);
-    buffer.index_buffer = CreateIndexBufferView(host_buffer);
+    buffer.vertex_buffer = CreateVertexBufferView(data_host_buffer);
+    buffer.index_buffer = CreateIndexBufferView(indexes_host_buffer);
     buffer.vertex_count = GetIndexCount();
     buffer.index_type = GetIndexType();
     return buffer;
@@ -123,10 +123,10 @@ class VertexBufferBuilder {
   std::vector<IndexType> indices_;
   std::string label_;
 
-  BufferView CreateVertexBufferView(HostBuffer& buffer) const {
-    return buffer.Emplace(
-        vertices_.data(), vertices_.size() * sizeof(VertexType),
-        alignof(VertexType), HostBuffer::BufferCategory::kData);
+  BufferView CreateVertexBufferView(HostBuffer& data_host_buffer) const {
+    return data_host_buffer.Emplace(vertices_.data(),
+                                    vertices_.size() * sizeof(VertexType),
+                                    alignof(VertexType));
   }
 
   BufferView CreateVertexBufferView(Allocator& allocator) const {
@@ -144,14 +144,14 @@ class VertexBufferBuilder {
 
   std::vector<IndexType> CreateIndexBuffer() const { return indices_; }
 
-  BufferView CreateIndexBufferView(HostBuffer& buffer) const {
+  BufferView CreateIndexBufferView(HostBuffer& indexes_host_buffer) const {
     const auto index_buffer = CreateIndexBuffer();
     if (index_buffer.size() == 0) {
       return {};
     }
-    return buffer.Emplace(
-        index_buffer.data(), index_buffer.size() * sizeof(IndexType),
-        alignof(IndexType), HostBuffer::BufferCategory::kIndexes);
+    return indexes_host_buffer.Emplace(index_buffer.data(),
+                                       index_buffer.size() * sizeof(IndexType),
+                                       alignof(IndexType));
   }
 
   BufferView CreateIndexBufferView(Allocator& allocator) const {

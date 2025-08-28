@@ -14,14 +14,13 @@ GeometryResult FillRectGeometry::GetPositionBuffer(
     const ContentContext& renderer,
     const Entity& entity,
     RenderPass& pass) const {
-  auto& host_buffer = renderer.GetTransientsBuffer();
+  auto& data_host_buffer = renderer.GetTransientsDataBuffer();
   return GeometryResult{
       .type = PrimitiveType::kTriangleStrip,
       .vertex_buffer =
           {
-              .vertex_buffer = host_buffer.Emplace(
-                  rect_.GetPoints().data(), 8 * sizeof(float), alignof(float),
-                  HostBuffer::BufferCategory::kData),
+              .vertex_buffer = data_host_buffer.Emplace(
+                  rect_.GetPoints().data(), 8 * sizeof(float), alignof(float)),
               .vertex_count = 4,
               .index_type = IndexType::kNone,
           },
@@ -70,7 +69,7 @@ GeometryResult StrokeRectGeometry::GetPositionBuffer(
   Scalar min_size = kMinStrokeSize / max_basis;
   Scalar half_stroke_width = std::max(stroke_width_, min_size) * 0.5f;
 
-  auto& host_buffer = renderer.GetTransientsBuffer();
+  auto& data_host_buffer = renderer.GetTransientsDataBuffer();
   const Rect& rect = rect_;
 
   switch (stroke_join_) {
@@ -96,9 +95,8 @@ GeometryResult StrokeRectGeometry::GetPositionBuffer(
           .type = PrimitiveType::kTriangleStrip,
           .vertex_buffer =
               {
-                  .vertex_buffer = host_buffer.Emplace(
+                  .vertex_buffer = data_host_buffer.Emplace(
                       vertex_count * sizeof(Point), alignof(Point),
-                      HostBuffer::BufferCategory::kData,
                       [hsw = half_stroke_width, &rect, vertex_count,
                        &trigs](uint8_t* buffer) {
                         auto vertices = reinterpret_cast<Point*>(buffer);
@@ -138,9 +136,8 @@ GeometryResult StrokeRectGeometry::GetPositionBuffer(
           .type = PrimitiveType::kTriangleStrip,
           .vertex_buffer =
               {
-                  .vertex_buffer = host_buffer.Emplace(
+                  .vertex_buffer = data_host_buffer.Emplace(
                       17 * sizeof(Point), alignof(Point),
-                      HostBuffer::BufferCategory::kData,
                       [hsw = half_stroke_width, &rect](uint8_t* buffer) {
                         Scalar left = rect.GetLeft();
                         Scalar top = rect.GetTop();
@@ -177,9 +174,8 @@ GeometryResult StrokeRectGeometry::GetPositionBuffer(
           .type = PrimitiveType::kTriangleStrip,
           .vertex_buffer =
               {
-                  .vertex_buffer = host_buffer.Emplace(
+                  .vertex_buffer = data_host_buffer.Emplace(
                       10 * sizeof(Point), alignof(Point),
-                      HostBuffer::BufferCategory::kData,
                       [hsw = half_stroke_width, &rect](uint8_t* buffer) {
                         Scalar left = rect.GetLeft();
                         Scalar top = rect.GetTop();

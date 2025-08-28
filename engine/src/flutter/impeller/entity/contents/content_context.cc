@@ -555,11 +555,17 @@ ContentContext::ContentContext(
                                ? std::make_shared<RenderTargetCache>(
                                      context_->GetResourceAllocator())
                                : std::move(render_target_allocator)),
-      host_buffer_(HostBuffer::Create(
+      data_host_buffer_(HostBuffer::Create(
           context_->GetResourceAllocator(),
           context_->GetIdleWaiter(),
-          context_->GetCapabilities()->GetMinimumUniformAlignment(),
-          context_->GetCapabilities()->NeedsPartitionedHostBuffer())),
+          context_->GetCapabilities()->GetMinimumUniformAlignment())),
+      indexes_host_buffer_(
+          context_->GetCapabilities()->NeedsPartitionedHostBuffer()
+              ? HostBuffer::Create(
+                    context_->GetResourceAllocator(),
+                    context_->GetIdleWaiter(),
+                    context_->GetCapabilities()->GetMinimumUniformAlignment())
+              : data_host_buffer_),
       text_shadow_cache_(std::make_unique<TextShadowCache>()) {
   if (!context_ || !context_->IsValid()) {
     return;
@@ -576,9 +582,8 @@ ContentContext::ContentContext(
     std::shared_ptr<CommandBuffer> cmd_buffer =
         GetContext()->CreateCommandBuffer();
     std::shared_ptr<BlitPass> blit_pass = cmd_buffer->CreateBlitPass();
-    HostBuffer& host_buffer = GetTransientsBuffer();
-    BufferView buffer_view =
-        host_buffer.Emplace(data, HostBuffer::BufferCategory::kData);
+    HostBuffer& data_host_buffer = GetTransientsDataBuffer();
+    BufferView buffer_view = data_host_buffer.Emplace(data);
     blit_pass->AddCopy(buffer_view, empty_texture_);
 
     if (!blit_pass->EncodeCommands() || !GetContext()

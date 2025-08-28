@@ -312,7 +312,8 @@ Tessellator::Trigs Tessellator::GetTrigsForDeviceRadius(Scalar pixel_radius) {
 }
 
 VertexBuffer Tessellator::TessellateConvex(const PathSource& path,
-                                           HostBuffer& host_buffer,
+                                           HostBuffer& data_host_buffer,
+                                           HostBuffer& indexes_host_buffer,
                                            Scalar tolerance,
                                            bool supports_primitive_restart,
                                            bool supports_triangle_fan) {
@@ -320,12 +321,11 @@ VertexBuffer Tessellator::TessellateConvex(const PathSource& path,
     // Primitive Restart.
     const auto [point_count, contour_count] =
         PathTessellator::CountFillStorage(path, tolerance);
-    BufferView point_buffer =
-        host_buffer.Emplace(nullptr, sizeof(Point) * point_count,
-                            alignof(Point), HostBuffer::BufferCategory::kData);
-    BufferView index_buffer = host_buffer.Emplace(
+    BufferView point_buffer = data_host_buffer.Emplace(
+        nullptr, sizeof(Point) * point_count, alignof(Point));
+    BufferView index_buffer = indexes_host_buffer.Emplace(
         nullptr, sizeof(uint16_t) * (point_count + contour_count),
-        alignof(uint16_t), HostBuffer::BufferCategory::kIndexes);
+        alignof(uint16_t));
 
     if (supports_triangle_fan) {
       FanPathVertexWriter writer(
@@ -381,13 +381,13 @@ VertexBuffer Tessellator::TessellateConvex(const PathSource& path,
     };
   }
 
-  BufferView vertex_buffer = host_buffer.Emplace(
+  BufferView vertex_buffer = data_host_buffer.Emplace(
       point_buffer_->data(), sizeof(Point) * point_buffer_->size(),
-      alignof(Point), HostBuffer::BufferCategory::kData);
+      alignof(Point));
 
-  BufferView index_buffer = host_buffer.Emplace(
+  BufferView index_buffer = indexes_host_buffer.Emplace(
       index_buffer_->data(), sizeof(uint16_t) * index_buffer_->size(),
-      alignof(uint16_t), HostBuffer::BufferCategory::kIndexes);
+      alignof(uint16_t));
 
   return VertexBuffer{
       .vertex_buffer = std::move(vertex_buffer),

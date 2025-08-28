@@ -290,18 +290,33 @@ class ContentContext {
   void ClearCachedRuntimeEffectPipeline(
       const std::string& unique_entrypoint_name) const;
 
-  /// @brief Retrieve the currnent host buffer for transient storage.
+  /// @brief Retrieve the current host buffer for transient storage of indexes
+  ///        used for indexed draws.
   ///
   /// This is only safe to use from the raster threads. Other threads should
   /// allocate their own device buffers.
-  HostBuffer& GetTransientsBuffer() const { return *host_buffer_; }
+  HostBuffer& GetTransientsIndexesBuffer() const {
+    return *indexes_host_buffer_;
+  }
+
+  /// @brief Retrieve the current host buffer for transient storage of other
+  ///        non-index data.
+  ///
+  /// This is only safe to use from the raster threads. Other threads should
+  /// allocate their own device buffers.
+  HostBuffer& GetTransientsDataBuffer() const { return *data_host_buffer_; }
 
   TextShadowCache& GetTextShadowCache() const { return *text_shadow_cache_; }
 
  protected:
   // Visible for testing.
-  void SetTransientsBuffer(std::shared_ptr<HostBuffer> host_buffer) {
-    host_buffer_ = std::move(host_buffer);
+  void SetTransientsIndexesBuffer(std::shared_ptr<HostBuffer> host_buffer) {
+    indexes_host_buffer_ = std::move(host_buffer);
+  }
+
+  // Visible for testing.
+  void SetTransientsDataBuffer(std::shared_ptr<HostBuffer> host_buffer) {
+    data_host_buffer_ = std::move(host_buffer);
   }
 
  private:
@@ -348,7 +363,8 @@ class ContentContext {
   bool is_valid_ = false;
   std::shared_ptr<Tessellator> tessellator_;
   std::shared_ptr<RenderTargetAllocator> render_target_cache_;
-  std::shared_ptr<HostBuffer> host_buffer_;
+  std::shared_ptr<HostBuffer> data_host_buffer_;
+  std::shared_ptr<HostBuffer> indexes_host_buffer_;
   std::shared_ptr<Texture> empty_texture_;
   std::unique_ptr<TextShadowCache> text_shadow_cache_;
 

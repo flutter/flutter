@@ -829,16 +829,17 @@ TEST_P(EntityTest, BlendingModeOptions) {
       options.primitive_type = PrimitiveType::kTriangle;
       pass.SetPipeline(context.GetSolidFillPipeline(options));
       pass.SetVertexBuffer(
-          vtx_builder.CreateVertexBuffer(context.GetTransientsBuffer()));
+          vtx_builder.CreateVertexBuffer(context.GetTransientsDataBuffer(),
+                                         context.GetTransientsIndexesBuffer()));
 
       VS::FrameInfo frame_info;
       frame_info.mvp = pass.GetOrthographicTransform() * world_matrix;
       VS::BindFrameInfo(
-          pass, context.GetTransientsBuffer().EmplaceUniform(frame_info));
+          pass, context.GetTransientsDataBuffer().EmplaceUniform(frame_info));
       FS::FragInfo frag_info;
       frag_info.color = color.Premultiply();
       FS::BindFragInfo(
-          pass, context.GetTransientsBuffer().EmplaceUniform(frame_info));
+          pass, context.GetTransientsDataBuffer().EmplaceUniform(frame_info));
       return pass.Draw().ok();
     };
 
@@ -1907,9 +1908,11 @@ TEST_P(EntityTest, RuntimeEffectSetsRightSizeWhenUniformIsStruct) {
   memcpy(uniform_data->data(), &frag_uniforms, sizeof(FragUniforms));
 
   auto buffer_view = RuntimeEffectContents::EmplaceVulkanUniform(
-      uniform_data, GetContentContext()->GetTransientsBuffer(),
+      uniform_data, GetContentContext()->GetTransientsDataBuffer(),
       runtime_stage->GetUniforms()[0],
-      GetContentContext()->GetTransientsBuffer().GetMinimumUniformAlignment());
+      GetContentContext()
+          ->GetTransientsDataBuffer()
+          .GetMinimumUniformAlignment());
 
   // 16 bytes:
   //   8 bytes for iResolution
@@ -2635,10 +2638,12 @@ class FlushTestContentContext : public ContentContext {
       const std::shared_ptr<TypographerContext>& typographer_context,
       const std::shared_ptr<Allocator>& allocator)
       : ContentContext(context, typographer_context) {
-    SetTransientsBuffer(HostBuffer::Create(
+    SetTransientsDataBuffer(HostBuffer::Create(
         allocator, context->GetIdleWaiter(),
-        context->GetCapabilities()->GetMinimumUniformAlignment(),
-        context->GetCapabilities()->NeedsPartitionedHostBuffer()));
+        context->GetCapabilities()->GetMinimumUniformAlignment()));
+    SetTransientsIndexesBuffer(HostBuffer::Create(
+        allocator, context->GetIdleWaiter(),
+        context->GetCapabilities()->GetMinimumUniformAlignment()));
   }
 };
 

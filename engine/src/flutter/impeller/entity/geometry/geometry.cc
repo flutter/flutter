@@ -36,9 +36,8 @@ GeometryResult Geometry::ComputePositionGeometry(
       .type = generator.GetTriangleType(),
       .vertex_buffer =
           {
-              .vertex_buffer = renderer.GetTransientsBuffer().Emplace(
+              .vertex_buffer = renderer.GetTransientsDataBuffer().Emplace(
                   count * sizeof(VT), alignof(VT),
-                  HostBuffer::BufferCategory::kData,
                   [&generator](uint8_t* buffer) {
                     auto vertices = reinterpret_cast<VT*>(buffer);
                     generator.GenerateVertices([&vertices](const Point& p) {

@@ -753,7 +753,7 @@ GeometryResult StrokeSegmentsGeometry::GetPositionBuffer(
   StrokeParameters adjusted_stroke = stroke_;
   adjusted_stroke.width = std::max(stroke_.width, min_size);
 
-  auto& host_buffer = renderer.GetTransientsBuffer();
+  auto& data_host_buffer = renderer.GetTransientsDataBuffer();
   auto scale = entity.GetTransform().GetMaxBasisLengthXY();
   auto& tessellator = renderer.GetTessellator();
 
@@ -764,9 +764,9 @@ GeometryResult StrokeSegmentsGeometry::GetPositionBuffer(
 
   const auto [arena_length, oversized_length] = position_writer.GetUsedSize();
   if (!position_writer.HasOversizedBuffer()) {
-    BufferView buffer_view = host_buffer.Emplace(
-        tessellator.GetStrokePointCache().data(), arena_length * sizeof(Point),
-        alignof(Point), HostBuffer::BufferCategory::kData);
+    BufferView buffer_view =
+        data_host_buffer.Emplace(tessellator.GetStrokePointCache().data(),
+                                 arena_length * sizeof(Point), alignof(Point));
 
     return GeometryResult{.type = PrimitiveType::kTriangleStrip,
                           .vertex_buffer =
@@ -780,11 +780,10 @@ GeometryResult StrokeSegmentsGeometry::GetPositionBuffer(
   }
   const std::vector<Point>& oversized_data =
       position_writer.GetOversizedBuffer();
-  BufferView buffer_view = host_buffer.Emplace(
+  BufferView buffer_view = data_host_buffer.Emplace(
       /*buffer=*/nullptr,                                 //
       (arena_length + oversized_length) * sizeof(Point),  //
-      alignof(Point),                                     //
-      HostBuffer::BufferCategory::kData                   //
+      alignof(Point)                                      //
   );
   memcpy(buffer_view.GetBuffer()->OnGetContents() +
              buffer_view.GetRange().offset,         //

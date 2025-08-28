@@ -78,10 +78,9 @@ TEST_P(RendererTest, CanCreateBoxPrimitive) {
   raw_ptr<const Sampler> sampler = context->GetSamplerLibrary()->GetSampler({});
   ASSERT_TRUE(sampler);
 
-  auto host_buffer = HostBuffer::Create(
+  auto data_host_buffer = HostBuffer::Create(
       context->GetResourceAllocator(), context->GetIdleWaiter(),
-      context->GetCapabilities()->GetMinimumUniformAlignment(),
-      context->GetCapabilities()->NeedsPartitionedHostBuffer());
+      context->GetCapabilities()->GetMinimumUniformAlignment());
   SinglePassCallback callback = [&](RenderPass& pass) {
     ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     static bool wireframe;
@@ -103,7 +102,7 @@ TEST_P(RendererTest, CanCreateBoxPrimitive) {
               Matrix::MakeOrthographic(pass.GetRenderTargetSize()));
     uniforms.mvp =
         pass.GetOrthographicTransform() * Matrix::MakeScale(GetContentScale());
-    VS::BindUniformBuffer(pass, host_buffer->EmplaceUniform(uniforms));
+    VS::BindUniformBuffer(pass, data_host_buffer->EmplaceUniform(uniforms));
 
     FS::FrameInfo frame_info;
     frame_info.current_time = GetSecondsElapsed();
@@ -111,11 +110,11 @@ TEST_P(RendererTest, CanCreateBoxPrimitive) {
     frame_info.window_size.x = GetWindowSize().width;
     frame_info.window_size.y = GetWindowSize().height;
 
-    FS::BindFrameInfo(pass, host_buffer->EmplaceUniform(frame_info));
+    FS::BindFrameInfo(pass, data_host_buffer->EmplaceUniform(frame_info));
     FS::BindContents1(pass, boston, sampler);
     FS::BindContents2(pass, bridge, sampler);
 
-    host_buffer->Reset();
+    data_host_buffer->Reset();
     return pass.Draw().ok();
   };
   OpenPlaygroundHere(callback);
@@ -145,12 +144,6 @@ TEST_P(RendererTest, BabysFirstTriangle) {
   // it once.
   auto pipeline = context->GetPipelineLibrary()->GetPipeline(desc).Get();
 
-  // Create a host side buffer to build the vertex and uniform information.
-  auto host_buffer = HostBuffer::Create(
-      context->GetResourceAllocator(), context->GetIdleWaiter(),
-      context->GetCapabilities()->GetMinimumUniformAlignment(),
-      context->GetCapabilities()->NeedsPartitionedHostBuffer());
-
   // Specify the vertex buffer information.
   VertexBufferBuilder<VS::PerVertexData> vertex_buffer_builder;
   vertex_buffer_builder.AddVertices({
@@ -169,11 +162,10 @@ TEST_P(RendererTest, BabysFirstTriangle) {
     FS::FragInfo frag_info;
     frag_info.time = fml::TimePoint::Now().ToEpochDelta().ToSecondsF();
 
-    auto host_buffer = HostBuffer::Create(
+    auto data_host_buffer = HostBuffer::Create(
         context->GetResourceAllocator(), context->GetIdleWaiter(),
-        context->GetCapabilities()->GetMinimumUniformAlignment(),
-        context->GetCapabilities()->NeedsPartitionedHostBuffer());
-    FS::BindFragInfo(pass, host_buffer->EmplaceUniform(frag_info));
+        context->GetCapabilities()->GetMinimumUniformAlignment());
+    FS::BindFragInfo(pass, data_host_buffer->EmplaceUniform(frag_info));
 
     return pass.Draw().ok();
   };
@@ -247,10 +239,9 @@ TEST_P(RendererTest, CanRenderPerspectiveCube) {
   ASSERT_TRUE(sampler);
 
   Vector3 euler_angles;
-  auto host_buffer = HostBuffer::Create(
+  auto data_host_buffer = HostBuffer::Create(
       context->GetResourceAllocator(), context->GetIdleWaiter(),
-      context->GetCapabilities()->GetMinimumUniformAlignment(),
-      context->GetCapabilities()->NeedsPartitionedHostBuffer());
+      context->GetCapabilities()->GetMinimumUniformAlignment());
   SinglePassCallback callback = [&](RenderPass& pass) {
     static Degrees fov_y(60);
     static Scalar distance = 10;
@@ -286,9 +277,9 @@ TEST_P(RendererTest, CanRenderPerspectiveCube) {
         Matrix::MakeRotationX(Radians(euler_angles.x)) *
         Matrix::MakeRotationY(Radians(euler_angles.y)) *
         Matrix::MakeRotationZ(Radians(euler_angles.z));
-    VS::BindUniformBuffer(pass, host_buffer->EmplaceUniform(uniforms));
+    VS::BindUniformBuffer(pass, data_host_buffer->EmplaceUniform(uniforms));
 
-    host_buffer->Reset();
+    data_host_buffer->Reset();
     return pass.Draw().ok();
   };
   OpenPlaygroundHere(callback);
@@ -329,10 +320,9 @@ TEST_P(RendererTest, CanRenderMultiplePrimitives) {
   raw_ptr<const Sampler> sampler = context->GetSamplerLibrary()->GetSampler({});
   ASSERT_TRUE(sampler);
 
-  auto host_buffer = HostBuffer::Create(
+  auto data_host_buffer = HostBuffer::Create(
       context->GetResourceAllocator(), context->GetIdleWaiter(),
-      context->GetCapabilities()->GetMinimumUniformAlignment(),
-      context->GetCapabilities()->NeedsPartitionedHostBuffer());
+      context->GetCapabilities()->GetMinimumUniformAlignment());
   SinglePassCallback callback = [&](RenderPass& pass) {
     for (size_t i = 0; i < 1; i++) {
       for (size_t j = 0; j < 1; j++) {
@@ -346,7 +336,7 @@ TEST_P(RendererTest, CanRenderMultiplePrimitives) {
         frame_info.window_size.x = GetWindowSize().width;
         frame_info.window_size.y = GetWindowSize().height;
 
-        FS::BindFrameInfo(pass, host_buffer->EmplaceUniform(frame_info));
+        FS::BindFrameInfo(pass, data_host_buffer->EmplaceUniform(frame_info));
         FS::BindContents1(pass, boston, sampler);
         FS::BindContents2(pass, bridge, sampler);
 
@@ -356,14 +346,14 @@ TEST_P(RendererTest, CanRenderMultiplePrimitives) {
         uniforms.mvp = pass.GetOrthographicTransform() *
                        Matrix::MakeScale(GetContentScale()) *
                        Matrix::MakeTranslation({i * 50.0f, j * 50.0f, 0.0f});
-        VS::BindUniformBuffer(pass, host_buffer->EmplaceUniform(uniforms));
+        VS::BindUniformBuffer(pass, data_host_buffer->EmplaceUniform(uniforms));
         if (!pass.Draw().ok()) {
           return false;
         }
       }
     }
 
-    host_buffer->Reset();
+    data_host_buffer->Reset();
     return true;
   };
   OpenPlaygroundHere(callback);
@@ -385,10 +375,9 @@ TEST_P(RendererTest, CanRenderToTexture) {
   auto box_pipeline =
       context->GetPipelineLibrary()->GetPipeline(pipeline_desc).Get();
   ASSERT_TRUE(box_pipeline);
-  auto host_buffer = HostBuffer::Create(
+  auto data_host_buffer = HostBuffer::Create(
       context->GetResourceAllocator(), context->GetIdleWaiter(),
-      context->GetCapabilities()->GetMinimumUniformAlignment(),
-      context->GetCapabilities()->NeedsPartitionedHostBuffer());
+      context->GetCapabilities()->GetMinimumUniformAlignment());
 
   VertexBufferBuilder<VS::PerVertexData> vertex_builder;
   vertex_builder.SetLabel("Box");
@@ -462,14 +451,14 @@ TEST_P(RendererTest, CanRenderToTexture) {
   frame_info.window_size.x = GetWindowSize().width;
   frame_info.window_size.y = GetWindowSize().height;
 
-  FS::BindFrameInfo(*r2t_pass, host_buffer->EmplaceUniform(frame_info));
+  FS::BindFrameInfo(*r2t_pass, data_host_buffer->EmplaceUniform(frame_info));
   FS::BindContents1(*r2t_pass, boston, sampler);
   FS::BindContents2(*r2t_pass, bridge, sampler);
 
   VS::UniformBuffer uniforms;
   uniforms.mvp = Matrix::MakeOrthographic(ISize{1024, 768}) *
                  Matrix::MakeTranslation({50.0f, 50.0f, 0.0f});
-  VS::BindUniformBuffer(*r2t_pass, host_buffer->EmplaceUniform(uniforms));
+  VS::BindUniformBuffer(*r2t_pass, data_host_buffer->EmplaceUniform(uniforms));
   ASSERT_TRUE(r2t_pass->Draw().ok());
   ASSERT_TRUE(r2t_pass->EncodeCommands());
 }
@@ -509,10 +498,16 @@ TEST_P(RendererTest, CanRenderInstanced) {
     instances.colors[i] = Color::Random();
   }
 
-  auto host_buffer = HostBuffer::Create(
+  auto data_host_buffer = HostBuffer::Create(
       GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
-      GetContext()->GetCapabilities()->GetMinimumUniformAlignment(),
-      GetContext()->GetCapabilities()->NeedsPartitionedHostBuffer());
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
+  auto indexes_host_buffer =
+      GetContext()->GetCapabilities()->NeedsPartitionedHostBuffer()
+          ? HostBuffer::Create(
+                GetContext()->GetResourceAllocator(),
+                GetContext()->GetIdleWaiter(),
+                GetContext()->GetCapabilities()->GetMinimumUniformAlignment())
+          : data_host_buffer;
   ASSERT_TRUE(OpenPlaygroundHere([&](RenderPass& pass) -> bool {
     pass.SetPipeline(pipeline);
     pass.SetCommandLabel("InstancedDraw");
@@ -522,16 +517,16 @@ TEST_P(RendererTest, CanRenderInstanced) {
               Matrix::MakeOrthographic(pass.GetRenderTargetSize()));
     frame_info.mvp =
         pass.GetOrthographicTransform() * Matrix::MakeScale(GetContentScale());
-    VS::BindFrameInfo(pass, host_buffer->EmplaceUniform(frame_info));
+    VS::BindFrameInfo(pass, data_host_buffer->EmplaceUniform(frame_info));
     VS::BindInstanceInfo(pass,
-                         host_buffer->EmplaceStorageBuffer(
-                             instances, HostBuffer::BufferCategory::kData));
-    pass.SetVertexBuffer(builder.CreateVertexBuffer(*host_buffer));
+                         data_host_buffer->EmplaceStorageBuffer(instances));
+    pass.SetVertexBuffer(
+        builder.CreateVertexBuffer(*data_host_buffer, *indexes_host_buffer));
 
     pass.SetInstanceCount(kInstancesCount);
     pass.Draw();
 
-    host_buffer->Reset();
+    data_host_buffer->Reset();
     return true;
   }));
 }
@@ -584,10 +579,9 @@ TEST_P(RendererTest, CanBlitTextureToTexture) {
       vertex_builder.CreateVertexBuffer(*context->GetResourceAllocator());
   ASSERT_TRUE(vertex_buffer);
 
-  auto host_buffer = HostBuffer::Create(
+  auto data_host_buffer = HostBuffer::Create(
       context->GetResourceAllocator(), context->GetIdleWaiter(),
-      context->GetCapabilities()->GetMinimumUniformAlignment(),
-      context->GetCapabilities()->NeedsPartitionedHostBuffer());
+      context->GetCapabilities()->GetMinimumUniformAlignment());
   Playground::RenderCallback callback = [&](RenderTarget& render_target) {
     auto buffer = context->CreateCommandBuffer();
     if (!buffer) {
@@ -626,11 +620,11 @@ TEST_P(RendererTest, CanBlitTextureToTexture) {
                   Matrix::MakeOrthographic(pass->GetRenderTargetSize()));
         frame_info.mvp = pass->GetOrthographicTransform() *
                          Matrix::MakeScale(GetContentScale());
-        VS::BindFrameInfo(*pass, host_buffer->EmplaceUniform(frame_info));
+        VS::BindFrameInfo(*pass, data_host_buffer->EmplaceUniform(frame_info));
 
         FS::FragInfo frag_info;
         frag_info.lod = 0;
-        FS::BindFragInfo(*pass, host_buffer->EmplaceUniform(frag_info));
+        FS::BindFragInfo(*pass, data_host_buffer->EmplaceUniform(frag_info));
 
         auto sampler = context->GetSamplerLibrary()->GetSampler({});
         FS::BindTex(*pass, texture, sampler);
@@ -643,7 +637,7 @@ TEST_P(RendererTest, CanBlitTextureToTexture) {
     if (!context->GetCommandQueue()->Submit({buffer}).ok()) {
       return false;
     }
-    host_buffer->Reset();
+    data_host_buffer->Reset();
     return true;
   };
   OpenPlaygroundHere(callback);
@@ -702,10 +696,9 @@ TEST_P(RendererTest, CanBlitTextureToBuffer) {
       vertex_builder.CreateVertexBuffer(*context->GetResourceAllocator());
   ASSERT_TRUE(vertex_buffer);
 
-  auto host_buffer = HostBuffer::Create(
+  auto data_host_buffer = HostBuffer::Create(
       context->GetResourceAllocator(), context->GetIdleWaiter(),
-      context->GetCapabilities()->GetMinimumUniformAlignment(),
-      context->GetCapabilities()->NeedsPartitionedHostBuffer());
+      context->GetCapabilities()->GetMinimumUniformAlignment());
   Playground::RenderCallback callback = [&](RenderTarget& render_target) {
     {
       auto buffer = context->CreateCommandBuffer();
@@ -750,11 +743,11 @@ TEST_P(RendererTest, CanBlitTextureToBuffer) {
                   Matrix::MakeOrthographic(pass->GetRenderTargetSize()));
         frame_info.mvp = pass->GetOrthographicTransform() *
                          Matrix::MakeScale(GetContentScale());
-        VS::BindFrameInfo(*pass, host_buffer->EmplaceUniform(frame_info));
+        VS::BindFrameInfo(*pass, data_host_buffer->EmplaceUniform(frame_info));
 
         FS::FragInfo frag_info;
         frag_info.lod = 0;
-        FS::BindFragInfo(*pass, host_buffer->EmplaceUniform(frag_info));
+        FS::BindFragInfo(*pass, data_host_buffer->EmplaceUniform(frag_info));
 
         raw_ptr<const Sampler> sampler =
             context->GetSamplerLibrary()->GetSampler({});
@@ -775,7 +768,7 @@ TEST_P(RendererTest, CanBlitTextureToBuffer) {
         return false;
       }
     }
-    host_buffer->Reset();
+    data_host_buffer->Reset();
     return true;
   };
   OpenPlaygroundHere(callback);
@@ -818,10 +811,9 @@ TEST_P(RendererTest, CanGenerateMipmaps) {
   ASSERT_TRUE(vertex_buffer);
 
   bool first_frame = true;
-  auto host_buffer = HostBuffer::Create(
+  auto data_host_buffer = HostBuffer::Create(
       context->GetResourceAllocator(), context->GetIdleWaiter(),
-      context->GetCapabilities()->GetMinimumUniformAlignment(),
-      context->GetCapabilities()->NeedsPartitionedHostBuffer());
+      context->GetCapabilities()->GetMinimumUniformAlignment());
   Playground::RenderCallback callback = [&](RenderTarget& render_target) {
     const char* mip_filter_names[] = {"Base", "Nearest", "Linear"};
     const MipFilter mip_filters[] = {MipFilter::kBase, MipFilter::kNearest,
@@ -879,11 +871,11 @@ TEST_P(RendererTest, CanGenerateMipmaps) {
                   Matrix::MakeOrthographic(pass->GetRenderTargetSize()));
         frame_info.mvp = pass->GetOrthographicTransform() *
                          Matrix::MakeScale(GetContentScale());
-        VS::BindFrameInfo(*pass, host_buffer->EmplaceUniform(frame_info));
+        VS::BindFrameInfo(*pass, data_host_buffer->EmplaceUniform(frame_info));
 
         FS::FragInfo frag_info;
         frag_info.lod = lod;
-        FS::BindFragInfo(*pass, host_buffer->EmplaceUniform(frag_info));
+        FS::BindFragInfo(*pass, data_host_buffer->EmplaceUniform(frag_info));
 
         SamplerDescriptor sampler_desc;
         sampler_desc.mip_filter = mip_filters[selected_mip_filter];
@@ -900,7 +892,7 @@ TEST_P(RendererTest, CanGenerateMipmaps) {
     if (!context->GetCommandQueue()->Submit({buffer}).ok()) {
       return false;
     }
-    host_buffer->Reset();
+    data_host_buffer->Reset();
     return true;
   };
   OpenPlaygroundHere(callback);
@@ -933,10 +925,16 @@ TEST_P(RendererTest, TheImpeller) {
        "table_mountain_pz.png", "table_mountain_nz.png"});
   raw_ptr<const Sampler> cube_map_sampler =
       context->GetSamplerLibrary()->GetSampler({});
-  auto host_buffer = HostBuffer::Create(
-      context->GetResourceAllocator(), context->GetIdleWaiter(),
-      context->GetCapabilities()->GetMinimumUniformAlignment(),
-      context->GetCapabilities()->NeedsPartitionedHostBuffer());
+  auto data_host_buffer = HostBuffer::Create(
+      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
+  auto indexes_host_buffer =
+      GetContext()->GetCapabilities()->NeedsPartitionedHostBuffer()
+          ? HostBuffer::Create(
+                GetContext()->GetResourceAllocator(),
+                GetContext()->GetIdleWaiter(),
+                GetContext()->GetCapabilities()->GetMinimumUniformAlignment())
+          : data_host_buffer;
 
   SinglePassCallback callback = [&](RenderPass& pass) {
     auto size = pass.GetRenderTargetSize();
@@ -950,22 +948,23 @@ TEST_P(RendererTest, TheImpeller) {
                          {Point(size.width, 0)},
                          {Point(0, size.height)},
                          {Point(size.width, size.height)}});
-    pass.SetVertexBuffer(builder.CreateVertexBuffer(*host_buffer));
+    pass.SetVertexBuffer(
+        builder.CreateVertexBuffer(*data_host_buffer, *indexes_host_buffer));
 
     VS::FrameInfo frame_info;
     EXPECT_EQ(pass.GetOrthographicTransform(), Matrix::MakeOrthographic(size));
     frame_info.mvp = pass.GetOrthographicTransform();
-    VS::BindFrameInfo(pass, host_buffer->EmplaceUniform(frame_info));
+    VS::BindFrameInfo(pass, data_host_buffer->EmplaceUniform(frame_info));
 
     FS::FragInfo fs_uniform;
     fs_uniform.texture_size = Point(size);
     fs_uniform.time = GetSecondsElapsed();
-    FS::BindFragInfo(pass, host_buffer->EmplaceUniform(fs_uniform));
+    FS::BindFragInfo(pass, data_host_buffer->EmplaceUniform(fs_uniform));
     FS::BindBlueNoise(pass, blue_noise, noise_sampler);
     FS::BindCubeMap(pass, cube_map, cube_map_sampler);
 
     pass.Draw().ok();
-    host_buffer->Reset();
+    data_host_buffer->Reset();
     return true;
   };
   OpenPlaygroundHere(callback);
@@ -985,10 +984,16 @@ TEST_P(RendererTest, Planet) {
       context->GetPipelineLibrary()->GetPipeline(pipeline_descriptor).Get();
   ASSERT_TRUE(pipeline && pipeline->IsValid());
 
-  auto host_buffer = HostBuffer::Create(
-      context->GetResourceAllocator(), context->GetIdleWaiter(),
-      context->GetCapabilities()->GetMinimumUniformAlignment(),
-      context->GetCapabilities()->NeedsPartitionedHostBuffer());
+  auto data_host_buffer = HostBuffer::Create(
+      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
+  auto indexes_host_buffer =
+      GetContext()->GetCapabilities()->NeedsPartitionedHostBuffer()
+          ? HostBuffer::Create(
+                GetContext()->GetResourceAllocator(),
+                GetContext()->GetIdleWaiter(),
+                GetContext()->GetCapabilities()->GetMinimumUniformAlignment())
+          : data_host_buffer;
 
   SinglePassCallback callback = [&](RenderPass& pass) {
     static Scalar speed = 0.1;
@@ -1016,12 +1021,13 @@ TEST_P(RendererTest, Planet) {
                          {Point(size.width, 0)},
                          {Point(0, size.height)},
                          {Point(size.width, size.height)}});
-    pass.SetVertexBuffer(builder.CreateVertexBuffer(*host_buffer));
+    pass.SetVertexBuffer(
+        builder.CreateVertexBuffer(*data_host_buffer, *indexes_host_buffer));
 
     VS::FrameInfo frame_info;
     EXPECT_EQ(pass.GetOrthographicTransform(), Matrix::MakeOrthographic(size));
     frame_info.mvp = pass.GetOrthographicTransform();
-    VS::BindFrameInfo(pass, host_buffer->EmplaceUniform(frame_info));
+    VS::BindFrameInfo(pass, data_host_buffer->EmplaceUniform(frame_info));
 
     FS::FragInfo fs_uniform;
     fs_uniform.resolution = Point(size);
@@ -1031,10 +1037,10 @@ TEST_P(RendererTest, Planet) {
     fs_uniform.show_normals = show_normals ? 1.0 : 0.0;
     fs_uniform.show_noise = show_noise ? 1.0 : 0.0;
     fs_uniform.seed_value = seed_value;
-    FS::BindFragInfo(pass, host_buffer->EmplaceUniform(fs_uniform));
+    FS::BindFragInfo(pass, data_host_buffer->EmplaceUniform(fs_uniform));
 
     pass.Draw().ok();
-    host_buffer->Reset();
+    data_host_buffer->Reset();
     return true;
   };
   OpenPlaygroundHere(callback);
@@ -1054,10 +1060,16 @@ TEST_P(RendererTest, ArrayUniforms) {
       context->GetPipelineLibrary()->GetPipeline(pipeline_descriptor).Get();
   ASSERT_TRUE(pipeline && pipeline->IsValid());
 
-  auto host_buffer = HostBuffer::Create(
-      context->GetResourceAllocator(), context->GetIdleWaiter(),
-      context->GetCapabilities()->GetMinimumUniformAlignment(),
-      context->GetCapabilities()->NeedsPartitionedHostBuffer());
+  auto data_host_buffer = HostBuffer::Create(
+      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
+  auto indexes_host_buffer =
+      GetContext()->GetCapabilities()->NeedsPartitionedHostBuffer()
+          ? HostBuffer::Create(
+                GetContext()->GetResourceAllocator(),
+                GetContext()->GetIdleWaiter(),
+                GetContext()->GetCapabilities()->GetMinimumUniformAlignment())
+          : data_host_buffer;
   SinglePassCallback callback = [&](RenderPass& pass) {
     auto size = pass.GetRenderTargetSize();
 
@@ -1070,13 +1082,14 @@ TEST_P(RendererTest, ArrayUniforms) {
                          {Point(size.width, 0)},
                          {Point(0, size.height)},
                          {Point(size.width, size.height)}});
-    pass.SetVertexBuffer(builder.CreateVertexBuffer(*host_buffer));
+    pass.SetVertexBuffer(
+        builder.CreateVertexBuffer(*data_host_buffer, *indexes_host_buffer));
 
     VS::FrameInfo frame_info;
     EXPECT_EQ(pass.GetOrthographicTransform(), Matrix::MakeOrthographic(size));
     frame_info.mvp =
         pass.GetOrthographicTransform() * Matrix::MakeScale(GetContentScale());
-    VS::BindFrameInfo(pass, host_buffer->EmplaceUniform(frame_info));
+    VS::BindFrameInfo(pass, data_host_buffer->EmplaceUniform(frame_info));
 
     auto time = GetSecondsElapsed();
     auto y_pos = [&time](float x) {
@@ -1091,10 +1104,10 @@ TEST_P(RendererTest, ArrayUniforms) {
                    Color::MakeRGBA8(244, 180, 0, 255),
                    Color::MakeRGBA8(15, 157, 88, 255)},
     };
-    FS::BindFragInfo(pass, host_buffer->EmplaceUniform(fs_uniform));
+    FS::BindFragInfo(pass, data_host_buffer->EmplaceUniform(fs_uniform));
 
     pass.Draw();
-    host_buffer->Reset();
+    data_host_buffer->Reset();
     return true;
   };
   OpenPlaygroundHere(callback);
@@ -1114,10 +1127,16 @@ TEST_P(RendererTest, InactiveUniforms) {
       context->GetPipelineLibrary()->GetPipeline(pipeline_descriptor).Get();
   ASSERT_TRUE(pipeline && pipeline->IsValid());
 
-  auto host_buffer = HostBuffer::Create(
-      context->GetResourceAllocator(), context->GetIdleWaiter(),
-      context->GetCapabilities()->GetMinimumUniformAlignment(),
-      context->GetCapabilities()->NeedsPartitionedHostBuffer());
+  auto data_host_buffer = HostBuffer::Create(
+      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
+  auto indexes_host_buffer =
+      GetContext()->GetCapabilities()->NeedsPartitionedHostBuffer()
+          ? HostBuffer::Create(
+                GetContext()->GetResourceAllocator(),
+                GetContext()->GetIdleWaiter(),
+                GetContext()->GetCapabilities()->GetMinimumUniformAlignment())
+          : data_host_buffer;
   SinglePassCallback callback = [&](RenderPass& pass) {
     auto size = pass.GetRenderTargetSize();
 
@@ -1131,20 +1150,21 @@ TEST_P(RendererTest, InactiveUniforms) {
                          {Point(size.width, 0)},
                          {Point(0, size.height)},
                          {Point(size.width, size.height)}});
-    pass.SetVertexBuffer(builder.CreateVertexBuffer(*host_buffer));
+    pass.SetVertexBuffer(
+        builder.CreateVertexBuffer(*data_host_buffer, *indexes_host_buffer));
 
     VS::FrameInfo frame_info;
     EXPECT_EQ(pass.GetOrthographicTransform(), Matrix::MakeOrthographic(size));
     frame_info.mvp =
         pass.GetOrthographicTransform() * Matrix::MakeScale(GetContentScale());
-    VS::BindFrameInfo(pass, host_buffer->EmplaceUniform(frame_info));
+    VS::BindFrameInfo(pass, data_host_buffer->EmplaceUniform(frame_info));
 
     FS::FragInfo fs_uniform = {.unused_color = Color::Red(),
                                .color = Color::Green()};
-    FS::BindFragInfo(pass, host_buffer->EmplaceUniform(fs_uniform));
+    FS::BindFragInfo(pass, data_host_buffer->EmplaceUniform(fs_uniform));
 
     pass.Draw().ok();
-    host_buffer->Reset();
+    data_host_buffer->Reset();
     return true;
   };
   OpenPlaygroundHere(callback);
@@ -1283,8 +1303,7 @@ TEST_P(RendererTest, StencilMask) {
 
   auto host_buffer = HostBuffer::Create(
       context->GetResourceAllocator(), context->GetIdleWaiter(),
-      context->GetCapabilities()->GetMinimumUniformAlignment(),
-      context->GetCapabilities()->NeedsPartitionedHostBuffer());
+      context->GetCapabilities()->GetMinimumUniformAlignment());
   Playground::RenderCallback callback = [&](RenderTarget& render_target) {
     auto buffer = context->CreateCommandBuffer();
     if (!buffer) {
@@ -1499,8 +1518,7 @@ TEST_P(RendererTest, CanSepiaToneWithSubpasses) {
   SinglePassCallback callback = [&](RenderPass& pass) {
     auto buffer = HostBuffer::Create(
         context->GetResourceAllocator(), context->GetIdleWaiter(),
-        context->GetCapabilities()->GetMinimumUniformAlignment(),
-        context->GetCapabilities()->NeedsPartitionedHostBuffer());
+        context->GetCapabilities()->GetMinimumUniformAlignment());
 
     // Draw the texture.
     {
@@ -1593,10 +1611,9 @@ TEST_P(RendererTest, CanSepiaToneThenSwizzleWithSubpasses) {
   ASSERT_TRUE(sampler);
 
   SinglePassCallback callback = [&](RenderPass& pass) {
-    auto buffer = HostBuffer::Create(
+    auto data_buffer = HostBuffer::Create(
         context->GetResourceAllocator(), context->GetIdleWaiter(),
-        context->GetCapabilities()->GetMinimumUniformAlignment(),
-        context->GetCapabilities()->NeedsPartitionedHostBuffer());
+        context->GetCapabilities()->GetMinimumUniformAlignment());
 
     // Draw the texture.
     {
@@ -1606,7 +1623,7 @@ TEST_P(RendererTest, CanSepiaToneThenSwizzleWithSubpasses) {
       TextureVS::UniformBuffer uniforms;
       uniforms.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
                      Matrix::MakeScale(GetContentScale());
-      TextureVS::BindUniformBuffer(pass, buffer->EmplaceUniform(uniforms));
+      TextureVS::BindUniformBuffer(pass, data_buffer->EmplaceUniform(uniforms));
       TextureFS::BindTextureContents(pass, boston, sampler);
       if (!pass.Draw().ok()) {
         return false;
@@ -1621,7 +1638,7 @@ TEST_P(RendererTest, CanSepiaToneThenSwizzleWithSubpasses) {
       SepiaVS::UniformBuffer uniforms;
       uniforms.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
                      Matrix::MakeScale(GetContentScale());
-      SepiaVS::BindUniformBuffer(pass, buffer->EmplaceUniform(uniforms));
+      SepiaVS::BindUniformBuffer(pass, data_buffer->EmplaceUniform(uniforms));
       if (!pass.Draw().ok()) {
         return false;
       }
@@ -1635,7 +1652,7 @@ TEST_P(RendererTest, CanSepiaToneThenSwizzleWithSubpasses) {
       SwizzleVS::UniformBuffer uniforms;
       uniforms.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
                      Matrix::MakeScale(GetContentScale());
-      SwizzleVS::BindUniformBuffer(pass, buffer->EmplaceUniform(uniforms));
+      SwizzleVS::BindUniformBuffer(pass, data_buffer->EmplaceUniform(uniforms));
       if (!pass.Draw().ok()) {
         return false;
       }

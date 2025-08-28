@@ -304,8 +304,7 @@ bool Playground::OpenPlaygroundHere(
       if (!host_buffer_) {
         host_buffer_ = HostBuffer::Create(
             context_->GetResourceAllocator(), context_->GetIdleWaiter(),
-            context_->GetCapabilities()->GetMinimumUniformAlignment(),
-            context_->GetCapabilities()->NeedsPartitionedHostBuffer());
+            context_->GetCapabilities()->GetMinimumUniformAlignment());
       }
 
       ImGui_ImplImpeller_RenderDrawData(ImGui::GetDrawData(), *pass,

@@ -415,9 +415,8 @@ GeometryResult RoundSuperellipseGeometry::GetPositionBuffer(
   }
 
   size_t contour_length = rearranger->ContourLength();
-  BufferView vertex_buffer = renderer.GetTransientsBuffer().Emplace(
-      nullptr, sizeof(Point) * contour_length, alignof(Point),
-      HostBuffer::BufferCategory::kData);
+  BufferView vertex_buffer = renderer.GetTransientsDataBuffer().Emplace(
+      nullptr, sizeof(Point) * contour_length, alignof(Point));
   Point* vertex_data =
       reinterpret_cast<Point*>(vertex_buffer.GetBuffer()->OnGetContents() +
                                vertex_buffer.GetRange().offset);
