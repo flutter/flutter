@@ -538,10 +538,9 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
         alignment: resolvedAlignment!,
         widthFactor: 1.0,
         heightFactor: 1.0,
-        child:
-            resolvedForegroundBuilder != null
-                ? resolvedForegroundBuilder(context, statesController.value, widget.child)
-                : widget.child,
+        child: resolvedForegroundBuilder != null
+            ? resolvedForegroundBuilder(context, statesController.value, widget.child)
+            : widget.child,
       ),
     );
     if (resolvedBackgroundBuilder != null) {

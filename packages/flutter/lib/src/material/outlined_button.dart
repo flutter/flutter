@@ -371,29 +371,29 @@ class OutlinedButton extends ButtonStyleButton {
     return Theme.of(context).useMaterial3
         ? _OutlinedButtonDefaultsM3(context)
         : styleFrom(
-          foregroundColor: colorScheme.primary,
-          disabledForegroundColor: colorScheme.onSurface.withOpacity(0.38),
-          backgroundColor: Colors.transparent,
-          disabledBackgroundColor: Colors.transparent,
-          shadowColor: theme.shadowColor,
-          elevation: 0,
-          textStyle: theme.textTheme.labelLarge,
-          padding: _scaledPadding(context),
-          minimumSize: const Size(64, 36),
-          maximumSize: Size.infinite,
-          side: BorderSide(color: colorScheme.onSurface.withOpacity(0.12)),
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(4)),
-          ), // TODO(camsim99): fix all docs to accommodate web.
-          enabledMouseCursor: kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
-          disabledMouseCursor: SystemMouseCursors.basic,
-          visualDensity: theme.visualDensity,
-          tapTargetSize: theme.materialTapTargetSize,
-          animationDuration: kThemeChangeDuration,
-          enableFeedback: true,
-          alignment: Alignment.center,
-          splashFactory: InkRipple.splashFactory,
-        );
+            foregroundColor: colorScheme.primary,
+            disabledForegroundColor: colorScheme.onSurface.withOpacity(0.38),
+            backgroundColor: Colors.transparent,
+            disabledBackgroundColor: Colors.transparent,
+            shadowColor: theme.shadowColor,
+            elevation: 0,
+            textStyle: theme.textTheme.labelLarge,
+            padding: _scaledPadding(context),
+            minimumSize: const Size(64, 36),
+            maximumSize: Size.infinite,
+            side: BorderSide(color: colorScheme.onSurface.withOpacity(0.12)),
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(4)),
+            ), // TODO(camsim99): fix all docs to accommodate web.
+            enabledMouseCursor: kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+            disabledMouseCursor: SystemMouseCursors.basic,
+            visualDensity: theme.visualDensity,
+            tapTargetSize: theme.materialTapTargetSize,
+            animationDuration: kThemeChangeDuration,
+            enableFeedback: true,
+            alignment: Alignment.center,
+            splashFactory: InkRipple.splashFactory,
+          );
   }
 
   @override
@@ -492,10 +492,9 @@ class _OutlinedButtonWithIconChild extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       spacing: lerpDouble(8, 4, scale)!,
-      children:
-          effectiveIconAlignment == IconAlignment.start
-              ? <Widget>[icon, Flexible(child: label)]
-              : <Widget>[Flexible(child: label), icon],
+      children: effectiveIconAlignment == IconAlignment.start
+          ? <Widget>[icon, Flexible(child: label)]
+          : <Widget>[Flexible(child: label), icon],
     );
   }
 }
