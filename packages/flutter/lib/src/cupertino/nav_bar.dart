@@ -1203,10 +1203,18 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   }
 
   @override
+  void didUpdateWidget(CupertinoSliverNavigationBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.middle != oldWidget.middle) {
+      _updateEffectiveMiddle();
+    }
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     isPortrait = MediaQuery.orientationOf(context) == Orientation.portrait;
-    effectiveMiddle = widget.middle ?? (isPortrait ? null : widget.largeTitle);
+    _updateEffectiveMiddle();
     _computeScaledHeights();
     _setupSearchableAnimation();
     _scrollableState?.position.isScrollingNotifier.removeListener(_handleScrollChange);
@@ -1232,6 +1240,10 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
       return widget.bottom!.preferredSize.height;
     }
     return 0.0;
+  }
+
+  void _updateEffectiveMiddle() {
+    effectiveMiddle = widget.middle ?? (isPortrait ? null : widget.largeTitle);
   }
 
   void _computeScaledHeights() {

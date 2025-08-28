@@ -9,7 +9,7 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
 
-class SkwasmCanvas implements SceneCanvas {
+class SkwasmCanvas implements LayerCanvas {
   factory SkwasmCanvas(SkwasmPictureRecorder recorder, ui.Rect cullRect) => SkwasmCanvas.fromHandle(
     withStackScope(
       (StackScope s) =>
@@ -34,16 +34,10 @@ class SkwasmCanvas implements SceneCanvas {
     final paintHandle = (paint as SkwasmPaint).toRawPaint();
     if (bounds != null) {
       withStackScope((StackScope s) {
-        canvasSaveLayer(
-          _handle,
-          s.convertRectToNative(bounds),
-          paintHandle,
-          nullptr,
-          ui.TileMode.clamp.index,
-        );
+        canvasSaveLayer(_handle, s.convertRectToNative(bounds), paintHandle, nullptr);
       });
     } else {
-      canvasSaveLayer(_handle, nullptr, paintHandle, nullptr, ui.TileMode.clamp.index);
+      canvasSaveLayer(_handle, nullptr, paintHandle, nullptr);
     }
     paintDispose(paintHandle);
   }
@@ -60,29 +54,16 @@ class SkwasmCanvas implements SceneCanvas {
     // and instead needs it supplied to the saveLayer call itself as a
     // separate argument.
     final SkwasmImageFilter nativeFilter = SkwasmImageFilter.fromUiFilter(imageFilter);
-    final ui.TileMode? backdropTileMode = nativeFilter.backdropTileMode;
     final paintHandle = (paint as SkwasmPaint).toRawPaint(/*ui.TileMode.decal*/);
     if (bounds != null) {
       withStackScope((StackScope s) {
         nativeFilter.withRawImageFilter((nativeFilterHandle) {
-          canvasSaveLayer(
-            _handle,
-            s.convertRectToNative(bounds),
-            paintHandle,
-            nativeFilterHandle,
-            (backdropTileMode ?? ui.TileMode.mirror).index,
-          );
+          canvasSaveLayer(_handle, s.convertRectToNative(bounds), paintHandle, nativeFilterHandle);
         }, defaultBlurTileMode: ui.TileMode.mirror);
       });
     } else {
       nativeFilter.withRawImageFilter((nativeFilterHandle) {
-        canvasSaveLayer(
-          _handle,
-          nullptr,
-          paintHandle,
-          nativeFilterHandle,
-          (backdropTileMode ?? ui.TileMode.mirror).index,
-        );
+        canvasSaveLayer(_handle, nullptr, paintHandle, nativeFilterHandle);
       }, defaultBlurTileMode: ui.TileMode.mirror);
     }
     paintDispose(paintHandle);
@@ -429,6 +410,18 @@ class SkwasmCanvas implements SceneCanvas {
       final Pointer<Float> outMatrix = scope.allocFloatArray(16);
       canvasGetTransform(_handle, outMatrix);
       return scope.convertMatrix44FromNative(outMatrix);
+    });
+  }
+
+  @override
+  void clear(ui.Color color) {
+    canvasClear(_handle, color.value);
+  }
+
+  @override
+  bool quickReject(ui.Rect rect) {
+    return withStackScope((StackScope s) {
+      return canvasQuickReject(_handle, s.convertRectToNative(rect));
     });
   }
 }
