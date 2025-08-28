@@ -1470,7 +1470,7 @@ void main() {
       TargetPlatform.fuchsia,
       TargetPlatform.linux,
     }),
-    skip: kIsWeb,
+    skip: kIsWeb, // [intended] the web traversal order by using ARIA-OWNS.
   );
 
   testWidgets(
@@ -1595,7 +1595,7 @@ void main() {
       TargetPlatform.iOS,
       TargetPlatform.macOS,
     }),
-    skip: kIsWeb,
+    skip: kIsWeb, // [intended] the web traversal order by using ARIA-OWNS.
   );
 
   testWidgets(
@@ -1766,7 +1766,7 @@ void main() {
       semantics.dispose();
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.windows}),
-    skip: kIsWeb,
+    skip: kIsWeb, // [intended] the web traversal order by using ARIA-OWNS.
   );
 
   testWidgets('Slider semantics with custom formatter', (WidgetTester tester) async {
@@ -1837,7 +1837,7 @@ void main() {
       ),
     );
     semantics.dispose();
-  }, skip: kIsWeb);
+  }, skip: kIsWeb); // [intended] the web traversal order by using ARIA-OWNS.
 
   // Regression test for https://github.com/flutter/flutter/issues/101868
   testWidgets('Slider.label info should not write to semantic node', (WidgetTester tester) async {
@@ -1911,7 +1911,7 @@ void main() {
       ),
     );
     semantics.dispose();
-  }, skip: kIsWeb);
+  }, skip: kIsWeb); // [intended] the web traversal order by using ARIA-OWNS.
 
   testWidgets('Material3 - Slider is focusable and has correct focus color', (
     WidgetTester tester,
@@ -2867,7 +2867,7 @@ void main() {
       semantics.dispose();
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.windows}),
-    skip: kIsWeb,
+    skip: kIsWeb, // [intended] the web traversal order by using ARIA-OWNS.
   );
 
   testWidgets('Value indicator appears when it should', (WidgetTester tester) async {
