@@ -39,12 +39,12 @@ class _${blockName}DefaultsM3 extends NavigationBarThemeData {
 
   @override
   WidgetStateProperty<IconThemeData?>? get iconTheme {
-    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
       return IconThemeData(
         size: ${getToken("md.comp.navigation-bar.icon.size")},
-        color: states.contains(MaterialState.disabled)
+        color: states.contains(WidgetState.disabled)
           ? _colors.onSurfaceVariant.withOpacity(0.38)
-          : states.contains(MaterialState.selected)
+          : states.contains(WidgetState.selected)
             ? ${componentColor("md.comp.navigation-bar.active.icon")}
             : ${componentColor("md.comp.navigation-bar.inactive.icon")},
       );
@@ -59,12 +59,12 @@ class _${blockName}DefaultsM3 extends NavigationBarThemeData {
 
   @override
   WidgetStateProperty<TextStyle?>? get labelTextStyle {
-    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
     final TextStyle style = ${textStyle("md.comp.navigation-bar.label-text")}!;
       return style.apply(
-        color: states.contains(MaterialState.disabled)
+        color: states.contains(WidgetState.disabled)
           ? _colors.onSurfaceVariant.withOpacity(0.38)
-          : states.contains(MaterialState.selected)
+          : states.contains(WidgetState.selected)
             ? ${componentColor("md.comp.navigation-bar.active.label-text")}
             : ${componentColor("md.comp.navigation-bar.inactive.label-text")}
       );
