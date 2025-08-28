@@ -860,6 +860,7 @@ def to_gn_wasm_args(args, gn_args):
   gn_args['skia_use_freetype'] = True
   gn_args['flutter_use_freetype_woff2'] = True
   gn_args['skia_use_harfbuzz'] = True
+  gn_args['skia_use_fontations'] = False
   gn_args['skia_use_fontconfig'] = False
   gn_args['skia_use_libheif'] = False
   gn_args['skia_enable_fontmgr_custom_directory'] = False

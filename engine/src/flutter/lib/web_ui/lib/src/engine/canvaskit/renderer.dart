@@ -45,10 +45,12 @@ class CanvasKitRenderer extends Renderer {
   @override
   String get rendererTag => 'canvaskit';
 
-  late final SkiaFontCollection _fontCollection = SkiaFontCollection();
+  late final FlutterFontCollection _fontCollection = isExperimentalWebParagraph
+      ? WebFontCollection()
+      : SkiaFontCollection();
 
   @override
-  SkiaFontCollection get fontCollection => _fontCollection;
+  FlutterFontCollection get fontCollection => _fontCollection;
 
   /// The scene host, where the root canvas and overlay canvases are added to.
   DomElement? _sceneHost;
