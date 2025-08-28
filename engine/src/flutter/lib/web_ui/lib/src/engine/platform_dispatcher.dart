@@ -1056,6 +1056,11 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       _typographyMeasurementElement!,
       'line-height',
     )?.toDouble();
+    final double? fontSize = parseFontSize(_typographyMeasurementElement!)?.toDouble();
+    late final double? lineHeightFactor;
+    if (fontSize != null && lineHeight != null) {
+      lineHeightFactor = lineHeight / fontSize;
+    }
     final double? wordSpacing = parseStyleProperty(
       _typographyMeasurementElement!,
       'word-spacing',
@@ -1072,14 +1077,14 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       _typographyMeasurementElement!,
       'margin-bottom',
     )?.toDouble();
-    if (lineHeight == null &&
+    if (lineHeightFactor == null &&
         wordSpacing == null &&
         letterSpacing == null &&
         paragraphSpacing == null) {
       return null;
     }
     return ui.TypographySettings(
-      lineHeight: lineHeight,
+      lineHeight: lineHeightFactor,
       letterSpacing: letterSpacing,
       wordSpacing: wordSpacing,
       paragraphSpacing: paragraphSpacing,
@@ -1111,6 +1116,8 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     style.wordSpacing = '${spacingDefault}px';
     style.margin = '0px 0px ${spacingDefault}px 0px';
     domDocument.body!.append(_typographyMeasurementElement!);
+    final double? typographyMeasurementElementFontSize = parseFontSize(_typographyMeasurementElement!)?.toDouble();
+    final double defaultLineHeightFactor = spacingDefault / typographyMeasurementElementFontSize!;//needs adjustment.
 
     _typographySettingsObserver = createDomResizeObserver((
       List<DomResizeObserverEntry> entries,
@@ -1118,7 +1125,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     ) {
       final ui.TypographySettings? computedTypographySettings = _computeTypographySettings();
       if (computedTypographySettings != null &&
-          computedTypographySettings.lineHeight == spacingDefault &&
+          computedTypographySettings.lineHeight == defaultLineHeightFactor &&
           computedTypographySettings.wordSpacing == spacingDefault &&
           computedTypographySettings.letterSpacing == spacingDefault &&
           computedTypographySettings.paragraphSpacing == spacingDefault) {
