@@ -32,6 +32,9 @@ void main() {
       }
 
       final jsonMap = jsonDecode(message);
+      if (!jsonMap.containsKey('type')) {
+        throw ArgumentError('Message must contain a "type" field.');
+      }
 
       if (jsonMap['type'] == 'get_size') {
         return jsonEncode({
@@ -78,6 +81,8 @@ void main() {
         controller.activate();
       } else if (jsonMap['type'] == 'get_activated') {
         return jsonEncode({'isActivated': controller.isActivated});
+      } else {
+        throw ArgumentError('Unknown message type: ${jsonMap['type']}');
       }
 
       return '';

@@ -10,7 +10,7 @@ import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   group('end-to-end test', () {
-    late FlutterDriver driver;
+    late final FlutterDriver driver;
 
     setUpAll(() async {
       driver = await FlutterDriver.connect();
