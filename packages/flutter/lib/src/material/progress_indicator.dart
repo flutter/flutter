@@ -472,14 +472,28 @@ class LinearProgressIndicator extends ProgressIndicator {
 
 class _LinearProgressIndicatorState extends State<LinearProgressIndicator>
     with SingleTickerProviderStateMixin {
+  late final AnimationController _internalController;
 
-  AnimationController? _internalControllerCache;
-  AnimationController get _internalController {
-    assert(widget.value == null);
-    return _internalControllerCache ??= AnimationController(
+  @override
+  void initState() {
+    super.initState();
+    _internalController = AnimationController(
       duration: LinearProgressIndicator.defaultAnimationDuration,
       vsync: this,
-    )..repeat();
+    );
+    _updateControllerAnimatingStatus();
+  }
+
+  @override
+  void didUpdateWidget(LinearProgressIndicator oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _updateControllerAnimatingStatus();
+  }
+
+  @override
+  void dispose() {
+    _internalController?.dispose();
+    super.dispose();
   }
 
   AnimationController get _controller =>
@@ -488,10 +502,12 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator>
       context.findAncestorWidgetOfExactType<Theme>()?.data.progressIndicatorTheme.controller ??
       _internalController;
 
-  @override
-  void dispose() {
-    _internalControllerCache?.dispose();
-    super.dispose();
+  void _updateControllerAnimatingStatus() {
+    if (widget.value == null && !_internalController.isAnimating) {
+      _internalController.repeat();
+    } else if (widget.value != null && _internalController.isAnimating) {
+      _internalController.stop();
+    }
   }
 
   Widget _buildIndicator(BuildContext context, double animationValue, TextDirection textDirection) {
@@ -957,13 +973,28 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
     curve: const SawTooth(_rotationCount),
   );
 
-  AnimationController? _internalControllerCache;
-  AnimationController get _internalController {
-    assert(widget.value == null);
-    return _internalControllerCache ??= AnimationController(
-      duration: LinearProgressIndicator.defaultAnimationDuration,
+  late final AnimationController _internalController;
+
+  @override
+  void initState() {
+    super.initState();
+    _internalController = AnimationController(
+      duration: CircularProgressIndicator.defaultAnimationDuration,
       vsync: this,
-    )..repeat();
+    );
+    _updateControllerAnimatingStatus();
+  }
+
+  @override
+  void didUpdateWidget(CircularProgressIndicator oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _updateControllerAnimatingStatus();
+  }
+
+  @override
+  void dispose() {
+    _internalController?.dispose();
+    super.dispose();
   }
 
   AnimationController get _controller =>
@@ -972,10 +1003,12 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
       context.findAncestorWidgetOfExactType<Theme>()?.data.progressIndicatorTheme.controller ??
       _internalController;
 
-  @override
-  void dispose() {
-    _internalControllerCache?.dispose();
-    super.dispose();
+  void _updateControllerAnimatingStatus() {
+    if (widget.value == null && !_internalController.isAnimating) {
+      _internalController.repeat();
+    } else if (widget.value != null && _internalController.isAnimating) {
+      _internalController.stop();
+    }
   }
 
   Widget _buildCupertinoIndicator(BuildContext context) {

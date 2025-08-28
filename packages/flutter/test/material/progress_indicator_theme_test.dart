@@ -680,7 +680,7 @@ void main() {
 
     await tester.pumpWidget(buildApp());
     await tester.pump(const Duration(milliseconds: 500));
-    expectProgressAt(start: 0.5235987755983583, sweep: 3.272911296018351);
+    expectProgressAt(start: 0.43225767465697107, sweep: 4.52182126629162);
 
     final AnimationController globalThemeController = AnimationController(
       vsync: tester,

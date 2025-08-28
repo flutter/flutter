@@ -571,26 +571,21 @@ void main() {
     final AnimationController controller = AnimationController(vsync: tester, value: 0.5);
     addTearDown(controller.dispose);
 
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(
+      MaterialApp(
         home: Material(
           child: Center(
-            child: SizedBox(
-              width: 200,
-              child: LinearProgressIndicator(controller: controller),
-            ),
+            child: SizedBox(width: 200, child: LinearProgressIndicator(controller: controller)),
           ),
         ),
-      ));
+      ),
+    );
 
     expect(
       find.byType(LinearProgressIndicator),
       paints
-          ..rect(
-            rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 4.0),
-          )
-          ..rect(
-            rect: const Rect.fromLTRB(127.79541015625, 0.0, 200.0, 4.0),
-          ),
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 4.0))
+        ..rect(rect: const Rect.fromLTRB(127.79541015625, 0.0, 200.0, 4.0)),
     );
   });
 
@@ -1833,7 +1828,8 @@ void main() {
     final AnimationController controller = AnimationController(vsync: tester, value: 0.5);
     addTearDown(controller.dispose);
 
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(
+      MaterialApp(
         home: Material(
           child: Center(
             child: SizedBox(
@@ -1848,7 +1844,8 @@ void main() {
             ),
           ),
         ),
-      ));
+      ),
+    );
 
     expect(
       find.byType(CircularProgressIndicator),
