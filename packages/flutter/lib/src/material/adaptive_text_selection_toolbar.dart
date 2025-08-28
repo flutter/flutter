@@ -297,7 +297,9 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // If there aren't any buttons to build, build an empty toolbar.
-    if ((children != null && children!.isEmpty) || (buttonItems != null && buttonItems!.isEmpty)) {
+    if ((children == null && buttonItems == null) ||
+        (children?.isEmpty ?? false) ||
+        (buttonItems?.isEmpty ?? false)) {
       return const SizedBox.shrink();
     }
 
