@@ -1385,7 +1385,8 @@ void main() {
         ),
       );
       final SemanticsNode node = tester.getSemantics(find.byKey(key));
-
+      // It is important that validationResult is passed as null to containsSemantics,
+      // because this is testing that null means "ignore the validation result value".
       expect(node, containsSemantics(label: 'Foo', textDirection: TextDirection.ltr));
 
       handle.dispose();
