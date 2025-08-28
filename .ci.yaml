@@ -2648,6 +2648,7 @@ targets:
 
   # linux mokey benchmark
   - name: Linux_mokey complex_layout__start_up
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/173691
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
