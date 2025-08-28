@@ -15,7 +15,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+import 'color_scheme.dart';
 import 'colors.dart';
+import 'predictive_back_page_transitions_builder.dart';
 import 'theme.dart';
 
 // Slides the page upwards and fades it in, starting from 1/4 screen
@@ -758,7 +760,12 @@ class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
   final Color? backgroundColor;
 
   /// The value of [transitionDuration] in milliseconds.
-  static const int kTransitionMilliseconds = 800;
+  ///
+  /// Eyeballed on a physical Pixel 9 running Android 16. This does not match
+  /// the actual value used by native Android, which is 800ms, because native
+  /// Android is using Material 3 Expressive springs that are not currently
+  /// supported by Flutter. So for now at least, this is an approximation.
+  static const int kTransitionMilliseconds = 450;
 
   @override
   Duration get transitionDuration => const Duration(milliseconds: kTransitionMilliseconds);
@@ -805,38 +812,43 @@ class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
     Animation<double> secondaryAnimation,
     Color? backgroundColor,
     Widget? child,
-  ) => DualTransitionBuilder(
-    animation: ReverseAnimation(secondaryAnimation),
-    forwardBuilder: (BuildContext context, Animation<double> animation, Widget? child) {
-      return ColoredBox(
-        color: animation.isAnimating
-            ? backgroundColor ?? Theme.of(context).colorScheme.surface
-            : Colors.transparent,
-        child: FadeTransition(
+  ) {
+    final Widget builder = DualTransitionBuilder(
+      animation: ReverseAnimation(secondaryAnimation),
+      forwardBuilder: (BuildContext context, Animation<double> animation, Widget? child) {
+        return FadeTransition(
           opacity: _fadeInTransition.animate(animation),
           child: SlideTransition(
             position: _secondaryForwardTranslationTween.animate(animation),
             child: child,
           ),
-        ),
-      );
-    },
-    reverseBuilder: (BuildContext context, Animation<double> animation, Widget? child) {
-      return ColoredBox(
-        color: animation.isAnimating
-            ? backgroundColor ?? Theme.of(context).colorScheme.surface
-            : Colors.transparent,
-        child: FadeTransition(
+        );
+      },
+      reverseBuilder: (BuildContext context, Animation<double> animation, Widget? child) {
+        return FadeTransition(
           opacity: _fadeOutTransition.animate(animation),
           child: SlideTransition(
             position: _secondaryBackwardTranslationTween.animate(animation),
             child: child,
           ),
-        ),
-      );
-    },
-    child: child,
-  );
+        );
+      },
+      child: child,
+    );
+
+    final bool isOpaque = ModalRoute.opaqueOf(context) ?? true;
+
+    if (!isOpaque) {
+      return builder;
+    }
+
+    return ColoredBox(
+      color: secondaryAnimation.isAnimating
+          ? backgroundColor ?? ColorScheme.of(context).surface
+          : Colors.transparent,
+      child: builder,
+    );
+  }
 
   @override
   Widget buildTransitions<T>(
@@ -1091,7 +1103,7 @@ class PageTransitionsTheme with Diagnosticable {
 
   static const Map<TargetPlatform, PageTransitionsBuilder> _defaultBuilders =
       <TargetPlatform, PageTransitionsBuilder>{
-        TargetPlatform.android: ZoomPageTransitionsBuilder(),
+        TargetPlatform.android: PredictiveBackPageTransitionsBuilder(),
         TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
         TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
         TargetPlatform.windows: ZoomPageTransitionsBuilder(),

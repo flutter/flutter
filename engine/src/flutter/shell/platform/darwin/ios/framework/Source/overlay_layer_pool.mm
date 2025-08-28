@@ -16,7 +16,7 @@ OverlayLayer::OverlayLayer(UIView* overlay_view,
     : overlay_view(overlay_view),
       overlay_view_wrapper(overlay_view_wrapper),
       ios_surface(std::move(ios_surface)),
-      surface(std::move(surface)){};
+      surface(std::move(surface)) {};
 
 void OverlayLayer::UpdateViewState(UIView* flutter_view,
                                    DlRect rect,

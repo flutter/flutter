@@ -358,6 +358,7 @@ TEST(MessageLoopTaskQueue, ConcurrentQueueAndTaskCreatingCounts) {
   constexpr size_t kThreadTaskCount = 500;
 
   std::vector<TaskQueueId> task_queue_ids;
+  task_queue_ids.reserve(kTaskQueuesCount);
   for (size_t i = 0; i < kTaskQueuesCount; ++i) {
     task_queue_ids.emplace_back(task_queues->CreateTaskQueue());
   }
@@ -383,6 +384,7 @@ TEST(MessageLoopTaskQueue, ConcurrentQueueAndTaskCreatingCounts) {
 
   std::vector<std::thread> threads;
 
+  threads.reserve(kThreadCount);
   for (size_t i = 0; i < kThreadCount; i++) {
     threads.emplace_back(std::thread{thread_main});
   }

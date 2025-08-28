@@ -5,7 +5,9 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_HOST_WINDOW_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_HOST_WINDOW_H_
 
+#include <shobjidl.h>
 #include <windows.h>
+#include <wrl/client.h>
 #include <memory>
 #include <optional>
 
@@ -34,7 +36,9 @@ class HostWindow {
   static std::unique_ptr<HostWindow> CreateRegularWindow(
       WindowManager* controller,
       FlutterWindowsEngine* engine,
-      const WindowSizing& content_size);
+      const WindowSizeRequest& preferred_size,
+      const WindowConstraints& preferred_constraints,
+      LPCWSTR title);
 
   // Returns the instance pointer for |hwnd| or nullptr if invalid.
   static HostWindow* GetThisFromHandle(HWND hwnd);
@@ -44,11 +48,42 @@ class HostWindow {
   HWND GetWindowHandle() const;
 
   // Resizes the window to accommodate a client area of the given
-  // |size|.
-  void SetContentSize(const WindowSizing& size);
+  // |size|. If the size does not satisfy the constraints, the window will be
+  // resized to the minimum or maximum size as appropriate.
+  void SetContentSize(const WindowSizeRequest& size);
+
+  // Sets the constaints on the client area of the window.
+  // If the current window size does not satisfy the new constraints,
+  // the window will be resized to satisy thew new constraints.
+  void SetConstraints(const WindowConstraints& constraints);
+
+  // Set the fullscreen state. |display_id| indicates the display where
+  // the window should be shown fullscreen; std::nullopt indicates
+  // that no display was specified, so the current display may be used.
+  void SetFullscreen(bool fullscreen,
+                     std::optional<FlutterEngineDisplayId> display_id);
+
+  // Returns |true| if this window is fullscreen, otherwise |false|.
+  bool GetFullscreen() const;
+
+  // Given a window identifier, returns the window content size of the
+  // window.
+  static ActualWindowSize GetWindowContentSize(HWND hwnd);
 
  private:
   friend WindowManager;
+
+  // Information saved before going into fullscreen mode, used to restore the
+  // window afterwards.
+  struct SavedWindowInfo {
+    LONG style;
+    LONG ex_style;
+    RECT rect;
+    ActualWindowSize client_size;
+    int dpi;
+    HMONITOR monitor;
+    MONITORINFO monitor_info;
+  };
 
   HostWindow(WindowManager* controller,
              FlutterWindowsEngine* engine,
@@ -90,6 +125,15 @@ class HostWindow {
 
   // The constraints on the window's client area.
   BoxConstraints box_constraints_;
+
+  // Whether or not the window is currently in a fullscreen state.
+  bool is_fullscreen_ = false;
+
+  // Saved window information from before entering fullscreen mode.
+  SavedWindowInfo saved_window_info_;
+
+  // Used to mark a window as fullscreen.
+  Microsoft::WRL::ComPtr<ITaskbarList2> task_bar_list_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(HostWindow);
 };

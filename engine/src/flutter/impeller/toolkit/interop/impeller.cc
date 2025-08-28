@@ -130,8 +130,8 @@ ImpellerContext ImpellerContextCreateOpenGLESNew(
 #endif  // IMPELLER_ENABLE_OPENGLES
 }
 
-IMPELLER_EXTERN_C ImpellerContext ImpellerContextCreateMetalNew(
-    uint32_t version) {
+IMPELLER_EXTERN_C ImpellerContext
+ImpellerContextCreateMetalNew(uint32_t version) {
   if (!CheckVersion(version)) {
     return nullptr;
   }
@@ -148,9 +148,9 @@ IMPELLER_EXTERN_C ImpellerContext ImpellerContextCreateMetalNew(
 #endif  // IMPELLER_ENABLE_METAL
 }
 
-IMPELLER_EXTERN_C ImpellerContext ImpellerContextCreateVulkanNew(
-    uint32_t version,
-    const ImpellerContextVulkanSettings* settings) {
+IMPELLER_EXTERN_C ImpellerContext
+ImpellerContextCreateVulkanNew(uint32_t version,
+                               const ImpellerContextVulkanSettings* settings) {
   if (!CheckVersion(version)) {
     return nullptr;
   }
@@ -225,8 +225,8 @@ ImpellerSurface ImpellerVulkanSwapchainAcquireNextSurfaceNew(
   return GetPeer(swapchain)->AcquireNextSurface().Leak();
 }
 
-IMPELLER_EXTERN_C ImpellerDisplayListBuilder ImpellerDisplayListBuilderNew(
-    const ImpellerRect* cull_rect) {
+IMPELLER_EXTERN_C ImpellerDisplayListBuilder
+ImpellerDisplayListBuilderNew(const ImpellerRect* cull_rect) {
   return Create<DisplayListBuilder>(cull_rect).Leak();
 }
 
@@ -1099,9 +1099,9 @@ ImpellerImageFilter ImpellerImageFilterCreateFragmentProgramNew(
       .Leak();
 }
 
-IMPELLER_EXTERN_C ImpellerImageFilter ImpellerImageFilterCreateComposeNew(
-    ImpellerImageFilter outer,
-    ImpellerImageFilter inner) {
+IMPELLER_EXTERN_C ImpellerImageFilter
+ImpellerImageFilterCreateComposeNew(ImpellerImageFilter outer,
+                                    ImpellerImageFilter inner) {
   return ImageFilter::MakeCompose(*GetPeer(outer), *GetPeer(inner)).Leak();
 }
 

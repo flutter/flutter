@@ -7,6 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -398,7 +399,7 @@ void main() {
               child: TextButtonTheme(
                 data: TextButtonThemeData(
                   style: ButtonStyle(
-                    foregroundColor: MaterialStateProperty.resolveWith<Color>(getTextColor),
+                    foregroundColor: WidgetStateProperty.resolveWith<Color>(getTextColor),
                   ),
                 ),
                 child: Builder(
@@ -537,7 +538,7 @@ void main() {
           body: Center(
             child: TextButton(
               style: ButtonStyle(
-                foregroundColor: MaterialStateProperty.resolveWith<Color>(getTextColor),
+                foregroundColor: WidgetStateProperty.resolveWith<Color>(getTextColor),
               ),
               onPressed: () {},
               focusNode: focusNode,
@@ -605,8 +606,8 @@ void main() {
           body: Center(
             child: TextButton.icon(
               style: ButtonStyle(
-                foregroundColor: MaterialStateProperty.resolveWith<Color>(getTextColor),
-                iconColor: MaterialStateProperty.resolveWith<Color>(getTextColor),
+                foregroundColor: WidgetStateProperty.resolveWith<Color>(getTextColor),
+                iconColor: WidgetStateProperty.resolveWith<Color>(getTextColor),
               ),
               key: buttonKey,
               icon: const Icon(Icons.add),
@@ -674,7 +675,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: TextButton(
           style: ButtonStyle(
-            overlayColor: MaterialStateProperty.resolveWith<Color?>(getOverlayColor),
+            overlayColor: WidgetStateProperty.resolveWith<Color?>(getOverlayColor),
           ),
           child: Container(),
           onPressed: () {
@@ -708,7 +709,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: TextButton(
           style: ButtonStyle(
-            overlayColor: MaterialStateProperty.resolveWith<Color?>(getOverlayColor),
+            overlayColor: WidgetStateProperty.resolveWith<Color?>(getOverlayColor),
           ),
           focusNode: focusNode,
           onPressed: () {},

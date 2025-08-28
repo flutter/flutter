@@ -152,3 +152,7 @@ android_toolchains_helper("arm64_apilevel26") {
     android_api_level = 26
   }
 }
+
+android_toolchains_helper("riscv64") {
+  toolchain_cpu = "riscv64"
+}
