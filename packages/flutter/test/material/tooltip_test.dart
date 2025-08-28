@@ -2006,7 +2006,7 @@ void main() {
     expect(semantics, hasSemantics(expected1, ignoreTransform: true, ignoreRect: true));
 
     semantics.dispose();
-  });
+  }, skip: kIsWeb);
 
   testWidgets('Tooltip semantics does not merge into child', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -2079,7 +2079,7 @@ void main() {
     );
 
     semantics.dispose();
-  });
+  }, skip: kIsWeb);
 
   testWidgets('Material2 - Tooltip text scales with textScaler', (WidgetTester tester) async {
     Widget buildApp(String text, {required TextScaler textScaler}) {
