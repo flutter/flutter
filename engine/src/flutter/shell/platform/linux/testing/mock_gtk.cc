@@ -92,6 +92,16 @@ GdkCursor* gdk_cursor_new_from_name(GdkDisplay* display, const gchar* name) {
 
 void gdk_window_set_cursor(GdkWindow* window, GdkCursor* cursor) {}
 
+void gdk_cairo_draw_from_gl(cairo_t* cr,
+                            GdkWindow* window,
+                            int source,
+                            int source_type,
+                            int buffer_scale,
+                            int x,
+                            int y,
+                            int width,
+                            int height) {}
+
 GtkWidget* gtk_window_new(GtkWindowType type) {
   GtkWindow* window = GTK_WINDOW(g_object_new(gtk_window_get_type(), nullptr));
   mock->gtk_window_new(window, type);
