@@ -21,8 +21,8 @@ jobs:
     steps:
       - name: Leave Comment and Remove Label
         run: |
-          gh pr edit ${{ github.event.pull_request.number }} --remove-label format('cp{0} beta', ':')
-          gh pr edit ${{ github.event.pull_request.number }} --remove-label format('cp{0} stable', ':')
+          gh pr edit ${{ github.event.pull_request.number }} --remove-label "cp: beta"
+          gh pr edit ${{ github.event.pull_request.number }} --remove-label "cp: stable"
           gh pr comment ${{ github.event.pull_request.number }} -R flutter/flutter -b "Only merged pull requests can be cherrypicked."
         env:
           GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
@@ -72,7 +72,7 @@ jobs:
           git push https://${{ env.GITHUB_TOKEN }}@github.com/flutteractionsbot/flutter cp-${CHANNEL}-${COMMIT_SHA}
           {
             echo 'PR_URL<<EOF'
-            gh pr create --title "[CP-${CHANNEL}]${PR_TITLE}" --body-file ../PULL_REQUEST_CP_TEMPLATE.md --base ${RELEASE_BRANCH} --label "cp: review" --repo flutter/flutter --head flutteractionsbot:cp-${CHANNEL}-${COMMIT_SHA}
+            gh pr create --title "[CP-${CHANNEL}]${PR_TITLE}" --body-file ".github/PR_TEMPLATE/PULL_REQUEST_CP_TEMPLATE.md" --base ${RELEASE_BRANCH} --label "cp: review" --repo flutter/flutter --head flutteractionsbot:cp-${CHANNEL}-${COMMIT_SHA}
             echo EOF
           } >> "$GITHUB_ENV"
         env:

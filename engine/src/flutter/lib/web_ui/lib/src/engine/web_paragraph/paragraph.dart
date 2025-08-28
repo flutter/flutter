@@ -324,6 +324,8 @@ class WebParagraph implements ui.Paragraph {
     }
   }
 
+  void paint(ui.Canvas canvas, ui.Offset offset) {}
+
   @override
   ui.TextRange getLineBoundary(ui.TextPosition position) {
     return const ui.TextRange(start: 0, end: 0);

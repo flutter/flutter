@@ -1053,7 +1053,7 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
       _styleStack = <CkTextStyle>[],
       _paragraphBuilder = canvasKit.ParagraphBuilder.MakeFromFontCollection(
         style.skParagraphStyle,
-        CanvasKitRenderer.instance.fontCollection.skFontCollection,
+        (CanvasKitRenderer.instance.fontCollection as SkiaFontCollection).skFontCollection,
       ) {
     _styleStack.add(_style.getTextStyle());
   }
