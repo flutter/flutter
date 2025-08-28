@@ -561,125 +561,157 @@ void main() {
     );
   });
 
-  testWidgets(
-    'LinearProgressIndicator paints at 50% and 80% when controller value is 0.5 and 0.8',
-    (WidgetTester tester) async {
-      final AnimationController controller = AnimationController(
-        vsync: tester,
-        duration: LinearProgressIndicator.defaultAnimationDuration,
-      );
-
-      final ThemeData theme = ThemeData(
-        progressIndicatorTheme: ProgressIndicatorThemeData(
-          color: Colors.black,
-          linearTrackColor: Colors.green,
-          controller: controller,
-        ),
-      );
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: Center(
-              child: Theme(
-                data: theme,
-                child: const SizedBox(width: 200.0, child: LinearProgressIndicator()),
+  testWidgets('LinearProgressIndicator reflects the value of the theme controller', (
+    WidgetTester tester,
+  ) async {
+    Widget buildApp({
+      AnimationController? widgetController,
+      AnimationController? indicatorThemeController,
+      AnimationController? globalThemeController,
+    }) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: Theme(
+              data: ThemeData(
+                progressIndicatorTheme: ProgressIndicatorThemeData(
+                  color: Colors.black,
+                  linearTrackColor: Colors.green,
+                  controller: globalThemeController,
+                ),
               ),
-            ),
-          ),
-        ),
-      );
-
-      controller.value = 0.5; // Set the progress
-
-      await tester.pump(); // Wait for all rebuilds
-
-      expect(
-        find.byType(LinearProgressIndicator),
-        paints
-          ..rect(
-            rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 4.0),
-            color: theme.progressIndicatorTheme.linearTrackColor,
-          )
-          ..rect(
-            rect: const Rect.fromLTRB(127.79541015625, 0.0, 200.0, 4.0),
-            color: theme.progressIndicatorTheme.color,
-          ),
-      );
-
-      controller.value = 0.8; // Set the progress
-
-      await tester.pump(); // Wait for all rebuilds
-
-      expect(
-        find.byType(LinearProgressIndicator),
-        paints
-          ..rect(
-            rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 4.0),
-            color: theme.progressIndicatorTheme.linearTrackColor,
-          )
-          ..rect(
-            rect: const Rect.fromLTRB(98.24226796627045, 0.0, 181.18448555469513, 4.0),
-            color: theme.progressIndicatorTheme.color,
-          ),
-      );
-
-      controller.dispose();
-    },
-  );
-
-  testWidgets(
-    'CircularProgressIndicator paints at 50% and 80% when controller value is 0.5 and 0.8',
-    (WidgetTester tester) async {
-      final AnimationController controller = AnimationController(
-        vsync: tester,
-        duration: CircularProgressIndicator.defaultAnimationDuration,
-      );
-
-      final ThemeData theme = ThemeData(
-        progressIndicatorTheme: ProgressIndicatorThemeData(
-          color: Colors.black,
-          linearTrackColor: Colors.green,
-          controller: controller,
-        ),
-      );
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: Center(
-              child: Theme(
-                data: theme,
-                child: const SizedBox(
+              child: ProgressIndicatorTheme(
+                data: ProgressIndicatorThemeData(controller: indicatorThemeController),
+                child: SizedBox(
                   width: 200.0,
-                  height: 200.0,
-                  child: CircularProgressIndicator(),
+                  child: LinearProgressIndicator(controller: widgetController),
                 ),
               ),
             ),
           ),
         ),
       );
+    }
 
-      controller.value = 0.5; // Set the progress
+    void expectProgressAt({required double left, required double right}) {
+      expect(
+        find.byType(LinearProgressIndicator),
+        paints
+          ..rect() // Background
+          ..rect(rect: Rect.fromLTRB(left, 0.0, right, 4.0)),
+      );
+    }
 
-      await tester.pump(); // Wait for all rebuilds
+    await tester.pumpWidget(buildApp());
+    await tester.pump(const Duration(milliseconds: 500));
+    expectProgressAt(left: 16.028758883476257, right: 141.07513427734375);
 
+    final AnimationController globalThemeController = AnimationController(
+      vsync: tester,
+      value: 0.1,
+    );
+    addTearDown(globalThemeController.dispose);
+    await tester.pumpWidget(buildApp(globalThemeController: globalThemeController));
+    expectProgressAt(left: 0.0, right: 37.14974820613861);
+
+    final AnimationController indicatorThemeController = AnimationController(
+      vsync: tester,
+      value: 0.5,
+    );
+    addTearDown(indicatorThemeController.dispose);
+    await tester.pumpWidget(
+      buildApp(
+        globalThemeController: globalThemeController,
+        indicatorThemeController: indicatorThemeController,
+      ),
+    );
+    expectProgressAt(left: 127.79541015625, right: 200.0);
+
+    final AnimationController widgetController = AnimationController(vsync: tester, value: 0.8);
+    addTearDown(widgetController.dispose);
+    await tester.pumpWidget(
+      buildApp(
+        globalThemeController: globalThemeController,
+        indicatorThemeController: indicatorThemeController,
+        widgetController: widgetController,
+      ),
+    );
+    expectProgressAt(left: 98.24226796627045, right: 181.18448555469513);
+  });
+
+  testWidgets('CircularProgressIndicator reflects the value of the theme controller', (
+    WidgetTester tester,
+  ) async {
+    Widget buildApp({
+      AnimationController? widgetController,
+      AnimationController? indicatorThemeController,
+      AnimationController? globalThemeController,
+    }) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: Theme(
+              data: ThemeData(
+                progressIndicatorTheme: ProgressIndicatorThemeData(
+                  color: Colors.black,
+                  linearTrackColor: Colors.green,
+                  controller: globalThemeController,
+                ),
+              ),
+              child: ProgressIndicatorTheme(
+                data: ProgressIndicatorThemeData(controller: indicatorThemeController),
+                child: SizedBox(
+                  width: 200.0,
+                  child: CircularProgressIndicator(controller: widgetController),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    void expectProgressAt({required double start, required double sweep}) {
       expect(
         find.byType(CircularProgressIndicator),
-        paints..arc(startAngle: 1.5707963267948966, sweepAngle: 0.001),
+        paints..arc(startAngle: start, sweepAngle: sweep),
       );
+    }
 
-      controller.value = 0.8; // Set the progress
+    await tester.pumpWidget(buildApp());
+    await tester.pump(const Duration(milliseconds: 500));
+    expectProgressAt(start: 0.5235987755983583, sweep: 3.272911296018351);
 
-      await tester.pump(); // Wait for all rebuilds
+    final AnimationController globalThemeController = AnimationController(
+      vsync: tester,
+      value: 0.1,
+    );
+    addTearDown(globalThemeController.dispose);
+    await tester.pumpWidget(buildApp(globalThemeController: globalThemeController));
+    expectProgressAt(start: 0.628318530718057, sweep: 2.8904563625380906);
 
-      expect(
-        find.byType(CircularProgressIndicator),
-        paints..arc(startAngle: 2.520489337828999, sweepAngle: 4.076855234710353),
-      );
+    final AnimationController indicatorThemeController = AnimationController(
+      vsync: tester,
+      value: 0.5,
+    );
+    addTearDown(indicatorThemeController.dispose);
+    await tester.pumpWidget(
+      buildApp(
+        globalThemeController: globalThemeController,
+        indicatorThemeController: indicatorThemeController,
+      ),
+    );
+    expectProgressAt(start: 1.5707963267948966, sweep: 0.001);
 
-      controller.dispose();
-    },
-  );
+    final AnimationController widgetController = AnimationController(vsync: tester, value: 0.8);
+    addTearDown(widgetController.dispose);
+    await tester.pumpWidget(
+      buildApp(
+        globalThemeController: globalThemeController,
+        indicatorThemeController: indicatorThemeController,
+        widgetController: widgetController,
+      ),
+    );
+    expectProgressAt(start: 2.520489337828999, sweep: 4.076855234710353);
+  });
 }

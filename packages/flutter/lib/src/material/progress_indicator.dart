@@ -472,52 +472,25 @@ class LinearProgressIndicator extends ProgressIndicator {
 
 class _LinearProgressIndicatorState extends State<LinearProgressIndicator>
     with SingleTickerProviderStateMixin {
-  late AnimationController _internalController;
-  AnimationController? _inheritedController;
 
-  AnimationController get _controller =>
-      widget.controller ?? _inheritedController ?? _internalController;
-
-  bool get _usingInternalController => _controller == _internalController;
-
-  @override
-  void initState() {
-    super.initState();
-    _inheritedController =
-        context.getInheritedWidgetOfExactType<ProgressIndicatorTheme>()?.data.controller ??
-        context.findAncestorWidgetOfExactType<Theme>()?.data.progressIndicatorTheme.controller;
-
-    _internalController = AnimationController(
+  AnimationController? _internalControllerCache;
+  AnimationController get _internalController {
+    assert(widget.value == null);
+    return _internalControllerCache ??= AnimationController(
       duration: LinearProgressIndicator.defaultAnimationDuration,
       vsync: this,
-    );
-
-    if (_usingInternalController && widget.value == null) {
-      _controller.repeat();
-    }
+    )..repeat();
   }
 
-  @override
-  void didUpdateWidget(LinearProgressIndicator oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (_usingInternalController) {
-      if (widget.value == null && !_controller.isAnimating) {
-        _controller.repeat();
-      } else if (widget.value != null && _controller.isAnimating) {
-        _controller.stop();
-      }
-    }
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _inheritedController = ProgressIndicatorTheme.of(context).controller;
-  }
+  AnimationController get _controller =>
+      widget.controller ??
+      context.getInheritedWidgetOfExactType<ProgressIndicatorTheme>()?.data.controller ??
+      context.findAncestorWidgetOfExactType<Theme>()?.data.progressIndicatorTheme.controller ??
+      _internalController;
 
   @override
   void dispose() {
-    _internalController.dispose();
+    _internalControllerCache?.dispose();
     super.dispose();
   }
 
@@ -984,52 +957,24 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
     curve: const SawTooth(_rotationCount),
   );
 
-  late AnimationController _internalController;
-  AnimationController? _inheritedController;
+  AnimationController? _internalControllerCache;
+  AnimationController get _internalController {
+    assert(widget.value == null);
+    return _internalControllerCache ??= AnimationController(
+      duration: LinearProgressIndicator.defaultAnimationDuration,
+      vsync: this,
+    )..repeat();
+  }
 
   AnimationController get _controller =>
-      widget.controller ?? _inheritedController ?? _internalController;
-
-  bool get _usingInternalController => _controller == _internalController;
-
-  @override
-  void initState() {
-    super.initState();
-    _inheritedController =
-        context.getInheritedWidgetOfExactType<ProgressIndicatorTheme>()?.data.controller ??
-        context.findAncestorWidgetOfExactType<Theme>()?.data.progressIndicatorTheme.controller;
-
-    _internalController = AnimationController(
-      duration: CircularProgressIndicator.defaultAnimationDuration,
-      vsync: this,
-    );
-
-    if (_usingInternalController && widget.value == null) {
-      _controller.repeat();
-    }
-  }
-
-  @override
-  void didUpdateWidget(CircularProgressIndicator oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (_usingInternalController) {
-      if (widget.value == null && !_controller.isAnimating) {
-        _controller.repeat();
-      } else if (widget.value != null && _controller.isAnimating) {
-        _controller.stop();
-      }
-    }
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _inheritedController = ProgressIndicatorTheme.of(context).controller;
-  }
+      widget.controller ??
+      context.getInheritedWidgetOfExactType<ProgressIndicatorTheme>()?.data.controller ??
+      context.findAncestorWidgetOfExactType<Theme>()?.data.progressIndicatorTheme.controller ??
+      _internalController;
 
   @override
   void dispose() {
-    _internalController.dispose();
+    _internalControllerCache?.dispose();
     super.dispose();
   }
 
