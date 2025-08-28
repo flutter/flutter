@@ -2048,8 +2048,6 @@ class SemanticsObject {
       // IMPORTANT: because headings also cover certain kinds of headers, the
       //            `heading` role has precedence over the `header` role.
       return EngineSemanticsRole.heading;
-    } else if (isLink) {
-      return EngineSemanticsRole.link;
     } else if (isTextField) {
       return EngineSemanticsRole.textField;
     } else if (isIncrementable) {
@@ -2058,6 +2056,8 @@ class SemanticsObject {
       return EngineSemanticsRole.image;
     } else if (isCheckable) {
       return EngineSemanticsRole.checkable;
+    } else if (isLink) {
+      return EngineSemanticsRole.link;
     } else if (isButton) {
       return EngineSemanticsRole.button;
     } else if (isScrollContainer) {
