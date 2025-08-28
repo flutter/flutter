@@ -53,7 +53,7 @@ class MockAllocator : public Allocator {
               (override));
   MOCK_METHOD(std::shared_ptr<Texture>,
               OnCreateTexture,
-              (const TextureDescriptor& desc),
+              (const TextureDescriptor& desc, bool threadsafe),
               (override));
 };
 

@@ -218,8 +218,8 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   bool get enableGestures =>
       widget.interactive ?? _scrollbarTheme.interactive ?? !_useAndroidScrollbar;
 
-  MaterialStateProperty<bool> get _trackVisibility =>
-      MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<bool> get _trackVisibility =>
+      WidgetStateProperty.resolveWith((Set<MaterialState> states) {
         return widget.trackVisibility ?? _scrollbarTheme.trackVisibility?.resolve(states) ?? false;
       });
 
@@ -228,7 +228,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
     if (_hoverIsActive) MaterialState.hovered,
   };
 
-  MaterialStateProperty<Color> get _thumbColor {
+  WidgetStateProperty<Color> get _thumbColor {
     final Color onSurface = _colorScheme.onSurface;
     final Brightness brightness = _colorScheme.brightness;
     late Color dragColor;
@@ -238,20 +238,18 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       case Brightness.light:
         dragColor = onSurface.withOpacity(0.6);
         hoverColor = onSurface.withOpacity(0.5);
-        idleColor =
-            _useAndroidScrollbar
-                ? Theme.of(context).highlightColor.withOpacity(1.0)
-                : onSurface.withOpacity(0.1);
+        idleColor = _useAndroidScrollbar
+            ? Theme.of(context).highlightColor.withOpacity(1.0)
+            : onSurface.withOpacity(0.1);
       case Brightness.dark:
         dragColor = onSurface.withOpacity(0.75);
         hoverColor = onSurface.withOpacity(0.65);
-        idleColor =
-            _useAndroidScrollbar
-                ? Theme.of(context).highlightColor.withOpacity(1.0)
-                : onSurface.withOpacity(0.3);
+        idleColor = _useAndroidScrollbar
+            ? Theme.of(context).highlightColor.withOpacity(1.0)
+            : onSurface.withOpacity(0.3);
     }
 
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.dragged)) {
         return _scrollbarTheme.thumbColor?.resolve(states) ?? dragColor;
       }
@@ -270,10 +268,10 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
     });
   }
 
-  MaterialStateProperty<Color> get _trackColor {
+  WidgetStateProperty<Color> get _trackColor {
     final Color onSurface = _colorScheme.onSurface;
     final Brightness brightness = _colorScheme.brightness;
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (showScrollbar && _trackVisibility.resolve(states)) {
         return _scrollbarTheme.trackColor?.resolve(states) ??
             switch (brightness) {
@@ -285,10 +283,10 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
     });
   }
 
-  MaterialStateProperty<Color> get _trackBorderColor {
+  WidgetStateProperty<Color> get _trackBorderColor {
     final Color onSurface = _colorScheme.onSurface;
     final Brightness brightness = _colorScheme.brightness;
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (showScrollbar && _trackVisibility.resolve(states)) {
         return _scrollbarTheme.trackBorderColor?.resolve(states) ??
             switch (brightness) {
@@ -300,8 +298,8 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
     });
   }
 
-  MaterialStateProperty<double> get _thickness {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<double> get _thickness {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.hovered) && _trackVisibility.resolve(states)) {
         return widget.thickness ??
             _scrollbarTheme.thickness?.resolve(states) ??

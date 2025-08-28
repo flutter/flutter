@@ -47,29 +47,28 @@ class _ListTileExampleState extends State<ListTileExample> {
                   titleAlignment = value;
                 });
               },
-              itemBuilder:
-                  (BuildContext context) => <PopupMenuEntry<ListTileTitleAlignment>>[
-                    const PopupMenuItem<ListTileTitleAlignment>(
-                      value: ListTileTitleAlignment.threeLine,
-                      child: Text('threeLine'),
-                    ),
-                    const PopupMenuItem<ListTileTitleAlignment>(
-                      value: ListTileTitleAlignment.titleHeight,
-                      child: Text('titleHeight'),
-                    ),
-                    const PopupMenuItem<ListTileTitleAlignment>(
-                      value: ListTileTitleAlignment.top,
-                      child: Text('top'),
-                    ),
-                    const PopupMenuItem<ListTileTitleAlignment>(
-                      value: ListTileTitleAlignment.center,
-                      child: Text('center'),
-                    ),
-                    const PopupMenuItem<ListTileTitleAlignment>(
-                      value: ListTileTitleAlignment.bottom,
-                      child: Text('bottom'),
-                    ),
-                  ],
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<ListTileTitleAlignment>>[
+                const PopupMenuItem<ListTileTitleAlignment>(
+                  value: ListTileTitleAlignment.threeLine,
+                  child: Text('threeLine'),
+                ),
+                const PopupMenuItem<ListTileTitleAlignment>(
+                  value: ListTileTitleAlignment.titleHeight,
+                  child: Text('titleHeight'),
+                ),
+                const PopupMenuItem<ListTileTitleAlignment>(
+                  value: ListTileTitleAlignment.top,
+                  child: Text('top'),
+                ),
+                const PopupMenuItem<ListTileTitleAlignment>(
+                  value: ListTileTitleAlignment.center,
+                  child: Text('center'),
+                ),
+                const PopupMenuItem<ListTileTitleAlignment>(
+                  value: ListTileTitleAlignment.bottom,
+                  child: Text('bottom'),
+                ),
+              ],
             ),
           ),
           const Divider(),

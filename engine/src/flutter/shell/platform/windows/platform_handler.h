@@ -104,18 +104,29 @@ class PlatformHandler {
   static constexpr char kClipboardError[] = "Clipboard error";
 
   static constexpr char kSoundTypeAlert[] = "SystemSoundType.alert";
+  static constexpr char kSoundTypeClick[] = "SystemSoundType.click";
+  static constexpr char kSoundTypeTick[] = "SystemSoundType.tick";
 
  private:
+  WNDCLASS RegisterWindowClass();
+
   // Called when a method is called on |channel_|;
   void HandleMethodCall(
       const MethodCall<rapidjson::Document>& method_call,
       std::unique_ptr<MethodResult<rapidjson::Document>> result);
+
+  static LRESULT CALLBACK WndProc(HWND const window,
+                                  UINT const message,
+                                  WPARAM const wparam,
+                                  LPARAM const lparam) noexcept;
 
   // The MethodChannel used for communication with the Flutter engine.
   std::unique_ptr<MethodChannel<rapidjson::Document>> channel_;
 
   // A reference to the Flutter engine.
   FlutterWindowsEngine* engine_;
+
+  HWND window_handle_ = nullptr;
 
   // A scoped clipboard provider that can be passed in for mocking in tests.
   // Use this to acquire clipboard in each operation to avoid blocking clipboard
@@ -130,7 +141,7 @@ class PlatformHandler {
 // PlatformHandler.
 class ScopedClipboardInterface {
  public:
-  virtual ~ScopedClipboardInterface(){};
+  virtual ~ScopedClipboardInterface() {};
 
   // Attempts to open the clipboard for the given window, returning the error
   // code in the case of failure and 0 otherwise.

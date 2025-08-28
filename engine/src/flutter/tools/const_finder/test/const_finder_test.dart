@@ -25,10 +25,9 @@ void main() {
     'test',
     'fixtures',
   );
-  final String fixturesUrl =
-      io.Platform.isWindows
-          ? '/$fixturesPath'.replaceAll(io.Platform.pathSeparator, '/')
-          : fixturesPath;
+  final String fixturesUrl = io.Platform.isWindows
+      ? '/$fixturesPath'.replaceAll(io.Platform.pathSeparator, '/')
+      : fixturesPath;
 
   final frontendServerSnapshot = path.join(buildDir, 'gen', 'frontend_server_aot.dart.snapshot');
   final flutterPatchedSdk = path.join(buildDir, 'flutter_patched_sdk');
@@ -114,10 +113,10 @@ void main() {
       'constantInstances': List<Object?> constantInstances,
       'nonConstantLocations': List<Object?> nonConstantLocations,
     } = ConstFinder(
-          kernelFilePath: dillPath,
-          classLibraryUri: 'package:const_finder_fixtures/target.dart',
-          className: 'Target',
-        ).findInstances();
+      kernelFilePath: dillPath,
+      classLibraryUri: 'package:const_finder_fixtures/target.dart',
+      className: 'Target',
+    ).findInstances();
 
     expect(
       constantInstances,
@@ -156,10 +155,10 @@ void main() {
       'constantInstances': List<Object?> constantInstances,
       'nonConstantLocations': List<Object?> nonConstantLocations,
     } = ConstFinder(
-          kernelFilePath: dillPath,
-          classLibraryUri: 'package:const_finder_fixtures/target.dart',
-          className: 'Target',
-        ).findInstances();
+      kernelFilePath: dillPath,
+      classLibraryUri: 'package:const_finder_fixtures/target.dart',
+      className: 'Target',
+    ).findInstances();
 
     expect(
       constantInstances,
@@ -201,10 +200,10 @@ void main() {
       'constantInstances': List<Object?> constantInstances,
       'nonConstantLocations': List<Object?> nonConstantLocations,
     } = ConstFinder(
-          kernelFilePath: dillPath,
-          classLibraryUri: 'package:const_finder_fixtures/target.dart',
-          className: 'Target',
-        ).findInstances();
+      kernelFilePath: dillPath,
+      classLibraryUri: 'package:const_finder_fixtures/target.dart',
+      className: 'Target',
+    ).findInstances();
 
     expect(
       constantInstances,
@@ -236,10 +235,10 @@ void main() {
       'constantInstances': List<Object?> constantInstances,
       'nonConstantLocations': List<Object?> nonConstantLocations,
     } = ConstFinder(
-          kernelFilePath: dillPath,
-          classLibraryUri: 'package:const_finder_fixtures/target.dart',
-          className: 'Target',
-        ).findInstances();
+      kernelFilePath: dillPath,
+      classLibraryUri: 'package:const_finder_fixtures/target.dart',
+      className: 'Target',
+    ).findInstances();
 
     expect(
       constantInstances,
@@ -279,7 +278,8 @@ void main() {
     final {
       'constantInstances': List<Object?> constantInstances,
       'nonConstantLocations': List<Object?> nonConstantLocations,
-    } = finder.findInstances();
+    } = finder
+        .findInstances();
     expect(
       constantInstances,
       unorderedEquals([
@@ -308,7 +308,8 @@ void main() {
     final {
       'constantInstances': List<Object?> constantInstances,
       'nonConstantLocations': List<Object?> nonConstantLocations,
-    } = finder.findInstances();
+    } = finder
+        .findInstances();
     expect(
       constantInstances,
       unorderedEquals([

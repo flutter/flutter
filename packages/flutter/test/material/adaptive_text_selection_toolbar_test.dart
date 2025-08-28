@@ -294,10 +294,9 @@ void main() {
                   cursorColor: Colors.red,
                   selectionControls: materialTextSelectionHandleControls,
                   contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
-                    buttonTypes =
-                        editableTextState.contextMenuButtonItems
-                            .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
-                            .toSet();
+                    buttonTypes = editableTextState.contextMenuButtonItems
+                        .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
+                        .toSet();
                     return const SizedBox.shrink();
                   },
                 ),
@@ -385,11 +384,10 @@ void main() {
                       ContextMenuButtonItem(label: buttonText, onPressed: () {}),
                     ];
                     return ListView(
-                      children:
-                          AdaptiveTextSelectionToolbar.getAdaptiveButtons(
-                            context,
-                            buttonItems,
-                          ).toList(),
+                      children: AdaptiveTextSelectionToolbar.getAdaptiveButtons(
+                        context,
+                        buttonItems,
+                      ).toList(),
                     );
                   },
                 ),

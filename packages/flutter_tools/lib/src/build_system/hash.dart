@@ -6,7 +6,7 @@ import 'dart:typed_data';
 
 /// Data from a non-linear mathematical function that functions as
 /// reproducible noise.
-final Uint32List _noise = Uint32List.fromList(<int>[
+final _noise = Uint32List.fromList(<int>[
   0xd76aa478,
   0xe8c7b756,
   0x242070db,
@@ -74,7 +74,7 @@ final Uint32List _noise = Uint32List.fromList(<int>[
 ]);
 
 /// Per-round shift amounts.
-const List<int> _shiftAmounts = <int>[
+const _shiftAmounts = <int>[
   07,
   12,
   17,
@@ -142,7 +142,7 @@ const List<int> _shiftAmounts = <int>[
 ];
 
 /// A bitmask that limits an integer to 32 bits.
-const int _mask32 = 0xFFFFFFFF;
+const _mask32 = 0xFFFFFFFF;
 
 /// An incremental hash computation of md5.
 class Md5Hash {
@@ -154,25 +154,25 @@ class Md5Hash {
   }
 
   // 64 bytes is 512 bits.
-  static const int _kChunkSize = 64;
+  static const _kChunkSize = 64;
 
   /// The current hash digest.
-  final Uint32List _digest = Uint32List(4);
-  final Uint8List _scratchSpace = Uint8List(_kChunkSize);
-  int _remainingLength = 0;
-  int _contentLength = 0;
+  final _digest = Uint32List(4);
+  final _scratchSpace = Uint8List(_kChunkSize);
+  var _remainingLength = 0;
+  var _contentLength = 0;
 
   void addChunk(Uint8List data, [int? stop]) {
     assert(_remainingLength == 0);
     stop ??= data.length;
-    int i = 0;
+    var i = 0;
     for (; i <= stop - _kChunkSize; i += _kChunkSize) {
-      final Uint32List view = Uint32List.view(data.buffer, i, 16);
+      final view = Uint32List.view(data.buffer, i, 16);
       _writeChunk(view);
     }
     if (i != stop) {
       // The data must be copied so that the provided buffer can be reused.
-      int j = 0;
+      var j = 0;
       for (; i < stop; i += 1) {
         _scratchSpace[j] = data[i];
         j += 1;
@@ -195,13 +195,13 @@ class Md5Hash {
     int c = _digest[2];
     int b = _digest[1];
     int a = _digest[0];
-    int e = 0;
-    int f = 0;
-    int i = 0;
+    var e = 0;
+    var f = 0;
+    var i = 0;
     for (; i < 16; i += 1) {
       e = (b & c) | ((~b & _mask32) & d);
       f = i;
-      final int temp = d;
+      final temp = d;
       d = c;
       c = b;
       b = _add32(b, _rotl32(_add32(_add32(a, e), _add32(_noise[i], chunk[f])), _shiftAmounts[i]));
@@ -210,7 +210,7 @@ class Md5Hash {
     for (; i < 32; i += 1) {
       e = (d & b) | ((~d & _mask32) & c);
       f = ((5 * i) + 1) % 16;
-      final int temp = d;
+      final temp = d;
       d = c;
       c = b;
       b = _add32(b, _rotl32(_add32(_add32(a, e), _add32(_noise[i], chunk[f])), _shiftAmounts[i]));
@@ -219,7 +219,7 @@ class Md5Hash {
     for (; i < 48; i += 1) {
       e = b ^ c ^ d;
       f = ((3 * i) + 5) % 16;
-      final int temp = d;
+      final temp = d;
       d = c;
       c = b;
       b = _add32(b, _rotl32(_add32(_add32(a, e), _add32(_noise[i], chunk[f])), _shiftAmounts[i]));
@@ -228,7 +228,7 @@ class Md5Hash {
     for (; i < 64; i += 1) {
       e = c ^ (b | (~d & _mask32));
       f = (7 * i) % 16;
-      final int temp = d;
+      final temp = d;
       d = c;
       c = b;
       b = _add32(b, _rotl32(_add32(_add32(a, e), _add32(_noise[i], chunk[f])), _shiftAmounts[i]));

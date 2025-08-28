@@ -146,14 +146,13 @@ mixin AnimationLocalListenersMixin {
     for (final VoidCallback listener in localListeners) {
       InformationCollector? collector;
       assert(() {
-        collector =
-            () => <DiagnosticsNode>[
-              DiagnosticsProperty<AnimationLocalListenersMixin>(
-                'The $runtimeType notifying listeners was',
-                this,
-                style: DiagnosticsTreeStyle.errorProperty,
-              ),
-            ];
+        collector = () => <DiagnosticsNode>[
+          DiagnosticsProperty<AnimationLocalListenersMixin>(
+            'The $runtimeType notifying listeners was',
+            this,
+            style: DiagnosticsTreeStyle.errorProperty,
+          ),
+        ];
         return true;
       }());
       try {
@@ -245,14 +244,13 @@ mixin AnimationLocalStatusListenersMixin {
       } catch (exception, stack) {
         InformationCollector? collector;
         assert(() {
-          collector =
-              () => <DiagnosticsNode>[
-                DiagnosticsProperty<AnimationLocalStatusListenersMixin>(
-                  'The $runtimeType notifying status listeners was',
-                  this,
-                  style: DiagnosticsTreeStyle.errorProperty,
-                ),
-              ];
+          collector = () => <DiagnosticsNode>[
+            DiagnosticsProperty<AnimationLocalStatusListenersMixin>(
+              'The $runtimeType notifying status listeners was',
+              this,
+              style: DiagnosticsTreeStyle.errorProperty,
+            ),
+          ];
           return true;
         }());
         FlutterError.reportError(

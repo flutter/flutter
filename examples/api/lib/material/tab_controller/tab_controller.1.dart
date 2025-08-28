@@ -35,15 +35,11 @@ class TabControllerExample extends StatelessWidget {
         child: Scaffold(
           appBar: AppBar(bottom: TabBar(tabs: tabs)),
           body: TabBarView(
-            children:
-                tabs.map((Tab tab) {
-                  return Center(
-                    child: Text(
-                      '${tab.text!} Tab',
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                  );
-                }).toList(),
+            children: tabs.map((Tab tab) {
+              return Center(
+                child: Text('${tab.text!} Tab', style: Theme.of(context).textTheme.headlineSmall),
+              );
+            }).toList(),
           ),
         ),
       ),

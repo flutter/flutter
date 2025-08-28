@@ -69,14 +69,13 @@ class _ScaffoldFloatingActionButtonAnimatorExampleState
                   _selectedFabAnimator = styles;
                 });
               },
-              segments:
-                  fabAnimatoregments.map<ButtonSegment<FabAnimator>>((
-                    (FabAnimator, String) fabAnimator,
-                  ) {
-                    final FabAnimator animator = fabAnimator.$1;
-                    final String label = fabAnimator.$2;
-                    return ButtonSegment<FabAnimator>(value: animator, label: Text(label));
-                  }).toList(),
+              segments: fabAnimatoregments.map<ButtonSegment<FabAnimator>>((
+                (FabAnimator, String) fabAnimator,
+              ) {
+                final FabAnimator animator = fabAnimator.$1;
+                final String label = fabAnimator.$2;
+                return ButtonSegment<FabAnimator>(value: animator, label: Text(label));
+              }).toList(),
             ),
             const SizedBox(height: 10),
             SegmentedButton<FabLocation>(
@@ -91,14 +90,13 @@ class _ScaffoldFloatingActionButtonAnimatorExampleState
                   _selectedFabLocation = styles;
                 });
               },
-              segments:
-                  fabLocationegments.map<ButtonSegment<FabLocation>>((
-                    (FabLocation, String) fabLocation,
-                  ) {
-                    final FabLocation location = fabLocation.$1;
-                    final String label = fabLocation.$2;
-                    return ButtonSegment<FabLocation>(value: location, label: Text(label));
-                  }).toList(),
+              segments: fabLocationegments.map<ButtonSegment<FabLocation>>((
+                (FabLocation, String) fabLocation,
+              ) {
+                final FabLocation location = fabLocation.$1;
+                final String label = fabLocation.$2;
+                return ButtonSegment<FabLocation>(value: location, label: Text(label));
+              }).toList(),
             ),
             const SizedBox(height: 10),
             FilledButton.icon(
@@ -113,8 +111,9 @@ class _ScaffoldFloatingActionButtonAnimatorExampleState
           ],
         ),
       ),
-      floatingActionButton:
-          !_showFab ? null : FloatingActionButton(onPressed: () {}, child: const Icon(Icons.add)),
+      floatingActionButton: !_showFab
+          ? null
+          : FloatingActionButton(onPressed: () {}, child: const Icon(Icons.add)),
     );
   }
 }

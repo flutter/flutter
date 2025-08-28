@@ -6,7 +6,7 @@ import '../base/file_system.dart';
 import '../base/project_migrator.dart';
 import '../project.dart';
 
-const String _gitignoreBefore = '''
+const _gitignoreBefore = '''
 .DS_Store
 .atom/
 .buildlog/
@@ -15,7 +15,7 @@ const String _gitignoreBefore = '''
 migrate_working_dir/
 ''';
 
-const String _gitignoreAfter = '''
+const _gitignoreAfter = '''
 .DS_Store
 .atom/
 .build/

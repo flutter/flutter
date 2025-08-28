@@ -26,8 +26,8 @@ void PlatformViewLayer::Preroll(PrerollContext* context) {
   MutatorsStack mutators;
   context->state_stack.fill(&mutators);
   std::unique_ptr<EmbeddedViewParams> params =
-      std::make_unique<EmbeddedViewParams>(
-          ToSkMatrix(context->state_stack.matrix()), ToSkSize(size_), mutators);
+      std::make_unique<EmbeddedViewParams>(context->state_stack.matrix(), size_,
+                                           mutators);
   context->view_embedder->PrerollCompositeEmbeddedView(view_id_,
                                                        std::move(params));
   context->view_embedder->PushVisitedPlatformView(view_id_);

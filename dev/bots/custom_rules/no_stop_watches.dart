@@ -85,15 +85,15 @@ class _StopwatchVisitor extends RecursiveAstVisitor<void> {
     return classElement.library.isDartCore
         ? classElement.name == 'Stopwatch'
         : _isStopwatchClassElementCache.putIfAbsent(
-          classElement,
-          () => _checkIfImplementsStopwatchRecursively(classElement),
-        );
+            classElement,
+            () => _checkIfImplementsStopwatchRecursively(classElement),
+          );
   }
 
   bool _isInternal(LibraryElement libraryElement) {
     return path.isWithin(
       compilationUnit.session.analysisContext.contextRoot.root.path,
-      libraryElement.source.fullName,
+      libraryElement.firstFragment.source.fullName,
     );
   }
 
@@ -118,14 +118,15 @@ class _StopwatchVisitor extends RecursiveAstVisitor<void> {
 
   @override
   void visitConstructorName(ConstructorName node) {
-    final Element? element = node.staticElement;
+    final Element? element = node.element;
     if (element is! ConstructorElement) {
       assert(false, '$element of $node is not a ConstructorElement.');
       return;
     }
     final bool isAllowed = switch (element.returnType) {
-      InterfaceType(element: final ClassElement classElement) =>
-        !_implementsStopwatch(classElement),
+      InterfaceType(element: final ClassElement classElement) => !_implementsStopwatch(
+        classElement,
+      ),
       InterfaceType(element: InterfaceElement()) => true,
     };
     if (isAllowed || _hasTrailingFlutterIgnore(node)) {
@@ -136,7 +137,7 @@ class _StopwatchVisitor extends RecursiveAstVisitor<void> {
 
   @override
   void visitSimpleIdentifier(SimpleIdentifier node) {
-    final bool isAllowed = switch (node.staticElement) {
+    final bool isAllowed = switch (node.element) {
       ExecutableElement(
         returnType: DartType(element: final ClassElement classElement),
         library: final LibraryElement libraryElement,

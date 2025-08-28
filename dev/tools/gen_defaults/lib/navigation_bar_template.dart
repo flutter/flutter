@@ -14,7 +14,8 @@ class NavigationBarTemplate extends TokenTemplate {
   });
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends NavigationBarThemeData {
   _${blockName}DefaultsM3(this.context)
     : super(
@@ -37,13 +38,13 @@ class _${blockName}DefaultsM3 extends NavigationBarThemeData {
   Color? get surfaceTintColor => ${colorOrTransparent("md.comp.navigation-bar.container.surface-tint-layer.color")};
 
   @override
-  MaterialStateProperty<IconThemeData?>? get iconTheme {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<IconThemeData?>? get iconTheme {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
       return IconThemeData(
         size: ${getToken("md.comp.navigation-bar.icon.size")},
-        color: states.contains(MaterialState.disabled)
+        color: states.contains(WidgetState.disabled)
           ? _colors.onSurfaceVariant.withOpacity(0.38)
-          : states.contains(MaterialState.selected)
+          : states.contains(WidgetState.selected)
             ? ${componentColor("md.comp.navigation-bar.active.icon")}
             : ${componentColor("md.comp.navigation-bar.inactive.icon")},
       );
@@ -57,13 +58,13 @@ class _${blockName}DefaultsM3 extends NavigationBarThemeData {
   ShapeBorder? get indicatorShape => ${shape("md.comp.navigation-bar.active-indicator")};
 
   @override
-  MaterialStateProperty<TextStyle?>? get labelTextStyle {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<TextStyle?>? get labelTextStyle {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
     final TextStyle style = ${textStyle("md.comp.navigation-bar.label-text")}!;
       return style.apply(
-        color: states.contains(MaterialState.disabled)
+        color: states.contains(WidgetState.disabled)
           ? _colors.onSurfaceVariant.withOpacity(0.38)
-          : states.contains(MaterialState.selected)
+          : states.contains(WidgetState.selected)
             ? ${componentColor("md.comp.navigation-bar.active.label-text")}
             : ${componentColor("md.comp.navigation-bar.inactive.label-text")}
       );

@@ -512,7 +512,10 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: SemanticsDebugger(key: debugger, child: Material(child: TextField(key: textField))),
+        home: SemanticsDebugger(
+          key: debugger,
+          child: Material(child: TextField(key: textField)),
+        ),
       ),
     );
 

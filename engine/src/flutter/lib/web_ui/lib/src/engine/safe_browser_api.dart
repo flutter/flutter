@@ -40,12 +40,11 @@ num? parseFontSize(DomElement element) {
   num? fontSize;
 
   if (element.has('computedStyleMap')) {
-    fontSize =
-        element
-            .computedStyleMap()
-            .get('font-size')
-            ?.getProperty<JSNumber>('value'.toJS)
-            .toDartDouble;
+    fontSize = element
+        .computedStyleMap()
+        .get('font-size')
+        ?.getProperty<JSNumber>('value'.toJS)
+        .toDartDouble;
   }
 
   if (fontSize == null) {

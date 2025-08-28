@@ -40,8 +40,8 @@ void main() {
 
   testWidgets(
     'runApp throws if given a View',
-    experimentalLeakTesting:
-        LeakTesting.settings.withIgnoredAll(), // The test leaks by design because of exception.
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // The test leaks by design because of exception.
     (WidgetTester tester) async {
       runApp(View(view: FakeFlutterView(tester.view), child: const SizedBox.shrink()));
       expect(

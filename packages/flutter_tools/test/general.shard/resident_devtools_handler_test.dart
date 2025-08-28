@@ -26,7 +26,7 @@ import '../src/fake_process_manager.dart';
 import '../src/fake_vm_services.dart';
 import '../src/fakes.dart';
 
-final vm_service.Isolate isolate = vm_service.Isolate(
+final isolate = vm_service.Isolate(
   id: '1',
   pauseEvent: vm_service.Event(kind: vm_service.EventKind.kResume, timestamp: 0),
   breakpoints: <vm_service.Breakpoint>[],
@@ -44,7 +44,7 @@ final vm_service.Isolate isolate = vm_service.Isolate(
   extensionRPCs: <String>['ext.flutter.connectedVmServiceUri'],
 );
 
-final FakeVmServiceRequest listViews = FakeVmServiceRequest(
+final listViews = FakeVmServiceRequest(
   method: kListViewsMethod,
   jsonResponse: <String, Object>{
     'views': <Object>[FlutterView(id: 'a', uiIsolate: isolate).toJson()],
@@ -86,7 +86,7 @@ void main() {
 
   testWithoutContext('Can use devtools with existing devtools URI', () async {
     final (BufferLogger logger, Artifacts artifacts) = getTestState();
-    final DevtoolsServerLauncher launcher = DevtoolsServerLauncher(
+    final launcher = DevtoolsServerLauncher(
       processManager: FakeProcessManager.empty(),
       artifacts: artifacts,
       logger: logger,
@@ -123,7 +123,7 @@ void main() {
       );
 
       // VM Service is intentionally null
-      final FakeFlutterDevice device = FakeFlutterDevice();
+      final device = FakeFlutterDevice();
 
       await handler.serveAndAnnounceDevTools(flutterDevices: <FlutterDevice>[device]);
     },
@@ -140,7 +140,7 @@ void main() {
         BufferLogger.test(),
         _FakeChromiumLauncher(),
       );
-      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      final fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           const FakeVmServiceRequest(
             method: 'streamListen',
@@ -166,7 +166,7 @@ void main() {
         httpAddress: Uri.parse('http://localhost:1234'),
       );
 
-      final FakeFlutterDevice device = FakeFlutterDevice()..vmService = fakeVmServiceHost.vmService;
+      final device = FakeFlutterDevice()..vmService = fakeVmServiceHost.vmService;
 
       await handler.serveAndAnnounceDevTools(flutterDevices: <FlutterDevice>[device]);
     },
@@ -179,12 +179,12 @@ void main() {
       BufferLogger.test(),
       _FakeChromiumLauncher(),
     );
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+    final fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[],
       httpAddress: Uri.parse('http://localhost:1234'),
     );
 
-    final FakeFlutterDevice device = FakeFlutterDevice()..vmService = fakeVmServiceHost.vmService;
+    final device = FakeFlutterDevice()..vmService = fakeVmServiceHost.vmService;
 
     await handler.serveAndAnnounceDevTools(flutterDevices: <FlutterDevice>[device]);
   });
@@ -198,7 +198,7 @@ void main() {
       BufferLogger.test(),
       _FakeChromiumLauncher(),
     );
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+    final fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
         const FakeVmServiceRequest(
           method: 'streamListen',
@@ -222,10 +222,9 @@ void main() {
       httpAddress: Uri.parse('http://localhost:1234'),
     );
 
-    final FakeFlutterDevice device =
-        FakeFlutterDevice()
-          ..vmService = fakeVmServiceHost.vmService
-          ..targetPlatform = TargetPlatform.web_javascript;
+    final device = FakeFlutterDevice()
+      ..vmService = fakeVmServiceHost.vmService
+      ..targetPlatform = TargetPlatform.web_javascript;
 
     await handler.serveAndAnnounceDevTools(flutterDevices: <FlutterDevice>[device]);
   });
@@ -239,7 +238,7 @@ void main() {
         BufferLogger.test(),
         _FakeChromiumLauncher(),
       );
-      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      final fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           const FakeVmServiceRequest(
             method: 'streamListen',
@@ -253,7 +252,7 @@ void main() {
         httpAddress: Uri.parse('http://localhost:1234'),
       );
 
-      final FakeFlutterDevice device = FakeFlutterDevice()..vmService = fakeVmServiceHost.vmService;
+      final device = FakeFlutterDevice()..vmService = fakeVmServiceHost.vmService;
 
       await handler.serveAndAnnounceDevTools(flutterDevices: <FlutterDevice>[device]);
     },
@@ -271,7 +270,7 @@ void main() {
         _FakeChromiumLauncher(),
       );
 
-      final FakeVmServiceHost vmServiceHost = FakeVmServiceHost(
+      final vmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           const FakeVmServiceRequest(
             method: 'streamListen',
@@ -297,7 +296,7 @@ void main() {
         httpAddress: Uri.parse('http://localhost:1234'),
       );
 
-      final FakeVmServiceHost vmServiceHostThatDisappears = FakeVmServiceHost(
+      final vmServiceHostThatDisappears = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           const FakeVmServiceRequest(
             method: 'streamListen',
@@ -321,7 +320,7 @@ void main() {
   );
 
   testWithoutContext('Does not launch devtools in browser if launcher is null', () async {
-    final FlutterResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
+    final handler = FlutterResidentDevtoolsHandler(
       null,
       FakeResidentRunner(),
       BufferLogger.test(),
@@ -336,7 +335,7 @@ void main() {
   testWithoutContext(
     'Does not launch devtools in browser if ResidentRunner does not support the service protocol',
     () async {
-      final FlutterResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
+      final handler = FlutterResidentDevtoolsHandler(
         FakeDevtoolsLauncher(),
         FakeResidentRunner()..supportsServiceProtocol = false,
         BufferLogger.test(),
@@ -352,8 +351,8 @@ void main() {
   testWithoutContext(
     'launchDevToolsInBrowser launches after _devToolsLauncher.ready completes',
     () async {
-      final Completer<void> completer = Completer<void>();
-      final FlutterResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
+      final completer = Completer<void>();
+      final handler = FlutterResidentDevtoolsHandler(
         FakeDevtoolsLauncher()
           ..devToolsUrl = null
           // We need to set [activeDevToolsServer] to simulate the state we would
@@ -377,7 +376,7 @@ void main() {
   );
 
   testWithoutContext('launchDevToolsInBrowser launches successfully', () async {
-    final FlutterResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
+    final handler = FlutterResidentDevtoolsHandler(
       FakeDevtoolsLauncher()
         ..devToolsUrl = Uri(host: 'localhost', port: 8080)
         ..activeDevToolsServer = DevToolsServerAddress('localhost', 8080),
@@ -391,7 +390,7 @@ void main() {
   });
 
   testWithoutContext('launchDevToolsInBrowser fails without Chrome installed', () async {
-    final FlutterResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
+    final handler = FlutterResidentDevtoolsHandler(
       FakeDevtoolsLauncher()
         ..devToolsUrl = Uri(host: 'localhost', port: 8080)
         ..activeDevToolsServer = DevToolsServerAddress('localhost', 8080),
@@ -407,8 +406,7 @@ void main() {
   testWithoutContext(
     'Converts a VM Service URI with a query parameter to a pretty display string',
     () {
-      const String value =
-          'http://127.0.0.1:9100?uri=http%3A%2F%2F127.0.0.1%3A57922%2F_MXpzytpH20%3D%2F';
+      const value = 'http://127.0.0.1:9100?uri=http%3A%2F%2F127.0.0.1%3A57922%2F_MXpzytpH20%3D%2F';
       final Uri uri = Uri.parse(value);
 
       expect(
@@ -421,13 +419,13 @@ void main() {
 
 class FakeResidentRunner extends Fake implements ResidentRunner {
   @override
-  bool supportsServiceProtocol = true;
+  var supportsServiceProtocol = true;
 
   @override
-  bool reportedDebuggers = false;
+  var reportedDebuggers = false;
 
   @override
-  DebuggingOptions debuggingOptions = DebuggingOptions.disabled(BuildInfo.debug);
+  var debuggingOptions = DebuggingOptions.disabled(BuildInfo.debug);
 }
 
 class FakeFlutterDevice extends Fake implements FlutterDevice {
@@ -447,8 +445,8 @@ class FakeDevice extends Fake implements Device {
 }
 
 class FakeDartDevelopmentService extends Fake implements DartDevelopmentService {
-  bool started = false;
-  bool disposed = false;
+  var started = false;
+  var disposed = false;
 
   @override
   final Uri uri = Uri.parse('http://127.0.0.1:1234/');

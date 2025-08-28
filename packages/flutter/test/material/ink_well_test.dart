@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/src/services/keyboard_key.g.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
 
@@ -34,6 +35,9 @@ void main() {
               },
               onLongPress: () {
                 log.add('long-press');
+              },
+              onLongPressUp: () {
+                log.add('long-press-up');
               },
               onTapDown: (TapDownDetails details) {
                 log.add('tap-down');
@@ -68,7 +72,7 @@ void main() {
 
     await tester.longPress(find.byType(InkWell), pointer: 4);
 
-    expect(log, equals(<String>['tap-down', 'tap-cancel', 'long-press']));
+    expect(log, equals(<String>['tap-down', 'tap-cancel', 'long-press', 'long-press-up']));
 
     log.clear();
     TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
@@ -142,10 +146,38 @@ void main() {
     expect(log, equals(<String>['tap']));
   });
 
+  testWidgets('InkWell onLongPressUp callback is triggered', (WidgetTester tester) async {
+    bool wasCalled = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: InkWell(
+            onLongPress: () {},
+            onLongPressUp: () {
+              wasCalled = true;
+            },
+            child: const SizedBox(width: 100, height: 100),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(InkWell)));
+    await tester.pump(const Duration(seconds: 1));
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(wasCalled, isTrue);
+  });
+
   testWidgets('long-press and tap on disabled should not throw', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Material(
-        child: Directionality(textDirection: TextDirection.ltr, child: Center(child: InkWell())),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(child: InkWell()),
+        ),
       ),
     );
     await tester.tap(find.byType(InkWell), pointer: 1);
@@ -170,6 +202,7 @@ void main() {
                 highlightColor: const Color(0xf00fffff),
                 onTap: () {},
                 onLongPress: () {},
+                onLongPressUp: () {},
                 onHover: (bool hover) {},
               ),
             ),
@@ -203,7 +236,7 @@ void main() {
               width: 100,
               height: 100,
               child: InkWell(
-                overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+                overlayColor: WidgetStateProperty.resolveWith<Color>((Set<MaterialState> states) {
                   if (states.contains(MaterialState.hovered)) {
                     return const Color(0xff00ff00);
                   }
@@ -217,6 +250,7 @@ void main() {
                 }),
                 onTap: () {},
                 onLongPress: () {},
+                onLongPressUp: () {},
                 onHover: (bool hover) {},
               ),
             ),
@@ -257,6 +291,7 @@ void main() {
                 highlightColor: const Color(0xf00fffff),
                 onTap: () {},
                 onLongPress: () {},
+                onLongPressUp: () {},
                 onHover: (bool hover) {},
               ),
             ),
@@ -294,7 +329,7 @@ void main() {
               height: 100,
               child: InkWell(
                 focusNode: focusNode,
-                overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+                overlayColor: WidgetStateProperty.resolveWith<Color>((Set<MaterialState> states) {
                   if (states.contains(MaterialState.hovered)) {
                     return const Color(0xff00ff00);
                   }
@@ -309,6 +344,7 @@ void main() {
                 highlightColor: const Color(0xf00fffff),
                 onTap: () {},
                 onLongPress: () {},
+                onLongPressUp: () {},
                 onHover: (bool hover) {},
               ),
             ),
@@ -345,7 +381,7 @@ void main() {
               height: 100,
               child: InkWell(
                 splashFactory: NoSplash.splashFactory,
-                overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+                overlayColor: WidgetStateProperty.resolveWith<Color>((Set<MaterialState> states) {
                   if (states.contains(MaterialState.pressed)) {
                     return pressedColor;
                   }
@@ -492,6 +528,7 @@ void main() {
                     highlightColor: const Color(0xf00fffff),
                     onTap: () {},
                     onLongPress: () {},
+                    onLongPressUp: () {},
                     onHover: (bool hover) {},
                   ),
                 ),
@@ -534,7 +571,7 @@ void main() {
                   width: 100,
                   height: 100,
                   child: InkWell(
-                    overlayColor: MaterialStateProperty.resolveWith<Color>((
+                    overlayColor: WidgetStateProperty.resolveWith<Color>((
                       Set<MaterialState> states,
                     ) {
                       if (states.contains(MaterialState.hovered)) {
@@ -550,6 +587,7 @@ void main() {
                     }),
                     onTap: () {},
                     onLongPress: () {},
+                    onLongPressUp: () {},
                     onHover: (bool hover) {},
                   ),
                 ),
@@ -722,8 +760,8 @@ void main() {
 
     // Create a rounded rectangle path with a radius that makes it similar to the custom border circle.
     const Rect expectedClipRect = Rect.fromLTRB(0, 0, 100, 100);
-    final Path expectedClipPath =
-        Path()..addRRect(RRect.fromRectAndRadius(expectedClipRect, const Radius.circular(50.0)));
+    final Path expectedClipPath = Path()
+      ..addRRect(RRect.fromRectAndRadius(expectedClipRect, const Radius.circular(50.0)));
     // The ink well custom border path should match the rounded rectangle path.
     expect(
       inkFeatures,
@@ -778,8 +816,8 @@ void main() {
 
     // Create a rounded rectangle path with a radius that makes it similar to the custom border circle.
     const Rect expectedClipRect = Rect.fromLTRB(0, 0, 100, 100);
-    final Path expectedClipPath =
-        Path()..addRRect(RRect.fromRectAndRadius(expectedClipRect, const Radius.circular(50.0)));
+    final Path expectedClipPath = Path()
+      ..addRRect(RRect.fromRectAndRadius(expectedClipRect, const Radius.circular(50.0)));
     // The ink well custom border path should match the rounded rectangle path.
     expect(
       inkFeatures,
@@ -963,8 +1001,8 @@ void main() {
     expect(inkFeatures, paintsExactlyCountTimes(#clipPath, 1));
 
     const Rect expectedClipRect = Rect.fromLTRB(0, 0, 100, 100);
-    Path expectedClipPath =
-        Path()..addRRect(RRect.fromRectAndRadius(expectedClipRect, const Radius.circular(20)));
+    Path expectedClipPath = Path()
+      ..addRRect(RRect.fromRectAndRadius(expectedClipRect, const Radius.circular(20)));
     expect(
       inkFeatures,
       paints..clipPath(
@@ -978,8 +1016,8 @@ void main() {
 
     await tester.pumpWidget(boilerplate(BorderRadius.circular(40)));
     await tester.pumpAndSettle();
-    expectedClipPath =
-        Path()..addRRect(RRect.fromRectAndRadius(expectedClipRect, const Radius.circular(40)));
+    expectedClipPath = Path()
+      ..addRRect(RRect.fromRectAndRadius(expectedClipRect, const Radius.circular(40)));
     expect(
       inkFeatures,
       paints..clipPath(
@@ -1034,8 +1072,8 @@ void main() {
     expect(inkFeatures, paintsExactlyCountTimes(#clipPath, 2)); // Splash and highlight.
 
     const Rect expectedClipRect = Rect.fromLTRB(0, 0, 100, 100);
-    Path expectedClipPath =
-        Path()..addRRect(RRect.fromRectAndRadius(expectedClipRect, const Radius.circular(20)));
+    Path expectedClipPath = Path()
+      ..addRRect(RRect.fromRectAndRadius(expectedClipRect, const Radius.circular(20)));
 
     // Check that the splash and the highlight are correctly clipped.
     expect(
@@ -1059,8 +1097,8 @@ void main() {
 
     await tester.pumpWidget(boilerplate(BorderRadius.circular(40)));
     await tester.pumpAndSettle();
-    expectedClipPath =
-        Path()..addRRect(RRect.fromRectAndRadius(expectedClipRect, const Radius.circular(40)));
+    expectedClipPath = Path()
+      ..addRRect(RRect.fromRectAndRadius(expectedClipRect, const Radius.circular(40)));
 
     // Check that the splash and the highlight are correctly clipped.
     expect(
@@ -1107,6 +1145,7 @@ void main() {
                 highlightColor: const Color(0xf00fffff),
                 onTap: () {},
                 onLongPress: () {},
+                onLongPressUp: () {},
                 onHover: (bool hover) {},
               ),
             ),
@@ -1153,7 +1192,10 @@ void main() {
       Material(
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: MouseRegion(cursor: SystemMouseCursors.forbidden, child: InkWell(onTap: () {})),
+          child: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: InkWell(onTap: () {}),
+          ),
         ),
       ),
     );
@@ -1219,7 +1261,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: SelectionArea(
-          child: Material(child: InkResponse(onTap: () {}, child: const Text('button'))),
+          child: Material(
+            child: InkResponse(onTap: () {}, child: const Text('button')),
+          ),
         ),
       ),
     );
@@ -1254,7 +1298,9 @@ void main() {
         Material(
           child: Directionality(
             textDirection: TextDirection.ltr,
-            child: Center(child: InkWell(onTap: () {}, onLongPress: () {})),
+            child: Center(
+              child: InkWell(onTap: () {}, onLongPress: () {}, onLongPressUp: () {}),
+            ),
           ),
         ),
       );
@@ -1279,7 +1325,14 @@ void main() {
         Material(
           child: Directionality(
             textDirection: TextDirection.ltr,
-            child: Center(child: InkWell(onTap: () {}, onLongPress: () {}, enableFeedback: false)),
+            child: Center(
+              child: InkWell(
+                onTap: () {},
+                onLongPress: () {},
+                onLongPressUp: () {},
+                enableFeedback: false,
+              ),
+            ),
           ),
         ),
       );
@@ -1310,7 +1363,10 @@ void main() {
                 addAutomaticKeepAlives: keepAlive,
                 dragStartBehavior: DragStartBehavior.down,
                 children: <Widget>[
-                  SizedBox(height: 500.0, child: InkWell(onTap: () {}, child: const Placeholder())),
+                  SizedBox(
+                    height: 500.0,
+                    child: InkWell(onTap: () {}, child: const Placeholder()),
+                  ),
                   const SizedBox(height: 500.0),
                   const SizedBox(height: 500.0),
                 ],
@@ -1350,7 +1406,9 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Material(child: InkWell(onTap: () {}, child: const Text('Button'))),
+        child: Material(
+          child: InkWell(onTap: () {}, child: const Text('Button')),
+        ),
       ),
     );
     expect(
@@ -1394,6 +1452,7 @@ void main() {
             autofocus: true,
             onTap: () {},
             onLongPress: () {},
+            onLongPressUp: () {},
             onHover: (bool hover) {},
             focusNode: focusNode,
             child: Container(key: childKey),
@@ -1407,7 +1466,10 @@ void main() {
       Material(
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: InkWell(focusNode: focusNode, child: Container(key: childKey)),
+          child: InkWell(
+            focusNode: focusNode,
+            child: Container(key: childKey),
+          ),
         ),
       ),
     );
@@ -1432,6 +1494,7 @@ void main() {
               autofocus: true,
               onTap: () {},
               onLongPress: () {},
+              onLongPressUp: () {},
               onHover: (bool hover) {},
               focusNode: focusNode,
               child: Container(key: childKey),
@@ -1448,7 +1511,10 @@ void main() {
           data: const MediaQueryData(navigationMode: NavigationMode.directional),
           child: Directionality(
             textDirection: TextDirection.ltr,
-            child: InkWell(focusNode: focusNode, child: Container(key: childKey)),
+            child: InkWell(
+              focusNode: focusNode,
+              child: Container(key: childKey),
+            ),
           ),
         ),
       ),
@@ -1613,7 +1679,10 @@ void main() {
                 height: 100,
                 child: Row(
                   children: <Widget>[
-                    paddedInkWell(key: middleKey, child: paddedInkWell(key: innerKey)),
+                    paddedInkWell(
+                      key: middleKey,
+                      child: paddedInkWell(key: innerKey),
+                    ),
                     const SizedBox(),
                   ],
                 ),
@@ -1646,7 +1715,10 @@ void main() {
                 width: 200,
                 height: 100,
                 child: Row(
-                  children: <Widget>[paddedInkWell(key: innerKey), paddedInkWell(key: middleKey)],
+                  children: <Widget>[
+                    paddedInkWell(key: innerKey),
+                    paddedInkWell(key: middleKey),
+                  ],
                 ),
               ),
             ),
@@ -2145,7 +2217,9 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Material(
-            child: Center(child: InkWell(onLongPress: () {}, child: const Text('Foo'))),
+            child: Center(
+              child: InkWell(onLongPress: () {}, onLongPressUp: () {}, child: const Text('Foo')),
+            ),
           ),
         ),
       );
@@ -2167,7 +2241,12 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Material(
             child: Center(
-              child: InkWell(onLongPress: () {}, onTap: () {}, child: const Text('Foo')),
+              child: InkWell(
+                onLongPress: () {},
+                onLongPressUp: () {},
+                onTap: () {},
+                child: const Text('Foo'),
+              ),
             ),
           ),
         ),
@@ -2341,9 +2420,7 @@ void main() {
               width: 100,
               height: 100,
               child: InkWell(
-                overlayColor: MaterialStateProperty.resolveWith<Color?>((
-                  Set<MaterialState> states,
-                ) {
+                overlayColor: WidgetStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
                   if (states.contains(MaterialState.hovered)) {
                     return const Color(0xff00ff00);
                   }
@@ -2351,6 +2428,7 @@ void main() {
                 }),
                 onTap: () {},
                 onLongPress: () {},
+                onLongPressUp: () {},
                 onHover: (bool hover) {},
               ),
             ),
@@ -2434,7 +2512,9 @@ void main() {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: Material(child: Center(child: InkWell(onTap: () {}))),
+          child: Material(
+            child: Center(child: InkWell(onTap: () {})),
+          ),
         ),
       );
 

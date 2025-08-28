@@ -305,21 +305,17 @@ class TraversalTester {
           textDirection: textDirection,
           child: CustomMultiChildLayout(
             delegate: TestLayoutDelegate(children),
-            children:
-                children.keys.map<Widget>((String label) {
-                  return LayoutId(
-                    id: label,
-                    child: Semantics(
-                      container: true,
-                      explicitChildNodes: true,
-                      label: label,
-                      child: SizedBox(
-                        width: children[label]!.width,
-                        height: children[label]!.height,
-                      ),
-                    ),
-                  );
-                }).toList(),
+            children: children.keys.map<Widget>((String label) {
+              return LayoutId(
+                id: label,
+                child: Semantics(
+                  container: true,
+                  explicitChildNodes: true,
+                  label: label,
+                  child: SizedBox(width: children[label]!.width, height: children[label]!.height),
+                ),
+              );
+            }).toList(),
           ),
         ),
       ),
@@ -332,10 +328,9 @@ class TraversalTester {
           children: <TestSemantics>[
             TestSemantics.rootChild(
               textDirection: textDirection,
-              children:
-                  expectedTraversal.split(' ').map<TestSemantics>((String label) {
-                    return TestSemantics(label: label);
-                  }).toList(),
+              children: expectedTraversal.split(' ').map<TestSemantics>((String label) {
+                return TestSemantics(label: label);
+              }).toList(),
             ),
           ],
         ),

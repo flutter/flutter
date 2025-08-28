@@ -10,14 +10,14 @@ void main() {
   // Going to test that operator== is overloaded properly since the rest
   // of the test depends on it.
   testWithoutContext('node equality', () {
-    final Node actual = Node(
+    final actual = Node(
       ST.placeholderExpr,
       0,
       expectedSymbolCount: 3,
       children: <Node>[Node.openBrace(0), Node.string(1, 'var'), Node.closeBrace(4)],
     );
 
-    final Node expected = Node(
+    final expected = Node(
       ST.placeholderExpr,
       0,
       expectedSymbolCount: 3,
@@ -25,7 +25,7 @@ void main() {
     );
     expect(actual, equals(expected));
 
-    final Node wrongType = Node(
+    final wrongType = Node(
       ST.pluralExpr,
       0,
       expectedSymbolCount: 3,
@@ -33,7 +33,7 @@ void main() {
     );
     expect(actual, isNot(equals(wrongType)));
 
-    final Node wrongPosition = Node(
+    final wrongPosition = Node(
       ST.placeholderExpr,
       1,
       expectedSymbolCount: 3,
@@ -41,7 +41,7 @@ void main() {
     );
     expect(actual, isNot(equals(wrongPosition)));
 
-    final Node wrongChildrenCount = Node(
+    final wrongChildrenCount = Node(
       ST.placeholderExpr,
       0,
       expectedSymbolCount: 3,
@@ -49,7 +49,7 @@ void main() {
     );
     expect(actual, isNot(equals(wrongChildrenCount)));
 
-    final Node wrongChild = Node(
+    final wrongChild = Node(
       ST.placeholderExpr,
       0,
       expectedSymbolCount: 3,
@@ -70,12 +70,11 @@ void main() {
       ]),
     );
 
-    final List<Node> tokens2 =
-        Parser(
-          'plural',
-          'app_en.arb',
-          'There are {count} {count, plural, =1{cat} other{cats}}',
-        ).lexIntoTokens();
+    final List<Node> tokens2 = Parser(
+      'plural',
+      'app_en.arb',
+      'There are {count} {count, plural, =1{cat} other{cats}}',
+    ).lexIntoTokens();
     expect(
       tokens2,
       equals(<Node>[
@@ -102,12 +101,11 @@ void main() {
       ]),
     );
 
-    final List<Node> tokens3 =
-        Parser(
-          'gender',
-          'app_en.arb',
-          '{gender, select, male{he} female{she} other{they}}',
-        ).lexIntoTokens();
+    final List<Node> tokens3 = Parser(
+      'gender',
+      'app_en.arb',
+      '{gender, select, male{he} female{she} other{they}}',
+    ).lexIntoTokens();
     expect(
       tokens3,
       equals(<Node>[
@@ -134,12 +132,11 @@ void main() {
   });
 
   testWithoutContext('lexer recursive', () {
-    final List<Node> tokens =
-        Parser(
-          'plural',
-          'app_en.arb',
-          '{count, plural, =1{{gender, select, male{he} female{she}}} other{they}}',
-        ).lexIntoTokens();
+    final List<Node> tokens = Parser(
+      'plural',
+      'app_en.arb',
+      '{count, plural, =1{{gender, select, male{he} female{she}}} other{they}}',
+    ).lexIntoTokens();
     expect(
       tokens,
       equals(<Node>[
@@ -176,26 +173,28 @@ void main() {
   });
 
   testWithoutContext('lexer escaping', () {
-    final List<Node> tokens1 =
-        Parser('escaping', 'app_en.arb', "''", useEscaping: true).lexIntoTokens();
+    final List<Node> tokens1 = Parser(
+      'escaping',
+      'app_en.arb',
+      "''",
+      useEscaping: true,
+    ).lexIntoTokens();
     expect(tokens1, equals(<Node>[Node.string(0, "'")]));
 
-    final List<Node> tokens2 =
-        Parser(
-          'escaping',
-          'app_en.arb',
-          "'hello world { name }'",
-          useEscaping: true,
-        ).lexIntoTokens();
+    final List<Node> tokens2 = Parser(
+      'escaping',
+      'app_en.arb',
+      "'hello world { name }'",
+      useEscaping: true,
+    ).lexIntoTokens();
     expect(tokens2, equals(<Node>[Node.string(0, 'hello world { name }')]));
 
-    final List<Node> tokens3 =
-        Parser(
-          'escaping',
-          'app_en.arb',
-          "'{ escaped string }' { not escaped }",
-          useEscaping: true,
-        ).lexIntoTokens();
+    final List<Node> tokens3 = Parser(
+      'escaping',
+      'app_en.arb',
+      "'{ escaped string }' { not escaped }",
+      useEscaping: true,
+    ).lexIntoTokens();
     expect(
       tokens3,
       equals(<Node>[
@@ -208,20 +207,23 @@ void main() {
       ]),
     );
 
-    final List<Node> tokens4 =
-        Parser('escaping', 'app_en.arb', "Flutter''s amazing!", useEscaping: true).lexIntoTokens();
+    final List<Node> tokens4 = Parser(
+      'escaping',
+      'app_en.arb',
+      "Flutter''s amazing!",
+      useEscaping: true,
+    ).lexIntoTokens();
     expect(
       tokens4,
       equals(<Node>[Node.string(0, 'Flutter'), Node.string(7, "'"), Node.string(9, 's amazing!')]),
     );
 
-    final List<Node> tokens5 =
-        Parser(
-          'escaping',
-          'app_en.arb',
-          "'Flutter''s amazing!'",
-          useEscaping: true,
-        ).lexIntoTokens();
+    final List<Node> tokens5 = Parser(
+      'escaping',
+      'app_en.arb',
+      "'Flutter''s amazing!'",
+      useEscaping: true,
+    ).lexIntoTokens();
     expect(
       tokens5,
       equals(<Node>[
@@ -232,12 +234,11 @@ void main() {
   });
 
   testWithoutContext('lexer identifier names can be "select" or "plural"', () {
-    final List<Node> tokens =
-        Parser(
-          'keywords',
-          'app_en.arb',
-          '{ select } { plural, select, singular{test} other{hmm} }',
-        ).lexIntoTokens();
+    final List<Node> tokens = Parser(
+      'keywords',
+      'app_en.arb',
+      '{ select } { plural, select, singular{test} other{hmm} }',
+    ).lexIntoTokens();
     expect(tokens[1].value, equals('select'));
     expect(tokens[1].type, equals(ST.identifier));
     expect(tokens[5].value, equals('plural'));
@@ -245,12 +246,11 @@ void main() {
   });
 
   testWithoutContext('lexer identifier names can contain underscores', () {
-    final List<Node> tokens =
-        Parser(
-          'keywords',
-          'app_en.arb',
-          '{ test_placeholder } { test_select, select, singular{test} other{hmm} }',
-        ).lexIntoTokens();
+    final List<Node> tokens = Parser(
+      'keywords',
+      'app_en.arb',
+      '{ test_placeholder } { test_select, select, singular{test} other{hmm} }',
+    ).lexIntoTokens();
     expect(tokens[1].value, equals('test_placeholder'));
     expect(tokens[1].type, equals(ST.identifier));
     expect(tokens[5].value, equals('test_select'));
@@ -258,12 +258,11 @@ void main() {
   });
 
   testWithoutContext('lexer identifier names can contain the strings select or plural', () {
-    final List<Node> tokens =
-        Parser(
-          'keywords',
-          'app_en.arb',
-          '{ selectTest } { pluralTest, select, singular{test} other{hmm} }',
-        ).lexIntoTokens();
+    final List<Node> tokens = Parser(
+      'keywords',
+      'app_en.arb',
+      '{ selectTest } { pluralTest, select, singular{test} other{hmm} }',
+    ).lexIntoTokens();
     expect(tokens[1].value, equals('selectTest'));
     expect(tokens[1].type, equals(ST.identifier));
     expect(tokens[5].value, equals('pluralTest'));
@@ -271,12 +270,11 @@ void main() {
   });
 
   testWithoutContext('lexer: lexically correct but syntactically incorrect', () {
-    final List<Node> tokens =
-        Parser(
-          'syntax',
-          'app_en.arb',
-          'string { identifier { string { identifier } } }',
-        ).lexIntoTokens();
+    final List<Node> tokens = Parser(
+      'syntax',
+      'app_en.arb',
+      'string { identifier { string { identifier } } }',
+    ).lexIntoTokens();
     expect(
       tokens,
       equals(<Node>[
@@ -296,8 +294,8 @@ void main() {
   });
 
   testWithoutContext('lexer unmatched single quote', () {
-    const String message = "here''s an unmatched single quote: '";
-    const String expectedError = '''
+    const message = "here''s an unmatched single quote: '";
+    const expectedError = '''
 [app_en.arb:escaping] ICU Lexing Error: Unmatched single quotes.
     here''s an unmatched single quote: '
                                        ^''';
@@ -314,8 +312,8 @@ void main() {
   });
 
   testWithoutContext('lexer unexpected character', () {
-    const String message = '{ * }';
-    const String expectedError = '''
+    const message = '{ * }';
+    const expectedError = '''
 [app_en.arb:lex] ICU Lexing Error: Unexpected character.
     { * }
       ^''';
@@ -332,8 +330,12 @@ void main() {
   });
 
   testWithoutContext('relaxed lexer', () {
-    final List<Node> tokens1 =
-        Parser('string', 'app_en.arb', '{ }', placeholders: <String>[]).lexIntoTokens();
+    final List<Node> tokens1 = Parser(
+      'string',
+      'app_en.arb',
+      '{ }',
+      placeholders: <String>[],
+    ).lexIntoTokens();
     expect(
       tokens1,
       equals(<Node>[
@@ -343,13 +345,12 @@ void main() {
       ]),
     );
 
-    final List<Node> tokens2 =
-        Parser(
-          'string',
-          'app_en.arb',
-          '{ notAPlaceholder }',
-          placeholders: <String>['isAPlaceholder'],
-        ).lexIntoTokens();
+    final List<Node> tokens2 = Parser(
+      'string',
+      'app_en.arb',
+      '{ notAPlaceholder }',
+      placeholders: <String>['isAPlaceholder'],
+    ).lexIntoTokens();
     expect(
       tokens2,
       equals(<Node>[
@@ -359,13 +360,12 @@ void main() {
       ]),
     );
 
-    final List<Node> tokens3 =
-        Parser(
-          'string',
-          'app_en.arb',
-          '{ isAPlaceholder }',
-          placeholders: <String>['isAPlaceholder'],
-        ).lexIntoTokens();
+    final List<Node> tokens3 = Parser(
+      'string',
+      'app_en.arb',
+      '{ isAPlaceholder }',
+      placeholders: <String>['isAPlaceholder'],
+    ).lexIntoTokens();
     expect(
       tokens3,
       equals(<Node>[
@@ -377,10 +377,14 @@ void main() {
   });
 
   testWithoutContext('relaxed lexer complex', () {
-    const String message =
+    const message =
         '{ notPlaceholder } {count,plural, =0{Hello} =1{Hello World} =2{Hello two worlds} few{Hello {count} worlds} many{Hello all {count} worlds} other{Hello other {count} worlds}}';
-    final List<Node> tokens =
-        Parser('string', 'app_en.arb', message, placeholders: <String>['count']).lexIntoTokens();
+    final List<Node> tokens = Parser(
+      'string',
+      'app_en.arb',
+      message,
+      placeholders: <String>['count'],
+    ).lexIntoTokens();
     expect(tokens[0].type, equals(ST.string));
   });
 
@@ -717,7 +721,7 @@ void main() {
 
   testWithoutContext('parser unexpected token', () {
     // unexpected token
-    const String expectedError1 = '''
+    const expectedError1 = '''
 [app_en.arb:unexpectedToken] ICU Syntax Error: Expected "}" but found "=".
     { placeholder =
                   ^''';
@@ -732,7 +736,7 @@ void main() {
       ),
     );
 
-    const String expectedError2 = '''
+    const expectedError2 = '''
 [app_en.arb:unexpectedToken] ICU Syntax Error: Expected "number" but found "}".
     { count, plural, = }
                        ^''';
@@ -747,7 +751,7 @@ void main() {
       ),
     );
 
-    const String expectedError3 = '''
+    const expectedError3 = '''
 [app_en.arb:unexpectedToken] ICU Syntax Error: Expected "identifier" but found ",".
     { , plural , = }
       ^''';
@@ -764,12 +768,11 @@ void main() {
   });
 
   testWithoutContext('parser allows select cases with numbers', () {
-    final Node node =
-        Parser(
-          'numberSelect',
-          'app_en.arb',
-          '{ count, select, 0{none} 100{perfect} other{required!} }',
-        ).parse();
+    final Node node = Parser(
+      'numberSelect',
+      'app_en.arb',
+      '{ count, select, 0{none} 100{perfect} other{required!} }',
+    ).parse();
     final Node selectExpr = node.children[0];
     final Node selectParts = selectExpr.children[5];
     final Node selectPart = selectParts.children[0];

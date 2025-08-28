@@ -32,7 +32,7 @@ void AndroidExternalViewEmbedder2::PrerollCompositeEmbeddedView(
   TRACE_EVENT0("flutter",
                "AndroidExternalViewEmbedder2::PrerollCompositeEmbeddedView");
 
-  SkRect view_bounds = SkRect::Make(frame_size_);
+  DlRect view_bounds = DlRect::MakeSize(frame_size_);
   std::unique_ptr<EmbedderViewSlice> view;
   view = std::make_unique<DisplayListEmbedderViewSlice>(view_bounds);
   slices_.insert_or_assign(view_id, std::move(view));
@@ -54,16 +54,12 @@ DlCanvas* AndroidExternalViewEmbedder2::CompositeEmbeddedView(int64_t view_id) {
   return nullptr;
 }
 
-SkRect AndroidExternalViewEmbedder2::GetViewRect(
+DlRect AndroidExternalViewEmbedder2::GetViewRect(
     int64_t view_id,
     const std::unordered_map<int64_t, EmbeddedViewParams>& view_params) {
   const EmbeddedViewParams& params = view_params.at(view_id);
   // https://github.com/flutter/flutter/issues/59821
-  return SkRect::MakeXYWH(params.finalBoundingRect().x(),      //
-                          params.finalBoundingRect().y(),      //
-                          params.finalBoundingRect().width(),  //
-                          params.finalBoundingRect().height()  //
-  );
+  return params.finalBoundingRect();
 }
 
 // |ExternalViewEmbedder|
@@ -77,20 +73,17 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
   if (!FrameHasPlatformLayers()) {
     frame->Submit();
     // If the previous frame had platform views, hide the overlay surface.
-    if (previous_frame_view_count_ > 0) {
-      jni_facade_->hideOverlaySurface2();
-    }
+    HideOverlayLayerIfNeeded();
     jni_facade_->applyTransaction();
     return;
   }
 
-  bool prev_frame_no_platform_views = previous_frame_view_count_ == 0;
-  std::unordered_map<int64_t, SkRect> view_rects;
+  std::unordered_map<int64_t, DlRect> view_rects;
   for (auto platform_id : composition_order_) {
     view_rects[platform_id] = GetViewRect(platform_id, view_params_);
   }
 
-  std::unordered_map<int64_t, SkRect> overlay_layers =
+  std::unordered_map<int64_t, DlRect> overlay_layers =
       SliceViews(frame->Canvas(),     //
                  composition_order_,  //
                  slices_,             //
@@ -119,7 +112,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
   if (surface_pool_->HasLayers()) {
     for (size_t i = 0; i < composition_order_.size(); i++) {
       int64_t view_id = composition_order_[i];
-      std::unordered_map<int64_t, SkRect>::const_iterator overlay =
+      std::unordered_map<int64_t, DlRect>::const_iterator overlay =
           overlay_layers.find(view_id);
 
       if (overlay == overlay_layers.end()) {
@@ -135,51 +128,55 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
       DlCanvas* overlay_canvas = overlay_frame->Canvas();
       int restore_count = overlay_canvas->GetSaveCount();
       overlay_canvas->Save();
-      overlay_canvas->ClipRect(ToDlRect(overlay->second));
+      overlay_canvas->ClipRect(overlay->second);
 
       // For all following platform views that would cover this overlay,
       // emulate the effect by adding a difference clip. This makes the
       // overlays appear as if they are under the platform view, when in
       // reality there is only a single layer.
       for (size_t j = i + 1; j < composition_order_.size(); j++) {
-        SkRect view_rect = GetViewRect(composition_order_[j], view_params_);
-        overlay_canvas->ClipRect(
-            DlRect::MakeLTRB(view_rect.left(), view_rect.top(),
-                             view_rect.right(), view_rect.bottom()),
-            DlClipOp::kDifference);
+        DlRect view_rect = GetViewRect(composition_order_[j], view_params_);
+        overlay_canvas->ClipRect(view_rect, DlClipOp::kDifference);
       }
 
       slices_[view_id]->render_into(overlay_canvas);
       overlay_canvas->RestoreToCount(restore_count);
     }
   }
+  bool overlay_layer_has_content_this_frame_;
   if (overlay_frame != nullptr) {
     overlay_frame->set_submit_info({.frame_boundary = false});
     overlay_frame->Submit();
+    overlay_layer_has_content_this_frame_ = true;
+  } else {
+    overlay_layer_has_content_this_frame_ = false;
   }
   frame->Submit();
 
   task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
       [&, composition_order = composition_order_, view_params = view_params_,
        jni_facade = jni_facade_, device_pixel_ratio = device_pixel_ratio_,
-       slices = std::move(slices_), prev_frame_no_platform_views]() -> void {
+       slices = std::move(slices_),
+       overlay_layer_has_content_this_frame_]() -> void {
         jni_facade->swapTransaction();
 
-        if (prev_frame_no_platform_views) {
-          jni_facade_->showOverlaySurface2();
+        if (overlay_layer_has_content_this_frame_) {
+          ShowOverlayLayerIfNeeded();
+        } else {
+          HideOverlayLayerIfNeeded();
         }
 
         for (int64_t view_id : composition_order) {
-          SkRect view_rect = GetViewRect(view_id, view_params);
+          DlRect view_rect = GetViewRect(view_id, view_params);
           const EmbeddedViewParams& params = view_params.at(view_id);
           jni_facade->onDisplayPlatformView2(
-              view_id,             //
-              view_rect.x(),       //
-              view_rect.y(),       //
-              view_rect.width(),   //
-              view_rect.height(),  //
-              params.sizePoints().width() * device_pixel_ratio,
-              params.sizePoints().height() * device_pixel_ratio,
+              view_id,                //
+              view_rect.GetX(),       //
+              view_rect.GetY(),       //
+              view_rect.GetWidth(),   //
+              view_rect.GetHeight(),  //
+              params.sizePoints().width * device_pixel_ratio,
+              params.sizePoints().height * device_pixel_ratio,
               params.mutatorsStack()  //
           );
         }
@@ -204,8 +201,6 @@ DlCanvas* AndroidExternalViewEmbedder2::GetRootCanvas() {
 }
 
 void AndroidExternalViewEmbedder2::Reset() {
-  previous_frame_view_count_ = composition_order_.size();
-
   composition_order_.clear();
   slices_.clear();
 }
@@ -217,7 +212,7 @@ void AndroidExternalViewEmbedder2::BeginFrame(
 
 // |ExternalViewEmbedder|
 void AndroidExternalViewEmbedder2::PrepareFlutterView(
-    SkISize frame_size,
+    DlISize frame_size,
     double device_pixel_ratio) {
   Reset();
 
@@ -264,6 +259,21 @@ void AndroidExternalViewEmbedder2::DestroySurfaces() {
                                       latch.Signal();
                                     });
   latch.Wait();
+  overlay_layer_is_shown_ = false;
+}
+
+void AndroidExternalViewEmbedder2::ShowOverlayLayerIfNeeded() {
+  if (!overlay_layer_is_shown_) {
+    jni_facade_->showOverlaySurface2();
+    overlay_layer_is_shown_ = true;
+  }
+}
+
+void AndroidExternalViewEmbedder2::HideOverlayLayerIfNeeded() {
+  if (overlay_layer_is_shown_) {
+    jni_facade_->hideOverlaySurface2();
+    overlay_layer_is_shown_ = false;
+  }
 }
 
 }  // namespace flutter

@@ -24,11 +24,10 @@ void main() {
   test('AnimationController dispatches memory events', () async {
     await expectLater(
       await memoryEvents(
-        () =>
-            AnimationController(
-              duration: const Duration(milliseconds: 100),
-              vsync: const TestVSync(),
-            ).dispose(),
+        () => AnimationController(
+          duration: const Duration(milliseconds: 100),
+          vsync: const TestVSync(),
+        ).dispose(),
         AnimationController,
       ),
       areCreateAndDispose,
@@ -1070,12 +1069,11 @@ void main() {
 
   test('Simulations run forward', () {
     final List<AnimationStatus> statuses = <AnimationStatus>[];
-    final AnimationController controller = AnimationController(
-      vsync: const TestVSync(),
-      duration: const Duration(seconds: 1),
-    )..addStatusListener((AnimationStatus status) {
-      statuses.add(status);
-    });
+    final AnimationController controller =
+        AnimationController(vsync: const TestVSync(), duration: const Duration(seconds: 1))
+          ..addStatusListener((AnimationStatus status) {
+            statuses.add(status);
+          });
 
     controller.animateWith(TestSimulation());
     tick(Duration.zero);
@@ -1086,12 +1084,11 @@ void main() {
 
   test('Simulations run forward even after a reverse run', () {
     final List<AnimationStatus> statuses = <AnimationStatus>[];
-    final AnimationController controller = AnimationController(
-      vsync: const TestVSync(),
-      duration: const Duration(seconds: 1),
-    )..addStatusListener((AnimationStatus status) {
-      statuses.add(status);
-    });
+    final AnimationController controller =
+        AnimationController(vsync: const TestVSync(), duration: const Duration(seconds: 1))
+          ..addStatusListener((AnimationStatus status) {
+            statuses.add(status);
+          });
     controller.reverse(from: 1.0);
     tick(Duration.zero);
     tick(const Duration(seconds: 2));
@@ -1111,12 +1108,11 @@ void main() {
 
   test('Repeating animation with reverse: true report as forward and reverse', () {
     final List<AnimationStatus> statuses = <AnimationStatus>[];
-    final AnimationController controller = AnimationController(
-      vsync: const TestVSync(),
-      duration: const Duration(seconds: 1),
-    )..addStatusListener((AnimationStatus status) {
-      statuses.add(status);
-    });
+    final AnimationController controller =
+        AnimationController(vsync: const TestVSync(), duration: const Duration(seconds: 1))
+          ..addStatusListener((AnimationStatus status) {
+            statuses.add(status);
+          });
 
     controller.repeat(reverse: true);
     tick(Duration.zero);
@@ -1130,12 +1126,11 @@ void main() {
 
   test('AnimateBack can runs successfully with just "reverseDuration" property set', () {
     final List<AnimationStatus> statuses = <AnimationStatus>[];
-    final AnimationController controller = AnimationController(
-      reverseDuration: const Duration(seconds: 2),
-      vsync: const TestVSync(),
-    )..addStatusListener((AnimationStatus status) {
-      statuses.add(status);
-    });
+    final AnimationController controller =
+        AnimationController(reverseDuration: const Duration(seconds: 2), vsync: const TestVSync())
+          ..addStatusListener((AnimationStatus status) {
+            statuses.add(status);
+          });
 
     controller.animateBack(0.8);
 

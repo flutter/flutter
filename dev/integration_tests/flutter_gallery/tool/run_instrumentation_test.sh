@@ -15,5 +15,5 @@ cd android
 # Currently there's no non-hacky way to pass a device ID to gradlew, but it's
 # OK as in the devicelab we have one device per host.
 #
-# See also: https://goo.gl/oe5aUW
+# See also: https://stackoverflow.com/q/23960667/
 ./gradlew connectedAndroidTest -Ptarget=test/live_smoketest.dart

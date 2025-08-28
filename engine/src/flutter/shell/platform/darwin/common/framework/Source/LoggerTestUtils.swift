@@ -11,16 +11,23 @@ public final class StringOutputWriter: NSObject, OutputWriter {
   @objc public var didLog = false
   public var lastLevel: LogLevel!
   @objc public var lastLine: String!
+  @objc public var expectedOutput: String?
+  @objc public var gotExpectedOutput = false
 
   public func writeLine(level: LogLevel, _ message: String) {
     didLog = true
     lastLevel = level
     lastLine = message
+    if let expectedOutput, message.contains(expectedOutput) {
+      gotExpectedOutput = true
+    }
   }
 
   @objc public func reset() {
     didLog = false
     lastLevel = nil
     lastLine = nil
+    expectedOutput = nil
+    gotExpectedOutput = false
   }
 }

@@ -159,8 +159,8 @@ class BottomAppBarTheme extends InheritedTheme with Diagnosticable {
 
   /// Returns the closest [BottomAppBarThemeData] instance given the build context.
   static BottomAppBarThemeData of(BuildContext context) {
-    final BottomAppBarTheme? bottomAppBarTheme =
-        context.dependOnInheritedWidgetOfExactType<BottomAppBarTheme>();
+    final BottomAppBarTheme? bottomAppBarTheme = context
+        .dependOnInheritedWidgetOfExactType<BottomAppBarTheme>();
     return bottomAppBarTheme?.data ?? Theme.of(context).bottomAppBarTheme;
   }
 

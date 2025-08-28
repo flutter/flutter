@@ -57,51 +57,49 @@ class RawMenuAnchorSubmenuAnimationExample extends StatelessWidget {
                       ),
                     );
                   },
-                  buttonBuilder: (
-                    BuildContext context,
-                    MenuController controller,
-                    AnimationStatus animationStatus,
-                  ) {
-                    return MenuItemButton(
-                      onFocusChange: (bool focused) {
-                        if (focused) {
-                          rootMenuController.closeChildren();
-                          controller.open();
-                        }
+                  buttonBuilder:
+                      (
+                        BuildContext context,
+                        MenuController controller,
+                        AnimationStatus animationStatus,
+                      ) {
+                        return MenuItemButton(
+                          onFocusChange: (bool focused) {
+                            if (focused) {
+                              rootMenuController.closeChildren();
+                              controller.open();
+                            }
+                          },
+                          onPressed: () {
+                            if (!animationStatus.isForwardOrCompleted) {
+                              rootMenuController.closeChildren();
+                              controller.open();
+                            } else {
+                              controller.close();
+                            }
+                          },
+                          trailingIcon: const Icon(Icons.arrow_forward),
+                          child: Text('Submenu $i'),
+                        );
                       },
-                      onPressed: () {
-                        if (!animationStatus.isForwardOrCompleted) {
-                          rootMenuController.closeChildren();
-                          controller.open();
-                        } else {
-                          controller.close();
-                        }
-                      },
-                      trailingIcon: const Text('▶'),
-                      child: Text('Submenu $i'),
-                    );
-                  },
                 ),
             ],
           ),
         );
       },
-      buttonBuilder: (
-        BuildContext context,
-        MenuController controller,
-        AnimationStatus animationStatus,
-      ) {
-        return FilledButton(
-          onPressed: () {
-            if (animationStatus.isForwardOrCompleted) {
-              controller.close();
-            } else {
-              controller.open();
-            }
+      buttonBuilder:
+          (BuildContext context, MenuController controller, AnimationStatus animationStatus) {
+            return FilledButton(
+              onPressed: () {
+                if (animationStatus.isForwardOrCompleted) {
+                  controller.close();
+                } else {
+                  controller.open();
+                }
+              },
+              child: const Text('Menu'),
+            );
           },
-          child: const Text('Menu'),
-        );
-      },
     );
   }
 }
@@ -125,16 +123,15 @@ class MenuState extends State<Menu> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 200),
-    )..addStatusListener((AnimationStatus status) {
-      if (mounted) {
-        setState(() {
-          // Rebuild to reflect animation status changes.
-        });
-      }
-    });
+    animationController =
+        AnimationController(vsync: this, duration: const Duration(milliseconds: 200))
+          ..addStatusListener((AnimationStatus status) {
+            if (mounted) {
+              setState(() {
+                // Rebuild to reflect animation status changes.
+              });
+            }
+          });
 
     animation = CurvedAnimation(parent: animationController, curve: Curves.easeOutQuart);
   }
@@ -182,8 +179,9 @@ class MenuState extends State<Menu> with SingleTickerProviderStateMixin {
         onOpenRequested: _handleMenuOpenRequest,
         onCloseRequested: _handleMenuCloseRequest,
         overlayBuilder: (BuildContext context, RawMenuOverlayInfo info) {
-          final ui.Offset position =
-              isSubmenu ? info.anchorRect.topRight : info.anchorRect.bottomLeft;
+          final ui.Offset position = isSubmenu
+              ? info.anchorRect.topRight
+              : info.anchorRect.bottomLeft;
           final ColorScheme colorScheme = ColorScheme.of(context);
           return Positioned(
             top: position.dy,

@@ -297,12 +297,10 @@ void main() {
         (WidgetTester tester) async {
           final GlobalKey key = GlobalKey();
           final List<Widget> slivers = <Widget>[
-            SliverFixedExtentList(
+            SliverFixedExtentList.builder(
               itemExtent: 150,
-              delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) => Container(color: Colors.amber),
-                childCount: 5,
-              ),
+              itemCount: 5,
+              itemBuilder: (BuildContext context, int index) => Container(color: Colors.amber),
             ),
             SliverFillRemaining(
               hasScrollBody: false,
@@ -586,12 +584,10 @@ void main() {
             final ScrollController controller = ScrollController();
             addTearDown(controller.dispose);
             final List<Widget> slivers = <Widget>[
-              SliverFixedExtentList(
+              SliverFixedExtentList.builder(
                 itemExtent: 150,
-                delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) => Container(color: Colors.amber),
-                  childCount: 5,
-                ),
+                itemCount: 5,
+                itemBuilder: (BuildContext context, int index) => Container(color: Colors.amber),
               ),
               SliverFillRemaining(
                 hasScrollBody: false,
@@ -651,11 +647,15 @@ void main() {
             final ScrollController controller = ScrollController();
             addTearDown(controller.dispose);
             final List<Widget> slivers = <Widget>[
-              SliverFixedExtentList(
+              SliverFixedExtentList.builder(
                 itemExtent: 150,
-                delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-                  return Semantics(label: index.toString(), child: Container(color: Colors.amber));
-                }, childCount: 5),
+                itemCount: 5,
+                itemBuilder: (BuildContext context, int index) {
+                  return Semantics(
+                    label: index.toString(),
+                    child: Container(color: Colors.amber),
+                  );
+                },
               ),
               SliverFillRemaining(
                 hasScrollBody: false,
@@ -971,12 +971,10 @@ void main() {
             final ScrollController controller = ScrollController();
             addTearDown(controller.dispose);
             final List<Widget> slivers = <Widget>[
-              SliverFixedExtentList(
+              SliverFixedExtentList.builder(
                 itemExtent: 150,
-                delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) => Container(color: Colors.amber),
-                  childCount: 5,
-                ),
+                itemCount: 5,
+                itemBuilder: (BuildContext context, int index) => Container(color: Colors.amber),
               ),
               SliverFillRemaining(
                 hasScrollBody: false,
@@ -1022,11 +1020,15 @@ void main() {
           final ScrollController controller = ScrollController();
           addTearDown(controller.dispose);
           final List<Widget> slivers = <Widget>[
-            SliverFixedExtentList(
+            SliverFixedExtentList.builder(
               itemExtent: 150,
-              delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-                return Semantics(label: index.toString(), child: Container(color: Colors.amber));
-              }, childCount: 5),
+              itemCount: 5,
+              itemBuilder: (BuildContext context, int index) {
+                return Semantics(
+                  label: index.toString(),
+                  child: Container(color: Colors.amber),
+                );
+              },
             ),
             SliverFillRemaining(
               hasScrollBody: false,

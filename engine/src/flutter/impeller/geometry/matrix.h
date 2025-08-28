@@ -320,6 +320,11 @@ struct Matrix {
 
   bool IsInvertible() const { return GetDeterminant() != 0; }
 
+  /// @brief  Return the maximum scale applied specifically to either the
+  ///         X axis or Y axis unit vectors (the bases). The matrix might
+  ///         lengthen a non-axis-aligned vector by more than this value.
+  ///
+  /// @see |GetMaxScale2D|
   inline Scalar GetMaxBasisLengthXY() const {
     // The full basis computation requires computing the squared scaling factor
     // for translate/scale only matrices. This substantially limits the range of
@@ -330,6 +335,54 @@ struct Matrix {
     }
     return std::sqrt(std::max(e[0][0] * e[0][0] + e[0][1] * e[0][1],
                               e[1][0] * e[1][0] + e[1][1] * e[1][1]));
+  }
+
+  /// @brief   Return the smaller of the two non-negative scales that will
+  ///          be applied to 2D coordinates by this matrix. If the matrix
+  ///          has perspective components, the method will return a nullopt.
+  ///
+  /// Note that negative scale factors really represent a positive scale
+  /// factor with a flip, so the absolute value (the positive scale factor)
+  /// is returned instead so that the results can be directly applied to
+  /// rendering calculations to compute the potential size of an operation.
+  ///
+  /// This method differs from the "basis length" methods in that those
+  /// methods answer the question "how much does this transform stretch
+  /// perfectly horizontal or vertical source vectors, whereas this method
+  /// can answer "what's the smallest scale applied to any vector regardless
+  /// of direction".
+  ///
+  /// @see |GetScales2D|
+  std::optional<Scalar> GetMinScale2D() const {
+    auto scales = GetScales2D();
+    if (!scales.has_value()) {
+      return std::nullopt;
+    }
+    return std::min(scales->first, scales->second);
+  }
+
+  /// @brief   Return the smaller of the two non-negative scales that will
+  ///          be applied to 2D coordinates by this matrix. If the matrix
+  ///          has perspective components, the method will return a nullopt.
+  ///
+  /// Note that negative scale factors really represent a positive scale
+  /// factor with a flip, so the absolute value (the positive scale factor)
+  /// is returned instead so that the results can be directly applied to
+  /// rendering calculations to compute the potential size of an operation.
+  ///
+  /// This method differs from the "basis length" methods in that those
+  /// methods answer the question "how much does this transform stretch
+  /// perfectly horizontal or vertical source vectors, whereas this method
+  /// can answer "what's the largest scale applied to any vector regardless
+  /// of direction".
+  ///
+  /// @see |GetScales2D|
+  std::optional<Scalar> GetMaxScale2D() const {
+    auto scales = GetScales2D();
+    if (!scales.has_value()) {
+      return std::nullopt;
+    }
+    return std::max(scales->first, scales->second);
   }
 
   constexpr Vector3 GetBasisX() const { return Vector3(m[0], m[1], m[2]); }
@@ -449,6 +502,20 @@ struct Matrix {
   }
 
   std::optional<MatrixDecomposition> Decompose() const;
+
+  /// @brief  Compute the two non-negative scales applied by this matrix to
+  ///         2D coordinates and return them as an optional pair of Scalar
+  ///         values in any order. If the matrix has perspective elements,
+  ///         this method will return a nullopt.
+  ///
+  /// Note that negative scale factors really represent a positive scale
+  /// factor with a flip, so the absolute value (the positive scale factor)
+  /// is returned instead so that the results can be directly applied to
+  /// rendering calculations to compute the potential size of an operation.
+  ///
+  /// @see |GetMinScale2D|
+  /// @see |GetMaxScale2D|
+  std::optional<std::pair<Scalar, Scalar>> GetScales2D() const;
 
   bool Equals(const Matrix& matrix, Scalar epsilon = 1e-5f) const {
     const Scalar* a = m;

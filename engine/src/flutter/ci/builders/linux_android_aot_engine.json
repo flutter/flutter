@@ -8,8 +8,7 @@
         "definition files."
     ],
     "luci_flags": {
-      "delay_collect_builds": true,
-      "parallel_download_builds": true
+      "upload_content_hash": true
     },
     "builds": [
         {
@@ -293,6 +292,98 @@
             "description": "Produces release mode artifacts to target x64 Android from a Linux host.",
             "ninja": {
                 "config": "ci/android_release_x64",
+                "targets": [
+                    "default",
+                    "clang_x64/gen_snapshot",
+                    "flutter/shell/platform/android:abi_jars",
+                    "flutter/shell/platform/android:analyze_snapshot"
+                ]
+            }
+        },
+        {
+            "archives": [
+                {
+                    "name": "ci/android_profile_riscv64",
+                    "type": "gcs",
+                    "base_path": "out/ci/android_profile_riscv64/zip_archives/",
+                    "include_paths": [
+                        "out/ci/android_profile_riscv64/zip_archives/android-riscv64-profile/artifacts.zip",
+                        "out/ci/android_profile_riscv64/zip_archives/android-riscv64-profile/linux-x64.zip",
+                        "out/ci/android_profile_riscv64/zip_archives/android-riscv64-profile/symbols.zip",
+                        "out/ci/android_profile_riscv64/zip_archives/android-riscv64-profile/analyze-snapshot-linux-x64.zip",
+                        "out/ci/android_profile_riscv64/zip_archives/download.flutter.io"
+                    ],
+                    "realm": "production"
+                }
+            ],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Linux"
+            ],
+            "gclient_variables": {
+                "use_rbe": true
+            },
+            "gn": [
+                "--target-dir",
+                "ci/android_profile_riscv64",
+                "--runtime-mode",
+                "profile",
+                "--android",
+                "--android-cpu",
+                "riscv64",
+                "--rbe",
+                "--no-goma"
+            ],
+            "name": "ci/android_profile_riscv64",
+            "description": "Produces profile mode artifacts to target riscv64 Android from a Linux host.",
+            "ninja": {
+                "config": "ci/android_profile_riscv64",
+                "targets": [
+                    "default",
+                    "clang_x64/gen_snapshot",
+                    "flutter/shell/platform/android:abi_jars",
+                    "flutter/shell/platform/android:analyze_snapshot"
+                ]
+            }
+        },
+        {
+            "archives": [
+                {
+                    "name": "ci/android_release_riscv64",
+                    "type": "gcs",
+                    "base_path": "out/ci/android_release_riscv64/zip_archives/",
+                    "include_paths": [
+                        "out/ci/android_release_riscv64/zip_archives/android-riscv64-release/artifacts.zip",
+                        "out/ci/android_release_riscv64/zip_archives/android-riscv64-release/linux-x64.zip",
+                        "out/ci/android_release_riscv64/zip_archives/android-riscv64-release/symbols.zip",
+                        "out/ci/android_release_riscv64/zip_archives/android-riscv64-release/analyze-snapshot-linux-x64.zip",
+                        "out/ci/android_release_riscv64/zip_archives/download.flutter.io"
+                    ],
+                    "realm": "production"
+                }
+            ],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Linux"
+            ],
+            "gclient_variables": {
+                "use_rbe": true
+            },
+            "gn": [
+                "--target-dir",
+                "ci/android_release_riscv64",
+                "--runtime-mode",
+                "release",
+                "--android",
+                "--android-cpu",
+                "riscv64",
+                "--rbe",
+                "--no-goma"
+            ],
+            "name": "ci/android_release_riscv64",
+            "description": "Produces release mode artifacts to target riscv64 Android from a Linux host.",
+            "ninja": {
+                "config": "ci/android_release_riscv64",
                 "targets": [
                     "default",
                     "clang_x64/gen_snapshot",

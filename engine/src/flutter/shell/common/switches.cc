@@ -93,6 +93,9 @@ void PrintUsage(const std::string& executable_name) {
 
   std::cerr << "Flutter Engine Version: " << GetFlutterEngineVersion()
             << std::endl;
+
+  std::cerr << "Flutter Content Hash: " << GetFlutterContentHash() << std::endl;
+
   std::cerr << "Skia Version: " << GetSkiaVersion() << std::endl;
 
   std::cerr << "Dart Version: " << GetDartVersion() << std::endl << std::endl;
@@ -291,6 +294,9 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   settings.enable_dart_profiling =
       command_line.HasOption(FlagForSwitch(Switch::EnableDartProfiling));
 
+  settings.profile_startup =
+      command_line.HasOption(FlagForSwitch(Switch::ProfileStartup));
+
   settings.enable_software_rendering =
       command_line.HasOption(FlagForSwitch(Switch::EnableSoftwareRendering));
 
@@ -379,7 +385,7 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
 
   if (!aot_shared_library_name.empty()) {
     for (std::string_view name : aot_shared_library_name) {
-      settings.application_library_path.emplace_back(name);
+      settings.application_library_paths.emplace_back(name);
     }
   } else if (!snapshot_asset_path.empty()) {
     settings.vm_snapshot_data_path =

@@ -66,7 +66,7 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
                       raster_thread_merger) override;
 
   // |ExternalViewEmbedder|
-  void PrepareFlutterView(SkISize frame_size,
+  void PrepareFlutterView(DlISize frame_size,
                           double device_pixel_ratio) override;
 
   // |ExternalViewEmbedder|
@@ -85,7 +85,7 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
 
   // Gets the rect based on the device pixel ratio of a platform view displayed
   // on the screen.
-  static SkRect GetViewRect(
+  static DlRect GetViewRect(
       int64_t view_id,
       const std::unordered_map<int64_t, EmbeddedViewParams>& view_params);
 
@@ -112,8 +112,11 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
   // The task runners.
   const TaskRunners task_runners_;
 
+  // If the overlay layer is currently shown.
+  bool overlay_layer_is_shown_ = false;
+
   // The size of the root canvas.
-  SkISize frame_size_;
+  DlISize frame_size_;
 
   // The pixel ratio used to determinate the size of a platform view layer
   // relative to the device layout system.
@@ -132,9 +135,6 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
   // mutation stack.
   std::unordered_map<int64_t, EmbeddedViewParams> view_params_;
 
-  // The number of platform views in the previous frame.
-  int64_t previous_frame_view_count_;
-
   // Destroys the surfaces created from the surface factory.
   // This method schedules a task on the platform thread, and waits for
   // the task until it completes.
@@ -145,6 +145,13 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
 
   // Whether the layer tree in the current frame has platform layers.
   bool FrameHasPlatformLayers();
+
+  // Shows the overlay layer if it has content and the previous frame did not.
+  void ShowOverlayLayerIfNeeded();
+
+  // Hides the overlay layer if it does not have content and the previous
+  // frame did have content.
+  void HideOverlayLayerIfNeeded();
 };
 
 }  // namespace flutter

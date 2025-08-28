@@ -12,10 +12,9 @@ void main() {
   // TODO(ianh): These tests and the filtering mechanism should be revisited to
   // account for causal async stack traces. https://github.com/flutter/flutter/issues/8128
   test('FlutterError.defaultStackFilter', () {
-    final List<String> filtered =
-        FlutterError.defaultStackFilter(
-          StackTrace.current.toString().trimRight().split('\n'),
-        ).toList();
+    final List<String> filtered = FlutterError.defaultStackFilter(
+      StackTrace.current.toString().trimRight().split('\n'),
+    ).toList();
     expect(filtered.length, greaterThanOrEqualTo(4));
     expect(
       filtered[0],
@@ -31,10 +30,9 @@ void main() {
   });
 
   test('FlutterError.defaultStackFilter (async test body)', () async {
-    final List<String> filtered =
-        FlutterError.defaultStackFilter(
-          StackTrace.current.toString().trimRight().split('\n'),
-        ).toList();
+    final List<String> filtered = FlutterError.defaultStackFilter(
+      StackTrace.current.toString().trimRight().split('\n'),
+    ).toList();
     expect(filtered.length, greaterThanOrEqualTo(3));
     expect(
       filtered[0],

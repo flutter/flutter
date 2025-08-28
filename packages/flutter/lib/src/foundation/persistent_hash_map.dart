@@ -289,8 +289,8 @@ class _CompressedNode extends _TrieNode {
     return (existingKeyHash == keyHash)
         ? _HashCollisionNode.fromCollision(keyHash, existingKey, existingValue, key, value)
         : _CompressedNode.empty
-            .put(bitIndex, existingKey, existingKeyHash, existingValue)
-            .put(bitIndex, key, keyHash, value);
+              .put(bitIndex, existingKey, existingKeyHash, existingValue)
+              .put(bitIndex, key, keyHash, value);
   }
 }
 

@@ -99,6 +99,10 @@ extension type CanvasKit(JSObject _) implements JSObject {
     Uint16List? indices,
   ) => _MakeVertices(mode, positions.toJS, textureCoordinates?.toJS, colors?.toJS, indices?.toJS);
 
+  external BidiNamespace get Bidi;
+
+  external CodeUnitsNamespace get CodeUnits;
+
   external SkParagraphBuilderNamespace get ParagraphBuilder;
   external SkParagraphStyle ParagraphStyle(SkParagraphStyleProperties properties);
   external SkTextStyle TextStyle(SkTextStyleProperties properties);
@@ -1145,10 +1149,9 @@ Float32List toSkPoint(ui.Offset offset) {
 }
 
 /// Color stops used when the framework specifies `null`.
-final Float32List _kDefaultSkColorStops =
-    Float32List(2)
-      ..[0] = 0
-      ..[1] = 1;
+final Float32List _kDefaultSkColorStops = Float32List(2)
+  ..[0] = 0
+  ..[1] = 1;
 
 /// Converts a list of color stops into a Skia-compatible JS array or color stops.
 ///
@@ -1779,9 +1782,43 @@ extension type SkPicture(JSObject _) implements JSObject {
 
   @JS('cullRect')
   external JSFloat32Array _cullRect();
+
   Float32List cullRect() => _cullRect().toDart;
 
   external int approximateBytesUsed();
+}
+
+extension type BidiRegion(JSObject _) implements JSObject {
+  external int get start;
+  external int get end;
+  external int get level;
+}
+
+extension type BidiIndex(JSObject _) implements JSObject {
+  external int get index;
+}
+
+extension type BidiNamespace(JSObject _) implements JSObject {
+  @JS('getBidiRegions')
+  external JSArray<JSAny?> _getBidiRegions(String text, SkTextDirection dir);
+  List<BidiRegion> getBidiRegions(String text, ui.TextDirection dir) =>
+      _getBidiRegions(text, toSkTextDirection(dir)).toDart.cast<BidiRegion>();
+
+  @JS('reorderVisual')
+  // TODO(jlavrova): Use a JSInt32Array return type instead of `List<BidiIndex>`
+  external JSArray<JSAny?> _reorderVisual(JSUint8Array visuals);
+  List<BidiIndex> reorderVisual(Uint8List visuals) =>
+      _reorderVisual(visuals.toJS).toDart.cast<BidiIndex>();
+}
+
+extension type CodeUnitInfo(JSObject _) implements JSObject {
+  external int get flags;
+}
+
+extension type CodeUnitsNamespace(JSObject _) implements JSObject {
+  @JS('compute')
+  external JSArray<JSAny?> _compute(String text);
+  List<CodeUnitInfo> compute(String text) => _compute(text).toDart.cast<CodeUnitInfo>();
 }
 
 extension type SkParagraphBuilderNamespace(JSObject _) implements JSObject {

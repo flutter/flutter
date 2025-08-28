@@ -4,7 +4,6 @@
 
 import 'dart:convert';
 
-import 'package:collection/collection.dart';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart' show getGradlewFileName;
 import 'package:flutter_tools/src/base/io.dart';
@@ -53,13 +52,10 @@ void main() {
       // Verify that gradlew has a javaVersion task.
       expect(result.exitCode, 0);
       // Verify the format is a number on its own line.
-      const List<String> expectedLines = <String>[
-        'BuildVariant: debug',
-        'BuildVariant: release',
-        'BuildVariant: profile',
-      ];
       final List<String> actualLines = LineSplitter.split(result.stdout.toString()).toList();
-      expect(const ListEquality<String>().equals(actualLines, expectedLines), isTrue);
+      expect(actualLines, contains('BuildVariant: debug'), reason: 'actual: $actualLines');
+      expect(actualLines, contains('BuildVariant: release'), reason: 'actual: $actualLines');
+      expect(actualLines, contains('BuildVariant: profile'), reason: 'actual: $actualLines');
     },
   );
 }

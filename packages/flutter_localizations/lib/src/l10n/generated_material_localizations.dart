@@ -5510,7 +5510,7 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Zpět';
 
   @override
-  String get bottomSheetLabel => 'Spodní tabulka';
+  String get bottomSheetLabel => 'Spodní panel';
 
   @override
   String get calendarModeButtonLabel => 'Přepnout na kalendář';
@@ -14620,7 +14620,7 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'حذف';
 
   @override
-  String get dialModeButtonLabel => 'رفتن به حالت انتخابگر صفحه ساعت';
+  String get dialModeButtonLabel => 'رفتن به حالت انتخاب‌گر صفحه ساعت';
 
   @override
   String get dialogLabel => 'کادر گفتگو';
@@ -24655,7 +24655,7 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get continueButtonLabel => '\u{cae}\u{cc1}\u{c82}\u{ca6}\u{cc1}\u{cb5}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get copyButtonLabel => '\u{ca8}\u{c95}\u{cb2}\u{cbf}\u{cb8}\u{cbf}';
+  String get copyButtonLabel => '\u{c95}\u{cbe}\u{caa}\u{cbf}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
   String get currentDateLabel => '\u{c87}\u{c82}\u{ca6}\u{cc1}';
@@ -39134,13 +39134,13 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Dölj';
 
   @override
-  String get expansionTileCollapsedHint => 'tryck snabbt två gånger för att utöka';
+  String get expansionTileCollapsedHint => 'dubbeltryck för att utöka';
 
   @override
   String get expansionTileCollapsedTapHint => 'Utöka för mer information';
 
   @override
-  String get expansionTileExpandedHint => 'tryck snabbt två gånger för att komprimera';
+  String get expansionTileExpandedHint => 'dubbeltryck för att komprimera';
 
   @override
   String get expansionTileExpandedTapHint => 'Komprimera';
@@ -45993,7 +45993,7 @@ class MaterialLocalizationZhHantTw extends MaterialLocalizationZhHant {
   String get timePickerMinuteModeAnnouncement => '選取分鐘數';
 
   @override
-  String get alertDialogLabel => '快訊';
+  String get alertDialogLabel => '警告';
 
   @override
   String get reorderItemToStart => '移至開頭';

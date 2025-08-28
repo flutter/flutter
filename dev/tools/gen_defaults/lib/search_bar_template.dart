@@ -25,7 +25,8 @@ class SearchBarTemplate extends TokenTemplate {
   }
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _SearchBarDefaultsM3 extends SearchBarThemeData {
   _SearchBarDefaultsM3(this.context);
 
@@ -34,31 +35,31 @@ class _SearchBarDefaultsM3 extends SearchBarThemeData {
   late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
-  MaterialStateProperty<Color?>? get backgroundColor =>
+  WidgetStateProperty<Color?>? get backgroundColor =>
     MaterialStatePropertyAll<Color>(${componentColor("md.comp.search-bar.container")});
 
   @override
-  MaterialStateProperty<double>? get elevation =>
+  WidgetStateProperty<double>? get elevation =>
     const MaterialStatePropertyAll<double>(${elevation("md.comp.search-bar.container")});
 
   @override
-  MaterialStateProperty<Color>? get shadowColor =>
+  WidgetStateProperty<Color>? get shadowColor =>
     MaterialStatePropertyAll<Color>(_colors.shadow);
 
   @override
-  MaterialStateProperty<Color>? get surfaceTintColor =>
+  WidgetStateProperty<Color>? get surfaceTintColor =>
     ${_surfaceTint()}
 
   @override
-  MaterialStateProperty<Color?>? get overlayColor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
+  WidgetStateProperty<Color?>? get overlayColor =>
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
         return ${componentColor("md.comp.search-bar.pressed.state-layer")};
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return ${componentColor("md.comp.search-bar.hover.state-layer")};
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return ${colorOrTransparent("md.comp.search-bar.focused.state-layer")};
       }
       return Colors.transparent;
@@ -67,19 +68,19 @@ class _SearchBarDefaultsM3 extends SearchBarThemeData {
   // No default side
 
   @override
-  MaterialStateProperty<OutlinedBorder>? get shape =>
+  WidgetStateProperty<OutlinedBorder>? get shape =>
     const MaterialStatePropertyAll<OutlinedBorder>(${shape('md.comp.search-bar.container', '')});
 
   @override
-  MaterialStateProperty<EdgeInsetsGeometry>? get padding =>
+  WidgetStateProperty<EdgeInsetsGeometry>? get padding =>
     const MaterialStatePropertyAll<EdgeInsetsGeometry>(EdgeInsets.symmetric(horizontal: 8.0));
 
   @override
-  MaterialStateProperty<TextStyle?> get textStyle =>
+  WidgetStateProperty<TextStyle?> get textStyle =>
     MaterialStatePropertyAll<TextStyle?>(${textStyleWithColor('md.comp.search-bar.input-text')});
 
   @override
-  MaterialStateProperty<TextStyle?> get hintStyle =>
+  WidgetStateProperty<TextStyle?> get hintStyle =>
     MaterialStatePropertyAll<TextStyle?>(${textStyleWithColor('md.comp.search-bar.supporting-text')});
 
   @override

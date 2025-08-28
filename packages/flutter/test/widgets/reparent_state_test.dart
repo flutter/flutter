@@ -56,8 +56,14 @@ void main() {
       Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          ColoredBox(color: Colors.green, child: StateMarker(key: left)),
-          ColoredBox(color: Colors.green, child: StateMarker(key: right, child: grandchild)),
+          ColoredBox(
+            color: Colors.green,
+            child: StateMarker(key: left),
+          ),
+          ColoredBox(
+            color: Colors.green,
+            child: StateMarker(key: right, child: grandchild),
+          ),
         ],
       ),
     );
@@ -76,8 +82,14 @@ void main() {
       Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          ColoredBox(color: Colors.green, child: StateMarker(key: right, child: newGrandchild)),
-          ColoredBox(color: Colors.green, child: StateMarker(key: left)),
+          ColoredBox(
+            color: Colors.green,
+            child: StateMarker(key: right, child: newGrandchild),
+          ),
+          ColoredBox(
+            color: Colors.green,
+            child: StateMarker(key: left),
+          ),
         ],
       ),
     );
@@ -94,7 +106,10 @@ void main() {
 
     await tester.pumpWidget(
       Center(
-        child: ColoredBox(color: Colors.green, child: StateMarker(key: left, child: Container())),
+        child: ColoredBox(
+          color: Colors.green,
+          child: StateMarker(key: left, child: Container()),
+        ),
       ),
     );
 
@@ -111,7 +126,10 @@ void main() {
     await tester.pumpWidget(
       Stack(
         textDirection: TextDirection.ltr,
-        children: <Widget>[StateMarker(key: left), StateMarker(key: right, child: grandchild)],
+        children: <Widget>[
+          StateMarker(key: left),
+          StateMarker(key: right, child: grandchild),
+        ],
       ),
     );
 
@@ -128,7 +146,10 @@ void main() {
     await tester.pumpWidget(
       Stack(
         textDirection: TextDirection.ltr,
-        children: <Widget>[StateMarker(key: right, child: newGrandchild), StateMarker(key: left)],
+        children: <Widget>[
+          StateMarker(key: right, child: newGrandchild),
+          StateMarker(key: left),
+        ],
       ),
     );
 
@@ -144,7 +165,10 @@ void main() {
 
     await tester.pumpWidget(
       Center(
-        child: ColoredBox(color: Colors.green, child: StateMarker(key: left, child: Container())),
+        child: ColoredBox(
+          color: Colors.green,
+          child: StateMarker(key: left, child: Container()),
+        ),
       ),
     );
 
@@ -167,7 +191,11 @@ void main() {
         child: ListView(
           itemExtent: 100.0,
           children: <Widget>[
-            SizedBox(key: const Key('container'), height: 100.0, child: StateMarker(key: key)),
+            SizedBox(
+              key: const Key('container'),
+              height: 100.0,
+              child: StateMarker(key: key),
+            ),
           ],
         ),
       ),
@@ -188,7 +216,10 @@ void main() {
     await tester.pumpWidget(
       Stack(
         textDirection: TextDirection.ltr,
-        children: <Widget>[StateMarker(key: key), const SizedBox(width: 100.0, height: 100.0)],
+        children: <Widget>[
+          StateMarker(key: key),
+          const SizedBox(width: 100.0, height: 100.0),
+        ],
       ),
     );
 
@@ -198,7 +229,10 @@ void main() {
     await tester.pumpWidget(
       Stack(
         textDirection: TextDirection.ltr,
-        children: <Widget>[const SizedBox(width: 100.0, height: 100.0), StateMarker(key: key)],
+        children: <Widget>[
+          const SizedBox(width: 100.0, height: 100.0),
+          StateMarker(key: key),
+        ],
       ),
     );
 
@@ -208,7 +242,10 @@ void main() {
     await tester.pumpWidget(
       Stack(
         textDirection: TextDirection.ltr,
-        children: <Widget>[StateMarker(key: key), const SizedBox(width: 100.0, height: 100.0)],
+        children: <Widget>[
+          StateMarker(key: key),
+          const SizedBox(width: 100.0, height: 100.0),
+        ],
       ),
     );
 
@@ -319,7 +356,10 @@ void main() {
             key: key1,
             child: StateMarker(
               key: key2,
-              child: StateMarker(key: key3, child: StateMarker(child: Container(width: 100.0))),
+              child: StateMarker(
+                key: key3,
+                child: StateMarker(child: Container(width: 100.0)),
+              ),
             ),
           ),
         ],
@@ -330,10 +370,16 @@ void main() {
       Row(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          StateMarker(key: key2, child: StateMarker(child: Container(width: 100.0))),
+          StateMarker(
+            key: key2,
+            child: StateMarker(child: Container(width: 100.0)),
+          ),
           StateMarker(
             key: key1,
-            child: StateMarker(key: key3, child: StateMarker(child: Container(width: 100.0))),
+            child: StateMarker(
+              key: key3,
+              child: StateMarker(child: Container(width: 100.0)),
+            ),
           ),
         ],
       ),

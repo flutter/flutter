@@ -14,7 +14,7 @@ import 'test_driver.dart';
 import 'test_utils.dart';
 
 void batch1() {
-  final BasicProject project = BasicProject();
+  final project = BasicProject();
   late Directory tempDir;
   late FlutterRunTestDriver flutter;
 
@@ -93,7 +93,7 @@ void batch1() {
 }
 
 void batch2() {
-  final TestsProject project = TestsProject();
+  final project = TestsProject();
   late Directory tempDir;
   late FlutterTestTestDriver flutter;
 
@@ -118,7 +118,7 @@ void batch2() {
 
     // Ensure we did not leave a dill file alongside the test.
     // https://github.com/Dart-Code/Dart-Code/issues/4243.
-    final String dillFilename = '${project.testFilePath}.dill';
+    final dillFilename = '${project.testFilePath}.dill';
     expect(fileSystem.file(dillFilename).existsSync(), isFalse);
   });
 
@@ -154,7 +154,7 @@ void batch2() {
 }
 
 void batch3() {
-  final IntegrationTestsProject project = IntegrationTestsProject();
+  final project = IntegrationTestsProject();
   late Directory tempDir;
   late FlutterTestTestDriver flutter;
 
@@ -181,7 +181,7 @@ void batch3() {
 
     // Ensure we did not leave a dill file alongside the test.
     // https://github.com/Dart-Code/Dart-Code/issues/4243.
-    final String dillFilename = '${project.testFilePath}.dill';
+    final dillFilename = '${project.testFilePath}.dill';
     expect(fileSystem.file(dillFilename).existsSync(), isFalse);
   });
 
@@ -199,7 +199,7 @@ void batch3() {
 
       // Ensure we did not leave a dill file alongside the test.
       // https://github.com/Dart-Code/Dart-Code/issues/4243.
-      final String dillFilename = '${project.testFilePath}.dill';
+      final dillFilename = '${project.testFilePath}.dill';
       expect(fileSystem.file(dillFilename).existsSync(), isFalse);
     },
   );
@@ -224,7 +224,7 @@ Future<void> evaluateComplexExpressions(FlutterTestDriver flutter) async {
 }
 
 Future<void> evaluateComplexReturningExpressions(FlutterTestDriver flutter) async {
-  final DateTime date = DateTime(2000);
+  final date = DateTime(2000);
   final ObjRef resp = await flutter.evaluateInFrame('new DateTime(2000)');
   expectInstanceOfClass(resp, 'DateTime');
   final ObjRef res = await flutter.evaluate(resp.id!, r'"$year-$month-$day"');

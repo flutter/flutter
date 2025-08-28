@@ -24,15 +24,16 @@ class _SlidersPageState extends State<SlidersPage> with TickerProviderStateMixin
     super.initState();
     _sliderController = AnimationController(duration: const Duration(seconds: 1), vsync: this)
       ..repeat();
-    _sliderAnimation = Tween<double>(begin: 0, end: 1).animate(_sliderController)..addListener(() {
-      setState(() {
-        _sliderValue = _sliderAnimation.value;
-        _rangeSliderValues = RangeValues(
-          clampDouble(_sliderAnimation.value, 0, 0.45),
-          1.0 - clampDouble(_sliderAnimation.value, 0, 0.45),
-        );
+    _sliderAnimation = Tween<double>(begin: 0, end: 1).animate(_sliderController)
+      ..addListener(() {
+        setState(() {
+          _sliderValue = _sliderAnimation.value;
+          _rangeSliderValues = RangeValues(
+            clampDouble(_sliderAnimation.value, 0, 0.45),
+            1.0 - clampDouble(_sliderAnimation.value, 0, 0.45),
+          );
+        });
       });
-    });
   }
 
   @override

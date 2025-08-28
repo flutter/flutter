@@ -419,7 +419,7 @@ class Size extends OffsetBase {
   ///  * [isFinite], which checks whether both dimensions are finite.
   static const Size infinite = Size(double.infinity, double.infinity);
 
-  /// Whether this size encloses a non-zero area.
+  /// Whether this size encloses a zero area.
   ///
   /// Negative areas are considered empty.
   bool get isEmpty => width <= 0.0 || height <= 0.0;
@@ -1090,7 +1090,7 @@ class Radius {
     return x == y
         ? 'Radius.circular(${x.toStringAsFixed(1)})'
         : 'Radius.elliptical(${x.toStringAsFixed(1)}, '
-            '${y.toStringAsFixed(1)})';
+              '${y.toStringAsFixed(1)})';
   }
 }
 

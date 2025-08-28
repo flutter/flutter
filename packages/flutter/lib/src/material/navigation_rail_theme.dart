@@ -165,14 +165,12 @@ class NavigationRailThemeData with Diagnosticable {
         b?.selectedLabelTextStyle,
         t,
       ),
-      unselectedIconTheme:
-          a?.unselectedIconTheme == null && b?.unselectedIconTheme == null
-              ? null
-              : IconThemeData.lerp(a?.unselectedIconTheme, b?.unselectedIconTheme, t),
-      selectedIconTheme:
-          a?.selectedIconTheme == null && b?.selectedIconTheme == null
-              ? null
-              : IconThemeData.lerp(a?.selectedIconTheme, b?.selectedIconTheme, t),
+      unselectedIconTheme: a?.unselectedIconTheme == null && b?.unselectedIconTheme == null
+          ? null
+          : IconThemeData.lerp(a?.unselectedIconTheme, b?.unselectedIconTheme, t),
+      selectedIconTheme: a?.selectedIconTheme == null && b?.selectedIconTheme == null
+          ? null
+          : IconThemeData.lerp(a?.selectedIconTheme, b?.selectedIconTheme, t),
       groupAlignment: lerpDouble(a?.groupAlignment, b?.groupAlignment, t),
       labelType: t < 0.5 ? a?.labelType : b?.labelType,
       useIndicator: t < 0.5 ? a?.useIndicator : b?.useIndicator,
@@ -321,8 +319,8 @@ class NavigationRailTheme extends InheritedTheme {
   /// NavigationRailThemeData theme = NavigationRailTheme.of(context);
   /// ```
   static NavigationRailThemeData of(BuildContext context) {
-    final NavigationRailTheme? navigationRailTheme =
-        context.dependOnInheritedWidgetOfExactType<NavigationRailTheme>();
+    final NavigationRailTheme? navigationRailTheme = context
+        .dependOnInheritedWidgetOfExactType<NavigationRailTheme>();
     return navigationRailTheme?.data ?? Theme.of(context).navigationRailTheme;
   }
 

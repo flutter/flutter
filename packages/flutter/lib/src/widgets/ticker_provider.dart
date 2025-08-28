@@ -57,8 +57,8 @@ class TickerMode extends StatefulWidget {
   /// bool tickingEnabled = TickerMode.of(context);
   /// ```
   static bool of(BuildContext context) {
-    final _EffectiveTickerMode? widget =
-        context.dependOnInheritedWidgetOfExactType<_EffectiveTickerMode>();
+    final _EffectiveTickerMode? widget = context
+        .dependOnInheritedWidgetOfExactType<_EffectiveTickerMode>();
     return widget?.enabled ?? true;
   }
 
@@ -93,8 +93,8 @@ class TickerMode extends StatefulWidget {
   /// In the absence of a [TickerMode] widget, this function returns a
   /// [ValueListenable], whose [ValueListenable.value] is always true.
   static ValueListenable<bool> getNotifier(BuildContext context) {
-    final _EffectiveTickerMode? widget =
-        context.getInheritedWidgetOfExactType<_EffectiveTickerMode>();
+    final _EffectiveTickerMode? widget = context
+        .getInheritedWidgetOfExactType<_EffectiveTickerMode>();
     return widget?.notifier ?? const _ConstantValueListenable<bool>(true);
   }
 
@@ -399,10 +399,9 @@ mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements 
       DiagnosticsProperty<Set<Ticker>>(
         'tickers',
         _tickers,
-        description:
-            _tickers != null
-                ? 'tracking ${_tickers!.length} ticker${_tickers!.length == 1 ? "" : "s"}'
-                : null,
+        description: _tickers != null
+            ? 'tracking ${_tickers!.length} ticker${_tickers!.length == 1 ? "" : "s"}'
+            : null,
         defaultValue: null,
       ),
     );

@@ -338,15 +338,13 @@ void main() {
     test('.generateConfiguration generates pubspec.yaml', () async {
       configurator.generateConfiguration();
       expect(packageRoot.childFile('pubspec.yaml').existsSync(), isTrue);
-      expect(packageRoot.childFile('pubspec.yaml').readAsStringSync(), contains('flutter_gpu:'));
-      expect(
-        packageRoot.childFile('pubspec.yaml').readAsStringSync(),
-        contains('dependency_overrides:'),
-      );
-      expect(
-        packageRoot.childFile('pubspec.yaml').readAsStringSync(),
-        contains('platform_integration:'),
-      );
+
+      final String pubspecContents = packageRoot.childFile('pubspec.yaml').readAsStringSync();
+
+      expect(pubspecContents, contains('flutter_gpu:'));
+      expect(pubspecContents, contains("sdk: '^2.14.0-360.0.dev'"));
+      expect(pubspecContents, contains('dependency_overrides:'));
+      expect(pubspecContents, contains('platform_integration:'));
     });
 
     test('.generateConfiguration generates fake lib', () async {
@@ -574,9 +572,9 @@ void main() {
             }
             publishRoot.childDirectory('flutter').childFile('index.html').createSync();
 
-            final Directory widgetsDir = publishRoot
-              .childDirectory('flutter')
-              .childDirectory('widgets')..createSync(recursive: true);
+            final Directory widgetsDir =
+                publishRoot.childDirectory('flutter').childDirectory('widgets')
+                  ..createSync(recursive: true);
             widgetsDir.childFile('showGeneralDialog.html').writeAsStringSync('''
 <pre id="longSnippet1">
   <code class="language-dart">
@@ -585,8 +583,9 @@ void main() {
 </pre>
 ''');
             expect(publishRoot.childDirectory('flutter').existsSync(), isTrue);
-            (widgetsDir.childDirectory('ModalRoute')
-              ..createSync(recursive: true)).childFile('barrierColor.html').writeAsStringSync('''
+            (widgetsDir.childDirectory(
+              'ModalRoute',
+            )..createSync(recursive: true)).childFile('barrierColor.html').writeAsStringSync('''
 <pre id="sample-code">
   <code class="language-dart">
     class FooClass {
@@ -611,7 +610,8 @@ void main() {
 }
 
 const String branchName = 'stable';
-const String testVersionInfo = '''
+const String testVersionInfo =
+    '''
 {
   "frameworkVersion": "2.5.0",
   "channel": "$branchName",

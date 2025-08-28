@@ -43,8 +43,11 @@ void PumpMessage() {
 namespace flutter {
 namespace testing {
 
+using ::testing::_;
+using ::testing::DoAll;
 using ::testing::NiceMock;
 using ::testing::Return;
+using ::testing::SetArgPointee;
 
 class FlutterWindowsEngineTest : public WindowsTest {};
 
@@ -65,6 +68,57 @@ TEST_F(FlutterWindowsEngineTest, RunDoesExpectedInitialization) {
   FlutterWindowsEngineBuilder builder{GetContext()};
   builder.AddDartEntrypointArgument("arg1");
   builder.AddDartEntrypointArgument("arg2");
+
+  auto windows_proc_table = std::make_shared<MockWindowsProcTable>();
+
+  HMONITOR mock_monitor = reinterpret_cast<HMONITOR>(1);
+
+  MONITORINFOEXW monitor_info = {};
+  monitor_info.cbSize = sizeof(MONITORINFOEXW);
+  monitor_info.rcMonitor = {0, 0, 1920, 1080};
+  monitor_info.rcWork = {0, 0, 1920, 1080};
+  monitor_info.dwFlags = MONITORINFOF_PRIMARY;
+  wcscpy_s(monitor_info.szDevice, L"\\\\.\\DISPLAY1");
+
+  EXPECT_CALL(*windows_proc_table, GetMonitorInfoW(mock_monitor, _))
+      .WillRepeatedly(DoAll(SetArgPointee<1>(monitor_info), Return(TRUE)));
+
+  EXPECT_CALL(*windows_proc_table, EnumDisplayMonitors(nullptr, nullptr, _, _))
+      .WillRepeatedly([&](HDC hdc, LPCRECT lprcClip, MONITORENUMPROC lpfnEnum,
+                          LPARAM dwData) {
+        lpfnEnum(mock_monitor, nullptr, &monitor_info.rcMonitor, dwData);
+        return TRUE;
+      });
+
+  EXPECT_CALL(*windows_proc_table, GetDpiForMonitor(mock_monitor, _))
+      .WillRepeatedly(Return(96));
+
+  // Mock locale information
+  EXPECT_CALL(*windows_proc_table, GetThreadPreferredUILanguages(_, _, _, _))
+      .WillRepeatedly(
+          [](DWORD flags, PULONG count, PZZWSTR languages, PULONG length) {
+            // We need to mock the locale information twice because the first
+            // call is to get the size and the second call is to fill the
+            // buffer.
+            if (languages == nullptr) {
+              // First call is to get the size
+              *count = 1;    // One language
+              *length = 10;  // "fr-FR\0\0" (double null-terminated)
+              return TRUE;
+            } else {
+              // Second call is to fill the buffer
+              *count = 1;
+              // Fill with "fr-FR\0\0" (double null-terminated)
+              wchar_t* lang_buffer = languages;
+              wcscpy(lang_buffer, L"fr-FR");
+              // Move past the first null terminator to add the second
+              lang_buffer += wcslen(L"fr-FR") + 1;
+              *lang_buffer = L'\0';
+              return TRUE;
+            }
+          });
+
+  builder.SetWindowsProcTable(windows_proc_table);
 
   std::unique_ptr<FlutterWindowsEngine> engine = builder.Build();
   EngineModifier modifier(engine.get());
@@ -141,23 +195,15 @@ TEST_F(FlutterWindowsEngineTest, RunDoesExpectedInitialization) {
 
   // And it should send display info.
   bool notify_display_update_called = false;
-  modifier.SetFrameInterval(16600000);  // 60 fps.
+
   modifier.embedder_api().NotifyDisplayUpdate = MOCK_ENGINE_PROC(
       NotifyDisplayUpdate,
-      ([&notify_display_update_called, engine_instance = engine.get()](
+      ([&notify_display_update_called](
            FLUTTER_API_SYMBOL(FlutterEngine) raw_engine,
            const FlutterEngineDisplaysUpdateType update_type,
            const FlutterEngineDisplay* embedder_displays,
            size_t display_count) {
         EXPECT_EQ(update_type, kFlutterEngineDisplaysUpdateTypeStartup);
-        EXPECT_EQ(display_count, 1);
-
-        FlutterEngineDisplay display = embedder_displays[0];
-
-        EXPECT_EQ(display.display_id, 0);
-        EXPECT_EQ(display.single_display, true);
-        EXPECT_EQ(std::floor(display.refresh_rate), 60.0);
-
         notify_display_update_called = true;
         return kSuccess;
       }));

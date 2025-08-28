@@ -13,31 +13,11 @@ import '../../src/fake_process_manager.dart';
 
 void main() {
   testWithoutContext('VsCodeInstallLocation equality', () {
-    const VsCodeInstallLocation installLocation1 = VsCodeInstallLocation(
-      'abc',
-      'zyx',
-      edition: '123',
-    );
-    const VsCodeInstallLocation installLocation2 = VsCodeInstallLocation(
-      'abc',
-      'zyx',
-      edition: '123',
-    );
-    const VsCodeInstallLocation installLocation3 = VsCodeInstallLocation(
-      'cba',
-      'zyx',
-      edition: '123',
-    );
-    const VsCodeInstallLocation installLocation4 = VsCodeInstallLocation(
-      'abc',
-      'xyz',
-      edition: '123',
-    );
-    const VsCodeInstallLocation installLocation5 = VsCodeInstallLocation(
-      'abc',
-      'xyz',
-      edition: '321',
-    );
+    const installLocation1 = VsCodeInstallLocation('abc', 'zyx', edition: '123');
+    const installLocation2 = VsCodeInstallLocation('abc', 'zyx', edition: '123');
+    const installLocation3 = VsCodeInstallLocation('cba', 'zyx', edition: '123');
+    const installLocation4 = VsCodeInstallLocation('abc', 'xyz', edition: '123');
+    const installLocation5 = VsCodeInstallLocation('abc', 'xyz', edition: '321');
 
     expect(installLocation1, installLocation2);
     expect(installLocation1.hashCode, installLocation2.hashCode);
@@ -50,13 +30,13 @@ void main() {
   });
 
   testWithoutContext('VsCode.fromDirectory does not crash when packages.json is malformed', () {
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final fileSystem = MemoryFileSystem.test();
     // Create invalid JSON file.
     fileSystem.file(fileSystem.path.join('', 'Resources', 'app', 'package.json'))
       ..createSync(recursive: true)
       ..writeAsStringSync('{');
 
-    final VsCode vsCode = VsCode.fromDirectory(
+    final vsCode = VsCode.fromDirectory(
       '',
       '',
       fileSystem: fileSystem,
@@ -68,26 +48,21 @@ void main() {
 
   testWithoutContext('VsCode.fromDirectory finds packages.json on Linux', () {
     // Regression test for https://github.com/flutter/flutter/issues/169812
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final fileSystem = MemoryFileSystem.test();
     // Installations on Linux appear to use $VSCODE_INSTALL/resources/app/package.json rather than
     // $VSCODE_INSTALL/Resources/app/package.json.
     fileSystem.file(fileSystem.path.join('', 'resources', 'app', 'package.json'))
       ..createSync(recursive: true)
       ..writeAsStringSync('{"version":"1.2.3"}');
 
-    final VsCode vsCode = VsCode.fromDirectory(
-      '',
-      '',
-      fileSystem: fileSystem,
-      platform: FakePlatform(),
-    );
+    final vsCode = VsCode.fromDirectory('', '', fileSystem: fileSystem, platform: FakePlatform());
 
     expect(vsCode.version, Version(1, 2, 3));
   });
 
   testWithoutContext('can locate VS Code installed via Snap', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    const String home = '/home/me';
+    const home = '/home/me';
     final Platform platform = FakePlatform(environment: <String, String>{'HOME': home});
 
     fileSystem
@@ -102,7 +77,7 @@ void main() {
         )
         .createSync(recursive: true);
 
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[]);
+    final processManager = FakeProcessManager.list(<FakeCommand>[]);
 
     final List<VsCode> installed = VsCode.allInstalled(fileSystem, platform, processManager);
     expect(installed.length, 2);
@@ -110,7 +85,7 @@ void main() {
 
   testWithoutContext('can locate VS Code installed via Flatpak', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    const String home = '/home/me';
+    const home = '/home/me';
     final Platform platform = FakePlatform(environment: <String, String>{'HOME': home});
 
     fileSystem
@@ -131,7 +106,7 @@ void main() {
         )
         .createSync(recursive: true);
 
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[]);
+    final processManager = FakeProcessManager.list(<FakeCommand>[]);
 
     final List<VsCode> installed = VsCode.allInstalled(fileSystem, platform, processManager);
     expect(installed.length, 2);
@@ -139,7 +114,7 @@ void main() {
 
   testWithoutContext('can locate installations on macOS', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    const String home = '/home/me';
+    const home = '/home/me';
     final Platform platform = FakePlatform(
       operatingSystem: 'macos',
       environment: <String, String>{'HOME': home},
@@ -186,7 +161,7 @@ void main() {
         )
         .createSync(recursive: true);
 
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: const <String>['mdfind', 'kMDItemCFBundleIdentifier="com.microsoft.VSCode"'],
         stdout: randomLocation,

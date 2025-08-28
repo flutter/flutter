@@ -25,27 +25,26 @@ void main() {
     await tester.tap(button);
     await tester.pump();
 
-    final Finder panel =
-        find
-            .ancestor(of: find.textContaining('Submenu 0'), matching: find.byType(ExcludeFocus))
-            .first;
+    final Finder panel = find
+        .ancestor(of: find.textContaining('Submenu 0'), matching: find.byType(ExcludeFocus))
+        .first;
 
     expect(
       tester.getRect(panel),
-      rectMoreOrLessEquals(const ui.Rect.fromLTRB(347.8, 324.0, 524.8, 324.0), epsilon: 0.1),
+      rectMoreOrLessEquals(const ui.Rect.fromLTRB(347.8, 324.0, 534.7, 324.0), epsilon: 0.1),
     );
 
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(
       tester.getRect(panel),
-      rectMoreOrLessEquals(const ui.Rect.fromLTRB(347.8, 324.0, 524.8, 499.7), epsilon: 0.1),
+      rectMoreOrLessEquals(const ui.Rect.fromLTRB(347.8, 324.0, 534.7, 499.7), epsilon: 0.1),
     );
 
     await tester.pump(const Duration(milliseconds: 101));
     expect(
       tester.getRect(panel),
-      rectMoreOrLessEquals(const ui.Rect.fromLTRB(347.8, 324.0, 524.8, 516.0), epsilon: 0.1),
+      rectMoreOrLessEquals(const ui.Rect.fromLTRB(347.8, 324.0, 534.7, 516.0), epsilon: 0.1),
     );
 
     expect(find.textContaining('Submenu'), findsNWidgets(4));
@@ -92,10 +91,9 @@ void main() {
     await hoverOver(tester, tester.getCenter(menuItem));
     await tester.pump();
 
-    final Finder panel =
-        find
-            .ancestor(of: find.textContaining('Panel 0'), matching: find.byType(ExcludeFocus))
-            .first;
+    final Finder panel = find
+        .ancestor(of: find.textContaining('Panel 0'), matching: find.byType(ExcludeFocus))
+        .first;
 
     // 25% through, 70% height
     await tester.pump(const Duration(milliseconds: 50));

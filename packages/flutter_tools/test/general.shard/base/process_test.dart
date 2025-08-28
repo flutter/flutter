@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/io.dart' as io;
+import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -42,10 +42,10 @@ void main() {
 
   group('shutdownHooks', () {
     testWithoutContext('runInExpectedOrder', () async {
-      int i = 1;
+      var i = 1;
       int? cleanup;
 
-      final ShutdownHooks shutdownHooks = ShutdownHooks();
+      final shutdownHooks = ShutdownHooks();
 
       shutdownHooks.addShutdownHook(() async {
         cleanup = i++;
@@ -69,7 +69,7 @@ void main() {
     });
 
     testWithoutContext('Command output is not wrapped.', () async {
-      final List<String> testString = <String>['0123456789' * 10];
+      final testString = <String>['0123456789' * 10];
       processManager.addCommand(
         FakeCommand(
           command: const <String>['command'],
@@ -185,7 +185,7 @@ void main() {
     });
 
     testWithoutContext('throws on failure with throwOnError', () async {
-      const String stderr = 'Something went wrong.';
+      const stderr = 'Something went wrong.';
       fakeProcessManager.addCommand(
         const FakeCommand(command: <String>['kaboom'], exitCode: 1, stderr: stderr),
       );
@@ -204,7 +204,7 @@ void main() {
     testWithoutContext(
       'throws with stderr in exception on failure with verboseExceptions',
       () async {
-        const String stderr = 'Something went wrong.';
+        const stderr = 'Something went wrong.';
         fakeProcessManager.addCommand(
           const FakeCommand(command: <String>['verybad'], exitCode: 1, stderr: stderr),
         );
@@ -376,7 +376,7 @@ void main() {
 
   group('writeToStdinGuarded', () {
     testWithoutContext('handles any error thrown by stdin.flush', () async {
-      final _ThrowsOnFlushIOSink stdin = _ThrowsOnFlushIOSink();
+      final stdin = _ThrowsOnFlushIOSink();
       Object? errorPassedToCallback;
 
       await ProcessUtils.writeToStdinGuarded(
@@ -405,7 +405,7 @@ void main() {
     setUp(() {
       fileSystem = MemoryFileSystem.test();
       logger = BufferLogger.test();
-      final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion();
+      final fakeFlutterVersion = FakeFlutterVersion();
       analytics = Analytics.fake(
         tool: DashTool.flutterTool,
         homeDirectory: fileSystem.currentDirectory,
@@ -419,8 +419,8 @@ void main() {
     testUsingContext(
       'prints analytics welcome message',
       () async {
-        io.setExitFunctionForTests((int exitCode) {});
-        final ShutdownHooks shutdownHooks = ShutdownHooks();
+        setExitFunctionForTests((int exitCode) {});
+        final shutdownHooks = ShutdownHooks();
         await exitWithHooks(0, shutdownHooks: shutdownHooks);
         expect(logger.statusText, contains(analytics.getConsentMessage));
       },
@@ -430,13 +430,45 @@ void main() {
     testUsingContext(
       'does not print analytics welcome message if Analytics instance indicates it should not be printed',
       () async {
-        io.setExitFunctionForTests((int exitCode) {});
+        setExitFunctionForTests((int exitCode) {});
 
         analytics.clientShowedMessage();
 
-        final ShutdownHooks shutdownHooks = ShutdownHooks();
+        final shutdownHooks = ShutdownHooks();
         await exitWithHooks(0, shutdownHooks: shutdownHooks);
         expect(logger.statusText, isNot(contains(analytics.getConsentMessage)));
+      },
+      overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger},
+    );
+
+    testUsingContext(
+      '[sync] exceptions thrown from a hook do not crash the tool',
+      () async {
+        setExitFunctionForTests((int exitCode) {});
+
+        final shutdownHooks = ShutdownHooks();
+        shutdownHooks.addShutdownHook(() => throw StateError('CRASH'));
+        await expectLater(exitWithHooks(0, shutdownHooks: shutdownHooks), completes);
+        expect(
+          logger.warningText,
+          stringContainsInOrder(<String>['One or more uncaught errors occurred', 'CRASH']),
+        );
+      },
+      overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger},
+    );
+
+    testUsingContext(
+      '[async] exceptions thrown from a hook do not crash the tool',
+      () async {
+        setExitFunctionForTests((int exitCode) {});
+
+        final shutdownHooks = ShutdownHooks();
+        shutdownHooks.addShutdownHook(() async => throw StateError('CRASH'));
+        await expectLater(exitWithHooks(0, shutdownHooks: shutdownHooks), completes);
+        expect(
+          logger.warningText,
+          stringContainsInOrder(<String>['One or more uncaught errors occurred', 'CRASH']),
+        );
       },
       overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger},
     );

@@ -5,4 +5,4 @@
 name: text-input-view
 
 environment:
-  sdk: ^3.7.0-0
+  sdk: ^3.8.0-0

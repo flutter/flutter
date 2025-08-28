@@ -15,7 +15,7 @@ library widgets;
 export 'package:characters/characters.dart';
 export 'package:vector_math/vector_math_64.dart' show Matrix4;
 
-export 'foundation.dart' show UniqueKey;
+export 'foundation.dart' show Brightness, UniqueKey;
 export 'rendering.dart' show TextSelectionHandleType;
 export 'src/widgets/actions.dart';
 export 'src/widgets/adapter.dart';
@@ -154,6 +154,7 @@ export 'src/widgets/spacer.dart';
 export 'src/widgets/spell_check.dart';
 export 'src/widgets/standard_component_type.dart';
 export 'src/widgets/status_transitions.dart';
+export 'src/widgets/stretch_effect.dart';
 export 'src/widgets/system_context_menu.dart';
 export 'src/widgets/table.dart';
 export 'src/widgets/tap_region.dart';

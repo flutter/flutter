@@ -15,7 +15,10 @@ void main() {
       Center(
         child: SizedBox(
           width: 200.0,
-          child: FittedBox(key: outside, child: SizedBox(key: inside, width: 100.0, height: 50.0)),
+          child: FittedBox(
+            key: outside,
+            child: SizedBox(key: inside, width: 100.0, height: 50.0),
+          ),
         ),
       ),
     );
@@ -44,7 +47,10 @@ void main() {
         child: SizedBox(
           width: 200.0,
           height: 200.0,
-          child: FittedBox(key: outside, child: SizedBox(key: inside, width: 100.0, height: 50.0)),
+          child: FittedBox(
+            key: outside,
+            child: SizedBox(key: inside, width: 100.0, height: 50.0),
+          ),
         ),
       ),
     );
@@ -97,7 +103,11 @@ void main() {
 
   testWidgets('FittedBox with no child', (WidgetTester tester) async {
     final Key key = UniqueKey();
-    await tester.pumpWidget(Center(child: FittedBox(key: key, fit: BoxFit.cover)));
+    await tester.pumpWidget(
+      Center(
+        child: FittedBox(key: key, fit: BoxFit.cover),
+      ),
+    );
 
     final RenderBox box = tester.firstRenderObject(find.byKey(key));
     expect(box.size.width, 0.0);

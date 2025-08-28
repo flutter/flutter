@@ -86,13 +86,13 @@ class ProgressIndicatorThemeData with Diagnosticable {
 
   /// Overrides the stop indicator color of the [LinearProgressIndicator].
   ///
-  /// If [LinearProgressIndicator.year2023] is false or [ThemeData.useMaterial3]
+  /// If [LinearProgressIndicator.year2023] is true or [ThemeData.useMaterial3]
   /// is false, then no stop indicator will be drawn.
   final Color? stopIndicatorColor;
 
   /// Overrides the stop indicator radius of the [LinearProgressIndicator].
   ///
-  /// If [LinearProgressIndicator.year2023] is false or [ThemeData.useMaterial3]
+  /// If [LinearProgressIndicator.year2023] is true or [ThemeData.useMaterial3]
   /// is false, then no stop indicator will be drawn.
   final double? stopIndicatorRadius;
 
@@ -110,10 +110,10 @@ class ProgressIndicatorThemeData with Diagnosticable {
 
   /// Overrides the active indicator and the background track.
   ///
-  /// If [CircularProgressIndicator.year2023] is false or [ThemeData.useMaterial3]
+  /// If [CircularProgressIndicator.year2023] is true or [ThemeData.useMaterial3]
   /// is false, then no track gap will be drawn.
   ///
-  /// If [LinearProgressIndicator.year2023] is false or [ThemeData.useMaterial3]
+  /// If [LinearProgressIndicator.year2023] is true or [ThemeData.useMaterial3]
   /// is false, then no track gap will be drawn.
   final double? trackGap;
 
@@ -325,8 +325,8 @@ class ProgressIndicatorTheme extends InheritedTheme {
   /// ProgressIndicatorThemeData theme = ProgressIndicatorTheme.of(context);
   /// ```
   static ProgressIndicatorThemeData of(BuildContext context) {
-    final ProgressIndicatorTheme? progressIndicatorTheme =
-        context.dependOnInheritedWidgetOfExactType<ProgressIndicatorTheme>();
+    final ProgressIndicatorTheme? progressIndicatorTheme = context
+        .dependOnInheritedWidgetOfExactType<ProgressIndicatorTheme>();
     return progressIndicatorTheme?.data ?? Theme.of(context).progressIndicatorTheme;
   }
 

@@ -30,14 +30,13 @@ class _RawMenuAnchorAnimationExampleState extends State<RawMenuAnchorAnimationEx
   @override
   void initState() {
     super.initState();
-    animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    )..addStatusListener((AnimationStatus status) {
-      setState(() {
-        // Rebuild to reflect animation status changes on the UI.
-      });
-    });
+    animationController =
+        AnimationController(vsync: this, duration: const Duration(milliseconds: 300))
+          ..addStatusListener((AnimationStatus status) {
+            setState(() {
+              // Rebuild to reflect animation status changes on the UI.
+            });
+          });
   }
 
   @override

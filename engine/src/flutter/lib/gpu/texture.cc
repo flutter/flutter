@@ -6,11 +6,14 @@
 
 #include "flutter/lib/gpu/formats.h"
 #include "flutter/lib/ui/painting/image.h"
+#include "fml/make_copyable.h"
 #include "fml/mapping.h"
 #include "impeller/core/allocator.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/texture.h"
-#include "impeller/display_list/dl_image_impeller.h"
+#if IMPELLER_SUPPORTS_RENDERING
+#include "impeller/display_list/dl_image_impeller.h"  // nogncheck
+#endif
 #include "third_party/tonic/typed_data/dart_byte_data.h"
 
 namespace flutter {
@@ -32,15 +35,33 @@ void Texture::SetCoordinateSystem(
   texture_->SetCoordinateSystem(coordinate_system);
 }
 
-bool Texture::Overwrite(const tonic::DartByteData& source_bytes) {
+bool Texture::Overwrite(Context& gpu_context,
+                        const tonic::DartByteData& source_bytes) {
   const uint8_t* data = static_cast<const uint8_t*>(source_bytes.data());
   auto copy = std::vector<uint8_t>(data, data + source_bytes.length_in_bytes());
   // Texture::SetContents is a bit funky right now. It takes a shared_ptr of a
   // mapping and we're forced to copy here.
   auto mapping = std::make_shared<fml::DataMapping>(copy);
+
+  // For the GLES backend, command queue submission just flushes the reactor,
+  // which needs to happen on the raster thread.
+  if (gpu_context.GetContext().GetBackendType() ==
+      impeller::Context::BackendType::kOpenGLES) {
+    auto dart_state = flutter::UIDartState::Current();
+    auto& task_runners = dart_state->GetTaskRunners();
+
+    task_runners.GetRasterTaskRunner()->PostTask(
+        fml::MakeCopyable([texture = texture_, mapping = mapping]() mutable {
+          if (!texture->SetContents(mapping)) {
+            FML_LOG(ERROR) << "Failed to set texture contents.";
+          }
+        }));
+  }
+
   if (!texture_->SetContents(mapping)) {
     return false;
   }
+  gpu_context.GetContext().DisposeThreadLocalCachedResources();
   return true;
 }
 
@@ -109,7 +130,8 @@ bool InternalFlutterGpu_Texture_Initialize(Dart_Handle wrapper,
       return false;
   }
   auto texture =
-      gpu_context->GetContext()->GetResourceAllocator()->CreateTexture(desc);
+      gpu_context->GetContext().GetResourceAllocator()->CreateTexture(desc,
+                                                                      true);
   if (!texture) {
     FML_LOG(ERROR) << "Failed to create texture.";
     return false;
@@ -132,8 +154,10 @@ void InternalFlutterGpu_Texture_SetCoordinateSystem(
 }
 
 bool InternalFlutterGpu_Texture_Overwrite(flutter::gpu::Texture* texture,
+                                          flutter::gpu::Context* gpu_context,
                                           Dart_Handle source_byte_data) {
-  return texture->Overwrite(tonic::DartByteData(source_byte_data));
+  return texture->Overwrite(*gpu_context,
+                            tonic::DartByteData(source_byte_data));
 }
 
 extern int InternalFlutterGpu_Texture_BytesPerTexel(

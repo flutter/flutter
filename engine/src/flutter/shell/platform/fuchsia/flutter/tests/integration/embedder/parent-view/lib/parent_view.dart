@@ -17,10 +17,9 @@ void main(List<String> args) async {
   print('parent-view: starting');
 
   args = args + _GetArgsFromConfigFile();
-  final parser =
-      ArgParser()
-        ..addFlag('showOverlay', defaultsTo: false)
-        ..addFlag('focusable', defaultsTo: true);
+  final parser = ArgParser()
+    ..addFlag('showOverlay', defaultsTo: false)
+    ..addFlag('focusable', defaultsTo: true);
   final arguments = parser.parse(args);
   for (final option in arguments.options) {
     print('parent-view: $option: ${arguments[option]}');
@@ -85,10 +84,9 @@ class TestApp {
     canvas.drawRect(windowBounds, paint);
     final picture = recorder.endRecording();
 
-    final sceneBuilder =
-        SceneBuilder()
-          ..pushClipRect(windowPhysicalBounds)
-          ..addPicture(Offset.zero, picture);
+    final sceneBuilder = SceneBuilder()
+      ..pushClipRect(windowPhysicalBounds)
+      ..addPicture(Offset.zero, picture);
 
     final childPhysicalSize = window.physicalSize * 0.33;
     // Alignment.center

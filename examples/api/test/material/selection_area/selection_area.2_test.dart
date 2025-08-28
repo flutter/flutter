@@ -36,12 +36,11 @@ void main() {
       matching: find.byType(RichText),
     );
     final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(paragraph1Finder);
-    final List<RenderParagraph> bullets =
-        tester
-            .renderObjectList<RenderParagraph>(
-              find.descendant(of: find.textContaining('• Bullet'), matching: find.byType(RichText)),
-            )
-            .toList();
+    final List<RenderParagraph> bullets = tester
+        .renderObjectList<RenderParagraph>(
+          find.descendant(of: find.textContaining('• Bullet'), matching: find.byType(RichText)),
+        )
+        .toList();
     expect(bullets.length, 7);
     final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(
       find.descendant(

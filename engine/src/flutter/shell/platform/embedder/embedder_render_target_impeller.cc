@@ -44,9 +44,9 @@ EmbedderRenderTargetImpeller::GetAiksContext() const {
   return aiks_context_;
 }
 
-SkISize EmbedderRenderTargetImpeller::GetRenderTargetSize() const {
+DlISize EmbedderRenderTargetImpeller::GetRenderTargetSize() const {
   auto size = impeller_target_->GetRenderTargetSize();
-  return SkISize::Make(size.width, size.height);
+  return DlISize(size);
 }
 
 }  // namespace flutter

@@ -56,7 +56,10 @@ void main() {
     final SemanticsHandle handle = tester.ensureSemantics();
 
     await tester.pumpWidget(
-      Theme(data: theme, child: Material(child: Checkbox(value: false, onChanged: (bool? b) {}))),
+      Theme(
+        data: theme,
+        child: Material(child: Checkbox(value: false, onChanged: (bool? b) {})),
+      ),
     );
 
     expect(
@@ -72,7 +75,10 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Theme(data: theme, child: Material(child: Checkbox(value: true, onChanged: (bool? b) {}))),
+      Theme(
+        data: theme,
+        child: Material(child: Checkbox(value: true, onChanged: (bool? b) {})),
+      ),
     );
 
     expect(
@@ -89,7 +95,10 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Theme(data: theme, child: const Material(child: Checkbox(value: false, onChanged: null))),
+      Theme(
+        data: theme,
+        child: const Material(child: Checkbox(value: false, onChanged: null)),
+      ),
     );
 
     expect(
@@ -111,7 +120,10 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Theme(data: theme, child: const Material(child: Checkbox(value: true, onChanged: null))),
+      Theme(
+        data: theme,
+        child: const Material(child: Checkbox(value: true, onChanged: null)),
+      ),
     );
 
     expect(
@@ -666,14 +678,13 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return Checkbox(
                   value: value,
-                  onChanged:
-                      enabled
-                          ? (bool? newValue) {
-                            setState(() {
-                              value = newValue;
-                            });
-                          }
-                          : null,
+                  onChanged: enabled
+                      ? (bool? newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        }
+                      : null,
                   focusColor: Colors.orange[500],
                   autofocus: true,
                   focusNode: focusNode,
@@ -745,14 +756,13 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return Checkbox(
                   value: value,
-                  onChanged:
-                      enabled
-                          ? (bool? newValue) {
-                            setState(() {
-                              value = newValue;
-                            });
-                          }
-                          : null,
+                  onChanged: enabled
+                      ? (bool? newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        }
+                      : null,
                   focusColor: Colors.orange[500],
                   autofocus: true,
                   focusNode: focusNode,
@@ -891,14 +901,13 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return Checkbox(
                   value: value,
-                  onChanged:
-                      enabled
-                          ? (bool? newValue) {
-                            setState(() {
-                              value = newValue;
-                            });
-                          }
-                          : null,
+                  onChanged: enabled
+                      ? (bool? newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        }
+                      : null,
                   hoverColor: Colors.orange[500],
                 );
               },
@@ -958,14 +967,13 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return Checkbox(
                   value: value,
-                  onChanged:
-                      enabled
-                          ? (bool? newValue) {
-                            setState(() {
-                              value = newValue;
-                            });
-                          }
-                          : null,
+                  onChanged: enabled
+                      ? (bool? newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        }
+                      : null,
                   hoverColor: Colors.orange[500],
                 );
               },
@@ -1022,14 +1030,13 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return Checkbox(
                   value: value,
-                  onChanged:
-                      enabled
-                          ? (bool? newValue) {
-                            setState(() {
-                              value = newValue;
-                            });
-                          }
-                          : null,
+                  onChanged: enabled
+                      ? (bool? newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        }
+                      : null,
                   focusColor: Colors.orange[500],
                   autofocus: true,
                 );
@@ -1065,7 +1072,9 @@ void main() {
         return MaterialApp(
           theme: theme.copyWith(visualDensity: VisualDensity.compact),
           home: Material(
-            child: Center(child: Checkbox(key: key, value: true, onChanged: (bool? value) {})),
+            child: Center(
+              child: Checkbox(key: key, value: true, onChanged: (bool? value) {}),
+            ),
           ),
         );
       }
@@ -1166,15 +1175,13 @@ void main() {
           child: Material(
             child: Center(
               child: StatefulBuilder(
-                builder:
-                    (_, StateSetter setState) => Checkbox(
-                      key: checkboxKey,
-                      value: checkboxVal,
-                      onChanged:
-                          (bool? newValue) => setState(() {
-                            checkboxVal = newValue;
-                          }),
-                    ),
+                builder: (_, StateSetter setState) => Checkbox(
+                  key: checkboxKey,
+                  value: checkboxVal,
+                  onChanged: (bool? newValue) => setState(() {
+                    checkboxVal = newValue;
+                  }),
+                ),
               ),
             ),
           ),
@@ -1336,7 +1343,7 @@ void main() {
       return activeEnabledFillColor;
     }
 
-    final MaterialStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
+    final WidgetStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
 
     Widget buildFrame({required bool enabled}) {
       return Material(
@@ -1388,7 +1395,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final MaterialStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
+    final WidgetStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
 
     Widget buildFrame() {
       return Material(
@@ -1673,7 +1680,7 @@ void main() {
             value: active,
             onChanged: (_) {},
             fillColor: const MaterialStatePropertyAll<Color>(fillColor),
-            overlayColor: useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
+            overlayColor: useOverlay ? WidgetStateProperty.resolveWith(getOverlayColor) : null,
             hoverColor: hoverColor,
             focusColor: focusColor,
             splashRadius: splashRadius,
@@ -1788,7 +1795,7 @@ void main() {
                     value = v;
                   });
                 },
-                overlayColor: MaterialStateProperty.resolveWith(getOverlayColor),
+                overlayColor: WidgetStateProperty.resolveWith(getOverlayColor),
                 splashRadius: splashRadius,
               );
             },
@@ -2394,7 +2401,7 @@ void main() {
         home: Material(
           child: Center(
             child: Checkbox(
-              fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              fillColor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
                 if (states.contains(MaterialState.selected)) {
                   return activeBackgroundColor;
                 }
@@ -2437,7 +2444,7 @@ void main() {
         home: Material(
           child: Center(
             child: Checkbox(
-              fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              fillColor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
                 if (states.contains(MaterialState.selected)) {
                   return activeBackgroundColor;
                 }
@@ -2468,6 +2475,17 @@ void main() {
       paints..drrect(color: theme.colorScheme.onSurface.withOpacity(0.38)),
     );
     expect(getCheckboxRenderer(), paints..path(color: inactiveBackgroundColor));
+  });
+
+  testWidgets('Checkbox renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: Scaffold(body: Checkbox(value: true, onChanged: null))),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
   });
 }
 

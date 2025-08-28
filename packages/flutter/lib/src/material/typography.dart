@@ -194,10 +194,12 @@ class Typography with Diagnosticable {
     // Ensure they are all uniformly dark or light, with
     // no color variation based on style as it was in previous
     // versions of Material Design.
-    final Color dark =
-        colorScheme.brightness == Brightness.light ? colorScheme.onSurface : colorScheme.surface;
-    final Color light =
-        colorScheme.brightness == Brightness.light ? colorScheme.surface : colorScheme.onSurface;
+    final Color dark = colorScheme.brightness == Brightness.light
+        ? colorScheme.onSurface
+        : colorScheme.surface;
+    final Color light = colorScheme.brightness == Brightness.light
+        ? colorScheme.surface
+        : colorScheme.onSurface;
     return base.copyWith(
       black: base.black.apply(displayColor: dark, bodyColor: dark, decorationColor: dark),
       white: base.white.apply(displayColor: light, bodyColor: light, decorationColor: light),

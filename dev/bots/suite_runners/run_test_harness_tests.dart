@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'dart:io' show File, Platform;
 
 import 'package:path/path.dart' as path;
@@ -27,7 +28,7 @@ String get platformFolderName {
 Future<void> testHarnessTestsRunner() async {
   printProgress('${green}Running test harness tests...$reset');
 
-  await _validateEngineHash();
+  await _validateEngineRevision();
 
   // Verify that the tests actually return failure on failure and success on
   // success.
@@ -58,8 +59,8 @@ Future<void> testHarnessTestsRunner() async {
         return result.flattenedStdout!.contains('failingPendingTimerTest')
             ? null
             : 'Failed to find the stack trace for the pending Timer.\n\n'
-                'stdout:\n${result.flattenedStdout}\n\n'
-                'stderr:\n${result.flattenedStderr}';
+                  'stdout:\n${result.flattenedStdout}\n\n'
+                  'stderr:\n${result.flattenedStderr}';
       },
     ),
     () => runFlutterTest(
@@ -127,14 +128,13 @@ Future<void> testHarnessTestsRunner() async {
   }
 
   // Verify that we correctly generated the version file.
-  final String? versionError = await verifyVersion(File(path.join(flutterRoot, 'version')));
-  if (versionError != null) {
-    foundError(<String>[versionError]);
+  if (await Version.resolveIn() case final VersionError e) {
+    foundError(<String>[e.error]);
   }
 }
 
-/// Verify the Flutter Engine is the revision in `bin/cache/engine.stamp`.
-Future<void> _validateEngineHash() async {
+/// Verify the Flutter Engine is the revision in `bin/cache/engine_stamp.json` key: git_revision.
+Future<void> _validateEngineRevision() async {
   final String flutterTester = path.join(
     flutterRoot,
     'bin',
@@ -154,7 +154,16 @@ Future<void> _validateEngineHash() async {
     print('${yellow}Skipping Flutter Engine Version Validation for swarming bot $luciBotId.');
     return;
   }
-  final String expectedVersion = File(engineVersionFile).readAsStringSync().trim();
+
+  final String expectedVersion;
+  if (json.decode(File(engineInfoFile).readAsStringSync().trim()) as Map<String, Object?> case {
+    'git_revision': final String parsedVersion,
+  }) {
+    expectedVersion = parsedVersion;
+  } else {
+    throw 'engine_stamp.json missing "git_revision" key';
+  }
+
   final CommandResult result = await runCommand(flutterTester, <String>[
     '--help',
   ], outputMode: OutputMode.capture);

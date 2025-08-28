@@ -46,6 +46,7 @@ ALL_PACKAGES = [
     os.path.join(ENGINE_DIR, 'tools', 'golden_tests_harvester'),
     os.path.join(ENGINE_DIR, 'tools', 'header_guard_check'),
     os.path.join(ENGINE_DIR, 'tools', 'licenses'),
+    os.path.join(ENGINE_DIR, 'tools', 'mcp'),
     os.path.join(ENGINE_DIR, 'tools', 'path_ops', 'dart'),
     os.path.join(ENGINE_DIR, 'tools', 'pkg', 'engine_build_configs'),
     os.path.join(ENGINE_DIR, 'tools', 'pkg', 'engine_repo_tools'),

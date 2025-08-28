@@ -273,9 +273,5 @@ class _FakePlatformViewManager extends PlatformViewManager {
 }
 
 Map<dynamic, dynamic> _getCreateArguments(String viewType, int viewId, [Object? params]) {
-  return <String, dynamic>{
-    'id': viewId,
-    'viewType': viewType,
-    if (params != null) 'params': params,
-  };
+  return <String, dynamic>{'id': viewId, 'viewType': viewType, 'params': ?params};
 }

@@ -256,8 +256,9 @@ abstract class MultiChildLayoutDelegate {
                   'The $this custom multichild layout delegate forgot '
                   'to lay out the following '
                   '${_debugChildrenNeedingLayout!.length > 1 ? 'children' : 'child'}',
-              properties:
-                  _debugChildrenNeedingLayout!.map<DiagnosticsNode>(_debugDescribeChild).toList(),
+              properties: _debugChildrenNeedingLayout!
+                  .map<DiagnosticsNode>(_debugDescribeChild)
+                  .toList(),
             ),
           ]);
         }

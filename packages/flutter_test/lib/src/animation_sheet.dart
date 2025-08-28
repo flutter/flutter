@@ -185,22 +185,21 @@ class AnimationSheetBuilder {
       key: key,
       size: frameSize,
       allLayers: allLayers,
-      handleRecorded:
-          !recording
-              ? null
-              : (Future<ui.Image> futureImage) {
-                _recordedFrames.add(
-                  _AsyncImage(() async {
-                    final ui.Image image = await futureImage;
-                    assert(
-                      image.width == frameSize.width && image.height == frameSize.height,
-                      'Unexpected size mismatch: frame has (${image.width}, ${image.height}) '
-                      'while `frameSize` is $frameSize.',
-                    );
-                    return image;
-                  }()),
-                );
-              },
+      handleRecorded: !recording
+          ? null
+          : (Future<ui.Image> futureImage) {
+              _recordedFrames.add(
+                _AsyncImage(() async {
+                  final ui.Image image = await futureImage;
+                  assert(
+                    image.width == frameSize.width && image.height == frameSize.height,
+                    'Unexpected size mismatch: frame has (${image.width}, ${image.height}) '
+                    'while `frameSize` is $frameSize.',
+                  );
+                  return image;
+                }()),
+              );
+            },
       child: child,
     );
   }

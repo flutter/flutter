@@ -212,6 +212,7 @@ TEST_F(FlutterEngineTest, CanLogToStdout) {
 
   // Replace stdout stream buffer with our own.
   FlutterStringOutputWriter* writer = [[FlutterStringOutputWriter alloc] init];
+  writer.expectedOutput = @"Hello logging";
   FlutterLogger.outputWriter = writer;
 
   // Launch the test entrypoint.
@@ -224,7 +225,7 @@ TEST_F(FlutterEngineTest, CanLogToStdout) {
   }
 
   // Verify hello world was written to stdout.
-  EXPECT_TRUE([writer.lastLine containsString:@"Hello logging"]);
+  EXPECT_TRUE(writer.gotExpectedOutput);
 }
 
 TEST_F(FlutterEngineTest, DISABLED_BackgroundIsBlack) {
@@ -323,6 +324,7 @@ TEST_F(FlutterEngineTest, CanToggleAccessibility) {
   FlutterSemanticsFlags child_flags = FlutterSemanticsFlags{0};
   root.id = 0;
   root.flags2 = &flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   root.actions = static_cast<FlutterSemanticsAction>(0);
   root.text_selection_base = -1;
   root.text_selection_extent = -1;
@@ -340,6 +342,7 @@ TEST_F(FlutterEngineTest, CanToggleAccessibility) {
   FlutterSemanticsNode2 child1;
   child1.id = 1;
   child1.flags2 = &child_flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   child1.actions = static_cast<FlutterSemanticsAction>(0);
   child1.text_selection_base = -1;
   child1.text_selection_extent = -1;
@@ -415,6 +418,7 @@ TEST_F(FlutterEngineTest, CanToggleAccessibilityWhenHeadless) {
   FlutterSemanticsFlags child_flags = FlutterSemanticsFlags{0};
   root.id = 0;
   root.flags2 = &flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   root.actions = static_cast<FlutterSemanticsAction>(0);
   root.text_selection_base = -1;
   root.text_selection_extent = -1;
@@ -432,6 +436,7 @@ TEST_F(FlutterEngineTest, CanToggleAccessibilityWhenHeadless) {
   FlutterSemanticsNode2 child1;
   child1.id = 1;
   child1.flags2 = &child_flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   child1.actions = static_cast<FlutterSemanticsAction>(0);
   child1.text_selection_base = -1;
   child1.text_selection_extent = -1;

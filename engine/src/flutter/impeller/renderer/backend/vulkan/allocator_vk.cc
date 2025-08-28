@@ -468,7 +468,8 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
 
 // |Allocator|
 std::shared_ptr<Texture> AllocatorVK::OnCreateTexture(
-    const TextureDescriptor& desc) {
+    const TextureDescriptor& desc,
+    bool threadsafe) {
   if (!IsValid()) {
     return nullptr;
   }

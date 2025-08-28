@@ -318,13 +318,13 @@ TEST_F(WindowsTest, VerifyNativeFunctionWithReturn) {
 TEST_F(WindowsTest, NextFrameCallback) {
   struct Captures {
     fml::AutoResetWaitableEvent frame_scheduled_latch;
-    fml::AutoResetWaitableEvent frame_drawn_latch;
     std::thread::id thread_id;
     bool done = false;
   };
   Captures captures;
 
-  CreateNewThread("test_platform_thread")->PostTask([&]() {
+  auto platform_thread = std::make_unique<fml::Thread>("test_platform_thread");
+  platform_thread->GetTaskRunner()->PostTask([&]() {
     captures.thread_id = std::this_thread::get_id();
 
     auto& context = GetContext();
@@ -332,13 +332,12 @@ TEST_F(WindowsTest, NextFrameCallback) {
     builder.SetDartEntrypoint("drawHelloWorld");
 
     auto native_entry = CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-      ASSERT_FALSE(captures.frame_drawn_latch.IsSignaledForTest());
       captures.frame_scheduled_latch.Signal();
     });
     context.AddNativeFunction("NotifyFirstFrameScheduled", native_entry);
 
     ViewControllerPtr controller{builder.Run()};
-    ASSERT_NE(controller, nullptr);
+    EXPECT_NE(controller, nullptr);
 
     auto engine = FlutterDesktopViewControllerGetEngine(controller.get());
 
@@ -347,14 +346,13 @@ TEST_F(WindowsTest, NextFrameCallback) {
         [](void* user_data) {
           auto captures = static_cast<Captures*>(user_data);
 
-          ASSERT_TRUE(captures->frame_scheduled_latch.IsSignaledForTest());
+          EXPECT_TRUE(captures->frame_scheduled_latch.IsSignaledForTest());
 
           // Callback should execute on platform thread.
-          ASSERT_EQ(std::this_thread::get_id(), captures->thread_id);
+          EXPECT_EQ(std::this_thread::get_id(), captures->thread_id);
 
           // Signal the test passed and end the Windows message loop.
           captures->done = true;
-          captures->frame_drawn_latch.Signal();
         },
         &captures);
 
@@ -364,7 +362,8 @@ TEST_F(WindowsTest, NextFrameCallback) {
     }
   });
 
-  captures.frame_drawn_latch.Wait();
+  // Wait for the platform thread to exit.
+  platform_thread->Join();
 }
 
 // Verify the embedder ignores presents to the implicit view when there is no

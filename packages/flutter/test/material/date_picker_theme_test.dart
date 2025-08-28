@@ -471,11 +471,10 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const DatePickerThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -485,11 +484,10 @@ void main() {
 
     datePickerTheme.debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(
       description,
@@ -715,8 +713,9 @@ void main() {
     expect(selectDate.style?.fontSize, datePickerTheme.headerHelpStyle?.fontSize);
     expect(headerMaterial.color, datePickerTheme.headerBackgroundColor);
 
-    final InputDecoration inputDecoration =
-        tester.widget<TextField>(find.byType(TextField)).decoration!;
+    final InputDecoration inputDecoration = tester
+        .widget<TextField>(find.byType(TextField))
+        .decoration!;
     expect(inputDecoration.fillColor, datePickerTheme.inputDecorationTheme?.fillColor);
 
     final ButtonStyle cancelButtonStyle = actionButtonStyle(tester, 'Cancel');
@@ -966,7 +965,7 @@ void main() {
   testWidgets('DatePickerDialog resolves DatePickerTheme.dayOverlayColor states', (
     WidgetTester tester,
   ) async {
-    final MaterialStateProperty<Color> dayOverlayColor = MaterialStateProperty.resolveWith<Color>((
+    final WidgetStateProperty<Color> dayOverlayColor = WidgetStateProperty.resolveWith<Color>((
       Set<MaterialState> states,
     ) {
       if (states.contains(MaterialState.hovered)) {
@@ -1069,7 +1068,7 @@ void main() {
   testWidgets('DatePickerDialog resolves DatePickerTheme.yearOverlayColor states', (
     WidgetTester tester,
   ) async {
-    final MaterialStateProperty<Color> yearOverlayColor = MaterialStateProperty.resolveWith<Color>((
+    final WidgetStateProperty<Color> yearOverlayColor = WidgetStateProperty.resolveWith<Color>((
       Set<MaterialState> states,
     ) {
       if (states.contains(MaterialState.hovered)) {
@@ -1148,8 +1147,8 @@ void main() {
   testWidgets('DateRangePickerDialog resolves DatePickerTheme.rangeSelectionOverlayColor states', (
     WidgetTester tester,
   ) async {
-    final MaterialStateProperty<Color> rangeSelectionOverlayColor =
-        MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+    final WidgetStateProperty<Color> rangeSelectionOverlayColor =
+        WidgetStateProperty.resolveWith<Color>((Set<MaterialState> states) {
           if (states.contains(MaterialState.hovered)) {
             return const Color(0xff00ff00);
           }
@@ -1260,8 +1259,9 @@ void main() {
     await tester.pumpWidget(buildFrame());
 
     // Find container whose child is text 2025.
-    final Finder yearContainer =
-        find.ancestor(of: find.text('2025'), matching: find.byType(Container)).first;
+    final Finder yearContainer = find
+        .ancestor(of: find.text('2025'), matching: find.byType(Container))
+        .first;
 
     expect(
       tester.renderObject(yearContainer),
@@ -1302,7 +1302,7 @@ void main() {
       MaterialApp(
         theme: ThemeData(
           datePickerTheme: datePickerTheme.copyWith(
-            yearShape: MaterialStateProperty.all<OutlinedBorder>(yearShpae),
+            yearShape: WidgetStateProperty.all<OutlinedBorder>(yearShpae),
           ),
         ),
         home: Directionality(

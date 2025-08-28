@@ -120,17 +120,16 @@ class SkiaGoldClient {
     final io.ProcessResult result = await process.run(authCommand);
 
     if (result.exitCode != 0) {
-      final StringBuffer buf =
-          StringBuffer()
-            ..writeln('Skia Gold authorization failed.')
-            ..writeln(
-              'Luci environments authenticate using the file provided '
-              'by LUCI_CONTEXT. There may be an error with this file or Gold '
-              'authentication.',
-            )
-            ..writeln('Debug information for Gold --------------------------------')
-            ..writeln('stdout: ${result.stdout}')
-            ..writeln('stderr: ${result.stderr}');
+      final StringBuffer buf = StringBuffer()
+        ..writeln('Skia Gold authorization failed.')
+        ..writeln(
+          'Luci environments authenticate using the file provided '
+          'by LUCI_CONTEXT. There may be an error with this file or Gold '
+          'authentication.',
+        )
+        ..writeln('Debug information for Gold --------------------------------')
+        ..writeln('stdout: ${result.stdout}')
+        ..writeln('stderr: ${result.stderr}');
       throw SkiaException(buf.toString());
     }
   }
@@ -179,11 +178,10 @@ class SkiaGoldClient {
     ];
 
     if (imgtestInitCommand.contains(null)) {
-      final StringBuffer buf =
-          StringBuffer()
-            ..writeln('A null argument was provided for Skia Gold imgtest init.')
-            ..writeln('Please confirm the settings of your golden file test.')
-            ..writeln('Arguments provided:');
+      final StringBuffer buf = StringBuffer()
+        ..writeln('A null argument was provided for Skia Gold imgtest init.')
+        ..writeln('Please confirm the settings of your golden file test.')
+        ..writeln('Arguments provided:');
       imgtestInitCommand.forEach(buf.writeln);
       throw SkiaException(buf.toString());
     }
@@ -192,15 +190,14 @@ class SkiaGoldClient {
 
     if (result.exitCode != 0) {
       _initialized = false;
-      final StringBuffer buf =
-          StringBuffer()
-            ..writeln('Skia Gold imgtest init failed.')
-            ..writeln('An error occurred when initializing golden file test with ')
-            ..writeln('goldctl.')
-            ..writeln()
-            ..writeln('Debug information for Gold --------------------------------')
-            ..writeln('stdout: ${result.stdout}')
-            ..writeln('stderr: ${result.stderr}');
+      final StringBuffer buf = StringBuffer()
+        ..writeln('Skia Gold imgtest init failed.')
+        ..writeln('An error occurred when initializing golden file test with ')
+        ..writeln('goldctl.')
+        ..writeln()
+        ..writeln('Debug information for Gold --------------------------------')
+        ..writeln('stdout: ${result.stdout}')
+        ..writeln('stderr: ${result.stderr}');
       throw SkiaException(buf.toString());
     }
     _initialized = true;
@@ -240,24 +237,23 @@ class SkiaGoldClient {
         resultContents = await resultFile.readAsString();
       }
 
-      final StringBuffer buf =
-          StringBuffer()
-            ..writeln('Skia Gold received an unapproved image in post-submit ')
-            ..writeln('testing. Golden file images in flutter/flutter are triaged ')
-            ..writeln('in pre-submit during code review for the given PR.')
-            ..writeln()
-            ..writeln('Visit https://flutter-gold.skia.org/ to view and approve ')
-            ..writeln('the image(s), or revert the associated change. For more ')
-            ..writeln('information, visit the wiki: ')
-            ..writeln(
-              'https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md',
-            )
-            ..writeln()
-            ..writeln('Debug information for Gold --------------------------------')
-            ..writeln('stdout: ${result.stdout}')
-            ..writeln('stderr: ${result.stderr}')
-            ..writeln()
-            ..writeln('result-state.json: ${resultContents ?? 'No result file found.'}');
+      final StringBuffer buf = StringBuffer()
+        ..writeln('Skia Gold received an unapproved image in post-submit ')
+        ..writeln('testing. Golden file images in flutter/flutter are triaged ')
+        ..writeln('in pre-submit during code review for the given PR.')
+        ..writeln()
+        ..writeln('Visit https://flutter-gold.skia.org/ to view and approve ')
+        ..writeln('the image(s), or revert the associated change. For more ')
+        ..writeln('information, visit the wiki: ')
+        ..writeln(
+          'https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md',
+        )
+        ..writeln()
+        ..writeln('Debug information for Gold --------------------------------')
+        ..writeln('stdout: ${result.stdout}')
+        ..writeln('stderr: ${result.stderr}')
+        ..writeln()
+        ..writeln('result-state.json: ${resultContents ?? 'No result file found.'}');
       throw SkiaException(buf.toString());
     }
 
@@ -313,11 +309,10 @@ class SkiaGoldClient {
     ];
 
     if (imgtestInitCommand.contains(null)) {
-      final StringBuffer buf =
-          StringBuffer()
-            ..writeln('A null argument was provided for Skia Gold tryjob init.')
-            ..writeln('Please confirm the settings of your golden file test.')
-            ..writeln('Arguments provided:');
+      final StringBuffer buf = StringBuffer()
+        ..writeln('A null argument was provided for Skia Gold tryjob init.')
+        ..writeln('Please confirm the settings of your golden file test.')
+        ..writeln('Arguments provided:');
       imgtestInitCommand.forEach(buf.writeln);
       throw SkiaException(buf.toString());
     }
@@ -326,15 +321,14 @@ class SkiaGoldClient {
 
     if (result.exitCode != 0) {
       _tryjobInitialized = false;
-      final StringBuffer buf =
-          StringBuffer()
-            ..writeln('Skia Gold tryjobInit failure.')
-            ..writeln('An error occurred when initializing golden file tryjob with ')
-            ..writeln('goldctl.')
-            ..writeln()
-            ..writeln('Debug information for Gold --------------------------------')
-            ..writeln('stdout: ${result.stdout}')
-            ..writeln('stderr: ${result.stderr}');
+      final StringBuffer buf = StringBuffer()
+        ..writeln('Skia Gold tryjobInit failure.')
+        ..writeln('An error occurred when initializing golden file tryjob with ')
+        ..writeln('goldctl.')
+        ..writeln()
+        ..writeln('Debug information for Gold --------------------------------')
+        ..writeln('stdout: ${result.stdout}')
+        ..writeln('stderr: ${result.stderr}');
       throw SkiaException(buf.toString());
     }
     _tryjobInitialized = true;
@@ -376,18 +370,17 @@ class SkiaGoldClient {
       if (await resultFile.exists()) {
         resultContents = await resultFile.readAsString();
       }
-      final StringBuffer buf =
-          StringBuffer()
-            ..writeln('Unexpected Gold tryjobAdd failure.')
-            ..writeln('Tryjob execution for golden file test $testName failed for')
-            ..writeln('a reason unrelated to pixel comparison.')
-            ..writeln()
-            ..writeln('Debug information for Gold --------------------------------')
-            ..writeln('stdout: ${result.stdout}')
-            ..writeln('stderr: ${result.stderr}')
-            ..writeln()
-            ..writeln()
-            ..writeln('result-state.json: ${resultContents ?? 'No result file found.'}');
+      final StringBuffer buf = StringBuffer()
+        ..writeln('Unexpected Gold tryjobAdd failure.')
+        ..writeln('Tryjob execution for golden file test $testName failed for')
+        ..writeln('a reason unrelated to pixel comparison.')
+        ..writeln()
+        ..writeln('Debug information for Gold --------------------------------')
+        ..writeln('stdout: ${result.stdout}')
+        ..writeln('stderr: ${result.stderr}')
+        ..writeln()
+        ..writeln()
+        ..writeln('result-state.json: ${resultContents ?? 'No result file found.'}');
       throw SkiaException(buf.toString());
     }
     return result.exitCode == 0 ? null : resultStdout;
@@ -541,7 +534,7 @@ class SkiaGoldClient {
       if (_isBrowserTest) 'Browser': _browserKey,
       'CI': 'luci',
       'Platform': platform.operatingSystem,
-      if (webRenderer != null) 'WebRenderer': webRenderer,
+      'WebRenderer': ?webRenderer,
       if (_isImpeller) 'impeller': 'swiftshader',
       'name': testName,
       'source_type': 'flutter',

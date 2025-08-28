@@ -14,10 +14,9 @@ void main() {
     await tester.tap(find.text('Open'));
     await tester.pump();
 
-    final Finder message =
-        find
-            .ancestor(of: find.textContaining('ANIMATION STATUS:'), matching: find.byType(Material))
-            .first;
+    final Finder message = find
+        .ancestor(of: find.textContaining('ANIMATION STATUS:'), matching: find.byType(Material))
+        .first;
 
     expect(find.text('Open'), findsNothing);
     expect(find.text('Close'), findsOneWidget);

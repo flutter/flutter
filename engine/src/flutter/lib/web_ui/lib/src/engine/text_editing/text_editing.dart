@@ -458,15 +458,17 @@ class AutofillInfo {
   }) {
     final String uniqueIdentifier = autofill.readString('uniqueIdentifier');
     final List<dynamic>? hintsList = autofill.tryList('hints');
-    final String? firstHint =
-        (hintsList == null || hintsList.isEmpty) ? null : hintsList.first as String;
+    final String? firstHint = (hintsList == null || hintsList.isEmpty)
+        ? null
+        : hintsList.first as String;
     final EditingState editingState = EditingState.fromFrameworkMessage(
       autofill.readJson('editingValue'),
     );
     return AutofillInfo(
       uniqueIdentifier: uniqueIdentifier,
-      autofillHint:
-          (firstHint != null) ? BrowserAutofillHints.instance.flutterToEngine(firstHint) : null,
+      autofillHint: (firstHint != null)
+          ? BrowserAutofillHints.instance.flutterToEngine(firstHint)
+          : null,
       editingState: editingState,
       placeholder: autofill.tryString('hintText'),
       textCapitalization: textCapitalization,
@@ -631,8 +633,9 @@ class TextEditingDeltaState {
           lastEditingState!.baseOffset > lastEditingState.extentOffset;
       // When a selection of text is replaced by a copy/paste operation we set the starting range
       // of the delta to be the beginning of the selection of the previous editing state.
-      newTextEditingDeltaState.deltaStart =
-          isPreviousSelectionInverted ? lastEditingState.extentOffset : lastEditingState.baseOffset;
+      newTextEditingDeltaState.deltaStart = isPreviousSelectionInverted
+          ? lastEditingState.extentOffset
+          : lastEditingState.baseOffset;
     }
 
     // If we are composing then set the delta range to the composing region we
@@ -1024,6 +1027,7 @@ class InputConfiguration {
     this.autofill,
     this.autofillGroup,
     this.enableDeltaModel = false,
+    this.enableInteractiveSelection = true,
   });
 
   InputConfiguration.fromFrameworkMessage(Map<String, dynamic> flutterInputConfiguration)
@@ -1041,16 +1045,17 @@ class InputConfiguration {
       textCapitalization = TextCapitalizationConfig.fromInputConfiguration(
         flutterInputConfiguration.readString('textCapitalization'),
       ),
-      autofill =
-          flutterInputConfiguration.containsKey('autofill')
-              ? AutofillInfo.fromFrameworkMessage(flutterInputConfiguration.readJson('autofill'))
-              : null,
+      autofill = flutterInputConfiguration.containsKey('autofill')
+          ? AutofillInfo.fromFrameworkMessage(flutterInputConfiguration.readJson('autofill'))
+          : null,
       autofillGroup = EngineAutofillForm.fromFrameworkMessage(
         flutterInputConfiguration.tryInt('viewId') ?? kImplicitViewId,
         flutterInputConfiguration.tryJson('autofill'),
         flutterInputConfiguration.tryList('fields'),
       ),
-      enableDeltaModel = flutterInputConfiguration.tryBool('enableDeltaModel') ?? false;
+      enableDeltaModel = flutterInputConfiguration.tryBool('enableDeltaModel') ?? false,
+      enableInteractiveSelection =
+          flutterInputConfiguration.tryBool('enableInteractiveSelection') ?? true;
 
   /// The ID of the view that contains the text field.
   final int viewId;
@@ -1085,6 +1090,13 @@ class InputConfiguration {
   final EngineAutofillForm? autofillGroup;
 
   final TextCapitalizationConfig textCapitalization;
+
+  /// Whether the user can change the text selection.
+  ///
+  /// When this is false, the text selection cannot be adjusted by
+  /// the user, text cannot be copied, and the user cannot paste into
+  /// the text field from the clipboard.
+  final bool enableInteractiveSelection;
 }
 
 typedef OnChangeCallback =
@@ -1399,6 +1411,14 @@ abstract class DefaultTextEditingStrategy
       );
     }
 
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'copy', createDomEventListener(handleClipboardEvent)),
+    );
+
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'paste', createDomEventListener(handleClipboardEvent)),
+    );
+
     addCompositionEventHandlers(activeDomElement);
 
     preventDefaultForMouseEvents();
@@ -1480,6 +1500,7 @@ abstract class DefaultTextEditingStrategy
     assert(isEnabled);
 
     EditingState newEditingState = EditingState.fromDomElement(activeDomElement);
+    newEditingState = suppressInteractiveSelectionIfNeeded(newEditingState);
     newEditingState = determineCompositionState(newEditingState);
 
     TextEditingDeltaState? newTextEditingDeltaState;
@@ -1502,6 +1523,24 @@ abstract class DefaultTextEditingStrategy
     _editingDeltaState = null;
   }
 
+  EditingState suppressInteractiveSelectionIfNeeded(EditingState editingState) {
+    if (inputConfiguration.enableInteractiveSelection) {
+      return editingState;
+    }
+
+    if (editingState.baseOffset == editingState.extentOffset) {
+      return editingState;
+    }
+
+    // If interactive selection is disabled, collapse the selection to the end.
+    final newEditingState = editingState.copyWith(
+      baseOffset: editingState.extentOffset,
+      extentOffset: editingState.extentOffset,
+    );
+    newEditingState.applyToDomElement(activeDomElement);
+    return newEditingState;
+  }
+
   void handleBeforeInput(DomEvent event) {
     // In some cases the beforeinput event is not fired such as when the selection
     // of a text field is updated. In this case only the oninput event is fired.
@@ -1517,8 +1556,9 @@ abstract class DefaultTextEditingStrategy
     if (inputType != null) {
       final bool isSelectionInverted =
           lastEditingState!.baseOffset > lastEditingState!.extentOffset;
-      final int deltaOffset =
-          isSelectionInverted ? lastEditingState!.baseOffset : lastEditingState!.extentOffset;
+      final int deltaOffset = isSelectionInverted
+          ? lastEditingState!.baseOffset
+          : lastEditingState!.extentOffset;
       if (inputType.contains('delete')) {
         // The deltaStart is set in handleChange because there is where we get access
         // to the new selection baseOffset which is our new deltaStart.
@@ -1565,6 +1605,13 @@ abstract class DefaultTextEditingStrategy
       // UX. We should reevaluate what it is we're trying to do here. Perhaps
       // there's a better way.
       moveFocusToActiveDomElement();
+    }
+  }
+
+  void handleClipboardEvent(DomEvent event) {
+    // Prevent clipboard copy/paste if interactive selection is disabled.
+    if (!inputConfiguration.enableInteractiveSelection) {
+      event.preventDefault();
     }
   }
 
@@ -1751,6 +1798,14 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
       DomSubscription(activeDomElement, 'blur', createDomEventListener(handleBlur)),
     );
 
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'copy', createDomEventListener(handleClipboardEvent)),
+    );
+
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'paste', createDomEventListener(handleClipboardEvent)),
+    );
+
     addCompositionEventHandlers(activeDomElement);
 
     // Position the DOM element after it is focused.
@@ -1889,6 +1944,14 @@ class AndroidTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
       DomSubscription(activeDomElement, 'blur', createDomEventListener(handleBlur)),
     );
 
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'copy', createDomEventListener(handleClipboardEvent)),
+    );
+
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'paste', createDomEventListener(handleClipboardEvent)),
+    );
+
     addCompositionEventHandlers(activeDomElement);
 
     preventDefaultForMouseEvents();
@@ -1973,6 +2036,14 @@ class FirefoxTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
 
     subscriptions.add(
       DomSubscription(activeDomElement, 'blur', createDomEventListener(handleBlur)),
+    );
+
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'copy', createDomEventListener(handleClipboardEvent)),
+    );
+
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'paste', createDomEventListener(handleClipboardEvent)),
     );
 
     preventDefaultForMouseEvents();
@@ -2442,8 +2513,9 @@ class EditableTextStyle {
     final int? fontWeightIndex = flutterStyle['fontWeightIndex'] as int?;
 
     // Convert [fontWeightIndex] to its CSS equivalent value.
-    final String fontWeight =
-        fontWeightIndex != null ? fontWeightIndexToCss(fontWeightIndex: fontWeightIndex) : 'normal';
+    final String fontWeight = fontWeightIndex != null
+        ? fontWeightIndexToCss(fontWeightIndex: fontWeightIndex)
+        : 'normal';
 
     // Also convert [textAlignIndex] and [textDirectionIndex] to their
     // corresponding enum values in [ui.TextAlign] and [ui.TextDirection]

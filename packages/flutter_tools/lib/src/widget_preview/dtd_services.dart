@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:dtd/dtd.dart';
+import 'package:json_rpc_2/json_rpc_2.dart';
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
@@ -14,12 +15,15 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../convert.dart';
 
+typedef DtdService = (String, DTDServiceCallback);
+
 /// Provides services, streams, and RPC invocations to interact with the Widget Preview Scaffold.
 class WidgetPreviewDtdServices {
   WidgetPreviewDtdServices({
     required this.logger,
     required this.shutdownHooks,
     required this.dtdLauncher,
+    required this.onHotRestartPreviewerRequest,
   }) {
     shutdownHooks.addShutdownHook(() async {
       await _dtd?.close();
@@ -27,9 +31,26 @@ class WidgetPreviewDtdServices {
     });
   }
 
+  // WARNING: Keep these constants and services in sync with those defined in the widget preview
+  // scaffold's dtd_services.dart.
+  //
+  // START KEEP SYNCED
+
+  static const kWidgetPreviewService = 'widget-preview';
+  static const kHotRestartPreviewer = 'hotRestartPreviewer';
+
+  /// The list of DTD service methods registered by the tool.
+  late final services = <DtdService>[(kHotRestartPreviewer, _hotRestart)];
+
+  // END KEEP SYNCED
+
   final Logger logger;
   final ShutdownHooks shutdownHooks;
   final DtdLauncher dtdLauncher;
+
+  /// Invoked when the [kHotRestartPreviewer] service method is invoked by the widget preview
+  /// scaffold.
+  final VoidCallback onHotRestartPreviewerRequest;
 
   DartToolingDaemon? _dtd;
 
@@ -50,8 +71,23 @@ class WidgetPreviewDtdServices {
   Future<void> connect({required Uri dtdWsUri}) async {
     _dtdUri = dtdWsUri;
     _dtd = await DartToolingDaemon.connect(dtdWsUri);
-    // TODO(bkonyi): register services.
+    await _registerServices();
     logger.printTrace('Connected to DTD and registered services.');
+  }
+
+  Future<void> _registerServices() async {
+    final DartToolingDaemon dtd = _dtd!;
+    await Future.wait(<Future<void>>[
+      for (final (String method, DTDServiceCallback callback) in services)
+        dtd
+            .registerService(kWidgetPreviewService, method, callback)
+            .then((_) => logger.printTrace('Registered DTD method: $method')),
+    ]);
+  }
+
+  Future<Map<String, Object?>> _hotRestart(Parameters params) async {
+    onHotRestartPreviewerRequest();
+    return const Success().toJson();
   }
 }
 
@@ -73,11 +109,11 @@ class DtdLauncher {
     ]);
 
     // Wait for the DTD connection information.
-    final Completer<Uri> dtdUri = Completer<Uri>();
+    final dtdUri = Completer<Uri>();
     late final StreamSubscription<String> sub;
     sub = _dtdProcess!.stdout.transform(const Utf8Decoder()).listen((String data) async {
       await sub.cancel();
-      final Map<String, Object?> jsonData = json.decode(data) as Map<String, Object?>;
+      final jsonData = json.decode(data) as Map<String, Object?>;
       if (jsonData case {'tooling_daemon_details': {'uri': final String dtdUriString}}) {
         dtdUri.complete(Uri.parse(dtdUriString));
       } else {

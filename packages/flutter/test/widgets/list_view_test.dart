@@ -91,8 +91,8 @@ void main() {
             stateSetter = setState;
             return ListView.builder(
               itemCount: itemCount,
-              itemBuilder:
-                  (BuildContext _, int index) => Container(key: Key('$index'), height: 2000.0),
+              itemBuilder: (BuildContext _, int index) =>
+                  Container(key: Key('$index'), height: 2000.0),
               findChildIndexCallback: (Key key) {
                 finderCalled = true;
                 return null;
@@ -125,8 +125,8 @@ void main() {
             stateSetter = setState;
             return ListView.separated(
               itemCount: itemCount,
-              itemBuilder:
-                  (BuildContext _, int index) => Container(key: Key('$index'), height: 2000.0),
+              itemBuilder: (BuildContext _, int index) =>
+                  Container(key: Key('$index'), height: 2000.0),
               findChildIndexCallback: (Key key) {
                 finderCalled = true;
                 return null;

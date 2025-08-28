@@ -50,7 +50,7 @@ import 'swift_package_manager.dart';
 /// Please file a bug at https://feedbackassistant.apple.com with this warning message and any useful information you can provide.
 
 /// ```
-final RegExp _filteredOutput = RegExp(
+final _filteredOutput = RegExp(
   r'^((?!'
   r'Requested but did not find extension point with identifier|'
   r'note\:|'
@@ -82,7 +82,7 @@ Future<void> buildMacOS({
     );
   }
 
-  final List<ProjectMigrator> migrators = <ProjectMigrator>[
+  final migrators = <ProjectMigrator>[
     RemoveMacOSFrameworkLinkAndEmbeddingMigration(
       flutterProject.macos,
       globals.logger,
@@ -108,7 +108,7 @@ Future<void> buildMacOS({
     MetalAPIValidationMigrator.macos(flutterProject.macos, globals.logger),
   ];
 
-  final ProjectMigration migration = ProjectMigration(migrators);
+  final migration = ProjectMigration(migrators);
   await migration.run();
 
   final Directory flutterBuildDir = flutterProject.directory.childDirectory(
@@ -177,7 +177,7 @@ Future<void> buildMacOS({
   }
 
   // Run the Xcode build.
-  final Stopwatch sw = Stopwatch()..start();
+  final sw = Stopwatch()..start();
   final Status status = globals.logger.startProgress('Building macOS application...');
   int result;
 
@@ -197,10 +197,9 @@ Future<void> buildMacOS({
     HostPlatform.darwin_x64 => 'x86_64',
     _ => throw UnimplementedError('Unsupported platform'),
   };
-  final String destination =
-      buildInfo.isDebug
-          ? 'platform=${XcodeSdk.MacOSX.displayName},arch=$arch'
-          : XcodeSdk.MacOSX.genericPlatform;
+  final String destination = buildInfo.isDebug
+      ? 'platform=${XcodeSdk.MacOSX.displayName},arch=$arch'
+      : XcodeSdk.MacOSX.genericPlatform;
 
   try {
     result = await globals.processUtils.stream(
@@ -228,8 +227,9 @@ Future<void> buildMacOS({
       ],
       trace: true,
       stdoutErrorMatcher: verboseLogging ? null : _filteredOutput,
-      mapFunction:
-          verboseLogging ? null : (String line) => _filteredOutput.hasMatch(line) ? line : null,
+      mapFunction: verboseLogging
+          ? null
+          : (String line) => _filteredOutput.hasMatch(line) ? line : null,
     );
   } finally {
     status.cancel();
@@ -245,10 +245,9 @@ Future<void> buildMacOS({
     final Directory outputDirectory = globals.fs.directory(applicationBundle);
     // This output directory is the .app folder itself.
     final int? directorySize = globals.os.getDirectorySize(outputDirectory);
-    final String appSize =
-        (buildInfo.mode == BuildMode.debug || directorySize == null)
-            ? '' // Don't display the size when building a debug variant.
-            : ' (${getSizeAsPlatformMB(directorySize)})';
+    final appSize = (buildInfo.mode == BuildMode.debug || directorySize == null)
+        ? '' // Don't display the size when building a debug variant.
+        : ' (${getSizeAsPlatformMB(directorySize)})';
     globals.printStatus(
       '${globals.terminal.successMark} '
       'Built ${globals.fs.path.relative(outputDirectory.path)}$appSize',

@@ -77,11 +77,10 @@ class ProxiedDevices extends PollingDeviceDiscovery {
 
   @override
   Future<List<Device>> discoverDevices({Duration? timeout, DeviceDiscoveryFilter? filter}) async {
-    final List<Map<String, Object?>> discoveredDevices =
-        _cast<List<dynamic>>(
-          await connection.sendRequest('device.discoverDevices'),
-        ).cast<Map<String, Object?>>();
-    final List<ProxiedDevice> devices = <ProxiedDevice>[
+    final List<Map<String, Object?>> discoveredDevices = _cast<List<dynamic>>(
+      await connection.sendRequest('device.discoverDevices'),
+    ).cast<Map<String, Object?>>();
+    final devices = <ProxiedDevice>[
       for (final Map<String, Object?> device in discoveredDevices) deviceFromDaemonResult(device),
     ];
 
@@ -106,10 +105,9 @@ class ProxiedDevices extends PollingDeviceDiscovery {
   ProxiedDevice deviceFromDaemonResult(Map<String, Object?> device) {
     final Map<String, Object?> capabilities = _cast<Map<String, Object?>>(device['capabilities']);
     final String? connectionInterfaceName = _cast<String?>(device['connectionInterface']);
-    final DeviceConnectionInterface? connectionInterface =
-        connectionInterfaceName != null
-            ? getDeviceConnectionInterfaceForName(connectionInterfaceName)
-            : null;
+    final DeviceConnectionInterface? connectionInterface = connectionInterfaceName != null
+        ? getDeviceConnectionInterfaceForName(connectionInterfaceName)
+        : null;
     return ProxiedDevice(
       connection,
       _cast<String>(device['id']),
@@ -139,10 +137,9 @@ class ProxiedDevices extends PollingDeviceDiscovery {
   @override
   Future<List<String>> getDiagnostics() async {
     try {
-      final List<String> diagnostics =
-          _cast<List<dynamic>>(
-            await connection.sendRequest('device.getDiagnostics'),
-          ).cast<String>();
+      final List<String> diagnostics = _cast<List<dynamic>>(
+        await connection.sendRequest('device.getDiagnostics'),
+      ).cast<String>();
       return diagnostics;
     } on String catch (e) {
       // Daemon actually does throw string types.
@@ -330,15 +327,14 @@ class ProxiedDevice extends Device {
     expectedHostPort: expectedHostPort,
     ipv6: ipv6,
     logger: logger,
-    fallbackDiscovery:
-        () => super.getVMServiceDiscoveryForAttach(
-          appId: appId,
-          fuchsiaModule: fuchsiaModule,
-          filterDevicePort: filterDevicePort,
-          expectedHostPort: expectedHostPort,
-          ipv6: ipv6,
-          logger: logger,
-        ),
+    fallbackDiscovery: () => super.getVMServiceDiscoveryForAttach(
+      appId: appId,
+      fuchsiaModule: fuchsiaModule,
+      filterDevicePort: filterDevicePort,
+      expectedHostPort: expectedHostPort,
+      ipv6: ipv6,
+      logger: logger,
+    ),
   );
 
   @override
@@ -421,18 +417,18 @@ class ProxiedDevice extends Device {
     await proxiedPortForwarder.dispose();
   }
 
-  final Map<String, Future<String>> _applicationPackageMap = <String, Future<String>>{};
+  final _applicationPackageMap = <String, Future<String>>{};
   Future<String> applicationPackageId(PrebuiltApplicationPackage package) async {
-    final File binary = package.applicationPackage as File;
+    final binary = package.applicationPackage as File;
     final String path = binary.absolute.path;
     if (_applicationPackageMap.containsKey(path)) {
       return _applicationPackageMap[path]!;
     }
     final String fileName = binary.basename;
-    final Completer<String> idCompleter = Completer<String>();
+    final idCompleter = Completer<String>();
     _applicationPackageMap[path] = idCompleter.future;
 
-    final Map<String, Object> args = <String, Object>{'path': fileName};
+    final args = <String, Object>{'path': fileName};
 
     Map<String, Object?>? rollingHashResultJson;
     if (_deltaFileTransfer) {
@@ -451,7 +447,7 @@ class ProxiedDevice extends Device {
 
       await connection.sendRequest('proxy.writeTempFile', args, await binary.readAsBytes());
     } else {
-      final BlockHashes rollingHashResult = BlockHashes.fromJson(rollingHashResultJson);
+      final rollingHashResult = BlockHashes.fromJson(rollingHashResultJson);
       final List<FileDeltaBlock> delta = await _fileTransfer.computeDelta(
         binary,
         rollingHashResult,
@@ -459,8 +455,9 @@ class ProxiedDevice extends Device {
 
       // Delta is empty if the file does not need to be updated
       if (delta.isNotEmpty) {
-        final List<Map<String, Object>> deltaJson =
-            delta.map((FileDeltaBlock block) => block.toJson()).toList();
+        final List<Map<String, Object>> deltaJson = delta
+            .map((FileDeltaBlock block) => block.toJson())
+            .toList();
         final Uint8List buffer = await _fileTransfer.binaryForRebuilding(binary, delta);
 
         await connection.sendRequest('proxy.updateFile', <String, Object>{
@@ -505,7 +502,7 @@ class _ProxiedLogReader extends DeviceLogReader {
   @override
   String get name => device.displayName;
 
-  final StreamController<String> _logLinesStreamController = StreamController<String>();
+  final _logLinesStreamController = StreamController<String>();
   Stream<String>? _logLines;
 
   String? _id;
@@ -515,13 +512,14 @@ class _ProxiedLogReader extends DeviceLogReader {
 
   Stream<String> _start() {
     final PrebuiltApplicationPackage? package = applicationPackage;
-    final Future<String?> applicationPackageId =
-        package != null ? device.applicationPackageId(package) : Future<String?>.value();
+    final Future<String?> applicationPackageId = package != null
+        ? device.applicationPackageId(package)
+        : Future<String?>.value();
     final Future<String> idFuture = applicationPackageId.then(
       (String? applicationPackageId) async => _cast<String>(
         await connection.sendRequest('device.logReader.start', <String, Object>{
           'deviceId': device.id,
-          if (applicationPackageId != null) 'applicationPackageId': applicationPackageId,
+          'applicationPackageId': ?applicationPackageId,
         }),
       ),
     );
@@ -620,9 +618,9 @@ class ProxiedPortForwarder extends DevicePortForwarder {
   @override
   List<ForwardedPort> get forwardedPorts => _hostPortToForwardedPorts.values.toList();
 
-  final Map<int, _ProxiedForwardedPort> _hostPortToForwardedPorts = <int, _ProxiedForwardedPort>{};
+  final _hostPortToForwardedPorts = <int, _ProxiedForwardedPort>{};
 
-  final List<Socket> _connectedSockets = <Socket>[];
+  final _connectedSockets = <Socket>[];
 
   @override
   Future<int> forward(int devicePort, {int? hostPort, bool? ipv6}) async {
@@ -668,10 +666,11 @@ class ProxiedPortForwarder extends DevicePortForwarder {
             .listenToEvent('proxy.data.$id')
             .asyncExpand((DaemonEventData event) => event.binary);
         final StreamSubscription<List<int>> subscription = dataStream.listen(socket.add);
-        final Future<DaemonEventData> disconnectFuture =
-            connection.listenToEvent('proxy.disconnected.$id').first;
+        final Future<DaemonEventData> disconnectFuture = connection
+            .listenToEvent('proxy.disconnected.$id')
+            .first;
 
-        bool socketDoneCalled = false;
+        var socketDoneCalled = false;
 
         unawaited(
           disconnectFuture.then<void>(
@@ -836,11 +835,11 @@ class ProxiedDartDevelopmentService
 
   @override
   Future<void> get done => _completer.future;
-  final Completer<void> _completer = Completer<void>();
+  final _completer = Completer<void>();
 
   final DartDevelopmentService _localDds;
 
-  bool _ddsStartedLocally = false;
+  var _ddsStartedLocally = false;
 
   @override
   Future<void> startDartDevelopmentService(
@@ -885,7 +884,7 @@ class ProxiedDartDevelopmentService
     final Uri remoteVMServiceUri = vmServiceUri.replace(port: remoteVMServicePort);
 
     String? remoteUriStr;
-    const String method = 'device.startDartDevelopmentService';
+    const method = 'device.startDartDevelopmentService';
     try {
       // Proxies the `done` future.
       unawaited(
@@ -994,7 +993,7 @@ class ProxiedVMServiceDiscoveryForAttach extends VMServiceDiscoveryForAttach {
   Stream<Uri> get uris {
     if (_uris == null) {
       String? requestId;
-      final StreamController<Uri> controller = StreamController<Uri>();
+      final controller = StreamController<Uri>();
 
       controller.onListen = () {
         connection

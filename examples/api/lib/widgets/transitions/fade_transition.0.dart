@@ -16,7 +16,9 @@ class FadeTransitionExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: FadeTransitionExample(duration: duration, curve: curve));
+    return const MaterialApp(
+      home: FadeTransitionExample(duration: duration, curve: curve),
+    );
   }
 }
 

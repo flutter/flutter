@@ -66,7 +66,7 @@ void main() {
   });
 
   testWithoutContext('no dependency on KernelSnapshot', () async {
-    const DartBuildForNative target = DartBuildForNative();
+    const target = DartBuildForNative();
     expect(target.dependencies, isNot(isA<KernelSnapshot>()));
   });
 
@@ -112,8 +112,8 @@ void main() {
 
   // The NativeAssets Target should _always_ be creating a yaml an d file.
   // The caching logic depends on this.
-  for (final bool isNativeAssetsEnabled in <bool>[true, false]) {
-    final String postFix = isNativeAssetsEnabled ? 'enabled' : 'disabled';
+  for (final isNativeAssetsEnabled in <bool>[true, false]) {
+    final postFix = isNativeAssetsEnabled ? 'enabled' : 'disabled';
     testUsingContext(
       'Successful native_assets.json and native_assets.d creation with feature $postFix',
       overrides: <Type, Generator>{
@@ -139,61 +139,60 @@ void main() {
     'NativeAssets with an asset',
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
-      ProcessManager:
-          () => FakeProcessManager.list(<FakeCommand>[
-            // Create the framework dylib.
-            const FakeCommand(
-              command: <Pattern>[
-                'lipo',
-                '-create',
-                '-output',
-                '/build/native_assets/ios/foo.framework/foo',
-                'foo.framework/foo',
-              ],
-            ),
-            // Lookup the original install names of the dylib.
-            // There can be different install names for different architectures.
-            FakeCommand(
-              command: const <Pattern>['otool', '-D', '/build/native_assets/ios/foo.framework/foo'],
-              stdout: <String>[
-                '/build/native_assets/ios/foo.framework/foo (architecture x86_64):',
-                '@rpath/libfoo.dylib',
-                '/build/native_assets/ios/foo.framework/foo (architecture arm64):',
-                '@rpath/libfoo.dylib',
-              ].join('\n'),
-            ),
-            // Change the install name of the binary itself and of its dependencies.
-            // We pass the old to new install name mappings of all native assets dylibs,
-            // even for the dylib that is being updated, since the `-change` option
-            // is ignored if the dylib does not depend on the target dylib.
-            const FakeCommand(
-              command: <Pattern>[
-                'install_name_tool',
-                '-id',
-                '@rpath/foo.framework/foo',
-                '-change',
-                '@rpath/libfoo.dylib',
-                '@rpath/foo.framework/foo',
-                '/build/native_assets/ios/foo.framework/foo',
-              ],
-            ),
-            // Only after all changes to the dylib have been made do we sign it.
-            const FakeCommand(
-              command: <Pattern>[
-                'codesign',
-                '--force',
-                '--sign',
-                '-',
-                '--timestamp=none',
-                '/build/native_assets/ios/foo.framework',
-              ],
-            ),
-          ]),
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        // Create the framework dylib.
+        const FakeCommand(
+          command: <Pattern>[
+            'lipo',
+            '-create',
+            '-output',
+            '/build/native_assets/ios/foo.framework/foo',
+            'foo.framework/foo',
+          ],
+        ),
+        // Lookup the original install names of the dylib.
+        // There can be different install names for different architectures.
+        FakeCommand(
+          command: const <Pattern>['otool', '-D', '/build/native_assets/ios/foo.framework/foo'],
+          stdout: <String>[
+            '/build/native_assets/ios/foo.framework/foo (architecture x86_64):',
+            '@rpath/libfoo.dylib',
+            '/build/native_assets/ios/foo.framework/foo (architecture arm64):',
+            '@rpath/libfoo.dylib',
+          ].join('\n'),
+        ),
+        // Change the install name of the binary itself and of its dependencies.
+        // We pass the old to new install name mappings of all native assets dylibs,
+        // even for the dylib that is being updated, since the `-change` option
+        // is ignored if the dylib does not depend on the target dylib.
+        const FakeCommand(
+          command: <Pattern>[
+            'install_name_tool',
+            '-id',
+            '@rpath/foo.framework/foo',
+            '-change',
+            '@rpath/libfoo.dylib',
+            '@rpath/foo.framework/foo',
+            '/build/native_assets/ios/foo.framework/foo',
+          ],
+        ),
+        // Only after all changes to the dylib have been made do we sign it.
+        const FakeCommand(
+          command: <Pattern>[
+            'codesign',
+            '--force',
+            '--sign',
+            '-',
+            '--timestamp=none',
+            '/build/native_assets/ios/foo.framework',
+          ],
+        ),
+      ]),
     },
     () async {
       writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
 
-      final List<CodeAsset> codeAssets = <CodeAsset>[
+      final codeAssets = <CodeAsset>[
         CodeAsset(
           package: 'foo',
           name: 'foo.dart',
@@ -244,8 +243,8 @@ void main() {
     },
   );
 
-  for (final bool hasAssets in <bool>[true, false]) {
-    final String withOrWithout = hasAssets ? 'with' : 'without';
+  for (final hasAssets in <bool>[true, false]) {
+    final withOrWithout = hasAssets ? 'with' : 'without';
     testUsingContext(
       'flutter build $withOrWithout native assets',
       overrides: <Type, Generator>{
@@ -256,7 +255,7 @@ void main() {
         writePackageConfigFiles(directory: androidEnvironment.projectDir, mainLibName: 'my_app');
         await fileSystem.file('libfoo.so').create();
 
-        final List<CodeAsset> codeAssets = <CodeAsset>[
+        final codeAssets = <CodeAsset>[
           if (hasAssets)
             CodeAsset(
               package: 'foo',
@@ -265,7 +264,7 @@ void main() {
               file: Uri.file('libfoo.so'),
             ),
         ];
-        final FakeFlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
+        final buildRunner = FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['foo'],
           buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
             dependencies: <Uri>[Uri.file('src/foo.c')],

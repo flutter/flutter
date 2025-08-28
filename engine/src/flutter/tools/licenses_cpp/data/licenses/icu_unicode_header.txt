@@ -1,0 +1,4 @@
+icu unicode header
+^© \d\d\d\d.*Unicode, Inc. and others.
+^© \d\d\d\d.*Unicode, Inc. and others.
+License & terms of use: http://www.unicode.org/copyright.html

@@ -14,7 +14,10 @@ import '../widgets/semantics_tester.dart';
 Widget wrap({required Widget child}) {
   return MediaQuery(
     data: const MediaQueryData(),
-    child: Directionality(textDirection: TextDirection.ltr, child: Material(child: child)),
+    child: Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(child: child),
+    ),
   );
 }
 
@@ -509,7 +512,7 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           switchTheme: SwitchThemeData(
-            thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+            thumbColor: WidgetStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
               return states.contains(MaterialState.selected) ? thumbColor : null;
             }),
           ),
@@ -745,7 +748,7 @@ void main() {
       return inactiveEnabledThumbColor;
     }
 
-    final MaterialStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
+    final WidgetStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
 
     Widget buildSwitchListTile({required bool enabled, required bool selected}) {
       return MaterialApp(
@@ -840,7 +843,7 @@ void main() {
       return inactiveEnabledThumbColor;
     }
 
-    final MaterialStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
+    final WidgetStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
 
     Widget buildSwitchListTile({required bool enabled, required bool selected}) {
       return MaterialApp(
@@ -918,7 +921,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final MaterialStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
+    final WidgetStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
 
     Widget buildSwitchListTile() {
       return MaterialApp(
@@ -985,7 +988,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final MaterialStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
+    final WidgetStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
 
     Widget buildSwitchListTile() {
       return MaterialApp(
@@ -1049,7 +1052,7 @@ void main() {
       return inactiveEnabledTrackColor;
     }
 
-    final MaterialStateProperty<Color> trackColor = MaterialStateColor.resolveWith(getTrackColor);
+    final WidgetStateProperty<Color> trackColor = MaterialStateColor.resolveWith(getTrackColor);
 
     Widget buildSwitchListTile({required bool enabled, required bool selected}) {
       return wrap(
@@ -1107,7 +1110,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final MaterialStateProperty<Color> trackColor = MaterialStateColor.resolveWith(getTrackColor);
+    final WidgetStateProperty<Color> trackColor = MaterialStateColor.resolveWith(getTrackColor);
 
     Widget buildSwitchListTile() {
       return wrap(
@@ -1138,8 +1141,8 @@ void main() {
     const Icon activeIcon = Icon(Icons.check);
     const Icon inactiveIcon = Icon(Icons.close);
 
-    MaterialStateProperty<Icon?> thumbIcon(Icon? activeIcon, Icon? inactiveIcon) {
-      return MaterialStateProperty.resolveWith<Icon?>((Set<MaterialState> states) {
+    WidgetStateProperty<Icon?> thumbIcon(Icon? activeIcon, Icon? inactiveIcon) {
+      return WidgetStateProperty.resolveWith<Icon?>((Set<MaterialState> states) {
         if (states.contains(MaterialState.selected)) {
           return activeIcon;
         }
@@ -1609,13 +1612,13 @@ void main() {
             body: SwitchListTile(
               value: active,
               onChanged: (_) {},
-              thumbColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+              thumbColor: WidgetStateProperty.resolveWith<Color>((Set<MaterialState> states) {
                 if (states.contains(MaterialState.selected)) {
                   return activeThumbColor;
                 }
                 return inactiveThumbColor;
               }),
-              overlayColor: useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
+              overlayColor: useOverlay ? WidgetStateProperty.resolveWith(getOverlayColor) : null,
               hoverColor: hoverColor,
             ),
           ),
@@ -1714,7 +1717,7 @@ void main() {
       return inactiveEnabledTrackOutlineColor;
     }
 
-    final MaterialStateProperty<Color> trackOutlineColor = MaterialStateColor.resolveWith(
+    final WidgetStateProperty<Color> trackOutlineColor = MaterialStateColor.resolveWith(
       getOutlineColor,
     );
 
@@ -1784,7 +1787,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final MaterialStateProperty<Color> outlineColor = MaterialStateColor.resolveWith(
+    final WidgetStateProperty<Color> outlineColor = MaterialStateColor.resolveWith(
       getTrackOutlineColor,
     );
 
@@ -1898,14 +1901,14 @@ void main() {
     Widget buildFrame({bool? themeDataIsThreeLine, bool? themeIsThreeLine, bool? isThreeLine}) {
       return MaterialApp(
         key: UniqueKey(),
-        theme:
-            themeDataIsThreeLine != null
-                ? ThemeData(listTileTheme: ListTileThemeData(isThreeLine: themeDataIsThreeLine))
-                : null,
+        theme: themeDataIsThreeLine != null
+            ? ThemeData(listTileTheme: ListTileThemeData(isThreeLine: themeDataIsThreeLine))
+            : null,
         home: Material(
           child: ListTileTheme(
-            data:
-                themeIsThreeLine != null ? ListTileThemeData(isThreeLine: themeIsThreeLine) : null,
+            data: themeIsThreeLine != null
+                ? ListTileThemeData(isThreeLine: themeIsThreeLine)
+                : null,
             child: ListView(
               children: <Widget>[
                 SwitchListTile(
@@ -2014,15 +2017,15 @@ void main() {
         key: UniqueKey(),
         theme: ThemeData(
           platform: TargetPlatform.iOS,
-          listTileTheme:
-              themeDataIsThreeLine != null
-                  ? ListTileThemeData(isThreeLine: themeDataIsThreeLine)
-                  : null,
+          listTileTheme: themeDataIsThreeLine != null
+              ? ListTileThemeData(isThreeLine: themeDataIsThreeLine)
+              : null,
         ),
         home: Material(
           child: ListTileTheme(
-            data:
-                themeIsThreeLine != null ? ListTileThemeData(isThreeLine: themeIsThreeLine) : null,
+            data: themeIsThreeLine != null
+                ? ListTileThemeData(isThreeLine: themeIsThreeLine)
+                : null,
             child: ListView(
               children: <Widget>[
                 SwitchListTile.adaptive(

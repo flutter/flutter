@@ -255,7 +255,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
   /// Returns null if [value] is null, otherwise `WidgetStatePropertyAll<T>(value)`.
   ///
   /// A convenience method for subclasses.
-  static MaterialStateProperty<T>? allOrNull<T>(T? value) =>
+  static WidgetStateProperty<T>? allOrNull<T>(T? value) =>
       value == null ? null : MaterialStatePropertyAll<T>(value);
 
   /// Returns null if [enabled] and [disabled] are null.
@@ -322,7 +322,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
   MaterialStatesController? internalStatesController;
 
   void handleStatesControllerChange() {
-    // Force a rebuild to resolve MaterialStateProperty properties
+    // Force a rebuild to resolve WidgetStateProperty properties
     setState(() {});
   }
 
@@ -386,7 +386,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
       return widgetValue ?? themeValue ?? defaultValue;
     }
 
-    T? resolve<T>(MaterialStateProperty<T>? Function(ButtonStyle? style) getProperty) {
+    T? resolve<T>(WidgetStateProperty<T>? Function(ButtonStyle? style) getProperty) {
       return effectiveValue((ButtonStyle? style) {
         return getProperty(style)?.resolve(statesController.value);
       });
@@ -434,7 +434,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
           effectiveValue((ButtonStyle? style) => style?.mouseCursor?.resolve(states)),
     );
 
-    final MaterialStateProperty<Color?> overlayColor = MaterialStateProperty.resolveWith<Color?>(
+    final WidgetStateProperty<Color?> overlayColor = WidgetStateProperty.resolveWith<Color?>(
       (Set<MaterialState> states) =>
           effectiveValue((ButtonStyle? style) => style?.overlayColor?.resolve(states)),
     );
@@ -538,10 +538,9 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
         alignment: resolvedAlignment!,
         widthFactor: 1.0,
         heightFactor: 1.0,
-        child:
-            resolvedForegroundBuilder != null
-                ? resolvedForegroundBuilder(context, statesController.value, widget.child)
-                : widget.child,
+        child: resolvedForegroundBuilder != null
+            ? resolvedForegroundBuilder(context, statesController.value, widget.child)
+            : widget.child,
       ),
     );
     if (resolvedBackgroundBuilder != null) {

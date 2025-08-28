@@ -12,6 +12,7 @@ source_set("version") {
 
   defines = [
     "FLUTTER_ENGINE_VERSION=\"$engine_version\"",
+    "FLUTTER_CONTENT_HASH=\"$content_hash\"",
     "SKIA_VERSION=\"$skia_version\"",
     "DART_VERSION=\"$dart_version\"",
   ]

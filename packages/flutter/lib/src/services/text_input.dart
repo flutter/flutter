@@ -791,7 +791,7 @@ class TextInputConfiguration {
       'keyboardAppearance': keyboardAppearance.toString(),
       'enableIMEPersonalizedLearning': enableIMEPersonalizedLearning,
       'contentCommitMimeTypes': allowedMimeTypes,
-      if (autofill != null) 'autofill': autofill,
+      'autofill': ?autofill,
       'enableDeltaModel': enableDeltaModel,
       'hintLocales': hintLocales?.map((Locale locale) => locale.toLanguageTag()).toList(),
     };
@@ -1081,8 +1081,8 @@ class TextEditingValue {
       // The length added by adding the replacementString.
       final int replacedLength =
           originalIndex <= replacementRange.start && originalIndex < replacementRange.end
-              ? 0
-              : replacementString.length;
+          ? 0
+          : replacementString.length;
       // The length removed by removing the replacementRange.
       final int removedLength =
           originalIndex.clamp(replacementRange.start, replacementRange.end) -
@@ -1708,10 +1708,9 @@ TextInputAction _toTextInputAction(String action) {
     'TextInputAction.emergencyCall' => TextInputAction.emergencyCall,
     'TextInputAction.done' => TextInputAction.done,
     'TextInputAction.newline' => TextInputAction.newline,
-    _ =>
-      throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('Unknown text input action: $action'),
-      ]),
+    _ => throw FlutterError.fromParts(<DiagnosticsNode>[
+      ErrorSummary('Unknown text input action: $action'),
+    ]),
   };
 }
 
@@ -1720,10 +1719,9 @@ FloatingCursorDragState _toTextCursorAction(String state) {
     'FloatingCursorDragState.start' => FloatingCursorDragState.Start,
     'FloatingCursorDragState.update' => FloatingCursorDragState.Update,
     'FloatingCursorDragState.end' => FloatingCursorDragState.End,
-    _ =>
-      throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('Unknown text cursor action: $state'),
-      ]),
+    _ => throw FlutterError.fromParts(<DiagnosticsNode>[
+      ErrorSummary('Unknown text cursor action: $state'),
+    ]),
   };
 }
 
@@ -1736,10 +1734,9 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
     encoded['Y'] != null,
     'You must provide a value for the vertical location of the floating cursor.',
   );
-  final Offset offset =
-      state == FloatingCursorDragState.Update
-          ? Offset((encoded['X'] as num).toDouble(), (encoded['Y'] as num).toDouble())
-          : Offset.zero;
+  final Offset offset = state == FloatingCursorDragState.Update
+      ? Offset((encoded['X'] as num).toDouble(), (encoded['Y'] as num).toDouble())
+      : Offset.zero;
   return RawFloatingCursorPoint(offset: offset, state: state);
 }
 
@@ -1811,8 +1808,8 @@ class TextInput {
   @visibleForTesting
   static void setChannel(MethodChannel newChannel) {
     assert(() {
-      _instance._channel =
-          newChannel..setMethodCallHandler(_instance._loudlyHandleTextInputInvocation);
+      _instance._channel = newChannel
+        ..setMethodCallHandler(_instance._loudlyHandleTextInputInvocation);
       return true;
     }());
   }
@@ -1981,14 +1978,13 @@ class TextInput {
           stack: stack,
           library: 'services library',
           context: ErrorDescription('during method call ${call.method}'),
-          informationCollector:
-              () => <DiagnosticsNode>[
-                DiagnosticsProperty<MethodCall>(
-                  'call',
-                  call,
-                  style: DiagnosticsTreeStyle.errorProperty,
-                ),
-              ],
+          informationCollector: () => <DiagnosticsNode>[
+            DiagnosticsProperty<MethodCall>(
+              'call',
+              call,
+              style: DiagnosticsTreeStyle.errorProperty,
+            ),
+          ],
         ),
       );
       rethrow;
@@ -2005,11 +2001,10 @@ class TextInput {
         );
         return;
       case 'TextInputClient.requestElementsInRect':
-        final List<double> args =
-            (methodCall.arguments as List<dynamic>)
-                .cast<num>()
-                .map<double>((num value) => value.toDouble())
-                .toList();
+        final List<double> args = (methodCall.arguments as List<dynamic>)
+            .cast<num>()
+            .map<double>((num value) => value.toDouble())
+            .toList();
         return _scribbleClients.keys
             .where((String elementIdentifier) {
               final Rect rect = Rect.fromLTWH(args[0], args[1], args[2], args[3]);
@@ -2607,7 +2602,7 @@ class _PlatformTextInputControl with TextInputControl {
 ///  * [SystemContextMenu], which wraps this functionality in a widget.
 ///  * [MediaQuery.maybeSupportsShowingSystemContextMenu], which indicates
 ///    whether the system context menu is supported.
-class SystemContextMenuController with SystemContextMenuClient {
+class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
   /// Creates an instance of [SystemContextMenuController].
   ///
   /// Not shown until [show] is called.
@@ -2628,6 +2623,8 @@ class SystemContextMenuController with SystemContextMenuClient {
   static const MethodChannel _channel = SystemChannels.platform;
 
   static SystemContextMenuController? _lastShown;
+
+  final Map<String, VoidCallback> _customActionCallbacks = <String, VoidCallback>{};
 
   /// The target [Rect] that was last given to [show].
   ///
@@ -2664,9 +2661,20 @@ class SystemContextMenuController with SystemContextMenuClient {
       _lastShown = null;
     }
     _hiddenBySystem = true;
+    _customActionCallbacks.clear();
     onSystemHide?.call();
   }
 
+  @override
+  void handleCustomContextMenuAction(String callbackId) {
+    final VoidCallback? callback = _customActionCallbacks[callbackId];
+    assert(
+      callback != null,
+      'Custom action callback not found for id: $callbackId. '
+      'This may indicate that the menu item was not properly registered.',
+    );
+    callback?.call();
+  }
   // End SystemContextMenuClient.
 
   /// Shows the system context menu anchored on the given [Rect].
@@ -2775,8 +2783,23 @@ class SystemContextMenuController with SystemContextMenuClient {
 
     ServicesBinding.systemContextMenuClient = this;
 
-    final List<Map<String, dynamic>> itemsJson =
-        items.map<Map<String, dynamic>>((IOSSystemContextMenuItemData item) => item._json).toList();
+    _customActionCallbacks.clear();
+    for (final IOSSystemContextMenuItemData item in items) {
+      if (item is IOSSystemContextMenuItemDataCustom) {
+        assert(
+          !_customActionCallbacks.containsKey(item.callbackId) ||
+              _customActionCallbacks[item.callbackId] == item.onPressed,
+          'Duplicate callback ID "${item.callbackId}" with different callbacks. '
+          'Each custom menu item must have a unique ID or the same callback.',
+        );
+        _customActionCallbacks[item.callbackId] = item.onPressed;
+      }
+    }
+
+    final List<Map<String, dynamic>> itemsJson = items
+        .map<Map<String, dynamic>>((IOSSystemContextMenuItemData item) => item._json)
+        .toList();
+
     _lastTargetRect = targetRect;
     _lastItems = items;
     _lastShown = this;
@@ -2813,14 +2836,27 @@ class SystemContextMenuController with SystemContextMenuClient {
     }
     _lastShown = null;
     ServicesBinding.systemContextMenuClient = null;
+    _customActionCallbacks.clear();
     // This may be called unnecessarily in the case where the user has already
     // hidden the menu (for example by tapping the screen).
     return _channel.invokeMethod<void>('ContextMenu.hideSystemContextMenu');
   }
 
   @override
-  String toString() {
-    return 'SystemContextMenuController(onSystemHide=$onSystemHide, _hiddenBySystem=$_hiddenBySystem, _isVisible=$isVisible, _isDisposed=$_isDisposed)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<bool>('isVisible', isVisible));
+    properties.add(
+      FlagProperty(
+        'onSystemHide',
+        value: onSystemHide != null,
+        ifTrue: 'callback set',
+        ifFalse: 'callback null',
+        showName: true,
+      ),
+    );
+    properties.add(DiagnosticsProperty<bool>('_hiddenBySystem', _hiddenBySystem));
+    properties.add(DiagnosticsProperty<bool>('_isDisposed', _isDisposed));
   }
 
   /// Used to release resources when this instance will never be used again.
@@ -2858,11 +2894,7 @@ sealed class IOSSystemContextMenuItemData {
   /// Returns json for use in method channel calls, specifically
   /// `ContextMenu.showSystemContextMenu`.
   Map<String, dynamic> get _json {
-    return <String, dynamic>{
-      'callbackId': hashCode,
-      if (title != null) 'title': title,
-      'type': _jsonType,
-    };
+    return <String, dynamic>{'callbackId': hashCode, 'title': ?title, 'type': _jsonType};
   }
 
   @override
@@ -2880,7 +2912,7 @@ sealed class IOSSystemContextMenuItemData {
   }
 }
 
-/// A [IOSSystemContextMenuItemData] for the system's built-in copy button.
+/// An [IOSSystemContextMenuItemData] for the system's built-in copy button.
 ///
 /// The title and action are both handled by the platform.
 ///
@@ -2898,7 +2930,7 @@ final class IOSSystemContextMenuItemDataCopy extends IOSSystemContextMenuItemDat
   String get _jsonType => 'copy';
 }
 
-/// A [IOSSystemContextMenuItemData] for the system's built-in cut button.
+/// An [IOSSystemContextMenuItemData] for the system's built-in cut button.
 ///
 /// The title and action are both handled by the platform.
 ///
@@ -2916,7 +2948,7 @@ final class IOSSystemContextMenuItemDataCut extends IOSSystemContextMenuItemData
   String get _jsonType => 'cut';
 }
 
-/// A [IOSSystemContextMenuItemData] for the system's built-in paste button.
+/// An [IOSSystemContextMenuItemData] for the system's built-in paste button.
 ///
 /// The title and action are both handled by the platform.
 ///
@@ -2934,7 +2966,7 @@ final class IOSSystemContextMenuItemDataPaste extends IOSSystemContextMenuItemDa
   String get _jsonType => 'paste';
 }
 
-/// A [IOSSystemContextMenuItemData] for the system's built-in select all
+/// An [IOSSystemContextMenuItemData] for the system's built-in select all
 /// button.
 ///
 /// The title and action are both handled by the platform.
@@ -2953,7 +2985,7 @@ final class IOSSystemContextMenuItemDataSelectAll extends IOSSystemContextMenuIt
   String get _jsonType => 'selectAll';
 }
 
-/// A [IOSSystemContextMenuItemData] for the system's built-in look up
+/// An [IOSSystemContextMenuItemData] for the system's built-in look up
 /// button.
 ///
 /// Must specify a [title], typically [WidgetsLocalizations.lookUpButtonLabel].
@@ -2967,7 +2999,8 @@ final class IOSSystemContextMenuItemDataSelectAll extends IOSSystemContextMenuIt
 ///  * [IOSSystemContextMenuItemLookUp], which performs a similar role but at the
 ///    widget level, where the title can be replaced with a default localized
 ///    value.
-final class IOSSystemContextMenuItemDataLookUp extends IOSSystemContextMenuItemData {
+final class IOSSystemContextMenuItemDataLookUp extends IOSSystemContextMenuItemData
+    with Diagnosticable {
   /// Creates an instance of [IOSSystemContextMenuItemDataLookUp].
   const IOSSystemContextMenuItemDataLookUp({required this.title});
 
@@ -2978,12 +3011,13 @@ final class IOSSystemContextMenuItemDataLookUp extends IOSSystemContextMenuItemD
   String get _jsonType => 'lookUp';
 
   @override
-  String toString() {
-    return 'IOSSystemContextMenuItemDataLookUp(title: $title)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('title', title));
   }
 }
 
-/// A [IOSSystemContextMenuItemData] for the system's built-in search web
+/// An [IOSSystemContextMenuItemData] for the system's built-in search web
 /// button.
 ///
 /// Must specify a [title], typically
@@ -2998,7 +3032,8 @@ final class IOSSystemContextMenuItemDataLookUp extends IOSSystemContextMenuItemD
 ///  * [IOSSystemContextMenuItemSearchWeb], which performs a similar role but at
 ///    the widget level, where the title can be replaced with a default localized
 ///    value.
-final class IOSSystemContextMenuItemDataSearchWeb extends IOSSystemContextMenuItemData {
+final class IOSSystemContextMenuItemDataSearchWeb extends IOSSystemContextMenuItemData
+    with Diagnosticable {
   /// Creates an instance of [IOSSystemContextMenuItemDataSearchWeb].
   const IOSSystemContextMenuItemDataSearchWeb({required this.title});
 
@@ -3009,12 +3044,13 @@ final class IOSSystemContextMenuItemDataSearchWeb extends IOSSystemContextMenuIt
   String get _jsonType => 'searchWeb';
 
   @override
-  String toString() {
-    return 'IOSSystemContextMenuItemDataSearchWeb(title: $title)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('title', title));
   }
 }
 
-/// A [IOSSystemContextMenuItemData] for the system's built-in share button.
+/// An [IOSSystemContextMenuItemData] for the system's built-in share button.
 ///
 /// Must specify a [title], typically
 /// [WidgetsLocalizations.shareButtonLabel].
@@ -3028,7 +3064,8 @@ final class IOSSystemContextMenuItemDataSearchWeb extends IOSSystemContextMenuIt
 ///  * [IOSSystemContextMenuItemShare], which performs a similar role but at
 ///    the widget level, where the title can be replaced with a default
 ///    localized value.
-final class IOSSystemContextMenuItemDataShare extends IOSSystemContextMenuItemData {
+final class IOSSystemContextMenuItemDataShare extends IOSSystemContextMenuItemData
+    with Diagnosticable {
   /// Creates an instance of [IOSSystemContextMenuItemDataShare].
   const IOSSystemContextMenuItemDataShare({required this.title});
 
@@ -3039,10 +3076,87 @@ final class IOSSystemContextMenuItemDataShare extends IOSSystemContextMenuItemDa
   String get _jsonType => 'share';
 
   @override
-  String toString() {
-    return 'IOSSystemContextMenuItemDataShare(title: $title)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('title', title));
   }
 }
 
-// TODO(justinmc): Support the "custom" type.
-// https://github.com/flutter/flutter/issues/103163
+/// An [IOSSystemContextMenuItemData] for the system's built-in Live Text
+/// (OCR) button.
+///
+/// This button is only available on iOS 15.0+ devices with camera support.
+/// It allows the user to scan text from the camera and insert it at the
+/// current cursor position.
+///
+/// The title and action are both handled by the platform, and the platform
+/// will use its default localized title.
+///
+/// See also:
+///
+///  * [IOSSystemContextMenuItemLiveText], which performs a similar role but at the
+///    widget level.
+///  * https://github.com/flutter/flutter/issues/169781
+final class IOSSystemContextMenuItemDataLiveText extends IOSSystemContextMenuItemData {
+  /// Creates an instance of [IOSSystemContextMenuItemDataLiveText].
+  const IOSSystemContextMenuItemDataLiveText();
+
+  @override
+  String get _jsonType => 'captureTextFromCamera';
+}
+
+/// An [IOSSystemContextMenuItemData] for custom action buttons defined by the developer.
+///
+/// Must specify a [title] and [onPressed].
+///
+/// Only supported on iOS 16.0 and above.
+///
+/// See also:
+///
+///  * [SystemContextMenuController], which is used to show the system context
+///    menu.
+///  * [IOSSystemContextMenuItemCustom], which performs a similar role but at the
+///    widget level.
+final class IOSSystemContextMenuItemDataCustom extends IOSSystemContextMenuItemData
+    with Diagnosticable {
+  /// Creates an instance of [IOSSystemContextMenuItemDataCustom].
+  const IOSSystemContextMenuItemDataCustom({required this.title, required this.onPressed});
+
+  @override
+  final String title;
+
+  /// The callback to be executed when the item is selected.
+  final VoidCallback onPressed;
+
+  /// The unique identifier for this custom action.
+  String get callbackId => hashCode.toString();
+
+  @override
+  String get _jsonType => 'custom';
+
+  @override
+  Map<String, dynamic> get _json {
+    return <String, dynamic>{'id': callbackId, 'title': title, 'type': _jsonType};
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('title', title));
+    properties.add(StringProperty('callbackId', callbackId));
+    properties.add(DiagnosticsProperty<VoidCallback>('onPressed', onPressed));
+  }
+
+  @override
+  int get hashCode => Object.hash(title, onPressed);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is IOSSystemContextMenuItemDataCustom &&
+        other.title == title &&
+        other.onPressed == onPressed;
+  }
+}

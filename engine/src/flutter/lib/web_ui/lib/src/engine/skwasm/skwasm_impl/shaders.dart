@@ -46,10 +46,12 @@ class SkwasmGradient extends SkwasmNativeShader implements ui.Gradient {
 
     final RawPointArray endPoints = scope.convertPointArrayToNative(<ui.Offset>[from, to]);
     final RawColorArray nativeColors = scope.convertColorArrayToNative(colors);
-    final Pointer<Float> stops =
-        colorStops != null ? scope.convertDoublesToNative(colorStops) : nullptr;
-    final Pointer<Float> matrix =
-        matrix4 != null ? scope.convertMatrix4toSkMatrix(matrix4) : nullptr;
+    final Pointer<Float> stops = colorStops != null
+        ? scope.convertDoublesToNative(colorStops)
+        : nullptr;
+    final Pointer<Float> matrix = matrix4 != null
+        ? scope.convertMatrix4toSkMatrix(matrix4)
+        : nullptr;
     final ShaderHandle handle = shaderCreateLinearGradient(
       endPoints,
       nativeColors,
@@ -75,10 +77,12 @@ class SkwasmGradient extends SkwasmNativeShader implements ui.Gradient {
     }());
 
     final RawColorArray rawColors = scope.convertColorArrayToNative(colors);
-    final Pointer<Float> rawStops =
-        colorStops != null ? scope.convertDoublesToNative(colorStops) : nullptr;
-    final Pointer<Float> matrix =
-        matrix4 != null ? scope.convertMatrix4toSkMatrix(matrix4) : nullptr;
+    final Pointer<Float> rawStops = colorStops != null
+        ? scope.convertDoublesToNative(colorStops)
+        : nullptr;
+    final Pointer<Float> matrix = matrix4 != null
+        ? scope.convertMatrix4toSkMatrix(matrix4)
+        : nullptr;
     final ShaderHandle handle = shaderCreateRadialGradient(
       center.dx,
       center.dy,
@@ -109,10 +113,12 @@ class SkwasmGradient extends SkwasmNativeShader implements ui.Gradient {
 
     final RawPointArray endPoints = scope.convertPointArrayToNative(<ui.Offset>[focal, center]);
     final RawColorArray rawColors = scope.convertColorArrayToNative(colors);
-    final Pointer<Float> rawStops =
-        colorStops != null ? scope.convertDoublesToNative(colorStops) : nullptr;
-    final Pointer<Float> matrix =
-        matrix4 != null ? scope.convertMatrix4toSkMatrix(matrix4) : nullptr;
+    final Pointer<Float> rawStops = colorStops != null
+        ? scope.convertDoublesToNative(colorStops)
+        : nullptr;
+    final Pointer<Float> matrix = matrix4 != null
+        ? scope.convertMatrix4toSkMatrix(matrix4)
+        : nullptr;
     final ShaderHandle handle = shaderCreateConicalGradient(
       endPoints,
       focalRadius,
@@ -141,10 +147,12 @@ class SkwasmGradient extends SkwasmNativeShader implements ui.Gradient {
     }());
 
     final RawColorArray rawColors = scope.convertColorArrayToNative(colors);
-    final Pointer<Float> rawStops =
-        colorStops != null ? scope.convertDoublesToNative(colorStops) : nullptr;
-    final Pointer<Float> matrix =
-        matrix4 != null ? scope.convertMatrix4toSkMatrix(matrix4) : nullptr;
+    final Pointer<Float> rawStops = colorStops != null
+        ? scope.convertDoublesToNative(colorStops)
+        : nullptr;
+    final Pointer<Float> matrix = matrix4 != null
+        ? scope.convertMatrix4toSkMatrix(matrix4)
+        : nullptr;
     final ShaderHandle handle = shaderCreateSweepGradient(
       center.dx,
       center.dy,
@@ -246,11 +254,15 @@ class SkwasmFragmentProgram extends SkwasmObjectWrapper<RawRuntimeEffect>
   int get uniformSize => runtimeEffectGetUniformSize(handle);
 }
 
-class SkwasmShaderData extends SkwasmObjectWrapper<RawSkData> {
-  SkwasmShaderData(int size) : super(skDataCreate(size), _registry);
+class SkwasmShaderData extends SkwasmObjectWrapper<RawUniformData> {
+  SkwasmShaderData(int size) : super(uniformDataCreate(size), _registry);
 
-  static final SkwasmFinalizationRegistry<RawSkData> _registry =
-      SkwasmFinalizationRegistry<RawSkData>((SkDataHandle handle) => skDataDispose(handle));
+  static final SkwasmFinalizationRegistry<RawUniformData> _registry =
+      SkwasmFinalizationRegistry<RawUniformData>(
+        (UniformDataHandle handle) => uniformDataDispose(handle),
+      );
+
+  Pointer<Void> get pointer => uniformDataGetPointer(handle);
 }
 
 // This class does not inherit from SkwasmNativeShader, as its handle might
@@ -318,7 +330,7 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
       _nativeShader!.dispose();
       _nativeShader = null;
     }
-    final Pointer<Float> dataPointer = skDataGetPointer(_uniformData.handle).cast<Float>();
+    final Pointer<Float> dataPointer = _uniformData.pointer.cast<Float>();
     dataPointer[index] = value;
   }
 
@@ -342,7 +354,7 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
     _childShaders[index] = shader;
     oldShader?.dispose();
 
-    final Pointer<Float> dataPointer = skDataGetPointer(_uniformData.handle).cast<Float>();
+    final Pointer<Float> dataPointer = _uniformData.pointer.cast<Float>();
     dataPointer[_floatUniformCount + index * 2] = image.width.toDouble();
     dataPointer[_floatUniformCount + index * 2 + 1] = image.height.toDouble();
   }

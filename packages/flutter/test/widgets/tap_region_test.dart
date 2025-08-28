@@ -1177,4 +1177,69 @@ void main() {
     expect(count1, 1); // tapRegion1 should respond.
     expect(count2, 1); // tapRegion2 should not respond anymore.
   });
+
+  // Regression test for the consumeOutsideTaps issue when navigating between pages
+  testWidgets('TapRegion with consumeOutsideTaps should not consume taps after navigation', (
+    WidgetTester tester,
+  ) async {
+    const ValueKey<String> tapRegionKey = ValueKey<String>('TapRegion');
+    const ValueKey<String> buttonKey = ValueKey<String>('Button');
+
+    bool buttonTapped = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: TapRegion(
+              key: tapRegionKey,
+              consumeOutsideTaps: true,
+              onTapOutside: (PointerEvent event) {},
+              behavior: HitTestBehavior.opaque,
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    tester.element(find.byType(GestureDetector)),
+                    MaterialPageRoute<void>(
+                      builder:
+                          (BuildContext context) => Scaffold(
+                            body: Center(
+                              child: ElevatedButton(
+                                key: buttonKey,
+                                onPressed: () {
+                                  buttonTapped = true;
+                                },
+                                child: const Text('Test Button'),
+                              ),
+                            ),
+                          ),
+                    ),
+                  );
+                },
+                child: Container(width: 250.0, height: 250.0, color: Colors.blue),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Navigate to the second page
+    await tester.tap(find.byKey(tapRegionKey));
+    await tester.pumpAndSettle();
+
+    // Verify that the button on the second page can be tapped
+    // If consumeOutsideTaps is still active from the first page's TapRegion,
+    // this tap would be consumed and buttonTapped would remain false
+    await tester.tap(find.byKey(buttonKey));
+    await tester.pumpAndSettle();
+
+    expect(
+      buttonTapped,
+      true,
+      reason: 'Button tap was not consumed by a TapRegion on a non-current route',
+    );
+  });
 }

@@ -62,11 +62,11 @@ class LogicalKeyData {
     _readFuchsiaKeyCodes(data, physicalKeyData);
     _readGlfwKeyCodes(data, glfwHeaderFile, parseMapOfListOfString(glfwNameMap));
     // Sort entries by value
-    final List<MapEntry<String, LogicalKeyEntry>> sortedEntries =
-        data.entries.toList()..sort(
-          (MapEntry<String, LogicalKeyEntry> a, MapEntry<String, LogicalKeyEntry> b) =>
-              LogicalKeyEntry.compareByValue(a.value, b.value),
-        );
+    final List<MapEntry<String, LogicalKeyEntry>> sortedEntries = data.entries.toList()
+      ..sort(
+        (MapEntry<String, LogicalKeyEntry> a, MapEntry<String, LogicalKeyEntry> b) =>
+            LogicalKeyEntry.compareByValue(a.value, b.value),
+      );
     data
       ..clear()
       ..addEntries(sortedEntries);
@@ -157,14 +157,12 @@ class LogicalKeyData {
       final String name = LogicalKeyEntry.computeName(
         webName.replaceAll(RegExp('[^A-Za-z0-9]'), ''),
       );
-      final int value =
-          match.namedGroup('unicode') != null
-              ? getHex(match.namedGroup('unicode')!)
-              : match.namedGroup('char')!.codeUnitAt(0);
-      final String? keyLabel =
-          (match.namedGroup('kind')! == 'UNI' && !_isControlCharacter(value))
-              ? String.fromCharCode(value)
-              : null;
+      final int value = match.namedGroup('unicode') != null
+          ? getHex(match.namedGroup('unicode')!)
+          : match.namedGroup('char')!.codeUnitAt(0);
+      final String? keyLabel = (match.namedGroup('kind')! == 'UNI' && !_isControlCharacter(value))
+          ? String.fromCharCode(value)
+          : null;
       // Skip modifier keys from DOM. They will be added with supplemental data.
       if (_chromeModifiers.containsKey(name) && source == 'DOM') {
         continue;
@@ -364,21 +362,20 @@ class LogicalKeyData {
     PhysicalKeyData physicalData,
   ) {
     for (final LogicalKeyEntry entry in data.values) {
-      final int? value =
-          (() {
-            if (entry.value == 0) {
-              return 0;
-            }
-            final String? keyLabel = printable[entry.constantName];
-            if (keyLabel != null && !entry.constantName.startsWith('numpad')) {
-              return toPlane(keyLabel.codeUnitAt(0), kUnicodePlane.value);
-            } else {
-              final PhysicalKeyEntry? physicalEntry = physicalData.tryEntryByName(entry.name);
-              if (physicalEntry != null) {
-                return toPlane(physicalEntry.usbHidCode, kFuchsiaPlane.value);
-              }
-            }
-          })();
+      final int? value = (() {
+        if (entry.value == 0) {
+          return 0;
+        }
+        final String? keyLabel = printable[entry.constantName];
+        if (keyLabel != null && !entry.constantName.startsWith('numpad')) {
+          return toPlane(keyLabel.codeUnitAt(0), kUnicodePlane.value);
+        } else {
+          final PhysicalKeyEntry? physicalEntry = physicalData.tryEntryByName(entry.name);
+          if (physicalEntry != null) {
+            return toPlane(physicalEntry.usbHidCode, kFuchsiaPlane.value);
+          }
+        }
+      })();
       if (value != null) {
         entry.fuchsiaValues.add(value);
       }
@@ -452,30 +449,27 @@ class LogicalKeyData {
   }();
 
   /// Returns the static map of printable representations.
-  static final Map<String, String> printable =
-      (() {
-        final String printableKeys = File(path.join(dataRoot, 'printable.json')).readAsStringSync();
-        return (json.decode(printableKeys) as Map<String, dynamic>).cast<String, String>();
-      })();
+  static final Map<String, String> printable = (() {
+    final String printableKeys = File(path.join(dataRoot, 'printable.json')).readAsStringSync();
+    return (json.decode(printableKeys) as Map<String, dynamic>).cast<String, String>();
+  })();
 
   /// Returns the static map of synonym representations.
   ///
   /// These include synonyms for keys which don't have printable
   /// representations, and appear in more than one place on the keyboard (e.g.
   /// SHIFT, ALT, etc.).
-  static final Map<String, List<String>> synonyms =
-      (() {
-        final String synonymKeys = File(path.join(dataRoot, 'synonyms.json')).readAsStringSync();
-        final Map<String, dynamic> dynamicSynonym =
-            json.decode(synonymKeys) as Map<String, dynamic>;
-        return dynamicSynonym.map((String name, dynamic values) {
-          // The keygen and algorithm of macOS relies on synonyms being pairs.
-          // See siblingKeyMap in macos_code_gen.dart.
-          final List<String> names = (values as List<dynamic>).whereType<String>().toList();
-          assert(names.length == 2);
-          return MapEntry<String, List<String>>(name, names);
-        });
-      })();
+  static final Map<String, List<String>> synonyms = (() {
+    final String synonymKeys = File(path.join(dataRoot, 'synonyms.json')).readAsStringSync();
+    final Map<String, dynamic> dynamicSynonym = json.decode(synonymKeys) as Map<String, dynamic>;
+    return dynamicSynonym.map((String name, dynamic values) {
+      // The keygen and algorithm of macOS relies on synonyms being pairs.
+      // See siblingKeyMap in macos_code_gen.dart.
+      final List<String> names = (values as List<dynamic>).whereType<String>().toList();
+      assert(names.length == 2);
+      return MapEntry<String, List<String>>(name, names);
+    });
+  })();
 
   static int _sourceToPlane(String source, bool isPrintable) {
     if (isPrintable) {

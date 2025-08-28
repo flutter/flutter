@@ -12,7 +12,7 @@ import '../src/common.dart';
 void main() {
   group('SettingsFile', () {
     testWithoutContext('parse', () {
-      final SettingsFile file = SettingsFile.parse('''
+      final file = SettingsFile.parse('''
 # ignore comment
 foo=bar
 baz=qux
@@ -51,7 +51,7 @@ baz=qux
       expect(v3, greaterThan(v2));
       expect(v2, greaterThan(v1));
 
-      final Version v5 = Version(1, 2, 0, text: 'foo');
+      final v5 = Version(1, 2, 0, text: 'foo');
       expect(v5, equals(v2));
 
       expect(Version.parse('Preview2.2'), isNull);
@@ -149,25 +149,25 @@ baz=qux
   });
 
   group('text wrapping', () {
-    const int lineLength = 40;
-    const String longLine = 'This is a long line that needs to be wrapped.';
-    final String longLineWithNewlines =
+    const lineLength = 40;
+    const longLine = 'This is a long line that needs to be wrapped.';
+    final longLineWithNewlines =
         'This is a long line with newlines that\n'
         'needs to be wrapped.\n\n'
         '${'0123456789' * 5}';
-    final String longAnsiLineWithNewlines =
+    final longAnsiLineWithNewlines =
         '${AnsiTerminal.red}This${AnsiTerminal.resetAll} is a long line with newlines that\n'
         'needs to be wrapped.\n\n'
         '${AnsiTerminal.green}0123456789${AnsiTerminal.resetAll}'
         '${'0123456789' * 3}'
         '${AnsiTerminal.green}0123456789${AnsiTerminal.resetAll}';
-    const String onlyAnsiSequences = '${AnsiTerminal.red}${AnsiTerminal.resetAll}';
-    final String indentedLongLineWithNewlines =
+    const onlyAnsiSequences = '${AnsiTerminal.red}${AnsiTerminal.resetAll}';
+    final indentedLongLineWithNewlines =
         '    This is an indented long line with newlines that\n'
         'needs to be wrapped.\n\tAnd preserves tabs.\n      \n  '
         '${'0123456789' * 5}';
-    const String shortLine = 'Short line.';
-    const String indentedLongLine =
+    const shortLine = 'Short line.';
+    const indentedLongLine =
         '    This is an indented long line that needs to be '
         'wrapped and indentation preserved.';
     testWithoutContext('does not wrap by default in tests', () {

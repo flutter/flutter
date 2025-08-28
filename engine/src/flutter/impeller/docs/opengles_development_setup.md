@@ -24,7 +24,7 @@ By default, the playgrounds will try to use the default OpenGL ES driver availab
 
 To verify that you are using Angle, refer to the window title which specifies if Angle (or SwiftShader with Vulkan) is being used.
 
-![Use Angle](./assets/opengles_development_setup/angle.png)
+![Use Angle](https://raw.githubusercontent.com/flutter/assets-for-api-docs/refs/heads/main/assets/engine/impeller/opengles_development_setup/angle.avif)
 
 Your playgrounds will run one after another. You can skip to the next one by pressing either `ESC`, `q`, or closing the window. To skip all remaining tests, press `Shift` + `ESC`.
 
@@ -77,24 +77,24 @@ An alternative on non-macOS platforms is RenderDoc. Instructions to [setup Rende
 
 * **1-1 relationship between most OpenGL ES and Metal resources (see exceptions)**.
 
-![Resources](./assets/opengles_development_setup/resources.png)
+![Resources](https://raw.githubusercontent.com/flutter/assets-for-api-docs/refs/heads/main/assets/engine/impeller/opengles_development_setup/resources.avif)
 
 * **Stepping into the Angle driver** and tracing how it converts OpenGL calls to Metal.
 * **Verifying load-store actions on render pass attachments**: This comes in handy when verifying correctness around `EXT_discard_framebuffer` and memory usage.
 
-![Load Store Actions](./assets/opengles_development_setup/load_store.png)
+![Load Store Actions](https://raw.githubusercontent.com/flutter/assets-for-api-docs/refs/heads/main/assets/engine/impeller/opengles_development_setup/load_store.avif)
 
 * **Pass dependency viewer**: While viewing the dependencies works, the dependencies seem to be over-specified. That is, Angle seems to be inserting dependencies based on completion of entire passes instead of waiting for resources in the pass to be ready for the next pass. Be aware that this will differ when comparing directly with Metal. Though this is less efficient, it is likely easier to read and comprehend in the trace.
 
-![Pass Dependencies](./assets/opengles_development_setup/pass_deps.png)
+![Pass Dependencies](https://raw.githubusercontent.com/flutter/assets-for-api-docs/refs/heads/main/assets/engine/impeller/opengles_development_setup/pass_deps.avif)
 
 * **The Performance HUD**: This can be [setup the same as Metal](./metal_validation.md). Remember, we are running Angle over Metal still. In most tests, you can expect OpenGL ES to take about 33% more memory because of sub-optimal load-store attachment actions and a final copy for composition. Instead of comparing performance across backends, look for trends and improvements within a test case.
 
-![Performance HUD](./assets/opengles_development_setup/hud.png)
+![Performance HUD](https://raw.githubusercontent.com/flutter/assets-for-api-docs/refs/heads/main/assets/engine/impeller/opengles_development_setup/hud.avif)
 
 * **The Geometry Viewer**: While the vertex buffers may not identical (see the note below), the geometry viewer should still be functional along with the vertex debugger. Even though the vertex debugger is almost entirely useless because you'll be debugging the extremely verbose Angle generated shader code, you should be able to spot issues due to buffer corruption and [global transformations](./coordinate_system.md).
 
-![Geometry Viewer](./assets/opengles_development_setup/geometry_viewer.png)
+![Geometry Viewer](https://raw.githubusercontent.com/flutter/assets-for-api-docs/refs/heads/main/assets/engine/impeller/opengles_development_setup/geometry_viewer.avif)
 
 * **Fragment Shader Debugger**: While the fragment shader debugger technically works, it is effectively useless. Angle generated shaders are extremely verbose and large. Our shader compiler is generally pretty good at generating readable Metal code directly and also generate functionally identical OpenGL ES code. It is recommended to debug shaders using the Metal backend directly.
 
@@ -102,7 +102,7 @@ An alternative on non-macOS platforms is RenderDoc. Instructions to [setup Rende
 
 * **1-1 relationship between vertex, index buffers, and uniform buffers**: Uniform buffers are emulated in Impeller, so there is no way such a buffer will be passed along to Metal. Angle also seems to be using intermediate allocations for the rest. Just don't expect to see the buffers you put together carefully to show up directly in the debugger.
 
-![Buffer Soup](./assets/opengles_development_setup/buffer_soup.png)
+![Buffer Soup](https://raw.githubusercontent.com/flutter/assets-for-api-docs/refs/heads/main/assets/engine/impeller/opengles_development_setup/buffer_soup.avif)
 
 * **Labeling metal resources**: Though Angle tracks debug labels, the corresponding Metal resources are not tagged with the same labels. Admittedly, this can get contentious as not all OpenGL resources have Metal counterparts. Butm Angle doesn't seem to tag even resources like textures. Getting the label you just set in code does work however. Its just the resource inspector resources that are unlabelled.
 * **Pushing and popping debug groups**: Angle assumes these are no-ops. Rather unnecessarily, Angle does log these messages to the console.

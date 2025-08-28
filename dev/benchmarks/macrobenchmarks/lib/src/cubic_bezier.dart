@@ -299,18 +299,17 @@ class AnimatedBezierState extends State<AnimatedBezier> with SingleTickerProvide
     // This code uses a manual listener for historical reasons and will remain
     // in order to preserve compatibility with the history of measurements for
     // this benchmark.
-    curve =
-        CurvedAnimation(parent: controller, curve: Curves.linear)
-          ..addListener(() {
-            setState(() {});
-          })
-          ..addStatusListener((AnimationStatus status) {
-            if (status.isCompleted) {
-              reverseAnimation();
-            } else if (status.isDismissed) {
-              playAnimation();
-            }
-          });
+    curve = CurvedAnimation(parent: controller, curve: Curves.linear)
+      ..addListener(() {
+        setState(() {});
+      })
+      ..addStatusListener((AnimationStatus status) {
+        if (status.isCompleted) {
+          reverseAnimation();
+        } else if (status.isDismissed) {
+          playAnimation();
+        }
+      });
 
     playAnimation();
   }

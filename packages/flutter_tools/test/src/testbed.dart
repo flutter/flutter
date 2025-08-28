@@ -30,24 +30,22 @@ export 'package:flutter_tools/src/base/context.dart' show Generator;
 
 // A default value should be provided if the vast majority of tests should use
 // this provider. For example, [BufferLogger], [MemoryFileSystem].
-final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
+final _testbedDefaults = <Type, Generator>{
   // Keeps tests fast by avoiding the actual file system.
-  FileSystem:
-      () => MemoryFileSystem(
-        style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
-      ),
+  FileSystem: () => MemoryFileSystem(
+    style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
+  ),
   ProcessManager: () => FakeProcessManager.any(),
-  Logger:
-      () => BufferLogger(
-        terminal: AnsiTerminal(
-          stdio: globals.stdio,
-          platform: globals.platform,
-        ), // Danger, using real stdio.
-        outputPreferences: OutputPreferences.test(),
-      ), // Allows reading logs and prevents stdout.
+  Logger: () => BufferLogger(
+    terminal: AnsiTerminal(
+      stdio: globals.stdio,
+      platform: globals.platform,
+    ), // Danger, using real stdio.
+    outputPreferences: OutputPreferences.test(),
+  ), // Allows reading logs and prevents stdout.
   OperatingSystemUtils: () => FakeOperatingSystemUtils(),
-  OutputPreferences:
-      () => OutputPreferences.test(), // configures BufferLogger to avoid color codes.
+  OutputPreferences: () =>
+      OutputPreferences.test(), // configures BufferLogger to avoid color codes.
   Usage: () => TestUsage(), // prevent addition of analytics from burdening test mocks
   Analytics: () => const NoOpAnalytics(),
   FlutterVersion: () => FakeFlutterVersion(), // prevent requirement to mock git for test runner.
@@ -103,7 +101,7 @@ class TestBed {
   /// `overrides` may be used to provide new context values for the single test
   /// case or override any context values from the setup.
   Future<T?> run<T>(FutureOr<T> Function() test, {Map<Type, Generator>? overrides}) {
-    final Map<Type, Generator> testOverrides = <Type, Generator>{
+    final testOverrides = <Type, Generator>{
       ..._testbedDefaults,
       // Add the initial setUp overrides
       ...?_overrides,
@@ -116,7 +114,7 @@ class TestBed {
     // Cache the original flutter root to restore after the test case.
     final String? originalFlutterRoot = Cache.flutterRoot;
     // Track pending timers to verify that they were correctly cleaned up.
-    final Map<Timer, StackTrace> timers = <Timer, StackTrace>{};
+    final timers = <Timer, StackTrace>{};
 
     return HttpOverrides.runZoned(() {
       return runInContext<T?>(() {
@@ -124,28 +122,30 @@ class TestBed {
           name: 'testbed',
           overrides: testOverrides,
           zoneSpecification: ZoneSpecification(
-            createTimer: (
-              Zone self,
-              ZoneDelegate parent,
-              Zone zone,
-              Duration duration,
-              void Function() timer,
-            ) {
-              final Timer result = parent.createTimer(zone, duration, timer);
-              timers[result] = StackTrace.current;
-              return result;
-            },
-            createPeriodicTimer: (
-              Zone self,
-              ZoneDelegate parent,
-              Zone zone,
-              Duration period,
-              void Function(Timer) timer,
-            ) {
-              final Timer result = parent.createPeriodicTimer(zone, period, timer);
-              timers[result] = StackTrace.current;
-              return result;
-            },
+            createTimer:
+                (
+                  Zone self,
+                  ZoneDelegate parent,
+                  Zone zone,
+                  Duration duration,
+                  void Function() timer,
+                ) {
+                  final Timer result = parent.createTimer(zone, duration, timer);
+                  timers[result] = StackTrace.current;
+                  return result;
+                },
+            createPeriodicTimer:
+                (
+                  Zone self,
+                  ZoneDelegate parent,
+                  Zone zone,
+                  Duration period,
+                  void Function(Timer) timer,
+                ) {
+                  final Timer result = parent.createPeriodicTimer(zone, period, timer);
+                  timers[result] = StackTrace.current;
+                  return result;
+                },
           ),
           body: () async {
             Cache.flutterRoot = '';

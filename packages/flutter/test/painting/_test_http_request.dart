@@ -93,10 +93,9 @@ class TestImgElement {
       'src',
       <String, JSFunction>{
         'get': (() => src).toJS,
-        'set':
-            ((JSString newValue) {
-              src = newValue.toDart;
-            }).toJS,
+        'set': ((JSString newValue) {
+          src = newValue.toDart;
+        }).toJS,
       }.jsify()!,
     );
     objectDefineProperty(
@@ -104,10 +103,9 @@ class TestImgElement {
       'naturalWidth',
       <String, JSFunction>{
         'get': (() => naturalWidth).toJS,
-        'set':
-            ((JSNumber newValue) {
-              naturalWidth = newValue.toDartInt;
-            }).toJS,
+        'set': ((JSNumber newValue) {
+          naturalWidth = newValue.toDartInt;
+        }).toJS,
       }.jsify()!,
     );
     objectDefineProperty(
@@ -115,10 +113,9 @@ class TestImgElement {
       'naturalHeight',
       <String, JSFunction>{
         'get': (() => naturalHeight).toJS,
-        'set':
-            ((JSNumber newValue) {
-              naturalHeight = newValue.toDartInt;
-            }).toJS,
+        'set': ((JSNumber newValue) {
+          naturalHeight = newValue.toDartInt;
+        }).toJS,
       }.jsify()!,
     );
   }
@@ -126,8 +123,8 @@ class TestImgElement {
   late ImgElementMock _mock;
 
   String src = '';
-  int naturalWidth = -1;
-  int naturalHeight = -1;
+  int naturalWidth = 1;
+  int naturalHeight = 1;
 
   // Either `decode` or `decodeSuccess/Failure` may be called first.
   // The following fields allow properly handling either case.

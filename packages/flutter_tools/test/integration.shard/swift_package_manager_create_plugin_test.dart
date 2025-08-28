@@ -10,11 +10,11 @@ import 'swift_package_manager_utils.dart';
 import 'test_utils.dart';
 
 void main() {
-  final List<String> platforms = <String>['ios', 'macos'];
-  for (final String platformName in platforms) {
-    final List<String> iosLanguages = <String>[if (platformName == 'ios') 'objc', 'swift'];
+  final platforms = <String>['ios', 'macos'];
+  for (final platformName in platforms) {
+    final iosLanguages = <String>[if (platformName == 'ios') 'objc', 'swift'];
 
-    for (final String iosLanguage in iosLanguages) {
+    for (final iosLanguage in iosLanguages) {
       test(
         'Create $platformName $iosLanguage plugin with Swift Package Manager disabled',
         () async {

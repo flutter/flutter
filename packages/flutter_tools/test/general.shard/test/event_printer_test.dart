@@ -20,7 +20,7 @@ void main() {
     });
 
     testWithoutContext('handles a null parent', () {
-      final FakeDevice device = FakeDevice();
+      final device = FakeDevice();
 
       expect(() => eventPrinter.handleFinishedTest(device), returnsNormally);
       expect(() => eventPrinter.handleStartedDevice(vmServiceUri), returnsNormally);

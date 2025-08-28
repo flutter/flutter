@@ -46,7 +46,7 @@ class LocaleInfo implements Comparable<LocaleInfo> {
     String? scriptCode;
     String? countryCode;
     int length = codes.length;
-    String originalString = locale;
+    var originalString = locale;
     if (codes.length == 2) {
       scriptCode = codes[1].length >= 4 ? codes[1] : null;
       countryCode = codes[1].length < 4 ? codes[1] : null;
@@ -130,7 +130,7 @@ class LocaleInfo implements Comparable<LocaleInfo> {
 
 // See also //master/tools/gen_locale.dart in the engine repo.
 Map<String, List<String>> _parseSection(String section) {
-  final Map<String, List<String>> result = <String, List<String>>{};
+  final result = <String, List<String>>{};
   late List<String> lastHeading;
   for (final String line in section.split('\n')) {
     if (line == '') {
@@ -152,23 +152,22 @@ Map<String, List<String>> _parseSection(String section) {
   return result;
 }
 
-final Map<String, String> _languages = <String, String>{};
-final Map<String, String> _regions = <String, String>{};
-final Map<String, String> _scripts = <String, String>{};
-const String kProvincePrefix = ', Province of ';
-const String kParentheticalPrefix = ' (';
+final _languages = <String, String>{};
+final _regions = <String, String>{};
+final _scripts = <String, String>{};
+const kProvincePrefix = ', Province of ';
+const kParentheticalPrefix = ' (';
 
 /// Prepares the data for the [describeLocale] method below.
 ///
 /// The data is obtained from the official IANA registry.
 void precacheLanguageAndRegionTags() {
-  final List<Map<String, List<String>>> sections =
-      languageSubtagRegistry
-          .split('%%')
-          .skip(1)
-          .map<Map<String, List<String>>>(_parseSection)
-          .toList();
-  for (final Map<String, List<String>> section in sections) {
+  final List<Map<String, List<String>>> sections = languageSubtagRegistry
+      .split('%%')
+      .skip(1)
+      .map<Map<String, List<String>>>(_parseSection)
+      .toList();
+  for (final section in sections) {
     assert(section.containsKey('Type'), section.toString());
     final String type = section['Type']!.single;
     if (type == 'language' || type == 'region' || type == 'script') {
@@ -214,7 +213,7 @@ String describeLocale(String tag) {
     );
   }
   final String language = _languages[languageCode]!;
-  String output = language;
+  var output = language;
   String? region;
   String? script;
   if (subtags.length == 2) {
@@ -258,7 +257,7 @@ String describeLocale(String tag) {
 /// foo$bar = 'foo\$bar'
 /// ```
 String generateString(String value) {
-  const String backslash = '__BACKSLASH__';
+  const backslash = '__BACKSLASH__';
   assert(
     !value.contains(backslash),
     'Input string cannot contain the sequence: '
@@ -314,7 +313,7 @@ String generateReturnExpr(List<String> expressions, {bool isSingleStringVar = fa
       if (expression[0] != r'$') {
         return expression + string;
       }
-      final RegExp alphanumeric = RegExp(r'^([0-9a-zA-Z]|_)+$');
+      final alphanumeric = RegExp(r'^([0-9a-zA-Z]|_)+$');
       if (alphanumeric.hasMatch(expression.substring(1)) &&
           !(string.isNotEmpty && alphanumeric.hasMatch(string[0]))) {
         return '$expression$string';
@@ -488,8 +487,8 @@ LocalizationOptions parseLocalizationsOptionsFromYAML({
     logger.printError('Expected ${file.path} to contain a map, instead was $yamlNode');
     throw Exception();
   }
-  const String kSyntheticPackage = 'synthetic-package';
-  const String kFlutterGenNotice = 'http://flutter.dev/to/flutter-gen-deprecation';
+  const kSyntheticPackage = 'synthetic-package';
+  const kFlutterGenNotice = 'http://flutter.dev/to/flutter-gen-deprecation';
   final bool? syntheticPackage = _tryReadBool(yamlNode, kSyntheticPackage, logger);
   if (syntheticPackage != null) {
     if (syntheticPackage) {
@@ -540,8 +539,8 @@ LocalizationOptions parseLocalizationsOptionsFromCommand({
   required FlutterCommand command,
   required String defaultArbDir,
 }) {
-  const String kSyntheticPackage = 'synthetic-package';
-  const String kFlutterGenNotice = 'http://flutter.dev/to/flutter-gen-deprecation';
+  const kSyntheticPackage = 'synthetic-package';
+  const kFlutterGenNotice = 'http://flutter.dev/to/flutter-gen-deprecation';
   if (command.argResults!.wasParsed(kSyntheticPackage)) {
     if (command.boolArg(kSyntheticPackage)) {
       throwToolExit(

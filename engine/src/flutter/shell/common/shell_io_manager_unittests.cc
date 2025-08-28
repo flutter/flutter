@@ -47,7 +47,7 @@ TEST_F(ShellIOManagerTest,
 
   // Setup the IO manager.
   PostTaskSync(runners.GetIOTaskRunner(), [&]() {
-    gl_surface = std::make_unique<TestGLSurface>(SkISize::Make(1, 1));
+    gl_surface = std::make_unique<TestGLSurface>(DlISize(1, 1));
     io_manager = std::make_unique<ShellIOManager>(
         gl_surface->CreateGrContext(), std::make_shared<fml::SyncSwitch>(),
         runners.GetIOTaskRunner(),

@@ -865,7 +865,9 @@ void main() {
     testWidgets('IconButton with enabled feedback', (WidgetTester tester) async {
       final Widget button = Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(child: IconButton(onPressed: () {}, icon: const Icon(Icons.link))),
+        child: Center(
+          child: IconButton(onPressed: () {}, icon: const Icon(Icons.link)),
+        ),
       );
 
       await tester.pumpWidget(
@@ -880,7 +882,9 @@ void main() {
     testWidgets('IconButton with enabled feedback by default', (WidgetTester tester) async {
       final Widget button = Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(child: IconButton(onPressed: () {}, icon: const Icon(Icons.link))),
+        child: Center(
+          child: IconButton(onPressed: () {}, icon: const Icon(Icons.link)),
+        ),
       );
 
       await tester.pumpWidget(
@@ -977,7 +981,9 @@ void main() {
         home: Material(
           child: Directionality(
             textDirection: TextDirection.ltr,
-            child: Center(child: IconButton(onPressed: () {}, icon: const Icon(Icons.play_arrow))),
+            child: Center(
+              child: IconButton(onPressed: () {}, icon: const Icon(Icons.play_arrow)),
+            ),
           ),
         ),
       ),
@@ -1125,7 +1131,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: themeM3,
-        home: Center(child: IconButton(onPressed: () {}, icon: const Icon(Icons.ac_unit))),
+        home: Center(
+          child: IconButton(onPressed: () {}, icon: const Icon(Icons.ac_unit)),
+        ),
       ),
     );
 
@@ -1262,7 +1270,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: themeM3,
-        home: Center(child: IconButton.filled(onPressed: () {}, icon: const Icon(Icons.ac_unit))),
+        home: Center(
+          child: IconButton.filled(onPressed: () {}, icon: const Icon(Icons.ac_unit)),
+        ),
       ),
     );
 
@@ -1781,7 +1791,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: themeM3,
-        home: Center(child: IconButton.outlined(onPressed: () {}, icon: const Icon(Icons.ac_unit))),
+        home: Center(
+          child: IconButton.outlined(onPressed: () {}, icon: const Icon(Icons.ac_unit)),
+        ),
       ),
     );
 
@@ -2121,7 +2133,7 @@ void main() {
               body: Center(
                 child: IconButton(
                   style: ButtonStyle(
-                    foregroundColor: MaterialStateProperty.resolveWith<Color>(getIconColor),
+                    foregroundColor: WidgetStateProperty.resolveWith<Color>(getIconColor),
                   ),
                   isSelected: isSelected,
                   onPressed: () {
@@ -2564,7 +2576,9 @@ void main() {
             visualDensity: themeVisualDensity,
           ),
           home: Material(
-            child: Center(child: IconButton(onPressed: () {}, icon: const Icon(Icons.play_arrow))),
+            child: Center(
+              child: IconButton(onPressed: () {}, icon: const Icon(Icons.play_arrow)),
+            ),
           ),
         ),
       );
@@ -2940,7 +2954,9 @@ void main() {
       // This is a regression test for https://github.com/flutter/flutter/issues/130708.
       Widget buildWidget(bool showIconButton) {
         return showIconButton
-            ? MaterialApp(home: IconButton(onPressed: () {}, icon: const Icon(Icons.search)))
+            ? MaterialApp(
+                home: IconButton(onPressed: () {}, icon: const Icon(Icons.search)),
+              )
             : const SizedBox();
       }
 
@@ -3011,7 +3027,9 @@ void main() {
       ),
     );
 
-    final Offset topLeft = tester.getTopLeft(find.byType(ColoredBox));
+    final Offset topLeft = tester.getTopLeft(
+      find.descendant(of: find.byType(Center), matching: find.byType(ColoredBox)),
+    );
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     await gesture.moveTo(topLeft);
@@ -3405,6 +3423,110 @@ void main() {
 
     await expectLater(find.byType(IconButton), matchesGoldenFile('icon_button.badge.outline.png'));
   });
+
+  Future<void> testStatesController(WidgetTester tester, IconButton iconButton) async {
+    int count = 0;
+    void valueChanged() {
+      count += 1;
+    }
+
+    final MaterialStatesController controller = iconButton.statesController!;
+    addTearDown(controller.dispose);
+    controller.addListener(valueChanged);
+
+    await tester.pumpWidget(MaterialApp(home: Center(child: iconButton)));
+
+    expect(controller.value, <MaterialState>{});
+    expect(count, 0);
+
+    final Offset center = tester.getCenter(find.byType(Icon));
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{MaterialState.hovered});
+    expect(count, 1);
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{});
+    expect(count, 2);
+
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{MaterialState.hovered});
+    expect(count, 3);
+
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{MaterialState.hovered, MaterialState.pressed});
+    expect(count, 4);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{MaterialState.hovered});
+    expect(count, 5);
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{});
+    expect(count, 6);
+
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+    expect(controller.value, <MaterialState>{MaterialState.hovered, MaterialState.pressed});
+    expect(count, 8); // adds hovered and pressed - two changes
+  }
+
+  testWidgets('IconButton statesController', (WidgetTester tester) async {
+    await testStatesController(
+      tester,
+      IconButton(
+        icon: const Icon(Icons.add),
+        onPressed: () {},
+        statesController: MaterialStatesController(),
+      ),
+    );
+  });
+
+  testWidgets('IconButton.filled statesController', (WidgetTester tester) async {
+    await testStatesController(
+      tester,
+      IconButton.filled(
+        onPressed: () {},
+        icon: const Icon(Icons.add),
+        statesController: MaterialStatesController(),
+      ),
+    );
+  });
+
+  testWidgets('IconButton.filledTonal statesController', (WidgetTester tester) async {
+    await testStatesController(
+      tester,
+      IconButton.filledTonal(
+        onPressed: () {},
+        icon: const Icon(Icons.add),
+        statesController: MaterialStatesController(),
+      ),
+    );
+  });
+
+  testWidgets('IconButton.outlined statesController', (WidgetTester tester) async {
+    await testStatesController(
+      tester,
+      IconButton.outlined(
+        onPressed: () {},
+        icon: const Icon(Icons.add),
+        statesController: MaterialStatesController(),
+      ),
+    );
+  });
 }
 
 Widget buildAllVariants({
@@ -3454,19 +3576,22 @@ Widget buildAllVariants({
 Widget wrap({required Widget child, required bool useMaterial3}) {
   return useMaterial3
       ? MaterialApp(
-        theme: ThemeData.from(colorScheme: const ColorScheme.light()),
-        home: FocusTraversalGroup(
-          policy: ReadingOrderTraversalPolicy(),
-          child: Directionality(textDirection: TextDirection.ltr, child: Center(child: child)),
-        ),
-      )
+          theme: ThemeData.from(colorScheme: const ColorScheme.light()),
+          home: FocusTraversalGroup(
+            policy: ReadingOrderTraversalPolicy(),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(child: child),
+            ),
+          ),
+        )
       : FocusTraversalGroup(
-        policy: ReadingOrderTraversalPolicy(),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Material(child: Center(child: child)),
-        ),
-      );
+          policy: ReadingOrderTraversalPolicy(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Material(child: Center(child: child)),
+          ),
+        );
 }
 
 TextStyle? _iconStyle(WidgetTester tester, IconData icon) {

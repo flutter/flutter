@@ -27,7 +27,9 @@ void main() {
       MaterialApp(
         theme: ThemeData.from(colorScheme: colorScheme),
         home: Scaffold(
-          body: Center(child: OutlinedButton(onPressed: () {}, child: const Text('button'))),
+          body: Center(
+            child: OutlinedButton(onPressed: () {}, child: const Text('button')),
+          ),
         ),
       ),
     );
@@ -67,7 +69,9 @@ void main() {
       MaterialApp(
         theme: ThemeData.from(useMaterial3: false, colorScheme: colorScheme),
         home: Scaffold(
-          body: Center(child: OutlinedButton(onPressed: () {}, child: const Text('button'))),
+          body: Center(
+            child: OutlinedButton(onPressed: () {}, child: const Text('button')),
+          ),
         ),
       ),
     );
@@ -159,13 +163,12 @@ void main() {
           body: Center(
             // If the OutlinedButtonTheme widget is present, it's used
             // instead of the Theme's ThemeData.outlinedButtonTheme.
-            child:
-                themeStyle == null
-                    ? child
-                    : OutlinedButtonTheme(
-                      data: OutlinedButtonThemeData(style: themeStyle),
-                      child: child,
-                    ),
+            child: themeStyle == null
+                ? child
+                : OutlinedButtonTheme(
+                    data: OutlinedButtonThemeData(style: themeStyle),
+                    child: child,
+                  ),
           ),
         ),
       );
@@ -195,11 +198,11 @@ void main() {
       expect(material.shadowColor, shadowColor);
       expect(material.elevation, elevation);
       expect(
-        MaterialStateProperty.resolveAs<MouseCursor?>(inkWell.mouseCursor, enabled),
+        WidgetStateProperty.resolveAs<MouseCursor?>(inkWell.mouseCursor, enabled),
         enabledMouseCursor,
       );
       expect(
-        MaterialStateProperty.resolveAs<MouseCursor?>(inkWell.mouseCursor, disabled),
+        WidgetStateProperty.resolveAs<MouseCursor?>(inkWell.mouseCursor, disabled),
         disabledMouseCursor,
       );
       expect(inkWell.overlayColor!.resolve(hovered), foregroundColor.withOpacity(0.08));

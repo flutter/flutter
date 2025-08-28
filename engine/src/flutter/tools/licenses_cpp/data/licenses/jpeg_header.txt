@@ -1,0 +1,6 @@
+jpeg header
+This file was part of the Independent JPEG Group's software
+(?s)This file was part of the Independent JPEG Group's software:
+Copyright.*
+For conditions of distribution and use, see the accompanying README.ijg
+file.

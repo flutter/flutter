@@ -8,7 +8,8 @@ class SurfaceTintTemplate extends TokenTemplate {
   const SurfaceTintTemplate(super.blockName, super.fileName, super.tokens);
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 // Surface tint opacities based on elevations according to the
 // Material Design 3 specification:
 //   https://m3.material.io/styles/color/the-color-system/color-roles

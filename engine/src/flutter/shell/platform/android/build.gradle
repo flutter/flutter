@@ -8,7 +8,9 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:8.9.1"
+        // Consult the Android team before bumping. This is only used for IDE support, so
+        // it does not need to be bumped as part of most repo-wide upgrades.
+        classpath "com.android.tools.build:gradle:8.7.1"
     }
 }
 
@@ -21,10 +23,10 @@ apply plugin: "com.android.library"
 
 android {
     namespace "io.flutter.embedding"
-    compileSdk 36
+    compileSdk = 36
 
     defaultConfig {
-        minSdkVersion 21
+        minSdk = 24
     }
 
     sourceSets {

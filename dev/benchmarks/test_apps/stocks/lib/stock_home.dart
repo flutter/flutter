@@ -198,26 +198,25 @@ class StockHomeState extends State<StockHome> {
           onSelected: (_StockMenuItem value) {
             _handleStockMenu(context, value);
           },
-          itemBuilder:
-              (BuildContext context) => <PopupMenuItem<_StockMenuItem>>[
-                CheckedPopupMenuItem<_StockMenuItem>(
-                  value: _StockMenuItem.autorefresh,
-                  checked: _autorefresh,
-                  child: const Text('Autorefresh'),
-                ),
-                const PopupMenuItem<_StockMenuItem>(
-                  value: _StockMenuItem.refresh,
-                  child: Text('Refresh'),
-                ),
-                const PopupMenuItem<_StockMenuItem>(
-                  value: _StockMenuItem.speedUp,
-                  child: Text('Increase animation speed'),
-                ),
-                const PopupMenuItem<_StockMenuItem>(
-                  value: _StockMenuItem.speedDown,
-                  child: Text('Decrease animation speed'),
-                ),
-              ],
+          itemBuilder: (BuildContext context) => <PopupMenuItem<_StockMenuItem>>[
+            CheckedPopupMenuItem<_StockMenuItem>(
+              value: _StockMenuItem.autorefresh,
+              checked: _autorefresh,
+              child: const Text('Autorefresh'),
+            ),
+            const PopupMenuItem<_StockMenuItem>(
+              value: _StockMenuItem.refresh,
+              child: Text('Refresh'),
+            ),
+            const PopupMenuItem<_StockMenuItem>(
+              value: _StockMenuItem.speedUp,
+              child: Text('Increase animation speed'),
+            ),
+            const PopupMenuItem<_StockMenuItem>(
+              value: _StockMenuItem.speedDown,
+              child: Text('Decrease animation speed'),
+            ),
+          ],
         ),
       ],
       bottom: TabBar(

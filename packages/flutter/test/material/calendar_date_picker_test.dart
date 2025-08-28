@@ -587,10 +587,9 @@ void main() {
           final DateTime updatedDate = DateTime(1976, 2, 23);
           final DateTime firstDate = DateTime(1970);
           final DateTime lastDate = DateTime(2099, 31, 12);
-          final Color selectedColor =
-              useMaterial3
-                  ? const Color(0xff6750a4)
-                  : const Color(0xff2196f3); // default primary color
+          final Color selectedColor = useMaterial3
+              ? const Color(0xff6750a4)
+              : const Color(0xff2196f3); // default primary color
 
           await tester.pumpWidget(
             calendarDatePicker(
@@ -1436,6 +1435,62 @@ void main() {
         ),
       );
     });
+
+    testWidgets('CalendarDatePicker renders at zero area', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox.shrink(
+              child: CalendarDatePicker(
+                initialDate: DateTime(2025),
+                firstDate: DateTime(2024),
+                lastDate: DateTime(2026),
+                onDateChanged: (_) {},
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox.shrink(
+              child: CalendarDatePicker(
+                initialDate: DateTime(2025),
+                firstDate: DateTime(2024),
+                lastDate: DateTime(2026),
+                onDateChanged: (_) {},
+                initialCalendarMode: DatePickerMode.year,
+              ),
+            ),
+          ),
+        ),
+      );
+    });
+
+    testWidgets('Ink feature paints on inner Material', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        calendarDatePicker(
+          firstDate: DateTime(2025, DateTime.june),
+          initialDate: DateTime(2025, DateTime.july, 20),
+          lastDate: DateTime(2025, DateTime.august, 31),
+        ),
+      );
+
+      // Material outside the PageView.
+      final MaterialInkController outerMaterial = Material.of(
+        tester.element(find.byType(FocusableActionDetector)),
+      );
+      // Material directly wrapping the PageView.
+      final MaterialInkController innerMaterial = Material.of(
+        tester.element(find.byType(PageView)),
+      );
+
+      // Only the inner Material should have ink features.
+      expect((outerMaterial as dynamic).debugInkFeatures, isNull);
+      expect((innerMaterial as dynamic).debugInkFeatures, hasLength(31));
+    });
   });
 
   group('YearPicker', () {
@@ -1521,13 +1576,29 @@ void main() {
       await tester.tap(find.text('2018'));
       expect(selectedYear, equals(DateTime(2018, DateTime.june)));
     });
+
+    testWidgets('YearPicker renders at zero area', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox.shrink(
+              child: YearPicker(
+                selectedDate: DateTime(2025),
+                firstDate: DateTime(2024),
+                lastDate: DateTime(2026),
+                onChanged: (_) {},
+              ),
+            ),
+          ),
+        ),
+      );
+    });
   });
 
   group('Calendar Delegate', () {
     testWidgets('Defaults to Gregorian calendar system', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: true),
           home: Material(
             child: CalendarDatePicker(
               initialDate: DateTime(2025, DateTime.february, 26),
@@ -1556,7 +1627,6 @@ void main() {
     testWidgets('Using custom calendar delegate implementation', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: true),
           home: Material(
             child: CalendarDatePicker(
               initialDate: DateTime(2025, DateTime.february, 26),

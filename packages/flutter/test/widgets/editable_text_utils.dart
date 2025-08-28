@@ -57,8 +57,9 @@ Future<void> sendKeys(
   required TargetPlatform targetPlatform,
 }) async {
   final String targetPlatformString = targetPlatform.toString();
-  final String platform =
-      targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
+  final String platform = targetPlatformString
+      .substring(targetPlatformString.indexOf('.') + 1)
+      .toLowerCase();
   if (shift) {
     await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
   }
