@@ -56,7 +56,7 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
     bundle = FLTFrameworkBundleWithIdentifier([FlutterDartProject defaultBundleIdentifier]);
   }
 
-  auto settings = flutter::SettingsFromCommandLine(command_line);
+  auto settings = flutter::SettingsFromCommandLine(command_line, true);
 
   settings.task_observer_add = [](intptr_t key, const fml::closure& callback) {
     fml::TaskQueueId queue_id = fml::MessageLoop::GetCurrentTaskQueueId();
@@ -216,9 +216,8 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
   NSNumber* enableMergedPlatformUIThread =
       [mainBundle objectForInfoDictionaryKey:@"FLTEnableMergedPlatformUIThread"];
   if (enableMergedPlatformUIThread != nil) {
-    settings.merged_platform_ui_thread = enableMergedPlatformUIThread.boolValue
-                                             ? flutter::Settings::MergedPlatformUIThread::kEnabled
-                                             : flutter::Settings::MergedPlatformUIThread::kDisabled;
+    FML_CHECK(enableMergedPlatformUIThread.boolValue)
+        << "FLTEnableMergedPlatformUIThread=false is no longer allowed.";
   }
 
   NSNumber* enableFlutterGPU = [mainBundle objectForInfoDictionaryKey:@"FLTEnableFlutterGPU"];

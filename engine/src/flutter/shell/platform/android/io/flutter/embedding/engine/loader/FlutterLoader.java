@@ -430,7 +430,8 @@ public class FlutterLoader {
           shellArgs.add("--enable-vulkan-gpu-tracing");
         }
         if (metaData.getBoolean(DISABLE_MERGED_PLATFORM_UI_THREAD_KEY, false)) {
-          shellArgs.add("--merged-platform-ui-thread=disabled");
+          throw new IllegalArgumentException(
+              DISABLE_MERGED_PLATFORM_UI_THREAD_KEY + " is no longer allowed.");
         }
         if (metaData.getBoolean(ENABLE_FLUTTER_GPU, false)) {
           shellArgs.add("--enable-flutter-gpu");
