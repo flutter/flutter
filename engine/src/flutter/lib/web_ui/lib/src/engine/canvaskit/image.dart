@@ -312,6 +312,17 @@ CkImage scaleImage(SkImage image, int? targetWidth, int? targetHeight) {
   return ckImage;
 }
 
+/// Thrown when the web engine fails to decode an image, either due to a
+/// network issue, corrupted image contents, or missing codec.
+class ImageCodecException implements Exception {
+  ImageCodecException(this._message);
+
+  final String _message;
+
+  @override
+  String toString() => 'ImageCodecException: $_message';
+}
+
 const String _kNetworkImageMessage = 'Failed to load network image.';
 
 /// Instantiates a [ui.Codec] backed by an `SkAnimatedImage` from Skia after

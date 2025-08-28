@@ -172,10 +172,6 @@ SKWASM_EXPORT void canvas_transform(DisplayListBuilder* canvas,
   canvas->Transform(*matrix44);
 }
 
-SKWASM_EXPORT void canvas_clear(DisplayListBuilder* canvas, uint32_t color) {
-  canvas->DrawColor(DlColor(color), DlBlendMode::kSrc);
-}
-
 SKWASM_EXPORT void canvas_clipRect(DisplayListBuilder* canvas,
                                    const DlRect* rect,
                                    DlClipOp op,
@@ -368,9 +364,4 @@ SKWASM_EXPORT void canvas_getLocalClipBounds(DisplayListBuilder* canvas,
 SKWASM_EXPORT void canvas_getDeviceClipBounds(DisplayListBuilder* canvas,
                                               DlIRect* outRect) {
   *outRect = DlIRect::RoundOut(canvas->GetDestinationClipCoverage());
-}
-
-SKWASM_EXPORT bool canvas_quickReject(DisplayListBuilder* canvas,
-                                      DlRect* rect) {
-  return canvas->QuickReject(*rect);
 }

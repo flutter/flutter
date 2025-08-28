@@ -267,14 +267,3 @@ ui.Image scaleImageIfNeeded(
   image.dispose();
   return finalImage;
 }
-
-/// Thrown when the web engine fails to decode an image, either due to a
-/// network issue, corrupted image contents, or missing codec.
-class ImageCodecException implements Exception {
-  ImageCodecException(this._message);
-
-  final String _message;
-
-  @override
-  String toString() => 'ImageCodecException: $_message';
-}

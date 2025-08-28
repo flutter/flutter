@@ -162,8 +162,9 @@ class FrameService {
     // In Flutter terminology "building a frame" consists of "beginning
     // frame" and "drawing frame".
     //
-    // We do not call `recordBuildFinish` from here because part of the
-    // rasterization process takes place in `SceneBuilder.build()`.
+    // We do not call `recordBuildFinish` from here because
+    // part of the rasterization process, particularly in the HTML
+    // renderer, takes place in the `SceneBuilder.build()`.
     FrameTimingRecorder.recordCurrentFrameBuildStart();
 
     // We have to convert high-resolution time to `int` so we can construct

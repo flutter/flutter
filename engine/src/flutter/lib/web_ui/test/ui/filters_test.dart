@@ -486,8 +486,8 @@ Future<void> testMain() async {
     await renderScene(builder.build());
 
     await matchGoldenFile('ui_zero_sigma_blur.png', region: region);
-    // Skwasm crashes with a zero-sigma blur. See:
-    // https://github.com/flutter/flutter/issues/174583
+    // Unskip when Skwasm and CanvasKit are unified:
+    // https://github.com/flutter/flutter/issues/172311
   }, skip: isSkwasm);
 
   test('== operator', () {

@@ -14,7 +14,7 @@ enum PathDirection { clockwise, counterClockwise }
 
 enum PathArcSize { small, large }
 
-class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements LayerPath, DisposablePath {
+class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements ScenePath, DisposablePath {
   factory SkwasmPath() {
     return SkwasmPath.fromHandle(pathCreate());
   }
