@@ -10,7 +10,6 @@ import 'package:web_engine_tester/golden_tester.dart';
 
 import '../common/rendering.dart';
 import '../common/test_initialization.dart';
-import 'utils.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -292,9 +291,7 @@ void testMain() {
       await renderScene(builder.build());
 
       await matchGoldenFile('ui_colorfilter_as_imagefilter.png', region: region);
-      // Unskip when Skwasm and CanvasKit are unified:
-      // https://github.com/flutter/flutter/issues/172311
-    }, skip: isSkwasm || isSafari || isFirefox);
+    });
     // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
   }, skip: isSafari || isFirefox);
 }

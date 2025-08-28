@@ -483,9 +483,7 @@ Future<void> testMain() async {
       'matrix(1, 0, 0, 1, 6, 6)',
       'matrix(1, 0, 0, 1, 3, 3)',
     ]);
-    // Unskip when Skwasm and CanvasKit are unified:
-    // https://github.com/flutter/flutter/issues/172311
-  }, skip: isSkwasm);
+  });
 
   test('converts device pixels to logical pixels (no clips)', () async {
     EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(4);
@@ -503,9 +501,7 @@ Future<void> testMain() async {
 
     expect(getTransformChain(slotHost), <String>['matrix(0.25, 0, 0, 0.25, 1.5, 1.5)']);
     EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(null);
-    // Unskip when Skwasm and CanvasKit are unified:
-    // https://github.com/flutter/flutter/issues/172311
-  }, skip: isSkwasm);
+  });
 
   test('converts device pixels to logical pixels (with clips)', () async {
     EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(4);
@@ -529,9 +525,7 @@ Future<void> testMain() async {
       'matrix(0.25, 0, 0, 0.25, 0.75, 0.75)',
     ]);
     EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(null);
-    // Unskip when Skwasm and CanvasKit are unified:
-    // https://github.com/flutter/flutter/issues/172311
-  }, skip: isSkwasm);
+  });
 
   test('renders overlays on top of platform views', () async {
     debugOverrideJsConfiguration(
@@ -677,9 +671,7 @@ Future<void> testMain() async {
     await renderTestScene(viewCount: 0);
     _expectSceneMatches(<_EmbeddedViewMarker>[]);
     debugOverrideJsConfiguration(null);
-    // Unskip when Skwasm and CanvasKit are unified:
-    // https://github.com/flutter/flutter/issues/172311
-  }, skip: isSkwasm);
+  });
 
   test('correctly reuses overlays', () async {
     final ui.PictureRecorder testRecorder = ui.PictureRecorder();
@@ -803,9 +795,7 @@ Future<void> testMain() async {
       _overlay,
       _platformView,
     ]);
-    // Unskip when Skwasm and CanvasKit are unified:
-    // https://github.com/flutter/flutter/issues/172311
-  }, skip: isSkwasm);
+  });
 
   test('embeds and disposes of a platform view', () async {
     await createPlatformView(1, platformViewType);
@@ -899,10 +889,8 @@ Future<void> testMain() async {
       implicitView.debugForceResize();
 
       // ImageDecoder is not supported in Safari or Firefox.
-      // Unskip when Skwasm and CanvasKit are unified:
-      // https://github.com/flutter/flutter/issues/172311
     },
-    skip: isSafari || isFirefox || isSkwasm,
+    skip: isSafari || isFirefox,
   );
 
   test('does not crash when a prerolled platform view is not composited', () async {
@@ -916,9 +904,7 @@ Future<void> testMain() async {
     // The below line should not throw an error.
     await renderScene(sb.build());
     _expectSceneMatches(<_EmbeddedViewMarker>[]);
-    // Unskip when Skwasm and CanvasKit are unified:
-    // https://github.com/flutter/flutter/issues/172311
-  }, skip: isSkwasm);
+  });
 
   test('does not create overlays for invisible platform views', () async {
     final ui.PictureRecorder testRecorder = ui.PictureRecorder();
@@ -1150,9 +1136,7 @@ Future<void> testMain() async {
       _platformView,
       _overlay,
     ]);
-    // Unskip when Skwasm and CanvasKit are unified:
-    // https://github.com/flutter/flutter/issues/172311
-  }, skip: isSkwasm);
+  });
 
   test('can dispose without crashing', () async {
     ui_web.platformViewRegistry.registerViewFactory(
@@ -1181,9 +1165,7 @@ Future<void> testMain() async {
       // The following line used to cause a "Concurrent modification during iteration"
       embedder.dispose();
     }, returnsNormally);
-    // Unskip when Skwasm and CanvasKit are unified:
-    // https://github.com/flutter/flutter/issues/172311
-  }, skip: isSkwasm);
+  });
 
   test('optimizes overlays when pictures and platform views do not overlap', () async {
     ui.Picture rectPicture(ui.Rect rect) {
@@ -1422,10 +1404,7 @@ Future<void> testMain() async {
         .map((CompositionCanvas canvas) => canvas.pictures.length)
         .toList();
     expect(picturesPerCanvas, <int>[1, 2]);
-    // Unskip when Skwasm and CanvasKit are unified:
-    // https://github.com/flutter/flutter/issues/172311
-  }, skip: isSkwasm);
-
+  });
   test('can customize amount of overlays', () async {
     final ui.PictureRecorder testRecorder = ui.PictureRecorder();
     final ui.Canvas testCanvas = ui.Canvas(testRecorder);
@@ -1493,9 +1472,7 @@ Future<void> testMain() async {
     ]);
 
     debugOverrideJsConfiguration(null);
-    // Unskip when Skwasm and CanvasKit are unified:
-    // https://github.com/flutter/flutter/issues/172311
-  }, skip: isSkwasm);
+  });
 
   test('correctly rearranges pictures to second-to-last canvas '
       'when hitting canvas limit', () async {
@@ -1605,10 +1582,7 @@ Future<void> testMain() async {
         .toList();
     expect(picturesPerCanvasInSecondRendering, <int>[19]);
     debugOverrideJsConfiguration(null);
-    // Unskip when Skwasm and CanvasKit are unified:
-    // https://github.com/flutter/flutter/issues/172311
-  }, skip: isSkwasm);
-
+  });
   test('disposes render pictures', () async {
     Instrumentation.enabled = true;
     Instrumentation.instance.debugCounters.clear();
