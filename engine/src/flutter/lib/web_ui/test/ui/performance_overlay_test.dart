@@ -32,10 +32,7 @@ void testMain() {
       warnings.clear();
       expect(() => sb1.addPerformanceOverlay(0, ui.Rect.zero), returnsNormally);
       expect(warnings, hasLength(1));
-      expect(
-        warnings.single,
-        contains('showPerformanceOverlay is not supported on Flutter Web'),
-      );
+      expect(warnings.single, contains('showPerformanceOverlay is not supported on Flutter Web'));
 
       final LayerSceneBuilder sb2 = LayerSceneBuilder();
       warnings.clear();
