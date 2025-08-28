@@ -492,7 +492,7 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator>
 
   @override
   void dispose() {
-    _internalController?.dispose();
+    _internalController.dispose();
     super.dispose();
   }
 
@@ -993,7 +993,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
 
   @override
   void dispose() {
-    _internalController?.dispose();
+    _internalController.dispose();
     super.dispose();
   }
 
