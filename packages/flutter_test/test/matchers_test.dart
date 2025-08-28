@@ -1348,6 +1348,49 @@ void main() {
 
       handle.dispose();
     });
+    testWidgets('can match validation result', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      const Key key = Key('a');
+      await tester.pumpWidget(
+        Semantics(
+          key: key,
+          label: 'Foo',
+          validationResult: SemanticsValidationResult.valid,
+          textDirection: TextDirection.ltr,
+        ),
+      );
+      final SemanticsNode node = tester.getSemantics(find.byKey(key));
+
+      expect(
+        node,
+        containsSemantics(
+          label: 'Foo',
+          validationResult: SemanticsValidationResult.valid,
+          textDirection: TextDirection.ltr,
+        ),
+      );
+
+      handle.dispose();
+    });
+
+    testWidgets('can ignore validation result', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      const Key key = Key('a');
+      await tester.pumpWidget(
+        Semantics(
+          key: key,
+          label: 'Foo',
+          validationResult: SemanticsValidationResult.valid,
+          textDirection: TextDirection.ltr,
+        ),
+      );
+      final SemanticsNode node = tester.getSemantics(find.byKey(key));
+      // It is important that validationResult is passed as null to containsSemantics,
+      // because this is testing that null means "ignore the validation result value".
+      expect(node, containsSemantics(label: 'Foo', textDirection: TextDirection.ltr));
+
+      handle.dispose();
+    });
 
     testWidgets('can match only custom actions', (WidgetTester tester) async {
       const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');

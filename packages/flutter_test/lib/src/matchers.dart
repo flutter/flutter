@@ -879,7 +879,7 @@ Matcher containsSemantics({
   int? platformViewId,
   int? maxValueLength,
   int? currentValueLength,
-  SemanticsValidationResult validationResult = SemanticsValidationResult.none,
+  SemanticsValidationResult? validationResult,
   ui.SemanticsInputType? inputType,
   // Flags
   bool? hasCheckedState,
@@ -2538,7 +2538,7 @@ class _MatchesSemanticsData extends Matcher {
   final int? currentValueLength;
   final ui.SemanticsInputType? inputType;
   final List<Matcher>? children;
-  final SemanticsValidationResult validationResult;
+  final SemanticsValidationResult? validationResult;
 
   /// There are three possible states for these two maps:
   ///
@@ -2645,7 +2645,7 @@ class _MatchesSemanticsData extends Matcher {
     if (hintOverrides != null) {
       description.add(' with custom hints: $hintOverrides');
     }
-    if (validationResult != SemanticsValidationResult.none) {
+    if (validationResult != null) {
       description.add(' with validation result: $validationResult');
     }
     if (children != null) {
@@ -2778,7 +2778,7 @@ class _MatchesSemanticsData extends Matcher {
     if (maxValueLength != null && maxValueLength != data.maxValueLength) {
       return failWithDescription(matchState, 'maxValueLength was: ${data.maxValueLength}');
     }
-    if (validationResult != data.validationResult) {
+    if (validationResult != null && validationResult != data.validationResult) {
       return failWithDescription(matchState, 'validationResult was: ${data.validationResult}');
     }
     if (inputType != null && inputType != data.inputType) {
