@@ -43,7 +43,10 @@ void Surface::dispose() {
 }
 
 // Main thread only
-uint32_t Surface::renderPictures(DisplayList** pictures, int count) {
+uint32_t Surface::renderPictures(DisplayList** pictures,
+                                 int width,
+                                 int height,
+                                 int count) {
   assert(emscripten_is_main_browser_thread());
   uint32_t callbackId = ++_currentCallbackId;
   std::unique_ptr<sk_sp<DisplayList>[]> picturePointers =
@@ -54,8 +57,8 @@ uint32_t Surface::renderPictures(DisplayList** pictures, int count) {
 
   // Releasing picturePointers here and will recreate the unique_ptr on the
   // other thread See surface_renderPicturesOnWorker
-  skwasm_dispatchRenderPictures(_thread, this, picturePointers.release(), count,
-                                callbackId);
+  skwasm_dispatchRenderPictures(_thread, this, picturePointers.release(), width,
+                                height, count, callbackId);
   return callbackId;
 }
 
@@ -115,10 +118,10 @@ void Surface::_init() {
 }
 
 // Worker thread only
-void Surface::_resizeCanvasToFit(int width, int height) {
-  if (!_surface || width > _canvasWidth || height > _canvasHeight) {
-    _canvasWidth = std::max(width, _canvasWidth);
-    _canvasHeight = std::max(height, _canvasHeight);
+void Surface::_resizeSurface(int width, int height) {
+  if (!_surface || width != _canvasWidth || height != _canvasHeight) {
+    _canvasWidth = width;
+    _canvasHeight = height;
     _recreateSurface();
   }
 }
@@ -136,6 +139,8 @@ void Surface::_recreateSurface() {
 
 // Worker thread only
 void Surface::renderPicturesOnWorker(sk_sp<DisplayList>* pictures,
+                                     int width,
+                                     int height,
                                      int pictureCount,
                                      uint32_t callbackId,
                                      double rasterStart) {
@@ -143,29 +148,24 @@ void Surface::renderPicturesOnWorker(sk_sp<DisplayList>* pictures,
     _init();
   }
 
-  // This is populated by the `captureImageBitmap` call the first time it is
-  // passed in.
-  SkwasmObject imagePromiseArray = __builtin_wasm_ref_null_extern();
+  // This is initialized on the first call to `skwasm_captureImageBitmap` and
+  // then populated with more bitmaps on subsequent calls.
+  SkwasmObject imageBitmapArray = __builtin_wasm_ref_null_extern();
   for (int i = 0; i < pictureCount; i++) {
     sk_sp<DisplayList> picture = pictures[i];
-    DlRect pictureRect = picture->GetBounds();
-    DlIRect roundedOutRect = DlIRect::RoundOut(pictureRect);
-    _resizeCanvasToFit(roundedOutRect.GetWidth(), roundedOutRect.GetHeight());
+    _resizeSurface(width, height);
     makeCurrent(_glContext);
     auto canvas = _surface->getCanvas();
     canvas->drawColor(SK_ColorTRANSPARENT, SkBlendMode::kSrc);
     auto dispatcher = DlSkCanvasDispatcher(canvas);
     dispatcher.save();
-    dispatcher.translate(-roundedOutRect.GetLeft(), -roundedOutRect.GetTop());
     dispatcher.drawDisplayList(picture, 1.0f);
     dispatcher.restore();
 
     _grContext->flush(_surface.get());
-    imagePromiseArray = skwasm_captureImageBitmap(
-        _glContext, roundedOutRect.GetWidth(), roundedOutRect.GetHeight(),
-        imagePromiseArray);
+    imageBitmapArray = skwasm_captureImageBitmap(_glContext, imageBitmapArray);
   }
-  skwasm_resolveAndPostImages(this, imagePromiseArray, rasterStart, callbackId);
+  skwasm_resolveAndPostImages(this, imageBitmapArray, rasterStart, callbackId);
 }
 
 // Worker thread only
@@ -198,7 +198,7 @@ void Surface::rasterizeImageOnWorker(SkImage* image,
   // `glReadPixels`. Once the skia bug is fixed, we should switch back to using
   // `SkImage::readPixels` instead.
   // See https://g-issues.skia.org/issues/349201915
-  _resizeCanvasToFit(image->width(), image->height());
+  _resizeSurface(image->width(), image->height());
   auto canvas = _surface->getCanvas();
   canvas->drawColor(SK_ColorTRANSPARENT, SkBlendMode::kSrc);
 
@@ -270,20 +270,24 @@ SKWASM_EXPORT void surface_dispose(Surface* surface) {
 
 SKWASM_EXPORT uint32_t surface_renderPictures(Surface* surface,
                                               DisplayList** pictures,
+                                              int width,
+                                              int height,
                                               int count) {
-  return surface->renderPictures(pictures, count);
+  return surface->renderPictures(pictures, width, height, count);
 }
 
 SKWASM_EXPORT void surface_renderPicturesOnWorker(Surface* surface,
                                                   sk_sp<DisplayList>* pictures,
+                                                  int width,
+                                                  int height,
                                                   int pictureCount,
                                                   uint32_t callbackId,
                                                   double rasterStart) {
   // This will release the pictures when they leave scope.
   std::unique_ptr<sk_sp<DisplayList>[]> picturesPointer =
       std::unique_ptr<sk_sp<DisplayList>[]>(pictures);
-  surface->renderPicturesOnWorker(pictures, pictureCount, callbackId,
-                                  rasterStart);
+  surface->renderPicturesOnWorker(pictures, width, height, pictureCount,
+                                  callbackId, rasterStart);
 }
 
 SKWASM_EXPORT uint32_t surface_rasterizeImage(Surface* surface,
