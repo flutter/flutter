@@ -1,3 +1,4 @@
+// filepath: /engine/src/flutter/lib/web_ui/lib/src/engine/layer/layer_scene_builder.dart
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -219,3 +220,4 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     throw UnimplementedError();
   }
 }
+
