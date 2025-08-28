@@ -16,7 +16,7 @@ typedef CanvasHandle = Pointer<RawCanvas>;
 @Native<Void Function(CanvasHandle)>(symbol: 'canvas_save', isLeaf: true)
 external void canvasSave(CanvasHandle canvas);
 
-@Native<Void Function(CanvasHandle, RawRect, PaintHandle, ImageFilterHandle, Int)>(
+@Native<Void Function(CanvasHandle, RawRect, PaintHandle, ImageFilterHandle)>(
   symbol: 'canvas_saveLayer',
   isLeaf: true,
 )
@@ -25,7 +25,6 @@ external void canvasSaveLayer(
   RawRect rect,
   PaintHandle paint,
   ImageFilterHandle handle,
-  int backdropTileMode,
 );
 
 @Native<Void Function(CanvasHandle)>(symbol: 'canvas_restore', isLeaf: true)

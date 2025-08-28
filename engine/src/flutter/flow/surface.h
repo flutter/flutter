@@ -12,6 +12,8 @@
 #include "flutter/flow/surface_frame.h"
 #include "flutter/fml/macros.h"
 
+#include "third_party/skia/include/core/SkData.h"
+
 class GrDirectContext;
 
 namespace impeller {

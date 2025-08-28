@@ -303,7 +303,7 @@ class TimePickerThemeData with Diagnosticable {
   ///
   /// If this is null and [ThemeData.useMaterial3] is false, then defaults to the value of
   /// [hourMinuteTextColor].
-  final MaterialStateProperty<Color?>? timeSelectorSeparatorColor;
+  final WidgetStateProperty<Color?>? timeSelectorSeparatorColor;
 
   /// Used to configure the text style for the time selector separator between the hour
   /// and minute controls.
@@ -313,7 +313,7 @@ class TimePickerThemeData with Diagnosticable {
   ///
   /// If this is null and [ThemeData.useMaterial3] is false, then defaults to the value of
   /// [hourMinuteTextStyle].
-  final MaterialStateProperty<TextStyle?>? timeSelectorSeparatorTextStyle;
+  final WidgetStateProperty<TextStyle?>? timeSelectorSeparatorTextStyle;
 
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
@@ -341,8 +341,8 @@ class TimePickerThemeData with Diagnosticable {
     InputDecorationTheme? inputDecorationTheme,
     EdgeInsetsGeometry? padding,
     ShapeBorder? shape,
-    MaterialStateProperty<Color?>? timeSelectorSeparatorColor,
-    MaterialStateProperty<TextStyle?>? timeSelectorSeparatorTextStyle,
+    WidgetStateProperty<Color?>? timeSelectorSeparatorColor,
+    WidgetStateProperty<TextStyle?>? timeSelectorSeparatorTextStyle,
   }) {
     return TimePickerThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -414,13 +414,13 @@ class TimePickerThemeData with Diagnosticable {
       inputDecorationTheme: t < 0.5 ? a?.inputDecorationTheme : b?.inputDecorationTheme,
       padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
-      timeSelectorSeparatorColor: MaterialStateProperty.lerp<Color?>(
+      timeSelectorSeparatorColor: WidgetStateProperty.lerp<Color?>(
         a?.timeSelectorSeparatorColor,
         b?.timeSelectorSeparatorColor,
         t,
         Color.lerp,
       ),
-      timeSelectorSeparatorTextStyle: MaterialStateProperty.lerp<TextStyle?>(
+      timeSelectorSeparatorTextStyle: WidgetStateProperty.lerp<TextStyle?>(
         a?.timeSelectorSeparatorTextStyle,
         b?.timeSelectorSeparatorTextStyle,
         t,
@@ -554,14 +554,14 @@ class TimePickerThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(
-      DiagnosticsProperty<MaterialStateProperty<Color?>>(
+      DiagnosticsProperty<WidgetStateProperty<Color?>>(
         'timeSelectorSeparatorColor',
         timeSelectorSeparatorColor,
         defaultValue: null,
       ),
     );
     properties.add(
-      DiagnosticsProperty<MaterialStateProperty<TextStyle?>>(
+      DiagnosticsProperty<WidgetStateProperty<TextStyle?>>(
         'timeSelectorSeparatorTextStyle',
         timeSelectorSeparatorTextStyle,
         defaultValue: null,

@@ -136,23 +136,23 @@ class Context {
       }
       errorOutput.write(resultStderr);
       if (skipErrorLog) {
-        // Pipe stderr to stdout under verbose mode.
-        // An example is on macOS 26, plutil reports NSBonjourServices key not found
-        // via stderr (rather than stdout on older macOS), and logging the message
-        // in stderr would be confusing, since not having the key is one of the expected states.
+        // Even if skipErrorLog, we still want to write to stdout if verbose.
         if (verbose) {
           echo(errorOutput.toString());
         }
       } else {
         echoError(errorOutput.toString());
       }
-
       // Stream stderr to the Flutter build process.
       // When in verbose mode, `echoError` above will show the logs. So only
       // stream if not in verbose mode to avoid duplicate logs.
       // Also, only stream if exitCode is 0 since errors are handled separately
       // by the tool on failure.
-      if (!verbose && exitCode == 0) {
+      // Also check for `skipErrorLog`, because some errors should not be printed
+      // out. For example, on macOS 26, plutil reports NSBonjourServices key not
+      // found as an error. However, logging it in non-verbose mode would be
+      // confusing, since not having the key is one of the expected states.
+      if (!verbose && exitCode == 0 && !skipErrorLog) {
         streamOutput(errorOutput.toString());
       }
     }

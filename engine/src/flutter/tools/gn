@@ -947,7 +947,7 @@ def parse_args(args):
   )
   parser.add_argument('--android', dest='target_os', action='store_const', const='android')
   parser.add_argument(
-      '--android-cpu', type=str, choices=['arm', 'x64', 'x86', 'arm64'], default='arm'
+      '--android-cpu', type=str, choices=['arm', 'x64', 'x86', 'arm64', 'riscv64'], default='arm'
   )
   parser.add_argument('--ios', dest='target_os', action='store_const', const='ios')
   parser.add_argument('--mac', dest='target_os', action='store_const', const='mac')

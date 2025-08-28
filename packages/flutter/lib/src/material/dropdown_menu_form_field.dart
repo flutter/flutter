@@ -75,11 +75,6 @@ class DropdownMenuFormField<T> extends FormField<T> {
          autovalidateMode: autovalidateMode,
          builder: (FormFieldState<T> field) {
            final _DropdownMenuFormFieldState<T> state = field as _DropdownMenuFormFieldState<T>;
-           void onSelectedHandler(T? value) {
-             field.didChange(value);
-             onSelected?.call(value);
-           }
-
            return UnmanagedRestorationScope(
              bucket: field.bucket,
              child: DropdownMenu<T>(
@@ -103,7 +98,7 @@ class DropdownMenuFormField<T> extends FormField<T> {
                menuStyle: menuStyle,
                controller: controller,
                initialSelection: state.value,
-               onSelected: onSelectedHandler,
+               onSelected: field.didChange,
                focusNode: focusNode,
                requestFocusOnTap: requestFocusOnTap,
                expandedInsets: expandedInsets,
