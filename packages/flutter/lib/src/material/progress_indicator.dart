@@ -17,7 +17,11 @@ import 'material.dart';
 import 'progress_indicator_theme.dart';
 import 'theme.dart';
 
+// This value is extracted from
+// https://cs.android.com/android/platform/superproject/+/master:frameworks/base/core/res/res/anim/progress_indeterminate_material.xml;drc=9cb5b4c2d93acb9d6f5e14167e265c328c487d6b
 const int _kIndeterminateLinearDuration = 1800;
+// This value is extracted from
+// https://cs.android.com/android/platform/superproject/+/master:frameworks/base/core/res/res/anim/progress_indeterminate_rotation_material.xml;drc=077b44912b879174cec48a25307f1c19b96c2a78
 const int _kIndeterminateCircularDuration = 1333 * 2222;
 
 enum _ActivityIndicatorType { material, adaptive }
