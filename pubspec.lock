@@ -126,10 +126,10 @@ packages:
     dependency: "direct main"
     description:
       name: code_assets
-      sha256: dd7ed641b7f642092092969f2dcd5845ab31c9f3efead0c06ca437bf9ce8a8b2
+      sha256: "3b182b03a2f263ad6ab47cdadf9b64daa1d2d72ac941a277f685fb77ba96cbd5"
       url: "https://pub.dev"
     source: hosted
-    version: "0.19.4"
+    version: "0.19.6"
   collection:
     dependency: "direct main"
     description:
@@ -350,10 +350,10 @@ packages:
     dependency: "direct main"
     description:
       name: hooks
-      sha256: "75363eae6c0c2db051c4f6b3b1fcdea8a09c4a596cc83bfff847661da6e80dfc"
+      sha256: "22abd27b650a571e53576abe732e4d9053aacaaa6dee23e9ff106c63e3e5b96c"
       url: "https://pub.dev"
     source: hosted
-    version: "0.19.5"
+    version: "0.20.1"
   html:
     dependency: "direct main"
     description:
@@ -510,10 +510,10 @@ packages:
     dependency: "direct main"
     description:
       name: native_toolchain_c
-      sha256: "74a0c80d877c519bc6bde2c4e27b6b01c1f93c9b480f65ceae8bedd3aba3c086"
+      sha256: "7e8358a4f6ec69a4f2d366bb971af298aca50d6c2e8a07be7c12d7f6d40460aa"
       url: "https://pub.dev"
     source: hosted
-    version: "0.16.8"
+    version: "0.17.1"
   nested:
     dependency: "direct main"
     description:
@@ -1096,5 +1096,5 @@ packages:
     source: hosted
     version: "2.2.2"
 sdks:
-  dart: ">=3.9.0-21.0.dev <4.0.0"
+  dart: ">=3.9.0 <4.0.0"
   flutter: ">=3.29.0"

@@ -5909,62 +5909,62 @@ class _InputDecoratorDefaultsM3 extends InputDecorationThemeData {
   // see https://github.com/flutter/flutter/pull/125905.
 
   @override
-  TextStyle? get hintStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
+  TextStyle? get hintStyle => MaterialStateTextStyle.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
       return TextStyle(color: _colors.onSurface.withOpacity(0.38));
     }
     return TextStyle(color: _colors.onSurfaceVariant);
   });
 
   @override
-  Color? get fillColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
+  Color? get fillColor => MaterialStateColor.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
       return _colors.onSurface.withOpacity(0.04);
     }
     return _colors.surfaceContainerHighest;
   });
 
   @override
-  BorderSide? get activeIndicatorBorder => MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
+  BorderSide? get activeIndicatorBorder => MaterialStateBorderSide.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
       return BorderSide(color: _colors.onSurface.withOpacity(0.38));
     }
-    if (states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.error)) {
+      if (states.contains(WidgetState.focused)) {
         return BorderSide(color: _colors.error, width: 2.0);
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return BorderSide(color: _colors.onErrorContainer);
       }
       return BorderSide(color: _colors.error);
     }
-    if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.focused)) {
       return BorderSide(color: _colors.primary, width: 2.0);
     }
-    if (states.contains(MaterialState.hovered)) {
+    if (states.contains(WidgetState.hovered)) {
       return BorderSide(color: _colors.onSurface);
     }
     return BorderSide(color: _colors.onSurfaceVariant);
     });
 
   @override
-  BorderSide? get outlineBorder => MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
+  BorderSide? get outlineBorder => MaterialStateBorderSide.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
       return BorderSide(color: _colors.onSurface.withOpacity(0.12));
     }
-    if (states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.error)) {
+      if (states.contains(WidgetState.focused)) {
         return BorderSide(color: _colors.error, width: 2.0);
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return BorderSide(color: _colors.onErrorContainer);
       }
       return BorderSide(color: _colors.error);
     }
-    if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.focused)) {
       return BorderSide(color: _colors.primary, width: 2.0);
     }
-    if (states.contains(MaterialState.hovered)) {
+    if (states.contains(WidgetState.hovered)) {
       return BorderSide(color: _colors.onSurface);
     }
     return BorderSide(color: _colors.outline);
@@ -5974,20 +5974,20 @@ class _InputDecoratorDefaultsM3 extends InputDecorationThemeData {
   Color? get iconColor => _colors.onSurfaceVariant;
 
   @override
-  Color? get prefixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
+  Color? get prefixIconColor => MaterialStateColor.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
       return _colors.onSurface.withOpacity(0.38);
     }
     return _colors.onSurfaceVariant;
   });
 
   @override
-  Color? get suffixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
+  Color? get suffixIconColor => MaterialStateColor.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
       return _colors.onSurface.withOpacity(0.38);
     }
-    if (states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.hovered)) {
+    if (states.contains(WidgetState.error)) {
+      if (states.contains(WidgetState.hovered)) {
         return _colors.onErrorContainer;
       }
       return _colors.error;
@@ -5996,64 +5996,64 @@ class _InputDecoratorDefaultsM3 extends InputDecorationThemeData {
   });
 
   @override
-  TextStyle? get labelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+  TextStyle? get labelStyle => MaterialStateTextStyle.resolveWith((Set<WidgetState> states) {
     final TextStyle textStyle = _textTheme.bodyLarge ?? const TextStyle();
-    if (states.contains(MaterialState.disabled)) {
+    if (states.contains(WidgetState.disabled)) {
       return textStyle.copyWith(color: _colors.onSurface.withOpacity(0.38));
     }
-    if (states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.error)) {
+      if (states.contains(WidgetState.focused)) {
         return textStyle.copyWith(color: _colors.error);
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return textStyle.copyWith(color: _colors.onErrorContainer);
       }
       return textStyle.copyWith(color: _colors.error);
     }
-    if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.focused)) {
       return textStyle.copyWith(color: _colors.primary);
     }
-    if (states.contains(MaterialState.hovered)) {
+    if (states.contains(WidgetState.hovered)) {
       return textStyle.copyWith(color: _colors.onSurfaceVariant);
     }
     return textStyle.copyWith(color: _colors.onSurfaceVariant);
   });
 
   @override
-  TextStyle? get floatingLabelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+  TextStyle? get floatingLabelStyle => MaterialStateTextStyle.resolveWith((Set<WidgetState> states) {
     final TextStyle textStyle = _textTheme.bodyLarge ?? const TextStyle();
-    if (states.contains(MaterialState.disabled)) {
+    if (states.contains(WidgetState.disabled)) {
       return textStyle.copyWith(color: _colors.onSurface.withOpacity(0.38));
     }
-    if (states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.error)) {
+      if (states.contains(WidgetState.focused)) {
         return textStyle.copyWith(color: _colors.error);
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return textStyle.copyWith(color: _colors.onErrorContainer);
       }
       return textStyle.copyWith(color: _colors.error);
     }
-    if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.focused)) {
       return textStyle.copyWith(color: _colors.primary);
     }
-    if (states.contains(MaterialState.hovered)) {
+    if (states.contains(WidgetState.hovered)) {
       return textStyle.copyWith(color: _colors.onSurfaceVariant);
     }
     return textStyle.copyWith(color: _colors.onSurfaceVariant);
   });
 
   @override
-  TextStyle? get helperStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+  TextStyle? get helperStyle => MaterialStateTextStyle.resolveWith((Set<WidgetState> states) {
     final TextStyle textStyle = _textTheme.bodySmall ?? const TextStyle();
-    if (states.contains(MaterialState.disabled)) {
+    if (states.contains(WidgetState.disabled)) {
       return textStyle.copyWith(color: _colors.onSurface.withOpacity(0.38));
     }
     return textStyle.copyWith(color: _colors.onSurfaceVariant);
   });
 
   @override
-  TextStyle? get errorStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+  TextStyle? get errorStyle => MaterialStateTextStyle.resolveWith((Set<WidgetState> states) {
     final TextStyle textStyle = _textTheme.bodySmall ?? const TextStyle();
     return textStyle.copyWith(color: _colors.error);
   });

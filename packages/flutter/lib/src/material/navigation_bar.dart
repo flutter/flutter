@@ -1451,12 +1451,12 @@ class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
 
   @override
   WidgetStateProperty<IconThemeData?>? get iconTheme {
-    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
       return IconThemeData(
         size: 24.0,
-        color: states.contains(MaterialState.disabled)
+        color: states.contains(WidgetState.disabled)
           ? _colors.onSurfaceVariant.withOpacity(0.38)
-          : states.contains(MaterialState.selected)
+          : states.contains(WidgetState.selected)
             ? _colors.onSecondaryContainer
             : _colors.onSurfaceVariant,
       );
@@ -1471,12 +1471,12 @@ class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
 
   @override
   WidgetStateProperty<TextStyle?>? get labelTextStyle {
-    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
     final TextStyle style = _textTheme.labelMedium!;
       return style.apply(
-        color: states.contains(MaterialState.disabled)
+        color: states.contains(WidgetState.disabled)
           ? _colors.onSurfaceVariant.withOpacity(0.38)
-          : states.contains(MaterialState.selected)
+          : states.contains(WidgetState.selected)
             ? _colors.onSurface
             : _colors.onSurfaceVariant
       );

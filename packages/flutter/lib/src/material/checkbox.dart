@@ -930,26 +930,26 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
 
   @override
   MaterialStateBorderSide? get side {
-    return MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        if (states.contains(MaterialState.selected)) {
+    return MaterialStateBorderSide.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
+        if (states.contains(WidgetState.selected)) {
           return const BorderSide(width: 2.0, color: Colors.transparent);
         }
         return BorderSide(width: 2.0, color: _colors.onSurface.withOpacity(0.38));
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return const BorderSide(width: 0.0, color: Colors.transparent);
       }
-      if (states.contains(MaterialState.error)) {
+      if (states.contains(WidgetState.error)) {
         return BorderSide(width: 2.0, color: _colors.error);
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return BorderSide(width: 2.0, color: _colors.onSurface);
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return BorderSide(width: 2.0, color: _colors.onSurface);
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return BorderSide(width: 2.0, color: _colors.onSurface);
       }
       return BorderSide(width: 2.0, color: _colors.onSurfaceVariant);
@@ -958,15 +958,15 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
 
   @override
   WidgetStateProperty<Color> get fillColor {
-    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        if (states.contains(MaterialState.selected)) {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
+        if (states.contains(WidgetState.selected)) {
           return _colors.onSurface.withOpacity(0.38);
         }
         return Colors.transparent;
       }
-      if (states.contains(MaterialState.selected)) {
-        if (states.contains(MaterialState.error)) {
+      if (states.contains(WidgetState.selected)) {
+        if (states.contains(WidgetState.error)) {
           return _colors.error;
         }
         return _colors.primary;
@@ -977,15 +977,15 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
 
   @override
   WidgetStateProperty<Color> get checkColor {
-    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        if (states.contains(MaterialState.selected)) {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
+        if (states.contains(WidgetState.selected)) {
           return _colors.surface;
         }
         return Colors.transparent; // No icons available when the checkbox is unselected.
       }
-      if (states.contains(MaterialState.selected)) {
-        if (states.contains(MaterialState.error)) {
+      if (states.contains(WidgetState.selected)) {
+        if (states.contains(WidgetState.error)) {
           return _colors.onError;
         }
         return _colors.onPrimary;
@@ -996,37 +996,37 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
 
   @override
   WidgetStateProperty<Color> get overlayColor {
-    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.error)) {
-        if (states.contains(MaterialState.pressed)) {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.error)) {
+        if (states.contains(WidgetState.pressed)) {
           return _colors.error.withOpacity(0.1);
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return _colors.error.withOpacity(0.08);
         }
-        if (states.contains(MaterialState.focused)) {
+        if (states.contains(WidgetState.focused)) {
           return _colors.error.withOpacity(0.1);
         }
       }
-      if (states.contains(MaterialState.selected)) {
-        if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.selected)) {
+        if (states.contains(WidgetState.pressed)) {
           return _colors.onSurface.withOpacity(0.1);
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return _colors.primary.withOpacity(0.08);
         }
-        if (states.contains(MaterialState.focused)) {
+        if (states.contains(WidgetState.focused)) {
           return _colors.primary.withOpacity(0.1);
         }
         return Colors.transparent;
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return _colors.primary.withOpacity(0.1);
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return _colors.onSurface.withOpacity(0.08);
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return _colors.onSurface.withOpacity(0.1);
       }
       return Colors.transparent;
