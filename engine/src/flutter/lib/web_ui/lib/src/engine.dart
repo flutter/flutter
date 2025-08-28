@@ -31,7 +31,7 @@ export 'engine/canvaskit/image_filter.dart';
 export 'engine/canvaskit/image_wasm_codecs.dart';
 export 'engine/canvaskit/image_web_codecs.dart';
 export 'engine/canvaskit/layer.dart';
-export 'engine/layer/layer_scene_builder.dart';
+export 'engine/canvaskit/layer_scene_builder.dart';
 export 'engine/canvaskit/layer_tree.dart';
 export 'engine/canvaskit/layer_visitor.dart';
 export 'engine/canvaskit/mask_filter.dart';
