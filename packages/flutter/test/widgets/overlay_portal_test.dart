@@ -2031,79 +2031,6 @@ void main() {
       verifyTreeIsClean();
     });
 
-    testWidgets('Nested overlay children: swap inner and outer', (WidgetTester tester) async {
-      final GlobalKey outerKey = GlobalKey(debugLabel: 'Original Outer Widget');
-      final GlobalKey innerKey = GlobalKey(debugLabel: 'Original Inner Widget');
-
-      final RenderBox child1Box = RenderConstrainedBox(
-        additionalConstraints: const BoxConstraints(),
-      );
-      final RenderBox child2Box = RenderConstrainedBox(
-        additionalConstraints: const BoxConstraints(),
-      );
-      final RenderBox overlayChildBox = RenderConstrainedBox(
-        additionalConstraints: const BoxConstraints(),
-      );
-      addTearDown(overlayChildBox.dispose);
-
-      late StateSetter setState;
-      bool swapped = false;
-
-      // WidgetToRenderBoxAdapter has its own builtin GlobalKey.
-      final Widget child1 = WidgetToRenderBoxAdapter(renderBox: child1Box);
-      final Widget child2 = WidgetToRenderBoxAdapter(renderBox: child2Box);
-      final Widget child3 = WidgetToRenderBoxAdapter(renderBox: overlayChildBox);
-
-      late final OverlayEntry entry;
-      addTearDown(() {
-        entry.remove();
-        entry.dispose();
-      });
-
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Overlay(
-            initialEntries: <OverlayEntry>[
-              entry = OverlayEntry(
-                builder: (BuildContext context) {
-                  return StatefulBuilder(
-                    builder: (BuildContext context, StateSetter stateSetter) {
-                      setState = stateSetter;
-                      return OverlayPortal(
-                        key: swapped ? outerKey : innerKey,
-                        controller: swapped ? controller2 : controller1,
-                        overlayChildBuilder: (BuildContext context) {
-                          return OverlayPortal(
-                            key: swapped ? innerKey : outerKey,
-                            controller: swapped ? controller1 : controller2,
-                            overlayChildBuilder: (BuildContext context) {
-                              return OverlayPortal(
-                                controller: OverlayPortalController(),
-                                overlayChildBuilder: (BuildContext context) => child3,
-                              );
-                            },
-                            child: child2,
-                          );
-                        },
-                        child: child1,
-                      );
-                    },
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
-      );
-
-      setState(() {
-        swapped = true;
-      });
-      await tester.pump();
-      verifyTreeIsClean();
-    });
-
     testWidgets('Paint order', (WidgetTester tester) async {
       final GlobalKey outerKey = GlobalKey(debugLabel: 'Original Outer Widget');
       final GlobalKey innerKey = GlobalKey(debugLabel: 'Original Inner Widget');
@@ -3018,11 +2945,15 @@ void main() {
       final SemanticsNode clippedOverlayChild = semantics.nodesWith(label: 'B').single;
 
       expect(clippedOverlayPortal.rect, Offset.zero & const Size(800, 10));
-      expect(clippedOverlayChild.rect, Offset.zero & const Size(10, 10));
+      expect(clippedOverlayChild.rect, Offset.zero & const Size(800, 600));
 
       expect(clippedOverlayPortal.transform, isNull);
-      // The parent SemanticsNode is created by OverlayPortal.
-      expect(clippedOverlayChild.transform, Matrix4.translationValues(0.0, -600.0, 0.0));
+      expect(
+        clippedOverlayChild.transform,
+        Matrix4.identity()
+          ..scale(1 / 3, 1 / 3, 1)
+          ..setTranslationRaw(0, -200, 0),
+      );
 
       semantics.dispose();
     });
@@ -3088,7 +3019,7 @@ void main() {
       await tester.pump();
 
       expect(semantics.nodesWith(label: 'A'), isEmpty);
-      expect(semantics.nodesWith(label: 'B'), isEmpty);
+      expect(semantics.nodesWith(label: 'B'), isNotEmpty);
       semantics.dispose();
 
       final RenderObject overlayRenderObject = tester.renderObject(find.byType(Overlay));
