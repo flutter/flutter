@@ -742,7 +742,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 /// {@template flutter.material.ProgressIndicator.AnimationSynchronization}
 /// ## Animation synchronization
 ///
-/// When multiple [CircularProgressIndicator] or [LinearProgressIndicator] are
+/// When multiple [CircularProgressIndicator]s or [LinearProgressIndicator]s are
 /// animating on screen simultaneously (e.g., in a list of loading items), their
 /// uncoordinated animations can appear visually cluttered. To address this, the
 /// animation of an indicator can be driven by a custom [AnimationController].
