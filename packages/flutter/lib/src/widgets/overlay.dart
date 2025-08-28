@@ -2193,7 +2193,10 @@ class _RenderTheaterMarker extends InheritedWidget {
       if (ancestor == null) {
         return null;
       }
-      return context.dependOnInheritedElement(ancestor) as _RenderTheaterMarker;
+      if (createDependency) {
+        return context.dependOnInheritedElement(ancestor) as _RenderTheaterMarker;
+      }
+      return ancestor.widget as _RenderTheaterMarker;
     }
 
     if (createDependency) {
