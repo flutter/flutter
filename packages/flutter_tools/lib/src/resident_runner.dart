@@ -1459,7 +1459,7 @@ abstract class ResidentRunner extends ResidentHandlers {
         /// Convert a [URI] with query parameters into a display format instead
         /// of the default URI encoding.
         String urlToDisplayString(Uri uri) {
-          final base = StringBuffer(uri.replace(queryParameters: <String, String>{}).toString());
+          final base = StringBuffer(uri.withoutQueryParameters().toString());
           base.write(
             uri.queryParameters.keys
                 .map((String key) => '$key=${uri.queryParameters[key]}')

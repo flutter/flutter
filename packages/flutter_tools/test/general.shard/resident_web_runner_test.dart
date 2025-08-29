@@ -142,6 +142,7 @@ name: my_app
     debugConnection.fakeVmServiceHost = () => fakeVmServiceHost;
     webDevFS.result = ConnectionResult(appConnection, debugConnection, debugConnection.vmService);
     debugConnection.uri = 'ws://127.0.0.1/abcd/';
+    debugConnection.devToolsUri = 'http://127.0.0.1/abcd/';
     chromeConnection.tabs.add(chromeTab);
   }
 
@@ -644,6 +645,7 @@ name: my_app
         'Waiting for connection from debug service on FakeDevice...\n'
         'Debug service listening on ws://127.0.0.1/abcd/\n'
         'A Dart VM Service on FakeDevice is available at: http://127.0.0.1/abcd/\n'
+        'The Flutter DevTools debugger and profiler on FakeDevice is available at: http://127.0.0.1/abcd/\n'
         '\n'
         'first\n'
         '\n'
@@ -1924,12 +1926,15 @@ ResidentRunner setUpResidentRunner(
 
 class FakeWebServerDevice extends FakeDevice implements WebServerDevice {}
 
-class FakeDevice extends Fake implements Device {
+class FakeDevice extends Fake implements WebDevice {
   @override
   var name = 'FakeDevice';
 
   @override
   String get displayName => name;
+
+  @override
+  Uri? devToolsUri;
 
   var count = 0;
 
@@ -1978,6 +1983,9 @@ class FakeDebugConnection extends Fake implements DebugConnection {
 
   @override
   late String uri;
+
+  @override
+  late String devToolsUri;
 
   final completer = Completer<void>();
   var didClose = false;

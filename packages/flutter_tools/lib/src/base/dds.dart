@@ -17,6 +17,7 @@ import '../resident_runner.dart';
 import '../vmservice.dart';
 import 'io.dart' as io;
 import 'logger.dart';
+import 'utils.dart';
 
 export 'package:dds/dds.dart'
     show DartDevelopmentServiceException, ExistingDartDevelopmentServiceException;
@@ -205,7 +206,7 @@ mixin DartDevelopmentServiceLocalOperationsMixin {
       // We're only setting the URI pointing to where DevTools is being served from. Don't include
       // any query parameters, including those used to automatically connect to the application.
       if (uri.hasQuery) {
-        uri = Uri(scheme: uri.scheme, host: uri.host, port: uri.port, path: uri.path);
+        uri = uri.withoutQueryParameters();
       }
       await _callDevToolsUriExtension(device!, uri);
     }
