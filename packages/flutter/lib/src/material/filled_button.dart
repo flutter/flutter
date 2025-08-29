@@ -89,6 +89,7 @@ class FilledButton extends ButtonStyleButton {
     super.autofocus = false,
     super.clipBehavior = Clip.none,
     super.statesController,
+    super.isEnabled,
     required super.child,
   }) : _variant = _FilledButtonVariant.filled;
 

@@ -7,6 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -2606,5 +2607,34 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(textColor(tester, buttonText), hoveredColor);
     expect(iconStyle(tester, buttonIcon).color, hoveredColor);
+  });
+
+  testWidgets('ElevatedButton isEnabled', (WidgetTester tester) async {
+    Widget buildButton({required bool? isEnabled, required VoidCallback? onPressed}) {
+      return MaterialApp(
+        home: Material(
+          child: ElevatedButton(
+            onPressed: onPressed,
+            isEnabled: isEnabled,
+            child: const Text('button'),
+          ),
+        ),
+      );
+    }
+
+    // isEnabled: true takes precedence over onPressed: null
+    await tester.pumpWidget(buildButton(isEnabled: true, onPressed: null));
+    expect(tester.widget<ElevatedButton>(find.byType(ElevatedButton)).enabled, isTrue);
+
+    // isEnabled: false takes precedence over onPressed: () {}
+    await tester.pumpWidget(buildButton(isEnabled: false, onPressed: () {}));
+    expect(tester.widget<ElevatedButton>(find.byType(ElevatedButton)).enabled, isFalse);
+
+    // Fallback behavior when isEnabled is null
+    await tester.pumpWidget(buildButton(isEnabled: null, onPressed: () {}));
+    expect(tester.widget<ElevatedButton>(find.byType(ElevatedButton)).enabled, isTrue);
+
+    await tester.pumpWidget(buildButton(isEnabled: null, onPressed: null));
+    expect(tester.widget<ElevatedButton>(find.byType(ElevatedButton)).enabled, isFalse);
   });
 }
