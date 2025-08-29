@@ -57,7 +57,8 @@ static bool IsDeviceEmulator() {
     return true;
   }
 
-  if (fs::exists("/dev/qemu_pipe")) {
+  std::error_code ec;
+  if (fs::exists("/dev/qemu_pipe", ec)) {
     return true;
   }
 
