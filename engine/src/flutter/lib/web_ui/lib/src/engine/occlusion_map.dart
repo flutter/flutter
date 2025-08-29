@@ -36,9 +36,11 @@ class OcclusionMapLeaf implements OcclusionMapNode {
   @override
   OcclusionMapNode insert(ui.Rect other) {
     if (rectContainsOther(rect, other)) {
+      // `other` is fully contained within `rect`, so we don't need to change anything.
       return this;
     }
     if (rectContainsOther(other, rect)) {
+      // `other` fully contains `rect`, so we replace `rect` with `other`.
       return OcclusionMapLeaf(other);
     }
     return OcclusionMapBranch(this, OcclusionMapLeaf(other));
@@ -65,9 +67,12 @@ class OcclusionMapBranch implements OcclusionMapNode {
 
   @override
   OcclusionMapNode insert(ui.Rect other) {
+    // `other` fully contains the bounding box of the left and right nodes, so the entire branch is
+    // replaced with a new leaf that only contains `other`.
     if (rectContainsOther(other, boundingBox)) {
       return OcclusionMapLeaf(other);
     }
+
     // Try to create nodes with the smallest possible area
     final double leftOtherArea = _areaOfUnion(left.boundingBox, other);
     final double rightOtherArea = _areaOfUnion(right.boundingBox, other);
@@ -76,6 +81,7 @@ class OcclusionMapBranch implements OcclusionMapNode {
       if (leftOtherArea < leftRightArea) {
         final OcclusionMapNode newLeft = left.insert(other);
         if (identical(newLeft, left)) {
+          // `other` made no difference to `left`, so there's no need to change anything.
           return this;
         }
         return OcclusionMapBranch(newLeft, right);
@@ -84,6 +90,7 @@ class OcclusionMapBranch implements OcclusionMapNode {
       if (rightOtherArea < leftRightArea) {
         final OcclusionMapNode newRight = right.insert(other);
         if (identical(newRight, right)) {
+          // `other` made no difference to `right`, so there's no need to change anything.
           return this;
         }
         return OcclusionMapBranch(left, newRight);
@@ -105,14 +112,16 @@ class OcclusionMap {
   OcclusionMapNode root = OcclusionMapEmpty();
 
   void addRect(ui.Rect rect) {
-    if (rect.width <= 0 || rect.height <= 0) {
+    if (rect.isEmpty) {
+      // Empty rects don't overlap with anything, there's no need to add them.
       return;
     }
     root = root.insert(rect);
   }
 
   bool overlaps(ui.Rect rect) {
-    if (rect.width <= 0 || rect.height <= 0) {
+    if (rect.isEmpty) {
+      // Empty rects don't overlap with anything, there's no need to check for overlaps.
       return false;
     }
     return root.overlaps(rect);
