@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:a11y_assessments/use_cases/snack_bar.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'test_utils.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -14,24 +14,16 @@ void main() {
     testWidgets('snack bar announces message', (WidgetTester tester) async {
       final List<Map<String, dynamic>> log = <Map<String, dynamic>>[];
 
-      Future<void> handleMessage(Object? mockMessage) async {
-        if (mockMessage is Map<Object?, Object?>) {
-          final Map<String, dynamic> casted = mockMessage.map(
-            (Object? key, Object? value) => MapEntry<String, dynamic>(key.toString(), value),
-          );
-          log.add(casted);
-        }
+      Future<dynamic> handleMessage(dynamic mockMessage) async {
+        final Map<dynamic, dynamic> message = mockMessage as Map<dynamic, dynamic>;
+        final Map<String, dynamic> castedMessage = Map<String, dynamic>.from(message);
+        log.add(castedMessage);
       }
 
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockDecodedMessageHandler<Object?>(SystemChannels.accessibility, handleMessage);
+          .setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, handleMessage);
 
-      await tester.pumpWidget(
-        const MediaQuery(
-          data: MediaQueryData(supportsAnnounce: true),
-          child: MaterialApp(home: MainWidget()),
-        ),
-      );
+      await pumpsUseCase(tester, SnackBarUseCase());
 
       const String snackBarText = 'Awesome Snackbar!';
       expect(find.text(snackBarText), findsNothing);
