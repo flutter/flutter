@@ -1025,4 +1025,31 @@ void main() {
 
     semantics.dispose();
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/174133.
+  testWidgets('Using Table with OverlayPortal', (WidgetTester tester) async {
+    final OverlayPortalController controller = OverlayPortalController()..show();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Table(
+            children: <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  OverlayPortal(
+                    controller: controller,
+                    overlayChildBuilder: (BuildContext context) {
+                      return Container();
+                    },
+                    child: const Text('data'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+  });
 }
