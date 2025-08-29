@@ -658,8 +658,6 @@ class WebParagraph implements ui.Paragraph {
     }
   }
 
-  void paint(ui.Canvas canvas, ui.Offset offset) {}
-
   @override
   ui.TextRange getLineBoundary(ui.TextPosition position) {
     final int codepointPosition = switch (position.affinity) {
