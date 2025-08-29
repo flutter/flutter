@@ -912,7 +912,9 @@ class SingletonFlutterWindow extends FlutterView {
 /// The system-reported typography settings if any.
 //
 // When changes are made to this class, the equivalent APIs in each of the
-// embedders *must* be updated.
+// embedders *must* be updated:
+//
+// * engine/src/flutter/lib/web_ui/lib/window.dart
 final class TypographySettings {
   /// Creates a new [TypographySettings].
   const TypographySettings({
