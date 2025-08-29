@@ -75,6 +75,8 @@ class LocaleInitialization extends Scenario {
         controlsNodes: null,
         inputType: SemanticsInputType.none,
         locale: null,
+        minValue: '',
+        maxValue: '',
       );
 
     final SemanticsUpdate semanticsUpdate = semanticsUpdateBuilder.build();
@@ -135,6 +137,8 @@ class LocaleInitialization extends Scenario {
         controlsNodes: null,
         inputType: SemanticsInputType.none,
         locale: null,
+        minValue: '',
+        maxValue: '',
       );
 
     final SemanticsUpdate semanticsUpdate = semanticsUpdateBuilder.build();
