@@ -202,13 +202,20 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: Center(
-              child: Slider(
-                value: 2,
-                year2023: false,
-                divisions: 4,
-                max: 5,
-                label: multilineLabel,
-                onChanged: (double newValue) {},
+              child: Theme(
+                data: ThemeData(
+                  sliderTheme: const SliderThemeData(
+                    valueIndicatorMultilineConfig: ValueIndicatorMultilineConfig(cornerPadding: 40),
+                  ),
+                ),
+                child: Slider(
+                  value: 2,
+                  year2023: false,
+                  divisions: 4,
+                  max: 5,
+                  label: multilineLabel,
+                  onChanged: (double newValue) {},
+                ),
               ),
             ),
           ),
