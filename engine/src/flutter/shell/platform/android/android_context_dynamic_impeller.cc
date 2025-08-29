@@ -6,7 +6,6 @@
 
 #include <android/api-level.h>
 #include <sys/system_properties.h>
-#include <filesystem>
 #include <memory>
 
 #include "flutter/impeller/base/validation.h"
@@ -57,8 +56,7 @@ static bool IsDeviceEmulator() {
     return true;
   }
 
-  std::error_code ec;
-  if (fs::exists("/dev/qemu_pipe", ec)) {
+  if (::access("/dev/qemu_pipe", F_OK) == 0) {
     return true;
   }
 
