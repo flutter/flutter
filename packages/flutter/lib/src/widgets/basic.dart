@@ -6087,6 +6087,7 @@ class Wrap extends MultiChildRenderObjectWidget {
     this.textDirection,
     this.verticalDirection = VerticalDirection.down,
     this.clipBehavior = Clip.none,
+    this.maxLines,
     super.children,
   });
 
@@ -6227,6 +6228,17 @@ class Wrap extends MultiChildRenderObjectWidget {
   /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
+  /// {@template flutter.widgets.Wrap.maxLines}
+  /// The maximum number of lines to display before wrapping.
+  ///
+  /// If null, there is no limit on the number of lines.
+  /// If not null, the wrap will stop creating new lines after reaching this limit.
+  /// Children that would exceed this limit are not displayed.
+  ///
+  /// Defaults to null.
+  /// {@endtemplate}
+  final int? maxLines;
+
   @override
   RenderWrap createRenderObject(BuildContext context) {
     return RenderWrap(
@@ -6239,6 +6251,7 @@ class Wrap extends MultiChildRenderObjectWidget {
       textDirection: textDirection ?? Directionality.maybeOf(context),
       verticalDirection: verticalDirection,
       clipBehavior: clipBehavior,
+      maxLines: maxLines,
     );
   }
 
@@ -6253,7 +6266,8 @@ class Wrap extends MultiChildRenderObjectWidget {
       ..crossAxisAlignment = crossAxisAlignment
       ..textDirection = textDirection ?? Directionality.maybeOf(context)
       ..verticalDirection = verticalDirection
-      ..clipBehavior = clipBehavior;
+      ..clipBehavior = clipBehavior
+      ..maxLines = maxLines;
   }
 
   @override
@@ -6273,6 +6287,7 @@ class Wrap extends MultiChildRenderObjectWidget {
         defaultValue: VerticalDirection.down,
       ),
     );
+    properties.add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
   }
 }
 
