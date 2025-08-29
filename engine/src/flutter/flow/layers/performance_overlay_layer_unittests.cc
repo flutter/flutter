@@ -73,6 +73,7 @@ static void TestPerformanceOverlayLayerGold(int refresh_rate) {
       .ui_time                       = mock_stopwatch,
       .texture_registry              = nullptr,
       .raster_cache                  = nullptr,
+      .impeller_enabled              = false,
       // clang-format on
   };
 
@@ -101,7 +102,7 @@ static void TestPerformanceOverlayLayerGold(int refresh_rate) {
 
   // TODO(https://github.com/flutter/flutter/issues/53784): enable this on all
   // platforms.
-#if !defined(FML_OS_LINUX)
+#if defined(FML_OS_LINUX)
   GTEST_SKIP() << "Skipping golden tests on non-Linux OSes";
 #else
   const bool golden_data_matches = golden_data->equals(snapshot_data.get());
