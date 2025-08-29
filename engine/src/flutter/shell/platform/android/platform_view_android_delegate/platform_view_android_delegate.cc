@@ -7,28 +7,27 @@
 #include <utility>
 
 namespace flutter {
-
+namespace {
 void putStringAttributesIntoBuffer(
     const StringAttributes& attributes,
-    int32_t* buffer_int32,
-    size_t& position,
+    int32_t* buffer,
+    size_t* position,
     std::vector<std::vector<uint8_t>>& string_attribute_args) {
   if (attributes.empty()) {
-    buffer_int32[position++] = PlatformViewAndroidDelegate::kEmptyStringIndex;
+    buffer[*position++] = PlatformViewAndroidDelegate::kEmptyStringIndex;
     return;
   }
-  buffer_int32[position++] = attributes.size();
+  buffer[*position++] = attributes.size();
   for (const auto& attribute : attributes) {
-    buffer_int32[position++] = attribute->start;
-    buffer_int32[position++] = attribute->end;
-    buffer_int32[position++] = static_cast<int32_t>(attribute->type);
+    buffer[*position++] = attribute->start;
+    buffer[*position++] = attribute->end;
+    buffer[*position++] = static_cast<int32_t>(attribute->type);
     switch (attribute->type) {
       case StringAttributeType::kSpellOut:
-        buffer_int32[position++] =
-            PlatformViewAndroidDelegate::kEmptyStringIndex;
+        buffer[*position++] = PlatformViewAndroidDelegate::kEmptyStringIndex;
         break;
       case StringAttributeType::kLocale:
-        buffer_int32[position++] = string_attribute_args.size();
+        buffer[*position++] = string_attribute_args.size();
         std::shared_ptr<LocaleStringAttribute> locale_attribute =
             std::static_pointer_cast<LocaleStringAttribute>(attribute);
         string_attribute_args.push_back(
@@ -39,13 +38,13 @@ void putStringAttributesIntoBuffer(
 }
 
 void putStringIntoBuffer(const std::string& string,
-                         int32_t* buffer_int32,
-                         size_t& position,
+                         int32_t* buffer,
+                         size_t* position,
                          std::vector<std::string>& strings) {
   if (string.empty()) {
-    buffer_int32[position++] = PlatformViewAndroidDelegate::kEmptyStringIndex;
+    buffer[*position++] = PlatformViewAndroidDelegate::kEmptyStringIndex;
   } else {
-    buffer_int32[position++] = strings.size();
+    buffer[*position++] = strings.size();
     strings.push_back(string);
   }
 }
@@ -147,6 +146,7 @@ int64_t flagsToInt64(flutter::SemanticsFlags flags) {
   }
   return result;
 }
+}  // namespace
 
 PlatformViewAndroidDelegate::PlatformViewAndroidDelegate(
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade)
@@ -211,31 +211,33 @@ void PlatformViewAndroidDelegate::UpdateSemantics(
       buffer_float32[position++] = static_cast<float>(node.scrollExtentMax);
       buffer_float32[position++] = static_cast<float>(node.scrollExtentMin);
 
-      putStringIntoBuffer(node.identifier, buffer_int32, position, strings);
+      putStringIntoBuffer(node.identifier, buffer_int32, &position, strings);
 
-      putStringIntoBuffer(node.label, buffer_int32, position, strings);
+      putStringIntoBuffer(node.label, buffer_int32, &position, strings);
       putStringAttributesIntoBuffer(node.labelAttributes, buffer_int32,
-                                    position, string_attribute_args);
+                                    &position, string_attribute_args);
 
-      putStringIntoBuffer(node.value, buffer_int32, position, strings);
+      putStringIntoBuffer(node.value, buffer_int32, &position, strings);
       putStringAttributesIntoBuffer(node.valueAttributes, buffer_int32,
-                                    position, string_attribute_args);
+                                    &position, string_attribute_args);
 
-      putStringIntoBuffer(node.increasedValue, buffer_int32, position, strings);
+      putStringIntoBuffer(node.increasedValue, buffer_int32, &position,
+                          strings);
       putStringAttributesIntoBuffer(node.increasedValueAttributes, buffer_int32,
-                                    position, string_attribute_args);
+                                    &position, string_attribute_args);
 
-      putStringIntoBuffer(node.decreasedValue, buffer_int32, position, strings);
+      putStringIntoBuffer(node.decreasedValue, buffer_int32, &position,
+                          strings);
       putStringAttributesIntoBuffer(node.decreasedValueAttributes, buffer_int32,
-                                    position, string_attribute_args);
+                                    &position, string_attribute_args);
 
-      putStringIntoBuffer(node.hint, buffer_int32, position, strings);
-      putStringAttributesIntoBuffer(node.hintAttributes, buffer_int32, position,
-                                    string_attribute_args);
+      putStringIntoBuffer(node.hint, buffer_int32, &position, strings);
+      putStringAttributesIntoBuffer(node.hintAttributes, buffer_int32,
+                                    &position, string_attribute_args);
 
-      putStringIntoBuffer(node.tooltip, buffer_int32, position, strings);
-      putStringIntoBuffer(node.linkUrl, buffer_int32, position, strings);
-      putStringIntoBuffer(node.locale, buffer_int32, position, strings);
+      putStringIntoBuffer(node.tooltip, buffer_int32, &position, strings);
+      putStringIntoBuffer(node.linkUrl, buffer_int32, &position, strings);
+      putStringIntoBuffer(node.locale, buffer_int32, &position, strings);
 
       buffer_int32[position++] = node.textDirection;
       buffer_float32[position++] = node.rect.left();
@@ -275,9 +277,9 @@ void PlatformViewAndroidDelegate::UpdateSemantics(
       const flutter::CustomAccessibilityAction& action = value.second;
       actions_buffer_int32[actions_position++] = action.id;
       actions_buffer_int32[actions_position++] = action.overrideId;
-      putStringIntoBuffer(action.label, actions_buffer_int32, actions_position,
+      putStringIntoBuffer(action.label, actions_buffer_int32, &actions_position,
                           action_strings);
-      putStringIntoBuffer(action.hint, actions_buffer_int32, actions_position,
+      putStringIntoBuffer(action.hint, actions_buffer_int32, &actions_position,
                           action_strings);
     }
 
