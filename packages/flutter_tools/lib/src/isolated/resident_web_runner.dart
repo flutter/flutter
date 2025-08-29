@@ -290,8 +290,12 @@ class ResidentWebRunner extends ResidentRunner {
           useSseForInjectedClient: debuggingOptions.webUseSseForInjectedClient,
           buildInfo: debuggingOptions.buildInfo,
           enableDwds: supportsServiceProtocol,
-          enableDds: debuggingOptions.enableDds,
-          ddsPort: debuggingOptions.ddsPort,
+          ddsConfig: DartDevelopmentServiceConfiguration(
+            enable: debuggingOptions.enableDds,
+            port: debuggingOptions.ddsPort,
+            serveDevTools: debuggingOptions.enableDevTools,
+            devToolsServerAddress: debuggingOptions.devToolsServerAddress,
+          ),
           entrypoint: _fileSystem.file(target).uri,
           expressionCompiler: expressionCompiler,
           chromiumLauncher: _chromiumLauncher,
@@ -771,7 +775,8 @@ class ResidentWebRunner extends ResidentRunner {
       unawaited(
         connectDebug!.then((connectionResult) async {
           _connectionResult = connectionResult;
-          unawaited(_connectionResult!.debugConnection!.onDone.whenComplete(_cleanupAndExit));
+          final DebugConnection debugConnection = connectionResult!.debugConnection!;
+          unawaited(debugConnection.onDone.whenComplete(_cleanupAndExit));
 
           void onLogEvent(vmservice.Event event) {
             final String message = processVmServiceMessage(event);
@@ -833,8 +838,11 @@ class ResidentWebRunner extends ResidentRunner {
             vmService: _vmService.service,
           );
 
-          final Uri websocketUri = Uri.parse(_connectionResult!.debugConnection!.uri);
+          final Uri websocketUri = Uri.parse(debugConnection.uri);
           device!.vmService = _vmService;
+          if (debugConnection.devToolsUri != null) {
+            (device!.device! as WebDevice).devToolsUri = Uri.parse(debugConnection.devToolsUri!);
+          }
 
           // Run main immediately if the app is not started paused or if there
           // is no debugger attached. Otherwise, runMain when a resume event

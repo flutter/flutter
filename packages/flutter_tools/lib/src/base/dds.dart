@@ -46,9 +46,11 @@ class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
 
   DartDevelopmentServiceLauncher? _ddsInstance;
 
+  @override
   Uri? get uri => _ddsInstance?.uri ?? _existingDdsUri;
   Uri? _existingDdsUri;
 
+  @override
   Uri? get devToolsUri => _ddsInstance?.devToolsUri;
 
   Uri? get dtdUri => _ddsInstance?.dtdUri;
@@ -56,6 +58,7 @@ class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
   Future<void> get done => _completer.future;
   final _completer = Completer<void>();
 
+  @override
   final Logger _logger;
 
   @override
@@ -199,6 +202,11 @@ mixin DartDevelopmentServiceLocalOperationsMixin {
     required Uri? uri,
   }) async {
     if (uri != null && device?.vmService != null) {
+      // We're only setting the URI pointing to where DevTools is being served from. Don't include
+      // any query parameters, including those used to automatically connect to the application.
+      if (uri.hasQuery) {
+        uri = Uri(scheme: uri.scheme, host: uri.host, port: uri.port, path: uri.path);
+      }
       await _callDevToolsUriExtension(device!, uri);
     }
   }
@@ -256,7 +264,7 @@ mixin DartDevelopmentServiceLocalOperationsMixin {
     await device.vmService!.invokeFlutterExtensionRpcRaw(
       method,
       args: params,
-      isolateId: views.first.uiIsolate!.id!,
+      isolateId: views.first.uiIsolate!.id,
     );
   }
 }

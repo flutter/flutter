@@ -394,7 +394,8 @@ class FlutterDevice {
           // isolate is paused on start.
           unawaited(device!.dds.invokeServiceExtensions(this));
         }
-        if (existingDds && debuggingOptions.devToolsServerAddress != null) {
+        if ((existingDds || !debuggingOptions.enableDds) &&
+            debuggingOptions.devToolsServerAddress != null) {
           // Don't await this as service extensions won't return if the target
           // isolate is paused on start.
           unawaited(
@@ -1453,14 +1454,12 @@ abstract class ResidentRunner extends ResidentHandlers {
       if (debuggingOptions.printDtd && dtdUri != null) {
         globals.printStatus('The Dart Tooling Daemon is available at: $dtdUri');
       }
-      final Uri? devToolsUri = dds.devToolsUri;
+      final Uri? devToolsUri = device.device!.devToolsUri;
       if (devToolsUri != null) {
         /// Convert a [URI] with query parameters into a display format instead
         /// of the default URI encoding.
         String urlToDisplayString(Uri uri) {
-          final StringBuffer base = StringBuffer(
-            uri.replace(queryParameters: <String, String>{}).toString(),
-          );
+          final base = StringBuffer(uri.replace(queryParameters: <String, String>{}).toString());
           base.write(
             uri.queryParameters.keys
                 .map((String key) => '$key=${uri.queryParameters[key]}')
