@@ -14,20 +14,20 @@ void putStringAttributesIntoBuffer(
     size_t* position,
     std::vector<std::vector<uint8_t>>& string_attribute_args) {
   if (attributes.empty()) {
-    buffer[*position++] = PlatformViewAndroidDelegate::kEmptyStringIndex;
+    buffer[(*position)++] = PlatformViewAndroidDelegate::kEmptyStringIndex;
     return;
   }
-  buffer[*position++] = attributes.size();
+  buffer[(*position)++] = attributes.size();
   for (const auto& attribute : attributes) {
-    buffer[*position++] = attribute->start;
-    buffer[*position++] = attribute->end;
-    buffer[*position++] = static_cast<int32_t>(attribute->type);
+    buffer[(*position)++] = attribute->start;
+    buffer[(*position)++] = attribute->end;
+    buffer[(*position)++] = static_cast<int32_t>(attribute->type);
     switch (attribute->type) {
       case StringAttributeType::kSpellOut:
-        buffer[*position++] = PlatformViewAndroidDelegate::kEmptyStringIndex;
+        buffer[(*position)++] = PlatformViewAndroidDelegate::kEmptyStringIndex;
         break;
       case StringAttributeType::kLocale:
-        buffer[*position++] = string_attribute_args.size();
+        buffer[(*position)++] = string_attribute_args.size();
         std::shared_ptr<LocaleStringAttribute> locale_attribute =
             std::static_pointer_cast<LocaleStringAttribute>(attribute);
         string_attribute_args.push_back(
@@ -42,9 +42,9 @@ void putStringIntoBuffer(const std::string& string,
                          size_t* position,
                          std::vector<std::string>& strings) {
   if (string.empty()) {
-    buffer[*position++] = PlatformViewAndroidDelegate::kEmptyStringIndex;
+    buffer[(*position)++] = PlatformViewAndroidDelegate::kEmptyStringIndex;
   } else {
-    buffer[*position++] = strings.size();
+    buffer[(*position)++] = strings.size();
     strings.push_back(string);
   }
 }
