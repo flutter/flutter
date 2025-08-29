@@ -869,13 +869,10 @@ class _StretchController extends Listenable {
 
   /// A fraction used to adjust the input velocity, measured in pixels,
   /// to a value between -1 and 1 when gesture fling.
-  static const double _flingVelocityFriction = 0.0000625;
+  static const double _flingVelocityFriction = 1 / 20000;
 
   /// The stiffness constant for the spring simulation controlling the overscroll effect.
   static const double _springStiffness = 200.0;
-
-  /// The damping constant for the spring simulation controlling the overscroll effect.
-  static const double _springDamping = 20.0;
 
   @override
   void addListener(VoidCallback listener) {
@@ -889,15 +886,19 @@ class _StretchController extends Listenable {
 
   /// Creates a spring description with the given mass,
   /// using predefined stiffness and damping values for the spring.
-  SpringDescription createSpringDescription(double mass) {
-    return SpringDescription(mass: mass, stiffness: _springStiffness, damping: _springDamping);
+  SpringDescription createSpringDescription(double dampingRatio) {
+    return SpringDescription.withDampingRatio(
+      mass: 1.0,
+      stiffness: _springStiffness,
+      ratio: dampingRatio,
+    );
   }
 
   /// Since the implementation methods of Android and Flutter differ,
   /// a [SpringSimulation] instance is created using an estimated
   /// value nearly identical to the Spring animation of the Stretch Overscroll effect.
   SpringSimulation createSimulation(double velocity) {
-    return SpringSimulation(createSpringDescription(1.0), overscroll, 0.0, velocity);
+    return SpringSimulation(createSpringDescription(0.8), overscroll, 0.0, velocity);
   }
 
   /// Uses the saturation function approach to scale velocity
@@ -905,16 +906,14 @@ class _StretchController extends Listenable {
   /// velocities gradually saturate. Returns the scaled velocity
   /// with the original direction preserved.
   double _calculateVelocityScale(double velocity) {
-    const double referenceVelocity = 3000.0;
-    const double velocityScaleFactor = 0.0001;
+    const double referenceVelocity = 5000.0;
     final double absVelocity = velocity.abs();
 
-    // Normalizes using 3,000px/s as the reference.
+    // Normalizes using 5,000px/s as the reference.
     final double normalizedVelocity = absVelocity / referenceVelocity;
     final double saturatedScale = normalizedVelocity / (1.0 + normalizedVelocity);
-    final double maxScale = 1.0 + velocity.abs() * velocityScaleFactor;
 
-    return saturatedScale * maxScale * velocity.sign;
+    return saturatedScale * velocity.sign;
   }
 
   /// Handle a fling to the edge of the viewport at a particular velocity.
@@ -925,7 +924,7 @@ class _StretchController extends Listenable {
       return;
     }
     final double scaledVelocity = _calculateVelocityScale(velocity);
-    animate(SpringSimulation(createSpringDescription(0.5), overscroll, 0.0, scaledVelocity));
+    animate(SpringSimulation(createSpringDescription(0.7), overscroll, 0.0, scaledVelocity));
   }
 
   /// Called when the overscroll ends to trigger a fling animation if needed.
@@ -947,11 +946,7 @@ class _StretchController extends Listenable {
   void animate(SpringSimulation simulation) {
     final double initialOverscroll = simulation.dx(0);
 
-    final AnimationController controller = AnimationController.unbounded(vsync: vsync);
-
-    _controller?.dispose();
-    _controller = controller;
-    _controller = AnimationController.unbounded(vsync: vsync)
+    final AnimationController controller = AnimationController.unbounded(vsync: vsync)
       ..addListener(() {
         final double newOverscroll = _controller?.value ?? 0.0;
 
@@ -972,6 +967,9 @@ class _StretchController extends Listenable {
         _controller!.dispose();
         _controller = null;
       });
+
+    _controller?.dispose();
+    _controller = controller;
   }
 
   /// Handle a user-driven overscroll.
