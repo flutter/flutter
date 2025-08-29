@@ -1414,13 +1414,24 @@ void main() {
       ),
     );
 
-    final OverlayEntry overlayEntry1 = OverlayEntry(
+    final OverlayEntry innerEntry = OverlayEntry(
       builder: (BuildContext context) {
         return Container(child: overlayBody);
       },
     );
     addTearDown(
-      () => overlayEntry1
+      () => innerEntry
+        ..remove()
+        ..dispose(),
+    );
+
+    final OverlayEntry midEntry = OverlayEntry(
+      builder: (BuildContext context) {
+        return Overlay(initialEntries: <OverlayEntry>[innerEntry]);
+      },
+    );
+    addTearDown(
+      () => midEntry
         ..remove()
         ..dispose(),
     );
@@ -1428,16 +1439,7 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Overlay(
-          key: oldRoot,
-          initialEntries: <OverlayEntry>[
-            OverlayEntry(
-              builder: (BuildContext context) {
-                return Overlay(initialEntries: <OverlayEntry>[overlayEntry1]);
-              },
-            ),
-          ],
-        ),
+        child: Overlay(key: oldRoot, initialEntries: <OverlayEntry>[midEntry]),
       ),
     );
 
@@ -1446,28 +1448,24 @@ void main() {
     ).single;
     expect(parentTheater, oldRoot.currentContext?.findRenderObject());
 
+    final OverlayEntry outerEntry = OverlayEntry(
+      builder: (BuildContext context) {
+        return Overlay(key: oldRoot, initialEntries: <OverlayEntry>[midEntry]);
+      },
+    );
+    addTearDown(
+      () => outerEntry
+        ..remove()
+        ..dispose(),
+    );
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Overlay(
           // Add a new root.
           key: newRoot,
-          initialEntries: <OverlayEntry>[
-            OverlayEntry(
-              builder: (BuildContext context) {
-                return Overlay(
-                  key: oldRoot,
-                  initialEntries: <OverlayEntry>[
-                    OverlayEntry(
-                      builder: (BuildContext context) {
-                        return Overlay(initialEntries: <OverlayEntry>[overlayEntry1]);
-                      },
-                    ),
-                  ],
-                );
-              },
-            ),
-          ],
+          initialEntries: <OverlayEntry>[outerEntry],
         ),
       ),
     );
@@ -1490,34 +1488,38 @@ void main() {
       ),
     );
 
+    final OverlayEntry innerEntry = OverlayEntry(
+      builder: (BuildContext context) {
+        return overlayBody;
+      },
+    );
+    addTearDown(
+      () => innerEntry
+        ..remove()
+        ..dispose(),
+    );
+
+    final OverlayEntry outerEntry = OverlayEntry(
+      builder: (BuildContext context) {
+        return ViewAnchor(
+          view: View(
+            view: FakeView(tester.view),
+            child: Overlay(key: inner, initialEntries: <OverlayEntry>[innerEntry]),
+          ),
+          child: const Placeholder(),
+        );
+      },
+    );
+    addTearDown(
+      () => outerEntry
+        ..remove()
+        ..dispose(),
+    );
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Overlay(
-          key: outer,
-          initialEntries: <OverlayEntry>[
-            OverlayEntry(
-              builder: (BuildContext context) {
-                return ViewAnchor(
-                  view: View(
-                    view: FakeView(tester.view),
-                    child: Overlay(
-                      key: inner,
-                      initialEntries: <OverlayEntry>[
-                        OverlayEntry(
-                          builder: (BuildContext context) {
-                            return overlayBody;
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  child: const Placeholder(),
-                );
-              },
-            ),
-          ],
-        ),
+        child: Overlay(key: outer, initialEntries: <OverlayEntry>[outerEntry]),
       ),
     );
 

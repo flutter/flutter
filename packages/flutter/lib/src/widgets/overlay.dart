@@ -1707,21 +1707,17 @@ class OverlayPortalController {
 /// entry to.
 ///
 /// This is typically used in [OverlayPortal].
-final class OverlayLocation {
-  const OverlayLocation._(this._isRoot);
-
-  final bool _isRoot;
-
+enum OverlayLocation {
   /// The [OverlayPortal] attaches to the immediate [Overlay] above the widget
   /// tree.
-  static const OverlayLocation nearest = OverlayLocation._(false);
+  nearest,
 
   /// The [OverlayPortal] attaches to the root [Overlay] above the widget
   /// tree.
   ///
   /// In case of multi-view apps, the root [Overlay] refers to the first Overlay
   /// below the View.
-  static const OverlayLocation root = OverlayLocation._(true);
+  root,
 }
 
 /// A widget that renders its overlay child on an [Overlay].
