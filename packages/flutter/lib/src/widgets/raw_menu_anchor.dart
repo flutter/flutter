@@ -823,19 +823,12 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
       ),
     );
 
-    if (useRootOverlay) {
-      return OverlayPortal.targetsRootOverlay(
-        controller: _overlayController,
-        overlayChildBuilder: _buildOverlay,
-        child: child,
-      );
-    } else {
-      return OverlayPortal(
-        controller: _overlayController,
-        overlayChildBuilder: _buildOverlay,
-        child: child,
-      );
-    }
+    return OverlayPortal(
+      controller: _overlayController,
+      overlayChildBuilder: _buildOverlay,
+      overlayLocation: useRootOverlay ? OverlayLocation.root : OverlayLocation.nearest,
+      child: child,
+    );
   }
 
   @override
