@@ -329,9 +329,8 @@ class RenderSliverMainAxisGroup extends RenderSliver
 
       final SliverGeometry childLayoutGeometry = child.geometry!;
 
-      if (childLayoutGeometry case SliverGeometry(
-        :final double scrollOffsetCorrection,
-      ) when scrollOffsetCorrection != 0) {
+      final double? scrollOffsetCorrection = childLayoutGeometry.scrollOffsetCorrection;
+      if (scrollOffsetCorrection != null) {
         geometry = SliverGeometry(scrollOffsetCorrection: scrollOffsetCorrection);
         return;
       }
