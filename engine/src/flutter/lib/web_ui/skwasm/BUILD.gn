@@ -22,6 +22,8 @@ template("skwasm_variant") {
       "paint.cpp",
       "path.cpp",
       "picture.cpp",
+      "render_context.h",
+      "render_context_skia.cpp",
       "shaders.cpp",
       "skwasm_support.h",
       "string.cpp",
