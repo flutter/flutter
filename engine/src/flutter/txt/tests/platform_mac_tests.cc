@@ -31,5 +31,19 @@ TEST_F(PlatformMacTests, RegisterSystemFonts) {
             10);
 }
 
+TEST_F(PlatformMacTests, GetDefaultFontFamiliesOffMainThreadCrash) {
+    std::thread t([]() {
+        // Chamada intencional fora da main thread
+        // Isso vai crashar no macOS/iOS real, simulando o bug da engine
+        auto families = txt::GetDefaultFontFamilies();
+
+        // Se não crashar, apenas printa
+        for (const auto &f : families) {
+            std::cout << f << std::endl;
+        }
+    });
+
+    t.join();
+}
 }  // namespace testing
 }  // namespace txt
