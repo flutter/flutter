@@ -87,17 +87,17 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
 
   @override
   WidgetStateProperty<Color?>? get foregroundColor {
-    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return ${componentColor('md.comp.list.list-item.disabled.label-text')};
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return ${componentColor('md.comp.list.list-item.pressed.label-text')};
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return ${componentColor('md.comp.list.list-item.hover.label-text')};
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return ${componentColor('md.comp.list.list-item.focus.label-text')};
       }
       return ${componentColor('md.comp.list.list-item.label-text')};
@@ -106,17 +106,17 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
 
   @override
   WidgetStateProperty<Color?>? get iconColor {
-    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return ${componentColor('md.comp.list.list-item.disabled.leading-icon')};
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return ${componentColor('md.comp.list.list-item.pressed.leading-icon.icon')};
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return ${componentColor('md.comp.list.list-item.hover.leading-icon.icon')};
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return ${componentColor('md.comp.list.list-item.focus.leading-icon.icon')};
       }
       return ${componentColor('md.comp.list.list-item.leading-icon')};
@@ -143,8 +143,8 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
   @override
   WidgetStateProperty<MouseCursor?>? get mouseCursor {
     return WidgetStateProperty.resolveWith(
-      (Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
+      (Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
           return SystemMouseCursors.basic;
         }
         return SystemMouseCursors.click;
@@ -155,14 +155,14 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
   @override
   WidgetStateProperty<Color?>? get overlayColor {
     return WidgetStateProperty.resolveWith(
-      (Set<MaterialState> states) {
-        if (states.contains(MaterialState.pressed)) {
+      (Set<WidgetState> states) {
+        if (states.contains(WidgetState.pressed)) {
           return ${componentColor('md.comp.list.list-item.pressed.state-layer')};
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return ${componentColor('md.comp.list.list-item.hover.state-layer')};
         }
-        if (states.contains(MaterialState.focused)) {
+        if (states.contains(WidgetState.focused)) {
           return ${componentColor('md.comp.list.list-item.focus.state-layer')};
         }
         return Colors.transparent;
