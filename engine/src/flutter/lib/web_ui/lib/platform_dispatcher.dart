@@ -85,6 +85,8 @@ abstract class PlatformDispatcher {
 
   void scheduleWarmUpFrame({required VoidCallback beginFrame, required VoidCallback drawFrame});
 
+  TypographySettings? get typographySettings;
+
   AccessibilityFeatures get accessibilityFeatures;
 
   VoidCallback? get onAccessibilityFeaturesChanged;
