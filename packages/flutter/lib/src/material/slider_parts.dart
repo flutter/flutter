@@ -835,8 +835,26 @@ class DropSliderValueIndicatorShape extends SliderComponentShape {
 }
 
 /// Utility class for processing multiline text in value indicators.
-class _ValueIndicatorTextProcessor {
+abstract class _ValueIndicatorTextProcessor {
   const _ValueIndicatorTextProcessor._();
+
+  /// Creates a TextPainter with ellipsis when text exceeds maxLines.
+  static TextPainter _createTextPainterWithEllipsis({
+    required TextPainter originalPainter,
+    required String originalText,
+    required int maxLines,
+    required double textScaleFactor,
+  }) {
+    final List<String> lines = originalText.split('\n');
+    final List<String> visibleLines = lines.take(maxLines - 1).toList();
+    visibleLines.add('${lines[maxLines - 1]}...');
+
+    return TextPainter(
+      text: TextSpan(text: visibleLines.join('\n'), style: originalPainter.text?.style),
+      textDirection: originalPainter.textDirection,
+      textScaleFactor: textScaleFactor,
+    )..layout();
+  }
 
   /// Processes multiline text for value indicators, handling maxLines
   /// truncation and ellipsis.
@@ -849,8 +867,6 @@ class _ValueIndicatorTextProcessor {
     required ValueIndicatorMultilineConfig multilineConfig,
     required double textScaleFactor,
   }) {
-    final String labelText = originalPainter.text?.toPlainText() ?? '';
-
     if (!multilineConfig.enabled || multilineConfig.maxLines == null) {
       return originalPainter;
     }
@@ -867,6 +883,7 @@ class _ValueIndicatorTextProcessor {
     }
 
     truncatedPainter.dispose();
+    final String labelText = originalPainter.text?.toPlainText() ?? '';
     return _createTextPainterWithEllipsis(
       originalPainter: originalPainter,
       originalText: labelText,
@@ -874,32 +891,6 @@ class _ValueIndicatorTextProcessor {
       textScaleFactor: textScaleFactor,
     );
   }
-
-  /// Safely disposes a TextPainter if it was created by processMultilineText.
-  /// Does nothing if the painter is the same as the original.
-  static void disposeIfCreated(TextPainter painter, TextPainter original) {
-    if (painter != original) {
-      painter.dispose();
-    }
-  }
-}
-
-/// Creates a TextPainter with ellipsis when text exceeds maxLines.
-TextPainter _createTextPainterWithEllipsis({
-  required TextPainter originalPainter,
-  required String originalText,
-  required int maxLines,
-  required double textScaleFactor,
-}) {
-  final List<String> lines = originalText.split('\n');
-  final List<String> visibleLines = lines.take(maxLines - 1).toList();
-  visibleLines.add('${lines[maxLines - 1]}...');
-
-  return TextPainter(
-    text: TextSpan(text: visibleLines.join('\n'), style: originalPainter.text?.style),
-    textDirection: originalPainter.textDirection,
-    textScaleFactor: textScaleFactor,
-  )..layout();
 }
 
 class _DropSliderValueIndicatorPathPainter {
@@ -983,6 +974,77 @@ class _DropSliderValueIndicatorPathPainter {
     )!;
   }
 
+  /// Creates a multiline drop path.
+  Path _createMultilineDropPath(Rect upperRect) {
+    final Path path = Path();
+    const double cornerRadius = _upperRectRadius;
+
+    // Start at the bottom tip of the triangle.
+    path.moveTo(0, 0);
+
+    // Draw left side of triangle to connect with rectangle.
+    path.lineTo(-_triangleHeight, -_triangleHeight);
+
+    // Draw the left edge of the rectangle
+    // (connecting to the left side of triangle).
+    path.lineTo(upperRect.left + cornerRadius, -_triangleHeight);
+
+    // Draw rounded rectangle manually to ensure proper connection
+    // Top left corner.
+    path.arcToPoint(
+      Offset(upperRect.left, -_triangleHeight - cornerRadius),
+      radius: const Radius.circular(cornerRadius),
+    );
+
+    // Left edge.
+    path.lineTo(upperRect.left, upperRect.top + cornerRadius);
+
+    // Top left corner.
+    path.arcToPoint(
+      Offset(upperRect.left + cornerRadius, upperRect.top),
+      radius: const Radius.circular(cornerRadius),
+    );
+
+    // Top edge.
+    path.lineTo(upperRect.right - cornerRadius, upperRect.top);
+
+    // Top right corner.
+    path.arcToPoint(
+      Offset(upperRect.right, upperRect.top + cornerRadius),
+      radius: const Radius.circular(cornerRadius),
+    );
+
+    // Right edge.
+    path.lineTo(upperRect.right, -_triangleHeight - cornerRadius);
+
+    // Bottom right corner.
+    path.arcToPoint(
+      Offset(upperRect.right - cornerRadius, -_triangleHeight),
+      radius: const Radius.circular(cornerRadius),
+    );
+
+    // Connect to right side of triangle.
+    path.lineTo(_triangleHeight, -_triangleHeight);
+
+    // Complete the triangle and close the path.
+    path.close();
+    return path;
+  }
+
+  /// Creates a single line drop path.
+  Path _createSingleLineDropPath(Rect upperRect, TextPainter labelPainter) {
+    final BorderRadius adjustedBorderRadius = _adjustBorderRadius(upperRect);
+    final RRect borderRect = adjustedBorderRadius
+        .resolve(labelPainter.textDirection)
+        .toRRect(upperRect);
+    final Path path = Path()
+      ..lineTo(-_triangleHeight, -_triangleHeight)
+      ..lineTo(_triangleHeight, -_triangleHeight)
+      ..close();
+    path.addRRect(borderRect);
+    return path;
+  }
+
   void paint({
     required RenderBox parentBox,
     required Canvas canvas,
@@ -1005,7 +1067,6 @@ class _DropSliderValueIndicatorPathPainter {
         sliderTheme.valueIndicatorMultilineConfig ?? const ValueIndicatorMultilineConfig();
 
     // Handle maxLines truncation if multiline is enabled from theme configuration.
-    final String labelText = labelPainter.text?.toPlainText() ?? '';
     final TextPainter finalLabelPainter = _ValueIndicatorTextProcessor.processMultilineText(
       originalPainter: labelPainter,
       multilineConfig: multilineConfig,
@@ -1021,7 +1082,7 @@ class _DropSliderValueIndicatorPathPainter {
       sizeWithOverflow: sizeWithOverflow,
       scale: scale,
     );
-
+    final String labelText = labelPainter.text?.toPlainText() ?? '';
     final bool hasNewline = multilineConfig.enabled && (labelText.contains('\n'));
 
     final Rect upperRect;
@@ -1052,75 +1113,9 @@ class _DropSliderValueIndicatorPathPainter {
     canvas.translate(center.dx, center.dy - _bottomTipYOffset);
     canvas.scale(scale, scale);
 
-    final Path path;
-    if (hasNewline) {
-      // For multiline text, create a single continuous path for the
-      // drop/triangle shape.
-      path = Path();
-
-      const double cornerRadius = _upperRectRadius;
-
-      // Start at the bottom tip of the triangle.
-      path.moveTo(0, 0);
-
-      // Draw left side of triangle to connect with rectangle.
-      path.lineTo(-_triangleHeight, -_triangleHeight);
-
-      // Draw the left edge of the rectangle
-      // (connecting to the left side of triangle).
-      path.lineTo(upperRect.left + cornerRadius, -_triangleHeight);
-
-      // Draw rounded rectangle manually to ensure proper connection
-      // Top left corner.
-      path.arcToPoint(
-        Offset(upperRect.left, -_triangleHeight - cornerRadius),
-        radius: const Radius.circular(cornerRadius),
-      );
-
-      // Left edge.
-      path.lineTo(upperRect.left, upperRect.top + cornerRadius);
-
-      // Top left corner.
-      path.arcToPoint(
-        Offset(upperRect.left + cornerRadius, upperRect.top),
-        radius: const Radius.circular(cornerRadius),
-      );
-
-      // Top edge.
-      path.lineTo(upperRect.right - cornerRadius, upperRect.top);
-
-      // Top right corner.
-      path.arcToPoint(
-        Offset(upperRect.right, upperRect.top + cornerRadius),
-        radius: const Radius.circular(cornerRadius),
-      );
-
-      // Right edge.
-      path.lineTo(upperRect.right, -_triangleHeight - cornerRadius);
-
-      // Bottom right corner.
-      path.arcToPoint(
-        Offset(upperRect.right - cornerRadius, -_triangleHeight),
-        radius: const Radius.circular(cornerRadius),
-      );
-
-      // Connect to right side of triangle.
-      path.lineTo(_triangleHeight, -_triangleHeight);
-
-      // Complete the triangle and close the path.
-      path.close();
-    } else {
-      // Original single-line calculation.
-      final BorderRadius adjustedBorderRadius = _adjustBorderRadius(upperRect);
-      final RRect borderRect = adjustedBorderRadius
-          .resolve(labelPainter.textDirection)
-          .toRRect(upperRect);
-      path = Path()
-        ..lineTo(-_triangleHeight, -_triangleHeight)
-        ..lineTo(_triangleHeight, -_triangleHeight)
-        ..close();
-      path.addRRect(borderRect);
-    }
+    final Path path = hasNewline
+        ? _createMultilineDropPath(upperRect)
+        : _createSingleLineDropPath(upperRect, labelPainter);
 
     if (strokePaintColor != null) {
       final Paint strokePaint = Paint()
@@ -1155,7 +1150,9 @@ class _DropSliderValueIndicatorPathPainter {
     canvas.restore();
 
     // Dispose TextPainter we created (but not the original labelPainter).
-    _ValueIndicatorTextProcessor.disposeIfCreated(finalLabelPainter, labelPainter);
+    if (finalLabelPainter != labelPainter) {
+      finalLabelPainter.dispose();
+    }
   }
 }
 
@@ -1601,7 +1598,6 @@ class _RoundedRectSliderValueIndicatorPathPainter {
         sliderTheme.valueIndicatorMultilineConfig ?? const ValueIndicatorMultilineConfig();
 
     // Handle maxLines truncation if multiline is enabled from theme configuration.
-    final String labelText = labelPainter.text?.toPlainText() ?? '';
     final TextPainter finalLabelPainter = _ValueIndicatorTextProcessor.processMultilineText(
       originalPainter: labelPainter,
       multilineConfig: multilineConfig,
@@ -1617,18 +1613,28 @@ class _RoundedRectSliderValueIndicatorPathPainter {
       sizeWithOverflow: sizeWithOverflow,
       scale: scale,
     );
-
+    final String labelText = labelPainter.text?.toPlainText() ?? '';
     final bool hasNewline = multilineConfig.enabled && labelText.contains('\n');
     final double cornerPadding = multilineConfig.cornerPadding ?? _multilineCornerPadding;
+    // Apply cornerPadding more effectively by distributing it between width and height.
+    // The w/h ratio(6/4) provides better visual balance,
+    // since horizontal size is often longer than vertical size as usual.
+    final double effectiveCornerPaddingWidth = hasNewline ? cornerPadding * 0.6 : 0.0;
+    final double effectiveCornerPaddingHeight = hasNewline ? cornerPadding * 0.4 : 0.0;
+
+    final double adjustedRectangleWidth = rectangleWidth + effectiveCornerPaddingWidth;
     final double rectHeight = hasNewline
-        ? math.max(_preferredHeight, finalLabelPainter.height + (_labelPadding * 2) + cornerPadding)
+        ? math.max(
+            _preferredHeight,
+            finalLabelPainter.height + (_labelPadding * 2) + effectiveCornerPaddingHeight,
+          )
         : _preferredHeight * textScaleFactor;
 
-    // The rectangle which is above the thumb, with no triangle)
+    // The rectangle which is above the thumb, with no triangle.
     final Rect upperRect = Rect.fromLTWH(
-      -rectangleWidth / 2 + horizontalShift,
+      -adjustedRectangleWidth / 2 + horizontalShift,
       -_bottomTipYOffset - rectHeight,
-      rectangleWidth,
+      adjustedRectangleWidth,
       rectHeight,
     );
 
@@ -1650,7 +1656,7 @@ class _RoundedRectSliderValueIndicatorPathPainter {
       canvas.drawRRect(rrect, strokePaint);
     }
 
-    // Draw the label, centered in the rectangle
+    // Draw the label, centered in the rectangle.
     final Offset labelOffset = Offset(
       rrect.left + (rrect.width - finalLabelPainter.width) / 2,
       rrect.top + (rrect.height - finalLabelPainter.height) / 2,
@@ -1659,7 +1665,9 @@ class _RoundedRectSliderValueIndicatorPathPainter {
     canvas.restore();
 
     // Dispose TextPainter we created (but not the original labelPainter).
-    _ValueIndicatorTextProcessor.disposeIfCreated(finalLabelPainter, labelPainter);
+    if (finalLabelPainter != labelPainter) {
+      finalLabelPainter.dispose();
+    }
   }
 }
 
