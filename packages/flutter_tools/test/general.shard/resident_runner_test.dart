@@ -1949,10 +1949,7 @@ flutter:
         unawaited(
           runZonedGuarded(
             () => flutterDevice
-                .connect(
-                  allowExistingDdsInstance: true,
-                  debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-                )
+                .connect(debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug))
                 .then((_) => done.complete()),
             (_, _) => done.complete(),
           ),
@@ -2005,7 +2002,6 @@ flutter:
             };
         final flutterDevice = TestFlutterDevice(device, vmServiceUris: Stream<Uri>.value(testUri));
         await flutterDevice.connect(
-          allowExistingDdsInstance: true,
           debuggingOptions: DebuggingOptions.enabled(
             BuildInfo.debug,
             disableServiceAuthCodes: true,

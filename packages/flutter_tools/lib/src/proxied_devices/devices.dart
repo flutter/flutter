@@ -514,7 +514,7 @@ class _ProxiedLogReader extends DeviceLogReader {
       (String? applicationPackageId) async => _cast<String>(
         await connection.sendRequest('device.logReader.start', <String, Object>{
           'deviceId': device.id,
-          if (applicationPackageId != null) 'applicationPackageId': applicationPackageId,
+          'applicationPackageId': ?applicationPackageId,
         }),
       ),
     );

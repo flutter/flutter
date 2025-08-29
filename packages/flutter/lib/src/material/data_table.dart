@@ -118,7 +118,7 @@ class DataColumn {
   ///
   /// See also:
   ///  * [WidgetStateMouseCursor], which can be used to create a [MouseCursor].
-  final MaterialStateProperty<MouseCursor?>? mouseCursor;
+  final WidgetStateProperty<MouseCursor?>? mouseCursor;
 
   /// Defines the horizontal layout of the [label] and sort indicator in the
   /// heading row.
@@ -148,6 +148,7 @@ class DataRow {
     this.selected = false,
     this.onSelectChanged,
     this.onLongPress,
+    this.onHover,
     this.color,
     this.mouseCursor,
     required this.cells,
@@ -160,6 +161,7 @@ class DataRow {
     this.selected = false,
     this.onSelectChanged,
     this.onLongPress,
+    this.onHover,
     this.color,
     this.mouseCursor,
     required this.cells,
@@ -199,6 +201,12 @@ class DataRow {
   /// that callback behavior overrides the gesture behavior of the row for
   /// that particular cell.
   final GestureLongPressCallback? onLongPress;
+
+  /// Called when a pointer enters or exits the row.
+  ///
+  /// The boolean value passed to the callback is true if a pointer has entered the row and false
+  /// when a pointer has exited the row.
+  final ValueChanged<bool>? onHover;
 
   /// Whether the row is selected.
   ///
@@ -248,7 +256,7 @@ class DataRow {
   ///  * The Material Design specification for overlay colors and how they
   ///    match a component's state:
   ///    <https://material.io/design/interaction/states.html#anatomy>.
-  final MaterialStateProperty<Color?>? color;
+  final WidgetStateProperty<Color?>? color;
 
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// data row.
@@ -262,7 +270,7 @@ class DataRow {
   ///
   /// See also:
   ///  * [WidgetStateMouseCursor], which can be used to create a [MouseCursor].
-  final MaterialStateProperty<MouseCursor?>? mouseCursor;
+  final WidgetStateProperty<MouseCursor?>? mouseCursor;
 
   bool get _debugInteractive =>
       onSelectChanged != null || cells.any((DataCell cell) => cell._debugInteractive);
@@ -596,7 +604,7 @@ class DataTable extends StatelessWidget {
   ///    match a component's state:
   ///    <https://material.io/design/interaction/states.html#anatomy>.
   /// {@endtemplate}
-  final MaterialStateProperty<Color?>? dataRowColor;
+  final WidgetStateProperty<Color?>? dataRowColor;
 
   /// {@template flutter.material.dataTable.dataRowHeight}
   /// The height of each row (excluding the row that contains column headings).
@@ -669,7 +677,7 @@ class DataTable extends StatelessWidget {
   ///    match a component's state:
   ///    <https://material.io/design/interaction/states.html#anatomy>.
   /// {@endtemplate}
-  final MaterialStateProperty<Color?>? headingRowColor;
+  final WidgetStateProperty<Color?>? headingRowColor;
 
   /// {@template flutter.material.dataTable.headingRowHeight}
   /// The height of the heading row.
@@ -826,7 +834,7 @@ class DataTable extends StatelessWidget {
     required bool? checked,
     required VoidCallback? onRowTap,
     required ValueChanged<bool?>? onCheckboxChanged,
-    required MaterialStateProperty<Color?>? overlayColor,
+    required WidgetStateProperty<Color?>? overlayColor,
     required bool tristate,
     MouseCursor? rowMouseCursor,
   }) {
@@ -873,7 +881,7 @@ class DataTable extends StatelessWidget {
     required VoidCallback? onSort,
     required bool sorted,
     required bool ascending,
-    required MaterialStateProperty<Color?>? overlayColor,
+    required WidgetStateProperty<Color?>? overlayColor,
     required MouseCursor? mouseCursor,
     required MainAxisAlignment headingRowAlignment,
   }) {
@@ -949,8 +957,9 @@ class DataTable extends StatelessWidget {
     required GestureLongPressCallback? onLongPress,
     required GestureTapDownCallback? onTapDown,
     required GestureTapCancelCallback? onTapCancel,
-    required MaterialStateProperty<Color?>? overlayColor,
+    required WidgetStateProperty<Color?>? overlayColor,
     required GestureLongPressCallback? onRowLongPress,
+    required ValueChanged<bool>? onRowHover,
     required MouseCursor? mouseCursor,
   }) {
     final ThemeData themeData = Theme.of(context);
@@ -1007,10 +1016,11 @@ class DataTable extends StatelessWidget {
         overlayColor: overlayColor,
         child: label,
       );
-    } else if (onSelectChanged != null || onRowLongPress != null) {
+    } else if (onSelectChanged != null || onRowLongPress != null || onRowHover != null) {
       label = TableRowInkWell(
         onTap: onSelectChanged,
         onLongPress: onRowLongPress,
+        onHover: onRowHover,
         overlayColor: overlayColor,
         mouseCursor: mouseCursor,
         child: label,
@@ -1025,11 +1035,11 @@ class DataTable extends StatelessWidget {
 
     final ThemeData theme = Theme.of(context);
     final DataTableThemeData dataTableTheme = DataTableTheme.of(context);
-    final MaterialStateProperty<Color?>? effectiveHeadingRowColor =
+    final WidgetStateProperty<Color?>? effectiveHeadingRowColor =
         headingRowColor ?? dataTableTheme.headingRowColor ?? theme.dataTableTheme.headingRowColor;
-    final MaterialStateProperty<Color?>? effectiveDataRowColor =
+    final WidgetStateProperty<Color?>? effectiveDataRowColor =
         dataRowColor ?? dataTableTheme.dataRowColor ?? theme.dataTableTheme.dataRowColor;
-    final MaterialStateProperty<Color?> defaultRowColor = MaterialStateProperty.resolveWith((
+    final WidgetStateProperty<Color?> defaultRowColor = WidgetStateProperty.resolveWith((
       Set<MaterialState> states,
     ) {
       if (states.contains(MaterialState.selected)) {
@@ -1223,6 +1233,7 @@ class DataTable extends StatelessWidget {
               : () => row.onSelectChanged?.call(!row.selected),
           overlayColor: row.color ?? effectiveDataRowColor,
           onRowLongPress: row.onLongPress,
+          onRowHover: row.onHover,
           mouseCursor:
               row.mouseCursor?.resolve(states) ?? dataTableTheme.dataRowCursor?.resolve(states),
         );
@@ -1276,6 +1287,7 @@ class TableRowInkWell extends InkResponse {
     super.onDoubleTap,
     super.onLongPress,
     super.onHighlightChanged,
+    super.onHover,
     super.onSecondaryTap,
     super.onSecondaryTapDown,
     super.overlayColor,
