@@ -584,7 +584,8 @@ void main() {
   );
 
   // Regression test for https://github.com/flutter/flutter/issues/174246 .
-  // A control case against its Web counterpart in html_element_view_test.dart.
+  // This is a control case against its Web counterpart in
+  // html_element_view_test.dart.
   testWidgets('SelectionArea applies correct mouse cursors in its empty region', (
     WidgetTester tester,
   ) async {

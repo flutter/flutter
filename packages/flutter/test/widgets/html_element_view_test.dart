@@ -431,6 +431,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/174246
+  // There is a control case for non-Web in selection_area_test.dart.
   testWidgets('SelectionArea applies correct mouse cursors in its empty region on Web', (
     WidgetTester tester,
   ) async {
