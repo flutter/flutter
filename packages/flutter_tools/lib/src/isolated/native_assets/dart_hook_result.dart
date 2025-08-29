@@ -39,11 +39,11 @@ final class DartHooksResult {
     }) {
       final DateTime buildStart = DateTime.parse(buildStartString);
       final DateTime buildEnd = DateTime.parse(buildEndString);
-      final List<Uri> dependencies = <Uri>[
+      final dependencies = <Uri>[
         for (final Object? encodedUri in dependenciesList ?? <Object?>[])
           Uri.parse(encodedUri! as String),
       ];
-      final List<FlutterCodeAsset> codeAssets = <FlutterCodeAsset>[
+      final codeAssets = <FlutterCodeAsset>[
         for (final (Map<String, Object?> codeAsset, String target) in codeAssetsList.map(
           (Object? codeJson) => switch (codeJson) {
             {_assetKey: final Map<String, Object?> codeAsset, _targetKey: final String target} => (
@@ -58,7 +58,7 @@ final class DartHooksResult {
             target: Target.fromString(target),
           ),
       ];
-      final List<DataAsset> dataAssets = <DataAsset>[
+      final dataAssets = <DataAsset>[
         for (final Object? dataAssetJson in dataAssetsList ?? const <Object?>[])
           DataAsset.fromEncoded(EncodedAsset.fromJson(dataAssetJson! as Map<String, Object?>)),
       ];
@@ -98,13 +98,13 @@ final class DartHooksResult {
     _dataAssetsKey: <Object?>[for (final DataAsset asset in dataAssets) asset.encode().toJson()],
   };
 
-  static const String _buildStartKey = 'build_start';
-  static const String _buildEndKey = 'build_end';
-  static const String _dependenciesKey = 'dependencies';
-  static const String _codeAssetsKey = 'code_assets';
-  static const String _dataAssetsKey = 'data_assets';
-  static const String _assetKey = 'asset';
-  static const String _targetKey = 'target';
+  static const _buildStartKey = 'build_start';
+  static const _buildEndKey = 'build_end';
+  static const _dependenciesKey = 'dependencies';
+  static const _codeAssetsKey = 'code_assets';
+  static const _dataAssetsKey = 'data_assets';
+  static const _assetKey = 'asset';
+  static const _targetKey = 'target';
 
   /// The files that eventually should be bundled with the app.
   List<Uri> get filesToBeBundled => <Uri>[

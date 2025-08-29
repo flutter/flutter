@@ -77,7 +77,6 @@ sealed class AssetBuildTarget {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
         return _androidTargets(targetPlatform, environmentDefines, supportedAssetTypes);
       case TargetPlatform.ios:
         return _iosTargets(environmentDefines, fileSystem, supportedAssetTypes);
@@ -87,6 +86,7 @@ sealed class AssetBuildTarget {
         return _flutterTesterTarget(supportedAssetTypes);
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
+      case TargetPlatform.unsupported:
         throwToolExit('No targets defined for target platform $targetPlatform.');
     }
   }
@@ -373,8 +373,6 @@ List<AndroidArch> _androidArchs(TargetPlatform targetPlatform, String? androidAr
       return <AndroidArch>[AndroidArch.arm64_v8a];
     case TargetPlatform.android_x64:
       return <AndroidArch>[AndroidArch.x86_64];
-    case TargetPlatform.android_x86:
-      return <AndroidArch>[AndroidArch.x86];
     case TargetPlatform.android:
       if (androidArchsEnvironment == null) {
         throw MissingDefineException(kAndroidArchs, 'native_assets');
@@ -390,6 +388,7 @@ List<AndroidArch> _androidArchs(TargetPlatform targetPlatform, String? androidAr
     case TargetPlatform.web_javascript:
     case TargetPlatform.windows_x64:
     case TargetPlatform.windows_arm64:
+    case TargetPlatform.unsupported:
       throwToolExit('Unsupported Android target platform: $targetPlatform.');
   }
 }

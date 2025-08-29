@@ -632,7 +632,6 @@ enum TargetPlatform {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
         return 'android';
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
@@ -643,6 +642,8 @@ enum TargetPlatform {
         return 'flutter-tester';
       case TargetPlatform.web_javascript:
         return 'web';
+      case TargetPlatform.unsupported:
+        throw UnsupportedError('Unexpected target platform $this');
     }
   }
 
@@ -773,7 +774,7 @@ DarwinArch getDarwinArchForName(String arch) {
 }
 
 List<DarwinArch> getDarwinArchsFromEnv(Map<String, String> defines) {
-  const List<DarwinArch> defaultDarwinArchitectures = <DarwinArch>[
+  const defaultDarwinArchitectures = <DarwinArch>[
     DarwinArch.x86_64,
     DarwinArch.arm64,
   ];

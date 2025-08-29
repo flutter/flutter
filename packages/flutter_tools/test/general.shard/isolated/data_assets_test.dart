@@ -90,7 +90,7 @@ void main() {
       DataAsset makeDataAsset(String name, Uri file) =>
           DataAsset(package: 'bar', name: name, file: file);
 
-      for (final BuildMode buildMode in <BuildMode>[BuildMode.debug, BuildMode.release]) {
+      for (final buildMode in <BuildMode>[BuildMode.debug, BuildMode.release]) {
         expect(
           () async => runFlutterSpecificHooks(
             environmentDefines: <String, String>{kBuildMode: buildMode.cliName},

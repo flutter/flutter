@@ -22,8 +22,8 @@ import '../transition_test_utils.dart';
 import 'native_assets_test_utils.dart';
 
 final String hostOs = platform.operatingSystem;
-const String packageName = 'data_asset_example';
-const String packageNameDependency = 'data_asset_dependency';
+const packageName = 'data_asset_example';
+const packageNameDependency = 'data_asset_dependency';
 
 void main() {
   if (!platform.isMacOS && !platform.isLinux && !platform.isWindows) {
@@ -57,14 +57,14 @@ void main() {
     // NOTE: flutter-tester doesn't support profile/release mode.
     // NOTE: flutter web doesn't allow cpaturing print()s in profile/release
     // nOTE: flutter web doens't allow adding assets on hot-restart
-    final List<String> devices = <String>[hostOs, 'chrome', 'flutter-tester'];
-    final List<String> modes = <String>['debug', 'release'];
+    final devices = <String>[hostOs, 'chrome', 'flutter-tester'];
+    final modes = <String>['debug', 'release'];
 
-    for (final String mode in modes) {
-      for (final String device in devices) {
-        final bool isFlutterTester = device == 'flutter-tester';
-        final bool isWeb = device == 'chrome';
-        final bool isDebug = mode == 'debug';
+    for (final mode in modes) {
+      for (final device in devices) {
+        final isFlutterTester = device == 'flutter-tester';
+        final isWeb = device == 'chrome';
+        final isDebug = mode == 'debug';
 
         // This test relies on running the flutter app and capturing `print()`s
         // the app prints to determine if the test succeeded.
@@ -81,10 +81,10 @@ void main() {
         }
 
         testWithoutContext('flutter run on $device --$mode', () async {
-          final bool performRestart = isDebug;
-          final bool performReload = isDebug;
+          final performRestart = isDebug;
+          final performReload = isDebug;
 
-          final Map<String, String> assets = <String, String>{'id1': 'content1', 'id2': 'content2'};
+          final assets = <String, String>{'id1': 'content1', 'id2': 'content2'};
           writeAssets(assets, root);
           writeHookLibrary(root, assets, available: <String>['id1']);
           writeHelperLibrary(root, 'version1', assets.keys.toList());
@@ -184,10 +184,10 @@ void main() {
       }
     }
 
-    for (final String target in <String>[hostOs, 'web']) {
+    for (final target in <String>[hostOs, 'web']) {
       testWithoutContext('flutter build $target', () async {
-        final Map<String, String> assets = <String, String>{'id1': 'content1', 'id2': 'content2'};
-        final List<String> available = <String>['id1'];
+        final assets = <String, String>{'id1': 'content1', 'id2': 'content2'};
+        final available = <String>['id1'];
         writeAssets(assets, root);
         writeHookLibrary(root, assets, available: available);
         writeHelperLibrary(root, 'version1', assets.keys.toList());
@@ -214,12 +214,12 @@ void main() {
         if (manifestFiles.isEmpty) {
           throw Exception('Expected a `AssetManifest.json` to be avilable in the $buildTargetDir.');
         }
-        for (final File manifestFile in manifestFiles) {
-          final Map<String, Object?> manifest =
+        for (final manifestFile in manifestFiles) {
+          final manifest =
               json.decode(manifestFile.readAsStringSync()) as Map<String, Object?>;
-          for (final String id in available) {
-            final String key = 'packages/$packageName/$id';
-            final List<Object?> entry = manifest[key]! as List<Object?>;
+          for (final id in available) {
+            final key = 'packages/$packageName/$id';
+            final entry = manifest[key]! as List<Object?>;
             expect(entry, equals(<String>[key]));
 
             final File file = manifestFile.parent.childFile(key);
@@ -229,13 +229,13 @@ void main() {
       });
     }
 
-    for (final String target in <String>[hostOs, 'web']) {
+    for (final target in <String>[hostOs, 'web']) {
       testWithoutContext('flutter build $target with conflicting assets', () async {
-        final Map<String, String> assets = <String, String>{
+        final assets = <String, String>{
           'id1.txt': 'content1',
           'id2.txt': 'content2',
         };
-        final List<String> available = <String>['id1.txt'];
+        final available = <String>['id1.txt'];
         writeAssets(assets, root);
         writeAssets(assets, rootDependency);
         writeHookLibrary(root, assets, available: available);
@@ -273,7 +273,7 @@ void main() {
 Future<void> modifyPubspec(Directory dir, void Function(YamlEditor editor) modify) async {
   final File pubspecFile = dir.childFile('pubspec.yaml');
   final String content = await pubspecFile.readAsString();
-  final YamlEditor yamlEditor = YamlEditor(content);
+  final yamlEditor = YamlEditor(content);
   modify(yamlEditor);
   pubspecFile.writeAsStringSync(yamlEditor.toString());
 }

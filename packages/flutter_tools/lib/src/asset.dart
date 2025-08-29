@@ -103,7 +103,7 @@ class HookAsset {
   }
 }
 
-const String defaultManifestPath = 'pubspec.yaml';
+const defaultManifestPath = 'pubspec.yaml';
 
 const kFontManifestJson = 'FontManifest.json';
 
@@ -523,7 +523,7 @@ class ManifestAssetBundle implements AssetBundle {
         relativeUri = fileUri;
       }
 
-      final _Asset asset = _Asset(
+      final asset = _Asset(
         baseDir: baseDir,
         relativeUri: relativeUri,
         entryUri: Uri.parse(_fileSystem.path.join('packages', dataAsset.package, dataAsset.name)),

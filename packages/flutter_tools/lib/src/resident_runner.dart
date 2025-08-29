@@ -1115,7 +1115,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   var _finished = Completer<int>();
   BuildResult? _lastBuild;
 
-  late final Environment _environment = Environment(
+  late final _environment = Environment(
     artifacts: globals.artifacts!,
     logger: globals.logger,
     cacheDir: globals.cache.getRoot(),
