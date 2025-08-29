@@ -126,7 +126,7 @@ TEST_F(SemanticsUpdateBuilderTest, CanHandleSemanticsRole) {
   auto configuration = RunConfiguration::InferFromSettings(settings);
   configuration.SetEntrypoint("sendSemanticsUpdateWithRole");
 
-  shell->RunEngine(std::move(configuration), [](RunStatus result) {
+  shell->RunEngine(std::move(configuration), [](Engine::RunStatus result) {
     ASSERT_EQ(result, Engine::RunStatus::Success);
   });
 
@@ -171,7 +171,7 @@ TEST_F(SemanticsUpdateBuilderTest, CanHandleSemanticsLocale) {
   auto configuration = RunConfiguration::InferFromSettings(settings);
   configuration.SetEntrypoint("sendSemanticsUpdateWithLocale");
 
-  shell->RunEngine(std::move(configuration), [](RunStatus result) {
+  shell->RunEngine(std::move(configuration), [](Engine::RunStatus result) {
     ASSERT_EQ(result, Engine::RunStatus::Success);
   });
 
