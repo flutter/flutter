@@ -1489,9 +1489,6 @@ class _AliasedLinePainter extends CustomPainter {
 /// will perform a destructive action, and will color the text of the menu item
 /// [CupertinoColors.systemRed].
 ///
-/// ## Shortcuts
-/// {@macro flutter.material.MenuBar.shortcuts_note}
-///
 /// {@tool dartpad}
 /// This example shows basic usage of a [CupertinoMenuItem] that wraps a button.
 ///
@@ -1505,12 +1502,6 @@ class _AliasedLinePainter extends CustomPainter {
 ///   that is the basis for [CupertinoMenuAnchor].
 /// * [PlatformMenuBar], which creates a menu bar that is rendered by the host
 ///   platform instead of by Flutter (on macOS, for example).
-/// * [ShortcutRegistry], a registry of shortcuts that apply for the entire
-///   application.
-/// * [VoidCallbackIntent], to define intents that will call a [VoidCallback]
-///   and work with the [Actions] and [Shortcuts] system.
-/// * [CallbackShortcuts] to define shortcuts that call a callback without
-///   involving [Actions].
 class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
   /// Creates a [CupertinoMenuItem]
   ///
