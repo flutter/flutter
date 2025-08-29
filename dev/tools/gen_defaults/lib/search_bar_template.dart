@@ -52,14 +52,14 @@ class _SearchBarDefaultsM3 extends SearchBarThemeData {
 
   @override
   WidgetStateProperty<Color?>? get overlayColor =>
-    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
         return ${componentColor("md.comp.search-bar.pressed.state-layer")};
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return ${componentColor("md.comp.search-bar.hover.state-layer")};
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return ${colorOrTransparent("md.comp.search-bar.focused.state-layer")};
       }
       return Colors.transparent;
