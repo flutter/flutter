@@ -862,7 +862,7 @@ class _MenuOverlayState extends State<_MenuOverlay>
     // velocity reduces proportionally to create smooth arrival at the target.
     // Higher values mean the animation begins to decelerate sooner, resulting to
     // a smoother animation curve.
-    const double decelerationDistanceThreshold = 70;
+    const double decelerationDistanceThreshold = 40;
 
     // The distance at which the animation will snap to the target distance without
     // any animation.
