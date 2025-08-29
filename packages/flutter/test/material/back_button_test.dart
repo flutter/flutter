@@ -337,6 +337,18 @@ void main() {
     expect(customCallbackWasCalled, true);
   });
 
+  testWidgets('CloseButton renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: Scaffold(body: CloseButton())),
+        ),
+      ),
+    );
+    final Finder closeButtonIcon = find.byType(CloseButtonIcon);
+    expect(tester.getSize(closeButtonIcon).isEmpty, isTrue);
+  });
+
   testWidgets('BackButton renders at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
