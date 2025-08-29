@@ -173,9 +173,9 @@ bool SolidRRectLikeBlurContents::Render(const ContentContext& renderer,
       entity.GetTransform() *
           Matrix::MakeTranslation(positive_rect.GetOrigin()));
 
-  auto& host_buffer = renderer.GetTransientsBuffer();
-  pass.SetVertexBuffer(CreateVertexBuffer(vertices, host_buffer));
-  VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
+  auto& data_host_buffer = renderer.GetTransientsDataBuffer();
+  pass.SetVertexBuffer(CreateVertexBuffer(vertices, data_host_buffer));
+  VS::BindFrameInfo(pass, data_host_buffer.EmplaceUniform(frame_info));
 
   if (!pass.Draw().ok()) {
     return false;

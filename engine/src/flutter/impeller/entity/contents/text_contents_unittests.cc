@@ -52,7 +52,7 @@ std::shared_ptr<TextFrame> MakeTextFrame(const std::string& text,
 std::shared_ptr<GlyphAtlas> CreateGlyphAtlas(
     Context& context,
     const TypographerContext* typographer_context,
-    HostBuffer& host_buffer,
+    HostBuffer& data_host_buffer,
     GlyphAtlas::Type type,
     Rational scale,
     const std::shared_ptr<GlyphAtlasContext>& atlas_context,
@@ -64,7 +64,7 @@ std::shared_ptr<GlyphAtlas> CreateGlyphAtlas(
       Matrix::MakeScale(
           Vector3{static_cast<Scalar>(scale), static_cast<Scalar>(scale), 1}),
       /*properties=*/std::nullopt);
-  return typographer_context->CreateGlyphAtlas(context, type, host_buffer,
+  return typographer_context->CreateGlyphAtlas(context, type, data_host_buffer,
                                                atlas_context, {frame});
 }
 
@@ -120,12 +120,12 @@ TEST_P(TextContentsTest, SimpleComputeVertexData) {
   std::shared_ptr<TypographerContext> context = TypographerContextSkia::Make();
   std::shared_ptr<GlyphAtlasContext> atlas_context =
       context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
-  std::shared_ptr<HostBuffer> host_buffer = HostBuffer::Create(
+  std::shared_ptr<HostBuffer> data_host_buffer = HostBuffer::Create(
       GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
       GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
   ASSERT_TRUE(context && context->IsValid());
   std::shared_ptr<GlyphAtlas> atlas =
-      CreateGlyphAtlas(*GetContext(), context.get(), *host_buffer,
+      CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
                        GlyphAtlas::Type::kAlphaBitmap, /*scale=*/Rational(1, 1),
                        atlas_context, text_frame, /*offset=*/{0, 0});
 
@@ -156,13 +156,13 @@ TEST_P(TextContentsTest, SimpleComputeVertexData2x) {
   std::shared_ptr<TypographerContext> context = TypographerContextSkia::Make();
   std::shared_ptr<GlyphAtlasContext> atlas_context =
       context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
-  std::shared_ptr<HostBuffer> host_buffer = HostBuffer::Create(
+  std::shared_ptr<HostBuffer> data_host_buffer = HostBuffer::Create(
       GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
       GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
   ASSERT_TRUE(context && context->IsValid());
   Rational font_scale(2, 1);
   std::shared_ptr<GlyphAtlas> atlas =
-      CreateGlyphAtlas(*GetContext(), context.get(), *host_buffer,
+      CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
                        GlyphAtlas::Type::kAlphaBitmap, font_scale,
                        atlas_context, text_frame, /*offset=*/{0, 0});
 
@@ -188,7 +188,7 @@ TEST_P(TextContentsTest, MaintainsShape) {
   std::shared_ptr<TypographerContext> context = TypographerContextSkia::Make();
   std::shared_ptr<GlyphAtlasContext> atlas_context =
       context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
-  std::shared_ptr<HostBuffer> host_buffer = HostBuffer::Create(
+  std::shared_ptr<HostBuffer> data_host_buffer = HostBuffer::Create(
       GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
       GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
   ASSERT_TRUE(context && context->IsValid());
@@ -202,7 +202,7 @@ TEST_P(TextContentsTest, MaintainsShape) {
       std::vector<GlyphAtlasPipeline::VertexShader::PerVertexData> data(12);
 
       std::shared_ptr<GlyphAtlas> atlas =
-          CreateGlyphAtlas(*GetContext(), context.get(), *host_buffer,
+          CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
                            GlyphAtlas::Type::kAlphaBitmap, font_scale,
                            atlas_context, text_frame, /*offset=*/{0, 0});
       ISize texture_size = atlas->GetTexture()->GetSize();
@@ -238,13 +238,13 @@ TEST_P(TextContentsTest, SimpleSubpixel) {
   std::shared_ptr<TypographerContext> context = TypographerContextSkia::Make();
   std::shared_ptr<GlyphAtlasContext> atlas_context =
       context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
-  std::shared_ptr<HostBuffer> host_buffer = HostBuffer::Create(
+  std::shared_ptr<HostBuffer> data_host_buffer = HostBuffer::Create(
       GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
       GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
   ASSERT_TRUE(context && context->IsValid());
   Point offset = Point(0.5, 0);
   std::shared_ptr<GlyphAtlas> atlas =
-      CreateGlyphAtlas(*GetContext(), context.get(), *host_buffer,
+      CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
                        GlyphAtlas::Type::kAlphaBitmap, /*scale=*/Rational(1),
                        atlas_context, text_frame, offset);
 
@@ -276,14 +276,14 @@ TEST_P(TextContentsTest, SimpleSubpixel3x) {
   std::shared_ptr<TypographerContext> context = TypographerContextSkia::Make();
   std::shared_ptr<GlyphAtlasContext> atlas_context =
       context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
-  std::shared_ptr<HostBuffer> host_buffer = HostBuffer::Create(
+  std::shared_ptr<HostBuffer> data_host_buffer = HostBuffer::Create(
       GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
       GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
   ASSERT_TRUE(context && context->IsValid());
   Rational font_scale(3, 1);
   Point offset = {0.16667, 0};
   std::shared_ptr<GlyphAtlas> atlas =
-      CreateGlyphAtlas(*GetContext(), context.get(), *host_buffer,
+      CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
                        GlyphAtlas::Type::kAlphaBitmap, font_scale,
                        atlas_context, text_frame, offset);
 
@@ -321,13 +321,13 @@ TEST_P(TextContentsTest, SimpleSubpixel26) {
   std::shared_ptr<TypographerContext> context = TypographerContextSkia::Make();
   std::shared_ptr<GlyphAtlasContext> atlas_context =
       context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
-  std::shared_ptr<HostBuffer> host_buffer = HostBuffer::Create(
+  std::shared_ptr<HostBuffer> data_host_buffer = HostBuffer::Create(
       GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
       GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
   ASSERT_TRUE(context && context->IsValid());
   Point offset = Point(0.26, 0);
   std::shared_ptr<GlyphAtlas> atlas =
-      CreateGlyphAtlas(*GetContext(), context.get(), *host_buffer,
+      CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
                        GlyphAtlas::Type::kAlphaBitmap, /*scale=*/Rational(1),
                        atlas_context, text_frame, offset);
 
@@ -359,13 +359,13 @@ TEST_P(TextContentsTest, SimpleSubpixel80) {
   std::shared_ptr<TypographerContext> context = TypographerContextSkia::Make();
   std::shared_ptr<GlyphAtlasContext> atlas_context =
       context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
-  std::shared_ptr<HostBuffer> host_buffer = HostBuffer::Create(
+  std::shared_ptr<HostBuffer> data_host_buffer = HostBuffer::Create(
       GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
       GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
   ASSERT_TRUE(context && context->IsValid());
   Point offset = Point(0.80, 0);
   std::shared_ptr<GlyphAtlas> atlas =
-      CreateGlyphAtlas(*GetContext(), context.get(), *host_buffer,
+      CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
                        GlyphAtlas::Type::kAlphaBitmap, /*scale=*/Rational(1),
                        atlas_context, text_frame, offset);
 
