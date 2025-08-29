@@ -60,7 +60,7 @@ abstract class Renderer {
   late StreamSubscription<int> _onViewDisposedListener;
 
   /// Set the maximum number of bytes that can be held in the GPU resource cache.
-  set resourceCacheMaxBytes(int bytes);
+  set resourceCacheMaxBytes(int bytes) => rasterizer.setResourceCacheMaxBytes(bytes);
 
   @mustCallSuper
   FutureOr<void> initialize() {

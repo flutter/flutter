@@ -44,9 +44,6 @@ class CanvasKitRenderer extends Renderer {
     rasterizer = _createRasterizer();
   }
 
-  @override
-  set resourceCacheMaxBytes(int bytes) => rasterizer.setResourceCacheMaxBytes(bytes);
-
   /// A surface used specifically for `Picture.toImage` when software rendering
   /// is supported.
   final Surface pictureToImageSurface = Surface();
