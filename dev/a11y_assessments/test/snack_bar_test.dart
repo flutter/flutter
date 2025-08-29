@@ -17,8 +17,7 @@ void main() {
       Future<void> handleMessage(Object? mockMessage) async {
         if (mockMessage is Map<Object?, Object?>) {
           final Map<String, dynamic> casted = mockMessage.map(
-                (Object? key, Object? value) =>
-                MapEntry<String, dynamic>(key.toString(), value),
+            (Object? key, Object? value) => MapEntry<String, dynamic>(key.toString(), value),
           );
           log.add(casted);
         }
@@ -42,13 +41,10 @@ void main() {
 
       expect(log, isNotEmpty);
       expect(
-        log.firstWhere(
-              (Map<String, dynamic> message) {
-            final Map<String, dynamic> data = message['data'] as Map<String, dynamic>;
-            return message['type'] == 'announce' && data['message'] == snackBarText;
-          },
-          orElse: () => <String, dynamic>{},
-        ),
+        log.firstWhere((Map<String, dynamic> message) {
+          final Map<String, dynamic> data = message['data'] as Map<String, dynamic>;
+          return message['type'] == 'announce' && data['message'] == snackBarText;
+        }, orElse: () => <String, dynamic>{}),
         isNotNull,
       );
     });
