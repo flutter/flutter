@@ -1093,7 +1093,9 @@ targets:
       - DEPS
 
   - name: Linux plugin_test_android
+    bringup: true
     recipe: devicelab/devicelab_drone
+    bringup: true
     timeout: 45
     properties:
       dependencies: >-
@@ -4413,6 +4415,7 @@ targets:
       - DEPS
 
   - name: Mac plugin_test_android
+    bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 45
     properties:
