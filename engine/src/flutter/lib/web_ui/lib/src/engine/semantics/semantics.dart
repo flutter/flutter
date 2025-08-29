@@ -1716,7 +1716,7 @@ class SemanticsObject {
 
     if (_traversalOwner != update.traversalOwner) {
       if (_traversalOwner != null && _traversalOwner != -1 && update.traversalOwner == -1) {
-        SemanticsObject? parent = owner._semanticsTree[_traversalOwner!];
+        final SemanticsObject? parent = owner._semanticsTree[_traversalOwner!];
         if (parent != null && parent.semanticRole != null) {
           parent.element.removeAttribute('aria-owns');
         }
@@ -1829,9 +1829,9 @@ class SemanticsObject {
 
     // Set up aria-owns relationship for overlay portal children.
     if (traversalOwner != -1) {
-      SemanticsObject? parent = owner._semanticsTree[traversalOwner!];
+      final SemanticsObject? parent = owner._semanticsTree[traversalOwner!];
       if (parent != null && parent.semanticRole != null) {
-        parent.element.setAttribute('aria-owns', '$kFlutterSemanticNodePrefix${id}');
+        parent.element.setAttribute('aria-owns', '$kFlutterSemanticNodePrefix$id');
       }
     }
 
