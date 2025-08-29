@@ -3032,6 +3032,17 @@ void main() {
     );
     expect(tester.getSize(find.byType(Dialog)).isEmpty, isTrue);
   });
+
+  testWidgets('AlertDialog does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: AlertDialog(content: Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(AlertDialog)).isEmpty, isTrue);
+  });
 }
 
 @pragma('vm:entry-point')
