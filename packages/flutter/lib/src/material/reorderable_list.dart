@@ -359,17 +359,17 @@ class ReorderableListView extends StatefulWidget {
 
   /// {@macro flutter.widgets.list_view.itemExtent}
   ///
-  /// This is null if this is a [ReorderableListView.separated].
+  /// This is null when using [ReorderableListView.separated] constructor.
   final double? itemExtent;
 
   /// {@macro flutter.widgets.list_view.itemExtentBuilder}
   ///
-  /// This is null if this is a [ReorderableListView.separated].
+  /// This is null when using [ReorderableListView.separated] constructor.
   final ItemExtentBuilder? itemExtentBuilder;
 
   /// {@macro flutter.widgets.list_view.prototypeItem}
   ///
-  /// This is null if this is a [ReorderableListView.separated].
+  /// This is null when using [ReorderableListView.separated] constructor.
   final Widget? prototypeItem;
 
   /// {@macro flutter.widgets.EdgeDraggingAutoScroller.velocityScalar}
@@ -392,7 +392,7 @@ class ReorderableListView extends StatefulWidget {
   ///  hovering, and [SystemMouseCursors.grabbing] when dragging.
   final MouseCursor? mouseCursor;
 
-  /// The builder for separator widgets if this is a [ReorderableListView.separated].
+  /// The builder for separator widgets when using [ReorderableListView.separated] constructor.
   ///
   /// This callback is used to build the separator widgets that appear between items.
   /// It is called with indices from 0 to [itemCount] - 2.
