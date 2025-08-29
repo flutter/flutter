@@ -2708,7 +2708,7 @@ void main() {
             child: ReorderableListView.separated(
               itemCount: listItems.length,
               itemBuilder: (BuildContext context, int index) {
-                return Container(
+                return SizedBox(
                   key: Key(listItems[index]),
                   height: 50,
                   child: Text(listItems[index]),
@@ -2750,7 +2750,7 @@ void main() {
             child: ReorderableListView.separated(
               itemCount: listItems.length,
               itemBuilder: (BuildContext context, int index) {
-                return Container(
+                return SizedBox(
                   key: Key(listItems[index]),
                   height: 50,
                   child: Text(listItems[index]),
