@@ -51,6 +51,7 @@ void main() {
     final RenderTable table = RenderTable(textDirection: TextDirection.ltr);
     final List<RenderBox> children = List<RenderBox>.generate(6, (_) => RenderPositionedBox());
 
+    children.forEach(table.shelterChild);
     table.setFlatChildren(6, children);
     layout(table, constraints: const BoxConstraints.tightFor(width: 100.0));
 
@@ -177,31 +178,41 @@ void main() {
     final RenderBox child2 = RenderPositionedBox();
     final RenderBox child3 = RenderPositionedBox();
     table = RenderTable(textDirection: TextDirection.ltr);
-    table.setFlatChildren(3, <RenderBox>[
-      child1,
-      RenderPositionedBox(),
-      child2,
-      RenderPositionedBox(),
-      child3,
-      RenderPositionedBox(),
-    ]);
+    table.setFlatChildren(
+      3,
+      <RenderBox>[
+        child1,
+        RenderPositionedBox(),
+        child2,
+        RenderPositionedBox(),
+        child3,
+        RenderPositionedBox(),
+      ]..forEach(table.shelterChild),
+    );
     expect(table.rows, equals(2));
     layout(table);
+    List<RenderBox> newChildren = <RenderBox>[
+      RenderPositionedBox(),
+      RenderPositionedBox(),
+      RenderPositionedBox(),
+    ]..forEach(table.shelterChild);
     table.setFlatChildren(3, <RenderBox>[
-      RenderPositionedBox(),
+      newChildren[0],
       child1,
-      RenderPositionedBox(),
+      newChildren[1],
       child2,
-      RenderPositionedBox(),
+      newChildren[2],
       child3,
     ]);
     pumpFrame();
+    newChildren = <RenderBox>[RenderPositionedBox(), RenderPositionedBox(), RenderPositionedBox()]
+      ..forEach(table.shelterChild);
     table.setFlatChildren(3, <RenderBox>[
-      RenderPositionedBox(),
+      newChildren[0],
       child1,
-      RenderPositionedBox(),
+      newChildren[1],
       child2,
-      RenderPositionedBox(),
+      newChildren[2],
       child3,
     ]);
     pumpFrame();
@@ -225,7 +236,7 @@ void main() {
         ..path()
         ..path(),
     );
-    table.setFlatChildren(1, <RenderBox>[RenderPositionedBox()]);
+    table.setFlatChildren(1, <RenderBox>[RenderPositionedBox()]..forEach(table.shelterChild));
     pumpFrame();
     expect(
       table,
@@ -235,18 +246,10 @@ void main() {
         ..path()
         ..path(),
     );
-    table.setFlatChildren(1, <RenderBox>[RenderPositionedBox(), RenderPositionedBox()]);
-    pumpFrame();
-    expect(
-      table,
-      paints
-        ..path()
-        ..path()
-        ..path()
-        ..path()
-        ..path(),
+    table.setFlatChildren(
+      1,
+      <RenderBox>[RenderPositionedBox(), RenderPositionedBox()]..forEach(table.shelterChild),
     );
-    table.setFlatChildren(2, <RenderBox>[RenderPositionedBox(), RenderPositionedBox()]);
     pumpFrame();
     expect(
       table,
@@ -257,12 +260,29 @@ void main() {
         ..path()
         ..path(),
     );
-    table.setFlatChildren(2, <RenderBox>[
-      RenderPositionedBox(),
-      RenderPositionedBox(),
-      RenderPositionedBox(),
-      RenderPositionedBox(),
-    ]);
+    table.setFlatChildren(
+      2,
+      <RenderBox>[RenderPositionedBox(), RenderPositionedBox()]..forEach(table.shelterChild),
+    );
+    pumpFrame();
+    expect(
+      table,
+      paints
+        ..path()
+        ..path()
+        ..path()
+        ..path()
+        ..path(),
+    );
+    table.setFlatChildren(
+      2,
+      <RenderBox>[
+        RenderPositionedBox(),
+        RenderPositionedBox(),
+        RenderPositionedBox(),
+        RenderPositionedBox(),
+      ]..forEach(table.shelterChild),
+    );
     pumpFrame();
     expect(
       table,
@@ -274,14 +294,17 @@ void main() {
         ..path()
         ..path(),
     );
-    table.setFlatChildren(3, <RenderBox>[
-      RenderPositionedBox(),
-      RenderPositionedBox(),
-      RenderPositionedBox(),
-      RenderPositionedBox(),
-      RenderPositionedBox(),
-      RenderPositionedBox(),
-    ]);
+    table.setFlatChildren(
+      3,
+      <RenderBox>[
+        RenderPositionedBox(),
+        RenderPositionedBox(),
+        RenderPositionedBox(),
+        RenderPositionedBox(),
+        RenderPositionedBox(),
+        RenderPositionedBox(),
+      ]..forEach(table.shelterChild),
+    );
     pumpFrame();
     expect(
       table,
@@ -326,12 +349,15 @@ void main() {
       border: TableBorder.all(borderRadius: const BorderRadius.all(Radius.circular(8.0))),
     );
     layout(table);
-    table.setFlatChildren(2, <RenderBox>[
-      RenderPositionedBox(),
-      RenderPositionedBox(),
-      RenderPositionedBox(),
-      RenderPositionedBox(),
-    ]);
+    table.setFlatChildren(
+      2,
+      <RenderBox>[
+        RenderPositionedBox(),
+        RenderPositionedBox(),
+        RenderPositionedBox(),
+        RenderPositionedBox(),
+      ]..forEach(table.shelterChild),
+    );
     pumpFrame();
     expect(
       table,
@@ -403,5 +429,23 @@ void main() {
     // Make sure the table has a size and that the children are filled vertically to the highest cell.
     expect(table.size, equals(size));
     expect(table.defaultVerticalAlignment, TableCellVerticalAlignment.intrinsicHeight);
+  });
+
+  test('shelterChild should be called before setFlatChildren.', () {
+    final RenderTable table = RenderTable(textDirection: TextDirection.ltr);
+    FlutterError? result;
+    try {
+      table.setFlatChildren(1, <RenderBox>[RenderPositionedBox()]);
+    } on FlutterError catch (error) {
+      result = error;
+    }
+    expect(result, isNotNull);
+    result = null;
+    try {
+      table.setFlatChildren(1, <RenderBox>[RenderPositionedBox()]..forEach(table.shelterChild));
+    } on FlutterError catch (error) {
+      result = error;
+    }
+    expect(result, isNull);
   });
 }
