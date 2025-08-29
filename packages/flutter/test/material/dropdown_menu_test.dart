@@ -4715,6 +4715,50 @@ void main() {
     final EditableText editableText = tester.widget(find.byType(EditableText));
     expect(editableText.cursorHeight, cursorHeight);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/174609.
+  testWidgets(
+    'DropdownMenu keeps the selected item from filtered list after entries list is updated',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return DropdownMenu<TestMenu>(
+                  controller: controller,
+                  requestFocusOnTap: true,
+                  enableFilter: true,
+                  // toList() is used here to simulate list update.
+                  dropdownMenuEntries: menuChildren.toList(),
+                  onSelected: (_) {
+                    setState(() {});
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      // Open the menu.
+      await tester.tap(find.byType(DropdownMenu<TestMenu>));
+      await tester.pump();
+
+      // Filter the entries to only show 'Menu 1'.
+      await tester.enterText(find.byType(TextField).first, TestMenu.mainMenu1.label);
+      await tester.pump();
+
+      // Select the 'Menu 1' item.
+      await tester.tap(findMenuItemButton(TestMenu.mainMenu1.label));
+      await tester.pumpAndSettle();
+
+      expect(controller.text, TestMenu.mainMenu1.label);
+    },
+  );
 }
 
 enum TestMenu {
