@@ -297,6 +297,7 @@ class ResidentWebRunner extends ResidentRunner {
           buildInfo: debuggingOptions.buildInfo,
           enableDwds: supportsServiceProtocol,
           enableDds: debuggingOptions.enableDds,
+          ddsPort: debuggingOptions.ddsPort,
           entrypoint: _fileSystem.file(target).uri,
           expressionCompiler: expressionCompiler,
           chromiumLauncher: _chromiumLauncher,
@@ -483,6 +484,12 @@ class ResidentWebRunner extends ResidentRunner {
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');
       }
+    }
+
+    if (_connectionResult == null) {
+      status.stop();
+      _logger.printStatus('Recompile complete. No client connected..');
+      return OperationResult.ok;
     }
 
     // Both will be null when not assigned.
@@ -769,7 +776,6 @@ class ResidentWebRunner extends ResidentRunner {
       }
       _wipConnection = await chromeTab.connect();
     }
-    Uri? websocketUri;
     if (supportsServiceProtocol) {
       assert(connectDebug != null);
       unawaited(
@@ -837,7 +843,7 @@ class ResidentWebRunner extends ResidentRunner {
             vmService: _vmService.service,
           );
 
-          websocketUri = Uri.parse(_connectionResult!.debugConnection!.uri);
+          final Uri websocketUri = Uri.parse(_connectionResult!.debugConnection!.uri);
           device!.vmService = _vmService;
 
           // Run main immediately if the app is not started paused or if there
@@ -855,14 +861,15 @@ class ResidentWebRunner extends ResidentRunner {
             });
           }
 
-          if (websocketUri != null) {
-            if (debuggingOptions.vmserviceOutFile != null) {
-              _fileSystem.file(debuggingOptions.vmserviceOutFile)
-                ..createSync(recursive: true)
-                ..writeAsStringSync(websocketUri.toString());
-            }
-            _logger.printStatus('Debug service listening on $websocketUri');
+          if (debuggingOptions.vmserviceOutFile != null) {
+            _fileSystem.file(debuggingOptions.vmserviceOutFile)
+              ..createSync(recursive: true)
+              ..writeAsStringSync(websocketUri.toString());
           }
+          // TODO(bkonyi): consider removing this log message and using only the standard VM
+          // service message instead.
+          _logger.printStatus('Debug service listening on $websocketUri');
+          printDebuggerList();
           connectionInfoCompleter?.complete(DebugConnectionInfo(wsUri: websocketUri));
         }),
       );
@@ -914,6 +921,9 @@ class ResidentWebRunner extends ResidentRunner {
 
 Uri _httpUriFromWebsocketUri(Uri websocketUri) {
   const wsPath = '/ws';
-  final String path = websocketUri.path;
-  return websocketUri.replace(scheme: 'http', path: path.substring(0, path.length - wsPath.length));
+  String path = websocketUri.path;
+  if (path.endsWith(wsPath)) {
+    path = path.substring(0, path.length - wsPath.length);
+  }
+  return websocketUri.replace(scheme: 'http', path: path);
 }

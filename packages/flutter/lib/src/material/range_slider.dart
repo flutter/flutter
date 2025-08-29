@@ -358,7 +358,7 @@ class RangeSlider extends StatefulWidget {
   /// an opacity of 0.12. If null, [SliderThemeData.overlayColor]
   /// will be used, otherwise defaults to [ColorScheme.primary] with
   /// an opacity of 0.12.
-  final MaterialStateProperty<Color?>? overlayColor;
+  final WidgetStateProperty<Color?>? overlayColor;
 
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
@@ -369,7 +369,7 @@ class RangeSlider extends StatefulWidget {
   /// See also:
   ///
   ///  * [WidgetStateMouseCursor], which can be used to create a [MouseCursor].
-  final MaterialStateProperty<MouseCursor?>? mouseCursor;
+  final WidgetStateProperty<MouseCursor?>? mouseCursor;
 
   /// The callback used to create a semantic value from the slider's values.
   ///
@@ -599,10 +599,13 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     return RangeValues(_unlerp(values.start), _unlerp(values.end));
   }
 
-  // Finds closest thumb. If the thumbs are close to each other, no thumb is
-  // immediately selected while the drag displacement is zero. If the first
-  // non-zero displacement is negative, then the left thumb is selected, and if its
-  // positive, then the right thumb is selected.
+  // Finds the closest thumb. If both thumbs are close to each other and within
+  // the touch radius, neither is selected immediately while the drag
+  // displacement is zero. The first non-zero displacement determines which
+  // thumb is selected: a negative displacement selects the left thumb,
+  // a positive one selects the right thumb.
+  // If only one or zero thumbs are within the touch radius,
+  // the closest one is selected.
   Thumb? _defaultRangeThumbSelector(
     TextDirection textDirection,
     RangeValues values,
@@ -632,11 +635,10 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
         return Thumb.end;
       }
     } else {
-      // Snap position on the track if its in the inactive range.
-      if (tapValue < values.start || inStartTouchTarget) {
+      // Choose the closest thumb and snap position.
+      if (tapValue * 2 < values.start + values.end) {
         return Thumb.start;
-      }
-      if (tapValue > values.end || inEndTouchTarget) {
+      } else {
         return Thumb.end;
       }
     }
@@ -690,7 +692,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     Color? effectiveOverlayColor() {
       return widget.overlayColor?.resolve(states) ??
           widget.activeColor?.withOpacity(0.12) ??
-          MaterialStateProperty.resolveAs<Color?>(sliderTheme.overlayColor, states) ??
+          WidgetStateProperty.resolveAs<Color?>(sliderTheme.overlayColor, states) ??
           defaults.overlayColor;
     }
 
@@ -2238,18 +2240,18 @@ class _RangeSliderDefaultsM3 extends SliderThemeData {
   double? get minThumbSeparation => 0;
 
   @override
-  MaterialStateProperty<Size?>? get thumbSize {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+  WidgetStateProperty<Size?>? get thumbSize {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return const Size(4.0, 44.0);
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return const Size(4.0, 44.0);
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return const Size(2.0, 44.0);
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return const Size(2.0, 44.0);
       }
       return const Size(4.0, 44.0);

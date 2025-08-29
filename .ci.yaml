@@ -348,7 +348,8 @@ targets:
       shard: analyze
       dependencies: >-
         [
-          {"dependency": "ktlint", "version": "version_1_5_0"}
+          {"dependency": "ktlint", "version": "version_1_5_0"},
+          {"dependency": "open_jdk", "version": "version:21"}
         ]
       tags: >
         ["framework","hostonly","shard","linux"]
@@ -374,7 +375,8 @@ targets:
       task_name: analyzer_benchmark
 
   - name: Linux coverage
-    bringup: true # https://github.com/flutter/flutter/issues/164591
+    # Because this only runs every 6 commits, it being flaky takes a long time to recover.
+    bringup: true
     presubmit: false
     recipe: flutter/coverage
     timeout: 90
@@ -407,7 +409,6 @@ targets:
 
   - name: Linux_android_emu android views
     recipe: devicelab/devicelab_drone
-    bringup: true # LUCI failing KVM access https://github.com/flutter/flutter/issues/170529
     properties:
       tags: >
         ["framework","hostonly","linux"]
@@ -1026,6 +1027,7 @@ targets:
       - DEPS
 
   - name: Linux build_android_host_app_with_module_aar
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/172630
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -1192,6 +1194,7 @@ targets:
       task_name: linux_feature_flags_test
 
   - name: Linux_android_emu android_display_cutout
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/174500
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -1665,21 +1668,6 @@ targets:
 
   - name: Linux_android_emu_vulkan_stable android_engine_vulkan_tests
     recipe: flutter/flutter_drone
-    bringup: true
-    timeout: 60
-    properties:
-      shard: android_engine_vulkan_tests
-      tags: >
-         ["framework", "hostonly", "shard", "linux"]
-      dependencies: >-
-        [
-          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
-        ]
-
-  - name: Linux_mokey android_engine_vulkan_tests
-    recipe: flutter/flutter_drone
-    # TODO(matanlurey): https://github.com/flutter/flutter/issues/163025.
-    bringup: true
     timeout: 60
     properties:
       shard: android_engine_vulkan_tests
@@ -2316,7 +2304,6 @@ targets:
 
   - name: Linux_android_emu android_defines_test
     recipe: devicelab/devicelab_drone
-    bringup: true # LUCI failing KVM access https://github.com/flutter/flutter/issues/170529
     timeout: 60
     properties:
       tags: >
@@ -2475,6 +2462,7 @@ targets:
 
   # Uses Impeller.
   - name: Linux_pixel_7pro hello_world_impeller
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/173698
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2662,6 +2650,7 @@ targets:
 
   # linux mokey benchmark
   - name: Linux_mokey complex_layout__start_up
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/173691
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2723,6 +2712,7 @@ targets:
       task_name: devtools_profile_start_test
 
   - name: Linux_pixel_7pro drive_perf_debug_warning
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/174111
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2730,15 +2720,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: drive_perf_debug_warning
-
-  - name: Linux_pixel_7pro embedded_android_views_integration_test
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "linux", "pixel", "7pro"]
-      task_name: embedded_android_views_integration_test
 
   - name: Linux_android_emu external_textures_integration_test
     recipe: devicelab/devicelab_drone
@@ -3216,6 +3197,7 @@ targets:
 
   # Pixel 7 Pro, Skia
   - name: Linux_pixel_7pro new_gallery__transition_perf
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/174105
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3256,6 +3238,7 @@ targets:
 
   # Pixel 7 Pro, Impeller (OpenGL)
   - name: Linux_pixel_7pro new_gallery_opengles_impeller__transition_perf
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/173337
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3371,6 +3354,7 @@ targets:
       task_name: platform_views_scroll_perf_impeller__timeline_summary
 
   - name: Linux_pixel_7pro platform_views_scroll_perf_impeller__timeline_summary
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/172210
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3408,6 +3392,7 @@ targets:
       task_name: routing_test
 
   - name: Linux_pixel_7pro service_extensions_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/174113
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3718,17 +3703,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: dynamic_path_stroke_tessellation_perf_ios__timeline_summary
-
-  - name: Staging_build_linux analyze
-    presubmit: false
-    bringup: true
-    recipe: flutter/flutter_drone
-    timeout: 60
-    properties:
-      shard: analyze
-      ignore_flakiness: "true"
-      tags: >
-        ["framework","hostonly","shard","linux"]
 
   - name: Mac_benchmark animated_complex_opacity_perf_macos__e2e_summary
     presubmit: false
@@ -4855,6 +4829,7 @@ targets:
 
   # mac mokey benchmark
   - name: Mac_mokey microbenchmarks
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/174101
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -4962,6 +4937,7 @@ targets:
 
   - name: Mac_ios channels_integration_test_ios
     recipe: devicelab/devicelab_drone
+    bringup: true # TODO(vashworth): Remove once https://github.com/flutter/flutter/issues/174444 is fixed.
     presubmit: false
     timeout: 60
     properties:
@@ -5149,6 +5125,7 @@ targets:
 
   - name: Mac_arm64_ios integration_test_test_ios
     recipe: devicelab/devicelab_drone
+    bringup: true # TODO(vashworth): Remove once https://github.com/flutter/flutter/issues/174444 is fixed.
     presubmit: false
     timeout: 60
     properties:
@@ -5298,6 +5275,7 @@ targets:
 
   - name: Mac_ios native_assets_ios
     recipe: devicelab/devicelab_drone
+    bringup: true # TODO(vashworth): Remove once https://github.com/flutter/flutter/issues/174444 is fixed.
     presubmit: false
     timeout: 60
     properties:
@@ -5433,6 +5411,7 @@ targets:
 
   - name: Mac_ios wide_gamut_ios
     recipe: devicelab/devicelab_drone
+    bringup: true # TODO(vashworth): Remove once https://github.com/flutter/flutter/issues/174444 is fixed.
     presubmit: false
     timeout: 60
     properties:
@@ -5473,7 +5452,6 @@ targets:
 
   - name: Mac_ios ios_debug_workflow
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -5544,6 +5522,7 @@ targets:
 
   - name: Mac_ios spell_check_test
     recipe: devicelab/devicelab_drone
+    bringup: true # TODO(vashworth): Remove once https://github.com/flutter/flutter/issues/174444 is fixed.
     presubmit: false
     timeout: 60
     properties:
@@ -6194,6 +6173,7 @@ targets:
       - DEPS
 
   - name: Windows plugin_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/174116
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -6858,6 +6838,7 @@ targets:
 
   # windows mokey test
   - name: Windows_mokey basic_material_app_win__compile
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/173701
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -7054,7 +7035,6 @@ targets:
     recipe: packaging/packaging
     timeout: 60
     scheduler: release
-    bringup: true
     enabled_branches:
       - beta
       - stable

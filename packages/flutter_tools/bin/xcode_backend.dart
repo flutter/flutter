@@ -136,23 +136,23 @@ class Context {
       }
       errorOutput.write(resultStderr);
       if (skipErrorLog) {
-        // Pipe stderr to stdout under verbose mode.
-        // An example is on macOS 26, plutil reports NSBonjourServices key not found
-        // via stderr (rather than stdout on older macOS), and logging the message
-        // in stderr would be confusing, since not having the key is one of the expected states.
+        // Even if skipErrorLog, we still want to write to stdout if verbose.
         if (verbose) {
           echo(errorOutput.toString());
         }
       } else {
         echoError(errorOutput.toString());
       }
-
       // Stream stderr to the Flutter build process.
       // When in verbose mode, `echoError` above will show the logs. So only
       // stream if not in verbose mode to avoid duplicate logs.
       // Also, only stream if exitCode is 0 since errors are handled separately
       // by the tool on failure.
-      if (!verbose && exitCode == 0) {
+      // Also check for `skipErrorLog`, because some errors should not be printed
+      // out. For example, on macOS 26, plutil reports NSBonjourServices key not
+      // found as an error. However, logging it in non-verbose mode would be
+      // confusing, since not having the key is one of the expected states.
+      if (!verbose && exitCode == 0 && !skipErrorLog) {
         streamOutput(errorOutput.toString());
       }
     }
@@ -540,8 +540,6 @@ class Context {
 
     final String buildMode = parseFlutterBuildMode();
 
-    _validateBuildMode(platform, buildMode);
-
     final List<String> flutterArgs = _generateFlutterArgsForAssemble(
       command: 'build',
       buildMode: buildMode,
@@ -568,53 +566,6 @@ class Context {
     streamOutput(' └─Compiling, linking and signing...');
 
     echo('Project $projectPath built and packaged successfully.');
-  }
-
-  /// Validate that the build mode targeted matches the build mode set by the
-  /// Flutter CLI.
-  /// If it doesn't match, print a warning unless the Xcode action is `install`,
-  /// which means the app is being archived for distribution. In that case, print
-  /// an error and fail the build.
-  ///
-  /// The targeted build mode might not match the one set by Flutter CLI when it
-  /// is changed and ran directly through Xcode.
-  ///
-  /// Flutter may change settings or files depending on the build mode. For
-  /// example, dev dependencies are excluded from release builds and requires
-  /// the Flutter CLI to update certain files.
-  void _validateBuildMode(TargetPlatform platform, String currentBuildMode) {
-    final String? buildModeCLILastUsed = environment['FLUTTER_CLI_BUILD_MODE'];
-
-    // Also fail the build if ACTION=install, which indicates the app is being
-    // built for distribution.
-    final String? action = environment['ACTION'];
-    final fatal = action == 'install';
-
-    if (buildModeCLILastUsed == null) {
-      final message =
-          'Your Flutter build settings are outdated. Please run '
-          '"flutter build ${platform.name} --config-only --$currentBuildMode" in your Flutter '
-          'project and try again.\n';
-      if (fatal) {
-        echoXcodeError(message);
-        exitApp(-1);
-      } else {
-        echoXcodeWarning(message);
-        return;
-      }
-    }
-    if (currentBuildMode != buildModeCLILastUsed) {
-      final message =
-          'Your Flutter project is currently configured for $buildModeCLILastUsed mode. '
-          'Please run `flutter build ${platform.name} --config-only --$currentBuildMode` '
-          'in your Flutter project to update your settings.\n';
-      if (fatal) {
-        echoXcodeError(message);
-        exitApp(-1);
-      } else {
-        echoXcodeWarning(message);
-      }
-    }
   }
 
   List<String> _generateFlutterArgsForAssemble({
