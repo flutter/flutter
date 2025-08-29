@@ -2520,9 +2520,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 }
 
 - (void)dealloc {
-  [_autofillContext removeAllObjects];
-  [self clearTextInputClient];
-  [self hideTextInput];
+  [self reset];
 }
 
 - (void)removeEnableFlutterTextInputViewAccessibilityTimer {
