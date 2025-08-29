@@ -76,9 +76,7 @@ config("relative_flutter_linux_headers") {
 }
 
 config("disable_warnings") {
-  warning_flags = [
-    "-Wno-deprecated-volatile",
-  ]
+  warning_flags = [ "-Wno-deprecated-volatile" ]
   cflags = warning_flags
   cflags_cc = warning_flags
 }
@@ -106,9 +104,7 @@ source_set("flutter_linux_sources") {
 
   configs += [ "//flutter/shell/platform/linux/config:gtk" ]
 
-  public_configs = [
-    ":disable_warnings"
-  ]
+  public_configs = [ ":disable_warnings" ]
 
   sources = [
     "fl_accessible_node.cc",
