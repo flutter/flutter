@@ -21,6 +21,12 @@ class SkwasmRenderer extends Renderer {
   SkwasmPathConstructors pathConstructors = SkwasmPathConstructors();
 
   @override
+  set resourceCacheMaxBytes(int bytes) {
+    // ?
+    // rasterizer.setResourceCacheMaxBytes(bytes);
+  }
+
+  @override
   final SkwasmFontCollection fontCollection = SkwasmFontCollection();
 
   @override

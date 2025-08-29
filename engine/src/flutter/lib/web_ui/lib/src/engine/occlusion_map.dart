@@ -6,6 +6,8 @@ import 'dart:math' as math;
 
 import 'package:ui/ui.dart' as ui;
 
+import 'util.dart';
+
 sealed class OcclusionMapNode {
   bool overlaps(ui.Rect rect);
   OcclusionMapNode insert(ui.Rect rect);
@@ -32,7 +34,15 @@ class OcclusionMapLeaf implements OcclusionMapNode {
   ui.Rect get boundingBox => rect;
 
   @override
-  OcclusionMapNode insert(ui.Rect other) => OcclusionMapBranch(this, OcclusionMapLeaf(other));
+  OcclusionMapNode insert(ui.Rect other) {
+    if (rectContainsOther(rect, other)) {
+      return this;
+    }
+    if (rectContainsOther(other, rect)) {
+      return OcclusionMapLeaf(other);
+    }
+    return OcclusionMapBranch(this, OcclusionMapLeaf(other));
+  }
 
   @override
   bool overlaps(ui.Rect other) => rect.overlaps(other);
@@ -55,17 +65,28 @@ class OcclusionMapBranch implements OcclusionMapNode {
 
   @override
   OcclusionMapNode insert(ui.Rect other) {
+    if (rectContainsOther(other, boundingBox)) {
+      return OcclusionMapLeaf(other);
+    }
     // Try to create nodes with the smallest possible area
     final double leftOtherArea = _areaOfUnion(left.boundingBox, other);
     final double rightOtherArea = _areaOfUnion(right.boundingBox, other);
     final double leftRightArea = boundingBox.width * boundingBox.height;
     if (leftOtherArea < rightOtherArea) {
       if (leftOtherArea < leftRightArea) {
-        return OcclusionMapBranch(left.insert(other), right);
+        final OcclusionMapNode newLeft = left.insert(other);
+        if (identical(newLeft, left)) {
+          return this;
+        }
+        return OcclusionMapBranch(newLeft, right);
       }
     } else {
       if (rightOtherArea < leftRightArea) {
-        return OcclusionMapBranch(left, right.insert(other));
+        final OcclusionMapNode newRight = right.insert(other);
+        if (identical(newRight, right)) {
+          return this;
+        }
+        return OcclusionMapBranch(left, newRight);
       }
     }
     return OcclusionMapBranch(this, OcclusionMapLeaf(other));
@@ -83,7 +104,17 @@ class OcclusionMapBranch implements OcclusionMapNode {
 class OcclusionMap {
   OcclusionMapNode root = OcclusionMapEmpty();
 
-  void addRect(ui.Rect rect) => root = root.insert(rect);
+  void addRect(ui.Rect rect) {
+    if (rect.width <= 0 || rect.height <= 0) {
+      return;
+    }
+    root = root.insert(rect);
+  }
 
-  bool overlaps(ui.Rect rect) => root.overlaps(rect);
+  bool overlaps(ui.Rect rect) {
+    if (rect.width <= 0 || rect.height <= 0) {
+      return false;
+    }
+    return root.overlaps(rect);
+  }
 }
