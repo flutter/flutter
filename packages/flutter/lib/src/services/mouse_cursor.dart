@@ -202,6 +202,18 @@ abstract class MouseCursor with Diagnosticable {
   @factory
   MouseCursorSession createSession(int device);
 
+  /// Whether this cursor should defer its creation to the next one in the
+  /// widget tree.
+  ///
+  /// If true, the framework will not call [createSession] on this instance and
+  /// will instead continue searching for a [MouseCursor] on widgets below this
+  /// one.
+  ///
+  /// It is the underlying mechanism used by [MouseCursor.defer].
+  ///
+  /// See also:
+  ///
+  ///  * [MouseCursor.defer], which is a cursor that unconditionally defers.
   @protected
   bool get shouldDefer => false;
 
