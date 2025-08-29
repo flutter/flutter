@@ -571,24 +571,25 @@ class DebugIosLLDBInit extends Target {
     // Also, this cannot check for a specific path/name for the LLDB Init File
     // since Flutter's LLDB Init file may be imported from within a user's
     // custom LLDB Init File.
-    var anyLLDBInitFound = false;
-    await for (final FileSystemEntity entity in xcodeProjectDir.list(recursive: true)) {
-      if (environment.fileSystem.path.extension(entity.path) == '.xcscheme' && entity is File) {
-        if (entity.readAsStringSync().contains('customLLDBInitFile')) {
-          anyLLDBInitFound = true;
-          break;
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+    if (flutterProject.isModule) {
+      var anyLLDBInitFound = false;
+      await for (final FileSystemEntity entity in xcodeProjectDir.list(recursive: true)) {
+        if (environment.fileSystem.path.extension(entity.path) == '.xcscheme' && entity is File) {
+          if (entity.readAsStringSync().contains('customLLDBInitFile')) {
+            anyLLDBInitFound = true;
+            break;
+          }
         }
       }
-    }
-    if (!anyLLDBInitFound) {
-      final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
-      final tab = flutterProject.isModule ? 'Use CocoaPods' : 'Use frameworks';
-      printXcodeWarning(
-        'Debugging Flutter on new iOS versions requires an LLDB Init File. To '
-        'ensure debug mode works, please complete instructions found in '
-        '"Embed a Flutter module in your iOS app > $tab > Set LLDB Init File" '
-        'section of https://docs.flutter.dev/to/ios-add-to-app-embed-setup.',
-      );
+      if (!anyLLDBInitFound) {
+        printXcodeWarning(
+          'Debugging Flutter on new iOS versions requires an LLDB Init File. To '
+          'ensure debug mode works, please complete instructions found in '
+          '"Embed a Flutter module in your iOS app > Use CocoaPods > Set LLDB Init File" '
+          'section of https://docs.flutter.dev/to/ios-add-to-app-embed-setup.',
+        );
+      }
     }
     return;
   }
