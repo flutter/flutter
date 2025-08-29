@@ -637,6 +637,8 @@ class SliverReorderableList extends StatefulWidget {
   }
 }
 
+int _kDefaultSemanticIndexCallback(Widget _, int localIndex) => localIndex;
+
 /// The state for a sliver list that allows the user to interactively reorder
 /// the list items.
 ///
@@ -1145,8 +1147,7 @@ class SliverReorderableListState extends State<SliverReorderableList>
       _itemBuilder,
       childCount: widget.itemCount,
       findChildIndexCallback: widget.findChildIndexCallback,
-      semanticIndexCallback:
-          widget.semanticIndexCallback ?? (Widget _, int localIndex) => localIndex,
+      semanticIndexCallback: widget.semanticIndexCallback ?? _kDefaultSemanticIndexCallback,
     );
     if (widget.itemExtent != null) {
       return SliverFixedExtentList(delegate: childrenDelegate, itemExtent: widget.itemExtent!);

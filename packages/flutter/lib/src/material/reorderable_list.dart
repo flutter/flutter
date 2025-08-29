@@ -359,17 +359,17 @@ class ReorderableListView extends StatefulWidget {
 
   /// {@macro flutter.widgets.list_view.itemExtent}
   ///
-  /// Null if this is a [ReorderableListView.separated].
+  /// This is null if this is a [ReorderableListView.separated].
   final double? itemExtent;
 
   /// {@macro flutter.widgets.list_view.itemExtentBuilder}
   ///
-  /// Null if this is a [ReorderableListView.separated].
+  /// This is null if this is a [ReorderableListView.separated].
   final ItemExtentBuilder? itemExtentBuilder;
 
   /// {@macro flutter.widgets.list_view.prototypeItem}
   ///
-  /// Null if this is a [ReorderableListView.separated].
+  /// This is null if this is a [ReorderableListView.separated].
   final Widget? prototypeItem;
 
   /// {@macro flutter.widgets.EdgeDraggingAutoScroller.velocityScalar}
