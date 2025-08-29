@@ -1389,6 +1389,65 @@ void main() {
     expect(secondTapped, 1);
   });
 
+  testWidgets('SliverGrid.list can display children', (WidgetTester tester) async {
+    int firstTapped = 0;
+    int secondTapped = 0;
+    final Key key = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          key: key,
+          body: CustomScrollView(
+            slivers: <Widget>[
+              SliverGrid.list(
+                gridDelegate: _TestArbitrarySliverGridDelegate(),
+                children: <Widget>[
+                  Material(
+                    color: Colors.yellow,
+                    child: InkWell(onTap: () => firstTapped++, child: const Text('First')),
+                  ),
+                  Material(
+                    color: Colors.red,
+                    child: InkWell(onTap: () => secondTapped++, child: const Text('Second')),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Verify correct hit testing
+    await tester.tap(find.text('First'));
+    expect(firstTapped, 1);
+    expect(secondTapped, 0);
+    firstTapped = 0;
+    await tester.tap(find.text('Second'));
+    expect(firstTapped, 0);
+    expect(secondTapped, 1);
+  });
+
+  testWidgets('SliverGrid.list with empty children list', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: <Widget>[
+              SliverGrid.list(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+                children: const <Widget>[],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Should render without errors - the SliverGrid should be present even with empty children
+    expect(find.byType(CustomScrollView), findsOneWidget);
+  });
+
   testWidgets('SliverGridRegularTileLayout.computeMaxScrollOffset handles 0 children', (
     WidgetTester tester,
   ) async {
