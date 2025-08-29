@@ -532,6 +532,7 @@ enum class StringAttribute {
   kDisplay,
   // Only present when different from parent.
   kFontFamily,
+  kHtmlId,
   kHtmlTag,
   // Stores an automatic image annotation if one is available. Only valid on
   // ax::mojom::Role::kImage. See kImageAnnotationStatus, too.
