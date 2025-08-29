@@ -1703,6 +1703,27 @@ class OverlayPortalController {
   }
 }
 
+/// The location of the [Overlay] that a [OverlayPortal] attaches its overlay
+/// entry to.
+///
+/// This is typically used in [OverlayPortal].
+final class OverlayLocation {
+  const OverlayLocation._(this._isRoot);
+
+  final bool _isRoot;
+
+  /// The [OverlayPortal] attaches to the immediate [Overlay] above the widget
+  /// tree.
+  static const OverlayLocation nearest = OverlayLocation._(false);
+
+  /// The [OverlayPortal] attaches to the root [Overlay] above the widget
+  /// tree.
+  ///
+  /// In case of multi-view apps, the root [Overlay] refers to the first Overlay
+  /// below the View.
+  static const OverlayLocation root = OverlayLocation._(true);
+}
+
 /// A widget that renders its overlay child on an [Overlay].
 ///
 /// The overlay child is initially hidden until [OverlayPortalController.show]
@@ -1784,22 +1805,31 @@ class OverlayPortal extends StatefulWidget {
   /// Creates an [OverlayPortal] that renders the widget [overlayChildBuilder]
   /// builds on the closest [Overlay] when [OverlayPortalController.show] is
   /// called.
+  ///
+  /// The [overlayLocation] sets which [Overlay] this widget attaches the widget
+  /// returned by [overlayChildBuilder] to. Defaults to
+  /// [OverlayLocation.nearest].
   const OverlayPortal({
     super.key,
     required this.controller,
     required this.overlayChildBuilder,
+    this.overlayLocation = OverlayLocation.nearest,
     this.child,
-  }) : _targetRootOverlay = false;
+  });
 
   /// Creates an [OverlayPortal] that renders the widget [overlayChildBuilder]
   /// builds on the root [Overlay] when [OverlayPortalController.show] is
   /// called.
+  @Deprecated(
+    'Use OverlayPortal with root overlay instead. '
+    'This feature was deprecated after v3.33.0-0.0.pre.',
+  )
   const OverlayPortal.targetsRootOverlay({
     super.key,
     required this.controller,
     required this.overlayChildBuilder,
     this.child,
-  }) : _targetRootOverlay = true;
+  }) : overlayLocation = OverlayLocation.root;
 
   /// Creates an [OverlayPortal] that renders the widget `overlayChildBuilder`
   /// builds on the closest [Overlay] when [OverlayPortalController.show] is
@@ -1822,16 +1852,22 @@ class OverlayPortal extends StatefulWidget {
   /// [CompositedTransformFollower] between the [OverlayPortal] and the [Overlay]
   /// may resulting in an incorrect child paint transform being provided to the
   /// `overlayChildBuilder` and will cause an assertion in debug mode.
+  ///
+  /// The [overlayLocation] sets which [Overlay] this widget attaches the widget
+  /// returned by `overlayChildBuilder` to. Defaults to
+  /// [OverlayLocation.nearest].
   OverlayPortal.overlayChildLayoutBuilder({
     Key? key,
     required OverlayPortalController controller,
     required OverlayChildLayoutBuilder overlayChildBuilder,
+    OverlayLocation overlayLocation = OverlayLocation.nearest,
     required Widget? child,
   }) : this(
          key: key,
          controller: controller,
          overlayChildBuilder: (_) => _OverlayChildLayoutBuilder(builder: overlayChildBuilder),
          child: child,
+         overlayLocation: overlayLocation,
        );
 
   /// The controller to show, hide and bring to top the overlay child.
@@ -1858,7 +1894,9 @@ class OverlayPortal extends StatefulWidget {
   /// A widget below this widget in the tree.
   final Widget? child;
 
-  final bool _targetRootOverlay;
+  /// The [Overlay] that the widget returns from [overlayChildBuilder] is
+  /// attached to.
+  final OverlayLocation overlayLocation;
 
   @override
   State<OverlayPortal> createState() => _OverlayPortalState();
@@ -1883,11 +1921,11 @@ class _OverlayPortalState extends State<OverlayPortal> {
         locationCache._theater == marker.theater;
   }
 
-  _OverlayEntryLocation _getLocation(int zOrderIndex, bool targetRootOverlay) {
+  _OverlayEntryLocation _getLocation(int zOrderIndex, OverlayLocation overlayLocation) {
     final _OverlayEntryLocation? cachedLocation = _locationCache;
     late final _RenderTheaterMarker marker = _RenderTheaterMarker.of(
       context,
-      targetRootOverlay: targetRootOverlay,
+      targetRootOverlay: overlayLocation == OverlayLocation.root,
     );
     final bool isCacheValid =
         cachedLocation != null &&
@@ -1941,7 +1979,7 @@ class _OverlayPortalState extends State<OverlayPortal> {
   void didUpdateWidget(OverlayPortal oldWidget) {
     super.didUpdateWidget(oldWidget);
     _childModelMayHaveChanged =
-        _childModelMayHaveChanged || oldWidget._targetRootOverlay != widget._targetRootOverlay;
+        _childModelMayHaveChanged || oldWidget.overlayLocation != widget.overlayLocation;
     if (oldWidget.controller != widget.controller) {
       oldWidget.controller._attachTarget = null;
       _setupController(widget.controller);
@@ -1990,7 +2028,7 @@ class _OverlayPortalState extends State<OverlayPortal> {
       return _OverlayPortal(overlayLocation: null, overlayChild: null, child: widget.child);
     }
     return _OverlayPortal(
-      overlayLocation: _getLocation(zOrderIndex, widget._targetRootOverlay),
+      overlayLocation: _getLocation(zOrderIndex, widget.overlayLocation),
       overlayChild: _DeferredLayout(child: Builder(builder: widget.overlayChildBuilder)),
       child: widget.child,
     );
