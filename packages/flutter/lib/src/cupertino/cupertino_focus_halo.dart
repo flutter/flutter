@@ -8,23 +8,23 @@ import 'colors.dart';
 import 'constants.dart';
 
 /// Applies a Cupertino-style focus border around its child when any of child focus nodes gain focus.
-/// 
+///
 /// The shape of the focus halo does not automatically adapt to the child widget
 /// it encloses. You are responsible for specifying a shape that correctly
 /// matches the child's geometry by using the appropriate constructor, such as
-/// [CupertinoFocusHalo.onRect] or [CupertinoFocusHalo.onRRect].
+/// [CupertinoFocusHalo.withRect] or [CupertinoFocusHalo.withRRect].
 ///
 /// See also:
 ///
 /// * <https://developer.apple.com/design/human-interface-guidelines/focus-and-selection/>
 class CupertinoFocusHalo extends StatefulWidget {
   /// Creates a rectangular [CupertinoFocusHalo] around the child
-  /// 
+  ///
   /// For example, to highlight a rectangular section of the widget tree when any button inside that
   /// section has focus, one could write:
   ///
   /// ```dart
-  /// CupertinoFocusHalo.onRect(
+  /// CupertinoFocusHalo.withRect(
   ///   child: Column(
   ///     children: [
   ///       CupertinoButton(child: Text('Child 1'), onPressed: () {}),
@@ -33,16 +33,16 @@ class CupertinoFocusHalo extends StatefulWidget {
   ///   ),
   /// )
   /// ```
-  const CupertinoFocusHalo.onRect({required this.child, super.key})
+  const CupertinoFocusHalo.withRect({required this.child, super.key})
     : _borderRadius = BorderRadius.zero;
 
   /// Creates a rounded rectangular [CupertinoFocusHalo] around the child
-  /// 
+  ///
   /// For example, to highlight a rounded rectangular section of the widget tree when any button inside that
   /// section has focus, one could write:
   ///
   /// ```dart
-  /// CupertinoFocusHalo.onRRect(
+  /// CupertinoFocusHalo.withRRect(
   ///   borderRadius: BorderRadius.circular(10.0),
   ///   child: Column(
   ///     children: [
@@ -52,7 +52,7 @@ class CupertinoFocusHalo extends StatefulWidget {
   ///   ),
   /// )
   /// ```
-  const CupertinoFocusHalo.onRRect({
+  const CupertinoFocusHalo.withRRect({
     required this.child,
     required BorderRadiusGeometry borderRadius,
     super.key,
@@ -94,12 +94,9 @@ class _CupertinoFocusHaloState extends State<CupertinoFocusHalo> {
         position: DecorationPosition.foreground,
         decoration: BoxDecoration(
           borderRadius: widget._borderRadius,
-          border:
-              _childHasFocus
-                  ? Border.fromBorderSide(
-                    BorderSide(color: _effectiveFocusOutlineColor, width: 3.5),
-                  )
-                  : null,
+          border: _childHasFocus
+              ? Border.fromBorderSide(BorderSide(color: _effectiveFocusOutlineColor, width: 3.5))
+              : null,
         ),
         child: widget.child,
       ),

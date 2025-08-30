@@ -9,11 +9,10 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   Border getExpectedHaloBorder() => Border.fromBorderSide(
     BorderSide(
-      color:
-          HSLColor.fromColor(CupertinoColors.activeBlue.withOpacity(kCupertinoFocusColorOpacity))
-              .withLightness(kCupertinoFocusColorBrightness)
-              .withSaturation(kCupertinoFocusColorSaturation)
-              .toColor(),
+      color: HSLColor.fromColor(CupertinoColors.activeBlue.withOpacity(kCupertinoFocusColorOpacity))
+          .withLightness(kCupertinoFocusColorBrightness)
+          .withSaturation(kCupertinoFocusColorSaturation)
+          .toColor(),
       width: 3.5,
     ),
   );
@@ -48,7 +47,7 @@ void main() {
         CupertinoApp(
           home: Column(
             children: <Widget>[
-              CupertinoFocusHalo.onRect(
+              CupertinoFocusHalo.withRect(
                 key: group1Key,
                 child: Column(
                   children: <Widget>[
@@ -63,7 +62,7 @@ void main() {
                   ],
                 ),
               ),
-              CupertinoFocusHalo.onRect(
+              CupertinoFocusHalo.withRect(
                 key: group2Key,
                 child: Focus(
                   focusNode: group2Child1FocusNode,
@@ -124,7 +123,7 @@ void main() {
         CupertinoApp(
           home: Column(
             children: <Widget>[
-              CupertinoFocusHalo.onRect(
+              CupertinoFocusHalo.withRect(
                 key: group1Key,
                 child: Column(
                   children: <Widget>[
@@ -139,7 +138,7 @@ void main() {
                   ],
                 ),
               ),
-              CupertinoFocusHalo.onRect(
+              CupertinoFocusHalo.withRect(
                 key: group2Key,
                 child: Focus(
                   focusNode: group2Child1FocusNode,
