@@ -67,6 +67,8 @@ TEST(PlatformViewShell, UpdateSemanticsDoesFlutterViewUpdateSemantics) {
   buffer_float32[position++] = node0.rect.bottom();
   node0.transform.getColMajor(&buffer_float32[position]);
   position += 16;
+  node0.hitTestTransform.getColMajor(&buffer_float32[position]);
+  position += 16;
   buffer_int32[position++] = 0;  // node0.childrenInTraversalOrder.size();
   buffer_int32[position++] = 0;  // node0.customAccessibilityActions.size();
   EXPECT_CALL(*jni_mock,
@@ -132,6 +134,8 @@ TEST(PlatformViewShell, UpdateSemanticsDoesUpdatelinkUrl) {
   buffer_float32[position++] = node0.rect.right();
   buffer_float32[position++] = node0.rect.bottom();
   node0.transform.getColMajor(&buffer_float32[position]);
+  position += 16;
+  node0.hitTestTransform.getColMajor(&buffer_float32[position]);
   position += 16;
   buffer_int32[position++] = 0;  // node0.childrenInTraversalOrder.size();
   buffer_int32[position++] = 0;  // node0.customAccessibilityActions.size();
@@ -225,6 +229,8 @@ TEST(PlatformViewShell,
   buffer_float32[position++] = node0.rect.right();
   buffer_float32[position++] = node0.rect.bottom();
   node0.transform.getColMajor(&buffer_float32[position]);
+  position += 16;
+  node0.hitTestTransform.getColMajor(&buffer_float32[position]);
   position += 16;
   buffer_int32[position++] = 0;  // node0.childrenInTraversalOrder.size();
   buffer_int32[position++] = 0;  // node0.customAccessibilityActions.size();

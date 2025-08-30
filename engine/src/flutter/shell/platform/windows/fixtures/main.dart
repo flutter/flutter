@@ -428,6 +428,7 @@ Future<void> sendSemanticsTreeInfo() async {
   ui.SemanticsUpdate createSemanticsUpdate(int nodeId) {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     final Float64List transform = Float64List(16);
+    final Float64List hitTestTransform = Float64List(16);
     final Int32List childrenInTraversalOrder = Int32List(0);
     final Int32List childrenInHitTestOrder = Int32List(0);
     final Int32List additionalActions = Int32List(0);
@@ -446,6 +447,7 @@ Future<void> sendSemanticsTreeInfo() async {
       platformViewId: -1,
       scrollChildren: 0,
       scrollIndex: 0,
+      traversalOwner: -1,
       scrollPosition: 0,
       scrollExtentMax: 0,
       scrollExtentMin: 0,
@@ -464,6 +466,7 @@ Future<void> sendSemanticsTreeInfo() async {
       tooltip: 'tooltip',
       textDirection: ui.TextDirection.ltr,
       transform: transform,
+      hitTestTransform: hitTestTransform,
       childrenInTraversalOrder: childrenInTraversalOrder,
       childrenInHitTestOrder: childrenInHitTestOrder,
       additionalActions: additionalActions,
