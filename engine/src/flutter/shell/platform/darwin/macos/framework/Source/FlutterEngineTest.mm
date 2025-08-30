@@ -744,6 +744,21 @@ TEST_F(FlutterEngineTest, PublishedValueReturnsLastPublished) {
   EXPECT_EQ([engine valuePublishedByPlugin:pluginName], secondValue);
 }
 
+TEST_F(FlutterEngineTest, RegistrarForwardViewControllerLookUpToEngine) {
+  NSString* fixtures = @(flutter::testing::GetFixturesPath());
+  FlutterDartProject* project = [[FlutterDartProject alloc]
+      initWithAssetsPath:fixtures
+             ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:project];
+
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  id<FlutterPluginRegistrar> registrar = [engine registrarForPlugin:@"MyPlugin"];
+
+  EXPECT_EQ([registrar viewController], viewController);
+}
+
 // If a channel overrides a previous channel with the same name, cleaning
 // the previous channel should not affect the new channel.
 //
