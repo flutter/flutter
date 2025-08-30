@@ -8,6 +8,7 @@
 
 #include "flutter/shell/platform/windows/direct_manipulation.h"
 #include "flutter/shell/platform/windows/flutter_window.h"
+#include "flutter/shell/platform/windows/wchar_util.h"
 #include "flutter/shell/platform/windows/window_binding_handler_delegate.h"
 
 #define RETURN_IF_FAILED(operation)            \
@@ -259,7 +260,7 @@ void DirectManipulationOwner::Update() {
               FORMAT_MESSAGE_IGNORE_INSERTS,
           NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
           reinterpret_cast<LPWSTR>(&message), 0, NULL);
-      FML_LOG(ERROR) << message;
+      FML_LOG(ERROR) << WCharBufferToString(message);
     }
   }
 }
