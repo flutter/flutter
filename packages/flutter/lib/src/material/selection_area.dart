@@ -54,6 +54,7 @@ class SelectionArea extends StatefulWidget {
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.magnifierConfiguration,
     this.onSelectionChanged,
+    this.cursorWidth = 2.0,
     required this.child,
   });
 
@@ -99,6 +100,9 @@ class SelectionArea extends StatefulWidget {
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
+  /// The width of the cursor.
+  final double cursorWidth;
+
   static Widget _defaultContextMenuBuilder(
     BuildContext context,
     SelectableRegionState selectableRegionState,
@@ -139,6 +143,7 @@ class SelectionAreaState extends State<SelectionArea> {
       magnifierConfiguration:
           widget.magnifierConfiguration ?? TextMagnifier.adaptiveMagnifierConfiguration,
       onSelectionChanged: widget.onSelectionChanged,
+      cursorWidth: widget.cursorWidth,
       child: widget.child,
     );
   }
