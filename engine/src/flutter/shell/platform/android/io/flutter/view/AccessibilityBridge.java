@@ -897,14 +897,14 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
             new AccessibilityNodeInfo.CollectionItemInfo(
                 nodeIndex, // row index
                 1, // row span
-                1, // column index
+                0, // column index
                 1, // column span
                 semanticsNode.hasFlag(Flag.IS_HEADER) // is heading
                 ));
       } else {
         result.setCollectionItemInfo(
             new AccessibilityNodeInfo.CollectionItemInfo(
-                1, // row index
+                0, // row index
                 1, // row span
                 nodeIndex, // column index
                 1, // column span

@@ -2089,7 +2089,14 @@ public class AccessibilityBridgeTest {
     testSemanticsUpdate = testSemanticsNode.toUpdate();
     testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
     nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
-    assertNotNull(nodeInfo.getCollectionInfo());
+    AccessibilityNodeInfo.CollectionInfo collectionInfo = nodeInfo.getCollectionInfo();
+    assertNotNull(collectionInfo);
+
+    boolean rowCount = collectionInfo.getRowCount() == testSemanticsNode.scrollChildren;
+    boolean colCount = collectionInfo.getColumnCount() == 1; // 1 column for a list
+    boolean isHierarchical =
+        !collectionInfo.isHierarchical(); // this should currently always be false
+    assertTrue(rowCount && colCount && isHierarchical);
   }
 
   @Test
@@ -2112,7 +2119,17 @@ public class AccessibilityBridgeTest {
     TestSemanticsUpdate testSemanticsUpdate = parentTestSemanticsNode.toUpdate();
     testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
     AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(1);
-    assertNotNull(nodeInfo.getCollectionItemInfo());
+    AccessibilityNodeInfo.CollectionItemInfo itemInfo = nodeInfo.getCollectionItemInfo();
+    assertNotNull(itemInfo);
+
+    boolean rowIndex = itemInfo.getRowIndex() == 0; // first item in the list
+    boolean rowSpan = itemInfo.getRowSpan() == 1;
+    boolean colIndex = itemInfo.getColumnIndex() == 0; // only a single column
+    boolean colSpan = itemInfo.getColumnSpan() == 1;
+    // Note: isHeading() is deprecated, and since this test node doesn't have IS_HEADER flag,
+    // we expect it to not be a heading. The heading state is set during CollectionItemInfo
+    // construction.
+    assertTrue(rowIndex && rowSpan && colIndex && colSpan);
   }
 
   AccessibilityBridge setUpBridge() {
