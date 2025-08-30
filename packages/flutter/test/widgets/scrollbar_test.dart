@@ -3635,4 +3635,79 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     expect(size.height - rtlRect1.bottom, 4);
     expect(rtlRect1.left, 3);
   });
+
+  testWidgets(
+    'RawScrollbar does not assert when dynamically assigning controller with thumbVisibility true',
+    (WidgetTester tester) async {
+      // This test reproduces the issue from https://github.com/flutter/flutter/issues/172614
+      // where dynamically assigning a controller and setting thumbVisibility to true
+      // in the same frame caused an assertion failure.
+
+      final ScrollController scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
+
+      bool useController = false;
+      bool thumbVisible = false;
+      bool interactive = false;
+
+      await tester.pumpWidget(
+        StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Directionality(
+              textDirection: TextDirection.ltr,
+              child: MediaQuery(
+                data: const MediaQueryData(),
+                child: Column(
+                  children: <Widget>[
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          // This reproduces the exact scenario from the linked issue:
+                          // Initially the controller is null, thumbVisibility is false, and interactive is false.
+                          // Then, in the next frame, the controller is non-null, thumbVisibility is true, and interactive is true.
+                          useController = true;
+                          thumbVisible = true;
+                          interactive = true;
+                        });
+                      },
+                      child: const Text('Enable Scrollbar'),
+                    ),
+                    Expanded(
+                      child: RawScrollbar(
+                        controller: useController ? scrollController : null,
+                        thumbVisibility: thumbVisible,
+                        interactive: interactive,
+                        child: SingleChildScrollView(
+                          controller: useController ? scrollController : null,
+                          child: const SizedBox(height: 2000.0, width: 100.0),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      );
+
+      await tester.pumpAndSettle();
+      expect(find.byType(RawScrollbar), findsOneWidget);
+
+      await tester.tap(find.text('Enable Scrollbar'));
+      await tester.pumpAndSettle();
+
+      // Verify scrollbar is now working properly and doesn't throw an assertion.
+      final Finder scrollbarFinder = find.byType(RawScrollbar);
+      expect(scrollbarFinder, findsOneWidget);
+      expect(scrollController.offset, 0.0);
+
+      // Test that scrolling works without assertions.
+      await tester.drag(find.byType(SingleChildScrollView), const Offset(0.0, -100.0));
+      await tester.pumpAndSettle();
+
+      // Verify the scroll happened.
+      expect(scrollController.offset, greaterThan(0.0));
+    },
+  );
 }
