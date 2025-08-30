@@ -72,27 +72,6 @@ typedef NS_ENUM(NSInteger, FlutterScribbleInteractionStatus) {
 
 @end
 
-/** An indexed position in the buffer of a Flutter text editing widget. */
-@interface FlutterTextPosition : UITextPosition
-
-@property(nonatomic, readonly) NSUInteger index;
-@property(nonatomic, readonly) UITextStorageDirection affinity;
-
-+ (instancetype)positionWithIndex:(NSUInteger)index;
-+ (instancetype)positionWithIndex:(NSUInteger)index affinity:(UITextStorageDirection)affinity;
-- (instancetype)initWithIndex:(NSUInteger)index affinity:(UITextStorageDirection)affinity;
-
-@end
-
-/** A range of text in the buffer of a Flutter text editing widget. */
-@interface FlutterTextRange : UITextRange <NSCopying>
-
-@property(nonatomic, readonly) NSRange range;
-
-+ (instancetype)rangeWithNSRange:(NSRange)range;
-
-@end
-
 /** A tokenizer used by `FlutterTextInputView` to customize string parsing. */
 @interface FlutterTokenizer : UITextInputStringTokenizer
 @end
