@@ -35,7 +35,8 @@ typedef PreviewDependencyGraph = Map<PreviewPath, LibraryPreviewNode>;
 class _PreviewVisitor extends RecursiveAstVisitor<void> {
   _PreviewVisitor({required LibraryElement2 lib})
     : packageName = lib.uri.scheme == 'package' ? lib.uri.pathSegments.first : null,
-      _context = lib.session.analysisContext;
+      _context = lib.session.analysisContext,
+      _currentScriptUri = null;
 
   late final String? packageName;
 
@@ -45,6 +46,12 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
   FunctionDeclaration? _currentFunction;
   ConstructorDeclaration? _currentConstructor;
   MethodDeclaration? _currentMethod;
+
+  Uri? _currentScriptUri;
+
+  void findPreviewsInResolvedUnitResult(ResolvedUnitResult unit) {
+    _scopedVisitChildren(unit.unit, (_) => _currentScriptUri = unit.file.toUri());
+  }
 
   /// Handles previews defined on top-level functions.
   @override
@@ -104,6 +111,7 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
           if (returnType.isWidget || returnType.isWidgetBuilder) {
             previewEntries.add(
               PreviewDetails(
+                scriptUri: _currentScriptUri!,
                 packageName: packageName,
                 functionName: _currentFunction!.name.toString(),
                 isBuilder: returnType.isWidgetBuilder,
@@ -118,6 +126,7 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
         final Token? name = _currentConstructor!.name;
         previewEntries.add(
           PreviewDetails(
+            scriptUri: _currentScriptUri!,
             packageName: packageName,
             functionName: '$returnType${name == null ? '' : '.$name'}',
             isBuilder: false,
@@ -132,6 +141,7 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
             final parentClass = _currentMethod!.parent! as ClassDeclaration;
             previewEntries.add(
               PreviewDetails(
+                scriptUri: _currentScriptUri!,
                 packageName: packageName,
                 functionName: '${parentClass.name}.${_currentMethod!.name}',
                 isBuilder: returnType.isWidgetBuilder,
@@ -210,9 +220,7 @@ final class LibraryPreviewNode {
   void findPreviews({required ResolvedLibraryResult lib}) {
     // Iterate over the compilation unit's AST to find previews.
     final visitor = _PreviewVisitor(lib: lib.element);
-    for (final ResolvedUnitResult libUnit in lib.units) {
-      libUnit.unit.visitChildren(visitor);
-    }
+    lib.units.forEach(visitor.findPreviewsInResolvedUnitResult);
     previews
       ..clear()
       ..addAll(visitor.previewEntries);
