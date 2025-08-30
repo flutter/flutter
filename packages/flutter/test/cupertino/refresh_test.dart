@@ -1727,7 +1727,7 @@ void main() {
         ),
       );
       expect(
-        tester.widget<CupertinoActivityIndicator>(find.byType(CupertinoActivityIndicator)).progress,
+        tester.widget<CupertinoActivityIndicator>(find.byType(CupertinoActivityIndicator)).value,
         10.0 / 100.0,
       );
 
@@ -1747,7 +1747,7 @@ void main() {
         ),
       );
       expect(
-        tester.widget<CupertinoActivityIndicator>(find.byType(CupertinoActivityIndicator)).progress,
+        tester.widget<CupertinoActivityIndicator>(find.byType(CupertinoActivityIndicator)).value,
         26.0 / 100.0,
       );
 
@@ -1767,7 +1767,7 @@ void main() {
         ),
       );
       expect(
-        tester.widget<CupertinoActivityIndicator>(find.byType(CupertinoActivityIndicator)).progress,
+        tester.widget<CupertinoActivityIndicator>(find.byType(CupertinoActivityIndicator)).value,
         100.0 / 100.0,
       );
     });
