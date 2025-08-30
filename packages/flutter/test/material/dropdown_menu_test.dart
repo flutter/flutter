@@ -2599,6 +2599,64 @@ void main() {
     },
   );
 
+  testWidgets('Entry selection in filtered entries should persist after the filter is cleared', (
+    WidgetTester tester,
+  ) async {
+    final TextEditingController controller = TextEditingController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            String getFirstItemLabel() => 'A1';
+
+            return Scaffold(
+              body: Column(
+                children: <Widget>[
+                  DropdownMenu<TestMenu>(
+                    requestFocusOnTap: true,
+                    enableFilter: true,
+                    controller: controller,
+                    dropdownMenuEntries: <DropdownMenuEntry<TestMenu>>[
+                      DropdownMenuEntry<TestMenu>(
+                        value: TestMenu.mainMenu0,
+                        // The use of a function is necessary to make the list mutable,
+                        // since immutable lists' selection does not rematch.
+                        label: getFirstItemLabel(),
+                      ),
+                      const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu2, label: 'B1'),
+                      const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu3, label: 'A2'),
+                    ],
+                  ),
+                ],
+              ),
+              floatingActionButton: FloatingActionButton(onPressed: () => setState(() {})),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Open the menu.
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pump();
+
+    // Filter the entries to only show the ones with 'A'.
+    await tester.enterText(find.byType(TextField), 'A');
+    await tester.pump();
+
+    // Select the second item in the filtered list.
+    await tester.tap(findMenuItemButton('A2'));
+    await tester.pump();
+
+    // Rebuild the widgets.
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pump();
+
+    expect(controller.text, 'A2');
+  });
+
   testWidgets('The default text input field should not be focused on mobile platforms '
       'when it is tapped', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
