@@ -35,6 +35,86 @@ TEST_P(AiksTest, CanRenderColoredRect) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, CanRenderWideStrokedRectWithoutOverlap) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue().withAlphaF(0.5));
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeWidth(30.0f);
+
+  paint.setStrokeJoin(DlStrokeJoin::kBevel);
+  builder.DrawRect(DlRect::MakeXYWH(100.0f, 100.0f, 100.0f, 100.0f), paint);
+  builder.DrawRect(DlRect::MakeXYWH(250.0f, 100.0f, 10.0f, 100.0f), paint);
+  builder.DrawRect(DlRect::MakeXYWH(100.0f, 250.0f, 100.0f, 10.0f), paint);
+
+  paint.setStrokeJoin(DlStrokeJoin::kRound);
+  builder.DrawRect(DlRect::MakeXYWH(350.0f, 100.0f, 100.0f, 100.0f), paint);
+  builder.DrawRect(DlRect::MakeXYWH(500.0f, 100.0f, 10.0f, 100.0f), paint);
+  builder.DrawRect(DlRect::MakeXYWH(350.0f, 250.0f, 100.0f, 10.0f), paint);
+
+  paint.setStrokeJoin(DlStrokeJoin::kMiter);
+  builder.DrawRect(DlRect::MakeXYWH(600.0f, 100.0f, 100.0f, 100.0f), paint);
+  builder.DrawRect(DlRect::MakeXYWH(750.0f, 100.0f, 10.0f, 100.0f), paint);
+  builder.DrawRect(DlRect::MakeXYWH(600.0f, 250.0f, 100.0f, 10.0f), paint);
+
+  // And now with a stroke width that overlaps in the middle.
+  paint.setStrokeWidth(110.0f);
+
+  paint.setStrokeJoin(DlStrokeJoin::kBevel);
+  builder.DrawRect(DlRect::MakeXYWH(100.0f, 400.0f, 100.0f, 100.0f), paint);
+
+  paint.setStrokeJoin(DlStrokeJoin::kRound);
+  builder.DrawRect(DlRect::MakeXYWH(350.0f, 400.0f, 100.0f, 100.0f), paint);
+
+  paint.setStrokeJoin(DlStrokeJoin::kMiter);
+  builder.DrawRect(DlRect::MakeXYWH(600.0f, 400.0f, 100.0f, 100.0f), paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CanRenderWideStrokedRectPathWithoutOverlap) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue().withAlphaF(0.5));
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeWidth(30.0f);
+
+  paint.setStrokeJoin(DlStrokeJoin::kBevel);
+  builder.DrawPath(DlPath::MakeRectXYWH(100.0f, 100.0f, 100.0f, 100.0f), paint);
+  builder.DrawPath(DlPath::MakeRectXYWH(250.0f, 100.0f, 10.0f, 100.0f), paint);
+  builder.DrawPath(DlPath::MakeRectXYWH(100.0f, 250.0f, 100.0f, 10.0f), paint);
+
+  paint.setStrokeJoin(DlStrokeJoin::kRound);
+  builder.DrawPath(DlPath::MakeRectXYWH(350.0f, 100.0f, 100.0f, 100.0f), paint);
+  builder.DrawPath(DlPath::MakeRectXYWH(500.0f, 100.0f, 10.0f, 100.0f), paint);
+  builder.DrawPath(DlPath::MakeRectXYWH(350.0f, 250.0f, 100.0f, 10.0f), paint);
+
+  paint.setStrokeJoin(DlStrokeJoin::kMiter);
+  builder.DrawPath(DlPath::MakeRectXYWH(600.0f, 100.0f, 100.0f, 100.0f), paint);
+  builder.DrawPath(DlPath::MakeRectXYWH(750.0f, 100.0f, 10.0f, 100.0f), paint);
+  builder.DrawPath(DlPath::MakeRectXYWH(600.0f, 250.0f, 100.0f, 10.0f), paint);
+
+  // And now with a stroke width that overlaps in the middle.
+  paint.setStrokeWidth(110.0f);
+
+  paint.setStrokeJoin(DlStrokeJoin::kBevel);
+  builder.DrawPath(DlPath::MakeRectXYWH(100.0f, 400.0f, 100.0f, 100.0f), paint);
+
+  paint.setStrokeJoin(DlStrokeJoin::kRound);
+  builder.DrawPath(DlPath::MakeRectXYWH(350.0f, 400.0f, 100.0f, 100.0f), paint);
+
+  paint.setStrokeJoin(DlStrokeJoin::kMiter);
+  builder.DrawPath(DlPath::MakeRectXYWH(600.0f, 400.0f, 100.0f, 100.0f), paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(AiksTest, CanRenderImage) {
   DisplayListBuilder builder;
   DlPaint paint;

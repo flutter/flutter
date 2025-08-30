@@ -25,6 +25,7 @@ GeometryResult FillRectGeometry::GetPositionBuffer(
               .index_type = IndexType::kNone,
           },
       .transform = entity.GetShaderTransform(pass),
+      .mode = GeometryResult::Mode::kNormal,
   };
 }
 
@@ -128,10 +129,40 @@ GeometryResult StrokeRectGeometry::GetPositionBuffer(
                   .index_type = IndexType::kNone,
               },
           .transform = entity.GetShaderTransform(pass),
+          .mode = GeometryResult::Mode::kPreventOverdraw,
       };
     }
 
     case Join::kBevel: {
+      if (half_stroke_width * 2.0f >= rect.GetSize().MinDimension()) {
+        return GeometryResult{
+            .type = PrimitiveType::kTriangleStrip,
+            .vertex_buffer =
+                {
+                    .vertex_buffer = data_host_buffer.Emplace(
+                        8 * sizeof(Point), alignof(Point),
+                        [hsw = half_stroke_width, &rect](uint8_t* buffer) {
+                          Scalar left = rect.GetLeft();
+                          Scalar top = rect.GetTop();
+                          Scalar right = rect.GetRight();
+                          Scalar bottom = rect.GetBottom();
+                          auto vertices = reinterpret_cast<Point*>(buffer);
+                          vertices[0] = Point(left, top - hsw);
+                          vertices[1] = Point(right, top - hsw);
+                          vertices[2] = Point(left - hsw, top);
+                          vertices[3] = Point(right + hsw, top);
+                          vertices[4] = Point(left - hsw, bottom);
+                          vertices[5] = Point(right + hsw, bottom);
+                          vertices[6] = Point(left, bottom + hsw);
+                          vertices[7] = Point(right, bottom + hsw);
+                        }),
+                    .vertex_count = 8u,
+                    .index_type = IndexType::kNone,
+                },
+            .transform = entity.GetShaderTransform(pass),
+            .mode = GeometryResult::Mode::kNormal,
+        };
+      }
       return GeometryResult{
           .type = PrimitiveType::kTriangleStrip,
           .vertex_buffer =
@@ -144,32 +175,59 @@ GeometryResult StrokeRectGeometry::GetPositionBuffer(
                         Scalar right = rect.GetRight();
                         Scalar bottom = rect.GetBottom();
                         auto vertices = reinterpret_cast<Point*>(buffer);
-                        vertices[0] = Point(left, top - hsw);
-                        vertices[1] = Point(left, top + hsw);
-                        vertices[2] = Point(right, top - hsw);
-                        vertices[3] = Point(right, top + hsw);
-                        vertices[4] = Point(right + hsw, top);
-                        vertices[5] = Point(right - hsw, top);
-                        vertices[6] = Point(right + hsw, bottom);
-                        vertices[7] = Point(right - hsw, bottom);
-                        vertices[8] = Point(right, bottom + hsw);
-                        vertices[9] = Point(right, bottom - hsw);
-                        vertices[10] = Point(left, bottom + hsw);
-                        vertices[11] = Point(left, bottom - hsw);
-                        vertices[12] = Point(left - hsw, bottom);
-                        vertices[13] = Point(left + hsw, bottom);
-                        vertices[14] = Point(left - hsw, top);
-                        vertices[15] = Point(left + hsw, top);
-                        vertices[16] = Point(left, top - hsw);
+                        vertices[0] = Point(left - hsw, top);
+                        vertices[1] = Point(left + hsw, top + hsw);
+                        vertices[2] = Point(left, top - hsw);
+                        vertices[3] = Point(right - hsw, top + hsw);
+                        vertices[4] = Point(right, top - hsw);
+                        vertices[5] = Point(right - hsw, top + hsw);
+                        vertices[6] = Point(right + hsw, top);
+                        vertices[7] = Point(right - hsw, bottom - hsw);
+                        vertices[8] = Point(right + hsw, bottom);
+                        vertices[9] = Point(right - hsw, bottom - hsw);
+                        vertices[10] = Point(right, bottom + hsw);
+                        vertices[11] = Point(left + hsw, bottom - hsw);
+                        vertices[12] = Point(left, bottom + hsw);
+                        vertices[13] = Point(left + hsw, bottom - hsw);
+                        vertices[14] = Point(left - hsw, bottom);
+                        vertices[15] = Point(left + hsw, top + hsw);
+                        vertices[16] = Point(left - hsw, top);
                       }),
                   .vertex_count = 17u,
                   .index_type = IndexType::kNone,
               },
           .transform = entity.GetShaderTransform(pass),
+          .mode = GeometryResult::Mode::kNormal,
       };
     }
 
     case Join::kMiter: {
+      if (half_stroke_width * 2.0f >= rect.GetSize().MinDimension()) {
+        return GeometryResult{
+            .type = PrimitiveType::kTriangleStrip,
+            .vertex_buffer =
+                {
+                    .vertex_buffer = data_host_buffer.Emplace(
+                        4 * sizeof(Point), alignof(Point),
+                        [hsw = half_stroke_width, &rect](uint8_t* buffer) {
+                          Scalar left = rect.GetLeft();
+                          Scalar top = rect.GetTop();
+                          Scalar right = rect.GetRight();
+                          Scalar bottom = rect.GetBottom();
+                          auto vertices = reinterpret_cast<Point*>(buffer);
+                          // Zig-zag pattern: UL, UR, LL, LR
+                          vertices[0] = Point(left - hsw, top - hsw);
+                          vertices[1] = Point(right + hsw, top - hsw);
+                          vertices[2] = Point(left - hsw, bottom + hsw);
+                          vertices[3] = Point(right + hsw, bottom + hsw);
+                        }),
+                    .vertex_count = 4u,
+                    .index_type = IndexType::kNone,
+                },
+            .transform = entity.GetShaderTransform(pass),
+            .mode = GeometryResult::Mode::kNormal,
+        };
+      }
       return GeometryResult{
           .type = PrimitiveType::kTriangleStrip,
           .vertex_buffer =
@@ -197,6 +255,7 @@ GeometryResult StrokeRectGeometry::GetPositionBuffer(
                   .index_type = IndexType::kNone,
               },
           .transform = entity.GetShaderTransform(pass),
+          .mode = GeometryResult::Mode::kNormal,
       };
     }
   }
@@ -205,6 +264,13 @@ GeometryResult StrokeRectGeometry::GetPositionBuffer(
 std::optional<Rect> StrokeRectGeometry::GetCoverage(
     const Matrix& transform) const {
   return rect_.TransformBounds(transform);
+}
+
+GeometryResult::Mode StrokeRectGeometry::GetResultMode() const {
+  // Most(all?) of our geometry is produced in full with an explicit mode
+  // specified in the returned GeometryResult, but just in case we missed
+  // a case, the safest mode to return here is kPreventOverdraw.
+  return GeometryResult::Mode::kPreventOverdraw;
 }
 
 Join StrokeRectGeometry::AdjustStrokeJoin(const StrokeParameters& stroke) {
