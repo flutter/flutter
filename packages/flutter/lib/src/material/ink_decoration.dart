@@ -291,6 +291,7 @@ class _InkState extends State<Ink> {
       _ink!.isVisible = Visibility.of(context);
       _ink!.configuration = createLocalImageConfiguration(context);
     }
+    // print('Ink: ${_ink?.referenceBox.size}');
     return widget.child ?? ConstrainedBox(constraints: const BoxConstraints.expand());
   }
 
