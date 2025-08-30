@@ -4946,6 +4946,8 @@ TEST_F(ShellTest, ProvidesNullEngineId) {
   configuration.SetEntrypoint("providesEngineId");
   RunEngine(shell.get(), std::move(configuration));
 
+  ASSERT_EQ(shell->GetEngine()->GetLastEngineId(), 99);
+
   latch.Wait();
   ASSERT_EQ(reported_handle, std::nullopt);
   DestroyShell(std::move(shell), task_runners);
