@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
@@ -147,7 +148,7 @@ name: my_app
   }
 
   testUsingContext(
-    'runner with web server device does not support debugging without --start-paused',
+    'runner with web server device supports debugging without --start-paused',
     () {
       final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
       flutterDevice.device = WebServerDevice(logger: BufferLogger.test());
@@ -165,7 +166,7 @@ name: my_app
         systemClock: globals.systemClock,
       );
 
-      expect(profileResidentWebRunner.debuggingEnabled, false);
+      expect(profileResidentWebRunner.debuggingEnabled, true);
 
       flutterDevice.device = chromeDevice;
 
@@ -652,6 +653,7 @@ name: my_app
         'Launching lib/main.dart on FakeDevice in debug mode...\n'
         'Waiting for connection from debug service on FakeDevice...\n'
         'Debug service listening on ws://127.0.0.1/abcd/\n'
+        'A Dart VM Service on FakeDevice is available at: http://127.0.0.1/abcd/\n'
         '\n'
         'first\n'
         '\n'
@@ -969,7 +971,7 @@ name: my_app
       expect(debugConnectionInfo, isNotNull);
 
       final OperationResult result = await residentWebRunner.restart();
-      expect(logger.statusText, contains('Reloaded application in'));
+      expect(logger.statusText, contains('Recompile complete. No client connected.'));
       expect(result.code, 0);
     },
     overrides: <Type, Generator>{
@@ -1104,7 +1106,12 @@ name: my_app
         logger: logger,
         systemClock: SystemClock.fixed(DateTime(2001)),
       );
-      fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations);
+      fakeVmServiceHost = FakeVmServiceHost(
+        requests: [
+          ...kAttachExpectations,
+          const FakeVmServiceRequest(method: 'hotRestart'),
+        ],
+      );
       setupMocks();
       flutterDevice.device = webServerDevice;
       webDevFS.report = UpdateFSReport(success: true);
@@ -1117,8 +1124,57 @@ name: my_app
       expect(logger.statusText, contains('Restarted application in'));
       expect(result.code, 0);
 
-      // web-server device does not send restart analytics
-      expect(fakeAnalytics.sentEvents, isEmpty);
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(
+          Event.timing(
+            workflow: 'hot',
+            variableName: 'web-incremental-restart',
+            elapsedMilliseconds: 0,
+          ),
+        ),
+      );
+    },
+    overrides: <Type, Generator>{
+      Analytics: () => fakeAnalytics,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+    },
+  );
+
+  testUsingContext(
+    'Does not fail hot restart when not attached',
+    () async {
+      final logger = BufferLogger.test();
+      final ResidentRunner residentWebRunner = setUpResidentRunner(
+        flutterDevice,
+        logger: logger,
+        systemClock: SystemClock.fixed(DateTime(2001)),
+      );
+      fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          ...kAttachExpectations,
+          const FakeVmServiceRequest(method: 'hotRestart'),
+        ],
+      );
+      flutterDevice.device = WebServerDevice(logger: logger);
+      webDevFS.report = UpdateFSReport(success: true);
+
+      final appStartedCompleter = Completer<void>();
+      unawaited(residentWebRunner.run(appStartedCompleter: appStartedCompleter));
+
+      await appStartedCompleter.future;
+
+      late final OperationResult result;
+
+      await expectReturnsNormallyLater(() async {
+        result = await residentWebRunner.restart(fullRestart: true);
+      }());
+
+      expect(result.code, 0);
+      expect(result.isOk, isTrue);
+      expect(logger.statusText, contains('Recompile complete. No client connected.'));
     },
     overrides: <Type, Generator>{
       Analytics: () => fakeAnalytics,
@@ -1581,7 +1637,7 @@ name: my_app
     'Sends unlaunched app.webLaunchUrl event for Web Server device',
     () async {
       final logger = BufferLogger.test();
-      fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+      fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
       setupMocks();
       flutterDevice.device = WebServerDevice(logger: logger);
       webDevFS.baseUri = Uri.parse('http://localhost:8765/app/');
@@ -1665,7 +1721,9 @@ flutter:
         mainLibName: 'my_app',
         packages: <String, String>{'path_provider_linux': '../../path_provider_linux'},
       );
-      expect(await residentWebRunner.run(), 0);
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+      expect(await residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter), 0);
+      await connectionInfoCompleter.future;
       final File generatedLocalizationsFile = globals.fs
           .directory('lib')
           .childDirectory('l10n')
@@ -2038,6 +2096,8 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
 
 class FakeWebDevFS extends Fake implements WebDevFS {
   Object? exception;
+
+  final resultCompleter = Completer<ConnectionResult?>();
   ConnectionResult? result;
   late UpdateFSReport report;
 
@@ -2054,6 +2114,9 @@ class FakeWebDevFS extends Fake implements WebDevFS {
 
   @override
   PackageConfig? lastPackageConfig = PackageConfig.empty;
+
+  @override
+  var useDwdsWebSocketConnection = false;
 
   @override
   Future<Uri> create() async {
@@ -2093,7 +2156,11 @@ class FakeWebDevFS extends Fake implements WebDevFS {
       // ignore: only_throw_errors, exception is either Error or Exception here.
       throw exception!;
     }
-    return result;
+    // Automatically complete the future if a non-null result has been set.
+    if (result != null) {
+      resultCompleter.complete(result);
+    }
+    return resultCompleter.future;
   }
 }
 
@@ -2236,7 +2303,6 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
     int? hostVmServicePort,
     bool? ipv6 = false,
     bool enableDevTools = false,
-    bool allowExistingDdsInstance = false,
   }) async {}
 
   @override

@@ -789,7 +789,7 @@ class AppDomain extends Domain {
 
     Completer<DebugConnectionInfo>? connectionInfoCompleter;
 
-    if (runner.debuggingEnabled) {
+    if (runner.supportsServiceProtocol && runner.debuggingEnabled) {
       connectionInfoCompleter = Completer<DebugConnectionInfo>();
       // We don't want to wait for this future to complete and callbacks won't fail.
       // As it just writes to stdout.
@@ -1824,7 +1824,7 @@ final class MachineOutputLogger extends DelegatingLogger {
       final event = <String, Object?>{
         'id': eventId,
         'progressId': eventType,
-        if (message != null) 'message': message,
+        'message': ?message,
         'finished': finished,
       };
 

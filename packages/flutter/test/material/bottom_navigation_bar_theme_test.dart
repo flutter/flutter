@@ -139,9 +139,7 @@ void main() {
             type: BottomNavigationBarType.fixed,
             selectedLabelStyle: selectedTextStyle,
             unselectedLabelStyle: unselectedTextStyle,
-            mouseCursor: MaterialStateProperty.resolveWith<MouseCursor?>((
-              Set<MaterialState> states,
-            ) {
+            mouseCursor: WidgetStateProperty.resolveWith<MouseCursor?>((Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
                 return SystemMouseCursors.grab;
               }
