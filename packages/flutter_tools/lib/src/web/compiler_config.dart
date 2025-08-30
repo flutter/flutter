@@ -150,6 +150,8 @@ class WasmCompilerConfig extends WebCompilerConfig {
     this.dryRun = false,
     super.sourceMaps = true,
     super.renderer = WebRendererMode.defaultForWasm,
+    this.dynamicModuleInterface,
+    this.dynamicModuleEntryPoint,
   });
 
   /// Build environment for [stripWasm].
@@ -158,6 +160,8 @@ class WasmCompilerConfig extends WebCompilerConfig {
   /// Whether to strip the wasm file of static symbols.
   final bool stripWasm;
 
+  final String? dynamicModuleInterface;
+  final String? dynamicModuleEntryPoint;
   final bool? minify;
 
   final bool dryRun;
@@ -181,6 +185,7 @@ class WasmCompilerConfig extends WebCompilerConfig {
   @override
   List<String> toCommandOptions(BuildMode buildMode) {
     final bool stripSymbols = buildMode == BuildMode.release && stripWasm;
+
     return <String>[
       '-O${optimizationLevelForBuildMode(buildMode)}',
       '--${stripSymbols ? '' : 'no-'}strip-wasm',
@@ -195,6 +200,11 @@ class WasmCompilerConfig extends WebCompilerConfig {
   String get buildKey {
     final settings = <String, dynamic>{
       ...super._buildKeyMap,
+      // Each dynamic module interface will define a separate set of dynamic modules
+      // and each dynamic entrypoint for that interface requires a new build.
+      // No entrypoint indicates this is the main module.
+      if (dynamicModuleInterface != null) 'dynamicModuleInterface': dynamicModuleInterface,
+      if (dynamicModuleEntryPoint != null) 'dynamicModuleEntryPoint': dynamicModuleEntryPoint,
       kStripWasm: stripWasm,
       'minify': minify,
       'dryRun': dryRun,
