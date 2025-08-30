@@ -136,6 +136,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     }
     addPubOptions();
     addMachineOutputFlag(verboseHelp: verbose);
+    addDevToolsOptions(verboseHelp: verbose);
     argParser
       ..addFlag(
         kWebServer,
@@ -450,6 +451,8 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         ),
         webEnableExposeUrl: false,
         webRunHeadless: boolArg(kHeadless),
+        enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
+        devToolsServerAddress: devToolsServerAddress,
       );
       final String target = bundle.defaultMainPath;
       final FlutterDevice flutterDevice = await FlutterDevice.create(

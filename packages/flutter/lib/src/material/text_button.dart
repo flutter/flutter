@@ -229,21 +229,18 @@ class TextButton extends ButtonStyleButton {
     ButtonLayerBuilder? backgroundBuilder,
     ButtonLayerBuilder? foregroundBuilder,
   }) {
-    final MaterialStateProperty<Color?>? backgroundColorProp = switch ((
+    final WidgetStateProperty<Color?>? backgroundColorProp = switch ((
       backgroundColor,
       disabledBackgroundColor,
     )) {
       (_?, null) => MaterialStatePropertyAll<Color?>(backgroundColor),
       (_, _) => ButtonStyleButton.defaultColor(backgroundColor, disabledBackgroundColor),
     };
-    final MaterialStateProperty<Color?>? iconColorProp = switch ((iconColor, disabledIconColor)) {
+    final WidgetStateProperty<Color?>? iconColorProp = switch ((iconColor, disabledIconColor)) {
       (_?, null) => MaterialStatePropertyAll<Color?>(iconColor),
       (_, _) => ButtonStyleButton.defaultColor(iconColor, disabledIconColor),
     };
-    final MaterialStateProperty<Color?>? overlayColorProp = switch ((
-      foregroundColor,
-      overlayColor,
-    )) {
+    final WidgetStateProperty<Color?>? overlayColorProp = switch ((foregroundColor, overlayColor)) {
       (null, null) => null,
       (_, Color(a: 0.0)) => WidgetStatePropertyAll<Color?>(overlayColor),
       (_, final Color color) ||
@@ -561,8 +558,8 @@ class _TextButtonDefaultsM3 extends ButtonStyle {
 
   @override
   WidgetStateProperty<Color?>? get foregroundColor =>
-    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return _colors.onSurface.withOpacity(0.38);
       }
       return _colors.primary;
@@ -570,14 +567,14 @@ class _TextButtonDefaultsM3 extends ButtonStyle {
 
   @override
   WidgetStateProperty<Color?>? get overlayColor =>
-    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
         return _colors.primary.withOpacity(0.1);
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return _colors.primary.withOpacity(0.08);
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return _colors.primary.withOpacity(0.1);
       }
       return null;
@@ -611,17 +608,17 @@ class _TextButtonDefaultsM3 extends ButtonStyle {
 
   @override
   WidgetStateProperty<Color>? get iconColor {
-    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return _colors.onSurface.withOpacity(0.38);
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return _colors.primary;
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return _colors.primary;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return _colors.primary;
       }
       return _colors.primary;
@@ -640,8 +637,8 @@ class _TextButtonDefaultsM3 extends ButtonStyle {
 
   @override
   WidgetStateProperty<MouseCursor?>? get mouseCursor =>
-    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return SystemMouseCursors.basic;
       }
       return SystemMouseCursors.click;
