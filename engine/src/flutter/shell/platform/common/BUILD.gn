@@ -150,7 +150,6 @@ source_set("common_cpp") {
 # API surface there will be.
 source_set("common_cpp_core") {
   public = [
-    "geometry.h",
     "path_utils.h",
     "windowing.h",
   ]
@@ -191,7 +190,6 @@ if (enable_unittests) {
 
     sources = [
       "engine_switches_unittests.cc",
-      "geometry_unittests.cc",
       "incoming_message_dispatcher_unittests.cc",
       "json_message_codec_unittests.cc",
       "json_method_codec_unittests.cc",
