@@ -961,8 +961,7 @@ pluginManagement {
         KgpAgpTestData(
           true,
           kgpVersion: templateKotlinGradlePluginVersion,
-          // TODO(reidbaker): Replace with templateAndroidGradlePluginVersion
-          agpVersion: '8.7.2',
+          agpVersion: templateAndroidGradlePluginVersion,
         ),
 
         // Kotlin version at the edge of support window.
