@@ -857,8 +857,7 @@ pluginManagement {
         GradleKgpTestData(
           true,
           kgpVersion: templateKotlinGradlePluginVersion,
-          // TODO(reidbaker): replace with templateDefaultGradleVersion.
-          gradleVersion: '8.10',
+          gradleVersion: templateDefaultGradleVersion,
         ),
 
         // Kotlin version at the edge of support window.
