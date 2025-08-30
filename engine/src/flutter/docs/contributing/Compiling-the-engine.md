@@ -168,7 +168,7 @@ require adding a `dependency_override` section in you app's `pubspec.yaml` as de
 [here](https://github.com/flutter/flutter/blob/master/docs/tool/README.md#using-a-locally-built-engine-with-the-flutter-tool).
 
 If you have [ccache](https://ccache.dev/) installed on your system you can enable this by using `--ccache` in step 2 above.
-This will speed up building of Flutter especially when you switch branches.
+This can speed up subsequent builds, especially when switching branches.
 
 
 ## Compiling for Windows
