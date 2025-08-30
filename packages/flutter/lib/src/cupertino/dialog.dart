@@ -1207,7 +1207,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
 
     return Padding(
       padding: EdgeInsets.only(top: cancelPadding),
-      child: CupertinoFocusHalo.onRRect(
+      child: CupertinoFocusHalo.withRRect(
         borderRadius: kCupertinoButtonSizeBorderRadius[CupertinoButtonSize.large]!,
         child: _ActionSheetButtonBackground(
           isCancel: true,
@@ -1475,14 +1475,13 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
     context.findRenderObject()!.sendSemanticsEvent(const TapSemanticEvent());
   }
 
-  Color get effectiveFocusBackgroundColor =>
-      HSLColor.fromColor(
-        (widget.focusColor ?? CupertinoColors.activeBlue).withOpacity(
-          CupertinoTheme.brightnessOf(context) == Brightness.light
-              ? kCupertinoButtonTintedOpacityLight
-              : kCupertinoButtonTintedOpacityDark,
-        ),
-      ).toColor();
+  Color get effectiveFocusBackgroundColor => HSLColor.fromColor(
+    (widget.focusColor ?? CupertinoColors.activeBlue).withOpacity(
+      CupertinoTheme.brightnessOf(context) == Brightness.light
+          ? kCupertinoButtonTintedOpacityLight
+          : kCupertinoButtonTintedOpacityDark,
+    ),
+  ).toColor();
 
   @override
   Widget build(BuildContext context) {
@@ -1902,7 +1901,7 @@ class _ActionSheetMainSheet extends StatelessWidget {
     );
     return _OverscrollBackground(
       color: backgroundColor,
-      child: CupertinoFocusHalo.onRRect(
+      child: CupertinoFocusHalo.withRRect(
         borderRadius: kCupertinoButtonSizeBorderRadius[CupertinoButtonSize.large]!.copyWith(
           topLeft: Radius.zero,
           topRight: Radius.zero,
