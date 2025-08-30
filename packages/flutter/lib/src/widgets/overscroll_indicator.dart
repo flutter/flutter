@@ -14,10 +14,9 @@ import 'dart:async' show Timer;
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/physics.dart' show Tolerance, nearEqual;
+import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/physics.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -869,10 +868,10 @@ class _StretchController extends Listenable {
 
   /// A fraction used to adjust the input velocity, measured in pixels,
   /// to a value between -1 and 1 when gesture fling.
-  static const double _flingVelocityFriction = 1 / 20000;
+  static const double _flingVelocityFriction = 0.000065;
 
   /// The stiffness constant for the spring simulation controlling the overscroll effect.
-  static const double _springStiffness = 200.0;
+  static const double _springStiffness = 300;
 
   @override
   void addListener(VoidCallback listener) {
@@ -898,7 +897,7 @@ class _StretchController extends Listenable {
   /// a [SpringSimulation] instance is created using an estimated
   /// value nearly identical to the Spring animation of the Stretch Overscroll effect.
   SpringSimulation createSimulation(double velocity) {
-    return SpringSimulation(createSpringDescription(0.8), overscroll, 0.0, velocity);
+    return SpringSimulation(createSpringDescription(1.0), overscroll, 0.0, velocity);
   }
 
   /// Uses the saturation function approach to scale velocity
@@ -906,10 +905,10 @@ class _StretchController extends Listenable {
   /// velocities gradually saturate. Returns the scaled velocity
   /// with the original direction preserved.
   double _calculateVelocityScale(double velocity) {
-    const double referenceVelocity = 5000.0;
+    const double referenceVelocity = 4000.0;
     final double absVelocity = velocity.abs();
 
-    // Normalizes using 5,000px/s as the reference.
+    // Normalizes using 4,000px/s as the reference.
     final double normalizedVelocity = absVelocity / referenceVelocity;
     final double saturatedScale = normalizedVelocity / (1.0 + normalizedVelocity);
 
