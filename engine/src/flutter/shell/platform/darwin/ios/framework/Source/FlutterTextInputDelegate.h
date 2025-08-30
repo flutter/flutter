@@ -34,6 +34,8 @@ typedef NS_ENUM(NSInteger, FlutterFloatingCursorDragState) {
   // NOLINTEND(readability-identifier-naming)
 };
 
+NS_ASSUME_NONNULL_BEGIN
+
 @protocol FlutterTextInputDelegate <NSObject>
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
          updateEditingClient:(int)client
@@ -77,5 +79,7 @@ typedef NS_ENUM(NSInteger, FlutterFloatingCursorDragState) {
     performContextMenuCustomActionWithActionID:(NSString*)actionID
                                textInputClient:(int)client;
 @end
+
+NS_ASSUME_NONNULL_END
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERTEXTINPUTDELEGATE_H_
