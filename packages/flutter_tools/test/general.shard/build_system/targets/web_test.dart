@@ -36,7 +36,7 @@ const _kDart2jsLinuxArgs = <String>[
 const _kStandardFlutterWebDefines = <String>[
   '-DFLUTTER_WEB_USE_SKIA=true',
   '-DFLUTTER_WEB_USE_SKWASM=false',
-  '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
+  '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/12345/',
 ];
 
 const _kDart2WasmLinuxArgs = <String>[
@@ -1217,7 +1217,7 @@ name: foo
                             '-DFLUTTER_WEB_USE_SKIA=true',
                             '-DFLUTTER_WEB_USE_SKWASM=false',
                           ],
-                          '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
+                          '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/12345/',
                           '--extra-compiler-option=--depfile=${depFile.absolute.path}',
                           '-O$expectedLevel',
                           if (strip && buildMode == 'release')
