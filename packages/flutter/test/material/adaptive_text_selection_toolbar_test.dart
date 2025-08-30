@@ -447,4 +447,22 @@ void main() {
       variant: TargetPlatformVariant.all(),
     );
   });
+
+  testWidgets('AdaptiveTextSelectionToolBar does not crash at zero area', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: AdaptiveTextSelectionToolbar(
+              anchors: TextSelectionToolbarAnchors(primaryAnchor: Offset.zero),
+              children: null,
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(AdaptiveTextSelectionToolbar)), Size.zero);
+  });
 }
