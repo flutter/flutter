@@ -665,6 +665,7 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
           if (withDebugger) {
             await connectToVmService(pauseOnExceptions: pauseOnExceptions);
             if (!startPaused) {
+              await started;
               await resume();
             }
           }

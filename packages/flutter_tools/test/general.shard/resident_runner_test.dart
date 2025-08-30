@@ -22,7 +22,6 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/run_hot.dart';
@@ -61,7 +60,6 @@ void main() {
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
           target: 'main.dart',
           analytics: fakeAnalytics,
-          devtoolsHandler: createNoOpHandler,
         );
       },
       overrides: <Type, Generator>{
@@ -121,7 +119,6 @@ void main() {
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
-        devtoolsHandler: createNoOpHandler,
         analytics: globals.analytics,
       );
       flutterDevice.generator = residentCompiler;
@@ -145,7 +142,6 @@ void main() {
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
-        devtoolsHandler: createNoOpHandler,
         analytics: globals.analytics,
       );
       flutterDevice.generator = residentCompiler;
@@ -167,7 +163,6 @@ void main() {
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.release),
         target: 'main.dart',
-        devtoolsHandler: createNoOpHandler,
       );
       flutterDevice.runColdCode = 1;
 
@@ -188,7 +183,6 @@ void main() {
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.release),
         target: 'main.dart',
-        devtoolsHandler: createNoOpHandler,
       );
       flutterDevice.runColdError = Exception('BAD STUFF');
 
@@ -211,7 +205,6 @@ void main() {
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
-        devtoolsHandler: createNoOpHandler,
         analytics: globals.analytics,
       );
       flutterDevice.generator = residentCompiler;
@@ -275,7 +268,6 @@ void main() {
           startPaused: true,
         ),
         target: 'main.dart',
-        devtoolsHandler: createNoOpHandler,
         analytics: globals.analytics,
       );
       final futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
@@ -475,7 +467,6 @@ void main() {
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
-        devtoolsHandler: createNoOpHandler,
         analytics: fakeAnalytics,
       );
       final futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
@@ -726,7 +717,6 @@ void main() {
           stayResident: false,
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
           target: 'main.dart',
-          devtoolsHandler: createNoOpHandler,
           analytics: fakeAnalytics,
         );
         devFS.nextUpdateReport = UpdateFSReport(success: true, invalidatedSourcesCount: 1);
@@ -1084,7 +1074,6 @@ void main() {
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         dillOutputPath: globals.fs.path.join('foobar', 'app.dill'),
         target: 'main.dart',
-        devtoolsHandler: createNoOpHandler,
         analytics: fakeAnalytics,
       );
       expect(otherRunner.artifactDirectory.path, contains('foobar'));
@@ -1192,7 +1181,6 @@ flutter:
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'custom_main.dart',
-        devtoolsHandler: createNoOpHandler,
         analytics: fakeAnalytics,
       );
       await residentRunner.runSourceGenerators();
@@ -1256,7 +1244,6 @@ flutter:
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
-        devtoolsHandler: createNoOpHandler,
         analytics: fakeAnalytics,
       );
       flutterDevice.generator = residentCompiler;
@@ -1367,7 +1354,6 @@ flutter:
         stayResident: false,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
         target: 'main.dart',
-        devtoolsHandler: createNoOpHandler,
       );
       residentRunner.printHelp(details: true);
 
@@ -1404,7 +1390,6 @@ flutter:
         stayResident: false,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
         target: 'main.dart',
-        devtoolsHandler: createNoOpHandler,
       );
       residentRunner.printHelp(details: false);
 
@@ -1443,7 +1428,6 @@ flutter:
           enableDevTools: false,
         ),
         target: 'main.dart',
-        devtoolsHandler: createNoOpHandler,
       );
 
       final Future<int?> result = residentRunner.attach();
@@ -1490,7 +1474,6 @@ flutter:
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, vmserviceOutFile: 'foo'),
         target: 'main.dart',
-        devtoolsHandler: createNoOpHandler,
         analytics: fakeAnalytics,
       );
 
@@ -1521,7 +1504,6 @@ flutter:
           ),
         ),
         target: 'main.dart',
-        devtoolsHandler: createNoOpHandler,
         analytics: fakeAnalytics,
       );
       residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
@@ -1556,7 +1538,6 @@ flutter:
           ),
         ),
         target: 'main.dart',
-        devtoolsHandler: createNoOpHandler,
         analytics: fakeAnalytics,
       );
       residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
@@ -1593,7 +1574,6 @@ flutter:
           ),
         ),
         target: 'main.dart',
-        devtoolsHandler: createNoOpHandler,
         analytics: fakeAnalytics,
       );
       residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
@@ -1620,7 +1600,6 @@ flutter:
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
-        devtoolsHandler: createNoOpHandler,
         analytics: fakeAnalytics,
       );
       residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
@@ -1650,7 +1629,6 @@ flutter:
         dillOutputPath: 'test',
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
-        devtoolsHandler: createNoOpHandler,
         analytics: fakeAnalytics,
       );
       residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
@@ -1682,7 +1660,6 @@ flutter:
           ),
         ),
         target: 'main.dart',
-        devtoolsHandler: createNoOpHandler,
         analytics: fakeAnalytics,
       );
       residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
@@ -1711,7 +1688,6 @@ flutter:
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
-        devtoolsHandler: createNoOpHandler,
         analytics: fakeAnalytics,
       );
 
@@ -1733,7 +1709,6 @@ flutter:
           stayResident: false,
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, vmserviceOutFile: 'foo'),
           target: 'main.dart',
-          devtoolsHandler: createNoOpHandler,
           analytics: fakeAnalytics,
         );
 
@@ -1760,7 +1735,6 @@ flutter:
         <FlutterDevice>[flutterDevice],
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile, vmserviceOutFile: 'foo'),
-        devtoolsHandler: createNoOpHandler,
         target: 'main.dart',
       );
 
@@ -2050,7 +2024,22 @@ flutter:
     'Host VM service ipv6 defaults',
     () => testbed.run(
       () async {
-        fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+        fakeVmServiceHost = FakeVmServiceHost(
+          requests: <VmServiceExpectation>[
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Isolate'},
+            ),
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Isolate'},
+            ),
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Isolate'},
+            ),
+          ],
+        );
         final device = FakeDevice()..dds = DartDevelopmentService(logger: testLogger);
         final done = Completer<void>();
         ddsLauncherCallback =
@@ -2094,7 +2083,7 @@ flutter:
               io.CompressionOptions? compression,
               Device? device,
               required Logger logger,
-            }) async => FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService,
+            }) async => fakeVmServiceHost!.vmService,
       },
     ),
   );
@@ -2109,24 +2098,6 @@ flutter:
     expect(() => nextPlatform('unknown'), throwsAssertionError);
   });
 
-  // TODO(bkonyi): remove when ready to serve DevTools from DDS.
-  testUsingContext(
-    'cleanupAtFinish shuts down resident devtools handler',
-    () => testbed.run(() async {
-      residentRunner = HotRunner(
-        <FlutterDevice>[flutterDevice],
-        stayResident: false,
-        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, vmserviceOutFile: 'foo'),
-        target: 'main.dart',
-        devtoolsHandler: createNoOpHandler,
-        analytics: fakeAnalytics,
-      );
-      await residentRunner.cleanupAtFinish();
-
-      expect((residentRunner.residentDevtoolsHandler! as NoOpDevtoolsHandler).wasShutdown, true);
-    }),
-  );
-
   testUsingContext(
     'HotRunner sets asset directory when first evict assets',
     () => testbed.run(() async {
@@ -2138,7 +2109,6 @@ flutter:
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
-        devtoolsHandler: createNoOpHandler,
         analytics: fakeAnalytics,
       );
 
@@ -2162,7 +2132,6 @@ flutter:
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
-        devtoolsHandler: createNoOpHandler,
         analytics: fakeAnalytics,
       );
 
@@ -2184,7 +2153,6 @@ flutter:
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
-        devtoolsHandler: createNoOpHandler,
         analytics: fakeAnalytics,
       );
 
@@ -2204,7 +2172,6 @@ flutter:
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
-        devtoolsHandler: createNoOpHandler,
         analytics: fakeAnalytics,
       );
 
@@ -2245,7 +2212,6 @@ flutter:
           ),
         ),
         target: 'main.dart',
-        devtoolsHandler: createNoOpHandler,
         analytics: globals.analytics,
         nativeAssetsYamlFile: 'foo.yaml',
       );

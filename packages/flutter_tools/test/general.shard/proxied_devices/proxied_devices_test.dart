@@ -663,6 +663,7 @@ void main() {
         'deviceId': 'test_id',
         'vmServiceUri': 'http://127.0.0.1:200/fake',
         'disableServiceAuthCodes': true,
+        'enableDevTools': false,
       });
 
       serverDaemonConnection.sendResponse(startMessage.data['id']!, const <String, Object?>{
@@ -722,6 +723,7 @@ void main() {
           'deviceId': 'test_id',
           'vmServiceUri': 'http://127.0.0.1:200/fake',
           'disableServiceAuthCodes': true,
+          'enableDevTools': false,
         });
 
         serverDaemonConnection.sendResponse(startMessage.data['id']!, <String, Object?>{
@@ -824,6 +826,7 @@ void main() {
           'deviceId': 'test_id',
           'vmServiceUri': 'http://127.0.0.1:200/fake',
           'disableServiceAuthCodes': true,
+          'enableDevTools': false,
         });
 
         serverDaemonConnection.sendErrorResponse(
@@ -1245,6 +1248,9 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
 
   @override
   Future<void> shutdown() async => shutdownCalled = true;
+
+  @override
+  Future<void> invokeServiceExtensions(FlutterDevice? device) async {}
 }
 
 class FakePrebuiltApplicationPackage extends Fake implements PrebuiltApplicationPackage {
