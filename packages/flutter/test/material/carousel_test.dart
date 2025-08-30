@@ -127,7 +127,7 @@ void main() {
     expect(inkWellElement.widget, isA<InkWell>());
     final InkWell inkWell = inkWellElement.widget as InkWell;
 
-    const MaterialState state = MaterialState.focused;
+    const WidgetState state = WidgetState.focused;
 
     // Check overlay color in focused state.
     expect(inkWell.overlayColor?.resolve(<WidgetState>{state}), Colors.purple);
