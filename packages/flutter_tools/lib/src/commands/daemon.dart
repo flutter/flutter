@@ -1402,7 +1402,6 @@ Future<Map<String, Object?>> _deviceToMap(Device device) async {
       'hotReload': device.supportsHotReload,
       'hotRestart': device.supportsHotRestart,
       'screenshot': device.supportsScreenshot,
-      'fastStart': device.supportsFastStart,
       'flutterExit': device.supportsFlutterExit,
       'hardwareRendering': await device.supportsHardwareRendering,
       'startPaused': device.supportsStartPaused,

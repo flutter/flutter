@@ -687,7 +687,6 @@ class FlutterPlugin : Plugin<Project> {
                     localEngineSrcPath = flutterPlugin.localEngineSrcPath
                     targetPath = FlutterPluginUtils.getFlutterTarget(project)
                     verbose = FlutterPluginUtils.isProjectVerbose(project)
-                    fastStart = FlutterPluginUtils.isProjectFastStart(project)
                     fileSystemRoots = fileSystemRootsValue
                     fileSystemScheme = fileSystemSchemeValue
                     trackWidgetCreation = trackWidgetCreationValue
