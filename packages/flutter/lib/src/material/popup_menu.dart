@@ -346,7 +346,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   /// {@endtemplate}
   ///
   /// If null, then the value of [PopupMenuThemeData.mouseCursor] is used. If
-  /// that is also null, then [WidgetStateMouseCursor.clickable] is used.
+  /// that is also null, then [WidgetStateMouseCursor.statelessClickable] is used.
   final MouseCursor? mouseCursor;
 
   /// The widget below this widget in the tree.
@@ -780,6 +780,7 @@ class _PopupMenuState<T> extends State<_PopupMenu<T>> {
       ),
     );
 
+    // TODO(camsim99): add cursor configuration
     return AnimatedBuilder(
       animation: widget.route.animation!,
       builder: (BuildContext context, Widget? child) {
@@ -1807,7 +1808,9 @@ class _EffectiveMouseCursor extends MaterialStateMouseCursor {
   MouseCursor resolve(Set<MaterialState> states) {
     return WidgetStateProperty.resolveAs<MouseCursor?>(widgetCursor, states) ??
         themeCursor?.resolve(states) ??
-        MaterialStateMouseCursor.clickable.resolve(states);
+        (kIsWeb
+            ? MaterialStateMouseCursor.clickable.resolve(states)
+            : MaterialStateMouseCursor.statelessClickable.resolve(states));
   }
 
   @override
