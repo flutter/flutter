@@ -1628,7 +1628,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
     final MouseCursor effectiveMouseCursor = WidgetStateProperty.resolveAs<MouseCursor>(
       MaterialStateMouseCursor.clickable,
-      <MaterialState>{if (!_enabled) MaterialState.disabled},
+      <WidgetState>{if (!_enabled) WidgetState.disabled},
     );
 
     // When an InputDecoration is provided, use it instead of using an InkWell

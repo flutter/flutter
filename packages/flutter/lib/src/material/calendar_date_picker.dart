@@ -1175,7 +1175,7 @@ class _DayState extends State<_Day> {
 
     T? resolve<T>(
       WidgetStateProperty<T>? Function(DatePickerThemeData? theme) getProperty,
-      Set<MaterialState> states,
+      Set<WidgetState> states,
     ) {
       return effectiveValue((DatePickerThemeData? theme) {
         return getProperty(theme)?.resolve(states);
@@ -1185,9 +1185,9 @@ class _DayState extends State<_Day> {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final String semanticLabelSuffix = widget.isToday ? ', ${localizations.currentDateLabel}' : '';
 
-    final Set<MaterialState> states = <MaterialState>{
-      if (widget.isDisabled) MaterialState.disabled,
-      if (widget.isSelectedDay) MaterialState.selected,
+    final Set<WidgetState> states = <WidgetState>{
+      if (widget.isDisabled) WidgetState.disabled,
+      if (widget.isSelectedDay) WidgetState.selected,
     };
 
     _statesController.value = states;
@@ -1203,7 +1203,7 @@ class _DayState extends State<_Day> {
       states,
     );
     final WidgetStateProperty<Color?> dayOverlayColor = WidgetStateProperty.resolveWith<Color?>(
-      (Set<MaterialState> states) =>
+      (Set<WidgetState> states) =>
           effectiveValue((DatePickerThemeData? theme) => theme?.dayOverlayColor?.resolve(states)),
     );
     final OutlinedBorder dayShape = resolve<OutlinedBorder?>(
@@ -1428,7 +1428,7 @@ class _YearPickerState extends State<YearPicker> {
 
     T? resolve<T>(
       WidgetStateProperty<T>? Function(DatePickerThemeData? theme) getProperty,
-      Set<MaterialState> states,
+      Set<WidgetState> states,
     ) {
       return effectiveValue((DatePickerThemeData? theme) {
         return getProperty(theme)?.resolve(states);
@@ -1448,9 +1448,9 @@ class _YearPickerState extends State<YearPicker> {
     final double decorationHeight = 36.0 * textScaleFactor;
     final double decorationWidth = 72.0 * textScaleFactor;
 
-    final Set<MaterialState> states = <MaterialState>{
-      if (isDisabled) MaterialState.disabled,
-      if (isSelected) MaterialState.selected,
+    final Set<WidgetState> states = <WidgetState>{
+      if (isDisabled) WidgetState.disabled,
+      if (isSelected) WidgetState.selected,
     };
 
     final Color? textColor = resolve<Color?>(
@@ -1464,7 +1464,7 @@ class _YearPickerState extends State<YearPicker> {
       states,
     );
     final WidgetStateProperty<Color?> overlayColor = WidgetStateProperty.resolveWith<Color?>(
-      (Set<MaterialState> states) =>
+      (Set<WidgetState> states) =>
           effectiveValue((DatePickerThemeData? theme) => theme?.yearOverlayColor?.resolve(states)),
     );
 

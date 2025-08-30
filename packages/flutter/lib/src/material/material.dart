@@ -568,7 +568,7 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
     this.color,
   }) : super(child);
 
-  // This class should exist in a 1:1 relationship with a MaterialState object,
+  // This class should exist in a 1:1 relationship with a WidgetState object,
   // since there's no current support for dynamically changing the ticker
   // provider.
   @override
@@ -576,7 +576,7 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
 
   // This is here to satisfy the MaterialInkController contract.
   // The actual painting of this color is done by a Container in the
-  // MaterialState build method.
+  // WidgetState build method.
   @override
   Color? color;
 
@@ -644,8 +644,8 @@ class _InkFeatures extends SingleChildRenderObjectWidget {
     super.child,
   });
 
-  // This widget must be owned by a MaterialState, which must be provided as the vsync.
-  // This relationship must be 1:1 and cannot change for the lifetime of the MaterialState.
+  // This widget must be owned by a WidgetState, which must be provided as the vsync.
+  // This relationship must be 1:1 and cannot change for the lifetime of the WidgetState.
 
   final Color? color;
 
