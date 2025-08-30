@@ -516,6 +516,7 @@ class SliverReorderableList extends StatefulWidget {
     this.prototypeItem,
     this.proxyDecorator,
     this.dragBoundaryProvider,
+    this.addSemanticIndexes = true,
     this.semanticIndexCallback,
     double? autoScrollerVelocityScalar,
   }) : autoScrollerVelocityScalar = autoScrollerVelocityScalar ?? _kDefaultAutoScrollVelocityScalar,
@@ -569,6 +570,9 @@ class SliverReorderableList extends StatefulWidget {
 
   /// {@macro flutter.widgets.reorderable_list.dragBoundaryProvider}
   final ReorderDragBoundaryProvider? dragBoundaryProvider;
+
+  /// {@macro flutter.widgets.SliverChildBuilderDelegate.addSemanticIndexes}
+  final bool addSemanticIndexes;
 
   /// {@macro flutter.widgets.SliverChildBuilderDelegate.semanticIndexCallback}
   final SemanticIndexCallback? semanticIndexCallback;
@@ -1147,6 +1151,7 @@ class SliverReorderableListState extends State<SliverReorderableList>
       _itemBuilder,
       childCount: widget.itemCount,
       findChildIndexCallback: widget.findChildIndexCallback,
+      addSemanticIndexes: widget.addSemanticIndexes,
       semanticIndexCallback: widget.semanticIndexCallback ?? _kDefaultSemanticIndexCallback,
     );
     if (widget.itemExtent != null) {
