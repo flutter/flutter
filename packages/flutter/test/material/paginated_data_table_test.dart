@@ -583,6 +583,7 @@ void main() {
   testWidgets('PaginatedDataTable footer scrolls', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        scrollBehavior: const MaterialScrollBehavior().copyWith(overscroll: false),
         home: Align(
           alignment: Alignment.topLeft,
           child: SizedBox(
