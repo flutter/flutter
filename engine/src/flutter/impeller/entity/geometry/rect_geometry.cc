@@ -68,10 +68,12 @@ GeometryResult StrokeRectGeometry::GetPositionBuffer(
   }
 
   Scalar min_size = kMinStrokeSize / max_basis;
-  Scalar half_stroke_width = std::max(stroke_width_, min_size) * 0.5f;
+  Scalar stroke_width = std::max(stroke_width_, min_size);
+  Scalar half_stroke_width = stroke_width * 0.5f;
 
   auto& data_host_buffer = renderer.GetTransientsDataBuffer();
   const Rect& rect = rect_;
+  bool interior_empty = (stroke_width >= rect.GetSize().MinDimension());
 
   switch (stroke_join_) {
     case Join::kRound: {
@@ -134,7 +136,7 @@ GeometryResult StrokeRectGeometry::GetPositionBuffer(
     }
 
     case Join::kBevel: {
-      if (half_stroke_width * 2.0f >= rect.GetSize().MinDimension()) {
+      if (interior_empty) {
         return GeometryResult{
             .type = PrimitiveType::kTriangleStrip,
             .vertex_buffer =
@@ -202,7 +204,7 @@ GeometryResult StrokeRectGeometry::GetPositionBuffer(
     }
 
     case Join::kMiter: {
-      if (half_stroke_width * 2.0f >= rect.GetSize().MinDimension()) {
+      if (interior_empty) {
         return GeometryResult{
             .type = PrimitiveType::kTriangleStrip,
             .vertex_buffer =
