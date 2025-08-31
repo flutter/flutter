@@ -828,6 +828,72 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
   }
 }
 
+/// A physics simulation modeling the stretch behavior of an edge effect.
+///
+/// This class is a direct port of Android's EdgeEffect.java:
+/// https://cs.android.com/android/platform/superproject/main/+/main:frameworks/base/core/java/android/widget/EdgeEffect.java
+///
+/// It reproduces the damped harmonic oscillator behavior of Android's
+/// overscroll effect in Flutter, using the same physical constants:
+/// - natural frequency
+/// - damping ratio
+///
+/// The formulas and coefficients are derived directly from the Android source.
+class _StretchSimulation extends Simulation {
+  _StretchSimulation(double distance, double velocity, Tolerance tolerance)
+    : _dampedFreq = _naturalFrequency * math.sqrt(1 - _dampingRatio * _dampingRatio),
+      _cosCoeff = distance,
+      _sinCoeff =
+          (1 / (_naturalFrequency * math.sqrt(1 - _dampingRatio * _dampingRatio))) *
+          (_dampingRatio * _naturalFrequency * distance + velocity),
+      super(tolerance: tolerance);
+
+  final double _dampedFreq;
+  final double _cosCoeff;
+  final double _sinCoeff;
+
+  // Physical constants ported directly from Android's EdgeEffect.java.
+  static const double _naturalFrequency = 24.657;
+  static const double _dampingRatio = 0.98;
+  static const double _timeCorrectionFactor = 0.8;
+
+  @override
+  double x(double time) {
+    final double correctedTime = time * _timeCorrectionFactor;
+
+    // This is the direct port of the distance calculation from Android's
+    // damped harmonic oscillator formula.
+    return math.pow(math.e, -_dampingRatio * _naturalFrequency * correctedTime) *
+        (_cosCoeff * math.cos(_dampedFreq * correctedTime) +
+            _sinCoeff * math.sin(_dampedFreq * correctedTime));
+  }
+
+  @override
+  double dx(double time) {
+    // To calculate the velocity (the derivative of x(t)), we apply the same
+    // time correction.
+    final double correctedTime = time * _timeCorrectionFactor;
+
+    // The derivative calculation ported from the original Android 12 code.
+    final double position = x(time);
+    final double uncorrectedDx =
+        position * (-_naturalFrequency) * _dampingRatio +
+        math.pow(math.e, -_dampingRatio * _naturalFrequency * correctedTime) *
+            (-_dampedFreq * _cosCoeff * math.sin(_dampedFreq * correctedTime) +
+                _dampedFreq * _sinCoeff * math.cos(_dampedFreq * correctedTime));
+
+    return uncorrectedDx * _timeCorrectionFactor;
+  }
+
+  @override
+  bool isDone(double time) {
+    // The simulation is considered done when both position and velocity
+    // are within the tolerance thresholds. This logic is similar to Android's
+    // isAtEquilibrium().
+    return x(time).abs() < tolerance.distance && dx(time).abs() < tolerance.velocity;
+  }
+}
+
 class _StretchController extends Listenable {
   _StretchController({required this.vsync});
 
@@ -868,10 +934,7 @@ class _StretchController extends Listenable {
 
   /// A fraction used to adjust the input velocity, measured in pixels,
   /// to a value between -1 and 1 when gesture fling.
-  static const double _flingVelocityFriction = 0.000065;
-
-  /// The stiffness constant for the spring simulation controlling the overscroll effect.
-  static const double _springStiffness = 300;
+  static const double _flingVelocityFriction = 1 / 10000;
 
   @override
   void addListener(VoidCallback listener) {
@@ -883,21 +946,9 @@ class _StretchController extends Listenable {
     _overscrollNotifier.removeListener(listener);
   }
 
-  /// Creates a spring description with the given mass,
-  /// using predefined stiffness and damping values for the spring.
-  SpringDescription createSpringDescription(double dampingRatio) {
-    return SpringDescription.withDampingRatio(
-      mass: 1.0,
-      stiffness: _springStiffness,
-      ratio: dampingRatio,
-    );
-  }
-
-  /// Since the implementation methods of Android and Flutter differ,
-  /// a [SpringSimulation] instance is created using an estimated
-  /// value nearly identical to the Spring animation of the Stretch Overscroll effect.
-  SpringSimulation createSimulation(double velocity) {
-    return SpringSimulation(createSpringDescription(1.0), overscroll, 0.0, velocity);
+  /// Creates a stretching-only [Simulation] ported from Android 12.
+  _StretchSimulation _createStretchSimulation(double velocity) {
+    return _StretchSimulation(overscroll, velocity, Tolerance.defaultTolerance);
   }
 
   /// Uses the saturation function approach to scale velocity
@@ -905,14 +956,14 @@ class _StretchController extends Listenable {
   /// velocities gradually saturate. Returns the scaled velocity
   /// with the original direction preserved.
   double _calculateVelocityScale(double velocity) {
-    const double referenceVelocity = 4000.0;
+    const double referenceVelocity = 3000.0;
     final double absVelocity = velocity.abs();
 
-    // Normalizes using 4,000px/s as the reference.
+    // Normalizes using 3,000px/s as the reference.
     final double normalizedVelocity = absVelocity / referenceVelocity;
     final double saturatedScale = normalizedVelocity / (1.0 + normalizedVelocity);
 
-    return saturatedScale * velocity.sign;
+    return saturatedScale * velocity.sign * 2;
   }
 
   /// Handle a fling to the edge of the viewport at a particular velocity.
@@ -923,7 +974,7 @@ class _StretchController extends Listenable {
       return;
     }
     final double scaledVelocity = _calculateVelocityScale(velocity);
-    animate(SpringSimulation(createSpringDescription(0.7), overscroll, 0.0, scaledVelocity));
+    animate(_createStretchSimulation(scaledVelocity));
   }
 
   /// Called when the overscroll ends to trigger a fling animation if needed.
@@ -933,7 +984,7 @@ class _StretchController extends Listenable {
     }
     final double scaledVelocity = -(velocity * _flingVelocityFriction);
     if (_controller == null) {
-      animate(createSimulation(scaledVelocity));
+      animate(_createStretchSimulation(scaledVelocity));
     }
   }
 
@@ -942,22 +993,10 @@ class _StretchController extends Listenable {
   /// Disposes any existing animation controller before starting a new one.
   /// Updates the [overscroll] value on each animation frame.
   /// Automatically disposes the controller when the animation completes.
-  void animate(SpringSimulation simulation) {
-    final double initialOverscroll = simulation.dx(0);
-
+  void animate(Simulation simulation) {
     final AnimationController controller = AnimationController.unbounded(vsync: vsync)
       ..addListener(() {
         final double newOverscroll = _controller?.value ?? 0.0;
-
-        // Stops the animation and resets overscroll when the value crosses zero
-        // in the opposite direction of the initial velocity, preventing overshoot.
-        if ((initialOverscroll > 0 && newOverscroll < 0) ||
-            (initialOverscroll < 0 && newOverscroll > 0)) {
-          _controller?.stop();
-          overscroll = 0.0;
-          return;
-        }
-
         overscroll = newOverscroll;
       })
       ..animateWith(simulation).whenComplete(() {
