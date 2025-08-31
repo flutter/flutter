@@ -934,7 +934,11 @@ class _StretchController extends Listenable {
 
   /// A fraction used to adjust the input velocity, measured in pixels,
   /// to a value between -1 and 1 when gesture fling.
-  static const double _flingVelocityFriction = 1 / 10000;
+  static const double _flingVelocityFriction = 1 / 6000;
+
+  /// The maximum velocity allowed for a fling after scaling
+  /// to prevent applying an excessive stretch effect.
+  static const double _maxFlingVelocity = 0.5;
 
   @override
   void addListener(VoidCallback listener) {
@@ -982,7 +986,12 @@ class _StretchController extends Listenable {
     if (velocity == 0.0 && overscroll == 0.0) {
       return;
     }
-    final double scaledVelocity = -(velocity * _flingVelocityFriction);
+    final double scaledVelocity = clampDouble(
+      -(velocity * _flingVelocityFriction),
+      -_maxFlingVelocity,
+      _maxFlingVelocity,
+    );
+
     if (_controller == null) {
       animate(_createStretchSimulation(scaledVelocity));
     }
