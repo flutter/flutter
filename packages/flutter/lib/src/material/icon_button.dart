@@ -904,7 +904,7 @@ class _SelectableIconButtonState extends State<_SelectableIconButton> {
       _internalStatesController = MaterialStatesController();
     }
 
-    statesController.update(MaterialState.selected, _isSelected);
+    statesController.update(WidgetState.selected, _isSelected);
   }
 
   @override
@@ -920,7 +920,7 @@ class _SelectableIconButtonState extends State<_SelectableIconButton> {
     }
 
     if (widget.isSelected != oldWidget.isSelected) {
-      statesController.update(MaterialState.selected, _isSelected);
+      statesController.update(WidgetState.selected, _isSelected);
     }
   }
 
@@ -929,7 +929,7 @@ class _SelectableIconButtonState extends State<_SelectableIconButton> {
       _internalStatesController = MaterialStatesController();
     }
 
-    statesController.update(MaterialState.selected, _isSelected);
+    statesController.update(WidgetState.selected, _isSelected);
   }
 
   @override
