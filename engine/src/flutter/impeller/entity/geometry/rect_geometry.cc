@@ -73,7 +73,7 @@ GeometryResult StrokeRectGeometry::GetPositionBuffer(
 
   auto& data_host_buffer = renderer.GetTransientsDataBuffer();
   const Rect& rect = rect_;
-  bool interior_empty = (stroke_width >= rect.GetSize().MinDimension());
+  bool interior_filled = (stroke_width >= rect.GetSize().MinDimension());
 
   switch (stroke_join_) {
     case Join::kRound: {
@@ -83,16 +83,13 @@ GeometryResult StrokeRectGeometry::GetPositionBuffer(
 
       FML_DCHECK(trigs.size() >= 2u);
 
-      // We use all but the first entry in trigs for each corner.
-      auto vertex_count = trigs.size() - 1;
-      // Every other point has a center vertex added.
-      vertex_count = vertex_count + (vertex_count >> 1);
-      // The loop also adds 3 points of its own.
-      vertex_count += 3;
-      // We do that for each of the 4 corners.
-      vertex_count = vertex_count * 4;
-      // We then add 2 more points at the end to close the last edge.
-      vertex_count += 2;
+      auto vertex_count = trigs.size() * 4;
+      if (!interior_filled) {
+        // If there is a hole in the interior (as with most stroked rects
+        // unless the stroke width is really really wide) then we need
+        // to perform some surgery to generate the hollowed-out interior.
+        vertex_count += 12;
+      }
 
       return GeometryResult{
           .type = PrimitiveType::kTriangleStrip,
@@ -100,29 +97,103 @@ GeometryResult StrokeRectGeometry::GetPositionBuffer(
               {
                   .vertex_buffer = data_host_buffer.Emplace(
                       vertex_count * sizeof(Point), alignof(Point),
-                      [hsw = half_stroke_width, &rect, vertex_count,
-                       &trigs](uint8_t* buffer) {
+                      [hsw = half_stroke_width, &rect, vertex_count, &trigs,
+                       interior_filled](uint8_t* buffer) {
+                        Scalar left = rect.GetLeft();
+                        Scalar top = rect.GetTop();
+                        Scalar right = rect.GetRight();
+                        Scalar bottom = rect.GetBottom();
+
                         auto vertices = reinterpret_cast<Point*>(buffer);
                         [[maybe_unused]]
                         auto vertices_end = vertices + vertex_count;
 
-                        vertices =
-                            AppendRoundCornerJoin(vertices, rect.GetLeftTop(),
-                                                  Vector2(-hsw, 0), trigs);
-                        vertices =
-                            AppendRoundCornerJoin(vertices, rect.GetRightTop(),
-                                                  Vector2(0, -hsw), trigs);
-                        vertices = AppendRoundCornerJoin(
-                            vertices, rect.GetRightBottom(), Vector2(hsw, 0),
-                            trigs);
-                        vertices = AppendRoundCornerJoin(
-                            vertices, rect.GetLeftBottom(), Vector2(0, hsw),
-                            trigs);
+                        // Traverse top down, left to right across slices.
 
-                        // Repeat the first 2 points from the first corner to
-                        // close the last edge.
-                        *vertices++ = rect.GetLeftTop() - Vector2(hsw, 0);
-                        *vertices++ = rect.GetLeftTop() + Vector2(hsw, 0);
+                        // Slice 1: Draw across between top pair of round joins.
+                        for (auto trig : trigs) {
+                          // trig.sin goes from 0 to 1
+                          // trig.cos goes from 1 to 0
+                          *vertices++ = Point(left - trig.sin * hsw,
+                                              top - trig.cos * hsw);
+                          *vertices++ = Point(right + trig.sin * hsw,
+                                              top - trig.cos * hsw);
+                        }
+                        // Ends up with vertices that draw across the bottom
+                        // of the top curved section (left - hsw, top) to
+                        // (right + hsw, top). This is the starting pair of
+                        // vertices for the following square section.
+
+                        if (interior_filled) {
+                          // If interior is filled, we can just let the bottom
+                          // pair of vertices of the top edge connect to the
+                          // top pair of vertices of the bottom edge generated
+                          // in slice 5 below. They both go left-right so they
+                          // will create a proper zig-zag box to connect the
+                          // 2 sections.
+                        } else {
+                          // Slice 2: Draw the inner part of the top stroke.
+                          // Simply extend down from the last horizontal pair
+                          // of vertices to (top + hsw).
+                          *vertices++ = Point(left - hsw, top + hsw);
+                          *vertices++ = Point(right + hsw, top + hsw);
+
+                          // Slice 3: Draw the left and right edges.
+
+                          // Slice 3a: Draw the right edge first.
+                          // Since we are already at the right edge from the
+                          // previous slice, we just have to add 2 vertices
+                          // to get to the bottom of that right edge, but we
+                          // have to start with an additional vertex that
+                          // connects to (right - hsw) instead of the left
+                          // side of the rectangle to avoid a big triangle
+                          // through the hollow interior section.
+                          *vertices++ = Point(right - hsw, top + hsw);
+                          *vertices++ = Point(right + hsw, bottom - hsw);
+                          *vertices++ = Point(right - hsw, bottom - hsw);
+
+                          // Now we need to jump up for the left edge, but we
+                          // need to dupliate the last point and the next point
+                          // to avoid drawing anything connecting them. These
+                          // 2 vertices end up generating 2 empty triangles.
+                          *vertices++ = Point(right - hsw, bottom - hsw);
+                          *vertices++ = Point(left + hsw, top + hsw);
+
+                          // Slice 3b: Now draw the left edge.
+                          // We draw this in a specific zig zag order so that
+                          // we end up at (left - hsw, bottom - hsw) to connect
+                          // properly to the next section.
+                          *vertices++ = Point(left + hsw, top + hsw);
+                          *vertices++ = Point(left - hsw, top + hsw);
+                          *vertices++ = Point(left + hsw, bottom - hsw);
+                          *vertices++ = Point(left - hsw, bottom - hsw);
+
+                          // Slice 4: Draw the inner part of the bottom stroke.
+                          // Since the next section starts by drawing across
+                          // the width of the rect at Y=bottom, we simple have
+                          // to make sure that we presently have a pair of
+                          // vertices that span the top of that section. The
+                          // last point was (left - hsw, bottom - hsw), so we
+                          // just have to add its right side partner which
+                          // is not the same as the vertex before that. This
+                          // extra vertex ends up defining an empty triangle,
+                          // but sets us up for the final slice to complete
+                          // this interior part of the bottom stroke.
+                          *vertices++ = Point(right + hsw, bottom - hsw);
+                          // Now the first pair of vertices below will
+                          // "complete the zig-zag box" for the inner part
+                          // of the bottom stroke.
+                        }
+
+                        // Slice 5: Draw between bottom pair of round joins.
+                        for (auto trig : trigs) {
+                          // trig.sin goes from 0 to 1
+                          // trig.cos goes from 1 to 0
+                          *vertices++ = Point(left - trig.cos * hsw,
+                                              bottom + trig.sin * hsw);
+                          *vertices++ = Point(right + trig.cos * hsw,
+                                              bottom + trig.sin * hsw);
+                        }
 
                         // Make sure our estimate is always up to date.
                         FML_DCHECK(vertices == vertices_end);
@@ -131,12 +202,12 @@ GeometryResult StrokeRectGeometry::GetPositionBuffer(
                   .index_type = IndexType::kNone,
               },
           .transform = entity.GetShaderTransform(pass),
-          .mode = GeometryResult::Mode::kPreventOverdraw,
+          .mode = GeometryResult::Mode::kNormal,
       };
     }
 
     case Join::kBevel: {
-      if (interior_empty) {
+      if (interior_filled) {
         return GeometryResult{
             .type = PrimitiveType::kTriangleStrip,
             .vertex_buffer =
@@ -204,7 +275,7 @@ GeometryResult StrokeRectGeometry::GetPositionBuffer(
     }
 
     case Join::kMiter: {
-      if (interior_empty) {
+      if (interior_filled) {
         return GeometryResult{
             .type = PrimitiveType::kTriangleStrip,
             .vertex_buffer =
@@ -279,31 +350,6 @@ Join StrokeRectGeometry::AdjustStrokeJoin(const StrokeParameters& stroke) {
   return (stroke.join == Join::kMiter && stroke.miter_limit < kSqrt2)
              ? Join::kBevel
              : stroke.join;
-}
-
-Point* StrokeRectGeometry::AppendRoundCornerJoin(
-    Point* buffer,
-    Point corner,
-    Vector2 offset,
-    const Tessellator::Trigs& trigs) {
-  // Close the edge box set up by the end of the last corner and
-  // set up the first wedge of this corner.
-  *buffer++ = corner + offset;
-  *buffer++ = corner - offset;
-  bool do_center = false;
-  auto trig = trigs.begin();
-  auto end = trigs.end();
-  while (++trig < end) {
-    if (do_center) {
-      *buffer++ = corner;
-    }
-    do_center = !do_center;
-    *buffer++ = corner + *trig * offset;
-  }
-  // Together with the last point pushed by the loop we set up to
-  // initiate the edge box connecting to the next corner.
-  *buffer++ = corner - end[-1] * offset;
-  return buffer;
 }
 
 }  // namespace impeller
