@@ -1027,6 +1027,7 @@ targets:
       - DEPS
 
   - name: Linux build_android_host_app_with_module_aar
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/172630
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -1193,6 +1194,7 @@ targets:
       task_name: linux_feature_flags_test
 
   - name: Linux_android_emu android_display_cutout
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/174500
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -2460,6 +2462,7 @@ targets:
 
   # Uses Impeller.
   - name: Linux_pixel_7pro hello_world_impeller
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/173698
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2647,6 +2650,7 @@ targets:
 
   # linux mokey benchmark
   - name: Linux_mokey complex_layout__start_up
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/173691
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2708,6 +2712,7 @@ targets:
       task_name: devtools_profile_start_test
 
   - name: Linux_pixel_7pro drive_perf_debug_warning
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/174111
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3192,6 +3197,7 @@ targets:
 
   # Pixel 7 Pro, Skia
   - name: Linux_pixel_7pro new_gallery__transition_perf
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/174105
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3232,6 +3238,7 @@ targets:
 
   # Pixel 7 Pro, Impeller (OpenGL)
   - name: Linux_pixel_7pro new_gallery_opengles_impeller__transition_perf
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/173337
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3347,6 +3354,7 @@ targets:
       task_name: platform_views_scroll_perf_impeller__timeline_summary
 
   - name: Linux_pixel_7pro platform_views_scroll_perf_impeller__timeline_summary
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/172210
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3384,6 +3392,7 @@ targets:
       task_name: routing_test
 
   - name: Linux_pixel_7pro service_extensions_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/174113
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -4820,6 +4829,7 @@ targets:
 
   # mac mokey benchmark
   - name: Mac_mokey microbenchmarks
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/174101
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -6163,6 +6173,7 @@ targets:
       - DEPS
 
   - name: Windows plugin_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/174116
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -6827,6 +6838,7 @@ targets:
 
   # windows mokey test
   - name: Windows_mokey basic_material_app_win__compile
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/173701
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60

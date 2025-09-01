@@ -486,6 +486,12 @@ class ResidentWebRunner extends ResidentRunner {
       }
     }
 
+    if (_connectionResult == null) {
+      status.stop();
+      _logger.printStatus('Recompile complete. No client connected..');
+      return OperationResult.ok;
+    }
+
     // Both will be null when not assigned.
     Duration? reloadDuration;
     Duration? reassembleDuration;
