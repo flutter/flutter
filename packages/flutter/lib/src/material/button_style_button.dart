@@ -394,8 +394,8 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
 
     Color? effectiveIconColor() {
       return widgetStyle?.iconColor?.resolve(statesController.value) ??
-          widgetStyle?.foregroundColor?.resolve(statesController.value) ??
           themeStyle?.iconColor?.resolve(statesController.value) ??
+          widgetStyle?.foregroundColor?.resolve(statesController.value) ??
           themeStyle?.foregroundColor?.resolve(statesController.value) ??
           defaultStyle.iconColor?.resolve(statesController.value) ??
           // Fallback to foregroundColor if iconColor is null.
