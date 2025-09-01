@@ -1045,6 +1045,9 @@ class _StretchController extends Listenable {
   void dispose() {
     _controller?.dispose();
   }
+
+  @override
+  String toString() => '_StretchController()';
 }
 
 /// A notification that either a [GlowingOverscrollIndicator] or a
