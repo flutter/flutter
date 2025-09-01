@@ -765,9 +765,7 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
       _stretchController.scrollEnd(velocity);
     } else if (notification is ScrollUpdateNotification) {
       _totalOverscroll = 0.0;
-
-      // Fixes an issue where the overscroll spring doesn't complete when velocity is too low.
-      Future<void>.microtask(() => _stretchController.scrollEnd(0.0));
+      _stretchController.scrollEnd(0.0);
     }
     _lastNotification = notification;
     return false;
