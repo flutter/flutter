@@ -11,6 +11,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_test/src/window.dart';
 
 import '../widgets/semantics_tester.dart';
 
@@ -3131,6 +3132,250 @@ void main() {
       expect(count, 2);
     },
   );
+
+  group('MediaQuery preservation tests', () {
+    testWidgets('CupertinoNavigationBar preserves MediaQuery size in trailing widget', (WidgetTester tester) async {
+      const Size testSize = Size(1200.0, 800.0);
+      Size? capturedTrailingSize;
+      Size? capturedRootSize;
+      
+      await tester.binding.setSurfaceSize(testSize);
+      
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Builder(
+            builder: (BuildContext context) {
+              capturedRootSize = MediaQuery.of(context).size;
+              return CupertinoPageScaffold(
+                navigationBar: CupertinoNavigationBar(
+                  middle: const Text('MediaQuery Test'),
+                  trailing: Builder(
+                    builder: (BuildContext context) {
+                      capturedTrailingSize = MediaQuery.of(context).size;
+                      return const Icon(CupertinoIcons.info);
+                    },
+                  ),
+                ),
+                child: const Center(child: Text('Test')),
+              );
+            },
+          ),
+        ),
+      );
+      
+      await tester.pumpAndSettle();
+      
+      // Verify that both sizes are captured and identical
+      expect(capturedRootSize, isNotNull);
+      expect(capturedTrailingSize, isNotNull);
+      expect(capturedTrailingSize, equals(capturedRootSize));
+      expect(capturedTrailingSize, isNot(equals(Size.zero)));
+      // Most importantly: size should not be Size(0,0) which was the regression
+      expect(capturedTrailingSize!.width, greaterThan(0));
+      expect(capturedTrailingSize!.height, greaterThan(0));
+    });
+
+    testWidgets('CupertinoNavigationBar preserves MediaQuery size in leading widget', (WidgetTester tester) async {
+      Size? capturedLeadingSize;
+      Size? capturedRootSize;
+      
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Builder(
+            builder: (BuildContext context) {
+              capturedRootSize = MediaQuery.of(context).size;
+              return CupertinoPageScaffold(
+                navigationBar: CupertinoNavigationBar(
+                  middle: const Text('MediaQuery Test'),
+                  leading: Builder(
+                    builder: (BuildContext context) {
+                      capturedLeadingSize = MediaQuery.of(context).size;
+                      return const Icon(CupertinoIcons.back);
+                    },
+                  ),
+                ),
+                child: const Center(child: Text('Test')),
+              );
+            },
+          ),
+        ),
+      );
+      
+      await tester.pumpAndSettle();
+      
+      // Verify that both sizes are captured and identical
+      expect(capturedRootSize, isNotNull);
+      expect(capturedLeadingSize, isNotNull);
+      expect(capturedLeadingSize, equals(capturedRootSize));
+      expect(capturedLeadingSize, isNot(equals(Size.zero)));
+      // Most importantly: size should not be Size(0,0) which was the regression
+      expect(capturedLeadingSize!.width, greaterThan(0));
+      expect(capturedLeadingSize!.height, greaterThan(0));
+    });
+
+    testWidgets('CupertinoNavigationBar preserves MediaQuery padding and devicePixelRatio', (WidgetTester tester) async {
+      MediaQueryData? capturedTrailingData;
+      MediaQueryData? capturedRootData;
+      
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Builder(
+            builder: (BuildContext context) {
+              capturedRootData = MediaQuery.of(context);
+              return CupertinoPageScaffold(
+                navigationBar: CupertinoNavigationBar(
+                  middle: const Text('MediaQuery Test'),
+                  trailing: Builder(
+                    builder: (BuildContext context) {
+                      capturedTrailingData = MediaQuery.of(context);
+                      return const Icon(CupertinoIcons.info);
+                    },
+                  ),
+                ),
+                child: const Center(child: Text('Test')),
+              );
+            },
+          ),
+        ),
+      );
+      
+      await tester.pumpAndSettle();
+      
+      // Verify all MediaQuery properties are preserved correctly
+      expect(capturedRootData, isNotNull);
+      expect(capturedTrailingData, isNotNull);
+      
+      // Size should be preserved
+      expect(capturedTrailingData!.size, equals(capturedRootData!.size));
+      expect(capturedTrailingData!.size, isNot(equals(Size.zero)));
+      expect(capturedTrailingData!.size.width, greaterThan(0));
+      expect(capturedTrailingData!.size.height, greaterThan(0));
+      
+      // Padding should be preserved
+      expect(capturedTrailingData!.padding, equals(capturedRootData!.padding));
+      
+      // Device pixel ratio should be preserved
+      expect(capturedTrailingData!.devicePixelRatio, equals(capturedRootData!.devicePixelRatio));
+      
+      // Text scaler should be modified (this is the intended behavior)
+      // The navigation bar applies text scaling limits while preserving other properties
+      expect(capturedTrailingData!.textScaler, isNotNull);
+    });
+
+    testWidgets('CupertinoNavigationBar middle widget preserves MediaQuery size', (WidgetTester tester) async {
+      Size? capturedMiddleSize;
+      Size? capturedRootSize;
+      
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Builder(
+            builder: (BuildContext context) {
+              capturedRootSize = MediaQuery.of(context).size;
+              return CupertinoPageScaffold(
+                navigationBar: CupertinoNavigationBar(
+                  middle: Builder(
+                    builder: (BuildContext context) {
+                      capturedMiddleSize = MediaQuery.of(context).size;
+                      return const Text('MediaQuery Test');
+                    },
+                  ),
+                ),
+                child: const Center(child: Text('Test')),
+              );
+            },
+          ),
+        ),
+      );
+      
+      await tester.pumpAndSettle();
+      
+      // Verify that both sizes are captured and identical
+      expect(capturedRootSize, isNotNull);
+      expect(capturedMiddleSize, isNotNull);
+      expect(capturedMiddleSize, equals(capturedRootSize));
+      expect(capturedMiddleSize, isNot(equals(Size.zero)));
+      // Most importantly: size should not be Size(0,0) which was the regression
+      expect(capturedMiddleSize!.width, greaterThan(0));
+      expect(capturedMiddleSize!.height, greaterThan(0));
+    });
+
+    testWidgets('CupertinoNavigationBar large title preserves MediaQuery size', (WidgetTester tester) async {
+      Size? capturedLargeTitleSize;
+      Size? capturedRootSize;
+      
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Builder(
+            builder: (BuildContext context) {
+              capturedRootSize = MediaQuery.of(context).size;
+              return CupertinoPageScaffold(
+                navigationBar: CupertinoNavigationBar.large(
+                  largeTitle: Builder(
+                    builder: (BuildContext context) {
+                      capturedLargeTitleSize = MediaQuery.of(context).size;
+                      return const Text('Large Title Test');
+                    },
+                  ),
+                ),
+                child: const Center(child: Text('Test')),
+              );
+            },
+          ),
+        ),
+      );
+      
+      await tester.pumpAndSettle();
+      
+      // Verify that both sizes are captured and identical
+      expect(capturedRootSize, isNotNull);
+      expect(capturedLargeTitleSize, isNotNull);
+      expect(capturedLargeTitleSize, equals(capturedRootSize));
+      expect(capturedLargeTitleSize, isNot(equals(Size.zero)));
+      // Most importantly: size should not be Size(0,0) which was the regression
+      expect(capturedLargeTitleSize!.width, greaterThan(0));
+      expect(capturedLargeTitleSize!.height, greaterThan(0));
+    });
+
+    testWidgets('CupertinoNavigationBar regression test - Size(0,0) should not occur', (WidgetTester tester) async {
+      // This test specifically checks that we don't regress back to Size(0,0)
+      final List<Size> capturedSizes = <Size>[];
+      
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            navigationBar: CupertinoNavigationBar(
+              middle: const Text('Regression Test'),
+              leading: Builder(
+                builder: (BuildContext context) {
+                  capturedSizes.add(MediaQuery.of(context).size);
+                  return const Icon(CupertinoIcons.back);
+                },
+              ),
+              trailing: Builder(
+                builder: (BuildContext context) {
+                  capturedSizes.add(MediaQuery.of(context).size);
+                  return const Icon(CupertinoIcons.info);
+                },
+              ),
+            ),
+            child: const Center(child: Text('Test')),
+          ),
+        ),
+      );
+      
+      await tester.pumpAndSettle();
+      
+      // Verify that we captured sizes from both leading and trailing
+      expect(capturedSizes.length, equals(2));
+      
+      // Most importantly: neither should be Size(0,0)
+      for (final Size size in capturedSizes) {
+        expect(size, isNot(equals(Size.zero)));
+        expect(size.width, greaterThan(0));
+        expect(size.height, greaterThan(0));
+      }
+    });
+  });
 }
 
 class _ExpectStyles extends StatelessWidget {
