@@ -271,6 +271,7 @@ class FlutterDevice {
             try {
               service = await connectToVmService(vmServiceUri!, logger: globals.logger);
               await service.dispose();
+              break;
             } on vm_service.RPCError catch (e, st) {
               if (!e.isConnectionDisposedException) {
                 handleVmServiceCheckException(e);
