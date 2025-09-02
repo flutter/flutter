@@ -32,8 +32,8 @@ void main() {
       final int? port = flutter.vmServicePort;
       expect(port != null, true);
       vmService = await vmServiceConnectUri('ws://localhost:$port/ws');
-      vmService.onSend.listen((String s) => print('=vm=> $s'));
-      vmService.onReceive.listen((String s) => print('<=vm= $s'));
+      vmService.onSend.listen((String s) => flutter.debugPrint(s, topic: '=vm=>'));
+      vmService.onReceive.listen((String s) => flutter.debugPrint(s, topic: '<=vm='));
     });
 
     tearDown(() async {
