@@ -51,7 +51,19 @@ Being in the Discord "team" group gives you the following:
 
 ## Process
 
-The actual process (as followed by Flutter repo admins) is as follows:
+### Requesting access
+
+To request access to either "flutter-hackers" or the "team" groups, follow these steps:
+1. Ask a Flutter team member to nominate you on the [#server-support](https://discord.com/channels/608014603317936148/611619879153565715) channel on Discord, and make sure to provide them with your Discord and GitHub usernames.
+1. Read the following contributions guides and prepare to confirm your commitment to following them when an Admin responds to the Discord message.
+ - [Tree-Hygiene](https://github.com/flutter/flutter/blob/master/docs/contributing/Tree-hygiene.md).
+ - [Style guide](https://github.com/flutter/flutter/blob/master/docs/contributing/Style-guide-for-Flutter-repo.md).
+
+ > For new Googlers joining the team: You need to ask someone in the team to add you to get added. It's not an automatic process after you join the flutter Google group.
+
+### Approving access requests
+
+The access granting process (as followed by Flutter repo admins) is as follows:
 
 1. Verify that they qualify under all the terms described above. Make sure they have a sponsor who isn't you.
 1. Verify the identity of the person making the request. Ask them to confirm, on Discord, that they have read the style guide, issue or tree hygiene wiki page, code of conduct, and other documents relevant to them.
@@ -59,9 +71,6 @@ The actual process (as followed by Flutter repo admins) is as follows:
 1. Click the "Add a member" button on [the flutter-hackers team page](https://github.com/orgs/flutter/teams/flutter-hackers/members) on GitHub.
 1. Type their name in the text field, select them, then click the "Invite" button.
 1. Add them to the "team" group on Discord. Be sure to verify that you are promoting the right person; multiple people can have the same nickname on Discord!
-
-*For new Googlers joining the team*: You need to ask someone in the team to add you to get added. It's not an automatic process after you join the flutter Google group.
-
 
 ## Inactivity
 
