@@ -14,7 +14,7 @@ vars = {
   'flutter_git': 'https://flutter.googlesource.com',
   'skia_git': 'https://skia.googlesource.com',
   'llvm_git': 'https://llvm.googlesource.com',
-  'skia_revision': '359f3d7cc7edfcb93e99ab5ed7e9f2f5fdd8ef85',
+  'skia_revision': '7c2f502e3304f4c76413696a9035470c32ac6dde',
 
   # WARNING: DO NOT EDIT canvaskit_cipd_instance MANUALLY
   # See `lib/web_ui/README.md` for how to roll CanvasKit to a new version.
@@ -256,7 +256,7 @@ deps = {
    Var('chromium_git') + '/vulkan-deps' + '@' + '938de304bdcb33049ec39ce45f16223eb6a960b6',
 
   'engine/src/flutter/third_party/flatbuffers':
-   Var('chromium_git') + '/external/github.com/google/flatbuffers' + '@' + '0a80646371179f8a7a5c1f42c31ee1d44dcf6709',
+   Var('chromium_git') + '/external/github.com/google/flatbuffers' + '@' + '067bfdbde9b10c1beb5d6b02d67ae9db8b96f736',
 
   'engine/src/flutter/third_party/icu':
    Var('chromium_git') + '/chromium/deps/icu.git' + '@' + '1b2e3e8a421efae36141a7b932b41e315b089af8',
