@@ -12,19 +12,19 @@ void main() {
     final ThemeData themeData = MaterialDemoThemeData.themeData;
 
     expect(
-      themeData.checkboxTheme.fillColor!.resolve(<MaterialState>{MaterialState.selected}),
+      themeData.checkboxTheme.fillColor!.resolve(<WidgetState>{WidgetState.selected}),
       primaryColor,
     );
     expect(
-      themeData.radioTheme.fillColor!.resolve(<MaterialState>{MaterialState.selected}),
+      themeData.radioTheme.fillColor!.resolve(<WidgetState>{WidgetState.selected}),
       primaryColor,
     );
     expect(
-      themeData.switchTheme.thumbColor!.resolve(<MaterialState>{MaterialState.selected}),
+      themeData.switchTheme.thumbColor!.resolve(<WidgetState>{WidgetState.selected}),
       primaryColor,
     );
     expect(
-      themeData.switchTheme.trackColor!.resolve(<MaterialState>{MaterialState.selected}),
+      themeData.switchTheme.trackColor!.resolve(<WidgetState>{WidgetState.selected}),
       primaryColor.withOpacity(0.5),
     );
   });

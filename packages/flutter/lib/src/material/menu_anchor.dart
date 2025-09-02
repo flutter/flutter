@@ -1756,10 +1756,10 @@ class _SubmenuButtonState extends State<SubmenuButton> {
       (Axis.vertical, TextDirection.rtl) => Offset(0, -menuPadding.top),
       (Axis.vertical, TextDirection.ltr) => Offset(0, -menuPadding.top),
     };
-    final Set<MaterialState> states = <MaterialState>{
-      if (!_enabled) MaterialState.disabled,
-      if (_isHovered) MaterialState.hovered,
-      if (_buttonFocusNode.hasFocus) MaterialState.focused,
+    final Set<WidgetState> states = <WidgetState>{
+      if (!_enabled) WidgetState.disabled,
+      if (_isHovered) WidgetState.hovered,
+      if (_buttonFocusNode.hasFocus) WidgetState.focused,
     };
     final Widget submenuIcon =
         widget.submenuIcon?.resolve(states) ??
@@ -1912,7 +1912,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
         MenuTheme.of(context).style?.padding ??
         _MenuDefaultsM3(context).padding!;
     return insets
-        .resolve(widget.statesController?.value ?? const <MaterialState>{})!
+        .resolve(widget.statesController?.value ?? const <WidgetState>{})!
         .resolve(Directionality.of(context));
   }
 
@@ -3153,7 +3153,7 @@ class _MenuPanelState extends State<_MenuPanel> {
 
     T? resolve<T>(WidgetStateProperty<T>? Function(MenuStyle? style) getProperty) {
       return effectiveValue((MenuStyle? style) {
-        return getProperty(style)?.resolve(<MaterialState>{});
+        return getProperty(style)?.resolve(<WidgetState>{});
       });
     }
 
@@ -3316,12 +3316,12 @@ class _Submenu extends StatelessWidget {
 
     T? resolve<T>(WidgetStateProperty<T>? Function(MenuStyle? style) getProperty) {
       return effectiveValue((MenuStyle? style) {
-        return getProperty(style)?.resolve(<MaterialState>{});
+        return getProperty(style)?.resolve(<WidgetState>{});
       });
     }
 
     final MaterialStateMouseCursor mouseCursor = _MouseCursor(
-      (Set<MaterialState> states) =>
+      (Set<WidgetState> states) =>
           effectiveValue((MenuStyle? style) => style?.mouseCursor?.resolve(states)),
     );
 
@@ -3427,7 +3427,7 @@ class _MouseCursor extends MaterialStateMouseCursor {
   final MaterialPropertyResolver<MouseCursor?> resolveCallback;
 
   @override
-  MouseCursor resolve(Set<MaterialState> states) =>
+  MouseCursor resolve(Set<WidgetState> states) =>
       resolveCallback(states) ?? MouseCursor.uncontrolled;
 
   @override
@@ -3570,17 +3570,17 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
 
   @override
   WidgetStateProperty<Color?>? get foregroundColor {
-    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return _colors.onSurface.withOpacity(0.38);
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return _colors.onSurface;
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return _colors.onSurface;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return _colors.onSurface;
       }
       return _colors.onSurface;
@@ -3589,17 +3589,17 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
 
   @override
   WidgetStateProperty<Color?>? get iconColor {
-    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return _colors.onSurface.withOpacity(0.38);
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return _colors.onSurfaceVariant;
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return _colors.onSurfaceVariant;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return _colors.onSurfaceVariant;
       }
       return _colors.onSurfaceVariant;
@@ -3626,8 +3626,8 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
   @override
   WidgetStateProperty<MouseCursor?>? get mouseCursor {
     return WidgetStateProperty.resolveWith(
-      (Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
+      (Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
           return SystemMouseCursors.basic;
         }
         return SystemMouseCursors.click;
@@ -3638,14 +3638,14 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
   @override
   WidgetStateProperty<Color?>? get overlayColor {
     return WidgetStateProperty.resolveWith(
-      (Set<MaterialState> states) {
-        if (states.contains(MaterialState.pressed)) {
+      (Set<WidgetState> states) {
+        if (states.contains(WidgetState.pressed)) {
           return _colors.onSurface.withOpacity(0.1);
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return _colors.onSurface.withOpacity(0.08);
         }
-        if (states.contains(MaterialState.focused)) {
+        if (states.contains(WidgetState.focused)) {
           return _colors.onSurface.withOpacity(0.1);
         }
         return Colors.transparent;

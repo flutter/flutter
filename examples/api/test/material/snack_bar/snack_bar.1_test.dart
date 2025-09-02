@@ -45,7 +45,9 @@ void main() {
     );
   });
 
-  testWidgets('Snackbar should disappear after timeout', (WidgetTester tester) async {
+  testWidgets('Snackbar should not disappear after timeout, unless tapping the action button', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.SnackBarExampleApp());
     expect(find.byType(SnackBar), findsNothing);
 
@@ -54,6 +56,10 @@ void main() {
     expect(find.byType(SnackBar), findsOneWidget);
 
     await tester.pump(const Duration(milliseconds: 1500));
+    await tester.pumpAndSettle();
+    expect(find.byType(SnackBar), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(SnackBarAction, 'Action'));
     await tester.pumpAndSettle();
     expect(find.byType(SnackBar), findsNothing);
   });

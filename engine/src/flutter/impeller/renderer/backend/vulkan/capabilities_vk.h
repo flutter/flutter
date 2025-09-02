@@ -281,6 +281,9 @@ class CapabilitiesVK final : public Capabilities,
   // |Capabilities|
   size_t GetMinimumUniformAlignment() const override;
 
+  // |Capabilities|
+  bool NeedsPartitionedHostBuffer() const override;
+
   //----------------------------------------------------------------------------
   /// @return     If fixed-rate compression for non-onscreen surfaces is
   ///             supported.

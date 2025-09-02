@@ -103,7 +103,6 @@ void main() {
             'CONFIGURATION': buildMode,
             'FLUTTER_ROOT': flutterRoot.path,
             'INFOPLIST_PATH': 'Info.plist',
-            'FLUTTER_CLI_BUILD_MODE': buildMode.toLowerCase(),
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -191,7 +190,6 @@ void main() {
             'TREE_SHAKE_ICONS': treeShake,
             'SRCROOT': srcRoot,
             'TARGET_DEVICE_OS_VERSION': iOSVersion,
-            'FLUTTER_CLI_BUILD_MODE': buildMode.toLowerCase(),
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -233,137 +231,6 @@ void main() {
         )..run();
         expect(context.stdout, contains('built and packaged successfully.'));
         expect(context.stderr, isEmpty);
-      });
-
-      test(
-        'exits with useful error message when missing FLUTTER_CLI_BUILD_MODE during archive',
-        () {
-          final Directory buildDir = fileSystem.directory('/path/to/builds')
-            ..createSync(recursive: true);
-          final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
-            ..createSync(recursive: true);
-
-          const buildMode = 'Release';
-
-          final context = TestContext(
-            <String>['build', platformName],
-            <String, String>{
-              'ACTION': 'install',
-              'CONFIGURATION': buildMode,
-              'BUILT_PRODUCTS_DIR': buildDir.path,
-              'FLUTTER_ROOT': flutterRoot.path,
-              'INFOPLIST_PATH': 'Info.plist',
-            },
-            commands: <FakeCommand>[],
-            fileSystem: fileSystem,
-          );
-          expect(() => context.run(), throwsException);
-          expect(
-            context.stderr,
-            contains(
-              'error: Your Flutter build settings are outdated. '
-              'Please run "flutter build ${platform.name} --config-only --release" '
-              'in your Flutter project and try again.',
-            ),
-          );
-        },
-      );
-
-      test('exits with useful error message when build mode mismatches during archive', () {
-        final Directory buildDir = fileSystem.directory('/path/to/builds')
-          ..createSync(recursive: true);
-        final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
-          ..createSync(recursive: true);
-
-        const buildMode = 'Release';
-
-        final context = TestContext(
-          <String>['build', platformName],
-          <String, String>{
-            'ACTION': 'install',
-            'CONFIGURATION': buildMode,
-            'BUILT_PRODUCTS_DIR': buildDir.path,
-            'FLUTTER_ROOT': flutterRoot.path,
-            'INFOPLIST_PATH': 'Info.plist',
-            'FLUTTER_CLI_BUILD_MODE': 'debug',
-          },
-          commands: <FakeCommand>[],
-          fileSystem: fileSystem,
-        );
-        expect(() => context.run(), throwsException);
-        expect(
-          context.stderr,
-          contains(
-            'error: Your Flutter project is currently configured for debug mode. '
-            'Please run `flutter build ${platform.name} --config-only --release` '
-            'in your Flutter project to update your settings.',
-          ),
-        );
-      });
-
-      test('prints useful warning message when missing FLUTTER_CLI_BUILD_MODE', () {
-        final Directory buildDir = fileSystem.directory('/path/to/builds')
-          ..createSync(recursive: true);
-        final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
-          ..createSync(recursive: true);
-
-        const buildMode = 'Release';
-
-        final context = TestContext(
-          <String>['build', platformName],
-          <String, String>{
-            'ACTION': 'build',
-            'CONFIGURATION': buildMode,
-            'BUILT_PRODUCTS_DIR': buildDir.path,
-            'FLUTTER_ROOT': flutterRoot.path,
-            'INFOPLIST_PATH': 'Info.plist',
-          },
-          commands: <FakeCommand>[],
-          fileSystem: fileSystem,
-          fakeProcessManager: FakeProcessManager.any(),
-        );
-        context.run();
-        expect(
-          context.stderr,
-          contains(
-            'warning: Your Flutter build settings are outdated. '
-            'Please run "flutter build ${platform.name} --config-only --release" '
-            'in your Flutter project and try again.',
-          ),
-        );
-      });
-
-      test('prints useful warning message when build mode mismatches', () {
-        final Directory buildDir = fileSystem.directory('/path/to/builds')
-          ..createSync(recursive: true);
-        final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
-          ..createSync(recursive: true);
-
-        const buildMode = 'Release';
-
-        final context = TestContext(
-          <String>['build', platformName],
-          <String, String>{
-            'ACTION': 'debug',
-            'CONFIGURATION': buildMode,
-            'BUILT_PRODUCTS_DIR': buildDir.path,
-            'FLUTTER_ROOT': flutterRoot.path,
-            'INFOPLIST_PATH': 'Info.plist',
-            'FLUTTER_CLI_BUILD_MODE': 'debug',
-          },
-          commands: <FakeCommand>[],
-          fileSystem: fileSystem,
-          fakeProcessManager: FakeProcessManager.any(),
-        );
-        context.run();
-        expect(
-          context.stderr,
-          contains(
-            'warning: Your Flutter project is currently configured for debug mode. '
-            'Please run `flutter build ${platform.name} --config-only --release` '
-            'in your Flutter project to update your settings.',
-          ),
-        );
       });
     });
   }
@@ -557,7 +424,6 @@ void main() {
             'BUILT_PRODUCTS_DIR': buildDir.path,
             'FLUTTER_ROOT': flutterRoot.path,
             'INFOPLIST_PATH': 'Info.plist',
-            'FLUTTER_CLI_BUILD_MODE': buildMode.toLowerCase(),
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -609,7 +475,6 @@ void main() {
             'CONFIGURATION': buildMode,
             'FLUTTER_ROOT': flutterRoot.path,
             'INFOPLIST_PATH': 'Info.plist',
-            'FLUTTER_CLI_BUILD_MODE': buildMode.toLowerCase(),
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -689,7 +554,6 @@ void main() {
             'TREE_SHAKE_ICONS': treeShake,
             'SRCROOT': srcRoot,
             'TARGET_DEVICE_OS_VERSION': iOSVersion,
-            'FLUTTER_CLI_BUILD_MODE': buildMode.toLowerCase(),
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -747,7 +611,6 @@ void main() {
             'ARCHS': 'arm64 x86_64',
             'ONLY_ACTIVE_ARCH': 'YES',
             'NATIVE_ARCH': 'arm64e',
-            'FLUTTER_CLI_BUILD_MODE': buildMode.toLowerCase(),
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -802,7 +665,6 @@ void main() {
             'ARCHS': 'arm64',
             'ONLY_ACTIVE_ARCH': 'YES',
             'NATIVE_ARCH': 'x86_64',
-            'FLUTTER_CLI_BUILD_MODE': buildMode.toLowerCase(),
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -856,7 +718,6 @@ void main() {
             'INFOPLIST_PATH': 'Info.plist',
             'ARCHS': 'arm64 x86_64',
             'NATIVE_ARCH': 'arm64e',
-            'FLUTTER_CLI_BUILD_MODE': buildMode.toLowerCase(),
           },
           commands: <FakeCommand>[
             FakeCommand(

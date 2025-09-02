@@ -50,6 +50,8 @@
 #define FML_OS_SOLARIS 1
 #elif defined(__QNXNTO__)
 #define FML_OS_QNX 1
+#elif defined(__EMSCRIPTEN__)
+#define FML_OS_EMSCRIPTEN
 #else
 #error Please add support for your platform in flutter/fml/build_config.h
 #endif
@@ -105,6 +107,9 @@
 #define FML_ARCH_CPU_LITTLE_ENDIAN 1
 #elif defined(__pnacl__)
 #define FML_ARCH_CPU_32_BITS 1
+#define FML_ARCH_CPU_LITTLE_ENDIAN 1
+#elif defined(__EMSCRIPTEN__)
+#define FML_ARGH_CPU_32_BITS 1
 #define FML_ARCH_CPU_LITTLE_ENDIAN 1
 #else
 #error Please add support for your architecture in flutter/fml/build_config.h

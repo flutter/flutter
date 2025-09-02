@@ -803,6 +803,60 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
        ),
        super(delegate: SliverChildListDelegate(children));
 
+  /// Creates a sliver that places multiple box children in a two dimensional
+  /// arrangement.
+  ///
+  /// _To learn more about slivers, see [CustomScrollView.slivers]._
+  ///
+  /// Uses a [SliverChildListDelegate] as the [delegate].
+  ///
+  /// The `addAutomaticKeepAlives` argument corresponds to the
+  /// [SliverChildListDelegate.addAutomaticKeepAlives] property. The
+  /// `addRepaintBoundaries` argument corresponds to the
+  /// [SliverChildListDelegate.addRepaintBoundaries] property. The
+  /// `addSemanticIndexes` argument corresponds to the
+  /// [SliverChildListDelegate.addSemanticIndexes] property. The
+  /// `semanticIndexOffset` argument corresponds to the
+  /// [SliverChildListDelegate.semanticIndexOffset] property.
+  ///
+  /// {@tool snippet}
+  /// This example, which would be inserted into a [CustomScrollView.slivers]
+  /// list, shows a grid of [Container] widgets.
+  ///
+  /// ```dart
+  /// SliverGrid.list(
+  ///   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+  ///     crossAxisCount: 3,
+  ///   ),
+  ///   children: <Widget>[
+  ///     Container(color: Colors.red),
+  ///     Container(color: Colors.green),
+  ///     Container(color: Colors.blue),
+  ///     Container(color: Colors.yellow),
+  ///     Container(color: Colors.orange),
+  ///     Container(color: Colors.purple),
+  ///   ],
+  /// );
+  /// ```
+  /// {@end-tool}
+  SliverGrid.list({
+    super.key,
+    required this.gridDelegate,
+    required List<Widget> children,
+    bool addAutomaticKeepAlives = true,
+    bool addRepaintBoundaries = true,
+    bool addSemanticIndexes = true,
+    int semanticIndexOffset = 0,
+  }) : super(
+         delegate: SliverChildListDelegate(
+           children,
+           addAutomaticKeepAlives: addAutomaticKeepAlives,
+           addRepaintBoundaries: addRepaintBoundaries,
+           addSemanticIndexes: addSemanticIndexes,
+           semanticIndexOffset: semanticIndexOffset,
+         ),
+       );
+
   /// The delegate that controls the size and position of the children.
   final SliverGridDelegate gridDelegate;
 

@@ -1267,7 +1267,8 @@ std::shared_ptr<Texture> DisplayListToTexture(
   context.GetContentContext().GetTextShadowCache().MarkFrameStart();
   fml::ScopedCleanupClosure cleanup([&] {
     if (reset_host_buffer) {
-      context.GetContentContext().GetTransientsBuffer().Reset();
+      context.GetContentContext().GetTransientsDataBuffer().Reset();
+      context.GetContentContext().GetTransientsIndexesBuffer().Reset();
     }
     context.GetContentContext().GetTextShadowCache().MarkFrameEnd();
     context.GetContentContext().GetLazyGlyphAtlas()->ResetTextFrames();
@@ -1302,7 +1303,7 @@ bool RenderToTarget(ContentContext& context,
   context.GetTextShadowCache().MarkFrameStart();
   fml::ScopedCleanupClosure cleanup([&] {
     if (reset_host_buffer) {
-      context.GetTransientsBuffer().Reset();
+      context.ResetTransientsBuffers();
     }
     context.GetTextShadowCache().MarkFrameEnd();
   });

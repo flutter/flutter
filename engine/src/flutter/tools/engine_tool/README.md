@@ -108,7 +108,7 @@ See [building a host engine](#building-a-host-engine) and
 
 > [!CAUTION]
 > Each build configuration (sometimes called a _variant_) produces a different
-> set of output files in `$ENGINE/src/out`, e.g. ``$ENGINE/src/out/host_debug`;
+> set of output files in `$ENGINE/src/out`, e.g. `$ENGINE/src/out/host_debug`;
 > these outputs can be multiple GBs, and add up quickly. Consider using
 > [`et cleanup`](#reclaiming-older-output-directories) to delete older output
 > directories automatically.
@@ -203,7 +203,7 @@ et build --config android_debug_unopt_arm64 //flutter/shell/platform:all
 
 ### Running C++ tests
 
-C++ unit tests can be simulatenously rebuilt and run using `et test`:
+C++ unit tests can be simultaneously rebuilt and run using `et test`:
 
 ```sh
 et test //flutter/impeller:impeller_unittests
@@ -258,7 +258,8 @@ cd to/project/dir
 et run
 ```
 
-> [!NOTE] > `et run` will rebuild (if necessary) host and target builds, which can take
+> [!NOTE]
+> `et run` will rebuild (if necessary) host and target builds, which can take
 > a significant amount of time.
 
 ## Advanced Features
@@ -381,7 +382,7 @@ We welcome contributions to improve `et` for our all developers.
   conventions that go beyond code formatting, which we'll follow even if using
   `dart format` in the future.
 - Do not call directly into `dart:io` except from `main.dart`. Instead access
-  the system only through the `Enviroment` object.
+  the system only through the `Environment` object.
 - All commands must have unit tests. If some functionality needs a fake
   implementation, then write a fake implementation.
 - When adding or changing functionality, update this README.md file.

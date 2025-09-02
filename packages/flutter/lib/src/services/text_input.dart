@@ -2624,6 +2624,8 @@ class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
 
   static SystemContextMenuController? _lastShown;
 
+  final Map<String, VoidCallback> _customActionCallbacks = <String, VoidCallback>{};
+
   /// The target [Rect] that was last given to [show].
   ///
   /// Null if [show] has not been called.
@@ -2659,9 +2661,20 @@ class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
       _lastShown = null;
     }
     _hiddenBySystem = true;
+    _customActionCallbacks.clear();
     onSystemHide?.call();
   }
 
+  @override
+  void handleCustomContextMenuAction(String callbackId) {
+    final VoidCallback? callback = _customActionCallbacks[callbackId];
+    assert(
+      callback != null,
+      'Custom action callback not found for id: $callbackId. '
+      'This may indicate that the menu item was not properly registered.',
+    );
+    callback?.call();
+  }
   // End SystemContextMenuClient.
 
   /// Shows the system context menu anchored on the given [Rect].
@@ -2770,9 +2783,23 @@ class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
 
     ServicesBinding.systemContextMenuClient = this;
 
+    _customActionCallbacks.clear();
+    for (final IOSSystemContextMenuItemData item in items) {
+      if (item is IOSSystemContextMenuItemDataCustom) {
+        assert(
+          !_customActionCallbacks.containsKey(item.callbackId) ||
+              _customActionCallbacks[item.callbackId] == item.onPressed,
+          'Duplicate callback ID "${item.callbackId}" with different callbacks. '
+          'Each custom menu item must have a unique ID or the same callback.',
+        );
+        _customActionCallbacks[item.callbackId] = item.onPressed;
+      }
+    }
+
     final List<Map<String, dynamic>> itemsJson = items
         .map<Map<String, dynamic>>((IOSSystemContextMenuItemData item) => item._json)
         .toList();
+
     _lastTargetRect = targetRect;
     _lastItems = items;
     _lastShown = this;
@@ -2809,6 +2836,7 @@ class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
     }
     _lastShown = null;
     ServicesBinding.systemContextMenuClient = null;
+    _customActionCallbacks.clear();
     // This may be called unnecessarily in the case where the user has already
     // hidden the menu (for example by tapping the screen).
     return _channel.invokeMethod<void>('ContextMenu.hideSystemContextMenu');
@@ -3077,5 +3105,58 @@ final class IOSSystemContextMenuItemDataLiveText extends IOSSystemContextMenuIte
   String get _jsonType => 'captureTextFromCamera';
 }
 
-// TODO(justinmc): Support the "custom" type.
-// https://github.com/flutter/flutter/issues/103163
+/// An [IOSSystemContextMenuItemData] for custom action buttons defined by the developer.
+///
+/// Must specify a [title] and [onPressed].
+///
+/// Only supported on iOS 16.0 and above.
+///
+/// See also:
+///
+///  * [SystemContextMenuController], which is used to show the system context
+///    menu.
+///  * [IOSSystemContextMenuItemCustom], which performs a similar role but at the
+///    widget level.
+final class IOSSystemContextMenuItemDataCustom extends IOSSystemContextMenuItemData
+    with Diagnosticable {
+  /// Creates an instance of [IOSSystemContextMenuItemDataCustom].
+  const IOSSystemContextMenuItemDataCustom({required this.title, required this.onPressed});
+
+  @override
+  final String title;
+
+  /// The callback to be executed when the item is selected.
+  final VoidCallback onPressed;
+
+  /// The unique identifier for this custom action.
+  String get callbackId => hashCode.toString();
+
+  @override
+  String get _jsonType => 'custom';
+
+  @override
+  Map<String, dynamic> get _json {
+    return <String, dynamic>{'id': callbackId, 'title': title, 'type': _jsonType};
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('title', title));
+    properties.add(StringProperty('callbackId', callbackId));
+    properties.add(DiagnosticsProperty<VoidCallback>('onPressed', onPressed));
+  }
+
+  @override
+  int get hashCode => Object.hash(title, onPressed);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is IOSSystemContextMenuItemDataCustom &&
+        other.title == title &&
+        other.onPressed == onPressed;
+  }
+}

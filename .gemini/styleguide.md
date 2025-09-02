@@ -13,6 +13,12 @@ flutter/flutter repository. It is based on the more comprehensive official
 - PR descriptions should include the Pre-launch Checklist from
   [the PR template](https://github.com/flutter/flutter/blob/main/.github/PULL_REQUEST_TEMPLATE.md),
   with all of the steps completed.
+- The most relevant guidelines should take precedence over less relevant
+  guidelines. For Flutter code, the
+  [Flutter styleguide](https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md)
+  should be followed as the first priority, and
+  [Effective Dart: Style](https://dart.dev/effective-dart/style)
+  should only be followed when it does not conflict with the former.
 
 ## Review Agent Guidelines
 

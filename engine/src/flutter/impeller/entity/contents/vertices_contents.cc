@@ -169,7 +169,7 @@ bool VerticesSimpleBlendContents::Render(const ContentContext& renderer,
                 static_cast<int>(tile_mode_y_));
     frag_info.use_strict_source_rect = 0.0;
 
-    auto& host_buffer = renderer.GetTransientsBuffer();
+    auto& host_buffer = renderer.GetTransientsDataBuffer();
     FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
     VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
 
@@ -203,7 +203,7 @@ bool VerticesSimpleBlendContents::Render(const ContentContext& renderer,
   frag_info.tmx = static_cast<int>(tile_mode_x_);
   frag_info.tmy = static_cast<int>(tile_mode_y_);
 
-  auto& host_buffer = renderer.GetTransientsBuffer();
+  auto& host_buffer = renderer.GetTransientsDataBuffer();
   FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
   VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
 

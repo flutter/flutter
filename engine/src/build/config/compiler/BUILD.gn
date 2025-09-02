@@ -716,6 +716,8 @@ if (is_win) {
       # freetype2 needs these two
       "-Wno-unused-function",
       "-Wno-unused-variable",
+
+      "-Wno-sign-conversion",
     ]
   }
 
@@ -1110,10 +1112,15 @@ config("prevent_unsafe_narrowing") {
       "-Wshorten-64-to-32",
       "-Wimplicit-int-conversion",
       "-Wsign-compare",
-      "-Wsign-conversion",
       # Avoid bugs of the form `if (size_t i = size; i >= 0; --i)` while
       # fixing types to be sign-correct.
       "-Wtautological-unsigned-zero-compare",
     ]
+
+    if (!is_wasm) {
+      # emscripten's headers themselves trigger this warning, so we can't
+      # keep this enabled on the wasm target.
+      cflags += [ "-Wsign-conversion" ]
+    }
   }
 }

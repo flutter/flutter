@@ -844,7 +844,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         final ButtonStyle defaultStyle = const MenuItemButton().defaultStyleOf(context);
 
         Color? resolveFocusedColor(WidgetStateProperty<Color?>? colorStateProperty) {
-          return colorStateProperty?.resolve(<MaterialState>{MaterialState.focused});
+          return colorStateProperty?.resolve(<WidgetState>{WidgetState.focused});
         }
 
         final Color focusedForegroundColor = resolveFocusedColor(
@@ -1076,7 +1076,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     final double? anchorWidth = getWidth(_anchorKey);
     if (widget.width != null) {
       effectiveMenuStyle = effectiveMenuStyle.copyWith(
-        minimumSize: WidgetStateProperty.resolveWith<Size?>((Set<MaterialState> states) {
+        minimumSize: WidgetStateProperty.resolveWith<Size?>((Set<WidgetState> states) {
           final double? effectiveMaximumWidth = effectiveMenuStyle!.maximumSize
               ?.resolve(states)
               ?.width;
@@ -1085,7 +1085,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       );
     } else if (anchorWidth != null) {
       effectiveMenuStyle = effectiveMenuStyle.copyWith(
-        minimumSize: WidgetStateProperty.resolveWith<Size?>((Set<MaterialState> states) {
+        minimumSize: WidgetStateProperty.resolveWith<Size?>((Set<WidgetState> states) {
           final double? effectiveMaximumWidth = effectiveMenuStyle!.maximumSize
               ?.resolve(states)
               ?.width;

@@ -25,6 +25,7 @@ struct MockCommandBuffer {
       std::shared_ptr<std::vector<std::string>> called_functions)
       : called_functions_(std::move(called_functions)) {}
   std::shared_ptr<std::vector<std::string>> called_functions_;
+  std::vector<VkImageMemoryBarrier> image_memory_barriers_;
 };
 
 struct MockQueryPool {};
@@ -448,6 +449,27 @@ void vkCmdBindPipeline(VkCommandBuffer commandBuffer,
   mock_command_buffer->called_functions_->push_back("vkCmdBindPipeline");
 }
 
+void vkCmdPipelineBarrier(VkCommandBuffer commandBuffer,
+                          VkPipelineStageFlags srcStageMask,
+                          VkPipelineStageFlags dstStageMask,
+                          VkDependencyFlags dependencyFlags,
+                          uint32_t memoryBarrierCount,
+                          const VkMemoryBarrier* pMemoryBarriers,
+                          uint32_t bufferMemoryBarrierCount,
+                          const VkBufferMemoryBarrier* pBufferMemoryBarriers,
+                          uint32_t imageMemoryBarrierCount,
+                          const VkImageMemoryBarrier* pImageMemoryBarriers) {
+  MockCommandBuffer* mock_command_buffer =
+      reinterpret_cast<MockCommandBuffer*>(commandBuffer);
+  mock_command_buffer->called_functions_->push_back("vkCmdPipelineBarrier");
+  if (pImageMemoryBarriers) {
+    for (uint32_t i = 0; i < imageMemoryBarrierCount; ++i) {
+      mock_command_buffer->image_memory_barriers_.push_back(
+          pImageMemoryBarriers[i]);
+    }
+  }
+}
+
 void vkCmdSetStencilReference(VkCommandBuffer commandBuffer,
                               VkStencilFaceFlags faceMask,
                               uint32_t reference) {
@@ -863,6 +885,8 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
     return reinterpret_cast<PFN_vkVoidFunction>(vkDestroyPipelineCache);
   } else if (strcmp("vkCmdBindPipeline", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkCmdBindPipeline);
+  } else if (strcmp("vkCmdPipelineBarrier", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkCmdPipelineBarrier);
   } else if (strcmp("vkCmdSetStencilReference", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkCmdSetStencilReference);
   } else if (strcmp("vkCmdSetScissor", pName) == 0) {
@@ -986,6 +1010,13 @@ std::shared_ptr<std::vector<std::string>> GetMockVulkanFunctions(
 
 void SetSwapchainImageSize(ISize size) {
   currentImageSize = size;
+}
+
+std::vector<VkImageMemoryBarrier>& GetImageMemoryBarriers(
+    VkCommandBuffer buffer) {
+  MockCommandBuffer* mock_command_buffer =
+      reinterpret_cast<MockCommandBuffer*>(buffer);
+  return mock_command_buffer->image_memory_barriers_;
 }
 
 }  // namespace testing
