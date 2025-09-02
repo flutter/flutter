@@ -63,7 +63,7 @@ class WidgetPreviewScaffoldController {
   }
 
   /// The current set of previews to be displayed.
-  ValueListenable<List<WidgetPreview>> get filteredPreviewSetListenable =>
+  ValueListenable<Iterable<WidgetPreview>> get filteredPreviewSetListenable =>
       _filteredPreviewSet;
   final _filteredPreviewSet = ValueNotifier<List<WidgetPreview>>([]);
 

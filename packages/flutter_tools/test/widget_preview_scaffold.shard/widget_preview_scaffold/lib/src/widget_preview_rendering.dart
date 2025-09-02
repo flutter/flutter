@@ -839,7 +839,7 @@ class WidgetPreviews extends StatelessWidget {
   static const _gridSpacing = 8.0;
   static const _gridRunSpacing = 8.0;
 
-  Widget _buildGridViewFlex(List<WidgetPreview> previewList) {
+  Widget _buildGridViewFlex(Iterable<WidgetPreview> previewList) {
     return SingleChildScrollView(
       child: Wrap(
         spacing: _gridSpacing,
@@ -853,7 +853,8 @@ class WidgetPreviews extends StatelessWidget {
     );
   }
 
-  Widget _buildVerticalListView(List<WidgetPreview> previewList) {
+  Widget _buildVerticalListView(Iterable<WidgetPreview> previews) {
+    final previewList = previews.toList();
     return ListView.builder(
       itemCount: previewList.length,
       itemBuilder: (context, index) {
@@ -865,7 +866,7 @@ class WidgetPreviews extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<List<WidgetPreview>>(
+    return ValueListenableBuilder<Iterable<WidgetPreview>>(
       valueListenable: controller.filteredPreviewSetListenable,
       builder: (context, previewList, _) {
         if (previewList.isEmpty) {
