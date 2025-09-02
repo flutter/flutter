@@ -200,8 +200,7 @@ class SwiftPackageManagerUtils {
       pluginName: pluginName,
       pluginPath: pluginDirectory.path,
       platform: platform,
-      className:
-          '${_capitalize(platform)}Swift${_capitalize(dependencyManager)}Plugin',
+      className: '${_capitalize(platform)}Swift${_capitalize(dependencyManager)}Plugin',
     );
   }
 
