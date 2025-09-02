@@ -54,6 +54,7 @@ class PredictiveBackGestureBuilder extends StatefulWidget {
     required this.transitionBuilder,
     required this.child,
     this.updateRouteUserGestureProgress = false,
+    this.behavior = PredictiveBackObserverBehavior.updateOnly,
   });
 
   /// The `ModalRoute` that this builder is associated with.
@@ -84,6 +85,12 @@ class PredictiveBackGestureBuilder extends StatefulWidget {
 
   /// When true, forwards gesture progress updates to [route].
   final bool updateRouteUserGestureProgress;
+
+  /// Defines the behavior for handling back gesture updates.
+  /// [PredictiveBackObserverBehavior.updateOnly] - the observer only receives updates, controlling nothing.
+  /// [PredictiveBackObserverBehavior.takeControl] - the observer receives updates andё controls navigation.
+  /// [PredictiveBackObserverBehavior.updateIfControlled] - the observer receives updates if there is already an observer that controls navigation.
+  final PredictiveBackObserverBehavior behavior;
 
   @override
   State<PredictiveBackGestureBuilder> createState() => _PredictiveBackGestureBuilderState();
@@ -118,19 +125,19 @@ class _PredictiveBackGestureBuilderState extends State<PredictiveBackGestureBuil
   // Begin WidgetsBindingObserver.
 
   @override
-  bool handleStartBackGesture(PredictiveBackEvent backEvent) {
+  PredictiveBackObserverBehavior? handleStartBackGesture(PredictiveBackEvent backEvent) {
     if (backEvent.isButtonEvent) {
-      return false;
-    }
-
-    if (widget.updateRouteUserGestureProgress) {
-      widget.route.handleStartBackGesture(progress: 1 - backEvent.progress);
+      return null;
     }
 
     phase = PredictiveBackPhase.start;
     startBackEvent = currentBackEvent = backEvent;
 
-    return true;
+    if (widget.updateRouteUserGestureProgress) {
+      widget.route.handleStartBackGesture(progress: 1 - backEvent.progress);
+    }
+
+    return widget.behavior;
   }
 
   @override

@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 /// A widget that applies Android-style predictive-back transform to `child`.
-class PredictiveBackSharedElementTransition extends StatelessWidget {
+class PredictiveBackTransition extends StatelessWidget {
   /// Creates a predictive back shared element transition.
   ///
   /// The [progress] animation drives the transform (scale + translation).
@@ -12,7 +12,7 @@ class PredictiveBackSharedElementTransition extends StatelessWidget {
   /// determine the X direction. Defaults: [useXShift]=true, [useYShift]=true,
   /// [useInterpolation]=true. If [alignment] is omitted, the transform uses
   /// `Alignment.center`.
-  const PredictiveBackSharedElementTransition({
+  const PredictiveBackTransition({
     super.key,
     required this.progress,
     required this.startBackEvent,
@@ -90,7 +90,9 @@ class PredictiveBackSharedElementTransition extends StatelessWidget {
 
   double _calcXShift(BuildContext context) {
     final RenderObject? renderObject = context.findRenderObject();
-    final double width = renderObject is RenderBox ? renderObject.size.width : MediaQuery.widthOf(context);
+    final double width = renderObject is RenderBox
+        ? renderObject.size.width
+        : MediaQuery.widthOf(context);
 
     final double maxShift = (width / _kDivisionFactor) - _kMargin;
 
@@ -103,7 +105,9 @@ class PredictiveBackSharedElementTransition extends StatelessWidget {
 
   double _calcYShift(BuildContext context) {
     final RenderObject? renderObject = context.findRenderObject();
-    final double height = renderObject is RenderBox ? renderObject.size.height : MediaQuery.heightOf(context);
+    final double height = renderObject is RenderBox
+        ? renderObject.size.height
+        : MediaQuery.heightOf(context);
 
     final double startTouchY = startBackEvent?.touchOffset?.dy ?? 0;
     final double currentTouchY = currentBackEvent?.touchOffset?.dy ?? 0;
