@@ -1042,6 +1042,7 @@ class _StretchController extends Listenable {
 
   void dispose() {
     _controller?.dispose();
+    _overscrollNotifier.dispose();
   }
 
   @override
