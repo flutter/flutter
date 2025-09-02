@@ -1124,7 +1124,7 @@ class PlatformDispatcher {
   /// The system-reported typography settings if any.
   ///
   /// If any of the settings change, [onMetricsChanged] will be called.
-  TypographySettings? get typographySettings => _configuration.typographySettings;
+  TypographySettings get typographySettings => _configuration.typographySettings;
 
   /// The system-reported text scale.
   ///
@@ -1816,7 +1816,7 @@ class _PlatformConfiguration {
     this.defaultRouteName,
     this.systemFontFamily,
     this.configurationId,
-    this.typographySettings,
+    this.typographySettings = const TypographySettings(),
   });
 
   _PlatformConfiguration copyWith({
@@ -1891,7 +1891,7 @@ class _PlatformConfiguration {
   final int? configurationId;
 
   /// Additional typography settings that may be enabled by the platform.
-  final TypographySettings? typographySettings;
+  final TypographySettings typographySettings;
 }
 
 /// An immutable view configuration.
