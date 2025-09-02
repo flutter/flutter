@@ -54,6 +54,7 @@ WidgetPreviewerWidgetScaffolding previewForBrightness({
     platformBrightness: platformBrightness ?? Brightness.light,
     child: WidgetPreviewWidget(
       preview: WidgetPreview(
+        scriptUri: '',
         builder: () => Text('Foo', key: key),
         theme: previewThemeData,
         brightness: brightness,

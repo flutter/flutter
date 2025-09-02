@@ -22,7 +22,10 @@ void main() {
               children: <Widget>[
                 for (int i = 0; i < kNumPreviewedWidgets; ++i)
                   WidgetPreviewWidget(
-                    preview: WidgetPreview(builder: () => Text('$kTestText$i')),
+                    preview: WidgetPreview(
+                      scriptUri: '',
+                      builder: () => Text('$kTestText$i'),
+                    ),
                   ),
               ],
             ),

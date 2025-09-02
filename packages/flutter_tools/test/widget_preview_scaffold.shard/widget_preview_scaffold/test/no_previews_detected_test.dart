@@ -4,9 +4,9 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:widget_preview_scaffold/src/dtd/dtd_services.dart';
 import 'package:widget_preview_scaffold/src/widget_preview.dart';
 import 'package:widget_preview_scaffold/src/widget_preview_rendering.dart';
+import 'package:widget_preview_scaffold/src/widget_preview_scaffold_controller.dart';
 
 import 'utils/widget_preview_scaffold_test_utils.dart';
 
@@ -14,16 +14,15 @@ void main() {
   testWidgets(
     'Help message is displayed with link to documentation when no previews are detected',
     (tester) async {
-      final WidgetPreviewScaffoldDtdServices dtdServices =
-          FakeWidgetPreviewScaffoldDtdServices();
+      final currentPreviews = <WidgetPreview>[];
+
+      final controller = WidgetPreviewScaffoldController(
+        dtdServicesOverride: FakeWidgetPreviewScaffoldDtdServices(),
+        previews: () => currentPreviews,
+      );
       // Start with no previews populated and verify the help message is displayed with a link to
       // documentation.
-      await tester.pumpWidget(
-        WidgetPreviewScaffold(
-          dtdServices: dtdServices,
-          previews: () => const <WidgetPreview>[],
-        ),
-      );
+      await tester.pumpWidget(WidgetPreviewScaffold(controller: controller));
 
       final Finder noPreviewDetectedFinder = find.byType(
         NoPreviewsDetectedWidget,
@@ -37,15 +36,15 @@ void main() {
       expect(documentationUrlFinder, findsOne);
       expect(widgetPreviewWidgetFinder, findsNothing);
 
-      // Add previews and verify the help message is gone.
-      await tester.pumpWidget(
-        WidgetPreviewScaffold(
-          dtdServices: dtdServices,
-          previews: () => <WidgetPreview>[
-            WidgetPreview(builder: () => const Text('Foo')),
-          ],
-        ),
+      currentPreviews.add(
+        WidgetPreview(scriptUri: '', builder: () => const Text('Foo')),
       );
+
+      // Fake a hot reload.
+      controller.onHotReload();
+
+      // Add previews and verify the help message is gone.
+      await tester.pumpWidget(WidgetPreviewScaffold(controller: controller));
 
       expect(noPreviewDetectedFinder, findsNothing);
       expect(documentationUrlFinder, findsNothing);

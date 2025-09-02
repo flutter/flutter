@@ -20,7 +20,10 @@ void main() {
       final WidgetPreviewerWidgetScaffolding widgetPreview =
           WidgetPreviewerWidgetScaffolding(
             child: WidgetPreviewWidget(
-              preview: WidgetPreview(builder: () => const Text(kTestText)),
+              preview: WidgetPreview(
+                scriptUri: '',
+                builder: () => const Text(kTestText),
+              ),
             ),
           );
 

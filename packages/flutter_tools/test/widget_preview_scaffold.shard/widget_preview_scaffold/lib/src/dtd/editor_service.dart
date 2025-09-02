@@ -40,6 +40,12 @@ mixin DtdEditorService {
     });
     await dtd.streamListen(kEditorService);
   }
+
+  @mustCallSuper
+  void dispose() {
+    _selectedSourceFile.dispose();
+    _editorTheme.dispose();
+  }
 }
 
 // TODO(bkonyi): much of the following code is copied from the DevTools codebase. We should publish
