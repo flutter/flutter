@@ -173,6 +173,84 @@ class Preview extends StatelessWidget {
   }
 }
 
+class WidgetPreviewGroupWidget extends StatelessWidget {
+  const WidgetPreviewGroupWidget({
+    super.key,
+    required this.controller,
+    required this.group,
+  });
+
+  final WidgetPreviewScaffoldController controller;
+  final WidgetPreviewGroup group;
+
+  // Spacing values for the grid layout
+  static const _gridSpacing = 8.0;
+  static const _gridRunSpacing = 8.0;
+
+  /// The default radius of a Material 3 `Card`, as per documentation for `Card.shape`.
+  // TODO(bkonyi): inherit this from the theme.
+  static const _kCardRadius = Radius.circular(12);
+
+  Widget _buildGridViewFlex(List<WidgetPreview> previews) {
+    return Wrap(
+      spacing: WidgetPreviewGroupWidget._gridSpacing,
+      runSpacing: WidgetPreviewGroupWidget._gridRunSpacing,
+      alignment: WrapAlignment.start,
+      children: <Widget>[
+        for (final WidgetPreview preview in previews)
+          WidgetPreviewWidget(preview: preview),
+      ],
+    );
+  }
+
+  Widget _buildVerticalListView(List<WidgetPreview> previews) {
+    return Column(
+      children: [
+        for (final preview in previews)
+          Center(child: WidgetPreviewWidget(preview: preview)),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      child: ListTileTheme(
+        data: ListTileTheme.of(context).copyWith(
+          dense: true,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(_kCardRadius),
+          ),
+        ),
+        child: Theme(
+          // Prevents divider lines appearing at the top and bottom of the
+          // expanded ExpansionTile.
+          data: theme.copyWith(dividerColor: Colors.transparent),
+          child: ExpansionTile(
+            key: PageStorageKey(group.name),
+            title: Text(group.name),
+            initiallyExpanded: true,
+            children: [
+              ValueListenableBuilder<LayoutType>(
+                valueListenable: controller.layoutTypeListenable,
+                builder: (context, selectedLayout, _) {
+                  return switch (selectedLayout) {
+                    LayoutType.gridView => _buildGridViewFlex(group.previews),
+                    LayoutType.listView => _buildVerticalListView(
+                      group.previews,
+                    ),
+                  };
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class WidgetPreviewWidget extends StatefulWidget {
   const WidgetPreviewWidget({super.key, required this.preview});
 
@@ -340,56 +418,110 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
       child: preview,
     );
 
-    preview = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (widget.preview.name != null) ...[
-          Text(
-            widget.preview.name!,
-            style: fixBlurryText(
-              TextStyle(fontSize: 16, fontWeight: FontWeight.w300),
+    // This IntrinsicWidth is here to prevent the Divider from forcing the Column
+    // to expand to the full width of the previewer.
+    preview = IntrinsicWidth(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (widget.preview.name != null)
+            _WidgetPreviewNameHeader(name: widget.preview.name!),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Column(
+              children: [
+                InteractiveViewerWrapper(
+                  transformationController: transformationController,
+                  child: preview,
+                ),
+                const VerticalSpacer(),
+                _WidgetPreviewControlRow(
+                  transformationController: transformationController,
+                  errorThrownDuringTreeConstruction:
+                      errorThrownDuringTreeConstruction,
+                  brightnessListenable: brightnessListenable,
+                  softRestartListenable: softRestartListenable,
+                ),
+              ],
             ),
           ),
-          const VerticalSpacer(),
         ],
-        InteractiveViewerWrapper(
-          transformationController: transformationController,
-          child: preview,
-        ),
-        const VerticalSpacer(),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          // If an unhandled exception was caught and we're displaying an error
-          // widget, these controls should be disabled.
-          // TODO(bkonyi): improve layout of controls.
-          children: [
-            ZoomControls(
-              transformationController: transformationController,
-              enabled: !errorThrownDuringTreeConstruction,
-            ),
-            const SizedBox(width: 30),
-            BrightnessToggleButton(
-              enabled: !errorThrownDuringTreeConstruction,
-              brightnessListenable: brightnessListenable,
-            ),
-            const SizedBox(width: 10),
-            SoftRestartButton(
-              enabled: !errorThrownDuringTreeConstruction,
-              softRestartListenable: softRestartListenable,
-            ),
-          ],
-        ),
-      ],
+      ),
     );
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: Card(
+      child: Card.outlined(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+          padding: const EdgeInsets.symmetric(vertical: 16.0),
           child: preview,
         ),
       ),
+    );
+  }
+}
+
+class _WidgetPreviewNameHeader extends StatelessWidget {
+  const _WidgetPreviewNameHeader({required this.name});
+
+  final String name;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Text(
+            name,
+            style: fixBlurryText(
+              TextStyle(fontSize: 16, fontWeight: FontWeight.w300),
+            ),
+          ),
+        ),
+        const Divider(indent: 0, endIndent: 0),
+        const VerticalSpacer(),
+      ],
+    );
+  }
+}
+
+class _WidgetPreviewControlRow extends StatelessWidget {
+  const _WidgetPreviewControlRow({
+    required this.transformationController,
+    required this.errorThrownDuringTreeConstruction,
+    required this.brightnessListenable,
+    required this.softRestartListenable,
+  });
+
+  final TransformationController transformationController;
+  final bool errorThrownDuringTreeConstruction;
+  final ValueNotifier<Brightness> brightnessListenable;
+  final ValueNotifier<bool> softRestartListenable;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      // If an unhandled exception was caught and we're displaying an error
+      // widget, these controls should be disabled.
+      // TODO(bkonyi): improve layout of controls.
+      children: [
+        ZoomControls(
+          transformationController: transformationController,
+          enabled: !errorThrownDuringTreeConstruction,
+        ),
+        const SizedBox(width: 30),
+        BrightnessToggleButton(
+          enabled: !errorThrownDuringTreeConstruction,
+          brightnessListenable: brightnessListenable,
+        ),
+        const SizedBox(width: 10),
+        SoftRestartButton(
+          enabled: !errorThrownDuringTreeConstruction,
+          softRestartListenable: softRestartListenable,
+        ),
+      ],
     );
   }
 }
@@ -835,41 +967,12 @@ class WidgetPreviews extends StatelessWidget {
 
   final WidgetPreviewScaffoldController controller;
 
-  // Spacing values for the grid layout
-  static const _gridSpacing = 8.0;
-  static const _gridRunSpacing = 8.0;
-
-  Widget _buildGridViewFlex(Iterable<WidgetPreview> previewList) {
-    return SingleChildScrollView(
-      child: Wrap(
-        spacing: _gridSpacing,
-        runSpacing: _gridRunSpacing,
-        alignment: WrapAlignment.start,
-        children: <Widget>[
-          for (final WidgetPreview preview in previewList)
-            WidgetPreviewWidget(preview: preview),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildVerticalListView(Iterable<WidgetPreview> previews) {
-    final previewList = previews.toList();
-    return ListView.builder(
-      itemCount: previewList.length,
-      itemBuilder: (context, index) {
-        final preview = previewList[index];
-        return Center(child: WidgetPreviewWidget(preview: preview));
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<Iterable<WidgetPreview>>(
+    return ValueListenableBuilder<WidgetPreviewGroups>(
       valueListenable: controller.filteredPreviewSetListenable,
-      builder: (context, previewList, _) {
-        if (previewList.isEmpty) {
+      builder: (context, previewGroups, _) {
+        if (previewGroups.isEmpty) {
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[NoPreviewsDetectedWidget()],
@@ -877,15 +980,16 @@ class WidgetPreviews extends StatelessWidget {
         }
         return LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
+            final previewGroupsList = previewGroups.toList();
             return WidgetPreviewerWindowConstraints(
               constraints: constraints,
-              child: ValueListenableBuilder<LayoutType>(
-                valueListenable: controller.layoutTypeListenable,
-                builder: (context, selectedLayout, _) {
-                  return switch (selectedLayout) {
-                    LayoutType.gridView => _buildGridViewFlex(previewList),
-                    LayoutType.listView => _buildVerticalListView(previewList),
-                  };
+              child: ListView.builder(
+                itemCount: previewGroups.length,
+                itemBuilder: (context, index) {
+                  return WidgetPreviewGroupWidget(
+                    controller: controller,
+                    group: previewGroupsList[index],
+                  );
                 },
               ),
             );
