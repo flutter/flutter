@@ -180,19 +180,20 @@ class TableBorder {
     final RRect borderRect = borderRadius.toRRect(rect);
     final Paint paint = Paint()..color = color;
 
-    final RRect inner = RRectUtils.deflateRRect(
-      borderRect,
-      EdgeInsets.fromLTRB(left.strokeInset, top.strokeInset, right.strokeInset, bottom.strokeInset),
-    );
-    final RRect outer = RRectUtils.inflateRRect(
-      borderRect,
-      EdgeInsets.fromLTRB(
-        left.strokeOutset,
-        top.strokeOutset,
-        right.strokeOutset,
-        bottom.strokeOutset,
-      ),
-    );
+    final RRect inner = EdgeInsets.fromLTRB(
+      left.strokeInset,
+      top.strokeInset,
+      right.strokeInset,
+      bottom.strokeInset,
+    ).deflateRRect(borderRect);
+
+    final RRect outer = EdgeInsets.fromLTRB(
+      left.strokeOutset,
+      top.strokeOutset,
+      right.strokeOutset,
+      bottom.strokeOutset,
+    ).inflateRRect(borderRect);
+
     canvas.drawDRRect(outer, inner, paint);
   }
 
