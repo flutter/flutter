@@ -19,9 +19,6 @@ void main() {
 
 class SemanticsTestBindingWithInitialEnabled extends AutomatedTestWidgetsFlutterBinding {
   @override
-  bool get semanticsEnabled => true;
-
-  @override
   TestPlatformDispatcherSpy get platformDispatcher => _platformDispatcherSpy;
   static final TestPlatformDispatcherSpy _platformDispatcherSpy = TestPlatformDispatcherSpy(
     platformDispatcher: PlatformDispatcher.instance,
@@ -35,4 +32,7 @@ class TestPlatformDispatcherSpy extends TestPlatformDispatcher {
   void setSemanticsTreeEnabled(bool enabled) {
     semanticsTreeEnabled = enabled;
   }
+
+  @override
+  bool get semanticsEnabled => true;
 }
