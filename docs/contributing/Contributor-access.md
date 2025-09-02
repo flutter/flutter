@@ -56,8 +56,8 @@ Being in the Discord "team" group gives you the following:
 To request access to either "flutter-hackers" or the "team" groups, follow these steps:
 1. Ask a Flutter team member to nominate you on the [#server-support](https://discord.com/channels/608014603317936148/611619879153565715) channel on Discord, and make sure to provide them with your Discord and GitHub usernames.
 2. Read the following contributions guides and prepare to confirm your commitment to following them when an Admin responds to the Discord message.
- - [Tree-Hygiene](https://github.com/flutter/flutter/blob/master/docs/contributing/Tree-hygiene.md).
- - [Style guide](https://github.com/flutter/flutter/blob/master/docs/contributing/Style-guide-for-Flutter-repo.md).
+ - [Tree-Hygiene](https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md).
+ - [Style guide](https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md).
 
  > For new Googlers joining the team: You need to ask someone in the team to add you to get added. It's not an automatic process after you join the flutter Google group.
 
