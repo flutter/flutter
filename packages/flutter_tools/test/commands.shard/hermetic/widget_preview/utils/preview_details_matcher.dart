@@ -14,7 +14,7 @@ class PreviewDetailsMatcher extends Matcher {
     required this.packageName,
     required this.functionName,
     required this.isBuilder,
-    this.group,
+    this.group = 'Default',
     this.name,
     this.size,
     this.textScaleFactor,

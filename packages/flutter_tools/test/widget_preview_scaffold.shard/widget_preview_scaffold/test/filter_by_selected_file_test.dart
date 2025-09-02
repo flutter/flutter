@@ -42,7 +42,11 @@ void main() {
     await tester.pumpWidget(widgetPreview);
     expect(controller.filterBySelectedFileListenable.value, true);
     expect(dtdServices.selectedSourceFile.value, isNull);
-    expect(controller.filteredPreviewSetListenable.value, hasLength(2));
+    expect(controller.filteredPreviewSetListenable.value, hasLength(1));
+    expect(
+      controller.filteredPreviewSetListenable.value.single.previews,
+      hasLength(2),
+    );
 
     // Select kScript1
     dtdServices.selectedSourceFile.value = TextDocument(
