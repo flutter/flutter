@@ -762,7 +762,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   }
 
   @override
-  ui.TypographySettings? get typographySettings => configuration.typographySettings;
+  ui.TypographySettings get typographySettings => configuration.typographySettings;
 
   /// Additional accessibility features that may be enabled by the platform.
   @override
@@ -1804,7 +1804,7 @@ class PlatformConfiguration {
     this.locales = const <ui.Locale>[],
     this.defaultRouteName = '/',
     this.systemFontFamily,
-    this.typographySettings,
+    this.typographySettings = const ui.TypographySettings(),
   });
 
   PlatformConfiguration copyWith({
@@ -1839,7 +1839,7 @@ class PlatformConfiguration {
   final List<ui.Locale> locales;
   final String defaultRouteName;
   final String? systemFontFamily;
-  final ui.TypographySettings? typographySettings;
+  final ui.TypographySettings typographySettings;
 }
 
 /// Helper class to hold navigation target information for AT focus restoration
