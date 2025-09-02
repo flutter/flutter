@@ -326,23 +326,6 @@ class FlutterPluginUtilsTest {
         assertEquals(true, result)
     }
 
-    // isProjectFastStart
-    @Test
-    fun `isProjectFastStart returns false by default`() {
-        val project = mockk<Project>()
-        every { project.findProperty(FlutterPluginUtils.PROP_IS_FAST_START) } returns null
-        val result = FlutterPluginUtils.isProjectFastStart(project)
-        assertEquals(false, result)
-    }
-
-    @Test
-    fun `isProjectFastStart returns true when the property is set to true`() {
-        val project = mockk<Project>()
-        every { project.findProperty(FlutterPluginUtils.PROP_IS_FAST_START) } returns true
-        val result = FlutterPluginUtils.isProjectFastStart(project)
-        assertEquals(true, result)
-    }
-
     // shouldConfigureFlutterTask
     @Test
     fun `shouldConfigureFlutterTask returns true for assemble task`() {
