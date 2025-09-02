@@ -691,10 +691,22 @@ class ListTile extends StatelessWidget {
   /// When that is also null, the [ListTileTheme.selectedTileColor] is used, otherwise
   /// [Colors.transparent] is used.
   ///
-  /// {@endtemplate}
+  /// ///
+/// Note: These colors are painted by the nearest Material ancestor.
+/// If a colored ancestor (for example, a Container/ColoredBox with
+/// a non-null color) sits between the ListTile and its Material, the
+/// tileColor may be obscured. Wrap the ListTile with a Material or apply
+/// the background color to the Material instead.
+{@endtemplate}
   final Color? tileColor;
 
   /// Defines the background color of `ListTile` when [selected] is true.
+///
+/// Note: Like [tileColor], this is painted by the nearest Material
+/// ancestor and can be hidden by a colored ancestor placed between
+/// the ListTile and that Material. Ensure the ListTile is wrapped
+/// with a [Material] (or apply the color to the [Material]) if you
+/// want the selected color to be visible.
   ///
   /// When the value if null, the [selectedTileColor] is set to [ListTileTheme.selectedTileColor]
   /// if it's not null and to [Colors.transparent] if it's null.
