@@ -5,12 +5,17 @@
 /// @docImport 'page.dart';
 library;
 
+import 'dart:math';
 import 'dart:ui' show clampDouble;
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'color_scheme.dart';
+import 'colors.dart';
 import 'page_transitions_theme.dart';
+import 'predictive_back_transition.dart';
+import 'theme.dart';
 
 /// Used by [PageTransitionsTheme] to define a [MaterialPageRoute] page
 /// transition animation that looks like the default page transition used on
@@ -44,11 +49,37 @@ import 'page_transitions_theme.dart';
 class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Creates an instance of a [PageTransitionsBuilder] that matches Android U's
   /// predictive back transition.
-  const PredictiveBackPageTransitionsBuilder();
+  const PredictiveBackPageTransitionsBuilder({this.backgroundColor});
+
+  /// The background color during transition between two routes.
+  ///
+  /// When a new page fades in and the old page fades out, this background color
+  /// helps avoid a black background between two page.
+  ///
+  /// Defaults to [ColorScheme.surface]
+  final Color? backgroundColor;
 
   @override
   Duration get transitionDuration =>
       const Duration(milliseconds: FadeForwardsPageTransitionsBuilder.kTransitionMilliseconds);
+
+  @override
+  DelegatedTransitionBuilder? get delegatedTransition =>
+      (
+        BuildContext context,
+        Animation<double> animation,
+        Animation<double> secondaryAnimation,
+        bool allowSnapshotting,
+        Widget? child,
+      ) {
+        final ModalRoute<dynamic>? route = ModalRoute.of(context);
+
+        if (route is PageRoute && child != null) {
+          return buildTransitions(route, context, animation, secondaryAnimation, child);
+        }
+
+        return child;
+      };
 
   @override
   Widget buildTransitions<T>(
@@ -58,8 +89,21 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
+    final bool isLastPage;
+    if (secondaryAnimation.isAnimating) {
+      isLastPage = false;
+    } else if (animation.isAnimating) {
+      isLastPage = true;
+    } else {
+      isLastPage = route.isCurrent;
+    }
+
     return PredictiveBackGestureBuilder(
       route: route,
+      updateRouteUserGestureProgress: isLastPage,
+      behavior: isLastPage
+          ? PredictiveBackObserverBehavior.takeControl
+          : PredictiveBackObserverBehavior.updateIfControlled,
       transitionBuilder:
           (
             BuildContext context,
@@ -68,30 +112,23 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
             PredictiveBackEvent? currentBackEvent,
             Widget child,
           ) {
-            // Only do a predictive back transition when the user is performing a
-            // pop gesture. Otherwise, for things like button presses or other
-            // programmatic navigation, fall back to
-            // FadeForwardsPageTransitionsBuilder.
-            if (route.popGestureInProgress) {
+            if (phase != PredictiveBackPhase.idle) {
               return _PredictiveBackSharedElementPageTransition(
-                isDelegatedTransition: true,
-                animation: animation,
+                isLastPage: isLastPage,
+                backgroundColor: backgroundColor,
+                animation: isLastPage ? animation : secondaryAnimation,
                 phase: phase,
-                secondaryAnimation: secondaryAnimation,
                 startBackEvent: startBackEvent,
                 currentBackEvent: currentBackEvent,
                 child: child,
               );
             }
 
-            return const FadeForwardsPageTransitionsBuilder().buildTransitions(
-              route,
-              context,
-              animation,
-              secondaryAnimation,
-              child,
-            );
+            return FadeForwardsPageTransitionsBuilder(
+              backgroundColor: backgroundColor,
+            ).buildTransitions(route, context, animation, secondaryAnimation, child);
           },
+
       child: child,
     );
   }
@@ -181,21 +218,22 @@ class PredictiveBackFullscreenPageTransitionsBuilder extends PageTransitionsBuil
 ///    which is the Android spec for this transition.
 class _PredictiveBackSharedElementPageTransition extends StatefulWidget {
   const _PredictiveBackSharedElementPageTransition({
-    required this.isDelegatedTransition,
+    required this.isLastPage,
+    required this.backgroundColor,
     required this.animation,
-    required this.secondaryAnimation,
     required this.phase,
     required this.startBackEvent,
     required this.currentBackEvent,
     required this.child,
   });
 
-  final bool isDelegatedTransition;
+  final bool isLastPage;
+  final Color? backgroundColor;
   final Animation<double> animation;
-  final Animation<double> secondaryAnimation;
   final PredictiveBackPhase phase;
   final PredictiveBackEvent? startBackEvent;
   final PredictiveBackEvent? currentBackEvent;
+
   final Widget child;
 
   @override
@@ -206,27 +244,6 @@ class _PredictiveBackSharedElementPageTransition extends StatefulWidget {
 class _PredictiveBackSharedElementPageTransitionState
     extends State<_PredictiveBackSharedElementPageTransition>
     with SingleTickerProviderStateMixin {
-  // Constants as per the motion specs
-  // https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#motion-specs
-  static const double _kMinScale = 0.90;
-  static const double _kDivisionFactor = 20.0;
-  static const double _kMargin = 8.0;
-  static const double _kYPositionFactor = 0.1;
-
-  // The duration of the commit transition.
-  //
-  // This is not the same as PredictiveBackPageTransitionsBuilder's duration,
-  // which is the duration of widget.animation, so an Interval is used.
-  //
-  // Eyeballed on a Pixel 9 running Android 16.
-  static const int _kCommitMilliseconds = 400;
-  static const Curve _kCurve = Curves.easeInOutCubicEmphasized;
-  static const Interval _kCommitInterval = Interval(
-    0.0,
-    _kCommitMilliseconds / FadeForwardsPageTransitionsBuilder.kTransitionMilliseconds,
-    curve: _kCurve,
-  );
-
   // Ideally this would match the curvature of the physical Android device being
   // used, but that is not yet supported. Instead, this value is a best guess at
   // a value that looks reasonable on most devices.
@@ -237,16 +254,33 @@ class _PredictiveBackSharedElementPageTransitionState
   // transition between the default radius and the actual radius.
   final Tween<double> _borderRadiusTween = Tween<double>(begin: 0.0, end: _kDeviceBorderRadius);
 
-  // The route fades out after commit.
-  final Tween<double> _opacityTween = Tween<double>(begin: 1.0, end: 0.0);
+  // https://cs.android.com/android/platform/superproject/+/android-16.0.0_r2:frameworks/base/libs/WindowManager/Shell/src/com/android/wm/shell/back/DefaultCrossActivityBackAnimation.kt;l=90
+  double get _closingOpacity => switch (widget.phase) {
+    PredictiveBackPhase.commit => max(1 - (1 - widget.animation.value) * 5, 0),
+    _ => 1.0,
+  };
 
-  // The route shrinks during the gesture and animates back to normal after
-  // commit.
-  final Tween<double> _scaleTween = Tween<double>(begin: 1.0, end: _kMinScale);
+  final Tween<Offset> _offsetTween = Tween<Offset>(begin: const Offset(-96, 0), end: Offset.zero);
 
-  // An animation that stays constant at zero before the commit, and after the
-  // commit goes from zero to one.
-  final ProxyAnimation _commitAnimation = ProxyAnimation();
+  // https://cs.android.com/android/platform/superproject/+/android-16.0.0_r2:frameworks/base/libs/WindowManager/Shell/src/com/android/wm/shell/back/CrossActivityBackAnimation.kt;l=422
+  Brightness? _brightness;
+  double get _maxBarrierAlpha => _brightness == Brightness.dark ? 0.8 : 0.2;
+  // https://cs.android.com/android/platform/superproject/+/android-16.0.0_r2:frameworks/base/libs/WindowManager/Shell/src/com/android/wm/shell/back/CrossActivityBackAnimation.kt;l=328
+  double get _barrierAlpha => switch (widget.phase) {
+    PredictiveBackPhase.commit => _maxBarrierAlpha * widget.animation.value,
+    _ => _maxBarrierAlpha,
+  };
+
+  // https://cs.android.com/android/platform/superproject/+/android-16.0.0_r2:frameworks/base/libs/WindowManager/Shell/src/com/android/wm/shell/back/DefaultCrossActivityBackAnimation.kt;l=111
+  static const int _kCommitMilliseconds = 450;
+  // Corresponds to Interpolators.EMPHASIZED
+  // https://cs.android.com/android/platform/superproject/+/android-16.0.0_r2:frameworks/base/libs/WindowManager/Shell/src/com/android/wm/shell/back/DefaultCrossActivityBackAnimation.kt;l=46
+  static const Curve _kCurve = Curves.easeInOutCubicEmphasized;
+  static const Interval _kCommitInterval = Interval(
+    0.0,
+    _kCommitMilliseconds / FadeForwardsPageTransitionsBuilder.kTransitionMilliseconds,
+    curve: _kCurve,
+  );
 
   // An animation that goes from zero to a maximum of one during a predictive
   // back gesture, and then at commit, it goes from its current value to zero.
@@ -255,94 +289,54 @@ class _PredictiveBackSharedElementPageTransitionState
   final ProxyAnimation _bounceAnimation = ProxyAnimation();
   double _lastBounceAnimationValue = 0.0;
 
-  // An animation that proxies to widget.animation during the gesture and then
-  // to _commitAnimation after the commit. So, it goes from zero to a maximum of
-  // one before commit, and then after commit goes from zero to one again.
-  final ProxyAnimation _animation = ProxyAnimation();
+  // An animation that stays constant at zero before the commit, and after the
+  // commit goes from zero to one.
+  final ProxyAnimation _commitAnimation = ProxyAnimation();
 
-  /// The same as widget.animation but with a curve applied.
-  CurvedAnimation? _curvedAnimation;
-
-  /// The reverse of _curvedAnimation.
+  /// The same as widget.animation but with a curve applied and reversed.
   CurvedAnimation? _curvedAnimationReversed;
 
-  late Animation<Offset> _positionAnimation;
+  /// Curved animation used during the pre-commit (gesture-driven) phase so
+  /// that the shared element transition follows the PredictiveBackSharedElementTransition.kCurve.
+  CurvedAnimation? _preCommitCurvedAnimation;
 
-  Offset _lastDrag = Offset.zero;
-
-  // This isn't done as an animation because it's based on the vertical drag
-  // amount, not the progression of the back gesture like widget.animation is.
-  double _getYShiftPosition(double screenHeight) {
-    final double startTouchY = widget.startBackEvent?.touchOffset?.dy ?? 0;
-    final double currentTouchY = widget.currentBackEvent?.touchOffset?.dy ?? 0;
-
-    final double yShiftMax = (screenHeight / _kDivisionFactor) - _kMargin;
-
-    final double rawYShift = currentTouchY - startTouchY;
-    final double easedYShift =
-        // This curve was eyeballed on a Pixel 9 running Android 16.
-        Curves.easeOut.transform(clampDouble(rawYShift.abs() / screenHeight, 0.0, 1.0)) *
-        rawYShift.sign *
-        yShiftMax;
-
-    return clampDouble(easedYShift, -yShiftMax, yShiftMax);
-  }
-
-  void _updateAnimations(Size screenSize) {
-    _animation.parent = switch (widget.phase) {
-      PredictiveBackPhase.commit => _curvedAnimationReversed,
-      _ => widget.animation,
-    };
-
+  void _updateAnimations() {
     _bounceAnimation.parent = switch (widget.phase) {
-      PredictiveBackPhase.commit => Tween<double>(
-        begin: 0.0,
-        end: _lastBounceAnimationValue,
-      ).animate(_curvedAnimation!),
-      _ => ReverseAnimation(widget.animation),
+      PredictiveBackPhase.commit =>
+        widget.isLastPage
+            ? AlwaysStoppedAnimation<double>(_lastBounceAnimationValue)
+            : Tween<double>(
+                begin: _lastBounceAnimationValue,
+                end: 0.0,
+              ).animate(_curvedAnimationReversed!),
+      _ => _preCommitCurvedAnimation,
     };
 
     _commitAnimation.parent = switch (widget.phase) {
-      PredictiveBackPhase.commit => _animation,
+      PredictiveBackPhase.commit => _curvedAnimationReversed,
       _ => kAlwaysDismissedAnimation,
     };
-
-    final double xShift = (screenSize.width / _kDivisionFactor) - _kMargin;
-    _positionAnimation = _animation.drive(switch (widget.phase) {
-      PredictiveBackPhase.commit => Tween<Offset>(
-        begin: _lastDrag,
-        end: Offset(screenSize.height * _kYPositionFactor, 0.0),
-      ),
-      _ => Tween<Offset>(
-        // The y position before commit is given by the vertical drag, not by an
-        // animation.
-        begin: switch (widget.currentBackEvent?.swipeEdge) {
-          SwipeEdge.left => Offset(xShift, _getYShiftPosition(screenSize.height)),
-          SwipeEdge.right => Offset(-xShift, _getYShiftPosition(screenSize.height)),
-          null => Offset(xShift, _getYShiftPosition(screenSize.height)),
-        },
-        end: Offset.zero,
-      ),
-    });
   }
 
   void _updateCurvedAnimations() {
-    _curvedAnimation?.dispose();
     _curvedAnimationReversed?.dispose();
-    _curvedAnimation = CurvedAnimation(parent: widget.animation, curve: _kCommitInterval);
+    _preCommitCurvedAnimation?.dispose();
     _curvedAnimationReversed = CurvedAnimation(
       parent: ReverseAnimation(widget.animation),
       curve: _kCommitInterval,
     );
+    _preCommitCurvedAnimation = CurvedAnimation(
+      parent: ReverseAnimation(widget.animation),
+      curve: PredictiveBackTransition.kCurve,
+    );
   }
-
-  // TODO(justinmc): Should have a delegatedTransition to animate the incoming
-  // route regardless of its page transition.
-  // https://github.com/flutter/flutter/issues/153577
 
   @override
   void initState() {
     super.initState();
+
+    _updateCurvedAnimations();
+    _updateAnimations();
   }
 
   @override
@@ -353,51 +347,51 @@ class _PredictiveBackSharedElementPageTransitionState
       _updateCurvedAnimations();
     }
     if (widget.phase != oldWidget.phase && widget.phase == PredictiveBackPhase.commit) {
-      _updateAnimations(MediaQuery.sizeOf(context));
+      _updateAnimations();
     }
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _updateCurvedAnimations();
-    _updateAnimations(MediaQuery.sizeOf(context));
+
+    _brightness = Theme.of(context).brightness;
   }
 
   @override
   void dispose() {
-    _curvedAnimation!.dispose();
-    _curvedAnimationReversed!.dispose();
     super.dispose();
+
+    _curvedAnimationReversed?.dispose();
+    _preCommitCurvedAnimation?.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: widget.animation,
-      builder: (BuildContext context, Widget? child) {
-        _lastBounceAnimationValue = _bounceAnimation.value;
-        return Transform.scale(
-          scale: _scaleTween.evaluate(_bounceAnimation),
-          child: Transform.translate(
-            offset: switch (widget.phase) {
-              PredictiveBackPhase.commit => _positionAnimation.value,
-              _ => _lastDrag = Offset(
-                _positionAnimation.value.dx,
-                _getYShiftPosition(MediaQuery.heightOf(context)),
-              ),
-            },
-            child: Opacity(
-              opacity: _opacityTween.evaluate(_commitAnimation),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(_borderRadiusTween.evaluate(_bounceAnimation)),
-                child: child,
-              ),
-            ),
-          ),
-        );
-      },
-      child: widget.child,
+    _lastBounceAnimationValue = _bounceAnimation.value;
+
+    final Widget builder = PredictiveBackTransition(
+      progress: _bounceAnimation,
+      startBackEvent: widget.startBackEvent,
+      currentBackEvent: widget.currentBackEvent,
+      useXShift: widget.startBackEvent?.swipeEdge == SwipeEdge.left && widget.isLastPage,
+      useInterpolation: false,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(_borderRadiusTween.evaluate(_bounceAnimation)),
+        child: widget.child,
+      ),
+    );
+
+    if (widget.isLastPage) {
+      return ColoredBox(
+        color: Colors.black.withValues(alpha: _barrierAlpha),
+        child: Opacity(opacity: _closingOpacity, child: builder),
+      );
+    }
+
+    return ColoredBox(
+      color: widget.backgroundColor ?? ColorScheme.of(context).surface,
+      child: Transform.translate(offset: _offsetTween.evaluate(_commitAnimation), child: builder),
     );
   }
 }
