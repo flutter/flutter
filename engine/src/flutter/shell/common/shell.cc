@@ -1811,8 +1811,9 @@ bool Shell::ShouldDiscardLayerTree(int64_t view_id,
                                    const flutter::LayerTree& tree) {
   std::scoped_lock<std::mutex> lock(resize_mutex_);
   auto expected_frame_constraints = ExpectedFrameConstraints(view_id);
-  return !(expected_frame_constraints.IsSatisfiedBy(
-      fml::Size(tree.frame_size().width, tree.frame_size().height)));
+  return !(expected_frame_constraints.IsEmpty()) &&
+         !(expected_frame_constraints.IsSatisfiedBy(
+             fml::Size(tree.frame_size().width, tree.frame_size().height)));
 }
 
 // |ServiceProtocol::Handler|
