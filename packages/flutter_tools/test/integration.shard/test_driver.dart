@@ -167,6 +167,7 @@ abstract final class FlutterTestDriver {
     await Future.wait(<Future<Success>>[
       _vmService!.streamListen('Isolate'),
       _vmService!.streamListen('Debug'),
+      _vmService!.streamListen('Service'),
     ]);
 
     if ((await _vmService!.getVM()).isolates?.isEmpty ?? true) {
