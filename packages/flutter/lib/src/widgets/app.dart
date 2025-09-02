@@ -232,7 +232,7 @@ Locale basicLocaleListResolution(
   // supported locale.
   final Locale resolvedLocale = matchesLanguageCode ?? matchesCountryCode ?? supportedLocales.first;
   return resolvedLocale;
-}
+      }
 
 /// The signature of [WidgetsApp.onGenerateTitle].
 ///
@@ -1415,7 +1415,7 @@ class WidgetsApp extends StatefulWidget {
 
   @override
   State<WidgetsApp> createState() => _WidgetsAppState();
-}
+      }
 
 class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   // STATE LIFECYCLE
@@ -1734,11 +1734,11 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     result = Stack(
       children: <Widget>[
         result,
-        const Positioned(top: 0.0, left: 0.0, right: 0.0, child: PerformanceOverlay.allEnabled()),
+        Positioned(top: 0.0, left: 0.0, right: 0.0, child: PerformanceOverlay.allEnabled()),
       ],
     );
   }
-}
+      }
 
     if (widget.showSemanticsDebugger) {
       result = SemanticsDebugger(child: result);
@@ -1834,4 +1834,4 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       ),
     );
   }
-}
+      }
