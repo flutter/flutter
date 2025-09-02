@@ -1216,6 +1216,7 @@ void main() {
       // the stretch direction is wrong.
       expect(findStretchEffect(tester).stretchStrength, isNot(0.0));
 
+      await gesture.up();
       await tester.pump(const Duration(milliseconds: 100));
 
       // At this point, the stretchStrength should be close to 0.
@@ -1227,8 +1228,6 @@ void main() {
       expect(box1.localToGlobal(Offset.zero).dy, 0.0);
       expect(box2.localToGlobal(Offset.zero).dy, 205.0);
       expect(box3.localToGlobal(Offset.zero).dy, 410.0);
-
-      await gesture.up();
     },
     // Skips this test when fragment shaders are used.
     skip: shaderSupported,
