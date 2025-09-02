@@ -613,11 +613,6 @@ class NoopViewRasterizer implements ViewRasterizer {
   }
 
   @override
-  Future<void> draw(LayerTree layerTree) {
-    throw UnimplementedError();
-  }
-
-  @override
   DisplayCanvas getOverlay() {
     throw UnimplementedError();
   }
@@ -627,11 +622,6 @@ class NoopViewRasterizer implements ViewRasterizer {
 
   @override
   RenderQueue get queue => throw UnimplementedError();
-
-  @override
-  Future<void> rasterizeToCanvas(DisplayCanvas canvas, List<CkPicture> pictures) {
-    throw UnimplementedError();
-  }
 
   @override
   void releaseOverlay(DisplayCanvas overlay) {}
@@ -649,7 +639,26 @@ class NoopViewRasterizer implements ViewRasterizer {
   EngineFlutterView get view => throw UnimplementedError();
 
   @override
-  HtmlViewEmbedder get viewEmbedder => throw UnimplementedError();
+  PlatformViewEmbedder get viewEmbedder => throw UnimplementedError();
+
+  @override
+  Map<String, dynamic>? dumpDebugInfo() {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> rasterize(
+    List<DisplayCanvas> displayCanvases,
+    List<ui.Picture> pictures,
+    FrameTimingRecorder? recorder,
+  ) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> draw(LayerTree layerTree, FrameTimingRecorder? recorder) {
+    throw UnimplementedError();
+  }
 }
 
 class SkwasmPictureRenderer implements PictureRenderer {
@@ -658,16 +667,6 @@ class SkwasmPictureRenderer implements PictureRenderer {
   SkwasmSurface surface;
 
   @override
-  FutureOr<RenderResult> renderPictures(List<ScenePicture> pictures) =>
-      surface.renderPictures(pictures.cast<SkwasmPicture>());
-
-  @override
-  ScenePicture clipPicture(ScenePicture picture, ui.Rect clip) {
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final ui.Canvas canvas = ui.Canvas(recorder, clip);
-    canvas.clipRect(clip);
-    canvas.drawPicture(picture);
-
-    return recorder.endRecording() as ScenePicture;
-  }
+  FutureOr<RenderResult> renderPictures(List<ScenePicture> pictures, int width, int height) =>
+      surface.renderPictures(pictures.cast<SkwasmPicture>(), width, height);
 }
