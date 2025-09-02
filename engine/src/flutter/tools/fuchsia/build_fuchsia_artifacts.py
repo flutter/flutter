@@ -199,12 +199,10 @@ def CopyBuildToBucket(runtime_mode, arch, optimized, product):
   # Copy the license files from the source directory to be next to the bucket we
   # are about to package.
   bucket_root = os.path.join(_bucket_directory, 'flutter')
-  licenses_root = os.path.join(_src_root_dir, 'flutter/ci/licenses_golden')
-  license_files = ['licenses_flutter', 'licenses_fuchsia', 'licenses_skia']
-  for license in license_files:
-    src_path = os.path.join(licenses_root, license)
-    dst_path = os.path.join(bucket_root, license)
-    CopyPath(src_path, dst_path)
+  CopyPath(
+      os.path.join(_src_root_dir, 'sky/packages/sky_engine/LICENSE'),
+      os.path.join(bucket_root, 'LICENSE')
+  )
 
 
 def CheckCIPDPackageExists(package_name, tag):
