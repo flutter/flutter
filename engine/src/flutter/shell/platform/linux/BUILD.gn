@@ -75,6 +75,12 @@ config("relative_flutter_linux_headers") {
   include_dirs = [ "public" ]
 }
 
+config("disable_warnings") {
+  warning_flags = [ "-Wno-deprecated-volatile" ]
+  cflags = warning_flags
+  cflags_cc = warning_flags
+}
+
 source_set("flutter_linux_sources") {
   public = _public_headers + [
              "fl_binary_messenger_private.h",
@@ -98,6 +104,8 @@ source_set("flutter_linux_sources") {
            ]
 
   configs += [ "//flutter/shell/platform/linux/config:gtk" ]
+
+  public_configs = [ ":disable_warnings" ]
 
   sources = [
     "fl_accessible_node.cc",

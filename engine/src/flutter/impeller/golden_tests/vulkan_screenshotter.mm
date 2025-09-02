@@ -62,7 +62,8 @@ std::unique_ptr<Screenshot> ReadTexture(
                               &CGColorSpaceRelease);
   CGBitmapInfo bitmap_info =
       texture->GetTextureDescriptor().format == PixelFormat::kB8G8R8A8UNormInt
-          ? kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little
+          ? static_cast<uint32_t>(kCGImageAlphaPremultipliedFirst) |
+                static_cast<uint32_t>(kCGBitmapByteOrder32Little)
           : kCGImageAlphaPremultipliedLast;
   CGContextPtr context(
       CGBitmapContextCreate(
