@@ -16,6 +16,7 @@ import '../build_info.dart';
 import '../device.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
+import '../hook_runner.dart' show hookRunner;
 import '../ios/devices.dart';
 import '../project.dart';
 import '../resident_runner.dart';
@@ -726,6 +727,8 @@ class RunCommand extends RunCommandBase {
         stayResident: stayResident,
         analytics: globals.analytics,
         nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
+        dartBuilder: hookRunner,
+        logger: globals.logger,
       );
     } else if (webMode) {
       return webRunnerFactory!.createWebRunner(
@@ -753,6 +756,7 @@ class RunCommand extends RunCommandBase {
           ? null
           : globals.fs.file(applicationBinaryPath),
       stayResident: stayResident,
+      dartBuilder: hookRunner,
     );
   }
 
