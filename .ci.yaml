@@ -1092,7 +1092,7 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Linux plugin_test_android
+  - name: Linux plugin_test_android_variants
     bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 45
@@ -1109,7 +1109,7 @@ targets:
         ["os=Linux", "os=Ubuntu-20"]
       tags: >
         ["devicelab", "hostonly", "linux"]
-      task_name: plugin_test_android
+      task_name: plugin_test_android_variants
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -1118,7 +1118,7 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Linux package_test_android
+  - name: Linux plugin_test_android_standard
     bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 45
@@ -1131,7 +1131,7 @@ targets:
         ]
       tags: >
         ["devicelab", "hostonly", "windows"]
-      task_name: package_test_android
+      task_name: plugin_test_android_standard
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4413,7 +4413,7 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Mac plugin_test_android
+  - name: Mac plugin_test_android_variants
     bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 45
@@ -4425,7 +4425,7 @@ targets:
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
-      task_name: plugin_test_android
+      task_name: plugin_test_android_variants
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4434,7 +4434,7 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Mac package_test_android
+  - name: Mac plugin_test_android_standard
     bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 45
@@ -4447,7 +4447,7 @@ targets:
         ]
       tags: >
         ["devicelab", "hostonly", "windows"]
-      task_name: package_test_android
+      task_name: plugin_test_android_standard
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -6218,7 +6218,7 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Windows plugin_test_android
+  - name: Windows plugin_test_android_variants
     bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 45
@@ -6231,7 +6231,7 @@ targets:
         ]
       tags: >
         ["devicelab", "hostonly", "windows"]
-      task_name: plugin_test_android
+      task_name: plugin_test_android_variants
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -6240,7 +6240,7 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Windows package_test_android
+  - name: Windows plugin_test_android_standard
     bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 45
@@ -6253,7 +6253,7 @@ targets:
         ]
       tags: >
         ["devicelab", "hostonly", "windows"]
-      task_name: package_test_android
+      task_name: plugin_test_android_standard
     runIf:
       - dev/**
       - packages/flutter_tools/**
