@@ -225,6 +225,7 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
            addAutomaticKeepAlives: addAutomaticKeepAlives,
            addRepaintBoundaries: addRepaintBoundaries,
            addSemanticIndexes: addSemanticIndexes,
+           semanticIndexOffset: semanticIndexOffset,
          ),
        );
 
@@ -349,6 +350,7 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
            addAutomaticKeepAlives: addAutomaticKeepAlives,
            addRepaintBoundaries: addRepaintBoundaries,
            addSemanticIndexes: addSemanticIndexes,
+           semanticIndexOffset: semanticIndexOffset,
          ),
        );
 
@@ -481,6 +483,7 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
            addAutomaticKeepAlives: addAutomaticKeepAlives,
            addRepaintBoundaries: addRepaintBoundaries,
            addSemanticIndexes: addSemanticIndexes,
+           semanticIndexOffset: semanticIndexOffset,
          ),
        );
 
@@ -528,6 +531,7 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
            addAutomaticKeepAlives: addAutomaticKeepAlives,
            addRepaintBoundaries: addRepaintBoundaries,
            addSemanticIndexes: addSemanticIndexes,
+           semanticIndexOffset: semanticIndexOffset,
          ),
        );
 
@@ -612,6 +616,7 @@ class SliverVariedExtentList extends SliverMultiBoxAdaptorWidget {
            addAutomaticKeepAlives: addAutomaticKeepAlives,
            addRepaintBoundaries: addRepaintBoundaries,
            addSemanticIndexes: addSemanticIndexes,
+           semanticIndexOffset: semanticIndexOffset,
          ),
        );
 
@@ -637,6 +642,7 @@ class SliverVariedExtentList extends SliverMultiBoxAdaptorWidget {
            addAutomaticKeepAlives: addAutomaticKeepAlives,
            addRepaintBoundaries: addRepaintBoundaries,
            addSemanticIndexes: addSemanticIndexes,
+           semanticIndexOffset: semanticIndexOffset,
          ),
        );
 
@@ -756,6 +762,7 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
            addAutomaticKeepAlives: addAutomaticKeepAlives,
            addRepaintBoundaries: addRepaintBoundaries,
            addSemanticIndexes: addSemanticIndexes,
+           semanticIndexOffset: semanticIndexOffset,
          ),
        );
 
