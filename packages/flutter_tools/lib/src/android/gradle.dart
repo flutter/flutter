@@ -114,6 +114,12 @@ String _taskForBuildVariant(String prefix, String buildVariant, [String suffix =
   return '$prefix${sentenceCase(buildVariant)}$suffix';
 }
 
+/// Returns the task to install an app.
+@visibleForTesting
+String getGradleTaskForInstall(BuildInfo buildInfo) {
+  return _taskFor('install', buildInfo);
+}
+
 /// Returns the task to build an APK.
 @visibleForTesting
 String getAssembleTaskFor(BuildInfo buildInfo) {
@@ -946,6 +952,38 @@ class AndroidGradleBuilder implements AndroidBuilder {
     }
 
     return results;
+  }
+
+  @override
+  Future<void> installApp({
+    required FlutterProject project,
+    required AndroidBuildInfo androidBuildInfo,
+    required String deviceId,
+    String? userIdentifier,
+  }) async {
+    final String gradleTask = getGradleTaskForInstall(androidBuildInfo.buildInfo);
+
+    final Status status = _logger.startProgress("Running Gradle task '$gradleTask'...");
+    final String gradleExecutable = _gradleUtils.getExecutable(project);
+    final command = <String>[gradleExecutable, '-q', gradleTask];
+    if (userIdentifier != null) {
+      command.add('-Pandroid.injected.user.serial=$userIdentifier');
+    }
+    try {
+      final RunResult result = await _processUtils.run(
+        command,
+        workingDirectory: project.android.hostAppGradleRoot.path,
+        environment: <String, String>{
+          if (_java?.environment != null) ..._java!.environment,
+          'ANDROID_SERIAL': deviceId,
+        },
+      );
+      if (result.exitCode != 0) {
+        throwToolExit('Gradle task $gradleTask failed with exit code ${result.exitCode}.');
+      }
+    } finally {
+      status.stop();
+    }
   }
 
   @override

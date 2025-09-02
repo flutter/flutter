@@ -222,6 +222,12 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         FlutterOptions.kWebWasmFlag,
         help: 'Compile to WebAssembly rather than JavaScript.\n$kWasmMoreInfo',
         negatable: false,
+      )
+      ..addFlag(
+        'enable-gradle-managed-install',
+        negatable: false,
+        help:
+            'Let Gradle manage Android app installation. This can help with installing related privacy sandbox binaries.',
       );
     usesWebOptions(verboseHelp: verboseHelp);
     usesTargetOption();

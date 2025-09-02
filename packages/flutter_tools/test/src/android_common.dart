@@ -44,6 +44,14 @@ class FakeAndroidBuilder implements AndroidBuilder {
   }) async {}
 
   @override
+  Future<void> installApp({
+    required FlutterProject project,
+    required AndroidBuildInfo androidBuildInfo,
+    required String deviceId,
+    String? userIdentifier,
+  }) async {}
+
+  @override
   Future<List<String>> getBuildVariants({required FlutterProject project}) async =>
       const <String>[];
 

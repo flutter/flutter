@@ -977,6 +977,7 @@ class DebuggingOptions {
     this.google3WorkspaceRoot,
     this.printDtd = false,
     this.webDevServerConfig,
+    this.enableGradleManagedInstall = false,
   }) : debuggingEnabled = true,
        webRenderer = webRenderer ?? WebRendererMode.getDefault(useWasm: webUseWasm);
 
@@ -1004,6 +1005,7 @@ class DebuggingOptions {
     this.usingCISystem = false,
     this.debugLogsDirectoryPath,
     this.webDevServerConfig,
+    this.enableGradleManagedInstall = false,
   }) : debuggingEnabled = false,
        useTestFonts = false,
        startPaused = false,
@@ -1089,6 +1091,7 @@ class DebuggingOptions {
     required this.ipv6,
     required this.google3WorkspaceRoot,
     required this.printDtd,
+    required this.enableGradleManagedInstall,
     this.webDevServerConfig,
   });
 
@@ -1135,6 +1138,7 @@ class DebuggingOptions {
   final String? google3WorkspaceRoot;
   final bool printDtd;
   final WebDevServerConfig? webDevServerConfig;
+  final bool enableGradleManagedInstall;
 
   /// Whether the tool should try to uninstall a previously installed version of the app.
   ///
@@ -1280,6 +1284,7 @@ class DebuggingOptions {
     'ipv6': ipv6,
     'google3WorkspaceRoot': google3WorkspaceRoot,
     'printDtd': printDtd,
+    'enableGradleManagedInstall': enableGradleManagedInstall,
     // TODO(jsimmons): This field is required for backward compatibility with
     // the flutter_tools binary that is currently checked into Google3.
     // Remove this when that binary has been updated.
@@ -1346,6 +1351,7 @@ class DebuggingOptions {
         ipv6: (json['ipv6'] as bool?) ?? false,
         google3WorkspaceRoot: json['google3WorkspaceRoot'] as String?,
         printDtd: (json['printDtd'] as bool?) ?? false,
+        enableGradleManagedInstall: (json['enableGradleManagedInstall'] as bool?) ?? false,
         webDevServerConfig: WebDevServerConfig(
           port: json['port'] is int ? json['port']! as int : 8080,
           host: json['hostname'] is String ? json['hostname']! as String : 'localhost',

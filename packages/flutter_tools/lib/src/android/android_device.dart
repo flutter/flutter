@@ -562,25 +562,50 @@ class AndroidDevice extends Device {
 
     if (!prebuiltApplication ||
         _androidSdk.licensesAvailable && _androidSdk.latestVersion == null) {
-      _logger.printTrace('Building APK');
-      final FlutterProject project = FlutterProject.current();
-      await androidBuilder!.buildApk(
-        project: project,
-        target: mainPath ?? 'lib/main.dart',
-        androidBuildInfo: AndroidBuildInfo(
-          debuggingOptions.buildInfo,
-          targetArchs: <AndroidArch>[androidArch],
-          fastStart: debuggingOptions.fastStart,
-        ),
-      );
-      // Package has been built, so we can get the updated application ID and
-      // activity name from the .apk.
-      builtPackage =
-          await ApplicationPackageFactory.instance!.getPackageForPlatform(
-                devicePlatform,
-                buildInfo: debuggingOptions.buildInfo,
-              )
-              as AndroidApk?;
+      if (debuggingOptions.enableGradleManagedInstall) {
+        // Package has not been built yet, but we can still get the package information
+        // from the manifest.
+        builtPackage =
+            await ApplicationPackageFactory.instance!.getPackageForPlatform(
+                  devicePlatform,
+                  buildInfo: debuggingOptions.buildInfo,
+                )
+                as AndroidApk?;
+        if (builtPackage == null) {
+          throwToolExit('Problem getting Android application information.');
+        }
+        final FlutterProject project = FlutterProject.current();
+        await androidBuilder!.installApp(
+          project: project,
+          androidBuildInfo: AndroidBuildInfo(
+            debuggingOptions.buildInfo,
+            targetArchs: <AndroidArch>[androidArch],
+            fastStart: debuggingOptions.fastStart,
+          ),
+          deviceId: id,
+          userIdentifier: userIdentifier,
+        );
+      } else {
+        _logger.printTrace('Building APK');
+        final FlutterProject project = FlutterProject.current();
+        await androidBuilder!.buildApk(
+          project: project,
+          target: mainPath ?? 'lib/main.dart',
+          androidBuildInfo: AndroidBuildInfo(
+            debuggingOptions.buildInfo,
+            targetArchs: <AndroidArch>[androidArch],
+            fastStart: debuggingOptions.fastStart,
+          ),
+        );
+        // Package has been built, so we can get the updated application ID and
+        // activity name from the .apk.
+        builtPackage =
+            await ApplicationPackageFactory.instance!.getPackageForPlatform(
+                  devicePlatform,
+                  buildInfo: debuggingOptions.buildInfo,
+                )
+                as AndroidApk?;
+      }
     }
     // There was a failure parsing the android project information.
     if (builtPackage == null) {
@@ -590,8 +615,10 @@ class AndroidDevice extends Device {
     _logger.printTrace("Stopping app '${builtPackage.name}' on $name.");
     await stopApp(builtPackage, userIdentifier: userIdentifier);
 
-    if (!await installApp(builtPackage, userIdentifier: userIdentifier)) {
-      return LaunchResult.failed();
+    if (!debuggingOptions.enableGradleManagedInstall) {
+      if (!await installApp(builtPackage, userIdentifier: userIdentifier)) {
+        return LaunchResult.failed();
+      }
     }
 
     final bool traceStartup = platformArgs['trace-startup'] as bool? ?? false;
