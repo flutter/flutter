@@ -1088,6 +1088,47 @@ void main() {
     expect(secondTapped, 1);
   });
 
+  testWidgets('SliverFixedExtentList.builder should respect semanticIndexOffset', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: SizedBox(
+            height: 200,
+            child: CustomScrollView(
+              slivers: <Widget>[
+                SliverFixedExtentList.builder(
+                  itemExtent: 50,
+                  itemCount: 3,
+                  semanticIndexOffset: 10,
+                  itemBuilder: (BuildContext context, int index) {
+                    return SizedBox(height: 50, child: Text('Item $index'));
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final IndexedSemantics s0 = tester.widget<IndexedSemantics>(
+      find.ancestor(of: find.text('Item 0'), matching: find.byType(IndexedSemantics)).first,
+    );
+    final IndexedSemantics s1 = tester.widget<IndexedSemantics>(
+      find.ancestor(of: find.text('Item 1'), matching: find.byType(IndexedSemantics)).first,
+    );
+    final IndexedSemantics s2 = tester.widget<IndexedSemantics>(
+      find.ancestor(of: find.text('Item 2'), matching: find.byType(IndexedSemantics)).first,
+    );
+
+    expect(s0.index, 10);
+    expect(s1.index, 11);
+    expect(s2.index, 12);
+  });
+
   testWidgets('SliverList.builder can build children', (WidgetTester tester) async {
     int firstTapped = 0;
     int secondTapped = 0;
@@ -1446,6 +1487,41 @@ void main() {
 
     // Should render without errors - the SliverGrid should be present even with empty children
     expect(find.byType(CustomScrollView), findsOneWidget);
+  });
+
+  testWidgets('SliverGrid.builder respeita semanticIndexOffset', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: <Widget>[
+              SliverGrid.builder(
+                itemCount: 3,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+                semanticIndexOffset: 7,
+                itemBuilder: (BuildContext context, int index) {
+                  return Center(child: Text('G $index'));
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final IndexedSemantics s0 = tester.widget<IndexedSemantics>(
+      find.ancestor(of: find.text('G 0'), matching: find.byType(IndexedSemantics)).first,
+    );
+    final IndexedSemantics s1 = tester.widget<IndexedSemantics>(
+      find.ancestor(of: find.text('G 1'), matching: find.byType(IndexedSemantics)).first,
+    );
+    final IndexedSemantics s2 = tester.widget<IndexedSemantics>(
+      find.ancestor(of: find.text('G 2'), matching: find.byType(IndexedSemantics)).first,
+    );
+
+    expect(s0.index, 7);
+    expect(s1.index, 8);
+    expect(s2.index, 9);
   });
 
   testWidgets('SliverGridRegularTileLayout.computeMaxScrollOffset handles 0 children', (

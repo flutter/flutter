@@ -363,6 +363,23 @@ void main() {
       expect(find.byKey(const Key('key1')), findsOneWidget);
     },
   );
+  testWidgets('SliverList.builder should respect semanticIndexOffset', (WidgetTester tester) async {
+    await tester.pumpWidget(_buildSliverListBuilder(semanticIndexOffset: 5));
+
+    final IndexedSemantics s0 = tester.widget<IndexedSemantics>(
+      find.ancestor(of: find.text('Tile 0'), matching: find.byType(IndexedSemantics)).first,
+    );
+    final IndexedSemantics s1 = tester.widget<IndexedSemantics>(
+      find.ancestor(of: find.text('Tile 1'), matching: find.byType(IndexedSemantics)).first,
+    );
+    final IndexedSemantics s2 = tester.widget<IndexedSemantics>(
+      find.ancestor(of: find.text('Tile 2'), matching: find.byType(IndexedSemantics)).first,
+    );
+
+    expect(s0.index, 5);
+    expect(s1.index, 6);
+    expect(s2.index, 7);
+  });
 }
 
 Widget _buildSliverListRenderWidgetChild(List<String> items, ScrollController controller) {
@@ -419,6 +436,35 @@ Widget _buildSliverList({
                 },
                 childCount: items.length,
               ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+Widget _buildSliverListBuilder({
+  ScrollController? controller,
+  int itemCount = 3,
+  int semanticIndexOffset = 0,
+  double itemHeight = 50.0,
+  double viewportHeight = 200.0,
+}) {
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: Center(
+      child: SizedBox(
+        height: viewportHeight,
+        child: CustomScrollView(
+          controller: controller,
+          slivers: <Widget>[
+            SliverList.builder(
+              itemCount: itemCount,
+              semanticIndexOffset: semanticIndexOffset,
+              itemBuilder: (BuildContext context, int index) {
+                return SizedBox(height: itemHeight, child: Text('Tile $index'));
+              },
             ),
           ],
         ),
