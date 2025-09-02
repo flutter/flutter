@@ -452,6 +452,7 @@ void main() {
                 'hotReload': true,
                 'hotRestart': true,
                 'screenshot': true,
+                'fastStart': false,
                 'flutterExit': true,
                 'hardwareRendering': true,
                 'startPaused': true,
