@@ -87,7 +87,7 @@ abstract class PlatformDispatcher {
 
   void setSemanticsTreeEnabled(bool enabled) {}
 
-  TypographySettings? get typographySettings;
+  TypographySettings get typographySettings;
 
   AccessibilityFeatures get accessibilityFeatures;
 

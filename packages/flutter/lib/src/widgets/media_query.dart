@@ -221,7 +221,7 @@ class MediaQueryData {
     this.gestureSettings = const DeviceGestureSettings(touchSlop: kTouchSlop),
     this.displayFeatures = const <ui.DisplayFeature>[],
     this.supportsShowingSystemContextMenu = false,
-    this.typographySettings,
+    this.typographySettings = const ui.TypographySettings(),
   }) : _textScaleFactor = textScaleFactor,
        _textScaler = textScaler,
        assert(
@@ -664,7 +664,7 @@ class MediaQueryData {
   ///
   /// This contains platform specific settings for typography, such a line height,
   /// word spacing, letter spacing, and paragraph spacing.
-  final ui.TypographySettings? typographySettings;
+  final ui.TypographySettings typographySettings;
 
   /// The orientation of the media (e.g., whether the device is in landscape or
   /// portrait mode).
@@ -1776,17 +1776,6 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   static bool? maybeSupportsAnnounceOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.supportsAnnounce)?.supportsAnnounce;
 
-  /// Returns the [MediaQueryData.typographySettings] for the
-  /// nearest [MediaQuery] ancestor or null, if no such ancestor exists.
-  ///
-  /// Use of this method will cause the given [context] to rebuild any time that
-  /// the [MediaQueryData.typographySettings] property of the ancestor [MediaQuery]
-  /// changes.
-  ///
-  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
-  static ui.TypographySettings? maybeTypographySettingsOf(BuildContext context) =>
-      _maybeOf(context, _MediaQueryAspect.typographySettings)?.typographySettings;
-
   /// Returns [MediaQueryData.navigationMode] for the nearest [MediaQuery]
   /// ancestor or throws an exception, if no such ancestor exists.
   ///
@@ -1878,6 +1867,28 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
     context,
     _MediaQueryAspect.supportsShowingSystemContextMenu,
   )?.supportsShowingSystemContextMenu;
+
+  /// Returns [MediaQueryData.typographySettings] for the nearest [MediaQuery]
+  /// ancestor or throws an exception, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.gestureSettings] property of the ancestor [MediaQuery]
+  /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
+  static ui.TypographySettings? typographySettingsOf(BuildContext context) =>
+      _of(context, _MediaQueryAspect.typographySettings).typographySettings;
+
+  /// Returns the [MediaQueryData.typographySettings] for the
+  /// nearest [MediaQuery] ancestor or null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.typographySettings] property of the ancestor [MediaQuery]
+  /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  static ui.TypographySettings? maybeTypographySettingsOf(BuildContext context) =>
+      _maybeOf(context, _MediaQueryAspect.typographySettings)?.typographySettings;
 
   @override
   bool updateShouldNotify(MediaQuery oldWidget) => data != oldWidget.data;
