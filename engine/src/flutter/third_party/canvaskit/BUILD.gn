@@ -84,8 +84,6 @@ wasm_toolchain("canvaskit_experimental_webparagraph") {
     # Remove all other text-related features that we don't need with WebParagraph.
     skia_enable_skparagraph = false
     skia_canvaskit_enable_paragraph = false
-    skia_enable_shaper = false
-    skia_enable_harfbuzz = false
     skia_use_harfbuzz = false
     skia_use_freetype = false
     flutter_use_freetype_woff2 = false
@@ -187,6 +185,23 @@ copy("skwasm_heavy_group") {
   if (is_debug) {
     if (!wasm_use_dwarf) {
       sources += [ "$root_out_dir/skwasm_heavy/skwasm_heavy.wasm.map" ]
+    }
+  }
+  outputs = [ "$root_out_dir/flutter_web_sdk/canvaskit/{{source_file_part}}" ]
+}
+
+copy("wimp_group") {
+  visibility = [ "//flutter/web_sdk:*" ]
+  public_deps = [ "//flutter/lib/web_ui/skwasm:wimp(:skwasm)" ]
+
+  sources = [
+    "$root_out_dir/skwasm/wimp.js",
+    "$root_out_dir/skwasm/wimp.js.symbols",
+    "$root_out_dir/skwasm/wimp.wasm",
+  ]
+  if (is_debug) {
+    if (!wasm_use_dwarf) {
+      sources += [ "$root_out_dir/skwasm/wimp.wasm.map" ]
     }
   }
   outputs = [ "$root_out_dir/flutter_web_sdk/canvaskit/{{source_file_part}}" ]

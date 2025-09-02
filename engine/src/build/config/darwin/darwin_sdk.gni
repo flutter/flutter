@@ -70,12 +70,14 @@ declare_args() {
   ios_testing_deployment_target = "13.0"
 }
 
-# Must be set above or by gn.
-assert(mac_deployment_target != "")
-assert(defined(use_ios_simulator))
-assert(defined(ios_use_simulator))
-assert(ios_deployment_target != "")
-assert(ios_testing_deployment_target != "")
+if (target_os == "ios" || target_os == "macos") {
+  # Must be set above or by gn.
+  assert(mac_deployment_target != "")
+  assert(defined(use_ios_simulator))
+  assert(defined(ios_use_simulator))
+  assert(ios_deployment_target != "")
+  assert(ios_testing_deployment_target != "")
+}
 
 # Run darwin_sdk.py to determine SDK paths if necessary.
 _need_darwin_sdk_run = false
