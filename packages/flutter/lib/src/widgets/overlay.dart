@@ -1703,21 +1703,21 @@ class OverlayPortalController {
   }
 }
 
-/// The location of the [Overlay] that a [OverlayPortal] attaches its overlay
-/// entry to.
+/// The location of the [Overlay] that an [OverlayPortal] renders its overlay
+/// child on.
 ///
 /// This is typically used in [OverlayPortal].
 enum OverlayLocation {
-  /// The [OverlayPortal] attaches to the immediate [Overlay] above the widget
-  /// tree.
-  nearest,
+  /// The [OverlayPortal] renders its overlay child on the closest ancestor
+  /// [Overlay] above the widget tree.
+  nearestOverlay,
 
-  /// The [OverlayPortal] attaches to the root [Overlay] above the widget
-  /// tree.
+  /// The [OverlayPortal] renders its overlay child on the root [Overlay] above
+  /// the widget tree.
   ///
   /// In case of multi-view apps, the root [Overlay] refers to the first Overlay
   /// below the View.
-  root,
+  rootOverlay,
 }
 
 /// A widget that renders its overlay child on an [Overlay].
