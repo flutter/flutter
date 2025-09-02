@@ -547,7 +547,7 @@ class EdgeInsets extends EdgeInsetsGeometry {
     );
   }
 
-  /// Returns a new [RRect] expanded by [insets], increasing each corner's
+  /// Returns a new [RRect] expanded by this [EdgeInsets], increasing each corner's
   /// radius by the corresponding per-axis inset amounts (clamped at zero).
   ///
   /// The resulting rectangle's left, top, right, and bottom edges are moved outward
@@ -556,10 +556,10 @@ class EdgeInsets extends EdgeInsetsGeometry {
   /// preserved while scaling appropriately.
   ///
   /// Corner radii are adjusted per-axis and clamped to be non-negative. For example,
-  /// the top-left corner radius is expanded by [insets.left] horizontally and
-  /// [insets.top] vertically.
+  /// the top-left corner radius is expanded by [left] horizontally and [top] vertically.
   ///
   /// See also:
+  ///
   ///  * [deflateRRect], to deflate an [RRect] rather than inflating it.
   ///  * [inflateRect], to inflate a [Rect] rather than an [RRect].
   ///  * [BorderRadius], which is used to define the corner radii of an [RRect].
@@ -576,7 +576,7 @@ class EdgeInsets extends EdgeInsetsGeometry {
     );
   }
 
-  /// Returns a new [RRect] shrunk by [insets], decreasing each corner's
+  /// Returns a new [RRect] shrunk by this [EdgeInsets], decreasing each corner's
   /// radius by the corresponding per-axis inset amounts (clamped at zero).
   ///
   /// The resulting rectangle's left, top, right, and bottom edges are moved inward
@@ -585,11 +585,12 @@ class EdgeInsets extends EdgeInsetsGeometry {
   /// scaling appropriately to the new size.
   ///
   /// Corner radii are adjusted per-axis and clamped to be non-negative. For example,
-  /// the top-left corner radius is reduced by [insets.left] horizontally and
-  /// [insets.top] vertically. If either resulting dimension would be negative,
-  /// the radius is clamped to zero in that direction.
+  /// the top-left corner radius is reduced by [left] horizontally and [top] vertically.
+  /// If either resulting dimension would be negative, the radius is clamped to zero
+  /// in that direction.
   ///
   /// See also:
+  ///
   ///  * [inflateRRect], to inflate an [RRect] rather than deflating it.
   ///  * [deflateRect], to deflate a [Rect] rather than an [RRect].
   ///  * [BorderRadius], which is used to define the corner radii of an [RRect].
