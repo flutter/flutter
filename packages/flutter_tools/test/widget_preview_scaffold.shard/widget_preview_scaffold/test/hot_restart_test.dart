@@ -16,7 +16,7 @@ void main() {
           FakeWidgetPreviewScaffoldDtdServices();
       final WidgetPreviewScaffold widgetPreview = WidgetPreviewScaffold(
         controller: FakeWidgetPreviewScaffoldController(
-          dtdServices: dtdServices,
+          dtdServicesOverride: dtdServices,
         ),
       );
 

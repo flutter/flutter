@@ -63,7 +63,9 @@ class FakeWidgetPreviewScaffoldDtdServices extends Fake
   Future<void> connect({Uri? dtdUri}) async {}
 
   @override
-  Future<void> dispose() async {}
+  Future<void> dispose() async {
+    super.dispose();
+  }
 
   bool hotRestartInvoked = false;
 
@@ -81,11 +83,11 @@ class FakeWidgetPreviewScaffoldDtdServices extends Fake
 class FakeWidgetPreviewScaffoldController
     extends WidgetPreviewScaffoldController {
   FakeWidgetPreviewScaffoldController({
-    WidgetPreviewScaffoldDtdServices? dtdServices,
+    WidgetPreviewScaffoldDtdServices? dtdServicesOverride,
     List<WidgetPreview>? previews,
-  }) : dtdServices = dtdServices ?? FakeWidgetPreviewScaffoldDtdServices(),
-       super(previews: () => previews ?? []);
-
-  @override
-  final WidgetPreviewScaffoldDtdServices dtdServices;
+  }) : super(
+         previews: () => previews ?? [],
+         dtdServicesOverride:
+             dtdServicesOverride ?? FakeWidgetPreviewScaffoldDtdServices(),
+       );
 }

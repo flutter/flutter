@@ -43,7 +43,9 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   }
 
   /// Disposes the DTD connection.
+  @override
   Future<void> dispose() async {
+    super.dispose();
     await dtd.close();
   }
 

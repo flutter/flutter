@@ -25,7 +25,7 @@ void main() {
       WidgetPreview(builder: () => Text('widget2'), scriptUri: kScript2),
     ];
     final controller = FakeWidgetPreviewScaffoldController(
-      dtdServices: dtdServices,
+      dtdServicesOverride: dtdServices,
       previews: previews,
     );
     await controller.initialize();

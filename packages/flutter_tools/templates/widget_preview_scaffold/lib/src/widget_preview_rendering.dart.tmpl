@@ -868,33 +868,28 @@ class WidgetPreviews extends StatelessWidget {
     return ValueListenableBuilder<List<WidgetPreview>>(
       valueListenable: controller.filteredPreviewSetListenable,
       builder: (context, previewList, _) {
-        Widget previewView;
         if (previewList.isEmpty) {
-          previewView = Column(
+          return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[NoPreviewsDetectedWidget()],
           );
-        } else {
-          previewView = LayoutBuilder(
-            builder: (BuildContext context, BoxConstraints constraints) {
-              return WidgetPreviewerWindowConstraints(
-                constraints: constraints,
-                child: ValueListenableBuilder<LayoutType>(
-                  valueListenable: controller.layoutTypeListenable,
-                  builder: (context, selectedLayout, _) {
-                    return switch (selectedLayout) {
-                      LayoutType.gridView => _buildGridViewFlex(previewList),
-                      LayoutType.listView => _buildVerticalListView(
-                        previewList,
-                      ),
-                    };
-                  },
-                ),
-              );
-            },
-          );
         }
-        return previewView;
+        return LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            return WidgetPreviewerWindowConstraints(
+              constraints: constraints,
+              child: ValueListenableBuilder<LayoutType>(
+                valueListenable: controller.layoutTypeListenable,
+                builder: (context, selectedLayout, _) {
+                  return switch (selectedLayout) {
+                    LayoutType.gridView => _buildGridViewFlex(previewList),
+                    LayoutType.listView => _buildVerticalListView(previewList),
+                  };
+                },
+              ),
+            );
+          },
+        );
       },
     );
   }

@@ -18,7 +18,7 @@ class WidgetPreviewScaffoldController {
     required PreviewsCallback previews,
     @visibleForTesting WidgetPreviewScaffoldDtdServices? dtdServicesOverride,
   }) : _previews = previews,
-       _dtdServices = dtdServicesOverride ?? WidgetPreviewScaffoldDtdServices();
+       dtdServices = dtdServicesOverride ?? WidgetPreviewScaffoldDtdServices();
 
   /// Initializes the controller by establishing a connection to DTD and
   /// listening for events.
@@ -29,8 +29,10 @@ class WidgetPreviewScaffoldController {
 
   /// Cleanup internal controller state.
   Future<void> dispose() async {
-    _cleanupListeners();
     await dtdServices.dispose();
+
+    _layoutType.dispose();
+    _filterBySelectedFile.dispose();
   }
 
   /// Update state after the project has been reassembled due to a hot reload.
@@ -39,8 +41,7 @@ class WidgetPreviewScaffoldController {
   }
 
   /// The active DTD connection used to communicate with other developer tooling.
-  WidgetPreviewScaffoldDtdServices get dtdServices => _dtdServices;
-  final WidgetPreviewScaffoldDtdServices _dtdServices;
+  final WidgetPreviewScaffoldDtdServices dtdServices;
 
   final List<WidgetPreview> Function() _previews;
 
@@ -51,13 +52,14 @@ class WidgetPreviewScaffoldController {
   LayoutType get layoutType => _layoutType.value;
   set layoutType(LayoutType type) => _layoutType.value = type;
 
+  /// Specifies if only previews from the currently selected source file should be rendered.
   ValueListenable<bool> get filterBySelectedFileListenable =>
       _filterBySelectedFile;
   final _filterBySelectedFile = ValueNotifier<bool>(true);
 
+  /// Enable or disable filtering by selected source file.
   void toggleFilterBySelectedFile() {
     _filterBySelectedFile.value = !_filterBySelectedFile.value;
-    _handleSelectedSourceFileChanged();
   }
 
   /// The current set of previews to be displayed.
@@ -69,24 +71,33 @@ class WidgetPreviewScaffoldController {
     dtdServices.selectedSourceFile.addListener(
       _handleSelectedSourceFileChanged,
     );
+    filterBySelectedFileListenable.addListener(() {
+      if (filterBySelectedFileListenable.value) {
+        dtdServices.selectedSourceFile.addListener(
+          _handleSelectedSourceFileChanged,
+        );
+      } else {
+        dtdServices.selectedSourceFile.removeListener(
+          _handleSelectedSourceFileChanged,
+        );
+      }
+      // Update the state if filtering has changed.
+      _handleSelectedSourceFileChanged();
+    });
     // Set the initial state.
     _handleSelectedSourceFileChanged();
   }
 
-  void _cleanupListeners() {
-    dtdServices.selectedSourceFile.removeListener(
-      _handleSelectedSourceFileChanged,
-    );
-  }
-
   void _handleSelectedSourceFileChanged() {
     final selectedSourceFile = dtdServices.selectedSourceFile.value;
-    if (selectedSourceFile == null || !_filterBySelectedFile.value) {
-      _filteredPreviewSet.value = _previews();
+    if (selectedSourceFile != null && _filterBySelectedFile.value) {
+      _filteredPreviewSet.value = _previews()
+          .where(
+            (preview) => preview.scriptUri == selectedSourceFile.uriAsString,
+          )
+          .toList();
       return;
     }
-    _filteredPreviewSet.value = _previews()
-        .where((preview) => preview.scriptUri == selectedSourceFile.uriAsString)
-        .toList();
+    _filteredPreviewSet.value = _previews();
   }
 }
