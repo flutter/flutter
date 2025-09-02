@@ -30,6 +30,7 @@ class FlutterHookResult {
     required this.buildStart,
     required this.buildEnd,
     required this.dataAssets,
+    required this.fontAssets,
     required this.dependencies,
   });
 
@@ -38,10 +39,12 @@ class FlutterHookResult {
         buildStart: DateTime.fromMillisecondsSinceEpoch(0),
         buildEnd: DateTime.fromMillisecondsSinceEpoch(0),
         dataAssets: <HookAsset>[],
+        fontAssets: <HookAsset>[],
         dependencies: <Uri>[],
       );
 
   final List<HookAsset> dataAssets;
+  final List<HookAsset> fontAssets;
 
   /// The timestamp at which we start a build - so the timestamp of the inputs.
   final DateTime buildStart;
@@ -510,17 +513,18 @@ class ManifestAssetBundle implements AssetBundle {
       }
     }
     for (final HookAsset dataAsset in flutterHookResult?.dataAssets ?? <HookAsset>[]) {
-      final Package package = packageConfig[dataAsset.package]!;
-      final Uri fileUri = dataAsset.file;
+      final _Asset asset = _parseAsset(packageConfig, dataAsset, AssetKind.regular);
+      if (assetVariants.containsKey(asset)) {
+        _logger.printError(
+          'Conflicting assets: The asset "$asset" was declared in the pubspec and the hook.',
+        );
+        return 1;
+      }
+      assetVariants[asset] = <_Asset>[asset];
+    }
 
-      final String filePath = fileUri.toFilePath();
-
-      final asset = _Asset(
-        baseDir: _fileSystem.path.dirname(filePath),
-        relativeUri: Uri(path: _fileSystem.path.basename(filePath)),
-        entryUri: Uri.parse(_fileSystem.path.join('packages', dataAsset.package, dataAsset.name)),
-        package: package,
-      );
+    for (final HookAsset fontAsset in flutterHookResult?.fontAssets ?? <HookAsset>[]) {
+      final _Asset asset = _parseAsset(packageConfig, fontAsset, AssetKind.font);
       if (assetVariants.containsKey(asset)) {
         _logger.printError(
           'Conflicting assets: The asset "$asset" was declared in the pubspec and the hook.',
@@ -673,6 +677,22 @@ class ManifestAssetBundle implements AssetBundle {
     return 0;
   }
 
+  _Asset _parseAsset(PackageConfig packageConfig, HookAsset dataAsset, AssetKind regular) {
+    final Package package = packageConfig[dataAsset.package]!;
+    final Uri fileUri = dataAsset.file;
+
+    final String filePath = fileUri.toFilePath();
+
+    final asset = _Asset(
+      baseDir: _fileSystem.path.dirname(filePath),
+      relativeUri: Uri(path: _fileSystem.path.basename(filePath)),
+      entryUri: Uri.parse(_fileSystem.path.join('packages', dataAsset.package, dataAsset.name)),
+      package: package,
+      kind: regular,
+    );
+    return asset;
+  }
+
   @override
   List<File> additionalDependencies = <File>[];
   void _setIfChanged(String key, DevFSContent content, AssetKind assetKind) {
@@ -780,7 +800,7 @@ class ManifestAssetBundle implements AssetBundle {
       }
     }
 
-    return result;
+    return [];
   }
 
   List<_Asset> _getMaterialShaders() {
