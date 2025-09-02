@@ -389,7 +389,6 @@ class AndroidBuildInfo {
       AndroidArch.x86_64,
     ],
     this.splitPerAbi = false,
-    this.fastStart = false,
   });
 
   // The build info containing the mode and flavor.
@@ -404,9 +403,6 @@ class AndroidBuildInfo {
 
   /// The target platforms for the build.
   final Iterable<AndroidArch> targetArchs;
-
-  /// Whether to bootstrap an empty application.
-  final bool fastStart;
 }
 
 /// A summary of the compilation strategy used for Dart.
