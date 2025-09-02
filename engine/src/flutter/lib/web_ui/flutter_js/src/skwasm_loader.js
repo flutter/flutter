@@ -7,7 +7,9 @@ import { resolveUrlWithSegments } from "./utils.js";
 
 export const loadSkwasm = async (deps, config, browserEnvironment, baseUrl) => {
   const needsHeavy = (!browserEnvironment.hasImageCodecs || !browserEnvironment.hasChromiumBreakIterators)
-  const fileStem = needsHeavy ? 'skwasm_heavy' : 'skwasm';
+  const fileStem = needsHeavy
+     ? 'skwasm_heavy'
+     : (config.enableWimp ? 'wimp' : 'skwasm');
   const rawSkwasmUrl = resolveUrlWithSegments(baseUrl, `${fileStem}.js`)
   let skwasmUrl = rawSkwasmUrl;
   if (deps.flutterTT.policy) {

@@ -164,15 +164,11 @@ template("impeller_shaders") {
     }
 
     if (enable_opengles) {
-      public_deps += [
-        ":$gles3_shaders",
-      ]
+      public_deps += [ ":$gles3_shaders" ]
 
       # wasm builds only use GLES3, no need to build GLES2 shaders
       if (!is_wasm) {
-        public_deps += [
-          ":$gles_shaders",
-        ]
+        public_deps += [ ":$gles_shaders" ]
       }
     }
 

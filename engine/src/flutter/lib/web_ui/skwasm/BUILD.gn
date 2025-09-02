@@ -99,13 +99,9 @@ template("skwasm_variant") {
     ]
 
     if (invoker.use_impeller) {
-      deps += [
-        "//flutter/impeller",
-      ]
+      deps += [ "//flutter/impeller" ]
     } else {
-      deps += [
-        "//flutter/skia",
-      ]
+      deps += [ "//flutter/skia" ]
     }
   }
 }
