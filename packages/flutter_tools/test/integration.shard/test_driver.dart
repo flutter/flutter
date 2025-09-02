@@ -30,7 +30,7 @@ import 'test_utils.dart';
 //   Messages regarding what the test is doing.
 // If this is false, then only critical errors and logs when things appear to be
 // taking a long time are printed to the console.
-const _printDebugOutputToStdOut = true;
+const _printDebugOutputToStdOut = false;
 
 final startTime = DateTime.now();
 

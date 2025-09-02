@@ -190,6 +190,7 @@ Future<vm_service.VmService> setUpVmService({
   // all at the end of this method.
   final registrationRequests = <Future<vm_service.Success?>>[];
   if (reloadSources != null) {
+    print('REGISTERING RELOAD SOURCES');
     vmService.registerServiceCallback(kReloadSourcesServiceName, (
       Map<String, Object?> params,
     ) async {
@@ -209,9 +210,13 @@ Future<vm_service.VmService> setUpVmService({
   }
 
   if (restart != null) {
+    print('REGISTERING RESTART');
     vmService.registerServiceCallback(kHotRestartServiceName, (Map<String, Object?> params) async {
+      print('RESTART INVOKED');
       final bool pause = _validateRpcBoolParam('compileExpression', params, 'pause');
+      print('RESTART(pause: $pause)');
       await restart(pause: pause);
+      print('RESTART(pause: $pause) DONE');
       return <String, Object>{
         'result': <String, Object>{kResultType: kResultTypeSuccess},
       };
@@ -324,7 +329,9 @@ Future<vm_service.VmService> setUpVmService({
   }
 
   try {
+    print('WAITING FOR REGISTRATIONS TO COMPLETE');
     await Future.wait(registrationRequests);
+    print('REGISTRATION COMPLETE');
   } on vm_service.RPCError catch (e) {
     if (e.isConnectionDisposedException) {
       rethrow;
