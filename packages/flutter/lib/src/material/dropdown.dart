@@ -782,14 +782,8 @@ class _DropdownMenuItemContainer extends StatelessWidget {
   const _DropdownMenuItemContainer({
     super.key,
     this.alignment = AlignmentDirectional.centerStart,
-    this.mouseCursor,
     required this.child,
   });
-
-  /// The cursor for a mouse pointer when it enters or is hovering over this item.
-  ///
-  /// If null, then [SystemMouseCursors.basic] is used.
-  final SystemMouseCursor? mouseCursor;
 
   /// The widget below this widget in the tree.
   ///
@@ -810,17 +804,16 @@ class _DropdownMenuItemContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final SystemMouseCursor effectiveNonWebMouseCursor = mouseCursor ?? SystemMouseCursors.basic;
-    SingleChildRenderObjectWidget semanticsChild = ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: _kMenuItemHeight),
-      child: Align(alignment: alignment, child: child),
+    return MouseRegion(
+      cursor: SystemMouseCursors.basic,
+      child: Semantics(
+        button: true,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: _kMenuItemHeight),
+          child: Align(alignment: alignment, child: child),
+        ),
+      ),
     );
-
-    if (!kIsWeb) {
-      semanticsChild = MouseRegion(cursor: effectiveNonWebMouseCursor, child: child);
-    }
-
-    return Semantics(button: true, child: semanticsChild);
   }
 }
 
@@ -838,7 +831,6 @@ class DropdownMenuItem<T> extends _DropdownMenuItemContainer {
     this.value,
     this.enabled = true,
     super.alignment,
-    super.mouseCursor,
     required super.child,
   });
 
@@ -1017,7 +1009,6 @@ class DropdownButton<T> extends StatefulWidget {
     this.borderRadius,
     this.padding,
     this.barrierDismissible = true,
-    this.mouseCursor,
     // When adding new arguments, consider adding similar arguments to
     // DropdownButtonFormField.
   }) : assert(
@@ -1067,7 +1058,6 @@ class DropdownButton<T> extends StatefulWidget {
     this.borderRadius,
     this.padding,
     this.barrierDismissible = true,
-    this.mouseCursor,
     required InputDecoration inputDecoration,
     required bool isEmpty,
   }) : assert(
@@ -1315,12 +1305,6 @@ class DropdownButton<T> extends StatefulWidget {
   ///
   /// Defaults to `true`.
   final bool barrierDismissible;
-
-  /// The mouse cursor that will show on hover.
-  ///
-  /// Will default to [WidgetStateMouseCursor.statelessClickable] if
-  /// not otherwise specified.
-  final MouseCursor? mouseCursor;
 
   final InputDecoration? _inputDecoration;
 
@@ -1586,16 +1570,20 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     if (items.isEmpty) {
       innerItemsWidget = const SizedBox.shrink();
     } else {
-      innerItemsWidget = IndexedStack(
-        index: _selectedIndex ?? hintIndex,
-        alignment: widget.alignment,
-        children: widget.isDense
-            ? items
-            : items.map((Widget item) {
-                return widget.itemHeight != null
-                    ? SizedBox(height: widget.itemHeight, child: item)
-                    : Column(mainAxisSize: MainAxisSize.min, children: <Widget>[item]);
-              }).toList(),
+      innerItemsWidget = MouseRegion(
+        cursor: SystemMouseCursors.basic, // not needed
+        child: IndexedStack(
+          index: _selectedIndex ?? hintIndex,
+          alignment: widget.alignment,
+          children: widget.isDense
+              ? items
+              : items.map((Widget item) {
+                  final Widget itemWidget = widget.itemHeight != null
+                      ? SizedBox(height: widget.itemHeight, child: item)
+                      : Column(mainAxisSize: MainAxisSize.min, children: <Widget>[item]);
+                  return MouseRegion(cursor: SystemMouseCursors.basic, child: itemWidget);
+                }).toList(),
+        ),
       );
     }
 
@@ -1615,7 +1603,8 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              if (widget.isExpanded) Expanded(child: innerItemsWidget) else innerItemsWidget,
+              innerItemsWidget,
+              // if (widget.isExpanded) Expanded(child: innerItemsWidget) else innerItemsWidget,
               if (widget._inputDecoration == null) effectiveSuffixIcon,
             ],
           ),
@@ -1645,10 +1634,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       );
     }
 
-    final MouseCursor effectiveMouseCursor = WidgetStateProperty.resolveAs<MouseCursor>(
-      MaterialStateMouseCursor.statelessClickable,
-      <WidgetState>{if (!_enabled) WidgetState.disabled},
-    );
+    final MouseCursor effectiveMouseCursor = SystemMouseCursors.basic;
 
     // When an InputDecoration is provided, use it instead of using an InkWell
     // that overflows in some cases (such as showing an errorText) and requires
@@ -1809,7 +1795,6 @@ class DropdownButtonFormField<T> extends FormField<T> {
     BorderRadius? borderRadius,
     EdgeInsetsGeometry? padding,
     this.barrierDismissible = true,
-    this.mouseCursor,
     // When adding new arguments, consider adding similar arguments to
     // DropdownButton.
   }) : assert(
@@ -1922,12 +1907,6 @@ class DropdownButtonFormField<T> extends FormField<T> {
   ///
   /// Defaults to `true`.
   final bool barrierDismissible;
-
-  /// The mouse cursor that will show on hover.
-  ///
-  /// Will default to [WidgetStateMouseCursor.statelessClickable] if
-  /// not otherwise specified.
-  final MouseCursor? mouseCursor;
 
   @override
   FormFieldState<T> createState() => _DropdownButtonFormFieldState<T>();
