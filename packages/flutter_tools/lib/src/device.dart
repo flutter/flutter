@@ -1266,6 +1266,8 @@ class DebuggingOptions {
     'profileStartup': profileStartup,
     'enableEmbedderApi': enableEmbedderApi,
     'usingCISystem': usingCISystem,
+    // TODO(bkonyi): remove once fg3 is updated.
+    'fastStart': false,
     'debugLogsDirectoryPath': debugLogsDirectoryPath,
     'enableDevTools': enableDevTools,
     'ipv6': ipv6,
