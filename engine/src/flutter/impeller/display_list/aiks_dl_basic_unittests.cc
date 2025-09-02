@@ -39,7 +39,6 @@ namespace {
 using DrawRectProc =
     std::function<void(DisplayListBuilder&, const DlRect&, const DlPaint&)>;
 
-[[maybe_unused]]
 sk_sp<DisplayList> MakeWideStrokedRects(Point scale,
                                         const DrawRectProc& draw_rect) {
   DisplayListBuilder builder;

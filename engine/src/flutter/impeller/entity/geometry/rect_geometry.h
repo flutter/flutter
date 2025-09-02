@@ -48,8 +48,6 @@ class StrokeRectGeometry final : public Geometry {
   // |Geometry|
   std::optional<Rect> GetCoverage(const Matrix& transform) const override;
 
-  virtual GeometryResult::Mode GetResultMode() const override;
-
  private:
   const Rect rect_;
   const Scalar stroke_width_;

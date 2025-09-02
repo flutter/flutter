@@ -339,13 +339,6 @@ std::optional<Rect> StrokeRectGeometry::GetCoverage(
   return rect_.TransformBounds(transform);
 }
 
-GeometryResult::Mode StrokeRectGeometry::GetResultMode() const {
-  // Most(all?) of our geometry is produced in full with an explicit mode
-  // specified in the returned GeometryResult, but just in case we missed
-  // a case, the safest mode to return here is kPreventOverdraw.
-  return GeometryResult::Mode::kPreventOverdraw;
-}
-
 Join StrokeRectGeometry::AdjustStrokeJoin(const StrokeParameters& stroke) {
   return (stroke.join == Join::kMiter && stroke.miter_limit < kSqrt2)
              ? Join::kBevel
