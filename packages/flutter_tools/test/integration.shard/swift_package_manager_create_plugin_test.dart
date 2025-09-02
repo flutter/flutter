@@ -30,7 +30,6 @@ void main() {
                 flutterBin,
                 workingDirectoryPath,
                 platform: platformName,
-                iosLanguage: 'swift',
               );
 
           final String appDirectoryPath = createdCocoaPodsPlugin.exampleAppPath;
@@ -112,7 +111,6 @@ void main() {
                 flutterBin,
                 workingDirectoryPath,
                 platform: platformName,
-                iosLanguage: 'swift',
               );
 
           final String appDirectoryPath = createdSwiftPackagePlugin.exampleAppPath;

@@ -83,7 +83,6 @@ void main() {
               flutterBin,
               workingDirectoryPath,
               platform: platformName,
-              iosLanguage: 'swift',
             );
 
         // Rebuild app with Swift Package Manager enabled, migrating the app and using the Swift Package Manager version of
@@ -96,7 +95,6 @@ void main() {
               flutterBin,
               workingDirectoryPath,
               platform: platformName,
-              iosLanguage: 'swift',
               usesSwiftPackageManager: true,
             );
         final File swiftPMPluginPackageManifest = fileSystem

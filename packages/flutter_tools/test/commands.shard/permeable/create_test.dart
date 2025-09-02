@@ -3325,13 +3325,6 @@ void main() {
       globals.fs.path.join(
         flutterToolsAbsolutePath,
         'templates',
-        'plugin',
-        'ios-swift.tmpl',
-        'projectName.podspec.tmpl',
-      ),
-      globals.fs.path.join(
-        flutterToolsAbsolutePath,
-        'templates',
         'plugin_ffi',
         'ios.tmpl',
         'projectName.podspec.tmpl',
