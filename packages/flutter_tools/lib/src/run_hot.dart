@@ -178,7 +178,9 @@ class HotRunner extends ResidentRunner {
   }
 
   Future<void> _restartService({bool pause = false}) async {
+    print('INVOKING RESTART SERVICE');
     final OperationResult result = await restart(fullRestart: true, pause: pause);
+    print('RESTART INVOKED: ${result.isOk}');
     if (!result.isOk) {
       throw vm_service.RPCError(
         'Unable to restart',

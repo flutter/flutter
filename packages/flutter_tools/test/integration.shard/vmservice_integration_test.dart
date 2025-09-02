@@ -32,6 +32,8 @@ void main() {
       final int? port = flutter.vmServicePort;
       expect(port != null, true);
       vmService = await vmServiceConnectUri('ws://localhost:$port/ws');
+      vmService.onSend.listen((String s) => print('=vm=> $s'));
+      vmService.onReceive.listen((String s) => print('<=vm= $s'));
     });
 
     tearDown(() async {
@@ -79,10 +81,12 @@ void main() {
       final VM vm = await vmService.getVM();
       final IsolateRef? isolateRef = vm.isolates?.first;
       expect(isolateRef != null, true);
+      print('CALLING HOT RESTART');
       final Response response = await vmService.callMethod(
         's0.hotRestart',
         isolateId: isolateRef!.id,
       );
+      print('CALLED HOT RESTART');
       expect(response.type, 'Success');
     });
 

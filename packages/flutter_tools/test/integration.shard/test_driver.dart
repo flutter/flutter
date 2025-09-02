@@ -30,7 +30,7 @@ import 'test_utils.dart';
 //   Messages regarding what the test is doing.
 // If this is false, then only critical errors and logs when things appear to be
 // taking a long time are printed to the console.
-const _printDebugOutputToStdOut = false;
+const _printDebugOutputToStdOut = true;
 
 final startTime = DateTime.now();
 
@@ -172,7 +172,6 @@ abstract final class FlutterTestDriver {
     if ((await _vmService!.getVM()).isolates?.isEmpty ?? true) {
       await isolateStarted.future;
     }
-
     await waitForPause();
     if (pauseOnExceptions) {
       await _vmService!.setIsolatePauseMode(
