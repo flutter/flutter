@@ -3858,6 +3858,15 @@ class SemanticsNode with DiagnosticableTreeMixin {
     if (_inputType != SemanticsInputType.none) {
       properties.add(EnumProperty<SemanticsInputType>('inputType', _inputType));
     }
+    if (validationResult != SemanticsValidationResult.none) {
+      properties.add(
+        EnumProperty<SemanticsValidationResult>(
+          'validationResult',
+          validationResult,
+          defaultValue: SemanticsValidationResult.none,
+        ),
+      );
+    }
   }
 
   /// Returns a string representation of this node and its descendants.
