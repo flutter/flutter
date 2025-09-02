@@ -3631,7 +3631,7 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
           return SystemMouseCursors.basic;
         }
         // TODO(camsim99): regenerate
-        return kIsWeb ? SystemMouseCursors.basic : SystemMouseCursors.click;
+        return kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic;
       },
     );
   }
