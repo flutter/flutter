@@ -86,11 +86,7 @@ Future<void> main() async {
 
       section('Lint macOS podspec plugin as framework');
 
-      final String macOSPodspecPath = path.join(
-        pluginPath,
-        'macos',
-        '$pluginName.podspec',
-      );
+      final String macOSPodspecPath = path.join(pluginPath, 'macos', '$pluginName.podspec');
       await inDirectory(tempDir, () async {
         await _tryMacOSLint(macOSPodspecPath, <String>['--allow-warnings']);
       });
@@ -219,9 +215,7 @@ void _validateMacOSPodfile(String appPath) {
       !podfileLockOutput.contains(
         ':path: Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos',
       ) ||
-      !podfileLockOutput.contains(
-        ':path: Flutter/ephemeral/.symlinks/plugins/test_plugin/macos',
-      ) ||
+      !podfileLockOutput.contains(':path: Flutter/ephemeral/.symlinks/plugins/test_plugin/macos') ||
       podfileLockOutput.contains('url_launcher_ios/')) {
     print(podfileLockOutput);
     throw TaskResult.failure('macOS Podfile.lock does not contain expected pods');
