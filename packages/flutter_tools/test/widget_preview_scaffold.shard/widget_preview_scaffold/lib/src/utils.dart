@@ -31,3 +31,44 @@ class VerticalSpacer extends StatelessWidget {
     return const SizedBox(height: 10);
   }
 }
+
+/// A basic horizontal spacer.
+class HorizontalSpacer extends StatelessWidget {
+  /// Creates a basic vertical spacer.
+  const HorizontalSpacer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox(width: 10);
+  }
+}
+
+/// A widget that explicitly responds to hot reload events.
+///
+/// Hot reload will always result in [reassemble] being called.
+class HotReloadListener extends StatefulWidget {
+  const HotReloadListener({
+    super.key,
+    required this.onHotReload,
+    required this.child,
+  });
+
+  final VoidCallback onHotReload;
+  final Widget child;
+
+  @override
+  HotReloadListenerState createState() => HotReloadListenerState();
+}
+
+class HotReloadListenerState extends State<HotReloadListener> {
+  @override
+  void reassemble() {
+    super.reassemble();
+    widget.onHotReload();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
+  }
+}

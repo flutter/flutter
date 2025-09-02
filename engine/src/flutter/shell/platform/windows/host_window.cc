@@ -11,6 +11,7 @@
 #include "flutter/shell/platform/windows/flutter_window.h"
 #include "flutter/shell/platform/windows/flutter_windows_view_controller.h"
 #include "flutter/shell/platform/windows/rect_helper.h"
+#include "flutter/shell/platform/windows/wchar_util.h"
 #include "flutter/shell/platform/windows/window_manager.h"
 
 namespace {
@@ -317,8 +318,9 @@ std::unique_ptr<HostWindow> HostWindow::CreateRegularWindow(
     window_class.lpszClassName = kWindowClassName;
 
     if (!RegisterClassEx(&window_class)) {
-      FML_LOG(ERROR) << "Cannot register window class " << kWindowClassName
-                     << ": " << GetLastErrorAsString();
+      FML_LOG(ERROR) << "Cannot register window class "
+                     << WCharBufferToString(kWindowClassName) << ": "
+                     << GetLastErrorAsString();
       return nullptr;
     }
   }

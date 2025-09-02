@@ -135,5 +135,7 @@ void testMain() {
         region: const ui.Rect.fromLTRB(0, 0, 200, 200),
       );
     });
-  });
+    // Unskip when Skwasm and CanvasKit are unified:
+    // https://github.com/flutter/flutter/issues/172311
+  }, skip: isSkwasm);
 }
