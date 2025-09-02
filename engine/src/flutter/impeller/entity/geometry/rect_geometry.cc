@@ -288,7 +288,7 @@ GeometryResult StrokeRectGeometry::GetPositionBuffer(
                           Scalar right = rect.GetRight();
                           Scalar bottom = rect.GetBottom();
                           auto vertices = reinterpret_cast<Point*>(buffer);
-                          // Zig-zag pattern: UL, UR, LL, LR
+
                           vertices[0] = Point(left - hsw, top - hsw);
                           vertices[1] = Point(right + hsw, top - hsw);
                           vertices[2] = Point(left - hsw, bottom + hsw);
