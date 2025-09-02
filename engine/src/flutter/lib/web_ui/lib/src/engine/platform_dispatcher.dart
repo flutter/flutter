@@ -70,7 +70,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     // Initial text spacing values are computed during
     // the initial resize event that happens during the
     // initial rendering of the `typographyMeasurementElement`.
-    // typographySettings: null,
+    // typographySettings: const ui.TypographySettings(),
   );
 
   /// Compute accessibility features based on the current value of high contrast flag
@@ -1043,7 +1043,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   /// Updates [typographySettings] and invokes [onPlatformConfigurationChanged] and
   /// [onMetricsChanged] callbacks if [typographySettings] changed.
-  void _updateTypographySettings(ui.TypographySettings? value) {
+  void _updateTypographySettings(ui.TypographySettings value) {
     if (configuration.typographySettings != value) {
       configuration = configuration.copyWith(typographySettings: value);
       invokeOnPlatformConfigurationChanged();
@@ -1051,7 +1051,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     }
   }
 
-  ui.TypographySettings? _computeTypographySettings() {
+  ui.TypographySettings _computeTypographySettings() {
     final double? lineHeight = parseStyleProperty(
       _typographyMeasurementElement!,
       'line-height',
@@ -1077,12 +1077,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       _typographyMeasurementElement!,
       'margin-bottom',
     )?.toDouble();
-    if (lineHeightFactor == null &&
-        wordSpacing == null &&
-        letterSpacing == null &&
-        paragraphSpacing == null) {
-      return null;
-    }
     return ui.TypographySettings(
       lineHeight: lineHeightFactor,
       letterSpacing: letterSpacing,
@@ -1126,9 +1120,8 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       List<DomResizeObserverEntry> entries,
       DomResizeObserver observer,
     ) {
-      final ui.TypographySettings? computedTypographySettings = _computeTypographySettings();
-      if (computedTypographySettings != null &&
-          computedTypographySettings.lineHeight == defaultLineHeightFactor &&
+      final ui.TypographySettings computedTypographySettings = _computeTypographySettings();
+      if (computedTypographySettings.lineHeight == defaultLineHeightFactor &&
           computedTypographySettings.wordSpacing == spacingDefault &&
           computedTypographySettings.letterSpacing == spacingDefault &&
           computedTypographySettings.paragraphSpacing == spacingDefault) {
