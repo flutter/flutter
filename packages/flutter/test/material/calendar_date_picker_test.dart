@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/gestures.dart';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -13,10 +15,16 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   final Finder nextMonthIcon = find.byWidgetPredicate(
-    (Widget w) => w is IconButton && (w.tooltip?.startsWith('Next month') ?? false),
+    (Widget w) =>
+        w is IconButton &&
+        ((w.tooltip?.startsWith('Next month') ?? false) ||
+            ((w.icon as Icon).semanticLabel?.startsWith('Next month') ?? false)),
   );
   final Finder previousMonthIcon = find.byWidgetPredicate(
-    (Widget w) => w is IconButton && (w.tooltip?.startsWith('Previous month') ?? false),
+    (Widget w) =>
+        w is IconButton &&
+        ((w.tooltip?.startsWith('Previous month') ?? false) ||
+            ((w.icon as Icon).semanticLabel?.startsWith('Previous month') ?? false)),
   );
 
   Widget calendarDatePicker({
@@ -324,7 +332,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(displayedMonth, equals(DateTime(2017, DateTime.february)));
       // Shouldn't be possible to keep going forward into March.
-      expect(nextMonthIcon, findsNothing);
+      expect(tester.getSemantics(nextMonthIcon).flagsCollection.isEnabled, Tristate.isFalse);
 
       await tester.tap(previousMonthIcon);
       await tester.pumpAndSettle();
@@ -332,7 +340,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(displayedMonth, equals(DateTime(2016, DateTime.december)));
       // Shouldn't be possible to keep going backward into November.
-      expect(previousMonthIcon, findsNothing);
+      expect(tester.getSemantics(previousMonthIcon).flagsCollection.isEnabled, Tristate.isFalse);
     });
 
     testWidgets('Cannot select disabled year', (WidgetTester tester) async {
@@ -959,10 +967,12 @@ void main() {
           matchesSemantics(
             label: '1, Friday, January 1, 2016',
             isButton: true,
+            hasEnabledState: true,
             hasTapAction: true,
             hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
+            isEnabled: true,
           ),
         );
         expect(
@@ -970,10 +980,12 @@ void main() {
           matchesSemantics(
             label: '2, Saturday, January 2, 2016',
             isButton: true,
+            hasEnabledState: true,
             hasTapAction: true,
             hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
+            isEnabled: true,
           ),
         );
         expect(
@@ -981,10 +993,12 @@ void main() {
           matchesSemantics(
             label: '3, Sunday, January 3, 2016, Today',
             isButton: true,
+            hasEnabledState: true,
             hasTapAction: true,
             hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
+            isEnabled: true,
           ),
         );
         expect(
@@ -992,10 +1006,12 @@ void main() {
           matchesSemantics(
             label: '4, Monday, January 4, 2016',
             isButton: true,
+            hasEnabledState: true,
             hasTapAction: true,
             hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
+            isEnabled: true,
           ),
         );
         expect(
@@ -1003,10 +1019,12 @@ void main() {
           matchesSemantics(
             label: '5, Tuesday, January 5, 2016',
             isButton: true,
+            hasEnabledState: true,
             hasTapAction: true,
             hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
+            isEnabled: true,
           ),
         );
         expect(
@@ -1014,10 +1032,12 @@ void main() {
           matchesSemantics(
             label: '6, Wednesday, January 6, 2016',
             isButton: true,
+            hasEnabledState: true,
             hasTapAction: true,
             hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
+            isEnabled: true,
           ),
         );
         expect(
@@ -1025,10 +1045,12 @@ void main() {
           matchesSemantics(
             label: '7, Thursday, January 7, 2016',
             isButton: true,
+            hasEnabledState: true,
             hasTapAction: true,
             hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
+            isEnabled: true,
           ),
         );
         expect(
@@ -1036,10 +1058,12 @@ void main() {
           matchesSemantics(
             label: '8, Friday, January 8, 2016',
             isButton: true,
+            hasEnabledState: true,
             hasTapAction: true,
             hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
+            isEnabled: true,
           ),
         );
         expect(
@@ -1047,10 +1071,12 @@ void main() {
           matchesSemantics(
             label: '9, Saturday, January 9, 2016',
             isButton: true,
+            hasEnabledState: true,
             hasTapAction: true,
             hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
+            isEnabled: true,
           ),
         );
         expect(
@@ -1058,10 +1084,12 @@ void main() {
           matchesSemantics(
             label: '10, Sunday, January 10, 2016',
             isButton: true,
+            hasEnabledState: true,
             hasTapAction: true,
             hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
+            isEnabled: true,
           ),
         );
         expect(
@@ -1069,10 +1097,12 @@ void main() {
           matchesSemantics(
             label: '11, Monday, January 11, 2016',
             isButton: true,
+            hasEnabledState: true,
             hasTapAction: true,
             hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
+            isEnabled: true,
           ),
         );
         expect(
@@ -1080,10 +1110,12 @@ void main() {
           matchesSemantics(
             label: '12, Tuesday, January 12, 2016',
             isButton: true,
+            hasEnabledState: true,
             hasTapAction: true,
             hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
+            isEnabled: true,
           ),
         );
         expect(
@@ -1091,10 +1123,12 @@ void main() {
           matchesSemantics(
             label: '13, Wednesday, January 13, 2016',
             isButton: true,
+            hasEnabledState: true,
             hasTapAction: true,
             hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
+            isEnabled: true,
           ),
         );
         expect(
@@ -1102,10 +1136,12 @@ void main() {
           matchesSemantics(
             label: '14, Thursday, January 14, 2016',
             isButton: true,
+            hasEnabledState: true,
             hasTapAction: true,
             hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
+            isEnabled: true,
           ),
         );
         expect(
@@ -1114,10 +1150,12 @@ void main() {
             label: '15, Friday, January 15, 2016',
             isButton: true,
             hasTapAction: true,
+            hasEnabledState: true,
             hasSelectedState: true,
             hasFocusAction: true,
             isSelected: true,
             isFocusable: true,
+            isEnabled: true,
           ),
         );
         expect(
@@ -1125,10 +1163,12 @@ void main() {
           matchesSemantics(
             label: '16, Saturday, January 16, 2016',
             isButton: true,
-            hasSelectedState: true,
+            hasEnabledState: true,
             hasTapAction: true,
+            hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
+            isEnabled: true,
           ),
         );
         expect(
@@ -1136,10 +1176,12 @@ void main() {
           matchesSemantics(
             label: '17, Sunday, January 17, 2016',
             isButton: true,
-            hasSelectedState: true,
+            hasEnabledState: true,
             hasTapAction: true,
+            hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
+            isEnabled: true,
           ),
         );
         expect(
@@ -1147,10 +1189,12 @@ void main() {
           matchesSemantics(
             label: '18, Monday, January 18, 2016',
             isButton: true,
-            hasSelectedState: true,
+            hasEnabledState: true,
             hasTapAction: true,
+            hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
+            isEnabled: true,
           ),
         );
         expect(
@@ -1158,10 +1202,12 @@ void main() {
           matchesSemantics(
             label: '19, Tuesday, January 19, 2016',
             isButton: true,
-            hasSelectedState: true,
+            hasEnabledState: true,
             hasTapAction: true,
+            hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
+            isEnabled: true,
           ),
         );
         expect(
@@ -1169,10 +1215,12 @@ void main() {
           matchesSemantics(
             label: '20, Wednesday, January 20, 2016',
             isButton: true,
-            hasSelectedState: true,
+            hasEnabledState: true,
             hasTapAction: true,
+            hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
+            isEnabled: true,
           ),
         );
         expect(
@@ -1180,10 +1228,12 @@ void main() {
           matchesSemantics(
             label: '21, Thursday, January 21, 2016',
             isButton: true,
-            hasSelectedState: true,
+            hasEnabledState: true,
             hasTapAction: true,
+            hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
+            isEnabled: true,
           ),
         );
         expect(
@@ -1191,10 +1241,12 @@ void main() {
           matchesSemantics(
             label: '22, Friday, January 22, 2016',
             isButton: true,
-            hasSelectedState: true,
+            hasEnabledState: true,
             hasTapAction: true,
+            hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
+            isEnabled: true,
           ),
         );
         expect(
@@ -1202,10 +1254,12 @@ void main() {
           matchesSemantics(
             label: '23, Saturday, January 23, 2016',
             isButton: true,
-            hasSelectedState: true,
+            hasEnabledState: true,
             hasTapAction: true,
+            hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
+            isEnabled: true,
           ),
         );
         expect(
@@ -1213,10 +1267,12 @@ void main() {
           matchesSemantics(
             label: '24, Sunday, January 24, 2016',
             isButton: true,
-            hasSelectedState: true,
+            hasEnabledState: true,
             hasTapAction: true,
+            hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
+            isEnabled: true,
           ),
         );
         expect(
@@ -1224,10 +1280,12 @@ void main() {
           matchesSemantics(
             label: '25, Monday, January 25, 2016',
             isButton: true,
-            hasSelectedState: true,
+            hasEnabledState: true,
             hasTapAction: true,
+            hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
+            isEnabled: true,
           ),
         );
         expect(
@@ -1235,10 +1293,12 @@ void main() {
           matchesSemantics(
             label: '26, Tuesday, January 26, 2016',
             isButton: true,
-            hasSelectedState: true,
+            hasEnabledState: true,
             hasTapAction: true,
+            hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
+            isEnabled: true,
           ),
         );
         expect(
@@ -1246,10 +1306,12 @@ void main() {
           matchesSemantics(
             label: '27, Wednesday, January 27, 2016',
             isButton: true,
-            hasSelectedState: true,
+            hasEnabledState: true,
             hasTapAction: true,
+            hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
+            isEnabled: true,
           ),
         );
         expect(
@@ -1257,10 +1319,12 @@ void main() {
           matchesSemantics(
             label: '28, Thursday, January 28, 2016',
             isButton: true,
-            hasSelectedState: true,
+            hasEnabledState: true,
             hasTapAction: true,
+            hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
+            isEnabled: true,
           ),
         );
         expect(
@@ -1268,10 +1332,12 @@ void main() {
           matchesSemantics(
             label: '29, Friday, January 29, 2016',
             isButton: true,
-            hasSelectedState: true,
+            hasEnabledState: true,
             hasTapAction: true,
+            hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
+            isEnabled: true,
           ),
         );
         expect(
@@ -1279,12 +1345,62 @@ void main() {
           matchesSemantics(
             label: '30, Saturday, January 30, 2016',
             isButton: true,
-            hasSelectedState: true,
+            hasEnabledState: true,
             hasTapAction: true,
+            hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
+            isEnabled: true,
           ),
         );
+        semantics.dispose();
+      });
+
+      testWidgets('day mode disabled dates are announced', (WidgetTester tester) async {
+        final SemanticsHandle semantics = tester.ensureSemantics();
+
+        await tester.pumpWidget(
+          calendarDatePicker(
+            initialDate: DateTime(2016, DateTime.january, 15),
+            firstDate: DateTime(2016, DateTime.january, 15),
+          ),
+        );
+
+        expect(
+          tester.getSemantics(find.text('14')),
+          matchesSemantics(
+            label: '14, Thursday, January 14, 2016',
+            hasEnabledState: true,
+            hasSelectedState: true,
+            isButton: true,
+          ),
+        );
+        semantics.dispose();
+      });
+
+      testWidgets('Disabled next and previous month buttons have meaningful labels', (
+        WidgetTester tester,
+      ) async {
+        final SemanticsHandle semantics = tester.ensureSemantics();
+
+        await tester.pumpWidget(
+          calendarDatePicker(
+            firstDate: DateTime(2016, DateTime.january, 14),
+            initialDate: DateTime(2016, DateTime.january, 15),
+            lastDate: DateTime(2016, DateTime.january, 16),
+          ),
+        );
+
+        // Prev/Next month buttons.
+        expect(
+          tester.getSemantics(previousMonthIcon),
+          matchesSemantics(label: 'Previous month', isButton: true, hasEnabledState: true),
+        );
+        expect(
+          tester.getSemantics(nextMonthIcon),
+          matchesSemantics(label: 'Next month', isButton: true, hasEnabledState: true),
+        );
+
         semantics.dispose();
       });
 
@@ -1316,15 +1432,40 @@ void main() {
             tester.getSemantics(find.text('$year')),
             matchesSemantics(
               label: '$year',
+              hasEnabledState: true,
               hasTapAction: true,
               hasFocusAction: true,
               isSelected: year == 2016,
               hasSelectedState: true,
               isFocusable: true,
+              isEnabled: true,
               isButton: true,
             ),
           );
         }
+        semantics.dispose();
+      });
+
+      testWidgets('calendar year mode disabled years are announced', (WidgetTester tester) async {
+        final SemanticsHandle semantics = tester.ensureSemantics();
+
+        await tester.pumpWidget(
+          calendarDatePicker(
+            initialDate: DateTime(2016, DateTime.january, 15),
+            firstDate: DateTime(2016, DateTime.january, 15),
+            initialCalendarMode: DatePickerMode.year,
+          ),
+        );
+
+        expect(
+          tester.getSemantics(find.text('2015')),
+          matchesSemantics(
+            label: '2015',
+            hasEnabledState: true,
+            hasSelectedState: true,
+            isButton: true,
+          ),
+        );
         semantics.dispose();
       });
 
