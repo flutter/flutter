@@ -6,6 +6,7 @@ import '../../artifacts.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../devfs.dart';
+import '../../isolated/native_assets/dart_hook_result.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
@@ -106,6 +107,7 @@ abstract class BundleWindowsAssets extends Target {
 
   @override
   List<Target> get dependencies => <Target>[
+    const DartBuildForNative(),
     const KernelSnapshot(),
     const InstallCodeAssets(),
     UnpackWindows(targetPlatform),
@@ -141,9 +143,11 @@ abstract class BundleWindowsAssets extends Target {
           .childFile('app.dill')
           .copySync(outputDirectory.childFile('kernel_blob.bin').path);
     }
+    final DartHooksResult dartHookResult = await DartBuild.loadHookResult(environment);
     final Depfile depfile = await copyAssets(
       environment,
       outputDirectory,
+      dartHookResult: dartHookResult,
       targetPlatform: targetPlatform,
       buildMode: buildMode,
       additionalContent: <String, DevFSContent>{

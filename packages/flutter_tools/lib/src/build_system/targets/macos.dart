@@ -13,6 +13,7 @@ import '../../build_info.dart';
 import '../../darwin/darwin.dart';
 import '../../devfs.dart';
 import '../../globals.dart' as globals show xcode;
+import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
@@ -206,9 +207,7 @@ class DebugMacOSFramework extends Target {
       environment.fileSystem.path.join(environment.buildDir.path, 'App.framework', 'App'),
     );
 
-    final Iterable<DarwinArch> darwinArchs =
-        environment.defines[kDarwinArchs]?.split(' ').map(getDarwinArchForName) ??
-        <DarwinArch>[DarwinArch.x86_64, DarwinArch.arm64];
+    final Iterable<DarwinArch> darwinArchs = getDarwinArchsFromEnv(environment.defines);
 
     final Iterable<String> darwinArchArguments = darwinArchs.expand(
       (DarwinArch arch) => <String>['-arch', arch.name],
@@ -285,9 +284,7 @@ class CompileMacOSFramework extends Target {
       kExtraGenSnapshotOptions,
     );
     final TargetPlatform targetPlatform = getTargetPlatformForName(targetPlatformEnvironment);
-    final List<DarwinArch> darwinArchs =
-        environment.defines[kDarwinArchs]?.split(' ').map(getDarwinArchForName).toList() ??
-        <DarwinArch>[DarwinArch.x86_64, DarwinArch.arm64];
+    final List<DarwinArch> darwinArchs = getDarwinArchsFromEnv(environment.defines);
     if (targetPlatform != TargetPlatform.darwin) {
       throw Exception('compile_macos_framework is only supported for darwin TargetPlatform.');
     }
@@ -378,6 +375,9 @@ abstract class MacOSBundleFlutterAssets extends Target {
   const MacOSBundleFlutterAssets();
 
   @override
+  List<Target> get dependencies => const <Target>[DartBuildForNative()];
+
+  @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{BUILD_DIR}/App.framework/App'),
     ...IconTreeShaker.inputs,
@@ -438,9 +438,11 @@ abstract class MacOSBundleFlutterAssets extends Target {
     final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
     final String? flavor = await flutterProject.macos.parseFlavorFromConfiguration(environment);
 
+    final DartHooksResult dartHookResult = await DartBuild.loadHookResult(environment);
     final Depfile assetDepfile = await copyAssets(
       environment,
       assetDirectory,
+      dartHookResult: dartHookResult,
       targetPlatform: TargetPlatform.darwin,
       buildMode: buildMode,
       flavor: flavor,
@@ -560,11 +562,12 @@ class DebugMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
   String get name => 'debug_macos_bundle_flutter_assets';
 
   @override
-  List<Target> get dependencies => const <Target>[
-    KernelSnapshot(),
-    DebugMacOSFramework(),
-    DebugUnpackMacOS(),
-    InstallCodeAssets(),
+  List<Target> get dependencies => <Target>[
+    ...super.dependencies,
+    const KernelSnapshot(),
+    const DebugMacOSFramework(),
+    const DebugUnpackMacOS(),
+    const InstallCodeAssets(),
   ];
 
   @override
@@ -606,10 +609,11 @@ class ProfileMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
   String get name => 'profile_macos_bundle_flutter_assets';
 
   @override
-  List<Target> get dependencies => const <Target>[
-    CompileMacOSFramework(),
-    InstallCodeAssets(),
-    ProfileUnpackMacOS(),
+  List<Target> get dependencies => <Target>[
+    ...super.dependencies,
+    const CompileMacOSFramework(),
+    const InstallCodeAssets(),
+    const ProfileUnpackMacOS(),
   ];
 
   @override
