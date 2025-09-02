@@ -4715,6 +4715,21 @@ void main() {
     final EditableText editableText = tester.widget(find.byType(EditableText));
     expect(editableText.cursorHeight, cursorHeight);
   });
+
+  testWidgets('DropdownMenu does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(
+              child: DropdownMenu<TestMenu>(dropdownMenuEntries: menuChildren),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(DropdownMenu<TestMenu>)), Size.zero);
+  });
 }
 
 enum TestMenu {
