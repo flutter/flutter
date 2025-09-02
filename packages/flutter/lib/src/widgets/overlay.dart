@@ -1707,7 +1707,7 @@ class OverlayPortalController {
 /// child on.
 ///
 /// This is typically used in [OverlayPortal].
-enum OverlayLocation {
+enum OverlayChildLocation {
   /// The [OverlayPortal] renders its overlay child on the closest ancestor
   /// [Overlay] above the widget tree.
   nearestOverlay,
@@ -1804,12 +1804,12 @@ class OverlayPortal extends StatefulWidget {
   ///
   /// The [overlayLocation] sets which [Overlay] this widget attaches the widget
   /// returned by [overlayChildBuilder] to. Defaults to
-  /// [OverlayLocation.nearest].
+  /// [OverlayChildLocation.nearestOverlay].
   const OverlayPortal({
     super.key,
     required this.controller,
     required this.overlayChildBuilder,
-    this.overlayLocation = OverlayLocation.nearest,
+    this.overlayLocation = OverlayChildLocation.nearestOverlay,
     this.child,
   });
 
@@ -1825,7 +1825,7 @@ class OverlayPortal extends StatefulWidget {
     required this.controller,
     required this.overlayChildBuilder,
     this.child,
-  }) : overlayLocation = OverlayLocation.root;
+  }) : overlayLocation = OverlayChildLocation.rootOverlay;
 
   /// Creates an [OverlayPortal] that renders the widget `overlayChildBuilder`
   /// builds on the closest [Overlay] when [OverlayPortalController.show] is
@@ -1851,12 +1851,12 @@ class OverlayPortal extends StatefulWidget {
   ///
   /// The [overlayLocation] sets which [Overlay] this widget attaches the widget
   /// returned by `overlayChildBuilder` to. Defaults to
-  /// [OverlayLocation.nearest].
+  /// [OverlayChildLocation.nearestOverlay].
   OverlayPortal.overlayChildLayoutBuilder({
     Key? key,
     required OverlayPortalController controller,
     required OverlayChildLayoutBuilder overlayChildBuilder,
-    OverlayLocation overlayLocation = OverlayLocation.nearest,
+    OverlayChildLocation overlayLocation = OverlayChildLocation.nearestOverlay,
     required Widget? child,
   }) : this(
          key: key,
@@ -1892,7 +1892,7 @@ class OverlayPortal extends StatefulWidget {
 
   /// The [Overlay] that the widget returns from [overlayChildBuilder] is
   /// attached to.
-  final OverlayLocation overlayLocation;
+  final OverlayChildLocation overlayLocation;
 
   @override
   State<OverlayPortal> createState() => _OverlayPortalState();
@@ -1917,11 +1917,11 @@ class _OverlayPortalState extends State<OverlayPortal> {
         locationCache._theater == marker.theater;
   }
 
-  _OverlayEntryLocation _getLocation(int zOrderIndex, OverlayLocation overlayLocation) {
+  _OverlayEntryLocation _getLocation(int zOrderIndex, OverlayChildLocation overlayLocation) {
     final _OverlayEntryLocation? cachedLocation = _locationCache;
     late final _RenderTheaterMarker marker = _RenderTheaterMarker.of(
       context,
-      targetRootOverlay: overlayLocation == OverlayLocation.root,
+      targetRootOverlay: overlayLocation == OverlayChildLocation.rootOverlay,
     );
     final bool isCacheValid =
         cachedLocation != null &&

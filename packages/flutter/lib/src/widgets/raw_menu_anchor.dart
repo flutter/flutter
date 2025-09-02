@@ -826,7 +826,9 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
     return OverlayPortal(
       controller: _overlayController,
       overlayChildBuilder: _buildOverlay,
-      overlayLocation: useRootOverlay ? OverlayLocation.root : OverlayLocation.nearest,
+      overlayLocation: useRootOverlay
+          ? OverlayChildLocation.rootOverlay
+          : OverlayChildLocation.nearestOverlay,
       child: child,
     );
   }

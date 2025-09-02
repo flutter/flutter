@@ -1243,7 +1243,7 @@ void main() {
     );
     final _RenderLayoutCounter overlayLayoutCounter = _RenderLayoutCounter();
     int layoutCount = 0;
-    OverlayLocation location = OverlayLocation.nearest;
+    OverlayChildLocation location = OverlayChildLocation.nearestOverlay;
     late StateSetter setState;
 
     // This tree has 3 nested Overlays.
@@ -1327,7 +1327,7 @@ void main() {
 
     // Now targets the root overlay.
     setState(() {
-      location = OverlayLocation.root;
+      location = OverlayChildLocation.rootOverlay;
     });
     await tester.pump();
 
@@ -1409,7 +1409,7 @@ void main() {
       height: 100,
       child: OverlayPortal(
         controller: controller1,
-        overlayLocation: OverlayLocation.root,
+        overlayLocation: OverlayChildLocation.rootOverlay,
         overlayChildBuilder: (BuildContext context) => Placeholder(key: overlayPortal),
       ),
     );
@@ -1483,7 +1483,7 @@ void main() {
       height: 100,
       child: OverlayPortal(
         controller: controller1,
-        overlayLocation: OverlayLocation.root,
+        overlayLocation: OverlayChildLocation.rootOverlay,
         overlayChildBuilder: (BuildContext context) => Placeholder(key: overlayPortal),
       ),
     );
