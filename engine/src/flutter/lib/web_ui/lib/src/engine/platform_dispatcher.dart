@@ -1125,11 +1125,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
           computedTypographySettings.wordSpacing == spacingDefault &&
           computedTypographySettings.letterSpacing == spacingDefault &&
           computedTypographySettings.paragraphSpacing == spacingDefault) {
-        // Ignore initial resize event if computed values match default ones.
-        if (typographySettings == null) {
-          return;
-        }
-        // Disable text spacing properties.
+        // Disable text spacing properties if computed values match the default ones.
         _updateTypographySettings(const ui.TypographySettings());
         return;
       }
