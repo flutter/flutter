@@ -953,7 +953,7 @@ class _StretchController extends Listenable {
     return _StretchSimulation(overscroll, velocity, Tolerance.defaultTolerance);
   }
 
-  /// Uses the saturation function approach to scale velocity
+  /// Uses the saturation function approach to scale velocity.
   /// Small velocities remain roughly proportional, while large
   /// velocities gradually saturate. Returns the scaled velocity
   /// with the original direction preserved.
