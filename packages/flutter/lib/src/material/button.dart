@@ -20,7 +20,6 @@ import 'button_theme.dart';
 import 'constants.dart';
 import 'ink_well.dart';
 import 'material.dart';
-import 'material_state.dart';
 import 'material_state_mixin.dart';
 import 'theme.dart';
 import 'theme_data.dart';
