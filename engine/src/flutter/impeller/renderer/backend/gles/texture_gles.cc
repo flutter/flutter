@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/backend/gles/texture_gles.h"
 
+#include <format>
 #include <optional>
 #include <utility>
 
@@ -11,7 +12,6 @@
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/trace_event.h"
 #include "impeller/base/allocation.h"
-#include "impeller/base/strings.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
@@ -255,8 +255,7 @@ void TextureGLES::SetLabel(std::string_view label) {
 void TextureGLES::SetLabel(std::string_view label, std::string_view trailing) {
 #ifdef IMPELLER_DEBUG
   if (reactor_->CanSetDebugLabels()) {
-    reactor_->SetDebugLabel(handle_,
-                            SPrintF("%s %s", label.data(), trailing.data()));
+    reactor_->SetDebugLabel(handle_, std::format("{} {}", label, trailing));
   }
 #endif  // IMPELLER_DEBUG
 }

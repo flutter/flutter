@@ -99,9 +99,9 @@ static bool LinkProgram(
   }
 
   gl.SetDebugLabel(DebugResourceType::kShader, vert_shader,
-                   SPrintF("%s Vertex Shader", descriptor.GetLabel().data()));
+                   std::format("{} Vertex Shader", descriptor.GetLabel()));
   gl.SetDebugLabel(DebugResourceType::kShader, frag_shader,
-                   SPrintF("%s Fragment Shader", descriptor.GetLabel().data()));
+                   std::format("{} Fragment Shader", descriptor.GetLabel()));
 
   fml::ScopedCleanupClosure delete_vert_shader(
       [&gl, vert_shader]() { gl.DeleteShader(vert_shader); });
