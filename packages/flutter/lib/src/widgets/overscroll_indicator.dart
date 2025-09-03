@@ -1034,7 +1034,7 @@ class _StretchController extends Listenable {
     final double exponentialIntensity =
         _stretchIntensity * (1 - math.exp(-absDistance * _exponentialScalar));
 
-    // Maintain sign of overscroll for direction
+    // Maintain sign of overscroll for direction.
     final double directionSign = pullDistance.sign;
     final double newOverscroll = directionSign * (linearIntensity + exponentialIntensity);
     overscroll = newOverscroll + _interruptedOverscroll;
