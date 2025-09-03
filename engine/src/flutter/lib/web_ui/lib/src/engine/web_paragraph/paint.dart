@@ -34,7 +34,7 @@ class TextPaint {
         continue;
       }
       // Placeholders do not need painting, just reserving the space
-      if (block is LinePlaceholdeBlock) {
+      if (block is LinePlaceholderBlock) {
         continue;
       }
       // Let's calculate the sizes

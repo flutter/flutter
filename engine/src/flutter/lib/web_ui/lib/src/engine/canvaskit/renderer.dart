@@ -54,7 +54,6 @@ class CanvasKitRenderer extends Renderer {
 
   /// The scene host, where the root canvas and overlay canvases are added to.
   DomElement? _sceneHost;
-
   DomElement? get sceneHost => _sceneHost;
 
   static Rasterizer _createRasterizer() {

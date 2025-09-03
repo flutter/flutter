@@ -6,16 +6,25 @@ class WebParagraphDebug {
   static bool logging = false;
 
   static void log(String arg) {
-    if (logging) {
-      print(arg);
-    }
+    assert(() {
+      if (logging) {
+        print(arg);
+      }
+      return true;
+    }());
   }
 
   static void warning(String arg) {
-    print('WARNING: $arg');
+    assert(() {
+      print('WARNING: $arg');
+      return true;
+    }());
   }
 
   static void error(String arg) {
-    print('ERROR: $arg');
+    assert(() {
+      print('ERROR: $arg');
+      return true;
+    }());
   }
 }

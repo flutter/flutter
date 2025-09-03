@@ -12,7 +12,6 @@ import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 final List<String> _testFonts = <String>['FlutterTest', 'Ahem'];
-
 List<String> _computeEffectiveFontFamilies(List<String> fontFamilies) {
   if (!ui_web.TestEnvironment.instance.forceTestFonts) {
     return fontFamilies;

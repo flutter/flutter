@@ -26,22 +26,17 @@ final DomCanvasRenderingContext2D layoutContext =
 ///
 /// It uses a [DomHTMLCanvasElement] to get text information
 class TextLayout {
-  TextLayout(this.paragraph)
-    : codeUnitFlags = <CodeUnitFlags>[],
-      textClusters = <ExtendedTextCluster>[],
-      bidiRuns = <BidiRun>[],
-      styledTextBlocks = <StyledTextBlock>[],
-      lines = <TextLine>[];
+  TextLayout(this.paragraph);
 
   final WebParagraph paragraph;
 
-  final List<CodeUnitFlags> codeUnitFlags;
-  final List<ExtendedTextCluster> textClusters;
-  final List<BidiRun> bidiRuns;
-  final List<StyledTextBlock> styledTextBlocks;
-  final List<TextLine> lines;
+  final List<CodeUnitFlags> codeUnitFlags = <CodeUnitFlags>[];
+  final List<ExtendedTextCluster> textClusters = <ExtendedTextCluster>[];
+  final List<BidiRun> bidiRuns = <BidiRun>[];
+  final List<StyledTextBlock> _styledTextBlocks = <StyledTextBlock>[];
+  final List<TextLine> lines = <TextLine>[];
 
-  Map<int, int> textToClusterMap = <int, int>{};
+  final Map<int, int> _textToClusterMap = <int, int>{};
 
   bool hasFlag(ui.TextRange cluster, int flag) {
     return codeUnitFlags[cluster.start].hasFlag(flag);
@@ -94,7 +89,7 @@ class TextLayout {
       if (styledBlock.isPlaceholder) {
         assert(styledBlock.size == 1);
 
-        styledTextBlocks.add(
+        _styledTextBlocks.add(
           StyledTextBlock.fromPlaceholder(
             styledBlock.start,
             styledBlock.end,
@@ -143,7 +138,7 @@ class TextLayout {
       );
 
       final DomTextMetrics blockTextMetrics = layoutContext.measureText(text);
-      styledTextBlocks.add(
+      _styledTextBlocks.add(
         StyledTextBlock(styledBlock.start, styledBlock.end, styledBlock.style, blockTextMetrics),
       );
 
@@ -176,19 +171,19 @@ class TextLayout {
       for (int i = 0; i < textClusters.length; ++i) {
         final ExtendedTextCluster textCluster = textClusters[i];
         for (int j = textCluster.textRange.start; j < textCluster.textRange.end; j += 1) {
-          textToClusterMap[j] = i;
+          _textToClusterMap[j] = i;
         }
       }
 
       // We need one more "fake" cluster so we can loop through clusters
       // without checking indexes for being outside of the range
-      textToClusterMap[paragraph.text.length] = textClusters.length;
+      _textToClusterMap[paragraph.text.length] = textClusters.length;
       textClusters.add(ExtendedTextCluster.fromLast(textClusters.last));
       if (WebParagraphDebug.logging) {
-        debugPrintClusters('Full text');
+        _debugPrintClusters('Full text');
       }
     } else {
-      textToClusterMap[paragraph.text.length] = 0;
+      _textToClusterMap[paragraph.text.length] = 0;
       textClusters.add(ExtendedTextCluster.empty());
     }
   }
@@ -216,8 +211,8 @@ class TextLayout {
     }
   }
 
-  void debugPrintClusters(String header) {
-    // ignore: dead_code
+  void _debugPrintClusters(String header) {
+    // ignore: dead_code, literal_only_boolean_expressions
     if (false) {
       WebParagraphDebug.log('Text Clusters ($header): ${textClusters.length}');
       int i = 0;
@@ -232,7 +227,7 @@ class TextLayout {
   }
 
   void debugPrintTextMetrics(String text, DomTextMetrics textMetrics) {
-    // ignore: dead_code
+    // ignore: dead_code, literal_only_boolean_expressions
     if (false) {
       final clusters = textMetrics.getTextClusters();
       WebParagraphDebug.log('TextMetrics "$text": ${clusters.length}');
@@ -249,7 +244,7 @@ class TextLayout {
   }
 
   void debugPrintClustersByBidi() {
-    // ignore: dead_code
+    // ignore: dead_code, literal_only_boolean_expressions
     if (false) {
       WebParagraphDebug.log('Text Clusters: ${textClusters.length}');
       int runIndex = 0;
@@ -272,11 +267,11 @@ class TextLayout {
 
   ClusterRange convertTextToClusterRange(TextRange textRange) {
     if (textRange.isEmpty) {
-      final int clusterIndex = textToClusterMap[textRange.start]!;
+      final int clusterIndex = _textToClusterMap[textRange.start]!;
       return ClusterRange(start: clusterIndex, end: clusterIndex);
     }
-    final int clusterStart = textToClusterMap[textRange.start]!;
-    final int clusterEnd = textToClusterMap[textRange.end - 1]!;
+    final int clusterStart = _textToClusterMap[textRange.start]!;
+    final int clusterEnd = _textToClusterMap[textRange.end - 1]!;
     return ClusterRange(start: clusterStart, end: clusterEnd + 1);
   }
 
@@ -414,10 +409,10 @@ class TextLayout {
 
       WebParagraphDebug.log(
         'Run: "$runText" '
-        '${bidiRun.clusterRange} & $lineClusterRange = $runClusterRange textRange:$runTextRange ${styledTextBlocks.length}',
+        '${bidiRun.clusterRange} & $lineClusterRange = $runClusterRange textRange:$runTextRange ${_styledTextBlocks.length}',
       );
 
-      for (final styledTextBlock in styledTextBlocks) {
+      for (final styledTextBlock in _styledTextBlocks) {
         final TextRange styleTextRange = TextRange.intersectTextRange(
           styledTextBlock,
           runTextRange,
@@ -440,7 +435,7 @@ class TextLayout {
           advance = theOnlyCluster.advance;
           shiftFromTextBlock = theOnlyCluster.advance.left;
           line.visualBlocks.add(
-            LinePlaceholdeBlock(
+            LinePlaceholderBlock(
               styledTextBlock.placeholder,
               bidiRun.bidiLevel,
               styledTextBlock.style,
@@ -503,7 +498,7 @@ class TextLayout {
       if (block is LineClusterBlock) {
         continue;
       }
-      final placeholderBlock = block as LinePlaceholdeBlock;
+      final placeholderBlock = block as LinePlaceholderBlock;
       placeholderBlock.correctMetrics(line.fontBoundingBoxAscent, line.fontBoundingBoxDescent);
       // Line always counts multipled metrics (no need for the others)
       line.fontBoundingBoxAscent = math.max(line.fontBoundingBoxAscent, placeholderBlock.ascent);
@@ -620,7 +615,7 @@ class TextLayout {
           */
         final firstRect = block.correctedAdvance.translate(
           block.clusterShiftInLine,
-          block is LinePlaceholdeBlock ? 0 : block.rawFontBoundingBoxAscent,
+          block is LinePlaceholderBlock ? 0 : block.rawFontBoundingBoxAscent,
         ); // block.advance.top == 0
         WebParagraphDebug.log(
           'getSelectionRects(${intersect.start},${intersect.end}): '
@@ -1046,8 +1041,8 @@ class LineClusterBlock extends LineBlock {
   final DomTextMetrics? textMetrics;
 }
 
-class LinePlaceholdeBlock extends LineBlock {
-  LinePlaceholdeBlock(
+class LinePlaceholderBlock extends LineBlock {
+  LinePlaceholderBlock(
     this.placeholder,
     super.bidiLevel,
     super.textStyle,
