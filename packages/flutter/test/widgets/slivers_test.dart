@@ -1114,15 +1114,17 @@ void main() {
       ),
     );
 
-    final IndexedSemantics s0 = tester.widget<IndexedSemantics>(
-      find.ancestor(of: find.text('Item 0'), matching: find.byType(IndexedSemantics)).first,
-    );
-    final IndexedSemantics s1 = tester.widget<IndexedSemantics>(
-      find.ancestor(of: find.text('Item 1'), matching: find.byType(IndexedSemantics)).first,
-    );
-    final IndexedSemantics s2 = tester.widget<IndexedSemantics>(
-      find.ancestor(of: find.text('Item 2'), matching: find.byType(IndexedSemantics)).first,
-    );
+    IndexedSemantics semanticsFor(String text) {
+      return tester.widget<IndexedSemantics>(
+        find.ancestor(of: find.text(text), matching: find.byType(IndexedSemantics)).first,
+      );
+    }
+
+    IndexedSemantics semanticsForItem(int index) => semanticsFor('Item $index');
+
+    final IndexedSemantics s0 = semanticsForItem(0);
+    final IndexedSemantics s1 = semanticsForItem(1);
+    final IndexedSemantics s2 = semanticsForItem(2);
 
     expect(s0.index, 10);
     expect(s1.index, 11);
@@ -1509,15 +1511,17 @@ void main() {
       ),
     );
 
-    final IndexedSemantics s0 = tester.widget<IndexedSemantics>(
-      find.ancestor(of: find.text('G 0'), matching: find.byType(IndexedSemantics)).first,
-    );
-    final IndexedSemantics s1 = tester.widget<IndexedSemantics>(
-      find.ancestor(of: find.text('G 1'), matching: find.byType(IndexedSemantics)).first,
-    );
-    final IndexedSemantics s2 = tester.widget<IndexedSemantics>(
-      find.ancestor(of: find.text('G 2'), matching: find.byType(IndexedSemantics)).first,
-    );
+    IndexedSemantics semanticsFor(String text) {
+      return tester.widget<IndexedSemantics>(
+        find.ancestor(of: find.text(text), matching: find.byType(IndexedSemantics)).first,
+      );
+    }
+
+    IndexedSemantics semanticsForGridItem(int index) => semanticsFor('G $index');
+
+    final IndexedSemantics s0 = semanticsForGridItem(0);
+    final IndexedSemantics s1 = semanticsForGridItem(1);
+    final IndexedSemantics s2 = semanticsForGridItem(2);
 
     expect(s0.index, 7);
     expect(s1.index, 8);
