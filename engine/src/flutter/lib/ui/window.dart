@@ -164,7 +164,7 @@ class FlutterView {
   /// See also:
   ///
   ///  * [physicalSize], which returns the current size of the view.
-  ViewConstraints get physicalConstraints => _viewConfiguration.viewConstraints.isEmpty()
+  ViewConstraints get physicalConstraints => _viewConfiguration.viewConstraints.isEmpty
       ? ViewConstraints.tight(physicalSize)
       : _viewConfiguration.viewConstraints;
 
