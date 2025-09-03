@@ -11,6 +11,8 @@
 #include "flutter/impeller/base/validation.h"
 #include "shell/platform/android/android_rendering_selector.h"
 
+namespace fs = std::filesystem;
+
 namespace flutter {
 
 namespace {
@@ -38,8 +40,27 @@ static constexpr const char* kBadSocs[] = {
     "exynos9825"   //
 };
 
-static bool IsDeviceEmulator(std::string_view product_model) {
-  return std::string(product_model).find("gphone") != std::string::npos;
+static bool IsDeviceEmulator() {
+  char property[PROP_VALUE_MAX];
+
+  __system_property_get("ro.hardware", property);
+  std::string_view hardware_prop(property);
+  if (hardware_prop == "goldfish" || hardware_prop == "ranchu" ||
+      hardware_prop == "qemu") {
+    return true;
+  }
+
+  __system_property_get("ro.product.model", property);
+  std::string_view model_prop(property);
+  if (model_prop.find("gphone") != std::string::npos) {
+    return true;
+  }
+
+  if (::access("/dev/qemu_pipe", F_OK) == 0) {
+    return true;
+  }
+
+  return false;
 }
 
 static bool IsKnownBadSOC(std::string_view hardware) {
@@ -64,15 +85,14 @@ GetActualRenderingAPIForImpeller(
   // Even if this check returns true, Impeller may determine it cannot use
   // Vulkan for some other reason, such as a missing required extension or
   // feature. In these cases it will use OpenGLES.
-  char product_model[PROP_VALUE_MAX];
-  __system_property_get("ro.product.model", product_model);
-  if (IsDeviceEmulator(product_model)) {
+  if (IsDeviceEmulator()) {
     // Avoid using Vulkan on known emulators.
     return nullptr;
   }
 
-  __system_property_get("ro.com.google.clientidbase", product_model);
-  if (strcmp(product_model, kAndroidHuawei) == 0) {
+  char property[PROP_VALUE_MAX];
+  __system_property_get("ro.com.google.clientidbase", property);
+  if (strcmp(property, kAndroidHuawei) == 0) {
     // Avoid using Vulkan on Huawei as AHB imports do not
     // consistently work.
     return nullptr;
@@ -85,8 +105,8 @@ GetActualRenderingAPIForImpeller(
     return nullptr;
   }
 
-  __system_property_get("ro.product.board", product_model);
-  if (IsKnownBadSOC(product_model)) {
+  __system_property_get("ro.product.board", property);
+  if (IsKnownBadSOC(property)) {
     FML_LOG(INFO)
         << "Known bad Vulkan driver encountered, falling back to OpenGLES.";
     return nullptr;

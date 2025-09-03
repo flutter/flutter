@@ -8,19 +8,12 @@ import 'package:flutter/widgets.dart';
 
 /// Wraps a [Widget], initializing various state and properties to allow for
 /// previewing of the [Widget] in the widget previewer.
-///
-/// WARNING: This interface is not stable and **will change**.
-///
-/// See also:
-///
-///  * [Preview], an annotation class used to mark functions returning widget
-///    previews.
-// TODO(bkonyi): link to actual documentation when available.
 class WidgetPreview {
   /// Wraps [builder] in a [WidgetPreview] instance that applies some set of
   /// properties.
   const WidgetPreview({
     required this.builder,
+    required this.scriptUri,
     this.packageName,
     this.name,
     this.size,
@@ -29,6 +22,11 @@ class WidgetPreview {
     this.theme,
     this.localizations,
   });
+
+  /// The absolute file:// URI pointing to the script containing this preview.
+  ///
+  /// This matches the URI format sent by IDEs for active location change events.
+  final String scriptUri;
 
   /// The name of the package in which a preview was defined.
   ///
