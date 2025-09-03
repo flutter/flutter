@@ -34,13 +34,13 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ### [3.35.3](https://github.com/flutter/flutter/releases/tag/3.35.3)
 
-- [flutter/172627](https://github.com/flutter/flutter/issues/172627) - Removes unnecessary output when in non-verbose mode.
-- [flutter/173917](https://github.com/flutter/flutter/issues/173917) - Fixes issues with calculating apk version code.
-- [flutter/174437](https://github.com/flutter/flutter/issues/174437) - Fixes an issue where when running a Flutter web application in debug mode, the console is spammed with non-fatal error messages.
-- [flutter/174267](https://github.com/flutter/flutter/issues/174267) - Fixes an issue where golden test failures cause the test harness to stall.
-- [flutter/171691](https://github.com/flutter/flutter/issues/171691) - Fixes a race that can cause crashes in the Impeller Vulkan back end.
-- [flutter/174100](https://github.com/flutter/flutter/issues/174100) - Fixes errors seen when rendering superellipses on Impeller.
-- [flutter/174015](https://github.com/flutter/flutter/issues/174015) - Removes obsolete warning and error message when switching between build mode through Xcode.
+- [flutter/172627](https://github.com/flutter/flutter/issues/172627) - Unnecessary output is printed in non-verbose mode.
+- [flutter/173917](https://github.com/flutter/flutter/issues/173917) - On Android, `flutter build apk` may fail to calculate the version code when using `--build-number`.
+- [flutter/174437](https://github.com/flutter/flutter/issues/174437) - When running a Flutter web application in debug mode, the console is spammed with non-fatal error messages.
+- [flutter/174267](https://github.com/flutter/flutter/issues/174267) - Golden test failures can cause the test harness to stall.
+- [flutter/171691](https://github.com/flutter/flutter/issues/171691) - A race condition can cause crashes in the Impeller Vulkan back end.
+- [flutter/174100](https://github.com/flutter/flutter/issues/174100) - Superellipses may not render correctly when using Impeller.
+- [flutter/174015](https://github.com/flutter/flutter/issues/174015) - Obsolete warning and error messages are shown when switching between build modes in Xcode.
 
 ### [3.35.2](https://github.com/flutter/flutter/releases/tag/3.35.2)
 
