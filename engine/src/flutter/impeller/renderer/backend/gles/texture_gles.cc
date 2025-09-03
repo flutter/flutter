@@ -255,8 +255,7 @@ void TextureGLES::SetLabel(std::string_view label) {
 void TextureGLES::SetLabel(std::string_view label, std::string_view trailing) {
 #ifdef IMPELLER_DEBUG
   if (reactor_->CanSetDebugLabels()) {
-    reactor_->SetDebugLabel(
-        handle_, std::format("{} {}", label.data(), trailing.data()));
+    reactor_->SetDebugLabel(handle_, std::format("{} {}", label, trailing));
   }
 #endif  // IMPELLER_DEBUG
 }
