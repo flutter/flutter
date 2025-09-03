@@ -347,7 +347,8 @@ default_library_type = "static_library"
 
 # These Sanitizers all imply using the Clang compiler. On Windows they either
 # don't work or work differently.
-using_sanitizer = !is_win && (is_asan || is_hwasan || is_lsan || is_tsan || is_msan)
+using_sanitizer =
+    !is_win && (is_asan || is_hwasan || is_lsan || is_tsan || is_msan)
 if (!is_clang && using_sanitizer) {
   is_clang = true
 }
