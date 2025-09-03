@@ -40,10 +40,6 @@ mixin SemanticsBinding on BindingBase {
       };
     _handleSemanticsEnabledChanged();
     addSemanticsEnabledListener(_handleFrameworkSemanticsEnabledChanged);
-    // Ensure the initial value is set.
-    if (semanticsEnabled) {
-      _handleFrameworkSemanticsEnabledChanged();
-    }
   }
 
   /// The current [SemanticsBinding], if one has been created.
