@@ -213,5 +213,35 @@
   "backButtonLabel": "Back",
   "@backButtonLabel": {
     "description": "Label for the back button. Used as the semantic label for the back button in CupertinoNavigationBar and CupertinoSliverNavigationBar and as a fallback display when the previous page title is truncated."
+  },
+
+  "expansionTileExpandedHint": "double tap to collapse",
+  "@expansionTileExpandedHint": {
+    "description": "The verb which describes the tap action on an expanded CupertinoExpansionTile. This is used by VoiceOver on iOS and macOS. This string will be appended to the collapsedHint string which describes the action to be performed on an expanded CupertinoExpansionTile. In the case of US english, this would be 'Expanded\n double tap to collapse.' The exact phrasing of the hint will vary based on locale"
+  },
+
+  "expansionTileCollapsedHint": "double tap to expand",
+  "@expansionTileCollapsedHint": {
+    "description": "The verb which describes the tap action on a collapsed CupertinoExpansionTile. This is used by VoiceOver on iOS and macOS. This string will be appended to the expandedHint string which describes the action to be performed on a collapsed CupertinoExpansionTile. In the case of US english, this would be 'Collapsed\n double tap to expand.' The exact phrasing of the hint will vary based on locale"
+  },
+
+  "expansionTileExpandedTapHint": "Collapse",
+  "@expansionTileExpandedTapHint": {
+    "description": "The verb which describes what happens when an expanded CupertinoExpansionTile is pressed. This is used by TalkBack on Android to replace the default hint on the accessibility action. The verb will be concatenated with a prefix string which describes how to perform the action, which by default is 'double tap to activate'. In the case of US english, this would be 'double tap to collapse.' The exact phrasing of the hint will vary based on locale"
+  },
+
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "@expansionTileCollapsedTapHint": {
+    "description": "The verb which describes what happens when an expanded CupertinoExpansionTile is pressed. This is used by TalkBack on Android to replace the default hint on the accessibility action. The verb will be concatenated with a prefix string which describes how to perform the action, which by default is 'double tap to activate'. In the case of US english, this would be 'double tap to expand for more details.' The exact phrasing of the hint will vary based on locale"
+  },
+
+  "expandedHint": "Collapsed",
+  "@expandedHint": {
+    "description": "The verb which describes the CupertinoExpansionTile state when an expanded CupertinoExpansionTile is pressed."
+  },
+
+  "collapsedHint": "Expanded",
+  "@collapsedHint": {
+    "description": "The verb which describes the CupertinoExpansionTile state when a collapsed CupertinoExpansionTile is pressed."
   }
 }

@@ -29,5 +29,11 @@
   "shareButtonLabel": "ចែករំលែក...",
   "clearButtonLabel": "សម្អាត",
   "cancelButtonLabel": "បោះបង់",
-  "backButtonLabel": "ថយក្រោយ"
+  "backButtonLabel": "ថយក្រោយ",
+  "expansionTileExpandedHint": "double tap to collapse",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }
