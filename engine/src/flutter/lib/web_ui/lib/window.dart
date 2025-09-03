@@ -131,6 +131,10 @@ final class TypographySettings {
 
   @override
   int get hashCode => Object.hash(lineHeight, letterSpacing, wordSpacing, paragraphSpacing);
+
+  @override
+  String toString() =>
+      'TypographySettings(lineHeight: $lineHeight, letterSpacing: $letterSpacing, wordSpacing: $wordSpacing, paragraphSpacing: $paragraphSpacing)';
 }
 
 abstract class AccessibilityFeatures {
