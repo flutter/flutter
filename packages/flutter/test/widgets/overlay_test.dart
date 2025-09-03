@@ -206,6 +206,13 @@ void main() {
     );
   });
 
+  test('of method calls getElementForInheritedWidgetOfExactType', () async {
+    final FakeBuildContext context = FakeBuildContext();
+    expect(context.called, isFalse);
+    expect(Overlay.maybeOf(context), isNull);
+    expect(context.called, isTrue);
+  });
+
   testWidgets('insert top', (WidgetTester tester) async {
     final GlobalKey overlayKey = GlobalKey();
     final List<String> buildOrder = <String>[];
@@ -1954,6 +1961,106 @@ class StatefulTestState extends State<StatefulTestWidget> {
     rebuildCount += 1;
     return Container();
   }
+}
+
+class FakeBuildContext extends BuildContext {
+  bool called = false;
+
+  @override
+  bool get debugDoingBuild => throw UnimplementedError();
+
+  @override
+  InheritedWidget dependOnInheritedElement(InheritedElement ancestor, {Object? aspect}) {
+    throw UnimplementedError();
+  }
+
+  @override
+  T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({Object? aspect}) {
+    throw UnimplementedError();
+  }
+
+  @override
+  DiagnosticsNode describeElement(
+    String name, {
+    DiagnosticsTreeStyle style = DiagnosticsTreeStyle.errorProperty,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  List<DiagnosticsNode> describeMissingAncestor({required Type expectedAncestorType}) {
+    throw UnimplementedError();
+  }
+
+  @override
+  DiagnosticsNode describeOwnershipChain(String name) {
+    throw UnimplementedError();
+  }
+
+  @override
+  DiagnosticsNode describeWidget(
+    String name, {
+    DiagnosticsTreeStyle style = DiagnosticsTreeStyle.errorProperty,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  void dispatchNotification(Notification notification) {}
+
+  @override
+  T? findAncestorRenderObjectOfType<T extends RenderObject>() {
+    throw UnimplementedError();
+  }
+
+  @override
+  T? findAncestorStateOfType<T extends State<StatefulWidget>>() {
+    throw UnimplementedError();
+  }
+
+  @override
+  T? findAncestorWidgetOfExactType<T extends Widget>() {
+    throw UnimplementedError();
+  }
+
+  @override
+  RenderObject? findRenderObject() {
+    throw UnimplementedError();
+  }
+
+  @override
+  T? findRootAncestorStateOfType<T extends State<StatefulWidget>>() {
+    throw UnimplementedError();
+  }
+
+  @override
+  InheritedElement? getElementForInheritedWidgetOfExactType<T extends InheritedWidget>() {
+    called = true;
+    return null;
+  }
+
+  @override
+  T? getInheritedWidgetOfExactType<T extends InheritedWidget>() {
+    throw UnimplementedError();
+  }
+
+  @override
+  bool get mounted => throw UnimplementedError();
+
+  @override
+  BuildOwner? get owner => throw UnimplementedError();
+
+  @override
+  Size? get size => throw UnimplementedError();
+
+  @override
+  void visitAncestorElements(ConditionalElementVisitor visitor) {}
+
+  @override
+  void visitChildElements(ElementVisitor visitor) {}
+
+  @override
+  Widget get widget => throw UnimplementedError();
 }
 
 /// This helper makes leak tracker forgiving the entry is not disposed.

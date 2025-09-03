@@ -36,7 +36,7 @@ object DeepLinkJsonFromManifestTaskHelper {
      *     ]
      * }
      */
-    public fun createAppLinkSettingsFile(
+    fun createAppLinkSettingsFile(
         applicationId: String,
         manifestFile: RegularFileProperty,
         deepLinkJson: RegularFileProperty
@@ -106,29 +106,19 @@ object DeepLinkJsonFromManifestTaskHelper {
                     appLinkIntent.children().filterIsInstance<Node>().filter { item ->
                         item.name() == "action"
                     }
-                // Any action item causes intentFilterCheck to always be true
-                // and we keep looping instead of exiting out early.
-                // TODO: Exit out early per intent filter action view.
-                actionItems.forEach { action ->
-                    if (action.attribute(MANIFEST_NAME_KEY) == "android.intent.action.VIEW") {
-                        intentFilterCheck.hasActionView = true
+                intentFilterCheck.hasActionView =
+                    actionItems.any { action ->
+                        action.attribute(MANIFEST_NAME_KEY) == "android.intent.action.VIEW"
                     }
-                }
                 val categoryItems: List<Node> =
                     appLinkIntent.children().filterIsInstance<Node>().filter { item ->
                         item.name() == "category"
                     }
-                categoryItems.forEach { category ->
-                    // TODO: Exit out early per intent filter default category.
-                    if (category.attribute(MANIFEST_NAME_KEY) == "android.intent.category.DEFAULT") {
-                        intentFilterCheck.hasDefaultCategory = true
-                    }
-                    // TODO: Exit out early per intent filter browsable category.
-                    if (category.attribute(MANIFEST_NAME_KEY) == "android.intent.category.BROWSABLE") {
-                        intentFilterCheck.hasBrowsableCategory =
-                            true
-                    }
-                }
+                intentFilterCheck.hasDefaultCategory =
+                    categoryItems.any { category -> category.attribute(MANIFEST_NAME_KEY) == "android.intent.category.DEFAULT" }
+                intentFilterCheck.hasBrowsableCategory =
+                    categoryItems.any { category -> category.attribute(MANIFEST_NAME_KEY) == "android.intent.category.BROWSABLE" }
+
                 val dataItems: List<Node> =
                     appLinkIntent.children().filterIsInstance<Node>().filter { item ->
                         item.name() == "data"
@@ -161,10 +151,10 @@ object DeepLinkJsonFromManifestTaskHelper {
                     if (paths.isEmpty()) {
                         paths.add(".*")
                     }
-                    // Sets are not ordered this could produce a bug.
-                    schemes.forEach { scheme ->
-                        hosts.forEach { host ->
-                            paths.forEach { path ->
+                    // Sets are not ordered so the sortedBy gives them a predictable order.
+                    schemes.sortedBy { it ?: "" }.forEach { scheme ->
+                        hosts.sortedBy { it ?: "" }.forEach { host ->
+                            paths.sortedBy { it ?: "" }.forEach { path ->
                                 appLinkSettings.deeplinks.add(
                                     Deeplink(
                                         scheme,

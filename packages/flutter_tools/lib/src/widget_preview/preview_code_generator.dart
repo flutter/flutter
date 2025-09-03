@@ -190,6 +190,7 @@ class PreviewCodeGenerator {
     return cb.refer(_kWidgetPreviewClass, _kWidgetPreviewLibraryUri).newInstance(
       <cb.Expression>[],
       <String, cb.Expression>{
+        PreviewDetails.kScriptUri: cb.literalString(preview.scriptUri.toString()),
         // TODO(bkonyi): try to display the preview name, even if the preview can't be displayed.
         if (!libraryDetails.dependencyHasErrors &&
             !libraryDetails.hasErrors) ...<String, cb.Expression>{
