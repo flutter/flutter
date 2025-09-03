@@ -15321,20 +15321,19 @@ void main() {
     await gesture.moveTo(iconArea);
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.basic,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
-    // TODO(camsim99): consider testing iconubtton default on web here or in a better test file.
 
     await gesture.moveTo(prefixIconArea);
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.basic,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
 
     await gesture.moveTo(suffixIconArea);
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.basic,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
   });
 

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -230,9 +231,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.basic,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
-    // TODO(camsim99): Add test for PopupMenu.
 
     // Test unchecked CheckedPopupMenuItem label.
     ListTile listTile = tester.widget<ListTile>(find.byType(ListTile).first);
@@ -572,9 +572,8 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-        SystemMouseCursors.basic,
+        kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
       );
-      // TODO(camsim99): Add test here for PopupMenu.
 
       // Check popup menu padding.
       final SingleChildScrollView popupMenu = tester.widget<SingleChildScrollView>(

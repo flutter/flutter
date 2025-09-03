@@ -606,7 +606,6 @@ void main() {
     expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
   });
 
-  // TODO(camsim99): test web changes
   testWidgets('RawMaterialButton changes mouse cursor as expected when hovered', (
     WidgetTester tester,
   ) async {
@@ -646,7 +645,7 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.basic,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
 
     // Test default cursor when disabled

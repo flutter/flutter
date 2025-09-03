@@ -1709,7 +1709,7 @@ void main() {
     ]);
   });
 
-  testWidgets('ToggleButtons changes mouse cursor when the button is hovered as expected', (
+  testWidgets('ToggleButtons changes mouse cursor when the button is hovered', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
@@ -1755,9 +1755,8 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.basic,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
-    // TODO(camsim99): test web
 
     // Test default cursor when disabled
     await tester.pumpWidget(

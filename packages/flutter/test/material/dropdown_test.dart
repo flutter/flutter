@@ -3930,7 +3930,6 @@ void main() {
     });
   });
 
-  // TODO(camsim99): fix all modified test files
   testWidgets('DropdownButton does not change mouse cursor when hovered', (
     WidgetTester tester,
   ) async {
@@ -3966,9 +3965,9 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.basic,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
-    // TODO(camsim99): test web
+
     await gesture.moveTo(offDropdownButton);
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),

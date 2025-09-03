@@ -974,7 +974,7 @@ void main() {
       SystemMouseCursors.forbidden,
     );
 
-    // Test default is click
+    // Test default is click on web, basic on non-web
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -991,8 +991,8 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.basic,
-    ); // TODO(camsim99): test web
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
   });
 
   testWidgets('disabled IconButton has basic mouse cursor', (WidgetTester tester) async {
