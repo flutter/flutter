@@ -65,7 +65,8 @@ class ButtonTemplate extends TokenTemplate {
   }
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends ButtonStyle {
   _${blockName}DefaultsM3(this.context)
    : super(
@@ -175,9 +176,16 @@ ${tokenAvailable("$tokenGroup.outline.color") ? '''
     const MaterialStatePropertyAll<OutlinedBorder>(${shape("$tokenGroup.container", '')});
 
   @override
-  MaterialStateProperty<MouseCursor?>? get mouseCursor => MaterialStateProperty.all<MouseCursor?>(
-    kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
-  );
+  WidgetStateProperty<MouseCursor?>? get mouseCursor {
+    return WidgetStateProperty.resolveWith(
+      (Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
+          return SystemMouseCursors.basic;
+        }
+        return kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic;
+      },
+    );
+  }
 
   @override
   VisualDensity? get visualDensity => Theme.of(context).visualDensity;

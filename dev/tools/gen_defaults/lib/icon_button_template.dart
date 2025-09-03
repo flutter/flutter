@@ -240,7 +240,8 @@ class IconButtonTemplate extends TokenTemplate {
   }
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends ButtonStyle {
   _${blockName}DefaultsM3(this.context, this.toggleable)
     : super(
@@ -300,9 +301,16 @@ class _${blockName}DefaultsM3 extends ButtonStyle {
   WidgetStateProperty<OutlinedBorder>? get shape =>${_shape()};
 
   @override
-  MaterialStateProperty<MouseCursor?>? get mouseCursor => MaterialStateProperty.all<MouseCursor?>(
-    kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
-  );
+  WidgetStateProperty<MouseCursor?>? get mouseCursor {
+    return WidgetStateProperty.resolveWith(
+      (Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
+          return SystemMouseCursors.basic;
+        }
+        return kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic;
+      },
+    );
+  }
 
   @override
   VisualDensity? get visualDensity => VisualDensity.standard;

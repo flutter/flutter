@@ -1144,9 +1144,16 @@ class _IconButtonDefaultsM3 extends ButtonStyle {
     const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
-  MaterialStateProperty<MouseCursor?>? get mouseCursor => MaterialStateProperty.all<MouseCursor?>(
-    kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
-  );
+  WidgetStateProperty<MouseCursor?>? get mouseCursor {
+    return WidgetStateProperty.resolveWith(
+      (Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
+          return SystemMouseCursors.basic;
+        }
+        return kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic;
+      },
+    );
+  }
 
   @override
   VisualDensity? get visualDensity => VisualDensity.standard;
@@ -1288,9 +1295,16 @@ class _FilledIconButtonDefaultsM3 extends ButtonStyle {
     const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
-  MaterialStateProperty<MouseCursor?>? get mouseCursor => MaterialStateProperty.all<MouseCursor?>(
-    kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
-  );
+  WidgetStateProperty<MouseCursor?>? get mouseCursor {
+    return WidgetStateProperty.resolveWith(
+      (Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
+          return SystemMouseCursors.basic;
+        }
+        return kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic;
+      },
+    );
+  }
 
   @override
   VisualDensity? get visualDensity => VisualDensity.standard;
@@ -1432,9 +1446,16 @@ class _FilledTonalIconButtonDefaultsM3 extends ButtonStyle {
     const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
-  MaterialStateProperty<MouseCursor?>? get mouseCursor => MaterialStateProperty.all<MouseCursor?>(
-    kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
-  );
+  WidgetStateProperty<MouseCursor?>? get mouseCursor {
+    return WidgetStateProperty.resolveWith(
+      (Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
+          return SystemMouseCursors.basic;
+        }
+        return kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic;
+      },
+    );
+  }
 
   @override
   VisualDensity? get visualDensity => VisualDensity.standard;
@@ -1571,9 +1592,16 @@ class _OutlinedIconButtonDefaultsM3 extends ButtonStyle {
     const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
-  MaterialStateProperty<MouseCursor?>? get mouseCursor => MaterialStateProperty.all<MouseCursor?>(
-    kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
-  );
+  WidgetStateProperty<MouseCursor?>? get mouseCursor {
+    return WidgetStateProperty.resolveWith(
+      (Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
+          return SystemMouseCursors.basic;
+        }
+        return kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic;
+      },
+    );
+  }
 
   @override
   VisualDensity? get visualDensity => VisualDensity.standard;
