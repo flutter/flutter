@@ -5,6 +5,7 @@
 #ifndef FLUTTER_FML_UNIQUE_OBJECT_H_
 #define FLUTTER_FML_UNIQUE_OBJECT_H_
 
+#include <concepts>
 #include <utility>
 
 #include "flutter/fml/logging.h"
@@ -12,18 +13,20 @@
 
 namespace fml {
 
-// struct UniqueFooTraits {
-//   // This function should be fast and inline.
-//   static int InvalidValue() { return 0; }
-//
-//   // This function should be fast and inline.
-//   static bool IsValid(const T& value) { return value != InvalidValue(); }
-//
-//   // This free function will not be called if f == InvalidValue()!
-//   static void Free(int f) { ::FreeFoo(f); }
-// };
+template <typename T, typename Traits>
+concept UniqueObjectTraits = requires {
+  // |InvalidValue| should be fast and inline.
+  { Traits::InvalidValue() } -> std::same_as<T>;
+
+  // |IsValid| function should be fast and inline.
+  { Traits::IsValid(T{}) } -> std::same_as<bool>;
+
+  // |Free| function will not be called if value == InvalidValue()!
+  { Traits::Free(T{}) };
+};
 
 template <typename T, typename Traits>
+  requires UniqueObjectTraits<T, Traits>
 class UniqueObject {
  private:
   // This must be first since it's used inline below.
