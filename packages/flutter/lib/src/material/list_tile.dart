@@ -31,6 +31,7 @@ import 'icon_button_theme.dart';
 import 'ink_decoration.dart';
 import 'ink_well.dart';
 import 'list_tile_theme.dart';
+import 'material.dart';
 import 'material_state.dart';
 import 'text_theme.dart';
 import 'theme.dart';
@@ -969,29 +970,27 @@ class ListTile extends StatelessWidget {
             ? ListTileTitleAlignment.threeLine
             : ListTileTitleAlignment.titleHeight);
 
-    return InkWell(
-      customBorder: shape ?? tileTheme.shape,
-      onTap: enabled ? onTap : null,
-      onLongPress: enabled ? onLongPress : null,
-      onFocusChange: onFocusChange,
-      mouseCursor: effectiveMouseCursor,
-      canRequestFocus: enabled,
-      focusNode: focusNode,
-      focusColor: focusColor,
-      hoverColor: hoverColor,
-      splashColor: splashColor,
-      autofocus: autofocus,
-      enableFeedback: enableFeedback ?? tileTheme.enableFeedback ?? true,
-      statesController: statesController,
-      child: Semantics(
-        button: internalAddSemanticForOnTap && (onTap != null || onLongPress != null),
-        selected: selected,
-        enabled: enabled,
-        child: Ink(
-          decoration: ShapeDecoration(
-            shape: shape ?? tileTheme.shape ?? const Border(),
-            color: _tileBackgroundColor(theme, tileTheme, defaults),
-          ),
+    return Material(
+      shape: shape ?? tileTheme.shape ?? const Border(),
+      color: _tileBackgroundColor(theme, tileTheme, defaults),
+      child: InkWell(
+        customBorder: shape ?? tileTheme.shape,
+        onTap: enabled ? onTap : null,
+        onLongPress: enabled ? onLongPress : null,
+        onFocusChange: onFocusChange,
+        mouseCursor: effectiveMouseCursor,
+        canRequestFocus: enabled,
+        focusNode: focusNode,
+        focusColor: focusColor,
+        hoverColor: hoverColor,
+        splashColor: splashColor,
+        autofocus: autofocus,
+        enableFeedback: enableFeedback ?? tileTheme.enableFeedback ?? true,
+        statesController: statesController,
+        child: Semantics(
+          button: internalAddSemanticForOnTap && (onTap != null || onLongPress != null),
+          selected: selected,
+          enabled: enabled,
           child: SafeArea(
             top: false,
             bottom: false,
