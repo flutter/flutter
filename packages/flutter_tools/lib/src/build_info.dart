@@ -614,6 +614,35 @@ enum TargetPlatform {
     }
   }
 
+  String get osName {
+    switch (this) {
+      case TargetPlatform.linux_x64:
+      case TargetPlatform.linux_arm64:
+        return 'linux';
+      case TargetPlatform.darwin:
+        return 'macos';
+      case TargetPlatform.windows_x64:
+      case TargetPlatform.windows_arm64:
+        return 'windows';
+      case TargetPlatform.android:
+      case TargetPlatform.android_arm:
+      case TargetPlatform.android_arm64:
+      case TargetPlatform.android_x64:
+        return 'android';
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
+        return 'fuchsia';
+      case TargetPlatform.ios:
+        return 'ios';
+      case TargetPlatform.tester:
+        return 'flutter-tester';
+      case TargetPlatform.web_javascript:
+        return 'web';
+      case TargetPlatform.unsupported:
+        throw UnsupportedError('Unexpected target platform $this');
+    }
+  }
+
   String get simpleName {
     switch (this) {
       case TargetPlatform.linux_x64:
@@ -738,6 +767,12 @@ DarwinArch getDarwinArchForName(String arch) {
     'x86_64' => DarwinArch.x86_64,
     _ => throw Exception('Unsupported MacOS arch name "$arch"'),
   };
+}
+
+List<DarwinArch> getDarwinArchsFromEnv(Map<String, String> defines) {
+  const defaultDarwinArchitectures = <DarwinArch>[DarwinArch.x86_64, DarwinArch.arm64];
+  return defines[kDarwinArchs]?.split(' ').map(getDarwinArchForName).toList() ??
+      defaultDarwinArchitectures;
 }
 
 String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch? darwinArch}) {
@@ -978,20 +1013,6 @@ const kSdkRoot = 'SdkRoot';
 
 /// Whether to enable Dart obfuscation and where to save the symbol map.
 const kDartObfuscation = 'DartObfuscation';
-
-/// Whether to enable Native Assets.
-///
-/// If true, native assets are built and the mapping for native assets lookup
-/// at runtime is embedded in the kernel file.
-///
-/// If false, native assets are not built, and an empty mapping is embedded in
-/// the kernel file. Used for targets that trigger kernel builds but
-/// are not OS/architecture specific.
-///
-/// Supported values are 'true' and 'false'.
-///
-/// Defaults to 'true'.
-const kNativeAssets = 'NativeAssets';
 
 /// An output directory where one or more code-size measurements may be written.
 const kCodeSizeDirectory = 'CodeSizeDirectory';
