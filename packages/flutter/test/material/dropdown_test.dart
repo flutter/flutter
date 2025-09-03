@@ -4694,4 +4694,26 @@ void main() {
       expect(fieldKey.currentState!.value, 'one');
     },
   );
+
+  testWidgets('DropdownButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(
+              child: DropdownButton<String>(
+                value: 'a',
+                onChanged: (_) {},
+                items: const <DropdownMenuItem<String>>[
+                  DropdownMenuItem<String>(value: 'a', child: Text('a')),
+                  DropdownMenuItem<String>(value: 'b', child: Text('b')),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(DropdownButton<String>)), Size.zero);
+  });
 }
