@@ -4,6 +4,7 @@
 
 #include "impeller/entity/contents/content_context.h"
 
+#include <format>
 #include <memory>
 #include <utility>
 
@@ -190,7 +191,7 @@ RenderPipelineHandleT* CreateIfNeeded(
                            PipelineDescriptor& desc) {
         opts.ApplyToPipelineDescriptor(desc);
         desc.SetLabel(
-            SPrintF("%s V#%zu", desc.GetLabel().data(), variants_count));
+            std::format("{} V#{}", desc.GetLabel().data(), variants_count));
       });
   std::unique_ptr<RenderPipelineHandleT> variant =
       std::make_unique<RenderPipelineHandleT>(std::move(variant_future));
