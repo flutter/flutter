@@ -804,14 +804,11 @@ class _DropdownMenuItemContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      cursor: SystemMouseCursors.basic,
-      child: Semantics(
-        button: true,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: _kMenuItemHeight),
-          child: Align(alignment: alignment, child: child),
-        ),
+    return Semantics(
+      button: true,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: _kMenuItemHeight),
+        child: Align(alignment: alignment, child: child),
       ),
     );
   }
@@ -1570,20 +1567,16 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     if (items.isEmpty) {
       innerItemsWidget = const SizedBox.shrink();
     } else {
-      innerItemsWidget = MouseRegion(
-        cursor: SystemMouseCursors.basic, // not needed
-        child: IndexedStack(
-          index: _selectedIndex ?? hintIndex,
-          alignment: widget.alignment,
-          children: widget.isDense
-              ? items
-              : items.map((Widget item) {
-                  final Widget itemWidget = widget.itemHeight != null
-                      ? SizedBox(height: widget.itemHeight, child: item)
-                      : Column(mainAxisSize: MainAxisSize.min, children: <Widget>[item]);
-                  return MouseRegion(cursor: SystemMouseCursors.basic, child: itemWidget);
-                }).toList(),
-        ),
+      innerItemsWidget = IndexedStack(
+        index: _selectedIndex ?? hintIndex,
+        alignment: widget.alignment,
+        children: widget.isDense
+            ? items
+            : items.map((Widget item) {
+                return widget.itemHeight != null
+                    ? SizedBox(height: widget.itemHeight, child: item)
+                    : Column(mainAxisSize: MainAxisSize.min, children: <Widget>[item]);
+              }).toList(),
       );
     }
 
@@ -1603,8 +1596,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              innerItemsWidget,
-              // if (widget.isExpanded) Expanded(child: innerItemsWidget) else innerItemsWidget,
+              if (widget.isExpanded) Expanded(child: innerItemsWidget) else innerItemsWidget,
               if (widget._inputDecoration == null) effectiveSuffixIcon,
             ],
           ),
@@ -1634,7 +1626,10 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       );
     }
 
-    final MouseCursor effectiveMouseCursor = SystemMouseCursors.basic;
+    final MouseCursor effectiveMouseCursor = WidgetStateProperty.resolveAs<MouseCursor>(
+      MaterialStateMouseCursor.statelessClickable,
+      <WidgetState>{if (!_enabled) WidgetState.disabled},
+    );
 
     // When an InputDecoration is provided, use it instead of using an InkWell
     // that overflows in some cases (such as showing an errorText) and requires
