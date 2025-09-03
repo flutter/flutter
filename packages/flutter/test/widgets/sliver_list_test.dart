@@ -366,15 +366,15 @@ void main() {
   testWidgets('SliverList.builder should respect semanticIndexOffset', (WidgetTester tester) async {
     await tester.pumpWidget(_buildSliverListBuilder(semanticIndexOffset: 5));
 
-    final IndexedSemantics s0 = tester.widget<IndexedSemantics>(
-      find.ancestor(of: find.text('Tile 0'), matching: find.byType(IndexedSemantics)).first,
-    );
-    final IndexedSemantics s1 = tester.widget<IndexedSemantics>(
-      find.ancestor(of: find.text('Tile 1'), matching: find.byType(IndexedSemantics)).first,
-    );
-    final IndexedSemantics s2 = tester.widget<IndexedSemantics>(
-      find.ancestor(of: find.text('Tile 2'), matching: find.byType(IndexedSemantics)).first,
-    );
+    IndexedSemantics semanticsForTile(int i) {
+      return tester.widget<IndexedSemantics>(
+        find.ancestor(of: find.text('Tile $i'), matching: find.byType(IndexedSemantics)).first,
+      );
+    }
+
+    final IndexedSemantics s0 = semanticsForTile(0);
+    final IndexedSemantics s1 = semanticsForTile(1);
+    final IndexedSemantics s2 = semanticsForTile(2);
 
     expect(s0.index, 5);
     expect(s1.index, 6);
