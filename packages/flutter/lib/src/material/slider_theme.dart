@@ -1210,12 +1210,16 @@ class ValueIndicatorMultilineConfig with Diagnosticable {
   /// This property is ignored by [DropSliderValueIndicatorShape] (Material 2)
   /// as it uses a different geometry that doesn't require corner padding.
   ///
-  /// If null, uses a default padding of 8.0 logical pixels for rounded rect shapes.
-  final double? cornerPadding;
+  /// If null, uses a default padding of [EdgeInsets.all(8.0)] for rounded rect shapes.
+  final EdgeInsetsGeometry? cornerPadding;
 
   /// Creates a copy of this configuration with the given fields replaced
   /// with new values.
-  ValueIndicatorMultilineConfig copyWith({bool? enabled, int? maxLines, double? cornerPadding}) {
+  ValueIndicatorMultilineConfig copyWith({
+    bool? enabled,
+    int? maxLines,
+    EdgeInsetsGeometry? cornerPadding,
+  }) {
     return ValueIndicatorMultilineConfig(
       enabled: enabled ?? this.enabled,
       maxLines: maxLines ?? this.maxLines,
@@ -1241,7 +1245,7 @@ class ValueIndicatorMultilineConfig with Diagnosticable {
     return ValueIndicatorMultilineConfig(
       enabled: t < 0.5 ? a.enabled : b.enabled,
       maxLines: t < 0.5 ? a.maxLines : b.maxLines,
-      cornerPadding: lerpDouble(a.cornerPadding, b.cornerPadding, t),
+      cornerPadding: EdgeInsetsGeometry.lerp(a.cornerPadding, b.cornerPadding, t),
     );
   }
 
@@ -1267,7 +1271,7 @@ class ValueIndicatorMultilineConfig with Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<bool>('enabled', enabled));
     properties.add(IntProperty('maxLines', maxLines));
-    properties.add(DoubleProperty('cornerPadding', cornerPadding));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('cornerPadding', cornerPadding));
   }
 }
 
