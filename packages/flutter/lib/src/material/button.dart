@@ -115,13 +115,15 @@ class RawMaterialButton extends StatefulWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// button.
   ///
-  /// If [mouseCursor] is a [WidgetStateMouseCursor],
+  /// On web, if [mouseCursor] is a [WidgetStateMouseCursor],
   /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
   ///  * [WidgetState.pressed].
   ///  * [WidgetState.hovered].
   ///  * [WidgetState.focused].
   ///  * [WidgetState.disabled].
+  ///
+  /// On all other platforms, [mouseCursor] will be used directly.
   /// {@endtemplate}
   ///
   /// If this property is null, [WidgetStateMouseCursor.statelessClickable] will be used.
@@ -362,13 +364,15 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
     final BoxConstraints effectiveConstraints = widget.visualDensity.effectiveConstraints(
       widget.constraints,
     );
-    final MouseCursor? effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(
-      widget.mouseCursor ??
-          (kIsWeb
-              ? MaterialStateMouseCursor.clickable
-              : MaterialStateMouseCursor.statelessClickable),
+
+    final MouseCursor? webCursor = WidgetStateProperty.resolveAs<MouseCursor?>(
+      widget.mouseCursor ?? WidgetStateMouseCursor.clickable,
       materialStates,
     );
+    final MouseCursor nonWebCursor =
+        widget.mouseCursor ?? WidgetStateMouseCursor.statelessClickable;
+    final MouseCursor? effectiveMouseCursor = kIsWeb ? webCursor : nonWebCursor;
+
     final EdgeInsetsGeometry padding = widget.padding
         .add(
           EdgeInsets.only(

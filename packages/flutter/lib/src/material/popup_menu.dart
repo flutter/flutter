@@ -337,16 +337,21 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// If [mouseCursor] is a [WidgetStateMouseCursor],
+  /// On web, if [mouseCursor] is a [WidgetStateMouseCursor],
   /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
   ///  * [WidgetState.hovered].
   ///  * [WidgetState.focused].
   ///  * [WidgetState.disabled].
+  ///
+  /// On all other platforms, [mouseCursor] will be used directly.
   /// {@endtemplate}
   ///
   /// If null, then the value of [PopupMenuThemeData.mouseCursor] is used. If
-  /// that is also null, then [WidgetStateMouseCursor.statelessClickable] is used.
+  /// that is also null, then:
+  ///
+  ///  * On web, [WidgetStateMouseCursor.clickable] is used.
+  ///  * On other platforms, [WidgetStateMouseCursor.statelessClickable] is used.
   final MouseCursor? mouseCursor;
 
   /// The widget below this widget in the tree.
@@ -780,7 +785,6 @@ class _PopupMenuState<T> extends State<_PopupMenu<T>> {
       ),
     );
 
-    // TODO(camsim99): add cursor configuration
     return AnimatedBuilder(
       animation: widget.route.animation!,
       builder: (BuildContext context, Widget? child) {

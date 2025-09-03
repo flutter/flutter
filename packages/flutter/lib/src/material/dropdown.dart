@@ -1307,6 +1307,10 @@ class DropdownButton<T> extends StatefulWidget {
 
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// dropdown button and its [DropdownMenuItem]s.
+  ///
+  /// If this property is null,
+  ///  * On web, [WidgetStateMouseCursor.clickable] will be used.
+  ///  * On other platforms, [WidgetStateMouseCursor.statelessClickable] will be used.
   final MouseCursor? mouseCursor;
 
   final InputDecoration? _inputDecoration;
@@ -1634,12 +1638,11 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
     final MouseCursor webCursor =
         widget.mouseCursor ??
-        WidgetStateProperty.resolveAs<MouseCursor>(
-          MaterialStateMouseCursor.clickable,
-          <WidgetState>{if (!_enabled) WidgetState.disabled},
-        );
+        WidgetStateProperty.resolveAs<MouseCursor>(WidgetStateMouseCursor.clickable, <WidgetState>{
+          if (!_enabled) WidgetState.disabled,
+        });
     final MouseCursor nonWebCursor =
-        widget.mouseCursor ?? MaterialStateMouseCursor.statelessClickable;
+        widget.mouseCursor ?? WidgetStateMouseCursor.statelessClickable;
     final MouseCursor effectiveMouseCursor = kIsWeb ? webCursor : nonWebCursor;
 
     // When an InputDecoration is provided, use it instead of using an InkWell
@@ -1918,6 +1921,11 @@ class DropdownButtonFormField<T> extends FormField<T> {
 
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// dropdown button and its [DropdownMenuItem]s.
+  ///
+  /// If this property is null,
+  ///
+  ///   * On web, [WidgetStateMouseCursor.clickable] will be used.
+  ///   * On other platforms, [WidgetStateMouseCursor.statelessClickable] will be used.
   final MouseCursor? mouseCursor;
 
   @override
