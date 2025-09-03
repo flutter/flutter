@@ -1018,7 +1018,6 @@ class IosDeviceDiscovery implements DeviceDiscovery {
     //       "hotReload": true,
     //       "hotRestart": true,
     //       "screenshot": true,
-    //       "fastStart": false,
     //       "flutterExit": true,
     //       "hardwareRendering": false,
     //       "startPaused": false
