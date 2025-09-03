@@ -9,6 +9,7 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:vm_service/vm_service.dart';
@@ -21,26 +22,51 @@ import '../src/common.dart';
 
 void main() {
   late Directory tempDir;
-  final BasicProjectWithUnaryMain project = BasicProjectWithUnaryMain();
+  final project = BasicProjectWithUnaryMain();
   late FlutterRunTestDriver flutter;
 
+  setUp(() async {
+    tempDir = createResolvedTempDirectorySync('run_test.');
+    await project.setUpIn(tempDir);
+    flutter = FlutterRunTestDriver(tempDir);
+  });
+
+  tearDown(() async {
+    await flutter.stop();
+    tryToDelete(tempDir);
+  });
+
+  testWithoutContext('flutter run on web respects --dds-port', () async {
+    // Regression test for https://github.com/flutter/flutter/issues/159157
+    Future<int> getFreePort() async {
+      final ServerSocket serverSocket = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
+      try {
+        return serverSocket.port;
+      } finally {
+        await serverSocket.close();
+      }
+    }
+
+    final int ddsPort = await getFreePort();
+    await flutter.run(
+      withDebugger: true,
+      // Unfortunately, we can't easily test the web-server device as we'd need to attach to the
+      // server with a Chromedriver instance to initialize DWDS and start DDS. However, the DDS
+      // port is provided via the same code path to DWDS regardless of which device we use, so
+      // only testing against the Chrome device should be sufficient.
+      device: GoogleChromeDevice.kChromeDeviceId,
+      ddsPort: ddsPort,
+      additionalCommandArgs: <String>['--verbose', '--no-web-resources-cdn'],
+    );
+    expect(flutter.vmServicePort, ddsPort);
+  });
+
   group('Clients of flutter run on web with DDS enabled', () {
-    setUp(() async {
-      tempDir = createResolvedTempDirectorySync('run_test.');
-      await project.setUpIn(tempDir);
-      flutter = FlutterRunTestDriver(tempDir);
-    });
-
-    tearDown(() async {
-      await flutter.stop();
-      tryToDelete(tempDir);
-    });
-
     testWithoutContext('can validate flutter version', () async {
       await flutter.run(
         withDebugger: true,
         device: GoogleChromeDevice.kChromeDeviceId,
-        additionalCommandArgs: <String>['--verbose'],
+        additionalCommandArgs: <String>['--verbose', '--no-web-resources-cdn'],
       );
 
       expect(flutter.vmServiceWsUri, isNotNull);
@@ -53,7 +79,7 @@ void main() {
       await flutter.run(
         withDebugger: true,
         device: GoogleChromeDevice.kChromeDeviceId,
-        additionalCommandArgs: <String>['--verbose'],
+        additionalCommandArgs: <String>['--verbose', '--no-web-resources-cdn'],
       );
 
       expect(flutter.vmServiceWsUri, isNotNull);
@@ -85,7 +111,7 @@ void main() {
       await flutter.run(
         withDebugger: true,
         device: GoogleChromeDevice.kChromeDeviceId,
-        additionalCommandArgs: <String>['--verbose'],
+        additionalCommandArgs: <String>['--verbose', '--no-web-resources-cdn'],
       );
 
       expect(flutter.vmServiceWsUri, isNotNull);

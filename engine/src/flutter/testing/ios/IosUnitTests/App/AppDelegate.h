@@ -8,14 +8,19 @@
 #import <UIKit/UIKit.h>
 
 @class FlutterEngine;
+@protocol FlutterPluginRegistrant;
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 
-@property(strong, nonatomic) UIWindow* window;
-/** The FlutterEngine that will be served by `takeLaunchEngine`. */
-@property(strong, nonatomic) FlutterEngine* mockLaunchEngine;
+@property(nonatomic, strong, nullable) UIWindow* window;
 
-- (FlutterEngine*)takeLaunchEngine;
+//  A mirror of the FlutterAppDelegate API for integration testing.
+@property(nonatomic, strong, nullable) NSObject<FlutterPluginRegistrant>* pluginRegistrant;
+
+/** The FlutterEngine that will be served by `takeLaunchEngine`. */
+@property(nonatomic, strong, nullable) FlutterEngine* mockLaunchEngine;
+
+- (nullable FlutterEngine*)takeLaunchEngine;
 
 @end
 

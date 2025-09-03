@@ -115,12 +115,11 @@ void main() {
     expect(pageOneOffset.dy, greaterThan(0.0));
     expect(pageOneOffset.dx, greaterThan(0.0));
     expect(find.text('Page 2'), findsOneWidget);
-    final double pageTwoYOffset =
-        tester
-            .getTopLeft(
-              find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold)),
-            )
-            .dy;
+    final double pageTwoYOffset = tester
+        .getTopLeft(
+          find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold)),
+        )
+        .dy;
     expect(pageTwoYOffset, greaterThan(pageOneOffset.dy));
   });
 
@@ -191,12 +190,11 @@ void main() {
 
     expect(find.text('Page 2'), findsOneWidget);
     expect(find.text('Page 3'), findsNothing);
-    final double previousPageTwoDY =
-        tester
-            .getTopLeft(
-              find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold)),
-            )
-            .dy;
+    final double previousPageTwoDY = tester
+        .getTopLeft(
+          find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold)),
+        )
+        .dy;
 
     await tester.tap(find.text('Push Page 3'));
     await tester.pumpAndSettle();
@@ -375,12 +373,11 @@ void main() {
     expect(find.text('Page 2'), findsOneWidget);
     expect(find.text('Page 3'), findsNothing);
 
-    final double pageTwoDY =
-        tester
-            .getTopLeft(
-              find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold)),
-            )
-            .dy;
+    final double pageTwoDY = tester
+        .getTopLeft(
+          find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold)),
+        )
+        .dy;
     expect(pageTwoDY, greaterThan(0.0));
 
     await tester.tap(find.text('Push Page 3'));
@@ -390,12 +387,11 @@ void main() {
     expect(find.text('Page 3'), findsOneWidget);
 
     // New route should be at the same height as the previous route.
-    final double pageThreeDY =
-        tester
-            .getTopLeft(
-              find.ancestor(of: find.text('Page 3'), matching: find.byType(CupertinoPageScaffold)),
-            )
-            .dy;
+    final double pageThreeDY = tester
+        .getTopLeft(
+          find.ancestor(of: find.text('Page 3'), matching: find.byType(CupertinoPageScaffold)),
+        )
+        .dy;
     expect(pageThreeDY, greaterThan(0.0));
     expect(pageThreeDY, equals(pageTwoDY));
   });
@@ -622,16 +618,17 @@ void main() {
         onGenerateRoute: (RouteSettings settings) {
           if (settings.name == '/') {
             return PageRouteBuilder<void>(
-              pageBuilder: (
-                BuildContext context,
-                Animation<double> animation,
-                Animation<double> secondaryAnimation,
-              ) {
-                return CupertinoPageScaffold(
-                  navigationBar: const CupertinoNavigationBar(middle: Text('Page 1')),
-                  child: Container(),
-                );
-              },
+              pageBuilder:
+                  (
+                    BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                  ) {
+                    return CupertinoPageScaffold(
+                      navigationBar: const CupertinoNavigationBar(middle: Text('Page 1')),
+                      child: Container(),
+                    );
+                  },
             );
           }
           return CupertinoSheetRoute<void>(
@@ -811,8 +808,8 @@ void main() {
     await tester.tap(find.byType(Icon));
     await tester.pumpAndSettle();
 
-    final Finder clipRRectFinder = find.byType(ClipRRect);
-    expect(clipRRectFinder, findsNothing);
+    expect(find.byType(ClipRSuperellipse), findsNothing);
+    expect(find.byType(ClipRRect), findsNothing);
   });
 
   testWidgets('Sheet transition does not interfere after popping', (WidgetTester tester) async {
@@ -1304,6 +1301,38 @@ void main() {
         equals(tester.getBottomLeft(find.byType(SnackBar).first).dy),
       );
     });
+
+    testWidgets('partial upward drag stretches and returns without popping', (
+      WidgetTester tester,
+    ) async {
+      final GlobalKey homeKey = GlobalKey();
+      final GlobalKey sheetKey = GlobalKey();
+
+      await tester.pumpWidget(dragGestureApp(homeKey, sheetKey));
+
+      await tester.tap(find.text('Push Page 2'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Page 2'), findsOneWidget);
+
+      RenderBox box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
+      final double initialPosition = box.localToGlobal(Offset.zero).dy;
+
+      final TestGesture gesture = await tester.startGesture(const Offset(100, 400));
+      await gesture.moveBy(const Offset(0, -100));
+      await tester.pump();
+
+      box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
+      final double stretchedPosition = box.localToGlobal(Offset.zero).dy;
+      expect(stretchedPosition, lessThan(initialPosition));
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
+      final double finalPosition = box.localToGlobal(Offset.zero).dy;
+      expect(finalPosition, initialPosition);
+    });
   });
 
   testWidgets('CupertinoSheet causes SystemUiOverlayStyle changes', (WidgetTester tester) async {
@@ -1415,15 +1444,14 @@ void main() {
       await tester.tap(find.text('Push Page 2'));
       await tester.pumpAndSettle();
 
-      final double pageHeight =
-          tester
-              .getRect(
-                find.ancestor(
-                  of: find.text('Top container'),
-                  matching: find.byType(CupertinoPageScaffold),
-                ),
-              )
-              .bottom;
+      final double pageHeight = tester
+          .getRect(
+            find.ancestor(
+              of: find.text('Top container'),
+              matching: find.byType(CupertinoPageScaffold),
+            ),
+          )
+          .bottom;
       expect(
         pageHeight -
             tester

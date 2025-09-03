@@ -25,12 +25,15 @@ abstract class CkShader implements ui.Shader {
   /// this reason, do not store the returned value long-term to prevent dangling
   /// pointer errors.
   SkShader getSkShader(ui.FilterQuality contextualQuality);
+
+  /// Whether the shader represents a gradient.
+  bool get isGradient;
 }
 
 /// Base class for shader implementations with a simple memory model that do not
 /// support contextual filter quality.
 ///
-/// Provides common memory mangement logic for shaders that map one-to-one to a
+/// Provides common memory management logic for shaders that map one-to-one to a
 /// [SkShader] object. The lifetime of this shader is hard-linked to the
 /// lifetime of the [SkShader]. [getSkShader] always returns the one and only
 /// [SkShader] object, ignoring contextual filter quality.
@@ -44,6 +47,9 @@ abstract class SimpleCkShader implements CkShader {
   @override
   SkShader getSkShader(ui.FilterQuality contextualQuality) => _ref.nativeObject;
 
+  @override
+  bool get isGradient => false;
+
   String get debugOwnerLabel;
   SkShader createSkiaObject();
 
@@ -54,12 +60,18 @@ abstract class SimpleCkShader implements CkShader {
   void dispose() {
     _ref.dispose();
   }
+}
+
+/// Base class for gradient shader implementations.
+abstract class GradientCkShader extends SimpleCkShader {
+  @override
+  bool get isGradient => true;
 
   @override
   String toString() => 'Gradient()';
 }
 
-class CkGradientSweep extends SimpleCkShader implements ui.Gradient {
+class CkGradientSweep extends GradientCkShader implements ui.Gradient {
   CkGradientSweep(
     this.center,
     this.colors,
@@ -102,7 +114,7 @@ class CkGradientSweep extends SimpleCkShader implements ui.Gradient {
   }
 }
 
-class CkGradientLinear extends SimpleCkShader implements ui.Gradient {
+class CkGradientLinear extends GradientCkShader implements ui.Gradient {
   CkGradientLinear(
     this.from,
     this.to,
@@ -142,12 +154,9 @@ class CkGradientLinear extends SimpleCkShader implements ui.Gradient {
       matrix4 != null ? toSkMatrixFromFloat32(matrix4!) : null,
     );
   }
-
-  @override
-  String toString() => 'Gradient()';
 }
 
-class CkGradientRadial extends SimpleCkShader implements ui.Gradient {
+class CkGradientRadial extends GradientCkShader implements ui.Gradient {
   CkGradientRadial(
     this.center,
     this.radius,
@@ -179,12 +188,9 @@ class CkGradientRadial extends SimpleCkShader implements ui.Gradient {
       0,
     );
   }
-
-  @override
-  String toString() => 'Gradient()';
 }
 
-class CkGradientConical extends SimpleCkShader implements ui.Gradient {
+class CkGradientConical extends GradientCkShader implements ui.Gradient {
   CkGradientConical(
     this.focal,
     this.focalRadius,
@@ -271,6 +277,9 @@ class CkImageShader implements ui.ImageShader, CkShader {
     }
     return ref!.nativeObject;
   }
+
+  @override
+  bool get isGradient => false;
 
   void _initializeSkImageShader(ui.FilterQuality quality) {
     final SkShader skShader;

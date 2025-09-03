@@ -59,6 +59,23 @@ TEST(SwitchesTest, TraceToFile) {
   EXPECT_EQ(settings.trace_to_file, "trace.binpb");
 }
 
+TEST(SwitchesTest, ProfileMicrotasks) {
+  {
+    fml::CommandLine command_line = fml::CommandLineFromInitializerList(
+        {"command", "--profile-microtasks"});
+    EXPECT_TRUE(command_line.HasOption("profile-microtasks"));
+    Settings settings = SettingsFromCommandLine(command_line);
+    EXPECT_EQ(settings.profile_microtasks, true);
+  }
+  {
+    // default
+    fml::CommandLine command_line =
+        fml::CommandLineFromInitializerList({"command"});
+    Settings settings = SettingsFromCommandLine(command_line);
+    EXPECT_EQ(settings.profile_microtasks, false);
+  }
+}
+
 TEST(SwitchesTest, RouteParsedFlag) {
   fml::CommandLine command_line =
       fml::CommandLineFromInitializerList({"command", "--route=/animation"});
@@ -105,6 +122,23 @@ TEST(SwitchesTest, NoEnableImpeller) {
   }
 }
 
+TEST(SwitchesTest, ProfileStartup) {
+  {
+    fml::CommandLine command_line =
+        fml::CommandLineFromInitializerList({"command", "--profile-startup"});
+    EXPECT_TRUE(command_line.HasOption("profile-startup"));
+    Settings settings = SettingsFromCommandLine(command_line);
+    EXPECT_EQ(settings.profile_startup, true);
+  }
+  {
+    // default
+    fml::CommandLine command_line =
+        fml::CommandLineFromInitializerList({"command"});
+    Settings settings = SettingsFromCommandLine(command_line);
+    EXPECT_EQ(settings.profile_startup, false);
+  }
+}
+
 #if !FLUTTER_RELEASE
 TEST(SwitchesTest, EnableAsserts) {
   fml::CommandLine command_line = fml::CommandLineFromInitializerList(
@@ -114,6 +148,20 @@ TEST(SwitchesTest, EnableAsserts) {
   EXPECT_EQ(settings.dart_flags[0], "--enable-asserts");
 }
 #endif
+
+#ifndef OS_FUCHSIA
+TEST(SwitchesTest, RequireMergedPlatformUIThread) {
+  fml::CommandLine command_line = fml::CommandLineFromInitializerList(
+      {"command", "--merged-platform-ui-thread=disabled"});
+  Settings settings = SettingsFromCommandLine(command_line);
+  EXPECT_EQ(settings.merged_platform_ui_thread,
+            Settings::MergedPlatformUIThread::kDisabled);
+
+  EXPECT_DEATH_IF_SUPPORTED(SettingsFromCommandLine(command_line, true),
+                            "This platform does not support the "
+                            "merged-platform-ui-thread=disabled flag");
+}
+#endif  // !OS_FUCHSIA
 
 }  // namespace testing
 }  // namespace flutter

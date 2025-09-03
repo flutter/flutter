@@ -25,11 +25,10 @@ abstract class BuildTestTask {
   static const String kBuildOnlyFlag = 'build';
   static const String kTestOnlyFlag = 'test';
 
-  final ArgParser argParser =
-      ArgParser()
-        ..addOption(kApplicationBinaryPathOption)
-        ..addFlag(kBuildOnlyFlag)
-        ..addFlag(kTestOnlyFlag);
+  final ArgParser argParser = ArgParser()
+    ..addOption(kApplicationBinaryPathOption)
+    ..addFlag(kBuildOnlyFlag)
+    ..addFlag(kTestOnlyFlag);
 
   /// Args passed from the test runner via "--task-arg".
   final List<String> args;

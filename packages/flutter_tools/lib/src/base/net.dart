@@ -13,15 +13,15 @@ import 'io.dart';
 import 'logger.dart';
 import 'platform.dart';
 
-const int kNetworkProblemExitCode = 50;
-const String kFlutterStorageBaseUrl = 'FLUTTER_STORAGE_BASE_URL';
+const kNetworkProblemExitCode = 50;
+const kFlutterStorageBaseUrl = 'FLUTTER_STORAGE_BASE_URL';
 
 typedef HttpClientFactory = HttpClient Function();
 
 typedef UrlTunneller = Future<String> Function(String url);
 
-/// If [httpClientFactory] is null, a default [HttpClient] is used.
 class Net {
+  /// If [httpClientFactory] is `null`, a default [HttpClient] is used.
   Net({HttpClientFactory? httpClientFactory, required Logger logger, required Platform platform})
     : _httpClientFactory = httpClientFactory ?? (() => HttpClient()),
       _logger = logger,
@@ -47,8 +47,8 @@ class Net {
     File? destFile,
     @visibleForTesting Duration? durationOverride,
   }) async {
-    int attempts = 0;
-    int durationSeconds = 1;
+    var attempts = 0;
+    var durationSeconds = 1;
     while (true) {
       attempts += 1;
       _MemoryIOSink? memorySink;
@@ -165,7 +165,7 @@ class _MemoryIOSink implements IOSink {
   @override
   Encoding encoding = utf8;
 
-  final BytesBuilder writes = BytesBuilder(copy: false);
+  final writes = BytesBuilder(copy: false);
 
   @override
   void add(List<int> data) {
@@ -174,7 +174,7 @@ class _MemoryIOSink implements IOSink {
 
   @override
   Future<void> addStream(Stream<List<int>> stream) {
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     stream.listen(add).onDone(completer.complete);
     return completer.future;
   }
@@ -196,7 +196,7 @@ class _MemoryIOSink implements IOSink {
 
   @override
   void writeAll(Iterable<dynamic> objects, [String separator = '']) {
-    bool addSeparator = false;
+    var addSeparator = false;
     for (final dynamic object in objects) {
       if (addSeparator) {
         write(separator);
@@ -221,7 +221,7 @@ class _MemoryIOSink implements IOSink {
   Future<void> flush() async {}
 }
 
-/// Returns [true] if [address] is an IPv6 address.
+/// Whether [address] is an IPv6 address.
 bool isIPv6Address(String address) {
   try {
     Uri.parseIPv6Address(address);

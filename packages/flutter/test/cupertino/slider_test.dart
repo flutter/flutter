@@ -564,7 +564,9 @@ void main() {
 
   testWidgets('Slider respects themes', (WidgetTester tester) async {
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoSlider(onChanged: (double value) {}, value: 0.5))),
+      CupertinoApp(
+        home: Center(child: CupertinoSlider(onChanged: (double value) {}, value: 0.5)),
+      ),
     );
     expect(
       find.byType(CupertinoSlider),

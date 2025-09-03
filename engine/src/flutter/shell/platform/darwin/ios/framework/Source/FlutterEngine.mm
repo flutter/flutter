@@ -20,6 +20,7 @@
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/common/variable_refresh_rate_display.h"
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/common/command_line.h"
 #import "flutter/shell/platform/darwin/common/framework/Source/FlutterBinaryMessengerRelay.h"
 #import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
@@ -504,10 +505,6 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   _platformViewsController = nil;
 }
 
-- (NSURL*)observatoryUrl {
-  return self.publisher.url;
-}
-
 - (NSURL*)vmServiceUrl {
   return self.publisher.url;
 }
@@ -663,8 +660,8 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
     NSData* data = [NSData dataWithBytes:screenshot.data->writable_data()
                                   length:screenshot.data->size()];
     NSString* format = [NSString stringWithUTF8String:screenshot.format.c_str()];
-    NSNumber* width = @(screenshot.frame_size.fWidth);
-    NSNumber* height = @(screenshot.frame_size.fHeight);
+    NSNumber* width = @(screenshot.frame_size.width);
+    NSNumber* height = @(screenshot.frame_size.height);
     return result(@[ width, height, format ?: [NSNull null], data ]);
   }];
 }
@@ -796,7 +793,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
          libraryURI:(NSString*)libraryURI
        initialRoute:(NSString*)initialRoute {
   if (_shell != nullptr) {
-    FML_LOG(WARNING) << "This FlutterEngine was already invoked.";
+    [FlutterLogger logWarning:@"This FlutterEngine was already invoked."];
     return NO;
   }
 
@@ -851,7 +848,11 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   );
 
   // Disable GPU if the app or scene is running in the background.
-  self.isGpuDisabled = self.viewController.stateIsBackground;
+  self.isGpuDisabled = self.viewController
+                           ? self.viewController.stateIsBackground
+                           : FlutterSharedApplication.application &&
+                                 FlutterSharedApplication.application.applicationState ==
+                                     UIApplicationStateBackground;
 
   // Create the shell. This is a blocking operation.
   std::unique_ptr<flutter::Shell> shell = flutter::Shell::Create(
@@ -863,8 +864,9 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
       /*is_gpu_disabled=*/_isGpuDisabled);
 
   if (shell == nullptr) {
-    FML_LOG(ERROR) << "Could not start a shell FlutterEngine with entrypoint: "
-                   << entrypoint.UTF8String;
+    NSString* errorMessage = [NSString
+        stringWithFormat:@"Could not start a shell FlutterEngine with entrypoint: %@", entrypoint];
+    [FlutterLogger logError:errorMessage];
   } else {
     [self setUpShell:std::move(shell)
         withVMServicePublication:settings.enable_vm_service_publication];
@@ -1056,6 +1058,13 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
           lookUpSelectedText:(NSString*)selectedText {
   [self.platformPlugin showLookUpViewController:selectedText];
+}
+
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+    performContextMenuCustomActionWithActionID:(NSString*)actionID
+                               textInputClient:(int)client {
+  [self.platformChannel invokeMethod:@"ContextMenu.onPerformCustomAction"
+                           arguments:@[ @(client), actionID ]];
 }
 
 #pragma mark - FlutterViewEngineDelegate

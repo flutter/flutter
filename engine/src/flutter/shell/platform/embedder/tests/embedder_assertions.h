@@ -534,31 +534,30 @@ inline FlutterSize FlutterSizeMake(const SkVector& vector) {
   return size;
 }
 
-inline FlutterTransformation FlutterTransformationMake(const SkMatrix& matrix) {
+inline FlutterTransformation FlutterTransformationMake(
+    const flutter::DlMatrix& matrix) {
   FlutterTransformation transformation = {};
-  transformation.scaleX = matrix[SkMatrix::kMScaleX];
-  transformation.skewX = matrix[SkMatrix::kMSkewX];
-  transformation.transX = matrix[SkMatrix::kMTransX];
-  transformation.skewY = matrix[SkMatrix::kMSkewY];
-  transformation.scaleY = matrix[SkMatrix::kMScaleY];
-  transformation.transY = matrix[SkMatrix::kMTransY];
-  transformation.pers0 = matrix[SkMatrix::kMPersp0];
-  transformation.pers1 = matrix[SkMatrix::kMPersp1];
-  transformation.pers2 = matrix[SkMatrix::kMPersp2];
+  transformation.scaleX = matrix.m[0];
+  transformation.skewX = matrix.m[4];
+  transformation.transX = matrix.m[12];
+  transformation.skewY = matrix.m[1];
+  transformation.scaleY = matrix.m[5];
+  transformation.transY = matrix.m[13];
+  transformation.pers0 = matrix.m[3];
+  transformation.pers1 = matrix.m[7];
+  transformation.pers2 = matrix.m[15];
   return transformation;
 }
 
-inline SkMatrix SkMatrixMake(const FlutterTransformation& xformation) {
-  return SkMatrix::MakeAll(xformation.scaleX,  //
-                           xformation.skewX,   //
-                           xformation.transX,  //
-                           xformation.skewY,   //
-                           xformation.scaleY,  //
-                           xformation.transY,  //
-                           xformation.pers0,   //
-                           xformation.pers1,   //
-                           xformation.pers2    //
+inline flutter::DlMatrix DlMatrixMake(const FlutterTransformation& xformation) {
+  // clang-format off
+  return flutter::DlMatrix(
+      xformation.scaleX, xformation.skewY,  0.0f, xformation.pers0,
+      xformation.skewX,  xformation.scaleY, 0.0f, xformation.pers1,
+      0.0f,              0.0f,              1.0f, 0.0f,
+      xformation.transX, xformation.transY, 0.0f, xformation.pers2
   );
+  // clang-format on
 }
 
 inline flutter::EmbedderEngine* ToEmbedderEngine(const FlutterEngine& engine) {
@@ -571,6 +570,15 @@ inline FlutterRect FlutterRectMake(const SkRect& rect) {
   r.top = rect.top();
   r.right = rect.right();
   r.bottom = rect.bottom();
+  return r;
+}
+
+inline FlutterRect FlutterRectMake(const flutter::DlRect& rect) {
+  FlutterRect r = {};
+  r.left = rect.GetLeft();
+  r.top = rect.GetTop();
+  r.right = rect.GetRight();
+  r.bottom = rect.GetBottom();
   return r;
 }
 

@@ -23,6 +23,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 #import "flutter/shell/platform/embedder/embedder.h"
+#import "flutter/testing/ios/IosUnitTests/App/AppDelegate.h"
 #import "flutter/third_party/spring_animation/spring_animation.h"
 
 FLUTTER_ASSERT_ARC
@@ -2474,6 +2475,16 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
   [mockBundle stopMocking];
   [mockVC stopMocking];
+}
+
+- (void)testAppDelegatePluginRegistrant {
+  id mockRegistrant = OCMProtocolMock(@protocol(FlutterPluginRegistrant));
+  id appDelegate = [[UIApplication sharedApplication] delegate];
+  XCTAssertTrue([appDelegate respondsToSelector:@selector(setPluginRegistrant:)]);
+  [appDelegate setPluginRegistrant:mockRegistrant];
+  FlutterViewController* viewController = [[FlutterViewController alloc] init];
+  [appDelegate setPluginRegistrant:nil];
+  OCMVerify([mockRegistrant registerWithRegistry:viewController]);
 }
 
 - (void)testGrabLaunchEngine {

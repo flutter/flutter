@@ -188,6 +188,8 @@ def get_target_cpu(args):
     return 'wasm'
   if args.target_os == 'win':
     return args.windows_cpu
+  if args.target_os == 'qnx':
+    return 'arm64'
 
   # Host build. Default to x64 unless overridden.
   if get_host_os() == 'mac' and args.mac_cpu:
@@ -326,12 +328,31 @@ def get_repository_version(repository):
   return str(version.strip(), 'utf-8')
 
 
+def get_content_hash():
+  'Returns the content hash for the engine.'
+  hash_method = os.path.join(SRC_ROOT, '..', '..', 'bin', 'internal', 'content_aware_hash')
+  if sys.platform.startswith(('cygwin', 'win')):
+    hash_method = f'{hash_method}.ps1'
+    # hash_command.insert(0, 'cmd.exe /c powershell.exe')
+  else:
+    hash_method = f'{hash_method}.sh'
+
+  hash_command = []
+  if sys.platform.startswith(('cygwin', 'win')):
+    hash_command = hash_command + ['cmd.exe', '/c', 'powershell.exe']
+  hash_command = hash_command + [hash_method]
+
+  version = subprocess.check_output(hash_command)
+
+  return str(version.strip(), 'utf-8')
+
+
 def setup_git_versions():
   revision_args = {}
 
   engine_path = os.path.join(SRC_ROOT, 'flutter')
   revision_args['engine_version'] = get_repository_version(engine_path)
-
+  revision_args['content_hash'] = get_content_hash()
   skia_path = os.path.join(SRC_ROOT, 'flutter', 'third_party', 'skia')
   revision_args['skia_version'] = get_repository_version(skia_path)
 
@@ -528,6 +549,14 @@ def to_gn_args(args):
     gn_args['ios_use_simulator'] = gn_args['use_ios_simulator']
     gn_args.update(setup_apple_sdks())
 
+  # Make the Dart VM include a simulator, even though it is generating arm64
+  # code on an arm64 device, so that it can fall back to interpreting the arm64
+  # code if the device does not support JITing.
+  if runtime_mode == 'debug' and gn_args[
+      'target_os'] == 'ios' and not gn_args['use_ios_simulator'] and gn_args[
+          'target_cpu'] == 'arm64' and gn_args['dart_target_arch'] == 'arm64':
+    gn_args['dart_force_simulator'] = True
+
   if args.dart_debug:
     gn_args['dart_debug'] = True
 
@@ -594,6 +623,8 @@ def to_gn_args(args):
     if sys.platform.startswith(('cygwin', 'win')):
       gn_args['dart_use_fallback_root_certificates'] = True
 
+  gn_args['dart_disable_secure_socket'] = args.no_dart_secure_socket
+
   if args.target_sysroot:
     gn_args['target_sysroot'] = args.target_sysroot
     gn_args['custom_sysroot'] = args.target_sysroot
@@ -610,6 +641,10 @@ def to_gn_args(args):
     gn_args['skia_use_gl'] = False
     gn_args['shell_enable_metal'] = True
     gn_args['skia_use_metal'] = True
+  elif args.target_os == 'qnx':
+    gn_args['skia_enable_ganesh'] = False
+    gn_args['skia_enable_graphite'] = False
+    gn_args['arm_use_neon'] = False
   else:
     gn_args['skia_use_gl'] = args.target_os != 'fuchsia'
 
@@ -710,6 +745,9 @@ def to_gn_args(args):
 
   if args.fstack_protector:
     gn_args['use_fstack_protector'] = True
+
+  if args.enable_minimal_linux:
+    gn_args['is_minimal_linux'] = True
 
   enable_vulkan_validation = args.enable_vulkan_validation_layers
 
@@ -822,6 +860,7 @@ def to_gn_wasm_args(args, gn_args):
   gn_args['skia_use_freetype'] = True
   gn_args['flutter_use_freetype_woff2'] = True
   gn_args['skia_use_harfbuzz'] = True
+  gn_args['skia_use_fontations'] = False
   gn_args['skia_use_fontconfig'] = False
   gn_args['skia_use_libheif'] = False
   gn_args['skia_enable_fontmgr_custom_directory'] = False
@@ -847,28 +886,6 @@ def to_gn_wasm_args(args, gn_args):
   gn_args['skia_canvaskit_enable_webgpu'] = False
   gn_args['skia_canvaskit_profile_build'] = args.runtime_mode == 'profile'
   gn_args['flutter_prebuilt_dart_sdk'] = True
-
-
-def run_impeller_cmake(args):
-  impeller_cmake_dir = os.path.join('flutter', 'third_party', 'impeller-cmake-example')
-  if not os.path.isdir(os.path.join(SRC_ROOT, impeller_cmake_dir)):
-    print('The Impeller cmake example directory "{}" does not exist'.format(impeller_cmake_dir))
-    return 1
-  cmake_cmd = [
-      'python3',
-      os.path.join(SRC_ROOT, 'flutter', 'ci', 'impeller_cmake_build_test.py'),
-      '--path',
-      impeller_cmake_dir,
-      '--cmake',
-  ]
-  if args.xcode_symlinks:
-    cmake_cmd = cmake_cmd + ['--xcode-symlinks']
-  try:
-    cmake_call_result = subprocess.call(cmake_cmd, cwd=SRC_ROOT)
-  except subprocess.CalledProcessError as exc:
-    print('Failed to generate cmake files: ', exc.returncode, exc.output)
-    return 1
-  return cmake_call_result
 
 
 def parse_args(args):
@@ -925,11 +942,13 @@ def parse_args(args):
   )
 
   parser.add_argument(
-      '--target-os', type=str, choices=['android', 'ios', 'mac', 'linux', 'fuchsia', 'wasm', 'win']
+      '--target-os',
+      type=str,
+      choices=['android', 'ios', 'mac', 'linux', 'fuchsia', 'wasm', 'win', 'qnx']
   )
   parser.add_argument('--android', dest='target_os', action='store_const', const='android')
   parser.add_argument(
-      '--android-cpu', type=str, choices=['arm', 'x64', 'x86', 'arm64'], default='arm'
+      '--android-cpu', type=str, choices=['arm', 'x64', 'x86', 'arm64', 'riscv64'], default='arm'
   )
   parser.add_argument('--ios', dest='target_os', action='store_const', const='ios')
   parser.add_argument('--mac', dest='target_os', action='store_const', const='mac')
@@ -1054,6 +1073,8 @@ def parse_args(args):
   parser.add_argument('--enable-fontconfig', action='store_true', default=False)
   parser.add_argument('--enable-vulkan-validation-layers', action='store_true', default=False)
 
+  parser.add_argument('--enable-minimal-linux', action='store_true', default=False)
+
   parser.add_argument(
       '--embedder-for-target', dest='embedder_for_target', action='store_true', default=False
   )
@@ -1171,22 +1192,14 @@ def parse_args(args):
       '--no-dart-dynamic-modules', dest='dart-dynamic-modules', action='store_false'
   )
 
-  # Impeller flags.
   parser.add_argument(
-      '--enable-impeller-3d',
+      '--no-dart-secure-socket',
       default=False,
       action='store_true',
-      help='Enables experimental 3d support.'
+      help='(dangerous) Disable secure socket support in Dart.',
   )
 
   parser.add_argument('--malioc-path', type=str, help='The path to the malioc tool.')
-
-  parser.add_argument(
-      '--impeller-cmake-example',
-      default=False,
-      action='store_true',
-      help='Do not run GN. Instead configure the Impeller cmake example build.',
-  )
 
   parser.add_argument(
       '--slimpeller',
@@ -1256,9 +1269,6 @@ def validate_args(args):
 def main(argv):
   args = parse_args(argv)
   validate_args(args)
-
-  if args.impeller_cmake_example:
-    return run_impeller_cmake(args)
 
   exe = '.exe' if sys.platform.startswith(('cygwin', 'win')) else ''
 

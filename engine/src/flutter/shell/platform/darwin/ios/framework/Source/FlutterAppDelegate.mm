@@ -4,7 +4,7 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterAppDelegate.h"
 
-#import "flutter/fml/logging.h"
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPluginAppLifeCycleDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Test.h"
@@ -21,30 +21,10 @@ static NSString* const kRemoteNotificationCapabitiliy = @"remote-notification";
 static NSString* const kBackgroundFetchCapatibility = @"fetch";
 static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 
-@interface FlutterSceneDelegate : NSObject <UIWindowSceneDelegate>
-@property(nonatomic, strong, nullable) UIWindow* window;
-@end
-
-@implementation FlutterSceneDelegate
-
-- (void)scene:(UIScene*)scene
-    willConnectToSession:(UISceneSession*)session
-                 options:(UISceneConnectionOptions*)connectionOptions {
-  NSObject<UIApplicationDelegate>* appDelegate = FlutterSharedApplication.application.delegate;
-  if (appDelegate.window.rootViewController) {
-    // If this is not nil we are running into a case where someone is manually
-    // performing root view controller setup in the UIApplicationDelegate.
-    UIWindowScene* windowScene = (UIWindowScene*)scene;
-    self.window = [[UIWindow alloc] initWithWindowScene:windowScene];
-    self.window.rootViewController = appDelegate.window.rootViewController;
-    appDelegate.window = self.window;
-    [self.window makeKeyAndVisible];
-  }
+@interface FlutterAppDelegate () {
+  __weak NSObject<FlutterPluginRegistrant>* _weakRegistrant;
+  NSObject<FlutterPluginRegistrant>* _strongRegistrant;
 }
-
-@end
-
-@interface FlutterAppDelegate ()
 @property(nonatomic, copy) FlutterViewController* (^rootFlutterViewControllerGetter)(void);
 @property(nonatomic, strong) FlutterPluginAppLifeCycleDelegate* lifeCycleDelegate;
 @property(nonatomic, strong) FlutterLaunchEngine* launchEngine;
@@ -205,7 +185,7 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
                                    }
                                  }];
   } else {
-    FML_LOG(ERROR) << "Attempting to open an URL without a Flutter RootViewController.";
+    [FlutterLogger logError:@"Attempting to open an URL without a Flutter RootViewController."];
     return NO;
   }
   return YES;
@@ -244,9 +224,8 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 // This method is called when opening an URL with a http/https scheme.
 - (BOOL)application:(UIApplication*)application
     continueUserActivity:(NSUserActivity*)userActivity
-      restorationHandler:
-          (void (^)(NSArray<id<UIUserActivityRestoring>>* __nullable restorableObjects))
-              restorationHandler {
+      restorationHandler:(void (^)(NSArray<id<UIUserActivityRestoring>>* __nullable
+                                       restorableObjects))restorationHandler {
   if ([self.lifeCycleDelegate application:application
                      continueUserActivity:userActivity
                        restorationHandler:restorationHandler]) {
@@ -257,6 +236,26 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 }
 
 #pragma mark - FlutterPluginRegistry methods. All delegating to the rootViewController
+
+- (NSObject<FlutterPluginRegistrant>*)pluginRegistrant {
+  if (_weakRegistrant) {
+    return _weakRegistrant;
+  }
+  if (_strongRegistrant) {
+    return _strongRegistrant;
+  }
+  return nil;
+}
+
+- (void)setPluginRegistrant:(NSObject<FlutterPluginRegistrant>*)pluginRegistrant {
+  if (pluginRegistrant == (id)self) {
+    _weakRegistrant = pluginRegistrant;
+    _strongRegistrant = nil;
+  } else {
+    _weakRegistrant = nil;
+    _strongRegistrant = pluginRegistrant;
+  }
+}
 
 - (NSObject<FlutterPluginRegistrar>*)registrarForPlugin:(NSString*)pluginKey {
   FlutterViewController* flutterRootViewController = [self rootFlutterViewController];
@@ -369,33 +368,6 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
                                                     error:&error];
   NSAssert(error == nil, @"Cannot obtain modification date of main bundle: %@", error);
   return [fileDate timeIntervalSince1970];
-}
-
-- (UISceneConfiguration*)application:(UIApplication*)application
-    configurationForConnectingSceneSession:(UISceneSession*)connectingSceneSession
-                                   options:(UISceneConnectionOptions*)options {
-  NSDictionary* sceneManifest =
-      [[NSBundle mainBundle] objectForInfoDictionaryKey:@"UIApplicationSceneManifest"];
-  NSDictionary* sceneConfigs = sceneManifest[@"UISceneConfigurations"];
-
-  if (sceneConfigs.count > 0) {
-    return connectingSceneSession.configuration;
-  } else {
-    UISceneConfiguration* config =
-        [UISceneConfiguration configurationWithName:@"flutter"
-                                        sessionRole:connectingSceneSession.role];
-    config.delegateClass = [FlutterSceneDelegate class];
-
-    NSString* mainStoryboard =
-        [[NSBundle mainBundle] objectForInfoDictionaryKey:@"UIMainStoryboardFile"];
-
-    if (mainStoryboard) {
-      UIStoryboard* storyboard = [UIStoryboard storyboardWithName:mainStoryboard
-                                                           bundle:[NSBundle mainBundle]];
-      config.storyboard = storyboard;
-    }
-    return config;
-  }
 }
 
 @end

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'widget_preview_scaffold_controller.dart';
 
 class _WidgetPreviewIconButton extends StatelessWidget {
   const _WidgetPreviewIconButton({
@@ -74,13 +75,13 @@ class ZoomControls extends StatelessWidget {
   void _zoomIn() {
     _transformationController.value = Matrix4.copy(
       _transformationController.value,
-    ).scaled(1.1);
+    ).scaledByDouble(1.1, 1.1, 1.1, 1);
   }
 
   void _zoomOut() {
     final Matrix4 updated = Matrix4.copy(
       _transformationController.value,
-    ).scaled(0.9);
+    ).scaledByDouble(0.9, 0.9, 0.9, 1);
 
     // Don't allow for zooming out past the original size of the widget.
     // Assumes scaling is evenly applied to the entire matrix.
@@ -93,6 +94,85 @@ class ZoomControls extends StatelessWidget {
 
   void _reset() {
     _transformationController.value = Matrix4.identity();
+  }
+}
+
+class _ControlDecorator extends StatelessWidget {
+  const _ControlDecorator({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(8.0),
+      decoration: BoxDecoration(
+        color: Colors.grey[300],
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: child,
+    );
+  }
+}
+
+/// Allows for controlling the grid vs layout view in the preview environment.
+class LayoutTypeSelector extends StatelessWidget {
+  const LayoutTypeSelector({super.key, required this.controller});
+
+  final WidgetPreviewScaffoldController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return _ControlDecorator(
+      child: ValueListenableBuilder<LayoutType>(
+        valueListenable: controller.layoutTypeListenable,
+        builder: (context, selectedLayout, _) {
+          return Row(
+            children: [
+              IconButton(
+                onPressed: () => controller.layoutType = LayoutType.gridView,
+                icon: Icon(Icons.grid_on),
+                color: selectedLayout == LayoutType.gridView
+                    ? Colors.blue
+                    : Colors.black,
+              ),
+              IconButton(
+                onPressed: () => controller.layoutType = LayoutType.listView,
+                icon: Icon(Icons.view_list),
+                color: selectedLayout == LayoutType.listView
+                    ? Colors.blue
+                    : Colors.black,
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// A toggle button that enables / disables filtering previews by the currently
+/// selected source file.
+class FilterBySelectedFileToggle extends StatelessWidget {
+  const FilterBySelectedFileToggle({super.key, required this.controller});
+
+  final WidgetPreviewScaffoldController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return _ControlDecorator(
+      child: ValueListenableBuilder(
+        valueListenable: controller.filterBySelectedFileListenable,
+        builder: (context, value, child) {
+          return IconButton(
+            onPressed: controller.toggleFilterBySelectedFile,
+            icon: Icon(Icons.file_open),
+            color: value ? Colors.blue : Colors.black,
+            tooltip: 'Filter previews by selected file',
+          );
+        },
+      ),
+    );
   }
 }
 
@@ -122,6 +202,25 @@ class SoftRestartButton extends StatelessWidget {
 
   void _onRestart() {
     softRestartListenable.value = true;
+  }
+}
+
+/// A button that triggers a restart of the widget previewer through a hot restart request made
+/// through DTD.
+class WidgetPreviewerRestartButton extends StatelessWidget {
+  const WidgetPreviewerRestartButton({super.key, required this.controller});
+
+  final WidgetPreviewScaffoldController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return _ControlDecorator(
+      child: IconButton(
+        tooltip: 'Restart the Widget Previewer',
+        onPressed: controller.dtdServices.hotRestartPreviewer,
+        icon: Icon(Icons.restart_alt),
+      ),
+    );
   }
 }
 

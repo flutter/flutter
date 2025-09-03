@@ -5,160 +5,15 @@
 import 'package:meta/meta.dart';
 
 import '../../artifacts.dart';
-import '../../base/common.dart';
-import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../build_info.dart';
-import '../../flutter_plugins.dart';
-import '../../globals.dart' as globals;
-import '../../project.dart';
+import '../../globals.dart' as globals show stdio;
 import '../build_system.dart';
-import '../exceptions.dart';
-
-/// A target that checks that dev dependencies are enabled on debug/profile
-/// builds and disabled on release builds.
-///
-/// The Flutter tool enables/disables dev dependencies using the build mode.
-/// These can get out of sync if the user switches the build mode in Xcode.
-///
-/// Implementers should override [CheckDevDependencies.inputs] to add a [Source]
-/// that changes when dev dependencies status changes.
-abstract class CheckDevDependencies extends Target {
-  const CheckDevDependencies();
-
-  @override
-  List<Target> get dependencies => <Target>[];
-
-  @override
-  List<Source> get inputs => <Source>[
-    const Source.pattern(
-      '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/darwin.dart',
-    ),
-    Source.fromProject((FlutterProject project) => project.flutterPluginsDependenciesFile),
-  ];
-
-  @override
-  List<Source> get outputs => const <Source>[];
-
-  // The command that turns on dev dependencies.
-  // Displayed in the error message if dev dependencies are off in a debug build.
-  @visibleForOverriding
-  String get debugBuildCommand;
-
-  // The command that turns on dev dependencies.
-  // Displayed in the error message if dev dependencies are off in a profile build.
-  @visibleForOverriding
-  String get profileBuildCommand;
-
-  // The command that turns off dev dependencies.
-  // Displayed in the error message if dev dependencies are off in a release build.
-  @visibleForOverriding
-  String get releaseBuildCommand;
-
-  // Check that dev dependencies are enabled on debug or profile builds and
-  // disabled on release builds.
-  //
-  // The Flutter tool enables/disables dev dependencies using the build mode.
-  // These can get out of sync if the user switches the build mode in Xcode.
-  @override
-  Future<void> build(Environment environment) async {
-    final String? buildModeEnvironment = environment.defines[kBuildMode];
-    if (buildModeEnvironment == null) {
-      throw MissingDefineException(kBuildMode, name);
-    }
-    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
-    final String? devDependenciesEnabledString = environment.defines[kDevDependenciesEnabled];
-    if (devDependenciesEnabledString == null) {
-      throw MissingDefineException(kDevDependenciesEnabled, name);
-    }
-
-    final bool? devDependenciesEnabled = bool.tryParse(
-      environment.defines[kDevDependenciesEnabled] ?? '',
-    );
-    if (devDependenciesEnabled == null) {
-      throw Exception(
-        'Unexpected $kDevDependenciesEnabled define value: "$devDependenciesEnabledString"',
-      );
-    }
-
-    if (devDependenciesEnabled && buildMode.isRelease) {
-      // Supress this error if the project has no dev dependencies.
-      if (!_hasDevDependencies(environment)) {
-        environment.logger.printTrace(
-          'Ignoring dev dependencies error as the project has no dev dependencies',
-        );
-        return;
-      }
-
-      _printXcodeError(
-        'Release builds should not have Dart dev dependencies enabled\n'
-        '\n'
-        'This error happens if:\n'
-        '\n'
-        '1. Your pubspec.yaml has dev dependencies\n'
-        '2. Your last Flutter CLI action turned on dev dependencies\n'
-        '3. You do a release build in Xcode\n'
-        '\n'
-        'You can turn off Dart dev dependencies by running this in your Flutter project:\n'
-        '\n'
-        '  $releaseBuildCommand\n'
-        '\n',
-      );
-      throwToolExit('Dev dependencies enabled in release build');
-    } else if (!devDependenciesEnabled && !buildMode.isRelease) {
-      // Supress this error if the project has no dev dependencies.
-      if (!_hasDevDependencies(environment)) {
-        environment.logger.printTrace(
-          'Ignoring dev dependencies error as the project has no dev dependencies',
-        );
-        return;
-      }
-
-      final bool profile = buildMode == BuildMode.profile;
-      _printXcodeError(
-        '${profile ? 'Profile' : 'Debug'} builds require Dart dev dependencies\n'
-        '\n'
-        'This error happens if:\n'
-        '\n'
-        '1. Your pubspec.yaml has dev dependencies\n'
-        '2. Your last Flutter CLI action turned off dev dependencies\n'
-        '3. You do a debug or profile build in Xcode\n'
-        '\n'
-        'You can turn on Dart dev dependencies by running this in your Flutter project:\n'
-        '\n'
-        '  ${profile ? profileBuildCommand : debugBuildCommand}\n'
-        '\n',
-      );
-      throwToolExit('Dev dependencies disabled in ${profile ? 'profile' : 'debug'} build');
-    }
-  }
-
-  // Check if the iOS project has Dart dev dependencies. On error, assumes true.
-  bool _hasDevDependencies(Environment environment) {
-    // If the app has no plugins, the .flutter-plugins-dependencies file isn't generated.
-    final FlutterProject project = FlutterProject.fromDirectory(environment.projectDir);
-    final File pluginsFile = project.flutterPluginsDependenciesFile;
-    if (!pluginsFile.existsSync()) {
-      return false;
-    }
-
-    try {
-      return flutterPluginsListHasDevDependencies(pluginsFile);
-    } on Exception catch (e) {
-      environment.logger.printWarning('Unable to parse .flutter-plugins-dependencies file:\n$e');
-      return true;
-    }
-  }
-
-  void _printXcodeError(String message) {
-    globals.stdio.stderrWrite('error: $message');
-  }
-}
 
 abstract class UnpackDarwin extends Target {
   const UnpackDarwin();
 
-  /// Copies the [framework] artifact using `rsync` to the [environment.outputDir].
+  /// Copies the [framework] artifact using `rsync` to the [Environment.outputDir].
   /// Throws an error if copy fails.
   @protected
   Future<void> copyFramework(
@@ -212,7 +67,7 @@ abstract class UnpackDarwin extends Target {
       '-info',
       frameworkBinaryPath,
     ]);
-    final String lipoInfo = infoResult.stdout as String;
+    final lipoInfo = infoResult.stdout as String;
 
     final ProcessResult verifyResult = await environment.processManager.run(<String>[
       'lipo',
@@ -257,3 +112,63 @@ abstract class UnpackDarwin extends Target {
     }
   }
 }
+
+/// Log warning message to the Xcode build logs. Log will show as yellow with an icon.
+///
+/// If the issue occurs in a specific file, include the [filePath] as an absolute path.
+/// If the issue occurs at a specific line in the file, include the [lineNumber] as well.
+/// The [filePath] and [lineNumber] are optional.
+void printXcodeWarning(String warning, {String? filePath, int? lineNumber}) {
+  _printXcodeLog(XcodeLogType.warning, warning, filePath: filePath, lineNumber: lineNumber);
+}
+
+/// Log error message to the Xcode build logs. Log will show as red with an icon and may cause the build to fail.
+///
+/// If the issue occurs in a specific file, include the [filePath] as an absolute path.
+/// If the issue occurs at a specific line in the file, include the [lineNumber] as well.
+/// The [filePath] and [lineNumber] are optional.
+void printXcodeError(String error, {String? filePath, int? lineNumber}) {
+  _printXcodeLog(XcodeLogType.error, error, filePath: filePath, lineNumber: lineNumber);
+}
+
+/// Log note message to the Xcode build logs. Log will show with no special color or icon.
+///
+/// If the issue occurs in a specific file, include the [filePath] as an absolute path.
+/// If the issue occurs at a specific line in the file, include the [lineNumber] as well.
+/// The [filePath] and [lineNumber] are optional.
+void printXcodeNote(String note, {String? filePath, int? lineNumber}) {
+  _printXcodeLog(XcodeLogType.note, note, filePath: filePath, lineNumber: lineNumber);
+}
+
+/// Log [message] to the Xcode build logs.
+///
+/// If [logType] is [XcodeLogType.error], log will show as red with an icon and may cause the build to fail.
+/// If [logType] is [XcodeLogType.warning], log will show as yellow with an icon.
+/// If [logType] is [XcodeLogType.note], log will show with no special color or icon.
+///
+///
+/// If the issue occurs in a specific file, include the [filePath] as an absolute path.
+/// If the issue occurs at a specific line in the file, include the [lineNumber] as well.
+/// The [filePath] and [lineNumber] are optional.
+///
+/// See Apple's documentation:
+/// https://developer.apple.com/documentation/xcode/running-custom-scripts-during-a-build#Log-errors-and-warnings-from-your-script
+void _printXcodeLog(XcodeLogType logType, String message, {String? filePath, int? lineNumber}) {
+  var linePath = '';
+  if (filePath != null) {
+    linePath = '$filePath:';
+
+    // A line number is meaningless without a filePath, so only set if filePath is also provided.
+    if (lineNumber != null) {
+      linePath = '$linePath$lineNumber:';
+    }
+  }
+  if (linePath.isNotEmpty) {
+    linePath = '$linePath ';
+  }
+
+  // Must be printed to stderr to be streamed to the Flutter tool in xcode_backend.dart.
+  globals.stdio.stderrWrite('$linePath${logType.name}: $message\n');
+}
+
+enum XcodeLogType { error, warning, note }

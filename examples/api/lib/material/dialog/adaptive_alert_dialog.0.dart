@@ -49,27 +49,25 @@ class AdaptiveDialogExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextButton(
-      onPressed:
-          () => showAdaptiveDialog<String>(
-            context: context,
-            builder:
-                (BuildContext context) => AlertDialog.adaptive(
-                  title: const Text('AlertDialog Title'),
-                  content: const Text('AlertDialog description'),
-                  actions: <Widget>[
-                    adaptiveAction(
-                      context: context,
-                      onPressed: () => Navigator.pop(context, 'Cancel'),
-                      child: const Text('Cancel'),
-                    ),
-                    adaptiveAction(
-                      context: context,
-                      onPressed: () => Navigator.pop(context, 'OK'),
-                      child: const Text('OK'),
-                    ),
-                  ],
-                ),
-          ),
+      onPressed: () => showAdaptiveDialog<String>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog.adaptive(
+          title: const Text('AlertDialog Title'),
+          content: const Text('AlertDialog description'),
+          actions: <Widget>[
+            adaptiveAction(
+              context: context,
+              onPressed: () => Navigator.pop(context, 'Cancel'),
+              child: const Text('Cancel'),
+            ),
+            adaptiveAction(
+              context: context,
+              onPressed: () => Navigator.pop(context, 'OK'),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      ),
       child: const Text('Show Dialog'),
     );
   }

@@ -46,16 +46,17 @@ abstract class HtmlImageElementCodec implements ui.Codec {
 
     // Ignoring the returned future on purpose because we're communicating
     // through the `completer`.
-    // ignore: unawaited_futures
-    imgElement!
-        .decode()
-        .then((dynamic _) {
-          chunkCallback?.call(100, 100);
-          completer.complete();
-        })
-        .catchError((dynamic e) {
-          completer.completeError(e.toString());
-        });
+    unawaited(
+      imgElement!
+          .decode()
+          .then((dynamic _) {
+            chunkCallback?.call(100, 100);
+            completer.complete();
+          })
+          .catchError((dynamic e) {
+            completer.completeError(e.toString());
+          }),
+    );
     return completer.future;
   }
 

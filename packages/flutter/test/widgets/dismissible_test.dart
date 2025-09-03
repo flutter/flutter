@@ -37,12 +37,11 @@ Widget buildTest({
             dragStartBehavior: DragStartBehavior.down,
             key: ValueKey<int>(item),
             direction: dismissDirection,
-            confirmDismiss:
-                confirmDismiss == null
-                    ? null
-                    : (DismissDirection direction) {
-                      return confirmDismiss(context, direction);
-                    },
+            confirmDismiss: confirmDismiss == null
+                ? null
+                : (DismissDirection direction) {
+                    return confirmDismiss(context, direction);
+                  },
             onDismissed: (DismissDirection direction) {
               setState(() {
                 reportedDismissDirection = direction;
@@ -60,10 +59,9 @@ Widget buildTest({
               reportedDismissUpdateProgress = details.progress;
             },
             background: background,
-            dismissThresholds:
-                startToEndThreshold == null
-                    ? <DismissDirection, double>{}
-                    : <DismissDirection, double>{DismissDirection.startToEnd: startToEndThreshold},
+            dismissThresholds: startToEndThreshold == null
+                ? <DismissDirection, double>{}
+                : <DismissDirection, double>{DismissDirection.startToEnd: startToEndThreshold},
             crossAxisEndOffset: crossAxisEndOffset,
             child: SizedBox(width: 100.0, height: 100.0, child: Text(item.toString())),
           );
@@ -77,11 +75,10 @@ Widget buildTest({
             dragStartBehavior: DragStartBehavior.down,
             scrollDirection: scrollDirection,
             itemExtent: 100.0,
-            children:
-                <int>[0, 1, 2, 3, 4, 5, 6, 7, 8]
-                    .where((int i) => !dismissedItems.contains(i))
-                    .map<Widget>(buildDismissibleItem)
-                    .toList(),
+            children: <int>[0, 1, 2, 3, 4, 5, 6, 7, 8]
+                .where((int i) => !dismissedItems.contains(i))
+                .map<Widget>(buildDismissibleItem)
+                .toList(),
           ),
         );
       },
@@ -957,8 +954,6 @@ void main() {
     await dismissItem(tester, 1, gestureDirection: AxisDirection.right);
     expect(dismissedItems, equals(<int>[1]));
     final dynamic exception = tester.takeException();
-    expect(exception, isNotNull);
-    expect(exception, isFlutterError);
     final FlutterError error = exception as FlutterError;
     expect(error.diagnostics.last.level, DiagnosticLevel.hint);
     expect(

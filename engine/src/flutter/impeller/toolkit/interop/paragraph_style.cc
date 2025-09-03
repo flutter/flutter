@@ -4,6 +4,8 @@
 
 #include "impeller/toolkit/interop/paragraph_style.h"
 
+#include "flutter/fml/string_conversion.h"
+
 namespace impeller::interop {
 
 ParagraphStyle::ParagraphStyle() = default;
@@ -82,6 +84,14 @@ const txt::ParagraphStyle& ParagraphStyle::GetParagraphStyle() const {
 void ParagraphStyle::SetTextDecoration(
     const ImpellerTextDecoration& decoration) {
   decoration_ = decoration;
+}
+
+void ParagraphStyle::SetEllipsis(const std::string& string) {
+  if (string.empty()) {
+    style_.ellipsis = {};
+    return;
+  }
+  style_.ellipsis = fml::Utf8ToUtf16(string);
 }
 
 }  // namespace impeller::interop

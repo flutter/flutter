@@ -198,7 +198,7 @@ void DlSkCanvasAdapter::DrawPaint(const DlPaint& paint) {
 }
 
 void DlSkCanvasAdapter::DrawColor(DlColor color, DlBlendMode mode) {
-  delegate_->drawColor(ToSk(color), ToSk(mode));
+  delegate_->drawColor(ToSkColor4f(color), ToSk(mode));
 }
 
 void DlSkCanvasAdapter::DrawLine(const DlPoint& p0,
@@ -355,19 +355,13 @@ void DlSkCanvasAdapter::DrawDisplayList(const sk_sp<DisplayList> display_list,
   delegate_->restoreToCount(restore_count);
 }
 
-void DlSkCanvasAdapter::DrawTextBlob(const sk_sp<SkTextBlob>& blob,
-                                     SkScalar x,
-                                     SkScalar y,
-                                     const DlPaint& paint) {
+void DlSkCanvasAdapter::DrawText(const std::shared_ptr<DlText>& text,
+                                 SkScalar x,
+                                 SkScalar y,
+                                 const DlPaint& paint) {
+  auto blob = text->GetTextBlob();
+  FML_CHECK(blob) << "Impeller DlText cannot be drawn to a Skia canvas.";
   delegate_->drawTextBlob(blob, x, y, ToSk(paint));
-}
-
-void DlSkCanvasAdapter::DrawTextFrame(
-    const std::shared_ptr<impeller::TextFrame>& text_frame,
-    SkScalar x,
-    SkScalar y,
-    const DlPaint& paint) {
-  FML_CHECK(false);
 }
 
 void DlSkCanvasAdapter::DrawShadow(const DlPath& path,

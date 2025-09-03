@@ -110,6 +110,6 @@ You also need to set the `--enable_playground` flag in order to do frame capturi
 This is also the spot where you will add other command line arguments that will
 aid in your debugging. In that example, `–timeout=-1` will disable the Flutter
 test hang watchdog which will kill your process if the test doesn’t complete in
-30 seconds. I also like to set the observatory port to a known value so I can
+30 seconds. I also like to set the VM service port to a known value so I can
 get to it and disable service auth codes so I can just refresh the page to
-launch the latest version of the observatory.
+connect to a new instance of the VM service.

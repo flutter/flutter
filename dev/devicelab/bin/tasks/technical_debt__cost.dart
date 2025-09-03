@@ -88,9 +88,8 @@ Future<double> findCostsForRepo() async {
     flutterDirectory.path,
   ], workingDirectory: flutterDirectory.path);
   double total = 0.0;
-  await for (final String entry in git.stdout
-      .transform<String>(utf8.decoder)
-      .transform<String>(const LineSplitter())) {
+  await for (final String entry
+      in git.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter())) {
     total += await findCostsForFile(File(path.join(flutterDirectory.path, entry)));
   }
   final int gitExitCode = await git.exitCode;
@@ -107,9 +106,8 @@ Future<int> findGlobalsForTool() async {
     path.join(flutterDirectory.path, 'packages', 'flutter_tools'),
   ], workingDirectory: flutterDirectory.path);
   int total = 0;
-  await for (final String entry in git.stdout
-      .transform<String>(utf8.decoder)
-      .transform<String>(const LineSplitter())) {
+  await for (final String entry
+      in git.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter())) {
     total += await findGlobalsForFile(File(path.join(flutterDirectory.path, entry)));
   }
   final int gitExitCode = await git.exitCode;
@@ -119,30 +117,52 @@ Future<int> findGlobalsForTool() async {
   return total;
 }
 
-Future<int> countDependencies() async {
-  final List<String> lines = (await evalFlutter(
-    'update-packages',
-    options: <String>['--transitive-closure'],
-  )).split('\n');
-  final int count = lines.where((String line) => line.contains('->')).length;
-  if (count < 2) {
-    throw Exception(
-      '"flutter update-packages --transitive-closure" returned bogus output:\n${lines.join("\n")}',
-    );
-  }
-  return count;
+Future<int> countDependencies() async => _getCount(<String>{
+  ...(await dependenciesAt(packageNames: const <String>['_flutter_packages'])),
+  ...(await dependenciesAt(
+    packageNames: const <String>['flutter_tools'],
+    workingDirectory: path.join(flutterDirectory.path, 'packages', 'flutter_tools'),
+  )),
+});
+
+Future<Set<String>> dependenciesAt({
+  required List<String> packageNames,
+  String? workingDirectory,
+}) async {
+  final String jsonOutput = await evalFlutter(
+    'pub',
+    options: <String>[
+      'deps',
+      '--json',
+      if (workingDirectory != null) ...<String>['-C', workingDirectory],
+    ],
+  );
+  final Map<String, dynamic> json = jsonDecode(jsonOutput) as Map<String, dynamic>;
+  final List<dynamic> packages = json['packages'] as List<dynamic>;
+  final Iterable<String> count = packages
+      .map((dynamic e) => e as Map<String, dynamic>)
+      .where((Map<String, dynamic> package) => packageNames.contains(package['name']))
+      .expand((Map<String, dynamic> element) => element['dependencies'] as List<dynamic>)
+      .map((dynamic e) => e as String);
+  return count.toSet();
 }
 
-Future<int> countConsumerDependencies() async {
-  final List<String> lines = (await evalFlutter(
-    'update-packages',
-    options: <String>['--transitive-closure', '--consumer-only'],
-  )).split('\n');
-  final int count = lines.where((String line) => line.contains('->')).length;
+Future<int> countConsumerDependencies() async => _getCount(
+  await dependenciesAt(
+    packageNames: <String>[
+      'flutter',
+      'flutter_test',
+      'flutter_driver',
+      'flutter_localizations',
+      'integration_test',
+    ],
+  ),
+);
+
+int _getCount(Set<String> deps) {
+  final int count = deps.length;
   if (count < 2) {
-    throw Exception(
-      '"flutter update-packages --transitive-closure" returned bogus output:\n${lines.join("\n")}',
-    );
+    throw Exception('"flutter pub deps --json" returned bogus output.');
   }
   return count;
 }

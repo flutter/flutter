@@ -208,7 +208,9 @@ void main() {
     final GlobalKey localizations = GlobalKey();
 
     await tester.pumpWidget(
-      MaterialApp(home: Material(key: localizations, child: const SizedBox.expand())),
+      MaterialApp(
+        home: Material(key: localizations, child: const SizedBox.expand()),
+      ),
     );
 
     final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(

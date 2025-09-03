@@ -5,11 +5,20 @@
 #ifndef FLUTTER_IMPELLER_GEOMETRY_PATH_SOURCE_H_
 #define FLUTTER_IMPELLER_GEOMETRY_PATH_SOURCE_H_
 
-#include "impeller/geometry/path.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/rect.h"
 
 namespace impeller {
+
+enum class FillType {
+  kNonZero,  // The default winding order.
+  kOdd,
+};
+
+enum class Convexity {
+  kUnknown,
+  kConvex,
+};
 
 /// @brief   Collection of functions to receive path segments from the
 ///          underlying path representation via the DlPath::Dispatch method.
@@ -41,7 +50,6 @@ class PathReceiver {
   }
   virtual void CubicTo(const Point& cp1, const Point& cp2, const Point& p2) = 0;
   virtual void Close() = 0;
-  virtual void PathEnd() {}
 };
 
 class PathSource {

@@ -613,23 +613,20 @@ void main() {
     late TapGestureRecognizer tapSecondary;
     late DoubleTapGestureRecognizer doubleTap;
     setUp(() {
-      tapPrimary =
-          TapGestureRecognizer()
-            ..onTapDown = (TapDownDetails details) {
-              recognized.add('tapPrimary');
-            };
+      tapPrimary = TapGestureRecognizer()
+        ..onTapDown = (TapDownDetails details) {
+          recognized.add('tapPrimary');
+        };
       addTearDown(tapPrimary.dispose);
-      tapSecondary =
-          TapGestureRecognizer()
-            ..onSecondaryTapDown = (TapDownDetails details) {
-              recognized.add('tapSecondary');
-            };
+      tapSecondary = TapGestureRecognizer()
+        ..onSecondaryTapDown = (TapDownDetails details) {
+          recognized.add('tapSecondary');
+        };
       addTearDown(tapSecondary.dispose);
-      doubleTap =
-          DoubleTapGestureRecognizer()
-            ..onDoubleTap = () {
-              recognized.add('doubleTap');
-            };
+      doubleTap = DoubleTapGestureRecognizer()
+        ..onDoubleTap = () {
+          recognized.add('doubleTap');
+        };
       addTearDown(doubleTap.dispose);
     });
 
@@ -669,11 +666,10 @@ void main() {
 
   testGesture('A secondary double tap should not trigger primary', (GestureTester tester) {
     final List<String> recognized = <String>[];
-    final DoubleTapGestureRecognizer doubleTap =
-        DoubleTapGestureRecognizer()
-          ..onDoubleTap = () {
-            recognized.add('primary');
-          };
+    final DoubleTapGestureRecognizer doubleTap = DoubleTapGestureRecognizer()
+      ..onDoubleTap = () {
+        recognized.add('primary');
+      };
     addTearDown(doubleTap.dispose);
 
     // Down/up pair 7: normal tap sequence close to pair 6
@@ -704,12 +700,11 @@ void main() {
 
   testGesture('Buttons filter should cancel invalid taps', (GestureTester tester) {
     final List<String> recognized = <String>[];
-    final DoubleTapGestureRecognizer doubleTap = DoubleTapGestureRecognizer(
-        allowedButtonsFilter: (int buttons) => false,
-      )
-      ..onDoubleTap = () {
-        recognized.add('primary');
-      };
+    final DoubleTapGestureRecognizer doubleTap =
+        DoubleTapGestureRecognizer(allowedButtonsFilter: (int buttons) => false)
+          ..onDoubleTap = () {
+            recognized.add('primary');
+          };
     addTearDown(doubleTap.dispose);
 
     // Down/up pair 7: normal tap sequence close to pair 6

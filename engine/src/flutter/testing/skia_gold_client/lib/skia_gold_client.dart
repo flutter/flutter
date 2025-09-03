@@ -230,14 +230,13 @@ interface class SkiaGoldClient {
     final io.ProcessResult result = await _runCommand(authCommand);
 
     if (result.exitCode != 0) {
-      final StringBuffer buf =
-          StringBuffer()
-            ..writeln('Skia Gold authorization failed.')
-            ..writeln(
-              'Luci environments authenticate using the file provided '
-              'by LUCI_CONTEXT. There may be an error with this file or Gold '
-              'authentication.',
-            );
+      final StringBuffer buf = StringBuffer()
+        ..writeln('Skia Gold authorization failed.')
+        ..writeln(
+          'Luci environments authenticate using the file provided '
+          'by LUCI_CONTEXT. There may be an error with this file or Gold '
+          'authentication.',
+        );
       throw SkiaGoldProcessError(
         command: authCommand,
         stdout: result.stdout.toString(),
@@ -287,11 +286,10 @@ interface class SkiaGoldClient {
     final io.ProcessResult result = await _runCommand(imgtestInitCommand);
 
     if (result.exitCode != 0) {
-      final StringBuffer buf =
-          StringBuffer()
-            ..writeln('Skia Gold imgtest init failed.')
-            ..writeln('An error occurred when initializing golden file test with ')
-            ..writeln('goldctl.');
+      final StringBuffer buf = StringBuffer()
+        ..writeln('Skia Gold imgtest init failed.')
+        ..writeln('An error occurred when initializing golden file test with ')
+        ..writeln('goldctl.');
       throw SkiaGoldProcessError(
         command: imgtestInitCommand,
         stdout: result.stdout.toString(),
@@ -418,18 +416,17 @@ interface class SkiaGoldClient {
     final io.ProcessResult result = await _runCommand(imgtestCommand);
 
     if (result.exitCode != 0) {
-      final StringBuffer buf =
-          StringBuffer()
-            ..writeln('Skia Gold received an unapproved image in post-submit ')
-            ..writeln('testing. Golden file images in flutter/engine are triaged ')
-            ..writeln('in pre-submit during code review for the given PR.')
-            ..writeln()
-            ..writeln('Visit https://flutter-gold.skia.org/ to view and approve ')
-            ..writeln('the image(s), or revert the associated change. For more ')
-            ..writeln('information, visit the wiki: ')
-            ..writeln(
-              'https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter',
-            );
+      final StringBuffer buf = StringBuffer()
+        ..writeln('Skia Gold received an unapproved image in post-submit ')
+        ..writeln('testing. Golden file images in flutter/engine are triaged ')
+        ..writeln('in pre-submit during code review for the given PR.')
+        ..writeln()
+        ..writeln('Visit https://flutter-gold.skia.org/ to view and approve ')
+        ..writeln('the image(s), or revert the associated change. For more ')
+        ..writeln('information, visit the wiki: ')
+        ..writeln(
+          'https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter',
+        );
       throw SkiaGoldProcessError(
         command: imgtestCommand,
         stdout: result.stdout.toString(),
@@ -480,11 +477,10 @@ interface class SkiaGoldClient {
     final io.ProcessResult result = await _runCommand(tryjobInitCommand);
 
     if (result.exitCode != 0) {
-      final StringBuffer buf =
-          StringBuffer()
-            ..writeln('Skia Gold tryjobInit failure.')
-            ..writeln('An error occurred when initializing golden file tryjob with ')
-            ..writeln('goldctl.');
+      final StringBuffer buf = StringBuffer()
+        ..writeln('Skia Gold tryjobInit failure.')
+        ..writeln('An error occurred when initializing golden file tryjob with ')
+        ..writeln('goldctl.');
       throw SkiaGoldProcessError(
         command: tryjobInitCommand,
         stdout: result.stdout.toString(),
@@ -542,11 +538,10 @@ interface class SkiaGoldClient {
       final bool isUntriaged = resultStdout.contains('Untriaged');
       final bool isNegative = resultStdout.contains('negative image');
       if (!isUntriaged && !isNegative) {
-        final StringBuffer buf =
-            StringBuffer()
-              ..writeln('Unexpected Gold tryjobAdd failure.')
-              ..writeln('Tryjob execution for golden file test $testName failed for')
-              ..writeln('a reason unrelated to pixel comparison.');
+        final StringBuffer buf = StringBuffer()
+          ..writeln('Unexpected Gold tryjobAdd failure.')
+          ..writeln('Tryjob execution for golden file test $testName failed for')
+          ..writeln('a reason unrelated to pixel comparison.');
         throw SkiaGoldProcessError(
           command: tryjobCommand,
           stdout: resultStdout,

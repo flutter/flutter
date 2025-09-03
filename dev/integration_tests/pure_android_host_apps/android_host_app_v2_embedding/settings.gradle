@@ -2,6 +2,44 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+    repositories {
+        google()
+        mavenCentral()
+        def flutterStorageUrl = System.getenv("FLUTTER_STORAGE_BASE_URL") ?: "https://storage.googleapis.com"
+        maven {
+            url = uri("$flutterStorageUrl/download.flutter.io")
+        }
+        maven {
+            url = uri("../hello/build/host/outputs/repo")
+        }
+        // BEGIN ci only configuration for getting engine artifacts in pre-submit environments
+        def flutterSdkPath = {
+            def properties = new Properties()
+            file("../hello/.android/local.properties").withInputStream { properties.load(it) }
+            def flutterSdkPath = properties.getProperty("flutter.sdk")
+            assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
+            return flutterSdkPath
+        }
+
+        settings.ext.flutterSdkPath = flutterSdkPath()
+
+        def engineRealm =
+                new File("${settings.ext.flutterSdkPath}/bin/cache/engine.realm")
+                        .getText('UTF-8')
+                        .trim()
+
+        if (engineRealm) { // In Groovy, a non-empty string is true
+            engineRealm += "/"
+        }
+
+        maven {
+            url = uri("${flutterStorageUrl}/${engineRealm}download.flutter.io")
+        }
+
+        // END ci only configuration for getting engine artifacts in pre-submit environments
+    }
+}
+
 include ':app'
-setBinding(new Binding([gradle: this]))
-evaluate(new File(settingsDir.parentFile, 'hello/.android/include_flutter.groovy'))

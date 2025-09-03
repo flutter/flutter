@@ -40,17 +40,27 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       // EngineFlutterView itself.
       invokeOnMetricsChanged();
     });
+
+    /// Registers a navigation focus handler for assistive technology compatibility.
+    ///
+    /// In Flutter Web, screen readers and other assistive technologies don't naturally trigger
+    /// DOM focus events when activating navigation elements. This handler detects such activations
+    /// and ensures proper focus is set, enabling Flutter's focus restoration to work correctly
+    /// when users navigate between pages.
+    _addNavigationFocusHandler();
   }
 
   late StreamSubscription<int> _onViewDisposedListener;
+
+  final Arena frameArena = Arena();
 
   /// The [EnginePlatformDispatcher] singleton.
   static EnginePlatformDispatcher get instance => _instance;
   static final EnginePlatformDispatcher _instance = EnginePlatformDispatcher();
 
   @visibleForTesting
-  final DomElement accessibilityPlaceholder =
-      EngineSemantics.instance.semanticsHelper.prepareAccessibilityPlaceholder();
+  final DomElement accessibilityPlaceholder = EngineSemantics.instance.semanticsHelper
+      .prepareAccessibilityPlaceholder();
 
   PlatformConfiguration configuration = PlatformConfiguration(
     locales: parseBrowserLanguages(),
@@ -260,6 +270,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _viewsRenderedInCurrentFrame = <ui.FlutterView>{};
     invoke(_onDrawFrame, _onDrawFrameZone);
     _viewsRenderedInCurrentFrame = null;
+    frameArena.collect();
   }
 
   /// A callback that is invoked when pointer data is available.
@@ -437,7 +448,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     // In widget tests we want to bypass processing of platform messages.
     bool returnImmediately = false;
     assert(() {
-      if (ui_web.debugEmulateFlutterTesterEnvironment) {
+      if (ui_web.TestEnvironment.instance.ignorePlatformMessages) {
         returnImmediately = true;
       }
       return true;
@@ -538,10 +549,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
             replyToPlatformMessage(callback, jsonCodec.encodeSuccessEnvelope(true));
             return;
           case 'Clipboard.setData':
-            ClipboardMessageHandler().setDataMethodCall(decoded, callback);
+            final Map<String, Object?> arguments = decoded.arguments as Map<String, Object?>;
+            final String? text = arguments['text'] as String?;
+            ClipboardMessageHandler().setDataMethodCall(callback, text);
             return;
           case 'Clipboard.getData':
-            ClipboardMessageHandler().getDataMethodCall(callback);
+            final String? format = decoded.arguments as String?;
+            ClipboardMessageHandler().getDataMethodCall(callback, format);
             return;
           case 'Clipboard.hasStrings':
             ClipboardMessageHandler().hasStringsMethodCall(callback);
@@ -666,18 +680,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     const int vibrateHeavyImpact = 30;
     const int vibrateSelectionClick = 10;
 
-    switch (type) {
-      case 'HapticFeedbackType.lightImpact':
-        return vibrateLightImpact;
-      case 'HapticFeedbackType.mediumImpact':
-        return vibrateMediumImpact;
-      case 'HapticFeedbackType.heavyImpact':
-        return vibrateHeavyImpact;
-      case 'HapticFeedbackType.selectionClick':
-        return vibrateSelectionClick;
-      default:
-        return vibrateLongPress;
-    }
+    return switch (type) {
+      'HapticFeedbackType.lightImpact' => vibrateLightImpact,
+      'HapticFeedbackType.mediumImpact' => vibrateMediumImpact,
+      'HapticFeedbackType.heavyImpact' => vibrateHeavyImpact,
+      'HapticFeedbackType.selectionClick' => vibrateSelectionClick,
+      _ => vibrateLongPress,
+    };
   }
 
   /// Requests that, at the next appropriate opportunity, the [onBeginFrame]
@@ -698,6 +707,15 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     required ui.VoidCallback drawFrame,
   }) {
     FrameService.instance.scheduleWarmUpFrame(beginFrame: beginFrame, drawFrame: drawFrame);
+  }
+
+  @override
+  void setSemanticsTreeEnabled(bool enabled) {
+    if (!enabled) {
+      for (final EngineFlutterView view in views) {
+        view.semantics.reset();
+      }
+    }
   }
 
   /// Updates the application's rendering on the GPU with the newly provided
@@ -736,11 +754,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     // by checking if the `_viewsRenderedInCurrentFrame` is non-null and this
     // view hasn't been rendered already in this scope.
     final bool shouldRender = _viewsRenderedInCurrentFrame?.add(target) ?? false;
-    // TODO(harryterkelsen): HTML renderer needs to violate the render rule in
-    // order to perform golden tests in Flutter framework because on the HTML
-    // renderer, golden tests render to DOM and then take a browser screenshot,
-    // https://github.com/flutter/flutter/issues/137073.
-    if (shouldRender || renderer.rendererTag == 'html') {
+    if (shouldRender) {
       await renderer.renderScene(scene, target);
     }
   }
@@ -896,9 +910,22 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     configuration = configuration.copyWith(locales: parseBrowserLanguages());
   }
 
+  /// Overrides the browser languages list.
+  ///
+  /// If [value] is null, resets the browser languages back to the real value.
+  ///
+  /// This is intended for tests only.
+  @visibleForTesting
+  static void debugOverrideBrowserLanguages(List<String>? value) {
+    _browserLanguagesOverride = value;
+  }
+
+  static List<String>? _browserLanguagesOverride;
+
+  @visibleForTesting
   static List<ui.Locale> parseBrowserLanguages() {
     // TODO(yjbanov): find a solution for IE
-    final List<String>? languages = domWindow.navigator.languages;
+    final List<String>? languages = _browserLanguagesOverride ?? domWindow.navigator.languages;
     if (languages == null || languages.isEmpty) {
       // To make it easier for the app code, let's not leave the locales list
       // empty. This way there's fewer corner cases for apps to handle.
@@ -907,12 +934,14 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
     final List<ui.Locale> locales = <ui.Locale>[];
     for (final String language in languages) {
-      final List<String> parts = language.split('-');
-      if (parts.length > 1) {
-        locales.add(ui.Locale(parts.first, parts.last));
-      } else {
-        locales.add(ui.Locale(language));
-      }
+      final DomLocale domLocale = DomLocale(language);
+      locales.add(
+        ui.Locale.fromSubtags(
+          languageCode: domLocale.language,
+          scriptCode: domLocale.script,
+          countryCode: domLocale.region,
+        ),
+      );
     }
 
     assert(locales.isNotEmpty);
@@ -1083,11 +1112,10 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       _brightnessMediaQuery.matches ? ui.Brightness.dark : ui.Brightness.light,
     );
 
-    _brightnessMediaQueryListener =
-        (DomEvent event) {
-          final DomMediaQueryListEvent mqEvent = event as DomMediaQueryListEvent;
-          _updatePlatformBrightness(mqEvent.matches! ? ui.Brightness.dark : ui.Brightness.light);
-        }.toJS;
+    _brightnessMediaQueryListener = (DomEvent event) {
+      final DomMediaQueryListEvent mqEvent = event as DomMediaQueryListEvent;
+      _updatePlatformBrightness(mqEvent.matches! ? ui.Brightness.dark : ui.Brightness.light);
+    }.toJS;
     _brightnessMediaQuery.addListener(_brightnessMediaQueryListener);
   }
 
@@ -1287,11 +1315,213 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     });
   }
 
+  /// The [ui.FrameData] object for the current frame.
   @override
-  ui.FrameData get frameData => const ui.FrameData.webOnly();
+  ui.FrameData get frameData => FrameService.instance.frameData;
+
+  /// A callback that is invoked when the window updates the [ui.FrameData].
+  @override
+  ui.VoidCallback? get onFrameDataChanged => _onFrameDataChanged;
+  ui.VoidCallback? _onFrameDataChanged;
+  Zone _onFrameDataChangedZone = Zone.root;
+  @override
+  set onFrameDataChanged(ui.VoidCallback? callback) {
+    _onFrameDataChanged = callback;
+    _onFrameDataChangedZone = Zone.current;
+  }
+
+  /// Engine code should use this method instead of the callback directly.
+  /// Otherwise zones won't work properly.
+  void invokeOnFrameDataChanged() {
+    invoke(onFrameDataChanged, _onFrameDataChangedZone);
+  }
 
   @override
   double scaleFontSize(double unscaledFontSize) => unscaledFontSize * textScaleFactor;
+
+  static const double _minTabIndex = 0;
+
+  void _addNavigationFocusHandler() {
+    final DomEventListener navigationFocusListener = createDomEventListener((DomEvent event) {
+      if (!_isLikelyAssistiveTechnologyActivation(event)) {
+        return;
+      }
+
+      final NavigationTarget? target = _findNavigationTarget(event);
+      if (target != null && !_isAlreadyFocused(target.element)) {
+        final DomElement? focusableElement = _findFocusableElement(target.element);
+        focusableElement?.focusWithoutScroll();
+      }
+    });
+
+    domDocument.addEventListener('click', navigationFocusListener, true.toJS);
+  }
+
+  /// Finds the navigation target by traversing up the DOM tree
+  NavigationTarget? _findNavigationTarget(DomEvent event) {
+    DomNode? currentNode = event.target as DomNode?;
+
+    while (currentNode != null) {
+      if (currentNode.isA<DomElement>()) {
+        final DomElement element = currentNode as DomElement;
+        final String? semanticsId = element.getAttribute('id');
+
+        if (semanticsId != null && semanticsId.startsWith(kFlutterSemanticNodePrefix)) {
+          if (_isLikelyNavigationElement(element)) {
+            final String nodeIdStr = semanticsId.substring(kFlutterSemanticNodePrefix.length);
+            final int? nodeId = int.tryParse(nodeIdStr);
+            if (nodeId != null) {
+              return NavigationTarget(element, nodeId);
+            }
+          }
+        }
+      }
+      currentNode = currentNode.parentNode;
+    }
+    return null;
+  }
+
+  bool _isAlreadyFocused(DomElement element) {
+    final DomElement? activeElement = domDocument.activeElement;
+    return activeElement != null &&
+        (identical(activeElement, element) || element.contains(activeElement));
+  }
+
+  DomElement? _findFocusableElement(DomElement element) {
+    // Check if element itself is focusable via tabindex
+    final double? tabIndex = element.tabIndex;
+    if (tabIndex != null && tabIndex >= _minTabIndex) {
+      return element;
+    }
+
+    if (_supportsSemanticsFocusAction(element)) {
+      return element;
+    }
+
+    // Look for first focusable child (by tabindex)
+    final DomElement? focusableChild = element.querySelector('[tabindex]:not([tabindex="-1"])');
+    if (focusableChild != null) {
+      return focusableChild;
+    }
+
+    return _findFirstSemanticsFocusableChild(element);
+  }
+
+  bool _supportsSemanticsFocusAction(DomElement element) {
+    // Check if this is a semantic node element
+    final String? id = element.getAttribute('id');
+    if (id == null || !id.startsWith(kFlutterSemanticNodePrefix)) {
+      return false;
+    }
+
+    final String nodeIdString = id.substring(kFlutterSemanticNodePrefix.length);
+    final int? nodeId = int.tryParse(nodeIdString);
+    if (nodeId == null) {
+      return false;
+    }
+
+    // Get the semantics tree and check if the node supports focus action
+    final Map<int, SemanticsObject>? semanticsTree = instance.implicitView?.semantics.semanticsTree;
+    if (semanticsTree == null) {
+      return false;
+    }
+
+    final SemanticsObject? semanticsObject = semanticsTree[nodeId];
+    return semanticsObject?.hasAction(ui.SemanticsAction.focus) ?? false;
+  }
+
+  DomElement? _findFirstSemanticsFocusableChild(DomElement element) {
+    final Iterable<DomElement> candidates = element.querySelectorAll(
+      '[id^="$kFlutterSemanticNodePrefix"]',
+    );
+    for (final DomElement candidate in candidates) {
+      if (_supportsSemanticsFocusAction(candidate)) {
+        return candidate;
+      }
+    }
+    return null;
+  }
+
+  /// Determines if a click event is likely from assistive technology rather than
+  /// normal mouse/touch interaction.
+  bool _isLikelyAssistiveTechnologyActivation(DomEvent event) {
+    if (!event.isA<DomMouseEvent>()) {
+      return false;
+    }
+
+    final DomMouseEvent mouseEvent = event as DomMouseEvent;
+    final double clientX = mouseEvent.clientX;
+    final double clientY = mouseEvent.clientY;
+
+    // Pattern 1: Origin clicks from basic ATs (NVDA, JAWS, Narrator)
+    if (clientX <= 2 && clientY <= 2 && clientX >= 0 && clientY >= 0) {
+      return true;
+    }
+
+    // Pattern 2: Integer coordinate navigation from sophisticated ATs
+    //
+    // SOPHISTICATED ASSISTIVE TECHNOLOGIES:
+    // • VoiceOver (macOS/iOS): Apple's advanced screen reader with spatial navigation and center-click behavior
+    // • Dragon NaturallySpeaking: Voice control software that issues precise pointer clicks via speech commands
+    // • Switch Control (iOS/macOS): Enables element-by-element scanning and activation using external switches
+    // • Eye-tracking systems: e.g., Tobii, EyeGaze — translate gaze into click or focus events
+    // • Head/mouth tracking: Hands-free inputs using webcam or sensors for cursor control
+    //
+    // In contrast, screen readers like NVDA, JAWS, and Narrator often operate in virtual-cursor modes,
+    // where activating elements can trigger synthetic clicks at (0,0) or similar minimal coordinates
+    //
+    // Sophisticated ATs tend to:
+    // • Send clicks at precise locations (e.g., element centers as with VoiceOver)
+    // • Depend on spatial awareness to mimic natural interactions
+    // • Use non-keyboard modalities (voice, gaze, head movement) to navigate UI
+
+    if (_isIntegerCoordinateNavigation(event, clientX, clientY)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /// Detects sophisticated AT navigation clicks with integer coordinates
+  ///
+  /// COORDINATE PATTERNS BY INPUT TYPE:
+  /// • Human mouse/trackpad clicks: Often fractional coordinates (e.g., 123.4, 456.7)
+  ///   due to sub-pixel precision and natural hand movement variations
+  /// • Sophisticated AT clicks: Precise integer coordinates (e.g., 123, 456) because:
+  ///   - Programmatically calculated positions (element center, computed layouts)
+  ///   - Voice commands like "click button" translate to calculated integer positions
+  ///   - Eye-tracking systems snap to discrete pixel grid positions
+  ///   - Switch control systems use computed element boundaries
+  ///
+  /// This heuristic helps distinguish AT-generated events from natural user input,
+  /// enabling appropriate focus restoration behavior for accessibility users.
+  ///
+  /// NOTE: Tests should use fractional coordinates (e.g., 10.5, 20.5) to avoid
+  /// triggering this detection logic.
+  bool _isIntegerCoordinateNavigation(DomEvent event, double clientX, double clientY) {
+    // Sophisticated ATs often generate integer coordinates, normal mouse clicks are often fractional
+    if (clientX != clientX.round() || clientY != clientY.round()) {
+      return false;
+    }
+
+    final DomElement? element = event.target as DomElement?;
+    if (element == null) {
+      return false;
+    }
+
+    return _isLikelyNavigationElement(element);
+  }
+
+  bool _isLikelyNavigationElement(DomElement element) {
+    final String? role = element.getAttribute('role');
+    final String tagName = element.tagName.toLowerCase();
+
+    return tagName == 'button' ||
+        role == 'button' ||
+        tagName == 'a' ||
+        role == 'link' ||
+        role == 'tab';
+  }
 }
 
 bool _handleWebTestEnd2EndMessage(MethodCodec codec, ByteData? data) {
@@ -1480,4 +1710,12 @@ class PlatformConfiguration {
   final List<ui.Locale> locales;
   final String defaultRouteName;
   final String? systemFontFamily;
+}
+
+/// Helper class to hold navigation target information for AT focus restoration
+class NavigationTarget {
+  NavigationTarget(this.element, this.nodeId);
+
+  final DomElement element;
+  final int nodeId;
 }

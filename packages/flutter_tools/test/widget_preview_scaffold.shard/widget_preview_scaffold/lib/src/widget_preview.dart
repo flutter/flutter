@@ -2,32 +2,37 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widget_previews.dart';
 import 'package:flutter/widgets.dart';
 
 /// Wraps a [Widget], initializing various state and properties to allow for
 /// previewing of the [Widget] in the widget previewer.
-///
-/// WARNING: This interface is not stable and **will change**.
-///
-/// See also:
-///
-///  * [Preview], an annotation class used to mark functions returning widget
-///    previews.
-// TODO(bkonyi): link to actual documentation when available.
 class WidgetPreview {
   /// Wraps [builder] in a [WidgetPreview] instance that applies some set of
   /// properties.
   const WidgetPreview({
     required this.builder,
+    required this.scriptUri,
+    this.packageName,
     this.name,
     this.size,
     this.textScaleFactor,
     this.brightness,
     this.theme,
+    this.localizations,
   });
+
+  /// The absolute file:// URI pointing to the script containing this preview.
+  ///
+  /// This matches the URI format sent by IDEs for active location change events.
+  final String scriptUri;
+
+  /// The name of the package in which a preview was defined.
+  ///
+  /// For example, if a preview is defined in 'package:foo/src/bar.dart', this
+  /// will have the value 'foo'.
+  final String? packageName;
 
   /// A description to be displayed alongside the preview.
   ///
@@ -61,4 +66,26 @@ class WidgetPreview {
   ///
   /// If not provided, the current system default brightness will be used.
   final Brightness? brightness;
+
+  /// A callback to return a localization configuration to be applied to the
+  /// previewed [Widget].
+  ///
+  /// Note: this must be a reference to a static, public function defined as
+  /// either a top-level function or static member in a class.
+  final PreviewLocalizationsData? localizations;
+
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    properties
+      ..add(DiagnosticsProperty<String>('name', name, ifNull: 'not set'))
+      ..add(DiagnosticsProperty<Size>('size', size))
+      ..add(DiagnosticsProperty<double>('textScaleFactor', textScaleFactor))
+      ..add(DiagnosticsProperty<PreviewThemeData>('theme', theme))
+      ..add(DiagnosticsProperty<Brightness>('brightness', brightness))
+      ..add(
+        DiagnosticsProperty<PreviewLocalizationsData>(
+          'localizations',
+          localizations,
+        ),
+      );
+  }
 }

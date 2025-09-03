@@ -290,6 +290,54 @@ at startup time. But it still aims to support Skia’s general 2D API and has th
 same spec. requirements. The design decisions made to support those requirements
 make offline shader compilation impossible.
 
-As of August 2024, Flutter has no plans to use Graphite. However, we, the
+As of May 2025, Flutter has no plans to use Graphite. However, we, the
 Flutter team, are in constant communication with the Skia team and freely share
 insights and ideas across Impeller and Graphite.
+
+### How does WebGPU/Dawn fit into the rendering landscape in Flutter?
+
+To access graphics/compute accelerators on the device, you need to go through a client API like Vulkan, OpenGL, Metal, DirectX, etc… Rendering engines like Impeller, Skia, ThreeJS (we’ll call them middleware) all have the same concern. The client APIs are extremely low-level, not fully platform/device agnostic, and difficult to target/maintain individually. Depending on the application's needs, you can get away with targeting just one client API. Sometimes, client APIs can be layered on top of another. For instance, running WebGL in the browser likely uses Metal under the hood (via Angle) when the browser is running on macOS.
+
+```mermaid
+flowchart TD
+        GraphicsHardware["Graphics Hardware"]
+        Impeller --> OpenGL
+        Skia --> OpenGL
+        Others --> OpenGL
+        Impeller --> Metal
+        Skia --> Metal
+        Others --> Metal
+        Impeller --> Vulkan
+        Skia --> Vulkan
+        Others --> Vulkan
+        OpenGL --> GraphicsHardware
+        Metal --> GraphicsHardware
+        Vulkan --> GraphicsHardware
+        
+```
+
+WebGPU, or Dawn/wgpu.rs in JS garb, purports to be a sensible and portable abstraction layer over the [client APIs](https://dawn.googlesource.com/dawn/+/HEAD/docs/support.md). For middleware, that presents an interesting value proposition. Instead of doing mostly the same thing multiple times, you just target one API and let the WebGPU library take care of the rest.
+
+```mermaid
+flowchart TD
+        GraphicsHardware["Graphics Hardware"]
+        Impeller --> Dawn
+        Skia --> Dawn
+        Others --> Dawn
+        OpenGL --> GraphicsHardware
+        Metal --> GraphicsHardware
+        Vulkan --> GraphicsHardware
+        Dawn --> OpenGL
+        Dawn --> Metal
+        Dawn --> Vulkan
+```
+
+However, for middleware like Impeller, there are a few practical considerations that make Dawn unsuitable for use today. For one, the binary size of the library is larger than the entire Flutter Engine. Flutter users are incredibly sensitive to binary size and more than doubling the size of the engine is a tough pill to swallow. In comparison, Impeller adds only about 100kb of binary size to the Flutter Engine today. Next, the WebGPU abstraction locks us out of features available directly in client API that Impeller freely exploits for performance (framebuffer-fetch, fixed-rate compression for intermediate render targets, etc…). Impeller would either have to wait for official support for it in Dawn or poke holes in the API which increases our support surface. But, we are not averse to having a WebGPU backend for Flutter. In fact, we’ve already done experiments where our compiler can target [WGSL](https://github.com/chinmaygarde/wgsl_sandbox) and are ready to support WebGPU when/where it makes sense. But, right now, we are in a situation where a WebGPU backend will be **in-addition-to** the other backends and not **instead-of**. This defeats the primary value proposition of WebGPU/Dawn which is not having to maintain multiple backends in the first place.
+
+As of May 2025, Impeller has no plans to add a WebGPU/Dawn backend. We will re-evaluate this decision if/when one or both of the following conditions hold:
+* WebGPU is the only available client API on the platform capable of servicing Flutters needs. Hypothetically, this could be a path Impeller takes on the web instead of using WebGL 2. Though, we must admit it's a tough decision today.
+* WebGPU is the preferred client API on a platform and is available on that platform already (negating Impellers concerns about binary size). Flutter targets no such platforms today.
+
+We do get queries about WebGPU from the perspective of application developers, **not** middleware like Impeller. Flutter does have the ability to poke a hole in the middleware for applications to support specific rendering use-cases. For instance, plugins use it to render into a texture using client APIs directly. But as soon as you attempt to do your own rendering, you hit a massive usability cliff where you need to support all client APIs portably. WebGPU starts looking like just the thing you need. FWIW, application developers can write bindings to WebGPU using the plugin model with FFI and use those bindings to write a renderer that renders to a texture that gets composited in a Flutter application. But it's going to be very hard. And developers will likely lose the benefits of stateful hot-reload and all the other developer affordances that are part of Flutters value proposition unless significant investments are made in the developer experience. The author's role as a middleware developer with the constraints listed above disincentives them from making such an investment. So this is a call to the community for a high-quality WebGPU package.
+
+Admittedly, a gap in Flutters rendering support is that there is no way to create a delightful 3D renderer in Flutter without also first escaping from Flutter. That an escape hatch (via FFI/plugins) exists is perhaps missing the point. Talking about how someone could use WebGPU once they use that escape hatch even more so. A potentially exciting proposal is [Flutter GPU](https://docs.google.com/document/d/1Sh1BAC5c_kkuMVreo7ymBzPoMzb7lamZRPsI7GBXv5M/edit?resourcekey=0-5w8u2V-LS41tCHeoE8bDTQ&tab=t.0). It would expose a really low-level (but still Dart) interface to accelerators in a portable manner. Package authors will then be able to write renderers in Dart (similar to ThreeJS) that integrate well with existing Canvas APIs (no platform views, no texture composition, etc…). The progress is compelling but slow given current resource constraints on the team.

@@ -100,31 +100,32 @@ TEST_P(InteropPlaygroundTest, CanDrawImage) {
   auto compressed = LoadFixtureImageCompressed(
       flutter::testing::OpenFixtureAsMapping("boston.jpg"));
   ASSERT_NE(compressed, nullptr);
-  auto decompressed = compressed->Decode().ConvertToRGBA();
-  ASSERT_TRUE(decompressed.IsValid());
-  ImpellerMapping mapping = {};
-  mapping.data = decompressed.GetAllocation()->GetMapping();
-  mapping.length = decompressed.GetAllocation()->GetSize();
+  auto decompressed = std::make_shared<impeller::DecompressedImage>(
+      compressed->Decode().ConvertToRGBA());
+  ASSERT_TRUE(decompressed->IsValid());
+  auto mapping = std::make_unique<hpp::Mapping>(
+      decompressed->GetAllocation()->GetMapping(),
+      decompressed->GetAllocation()->GetSize(), [decompressed]() {
+        // Mapping will be dropped on the floor.
+      });
 
-  auto context = GetInteropContext();
+  auto context = GetHPPContext();
   ImpellerTextureDescriptor desc = {};
   desc.pixel_format = ImpellerPixelFormat::kImpellerPixelFormatRGBA8888;
-  desc.size = {decompressed.GetSize().width, decompressed.GetSize().height};
+  desc.size = {decompressed->GetSize().width, decompressed->GetSize().height};
   desc.mip_count = 1u;
-  auto texture = Adopt<Texture>(ImpellerTextureCreateWithContentsNew(
-      context.GetC(), &desc, &mapping, nullptr));
+  auto texture = hpp::Texture::WithContents(context, desc, std::move(mapping));
   ASSERT_TRUE(texture);
-  auto builder =
-      Adopt<DisplayListBuilder>(ImpellerDisplayListBuilderNew(nullptr));
-  ImpellerPoint point = {100, 100};
-  ImpellerDisplayListBuilderDrawTexture(builder.GetC(), texture.GetC(), &point,
-                                        kImpellerTextureSamplingLinear,
-                                        nullptr);
-  auto dl = Adopt<DisplayList>(
-      ImpellerDisplayListBuilderCreateDisplayListNew(builder.GetC()));
+
+  auto dl = hpp::DisplayListBuilder{}
+                .DrawTexture(texture, {100, 100},
+                             kImpellerTextureSamplingLinear, hpp::Paint{})
+                .Build();
+
   ASSERT_TRUE(
       OpenPlaygroundHere([&](const auto& context, const auto& surface) -> bool {
-        ImpellerSurfaceDrawDisplayList(surface.GetC(), dl.GetC());
+        hpp::Surface window(surface.GetC());
+        window.Draw(dl);
         return true;
       }));
 }
@@ -629,6 +630,74 @@ TEST_P(InteropPlaygroundTest, CanGetPathBounds) {
   ASSERT_EQ(bounds.y, 100);
   ASSERT_EQ(bounds.width, 100);
   ASSERT_EQ(bounds.height, 100);
+}
+
+TEST_P(InteropPlaygroundTest, CanControlEllipses) {
+  hpp::TypographyContext context;
+  auto style = hpp::ParagraphStyle{};
+  style.SetFontSize(50);
+  style.SetForeground(hpp::Paint{}.SetColor({.red = 1.0, .alpha = 1.0}));
+  const auto text = std::string{"The quick brown fox jumped over the lazy dog"};
+  style.SetEllipsis("🐶");
+  auto para1 =
+      hpp::ParagraphBuilder{context}.PushStyle(style).AddText(text).Build(250);
+  style.SetForeground(hpp::Paint{}.SetColor({.green = 1.0, .alpha = 1.0}));
+  style.SetEllipsis(nullptr);
+  auto para2 =
+      hpp::ParagraphBuilder{context}.PushStyle(style).AddText(text).Build(250);
+  auto dl = hpp::DisplayListBuilder{}
+                .DrawParagraph(para1, {100, 100})
+                .DrawParagraph(para2, {100, 200})
+                .Build();
+  ASSERT_TRUE(
+      OpenPlaygroundHere([&](const auto& context, const auto& surface) -> bool {
+        hpp::Surface window(surface.GetC());
+        window.Draw(dl);
+        return true;
+      }));
+}
+
+TEST_P(InteropPlaygroundTest, CanCreateFragmentProgramColorFilters) {
+  auto iplr = OpenAssetAsHPPMapping("interop_runtime_stage_cs.frag.iplr");
+  ASSERT_TRUE(!!iplr);
+  auto program = hpp::FragmentProgram::WithData(std::move(iplr));
+  ASSERT_TRUE(program);
+  auto context = GetHPPContext();
+  auto filter =
+      hpp::ImageFilter::FragmentProgram(context, program, {}, nullptr);
+  ASSERT_TRUE(filter);
+  auto bay_bridge = OpenAssetAsHPPTexture("bay_bridge.jpg");
+  ASSERT_TRUE(bay_bridge);
+
+  float size_data[4] = {500, 500};
+  auto uniform_data = hpp::Mapping{reinterpret_cast<const uint8_t*>(&size_data),
+                                   sizeof(size_data), nullptr};
+
+  auto dl = hpp::DisplayListBuilder{}
+                .DrawRect({10, 10, 500, 500},
+                          hpp::Paint{}
+                              .SetColor({1.0, 1.0, 1.0, 1.0})
+                              .SetColorSource(hpp::ColorSource::FragmentProgram(
+                                  context,             //
+                                  program,             //
+                                  {bay_bridge.Get()},  // samplers
+                                  &uniform_data        // uniform data
+                                  )))
+                .Build();
+  ASSERT_TRUE(
+      OpenPlaygroundHere([&](const auto& context, const auto& surface) -> bool {
+        hpp::Surface window(surface.GetC());
+        window.Draw(dl);
+        return true;
+      }));
+}
+
+TEST_P(InteropPlaygroundTest, MappingsReleaseTheirDataOnDestruction) {
+  bool deleted = false;
+  {
+    hpp::Mapping mapping(nullptr, 0, [&deleted]() { deleted = true; });
+  }
+  ASSERT_TRUE(deleted);
 }
 
 }  // namespace impeller::interop::testing

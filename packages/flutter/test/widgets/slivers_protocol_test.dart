@@ -36,7 +36,7 @@ void main() {
     final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
     const double max =
         RenderBigSliver.height * 3.0 +
-        (RenderOverlappingSliver.totalHeight) * 2.0 -
+        RenderOverlappingSliver.totalHeight * 2.0 -
         600.0; // 600 is the height of the test viewport
     assert(max < 10000.0);
     expect(max, 1450.0);

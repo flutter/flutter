@@ -66,7 +66,7 @@ abstract class OperatingSystemUtils {
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
   @visibleForTesting
-  static final GZipCodec gzipLevel1 = GZipCodec(level: 1);
+  static final gzipLevel1 = GZipCodec(level: 1);
 
   final FileSystem _fileSystem;
   final Logger _logger;
@@ -127,11 +127,7 @@ abstract class OperatingSystemUtils {
   ///
   /// If available, the detailed version of the OS is included.
   String get name {
-    const Map<String, String> osNames = <String, String>{
-      'macos': 'Mac OS',
-      'linux': 'Linux',
-      'windows': 'Windows',
-    };
+    const osNames = <String, String>{'macos': 'Mac OS', 'linux': 'Linux', 'windows': 'Windows'};
     final String osName = _platform.operatingSystem;
     return osNames[osName] ?? osName;
   }
@@ -150,10 +146,11 @@ abstract class OperatingSystemUtils {
   /// The port returned by this function may become used before it is bound by
   /// its intended user.
   Future<int> findFreePort({bool ipv6 = false}) async {
-    int port = 0;
+    var port = 0;
     ServerSocket? serverSocket;
-    final InternetAddress loopback =
-        ipv6 ? InternetAddress.loopbackIPv6 : InternetAddress.loopbackIPv4;
+    final InternetAddress loopback = ipv6
+        ? InternetAddress.loopbackIPv6
+        : InternetAddress.loopbackIPv4;
     try {
       serverSocket = await ServerSocket.bind(loopback, 0);
       port = serverSocket.port;
@@ -208,12 +205,12 @@ class _PosixUtils extends OperatingSystemUtils {
 
   @override
   List<File> _which(String execName, {bool all = false}) {
-    final List<String> command = <String>['which', if (all) '-a', execName];
+    final command = <String>['which', if (all) '-a', execName];
     final ProcessResult result = _processManager.runSync(command);
     if (result.exitCode != 0) {
       return const <File>[];
     }
-    final String stdout = result.stdout as String;
+    final stdout = result.stdout as String;
     return stdout
         .trim()
         .split('\n')
@@ -227,7 +224,7 @@ class _PosixUtils extends OperatingSystemUtils {
     if (!_processManager.canRun('unzip')) {
       // unzip is not available. this error message is modeled after the download
       // error in bin/internal/update_dart_sdk.sh
-      String message = 'Please install unzip.';
+      var message = 'Please install unzip.';
       if (_platform.isMacOS) {
         message = 'Consider running "brew install unzip".';
       } else if (_platform.isLinux) {
@@ -304,12 +301,11 @@ class _LinuxUtils extends _PosixUtils {
   @override
   String get name {
     if (_name == null) {
-      const String prettyNameKey = 'PRETTY_NAME';
+      const prettyNameKey = 'PRETTY_NAME';
       // If "/etc/os-release" doesn't exist, fallback to "/usr/lib/os-release".
-      final String osReleasePath =
-          _fileSystem.file('/etc/os-release').existsSync()
-              ? '/etc/os-release'
-              : '/usr/lib/os-release';
+      final osReleasePath = _fileSystem.file('/etc/os-release').existsSync()
+          ? '/etc/os-release'
+          : '/usr/lib/os-release';
       String prettyName;
       String kernelRelease;
       try {
@@ -341,7 +337,7 @@ class _LinuxUtils extends _PosixUtils {
 
   String _getOsReleaseValueForKey(String osRelease, String key) {
     final List<String> osReleaseSplit = osRelease.split('\n');
-    for (String entry in osReleaseSplit) {
+    for (var entry in osReleaseSplit) {
       entry = entry.trim();
       final List<String> entryKeyValuePair = entry.split('=');
       if (entryKeyValuePair[0] == key) {
@@ -372,7 +368,7 @@ class _MacOSUtils extends _PosixUtils {
   @override
   String get name {
     if (_name == null) {
-      final List<RunResult> results = <RunResult>[
+      final results = <RunResult>[
         _processUtils.runSync(<String>['sw_vers', '-productName']),
         _processUtils.runSync(<String>['sw_vers', '-productVersion']),
         _processUtils.runSync(<String>['sw_vers', '-buildVersion']),
@@ -399,7 +395,7 @@ class _MacOSUtils extends _PosixUtils {
       String? sysctlPath;
       if (which('sysctl') == null) {
         // Fallback to known install locations.
-        for (final String path in <String>['/usr/sbin/sysctl', '/sbin/sysctl']) {
+        for (final path in <String>['/usr/sbin/sysctl', '/sbin/sysctl']) {
           if (_fileSystem.isFileSync(path)) {
             sysctlPath = path;
           }
@@ -481,9 +477,10 @@ class _WindowsUtils extends OperatingSystemUtils {
   @override
   HostPlatform get hostPlatform {
     if (_hostPlatform == null) {
-      final Abi abi = Abi.current();
-      _hostPlatform =
-          (abi == Abi.windowsArm64) ? HostPlatform.windows_arm64 : HostPlatform.windows_x64;
+      final abi = Abi.current();
+      _hostPlatform = (abi == Abi.windowsArm64)
+          ? HostPlatform.windows_arm64
+          : HostPlatform.windows_x64;
     }
     return _hostPlatform!;
   }
@@ -595,7 +592,7 @@ class _WindowsUtils extends OperatingSystemUtils {
 /// Return null if the project root could not be found
 /// or if the project root is the flutter repository root.
 String? findProjectRoot(FileSystem fileSystem, [String? directory]) {
-  const String kProjectRootSentinel = 'pubspec.yaml';
+  const kProjectRootSentinel = 'pubspec.yaml';
   directory ??= fileSystem.currentDirectory.path;
   Directory currentDirectory = fileSystem.directory(directory).absolute;
   while (true) {

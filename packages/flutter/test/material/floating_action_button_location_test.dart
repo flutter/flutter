@@ -846,20 +846,18 @@ void main() {
           data: data,
           child: Scaffold(
             resizeToAvoidBottomInset: resizeToAvoidBottomInset,
-            bottomSheet:
-                bottomSheet
-                    ? const SizedBox(height: 100, child: Center(child: Text('BottomSheet')))
-                    : null,
+            bottomSheet: bottomSheet
+                ? const SizedBox(height: 100, child: Center(child: Text('BottomSheet')))
+                : null,
             appBar: appBar ? AppBar(title: const Text('Demo')) : null,
-            bottomNavigationBar:
-                bottomNavigationBar
-                    ? BottomNavigationBar(
-                      items: const <BottomNavigationBarItem>[
-                        BottomNavigationBarItem(icon: Icon(Icons.star), label: '0'),
-                        BottomNavigationBarItem(icon: Icon(Icons.star_border), label: '1'),
-                      ],
-                    )
-                    : null,
+            bottomNavigationBar: bottomNavigationBar
+                ? BottomNavigationBar(
+                    items: const <BottomNavigationBarItem>[
+                      BottomNavigationBarItem(icon: Icon(Icons.star), label: '0'),
+                      BottomNavigationBarItem(icon: Icon(Icons.star_border), label: '1'),
+                    ],
+                  )
+                : null,
             floatingActionButtonLocation: location,
             floatingActionButton: Builder(
               builder: (BuildContext context) {
@@ -1910,8 +1908,9 @@ class _StartTopFloatingActionButtonLocation extends FloatingActionButtonLocation
 class _AlmostEndFloatFabLocation extends StandardFabLocation with FabEndOffsetX, FabFloatOffsetY {
   @override
   double getOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
-    final double directionalAdjustment =
-        scaffoldGeometry.textDirection == TextDirection.ltr ? -50.0 : 50.0;
+    final double directionalAdjustment = scaffoldGeometry.textDirection == TextDirection.ltr
+        ? -50.0
+        : 50.0;
     return super.getOffsetX(scaffoldGeometry, adjustment) + directionalAdjustment;
   }
 }

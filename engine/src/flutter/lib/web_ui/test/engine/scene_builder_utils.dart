@@ -10,6 +10,8 @@ import 'package:ui/ui.dart' as ui;
 class StubPicture implements ScenePicture {
   StubPicture(this.cullRect);
 
+  bool _isDisposed = false;
+
   @override
   final ui.Rect cullRect;
 
@@ -17,10 +19,13 @@ class StubPicture implements ScenePicture {
   int get approximateBytesUsed => throw UnimplementedError();
 
   @override
-  bool get debugDisposed => throw UnimplementedError();
+  bool get debugDisposed => _isDisposed;
 
   @override
-  void dispose() {}
+  void dispose() {
+    assert(!_isDisposed);
+    _isDisposed = true;
+  }
 
   @override
   Future<ui.Image> toImage(int width, int height) {

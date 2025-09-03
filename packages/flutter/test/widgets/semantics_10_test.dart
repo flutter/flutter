@@ -48,7 +48,12 @@ Widget buildTestWidgets({
         child: TestWidget(
           label: label,
           isSemanticBoundary: isSemanticsBoundary,
-          child: Column(children: <Widget>[Semantics(label: 'child1'), Semantics(label: 'child2')]),
+          child: Column(
+            children: <Widget>[
+              Semantics(label: 'child1'),
+              Semantics(label: 'child2'),
+            ],
+          ),
         ),
       ),
     ),

@@ -164,14 +164,12 @@ bool VerticesSimpleBlendContents::Render(const ContentContext& renderer,
     frame_info.texture_sampler_y_coord_scale = texture->GetYCoordScale();
     frame_info.mvp = geometry_result.transform;
 
-    frag_info.output_alpha = alpha_;
-    frag_info.input_alpha = 1.0;
+    frag_info.input_alpha_output_alpha_tmx_tmy =
+        Vector4(1, alpha_, static_cast<int>(tile_mode_x_),
+                static_cast<int>(tile_mode_y_));
+    frag_info.use_strict_source_rect = 0.0;
 
-    // These values are ignored if the platform supports native decal mode.
-    frag_info.tmx = static_cast<int>(tile_mode_x_);
-    frag_info.tmy = static_cast<int>(tile_mode_y_);
-
-    auto& host_buffer = renderer.GetTransientsBuffer();
+    auto& host_buffer = renderer.GetTransientsDataBuffer();
     FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
     VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
 
@@ -205,7 +203,7 @@ bool VerticesSimpleBlendContents::Render(const ContentContext& renderer,
   frag_info.tmx = static_cast<int>(tile_mode_x_);
   frag_info.tmy = static_cast<int>(tile_mode_y_);
 
-  auto& host_buffer = renderer.GetTransientsBuffer();
+  auto& host_buffer = renderer.GetTransientsDataBuffer();
   FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
   VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
 

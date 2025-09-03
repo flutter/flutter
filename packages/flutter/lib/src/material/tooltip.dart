@@ -606,7 +606,6 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   }
 
   void _handlePointerDown(PointerDownEvent event) {
-    assert(mounted);
     // PointerDeviceKinds that don't support hovering.
     const Set<PointerDeviceKind> triggerModeDeviceKinds = <PointerDeviceKind>{
       PointerDeviceKind.invertedStylus,
@@ -618,22 +617,18 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     };
     switch (_triggerMode) {
       case TooltipTriggerMode.longPress:
-        final LongPressGestureRecognizer recognizer =
-            _longPressRecognizer ??= LongPressGestureRecognizer(
-              debugOwner: this,
-              supportedDevices: triggerModeDeviceKinds,
-            );
+        final LongPressGestureRecognizer recognizer = _longPressRecognizer ??=
+            LongPressGestureRecognizer(debugOwner: this, supportedDevices: triggerModeDeviceKinds);
         recognizer
           ..onLongPressCancel = _handleTapToDismiss
           ..onLongPress = _handleLongPress
           ..onLongPressUp = _handlePressUp
           ..addPointer(event);
       case TooltipTriggerMode.tap:
-        final TapGestureRecognizer recognizer =
-            _tapRecognizer ??= TapGestureRecognizer(
-              debugOwner: this,
-              supportedDevices: triggerModeDeviceKinds,
-            );
+        final TapGestureRecognizer recognizer = _tapRecognizer ??= TapGestureRecognizer(
+          debugOwner: this,
+          supportedDevices: triggerModeDeviceKinds,
+        );
         recognizer
           ..onTapCancel = _handleTapToDismiss
           ..onTap = _handleTap
@@ -733,10 +728,9 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     // before dispatching any `onEnter` events, so `event.device` must have
     // already been removed from _activeHoveringPointerDevices of the tooltips
     // that are no longer being hovered over.
-    final List<TooltipState> tooltipsToDismiss =
-        Tooltip._openedTooltips
-            .where((TooltipState tooltip) => tooltip._activeHoveringPointerDevices.isEmpty)
-            .toList();
+    final List<TooltipState> tooltipsToDismiss = Tooltip._openedTooltips
+        .where((TooltipState tooltip) => tooltip._activeHoveringPointerDevices.isEmpty)
+        .toList();
     for (final TooltipState tooltip in tooltipsToDismiss) {
       assert(tooltip.mounted);
       tooltip._scheduleDismissTooltip(withDelay: Duration.zero);
@@ -820,12 +814,14 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     };
   }
 
-  Widget _buildTooltipOverlay(BuildContext context) {
-    final OverlayState overlayState = Overlay.of(context, debugRequiredFor: widget);
-    final RenderBox box = this.context.findRenderObject()! as RenderBox;
-    final Offset target = box.localToGlobal(
-      box.size.center(Offset.zero),
-      ancestor: overlayState.context.findRenderObject(),
+  Widget _buildTooltipOverlay(BuildContext context, OverlayChildLayoutInfo layoutInfo) {
+    if (layoutInfo.childPaintTransform.determinant() == 0.0) {
+      // The child is not visible.
+      return const SizedBox.shrink();
+    }
+    final Offset target = MatrixUtils.transformPoint(
+      layoutInfo.childPaintTransform,
+      layoutInfo.childSize.center(Offset.zero),
     );
 
     final (TextStyle defaultTextStyle, BoxDecoration defaultDecoration) = switch (Theme.of(
@@ -928,16 +924,8 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       child: widget.child,
     );
 
-    bool visible = _visible;
-
-    // Check if there's an ongoing route transition
-    final ModalRoute<dynamic>? route = ModalRoute.of(context);
-    if (route?.secondaryAnimation != null && route!.secondaryAnimation!.isAnimating) {
-      visible = false;
-    }
-
     // Only check for gestures if tooltip should be visible.
-    if (visible) {
+    if (_visible) {
       result = _ExclusiveMouseRegion(
         onEnter: _handleMouseEnter,
         onExit: _handleMouseExit,
@@ -949,7 +937,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         ),
       );
     }
-    return OverlayPortal(
+    return OverlayPortal.overlayChildLayoutBuilder(
       controller: _overlayController,
       overlayChildBuilder: _buildTooltipOverlay,
       child: result,

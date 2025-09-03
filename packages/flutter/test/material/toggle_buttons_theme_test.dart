@@ -9,7 +9,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   Widget boilerplate({required Widget child}) {
-    return Directionality(textDirection: TextDirection.ltr, child: Center(child: child));
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Center(child: child),
+    );
   }
 
   TextStyle iconStyle(WidgetTester tester, IconData icon) {
@@ -76,11 +79,10 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ToggleButtonsThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -105,11 +107,10 @@ void main() {
       borderWidth: 2.0,
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'textStyle.inherit: true',
@@ -154,28 +155,26 @@ void main() {
     );
 
     TextStyle textStyle;
-    textStyle =
-        tester
-            .widget<DefaultTextStyle>(
-              find.descendant(
-                of: find.widgetWithText(TextButton, 'First child'),
-                matching: find.byType(DefaultTextStyle),
-              ),
-            )
-            .style;
+    textStyle = tester
+        .widget<DefaultTextStyle>(
+          find.descendant(
+            of: find.widgetWithText(TextButton, 'First child'),
+            matching: find.byType(DefaultTextStyle),
+          ),
+        )
+        .style;
     expect(textStyle.textBaseline, TextBaseline.ideographic);
     expect(textStyle.fontSize, 20.0);
     expect(textStyle.color, isNot(Colors.orange));
 
-    textStyle =
-        tester
-            .widget<DefaultTextStyle>(
-              find.descendant(
-                of: find.widgetWithText(TextButton, 'Second child'),
-                matching: find.byType(DefaultTextStyle),
-              ),
-            )
-            .style;
+    textStyle = tester
+        .widget<DefaultTextStyle>(
+          find.descendant(
+            of: find.widgetWithText(TextButton, 'Second child'),
+            matching: find.byType(DefaultTextStyle),
+          ),
+        )
+        .style;
     expect(textStyle.textBaseline, TextBaseline.ideographic);
     expect(textStyle.fontSize, 20.0);
     expect(textStyle.color, isNot(Colors.orange));

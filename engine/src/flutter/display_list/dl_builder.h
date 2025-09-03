@@ -227,19 +227,10 @@ class DisplayListBuilder final : public virtual DlCanvas,
   void DrawDisplayList(const sk_sp<DisplayList> display_list,
                        DlScalar opacity = SK_Scalar1) override;
   // |DlCanvas|
-  void DrawTextBlob(const sk_sp<SkTextBlob>& blob,
-                    DlScalar x,
-                    DlScalar y,
-                    const DlPaint& paint) override;
-
-  void drawTextFrame(const std::shared_ptr<impeller::TextFrame>& text_frame,
-                     DlScalar x,
-                     DlScalar y) override;
-
-  void DrawTextFrame(const std::shared_ptr<impeller::TextFrame>& text_frame,
-                     DlScalar x,
-                     DlScalar y,
-                     const DlPaint& paint) override;
+  void DrawText(const std::shared_ptr<DlText>& text,
+                DlScalar x,
+                DlScalar y,
+                const DlPaint& paint) override;
 
   // |DlCanvas|
   void DrawShadow(const DlPath& path,
@@ -329,25 +320,25 @@ class DisplayListBuilder final : public virtual DlCanvas,
   }
   // |DlOpReceiver|
   void setColorSource(const DlColorSource* source) override {
-    if (NotEquals(current_.getColorSource(), source)) {
+    if (NotEquals(current_.getColorSourcePtr(), source)) {
       onSetColorSource(source);
     }
   }
   // |DlOpReceiver|
   void setImageFilter(const DlImageFilter* filter) override {
-    if (NotEquals(current_.getImageFilter(), filter)) {
+    if (NotEquals(current_.getImageFilterPtr(), filter)) {
       onSetImageFilter(filter);
     }
   }
   // |DlOpReceiver|
   void setColorFilter(const DlColorFilter* filter) override {
-    if (NotEquals(current_.getColorFilter(), filter)) {
+    if (NotEquals(current_.getColorFilterPtr(), filter)) {
       onSetColorFilter(filter);
     }
   }
   // |DlOpReceiver|
   void setMaskFilter(const DlMaskFilter* filter) override {
-    if (NotEquals(current_.getMaskFilter(), filter)) {
+    if (NotEquals(current_.getMaskFilterPtr(), filter)) {
       onSetMaskFilter(filter);
     }
   }
@@ -497,10 +488,12 @@ class DisplayListBuilder final : public virtual DlCanvas,
                        DlScalar opacity) override {
     DrawDisplayList(display_list, opacity);
   }
+
   // |DlOpReceiver|
-  void drawTextBlob(const sk_sp<SkTextBlob> blob,
-                    DlScalar x,
-                    DlScalar y) override;
+  void drawText(const std::shared_ptr<DlText>& text,
+    DlScalar x,
+    DlScalar y) override;
+
   // |DlOpReceiver|
   void drawShadow(const DlPath& path,
                   const DlColor color,

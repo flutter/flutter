@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
@@ -11,6 +12,7 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:web_engine_tester/golden_tester.dart';
 
+import '../common/rendering.dart';
 import '../common/test_initialization.dart';
 import 'utils.dart';
 
@@ -249,12 +251,11 @@ Future<void> testMain() async {
     final ui.Paint grey = ui.Paint()..color = const ui.Color.fromARGB(255, 127, 127, 127);
     final ui.Paint unblurredFill = ui.Paint()..shader = gradient;
     final ui.Paint blurredFill = ui.Paint.from(unblurredFill)..imageFilter = filter;
-    final ui.Paint unblurredStroke =
-        ui.Paint.from(unblurredFill)
-          ..style = ui.PaintingStyle.stroke
-          ..strokeCap = ui.StrokeCap.round
-          ..strokeJoin = ui.StrokeJoin.round
-          ..strokeWidth = 10;
+    final ui.Paint unblurredStroke = ui.Paint.from(unblurredFill)
+      ..style = ui.PaintingStyle.stroke
+      ..strokeCap = ui.StrokeCap.round
+      ..strokeJoin = ui.StrokeJoin.round
+      ..strokeWidth = 10;
     final ui.Paint blurredStroke = ui.Paint.from(unblurredStroke)..imageFilter = filter;
     final ui.Image image = makeCheckerBoard(20, 20);
     const ui.Rect imageBounds = ui.Rect.fromLTRB(0, 0, 20, 20);
@@ -439,4 +440,140 @@ Future<void> testMain() async {
       region: region,
     );
   });
+
+  test('does not throw for both sigmaX and sigmaY set to 0', () async {
+    // Ignoring redundant arguments (the default sigma is 0) to make the
+    // test clearer.
+    final ui.ImageFilter imageFilter = ui.ImageFilter.blur(
+      // ignore: avoid_redundant_argument_values
+      sigmaX: 0,
+      // ignore: avoid_redundant_argument_values
+      sigmaY: 0,
+      tileMode: ui.TileMode.clamp,
+    );
+    expect(imageFilter, isNotNull);
+
+    const ui.Rect region = ui.Rect.fromLTRB(0, 0, 500, 250);
+
+    final ui.SceneBuilder builder = ui.SceneBuilder();
+    builder.pushOffset(0, 0);
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final ui.Canvas canvas = ui.Canvas(recorder, region);
+
+    canvas.drawCircle(
+      const ui.Offset(75, 125),
+      50,
+      ui.Paint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
+    );
+    final ui.Picture redCircle1 = recorder.endRecording();
+    builder.addPicture(ui.Offset.zero, redCircle1);
+
+    builder.pushImageFilter(imageFilter);
+
+    // Draw another red circle and apply it to the scene.
+    // This one should also be red with the image filter doing nothing
+    final ui.PictureRecorder recorder2 = ui.PictureRecorder();
+    final ui.Canvas canvas2 = ui.Canvas(recorder2, region);
+    canvas2.drawCircle(
+      const ui.Offset(425, 125),
+      50,
+      ui.Paint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
+    );
+    final ui.Picture redCircle2 = recorder2.endRecording();
+
+    builder.addPicture(ui.Offset.zero, redCircle2);
+
+    await renderScene(builder.build());
+
+    await matchGoldenFile('ui_zero_sigma_blur.png', region: region);
+    // Unskip when Skwasm and CanvasKit are unified:
+    // https://github.com/flutter/flutter/issues/172311
+  }, skip: isSkwasm);
+
+  test('== operator', () {
+    final List<ui.ImageFilter> filters1 = <ui.ImageFilter>[
+      ...createImageFilters(),
+      ...createColorFilters(),
+    ];
+    final List<ui.ImageFilter> filters2 = <ui.ImageFilter>[
+      ...createImageFilters(),
+      ...createColorFilters(),
+    ];
+
+    for (int index1 = 0; index1 < filters1.length; index1 += 1) {
+      final ui.ImageFilter imageFilter1 = filters1[index1];
+      expect(imageFilter1 == imageFilter1, isTrue);
+      for (int index2 = 0; index2 < filters2.length; index2 += 1) {
+        final ui.ImageFilter imageFilter2 = filters2[index2];
+        expect(imageFilter1 == imageFilter2, imageFilter2 == imageFilter1);
+        expect(
+          imageFilter1 == imageFilter2,
+          index1 == index2,
+          reason:
+              'filters1[$index1] != filters2[$index2]\n'
+              'imageFilter1 = $imageFilter1\n'
+              'imageFilter2 = $imageFilter2',
+        );
+      }
+    }
+    // == for ImageFilter is not implemented in Skwasm.
+    // See: https://github.com/flutter/flutter/issues/173968
+  }, skip: isSkwasm);
+
+  group('MaskFilter', () {
+    test('with 0 sigma can be set on a Paint', () {
+      final ui.Paint paint = ui.Paint();
+      const ui.MaskFilter filter = ui.MaskFilter.blur(ui.BlurStyle.normal, 0);
+
+      expect(() => paint.maskFilter = filter, isNot(throwsException));
+    });
+  });
+}
+
+List<ui.ColorFilter> createColorFilters() {
+  return <ui.ColorFilter>[
+    const EngineColorFilter.mode(ui.Color(0x12345678), ui.BlendMode.srcOver),
+    const EngineColorFilter.mode(ui.Color(0x12345678), ui.BlendMode.dstOver),
+    const EngineColorFilter.mode(ui.Color(0x87654321), ui.BlendMode.dstOver),
+    const EngineColorFilter.matrix(<double>[
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+    ]),
+    EngineColorFilter.matrix(
+      Float32List.fromList(<double>[2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0]),
+    ),
+    const EngineColorFilter.linearToSrgbGamma(),
+    const EngineColorFilter.srgbToLinearGamma(),
+  ];
+}
+
+List<ui.ImageFilter> createImageFilters() {
+  final List<ui.ImageFilter> filters = <ui.ImageFilter>[
+    ui.ImageFilter.blur(sigmaX: 5, sigmaY: 6, tileMode: ui.TileMode.clamp),
+    ui.ImageFilter.blur(sigmaX: 6, sigmaY: 5, tileMode: ui.TileMode.clamp),
+    ui.ImageFilter.blur(sigmaX: 6, sigmaY: 5, tileMode: ui.TileMode.decal),
+    ui.ImageFilter.dilate(radiusX: 5, radiusY: 6),
+    ui.ImageFilter.erode(radiusX: 7, radiusY: 8),
+  ];
+  filters.add(ui.ImageFilter.compose(outer: filters[0], inner: filters[1]));
+  filters.add(ui.ImageFilter.compose(outer: filters[1], inner: filters[3]));
+  return filters;
 }

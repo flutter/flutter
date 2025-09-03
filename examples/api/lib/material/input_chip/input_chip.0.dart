@@ -43,27 +43,26 @@ class _InputChipExampleState extends State<InputChipExample> {
             Wrap(
               alignment: WrapAlignment.center,
               spacing: 5.0,
-              children:
-                  List<Widget>.generate(inputs, (int index) {
-                    return InputChip(
-                      label: Text('Person ${index + 1}'),
-                      selected: selectedIndex == index,
-                      onSelected: (bool selected) {
-                        setState(() {
-                          if (selectedIndex == index) {
-                            selectedIndex = null;
-                          } else {
-                            selectedIndex = index;
-                          }
-                        });
-                      },
-                      onDeleted: () {
-                        setState(() {
-                          inputs = inputs - 1;
-                        });
-                      },
-                    );
-                  }).toList(),
+              children: List<Widget>.generate(inputs, (int index) {
+                return InputChip(
+                  label: Text('Person ${index + 1}'),
+                  selected: selectedIndex == index,
+                  onSelected: (bool selected) {
+                    setState(() {
+                      if (selectedIndex == index) {
+                        selectedIndex = null;
+                      } else {
+                        selectedIndex = index;
+                      }
+                    });
+                  },
+                  onDeleted: () {
+                    setState(() {
+                      inputs = inputs - 1;
+                    });
+                  },
+                );
+              }).toList(),
             ),
             const SizedBox(height: 10),
             ElevatedButton(

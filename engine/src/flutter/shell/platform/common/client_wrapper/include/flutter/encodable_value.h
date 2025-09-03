@@ -216,12 +216,57 @@ class EncodableValue : public internal::EncodableValueVariant {
     return std::get<int64_t>(*this);
   }
 
-  // Explicitly provide operator<, delegating to std::variant's operator<.
-  // There are issues with with the way the standard library-provided
-  // < and <=> comparisons interact with classes derived from variant.
+// The C++ Standard Library implementations can get into issues with recursive
+// constraint satisfaction when (among other things) objects of this type (which
+// is an `std::variant` subclass) are put into containers like `std::vector`.
+//
+// A definition of `operator<` is provided to break that recursion. However, in
+// C++20 with the latest compilers (Clang compilers newer than 20 and the latest
+// GCC variants, see https://gcc.godbolt.org/z/KM6n6qane) requiring that that
+// the `std::three_way_comparable` constraint be satisfied requires the
+// provision of `operator<=>` to do the same thing.
+//
+// The code below makes this translation unit be safe to include from both C++17
+// and C++20 translation units while also using the newest compilers.
+//
+// The correctness of the compiler's gripes with this code and the subsequent
+// need for these workarounds is not fully understood or explored. If you run
+// into issues with this code again, the following breadcrumbs may prove
+// useful. If you cannot access some or all of these links, the compiler
+// explorer link above should serve a reduced test case to base an investigation
+// off of.
+//
+// * b/423885648#comment8
+// * b/423885648#comment19
+// * cl/542631351
+// * cl/542541552
+// * https://github.com/flutter/engine/pull/43091
+//
+#if __cplusplus >= 202002L
+  friend std::partial_ordering operator<=>(const EncodableValue& lhs,
+                                           const EncodableValue& rhs) {
+    auto& lv = static_cast<const super&>(lhs);
+    auto& rv = static_cast<const super&>(rhs);
+
+    if (lv < rv) {
+      return std::partial_ordering::less;
+    }
+
+    if (rv < lv) {
+      return std::partial_ordering::greater;
+    }
+
+    if (lv == rv) {
+      return std::partial_ordering::equivalent;
+    }
+
+    return std::partial_ordering::unordered;
+  }
+#else   //  __cplusplus >= 202002L
   friend bool operator<(const EncodableValue& lhs, const EncodableValue& rhs) {
     return static_cast<const super&>(lhs) < static_cast<const super&>(rhs);
   }
+#endif  //  __cplusplus >= 202002L
 };
 
 }  // namespace flutter

@@ -41,23 +41,22 @@ class _ListDemoState extends State<ReorderableListDemo> {
   _ReorderableListType? _itemType = _ReorderableListType.threeLine;
   bool? _reverse = false;
   bool _reverseSort = false;
-  final List<_ListItem> _items =
-      <String>[
-        'A',
-        'B',
-        'C',
-        'D',
-        'E',
-        'F',
-        'G',
-        'H',
-        'I',
-        'J',
-        'K',
-        'L',
-        'M',
-        'N',
-      ].map<_ListItem>((String item) => _ListItem(item, false)).toList();
+  final List<_ListItem> _items = <String>[
+    'A',
+    'B',
+    'C',
+    'D',
+    'E',
+    'F',
+    'G',
+    'H',
+    'I',
+    'J',
+    'K',
+    'L',
+    'M',
+    'N',
+  ].map<_ListItem>((String item) => _ListItem(item, false)).toList();
 
   void changeItemType(_ReorderableListType? type) {
     setState(() {
@@ -87,7 +86,9 @@ class _ListDemoState extends State<ReorderableListDemo> {
     setState(() {
       _bottomSheet = scaffoldKey.currentState!.showBottomSheet((BuildContext bottomSheetContext) {
         return DecoratedBox(
-          decoration: const BoxDecoration(border: Border(top: BorderSide(color: Colors.black26))),
+          decoration: const BoxDecoration(
+            border: Border(top: BorderSide(color: Colors.black26)),
+          ),
           child: ListView(
             shrinkWrap: true,
             primary: false,
@@ -213,20 +214,20 @@ class _ListDemoState extends State<ReorderableListDemo> {
       body: Scrollbar(
         child: ReorderableListView(
           primary: true,
-          header:
-              _itemType != _ReorderableListType.threeLine
-                  ? Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      'Header of the list',
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                  )
-                  : null,
+          header: _itemType != _ReorderableListType.threeLine
+              ? Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    'Header of the list',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                )
+              : null,
           onReorder: _onReorder,
           reverse: _reverse!,
-          scrollDirection:
-              _itemType == _ReorderableListType.horizontalAvatar ? Axis.horizontal : Axis.vertical,
+          scrollDirection: _itemType == _ReorderableListType.horizontalAvatar
+              ? Axis.horizontal
+              : Axis.vertical,
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           children: _items.map<Widget>(buildListTile).toList(),
         ),

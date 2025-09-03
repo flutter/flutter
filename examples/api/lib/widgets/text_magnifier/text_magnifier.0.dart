@@ -29,9 +29,8 @@ class TextMagnifierExampleApp extends StatelessWidget {
               // Create a custom magnifier configuration that
               // this `TextField` will use to build a magnifier with.
               magnifierConfiguration: TextMagnifierConfiguration(
-                magnifierBuilder:
-                    (_, _, ValueNotifier<MagnifierInfo> magnifierInfo) =>
-                        CustomMagnifier(magnifierInfo: magnifierInfo),
+                magnifierBuilder: (_, _, ValueNotifier<MagnifierInfo> magnifierInfo) =>
+                    CustomMagnifier(magnifierInfo: magnifierInfo),
               ),
               controller: TextEditingController(text: text),
             ),

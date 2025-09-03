@@ -5,7 +5,6 @@
 /// @docImport 'binding.dart';
 library;
 
-import 'dart:collection' show LinkedHashMap;
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -27,16 +26,13 @@ class _MouseState {
   _MouseState({required PointerEvent initialEvent}) : _latestEvent = initialEvent;
 
   // The list of annotations that contains this device.
-  //
-  // It uses [LinkedHashMap] to keep the insertion order.
-  LinkedHashMap<MouseTrackerAnnotation, Matrix4> get annotations => _annotations;
-  LinkedHashMap<MouseTrackerAnnotation, Matrix4> _annotations =
-      LinkedHashMap<MouseTrackerAnnotation, Matrix4>();
+  Map<MouseTrackerAnnotation, Matrix4> get annotations => _annotations;
+  Map<MouseTrackerAnnotation, Matrix4> _annotations = <MouseTrackerAnnotation, Matrix4>{};
 
-  LinkedHashMap<MouseTrackerAnnotation, Matrix4> replaceAnnotations(
-    LinkedHashMap<MouseTrackerAnnotation, Matrix4> value,
+  Map<MouseTrackerAnnotation, Matrix4> replaceAnnotations(
+    Map<MouseTrackerAnnotation, Matrix4> value,
   ) {
-    final LinkedHashMap<MouseTrackerAnnotation, Matrix4> previous = _annotations;
+    final Map<MouseTrackerAnnotation, Matrix4> previous = _annotations;
     _annotations = value;
     return previous;
   }
@@ -93,12 +89,12 @@ class _MouseTrackerUpdateDetails with Diagnosticable {
   /// The annotations that the device is hovering before the update.
   ///
   /// It is never null.
-  final LinkedHashMap<MouseTrackerAnnotation, Matrix4> lastAnnotations;
+  final Map<MouseTrackerAnnotation, Matrix4> lastAnnotations;
 
   /// The annotations that the device is hovering after the update.
   ///
   /// It is never null.
-  final LinkedHashMap<MouseTrackerAnnotation, Matrix4> nextAnnotations;
+  final Map<MouseTrackerAnnotation, Matrix4> nextAnnotations;
 
   /// The last event that the device observed before the update.
   ///
@@ -232,11 +228,8 @@ class MouseTracker extends ChangeNotifier {
         lastEvent.position != event.position;
   }
 
-  LinkedHashMap<MouseTrackerAnnotation, Matrix4> _hitTestInViewResultToAnnotations(
-    HitTestResult result,
-  ) {
-    final LinkedHashMap<MouseTrackerAnnotation, Matrix4> annotations =
-        LinkedHashMap<MouseTrackerAnnotation, Matrix4>();
+  Map<MouseTrackerAnnotation, Matrix4> _hitTestInViewResultToAnnotations(HitTestResult result) {
+    final Map<MouseTrackerAnnotation, Matrix4> annotations = <MouseTrackerAnnotation, Matrix4>{};
     for (final HitTestEntry entry in result.path) {
       final Object target = entry.target;
       if (target is MouseTrackerAnnotation) {
@@ -251,12 +244,12 @@ class MouseTracker extends ChangeNotifier {
   //
   // If the device is not connected or not a mouse, an empty map is returned
   // without calling `hitTest`.
-  LinkedHashMap<MouseTrackerAnnotation, Matrix4> _findAnnotations(_MouseState state) {
+  Map<MouseTrackerAnnotation, Matrix4> _findAnnotations(_MouseState state) {
     final Offset globalPosition = state.latestEvent.position;
     final int device = state.device;
     final int viewId = state.latestEvent.viewId;
     if (!_mouseStates.containsKey(device)) {
-      return LinkedHashMap<MouseTrackerAnnotation, Matrix4>();
+      return <MouseTrackerAnnotation, Matrix4>{};
     }
 
     return _hitTestInViewResultToAnnotations(_hitTestInView(globalPosition, viewId));
@@ -341,12 +334,12 @@ class MouseTracker extends ChangeNotifier {
         final _MouseState targetState = _mouseStates[device] ?? existingState!;
 
         final PointerEvent lastEvent = targetState.replaceLatestEvent(event);
-        final LinkedHashMap<MouseTrackerAnnotation, Matrix4> nextAnnotations =
-            event is PointerRemovedEvent
-                ? LinkedHashMap<MouseTrackerAnnotation, Matrix4>()
-                : _hitTestInViewResultToAnnotations(result);
-        final LinkedHashMap<MouseTrackerAnnotation, Matrix4> lastAnnotations = targetState
-            .replaceAnnotations(nextAnnotations);
+        final Map<MouseTrackerAnnotation, Matrix4> nextAnnotations = event is PointerRemovedEvent
+            ? <MouseTrackerAnnotation, Matrix4>{}
+            : _hitTestInViewResultToAnnotations(result);
+        final Map<MouseTrackerAnnotation, Matrix4> lastAnnotations = targetState.replaceAnnotations(
+          nextAnnotations,
+        );
 
         _handleDeviceUpdate(
           _MouseTrackerUpdateDetails.byPointerEvent(
@@ -374,11 +367,10 @@ class MouseTracker extends ChangeNotifier {
     _deviceUpdatePhase(() {
       for (final _MouseState dirtyState in _mouseStates.values) {
         final PointerEvent lastEvent = dirtyState.latestEvent;
-        final LinkedHashMap<MouseTrackerAnnotation, Matrix4> nextAnnotations = _findAnnotations(
-          dirtyState,
+        final Map<MouseTrackerAnnotation, Matrix4> nextAnnotations = _findAnnotations(dirtyState);
+        final Map<MouseTrackerAnnotation, Matrix4> lastAnnotations = dirtyState.replaceAnnotations(
+          nextAnnotations,
         );
-        final LinkedHashMap<MouseTrackerAnnotation, Matrix4> lastAnnotations = dirtyState
-            .replaceAnnotations(nextAnnotations);
 
         _handleDeviceUpdate(
           _MouseTrackerUpdateDetails.byNewFrame(
@@ -407,8 +399,8 @@ class MouseTracker extends ChangeNotifier {
   static void _handleDeviceUpdateMouseEvents(_MouseTrackerUpdateDetails details) {
     final PointerEvent latestEvent = details.latestEvent;
 
-    final LinkedHashMap<MouseTrackerAnnotation, Matrix4> lastAnnotations = details.lastAnnotations;
-    final LinkedHashMap<MouseTrackerAnnotation, Matrix4> nextAnnotations = details.nextAnnotations;
+    final Map<MouseTrackerAnnotation, Matrix4> lastAnnotations = details.lastAnnotations;
+    final Map<MouseTrackerAnnotation, Matrix4> nextAnnotations = details.nextAnnotations;
 
     // Order is important for mouse event callbacks. The
     // `_hitTestInViewResultToAnnotations` returns annotations in the visual order
@@ -426,10 +418,9 @@ class MouseTracker extends ChangeNotifier {
 
     // Send enter events to annotations that are not in last but in next, in
     // reverse hit-test order.
-    final List<MouseTrackerAnnotation> enteringAnnotations =
-        nextAnnotations.keys
-            .where((MouseTrackerAnnotation annotation) => !lastAnnotations.containsKey(annotation))
-            .toList();
+    final List<MouseTrackerAnnotation> enteringAnnotations = nextAnnotations.keys
+        .where((MouseTrackerAnnotation annotation) => !lastAnnotations.containsKey(annotation))
+        .toList();
     final PointerEnterEvent baseEnterEvent = PointerEnterEvent.fromMouseEvent(latestEvent);
     for (final MouseTrackerAnnotation annotation in enteringAnnotations.reversed) {
       if (annotation.validForMouseTracker) {

@@ -10,8 +10,6 @@ import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/src/widgets/_html_element_view_web.dart'
-    show debugOverridePlatformViewRegistry;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:web/web.dart' as web;
@@ -269,11 +267,11 @@ void main() {
 
   group('HtmlElementView.fromTagName', () {
     setUp(() {
-      debugOverridePlatformViewRegistry = fakePlatformViewRegistry;
+      ui_web.debugOverridePlatformViewRegistry(fakePlatformViewRegistry);
     });
 
     tearDown(() {
-      debugOverridePlatformViewRegistry = null;
+      ui_web.debugOverridePlatformViewRegistry(null);
     });
 
     testWidgets('Create platform view from tagName', (WidgetTester tester) async {

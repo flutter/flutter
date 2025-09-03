@@ -15,53 +15,53 @@ import '../java.dart';
 // Android Studio 2022.2 "Flamingo" is the first to bundle a Java 17 JDK.
 // Previous versions bundled a Java 11 JDK.
 @visibleForTesting
-final Version androidStudioFlamingo = Version(2022, 2, 0);
+final androidStudioFlamingo = Version(2022, 2, 0);
 @visibleForTesting
-const String gradleVersion7_6_1 = r'7.6.1';
+const gradleVersion7_6_1 = r'7.6.1';
 
 // String that can be placed in the gradle-wrapper.properties to opt out of this
 // migrator.
 @visibleForTesting
-const String optOutFlag = 'NoFlutterGradleWrapperUpgrade';
+const optOutFlag = 'NoFlutterGradleWrapperUpgrade';
 // Only the major version matters.
-final Version flamingoBundledJava = Version(17, 0, 0);
+final flamingoBundledJava = Version(17, 0, 0);
 
 // These gradle versions were chosen because they
 // 1. Were output by 'flutter create' at some point in flutter's history and
 // 2. Are less than 7.3, the lowest supported gradle version for JDK 17
-const List<String> gradleVersionsToUpgradeFrom = <String>['5.6.2', '6.7'];
+const gradleVersionsToUpgradeFrom = <String>['5.6.2', '6.7'];
 
 // Define log messages as constants to re-use in testing.
 @visibleForTesting
-const String gradleWrapperNotFound =
+const gradleWrapperNotFound =
     'gradle-wrapper.properties not found, skipping Gradle-Java version compatibility check.';
 @visibleForTesting
-const String androidStudioNotFound =
+const androidStudioNotFound =
     'Android Studio version could not be detected, '
     'skipping Gradle-Java version compatibility check.';
 @visibleForTesting
-const String androidStudioVersionBelowFlamingo =
+const androidStudioVersionBelowFlamingo =
     'Version of Android Studio is less than Flamingo (the first impacted version),'
     ' no migration attempted.';
 @visibleForTesting
-const String javaVersionNot17 =
+const javaVersionNot17 =
     'Version of Java is different than impacted version, no migration attempted.';
 @visibleForTesting
-const String javaVersionNotFound = 'Version of Java not found, no migration attempted.';
+const javaVersionNotFound = 'Version of Java not found, no migration attempted.';
 @visibleForTesting
-const String conflictDetected =
+const conflictDetected =
     'Conflict detected between versions of Android Studio '
     'and Gradle, upgrading Gradle version from current to 7.4';
 @visibleForTesting
-const String gradleVersionNotFound =
+const gradleVersionNotFound =
     'Failed to parse Gradle version from distribution url, '
     'skipping Gradle-Java version compatibility check.';
 @visibleForTesting
-const String optOutFlagEnabled =
+const optOutFlagEnabled =
     'Skipping Android Studio Java-Gradle compatibility '
     "because opt out flag: '$optOutFlag' is enabled in gradle-wrapper.properties file.";
 @visibleForTesting
-const String errorWhileMigrating =
+const errorWhileMigrating =
     'Encountered an error while attempting Gradle-Java '
     'version compatibility check, skipping migration attempt. Error was: ';
 

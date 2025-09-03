@@ -53,7 +53,7 @@ void main() {
     );
 
     // See: https://regexr.com/6q0ft
-    final RegExp regex = RegExp(r'(?:\.flutter-loader\s*\{)[^}]+(?:overflow\:\s*hidden;)[^}]+}');
+    final regex = RegExp(r'(?:\.flutter-loader\s*\{)[^}]+(?:overflow\:\s*hidden;)[^}]+}');
 
     expect(result, matches(regex), reason: '.flutter-loader must have overflow: hidden');
   });
@@ -66,7 +66,7 @@ void main() {
     );
 
     // See: https://regexr.com/6q0kp
-    final RegExp regex = RegExp(
+    final regex = RegExp(
       r'(?:require\.config\(\{)(?:.|\s(?!\}\);))*'
       r'(?:waitSeconds\:\s*0[,]?)'
       r'(?:(?!\}\);).|\s)*\}\);',
@@ -146,7 +146,7 @@ void main() {
   });
 
   test('generateMainModule sets rootDirectories', () {
-    const String root = 'http://localhost:12345';
+    const root = 'http://localhost:12345';
     final String result = generateMainModule(
       entrypoint: 'foo/bar/main.js',
       nativeNullAssertions: false,
@@ -254,7 +254,7 @@ void main() {
       );
 
       // See: https://regexr.com/6q0ft
-      final RegExp regex = RegExp(r'(?:\.flutter-loader\s*\{)[^}]+(?:overflow\:\s*hidden;)[^}]+}');
+      final regex = RegExp(r'(?:\.flutter-loader\s*\{)[^}]+(?:overflow\:\s*hidden;)[^}]+}');
 
       expect(result, matches(regex), reason: '.flutter-loader must have overflow: hidden');
     });
@@ -264,9 +264,10 @@ void main() {
         entrypoint: 'main.js',
         nativeNullAssertions: false,
         onLoadEndBootstrap: 'on_load_end_bootstrap.js',
+        isCi: true,
       );
       // bootstrap main module has correct defined module.
-      expect(result, contains('let appName = "org-dartlang-app:/main.js";'));
+      expect(result, contains('const appName = "org-dartlang-app:/main.js";'));
       expect(result, contains('dartDevEmbedder.runMain(appName, sdkOptions);'));
     });
 
@@ -275,6 +276,7 @@ void main() {
         entrypoint: 'main.js',
         nativeNullAssertions: true,
         onLoadEndBootstrap: 'on_load_end_bootstrap.js',
+        isCi: true,
       );
 
       expect(result, contains('nativeNonNullAsserts: true'));
@@ -285,9 +287,30 @@ void main() {
         entrypoint: 'main.js',
         nativeNullAssertions: false,
         onLoadEndBootstrap: 'on_load_end_bootstrap.js',
+        isCi: true,
       );
 
       expect(result, contains('nativeNonNullAsserts: false'));
+    });
+
+    test('generateDDCLibraryBundleMainModule sets max requests when isCi only', () {
+      String result = generateDDCLibraryBundleMainModule(
+        entrypoint: 'main.js',
+        nativeNullAssertions: false,
+        onLoadEndBootstrap: 'on_load_end_bootstrap.js',
+        isCi: true,
+      );
+
+      expect(result, contains('maxRequestPoolSize ='));
+
+      result = generateDDCLibraryBundleMainModule(
+        entrypoint: 'main.js',
+        nativeNullAssertions: false,
+        onLoadEndBootstrap: 'on_load_end_bootstrap.js',
+        isCi: false,
+      );
+
+      expect(result, isNot(contains('maxRequestPoolSize =')));
     });
 
     test('generateTestBootstrapFileContents embeds urls correctly', () {

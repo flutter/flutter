@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:js_interop';
-import 'dart:js_util' as js_util;
+import 'dart:js_interop_unsafe';
 import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
@@ -334,6 +334,19 @@ Future<void> testMain() async {
     EnginePlatformDispatcher.instance.invokeOnAccessibilityFeaturesChanged();
   });
 
+  test('onAccessibilityFeaturesChanged is called when semantics is enabled', () {
+    bool a11yChangeInvoked = false;
+    myWindow.onAccessibilityFeaturesChanged = () {
+      a11yChangeInvoked = true;
+    };
+
+    expect(EngineSemantics.instance.semanticsEnabled, isFalse);
+    EngineSemantics.instance.semanticsEnabled = true;
+
+    expect(EngineSemantics.instance.semanticsEnabled, isTrue);
+    expect(a11yChangeInvoked, isTrue);
+  });
+
   test('onPlatformMessage preserves the zone', () {
     final Zone innerZone = Zone.current.fork();
 
@@ -383,6 +396,23 @@ Future<void> testMain() async {
     expect(responded, isTrue);
   });
 
+  test('onFrameDataChanged preserves the zone', () {
+    final Zone innerZone = Zone.current.fork();
+
+    innerZone.runGuarded(() {
+      void callback() {
+        expect(Zone.current, innerZone);
+      }
+
+      myWindow.onFrameDataChanged = callback;
+
+      // Test that the getter returns the exact same callback, e.g. it doesn't wrap it.
+      expect(myWindow.onFrameDataChanged, same(callback));
+    });
+
+    EnginePlatformDispatcher.instance.invokeOnFrameDataChanged();
+  });
+
   // Emulates the framework sending a request for screen orientation lock.
   Future<bool> sendSetPreferredOrientations(List<dynamic> orientations) {
     final Completer<bool> completer = Completer<bool>();
@@ -407,26 +437,20 @@ Future<void> testMain() async {
     bool simulateError = false;
 
     // The `orientation` property cannot be overridden, so this test overrides the entire `screen`.
-    js_util.setProperty(
-      domWindow,
-      'screen',
-      js_util.jsify(<Object?, Object?>{
-        'orientation': <Object?, Object?>{
-          'lock':
-              (String lockType) {
-                lockCalls.add(lockType);
-                if (simulateError) {
-                  throw Error();
-                }
-                return Future<JSNumber>.value(0.toJS).toJS;
-              }.toJS,
-          'unlock':
-              () {
-                unlockCount += 1;
-              }.toJS,
-        },
-      }),
-    );
+    domWindow['screen'] = <String, Object?>{
+      'orientation': <String, Object?>{
+        'lock': (String lockType) {
+          lockCalls.add(lockType);
+          if (simulateError) {
+            throw Error();
+          }
+          return Future<JSNumber>.value(0.toJS).toJS;
+        }.toJS,
+        'unlock': () {
+          unlockCount += 1;
+        }.toJS,
+      },
+    }.jsify();
 
     // Sanity-check the test setup.
     expect(lockCalls, <String>[]);
@@ -482,7 +506,7 @@ Future<void> testMain() async {
     expect(lockCalls, <String>[ScreenOrientation.lockTypePortraitSecondary]);
     expect(unlockCount, 0);
 
-    js_util.setProperty(domWindow, 'screen', original);
+    domWindow['screen'] = original;
   });
 
   /// Regression test for https://github.com/flutter/flutter/issues/66128.
@@ -490,14 +514,10 @@ Future<void> testMain() async {
     final DomScreen? original = domWindow.screen;
 
     // The `orientation` property cannot be overridden, so this test overrides the entire `screen`.
-    js_util.setProperty(
-      domWindow,
-      'screen',
-      js_util.jsify(<Object?, Object?>{'orientation': null}),
-    );
+    domWindow['screen'] = <Object?, Object?>{'orientation': null}.jsify();
     expect(domWindow.screen!.orientation, isNull);
     expect(await sendSetPreferredOrientations(<dynamic>[]), isFalse);
-    js_util.setProperty(domWindow, 'screen', original);
+    domWindow['screen'] = original;
   });
 
   test(
@@ -558,10 +578,9 @@ Future<void> testMain() async {
   });
 
   test('in full-page mode, Flutter window replaces viewport meta tags', () {
-    final DomHTMLMetaElement existingMeta =
-        createDomHTMLMetaElement()
-          ..name = 'viewport'
-          ..content = 'foo=bar';
+    final DomHTMLMetaElement existingMeta = createDomHTMLMetaElement()
+      ..name = 'viewport'
+      ..content = 'foo=bar';
     domDocument.head!.append(existingMeta);
     expect(existingMeta.isConnected, isTrue);
 
@@ -725,6 +744,9 @@ Future<void> testMain() async {
       // Resize the host to 20x20 (physical pixels).
       view.resize(const ui.Size.square(50));
 
+      // The view's physicalSize should be updated too.
+      expect(view.physicalSize, const ui.Size(50.0, 50.0));
+
       await view.onResize.first;
 
       // The host tightly wraps the rootElement:
@@ -743,10 +765,9 @@ Future<void> testMain() async {
 
     setUp(() async {
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(dpr);
-      host =
-          createDomHTMLDivElement()
-            ..style.width = '640px'
-            ..style.height = '480px';
+      host = createDomHTMLDivElement()
+        ..style.width = '640px'
+        ..style.height = '480px';
       domDocument.body!.append(host);
     });
 

@@ -13,9 +13,11 @@
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/display_list/aiks_unittests.h"
 #include "impeller/display_list/canvas.h"
+#include "impeller/display_list/dl_runtime_effect_impeller.h"
 #include "impeller/display_list/dl_vertices_geometry.h"
 #include "impeller/geometry/geometry_asserts.h"
 #include "impeller/playground/playground.h"
+#include "impeller/playground/widgets.h"
 #include "impeller/renderer/render_target.h"
 
 namespace impeller {
@@ -332,7 +334,7 @@ TEST_P(AiksTest, DrawVerticesWithEmptyTextureCoordinates) {
       runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(runtime_stage);
 
-  auto runtime_effect = flutter::DlRuntimeEffect::MakeImpeller(runtime_stage);
+  auto runtime_effect = flutter::DlRuntimeEffectImpeller::Make(runtime_stage);
   auto uniform_data = std::make_shared<std::vector<uint8_t>>();
   auto color_source = flutter::DlColorSource::MakeRuntimeEffect(
       runtime_effect, {}, uniform_data);
@@ -383,6 +385,80 @@ TEST_P(AiksTest, SupportsBlitToOnscreen) {
   } else {
     EXPECT_TRUE(canvas->SupportsBlitToOnscreen());
   }
+}
+
+TEST_P(AiksTest, RoundSuperellipseShadowComparison) {
+  // Config
+  Size default_size(600, 400);
+  Point left_center(400, 700);
+  Point right_center(1300, 700);
+  Color color = Color::Red();
+
+  // Convert `color` to a `color_source`. This forces
+  // `canvas.DrawRoundSuperellipse` to use the regular shadow algorithm
+  // (blurring) instead of the fast shadow algorithm.
+  std::shared_ptr<flutter::DlColorSource> color_source;
+  {
+    flutter::DlColor dl_color = flutter::DlColor(color.ToARGB());
+    std::vector<flutter::DlColor> colors = {dl_color, dl_color};
+    std::vector<Scalar> stops = {0.0, 1.0};
+    color_source = flutter::DlColorSource::MakeLinear(
+        {0, 0}, {1000, 1000}, 2, colors.data(), stops.data(),
+        flutter::DlTileMode::kClamp);
+  }
+
+  auto RectMakeCenterHalfSize = [](Point center, Point half_size) {
+    Size size(half_size.x * 2, half_size.y * 2);
+    return Rect::MakeOriginSize(center - half_size, size);
+  };
+
+  RenderCallback callback = [&](RenderTarget& render_target) {
+    ContentContext context(GetContext(), nullptr);
+    Canvas canvas(context, render_target, true, false);
+    // Somehow there's a scaling factor between PlaygroundPoint and Canvas.
+    Matrix ctm = Matrix::MakeScale(Vector2(1, 1) * 0.5);
+    Matrix i_ctm = ctm.Invert();
+
+    static Scalar sigma = 0.05;
+    static Scalar radius = 200;
+
+    // Define the ImGui
+    ImGui::Begin("Shadow", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    {
+      ImGui::SliderFloat("Sigma", &sigma, 0, 100);
+      ImGui::SliderFloat("Radius", &radius, 0, 1000);
+    }
+    ImGui::End();
+
+    static PlaygroundPoint right_reference_var(
+        ctm * (right_center + default_size / 2), 30, Color::White());
+    Point right_reference = i_ctm * DrawPlaygroundPoint(right_reference_var);
+    Point half_size = (right_reference - right_center).Abs();
+    Rect left_bounds = RectMakeCenterHalfSize(left_center, half_size);
+    Rect right_bounds = RectMakeCenterHalfSize(right_center, half_size);
+
+    Paint paint{
+        .color = color,
+        .mask_blur_descriptor =
+            Paint::MaskBlurDescriptor{
+                .sigma = Sigma(sigma),
+            },
+    };
+
+    // Left: Draw with canvas
+    canvas.DrawRoundSuperellipse(
+        RoundSuperellipse::MakeRectRadius(left_bounds, radius), paint);
+
+    // Right: Direct draw
+    paint.color_source = color_source.get();
+    canvas.DrawRoundSuperellipse(
+        RoundSuperellipse::MakeRectRadius(right_bounds, radius), paint);
+
+    canvas.EndReplay();
+    return true;
+  };
+
+  ASSERT_TRUE(Playground::OpenPlaygroundHere(callback));
 }
 
 }  // namespace testing

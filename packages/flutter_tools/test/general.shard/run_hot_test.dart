@@ -47,7 +47,7 @@ void main() {
     testUsingContext(
       'kills the test device',
       () async {
-        final HotRunner runner = HotRunner(
+        final runner = HotRunner(
           <FlutterDevice>[flutterDevice],
           target: 'main.dart',
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
@@ -70,7 +70,7 @@ void main() {
     testUsingContext(
       'kill with a detach keeps the test device running',
       () async {
-        final HotRunner runner = HotRunner(
+        final runner = HotRunner(
           <FlutterDevice>[flutterDevice],
           target: 'main.dart',
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
@@ -91,7 +91,7 @@ void main() {
     testUsingContext(
       'kill on an attached device keeps the test device running',
       () async {
-        final HotRunner runner = HotRunner(
+        final runner = HotRunner(
           <FlutterDevice>[flutterDevice],
           target: 'main.dart',
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
@@ -161,7 +161,7 @@ class _FakeHotCompatibleFlutterDevice extends Fake implements FlutterDevice {
     wasExited = true;
   }
 
-  bool wasExited = false;
+  var wasExited = false;
 }
 
 class _FakeFlutterVmService extends Fake implements FlutterVmService {
@@ -175,7 +175,7 @@ class _FakeVmService extends Fake implements vm_service.VmService {
 }
 
 class _FakeVm extends Fake implements vm_service.VM {
-  final List<vm_service.IsolateRef> _isolates = <vm_service.IsolateRef>[];
+  final _isolates = <vm_service.IsolateRef>[];
 
   @override
   List<vm_service.IsolateRef>? get isolates => _isolates;

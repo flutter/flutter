@@ -6,6 +6,7 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
+import 'package:yaml_edit/yaml_edit.dart';
 
 /// If no `copies` param is passed in, we scale the generated app up to 60k lines.
 const int kTargetLineCount = 60 * 1024;
@@ -18,7 +19,7 @@ void main(List<String> args) {
   }
 
   final ArgParser argParser = ArgParser();
-  argParser.addOption('out');
+  argParser.addOption('out', mandatory: true);
   argParser.addOption('copies');
   argParser.addFlag('delete', negatable: false);
   argParser.addFlag('help', abbr: 'h', negatable: false);
@@ -33,12 +34,13 @@ void main(List<String> args) {
   }
 
   final Directory source = Directory(_normalize('dev/integration_tests/flutter_gallery'));
-  final Directory out = Directory(_normalize(results['out'] as String));
+  final Directory outParent = Directory(_normalize(results['out'] as String));
+  final Directory out = Directory(path.join(outParent.path, 'packages'));
 
   if (results['delete'] as bool) {
-    if (out.existsSync()) {
-      print('Deleting ${out.path}');
-      out.deleteSync(recursive: true);
+    if (outParent.existsSync()) {
+      print('Deleting ${outParent.path}');
+      outParent.deleteSync(recursive: true);
     }
 
     exit(0);
@@ -83,9 +85,11 @@ void main(List<String> args) {
   _createEntry(_file(out, 'lib/main.dart'), copies);
 
   // Update the pubspec.
-  String pubspec = _file(out, 'pubspec.yaml').readAsStringSync();
-  pubspec = pubspec.replaceAll('../../packages/flutter', '../../../packages/flutter');
-  _file(out, 'pubspec.yaml').writeAsStringSync(pubspec);
+  final String pubspec = _file(Directory(''), 'pubspec.yaml').readAsStringSync();
+
+  final YamlEditor yamlEditor = YamlEditor(pubspec);
+  yamlEditor.update(<String>['workspace'], <String>['packages']);
+  File(path.join(outParent.path, 'pubspec.yaml')).writeAsStringSync(yamlEditor.toString());
 
   // Replace the (flutter_gallery specific) analysis_options.yaml file with a default one.
   _file(out, 'analysis_options.yaml').writeAsStringSync('''
@@ -111,7 +115,8 @@ void _createEntry(File mainFile, int copies) {
     imports.writeln("import 'gallery_$i/main.dart' as main_$i;");
   }
 
-  final String contents = '''
+  final String contents =
+      '''
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.

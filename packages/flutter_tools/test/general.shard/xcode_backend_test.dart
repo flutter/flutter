@@ -21,8 +21,8 @@ void main() {
     final Directory buildDir = fileSystem.directory('/path/to/builds')..createSync(recursive: true);
     final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
       ..createSync(recursive: true);
-    const String buildMode = 'Debug';
-    final TestContext context = TestContext(
+    const buildMode = 'Debug';
+    final context = TestContext(
       <String>['build'],
       <String, String>{
         'BUILT_PRODUCTS_DIR': buildDir.path,
@@ -53,7 +53,6 @@ void main() {
             '--DartDefines=',
             '--ExtraFrontEndOptions=',
             '-dSrcRoot=',
-            '-dDevDependenciesEnabled=',
             '-dTargetDeviceOSVersion=',
             'debug_ios_bundle_flutter_assets',
           ],
@@ -65,7 +64,7 @@ void main() {
   });
 
   const List<TargetPlatform> platforms = TargetPlatform.values;
-  for (final TargetPlatform platform in platforms) {
+  for (final platform in platforms) {
     final String platformName = platform.name;
     group('build for $platformName', () {
       test('exits with useful error message when build mode not set', () {
@@ -73,7 +72,7 @@ void main() {
           ..createSync(recursive: true);
         final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
           ..createSync(recursive: true);
-        final TestContext context = TestContext(
+        final context = TestContext(
           <String>['build', platformName],
           <String, String>{
             'ACTION': 'build',
@@ -89,15 +88,15 @@ void main() {
       });
 
       test('calls flutter assemble', () {
-        final String targetPlatform = platform == TargetPlatform.ios ? 'Ios' : 'Darwin';
+        final targetPlatform = platform == TargetPlatform.ios ? 'Ios' : 'Darwin';
         final Directory buildDir = fileSystem.directory('/path/to/builds')
           ..createSync(recursive: true);
         final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
           ..createSync(recursive: true);
         final File pipe = fileSystem.file('/tmp/pipe')..createSync(recursive: true);
-        const String buildMode = 'Debug';
+        const buildMode = 'Debug';
 
-        final TestContext context = TestContext(
+        final context = TestContext(
           <String>['build', platformName],
           <String, String>{
             'BUILT_PRODUCTS_DIR': buildDir.path,
@@ -128,7 +127,6 @@ void main() {
                 '--DartDefines=',
                 '--ExtraFrontEndOptions=',
                 '-dSrcRoot=',
-                '-dDevDependenciesEnabled=',
                 if (platform == TargetPlatform.ios) ...<String>['-dTargetDeviceOSVersion='],
                 if (platform == TargetPlatform.macos) ...<String>[
                   '--build-inputs=/Flutter/ephemeral/FlutterInputs.xcfilelist',
@@ -150,27 +148,26 @@ void main() {
       });
 
       test('forwards all env variables to flutter assemble', () {
-        final String targetPlatform = platform == TargetPlatform.ios ? 'Ios' : 'Darwin';
+        final targetPlatform = platform == TargetPlatform.ios ? 'Ios' : 'Darwin';
         final Directory buildDir = fileSystem.directory('/path/to/builds')
           ..createSync(recursive: true);
         final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
           ..createSync(recursive: true);
-        const String archs = 'arm64';
-        const String buildMode = 'Release';
-        const String dartObfuscation = 'false';
-        const String dartDefines = 'flutter.inspector.structuredErrors%3Dtrue';
-        const String expandedCodeSignIdentity = 'F1326572E0B71C3C8442805230CB4B33B708A2E2';
-        const String extraFrontEndOptions = '--some-option';
-        const String extraGenSnapshotOptions = '--obfuscate';
-        const String frontendServerStarterPath = '/path/to/frontend_server_starter.dart';
-        const String sdkRoot = '/path/to/sdk';
-        const String splitDebugInfo = '/path/to/split/debug/info';
-        const String trackWidgetCreation = 'true';
-        const String treeShake = 'true';
-        const String srcRoot = '/path/to/project';
-        const String iOSVersion = '18.3.1';
-        const String devDependenciesEnabled = 'true';
-        final TestContext context = TestContext(
+        const archs = 'arm64';
+        const buildMode = 'Release';
+        const dartObfuscation = 'false';
+        const dartDefines = 'flutter.inspector.structuredErrors%3Dtrue';
+        const expandedCodeSignIdentity = 'F1326572E0B71C3C8442805230CB4B33B708A2E2';
+        const extraFrontEndOptions = '--some-option';
+        const extraGenSnapshotOptions = '--obfuscate';
+        const frontendServerStarterPath = '/path/to/frontend_server_starter.dart';
+        const sdkRoot = '/path/to/sdk';
+        const splitDebugInfo = '/path/to/split/debug/info';
+        const trackWidgetCreation = 'true';
+        const treeShake = 'true';
+        const srcRoot = '/path/to/project';
+        const iOSVersion = '18.3.1';
+        final context = TestContext(
           <String>['build', platformName],
           <String, String>{
             'ACTION': 'install',
@@ -193,7 +190,6 @@ void main() {
             'TREE_SHAKE_ICONS': treeShake,
             'SRCROOT': srcRoot,
             'TARGET_DEVICE_OS_VERSION': iOSVersion,
-            'FLUTTER_DEV_DEPENDENCIES_ENABLED': devDependenciesEnabled,
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -219,7 +215,6 @@ void main() {
                 '--DartDefines=$dartDefines',
                 '--ExtraFrontEndOptions=$extraFrontEndOptions',
                 '-dSrcRoot=$srcRoot',
-                '-dDevDependenciesEnabled=$devDependenciesEnabled',
                 if (platform == TargetPlatform.ios) ...<String>[
                   '-dTargetDeviceOSVersion=$iOSVersion',
                   '-dCodesignIdentity=$expandedCodeSignIdentity',
@@ -242,9 +237,9 @@ void main() {
 
   group('test_vm_service_bonjour_service', () {
     test('handles when the Info.plist is missing', () {
-      final Directory buildDir = fileSystem.directory('/path/to/builds');
-      buildDir.createSync(recursive: true);
-      final TestContext context = TestContext(
+      final Directory buildDir = fileSystem.directory('/path/to/builds')
+        ..createSync(recursive: true);
+      final context = TestContext(
         <String>['test_vm_service_bonjour_service'],
         <String, String>{
           'CONFIGURATION': 'Debug',
@@ -261,20 +256,168 @@ void main() {
         ),
       );
     });
+
+    for (final verbose in <bool>[true, false]) {
+      test(
+        'Missing NSBonjourServices key in Info.plist should not fail Xcode compilation under ${verbose ? 'verbose' : 'non-verbose'} mode',
+        () {
+          final Directory buildDir = fileSystem.directory('/path/to/builds')
+            ..createSync(recursive: true);
+          final File infoPlist = buildDir.childFile('Info.plist')..createSync();
+          const plutilErrorMessage =
+              'Could not extract value, error: No value at that key path or invalid key path: NSBonjourServices';
+          final File pipe = fileSystem.file('/tmp/pipe')..createSync(recursive: true);
+          final context = TestContext(
+            <String>['test_vm_service_bonjour_service'],
+            <String, String>{
+              'CONFIGURATION': 'Debug',
+              'BUILT_PRODUCTS_DIR': buildDir.path,
+              'INFOPLIST_PATH': 'Info.plist',
+              if (verbose) 'VERBOSE_SCRIPT_LOGGING': 'YES',
+            },
+            commands: <FakeCommand>[
+              FakeCommand(
+                command: <String>[
+                  'plutil',
+                  '-extract',
+                  'NSBonjourServices',
+                  'xml1',
+                  '-o',
+                  '-',
+                  infoPlist.path,
+                ],
+                exitCode: 1,
+                stderr: plutilErrorMessage,
+              ),
+              FakeCommand(
+                command: <String>[
+                  'plutil',
+                  '-insert',
+                  'NSBonjourServices',
+                  '-json',
+                  '["_dartVmService._tcp"]',
+                  infoPlist.path,
+                ],
+              ),
+              FakeCommand(
+                command: <String>[
+                  'plutil',
+                  '-extract',
+                  'NSLocalNetworkUsageDescription',
+                  'xml1',
+                  '-o',
+                  '-',
+                  infoPlist.path,
+                ],
+              ),
+            ],
+            fileSystem: fileSystem,
+            scriptOutputStreamFile: pipe,
+          )..run();
+
+          expect(context.stderr, isNot(startsWith('error: ')));
+          expect(pipe.readAsStringSync(), isNot(contains(plutilErrorMessage)));
+          expect(context.stderr, isNot(contains(plutilErrorMessage)));
+          if (verbose) {
+            expect(context.stdout, contains(plutilErrorMessage));
+          } else {
+            expect(context.stdout, isNot(contains(plutilErrorMessage)));
+          }
+        },
+      );
+
+      test(
+        'Missing NSLocalNetworkUsageDescription in Info.plist should not fail Xcode compilation under ${verbose ? 'verbose' : 'non-verbose'} mode',
+        () {
+          final Directory buildDir = fileSystem.directory('/path/to/builds')
+            ..createSync(recursive: true);
+          final File infoPlist = buildDir.childFile('Info.plist')..createSync();
+          const plutilErrorMessage =
+              'Could not extract value, error: No value at that key path or invalid key path: NSLocalNetworkUsageDescription';
+          final File pipe = fileSystem.file('/tmp/pipe')..createSync(recursive: true);
+          final context = TestContext(
+            <String>['test_vm_service_bonjour_service'],
+            <String, String>{
+              'CONFIGURATION': 'Debug',
+              'BUILT_PRODUCTS_DIR': buildDir.path,
+              'INFOPLIST_PATH': 'Info.plist',
+              if (verbose) 'VERBOSE_SCRIPT_LOGGING': 'YES',
+            },
+            commands: <FakeCommand>[
+              FakeCommand(
+                command: <String>[
+                  'plutil',
+                  '-extract',
+                  'NSBonjourServices',
+                  'xml1',
+                  '-o',
+                  '-',
+                  infoPlist.path,
+                ],
+              ),
+              FakeCommand(
+                command: <String>[
+                  'plutil',
+                  '-insert',
+                  'NSBonjourServices.0',
+                  '-string',
+                  '_dartVmService._tcp',
+                  infoPlist.path,
+                ],
+              ),
+              FakeCommand(
+                command: <String>[
+                  'plutil',
+                  '-extract',
+                  'NSLocalNetworkUsageDescription',
+                  'xml1',
+                  '-o',
+                  '-',
+                  infoPlist.path,
+                ],
+                exitCode: 1,
+                stderr: plutilErrorMessage,
+              ),
+              FakeCommand(
+                command: <String>[
+                  'plutil',
+                  '-insert',
+                  'NSLocalNetworkUsageDescription',
+                  '-string',
+                  'Allow Flutter tools on your computer to connect and debug your application. This prompt will not appear on release builds.',
+                  infoPlist.path,
+                ],
+              ),
+            ],
+            fileSystem: fileSystem,
+            scriptOutputStreamFile: pipe,
+          )..run();
+
+          expect(context.stderr, isNot(startsWith('error: ')));
+          expect(pipe.readAsString(), isNot(contains(plutilErrorMessage)));
+          expect(context.stderr, isNot(contains(plutilErrorMessage)));
+          if (verbose) {
+            expect(context.stdout, contains(plutilErrorMessage));
+          } else {
+            expect(context.stdout, isNot(contains(plutilErrorMessage)));
+          }
+        },
+      );
+    }
   });
 
-  for (final TargetPlatform platform in platforms) {
+  for (final platform in platforms) {
     final String platformName = platform.name;
     group('prepare for $platformName', () {
       test('exits with useful error message when build mode not set', () {
-        final String targetPlatform = platform == TargetPlatform.ios ? 'Ios' : 'Darwin';
+        final targetPlatform = platform == TargetPlatform.ios ? 'Ios' : 'Darwin';
         final Directory buildDir = fileSystem.directory('/path/to/builds')
           ..createSync(recursive: true);
         final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
           ..createSync(recursive: true);
         final File pipe = fileSystem.file('/tmp/pipe')..createSync(recursive: true);
-        const String buildMode = 'Debug';
-        final TestContext context = TestContext(
+        const buildMode = 'Debug';
+        final context = TestContext(
           <String>['prepare', platformName],
           <String, String>{
             'ACTION': 'build',
@@ -318,14 +461,14 @@ void main() {
       });
 
       test('calls flutter assemble', () {
-        final String targetPlatform = platform == TargetPlatform.ios ? 'Ios' : 'Darwin';
+        final targetPlatform = platform == TargetPlatform.ios ? 'Ios' : 'Darwin';
         final Directory buildDir = fileSystem.directory('/path/to/builds')
           ..createSync(recursive: true);
         final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
           ..createSync(recursive: true);
         final File pipe = fileSystem.file('/tmp/pipe')..createSync(recursive: true);
-        const String buildMode = 'Debug';
-        final TestContext context = TestContext(
+        const buildMode = 'Debug';
+        final context = TestContext(
           <String>['prepare', platformName],
           <String, String>{
             'BUILT_PRODUCTS_DIR': buildDir.path,
@@ -356,7 +499,6 @@ void main() {
                 '--DartDefines=',
                 '--ExtraFrontEndOptions=',
                 '-dSrcRoot=',
-                '-dDevDependenciesEnabled=',
                 if (platform == TargetPlatform.ios) ...<String>['-dTargetDeviceOSVersion='],
                 '-dPreBuildAction=PrepareFramework',
                 'debug_unpack_$platformName',
@@ -370,27 +512,26 @@ void main() {
       });
 
       test('forwards all env variables to flutter assemble', () {
-        final String targetPlatform = platform == TargetPlatform.ios ? 'Ios' : 'Darwin';
+        final targetPlatform = platform == TargetPlatform.ios ? 'Ios' : 'Darwin';
         final Directory buildDir = fileSystem.directory('/path/to/builds')
           ..createSync(recursive: true);
         final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
           ..createSync(recursive: true);
-        const String archs = 'arm64';
-        const String buildMode = 'Release';
-        const String dartObfuscation = 'false';
-        const String dartDefines = 'flutter.inspector.structuredErrors%3Dtrue';
-        const String expandedCodeSignIdentity = 'F1326572E0B71C3C8442805230CB4B33B708A2E2';
-        const String extraFrontEndOptions = '--some-option';
-        const String extraGenSnapshotOptions = '--obfuscate';
-        const String frontendServerStarterPath = '/path/to/frontend_server_starter.dart';
-        const String sdkRoot = '/path/to/sdk';
-        const String splitDebugInfo = '/path/to/split/debug/info';
-        const String trackWidgetCreation = 'true';
-        const String treeShake = 'true';
-        const String srcRoot = '/path/to/project';
-        const String iOSVersion = '18.3.1';
-        const String devDependenciesEnabled = 'true';
-        final TestContext context = TestContext(
+        const archs = 'arm64';
+        const buildMode = 'Release';
+        const dartObfuscation = 'false';
+        const dartDefines = 'flutter.inspector.structuredErrors%3Dtrue';
+        const expandedCodeSignIdentity = 'F1326572E0B71C3C8442805230CB4B33B708A2E2';
+        const extraFrontEndOptions = '--some-option';
+        const extraGenSnapshotOptions = '--obfuscate';
+        const frontendServerStarterPath = '/path/to/frontend_server_starter.dart';
+        const sdkRoot = '/path/to/sdk';
+        const splitDebugInfo = '/path/to/split/debug/info';
+        const trackWidgetCreation = 'true';
+        const treeShake = 'true';
+        const srcRoot = '/path/to/project';
+        const iOSVersion = '18.3.1';
+        final context = TestContext(
           <String>['prepare', platformName],
           <String, String>{
             'ACTION': 'install',
@@ -413,7 +554,6 @@ void main() {
             'TREE_SHAKE_ICONS': treeShake,
             'SRCROOT': srcRoot,
             'TARGET_DEVICE_OS_VERSION': iOSVersion,
-            'FLUTTER_DEV_DEPENDENCIES_ENABLED': devDependenciesEnabled,
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -439,7 +579,6 @@ void main() {
                 '--DartDefines=$dartDefines',
                 '--ExtraFrontEndOptions=$extraFrontEndOptions',
                 '-dSrcRoot=$srcRoot',
-                '-dDevDependenciesEnabled=$devDependenciesEnabled',
                 if (platform == TargetPlatform.ios) ...<String>[
                   '-dTargetDeviceOSVersion=$iOSVersion',
                   '-dCodesignIdentity=$expandedCodeSignIdentity',
@@ -455,14 +594,14 @@ void main() {
       });
 
       test('assumes ARCHS based on NATIVE_ARCH if ONLY_ACTIVE_ARCH is YES', () {
-        final String targetPlatform = platform == TargetPlatform.ios ? 'Ios' : 'Darwin';
+        final targetPlatform = platform == TargetPlatform.ios ? 'Ios' : 'Darwin';
         final Directory buildDir = fileSystem.directory('/path/to/builds')
           ..createSync(recursive: true);
         final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
           ..createSync(recursive: true);
         final File pipe = fileSystem.file('/tmp/pipe')..createSync(recursive: true);
-        const String buildMode = 'Debug';
-        final TestContext context = TestContext(
+        const buildMode = 'Debug';
+        final context = TestContext(
           <String>['prepare', platformName],
           <String, String>{
             'BUILT_PRODUCTS_DIR': buildDir.path,
@@ -496,7 +635,6 @@ void main() {
                 '--DartDefines=',
                 '--ExtraFrontEndOptions=',
                 '-dSrcRoot=',
-                '-dDevDependenciesEnabled=',
                 if (platform == TargetPlatform.ios) ...<String>['-dTargetDeviceOSVersion='],
                 '-dPreBuildAction=PrepareFramework',
                 'debug_unpack_$platformName',
@@ -510,14 +648,14 @@ void main() {
       });
 
       test('does not assumes ARCHS if ARCHS and NATIVE_ARCH are different', () {
-        final String targetPlatform = platform == TargetPlatform.ios ? 'Ios' : 'Darwin';
+        final targetPlatform = platform == TargetPlatform.ios ? 'Ios' : 'Darwin';
         final Directory buildDir = fileSystem.directory('/path/to/builds')
           ..createSync(recursive: true);
         final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
           ..createSync(recursive: true);
         final File pipe = fileSystem.file('/tmp/pipe')..createSync(recursive: true);
-        const String buildMode = 'Debug';
-        final TestContext context = TestContext(
+        const buildMode = 'Debug';
+        final context = TestContext(
           <String>['prepare', platformName],
           <String, String>{
             'BUILT_PRODUCTS_DIR': buildDir.path,
@@ -551,7 +689,6 @@ void main() {
                 '--DartDefines=',
                 '--ExtraFrontEndOptions=',
                 '-dSrcRoot=',
-                '-dDevDependenciesEnabled=',
                 if (platform == TargetPlatform.ios) ...<String>['-dTargetDeviceOSVersion='],
                 '-dPreBuildAction=PrepareFramework',
                 'debug_unpack_$platformName',
@@ -565,14 +702,14 @@ void main() {
       });
 
       test('does not assumes ARCHS if ONLY_ACTIVE_ARCH is not YES', () {
-        final String targetPlatform = platform == TargetPlatform.ios ? 'Ios' : 'Darwin';
+        final targetPlatform = platform == TargetPlatform.ios ? 'Ios' : 'Darwin';
         final Directory buildDir = fileSystem.directory('/path/to/builds')
           ..createSync(recursive: true);
         final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
           ..createSync(recursive: true);
         final File pipe = fileSystem.file('/tmp/pipe')..createSync(recursive: true);
-        const String buildMode = 'Debug';
-        final TestContext context = TestContext(
+        const buildMode = 'Debug';
+        final context = TestContext(
           <String>['prepare', platformName],
           <String, String>{
             'BUILT_PRODUCTS_DIR': buildDir.path,
@@ -605,7 +742,6 @@ void main() {
                 '--DartDefines=',
                 '--ExtraFrontEndOptions=',
                 '-dSrcRoot=',
-                '-dDevDependenciesEnabled=',
                 if (platform == TargetPlatform.ios) ...<String>['-dTargetDeviceOSVersion='],
                 '-dPreBuildAction=PrepareFramework',
                 'debug_unpack_$platformName',
@@ -625,23 +761,23 @@ void main() {
       ..createSync(recursive: true);
     final Directory targetBuildDir = fileSystem.directory('/path/to/Build/Products/Debug-iphoneos')
       ..createSync(recursive: true);
-    const String appPath = '/path/to/my_flutter_app';
-    const String platformDirPath = '$appPath/ios';
-    const String frameworksFolderPath = 'Runner.app/Frameworks';
-    const String flutterBuildDir = 'build';
+    const appPath = '/path/to/my_flutter_app';
+    const platformDirPath = '$appPath/ios';
+    const frameworksFolderPath = 'Runner.app/Frameworks';
+    const flutterBuildDir = 'build';
     final Directory nativeAssetsDir = fileSystem.directory(
       '/path/to/my_flutter_app/$flutterBuildDir/native_assets/ios/',
     );
     nativeAssetsDir.createSync(recursive: true);
-    const String ffiPackageName = 'package_a';
+    const ffiPackageName = 'package_a';
     final Directory ffiPackageDir = nativeAssetsDir.childDirectory('$ffiPackageName.framework')
       ..createSync();
     nativeAssetsDir.childFile('random.txt').createSync();
-    const String infoPlistPath = 'Runner.app/Info.plist';
+    const infoPlistPath = 'Runner.app/Info.plist';
     final File infoPlist = fileSystem.file('${buildDir.path}/$infoPlistPath');
     infoPlist.createSync(recursive: true);
-    const String buildMode = 'Debug';
-    final TestContext testContext = TestContext(
+    const buildMode = 'Debug';
+    final testContext = TestContext(
       <String>['embed_and_thin', 'ios'],
       <String, String>{
         'BUILT_PRODUCTS_DIR': buildDir.path,
@@ -747,24 +883,24 @@ void main() {
       ..createSync(recursive: true);
     final Directory targetBuildDir = fileSystem.directory('/path/to/Build/Products/Debug')
       ..createSync(recursive: true);
-    const String appPath = '/path/to/my_flutter_app';
-    const String platformDirPath = '$appPath/macos';
-    const String frameworksFolderPath = 'Runner.app/Frameworks';
-    const String flutterBuildDir = 'build';
+    const appPath = '/path/to/my_flutter_app';
+    const platformDirPath = '$appPath/macos';
+    const frameworksFolderPath = 'Runner.app/Frameworks';
+    const flutterBuildDir = 'build';
     final Directory nativeAssetsDir = fileSystem.directory(
       '/path/to/my_flutter_app/$flutterBuildDir/native_assets/macos/',
     );
     nativeAssetsDir.createSync(recursive: true);
-    const String ffiPackageName = 'package_a';
+    const ffiPackageName = 'package_a';
     final Directory ffiPackageDir = nativeAssetsDir.childDirectory('$ffiPackageName.framework')
       ..createSync();
     nativeAssetsDir.childFile('random.txt').createSync();
-    const String infoPlistPath = 'Runner.app/Info.plist';
+    const infoPlistPath = 'Runner.app/Info.plist';
     final File infoPlist = fileSystem.file('${buildDir.path}/$infoPlistPath');
     infoPlist.createSync(recursive: true);
-    const String buildMode = 'Debug';
-    const String codesignIdentity = '12312313';
-    final TestContext testContext = TestContext(
+    const buildMode = 'Debug';
+    const codesignIdentity = '12312313';
+    final testContext = TestContext(
       <String>['embed_and_thin', 'macos'],
       <String, String>{
         'BUILT_PRODUCTS_DIR': buildDir.path,
@@ -902,7 +1038,8 @@ class TestContext extends Context {
     required this.fileSystem,
     required List<FakeCommand> commands,
     File? scriptOutputStreamFile,
-  }) : processManager = FakeProcessManager.list(commands),
+    FakeProcessManager? fakeProcessManager,
+  }) : processManager = fakeProcessManager ?? FakeProcessManager.list(commands),
        super(
          arguments: arguments,
          environment: environment,
@@ -912,8 +1049,8 @@ class TestContext extends Context {
   final FileSystem fileSystem;
   final FakeProcessManager processManager;
 
-  String stdout = '';
-  String stderr = '';
+  var stdout = '';
+  var stderr = '';
 
   @override
   bool existsFile(String path) {
@@ -926,13 +1063,7 @@ class TestContext extends Context {
   }
 
   @override
-  ProcessResult runSync(
-    String bin,
-    List<String> args, {
-    bool verbose = false,
-    bool allowFail = false,
-    String? workingDirectory,
-  }) {
+  ProcessResult runSyncProcess(String bin, List<String> args, {String? workingDirectory}) {
     return processManager.runSync(
       <dynamic>[bin, ...args],
       workingDirectory: workingDirectory,

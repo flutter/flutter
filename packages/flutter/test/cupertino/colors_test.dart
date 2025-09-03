@@ -14,7 +14,10 @@ class DependentWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color resolved = CupertinoDynamicColor.resolve(color, context);
-    return DecoratedBox(decoration: BoxDecoration(color: resolved), child: const SizedBox.expand());
+    return DecoratedBox(
+      decoration: BoxDecoration(color: resolved),
+      child: const SizedBox.expand(),
+    );
   }
 }
 

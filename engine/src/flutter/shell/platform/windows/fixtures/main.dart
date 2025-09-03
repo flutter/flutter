@@ -333,10 +333,9 @@ void drawHelloWorld() {
     canvas.drawParagraph(paragraph, ui.Offset.zero);
 
     final ui.Picture picture = recorder.endRecording();
-    final ui.SceneBuilder sceneBuilder =
-        ui.SceneBuilder()
-          ..addPicture(ui.Offset.zero, picture)
-          ..pop();
+    final ui.SceneBuilder sceneBuilder = ui.SceneBuilder()
+      ..addPicture(ui.Offset.zero, picture)
+      ..pop();
 
     ui.PlatformDispatcher.instance.implicitView?.render(sceneBuilder.build());
   };
@@ -406,6 +405,11 @@ void testEngineId() {
 }
 
 @pragma('vm:entry-point')
+void testWindowController() {
+  signal();
+}
+
+@pragma('vm:entry-point')
 Future<void> sendSemanticsTreeInfo() async {
   // Wait until semantics are enabled.
   if (!ui.PlatformDispatcher.instance.semanticsEnabled) {
@@ -433,7 +437,7 @@ Future<void> sendSemanticsTreeInfo() async {
     transform[10] = 1;
     builder.updateNode(
       id: nodeId,
-      flags: 0,
+      flags: ui.SemanticsFlags.none,
       actions: 0,
       maxValueLength: 0,
       currentValueLength: 0,
@@ -446,8 +450,6 @@ Future<void> sendSemanticsTreeInfo() async {
       scrollExtentMax: 0,
       scrollExtentMin: 0,
       rect: const ui.Rect.fromLTRB(0, 0, 10, 10),
-      elevation: 0,
-      thickness: 0,
       identifier: 'identifier',
       label: 'label',
       labelAttributes: const <ui.StringAttribute>[],
@@ -468,10 +470,12 @@ Future<void> sendSemanticsTreeInfo() async {
       role: ui.SemanticsRole.tab,
       controlsNodes: null,
       inputType: ui.SemanticsInputType.none,
+      locale: null,
     );
     return builder.build();
   }
 
+  ui.PlatformDispatcher.instance.setSemanticsTreeEnabled(true);
   view1.updateSemantics(createSemanticsUpdate(view1.viewId + 1));
   view2.updateSemantics(createSemanticsUpdate(view2.viewId + 1));
   signal();

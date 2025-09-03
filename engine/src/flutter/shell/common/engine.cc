@@ -303,11 +303,6 @@ void Engine::NotifyIdle(fml::TimeDelta deadline) {
   runtime_controller_->NotifyIdle(deadline);
 }
 
-void Engine::NotifyDestroyed() {
-  TRACE_EVENT0("flutter", "Engine::NotifyDestroyed");
-  runtime_controller_->NotifyDestroyed();
-}
-
 std::optional<uint32_t> Engine::GetUIIsolateReturnCode() {
   return runtime_controller_->GetRootIsolateReturnCode();
 }
@@ -530,6 +525,10 @@ void Engine::UpdateSemantics(int64_t view_id,
                              CustomAccessibilityActionUpdates actions) {
   delegate_.OnEngineUpdateSemantics(view_id, std::move(update),
                                     std::move(actions));
+}
+
+void Engine::SetSemanticsTreeEnabled(bool enabled) {
+  delegate_.OnEngineSetSemanticsTreeEnabled(enabled);
 }
 
 void Engine::HandlePlatformMessage(std::unique_ptr<PlatformMessage> message) {

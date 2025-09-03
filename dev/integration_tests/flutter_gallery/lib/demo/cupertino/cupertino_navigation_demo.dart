@@ -162,12 +162,12 @@ class CupertinoDemoTab1 extends StatelessWidget {
           SliverPadding(
             // Top media padding consumed by CupertinoSliverNavigationBar.
             // Left/Right media padding consumed by Tab1RowItem.
-            padding:
-                MediaQuery.of(
-                  context,
-                ).removePadding(removeTop: true, removeLeft: true, removeRight: true).padding,
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+            padding: MediaQuery.of(
+              context,
+            ).removePadding(removeTop: true, removeLeft: true, removeRight: true).padding,
+            sliver: SliverList.builder(
+              itemCount: _kChildCount,
+              itemBuilder: (BuildContext context, int index) {
                 return Tab1RowItem(
                   index: index,
                   lastItem: index == _kChildCount - 1,
@@ -175,7 +175,7 @@ class CupertinoDemoTab1 extends StatelessWidget {
                   colorName: colorNameItems![index],
                   randomSeed: randomSeed,
                 );
-              }, childCount: _kChildCount),
+              },
             ),
           ),
         ],
@@ -208,13 +208,12 @@ class Tab1RowItem extends StatelessWidget {
         Navigator.of(context).push(
           CupertinoPageRoute<void>(
             title: colorName,
-            builder:
-                (BuildContext context) => Tab1ItemPage(
-                  color: color,
-                  colorName: colorName,
-                  index: index,
-                  randomSeed: randomSeed,
-                ),
+            builder: (BuildContext context) => Tab1ItemPage(
+              color: color,
+              colorName: colorName,
+              index: index,
+              randomSeed: randomSeed,
+            ),
           ),
         );
       },
@@ -469,7 +468,7 @@ class Tab2Header extends StatelessWidget {
       child: SafeArea(
         top: false,
         bottom: false,
-        child: ClipRRect(
+        child: ClipRSuperellipse(
           borderRadius: const BorderRadius.all(Radius.circular(16.0)),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -689,7 +688,7 @@ class Tab2ConversationRow extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: isSelf ? CrossAxisAlignment.center : CrossAxisAlignment.end,
         children: <Widget>[
-          if (avatar != null) avatar!,
+          ?avatar,
           CupertinoUserInterfaceLevel(
             data: CupertinoUserInterfaceLevelData.elevated,
             child: Tab2ConversationBubble(

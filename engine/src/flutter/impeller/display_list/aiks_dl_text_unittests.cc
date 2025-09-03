@@ -2,19 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "display_list/display_list.h"
-#include "display_list/dl_blend_mode.h"
-#include "display_list/dl_tile_mode.h"
-#include "display_list/effects/dl_color_source.h"
-#include "display_list/effects/dl_mask_filter.h"
+#include "flutter/display_list/display_list.h"
+#include "flutter/display_list/dl_blend_mode.h"
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_color.h"
 #include "flutter/display_list/dl_paint.h"
+#include "flutter/display_list/dl_tile_mode.h"
+#include "flutter/display_list/effects/dl_color_source.h"
+#include "flutter/display_list/effects/dl_mask_filter.h"
+#include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/fml/build_config.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
 #include "flutter/testing/testing.h"
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/dl_dispatcher.h"
+#include "impeller/display_list/dl_text_impeller.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/text_contents.h"
 #include "impeller/entity/entity.h"
@@ -88,8 +90,8 @@ bool RenderTextInCanvasSkia(const std::shared_ptr<Context>& context,
   text_paint.setStrokeWidth(options.stroke_width);
   text_paint.setDrawStyle(options.stroke ? DlDrawStyle::kStroke
                                          : DlDrawStyle::kFill);
-  canvas.DrawTextFrame(frame, options.position.x, options.position.y,
-                       text_paint);
+  canvas.DrawText(DlTextImpeller::Make(frame), options.position.x,
+                  options.position.y, text_paint);
   return true;
 }
 
@@ -476,7 +478,7 @@ TEST_P(AiksTest, CanRenderTextOutsideBoundaries) {
       auto blob = SkTextBlob::MakeFromString(t.text, sk_font);
       ASSERT_NE(blob, nullptr);
       auto frame = MakeTextFrameFromTextBlobSkia(blob);
-      builder.DrawTextFrame(frame, 0, 0, text_paint);
+      builder.DrawText(DlTextImpeller::Make(frame), 0, 0, text_paint);
     }
     builder.Restore();
   }
@@ -621,7 +623,7 @@ TEST_P(AiksTest, TextForegroundShaderWithTransform) {
   auto blob = SkTextBlob::MakeFromString("Hello", sk_font);
   ASSERT_NE(blob, nullptr);
   auto frame = MakeTextFrameFromTextBlobSkia(blob);
-  builder.DrawTextFrame(frame, 0, 0, text_paint);
+  builder.DrawText(DlTextImpeller::Make(frame), 0, 0, text_paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
@@ -683,7 +685,7 @@ TEST_P(AiksTest, DifferenceClipsMustRenderIdenticallyAcrossBackends) {
   path_builder.LineTo(DlPoint(25.0, 118.0));
   path_builder.LineTo(DlPoint(150.0, 29.5));
   path_builder.Close();
-  DlPath path(path_builder);
+  DlPath path = path_builder.TakePath();
 
   DlColor fill_color(1.0, 1.0, 0.0, 0.0, DlColorSpace::kSRGB);
   DlColor stroke_color(1.0, 0.0, 0.0, 0.0, DlColorSpace::kSRGB);

@@ -10,11 +10,12 @@
 #include "flutter/display_list/effects/dl_color_filters.h"
 #include "flutter/display_list/effects/dl_color_sources.h"
 #include "flutter/display_list/effects/dl_image_filters.h"
+#include "flutter/display_list/effects/dl_runtime_effect_skia.h"
 #include "flutter/display_list/skia/dl_sk_conversions.h"
-#include "flutter/impeller/geometry/path_component.h"
 #include "flutter/third_party/skia/include/core/SkColorSpace.h"
 #include "flutter/third_party/skia/include/core/SkSamplingOptions.h"
 #include "flutter/third_party/skia/include/core/SkTileMode.h"
+#include "flutter/third_party/skia/include/effects/SkRuntimeEffect.h"
 
 #include "gtest/gtest.h"
 
@@ -30,19 +31,89 @@ TEST(DisplayListImageFilter, LocalImageSkiaNull) {
   ASSERT_EQ(ToSk(dl_local_matrix_filter), nullptr);
 }
 
+// This test exists just to confirm and demonstrate how to convert existing
+// SkMatrix construction code into the same operations using the replacement
+// DlMatrix/impeller::Matrix objects.
+//
+// To be clear, it verifies:
+// SkMatrix.pre<Op>(data) is the same as DlMatrix * DlMatrix::Make<Op>(data).
+// SkMatrix1.preConcat(SkMatrix2) is the same as DlMatrix1 * DlMatrix2.
+TEST(DisplayListSkConversions, OpOrderPreMethodsVsMatrixMultiply) {
+  // If you have code like this...
+  const SkMatrix sk_matrix =
+      SkMatrix().preTranslate(0, 800).preRotate(-90, 0, 0);
+
+  // Convert it to math like this (same order as the pre<Op>() calls)...
+  const DlMatrix dl_matrix = DlMatrix::MakeTranslation({0, 800}) *
+                             DlMatrix::MakeRotationZ(DlDegrees(-90));
+  SkPoint sk_result = sk_matrix.mapPoint({10, 10});
+  DlPoint dl_result = dl_matrix * DlPoint(10, 10);
+  EXPECT_FLOAT_EQ(sk_result.fX, dl_result.x);
+  EXPECT_FLOAT_EQ(sk_result.fY, dl_result.y);
+
+  // Not like this...
+  const DlMatrix dl_matrix_2 = DlMatrix::MakeRotationZ(DlDegrees(-90)) *
+                               DlMatrix::MakeTranslation({0, 800});
+  DlPoint dl_result_2 = dl_matrix_2 * DlPoint(10, 10);
+  EXPECT_FALSE(impeller::ScalarNearlyEqual(sk_result.fX, dl_result_2.x));
+  EXPECT_FALSE(impeller::ScalarNearlyEqual(sk_result.fY, dl_result_2.y));
+
+  // -------------------------------------------------------------------
+
+  // And if you have this...
+  SkMatrix sk_matrix_2;
+  sk_matrix_2.preConcat(SkMatrix::Translate(0, 800));
+  sk_matrix_2.preConcat(SkMatrix::RotateDeg(-90));
+
+  // It's really the same as the above case, btw...
+  SkPoint sk_result_2 = sk_matrix_2.mapPoint({10, 10});
+  EXPECT_FLOAT_EQ(sk_result.fX, sk_result_2.fX);
+  EXPECT_FLOAT_EQ(sk_result.fY, sk_result_2.fY);
+
+  // Convert it to math like this (same order as the pre<Op>() calls)...
+  DlMatrix dl_matrix_3;
+  dl_matrix_3 = dl_matrix_3 * DlMatrix::MakeTranslation({0, 800});
+  dl_matrix_3 = dl_matrix_3 * DlMatrix::MakeRotationZ(DlDegrees(-90));
+  DlPoint dl_result_3 = dl_matrix_3 * DlPoint(10, 10);
+  EXPECT_FLOAT_EQ(sk_result_2.fX, dl_result_3.x);
+  EXPECT_FLOAT_EQ(sk_result_2.fY, dl_result_3.y);
+
+  // Which is also the same result as the first case above...
+  EXPECT_FLOAT_EQ(dl_result_3.x, dl_result.x);
+  EXPECT_FLOAT_EQ(dl_result_3.y, dl_result.y);
+
+  // Not like this...
+  DlMatrix dl_matrix_4;
+  dl_matrix_4 = dl_matrix_4 * DlMatrix::MakeRotationZ(DlDegrees(-90));
+  dl_matrix_4 = dl_matrix_4 * DlMatrix::MakeTranslation({0, 800});
+  DlPoint dl_result_4 = dl_matrix_4 * DlPoint(10, 10);
+  EXPECT_FALSE(impeller::ScalarNearlyEqual(sk_result_2.fX, dl_result_4.x));
+  EXPECT_FALSE(impeller::ScalarNearlyEqual(sk_result_2.fY, dl_result_4.y));
+
+  // Which is also the same result as the second case above...
+  EXPECT_FLOAT_EQ(dl_result_4.x, dl_result_2.x);
+  EXPECT_FLOAT_EQ(dl_result_4.y, dl_result_2.y);
+}
+
 TEST(DisplayListSkConversions, ToSkColor) {
   // Red
-  ASSERT_EQ(ToSk(DlColor::kRed()), SK_ColorRED);
+  ASSERT_EQ(ToSkColor(DlColor::kRed()), SK_ColorRED);
+  ASSERT_EQ(ToSkColor4f(DlColor::kRed()), SkColors::kRed);
 
   // Green
-  ASSERT_EQ(ToSk(DlColor::kGreen()), SK_ColorGREEN);
+  ASSERT_EQ(ToSkColor(DlColor::kGreen()), SK_ColorGREEN);
+  ASSERT_EQ(ToSkColor4f(DlColor::kGreen()), SkColors::kGreen);
 
   // Blue
-  ASSERT_EQ(ToSk(DlColor::kBlue()), SK_ColorBLUE);
+  ASSERT_EQ(ToSkColor(DlColor::kBlue()), SK_ColorBLUE);
+  ASSERT_EQ(ToSkColor4f(DlColor::kBlue()), SkColors::kBlue);
 
   // Half transparent grey
   auto const grey_hex_half_opaque = 0x7F999999;
-  ASSERT_EQ(ToSk(DlColor(grey_hex_half_opaque)), SkColor(grey_hex_half_opaque));
+  ASSERT_EQ(ToSkColor(DlColor(grey_hex_half_opaque)),
+            SkColor(grey_hex_half_opaque));
+  ASSERT_EQ(ToSkColor4f(DlColor(grey_hex_half_opaque)),
+            SkColor4f::FromColor(grey_hex_half_opaque));
 }
 
 TEST(DisplayListSkConversions, ToSkTileMode) {
@@ -144,9 +215,9 @@ TEST(DisplayListSkConversions, ToSkSamplingOptions) {
   FUNC(kLuminosity)                    \
   FUNC(kLastMode)
 
-TEST(DisplayListSkConversions, ToSkBlendMode){
+TEST(DisplayListSkConversions, ToSkBlendMode) {
 #define CHECK_TO_SKENUM(V) ASSERT_EQ(ToSk(DlBlendMode::V), SkBlendMode::V);
-    FOR_EACH_BLEND_MODE_ENUM(CHECK_TO_SKENUM)
+  FOR_EACH_BLEND_MODE_ENUM(CHECK_TO_SKENUM)
 #undef CHECK_TO_SKENUM
 }
 
@@ -223,11 +294,11 @@ TEST(DisplayListVertices, ConvertWithZeroAndNegativeVerticesAndIndices) {
 }
 
 TEST(DisplayListColorSource, ConvertRuntimeEffect) {
-  const sk_sp<DlRuntimeEffect> kTestRuntimeEffect1 = DlRuntimeEffect::MakeSkia(
+  const sk_sp<DlRuntimeEffect> kTestRuntimeEffect1 = DlRuntimeEffectSkia::Make(
       SkRuntimeEffect::MakeForShader(
           SkString("vec4 main(vec2 p) { return vec4(0); }"))
           .effect);
-  const sk_sp<DlRuntimeEffect> kTestRuntimeEffect2 = DlRuntimeEffect::MakeSkia(
+  const sk_sp<DlRuntimeEffect> kTestRuntimeEffect2 = DlRuntimeEffectSkia::Make(
       SkRuntimeEffect::MakeForShader(
           SkString("vec4 main(vec2 p) { return vec4(1); }"))
           .effect);
@@ -244,7 +315,7 @@ TEST(DisplayListColorSource, ConvertRuntimeEffect) {
 }
 
 TEST(DisplayListColorSource, ConvertRuntimeEffectWithNullSampler) {
-  const sk_sp<DlRuntimeEffect> kTestRuntimeEffect1 = DlRuntimeEffect::MakeSkia(
+  const sk_sp<DlRuntimeEffect> kTestRuntimeEffect1 = DlRuntimeEffectSkia::Make(
       SkRuntimeEffect::MakeForShader(
           SkString("vec4 main(vec2 p) { return vec4(0); }"))
           .effect);
@@ -369,72 +440,6 @@ TEST(DisplayListSkConversions, ToSkRSTransform) {
     EXPECT_FLOAT_EQ(sk_quad[2].fY, dl_quad[3].y) << i;
     EXPECT_FLOAT_EQ(sk_quad[3].fX, dl_quad[2].x) << i;
     EXPECT_FLOAT_EQ(sk_quad[3].fY, dl_quad[2].y) << i;
-  }
-}
-
-// This tests the new conic subdivision code in the Impeller conic path
-// component object vs the code we used to rely on inside Skia
-TEST(DisplayListSkConversions, ConicToQuads) {
-  SkScalar weights[4] = {
-      0.02f,
-      0.5f,
-      SK_ScalarSqrt2 * 0.5f,
-      1.0f,
-  };
-
-  for (SkScalar weight : weights) {
-    SkPoint sk_points[5];
-    int ncurves = SkPath::ConvertConicToQuads(
-        SkPoint::Make(10, 10), SkPoint::Make(20, 10), SkPoint::Make(20, 20),
-        weight, sk_points, 1);
-    ASSERT_EQ(ncurves, 2) << "weight: " << weight;
-
-    std::array<DlPoint, 5> i_points;
-    impeller::ConicPathComponent i_conic(DlPoint(10, 10), DlPoint(20, 10),
-                                         DlPoint(20, 20), weight);
-    i_conic.SubdivideToQuadraticPoints(i_points);
-
-    for (int i = 0; i < 5; i++) {
-      EXPECT_FLOAT_EQ(sk_points[i].fX, i_points[i].x)
-          << "weight: " << weight << "point[" << i << "].x";
-      EXPECT_FLOAT_EQ(sk_points[i].fY, i_points[i].y)
-          << "weight: " << weight << "point[" << i << "].y";
-    }
-  }
-}
-
-TEST(DisplayListSkConversions, ConicPathToImpeller) {
-  // If we execute conicTo with a weight of exactly 1.0, SkPath will turn
-  // it into a quadTo, so we avoid that by using 0.999
-  SkScalar weights[4] = {
-      0.02f,
-      0.5f,
-      SK_ScalarSqrt2 * 0.5f,
-      1.0f - kEhCloseEnough,
-  };
-
-  for (SkScalar weight : weights) {
-    SkPath sk_path;
-    sk_path.moveTo(10, 10);
-    sk_path.conicTo(20, 10, 20, 20, weight);
-
-    DlPath dl_path(sk_path);
-    const impeller::Path& i_path = dl_path.GetPath();
-
-    auto it = i_path.begin();
-    ASSERT_EQ(it.type(), impeller::Path::ComponentType::kContour);
-    ++it;
-
-    ASSERT_EQ(it.type(), impeller::Path::ComponentType::kConic);
-    auto conic = it.conic();
-    ASSERT_NE(conic, nullptr);
-    ++it;
-
-    EXPECT_EQ(conic->p1, DlPoint(10, 10)) << "weight: " << weight;
-    EXPECT_EQ(conic->cp, DlPoint(20, 10)) << "weight: " << weight;
-    EXPECT_EQ(conic->p2, DlPoint(20, 20)) << "weight: " << weight;
-    EXPECT_EQ(conic->weight.x, weight) << "weight: " << weight;
-    EXPECT_EQ(conic->weight.y, weight) << "weight: " << weight;
   }
 }
 

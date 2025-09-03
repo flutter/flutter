@@ -9,7 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  const AppBarTheme appBarTheme = AppBarTheme(
+  const AppBarThemeData appBarTheme = AppBarThemeData(
     backgroundColor: Color(0xff00ff00),
     foregroundColor: Color(0xff00ffff),
     elevation: 4.0,
@@ -27,9 +27,27 @@ void main() {
     return PrimaryScrollController.of(tester.element(find.byType(CustomScrollView)));
   }
 
-  test('AppBarTheme copyWith, ==, hashCode basics', () {
-    expect(const AppBarTheme(), const AppBarTheme().copyWith());
-    expect(const AppBarTheme().hashCode, const AppBarTheme().copyWith().hashCode);
+  test('AppBarThemeData copyWith, ==, hashCode basics', () {
+    expect(const AppBarThemeData(), const AppBarThemeData().copyWith());
+    expect(const AppBarThemeData().hashCode, const AppBarThemeData().copyWith().hashCode);
+
+    expect(const AppBarThemeData().backgroundColor, null);
+    expect(const AppBarThemeData().foregroundColor, null);
+    expect(const AppBarThemeData().elevation, null);
+    expect(const AppBarThemeData().scrolledUnderElevation, null);
+    expect(const AppBarThemeData().shadowColor, null);
+    expect(const AppBarThemeData().surfaceTintColor, null);
+    expect(const AppBarThemeData().shape, null);
+    expect(const AppBarThemeData().iconTheme, null);
+    expect(const AppBarThemeData().actionsIconTheme, null);
+    expect(const AppBarThemeData().centerTitle, null);
+    expect(const AppBarThemeData().titleSpacing, null);
+    expect(const AppBarThemeData().leadingWidth, null);
+    expect(const AppBarThemeData().toolbarHeight, null);
+    expect(const AppBarThemeData().toolbarTextStyle, null);
+    expect(const AppBarThemeData().titleTextStyle, null);
+    expect(const AppBarThemeData().systemOverlayStyle, null);
+    expect(const AppBarThemeData().actionsPadding, null);
   });
 
   test('AppBarTheme lerp special cases', () {
@@ -123,7 +141,7 @@ void main() {
   });
 
   testWidgets('AppBar uses values from AppBarTheme', (WidgetTester tester) async {
-    final AppBarTheme appBarTheme = _appBarTheme();
+    final AppBarThemeData appBarTheme = _appBarTheme();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -238,7 +256,7 @@ void main() {
   testWidgets('AppBarTheme properties take priority over ThemeData properties', (
     WidgetTester tester,
   ) async {
-    final AppBarTheme appBarTheme = _appBarTheme();
+    final AppBarThemeData appBarTheme = _appBarTheme();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -497,7 +515,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(appBarTheme: const AppBarTheme(centerTitle: true)),
+        theme: ThemeData(appBarTheme: const AppBarThemeData(centerTitle: true)),
         home: Scaffold(appBar: AppBar(title: const Text('Title'))),
       ),
     );
@@ -511,64 +529,69 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(appBarTheme: const AppBarTheme(centerTitle: true)),
+        theme: ThemeData(appBarTheme: const AppBarThemeData(centerTitle: true)),
         home: Scaffold(appBar: AppBar(title: const Text('Title'), centerTitle: false)),
       ),
     );
 
     final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
-    // The AppBar.centerTitle should be used instead of AppBarTheme.centerTitle.
+    // The AppBar.centerTitle should be used instead of AppBarThemeData.centerTitle.
     expect(navToolBar.centerMiddle, false);
   });
 
-  testWidgets('AppBar.centerTitle adapts to TargetPlatform when AppBarTheme.centerTitle is null', (
+  testWidgets(
+    'AppBar.centerTitle adapts to TargetPlatform when AppBarThemeData.centerTitle is null',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: TargetPlatform.iOS),
+          home: Scaffold(appBar: AppBar(title: const Text('Title'))),
+        ),
+      );
+
+      final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
+      // When ThemeData.platform is TargetPlatform.iOS, and AppBarThemeData is null,
+      // the value of NavigationToolBar.centerMiddle should be true.
+      expect(navToolBar.centerMiddle, true);
+    },
+  );
+
+  testWidgets('AppBar.shadowColor takes priority over AppBarThemeData.shadowColor', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(platform: TargetPlatform.iOS),
-        home: Scaffold(appBar: AppBar(title: const Text('Title'))),
-      ),
-    );
-
-    final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
-    // When ThemeData.platform is TargetPlatform.iOS, and AppBarTheme is null,
-    // the value of NavigationToolBar.centerMiddle should be true.
-    expect(navToolBar.centerMiddle, true);
-  });
-
-  testWidgets('AppBar.shadowColor takes priority over AppBarTheme.shadowColor', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(appBarTheme: const AppBarTheme(shadowColor: Colors.red)),
-        home: Scaffold(appBar: AppBar(title: const Text('Title'), shadowColor: Colors.yellow)),
+        theme: ThemeData(appBarTheme: const AppBarThemeData(shadowColor: Colors.red)),
+        home: Scaffold(
+          appBar: AppBar(title: const Text('Title'), shadowColor: Colors.yellow),
+        ),
       ),
     );
 
     final AppBar appBar = tester.widget(find.byType(AppBar));
-    // The AppBar.shadowColor should be used instead of AppBarTheme.shadowColor.
+    // The AppBar.shadowColor should be used instead of AppBarThemeData.shadowColor.
     expect(appBar.shadowColor, Colors.yellow);
   });
 
-  testWidgets('AppBar.surfaceTintColor takes priority over AppBarTheme.surfaceTintColor', (
+  testWidgets('AppBar.surfaceTintColor takes priority over AppBarThemeData.surfaceTintColor', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(appBarTheme: const AppBarTheme(surfaceTintColor: Colors.red)),
-        home: Scaffold(appBar: AppBar(title: const Text('Title'), surfaceTintColor: Colors.yellow)),
+        theme: ThemeData(appBarTheme: const AppBarThemeData(surfaceTintColor: Colors.red)),
+        home: Scaffold(
+          appBar: AppBar(title: const Text('Title'), surfaceTintColor: Colors.yellow),
+        ),
       ),
     );
 
     final AppBar appBar = tester.widget(find.byType(AppBar));
-    // The AppBar.surfaceTintColor should be used instead of AppBarTheme.surfaceTintColor.
+    // The AppBar.surfaceTintColor should be used instead of AppBarThemeData.surfaceTintColor.
     expect(appBar.surfaceTintColor, Colors.yellow);
   });
 
   testWidgets(
-    'Material3 - AppBarTheme.iconTheme.color takes priority over IconButtonTheme.foregroundColor',
+    'Material3 - AppBarThemeData.iconTheme.color takes priority over IconButtonTheme.foregroundColor',
     (WidgetTester tester) async {
       const IconThemeData overallIconTheme = IconThemeData(color: Colors.yellow);
       await tester.pumpWidget(
@@ -577,7 +600,7 @@ void main() {
             iconButtonTheme: IconButtonThemeData(
               style: IconButton.styleFrom(foregroundColor: Colors.red),
             ),
-            appBarTheme: const AppBarTheme(iconTheme: overallIconTheme),
+            appBarTheme: const AppBarThemeData(iconTheme: overallIconTheme),
           ),
           home: Scaffold(
             appBar: AppBar(
@@ -598,14 +621,14 @@ void main() {
   );
 
   testWidgets(
-    'Material3 - AppBarTheme.iconTheme.size takes priority over IconButtonTheme.iconSize',
+    'Material3 - AppBarThemeData.iconTheme.size takes priority over IconButtonTheme.iconSize',
     (WidgetTester tester) async {
       const IconThemeData overallIconTheme = IconThemeData(size: 30.0);
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(
             iconButtonTheme: IconButtonThemeData(style: IconButton.styleFrom(iconSize: 32.0)),
-            appBarTheme: const AppBarTheme(iconTheme: overallIconTheme),
+            appBarTheme: const AppBarThemeData(iconTheme: overallIconTheme),
           ),
           home: Scaffold(
             appBar: AppBar(
@@ -626,7 +649,7 @@ void main() {
   );
 
   testWidgets(
-    'Material3 - AppBarTheme.actionsIconTheme.color takes priority over IconButtonTheme.foregroundColor',
+    'Material3 - AppBarThemeData.actionsIconTheme.color takes priority over IconButtonTheme.foregroundColor',
     (WidgetTester tester) async {
       const IconThemeData actionsIconTheme = IconThemeData(color: Colors.yellow);
       final IconButtonThemeData iconButtonTheme = IconButtonThemeData(
@@ -637,7 +660,7 @@ void main() {
         MaterialApp(
           theme: ThemeData(
             iconButtonTheme: iconButtonTheme,
-            appBarTheme: const AppBarTheme(actionsIconTheme: actionsIconTheme),
+            appBarTheme: const AppBarThemeData(actionsIconTheme: actionsIconTheme),
           ),
           home: Scaffold(
             appBar: AppBar(
@@ -658,7 +681,7 @@ void main() {
   );
 
   testWidgets(
-    'Material3 - AppBarTheme.actionsIconTheme.size takes priority over IconButtonTheme.iconSize',
+    'Material3 - AppBarThemeData.actionsIconTheme.size takes priority over IconButtonTheme.iconSize',
     (WidgetTester tester) async {
       const IconThemeData actionsIconTheme = IconThemeData(size: 30.0);
       final IconButtonThemeData iconButtonTheme = IconButtonThemeData(
@@ -668,7 +691,7 @@ void main() {
         MaterialApp(
           theme: ThemeData(
             iconButtonTheme: iconButtonTheme,
-            appBarTheme: const AppBarTheme(actionsIconTheme: actionsIconTheme),
+            appBarTheme: const AppBarThemeData(actionsIconTheme: actionsIconTheme),
           ),
           home: Scaffold(
             appBar: AppBar(
@@ -692,12 +715,12 @@ void main() {
   );
 
   testWidgets(
-    'Material3 - AppBarTheme.foregroundColor takes priority over IconButtonTheme.foregroundColor',
+    'Material3 - AppBarThemeData.foregroundColor takes priority over IconButtonTheme.foregroundColor',
     (WidgetTester tester) async {
       final IconButtonThemeData iconButtonTheme = IconButtonThemeData(
         style: IconButton.styleFrom(foregroundColor: Colors.red),
       );
-      const AppBarTheme appBarTheme = AppBarTheme(foregroundColor: Colors.green);
+      const AppBarThemeData appBarTheme = AppBarThemeData(foregroundColor: Colors.green);
       final ThemeData themeData = ThemeData(
         iconButtonTheme: iconButtonTheme,
         appBarTheme: appBarTheme,
@@ -724,11 +747,11 @@ void main() {
     },
   );
 
-  testWidgets('AppBar uses AppBarTheme.titleSpacing', (WidgetTester tester) async {
+  testWidgets('AppBar uses AppBarThemeData.titleSpacing', (WidgetTester tester) async {
     const double kTitleSpacing = 10;
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
+        theme: ThemeData(appBarTheme: const AppBarThemeData(titleSpacing: kTitleSpacing)),
         home: Scaffold(appBar: AppBar(title: const Text('Title'))),
       ),
     );
@@ -737,13 +760,13 @@ void main() {
     expect(navToolBar.middleSpacing, kTitleSpacing);
   });
 
-  testWidgets('AppBar.titleSpacing takes priority over AppBarTheme.titleSpacing', (
+  testWidgets('AppBar.titleSpacing takes priority over AppBarThemeData.titleSpacing', (
     WidgetTester tester,
   ) async {
     const double kTitleSpacing = 10;
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
+        theme: ThemeData(appBarTheme: const AppBarThemeData(titleSpacing: kTitleSpacing)),
         home: Scaffold(appBar: AppBar(title: const Text('Title'), titleSpacing: 40)),
       ),
     );
@@ -752,11 +775,11 @@ void main() {
     expect(navToolBar.middleSpacing, 40);
   });
 
-  testWidgets('AppBar uses AppBarTheme.leadingWidth', (WidgetTester tester) async {
+  testWidgets('AppBar uses AppBarThemeData.leadingWidth', (WidgetTester tester) async {
     const double kLeadingWidth = 80;
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(appBarTheme: const AppBarTheme(leadingWidth: kLeadingWidth)),
+        theme: ThemeData(appBarTheme: const AppBarThemeData(leadingWidth: kLeadingWidth)),
         home: Scaffold(appBar: AppBar(leading: const Icon(Icons.chevron_left))),
       ),
     );
@@ -767,13 +790,13 @@ void main() {
     expect(leadingConstraints.minWidth, kLeadingWidth);
   });
 
-  testWidgets('AppBar.leadingWidth takes priority over AppBarTheme.leadingWidth', (
+  testWidgets('AppBar.leadingWidth takes priority over AppBarThemeData.leadingWidth', (
     WidgetTester tester,
   ) async {
     const double kLeadingWidth = 80;
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(appBarTheme: const AppBarTheme(leadingWidth: kLeadingWidth)),
+        theme: ThemeData(appBarTheme: const AppBarThemeData(leadingWidth: kLeadingWidth)),
         home: Scaffold(appBar: AppBar(leading: const Icon(Icons.chevron_left), leadingWidth: 40)),
       ),
     );
@@ -784,11 +807,11 @@ void main() {
     expect(leadingConstraints.minWidth, 40);
   });
 
-  testWidgets('SliverAppBar uses AppBarTheme.titleSpacing', (WidgetTester tester) async {
+  testWidgets('SliverAppBar uses AppBarThemeData.titleSpacing', (WidgetTester tester) async {
     const double kTitleSpacing = 10;
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
+        theme: ThemeData(appBarTheme: const AppBarThemeData(titleSpacing: kTitleSpacing)),
         home: const CustomScrollView(slivers: <Widget>[SliverAppBar(title: Text('Title'))]),
       ),
     );
@@ -797,13 +820,13 @@ void main() {
     expect(navToolBar.middleSpacing, kTitleSpacing);
   });
 
-  testWidgets('SliverAppBar.titleSpacing takes priority over AppBarTheme.titleSpacing ', (
+  testWidgets('SliverAppBar.titleSpacing takes priority over AppBarThemeData.titleSpacing ', (
     WidgetTester tester,
   ) async {
     const double kTitleSpacing = 10;
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
+        theme: ThemeData(appBarTheme: const AppBarThemeData(titleSpacing: kTitleSpacing)),
         home: const CustomScrollView(
           slivers: <Widget>[SliverAppBar(title: Text('Title'), titleSpacing: 40)],
         ),
@@ -814,11 +837,11 @@ void main() {
     expect(navToolbar.middleSpacing, 40);
   });
 
-  testWidgets('SliverAppBar uses AppBarTheme.leadingWidth', (WidgetTester tester) async {
+  testWidgets('SliverAppBar uses AppBarThemeData.leadingWidth', (WidgetTester tester) async {
     const double kLeadingWidth = 80;
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(appBarTheme: const AppBarTheme(leadingWidth: kLeadingWidth)),
+        theme: ThemeData(appBarTheme: const AppBarThemeData(leadingWidth: kLeadingWidth)),
         home: const CustomScrollView(
           slivers: <Widget>[SliverAppBar(leading: Icon(Icons.chevron_left))],
         ),
@@ -831,13 +854,13 @@ void main() {
     expect(leadingConstraints.minWidth, kLeadingWidth);
   });
 
-  testWidgets('SliverAppBar.leadingWidth takes priority over AppBarTheme.leadingWidth ', (
+  testWidgets('SliverAppBar.leadingWidth takes priority over AppBarThemeData.leadingWidth ', (
     WidgetTester tester,
   ) async {
     const double kLeadingWidth = 80;
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(appBarTheme: const AppBarTheme(leadingWidth: kLeadingWidth)),
+        theme: ThemeData(appBarTheme: const AppBarThemeData(leadingWidth: kLeadingWidth)),
         home: const CustomScrollView(
           slivers: <Widget>[SliverAppBar(leading: Icon(Icons.chevron_left), leadingWidth: 40)],
         ),
@@ -850,7 +873,7 @@ void main() {
     expect(leadingConstraints.minWidth, 40);
   });
 
-  testWidgets('SliverAppBar.medium uses AppBarTheme properties', (WidgetTester tester) async {
+  testWidgets('SliverAppBar.medium uses AppBarThemeData properties', (WidgetTester tester) async {
     const String title = 'Medium App Bar';
 
     await tester.pumpWidget(
@@ -902,7 +925,7 @@ void main() {
     expect(titleOffset.dx, iconOffset.dx + appBarTheme.titleSpacing!);
   });
 
-  testWidgets('SliverAppBar.medium properties take priority over AppBarTheme properties', (
+  testWidgets('SliverAppBar.medium properties take priority over AppBarThemeData properties', (
     WidgetTester tester,
   ) async {
     const String title = 'Medium App Bar';
@@ -974,7 +997,7 @@ void main() {
     expect(titleOffset.dx, iconOffset.dx + titleSpacing);
   });
 
-  testWidgets('SliverAppBar.large uses AppBarTheme properties', (WidgetTester tester) async {
+  testWidgets('SliverAppBar.large uses AppBarThemeData properties', (WidgetTester tester) async {
     const String title = 'Large App Bar';
 
     await tester.pumpWidget(
@@ -1026,7 +1049,7 @@ void main() {
     expect(titleOffset.dx, iconOffset.dx + appBarTheme.titleSpacing!);
   });
 
-  testWidgets('SliverAppBar.large properties take priority over AppBarTheme properties', (
+  testWidgets('SliverAppBar.large properties take priority over AppBarThemeData properties', (
     WidgetTester tester,
   ) async {
     const String title = 'Large App Bar';
@@ -1100,10 +1123,10 @@ void main() {
 
   testWidgets('SliverAppBar medium & large supports foregroundColor', (WidgetTester tester) async {
     const String title = 'AppBar title';
-    const AppBarTheme appBarTheme = AppBarTheme(foregroundColor: Color(0xff00ff20));
+    const AppBarThemeData appBarTheme = AppBarThemeData(foregroundColor: Color(0xff00ff20));
     const Color foregroundColor = Color(0xff001298);
 
-    Widget buildWidget({Color? color, AppBarTheme? appBarTheme}) {
+    Widget buildWidget({Color? color, AppBarThemeData? appBarTheme}) {
       return MaterialApp(
         theme: ThemeData(appBarTheme: appBarTheme),
         home: CustomScrollView(
@@ -1118,7 +1141,7 @@ void main() {
 
     await tester.pumpWidget(buildWidget(appBarTheme: appBarTheme));
 
-    // Test AppBarTheme.foregroundColor parameter.
+    // Test AppBarThemeData.foregroundColor parameter.
     RichText mediumTitle = tester.widget(find.byType(RichText).first);
     expect(mediumTitle.text.style!.color, appBarTheme.foregroundColor);
     RichText largeTitle = tester.widget(find.byType(RichText).first);
@@ -1133,22 +1156,21 @@ void main() {
     expect(largeTitle.text.style!.color, foregroundColor);
   });
 
-  testWidgets('Default AppBarTheme debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default AppBarThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    const AppBarTheme().debugFillProperties(builder);
+    const AppBarThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
 
-  testWidgets('AppBarTheme implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('AppBarThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    const AppBarTheme(
+    const AppBarThemeData(
       backgroundColor: Color(0xff000000),
       foregroundColor: Color(0xff000001),
       elevation: 8.0,
@@ -1157,6 +1179,7 @@ void main() {
       surfaceTintColor: Color(0xff000003),
       shape: StadiumBorder(),
       iconTheme: IconThemeData(color: Color(0xff000004)),
+      actionsIconTheme: IconThemeData(color: Color(0xff000004)),
       centerTitle: true,
       titleSpacing: 40.0,
       leadingWidth: 96,
@@ -1164,13 +1187,13 @@ void main() {
       toolbarTextStyle: TextStyle(color: Color(0xff000005)),
       titleTextStyle: TextStyle(color: Color(0xff000006)),
       systemOverlayStyle: SystemUiOverlayStyle(systemNavigationBarColor: Color(0xff000007)),
+      actionsPadding: EdgeInsets.symmetric(horizontal: 8.0),
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(
       description,
@@ -1183,12 +1206,15 @@ void main() {
         'surfaceTintColor: ${const Color(0xff000003)}',
         'shape: StadiumBorder(BorderSide(width: 0.0, style: none))',
         'iconTheme: IconThemeData#00000(color: ${const Color(0xff000004)})',
+        'actionsIconTheme: IconThemeData#00000(color: ${const Color(0xff000004)})',
         'centerTitle: true',
         'titleSpacing: 40.0',
         'leadingWidth: 96.0',
         'toolbarHeight: 96.0',
         'toolbarTextStyle: TextStyle(inherit: true, color: ${const Color(0xff000005)})',
         'titleTextStyle: TextStyle(inherit: true, color: ${const Color(0xff000006)})',
+        'systemOverlayStyle: SystemUiOverlayStyle(systemNavigationBarColor: ${const Color(0xff000007)})',
+        'actionsPadding: EdgeInsets(8.0, 0.0, 8.0, 0.0)',
       ]),
     );
 
@@ -1199,13 +1225,227 @@ void main() {
     // the web and the rest of Flutter's target platforms.
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87364
 
+  testWidgets('Local AppBarTheme overrides defaults', (WidgetTester tester) async {
+    const Color backgroundColor = Colors.blueAccent;
+    const Color foregroundColor = Colors.white;
+    const double elevation = 1.0;
+    const double scrolledUnderElevation = 2.0;
+    const Color shadowColor = Colors.black87;
+    const Color surfaceTintColor = Colors.transparent;
+    const ShapeBorder shape = RoundedRectangleBorder();
+    const IconThemeData iconTheme = IconThemeData(color: Colors.red);
+    const IconThemeData actionsIconTheme = IconThemeData(color: Color(0xFF6750A4));
+    const bool centerTitle = true;
+    const double titleSpacing = 20.0;
+    const double leadingWidth = 80.0;
+    const double toolbarHeight = 100.0;
+    const TextStyle toolbarTextStyle = TextStyle(color: Colors.yellow);
+    const TextStyle titleTextStyle = TextStyle(color: Colors.orange);
+    const SystemUiOverlayStyle systemOverlayStyle = SystemUiOverlayStyle.dark;
+    const EdgeInsetsGeometry actionsPadding = EdgeInsets.all(8);
+
+    const AppBarThemeData appbarThemeData = AppBarThemeData(
+      backgroundColor: backgroundColor,
+      foregroundColor: foregroundColor,
+      elevation: elevation,
+      scrolledUnderElevation: scrolledUnderElevation,
+      shadowColor: shadowColor,
+      surfaceTintColor: surfaceTintColor,
+      shape: shape,
+      iconTheme: iconTheme,
+      actionsIconTheme: actionsIconTheme,
+      centerTitle: centerTitle,
+      titleSpacing: titleSpacing,
+      leadingWidth: leadingWidth,
+      toolbarHeight: toolbarHeight,
+      toolbarTextStyle: toolbarTextStyle,
+      titleTextStyle: titleTextStyle,
+      systemOverlayStyle: systemOverlayStyle,
+      actionsPadding: actionsPadding,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: AppBarTheme(
+          data: appbarThemeData,
+          child: Scaffold(
+            appBar: AppBar(
+              title: const Text('Title'),
+              leading: IconButton(icon: const Icon(Icons.menu), onPressed: () {}),
+              actions: <Widget>[IconButton(icon: const Icon(Icons.add), onPressed: () {})],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Material material = _getAppBarMaterial(tester);
+    expect(material.color, backgroundColor);
+    expect(material.elevation, elevation);
+    expect(material.shadowColor, shadowColor);
+    expect(material.surfaceTintColor, surfaceTintColor);
+    expect(material.shape, shape);
+
+    final IconTheme leadingIconTheme = _getAppBarIconTheme(tester);
+    expect(leadingIconTheme.data, iconTheme);
+
+    final IconTheme actionsIconThemeWidget = _getAppBarActionsIconTheme(tester);
+    expect(actionsIconThemeWidget.data.color, appbarThemeData.actionsIconTheme!.color);
+    expect(actionsIconThemeWidget.data.size, appbarThemeData.actionsIconTheme!.size);
+
+    final NavigationToolbar navToolbar = tester.widget(find.byType(NavigationToolbar));
+    expect(navToolbar.centerMiddle, centerTitle);
+    expect(navToolbar.middleSpacing, titleSpacing);
+
+    final BoxConstraints leadingConstraints = (navToolbar.leading! as ConstrainedBox).constraints;
+    expect(leadingConstraints.maxWidth, leadingWidth);
+    expect(leadingConstraints.minWidth, leadingWidth);
+
+    expect(tester.getSize(find.byType(AppBar)).height, toolbarHeight);
+
+    final DefaultTextStyle text = _getAppBarText(tester);
+    expect(text.style, toolbarTextStyle);
+
+    final RichText titleText = tester.widget<RichText>(
+      find.descendant(of: find.text('Title'), matching: find.byType(RichText)),
+    );
+    expect(titleText.text.style, titleTextStyle);
+
+    expect(SystemChrome.latestStyle, systemOverlayStyle);
+
+    final Padding actionsPaddingWidget = tester.widget<Padding>(
+      find.descendant(of: find.byType(NavigationToolbar), matching: find.byType(Padding).last),
+    );
+    expect(actionsPaddingWidget.padding, actionsPadding);
+
+    final Size appBarSize = tester.getSize(find.byType(AppBar));
+    expect(appBarSize.height, toolbarHeight);
+  });
+
+  testWidgets('Local AppBarTheme can override global AppBarTheme', (WidgetTester tester) async {
+    const Color backgroundColor = Colors.blueAccent;
+    const Color foregroundColor = Colors.white;
+    const double elevation = 1.0;
+    const double scrolledUnderElevation = 2.0;
+    const Color shadowColor = Colors.black87;
+    const Color surfaceTintColor = Colors.transparent;
+    const ShapeBorder shape = RoundedRectangleBorder();
+    const IconThemeData iconTheme = IconThemeData(color: Colors.red);
+    const IconThemeData actionsIconTheme = IconThemeData(color: Color(0xFF6750A4));
+    const bool centerTitle = true;
+    const double titleSpacing = 20.0;
+    const double leadingWidth = 80.0;
+    const double toolbarHeight = 100.0;
+    const TextStyle toolbarTextStyle = TextStyle(color: Colors.yellow);
+    const TextStyle titleTextStyle = TextStyle(color: Colors.orange);
+    const SystemUiOverlayStyle systemOverlayStyle = SystemUiOverlayStyle.dark;
+    const EdgeInsetsGeometry actionsPadding = EdgeInsets.all(8);
+
+    const AppBarThemeData appbarThemeData = AppBarThemeData(
+      backgroundColor: backgroundColor,
+      foregroundColor: foregroundColor,
+      elevation: elevation,
+      scrolledUnderElevation: scrolledUnderElevation,
+      shadowColor: shadowColor,
+      surfaceTintColor: surfaceTintColor,
+      shape: shape,
+      iconTheme: iconTheme,
+      actionsIconTheme: actionsIconTheme,
+      centerTitle: centerTitle,
+      titleSpacing: titleSpacing,
+      leadingWidth: leadingWidth,
+      toolbarHeight: toolbarHeight,
+      toolbarTextStyle: toolbarTextStyle,
+      titleTextStyle: titleTextStyle,
+      systemOverlayStyle: systemOverlayStyle,
+      actionsPadding: actionsPadding,
+    );
+    const AppBarThemeData globalAppbarThemeData = AppBarThemeData(
+      backgroundColor: Colors.red,
+      foregroundColor: Colors.green,
+      elevation: 0.0,
+      scrolledUnderElevation: 0.0,
+      shadowColor: Colors.blue,
+      surfaceTintColor: Colors.yellow,
+      shape: RoundedRectangleBorder(),
+      iconTheme: IconThemeData(color: Colors.black),
+      actionsIconTheme: IconThemeData(color: Colors.purple),
+      centerTitle: false,
+      titleSpacing: 10.0,
+      leadingWidth: 50.0,
+      toolbarHeight: 50.0,
+      toolbarTextStyle: TextStyle(color: Colors.white),
+      titleTextStyle: TextStyle(color: Colors.black),
+      systemOverlayStyle: SystemUiOverlayStyle.light,
+      actionsPadding: EdgeInsets.zero,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(appBarTheme: globalAppbarThemeData),
+        home: AppBarTheme(
+          data: appbarThemeData,
+          child: Scaffold(
+            appBar: AppBar(
+              title: const Text('Title'),
+              leading: IconButton(icon: const Icon(Icons.menu), onPressed: () {}),
+              actions: <Widget>[IconButton(icon: const Icon(Icons.add), onPressed: () {})],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Material material = _getAppBarMaterial(tester);
+    expect(material.color, backgroundColor);
+    expect(material.elevation, elevation);
+    expect(material.shadowColor, shadowColor);
+    expect(material.surfaceTintColor, surfaceTintColor);
+    expect(material.shape, shape);
+
+    final IconTheme leadingIconTheme = _getAppBarIconTheme(tester);
+    expect(leadingIconTheme.data, iconTheme);
+
+    final IconTheme actionsIconThemeWidget = _getAppBarActionsIconTheme(tester);
+    expect(actionsIconThemeWidget.data.color, appbarThemeData.actionsIconTheme!.color);
+    expect(actionsIconThemeWidget.data.size, appbarThemeData.actionsIconTheme!.size);
+
+    final NavigationToolbar navToolbar = tester.widget(find.byType(NavigationToolbar));
+    expect(navToolbar.centerMiddle, centerTitle);
+    expect(navToolbar.middleSpacing, titleSpacing);
+
+    final BoxConstraints leadingConstraints = (navToolbar.leading! as ConstrainedBox).constraints;
+    expect(leadingConstraints.maxWidth, leadingWidth);
+    expect(leadingConstraints.minWidth, leadingWidth);
+
+    expect(tester.getSize(find.byType(AppBar)).height, toolbarHeight);
+
+    final DefaultTextStyle text = _getAppBarText(tester);
+    expect(text.style, toolbarTextStyle);
+
+    final RichText titleText = tester.widget<RichText>(
+      find.descendant(of: find.text('Title'), matching: find.byType(RichText)),
+    );
+    expect(titleText.text.style, titleTextStyle);
+
+    expect(SystemChrome.latestStyle, systemOverlayStyle);
+
+    final Padding actionsPaddingWidget = tester.widget<Padding>(
+      find.descendant(of: find.byType(NavigationToolbar), matching: find.byType(Padding).last),
+    );
+    expect(actionsPaddingWidget.padding, actionsPadding);
+
+    final Size appBarSize = tester.getSize(find.byType(AppBar));
+    expect(appBarSize.height, toolbarHeight);
+  });
+
   // This is a regression test for https://github.com/flutter/flutter/issues/130485.
   testWidgets(
-    'Material3 - AppBarTheme.iconTheme correctly applies custom white color in dark mode',
+    'Material3 - AppBarThemeData.iconTheme correctly applies custom white color in dark mode',
     (WidgetTester tester) async {
       final ThemeData themeData = ThemeData(
         brightness: Brightness.dark,
-        appBarTheme: const AppBarTheme(iconTheme: IconThemeData(color: Colors.white)),
+        appBarTheme: const AppBarThemeData(iconTheme: IconThemeData(color: Colors.white)),
       );
       await tester.pumpWidget(
         MaterialApp(
@@ -1228,7 +1468,7 @@ void main() {
   );
 }
 
-AppBarTheme _appBarTheme() {
+AppBarThemeData _appBarTheme() {
   const SystemUiOverlayStyle systemOverlayStyle = SystemUiOverlayStyle.dark;
   const Color backgroundColor = Colors.lightBlue;
   const double elevation = 6.0;
@@ -1236,7 +1476,7 @@ AppBarTheme _appBarTheme() {
   const Color surfaceTintColor = Colors.green;
   const IconThemeData iconThemeData = IconThemeData(color: Colors.black);
   const IconThemeData actionsIconThemeData = IconThemeData(color: Colors.pink);
-  return const AppBarTheme(
+  return const AppBarThemeData(
     actionsIconTheme: actionsIconThemeData,
     systemOverlayStyle: systemOverlayStyle,
     backgroundColor: backgroundColor,

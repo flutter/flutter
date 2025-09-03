@@ -15,7 +15,7 @@ enum ColorFilterType { mode, matrix, linearToSrgbGamma, srgbToLinearGamma }
 ///
 /// Instances of this class are used with [Paint.colorFilter] on [Paint]
 /// objects.
-class EngineColorFilter implements SceneImageFilter, ui.ColorFilter {
+class EngineColorFilter implements LayerImageFilter, ui.ColorFilter {
   /// Creates a color filter that applies the blend mode given as the second
   /// argument. The source color is the one given as the first argument, and the
   /// destination color is the one from the layer being composited.
@@ -119,18 +119,29 @@ class EngineColorFilter implements SceneImageFilter, ui.ColorFilter {
 
   @override
   String toString() {
-    switch (type) {
-      case ColorFilterType.mode:
-        return 'ColorFilter.mode($color, $blendMode)';
-      case ColorFilterType.matrix:
-        return 'ColorFilter.matrix($matrix)';
-      case ColorFilterType.linearToSrgbGamma:
-        return 'ColorFilter.linearToSrgbGamma()';
-      case ColorFilterType.srgbToLinearGamma:
-        return 'ColorFilter.srgbToLinearGamma()';
-    }
+    return switch (type) {
+      ColorFilterType.mode => 'ColorFilter.mode($color, $blendMode)',
+      ColorFilterType.matrix => 'ColorFilter.matrix($matrix)',
+      ColorFilterType.linearToSrgbGamma => 'ColorFilter.linearToSrgbGamma()',
+      ColorFilterType.srgbToLinearGamma => 'ColorFilter.srgbToLinearGamma()',
+    };
   }
 
   @override
   Matrix4? get transform => null;
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! EngineColorFilter) {
+      return false;
+    }
+    return other.type == type &&
+        other.color == color &&
+        other.blendMode == blendMode &&
+        listEquals(other.matrix, matrix);
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(type, color, blendMode, Object.hashAll(matrix ?? const <double>[]));
 }

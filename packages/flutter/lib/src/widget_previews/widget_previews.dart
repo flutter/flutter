@@ -16,6 +16,9 @@ typedef PreviewTheme = PreviewThemeData Function();
 /// Signature for callbacks that wrap a [Widget] with another [Widget] when creating a [Preview].
 typedef WidgetWrapper = Widget Function(Widget);
 
+/// Signature for callbacks that build localization data used when creating a [Preview].
+typedef PreviewLocalizations = PreviewLocalizationsData Function();
+
 /// Annotation used to mark functions that return a widget preview.
 ///
 /// NOTE: this interface is not stable and **will change**.
@@ -58,8 +61,11 @@ typedef WidgetWrapper = Widget Function(Widget);
 ///
 /// **Important Note:** all values provided to the `@Preview()` annotation must
 /// be constant and non-private.
-// TODO(bkonyi): link to actual documentation when available.
-base class Preview {
+///
+/// See also:
+///   - [flutter.dev/to/widget-previews](https://flutter.dev/to/widget-previews)
+///     for details on getting started with widget previews.
+final class Preview {
   /// Annotation used to mark functions that return widget previews.
   const Preview({
     this.name,
@@ -68,6 +74,7 @@ base class Preview {
     this.wrapper,
     this.theme,
     this.brightness,
+    this.localizations,
   });
 
   /// A description to be displayed alongside the preview.
@@ -114,10 +121,144 @@ base class Preview {
   ///
   /// If not provided, the current system default brightness will be used.
   final Brightness? brightness;
+
+  /// A callback to return a localization configuration to be applied to the
+  /// previewed [Widget].
+  ///
+  /// Note: this must be a reference to a static, public function defined as
+  /// either a top-level function or static member in a class.
+  final PreviewLocalizations? localizations;
+}
+
+/// The base class used to define a custom 'multi-preview' annotation.
+///
+/// Marking functions that return a widget preview with an instance of [MultiPreview] is the
+/// equivalent of applying each [Preview] instance in the `previews` field to the function.
+///
+/// {@tool snippet}
+/// This sample shows two ways to define multiple previews for a single preview function.
+///
+/// The first approach uses a [MultiPreview] implementation that creates previews using light and
+/// dark mode themes.
+///
+/// The second approach uses multiple [Preview] annotations to achieve the same result.
+///
+/// ```dart
+/// final class BrightnessPreview extends MultiPreview {
+///   const BrightnessPreview();
+///
+///   @override
+///   // ignore: avoid_field_initializers_in_const_classes
+///   final List<Preview> previews = const <Preview>[
+///     Preview(name: 'Light', brightness: Brightness.light),
+///     Preview(name: 'Dark', brightness: Brightness.dark),
+///   ];
+/// }
+///
+/// // Using a multi-preview to create 'Light' and 'Dark' previews.
+/// @BrightnessPreview()
+/// WidgetBuilder brightnessPreview() {
+///   return (BuildContext context) {
+///     final ThemeData theme = Theme.of(context);
+///     return Text('Brightness: ${theme.brightness}');
+///   };
+/// }
+///
+/// // Using multiple Preview annotations to create 'Light' and 'Dark' previews.
+/// @Preview(name: 'Light', brightness: Brightness.light)
+/// @Preview(name: 'Dark', brightness: Brightness.dark)
+/// WidgetBuilder brightnessPreviewManual() {
+///   return (BuildContext context) {
+///     final ThemeData theme = Theme.of(context);
+///     return Text('Brightness: ${theme.brightness}');
+///   };
+/// }
+/// ```
+/// {@end-tool}
+///
+/// **Important Note:** all values provided to the `Preview()` instances included in the
+/// `previews` list must be constant and non-private.
+abstract base class MultiPreview {
+  /// Creates a [MultiPreview] annotation instance.
+  const MultiPreview();
+
+  /// The set of [Preview]s to be created for the annotated function.
+  ///
+  /// **Important Note:** this getter must be overridden with a field, not a getter, otherwise
+  /// the list of [Preview]s will not be detected.
+  List<Preview> get previews;
+}
+
+/// A collection of localization objects and callbacks for use in widget previews.
+base class PreviewLocalizationsData {
+  /// Creates a collection of localization objects and callbacks for use in
+  /// widget previews.
+  const PreviewLocalizationsData({
+    this.locale,
+    this.supportedLocales = const <Locale>[Locale('en', 'US')],
+    this.localizationsDelegates,
+    this.localeListResolutionCallback,
+    this.localeResolutionCallback,
+  });
+
+  /// {@macro flutter.widgets.widgetsApp.locale}
+  ///
+  /// See also:
+  ///
+  ///  * [localeResolutionCallback], which can override the default
+  ///    [supportedLocales] matching algorithm.
+  ///  * [localizationsDelegates], which collectively define all of the localized
+  ///    resources used by this preview.
+  final Locale? locale;
+
+  /// {@macro flutter.widgets.widgetsApp.supportedLocales}
+  ///
+  /// See also:
+  ///
+  ///  * [localeResolutionCallback], an app callback that resolves the app's locale
+  ///    when the device's locale changes.
+  ///  * [localizationsDelegates], which collectively define all of the localized
+  ///    resources used by this app.
+  ///  * [basicLocaleListResolution], the default locale resolution algorithm.
+  final List<Locale> supportedLocales;
+
+  /// The delegates for this preview's [Localizations] widget.
+  ///
+  /// The delegates collectively define all of the localized resources
+  /// for this preview's [Localizations] widget.
+  final Iterable<LocalizationsDelegate<Object?>>? localizationsDelegates;
+
+  /// {@macro flutter.widgets.widgetsApp.localeListResolutionCallback}
+  ///
+  /// This callback considers the entire list of preferred locales.
+  ///
+  /// This algorithm should be able to handle a null or empty list of preferred locales,
+  /// which indicates Flutter has not yet received locale information from the platform.
+  ///
+  /// See also:
+  ///
+  ///  * [basicLocaleListResolution], the default locale resolution algorithm.
+  final LocaleListResolutionCallback? localeListResolutionCallback;
+
+  /// {@macro flutter.widgets.widgetsApp.localeListResolutionCallback}
+  ///
+  /// This callback considers only the default locale, which is the first locale
+  /// in the preferred locales list. It is preferred to set [localeListResolutionCallback]
+  /// over [localeResolutionCallback] as it provides the full preferred locales list.
+  ///
+  /// This algorithm should be able to handle a null locale, which indicates
+  /// Flutter has not yet received locale information from the platform.
+  ///
+  /// See also:
+  ///
+  ///  * [basicLocaleListResolution], the default locale resolution algorithm.
+  final LocaleResolutionCallback? localeResolutionCallback;
 }
 
 /// A collection of [ThemeData] and [CupertinoThemeData] instances for use in
 /// widget previews.
+///
+/// NOTE: this interface is not stable and **will change**.
 base class PreviewThemeData {
   /// Creates a collection of [ThemeData] and [CupertinoThemeData] instances
   /// for use in widget previews.

@@ -42,7 +42,12 @@ void main() {
       duration: const Duration(seconds: 2),
     );
     addTearDown(controller.dispose);
-    await tester.pumpWidget(FadeTransition(opacity: controller, child: Placeholder(key: key)));
+    await tester.pumpWidget(
+      FadeTransition(
+        opacity: controller,
+        child: Placeholder(key: key),
+      ),
+    );
     controller.value = 0.5;
     key.currentContext?.findRenderObject()?.markNeedsPaint();
     controller.value = 0;

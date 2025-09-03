@@ -4,9 +4,9 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPluginAppLifeCycleDelegate.h"
 
-#include "flutter/fml/logging.h"
 #include "flutter/fml/paths.h"
 #include "flutter/lib/ui/plugins/callback_cache.h"
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterCallbackCache_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 
@@ -143,11 +143,11 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
                     [application endBackgroundTask:_debugBackgroundTask];
                     _debugBackgroundTask = UIBackgroundTaskInvalid;
                   }
-                  FML_LOG(WARNING)
-                      << "\nThe OS has terminated the Flutter debug connection for being "
-                         "inactive in the background for too long.\n\n"
-                         "There are no errors with your Flutter application.\n\n"
-                         "To reconnect, launch your application again via 'flutter run'";
+                  [FlutterLogger
+                      logWarning:@"\nThe OS has terminated the Flutter debug connection for being "
+                                  "inactive in the background for too long.\n\n"
+                                  "There are no errors with your Flutter application.\n\n"
+                                  "To reconnect, launch your application again via 'flutter run'"];
                 }];
 #endif  // FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
   for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {

@@ -10,7 +10,7 @@ import 'package:widget_preview_scaffold/src/controls.dart';
 import 'package:widget_preview_scaffold/src/widget_preview.dart';
 import 'package:widget_preview_scaffold/src/widget_preview_rendering.dart';
 
-import 'widget_preview_scaffold_test_utils.dart';
+import 'utils/widget_preview_scaffold_test_utils.dart';
 
 void main() {
   testWidgets(
@@ -20,7 +20,10 @@ void main() {
       final WidgetPreviewerWidgetScaffolding widgetPreview =
           WidgetPreviewerWidgetScaffolding(
             child: WidgetPreviewWidget(
-              preview: WidgetPreview(builder: () => const Text(kTestText)),
+              preview: WidgetPreview(
+                scriptUri: '',
+                builder: () => const Text(kTestText),
+              ),
             ),
           );
 

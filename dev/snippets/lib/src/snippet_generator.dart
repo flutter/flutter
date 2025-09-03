@@ -61,10 +61,9 @@ class SnippetGenerator {
     // Only insert a div for the description if there actually is some text there.
     // This means that the {{description}} marker in the skeleton needs to
     // be inside of an {@inject-html} block.
-    final String description =
-        sample.description.trim().isNotEmpty
-            ? '<div class="snippet-description">{@end-inject-html}${sample.description.trim()}{@inject-html}</div>'
-            : '';
+    final String description = sample.description.trim().isNotEmpty
+        ? '<div class="snippet-description">{@end-inject-html}${sample.description.trim()}{@inject-html}</div>'
+        : '';
 
     // DartPad only supports stable or main as valid channels. Use main
     // if not on stable so that local runs will work (although they will
@@ -128,10 +127,9 @@ class SnippetGenerator {
   /// processed separately. Uses a primitive heuristic to make sample blocks
   /// into valid Dart code.
   List<SourceLine> _processBlocks(CodeSample sample) {
-    final List<SourceLine> block =
-        sample.parts
-            .expand<SourceLine>((SkeletonInjection injection) => injection.contents)
-            .toList();
+    final List<SourceLine> block = sample.parts
+        .expand<SourceLine>((SkeletonInjection injection) => injection.contents)
+        .toList();
     if (block.isEmpty) {
       return <SourceLine>[];
     }
@@ -277,8 +275,8 @@ class SnippetGenerator {
     return sample.description.splitMapJoin(
       '\n',
       onMatch: (Match match) => match.group(0)!,
-      onNonMatch:
-          (String nonmatch) => nonmatch.trimRight().isEmpty ? '//' : '// ${nonmatch.trimRight()}',
+      onNonMatch: (String nonmatch) =>
+          nonmatch.trimRight().isEmpty ? '//' : '// ${nonmatch.trimRight()}',
     );
   }
 
@@ -357,30 +355,29 @@ class SnippetGenerator {
   ///
   /// Not used for "sample" and "dartpad" samples, which use their own template.
   List<SourceLine> get headers {
-    return _headers ??=
-        <String>[
-          '// generated code',
-          '// ignore_for_file: unused_import',
-          '// ignore_for_file: unused_element',
-          '// ignore_for_file: unused_local_variable',
-          "import 'dart:async';",
-          "import 'dart:convert';",
-          "import 'dart:math' as math;",
-          "import 'dart:typed_data';",
-          "import 'dart:ui' as ui;",
-          "import 'package:flutter_test/flutter_test.dart';",
-          for (final File file in _listDartFiles(
-            FlutterInformation.instance
-                .getFlutterRoot()
-                .childDirectory('packages')
-                .childDirectory('flutter')
-                .childDirectory('lib'),
-          )) ...<String>[
-            '',
-            '// ${file.path}',
-            "import 'package:flutter/${path.basename(file.path)}';",
-          ],
-        ].map<SourceLine>((String code) => SourceLine(code)).toList();
+    return _headers ??= <String>[
+      '// generated code',
+      '// ignore_for_file: unused_import',
+      '// ignore_for_file: unused_element',
+      '// ignore_for_file: unused_local_variable',
+      "import 'dart:async';",
+      "import 'dart:convert';",
+      "import 'dart:math' as math;",
+      "import 'dart:typed_data';",
+      "import 'dart:ui' as ui;",
+      "import 'package:flutter_test/flutter_test.dart';",
+      for (final File file in _listDartFiles(
+        FlutterInformation.instance
+            .getFlutterRoot()
+            .childDirectory('packages')
+            .childDirectory('flutter')
+            .childDirectory('lib'),
+      )) ...<String>[
+        '',
+        '// ${file.path}',
+        "import 'package:flutter/${path.basename(file.path)}';",
+      ],
+    ].map<SourceLine>((String code) => SourceLine(code)).toList();
   }
 
   List<SourceLine>? _headers;

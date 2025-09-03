@@ -33,11 +33,10 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const NavigationBarThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -59,11 +58,10 @@ void main() {
       labelPadding: EdgeInsets.all(8),
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(
       description,
@@ -114,7 +112,7 @@ void main() {
                 elevation: elevation,
                 indicatorColor: indicatorColor,
                 indicatorShape: indicatorShape,
-                iconTheme: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+                iconTheme: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
                   if (states.contains(MaterialState.selected)) {
                     return const IconThemeData(
                       size: selectedIconSize,
@@ -128,7 +126,7 @@ void main() {
                     opacity: unselectedIconOpacity,
                   );
                 }),
-                labelTextStyle: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+                labelTextStyle: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
                   if (states.contains(MaterialState.selected)) {
                     return const TextStyle(fontSize: selectedLabelFontSize);
                   }
@@ -250,7 +248,7 @@ void main() {
       const Color hoverColor = Color(0xff0000ff);
       const Color focusColor = Color(0xff00ffff);
       const Color pressedColor = Color(0xffff00ff);
-      final MaterialStateProperty<Color?> overlayColor = MaterialStateProperty.resolveWith<Color>((
+      final WidgetStateProperty<Color?> overlayColor = WidgetStateProperty.resolveWith<Color>((
         Set<MaterialState> states,
       ) {
         if (states.contains(MaterialState.hovered)) {
@@ -296,9 +294,9 @@ void main() {
         inkFeatures,
         kIsWeb
             ? (paints
-              ..rrect()
-              ..rrect()
-              ..circle(color: hoverColor))
+                ..rrect()
+                ..rrect()
+                ..circle(color: hoverColor))
             : (paints..circle(color: hoverColor)),
       );
 
@@ -310,12 +308,12 @@ void main() {
         inkFeatures,
         kIsWeb
             ? (paints
-              ..circle()
-              ..circle()
-              ..circle(color: pressedColor))
+                ..circle()
+                ..circle()
+                ..circle(color: pressedColor))
             : (paints
-              ..circle()
-              ..circle(color: pressedColor)),
+                ..circle()
+                ..circle(color: pressedColor)),
       );
 
       await gesture.up();
@@ -330,11 +328,11 @@ void main() {
         inkFeatures,
         kIsWeb
             ? (paints
-              ..circle()
-              ..circle(color: focusColor))
+                ..circle()
+                ..circle(color: focusColor))
             : (paints
-              ..circle()
-              ..circle(color: focusColor)),
+                ..circle()
+                ..circle(color: focusColor)),
       );
     },
   );
@@ -367,8 +365,8 @@ Material _barMaterial(WidgetTester tester) {
 
 ShapeDecoration? _indicator(WidgetTester tester) {
   return tester
-          .firstWidget<Ink>(
-            find.descendant(of: find.byType(FadeTransition), matching: find.byType(Ink)),
+          .firstWidget<Container>(
+            find.descendant(of: find.byType(FadeTransition), matching: find.byType(Container)),
           )
           .decoration
       as ShapeDecoration?;

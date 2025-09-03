@@ -3,22 +3,23 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 const String kCanvasContainerTag = 'flt-canvas-container';
 
-typedef RenderResult =
-    ({List<DomImageBitmap> imageBitmaps, int rasterStartMicros, int rasterEndMicros});
+typedef RenderResult = ({
+  List<DomImageBitmap> imageBitmaps,
+  int rasterStartMicros,
+  int rasterEndMicros,
+});
 
 // This is an interface that renders a `ScenePicture` as a `DomImageBitmap`.
 // It is optionally asynchronous. It is required for the `EngineSceneView` to
 // composite pictures into the canvases in the DOM tree it builds.
 abstract class PictureRenderer {
-  FutureOr<RenderResult> renderPictures(List<ScenePicture> picture);
-  ScenePicture clipPicture(ScenePicture picture, ui.Rect clip);
+  FutureOr<RenderResult> renderPictures(List<ScenePicture> picture, int width, int height);
 }
 
 class _SceneRender {
@@ -94,7 +95,6 @@ class EngineSceneView {
     );
     final List<LayerSlice?> slices = scene.rootLayer.slices;
     final List<ScenePicture> picturesToRender = <ScenePicture>[];
-    final List<ScenePicture> originalPicturesToRender = <ScenePicture>[];
     for (final LayerSlice? slice in slices) {
       if (slice == null) {
         continue;
@@ -103,21 +103,20 @@ class EngineSceneView {
       if (clippedRect.isEmpty) {
         // This picture is completely offscreen, so don't render it at all
         continue;
-      } else if (clippedRect == slice.picture.cullRect) {
-        // The picture doesn't need to be clipped, just render the original
-        originalPicturesToRender.add(slice.picture);
-        picturesToRender.add(slice.picture);
       } else {
-        originalPicturesToRender.add(slice.picture);
-        picturesToRender.add(pictureRenderer.clipPicture(slice.picture, clippedRect));
+        picturesToRender.add(slice.picture);
       }
     }
     final Map<ScenePicture, DomImageBitmap> renderMap;
     if (picturesToRender.isNotEmpty) {
-      final RenderResult renderResult = await pictureRenderer.renderPictures(picturesToRender);
+      final RenderResult renderResult = await pictureRenderer.renderPictures(
+        picturesToRender,
+        screenBounds.width.ceil(),
+        screenBounds.height.ceil(),
+      );
       renderMap = <ScenePicture, DomImageBitmap>{
         for (int i = 0; i < picturesToRender.length; i++)
-          originalPicturesToRender[i]: renderResult.imageBitmaps[i],
+          picturesToRender[i]: renderResult.imageBitmaps[i],
       };
       recorder?.recordRasterStart(renderResult.rasterStartMicros);
       recorder?.recordRasterFinish(renderResult.rasterEndMicros);
@@ -146,11 +145,10 @@ class EngineSceneView {
           }
         }
 
-        final ui.Rect clippedBounds = slice.picture.cullRect.intersect(screenBounds);
         if (container != null) {
-          container.bounds = clippedBounds;
+          container.bounds = screenBounds;
         } else {
-          container = PictureSliceContainer(clippedBounds);
+          container = PictureSliceContainer(screenBounds);
         }
         container.updateContents();
         container.renderBitmap(bitmap);
@@ -206,28 +204,11 @@ class EngineSceneView {
     }
   }
 
-  String _generateDebugFilename() {
-    final now = DateTime.now();
-    final String y = now.year.toString().padLeft(4, '0');
-    final String mo = now.month.toString().padLeft(2, '0');
-    final String d = now.day.toString().padLeft(2, '0');
-    final String h = now.hour.toString().padLeft(2, '0');
-    final String mi = now.minute.toString().padLeft(2, '0');
-    final String s = now.second.toString().padLeft(2, '0');
-    return 'flutter-scene-$y-$mo-$d-$h-$mi-$s.json';
-  }
-
-  void dumpDebugInfo() {
+  Map<String, dynamic>? dumpDebugInfo() {
     if (kDebugMode && _previousRender != null) {
-      final Map<String, Object?> debugJson = _previousRender!.scene.debugJsonDescription;
-      final String jsonString = jsonEncode(debugJson);
-      final blob = createDomBlob([jsonString], {'type': 'application/json'});
-      final url = domWindow.URL.createObjectURL(blob);
-      final element = domDocument.createElement('a');
-      element.setAttribute('href', url);
-      element.setAttribute('download', _generateDebugFilename());
-      element.click();
+      return _previousRender!.scene.debugJsonDescription;
     }
+    return null;
   }
 }
 
