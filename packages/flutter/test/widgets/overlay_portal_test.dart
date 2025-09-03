@@ -1384,7 +1384,7 @@ void main() {
     );
 
     controller1.show();
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     final RenderObject parentTheater = _ancestorRenderTheaters(
       tester.renderObject(find.byKey(overlayPortal)),
@@ -1392,12 +1392,12 @@ void main() {
 
     final OverlaySwapsState swaps = tester.state<OverlaySwapsState>(find.byType(OverlaySwaps));
     swaps.swaps();
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     final RenderObject newParentTheater = _ancestorRenderTheaters(
       tester.renderObject(find.byKey(overlayPortal)),
     ).single;
-    expect(parentTheater != newParentTheater, isTrue);
+    expect(parentTheater, isNot(newParentTheater));
   });
 
   testWidgets('Listens to root overlay changes', (WidgetTester tester) async {
