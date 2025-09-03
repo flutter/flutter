@@ -81,6 +81,11 @@ class FakeCustomBrowserDevice extends Fake implements ChromiumDevice {
   String get displayName => 'Dartium';
 }
 
+extension on String {
+  String get stripScriptUris =>
+      replaceAll(RegExp(r"scriptUri:\s*'file:\/\/\/\S*',"), "scriptUri: 'STRIPPED',");
+}
+
 void main() {
   late Directory originalCwd;
   late Directory tempDir;
@@ -324,6 +329,7 @@ import 'package:flutter_project/foo.dart' as _i2;
 
 List<_i1.WidgetPreview> previews() => [
       _i1.WidgetPreview(
+        scriptUri: 'STRIPPED',
         packageName: 'flutter_project',
         name: 'preview',
         builder: () => _i2.preview(),
@@ -348,7 +354,7 @@ List<_i1.WidgetPreview> previews() => [
         );
 
         await startWidgetPreview(rootProject: rootProject);
-        expect(generatedFile.readAsStringSync(), expectedGeneratedFileContents);
+        expect(generatedFile.readAsStringSync().stripScriptUris, expectedGeneratedFileContents);
         expectSinglePreviewLaunchTimingEvent();
       },
       overrides: <Type, Generator>{
@@ -386,7 +392,7 @@ List<_i1.WidgetPreview> previews() => [
         fs.currentDirectory = rootProject;
         await startWidgetPreview(rootProject: null);
 
-        expect(generatedFile.readAsStringSync(), expectedGeneratedFileContents);
+        expect(generatedFile.readAsStringSync().stripScriptUris, expectedGeneratedFileContents);
         expectSinglePreviewLaunchTimingEvent();
       },
       overrides: <Type, Generator>{
