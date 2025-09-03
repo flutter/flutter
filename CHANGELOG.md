@@ -32,6 +32,16 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ## Flutter 3.35 Changes
 
+### [3.35.3](https://github.com/flutter/flutter/releases/tag/3.35.3)
+
+- [flutter/172627](https://github.com/flutter/flutter/issues/172627) - Removes unnecessary output when in non-verbose mode.
+- [flutter/173917](https://github.com/flutter/flutter/issues/173917) - Fixes issues with calculating apk version code.
+- [flutter/174437](https://github.com/flutter/flutter/issues/174437) - Fixes an issue where when running a Flutter web application in debug mode, the console is spammed with non-fatal error messages.
+- [flutter/174267](https://github.com/flutter/flutter/issues/174267) - Fixes an issue where golden test failures cause the test harness to stall.
+- [flutter/171691](https://github.com/flutter/flutter/issues/171691) - Fixes a race that can cause crashes in the Impeller Vulkan back end.
+- [flutter/174100](https://github.com/flutter/flutter/issues/174100) - Fixes errors seen when rendering superellipses on Impeller.
+- [flutter/174015](https://github.com/flutter/flutter/issues/174015) - Removes obsolete warning and error message when switching between build mode through Xcode.
+
 ### [3.35.2](https://github.com/flutter/flutter/releases/tag/3.35.2)
 
 - [flutter/173823](https://github.com/flutter/flutter/issues/173823) - On Android builds that do not use flutter.minSdkVersion and do use a value lower than 24 in a kotlin build file, correct flutters auto migration to update value with kotlin syntax.
