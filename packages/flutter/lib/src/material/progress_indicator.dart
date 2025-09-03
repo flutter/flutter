@@ -227,8 +227,8 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 
     // Calculates a track gap fraction that is scaled proportionally to a given
     // value.
-    // This is used to smoothly transition the track gap's size, preventing it
-    // from appearing or disappearing abruptly. The returned value increases
+    // This is used for a smooth transition of the track gap's size, preventing
+    // it from appearing or disappearing abruptly. The returned value increases
     // linearly from 0 to the full `trackGapFraction` as `currentValue`
     // increases from 0 to `_kTrackGapRampDownThreshold`.
     double getEffectiveTrackGapFraction(double currentValue, double trackGapFraction) {
