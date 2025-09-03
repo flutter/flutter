@@ -823,9 +823,9 @@ class ListTile extends StatelessWidget {
     final ListTileThemeData defaults = theme.useMaterial3
         ? _LisTileDefaultsM3(context)
         : _LisTileDefaultsM2(context, listTileStyle);
-    final Set<MaterialState> states = <MaterialState>{
-      if (!enabled) MaterialState.disabled,
-      if (selected) MaterialState.selected,
+    final Set<WidgetState> states = <WidgetState>{
+      if (!enabled) WidgetState.disabled,
+      if (selected) WidgetState.selected,
     };
 
     Color? resolveColor(
@@ -954,8 +954,8 @@ class ListTile extends StatelessWidget {
         defaults.contentPadding!.resolve(textDirection);
 
     // Show basic cursor when ListTile isn't enabled or gesture callbacks are null.
-    final Set<MaterialState> mouseStates = <MaterialState>{
-      if (!enabled || (onTap == null && onLongPress == null)) MaterialState.disabled,
+    final Set<WidgetState> mouseStates = <WidgetState>{
+      if (!enabled || (onTap == null && onLongPress == null)) WidgetState.disabled,
     };
     final MouseCursor effectiveMouseCursor =
         WidgetStateProperty.resolveAs<MouseCursor?>(mouseCursor, mouseStates) ??
@@ -1150,14 +1150,14 @@ class _IndividualOverrides extends WidgetStateProperty<Color?> {
   final Color? disabledColor;
 
   @override
-  Color? resolve(Set<MaterialState> states) {
+  Color? resolve(Set<WidgetState> states) {
     if (explicitColor is MaterialStateColor) {
       return WidgetStateProperty.resolveAs<Color?>(explicitColor, states);
     }
-    if (states.contains(MaterialState.disabled)) {
+    if (states.contains(WidgetState.disabled)) {
       return disabledColor;
     }
-    if (states.contains(MaterialState.selected)) {
+    if (states.contains(WidgetState.selected)) {
       return selectedColor;
     }
     return enabledColor;
