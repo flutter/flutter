@@ -1054,6 +1054,102 @@ void main() {
     expect(controller.offset, 400);
     expect(counter, equals(2));
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/174262.
+  testWidgets('SliverCrossAxisGroup pointer event positions', (WidgetTester tester) async {
+    final List<({int index, TapDownDetails details})> tapDownLog =
+        <({int index, TapDownDetails details})>[];
+
+    Widget buildItem(int index) {
+      return SliverToBoxAdapter(
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTapDown: (TapDownDetails details) => tapDownLog.add((index: index, details: details)),
+          child: const SizedBox.square(dimension: 20),
+        ),
+      );
+    }
+
+    Future<void> checkTapDown({
+      required Offset tapAt,
+      required int expectedIndex,
+      required Offset expectedLocalPosition,
+    }) async {
+      await tester.tapAt(tapAt);
+      expect(tapDownLog.last.index, expectedIndex);
+      expect(tapDownLog.last.details.localPosition, expectedLocalPosition);
+      expect(tapDownLog.last.details.globalPosition, tapAt);
+    }
+
+    // Vertical axis.
+    await tester.pumpWidget(
+      KeyedSubtree(
+        key: const ObjectKey(Axis.vertical),
+        child: _buildSliverCrossAxisGroup(
+          viewportWidth: 40,
+          viewportHeight: 20,
+          slivers: <Widget>[buildItem(0), buildItem(1)],
+        ),
+      ),
+    );
+
+    await checkTapDown(
+      tapAt: const Offset(5, 15),
+      expectedIndex: 0,
+      expectedLocalPosition: const Offset(5, 15),
+    );
+    await checkTapDown(
+      tapAt: const Offset(15, 15),
+      expectedIndex: 0,
+      expectedLocalPosition: const Offset(15, 15),
+    );
+    await checkTapDown(
+      tapAt: const Offset(25, 15),
+      expectedIndex: 1,
+      expectedLocalPosition: const Offset(5, 15),
+    );
+    await checkTapDown(
+      tapAt: const Offset(35, 15),
+      expectedIndex: 1,
+      expectedLocalPosition: const Offset(15, 15),
+    );
+
+    tapDownLog.clear();
+
+    // Horizontal axis.
+    await tester.pumpWidget(
+      KeyedSubtree(
+        key: const ObjectKey(Axis.horizontal),
+        child: _buildSliverCrossAxisGroup(
+          viewportWidth: 20,
+          viewportHeight: 40,
+          scrollDirection: Axis.horizontal,
+          slivers: <Widget>[buildItem(0), buildItem(1)],
+        ),
+      ),
+    );
+
+    await checkTapDown(
+      tapAt: const Offset(15, 5),
+      expectedIndex: 0,
+      expectedLocalPosition: const Offset(15, 5),
+    );
+    await checkTapDown(
+      tapAt: const Offset(15, 15),
+      expectedIndex: 0,
+      expectedLocalPosition: const Offset(15, 15),
+    );
+    await checkTapDown(
+      tapAt: const Offset(15, 25),
+      expectedIndex: 1,
+      expectedLocalPosition: const Offset(15, 5),
+    );
+    await checkTapDown(
+      tapAt: const Offset(15, 35),
+      expectedIndex: 1,
+      expectedLocalPosition: const Offset(15, 15),
+    );
+  });
 }
 
 Widget _buildSliverList({
