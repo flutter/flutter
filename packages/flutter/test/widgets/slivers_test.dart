@@ -36,18 +36,16 @@ Future<void> testSliverFixedExtentList(WidgetTester tester, List<String> items) 
       textDirection: TextDirection.ltr,
       child: CustomScrollView(
         slivers: <Widget>[
-          SliverFixedExtentList(
+          SliverFixedExtentList.builder(
             itemExtent: 900,
-            delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) {
-                return Center(key: ValueKey<String>(items[index]), child: KeepAlive(items[index]));
-              },
-              childCount: items.length,
-              findChildIndexCallback: (Key key) {
-                final ValueKey<String> valueKey = key as ValueKey<String>;
-                return items.indexOf(valueKey.value);
-              },
-            ),
+            itemCount: items.length,
+            itemBuilder: (BuildContext context, int index) {
+              return Center(key: ValueKey<String>(items[index]), child: KeepAlive(items[index]));
+            },
+            findChildIndexCallback: (Key key) {
+              final ValueKey<String> valueKey = key as ValueKey<String>;
+              return items.indexOf(valueKey.value);
+            },
           ),
         ],
       ),
@@ -197,20 +195,16 @@ void main() {
             textDirection: TextDirection.ltr,
             child: CustomScrollView(
               slivers: <Widget>[
-                SliverList(
-                  delegate: SliverChildListDelegate(const <Widget>[
+                SliverList.list(
+                  children: const <Widget>[
                     SizedBox(height: 22.2, child: Text('TOP')),
                     SizedBox(height: 22.2),
                     SizedBox(height: 22.2),
-                  ]),
+                  ],
                 ),
-                SliverFixedExtentList(
+                SliverFixedExtentList.list(
                   itemExtent: 22.2,
-                  delegate: SliverChildListDelegate(const <Widget>[
-                    SizedBox(),
-                    Text('A'),
-                    SizedBox(),
-                  ]),
+                  children: const <Widget>[SizedBox(), Text('A'), SizedBox()],
                 ),
                 SliverGrid(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
@@ -220,12 +214,12 @@ void main() {
                     SizedBox(),
                   ]),
                 ),
-                SliverList(
-                  delegate: SliverChildListDelegate(const <Widget>[
+                SliverList.list(
+                  children: const <Widget>[
                     SizedBox(height: 22.2),
                     SizedBox(height: 22.2),
                     SizedBox(height: 22.2, child: Text('BOTTOM')),
-                  ]),
+                  ],
                 ),
               ],
             ),
@@ -274,26 +268,22 @@ void main() {
               textDirection: TextDirection.ltr,
               child: CustomScrollView(
                 slivers: <Widget>[
-                  SliverGrid(
+                  SliverGrid.builder(
                     gridDelegate: TestGridDelegate(replace),
-                    delegate: SliverChildBuilderDelegate(
-                      (BuildContext context, int index) {
-                        final int item = replace ? replacedItems[index] : items[index];
-                        return Container(
-                          key: ValueKey<int>(item),
-                          alignment: Alignment.center,
-                          child: Text('item $item'),
-                        );
-                      },
-                      childCount: replace ? 7 : 6,
-                      findChildIndexCallback: (Key key) {
-                        final int item = (key as ValueKey<int>).value;
-                        final int index = replace
-                            ? replacedItems.indexOf(item)
-                            : items.indexOf(item);
-                        return index >= 0 ? index : null;
-                      },
-                    ),
+                    itemCount: replace ? 7 : 6,
+                    itemBuilder: (BuildContext context, int index) {
+                      final int item = replace ? replacedItems[index] : items[index];
+                      return Container(
+                        key: ValueKey<int>(item),
+                        alignment: Alignment.center,
+                        child: Text('item $item'),
+                      );
+                    },
+                    findChildIndexCallback: (Key key) {
+                      final int item = (key as ValueKey<int>).value;
+                      final int index = replace ? replacedItems.indexOf(item) : items.indexOf(item);
+                      return index >= 0 ? index : null;
+                    },
                   ),
                 ],
               ),
@@ -377,9 +367,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: CustomScrollView(
           controller: controller,
-          slivers: <Widget>[
-            SliverFixedExtentList(itemExtent: 900, delegate: SliverChildListDelegate(children)),
-          ],
+          slivers: <Widget>[SliverFixedExtentList.list(itemExtent: 900, children: children)],
         ),
       ),
     );
@@ -403,9 +391,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: CustomScrollView(
           controller: controller,
-          slivers: <Widget>[
-            SliverFixedExtentList(itemExtent: 900, delegate: SliverChildListDelegate(children)),
-          ],
+          slivers: <Widget>[SliverFixedExtentList.list(itemExtent: 900, children: children)],
         ),
       ),
     );
@@ -505,9 +491,7 @@ void main() {
         theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: CustomScrollView(
-            slivers: <Widget>[
-              SliverList(delegate: SliverChildBuilderDelegate(buildItem, childCount: 30)),
-            ],
+            slivers: <Widget>[SliverList.builder(itemCount: 30, itemBuilder: buildItem)],
           ),
         ),
       ),
@@ -529,9 +513,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: CustomScrollView(
-            slivers: <Widget>[
-              SliverList(delegate: SliverChildBuilderDelegate(buildItem, childCount: 30)),
-            ],
+            slivers: <Widget>[SliverList.builder(itemCount: 30, itemBuilder: buildItem)],
           ),
         ),
       ),
@@ -655,14 +637,14 @@ void main() {
             controller: controller,
             cacheExtent: 0,
             slivers: <Widget>[
-              SliverFixedExtentList(
+              SliverFixedExtentList.builder(
                 itemExtent: 200,
-                delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+                itemBuilder: (BuildContext context, int index) {
                   if (index <= 6) {
                     return Center(child: Text('Page $index'));
                   }
                   return null;
-                }),
+                },
               ),
             ],
           ),
@@ -705,14 +687,14 @@ void main() {
             controller: controller,
             cacheExtent: 0,
             slivers: <Widget>[
-              SliverFixedExtentList(
+              SliverFixedExtentList.builder(
                 itemExtent: 200,
-                delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+                itemBuilder: (BuildContext context, int index) {
                   if (index <= 6) {
                     return Center(child: Text('Page $index'));
                   }
                   return null;
-                }),
+                },
               ),
             ],
           ),
@@ -1036,12 +1018,8 @@ void main() {
           body: CustomScrollView(
             physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
             slivers: <Widget>[
-              SliverList(
-                delegate: SliverChildListDelegate(const <Widget>[
-                  SizedBox.shrink(),
-                  Text('index 1'),
-                  Text('index 2'),
-                ]),
+              SliverList.list(
+                children: const <Widget>[SizedBox.shrink(), Text('index 1'), Text('index 2')],
               ),
             ],
           ),
@@ -1411,6 +1389,65 @@ void main() {
     expect(secondTapped, 1);
   });
 
+  testWidgets('SliverGrid.list can display children', (WidgetTester tester) async {
+    int firstTapped = 0;
+    int secondTapped = 0;
+    final Key key = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          key: key,
+          body: CustomScrollView(
+            slivers: <Widget>[
+              SliverGrid.list(
+                gridDelegate: _TestArbitrarySliverGridDelegate(),
+                children: <Widget>[
+                  Material(
+                    color: Colors.yellow,
+                    child: InkWell(onTap: () => firstTapped++, child: const Text('First')),
+                  ),
+                  Material(
+                    color: Colors.red,
+                    child: InkWell(onTap: () => secondTapped++, child: const Text('Second')),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Verify correct hit testing
+    await tester.tap(find.text('First'));
+    expect(firstTapped, 1);
+    expect(secondTapped, 0);
+    firstTapped = 0;
+    await tester.tap(find.text('Second'));
+    expect(firstTapped, 0);
+    expect(secondTapped, 1);
+  });
+
+  testWidgets('SliverGrid.list with empty children list', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: <Widget>[
+              SliverGrid.list(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+                children: const <Widget>[],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Should render without errors - the SliverGrid should be present even with empty children
+    expect(find.byType(CustomScrollView), findsOneWidget);
+  });
+
   testWidgets('SliverGridRegularTileLayout.computeMaxScrollOffset handles 0 children', (
     WidgetTester tester,
   ) async {
@@ -1537,9 +1574,7 @@ class TestSliverFixedExtentList extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: CustomScrollView(
-        slivers: <Widget>[
-          SliverFixedExtentList(itemExtent: 10.0, delegate: SliverChildListDelegate(children)),
-        ],
+        slivers: <Widget>[SliverFixedExtentList.list(itemExtent: 10.0, children: children)],
       ),
     );
   }

@@ -2,12 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/constant/value.dart';
 
 /// Contains details related to a single preview instance.
 final class PreviewDetails {
-  PreviewDetails({required this.packageName, required this.functionName, required this.isBuilder});
+  PreviewDetails({
+    required this.scriptUri,
+    required this.packageName,
+    required this.functionName,
+    required this.isBuilder,
+    required DartObject previewAnnotation,
+  }) : name = previewAnnotation.getField(kName)!,
+       size = previewAnnotation.getField(kSize)!,
+       textScaleFactor = previewAnnotation.getField(kTextScaleFactor)!,
+       wrapper = previewAnnotation.getField(kWrapper)!,
+       theme = previewAnnotation.getField(kTheme)!,
+       brightness = previewAnnotation.getField(kBrightness)!,
+       localizations = previewAnnotation.getField(kLocalizations)!;
 
+  static const kScriptUri = 'scriptUri';
   static const kPackageName = 'packageName';
   static const kName = 'name';
   static const kSize = 'size';
@@ -16,6 +29,9 @@ final class PreviewDetails {
   static const kTheme = 'theme';
   static const kBrightness = 'brightness';
   static const kLocalizations = 'localizations';
+
+  /// The file:// URI pointing to the script in which the preview is defined.
+  final Uri scriptUri;
 
   /// The name of the package in which the preview was defined.
   ///
@@ -36,86 +52,40 @@ final class PreviewDetails {
   /// A description to be displayed alongside the preview.
   ///
   /// If not provided, no name will be associated with the preview.
-  Expression? get name => _name;
-  Expression? _name;
+  final DartObject name;
 
   /// Artificial constraints to be applied to the `child`.
   ///
   /// If not provided, the previewed widget will attempt to set its own
   /// constraints and may result in an unbounded constraint error.
-  Expression? get size => _size;
-  Expression? _size;
+  final DartObject size;
 
   /// Applies font scaling to text within the `child`.
   ///
   /// If not provided, the default text scaling factor provided by `MediaQuery`
   /// will be used.
-  Expression? get textScaleFactor => _textScaleFactor;
-  Expression? _textScaleFactor;
+  final DartObject textScaleFactor;
 
   /// The name of a tear-off used to wrap the `Widget` returned by the preview
   /// function defined by [functionName].
   ///
   /// If not provided, the `Widget` returned by [functionName] will be used by
   /// the previewer directly.
-  Identifier? get wrapper => _wrapper;
-  Identifier? _wrapper;
+  final DartObject wrapper;
 
   /// Set to `true` if `wrapper` is set.
-  bool get hasWrapper => _wrapper != null;
+  bool get hasWrapper => !wrapper.isNull;
 
   /// A callback to return Material and Cupertino theming data to be applied
   /// to the previewed `Widget`.
-  Identifier? get theme => _theme;
-  Identifier? _theme;
+  final DartObject theme;
 
   /// Sets the initial theme brightness.
   ///
   /// If not provided, the current system default brightness will be used.
-  Expression? get brightness => _brightness;
-  Expression? _brightness;
+  final DartObject brightness;
 
-  Expression? get localizations => _localizations;
-  Expression? _localizations;
-
-  /// Initializes a property based on a argument to the preview declaration.
-  ///
-  /// Throws a [StateError] if the property has already been initialized.
-  void setField({required NamedExpression node}) {
-    final String key = node.name.label.name;
-    final Expression expression = node.expression;
-    switch (key) {
-      case kName:
-        _expectNotSet(kName, _name);
-        _name = expression;
-      case kSize:
-        _expectNotSet(kSize, _size);
-        _size = expression;
-      case kTextScaleFactor:
-        _expectNotSet(kTextScaleFactor, _textScaleFactor);
-        _textScaleFactor = expression;
-      case kWrapper:
-        _expectNotSet(kWrapper, _wrapper);
-        _wrapper = expression as Identifier;
-      case kTheme:
-        _expectNotSet(kTheme, _theme);
-        _theme = expression as Identifier;
-      case kBrightness:
-        _expectNotSet(kBrightness, _brightness);
-        _brightness = expression;
-      case kLocalizations:
-        _expectNotSet(kLocalizations, _localizations);
-        _localizations = expression;
-      default:
-        throw StateError('Unknown Preview field "$name": ${expression.toSource()}');
-    }
-  }
-
-  void _expectNotSet(String key, Object? field) {
-    if (field != null) {
-      throw StateError('$key has already been set.');
-    }
-  }
+  final DartObject localizations;
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
@@ -140,7 +110,7 @@ final class PreviewDetails {
   String toString() =>
       'PreviewDetails(function: $functionName packageName: $packageName isBuilder: $isBuilder '
       '$kName: $name $kSize: $size $kTextScaleFactor: $textScaleFactor $kWrapper: $wrapper '
-      '$kTheme: $theme $kBrightness: $_brightness $kLocalizations: $_localizations)';
+      '$kTheme: $theme $kBrightness: $brightness $kLocalizations: $localizations)';
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes

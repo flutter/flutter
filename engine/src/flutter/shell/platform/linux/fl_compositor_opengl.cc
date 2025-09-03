@@ -41,8 +41,8 @@ static const char* fragment_shader_src =
 struct _FlCompositorOpenGL {
   FlCompositor parent_instance;
 
-  // Engine we are rendering.
-  GWeakRef engine;
+  // Task runner to wait for frames on.
+  FlTaskRunner* task_runner;
 
   // TRUE if can share framebuffers between contexts.
   gboolean shareable;
@@ -77,9 +77,6 @@ struct _FlCompositorOpenGL {
 
   // Ensure Flutter and GTK can access the frame data (framebuffer or pixels).
   GMutex frame_mutex;
-
-  // Allow GTK to wait for Flutter to generate a suitable frame.
-  GCond frame_cond;
 };
 
 G_DEFINE_TYPE(FlCompositorOpenGL,
@@ -113,6 +110,13 @@ static gchar* get_program_log(GLuint program) {
 }
 
 static void setup_shader(FlCompositorOpenGL* self) {
+  if (!fl_opengl_manager_make_current(self->opengl_manager)) {
+    g_warning(
+        "Failed to setup compositor shaders, unable to make OpenGL context "
+        "current");
+    return;
+  }
+
   GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vertex_shader, 1, &vertex_shader_src, nullptr);
   glCompileShader(vertex_shader);
@@ -164,6 +168,22 @@ static void setup_shader(FlCompositorOpenGL* self) {
                GL_STATIC_DRAW);
 }
 
+static void cleanup_shader(FlCompositorOpenGL* self) {
+  if (!fl_opengl_manager_make_current(self->opengl_manager)) {
+    g_warning(
+        "Failed to cleanup compositor shaders, unable to make OpenGL context "
+        "current");
+    return;
+  }
+
+  if (self->program != 0) {
+    glDeleteProgram(self->program);
+  }
+  if (self->vertex_buffer != 0) {
+    glDeleteBuffers(1, &self->vertex_buffer);
+  }
+}
+
 static void composite_layer(FlCompositorOpenGL* self,
                             FlFramebuffer* framebuffer,
                             double x,
@@ -188,11 +208,9 @@ static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
                                                     size_t layers_count) {
   FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(compositor);
 
-  g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
-
-  g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->frame_mutex);
-
+  g_mutex_lock(&self->frame_mutex);
   if (layers_count == 0) {
+    g_mutex_unlock(&self->frame_mutex);
     return TRUE;
   }
 
@@ -309,8 +327,61 @@ static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
     glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
   }
 
-  // Signal a frame is ready.
-  g_cond_signal(&self->frame_cond);
+  g_mutex_unlock(&self->frame_mutex);
+
+  fl_task_runner_stop_wait(self->task_runner);
+
+  return TRUE;
+}
+
+static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
+                                            cairo_t* cr,
+                                            GdkWindow* window) {
+  FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(compositor);
+
+  g_mutex_lock(&self->frame_mutex);
+  if (self->framebuffer == nullptr) {
+    g_mutex_unlock(&self->frame_mutex);
+    return FALSE;
+  }
+
+  // If frame not ready, then wait for it.
+  gint scale_factor = gdk_window_get_scale_factor(window);
+  size_t width = gdk_window_get_width(window) * scale_factor;
+  size_t height = gdk_window_get_height(window) * scale_factor;
+  while (fl_framebuffer_get_width(self->framebuffer) != width ||
+         fl_framebuffer_get_height(self->framebuffer) != height) {
+    g_mutex_unlock(&self->frame_mutex);
+    fl_task_runner_wait(self->task_runner);
+    g_mutex_lock(&self->frame_mutex);
+  }
+
+  if (fl_framebuffer_get_shareable(self->framebuffer)) {
+    g_autoptr(FlFramebuffer) sibling =
+        fl_framebuffer_create_sibling(self->framebuffer);
+    gdk_cairo_draw_from_gl(cr, window, fl_framebuffer_get_texture_id(sibling),
+                           GL_TEXTURE, scale_factor, 0, 0, width, height);
+  } else {
+    GLint saved_texture_binding;
+    glGetIntegerv(GL_TEXTURE_BINDING_2D, &saved_texture_binding);
+
+    GLuint texture_id;
+    glGenTextures(1, &texture_id);
+    glBindTexture(GL_TEXTURE_2D, texture_id);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
+                 GL_UNSIGNED_BYTE, self->pixels);
+
+    gdk_cairo_draw_from_gl(cr, window, texture_id, GL_TEXTURE, scale_factor, 0,
+                           0, width, height);
+
+    glDeleteTextures(1, &texture_id);
+
+    glBindTexture(GL_TEXTURE_2D, saved_texture_binding);
+  }
+
+  glFlush();
+
+  g_mutex_unlock(&self->frame_mutex);
 
   return TRUE;
 }
@@ -318,12 +389,13 @@ static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
 static void fl_compositor_opengl_dispose(GObject* object) {
   FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(object);
 
-  g_weak_ref_clear(&self->engine);
+  cleanup_shader(self);
+
+  g_clear_object(&self->task_runner);
   g_clear_object(&self->opengl_manager);
   g_clear_object(&self->framebuffer);
   g_clear_pointer(&self->pixels, g_free);
   g_mutex_clear(&self->frame_mutex);
-  g_cond_clear(&self->frame_cond);
 
   G_OBJECT_CLASS(fl_compositor_opengl_parent_class)->dispose(object);
 }
@@ -331,86 +403,26 @@ static void fl_compositor_opengl_dispose(GObject* object) {
 static void fl_compositor_opengl_class_init(FlCompositorOpenGLClass* klass) {
   FL_COMPOSITOR_CLASS(klass)->present_layers =
       fl_compositor_opengl_present_layers;
+  FL_COMPOSITOR_CLASS(klass)->render = fl_compositor_opengl_render;
 
   G_OBJECT_CLASS(klass)->dispose = fl_compositor_opengl_dispose;
 }
 
 static void fl_compositor_opengl_init(FlCompositorOpenGL* self) {
   g_mutex_init(&self->frame_mutex);
-  g_cond_init(&self->frame_cond);
 }
 
-FlCompositorOpenGL* fl_compositor_opengl_new(FlEngine* engine,
+FlCompositorOpenGL* fl_compositor_opengl_new(FlTaskRunner* task_runner,
+                                             FlOpenGLManager* opengl_manager,
                                              gboolean shareable) {
   FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(
       g_object_new(fl_compositor_opengl_get_type(), nullptr));
 
-  g_weak_ref_init(&self->engine, engine);
+  self->task_runner = FL_TASK_RUNNER(g_object_ref(task_runner));
   self->shareable = shareable;
-  self->opengl_manager =
-      FL_OPENGL_MANAGER(g_object_ref(fl_engine_get_opengl_manager(engine)));
-
-  fl_opengl_manager_make_current(self->opengl_manager);
+  self->opengl_manager = FL_OPENGL_MANAGER(g_object_ref(opengl_manager));
 
   setup_shader(self);
 
   return self;
-}
-
-void fl_compositor_opengl_render(FlCompositorOpenGL* self,
-                                 size_t width,
-                                 size_t height) {
-  g_return_if_fail(FL_IS_COMPOSITOR_OPENGL(self));
-
-  g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->frame_mutex);
-
-  if (self->framebuffer == nullptr) {
-    return;
-  }
-
-  // If frame not ready, then wait for it.
-  while (fl_framebuffer_get_width(self->framebuffer) != width ||
-         fl_framebuffer_get_height(self->framebuffer) != height) {
-    g_cond_wait(&self->frame_cond, &self->frame_mutex);
-  }
-
-  if (fl_framebuffer_get_shareable(self->framebuffer)) {
-    g_autoptr(FlFramebuffer) sibling =
-        fl_framebuffer_create_sibling(self->framebuffer);
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, fl_framebuffer_get_id(sibling));
-    glBlitFramebuffer(0, 0, width, height, 0, 0, width, height,
-                      GL_COLOR_BUFFER_BIT, GL_NEAREST);
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-  } else {
-    GLuint texture_id;
-    glGenTextures(1, &texture_id);
-    glBindTexture(GL_TEXTURE_2D, texture_id);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
-                 GL_UNSIGNED_BYTE, self->pixels);
-
-    GLuint framebuffer_id;
-    glGenFramebuffers(1, &framebuffer_id);
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer_id);
-    glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                           GL_TEXTURE_2D, texture_id, 0);
-    glBlitFramebuffer(0, 0, width, height, 0, 0, width, height,
-                      GL_COLOR_BUFFER_BIT, GL_NEAREST);
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-
-    glDeleteFramebuffers(1, &framebuffer_id);
-    glDeleteTextures(1, &texture_id);
-  }
-
-  glFlush();
-}
-
-void fl_compositor_opengl_cleanup(FlCompositorOpenGL* self) {
-  g_return_if_fail(FL_IS_COMPOSITOR_OPENGL(self));
-
-  if (self->program != 0) {
-    glDeleteProgram(self->program);
-  }
-  if (self->vertex_buffer != 0) {
-    glDeleteBuffers(1, &self->vertex_buffer);
-  }
 }

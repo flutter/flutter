@@ -452,7 +452,7 @@ void main() {
                 'hotReload': true,
                 'hotRestart': true,
                 'screenshot': true,
-                'fastStart': true,
+                'fastStart': false,
                 'flutterExit': true,
                 'hardwareRendering': true,
                 'startPaused': true,
@@ -1173,9 +1173,6 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   bool get supportsScreenshot => true;
 
   @override
-  bool get supportsFastStart => true;
-
-  @override
   bool get supportsFlutterExit => true;
 
   @override
@@ -1300,7 +1297,7 @@ class FakeApplicationPackageFactory implements ApplicationPackageFactory {
 
 class FakeApplicationPackage extends Fake implements ApplicationPackage {}
 
-class TestIOOverrides extends io.IOOverrides {
+final class TestIOOverrides extends io.IOOverrides {
   late Future<io.Socket> Function(Object? host, int port) connectCallback;
 
   @override

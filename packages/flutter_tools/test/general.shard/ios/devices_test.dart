@@ -27,7 +27,9 @@ import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcode_debug.dart';
 import 'package:flutter_tools/src/macos/xcdevice.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
@@ -45,6 +47,7 @@ void main() {
     late IMobileDevice iMobileDevice;
     late FileSystem fileSystem;
     late IOSCoreDeviceControl coreDeviceControl;
+    late IOSCoreDeviceLauncher coreDeviceLauncher;
     late XcodeDebug xcodeDebug;
 
     setUp(() {
@@ -66,6 +69,7 @@ void main() {
         processManager: FakeProcessManager.any(),
       );
       coreDeviceControl = FakeIOSCoreDeviceControl();
+      coreDeviceLauncher = FakeIOSCoreDeviceLauncher();
       xcodeDebug = FakeXcodeDebug();
     });
 
@@ -77,8 +81,10 @@ void main() {
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
+        analytics: FakeAnalytics(),
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
+        coreDeviceLauncher: coreDeviceLauncher,
         xcodeDebug: xcodeDebug,
         name: 'iPhone 1',
         sdkVersion: '13.3',
@@ -98,10 +104,12 @@ void main() {
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
         logger: logger,
+        analytics: FakeAnalytics(),
         platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
+        coreDeviceLauncher: coreDeviceLauncher,
         xcodeDebug: xcodeDebug,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.armv7,
@@ -121,10 +129,12 @@ void main() {
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           fileSystem: fileSystem,
           logger: logger,
+          analytics: FakeAnalytics(),
           platform: macPlatform,
           iosDeploy: iosDeploy,
           iMobileDevice: iMobileDevice,
           coreDeviceControl: coreDeviceControl,
+          coreDeviceLauncher: coreDeviceLauncher,
           xcodeDebug: xcodeDebug,
           name: 'iPhone 1',
           cpuArchitecture: DarwinArch.arm64,
@@ -143,10 +153,12 @@ void main() {
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           fileSystem: fileSystem,
           logger: logger,
+          analytics: FakeAnalytics(),
           platform: macPlatform,
           iosDeploy: iosDeploy,
           iMobileDevice: iMobileDevice,
           coreDeviceControl: coreDeviceControl,
+          coreDeviceLauncher: coreDeviceLauncher,
           xcodeDebug: xcodeDebug,
           name: 'iPhone 1',
           cpuArchitecture: DarwinArch.arm64,
@@ -165,10 +177,12 @@ void main() {
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           fileSystem: fileSystem,
           logger: logger,
+          analytics: FakeAnalytics(),
           platform: macPlatform,
           iosDeploy: iosDeploy,
           iMobileDevice: iMobileDevice,
           coreDeviceControl: coreDeviceControl,
+          coreDeviceLauncher: coreDeviceLauncher,
           xcodeDebug: xcodeDebug,
           name: 'iPhone 1',
           cpuArchitecture: DarwinArch.arm64,
@@ -187,10 +201,12 @@ void main() {
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           fileSystem: fileSystem,
           logger: logger,
+          analytics: FakeAnalytics(),
           platform: macPlatform,
           iosDeploy: iosDeploy,
           iMobileDevice: iMobileDevice,
           coreDeviceControl: coreDeviceControl,
+          coreDeviceLauncher: coreDeviceLauncher,
           xcodeDebug: xcodeDebug,
           name: 'iPhone 1',
           cpuArchitecture: DarwinArch.arm64,
@@ -209,10 +225,12 @@ void main() {
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           fileSystem: fileSystem,
           logger: logger,
+          analytics: FakeAnalytics(),
           platform: macPlatform,
           iosDeploy: iosDeploy,
           iMobileDevice: iMobileDevice,
           coreDeviceControl: coreDeviceControl,
+          coreDeviceLauncher: coreDeviceLauncher,
           xcodeDebug: xcodeDebug,
           name: 'iPhone 1',
           cpuArchitecture: DarwinArch.arm64,
@@ -233,10 +251,12 @@ void main() {
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
         logger: logger,
+        analytics: FakeAnalytics(),
         platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
+        coreDeviceLauncher: coreDeviceLauncher,
         xcodeDebug: xcodeDebug,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
@@ -257,10 +277,12 @@ void main() {
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
         logger: logger,
+        analytics: FakeAnalytics(),
         platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
+        coreDeviceLauncher: coreDeviceLauncher,
         xcodeDebug: xcodeDebug,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
@@ -281,10 +303,12 @@ void main() {
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
         logger: logger,
+        analytics: FakeAnalytics(),
         platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
+        coreDeviceLauncher: coreDeviceLauncher,
         xcodeDebug: xcodeDebug,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
@@ -305,10 +329,12 @@ void main() {
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
         logger: logger,
+        analytics: FakeAnalytics(),
         platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
+        coreDeviceLauncher: coreDeviceLauncher,
         xcodeDebug: xcodeDebug,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
@@ -329,10 +355,12 @@ void main() {
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
         logger: logger,
+        analytics: FakeAnalytics(),
         platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
+        coreDeviceLauncher: coreDeviceLauncher,
         xcodeDebug: xcodeDebug,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
@@ -349,10 +377,12 @@ void main() {
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
         logger: logger,
+        analytics: FakeAnalytics(),
         platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
+        coreDeviceLauncher: coreDeviceLauncher,
         xcodeDebug: xcodeDebug,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
@@ -372,10 +402,12 @@ void main() {
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
         logger: logger,
+        analytics: FakeAnalytics(),
         platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
+        coreDeviceLauncher: coreDeviceLauncher,
         xcodeDebug: xcodeDebug,
         name: 'iPhone 1',
         sdkVersion: '13.3 17C54',
@@ -396,10 +428,12 @@ void main() {
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
         logger: logger,
+        analytics: FakeAnalytics(),
         platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
+        coreDeviceLauncher: coreDeviceLauncher,
         xcodeDebug: xcodeDebug,
         name: 'iPhone 1',
         sdkVersion: '13.3',
@@ -427,10 +461,12 @@ void main() {
               iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
               fileSystem: fileSystem,
               logger: logger,
+              analytics: FakeAnalytics(),
               platform: platform,
               iosDeploy: iosDeploy,
               iMobileDevice: iMobileDevice,
               coreDeviceControl: coreDeviceControl,
+              coreDeviceLauncher: coreDeviceLauncher,
               xcodeDebug: xcodeDebug,
               name: 'iPhone 1',
               sdkVersion: '13.3',
@@ -485,6 +521,7 @@ void main() {
           device: device,
           app: appPackage,
           iMobileDevice: IMobileDevice.test(processManager: FakeProcessManager.any()),
+          xcode: FakeXcode(),
         );
         logReader.idevicesyslogProcess = process;
         return logReader;
@@ -515,10 +552,12 @@ void main() {
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           fileSystem: fileSystem,
           logger: logger,
+          analytics: FakeAnalytics(),
           platform: macPlatform,
           iosDeploy: iosDeploy,
           iMobileDevice: iMobileDevice,
           coreDeviceControl: coreDeviceControl,
+          coreDeviceLauncher: coreDeviceLauncher,
           xcodeDebug: xcodeDebug,
           name: 'iPhone 1',
           sdkVersion: '13.3',
@@ -554,6 +593,7 @@ void main() {
     late IMobileDevice iMobileDevice;
     late IOSWorkflow iosWorkflow;
     late IOSCoreDeviceControl coreDeviceControl;
+    late IOSCoreDeviceLauncher coreDeviceLauncher;
     late XcodeDebug xcodeDebug;
     late IOSDevice device1;
     late IOSDevice device2;
@@ -579,6 +619,7 @@ void main() {
         logger: logger,
       );
       coreDeviceControl = FakeIOSCoreDeviceControl();
+      coreDeviceLauncher = FakeIOSCoreDeviceLauncher();
       xcodeDebug = FakeXcodeDebug();
 
       device1 = IOSDevice(
@@ -588,8 +629,10 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         iosDeploy: iosDeploy,
+        analytics: FakeAnalytics(),
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
+        coreDeviceLauncher: coreDeviceLauncher,
         xcodeDebug: xcodeDebug,
         logger: logger,
         platform: macPlatform,
@@ -608,8 +651,10 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         iosDeploy: iosDeploy,
+        analytics: FakeAnalytics(),
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
+        coreDeviceLauncher: coreDeviceLauncher,
         xcodeDebug: xcodeDebug,
         logger: logger,
         platform: macPlatform,
@@ -882,6 +927,7 @@ void main() {
     late IMobileDevice iMobileDevice;
     late IOSWorkflow iosWorkflow;
     late IOSCoreDeviceControl coreDeviceControl;
+    late IOSCoreDeviceLauncher coreDeviceLauncher;
     late XcodeDebug xcodeDebug;
     late IOSDevice notConnected1;
 
@@ -906,6 +952,7 @@ void main() {
         logger: logger,
       );
       coreDeviceControl = FakeIOSCoreDeviceControl();
+      coreDeviceLauncher = FakeIOSCoreDeviceLauncher();
       xcodeDebug = FakeXcodeDebug();
       notConnected1 = IOSDevice(
         '00000001-0000000000000000',
@@ -914,8 +961,10 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         iosDeploy: iosDeploy,
+        analytics: FakeAnalytics(),
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
+        coreDeviceLauncher: coreDeviceLauncher,
         xcodeDebug: xcodeDebug,
         logger: logger,
         platform: macPlatform,
@@ -1080,3 +1129,9 @@ class FakeXcodeDebug extends Fake implements XcodeDebug {
 }
 
 class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {}
+
+class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {}
+
+class FakeAnalytics extends Fake implements Analytics {}
+
+class FakeXcode extends Fake implements Xcode {}

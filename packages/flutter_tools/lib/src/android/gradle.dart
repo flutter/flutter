@@ -310,7 +310,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       );
       _logger.printStatus(
         'To avoid potential build failures, you can quickly migrate your app '
-        'by following the steps on https://goo.gl/CP92wY .',
+        'by following the steps on https://docs.flutter.dev/release/breaking-changes/androidx-migration .',
         indent: 4,
       );
     }
@@ -569,9 +569,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
     }
     if (androidBuildInfo.splitPerAbi) {
       options.add('-Psplit-per-abi=true');
-    }
-    if (androidBuildInfo.fastStart) {
-      options.add('-Pfast-start=true');
     }
     late Stopwatch sw;
     final int exitCode = await _runGradleTask(

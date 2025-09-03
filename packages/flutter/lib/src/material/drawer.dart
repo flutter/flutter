@@ -505,18 +505,8 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
 
   @protected
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _scrimColorTween = _buildScrimColorTween();
-  }
-
-  @protected
-  @override
   void didUpdateWidget(DrawerController oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.scrimColor != oldWidget.scrimColor) {
-      _scrimColorTween = _buildScrimColorTween();
-    }
 
     if (_controller.status.isAnimating) {
       return; // Don't snap the drawer open or shut while the user is dragging.
@@ -645,15 +635,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     widget.drawerCallback?.call(false);
   }
 
-  late ColorTween _scrimColorTween;
   final GlobalKey _gestureDetectorKey = GlobalKey();
-
-  ColorTween _buildScrimColorTween() {
-    return ColorTween(
-      begin: Colors.transparent,
-      end: widget.scrimColor ?? DrawerTheme.of(context).scrimColor ?? Colors.black54,
-    );
-  }
 
   AlignmentDirectional get _drawerOuterAlignment => switch (widget.alignment) {
     DrawerAlignment.start => AlignmentDirectional.centerStart,
@@ -714,14 +696,15 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
           platformHasBackButton = false;
       }
 
-      Widget drawerScrim = const LimitedBox(
-        maxWidth: 0.0,
-        maxHeight: 0.0,
-        child: SizedBox.expand(),
+      final Color scrimColor =
+          widget.scrimColor ?? DrawerTheme.of(context).scrimColor ?? Colors.black54;
+      final Color effectiveScrimColor = scrimColor.withValues(
+        alpha: scrimColor.a * _controller.value,
       );
-      if (_scrimColorTween.evaluate(_controller) case final Color color) {
-        drawerScrim = ColoredBox(color: color, child: drawerScrim);
-      }
+      final Widget drawerScrim = ColoredBox(
+        color: effectiveScrimColor,
+        child: const LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand()),
+      );
 
       final Widget child = _DrawerControllerScope(
         controller: widget,

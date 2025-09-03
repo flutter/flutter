@@ -50,10 +50,19 @@ mixin FlutterFeatureFlagsIsEnabled implements FeatureFlags {
   bool get isNativeAssetsEnabled => isEnabled(nativeAssets);
 
   @override
+  bool get isDartDataAssetsEnabled => isEnabled(dartDataAssets);
+
+  @override
   bool get isSwiftPackageManagerEnabled => isEnabled(swiftPackageManager);
 
   @override
   bool get isOmitLegacyVersionFileEnabled => isEnabled(omitLegacyVersionFile);
+
+  @override
+  bool get isWindowingEnabled => isEnabled(windowingFeature);
+
+  @override
+  bool get isLLDBDebuggingEnabled => isEnabled(lldbDebugging);
 }
 
 interface class FlutterFeatureFlags extends FeatureFlags with FlutterFeatureFlagsIsEnabled {

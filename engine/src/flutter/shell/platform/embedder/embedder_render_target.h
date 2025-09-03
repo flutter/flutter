@@ -6,10 +6,10 @@
 #define FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_RENDER_TARGET_H_
 
 #include <memory>
+#include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "flutter/fml/closure.h"
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/embedder/embedder.h"
-#include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
 namespace impeller {
@@ -77,7 +77,7 @@ class EmbedderRenderTarget {
   ///
   /// @return     The size of the render target.
   ///
-  virtual SkISize GetRenderTargetSize() const = 0;
+  virtual DlISize GetRenderTargetSize() const = 0;
 
   //----------------------------------------------------------------------------
   /// @brief      The embedder backing store descriptor. This is the descriptor

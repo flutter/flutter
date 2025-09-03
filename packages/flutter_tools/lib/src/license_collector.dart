@@ -8,10 +8,10 @@ import 'base/file_system.dart';
 
 /// Processes dependencies into a string representing the NOTICES file.
 ///
-/// Reads the NOTICES or LICENSE file from each package in the .packages file,
-/// splitting each one into each component license so that it can be de-duped
-/// if possible. If the NOTICES file exists, it is preferred over the LICENSE
-/// file.
+/// Reads the NOTICES or LICENSE file from each package in the
+/// package_config.json file, splitting each one into each component license so
+/// that it can be de-duped if possible. If the NOTICES file exists, it is
+/// preferred over the LICENSE file.
 ///
 /// Individual licenses inside each LICENSE file should be separated by 80
 /// hyphens on their own on a line.

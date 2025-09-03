@@ -67,7 +67,9 @@ FakePlatform _kNoColorTerminalMacOSPlatform() => FakePlatform.fromPlatform(const
   ..stdoutSupportsAnsi = false
   ..operatingSystem = 'macos';
 
-final noColorTerminalOverride = <Type, Generator>{Platform: _kNoColorTerminalPlatform};
+final Map<Type, FakePlatform Function()> noColorTerminalOverride = {
+  Platform: _kNoColorTerminalPlatform,
+};
 
 const samplesIndexJson = '''
 [
@@ -166,7 +168,7 @@ void main() {
         );
       }, getCurrentDirectory: () => workingDir);
     },
-    overrides: <Type, Generator>{Logger: () => BufferLogger.test()},
+    overrides: {Logger: () => BufferLogger.test()},
     skip: !io.Platform.isWindows, // [intended] relies on Windows file system
   );
 
@@ -213,7 +215,7 @@ void main() {
       // Check that the tests run clean
       return _runFlutterTest(projectDir);
     },
-    overrides: <Type, Generator>{
+    overrides: {
       Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: logger,
@@ -245,7 +247,7 @@ void main() {
         ],
       );
     },
-    overrides: <Type, Generator>{
+    overrides: {
       Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -281,7 +283,7 @@ void main() {
       );
       return _runFlutterTest(projectDir);
     },
-    overrides: <Type, Generator>{
+    overrides: {
       Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -308,7 +310,7 @@ void main() {
         throwsToolExit(message: 'Sorry, unable to detect the type of project to recreate'),
       );
     },
-    overrides: <Type, Generator>{
+    overrides: {
       Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -336,7 +338,7 @@ void main() {
       expect(exec.exitCode, 2);
       expect(exec.stderr, contains('Cannot create a project within the Flutter SDK'));
     },
-    overrides: <Type, Generator>{
+    overrides: {
       Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -368,7 +370,7 @@ void main() {
         unexpectedPaths: <String>['.android/', '.ios/'],
       );
     },
-    overrides: <Type, Generator>{
+    overrides: {
       Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -399,7 +401,7 @@ void main() {
         unexpectedPaths: <String>['.android/', '.ios/'],
       );
     },
-    overrides: <Type, Generator>{
+    overrides: {
       Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -427,7 +429,7 @@ void main() {
         ],
       );
     },
-    overrides: <Type, Generator>{
+    overrides: {
       Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -466,7 +468,7 @@ void main() {
         ],
       );
     },
-    overrides: <Type, Generator>{
+    overrides: {
       Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -499,7 +501,7 @@ void main() {
         ],
       );
     },
-    overrides: <Type, Generator>{
+    overrides: {
       Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -552,7 +554,7 @@ void main() {
       );
       return _runFlutterTest(projectDir);
     },
-    overrides: <Type, Generator>{
+    overrides: {
       Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -587,7 +589,7 @@ void main() {
       );
       return _runFlutterTest(projectDir.childDirectory('example'));
     },
-    overrides: <Type, Generator>{
+    overrides: {
       Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -618,7 +620,7 @@ void main() {
       expect(web['fileName'], 'flutter_project_web.dart');
       expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
     },
-    overrides: <Type, Generator>{
+    overrides: {
       FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
       Pub: () => Pub.test(
         fileSystem: globals.fs,
@@ -651,7 +653,7 @@ void main() {
       final pathDependency = pubspec.dependencies[pluginName]! as PathDependency;
       expect(pathDependency.path, '../');
     },
-    overrides: <Type, Generator>{
+    overrides: {
       Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -673,7 +675,7 @@ void main() {
       );
       return _runFlutterTest(projectDir.childDirectory('example'));
     },
-    overrides: <Type, Generator>{
+    overrides: {
       Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -724,7 +726,7 @@ void main() {
         ],
       );
     },
-    overrides: <Type, Generator>{
+    overrides: {
       // Test flags disable Swift Package Manager.
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
     },
@@ -761,7 +763,7 @@ void main() {
         ],
       );
     },
-    overrides: <Type, Generator>{
+    overrides: {
       FeatureFlags: () =>
           TestFeatureFlags(isSwiftPackageManagerEnabled: true, isMacOSEnabled: true),
     },
@@ -787,9 +789,7 @@ void main() {
         ],
       );
     },
-    overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
-    },
+    overrides: {FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true)},
   );
 
   testUsingContext('plugin project with custom org', () async {
@@ -934,7 +934,7 @@ void main() {
         ],
       );
     },
-    overrides: <Type, Generator>{
+    overrides: {
       Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -1006,7 +1006,7 @@ void main() {
         ),
       );
     },
-    overrides: <Type, Generator>{Logger: () => logger},
+    overrides: {Logger: () => logger},
   );
 
   testUsingContext('app supports android and ios by default', () async {
@@ -1017,7 +1017,7 @@ void main() {
 
     expect(projectDir.childDirectory('android'), exists);
     expect(projectDir.childDirectory('ios'), exists);
-  }, overrides: <Type, Generator>{});
+  }, overrides: {});
 
   testUsingContext(
     'app does not include android if disabled in config',
@@ -1029,7 +1029,7 @@ void main() {
 
       expect(projectDir.childDirectory('android'), isNot(exists));
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(isAndroidEnabled: false)},
+    overrides: {FeatureFlags: () => TestFeatureFlags(isAndroidEnabled: false)},
   );
 
   testUsingContext(
@@ -1042,7 +1042,7 @@ void main() {
 
       expect(projectDir.childDirectory('ios'), isNot(exists));
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(isIOSEnabled: false)},
+    overrides: {FeatureFlags: () => TestFeatureFlags(isIOSEnabled: false)},
   );
 
   testUsingContext(
@@ -1058,7 +1058,7 @@ void main() {
       expect(projectDir.childDirectory('windows'), isNot(exists));
       expect(projectDir.childDirectory('web'), isNot(exists));
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()},
+    overrides: {FeatureFlags: () => TestFeatureFlags()},
   );
 
   testUsingContext(
@@ -1078,7 +1078,7 @@ void main() {
       expect(projectDir.childDirectory('example').childDirectory('windows'), isNot(exists));
       expect(projectDir.childDirectory('example').childDirectory('web'), isNot(exists));
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()},
+    overrides: {FeatureFlags: () => TestFeatureFlags()},
   );
 
   testUsingContext(
@@ -1097,10 +1097,7 @@ void main() {
       expect(projectDir.childDirectory('web'), isNot(exists));
       expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
     },
-    overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-      Logger: () => logger,
-    },
+    overrides: {FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true), Logger: () => logger},
   );
 
   testUsingContext(
@@ -1132,10 +1129,7 @@ void main() {
       );
       expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
     },
-    overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-      Logger: () => logger,
-    },
+    overrides: {FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true), Logger: () => logger},
   );
 
   testUsingContext(
@@ -1154,10 +1148,7 @@ void main() {
       expect(projectDir.childDirectory('web'), isNot(exists));
       expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
     },
-    overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
-      Logger: () => logger,
-    },
+    overrides: {FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true), Logger: () => logger},
   );
 
   testUsingContext(
@@ -1189,10 +1180,7 @@ void main() {
       );
       expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
     },
-    overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
-      Logger: () => logger,
-    },
+    overrides: {FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true), Logger: () => logger},
   );
 
   testUsingContext(
@@ -1211,10 +1199,7 @@ void main() {
       expect(projectDir.childDirectory('web'), isNot(exists));
       expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
     },
-    overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
-      Logger: () => logger,
-    },
+    overrides: {FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true), Logger: () => logger},
   );
 
   testUsingContext(
@@ -1235,7 +1220,7 @@ void main() {
       expect(contents, contains('"FileDescription", "flutter_project"'));
       expect(contents, contains('"ProductName", "flutter_project"'));
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true)},
+    overrides: {FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true)},
   );
 
   testUsingContext(
@@ -1267,10 +1252,7 @@ void main() {
       );
       expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
     },
-    overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
-      Logger: () => logger,
-    },
+    overrides: {FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true), Logger: () => logger},
   );
 
   testUsingContext(
@@ -1289,10 +1271,7 @@ void main() {
       expect(projectDir.childDirectory('windows'), isNot(exists));
       expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
     },
-    overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-      Logger: () => logger,
-    },
+    overrides: {FeatureFlags: () => TestFeatureFlags(isWebEnabled: true), Logger: () => logger},
   );
 
   testUsingContext('app creates maskable icons for web', () async {
@@ -1450,10 +1429,7 @@ void main() {
       expect(sdkMetaContents, contains('<root url="file:/'));
       expect(sdkMetaContents, contains('/bin/cache/dart-sdk/lib/core"'));
     },
-    overrides: <Type, Generator>{
-      FlutterVersion: () => fakeFlutterVersion,
-      Platform: _kNoColorTerminalPlatform,
-    },
+    overrides: {FlutterVersion: () => fakeFlutterVersion, Platform: _kNoColorTerminalPlatform},
   );
 
   testUsingContext(
@@ -1557,10 +1533,7 @@ void main() {
       expect(sdkMetaContents, contains('<root url="file:/'));
       expect(sdkMetaContents, contains('/bin/cache/dart-sdk/lib/core"'));
     },
-    overrides: <Type, Generator>{
-      FlutterVersion: () => fakeFlutterVersion,
-      Platform: _kNoColorTerminalPlatform,
-    },
+    overrides: {FlutterVersion: () => fakeFlutterVersion, Platform: _kNoColorTerminalPlatform},
   );
 
   testUsingContext(
@@ -1618,7 +1591,7 @@ void main() {
       final String xcodeProject = xcodeProjectFile.readAsStringSync();
       expect(xcodeProject, contains('DEVELOPMENT_TEAM = 3333CCCC33;'));
     },
-    overrides: <Type, Generator>{
+    overrides: {
       FlutterVersion: () => fakeFlutterVersion,
       Java: () => null,
       Platform: _kNoColorTerminalMacOSPlatform,
@@ -1694,7 +1667,7 @@ void main() {
       );
       expect(displayName, 'My Project');
     },
-    overrides: <Type, Generator>{
+    overrides: {
       Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -1753,7 +1726,7 @@ void main() {
         contains('The "ios-language" option is only supported for "--template=plugin".'),
       );
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
+    overrides: {FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
   );
 
   testUsingContext(
@@ -1778,7 +1751,7 @@ void main() {
       );
       expect(logger.warningText, contains('https://github.com/flutter/flutter/issues/169683'));
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
+    overrides: {FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
   );
 
   testUsingContext(
@@ -1842,7 +1815,7 @@ void main() {
       );
       expectExists(projectSharedData.childFile('IDEWorkspaceChecks.plist').path);
     },
-    overrides: <Type, Generator>{
+    overrides: {
       Platform: _kNoColorTerminalPlatform,
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
     },
@@ -1907,7 +1880,7 @@ void main() {
       expect(project.android.applicationId, 'flutter_project.untitled');
       expect(project.linux.applicationId, 'flutter_project.untitled');
     },
-    overrides: <Type, Generator>{
+    overrides: {
       FlutterVersion: () => fakeFlutterVersion,
       Platform: _kNoColorTerminalPlatform,
       FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
@@ -2029,7 +2002,7 @@ void main() {
         '.android/app/src/main/java/com/bar/foo/flutter_project/host/MainActivity.java',
       ]);
     },
-    overrides: <Type, Generator>{
+    overrides: {
       Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -2057,7 +2030,7 @@ void main() {
         'com.bar.foo.flutterProject',
       );
     },
-    overrides: <Type, Generator>{
+    overrides: {
       Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -2150,7 +2123,7 @@ void main() {
         'com.bar.foo.flutterProjectExample',
       );
     },
-    overrides: <Type, Generator>{
+    overrides: {
       // Test flags disable Swift Package Manager.
       FeatureFlags: () => TestFeatureFlags(),
     },
@@ -2201,9 +2174,7 @@ void main() {
         'com.bar.foo.flutterProjectExample',
       );
     },
-    overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
-    },
+    overrides: {FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true)},
   );
 
   testUsingContext('fails to re-gen without specified org when org is ambiguous', () async {
@@ -2277,7 +2248,7 @@ void main() {
         ],
       );
     },
-    overrides: <Type, Generator>{
+    overrides: {
       Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -2321,7 +2292,7 @@ void main() {
         ),
       );
     },
-    overrides: <Type, Generator>{
+    overrides: {
       ProcessManager: () => loggingProcessManager,
       Pub: () => Pub.test(
         fileSystem: globals.fs,
@@ -2441,7 +2412,7 @@ void main() {
         contains('void main() {}'),
       );
     },
-    overrides: <Type, Generator>{
+    overrides: {
       HttpClientFactory: () {
         return () {
           return FakeHttpClient.list(<FakeRequest>[
@@ -2468,7 +2439,7 @@ void main() {
         contains('String?'), // uses null-safe syntax
       );
     },
-    overrides: <Type, Generator>{
+    overrides: {
       HttpClientFactory: () {
         return () {
           return FakeHttpClient.list(<FakeRequest>[
@@ -2499,7 +2470,7 @@ void main() {
       expect(expectedFile, exists);
       expect(expectedFile.readAsStringSync(), equals(samplesIndexJson));
     },
-    overrides: <Type, Generator>{
+    overrides: {
       HttpClientFactory: () {
         return () {
           return FakeHttpClient.list(<FakeRequest>[
@@ -2526,7 +2497,7 @@ void main() {
         throwsToolExit(exitCode: 2, message: 'Unable to download samples'),
       );
     },
-    overrides: <Type, Generator>{
+    overrides: {
       HttpClientFactory: () {
         return () {
           return FakeHttpClient.list(<FakeRequest>[
@@ -2551,7 +2522,7 @@ void main() {
       );
       expect(globals.fs.file(outputFile), isNot(exists));
     },
-    overrides: <Type, Generator>{
+    overrides: {
       HttpClientFactory: () {
         return () {
           return FakeHttpClient.list(<FakeRequest>[
@@ -2593,43 +2564,35 @@ void main() {
         unexpectedPlatforms: <String>['ios', 'android', 'web', 'linux', 'windows', 'macos'],
       );
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()},
+    overrides: {FeatureFlags: () => TestFeatureFlags()},
   );
 
-  testUsingContext(
-    'plugin creates platform interface by default',
-    () async {
-      final command = CreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
+  testUsingContext('plugin creates platform interface by default', () async {
+    final command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
 
-      expect(
-        projectDir.childDirectory('lib').childFile('flutter_project_method_channel.dart'),
-        exists,
-      );
-      expect(
-        projectDir.childDirectory('lib').childFile('flutter_project_platform_interface.dart'),
-        exists,
-      );
-    },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()},
-  );
+    expect(
+      projectDir.childDirectory('lib').childFile('flutter_project_method_channel.dart'),
+      exists,
+    );
+    expect(
+      projectDir.childDirectory('lib').childFile('flutter_project_platform_interface.dart'),
+      exists,
+    );
+  }, overrides: {FeatureFlags: () => TestFeatureFlags()});
 
-  testUsingContext(
-    'plugin passes analysis and unit tests',
-    () async {
-      final command = CreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
+  testUsingContext('plugin passes analysis and unit tests', () async {
+    final command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
 
-      await _getPackages(projectDir);
-      await analyzeProject(projectDir.path);
-      await _runFlutterTest(projectDir);
-    },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()},
-  );
+    await _getPackages(projectDir);
+    await analyzeProject(projectDir.path);
+    await _runFlutterTest(projectDir);
+  }, overrides: {FeatureFlags: () => TestFeatureFlags()});
 
   testUsingContext('plugin example passes analysis and unit tests', () async {
     final command = CreateCommand();
@@ -2668,7 +2631,7 @@ void main() {
       );
       expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
+    overrides: {FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
   );
 
   testUsingContext(
@@ -2696,7 +2659,7 @@ void main() {
       );
       expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
+    overrides: {FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
   );
 
   testUsingContext(
@@ -2727,10 +2690,7 @@ void main() {
       await analyzeProject(projectDir.path);
       await _runFlutterTest(projectDir);
     },
-    overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-      Logger: () => logger,
-    },
+    overrides: {FeatureFlags: () => TestFeatureFlags(isWebEnabled: true), Logger: () => logger},
   );
 
   testUsingContext(
@@ -2755,48 +2715,40 @@ void main() {
       );
       expect(logger.errorText, contains(_kNoPlatformsMessage));
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
+    overrides: {FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
   );
 
-  testUsingContext(
-    'create an empty plugin, then add ios',
-    () async {
-      final command = CreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
-      await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
-      await runner.run(<String>[
-        'create',
-        '--no-pub',
-        '--template=plugin',
-        '--platform=ios',
-        projectDir.path,
-      ]);
+  testUsingContext('create an empty plugin, then add ios', () async {
+    final command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+    await runner.run(<String>[
+      'create',
+      '--no-pub',
+      '--template=plugin',
+      '--platform=ios',
+      projectDir.path,
+    ]);
 
-      expect(projectDir.childDirectory('ios'), exists);
-      expect(projectDir.childDirectory('example').childDirectory('ios'), exists);
-    },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()},
-  );
+    expect(projectDir.childDirectory('ios'), exists);
+    expect(projectDir.childDirectory('example').childDirectory('ios'), exists);
+  }, overrides: {FeatureFlags: () => TestFeatureFlags()});
 
-  testUsingContext(
-    'create an empty plugin, then add android',
-    () async {
-      final command = CreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
-      await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
-      await runner.run(<String>[
-        'create',
-        '--no-pub',
-        '--template=plugin',
-        '--platform=android',
-        projectDir.path,
-      ]);
+  testUsingContext('create an empty plugin, then add android', () async {
+    final command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+    await runner.run(<String>[
+      'create',
+      '--no-pub',
+      '--template=plugin',
+      '--platform=android',
+      projectDir.path,
+    ]);
 
-      expect(projectDir.childDirectory('android'), exists);
-      expect(projectDir.childDirectory('example').childDirectory('android'), exists);
-    },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()},
-  );
+    expect(projectDir.childDirectory('android'), exists);
+    expect(projectDir.childDirectory('example').childDirectory('android'), exists);
+  }, overrides: {FeatureFlags: () => TestFeatureFlags()});
 
   testUsingContext(
     'create an empty plugin, then add linux',
@@ -2815,7 +2767,7 @@ void main() {
       expect(projectDir.childDirectory('linux'), exists);
       expect(projectDir.childDirectory('example').childDirectory('linux'), exists);
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true)},
+    overrides: {FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true)},
   );
 
   testUsingContext(
@@ -2835,7 +2787,7 @@ void main() {
       expect(projectDir.childDirectory('macos'), exists);
       expect(projectDir.childDirectory('example').childDirectory('macos'), exists);
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true)},
+    overrides: {FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true)},
   );
 
   testUsingContext(
@@ -2855,7 +2807,7 @@ void main() {
       expect(projectDir.childDirectory('windows'), exists);
       expect(projectDir.childDirectory('example').childDirectory('windows'), exists);
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true)},
+    overrides: {FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true)},
   );
 
   testUsingContext(
@@ -2874,7 +2826,7 @@ void main() {
 
       expect(projectDir.childDirectory('lib').childFile('flutter_project_web.dart'), exists);
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(isWebEnabled: true)},
+    overrides: {FeatureFlags: () => TestFeatureFlags(isWebEnabled: true)},
   );
 
   testUsingContext(
@@ -2910,7 +2862,7 @@ void main() {
       expect(projectDir.childDirectory('ios'), exists);
       expect(projectDir.childDirectory('example').childDirectory('ios'), exists);
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true)},
+    overrides: {FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true)},
   );
 
   testUsingContext('create a plugin with ios and android', () async {
@@ -2970,10 +2922,7 @@ void main() {
         exists,
       );
     },
-    overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
-      Logger: () => logger,
-    },
+    overrides: {FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true), Logger: () => logger},
   );
 
   testUsingContext(
@@ -3004,7 +2953,7 @@ void main() {
         exists,
       );
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
+    overrides: {FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
   );
 
   testUsingContext(
@@ -3037,7 +2986,7 @@ void main() {
         exists,
       );
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
+    overrides: {FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
   );
 
   testUsingContext(
@@ -3065,7 +3014,7 @@ void main() {
         exists,
       );
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
+    overrides: {FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
   );
 
   testUsingContext(
@@ -3090,10 +3039,7 @@ void main() {
         exists,
       );
     },
-    overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
-      Logger: () => logger,
-    },
+    overrides: {FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true), Logger: () => logger},
   );
 
   testUsingContext(
@@ -3118,10 +3064,7 @@ void main() {
         exists,
       );
     },
-    overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-      Logger: () => logger,
-    },
+    overrides: {FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true), Logger: () => logger},
   );
 
   testUsingContext('create a module with --platforms throws error.', () async {
@@ -3170,7 +3113,7 @@ void main() {
         throwsToolExit(message: 'The "--platforms" argument is not supported', exitCode: 2),
       );
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true)},
+    overrides: {FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true)},
   );
 
   testUsingContext('create a plugin with android, delete then re-create folders', () async {
@@ -3234,7 +3177,7 @@ void main() {
       expect(projectDir.childDirectory('windows'), exists);
       expect(projectDir.childDirectory('example').childDirectory('windows'), exists);
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true)},
+    overrides: {FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true)},
   );
 
   testUsingContext(
@@ -3273,7 +3216,7 @@ void main() {
       expect(projectDir.childDirectory('windows'), isNot(exists));
       expect(projectDir.childDirectory('example').childDirectory('windows'), isNot(exists));
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true)},
+    overrides: {FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true)},
   );
 
   testUsingContext(
@@ -3293,7 +3236,7 @@ void main() {
       expect(projectDir.childDirectory('linux'), isNot(exists));
       expect(projectDir.childDirectory('example').childDirectory('linux'), isNot(exists));
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true)},
+    overrides: {FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true)},
   );
 
   testUsingContext(
@@ -3312,7 +3255,7 @@ void main() {
       await runner.run(<String>['create', '--no-pub', projectDir.path]);
       expect(projectDir.childDirectory('lib').childFile('flutter_project_web.dart'), isNot(exists));
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(isWebEnabled: true)},
+    overrides: {FeatureFlags: () => TestFeatureFlags(isWebEnabled: true)},
   );
 
   testUsingContext(
@@ -3332,7 +3275,7 @@ void main() {
       expect(projectDir.childDirectory('macos'), isNot(exists));
       expect(projectDir.childDirectory('example').childDirectory('macos'), isNot(exists));
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true)},
+    overrides: {FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true)},
   );
 
   testUsingContext(
@@ -3369,7 +3312,7 @@ void main() {
       await runner.run(<String>['create', '--no-pub', projectDir.path]);
       expect(logger.statusText, contains('Your example app code is in $relativeExamplePath.\n'));
     },
-    overrides: <Type, Generator>{Logger: () => logger},
+    overrides: {Logger: () => logger},
   );
 
   testUsingContext(
@@ -3395,7 +3338,7 @@ void main() {
         ),
       );
     },
-    overrides: <Type, Generator>{Logger: () => logger},
+    overrides: {Logger: () => logger},
   );
 
   testUsingContext(
@@ -3430,7 +3373,7 @@ void main() {
         contains('You need to update $relativePluginPath/pubspec.yaml to support android.\n'),
       );
     },
-    overrides: <Type, Generator>{Logger: () => logger},
+    overrides: {Logger: () => logger},
   );
 
   testUsingContext('newly created plugin has min flutter sdk version as 3.3.0', () async {
@@ -3707,7 +3650,7 @@ void main() {
       const expectedHostNameSpace = 'namespace = "com.bar.foo.flutter_project.host"';
       expect(moduleAppBuildGradleFileContent.contains(expectedHostNameSpace), true);
     },
-    overrides: <Type, Generator>{
+    overrides: {
       Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -3754,7 +3697,7 @@ void main() {
       expect(cmakeContents, contains('"$classFilenameBase.cc"'));
       expect(cmakeContents, contains('set(PLUGIN_NAME "foo_BarBaz_plugin")'));
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true)},
+    overrides: {FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true)},
   );
 
   testUsingContext(
@@ -3808,7 +3751,7 @@ void main() {
       expect(cmakeContents, contains('"include/$projectName/${classFilenameBase}_c_api.h"'));
       expect(cmakeContents, contains('set(PLUGIN_NAME "foo_BarBaz_plugin")'));
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true)},
+    overrides: {FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true)},
   );
 
   testUsingContext(
@@ -3850,7 +3793,7 @@ void main() {
       // builds.
       expect(cmakeContents, contains('set(PLUGIN_NAME "foo_bar_plugin_plugin")'));
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true)},
+    overrides: {FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true)},
   );
 
   testUsingContext(
@@ -3904,7 +3847,7 @@ void main() {
       // builds.
       expect(cmakeContents, contains('set(PLUGIN_NAME "foo_bar_plugin_plugin")'));
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true)},
+    overrides: {FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true)},
   );
 
   testUsingContext(
@@ -3926,7 +3869,7 @@ void main() {
         contains('For more information, see https://flutter.dev/to/pubspec-plugin-platforms.'),
       );
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
+    overrides: {FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
   );
 
   testUsingContext(
@@ -3948,7 +3891,7 @@ void main() {
         contains('For more information, see https://flutter.dev/to/pubspec-plugin-platforms.'),
       );
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
+    overrides: {FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
   );
 
   testUsingContext(
@@ -3967,7 +3910,7 @@ void main() {
       await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
       expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
+    overrides: {FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
   );
 
   testUsingContext(
@@ -3986,7 +3929,7 @@ void main() {
       await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
       expect(logger.statusText, contains(_kDisabledPlatformRequestedMessage));
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
+    overrides: {FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
   );
 
   testUsingContext(
@@ -4005,10 +3948,7 @@ void main() {
       await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
       expect(logger.statusText, isNot(contains(_kDisabledPlatformRequestedMessage)));
     },
-    overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
-      Logger: () => logger,
-    },
+    overrides: {FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true), Logger: () => logger},
   );
 
   testUsingContext(
@@ -4026,7 +3966,7 @@ void main() {
       await runner.run(<String>['create', '--no-pub', projectDir.path]);
       expect(logger.statusText, contains(_kDisabledPlatformRequestedMessage));
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
+    overrides: {FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
   );
 
   testUsingContext(
@@ -4045,7 +3985,7 @@ void main() {
       await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
       expect(logger.statusText, isNot(contains(_kDisabledPlatformRequestedMessage)));
     },
-    overrides: <Type, Generator>{
+    overrides: {
       FeatureFlags: () =>
           TestFeatureFlags(isWindowsEnabled: true, isAndroidEnabled: false, isIOSEnabled: false),
       Logger: () => logger,
@@ -4077,7 +4017,7 @@ void main() {
       expect(expectedFailures.length, '// LINT:'.allMatches(toAnalyze.readAsStringSync()).length);
       await analyzeProject(projectDir.path, expectedFailures: expectedFailures);
     },
-    overrides: <Type, Generator>{
+    overrides: {
       Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -4124,7 +4064,7 @@ void main() {
         throwsToolExit(message: 'The template skeleton is no longer available'),
       );
     },
-    overrides: <Type, Generator>{
+    overrides: {
       Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -4170,7 +4110,7 @@ void main() {
       expect(projectDir.childDirectory('ios'), exists);
       expect(projectDir.childDirectory('example').childDirectory('ios'), exists);
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true)},
+    overrides: {FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true)},
   );
 
   for (final template in <String>['package_ffi', 'plugin_ffi']) {
@@ -4197,9 +4137,7 @@ void main() {
           ),
         );
       },
-      overrides: <Type, Generator>{
-        FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-      },
+      overrides: {FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true)},
     );
   }
 
@@ -4236,7 +4174,7 @@ void main() {
       await runner.run(<String>['create', '--no-pub', '--template=plugin_ffi', projectDir.path]);
       expect(logger.statusText, contains(_kDisabledPlatformRequestedMessage));
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
+    overrides: {FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
   );
 
   testUsingContext(
@@ -4249,7 +4187,7 @@ void main() {
 
       expect(logger.warningText, isNot(contains(_kIncompatibleJavaVersionMessage)));
     },
-    overrides: <Type, Generator>{Java: () => null, Logger: () => logger},
+    overrides: {Java: () => null, Logger: () => logger},
   );
 
   testUsingContext('should return correct warning for incompatible Gradle versions', () async {
@@ -4365,7 +4303,7 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
         ),
       );
     },
-    overrides: <Type, Generator>{
+    overrides: {
       Java: () => FakeJava(
         version: const software.Version.withText(1000, 0, 0, '1000.0.0'),
       ), // Too high a version for template Gradle versions.
@@ -4417,7 +4355,7 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
         ),
       );
     },
-    overrides: <Type, Generator>{
+    overrides: {
       Java: () => FakeJava(
         version: const software.Version.withText(0, 0, 0, '0.0.0'),
       ), // Too low a version for template AGP versions.
@@ -4501,7 +4439,7 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
         logger.clear();
       }
     },
-    overrides: <Type, Generator>{
+    overrides: {
       Java: () => FakeJava(
         version: const software.Version.withText(500, 0, 0, '500.0.0'),
       ), // Too high a version for template Gradle versions.
@@ -4587,7 +4525,7 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
         logger.clear();
       }
     },
-    overrides: <Type, Generator>{
+    overrides: {
       Java: () => FakeJava(
         version: const software.Version.withText(1, 8, 0, '1.8.0'),
       ), // Too low a version for template AGP versions.
@@ -4644,7 +4582,7 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
         logger.clear();
       }
     },
-    overrides: <Type, Generator>{
+    overrides: {
       Java: () => FakeJava(
         version: const software.Version.withText(20, 0, 0, '20.0.0'),
       ), // Middle compatible Java version with current template AGP/Gradle versions.
@@ -4699,7 +4637,7 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
         logger.clear();
       }
     },
-    overrides: <Type, Generator>{
+    overrides: {
       Java: () => FakeJava(
         version: const software.Version.withText(17, 0, 0, '22.0.0'),
       ), // Maximum compatible Java version with current template AGP/Gradle versions.
@@ -4754,7 +4692,7 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
         logger.clear();
       }
     },
-    overrides: <Type, Generator>{
+    overrides: {
       Java: () => FakeJava(
         version: const software.Version.withText(17, 0, 0, '17.0.0'),
       ), // Minimum compatible Java version with current template AGP/Gradle versions.
@@ -4823,7 +4761,7 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
         throwsToolExit(message: 'Unable to read the template manifest at path'),
       );
     },
-    overrides: <Type, Generator>{
+    overrides: {
       FileSystem: () => MemoryFileSystem.test(
         opHandle: (String context, FileSystemOp operation) {
           if (operation == FileSystemOp.read && context.contains('template_manifest.json')) {
@@ -4852,7 +4790,7 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
 
       expect(logger.warningText, contains(expectedMessage));
     },
-    overrides: <Type, Generator>{
+    overrides: {
       Java: () => FakeJava(
         version: const software.Version.withText(500, 0, 0, '500.0.0'),
       ), // Too high a version for template Gradle versions.
@@ -4866,7 +4804,7 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
 
     await runner.run(<String>['create', '--help']);
     expect(logger.statusText, isNot(contains('--sample')));
-  }, overrides: <Type, Generator>{Logger: () => logger});
+  }, overrides: {Logger: () => logger});
 
   testUsingContext('flutter create --verbose --help shows --sample', () async {
     // Because this is an instrumented TestCommandRunner, verboseHelp is not
@@ -4876,7 +4814,30 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
 
     await runner.run(<String>['create', '--verbose', '--help']);
     expect(logger.statusText, contains('--sample'));
-  }, overrides: <Type, Generator>{Logger: () => logger});
+  }, overrides: {Logger: () => logger});
+
+  testUsingContext('suggests cd ... after creating a directory', () async {
+    final CommandRunner<void> runner = createTestCommandRunner(CreateCommand());
+    await runner.run(['create', '--no-pub', projectDir.path]);
+    final cdLine = RegExp(r'^  \$ cd .*flutter_project$', multiLine: true);
+    expect(cdLine.hasMatch(logger.statusText), isTrue);
+  }, overrides: {Logger: () => logger});
+
+  testUsingContext('omits suggesting cd ... if flutter create . was run', () async {
+    final Directory tmp = globals.fs.systemTempDirectory..createTempSync();
+    final Directory out = tmp.childDirectory('project')..createSync(recursive: true);
+
+    // This is messier than the above test because:
+    // 1. We can't create into the flutter root (prohibited, for good reason)
+    // 2. We want to pretend we're creating into a relative (not absolute) path
+    // 3. It's non-trivial to use MemoryFileSystem.test(), we need real template files
+    await io.IOOverrides.runZoned<Future<void>>(() async {
+      Cache.flutterRoot = getFlutterRoot();
+      final CommandRunner<void> runner = createTestCommandRunner(CreateCommand());
+      await runner.run(['create', '--no-pub', '.']);
+    }, getCurrentDirectory: () => out);
+    expect(logger.statusText, isNot(contains(r'  $ cd')));
+  }, overrides: {Logger: () => logger});
 }
 
 Future<void> _createProject(
@@ -4951,7 +4912,7 @@ Future<void> _runFlutterTest(Directory workingDir, {String? target}) async {
 
   await _getPackages(workingDir);
 
-  final args = <String>[flutterToolsSnapshotPath, 'test', '--no-color', if (target != null) target];
+  final args = <String>[flutterToolsSnapshotPath, 'test', '--no-color', ?target];
 
   final ProcessResult exec = await Process.run(
     globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),

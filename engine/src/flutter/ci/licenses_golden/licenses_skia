@@ -1,4 +1,4 @@
-Signature: d1096e15ec001154e1fd674754e18962
+Signature: 943b949946530e9a517ce421e0e8542d
 
 ====================================================================================================
 LIBRARY: etc1
@@ -436,6 +436,7 @@ FILE: ../../../flutter/third_party/skia/modules/skparagraph/test.html
 FILE: ../../../flutter/third_party/skia/package-lock.json
 FILE: ../../../flutter/third_party/skia/relnotes/graphite_insert_status.md
 FILE: ../../../flutter/third_party/skia/relnotes/image.md
+FILE: ../../../flutter/third_party/skia/relnotes/skfontmgr_android.md
 FILE: ../../../flutter/third_party/skia/relnotes/typeface_virtuals.md
 FILE: ../../../flutter/third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../flutter/third_party/skia/src/ports/fontations/Cargo.toml
@@ -468,7 +469,6 @@ FILE: ../../../flutter/third_party/skia/src/sksl/sksl_rt_shader.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/sksl_shared.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/sksl_vert.sksl
 FILE: ../../../flutter/third_party/skia/third_party/go.mod
-FILE: ../../../flutter/third_party/skia/toolchain/linux_trampolines/IWYU_mapping.imp
 FILE: ../../../flutter/third_party/skia/toolchain/ndk.BUILD
 FILE: ../../../flutter/third_party/skia/whitespace.txt
 ----------------------------------------------------------------------------------------------------
@@ -9898,8 +9898,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
+ORIGIN: ../../../flutter/third_party/skia/src/core/SkPathPriv.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/vk/VulkanPreferredFeatures.cpp + ../../../flutter/third_party/skia/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../flutter/third_party/skia/src/core/SkPathPriv.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/vk/VulkanPreferredFeatures.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2025 Google Inc.
@@ -9949,6 +9951,8 @@ ORIGIN: ../../../flutter/third_party/skia/modules/skunicode/include/SkUnicode_bi
 ORIGIN: ../../../flutter/third_party/skia/modules/skunicode/src/SkUnicode_bidi.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/capture/SkCaptureCanvas.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/capture/SkCaptureCanvas.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/capture/SkCaptureManager.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/capture/SkCaptureManager.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkCPUContext.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkCPUContextImpl.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkCPURecorder.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -9983,6 +9987,8 @@ FILE: ../../../flutter/third_party/skia/modules/skunicode/include/SkUnicode_bidi
 FILE: ../../../flutter/third_party/skia/modules/skunicode/src/SkUnicode_bidi.cpp
 FILE: ../../../flutter/third_party/skia/src/capture/SkCaptureCanvas.cpp
 FILE: ../../../flutter/third_party/skia/src/capture/SkCaptureCanvas.h
+FILE: ../../../flutter/third_party/skia/src/capture/SkCaptureManager.cpp
+FILE: ../../../flutter/third_party/skia/src/capture/SkCaptureManager.h
 FILE: ../../../flutter/third_party/skia/src/core/SkCPUContext.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkCPUContextImpl.h
 FILE: ../../../flutter/third_party/skia/src/core/SkCPURecorder.cpp
@@ -10039,11 +10045,15 @@ LIBRARY: skia
 ORIGIN: ../../../flutter/third_party/skia/gm/tablemaskfilter.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkPathRaw.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkPathRaw.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/core/SkPathRawShapes.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/core/SkPathRawShapes.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/tools.go + ../../../flutter/third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/third_party/skia/gm/tablemaskfilter.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkPathRaw.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkPathRaw.h
+FILE: ../../../flutter/third_party/skia/src/core/SkPathRawShapes.cpp
+FILE: ../../../flutter/third_party/skia/src/core/SkPathRawShapes.h
 FILE: ../../../flutter/third_party/skia/tools.go
 ----------------------------------------------------------------------------------------------------
 Copyright 2025 Google LLC.

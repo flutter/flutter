@@ -102,7 +102,14 @@ class Context {
 
   Directory directoryFromPath(String path) => Directory(path);
 
-  /// Run given command in a synchronous subprocess.
+  /// Run given command ([bin]) in a synchronous subprocess.
+  ///
+  /// If [allowFail] is true, an exception will not be thrown even if the process returns a
+  /// non-zero exit code. Also, `error:` will not be prefixed to the output to prevent Xcode
+  /// complication failures.
+  ///
+  /// If [skipErrorLog] is true, `stderr` from the process will not be output unless in [verbose]
+  /// mode. If in [verbose], pipes `stderr` to `stdout`.
   ///
   /// Will throw [Exception] if the exit code is not 0.
   ProcessResult runSync(
@@ -110,31 +117,42 @@ class Context {
     List<String> args, {
     bool verbose = false,
     bool allowFail = false,
+    bool skipErrorLog = false,
     String? workingDirectory,
   }) {
     if (verbose) {
       print('♦ $bin ${args.join(' ')}');
     }
-    final ProcessResult result = Process.runSync(bin, args, workingDirectory: workingDirectory);
+    final ProcessResult result = runSyncProcess(bin, args, workingDirectory: workingDirectory);
     if (verbose) {
       print((result.stdout as String).trim());
     }
     final String resultStderr = result.stderr.toString().trim();
     if (resultStderr.isNotEmpty) {
       final errorOutput = StringBuffer();
-      if (result.exitCode != 0) {
+      if (!allowFail && result.exitCode != 0) {
         // "error:" prefix makes this show up as an Xcode compilation error.
         errorOutput.write('error: ');
       }
       errorOutput.write(resultStderr);
-      echoError(errorOutput.toString());
-
+      if (skipErrorLog) {
+        // Even if skipErrorLog, we still want to write to stdout if verbose.
+        if (verbose) {
+          echo(errorOutput.toString());
+        }
+      } else {
+        echoError(errorOutput.toString());
+      }
       // Stream stderr to the Flutter build process.
       // When in verbose mode, `echoError` above will show the logs. So only
       // stream if not in verbose mode to avoid duplicate logs.
       // Also, only stream if exitCode is 0 since errors are handled separately
       // by the tool on failure.
-      if (!verbose && exitCode == 0) {
+      // Also check for `skipErrorLog`, because some errors should not be printed
+      // out. For example, on macOS 26, plutil reports NSBonjourServices key not
+      // found as an error. However, logging it in non-verbose mode would be
+      // confusing, since not having the key is one of the expected states.
+      if (!verbose && exitCode == 0 && !skipErrorLog) {
         streamOutput(errorOutput.toString());
       }
     }
@@ -142,6 +160,13 @@ class Context {
       throw Exception('Command "$bin ${args.join(' ')}" exited with code ${result.exitCode}');
     }
     return result;
+  }
+
+  // TODO(hellohuanlin): Instead of using inheritance to stub the function in
+  // the subclass, we should favor composition by injecting the dependencies.
+  // See: https://github.com/flutter/flutter/issues/173133
+  ProcessResult runSyncProcess(String bin, List<String> args, {String? workingDirectory}) {
+    return Process.runSync(bin, args, workingDirectory: workingDirectory);
   }
 
   /// Log message to stderr.
@@ -414,16 +439,17 @@ class Context {
       return;
     }
 
+    final bool verbose = (environment['VERBOSE_SCRIPT_LOGGING'] ?? '').isNotEmpty;
+
     // If there are already NSBonjourServices specified by the app (uncommon),
     // insert the vmService service name to the existing list.
-    ProcessResult result = runSync('plutil', <String>[
-      '-extract',
-      'NSBonjourServices',
-      'xml1',
-      '-o',
-      '-',
-      builtProductsPlist,
-    ], allowFail: true);
+    ProcessResult result = runSync(
+      'plutil',
+      <String>['-extract', 'NSBonjourServices', 'xml1', '-o', '-', builtProductsPlist],
+      verbose: verbose,
+      allowFail: true,
+      skipErrorLog: true,
+    );
     if (result.exitCode == 0) {
       runSync('plutil', <String>[
         '-insert',
@@ -448,14 +474,13 @@ class Context {
     // specified (uncommon). This text will appear below the "Your app would
     // like to find and connect to devices on your local network" permissions
     // popup.
-    result = runSync('plutil', <String>[
-      '-extract',
-      'NSLocalNetworkUsageDescription',
-      'xml1',
-      '-o',
-      '-',
-      builtProductsPlist,
-    ], allowFail: true);
+    result = runSync(
+      'plutil',
+      <String>['-extract', 'NSLocalNetworkUsageDescription', 'xml1', '-o', '-', builtProductsPlist],
+      verbose: verbose,
+      allowFail: true,
+      skipErrorLog: true,
+    );
     if (result.exitCode != 0) {
       runSync('plutil', <String>[
         '-insert',
@@ -515,8 +540,6 @@ class Context {
 
     final String buildMode = parseFlutterBuildMode();
 
-    _validateBuildMode(platform, buildMode);
-
     final List<String> flutterArgs = _generateFlutterArgsForAssemble(
       command: 'build',
       buildMode: buildMode,
@@ -543,53 +566,6 @@ class Context {
     streamOutput(' └─Compiling, linking and signing...');
 
     echo('Project $projectPath built and packaged successfully.');
-  }
-
-  /// Validate that the build mode targeted matches the build mode set by the
-  /// Flutter CLI.
-  /// If it doesn't match, print a warning unless the Xcode action is `install`,
-  /// which means the app is being archived for distribution. In that case, print
-  /// an error and fail the build.
-  ///
-  /// The targeted build mode might not match the one set by Flutter CLI when it
-  /// is changed and ran directly through Xcode.
-  ///
-  /// Flutter may change settings or files depending on the build mode. For
-  /// example, dev dependencies are excluded from release builds and requires
-  /// the Flutter CLI to update certain files.
-  void _validateBuildMode(TargetPlatform platform, String currentBuildMode) {
-    final String? buildModeCLILastUsed = environment['FLUTTER_CLI_BUILD_MODE'];
-
-    // Also fail the build if ACTION=install, which indicates the app is being
-    // built for distribution.
-    final String? action = environment['ACTION'];
-    final fatal = action == 'install';
-
-    if (buildModeCLILastUsed == null) {
-      final message =
-          'Your Flutter build settings are outdated. Please run '
-          '"flutter build ${platform.name} --config-only --$currentBuildMode" in your Flutter '
-          'project and try again.\n';
-      if (fatal) {
-        echoXcodeError(message);
-        exitApp(-1);
-      } else {
-        echoXcodeWarning(message);
-        return;
-      }
-    }
-    if (currentBuildMode != buildModeCLILastUsed) {
-      final message =
-          'Your Flutter project is currently configured for $buildModeCLILastUsed mode. '
-          'Please run `flutter build ${platform.name} --config-only --$currentBuildMode` '
-          'in your Flutter project to update your settings.\n';
-      if (fatal) {
-        echoXcodeError(message);
-        exitApp(-1);
-      } else {
-        echoXcodeWarning(message);
-      }
-    }
   }
 
   List<String> _generateFlutterArgsForAssemble({

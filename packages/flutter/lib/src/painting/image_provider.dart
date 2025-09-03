@@ -1250,6 +1250,7 @@ enum ResizeImagePolicy {
 ///
 ///  * [ui.FlutterView.devicePixelRatio], used to convert between physical and
 ///    logical pixels.
+@immutable
 class ResizeImage extends ImageProvider<ResizeImageKey> {
   /// Creates an ImageProvider that decodes the image to the specified size.
   ///
@@ -1462,6 +1463,25 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
     completer = Completer<ResizeImageKey>();
     return completer.future;
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is ResizeImage &&
+        imageProvider == other.imageProvider &&
+        width == other.width &&
+        height == other.height &&
+        policy == other.policy &&
+        allowUpscaling == other.allowUpscaling;
+  }
+
+  @override
+  int get hashCode => Object.hash(imageProvider, width, height, policy, allowUpscaling);
 }
 
 /// The strategy for [Image.network] and [NetworkImage] to decide whether to

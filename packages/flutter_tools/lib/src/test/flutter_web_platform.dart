@@ -57,7 +57,7 @@ shelf.Handler createDirectoryHandler(Directory directory, {required bool crossOr
     return shelf.Response.ok(
       file.openRead(),
       headers: <String, String>{
-        if (contentType != null) 'Content-Type': contentType,
+        'Content-Type': ?contentType,
         if (needsCrossOriginIsolated) ...kMultiThreadedHeaders,
       },
     );
@@ -661,7 +661,7 @@ class FlutterWebPlatform extends PlatformPlugin {
   @override
   Future<void> close() => _closeMemo.runOnce(() async {
     await Future.wait<void>(<Future<dynamic>>[
-      if (_browserManager != null) _browserManager!.close(),
+      ?_browserManager?.close(),
       _server.close(),
       _testGoldenComparator.close(),
     ]);

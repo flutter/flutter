@@ -11,5 +11,7 @@
   "searchWebButtonLabel": "ស្វែងរក​លើបណ្ដាញ",
   "shareButtonLabel": "ចែករំលែក",
   "pasteButtonLabel": "ដាក់​ចូល",
-  "selectAllButtonLabel": "ជ្រើសរើស​ទាំងអស់"
+  "selectAllButtonLabel": "ជ្រើសរើស​ទាំងអស់",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found"
 }

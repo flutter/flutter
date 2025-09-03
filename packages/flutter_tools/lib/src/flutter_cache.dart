@@ -606,7 +606,10 @@ class FlutterRunnerSDKArtifacts extends CachedArtifact {
     if (!_platform.isLinux && !_platform.isMacOS) {
       return;
     }
-    final url = '${cache.cipdBaseUrl}/flutter/fuchsia/+/git_revision:$version';
+    // Keep in sync with
+    //   engine/src/flutter/tools/fuchsia/build_fuchsia_artifacts.py
+    //   engine/src/flutter/tools/fuchsia/merge_and_upload_debug_symbols.py
+    final url = '${cache.cipdBaseUrl}/flutter/fuchsia/+/content_aware_hash:$version';
     await artifactUpdater.downloadZipArchive(
       'Downloading package flutter runner...',
       Uri.parse(url),
@@ -633,7 +636,10 @@ class CipdArchiveResolver extends VersionedPackageResolver {
 
   @override
   String resolveUrl(String packageName, String version) {
-    return '${cache.cipdBaseUrl}/flutter/$packageName/+/git_revision:$version';
+    // Keep in sync with
+    //   engine/src/flutter/tools/fuchsia/build_fuchsia_artifacts.py
+    //   engine/src/flutter/tools/fuchsia/merge_and_upload_debug_symbols.py
+    return '${cache.cipdBaseUrl}/flutter/$packageName/+/content_aware_hash:$version';
   }
 }
 

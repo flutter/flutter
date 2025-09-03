@@ -11,6 +11,7 @@ import 'src/base/template.dart';
 import 'src/base/terminal.dart';
 import 'src/base/user_messages.dart';
 import 'src/build_system/build_targets.dart';
+import 'src/build_system/targets/hook_runner_native.dart' show FlutterHookRunnerNative;
 import 'src/cache.dart';
 import 'src/commands/analyze.dart';
 import 'src/commands/assemble.dart';
@@ -47,6 +48,7 @@ import 'src/devtools_launcher.dart';
 import 'src/features.dart';
 import 'src/globals.dart' as globals;
 // Files in `isolated` are intentionally excluded from google3 tooling.
+import 'src/hook_runner.dart' show FlutterHookRunner;
 import 'src/isolated/build_targets.dart';
 import 'src/isolated/mustache_template.dart';
 import 'src/isolated/native_assets/test/native_assets.dart';
@@ -86,12 +88,7 @@ Future<void> main(List<String> args) async {
   final bool muteCommandLogging = (help || doctor) && !veryVerbose;
   final bool verboseHelp = help && verbose;
   final bool daemon = args.contains('daemon');
-  final bool runMachine =
-      (args.contains('--machine') && args.contains('run')) ||
-      (args.contains('--machine') && args.contains('attach')) ||
-      // `flutter widget-preview start` starts an application that requires a logger
-      // to be setup for machine mode.
-      (args.contains('widget-preview') && args.contains('start'));
+  final bool runMachine = args.contains('--machine');
 
   // Cache.flutterRoot must be set early because other features use it (e.g.
   // enginePath's initializer uses it). This can only work with the real
@@ -109,6 +106,7 @@ Future<void> main(List<String> args) async {
     muteCommandLogging: muteCommandLogging,
     verboseHelp: verboseHelp,
     overrides: <Type, Generator>{
+      FlutterHookRunner: () => FlutterHookRunnerNative(),
       // The web runner is not supported in google3 because it depends
       // on dwds.
       WebRunnerFactory: () => DwdsWebRunnerFactory(),
@@ -173,6 +171,7 @@ List<FlutterCommand> generateCommands({required bool verboseHelp, required bool 
             logger: globals.logger,
             fileSystem: globals.fs,
             platform: globals.platform,
+            git: globals.git,
           ),
         ],
         suppressAnalytics: !globals.analytics.okToSend,
@@ -322,7 +321,7 @@ class LoggerFactory {
       return NotifyingLogger(verbose: verbose, parent: logger);
     }
     if (machine) {
-      return AppRunLogger(parent: logger);
+      return MachineOutputLogger(parent: logger);
     }
     return logger;
   }

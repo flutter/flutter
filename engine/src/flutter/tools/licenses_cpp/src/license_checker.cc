@@ -26,8 +26,9 @@ namespace fs = std::filesystem;
 const char* LicenseChecker::kHeaderLicenseRegex = "(?i)(license|copyright)";
 
 namespace {
-const std::array<std::string_view, 5> kLicenseFileNames = {
-    "LICENSE", "LICENSE.TXT", "LICENSE.md", "LICENSE.MIT", "COPYING"};
+const std::array<std::string_view, 8> kLicenseFileNames = {
+    "LICENSE",     "LICENSE.TXT", "LICENSE.txt", "LICENSE.md",
+    "LICENSE.MIT", "COPYING",     "License.txt", "docs/FTL.TXT"};
 
 RE2 kHeaderLicense(LicenseChecker::kHeaderLicenseRegex);
 
@@ -138,11 +139,22 @@ struct Package {
   bool is_root_package;
 };
 
+/// This makes sure trailing slashes on paths are treated the same.
+/// Example:
+///   f("/foo/") == f("/foo") == "foo"
+std::string GetDirFilename(const fs::path& working_dir) {
+  std::string result = working_dir.filename();
+  if (result.empty()) {
+    result = working_dir.parent_path().filename();
+  }
+  return result;
+}
+
 Package GetPackage(const Data& data,
                    const fs::path& working_dir,
                    const fs::path& relative_path) {
   Package result = {
-      .name = working_dir.filename(),
+      .name = GetDirFilename(working_dir),
       .license_file = FindLicense(data, working_dir, "."),
       .is_root_package = true,
   };
@@ -218,8 +230,8 @@ absl::Status MatchLicenseFile(const fs::path& path,
 
     if (matches.ok()) {
       for (const Catalog::Match& match : matches.value()) {
-        license_map->Add(package.name, match.matched_text);
-        VLOG(1) << "OK: " << path << " : " << match.matcher;
+        license_map->Add(package.name, match.GetMatchedText());
+        VLOG(1) << "OK: " << path << " : " << match.GetMatcher();
       }
     } else {
       return absl::NotFoundError(
@@ -261,9 +273,9 @@ bool ProcessSourceCode(const fs::path& relative_path,
           if (matches.ok()) {
             did_find_copyright = true;
             for (const Catalog::Match& match : matches.value()) {
-              license_map->Add(package.name, match.matched_text);
+              license_map->Add(package.name, match.GetMatchedText());
               VLOG(1) << "OK: " << relative_path.lexically_normal() << " : "
-                      << match.matcher;
+                      << match.GetMatcher();
             }
           } else {
             if (flags.treat_unmatched_comments_as_errors) {
@@ -324,15 +336,17 @@ bool ProcessNotices(const fs::path& relative_path,
   while (RE2::FindAndConsume(&input, regex, &projects_text, &license)) {
     std::vector<std::string_view> projects = SplitLines(projects_text);
 
+    VLOG(4) << license;
+
     absl::StatusOr<std::vector<Catalog::Match>> matches =
         data.catalog.FindMatch(license);
     if (matches.ok()) {
       for (const Catalog::Match& match : matches.value()) {
         for (std::string_view project : projects) {
-          license_map->Add(project, match.matched_text);
+          license_map->Add(project, match.GetMatchedText());
         }
         VLOG(1) << "OK: " << relative_path.lexically_normal() << " : "
-                << match.matcher;
+                << match.GetMatcher();
       }
     } else {
       VLOG(2) << "NOT_FOUND: " << relative_path.lexically_normal() << " : "
@@ -363,8 +377,8 @@ absl::Status ProcessFile(const fs::path& working_dir_path,
       &state->seen_license_files;
 
   bool did_find_copyright = false;
-  fs::path relative_path = fs::relative(full_path, working_dir_path);
-  VLOG(2) << relative_path;
+  fs::path relative_path = full_path.lexically_relative(working_dir_path);
+  VLOG(2) << "Process: " << relative_path;
   if (!data.include_filter.Matches(relative_path.string()) ||
       data.exclude_filter.Matches(relative_path.string())) {
     VLOG(1) << "EXCLUDE: " << relative_path.lexically_normal();
@@ -382,6 +396,8 @@ absl::Status ProcessFile(const fs::path& working_dir_path,
         errors->emplace_back(std::move(match_status));
       }
     }
+  } else {
+    VLOG(3) << "No license file: " << relative_path.lexically_normal();
   }
 
   absl::StatusOr<MMapFile> file = MMapFile::Make(full_path.string());
@@ -411,7 +427,7 @@ absl::Status ProcessFile(const fs::path& working_dir_path,
                                 relative_path.lexically_normal().string()));
       } else {
         fs::path relative_license_path =
-            fs::relative(*package.license_file, working_dir_path);
+            package.license_file->lexically_relative(working_dir_path);
         VLOG(1) << "OK: " << relative_path.lexically_normal()
                 << " : dir license(" << relative_license_path.lexically_normal()
                 << ")";
@@ -454,9 +470,9 @@ std::vector<absl::Status> LicenseChecker::Run(
     std::ostream& licenses,
     const Data& data,
     const LicenseChecker::Flags& flags) {
-  std::vector<fs::path> git_repos = GetGitRepos(working_dir);
   fs::path working_dir_path =
       fs::absolute(fs::path(working_dir)).lexically_normal();
+  std::vector<fs::path> git_repos = GetGitRepos(working_dir_path.string());
 
   size_t count = 0;
   ProcessState state;
@@ -584,8 +600,12 @@ int LicenseChecker::FileRun(std::string_view working_dir,
   }
 
   ProcessState state;
-  absl::Status process_result = ProcessFile(working_dir, licenses, data.value(),
-                                            full_path, flags, &state);
+  fs::path working_dir_path =
+      fs::absolute(fs::path(working_dir)).lexically_normal();
+  fs::path absolute_full_path = fs::absolute(fs::path(full_path));
+  absl::Status process_result =
+      ProcessFile(working_dir_path, licenses, data.value(), absolute_full_path,
+                  flags, &state);
 
   if (!process_result.ok()) {
     std::cerr << process_result << std::endl;

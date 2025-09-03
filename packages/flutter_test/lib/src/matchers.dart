@@ -879,7 +879,7 @@ Matcher containsSemantics({
   int? platformViewId,
   int? maxValueLength,
   int? currentValueLength,
-  SemanticsValidationResult validationResult = SemanticsValidationResult.none,
+  SemanticsValidationResult? validationResult,
   ui.SemanticsInputType? inputType,
   // Flags
   bool? hasCheckedState,
@@ -2455,70 +2455,62 @@ class _MatchesSemanticsData extends Matcher {
     required this.customActions,
     required this.children,
   }) : flags = <SemanticsFlag, bool>{
-         if (hasCheckedState != null) SemanticsFlag.hasCheckedState: hasCheckedState,
-         if (isChecked != null) SemanticsFlag.isChecked: isChecked,
-         if (isCheckStateMixed != null) SemanticsFlag.isCheckStateMixed: isCheckStateMixed,
-         if (isSelected != null) SemanticsFlag.isSelected: isSelected,
-         if (hasSelectedState != null) SemanticsFlag.hasSelectedState: hasSelectedState,
-         if (isButton != null) SemanticsFlag.isButton: isButton,
-         if (isSlider != null) SemanticsFlag.isSlider: isSlider,
-         if (isKeyboardKey != null) SemanticsFlag.isKeyboardKey: isKeyboardKey,
-         if (isLink != null) SemanticsFlag.isLink: isLink,
-         if (isTextField != null) SemanticsFlag.isTextField: isTextField,
-         if (isReadOnly != null) SemanticsFlag.isReadOnly: isReadOnly,
-         if (isFocused != null) SemanticsFlag.isFocused: isFocused,
-         if (isFocusable != null) SemanticsFlag.isFocusable: isFocusable,
-         if (hasEnabledState != null) SemanticsFlag.hasEnabledState: hasEnabledState,
-         if (isEnabled != null) SemanticsFlag.isEnabled: isEnabled,
-         if (isInMutuallyExclusiveGroup != null)
-           SemanticsFlag.isInMutuallyExclusiveGroup: isInMutuallyExclusiveGroup,
-         if (isHeader != null) SemanticsFlag.isHeader: isHeader,
-         if (isObscured != null) SemanticsFlag.isObscured: isObscured,
-         if (isMultiline != null) SemanticsFlag.isMultiline: isMultiline,
-         if (namesRoute != null) SemanticsFlag.namesRoute: namesRoute,
-         if (scopesRoute != null) SemanticsFlag.scopesRoute: scopesRoute,
-         if (isHidden != null) SemanticsFlag.isHidden: isHidden,
-         if (isImage != null) SemanticsFlag.isImage: isImage,
-         if (isLiveRegion != null) SemanticsFlag.isLiveRegion: isLiveRegion,
-         if (hasToggledState != null) SemanticsFlag.hasToggledState: hasToggledState,
-         if (isToggled != null) SemanticsFlag.isToggled: isToggled,
-         if (hasImplicitScrolling != null) SemanticsFlag.hasImplicitScrolling: hasImplicitScrolling,
-         if (isSlider != null) SemanticsFlag.isSlider: isSlider,
-         if (hasExpandedState != null) SemanticsFlag.hasExpandedState: hasExpandedState,
-         if (isExpanded != null) SemanticsFlag.isExpanded: isExpanded,
-         if (hasRequiredState != null) SemanticsFlag.hasRequiredState: hasRequiredState,
-         if (isRequired != null) SemanticsFlag.isRequired: isRequired,
+         SemanticsFlag.hasCheckedState: ?hasCheckedState,
+         SemanticsFlag.isChecked: ?isChecked,
+         SemanticsFlag.isCheckStateMixed: ?isCheckStateMixed,
+         SemanticsFlag.isSelected: ?isSelected,
+         SemanticsFlag.hasSelectedState: ?hasSelectedState,
+         SemanticsFlag.isButton: ?isButton,
+         SemanticsFlag.isSlider: ?isSlider,
+         SemanticsFlag.isKeyboardKey: ?isKeyboardKey,
+         SemanticsFlag.isLink: ?isLink,
+         SemanticsFlag.isTextField: ?isTextField,
+         SemanticsFlag.isReadOnly: ?isReadOnly,
+         SemanticsFlag.isFocused: ?isFocused,
+         SemanticsFlag.isFocusable: ?isFocusable,
+         SemanticsFlag.hasEnabledState: ?hasEnabledState,
+         SemanticsFlag.isEnabled: ?isEnabled,
+         SemanticsFlag.isInMutuallyExclusiveGroup: ?isInMutuallyExclusiveGroup,
+         SemanticsFlag.isHeader: ?isHeader,
+         SemanticsFlag.isObscured: ?isObscured,
+         SemanticsFlag.isMultiline: ?isMultiline,
+         SemanticsFlag.namesRoute: ?namesRoute,
+         SemanticsFlag.scopesRoute: ?scopesRoute,
+         SemanticsFlag.isHidden: ?isHidden,
+         SemanticsFlag.isImage: ?isImage,
+         SemanticsFlag.isLiveRegion: ?isLiveRegion,
+         SemanticsFlag.hasToggledState: ?hasToggledState,
+         SemanticsFlag.isToggled: ?isToggled,
+         SemanticsFlag.hasImplicitScrolling: ?hasImplicitScrolling,
+         SemanticsFlag.hasExpandedState: ?hasExpandedState,
+         SemanticsFlag.isExpanded: ?isExpanded,
+         SemanticsFlag.hasRequiredState: ?hasRequiredState,
+         SemanticsFlag.isRequired: ?isRequired,
        },
        actions = <SemanticsAction, bool>{
-         if (hasTapAction != null) SemanticsAction.tap: hasTapAction,
-         if (hasFocusAction != null) SemanticsAction.focus: hasFocusAction,
-         if (hasLongPressAction != null) SemanticsAction.longPress: hasLongPressAction,
-         if (hasScrollLeftAction != null) SemanticsAction.scrollLeft: hasScrollLeftAction,
-         if (hasScrollRightAction != null) SemanticsAction.scrollRight: hasScrollRightAction,
-         if (hasScrollUpAction != null) SemanticsAction.scrollUp: hasScrollUpAction,
-         if (hasScrollDownAction != null) SemanticsAction.scrollDown: hasScrollDownAction,
-         if (hasIncreaseAction != null) SemanticsAction.increase: hasIncreaseAction,
-         if (hasDecreaseAction != null) SemanticsAction.decrease: hasDecreaseAction,
-         if (hasShowOnScreenAction != null) SemanticsAction.showOnScreen: hasShowOnScreenAction,
-         if (hasMoveCursorForwardByCharacterAction != null)
-           SemanticsAction.moveCursorForwardByCharacter: hasMoveCursorForwardByCharacterAction,
-         if (hasMoveCursorBackwardByCharacterAction != null)
-           SemanticsAction.moveCursorBackwardByCharacter: hasMoveCursorBackwardByCharacterAction,
-         if (hasSetSelectionAction != null) SemanticsAction.setSelection: hasSetSelectionAction,
-         if (hasCopyAction != null) SemanticsAction.copy: hasCopyAction,
-         if (hasCutAction != null) SemanticsAction.cut: hasCutAction,
-         if (hasPasteAction != null) SemanticsAction.paste: hasPasteAction,
-         if (hasDidGainAccessibilityFocusAction != null)
-           SemanticsAction.didGainAccessibilityFocus: hasDidGainAccessibilityFocusAction,
-         if (hasDidLoseAccessibilityFocusAction != null)
-           SemanticsAction.didLoseAccessibilityFocus: hasDidLoseAccessibilityFocusAction,
-         if (customActions != null) SemanticsAction.customAction: customActions.isNotEmpty,
-         if (hasDismissAction != null) SemanticsAction.dismiss: hasDismissAction,
-         if (hasMoveCursorForwardByWordAction != null)
-           SemanticsAction.moveCursorForwardByWord: hasMoveCursorForwardByWordAction,
-         if (hasMoveCursorBackwardByWordAction != null)
-           SemanticsAction.moveCursorBackwardByWord: hasMoveCursorBackwardByWordAction,
-         if (hasSetTextAction != null) SemanticsAction.setText: hasSetTextAction,
+         SemanticsAction.tap: ?hasTapAction,
+         SemanticsAction.focus: ?hasFocusAction,
+         SemanticsAction.longPress: ?hasLongPressAction,
+         SemanticsAction.scrollLeft: ?hasScrollLeftAction,
+         SemanticsAction.scrollRight: ?hasScrollRightAction,
+         SemanticsAction.scrollUp: ?hasScrollUpAction,
+         SemanticsAction.scrollDown: ?hasScrollDownAction,
+         SemanticsAction.increase: ?hasIncreaseAction,
+         SemanticsAction.decrease: ?hasDecreaseAction,
+         SemanticsAction.showOnScreen: ?hasShowOnScreenAction,
+         SemanticsAction.moveCursorForwardByCharacter: ?hasMoveCursorForwardByCharacterAction,
+         SemanticsAction.moveCursorBackwardByCharacter: ?hasMoveCursorBackwardByCharacterAction,
+         SemanticsAction.setSelection: ?hasSetSelectionAction,
+         SemanticsAction.copy: ?hasCopyAction,
+         SemanticsAction.cut: ?hasCutAction,
+         SemanticsAction.paste: ?hasPasteAction,
+         SemanticsAction.didGainAccessibilityFocus: ?hasDidGainAccessibilityFocusAction,
+         SemanticsAction.didLoseAccessibilityFocus: ?hasDidLoseAccessibilityFocusAction,
+         SemanticsAction.customAction: ?customActions?.isNotEmpty,
+         SemanticsAction.dismiss: ?hasDismissAction,
+         SemanticsAction.moveCursorForwardByWord: ?hasMoveCursorForwardByWordAction,
+         SemanticsAction.moveCursorBackwardByWord: ?hasMoveCursorBackwardByWordAction,
+         SemanticsAction.setText: ?hasSetTextAction,
        },
        hintOverrides = onTapHint == null && onLongPressHint == null
            ? null
@@ -2546,7 +2538,7 @@ class _MatchesSemanticsData extends Matcher {
   final int? currentValueLength;
   final ui.SemanticsInputType? inputType;
   final List<Matcher>? children;
-  final SemanticsValidationResult validationResult;
+  final SemanticsValidationResult? validationResult;
 
   /// There are three possible states for these two maps:
   ///
@@ -2653,7 +2645,7 @@ class _MatchesSemanticsData extends Matcher {
     if (hintOverrides != null) {
       description.add(' with custom hints: $hintOverrides');
     }
-    if (validationResult != SemanticsValidationResult.none) {
+    if (validationResult != null) {
       description.add(' with validation result: $validationResult');
     }
     if (children != null) {
@@ -2786,7 +2778,7 @@ class _MatchesSemanticsData extends Matcher {
     if (maxValueLength != null && maxValueLength != data.maxValueLength) {
       return failWithDescription(matchState, 'maxValueLength was: ${data.maxValueLength}');
     }
-    if (validationResult != data.validationResult) {
+    if (validationResult != null && validationResult != data.validationResult) {
       return failWithDescription(matchState, 'validationResult was: ${data.validationResult}');
     }
     if (inputType != null && inputType != data.inputType) {

@@ -91,7 +91,7 @@ Future<Map<String, dynamic>?> _runTest(String scriptPath) async {
                 if (json is List<dynamic>) {
                   return json.cast();
                 }
-                return <Map<String, dynamic>>[if (json != null) json as Map<String, dynamic>];
+                return <Map<String, dynamic>>[?json as Map<String, dynamic>?];
               })
               .where((Map<String, dynamic> testEvent) => testEvent['type'] == 'print')
               .map((Map<String, dynamic> printEvent) => printEvent['message'] as String)

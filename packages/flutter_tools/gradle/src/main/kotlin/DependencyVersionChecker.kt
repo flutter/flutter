@@ -90,7 +90,7 @@ object DependencyVersionChecker {
     // flutter.dev/go/android-dependency-versions for more.
     // Advice for maintainers for other areas of code that are impacted are documented
     // in packages/flutter_tools/lib/src/android/README.md.
-    @VisibleForTesting internal val warnGradleVersion: Version = Version(8, 7, 2)
+    @VisibleForTesting internal val warnGradleVersion: Version = Version(8, 7, 0)
 
     @VisibleForTesting internal val errorGradleVersion: Version = Version(8, 3, 0)
 
