@@ -205,7 +205,9 @@ void main() {
               child: Theme(
                 data: ThemeData(
                   sliderTheme: const SliderThemeData(
-                    valueIndicatorMultilineConfig: ValueIndicatorMultilineConfig(cornerPadding: 40),
+                    valueIndicatorMultilineConfig: ValueIndicatorMultilineConfig(
+                      cornerPadding: EdgeInsets.all(16),
+                    ),
                   ),
                 ),
                 child: Slider(
