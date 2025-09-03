@@ -1110,7 +1110,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     Widget menuAnchor = MenuAnchor(
       style: effectiveMenuStyle,
       alignmentOffset: widget.alignmentOffset,
-      viewPadding: EdgeInsets.zero,
+      reservedPadding: EdgeInsets.zero,
       controller: _controller,
       menuChildren: menu,
       crossAxisUnconstrained: false,

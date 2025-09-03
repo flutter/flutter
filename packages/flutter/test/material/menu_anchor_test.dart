@@ -5048,7 +5048,7 @@ void main() {
     });
   });
 
-  testWidgets('Menu panel default view padding', (WidgetTester tester) async {
+  testWidgets('Menu panel default reserved padding', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -5068,19 +5068,19 @@ void main() {
     controller.open();
     await tester.pump();
 
-    const double defaultViewPadding = 8.0; // See _kMenuViewPadding.
-    expect(tester.getRect(findMenuPanels()).width, 800.0 - defaultViewPadding * 2);
+    const double defaultReservedPadding = 8.0; // See _kMenuViewPadding.
+    expect(tester.getRect(findMenuPanels()).width, 800.0 - defaultReservedPadding * 2);
   });
 
-  testWidgets('Menu panel accepts custom view padding', (WidgetTester tester) async {
-    const EdgeInsetsGeometry customViewPadding = EdgeInsets.symmetric(horizontal: 13.0);
+  testWidgets('Menu panel accepts custom reserved padding', (WidgetTester tester) async {
+    const EdgeInsetsGeometry reservedPadding = EdgeInsets.symmetric(horizontal: 13.0);
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
           child: Center(
             child: MenuAnchor(
               controller: controller,
-              viewPadding: customViewPadding,
+              reservedPadding: reservedPadding,
               menuChildren: const <Widget>[SizedBox(width: 800, height: 24)],
               builder: (BuildContext context, MenuController controller, Widget? child) {
                 return const SizedBox(width: 800, height: 24);
@@ -5094,7 +5094,7 @@ void main() {
     controller.open();
     await tester.pump();
 
-    expect(tester.getRect(findMenuPanels()).width, 800.0 - customViewPadding.horizontal);
+    expect(tester.getRect(findMenuPanels()).width, 800.0 - reservedPadding.horizontal);
   });
 }
 
