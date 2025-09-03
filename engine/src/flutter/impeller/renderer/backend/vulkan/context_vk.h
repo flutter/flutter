@@ -160,7 +160,7 @@ class ContextVK final : public Context,
       // No-op if validation layers are not enabled.
       return true;
     }
-    std::string combined = std::format("{} {}", label.data(), trailing.data());
+    std::string combined = std::format("{} {}", label, trailing);
     return SetDebugName(GetDevice(), handle, combined);
   }
 

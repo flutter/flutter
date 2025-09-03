@@ -190,8 +190,7 @@ RenderPipelineHandleT* CreateIfNeeded(
       /*async=*/false, [&opts, variants_count = container.GetPipelineCount()](
                            PipelineDescriptor& desc) {
         opts.ApplyToPipelineDescriptor(desc);
-        desc.SetLabel(
-            std::format("{} V#{}", desc.GetLabel().data(), variants_count));
+        desc.SetLabel(std::format("{} V#{}", desc.GetLabel(), variants_count));
       });
   std::unique_ptr<RenderPipelineHandleT> variant =
       std::make_unique<RenderPipelineHandleT>(std::move(variant_future));
