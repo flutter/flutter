@@ -2468,6 +2468,7 @@ class ViewConstraints {
         (size.height <= maxHeight);
   }
 
+  /// Whether the constraint is empty (min/max is all zeroes).
   bool isEmpty() => minWidth == 0.0 && maxWidth == 0.0 && minHeight == 0.0 && maxHeight == 0.0;
 
   /// Whether there is exactly one size that satisfies the constraints.
