@@ -2469,6 +2469,41 @@ void main() {
     expect(find.text('Tap me please!'), findsOneWidget);
   });
 
+  testWidgets('PopupMenuButton has expected default mouse cursor on hover', (
+    WidgetTester tester,
+  ) async {
+    const Key key = ValueKey<int>(1);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              key: key,
+              itemBuilder: (_) => const <PopupMenuEntry<String>>[
+                PopupMenuItem<String>(value: 'a', child: Text('A')),
+                PopupMenuItem<String>(value: 'b', child: Text('B')),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1,
+    );
+    await gesture.addPointer(location: tester.getCenter(find.byKey(key)));
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
+  });
+
   testWidgets('PopupMenuItem changes mouse cursor when hovered', (WidgetTester tester) async {
     const Key key = ValueKey<int>(1);
     // Test PopupMenuItem() constructor
