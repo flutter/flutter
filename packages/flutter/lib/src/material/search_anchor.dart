@@ -1575,14 +1575,14 @@ class SearchBar extends StatefulWidget {
   final bool readOnly;
 
   /// Configures how smart dashes are handled in the text field
-  /// used by this [SearchAnchor].
+  /// used by this [SearchBar].
   ///
   /// For example, when enabled, double hyphens (`--`) may be
   /// automatically replaced with an em dash (`—`) on iOS.
   final SmartDashesType? smartDashesType;
 
   /// Configures how smart quotes are handled in the text field
-  /// used by this [SearchAnchor].
+  /// used by this [SearchBar].
   ///
   /// For example, when enabled, straight quotes (`"`) may be
   /// automatically replaced with curly quotes (`“ ”`) on iOS.
