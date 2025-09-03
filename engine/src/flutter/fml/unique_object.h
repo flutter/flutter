@@ -19,10 +19,10 @@ concept UniqueObjectTraits = requires {
   { Traits::InvalidValue() } -> std::same_as<T>;
 
   // |IsValid| function should be fast and inline.
-  { Traits::IsValid(T{}) } -> std::same_as<bool>;
+  { Traits::IsValid(std::declval<T>()) } -> std::same_as<bool>;
 
   // |Free| function will not be called if value == InvalidValue()!
-  { Traits::Free(T{}) };
+  { Traits::Free(std::declval<T>()) };
 };
 
 template <typename T, typename Traits>
