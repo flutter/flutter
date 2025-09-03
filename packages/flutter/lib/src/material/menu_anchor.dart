@@ -3630,7 +3630,6 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
         if (states.contains(WidgetState.disabled)) {
           return SystemMouseCursors.basic;
         }
-        // TODO(camsim99): regenerate
         return kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic;
       },
     );
