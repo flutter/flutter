@@ -1930,6 +1930,7 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
       # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
       presubmit_max_attempts: "2"
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**
@@ -1954,6 +1955,7 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
       # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
       presubmit_max_attempts: "2"
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**
@@ -1978,6 +1980,7 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
       # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
       presubmit_max_attempts: "2"
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**
@@ -2002,6 +2005,7 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
       # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
       presubmit_max_attempts: "2"
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**
@@ -2026,6 +2030,7 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
       # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
       presubmit_max_attempts: "2"
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**
@@ -2050,6 +2055,7 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
       # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
       presubmit_max_attempts: "2"
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**
@@ -2074,6 +2080,7 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
       # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
       presubmit_max_attempts: "2"
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**
@@ -2099,6 +2106,7 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
       # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
       presubmit_max_attempts: "2"
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**
@@ -2123,6 +2131,7 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
       # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
       presubmit_max_attempts: "2"
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**
@@ -2147,6 +2156,7 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
       # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
       presubmit_max_attempts: "2"
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**
@@ -2171,6 +2181,7 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
       # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
       presubmit_max_attempts: "2"
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**
@@ -2195,6 +2206,7 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
       # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
       presubmit_max_attempts: "2"
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**
@@ -2219,6 +2231,7 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
       # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
       presubmit_max_attempts: "2"
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**
@@ -2243,6 +2256,7 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
       # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
       presubmit_max_attempts: "2"
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**
@@ -2267,6 +2281,7 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
       # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
       presubmit_max_attempts: "2"
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**
@@ -2291,6 +2306,7 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
       # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
       presubmit_max_attempts: "2"
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**
