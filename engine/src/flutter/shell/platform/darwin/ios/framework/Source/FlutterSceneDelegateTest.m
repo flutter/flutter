@@ -49,7 +49,7 @@
 
   [mockSceneDelegate scene:scene willConnectToSession:session options:connectionOptions];
 
-  OCMVerify(times(1), [mockSceneDelegate moveRootViewControllerFrom:[OCMArg any] to:[OCMArg any]]);
+  OCMVerify(times(1), [mockSceneDelegate moveRootViewControllerFrom:mockAppDelegate to:scene]);
 }
 
 - (void)testMoveRootViewControllerWhenNoWindow {
