@@ -965,10 +965,12 @@ class AndroidGradleBuilder implements AndroidBuilder {
 
     final Status status = _logger.startProgress("Running Gradle task '$gradleTask'...");
     final String gradleExecutable = _gradleUtils.getExecutable(project);
-    final command = <String>[gradleExecutable, '-q', gradleTask];
-    if (userIdentifier != null) {
-      command.add('-Pandroid.injected.user.serial=$userIdentifier');
-    }
+    final command = <String>[
+      gradleExecutable,
+      '-q',
+      gradleTask,
+      if (userIdentifier != null) '-Pandroid.injected.user.serial=$userIdentifier',
+    ];
     try {
       final RunResult result = await _processUtils.run(
         command,
@@ -979,6 +981,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
         },
       );
       if (result.exitCode != 0) {
+        _logger.printStatus(result.stdout, wrap: false);
+        _logger.printError(result.stderr, wrap: false);
         throwToolExit('Gradle task $gradleTask failed with exit code ${result.exitCode}.');
       }
     } finally {

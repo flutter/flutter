@@ -225,7 +225,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       )
       ..addFlag(
         'enable-gradle-managed-install',
-        negatable: false,
+        negatable: true,
         help:
             'Let Gradle manage Android app installation. This can help with installing related privacy sandbox binaries.',
       );
