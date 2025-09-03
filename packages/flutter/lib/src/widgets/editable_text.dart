@@ -4993,6 +4993,7 @@ class EditableTextState extends State<EditableText>
   }
 
   /// Toggles the visibility of the toolbar.
+  @override
   void toggleToolbar([bool hideHandles = true]) {
     final TextSelectionOverlay selectionOverlay = _selectionOverlay ??= _createSelectionOverlay();
     if (selectionOverlay.toolbarIsVisible) {
