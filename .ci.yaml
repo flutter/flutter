@@ -2090,7 +2090,6 @@ targets:
       - DEPS
 
   - name: Linux web_canvaskit_tests_7_last
-    bringup: true # Needs resharding: https://github.com/flutter/flutter/issues/174877
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
