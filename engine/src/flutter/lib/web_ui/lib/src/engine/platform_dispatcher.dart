@@ -1103,18 +1103,18 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     style.wordSpacing = '${spacingDefault}px';
     style.margin = '0px 0px ${spacingDefault}px 0px';
     domDocument.body!.append(_typographyMeasurementElement!);
-    // final double? typographyMeasurementElementFontSize = parseFontSize(
-    //   _typographyMeasurementElement!,
-    // )?.toDouble();
-    // final double defaultLineHeightFactor =
-    //     spacingDefault / typographyMeasurementElementFontSize!; //needs adjustment.
+    final double? typographyMeasurementElementFontSize = parseFontSize(
+      _typographyMeasurementElement!,
+    )?.toDouble();
+    final double defaultLineHeightFactor =
+        spacingDefault / typographyMeasurementElementFontSize!; //needs adjustment.
 
     _typographySettingsObserver = createDomResizeObserver((
       List<DomResizeObserverEntry> entries,
       DomResizeObserver observer,
     ) {
       final ui.TypographySettings computedTypographySettings = _computeTypographySettings();
-      if (computedTypographySettings.lineHeight == spacingDefault &&
+      if (computedTypographySettings.lineHeight == defaultLineHeightFactor &&
           computedTypographySettings.wordSpacing == spacingDefault &&
           computedTypographySettings.letterSpacing == spacingDefault &&
           computedTypographySettings.paragraphSpacing == spacingDefault) {
