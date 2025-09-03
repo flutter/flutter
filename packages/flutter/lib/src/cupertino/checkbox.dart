@@ -66,6 +66,9 @@ const List<double> _kDisabledDarkGradientOpacities = <double>[0.08, 0.14];
 /// ([CupertinoSwitch] in Flutter) instead, or to find a creative custom
 /// solution.
 ///
+/// The checkbox has a default size of 14-by-14 pixels on desktop devices and
+/// [kMinInteractiveDimensionCupertino] pixels on mobile devices.
+///
 /// {@tool dartpad}
 /// This example shows a toggleable [CupertinoCheckbox].
 ///
@@ -113,7 +116,6 @@ class CupertinoCheckbox extends StatefulWidget {
     this.autofocus = false,
     this.side,
     this.shape,
-    this.tapTargetSize,
     this.semanticLabel,
   }) : assert(tristate || value != null);
 
@@ -291,9 +293,6 @@ class CupertinoCheckbox extends StatefulWidget {
   /// [RoundedRectangleBorder] with a circular corner radius of 4.0.
   final OutlinedBorder? shape;
 
-  ///
-  final Size? tapTargetSize;
-
   /// The semantic label for the checkbox that will be announced by screen readers.
   ///
   /// This is announced by assistive technologies (e.g TalkBack/VoiceOver).
@@ -426,6 +425,15 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox>
                   : SystemMouseCursors.basic);
         });
 
+    final Size effectiveSize = switch (defaultTargetPlatform) {
+      TargetPlatform.iOS ||
+      TargetPlatform.android ||
+      TargetPlatform.fuchsia => const Size.square(kMinInteractiveDimensionCupertino),
+      TargetPlatform.macOS ||
+      TargetPlatform.linux ||
+      TargetPlatform.windows => const Size.square(CupertinoCheckbox.width),
+    };
+
     return Semantics(
       label: widget.semanticLabel,
       checked: widget.value ?? false,
@@ -434,7 +442,7 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox>
         mouseCursor: effectiveMouseCursor,
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
-        size: widget.tapTargetSize ?? const Size.square(kMinInteractiveDimensionCupertino),
+        size: effectiveSize,
         painter: _painter
           ..position = position
           ..reaction = reaction

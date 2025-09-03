@@ -412,7 +412,7 @@ void main() {
     expect(value, isTrue);
   });
 
-  testWidgets('Checkbox respects shape and side', (WidgetTester tester) async {
+  testWidgets('Checkbox respects shape and side on mobile', (WidgetTester tester) async {
     const RoundedRectangleBorder roundedRectangleBorder = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(5)),
     );
@@ -452,7 +452,49 @@ void main() {
         inner: RRect.fromLTRBR(19.0, 19.0, 25.0, 25.0, const Radius.circular(1)),
       ),
     );
-  });
+  }, variant: TargetPlatformVariant.mobile());
+
+  testWidgets('Checkbox respects shape and side on desktop', (WidgetTester tester) async {
+    const RoundedRectangleBorder roundedRectangleBorder = RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(5)),
+    );
+
+    const BorderSide side = BorderSide(width: 4, color: Color(0xfff44336));
+
+    Widget buildApp() {
+      return CupertinoApp(
+        home: Center(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return CupertinoCheckbox(
+                value: false,
+                onChanged: (bool? newValue) {},
+                shape: roundedRectangleBorder,
+                side: side,
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.widget<CupertinoCheckbox>(find.byType(CupertinoCheckbox)).shape,
+      roundedRectangleBorder,
+    );
+    expect(tester.widget<CupertinoCheckbox>(find.byType(CupertinoCheckbox)).side, side);
+    expect(
+      find.byType(CupertinoCheckbox),
+      paints..drrect(
+        color: const Color(0xfff44336),
+        outer: RRect.fromLTRBR(0.0, 0.0, 14.0, 14.0, const Radius.circular(5)),
+        inner: RRect.fromLTRBR(4.0, 4.0, 10.0, 10.0, const Radius.circular(1)),
+      ),
+    );
+  }, variant: TargetPlatformVariant.desktop());
 
   testWidgets('Checkbox configures mouse cursor', (WidgetTester tester) async {
     Widget buildApp({MouseCursor? mouseCursor, bool enabled = true, bool value = true}) {
