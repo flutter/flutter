@@ -5,7 +5,7 @@ BasedOnStyle: Chromium
 # 'vector<vector<int> >' in existing files gets formatted to
 # 'vector<vector<int>>'. ('Auto' means that clang-format will only use
 # 'int>>' if the file already contains at least one such instance.)
-Standard: Cpp11
+Standard: c++20
 SortIncludes: true
 ---
 Language: ObjC

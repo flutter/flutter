@@ -7,6 +7,7 @@ import 'package:analyzer/dart/constant/value.dart';
 /// Contains details related to a single preview instance.
 final class PreviewDetails {
   PreviewDetails({
+    required this.scriptUri,
     required this.packageName,
     required this.functionName,
     required this.isBuilder,
@@ -19,6 +20,7 @@ final class PreviewDetails {
        brightness = previewAnnotation.getField(kBrightness)!,
        localizations = previewAnnotation.getField(kLocalizations)!;
 
+  static const kScriptUri = 'scriptUri';
   static const kPackageName = 'packageName';
   static const kName = 'name';
   static const kSize = 'size';
@@ -27,6 +29,9 @@ final class PreviewDetails {
   static const kTheme = 'theme';
   static const kBrightness = 'brightness';
   static const kLocalizations = 'localizations';
+
+  /// The file:// URI pointing to the script in which the preview is defined.
+  final Uri scriptUri;
 
   /// The name of the package in which the preview was defined.
   ///

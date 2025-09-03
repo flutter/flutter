@@ -9,6 +9,7 @@ import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../devfs.dart';
 import '../../globals.dart' as globals show xcode;
+import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
@@ -70,9 +71,11 @@ abstract class AndroidAssetBundle extends Target {
           .file(isolateSnapshotData)
           .copySync(outputDirectory.childFile('isolate_snapshot_data').path);
     }
+    final DartHooksResult dartHookResult = await DartBuild.loadHookResult(environment);
     final Depfile assetDepfile = await copyAssets(
       environment,
       outputDirectory,
+      dartHookResult: dartHookResult,
       targetPlatform: TargetPlatform.android,
       buildMode: buildMode,
       flavor: environment.defines[kFlavor],
@@ -89,7 +92,11 @@ abstract class AndroidAssetBundle extends Target {
   }
 
   @override
-  List<Target> get dependencies => const <Target>[KernelSnapshot(), InstallCodeAssets()];
+  List<Target> get dependencies => const <Target>[
+    DartBuildForNative(),
+    KernelSnapshot(),
+    InstallCodeAssets(),
+  ];
 }
 
 /// An implementation of [AndroidAssetBundle] that includes dependencies on vm
