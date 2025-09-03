@@ -431,6 +431,26 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
+  TypographySettings get typographySettings =>
+      _typographySettingsTestValue ?? _platformDispatcher.typographySettings;
+  TypographySettings? _typographySettingsTestValue;
+
+  /// Hides the real typography settings and reports the given
+  /// [typographySettings] instead.
+  // ignore: avoid_setters_without_getters
+  set typographySettingsTestValue(TypographySettings typographySettingsTestValue) {
+    _typographySettingsTestValue = typographySettingsTestValue;
+    onMetricsChanged?.call();
+  }
+
+  /// Deletes any existing test typography settings and returns to using the
+  /// real accessibility features.
+  void clearTypographySettingsTestValue() {
+    _typographySettingsTestValue = null;
+    onMetricsChanged?.call();
+  }
+
+  @override
   FrameCallback? get onBeginFrame => _platformDispatcher.onBeginFrame;
   @override
   set onBeginFrame(FrameCallback? callback) {
