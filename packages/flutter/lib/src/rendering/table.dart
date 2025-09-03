@@ -394,6 +394,10 @@ class RenderTable extends RenderBox {
        _textBaseline = textBaseline,
        _defaultVerticalAlignment = defaultVerticalAlignment,
        _configuration = configuration {
+    assert(() {
+      _debugShelteredChildren = <RenderBox>[];
+      return true;
+    }());
     _children = <RenderBox?>[]..length = _columns * _rows;
     this.rowDecorations = rowDecorations; // must use setter to initialize box painters array
     children?.forEach(addRow);
@@ -842,7 +846,7 @@ class RenderTable extends RenderBox {
             (x >= _columns || y >= _rows || _children[xyOld] != cells[xyNew])) {
           if (!lostChildren.remove(cells[xyNew])) {
             assert(() {
-              if (!_shelteredChildren.remove(cells[xyNew])) {
+              if (!_debugShelteredChildren.remove(cells[xyNew])) {
                 throw FlutterError.fromParts(<DiagnosticsNode>[
                   ErrorSummary('The newly added child did not call shelterChild.'),
                   ErrorHint(
@@ -925,7 +929,7 @@ class RenderTable extends RenderBox {
     }
   }
 
-  final List<RenderBox> _shelteredChildren = <RenderBox>[];
+  late final List<RenderBox> _debugShelteredChildren;
 
   /// Before using [setFlatChildren], you need to shelter the new child with this method
   /// to attach it to the tree. Allowing children that are not attached to the tree to
@@ -935,8 +939,9 @@ class RenderTable extends RenderBox {
   void shelterChild(RenderBox child) {
     assert(child != this);
     assert(!_children.contains(child));
+    assert(!_debugShelteredChildren.contains(child));
     assert(() {
-      _shelteredChildren.add(child);
+      _debugShelteredChildren.add(child);
       return true;
     }());
     adoptChild(child);
@@ -1334,7 +1339,7 @@ class RenderTable extends RenderBox {
 
   @override
   void performLayout() {
-    assert(_shelteredChildren.isEmpty);
+    assert(_debugShelteredChildren.isEmpty);
     final BoxConstraints constraints = this.constraints;
     final int rows = this.rows;
     final int columns = this.columns;
@@ -1481,7 +1486,7 @@ class RenderTable extends RenderBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    assert(_shelteredChildren.isEmpty);
+    assert(_debugShelteredChildren.isEmpty);
     assert(_children.length == rows * columns);
     if (rows * columns == 0) {
       if (border != null) {
