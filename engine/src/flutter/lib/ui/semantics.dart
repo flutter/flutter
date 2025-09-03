@@ -1948,7 +1948,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       controlsNodes,
       validationResult.index,
       inputType.index,
-      locale?.toString() ?? '',
+      locale?.toLanguageTag() ?? '',
     );
   }
 
