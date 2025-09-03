@@ -1006,6 +1006,7 @@ class DropdownButton<T> extends StatefulWidget {
     this.borderRadius,
     this.padding,
     this.barrierDismissible = true,
+    this.mouseCursor,
     // When adding new arguments, consider adding similar arguments to
     // DropdownButtonFormField.
   }) : assert(
@@ -1055,6 +1056,7 @@ class DropdownButton<T> extends StatefulWidget {
     this.borderRadius,
     this.padding,
     this.barrierDismissible = true,
+    this.mouseCursor,
     required InputDecoration inputDecoration,
     required bool isEmpty,
   }) : assert(
@@ -1302,6 +1304,10 @@ class DropdownButton<T> extends StatefulWidget {
   ///
   /// Defaults to `true`.
   final bool barrierDismissible;
+
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// dropdown button and its [DropdownMenuItem]s.
+  final MouseCursor? mouseCursor;
 
   final InputDecoration? _inputDecoration;
 
@@ -1626,10 +1632,15 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       );
     }
 
-    final MouseCursor effectiveMouseCursor = WidgetStateProperty.resolveAs<MouseCursor>(
-      MaterialStateMouseCursor.statelessClickable,
-      <WidgetState>{if (!_enabled) WidgetState.disabled},
-    );
+    final MouseCursor webCursor =
+        widget.mouseCursor ??
+        WidgetStateProperty.resolveAs<MouseCursor>(
+          MaterialStateMouseCursor.clickable,
+          <WidgetState>{if (!_enabled) WidgetState.disabled},
+        );
+    final MouseCursor nonWebCursor =
+        widget.mouseCursor ?? MaterialStateMouseCursor.statelessClickable;
+    final MouseCursor effectiveMouseCursor = kIsWeb ? webCursor : nonWebCursor;
 
     // When an InputDecoration is provided, use it instead of using an InkWell
     // that overflows in some cases (such as showing an errorText) and requires
@@ -1790,6 +1801,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
     BorderRadius? borderRadius,
     EdgeInsetsGeometry? padding,
     this.barrierDismissible = true,
+    this.mouseCursor,
     // When adding new arguments, consider adding similar arguments to
     // DropdownButton.
   }) : assert(
@@ -1880,6 +1892,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
                  isEmpty: isEmpty,
                  padding: padding,
                  barrierDismissible: barrierDismissible,
+                 mouseCursor: mouseCursor,
                ),
              ),
            );
@@ -1902,6 +1915,10 @@ class DropdownButtonFormField<T> extends FormField<T> {
   ///
   /// Defaults to `true`.
   final bool barrierDismissible;
+
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// dropdown button and its [DropdownMenuItem]s.
+  final MouseCursor? mouseCursor;
 
   @override
   FormFieldState<T> createState() => _DropdownButtonFormFieldState<T>();
