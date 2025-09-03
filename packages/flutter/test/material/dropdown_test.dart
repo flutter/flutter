@@ -3930,7 +3930,10 @@ void main() {
     });
   });
 
-  testWidgets('DropdownButton changes mouse cursor when hovered', (WidgetTester tester) async {
+  // TODO(camsim99): fix all modified test files
+  testWidgets('DropdownButton does not change mouse cursor when hovered', (
+    WidgetTester tester,
+  ) async {
     const Key key = Key('testDropdownButton');
     await tester.pumpWidget(
       MaterialApp(
@@ -3963,8 +3966,9 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      SystemMouseCursors.basic,
     );
+    // TODO(camsim99): test web
     await gesture.moveTo(offDropdownButton);
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),

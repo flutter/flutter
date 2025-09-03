@@ -1202,7 +1202,7 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      SystemMouseCursors.basic,
     );
 
     // Test disabled
@@ -1235,7 +1235,7 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      SystemMouseCursors.basic,
     );
 
     // Test disabled
@@ -1278,8 +1278,10 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      SystemMouseCursors.basic,
     );
+
+    // TODO(camsim99): add test here for web and same for "InkWell.mouseCursor changes cursor on hover"
   });
 
   group('feedback', () {

@@ -1384,8 +1384,11 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
       statesController.value,
     );
-    final MouseCursor nonWebCursor =
-        widget.mouseCursor ?? MaterialStateMouseCursor.statelessClickable;
+    // TODO(camsim99): determine if this is what I want and if so, correct docs everywhere and consolidate logic.
+    final MouseCursor nonWebCursor = WidgetStateProperty.resolveAs<MouseCursor>(
+      widget.mouseCursor ?? MaterialStateMouseCursor.statelessClickable,
+      statesController.value,
+    );
     final MouseCursor effectiveMouseCursor = kIsWeb ? webCursor : nonWebCursor;
 
     return _ParentInkResponseProvider(

@@ -230,8 +230,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      SystemMouseCursors.basic,
     );
+    // TODO(camsim99): Add test for PopupMenu.
 
     // Test unchecked CheckedPopupMenuItem label.
     ListTile listTile = tester.widget<ListTile>(find.byType(ListTile).first);
@@ -571,8 +572,9 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-        SystemMouseCursors.click,
+        SystemMouseCursors.basic,
       );
+      // TODO(camsim99): Add test here for PopupMenu.
 
       // Check popup menu padding.
       final SingleChildScrollView popupMenu = tester.widget<SingleChildScrollView>(

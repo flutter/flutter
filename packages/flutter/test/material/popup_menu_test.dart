@@ -2535,8 +2535,9 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      SystemMouseCursors.basic,
     );
+    // TODO(camsim99): test web
 
     // Test default cursor when disabled
     await tester.pumpWidget(
@@ -2635,7 +2636,7 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      SystemMouseCursors.basic,
     );
 
     // Test default cursor when disabled

@@ -991,8 +991,8 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
-    );
+      SystemMouseCursors.basic,
+    ); // TODO(camsim99): test web
   });
 
   testWidgets('disabled IconButton has basic mouse cursor', (WidgetTester tester) async {
