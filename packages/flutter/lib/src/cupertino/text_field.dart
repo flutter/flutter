@@ -1797,6 +1797,22 @@ class _RenderBaselineAlignedStack extends RenderBox
   }
 
   @override
+  double computeMinIntrinsicWidth(double height) {
+    return math.max(
+      _placeholderChild?.getMinIntrinsicWidth(height) ?? 0.0,
+      _editableTextChild.getMinIntrinsicWidth(height),
+    );
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    return math.max(
+      _placeholderChild?.getMaxIntrinsicWidth(height) ?? 0.0,
+      _editableTextChild.getMaxIntrinsicWidth(height),
+    );
+  }
+
+  @override
   void performLayout() {
     assert(constraints.hasTightWidth);
     final RenderBox? placeholder = _placeholderChild;
