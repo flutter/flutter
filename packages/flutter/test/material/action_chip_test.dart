@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -501,6 +502,35 @@ void main() {
     );
 
     expect(tester.widget<RawChip>(find.byType(RawChip)).chipAnimationStyle, chipAnimationStyle);
+  });
+
+  testWidgets('ActionChip has expected default mouse cursor on hover', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrapForChip(
+        child: Center(
+          child: ActionChip(label: const Text('Chip'), onPressed: () {}),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1,
+    );
+    await gesture.addPointer(location: const Offset(10, 10));
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic,
+    );
+
+    final Offset chip = tester.getCenter(find.text('Chip'));
+    await gesture.moveTo(chip);
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
   });
 
   testWidgets('ActionChip mouse cursor behavior', (WidgetTester tester) async {

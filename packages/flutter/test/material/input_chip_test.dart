@@ -607,10 +607,12 @@ void main() {
     expect(tester.widget<RawChip>(find.byType(RawChip)).chipAnimationStyle, chipAnimationStyle);
   });
 
-  testWidgets('InputChip has expected mouse cursor on hover', (WidgetTester tester) async {
+  testWidgets('InputChip has expected default mouse cursor on hover', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrapForChip(
-        child: const Center(child: InputChip(label: Text('Chip'))),
+        child: Center(
+          child: InputChip(label: const Text('Chip'), onPressed: () {}),
+        ),
       ),
     );
 
