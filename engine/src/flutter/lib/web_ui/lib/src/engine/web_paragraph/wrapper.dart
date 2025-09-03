@@ -3,28 +3,16 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'code_unit_flags.dart';
 import 'debug.dart';
 import 'layout.dart';
 import 'paragraph.dart';
 
 /// Wraps the text by a given width.
 class TextWrapper {
-  TextWrapper(this._layout) {
-    // Start a new line from the beginning of the text
-    startNewLine(0, 0.0);
-  }
+  TextWrapper(this._layout);
 
   final TextLayout _layout;
-
-  int _startLine = 0;
-  double _top = 0.0;
-
-  // Whitespaces always separates text from clusters even if it's empty
-  late ClusterRange _whitespaces;
-
-  double _widthText = 0.0; // English: contains all whole words on the line
-  double _widthWhitespaces = 0.0;
-  double _widthLetters = 0.0; // English: contains all the letters that didn't make the word yet
 
   double get maxIntrinsicWidth => _maxIntrinsicWidth;
   double _maxIntrinsicWidth = 0.0;
@@ -33,167 +21,114 @@ class TextWrapper {
   double _minIntrinsicWidth = double.infinity;
 
   bool isWhitespace(ExtendedTextCluster cluster) {
-    return _layout.codeUnitFlags[cluster.textRange.start].isWhitespace;
+    return _layout.hasFlag(cluster.globalStart, CodeUnitFlags.kWhitespaceFlag);
   }
 
   bool isSoftLineBreak(ExtendedTextCluster cluster) {
-    return _layout.codeUnitFlags[cluster.textRange.start].isSoftLineBreak;
+    return _layout.hasFlag(cluster.globalStart, CodeUnitFlags.kSoftLineBreakFlag);
   }
 
   bool isHardLineBreak(ExtendedTextCluster cluster) {
-    return _layout.codeUnitFlags[cluster.textRange.start].isHardLineBreak;
+    return _layout.hasFlag(cluster.globalStart, CodeUnitFlags.kHardLineBreakFlag);
   }
 
-  // TODO(jlavrova): Consider combining this with `_layout.addLine`.
-  // Answer: startNewLine and _layout.addLine should not be combined.
-  // It's too much trouble to keep them in accord and there are cases when we call one without another.
-  void startNewLine(int start, double clusterWidth) {
-    _startLine = start;
-    _whitespaces = ClusterRange.collapsed(start);
-    _widthText = 0.0;
-    _widthWhitespaces = 0.0;
-    _minIntrinsicWidth = math.max(_maxIntrinsicWidth, _widthLetters);
-    _widthLetters = clusterWidth;
-  }
-
-  void breakLines(double width) {
+  void breakLines(double maxWidth) {
     // LTR: "words":[startLine:whitespaces.start) "whitespaces":[whitespaces.start:whitespaces.end) "letters":[whitespaces.end:...)
     // RTL: "letters":(...:whitespaces.end] "whitespaces":(whitespaces.end:whitespaces.start] "words":(whitespaces.start:startLine]
 
-    startNewLine(0, 0.0);
-    _top = 0.0;
+    _LineBuilder line = _LineBuilder.first(_layout, maxWidth);
 
     bool hardLineBreak = false;
-    for (int index = 0; index != _layout.textClusters.length - 1; index += 1) {
-      final ExtendedTextCluster cluster = _layout.textClusters[index];
-      double widthCluster = cluster.advance.width;
+    for (int index = 0; index < _layout.allClusters.length; index += 1) {
+      final ExtendedTextCluster cluster = _layout.allClusters[index];
+      final double widthCluster = cluster.advance.width;
       hardLineBreak = isHardLineBreak(cluster);
 
       if (hardLineBreak) {
-        WebParagraphDebug.log('isHardLineBreak: $index');
         // Break the line and then continue with the current cluster as usual
-        if (_whitespaces.end != index) {
-          // Take letters into account
-          _widthText += _widthWhitespaces + _widthLetters;
-          _whitespaces.start = index;
-          _whitespaces.end = index;
-        }
-        _maxIntrinsicWidth = math.max(_maxIntrinsicWidth, _widthText);
-        _top += _layout.addLine(
-          ClusterRange(start: _startLine, end: _whitespaces.start),
-          _whitespaces.clone(),
-          hardLineBreak,
-          _top,
-        );
-        // Start a new line with an empty text
-        startNewLine(index, 0.0);
-      } else if (isSoftLineBreak(cluster) && index != _startLine) {
-        WebParagraphDebug.log('isSoftLineBreak: $index');
+        WebParagraphDebug.log('isHardLineBreak: $index');
+
+        _minIntrinsicWidth = math.max(_minIntrinsicWidth, line.widthTrailingText);
+        line.subsumeTrailingText();
+
+        _maxIntrinsicWidth = math.max(_maxIntrinsicWidth, line.widthText);
+        line = line.next(hardLineBreak);
+      } else if (isSoftLineBreak(cluster) && index != line.start) {
         // Mark the potential line break and then continue with the current cluster as usual
-        if (_whitespaces.start == _startLine && _whitespaces.end != _startLine) {
+        WebParagraphDebug.log('isSoftLineBreak: $index');
+        if (line.hasLeadingWhitespaces) {
           // There is one case when we have to ignore this soft line break: if we only had whitespaces so far -
           // these are the leading spaces and Flutter wants them to be preserved
           // We need to pretend that these are not whitespaces
         } else {
-          if (_whitespaces.end != index) {
-            // Line break without whitespaces before, add all collected letters to the text as a word
-            _widthText += _widthLetters;
-            _whitespaces.start = index;
-          }
-          // Close the softBreak sequence
-          _whitespaces.end = index;
-          // Start a new cluster sequence
-          _minIntrinsicWidth = math.max(_maxIntrinsicWidth, _widthLetters);
-          _widthLetters = 0.0;
+          _minIntrinsicWidth = math.max(_minIntrinsicWidth, line.widthTrailingText);
+          line.markSoftLineBreak(index);
+
+          // TODO(mdebbar): Not sure about this one..
+
+          // // Close the softBreak sequence
+          // _whitespaces.end = index;
+          // // Start a new cluster sequence
+          // _widthTrailingText = 0.0;
         }
       }
 
-      // Check if we have a (hanging) whitespace which does not affect the line width
+      // Check if we have a trailing whitespace that does not affect the line width
       if (isWhitespace(cluster)) {
-        WebParagraphDebug.log('isWhitespace: @$index ${cluster.textRange}');
-        if (_whitespaces.end != index) {
-          // Start a new (empty) whitespace sequence
-          _widthText += _widthWhitespaces + _widthLetters;
-          _minIntrinsicWidth = math.max(_maxIntrinsicWidth, _widthLetters);
-          _widthLetters = 0.0;
-          _whitespaces = ClusterRange.collapsed(index);
-          _widthWhitespaces = 0.0;
-        }
+        _minIntrinsicWidth = math.max(_minIntrinsicWidth, line.widthTrailingText);
+        line.subsumeTrailingText();
         // Add the cluster to the current whitespace sequence (empty or not)
-        _whitespaces.end = index + 1;
-        _widthWhitespaces += widthCluster;
+        line.addWhitespace(index, widthCluster);
         continue;
       }
 
       // Check if we exceeded the line width
-      if (_widthText + _widthWhitespaces + _widthLetters + widthCluster > width) {
-        WebParagraphDebug.log(
-          'exceeded: $index $_widthText + $_widthWhitespaces + $_widthLetters + $widthCluster = ${_widthText + _widthWhitespaces + _widthLetters + widthCluster} ',
-        );
-        if (_whitespaces.start != _startLine) {
+      if (!line.canFit(widthCluster)) {
+        bool clusterAdded = false;
+
+        if (line.hasSoftLineBreak) {
           // There was at least one possible line break so we can use it to break the text
-        } else if (index > _startLine) {
-          // There was some text without line break, we will have to break the text by cluster
-          assert(_widthText == 0.0);
-          if (_widthLetters > 0) {
-            // We possibly have some leading spaces and some text after
-            _widthText = _widthWhitespaces + _widthLetters;
-            _widthWhitespaces = 0.0;
-            _minIntrinsicWidth = math.max(_maxIntrinsicWidth, _widthLetters);
-            _widthLetters = 0.0;
-            _whitespaces.start = _whitespaces.end = index;
-          } else {
-            // We only have whitespaces on the line
-            _widthText = 0.0;
-          }
+        } else if (index > line.start) {
+          // There was some text without line break, we will have to force-break the text at this cluster.
+          assert(line.widthText == 0.0);
+          // TODO(mdebbar): Is this right? Should we update min intrinsic width when we force-break the line?
+          _minIntrinsicWidth = math.max(_minIntrinsicWidth, line.widthTrailingText);
+          // We possibly have some leading spaces and some text after
+          line.subsumeTrailingText();
         } else {
           // We have only one cluster and it's too big to fit the line but we place it anyway
           assert(
-            _startLine == index &&
-                _widthText == 0.0 &&
-                _widthWhitespaces == 0.0 &&
-                _widthLetters == 0.0,
+            line.start == index &&
+                line.widthText == 0.0 &&
+                line.widthWhitespaces == 0.0 &&
+                line.widthTrailingText == 0.0,
           );
-          _widthText = widthCluster;
-          _whitespaces.start = _whitespaces.end = index + 1;
-          widthCluster = 0.0; // Since we already processed this cluster
+          line.addTrailingText(index, widthCluster);
+          line.subsumeTrailingText();
+          clusterAdded = true;
         }
 
         // Add the line
-        _maxIntrinsicWidth = math.max(_maxIntrinsicWidth, _widthText);
-        _top += _layout.addLine(
-          ClusterRange(start: _startLine, end: _whitespaces.start),
-          ClusterRange(start: _whitespaces.start, end: _whitespaces.end),
-          hardLineBreak,
-          _top,
-        );
+        _maxIntrinsicWidth = math.max(_maxIntrinsicWidth, line.widthText);
+        line = line.next(hardLineBreak);
 
-        // Start a new line with already collected clusters sequence
-        startNewLine(_whitespaces.end, _widthLetters);
+        if (clusterAdded) {
+          continue;
+        }
       }
 
-      // This is just a regular cluster, keep track of it
-      _widthLetters += widthCluster;
+      // This is just a regular cluster, add it as trailing text.
+      line.addTrailingText(index, widthCluster);
     }
 
-    // Assume a soft line break at the end of the text
-    if (_whitespaces.end != _layout.textClusters.length - 1) {
-      // We have letters at the end, make them into a word
-      _widthText += _widthWhitespaces;
-      _whitespaces = ClusterRange.collapsed(_layout.textClusters.length - 1);
-      _widthWhitespaces = 0.0;
-      _widthText += _widthLetters;
-    }
+    // Treat the end of text as a line break
+    _minIntrinsicWidth = math.max(_minIntrinsicWidth, line.widthTrailingText);
+    line.markSoftLineBreak(_layout.allClusters.length);
 
-    _maxIntrinsicWidth = math.max(_maxIntrinsicWidth, _widthText);
-    _top += _layout.addLine(
-      ClusterRange(start: _startLine, end: _whitespaces.start),
-      _whitespaces.clone(),
-      hardLineBreak,
-      _top,
-    );
+    _maxIntrinsicWidth = math.max(_maxIntrinsicWidth, line.widthText);
+    line.build(hardLineBreak);
 
-    // TODO(jlavrova): Discuss with Mouad
+    // TODO(mdebbar=>jlavrova): Discuss with Mouad
     // Flutter wants to have another (empty) line if \n is the last codepoint in the text
     // This empty line gets in a way of detecting line visual runs (there isn't any)
     /*
@@ -219,5 +154,112 @@ class TextWrapper {
       }
     }
     */
+  }
+}
+
+class _LineBuilder {
+  _LineBuilder._(this._layout, this._maxWidth, this.start, this._top)
+    : whitespaceStart = start,
+      whitespaceEnd = start,
+      trailingTextEnd = start;
+
+  _LineBuilder.first(TextLayout layout, double maxWidth) : this._(layout, maxWidth, 0, 0.0);
+
+  final TextLayout _layout;
+  final double _maxWidth;
+  final double _top;
+
+  final int start;
+
+  int whitespaceStart;
+  int whitespaceEnd;
+
+  int trailingTextEnd;
+
+  double widthText = 0.0;
+  double widthWhitespaces = 0.0;
+  double widthTrailingText = 0.0;
+
+  bool get _hasWhitespaces => whitespaceStart != whitespaceEnd;
+
+  bool get hasLeadingWhitespaces => whitespaceStart == start && _hasWhitespaces;
+  bool get _hasTrailingText => trailingTextEnd > whitespaceEnd;
+
+  bool _hasSoftLineBreak = false;
+  bool get hasSoftLineBreak => _hasSoftLineBreak;
+
+  void markSoftLineBreak(int index) {
+    _hasSoftLineBreak = true;
+
+    if (_hasTrailingText) {
+      assert(trailingTextEnd == index);
+    } else {
+      assert(whitespaceEnd == index);
+    }
+
+    subsumeTrailingText();
+    assert(whitespaceEnd == index);
+  }
+
+  bool canFit(double extraWidth) {
+    return widthText + widthWhitespaces + widthTrailingText + extraWidth <= _maxWidth;
+  }
+
+  void addWhitespace(int index, double width) {
+    assert(!_hasTrailingText);
+
+    whitespaceEnd = index + 1;
+    trailingTextEnd = index + 1;
+
+    widthWhitespaces += width;
+
+    assert(_hasWhitespaces);
+  }
+
+  void addTrailingText(int index, double width) {
+    trailingTextEnd = index + 1;
+    widthTrailingText += width;
+
+    assert(_hasTrailingText);
+  }
+
+  // TODO(mdebbar): Can we inline this in `markSoftLineBreak` and use that everywhere?
+  void subsumeTrailingText() {
+    if (!_hasTrailingText) {
+      return;
+    }
+
+    whitespaceStart = trailingTextEnd;
+    whitespaceEnd = trailingTextEnd;
+
+    widthText += widthWhitespaces + widthTrailingText;
+    widthWhitespaces = 0.0;
+    widthTrailingText = 0.0;
+
+    assert(!_hasWhitespaces);
+    assert(!_hasTrailingText);
+  }
+
+  /// Builds a line and adds it to [_layout].
+  ///
+  /// Returns the height of the line.
+  double build(bool hardLineBreak) {
+    return _layout.addLine(
+      ClusterRange(start: start, end: whitespaceStart),
+      ClusterRange(start: whitespaceStart, end: whitespaceEnd),
+      hardLineBreak,
+      _top,
+    );
+  }
+
+  // TODO(mdebbar): Can we reuse the same _LineBuilder instance for the next line?
+  _LineBuilder next(bool hardLineBreak) {
+    final double height = build(hardLineBreak);
+    final nextLine = _LineBuilder._(_layout, _maxWidth, whitespaceEnd, _top + height);
+    if (_hasTrailingText) {
+      nextLine.trailingTextEnd = trailingTextEnd;
+      nextLine.widthTrailingText = widthTrailingText;
+    }
+    return nextLine;
   }
 }

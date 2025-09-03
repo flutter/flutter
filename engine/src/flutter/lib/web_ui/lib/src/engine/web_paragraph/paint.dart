@@ -30,19 +30,19 @@ class TextPaint {
   ) {
     // We traverse text in visual blocks order (broken by text styles and bidi runs, then reordered)
     for (final LineBlock block in line.visualBlocks) {
-      if (!block.textStyle.hasElement(styleElement)) {
+      if (!block.style.hasElement(styleElement)) {
         continue;
       }
       // Placeholders do not need painting, just reserving the space
-      if (block is LinePlaceholderBlock) {
+      if (block is PlaceholderBlock) {
         continue;
       }
       // Let's calculate the sizes
       final (ui.Rect sourceRect, ui.Rect targetRect) = calculateBlock(
         layout,
-        block as LineClusterBlock,
+        block as ClusterBlock,
         ui.Offset(
-          line.advance.left + line.formattingShift + block.clusterShiftInLine,
+          line.advance.left + line.formattingShift,
           line.advance.top + line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent,
         ),
         ui.Offset(x, y),
@@ -71,42 +71,43 @@ class TextPaint {
     // We traverse clusters in the order of visual blocks (broken by text styles and bidi runs, then reordered)
     // and then in visual order inside blocks
     for (final LineBlock block in line.visualBlocks) {
-      if (!block.textStyle.hasElement(styleElement)) {
+      if (!block.style.hasElement(styleElement)) {
         continue;
       }
       // Placeholders do not need painting, just reserving the space
       if (block.clusterRange.size == 1 &&
-          layout.textClusters[block.clusterRange.start].placeholder) {
+          layout.allClusters[block.clusterRange.start] is PlaceholderCluster) {
         continue;
       }
       WebParagraphDebug.log(
         'paintByClusters: ${line.fontBoundingBoxAscent} - ${block.rawFontBoundingBoxAscent}',
       );
-      final int start = block.bidiLevel.isEven
-          ? block.clusterRange.start
-          : block.clusterRange.end - 1;
-      final int end = block.bidiLevel.isEven
-          ? block.clusterRange.end
-          : block.clusterRange.start - 1;
-      final int step = block.bidiLevel.isEven ? 1 : -1;
+      final int start = block.isLtr ? block.clusterRange.start : block.clusterRange.end - 1;
+      final int end = block.isLtr ? block.clusterRange.end : block.clusterRange.start - 1;
+      final int step = block.isLtr ? 1 : -1;
+      // TODO(mdebbar=>jlavrova): Do we need to paint in visual order? Why not paint in logical order?
+      //                          Within a block, all clusters have the same font, style, etc.
       for (int i = start; i != end; i += step) {
-        final clusterText = layout.textClusters[i];
+        final clusterText = layout.allClusters[i];
         final (ui.Rect sourceRect, ui.Rect targetRect) = calculateCluster(
           layout,
           block,
           clusterText,
           ui.Offset(
-            line.advance.left + line.formattingShift + block.clusterShiftInLine,
+            // TODO(mdebbar): Avoid use of `block.spanAdvanceInLine` (similar to `getPositionForOffset`)
+            line.advance.left + line.formattingShift + block.spanAdvanceInLine,
             line.advance.top + line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent,
           ),
           ui.Offset(x, y),
         );
         switch (styleElement) {
           case StyleElements.shadows:
-            for (final ui.Shadow shadow in clusterText.textStyle!.shadows!) {
+            paintContext.save();
+            for (final ui.Shadow shadow in clusterText.style.shadows!) {
               painter.fillShadow(clusterText, shadow, layout.isDefaultLtr);
               painter.paintShadow(canvas, sourceRect, targetRect);
             }
+            paintContext.restore();
           case StyleElements.text:
             painter.fillTextCluster(clusterText, layout.isDefaultLtr);
             painter.paintTextCluster(canvas, sourceRect, targetRect);
@@ -146,28 +147,26 @@ class TextPaint {
         .translate(lineOffset.dx, lineOffset.dy)
         .translate(-shift, 0);
 
-    final String text = paragraph.getText(webTextCluster.textRange);
-    WebParagraphDebug.log(
-      'calculateBlock "$text" ${block.textRange}-${block.textMetricsZero} ${block.clusterRange} source: $sourceRect => target: $targetRect',
-    );
+    if (WebParagraphDebug.logging) {
+      final String text = paragraph.getText1(webTextCluster.globalStart, webTextCluster.globalEnd);
+      WebParagraphDebug.log(
+        'calculateCluster "$text" ${block.textRange}-${block.span.start} ${block.clusterRange} source: $sourceRect => target: $targetRect',
+      );
+    }
 
     return (sourceRect, targetRect);
   }
 
   (ui.Rect sourceRect, ui.Rect targetRect) calculateBlock(
     TextLayout layout,
-    LineClusterBlock block,
+    ClusterBlock block,
     ui.Offset blockOffset,
     ui.Offset paragraphOffset,
   ) {
-    final ui.Rect advance = block.textMetrics!.getAdvance(
-      block.textRange.translate(-block.textMetricsZero),
-    );
+    final ui.Rect advance = block.advance;
 
-    final int start = block.bidiLevel.isEven
-        ? block.clusterRange.start
-        : block.clusterRange.end - 1;
-    final ExtendedTextCluster startCluster = layout.textClusters[start];
+    final int start = block.isLtr ? block.clusterRange.start : block.clusterRange.end - 1;
+    final ExtendedTextCluster startCluster = layout.allClusters[start];
 
     // Define the text clusters rect (using advances, not selected rects)
     final ui.Rect zeroRect = ui.Rect.fromLTWH(0, 0, advance.width, advance.height);
@@ -178,12 +177,14 @@ class TextPaint {
     // (and then to the paragraph.paint x and y)
     // TODO(jlavrova): Make translation in a single operation so it's actually an integer
     final ui.Rect targetRect = zeroRect
+        // TODO(mdebbar=>jlavrova): Can we use `block.advance.left` instead of the cluster? That way
+        //                          we don't have to worry about LTR vs RTL to get first cluster.
         .translate(blockOffset.dx + startCluster.advance.left, blockOffset.dy)
         .translate(paragraphOffset.dx, paragraphOffset.dy);
 
     final String text = paragraph.getText(block.textRange);
     WebParagraphDebug.log(
-      'calculateBlock "$text" ${block.textRange}-${block.textMetricsZero} ${block.clusterRange} '
+      'calculateBlock "$text" ${block.textRange}-${block.span.start} ${block.clusterRange} '
       'source: ${sourceRect.left}:${sourceRect.right}x${sourceRect.top}:${sourceRect.bottom} => '
       'target: ${targetRect.left}:${targetRect.right}x${targetRect.top}:${targetRect.bottom}',
     );

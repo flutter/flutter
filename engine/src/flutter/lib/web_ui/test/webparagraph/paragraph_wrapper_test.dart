@@ -9,7 +9,7 @@ import 'package:ui/ui.dart';
 
 import '../common/test_initialization.dart';
 
-// TODO(jlavrova): To make the tests consistent in all environments, we need to use the Ahem font.
+// TODO(mdebbar=>jlavrova): To make the tests consistent in all environments, we need to use the Ahem font.
 final WebParagraphStyle ahemStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
 
 void main() {

@@ -16,9 +16,17 @@ import 'layout.dart';
 import 'paint.dart';
 import 'painter.dart';
 
+/// A single canvas2d context to use for text layout.
+@visibleForTesting
+final DomCanvasRenderingContext2D layoutContext =
+    // We don't use this canvas to draw anything, so let's make it as small as
+    // possible to save memory.
+    createDomCanvasElement(width: 0, height: 0).context2D;
+
 /// The web implementation of  [ui.ParagraphStyle]
 @immutable
 class WebParagraphStyle implements ui.ParagraphStyle {
+  // TODO(mdebbar): Make all params required to avoid future bugs.
   WebParagraphStyle({
     ui.TextDirection? textDirection,
     ui.TextAlign? textAlign,
@@ -46,10 +54,6 @@ class WebParagraphStyle implements ui.ParagraphStyle {
   @visibleForTesting
   WebTextStyle get textStyle => _textStyle;
   final WebTextStyle _textStyle;
-
-  WebTextStyle getTextStyle() {
-    return _textStyle;
-  }
 
   final ui.TextDirection textDirection;
   final ui.TextAlign textAlign;
@@ -121,6 +125,7 @@ class WebParagraphStyle implements ui.ParagraphStyle {
   }
 }
 
+// TODO(mdebbar): Rename to `PaintElements`?
 enum StyleElements {
   // Background for a text clusters block
   background,
@@ -398,7 +403,7 @@ class WebTextStyle implements ui.TextStyle {
     return result;
   }
 
-  String buildCssFontString() {
+  String _buildCssFontString() {
     final String cssFontStyle = fontStyle?.toCssString() ?? StyleManager.defaultFontStyle;
     final String cssFontWeight = fontWeight?.toCssString() ?? StyleManager.defaultFontWeight;
     final int cssFontSize = (fontSize ?? StyleManager.defaultFontSize).floor();
@@ -407,15 +412,15 @@ class WebTextStyle implements ui.TextStyle {
     return '$cssFontStyle $cssFontWeight ${cssFontSize}px $cssFontFamily';
   }
 
-  String buildLetterSpacingString() {
+  String _buildLetterSpacingString() {
     return (letterSpacing != null) ? '${letterSpacing}px' : '0px';
   }
 
-  String buildWordSpacingString() {
+  String _buildWordSpacingString() {
     return (wordSpacing != null) ? '${wordSpacing}px' : '0px';
   }
 
-  void applyFontFeatures(DomCanvasRenderingContext2D context) {
+  void _applyFontFeatures(DomCanvasRenderingContext2D context) {
     if (fontFeatures == null) {
       return;
     }
@@ -450,6 +455,15 @@ class WebTextStyle implements ui.TextStyle {
       context.textRendering = optimizeLegibility ? 'optimizeLegibility' : 'optimizeSpeed';
       context.canvas!.style.fontFeatureSettings = fontFeatureListToCss(fontFeatureSettings);
     }
+  }
+
+  void applyToContext(DomCanvasRenderingContext2D context) {
+    // Setup all the font-affecting attributes
+    // TODO(jlavrova): set 'lang' attribute as a combination of locale+language
+    context.font = _buildCssFontString();
+    context.letterSpacing = _buildLetterSpacingString();
+    context.wordSpacing = _buildWordSpacingString();
+    _applyFontFeatures(context);
   }
 
   bool hasElement(StyleElements element) {
@@ -497,6 +511,20 @@ abstract class _RangeStartEnd {
   int get size => _end - _start;
 
   bool get isEmpty => _start == _end;
+  bool get isNotEmpty => !isEmpty;
+
+  bool isBefore(int otherStart) {
+    return end <= otherStart;
+  }
+
+  bool isAfter(int otherEnd) {
+    return otherEnd <= start;
+  }
+
+  /// Whether this range overlaps with the given range from [start] to [end].
+  bool overlapsWith(int start, int end) {
+    return !(isBefore(start) || isAfter(end));
+  }
 
   @override
   bool operator ==(Object other) {
@@ -541,27 +569,31 @@ class ClusterRange extends _RangeStartEnd {
   static ClusterRange intersectClusterRange(ClusterRange a, ClusterRange b) {
     return ClusterRange(start: math.max(a.start, b.start), end: math.min(a.end, b.end));
   }
-
-  static ClusterRange mergeSequentialClusterRanges(ClusterRange a, ClusterRange b) {
-    assert(a.end == b.start || b.end == a.start);
-    return ClusterRange(start: math.min(a.start, b.start), end: math.max(a.end, b.end));
-  }
 }
 
-/// A range of text, represented by its start (inclusive) and end (exclusive) indices.
+/// A range of text, represented by its [start] (inclusive) and [end] (exclusive) indices.
+///
 /// The indices point to the UTF-16 code units of the text string.
-/// Notice that this is different from ClusterRange, which points to the textCluster list.
-/// The main source of confusion is that these two ranges are often look identical but really are not
+///
+/// Note that this is different from [ClusterRange], which points to the text cluster list.
+/// The main source of confusion is that these two ranges often look identical but really are not
 /// (in case of one codepoint = one text cluster, often happens in English text).
-class TextRange extends _RangeStartEnd {
-  TextRange({required int start, required int end}) : super(start, end);
+///
+/// This is also different from [ui.TextRange] in that this is a mutable range.
+// TODO(mdebbar): Can we remove this class and use ui.TextRange instead?
+class MutTextRange extends _RangeStartEnd {
+  MutTextRange(super.start, super.end);
+  MutTextRange.collapsed(super.offset) : super.collapsed();
+  MutTextRange.zero() : super.zero();
 
-  TextRange.collapsed(super.offset) : super.collapsed();
+  MutTextRange clone() => MutTextRange(start, end);
 
-  TextRange.zero() : super.zero();
+  MutTextRange translate(int offset) {
+    return MutTextRange(start + offset, end + offset);
+  }
 
-  TextRange clone() {
-    return TextRange(start: start, end: end);
+  MutTextRange intersect(MutTextRange other) {
+    return MutTextRange(math.max(start, other.start), math.min(end, other.end));
   }
 
   @override
@@ -571,44 +603,123 @@ class TextRange extends _RangeStartEnd {
     if (identical(this, other)) {
       return true;
     }
-    return other is TextRange && super == other;
+    return other is MutTextRange && super == other;
   }
 
   @override
   String toString() {
     return '[$start:$end)';
   }
+}
 
-  TextRange translate(int offset) {
-    return TextRange(start: start + offset, end: end + offset);
-  }
+abstract class ParagraphSpan extends MutTextRange {
+  ParagraphSpan(super.start, super.end, this.style);
+  ParagraphSpan.collapsed(super.offset, this.style) : super.collapsed();
+  ParagraphSpan.zero(this.style) : super.zero();
 
-  static TextRange intersectTextRange(TextRange a, TextRange b) {
-    return TextRange(start: math.max(a.start, b.start), end: math.min(a.end, b.end));
+  final WebTextStyle style;
+
+  late final clusters = _getClusters();
+
+  double get fontBoundingBoxAscent;
+  double get fontBoundingBoxDescent;
+
+  List<ExtendedTextCluster> _getClusters();
+}
+
+class PlaceholderSpan extends ParagraphSpan {
+  PlaceholderSpan(
+    super.start,
+    super.end,
+    super.style, {
+    required this.width,
+    required this.height,
+    required this.alignment,
+    required this.baseline,
+    required this.baselineOffset,
+  });
+
+  final double width;
+  final double height;
+  final ui.PlaceholderAlignment alignment;
+  final ui.TextBaseline baseline;
+  final double baselineOffset;
+
+  PlaceholderCluster get singleCluster => clusters.single as PlaceholderCluster;
+
+  @override
+  double get fontBoundingBoxAscent => height;
+
+  @override
+  double get fontBoundingBoxDescent => 0.0;
+
+  @override
+  List<PlaceholderCluster> _getClusters() {
+    return <PlaceholderCluster>[PlaceholderCluster(this)];
   }
 }
 
-/// A [TextRange] with an associated [WebTextStyle].
-class StyledTextRange extends TextRange {
-  StyledTextRange(int start, int end, this.style) : super(start: start, end: end);
+class TextSpan extends ParagraphSpan {
+  TextSpan(super.start, super.end, super.style, this.text);
+  TextSpan.collapsed(super.offset, super.style, this.text) : super.collapsed();
+  TextSpan.zero(super.style, this.text) : super.zero();
 
-  StyledTextRange.collapsed(super.offset, this.style) : super.collapsed();
+  final String text;
 
-  StyledTextRange.zero(this.style) : super.zero();
+  late final DomTextMetrics _metrics = _getMetrics();
 
-  final WebTextStyle style;
-  WebParagraphPlaceholder? placeholder;
+  @override
+  late final double fontBoundingBoxAscent = _metrics.fontBoundingBoxAscent;
+
+  @override
+  late final double fontBoundingBoxDescent = _metrics.fontBoundingBoxDescent;
+
+  DomTextMetrics _getMetrics() {
+    // TODO(mdebbar=>jlavrova): Is this necessary?
+    // layoutContext.direction = isDefaultLtr ? 'ltr' : 'rtl';
+
+    style.applyToContext(layoutContext);
+    return layoutContext.measureText(text);
+  }
+
+  @override
+  List<TextCluster> _getClusters() {
+    final clusters = <TextCluster>[];
+    for (final DomTextCluster cluster in _metrics.getTextClusters()) {
+      clusters.add(TextCluster(this, cluster));
+    }
+    return clusters;
+  }
+
+  ui.Rect getClusterBounds(TextCluster cluster) {
+    return _metrics.getBounds(cluster.start, cluster.end);
+  }
+
+  ui.Rect getClusterSelection(TextCluster cluster) {
+    return _metrics.getSelection(cluster.start, cluster.end);
+  }
+
+  ui.Rect getBlockSelection(LineBlock block) {
+    // This `selection` is relative to the span, but blocks should be positioned relative to the line.
+    final selection = _metrics.getSelection(
+      block.textRange.start - start,
+      block.textRange.end - start,
+    );
+
+    // TODO(mdebbar): Consider moving this block-aware code to `TextBlock`.
+
+    // `metrics.getSelection` calculates the rect relative to the span. It has no idea about the
+    // span's position within the line or the paragraph. In order to make the rect's position relative
+    // to the line, we need to use `block.advanceInLine`.
+    //
+    // See [LineBlock.advanceInLine] for a clarifying diagram.
+    return ui.Rect.fromLTWH(block.advanceInLine, selection.top, selection.width, selection.height);
+  }
 
   @override
   String toString() {
-    return 'StyledTextRange[$start:$end) ${placeholder != null ? 'placeholder' : 'text'} style: $style';
+    return 'TextSpan($start, $end, "$text", $style)';
   }
-
-  void markAsPlaceholder(WebParagraphPlaceholder placeholder) {
-    this.placeholder = placeholder;
-  }
-
-  bool get isPlaceholder => placeholder != null;
 }
 
 class WebStrutStyle implements ui.StrutStyle {
@@ -632,21 +743,15 @@ class WebStrutStyle implements ui.StrutStyle {
 ///
 /// See: https://chromestatus.com/feature/5075532483657728
 class WebParagraph implements ui.Paragraph {
-  WebParagraph(this._paragraphStyle, this._styledTextRanges, this._text);
+  WebParagraph(this.paragraphStyle, this.spans, this.text);
 
-  WebParagraphStyle get paragraphStyle => _paragraphStyle;
-  final WebParagraphStyle _paragraphStyle;
-
-  List<StyledTextRange> get styledTextRanges => _styledTextRanges;
-  final List<StyledTextRange> _styledTextRanges;
-
-  String get text => _text;
-  final String _text;
+  final WebParagraphStyle paragraphStyle;
+  final List<ParagraphSpan> spans;
+  final String text;
 
   // TODO(jlavrova): Implement.
   @override
-  double get alphabeticBaseline => _alphabeticBaseline;
-  final double _alphabeticBaseline = 0;
+  double alphabeticBaseline = 0;
 
   // TODO(jlavrova): Implement.
   @override
@@ -671,6 +776,7 @@ class WebParagraph implements ui.Paragraph {
   @override
   double width = 0;
 
+  // TODO(mdebbar): Rename this when you understand what it's for.
   double requiredWidth = 0;
 
   List<TextLine> get lines => _layout.lines;
@@ -703,6 +809,7 @@ class WebParagraph implements ui.Paragraph {
   }
 
   @override
+  // TODO(mdebbar=>jlavrova): Why is this implemented here, not in `_layout`?
   ui.GlyphInfo? getGlyphInfoAt(int codeUnitOffset) {
     WebParagraphDebug.log('getGlyphInfoAt($codeUnitOffset)');
     final clusterRange = _layout.convertTextToClusterRange(
@@ -735,13 +842,13 @@ class WebParagraph implements ui.Paragraph {
           } else if (i >= clusterRange.end) {
             break;
           }
-          final cluster = _layout.textClusters[i];
+          final cluster = _layout.allClusters[i];
           return ui.GlyphInfo(
             cluster.advance.translate(
-              line.advance.left + line.formattingShift + visualBlock.clusterShiftInLine,
+              line.advance.left + line.formattingShift + visualBlock.spanAdvanceInLine,
               line.advance.top + line.fontBoundingBoxAscent,
             ),
-            ui.TextRange(start: cluster.textRange.start, end: cluster.textRange.end),
+            ui.TextRange(start: cluster.globalStart, end: cluster.globalEnd),
             _layout.detectTextDirection(clusterRange),
           );
         }
@@ -856,13 +963,18 @@ class WebParagraph implements ui.Paragraph {
     return _layout;
   }
 
-  String getText(TextRange textRange) {
+  // TODO(mdebbar): Remove this in favor of `getText1`.
+  String getText(MutTextRange textRange) {
+    return getText1(textRange.start, textRange.end);
+  }
+
+  String getText1(int start, int end) {
     if (text.isEmpty) {
       return text;
     }
-    assert(textRange.start >= 0);
-    assert(textRange.end <= text.length);
-    return text.substring(textRange.start, textRange.end);
+    assert(start >= 0);
+    assert(end <= text.length);
+    return text.substring(start, end);
   }
 
   late final TextLayout _layout = TextLayout(this);
@@ -950,49 +1062,31 @@ class WebLineMetrics implements ui.LineMetrics {
   }
 }
 
-final String placeholderChar = String.fromCharCode(0xFFFC);
-
-class WebParagraphPlaceholder {
-  WebParagraphPlaceholder({
-    required this.width,
-    required this.height,
-    required this.alignment,
-    required this.baseline,
-    required this.offset,
-  });
-
-  final double width;
-  final double height;
-  final ui.PlaceholderAlignment alignment;
-  final ui.TextBaseline baseline;
-  final double offset;
-}
+const String _kPlaceholderChar = '\uFFFC';
 
 class WebParagraphBuilder implements ui.ParagraphBuilder {
   WebParagraphBuilder(ui.ParagraphStyle paragraphStyle)
-    : paragraphStyle = paragraphStyle as WebParagraphStyle,
-      textStylesList = <StyledTextRange>[StyledTextRange.zero(paragraphStyle.getTextStyle())],
-      textStylesStack = <WebTextStyle>[paragraphStyle.getTextStyle()] {
-    WebParagraphDebug.log('WebParagraphBuilder($paragraphStyle)');
-  }
+    : _paragraphStyle = paragraphStyle as WebParagraphStyle,
+      _styleStack = <StyleNode>[RootStyleNode(paragraphStyle)];
 
-  final WebParagraphStyle paragraphStyle;
+  final WebParagraphStyle _paragraphStyle;
 
-  // TODO(jlavrova): Combine these two. We can do this with only a List<StyledTextRange>.
-  // Answer: not without adding extra information to the list.
-  // Currently, the list serves just as a flattened list of style/range
-  // The stack serves as a structure for push/pop (which cannot be done with the list).
-  final List<StyledTextRange> textStylesList;
-  final List<WebTextStyle> textStylesStack;
+  final _spans = <ParagraphSpan>[];
+  final List<StyleNode> _styleStack;
 
-  final StringBuffer textBuffer = StringBuffer();
+  final StringBuffer _fullTextBuffer = StringBuffer();
+
+  WebTextStyle? _spanStyle;
+  StringBuffer _spanTextBuffer = StringBuffer();
+
+  WebTextStyle get _currentStyle => _styleStack.last.mergedStyle();
 
   @override
   void addPlaceholder(
     double width,
     double height,
     ui.PlaceholderAlignment alignment, {
-    double? scale,
+    double scale = 1.0,
     double? baselineOffset,
     ui.TextBaseline? baseline,
   }) {
@@ -1009,53 +1103,94 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
           baseline != null,
     );
 
-    pushStyle(textStylesStack.last);
-    addText(placeholderChar);
-    textStylesList.last.markAsPlaceholder(
-      WebParagraphPlaceholder(
-        width: width * (scale ?? 1.0),
-        height: height * (scale ?? 1.0),
+    _closeTextSpan();
+
+    final start = _fullTextBuffer.length;
+    addText(_kPlaceholderChar);
+    final end = _fullTextBuffer.length;
+
+    _spans.add(
+      PlaceholderSpan(
+        start,
+        end,
+        _currentStyle,
+        width: width,
+        height: height,
         alignment: alignment,
         baseline: baseline ?? ui.TextBaseline.alphabetic,
-        offset: (baselineOffset ?? height) * (scale ?? 1.0),
+        baselineOffset: (baselineOffset ?? height) * scale,
       ),
     );
-    pop();
+
+    _resetTextSpan();
 
     _placeholderCount++;
-    _placeholderScales.add(scale ?? 1.0);
+    _placeholderScales.add(scale);
   }
 
   @override
   void addText(String text) {
-    WebParagraphDebug.log('WebParagraphBuilder.addText("$text")');
-    for (var i = 0; i < textStylesList.length; ++i) {
-      WebParagraphDebug.log('$i: ${textStylesList[i]}');
+    if (text.isEmpty) {
+      return;
     }
-    textBuffer.write(text);
-    finishStyledTextRange();
+
+    if (_shouldCloseTextSpan()) {
+      _closeTextSpan();
+    }
+
+    // Remember the style that the span started at.
+    _spanStyle = _currentStyle;
+    _spanTextBuffer.write(text);
+
+    _fullTextBuffer.write(text);
+  }
+
+  bool _shouldCloseTextSpan() {
+    if (_spanStyle == null) {
+      // No span has started yet, there's nothing to close.
+      return false;
+    }
+
+    // When the current style is different from the style of the span being built, then we
+    // should close that span and start a new one.
+    return _spanStyle != _currentStyle;
+  }
+
+  void _closeTextSpan() {
+    if (_spanStyle == null) {
+      // No span has started yet, there's nothing to close.
+      return;
+    }
+
+    assert(_spanTextBuffer.isNotEmpty);
+    _spans.add(
+      TextSpan(
+        _fullTextBuffer.length - _spanTextBuffer.length,
+        _fullTextBuffer.length,
+        _spanStyle!,
+        _spanTextBuffer.toString(),
+      ),
+    );
+
+    _resetTextSpan();
+  }
+
+  void _resetTextSpan() {
+    _spanStyle = null;
+    _spanTextBuffer = StringBuffer();
   }
 
   @override
   WebParagraph build() {
-    final String text = textBuffer.toString();
-    finishStyledTextRange();
+    _closeTextSpan();
+    final String text = _fullTextBuffer.toString();
 
-    // We only keep the default style if it has some text
-    if (textStylesList.first.isEmpty) {
-      textStylesList.removeAt(0);
+    final paragraph = WebParagraph(_paragraphStyle, _spans, text);
+    WebParagraphDebug.log('WebParagraphBuilder.build(): "$text" ${_spans.length}');
+    for (var i = 0; i < _spans.length; ++i) {
+      WebParagraphDebug.log('$i: ${_spans[i]}');
     }
-
-    for (var i = 0; i < textStylesList.length; ++i) {
-      textStylesList[i].style.fillMissingFields();
-    }
-
-    final WebParagraph builtParagraph = WebParagraph(paragraphStyle, textStylesList, text);
-    WebParagraphDebug.log('WebParagraphBuilder.build(): "$text" ${textStylesList.length}');
-    for (var i = 0; i < textStylesList.length; ++i) {
-      WebParagraphDebug.log('$i: ${textStylesList[i]}');
-    }
-    return builtParagraph;
+    return paragraph;
   }
 
   @override
@@ -1068,51 +1203,244 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
 
   @override
   void pop() {
-    WebParagraphDebug.log('WebParagraphBuilder.pop()');
-    for (var i = 0; i < textStylesList.length; ++i) {
-      WebParagraphDebug.log('$i: ${textStylesList[i]}');
-    }
-    if (textStylesStack.length > 1) {
-      textStylesStack.removeLast();
-      startStyledTextRange();
-    } else {
-      // In this case we use paragraph style and skip Pop operation
-      WebParagraphDebug.error('Cannot perform pop operation: empty style list');
+    // Don't pop the the first style node that represents `paragraphStyle`.
+    if (_styleStack.length > 1) {
+      _styleStack.removeLast();
     }
   }
 
   @override
   void pushStyle(ui.TextStyle textStyle) {
-    WebParagraphDebug.log('WebParagraphBuilder.pushStyle($textStyle)');
-    for (var i = 0; i < textStylesList.length; ++i) {
-      WebParagraphDebug.log('$i: ${textStylesList[i]}');
-    }
-    final mergedStyle = textStylesStack.last.mergeWith(textStyle as WebTextStyle);
-    textStylesStack.add(mergedStyle);
-    final last = textStylesList.last;
-    if (last.end == textBuffer.length && last.style == textStyle) {
-      // Just continue with the same style
-      return;
-    }
-    startStyledTextRange();
+    final newNode = _styleStack.last.createChild(textStyle as WebTextStyle);
+    _styleStack.add(newNode);
+  }
+}
+
+/// Represents a node in the tree of text styles pushed to [ui.ParagraphBuilder].
+///
+/// The [ui.ParagraphBuilder.pushStyle] and [ui.ParagraphBuilder.pop] operations
+/// represent the entire tree of styles in the paragraph. In our implementation,
+/// we don't need to keep the entire tree structure in memory. At any point in
+/// time, we only need a stack of nodes that represent the current branch in the
+/// tree. The items in the stack are [StyleNode] objects.
+abstract class StyleNode {
+  /// Create a child for this style node.
+  ///
+  /// We are not creating a tree structure, hence there's no need to keep track
+  /// of the children.
+  ChildStyleNode createChild(WebTextStyle style) {
+    return ChildStyleNode(parent: this, style: style);
   }
 
-  void startStyledTextRange() {
-    finishStyledTextRange();
-    textStylesList.add(StyledTextRange.collapsed(textBuffer.length, textStylesStack.last));
+  WebTextStyle? _cachedMergedStyle;
+
+  /// Generates the final text style to be applied to the text span.
+  ///
+  /// The resolved text style is equivalent to the entire ascendent chain of
+  /// parent style nodes.
+  WebTextStyle mergedStyle() {
+    return _cachedMergedStyle ??= WebTextStyle(
+      color: _color,
+      decoration: _decoration,
+      decorationColor: _decorationColor,
+      decorationStyle: _decorationStyle,
+      decorationThickness: _decorationThickness,
+      fontWeight: _fontWeight,
+      fontStyle: _fontStyle,
+      textBaseline: _textBaseline,
+      fontFamily: _fontFamily,
+      fontFamilyFallback: _fontFamilyFallback,
+      fontFeatures: _fontFeatures,
+      fontVariations: _fontVariations,
+      fontSize: _fontSize,
+      letterSpacing: _letterSpacing,
+      wordSpacing: _wordSpacing,
+      height: _height,
+      leadingDistribution: _leadingDistribution,
+      locale: _locale,
+      background: _background,
+      foreground: _foreground,
+      shadows: _shadows,
+    );
   }
 
-  void finishStyledTextRange() {
-    // TODO(jlavrova): Instead of removing empty styles, can we try reusing the last one if it's empty?
-    //                 We would need to make `StyledTextRange.style` non-final.
-    // Answer: we can but we we still have to (possibly) remove few empty styles in the middle.
-    // It's a small gain at expense of clarity, I think.
+  ui.Color? get _color;
+  ui.TextDecoration? get _decoration;
+  ui.Color? get _decorationColor;
+  ui.TextDecorationStyle? get _decorationStyle;
+  double? get _decorationThickness;
+  ui.FontWeight? get _fontWeight;
+  ui.FontStyle? get _fontStyle;
+  ui.TextBaseline? get _textBaseline;
+  String get _fontFamily;
+  List<String>? get _fontFamilyFallback;
+  List<ui.FontFeature>? get _fontFeatures;
+  List<ui.FontVariation>? get _fontVariations;
+  double get _fontSize;
+  double? get _letterSpacing;
+  double? get _wordSpacing;
+  double? get _height;
+  ui.TextLeadingDistribution? get _leadingDistribution;
+  ui.Locale? get _locale;
+  ui.Paint? get _background;
+  ui.Paint? get _foreground;
+  List<ui.Shadow>? get _shadows;
+}
 
-    // Remove all text styles without text
-    while (textStylesList.length > 1 && textStylesList.last.start == textBuffer.length) {
-      textStylesList.removeLast();
-    }
-    // Update the first one found with text
-    textStylesList.last.end = textBuffer.length;
+/// Represents a non-root [StyleNode].
+class ChildStyleNode extends StyleNode {
+  /// Creates a [ChildStyleNode] with the given [parent] and [style].
+  ChildStyleNode({required this.parent, required this.style});
+
+  /// The parent node to be used when resolving text styles.
+  final StyleNode parent;
+
+  /// The text style associated with the current node.
+  final WebTextStyle style;
+
+  // Read these properties from the TextStyle associated with this node. If the
+  // property isn't defined, go to the parent node.
+
+  @override
+  ui.Color? get _color => style.color ?? (_foreground == null ? parent._color : null);
+
+  @override
+  ui.TextDecoration? get _decoration => style.decoration ?? parent._decoration;
+
+  @override
+  ui.Color? get _decorationColor => style.decorationColor ?? parent._decorationColor;
+
+  @override
+  ui.TextDecorationStyle? get _decorationStyle => style.decorationStyle ?? parent._decorationStyle;
+
+  @override
+  double? get _decorationThickness => style.decorationThickness ?? parent._decorationThickness;
+
+  @override
+  ui.FontWeight? get _fontWeight => style.fontWeight ?? parent._fontWeight;
+
+  @override
+  ui.FontStyle? get _fontStyle => style.fontStyle ?? parent._fontStyle;
+
+  @override
+  ui.TextBaseline? get _textBaseline => style.textBaseline ?? parent._textBaseline;
+
+  @override
+  List<String>? get _fontFamilyFallback => style.fontFamilyFallback ?? parent._fontFamilyFallback;
+
+  @override
+  List<ui.FontFeature>? get _fontFeatures => style.fontFeatures ?? parent._fontFeatures;
+
+  @override
+  List<ui.FontVariation>? get _fontVariations => style.fontVariations ?? parent._fontVariations;
+
+  @override
+  double get _fontSize => style.fontSize ?? parent._fontSize;
+
+  @override
+  double? get _letterSpacing => style.letterSpacing ?? parent._letterSpacing;
+
+  @override
+  double? get _wordSpacing => style.wordSpacing ?? parent._wordSpacing;
+
+  @override
+  double? get _height {
+    return style.height == ui.kTextHeightNone ? null : (style.height ?? parent._height);
   }
+
+  @override
+  ui.TextLeadingDistribution? get _leadingDistribution =>
+      style.leadingDistribution ?? parent._leadingDistribution;
+
+  @override
+  ui.Locale? get _locale => style.locale ?? parent._locale;
+
+  @override
+  ui.Paint? get _background => style.background ?? parent._background;
+
+  @override
+  ui.Paint? get _foreground => style.foreground ?? parent._foreground;
+
+  @override
+  List<ui.Shadow>? get _shadows => style.shadows ?? parent._shadows;
+
+  // Font family is slightly different from the other properties above. It's
+  // never null on the TextStyle object, so we use `isFontFamilyProvided` to
+  // check if font family is defined or not.
+  @override
+  String get _fontFamily => style.originalFontFamily ?? parent._fontFamily;
+}
+
+/// The root style node for the paragraph.
+///
+/// The style of the root is derived from a [ui.ParagraphStyle] and is the root
+/// style for all spans in the paragraph.
+class RootStyleNode extends StyleNode {
+  /// Creates a [RootStyleNode] from [paragraphStyle].
+  RootStyleNode(WebParagraphStyle paragraphStyle) : style = paragraphStyle.textStyle;
+
+  /// The style for the current node.
+  final WebTextStyle style;
+
+  @override
+  ui.Color? get _color => null;
+
+  @override
+  ui.TextDecoration? get _decoration => null;
+
+  @override
+  ui.Color? get _decorationColor => null;
+
+  @override
+  ui.TextDecorationStyle? get _decorationStyle => null;
+
+  @override
+  double? get _decorationThickness => null;
+
+  @override
+  ui.FontWeight? get _fontWeight => style.fontWeight;
+  @override
+  ui.FontStyle? get _fontStyle => style.fontStyle;
+
+  @override
+  ui.TextBaseline? get _textBaseline => null;
+
+  @override
+  String get _fontFamily => style.originalFontFamily ?? StyleManager.defaultFontFamily;
+
+  @override
+  List<String>? get _fontFamilyFallback => null;
+
+  @override
+  List<ui.FontFeature>? get _fontFeatures => null;
+
+  @override
+  List<ui.FontVariation>? get _fontVariations => null;
+
+  @override
+  double get _fontSize => style.fontSize ?? StyleManager.defaultFontSize;
+
+  @override
+  double? get _letterSpacing => null;
+
+  @override
+  double? get _wordSpacing => null;
+
+  @override
+  double? get _height => style.height;
+
+  @override
+  ui.TextLeadingDistribution? get _leadingDistribution => null;
+
+  @override
+  ui.Locale? get _locale => style.locale;
+
+  @override
+  ui.Paint? get _background => null;
+
+  @override
+  ui.Paint? get _foreground => null;
+
+  @override
+  List<ui.Shadow>? get _shadows => null;
 }

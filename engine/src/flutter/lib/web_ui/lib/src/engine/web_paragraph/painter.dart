@@ -33,13 +33,13 @@ abstract class Painter {
   /// Fills out the information needed to paint the background.
   void paintBackground(
     ui.Canvas canvas,
-    LineClusterBlock block,
+    ClusterBlock block,
     ui.Rect sourceRect,
     ui.Rect targetRect,
   );
 
   /// Fills out the information needed to paint the decorations.
-  void fillDecorations(LineClusterBlock block, ui.Rect sourceRect);
+  void fillDecorations(ClusterBlock block, ui.Rect sourceRect);
 
   /// Paints the decorations previously filled by [fillDecorations].
   void paintDecorations(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect);
@@ -54,14 +54,14 @@ final paintContext = _paintCanvas.getContext('2d')! as DomCanvasRenderingContext
 class CanvasKitPainter extends Painter {
   @override
   void paintBackground(ui.Canvas canvas, LineBlock block, ui.Rect sourceRect, ui.Rect targetRect) {
-    canvas.drawRect(targetRect, block.textStyle.background!);
+    canvas.drawRect(targetRect, block.style.background!);
   }
 
   @override
-  void fillDecorations(LineClusterBlock block, ui.Rect sourceRect) {
-    paintContext.fillStyle = block.textStyle.foreground?.color.toCssString();
+  void fillDecorations(ClusterBlock block, ui.Rect sourceRect) {
+    paintContext.fillStyle = block.style.foreground?.color.toCssString();
 
-    final double thickness = calculateThickness(block.textStyle);
+    final double thickness = calculateThickness(block.style);
 
     const double DoubleDecorationSpacing = 3.0;
 
@@ -70,13 +70,13 @@ class CanvasKitPainter extends Painter {
       ui.TextDecoration.underline,
       ui.TextDecoration.overline,
     ]) {
-      if (!block.textStyle.decoration!.contains(decoration)) {
+      if (!block.style.decoration!.contains(decoration)) {
         continue;
       }
 
-      final double height =
-          block.textMetrics!.fontBoundingBoxAscent + block.textMetrics!.fontBoundingBoxDescent;
-      final double ascent = block.textMetrics!.fontBoundingBoxAscent;
+      // TODO(mdebbar=>jlavrova): Why using these instead of multiplied values?
+      final double height = block.rawFontBoundingBoxAscent + block.rawFontBoundingBoxDescent;
+      final double ascent = block.rawFontBoundingBoxAscent;
       final double position = calculatePosition(decoration, thickness, height, ascent);
       WebParagraphDebug.log('decoration=$decoration thickness=$thickness position=$position');
 
@@ -86,11 +86,11 @@ class CanvasKitPainter extends Painter {
 
       paintContext.reset();
       paintContext.lineWidth = thickness;
-      paintContext.strokeStyle = block.textStyle.decorationColor!.toCssString();
+      paintContext.strokeStyle = block.style.decorationColor!.toCssString();
 
-      switch (block.textStyle.decorationStyle!) {
+      switch (block.style.decorationStyle!) {
         case ui.TextDecorationStyle.wavy:
-          calculateWaves(x, y, block.textStyle, sourceRect, thickness);
+          calculateWaves(x, y, block.style, sourceRect, thickness);
 
         case ui.TextDecorationStyle.double:
           final double bottom = y + DoubleDecorationSpacing + thickness;
@@ -106,8 +106,7 @@ class CanvasKitPainter extends Painter {
         case ui.TextDecorationStyle.dotted:
           final Float32List dashes = Float32List(2)
             ..[0] =
-                thickness *
-                (block.textStyle.decorationStyle! == ui.TextDecorationStyle.dotted ? 1 : 4)
+                thickness * (block.style.decorationStyle! == ui.TextDecorationStyle.dotted ? 1 : 4)
             ..[1] = thickness;
 
           paintContext.setLineDash(dashes);
@@ -123,7 +122,7 @@ class CanvasKitPainter extends Painter {
           paintContext.lineTo(x + width, y);
           paintContext.stroke();
           WebParagraphDebug.log(
-            'solid: $x:${x + width}, $y ${block.textStyle.decorationColor!.toCssString()}',
+            'solid: $x:${x + width}, $y ${block.style.decorationColor!.toCssString()}',
           );
       }
     }
@@ -149,12 +148,13 @@ class CanvasKitPainter extends Painter {
 
   @override
   void fillShadow(ExtendedTextCluster webTextCluster, ui.Shadow shadow, bool isDefaultLtr) {
-    final WebTextStyle textStyle = webTextCluster.textStyle!;
+    final WebTextStyle style = webTextCluster.style;
 
     // TODO(jlavrova): see if we can implement shadowing ourself avoiding redrawing text clusters many times.
     // Answer: we cannot, and also there is a question of calculating the size of the shadow which we have to
     // take from Chrome as well (performing another measure text operation with shadow attribute set).
-    paintContext.fillStyle = textStyle.foreground?.color.toCssString();
+    // TODO(mdebbar=>jlavrova): Check `style.color` first.
+    paintContext.fillStyle = style.foreground?.color.toCssString();
     paintContext.shadowColor = shadow.color.toCssString();
     paintContext.shadowBlur = shadow.blurRadius;
     paintContext.shadowOffsetX = shadow.offset.dx;
@@ -166,22 +166,13 @@ class CanvasKitPainter extends Painter {
     // We fill the text cluster into a rectange [0,0,w,h]
     // but we need to shift the y coordinate by the font ascent
     // becase the text is drawn at the ascent, not at 0
-    paintContext.fillTextCluster(
-      webTextCluster.cluster!,
-      /*left:*/ 0,
-      /*top:*/ webTextCluster.fontBoundingBoxAscent,
-      /*ignore the text cluster shift from the text run*/ {
-        // TODO(jlavrova): calculate the proper shift for the shadow
-        'x': (isDefaultLtr ? 0 : webTextCluster.advance.width) + 100,
-        'y': 100,
-      },
+    webTextCluster.fillOnContext(
+      paintContext,
+      /*ignore the text cluster shift from the text run*/
+      // TODO(jlavrova): calculate the proper shift for the shadow
+      x: (isDefaultLtr ? 0 : webTextCluster.advance.width) + 100,
+      y: 100,
     );
-
-    // Clean the shadow context
-    paintContext.shadowColor = '';
-    paintContext.shadowBlur = 0;
-    paintContext.shadowOffsetX = 0;
-    paintContext.shadowOffsetY = 0;
   }
 
   @override
@@ -207,20 +198,18 @@ class CanvasKitPainter extends Painter {
 
   @override
   void fillTextCluster(ExtendedTextCluster webTextCluster, bool isDefaultLtr) {
-    final WebTextStyle textStyle = webTextCluster.textStyle!;
-    paintContext.fillStyle = textStyle.foreground?.color.toCssString();
+    final WebTextStyle style = webTextCluster.style;
+    // TODO(mdebbar=>jlavrova): Check `style.color` first.
+    paintContext.fillStyle = style.foreground?.color.toCssString();
 
     // We fill the text cluster into a rectange [0,0,w,h]
     // but we need to shift the y coordinate by the font ascent
     // becase the text is drawn at the ascent, not at 0
-    paintContext.fillTextCluster(
-      webTextCluster.cluster!,
-      /*left:*/ 0,
-      /*top:*/ webTextCluster.fontBoundingBoxAscent,
-      /*ignore the text cluster shift from the text run*/ {
-        'x': (isDefaultLtr ? 0 : webTextCluster.advance.width),
-        'y': 0,
-      },
+    webTextCluster.fillOnContext(
+      paintContext,
+      /*ignore the text cluster shift from the text run*/
+      x: (isDefaultLtr ? 0 : webTextCluster.advance.width),
+      y: 0,
     );
   }
 

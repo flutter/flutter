@@ -10,6 +10,8 @@ class CodeUnitFlags {
   CodeUnitFlags(this._value);
 
   static List<CodeUnitFlags> extractForParagraph(WebParagraph paragraph) {
+    // TODO(mdebbar=>jlavrova): If these are mostly hardcoded, let's move them to Dart instead of
+    //                          calling to CanvasKit.
     final List<CodeUnitInfo> ckFlags = canvasKit.CodeUnits.compute(paragraph.text);
     assert(ckFlags.length == (paragraph.text.length + 1));
 
@@ -19,20 +21,22 @@ class CodeUnitFlags {
     final SegmentationResult result = segmentText(paragraph.text);
 
     // Fill out grapheme flags
-    for (final grapheme in result.graphemes) {
-      codeUnitFlags[grapheme].graphemeStart = true;
+    for (final index in result.graphemes) {
+      codeUnitFlags[index].graphemeStart = true;
     }
     // Fill out word flags
-    for (final word in result.words) {
-      codeUnitFlags[word].wordBreak = true;
+    for (final index in result.words) {
+      codeUnitFlags[index].wordBreak = true;
     }
     // Fill out line break flags
-    for (int index = 0; index < result.breaks.length; index += 2) {
-      final int lineBreak = result.breaks[index];
-      if (result.breaks[index + 1] == kSoftLineBreak) {
-        codeUnitFlags[lineBreak].softLineBreak = true;
+    for (int i = 0; i < result.breaks.length; i += 2) {
+      final int index = result.breaks[i];
+      final int type = result.breaks[i + 1];
+
+      if (type == kSoftLineBreak) {
+        codeUnitFlags[index].softLineBreak = true;
       } else {
-        codeUnitFlags[lineBreak].hardLineBreak = true;
+        codeUnitFlags[index].hardLineBreak = true;
       }
     }
     return codeUnitFlags;
