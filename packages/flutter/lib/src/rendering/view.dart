@@ -361,6 +361,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       }
       assert(configuration.logicalConstraints.isSatisfiedBy(size));
       _view.render(scene, size: configuration.toPhysicalSize(size));
+      print(configuration.toPhysicalSize(size));
       scene.dispose();
       assert(() {
         if (debugRepaintRainbowEnabled || debugRepaintTextRainbowEnabled) {

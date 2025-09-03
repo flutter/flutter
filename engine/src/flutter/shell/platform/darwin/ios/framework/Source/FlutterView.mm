@@ -85,8 +85,6 @@ FLUTTER_ASSERT_ARC
                                                  multiplier:1.0
                                                    constant:scaledSize.height];
 
-  // widthConstraint.priority = UILayoutPriorityDefaultLow;
-  // heightConstraint.priority = UILayoutPriorityDefaultLow;
   [NSLayoutConstraint activateConstraints:@[ widthConstraint, heightConstraint ]];
   [self setNeedsLayout];
 }

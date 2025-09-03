@@ -711,6 +711,9 @@ DrawSurfaceStatus Rasterizer::DrawToSurfaceUnsafe(
     embedder_root_canvas = external_view_embedder_->GetRootCanvas();
   }
 
+//  std::cout << "In Draw Surface Unsafe" << layer_tree.frame_size().width << "x" << layer_tree.frame_size().height
+//            << std::endl;
+
   // On Android, the external view embedder deletes surfaces in `BeginFrame`.
   //
   // Deleting a surface also clears the GL context. Therefore, acquire the

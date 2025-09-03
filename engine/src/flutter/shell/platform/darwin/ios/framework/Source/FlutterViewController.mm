@@ -100,6 +100,8 @@ typedef struct MouseState {
  */
 @property(nonatomic, assign) BOOL shouldIgnoreViewportMetricsUpdatesDuringRotation;
 
+@property(nonatomic, strong) NSTimer* viewportUpdateDebounceTimer;
+
 /**
  * Keyboard animation properties
  */
@@ -954,7 +956,7 @@ static void SendFakeTouchEvent(UIScreen* screen,
   // See: https://github.com/flutter/flutter/issues/16322
   //
   // This approach does not fully resolve all distortion problem. But instead, it reduces the
-  // rotation distortion roughly from 4x to 2x. The most distorted frames occur in the middle
+  // rotation distortion roughly from 4x to 2x.  The most distorted frames occur in the middle
   // of the transition when it is rotating the fastest, making it hard to notice.
 
   NSTimeInterval transitionDuration = coordinator.transitionDuration;
@@ -1464,7 +1466,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
                                                  "frame to avoid the timeout."];
                        }
                      }];
-  }
+  
   }
 }
 
@@ -1475,6 +1477,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 - (void)setAutoResizable:(BOOL)value {
   _autoResizable = value;
   self.flutterView.autoResizable = value;
+  self.flutterView.contentMode = UIViewContentModeCenter;
 }
 
 - (void)updateAutoResizeConstraints {
@@ -1517,9 +1520,6 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   _viewportMetrics.physical_min_height_constraint = minHeight * _viewportMetrics.device_pixel_ratio;
   _viewportMetrics.physical_max_height_constraint = maxHeight * _viewportMetrics.device_pixel_ratio;
 
-  // NSLog(@"Updated auto-resize constraints: maxWidth = %f, maxHeight = %f,  minWidth = %f, "
-  //       @"minHeight = %f",
-  //       maxWidth, maxHeight, minWidth, minHeight);
 }
 
 - (void)viewSafeAreaInsetsDidChange {

@@ -1127,6 +1127,7 @@ void Shell::OnPlatformViewSetViewportMetrics(int64_t view_id,
                                              const ViewportMetrics& metrics) {
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+  std::cout << metrics.physical_height << "x" << metrics.physical_width << std::endl;
 
   if (!ValidateViewportMetrics(metrics)) {
     // Ignore invalid view-port metrics.

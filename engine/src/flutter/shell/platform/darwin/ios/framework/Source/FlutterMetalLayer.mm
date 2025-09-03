@@ -182,6 +182,7 @@ extern CFTimeInterval display_link_target;
 - (instancetype)init {
   if (self = [super init]) {
     _preferredDevice = MTLCreateSystemDefaultDevice();
+    self.contentsGravity = kCAGravityTop;
     self.device = self.preferredDevice;
     self.pixelFormat = MTLPixelFormatBGRA8Unorm;
     _availableTextures = [[NSMutableSet alloc] init];
@@ -252,6 +253,7 @@ extern CFTimeInterval display_link_target;
   _front = nil;
   _totalTextures = 0;
   _drawableSize = drawableSize;
+  NSLog(@"drawableSize %f", drawableSize.height);
 }
 
 - (void)didEnterBackground:(id)notification {
@@ -286,6 +288,7 @@ extern CFTimeInterval display_link_target;
       IOSurfaceAlignProperty(kIOSurfaceBytesPerRow, _drawableSize.width * bytesPerElement);
   size_t totalBytes =
       IOSurfaceAlignProperty(kIOSurfaceAllocSize, _drawableSize.height * bytesPerRow);
+  NSLog(@"metal %f", _drawableSize.height);
   NSDictionary* options = @{
     (id)kIOSurfaceWidth : @(_drawableSize.width),
     (id)kIOSurfaceHeight : @(_drawableSize.height),
@@ -379,6 +382,12 @@ extern CFTimeInterval display_link_target;
         }
       }
       if (res != nil) {
+        if (res.texture.width != _drawableSize.width ||
+            res.texture.height != _drawableSize.height) {
+          NSLog(@"1 wrong size, should be %f, but is %lu", _drawableSize.height, res.texture.height);
+          --_totalTextures;
+          return nil;
+        }
         [_availableTextures removeObject:res];
       }
       return res;
@@ -398,6 +407,13 @@ extern CFTimeInterval display_link_target;
 }
 
 - (void)presentOnMainThread:(FlutterTexture*)texture {
+  if (texture.texture.width != _drawableSize.width ||
+      texture.texture.height != _drawableSize.height) {
+    // This texture was created with an old size, but the view has since been
+    // resized. Do not present this stale frame to avoid distortion. The texture
+    // will be correctly recycled on the next frame.
+    return;
+  }
   // This is needed otherwise frame gets skipped on touch begin / end. Go figure.
   // Might also be placebo
   [self setNeedsDisplay];
@@ -405,6 +421,9 @@ extern CFTimeInterval display_link_target;
   [CATransaction begin];
   [CATransaction setDisableActions:YES];
   self.contents = texture.surface;
+  NSLog(@"surface %ld", (long)texture.surface.height);
+
+
   [CATransaction commit];
   _displayLink.paused = NO;
   _displayLinkPauseCountdown = 0;
@@ -420,6 +439,7 @@ extern CFTimeInterval display_link_target;
   @synchronized(self) {
     if (_front != nil) {
       [_availableTextures addObject:_front];
+
     }
     _front = texture;
     texture.presentedTime = CACurrentMediaTime();

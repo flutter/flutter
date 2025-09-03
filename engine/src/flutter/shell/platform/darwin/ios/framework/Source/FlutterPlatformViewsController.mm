@@ -672,6 +672,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
       // If the raster thread isn't merged, resize the view on the platform thread and block until
       // complete.
       auto latch = std::make_shared<fml::CountDownLatch>(1u);
+      usleep(50000);
       fml::TaskRunner::RunNowOrPostTask(self.platformTaskRunner,
                                         [self, frameSize = self.frameSize, latch]() mutable {
                                           [self performResize:frameSize];
@@ -824,9 +825,10 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 - (void)performResize:(const flutter::DlISize&)frameSize {
   TRACE_EVENT0("flutter", "PlatformViewsController::PerformResize");
   FML_DCHECK([[NSThread currentThread] isMainThread]);
+
   if (self.flutterView != nil) {
-    FML_LOG(ERROR) << "RESIZE RENDER STEP 9: \n  setIntrinsicContentSize " << frameSize.width << "x"
-                   << frameSize.height;
+//    FML_LOG(ERROR) << "RESIZE RENDER STEP 9: \n  setIntrinsicContentSize " << frameSize.width << "x"
+//                   << frameSize.height;
     [(FlutterView*)self.flutterView
         setIntrinsicContentSize:CGSizeMake(frameSize.width, frameSize.height)];
   }
