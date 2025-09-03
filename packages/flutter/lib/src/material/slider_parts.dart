@@ -836,8 +836,6 @@ class DropSliderValueIndicatorShape extends SliderComponentShape {
 
 /// Utility class for processing multiline text in value indicators.
 abstract class _ValueIndicatorTextProcessor {
-  const _ValueIndicatorTextProcessor._();
-
   /// Creates a TextPainter with ellipsis when text exceeds maxLines.
   static TextPainter _createTextPainterWithEllipsis({
     required TextPainter originalPainter,
@@ -1513,7 +1511,7 @@ class _RoundedRectSliderValueIndicatorPathPainter {
   /// A default extra padding for rounded corners when the label is multiline.
   ///
   /// This constant is to prevent text from appearing to "spill out" of the rounded corners.
-  static const double _multilineCornerPadding = 8.0;
+  static const EdgeInsets _multilineCornerPadding = EdgeInsets.all(8.0);
 
   Size getPreferredSize(TextPainter labelPainter, double textScaleFactor) {
     // For getPreferredSize, assuming multiline support for sizing estimation.
@@ -1524,7 +1522,9 @@ class _RoundedRectSliderValueIndicatorPathPainter {
     if (hasNewline) {
       final double height = math.max(
         _preferredHeight,
-        labelPainter.height + (_labelPadding * 2 * textScaleFactor) + _multilineCornerPadding,
+        labelPainter.height +
+            (_labelPadding * 2 * textScaleFactor) +
+            _multilineCornerPadding.vertical,
       );
       return Size(width, height);
     } else {
@@ -1615,12 +1615,10 @@ class _RoundedRectSliderValueIndicatorPathPainter {
     );
     final String labelText = labelPainter.text?.toPlainText() ?? '';
     final bool hasNewline = multilineConfig.enabled && labelText.contains('\n');
-    final double cornerPadding = multilineConfig.cornerPadding ?? _multilineCornerPadding;
-    // Apply cornerPadding more effectively by distributing it between width and height.
-    // The w/h ratio(6/4) provides better visual balance,
-    // since horizontal size is often longer than vertical size as usual.
-    final double effectiveCornerPaddingWidth = hasNewline ? cornerPadding * 0.6 : 0.0;
-    final double effectiveCornerPaddingHeight = hasNewline ? cornerPadding * 0.4 : 0.0;
+    final EdgeInsetsGeometry cornerPadding =
+        multilineConfig.cornerPadding ?? _multilineCornerPadding;
+    final double effectiveCornerPaddingWidth = hasNewline ? cornerPadding.horizontal : 0.0;
+    final double effectiveCornerPaddingHeight = hasNewline ? cornerPadding.vertical : 0.0;
 
     final double adjustedRectangleWidth = rectangleWidth + effectiveCornerPaddingWidth;
     final double rectHeight = hasNewline

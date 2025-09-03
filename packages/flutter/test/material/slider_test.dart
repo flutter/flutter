@@ -132,8 +132,8 @@ class LoggingValueIndicatorShape extends SliderComponentShape {
 }
 
 // A value indicator shape that captures the final processed text painter size for testing.
-class HeightCapturingValueIndicatorShape extends SliderComponentShape {
-  HeightCapturingValueIndicatorShape(this.capturedSizes);
+class _HeightCapturingValueIndicatorShape extends SliderComponentShape {
+  _HeightCapturingValueIndicatorShape(this.capturedSizes);
   final List<Size> capturedSizes;
 
   @override
@@ -158,7 +158,7 @@ class HeightCapturingValueIndicatorShape extends SliderComponentShape {
     required double textScaleFactor,
     required Size sizeWithOverflow,
   }) {
-    // Apply the same multiline logic as the real implementation
+    // Apply the same multiline logic as the real implementation.
     final ValueIndicatorMultilineConfig? multilineConfig =
         sliderTheme.valueIndicatorMultilineConfig;
     TextPainter finalLabelPainter = labelPainter;
@@ -181,8 +181,8 @@ class HeightCapturingValueIndicatorShape extends SliderComponentShape {
 }
 
 // A test value indicator shape that captures the final rendered text for testing ellipsis behavior.
-class TestEllipsisValueIndicatorShape extends SliderComponentShape {
-  TestEllipsisValueIndicatorShape(this.capturedTexts);
+class _TestEllipsisValueIndicatorShape extends SliderComponentShape {
+  _TestEllipsisValueIndicatorShape(this.capturedTexts);
   final List<String> capturedTexts;
 
   @override
@@ -5621,7 +5621,7 @@ void main() {
       const ValueIndicatorMultilineConfig customConfig = ValueIndicatorMultilineConfig(
         enabled: false,
         maxLines: 3,
-        cornerPadding: 12.0,
+        cornerPadding: EdgeInsets.all(12.0),
       );
 
       await tester.pumpWidget(
@@ -5645,7 +5645,7 @@ void main() {
       expect(sliderTheme.valueIndicatorMultilineConfig, equals(customConfig));
       expect(sliderTheme.valueIndicatorMultilineConfig!.enabled, false);
       expect(sliderTheme.valueIndicatorMultilineConfig!.maxLines, 3);
-      expect(sliderTheme.valueIndicatorMultilineConfig!.cornerPadding, 12.0);
+      expect(sliderTheme.valueIndicatorMultilineConfig!.cornerPadding, const EdgeInsets.all(12.0));
     });
 
     testWidgets('SliderTheme.copyWith can update valueIndicatorMultilineConfig', (
@@ -5653,13 +5653,13 @@ void main() {
     ) async {
       const ValueIndicatorMultilineConfig originalConfig = ValueIndicatorMultilineConfig(
         maxLines: 2,
-        cornerPadding: 8.0,
+        cornerPadding: EdgeInsets.all(8.0),
       );
 
       const ValueIndicatorMultilineConfig updatedConfig = ValueIndicatorMultilineConfig(
         enabled: false,
         maxLines: 5,
-        cornerPadding: 16.0,
+        cornerPadding: EdgeInsets.all(16.0),
       );
 
       await tester.pumpWidget(
@@ -5686,7 +5686,7 @@ void main() {
       expect(sliderTheme.valueIndicatorMultilineConfig, equals(updatedConfig));
       expect(sliderTheme.valueIndicatorMultilineConfig!.enabled, false);
       expect(sliderTheme.valueIndicatorMultilineConfig!.maxLines, 5);
-      expect(sliderTheme.valueIndicatorMultilineConfig!.cornerPadding, 16.0);
+      expect(sliderTheme.valueIndicatorMultilineConfig!.cornerPadding, const EdgeInsets.all(16.0));
     });
 
     // Common widget builder for testing value indicator multiline config.
@@ -5729,7 +5729,7 @@ void main() {
       // First test without cornerPadding to get baseline overlay size.
       // Without additional padding - text might spill out at corners.
       const ValueIndicatorMultilineConfig configNoPadding = ValueIndicatorMultilineConfig(
-        cornerPadding: 0.0,
+        cornerPadding: EdgeInsets.zero,
       );
 
       await tester.pumpWidget(
@@ -5748,7 +5748,7 @@ void main() {
 
       // Now test with additional cornerPadding to prevent text spill out.
       const ValueIndicatorMultilineConfig configWithPadding = ValueIndicatorMultilineConfig(
-        cornerPadding: 24.0,
+        cornerPadding: EdgeInsets.all(24.0),
       );
 
       await tester.pumpWidget(
@@ -5762,7 +5762,7 @@ void main() {
       final Size paddingSize = paddingBox.size;
 
       // Verify that value indicator renders properly with cornerPadding applied.
-      expect(paddingBox, paints..rrect()); // RoundedRectSliderValueIndicatorShape uses rrect
+      expect(paddingBox, paints..rrect()); // RoundedRectSliderValueIndicatorShape uses rrect.
 
       // With cornerPadding, the overlay should be larger than the non - additional padding size.
       expect(paddingSize.width, greaterThanOrEqualTo(noPaddingSize.width));
@@ -5795,7 +5795,9 @@ void main() {
 
       // Now test with large cornerPadding.
       const ValueIndicatorMultilineConfig configLargePadding = ValueIndicatorMultilineConfig(
-        cornerPadding: 50.0, // A big enough padding that would affect the rounded rect size.
+        cornerPadding: EdgeInsets.all(
+          50.0,
+        ), // A big enough padding that would affect the rounded rect size.
       );
 
       await tester.pumpWidget(
@@ -5826,9 +5828,8 @@ void main() {
 
       // First test with unlimited maxLines.
       final List<Size> unlimitedSizes = <Size>[];
-      final HeightCapturingValueIndicatorShape unlimitedShape = HeightCapturingValueIndicatorShape(
-        unlimitedSizes,
-      );
+      final _HeightCapturingValueIndicatorShape unlimitedShape =
+          _HeightCapturingValueIndicatorShape(unlimitedSizes);
 
       await tester.pumpWidget(
         buildSliderWithConfig(
@@ -5851,7 +5852,7 @@ void main() {
 
       // Now test with limited maxLines = 2.
       final List<Size> limitedSizes = <Size>[];
-      final HeightCapturingValueIndicatorShape limitedShape = HeightCapturingValueIndicatorShape(
+      final _HeightCapturingValueIndicatorShape limitedShape = _HeightCapturingValueIndicatorShape(
         limitedSizes,
       );
 
@@ -5883,9 +5884,8 @@ void main() {
 
       // First test with unlimited maxLines.
       final List<Size> unlimitedSizes = <Size>[];
-      final HeightCapturingValueIndicatorShape unlimitedShape = HeightCapturingValueIndicatorShape(
-        unlimitedSizes,
-      );
+      final _HeightCapturingValueIndicatorShape unlimitedShape =
+          _HeightCapturingValueIndicatorShape(unlimitedSizes);
 
       await tester.pumpWidget(
         buildSliderWithConfig(
@@ -5908,7 +5908,7 @@ void main() {
 
       // Now test with limited maxLines = 3.
       final List<Size> limitedSizes = <Size>[];
-      final HeightCapturingValueIndicatorShape limitedShape = HeightCapturingValueIndicatorShape(
+      final _HeightCapturingValueIndicatorShape limitedShape = _HeightCapturingValueIndicatorShape(
         limitedSizes,
       );
 
@@ -5937,7 +5937,9 @@ void main() {
       WidgetTester tester,
     ) async {
       final List<String> capturedTexts = <String>[];
-      final TestEllipsisValueIndicatorShape shape = TestEllipsisValueIndicatorShape(capturedTexts);
+      final _TestEllipsisValueIndicatorShape shape = _TestEllipsisValueIndicatorShape(
+        capturedTexts,
+      );
 
       await tester.pumpWidget(
         buildSliderWithConfig(
@@ -5963,7 +5965,9 @@ void main() {
       WidgetTester tester,
     ) async {
       final List<String> capturedTexts = <String>[];
-      final TestEllipsisValueIndicatorShape shape = TestEllipsisValueIndicatorShape(capturedTexts);
+      final _TestEllipsisValueIndicatorShape shape = _TestEllipsisValueIndicatorShape(
+        capturedTexts,
+      );
 
       await tester.pumpWidget(
         buildSliderWithConfig(
@@ -5989,12 +5993,14 @@ void main() {
       WidgetTester tester,
     ) async {
       final List<String> capturedTexts = <String>[];
-      final TestEllipsisValueIndicatorShape shape = TestEllipsisValueIndicatorShape(capturedTexts);
+      final _TestEllipsisValueIndicatorShape shape = _TestEllipsisValueIndicatorShape(
+        capturedTexts,
+      );
 
       await tester.pumpWidget(
         buildSliderWithConfig(
           config: const ValueIndicatorMultilineConfig(maxLines: 5),
-          year2023: false,
+          year2023: true,
           label: 'Line 1\nLine 2',
           valueIndicatorShape: shape,
         ),
