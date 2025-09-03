@@ -401,8 +401,8 @@ class FilledButton extends ButtonStyleButton {
   /// * `side` - null
   /// * `shape` - StadiumBorder()
   /// * `mouseCursor`
-  ///   * On web - SystemMouseCursors.click
-  ///   * On all other platforms - SystemMouseCursors.basic
+  ///   * on web and enabled - SystemMouseCursors.click
+  ///   * others - SystemMouseCursors.basic
   /// * `visualDensity` - Theme.visualDensity
   /// * `tapTargetSize` - Theme.materialTapTargetSize
   /// * `animationDuration` - kThemeChangeDuration
@@ -456,8 +456,8 @@ class FilledButton extends ButtonStyleButton {
   /// * `side` - null
   /// * `shape` - StadiumBorder()
   /// * `mouseCursor`
-  ///   * On web - SystemMouseCursors.click
-  ///   * On all other platforms - SystemMouseCursors.basic
+  ///   * on web and enabled - SystemMouseCursors.click
+  ///   * others - SystemMouseCursors.basic
   /// * `visualDensity` - Theme.visualDensity
   /// * `tapTargetSize` - Theme.materialTapTargetSize
   /// * `animationDuration` - kThemeChangeDuration

@@ -1924,8 +1924,8 @@ class DropdownButtonFormField<T> extends FormField<T> {
   ///
   /// If this property is null,
   ///
-  ///   * On web, [WidgetStateMouseCursor.clickable] will be used.
-  ///   * On other platforms, [WidgetStateMouseCursor.statelessClickable] will be used.
+  ///   * On web and disabled, [WidgetStateMouseCursor.clickable] will be used.
+  ///   * Otherwise, [WidgetStateMouseCursor.statelessClickable] will be used.
   final MouseCursor? mouseCursor;
 
   @override

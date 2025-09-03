@@ -1007,8 +1007,8 @@ class _IconButtonM3 extends ButtonStyleButton {
   /// * `side` - null
   /// * `shape` - StadiumBorder()
   /// * `mouseCursor`
-  ///   * On web and enabled - SystemMouseCursors.click
-  ///   * Others - SystemMouseCursors.basic
+  ///   * on web and enabled - SystemMouseCursors.click
+  ///   * others - SystemMouseCursors.basic
   /// * `visualDensity` - VisualDensity.standard
   /// * `tapTargetSize` - theme.materialTapTargetSize
   /// * `animationDuration` - kThemeChangeDuration

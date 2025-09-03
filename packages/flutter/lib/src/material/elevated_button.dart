@@ -344,8 +344,8 @@ class ElevatedButton extends ButtonStyleButton {
   /// * `side` - null
   /// * `shape` - RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))
   /// * `mouseCursor`
-  ///   * On web and enabled - SystemMouseCursors.click
-  ///   * Others - SystemMouseCursors.basic
+  ///   * on web and enabled - SystemMouseCursors.click
+  ///   * others - SystemMouseCursors.basic
   /// * `visualDensity` - theme.visualDensity
   /// * `tapTargetSize` - theme.materialTapTargetSize
   /// * `animationDuration` - kThemeChangeDuration
@@ -399,8 +399,8 @@ class ElevatedButton extends ButtonStyleButton {
   /// * `side` - null
   /// * `shape` - StadiumBorder()
   /// * `mouseCursor`
-  ///   * On web and enabled - SystemMouseCursors.click
-  ///   * Others - SystemMouseCursors.basic
+  ///   * on web and enabled - SystemMouseCursors.click
+  ///   * others - SystemMouseCursors.basic
   /// * `visualDensity` - Theme.visualDensity
   /// * `tapTargetSize` - Theme.materialTapTargetSize
   /// * `animationDuration` - kThemeChangeDuration

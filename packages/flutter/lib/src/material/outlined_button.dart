@@ -317,8 +317,8 @@ class OutlinedButton extends ButtonStyleButton {
   /// * `side` - BorderSide(width: 1, color: Theme.colorScheme.onSurface(0.12))
   /// * `shape` - RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))
   /// * `mouseCursor`
-  ///   * On web and enabled - SystemMouseCursors.click
-  ///   * Others - SystemMouseCursors.basic
+  ///   * on web and enabled - SystemMouseCursors.click
+  ///   * others - SystemMouseCursors.basic
   /// * `visualDensity` - theme.visualDensity
   /// * `tapTargetSize` - theme.materialTapTargetSize
   /// * `animationDuration` - kThemeChangeDuration
@@ -356,8 +356,8 @@ class OutlinedButton extends ButtonStyleButton {
   ///   * others - BorderSide(color: Theme.colorScheme.outline)
   /// * `shape` - StadiumBorder()
   /// * `mouseCursor`
-  ///   * On web and enabled - SystemMouseCursors.click
-  ///   * Others - SystemMouseCursors.basic
+  ///   * on web and enabled - SystemMouseCursors.click
+  ///   * others - SystemMouseCursors.basic
   /// * `visualDensity` - theme.visualDensity
   /// * `tapTargetSize` - theme.materialTapTargetSize
   /// * `animationDuration` - kThemeChangeDuration
