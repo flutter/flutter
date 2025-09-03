@@ -26,6 +26,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterLaunchEngine.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifecycle.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
@@ -904,6 +905,21 @@ static void SendFakeTouchEvent(UIScreen* screen,
   }
 
   [super viewWillAppear:animated];
+}
+
+- (void)viewIsAppearing:(BOOL)animated {
+  TRACE_EVENT0("flutter", "viewIsAppearing");
+  if (self.engine.viewController == self) {
+    // The scene is not available until viewIsAppearing
+    UIWindowScene* scene = self.view.window.windowScene;
+    if ([scene.delegate conformsToProtocol:@protocol(FlutterSceneLifeCycleProvider)]) {
+      id<FlutterSceneLifeCycleProvider> lifeCycleProvider =
+          (id<FlutterSceneLifeCycleProvider>)scene.delegate;
+      [lifeCycleProvider.sceneLifeCycleDelegate addFlutterViewController:self];
+    }
+  }
+
+  [super viewIsAppearing:animated];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
