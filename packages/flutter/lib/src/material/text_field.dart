@@ -1870,8 +1870,8 @@ TextStyle _m2CounterErrorStyle(BuildContext context) =>
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
 // dart format off
-TextStyle? _m3StateInputStyle(BuildContext context) => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-  if (states.contains(MaterialState.disabled)) {
+TextStyle? _m3StateInputStyle(BuildContext context) => MaterialStateTextStyle.resolveWith((Set<WidgetState> states) {
+  if (states.contains(WidgetState.disabled)) {
     return TextStyle(color: Theme.of(context).textTheme.bodyLarge!.color?.withOpacity(0.38));
   }
   return TextStyle(color: Theme.of(context).textTheme.bodyLarge!.color);
