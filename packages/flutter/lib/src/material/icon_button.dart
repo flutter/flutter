@@ -652,7 +652,6 @@ class IconButton extends StatelessWidget {
     Color? focusColor,
     Color? hoverColor,
     Color? highlightColor,
-    Color? iconColor,
     Color? shadowColor,
     Color? surfaceTintColor,
     Color? overlayColor,
@@ -697,7 +696,6 @@ class IconButton extends StatelessWidget {
       minimumSize: ButtonStyleButton.allOrNull<Size>(minimumSize),
       fixedSize: ButtonStyleButton.allOrNull<Size>(fixedSize),
       maximumSize: ButtonStyleButton.allOrNull<Size>(maximumSize),
-      iconColor: ButtonStyleButton.defaultColor(iconColor, disabledForegroundColor),
       iconSize: ButtonStyleButton.allOrNull<double>(iconSize),
       side: ButtonStyleButton.allOrNull<BorderSide>(side),
       shape: ButtonStyleButton.allOrNull<OutlinedBorder>(shape),
@@ -738,7 +736,6 @@ class IconButton extends StatelessWidget {
         padding: padding,
         minimumSize: minSize,
         maximumSize: maxSize,
-        iconColor: color,
         iconSize: iconSize,
         alignment: alignment,
         enabledMouseCursor: mouseCursor,
@@ -748,7 +745,9 @@ class IconButton extends StatelessWidget {
       if (style != null) {
         adjustedStyle = style!.merge(adjustedStyle);
       }
-
+      if (adjustedStyle.iconColor == null) {
+        adjustedStyle = adjustedStyle.copyWith(iconColor: adjustedStyle.foregroundColor);
+      }
       Widget effectiveIcon = icon;
       if ((isSelected ?? false) && selectedIcon != null) {
         effectiveIcon = selectedIcon!;
