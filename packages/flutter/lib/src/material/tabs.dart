@@ -1937,6 +1937,7 @@ class _TabBarState extends State<TabBar> {
       final WidgetStateProperty<Color?> defaultOverlay = WidgetStateProperty.resolveWith<Color?>((
         Set<WidgetState> states,
       ) {
+        // TODO(ValentinVignal): Don't selectedState.
         final Set<WidgetState> effectiveStates = selectedState..addAll(states);
         return _defaults.overlayColor?.resolve(effectiveStates);
       });
