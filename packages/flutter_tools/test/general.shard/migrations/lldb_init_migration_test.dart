@@ -34,7 +34,14 @@ void main() {
       );
 
       await migration.migrate();
-      expect(testLogger.errorText, contains('Xcode project not found'));
+      expect(testLogger.traceText, contains('Xcode project not found'));
+      expect(
+        testLogger.errorText,
+        contains(
+          'Running Flutter in debug mode on new iOS versions requires a LLDB Init File, but the '
+          'scheme does not have it set.',
+        ),
+      );
     });
 
     group('get scheme file', () {
@@ -57,7 +64,14 @@ void main() {
           fileSystem: memoryFileSystem,
         );
         await migration.migrate();
-        expect(testLogger.errorText, contains('Unable to get Xcode project info.'));
+        expect(testLogger.traceText, contains('Unable to get Xcode project info.'));
+        expect(
+          testLogger.errorText,
+          contains(
+            'Running Flutter in debug mode on new iOS versions requires a LLDB Init File, but the '
+            'scheme does not have it set.',
+          ),
+        );
       });
 
       testWithoutContext('fails if Xcode workspace not found', () async {
@@ -79,7 +93,14 @@ void main() {
           fileSystem: memoryFileSystem,
         );
         await migration.migrate();
-        expect(testLogger.errorText, contains('Xcode workspace not found.'));
+        expect(testLogger.traceText, contains('Xcode workspace not found.'));
+        expect(
+          testLogger.errorText,
+          contains(
+            'Running Flutter in debug mode on new iOS versions requires a LLDB Init File, but the '
+            'scheme does not have it set.',
+          ),
+        );
       });
 
       testWithoutContext('fails if scheme not found', () async {
@@ -100,9 +121,8 @@ void main() {
           environmentType: EnvironmentType.physical,
           fileSystem: memoryFileSystem,
         );
-        await migration.migrate();
-        expect(
-          testLogger.errorText,
+        await expectToolExitLater(
+          migration.migrate(),
           contains('You must specify a --flavor option to select one of the available schemes.'),
         );
       });
@@ -125,7 +145,14 @@ void main() {
           fileSystem: memoryFileSystem,
         );
         await migration.migrate();
-        expect(testLogger.errorText, contains('Unable to get scheme file for Runner.'));
+        expect(testLogger.traceText, contains('Unable to get scheme file for Runner.'));
+        expect(
+          testLogger.errorText,
+          contains(
+            'Running Flutter in debug mode on new iOS versions requires a LLDB Init File, but the '
+            'Runner scheme does not have it set.',
+          ),
+        );
       });
     });
 
@@ -218,7 +245,7 @@ void main() {
         testLogger.errorText,
         contains(
           'Running Flutter in debug mode on new iOS versions requires a LLDB '
-          'Init File, but the Launch action in the Runner scheme does not have it set.',
+          'Init File, but the Run action in the Runner scheme does not have it set.',
         ),
       );
     });
@@ -371,7 +398,14 @@ void main() {
         fileSystem: memoryFileSystem,
       );
       await migration.migrate();
-      expect(testLogger.errorText, contains('Failed to find LaunchAction for the Scheme'));
+      expect(testLogger.traceText, contains('Failed to find LaunchAction for the Scheme'));
+      expect(
+        testLogger.errorText,
+        contains(
+          'Running Flutter in debug mode on new iOS versions requires a LLDB Init File, but the '
+          'Runner scheme does not have it set.',
+        ),
+      );
     });
 
     testWithoutContext('prints error if TestAction is missing', () async {
@@ -393,7 +427,14 @@ void main() {
         fileSystem: memoryFileSystem,
       );
       await migration.migrate();
-      expect(testLogger.errorText, contains('Failed to find TestAction for the Scheme'));
+      expect(testLogger.traceText, contains('Failed to find TestAction for the Scheme'));
+      expect(
+        testLogger.errorText,
+        contains(
+          'Running Flutter in debug mode on new iOS versions requires a LLDB Init File, but the '
+          'Runner scheme does not have it set.',
+        ),
+      );
     });
 
     testWithoutContext('prints error if scheme file is invalid XML', () async {
@@ -417,7 +458,14 @@ void main() {
         fileSystem: memoryFileSystem,
       );
       await migration.migrate();
-      expect(testLogger.errorText, contains('Failed to parse'));
+      expect(testLogger.traceText, contains('Failed to parse'));
+      expect(
+        testLogger.errorText,
+        contains(
+          'Running Flutter in debug mode on new iOS versions requires a LLDB Init File, but the '
+          'Runner scheme does not have it set.',
+        ),
+      );
     });
 
     testWithoutContext('succeeds', () async {
