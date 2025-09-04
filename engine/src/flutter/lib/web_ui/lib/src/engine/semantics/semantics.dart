@@ -802,6 +802,10 @@ abstract class SemanticRole {
     if (semanticsObject.isLocaleDirty) {
       semanticsObject.owner.addOneTimePostUpdateCallback(_updateLocale);
     }
+
+    if (semanticsObject.isTraversalOwnerDirty) {
+      _updateTraversalOwner();
+    }
   }
 
   void _updateIdentifier() {
@@ -840,6 +844,28 @@ abstract class SemanticRole {
       return;
     }
     setAttribute('lang', locale);
+  }
+
+  void _updateTraversalOwner() {
+    // Set up aria-owns relationship for overlay portal children.
+    if (semanticsObject.traversalOwner != -1) {
+      SemanticsObject? parent =
+          semanticsObject.owner._semanticsTree[semanticsObject.traversalOwner!];
+      if (parent != null && parent.semanticRole != null) {
+        parent.element.setAttribute(
+          'aria-owns',
+          '$kFlutterSemanticNodePrefix${semanticsObject.id}',
+        );
+      }
+    }
+    // Clean up aria-owns relationship.
+    if (semanticsObject.traversalOwner != null && semanticsObject.traversalOwner == -1) {
+      SemanticsObject? parent =
+          semanticsObject.owner._semanticsTree[semanticsObject.traversalOwner!];
+      if (parent != null) {
+        parent.element.removeAttribute('aria-owns');
+      }
+    }
   }
 
   /// Applies the current [SemanticsObject.validationResult] to the DOM managed
@@ -1715,21 +1741,7 @@ class SemanticsObject {
     }
 
     if (_traversalOwner != update.traversalOwner) {
-      // Remove aria-owns relationship if there is not traversal parent.
-      if (_traversalOwner != null && _traversalOwner != -1 && update.traversalOwner == -1) {
-        final SemanticsObject? parent = owner._semanticsTree[_traversalOwner!];
-        if (parent != null) {
-          parent.element.removeAttribute('aria-owns');
-        }
-      }
       _traversalOwner = update.traversalOwner;
-      // Set up aria-owns relationship for overlay portal children.
-      if (_traversalOwner != null && _traversalOwner != -1) {
-        final SemanticsObject? parent = owner._semanticsTree[_traversalOwner!];
-        if (parent != null && parent.semanticRole != null) {
-          parent.element.setAttribute('aria-owns', '$kFlutterSemanticNodePrefix$id');
-        }
-      }
       _markTraversalOwnerDirty();
     }
 
