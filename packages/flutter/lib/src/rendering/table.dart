@@ -751,11 +751,13 @@ class RenderTable extends RenderBox {
           // Shift child transform.
           final Rect localRect = rectWithOffset(child);
           // The rect should satisfy 0 <= localRect.top < localRect.bottom <= rowBox.height
-          final double dy = localRect.top >= rowBox.height ? -_rowTops.elementAt(y) : 0.0;
+          final double dy = localRect.bottom > rowBox.height + precisionErrorTolerance
+              ? -_rowTops.elementAt(y)
+              : 0.0;
 
           // if addCellWrapper is true, the rect is relative to the cell
           // The rect should satisfy 0 <= localRect.left < localRect.right <= cellWidth
-          // if addCellWrapper is false, the rect is relative to the raw
+          // if addCellWrapper is false, the rect is relative to the row
           // The rect should satisfy _columnLefts!.elementAt(x) <= localRect.left < localRect.right <= _columnLefts!.elementAt(x+1)
           final double dx = addCellWrapper
               ? ((localRect.left >= cellWidth) ? -_columnLefts!.elementAt(x) : 0.0)
