@@ -686,7 +686,13 @@ class AndroidDevice extends Device {
     // A motoG4 phone returns `mWakefulness=Awake`.
     // A Samsung phone returns `getWakefullnessLocked()=Awake`.
     final RegExp wakefulnessRegexp = RegExp(r'.*(mWakefulness=|getWakefulnessLocked\(\)=).*');
-    final String wakefulness = grep(wakefulnessRegexp, from: powerInfo).single.split('=')[1].trim();
+    final Iterable<String> matches = grep(wakefulnessRegexp, from: powerInfo);
+    if (matches.isEmpty) {
+      throw StateError('No wakefulness information found in dumpsys power output');
+    }
+    // Use the first match if multiple are found to handle cases where
+    // dumpsys power returns multiple lines containing wakefulness info
+    final String wakefulness = matches.first.split('=')[1].trim();
     return wakefulness;
   }
 
