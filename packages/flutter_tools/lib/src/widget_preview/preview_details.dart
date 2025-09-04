@@ -54,8 +54,6 @@ final class PreviewDetails {
   final bool isBuilder;
 
   /// The group the preview belongs to.
-  ///
-  /// If not provided, the preview will be part of the "empty" group.
   final DartObject group;
 
   /// A description to be displayed alongside the preview.
