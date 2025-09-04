@@ -334,6 +334,7 @@ class AnimationController extends Animation<double>
     final Ticker oldTicker = _ticker!;
     _ticker = vsync.createTicker(_tick);
     _ticker!.absorbTicker(oldTicker);
+    _updateTickerMuting();
   }
 
   void _updateTickerMuting({bool? muted}) {

@@ -253,11 +253,20 @@ void main() {
     final Widget widget = _SingleTickerTest(key: key);
     await tester.pumpWidget(widget);
     key.currentState!.controller.repeat();
+    await tester.pump();
     expect(tester.binding.transientCallbackCount, 0);
     key.currentState!.controller.addListener(listener);
     await tester.pump();
     expect(tester.binding.transientCallbackCount, 1);
     key.currentState!.controller.removeListener(listener);
+    await tester.pump();
+    expect(tester.binding.transientCallbackCount, 0);
+    // Test with status listener
+    void statusListener(AnimationStatus status) {}
+    key.currentState!.controller.addStatusListener(statusListener);
+    await tester.pump();
+    expect(tester.binding.transientCallbackCount, 1);
+    key.currentState!.controller.removeStatusListener(statusListener);
     await tester.pump();
     expect(tester.binding.transientCallbackCount, 0);
   });
