@@ -828,7 +828,8 @@ TEST_F(LicenseCheckerTest, DoubleLicenseFiles) {
   absl::StatusOr<fs::path> temp_path = MakeTempDir();
   ASSERT_TRUE(temp_path.ok());
 
-  absl::StatusOr<Data> data = MakeTestData(/*include_filter_text=*/".*/COPYING|.*cc");
+  absl::StatusOr<Data> data =
+      MakeTestData(/*include_filter_text=*/".*/COPYING|.*cc");
   ASSERT_TRUE(data.ok());
 
   fs::current_path(*temp_path);
