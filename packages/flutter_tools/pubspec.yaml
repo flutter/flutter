@@ -61,6 +61,7 @@ dependencies:
   hooks_runner: 0.22.1
   hooks: 0.20.1
   code_assets: 0.19.6
+  data_assets: 0.19.3
 
   # We depend on very specific internal implementation details of the
   # 'test' package, which change between versions, so when upgrading
@@ -126,4 +127,4 @@ dev_dependencies:
 dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
-# PUBSPEC CHECKSUM: 7tppf2
+# PUBSPEC CHECKSUM: icpq7r
