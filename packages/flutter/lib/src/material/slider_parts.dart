@@ -869,23 +869,26 @@ abstract class _ValueIndicatorTextProcessor {
       return originalPainter;
     }
 
-    final TextPainter truncatedPainter = TextPainter(
-      text: originalPainter.text,
-      textDirection: originalPainter.textDirection,
-      textScaleFactor: textScaleFactor,
-      maxLines: multilineConfig.maxLines,
-    )..layout();
+    // Use computeLineMetrics to check if truncation is needed.
+    final int actualLines = originalPainter.computeLineMetrics().length;
+    final int maxLines = multilineConfig.maxLines!;
 
-    if (!truncatedPainter.didExceedMaxLines) {
-      return truncatedPainter;
+    if (actualLines <= maxLines) {
+      // Text fits within maxLines, create a simple TextPainter with maxLines constraint.
+      return TextPainter(
+        text: originalPainter.text,
+        textDirection: originalPainter.textDirection,
+        textScaleFactor: textScaleFactor,
+        maxLines: maxLines,
+      )..layout();
     }
 
-    truncatedPainter.dispose();
+    // Text exceeds maxLines, create painter with ellipsis.
     final String labelText = originalPainter.text?.toPlainText() ?? '';
     return _createTextPainterWithEllipsis(
       originalPainter: originalPainter,
       originalText: labelText,
-      maxLines: multilineConfig.maxLines!,
+      maxLines: maxLines,
       textScaleFactor: textScaleFactor,
     );
   }
