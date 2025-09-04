@@ -132,11 +132,6 @@ String getAarTaskFor(BuildInfo buildInfo) {
   return _taskFor('assembleAar', buildInfo);
 }
 
-@visibleForTesting
-const androidX86DeprecationWarning =
-    'Support for Android x86 targets will be removed in the next stable release after 3.27. '
-    'See https://github.com/flutter/flutter/issues/157543 for details.';
-
 /// Returns the output APK file names for a given [AndroidBuildInfo].
 ///
 /// For example, when [AndroidBuildInfo.splitPerAbi] is `true`, multiple APKs are created.
