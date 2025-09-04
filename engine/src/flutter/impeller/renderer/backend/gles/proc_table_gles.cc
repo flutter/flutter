@@ -4,11 +4,11 @@
 
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
 
+#include <format>
 #include <sstream>
 
 #include "impeller/base/allocation.h"
 #include "impeller/base/comparable.h"
-#include "impeller/base/strings.h"
 #include "impeller/base/validation.h"
 #include "impeller/renderer/backend/gles/capabilities_gles.h"
 #include "impeller/renderer/capabilities.h"
@@ -280,8 +280,9 @@ std::string ProcTableGLES::DescribeCurrentFramebuffer() const {
     return "The default framebuffer (FBO0) was bound.";
   }
   if (IsFramebuffer(framebuffer) == GL_FALSE) {
-    return SPrintF("The framebuffer binding (%d) was not a valid framebuffer.",
-                   framebuffer);
+    return std::format(
+        "The framebuffer binding ({}) was not a valid framebuffer.",
+        framebuffer);
   }
 
   GLenum status = CheckFramebufferStatus(GL_FRAMEBUFFER);
