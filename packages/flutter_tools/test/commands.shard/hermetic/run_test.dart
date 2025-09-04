@@ -1303,6 +1303,7 @@ void main() {
           '--enable-embedder-api',
           '--ci',
           '--debug-logs-dir=path/to/logs',
+          '--enable-gradle-managed-install',
         ]),
         throwsToolExit(),
       );
@@ -1327,6 +1328,32 @@ void main() {
       expect(options.skiaDeterministicRendering, true);
       expect(options.usingCISystem, true);
       expect(options.debugLogsDirectoryPath, 'path/to/logs');
+      expect(options.enableGradleManagedInstall, true);
+    },
+    overrides: <Type, Generator>{
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
+
+  testUsingContext(
+    'negative flags propagate to debugging options',
+    () async {
+      final command = RunCommand();
+      await expectLater(
+        () => createTestCommandRunner(command).run(<String>[
+          'run',
+          '--no-enable-dart-profiling',
+          '--no-enable-gradle-managed-install',
+        ]),
+        throwsToolExit(),
+      );
+
+      final DebuggingOptions options = await command.createDebuggingOptions();
+
+      expect(options.enableDartProfiling, isFalse);
+      expect(options.enableGradleManagedInstall, isFalse);
     },
     overrides: <Type, Generator>{
       Cache: () => Cache.test(processManager: FakeProcessManager.any()),
