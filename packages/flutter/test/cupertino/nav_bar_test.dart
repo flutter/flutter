@@ -452,6 +452,7 @@ void main() {
   });
 
   testWidgets('Nav bar static components respect MediaQueryData', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/174642
     const double value = 10.0;
 
     void expectCustomMediaQueryData(BuildContext context) {
