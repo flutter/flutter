@@ -416,6 +416,12 @@ class SearchAnchor extends StatefulWidget {
   ///
   /// For example, when enabled, double hyphens (`--`) may be
   /// automatically replaced with an em dash (`—`) on iOS.
+  ///
+  /// Defaults to [SmartDashesType.enabled].
+  ///
+  /// See also:
+  ///  * [TextField.smartDashesType], which provides the same
+  ///    configuration option on a standalone [TextField].
   final SmartDashesType? smartDashesType;
 
   /// Configures how smart quotes are handled in the text field
@@ -423,6 +429,12 @@ class SearchAnchor extends StatefulWidget {
   ///
   /// For example, when enabled, straight quotes (`"`) may be
   /// automatically replaced with curly quotes (`“ ”`) on iOS.
+  ///
+  /// Defaults to [SmartQuotesType.enabled].
+  ///
+  /// See also:
+  ///  * [TextField.smartQuotesType], which provides the same
+  ///    configuration option on a standalone [TextField].
   final SmartQuotesType? smartQuotesType;
 
   @override
@@ -1579,6 +1591,12 @@ class SearchBar extends StatefulWidget {
   ///
   /// For example, when enabled, double hyphens (`--`) may be
   /// automatically replaced with an em dash (`—`) on iOS.
+  ///
+  /// Defaults to [SmartDashesType.enabled].
+  ///
+  /// See also:
+  ///  * [TextField.smartDashesType], which provides the same
+  ///    configuration option on a standalone [TextField].
   final SmartDashesType? smartDashesType;
 
   /// Configures how smart quotes are handled in the text field
@@ -1586,6 +1604,12 @@ class SearchBar extends StatefulWidget {
   ///
   /// For example, when enabled, straight quotes (`"`) may be
   /// automatically replaced with curly quotes (`“ ”`) on iOS.
+  ///
+  /// Defaults to [SmartQuotesType.enabled].
+  ///
+  /// See also:
+  ///  * [TextField.smartQuotesType], which provides the same
+  ///    configuration option on a standalone [TextField].
   final SmartQuotesType? smartQuotesType;
 
   static Widget _defaultContextMenuBuilder(
