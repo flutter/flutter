@@ -33,12 +33,14 @@ FLUTTER_ASSERT_ARC
       [[FlutterPluginSceneLifeCycleDelegate alloc] init];
   id mockLifecycleDelegate = OCMPartialMock(lifecycleDelegate);
 
-  id mockViewController = [self createMockFlutterViewController:mockSceneDelegate
-                                          mockLifecycleDelegate:mockLifecycleDelegate];
+  NSDictionary* mocks = [self createMockFlutterViewController:mockSceneDelegate
+                                        mockLifecycleDelegate:mockLifecycleDelegate];
+  id mockViewController = mocks[@"mockViewController"];
+  id viewController = mocks[@"viewController"];
 
   [mockViewController viewIsAppearing:NO];
 
-  OCMVerify(times(1), [lifecycleDelegate addFlutterViewController:mockViewController]);
+  OCMVerify(times(1), [mockLifecycleDelegate addFlutterViewController:viewController]);
   XCTAssertEqual(lifecycleDelegate.engines.count, 1.0);
 }
 
@@ -50,13 +52,15 @@ FLUTTER_ASSERT_ARC
       [[FlutterPluginSceneLifeCycleDelegate alloc] init];
   id mockLifecycleDelegate = OCMPartialMock(lifecycleDelegate);
 
-  id mockViewController = [self createMockFlutterViewController:mockSceneDelegate
-                                          mockLifecycleDelegate:mockLifecycleDelegate];
+  NSDictionary* mocks = [self createMockFlutterViewController:mockSceneDelegate
+                                        mockLifecycleDelegate:mockLifecycleDelegate];
+  id mockViewController = mocks[@"mockViewController"];
+  id viewController = mocks[@"viewController"];
 
   [mockViewController viewIsAppearing:NO];
   [mockViewController viewIsAppearing:NO];
 
-  OCMVerify(times(2), [lifecycleDelegate addFlutterViewController:mockViewController]);
+  OCMVerify(times(2), [mockLifecycleDelegate addFlutterViewController:viewController]);
   XCTAssertEqual(lifecycleDelegate.engines.count, 1.0);
 }
 
@@ -68,23 +72,27 @@ FLUTTER_ASSERT_ARC
       [[FlutterPluginSceneLifeCycleDelegate alloc] init];
   id mockLifecycleDelegate = OCMPartialMock(lifecycleDelegate);
 
-  id mockViewController = [self createMockFlutterViewController:mockSceneDelegate
-                                          mockLifecycleDelegate:mockLifecycleDelegate];
+  NSDictionary* mocks1 = [self createMockFlutterViewController:mockSceneDelegate
+                                         mockLifecycleDelegate:mockLifecycleDelegate];
+  id mockViewController1 = mocks1[@"mockViewController"];
+  id viewController1 = mocks1[@"viewController"];
 
-  id mockViewController2 = [self createMockFlutterViewController:mockSceneDelegate
-                                           mockLifecycleDelegate:mockLifecycleDelegate];
+  NSDictionary* mocks2 = [self createMockFlutterViewController:mockSceneDelegate
+                                         mockLifecycleDelegate:mockLifecycleDelegate];
+  id mockViewController2 = mocks2[@"mockViewController"];
+  id viewController2 = mocks2[@"viewController"];
 
-  [mockViewController viewIsAppearing:NO];
+  [mockViewController1 viewIsAppearing:NO];
   [mockViewController2 viewIsAppearing:NO];
-  [mockViewController viewIsAppearing:NO];
+  [mockViewController1 viewIsAppearing:NO];
 
-  OCMVerify([lifecycleDelegate addFlutterViewController:mockViewController]);
-  OCMVerify([lifecycleDelegate addFlutterViewController:mockViewController2]);
+  OCMVerify(times(2), [mockLifecycleDelegate addFlutterViewController:viewController1]);
+  OCMVerify(times(1), [mockLifecycleDelegate addFlutterViewController:viewController2]);
   XCTAssertEqual(lifecycleDelegate.engines.count, 2.0);
 }
 
-- (id)createMockFlutterViewController:(id)mockSceneDelegate
-                mockLifecycleDelegate:(id)mockLifecycleDelegate {
+- (NSDictionary*)createMockFlutterViewController:(id)mockSceneDelegate
+                           mockLifecycleDelegate:(id)mockLifecycleDelegate {
   id mockEngine = OCMClassMock([FlutterEngine class]);
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:mockEngine
                                                                                 nibName:nil
@@ -103,7 +111,10 @@ FLUTTER_ASSERT_ARC
   OCMStub([mockWindow windowScene]).andReturn(mockWindowScene);
   OCMStub([mockWindowScene delegate]).andReturn(mockSceneDelegate);
   OCMStub([mockSceneDelegate sceneLifeCycleDelegate]).andReturn(mockLifecycleDelegate);
-  return mockViewController;
+  return @{
+    @"viewController" : viewController,
+    @"mockViewController" : mockViewController,
+  };
 }
 
 @end
