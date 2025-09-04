@@ -685,7 +685,7 @@ class AndroidDevice extends Device {
     final String powerInfo = await shellEval('dumpsys', <String>['power']);
     // A motoG4 phone returns `mWakefulness=Awake`.
     // A Samsung phone returns `getWakefullnessLocked()=Awake`.
-    final RegExp wakefulnessRegexp = RegExp(r'.*(mWakefulness|getWakefulnessLocked\(\))=[a-zA-Z]*');
+    final RegExp wakefulnessRegexp = RegExp(r'(?:mWakefulness|getWakefulnessLocked\(\))=[a-zA-Z]+');
     final String wakefulness = grep(wakefulnessRegexp, from: powerInfo).single.split('=')[1].trim();
     return wakefulness;
   }
