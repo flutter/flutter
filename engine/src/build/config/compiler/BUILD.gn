@@ -116,6 +116,7 @@ config("compiler") {
     } else if (!is_ios && !is_wasm && !is_qnx) {
       cflags += [
         "-fstack-protector",
+
         # 8 is the default, but make this explicit here so that we don't have to
         # go hunting for the flag name if we ever want a value that is
         # different from the default.
@@ -300,7 +301,8 @@ config("compiler") {
     if (wasm_use_workers) {
       cflags += [ "-sWASM_WORKERS=1" ]
       ldflags += [ "-sWASM_WORKERS=1" ]
-    } if (wasm_shared_memory) {
+    }
+    if (wasm_shared_memory) {
       cflags += [ "-sSHARED_MEMORY=1" ]
       ldflags += [ "-sSHARED_MEMORY=1" ]
     }
@@ -356,9 +358,7 @@ config("compiler") {
   # Linux/Android common flags setup.
   # ---------------------------------
   if (is_linux || is_android || is_qnx) {
-    cflags += [
-      "-fPIC",
-    ]
+    cflags += [ "-fPIC" ]
 
     if (!is_qnx) {
       cflags += [
@@ -382,7 +382,7 @@ config("compiler") {
     if (target_cpu == "arm64") {
       qnx_arch_flags += [
         "-V",
-        "gcc_ntoaarch64le"
+        "gcc_ntoaarch64le",
       ]
     } else {
       assert(false, "Unknown QNX architecture")
@@ -474,20 +474,55 @@ config("compiler") {
   # Fuchsia-specific flags setup.
   # -----------------------------
   if (is_fuchsia) {
-    configs = ["//flutter/tools/fuchsia/gn-sdk/src/config:compiler"]
+    configs = [ "//flutter/tools/fuchsia/gn-sdk/src/config:compiler" ]
   }
 
   asmflags = cflags
 }
 
+# C++ modules (available and enabled by default in C++20 and above) are
+# prohibited by the style guide.
+config("cxx_disable_modules") {
+  disable_modules_flags = [
+    "-fno-modules",
+
+    # Some Clang versions do not disable ObjC modules (as tested by
+    # __has_feature(objc_modules)) when just -fno-modules is present.
+    "-Xclang",
+    "-fno-cxx-modules",
+  ]
+  cflags_c = disable_modules_flags
+  cflags_cc = disable_modules_flags
+  cflags_objc = disable_modules_flags
+  cflags_objcc = disable_modules_flags
+}
+
 config("cxx_version_default") {
   if (is_win) {
-    cc_std = [ "/std:c++17" ]
+    cc_std = [ "/std:c++20" ]
   } else {
-    cc_std = [ "-std=c++17" ]
+    cc_std = [ "-std=c++20" ]
   }
+
+  configs = [ ":cxx_disable_modules" ]
+
   cflags_cc = cc_std
   cflags_objcc = cc_std
+
+  # The following corrections are only in place for targets that have opted into
+  # the default version. These targets have not had to opportunity to upgrade to
+  # a newer version. Targets that have explicitly opted into the newer version
+  # must fix the errors they run into.
+
+  if (is_clang) {
+    extra_warning_flags_cc = [
+      # TODO(174665): Third-party dependency (Angle) needs to patched to work
+      # around this.
+      "-Wno-deprecated-this-capture",
+    ]
+    cflags_cc += extra_warning_flags_cc
+    cflags_objcc += extra_warning_flags_cc
+  }
 }
 
 config("cxx_version_11") {
@@ -528,6 +563,8 @@ config("cxx_version_20") {
   }
   cflags_cc = cc_std
   cflags_objcc = cc_std
+
+  configs = [ ":cxx_disable_modules" ]
 }
 
 config("compiler_arm_fpu") {
@@ -575,8 +612,10 @@ config("runtime_library") {
     # Add libcxx[abi]/include via cflags_cc, cflags_objcc to apply to
     # C++/Obj-C++ only. Adding them via include_dirs is problematic for Swift,
     # whose core libraries expect the Apple SDK C++ headers, module.modulemap.
-    _libcxx_include = rebase_path("//flutter/third_party/libcxx/include", root_build_dir)
-    _libcxxabi_include = rebase_path("//flutter/third_party/libcxxabi/include", root_build_dir)
+    _libcxx_include =
+        rebase_path("//flutter/third_party/libcxx/include", root_build_dir)
+    _libcxxabi_include =
+        rebase_path("//flutter/third_party/libcxxabi/include", root_build_dir)
     cflags_cc += [
       "-nostdinc++",
       "-I" + _libcxx_include,
@@ -604,9 +643,7 @@ config("runtime_library") {
 
     ldflags += [ "-nostdlib" ]
 
-    ldflags += [
-      "-Wl,--warn-shared-textrel",
-    ]
+    ldflags += [ "-Wl,--warn-shared-textrel" ]
 
     libs += [
       "c",
@@ -639,7 +676,7 @@ config("runtime_library") {
 
   # Fuchsia standard library setup.
   if (is_fuchsia) {
-    configs = ["//flutter/tools/fuchsia/gn-sdk/src/config:runtime_library"]
+    configs = [ "//flutter/tools/fuchsia/gn-sdk/src/config:runtime_library" ]
   }
 }
 
@@ -653,6 +690,7 @@ default_warning_flags_cc = []
 if (is_qnx) {
   default_warning_flags_cc += [ "-fpermissive" ]
 }
+
 if (is_win) {
   default_warning_flags += [
     # Permanent.
@@ -1013,9 +1051,7 @@ config("no_optimize") {
     # On WASM we don't want to fully deoptimize the debug build because the
     # compiled binary will have some functions with too many local variables
     # and Chrome will reject it.
-    cflags = [
-      "-O1",
-    ]
+    cflags = [ "-O1" ]
     ldflags = common_optimize_on_ldflags
   } else {
     cflags = [ "-O0" ]
@@ -1112,6 +1148,7 @@ config("prevent_unsafe_narrowing") {
       "-Wshorten-64-to-32",
       "-Wimplicit-int-conversion",
       "-Wsign-compare",
+
       # Avoid bugs of the form `if (size_t i = size; i >= 0; --i)` while
       # fixing types to be sign-correct.
       "-Wtautological-unsigned-zero-compare",

@@ -69,6 +69,9 @@
   }
 #define VULKAN_HPP_NO_EXCEPTIONS
 
+// The spaceship operator behaves differently on 32-bit platforms.
+#define VULKAN_HPP_NO_SPACESHIP_OPERATOR
+
 #include "vulkan/vulkan.hpp"  // IWYU pragma: keep.
 
 static_assert(VK_HEADER_VERSION >= 215, "Vulkan headers must not be too old.");
