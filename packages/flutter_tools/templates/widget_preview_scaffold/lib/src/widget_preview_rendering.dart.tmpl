@@ -418,35 +418,48 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
       child: preview,
     );
 
-    // This IntrinsicWidth is here to prevent the Divider from forcing the Column
-    // to expand to the full width of the previewer.
-    preview = IntrinsicWidth(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (widget.preview.name != null)
-            _WidgetPreviewNameHeader(name: widget.preview.name!),
+    final hasName = widget.preview.name != null;
+    preview = Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        if (hasName)
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Column(
-              children: [
-                InteractiveViewerWrapper(
-                  transformationController: transformationController,
-                  child: preview,
-                ),
-                const VerticalSpacer(),
-                _WidgetPreviewControlRow(
-                  transformationController: transformationController,
-                  errorThrownDuringTreeConstruction:
-                      errorThrownDuringTreeConstruction,
-                  brightnessListenable: brightnessListenable,
-                  softRestartListenable: softRestartListenable,
-                ),
-              ],
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Text(
+              widget.preview.name!,
+              style: fixBlurryText(
+                TextStyle(fontSize: 16, fontWeight: FontWeight.w300),
+              ),
             ),
           ),
-        ],
-      ),
+        Container(
+          padding: const EdgeInsets.symmetric(
+            // TODO(bkonyi): use theming or define global constants.
+            horizontal: 16.0,
+          ).add(hasName ? const EdgeInsets.only(top: 8.0) : EdgeInsets.zero),
+          decoration: hasName
+              ? BoxDecoration(
+                  border: Border(top: Divider.createBorderSide(context)),
+                )
+              : null,
+          child: Column(
+            children: [
+              InteractiveViewerWrapper(
+                transformationController: transformationController,
+                child: preview,
+              ),
+              const VerticalSpacer(),
+              _WidgetPreviewControlRow(
+                transformationController: transformationController,
+                errorThrownDuringTreeConstruction:
+                    errorThrownDuringTreeConstruction,
+                brightnessListenable: brightnessListenable,
+                softRestartListenable: softRestartListenable,
+              ),
+            ],
+          ),
+        ),
+      ],
     );
 
     return Padding(
@@ -457,31 +470,6 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
           child: preview,
         ),
       ),
-    );
-  }
-}
-
-class _WidgetPreviewNameHeader extends StatelessWidget {
-  const _WidgetPreviewNameHeader({required this.name});
-
-  final String name;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Text(
-            name,
-            style: fixBlurryText(
-              TextStyle(fontSize: 16, fontWeight: FontWeight.w300),
-            ),
-          ),
-        ),
-        const Divider(indent: 0, endIndent: 0),
-        const VerticalSpacer(),
-      ],
     );
   }
 }
