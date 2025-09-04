@@ -847,7 +847,7 @@ abstract class SemanticRole {
   }
 
   void _updateTraversalOwner() {
-    // Set up aria-owns relationship for overlay portal children.
+    // Set up aria-owns relationship for traversal order.
     if (semanticsObject.traversalOwner != -1) {
       SemanticsObject? parent =
           semanticsObject.owner._semanticsTree[semanticsObject.traversalOwner!];
@@ -859,9 +859,10 @@ abstract class SemanticRole {
       }
     }
     // Clean up aria-owns relationship.
-    if (semanticsObject.traversalOwner != null && semanticsObject.traversalOwner == -1) {
+    if (semanticsObject._previousTraversalOwner != null &&
+        semanticsObject._previousTraversalOwner != -1) {
       SemanticsObject? parent =
-          semanticsObject.owner._semanticsTree[semanticsObject.traversalOwner!];
+          semanticsObject.owner._semanticsTree[semanticsObject._previousTraversalOwner!];
       if (parent != null) {
         parent.element.removeAttribute('aria-owns');
       }
@@ -1543,6 +1544,7 @@ class SemanticsObject {
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   int? get traversalOwner => _traversalOwner;
   int? _traversalOwner;
+  int? get _previousTraversalOwner;
 
   static const int _traversalOwnerIndex = 1 << 29;
 
@@ -1741,6 +1743,7 @@ class SemanticsObject {
     }
 
     if (_traversalOwner != update.traversalOwner) {
+      _previousTraversalOwner = _traversalOwner;
       _traversalOwner = update.traversalOwner;
       _markTraversalOwnerDirty();
     }
