@@ -200,7 +200,7 @@ def CopyBuildToBucket(runtime_mode, arch, optimized, product):
   # are about to package.
   bucket_root = os.path.join(_bucket_directory, 'flutter')
   CopyPath(
-      os.path.join(_src_root_dir, 'sky/packages/sky_engine/LICENSE'),
+      os.path.join(_src_root_dir, 'flutter/sky/packages/sky_engine/LICENSE'),
       os.path.join(bucket_root, 'LICENSE')
   )
 
