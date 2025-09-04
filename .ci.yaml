@@ -1092,9 +1092,10 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Linux plugin_test
+  - name: Linux plugin_test_android_variants
+    bringup: true
     recipe: devicelab/devicelab_drone
-    timeout: 60
+    timeout: 45
     properties:
       dependencies: >-
         [
@@ -1108,7 +1109,29 @@ targets:
         ["os=Linux", "os=Ubuntu-20"]
       tags: >
         ["devicelab", "hostonly", "linux"]
-      task_name: plugin_test
+      task_name: plugin_test_android_variants
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  - name: Linux plugin_test_android_standard
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    timeout: 45
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:36v1"},
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "open_jdk", "version": "version:21"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      task_name: plugin_test_android_standard
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -1194,7 +1217,6 @@ targets:
       task_name: linux_feature_flags_test
 
   - name: Linux_android_emu android_display_cutout
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/174500
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -1786,8 +1808,6 @@ targets:
       subshard: "1_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1810,8 +1830,6 @@ targets:
       subshard: "2_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1834,8 +1852,6 @@ targets:
       subshard: "3_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1858,8 +1874,6 @@ targets:
       subshard: "4_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1882,8 +1896,6 @@ targets:
       subshard: "5_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1906,8 +1918,7 @@ targets:
       subshard: "0"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**
@@ -1930,8 +1941,7 @@ targets:
       subshard: "1"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**
@@ -1954,8 +1964,7 @@ targets:
       subshard: "2"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**
@@ -1978,8 +1987,7 @@ targets:
       subshard: "3"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**
@@ -2002,8 +2010,7 @@ targets:
       subshard: "4"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**
@@ -2026,8 +2033,7 @@ targets:
       subshard: "5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**
@@ -2050,8 +2056,7 @@ targets:
       subshard: "6"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**
@@ -2074,8 +2079,7 @@ targets:
       subshard: "7_last"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**
@@ -2098,8 +2102,7 @@ targets:
       subshard: "0"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**
@@ -2122,8 +2125,7 @@ targets:
       subshard: "1"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**
@@ -2146,8 +2148,7 @@ targets:
       subshard: "2"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**
@@ -2170,8 +2171,7 @@ targets:
       subshard: "3"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**
@@ -2194,8 +2194,7 @@ targets:
       subshard: "4"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**
@@ -2218,8 +2217,7 @@ targets:
       subshard: "5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**
@@ -2242,8 +2240,7 @@ targets:
       subshard: "6"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**
@@ -2266,8 +2263,7 @@ targets:
       subshard: "7_last"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**
@@ -2291,8 +2287,6 @@ targets:
       subshard: "1_1"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
       test_timeout_secs: "5400" # https://github.com/flutter/flutter/issues/162714
     runIf:
       - dev/**
@@ -2462,6 +2456,7 @@ targets:
 
   # Uses Impeller.
   - name: Linux_pixel_7pro hello_world_impeller
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/173698
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2711,6 +2706,7 @@ targets:
       task_name: devtools_profile_start_test
 
   - name: Linux_pixel_7pro drive_perf_debug_warning
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/174111
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3195,6 +3191,7 @@ targets:
 
   # Pixel 7 Pro, Skia
   - name: Linux_pixel_7pro new_gallery__transition_perf
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/174105
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -4387,9 +4384,10 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Mac plugin_test
+  - name: Mac plugin_test_android_variants
+    bringup: true
     recipe: devicelab/devicelab_drone
-    timeout: 60
+    timeout: 45
     properties:
       dependencies: >-
         [
@@ -4398,7 +4396,29 @@ targets:
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
-      task_name: plugin_test
+      task_name: plugin_test_android_variants
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  - name: Mac plugin_test_android_standard
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    timeout: 45
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:36v1"},
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "open_jdk", "version": "version:21"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      task_name: plugin_test_android_standard
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -6169,10 +6189,10 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Windows plugin_test
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/174116
+  - name: Windows plugin_test_android_variants
+    bringup: true
     recipe: devicelab/devicelab_drone
-    timeout: 60
+    timeout: 45
     properties:
       dependencies: >-
         [
@@ -6182,7 +6202,29 @@ targets:
         ]
       tags: >
         ["devicelab", "hostonly", "windows"]
-      task_name: plugin_test
+      task_name: plugin_test_android_variants
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  - name: Windows plugin_test_android_standard
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    timeout: 45
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:36v1"},
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "open_jdk", "version": "version:21"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      task_name: plugin_test_android_standard
     runIf:
       - dev/**
       - packages/flutter_tools/**
