@@ -189,6 +189,17 @@ FLUTTER_ASSERT_ARC
   OCMVerify([plugin detachFromEngineForRegistrar:[OCMArg any]]);
 }
 
+- (void)testGetViewControllerFromRegistrar {
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"engine" project:project];
+  id mockEngine = OCMPartialMock(engine);
+  NSObject<FlutterPluginRegistrar>* registrar = [mockEngine registrarForPlugin:@"plugin"];
+
+  // Verify accessing the viewController getter calls FlutterEngine.viewController.
+  (void)[registrar viewController];
+  OCMVerify(times(1), [mockEngine viewController]);
+}
+
 - (void)testSetBinaryMessengerToSameBinaryMessenger {
   FakeBinaryMessengerRelay* fakeBinaryMessenger = [[FakeBinaryMessengerRelay alloc] init];
 
