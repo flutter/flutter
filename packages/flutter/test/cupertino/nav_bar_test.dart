@@ -452,8 +452,14 @@ void main() {
   });
 
   testWidgets('Nav bar static components respect MediaQueryData', (WidgetTester tester) async {
-    count = 0x000000;
     const double value = 10.0;
+
+    void expectCustomMediaQueryData(BuildContext context) {
+      expect(MediaQuery.platformBrightnessOf(context), Brightness.dark);
+      expect(MediaQuery.devicePixelRatioOf(context), value);
+      expect(MediaQuery.viewInsetsOf(context), const EdgeInsets.all(value));
+    }
+
     await tester.pumpWidget(
       CupertinoApp(
         home: MediaQuery(
@@ -463,20 +469,31 @@ void main() {
             platformBrightness: Brightness.dark,
           ),
           child: CupertinoNavigationBar(
-            leading: CupertinoButton(
-              onPressed: () {},
-              child: const _ExpectCustomMediaQuery(value: value, index: 0x000001),
+            leading: Builder(
+              builder: (BuildContext context) {
+                expectCustomMediaQueryData(context);
+                return CupertinoButton(onPressed: () {}, child: const Text('leading'));
+              },
             ),
-            middle: const _ExpectCustomMediaQuery(value: value, index: 0x000100),
-            trailing: CupertinoButton(
-              onPressed: () {},
-              child: const _ExpectCustomMediaQuery(value: value, index: 0x010000),
+            middle: Builder(
+              builder: (BuildContext context) {
+                expectCustomMediaQueryData(context);
+                return CupertinoButton(onPressed: () {}, child: const Text('middle'));
+              },
+            ),
+            trailing: Builder(
+              builder: (BuildContext context) {
+                expectCustomMediaQueryData(context);
+                return CupertinoButton(onPressed: () {}, child: const Text('trailing'));
+              },
             ),
           ),
         ),
       ),
     );
-    expect(count, 0x010101);
+    expect(find.text('leading'), findsOneWidget);
+    expect(find.text('middle'), findsOneWidget);
+    expect(find.text('trailing'), findsOneWidget);
   });
 
   testWidgets('No slivers with no large titles', (WidgetTester tester) async {
@@ -3210,22 +3227,6 @@ class _ExpectStyles extends StatelessWidget {
     expect(style.fontFamily, 'CupertinoSystemText');
     expect(style.fontSize, 17.0);
     expect(style.letterSpacing, -0.41);
-    count += index;
-    return Container();
-  }
-}
-
-class _ExpectCustomMediaQuery extends StatelessWidget {
-  const _ExpectCustomMediaQuery({required this.value, required this.index});
-
-  final double value;
-  final int index;
-
-  @override
-  Widget build(BuildContext context) {
-    expect(MediaQuery.platformBrightnessOf(context), Brightness.dark);
-    expect(MediaQuery.devicePixelRatioOf(context), value);
-    expect(MediaQuery.viewInsetsOf(context), EdgeInsets.all(value));
     count += index;
     return Container();
   }
