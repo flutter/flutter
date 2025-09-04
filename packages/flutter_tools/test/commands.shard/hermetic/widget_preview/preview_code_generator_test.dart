@@ -171,6 +171,7 @@ void main() {
         ..childFile('lib/src/transitive_error.dart').writeAsStringSync(kTransitiveErrorLibrary);
       project = FlutterProject.fromDirectoryTest(projectDir);
       previewDetector = PreviewDetector(
+        platform: FakePlatform(),
         previewAnalytics: WidgetPreviewAnalytics(
           analytics: getInitializedFakeAnalyticsInstance(
             // We don't care about anything written to the file system by analytics, so we're safe
@@ -239,19 +240,23 @@ import 'package:flutter/material.dart' as _i10;
 
 List<_i1.WidgetPreview> previews() => [
       _i1.WidgetPreview(
+        scriptUri: 'STRIPPED',
         packageName: 'foo_project',
         builder: () => _i2.preview(),
       ),
       _i1.WidgetPreview(
+        scriptUri: 'STRIPPED',
         packageName: 'foo_project',
         builder: () => _i3.barPreview1(),
       ),
       _i1.WidgetPreview(
+        scriptUri: 'STRIPPED',
         packageName: 'foo_project',
         brightness: _i4.brightnessConstant,
         builder: () => _i3.barPreview2(),
       ),
       _i1.WidgetPreview(
+        scriptUri: 'STRIPPED',
         packageName: 'foo_project',
         name: 'Foo',
         size: const _i5.Size(
@@ -265,14 +270,24 @@ List<_i1.WidgetPreview> previews() => [
         builder: () => _i8.wrapper(_i9.Builder(builder: _i3.barPreview3())),
       ),
       _i1.WidgetPreview(
-          builder: () =>
-              _i10.Text('package:foo_project/src/error.dart has errors!')),
+        scriptUri: 'STRIPPED',
+        builder: () =>
+            _i10.Text('package:foo_project/src/error.dart has errors!'),
+      ),
       _i1.WidgetPreview(
-          builder: () => _i10.Text(
-              'Dependency of package:foo_project/src/transitive_error.dart has errors!')),
+        scriptUri: 'STRIPPED',
+        builder: () => _i10.Text(
+            'Dependency of package:foo_project/src/transitive_error.dart has errors!'),
+      ),
     ];
 ''';
-        expect(generatedPreviewFile.readAsStringSync(), expectedGeneratedPreviewFileContents);
+        expect(
+          generatedPreviewFile.readAsStringSync().replaceAll(
+            RegExp(r"scriptUri:\s*'file:\/\/\/\S*',"),
+            "scriptUri: 'STRIPPED',",
+          ),
+          expectedGeneratedPreviewFileContents,
+        );
 
         // Regenerate the generated file with no previews.
         codeGenerator.populatePreviewsInGeneratedPreviewScaffold(

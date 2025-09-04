@@ -13,6 +13,7 @@ import 'dart:core';
 import 'dart:math' as math;
 import 'dart:ui'
     show
+        CheckedState,
         Locale,
         Offset,
         Rect,
@@ -25,7 +26,8 @@ import 'dart:ui'
         SemanticsUpdateBuilder,
         SemanticsValidationResult,
         StringAttribute,
-        TextDirection;
+        TextDirection,
+        Tristate;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
@@ -163,7 +165,7 @@ sealed class _DebugSemanticsRoleChecks {
 
   static FlutterError? _semanticsTab(SemanticsNode node) {
     final SemanticsData data = node.getSemanticsData();
-    if (!data.flagsCollection.hasSelectedState) {
+    if (data.flagsCollection.isSelected == Tristate.none) {
       return FlutterError('A tab needs selected states');
     }
 
@@ -171,13 +173,11 @@ sealed class _DebugSemanticsRoleChecks {
       return null;
     }
 
-    if (!data.flagsCollection.hasEnabledState) {
-      if (!data.hasAction(SemanticsAction.tap)) {
-        return FlutterError('A tab must have a tap action');
-      }
-    } else if (data.flagsCollection.isEnabled && !data.hasAction(SemanticsAction.tap)) {
+    if (data.flagsCollection.isEnabled != Tristate.isFalse &&
+        !data.hasAction(SemanticsAction.tap)) {
       return FlutterError('A tab must have a tap action');
     }
+
     return null;
   }
 
@@ -250,7 +250,7 @@ sealed class _DebugSemanticsRoleChecks {
         return error == null;
       }
 
-      if (data.flagsCollection.isChecked) {
+      if (data.flagsCollection.isChecked == CheckedState.isTrue) {
         if (hasCheckedChild) {
           error = FlutterError('Radio groups must not have multiple checked children');
           return false;
@@ -296,7 +296,7 @@ sealed class _DebugSemanticsRoleChecks {
 
   static FlutterError? _semanticsMenuItemCheckbox(SemanticsNode node) {
     final SemanticsData data = node.getSemanticsData();
-    if (!data.flagsCollection.hasCheckedState) {
+    if (data.flagsCollection.isChecked == CheckedState.none) {
       return FlutterError('a menu item checkbox must be checkable');
     }
 
@@ -313,7 +313,7 @@ sealed class _DebugSemanticsRoleChecks {
 
   static FlutterError? _semanticsMenuItemRadio(SemanticsNode node) {
     final SemanticsData data = node.getSemanticsData();
-    if (!data.flagsCollection.hasCheckedState) {
+    if (data.flagsCollection.isChecked == CheckedState.none) {
       return FlutterError('a menu item radio must be checkable');
     }
 
@@ -3858,6 +3858,15 @@ class SemanticsNode with DiagnosticableTreeMixin {
     if (_inputType != SemanticsInputType.none) {
       properties.add(EnumProperty<SemanticsInputType>('inputType', _inputType));
     }
+    if (validationResult != SemanticsValidationResult.none) {
+      properties.add(
+        EnumProperty<SemanticsValidationResult>(
+          'validationResult',
+          validationResult,
+          defaultValue: SemanticsValidationResult.none,
+        ),
+      );
+    }
   }
 
   /// Returns a string representation of this node and its descendants.
@@ -5502,9 +5511,9 @@ class SemanticsConfiguration {
   /// accessibility focused may or may not be selected; e.g. a [ListTile] can have
   /// accessibility focus but have its [ListTile.selected] property set to false,
   /// in which case it will not be flagged as selected.
-  bool get isSelected => _flags.isSelected;
+  bool get isSelected => _flags.isSelected == Tristate.isTrue;
   set isSelected(bool value) {
-    _flags = _flags.copyWith(hasSelectedState: true, isSelected: value);
+    _flags = _flags.copyWith(isSelected: _tristateFromBoolOrNull(value));
     _hasBeenAnnotated = true;
   }
 
@@ -5516,9 +5525,9 @@ class SemanticsConfiguration {
   ///
   /// The getter returns null if the owning [RenderObject] does not have
   /// expanded/collapsed state.
-  bool? get isExpanded => _flags.hasExpandedState ? _flags.isExpanded : null;
+  bool? get isExpanded => _flags.isExpanded.toBoolOrNull();
   set isExpanded(bool? value) {
-    _flags = _flags.copyWith(hasExpandedState: true, isExpanded: value);
+    _flags = _flags.copyWith(isExpanded: _tristateFromBoolOrNull(value));
     _hasBeenAnnotated = true;
   }
 
@@ -5537,10 +5546,9 @@ class SemanticsConfiguration {
   /// This property does not control whether semantics are enabled. If you wish to
   /// disable semantics for a particular widget, you should use an [ExcludeSemantics]
   /// widget.
-  bool? get isEnabled => _flags.hasEnabledState ? _flags.isEnabled : null;
+  bool? get isEnabled => _flags.isEnabled.toBoolOrNull();
   set isEnabled(bool? value) {
-    _flags = _flags.copyWith(hasEnabledState: true, isEnabled: value);
-
+    _flags = _flags.copyWith(isEnabled: _tristateFromBoolOrNull(value));
     _hasBeenAnnotated = true;
   }
 
@@ -5553,10 +5561,12 @@ class SemanticsConfiguration {
   ///
   /// The getter returns null if the owning [RenderObject] does not have
   /// checked/unchecked state.
-  bool? get isChecked => _flags.hasCheckedState ? _flags.isChecked : null;
+  bool? get isChecked =>
+      _flags.isChecked == CheckedState.none ? null : _flags.isChecked == CheckedState.isTrue;
   set isChecked(bool? value) {
-    assert(value != true || isCheckStateMixed != true);
-    _flags = _flags.copyWith(hasCheckedState: true, isChecked: value);
+    if (value != null) {
+      _flags = _flags.copyWith(isChecked: value ? CheckedState.isTrue : CheckedState.isFalse);
+    }
     _hasBeenAnnotated = true;
   }
 
@@ -5568,10 +5578,12 @@ class SemanticsConfiguration {
   ///
   /// The getter returns null if the owning [RenderObject] does not have
   /// mixed checked state.
-  bool? get isCheckStateMixed => _flags.hasCheckedState ? _flags.isCheckStateMixed : null;
+  bool? get isCheckStateMixed =>
+      _flags.isChecked == CheckedState.none ? null : _flags.isChecked == CheckedState.mixed;
   set isCheckStateMixed(bool? value) {
-    assert(value != true || isChecked != true);
-    _flags = _flags.copyWith(hasCheckedState: true, isCheckStateMixed: value);
+    if (value ?? false) {
+      _flags = _flags.copyWith(isChecked: CheckedState.mixed);
+    }
     _hasBeenAnnotated = true;
   }
 
@@ -5583,9 +5595,9 @@ class SemanticsConfiguration {
   ///
   /// The getter returns null if the owning [RenderObject] does not have
   /// on/off state.
-  bool? get isToggled => _flags.hasToggledState ? _flags.isToggled : null;
+  bool? get isToggled => _flags.isToggled.toBoolOrNull();
   set isToggled(bool? value) {
-    _flags = _flags.copyWith(hasToggledState: true, isToggled: value);
+    _flags = _flags.copyWith(isToggled: _tristateFromBoolOrNull(value));
     _hasBeenAnnotated = true;
   }
 
@@ -5605,26 +5617,30 @@ class SemanticsConfiguration {
     'Check if isFocused is null instead. '
     'This feature was deprecated after v3.36.0-0.0.pre.',
   )
-  bool get isFocusable => _flags.isFocusable;
+  bool get isFocusable => _flags.isFocused != Tristate.none;
 
   @Deprecated(
     'Setting isFocused automatically set this to true. '
     'This feature was deprecated after v3.36.0-0.0.pre.',
   )
   set isFocusable(bool value) {
-    _flags = _flags.copyWith(isFocusable: value);
+    // If value is false, set `isFocused` to none.
+    // If value is true, `isFocused` should be true or false. If `isFocused` is not none,
+    // don't change it, if `isFocused` is `none`, change it to `false`.
+    if (!value) {
+      _flags = _flags.copyWith(isFocused: Tristate.none);
+    } else {
+      if (_flags.isFocused == Tristate.none) {
+        _flags = _flags.copyWith(isFocused: Tristate.isFalse);
+      }
+    }
     _hasBeenAnnotated = true;
   }
 
   /// Whether the owning [RenderObject] currently holds the input focus.
-  /// If the value is `null`, it's not focusable.
-  bool? get isFocused => _flags.isFocusable ? _flags.isFocused : null;
+  bool? get isFocused => _flags.isFocused.toBoolOrNull();
   set isFocused(bool? value) {
-    if (value != null) {
-      _flags = _flags.copyWith(isFocusable: true, isFocused: value);
-    } else {
-      _flags = _flags.copyWith(isFocusable: false, isFocused: false);
-    }
+    _flags = _flags.copyWith(isFocused: _tristateFromBoolOrNull(value));
     _hasBeenAnnotated = true;
   }
 
@@ -5761,9 +5777,9 @@ class SemanticsConfiguration {
   /// See also:
   ///
   ///  * [SemanticsFlag.isRequired], for a full description of required nodes.
-  bool? get isRequired => _flags.hasRequiredState ? _flags.isRequired : null;
+  bool? get isRequired => _flags.isRequired.toBoolOrNull();
   set isRequired(bool? value) {
-    _flags = _flags.copyWith(hasRequiredState: true, isRequired: value);
+    _flags = _flags.copyWith(isRequired: _tristateFromBoolOrNull(value));
     _hasBeenAnnotated = true;
   }
 
@@ -6278,16 +6294,27 @@ int _mergeHeadingLevels({required int sourceLevel, required int targetLevel}) {
   return targetLevel == 0 ? sourceLevel : targetLevel;
 }
 
+Tristate _tristateFromBoolOrNull(bool? value) {
+  if (value == null) {
+    return Tristate.none;
+  }
+
+  if (value) {
+    return Tristate.isTrue;
+  }
+  return Tristate.isFalse;
+}
+
 /// This is just to support flag 0-30, new flags don't need to be in the bitmask.
 int _toBitMask(SemanticsFlags flags) {
   int bitmask = 0;
-  if (flags.hasCheckedState) {
+  if (flags.isChecked != CheckedState.none) {
     bitmask |= 1 << 0;
   }
-  if (flags.isChecked) {
+  if (flags.isChecked == CheckedState.isTrue) {
     bitmask |= 1 << 1;
   }
-  if (flags.isSelected) {
+  if (flags.isSelected == Tristate.isTrue) {
     bitmask |= 1 << 2;
   }
   if (flags.isButton) {
@@ -6296,13 +6323,13 @@ int _toBitMask(SemanticsFlags flags) {
   if (flags.isTextField) {
     bitmask |= 1 << 4;
   }
-  if (flags.isFocused) {
+  if (flags.isFocused == Tristate.isTrue) {
     bitmask |= 1 << 5;
   }
-  if (flags.hasEnabledState) {
+  if (flags.isEnabled != Tristate.none) {
     bitmask |= 1 << 6;
   }
-  if (flags.isEnabled) {
+  if (flags.isEnabled == Tristate.isTrue) {
     bitmask |= 1 << 7;
   }
   if (flags.isInMutuallyExclusiveGroup) {
@@ -6329,10 +6356,10 @@ int _toBitMask(SemanticsFlags flags) {
   if (flags.isLiveRegion) {
     bitmask |= 1 << 15;
   }
-  if (flags.hasToggledState) {
+  if (flags.isToggled != Tristate.none) {
     bitmask |= 1 << 16;
   }
-  if (flags.isToggled) {
+  if (flags.isToggled == Tristate.isTrue) {
     bitmask |= 1 << 17;
   }
   if (flags.hasImplicitScrolling) {
@@ -6344,7 +6371,7 @@ int _toBitMask(SemanticsFlags flags) {
   if (flags.isReadOnly) {
     bitmask |= 1 << 20;
   }
-  if (flags.isFocusable) {
+  if (flags.isFocused != Tristate.none) {
     bitmask |= 1 << 21;
   }
   if (flags.isLink) {
@@ -6356,22 +6383,22 @@ int _toBitMask(SemanticsFlags flags) {
   if (flags.isKeyboardKey) {
     bitmask |= 1 << 24;
   }
-  if (flags.isCheckStateMixed) {
+  if (flags.isChecked == CheckedState.mixed) {
     bitmask |= 1 << 25;
   }
-  if (flags.hasExpandedState) {
+  if (flags.isExpanded != Tristate.none) {
     bitmask |= 1 << 26;
   }
-  if (flags.isExpanded) {
+  if (flags.isExpanded == Tristate.isTrue) {
     bitmask |= 1 << 27;
   }
-  if (flags.hasSelectedState) {
+  if (flags.isSelected != Tristate.none) {
     bitmask |= 1 << 28;
   }
-  if (flags.hasRequiredState) {
+  if (flags.isRequired != Tristate.none) {
     bitmask |= 1 << 29;
   }
-  if (flags.isRequired) {
+  if (flags.isRequired == Tristate.isTrue) {
     bitmask |= 1 << 30;
   }
   return bitmask;
