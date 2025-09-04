@@ -688,8 +688,7 @@ class AndroidDevice extends Device {
     final RegExp wakefulnessRegexp = RegExp(
       r'(?:mWakefulness|getWakefulnessLocked\(\))=\s*([a-zA-Z]+)',
     );
-    final String wakefulnessEntry = grep(wakefulnessRegexp, from: powerInfo).single;
-    return wakefulnessRegexp.firstMatch(wakefulnessEntry)!.group(1)!;
+    return wakefulnessRegexp.allMatches(powerInfo).single.group(1)!;
   }
 
   Future<bool> isArm64() async {
