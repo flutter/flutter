@@ -1050,12 +1050,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       'line-height',
     )?.toDouble();
     final double? fontSize = parseFontSize(_typographyMeasurementElement!)?.toDouble();
-    late final double? lineHeightFactor;
-    if (fontSize != null && lineHeight != null) {
-      lineHeightFactor = lineHeight / fontSize;
-    } else {
-      lineHeightFactor = null;
-    }
+    final double? lineHeightFactor = fontSize != null && lineHeight != null
+        ? lineHeight / fontSize
+        : null;
     final double? wordSpacing = parseStyleProperty(
       _typographyMeasurementElement!,
       'word-spacing',
