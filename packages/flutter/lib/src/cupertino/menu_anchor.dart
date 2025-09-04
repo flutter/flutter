@@ -43,6 +43,56 @@ bool get _isCupertino {
   }
 }
 
+// The font size at which text scales linearly in a CupertinoMenuItem.
+const double _kBaseFontSize = 17.0;
+
+// Returns an integer that represents the current text scale factor normalized
+// to the base font size.
+//
+// On iOS, each "unit" of text scaling adds or removes 1/17th of the base font size.
+//
+// Examples:
+// textScaler.scale(17) = 17 → units = 0.0 (default size)
+// textScaler.scale(17) = 19 → units = 2.0 (2 units larger)
+// textScaler.scale(17) = 15 → units = -2.0 (2 units smaller)
+//
+// The returned value is positive when the text scale factor is larger than the
+// base font size, negative when smaller, and zero when equal.
+//
+// Normalizing to the base font size simplifies calculations that depend on
+// nonlinear text scaling, such as menu layout.
+int _normalizeTextScale(BuildContext context) {
+  final TextScaler? textScaler = MediaQuery.maybeTextScalerOf(context);
+  if (textScaler == null || textScaler == TextScaler.noScaling) {
+    return 0;
+  }
+
+  return (textScaler.scale(_kBaseFontSize) - _kBaseFontSize).round();
+}
+
+// The CupertinoMenuAnchor layout policy changes depending on whether the user is using
+// a "regular" font size vs a "large" font size. This is a spectrum. There are
+// many "regular" font sizes and many "large" font sizes. But depending on which
+// policy is currently being used, a menu is laid out differently.
+//
+// Empirically, the jump from one policy to the other occurs at the following text
+// scale factors:
+// Largest regular scale factor:  1.3529411764705883
+// Smallest large scale factor:   1.6470588235294117
+//
+// The following constant represents a division in text scale factor beyond which
+// we want to change how the menu is laid out.
+//
+// This explanation was ported from CupertinoDialog.
+const double _kMaxRegularTextScaleFactor = 1.4;
+
+// Accessibility mode on iOS is determined by the text scale factor that the
+// user has selected.
+bool _isAccessibilityModeEnabled(BuildContext context) {
+  final double scaleFactor = MediaQuery.maybeTextScalerOf(context)?.scale(1) ?? 1;
+  return scaleFactor > _kMaxRegularTextScaleFactor;
+}
+
 /// Mix [CupertinoMenuEntryMixin] in to define how a menu item should be drawn
 /// in a menu.
 mixin CupertinoMenuEntryMixin {
@@ -603,12 +653,8 @@ class _MenuOverlay extends StatefulWidget {
 
 class _MenuOverlayState extends State<_MenuOverlay>
     with TickerProviderStateMixin, WidgetsBindingObserver {
-  /// The menu width observed when the TextScaleFactor is less than or equal to
-  /// 1.25.
   static const double _defaultMenuWidth = 250;
-
-  /// The menu width observed when the TextScaleFactor is greater than 1.25.
-  static const double _largeMenuWidth = 350;
+  static const double _accessibleMenuWidth = 343;
 
   static final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
     _FocusDownIntent: _FocusDownAction(),
@@ -913,61 +959,69 @@ class _MenuOverlayState extends State<_MenuOverlay>
 
   @override
   Widget build(BuildContext context) {
-    Widget child = _PanSurface(
-      includeInPanArea: true,
-      child: Actions(
-        actions: _actions,
-        child: Shortcuts(
-          shortcuts: _kMenuTraversalShortcuts,
-          child: FocusScope(
-            node: widget.focusScopeNode,
-            descendantsAreFocusable: true,
-            descendantsAreTraversable: true,
-            canRequestFocus: true,
-            child: TapRegion(
-              groupId: widget.tapRegionGroupId,
-              consumeOutsideTaps: widget.consumeOutsideTaps,
-              onTapOutside: _handleOutsideTap,
-              // A custom shadow painter is used to make the underlying colors
-              // appear more vibrant. This is achieved by removing the shadow
-              // underlying the popup surface using a save layer combined with a
-              // clear blend mode.
-              //
-              // From my (davidhicks980) understanding and testing, it is
-              // impossible to achieve the appearance of an iOS backdrop using
-              // only guassian blur, linear color filter, and shadows, because the
-              // iOS popup surface does not linearly transform underlying colors.
-              // A custom shader would need to be used to achieve the same effect.
-              // Please correct me if I am wrong.
-              child: CustomPaint(
-                painter: _ShadowPainter(
-                  radius: const Radius.circular(13),
-                  brightness: CupertinoTheme.brightnessOf(context),
-                  repaint: _fadeAnimation,
-                ),
-                child: FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: CupertinoPopupSurface(
-                    // The FadeTransition widget needs to wrap Semantics so that
-                    // the semantics widget senses that the menu is the same
-                    // opacity as the menu items. Otherwise, "a menu cannot be
-                    // empty" is thrown due to the menu items being transparent
-                    // while the menu semantics are still present.
-                    child: Semantics.fromProperties(
-                      explicitChildNodes: true,
-                      excludeSemantics: _excludeInteraction,
-                      properties: SemanticsProperties(
-                        role: _excludeInteraction ? null : SemanticsRole.menu,
-                        scopesRoute: true,
-                        namesRoute: true,
-                        label: widget.semanticLabel,
-                      ),
-                      child: AnimatedBuilder(
-                        animation: _sizeAnimation,
-                        builder: _buildAlignTransition,
-                        child: SingleChildScrollView(
-                          clipBehavior: Clip.none,
-                          child: Column(children: _children),
+    final BoxConstraints constraints =
+        widget.constraints ??
+        (_isAccessibilityModeEnabled(context)
+            ? const BoxConstraints.tightFor(width: _accessibleMenuWidth)
+            : const BoxConstraints.tightFor(width: _defaultMenuWidth));
+    Widget child = ConstrainedBox(
+      constraints: constraints,
+      child: _PanSurface(
+        includeInPanArea: true,
+        child: Actions(
+          actions: _actions,
+          child: Shortcuts(
+            shortcuts: _kMenuTraversalShortcuts,
+            child: FocusScope(
+              node: widget.focusScopeNode,
+              descendantsAreFocusable: true,
+              descendantsAreTraversable: true,
+              canRequestFocus: true,
+              child: TapRegion(
+                groupId: widget.tapRegionGroupId,
+                consumeOutsideTaps: widget.consumeOutsideTaps,
+                onTapOutside: _handleOutsideTap,
+                // A custom shadow painter is used to make the underlying colors
+                // appear more vibrant. This is achieved by removing the shadow
+                // underlying the popup surface using a save layer combined with a
+                // clear blend mode.
+                //
+                // From my (davidhicks980) understanding and testing, it is
+                // impossible to achieve the appearance of an iOS backdrop using
+                // only guassian blur, linear color filter, and shadows, because the
+                // iOS popup surface does not linearly transform underlying colors.
+                // A custom shader would need to be used to achieve the same effect.
+                // Please correct me if I am wrong.
+                child: CustomPaint(
+                  painter: _ShadowPainter(
+                    radius: const Radius.circular(13),
+                    brightness: CupertinoTheme.brightnessOf(context),
+                    repaint: _fadeAnimation,
+                  ),
+                  child: FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: CupertinoPopupSurface(
+                      // The FadeTransition widget needs to wrap Semantics so that
+                      // the semantics widget senses that the menu is the same
+                      // opacity as the menu items. Otherwise, "a menu cannot be
+                      // empty" is thrown due to the menu items being transparent
+                      // while the menu semantics are still present.
+                      child: Semantics.fromProperties(
+                        explicitChildNodes: true,
+                        excludeSemantics: _excludeInteraction,
+                        properties: SemanticsProperties(
+                          role: _excludeInteraction ? null : SemanticsRole.menu,
+                          scopesRoute: true,
+                          namesRoute: true,
+                          label: widget.semanticLabel,
+                        ),
+                        child: AnimatedBuilder(
+                          animation: _sizeAnimation,
+                          builder: _buildAlignTransition,
+                          child: SingleChildScrollView(
+                            clipBehavior: Clip.none,
+                            child: Column(children: _children),
+                          ),
                         ),
                       ),
                     ),
@@ -980,6 +1034,17 @@ class _MenuOverlayState extends State<_MenuOverlay>
       ),
     );
 
+    // The menu content can grow beyond the size of the overlay, but will be
+    // clipped by the overlay's bounds.
+    if (!widget.constrainCrossAxis) {
+      child = UnconstrainedBox(
+        clipBehavior: Clip.hardEdge,
+        alignment: AlignmentDirectional.centerStart,
+        constrainedAxis: Axis.vertical,
+        child: child,
+      );
+    }
+
     return ConstrainedBox(
       constraints: BoxConstraints.loose(widget.overlaySize),
       child: ScaleTransition(
@@ -987,42 +1052,18 @@ class _MenuOverlayState extends State<_MenuOverlay>
         alignment: _attachmentPointAlignment,
         child: Builder(
           builder: (BuildContext context) {
-            final TextScaler textScaler = MediaQuery.textScalerOf(context);
-            // Width observed on the iOS 17.2 simulator
-            final double width = textScaler.scale(1) > 1.25 ? _largeMenuWidth : _defaultMenuWidth;
-
-            child = ConstrainedBox(
-              constraints: widget.constraints ?? BoxConstraints(minWidth: width, maxWidth: width),
+            final MediaQueryData mediaQuery = MediaQuery.of(context);
+            return CustomSingleChildLayout(
+              delegate: _MenuLayoutDelegate(
+                isPositioned: widget.anchorPosition != null,
+                constrainCrossAxis: widget.constrainCrossAxis,
+                padding: mediaQuery.padding + widget.overlayInsets.resolve(_textDirection),
+                avoidBounds: DisplayFeatureSubScreen.avoidBounds(mediaQuery).toSet(),
+                anchorRect: widget.anchorRect,
+                attachmentPoint: _attachmentPoint,
+                menuAlignment: _menuAlignment,
+              ),
               child: child,
-            );
-
-            // The menu content can grow beyond the size of the overlay, but will be
-            // clipped by the overlay's bounds.
-            if (!widget.constrainCrossAxis) {
-              child = UnconstrainedBox(
-                clipBehavior: Clip.hardEdge,
-                alignment: AlignmentDirectional.centerStart,
-                constrainedAxis: Axis.vertical,
-                child: child,
-              );
-            }
-
-            return Builder(
-              builder: (BuildContext context) {
-                final MediaQueryData mediaQuery = MediaQuery.of(context);
-                return CustomSingleChildLayout(
-                  delegate: _MenuLayoutDelegate(
-                    isPositioned: widget.anchorPosition != null,
-                    constrainCrossAxis: widget.constrainCrossAxis,
-                    padding: mediaQuery.padding + widget.overlayInsets.resolve(_textDirection),
-                    avoidBounds: DisplayFeatureSubScreen.avoidBounds(mediaQuery).toSet(),
-                    anchorRect: widget.anchorRect,
-                    attachmentPoint: _attachmentPoint,
-                    menuAlignment: _menuAlignment,
-                  ),
-                  child: child,
-                );
-              },
             );
           },
         ),
@@ -1525,7 +1566,6 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
     this.decoration,
     this.mouseCursor,
     this.panActivationDelay,
-    this.shortcut,
     this.statesController,
     this.behavior = HitTestBehavior.opaque,
     this.applyInsetScaling = true,
@@ -1634,11 +1674,6 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
   /// Defaults to true.
   final bool applyInsetScaling;
 
-  /// The optional shortcut that selects this [CupertinoMenuItem].
-  ///
-  /// {@macro flutter.material.MenuBar.shortcuts_note}
-  final MenuSerializableShortcut? shortcut;
-
   /// Whether the menu item will respond to user input.
   bool get enabled => onPressed != null;
 
@@ -1667,30 +1702,31 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
       });
 
   /// The default [TextStyle] applied to the [child] widget.
+  // Color and size were obtained from the iOS 18.5 simulator.
   static const TextStyle defaultTitleStyle = TextStyle(
-    height: 1.25,
     fontSize: 17,
     letterSpacing: -0.41,
-    overflow: TextOverflow.ellipsis,
-    textBaseline: TextBaseline.ideographic,
     color: CupertinoDynamicColor.withBrightness(
-      color: Color.fromRGBO(0, 0, 0, 1),
-      darkColor: Color.fromRGBO(255, 255, 255, 1),
+      color: Color.from(alpha: 0.96, red: 0, green: 0, blue: 0),
+      darkColor: Color.from(alpha: 0.96, red: 255, green: 255, blue: 255),
     ),
   );
 
+  // Obtained from the iOS 18.5 simulator.
+  static const double _defaultSubtitleFontSize = 15.0;
+
   /// The default [TextStyle] applied to the [subtitle] widget.
+  // A custom blend mode is applied to the subtitle to mimick the visual effect of
+  // the iOS menu subtitle. As a result, the defaultSubtitleStyle color does not match the
+  // reported color on the iOS 18.5 simulator.
   static const TextStyle defaultSubtitleStyle = TextStyle(
-    height: 1.25,
-    fontSize: 15,
+    fontSize: _defaultSubtitleFontSize,
     letterSpacing: -0.21,
-    overflow: TextOverflow.ellipsis,
-    textBaseline: TextBaseline.ideographic,
     color: CupertinoDynamicColor.withBrightnessAndContrast(
-      color: Color.fromRGBO(0, 0, 0, 0.4),
-      darkColor: Color.fromRGBO(255, 255, 255, 0.4),
-      highContrastColor: Color.fromRGBO(0, 0, 0, 0.8),
-      darkHighContrastColor: Color.fromRGBO(255, 255, 255, 0.8),
+      color: Color.from(alpha: 0.4, red: 0, green: 0, blue: 0),
+      darkColor: Color.from(alpha: 0.4, red: 1, green: 1, blue: 1),
+      highContrastColor: Color.from(alpha: 0.8, red: 0, green: 0, blue: 0),
+      darkHighContrastColor: Color.from(alpha: 0.8, red: 1, green: 1, blue: 1),
     ),
   );
 
@@ -1702,6 +1738,10 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
   // Dark mode on black                rgb(61, 61, 61)
   // Light mode on black               rgb(177, 177, 177)
   // Light mode on white               rgb(225, 225, 225)
+  //
+  // Blend mode is used to mimick the visual effect of the iOS
+  // menu item. As a result, the default pressed color does not match the
+  // reported colors on the iOS 18.5 simulator.
   static const WidgetStateProperty<BoxDecoration> defaultDecoration =
       WidgetStateProperty<BoxDecoration>.fromMap(<WidgetStatesConstraint, BoxDecoration>{
         WidgetState.dragged: BoxDecoration(
@@ -1743,20 +1783,20 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
   /// [MediaQuery.textScalerOf] returns a [TextScaler] that is less than or
   /// equal to 1.25.
   // Observed to be 2 on the iOS 17.2 simulator.
-  static const int defaultTextMaxLines = 2;
+  static const int defaultMaxLines = 2;
 
   /// The maximum number of lines for the [child] widget when
   /// [MediaQuery.textScalerOf] returns a [TextScaler] that is greater than
   /// 1.25.
   ///
   // Observed to be infinite on the iOS 17.2 simulator.
-  static const int defaultLargeTextMaxLines = 100;
+  static const int defaultAccessibilityModeMaxLines = 100;
 
   /// Resolves the title [TextStyle] in response to
   /// [CupertinoThemeData.brightness], [isDestructiveAction], and [enabled].
   //
   // Approximated from the iOS 17.2 simulator.
-  TextStyle _resolveTitleStyle(BuildContext context) {
+  TextStyle _resolveChildStyle(BuildContext context) {
     final Color color;
     if (!enabled) {
       color = CupertinoColors.systemGrey;
@@ -1773,38 +1813,77 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
     );
   }
 
-  TextStyle _resolveSubtitleStyle(BuildContext context) {
-    TextStyle blendedSubtitleStyle = defaultSubtitleStyle;
-    if (subtitle != null || shortcut != null) {
-      final bool isDark = CupertinoTheme.brightnessOf(context) == Brightness.dark;
-      blendedSubtitleStyle = blendedSubtitleStyle.copyWith(
-        fontFamily: CupertinoTheme.of(context).textTheme.textStyle.fontFamily,
-        foreground:
-            Paint()
-              ..blendMode = isDark ? BlendMode.plus : BlendMode.hardLight
-              ..color =
-                  CupertinoDynamicColor.maybeResolve(defaultSubtitleStyle.color, context) ??
-                  defaultSubtitleStyle.color!,
-      );
+  // The font sizes observed on the iOS 18.5 simulator differ from the HIG
+  // guidelines for fonts, so a correction factor is applied to the subtitle
+  // font size to match the observed sizes.
+  //
+  // iOS font sizes:
+  //  Units    | -3 | -2 | -1 |  0 |  2 |  4 |  6 | 11 | 16 | 23 | 30 | 36
+  //  Subtitle | 12 | 13 | 14 | 15 | 17 | 19 | 21 | 25 | 30 | 36 | 42 | 49
+  double _calculateSubtitleCorrectionFactor(BuildContext context) {
+    final int units = _normalizeTextScale(context);
+    if (units == 0) {
+      return 1.0;
     }
-    return blendedSubtitleStyle;
+
+    final TextScaler textScaler = MediaQuery.textScalerOf(context);
+    final double higFontSize = textScaler.scale(_defaultSubtitleFontSize);
+    final double linearTextSize = units + _defaultSubtitleFontSize;
+
+    // correctedTextSize is the font size observed on iOS 18.5, and the font
+    // size we want to match.
+    final double correctedTextSize =
+        linearTextSize +
+        switch (units) {
+          < 16 => 0,
+          < 23 => -1,
+          == 30 => -3,
+          _ => -2,
+        };
+
+    // Return the factor to convert the HIG font size to the desired font size.
+    return correctedTextSize / higFontSize;
+  }
+
+  TextStyle _resolveSubtitleStyle(BuildContext context) {
+    TextStyle subtitleStyle = defaultSubtitleStyle;
+    final double correctionFactor = _calculateSubtitleCorrectionFactor(context);
+    if (correctionFactor != 1.0) {
+      final double fontSize = defaultSubtitleStyle.fontSize!;
+      subtitleStyle = subtitleStyle.copyWith(fontSize: correctionFactor * fontSize);
+    }
+
+    final bool isDark = CupertinoTheme.brightnessOf(context) == Brightness.dark;
+    subtitleStyle = subtitleStyle.copyWith(
+      fontFamily: CupertinoTheme.of(context).textTheme.textStyle.fontFamily,
+      foreground:
+          Paint()
+            ..blendMode = isDark ? BlendMode.plus : BlendMode.hardLight
+            ..color =
+                CupertinoDynamicColor.maybeResolve(defaultSubtitleStyle.color, context) ??
+                defaultSubtitleStyle.color!,
+    );
+
+    return subtitleStyle;
   }
 
   void _handleSelect(BuildContext context) {
     if (requestCloseOnActivate) {
       MenuController.maybeOf(context)?.close();
     }
+
     onPressed?.call();
   }
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle titleTextStyle = _resolveTitleStyle(context);
-    final double textScale = MediaQuery.maybeTextScalerOf(context)?.scale(1) ?? 1.0;
+    final TextStyle childTextStyle = _resolveChildStyle(context);
+    final bool isAccessibilityModeEnabled = _isAccessibilityModeEnabled(context);
+
     Widget label = _CupertinoMenuItemLabel(
       padding: padding,
       constraints: constraints,
-      trailing: textScale <= 1.25 ? trailing : null,
+      trailing: isAccessibilityModeEnabled ? trailing : null,
       leading: leading,
       leadingAlignment: leadingAlignment,
       trailingAlignment: trailingAlignment,
@@ -1815,12 +1894,12 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
           subtitle != null
               ? DefaultTextStyle.merge(style: _resolveSubtitleStyle(context), child: subtitle!)
               : null,
-      child: DefaultTextStyle.merge(style: titleTextStyle, child: child),
+      child: DefaultTextStyle.merge(style: childTextStyle, child: child),
     );
 
     if (leading != null || trailing != null) {
       label = IconTheme.merge(
-        data: IconThemeData(size: math.sqrt(textScale) * 21, color: titleTextStyle.color),
+        data: IconThemeData(size: 21, color: childTextStyle.color, applyTextScaling: true),
         child: label,
       );
     }
@@ -1838,10 +1917,10 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
       statesController: statesController,
       behavior: behavior,
       child: DefaultTextStyle.merge(
-        maxLines: textScale > 1.25 ? defaultLargeTextMaxLines : defaultTextMaxLines,
+        maxLines: isAccessibilityModeEnabled ? defaultAccessibilityModeMaxLines : defaultMaxLines,
         overflow: TextOverflow.ellipsis,
         softWrap: true,
-        style: titleTextStyle,
+        style: const TextStyle(height: 1.25, textBaseline: TextBaseline.ideographic),
         child: label,
       ),
     );
@@ -1860,7 +1939,7 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
     );
     properties.add(DiagnosticsProperty<FocusNode?>('focusNode', focusNode, defaultValue: null));
     properties.add(FlagProperty('enabled', value: onPressed != null, ifFalse: 'DISABLED'));
-    properties.add(DiagnosticsProperty<Widget?>('title', child));
+    properties.add(DiagnosticsProperty<Widget?>('child', child));
     properties.add(DiagnosticsProperty<Widget?>('subtitle', subtitle));
     if (leading != null) {
       properties.add(DiagnosticsProperty<Widget?>('leading', leading));
@@ -2043,7 +2122,15 @@ class _CupertinoMenuItemLabel extends StatelessWidget {
             SizedBox(
               width: resolvedTrailingWidth,
               child:
-                  trailing != null ? Align(alignment: _trailingAlignment, child: trailing) : null,
+                  trailing != null
+                      ? Align(
+                        alignment: _trailingAlignment,
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(maxHeight: 20 * textScale),
+                          child: trailing,
+                        ),
+                      )
+                      : null,
             ),
           ],
         ),
@@ -2068,13 +2155,6 @@ class CupertinoLargeMenuDivider extends StatelessWidget with CupertinoMenuEntryM
   /// Creates a large horizontal divider for a [CupertinoMenuAnchor].
   const CupertinoLargeMenuDivider({super.key, this.color = defaultColor});
 
-  /// Color for a transparent [CupertinoLargeMenuDivider].
-  // The following colors were measured from debug mode on the iOS simulator,
-  static const CupertinoDynamicColor defaultColor = CupertinoDynamicColor.withBrightness(
-    color: Color.fromRGBO(0, 0, 0, 0.08),
-    darkColor: Color.fromRGBO(0, 0, 0, 0.16),
-  );
-
   /// The color of the divider.
   ///
   /// If this property is null, [CupertinoLargeMenuDivider.defaultColor] is
@@ -2090,9 +2170,18 @@ class CupertinoLargeMenuDivider extends StatelessWidget with CupertinoMenuEntryM
   @override
   bool get hasLeading => false;
 
+  /// Color for a transparent [CupertinoLargeMenuDivider].
+  // The following colors were measured from debug mode on the iOS 18.5 simulator,
+  static const CupertinoDynamicColor defaultColor = CupertinoDynamicColor.withBrightness(
+    color: Color.fromRGBO(0, 0, 0, 0.08),
+    darkColor: Color.fromRGBO(0, 0, 0, 0.16),
+  );
+
+  static const double _height = 8.0;
+
   @override
   Widget build(BuildContext context) {
-    return Container(height: 8, color: CupertinoDynamicColor.resolve(color, context));
+    return Container(height: _height, color: CupertinoDynamicColor.resolve(color, context));
   }
 }
 
@@ -2382,7 +2471,9 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
       decoration = decoration.copyWith(
         color: CupertinoDynamicColor.maybeResolve(decoration.color, context),
       );
-      if (!kIsWeb) {
+
+      // Don't apply a blend mode if the user has specified one.
+      if (!kIsWeb && decoration.backgroundBlendMode == null) {
         decoration = decoration.copyWith(
           backgroundBlendMode:
               CupertinoTheme.maybeBrightnessOf(context) == Brightness.light
