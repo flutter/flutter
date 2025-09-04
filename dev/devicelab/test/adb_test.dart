@@ -325,19 +325,34 @@ class FakeDevice extends AndroidDevice {
   }
 
   static void pretendAwake() {
+    // Emit an integer value in addition to the state string to ensure only
+    // the state string is matched.
+    //
+    // Regression testing for https://github.com/flutter/flutter/issues/174952.
     output = '''
+      mWakefulness=1
       mWakefulness=Awake
     ''';
   }
 
   static void pretendAwakeSamsung() {
+    // Emit an integer value in addition to the state string to ensure only
+    // the state string is matched.
+    //
+    // Regression testing for https://github.com/flutter/flutter/issues/174952.
     output = '''
+      getWakefulnessLocked()=1
       getWakefulnessLocked()=Awake
     ''';
   }
 
   static void pretendAsleep() {
+    // Emit an integer value in addition to the state string to ensure only
+    // the state string is matched.
+    //
+    // Regression testing for https://github.com/flutter/flutter/issues/174952.
     output = '''
+      mWakefulness=0
       mWakefulness=Asleep
     ''';
   }
