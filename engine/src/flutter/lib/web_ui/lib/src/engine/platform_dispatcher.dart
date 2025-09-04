@@ -1045,7 +1045,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   }
 
   ui.TypographySettings _computeTypographySettings() {
-    final double? lineHeight = parseStyleProperty(
+    final double? lineHeight = parseNumericStyleProperty(
       _typographyMeasurementElement!,
       'line-height',
     )?.toDouble();
@@ -1053,11 +1053,11 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     final double? lineHeightFactor = fontSize != null && lineHeight != null
         ? lineHeight / fontSize
         : null;
-    final double? wordSpacing = parseStyleProperty(
+    final double? wordSpacing = parseNumericStyleProperty(
       _typographyMeasurementElement!,
       'word-spacing',
     )?.toDouble();
-    final double? letterSpacing = parseStyleProperty(
+    final double? letterSpacing = parseNumericStyleProperty(
       _typographyMeasurementElement!,
       'letter-spacing',
     )?.toDouble();
@@ -1065,7 +1065,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     // so on the web this feature is usually implemented
     // by extension authors by leveraging `margin-bottom` on
     // the `p` element.
-    final double? paragraphSpacing = parseStyleProperty(
+    final double? paragraphSpacing = parseNumericStyleProperty(
       _typographyMeasurementElement!,
       'margin-bottom',
     )?.toDouble();
