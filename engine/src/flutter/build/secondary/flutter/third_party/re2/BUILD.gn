@@ -22,8 +22,8 @@ source_set("re2") {
     "$re2_base/re2/onepass.cc",
     "$re2_base/re2/parse.cc",
     "$re2_base/re2/perl_groups.cc",
-    "$re2_base/re2/prefilter_tree.cc",
     "$re2_base/re2/prefilter.cc",
+    "$re2_base/re2/prefilter_tree.cc",
     "$re2_base/re2/prog.cc",
     "$re2_base/re2/re2.cc",
     "$re2_base/re2/re2.h",
@@ -42,8 +42,8 @@ source_set("re2") {
     "//flutter/third_party/abseil-cpp/absl/base",
     "//flutter/third_party/abseil-cpp/absl/container:flat_hash_map",
     "//flutter/third_party/abseil-cpp/absl/container:flat_hash_set",
-    "//flutter/third_party/abseil-cpp/absl/log:check",
     "//flutter/third_party/abseil-cpp/absl/log",
+    "//flutter/third_party/abseil-cpp/absl/log:check",
     "//flutter/third_party/abseil-cpp/absl/strings",
   ]
 }
