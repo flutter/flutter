@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <UIKit/UIKit.h>
 #include "common/settings.h"
 #define FML_USED_ON_EMBEDDER
 
@@ -1519,6 +1520,10 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
 - (NSObject<FlutterTextureRegistry>*)textures {
   return _flutterEngine.textureRegistry;
+}
+
+- (nullable UIViewController*)viewController {
+  return _flutterEngine.viewController;
 }
 
 - (void)publish:(NSObject*)value {
