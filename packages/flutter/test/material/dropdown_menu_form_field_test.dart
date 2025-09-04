@@ -1224,4 +1224,19 @@ void main() {
     await tester.pump();
     expect(onSelectedCallCount, 1);
   });
+
+  testWidgets('DropdownMenuFormField does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(
+              child: DropdownMenuFormField<MenuItem>(dropdownMenuEntries: menuEntries),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(DropdownMenuFormField<MenuItem>)), Size.zero);
+  });
 }
