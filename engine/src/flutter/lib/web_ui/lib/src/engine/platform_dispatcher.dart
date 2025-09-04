@@ -1049,11 +1049,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       _typographyMeasurementElement!,
       'line-height',
     )?.toDouble();
-    // final double? fontSize = parseFontSize(_typographyMeasurementElement!)?.toDouble();
-    // late final double? lineHeightFactor;
-    // if (fontSize != null && lineHeight != null) {
-    //   lineHeightFactor = lineHeight / fontSize;
-    // }
+    final double? fontSize = parseFontSize(_typographyMeasurementElement!)?.toDouble();
+    late final double? lineHeightFactor;
+    if (fontSize != null && lineHeight != null) {
+      lineHeightFactor = lineHeight / fontSize;
+    } else {
+      lineHeightFactor = null;
+    }
     final double? wordSpacing = parseStyleProperty(
       _typographyMeasurementElement!,
       'word-spacing',
@@ -1071,7 +1073,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       'margin-bottom',
     )?.toDouble();
     return ui.TypographySettings(
-      lineHeight: lineHeight,
+      lineHeight: lineHeightFactor,
       letterSpacing: letterSpacing,
       wordSpacing: wordSpacing,
       paragraphSpacing: paragraphSpacing,
