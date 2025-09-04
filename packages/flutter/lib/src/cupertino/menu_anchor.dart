@@ -1694,6 +1694,8 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
   /// [BoxConstraints.minHeight].
   final BoxConstraints? constraints;
 
+  /// The default [MouseCursor] for a [CupertinoMenuItem].
+  // Obtained from
   static final WidgetStateProperty<MouseCursor> defaultCursor =
       WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
         return !states.contains(WidgetState.disabled) && kIsWeb
@@ -2733,7 +2735,7 @@ class _PanRegionState extends State<_PanRegion> {
 
 /// An area that can initiate panning.
 ///
-/// This widget registers with the nearest [_PanRegion] and exposes it's position
+/// This widget registers with the nearest [_PanRegion] and exposes its position
 /// as a [ui.Rect]. This [_PanSurface] will route [PointerDownEvent]s to its
 /// [_PanRegion]. If a routed [PointerDownEvent] results in a pan gesture, the
 /// [_PanRegion] will use the combined [ui.Rect] of all registered [_PanSurface]s
