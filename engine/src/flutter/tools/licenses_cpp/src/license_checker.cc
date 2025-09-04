@@ -26,9 +26,9 @@ namespace fs = std::filesystem;
 const char* LicenseChecker::kHeaderLicenseRegex = "(?i)(license|copyright)";
 
 namespace {
-const std::array<std::string_view, 8> kLicenseFileNames = {
-    "LICENSE",     "LICENSE.TXT", "LICENSE.txt", "LICENSE.md",
-    "LICENSE.MIT", "COPYING",     "License.txt", "docs/FTL.TXT"};
+const std::array<std::string_view, 9> kLicenseFileNames = {
+    "LICENSE", "LICENSE.TXT", "LICENSE.txt",  "LICENSE.md", "LICENSE.MIT",
+    "COPYING", "License.txt", "docs/FTL.TXT", "README.ijg"};
 
 RE2 kHeaderLicense(LicenseChecker::kHeaderLicenseRegex);
 
@@ -175,6 +175,10 @@ Package GetPackage(const Data& data,
       result.license_file = std::nullopt;
       result.is_root_package = false;
     }
+  }
+  if (std::find(kLicenseFileNames.begin(), kLicenseFileNames.end(),
+                relative_path.filename()) != kLicenseFileNames.end()) {
+    result.license_file = working_dir / relative_path;
   }
 
   return result;
