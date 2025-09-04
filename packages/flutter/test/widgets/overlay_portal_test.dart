@@ -2832,7 +2832,7 @@ void main() {
 
       expect(semantics, hasSemantics(expected));
       semantics.dispose();
-    }, skip: kIsWeb);
+    }, skip: kIsWeb); // [intended] the web traversal order by using ARIA-OWNS.
 
     testWidgets('OverlayPortal overlay child clipping', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
