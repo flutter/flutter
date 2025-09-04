@@ -1109,8 +1109,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     final double? typographyMeasurementElementFontSize = parseFontSize(
       _typographyMeasurementElement!,
     )?.toDouble();
-    final double defaultLineHeightFactor =
-        spacingDefault / typographyMeasurementElementFontSize!; //needs adjustment.
+    final double defaultLineHeightFactor = spacingDefault / typographyMeasurementElementFontSize!;
 
     _typographySettingsObserver = createDomResizeObserver((
       List<DomResizeObserverEntry> entries,
