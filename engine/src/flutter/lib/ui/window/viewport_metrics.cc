@@ -71,6 +71,9 @@ ViewportMetrics::ViewportMetrics(
           p_physical_system_gesture_inset_bottom),
       physical_system_gesture_inset_left(p_physical_system_gesture_inset_left),
       physical_touch_slop(p_physical_touch_slop),
+      physical_display_features_bounds(p_physical_display_features_bounds),
+      physical_display_features_type(p_physical_display_features_type),
+      physical_display_features_state(p_physical_display_features_state),
       display_id(p_display_id) {}
 
 bool operator==(const ViewportMetrics& a, const ViewportMetrics& b) {
