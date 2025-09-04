@@ -3930,7 +3930,59 @@ void main() {
     });
   });
 
-  testWidgets('DropdownButton does not change mouse cursor when hovered', (
+  testWidgets('DropdownMenuItem has expected default mouse cursor on hover', (
+    WidgetTester tester,
+  ) async {
+    const Key menuKey = Key('testDropdownMenuButton');
+    const Key itemKey = Key('testDropdownMenuItem');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DropdownButton<String>(
+            key: menuKey,
+            onChanged: (String? value) {},
+            items: const <DropdownMenuItem<String>>[
+              DropdownMenuItem<String>(
+                key: itemKey,
+                value: 'testDropdownMenuItem',
+                child: Text('TestDropdownMenuItem'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Open DropdownButton.
+    await tester.tap(find.byKey(menuKey));
+    await tester.pumpAndSettle();
+
+    // Find DropdownMenuItem.
+    final Finder menuItemFinder = find.byKey(itemKey);
+    final Offset onMenuItem = tester.getCenter(menuItemFinder);
+    final Offset offMenuItem = tester.getBottomRight(menuItemFinder) + const Offset(1, 1);
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1,
+    );
+
+    await gesture.addPointer(location: onMenuItem);
+
+    await tester.pump();
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
+
+    await gesture.moveTo(offMenuItem);
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic,
+    );
+  });
+
+  testWidgets('DropdownButton changes mouse cursor when hovered as expected', (
     WidgetTester tester,
   ) async {
     const Key key = Key('testDropdownButton');
