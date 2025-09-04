@@ -23,8 +23,7 @@
 ^third_party/dart/third_party/binary_size/.*
 ^third_party/dart/third_party/binaryen/.*
 ^third_party/dart/third_party/d3/.*
-^third_party/dart/third_party/devtools/web/.*\.frag$
-^third_party/dart/third_party/devtools/web/.*\.js$
+^third_party/dart/third_party/devtools/.*
 ^third_party/dart/third_party/pkg/.*
 ^third_party/dart/third_party/requirejs/.*
 ^third_party/depot_tools/.*
