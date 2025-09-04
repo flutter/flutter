@@ -121,7 +121,7 @@ void main() {
         );
         expect(error.diagnostics[3], isA<DiagnosticsProperty<Ticker>>());
         expect(
-          error.toStringDeep().split('\n').take(13).join('\n'),
+          error.toStringDeep().split('\n').take(14).join('\n'),
           equalsIgnoringHashCodes(
             'FlutterError\n'
             '   _SingleTickerTestState#00000(ticker active) was disposed with an\n'
@@ -134,8 +134,9 @@ void main() {
             '   calling dispose() on the AnimationController itself. Otherwise,\n'
             '   the ticker will leak.\n'
             '   The offending ticker was:\n'
-            '     Ticker(created by _SingleTickerTestState#00000)\n'
-            '     The stack trace when the Ticker was actually created was:',
+            '     _WidgetTicker(created by _SingleTickerTestState#00000)\n'
+            '     The stack trace when the _WidgetTicker was actually created\n'
+            '     was:',
           ),
         );
         key.currentState!.controller.stop();
@@ -164,7 +165,7 @@ void main() {
         );
         expect(error.diagnostics[3], isA<DiagnosticsProperty<Ticker>>());
         expect(
-          error.toStringDeep().split('\n').take(13).join('\n'),
+          error.toStringDeep().split('\n').take(14).join('\n'),
           equalsIgnoringHashCodes(
             'FlutterError\n'
             '   _SingleTickerTestState#00000(ticker active) was disposed with an\n'
@@ -177,8 +178,9 @@ void main() {
             '   calling dispose() on the AnimationController itself. Otherwise,\n'
             '   the ticker will leak.\n'
             '   The offending ticker was:\n'
-            '     Ticker(created by _SingleTickerTestState#00000)\n'
-            '     The stack trace when the Ticker was actually created was:',
+            '     _WidgetTicker(created by _SingleTickerTestState#00000)\n'
+            '     The stack trace when the _WidgetTicker was actually created\n'
+            '     was:',
           ),
         );
         key.currentState!.controller.stop();
@@ -244,6 +246,21 @@ void main() {
       0,
     );
   });
+
+  testWidgets('AnimationController only ticks when it has listeners', (WidgetTester tester) async {
+    void listener() {}
+    final GlobalKey<_SingleTickerTestState> key = GlobalKey<_SingleTickerTestState>();
+    final Widget widget = _SingleTickerTest(key: key);
+    await tester.pumpWidget(widget);
+    key.currentState!.controller.repeat();
+    expect(tester.binding.transientCallbackCount, 0);
+    key.currentState!.controller.addListener(listener);
+    await tester.pump();
+    expect(tester.binding.transientCallbackCount, 1);
+    key.currentState!.controller.removeListener(listener);
+    await tester.pump();
+    expect(tester.binding.transientCallbackCount, 0);
+  });
 }
 
 class BoringTickerTest extends StatefulWidget {
@@ -279,6 +296,12 @@ class _SingleTickerTestState extends State<_SingleTickerTest> with SingleTickerP
   }
 
   int toStringCount = 0;
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {

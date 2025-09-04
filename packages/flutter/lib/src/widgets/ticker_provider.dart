@@ -190,7 +190,7 @@ class _EffectiveTickerMode extends InheritedWidget {
 @optionalTypeArgs
 mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T>
     implements TickerProvider {
-  Ticker? _ticker;
+  _WidgetTicker? _ticker;
 
   @override
   Ticker createTicker(TickerCallback onTick) {
@@ -212,12 +212,12 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T>
         ),
       ]);
     }());
-    _ticker = Ticker(
+    _ticker = _WidgetTicker(
       onTick,
+      null,
       debugLabel: kDebugMode ? 'created by ${describeIdentity(this)}' : null,
     );
-    _updateTickerModeNotifier();
-    _updateTicker(); // Sets _ticker.mute correctly.
+    _ticker?.tickerModeNotifier = TickerMode.getNotifier(context);
     return _ticker!;
   }
 
@@ -242,31 +242,14 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T>
         _ticker!.describeForError('The offending ticker was'),
       ]);
     }());
-    _tickerModeNotifier?.removeListener(_updateTicker);
-    _tickerModeNotifier = null;
     super.dispose();
   }
-
-  ValueListenable<bool>? _tickerModeNotifier;
 
   @override
   void activate() {
     super.activate();
     // We may have a new TickerMode ancestor.
-    _updateTickerModeNotifier();
-    _updateTicker();
-  }
-
-  void _updateTicker() => _ticker?.muted = !_tickerModeNotifier!.value;
-
-  void _updateTickerModeNotifier() {
-    final ValueListenable<bool> newNotifier = TickerMode.getNotifier(context);
-    if (newNotifier == _tickerModeNotifier) {
-      return;
-    }
-    _tickerModeNotifier?.removeListener(_updateTicker);
-    newNotifier.addListener(_updateTicker);
-    _tickerModeNotifier = newNotifier;
+    _ticker?.tickerModeNotifier = TickerMode.getNotifier(context);
   }
 
   @override
@@ -308,21 +291,17 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T>
 /// [SingleTickerProviderStateMixin].
 @optionalTypeArgs
 mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements TickerProvider {
-  Set<Ticker>? _tickers;
+  Set<_WidgetTicker>? _tickers;
 
   @override
   Ticker createTicker(TickerCallback onTick) {
-    if (_tickerModeNotifier == null) {
-      // Setup TickerMode notifier before we vend the first ticker.
-      _updateTickerModeNotifier();
-    }
-    assert(_tickerModeNotifier != null);
     _tickers ??= <_WidgetTicker>{};
     final _WidgetTicker result = _WidgetTicker(
       onTick,
       this,
       debugLabel: kDebugMode ? 'created by ${describeIdentity(this)}' : null,
-    )..muted = !_tickerModeNotifier!.value;
+    );
+    result.tickerModeNotifier = TickerMode.getNotifier(context);
     _tickers!.add(result);
     return result;
   }
@@ -333,33 +312,18 @@ mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements 
     _tickers!.remove(ticker);
   }
 
-  ValueListenable<bool>? _tickerModeNotifier;
-
   @override
   void activate() {
     super.activate();
     // We may have a new TickerMode ancestor, get its Notifier.
     _updateTickerModeNotifier();
-    _updateTickers();
-  }
-
-  void _updateTickers() {
-    if (_tickers != null) {
-      final bool muted = !_tickerModeNotifier!.value;
-      for (final Ticker ticker in _tickers!) {
-        ticker.muted = muted;
-      }
-    }
   }
 
   void _updateTickerModeNotifier() {
     final ValueListenable<bool> newNotifier = TickerMode.getNotifier(context);
-    if (newNotifier == _tickerModeNotifier) {
-      return;
+    for (final _WidgetTicker ticker in _tickers ?? <_WidgetTicker>[]) {
+      ticker.tickerModeNotifier = newNotifier;
     }
-    _tickerModeNotifier?.removeListener(_updateTickers);
-    newNotifier.addListener(_updateTickers);
-    _tickerModeNotifier = newNotifier;
   }
 
   @override
@@ -387,8 +351,6 @@ mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements 
       }
       return true;
     }());
-    _tickerModeNotifier?.removeListener(_updateTickers);
-    _tickerModeNotifier = null;
     super.dispose();
   }
 
@@ -415,11 +377,39 @@ mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements 
 class _WidgetTicker extends Ticker {
   _WidgetTicker(super.onTick, this._creator, {super.debugLabel});
 
-  final TickerProviderStateMixin _creator;
+  final TickerProviderStateMixin? _creator;
+
+  bool _isTickerMuted = false;
+  ValueListenable<bool>? _tickerModeNotifier;
+  ValueListenable<bool>? get tickerModeNotifier => _tickerModeNotifier;
+  set tickerModeNotifier(ValueListenable<bool>? value) {
+    if (value == _tickerModeNotifier) {
+      return;
+    }
+    _tickerModeNotifier?.removeListener(_updateMuting);
+    value?.addListener(_updateMuting);
+    _tickerModeNotifier = value;
+    _updateMuting();
+  }
+
+  @override
+  set muted(bool muted) {
+    if (_isTickerMuted == muted) {
+      return;
+    }
+    _isTickerMuted = muted;
+    _updateMuting();
+  }
+
+  void _updateMuting() {
+    super.muted = _isTickerMuted || !(_tickerModeNotifier?.value ?? true);
+  }
 
   @override
   void dispose() {
-    _creator._removeTicker(this);
+    _creator?._removeTicker(this);
+    _tickerModeNotifier?.removeListener(_updateMuting);
+    _tickerModeNotifier = null;
     super.dispose();
   }
 }

@@ -92,6 +92,9 @@ mixin AnimationEagerListenerMixin {
 mixin AnimationLocalListenersMixin {
   final HashedObserverList<VoidCallback> _listeners = HashedObserverList<VoidCallback>();
 
+  /// Whether there are any listeners.
+  bool get isListening => _listeners.isNotEmpty;
+
   /// Called immediately before a listener is added via [addListener].
   ///
   /// At the time this method is called the registered listener is not yet
@@ -184,6 +187,9 @@ mixin AnimationLocalListenersMixin {
 mixin AnimationLocalStatusListenersMixin {
   final ObserverList<AnimationStatusListener> _statusListeners =
       ObserverList<AnimationStatusListener>();
+
+  /// Whether there are any status listeners.
+  bool get isStatusListening => _statusListeners.isNotEmpty;
 
   /// Called immediately before a status listener is added via [addStatusListener].
   ///

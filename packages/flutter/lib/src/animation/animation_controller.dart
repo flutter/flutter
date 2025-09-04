@@ -256,6 +256,7 @@ class AnimationController extends Animation<double>
     assert(debugMaybeDispatchCreated('animation', 'AnimationController', this));
     _ticker = vsync.createTicker(_tick);
     _internalSetValue(value ?? lowerBound);
+    _updateTickerMuting(muted: true);
   }
 
   /// Creates an animation controller with no upper or lower bound for its
@@ -288,6 +289,7 @@ class AnimationController extends Animation<double>
     assert(debugMaybeDispatchCreated('animation', 'AnimationController', this));
     _ticker = vsync.createTicker(_tick);
     _internalSetValue(value);
+    _updateTickerMuting(muted: true);
   }
 
   /// The value at which this animation is deemed to be dismissed.
@@ -332,6 +334,34 @@ class AnimationController extends Animation<double>
     final Ticker oldTicker = _ticker!;
     _ticker = vsync.createTicker(_tick);
     _ticker!.absorbTicker(oldTicker);
+  }
+
+  void _updateTickerMuting({bool? muted}) {
+    _ticker?.muted = muted ?? (!isListening && !isStatusListening);
+  }
+
+  @override
+  void didRegisterListener() {
+    super.didRegisterListener();
+    _updateTickerMuting(muted: false);
+  }
+
+  @override
+  void didUnregisterListener() {
+    super.didUnregisterListener();
+    _updateTickerMuting();
+  }
+
+  @override
+  void clearListeners() {
+    super.clearListeners();
+    _updateTickerMuting();
+  }
+
+  @override
+  void clearStatusListeners() {
+    super.clearStatusListeners();
+    _updateTickerMuting();
   }
 
   Simulation? _simulation;
