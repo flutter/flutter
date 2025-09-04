@@ -142,8 +142,8 @@ void main() {
   });
 
   testWidgets('LinkUri from child is passed up to the parent when merging nodes', (
-      WidgetTester tester,
-      ) async {
+    WidgetTester tester,
+  ) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final Uri uri = Uri.parse('https://flutter.com');
     const String label = 'test1';
@@ -179,10 +179,7 @@ void main() {
                 SemanticsFlag.isFocusable,
                 SemanticsFlag.isLink,
               ],
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-                SemanticsAction.focus,
-              ],
+              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               label: label,
             ),
           ],
