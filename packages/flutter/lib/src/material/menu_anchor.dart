@@ -161,6 +161,7 @@ class MenuAnchor extends StatefulWidget {
     this.childFocusNode,
     this.style,
     this.alignmentOffset = Offset.zero,
+    this.reservedPadding,
     this.layerLink,
     this.clipBehavior = Clip.hardEdge,
     @Deprecated(
@@ -318,6 +319,11 @@ class MenuAnchor extends StatefulWidget {
   /// to rebuild this child when those change.
   final Widget? child;
 
+  /// The padding between the edge of the safe area and the menu panel.
+  ///
+  /// Defaults to EdgeInsets.all(8).
+  final EdgeInsetsGeometry? reservedPadding;
+
   @override
   State<MenuAnchor> createState() => _MenuAnchorState();
 
@@ -406,6 +412,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
       menuPosition: position,
       anchor: this,
       alignmentOffset: widget.alignmentOffset ?? Offset.zero,
+      reservedPadding: widget.reservedPadding ?? const EdgeInsets.all(_kMenuViewPadding),
     );
   }
 
@@ -2920,6 +2927,7 @@ class _MenuLayout extends SingleChildLayoutDelegate {
     required this.avoidBounds,
     required this.orientation,
     required this.parentOrientation,
+    required this.reservedPadding,
   });
 
   // Rectangle of underlying button, relative to the overlay's dimensions.
@@ -2951,13 +2959,14 @@ class _MenuLayout extends SingleChildLayoutDelegate {
   // The orientation of this menu's parent.
   final Axis parentOrientation;
 
+  // How close to the edge of the safe area the menu will be placed.
+  final EdgeInsetsGeometry reservedPadding;
+
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
-    // The menu can be at most the size of the overlay minus _kMenuViewPadding
-    // pixels in each direction.
-    return BoxConstraints.loose(
-      constraints.biggest,
-    ).deflate(const EdgeInsets.all(_kMenuViewPadding));
+    // The menu can be at most the size of the overlay minus the view padding
+    // in each direction.
+    return BoxConstraints.loose(constraints.biggest).deflate(reservedPadding);
   }
 
   @override
@@ -3289,6 +3298,7 @@ class _Submenu extends StatelessWidget {
     this.crossAxisUnconstrained = true,
     required this.menuChildren,
     required this.menuScopeNode,
+    required this.reservedPadding,
   });
 
   final FocusScopeNode menuScopeNode;
@@ -3301,6 +3311,7 @@ class _Submenu extends StatelessWidget {
   final Clip clipBehavior;
   final bool crossAxisUnconstrained;
   final List<Widget> menuChildren;
+  final EdgeInsetsGeometry reservedPadding;
 
   @override
   Widget build(BuildContext context) {
@@ -3399,6 +3410,7 @@ class _Submenu extends StatelessWidget {
                 menuPosition: menuPosition.position,
                 orientation: anchor._orientation,
                 parentOrientation: anchor._parent?._orientation ?? Axis.horizontal,
+                reservedPadding: reservedPadding,
               ),
               child: menuPanel,
             );
