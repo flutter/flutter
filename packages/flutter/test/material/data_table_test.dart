@@ -2353,6 +2353,8 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: DataTable(
+            dataRowMaxHeight: double.infinity,
+            dataRowMinHeight: 70,
             columns: const <DataColumn>[
               // Set width so the Column width is not determined by text.
               DataColumn(label: SizedBox(width: 250, child: Text('Column 1'))),
@@ -2368,84 +2370,15 @@ void main() {
       ),
     );
 
-    final TestSemantics expectedSemantics = TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics.rootChild(
-          id: 1,
-          textDirection: TextDirection.ltr,
-          rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
-          children: <TestSemantics>[
-            TestSemantics(
-              id: 2,
-              rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
-              children: <TestSemantics>[
-                TestSemantics(
-                  id: 3,
-                  rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
-                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                  children: <TestSemantics>[
-                    TestSemantics(
-                      id: 4,
-                      rect: const Rect.fromLTRB(0.0, 0.0, 604.0, 104.0),
-                      role: SemanticsRole.table,
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          id: 9,
-                          rect: const Rect.fromLTRB(0.0, 0.0, 604.0, 56.0),
-                          role: SemanticsRole.row,
-                          children: <TestSemantics>[
-                            TestSemantics(
-                              id: 5,
-                              rect: const Rect.fromLTRB(0.0, 0.0, 302.0, 56.0),
-                              label: 'Column 1',
-                              textDirection: TextDirection.ltr,
-                              role: SemanticsRole.columnHeader,
-                            ),
-                            TestSemantics(
-                              id: 6,
-                              rect: const Rect.fromLTRB(0.0, 0.0, 302.0, 56.0),
-                              transform: Matrix4.translationValues(302, 0, 0),
-                              label: 'Column 2',
-                              textDirection: TextDirection.ltr,
-                              role: SemanticsRole.columnHeader,
-                            ),
-                          ],
-                        ),
-                        TestSemantics(
-                          id: 10,
-                          rect: const Rect.fromLTRB(0.0, 0.0, 604.0, 48.0),
-                          transform: Matrix4.translationValues(0, 56, 0),
-                          role: SemanticsRole.row,
-                          children: <TestSemantics>[
-                            TestSemantics(
-                              id: 7,
-                              rect: const Rect.fromLTRB(0.0, 0.0, 302.0, 48.0),
-                              label: 'Data Cell 1',
-                              textDirection: TextDirection.ltr,
-                              role: SemanticsRole.cell,
-                            ),
-                            TestSemantics(
-                              id: 8,
-                              rect: const Rect.fromLTRB(0.0, 0.0, 302.0, 48.0),
-                              transform: Matrix4.translationValues(302, 0, 0),
-                              label: 'Data Cell 2',
-                              textDirection: TextDirection.ltr,
-                              role: SemanticsRole.cell,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-      ],
-    );
+    final SemanticsFinder cell1 = find.semantics.byLabel('Data Cell 1');
 
-    expect(semantics, hasSemantics(expectedSemantics));
+    expect(cell1, findsOne);
+
+    final SemanticsNode cell1Node = cell1.evaluate().first;
+
+    // The semantics node of cell 1 should not have a transform
+    expect(cell1Node.transform, null);
+    expect(cell1Node.rect, const Rect.fromLTRB(0.0, 0.0, 302.0, 70.0));
 
     semantics.dispose();
   });
