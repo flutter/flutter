@@ -9,7 +9,8 @@ import 'widget_preview.dart';
 /// Define the Enum for Layout Types
 enum LayoutType { gridView, listView }
 
-typedef PreviewsCallback = List<WidgetPreview> Function();
+typedef WidgetPreviewGroups = Iterable<WidgetPreviewGroup>;
+typedef PreviewsCallback = WidgetPreviewGroups Function();
 
 /// Controller used to process events and determine which previews should be
 /// displayed and how they should be displayed in the [WidgetPreviewScaffold].
@@ -43,7 +44,7 @@ class WidgetPreviewScaffoldController {
   /// The active DTD connection used to communicate with other developer tooling.
   final WidgetPreviewScaffoldDtdServices dtdServices;
 
-  final List<WidgetPreview> Function() _previews;
+  final PreviewsCallback _previews;
 
   /// Specifies how the previews should be laid out.
   ValueListenable<LayoutType> get layoutTypeListenable => _layoutType;
@@ -63,9 +64,9 @@ class WidgetPreviewScaffoldController {
   }
 
   /// The current set of previews to be displayed.
-  ValueListenable<Iterable<WidgetPreview>> get filteredPreviewSetListenable =>
+  ValueListenable<WidgetPreviewGroups> get filteredPreviewSetListenable =>
       _filteredPreviewSet;
-  final _filteredPreviewSet = ValueNotifier<List<WidgetPreview>>([]);
+  final _filteredPreviewSet = ValueNotifier<WidgetPreviewGroups>([]);
 
   void _registerListeners() {
     dtdServices.selectedSourceFile.addListener(
@@ -92,9 +93,18 @@ class WidgetPreviewScaffoldController {
     final selectedSourceFile = dtdServices.selectedSourceFile.value;
     if (selectedSourceFile != null && _filterBySelectedFile.value) {
       _filteredPreviewSet.value = _previews()
-          .where(
-            (preview) => preview.scriptUri == selectedSourceFile.uriAsString,
+          .map(
+            (group) => WidgetPreviewGroup(
+              name: group.name,
+              previews: group.previews
+                  .where(
+                    (preview) =>
+                        preview.scriptUri == selectedSourceFile.uriAsString,
+                  )
+                  .toList(),
+            ),
           )
+          .where((group) => group.hasPreviews)
           .toList();
       return;
     }

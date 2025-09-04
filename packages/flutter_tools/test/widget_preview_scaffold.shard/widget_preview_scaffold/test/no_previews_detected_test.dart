@@ -14,7 +14,7 @@ void main() {
   testWidgets(
     'Help message is displayed with link to documentation when no previews are detected',
     (tester) async {
-      final currentPreviews = <WidgetPreview>[];
+      final currentPreviews = <WidgetPreviewGroup>[];
 
       final controller = WidgetPreviewScaffoldController(
         dtdServicesOverride: FakeWidgetPreviewScaffoldDtdServices(),
@@ -27,6 +27,9 @@ void main() {
       final Finder noPreviewDetectedFinder = find.byType(
         NoPreviewsDetectedWidget,
       );
+      final Finder widgetPreviewGroupWidgetFinder = find.byType(
+        WidgetPreviewGroupWidget,
+      );
       final Finder widgetPreviewWidgetFinder = find.byType(WidgetPreviewWidget);
       final Finder documentationUrlFinder = find.text(
         NoPreviewsDetectedWidget.documentationUrl.toString(),
@@ -34,10 +37,16 @@ void main() {
 
       expect(noPreviewDetectedFinder, findsOne);
       expect(documentationUrlFinder, findsOne);
+      expect(widgetPreviewGroupWidgetFinder, findsNothing);
       expect(widgetPreviewWidgetFinder, findsNothing);
 
       currentPreviews.add(
-        WidgetPreview(scriptUri: '', builder: () => const Text('Foo')),
+        WidgetPreviewGroup(
+          name: 'group',
+          previews: <WidgetPreview>[
+            WidgetPreview(scriptUri: '', builder: () => const Text('Foo')),
+          ],
+        ),
       );
 
       // Fake a hot reload.
@@ -49,6 +58,7 @@ void main() {
       expect(noPreviewDetectedFinder, findsNothing);
       expect(documentationUrlFinder, findsNothing);
       expect(widgetPreviewWidgetFinder, findsOne);
+      expect(widgetPreviewGroupWidgetFinder, findsOne);
     },
   );
 }
