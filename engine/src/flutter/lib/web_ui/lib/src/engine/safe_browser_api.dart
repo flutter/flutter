@@ -57,8 +57,11 @@ num? parseFontSize(DomElement element) {
 }
 
 /// Parses the given style property [attributeName] of [element] and returns the
-/// value without a unit.
-num? parseStyleProperty(DomElement element, String attributeName) {
+/// [resolved value](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_cascade/Value_processing#resolved_value) without a unit.
+///
+/// Returns `null` if the property value is not numeric (e.g., 'normal',
+/// 'auto') or cannot be parsed.
+num? parseNumericStyleProperty(DomElement element, String attributeName) {
   num? styleProperty;
 
   final String stylePropertyString = domWindow
