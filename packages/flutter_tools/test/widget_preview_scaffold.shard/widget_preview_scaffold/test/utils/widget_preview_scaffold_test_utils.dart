@@ -5,7 +5,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:widget_preview_scaffold/src/dtd/dtd_services.dart';
+import 'package:widget_preview_scaffold/src/dtd/editor_service.dart';
+import 'package:widget_preview_scaffold/src/widget_preview.dart';
 import 'package:widget_preview_scaffold/src/widget_preview_rendering.dart';
+import 'package:widget_preview_scaffold/src/widget_preview_scaffold_controller.dart';
 
 class WidgetPreviewerWidgetScaffolding extends StatelessWidget {
   WidgetPreviewerWidgetScaffolding({
@@ -54,11 +57,37 @@ class WidgetPreviewerWidgetScaffolding extends StatelessWidget {
 }
 
 class FakeWidgetPreviewScaffoldDtdServices extends Fake
+    with DtdEditorService
     implements WidgetPreviewScaffoldDtdServices {
+  @override
+  Future<void> connect({Uri? dtdUri}) async {}
+
+  @override
+  Future<void> dispose() async {
+    super.dispose();
+  }
+
   bool hotRestartInvoked = false;
 
   @override
   Future<void> hotRestartPreviewer() async {
     hotRestartInvoked = true;
   }
+
+  /// The currently selected source file in the IDE.
+  @override
+  final ValueNotifier<TextDocument?> selectedSourceFile =
+      ValueNotifier<TextDocument?>(null);
+}
+
+class FakeWidgetPreviewScaffoldController
+    extends WidgetPreviewScaffoldController {
+  FakeWidgetPreviewScaffoldController({
+    WidgetPreviewScaffoldDtdServices? dtdServicesOverride,
+    List<WidgetPreview>? previews,
+  }) : super(
+         previews: () => previews ?? [],
+         dtdServicesOverride:
+             dtdServicesOverride ?? FakeWidgetPreviewScaffoldDtdServices(),
+       );
 }
