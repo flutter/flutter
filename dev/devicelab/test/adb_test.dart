@@ -23,7 +23,9 @@ void main() {
       device = FakeDevice(deviceId: 'fakeDeviceId');
     });
 
-    tearDown(() {});
+    tearDown(() {
+      FakeDevice.resetLog();
+    });
 
     group('cpu check', () {
       test('arm64', () async {
@@ -332,6 +334,7 @@ class FakeDevice extends AndroidDevice {
     output = '''
       mWakefulness=1
       mWakefulness=Awake
+
     ''';
   }
 
@@ -343,6 +346,7 @@ class FakeDevice extends AndroidDevice {
     output = '''
       getWakefulnessLocked()=1
       getWakefulnessLocked()=Awake
+
     ''';
   }
 
@@ -354,6 +358,7 @@ class FakeDevice extends AndroidDevice {
     output = '''
       mWakefulness=0
       mWakefulness=Asleep
+
     ''';
   }
 
