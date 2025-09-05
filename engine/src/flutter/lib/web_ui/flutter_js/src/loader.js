@@ -89,19 +89,11 @@ export class FlutterLoader {
       }
     }
 
-    /**
-     * @param {import("./types").ApplicationBuild} build
-     * @param {import("./types").WebRenderer} renderer
-     **/
-    const buildContainsRenderer = (build, renderer) => {
-      return build.renderer == renderer;
-    }
-
     const buildIsCompatible = (build) => {
       if (build.compileTarget === "dart2wasm" && !supportsDart2Wasm) {
         return false;
       }
-      if (config.renderer && !buildContainsRenderer(build, config.renderer)) {
+      if (config.renderer && config.renderer != build.renderer) {
         return false;
       }
       return rendererIsCompatible(build.renderer);
