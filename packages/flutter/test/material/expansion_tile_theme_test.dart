@@ -50,7 +50,10 @@ class TestTextState extends State<TestText> {
 void main() {
   Material getMaterial(WidgetTester tester) {
     return tester.widget<Material>(
-      find.descendant(of: find.byType(ExpansionTile), matching: find.byType(Material)),
+      find.descendant(
+        of: find.byType(ExpansionTile),
+        matching: find.ancestor(of: find.byType(ListTile), matching: find.byType(Material)),
+      ),
     );
   }
 

@@ -185,7 +185,10 @@ void main() {
     /// that is of type Material, this code retrieves the built
     /// [PopupMenuButton].
     final Material button = tester.widget<Material>(
-      find.descendant(of: find.byKey(popupButtonApp), matching: find.byType(Material)).last,
+      find.descendant(
+        of: find.byKey(popupButtonApp),
+        matching: find.ancestor(of: find.byType(ListTile), matching: find.byType(Material)),
+      ),
     );
     expect(button.color, theme.colorScheme.surfaceContainer);
     expect(button.shadowColor, theme.colorScheme.shadow);
@@ -306,7 +309,10 @@ void main() {
     /// that is of type Material, this code retrieves the built
     /// [PopupMenuButton].
     final Material button = tester.widget<Material>(
-      find.descendant(of: find.byKey(popupButtonApp), matching: find.byType(Material)).last,
+      find.descendant(
+        of: find.byKey(popupButtonApp),
+        matching: find.ancestor(of: find.byType(ListTile), matching: find.byType(Material)),
+      ),
     );
     expect(button.color, Colors.orange);
     expect(button.surfaceTintColor, const Color(0xff00ff00));
@@ -432,7 +438,10 @@ void main() {
     /// that is of type Material, this code retrieves the built
     /// [PopupMenuButton].
     final Material button = tester.widget<Material>(
-      find.descendant(of: find.byKey(popupButtonApp), matching: find.byType(Material)).last,
+      find.descendant(
+        of: find.byKey(popupButtonApp),
+        matching: find.ancestor(of: find.byType(ListTile), matching: find.byType(Material)),
+      ),
     );
     expect(button.color, color);
     expect(button.shape, shape);
