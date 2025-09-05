@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
@@ -962,7 +963,7 @@ name: my_app
       expect(debugConnectionInfo, isNotNull);
 
       final OperationResult result = await residentWebRunner.restart();
-      expect(logger.statusText, contains('Reloaded application in'));
+      expect(logger.statusText, contains('Recompile complete. No client connected.'));
       expect(result.code, 0);
     },
     overrides: <Type, Generator>{
@@ -1125,6 +1126,47 @@ name: my_app
           ),
         ),
       );
+    },
+    overrides: <Type, Generator>{
+      Analytics: () => fakeAnalytics,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+    },
+  );
+
+  testUsingContext(
+    'Does not fail hot restart when not attached',
+    () async {
+      final logger = BufferLogger.test();
+      final ResidentRunner residentWebRunner = setUpResidentRunner(
+        flutterDevice,
+        logger: logger,
+        systemClock: SystemClock.fixed(DateTime(2001)),
+      );
+      fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          ...kAttachExpectations,
+          const FakeVmServiceRequest(method: 'hotRestart'),
+        ],
+      );
+      flutterDevice.device = WebServerDevice(logger: logger);
+      webDevFS.report = UpdateFSReport(success: true);
+
+      final appStartedCompleter = Completer<void>();
+      unawaited(residentWebRunner.run(appStartedCompleter: appStartedCompleter));
+
+      await appStartedCompleter.future;
+
+      late final OperationResult result;
+
+      await expectReturnsNormallyLater(() async {
+        result = await residentWebRunner.restart(fullRestart: true);
+      }());
+
+      expect(result.code, 0);
+      expect(result.isOk, isTrue);
+      expect(logger.statusText, contains('Recompile complete. No client connected.'));
     },
     overrides: <Type, Generator>{
       Analytics: () => fakeAnalytics,
@@ -2047,6 +2089,8 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
 
 class FakeWebDevFS extends Fake implements WebDevFS {
   Object? exception;
+
+  final resultCompleter = Completer<ConnectionResult?>();
   ConnectionResult? result;
   late UpdateFSReport report;
 
@@ -2105,7 +2149,11 @@ class FakeWebDevFS extends Fake implements WebDevFS {
       // ignore: only_throw_errors, exception is either Error or Exception here.
       throw exception!;
     }
-    return result;
+    // Automatically complete the future if a non-null result has been set.
+    if (result != null) {
+      resultCompleter.complete(result);
+    }
+    return resultCompleter.future;
   }
 }
 

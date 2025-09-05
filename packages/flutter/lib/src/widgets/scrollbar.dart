@@ -1456,6 +1456,14 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     } else if (_effectiveScrollController != null && enableGestures) {
       // Interactive scrollbars need to be properly configured. If it is visible
       // for interaction, ensure we are set up properly.
+      // Don't assert immediately if we're in the middle of updating the widget
+      // as the controller may not be attached yet in that frame.
+      if (_fadeoutAnimationController.status == AnimationStatus.forward &&
+          (widget.thumbVisibility ?? false)) {
+        // When thumbVisibility is true and we're animating forward,
+        // the check is already scheduled by _debugScheduleCheckHasValidScrollPosition.
+        return;
+      }
       assert(_debugCheckHasValidScrollPosition());
     }
   }

@@ -76,9 +76,7 @@ config("relative_paths") {
       "-fdebug-prefix-map=$absolute_path=$relative_path",
     ]
   } else {
-    cflags += [
-      "-fdebug-prefix-map=$absolute_path=$relative_path",
-    ]
+    cflags += [ "-fdebug-prefix-map=$absolute_path=$relative_path" ]
   }
   cflags += [
     # This makes sure that include directories in the toolchain are
