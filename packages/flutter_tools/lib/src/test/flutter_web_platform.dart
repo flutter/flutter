@@ -581,7 +581,7 @@ class FlutterWebPlatform extends PlatformPlugin {
 
     final Runtime browser = platform.runtime;
     try {
-      if (_browserManager?.closed ?? false) {
+      if (_browserManager?.closed ?? true) {
         _browserManager = await _launchBrowser(browser);
       }
     } on Error catch (_) {
