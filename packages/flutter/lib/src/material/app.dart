@@ -468,7 +468,7 @@ class MaterialApp extends StatefulWidget {
   /// This approach affects both theme selection and any widgets that check
   /// [MediaQuery.highContrastOf], ensuring consistent behavior throughout
   /// the application.
-  /// {@endtool}
+  /// {@end-tool}
   ///
   /// See also:
   ///
@@ -492,7 +492,7 @@ class MaterialApp extends StatefulWidget {
   /// To manually override the high contrast setting, you can use the same
   /// [MediaQuery] override approach as described in [highContrastTheme].
   /// The override will affect both light and dark high contrast theme selection.
-  /// {@endtool}
+  /// {@end-tool}
   ///
   /// See also:
   ///
