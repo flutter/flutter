@@ -1130,7 +1130,6 @@ void Shell::OnPlatformViewSetViewportMetrics(int64_t view_id,
 
   if (!ValidateViewportMetrics(metrics)) {
     // Ignore invalid view-port metrics.
-    FML_LOG(ERROR) << "Ignoring invalid viewport metrics";
     return;
   }
 
