@@ -101,7 +101,6 @@ workspace:
   - tools/header_guard_check
   - tools/gen_web_locale_keymap
   - tools/githooks
-  - tools/licenses
   - tools/mcp
   - tools/path_ops/dart
   - tools/golden_tests_harvester
