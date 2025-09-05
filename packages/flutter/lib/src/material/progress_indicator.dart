@@ -35,19 +35,39 @@ enum _ActivityIndicatorType { material, adaptive }
 /// See also:
 ///
 ///  * <https://material.io/components/progress-indicators>
-abstract class _MaterialProgressIndicator extends ProgressIndicator {
+abstract class ProgressIndicator extends StatefulWidget {
   /// Creates a progress indicator.
   ///
-  /// {@macro flutter.widget.ProgressIndicator.ProgressIndicator}
-  const _MaterialProgressIndicator({
+  /// {@template flutter.material.ProgressIndicator.ProgressIndicator}
+  /// The [value] argument can either be null for an indeterminate
+  /// progress indicator, or a non-null value between 0.0 and 1.0 for a
+  /// determinate progress indicator.
+  ///
+  /// ## Accessibility
+  ///
+  /// The [semanticsLabel] can be used to identify the purpose of this progress
+  /// bar for screen reading software. The [semanticsValue] property may be used
+  /// for determinate progress indicators to indicate how much progress has been made.
+  /// {@endtemplate}
+  const ProgressIndicator({
     super.key,
-    super.value,
+    this.value,
     this.backgroundColor,
     this.color,
     this.valueColor,
-    super.semanticsLabel,
-    super.semanticsValue,
+    this.semanticsLabel,
+    this.semanticsValue,
   });
+
+  /// If non-null, the value of this progress indicator.
+  ///
+  /// A value of 0.0 means no progress and 1.0 means that progress is complete.
+  /// The value will be clamped to be in the range 0.0-1.0.
+  ///
+  /// If null, this progress indicator is indeterminate, which means the
+  /// indicator displays a predetermined animation that does not indicate how
+  /// much actual progress is being made.
+  final double? value;
 
   /// The progress indicator's background color.
   ///
@@ -58,11 +78,10 @@ abstract class _MaterialProgressIndicator extends ProgressIndicator {
   /// {@template flutter.progress_indicator.ProgressIndicator.color}
   /// The progress indicator's color.
   ///
-  /// This is only used if [CircularProgressIndicator.valueColor] or
-  /// [LinearProgressIndicator.valueColor] is null. If
-  /// [CircularProgressIndicator.color] or [LinearProgressIndicator.color] is
-  /// also null, then the ambient [ProgressIndicatorThemeData.color] will be
-  /// used. If that is null then the current theme's [ColorScheme.primary] will
+  /// This is only used if [ProgressIndicator.valueColor] is null.
+  /// If [ProgressIndicator.color] is also null, then the ambient
+  /// [ProgressIndicatorThemeData.color] will be used. If that
+  /// is null then the current theme's [ColorScheme.primary] will
   /// be used by default.
   /// {@endtemplate}
   final Color? color;
@@ -74,13 +93,49 @@ abstract class _MaterialProgressIndicator extends ProgressIndicator {
   /// is also null then it defaults to the current theme's [ColorScheme.primary].
   final Animation<Color?>? valueColor;
 
-  @override
-  Color getValueColor(BuildContext context, {Color? defaultColor}) {
+  /// {@template flutter.progress_indicator.ProgressIndicator.semanticsLabel}
+  /// The [SemanticsProperties.label] for this progress indicator.
+  ///
+  /// This value indicates the purpose of the progress bar, and will be
+  /// read out by screen readers to indicate the purpose of this progress
+  /// indicator.
+  /// {@endtemplate}
+  final String? semanticsLabel;
+
+  /// {@template flutter.progress_indicator.ProgressIndicator.semanticsValue}
+  /// The [SemanticsProperties.value] for this progress indicator.
+  ///
+  /// This will be used in conjunction with the [semanticsLabel] by
+  /// screen reading software to identify the widget, and is primarily
+  /// intended for use with determinate progress indicators to announce
+  /// how far along they are.
+  ///
+  /// For determinate progress indicators, this will be defaulted to
+  /// [ProgressIndicator.value] expressed as a percentage, i.e. `0.1` will
+  /// become '10%'.
+  /// {@endtemplate}
+  final String? semanticsValue;
+
+  Color _getValueColor(BuildContext context, {Color? defaultColor}) {
     return valueColor?.value ??
         color ??
         ProgressIndicatorTheme.of(context).color ??
         defaultColor ??
         Theme.of(context).colorScheme.primary;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(PercentProperty('value', value, showName: false, ifNull: '<indeterminate>'));
+  }
+
+  Widget _buildSemanticsWrapper({required BuildContext context, required Widget child}) {
+    String? expandedSemanticsValue = semanticsValue;
+    if (value != null) {
+      expandedSemanticsValue ??= '${(value! * 100).round()}%';
+    }
+    return Semantics(label: semanticsLabel, value: expandedSemanticsValue, child: child);
   }
 }
 
@@ -329,10 +384,10 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 ///  * [RefreshIndicator], which automatically displays a [CircularProgressIndicator]
 ///    when the underlying vertical scrollable is overscrolled.
 ///  * <https://material.io/design/components/progress-indicators.html#linear-progress-indicators>
-class LinearProgressIndicator extends _MaterialProgressIndicator {
+class LinearProgressIndicator extends ProgressIndicator {
   /// Creates a linear progress indicator.
   ///
-  /// {@macro flutter.widget.ProgressIndicator.ProgressIndicator}
+  /// {@macro flutter.material.ProgressIndicator.ProgressIndicator}
   const LinearProgressIndicator({
     super.key,
     super.value,
@@ -436,16 +491,36 @@ class LinearProgressIndicator extends _MaterialProgressIndicator {
 }
 
 class _LinearProgressIndicatorState extends State<LinearProgressIndicator>
-    with
-        SingleTickerProviderStateMixin<LinearProgressIndicator>,
-        ProgressIndicatorMixin<LinearProgressIndicator> {
-  @protected
-  @override
-  Duration get duration => const Duration(milliseconds: _kIndeterminateLinearDuration);
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
 
-  @protected
   @override
-  bool get animating => widget.value == null;
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: _kIndeterminateLinearDuration),
+      vsync: this,
+    );
+    if (widget.value == null) {
+      _controller.repeat();
+    }
+  }
+
+  @override
+  void didUpdateWidget(LinearProgressIndicator oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.value == null && !_controller.isAnimating) {
+      _controller.repeat();
+    } else if (widget.value != null && _controller.isAnimating) {
+      _controller.stop();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   Widget _buildIndicator(BuildContext context, double animationValue, TextDirection textDirection) {
     final ProgressIndicatorThemeData indicatorTheme = ProgressIndicatorTheme.of(context);
@@ -482,7 +557,7 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator>
       child: CustomPaint(
         painter: _LinearProgressIndicatorPainter(
           trackColor: trackColor,
-          valueColor: widget.getValueColor(context, defaultColor: defaults.color),
+          valueColor: widget._getValueColor(context, defaultColor: defaults.color),
           value: widget.value, // may be null
           animationValue: animationValue, // ignored if widget.value is not null
           textDirection: textDirection,
@@ -499,7 +574,7 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator>
       result = ClipRRect(borderRadius: borderRadius, child: result);
     }
 
-    return buildSemanticsWrapper(context: context, child: result);
+    return widget._buildSemanticsWrapper(context: context, child: result);
   }
 
   @override
@@ -507,13 +582,13 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator>
     final TextDirection textDirection = Directionality.of(context);
 
     if (widget.value != null) {
-      return _buildIndicator(context, controller.value, textDirection);
+      return _buildIndicator(context, _controller.value, textDirection);
     }
 
     return AnimatedBuilder(
-      animation: controller.view,
+      animation: _controller.view,
       builder: (BuildContext context, Widget? child) {
-        return _buildIndicator(context, controller.value, textDirection);
+        return _buildIndicator(context, _controller.value, textDirection);
       },
     );
   }
@@ -682,10 +757,10 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 ///  * [RefreshIndicator], which automatically displays a [CircularProgressIndicator]
 ///    when the underlying vertical scrollable is overscrolled.
 ///  * <https://material.io/design/components/progress-indicators.html#circular-progress-indicators>
-class CircularProgressIndicator extends _MaterialProgressIndicator {
+class CircularProgressIndicator extends ProgressIndicator {
   /// Creates a circular progress indicator.
   ///
-  /// {@macro flutter.widget.ProgressIndicator.ProgressIndicator}
+  /// {@macro flutter.material.ProgressIndicator.ProgressIndicator}
   const CircularProgressIndicator({
     super.key,
     super.value,
@@ -717,7 +792,7 @@ class CircularProgressIndicator extends _MaterialProgressIndicator {
   /// [semanticsLabel], [semanticsValue], [trackGap], [year2023] will be
   /// ignored on iOS & macOS.
   ///
-  /// {@macro flutter.widget.ProgressIndicator.ProgressIndicator}
+  /// {@macro flutter.material.ProgressIndicator.ProgressIndicator}
   const CircularProgressIndicator.adaptive({
     super.key,
     super.value,
@@ -852,9 +927,7 @@ class CircularProgressIndicator extends _MaterialProgressIndicator {
 }
 
 class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
-    with
-        SingleTickerProviderStateMixin<CircularProgressIndicator>,
-        ProgressIndicatorMixin<CircularProgressIndicator> {
+    with SingleTickerProviderStateMixin {
   static const int _pathCount = _kIndeterminateCircularDuration ~/ 1333;
   static const int _rotationCount = _kIndeterminateCircularDuration ~/ 2222;
 
@@ -869,13 +942,35 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
     curve: const SawTooth(_rotationCount),
   );
 
-  @protected
-  @override
-  Duration get duration => const Duration(milliseconds: _kIndeterminateCircularDuration);
+  late AnimationController _controller;
 
-  @protected
   @override
-  bool get animating => widget.value == null;
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: _kIndeterminateCircularDuration),
+      vsync: this,
+    );
+    if (widget.value == null) {
+      _controller.repeat();
+    }
+  }
+
+  @override
+  void didUpdateWidget(CircularProgressIndicator oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.value == null && !_controller.isAnimating) {
+      _controller.repeat();
+    } else if (widget.value != null && _controller.isAnimating) {
+      _controller.stop();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   Widget _buildCupertinoIndicator(BuildContext context) {
     final Color? tickColor = widget.backgroundColor;
@@ -929,7 +1024,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
       child: CustomPaint(
         painter: _CircularProgressIndicatorPainter(
           trackColor: trackColor,
-          valueColor: widget.getValueColor(context, defaultColor: defaults.color),
+          valueColor: widget._getValueColor(context, defaultColor: defaults.color),
           value: widget.value, // may be null
           headValue: headValue, // remaining arguments are ignored if widget.value is not null
           tailValue: tailValue,
@@ -948,19 +1043,19 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
       result = Padding(padding: effectivePadding, child: result);
     }
 
-    return buildSemanticsWrapper(context: context, child: result);
+    return widget._buildSemanticsWrapper(context: context, child: result);
   }
 
   Widget _buildAnimation() {
     return AnimatedBuilder(
-      animation: controller,
+      animation: _controller,
       builder: (BuildContext context, Widget? child) {
         return _buildMaterialIndicator(
           context,
-          _strokeHeadTween.evaluate(controller),
-          _strokeTailTween.evaluate(controller),
-          _offsetTween.evaluate(controller),
-          _rotationTween.evaluate(controller),
+          _strokeHeadTween.evaluate(_controller),
+          _strokeTailTween.evaluate(_controller),
+          _offsetTween.evaluate(_controller),
+          _rotationTween.evaluate(_controller),
         );
       },
     );
@@ -1065,7 +1160,7 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
   /// Rather than creating a refresh progress indicator directly, consider using
   /// a [RefreshIndicator] together with a [Scrollable] widget.
   ///
-  /// {@macro flutter.widget.ProgressIndicator.ProgressIndicator}
+  /// {@macro flutter.material.ProgressIndicator.ProgressIndicator}
   const RefreshProgressIndicator({
     super.key,
     super.value,
@@ -1153,7 +1248,7 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
     final double? value = widget.value;
     if (value != null) {
       _lastValue = value;
-      controller.value =
+      _controller.value =
           _convertTween.transform(value) * (1333 / 2 / _kIndeterminateCircularDuration);
     }
     return _buildAnimation();
@@ -1162,15 +1257,15 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
   @override
   Widget _buildAnimation() {
     return AnimatedBuilder(
-      animation: controller,
+      animation: _controller,
       builder: (BuildContext context, Widget? child) {
         return _buildMaterialIndicator(
           context,
           // Lengthen the arc a little
-          1.05 * _CircularProgressIndicatorState._strokeHeadTween.evaluate(controller),
-          _CircularProgressIndicatorState._strokeTailTween.evaluate(controller),
-          _CircularProgressIndicatorState._offsetTween.evaluate(controller),
-          _CircularProgressIndicatorState._rotationTween.evaluate(controller),
+          1.05 * _CircularProgressIndicatorState._strokeHeadTween.evaluate(_controller),
+          _CircularProgressIndicatorState._strokeTailTween.evaluate(_controller),
+          _CircularProgressIndicatorState._offsetTween.evaluate(_controller),
+          _CircularProgressIndicatorState._rotationTween.evaluate(_controller),
         );
       },
     );
@@ -1196,7 +1291,7 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
       rotation = math.pi * _additionalRotationTween.transform(value ?? _lastValue!);
     }
 
-    Color valueColor = widget.getValueColor(context);
+    Color valueColor = widget._getValueColor(context);
     final double opacity = valueColor.opacity;
     valueColor = valueColor.withOpacity(1.0);
 
@@ -1215,7 +1310,7 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
         widget.strokeAlign ?? indicatorTheme.strokeAlign ?? defaults.strokeAlign!;
     final StrokeCap? strokeCap = widget.strokeCap ?? indicatorTheme.strokeCap;
 
-    return buildSemanticsWrapper(
+    return widget._buildSemanticsWrapper(
       context: context,
       child: Padding(
         padding: widget.indicatorMargin,
