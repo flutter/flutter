@@ -822,16 +822,7 @@ class WebServiceWorker extends Target {
     final String fileGeneratorsPath = environment.artifacts.getArtifactPath(
       Artifact.flutterToolsFileGenerators,
     );
-    final String serviceWorker = generateServiceWorker(fileGeneratorsPath, urlToHash, <String>[
-      'main.dart.js',
-      if (compileConfigs.any(
-        (WebCompilerConfig config) => config is WasmCompilerConfig && !config.dryRun,
-      )) ...<String>['main.dart.wasm', 'main.dart.mjs'],
-      'index.html',
-      'flutter_bootstrap.js',
-      if (urlToHash.containsKey('assets/AssetManifest.bin.json')) 'assets/AssetManifest.bin.json',
-      if (urlToHash.containsKey('assets/FontManifest.json')) 'assets/FontManifest.json',
-    ], serviceWorkerStrategy: environment.serviceWorkerStrategy);
+    final String serviceWorker = generateServiceWorker(fileGeneratorsPath, serviceWorkerStrategy: environment.serviceWorkerStrategy);
     serviceWorkerFile.writeAsStringSync(serviceWorker);
     environment.depFileService.writeToFile(
       depfile,
