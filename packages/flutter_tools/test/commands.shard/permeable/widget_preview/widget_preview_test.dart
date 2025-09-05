@@ -190,7 +190,7 @@ void main() {
   void expectSinglePreviewLaunchTimingEvent() => expectNPreviewLaunchTimingEvents(1);
 
   void expectDeviceSelected(Device device) {
-    final bufferLogger = logger as BufferLogger;
+    final BufferLogger bufferLogger = asLogger<BufferLogger>(logger);
     expect(
       bufferLogger.statusText,
       contains('Launching the Widget Preview Scaffold on ${device.displayName}...'),
