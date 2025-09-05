@@ -83,9 +83,9 @@ ValueListenableBuilder<int>(
     Model-View-ViewModel (MVVM) pattern.
 *   Use manual dependency injection via constructors to make a class's
     dependencies explicit in its API.
-*   Use `provider` for dependency injection to make services, repositories, or
+*   If a dependency injection solution beyond manual constructor injection is explicitly requested, `provider` can be used to make services, repositories, or
     complex state objects available to the UI layer without tight coupling
-    (note: `new-rules.md` generally defaults against third-party packages for
+    (note: this document generally defaults against third-party packages for
     state management unless explicitly requested).
 
 ### Data Flow
