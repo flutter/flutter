@@ -2346,6 +2346,43 @@ void main() {
     semantics.dispose();
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/171264
+  testWidgets('DataTable cell has correct semantics rect ', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DataTable(
+            dataRowMaxHeight: double.infinity,
+            dataRowMinHeight: 70,
+            columns: const <DataColumn>[
+              // Set width so the Column width is not determined by text.
+              DataColumn(label: SizedBox(width: 250, child: Text('Column 1'))),
+              DataColumn(label: SizedBox(width: 250, child: Text('Column 2'))),
+            ],
+            rows: const <DataRow>[
+              DataRow(
+                cells: <DataCell>[DataCell(Text('Data Cell 1')), DataCell(Text('Data Cell 2'))],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final SemanticsFinder cell1 = find.semantics.byLabel('Data Cell 1');
+
+    expect(cell1, findsOne);
+
+    final SemanticsNode cell1Node = cell1.evaluate().first;
+
+    // The semantics node of cell 1 should not have a transform
+    expect(cell1Node.transform, null);
+    expect(cell1Node.rect, const Rect.fromLTRB(0.0, 0.0, 302.0, 70.0));
+
+    semantics.dispose();
+  });
+
   testWidgets('DataTable, DataColumn, DataRow, and DataCell render at zero area', (
     WidgetTester tester,
   ) async {
