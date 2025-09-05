@@ -34,7 +34,7 @@ void DlStopwatchVisualizer::Visualize(DlCanvas* canvas,
   auto const one_frame_ms = GetFrameBudget().count();
   auto const max_interval = one_frame_ms * 3.0;
   auto const max_unit_interval = UnitFrameInterval(max_interval);
-  auto const sample_unit_width = (1.0 / kMaxSamples);
+  auto const sample_unit_width = width / kMaxSamples;
 
   // resize backing storage to match expected lap count.
   size_t required_storage =
@@ -50,20 +50,21 @@ void DlStopwatchVisualizer::Visualize(DlCanvas* canvas,
   // Prepare a path for the data; we start at the height of the last point so
   // it looks like we wrap around.
   {
+    auto bar_left = x;
     for (auto i = 0u; i < stopwatch_.GetLapsCount(); i++) {
+      auto time_ms = stopwatch_.GetLap(i).ToMillisecondsF();
       auto const sample_unit_height =
-          (1.0 - UnitHeight(stopwatch_.GetLap(i).ToMillisecondsF(),
-                            max_unit_interval));
+          height * UnitHeight(time_ms, max_unit_interval);
 
-      auto const bar_width = width * sample_unit_width;
-      auto const bar_height = height * sample_unit_height;
-      auto const bar_left = x + width * sample_unit_width * i;
+      auto const bar_top = bottom - sample_unit_height;
+      auto const bar_right = x + (i + 1) * sample_unit_width;
 
       painter.DrawRect(DlRect::MakeLTRB(/*left=*/bar_left,
-                                        /*top=*/y + bar_height,
-                                        /*right=*/bar_left + bar_width,
+                                        /*top=*/bar_top,
+                                        /*right=*/bar_right,
                                         /*bottom=*/bottom),
                        DlColor(0xAA0000FF));
+      bar_left = bar_right;
     }
   }
 
@@ -86,7 +87,7 @@ void DlStopwatchVisualizer::Visualize(DlCanvas* canvas,
         // Draw a skinny rectangle (i.e. a line).
         painter.DrawRect(DlRect::MakeLTRB(/*left=*/x,
                                           /*top=*/y + frame_height,
-                                          /*right=*/width,
+                                          /*right=*/x + width,
                                           /*bottom=*/y + frame_height + 1),
                          DlColor(0xCC000000));
       }
@@ -100,11 +101,11 @@ void DlStopwatchVisualizer::Visualize(DlCanvas* canvas,
       // budget exceeded.
       color = DlColor::kRed();
     }
-    auto const l =
-        x + width * (static_cast<double>(stopwatch_.GetCurrentSample()) /
-                     kMaxSamples);
+    auto sample =
+        (stopwatch_.GetCurrentSample() + 1) % stopwatch_.GetLapsCount();
+    auto const l = x + sample * sample_unit_width;
     auto const t = y;
-    auto const r = l + width * sample_unit_width;
+    auto const r = l + sample_unit_width;
     auto const b = rect.GetBottom();
     painter.DrawRect(DlRect::MakeLTRB(l, t, r, b), color);
   }

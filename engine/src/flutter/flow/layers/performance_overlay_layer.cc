@@ -12,7 +12,6 @@
 #include "display_list/dl_text_skia.h"
 #include "flow/stopwatch.h"
 #include "flow/stopwatch_dl.h"
-#include "flow/stopwatch_sk.h"
 #include "third_party/skia/include/core/SkFont.h"
 #include "third_party/skia/include/core/SkFontMgr.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
@@ -44,12 +43,8 @@ void VisualizeStopWatch(DlCanvas* canvas,
 
   if (show_graph) {
     DlRect visualization_rect = DlRect::MakeXYWH(x, y, width, height);
-    if (impeller_enabled) {
-      DlStopwatchVisualizer(stopwatch, point_storage, color_storage)
-          .Visualize(canvas, visualization_rect);
-    } else {
-      SkStopwatchVisualizer(stopwatch).Visualize(canvas, visualization_rect);
-    }
+    DlStopwatchVisualizer(stopwatch, point_storage, color_storage)
+        .Visualize(canvas, visualization_rect);
   }
 
   if (show_labels) {
