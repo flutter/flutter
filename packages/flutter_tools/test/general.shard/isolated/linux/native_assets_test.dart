@@ -6,20 +6,17 @@ import 'package:code_assets/code_assets.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/isolated/native_assets/linux/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
-import 'package:package_config/package_config_types.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
-import '../../../src/package_config.dart';
 import '../fake_native_assets_build_runner.dart';
 
 void main() {
@@ -29,7 +26,6 @@ void main() {
   late FileSystem fileSystem;
   late BufferLogger logger;
   late Uri projectUri;
-  late String runPackageName;
 
   setUp(() {
     processManager = FakeProcessManager.empty();
@@ -46,7 +42,6 @@ void main() {
     );
     environment.buildDir.createSync(recursive: true);
     projectUri = environment.projectDir.uri;
-    runPackageName = environment.projectDir.basename;
   });
 
   testUsingContext(
@@ -56,7 +51,7 @@ void main() {
       final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
       await packageConfig.create(recursive: true);
 
-      await runFlutterSpecificDartBuild(
+      await runFlutterSpecificHooks(
         environmentDefines: <String, String>{kBuildMode: BuildMode.debug.cliName},
         targetPlatform: TargetPlatform.linux_x64,
         projectUri: projectUri,
@@ -74,7 +69,7 @@ void main() {
   // randomization causing issues with what processes are invoked.
   // Exercise the parsing of the process output in this separate test.
   testUsingContext(
-    'NativeAssetsBuildRunnerImpl.cCompilerConfig',
+    'cCompilerConfigLinux',
     overrides: <Type, Generator>{
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
@@ -97,35 +92,10 @@ void main() {
       await fileSystem.file('/some/path/to/llvm-ar').create();
       await fileSystem.file('/some/path/to/ld.lld').create();
 
-      final File packageConfigFile = writePackageConfigFiles(
-        directory: fileSystem.directory(projectUri),
-        mainLibName: 'my_app',
-      );
-      final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-        packageConfigFile,
-        logger: environment.logger,
-      );
-      final File pubspecFile = fileSystem.file(projectUri.resolve('pubspec.yaml'));
-      await pubspecFile.writeAsString('''
-name: my_app
-''');
-      final FlutterNativeAssetsBuildRunner runner = FlutterNativeAssetsBuildRunnerImpl(
-        packageConfigFile.path,
-        packageConfig,
-        fileSystem,
-        logger,
-        runPackageName,
-        includeDevDependencies: false,
-        pubspecFile.path,
-      );
-      final CCompilerConfig result = (await runner.cCompilerConfig)!;
+      final CCompilerConfig result = await cCompilerConfigLinux();
       expect(result.compiler, Uri.file('/some/path/to/clang'));
     },
   );
 }
 
-class _BuildRunnerWithoutClang extends FakeFlutterNativeAssetsBuildRunner {
-  @override
-  Future<CCompilerConfig> get cCompilerConfig async =>
-      throwToolExit('Failed to find clang++ on the PATH.');
-}
+class _BuildRunnerWithoutClang extends FakeFlutterNativeAssetsBuildRunner {}
