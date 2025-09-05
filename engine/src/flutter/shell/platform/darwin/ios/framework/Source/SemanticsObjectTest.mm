@@ -595,7 +595,7 @@ const float kFloatCompareEpsilon = 0.001;
 
   FlutterSemanticsObject* object = [[FlutterSemanticsObject alloc] initWithBridge:bridge uid:0];
   [object setSemanticsNode:&node];
-  XCTAssertTrue([object.accessibilityLanguage isEqualToString:nil]);
+  XCTAssertTrue(object.accessibilityLanguage == nil);
 }
 
 - (void)testFlutterScrollableSemanticsObjectWithLabelValueHintIsNotHiddenWhenVoiceOverIsRunning {
