@@ -207,6 +207,7 @@ void PlatformViewAndroidDelegate::UpdateSemantics(
       buffer_int32[position++] = node.platformViewId;
       buffer_int32[position++] = node.scrollChildren;
       buffer_int32[position++] = node.scrollIndex;
+      buffer_int32[position++] = node.traversalOwner;
       buffer_float32[position++] = static_cast<float>(node.scrollPosition);
       buffer_float32[position++] = static_cast<float>(node.scrollExtentMax);
       buffer_float32[position++] = static_cast<float>(node.scrollExtentMin);

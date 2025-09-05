@@ -2232,6 +2232,7 @@ public class AccessibilityBridgeTest {
     int platformViewId = -1;
     int scrollChildren = 0;
     int scrollIndex = 0;
+    int traversalOwner = -1;
     float scrollPosition = 0.0f;
     float scrollExtentMax = 0.0f;
     float scrollExtentMin = 0.0f;
@@ -2292,6 +2293,7 @@ public class AccessibilityBridgeTest {
       bytes.putInt(platformViewId);
       bytes.putInt(scrollChildren);
       bytes.putInt(scrollIndex);
+      bytes.putInt(traversalOwner);
       bytes.putFloat(scrollPosition);
       bytes.putFloat(scrollExtentMax);
       bytes.putFloat(scrollExtentMin);

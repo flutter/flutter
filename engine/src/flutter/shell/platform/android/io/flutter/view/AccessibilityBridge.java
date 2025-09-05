@@ -2338,6 +2338,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     private int platformViewId;
     private int scrollChildren;
     private int scrollIndex;
+    private int traversalOwner;
     private float scrollPosition;
     private float scrollExtentMax;
     private float scrollExtentMin;
@@ -2541,6 +2542,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       platformViewId = buffer.getInt();
       scrollChildren = buffer.getInt();
       scrollIndex = buffer.getInt();
+      traversalOwner = buffer.getInt();
       scrollPosition = buffer.getFloat();
       scrollExtentMax = buffer.getFloat();
       scrollExtentMin = buffer.getFloat();
