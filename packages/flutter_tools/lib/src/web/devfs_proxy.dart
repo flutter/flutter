@@ -118,8 +118,7 @@ class RegexProxyRule implements ProxyRule {
 
   /// Attempts to create a [RegexProxyRule] from the provided [yaml] map.
   /// If the 'regex' or 'target' keys are missing or invalid, it logs an error
-  /// and returns null.
-  /// If the 'regex' is invalid, it logs a warning and treats it as a string.
+  /// and returns null. If the 'regex' is invalid, it logs a warning and treats it as a string.
   static RegexProxyRule? fromYaml(YamlMap yaml, Logger effectiveLogger) {
     final regex = yaml[ProxyRule._kRegex] as String?;
     final target = yaml[ProxyRule._kTarget] as String?;
