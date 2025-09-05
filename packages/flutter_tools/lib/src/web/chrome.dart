@@ -554,7 +554,7 @@ class Chromium {
   /// Closes all connections to the browser and asks the browser to exit.
   Future<void> close() async {
     if (_logger.isVerbose) {
-      _logger.printTrace('Shutting down Chromium.');
+      _logger.printTrace('Shutting down Chromium. ${StackTrace.current}');
     }
     if (_chromiumLauncher.hasChromeInstance) {
       _chromiumLauncher.currentCompleter = Completer<Chromium>();
