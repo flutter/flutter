@@ -296,7 +296,7 @@ void main() {
     await tester.pumpWidget(const MaterialApp(home: Material(child: DrawerButton())));
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture.addPointer();
+    await gesture.addPointer(location: const Offset(1000, 1000));
     addTearDown(gesture.removePointer);
 
     expect(
@@ -318,7 +318,7 @@ void main() {
     await tester.pumpWidget(const MaterialApp(home: Material(child: EndDrawerButton())));
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture.addPointer();
+    await gesture.addPointer(location: const Offset(1000, 1000));
     addTearDown(gesture.removePointer);
 
     expect(
