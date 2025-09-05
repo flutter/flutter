@@ -52,7 +52,9 @@ Future<List<License>> parseLicenses(String filePath) async {
   bool seenDivider = false;
 
   for (final line in lines) {
-    if (line.startsWith('====================================================================================================')) {
+    if (line.startsWith(
+      '====================================================================================================',
+    )) {
       if (currentLibrary != null) {
         licenses.add(
           License(
@@ -84,7 +86,8 @@ Future<List<License>> parseLicenses(String filePath) async {
         currentType = line.substring('TYPE:'.length).trim();
       } else if (line.startsWith('FILE:')) {
         currentFiles.add(line.substring('FILE:'.length).trim());
-      } else if (line == '----------------------------------------------------------------------------------------------------') {
+      } else if (line ==
+          '----------------------------------------------------------------------------------------------------') {
         seenDivider = true;
       } else if (seenDivider) {
         buffer.writeln(line);
