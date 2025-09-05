@@ -533,53 +533,40 @@ void main() {
       WidgetTester tester,
     ) async {
       // Test with null begin value - should throw assertion error
-      await tester.pumpWidget(
-        RepeatingTweenAnimationBuilder<double>(
+      expect(
+        () => RepeatingTweenAnimationBuilder<double>(
           duration: const Duration(seconds: 1),
           tween: Tween<double>(end: 1.0), // begin is null
           builder: (BuildContext context, Animation<double> animation, Widget? child) {
             return const Placeholder();
           },
         ),
+        throwsAssertionError,
       );
 
-      // The assertion error is thrown but caught by the framework and displayed as an error widget
-      expect(tester.takeException(), isAssertionError);
-
-      // Clear the widget tree to avoid leaks
-      await tester.pumpWidget(const SizedBox.shrink());
-
       // Test with null end value - should throw assertion error
-      await tester.pumpWidget(
-        RepeatingTweenAnimationBuilder<double>(
+      expect(
+        () => RepeatingTweenAnimationBuilder<double>(
           duration: const Duration(seconds: 1),
           tween: Tween<double>(begin: 0.0), // end is null
           builder: (BuildContext context, Animation<double> animation, Widget? child) {
             return const Placeholder();
           },
         ),
+        throwsAssertionError,
       );
 
-      expect(tester.takeException(), isAssertionError);
-
-      // Clear the widget tree to avoid leaks
-      await tester.pumpWidget(const SizedBox.shrink());
-
       // Test with both null - should also throw assertion error
-      await tester.pumpWidget(
-        RepeatingTweenAnimationBuilder<double>(
+      expect(
+        () => RepeatingTweenAnimationBuilder<double>(
           duration: const Duration(seconds: 1),
           tween: Tween<double>(), // both begin and end are null
           builder: (BuildContext context, Animation<double> animation, Widget? child) {
             return const Placeholder();
           },
         ),
+        throwsAssertionError,
       );
-
-      expect(tester.takeException(), isAssertionError);
-
-      // Clear the widget tree to avoid leaks
-      await tester.pumpWidget(const SizedBox.shrink());
 
       // Test with both begin and end non-null - should work fine
       await tester.pumpWidget(
