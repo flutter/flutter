@@ -264,35 +264,46 @@ bool ProcessSourceCode(const fs::path& relative_path,
   bool did_find_copyright = false;
   std::vector<absl::Status>* errors = &state->errors;
   LicenseMap* license_map = &state->license_map;
-  IterateComments(
-      file.GetData(), file.GetSize(), [&](std::string_view comment) {
-        VLOG(4) << comment;
-        re2::StringPiece match;
-        if (RE2::PartialMatch(comment, kHeaderLicense, &match)) {
-          if (!VLOG_IS_ON(4)) {
-            VLOG(3) << comment;
-          }
-          absl::StatusOr<std::vector<Catalog::Match>> matches =
-              data.catalog.FindMatch(comment);
-          if (matches.ok()) {
-            did_find_copyright = true;
-            for (const Catalog::Match& match : matches.value()) {
-              license_map->Add(package.name, match.GetMatchedText());
-              VLOG(1) << "OK: " << relative_path.lexically_normal() << " : "
-                      << match.GetMatcher();
-            }
-          } else {
-            if (flags.treat_unmatched_comments_as_errors) {
-              errors->push_back(absl::NotFoundError(
-                  absl::StrCat(relative_path.lexically_normal().string(), " : ",
-                               matches.status().message(), "\n", comment)));
-            }
-            VLOG(2) << "NOT_FOUND: " << relative_path.lexically_normal()
-                    << " : " << matches.status().message() << "\n"
-                    << comment;
-          }
+  int32_t comment_count = 0;
+
+  auto comment_handler = [&](std::string_view comment) -> void {
+    comment_count += 1;
+    VLOG(4) << comment;
+    re2::StringPiece match;
+    if (RE2::PartialMatch(comment, kHeaderLicense, &match)) {
+      if (!VLOG_IS_ON(4)) {
+        VLOG(3) << comment;
+      }
+      absl::StatusOr<std::vector<Catalog::Match>> matches =
+          data.catalog.FindMatch(comment);
+      if (matches.ok()) {
+        did_find_copyright = true;
+        for (const Catalog::Match& match : matches.value()) {
+          license_map->Add(package.name, match.GetMatchedText());
+          VLOG(1) << "OK: " << relative_path.lexically_normal() << " : "
+                  << match.GetMatcher();
         }
-      });
+      } else {
+        if (flags.treat_unmatched_comments_as_errors) {
+          errors->push_back(absl::NotFoundError(
+              absl::StrCat(relative_path.lexically_normal().string(), " : ",
+                           matches.status().message(), "\n", comment)));
+        }
+        VLOG(2) << "NOT_FOUND: " << relative_path.lexically_normal() << " : "
+                << matches.status().message() << "\n"
+                << comment;
+      }
+    }
+  };
+
+  IterateComments(file.GetData(), file.GetSize(), comment_handler);
+
+  // If we didn't find any comments, the input may be a text file, not source
+  // code. So, we attempt to match the full text.
+  if (comment_count <= 0) {
+    comment_handler(std::string_view(file.GetData(), file.GetSize()));
+  }
+
   return did_find_copyright;
 }
 
