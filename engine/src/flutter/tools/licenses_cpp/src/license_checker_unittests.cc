@@ -824,6 +824,36 @@ v2.0
 )output");
 }
 
+TEST_F(LicenseCheckerTest, HandlesTxtFiles) {
+  absl::StatusOr<fs::path> temp_path = MakeTempDir();
+  ASSERT_TRUE(temp_path.ok());
+
+  absl::StatusOr<Data> data = MakeTestData(/*include_filter_text=*/".*txt");
+  ASSERT_TRUE(data.ok());
+
+  fs::current_path(*temp_path);
+
+  ASSERT_TRUE(WriteFile(R"lic(Test License
+v2.0
+)lic",
+                        *temp_path / "foobar.txt")
+                  .ok());
+  Repo repo;
+  repo.Add("foobar.txt");
+  ASSERT_TRUE(repo.Commit().ok());
+
+  std::stringstream ss;
+  std::vector<absl::Status> errors =
+      LicenseChecker::Run(temp_path->string(), ss, *data);
+  EXPECT_EQ(errors.size(), 0u) << errors[0];
+
+  EXPECT_EQ(ss.str(), R"output(engine
+
+Test License
+v2.0
+)output");
+}
+
 TEST_F(LicenseCheckerTest, DoubleLicenseFiles) {
   absl::StatusOr<fs::path> temp_path = MakeTempDir();
   ASSERT_TRUE(temp_path.ok());
