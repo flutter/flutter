@@ -80,38 +80,6 @@ void main() {
     );
 
     testUsingContext(
-      'does not support "--use-application-binary" and "--fast-start"',
-      () async {
-        fileSystem.file('lib/main.dart').createSync(recursive: true);
-        fileSystem.file('pubspec.yaml').createSync();
-        fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
-
-        final command = RunCommand();
-        await expectLater(
-          () => createTestCommandRunner(command).run(<String>[
-            'run',
-            '--use-application-binary=app/bar/faz',
-            '--fast-start',
-            '--no-pub',
-            '--show-test-device',
-          ]),
-          throwsA(
-            isException.having(
-              (Exception exception) => exception.toString(),
-              'toString',
-              isNot(contains('--fast-start is not supported with --use-application-binary')),
-            ),
-          ),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Logger: () => logger,
-      },
-    );
-
-    testUsingContext(
       'Walks upward looking for a pubspec.yaml and succeeds if found',
       () async {
         fileSystem.file('pubspec.yaml').createSync();
@@ -1492,9 +1460,6 @@ class FakeDevice extends Fake implements Device {
 
   @override
   bool get supportsHotRestart => true;
-
-  @override
-  bool get supportsFastStart => false;
 
   @override
   bool get supportsFlavors => _supportsFlavors;

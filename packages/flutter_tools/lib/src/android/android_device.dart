@@ -751,7 +751,6 @@ class AndroidDevice extends Device {
       androidBuildInfo: AndroidBuildInfo(
         debuggingOptions.buildInfo,
         targetArchs: <AndroidArch>[androidArch],
-        fastStart: debuggingOptions.fastStart,
       ),
       deviceId: id,
       userIdentifier: userIdentifier,
@@ -767,22 +766,22 @@ class AndroidDevice extends Device {
     required TargetPlatform devicePlatform,
   }) async {
     _logger.printTrace('Building APK');
+
     await androidBuilder!.buildApk(
       project: project,
       target: mainPath ?? 'lib/main.dart',
       androidBuildInfo: AndroidBuildInfo(
         debuggingOptions.buildInfo,
         targetArchs: <AndroidArch>[androidArch],
-        fastStart: debuggingOptions.fastStart,
       ),
     );
     // Package has been built, so we can get the updated application ID and
     // activity name from the .apk.
     return await ApplicationPackageFactory.instance!.getPackageForPlatform(
-          devicePlatform,
-          buildInfo: debuggingOptions.buildInfo,
-        )
-        as AndroidApk?;
+      devicePlatform,
+      buildInfo: debuggingOptions.buildInfo,
+    )
+    as AndroidApk?;
   }
 
   @override
@@ -790,9 +789,6 @@ class AndroidDevice extends Device {
 
   @override
   bool get supportsHotRestart => true;
-
-  @override
-  bool get supportsFastStart => true;
 
   @override
   Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
