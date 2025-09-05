@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1074,6 +1076,59 @@ void main() {
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
     expect(textField.focusNode!.hasFocus, isFalse);
+
+    // ScrollViewKeyboardDismissBehavior.onDrag don't dismiss keyboard on scroll with no drag
+    await boilerplate(ScrollViewKeyboardDismissBehavior.onDrag);
+
+    finder = find.byType(TextField).first;
+    textField = tester.widget(finder);
+    await tester.showKeyboard(finder);
+    expect(textField.focusNode!.hasFocus, isTrue);
+
+    final TestPointer testPointer = TestPointer(1, PointerDeviceKind.mouse);
+    final Offset scrollStart = tester.getCenter(find.byType(SingleChildScrollView));
+    testPointer.hover(scrollStart);
+    await tester.sendEventToBinding(testPointer.scroll(Offset(scrollStart.dx, scrollStart.dy - 100)));
+    await tester.pumpAndSettle();
+    expect(textField.focusNode!.hasFocus, isTrue);
+
+    // ScrollViewKeyboardDismissBehavior.onScroll dismiss keyboard on scroll with no drag
+    await boilerplate(ScrollViewKeyboardDismissBehavior.onScroll);
+
+    finder = find.byType(TextField).first;
+    textField = tester.widget(finder);
+    await tester.showKeyboard(finder);
+    expect(textField.focusNode!.hasFocus, isTrue);
+
+    testPointer.hover(scrollStart);
+    await tester.sendEventToBinding(testPointer.scroll(Offset(scrollStart.dx, scrollStart.dy - 100)));
+    await tester.pumpAndSettle();
+    expect(textField.focusNode!.hasFocus, isFalse);
+
+    // ScrollViewKeyboardDismissBehavior.onScroll dismiss keyboard on scroll with drag
+    await boilerplate(ScrollViewKeyboardDismissBehavior.onScroll);
+
+    finder = find.byType(TextField).first;
+    textField = tester.widget(finder);
+    await tester.showKeyboard(finder);
+    expect(textField.focusNode!.hasFocus, isTrue);
+
+    await tester.dragUntilVisible(finder, find.byType(SingleChildScrollView), const Offset(0.0, -40.0));
+    await tester.pumpAndSettle();
+    expect(textField.focusNode!.hasFocus, isFalse);
+
+    // ScrollViewKeyboardDismissBehavior.onScroll doesn't dismiss keyboard on programmatic scroll
+    await boilerplate(ScrollViewKeyboardDismissBehavior.onScroll);
+
+    finder = find.byType(TextField).last;
+    textField = tester.widget(finder);
+
+    final FocusNode lastFocusNode = focusNodes.last;
+    lastFocusNode.requestFocus();
+    await tester.pumpAndSettle();
+
+    expect(textField.focusNode!.hasFocus, isTrue);
+
 
     // ScrollViewKeyboardDismissBehavior.manual does no dismiss the keyboard
     await boilerplate(ScrollViewKeyboardDismissBehavior.manual);
