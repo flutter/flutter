@@ -14,4 +14,34 @@ void main() {
 
     expect(find.byType(NavigationRail), findsExactly(1));
   });
+
+  testWidgets('navigation rail can show/hide leading', (WidgetTester tester) async {
+    await pumpsUseCase(tester, NavigationRailUseCase());
+    final Finder findLeading = find.byTooltip('Add');
+
+    expect(findLeading, findsNothing);
+
+    await tester.tap(find.text('Show Leading'));
+    await tester.pump();
+    expect(findLeading, findsOne);
+
+    await tester.tap(find.text('Hide Leading'));
+    await tester.pump();
+    expect(findLeading, findsNothing);
+  });
+
+  testWidgets('navigation rail can show/hide trailing', (WidgetTester tester) async {
+    await pumpsUseCase(tester, NavigationRailUseCase());
+    final Finder findTrailing = find.byTooltip('More');
+
+    expect(findTrailing, findsNothing);
+
+    await tester.tap(find.text('Show Trailing'));
+    await tester.pump();
+    expect(findTrailing, findsOne);
+
+    await tester.tap(find.text('Hide Trailing'));
+    await tester.pump();
+    expect(findTrailing, findsNothing);
+  });
 }
