@@ -2088,7 +2088,7 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Linux web_skwasm_tests
+  - name: Linux web_skwasm_tests_0
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
