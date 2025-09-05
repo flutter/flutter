@@ -64,7 +64,6 @@ void main() {
               'hotReload': true,
               'hotRestart': true,
               'screenshot': false,
-              'fastStart': false,
               'flutterExit': false,
               'hardwareRendering': false,
               'startPaused': true,

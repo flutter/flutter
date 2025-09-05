@@ -1226,7 +1226,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// * pressed - ThemeData.colorScheme.primary(0.1)
   /// * hovered - ThemeData.colorScheme.onSurface(0.08)
   /// * focused - ThemeData.colorScheme.onSurface(0.1)
-  final MaterialStateProperty<Color?>? overlayColor;
+  final WidgetStateProperty<Color?>? overlayColor;
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
@@ -1930,15 +1930,16 @@ class _TabBarState extends State<TabBar> {
       };
 
       final MouseCursor effectiveMouseCursor =
-          MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, selectedState) ??
+          WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, selectedState) ??
           tabBarTheme.mouseCursor?.resolve(selectedState) ??
           MaterialStateMouseCursor.clickable.resolve(selectedState);
 
-      final MaterialStateProperty<Color?> defaultOverlay =
-          MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-            final Set<MaterialState> effectiveStates = selectedState..addAll(states);
-            return _defaults.overlayColor?.resolve(effectiveStates);
-          });
+      final WidgetStateProperty<Color?> defaultOverlay = WidgetStateProperty.resolveWith<Color?>((
+        Set<MaterialState> states,
+      ) {
+        final Set<MaterialState> effectiveStates = selectedState..addAll(states);
+        return _defaults.overlayColor?.resolve(effectiveStates);
+      });
       wrappedTabs[index] = InkWell(
         mouseCursor: effectiveMouseCursor,
         onTap: () {
@@ -2694,26 +2695,26 @@ class _TabsPrimaryDefaultsM3 extends TabBarThemeData {
 
   @override
   WidgetStateProperty<Color?> get overlayColor {
-    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
-        if (states.contains(MaterialState.pressed)) {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
+        if (states.contains(WidgetState.pressed)) {
           return _colors.primary.withOpacity(0.1);
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return _colors.primary.withOpacity(0.08);
         }
-        if (states.contains(MaterialState.focused)) {
+        if (states.contains(WidgetState.focused)) {
           return _colors.primary.withOpacity(0.1);
         }
         return null;
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return _colors.primary.withOpacity(0.1);
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return _colors.onSurface.withOpacity(0.08);
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return _colors.onSurface.withOpacity(0.1);
       }
       return null;
@@ -2773,26 +2774,26 @@ class _TabsSecondaryDefaultsM3 extends TabBarThemeData {
 
   @override
   WidgetStateProperty<Color?> get overlayColor {
-    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
-        if (states.contains(MaterialState.pressed)) {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
+        if (states.contains(WidgetState.pressed)) {
           return _colors.onSurface.withOpacity(0.1);
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return _colors.onSurface.withOpacity(0.08);
         }
-        if (states.contains(MaterialState.focused)) {
+        if (states.contains(WidgetState.focused)) {
           return _colors.onSurface.withOpacity(0.1);
         }
         return null;
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return _colors.onSurface.withOpacity(0.1);
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return _colors.onSurface.withOpacity(0.08);
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return _colors.onSurface.withOpacity(0.1);
       }
       return null;

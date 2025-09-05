@@ -2133,7 +2133,7 @@ void main() {
               body: Center(
                 child: IconButton(
                   style: ButtonStyle(
-                    foregroundColor: MaterialStateProperty.resolveWith<Color>(getIconColor),
+                    foregroundColor: WidgetStateProperty.resolveWith<Color>(getIconColor),
                   ),
                   isSelected: isSelected,
                   onPressed: () {
@@ -2759,6 +2759,37 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.pumpAndSettle();
     expect(getOverlayColor(tester), paints..rect(color: overlayColor));
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/174511.
+  testWidgets('IconButton.color takes precedence over ambient IconButtonThemeData.iconColor', (
+    WidgetTester tester,
+  ) async {
+    const Color iconButtonColor = Color(0xFFFF1234);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          iconButtonTheme: const IconButtonThemeData(
+            style: ButtonStyle(
+              iconColor: WidgetStateColor.fromMap(<WidgetStatesConstraint, Color>{
+                WidgetState.any: Colors.purple,
+              }),
+            ),
+          ),
+        ),
+        home: Material(
+          child: Center(
+            child: IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.add, size: 64),
+              color: iconButtonColor,
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(_iconStyle(tester, Icons.add)?.color, iconButtonColor);
   });
 
   group('IconTheme tests in Material 3', () {

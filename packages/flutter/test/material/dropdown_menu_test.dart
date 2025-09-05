@@ -144,25 +144,25 @@ void main() {
     const Color defaultOverlayColor = Color(0xffffff00);
 
     final ButtonStyle customButtonStyle = ButtonStyle(
-      backgroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      backgroundColor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
         if (states.contains(MaterialState.focused)) {
           return focusedBackgroundColor;
         }
         return defaultBackgroundColor;
       }),
-      foregroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      foregroundColor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
         if (states.contains(MaterialState.focused)) {
           return focusedForegroundColor;
         }
         return defaultForegroundColor;
       }),
-      iconColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      iconColor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
         if (states.contains(MaterialState.focused)) {
           return focusedIconColor;
         }
         return defaultIconColor;
       }),
-      overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      overlayColor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
         if (states.contains(MaterialState.focused)) {
           return focusedOverlayColor;
         }
@@ -378,10 +378,10 @@ void main() {
 
       const Color luckyColor = Color(0xff777777);
       final ButtonStyle singleColorButtonStyle = ButtonStyle(
-        backgroundColor: MaterialStateProperty.all(luckyColor),
-        foregroundColor: MaterialStateProperty.all(luckyColor),
-        iconColor: MaterialStateProperty.all(luckyColor),
-        overlayColor: MaterialStateProperty.all(luckyColor),
+        backgroundColor: WidgetStateProperty.all(luckyColor),
+        foregroundColor: WidgetStateProperty.all(luckyColor),
+        iconColor: WidgetStateProperty.all(luckyColor),
+        overlayColor: WidgetStateProperty.all(luckyColor),
       );
 
       await tester.pumpWidget(
@@ -442,8 +442,8 @@ void main() {
 
       const Color luckyColor = Color(0xff777777);
       final ButtonStyle partialButtonStyle = ButtonStyle(
-        backgroundColor: MaterialStateProperty.all(luckyColor),
-        foregroundColor: MaterialStateProperty.all(luckyColor),
+        backgroundColor: WidgetStateProperty.all(luckyColor),
+        foregroundColor: WidgetStateProperty.all(luckyColor),
       );
 
       final List<DropdownMenuEntry<TestMenu>> partiallyStyledMenuEntries =
@@ -925,6 +925,31 @@ void main() {
     await tester.pumpAndSettle();
     buttonSize = tester.getSize(findMenuItemButton('I0'));
     expect(buttonSize.width, parentWidth - 35.0 - 20.0);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/172680.
+  testWidgets('Menu panel width can expand to full-screen width', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<int>(
+            expandedInsets: EdgeInsets.zero,
+            dropdownMenuEntries: <DropdownMenuEntry<int>>[
+              DropdownMenuEntry<int>(value: 0, label: 'Flutter'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final double dropdownWidth = tester.getSize(find.byType(DropdownMenu<int>)).width;
+    expect(dropdownWidth, 800);
+
+    await tester.tap(find.byType(DropdownMenu<int>));
+    await tester.pump();
+
+    final double menuWidth = tester.getSize(findMenuItemButton('Flutter')).width;
+    expect(dropdownWidth, menuWidth);
   });
 
   testWidgets(

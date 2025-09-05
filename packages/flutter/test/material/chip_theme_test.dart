@@ -1102,7 +1102,7 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           chipTheme: ChipThemeData(
-            color: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            color: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
               if (states.contains(MaterialState.disabled) &&
                   states.contains(MaterialState.selected)) {
                 return disabledSelectedColor;
