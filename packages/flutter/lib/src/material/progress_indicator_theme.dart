@@ -17,8 +17,7 @@ import 'theme.dart';
 // late BuildContext context;
 
 @immutable
-/// Defines the visual properties of [CircularProgressIndicator] and
-/// [LinearProgressIndicator] widgets.
+/// Defines the visual properties of [ProgressIndicator] widgets.
 ///
 /// Used by [ProgressIndicatorTheme] to control the visual properties of
 /// progress indicators in a widget subtree.
@@ -33,8 +32,7 @@ import 'theme.dart';
 ///  * [ThemeData.progressIndicatorTheme], which describes the defaults for
 ///    any progress indicators as part of the application's [ThemeData].
 class ProgressIndicatorThemeData with Diagnosticable {
-  /// Creates the set of properties used to configure
-  /// [CircularProgressIndicator] and [LinearProgressIndicator] widgets.
+  /// Creates the set of properties used to configure [ProgressIndicator] widgets.
   const ProgressIndicatorThemeData({
     this.color,
     this.linearTrackColor,
@@ -58,22 +56,17 @@ class ProgressIndicatorThemeData with Diagnosticable {
     this.year2023,
   });
 
-  /// The color of the [CircularProgressIndicator] and
-  /// [LinearProgressIndicator]'s indicator.
+  /// The color of the [ProgressIndicator]'s indicator.
   ///
   /// If null, then it will use [ColorScheme.primary] of the ambient
   /// [ThemeData.colorScheme].
   ///
   /// See also:
   ///
-  ///  * [CircularProgressIndicator.color], which specifies the indicator color
-  ///    for a specific circular progress indicator.
-  ///  * [CircularProgressIndicator.valueColor], which specifies the circular
-  ///    indicator color a an animated color.
-  ///  * [LinearProgressIndicator.color], which specifies the linear indicator
-  ///    color for a specific progress indicator.
-  ///  * [LinearProgressIndicator.valueColor], which specifies the linear
-  ///    indicator color a an animated color.
+  ///  * [ProgressIndicator.color], which specifies the indicator color for a
+  ///    specific progress indicator.
+  ///  * [ProgressIndicator.valueColor], which specifies the indicator color
+  ///    a an animated color.
   final Color? color;
 
   /// {@macro flutter.material.LinearProgressIndicator.trackColor}
@@ -88,8 +81,7 @@ class ProgressIndicatorThemeData with Diagnosticable {
   /// {@macro flutter.material.RefreshProgressIndicator.backgroundColor}
   final Color? refreshBackgroundColor;
 
-  /// Overrides the border radius of the [CircularProgressIndicator] and
-  /// [LinearProgressIndicator].
+  /// Overrides the border radius of the [ProgressIndicator].
   final BorderRadiusGeometry? borderRadius;
 
   /// Overrides the stop indicator color of the [LinearProgressIndicator].
@@ -297,12 +289,10 @@ class ProgressIndicatorThemeData with Diagnosticable {
 }
 
 /// An inherited widget that defines the configuration for
-/// [CircularProgressIndicator] and [LinearProgressIndicator] in this widget's
-/// subtree.
+/// [ProgressIndicator]s in this widget's subtree.
 ///
-/// Values specified here are used for [CircularProgressIndicator] and
-/// [LinearProgressIndicator] properties that are not given an explicit non-null
-/// value.
+/// Values specified here are used for [ProgressIndicator] properties that are not
+/// given an explicit non-null value.
 ///
 /// {@tool snippet}
 ///
@@ -319,12 +309,11 @@ class ProgressIndicatorThemeData with Diagnosticable {
 /// ```
 /// {@end-tool}
 class ProgressIndicatorTheme extends InheritedTheme {
-  /// Creates a theme that controls the configurations for
-  /// [CircularProgressIndicator] and [LinearProgressIndicator] widgets.
+  /// Creates a theme that controls the configurations for [ProgressIndicator]
+  /// widgets.
   const ProgressIndicatorTheme({super.key, required this.data, required super.child});
 
-  /// The properties for descendant [CircularProgressIndicator] and
-  /// [LinearProgressIndicator] widgets.
+  /// The properties for descendant [ProgressIndicator] widgets.
   final ProgressIndicatorThemeData data;
 
   /// Returns the [data] from the closest [ProgressIndicatorTheme] ancestor. If
