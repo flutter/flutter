@@ -284,8 +284,7 @@ ValueListenableBuilder<int>(
     Image.asset('assets/images/placeholder.png')
     ```
 
-*   Displays an icon from an `ImageProvider`, useful for custom icons not in
-    `Icons` class.
+*   Use `ImageIcon` to display an icon from an `ImageProvider`, useful for custom icons not in the `Icons` class.
 *   Use `Image.network` to display images from a URL, and always include
     `loadingBuilder` and `errorBuilder` for a better user experience.
 
