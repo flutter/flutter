@@ -26,9 +26,16 @@ namespace fs = std::filesystem;
 const char* LicenseChecker::kHeaderLicenseRegex = "(?i)(license|copyright)";
 
 namespace {
+// TODO(): Move this into the data directory.
 const std::array<std::string_view, 9> kLicenseFileNames = {
     "LICENSE", "LICENSE.TXT", "LICENSE.txt",  "LICENSE.md", "LICENSE.MIT",
     "COPYING", "License.txt", "docs/FTL.TXT", "README.ijg"};
+
+// TODO(): Move this into the data directory
+//  These are directories that when they are found in third_party directories
+//  are ignored as package names.
+const std::array<std::string_view, 2> kThirdPartyIgnore = {"pkg",
+                                                           "vulkan-deps"};
 
 RE2 kHeaderLicense(LicenseChecker::kHeaderLicenseRegex);
 
@@ -167,7 +174,9 @@ Package GetPackage(const Data& data,
     if (current_license.has_value()) {
       result.license_file = current_license;
     }
-    if (after_third_party) {
+    if (after_third_party &&
+        std::find(kThirdPartyIgnore.begin(), kThirdPartyIgnore.end(),
+                  component) == kThirdPartyIgnore.end()) {
       result.name = component;
       after_third_party = false;
     } else if (component.string() == "third_party") {
