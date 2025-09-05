@@ -2262,6 +2262,14 @@ public class AccessibilityBridgeTest {
           0.0f, 0.0f, 1.0f, 0.0f,
           0.0f, 0.0f, 0.0f, 1.0f
         };
+    float[] hitTestTransform =
+        new float[] {
+          1.0f, 0.0f, 0.0f, 0.0f,
+          0.0f, 1.0f, 0.0f, 0.0f,
+          0.0f, 0.0f, 1.0f, 0.0f,
+          0.0f, 0.0f, 0.0f, 1.0f
+        };
+
     final List<TestSemanticsNode> children = new ArrayList<TestSemanticsNode>();
 
     public void addChild(TestSemanticsNode child) {
@@ -2335,12 +2343,17 @@ public class AccessibilityBridgeTest {
       for (int i = 0; i < 16; i++) {
         bytes.putFloat(transform[i]);
       }
+      // hitTestTransform.
+      for (int i = 0; i < 16; i++) {
+        bytes.putFloat(hitTestTransform[i]);
+      }
       // children in traversal order.
       bytes.putInt(children.size());
       for (TestSemanticsNode node : children) {
         bytes.putInt(node.id);
       }
       // children in hit test order.
+      bytes.putInt(children.size());
       for (TestSemanticsNode node : children) {
         bytes.putInt(node.id);
       }
