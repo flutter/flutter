@@ -239,7 +239,7 @@ class RepeatingTweenAnimationBuilder<T extends Object> extends StatefulWidget {
   /// Creates a widget that repeats a tween animation.
   ///
   /// The [tween], [duration], and [builder] arguments must not be null.
-  const RepeatingTweenAnimationBuilder({
+  RepeatingTweenAnimationBuilder({
     super.key,
     required this.tween,
     required this.duration,
@@ -248,7 +248,8 @@ class RepeatingTweenAnimationBuilder<T extends Object> extends StatefulWidget {
     this.paused = false,
     required this.builder,
     this.child,
-  });
+  }) : assert(tween.begin != null, 'Tween.begin must not be null'),
+       assert(tween.end != null, 'Tween.end must not be null');
 
   /// The tween to animate.
   ///
@@ -315,12 +316,6 @@ class _RepeatingTweenAnimationBuilderState<T extends Object>
   @override
   void initState() {
     super.initState();
-    // Validate inputs early to provide clear error messages
-    assert(
-      widget.tween.begin != null && widget.tween.end != null,
-      'Tween provided to RepeatingTweenAnimationBuilder must have non-null begin and end values.',
-    );
-
     _controller = AnimationController(duration: widget.duration, vsync: this);
     _updateAnimation();
 
