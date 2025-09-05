@@ -1380,16 +1380,13 @@ class _InkResponseState extends State<_InkResponseStateWidget>
         widget.splashColor ??
         Theme.of(context).splashColor;
 
-    final MouseCursor webCursor = WidgetStateProperty.resolveAs<MouseCursor>(
-      widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
+    const MouseCursor fallbackMouseCursor = kIsWeb
+        ? WidgetStateMouseCursor.clickable
+        : WidgetStateMouseCursor.statelessClickable;
+    final MouseCursor effectiveMouseCursor = WidgetStateProperty.resolveAs<MouseCursor>(
+      widget.mouseCursor ?? fallbackMouseCursor,
       statesController.value,
     );
-    // TODO(camsim99): determine if this is what I want and if so, correct docs everywhere and consolidate logic.
-    final MouseCursor nonWebCursor = WidgetStateProperty.resolveAs<MouseCursor>(
-      widget.mouseCursor ?? MaterialStateMouseCursor.statelessClickable,
-      statesController.value,
-    );
-    final MouseCursor effectiveMouseCursor = kIsWeb ? webCursor : nonWebCursor;
 
     return _ParentInkResponseProvider(
       state: this,
