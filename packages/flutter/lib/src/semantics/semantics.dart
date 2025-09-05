@@ -5060,6 +5060,7 @@ class SemanticsConfiguration {
   VoidCallback? get onExpand => _onExpand;
   VoidCallback? _onExpand;
   set onExpand(VoidCallback? value) {
+    assert(value != null);
     _addArgumentlessAction(SemanticsAction.expand, value!);
     _onExpand = value;
   }
@@ -5070,6 +5071,7 @@ class SemanticsConfiguration {
   VoidCallback? get onCollapse => _onCollapse;
   VoidCallback? _onCollapse;
   set onCollapse(VoidCallback? value) {
+    assert(value != null);
     _addArgumentlessAction(SemanticsAction.collapse, value!);
     _onCollapse = value;
   }
