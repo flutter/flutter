@@ -106,7 +106,6 @@ third_party/freetype2/include/freetype/ftchapters.h
 third_party/freetype2/LICENSE.TXT
 third_party/freetype2/src/gxvalid/gxvfgen.c
 third_party/freetype2/src/gzip/.*
-third_party/freetype2/src/pcf/pcfutil.c
 third_party/freetype2/src/psaux/.*
 third_party/freetype2/src/tools/.*
 third_party/freetype2/src/truetype/ttpload.c
