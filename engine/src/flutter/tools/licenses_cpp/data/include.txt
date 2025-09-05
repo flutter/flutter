@@ -25,4 +25,5 @@
 .*\.txt$
 .*\.ucm$
 .*\.vert$
+^ci/licenses_golden/third_party/fuchsia_sdk/NOTICES$
 ^third_party/libjpeg-turbo/src/README\.ijg$
