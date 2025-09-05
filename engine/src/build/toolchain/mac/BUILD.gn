@@ -283,6 +283,11 @@ template("mac_toolchain") {
                         rebase_path(swift_toolchain_path, root_build_dir)
       }
 
+      if (mac_host_toolchain_path != "") {
+        _extra_flags += " --mac-host-toolchain-path " +
+                        rebase_path(mac_host_toolchain_path, root_build_dir)
+      }
+
       if (swift_whole_module_optimization) {
         _extra_flags += " --whole-module-optimization"
       }
