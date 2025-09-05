@@ -3669,8 +3669,8 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
 
   @override
   Color get dayPeriodColor {
-    return MaterialStateColor.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
+    return MaterialStateColor.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         return _colors.tertiaryContainer;
       }
       // The unselected day period should match the overall picker dialog color.
@@ -3704,26 +3704,26 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
 
   @override
   Color get dayPeriodTextColor {
-    return MaterialStateColor.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
-        if (states.contains(MaterialState.focused)) {
+    return MaterialStateColor.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
+        if (states.contains(WidgetState.focused)) {
           return _colors.onTertiaryContainer;
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return _colors.onTertiaryContainer;
         }
-        if (states.contains(MaterialState.pressed)) {
+        if (states.contains(WidgetState.pressed)) {
           return _colors.onTertiaryContainer;
         }
         return _colors.onTertiaryContainer;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return _colors.onSurfaceVariant;
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return _colors.onSurfaceVariant;
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return _colors.onSurfaceVariant;
       }
       return _colors.onSurfaceVariant;
@@ -3767,8 +3767,8 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
 
   @override
   Color get dialTextColor {
-    return MaterialStateColor.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
+    return MaterialStateColor.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         return _colors.onPrimary;
       }
       return _colors.onSurface;
@@ -3792,7 +3792,7 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
 
   @override
   TextStyle get helpTextStyle {
-    return MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+    return MaterialStateTextStyle.resolveWith((Set<WidgetState> states) {
       final TextStyle textStyle = _textTheme.labelMedium!;
       return textStyle.copyWith(color: _colors.onSurfaceVariant);
     });
@@ -3805,27 +3805,27 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
 
   @override
   Color get hourMinuteColor {
-    return MaterialStateColor.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
+    return MaterialStateColor.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         Color overlayColor = _colors.primaryContainer;
-        if (states.contains(MaterialState.pressed)) {
+        if (states.contains(WidgetState.pressed)) {
           overlayColor = _colors.onPrimaryContainer;
-        } else if (states.contains(MaterialState.hovered)) {
+        } else if (states.contains(WidgetState.hovered)) {
           const double hoverOpacity = 0.08;
           overlayColor = _colors.onPrimaryContainer.withOpacity(hoverOpacity);
-        } else if (states.contains(MaterialState.focused)) {
+        } else if (states.contains(WidgetState.focused)) {
           const double focusOpacity = 0.1;
           overlayColor = _colors.onPrimaryContainer.withOpacity(focusOpacity);
         }
         return Color.alphaBlend(overlayColor, _colors.primaryContainer);
       } else {
         Color overlayColor = _colors.surfaceContainerHighest;
-        if (states.contains(MaterialState.pressed)) {
+        if (states.contains(WidgetState.pressed)) {
           overlayColor = _colors.onSurface;
-        } else if (states.contains(MaterialState.hovered)) {
+        } else if (states.contains(WidgetState.hovered)) {
           const double hoverOpacity = 0.08;
           overlayColor = _colors.onSurface.withOpacity(hoverOpacity);
-        } else if (states.contains(MaterialState.focused)) {
+        } else if (states.contains(WidgetState.focused)) {
           const double focusOpacity = 0.1;
           overlayColor = _colors.onSurface.withOpacity(focusOpacity);
         }
@@ -3865,33 +3865,33 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
 
   @override
   Color get hourMinuteTextColor {
-    return MaterialStateColor.resolveWith((Set<MaterialState> states) {
+    return MaterialStateColor.resolveWith((Set<WidgetState> states) {
       return _hourMinuteTextColor.resolve(states);
     });
   }
 
   WidgetStateProperty<Color> get _hourMinuteTextColor {
-    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
-        if (states.contains(MaterialState.pressed)) {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
+        if (states.contains(WidgetState.pressed)) {
           return _colors.onPrimaryContainer;
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return _colors.onPrimaryContainer;
         }
-        if (states.contains(MaterialState.focused)) {
+        if (states.contains(WidgetState.focused)) {
           return _colors.onPrimaryContainer;
         }
         return _colors.onPrimaryContainer;
       } else {
         // unselected
-        if (states.contains(MaterialState.pressed)) {
+        if (states.contains(WidgetState.pressed)) {
           return _colors.onSurface;
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return _colors.onSurface;
         }
-        if (states.contains(MaterialState.focused)) {
+        if (states.contains(WidgetState.focused)) {
           return _colors.onSurface;
         }
         return _colors.onSurface;
@@ -3901,7 +3901,7 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
 
   @override
   TextStyle get hourMinuteTextStyle {
-    return MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+    return MaterialStateTextStyle.resolveWith((Set<WidgetState> states) {
       // TODO(tahatesser): Update this when https://github.com/flutter/flutter/issues/131247 is fixed.
       // This is using the correct text style from Material 3 spec.
       // https://m3.material.io/components/time-pickers/specs#fd0b6939-edab-4058-82e1-93d163945215
