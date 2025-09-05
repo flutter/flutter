@@ -63,6 +63,14 @@ abstract final class FlutterTestDriver {
   bool get hasExited => _hasExited;
   Uri? get vmServiceWsUri => _vmServiceWsUri;
 
+  /// Completes with the full method name for the 'reloadSources' service once
+  /// it's registered (e.g., `s0.reloadSources`).
+  late final Future<String> reloadSourcesService;
+
+  /// Completes with the full method name for the 'hotRestart' service once
+  /// it's registered (e.g., `s0.hotRestart`).
+  late final Future<String> hotRestartService;
+
   var lastTime = '';
   void debugPrint(String message, {String topic = ''}) {
     const maxLength = 2500;
@@ -164,10 +172,13 @@ abstract final class FlutterTestDriver {
       }
     });
 
+    reloadSourcesService = subscribeToServiceRegisteredEvent('reloadSources');
+    hotRestartService = subscribeToServiceRegisteredEvent('hotRestart');
+
     await Future.wait(<Future<Success>>[
-      _vmService!.streamListen('Isolate'),
-      _vmService!.streamListen('Debug'),
-      _vmService!.streamListen('Service'),
+      _vmService!.streamListen(EventStreams.kIsolate),
+      _vmService!.streamListen(EventStreams.kDebug),
+      _vmService!.streamListen(EventStreams.kService),
     ]);
 
     if ((await _vmService!.getVM()).isolates?.isEmpty ?? true) {
@@ -317,6 +328,16 @@ abstract final class FlutterTestDriver {
     return _vmService!.onDebugEvent.where((Event event) {
       return event.isolate?.id == isolateId && (event.kind?.startsWith(kind) ?? false);
     }).first;
+  }
+
+  Future<String> subscribeToServiceRegisteredEvent(String service) {
+    debugPrint("Start listening for service  '$service' to be registered");
+    return _vmService!.onServiceEvent
+        .where((Event event) {
+          return event.service == service;
+        })
+        .first
+        .then((e) => e.method!);
   }
 
   /// Wait for the [event] if needed.

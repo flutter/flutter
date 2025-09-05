@@ -65,19 +65,18 @@ void main() {
       final VM vm = await vmService.getVM();
       final IsolateRef? isolateRef = vm.isolates?.first;
       expect(isolateRef != null, true);
-      print('CALLING RELOAD SOURCES');
       final Response response = await vmService.callMethod(
-        's0.reloadSources',
+        await flutter.reloadSourcesService,
         isolateId: isolateRef!.id,
       );
-      print('RELOAD SOURCES CALLED');
       expect(response.type, 'Success');
     });
 
     testWithoutContext('reloadSources fails on bad params', () async {
-      print('CALLING RELOAD SOURCES');
-      final Future<Response> response = vmService.callMethod('s0.reloadSources', isolateId: '');
-      print('RELOAD SOURCES CALLED');
+      final Future<Response> response = vmService.callMethod(
+        await flutter.reloadSourcesService,
+        isolateId: '',
+      );
       expect(response, throwsA(const TypeMatcher<RPCError>()));
     });
 
@@ -85,18 +84,16 @@ void main() {
       final VM vm = await vmService.getVM();
       final IsolateRef? isolateRef = vm.isolates?.first;
       expect(isolateRef != null, true);
-      print('CALLING HOT RESTART');
       final Response response = await vmService.callMethod(
-        's0.hotRestart',
+        await flutter.hotRestartService,
         isolateId: isolateRef!.id,
       );
-      print('CALLED HOT RESTART');
       expect(response.type, 'Success');
     });
 
     testWithoutContext('hotRestart fails on bad params', () async {
       final Future<Response> response = vmService.callMethod(
-        's0.hotRestart',
+        await flutter.hotRestartService,
         args: <String, dynamic>{'pause': 'not_a_bool'},
       );
       expect(response, throwsA(const TypeMatcher<RPCError>()));
