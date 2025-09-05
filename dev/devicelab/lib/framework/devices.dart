@@ -692,7 +692,8 @@ class AndroidDevice extends Device {
     }
     // Use the first match if multiple are found to handle cases where
     // dumpsys power returns multiple lines containing wakefulness info
-    final String wakefulness = matches.first.split('=')[1].trim();
+    final Match match = RegExp(r'(?:mWakefulness|getWakefulnessLocked\(\))=(.*)').firstMatch(matches.first)!;
+    final String wakefulness = match.group(1)!.trim();
     return wakefulness;
   }
 
