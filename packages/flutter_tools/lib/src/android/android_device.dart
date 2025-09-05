@@ -778,10 +778,10 @@ class AndroidDevice extends Device {
     // Package has been built, so we can get the updated application ID and
     // activity name from the .apk.
     return await ApplicationPackageFactory.instance!.getPackageForPlatform(
-      devicePlatform,
-      buildInfo: debuggingOptions.buildInfo,
-    )
-    as AndroidApk?;
+          devicePlatform,
+          buildInfo: debuggingOptions.buildInfo,
+        )
+        as AndroidApk?;
   }
 
   @override

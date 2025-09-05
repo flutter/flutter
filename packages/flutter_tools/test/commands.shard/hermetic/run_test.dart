@@ -1310,11 +1310,9 @@ void main() {
     () async {
       final command = RunCommand();
       await expectLater(
-        () => createTestCommandRunner(command).run(<String>[
-          'run',
-          '--no-enable-dart-profiling',
-          '--no-enable-gradle-managed-install',
-        ]),
+        () => createTestCommandRunner(
+          command,
+        ).run(<String>['run', '--no-enable-dart-profiling', '--no-enable-gradle-managed-install']),
         throwsToolExit(),
       );
 
