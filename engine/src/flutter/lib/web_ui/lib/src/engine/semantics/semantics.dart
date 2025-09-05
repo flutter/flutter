@@ -1544,7 +1544,7 @@ class SemanticsObject {
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   int? get traversalOwner => _traversalOwner;
   int? _traversalOwner;
-  int? get _previousTraversalOwner;
+  int? _previousTraversalOwner;
 
   static const int _traversalOwnerIndex = 1 << 29;
 
