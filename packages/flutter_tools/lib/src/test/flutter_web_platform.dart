@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' as io;
 import 'dart:typed_data';
 
 import 'package:async/async.dart';
@@ -580,7 +581,9 @@ class FlutterWebPlatform extends PlatformPlugin {
 
     final Runtime browser = platform.runtime;
     try {
-      _browserManager ??= await _launchBrowser(browser);
+      if (_browserManager?.closed ?? false) {
+        _browserManager = await _launchBrowser(browser);
+      }
     } on Error catch (_) {
       await _suiteLock.close();
       rethrow;
@@ -738,7 +741,10 @@ class BrowserManager {
     );
 
     _environment = _loadBrowserEnvironment();
-    _channel.stream.listen(_onMessage, onDone: close);
+    _channel.stream.listen(_onMessage, onDone: () {
+      io.stdout.write('BrowserManager web socket closing');
+      close();
+    });
   }
 
   /// The browser instance that this is connected to via [_channel].
@@ -758,6 +764,8 @@ class BrowserManager {
 
   /// Whether the channel to the browser has closed.
   var _closed = false;
+
+  bool get closed => _closed;
 
   /// The completer for [_BrowserEnvironment.displayPause].
   ///
