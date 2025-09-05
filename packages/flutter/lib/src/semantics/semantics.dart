@@ -1531,6 +1531,8 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onDidLoseAccessibilityFocus,
     this.onFocus,
     this.onDismiss,
+    this.onExpand,
+    this.onCollapse,
     this.customSemanticsActions,
   }) : assert(
          label == null || attributedLabel == null,
@@ -2330,6 +2332,18 @@ class SemanticsProperties extends DiagnosticableTree {
   /// menu, and VoiceOver users on iOS can trigger this action with a standard
   /// gesture or menu option.
   final VoidCallback? onDismiss;
+
+  /// The handler for [SemanticsAction.expand].
+  ///
+  /// This is a request to expand the currently focused node. For example, this
+  /// action might be recognized by a dropdown.
+  final VoidCallback? onExpand;
+
+  /// The handler for [SemanticsAction.collapse].
+  ///
+  /// This is a request to collapse the currently focused node. For example,
+  /// this action might be recognized by a dropdown.
+  final VoidCallback? onCollapse;
 
   /// A map from each supported [CustomSemanticsAction] to a provided handler.
   ///
@@ -5038,6 +5052,26 @@ class SemanticsConfiguration {
   set onFocus(VoidCallback? value) {
     _addArgumentlessAction(SemanticsAction.focus, value!);
     _onFocus = value;
+  }
+
+  /// The handler for [SemanticsAction.expand].
+  ///
+  /// This is a request to expand the currently focused node.
+  VoidCallback? get onExpand => _onExpand;
+  VoidCallback? _onExpand;
+  set onExpand(VoidCallback? value) {
+    _addArgumentlessAction(SemanticsAction.expand, value!);
+    _onExpand = value;
+  }
+
+  /// The handler for [SemanticsAction.collapse].
+  ///
+  /// This is a request to collapse the currently focused node.
+  VoidCallback? get onCollapse => _onCollapse;
+  VoidCallback? _onCollapse;
+  set onCollapse(VoidCallback? value) {
+    _addArgumentlessAction(SemanticsAction.collapse, value!);
+    _onCollapse = value;
   }
 
   /// A delegate that decides how to handle [SemanticsConfiguration]s produced
