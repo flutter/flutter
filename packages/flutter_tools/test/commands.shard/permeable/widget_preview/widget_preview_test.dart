@@ -109,7 +109,7 @@ void main() {
     await ensureFlutterToolsSnapshot();
     loggingProcessManager = LoggingProcessManager();
     shutdownHooks = ShutdownHooks();
-    logger = BufferLogger.test();
+    logger = WidgetPreviewMachineAwareLogger(BufferLogger.test(), machine: false, verbose: false);
     fs = LocalFileSystem.test(signals: Signals.test());
     botDetector = const FakeBotDetector(false);
     tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_create_test.');
