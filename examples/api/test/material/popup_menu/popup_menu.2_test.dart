@@ -18,18 +18,18 @@ void main() {
     // Advance the animation by half of the default duration.
     await tester.pump(const Duration(milliseconds: 100));
 
-    expect(
-      tester.getSize(find.byType(Material).last),
-      within(distance: 0.1, from: const Size(224.0, 130.0)),
-    );
+    Finder findMenu() {
+      return find.byWidgetPredicate((Widget widget) {
+        return widget.runtimeType.toString() == '_PopupMenu<Menu?>';
+      });
+    }
+
+    expect(tester.getSize(findMenu()), within(distance: 0.1, from: const Size(224.0, 130.0)));
 
     // Let the animation finish.
     await tester.pumpAndSettle();
 
-    expect(
-      tester.getSize(find.byType(Material).last),
-      within(distance: 0.1, from: const Size(224.0, 312.0)),
-    );
+    expect(tester.getSize(findMenu()), within(distance: 0.1, from: const Size(224.0, 312.0)));
 
     // Tap outside the popup menu to close it.
     await tester.tapAt(const Offset(1, 1));
@@ -44,18 +44,12 @@ void main() {
     // Advance the animation by one third of the custom duration.
     await tester.pump(const Duration(milliseconds: 1000));
 
-    expect(
-      tester.getSize(find.byType(Material).last),
-      within(distance: 0.1, from: const Size(224.0, 312.0)),
-    );
+    expect(tester.getSize(findMenu()), within(distance: 0.1, from: const Size(224.0, 312.0)));
 
     // Let the animation finish.
     await tester.pumpAndSettle();
 
-    expect(
-      tester.getSize(find.byType(Material).last),
-      within(distance: 0.1, from: const Size(224.0, 312.0)),
-    );
+    expect(tester.getSize(findMenu()), within(distance: 0.1, from: const Size(224.0, 312.0)));
 
     // Tap outside the popup menu to close it.
     await tester.tapAt(const Offset(1, 1));
@@ -70,9 +64,6 @@ void main() {
     await tester.pump();
 
     // The popup menu is shown immediately.
-    expect(
-      tester.getSize(find.byType(Material).last),
-      within(distance: 0.1, from: const Size(224.0, 312.0)),
-    );
+    expect(tester.getSize(findMenu()), within(distance: 0.1, from: const Size(224.0, 312.0)));
   });
 }
