@@ -356,7 +356,7 @@ void main() {
     await tester.pumpWidget(const MaterialApp(home: Material(child: BackButton())));
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture.addPointer();
+    await gesture.addPointer(location: const Offset(1000, 1000));
     addTearDown(gesture.removePointer);
 
     expect(
@@ -378,7 +378,7 @@ void main() {
     await tester.pumpWidget(const MaterialApp(home: Material(child: CloseButton())));
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture.addPointer();
+    await gesture.addPointer(location: const Offset(1000, 1000));
     addTearDown(gesture.removePointer);
 
     expect(

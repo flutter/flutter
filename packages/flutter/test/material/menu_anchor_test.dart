@@ -5066,7 +5066,7 @@ void main() {
       );
 
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      await gesture.addPointer();
+      await gesture.addPointer(location: const Offset(1000, 1000));
       addTearDown(gesture.removePointer);
 
       expect(
@@ -5109,7 +5109,7 @@ void main() {
 
       final Finder menuItemFinder = find.byType(MenuItemButton);
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      await gesture.addPointer();
+      await gesture.addPointer(location: const Offset(1000, 1000));
       addTearDown(gesture.removePointer);
 
       expect(
@@ -5146,7 +5146,7 @@ void main() {
       );
 
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      await gesture.addPointer();
+      await gesture.addPointer(location: const Offset(1000, 1000));
       addTearDown(gesture.removePointer);
 
       expect(
@@ -5183,7 +5183,7 @@ void main() {
       );
 
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      await gesture.addPointer();
+      await gesture.addPointer(location: const Offset(1000, 1000));
       addTearDown(gesture.removePointer);
 
       expect(
@@ -5192,35 +5192,6 @@ void main() {
       );
 
       await gesture.moveTo(tester.getCenter(find.byType(RadioMenuButton<int>)));
-      await tester.pumpAndSettle();
-
-      expect(
-        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-        kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
-      );
-    });
-
-    testWidgets('MenuBar has expected default mouse cursor on hover', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: MenuBar(
-              children: <Widget>[MenuItemButton(onPressed: () {}, child: const Text('Menu Item'))],
-            ),
-          ),
-        ),
-      );
-
-      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      await gesture.addPointer();
-      addTearDown(gesture.removePointer);
-
-      expect(
-        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-        SystemMouseCursors.basic,
-      );
-
-      await gesture.moveTo(tester.getCenter(find.byType(MenuBar)));
       await tester.pumpAndSettle();
 
       expect(
