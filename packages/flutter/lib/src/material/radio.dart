@@ -11,6 +11,7 @@
 library;
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'color_scheme.dart';
 import 'colors.dart';
@@ -541,14 +542,14 @@ class _RadioState<T> extends State<Radio<T>> {
     }
 
     final RadioThemeData radioTheme = RadioTheme.of(context);
+    const WidgetStateMouseCursor fallbackMouseCursor = kIsWeb
+        ? WidgetStateMouseCursor.clickable
+        : WidgetStateMouseCursor.statelessClickable;
     final WidgetStateProperty<MouseCursor> effectiveMouseCursor =
         WidgetStateProperty.resolveWith<MouseCursor>((Set<MaterialState> states) {
           return WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
               radioTheme.mouseCursor?.resolve(states) ??
-              WidgetStateProperty.resolveAs<MouseCursor>(
-                MaterialStateMouseCursor.clickable,
-                states,
-              );
+              WidgetStateProperty.resolveAs<MouseCursor>(fallbackMouseCursor, states);
         });
     return RawRadio<T>(
       value: widget.value,
