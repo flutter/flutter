@@ -270,7 +270,7 @@ Run a Flutter app in debug mode using your locally built Web Engine artifacts:
   flutter run --local-web-sdk=wasm_release --debug -d web-server --web-port 8080
   ```
   To see your Flutter app, navigate your browser to http://localhost:8080.
-  
+
   This option is useful if you want to keep your browser window when you
   you restart `flutter run`, or, if you need to debug using browsers that
   aren't supported by `flutter run`, such as Firefox and Safari.
@@ -343,7 +343,3 @@ Once you know the version for the Emscripten SDK, change the line in
 [6]: https://chromium.googlesource.com/chromium/src.git/+/main/docs/cipd_and_3pp.md#What-is-CIPD
 [7]: https://developer.chrome.com/docs/devtools
 [8]: https://developer.chrome.com/docs/devtools/sources
-
-## Unicode properties
-
-We pull the unicode properties we need from `third_party/web_unicode`. See `third_party/web_unicode/README.md` for more details on how we generate Dart code from unicode properties.

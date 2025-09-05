@@ -31778,7 +31778,6 @@ url_launcher_web
 url_launcher_windows
 web_benchmarks
 web_test_fonts
-web_unicode
 
 Copyright 2013 The Flutter Authors. All rights reserved.
 
@@ -31812,7 +31811,6 @@ flutter
 spring_animation
 tonic
 web_test_fonts
-web_unicode
 
 Copyright 2013 The Flutter Authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
@@ -44768,7 +44766,6 @@ written authorization of the copyright holder.
 --------------------------------------------------------------------------------
 harfbuzz
 icu
-web_unicode
 
 UNICODE, INC. LICENSE AGREEMENT - DATA FILES AND SOFTWARE
 
