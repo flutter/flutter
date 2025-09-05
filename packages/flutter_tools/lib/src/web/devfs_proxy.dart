@@ -20,7 +20,6 @@ RegExp _globToRegex(String pattern) {
   for (final RegExpMatch match in globPatternRegex.allMatches(pattern)) {
     final String preMatch = pattern.substring(lastIndex, match.start);
     rc.write(RegExp.escape(preMatch));
-
     final String matchedString = match.group(0)!;
     if (matchedString.startsWith('{')) {
       final String alternatives = match.group(1)!;
@@ -250,7 +249,7 @@ class SourceProxyRule extends RegexProxyRule {
   bool matches(String path) {
     return _source.matches(path);
   }
-  
+
   @override
   String toString() {
     return '{${ProxyRule._kSource}: ${_source.pattern}, ${ProxyRule._kTarget}: $_target, ${ProxyRule._kReplace}: ${_replacement ?? 'null'}}';
