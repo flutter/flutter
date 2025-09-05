@@ -194,6 +194,7 @@ List<FlutterCommand> generateCommands({required bool verboseHelp, required bool 
         verboseHelp: verboseHelp,
         androidSdk: globals.androidSdk,
         logger: globals.logger,
+        processManager: globals.processManager,
       ),
       ChannelCommand(verboseHelp: verboseHelp),
       CleanCommand(verbose: verbose),
