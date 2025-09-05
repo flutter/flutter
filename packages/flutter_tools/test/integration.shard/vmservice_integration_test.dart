@@ -50,14 +50,18 @@ void main() {
     });
 
     testWithoutContext('flutterVersion can be called', () async {
-      final Response response = await vmService.callServiceExtension('s0.flutterVersion');
+      final Response response = await vmService.callServiceExtension(
+        await flutter.flutterVersionService,
+      );
       expect(response.type, 'Success');
       expect(response.json, containsPair('frameworkRevisionShort', isNotNull));
       expect(response.json, containsPair('engineRevisionShort', isNotNull));
     });
 
     testWithoutContext('flutterMemoryInfo can be called', () async {
-      final Response response = await vmService.callServiceExtension('s0.flutterMemoryInfo');
+      final Response response = await vmService.callServiceExtension(
+        await flutter.flutterMemoryInfoService,
+      );
       expect(response.type, 'Success');
     });
 

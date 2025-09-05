@@ -177,9 +177,7 @@ class HotRunner extends ResidentRunner {
     bool force = false,
     bool pause = false,
   }) async {
-    print('INVOKING RELOAD SOURCES SERVICE');
     final OperationResult result = await restart(pause: pause);
-    print('RELOAD SOURCES INVOKED: ${result.isOk}');
     if (!result.isOk) {
       throw vm_service.RPCError(
         'Unable to reload sources',
@@ -190,9 +188,7 @@ class HotRunner extends ResidentRunner {
   }
 
   Future<void> _restartService({bool pause = false}) async {
-    print('INVOKING RESTART SERVICE');
     final OperationResult result = await restart(fullRestart: true, pause: pause);
-    print('RESTART INVOKED: ${result.isOk}');
     if (!result.isOk) {
       throw vm_service.RPCError(
         'Unable to restart',

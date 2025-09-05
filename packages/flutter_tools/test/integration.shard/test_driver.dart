@@ -71,6 +71,14 @@ abstract final class FlutterTestDriver {
   /// it's registered (e.g., `s0.hotRestart`).
   late final Future<String> hotRestartService;
 
+  /// Completes with the full method name for the 'flutterVersion' service once
+  /// it's registered (e.g., `s0.hotRestart`).
+  late final Future<String> flutterVersionService;
+
+  /// Completes with the full method name for the 'flutterMemoryInfo' service once
+  /// it's registered (e.g., `s0.hotRestart`).
+  late final Future<String> flutterMemoryInfoService;
+
   var lastTime = '';
   void debugPrint(String message, {String topic = ''}) {
     const maxLength = 2500;
@@ -174,6 +182,8 @@ abstract final class FlutterTestDriver {
 
     reloadSourcesService = subscribeToServiceRegisteredEvent('reloadSources');
     hotRestartService = subscribeToServiceRegisteredEvent('hotRestart');
+    flutterVersionService = subscribeToServiceRegisteredEvent('flutterVersion');
+    flutterMemoryInfoService = subscribeToServiceRegisteredEvent('flutterMemoryInfo');
 
     await Future.wait(<Future<Success>>[
       _vmService!.streamListen(EventStreams.kIsolate),
