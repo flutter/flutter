@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// This example demonstrates how to override high contrast accessibility
-/// settings using MediaQuery to control theme selection in MaterialApp.
-///
-/// This approach allows developers to manually control high contrast mode
-/// without adding new API surfaces to MaterialApp.
+// This example demonstrates how to override high contrast accessibility
+// settings using MediaQuery to control theme selection in MaterialApp.
+//
+// This approach allows developers to manually control high contrast mode
+// without adding new API surfaces to MaterialApp.
 
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 void main() {
@@ -29,7 +30,7 @@ class _HighContrastOverrideExampleState extends State<HighContrastOverrideExampl
     return MaterialApp(
       title: 'High Contrast Override Example',
       // Example of how to override high contrast setting
-      builder: (context, child) {
+      builder: (BuildContext context, Widget? child) {
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(
             highContrast: _forceHighContrast,
@@ -59,7 +60,7 @@ class _HighContrastOverrideExampleState extends State<HighContrastOverrideExampl
       ),
       home: HighContrastDemo(
         forceHighContrast: _forceHighContrast,
-        onToggleHighContrast: (value) {
+        onToggleHighContrast: (bool value) {
           setState(() {
             _forceHighContrast = value;
           });
@@ -81,7 +82,7 @@ class HighContrastDemo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool systemHighContrast = MediaQuery.platformDispatcherOf(context)
+    final bool systemHighContrast = ui.PlatformDispatcher.instance
         .accessibilityFeatures.highContrast;
     final bool effectiveHighContrast = MediaQuery.highContrastOf(context);
 
@@ -100,7 +101,7 @@ class HighContrastDemo extends StatelessWidget {
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+                  children: <Widget>[
                     Text(
                       'High Contrast Status',
                       style: Theme.of(context).textTheme.headlineSmall,
@@ -133,7 +134,7 @@ class HighContrastDemo extends StatelessWidget {
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+                  children: <Widget>[
                     Text(
                       'Controls',
                       style: Theme.of(context).textTheme.headlineSmall,
@@ -157,7 +158,7 @@ class HighContrastDemo extends StatelessWidget {
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+                  children: <Widget>[
                     Text(
                       'Sample UI Elements',
                       style: Theme.of(context).textTheme.headlineSmall,
@@ -166,7 +167,7 @@ class HighContrastDemo extends StatelessWidget {
                     Wrap(
                       spacing: 16,
                       runSpacing: 16,
-                      children: [
+                      children: <Widget>[
                         ElevatedButton(
                           onPressed: () {},
                           child: const Text('Elevated Button'),
@@ -228,7 +229,7 @@ class _StatusRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
+      children: <Widget>[
         Text(label),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
