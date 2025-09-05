@@ -879,7 +879,7 @@ abstract class SemanticRole {
   void _updateTraversalOwner() {
     // Set up aria-owns relationship for traversal order.
     if (semanticsObject.traversalOwner != -1) {
-      SemanticsObject? parent =
+      final SemanticsObject? parent =
           semanticsObject.owner._semanticsTree[semanticsObject.traversalOwner!];
       if (parent != null && parent.semanticRole != null) {
         parent.element.setAttribute(
@@ -891,7 +891,7 @@ abstract class SemanticRole {
     // Clean up aria-owns relationship.
     if (semanticsObject._previousTraversalOwner != null &&
         semanticsObject._previousTraversalOwner != -1) {
-      SemanticsObject? parent =
+      final SemanticsObject? parent =
           semanticsObject.owner._semanticsTree[semanticsObject._previousTraversalOwner!];
       if (parent != null) {
         parent.element.removeAttribute('aria-owns');
