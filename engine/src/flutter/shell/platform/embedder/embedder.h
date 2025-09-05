@@ -262,6 +262,8 @@ typedef enum {
   ///
   /// Only applicable when kFlutterSemanticsFlagHasRequiredState flag is on.
   kFlutterSemanticsFlagIsRequired = 1 << 30,
+  /// Whether the semantics node represents a combo box.
+  kFlutterSemanticsFlagIsComboBox = 1 << 31,
 } FlutterSemanticsFlag;
 
 typedef enum {
@@ -348,6 +350,8 @@ typedef struct {
   bool is_slider;
   /// Whether the semantics node represents a keyboard key.
   bool is_keyboard_key;
+  /// Whether the semantics node represents a combo box.
+  bool is_combo_box;
 } FlutterSemanticsFlags;
 
 typedef enum {
