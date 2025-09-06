@@ -580,7 +580,7 @@ class FlutterWebPlatform extends PlatformPlugin {
 
     final Runtime browser = platform.runtime;
     try {
-      _browserManager = await _launchBrowser(browser);
+      _browserManager ??= await _launchBrowser(browser);
     } on Error catch (_) {
       await _suiteLock.close();
       rethrow;
@@ -600,8 +600,6 @@ class FlutterWebPlatform extends PlatformPlugin {
       suiteConfig,
       message,
       onDone: () async {
-        await _browserManager!.close();
-        _browserManager = null;
         lockResource.release();
         if (_logger.isVerbose) {
           _logger.printTrace('Test suite $relativePath finished.');

@@ -44,32 +44,20 @@ rewrapper_command = [
   "--exec_root=$rbe_exec_root",
 ]
 if (rbe_server_address != "") {
-  rewrapper_command += [
-    "--server_address=$rbe_server_address",
-  ]
+  rewrapper_command += [ "--server_address=$rbe_server_address" ]
 }
 if (rbe_exec_strategy != "") {
-  rewrapper_command += [
-    "--exec_strategy=$rbe_exec_strategy",
-  ]
+  rewrapper_command += [ "--exec_strategy=$rbe_exec_strategy" ]
 }
 if (rbe_dial_timeout != "") {
-  rewrapper_command += [
-    "--dial_timeout=$rbe_dial_timeout",
-  ]
+  rewrapper_command += [ "--dial_timeout=$rbe_dial_timeout" ]
 }
 if (rbe_exec_timeout != "") {
-  rewrapper_command += [
-    "--exec_timeout=$rbe_exec_timeout",
-  ]
+  rewrapper_command += [ "--exec_timeout=$rbe_exec_timeout" ]
 }
 if (rbe_reclient_timeout != "") {
-  rewrapper_command += [
-    "--reclient_timeout=$rbe_reclient_timeout",
-  ]
+  rewrapper_command += [ "--reclient_timeout=$rbe_reclient_timeout" ]
 }
 if (rbe_platform != "") {
-  rewrapper_command += [
-    "--platform=$rbe_platform",
-  ]
+  rewrapper_command += [ "--platform=$rbe_platform" ]
 }
