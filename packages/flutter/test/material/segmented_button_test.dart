@@ -9,6 +9,7 @@ library;
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -1443,6 +1444,47 @@ void main() {
         ..rrect(color: enabledColor)
         // Second segment has a disabled border.
         ..rrect(color: disabledColor),
+    );
+  });
+
+  testWidgets('SegmentedButton has expected default mouse cursor on hover', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SegmentedButton<int>(
+              segments: const <ButtonSegment<int>>[
+                ButtonSegment<int>(value: 0, label: Text('0')),
+                ButtonSegment<int>(value: 1, label: Text('1')),
+              ],
+              selected: const <int>{0},
+              onSelectionChanged: (Set<int> newSelection) {},
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1,
+    );
+    await gesture.addPointer(location: const Offset(10, 10));
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic,
+    );
+
+    final Offset chip = tester.getCenter(find.text('0'));
+    await gesture.moveTo(chip);
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
   });
 }

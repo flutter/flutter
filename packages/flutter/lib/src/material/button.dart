@@ -20,7 +20,6 @@ import 'button_theme.dart';
 import 'constants.dart';
 import 'ink_well.dart';
 import 'material.dart';
-import 'material_state.dart';
 import 'material_state_mixin.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -115,16 +114,20 @@ class RawMaterialButton extends StatefulWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// button.
   ///
-  /// If [mouseCursor] is a [WidgetStateMouseCursor],
+  /// On web, if [mouseCursor] is a [WidgetStateMouseCursor],
   /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
   ///  * [WidgetState.pressed].
   ///  * [WidgetState.hovered].
   ///  * [WidgetState.focused].
   ///  * [WidgetState.disabled].
+  ///
+  /// On all other platforms, [mouseCursor] will be used directly.
   /// {@endtemplate}
   ///
-  /// If this property is null, [WidgetStateMouseCursor.clickable] will be used.
+  /// If this property is null,
+  ///   * On web, [WidgetStateMouseCursor.clickable] will be used.
+  ///   * On other platforms, [WidgetStateMouseCursor.statelessClickable] will be used.
   final MouseCursor? mouseCursor;
 
   /// Defines the default text style, with [Material.textStyle], for the
@@ -362,10 +365,15 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
     final BoxConstraints effectiveConstraints = widget.visualDensity.effectiveConstraints(
       widget.constraints,
     );
-    final MouseCursor? effectiveMouseCursor = WidgetStateProperty.resolveAs<MouseCursor?>(
-      widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
+
+    final MouseCursor? webCursor = WidgetStateProperty.resolveAs<MouseCursor?>(
+      widget.mouseCursor ?? WidgetStateMouseCursor.clickable,
       materialStates,
     );
+    final MouseCursor nonWebCursor =
+        widget.mouseCursor ?? WidgetStateMouseCursor.statelessClickable;
+    final MouseCursor? effectiveMouseCursor = kIsWeb ? webCursor : nonWebCursor;
+
     final EdgeInsetsGeometry padding = widget.padding
         .add(
           EdgeInsets.only(

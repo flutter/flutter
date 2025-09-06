@@ -3,8 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui' show PointerDeviceKind;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show RendererBinding;
 import 'package:flutter_test/flutter_test.dart';
 
 const List<String> menuItems = <String>['one', 'two', 'three', 'four'];
@@ -1458,5 +1461,40 @@ void main() {
     );
 
     expect(tester.getCenter(find.text(labelText)).dy, tester.getCenter(find.byType(Icon).last).dy);
+  });
+
+  testWidgets('DropdownFormField has expected default mouse cursor on hover', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: DropdownButtonFormField<String>(
+              items: <String>['One', 'Two'].map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(value: value, child: Text(value));
+              }).toList(),
+              onChanged: (String? value) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic,
+    );
+    await gesture.moveTo(tester.getCenter(find.byType(DropdownButtonFormField<String>)));
+    await tester.pumpAndSettle();
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
   });
 }

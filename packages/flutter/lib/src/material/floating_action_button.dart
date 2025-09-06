@@ -231,7 +231,7 @@ class FloatingActionButton extends StatelessWidget {
     this.highlightElevation,
     this.disabledElevation,
     required this.onPressed,
-    this.mouseCursor = SystemMouseCursors.click,
+    this.mouseCursor,
     this.shape,
     this.isExtended = true,
     this.materialTapTargetSize,
@@ -324,7 +324,10 @@ class FloatingActionButton extends StatelessWidget {
 
   /// {@macro flutter.material.RawMaterialButton.mouseCursor}
   ///
-  /// If this property is null, [WidgetStateMouseCursor.clickable] will be used.
+  /// If this property is null,
+  ///
+  /// * On web, [WidgetStateMouseCursor.clickable] will be used.
+  /// * On other platforms, [WidgetStateMouseCursor.statelessClickable] will be used.
   final MouseCursor? mouseCursor;
 
   /// The z-coordinate at which to place this button relative to its parent.
@@ -650,7 +653,9 @@ class _EffectiveMouseCursor extends MaterialStateMouseCursor {
   MouseCursor resolve(Set<WidgetState> states) {
     return WidgetStateProperty.resolveAs<MouseCursor?>(widgetCursor, states) ??
         themeCursor?.resolve(states) ??
-        MaterialStateMouseCursor.clickable.resolve(states);
+        (kIsWeb
+            ? WidgetStateMouseCursor.clickable.resolve(states)
+            : WidgetStateMouseCursor.statelessClickable.resolve(states));
   }
 
   @override

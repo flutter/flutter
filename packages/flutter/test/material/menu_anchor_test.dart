@@ -5048,6 +5048,159 @@ void main() {
     });
   });
 
+  group('Mouse cursors', () {
+    testWidgets('SubmenuButton has expected default mouse cursor on hover', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: SubmenuButton(
+              menuChildren: <Widget>[
+                MenuItemButton(onPressed: () {}, child: const Text('Test menu button item')),
+              ],
+              child: const Text('Main Menu'),
+            ),
+          ),
+        ),
+      );
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: const Offset(1000, 1000));
+      addTearDown(gesture.removePointer);
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.basic,
+      );
+
+      await gesture.moveTo(tester.getCenter(find.byType(SubmenuButton)));
+      await tester.pumpAndSettle();
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      );
+    });
+
+    testWidgets('MenuItemButton has expected default mouse cursor on hover', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuBar(
+              children: <Widget>[
+                SubmenuButton(
+                  menuChildren: <Widget>[
+                    MenuItemButton(onPressed: () {}, child: const Text('Test menu item')),
+                  ],
+                  child: const Text('File'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // Open SubmenuButton.
+      await tester.tap(find.text('File'));
+      await tester.pumpAndSettle();
+
+      final Finder menuItemFinder = find.byType(MenuItemButton);
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: const Offset(1000, 1000));
+      addTearDown(gesture.removePointer);
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.basic,
+      );
+
+      // Move to MenuItemButton.
+      await gesture.moveTo(tester.getCenter(menuItemFinder));
+      await tester.pumpAndSettle();
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      );
+    });
+
+    testWidgets('CheckboxMenuButton has expected default mouse cursor on hover', (
+      WidgetTester tester,
+    ) async {
+      bool? value = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: CheckboxMenuButton(
+              value: value,
+              onChanged: (bool? newValue) {
+                value = newValue;
+              },
+              child: const Text('Checkbox'),
+            ),
+          ),
+        ),
+      );
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: const Offset(1000, 1000));
+      addTearDown(gesture.removePointer);
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.basic,
+      );
+
+      await gesture.moveTo(tester.getCenter(find.byType(CheckboxMenuButton)));
+      await tester.pumpAndSettle();
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      );
+    });
+
+    testWidgets('RadioMenuButton has expected default mouse cursor on hover', (
+      WidgetTester tester,
+    ) async {
+      int? groupValue = 0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: RadioMenuButton<int>(
+              value: 1,
+              groupValue: groupValue,
+              onChanged: (int? newValue) {
+                groupValue = newValue;
+              },
+              child: const Text('Radio'),
+            ),
+          ),
+        ),
+      );
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: const Offset(1000, 1000));
+      addTearDown(gesture.removePointer);
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.basic,
+      );
+
+      await gesture.moveTo(tester.getCenter(find.byType(RadioMenuButton<int>)));
+      await tester.pumpAndSettle();
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      );
+    });
+  });
+
   testWidgets('Menu panel default reserved padding', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(

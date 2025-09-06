@@ -426,11 +426,25 @@ abstract class WidgetStateMouseCursor extends MouseCursor
     _clickable,
     debugDescription: 'WidgetStateMouseCursor(clickable)',
   );
+
   static MouseCursor _clickable(Set<WidgetState> states) {
     if (states.contains(WidgetState.disabled)) {
       return SystemMouseCursors.basic;
     }
     return SystemMouseCursors.click;
+  }
+
+  /// A mouse cursor for clickable widgets, which always resolves to [SystemMouseCursors.basic]
+  /// regardless of whether or ont the widget is disabled.
+  ///
+  /// This cursor is the default for many Material widgets.
+  static const WidgetStateMouseCursor statelessClickable = WidgetStateMouseCursor.resolveWith(
+    _statelessClickable,
+    debugDescription: 'WidgetStateMouseCursor(statelessClickable)',
+  );
+
+  static MouseCursor _statelessClickable(Set<WidgetState> states) {
+    return SystemMouseCursors.basic;
   }
 
   /// A mouse cursor for widgets related to text, which resolves differently
