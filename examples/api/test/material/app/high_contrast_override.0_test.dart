@@ -15,7 +15,7 @@ void main() {
     // Verify that the app loads with expected elements
     expect(find.text('High Contrast Override Demo'), findsOneWidget);
     expect(find.text('Force High Contrast'), findsOneWidget);
-    expect(find.text('High Contrast Status'), findsOneWidget);
+    expect(find.text('Status Information'), findsOneWidget);
 
     // Find the switch and verify initial state
     final switchFinder = find.byType(Switch);
