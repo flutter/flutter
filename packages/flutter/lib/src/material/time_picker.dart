@@ -237,7 +237,7 @@ class _TimePickerModel extends InheritedModel<_TimePickerAspect> {
   }
 }
 
-/// Header for time picker in dial mode.
+/// The header for the time picker in dial mode.
 class _DialTimePickerHeader extends StatelessWidget {
   const _DialTimePickerHeader({required this.helpText});
 
