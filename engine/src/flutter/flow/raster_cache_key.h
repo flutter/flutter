@@ -64,10 +64,6 @@ class RasterCacheKeyID {
            GetHash() == other.GetHash() && child_ids_ == other.child_ids_;
   }
 
-  bool operator!=(const RasterCacheKeyID& other) const {
-    return !operator==(other);
-  }
-
  private:
   const uint64_t unique_id_;
   const RasterCacheKeyType type_;
