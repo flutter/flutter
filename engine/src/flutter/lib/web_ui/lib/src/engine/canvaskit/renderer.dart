@@ -54,6 +54,7 @@ class CanvasKitRenderer extends Renderer {
 
   /// The scene host, where the root canvas and overlay canvases are added to.
   DomElement? _sceneHost;
+
   DomElement? get sceneHost => _sceneHost;
 
   static Rasterizer _createRasterizer() {
@@ -340,7 +341,12 @@ class CanvasKitRenderer extends Renderer {
     List<ui.FontFeature>? fontFeatures,
     List<ui.FontVariation>? fontVariations,
   }) => isExperimentalWebParagraph
-      ? WebTextStyle(fontFamily: fontFamily, fontSize: fontSize, color: color)
+      ? WebTextStyle(
+          fontFamily: fontFamily,
+          fontSize: fontSize,
+          foreground: foreground,
+          background: background,
+        )
       : CkTextStyle(
           color: color,
           decoration: decoration,
