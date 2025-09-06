@@ -17,38 +17,23 @@ class ScaleTransitionExampleApp extends StatelessWidget {
   }
 }
 
-class ScaleTransitionExample extends StatefulWidget {
+class ScaleTransitionExample extends StatelessWidget {
   const ScaleTransitionExample({super.key});
-
-  @override
-  State<ScaleTransitionExample> createState() => _ScaleTransitionExampleState();
-}
-
-/// [AnimationController]s can be created with `vsync: this` because of
-/// [TickerProviderStateMixin].
-class _ScaleTransitionExampleState extends State<ScaleTransitionExample>
-    with TickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    duration: const Duration(seconds: 2),
-    vsync: this,
-  )..repeat(reverse: true);
-  late final Animation<double> _animation = CurvedAnimation(
-    parent: _controller,
-    curve: Curves.fastOutSlowIn,
-  );
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: ScaleTransition(
-          scale: _animation,
+        child: RepeatingTweenAnimationBuilder<double>(
+          tween: Tween<double>(begin: 0.0, end: 1.0),
+          duration: const Duration(seconds: 2),
+          reverse: true,
+          builder: (BuildContext context, Animation<double> animation, Widget? child) {
+            return ScaleTransition(
+              scale: CurvedAnimation(parent: animation, curve: Curves.fastOutSlowIn),
+              child: child,
+            );
+          },
           child: const Padding(padding: EdgeInsets.all(8.0), child: FlutterLogo(size: 150.0)),
         ),
       ),

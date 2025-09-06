@@ -39,57 +39,40 @@ class AnimatedIconApp extends StatelessWidget {
   }
 }
 
-class AnimatedIconExample extends StatefulWidget {
+class AnimatedIconExample extends StatelessWidget {
   const AnimatedIconExample({super.key});
-
-  @override
-  State<AnimatedIconExample> createState() => _AnimatedIconExampleState();
-}
-
-class _AnimatedIconExampleState extends State<AnimatedIconExample>
-    with SingleTickerProviderStateMixin {
-  late AnimationController controller;
-  late Animation<double> animation;
-
-  @override
-  void initState() {
-    super.initState();
-    controller = AnimationController(vsync: this, duration: const Duration(seconds: 2))
-      ..forward()
-      ..repeat(reverse: true);
-    animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: GridView(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
-        children: iconsList.entries.map((MapEntry<String, AnimatedIconData> entry) {
-          return Card(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  AnimatedIcon(
-                    icon: entry.value,
-                    progress: animation,
-                    size: 72.0,
-                    semanticLabel: entry.key,
+      body: RepeatingTweenAnimationBuilder<double>(
+        tween: Tween<double>(begin: 0.0, end: 1.0),
+        duration: const Duration(seconds: 2),
+        reverse: true,
+        builder: (BuildContext context, Animation<double> animation, Widget? child) {
+          return GridView(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
+            children: iconsList.entries.map((MapEntry<String, AnimatedIconData> entry) {
+              return Card(
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      AnimatedIcon(
+                        icon: entry.value,
+                        progress: animation,
+                        size: 72.0,
+                        semanticLabel: entry.key,
+                      ),
+                      const SizedBox(height: 8.0),
+                      Text(entry.key),
+                    ],
                   ),
-                  const SizedBox(height: 8.0),
-                  Text(entry.key),
-                ],
-              ),
-            ),
+                ),
+              );
+            }).toList(),
           );
-        }).toList(),
+        },
       ),
     );
   }

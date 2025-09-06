@@ -490,38 +490,7 @@ class LinearProgressIndicator extends ProgressIndicator {
   State<LinearProgressIndicator> createState() => _LinearProgressIndicatorState();
 }
 
-class _LinearProgressIndicatorState extends State<LinearProgressIndicator>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: _kIndeterminateLinearDuration),
-      vsync: this,
-    );
-    if (widget.value == null) {
-      _controller.repeat();
-    }
-  }
-
-  @override
-  void didUpdateWidget(LinearProgressIndicator oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.value == null && !_controller.isAnimating) {
-      _controller.repeat();
-    } else if (widget.value != null && _controller.isAnimating) {
-      _controller.stop();
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
+class _LinearProgressIndicatorState extends State<LinearProgressIndicator> {
   Widget _buildIndicator(BuildContext context, double animationValue, TextDirection textDirection) {
     final ProgressIndicatorThemeData indicatorTheme = ProgressIndicatorTheme.of(context);
     final bool year2023 = widget.year2023 ?? indicatorTheme.year2023 ?? true;
@@ -582,13 +551,16 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator>
     final TextDirection textDirection = Directionality.of(context);
 
     if (widget.value != null) {
-      return _buildIndicator(context, _controller.value, textDirection);
+      // For determinate progress, just build directly without animation
+      return _buildIndicator(context, 0, textDirection);
     }
 
-    return AnimatedBuilder(
-      animation: _controller.view,
-      builder: (BuildContext context, Widget? child) {
-        return _buildIndicator(context, _controller.value, textDirection);
+    // For indeterminate progress, use repeating animation
+    return RepeatingTweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: const Duration(milliseconds: _kIndeterminateLinearDuration),
+      builder: (BuildContext context, Animation<double> animation, Widget? child) {
+        return _buildIndicator(context, animation.value, textDirection);
       },
     );
   }
@@ -926,8 +898,7 @@ class CircularProgressIndicator extends ProgressIndicator {
   State<CircularProgressIndicator> createState() => _CircularProgressIndicatorState();
 }
 
-class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
-    with SingleTickerProviderStateMixin {
+class _CircularProgressIndicatorState extends State<CircularProgressIndicator> {
   static const int _pathCount = _kIndeterminateCircularDuration ~/ 1333;
   static const int _rotationCount = _kIndeterminateCircularDuration ~/ 2222;
 
@@ -941,36 +912,6 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
   static final Animatable<double> _rotationTween = CurveTween(
     curve: const SawTooth(_rotationCount),
   );
-
-  late AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: _kIndeterminateCircularDuration),
-      vsync: this,
-    );
-    if (widget.value == null) {
-      _controller.repeat();
-    }
-  }
-
-  @override
-  void didUpdateWidget(CircularProgressIndicator oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.value == null && !_controller.isAnimating) {
-      _controller.repeat();
-    } else if (widget.value != null && _controller.isAnimating) {
-      _controller.stop();
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
 
   Widget _buildCupertinoIndicator(BuildContext context) {
     final Color? tickColor = widget.backgroundColor;
@@ -1047,15 +988,17 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
   }
 
   Widget _buildAnimation() {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (BuildContext context, Widget? child) {
+    return RepeatingTweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: const Duration(milliseconds: _kIndeterminateCircularDuration),
+      paused: widget.value != null,
+      builder: (BuildContext context, Animation<double> animation, Widget? child) {
         return _buildMaterialIndicator(
           context,
-          _strokeHeadTween.evaluate(_controller),
-          _strokeTailTween.evaluate(_controller),
-          _offsetTween.evaluate(_controller),
-          _rotationTween.evaluate(_controller),
+          _strokeHeadTween.transform(animation.value),
+          _strokeTailTween.transform(animation.value),
+          _offsetTween.transform(animation.value),
+          _rotationTween.transform(animation.value),
         );
       },
     );
@@ -1205,7 +1148,8 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
   State<CircularProgressIndicator> createState() => _RefreshProgressIndicatorState();
 }
 
-class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
+class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState
+    with SingleTickerProviderStateMixin {
   static const double _indicatorSize = 41.0;
 
   /// Interval for arrow head to fully grow.
@@ -1233,9 +1177,40 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
   // Last value received from the widget before null.
   double? _lastValue;
 
+  // Controller to manage the animation state when switching between modes
+  late AnimationController _controller;
+
   /// Force casting the widget as [RefreshProgressIndicator].
   @override
   RefreshProgressIndicator get widget => super.widget as RefreshProgressIndicator;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: _kIndeterminateCircularDuration),
+      vsync: this,
+    );
+    if (widget.value == null) {
+      _controller.repeat();
+    }
+  }
+
+  @override
+  void didUpdateWidget(RefreshProgressIndicator oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.value == null && !_controller.isAnimating) {
+      _controller.repeat();
+    } else if (widget.value != null && _controller.isAnimating) {
+      _controller.stop();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   // Always show the indeterminate version of the circular progress indicator.
   //
