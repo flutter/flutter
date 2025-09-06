@@ -444,10 +444,24 @@ class MaterialApp extends StatefulWidget {
   ///
   /// Uses [theme] instead when null.
   ///
+  /// {@tool dartpad}
+  /// To manually override the high contrast setting (for example, to force
+  /// high contrast mode for testing or provide in-app accessibility controls),
+  /// you can wrap your [MaterialApp] with a [MediaQuery] override.
+  ///
+  /// This approach affects both theme selection and any widgets that check
+  /// [MediaQuery.highContrastOf], ensuring consistent behavior throughout
+  /// the application.
+  ///
+  /// ** See code in examples/api/lib/material/app/high_contrast_override.0.dart **
+  /// {@end-tool}
+  ///
   /// See also:
   ///
   ///  * [MediaQueryData.highContrast], which indicates the platform's
   ///    desire to increase contrast.
+  ///  * [highContrastDarkTheme], which is used when both dark mode and
+  ///    high contrast are requested.
   final ThemeData? highContrastTheme;
 
   /// The [ThemeData] to use when a 'dark mode' and 'high contrast' is requested
@@ -460,10 +474,39 @@ class MaterialApp extends StatefulWidget {
   ///
   /// Uses [darkTheme] instead when null.
   ///
+  /// {@tool snippet}
+  /// To manually override the high contrast setting, you can use the same
+  /// [MediaQuery] override approach as described in [highContrastTheme].
+  /// The override will affect both light and dark high contrast theme selection:
+  ///
+  /// ```dart
+  /// bool customHighContrastEnabled = true;
+  /// 
+  /// MaterialApp(
+  ///   builder: (context, child) {
+  ///     return MediaQuery(
+  ///       data: MediaQuery.of(context).copyWith(
+  ///         highContrast: customHighContrastEnabled,
+  ///       ),
+  ///       child: child!,
+  ///     );
+  ///   },
+  ///   darkTheme: ThemeData(brightness: Brightness.dark),
+  ///   highContrastDarkTheme: ThemeData(
+  ///     brightness: Brightness.dark,
+  ///     // High contrast dark theme configuration
+  ///   ),
+  ///   // ... other properties
+  /// )
+  /// ```
+  /// {@end-tool}
+  ///
   /// See also:
   ///
   ///  * [MediaQueryData.highContrast], which indicates the platform's
   ///    desire to increase contrast.
+  ///  * [highContrastTheme], which is used when high contrast is requested
+  ///    in light mode.
   final ThemeData? highContrastDarkTheme;
 
   /// Determines which theme will be used by the application if both [theme]
