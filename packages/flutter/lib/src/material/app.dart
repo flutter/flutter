@@ -444,30 +444,16 @@ class MaterialApp extends StatefulWidget {
   ///
   /// Uses [theme] instead when null.
   ///
-  /// {@tool snippet}
+  /// {@tool dartpad}
   /// To manually override the high contrast setting (for example, to force
   /// high contrast mode for testing or provide in-app accessibility controls),
-  /// you can wrap your [MaterialApp] with a [MediaQuery] override:
-  ///
-  /// ```dart
-  /// MaterialApp(
-  ///   builder: (context, child) {
-  ///     return MediaQuery(
-  ///       data: MediaQuery.of(context).copyWith(
-  ///         highContrast: true, // Force high contrast
-  ///       ),
-  ///       child: child!,
-  ///     );
-  ///   },
-  ///   theme: ThemeData(...),
-  ///   highContrastTheme: ThemeData(...),
-  ///   // ... other properties
-  /// )
-  /// ```
+  /// you can wrap your [MaterialApp] with a [MediaQuery] override.
   ///
   /// This approach affects both theme selection and any widgets that check
   /// [MediaQuery.highContrastOf], ensuring consistent behavior throughout
   /// the application.
+  ///
+  /// ** See code in examples/api/lib/material/app/high_contrast_override.0.dart **
   /// {@end-tool}
   ///
   /// See also:
@@ -491,7 +477,28 @@ class MaterialApp extends StatefulWidget {
   /// {@tool snippet}
   /// To manually override the high contrast setting, you can use the same
   /// [MediaQuery] override approach as described in [highContrastTheme].
-  /// The override will affect both light and dark high contrast theme selection.
+  /// The override will affect both light and dark high contrast theme selection:
+  ///
+  /// ```dart
+  /// bool customHighContrastEnabled = true;
+  /// 
+  /// MaterialApp(
+  ///   builder: (context, child) {
+  ///     return MediaQuery(
+  ///       data: MediaQuery.of(context).copyWith(
+  ///         highContrast: customHighContrastEnabled,
+  ///       ),
+  ///       child: child!,
+  ///     );
+  ///   },
+  ///   darkTheme: ThemeData(brightness: Brightness.dark),
+  ///   highContrastDarkTheme: ThemeData(
+  ///     brightness: Brightness.dark,
+  ///     // High contrast dark theme configuration
+  ///   ),
+  ///   // ... other properties
+  /// )
+  /// ```
   /// {@end-tool}
   ///
   /// See also:
