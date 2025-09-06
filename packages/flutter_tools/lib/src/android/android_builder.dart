@@ -49,4 +49,12 @@ abstract class AndroidBuilder {
   ///
   /// The return future resolves to the path of the json file.
   Future<String> outputsAppLinkSettings(String buildVariant, {required FlutterProject project});
+
+  /// Builds and installs the app.
+  Future<void> installApp({
+    required FlutterProject project,
+    required AndroidBuildInfo androidBuildInfo,
+    required String deviceId,
+    String? userIdentifier,
+  });
 }

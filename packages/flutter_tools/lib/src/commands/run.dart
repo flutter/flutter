@@ -31,6 +31,9 @@ import '../web/web_constants.dart';
 import '../web/web_runner.dart';
 import 'daemon.dart';
 
+/// Argument parser option constants.
+const _kEnableGradleManagedInstall = 'enable-gradle-managed-install';
+
 /// Shared logic between `flutter run` and `flutter drive` commands.
 abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   RunCommandBase({required bool verboseHelp}) {
@@ -223,6 +226,11 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         FlutterOptions.kWebWasmFlag,
         help: 'Compile to WebAssembly rather than JavaScript.\n$kWasmMoreInfo',
         negatable: false,
+      )
+      ..addFlag(
+        _kEnableGradleManagedInstall,
+        help:
+            'Let Gradle manage Android app installation. This can help with installing related privacy sandbox binaries.',
       );
     usesWebOptions(verboseHelp: verboseHelp);
     usesTargetOption();
@@ -257,6 +265,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get enableVulkanValidation => boolArg('enable-vulkan-validation');
   bool get uninstallFirst => boolArg('uninstall-first');
   bool get enableEmbedderApi => boolArg('enable-embedder-api');
+  bool get enableGradleManagedInstall => boolArg(_kEnableGradleManagedInstall);
 
   @override
   bool get refreshWirelessDevices => true;
@@ -317,6 +326,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         usingCISystem: usingCISystem,
         debugLogsDirectoryPath: debugLogsDirectoryPath,
         webDevServerConfig: webDevServerConfig,
+        enableGradleManagedInstall: enableGradleManagedInstall,
       );
     } else {
       return DebuggingOptions.enabled(
@@ -379,6 +389,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         ipv6: boolArg(FlutterCommand.ipv6Flag),
         printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
         webDevServerConfig: webDevServerConfig,
+        enableGradleManagedInstall: enableGradleManagedInstall,
       );
     }
   }
