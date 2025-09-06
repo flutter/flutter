@@ -37,6 +37,7 @@ import 'package:flutter/services.dart';
 
 import '../foundation/_features.dart';
 import '_window.dart';
+import '_window_owner_creator.dart';
 import 'app.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
@@ -461,7 +462,7 @@ mixin WidgetsBinding
       return true;
     }());
     platformMenuDelegate = DefaultPlatformMenuDelegate();
-    _windowingOwner = WindowingOwner.createDefaultOwner();
+    _windowingOwner = createDefaultOwner();
   }
 
   /// The current [WidgetsBinding], if one has been created.

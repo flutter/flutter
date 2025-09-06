@@ -221,6 +221,13 @@ TaskFunction createWindowsStartupDriverTest({String? deviceIdOverride}) {
   ).call;
 }
 
+TaskFunction createWindowingDriverTest() {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/windows_startup_test',
+    'lib/main.dart',
+  ).call;
+}
+
 TaskFunction createWideGamutTest() {
   return IntegrationTest(
     '${flutterDirectory.path}/dev/integration_tests/wide_gamut_test',
