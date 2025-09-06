@@ -402,9 +402,9 @@ final outdatedGradleHandler = GradleHandledError(
     final File gradleFile = project.android.hostAppGradleFile;
     final File gradlePropertiesFile = project.directory
         .childDirectory('android')
-        .childDirectory('gradle')
-        .childDirectory('wrapper')
-        .childFile('gradle-wrapper.properties');
+        .childDirectory(gradleDirectoryName)
+        .childDirectory(gradleWrapperDirectoryName)
+        .childFile(gradleWrapperPropertiesFilename);
     globals.printBox(
       '${globals.logger.terminal.warningMark} Your project needs to upgrade Gradle and the Android Gradle plugin.\n\n'
       'To fix this issue, replace the following content:\n'
@@ -509,11 +509,9 @@ final incompatibleJavaAndGradleVersionsHandler = GradleHandledError(
       ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
         final File gradlePropertiesFile = project.directory
             .childDirectory('android')
-            .childDirectory('gradle')
-            .childDirectory('wrapper')
-            .childFile('gradle-wrapper.properties');
-        // TODO(reidbaker): Replace URL with constant defined in
-        // https://github.com/flutter/flutter/pull/123916.
+            .childDirectory(gradleDirectoryName)
+            .childDirectory(gradleWrapperDirectoryName)
+            .childFile(gradleWrapperPropertiesFilename);
         globals.printBox(
           "${globals.logger.terminal.warningMark} Your project's Gradle version "
           'is incompatible with the Java version that Flutter is using for Gradle.\n\n'
