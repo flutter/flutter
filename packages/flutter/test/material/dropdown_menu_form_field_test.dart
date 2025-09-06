@@ -772,7 +772,7 @@ void main() {
     DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
     expect(dropdownMenu.maxLines, 1);
 
-    const int maxLines = 3;
+    const double maxLines = 3;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
