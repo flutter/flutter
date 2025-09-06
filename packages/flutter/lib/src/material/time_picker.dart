@@ -246,6 +246,7 @@ class _DialTimePickerHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    assert(_debugDialTimePickerEntryMode(context));
     final TimeOfDayFormat timeOfDayFormat = MaterialLocalizations.of(
       context,
     ).timeOfDayFormat(alwaysUse24HourFormat: _TimePickerModel.use24HourFormatOf(context));
@@ -356,6 +357,7 @@ class _DialTimeSelectorControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    assert(_debugDialTimePickerEntryMode(context));
     final TimePickerThemeData timePickerTheme = _TimePickerModel.themeOf(context);
     final _TimePickerDefaults defaultTheme = _TimePickerModel.defaultThemeOf(context);
     final Color backgroundColor = timePickerTheme.hourMinuteColor ?? defaultTheme.hourMinuteColor;
@@ -398,6 +400,7 @@ class _DialHourControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    assert(_debugDialTimePickerEntryMode(context));
     assert(debugCheckHasMediaQuery(context));
     final bool alwaysUse24HourFormat = MediaQuery.alwaysUse24HourFormatOf(context);
     final TimeOfDay selectedTime = _TimePickerModel.selectedTimeOf(context);
@@ -538,6 +541,7 @@ class _DialMinuteControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    assert(_debugDialTimePickerEntryMode(context));
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final TimeOfDay selectedTime = _TimePickerModel.selectedTimeOf(context);
     final String formattedMinute = localizations.formatMinute(selectedTime);
@@ -1604,6 +1608,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    assert(_debugDialTimePickerEntryMode(context));
     final ThemeData theme = Theme.of(context);
     final TimePickerThemeData timePickerTheme = TimePickerTheme.of(context);
     final _TimePickerDefaults defaultTheme = theme.useMaterial3
@@ -3618,6 +3623,12 @@ class _TimePickerDefaultsM2 extends _TimePickerDefaults {
   ShapeBorder get shape {
     return _kDefaultShape;
   }
+}
+
+/// Ensure the widget is called in [TimePickerEntryMode.dial] or [TimePickerEntryMode.dialOnly] mode.
+bool _debugDialTimePickerEntryMode(BuildContext context) {
+  final TimePickerEntryMode entryMode = _TimePickerModel.entryModeOf(context);
+  return entryMode == TimePickerEntryMode.dial || entryMode == TimePickerEntryMode.dialOnly;
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - TimePicker
