@@ -423,9 +423,9 @@ class NavigationDestination extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _NavigationDestinationInfo info = _NavigationDestinationInfo.of(context);
-    const Set<MaterialState> selectedState = <MaterialState>{MaterialState.selected};
-    const Set<MaterialState> unselectedState = <MaterialState>{};
-    const Set<MaterialState> disabledState = <MaterialState>{MaterialState.disabled};
+    const Set<WidgetState> selectedState = <WidgetState>{WidgetState.selected};
+    const Set<WidgetState> unselectedState = <WidgetState>{};
+    const Set<WidgetState> disabledState = <WidgetState>{WidgetState.disabled};
 
     final NavigationBarThemeData navigationBarTheme = NavigationBarTheme.of(context);
     final NavigationBarThemeData defaults = _defaultsFor(context);

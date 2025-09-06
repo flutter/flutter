@@ -35,6 +35,7 @@ WidgetPreviewerWidgetScaffolding previewForLocalizations({
   return WidgetPreviewerWidgetScaffolding(
     child: WidgetPreviewWidget(
       preview: WidgetPreview(
+        scriptUri: '',
         builder: () => Text('Foo', key: key),
         localizations: previewLocalizationsData,
       ),
