@@ -78,11 +78,11 @@ class SnapshotDelegate {
 
   virtual void MakeRasterSnapshot(
       sk_sp<DisplayList> display_list,
-      SkISize picture_size,
+      DlISize picture_size,
       std::function<void(sk_sp<DlImage>)> callback) = 0;
 
   virtual sk_sp<DlImage> MakeRasterSnapshotSync(sk_sp<DisplayList> display_list,
-                                                SkISize picture_size) = 0;
+                                                DlISize picture_size) = 0;
 
   virtual sk_sp<SkImage> ConvertToRasterImage(sk_sp<SkImage> image) = 0;
 

@@ -585,7 +585,7 @@ void main() {
         throwsToolExit(),
       );
 
-      final DebuggingOptions options = await command.createDebuggingOptions(false);
+      final DebuggingOptions options = await command.createDebuggingOptions();
 
       expect(options.startPaused, true);
       expect(options.disableServiceAuthCodes, true);
@@ -636,7 +636,7 @@ void main() {
         throwsToolExit(),
       );
 
-      final DebuggingOptions options = await command.createDebuggingOptions(false);
+      final DebuggingOptions options = await command.createDebuggingOptions();
       expect(options.disablePortPublication, false);
     },
     overrides: <Type, Generator>{
@@ -672,7 +672,7 @@ void main() {
         ..connectionInterface = DeviceConnectionInterface.attached;
       fakeDeviceManager.attachedDevices = <Device>[usbDevice];
 
-      final DebuggingOptions options = await command.createDebuggingOptions(false);
+      final DebuggingOptions options = await command.createDebuggingOptions();
       expect(options.disablePortPublication, true);
     },
     overrides: <Type, Generator>{
@@ -708,7 +708,7 @@ void main() {
         throwsToolExit(),
       );
 
-      final DebuggingOptions options = await command.createDebuggingOptions(false);
+      final DebuggingOptions options = await command.createDebuggingOptions();
       expect(options.disablePortPublication, true);
     },
     overrides: <Type, Generator>{

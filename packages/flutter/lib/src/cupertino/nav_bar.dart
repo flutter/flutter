@@ -643,8 +643,13 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
 
   @override
   Size get preferredSize {
-    final double heightForDrawer = bottom?.preferredSize.height ?? 0.0;
-    return Size.fromHeight(_kNavBarPersistentHeight + heightForDrawer);
+    final double bottomHeight = bottom?.preferredSize.height ?? 0.0;
+
+    final double effectiveLargeHeight = largeTitle != null
+        ? _kNavBarLargeTitleHeightExtension
+        : 0.0;
+
+    return Size.fromHeight(_kNavBarPersistentHeight + bottomHeight + effectiveLargeHeight);
   }
 
   @override
@@ -1203,10 +1208,18 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   }
 
   @override
+  void didUpdateWidget(CupertinoSliverNavigationBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.middle != oldWidget.middle) {
+      _updateEffectiveMiddle();
+    }
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     isPortrait = MediaQuery.orientationOf(context) == Orientation.portrait;
-    effectiveMiddle = widget.middle ?? (isPortrait ? null : widget.largeTitle);
+    _updateEffectiveMiddle();
     _computeScaledHeights();
     _setupSearchableAnimation();
     _scrollableState?.position.isScrollingNotifier.removeListener(_handleScrollChange);
@@ -1232,6 +1245,10 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
       return widget.bottom!.preferredSize.height;
     }
     return 0.0;
+  }
+
+  void _updateEffectiveMiddle() {
+    effectiveMiddle = widget.middle ?? (isPortrait ? null : widget.largeTitle);
   }
 
   void _computeScaledHeights() {

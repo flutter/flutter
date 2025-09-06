@@ -105,8 +105,8 @@ FlutterMetalTexture EmbedderTestContextMetal::GetNextDrawable(const FlutterFrame
   return texture;
 }
 
-void EmbedderTestContextMetal::SetSurface(SkISize surface_size) {
-  FML_CHECK(surface_size_.isEmpty());
+void EmbedderTestContextMetal::SetSurface(DlISize surface_size) {
+  FML_CHECK(surface_size_.IsEmpty());
   surface_size_ = surface_size;
   metal_surface_ = TestMetalSurface::Create(*metal_context_, surface_size_);
 }

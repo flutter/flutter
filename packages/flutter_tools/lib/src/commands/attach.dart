@@ -21,6 +21,7 @@ import '../compile.dart';
 import '../daemon.dart';
 import '../device.dart';
 import '../device_vm_service_discovery_for_attach.dart';
+import '../hook_runner.dart' show hookRunner;
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
 import '../macos/macos_ipad_device.dart';
@@ -370,7 +371,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
               return runner.attach(
                 connectionInfoCompleter: connectionInfoCompleter,
                 appStartedCompleter: appStartedCompleter,
-                allowExistingDdsInstance: true,
               );
             },
             device,
@@ -411,10 +411,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
                   ..setupTerminal();
           }),
         );
-        result = await runner.attach(
-          appStartedCompleter: onAppStart,
-          allowExistingDdsInstance: true,
-        );
+        result = await runner.attach(appStartedCompleter: onAppStart);
         if (result != 0) {
           throwToolExit(null, exitCode: result);
         }
@@ -487,8 +484,14 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             flutterProject: flutterProject,
             nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
             analytics: analytics,
+            logger: _logger,
           )
-        : ColdRunner(flutterDevices, target: targetFile, debuggingOptions: debuggingOptions);
+        : ColdRunner(
+            flutterDevices,
+            target: targetFile,
+            debuggingOptions: debuggingOptions,
+            dartBuilder: hookRunner,
+          );
   }
 
   Future<void> _validateArguments() async {}
@@ -513,6 +516,7 @@ class HotRunnerFactory {
     FlutterProject? flutterProject,
     String? nativeAssetsYamlFile,
     required Analytics analytics,
+    Logger? logger,
   }) => HotRunner(
     devices,
     target: target,
@@ -525,5 +529,7 @@ class HotRunnerFactory {
     stayResident: stayResident,
     nativeAssetsYamlFile: nativeAssetsYamlFile,
     analytics: analytics,
+    dartBuilder: hookRunner,
+    logger: logger,
   );
 }

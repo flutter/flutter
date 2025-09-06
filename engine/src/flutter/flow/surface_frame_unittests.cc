@@ -25,7 +25,7 @@ TEST(FlowTest, SurfaceFrameDoesNotSubmitInDtor) {
       /*framebuffer_info=*/framebuffer_info,
       /*encode_callback=*/encode_callback,
       /*submit_callback=*/callback,
-      /*frame_size=*/SkISize::Make(800, 600));
+      /*frame_size=*/DlISize(800, 600));
   surface_frame.reset();
 }
 
@@ -38,7 +38,7 @@ TEST(FlowTest, SurfaceFrameDoesNotHaveEmptyCanvas) {
       /*framebuffer_info=*/framebuffer_info,
       /*encode_callback=*/callback,
       /*submit_callback=*/submit_callback,
-      /*frame_size=*/SkISize::Make(800, 600),
+      /*frame_size=*/DlISize(800, 600),
       /*context_result=*/nullptr,
       /*display_list_fallback=*/true);
 
@@ -55,7 +55,7 @@ TEST(FlowTest, SurfaceFrameDoesNotPrepareRtree) {
       /*framebuffer_info=*/framebuffer_info,
       /*encode_callback=*/callback,
       /*submit_callback=*/submit_callback,
-      /*frame_size=*/SkISize::Make(800, 600),
+      /*frame_size=*/DlISize(800, 600),
       /*context_result=*/nullptr,
       /*display_list_fallback=*/true);
   surface_frame->Canvas()->DrawRect(DlRect::MakeWH(100, 100), DlPaint());

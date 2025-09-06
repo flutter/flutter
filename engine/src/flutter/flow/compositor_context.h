@@ -16,7 +16,6 @@
 #include "flutter/flow/stopwatch.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/raster_thread_merger.h"
-#include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 
 namespace flutter {
@@ -111,7 +110,7 @@ class CompositorContext {
                 GrDirectContext* gr_context,
                 DlCanvas* canvas,
                 ExternalViewEmbedder* view_embedder,
-                const SkMatrix& root_surface_transformation,
+                const DlMatrix& root_surface_transformation,
                 bool instrumentation_enabled,
                 bool surface_supports_readback,
                 fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger,
@@ -125,7 +124,7 @@ class CompositorContext {
 
     CompositorContext& context() const { return context_; }
 
-    const SkMatrix& root_surface_transformation() const {
+    const DlMatrix& root_surface_transformation() const {
       return root_surface_transformation_;
     }
 
@@ -154,7 +153,7 @@ class CompositorContext {
     DlCanvas* canvas_;
     impeller::AiksContext* aiks_context_;
     ExternalViewEmbedder* view_embedder_;
-    const SkMatrix root_surface_transformation_;
+    const DlMatrix root_surface_transformation_;
     const bool instrumentation_enabled_;
     const bool surface_supports_readback_;
     fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger_;
@@ -172,7 +171,7 @@ class CompositorContext {
       GrDirectContext* gr_context,
       DlCanvas* canvas,
       ExternalViewEmbedder* view_embedder,
-      const SkMatrix& root_surface_transformation,
+      const DlMatrix& root_surface_transformation,
       bool instrumentation_enabled,
       bool surface_supports_readback,
       fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger,

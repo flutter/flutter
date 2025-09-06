@@ -223,78 +223,6 @@ void main() {
   );
 
   testUsingContext(
-    'ResidentRunner can attach to device successfully with --fast-start',
-    () => testbed.run(() async {
-      fakeVmServiceHost = FakeVmServiceHost(
-        requests: <VmServiceExpectation>[
-          listViews,
-          listViews,
-          listViews,
-          FakeVmServiceRequest(
-            method: 'getIsolate',
-            args: <String, Object?>{'isolateId': fakeUnpausedIsolate.id},
-            jsonResponse: fakeUnpausedIsolate.toJson(),
-          ),
-          FakeVmServiceRequest(
-            method: 'setIsolatePauseMode',
-            args: <String, Object?>{
-              'isolateId': fakeUnpausedIsolate.id,
-              'exceptionPauseMode': vm_service.ExceptionPauseMode.kNone,
-            },
-            jsonResponse: vm_service.Success().toJson(),
-          ),
-          FakeVmServiceRequest(
-            method: 'getVM',
-            jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
-          ),
-          listViews,
-          const FakeVmServiceRequest(
-            method: 'streamListen',
-            args: <String, Object>{'streamId': 'Isolate'},
-          ),
-          FakeVmServiceRequest(
-            method: kRunInViewMethod,
-            args: <String, Object>{
-              'viewId': fakeFlutterView.id,
-              'mainScript': 'main.dart.dill',
-              'assetDirectory': 'build/flutter_assets',
-            },
-          ),
-          FakeVmServiceStreamResponse(
-            streamId: 'Isolate',
-            event: vm_service.Event(timestamp: 0, kind: vm_service.EventKind.kIsolateRunnable),
-          ),
-        ],
-      );
-      residentRunner = HotRunner(
-        <FlutterDevice>[flutterDevice],
-        stayResident: false,
-        debuggingOptions: DebuggingOptions.enabled(
-          BuildInfo.debug,
-          fastStart: true,
-          startPaused: true,
-        ),
-        target: 'main.dart',
-        devtoolsHandler: createNoOpHandler,
-        analytics: globals.analytics,
-      );
-      final futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
-      final futureAppStart = Completer<void>.sync();
-      final Future<int?> result = residentRunner.attach(
-        appStartedCompleter: futureAppStart,
-        connectionInfoCompleter: futureConnectionInfo,
-      );
-      final Future<DebugConnectionInfo> connectionInfo = futureConnectionInfo.future;
-
-      expect(await result, 0);
-      expect(futureConnectionInfo.isCompleted, true);
-      expect((await connectionInfo).baseUri, 'foo://bar');
-      expect(futureAppStart.isCompleted, true);
-      expect(fakeVmServiceHost?.hasRemainingExpectations, false);
-    }),
-  );
-
-  testUsingContext(
     'ResidentRunner can handle an RPC exception from hot reload',
     () => testbed.run(() async {
       fakeVmServiceHost = FakeVmServiceHost(
@@ -2021,10 +1949,7 @@ flutter:
         unawaited(
           runZonedGuarded(
             () => flutterDevice
-                .connect(
-                  allowExistingDdsInstance: true,
-                  debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-                )
+                .connect(debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug))
                 .then((_) => done.complete()),
             (_, _) => done.complete(),
           ),
@@ -2077,7 +2002,6 @@ flutter:
             };
         final flutterDevice = TestFlutterDevice(device, vmServiceUris: Stream<Uri>.value(testUri));
         await flutterDevice.connect(
-          allowExistingDdsInstance: true,
           debuggingOptions: DebuggingOptions.enabled(
             BuildInfo.debug,
             disableServiceAuthCodes: true,

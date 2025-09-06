@@ -11,5 +11,7 @@
   "searchWebButtonLabel": "Претражи веб",
   "shareButtonLabel": "Дели",
   "pasteButtonLabel": "Налепи",
-  "selectAllButtonLabel": "Изабери све"
+  "selectAllButtonLabel": "Изабери све",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found"
 }

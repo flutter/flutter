@@ -2133,7 +2133,7 @@ void main() {
               body: Center(
                 child: IconButton(
                   style: ButtonStyle(
-                    foregroundColor: MaterialStateProperty.resolveWith<Color>(getIconColor),
+                    foregroundColor: WidgetStateProperty.resolveWith<Color>(getIconColor),
                   ),
                   isSelected: isSelected,
                   onPressed: () {
@@ -2761,6 +2761,37 @@ void main() {
     expect(getOverlayColor(tester), paints..rect(color: overlayColor));
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/174511.
+  testWidgets('IconButton.color takes precedence over ambient IconButtonThemeData.iconColor', (
+    WidgetTester tester,
+  ) async {
+    const Color iconButtonColor = Color(0xFFFF1234);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          iconButtonTheme: const IconButtonThemeData(
+            style: ButtonStyle(
+              iconColor: WidgetStateColor.fromMap(<WidgetStatesConstraint, Color>{
+                WidgetState.any: Colors.purple,
+              }),
+            ),
+          ),
+        ),
+        home: Material(
+          child: Center(
+            child: IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.add, size: 64),
+              color: iconButtonColor,
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(_iconStyle(tester, Icons.add)?.color, iconButtonColor);
+  });
+
   group('IconTheme tests in Material 3', () {
     testWidgets('IconTheme overrides default values in M3', (WidgetTester tester) async {
       // Theme's IconTheme
@@ -3027,7 +3058,9 @@ void main() {
       ),
     );
 
-    final Offset topLeft = tester.getTopLeft(find.byType(ColoredBox));
+    final Offset topLeft = tester.getTopLeft(
+      find.descendant(of: find.byType(Center), matching: find.byType(ColoredBox)),
+    );
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     await gesture.moveTo(topLeft);
