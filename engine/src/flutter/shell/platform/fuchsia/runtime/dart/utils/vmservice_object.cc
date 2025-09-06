@@ -6,7 +6,7 @@
 
 #include <dirent.h>
 #include <fuchsia/io/cpp/fidl.h>
-#include <lib/fdio/vfs.h>
+#include <sys/stat.h>
 #include <zircon/status.h>
 
 #include <cerrno>
@@ -49,7 +49,7 @@ void VMServiceObject::GetContents(LazyEntryVector* out_vector) const {
       continue;
     }
     out_vector->push_back(
-        {std::stoul(file) + GetStartingId(), file, V_TYPE_FILE});
+        {std::stoul(file) + GetStartingId(), file, S_IFREG});
   }
 }
 
