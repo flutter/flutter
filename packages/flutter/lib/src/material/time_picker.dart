@@ -334,7 +334,7 @@ class _DialTimePickerHeader extends StatelessWidget {
   }
 }
 
-/// The control label for time selector in dial mode.
+/// The control label for the time selector in dial mode.
 class _DialTimeSelectorControl extends StatelessWidget {
   const _DialTimeSelectorControl({
     required this.text,
