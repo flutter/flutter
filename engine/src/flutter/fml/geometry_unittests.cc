@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/common/geometry.h"
+#include "flutter/fml/geometry.h"
 
 #include "gtest/gtest.h"
 
-namespace flutter {
+namespace fml {
 
 TEST(Point, SetsCoordinates) {
   Point point(-30.0, 42.0);
@@ -52,4 +52,4 @@ TEST(Rect, ReturnsWidthHeight) {
   EXPECT_DOUBLE_EQ(22.0, rect.height());
 }
 
-}  // namespace flutter
+}  // namespace fml
