@@ -856,7 +856,7 @@ pluginManagement {
         // Template versions of Gradle/AGP.
         GradleKgpTestData(
           true,
-          kgpVersion: templateKotlinGradlePluginVersion,
+          kgpVersion: '2.1.20',
           gradleVersion: templateDefaultGradleVersion,
         ),
 
