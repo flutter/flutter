@@ -42,7 +42,7 @@ const templateAndroidGradlePluginVersion = '8.9.1';
 const templateAndroidGradlePluginVersionForModule = '8.9.1';
 
 // See https://kotlinlang.org/docs/releases.html#release-details
-const templateKotlinGradlePluginVersion = '2.1.0';
+const templateKotlinGradlePluginVersion = '2.1.20';
 
 // The Flutter Gradle Plugin is only applied to app projects, and modules that
 // are built from source using (`include_flutter.groovy`). The remaining
