@@ -1256,7 +1256,6 @@ abstract class BoxScrollView extends ScrollView {
 /// /// * Cookbook: [Implement swipe to dismiss](https://docs.flutter.dev/cookbook/gestures/dismissible)
 ///
 /// ### Removing default bottom padding
-///
 /// By default, `ListView` and `ListView.builder` add bottom padding to account
 /// for system UI elements like the Android navigation bar or iOS home indicator.
 ///
@@ -1289,8 +1288,7 @@ abstract class BoxScrollView extends ScrollView {
 ///       return ListTile(title: Text('Item \$index'));
 ///     },
 ///   ),
-/// )
-/// ```
+/// )```
 class ListView extends BoxScrollView {
   /// Creates a scrollable, linear array of widgets from an explicit [List].
   ///
