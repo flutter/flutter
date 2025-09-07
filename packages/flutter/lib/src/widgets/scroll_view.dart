@@ -1253,6 +1253,44 @@ abstract class BoxScrollView extends ScrollView {
 ///  * Cookbook: [Create a horizontal list](https://docs.flutter.dev/cookbook/lists/horizontal-list)
 ///  * Cookbook: [Create lists with different types of items](https://docs.flutter.dev/cookbook/lists/mixed-list)
 ///  * Cookbook: [Implement swipe to dismiss](https://docs.flutter.dev/cookbook/gestures/dismissible)
+/// /// * Cookbook: [Implement swipe to dismiss](https://docs.flutter.dev/cookbook/gestures/dismissible)
+///
+/// ### Removing default bottom padding
+///
+/// By default, `ListView` and `ListView.builder` add bottom padding to account
+/// for system UI elements like the Android navigation bar or iOS home indicator.
+///
+/// If you want to remove this padding, wrap the `ListView` with
+/// `MediaQuery.removePadding` and set `removeBottom: true`.
+///
+/// ```dart
+/// MediaQuery.removePadding(
+///   context: context,
+///   removeBottom: true,
+///   child: ListView.builder(
+///     padding: EdgeInsets.zero, // also removes any default list padding
+///     itemCount: 20,
+///     itemBuilder: (context, index) {
+///       return ListTile(title: Text('Item \$index'));
+///     },
+///   ),
+/// )
+/// ```
+///
+/// Alternatively, you can also wrap your list in a `SafeArea` if you want to
+/// respect the top inset (status bar, notch) but ignore the bottom inset:
+///
+/// ```dart
+/// SafeArea(
+///   bottom: false,
+///   child: ListView.builder(
+///     itemCount: 20,
+///     itemBuilder: (context, index) {
+///       return ListTile(title: Text('Item \$index'));
+///     },
+///   ),
+/// )
+/// ```
 class ListView extends BoxScrollView {
   /// Creates a scrollable, linear array of widgets from an explicit [List].
   ///
