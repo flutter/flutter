@@ -61,10 +61,8 @@ class WindowManagerModel extends ChangeNotifier {
 
 class WindowSettings {
   WindowSettings({Size regularSize = const Size(400, 300)})
-    : _regularSize = regularSize;
+    : regularSize = regularSize;
 
   /// The initial size for newly created regular windows.
-  Size get regularSize => _regularSize;
-  Size _regularSize;
-  set regularSize(Size value) => _regularSize = value;
+  Size regularSize;
 }

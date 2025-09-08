@@ -221,8 +221,7 @@ TaskFunction createWindowsStartupDriverTest({String? deviceIdOverride}) {
   ).call;
 }
 
-TaskFunction createWindowingDriverTest() async {
-  await flutter('config', options: const <String>['--enable-windowing']);
+TaskFunction createWindowingDriverTest() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/windowing_test',
     'lib/main.dart',

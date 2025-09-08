@@ -11,8 +11,8 @@ import 'package:flutter/src/widgets/_window.dart'
         RegularWindowController,
         RegularWindowControllerDelegate,
         WindowScope,
-        WindowingOwner;
-import 'package:flutter/src/widgets/_window_owner_creator.dart';
+        WindowingOwner,
+        createDefaultOwner;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
