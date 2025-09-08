@@ -2930,8 +2930,7 @@ class TextSelectionGestureDetectorBuilder {
     if (_isEditableTextMounted &&
         defaultTargetPlatform == TargetPlatform.iOS &&
         delegate.selectionEnabled &&
-        editableText.textEditingValue.selection.isCollapsed &&
-        editableText.renderEditable.hasFocus) {
+        editableText.textEditingValue.selection.isCollapsed) {
       // Update the floating cursor.
       final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
         state: FloatingCursorDragState.End,
