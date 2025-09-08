@@ -187,6 +187,39 @@ enum HighContrastThemeMode {
 /// ```
 /// {@end-tool}
 ///
+/// {@tool snippet}
+/// This example shows how to override high contrast accessibility settings
+/// to control theme selection in a MaterialApp. To affect theme selection,
+/// the MediaQuery override must wrap the MaterialApp widget, not be placed
+/// in the builder property.
+///
+/// ```dart
+/// MediaQuery(
+///   data: MediaQuery.of(context).copyWith(
+///     highContrast: true, // Force high contrast mode
+///   ),
+///   child: MaterialApp(
+///     theme: ThemeData.light(),
+///     highContrastTheme: ThemeData.light().copyWith(
+///       colorScheme: ColorScheme.fromSeed(
+///         seedColor: Colors.blue,
+///         brightness: Brightness.light,
+///         contrastLevel: 1.0, // High contrast
+///       ),
+///     ),
+///     home: Scaffold(
+///       appBar: AppBar(
+///         title: const Text('High Contrast Demo'),
+///       ),
+///       body: const Center(
+///         child: Text('High contrast theme applied'),
+///       ),
+///     ),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+///
 /// ## Troubleshooting
 ///
 /// ### Why is my app's text red with yellow underlines?
