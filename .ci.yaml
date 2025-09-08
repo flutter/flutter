@@ -6947,7 +6947,7 @@ targets:
         ]
       tags: >
         ["devicelab", "hostonly", "windows"]
-      task_name: windowing_test
+      task_name: windowing_test_windows
 
   - name: Windows flutter_tool_startup__windows
     recipe: devicelab/devicelab_drone
