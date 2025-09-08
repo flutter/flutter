@@ -183,7 +183,7 @@ dependency_overrides:
   convert:
     path: ./third_party/dart/third_party/pkg/core/pkgs/convert
   coverage:
-    path: ./third_party/pkg/coverage
+    path: ./third_party/pkg/tools/pkgs/coverage
   crypto:
     path: ./third_party/dart/third_party/pkg/core/pkgs/crypto
   dart_mcp:
