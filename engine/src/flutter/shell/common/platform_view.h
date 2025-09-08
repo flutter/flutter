@@ -515,6 +515,14 @@ class PlatformView {
                                CustomAccessibilityActionUpdates actions);
 
   //----------------------------------------------------------------------------
+  /// @brief      Used by the framework to set application locale in the
+  ///             embedding
+  ///
+  /// @param[in]  locale The application locale.
+  ///
+  virtual void SetApplicationLocale(const std::string& locale);
+
+  //----------------------------------------------------------------------------
   /// @brief      Used by the framework to tell the embedder to prepare or clear
   ///             resoruce for accepting semantics tree.
   ///

@@ -160,6 +160,19 @@ void PlatformViewIOS::UpdateSemantics(int64_t view_id,
 }
 
 // |PlatformView|
+void PlatformViewIOS::SetApplicationLocale(const std::string& locale) {
+  FML_DCHECK(owner_controller_);
+  FML_DCHECK(accessibility_bridge_);
+  if (owner_controller_) {
+    if (locale.empty()) {
+      owner_controller_.applicationLocale = nil;
+    } else {
+      owner_controller_.applicationLocale = @(locale.data());
+    }
+  }
+}
+
+// |PlatformView|
 void PlatformViewIOS::SetSemanticsTreeEnabled(bool enabled) {
   FML_DCHECK(owner_controller_);
   if (enabled) {

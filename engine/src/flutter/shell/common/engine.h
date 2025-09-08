@@ -162,6 +162,13 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
         CustomAccessibilityActionUpdates actions) = 0;
 
     //--------------------------------------------------------------------------
+    /// @brief      Framework sets the application locale.
+    ///
+    /// @param[in]  locale  The application locale
+    ///
+    virtual void OnEngineSetApplicationLocale(const std::string& locale) = 0;
+
+    //--------------------------------------------------------------------------
     /// @brief      When the Framework starts or stops generating semantics
     /// tree,
     ///             this new information needs to be conveyed to the underlying
@@ -1028,6 +1035,9 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   void UpdateSemantics(int64_t view_id,
                        SemanticsNodeUpdates update,
                        CustomAccessibilityActionUpdates actions) override;
+
+  // |RuntimeDelegate|
+  void SetApplicationLocale(const std::string& locale) override;
 
   // |RuntimeDelegate|
   void SetSemanticsTreeEnabled(bool enabled) override;

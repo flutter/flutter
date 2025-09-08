@@ -675,6 +675,9 @@ class Shell final : public PlatformView::Delegate,
       CustomAccessibilityActionUpdates actions) override;
 
   // |Engine::Delegate|
+  void OnEngineSetApplicationLocale(const std::string& locale) override;
+
+  // |Engine::Delegate|
   void OnEngineSetSemanticsTreeEnabled(bool enabled) override;
 
   // |Engine::Delegate|
