@@ -282,7 +282,8 @@
 /dev/devicelab/bin/tasks/platform_view_macos__start_up.dart @cbracken @flutter/desktop
 /dev/devicelab/bin/tasks/platform_view_win_desktop__start_up.dart @yaakovschectman @flutter/desktop
 /dev/devicelab/bin/tasks/plugin_lint_mac.dart @stuartmorgan-g @flutter/plugin
-/dev/devicelab/bin/tasks/plugin_test.dart @stuartmorgan-g @flutter/plugin
+/dev/devicelab/bin/tasks/plugin_test_android_standard.dart @stuartmorgan-g @flutter/plugin
+/dev/devicelab/bin/tasks/plugin_test_android_variants.dart @stuartmorgan-g @flutter/plugin
 /dev/devicelab/bin/tasks/plugin_test_ios.dart @stuartmorgan-g @flutter/ios
 /dev/devicelab/bin/tasks/plugin_test_linux.dart @stuartmorgan-g @flutter/desktop
 /dev/devicelab/bin/tasks/plugin_test_macos.dart @vashworth @flutter/desktop

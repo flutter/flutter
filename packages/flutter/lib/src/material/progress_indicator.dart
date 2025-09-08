@@ -20,6 +20,10 @@ import 'theme.dart';
 const int _kIndeterminateLinearDuration = 1800;
 const int _kIndeterminateCircularDuration = 1333 * 2222;
 
+// The progress value below which the track gap is scaled proportionally to
+// prevent a track gap from appearing at 0% progress.
+const double _kTrackGapRampDownThreshold = 0.01;
+
 enum _ActivityIndicatorType { material, adaptive }
 
 /// A base class for Material Design progress indicators.
@@ -183,87 +187,142 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final double effectiveTrackGap = switch (value) {
-      null || 1.0 => 0.0,
-      _ => trackGap ?? 0.0,
-    };
+    final double effectiveTrackGap = trackGap ?? 0.0;
 
-    final Rect trackRect;
-    if (value != null && effectiveTrackGap > 0) {
-      trackRect = switch (textDirection) {
-        TextDirection.ltr => Rect.fromLTRB(
-          clampDouble(value!, 0.0, 1.0) * size.width + effectiveTrackGap,
-          0,
-          size.width,
-          size.height,
-        ),
-        TextDirection.rtl => Rect.fromLTRB(
-          0,
-          0,
-          size.width - clampDouble(value!, 0.0, 1.0) * size.width - effectiveTrackGap,
-          size.height,
-        ),
-      };
-    } else {
-      trackRect = Offset.zero & size;
-    }
+    void drawLinearIndicator({
+      required double startFraction,
+      required double endFraction,
+      required Color color,
+    }) {
+      if (endFraction - startFraction <= 0) {
+        return;
+      }
 
-    // Draw the track.
-    final Paint trackPaint = Paint()..color = trackColor;
-    if (indicatorBorderRadius != null) {
-      final RRect trackRRect = indicatorBorderRadius!.resolve(textDirection).toRRect(trackRect);
-      canvas.drawRRect(trackRRect, trackPaint);
-    } else {
-      canvas.drawRect(trackRect, trackPaint);
+      final bool isLtr = textDirection == TextDirection.ltr;
+      final double left = (isLtr ? startFraction : 1 - endFraction) * size.width;
+      final double right = (isLtr ? endFraction : 1 - startFraction) * size.width;
+
+      final Rect rect = Rect.fromLTRB(left, 0, right, size.height);
+      final Paint paint = Paint()..color = color;
+
+      if (indicatorBorderRadius != null) {
+        final RRect rrect = indicatorBorderRadius!.resolve(textDirection).toRRect(rect);
+        canvas.drawRRect(rrect, paint);
+      } else {
+        canvas.drawRect(rect, paint);
+      }
     }
 
     void drawStopIndicator() {
-      // Limit the stop indicator radius to the height of the indicator.
-      final double radius = math.min(stopIndicatorRadius!, size.height / 2);
+      // Limit the stop indicator to the height of the indicator.
+      final double maxRadius = size.height / 2;
+      final double radius = math.min(stopIndicatorRadius!, maxRadius);
       final Paint indicatorPaint = Paint()..color = stopIndicatorColor!;
       final Offset position = switch (textDirection) {
-        TextDirection.rtl => Offset(size.height / 2, size.height / 2),
-        TextDirection.ltr => Offset(size.width - size.height / 2, size.height / 2),
+        TextDirection.rtl => Offset(maxRadius, maxRadius),
+        TextDirection.ltr => Offset(size.width - maxRadius, maxRadius),
       };
       canvas.drawCircle(position, radius, indicatorPaint);
     }
 
-    // Draw the stop indicator.
-    if (value != null && stopIndicatorRadius != null && stopIndicatorRadius! > 0) {
-      drawStopIndicator();
+    // Calculates a track gap fraction that is scaled proportionally to a given
+    // value.
+    // This is used for a smooth transition of the track gap's size, preventing
+    // it from appearing or disappearing abruptly. The returned value increases
+    // linearly from 0 to the full `trackGapFraction` as `currentValue`
+    // increases from 0 to `_kTrackGapRampDownThreshold`.
+    double getEffectiveTrackGapFraction(double currentValue, double trackGapFraction) {
+      return trackGapFraction *
+          clampDouble(currentValue, 0, _kTrackGapRampDownThreshold) /
+          _kTrackGapRampDownThreshold;
     }
 
-    void drawActiveIndicator(double x, double width) {
-      if (width <= 0.0) {
-        return;
-      }
-      final Paint activeIndicatorPaint = Paint()..color = valueColor;
-      final double left = switch (textDirection) {
-        TextDirection.rtl => size.width - width - x,
-        TextDirection.ltr => x,
-      };
+    final double trackGapFraction = effectiveTrackGap / size.width;
+    final double? effectiveValue = value == null ? null : clampDouble(value!, 0.0, 1.0);
 
-      final Rect activeRect = Offset(left, 0.0) & Size(width, size.height);
-      if (indicatorBorderRadius != null) {
-        final RRect activeRRect = indicatorBorderRadius!.resolve(textDirection).toRRect(activeRect);
-        canvas.drawRRect(activeRRect, activeIndicatorPaint);
-      } else {
-        canvas.drawRect(activeRect, activeIndicatorPaint);
+    // Determinate progress indicator.
+    if (effectiveValue != null) {
+      final double trackStartFraction = trackGapFraction > 0
+          ? effectiveValue + getEffectiveTrackGapFraction(effectiveValue, trackGapFraction)
+          : 0;
+
+      // Draw the track when there is still space.
+      if (trackStartFraction < 1) {
+        drawLinearIndicator(startFraction: trackStartFraction, endFraction: 1, color: trackColor);
       }
+
+      // Draw the stop indicator.
+      if (stopIndicatorRadius != null && stopIndicatorRadius! > 0) {
+        drawStopIndicator();
+      }
+
+      // Draw the active indicator.
+      if (effectiveValue > 0) {
+        drawLinearIndicator(startFraction: 0, endFraction: effectiveValue, color: valueColor);
+      }
+
+      return;
     }
 
-    // Draw the active indicator.
-    if (value != null) {
-      drawActiveIndicator(0.0, clampDouble(value!, 0.0, 1.0) * size.width);
-    } else {
-      final double x1 = size.width * line1Tail.transform(animationValue);
-      final double width1 = size.width * line1Head.transform(animationValue) - x1;
+    // Indeterminate progress indicator.
+    // For LTR text direction the `head` is the right endpoint and the `tail` is
+    // the left endpoint.
+    final double firstLineHead = line1Head.transform(animationValue);
+    final double firstLineTail = line1Tail.transform(animationValue);
+    final double secondLineHead = line2Head.transform(animationValue);
+    final double secondLineTail = line2Tail.transform(animationValue);
 
-      final double x2 = size.width * line2Tail.transform(animationValue);
-      final double width2 = size.width * line2Head.transform(animationValue) - x2;
+    // Draw the track before line 1. Assuming text direction is LTR, this track
+    // appears on the right side of line 1.
+    if (firstLineHead < 1 - trackGapFraction) {
+      final double trackStartFraction = firstLineHead > 0
+          ? firstLineHead + getEffectiveTrackGapFraction(firstLineHead, trackGapFraction)
+          : 0;
+      drawLinearIndicator(startFraction: trackStartFraction, endFraction: 1, color: trackColor);
+    }
 
-      drawActiveIndicator(x1, width1);
-      drawActiveIndicator(x2, width2);
+    // Draw the line 1.
+    if (firstLineHead - firstLineTail > 0) {
+      drawLinearIndicator(
+        startFraction: firstLineTail,
+        endFraction: firstLineHead,
+        color: valueColor,
+      );
+    }
+
+    // Draw the track between line 1 and line 2. Assuming text direction is
+    // LTR, this track appears on the left side of line 1 and on the right side
+    // of line 2.
+    if (firstLineTail > trackGapFraction) {
+      final double trackStartFraction = secondLineHead > 0
+          ? secondLineHead + getEffectiveTrackGapFraction(secondLineHead, trackGapFraction)
+          : 0;
+      final double trackEndFraction = firstLineTail < 1
+          ? firstLineTail - getEffectiveTrackGapFraction(1 - firstLineTail, trackGapFraction)
+          : 1;
+      drawLinearIndicator(
+        startFraction: trackStartFraction,
+        endFraction: trackEndFraction,
+        color: trackColor,
+      );
+    }
+
+    // Draw the line 2.
+    if (secondLineHead - secondLineTail > 0) {
+      drawLinearIndicator(
+        startFraction: secondLineTail,
+        endFraction: secondLineHead,
+        color: valueColor,
+      );
+    }
+
+    // Draw the track after line 2. Assuming text direction is LTR, this track
+    // appears on the left side of line 2.
+    if (secondLineTail > trackGapFraction) {
+      final double trackEndFraction = secondLineTail < 1
+          ? secondLineTail - getEffectiveTrackGapFraction(1 - secondLineTail, trackGapFraction)
+          : 1;
+      drawLinearIndicator(startFraction: 0, endFraction: trackEndFraction, color: trackColor);
     }
   }
 
@@ -381,7 +440,7 @@ class LinearProgressIndicator extends ProgressIndicator {
 
   /// The color of the stop indicator.
   ///
-  /// If [year2023] is false or [ThemeData.useMaterial3] is false, then no stop
+  /// If [year2023] is true or [ThemeData.useMaterial3] is false, then no stop
   /// indicator will be drawn.
   ///
   /// If null, then the [ProgressIndicatorThemeData.stopIndicatorColor] will be used.
@@ -390,7 +449,7 @@ class LinearProgressIndicator extends ProgressIndicator {
 
   /// The radius of the stop indicator.
   ///
-  /// If [year2023] is false or [ThemeData.useMaterial3] is false, then no stop
+  /// If [year2023] is true or [ThemeData.useMaterial3] is false, then no stop
   /// indicator will be drawn.
   ///
   /// Set [stopIndicatorRadius] to 0 to hide the stop indicator.
@@ -401,7 +460,7 @@ class LinearProgressIndicator extends ProgressIndicator {
 
   /// The gap between the indicator and the track.
   ///
-  /// If [year2023] is false or [ThemeData.useMaterial3] is false, then no track
+  /// If [year2023] is true or [ThemeData.useMaterial3] is false, then no track
   /// gap will be drawn.
   ///
   /// Set [trackGap] to 0 to hide the track gap.
@@ -811,7 +870,7 @@ class CircularProgressIndicator extends ProgressIndicator {
 
   /// The gap between the active indicator and the background track.
   ///
-  /// If [year2023] is false or [ThemeData.useMaterial3] is false, then no track
+  /// If [year2023] is true or [ThemeData.useMaterial3] is false, then no track
   /// gap will be drawn.
   ///
   /// Set [trackGap] to 0 to hide the track gap.
