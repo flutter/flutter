@@ -20,12 +20,12 @@ import 'package:meta/meta.dart';
 ///
 /// See: https://github.com/flutter/flutter/issues/30701.
 @internal
-bool isWindowingEnabled = debugEnabledFeatureFlags.contains('windowing');
+final bool isWindowingEnabled = debugEnabledFeatureFlags.contains('windowing');
 
 /// The feature flags this app was built with.
 ///
 /// Do not use this API. Flutter can and will make breaking changes to this API.
 @internal
-Set<String> debugEnabledFeatureFlags = <String>{
+final Set<String> debugEnabledFeatureFlags = <String>{
   ...const String.fromEnvironment('FLUTTER_ENABLED_FEATURE_FLAGS').split(','),
 };

@@ -214,7 +214,6 @@ TaskFunction createSpellCheckIntegrationTest() {
 }
 
 TaskFunction createWindowsStartupDriverTest({String? deviceIdOverride}) {
-  await flutter('config', options: const <String>['--enable-windowing']);
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/windows_startup_test',
     'lib/main.dart',
@@ -222,7 +221,8 @@ TaskFunction createWindowsStartupDriverTest({String? deviceIdOverride}) {
   ).call;
 }
 
-TaskFunction createWindowingDriverTest() {
+TaskFunction createWindowingDriverTest() async {
+  await flutter('config', options: const <String>['--enable-windowing']);
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/windowing_test',
     'lib/main.dart',
