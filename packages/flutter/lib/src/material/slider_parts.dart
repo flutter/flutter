@@ -835,9 +835,58 @@ class DropSliderValueIndicatorShape extends SliderComponentShape {
 }
 
 /// Utility class for processing multiline text in value indicators.
-abstract class _ValueIndicatorTextProcessor {
+///
+/// This class manages the lifecycle of TextPainter objects for multiline text processing.
+/// It will either reuse the original TextPainter or create a new one with proper ellipsis handling.
+/// Always call dispose() when done to prevent memory leaks.
+class _ValueIndicatorTextProcessor {
+  _ValueIndicatorTextProcessor({
+    required TextPainter originalPainter,
+    required ValueIndicatorMultilineConfig multilineConfig,
+    required double textScaleFactor,
+  }) : _originalPainter = originalPainter {
+    _processText(multilineConfig, textScaleFactor);
+  }
+
+  final TextPainter _originalPainter;
+  late final TextPainter _textPainter;
+  bool _createdNewPainter = false;
+
+  /// Gets the TextPainter to use for rendering.
+  /// This will be either the original painter or a new one with multiline processing applied.
+  TextPainter get textPainter => _textPainter;
+
+  void _processText(ValueIndicatorMultilineConfig multilineConfig, double textScaleFactor) {
+    if (!multilineConfig.enabled || multilineConfig.maxLines == null) {
+      _textPainter = _originalPainter;
+      _createdNewPainter = false;
+      return;
+    }
+
+    // Use computeLineMetrics to check if truncation is needed.
+    final int actualLines = _originalPainter.computeLineMetrics().length;
+    final int maxLines = multilineConfig.maxLines!;
+
+    if (actualLines <= maxLines) {
+      // Text fits within maxLines, just return the original painter.
+      _textPainter = _originalPainter;
+      _createdNewPainter = false;
+      return;
+    }
+
+    // Text exceeds maxLines, create painter with ellipsis.
+    final String labelText = _originalPainter.text?.toPlainText() ?? '';
+    _textPainter = _createTextPainterWithEllipsis(
+      originalPainter: _originalPainter,
+      originalText: labelText,
+      maxLines: maxLines,
+      textScaleFactor: textScaleFactor,
+    );
+    _createdNewPainter = true;
+  }
+
   /// Creates a TextPainter with ellipsis when text exceeds maxLines.
-  static TextPainter _createTextPainterWithEllipsis({
+  TextPainter _createTextPainterWithEllipsis({
     required TextPainter originalPainter,
     required String originalText,
     required int maxLines,
@@ -854,43 +903,12 @@ abstract class _ValueIndicatorTextProcessor {
     )..layout();
   }
 
-  /// Processes multiline text for value indicators, handling maxLines
-  /// truncation and ellipsis.
-  ///
-  /// Returns the appropriate TextPainter based on the multiline configuration.
-  /// The caller is responsible for disposing the returned TextPainter
-  /// if it differs from the original.
-  static TextPainter processMultilineText({
-    required TextPainter originalPainter,
-    required ValueIndicatorMultilineConfig multilineConfig,
-    required double textScaleFactor,
-  }) {
-    if (!multilineConfig.enabled || multilineConfig.maxLines == null) {
-      return originalPainter;
+  /// Disposes resources if a new TextPainter was created.
+  /// Safe to call multiple times.
+  void dispose() {
+    if (_createdNewPainter && _textPainter != _originalPainter) {
+      _textPainter.dispose();
     }
-
-    // Use computeLineMetrics to check if truncation is needed.
-    final int actualLines = originalPainter.computeLineMetrics().length;
-    final int maxLines = multilineConfig.maxLines!;
-
-    if (actualLines <= maxLines) {
-      // Text fits within maxLines, create a simple TextPainter with maxLines constraint.
-      return TextPainter(
-        text: originalPainter.text,
-        textDirection: originalPainter.textDirection,
-        textScaleFactor: textScaleFactor,
-        maxLines: maxLines,
-      )..layout();
-    }
-
-    // Text exceeds maxLines, create painter with ellipsis.
-    final String labelText = originalPainter.text?.toPlainText() ?? '';
-    return _createTextPainterWithEllipsis(
-      originalPainter: originalPainter,
-      originalText: labelText,
-      maxLines: maxLines,
-      textScaleFactor: textScaleFactor,
-    );
   }
 }
 
@@ -1068,11 +1086,12 @@ class _DropSliderValueIndicatorPathPainter {
         sliderTheme.valueIndicatorMultilineConfig ?? const ValueIndicatorMultilineConfig();
 
     // Handle maxLines truncation if multiline is enabled from theme configuration.
-    final TextPainter finalLabelPainter = _ValueIndicatorTextProcessor.processMultilineText(
+    final _ValueIndicatorTextProcessor processor = _ValueIndicatorTextProcessor(
       originalPainter: labelPainter,
       multilineConfig: multilineConfig,
       textScaleFactor: textScaleFactor,
     );
+    final TextPainter finalLabelPainter = processor.textPainter;
 
     final double rectangleWidth = _upperRectangleWidth(finalLabelPainter, scale);
     final double horizontalShift = getHorizontalShift(
@@ -1150,10 +1169,8 @@ class _DropSliderValueIndicatorPathPainter {
     }
     canvas.restore();
 
-    // Dispose TextPainter we created (but not the original labelPainter).
-    if (finalLabelPainter != labelPainter) {
-      finalLabelPainter.dispose();
-    }
+    // Dispose the processor, which handles TextPainter lifecycle automatically.
+    processor.dispose();
   }
 }
 
@@ -1601,11 +1618,12 @@ class _RoundedRectSliderValueIndicatorPathPainter {
         sliderTheme.valueIndicatorMultilineConfig ?? const ValueIndicatorMultilineConfig();
 
     // Handle maxLines truncation if multiline is enabled from theme configuration.
-    final TextPainter finalLabelPainter = _ValueIndicatorTextProcessor.processMultilineText(
+    final _ValueIndicatorTextProcessor processor = _ValueIndicatorTextProcessor(
       originalPainter: labelPainter,
       multilineConfig: multilineConfig,
       textScaleFactor: textScaleFactor,
     );
+    final TextPainter finalLabelPainter = processor.textPainter;
 
     final double rectangleWidth = _upperRectangleWidth(finalLabelPainter, scale);
     final double horizontalShift = getHorizontalShift(
@@ -1665,10 +1683,8 @@ class _RoundedRectSliderValueIndicatorPathPainter {
     finalLabelPainter.paint(canvas, labelOffset);
     canvas.restore();
 
-    // Dispose TextPainter we created (but not the original labelPainter).
-    if (finalLabelPainter != labelPainter) {
-      finalLabelPainter.dispose();
-    }
+    // Dispose the processor, which handles TextPainter lifecycle automatically.
+    processor.dispose();
   }
 }
 
