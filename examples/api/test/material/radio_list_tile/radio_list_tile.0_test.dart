@@ -13,26 +13,23 @@ void main() {
     // Find the number of RadioListTiles.
     expect(find.byType(RadioListTile<example.SingingCharacter>), findsNWidgets(2));
 
-    // The initial group value is lafayette for the first RadioListTile.
-    RadioListTile<example.SingingCharacter> radioListTile = tester.widget(
-      find.byType(RadioListTile<example.SingingCharacter>).first,
-    );
-    expect(radioListTile.groupValue, example.SingingCharacter.lafayette);
-
-    // The initial group value is lafayette for the last RadioListTile.
-    radioListTile = tester.widget(find.byType(RadioListTile<example.SingingCharacter>).last);
-    expect(radioListTile.groupValue, example.SingingCharacter.lafayette);
+    // The initial group value is lafayette.
+    RadioGroup<example.SingingCharacter> group = tester
+        .widget<RadioGroup<example.SingingCharacter>>(
+          find.byType(RadioGroup<example.SingingCharacter>),
+        );
+    // Second radio is checked.
+    expect(group.groupValue, example.SingingCharacter.lafayette);
 
     // Tap the last RadioListTile to change the group value to jefferson.
     await tester.tap(find.byType(RadioListTile<example.SingingCharacter>).last);
     await tester.pump();
 
-    // The group value is now jefferson for the first RadioListTile.
-    radioListTile = tester.widget(find.byType(RadioListTile<example.SingingCharacter>).first);
-    expect(radioListTile.groupValue, example.SingingCharacter.jefferson);
-
-    // The group value is now jefferson for the last RadioListTile.
-    radioListTile = tester.widget(find.byType(RadioListTile<example.SingingCharacter>).last);
-    expect(radioListTile.groupValue, example.SingingCharacter.jefferson);
+    // The group value is now jefferson.
+    group = tester.widget<RadioGroup<example.SingingCharacter>>(
+      find.byType(RadioGroup<example.SingingCharacter>),
+    );
+    // Second radio is checked.
+    expect(group.groupValue, example.SingingCharacter.jefferson);
   });
 }
