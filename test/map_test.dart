@@ -4,23 +4,23 @@ void main() {
   late Map<String, List<double>> alunos;
 
   setUp(() {
-    alunos = {
-      'Maria': [8.0, 9.0],
-      'Bruna': [7.0, 7.0],
-      'Carla': [10.0, 9.0],
+    alunos = <String, List<double>>{
+      'Maria': <double>[8.0, 9.0],
+      'Bruna': <double>[7.0, 7.0],
+      'Carla': <double>[10.0, 9.0],
     };
   });
 
   test('Adicionar elemento', () {
-    alunos.putIfAbsent('Elena', () => [9.0, 8.0]);
+    alunos.putIfAbsent('Elena', () => <double>[9.0, 8.0]);
     expect(alunos.containsKey('Elena'), isTrue);
-    expect(alunos['Elena'], [9.0, 8.0]);
+    expect(alunos['Elena'], <double>[9.0, 8.0]);
   });
 
   test('Adicionar outro dicionário', () {
-    alunos.addAll({
-      'Elena': [9.0, 8.0],
-      'Luiza': [8.0, 9.0],
+    alunos.addAll(<String, List<double>>{
+      'Elena': <double>[9.0, 8.0],
+      'Luiza': <double>[8.0, 9.0],
     });
     expect(alunos.containsKey('Elena'), isTrue);
     expect(alunos.containsKey('Luiza'), isTrue);
@@ -32,24 +32,24 @@ void main() {
   });
 
   test('Atualizar elemento', () {
-    alunos.update('Carla', (value) => [9.0, 8.0]);
-    expect(alunos['Carla'], [9.0, 8.0]);
-    alunos['Carla'] = [8.0, 9.0];
-    expect(alunos['Carla'], [8.0, 9.0]);
+    alunos.update('Carla', (List<double> value) => <double>[9.0, 8.0]);
+    expect(alunos['Carla'], <double>[9.0, 8.0]);
+    alunos['Carla'] = <double>[8.0, 9.0];
+    expect(alunos['Carla'], <double>[8.0, 9.0]);
   });
 
   test('Testar percorrer dicionário', () {
-    alunos.addAll({
-      'Elena': [9.0, 8.0],
-      'Luiza': [8.0, 9.0],
+    alunos.addAll(<String, List<double>>{
+      'Elena': <double>[9.0, 8.0],
+      'Luiza': <double>[8.0, 9.0],
     });
 
-    expect(alunos.keys, ['Maria', 'Bruna', 'Carla', 'Elena', 'Luiza']);
-    expect(alunos['Maria'], [8.0, 9.0]);
+    expect(alunos.keys, <String>['Maria', 'Bruna', 'Carla', 'Elena', 'Luiza']);
+    expect(alunos['Maria'], <double>[8.0, 9.0]);
 
     double soma = 0;
-    alunos.forEach((key, value) {
-      for (double nota in value) {
+    alunos.forEach((String key, List<double> value) {
+      for (final double nota in value) {
         soma += nota;
       }
     });
@@ -58,26 +58,26 @@ void main() {
   });
 
   test('Calcular médias', () {
-    alunos.addAll({
-      'Elena': [9.0, 8.0],
-      'Luiza': [8.0, 9.0],
+    alunos.addAll(<String, List<double>>{
+      'Elena': <double>[9.0, 8.0],
+      'Luiza': <double>[8.0, 9.0],
     });
 
-    Map<String, double> medias = {};
+    final Map<String, double> medias = <String, double>{};
 
-    alunos.forEach((key, value) {
+    alunos.forEach((String key, List<double> value) {
       if (value.isEmpty) {
         medias[key] = 0;
       } else {
         double soma = 0;
-        for (double nota in value) {
+        for (final double nota in value) {
           soma += nota;
         }
         medias[key] = soma / value.length;
       }
     });
 
-    expect(medias, {
+    expect(medias, <String, double>{
       'Maria': 8.5,
       'Bruna': 7.0,
       'Carla': 9.5,

@@ -4,7 +4,7 @@ void main() {
   late List<int> numeros;
 
   setUp(() {
-    numeros = [1, 2, 3];
+    numeros = <int>[1, 2, 3];
   });
 
   test('Adicionar elemento', () {
@@ -13,7 +13,7 @@ void main() {
   });
 
   test('Adicionar outra lista', () {
-    numeros.addAll([5, 6]);
+    numeros.addAll(<int>[5, 6]);
     expect(numeros.contains(5), isTrue);
     expect(numeros.contains(6), isTrue);
   });
@@ -34,7 +34,7 @@ void main() {
   });
 
   test('Testar tamanho', () {
-    numeros.addAll([4, 5]);
+    numeros.addAll(<int>[4, 5]);
     expect(numeros.length, 5);
   });
 
@@ -44,23 +44,23 @@ void main() {
   });
 
   test('Testar ordenação', () {
-    numeros.addAll([4, 5, 6]);
-    expect(numeros.reversed.toList(), [6, 5, 4, 3, 2, 1]);
+    numeros.addAll(<int>[4, 5, 6]);
+    expect(numeros.reversed.toList(), <int>[6, 5, 4, 3, 2, 1]);
     numeros.sort();
-    expect(numeros, [1, 2, 3, 4, 5, 6]);
+    expect(numeros, <int>[1, 2, 3, 4, 5, 6]);
   });
 
   test('Testar percorrer lista', () {
     int soma = 0;
-    for (int numero in numeros) {
+    for (final int numero in numeros) {
       soma += numero;
     }
     expect(soma, 6);
 
-    numeros = numeros.map((numero) => numero * 2).toList();
-    expect(numeros, [2, 4, 6]);
+    numeros = numeros.map((int numero) => numero * 2).toList();
+    expect(numeros, <int>[2, 4, 6]);
 
-    numeros = numeros.where((numero) => numero % 3 == 0).toList();
-    expect(numeros, [6]);
+    numeros = numeros.where((int numero) => numero % 3 == 0).toList();
+    expect(numeros, <int>[6]);
   });
 }
