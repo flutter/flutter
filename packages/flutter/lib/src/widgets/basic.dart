@@ -1722,14 +1722,49 @@ class Transform extends SingleChildRenderObjectWidget {
   /// The matrix to transform the child by during painting.
   final Matrix4 transform;
 
-  /// The origin of the coordinate system (relative to the upper left corner of
-  /// this render object) in which to apply the matrix.
+  /// The origin of the coordinate system in which to apply the matrix,
+  /// described relative to the point given by [alignment].
   ///
   /// Setting an origin is equivalent to conjugating the transform matrix by a
   /// translation. This property is provided just for convenience.
+  ///
+  /// This offset is applied in addition to any [alignment] transformation, so in this
+  /// example, the child is rotated about its center, since [alignment]
+  /// in [Transform.rotate] defaults to [Alignment.center]:
+  ///
+  /// ```dart
+  /// Transform.rotate(
+  ///   angle: math.pi,
+  ///   child: Container(
+  ///    width: 150.0,
+  ///    height: 150.0,
+  ///    color: Colors.blue,
+  ///  ),
+  /// )
+  /// ```
+  ///
+  /// However, in this example the [origin] offset is applied after the
+  /// `alignment`, so the child rotates about its bottom-right corner:
+  ///
+  /// ```dart
+  /// Transform.rotate(
+  ///   angle: math.pi,
+  ///   origin: const Offset(75.0, 75.0),
+  ///   child: Container(
+  ///    width: 150.0,
+  ///    height: 150.0,
+  ///    color: Colors.blue,
+  ///  ),
+  /// )
+  /// ```
   final Offset? origin;
 
   /// The alignment of the origin, relative to the size of the box.
+  ///
+  /// When this and [origin] are both null, the origin is the upper-left corner
+  /// of this render object.
+  /// The default for this field is null for some constructors,
+  /// and [Alignment.center] for others.
   ///
   /// This is equivalent to setting an origin based on the size of the box.
   /// If it is specified at the same time as the [origin], both are applied.

@@ -27,7 +27,6 @@ import 'selectable_region.dart';
 import 'selection_container.dart';
 
 // Examples can assume:
-// late String _name;
 // late BuildContext context;
 
 /// The text style to apply to descendant [Text] widgets which don't have an
@@ -389,7 +388,11 @@ class DefaultTextHeightBehavior extends InheritedTheme {
 /// Container(
 ///   width: 100,
 ///   decoration: BoxDecoration(border: Border.all()),
-///   child: Text(overflow: TextOverflow.ellipsis, 'Hello $_name, how are you?'))
+///   child: const Text(
+///     'Hello, how are you?',
+///     overflow: TextOverflow.ellipsis,
+///   ),
+/// )
 /// ```
 /// {@end-tool}
 ///
@@ -402,10 +405,11 @@ class DefaultTextHeightBehavior extends InheritedTheme {
 /// ![If a second line overflows the Text widget displays a horizontal fade](https://flutter.github.io/assets-for-api-docs/assets/widgets/text_fade_max_lines.png)
 ///
 /// ```dart
-/// Text(
+/// const Text(
+///   'Hello, how are you?',
 ///   overflow: TextOverflow.fade,
 ///   maxLines: 1,
-///   'Hello $_name, how are you?')
+/// )
 /// ```
 ///
 /// Here soft wrapping is enabled and the [Text] widget tries to wrap the words
@@ -416,10 +420,11 @@ class DefaultTextHeightBehavior extends InheritedTheme {
 /// ![If a single line overflows the Text widget displays a horizontal fade](https://flutter.github.io/assets-for-api-docs/assets/widgets/text_fade_soft_wrap.png)
 ///
 /// ```dart
-/// Text(
+/// const Text(
+///   'Hello, how are you?',
 ///   overflow: TextOverflow.fade,
 ///   softWrap: false,
-///   'Hello $_name, how are you?')
+/// )
 /// ```
 ///
 /// Here soft wrapping is disabled with `softWrap: false` and the [Text] widget

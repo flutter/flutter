@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
+import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -31,16 +32,20 @@ void main() {
     expect(await webDevices.pollingGetDevices(), isEmpty);
   });
 
+  _FakeChromiumDevice getFakeChromiumDevice() {
+    final launcher = TestChromiumLauncher(launcher: () => _OnceClosableChromium());
+
+    return _FakeChromiumDevice(
+      chromiumLauncher: launcher,
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+    );
+  }
+
   testWithoutContext(
     'Successive calls of ChromiumDevice.stopApp() do not try to close chrome',
     () async {
-      final launcher = TestChromiumLauncher(launcher: () => _OnceClosableChromium());
-
-      final chromiumDevice = _FakeChromiumDevice(
-        chromiumLauncher: launcher,
-        fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
-      );
+      final _FakeChromiumDevice chromiumDevice = getFakeChromiumDevice();
 
       await chromiumDevice.startApp(
         null,
@@ -379,6 +384,41 @@ void main() {
 
     expect((await macosWebDevices.pollingGetDevices()).whereType<MicrosoftEdgeDevice>(), isEmpty);
   });
+
+  @isTest
+  void testWebLaunchUrl(String description, {required String url, required Matcher matcher}) {
+    // ignore: unnecessary_parenthesis – Prevent IDEs from showing a run button.
+    (testWithoutContext)(description, () async {
+      final _FakeChromiumDevice chromiumDevice = getFakeChromiumDevice();
+
+      await expectLater(
+        () => chromiumDevice.startApp(
+          null,
+          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, webLaunchUrl: url),
+          platformArgs: <String, Object?>{'uri': url},
+        ),
+        matcher,
+      );
+    });
+  }
+
+  testWebLaunchUrl(
+    'HTTP web launch url is not invalid',
+    url: 'http://localhost:3000',
+    matcher: returnsNormally,
+  );
+
+  testWebLaunchUrl(
+    'HTTPS web launch url is not invalid',
+    url: 'https://localhost:3000',
+    matcher: returnsNormally,
+  );
+
+  testWebLaunchUrl(
+    'Non-HTTP web launch url scheme is invalid',
+    url: 'file://path',
+    matcher: throwsToolExit(message: '"file://path" is not a valid HTTP URL.'),
+  );
 }
 
 /// A test implementation of the [ChromiumLauncher] that launches a fixed instance.

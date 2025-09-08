@@ -340,7 +340,7 @@ enum class CullMode {
   kBackFace,
 };
 
-enum class IndexType {
+enum class IndexType : uint8_t {
   kUnknown,
   k16bit,
   k32bit,

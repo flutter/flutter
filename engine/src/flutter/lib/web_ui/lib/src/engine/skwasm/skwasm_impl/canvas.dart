@@ -34,16 +34,10 @@ class SkwasmCanvas implements SceneCanvas {
     final paintHandle = (paint as SkwasmPaint).toRawPaint();
     if (bounds != null) {
       withStackScope((StackScope s) {
-        canvasSaveLayer(
-          _handle,
-          s.convertRectToNative(bounds),
-          paintHandle,
-          nullptr,
-          ui.TileMode.clamp.index,
-        );
+        canvasSaveLayer(_handle, s.convertRectToNative(bounds), paintHandle, nullptr);
       });
     } else {
-      canvasSaveLayer(_handle, nullptr, paintHandle, nullptr, ui.TileMode.clamp.index);
+      canvasSaveLayer(_handle, nullptr, paintHandle, nullptr);
     }
     paintDispose(paintHandle);
   }
@@ -60,29 +54,16 @@ class SkwasmCanvas implements SceneCanvas {
     // and instead needs it supplied to the saveLayer call itself as a
     // separate argument.
     final SkwasmImageFilter nativeFilter = SkwasmImageFilter.fromUiFilter(imageFilter);
-    final ui.TileMode? backdropTileMode = nativeFilter.backdropTileMode;
     final paintHandle = (paint as SkwasmPaint).toRawPaint(/*ui.TileMode.decal*/);
     if (bounds != null) {
       withStackScope((StackScope s) {
         nativeFilter.withRawImageFilter((nativeFilterHandle) {
-          canvasSaveLayer(
-            _handle,
-            s.convertRectToNative(bounds),
-            paintHandle,
-            nativeFilterHandle,
-            (backdropTileMode ?? ui.TileMode.mirror).index,
-          );
+          canvasSaveLayer(_handle, s.convertRectToNative(bounds), paintHandle, nativeFilterHandle);
         }, defaultBlurTileMode: ui.TileMode.mirror);
       });
     } else {
       nativeFilter.withRawImageFilter((nativeFilterHandle) {
-        canvasSaveLayer(
-          _handle,
-          nullptr,
-          paintHandle,
-          nativeFilterHandle,
-          (backdropTileMode ?? ui.TileMode.mirror).index,
-        );
+        canvasSaveLayer(_handle, nullptr, paintHandle, nativeFilterHandle);
       }, defaultBlurTileMode: ui.TileMode.mirror);
     }
     paintDispose(paintHandle);

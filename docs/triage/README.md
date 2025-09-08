@@ -210,7 +210,7 @@ For more guidance on reviewing PRs, see [Tree Hygiene](../contributing/Tree-hygi
 - [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-android%2Cfyi-android+-label%3Atriaged-android+no%3Aassignee+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc)
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-android+label%3AP0+sort%3Aupdated-asc)
 - [P1, No Assignee list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-android+label%3Ap1+no%3Aassignee+sort%3Aupdated-asc)
-- PRs: [Framework/Tool](https://github.com/flutter/flutter/pulls?q=is%3Aopen+draft%3Afalse+is%3Apr+label%3Aplatform-android+-label%3A%22work+in+progress%3B+do+not+review%22+sort%3Aupdated-asc+), [Plugins \(non-dependabot\)](https://github.com/flutter/packages/pulls?q=is%3Aopen+draft%3Afalse+is%3Apr+label%3Atriage-android+sort%3Aupdated-asc+-author%3Aapp%2Fdependabot+), [Plugins \(dependabot\)](https://github.com/flutter/packages/pulls?q=is%3Aopen+draft%3Afalse+is%3Apr+label%3Aplatform-android+sort%3Aupdated-asc+author%3Aapp%2Fdependabot+)
+- PRs: [Framework/Tool](https://github.com/flutter/flutter/pulls?q=is%3Aopen+draft%3Afalse+is%3Apr+label%3Aplatform-android%2Cteam-android+-label%3A%22work+in+progress%3B+do+not+review%22+sort%3Aupdated-asc+), [Plugins \(non-dependabot\)](https://github.com/flutter/packages/pulls?q=is%3Aopen+draft%3Afalse+is%3Apr+label%3Atriage-android+sort%3Aupdated-asc+-author%3Aapp%2Fdependabot+), [Plugins \(dependabot\)](https://github.com/flutter/packages/pulls?q=is%3Aopen+draft%3Afalse+is%3Apr+label%3Aplatform-android+sort%3Aupdated-asc+author%3Aapp%2Fdependabot+)
 
 ### Codelabs team (`team-codelabs`)
 
@@ -271,7 +271,7 @@ See the [Flutter Infra Team Triage](./Infra-Triage.md) page.
 
 PRs are reviewed weekly across the framework, packages, and engine repositories:
 
-- [iOS PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3Aplatform-ios+sort%3Acreated-asc+-is%3Adraft)
+- [iOS PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3Aplatform-ios%2Cteam-ios+sort%3Acreated-asc+-is%3Adraft)
 - [macOS PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22a%3A+desktop%22+label%3Aplatform-macos++sort%3Aupdated-asc)
 - [iOS and macOS PRs on packages](https://github.com/flutter/packages/pulls?q=is%3Aopen+is%3Apr+label%3Atriage-macos%2Ctriage-ios+sort%3Aupdated-asc+)
 
@@ -291,7 +291,7 @@ PRs are reviewed weekly across the framework, packages, and engine repositories:
 
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3A%22a%3A+text+input%22%2Cteam-text-input%2Cfyi-text-input+sort%3Aupdated-asc+label%3AP0+)
 - [PR list](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+sort%3Acreated-desc+draft%3Afalse+label%3A%22a%3A+text+input%22%2Cteam-text-input%2Cfyi-text-input+)
-- [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22a%3A+text+input%22%2Cteam-text-input%2Cfyi-text-input+no%3Aassignee+-label%3A%22triaged-design%22+-label%3A%22triaged-framework%22+-label%3A%22triaged-linux%22+-label%3A%22triaged-macos%22+-label%3A%22triaged-windows%22+-label%3A%22triaged-android%22+-label%3A%22triaged-ios%22+-label%3A%22triaged-web%22+-label%3A%22triaged-ecosystem%22+-label%3A%22triaged-engine%22+-label%3A%22triaged-tool%22+-label%3A%22triaged-text-input%22+-project%3Aflutter%2F111+)
+- [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aopen%20is%3Aissue%20label%3Ateam-text-input%2Cfyi-text-input%20no%3Aassignee%20-label%3Atriaged-text-input)
 
 ### Flutter Tool team (`team-tool`)
 

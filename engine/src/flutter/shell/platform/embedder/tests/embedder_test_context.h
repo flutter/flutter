@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 
+#include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "flutter/fml/closure.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
@@ -72,7 +73,7 @@ class EmbedderTestContext {
 
   FlutterEngineAOTData GetAOTData() const;
 
-  void SetRootSurfaceTransformation(SkMatrix matrix);
+  void SetRootSurfaceTransformation(DlMatrix matrix);
 
   FlutterRendererConfig& GetRendererConfig();
 
@@ -143,7 +144,7 @@ class EmbedderTestContext {
   LogMessageCallback log_message_callback_;
   std::unique_ptr<EmbedderTestCompositor> compositor_;
   NextSceneCallback next_scene_callback_;
-  SkMatrix root_surface_transformation_;
+  DlMatrix root_surface_transformation_;
   std::function<void(intptr_t)> vsync_callback_ = nullptr;
 
   static VoidCallback GetIsolateCreateCallbackHook();
@@ -170,7 +171,7 @@ class EmbedderTestContext {
 
   void SetupAOTDataIfNecessary();
 
-  virtual void SetSurface(SkISize surface_size) = 0;
+  virtual void SetSurface(DlISize surface_size) = 0;
 
   virtual void SetupCompositor() = 0;
 

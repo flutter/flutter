@@ -11,6 +11,7 @@
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_color.h"
 #include "flutter/display_list/dl_paint.h"
+#include "flutter/display_list/dl_text_skia.h"
 #include "flutter/display_list/dl_tile_mode.h"
 #include "flutter/display_list/effects/dl_color_filter.h"
 #include "flutter/display_list/effects/dl_color_source.h"
@@ -52,8 +53,9 @@ TEST_P(DisplayListTest, CanDrawRect) {
 
 TEST_P(DisplayListTest, CanDrawTextBlob) {
   flutter::DisplayListBuilder builder;
-  builder.DrawTextBlob(SkTextBlob::MakeFromString("Hello", CreateTestFont()),
-                       100, 100, flutter::DlPaint(flutter::DlColor::kBlue()));
+  builder.DrawText(flutter::DlTextSkia::Make(
+                       SkTextBlob::MakeFromString("Hello", CreateTestFont())),
+                   100, 100, flutter::DlPaint(flutter::DlColor::kBlue()));
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
@@ -70,24 +72,25 @@ TEST_P(DisplayListTest, CanDrawTextBlobWithGradient) {
   flutter::DlPaint paint;
   paint.setColorSource(linear);
 
-  builder.DrawTextBlob(
-      SkTextBlob::MakeFromString("Hello World", CreateTestFont()), 100, 100,
-      paint);
+  builder.DrawText(flutter::DlTextSkia::Make(SkTextBlob::MakeFromString(
+                       "Hello World", CreateTestFont())),
+                   100, 100, paint);
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
 TEST_P(DisplayListTest, CanDrawTextWithSaveLayer) {
   flutter::DisplayListBuilder builder;
-  builder.DrawTextBlob(SkTextBlob::MakeFromString("Hello", CreateTestFont()),
-                       100, 100, flutter::DlPaint(flutter::DlColor::kRed()));
+  builder.DrawText(flutter::DlTextSkia::Make(
+                       SkTextBlob::MakeFromString("Hello", CreateTestFont())),
+                   100, 100, flutter::DlPaint(flutter::DlColor::kRed()));
 
   flutter::DlPaint save_paint;
   float alpha = 0.5;
   save_paint.setAlpha(static_cast<uint8_t>(255 * alpha));
   builder.SaveLayer(std::nullopt, &save_paint);
-  builder.DrawTextBlob(SkTextBlob::MakeFromString("Hello with half alpha",
-                                                  CreateTestFontOfSize(100)),
-                       100, 300, flutter::DlPaint(flutter::DlColor::kRed()));
+  builder.DrawText(flutter::DlTextSkia::Make(SkTextBlob::MakeFromString(
+                       "Hello with half alpha", CreateTestFontOfSize(100))),
+                   100, 300, flutter::DlPaint(flutter::DlColor::kRed()));
   builder.Restore();
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
@@ -463,9 +466,9 @@ TEST_P(DisplayListTest, CanDrawWithMaskBlur) {
     auto filter =
         flutter::DlBlurMaskFilter(flutter::DlBlurStyle::kSolid, 10.0f);
     paint.setMaskFilter(&filter);
-    builder.DrawTextBlob(
-        SkTextBlob::MakeFromString("Testing", CreateTestFont()), 220, 170,
-        paint);
+    builder.DrawText(flutter::DlTextSkia::Make(SkTextBlob::MakeFromString(
+                         "Testing", CreateTestFont())),
+                     220, 170, paint);
   }
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
@@ -477,9 +480,9 @@ TEST_P(DisplayListTest, CanDrawStrokedText) {
 
   paint.setDrawStyle(flutter::DlDrawStyle::kStroke);
   paint.setColor(flutter::DlColor::kRed());
-  builder.DrawTextBlob(
-      SkTextBlob::MakeFromString("stoked about stroked text", CreateTestFont()),
-      250, 250, paint);
+  builder.DrawText(flutter::DlTextSkia::Make(SkTextBlob::MakeFromString(
+                       "stoked about stroked text", CreateTestFont())),
+                   250, 250, paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
@@ -489,6 +492,7 @@ TEST_P(DisplayListTest, StrokedTextNotOffsetFromNormalText) {
   flutter::DisplayListBuilder builder;
   flutter::DlPaint paint;
   auto const& text_blob = SkTextBlob::MakeFromString("00000", CreateTestFont());
+  auto text = flutter::DlTextSkia::Make(text_blob);
 
   // https://api.flutter.dev/flutter/material/Colors/blue-constant.html.
   auto const& mat_blue = flutter::DlColor(0xFF2196f3);
@@ -501,11 +505,11 @@ TEST_P(DisplayListTest, StrokedTextNotOffsetFromNormalText) {
   // Draw stacked text, with stroked text on top.
   paint.setDrawStyle(flutter::DlDrawStyle::kFill);
   paint.setColor(flutter::DlColor::kWhite());
-  builder.DrawTextBlob(text_blob, 250, 250, paint);
+  builder.DrawText(text, 250, 250, paint);
 
   paint.setDrawStyle(flutter::DlDrawStyle::kStroke);
   paint.setColor(flutter::DlColor::kBlack());
-  builder.DrawTextBlob(text_blob, 250, 250, paint);
+  builder.DrawText(text, 250, 250, paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }

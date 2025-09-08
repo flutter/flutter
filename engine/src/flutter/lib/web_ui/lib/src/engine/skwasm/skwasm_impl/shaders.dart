@@ -254,11 +254,15 @@ class SkwasmFragmentProgram extends SkwasmObjectWrapper<RawRuntimeEffect>
   int get uniformSize => runtimeEffectGetUniformSize(handle);
 }
 
-class SkwasmShaderData extends SkwasmObjectWrapper<RawSkData> {
-  SkwasmShaderData(int size) : super(skDataCreate(size), _registry);
+class SkwasmShaderData extends SkwasmObjectWrapper<RawUniformData> {
+  SkwasmShaderData(int size) : super(uniformDataCreate(size), _registry);
 
-  static final SkwasmFinalizationRegistry<RawSkData> _registry =
-      SkwasmFinalizationRegistry<RawSkData>((SkDataHandle handle) => skDataDispose(handle));
+  static final SkwasmFinalizationRegistry<RawUniformData> _registry =
+      SkwasmFinalizationRegistry<RawUniformData>(
+        (UniformDataHandle handle) => uniformDataDispose(handle),
+      );
+
+  Pointer<Void> get pointer => uniformDataGetPointer(handle);
 }
 
 // This class does not inherit from SkwasmNativeShader, as its handle might
@@ -326,7 +330,7 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
       _nativeShader!.dispose();
       _nativeShader = null;
     }
-    final Pointer<Float> dataPointer = skDataGetPointer(_uniformData.handle).cast<Float>();
+    final Pointer<Float> dataPointer = _uniformData.pointer.cast<Float>();
     dataPointer[index] = value;
   }
 
@@ -350,7 +354,7 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
     _childShaders[index] = shader;
     oldShader?.dispose();
 
-    final Pointer<Float> dataPointer = skDataGetPointer(_uniformData.handle).cast<Float>();
+    final Pointer<Float> dataPointer = _uniformData.pointer.cast<Float>();
     dataPointer[_floatUniformCount + index * 2] = image.width.toDouble();
     dataPointer[_floatUniformCount + index * 2 + 1] = image.height.toDouble();
   }

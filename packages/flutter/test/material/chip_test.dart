@@ -4887,7 +4887,7 @@ void main() {
         child: RawChip(
           isEnabled: enabled,
           selected: selected,
-          color: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+          color: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
             if (states.contains(MaterialState.disabled) &&
                 states.contains(MaterialState.selected)) {
               return disabledSelectedColor;
@@ -6374,6 +6374,34 @@ void main() {
       handle.dispose();
     },
   );
+
+  testWidgets('Chip renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: Scaffold(body: Chip(label: Text('X'))),
+          ),
+        ),
+      ),
+    );
+    final Finder xText = find.text('X');
+    expect(tester.getSize(xText).isEmpty, isTrue);
+  });
+
+  testWidgets('RawChip renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: Scaffold(body: RawChip(label: Text('X'))),
+          ),
+        ),
+      ),
+    );
+    final Finder xText = find.text('X');
+    expect(tester.getSize(xText).isEmpty, isTrue);
+  });
 }
 
 class _MaterialStateOutlinedBorder extends StadiumBorder implements MaterialStateOutlinedBorder {

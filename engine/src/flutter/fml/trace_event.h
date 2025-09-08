@@ -280,7 +280,7 @@ void SplitArgumentsCollect(std::vector<const char*>& keys,
                            Value value,
                            Args... args) {
   keys.emplace_back(key);
-  values.emplace_back(TraceToString(value));
+  values.emplace_back(TraceToString(std::move(value)));
   SplitArgumentsCollect(keys, values, args...);
 }
 
@@ -294,7 +294,7 @@ std::pair<std::vector<const char*>, std::vector<std::string>>
 SplitArguments(Key key, Value value, Args... args) {
   std::vector<const char*> keys;
   std::vector<std::string> values;
-  SplitArgumentsCollect(keys, values, key, value, args...);
+  SplitArgumentsCollect(keys, values, key, std::move(value), args...);
   return std::make_pair(std::move(keys), std::move(values));
 }
 
@@ -328,7 +328,7 @@ void TraceEvent(TraceArg category,
                 const uint64_t* flow_ids,
                 Args... args) {
 #if FLUTTER_TIMELINE_ENABLED
-  auto split = SplitArguments(args...);
+  auto split = SplitArguments(std::move(args)...);
   TraceTimelineEvent(category, name, 0, flow_id_count, flow_ids,
                      Dart_Timeline_Event_Begin, split.first, split.second);
 #endif  // FLUTTER_TIMELINE_ENABLED

@@ -21,6 +21,7 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:flutter_tools/src/widget_preview/analytics.dart';
 import 'package:flutter_tools/src/widget_preview/dtd_services.dart';
 import 'package:flutter_tools/src/widget_preview/preview_code_generator.dart';
@@ -29,7 +30,6 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
-import '../../../src/fake_devices.dart';
 import '../../../src/fakes.dart';
 import '../../../src/test_flutter_command_runner.dart';
 import '../utils/project_testing_utils.dart';
@@ -48,10 +48,49 @@ class FakeWidgetPreviewScaffoldDtdServices extends Fake implements WidgetPreview
   Future<void> launchAndConnect() async {}
 }
 
+class FakeGoogleChromeDevice extends Fake implements GoogleChromeDevice {
+  @override
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.web_javascript;
+
+  @override
+  PlatformType? get platformType => PlatformType.web;
+
+  @override
+  String get displayName => GoogleChromeDevice.kChromeDeviceName;
+}
+
+class FakeMicrosoftEdgeDevice extends Fake implements MicrosoftEdgeDevice {
+  @override
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.web_javascript;
+
+  @override
+  PlatformType? get platformType => PlatformType.web;
+
+  @override
+  String get displayName => MicrosoftEdgeDevice.kEdgeDeviceName;
+}
+
+class FakeCustomBrowserDevice extends Fake implements ChromiumDevice {
+  @override
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.web_javascript;
+
+  @override
+  PlatformType? get platformType => PlatformType.web;
+
+  @override
+  String get displayName => 'Dartium';
+}
+
+extension on String {
+  String get stripScriptUris =>
+      replaceAll(RegExp(r"scriptUri:\s*'file:\/\/\/\S*',"), "scriptUri: 'STRIPPED',");
+}
+
 void main() {
   late Directory originalCwd;
   late Directory tempDir;
   late LoggingProcessManager loggingProcessManager;
+  late ShutdownHooks shutdownHooks;
   late FakeStdio mockStdio;
   late Logger logger;
   // We perform this initialization just so we can build the generated file path for test
@@ -61,11 +100,15 @@ void main() {
   late Platform platform;
   late FakeDeviceManager fakeDeviceManager;
   late FakeAnalytics fakeAnalytics;
+  late FakeGoogleChromeDevice fakeGoogleChromeDevice;
+  late FakeMicrosoftEdgeDevice fakeMicrosoftEdgeDevice;
+  late FakeCustomBrowserDevice fakeCustomBrowserDevice;
 
   setUp(() async {
     originalCwd = globals.fs.currentDirectory;
     await ensureFlutterToolsSnapshot();
     loggingProcessManager = LoggingProcessManager();
+    shutdownHooks = ShutdownHooks();
     logger = BufferLogger.test();
     fs = LocalFileSystem.test(signals: Signals.test());
     botDetector = const FakeBotDetector(false);
@@ -73,13 +116,15 @@ void main() {
     mockStdio = FakeStdio();
     platform = FakePlatform.fromPlatform(const LocalPlatform());
 
+    fakeGoogleChromeDevice = FakeGoogleChromeDevice();
+    fakeMicrosoftEdgeDevice = FakeMicrosoftEdgeDevice();
+    fakeCustomBrowserDevice = FakeCustomBrowserDevice();
+
     // Create a fake device manager which only contains a single Chrome device.
-    const kChromeDeviceId = 'chrome-id';
-    final fakeChromeDevice = FakeDevice('chrome', kChromeDeviceId)
-      ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.web_javascript);
     fakeDeviceManager = FakeDeviceManager()
-      ..addAttachedDevice(fakeChromeDevice)
-      ..specifiedDeviceId = kChromeDeviceId;
+      ..addAttachedDevice(fakeGoogleChromeDevice)
+      ..addAttachedDevice(fakeMicrosoftEdgeDevice)
+      ..addAttachedDevice(fakeCustomBrowserDevice);
 
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fs: MemoryFileSystem.test(),
@@ -93,9 +138,10 @@ void main() {
     Cache.flutterRoot = fs.path.absolute('..', '..');
   });
 
-  tearDown(() {
+  tearDown(() async {
+    await shutdownHooks.runShutdownHooks(logger);
     tryToDelete(tempDir);
-    fs.dispose();
+    await fs.dispose();
     globals.fs.currentDirectory = originalCwd;
   });
 
@@ -116,7 +162,7 @@ void main() {
         projectFactory: FlutterProjectFactory(logger: logger, fileSystem: fs),
         cache: Cache.test(processManager: loggingProcessManager, platform: platform),
         platform: platform,
-        shutdownHooks: ShutdownHooks(),
+        shutdownHooks: shutdownHooks,
         os: OperatingSystemUtils(
           fileSystem: fs,
           processManager: loggingProcessManager,
@@ -142,6 +188,14 @@ void main() {
 
   void expectNoPreviewLaunchTimingEvents() => expectNPreviewLaunchTimingEvents(0);
   void expectSinglePreviewLaunchTimingEvent() => expectNPreviewLaunchTimingEvents(1);
+
+  void expectDeviceSelected(Device device) {
+    final bufferLogger = logger as BufferLogger;
+    expect(
+      bufferLogger.statusText,
+      contains('Launching the Widget Preview Scaffold on ${device.displayName}...'),
+    );
+  }
 
   Future<void> startWidgetPreview({
     required Directory? rootProject,
@@ -273,11 +327,17 @@ Widget preview() => Text('Foo');''';
 import 'widget_preview.dart' as _i1;
 import 'package:flutter_project/foo.dart' as _i2;
 
-List<_i1.WidgetPreview> previews() => [
-      _i1.WidgetPreview(
-        packageName: 'flutter_project',
-        name: 'preview',
-        builder: () => _i2.preview(),
+List<_i1.WidgetPreviewGroup> previews() => [
+      _i1.WidgetPreviewGroup(
+        name: 'Default',
+        previews: [
+          _i1.WidgetPreview(
+            scriptUri: 'STRIPPED',
+            packageName: 'flutter_project',
+            name: 'preview',
+            builder: () => _i2.preview(),
+          )
+        ],
       )
     ];
 ''';
@@ -299,7 +359,7 @@ List<_i1.WidgetPreview> previews() => [
         );
 
         await startWidgetPreview(rootProject: rootProject);
-        expect(generatedFile.readAsStringSync(), expectedGeneratedFileContents);
+        expect(generatedFile.readAsStringSync().stripScriptUris, expectedGeneratedFileContents);
         expectSinglePreviewLaunchTimingEvent();
       },
       overrides: <Type, Generator>{
@@ -337,7 +397,7 @@ List<_i1.WidgetPreview> previews() => [
         fs.currentDirectory = rootProject;
         await startWidgetPreview(rootProject: null);
 
-        expect(generatedFile.readAsStringSync(), expectedGeneratedFileContents);
+        expect(generatedFile.readAsStringSync().stripScriptUris, expectedGeneratedFileContents);
         expectSinglePreviewLaunchTimingEvent();
       },
       overrides: <Type, Generator>{
@@ -419,6 +479,84 @@ List<_i1.WidgetPreview> previews() => [
       overrides: <Type, Generator>{
         Analytics: () => fakeAnalytics,
         DeviceManager: () => fakeDeviceManager,
+        ProcessManager: () => loggingProcessManager,
+        Pub: () => Pub.test(
+          fileSystem: fs,
+          logger: logger,
+          processManager: loggingProcessManager,
+          botDetector: botDetector,
+          platform: platform,
+          stdio: mockStdio,
+        ),
+      },
+    );
+
+    testUsingContext(
+      'start exits if no web target is available.',
+      () async {
+        // Regression test for https://github.com/flutter/flutter/issues/173960.
+        final Directory rootProject = await createRootProject();
+        await expectToolExitLater(
+          startWidgetPreview(rootProject: rootProject),
+          contains(WidgetPreviewStartCommand.kBrowserNotFoundErrorMessage),
+        );
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        DeviceManager: () => fakeDeviceManager..attachedDevices.clear(),
+        FileSystem: () => fs,
+        ProcessManager: () => loggingProcessManager,
+        Pub: () => Pub.test(
+          fileSystem: fs,
+          logger: logger,
+          processManager: loggingProcessManager,
+          botDetector: botDetector,
+          platform: platform,
+          stdio: mockStdio,
+        ),
+      },
+    );
+
+    testUsingContext(
+      'always starts with Chrome when available.',
+      () async {
+        final Directory rootProject = await createRootProject();
+        await startWidgetPreview(rootProject: rootProject);
+        expectDeviceSelected(fakeGoogleChromeDevice);
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        DeviceManager: () => fakeDeviceManager
+          ..attachedDevices.clear()
+          ..addAttachedDevice(fakeMicrosoftEdgeDevice)
+          // Register the Chrome device second to ensure we're not just grabbing the first device.
+          ..addAttachedDevice(fakeGoogleChromeDevice),
+        FileSystem: () => fs,
+        ProcessManager: () => loggingProcessManager,
+        Pub: () => Pub.test(
+          fileSystem: fs,
+          logger: logger,
+          processManager: loggingProcessManager,
+          botDetector: botDetector,
+          platform: platform,
+          stdio: mockStdio,
+        ),
+      },
+    );
+
+    testUsingContext(
+      'starts with Edge if Chrome is not available.',
+      () async {
+        final Directory rootProject = await createRootProject();
+        await startWidgetPreview(rootProject: rootProject);
+        expectDeviceSelected(fakeMicrosoftEdgeDevice);
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        DeviceManager: () => fakeDeviceManager
+          ..attachedDevices.clear()
+          ..addAttachedDevice(fakeMicrosoftEdgeDevice),
+        FileSystem: () => fs,
         ProcessManager: () => loggingProcessManager,
         Pub: () => Pub.test(
           fileSystem: fs,

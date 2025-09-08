@@ -1141,6 +1141,94 @@ void main() {
       await tester.pumpAndSettle();
     });
 
+    testWidgets('drag dismiss uses route navigator instead of root navigator', (
+      WidgetTester tester,
+    ) async {
+      final GlobalKey homeKey = GlobalKey();
+      final GlobalKey nestedNavigatorKey = GlobalKey<NavigatorState>();
+      final GlobalKey sheetKey = GlobalKey();
+      bool wasPopped = false;
+      bool rootNavigatorPopped = false;
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: PopScope(
+            onPopInvokedWithResult: (bool didPop, Object? result) {
+              if (didPop) {
+                rootNavigatorPopped = true;
+              }
+            },
+            child: CupertinoPageScaffold(
+              key: homeKey,
+              child: Navigator(
+                key: nestedNavigatorKey,
+                onGenerateRoute: (RouteSettings settings) {
+                  return CupertinoPageRoute<void>(
+                    settings: settings,
+                    builder: (BuildContext context) {
+                      return Center(
+                        child: Column(
+                          children: <Widget>[
+                            const Text('Page 1'),
+                            CupertinoButton(
+                              onPressed: () {
+                                Navigator.push<void>(
+                                  context,
+                                  CupertinoSheetRoute<void>(
+                                    builder: (BuildContext context) {
+                                      return PopScope(
+                                        onPopInvokedWithResult: (bool didPop, Object? result) {
+                                          if (didPop) {
+                                            wasPopped = true;
+                                          }
+                                        },
+                                        child: CupertinoPageScaffold(
+                                          key: sheetKey,
+                                          child: const Center(child: Text('Page 2')),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                );
+                              },
+                              child: const Text('Push Page 2'),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Push Page 2'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Page 2'), findsOneWidget);
+      expect(wasPopped, false);
+      expect(rootNavigatorPopped, false);
+
+      // Start drag gesture and drag down far enough to trigger dismissal
+      final TestGesture gesture = await tester.startGesture(const Offset(100, 200));
+      await gesture.moveBy(const Offset(0, 350));
+      await tester.pump();
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Verify the sheet was dismissed and the PopScope callback was triggered
+      expect(find.text('Page 2'), findsNothing);
+      expect(find.text('Page 1'), findsOneWidget);
+      // Verify that the nested navigator was used (sheet PopScope triggered)
+      // but the root navigator was NOT used (root PopScope not triggered)
+      expect(wasPopped, true);
+      expect(rootNavigatorPopped, false);
+    });
+
     testWidgets('dragging does not move the sheet when enableDrag is false', (
       WidgetTester tester,
     ) async {
@@ -1300,6 +1388,38 @@ void main() {
         tester.getBottomLeft(find.byType(Scaffold).first).dy,
         equals(tester.getBottomLeft(find.byType(SnackBar).first).dy),
       );
+    });
+
+    testWidgets('partial upward drag stretches and returns without popping', (
+      WidgetTester tester,
+    ) async {
+      final GlobalKey homeKey = GlobalKey();
+      final GlobalKey sheetKey = GlobalKey();
+
+      await tester.pumpWidget(dragGestureApp(homeKey, sheetKey));
+
+      await tester.tap(find.text('Push Page 2'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Page 2'), findsOneWidget);
+
+      RenderBox box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
+      final double initialPosition = box.localToGlobal(Offset.zero).dy;
+
+      final TestGesture gesture = await tester.startGesture(const Offset(100, 400));
+      await gesture.moveBy(const Offset(0, -100));
+      await tester.pump();
+
+      box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
+      final double stretchedPosition = box.localToGlobal(Offset.zero).dy;
+      expect(stretchedPosition, lessThan(initialPosition));
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
+      final double finalPosition = box.localToGlobal(Offset.zero).dy;
+      expect(finalPosition, initialPosition);
     });
   });
 

@@ -206,10 +206,10 @@ class MockSurface : public Surface {
 
   MOCK_METHOD(std::unique_ptr<SurfaceFrame>,
               AcquireFrame,
-              (const SkISize& size),
+              (const DlISize& size),
               (override));
 
-  MOCK_METHOD(SkMatrix, GetRootTransformation, (), (const, override));
+  MOCK_METHOD(DlMatrix, GetRootTransformation, (), (const, override));
 
   MOCK_METHOD(GrDirectContext*, GetContext, (), (override));
 
@@ -2316,7 +2316,7 @@ TEST_F(ShellTest, LocaltimesMatch) {
 class SinglePixelImageGenerator : public ImageGenerator {
  public:
   SinglePixelImageGenerator()
-      : info_(SkImageInfo::MakeN32(1, 1, SkAlphaType::kOpaque_SkAlphaType)){};
+      : info_(SkImageInfo::MakeN32(1, 1, SkAlphaType::kOpaque_SkAlphaType)) {};
   ~SinglePixelImageGenerator() = default;
   const SkImageInfo& GetInfo() { return info_; }
 
@@ -2487,7 +2487,7 @@ TEST_F(ShellTest, RasterizerMakeRasterSnapshot) {
         SnapshotDelegate* delegate =
             reinterpret_cast<Rasterizer*>(shell->GetRasterizer().get());
         sk_sp<DlImage> image = delegate->MakeRasterSnapshotSync(
-            MakeSizedDisplayList(50, 50), SkISize::Make(50, 50));
+            MakeSizedDisplayList(50, 50), DlISize(50, 50));
         EXPECT_NE(image, nullptr);
 
         latch->Signal();
@@ -4589,6 +4589,7 @@ TEST_F(ShellTest, ShellCannotAddDuplicateViewId) {
 
 // Test that remove view fails if the view ID does not exist.
 TEST_F(ShellTest, ShellCannotRemoveNonexistentId) {
+  // NOLINTNEXTLINE(clang-analyzer-core.uninitialized.Assign)
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
   Settings settings = CreateSettingsForFixture();
   ThreadHost thread_host(ThreadHost::ThreadHostConfig(
@@ -4831,9 +4832,9 @@ TEST_F(ShellTest, WillLogWarningWhenImpellerIsOptedOut) {
   std::ostringstream stream;
   fml::LogMessage::CaptureNextLog(&stream);
   std::unique_ptr<Shell> shell = CreateShell(settings, task_runners);
-  ASSERT_TRUE(stream.str().find(
-                  "[Action Required] The application opted out of Impeller") !=
-              std::string::npos);
+  ASSERT_TRUE(
+      stream.str().find("[Action Required]: Impeller opt-out deprecated.") !=
+      std::string::npos);
   ASSERT_TRUE(shell);
   DestroyShell(std::move(shell), task_runners);
 }

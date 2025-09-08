@@ -723,6 +723,7 @@ void main() {
           traceToFile: 'path/to/trace.binpb',
           endlessTraceBuffer: true,
           profileMicrotasks: true,
+          profileStartup: true,
           purgePersistentCache: true,
           verboseSystemLogs: true,
           enableImpeller: ImpellerStatus.disabled,
@@ -740,6 +741,7 @@ void main() {
           launchArguments.join(' '),
           <String>[
             '--enable-dart-profiling',
+            '--profile-startup',
             '--disable-service-auth-codes',
             '--disable-vm-service-publication',
             '--start-paused',
@@ -786,22 +788,6 @@ void main() {
             '--verify-entry-points',
           ].join(' '),
         );
-      },
-    );
-
-    testWithoutContext(
-      'Get launch arguments for physical CoreDevice with debugging enabled with no launch arguments',
-      () {
-        final original = DebuggingOptions.enabled(BuildInfo.debug);
-
-        final List<String> launchArguments = original.getIOSLaunchArguments(
-          EnvironmentType.physical,
-          null,
-          <String, Object?>{},
-          isCoreDevice: true,
-        );
-
-        expect(launchArguments.join(' '), <String>['--enable-dart-profiling'].join(' '));
       },
     );
 
@@ -894,6 +880,7 @@ void main() {
           traceToFile: 'path/to/trace.binpb',
           endlessTraceBuffer: true,
           profileMicrotasks: true,
+          profileStartup: true,
           purgePersistentCache: true,
           verboseSystemLogs: true,
           enableImpeller: ImpellerStatus.disabled,
@@ -911,6 +898,7 @@ void main() {
           launchArguments.join(' '),
           <String>[
             '--enable-dart-profiling',
+            '--profile-startup',
             '--disable-service-auth-codes',
             '--disable-vm-service-publication',
             '--start-paused',

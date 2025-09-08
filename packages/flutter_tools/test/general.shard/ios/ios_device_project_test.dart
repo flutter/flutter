@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcode_debug.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -107,8 +108,10 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
       artifacts: Artifacts.test(),
       cache: Cache.test(processManager: processManager),
     ),
+    analytics: FakeAnalytics(),
     iMobileDevice: IMobileDevice.test(processManager: processManager),
     coreDeviceControl: FakeIOSCoreDeviceControl(),
+    coreDeviceLauncher: FakeIOSCoreDeviceLauncher(),
     xcodeDebug: FakeXcodeDebug(),
     platform: platform,
     name: 'iPhone 1',
@@ -126,3 +129,7 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
 class FakeXcodeDebug extends Fake implements XcodeDebug {}
 
 class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {}
+
+class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {}
+
+class FakeAnalytics extends Fake implements Analytics {}

@@ -11,5 +11,7 @@
   "searchWebButtonLabel": "Leita á vefnum",
   "shareButtonLabel": "Deila",
   "pasteButtonLabel": "Líma",
-  "selectAllButtonLabel": "Velja allt"
+  "selectAllButtonLabel": "Velja allt",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found"
 }

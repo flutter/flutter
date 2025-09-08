@@ -58,7 +58,7 @@ void AndroidSurfaceDynamicImpeller::SetupImpellerSurface() {
   }
 }
 
-bool AndroidSurfaceDynamicImpeller::OnScreenSurfaceResize(const SkISize& size) {
+bool AndroidSurfaceDynamicImpeller::OnScreenSurfaceResize(const DlISize& size) {
   if (vulkan_surface_) {
     return vulkan_surface_->OnScreenSurfaceResize(size);
   }

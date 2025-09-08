@@ -51,7 +51,10 @@ class UniqueObject {
   UniqueObject(UniqueObject&& other)
       : data_(other.release(), other.get_traits()) {}
 
-  ~UniqueObject() { FreeIfNecessary(); }
+  ~UniqueObject() {
+    // NOLINTNEXTLINE(clang-analyzer-core.StackAddressEscape)
+    FreeIfNecessary();
+  }
 
   UniqueObject& operator=(UniqueObject&& other) {
     reset(other.release());

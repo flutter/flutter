@@ -25,7 +25,22 @@ class EnumIndex<E> {
   final Map<E, String> _valueToName;
 
   /// Given a [simpleName] finds the corresponding enum value.
-  E lookupBySimpleName(String simpleName) => _nameToValue[simpleName]!;
+  ///
+  /// Throws an [ArgumentError] if [simpleName] is not valid.
+  ///
+  /// The [path] is the path in the parent JSON structure at which this value
+  /// was found, and will be reported in any [ArgumentError]s as the name.
+  E lookupBySimpleName(String simpleName, {String? path}) {
+    final E? value = _nameToValue[simpleName];
+    if (value == null) {
+      throw ArgumentError.value(
+        simpleName,
+        path,
+        'Invalid enum value, valid values are ${_nameToValue.keys.join(', ')}',
+      );
+    }
+    return value;
+  }
 
   /// Returns the simple name for [enumValue].
   String toSimpleName(E enumValue) => _valueToName[enumValue]!;

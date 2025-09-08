@@ -20,6 +20,7 @@ import 'device_vm_service_discovery_for_attach.dart';
 import 'project.dart';
 import 'vmservice.dart';
 import 'web/compile.dart';
+import 'web/devfs_config.dart';
 
 DeviceManager? get deviceManager => context.get<DeviceManager>();
 
@@ -767,9 +768,6 @@ abstract class Device {
   /// application.
   bool get supportsScreenshot => false;
 
-  /// Whether the device supports the '--fast-start' development mode.
-  bool get supportsFastStart => false;
-
   /// Whether the Flavors feature ('--flavor') is supported for this device.
   bool get supportsFlavors => false;
 
@@ -873,7 +871,6 @@ abstract class Device {
         'hotReload': supportsHotReload,
         'hotRestart': supportsHotRestart,
         'screenshot': supportsScreenshot,
-        'fastStart': supportsFastStart,
         'flutterExit': supportsFlutterExit,
         'hardwareRendering': isLocalEmu && await supportsHardwareRendering,
         'startPaused': supportsStartPaused,
@@ -948,10 +945,6 @@ class DebuggingOptions {
     this.deviceVmServicePort,
     this.ddsPort,
     this.devToolsServerAddress,
-    this.hostname,
-    this.port,
-    this.tlsCertPath,
-    this.tlsCertKeyPath,
     this.webEnableExposeUrl,
     this.webUseSseForDebugProxy = true,
     this.webUseSseForDebugBackend = true,
@@ -960,18 +953,17 @@ class DebuggingOptions {
     this.webBrowserDebugPort,
     this.webBrowserFlags = const <String>[],
     this.webEnableExpressionEvaluation = false,
-    this.webHeaders = const <String, String>{},
     this.webLaunchUrl,
     WebRendererMode? webRenderer,
     this.webUseWasm = false,
     this.vmserviceOutFile,
-    this.fastStart = false,
     this.nativeNullAssertions = false,
     this.enableImpeller = ImpellerStatus.platformDefault,
     this.enableFlutterGpu = false,
     this.enableVulkanValidation = false,
     this.uninstallFirst = false,
     this.enableDartProfiling = true,
+    this.profileStartup = false,
     this.enableEmbedderApi = false,
     this.usingCISystem = false,
     this.debugLogsDirectoryPath,
@@ -979,16 +971,13 @@ class DebuggingOptions {
     this.ipv6 = false,
     this.google3WorkspaceRoot,
     this.printDtd = false,
+    this.webDevServerConfig,
   }) : debuggingEnabled = true,
        webRenderer = webRenderer ?? WebRendererMode.getDefault(useWasm: webUseWasm);
 
   DebuggingOptions.disabled(
     this.buildInfo, {
     this.dartEntrypointArgs = const <String>[],
-    this.port,
-    this.hostname,
-    this.tlsCertPath,
-    this.tlsCertKeyPath,
     this.webEnableExposeUrl,
     this.webUseSseForDebugProxy = true,
     this.webUseSseForDebugBackend = true,
@@ -997,7 +986,6 @@ class DebuggingOptions {
     this.webBrowserDebugPort,
     this.webBrowserFlags = const <String>[],
     this.webLaunchUrl,
-    this.webHeaders = const <String, String>{},
     WebRendererMode? webRenderer,
     this.webUseWasm = false,
     this.traceAllowlist,
@@ -1006,9 +994,11 @@ class DebuggingOptions {
     this.enableVulkanValidation = false,
     this.uninstallFirst = false,
     this.enableDartProfiling = true,
+    this.profileStartup = false,
     this.enableEmbedderApi = false,
     this.usingCISystem = false,
     this.debugLogsDirectoryPath,
+    this.webDevServerConfig,
   }) : debuggingEnabled = false,
        useTestFonts = false,
        startPaused = false,
@@ -1032,7 +1022,6 @@ class DebuggingOptions {
        ddsPort = null,
        devToolsServerAddress = null,
        vmserviceOutFile = null,
-       fastStart = false,
        webEnableExpressionEvaluation = false,
        nativeNullAssertions = false,
        enableDevTools = false,
@@ -1067,10 +1056,6 @@ class DebuggingOptions {
     required this.disablePortPublication,
     required this.ddsPort,
     required this.devToolsServerAddress,
-    required this.port,
-    required this.hostname,
-    required this.tlsCertPath,
-    required this.tlsCertKeyPath,
     required this.webEnableExposeUrl,
     required this.webUseSseForDebugProxy,
     required this.webUseSseForDebugBackend,
@@ -1079,18 +1064,17 @@ class DebuggingOptions {
     required this.webBrowserDebugPort,
     required this.webBrowserFlags,
     required this.webEnableExpressionEvaluation,
-    required this.webHeaders,
     required this.webLaunchUrl,
     required this.webRenderer,
     required this.webUseWasm,
     required this.vmserviceOutFile,
-    required this.fastStart,
     required this.nativeNullAssertions,
     required this.enableImpeller,
     required this.enableFlutterGpu,
     required this.enableVulkanValidation,
     required this.uninstallFirst,
     required this.enableDartProfiling,
+    required this.profileStartup,
     required this.enableEmbedderApi,
     required this.usingCISystem,
     required this.debugLogsDirectoryPath,
@@ -1098,6 +1082,7 @@ class DebuggingOptions {
     required this.ipv6,
     required this.google3WorkspaceRoot,
     required this.printDtd,
+    this.webDevServerConfig,
   });
 
   final bool debuggingEnabled;
@@ -1126,10 +1111,6 @@ class DebuggingOptions {
   final bool disablePortPublication;
   final int? ddsPort;
   final Uri? devToolsServerAddress;
-  final String? port;
-  final String? hostname;
-  final String? tlsCertPath;
-  final String? tlsCertKeyPath;
   final bool? webEnableExposeUrl;
   final bool webUseSseForDebugProxy;
   final bool webUseSseForDebugBackend;
@@ -1138,6 +1119,7 @@ class DebuggingOptions {
   final bool enableFlutterGpu;
   final bool enableVulkanValidation;
   final bool enableDartProfiling;
+  final bool profileStartup;
   final bool enableEmbedderApi;
   final bool usingCISystem;
   final String? debugLogsDirectoryPath;
@@ -1145,6 +1127,7 @@ class DebuggingOptions {
   final bool ipv6;
   final String? google3WorkspaceRoot;
   final bool printDtd;
+  final WebDevServerConfig? webDevServerConfig;
 
   /// Whether the tool should try to uninstall a previously installed version of the app.
   ///
@@ -1170,9 +1153,6 @@ class DebuggingOptions {
   /// Allow developers to customize the browser's launch URL
   final String? webLaunchUrl;
 
-  /// Allow developers to add custom headers to web server
-  final Map<String, String> webHeaders;
-
   /// Which web renderer to use for the debugging session
   final WebRendererMode webRenderer;
 
@@ -1181,7 +1161,6 @@ class DebuggingOptions {
 
   /// A file where the VM Service URL should be written after the application is started.
   final String? vmserviceOutFile;
-  final bool fastStart;
 
   /// Additional null runtime checks inserted for web applications.
   ///
@@ -1194,10 +1173,10 @@ class DebuggingOptions {
     String? route,
     Map<String, Object?> platformArgs, {
     DeviceConnectionInterface interfaceType = DeviceConnectionInterface.attached,
-    bool isCoreDevice = false,
   }) {
     return <String>[
       if (enableDartProfiling) '--enable-dart-profiling',
+      if (profileStartup) '--profile-startup',
       if (disableServiceAuthCodes) '--disable-service-auth-codes',
       if (disablePortPublication) '--disable-vm-service-publication',
       if (startPaused) '--start-paused',
@@ -1207,13 +1186,7 @@ class DebuggingOptions {
       if (environmentType == EnvironmentType.simulator && dartFlags.isNotEmpty)
         '--dart-flags=$dartFlags',
       if (useTestFonts) '--use-test-fonts',
-      // Core Devices (iOS 17 devices) are debugged through Xcode so don't
-      // include these flags, which are used to check if the app was launched
-      // via Flutter CLI and `ios-deploy`.
-      if (debuggingEnabled && !isCoreDevice) ...<String>[
-        '--enable-checked-mode',
-        '--verify-entry-points',
-      ],
+      if (debuggingEnabled) ...<String>['--enable-checked-mode', '--verify-entry-points'],
       if (enableSoftwareRendering) '--enable-software-rendering',
       if (traceSystrace) '--trace-systrace',
       if (traceToFile != null) '--trace-to-file="$traceToFile"',
@@ -1268,10 +1241,10 @@ class DebuggingOptions {
     'disablePortPublication': disablePortPublication,
     'ddsPort': ddsPort,
     'devToolsServerAddress': devToolsServerAddress.toString(),
-    'port': port,
-    'hostname': hostname,
-    'tlsCertPath': tlsCertPath,
-    'tlsCertKeyPath': tlsCertKeyPath,
+    'port': webDevServerConfig?.port,
+    'hostname': webDevServerConfig?.host,
+    'tlsCertPath': webDevServerConfig?.https?.certPath,
+    'tlsCertKeyPath': webDevServerConfig?.https?.certKeyPath,
     'webEnableExposeUrl': webEnableExposeUrl,
     'webUseSseForDebugProxy': webUseSseForDebugProxy,
     'webUseSseForDebugBackend': webUseSseForDebugBackend,
@@ -1281,18 +1254,20 @@ class DebuggingOptions {
     'webBrowserFlags': webBrowserFlags,
     'webEnableExpressionEvaluation': webEnableExpressionEvaluation,
     'webLaunchUrl': webLaunchUrl,
-    'webHeaders': webHeaders,
+    'webHeaders': webDevServerConfig?.headers ?? <String, String>{},
     'webRenderer': webRenderer.name,
     'webUseWasm': webUseWasm,
     'vmserviceOutFile': vmserviceOutFile,
-    'fastStart': fastStart,
     'nativeNullAssertions': nativeNullAssertions,
     'enableImpeller': enableImpeller.asBool,
     'enableFlutterGpu': enableFlutterGpu,
     'enableVulkanValidation': enableVulkanValidation,
     'enableDartProfiling': enableDartProfiling,
+    'profileStartup': profileStartup,
     'enableEmbedderApi': enableEmbedderApi,
     'usingCISystem': usingCISystem,
+    // TODO(bkonyi): remove once fg3 is updated.
+    'fastStart': false,
     'debugLogsDirectoryPath': debugLogsDirectoryPath,
     'enableDevTools': enableDevTools,
     'ipv6': ipv6,
@@ -1337,10 +1312,6 @@ class DebuggingOptions {
         devToolsServerAddress: json['devToolsServerAddress'] != null
             ? Uri.parse(json['devToolsServerAddress']! as String)
             : null,
-        port: json['port'] as String?,
-        hostname: json['hostname'] as String?,
-        tlsCertPath: json['tlsCertPath'] as String?,
-        tlsCertKeyPath: json['tlsCertKeyPath'] as String?,
         webEnableExposeUrl: json['webEnableExposeUrl'] as bool?,
         webUseSseForDebugProxy: json['webUseSseForDebugProxy']! as bool,
         webUseSseForDebugBackend: json['webUseSseForDebugBackend']! as bool,
@@ -1349,18 +1320,17 @@ class DebuggingOptions {
         webBrowserDebugPort: json['webBrowserDebugPort'] as int?,
         webBrowserFlags: (json['webBrowserFlags']! as List<dynamic>).cast<String>(),
         webEnableExpressionEvaluation: json['webEnableExpressionEvaluation']! as bool,
-        webHeaders: (json['webHeaders']! as Map<dynamic, dynamic>).cast<String, String>(),
         webLaunchUrl: json['webLaunchUrl'] as String?,
         webRenderer: WebRendererMode.values.byName(json['webRenderer']! as String),
         webUseWasm: json['webUseWasm']! as bool,
         vmserviceOutFile: json['vmserviceOutFile'] as String?,
-        fastStart: json['fastStart']! as bool,
         nativeNullAssertions: json['nativeNullAssertions']! as bool,
         enableImpeller: ImpellerStatus.fromBool(json['enableImpeller'] as bool?),
         enableFlutterGpu: json['enableFlutterGpu']! as bool,
         enableVulkanValidation: (json['enableVulkanValidation'] as bool?) ?? false,
         uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
         enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,
+        profileStartup: (json['profileStartup'] as bool?) ?? false,
         enableEmbedderApi: (json['enableEmbedderApi'] as bool?) ?? false,
         usingCISystem: (json['usingCISystem'] as bool?) ?? false,
         debugLogsDirectoryPath: json['debugLogsDirectoryPath'] as String?,
@@ -1368,6 +1338,18 @@ class DebuggingOptions {
         ipv6: (json['ipv6'] as bool?) ?? false,
         google3WorkspaceRoot: json['google3WorkspaceRoot'] as String?,
         printDtd: (json['printDtd'] as bool?) ?? false,
+        webDevServerConfig: WebDevServerConfig(
+          port: json['port'] is int ? json['port']! as int : 8080,
+          host: json['hostname'] is String ? json['hostname']! as String : 'localhost',
+
+          https: (json['tlsCertPath'] != null || json['tlsCertKeyPath'] != null)
+              ? HttpsConfig(
+                  certPath: json['tlsCertPath'] as String?,
+                  certKeyPath: json['tlsCertKeyPath'] as String?,
+                )
+              : null,
+          headers: (json['webHeaders']! as Map<dynamic, dynamic>).cast<String, String>(),
+        ),
       );
 }
 

@@ -124,7 +124,7 @@ void main() {
         'SYMROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
         if (verbose) 'VERBOSE_SCRIPT_LOGGING=YES' else '-quiet',
         'COMPILER_INDEX_STORE_ENABLE=NO',
-        if (additionalCommandArguments != null) ...additionalCommandArguments,
+        ...?additionalCommandArguments,
       ],
       stdout: '''
 STDOUT STUFF

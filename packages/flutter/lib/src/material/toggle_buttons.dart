@@ -903,22 +903,22 @@ class ToggleButtons extends StatelessWidget {
 }
 
 @immutable
-class _ResolveFillColor extends MaterialStateProperty<Color?> with Diagnosticable {
+class _ResolveFillColor extends WidgetStateProperty<Color?> with Diagnosticable {
   _ResolveFillColor(this.primary);
 
   final Color? primary;
 
   @override
   Color? resolve(Set<MaterialState> states) {
-    if (primary is MaterialStateProperty<Color>) {
-      return MaterialStateProperty.resolveAs<Color?>(primary, states);
+    if (primary is WidgetStateProperty<Color>) {
+      return WidgetStateProperty.resolveAs<Color?>(primary, states);
     }
     return states.contains(MaterialState.selected) ? primary : null;
   }
 }
 
 @immutable
-class _DefaultFillColor extends MaterialStateProperty<Color> with Diagnosticable {
+class _DefaultFillColor extends WidgetStateProperty<Color> with Diagnosticable {
   _DefaultFillColor(this.colorScheme);
 
   final ColorScheme colorScheme;
@@ -933,7 +933,7 @@ class _DefaultFillColor extends MaterialStateProperty<Color> with Diagnosticable
 }
 
 @immutable
-class _ToggleButtonDefaultOverlay extends MaterialStateProperty<Color?> {
+class _ToggleButtonDefaultOverlay extends WidgetStateProperty<Color?> {
   _ToggleButtonDefaultOverlay({
     required this.selected,
     required this.unselected,

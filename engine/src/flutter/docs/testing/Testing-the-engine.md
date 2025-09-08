@@ -52,6 +52,41 @@ on and for your host machine architecture.
 It's best practice to test only one real production class per test and create
 mocks for all other dependencies.
 
+Each Google Test target produces an executable in the `out` directory with the
+`_unittests` suffix. You use these executables to run Google Tests.
+
+To run the shell's C++ unit tests:
+
+```sh
+../out/host_debug_unopt/shell_unittests
+```
+
+To run a single test, use [Google Test's filters][]:
+
+```sh
+../out/host_debug_unopt/shell_unittests --gtest_filter="ShellTest.WaitForFirstFrame"
+```
+
+[Google Test's filters]: https://google.github.io/googletest/advanced.html#running-a-subset-of-the-tests
+
+You can use `*` wildcards to run tests whose name matches a pattern:
+
+```sh
+../out/host_debug_unopt/shell_unittests --gtest_filter="ShellTest.WaitFor*"
+```
+
+> [!TIP]
+> Google Test supports other patterns, like `-` for exclusions and `:` for joins.
+> Check [Google Test's documentation][] for details.
+
+[Google Test's documentation]: https://google.github.io/googletest/advanced.html#running-a-subset-of-the-tests
+
+To reproduce test flakes, you can run a test multiple times:
+
+```sh
+../out/host_debug_unopt/shell_unittests --gtest_filter="ShellTest.WaitForFirstFrame" --gtest_repeat=1000
+```
+
 ## Java - Android embedding
 
 If you edit `.java` files in the [`shell/platform/android`](../../shell/platform/android/)
@@ -186,6 +221,7 @@ testing/run_tests.py --type=objc
 
 to easily build and run the XCTests.
 
+- Add the `--variant host_debug_unopt_arm64` argument when using an arm64 Mac targeting either simulators or physical devices.
 - Add the `--ios-variant ios_debug_sim_unopt_arm64` argument when using an arm64 Mac simulator (built with `--simulator-cpu=arm64`).
 
 This script only has a limited amount of smartness. If you've never built the engine before, it'll build the test and classes under test with a reasonable default configuration. If you've built the engine before, it'll re-build the engine with the same GN flags. You may want to double check your GN flags ([See compiling for ios from macos](../contributing/Compiling-the-engine.md#compiling-for-ios-from-macos)) if you haven't built the engine for a while.

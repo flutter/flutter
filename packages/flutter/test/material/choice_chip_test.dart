@@ -416,7 +416,7 @@ void main() {
     const Color disabledColor = Color(0xff00ff00);
     const Color backgroundColor = Color(0xff0000ff);
     const Color selectedColor = Color(0xffff0000);
-    final MaterialStateProperty<Color?> color = MaterialStateProperty.resolveWith((
+    final WidgetStateProperty<Color?> color = WidgetStateProperty.resolveWith((
       Set<MaterialState> states,
     ) {
       if (states.contains(MaterialState.disabled) && states.contains(MaterialState.selected)) {
@@ -847,5 +847,19 @@ void main() {
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       SystemMouseCursors.forbidden,
     );
+  });
+
+  testWidgets('ChoiceChip renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: Scaffold(body: ChoiceChip(label: Text('X'), selected: true)),
+          ),
+        ),
+      ),
+    );
+    final Finder xText = find.text('X');
+    expect(tester.getSize(xText).isEmpty, isTrue);
   });
 }

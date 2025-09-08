@@ -1254,7 +1254,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Drag handle color can take MaterialStateProperty', (WidgetTester tester) async {
+  testWidgets('Drag handle color can take WidgetStateProperty', (WidgetTester tester) async {
     const Color defaultColor = Colors.blue;
     const Color hoveringColor = Colors.green;
 

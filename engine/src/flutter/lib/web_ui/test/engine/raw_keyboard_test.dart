@@ -763,8 +763,8 @@ DomKeyboardEvent dispatchKeyboardEvent(
   target ??= domWindow;
 
   final DomKeyboardEvent event = createDomKeyboardEvent(type, <String, Object>{
-    if (key != null) 'key': key,
-    if (code != null) 'code': code,
+    'key': ?key,
+    'code': ?code,
     'location': location,
     'repeat': repeat,
     'shiftKey': isShiftPressed,

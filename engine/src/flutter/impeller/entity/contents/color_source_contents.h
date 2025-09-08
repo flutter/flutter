@@ -174,7 +174,8 @@ class ColorSourceContents : public Contents {
       clip_frame_info.depth = entity.GetShaderClipDepth();
       clip_frame_info.mvp = stencil_geometry_result.transform;
       ClipPipeline::VertexShader::BindFrameInfo(
-          pass, renderer.GetTransientsBuffer().EmplaceUniform(clip_frame_info));
+          pass,
+          renderer.GetTransientsDataBuffer().EmplaceUniform(clip_frame_info));
 
       if (!pass.Draw().ok()) {
         return false;
@@ -228,7 +229,7 @@ class ColorSourceContents : public Contents {
     pass.SetStencilReference(0);
 
     VertexShaderT::BindFrameInfo(
-        pass, renderer.GetTransientsBuffer().EmplaceUniform(frame_info));
+        pass, renderer.GetTransientsDataBuffer().EmplaceUniform(frame_info));
 
     // The reason we need to have a callback mechanism here is that this routine
     // may insert draw calls before the main draw call below. For example, for

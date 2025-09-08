@@ -13,7 +13,7 @@ namespace flutter {
 namespace testing {
 
 EmbedderTestCompositorSoftware::EmbedderTestCompositorSoftware(
-    SkISize surface_size)
+    DlISize surface_size)
     : EmbedderTestCompositor(surface_size, nullptr) {}
 
 EmbedderTestCompositorSoftware::~EmbedderTestCompositorSoftware() = default;
@@ -44,7 +44,7 @@ bool EmbedderTestCompositorSoftware::UpdateOffscrenComposition(
     size_t layers_count) {
   last_composition_ = nullptr;
 
-  const auto image_info = SkImageInfo::MakeN32Premul(surface_size_);
+  const auto image_info = SkImageInfo::MakeN32Premul(ToSkISize(surface_size_));
 
   auto surface = SkSurfaces::Raster(image_info);
 
