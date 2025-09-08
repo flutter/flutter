@@ -17713,7 +17713,7 @@ void main() {
         await gesture.moveBy(const Offset(30, 0));
         await tester.pumpAndSettle();
 
-        // The floating cursor should NOT be shown.
+        // The blinking cursor should NOT be shown.
         final EditableTextState editableTextState = tester.state<EditableTextState>(
           find.byType(EditableText),
         );
@@ -17725,7 +17725,7 @@ void main() {
         await tester.longPress(find.byType(EditableText));
         await tester.pumpAndSettle();
 
-        // The floating cursor should now be shown.
+        // The blinking cursor should now be shown.
         expect(focusNode.hasFocus, isTrue);
         expect(editableTextState.cursorCurrentlyVisible, isTrue);
       },
