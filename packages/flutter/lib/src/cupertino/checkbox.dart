@@ -66,8 +66,12 @@ const List<double> _kDisabledDarkGradientOpacities = <double>[0.08, 0.14];
 /// ([CupertinoSwitch] in Flutter) instead, or to find a creative custom
 /// solution.
 ///
-/// The checkbox has a default size of 14-by-14 pixels on desktop devices and
-/// [kMinInteractiveDimensionCupertino] pixels on mobile devices.
+/// Visually, the checkbox is a square of [CupertinoCheckbox.width] pixels.
+/// However, the widget's tap target and layout size depend on the platform:
+///   * On desktop devices, the tap target matches the visual size.
+///   * On mobile devices, the tap target expands to a square of
+///     [kMinInteractiveDimensionCupertino] pixels to meet accessibility
+///     guidelines.
 ///
 /// {@tool dartpad}
 /// This example shows a toggleable [CupertinoCheckbox].
@@ -296,9 +300,9 @@ class CupertinoCheckbox extends StatefulWidget {
 
   /// The tap target and layout size of the checkbox.
   ///
-  /// If this property is null, the tap target size defaults to a size of
-  /// 14-by-14 pixels on desktop devices and [kMinInteractiveDimensionCupertino]
-  /// pixels on mobile devices.
+  /// If this property is null, the tap target size defaults to a square of
+  /// [CupertinoCheckbox.width] pixels on desktop devices and
+  /// [kMinInteractiveDimensionCupertino] pixels on mobile devices.
   final Size? tapTargetSize;
 
   /// The semantic label for the checkbox that will be announced by screen readers.
