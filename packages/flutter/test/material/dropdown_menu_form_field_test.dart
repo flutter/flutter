@@ -982,19 +982,24 @@ void main() {
         ),
       );
 
+      final TextField textField = tester.widget(find.byType(TextField));
+
       // Select menuItem1.
       await tester.tap(find.byType(DropdownMenu<MenuItem>));
       await tester.pump();
       await tester.tap(findMenuItem(MenuItem.menuItem1));
       await tester.pump();
       expect(fieldKey.currentState!.value, MenuItem.menuItem1);
+      expect(
+        textField.controller?.value,
+        const TextEditingValue(text: 'Item 1', selection: TextSelection.collapsed(offset: 6)),
+      );
 
       // After reset the text field content is cleared.
       fieldKey.currentState!.reset();
       await tester.pump();
 
       expect(fieldKey.currentState!.value, null);
-      final TextField textField = tester.widget(find.byType(TextField));
       expect(
         textField.controller?.value,
         const TextEditingValue(selection: TextSelection.collapsed(offset: 0)),
@@ -1032,6 +1037,10 @@ void main() {
       await tester.tap(findMenuItem(MenuItem.menuItem1));
       await tester.pump();
       expect(fieldKey.currentState!.value, MenuItem.menuItem1);
+      expect(
+        textField.controller?.value,
+        const TextEditingValue(text: 'Item 1', selection: TextSelection.collapsed(offset: 6)),
+      );
 
       // After reset the text field content is cleared.
       fieldKey.currentState!.reset();
