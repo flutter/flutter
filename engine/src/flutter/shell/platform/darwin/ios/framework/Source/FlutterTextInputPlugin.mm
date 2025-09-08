@@ -1022,7 +1022,8 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
                                                                            _textInputClient];
                       }
                     }];
-        action.attributes = [keepsMenuPresented boolValue] ? UIMenuElementAttributesKeepsMenuPresented : 0;
+        action.attributes =
+            [keepsMenuPresented boolValue] ? UIMenuElementAttributesKeepsMenuPresented : 0;
         [items addObject:action];
       }
     }
