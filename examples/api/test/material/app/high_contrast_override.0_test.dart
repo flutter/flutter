@@ -12,18 +12,18 @@ void main() {
     await tester.pumpAndSettle();
 
     // Initially high contrast should be disabled
-    expect(find.text('High contrast: Disabled'), findsOneWidget);
+    expect(find.text('High contrast is disabled'), findsOneWidget);
     
     // Get the initial theme data (should be standard theme)
     final BuildContext context = tester.element(find.byType(Scaffold));
     final ThemeData initialTheme = Theme.of(context);
     
-    // Tap the switch to enable high contrast
-    await tester.tap(find.byType(Switch));
+    // Tap the button to enable high contrast
+    await tester.tap(find.text('Enable High Contrast'));
     await tester.pumpAndSettle();
     
     // Now high contrast should be enabled
-    expect(find.text('High contrast: Enabled'), findsOneWidget);
+    expect(find.text('High contrast is enabled'), findsOneWidget);
     
     // Get the updated theme data (should be high contrast theme)
     final BuildContext newContext = tester.element(find.byType(Scaffold));
@@ -37,11 +37,11 @@ void main() {
     expect(MediaQuery.highContrastOf(newContext), isTrue);
     
     // Tap again to disable high contrast
-    await tester.tap(find.byType(Switch));
+    await tester.tap(find.text('Disable High Contrast'));
     await tester.pumpAndSettle();
     
     // Should be back to disabled state
-    expect(find.text('High contrast: Disabled'), findsOneWidget);
+    expect(find.text('High contrast is disabled'), findsOneWidget);
     
     // Verify MediaQuery high contrast value is back to false
     final BuildContext finalContext = tester.element(find.byType(Scaffold));
@@ -83,7 +83,7 @@ void main() {
                           highContrastValue = !highContrastValue;
                         });
                       },
-                      child: Text('High contrast: ${highContrastValue ? "Enabled" : "Disabled"}'),
+                      child: Text('High contrast is ${highContrastValue ? "enabled" : "disabled"}'),
                     ),
                   );
                 },
@@ -98,7 +98,7 @@ void main() {
     
     // Capture initial theme (standard theme)
     final ThemeData standardTheme = capturedTheme;
-    expect(find.text('High contrast: Disabled'), findsOneWidget);
+    expect(find.text('High contrast is disabled'), findsOneWidget);
     
     // Toggle high contrast
     await tester.tap(find.byType(ElevatedButton));
@@ -106,7 +106,7 @@ void main() {
     
     // Capture high contrast theme
     final ThemeData highContrastTheme = capturedTheme;
-    expect(find.text('High contrast: Enabled'), findsOneWidget);
+    expect(find.text('High contrast is enabled'), findsOneWidget);
     
     // Verify that the themes are actually different (theme selection worked)
     expect(standardTheme.colorScheme.primary, isNot(equals(highContrastTheme.colorScheme.primary)));
