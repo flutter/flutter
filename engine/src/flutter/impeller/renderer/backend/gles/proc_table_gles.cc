@@ -15,7 +15,7 @@
 
 namespace impeller {
 
-const char* GLErrorToString(GLenum value) {
+std::string_view GLErrorToString(GLenum value) {
   switch (value) {
     case GL_NO_ERROR:
       return "GL_NO_ERROR";
@@ -89,7 +89,7 @@ ProcTableGLES::ProcTableGLES(  // NOLINT(google-readability-function-size)
   }
 
 #define IMPELLER_PROC(proc_ivar)                                \
-  if (auto fn_ptr = resolver(proc_ivar.name)) {                 \
+  if (auto fn_ptr = resolver(proc_ivar.name.data())) {          \
     proc_ivar.function =                                        \
         reinterpret_cast<decltype(proc_ivar.function)>(fn_ptr); \
     proc_ivar.error_fn = error_fn;                              \
@@ -115,7 +115,7 @@ ProcTableGLES::ProcTableGLES(  // NOLINT(google-readability-function-size)
 #undef IMPELLER_PROC
 
 #define IMPELLER_PROC(proc_ivar)                                \
-  if (auto fn_ptr = resolver(proc_ivar.name)) {                 \
+  if (auto fn_ptr = resolver(proc_ivar.name.data())) {          \
     proc_ivar.function =                                        \
         reinterpret_cast<decltype(proc_ivar.function)>(fn_ptr); \
     proc_ivar.error_fn = error_fn;                              \
