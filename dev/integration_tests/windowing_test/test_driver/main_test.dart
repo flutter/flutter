@@ -14,9 +14,6 @@ void main() {
 
     setUpAll(() async {
       driver = await FlutterDriver.connect();
-
-      // TODO(mattkae): I am unsure as to why this sleep is necessary
-      sleep(Duration(seconds: 1));
     });
 
     tearDownAll(() async {

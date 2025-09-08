@@ -4,11 +4,11 @@
 
 // ignore_for_file: invalid_use_of_internal_member
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/_features.dart';
 import 'package:flutter/src/widgets/_window.dart';
 import 'package:flutter_driver/driver_extension.dart';
 
@@ -25,8 +25,10 @@ class _MainRegularWindowControllerDelegate
 late final RegularWindowController controller;
 
 void main() {
+  final Completer<void> windowCreated = Completer();
   enableFlutterDriverExtension(
     handler: (String? message) async {
+      await windowCreated.future;
       if (message == null) {
         return '';
       }
@@ -93,6 +95,7 @@ void main() {
     title: 'Integration Test',
     delegate: _MainRegularWindowControllerDelegate(),
   );
+  windowCreated.complete();
 
   runWidget(RegularWindow(controller: controller, child: MyApp()));
 }
