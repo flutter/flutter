@@ -25,6 +25,25 @@ import 'tooltip_visibility.dart';
 /// Signature for when a tooltip is triggered.
 typedef TooltipTriggeredCallback = void Function();
 
+/// Signature for computing the position of a tooltip.
+///
+/// The arguments are:
+/// * `target`: The center point of the target widget in the global coordinate system.
+/// * `targetSize`: The size of the target widget that triggers the tooltip.
+/// * `childSize`: The size of the tooltip itself.
+/// * `verticalOffset`: The configured vertical offset.
+/// * `preferBelow`: Whether the tooltip prefers to be positioned below the target.
+///
+/// Returns the offset from the top left of the overlay to the top left of the tooltip.
+typedef TooltipPositionDelegate =
+    Offset Function({
+      required Offset target,
+      required Size targetSize,
+      required Size childSize,
+      required double verticalOffset,
+      required bool preferBelow,
+    });
+
 /// A special [MouseRegion] that when nested, only the first [_ExclusiveMouseRegion]
 /// to be hit in hit-testing order will be added to the BoxHitTestResult (i.e.,
 /// child over parent, last sibling over first sibling).
@@ -192,6 +211,7 @@ class Tooltip extends StatefulWidget {
     this.onTriggered,
     this.mouseCursor,
     this.ignorePointer,
+    this.positionDelegate,
     this.child,
   }) : assert(
          (message == null) != (richMessage == null),
@@ -392,6 +412,17 @@ class Tooltip extends StatefulWidget {
   /// handled or ignored.
   final bool? ignorePointer;
 
+  /// A custom position delegate function for computing where the tooltip should be positioned.
+  ///
+  /// If provided, this function will be called instead of the default positioning logic
+  /// to determine where to place the tooltip relative to its target.
+  ///
+  /// This allows for custom positioning such as left/right positioning, or any other
+  /// arbitrary positioning logic.
+  ///
+  /// If null, the default positioning behavior is used (above or below the target).
+  final TooltipPositionDelegate? positionDelegate;
+
   static final List<TooltipState> _openedTooltips = <TooltipState>[];
 
   /// Dismiss all of the tooltips that are currently shown on the screen,
@@ -469,6 +500,13 @@ class Tooltip extends StatefulWidget {
       FlagProperty('enableFeedback', value: enableFeedback, ifTrue: 'true', showName: true),
     );
     properties.add(DiagnosticsProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<TooltipPositionDelegate>(
+        'positionDelegate',
+        positionDelegate,
+        defaultValue: null,
+      ),
+    );
   }
 }
 
@@ -823,6 +861,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       layoutInfo.childPaintTransform,
       layoutInfo.childSize.center(Offset.zero),
     );
+    final Size targetSize = layoutInfo.childSize;
 
     final (TextStyle defaultTextStyle, BoxDecoration defaultDecoration) = switch (Theme.of(
       context,
@@ -875,9 +914,11 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       textAlign: widget.textAlign ?? tooltipTheme.textAlign ?? _defaultTextAlign,
       animation: _overlayAnimation,
       target: target,
+      targetSize: targetSize,
       verticalOffset:
           widget.verticalOffset ?? tooltipTheme.verticalOffset ?? _defaultVerticalOffset,
       preferBelow: widget.preferBelow ?? tooltipTheme.preferBelow ?? _defaultPreferBelow,
+      positionDelegate: widget.positionDelegate,
       ignorePointer: widget.ignorePointer ?? widget.message != null,
     );
 
@@ -951,13 +992,18 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
   /// Creates a delegate for computing the layout of a tooltip.
   _TooltipPositionDelegate({
     required this.target,
+    required this.targetSize,
     required this.verticalOffset,
     required this.preferBelow,
+    this.positionDelegate,
   });
 
   /// The offset of the target the tooltip is positioned near in the global
   /// coordinate system.
   final Offset target;
+
+  /// The size of the target widget that triggers the tooltip.
+  final Size targetSize;
 
   /// The amount of vertical distance between the target and the displayed
   /// tooltip.
@@ -969,11 +1015,25 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
   /// direction, the tooltip will be displayed in the opposite direction.
   final bool preferBelow;
 
+  /// A custom position delegate function for computing where the tooltip should be positioned.
+  ///
+  /// If provided, this function will be called instead of the default positioning logic.
+  final TooltipPositionDelegate? positionDelegate;
+
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) => constraints.loosen();
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
+    if (positionDelegate != null) {
+      return positionDelegate!(
+        target: target,
+        targetSize: targetSize,
+        childSize: childSize,
+        verticalOffset: verticalOffset,
+        preferBelow: preferBelow,
+      );
+    }
     return positionDependentBox(
       size: size,
       childSize: childSize,
@@ -986,8 +1046,10 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
   @override
   bool shouldRelayout(_TooltipPositionDelegate oldDelegate) {
     return target != oldDelegate.target ||
+        targetSize != oldDelegate.targetSize ||
         verticalOffset != oldDelegate.verticalOffset ||
-        preferBelow != oldDelegate.preferBelow;
+        preferBelow != oldDelegate.preferBelow ||
+        positionDelegate != oldDelegate.positionDelegate;
   }
 }
 
@@ -1002,9 +1064,11 @@ class _TooltipOverlay extends StatelessWidget {
     required this.textAlign,
     required this.animation,
     required this.target,
+    required this.targetSize,
     required this.verticalOffset,
     required this.preferBelow,
     required this.ignorePointer,
+    this.positionDelegate,
     this.onEnter,
     this.onExit,
   });
@@ -1018,8 +1082,10 @@ class _TooltipOverlay extends StatelessWidget {
   final TextAlign textAlign;
   final Animation<double> animation;
   final Offset target;
+  final Size targetSize;
   final double verticalOffset;
   final bool preferBelow;
+  final TooltipPositionDelegate? positionDelegate;
   final PointerEnterEventListener? onEnter;
   final PointerExitEventListener? onExit;
   final bool ignorePointer;
@@ -1057,8 +1123,10 @@ class _TooltipOverlay extends StatelessWidget {
       child: CustomSingleChildLayout(
         delegate: _TooltipPositionDelegate(
           target: target,
+          targetSize: targetSize,
           verticalOffset: verticalOffset,
           preferBelow: preferBelow,
+          positionDelegate: positionDelegate,
         ),
         child: IgnorePointer(ignoring: ignorePointer, child: result),
       ),

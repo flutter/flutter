@@ -3609,6 +3609,49 @@ void main() {
     expect(find.text('Hello'), findsOne);
     await gesture.removePointer();
   });
+
+  testWidgets('Custom tooltip positioning - positionDelegate parameter', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Tooltip(
+              message: tooltipText,
+              positionDelegate:
+                  ({
+                    required Offset target,
+                    required Size targetSize,
+                    required Size childSize,
+                    required double verticalOffset,
+                    required bool preferBelow,
+                  }) {
+                    // Align on top right of box with bottom left of tooltip.
+                    return Offset(
+                      target.dx + (targetSize.width / 2),
+                      target.dy - (targetSize.height / 2) - childSize.height,
+                    );
+                  },
+              child: const SizedBox(width: 50, height: 50),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.longPress(find.byType(Tooltip));
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.text(tooltipText), findsOneWidget);
+
+    final Offset targetCenter = tester.getCenter(find.byType(Tooltip));
+    final Offset tooltipPosition = tester.getTopLeft(_findTooltipContainer(tooltipText));
+
+    // The tooltip should be positioned at target + (25, -25-32).
+    expect(tooltipPosition.dx, closeTo(targetCenter.dx + 25, 5.0));
+    expect(tooltipPosition.dy, closeTo(targetCenter.dy - 25 - 32, 5.0));
+  });
 }
 
 Future<void> setWidgetForTooltipMode(
