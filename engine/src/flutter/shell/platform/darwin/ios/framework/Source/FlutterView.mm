@@ -5,6 +5,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 
 #include "flutter/fml/platform/darwin/cf_utils.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifecycle.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.h"
 
@@ -12,6 +13,7 @@ FLUTTER_ASSERT_ARC
 
 @interface FlutterView ()
 @property(nonatomic, weak) id<FlutterViewEngineDelegate> delegate;
+@property(nonatomic, weak) UIScene* previousScene;
 @end
 
 @implementation FlutterView {
@@ -76,6 +78,7 @@ FLUTTER_ASSERT_ARC
   if (self) {
     _delegate = delegate;
     _isWideGamutEnabled = isWideGamutEnabled;
+    _previousScene = nil;
     self.layer.opaque = opaque;
   }
 
@@ -239,6 +242,30 @@ static void PrintWideGamutWarningOnce() {
   // the focus engine should only interact with the designated focus items
   // (SemanticsObjects).
   return nil;
+}
+
+- (void)willMoveToWindow:(UIWindow*)newWindow {
+  // When a FlutterView moves windows, it may also be moving scenes. Add/remove the FlutterEngine
+  // from the sceneLifeCycleDelegate.
+  UIWindowScene* scene = newWindow.windowScene;
+  if (scene) {
+    if ([scene.delegate conformsToProtocol:@protocol(FlutterSceneLifeCycleProvider)]) {
+      id<FlutterSceneLifeCycleProvider> lifeCycleProvider =
+          (id<FlutterSceneLifeCycleProvider>)scene.delegate;
+      [lifeCycleProvider.sceneLifeCycleDelegate addFlutterEngine:(FlutterEngine*)self.delegate];
+    }
+    _previousScene = scene;
+  } else if ([_previousScene.delegate
+                 conformsToProtocol:@protocol(FlutterSceneLifeCycleProvider)]) {
+    // The window, and therefore windowScene, property may be nil if the receiver does not currently
+    // reside in any window. This occurs when the receiver has just been removed from its superview
+    // or when the receiver has just been added to a superview that is not attached to a window.
+    // Remove the engine from the previous scene if set since it is no longer in that window and
+    // scene.
+    id<FlutterSceneLifeCycleProvider> lifeCycleProvider =
+        (id<FlutterSceneLifeCycleProvider>)_previousScene.delegate;
+    [lifeCycleProvider.sceneLifeCycleDelegate removeFlutterEngine:(FlutterEngine*)self.delegate];
+  }
 }
 
 @end

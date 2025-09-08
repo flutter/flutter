@@ -12,7 +12,10 @@
  * registered plugins.
  */
 @interface FlutterPluginSceneLifeCycleDelegate : NSObject
-- (void)addFlutterViewController:(FlutterViewController*)controller;
+
+- (void)addFlutterEngine:(FlutterEngine*)engine;
+
+- (void)removeFlutterEngine:(FlutterEngine*)engine;
 @end
 
 /**

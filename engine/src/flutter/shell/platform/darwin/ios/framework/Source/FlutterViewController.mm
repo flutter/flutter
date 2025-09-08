@@ -907,21 +907,6 @@ static void SendFakeTouchEvent(UIScreen* screen,
   [super viewWillAppear:animated];
 }
 
-- (void)viewIsAppearing:(BOOL)animated {
-  TRACE_EVENT0("flutter", "viewIsAppearing");
-  if (self.engine.viewController == self) {
-    // The earliest the view can access the scene is in viewIsAppearing.
-    UIWindowScene* scene = self.view.window.windowScene;
-    if ([scene.delegate conformsToProtocol:@protocol(FlutterSceneLifeCycleProvider)]) {
-      id<FlutterSceneLifeCycleProvider> lifeCycleProvider =
-          (id<FlutterSceneLifeCycleProvider>)scene.delegate;
-      [lifeCycleProvider.sceneLifeCycleDelegate addFlutterViewController:self];
-    }
-  }
-
-  [super viewIsAppearing:animated];
-}
-
 - (void)viewDidAppear:(BOOL)animated {
   TRACE_EVENT0("flutter", "viewDidAppear");
   if (self.engine.viewController == self) {
