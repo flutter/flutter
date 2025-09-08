@@ -123,10 +123,6 @@ struct RoundSuperellipse {
     return bounds_ == rr.bounds_ && radii_ == rr.radii_;
   }
 
-  [[nodiscard]] constexpr bool operator!=(const RoundSuperellipse& r) const {
-    return !(*this == r);
-  }
-
   // Approximates a rounded superellipse with a round rectangle to the
   // best practical accuracy.
   //

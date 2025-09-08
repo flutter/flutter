@@ -52,8 +52,6 @@ struct Half {
   constexpr Half(InternalHalf x) : x(x) {}
 
   constexpr bool operator==(const Half& v) const { return v.x == x; }
-
-  constexpr bool operator!=(const Half& v) const { return v.x != x; }
 };
 
 /// @brief A storage only class for half precision floating point vector 4.

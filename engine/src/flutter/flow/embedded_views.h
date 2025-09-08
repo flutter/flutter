@@ -56,10 +56,6 @@ class ImageFilterMutation {
     return *filter_ == *other.filter_ && filter_rect_ == other.filter_rect_;
   }
 
-  bool operator!=(const ImageFilterMutation& other) const {
-    return !operator==(other);
-  }
-
  private:
   std::shared_ptr<DlImageFilter> filter_;
   const DlRect filter_rect_;
@@ -106,8 +102,6 @@ class Mutator {
   float GetAlphaFloat() const { return DlColor::toOpacity(GetAlpha()); }
 
   bool operator==(const Mutator& other) const { return data_ == other.data_; }
-
-  bool operator!=(const Mutator& other) const { return !operator==(other); }
 
   bool IsClipType() {
     switch (GetType()) {

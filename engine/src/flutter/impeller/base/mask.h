@@ -51,32 +51,9 @@ struct Mask {
 
   explicit constexpr operator bool() const { return !!mask_; }
 
-  // The following relational operators can be replaced with a defaulted
-  // spaceship operator post C++20.
+  // Comparison operators.
 
-  constexpr bool operator<(const Mask<EnumType>& other) const {
-    return mask_ < other.mask_;
-  }
-
-  constexpr bool operator>(const Mask<EnumType>& other) const {
-    return mask_ > other.mask_;
-  }
-
-  constexpr bool operator>=(const Mask<EnumType>& other) const {
-    return mask_ >= other.mask_;
-  }
-
-  constexpr bool operator<=(const Mask<EnumType>& other) const {
-    return mask_ <= other.mask_;
-  }
-
-  constexpr bool operator==(const Mask<EnumType>& other) const {
-    return mask_ == other.mask_;
-  }
-
-  constexpr bool operator!=(const Mask<EnumType>& other) const {
-    return mask_ != other.mask_;
-  }
+  constexpr auto operator<=>(const Mask<EnumType>& other) const = default;
 
   // Logical operators.
 
@@ -180,49 +157,13 @@ inline constexpr Mask<EnumType> operator^(const EnumType& lhs,
   return Mask<EnumType>{lhs} ^ rhs;
 }
 
-// Relational operators with EnumType promotion. These can be replaced by a
-// defaulted spaceship operator post C++20.
+// Relational operators with EnumType promotion.
 
 template <typename EnumType,
           typename std::enable_if_t<MaskTraits<EnumType>::kIsMask, bool> = true>
-inline constexpr bool operator<(const EnumType& lhs,
-                                const Mask<EnumType>& rhs) {
-  return Mask<EnumType>{lhs} < rhs;
-}
-
-template <typename EnumType,
-          typename std::enable_if_t<MaskTraits<EnumType>::kIsMask, bool> = true>
-inline constexpr bool operator>(const EnumType& lhs,
-                                const Mask<EnumType>& rhs) {
-  return Mask<EnumType>{lhs} > rhs;
-}
-
-template <typename EnumType,
-          typename std::enable_if_t<MaskTraits<EnumType>::kIsMask, bool> = true>
-inline constexpr bool operator<=(const EnumType& lhs,
-                                 const Mask<EnumType>& rhs) {
-  return Mask<EnumType>{lhs} <= rhs;
-}
-
-template <typename EnumType,
-          typename std::enable_if_t<MaskTraits<EnumType>::kIsMask, bool> = true>
-inline constexpr bool operator>=(const EnumType& lhs,
-                                 const Mask<EnumType>& rhs) {
-  return Mask<EnumType>{lhs} >= rhs;
-}
-
-template <typename EnumType,
-          typename std::enable_if_t<MaskTraits<EnumType>::kIsMask, bool> = true>
-inline constexpr bool operator==(const EnumType& lhs,
-                                 const Mask<EnumType>& rhs) {
-  return Mask<EnumType>{lhs} == rhs;
-}
-
-template <typename EnumType,
-          typename std::enable_if_t<MaskTraits<EnumType>::kIsMask, bool> = true>
-inline constexpr bool operator!=(const EnumType& lhs,
-                                 const Mask<EnumType>& rhs) {
-  return Mask<EnumType>{lhs} != rhs;
+inline constexpr auto operator<=>(const EnumType& lhs,
+                                  const Mask<EnumType>& rhs) {
+  return Mask<EnumType>{lhs} <=> rhs;
 }
 
 }  // namespace impeller
