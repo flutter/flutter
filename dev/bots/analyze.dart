@@ -2580,12 +2580,6 @@ Future<void> verifyIntegrationTestTemplateFiles(String flutterRoot) async {
   ).listSync().toList().whereType<Directory>();
   for (final Directory testPath in subDirs) {
     final String projectName = path.basename(testPath.path);
-
-    // TODO(mattkae): Remove this exception when the windowing template is standardized.
-    if (projectName == 'windowing_test') {
-      continue;
-    }
-
     final String runnerPath = path.join(testPath.path, _kWindowsRunnerSubPath);
     final Directory runner = Directory(runnerPath);
     if (!runner.existsSync()) {
