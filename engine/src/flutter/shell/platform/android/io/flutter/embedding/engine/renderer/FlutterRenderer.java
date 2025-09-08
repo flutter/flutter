@@ -413,7 +413,6 @@ public class FlutterRenderer implements TextureRegistry {
           TextureRegistry.ImageConsumer,
           TextureRegistry.OnTrimMemoryListener {
     private static final String TAG = "ImageReaderSurfaceProducer";
-    private static final int MAX_IMAGES = 6;
     // The ImageReaderSurfaceProducer must not close images until the renderer,
     // either Skia OpenGL, Impeller OpenGL, or Impeller Vulkan is done reading
     // from them. The Vulkan renderer allows up to two frames in flight before
@@ -422,6 +421,7 @@ public class FlutterRenderer implements TextureRegistry {
     // the frame that references them has finished rendering can result in
     // tearing or other incorrect rendering.
     private static final int MAX_DEQUEUED_IMAGES = 2;
+    private static final int MAX_IMAGES = 5 + MAX_DEQUEUED_IMAGES;
 
     // Flip when debugging to see verbose logs.
     private static final boolean VERBOSE_LOGS = false;
