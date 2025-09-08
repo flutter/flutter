@@ -737,7 +737,7 @@ class AndroidDevice extends Device {
   }) async {
     // Package has not been built yet, but we can still get the package information
     // from the manifest.
-    final AndroidApk? builtPackage =
+    final builtPackage =
         await ApplicationPackageFactory.instance!.getPackageForPlatform(
               devicePlatform,
               buildInfo: debuggingOptions.buildInfo,
