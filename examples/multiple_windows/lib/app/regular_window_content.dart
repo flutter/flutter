@@ -7,8 +7,7 @@
 
 import 'package:flutter/material.dart';
 import 'window_controller_render.dart';
-import 'window_manager_model.dart';
-import 'window_settings.dart';
+import 'models.dart';
 import 'dart:math';
 import 'package:vector_math/vector_math_64.dart';
 import 'package:flutter/src/widgets/_window.dart';
@@ -111,7 +110,7 @@ class _RegularWindowContentState extends State<RegularWindowContent>
                   onPressed: () {
                     final UniqueKey key = UniqueKey();
                     widget.windowManagerModel.add(
-                      KeyedWindowController(
+                      KeyedWindow(
                         key: key,
                         controller: RegularWindowController(
                           preferredSize: widget.windowSettings.regularSize,
@@ -145,19 +144,17 @@ class _RegularWindowContentState extends State<RegularWindowContent>
         listenable: widget.windowManagerModel,
         builder: (BuildContext context, Widget? _) {
           final List<Widget> childViews = <Widget>[];
-          for (final KeyedWindowController controller
-              in widget.windowManagerModel.windows) {
-            if (controller.parent == widget.window) {
+          for (final KeyedWindow window in widget.windowManagerModel.windows) {
+            if (window.parent == widget.window) {
               childViews.add(
                 WindowControllerRender(
-                  controller: controller.controller,
-                  key: controller.key,
+                  controller: window.controller,
+                  key: window.key,
                   windowSettings: widget.windowSettings,
                   windowManagerModel: widget.windowManagerModel,
                   onDestroyed: () =>
-                      widget.windowManagerModel.remove(controller.key),
-                  onError: () =>
-                      widget.windowManagerModel.remove(controller.key),
+                      widget.windowManagerModel.remove(window.key),
+                  onError: () => widget.windowManagerModel.remove(window.key),
                 ),
               );
             }

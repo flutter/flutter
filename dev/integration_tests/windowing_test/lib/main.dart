@@ -88,7 +88,6 @@ void main() {
       return '';
     },
   );
-  isWindowingEnabled = true;
   controller = RegularWindowController(
     preferredSize: Size(640, 480),
     title: 'Integration Test',

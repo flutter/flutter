@@ -21,7 +21,9 @@ import 'package:flutter/foundation.dart';
 import '_window.dart';
 import '_window_win32.dart';
 
-/// Creates a default [WindowingOwner] for current platform.
+/// Creates a default [WindowingOwner] for the current platform.
+///
+/// Returns null if windowing is not supported on the current platform.
 /// Only supported on desktop platforms.
 ///
 /// {@macro flutter.widgets.windowing.experimental}

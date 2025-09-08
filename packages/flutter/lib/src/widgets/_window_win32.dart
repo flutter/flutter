@@ -114,13 +114,11 @@ class WindowingOwnerWin32 extends WindowingOwner {
       'WindowingOwnerWin32 must be created after the engine has been initialized.',
     );
 
-    final ffi.Pointer<_WindowingInitRequest> request = allocator<_WindowingInitRequest>()
-      ..ref.onMessage =
-          ffi.NativeCallable<ffi.Void Function(ffi.Pointer<_WindowsMessage>)>.isolateLocal(
-            _onMessage,
-          ).nativeFunction;
-    _Win32PlatformInterface.initializeWindowing(PlatformDispatcher.instance.engineId!, request);
-    allocator.free(request);
+    _Win32PlatformInterface.initializeWindowing(
+      allocator,
+      PlatformDispatcher.instance.engineId!,
+      _onMessage,
+    );
   }
 
   final List<_WindowsMessageHandler> _messageHandlers = <_WindowsMessageHandler>[];
@@ -160,14 +158,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
   /// Handlers are called in the order that they are added.
   ///
   /// Callers must remove their message handlers using
-  /// [WindowingOwnerWin32.removeMessageHandler].
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  ///
-  /// See also:
-  ///
-  ///  * [WindowsMessageHandler], the interface for message handlers.
-  ///  * [WindowingOwnerWin32.removeMessageHandler], to remove message handlers.
+  /// [WindowingOwnerWin32._removeMessageHandler].
   void _addMessageHandler(_WindowsMessageHandler handler) {
     if (_messageHandlers.contains(handler)) {
       return;
@@ -179,13 +170,6 @@ class WindowingOwnerWin32 extends WindowingOwner {
   /// Unregister a [WindowsMessageHandler].
   ///
   /// If the handler has not been registered, this method has no effect.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  ///
-  /// See also:
-  ///
-  ///  * [WindowsMessageHandler], the interface for message handlers.
-  ///  * [WindowingOwnerWin32.addMessageHandler], to register message handlers.
   void _removeMessageHandler(_WindowsMessageHandler handler) {
     _messageHandlers.remove(handler);
   }
@@ -453,10 +437,27 @@ class _Win32PlatformInterface {
   )
   external static bool hasTopLevelWindows(int engineId);
 
+  static void initializeWindowing(
+    ffi.Allocator allocator,
+    int engineId,
+    void Function(ffi.Pointer<_WindowsMessage>) onMessage,
+  ) {
+    final ffi.Pointer<_WindowingInitRequest> request = allocator<_WindowingInitRequest>();
+    try {
+      request.ref.onMessage =
+          ffi.NativeCallable<ffi.Void Function(ffi.Pointer<_WindowsMessage>)>.isolateLocal(
+            onMessage,
+          ).nativeFunction;
+      _initializeWindowing(engineId, request);
+    } finally {
+      allocator.free(request);
+    }
+  }
+
   @ffi.Native<ffi.Void Function(ffi.Int64, ffi.Pointer<_WindowingInitRequest>)>(
     symbol: 'InternalFlutterWindows_WindowManager_Initialize',
   )
-  external static void initializeWindowing(
+  external static void _initializeWindowing(
     int engineId,
     ffi.Pointer<_WindowingInitRequest> request,
   );

@@ -11,15 +11,14 @@ import 'package:flutter/src/widgets/_window.dart';
 import 'window_controller_render.dart';
 
 import 'regular_window_content.dart';
-import 'window_settings.dart';
 import 'window_settings_dialog.dart';
-import 'window_manager_model.dart';
+import 'models.dart';
 import 'regular_window_edit_dialog.dart';
 
 class MainWindow extends StatelessWidget {
   MainWindow({super.key, required BaseWindowController mainController}) {
     windowManagerModel.add(
-      KeyedWindowController(
+      KeyedWindow(
         isMainWindow: true,
         key: UniqueKey(),
         controller: mainController,
@@ -37,17 +36,16 @@ class MainWindow extends StatelessWidget {
         listenable: windowManagerModel,
         builder: (BuildContext context, Widget? _) {
           final List<Widget> childViews = <Widget>[];
-          for (final KeyedWindowController controller
-              in windowManagerModel.windows) {
-            if (controller.parent == null && !controller.isMainWindow) {
+          for (final KeyedWindow window in windowManagerModel.windows) {
+            if (window.parent == null && !window.isMainWindow) {
               childViews.add(
                 WindowControllerRender(
-                  controller: controller.controller,
-                  key: controller.key,
+                  controller: window.controller,
+                  key: window.key,
                   windowSettings: settings,
                   windowManagerModel: windowManagerModel,
-                  onDestroyed: () => windowManagerModel.remove(controller.key),
-                  onError: () => windowManagerModel.remove(controller.key),
+                  onDestroyed: () => windowManagerModel.remove(window.key),
+                  onError: () => windowManagerModel.remove(window.key),
                 ),
               );
             }
@@ -126,57 +124,53 @@ class _WindowsTable extends StatelessWidget {
               numeric: true,
             ),
           ],
-          rows: (windowManagerModel.windows).map<DataRow>((
-            KeyedWindowController controller,
-          ) {
-            return DataRow(
-              key: controller.key,
-              color: WidgetStateColor.resolveWith((states) {
-                if (states.contains(WidgetState.selected)) {
-                  return Theme.of(context).colorScheme.primary.withAlpha(20);
-                }
-                return Colors.transparent;
-              }),
-              selected: controller.controller == windowManagerModel.selected,
-              onSelectChanged: (bool? selected) {
-                if (selected != null) {
-                  windowManagerModel.select(
-                    selected ? controller.controller.rootView.viewId : null,
-                  );
-                }
-              },
-              cells: [
-                DataCell(Text('${controller.controller.rootView.viewId}')),
-                DataCell(Text(_getWindowTypeName(controller.controller))),
-                DataCell(
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit_outlined),
-                        onPressed: () =>
-                            _showWindowEditDialog(controller, context),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete_outlined),
-                        onPressed: () async {
-                          controller.controller.destroy();
-                        },
-                      ),
-                    ],
+          rows: <DataRow>[
+            for (KeyedWindow controller in windowManagerModel.windows)
+              DataRow(
+                key: controller.key,
+                color: WidgetStateColor.resolveWith((states) {
+                  if (states.contains(WidgetState.selected)) {
+                    return Theme.of(context).colorScheme.primary.withAlpha(20);
+                  }
+                  return Colors.transparent;
+                }),
+                selected: controller.controller == windowManagerModel.selected,
+                onSelectChanged: (bool? selected) {
+                  if (selected != null) {
+                    windowManagerModel.select(
+                      selected ? controller.controller.rootView.viewId : null,
+                    );
+                  }
+                },
+                cells: [
+                  DataCell(Text('${controller.controller.rootView.viewId}')),
+                  DataCell(Text(_getWindowTypeName(controller.controller))),
+                  DataCell(
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit_outlined),
+                          onPressed: () =>
+                              _showWindowEditDialog(controller, context),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete_outlined),
+                          onPressed: () async {
+                            controller.controller.destroy();
+                          },
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            );
-          }).toList(),
+                ],
+              ),
+          ],
         );
       },
     );
   }
 
-  void _showWindowEditDialog(
-    KeyedWindowController controller,
-    BuildContext context,
-  ) {
+  void _showWindowEditDialog(KeyedWindow controller, BuildContext context) {
     return switch (controller.controller) {
       final RegularWindowController regular => showRegularWindowEditDialog(
         context: context,
@@ -187,7 +181,7 @@ class _WindowsTable extends StatelessWidget {
 
   static String _getWindowTypeName(BaseWindowController controller) {
     return switch (controller) {
-      RegularWindowController() => "Regular",
+      RegularWindowController() => 'Regular',
     };
   }
 }
@@ -226,13 +220,13 @@ class _WindowCreatorCard extends StatelessWidget {
                   onPressed: () async {
                     final UniqueKey key = UniqueKey();
                     windowManagerModel.add(
-                      KeyedWindowController(
+                      KeyedWindow(
                         key: key,
                         controller: RegularWindowController(
                           delegate: CallbackRegularWindowControllerDelegate(
                             onDestroyed: () => windowManagerModel.remove(key),
                           ),
-                          title: "Regular",
+                          title: 'Regular',
                           preferredSize: windowSettings.regularSize,
                         ),
                       ),
@@ -246,7 +240,7 @@ class _WindowCreatorCard extends StatelessWidget {
                   child: TextButton(
                     child: const Text('SETTINGS'),
                     onPressed: () {
-                      windowSettingsDialog(context, windowSettings);
+                      showWindowSettingsDialog(context, windowSettings);
                     },
                   ),
                 ),

@@ -37,7 +37,6 @@ import 'package:flutter/services.dart';
 
 import '../foundation/_features.dart';
 import '_window.dart';
-import '_window_owner_creator.dart';
 import 'app.dart';
 import 'debug.dart';
 import 'focus_manager.dart';

@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'window_settings.dart';
+import 'models.dart';
 
-Future<void> windowSettingsDialog(
+Future<void> showWindowSettingsDialog(
   BuildContext context,
   WindowSettings settings,
 ) async {
@@ -14,21 +14,35 @@ Future<void> windowSettingsDialog(
     context: context,
     builder: (BuildContext ctx) {
       return _WindowSettingsEditor(
-        settings: WindowSettings.clone(settings),
-        onClose: (WindowSettings newSettings) {
-          settings.from(newSettings);
-          Navigator.of(context, rootNavigator: true).pop();
-        },
+        settings: settings,
+        onClose: () => Navigator.of(context, rootNavigator: true).pop(),
       );
     },
   );
 }
 
-class _WindowSettingsEditor extends StatelessWidget {
+class _WindowSettingsEditor extends StatefulWidget {
   const _WindowSettingsEditor({required this.settings, required this.onClose});
 
   final WindowSettings settings;
-  final void Function(WindowSettings) onClose;
+  final void Function() onClose;
+
+  @override
+  State<_WindowSettingsEditor> createState() => _WindowSettingsEditorState();
+}
+
+class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
+  final TextEditingController _regularWidthController = TextEditingController();
+  final TextEditingController _regularHeightController =
+      TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _regularWidthController.text = widget.settings.regularSize.width.toString();
+    _regularHeightController.text = widget.settings.regularSize.height
+        .toString();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,64 +51,44 @@ class _WindowSettingsEditor extends StatelessWidget {
       titlePadding: const EdgeInsets.fromLTRB(24, 10, 24, 0),
       title: const Center(child: Text('Window Settings')),
       children: [
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
+        Expanded(
+          child: ListTile(
+            title: const Text('Regular'),
+            subtitle: Row(
               children: [
                 Expanded(
-                  child: ListTile(
-                    title: const Text('Regular'),
-                    subtitle: ListenableBuilder(
-                      listenable: settings,
-                      builder: (BuildContext ctx, Widget? _) {
-                        return Row(
-                          children: [
-                            Expanded(
-                              child: TextFormField(
-                                initialValue: settings.regularSize.width
-                                    .toString(),
-                                decoration: const InputDecoration(
-                                  labelText: 'Initial width',
-                                ),
-                                onChanged: (String value) =>
-                                    settings.regularSize = Size(
-                                      double.tryParse(value) ?? 0,
-                                      settings.regularSize.height,
-                                    ),
-                              ),
-                            ),
-                            const SizedBox(width: 20),
-                            Expanded(
-                              child: TextFormField(
-                                initialValue: settings.regularSize.height
-                                    .toString(),
-                                decoration: const InputDecoration(
-                                  labelText: 'Initial height',
-                                ),
-                                onChanged: (String value) =>
-                                    settings.regularSize = Size(
-                                      settings.regularSize.width,
-                                      double.tryParse(value) ?? 0,
-                                    ),
-                              ),
-                            ),
-                          ],
-                        );
-                      },
+                  child: TextFormField(
+                    controller: _regularWidthController,
+                    initialValue: widget.settings.regularSize.width.toString(),
+                    decoration: const InputDecoration(
+                      labelText: 'Initial width',
                     ),
                   ),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 20),
+                Expanded(
+                  child: TextFormField(
+                    initialValue: widget.settings.regularSize.height.toString(),
+                    decoration: const InputDecoration(
+                      labelText: 'Initial height',
+                    ),
+                  ),
+                ),
               ],
             ),
-          ],
+          ),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: TextButton(
             onPressed: () {
-              onClose(settings);
+              widget.settings.regularSize = Size(
+                double.tryParse(_regularWidthController.text) ??
+                    widget.settings.regularSize.width,
+                double.tryParse(_regularHeightController.text) ??
+                    widget.settings.regularSize.height,
+              );
+              widget.onClose();
             },
             child: const Text('Apply'),
           ),

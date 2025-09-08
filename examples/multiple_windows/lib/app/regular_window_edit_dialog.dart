@@ -49,9 +49,8 @@ class _RegularWindowEditDialogState extends State<_RegularWindowEditDialog> {
   bool? nextIsMaximized;
   bool? nextIsMinized;
 
-  @override
-  void initState() {
-    super.initState();
+  void _init() {
+    widget.controller.addListener(_onNotification);
     initialSize = widget.controller.contentSize;
     initialTitle = widget.controller.title;
     initialFullscreen = widget.controller.isFullscreen;
@@ -63,8 +62,24 @@ class _RegularWindowEditDialogState extends State<_RegularWindowEditDialog> {
       text: initialSize.height.toString(),
     );
     titleController = TextEditingController(text: initialTitle);
+    nextIsFullscreen = null;
+    nextIsMaximized = null;
+    nextIsMinized = null;
+  }
 
-    widget.controller.addListener(_onNotification);
+  @override
+  void initState() {
+    super.initState();
+    _init();
+  }
+
+  @override
+  void didUpdateWidget(covariant _RegularWindowEditDialog oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller.removeListener(_onNotification);
+      _init();
+    }
   }
 
   void _onNotification() {
@@ -163,26 +178,22 @@ class _RegularWindowEditDialogState extends State<_RegularWindowEditDialog> {
     double? width = double.tryParse(widthController.text);
     double? height = double.tryParse(heightController.text);
     String? title = titleController.text.isEmpty ? null : titleController.text;
-    if (width != null && height != null) {
+    if (width != null &&
+        height != null &&
+        (width != initialSize.width || height != initialSize.height)) {
       widget.controller.setSize(Size(width, height));
     }
-    if (title != null) {
+    if (title != null && title != initialTitle) {
       widget.controller.setTitle(title);
     }
-    if (nextIsFullscreen != null) {
-      if (widget.controller.isFullscreen != nextIsFullscreen) {
-        widget.controller.setFullscreen(nextIsFullscreen!);
-      }
+    if (nextIsFullscreen != null && nextIsFullscreen != initialFullscreen) {
+      widget.controller.setFullscreen(nextIsFullscreen!);
     }
-    if (nextIsMaximized != null) {
-      if (widget.controller.isMaximized != nextIsMaximized) {
-        widget.controller.setMaximized(nextIsMaximized!);
-      }
+    if (nextIsMaximized != null && nextIsMaximized != initialMaximized) {
+      widget.controller.setMaximized(nextIsMaximized!);
     }
-    if (nextIsMinized != null) {
-      if (widget.controller.isMinimized != nextIsMinized) {
-        widget.controller.setMinimized(nextIsMinized!);
-      }
+    if (nextIsMinized != null && nextIsMinized != initialMinimized) {
+      widget.controller.setMinimized(nextIsMinized!);
     }
 
     widget.onClose();

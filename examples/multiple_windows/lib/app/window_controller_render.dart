@@ -7,18 +7,17 @@
 
 import 'package:flutter/material.dart';
 import 'regular_window_content.dart';
-import 'window_manager_model.dart';
-import 'window_settings.dart';
+import 'models.dart';
 import 'package:flutter/src/widgets/_window.dart';
 
 class WindowControllerRender extends StatelessWidget {
   const WindowControllerRender({
+    required super.key,
     required this.controller,
     required this.onDestroyed,
     required this.onError,
     required this.windowSettings,
     required this.windowManagerModel,
-    required super.key,
   });
 
   final BaseWindowController controller;

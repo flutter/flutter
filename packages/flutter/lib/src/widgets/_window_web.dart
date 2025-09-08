@@ -18,8 +18,9 @@ import 'package:flutter/foundation.dart';
 
 import '_window.dart';
 
-/// Creates a default [WindowingOwner] for web. Returns `null` as web does not
-/// support multiple windows.
+/// Creates a default [WindowingOwner] for web.
+///
+/// Returns `null` as web does not support multiple windows.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 @internal

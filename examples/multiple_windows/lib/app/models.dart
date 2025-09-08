@@ -8,8 +8,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter/src/widgets/_window.dart';
 
-class KeyedWindowController {
-  KeyedWindowController({
+class KeyedWindow {
+  KeyedWindow({
     this.parent,
     this.isMainWindow = false,
     required this.key,
@@ -26,30 +26,30 @@ class KeyedWindowController {
 /// created by the application as well as which controller is currently
 /// selected by the UI.
 class WindowManagerModel extends ChangeNotifier {
-  final List<KeyedWindowController> _windows = <KeyedWindowController>[];
-  List<KeyedWindowController> get windows => _windows;
+  final List<KeyedWindow> _windows = <KeyedWindow>[];
+  List<KeyedWindow> get windows => _windows;
   int? _selectedViewId;
   BaseWindowController? get selected {
     if (_selectedViewId == null) {
       return null;
     }
 
-    for (final KeyedWindowController controller in _windows) {
-      if (controller.controller.rootView.viewId == _selectedViewId) {
-        return controller.controller;
+    for (final KeyedWindow window in _windows) {
+      if (window.controller.rootView.viewId == _selectedViewId) {
+        return window.controller;
       }
     }
 
     return null;
   }
 
-  void add(KeyedWindowController window) {
+  void add(KeyedWindow window) {
     _windows.add(window);
     notifyListeners();
   }
 
   void remove(UniqueKey key) {
-    _windows.removeWhere((KeyedWindowController window) => window.key == key);
+    _windows.removeWhere((KeyedWindow window) => window.key == key);
     notifyListeners();
   }
 
@@ -57,4 +57,14 @@ class WindowManagerModel extends ChangeNotifier {
     _selectedViewId = viewId;
     notifyListeners();
   }
+}
+
+class WindowSettings {
+  WindowSettings({Size regularSize = const Size(400, 300)})
+    : _regularSize = regularSize;
+
+  /// The initial size for newly created regular windows.
+  Size get regularSize => _regularSize;
+  Size _regularSize;
+  set regularSize(Size value) => _regularSize = value;
 }

@@ -6960,7 +6960,7 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       tags: >
-        ["devicelab", "hostonly", "windows", "arm64"]
+        ["devicelab", "hostonly", "windows"]
       task_name: windowing_test
 
   - name: Windows flutter_tool_startup__windows
