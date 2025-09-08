@@ -16,6 +16,7 @@
 #include "flutter/common/task_runners.h"
 #include "flutter/flow/surface.h"
 #include "flutter/fml/closure.h"
+#include "flutter/fml/geometry.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/fml/memory/thread_checker.h"
@@ -511,13 +512,13 @@ class Shell final : public PlatformView::Delegate,
   /// any of the threads.
   std::unique_ptr<DisplayManager> display_manager_;
 
-  // protects expected_frame_size_ which is set on platform thread and read on
-  // raster thread
+  // Protects expected_frame_constraints_ which is set on platform thread and
+  // read on raster thread.
   std::mutex resize_mutex_;
 
-  // used to discard wrong size layer tree produced during interactive
-  // resizing
-  std::unordered_map<int64_t, DlISize> expected_frame_sizes_;
+  // Used to discard wrong size layer tree produced during interactive
+  // resizing.
+  std::unordered_map<int64_t, fml::BoxConstraints> expected_frame_constraints_;
 
   // Used to communicate the right frame bounds via service protocol.
   double device_pixel_ratio_ = 0.0;
@@ -804,7 +805,7 @@ class Shell final : public PlatformView::Delegate,
   // directory.
   std::unique_ptr<DirectoryAssetBundle> RestoreOriginalAssetResolver();
 
-  DlISize ExpectedFrameSize(int64_t view_id);
+  fml::BoxConstraints ExpectedFrameConstraints(int64_t view_id);
 
   // For accessing the Shell via the raster thread, necessary for various
   // rasterizer callbacks.
