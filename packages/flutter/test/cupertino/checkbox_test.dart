@@ -496,6 +496,35 @@ void main() {
     );
   }, variant: TargetPlatformVariant.desktop());
 
+  testWidgets('Checkbox respects tap target size', (WidgetTester tester) async {
+    Widget buildApp() {
+      return CupertinoApp(
+        home: Center(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return CupertinoCheckbox(
+                value: false,
+                onChanged: (bool? newValue) {},
+                tapTargetSize: const Size.square(20.0),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(CupertinoCheckbox),
+      paints..drrect(
+        outer: RRect.fromLTRBR(3.0, 3.0, 17.0, 17.0, const Radius.circular(4)),
+        inner: RRect.fromLTRBR(4.0, 4.0, 16.0, 16.0, const Radius.circular(3)),
+      ),
+    );
+  });
+
   testWidgets('Checkbox configures mouse cursor', (WidgetTester tester) async {
     Widget buildApp({MouseCursor? mouseCursor, bool enabled = true, bool value = true}) {
       return CupertinoApp(

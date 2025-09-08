@@ -116,6 +116,7 @@ class CupertinoCheckbox extends StatefulWidget {
     this.autofocus = false,
     this.side,
     this.shape,
+    this.tapTargetSize,
     this.semanticLabel,
   }) : assert(tristate || value != null);
 
@@ -293,6 +294,13 @@ class CupertinoCheckbox extends StatefulWidget {
   /// [RoundedRectangleBorder] with a circular corner radius of 4.0.
   final OutlinedBorder? shape;
 
+  /// The tap target and layout size of the checkbox.
+  ///
+  /// If this property is null, the tap target size defaults to a size of
+  /// 14-by-14 pixels on desktop devices and [kMinInteractiveDimensionCupertino]
+  /// pixels on mobile devices.
+  final Size? tapTargetSize;
+
   /// The semantic label for the checkbox that will be announced by screen readers.
   ///
   /// This is announced by assistive technologies (e.g TalkBack/VoiceOver).
@@ -425,14 +433,16 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox>
                   : SystemMouseCursors.basic);
         });
 
-    final Size effectiveSize = switch (defaultTargetPlatform) {
-      TargetPlatform.iOS ||
-      TargetPlatform.android ||
-      TargetPlatform.fuchsia => const Size.square(kMinInteractiveDimensionCupertino),
-      TargetPlatform.macOS ||
-      TargetPlatform.linux ||
-      TargetPlatform.windows => const Size.square(CupertinoCheckbox.width),
-    };
+    final Size effectiveSize =
+        widget.tapTargetSize ??
+        switch (defaultTargetPlatform) {
+          TargetPlatform.iOS ||
+          TargetPlatform.android ||
+          TargetPlatform.fuchsia => const Size.square(kMinInteractiveDimensionCupertino),
+          TargetPlatform.macOS ||
+          TargetPlatform.linux ||
+          TargetPlatform.windows => const Size.square(CupertinoCheckbox.width),
+        };
 
     return Semantics(
       label: widget.semanticLabel,
