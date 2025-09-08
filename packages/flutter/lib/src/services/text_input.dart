@@ -3120,10 +3120,12 @@ final class IOSSystemContextMenuItemDataLiveText extends IOSSystemContextMenuIte
 final class IOSSystemContextMenuItemDataCustom extends IOSSystemContextMenuItemData
     with Diagnosticable {
   /// Creates an instance of [IOSSystemContextMenuItemDataCustom].
-  const IOSSystemContextMenuItemDataCustom({required this.title, required this.onPressed});
+  const IOSSystemContextMenuItemDataCustom({required this.title, required this.keepsMenuPresented, required this.onPressed});
 
   @override
   final String title;
+
+  final bool keepsMenuPresented;
 
   /// The callback to be executed when the item is selected.
   final VoidCallback onPressed;
@@ -3136,7 +3138,7 @@ final class IOSSystemContextMenuItemDataCustom extends IOSSystemContextMenuItemD
 
   @override
   Map<String, dynamic> get _json {
-    return <String, dynamic>{'id': callbackId, 'title': title, 'type': _jsonType};
+    return <String, dynamic>{'id': callbackId, 'title': title, 'type': _jsonType, 'keepsMenuPresented': keepsMenuPresented};
   }
 
   @override
@@ -3144,11 +3146,12 @@ final class IOSSystemContextMenuItemDataCustom extends IOSSystemContextMenuItemD
     super.debugFillProperties(properties);
     properties.add(StringProperty('title', title));
     properties.add(StringProperty('callbackId', callbackId));
+    properties.add(FlagProperty('keepsMenuPresented', value: keepsMenuPresented));
     properties.add(DiagnosticsProperty<VoidCallback>('onPressed', onPressed));
   }
 
   @override
-  int get hashCode => Object.hash(title, onPressed);
+  int get hashCode => Object.hash(title, keepsMenuPresented, onPressed);
 
   @override
   bool operator ==(Object other) {
@@ -3157,6 +3160,7 @@ final class IOSSystemContextMenuItemDataCustom extends IOSSystemContextMenuItemD
     }
     return other is IOSSystemContextMenuItemDataCustom &&
         other.title == title &&
+        other.keepsMenuPresented == keepsMenuPresented &&
         other.onPressed == onPressed;
   }
 }
