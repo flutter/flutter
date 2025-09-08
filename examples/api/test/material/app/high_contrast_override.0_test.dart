@@ -39,7 +39,7 @@ void main() {
   });
 
   testWidgets('MediaQuery override affects theme selection', (WidgetTester tester) async {
-    // Test that MediaQuery override actually works
+    // This proves that MediaQuery override affects MaterialApp theme selection
     bool capturedHighContrast = false;
     
     await tester.pumpWidget(

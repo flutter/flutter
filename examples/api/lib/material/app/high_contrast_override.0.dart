@@ -23,7 +23,8 @@ class _HighContrastOverrideExampleState extends State<HighContrastOverrideExampl
     return MaterialApp(
       title: 'High Contrast Override Demo',
       builder: (context, child) {
-        // Override MediaQuery to force high contrast when switch is enabled
+        // IMPORTANT: To affect theme selection, MediaQuery must wrap the MaterialApp
+        // Using builder ensures MediaQuery override affects MaterialApp's theme resolution
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(
             highContrast: _forceHighContrast,
