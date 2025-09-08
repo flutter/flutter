@@ -95,8 +95,6 @@ class UniqueObject {
 
   bool operator==(const T& value) const { return data_.generic == value; }
 
-  bool operator!=(const T& value) const { return data_.generic != value; }
-
   Traits& get_traits() { return data_; }
   const Traits& get_traits() const { return data_; }
 
