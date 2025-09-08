@@ -47,6 +47,7 @@ TaskFunction createNativeAssetsTest({
           '--verbose',
           '--uninstall-first',
           '--$buildMode',
+          '-v',
         ];
         int transitionCount = 0;
         bool done = false;
@@ -118,7 +119,7 @@ TaskFunction createNativeAssetsTest({
           final int integrationTestResult = await inDirectory<int>(exampleDirectory, () async {
             return runFlutter(
               command: 'test',
-              options: <String>['integration_test', '-d', deviceIdOverride!],
+              options: <String>['integration_test', '-d', deviceIdOverride!, '-v'],
               onLine: (String line, Process _) {
                 if (line.contains('All tests passed!')) {
                   done = true;
