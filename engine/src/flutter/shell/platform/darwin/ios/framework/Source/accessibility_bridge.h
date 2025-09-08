@@ -67,7 +67,7 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
 
   UIView* view() const override { return view_controller_.view; }
 
-  NSString* GetApplicationLocale {return view_controller_.applicationLocale;}
+  NSString* GetApplicationLocale { return view_controller_.applicationLocale; }
 
   bool isVoiceOverRunning() const override { return view_controller_.isVoiceOverRunning; }
 
