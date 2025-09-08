@@ -512,8 +512,8 @@ class Shell final : public PlatformView::Delegate,
   /// any of the threads.
   std::unique_ptr<DisplayManager> display_manager_;
 
-  // Protects expected_frame_size_ which is set on platform thread and read on
-  // raster thread.
+  // Protects expected_frame_constraints_ which is set on platform thread and
+  // read on raster thread.
   std::mutex resize_mutex_;
 
   // Used to discard wrong size layer tree produced during interactive
