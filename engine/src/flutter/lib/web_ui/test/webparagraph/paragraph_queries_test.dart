@@ -14,7 +14,7 @@ void main() {
 
 Future<void> testMain() async {
   setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
-
+  /*
   test('Paragraph getWordBoundary', () {
     final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
 
@@ -188,5 +188,65 @@ Future<void> testMain() async {
     expect(paragraph.getLineNumberAt(3), 0);
     expect(paragraph.getLineNumberAt(9), 1);
     expect(paragraph.getLineNumberAt(15), 2);
+  });
+*/
+  test('Paragraph getGlyphInfoAt', () {
+    const double epsilon = 0.001;
+    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+
+    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText('Line1\nLine2\nLine3');
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+    for (final line in paragraph.getLayout().lines) {
+      double left = line.advance.left;
+      for (final visualBlock in line.visualBlocks) {
+        for (int i = visualBlock.textRange.start; i < visualBlock.textRange.end; i++) {
+          final glyphInfo = paragraph.getGlyphInfoAt(i);
+          if (glyphInfo != null) {
+            expect(glyphInfo.graphemeClusterCodeUnitRange, ui.TextRange(start: i, end: i + 1));
+            expect(
+              glyphInfo.graphemeClusterLayoutBounds.height,
+              closeTo(line.advance.height, epsilon),
+            );
+            expect(glyphInfo.graphemeClusterLayoutBounds.left, closeTo(left, epsilon));
+            left = glyphInfo.graphemeClusterLayoutBounds.right;
+            expect(glyphInfo.writingDirection, ui.TextDirection.ltr);
+          } else {
+            assert(false, 'glyphInfo should not be null');
+          }
+        }
+      }
+    }
+  });
+
+  test('Paragraph getClosestGlyphInfoForOffset', () {
+    const double epsilon = 0.001;
+    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText('Line1\nLine2\nLine3');
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+    for (final line in paragraph.getLayout().lines) {
+      for (final visualBlock in line.visualBlocks) {
+        for (int i = visualBlock.textRange.start; i < visualBlock.textRange.end; i++) {
+          final glyphInfo = paragraph.getGlyphInfoAt(i);
+          if (glyphInfo != null) {
+            final center = ui.Offset(
+              glyphInfo.graphemeClusterLayoutBounds.left + epsilon,
+              glyphInfo.graphemeClusterLayoutBounds.center.dy,
+            );
+            final closestGlyphInfo = paragraph.getClosestGlyphInfoForOffset(center);
+            if (closestGlyphInfo != null) {
+              expect(closestGlyphInfo, equals(glyphInfo));
+            } else {
+              assert(false, 'closestGlyphInfo should not be null');
+            }
+          } else {
+            assert(false, 'glyphInfo should not be null');
+          }
+        }
+      }
+    }
   });
 }

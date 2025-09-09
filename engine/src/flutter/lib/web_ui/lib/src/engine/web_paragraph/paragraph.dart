@@ -624,12 +624,57 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   ui.GlyphInfo? getClosestGlyphInfoForOffset(ui.Offset offset) {
-    throw UnimplementedError('getClosestGlyphInfoForOffset not supported by WebParagraph');
+    final position = _layout.getPositionForOffset(offset);
+    assert(position.offset != 0 || position.affinity != ui.TextAffinity.upstream);
+    assert(position.offset < text.length);
+    return getGlyphInfoAt(position.offset);
   }
 
   @override
   ui.GlyphInfo? getGlyphInfoAt(int codeUnitOffset) {
-    throw UnimplementedError('getGlyphInfoAt not supported by WebParagraph');
+    final clusterRange = _layout.convertTextToClusterRange(
+      TextRange(start: codeUnitOffset, end: codeUnitOffset + 1),
+    );
+    if (clusterRange.isEmpty) {
+      return null;
+    }
+    for (final line in _layout.lines) {
+      if (line.allLineTextRange.start > codeUnitOffset) {
+        // No more lines can contain the cluster
+        break;
+      } else if (line.allLineTextRange.end <= codeUnitOffset) {
+        // The cluster is not on this line
+        continue;
+      }
+      // The cluster is on this line
+      for (final visualBlock in line.visualBlocks) {
+        if (visualBlock.clusterRange.start > clusterRange.start) {
+          // No more visual blocks can contain the cluster
+          break;
+        } else if (visualBlock.clusterRange.end <= clusterRange.start) {
+          // The cluster is not in this visual block
+          continue;
+        }
+        // The cluster is in this visual block
+        for (int i = visualBlock.clusterRange.start; i < visualBlock.clusterRange.end; i++) {
+          if (i < clusterRange.start) {
+            continue;
+          } else if (i >= clusterRange.end) {
+            break;
+          }
+          final cluster = _layout.textClusters[i];
+          return ui.GlyphInfo(
+            cluster.advance.translate(
+              line.advance.left + line.formattingShift + visualBlock.clusterShiftInLine,
+              line.advance.top + line.fontBoundingBoxAscent,
+            ),
+            ui.TextRange(start: cluster.textRange.start, end: cluster.textRange.end),
+            _layout.detectTextDirection(clusterRange),
+          );
+        }
+      }
+    }
+    return null;
   }
 
   @override

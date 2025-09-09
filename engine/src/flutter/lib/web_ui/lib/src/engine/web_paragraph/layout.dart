@@ -68,6 +68,19 @@ class TextLayout {
     formatLines(width);
   }
 
+  ui.TextDirection detectTextDirection(ClusterRange clusterRange) {
+    for (final bidiRun in bidiRuns) {
+      final ClusterRange intersection = ClusterRange.intersectClusterRange(
+        bidiRun.clusterRange,
+        clusterRange,
+      );
+      if (intersection.size > 0) {
+        return bidiRun.bidiLevel.isEven ? ui.TextDirection.ltr : ui.TextDirection.rtl;
+      }
+    }
+    return paragraph.paragraphStyle.textDirection;
+  }
+
   void extractClusterTexts() {
     // Walk through all the styled text ranges
     double blockStart = 0.0;
@@ -739,13 +752,18 @@ class TextLayout {
         // We are not there yet; we need a line closest to the offset.
         continue;
       }
-      WebParagraphDebug.log('Found line: ${line.textClusterRange} ${line.advance} ');
 
       // We found the line that contains the offset; let's go through all the visual blocks to find the position
       int blockNum = 0;
       for (final block in line.visualBlocks) {
         blockNum++;
-        if (block.correctedAdvance.left > offset.dx) {
+        final blockRect = block.correctedAdvance
+            .translate(
+              line.advance.left + line.formattingShift + block.clusterShiftInLine,
+              line.advance.top,
+            )
+            .inflate(epsilon);
+        if (blockRect.right < offset.dx) {
           // We didn't find any block and we already on the right side of our offset
           // It's only possible for the first block in the line
           assert(blockNum == 1);
@@ -753,7 +771,7 @@ class TextLayout {
             offset: line.textClusterRange.end,
             /*affinity: ui.TextAffinity.downstream,*/
           );
-        } else if (block.correctedAdvance.right < offset.dx) {
+        } else if (blockRect.left > offset.dx) {
           // We are not there yet; we need a block containing the offset (or the closest to it)
           continue;
         }
@@ -780,12 +798,12 @@ class TextLayout {
             if (offset.dx - rect.left <= rect.right - offset.dx) {
               return ui.TextPosition(
                 offset: cluster.textRange.start,
-                affinity: ui.TextAffinity.upstream,
+                /* affinity: ui.TextAffinity.downstream, */
               );
             } else {
               return ui.TextPosition(
                 offset: cluster.textRange.end,
-                /*affinity: ui.TextAffinity.downstream,*/
+                affinity: ui.TextAffinity.upstream,
               );
             }
           }
