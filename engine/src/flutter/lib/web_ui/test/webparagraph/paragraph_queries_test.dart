@@ -14,7 +14,7 @@ void main() {
 
 Future<void> testMain() async {
   setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
-  /*
+
   test('Paragraph getWordBoundary', () {
     final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
 
@@ -189,7 +189,7 @@ Future<void> testMain() async {
     expect(paragraph.getLineNumberAt(9), 1);
     expect(paragraph.getLineNumberAt(15), 2);
   });
-*/
+
   test('Paragraph getGlyphInfoAt', () {
     const double epsilon = 0.001;
     final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);

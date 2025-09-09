@@ -64,7 +64,7 @@ Future<void> testMain() async {
     expect(paragraph.text, 'some text');
     expect(paragraph.paragraphStyle, paragraphStyle);
     expect(paragraph.styledTextRanges.length, 1);
-    expect(paragraph.styledTextRanges.first.style, textStyle1);
+    expect(paragraph.styledTextRanges.first.style, textStyle1.fillMissingFields());
     expect(paragraph.styledTextRanges.last.start, 0);
     expect(paragraph.styledTextRanges.last.end, paragraph.text.length);
   });
@@ -84,7 +84,7 @@ Future<void> testMain() async {
     expect(paragraph.text, 'some text');
     expect(paragraph.paragraphStyle, paragraphStyle);
     expect(paragraph.styledTextRanges.length, 1);
-    expect(paragraph.styledTextRanges[0].style, textStyle3);
+    expect(paragraph.styledTextRanges[0].style, textStyle3.fillMissingFields());
     expect(paragraph.styledTextRanges.last.start, 0);
     expect(paragraph.styledTextRanges.last.end, paragraph.text.length);
   });
@@ -109,9 +109,9 @@ Future<void> testMain() async {
     expect(paragraph.text, '[1][2][3]');
     expect(paragraph.paragraphStyle, paragraphStyle);
     expect(paragraph.styledTextRanges.length, 3);
-    expect(paragraph.styledTextRanges[0].style, textStyle1);
-    expect(paragraph.styledTextRanges[1].style, textStyle2);
-    expect(paragraph.styledTextRanges[2].style, textStyle3);
+    expect(paragraph.styledTextRanges[0].style, textStyle1.fillMissingFields());
+    expect(paragraph.styledTextRanges[1].style, textStyle2.fillMissingFields());
+    expect(paragraph.styledTextRanges[2].style, textStyle3.fillMissingFields());
     expect(paragraph.styledTextRanges[0].start, 0);
     expect(paragraph.styledTextRanges[0].end, 3);
     expect(paragraph.styledTextRanges[1].start, 3);
@@ -137,9 +137,47 @@ Future<void> testMain() async {
     expect(paragraph.text, '[1[2[3]]]');
     expect(paragraph.paragraphStyle, paragraphStyle);
     expect(paragraph.styledTextRanges.length, 3);
-    expect(paragraph.styledTextRanges[0].style, textStyle1);
-    expect(paragraph.styledTextRanges[1].style, textStyle2);
-    expect(paragraph.styledTextRanges[2].style, textStyle3);
+    expect(paragraph.styledTextRanges[0].style, textStyle1.fillMissingFields());
+    expect(paragraph.styledTextRanges[1].style, textStyle2.fillMissingFields());
+    expect(paragraph.styledTextRanges[2].style, textStyle3.fillMissingFields());
+    expect(paragraph.styledTextRanges[0].start, 0);
+    expect(paragraph.styledTextRanges[0].end, 2);
+    expect(paragraph.styledTextRanges[1].start, 2);
+    expect(paragraph.styledTextRanges[1].end, 4);
+    expect(paragraph.styledTextRanges[2].start, 4);
+    expect(paragraph.styledTextRanges[2].end, 9);
+  });
+
+  test('Build paragraph with inherited styles [1[2[3]]]', () {
+    final WebParagraphStyle paragraphStyle = WebParagraphStyle();
+    final WebTextStyle textStyle1 = WebTextStyle(fontFamily: 'Roboto');
+    final WebTextStyle textStyle2 = WebTextStyle(fontSize: 42);
+    final WebTextStyle textStyle3 = WebTextStyle(fontStyle: FontStyle.italic);
+
+    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    builder.pushStyle(textStyle1);
+    builder.addText('[1');
+    builder.pushStyle(textStyle2);
+    builder.addText('[2');
+    builder.pushStyle(textStyle3);
+    builder.addText('[3]]]');
+    final WebParagraph paragraph = builder.build();
+    expect(paragraph.text, '[1[2[3]]]');
+    expect(paragraph.paragraphStyle, paragraphStyle);
+    expect(paragraph.styledTextRanges.length, 3);
+    expect(paragraph.styledTextRanges[0].style, textStyle1.fillMissingFields());
+    expect(
+      paragraph.styledTextRanges[1].style,
+      WebTextStyle(fontFamily: 'Roboto', fontSize: 42).fillMissingFields(),
+    );
+    expect(
+      paragraph.styledTextRanges[2].style,
+      WebTextStyle(
+        fontFamily: 'Roboto',
+        fontSize: 42,
+        fontStyle: FontStyle.italic,
+      ).fillMissingFields().fillMissingFields(),
+    );
     expect(paragraph.styledTextRanges[0].start, 0);
     expect(paragraph.styledTextRanges[0].end, 2);
     expect(paragraph.styledTextRanges[1].start, 2);
@@ -155,26 +193,26 @@ Future<void> testMain() async {
     final WebTextStyle textStyle3 = WebTextStyle(fontFamily: 'Roboto', fontSize: 40);
     final WebTextStyle textStyle4 = WebTextStyle(fontFamily: 'Roboto', fontSize: 45);
     final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
-    builder.pushStyle(textStyle1);
+    builder.pushStyle(textStyle1.fillMissingFields());
     builder.addText('[1');
-    builder.pushStyle(textStyle2);
+    builder.pushStyle(textStyle2.fillMissingFields());
     builder.addText('[11');
-    builder.pushStyle(textStyle3);
+    builder.pushStyle(textStyle3.fillMissingFields());
     builder.addText('[111]');
     builder.pop();
-    builder.pushStyle(textStyle4);
+    builder.pushStyle(textStyle4.fillMissingFields());
     builder.addText('[112]]]');
     builder.pop();
     builder.pop();
     builder.pop();
-    builder.pushStyle(textStyle1);
+    builder.pushStyle(textStyle1.fillMissingFields());
     builder.addText('[2');
-    builder.pushStyle(textStyle2);
+    builder.pushStyle(textStyle2.fillMissingFields());
     builder.addText('[21');
-    builder.pushStyle(textStyle3);
+    builder.pushStyle(textStyle3.fillMissingFields());
     builder.addText('[211]');
     builder.pop();
-    builder.pushStyle(textStyle4);
+    builder.pushStyle(textStyle4.fillMissingFields());
     builder.addText('[212]]]');
     final WebParagraph paragraph = builder.build();
     expect(paragraph.text, '[1[11[111][112]]][2[21[211][212]]]');
@@ -220,9 +258,6 @@ Future<void> testMain() async {
     expect(paragraph.text, 'textStyle1. ${placeholderChar}textStyle3. $placeholderChar');
     expect(paragraph.paragraphStyle, paragraphStyle);
     expect(paragraph.styledTextRanges.length, 4);
-    for (final tr in paragraph.styledTextRanges) {
-      print('$tr');
-    }
     expect(paragraph.styledTextRanges[0].placeholder == null, true);
     expect(paragraph.styledTextRanges[1].placeholder != null, true);
     expect(paragraph.styledTextRanges[2].placeholder == null, true);

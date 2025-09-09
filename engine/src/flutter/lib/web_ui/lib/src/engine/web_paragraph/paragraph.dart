@@ -116,7 +116,6 @@ enum StyleElements {
   text,
 }
 
-@immutable
 class WebTextStyle implements ui.TextStyle {
   factory WebTextStyle({
     String? fontFamily,
@@ -137,12 +136,12 @@ class WebTextStyle implements ui.TextStyle {
     List<ui.FontVariation>? fontVariations,
   }) {
     return WebTextStyle._(
-      originalFontFamily: fontFamily ?? 'Arial',
-      fontSize: fontSize ?? 14.0,
-      fontStyle: fontStyle ?? ui.FontStyle.normal,
-      fontWeight: fontWeight ?? ui.FontWeight.normal,
-      foreground: foreground ?? (ui.Paint()..color = const ui.Color(0xFF000000)),
-      background: background ?? (ui.Paint()..color = const ui.Color(0x00000000)),
+      originalFontFamily: fontFamily,
+      fontSize: fontSize,
+      fontStyle: fontStyle,
+      fontWeight: fontWeight,
+      foreground: foreground,
+      background: background,
       shadows: shadows,
       decoration: decoration,
       decorationColor: decorationColor,
@@ -156,7 +155,7 @@ class WebTextStyle implements ui.TextStyle {
     );
   }
 
-  const WebTextStyle._({
+  WebTextStyle._({
     required this.originalFontFamily,
     required this.fontSize,
     required this.fontStyle,
@@ -175,10 +174,10 @@ class WebTextStyle implements ui.TextStyle {
     required this.fontVariations,
   });
 
-  final String? originalFontFamily;
-  final double? fontSize;
-  final ui.FontStyle? fontStyle;
-  final ui.FontWeight? fontWeight;
+  late final String? originalFontFamily;
+  late final double? fontSize;
+  late final ui.FontStyle? fontStyle;
+  late final ui.FontWeight? fontWeight;
   final ui.Paint? foreground;
   final ui.Paint? background;
   final List<ui.Shadow>? shadows;
@@ -215,6 +214,28 @@ class WebTextStyle implements ui.TextStyle {
       fontFeatures: other.fontFeatures ?? fontFeatures,
       fontVariations: other.fontVariations ?? fontVariations,
     );
+  }
+
+  WebTextStyle fillMissingFields() {
+    final WebTextStyle filled = WebTextStyle._(
+      originalFontFamily: originalFontFamily ?? StyleManager.defaultFontFamily,
+      fontSize: fontSize ?? StyleManager.defaultFontSize,
+      fontStyle: fontStyle ?? ui.FontStyle.normal,
+      fontWeight: fontWeight ?? ui.FontWeight.normal,
+      foreground: foreground,
+      background: background,
+      shadows: shadows,
+      decoration: decoration,
+      decorationColor: decorationColor,
+      decorationStyle: decorationStyle,
+      decorationThickness: decorationThickness,
+      letterSpacing: letterSpacing,
+      wordSpacing: wordSpacing,
+      height: height,
+      fontFeatures: fontFeatures,
+      fontVariations: fontVariations,
+    );
+    return filled;
   }
 
   @override
@@ -987,7 +1008,8 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
 
   @override
   void pushStyle(ui.TextStyle textStyle) {
-    textStylesStack.add(textStyle as WebTextStyle);
+    final mergedStyle = textStylesStack.last.mergeWith(textStyle as WebTextStyle);
+    textStylesStack.add(mergedStyle);
     final last = textStylesList.last;
     if (last.end == textBuffer.length && last.style == textStyle) {
       // Just continue with the same style
@@ -998,7 +1020,9 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
 
   void startStyledTextRange() {
     finishStyledTextRange();
-    textStylesList.add(StyledTextRange.collapsed(textBuffer.length, textStylesStack.last));
+    textStylesList.add(
+      StyledTextRange.collapsed(textBuffer.length, textStylesStack.last.fillMissingFields()),
+    );
   }
 
   void finishStyledTextRange() {
