@@ -221,7 +221,19 @@ class _CkDilateImageFilter extends CkImageFilter {
     SkImageFilterBorrow borrow, {
     ui.TileMode defaultBlurTileMode = ui.TileMode.clamp,
   }) {
-    final skImageFilter = canvasKit.ImageFilter.MakeDilate(radiusX, radiusY, null);
+    // Return the identity matrix when both radiusX and radiusY are 0.
+    // Replicates effect of applying no filter.
+    final SkImageFilter skImageFilter;
+    if (radiusX == 0 && radiusY == 0) {
+      skImageFilter = canvasKit.ImageFilter.MakeMatrixTransform(
+        toSkMatrixFromFloat32(Matrix4.identity().storage),
+        toSkFilterOptions(ui.FilterQuality.none),
+        null,
+      );
+    } else {
+      skImageFilter = canvasKit.ImageFilter.MakeDilate(radiusX, radiusY, null);
+    }
+
     borrow(skImageFilter);
     skImageFilter.delete();
   }
@@ -254,7 +266,19 @@ class _CkErodeImageFilter extends CkImageFilter {
     SkImageFilterBorrow borrow, {
     ui.TileMode defaultBlurTileMode = ui.TileMode.clamp,
   }) {
-    final skImageFilter = canvasKit.ImageFilter.MakeErode(radiusX, radiusY, null);
+    // Return the identity matrix when both radiusX and radiusY are 0.
+    // Replicates effect of applying no filter.
+    final SkImageFilter skImageFilter;
+    if (radiusX == 0 && radiusY == 0) {
+      skImageFilter = canvasKit.ImageFilter.MakeMatrixTransform(
+        toSkMatrixFromFloat32(Matrix4.identity().storage),
+        toSkFilterOptions(ui.FilterQuality.none),
+        null,
+      );
+    } else {
+      skImageFilter = canvasKit.ImageFilter.MakeErode(radiusX, radiusY, null);
+    }
+
     borrow(skImageFilter);
     skImageFilter.delete();
   }
