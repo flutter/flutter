@@ -4917,6 +4917,15 @@ TEST_F(ShellTest, ProvidesEngineId) {
 
   latch.Wait();
   ASSERT_EQ(reported_handle, 99);
+
+  latch.Reset();
+
+  fml::TaskRunner::RunNowOrPostTask(
+      shell->GetTaskRunners().GetUITaskRunner(), [&]() {
+        ASSERT_EQ(shell->GetEngine()->GetLastEngineId(), 99);
+        latch.Signal();
+      });
+  latch.Wait();
   DestroyShell(std::move(shell), task_runners);
 }
 
@@ -4945,8 +4954,6 @@ TEST_F(ShellTest, ProvidesNullEngineId) {
   auto configuration = RunConfiguration::InferFromSettings(settings);
   configuration.SetEntrypoint("providesEngineId");
   RunEngine(shell.get(), std::move(configuration));
-
-  ASSERT_EQ(shell->GetEngine()->GetLastEngineId(), 99);
 
   latch.Wait();
   ASSERT_EQ(reported_handle, std::nullopt);
