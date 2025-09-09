@@ -109,7 +109,7 @@ void main() {
     await ensureFlutterToolsSnapshot();
     loggingProcessManager = LoggingProcessManager();
     shutdownHooks = ShutdownHooks();
-    logger = BufferLogger.test();
+    logger = WidgetPreviewMachineAwareLogger(BufferLogger.test(), machine: false, verbose: false);
     fs = LocalFileSystem.test(signals: Signals.test());
     botDetector = const FakeBotDetector(false);
     tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_create_test.');
@@ -190,7 +190,7 @@ void main() {
   void expectSinglePreviewLaunchTimingEvent() => expectNPreviewLaunchTimingEvents(1);
 
   void expectDeviceSelected(Device device) {
-    final bufferLogger = logger as BufferLogger;
+    final BufferLogger bufferLogger = asLogger<BufferLogger>(logger);
     expect(
       bufferLogger.statusText,
       contains('Launching the Widget Preview Scaffold on ${device.displayName}...'),
@@ -327,12 +327,17 @@ Widget preview() => Text('Foo');''';
 import 'widget_preview.dart' as _i1;
 import 'package:flutter_project/foo.dart' as _i2;
 
-List<_i1.WidgetPreview> previews() => [
-      _i1.WidgetPreview(
-        scriptUri: 'STRIPPED',
-        packageName: 'flutter_project',
-        name: 'preview',
-        builder: () => _i2.preview(),
+List<_i1.WidgetPreviewGroup> previews() => [
+      _i1.WidgetPreviewGroup(
+        name: 'Default',
+        previews: [
+          _i1.WidgetPreview(
+            scriptUri: 'STRIPPED',
+            packageName: 'flutter_project',
+            name: 'preview',
+            builder: () => _i2.preview(),
+          )
+        ],
       )
     ];
 ''';
