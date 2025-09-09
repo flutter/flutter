@@ -37,9 +37,9 @@ Future<void> testMain() async {
       ui.Offset(paragraph.width + 1, paragraph.height + 1),
     );
     expect(positiontt, const ui.TextPosition(offset: 0 /*affinity: ui.TextAffinity.downstream)*/));
-    expect(position00, const ui.TextPosition(offset: 0, affinity: ui.TextAffinity.upstream));
-    expect(positionmm, const ui.TextPosition(offset: 37, affinity: ui.TextAffinity.upstream));
-    expect(positionee, const ui.TextPosition(offset: 81 /*affinity: ui.TextAffinity.downstream)*/));
+    expect(position00, const ui.TextPosition(offset: 0 /*affinity: ui.TextAffinity.downstream)*/));
+    expect(positionmm, const ui.TextPosition(offset: 37 /*affinity: ui.TextAffinity.downstream)*/));
+    expect(positionee, const ui.TextPosition(offset: 81, affinity: ui.TextAffinity.upstream));
     expect(positionbb, const ui.TextPosition(offset: 81, affinity: ui.TextAffinity.upstream));
   });
 
@@ -66,9 +66,9 @@ Future<void> testMain() async {
     );
 
     expect(positiontt, const ui.TextPosition(offset: 0 /*affinity: ui.TextAffinity.downstream)*/));
-    expect(position00, const ui.TextPosition(offset: 0, affinity: ui.TextAffinity.upstream));
-    expect(positionmm, const ui.TextPosition(offset: 37, affinity: ui.TextAffinity.upstream));
-    expect(positionee, const ui.TextPosition(offset: 81 /*affinity: ui.TextAffinity.downstream)*/));
+    expect(position00, const ui.TextPosition(offset: 0 /*affinity: ui.TextAffinity.downstream)*/));
+    expect(positionmm, const ui.TextPosition(offset: 37 /*affinity: ui.TextAffinity.downstream)*/));
+    expect(positionee, const ui.TextPosition(offset: 81, affinity: ui.TextAffinity.upstream));
     expect(positionbb, const ui.TextPosition(offset: 81, affinity: ui.TextAffinity.upstream));
   });
 }
