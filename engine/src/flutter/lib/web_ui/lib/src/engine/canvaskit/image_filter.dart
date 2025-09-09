@@ -58,6 +58,16 @@ abstract class CkImageFilter implements CkManagedSkImageFilterConvertible, Layer
 
   CkImageFilter._();
 
+  /// Returns the identity matrix image filter.
+  /// This is used to replicate effect of applying no filter.
+  static SkImageFilter _createIdentityMatrixFilter() {
+    return canvasKit.ImageFilter.MakeMatrixTransform(
+      toSkMatrixFromFloat32(Matrix4.identity().storage),
+      toSkFilterOptions(ui.FilterQuality.none),
+      null,
+    );
+  }
+
   // The blur ImageFilter will override this and return the necessary
   // value to hand to the saveLayer call. It is the only filter type that
   // needs to pass along a tile mode so we just return a default value of
@@ -124,15 +134,10 @@ class _CkBlurImageFilter extends CkImageFilter {
     SkImageFilterBorrow borrow, {
     ui.TileMode defaultBlurTileMode = ui.TileMode.clamp,
   }) {
-    /// Return the identity matrix when both sigmaX and sigmaY are 0. Replicates
-    /// effect of applying no filter
+    /// Returns the identity matrix filter when both sigmaX and sigmaY are 0.
     final SkImageFilter skImageFilter;
     if (sigmaX == 0 && sigmaY == 0) {
-      skImageFilter = canvasKit.ImageFilter.MakeMatrixTransform(
-        toSkMatrixFromFloat32(Matrix4.identity().storage),
-        toSkFilterOptions(ui.FilterQuality.none),
-        null,
-      );
+      skImageFilter = CkImageFilter._createIdentityMatrixFilter();
     } else {
       skImageFilter = canvasKit.ImageFilter.MakeBlur(
         sigmaX,
@@ -221,15 +226,10 @@ class _CkDilateImageFilter extends CkImageFilter {
     SkImageFilterBorrow borrow, {
     ui.TileMode defaultBlurTileMode = ui.TileMode.clamp,
   }) {
-    // Returns the identity matrix when both radiusX and radiusY are 0.
-    // Replicates effect of applying no filter.
+    // Returns the identity matrix filter when both radiusX and radiusY are 0.
     final SkImageFilter skImageFilter;
     if (radiusX == 0 && radiusY == 0) {
-      skImageFilter = canvasKit.ImageFilter.MakeMatrixTransform(
-        toSkMatrixFromFloat32(Matrix4.identity().storage),
-        toSkFilterOptions(ui.FilterQuality.none),
-        null,
-      );
+      skImageFilter = CkImageFilter._createIdentityMatrixFilter();
     } else {
       skImageFilter = canvasKit.ImageFilter.MakeDilate(radiusX, radiusY, null);
     }
@@ -266,15 +266,10 @@ class _CkErodeImageFilter extends CkImageFilter {
     SkImageFilterBorrow borrow, {
     ui.TileMode defaultBlurTileMode = ui.TileMode.clamp,
   }) {
-    // Returns the identity matrix when both radiusX and radiusY are 0.
-    // Replicates effect of applying no filter.
+    // Returns the identity matrix filter when both radiusX and radiusY are 0.
     final SkImageFilter skImageFilter;
     if (radiusX == 0 && radiusY == 0) {
-      skImageFilter = canvasKit.ImageFilter.MakeMatrixTransform(
-        toSkMatrixFromFloat32(Matrix4.identity().storage),
-        toSkFilterOptions(ui.FilterQuality.none),
-        null,
-      );
+      skImageFilter = CkImageFilter._createIdentityMatrixFilter();
     } else {
       skImageFilter = canvasKit.ImageFilter.MakeErode(radiusX, radiusY, null);
     }
