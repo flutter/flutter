@@ -221,7 +221,7 @@ class _CkDilateImageFilter extends CkImageFilter {
     SkImageFilterBorrow borrow, {
     ui.TileMode defaultBlurTileMode = ui.TileMode.clamp,
   }) {
-    // Return the identity matrix when both radiusX and radiusY are 0.
+    // Returns the identity matrix when both radiusX and radiusY are 0.
     // Replicates effect of applying no filter.
     final SkImageFilter skImageFilter;
     if (radiusX == 0 && radiusY == 0) {
@@ -266,7 +266,7 @@ class _CkErodeImageFilter extends CkImageFilter {
     SkImageFilterBorrow borrow, {
     ui.TileMode defaultBlurTileMode = ui.TileMode.clamp,
   }) {
-    // Return the identity matrix when both radiusX and radiusY are 0.
+    // Returns the identity matrix when both radiusX and radiusY are 0.
     // Replicates effect of applying no filter.
     final SkImageFilter skImageFilter;
     if (radiusX == 0 && radiusY == 0) {
