@@ -57,7 +57,7 @@ These steps build the engine used by `flutter run` for Android devices.
 
 Run the following steps from the `engine/src` directory in your local checkout. See [Setting up the Engine development environment](Setting-up-the-Engine-development-environment.md).
 
-1. Make sure your engine code is [up to date](https://github.com/flutter/flutter/blob/master/engine/src/flutter/docs/contributing/Compiling-the-engine.md#updating-the-engine).
+1. Make sure your engine code is [up to date](https://github.com/flutter/flutter/blob/master/docs/engine/contributing/Compiling-the-engine.md#updating-the-engine).
 
 2. Prepare your build files
     * `./flutter/tools/gn --android --unoptimized` for device-side executables.
@@ -130,7 +130,7 @@ These steps build the engine used by `flutter run` for iOS devices.
 
 Run the following steps, from the `engine/src` directory:
 
-1. Make sure your engine code is [up to date](https://github.com/flutter/flutter/blob/master/engine/src/flutter/docs/contributing/Compiling-the-engine.md#updating-the-engine).
+1. Make sure your engine code is [up to date](https://github.com/flutter/flutter/blob/master/docs/engine/contributing/Compiling-the-engine.md#updating-the-engine).
 
 2. `./flutter/tools/gn --ios --unoptimized` to prepare build files for device-side executables (or `--ios --simulator --unoptimized` for simulator).
    * This also produces an Xcode project for working with the engine source code at `out/ios_debug_unopt/flutter_engine.xcodeproj`
@@ -154,7 +154,7 @@ See also [instructions for debugging the engine in a Flutter app in Xcode](../De
 
 These steps build the desktop embedding, and the engine used by `flutter test` on a host workstation.
 
-1. Make sure your engine code is [up to date](https://github.com/flutter/flutter/blob/master/engine/src/flutter/docs/contributing/Compiling-the-engine.md#updating-the-engine).
+1. Make sure your engine code is [up to date](https://github.com/flutter/flutter/blob/master/docs/engine/contributing/Compiling-the-engine.md#updating-the-engine).
 
 2. `./flutter/tools/gn --unoptimized` to prepare your build files.
    * `--unoptimized` disables C++ compiler optimizations. On macOS, binaries are emitted unstripped; on Linux, unstripped binaries are emitted to an `exe.unstripped` subdirectory of the build.
@@ -180,7 +180,7 @@ On Windows, ensure that the engine checkout is not deeply nested. This avoid the
 
 1. Make sure you have Visual Studio installed (non-Googlers only). [Debugging Tools for Windows 10](https://docs.microsoft.com/en-us/windows-hardware/drivers/debugger/debugger-download-tools#small-classic-windbg-preview-logo-debugging-tools-for-windows-10-windbg) must be installed.
 
-2. Make sure your engine code is [up to date](https://github.com/flutter/flutter/blob/master/engine/src/flutter/docs/contributing/Compiling-the-engine.md#updating-the-engine).
+2. Make sure your engine code is [up to date](https://github.com/flutter/flutter/blob/master/docs/engine/contributing/Compiling-the-engine.md#updating-the-engine).
 
 3. Ensure long path support is enabled on your machine. Launch PowerShell as an administrator and run:
 ```
@@ -290,7 +290,7 @@ Compiling the web engine might take a few extra steps on Windows. Use cmd.exe an
 2. Make sure, depot_tools, ninja and python are installed and added to the path. Also set the following environment variable for depot tools:
    * `DEPOT_TOOLS_WIN_TOOLCHAIN = 0`
    * Tip: if you get a python error try to use Python 2 instead of 3
-3. Make sure your engine code is [up to date](https://github.com/flutter/flutter/blob/master/engine/src/flutter/docs/contributing/Compiling-the-engine.md#updating-the-engine).
+3. Make sure your engine code is [up to date](https://github.com/flutter/flutter/blob/master/docs/engine/contributing/Compiling-the-engine.md#updating-the-engine).
    * Tip: If you get a git authentication errors on this step try Git Bash instead
 5. `python .\flutter\tools\gn --unoptimized --full-dart-sdk` to prepare your build files.
 6. `ninja -C .\out\<dir created by previous step>` to build.
