@@ -2184,6 +2184,30 @@ public class AccessibilityBridgeTest {
   @Config(sdk = API_LEVELS.API_36)
   @TargetApi(API_LEVELS.API_36)
   @Test
+  public void itCanPerformExpand() {
+    AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
+    AccessibilityBridge accessibilityBridge =
+        setUpBridge(
+            /* rootAccessibilityView= */ null,
+            /* accessibilityChannel= */ mockChannel,
+            /* accessibilityManager= */ null,
+            /* contentResolver= */ null,
+            /* accessibilityViewEmbedder= */ null,
+            /* platformViewsAccessibilityDelegate= */ null);
+
+    TestSemanticsNode node = new TestSemanticsNode();
+    node.addFlag(AccessibilityBridge.Flag.HAS_EXPANDED_STATE);
+    node.addAction(AccessibilityBridge.Action.EXPAND);
+    TestSemanticsUpdate testSemanticsUpdate = node.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+
+    accessibilityBridge.performAction(0, AccessibilityNodeInfo.ACTION_EXPAND, null);
+    verify(mockChannel).dispatchSemanticsAction(0, AccessibilityBridge.Action.EXPAND);
+  }
+
+  @Config(sdk = API_LEVELS.API_36)
+  @TargetApi(API_LEVELS.API_36)
+  @Test
   public void itAddsCollapseActionBasedOnFlagsCorrectly() {
     AccessibilityBridge accessibilityBridge = setUpBridge();
 
@@ -2215,6 +2239,31 @@ public class AccessibilityBridgeTest {
     nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
     actions = nodeInfo.getActionList();
     assertTrue(actions.contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_COLLAPSE));
+  }
+
+  @Config(sdk = API_LEVELS.API_36)
+  @TargetApi(API_LEVELS.API_36)
+  @Test
+  public void itCanPerformCollapse() {
+    AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
+    AccessibilityBridge accessibilityBridge =
+        setUpBridge(
+            /* rootAccessibilityView= */ null,
+            /* accessibilityChannel= */ mockChannel,
+            /* accessibilityManager= */ null,
+            /* contentResolver= */ null,
+            /* accessibilityViewEmbedder= */ null,
+            /* platformViewsAccessibilityDelegate= */ null);
+
+    TestSemanticsNode node = new TestSemanticsNode();
+    node.addFlag(AccessibilityBridge.Flag.HAS_EXPANDED_STATE);
+    node.addFlag(AccessibilityBridge.Flag.IS_EXPANDED);
+    node.addAction(AccessibilityBridge.Action.COLLAPSE);
+    TestSemanticsUpdate testSemanticsUpdate = node.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+
+    accessibilityBridge.performAction(0, AccessibilityNodeInfo.ACTION_COLLAPSE, null);
+    verify(mockChannel).dispatchSemanticsAction(0, AccessibilityBridge.Action.COLLAPSE);
   }
 
   @Config(sdk = API_LEVELS.API_36)
