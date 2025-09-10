@@ -1093,7 +1093,6 @@ targets:
       - DEPS
 
   - name: Linux plugin_test_android_variants
-    bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 45
     properties:
@@ -1119,7 +1118,6 @@ targets:
       - DEPS
 
   - name: Linux plugin_test_android_standard
-    bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 45
     properties:
@@ -4385,7 +4383,6 @@ targets:
       - DEPS
 
   - name: Mac plugin_test_android_variants
-    bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 45
     properties:
@@ -4406,7 +4403,6 @@ targets:
       - DEPS
 
   - name: Mac plugin_test_android_standard
-    bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 45
     properties:
@@ -6190,7 +6186,6 @@ targets:
       - DEPS
 
   - name: Windows plugin_test_android_variants
-    bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 45
     properties:
@@ -6212,7 +6207,6 @@ targets:
       - DEPS
 
   - name: Windows plugin_test_android_standard
-    bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 45
     properties:
