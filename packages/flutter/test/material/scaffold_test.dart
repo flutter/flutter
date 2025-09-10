@@ -615,7 +615,7 @@ void main() {
   );
 
   testWidgets(
-    'No status bar when primay is false',
+    'No status bar when primary is false',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
