@@ -341,10 +341,27 @@ class CanvasKitRenderer extends Renderer {
     List<ui.FontVariation>? fontVariations,
   }) => isExperimentalWebParagraph
       ? WebTextStyle(
+          color: color,
+          decoration: decoration,
+          decorationColor: decorationColor,
+          decorationStyle: decorationStyle,
+          decorationThickness: decorationThickness,
+          fontWeight: fontWeight,
+          fontStyle: fontStyle,
+          textBaseline: textBaseline,
           fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
           fontSize: fontSize,
-          foreground: foreground,
-          background: background,
+          letterSpacing: letterSpacing,
+          wordSpacing: wordSpacing,
+          height: height,
+          leadingDistribution: leadingDistribution,
+          locale: locale,
+          background: background as CkPaint?,
+          foreground: foreground as CkPaint?,
+          shadows: shadows,
+          fontFeatures: fontFeatures,
+          fontVariations: fontVariations,
         )
       : CkTextStyle(
           color: color,
@@ -386,10 +403,18 @@ class CanvasKitRenderer extends Renderer {
     ui.Locale? locale,
   }) => isExperimentalWebParagraph
       ? WebParagraphStyle(
-          textDirection: textDirection,
           textAlign: textAlign,
+          textDirection: textDirection,
+          maxLines: maxLines,
           fontFamily: fontFamily,
           fontSize: fontSize,
+          height: height,
+          textHeightBehavior: textHeightBehavior,
+          fontWeight: fontWeight,
+          fontStyle: fontStyle,
+          strutStyle: strutStyle as WebStrutStyle?,
+          ellipsis: ellipsis,
+          locale: locale,
         )
       : CkParagraphStyle(
           textAlign: textAlign,

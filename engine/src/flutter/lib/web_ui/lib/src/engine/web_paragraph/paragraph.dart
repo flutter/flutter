@@ -26,44 +26,39 @@ class WebParagraphStyle implements ui.ParagraphStyle {
     double? fontSize,
     ui.FontStyle? fontStyle,
     ui.FontWeight? fontWeight,
-    ui.Paint? foreground,
-    ui.Paint? background,
-    List<ui.Shadow>? shadows,
-    ui.TextDecoration? decoration,
-    ui.Color? decorationColor,
-    ui.TextDecorationStyle? decorationStyle,
-    double? decorationThickness,
-    double? letterSpacing,
-    double? wordSpacing,
-  }) : _defaultTextStyle = WebTextStyle(
+    double? height,
+    ui.Locale? locale,
+    this.maxLines,
+    this.ellipsis,
+    this.textHeightBehavior,
+    this.strutStyle,
+  }) : _textStyle = WebTextStyle(
          fontFamily: fontFamily,
          fontSize: fontSize,
          fontStyle: fontStyle,
          fontWeight: fontWeight,
-         foreground: foreground,
-         background: background,
-         shadows: shadows,
-         decoration: decoration,
-         decorationColor: decorationColor,
-         decorationStyle: decorationStyle,
-         decorationThickness: decorationThickness,
-         letterSpacing: letterSpacing,
-         wordSpacing: wordSpacing,
+         height: height,
+         locale: locale,
        ),
-       _textDirection = textDirection ?? ui.TextDirection.ltr,
-       _textAlign = textAlign ?? ui.TextAlign.start;
+       textDirection = textDirection ?? ui.TextDirection.ltr,
+       textAlign = textAlign ?? ui.TextAlign.start;
 
-  final WebTextStyle _defaultTextStyle;
-  final ui.TextDirection _textDirection;
-  final ui.TextAlign _textAlign;
+  @visibleForTesting
+  WebTextStyle get textStyle => _textStyle;
+  final WebTextStyle _textStyle;
 
   WebTextStyle getTextStyle() {
-    return _defaultTextStyle;
+    return _textStyle;
   }
 
-  ui.TextDirection get textDirection => _textDirection;
+  final ui.TextDirection textDirection;
+  final ui.TextAlign textAlign;
 
-  ui.TextAlign get textAlign => _textAlign;
+  final int? maxLines;
+  final String? ellipsis;
+
+  final ui.TextHeightBehavior? textHeightBehavior;
+  final WebStrutStyle? strutStyle;
 
   @override
   bool operator ==(Object other) {
@@ -73,12 +68,27 @@ class WebParagraphStyle implements ui.ParagraphStyle {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is WebParagraphStyle && _defaultTextStyle == other._defaultTextStyle;
+    return other is WebParagraphStyle &&
+        textDirection == other.textDirection &&
+        textAlign == other.textAlign &&
+        maxLines == other.maxLines &&
+        ellipsis == other.ellipsis &&
+        textHeightBehavior == other.textHeightBehavior &&
+        strutStyle == other.strutStyle &&
+        _textStyle == other._textStyle;
   }
 
   @override
   int get hashCode {
-    return Object.hash(_defaultTextStyle, null);
+    return Object.hash(
+      textDirection,
+      textAlign,
+      maxLines,
+      ellipsis,
+      textHeightBehavior,
+      strutStyle,
+      _textStyle,
+    );
   }
 
   @override
@@ -87,7 +97,13 @@ class WebParagraphStyle implements ui.ParagraphStyle {
     assert(() {
       result =
           'WebParagraphStyle('
-          'defaultTextStyle: $_defaultTextStyle'
+          'textDirection: $textDirection, '
+          'textAlign: $textAlign, '
+          'maxLines: $maxLines, '
+          'ellipsis: $ellipsis, '
+          'textHeightBehavior: $textHeightBehavior, '
+          'strutStyle: $strutStyle, '
+          'textStyle: $_textStyle'
           ')';
       return true;
     }());
@@ -95,12 +111,12 @@ class WebParagraphStyle implements ui.ParagraphStyle {
   }
 
   ui.TextAlign effectiveAlign() {
-    if (_textAlign == ui.TextAlign.start) {
-      return (_textDirection == ui.TextDirection.ltr) ? ui.TextAlign.left : ui.TextAlign.right;
-    } else if (_textAlign == ui.TextAlign.end) {
-      return (_textDirection == ui.TextDirection.ltr) ? ui.TextAlign.right : ui.TextAlign.left;
+    if (textAlign == ui.TextAlign.start) {
+      return (textDirection == ui.TextDirection.ltr) ? ui.TextAlign.left : ui.TextAlign.right;
+    } else if (textAlign == ui.TextAlign.end) {
+      return (textDirection == ui.TextDirection.ltr) ? ui.TextAlign.right : ui.TextAlign.left;
     } else {
-      return _textAlign;
+      return textAlign;
     }
   }
 }
@@ -119,9 +135,11 @@ enum StyleElements {
 class WebTextStyle implements ui.TextStyle {
   factory WebTextStyle({
     String? fontFamily,
+    List<String>? fontFamilyFallback,
     double? fontSize,
     ui.FontStyle? fontStyle,
     ui.FontWeight? fontWeight,
+    ui.Color? color,
     ui.Paint? foreground,
     ui.Paint? background,
     List<ui.Shadow>? shadows,
@@ -132,16 +150,21 @@ class WebTextStyle implements ui.TextStyle {
     double? letterSpacing,
     double? wordSpacing,
     double? height,
+    ui.TextBaseline? textBaseline,
+    ui.TextLeadingDistribution? leadingDistribution,
+    ui.Locale? locale,
     List<ui.FontFeature>? fontFeatures,
     List<ui.FontVariation>? fontVariations,
   }) {
     return WebTextStyle._(
-      originalFontFamily: fontFamily,
-      fontSize: fontSize,
-      fontStyle: fontStyle,
-      fontWeight: fontWeight,
-      foreground: foreground,
-      background: background,
+      originalFontFamily: fontFamily, // ?? 'Arial',
+      fontFamilyFallback: fontFamilyFallback,
+      fontSize: fontSize, // ?? 14.0,
+      fontStyle: fontStyle, // ?? ui.FontStyle.normal,
+      fontWeight: fontWeight, // ?? ui.FontWeight.normal,
+      color: color,
+      foreground: foreground, // ?? (ui.Paint()..color = const ui.Color(0xFF000000)),
+      background: background, // ?? (ui.Paint()..color = const ui.Color(0x00000000)),
       shadows: shadows,
       decoration: decoration,
       decorationColor: decorationColor,
@@ -150,6 +173,9 @@ class WebTextStyle implements ui.TextStyle {
       letterSpacing: letterSpacing,
       wordSpacing: wordSpacing,
       height: height,
+      textBaseline: textBaseline,
+      leadingDistribution: leadingDistribution,
+      locale: locale,
       fontFeatures: fontFeatures,
       fontVariations: fontVariations,
     );
@@ -157,9 +183,11 @@ class WebTextStyle implements ui.TextStyle {
 
   WebTextStyle._({
     required this.originalFontFamily,
+    required this.fontFamilyFallback,
     required this.fontSize,
     required this.fontStyle,
     required this.fontWeight,
+    required this.color,
     required this.foreground,
     required this.background,
     required this.shadows,
@@ -170,16 +198,21 @@ class WebTextStyle implements ui.TextStyle {
     required this.letterSpacing,
     required this.wordSpacing,
     required this.height,
+    required this.textBaseline,
+    required this.leadingDistribution,
+    required this.locale,
     required this.fontFeatures,
     required this.fontVariations,
   });
 
-  String? originalFontFamily;
-  double? fontSize;
-  ui.FontStyle? fontStyle;
-  ui.FontWeight? fontWeight;
-  ui.Paint? foreground;
-  ui.Paint? background;
+  final String? originalFontFamily;
+  final List<String>? fontFamilyFallback;
+  final double? fontSize;
+  final ui.FontStyle? fontStyle;
+  final ui.FontWeight? fontWeight;
+  final ui.Color? color;
+  final ui.Paint? foreground;
+  final ui.Paint? background;
   final List<ui.Shadow>? shadows;
   final ui.TextDecoration? decoration;
   final ui.Color? decorationColor;
@@ -188,6 +221,9 @@ class WebTextStyle implements ui.TextStyle {
   final double? letterSpacing;
   final double? wordSpacing;
   final double? height;
+  final ui.TextBaseline? textBaseline;
+  final ui.TextLeadingDistribution? leadingDistribution;
+  final ui.Locale? locale;
   final List<ui.FontFeature>? fontFeatures;
   final List<ui.FontVariation>? fontVariations;
 
@@ -198,9 +234,11 @@ class WebTextStyle implements ui.TextStyle {
   WebTextStyle mergeWith(WebTextStyle other) {
     return WebTextStyle._(
       originalFontFamily: other.originalFontFamily ?? originalFontFamily,
+      fontFamilyFallback: other.fontFamilyFallback ?? fontFamilyFallback,
       fontSize: other.fontSize ?? fontSize,
       fontStyle: other.fontStyle ?? fontStyle,
       fontWeight: other.fontWeight ?? fontWeight,
+      color: other.color ?? color,
       foreground: other.foreground ?? foreground,
       background: other.background ?? background,
       shadows: other.shadows ?? shadows,
@@ -211,37 +249,27 @@ class WebTextStyle implements ui.TextStyle {
       letterSpacing: other.letterSpacing ?? letterSpacing,
       wordSpacing: other.wordSpacing ?? wordSpacing,
       height: other.height ?? height,
+      textBaseline: other.textBaseline ?? textBaseline,
+      leadingDistribution: other.leadingDistribution ?? leadingDistribution,
+      locale: other.locale ?? locale,
       fontFeatures: other.fontFeatures ?? fontFeatures,
       fontVariations: other.fontVariations ?? fontVariations,
     );
   }
 
-  void fillMissingFields() {
-    originalFontFamily ??= StyleManager.defaultFontFamily;
-    fontSize ??= StyleManager.defaultFontSize;
-    fontStyle ??= ui.FontStyle.normal;
-    fontWeight ??= ui.FontWeight.normal;
-    foreground ??= ui.Paint()..color = const ui.Color(0xFF000000);
-    background ??= ui.Paint()..color = const ui.Color(0x00000000);
-  }
-
   bool paintsEqual(ui.Paint? a, ui.Paint? b) {
     if (a == null) {
-      if (b == null) {
-        return true;
-      } else {
-        //WebParagraphDebug.log('null != !null');
-        return false;
-      }
+      return b == null;
     }
     if (b == null) {
       //WebParagraphDebug.log('!null != null');
       return false;
     }
-    if (a == ui.Paint() && b == ui.Paint()) {
-      WebParagraphDebug.log('Paint() are equal');
-      return true;
-    }
+    // TODO(mdebbar=>jlavrova): Explain this?
+    // if (a == ui.Paint() && b == ui.Paint()) {
+    //   WebParagraphDebug.log('Paint() are equal');
+    //   return true;
+    // }
     if (a.blendMode != b.blendMode) {
       WebParagraphDebug.log('blendMode are not equal');
       return false;
@@ -374,12 +402,14 @@ class WebTextStyle implements ui.TextStyle {
     */
     return other is WebTextStyle &&
         other.originalFontFamily == originalFontFamily &&
+        listEquals<String>(other.fontFamilyFallback, fontFamilyFallback) &&
         other.fontSize == fontSize &&
         other.fontStyle == fontStyle &&
         other.fontWeight == fontWeight &&
+        other.color == color &&
         paintsEqual(other.foreground, foreground) &&
         paintsEqual(other.background, background) &&
-        other.shadows == shadows &&
+        listEquals<ui.Shadow>(other.shadows, shadows) &&
         other.decoration == decoration &&
         other.decorationColor == decorationColor &&
         other.decorationStyle == decorationStyle &&
@@ -387,20 +417,29 @@ class WebTextStyle implements ui.TextStyle {
         other.letterSpacing == letterSpacing &&
         other.wordSpacing == wordSpacing &&
         other.height == height &&
-        other.fontFeatures == fontFeatures &&
-        other.fontVariations == fontVariations;
+        other.textBaseline == textBaseline &&
+        other.leadingDistribution == leadingDistribution &&
+        other.locale == locale &&
+        listEquals<ui.FontFeature>(other.fontFeatures, fontFeatures) &&
+        listEquals<ui.FontVariation>(other.fontVariations, fontVariations);
   }
 
   @override
   int get hashCode {
+    final List<String>? fontFamilyFallback = this.fontFamilyFallback;
+    final List<ui.Shadow>? shadows = this.shadows;
+    final List<ui.FontFeature>? fontFeatures = this.fontFeatures;
+    final List<ui.FontVariation>? fontVariations = this.fontVariations;
     return Object.hash(
       originalFontFamily,
+      fontFamilyFallback == null ? null : Object.hashAll(fontFamilyFallback),
       fontSize,
       fontStyle,
       fontWeight,
+      color,
       foreground,
       background,
-      shadows,
+      shadows == null ? null : Object.hashAll(shadows),
       decoration,
       decorationColor,
       decorationStyle,
@@ -408,18 +447,21 @@ class WebTextStyle implements ui.TextStyle {
       letterSpacing,
       wordSpacing,
       height,
-      fontFeatures,
-      fontVariations,
+      textBaseline,
+      leadingDistribution,
+      locale,
+      // Object.hash goes up to 20 arguments, but we have 21
+      Object.hash(
+        fontFeatures == null ? null : Object.hashAll(fontFeatures),
+        fontVariations == null ? null : Object.hashAll(fontVariations),
+      ),
     );
   }
 
   String _simplePaintToString(ui.Paint? paint) {
     if (paint != null) {
-      return '[${paint.color.alpha.toRadixString(16).padLeft(2, '0')},'
-          '${paint.color.red.toRadixString(16).padLeft(2, '0')},'
-          '${paint.color.green.toRadixString(16).padLeft(2, '0')},'
-          '${paint.color.blue.toRadixString(16).padLeft(2, '0')}]'
-          /*
+      return paint.color.toCssString();
+      /*
           'colorFilter:${paint.colorFilter}\n'
           'strokeWidth:${paint.strokeWidth}\n'
           'strokeMiterLimit:${paint.strokeMiterLimit}\n'
@@ -435,7 +477,6 @@ class WebTextStyle implements ui.TextStyle {
           '${paint.invertColors ? 'invertColors,' : 'null invertColors'}\n'
           '${paint.filterQuality != ui.FilterQuality.none ? 'filterQuality:${paint.filterQuality},' : 'none filterQuality'}'
           */
-          '';
     }
     return 'null';
   }
@@ -450,9 +491,9 @@ class WebTextStyle implements ui.TextStyle {
           'fontSize: ${fontSize != null ? fontSize.toStringAsFixed(1) : ""}px '
           'fontStyle: ${fontStyle != null ? fontStyle.toString().replaceFirst("FontStyle.", "") : ""} '
           'fontWeight: ${fontWeight != null ? fontWeight.toString().replaceFirst("FontWeight.", "") : ""} '
+          'color: ${color != null ? color!.toCssString() : ""} '
           'foreground: ${_simplePaintToString(foreground)} '
-          'background: ${_simplePaintToString(background)} '
-          '';
+          'background: ${_simplePaintToString(background)} ';
       if (shadows != null && shadows!.isNotEmpty) {
         result += 'shadows(${shadows!.length}) ';
         for (final ui.Shadow shadow in shadows!) {
@@ -487,6 +528,7 @@ class WebTextStyle implements ui.TextStyle {
           result += '[${variation.axis} ${variation.value}]';
         }
       }
+      result += ')';
       return true;
     }());
     return result;
@@ -721,7 +763,9 @@ class WebStrutStyle implements ui.StrutStyle {
   }
 }
 
-/// The Web implementation of [ui.Paragraph].
+/// An implementation of [ui.Paragraph] based on the new Enhanced TextMetrics API.
+///
+/// See: https://chromestatus.com/feature/5075532483657728
 class WebParagraph implements ui.Paragraph {
   WebParagraph(this._paragraphStyle, this._styledTextRanges, this._text);
 
@@ -734,47 +778,33 @@ class WebParagraph implements ui.Paragraph {
   String get text => _text;
   final String _text;
 
+  // TODO(jlavrova): Implement.
   @override
   double get alphabeticBaseline => _alphabeticBaseline;
   final double _alphabeticBaseline = 0;
 
+  // TODO(jlavrova): Implement.
   @override
-  bool get didExceedMaxLines => _didExceedMaxLines;
-  final bool _didExceedMaxLines = false;
-
-  @override
-  double get height => _height;
-
-  set height(double value) => _height = value;
-  double _height = 0;
+  bool didExceedMaxLines = false;
 
   @override
-  double get ideographicBaseline => _ideographicBaseline;
-  final double _ideographicBaseline = 0;
+  double height = 0;
+
+  // TODO(jlavrova): Implement. Maybe use the same hack from the HTML renderer?
+  @override
+  double ideographicBaseline = 0;
 
   @override
-  double get longestLine => _longestLine;
-
-  set longestLine(double value) => _longestLine = value;
-  double _longestLine = 0;
+  double longestLine = 0;
 
   @override
-  double get maxIntrinsicWidth => _maxIntrinsicWidth;
-
-  set maxIntrinsicWidth(double value) => _maxIntrinsicWidth = value;
-  double _maxIntrinsicWidth = 0;
+  double maxIntrinsicWidth = 0;
 
   @override
-  double get minIntrinsicWidth => _minIntrinsicWidth;
-
-  set minIntrinsicWidth(double value) => _minIntrinsicWidth = value;
-  double _minIntrinsicWidth = 0;
+  double minIntrinsicWidth = 0;
 
   @override
-  double get width => _width;
-
-  set width(double value) => _width = value;
-  double _width = 0;
+  double width = 0;
 
   double requiredWidth = 0;
 
