@@ -4385,7 +4385,6 @@ targets:
       - DEPS
 
   - name: Mac plugin_test_android_variants
-    bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 45
     properties:
