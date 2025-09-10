@@ -615,6 +615,86 @@ void main() {
   );
 
   testWidgets(
+    'No status bar when primay is false',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: debugDefaultTargetPlatformOverride),
+          home: MediaQuery(
+            data: const MediaQueryData(padding: EdgeInsets.only(top: 25.0)), // status bar
+            child: Scaffold(
+              primary: false,
+              body: CustomScrollView(
+                primary: true,
+                slivers: <Widget>[
+                  const SliverAppBar(title: Text('Title')),
+                  SliverList.builder(
+                    itemCount: 20,
+                    itemBuilder: (BuildContext context, int index) {
+                      return SizedBox(height: 100.0, child: Text('$index'));
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+      scrollable.position.jumpTo(500.0);
+      expect(scrollable.position.pixels, equals(500.0));
+      await tester.tapAt(const Offset(100.0, 10.0));
+      await tester.pumpAndSettle();
+      expect(scrollable.position.pixels, equals(500.0));
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    }),
+  );
+
+  testWidgets(
+    'Top of Scaffold is not blocked when primary is false',
+    (WidgetTester tester) async {
+      bool receivedTap = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (BuildContext context) {
+              return MediaQuery(
+                data: const MediaQueryData(
+                  padding: EdgeInsets.only(top: kToolbarHeight),
+                ), // status bar
+                child: Scaffold(
+                  appBar: AppBar(
+                    primary: false,
+                    title: GestureDetector(
+                      onTap: () {
+                        receivedTap = true;
+                      },
+                      child: const Text('Title'),
+                    ),
+                  ),
+                  primary: false,
+                  body: const Text('Scaffold'),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Title'));
+      await tester.pumpAndSettle();
+      expect(receivedTap, true);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    }),
+  );
+
+  testWidgets(
     'Tapping the status bar scrolls to top with ease out curve animation',
     (WidgetTester tester) async {
       const int duration = 1000;

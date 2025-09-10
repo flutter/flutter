@@ -3155,20 +3155,22 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     switch (themeData.platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        _addIfNonNull(
-          children,
-          GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: _handleStatusBarTap,
-            // iOS accessibility automatically adds scroll-to-top to the clock in the status bar
-            excludeFromSemantics: true,
-          ),
-          _ScaffoldSlot.statusBar,
-          removeLeftPadding: false,
-          removeTopPadding: true,
-          removeRightPadding: false,
-          removeBottomPadding: true,
-        );
+        if (widget.primary) {
+          _addIfNonNull(
+            children,
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: _handleStatusBarTap,
+              // iOS accessibility automatically adds scroll-to-top to the clock in the status bar
+              excludeFromSemantics: true,
+            ),
+            _ScaffoldSlot.statusBar,
+            removeLeftPadding: false,
+            removeTopPadding: true,
+            removeRightPadding: false,
+            removeBottomPadding: true,
+          );
+        }
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
