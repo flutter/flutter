@@ -6877,7 +6877,6 @@ targets:
 
   # windows mokey test
   - name: Windows_mokey basic_material_app_win__compile
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/173701
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
