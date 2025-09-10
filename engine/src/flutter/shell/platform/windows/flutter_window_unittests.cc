@@ -282,7 +282,6 @@ TEST_F(FlutterWindowTest, OnStylusPointerDown) {
         return TRUE;
       });
 
-  // Test that the mock is working by calling it directly
   POINTER_INFO test_pointer_info = {};
   BOOL result = mock_proc_table->GetPointerInfo(1, &test_pointer_info);
 
@@ -291,7 +290,6 @@ TEST_F(FlutterWindowTest, OnStylusPointerDown) {
 
   win32window.SetView(&delegate);
 
-  // Add debug output to see what's actually being called
   EXPECT_CALL(delegate,
               OnPointerDown(10.0, 10.0, kFlutterPointerDeviceKindStylus,
                             kDefaultPointerDeviceId,
@@ -302,9 +300,7 @@ TEST_F(FlutterWindowTest, OnStylusPointerDown) {
   WPARAM wparam = static_cast<WPARAM>(pointerId);
   LPARAM lparam = MAKELPARAM(10, 10);
 
-  // Add a simple test to see if the mock is being called
-  LRESULT message_result =
-      win32window.InjectWindowMessage(WM_POINTERDOWN, wparam, lparam);
+  win32window.InjectWindowMessage(WM_POINTERDOWN, wparam, lparam);
 }
 
 TEST_F(FlutterWindowTest, OnStylusPointerMove) {
@@ -325,7 +321,7 @@ TEST_F(FlutterWindowTest, OnStylusPointerMove) {
       .WillRepeatedly([](UINT32 pointer_id, POINTER_PEN_INFO* pen_info) {
         if (pen_info != nullptr) {
           pen_info->pressure = 720;  // Non-zero pressure for contact events
-          pen_info->rotation = 0;
+          pen_info->rotation = 10;   // This is PRE-transformation to radians.
         }
         return TRUE;
       });
@@ -335,7 +331,7 @@ TEST_F(FlutterWindowTest, OnStylusPointerMove) {
   win32window.SetView(&delegate);
 
   EXPECT_CALL(delegate, OnPointerMove(15, 20, kFlutterPointerDeviceKindStylus,
-                                      kDefaultPointerDeviceId, 0, 720, 0))
+                                      kDefaultPointerDeviceId, 10, 720, 0))
       .Times(1);
 
   UINT32 pointerId = 1;
