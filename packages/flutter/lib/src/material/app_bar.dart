@@ -29,7 +29,6 @@ import 'icon_button.dart';
 import 'icon_button_theme.dart';
 import 'icons.dart';
 import 'material.dart';
-import 'material_state.dart';
 import 'scaffold.dart';
 import 'tabs.dart';
 import 'text_theme.dart';
@@ -864,14 +863,14 @@ class _AppBarState extends State<AppBar> {
 
       if (_scrolledUnder != oldScrolledUnder) {
         setState(() {
-          // React to a change in MaterialState.scrolledUnder
+          // React to a change in WidgetState.scrolledUnder
         });
       }
     }
   }
 
   Color _resolveColor(
-    Set<MaterialState> states,
+    Set<WidgetState> states,
     Color? widgetColor,
     Color? themeColor,
     Color defaultColor,
@@ -912,8 +911,8 @@ class _AppBarState extends State<AppBar> {
 
     final FlexibleSpaceBarSettings? settings = context
         .dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>();
-    final Set<MaterialState> states = <MaterialState>{
-      if (settings?.isScrolledUnder ?? _scrolledUnder) MaterialState.scrolledUnder,
+    final Set<WidgetState> states = <WidgetState>{
+      if (settings?.isScrolledUnder ?? _scrolledUnder) WidgetState.scrolledUnder,
     };
 
     final bool hasDrawer = scaffold?.hasDrawer ?? false;
@@ -937,7 +936,7 @@ class _AppBarState extends State<AppBar> {
       Theme.of(context).colorScheme.surfaceContainer,
     );
 
-    final Color effectiveBackgroundColor = states.contains(MaterialState.scrolledUnder)
+    final Color effectiveBackgroundColor = states.contains(WidgetState.scrolledUnder)
         ? scrolledUnderBackground
         : backgroundColor;
 
@@ -946,7 +945,7 @@ class _AppBarState extends State<AppBar> {
 
     final double elevation = widget.elevation ?? appBarTheme.elevation ?? defaults.elevation!;
 
-    final double effectiveElevation = states.contains(MaterialState.scrolledUnder)
+    final double effectiveElevation = states.contains(WidgetState.scrolledUnder)
         ? widget.scrolledUnderElevation ??
               appBarTheme.scrolledUnderElevation ??
               defaults.scrolledUnderElevation ??
