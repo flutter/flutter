@@ -6039,6 +6039,7 @@ class SemanticsConfiguration {
     _actionsAsBits |= child._effectiveActionsAsBits;
     _customSemanticsActions.addAll(child._customSemanticsActions);
     _flags = _flags.merge(child._flags);
+    _linkUrl ??= child._linkUrl;
     _textSelection ??= child._textSelection;
     _scrollPosition ??= child._scrollPosition;
     _scrollExtentMax ??= child._scrollExtentMax;
