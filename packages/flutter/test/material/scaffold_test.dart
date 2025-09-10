@@ -653,33 +653,31 @@ void main() {
     }),
   );
 
+  // Regression test for https://github.com/flutter/flutter/issues/175062
   testWidgets(
     'Top of Scaffold is not blocked when primary is false',
     (WidgetTester tester) async {
       bool receivedTap = false;
       await tester.pumpWidget(
         MaterialApp(
-          home: Builder(
-            builder: (BuildContext context) {
-              return MediaQuery(
-                data: const MediaQueryData(
-                  padding: EdgeInsets.only(top: kToolbarHeight),
-                ), // status bar
-                child: Scaffold(
-                  appBar: AppBar(
-                    primary: false,
-                    title: GestureDetector(
-                      onTap: () {
-                        receivedTap = true;
-                      },
-                      child: const Text('Title'),
-                    ),
-                  ),
-                  primary: false,
-                  body: const Text('Scaffold'),
+          theme: ThemeData(platform: debugDefaultTargetPlatformOverride),
+          home: MediaQuery(
+            data: const MediaQueryData(
+              padding: EdgeInsets.only(top: kToolbarHeight), // status bar
+            ),
+            child: Scaffold(
+              appBar: AppBar(
+                primary: false,
+                title: GestureDetector(
+                  onTap: () {
+                    receivedTap = true;
+                  },
+                  child: const Text('Title'),
                 ),
-              );
-            },
+              ),
+              primary: false,
+              body: const Text('Scaffold'),
+            ),
           ),
         ),
       );
