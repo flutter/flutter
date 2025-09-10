@@ -227,6 +227,8 @@ Engine::RunStatus Engine::Run(RunConfiguration configuration) {
   last_entry_point_args_ = configuration.GetEntrypointArgs();
 #endif
 
+  last_engine_id_ = configuration.GetEngineId();
+
   UpdateAssetManager(configuration.GetAssetManager());
 
   if (runtime_controller_->IsRootIsolateRunning()) {
@@ -615,6 +617,10 @@ const std::string& Engine::GetLastEntrypointLibrary() const {
 
 const std::vector<std::string>& Engine::GetLastEntrypointArgs() const {
   return last_entry_point_args_;
+}
+
+std::optional<int64_t> Engine::GetLastEngineId() const {
+  return last_engine_id_;
 }
 
 // |RuntimeDelegate|
