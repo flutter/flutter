@@ -560,14 +560,15 @@ FlutterWindow::HandleMessage(UINT const message,
           case PT_MOUSE:
             device_kind = kFlutterPointerDeviceKindMouse;
             break;
+          case PT_TOUCHPAD:
+            device_kind = kFlutterPointerDeviceKindTrackpad;
         }
         if (message == WM_POINTERDOWN) {
           OnPointerDown(x, y, device_kind, touch_id, WM_LBUTTONDOWN, rotation,
                         pressure);
         } else if (message == WM_POINTERUPDATE) {
-          // POINTER_FLAG_INCONTACT indicates the stylus is touching the screen
-          // When not set, it means the stylus is hovering
-          OnPointerMove(x, y, device_kind, touch_id, rotation, pressure, 0);
+          OnPointerMove(x, y, device_kind, touch_id, rotation, pressure,
+                        /* modifiers_state=*/0);
         } else if (message == WM_POINTERUP) {
           OnPointerUp(x, y, device_kind, touch_id, WM_LBUTTONUP);
           // keep tracking the pointer (especially important for stylus)
@@ -597,7 +598,7 @@ FlutterWindow::HandleMessage(UINT const message,
           mods |= kShift;
         }
         OnPointerMove(mouse_x_, mouse_y_, device_kind, kDefaultPointerDeviceId,
-                      0, 0, mods);
+                      /*rotation=*/0, /*pressure=*/0, mods);
       }
       break;
     case WM_MOUSELEAVE:
@@ -653,7 +654,8 @@ FlutterWindow::HandleMessage(UINT const message,
       xPos = GET_X_LPARAM(lparam);
       yPos = GET_Y_LPARAM(lparam);
       OnPointerDown(static_cast<double>(xPos), static_cast<double>(yPos),
-                    device_kind, kDefaultPointerDeviceId, button_pressed, 0, 0);
+                    device_kind, kDefaultPointerDeviceId, button_pressed,
+                    /*rotation=*/0, /*pressure=*/0);
       break;
     case WM_LBUTTONUP:
     case WM_RBUTTONUP:
