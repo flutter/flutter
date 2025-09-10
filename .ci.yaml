@@ -1118,7 +1118,6 @@ targets:
       - DEPS
 
   - name: Linux plugin_test_android_standard
-    bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 45
     properties:
