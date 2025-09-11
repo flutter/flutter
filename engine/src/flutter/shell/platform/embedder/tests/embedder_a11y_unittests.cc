@@ -301,6 +301,11 @@ TEST_F(EmbedderA11yTest, A11yStringAttributes) {
 
         auto node = update->nodes[0];
 
+        // Verify identifier
+        {
+          ASSERT_EQ(std::string(node->identifier), "identifier");
+        }
+
         // Verify label
         {
           ASSERT_EQ(std::string(node->label), "What is the meaning of life?");
