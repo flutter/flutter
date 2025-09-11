@@ -516,9 +516,7 @@ Future<void> testMain() async {
         );
       }
     }
-    // == for ImageFilter is not implemented in Skwasm.
-    // See: https://github.com/flutter/flutter/issues/173968
-  }, skip: isSkwasm);
+  });
 
   group('MaskFilter', () {
     test('with 0 sigma can be set on a Paint', () {
@@ -531,37 +529,23 @@ Future<void> testMain() async {
 }
 
 List<ui.ColorFilter> createColorFilters() {
+  // Creates new color filter instances on each invocation.
   return <ui.ColorFilter>[
-    const EngineColorFilter.mode(ui.Color(0x12345678), ui.BlendMode.srcOver),
-    const EngineColorFilter.mode(ui.Color(0x12345678), ui.BlendMode.dstOver),
-    const EngineColorFilter.mode(ui.Color(0x87654321), ui.BlendMode.dstOver),
-    const EngineColorFilter.matrix(<double>[
-      1,
-      0,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-    ]),
+    // ignore: prefer_const_constructors
+    EngineColorFilter.mode(ui.Color(0x12345678), ui.BlendMode.srcOver),
+    // ignore: prefer_const_constructors
+    EngineColorFilter.mode(ui.Color(0x12345678), ui.BlendMode.dstOver),
+    // ignore: prefer_const_constructors
+    EngineColorFilter.mode(ui.Color(0x87654321), ui.BlendMode.dstOver),
+    // ignore: prefer_const_constructors
+    EngineColorFilter.matrix(<double>[1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0]),
     EngineColorFilter.matrix(
       Float32List.fromList(<double>[2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0]),
     ),
-    const EngineColorFilter.linearToSrgbGamma(),
-    const EngineColorFilter.srgbToLinearGamma(),
+    // ignore: prefer_const_constructors
+    EngineColorFilter.linearToSrgbGamma(),
+    // ignore: prefer_const_constructors
+    EngineColorFilter.srgbToLinearGamma(),
   ];
 }
 
