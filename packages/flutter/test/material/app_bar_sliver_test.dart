@@ -838,10 +838,8 @@ void main() {
             slivers: <Widget>[
               SliverAppBar(
                 elevation: 0,
-                backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-                  return states.contains(MaterialState.scrolledUnder)
-                      ? scrolledColor
-                      : defaultColor;
+                backgroundColor: MaterialStateColor.resolveWith((Set<WidgetState> states) {
+                  return states.contains(WidgetState.scrolledUnder) ? scrolledColor : defaultColor;
                 }),
                 expandedHeight: expandedHeight,
                 pinned: true,

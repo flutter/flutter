@@ -1583,7 +1583,7 @@ class _SearchBarState extends State<SearchBar> {
       WidgetStateProperty<T>? themeValue,
       WidgetStateProperty<T>? defaultValue,
     ) {
-      final Set<MaterialState> states = _internalStatesController.value;
+      final Set<WidgetState> states = _internalStatesController.value;
       return widgetValue?.resolve(states) ??
           themeValue?.resolve(states) ??
           defaultValue?.resolve(states);
@@ -1636,7 +1636,7 @@ class _SearchBarState extends State<SearchBar> {
         searchBarTheme.textCapitalization ??
         defaults.textCapitalization!;
 
-    final Set<MaterialState> states = _internalStatesController.value;
+    final Set<WidgetState> states = _internalStatesController.value;
     final TextStyle? effectiveHintStyle =
         widget.hintStyle?.resolve(states) ??
         searchBarTheme.hintStyle?.resolve(states) ??

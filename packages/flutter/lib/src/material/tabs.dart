@@ -276,8 +276,8 @@ class _TabStyle extends AnimatedWidget {
     final Color unselectedColor;
 
     if (selectedColor is MaterialStateColor) {
-      unselectedColor = selectedColor.resolve(const <MaterialState>{});
-      selectedColor = selectedColor.resolve(const <MaterialState>{MaterialState.selected});
+      unselectedColor = selectedColor.resolve(const <WidgetState>{});
+      selectedColor = selectedColor.resolve(const <WidgetState>{WidgetState.selected});
     } else {
       // unselectedLabelColor and tabBarTheme.unselectedLabelColor are ignored
       // when labelColor is a MaterialStateColor.
@@ -292,8 +292,8 @@ class _TabStyle extends AnimatedWidget {
               : selectedColor.withAlpha(0xB2)); // 70% alpha
     }
 
-    return MaterialStateColor.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
+    return MaterialStateColor.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         return Color.lerp(selectedColor, unselectedColor, animation.value)!;
       }
       return Color.lerp(unselectedColor, selectedColor, animation.value)!;
@@ -306,9 +306,9 @@ class _TabStyle extends AnimatedWidget {
     final TabBarThemeData tabBarTheme = TabBarTheme.of(context);
     final Animation<double> animation = listenable as Animation<double>;
 
-    final Set<MaterialState> states = isSelected
-        ? const <MaterialState>{MaterialState.selected}
-        : const <MaterialState>{};
+    final Set<WidgetState> states = isSelected
+        ? const <WidgetState>{WidgetState.selected}
+        : const <WidgetState>{};
 
     // To enable TextStyle.lerp(style1, style2, value), both styles must have
     // the same value of inherit. Force that to be inherit=true here.
@@ -1925,8 +1925,8 @@ class _TabBarState extends State<TabBar> {
     // the same share of the tab bar's overall width.
     final int tabCount = widget.tabs.length;
     for (int index = 0; index < tabCount; index += 1) {
-      final Set<MaterialState> selectedState = <MaterialState>{
-        if (index == _currentIndex) MaterialState.selected,
+      final Set<WidgetState> selectedState = <WidgetState>{
+        if (index == _currentIndex) WidgetState.selected,
       };
 
       final MouseCursor effectiveMouseCursor =
@@ -1935,9 +1935,10 @@ class _TabBarState extends State<TabBar> {
           MaterialStateMouseCursor.clickable.resolve(selectedState);
 
       final WidgetStateProperty<Color?> defaultOverlay = WidgetStateProperty.resolveWith<Color?>((
-        Set<MaterialState> states,
+        Set<WidgetState> states,
       ) {
-        final Set<MaterialState> effectiveStates = selectedState..addAll(states);
+        // TODO(ValentinVignal): Don't selectedState.
+        final Set<WidgetState> effectiveStates = selectedState..addAll(states);
         return _defaults.overlayColor?.resolve(effectiveStates);
       });
       wrappedTabs[index] = InkWell(

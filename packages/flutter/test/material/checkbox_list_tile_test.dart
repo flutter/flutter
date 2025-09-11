@@ -122,8 +122,8 @@ void main() {
         child: Theme(
           data: ThemeData(
             checkboxTheme: CheckboxThemeData(
-              fillColor: WidgetStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-                return states.contains(MaterialState.selected) ? themeColor : null;
+              fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+                return states.contains(WidgetState.selected) ? themeColor : null;
               }),
             ),
           ),
@@ -356,8 +356,8 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           checkboxTheme: CheckboxThemeData(
-            fillColor: WidgetStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-              return states.contains(MaterialState.selected) ? fillColor : null;
+            fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+              return states.contains(WidgetState.selected) ? fillColor : null;
             }),
           ),
         ),
@@ -640,8 +640,8 @@ void main() {
     const Color activeEnabledFillColor = Color(0xFF000001);
     const Color activeDisabledFillColor = Color(0xFF000002);
 
-    Color getFillColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    Color getFillColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return activeDisabledFillColor;
       }
       return activeEnabledFillColor;
@@ -676,8 +676,8 @@ void main() {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const Color hoveredFillColor = Color(0xFF000001);
 
-    Color getFillColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.hovered)) {
+    Color getFillColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.hovered)) {
         return hoveredFillColor;
       }
       return Colors.transparent;
@@ -779,14 +779,14 @@ void main() {
       const Color hoverOverlayColor = Color(0xFF000003);
       const Color hoverColor = Color(0xFF000005);
 
-      Color? getOverlayColor(Set<MaterialState> states) {
-        if (states.contains(MaterialState.pressed)) {
-          if (states.contains(MaterialState.selected)) {
+      Color? getOverlayColor(Set<WidgetState> states) {
+        if (states.contains(WidgetState.pressed)) {
+          if (states.contains(WidgetState.selected)) {
             return activePressedOverlayColor;
           }
           return inactivePressedOverlayColor;
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return hoverOverlayColor;
         }
         return null;
@@ -902,14 +902,14 @@ void main() {
       const Color hoverOverlayColor = Color(0xFF000003);
       const Color hoverColor = Color(0xFF000005);
 
-      Color? getOverlayColor(Set<MaterialState> states) {
-        if (states.contains(MaterialState.pressed)) {
-          if (states.contains(MaterialState.selected)) {
+      Color? getOverlayColor(Set<WidgetState> states) {
+        if (states.contains(WidgetState.pressed)) {
+          if (states.contains(WidgetState.selected)) {
             return activePressedOverlayColor;
           }
           return inactivePressedOverlayColor;
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return hoverOverlayColor;
         }
         return null;
@@ -1849,8 +1849,8 @@ class _SelectedGrabMouseCursor extends MaterialStateMouseCursor {
   const _SelectedGrabMouseCursor();
 
   @override
-  MouseCursor resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.selected)) {
+  MouseCursor resolve(Set<WidgetState> states) {
+    if (states.contains(WidgetState.selected)) {
       return SystemMouseCursors.grab;
     }
     return SystemMouseCursors.basic;

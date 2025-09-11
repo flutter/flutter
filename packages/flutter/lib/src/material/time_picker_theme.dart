@@ -123,8 +123,8 @@ class TimePickerThemeData with Diagnosticable {
     if (_dayPeriodColor == null || _dayPeriodColor is MaterialStateColor) {
       return _dayPeriodColor;
     }
-    return MaterialStateColor.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
+    return MaterialStateColor.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         return _dayPeriodColor;
       }
       // The unselected day period should match the overall picker dialog color.

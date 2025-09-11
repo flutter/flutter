@@ -735,9 +735,9 @@ class ToggleButtons extends StatelessWidget {
         toggleButtonsTheme,
       );
 
-      final Set<MaterialState> states = <MaterialState>{
-        if (isSelected[index] && onPressed != null) MaterialState.selected,
-        if (onPressed == null) MaterialState.disabled,
+      final Set<WidgetState> states = <WidgetState>{
+        if (isSelected[index] && onPressed != null) WidgetState.selected,
+        if (onPressed == null) WidgetState.disabled,
       };
       final Color effectiveFillColor =
           _ResolveFillColor(fillColor ?? toggleButtonsTheme.fillColor).resolve(states) ??
@@ -909,11 +909,11 @@ class _ResolveFillColor extends WidgetStateProperty<Color?> with Diagnosticable 
   final Color? primary;
 
   @override
-  Color? resolve(Set<MaterialState> states) {
+  Color? resolve(Set<WidgetState> states) {
     if (primary is WidgetStateProperty<Color>) {
       return WidgetStateProperty.resolveAs<Color?>(primary, states);
     }
-    return states.contains(MaterialState.selected) ? primary : null;
+    return states.contains(WidgetState.selected) ? primary : null;
   }
 }
 
@@ -924,8 +924,8 @@ class _DefaultFillColor extends WidgetStateProperty<Color> with Diagnosticable {
   final ColorScheme colorScheme;
 
   @override
-  Color resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.selected)) {
+  Color resolve(Set<WidgetState> states) {
+    if (states.contains(WidgetState.selected)) {
       return colorScheme.primary.withOpacity(0.12);
     }
     return colorScheme.surface.withOpacity(0.0);
@@ -955,25 +955,25 @@ class _ToggleButtonDefaultOverlay extends WidgetStateProperty<Color?> {
   final Color? disabledColor;
 
   @override
-  Color? resolve(Set<MaterialState> states) {
+  Color? resolve(Set<WidgetState> states) {
     if (selected) {
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return splashColor ?? colorScheme?.primary.withOpacity(0.16);
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return hoverColor ?? colorScheme?.primary.withOpacity(0.04);
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return focusColor ?? colorScheme?.primary.withOpacity(0.12);
       }
     } else if (unselected) {
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return splashColor ?? highlightColor ?? colorScheme?.onSurface.withOpacity(0.16);
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return hoverColor ?? colorScheme?.onSurface.withOpacity(0.04);
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return focusColor ?? colorScheme?.onSurface.withOpacity(0.12);
       }
     }
