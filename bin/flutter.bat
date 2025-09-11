@@ -11,7 +11,7 @@ REM continue to work across all platforms!
 REM
 REM --------------------------------------------------------------------------
 
-SETLOCAL
+SETLOCA
 
 REM To debug the tool, you can uncomment the following line to enable debug mode:
 REM SET FLUTTER_TOOL_ARGS="--enable-asserts %FLUTTER_TOOL_ARGS%"
