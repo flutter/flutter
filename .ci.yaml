@@ -376,7 +376,6 @@ targets:
 
   - name: Linux coverage
     # Because this only runs every 6 commits, it being flaky takes a long time to recover.
-    bringup: true
     presubmit: false
     recipe: flutter/coverage
     timeout: 90
