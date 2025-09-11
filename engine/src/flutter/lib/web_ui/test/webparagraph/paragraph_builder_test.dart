@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine/web_paragraph/paragraph.dart';
@@ -15,6 +17,22 @@ void main() {
 
 Future<void> testMain() async {
   setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
+  test('Build paragraph for Flutter Gallery', () {
+    final WebParagraphStyle paragraphStyle = WebParagraphStyle(
+      fontFamily: 'GoogleSans',
+      fontSize: 20.0,
+    );
+    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    builder.pushStyle(WebTextStyle(fontFamily: 'GoogleSans', fontSize: 20.0));
+    builder.addText('Options');
+    builder.pop();
+    final WebParagraph paragraph = builder.build();
+    expect(paragraph.styledTextRanges.length, 1);
+    expect(
+      paragraph.styledTextRanges.first,
+      StyledTextRange(0, 7, WebTextStyle(fontFamily: 'GoogleSans', fontSize: 20.0)),
+    );
+  });
 
   test('Build paragraph without text or style', () {
     final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
@@ -22,7 +40,7 @@ Future<void> testMain() async {
     final WebParagraph paragraph = builder.build();
     expect(paragraph.text, '');
     expect(paragraph.paragraphStyle, paragraphStyle);
-    expect(paragraph.styledTextRanges.length, 1); // Default text style from the paragraph style
+    expect(paragraph.styledTextRanges.length, 0);
   });
 
   test('Build paragraph with some text but without a style', () {
@@ -30,10 +48,12 @@ Future<void> testMain() async {
     final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
     builder.addText('some text');
     final WebParagraph paragraph = builder.build();
+    final WebTextStyle defaultStyle = paragraphStyle.getTextStyle();
+    defaultStyle.fillMissingFields();
     expect(paragraph.text, 'some text');
     expect(paragraph.paragraphStyle, paragraphStyle);
     expect(paragraph.styledTextRanges.length, 1);
-    expect(paragraph.styledTextRanges.last.style, paragraphStyle.getTextStyle());
+    expect(paragraph.styledTextRanges.last.style, defaultStyle);
     expect(paragraph.styledTextRanges.last.start, 0);
     expect(paragraph.styledTextRanges.last.end, paragraph.text.length);
   });
@@ -46,7 +66,7 @@ Future<void> testMain() async {
     final WebParagraph paragraph = builder.build();
     expect(paragraph.text, '');
     expect(paragraph.paragraphStyle, paragraphStyle);
-    expect(paragraph.styledTextRanges.length, 1);
+    expect(paragraph.styledTextRanges.length, 0);
   });
 
   test('Build paragraph with a few styles at the and without any text', () {
@@ -61,10 +81,13 @@ Future<void> testMain() async {
     builder.pushStyle(textStyle2);
     builder.pushStyle(textStyle3);
     final WebParagraph paragraph = builder.build();
+    textStyle1.fillMissingFields();
+    textStyle2.fillMissingFields();
+    textStyle3.fillMissingFields();
     expect(paragraph.text, 'some text');
     expect(paragraph.paragraphStyle, paragraphStyle);
     expect(paragraph.styledTextRanges.length, 1);
-    expect(paragraph.styledTextRanges.first.style, textStyle1.fillMissingFields());
+    expect(paragraph.styledTextRanges.first.style, textStyle1);
     expect(paragraph.styledTextRanges.last.start, 0);
     expect(paragraph.styledTextRanges.last.end, paragraph.text.length);
   });
@@ -81,10 +104,13 @@ Future<void> testMain() async {
     builder.pushStyle(textStyle3);
     builder.addText('some text');
     final WebParagraph paragraph = builder.build();
+    textStyle1.fillMissingFields();
+    textStyle2.fillMissingFields();
+    textStyle3.fillMissingFields();
     expect(paragraph.text, 'some text');
     expect(paragraph.paragraphStyle, paragraphStyle);
     expect(paragraph.styledTextRanges.length, 1);
-    expect(paragraph.styledTextRanges[0].style, textStyle3.fillMissingFields());
+    expect(paragraph.styledTextRanges[0].style, textStyle3);
     expect(paragraph.styledTextRanges.last.start, 0);
     expect(paragraph.styledTextRanges.last.end, paragraph.text.length);
   });
@@ -106,12 +132,15 @@ Future<void> testMain() async {
     builder.addText('[3]');
     builder.pop();
     final WebParagraph paragraph = builder.build();
+    textStyle1.fillMissingFields();
+    textStyle2.fillMissingFields();
+    textStyle3.fillMissingFields();
     expect(paragraph.text, '[1][2][3]');
     expect(paragraph.paragraphStyle, paragraphStyle);
     expect(paragraph.styledTextRanges.length, 3);
-    expect(paragraph.styledTextRanges[0].style, textStyle1.fillMissingFields());
-    expect(paragraph.styledTextRanges[1].style, textStyle2.fillMissingFields());
-    expect(paragraph.styledTextRanges[2].style, textStyle3.fillMissingFields());
+    expect(paragraph.styledTextRanges[0].style, textStyle1);
+    expect(paragraph.styledTextRanges[1].style, textStyle2);
+    expect(paragraph.styledTextRanges[2].style, textStyle3);
     expect(paragraph.styledTextRanges[0].start, 0);
     expect(paragraph.styledTextRanges[0].end, 3);
     expect(paragraph.styledTextRanges[1].start, 3);
@@ -134,12 +163,15 @@ Future<void> testMain() async {
     builder.pushStyle(textStyle3);
     builder.addText('[3]]]');
     final WebParagraph paragraph = builder.build();
+    textStyle1.fillMissingFields();
+    textStyle2.fillMissingFields();
+    textStyle3.fillMissingFields();
     expect(paragraph.text, '[1[2[3]]]');
     expect(paragraph.paragraphStyle, paragraphStyle);
     expect(paragraph.styledTextRanges.length, 3);
-    expect(paragraph.styledTextRanges[0].style, textStyle1.fillMissingFields());
-    expect(paragraph.styledTextRanges[1].style, textStyle2.fillMissingFields());
-    expect(paragraph.styledTextRanges[2].style, textStyle3.fillMissingFields());
+    expect(paragraph.styledTextRanges[0].style, textStyle1);
+    expect(paragraph.styledTextRanges[1].style, textStyle2);
+    expect(paragraph.styledTextRanges[2].style, textStyle3);
     expect(paragraph.styledTextRanges[0].start, 0);
     expect(paragraph.styledTextRanges[0].end, 2);
     expect(paragraph.styledTextRanges[1].start, 2);
@@ -148,7 +180,7 @@ Future<void> testMain() async {
     expect(paragraph.styledTextRanges[2].end, 9);
   });
 
-  test('Build paragraph with inherited styles [1[2[3]]]', () {
+  test('Build paragraph with inherited styles (font name, font size, font style) [1[2[3]]]', () {
     final WebParagraphStyle paragraphStyle = WebParagraphStyle();
     final WebTextStyle textStyle1 = WebTextStyle(fontFamily: 'Roboto');
     final WebTextStyle textStyle2 = WebTextStyle(fontSize: 42);
@@ -162,22 +194,61 @@ Future<void> testMain() async {
     builder.pushStyle(textStyle3);
     builder.addText('[3]]]');
     final WebParagraph paragraph = builder.build();
+    final WebTextStyle merged12 = textStyle1.mergeWith(textStyle2);
+    final WebTextStyle merged123 = textStyle1.mergeWith(textStyle2).mergeWith(textStyle3);
+    textStyle1.fillMissingFields();
+    textStyle2.fillMissingFields();
+    textStyle3.fillMissingFields();
+    merged12.fillMissingFields();
+    merged123.fillMissingFields();
     expect(paragraph.text, '[1[2[3]]]');
     expect(paragraph.paragraphStyle, paragraphStyle);
     expect(paragraph.styledTextRanges.length, 3);
-    expect(paragraph.styledTextRanges[0].style, textStyle1.fillMissingFields());
-    expect(
-      paragraph.styledTextRanges[1].style,
-      WebTextStyle(fontFamily: 'Roboto', fontSize: 42).fillMissingFields(),
+    expect(paragraph.styledTextRanges[0].style, textStyle1);
+    expect(paragraph.styledTextRanges[1].style, merged12);
+    expect(paragraph.styledTextRanges[2].style, merged123);
+    expect(paragraph.styledTextRanges[0].start, 0);
+    expect(paragraph.styledTextRanges[0].end, 2);
+    expect(paragraph.styledTextRanges[1].start, 2);
+    expect(paragraph.styledTextRanges[1].end, 4);
+    expect(paragraph.styledTextRanges[2].start, 4);
+    expect(paragraph.styledTextRanges[2].end, 9);
+  });
+
+  test('Build paragraph with inherited styles (foreground, background) [1[2[3]]]', () {
+    final WebParagraphStyle paragraphStyle = WebParagraphStyle();
+    final WebTextStyle textStyle1 = WebTextStyle(
+      foreground: Paint()..color = const Color(0xFF00FF00),
     );
-    expect(
-      paragraph.styledTextRanges[2].style,
-      WebTextStyle(
-        fontFamily: 'Roboto',
-        fontSize: 42,
-        fontStyle: FontStyle.italic,
-      ).fillMissingFields().fillMissingFields(),
+    final WebTextStyle textStyle2 = WebTextStyle(
+      background: Paint()..color = const Color(0xFFFF0000),
     );
+    final WebTextStyle textStyle3 = WebTextStyle(
+      foreground: Paint()..color = const Color(0xFF0000FF),
+    );
+
+    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    builder.pushStyle(textStyle1);
+    builder.addText('[1');
+    builder.pushStyle(textStyle2);
+    builder.addText('[2');
+    builder.pushStyle(textStyle3);
+    builder.addText('[3]]]');
+    final WebParagraph paragraph = builder.build();
+    final WebTextStyle merged12 = textStyle1.mergeWith(textStyle2);
+    final WebTextStyle merged123 = merged12.mergeWith(textStyle3);
+    textStyle1.fillMissingFields();
+    textStyle2.fillMissingFields();
+    textStyle3.fillMissingFields();
+    merged12.fillMissingFields();
+    merged123.fillMissingFields();
+    expect(paragraph.text, '[1[2[3]]]');
+    expect(paragraph.paragraphStyle, paragraphStyle);
+    expect(paragraph.styledTextRanges.length, 3);
+    expect(paragraph.styledTextRanges[0].style, textStyle1);
+    expect(paragraph.styledTextRanges[1].style, merged12);
+    expect(paragraph.styledTextRanges[2].style, merged123);
+
     expect(paragraph.styledTextRanges[0].start, 0);
     expect(paragraph.styledTextRanges[0].end, 2);
     expect(paragraph.styledTextRanges[1].start, 2);
@@ -193,26 +264,31 @@ Future<void> testMain() async {
     final WebTextStyle textStyle3 = WebTextStyle(fontFamily: 'Roboto', fontSize: 40);
     final WebTextStyle textStyle4 = WebTextStyle(fontFamily: 'Roboto', fontSize: 45);
     final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
-    builder.pushStyle(textStyle1.fillMissingFields());
+    textStyle1.fillMissingFields();
+    textStyle2.fillMissingFields();
+    textStyle3.fillMissingFields();
+    textStyle4.fillMissingFields();
+
+    builder.pushStyle(textStyle1);
     builder.addText('[1');
-    builder.pushStyle(textStyle2.fillMissingFields());
+    builder.pushStyle(textStyle2);
     builder.addText('[11');
-    builder.pushStyle(textStyle3.fillMissingFields());
+    builder.pushStyle(textStyle3);
     builder.addText('[111]');
     builder.pop();
-    builder.pushStyle(textStyle4.fillMissingFields());
+    builder.pushStyle(textStyle4);
     builder.addText('[112]]]');
     builder.pop();
     builder.pop();
     builder.pop();
-    builder.pushStyle(textStyle1.fillMissingFields());
+    builder.pushStyle(textStyle1);
     builder.addText('[2');
-    builder.pushStyle(textStyle2.fillMissingFields());
+    builder.pushStyle(textStyle2);
     builder.addText('[21');
-    builder.pushStyle(textStyle3.fillMissingFields());
+    builder.pushStyle(textStyle3);
     builder.addText('[211]');
     builder.pop();
-    builder.pushStyle(textStyle4.fillMissingFields());
+    builder.pushStyle(textStyle4);
     builder.addText('[212]]]');
     final WebParagraph paragraph = builder.build();
     expect(paragraph.text, '[1[11[111][112]]][2[21[211][212]]]');

@@ -174,12 +174,12 @@ class WebTextStyle implements ui.TextStyle {
     required this.fontVariations,
   });
 
-  late final String? originalFontFamily;
-  late final double? fontSize;
-  late final ui.FontStyle? fontStyle;
-  late final ui.FontWeight? fontWeight;
-  final ui.Paint? foreground;
-  final ui.Paint? background;
+  String? originalFontFamily;
+  double? fontSize;
+  ui.FontStyle? fontStyle;
+  ui.FontWeight? fontWeight;
+  ui.Paint? foreground;
+  ui.Paint? background;
   final List<ui.Shadow>? shadows;
   final ui.TextDecoration? decoration;
   final ui.Color? decorationColor;
@@ -216,40 +216,169 @@ class WebTextStyle implements ui.TextStyle {
     );
   }
 
-  WebTextStyle fillMissingFields() {
-    final WebTextStyle filled = WebTextStyle._(
-      originalFontFamily: originalFontFamily ?? StyleManager.defaultFontFamily,
-      fontSize: fontSize ?? StyleManager.defaultFontSize,
-      fontStyle: fontStyle ?? ui.FontStyle.normal,
-      fontWeight: fontWeight ?? ui.FontWeight.normal,
-      foreground: foreground,
-      background: background,
-      shadows: shadows,
-      decoration: decoration,
-      decorationColor: decorationColor,
-      decorationStyle: decorationStyle,
-      decorationThickness: decorationThickness,
-      letterSpacing: letterSpacing,
-      wordSpacing: wordSpacing,
-      height: height,
-      fontFeatures: fontFeatures,
-      fontVariations: fontVariations,
-    );
-    return filled;
+  void fillMissingFields() {
+    originalFontFamily ??= StyleManager.defaultFontFamily;
+    fontSize ??= StyleManager.defaultFontSize;
+    fontStyle ??= ui.FontStyle.normal;
+    fontWeight ??= ui.FontWeight.normal;
+    foreground ??= ui.Paint()..color = const ui.Color(0xFF000000);
+    background ??= ui.Paint()..color = const ui.Color(0x00000000);
+  }
+
+  bool paintsEqual(ui.Paint? a, ui.Paint? b) {
+    if (a == null) {
+      if (b == null) {
+        return true;
+      } else {
+        //WebParagraphDebug.log('null != !null');
+        return false;
+      }
+    }
+    if (b == null) {
+      //WebParagraphDebug.log('!null != null');
+      return false;
+    }
+    if (a == ui.Paint() && b == ui.Paint()) {
+      WebParagraphDebug.log('Paint() are equal');
+      return true;
+    }
+    if (a.blendMode != b.blendMode) {
+      WebParagraphDebug.log('blendMode are not equal');
+      return false;
+    }
+    if (a.color != b.color) {
+      WebParagraphDebug.log('color are not equal');
+      return false;
+    }
+    if (a.colorFilter != b.colorFilter) {
+      WebParagraphDebug.log('colorFilter are not equal');
+      return false;
+    }
+    if (a.filterQuality != b.filterQuality) {
+      WebParagraphDebug.log('filterQuality are not equal');
+      return false;
+    }
+    if (a.imageFilter != b.imageFilter) {
+      WebParagraphDebug.log('imageFilter are not equal');
+      return false;
+    }
+    if (a.invertColors != b.invertColors) {
+      WebParagraphDebug.log('invertColors are not equal');
+      return false;
+    }
+    if (a.isAntiAlias != b.isAntiAlias) {
+      WebParagraphDebug.log('isAntiAlias are not equal');
+      return false;
+    }
+    if (a.maskFilter != b.maskFilter) {
+      WebParagraphDebug.log('maskFilter are not equal');
+      return false;
+    }
+    if (a.shader != b.shader) {
+      WebParagraphDebug.log('shader are not equal');
+      return false;
+    }
+    if (a.strokeCap != b.strokeCap) {
+      WebParagraphDebug.log('strokeCap are not equal');
+      return false;
+    }
+    if (a.strokeJoin != b.strokeJoin) {
+      WebParagraphDebug.log('strokeJoin are not equal');
+      return false;
+    }
+    if (a.strokeMiterLimit != b.strokeMiterLimit) {
+      WebParagraphDebug.log('strokeMiterLimit are not equal');
+      return false;
+    }
+    if (a.strokeWidth != b.strokeWidth) {
+      WebParagraphDebug.log('strokeWidth are not equal');
+      return false;
+    }
+    if (a.style != b.style) {
+      WebParagraphDebug.log('strokeWidth are not equal');
+      return false;
+    }
+    return true;
   }
 
   @override
   bool operator ==(Object other) {
+    //WebParagraphDebug.log('WebTextStyle ==');
     if (identical(this, other)) {
       return true;
     }
+    if (other is! WebTextStyle) {
+      WebParagraphDebug.log('other is not WebTextStyle: $other');
+      return false;
+    }
+    final WebTextStyle otherStyle = other as WebTextStyle;
+    if (!(otherStyle.originalFontFamily == originalFontFamily)) {
+      WebParagraphDebug.log(
+        'originalFontFamily $originalFontFamily != ${otherStyle.originalFontFamily}',
+      );
+    }
+    if (!(otherStyle.fontStyle == fontStyle)) {
+      WebParagraphDebug.log('fontStyle $fontStyle != ${otherStyle.fontStyle}');
+    }
+    if (!(otherStyle.fontSize == fontSize)) {
+      WebParagraphDebug.log('fontSize $fontSize != ${otherStyle.fontSize}');
+    }
+    if (!(otherStyle.fontWeight == fontWeight)) {
+      WebParagraphDebug.log('fontWeight $fontWeight != ${otherStyle.fontWeight}');
+    }
+    if (!paintsEqual(otherStyle.foreground, foreground)) {
+      WebParagraphDebug.log('foreground $foreground != ${otherStyle.foreground}');
+    }
+    if (!paintsEqual(otherStyle.background, background)) {
+      WebParagraphDebug.log('background $background != ${otherStyle.background}');
+    }
+    if (!(otherStyle.shadows == shadows)) {
+      WebParagraphDebug.log('shadows $shadows != ${otherStyle.shadows}');
+    }
+    if (!(otherStyle.decoration == decoration)) {
+      WebParagraphDebug.log('decoration $decoration != ${otherStyle.decoration}');
+    }
+    if (!(otherStyle.decorationColor == decorationColor)) {
+      WebParagraphDebug.log('decorationColor $decorationColor != ${otherStyle.decorationColor}');
+    }
+    if (!(otherStyle.decorationStyle == decorationStyle)) {
+      WebParagraphDebug.log('decorationStyle $decorationStyle != ${otherStyle.decorationStyle}');
+    }
+    if (!(otherStyle.decorationThickness == decorationThickness)) {
+      WebParagraphDebug.log(
+        'decorationThickness $decorationThickness != ${otherStyle.decorationThickness}',
+      );
+    }
+    if (!(otherStyle.letterSpacing == letterSpacing)) {
+      WebParagraphDebug.log('letterSpacing $letterSpacing != ${otherStyle.letterSpacing}');
+    }
+    if (!(otherStyle.wordSpacing == wordSpacing)) {
+      WebParagraphDebug.log('wordSpacing $wordSpacing != ${otherStyle.wordSpacing}');
+    }
+    if (!(otherStyle.height == height)) {
+      WebParagraphDebug.log('height $height != ${otherStyle.height}');
+    }
+    if (!(otherStyle.fontFeatures == fontFeatures)) {
+      WebParagraphDebug.log('fontFeatures $fontFeatures != ${otherStyle.fontFeatures}');
+    }
+    if (!(otherStyle.fontVariations == fontVariations)) {
+      WebParagraphDebug.log('fontVariations $fontVariations != ${otherStyle.fontVariations}');
+    }
+    /*
+    if (!(otherStyle.foreground == foreground)) {
+      WebParagraphDebug.log('foreground are not ==');
+    }
+    if (!(otherStyle.background == background)) {
+      WebParagraphDebug.log('background are not ==\n');
+    }
+    */
     return other is WebTextStyle &&
         other.originalFontFamily == originalFontFamily &&
         other.fontSize == fontSize &&
         other.fontStyle == fontStyle &&
         other.fontWeight == fontWeight &&
-        other.foreground == foreground &&
-        other.background == background &&
+        paintsEqual(other.foreground, foreground) &&
+        paintsEqual(other.background, background) &&
         other.shadows == shadows &&
         other.decoration == decoration &&
         other.decorationColor == decorationColor &&
@@ -284,20 +413,46 @@ class WebTextStyle implements ui.TextStyle {
     );
   }
 
+  String _simplePaintToString(ui.Paint? paint) {
+    if (paint != null) {
+      return '[${paint.color.alpha.toRadixString(16).padLeft(2, '0')},'
+          '${paint.color.red.toRadixString(16).padLeft(2, '0')},'
+          '${paint.color.green.toRadixString(16).padLeft(2, '0')},'
+          '${paint.color.blue.toRadixString(16).padLeft(2, '0')}]'
+          /*
+          'colorFilter:${paint.colorFilter}\n'
+          'strokeWidth:${paint.strokeWidth}\n'
+          'strokeMiterLimit:${paint.strokeMiterLimit}\n'
+          'strokeCap:${paint.strokeCap}\n'
+          'strokeJoin:${paint.strokeJoin}\n'
+          'style:${paint.style}\n'
+          '${paint.shader != null ? 'shader,' : 'null shader'}\n'
+          '${paint.maskFilter != null ? 'maskFilter,' : 'null maskFilter'}\n'
+          '${paint.colorFilter != null ? 'colorFilter,' : 'null colorFilter'}\n'
+          '${paint.imageFilter != null ? 'imageFilter,' : 'null imageFilter'}\n'
+          'blendMode:${paint.blendMode}\n'
+          'isAntiAlias:${paint.isAntiAlias}\n'
+          '${paint.invertColors ? 'invertColors,' : 'null invertColors'}\n'
+          '${paint.filterQuality != ui.FilterQuality.none ? 'filterQuality:${paint.filterQuality},' : 'none filterQuality'}'
+          */
+          '';
+    }
+    return 'null';
+  }
+
   @override
   String toString() {
     String result = super.toString();
     assert(() {
       final double? fontSize = this.fontSize;
       result =
-          'WebTextStyle('
           'fontFamily: ${originalFontFamily ?? ""} '
           'fontSize: ${fontSize != null ? fontSize.toStringAsFixed(1) : ""}px '
-          'fontStyle: ${fontStyle != null ? fontStyle.toString() : ""} '
-          'fontWeight: ${fontWeight != null ? fontWeight.toString() : ""} '
-          'foreground: ${foreground != null ? foreground.toString() : ""} '
-          'background: ${background != null ? background.toString() : ""} '
-          ')';
+          'fontStyle: ${fontStyle != null ? fontStyle.toString().replaceFirst("FontStyle.", "") : ""} '
+          'fontWeight: ${fontWeight != null ? fontWeight.toString().replaceFirst("FontWeight.", "") : ""} '
+          'foreground: ${_simplePaintToString(foreground)} '
+          'background: ${_simplePaintToString(background)} '
+          '';
       if (shadows != null && shadows!.isNotEmpty) {
         result += 'shadows(${shadows!.length}) ';
         for (final ui.Shadow shadow in shadows!) {
@@ -539,7 +694,7 @@ class StyledTextRange extends TextRange {
 
   @override
   String toString() {
-    return 'StyledTextRange[$start:$end) ${placeholder != null ? 'placeholder' : 'text'}';
+    return 'StyledTextRange[$start:$end) ${placeholder != null ? 'placeholder' : 'text'} style: $style';
   }
 
   void markAsPlaceholder(WebParagraphPlaceholder placeholder) {
@@ -646,6 +801,7 @@ class WebParagraph implements ui.Paragraph {
   @override
   ui.GlyphInfo? getClosestGlyphInfoForOffset(ui.Offset offset) {
     final position = _layout.getPositionForOffset(offset);
+    WebParagraphDebug.log('getClosestGlyphInfoForOffset($offset): $position');
     assert(position.offset != 0 || position.affinity != ui.TextAffinity.upstream);
     assert(position.offset < text.length);
     return getGlyphInfoAt(position.offset);
@@ -653,6 +809,7 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   ui.GlyphInfo? getGlyphInfoAt(int codeUnitOffset) {
+    WebParagraphDebug.log('getGlyphInfoAt($codeUnitOffset)');
     final clusterRange = _layout.convertTextToClusterRange(
       TextRange(start: codeUnitOffset, end: codeUnitOffset + 1),
     );
@@ -700,6 +857,7 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   ui.TextRange getWordBoundary(ui.TextPosition position) {
+    WebParagraphDebug.log('getWordBoundary($position)');
     final int codepointPosition = switch (position.affinity) {
       ui.TextAffinity.upstream => position.offset - 1,
       ui.TextAffinity.downstream => position.offset,
@@ -726,6 +884,7 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   ui.TextRange getLineBoundary(ui.TextPosition position) {
+    WebParagraphDebug.log('getLineBoundary($position)');
     final int codepointPosition = switch (position.affinity) {
       ui.TextAffinity.upstream => position.offset - 1,
       ui.TextAffinity.downstream => position.offset,
@@ -741,6 +900,7 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   List<ui.LineMetrics> computeLineMetrics() {
+    WebParagraphDebug.log('computeLineMetrics()');
     final List<ui.LineMetrics> metrics = <ui.LineMetrics>[];
     for (final line in _layout.lines) {
       metrics.add(line.getMetrics());
@@ -750,6 +910,7 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   ui.LineMetrics? getLineMetricsAt(int lineNumber) {
+    WebParagraphDebug.log('getLineMetricsAt($lineNumber)');
     if (lineNumber < 0 || lineNumber >= _layout.lines.length) {
       return null;
     }
@@ -763,6 +924,7 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   int? getLineNumberAt(int codeUnitOffset) {
+    WebParagraphDebug.log('getLineNumberAt($codeUnitOffset)');
     for (final line in _layout.lines) {
       if (line.allLineTextRange.start <= codeUnitOffset &&
           line.allLineTextRange.end > codeUnitOffset) {
@@ -915,7 +1077,9 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
   WebParagraphBuilder(ui.ParagraphStyle paragraphStyle)
     : paragraphStyle = paragraphStyle as WebParagraphStyle,
       textStylesList = <StyledTextRange>[StyledTextRange.zero(paragraphStyle.getTextStyle())],
-      textStylesStack = <WebTextStyle>[paragraphStyle.getTextStyle()];
+      textStylesStack = <WebTextStyle>[paragraphStyle.getTextStyle()] {
+    WebParagraphDebug.log('WebParagraphBuilder($paragraphStyle)');
+  }
 
   final WebParagraphStyle paragraphStyle;
 
@@ -937,6 +1101,12 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
     double? baselineOffset,
     ui.TextBaseline? baseline,
   }) {
+    WebParagraphDebug.log(
+      'WebParagraphBuilder.addPlaceholder('
+      'width: $width, height: $height, alignment: $alignment, '
+      'scale: $scale, baselineOffset: $baselineOffset, baseline: $baseline',
+    );
+
     assert(
       !(alignment == ui.PlaceholderAlignment.aboveBaseline ||
               alignment == ui.PlaceholderAlignment.belowBaseline ||
@@ -963,6 +1133,10 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
 
   @override
   void addText(String text) {
+    WebParagraphDebug.log('WebParagraphBuilder.addText("$text")');
+    for (var i = 0; i < textStylesList.length; ++i) {
+      WebParagraphDebug.log('$i: ${textStylesList[i]}');
+    }
     textBuffer.write(text);
     finishStyledTextRange();
   }
@@ -970,14 +1144,16 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
   @override
   WebParagraph build() {
     final String text = textBuffer.toString();
-
-    // We only keep the default style if there is nothing else
-    if (textStylesList.length > 1) {
-      textStylesList.removeAt(0);
-    } else {
-      textStylesList.first.end = text.length;
-    }
     finishStyledTextRange();
+
+    // We only keep the default style if it has some text
+    if (textStylesList.first.isEmpty) {
+      textStylesList.removeAt(0);
+    }
+
+    for (var i = 0; i < textStylesList.length; ++i) {
+      textStylesList[i].style.fillMissingFields();
+    }
 
     final WebParagraph builtParagraph = WebParagraph(paragraphStyle, textStylesList, text);
     WebParagraphDebug.log('WebParagraphBuilder.build(): "$text" ${textStylesList.length}');
@@ -997,6 +1173,10 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
 
   @override
   void pop() {
+    WebParagraphDebug.log('WebParagraphBuilder.pop()');
+    for (var i = 0; i < textStylesList.length; ++i) {
+      WebParagraphDebug.log('$i: ${textStylesList[i]}');
+    }
     if (textStylesStack.length > 1) {
       textStylesStack.removeLast();
       startStyledTextRange();
@@ -1008,6 +1188,10 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
 
   @override
   void pushStyle(ui.TextStyle textStyle) {
+    WebParagraphDebug.log('WebParagraphBuilder.pushStyle($textStyle)');
+    for (var i = 0; i < textStylesList.length; ++i) {
+      WebParagraphDebug.log('$i: ${textStylesList[i]}');
+    }
     final mergedStyle = textStylesStack.last.mergeWith(textStyle as WebTextStyle);
     textStylesStack.add(mergedStyle);
     final last = textStylesList.last;
@@ -1020,9 +1204,7 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
 
   void startStyledTextRange() {
     finishStyledTextRange();
-    textStylesList.add(
-      StyledTextRange.collapsed(textBuffer.length, textStylesStack.last.fillMissingFields()),
-    );
+    textStylesList.add(StyledTextRange.collapsed(textBuffer.length, textStylesStack.last));
   }
 
   void finishStyledTextRange() {

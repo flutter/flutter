@@ -217,47 +217,56 @@ class TextLayout {
   }
 
   void debugPrintClusters(String header) {
-    WebParagraphDebug.log('Text Clusters ($header): ${textClusters.length}');
-    int i = 0;
-    for (final ExtendedTextCluster cluster in textClusters) {
-      final String clusterText = paragraph.getText(cluster.textRange);
-      WebParagraphDebug.log(
-        'cluster[$i]: "$clusterText" ${cluster.textRange} @${cluster.shift} ${cluster.advance.left}:${cluster.advance.right}=${cluster.advance.width} ${cluster.bounds.left}:${cluster.bounds.right}=${cluster.bounds.width}',
-      );
-      i += 1;
+    // ignore: dead_code
+    if (false) {
+      WebParagraphDebug.log('Text Clusters ($header): ${textClusters.length}');
+      int i = 0;
+      for (final ExtendedTextCluster cluster in textClusters) {
+        final String clusterText = paragraph.getText(cluster.textRange);
+        WebParagraphDebug.log(
+          'cluster[$i]: "$clusterText" ${cluster.textRange} @${cluster.shift} ${cluster.advance.left}:${cluster.advance.right}=${cluster.advance.width} ${cluster.bounds.left}:${cluster.bounds.right}=${cluster.bounds.width}',
+        );
+        i += 1;
+      }
     }
   }
 
   void debugPrintTextMetrics(String text, DomTextMetrics textMetrics) {
-    final clusters = textMetrics.getTextClusters();
-    WebParagraphDebug.log('TextMetrics "$text": ${clusters.length}');
-    int index = 0;
-    for (final cluster in clusters) {
-      final advance = textMetrics.getSelectionRects(cluster.start, cluster.end);
-      assert(advance.length == 1);
-      WebParagraphDebug.log(
-        '$index: [${cluster.start}:${cluster.end}) [${advance.first.left}:${advance.first.right})',
-      );
-      index++;
+    // ignore: dead_code
+    if (false) {
+      final clusters = textMetrics.getTextClusters();
+      WebParagraphDebug.log('TextMetrics "$text": ${clusters.length}');
+      int index = 0;
+      for (final cluster in clusters) {
+        final advance = textMetrics.getSelectionRects(cluster.start, cluster.end);
+        assert(advance.length == 1);
+        WebParagraphDebug.log(
+          '$index: [${cluster.start}:${cluster.end}) [${advance.first.left}:${advance.first.right})',
+        );
+        index++;
+      }
     }
   }
 
   void debugPrintClustersByBidi() {
-    WebParagraphDebug.log('Text Clusters: ${textClusters.length}');
-    int runIndex = 0;
-    for (final BidiRun run in bidiRuns) {
-      final String runText = getTextFromMonodirectionalClusterRange(run.clusterRange);
-      WebParagraphDebug.log(
-        'Run[$runIndex]: [${run.clusterRange.start}:${run.clusterRange.end}) "$runText"',
-      );
-      for (var i = run.clusterRange.start; i < run.clusterRange.end; ++i) {
-        final ExtendedTextCluster cluster = textClusters[i];
-        final String clusterText = paragraph.getText(cluster.textRange);
+    // ignore: dead_code
+    if (false) {
+      WebParagraphDebug.log('Text Clusters: ${textClusters.length}');
+      int runIndex = 0;
+      for (final BidiRun run in bidiRuns) {
+        final String runText = getTextFromMonodirectionalClusterRange(run.clusterRange);
         WebParagraphDebug.log(
-          '$i: [${cluster.textRange.start}:${cluster.textRange.end}) ${cluster.bounds.left}:${cluster.bounds.right} ${cluster.bounds.width}*${cluster.bounds.height} "$clusterText"',
+          'Run[$runIndex]: [${run.clusterRange.start}:${run.clusterRange.end}) "$runText"',
         );
+        for (var i = run.clusterRange.start; i < run.clusterRange.end; ++i) {
+          final ExtendedTextCluster cluster = textClusters[i];
+          final String clusterText = paragraph.getText(cluster.textRange);
+          WebParagraphDebug.log(
+            '$i: [${cluster.textRange.start}:${cluster.textRange.end}) ${cluster.bounds.left}:${cluster.bounds.right} ${cluster.bounds.width}*${cluster.bounds.height} "$clusterText"',
+          );
+        }
+        runIndex += 1;
       }
-      runIndex += 1;
     }
   }
 
@@ -768,7 +777,7 @@ class TextLayout {
           // It's only possible for the first block in the line
           assert(blockNum == 1);
           return ui.TextPosition(
-            offset: line.textClusterRange.end,
+            offset: line.textClusterRange.end - 1,
             /*affinity: ui.TextAffinity.downstream,*/
           );
         } else if (blockRect.left > offset.dx) {
@@ -802,7 +811,7 @@ class TextLayout {
               );
             } else {
               return ui.TextPosition(
-                offset: cluster.textRange.end,
+                offset: cluster.textRange.end - 1,
                 affinity: ui.TextAffinity.upstream,
               );
             }
@@ -816,7 +825,7 @@ class TextLayout {
       // we didn't find the block that is on the right of the offset
       // So all the blocks are on the left
       return ui.TextPosition(
-        offset: line.textClusterRange.end,
+        offset: line.textClusterRange.end - 1,
         /*affinity: ui.TextAffinity.downstream,*/
       );
     }
