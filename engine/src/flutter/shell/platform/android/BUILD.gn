@@ -379,6 +379,8 @@ embedding_dependencies_jars = [
   "//flutter/third_party/android_embedding_dependencies/lib/annotation-jvm-1.8.0.jar",
   "//flutter/third_party/android_embedding_dependencies/lib/annotation-experimental-1.4.0.jar",
   "//flutter/third_party/android_embedding_dependencies/lib/annotations-23.0.0.jar",
+  "//flutter/third_party/android_embedding_dependencies/lib/appcompat-1.7.0.jar",
+  "//flutter/third_party/android_embedding_dependencies/lib/appcompat-resources-1.7.0.jar",
   "//flutter/third_party/android_embedding_dependencies/lib/collection-1.1.0.jar",
   "//flutter/third_party/android_embedding_dependencies/lib/core-1.13.1.jar",
   "//flutter/third_party/android_embedding_dependencies/lib/core-1.10.3.jar",
