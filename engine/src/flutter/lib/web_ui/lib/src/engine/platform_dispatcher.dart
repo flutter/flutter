@@ -67,10 +67,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     locales: parseBrowserLanguages(),
     textScaleFactor: findBrowserTextScaleFactor(),
     accessibilityFeatures: computeAccessibilityFeatures(),
-    // Initial text spacing values are computed during
-    // the initial resize event that happens during the
-    // initial rendering of the `typographyMeasurementElement`.
-    // typographySettings: const ui.TypographySettings(),
   );
 
   /// Compute accessibility features based on the current value of high contrast flag
