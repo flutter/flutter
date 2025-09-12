@@ -26,7 +26,7 @@ below explain how to fetch the license information for the dependencies.
 1. Examine the file `./build/reports/license/license-dependency.xml`. If it
    contains licenses other than "The Apache License, Version 2.0" or something
    very similar, STOP. Ask Hixie for adivce on how to proceed.
-1. Copy or move the `lib/` directory to `src/third_party/android_embedding_dependencies/`,
+1. Copy or move the `lib/` directory to `src/flutter/third_party/android_embedding_dependencies/`,
    overwriting its contents, and ensure the Android build still works.
 1. Run `cipd create --pkg-def cipd.yaml -tag last_updated:"$version_tag"` where
    `$version_tag` is the output of `date +%Y-%m-%dT%T%z`.
