@@ -363,7 +363,8 @@ void main() {
       expect(find.byKey(const Key('key1')), findsOneWidget);
     },
   );
-  testWidgets('SliverList.builder should respect semanticIndexOffset', (WidgetTester tester) async {
+
+  testWidgets('SliverList.builder respects semanticIndexOffset', (WidgetTester tester) async {
     await tester.pumpWidget(_buildSliverListBuilder(semanticIndexOffset: 5));
 
     IndexedSemantics semanticsForTile(int i) {
