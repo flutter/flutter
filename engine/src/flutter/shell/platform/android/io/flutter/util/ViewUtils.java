@@ -17,7 +17,7 @@ import androidx.window.layout.WindowMetricsCalculator;
 public final class ViewUtils {
   public interface DisplayUpdater {
     /** Publishes display metrics to Dart code in Flutter. */
-    public void updateDisplayMetrics(float width, float height, float density);
+    void updateDisplayMetrics(float width, float height, float density);
   }
 
   /**
@@ -65,7 +65,7 @@ public final class ViewUtils {
    * @return True if the current view or any descendant view has focus.
    */
   public static boolean childHasFocus(@Nullable View root) {
-    return traverseHierarchy(root, (View view) -> view.hasFocus());
+    return traverseHierarchy(root, View::hasFocus);
   }
 
   /**
@@ -79,12 +79,11 @@ public final class ViewUtils {
     return traverseHierarchy(
         root,
         (View view) -> {
-          for (int i = 0; i < viewTypes.length; i++) {
-            final Class<? extends View> viewType = viewTypes[i];
-            if (viewType.isInstance(view)) {
-              return true;
+          for (final Class<? extends View> viewType : viewTypes) {
+                if (viewType.isInstance(view)) {
+                    return true;
+                }
             }
-          }
           return false;
         });
   }
