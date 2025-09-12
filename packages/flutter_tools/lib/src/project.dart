@@ -898,16 +898,16 @@ See the link below for more information:
       return;
     }
     // The v1 android embedding has been deleted.
-    throwToolExit('Build failed due to use of deleted Android v1 embedding.', exitCode: 1);
+    throwToolExit('Build failed due to use of deleted Android v1 embedding. Reason: ${result.reason}', exitCode: 1);
   }
 
   AndroidEmbeddingVersion getEmbeddingVersion() {
-    final AndroidEmbeddingVersion androidEmbeddingVersion = computeEmbeddingVersion().version;
-    if (androidEmbeddingVersion == AndroidEmbeddingVersion.v1) {
-      throwToolExit('Build failed due to use of deleted Android v1 embedding.', exitCode: 1);
+    final AndroidEmbeddingVersionResult result = computeEmbeddingVersion();
+    if (result.version == AndroidEmbeddingVersion.v1) {
+      throwToolExit('Build failed due to use of deleted Android v1 embedding. Reason: ${result.reason}', exitCode: 1);
     }
 
-    return androidEmbeddingVersion;
+    return result.version;
   }
 
   AndroidEmbeddingVersionResult computeEmbeddingVersion() {
