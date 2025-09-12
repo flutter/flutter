@@ -5,7 +5,7 @@ contains the build-time dependencies of the Android embedding of the Engine,
 and the dependencies of the in-tree testing framework. The Android embedder is
 shipped to Flutter end-users, but these build-time dependencies are not.
 Therefore, the license script can skip over the destination of the CIPD package
-in an Engine checkout at `src/third_party/android_embedding_dependencies`.
+in an Engine checkout at `src/flutter/third_party/android_embedding_dependencies`.
 Even so, the CIPD package should contain a LICENSE file, and the instructions
 below explain how to fetch the license information for the dependencies.
 
