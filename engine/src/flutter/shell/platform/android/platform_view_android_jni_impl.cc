@@ -70,7 +70,7 @@ static jfieldID g_jni_shell_holder_field = nullptr;
   V(g_update_semantics_method, updateSemantics,                               \
     "(Ljava/nio/ByteBuffer;[Ljava/lang/String;[Ljava/nio/ByteBuffer;)V")      \
   V(g_set_application_locale_method, setApplicationLocale,                    \
-    "(Ljava/lang/String;)V")                                                   \
+    "(Ljava/lang/String;)V")                                                  \
   V(g_on_display_platform_view_method, onDisplayPlatformView,                 \
     "(IIIIIIILio/flutter/embedding/engine/mutatorsstack/"                     \
     "FlutterMutatorsStack;)V")                                                \
