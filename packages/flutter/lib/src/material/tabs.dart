@@ -2143,6 +2143,8 @@ class _TabBarState extends State<TabBar> {
   }
 }
 
+// ... Rest of the classes remain the same (TabBarView, TabPageSelectorIndicator, TabPageSelector, defaults classes, etc.)
+
 /// A page view that displays the widget which corresponds to the currently
 /// selected tab.
 ///
