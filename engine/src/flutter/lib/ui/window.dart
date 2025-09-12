@@ -928,12 +928,14 @@ final class TypographySettings {
   final double? lineHeight;
 
   /// The amount of space (in logical pixels) to add between each letter.
+  ///
   /// A negative value can be used to bring the letters closer.
   final double? letterSpacing;
 
   /// The amount of space (in logical pixels) to add at each sequence of
-  /// white-space (i.e. between each word). A negative value can be used to
-  /// bring the words closer.
+  /// white-space (i.e. between each word).
+  ///
+  /// A negative value can be used to bring the words closer.
   final double? wordSpacing;
 
   /// The amount of space (in logical pixels) to add between each paragraph.
