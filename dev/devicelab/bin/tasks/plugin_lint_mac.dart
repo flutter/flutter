@@ -162,7 +162,7 @@ Future<void> main() async {
 
       const String iosPlatformMap = '''
       ios:
-        pluginClass: TestPluginSwiftPlugin''';
+        pluginClass: TestPlugin''';
 
       final File pluginPubspec = File(path.join(pluginPath, 'pubspec.yaml'));
       String pluginPubspecContent = pluginPubspec.readAsStringSync();
@@ -186,7 +186,7 @@ Future<void> main() async {
           !podfileLockOutput.contains(':path: Flutter')
           // test_plugin no longer supports iOS, shouldn't be present.
           ||
-          !podfileLockOutput.contains(':path: ".symlinks/plugins/test_plugin/ios"')) {
+          podfileLockOutput.contains(':path: ".symlinks/plugins/test_plugin/ios"')) {
         print(podfileLockOutput);
         return TaskResult.failure('Podfile.lock does not contain expected pods');
       }
