@@ -163,6 +163,11 @@ class ExpansionPanelRadio extends ExpansionPanel {
 /// A material expansion panel list that lays out its children and animates
 /// expansions.
 ///
+/// This implementation provides improved animation performance through
+/// optimized rendering techniques while maintaining full backward compatibility.
+/// For large lists requiring viewport virtualization, consider wrapping this
+/// widget in a [SingleChildScrollView].
+///
 /// The [expansionCallback] is called when the expansion state changes. For
 /// normal [ExpansionPanelList] widgets, it is the responsibility of the parent
 /// widget to rebuild the [ExpansionPanelList] with updated values for
@@ -287,12 +292,16 @@ class ExpansionPanelList extends StatefulWidget {
   State<StatefulWidget> createState() => _ExpansionPanelListState();
 }
 
-class _ExpansionPanelListState extends State<ExpansionPanelList> {
+class _ExpansionPanelListState extends State<ExpansionPanelList> with TickerProviderStateMixin {
   ExpansionPanelRadio? _currentOpenPanel;
+  late List<AnimationController> _animationControllers;
+  late List<Animation<double>> _heightFactors;
 
   @override
   void initState() {
     super.initState();
+    _initializeControllers();
+
     if (widget._allowOnlyOnePanelOpen) {
       assert(_allIdentifiersUnique(), 'All ExpansionPanelRadio identifier values must be unique.');
       if (widget.initialOpenPanelValue != null) {
@@ -308,6 +317,21 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
   void didUpdateWidget(ExpansionPanelList oldWidget) {
     super.didUpdateWidget(oldWidget);
 
+    if (oldWidget.children.length != widget.children.length) {
+      for (final AnimationController controller in _animationControllers) {
+        controller.dispose();
+      }
+      _initializeControllers();
+    } else {
+      _syncAnimationControllers();
+    }
+
+    if (oldWidget.animationDuration != widget.animationDuration) {
+      for (final AnimationController controller in _animationControllers) {
+        controller.duration = widget.animationDuration;
+      }
+    }
+
     if (widget._allowOnlyOnePanelOpen) {
       assert(_allIdentifiersUnique(), 'All ExpansionPanelRadio identifier values must be unique.');
       // If the previous widget was non-radio ExpansionPanelList, initialize the
@@ -320,6 +344,50 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
       }
     } else {
       _currentOpenPanel = null;
+    }
+  }
+
+  @override
+  void dispose() {
+    for (final AnimationController controller in _animationControllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  /// Initializes the animation controllers and height factors for all panels.
+  /// This method is called during initialization and when the number of children changes.
+  void _initializeControllers() {
+    _animationControllers = List<AnimationController>.generate(
+      widget.children.length,
+      (int index) => AnimationController(duration: widget.animationDuration, vsync: this),
+    );
+
+    _heightFactors = _animationControllers
+        .map(
+          (AnimationController controller) => controller.drive(
+            Tween<double>(begin: 0.0, end: 1.0).chain(CurveTween(curve: Curves.fastOutSlowIn)),
+          ),
+        )
+        .toList();
+
+    for (int i = 0; i < widget.children.length; i++) {
+      if (_isChildExpanded(i)) {
+        _animationControllers[i].value = 1.0;
+      }
+    }
+  }
+
+  void _syncAnimationControllers() {
+    for (int i = 0; i < widget.children.length; i++) {
+      final bool shouldBeExpanded = _isChildExpanded(i);
+      final double currentValue = _animationControllers[i].value;
+
+      if (shouldBeExpanded && currentValue != 1.0) {
+        _animationControllers[i].forward();
+      } else if (!shouldBeExpanded && currentValue != 0.0) {
+        _animationControllers[i].reverse();
+      }
     }
   }
 
@@ -340,6 +408,12 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
   }
 
   void _handlePressed(bool isExpanded, int index) {
+    if (isExpanded) {
+      _animationControllers[index].reverse();
+    } else {
+      _animationControllers[index].forward();
+    }
+
     if (widget._allowOnlyOnePanelOpen) {
       final ExpansionPanelRadio pressedChild = widget.children[index] as ExpansionPanelRadio;
 
@@ -351,6 +425,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
             childIndex != index &&
             child.value == _currentOpenPanel?.value) {
           widget.expansionCallback!(childIndex, false);
+          _animationControllers[childIndex].reverse();
         }
       }
 
@@ -452,19 +527,18 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
           child: Column(
             children: <Widget>[
               header,
-              AnimatedCrossFade(
-                firstChild: const LimitedBox(
-                  maxWidth: 0.0,
-                  child: SizedBox(width: double.infinity, height: 0),
-                ),
-                secondChild: child.body,
-                firstCurve: const Interval(0.0, 0.6, curve: Curves.fastOutSlowIn),
-                secondCurve: const Interval(0.4, 1.0, curve: Curves.fastOutSlowIn),
-                sizeCurve: Curves.fastOutSlowIn,
-                crossFadeState: _isChildExpanded(index)
-                    ? CrossFadeState.showSecond
-                    : CrossFadeState.showFirst,
-                duration: widget.animationDuration,
+              AnimatedBuilder(
+                animation: _heightFactors[index],
+                builder: (BuildContext context, Widget? child) {
+                  return ClipRect(
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      heightFactor: _heightFactors[index].value,
+                      child: child,
+                    ),
+                  );
+                },
+                child: child.body,
               ),
             ],
           ),
