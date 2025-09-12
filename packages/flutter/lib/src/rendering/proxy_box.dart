@@ -1303,7 +1303,9 @@ class RenderBackdropFilter extends RenderProxyBox {
 
     ui.ImageFilter? effectiveFilter = _filter;
     if (_filterConfig != null) {
-      effectiveFilter = _filterConfig!.resolve(paintBounds);
+      effectiveFilter = _filterConfig!.resolve(
+        MatrixUtils.transformRect(getTransformTo(null), offset & size),
+      );
     }
 
     if (child != null) {

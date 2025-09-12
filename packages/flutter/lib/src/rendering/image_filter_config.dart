@@ -25,6 +25,10 @@ abstract class ImageFilterConfig {
   /// const constructors so that they can be used in const expressions.
   const ImageFilterConfig();
 
+  factory ImageFilterConfig.filter(ui.ImageFilter filter) {
+    return _DirectImageFilterConfig(filter);
+  }
+
   /// Creates a configuration for a Gaussian blur.
   ///
   /// The `sigmaX` and `sigmaY` arguments are the standard deviation of the
@@ -105,8 +109,11 @@ class _BlurImageFilterConfig extends ImageFilterConfig {
 
   @override
   ui.ImageFilter resolve(ui.Rect bounds) {
-    return ui.ImageFilter.blur(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode,
-    bounds: useObjectBounds ? bounds : null
+    return ui.ImageFilter.blur(
+      sigmaX: sigmaX,
+      sigmaY: sigmaY,
+      tileMode: tileMode,
+      bounds: useObjectBounds ? bounds : null,
     );
   }
 
@@ -177,4 +184,27 @@ class _ComposeImageFilterConfig extends ImageFilterConfig {
 
   @override
   int get hashCode => Object.hash(outer, inner);
+}
+
+class _DirectImageFilterConfig extends ImageFilterConfig {
+  const _DirectImageFilterConfig(this.filter);
+
+  final ui.ImageFilter filter;
+
+  @override
+  ui.ImageFilter resolve(ui.Rect bounds) {
+    return filter;
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is _DirectImageFilterConfig &&
+           other.filter == filter;
+  }
+
+  @override
+  int get hashCode => filter.hashCode;
 }

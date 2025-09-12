@@ -62,6 +62,7 @@ class GaussianBlurFilterContents final : public FilterContents {
                                       BlurStyle mask_blur_style,
                                       const Geometry* mask_geometry = nullptr);
 
+  std::optional<Rect> GetBounds() const { return bounds_; }
   Scalar GetSigmaX() const { return sigma_.x; }
   Scalar GetSigmaY() const { return sigma_.y; }
 
