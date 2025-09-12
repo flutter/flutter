@@ -886,6 +886,9 @@ class _ValueIndicatorTextProcessor {
   }
 
   /// Creates a TextPainter with ellipsis when text exceeds maxLines.
+  // TODO(huycozy): Use TextPainter built-in API for ellipsis.
+  //  See https://github.com/flutter/flutter/issues/175251
+  //  Blocked by https://github.com/flutter/flutter/issues/50168
   TextPainter _createTextPainterWithEllipsis({
     required TextPainter originalPainter,
     required String originalText,
