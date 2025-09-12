@@ -1429,6 +1429,8 @@ const char* ToString(ax::mojom::StringAttribute string_attribute) {
       return "display";
     case ax::mojom::StringAttribute::kFontFamily:
       return "fontFamily";
+    case ax::mojom::StringAttribute::kHtmlId:
+      return "htmlId";
     case ax::mojom::StringAttribute::kHtmlTag:
       return "htmlTag";
     case ax::mojom::StringAttribute::kImageAnnotation:
@@ -1489,6 +1491,8 @@ ax::mojom::StringAttribute ParseStringAttribute(const char* string_attribute) {
     return ax::mojom::StringAttribute::kDisplay;
   if (0 == strcmp(string_attribute, "fontFamily"))
     return ax::mojom::StringAttribute::kFontFamily;
+  if (0 == strcmp(string_attribute, "htmlId"))
+    return ax::mojom::StringAttribute::kHtmlId;
   if (0 == strcmp(string_attribute, "htmlTag"))
     return ax::mojom::StringAttribute::kHtmlTag;
   if (0 == strcmp(string_attribute, "imageAnnotation"))
