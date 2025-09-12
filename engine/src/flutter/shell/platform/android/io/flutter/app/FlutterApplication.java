@@ -12,7 +12,7 @@ import android.app.Application;
  * android.app.Application} instead.
  *
  * <p>For more information on the removal of Flutter's v1 Android embedding, see:
- *  <a href="https://docs.flutter.dev/release/breaking-changes/v1-android-embedding">breaking-changes/v1-android-embedding</a>.
+ *  <a href="https://docs.flutter.dev/release/breaking-changes/v1-android-embedding">breaking-changes/v1-android-embedding</a>
  */
 @Deprecated
 public class FlutterApplication extends Application {}
