@@ -156,6 +156,48 @@ Future<void> main() async {
 
       _validateMacOSPodfile(appPath);
 
+      section('Remove iOS support from plugin');
+
+      Directory(path.join(pluginPath, 'ios')).deleteSync(recursive: true);
+
+      const String iosPlatformMap = '''
+      ios:
+        pluginClass: TestPluginSwiftPlugin''';
+
+      final File pluginPubspec = File(path.join(pluginPath, 'pubspec.yaml'));
+      String pluginPubspecContent = pluginPubspec.readAsStringSync();
+      if (!pluginPubspecContent.contains(iosPlatformMap)) {
+        return TaskResult.failure('Plugin pubspec.yaml missing iOS platform map');
+      }
+
+      pluginPubspecContent = pluginPubspecContent.replaceFirst(iosPlatformMap, '');
+      pluginPubspec.writeAsStringSync(pluginPubspecContent, flush: true);
+
+      await inDirectory(appPath, () async {
+        await flutter('clean');
+        await flutter('build', options: <String>['ios', '--no-codesign']);
+      });
+
+      section('Validate plugin without iOS platform');
+
+      final File podfileLockFile = File(path.join(appPath, 'ios', 'Podfile.lock'));
+      final String podfileLockOutput = podfileLockFile.readAsStringSync();
+      if (!podfileLockOutput.contains(':path: ".symlinks/plugins/url_launcher_ios/ios"') ||
+          !podfileLockOutput.contains(':path: Flutter')
+          // test_plugin no longer supports iOS, shouldn't be present.
+          ||
+          !podfileLockOutput.contains(':path: ".symlinks/plugins/test_plugin/ios"')) {
+        print(podfileLockOutput);
+        return TaskResult.failure('Podfile.lock does not contain expected pods');
+      }
+
+      final String pluginSymlinks = path.join(appPath, 'ios', '.symlinks', 'plugins');
+
+      checkDirectoryExists(path.join(pluginSymlinks, 'url_launcher_ios', 'ios'));
+
+      // test_plugin no longer supports iOS, shouldn't exist!
+      checkDirectoryNotExists(path.join(pluginSymlinks, 'test_plugin'));
+
       section('Build macOS application with plugins as libraries');
 
       macosPodfileContent = macosPodfileContent.replaceAll('use_frameworks!', '');

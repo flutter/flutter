@@ -171,7 +171,7 @@ class SwiftPackageManagerUtils {
     final dependencyManager = usesSwiftPackageManager ? 'spm' : 'cocoapods';
 
     // Create plugin
-    final pluginName = '${platform}_swift_${dependencyManager}_plugin';
+    final pluginName = '${platform}_${dependencyManager}_plugin';
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
@@ -200,7 +200,7 @@ class SwiftPackageManagerUtils {
       pluginName: pluginName,
       pluginPath: pluginDirectory.path,
       platform: platform,
-      className: '${_capitalize(platform)}Swift${_capitalize(dependencyManager)}Plugin',
+      className: '${_capitalize(platform)}${_capitalize(dependencyManager)}Plugin',
     );
   }
 

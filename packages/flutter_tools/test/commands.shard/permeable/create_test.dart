@@ -3314,27 +3314,16 @@ void main() {
       'packages',
       'flutter_tools',
     );
-    final iosPluginTemplates = <String>[
-      globals.fs.path.join(
-        flutterToolsAbsolutePath,
-        'templates',
-        'plugin',
-        'ios-objc.tmpl',
-        'projectName.podspec.tmpl',
-      ),
-      globals.fs.path.join(
-        flutterToolsAbsolutePath,
-        'templates',
-        'plugin_ffi',
-        'ios.tmpl',
-        'projectName.podspec.tmpl',
-      ),
-    ];
+    final String iosPluginTemplate = globals.fs.path.join(
+      flutterToolsAbsolutePath,
+      'templates',
+      'plugin_ffi',
+      'ios.tmpl',
+      'projectName.podspec.tmpl',
+    );
 
-    for (final templatePath in iosPluginTemplates) {
-      final String rawTemplate = globals.fs.file(templatePath).readAsStringSync();
-      expect(rawTemplate, contains("s.platform = :ios, '13.0'"));
-    }
+    final String rawTemplate = globals.fs.file(iosPluginTemplate).readAsStringSync();
+    expect(rawTemplate, contains("s.platform = :ios, '13.0'"));
 
     final command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
