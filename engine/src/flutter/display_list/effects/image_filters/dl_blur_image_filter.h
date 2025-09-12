@@ -16,16 +16,16 @@ class DlBlurImageFilter final : public DlImageFilter {
   DlBlurImageFilter(DlScalar sigma_x, DlScalar sigma_y, DlTileMode tile_mode)
       : sigma_x_(sigma_x),
         sigma_y_(sigma_y),
-        tile_mode_(tile_mode),
-        bounds_(DlRect::MakeMaximum()) {}
+        bounds_(std::nullopt),
+        tile_mode_(tile_mode) {}
   DlBlurImageFilter(DlScalar sigma_x,
                     DlScalar sigma_y,
-                    DlTileMode tile_mode,
-                    DlRect bounds)
+                    std::optional<DlRect> bounds,
+                    DlTileMode tile_mode)
       : sigma_x_(sigma_x),
         sigma_y_(sigma_y),
-        tile_mode_(tile_mode),
-        bounds_(bounds) {}
+        bounds_(bounds),
+        tile_mode_(tile_mode) {}
   explicit DlBlurImageFilter(const DlBlurImageFilter* filter)
       : DlBlurImageFilter(filter->sigma_x_,
                           filter->sigma_y_,
@@ -40,7 +40,7 @@ class DlBlurImageFilter final : public DlImageFilter {
   static std::shared_ptr<DlImageFilter> Make(DlScalar sigma_x,
                                              DlScalar sigma_y,
                                              DlTileMode tile_mode,
-                                             DlRect bounds);
+                                             std::optional<DlRect> bounds);
 
   std::shared_ptr<DlImageFilter> shared() const override {
     return std::make_shared<DlBlurImageFilter>(this);
@@ -66,8 +66,8 @@ class DlBlurImageFilter final : public DlImageFilter {
 
   DlScalar sigma_x() const { return sigma_x_; }
   DlScalar sigma_y() const { return sigma_y_; }
+  std::optional<DlRect> bounds() const { return bounds_; }
   DlTileMode tile_mode() const { return tile_mode_; }
-  DlRect bounds() const { return bounds_; }
 
  protected:
   bool equals_(const DlImageFilter& other) const override;
@@ -75,8 +75,8 @@ class DlBlurImageFilter final : public DlImageFilter {
  private:
   DlScalar sigma_x_;
   DlScalar sigma_y_;
+  std::optional<DlRect> bounds_;
   DlTileMode tile_mode_;
-  DlRect bounds_;
 };
 
 }  // namespace flutter

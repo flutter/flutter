@@ -5,18 +5,21 @@
 #include "flutter/display_list/effects/image_filters/dl_blur_image_filter.h"
 
 namespace flutter {
+// namespace {
+// const DlRect kEmptyRect = DlRect::MakeLTRB(1, 2, 3, 4); // TODO: Debug value
+// } // namespace
 
 std::shared_ptr<DlImageFilter> DlBlurImageFilter::Make(DlScalar sigma_x,
                                                        DlScalar sigma_y,
                                                        DlTileMode tile_mode) {
-  return DlBlurImageFilter::Make(sigma_x, sigma_y, tile_mode,
-                                 DlRect::MakeMaximum());
+  return DlBlurImageFilter::Make(sigma_x, sigma_y, tile_mode, std::nullopt);
 }
 
-std::shared_ptr<DlImageFilter> DlBlurImageFilter::Make(DlScalar sigma_x,
-                                                       DlScalar sigma_y,
-                                                       DlTileMode tile_mode,
-                                                       DlRect bounds) {
+std::shared_ptr<DlImageFilter> DlBlurImageFilter::Make(
+    DlScalar sigma_x,
+    DlScalar sigma_y,
+    DlTileMode tile_mode,
+    std::optional<DlRect> bounds) {
   if (!std::isfinite(sigma_x) || !std::isfinite(sigma_y)) {
     return nullptr;
   }
@@ -25,8 +28,8 @@ std::shared_ptr<DlImageFilter> DlBlurImageFilter::Make(DlScalar sigma_x,
   }
   sigma_x = (sigma_x < SK_ScalarNearlyZero) ? 0 : sigma_x;
   sigma_y = (sigma_y < SK_ScalarNearlyZero) ? 0 : sigma_y;
-  return std::make_shared<DlBlurImageFilter>(sigma_x, sigma_y, tile_mode,
-                                             bounds);
+  return std::make_shared<DlBlurImageFilter>(sigma_x, sigma_y, bounds,
+                                             tile_mode);
 }
 
 DlRect* DlBlurImageFilter::map_local_bounds(const DlRect& input_bounds,

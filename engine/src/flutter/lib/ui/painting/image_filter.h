@@ -32,6 +32,7 @@ class ImageFilter : public RefCountedDartWrappable<ImageFilter> {
   void initBlur(double sigma_x,
                 double sigma_y,
                 int tile_mode_index,
+                bool bounded,
                 double bounds_left,
                 double bounds_top,
                 double bounds_right,

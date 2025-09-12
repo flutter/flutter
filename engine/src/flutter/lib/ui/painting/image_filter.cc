@@ -72,6 +72,7 @@ const std::shared_ptr<DlImageFilter> ImageFilter::filter(
 void ImageFilter::initBlur(double sigma_x,
                            double sigma_y,
                            int tile_mode_index,
+                           bool bounded,
                            double bounds_left,
                            double bounds_top,
                            double bounds_right,
@@ -85,9 +86,12 @@ void ImageFilter::initBlur(double sigma_x,
     is_dynamic = false;
     tile_mode = static_cast<DlTileMode>(tile_mode_index);
   }
-  DlRect bounds =
-      DlRect::MakeLTRB(SafeNarrow(bounds_left), SafeNarrow(bounds_top),
-                       SafeNarrow(bounds_right), SafeNarrow(bounds_bottom));
+  std::optional<DlRect> bounds;
+  if (bounded) {
+    bounds =
+        DlRect::MakeLTRB(SafeNarrow(bounds_left), SafeNarrow(bounds_top),
+                         SafeNarrow(bounds_right), SafeNarrow(bounds_bottom));
+  }
   filter_ = DlBlurImageFilter::Make(SafeNarrow(sigma_x), SafeNarrow(sigma_y),
                                     tile_mode, bounds);
   // If it was a NOP filter, don't bother processing dynamic substitutions

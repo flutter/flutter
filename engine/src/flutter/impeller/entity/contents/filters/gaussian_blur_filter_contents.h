@@ -57,6 +57,7 @@ class GaussianBlurFilterContents final : public FilterContents {
  public:
   explicit GaussianBlurFilterContents(Scalar sigma_x,
                                       Scalar sigma_y,
+                                      std::optional<Rect> bounds,
                                       Entity::TileMode tile_mode,
                                       BlurStyle mask_blur_style,
                                       const Geometry* mask_geometry = nullptr);
@@ -114,6 +115,7 @@ class GaussianBlurFilterContents final : public FilterContents {
       const std::optional<Rect>& coverage_hint) const override;
 
   const Vector2 sigma_ = Vector2(0.0, 0.0);
+  const std::optional<Rect> bounds_ = std::nullopt;
   const Entity::TileMode tile_mode_;
   const BlurStyle mask_blur_style_;
   const Geometry* mask_geometry_ = nullptr;
