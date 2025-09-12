@@ -596,6 +596,8 @@ class DropdownMenu<T> extends StatefulWidget {
   /// {@macro flutter.material.textfield.restorationId}
   final String? restorationId;
 
+  /// An optional controller that allows opening and closing of the menu from
+  /// other widgets.
   final MenuController? menuController;
 
   @override
