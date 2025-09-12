@@ -253,14 +253,12 @@ class CupertinoLinearActivityIndicator extends StatelessWidget {
 
 class _CupertinoLinearActivityIndicator extends CustomPainter {
   _CupertinoLinearActivityIndicator({required this.progress, this.color})
-    : _backgroundPaint =
-          Paint()
-            ..color = CupertinoColors.systemFill
-            ..style = PaintingStyle.fill,
-      _progressPaint =
-          Paint()
-            ..color = color ?? CupertinoColors.activeBlue
-            ..style = PaintingStyle.fill;
+    : _backgroundPaint = Paint()
+        ..color = CupertinoColors.systemFill
+        ..style = PaintingStyle.fill,
+      _progressPaint = Paint()
+        ..color = color ?? CupertinoColors.activeBlue
+        ..style = PaintingStyle.fill;
 
   final double progress;
 
