@@ -1491,7 +1491,7 @@ void main() {
     expect(find.byType(CustomScrollView), findsOneWidget);
   });
 
-  testWidgets('SliverGrid.builder respeita semanticIndexOffset', (WidgetTester tester) async {
+  testWidgets('SliverGrid.builder respects semanticIndexOffset', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
