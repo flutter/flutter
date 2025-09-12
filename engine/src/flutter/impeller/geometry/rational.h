@@ -22,8 +22,6 @@ class Rational {
 
   bool operator==(const Rational& that) const;
 
-  bool operator!=(const Rational& that) const;
-
   bool operator<(const Rational& that) const;
 
   uint64_t GetHash() const;

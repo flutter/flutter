@@ -34,7 +34,10 @@ class PreviewCodeGenerator {
   static const _kBuilderProperty = 'builder';
   static const _kListType = 'List';
   static const _kPreviewsFunctionName = 'previews';
+  static const _kGroupNameProperty = 'name';
+  static const _kGroupPreviewsProperty = 'previews';
   static const _kWidgetPreviewClass = 'WidgetPreview';
+  static const _kWidgetPreviewGroupClass = 'WidgetPreviewGroup';
   static const _kWidgetPreviewLibraryUri = 'widget_preview.dart';
 
   static String getGeneratedPreviewFilePath(FileSystem fs) =>
@@ -116,7 +119,6 @@ class PreviewCodeGenerator {
     required cb.Allocator allocator,
     required cb.MethodBuilder builder,
   }) {
-    final previewExpressions = <cb.Expression>[];
     // Sort the entries by URI so that the code generator assigns import prefixes in a
     // deterministic manner, mainly for testing purposes. This also results in previews being
     // displayed in the same order across platforms with differing path styles.
@@ -124,32 +126,45 @@ class PreviewCodeGenerator {
       ..sort((_PreviewMappingEntry a, _PreviewMappingEntry b) {
         return a.key.uri.toString().compareTo(b.key.uri.toString());
       });
-    for (final _PreviewMappingEntry(
-          key: (path: String _, :Uri uri),
-          value: LibraryPreviewNode libraryDetails,
-        )
+
+    // Iterate over all detected previews and build groups of previews based on shared 'group'
+    // names.
+    final previewGroups = <String, List<cb.Expression>>{};
+    for (final _PreviewMappingEntry(key: (path: _, :uri), value: libraryDetails)
         in sortedPreviews) {
       for (final PreviewDetails preview in libraryDetails.previews) {
-        previewExpressions.add(
-          _buildPreviewWidget(
-            allocator: allocator,
-            preview: preview,
-            uri: uri,
-            libraryDetails: libraryDetails,
-          ),
-        );
+        final String group = preview.group.toStringValue()!;
+        previewGroups
+            .putIfAbsent(group, () => <cb.Expression>[])
+            .add(
+              _buildPreviewWidget(
+                allocator: allocator,
+                preview: preview,
+                uri: uri,
+                libraryDetails: libraryDetails,
+              ),
+            );
       }
     }
     builder
-      ..body = cb.literalList(previewExpressions).code
+      ..body = cb.literalList(previewGroups.entries.map(_buildPreviewGroup)).code
       ..name = _kPreviewsFunctionName
       ..returns =
           (cb.TypeReferenceBuilder()
                 ..symbol = _kListType
                 ..types = ListBuilder<cb.Reference>(<cb.Reference>[
-                  cb.refer(_kWidgetPreviewClass, _kWidgetPreviewLibraryUri),
+                  cb.refer(_kWidgetPreviewGroupClass, _kWidgetPreviewLibraryUri),
                 ]))
               .build();
+  }
+
+  cb.Expression _buildPreviewGroup(MapEntry<String, List<cb.Expression>> group) {
+    return cb
+        .refer(_kWidgetPreviewGroupClass, _kWidgetPreviewLibraryUri)
+        .newInstance(<cb.Expression>[], <String, cb.Expression>{
+          _kGroupNameProperty: cb.literalString(group.key),
+          _kGroupPreviewsProperty: cb.literalList(group.value),
+        });
   }
 
   cb.Expression _buildPreviewWidget({
@@ -196,38 +211,13 @@ class PreviewCodeGenerator {
             !libraryDetails.hasErrors) ...<String, cb.Expression>{
           if (preview.packageName != null)
             PreviewDetails.kPackageName: cb.literalString(preview.packageName!),
-          ...?_generateCodeFromAnalyzerExpression(
-            allocator: allocator,
-            key: PreviewDetails.kName,
-            object: preview.name,
-          ),
-          ...?_generateCodeFromAnalyzerExpression(
-            allocator: allocator,
-            key: PreviewDetails.kSize,
-            object: preview.size,
-          ),
-          ...?_generateCodeFromAnalyzerExpression(
-            allocator: allocator,
-            key: PreviewDetails.kTextScaleFactor,
-            object: preview.textScaleFactor,
-          ),
-          ...?_generateCodeFromAnalyzerExpression(
-            allocator: allocator,
-            key: PreviewDetails.kTheme,
-            object: preview.theme,
-            isCallback: true,
-          ),
-          ...?_generateCodeFromAnalyzerExpression(
-            allocator: allocator,
-            key: PreviewDetails.kBrightness,
-            object: preview.brightness,
-          ),
-          ...?_generateCodeFromAnalyzerExpression(
-            allocator: allocator,
-            key: PreviewDetails.kLocalizations,
-            object: preview.localizations,
-            isCallback: true,
-          ),
+          for (final (:key, :object, :isCallback) in preview.toDartObjectProperties())
+            ...?_generateCodeFromAnalyzerExpression(
+              allocator: allocator,
+              key: key,
+              object: object,
+              isCallback: isCallback,
+            ),
         },
         _kBuilderProperty: previewWidget,
       },
