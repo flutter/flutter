@@ -288,33 +288,33 @@ SKWASM_EXPORT void canvas_drawPicture(DisplayListBuilder* canvas,
 }
 
 SKWASM_EXPORT void canvas_drawImage(DisplayListBuilder* canvas,
-                                    SkImage* image,
+                                    DlImage* image,
                                     DlScalar offsetX,
                                     DlScalar offsetY,
                                     DlPaint* paint,
                                     FilterQuality quality) {
-  canvas->DrawImage(DlImage::Make(image), DlPoint{offsetX, offsetY},
+  canvas->DrawImage(sk_ref_sp(image), DlPoint{offsetX, offsetY},
                     samplingOptionsForQuality(quality), paint);
 }
 
 SKWASM_EXPORT void canvas_drawImageRect(DisplayListBuilder* canvas,
-                                        SkImage* image,
+                                        DlImage* image,
                                         DlRect* sourceRect,
                                         DlRect* destRect,
                                         DlPaint* paint,
                                         FilterQuality quality) {
-  canvas->DrawImageRect(DlImage::Make(image), *sourceRect, *destRect,
+  canvas->DrawImageRect(sk_ref_sp(image), *sourceRect, *destRect,
                         samplingOptionsForQuality(quality), paint,
                         DlSrcRectConstraint::kStrict);
 }
 
 SKWASM_EXPORT void canvas_drawImageNine(DisplayListBuilder* canvas,
-                                        SkImage* image,
+                                        DlImage* image,
                                         DlIRect* centerRect,
                                         DlRect* destinationRect,
                                         DlPaint* paint,
                                         FilterQuality quality) {
-  canvas->DrawImageNine(DlImage::Make(image), *centerRect, *destinationRect,
+  canvas->DrawImageNine(sk_ref_sp(image), *centerRect, *destinationRect,
                         filterModeForQuality(quality), paint);
 }
 
@@ -334,7 +334,7 @@ SKWASM_EXPORT void canvas_drawPoints(DisplayListBuilder* canvas,
 }
 
 SKWASM_EXPORT void canvas_drawAtlas(DisplayListBuilder* canvas,
-                                    SkImage* atlas,
+                                    DlImage* atlas,
                                     DlRSTransform* transforms,
                                     DlRect* rects,
                                     uint32_t* colors,
@@ -347,8 +347,8 @@ SKWASM_EXPORT void canvas_drawAtlas(DisplayListBuilder* canvas,
     dlColors[i] = DlColor(colors[i]);
   }
   canvas->DrawAtlas(
-      DlImage::Make(atlas), transforms, rects, dlColors.data(), spriteCount,
-      mode, samplingOptionsForQuality(FilterQuality::medium), cullRect, paint);
+      sk_ref_sp(atlas), transforms, rects, dlColors.data(), spriteCount, mode,
+      samplingOptionsForQuality(FilterQuality::medium), cullRect, paint);
 }
 
 SKWASM_EXPORT void canvas_getTransform(DisplayListBuilder* canvas,

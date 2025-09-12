@@ -9,7 +9,7 @@
 
 #include "flutter/display_list/effects/dl_color_source.h"
 #include "flutter/display_list/effects/dl_runtime_effect_skia.h"
-#include "third_party/skia/include/core/SkImage.h"
+#include "flutter/display_list/image/dl_image.h"
 #include "third_party/skia/include/effects/SkRuntimeEffect.h"
 
 using namespace Skwasm;
@@ -172,7 +172,7 @@ SKWASM_EXPORT sp_wrapper<DlColorSource>* shader_createRuntimeEffectShader(
 }
 
 SKWASM_EXPORT sp_wrapper<DlColorSource>* shader_createFromImage(
-    SkImage* image,
+    DlImage* image,
     DlTileMode tileModeX,
     DlTileMode tileModeY,
     FilterQuality quality,
@@ -181,11 +181,11 @@ SKWASM_EXPORT sp_wrapper<DlColorSource>* shader_createFromImage(
   if (matrix33) {
     auto localMatrix = createDlMatrixFrom3x3(matrix33);
     return new sp_wrapper<DlColorSource>(DlColorSource::MakeImage(
-        DlImage::Make(image), tileModeX, tileModeY,
+        sk_ref_sp(image), tileModeX, tileModeY,
         samplingOptionsForQuality(quality), &localMatrix));
   } else {
     return new sp_wrapper<DlColorSource>(
-        DlColorSource::MakeImage(DlImage::Make(image), tileModeX, tileModeY,
+        DlColorSource::MakeImage(sk_ref_sp(image), tileModeX, tileModeY,
                                  samplingOptionsForQuality(quality)));
   }
 }

@@ -12,6 +12,8 @@
 #include "third_party/skia/include/codec/SkGifDecoder.h"
 #include "third_party/skia/include/codec/SkWebpDecoder.h"
 
+#include "flutter/display_list/image/dl_image.h"
+
 #include <memory>
 
 namespace {
@@ -75,7 +77,8 @@ SKWASM_EXPORT void animatedImage_decodeNextFrame(SkAnimatedImage* image) {
   image->decodeNextFrame();
 }
 
-SKWASM_EXPORT SkImage* animatedImage_getCurrentFrame(SkAnimatedImage* image) {
+SKWASM_EXPORT flutter::DlImage* animatedImage_getCurrentFrame(
+    SkAnimatedImage* image) {
   liveImageCount++;
-  return image->getCurrentFrame().release();
+  return flutter::DlImage::Make(image->getCurrentFrame()).release();
 }

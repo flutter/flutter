@@ -113,7 +113,7 @@ class TextureSourceImageGenerator : public GrExternalTextureGenerator {
 
 namespace Skwasm {
 
-sk_sp<SkImage> MakeImageFromPicture(flutter::DisplayList* displayList,
+sk_sp<DlImage> MakeImageFromPicture(flutter::DisplayList* displayList,
                                     int32_t width,
                                     int32_t height) {
   SkPictureRecorder recorder;
@@ -122,33 +122,33 @@ sk_sp<SkImage> MakeImageFromPicture(flutter::DisplayList* displayList,
   DlSkCanvasDispatcher dispatcher(canvas);
   dispatcher.drawDisplayList(sk_ref_sp(displayList), 1.0f);
 
-  return DeferredFromPicture(recorder.finishRecordingAsPicture(),
-                             {width, height}, nullptr, nullptr, BitDepth::kU8,
-                             SkColorSpace::MakeSRGB());
+  return DlImage::Make(DeferredFromPicture(
+      recorder.finishRecordingAsPicture(), {width, height}, nullptr, nullptr,
+      BitDepth::kU8, SkColorSpace::MakeSRGB()));
 }
 
-sk_sp<SkImage> MakeImageFromTexture(SkwasmObject textureSource,
+sk_sp<DlImage> MakeImageFromTexture(SkwasmObject textureSource,
                                     int width,
                                     int height,
                                     Skwasm::Surface* surface) {
-  return SkImages::DeferredFromTextureGenerator(
+  return DlImage::Make(SkImages::DeferredFromTextureGenerator(
       std::unique_ptr<TextureSourceImageGenerator>(
           new TextureSourceImageGenerator(
               SkImageInfo::Make(width, height,
                                 SkColorType::kRGBA_8888_SkColorType,
                                 SkAlphaType::kPremul_SkAlphaType),
-              textureSource, surface)));
+              textureSource, surface))));
 }
 
-sk_sp<SkImage> MakeImageFromPixels(SkData* data,
+sk_sp<DlImage> MakeImageFromPixels(SkData* data,
                                    int width,
                                    int height,
                                    PixelFormat pixelFormat,
                                    size_t rowByteCount) {
-  return SkImages::RasterFromData(
+  return DlImage::Make(SkImages::RasterFromData(
       SkImageInfo::Make(width, height, colorTypeForPixelFormat(pixelFormat),
                         alphaTypeForPixelFormat(pixelFormat),
                         SkColorSpace::MakeSRGB()),
-      sk_ref_sp(data), rowByteCount);
+      sk_ref_sp(data), rowByteCount));
 }
 }  // namespace Skwasm

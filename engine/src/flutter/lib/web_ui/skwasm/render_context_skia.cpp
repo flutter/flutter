@@ -46,7 +46,8 @@ class SkiaRenderContext : public RenderContext {
     _grContext->flush(_surface.get());
   }
 
-  virtual void renderImage(SkImage* image, ImageByteFormat format) override {
+  virtual void renderImage(flutter::DlImage* image,
+                           ImageByteFormat format) override {
     auto canvas = _surface->getCanvas();
     canvas->drawColor(SK_ColorTRANSPARENT, SkBlendMode::kSrc);
 
@@ -55,7 +56,7 @@ class SkiaRenderContext : public RenderContext {
     // we are drawing it to get the pixels in the desired order.
     canvas->save();
     canvas->scale(1, -1);
-    canvas->drawImage(image, 0, -_height);
+    canvas->drawImage(image->skia_image(), 0, -_height);
     canvas->restore();
     _grContext->flush(_surface.get());
   }

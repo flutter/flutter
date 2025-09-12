@@ -7,6 +7,7 @@
 #include "skwasm_support.h"
 
 #include "flutter/display_list/display_list.h"
+#include "flutter/display_list/image/dl_image.h"
 
 #include <emscripten/wasm_worker.h>
 #include <algorithm>
@@ -57,7 +58,7 @@ uint32_t Surface::renderPictures(DisplayList** pictures,
 }
 
 // Main thread only
-uint32_t Surface::rasterizeImage(SkImage* image, ImageByteFormat format) {
+uint32_t Surface::rasterizeImage(DlImage* image, ImageByteFormat format) {
   assert(emscripten_is_main_browser_thread());
   uint32_t callbackId = ++_currentCallbackId;
   image->ref();
@@ -150,7 +151,7 @@ void Surface::renderPicturesOnWorker(sk_sp<DisplayList>* pictures,
 }
 
 // Worker thread only
-void Surface::rasterizeImageOnWorker(SkImage* image,
+void Surface::rasterizeImageOnWorker(DlImage* image,
                                      ImageByteFormat format,
                                      uint32_t callbackId) {
   if (!_isInitialized) {
@@ -263,13 +264,13 @@ SKWASM_EXPORT void surface_renderPicturesOnWorker(Surface* surface,
 }
 
 SKWASM_EXPORT uint32_t surface_rasterizeImage(Surface* surface,
-                                              SkImage* image,
+                                              DlImage* image,
                                               ImageByteFormat format) {
   return surface->rasterizeImage(image, format);
 }
 
 SKWASM_EXPORT void surface_rasterizeImageOnWorker(Surface* surface,
-                                                  SkImage* image,
+                                                  DlImage* image,
                                                   ImageByteFormat format,
                                                   uint32_t callbackId) {
   surface->rasterizeImageOnWorker(image, format, callbackId);

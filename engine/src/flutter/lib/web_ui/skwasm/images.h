@@ -7,8 +7,7 @@
 
 #include "skwasm_support.h"
 
-#include "flutter/display_list/display_list.h"
-#include "third_party/skia/include/core/SkImage.h"
+#include "flutter/display_list/image/dl_image.h"
 
 namespace Skwasm {
 
@@ -18,18 +17,19 @@ enum class PixelFormat {
   rgbaFloat32,
 };
 
-extern sk_sp<SkImage> MakeImageFromPicture(flutter::DisplayList* displayList,
-                                           int32_t width,
-                                           int32_t height);
-extern sk_sp<SkImage> MakeImageFromTexture(SkwasmObject textureSource,
-                                           int width,
-                                           int height,
-                                           Skwasm::Surface* surface);
-extern sk_sp<SkImage> MakeImageFromPixels(SkData* data,
-                                          int width,
-                                          int height,
-                                          PixelFormat pixelFormat,
-                                          size_t rowByteCount);
+extern sk_sp<flutter::DlImage> MakeImageFromPicture(
+    flutter::DisplayList* displayList,
+    int32_t width,
+    int32_t height);
+extern sk_sp<flutter::DlImage> MakeImageFromTexture(SkwasmObject textureSource,
+                                                    int width,
+                                                    int height,
+                                                    Skwasm::Surface* surface);
+extern sk_sp<flutter::DlImage> MakeImageFromPixels(SkData* data,
+                                                   int width,
+                                                   int height,
+                                                   PixelFormat pixelFormat,
+                                                   size_t rowByteCount);
 
 }  // namespace Skwasm
 

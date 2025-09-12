@@ -6,11 +6,10 @@
 #define FLUTTER_LIB_WEB_UI_SKWASM_RENDER_CONTEXT_H_
 
 #include "flutter/display_list/display_list.h"
+#include "flutter/display_list/image/dl_image.h"
 #include "helpers.h"
 
 #include <memory>
-
-class SkImage;
 
 namespace Skwasm {
 class RenderContext {
@@ -19,7 +18,7 @@ class RenderContext {
 
   virtual ~RenderContext() = default;
   virtual void renderPicture(const sk_sp<flutter::DisplayList> displayList) = 0;
-  virtual void renderImage(SkImage* image, ImageByteFormat format) = 0;
+  virtual void renderImage(flutter::DlImage* image, ImageByteFormat format) = 0;
   virtual void resize(int width, int height);
 };
 }  // namespace Skwasm

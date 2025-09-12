@@ -4,6 +4,8 @@
 
 #include "images.h"
 
+using namespace flutter;
+
 namespace {
 // TODO(jacksongardner): Remove this. This just hacks around weird LTO problems
 // with emscripten.
@@ -18,20 +20,20 @@ void blurp() {
 
 namespace Skwasm {
 
-sk_sp<SkImage> MakeImageFromPicture(flutter::DisplayList* displayList,
+sk_sp<DlImage> MakeImageFromPicture(flutter::DisplayList* displayList,
                                     int32_t width,
                                     int32_t height) {
   return nullptr;
 }
 
-sk_sp<SkImage> MakeImageFromTexture(SkwasmObject textureSource,
+sk_sp<DlImage> MakeImageFromTexture(SkwasmObject textureSource,
                                     int width,
                                     int height,
                                     Skwasm::Surface* surface) {
   return nullptr;
 }
 
-sk_sp<SkImage> MakeImageFromPixels(SkData* data,
+sk_sp<DlImage> MakeImageFromPixels(SkData* data,
                                    int width,
                                    int height,
                                    PixelFormat pixelFormat,

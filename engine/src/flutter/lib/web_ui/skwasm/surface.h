@@ -48,7 +48,7 @@ class Surface {
                           int width,
                           int height,
                           int count);
-  uint32_t rasterizeImage(SkImage* image, ImageByteFormat format);
+  uint32_t rasterizeImage(flutter::DlImage* image, ImageByteFormat format);
   void setCallbackHandler(CallbackHandler* callbackHandler);
   void onRenderComplete(uint32_t callbackId, SkwasmObject imageBitmap);
   void onRasterizeComplete(uint32_t callbackId, SkData* data);
@@ -64,7 +64,7 @@ class Surface {
                               int pictureCount,
                               uint32_t callbackId,
                               double rasterStart);
-  void rasterizeImageOnWorker(SkImage* image,
+  void rasterizeImageOnWorker(flutter::DlImage* image,
                               ImageByteFormat format,
                               uint32_t callbackId);
 

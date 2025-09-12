@@ -56,12 +56,12 @@ class ImpellerRenderContext : public RenderContext {
     );
     auto contentContext = std::make_unique<impeller::ContentContext>(
         _context, _typographerContext, nullptr);
-    RenderToTarget(*contentContext, surface->GetRenderTarget(),
-                   displayList, impeller::Rect::MakeLTRB(0, 0, _width, _height),
-                   true);
+    RenderToTarget(*contentContext, surface->GetRenderTarget(), displayList,
+                   impeller::Rect::MakeLTRB(0, 0, _width, _height), true);
   }
 
-  virtual void renderImage(SkImage* image, ImageByteFormat format) override {}
+  virtual void renderImage(flutter::DlImage* image,
+                           ImageByteFormat format) override {}
 
   virtual void resize(int width, int height) override {
     _width = width;
