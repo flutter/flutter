@@ -1197,7 +1197,7 @@ class ValueIndicatorMultilineConfig with Diagnosticable {
   /// Maximum number of lines to display in the value indicator.
   ///
   /// If null, there is no limit on the number of lines.
-  /// If specified, text beyond this limit will be truncated.
+  /// If specified, text beyond this limit will be ellipsized.
   final int? maxLines;
 
   /// Additional padding for rounded corners in multiline mode.
