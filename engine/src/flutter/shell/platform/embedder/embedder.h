@@ -1335,6 +1335,14 @@ typedef struct {
   double rotation;
   /// The identifier of the view that received the pointer event.
   FlutterViewId view_id;
+  /// The pressure of the current pointer, where 0.0 is the default value.
+  double pressure;
+  /// The minimum bound of the pressure of the current pointer, where 0.0 is the
+  /// default minimum bound.
+  double pressure_min;
+  /// The maximum bound of the pressure of the current pointer, where 0.0 is the
+  /// default maximum bound.
+  double pressure_max;
 } FlutterPointerEvent;
 
 typedef enum {
