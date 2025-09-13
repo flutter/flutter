@@ -9278,4 +9278,39 @@ void main() {
       (focus: false, index: 2), // Third tab loses focus
     ]);
   });
+
+  // In tabs_test.dart, add:
+
+  testWidgets('TabBar unselected indicator', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultTabController(
+          length: 3,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: const TabBar(
+                tabs: <Tab>[
+                  Tab(text: 'Tab 1'),
+                  Tab(text: 'Tab 2'),
+                  Tab(text: 'Tab 3'),
+                ],
+                unselectedIndicatorColor: Colors.grey,
+                unselectedIndicatorWeight: 1.0,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Verify the unselected indicators are painted
+    final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    expect(
+      tabBarBox,
+      paints
+        ..line()
+        ..line()
+        ..line(),
+    ); // 3 lines for indicators
+  });
 }

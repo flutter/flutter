@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show lerpDouble;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -39,6 +41,9 @@ class TabBarTheme extends InheritedTheme with Diagnosticable {
     TabAlignment? tabAlignment,
     TextScaler? textScaler,
     TabIndicatorAnimation? indicatorAnimation,
+    Decoration? unselectedIndicator,
+    Color? unselectedIndicatorColor,
+    double? unselectedIndicatorWeight,
     TabBarThemeData? data,
     Widget? child,
   }) : assert(
@@ -58,7 +63,10 @@ class TabBarTheme extends InheritedTheme with Diagnosticable {
                      mouseCursor ??
                      tabAlignment ??
                      textScaler ??
-                     indicatorAnimation) ==
+                     indicatorAnimation ??
+                     unselectedIndicator ??
+                     unselectedIndicatorColor ??
+                     unselectedIndicatorWeight) ==
                  null,
        ),
        _indicator = indicator,
@@ -77,6 +85,9 @@ class TabBarTheme extends InheritedTheme with Diagnosticable {
        _tabAlignment = tabAlignment,
        _textScaler = textScaler,
        _indicatorAnimation = indicatorAnimation,
+       _unselectedIndicator = unselectedIndicator,
+       _unselectedIndicatorColor = unselectedIndicatorColor,
+       _unselectedIndicatorWeight = unselectedIndicatorWeight,
        _data = data,
        super(child: child ?? const SizedBox());
 
@@ -97,6 +108,9 @@ class TabBarTheme extends InheritedTheme with Diagnosticable {
   final TabAlignment? _tabAlignment;
   final TextScaler? _textScaler;
   final TabIndicatorAnimation? _indicatorAnimation;
+  final Decoration? _unselectedIndicator;
+  final Color? _unselectedIndicatorColor;
+  final double? _unselectedIndicatorWeight;
 
   /// Overrides the default value for [TabBar.indicator].
   ///
@@ -200,6 +214,27 @@ class TabBarTheme extends InheritedTheme with Diagnosticable {
   TabIndicatorAnimation? get indicatorAnimation =>
       _data != null ? _data.indicatorAnimation : _indicatorAnimation;
 
+  /// Overrides the default value for [TabBar.unselectedIndicator].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [TabBarThemeData.unselectedIndicator] property in [data] instead.
+  Decoration? get unselectedIndicator =>
+      _data != null ? _data.unselectedIndicator : _unselectedIndicator;
+
+  /// Overrides the default value for [TabBar.unselectedIndicatorColor].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [TabBarThemeData.unselectedIndicatorColor] property in [data] instead.
+  Color? get unselectedIndicatorColor =>
+      _data != null ? _data.unselectedIndicatorColor : _unselectedIndicatorColor;
+
+  /// Overrides the default value for [TabBar.unselectedIndicatorWeight].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [TabBarThemeData.unselectedIndicatorWeight] property in [data] instead.
+  double? get unselectedIndicatorWeight =>
+      _data != null ? _data.unselectedIndicatorWeight : _unselectedIndicatorWeight;
+
   /// The properties used for all descendant [TabBar] widgets.
   TabBarThemeData get data =>
       _data ??
@@ -220,6 +255,9 @@ class TabBarTheme extends InheritedTheme with Diagnosticable {
         tabAlignment: _tabAlignment,
         textScaler: _textScaler,
         indicatorAnimation: _indicatorAnimation,
+        unselectedIndicator: _unselectedIndicator,
+        unselectedIndicatorColor: _unselectedIndicatorColor,
+        unselectedIndicatorWeight: _unselectedIndicatorWeight,
       );
 
   /// Creates a copy of this object but with the given fields replaced with the
@@ -244,6 +282,9 @@ class TabBarTheme extends InheritedTheme with Diagnosticable {
     TabAlignment? tabAlignment,
     TextScaler? textScaler,
     TabIndicatorAnimation? indicatorAnimation,
+    Decoration? unselectedIndicator,
+    Color? unselectedIndicatorColor,
+    double? unselectedIndicatorWeight,
   }) {
     return TabBarTheme(
       indicator: indicator ?? this.indicator,
@@ -262,6 +303,9 @@ class TabBarTheme extends InheritedTheme with Diagnosticable {
       tabAlignment: tabAlignment ?? this.tabAlignment,
       textScaler: textScaler ?? this.textScaler,
       indicatorAnimation: indicatorAnimation ?? this.indicatorAnimation,
+      unselectedIndicator: unselectedIndicator ?? this.unselectedIndicator,
+      unselectedIndicatorColor: unselectedIndicatorColor ?? this.unselectedIndicatorColor,
+      unselectedIndicatorWeight: unselectedIndicatorWeight ?? this.unselectedIndicatorWeight,
     );
   }
 
@@ -298,6 +342,17 @@ class TabBarTheme extends InheritedTheme with Diagnosticable {
       tabAlignment: t < 0.5 ? a.tabAlignment : b.tabAlignment,
       textScaler: t < 0.5 ? a.textScaler : b.textScaler,
       indicatorAnimation: t < 0.5 ? a.indicatorAnimation : b.indicatorAnimation,
+      unselectedIndicator: Decoration.lerp(a.unselectedIndicator, b.unselectedIndicator, t),
+      unselectedIndicatorColor: Color.lerp(
+        a.unselectedIndicatorColor,
+        b.unselectedIndicatorColor,
+        t,
+      ),
+      unselectedIndicatorWeight: lerpDouble(
+        a.unselectedIndicatorWeight,
+        b.unselectedIndicatorWeight,
+        t,
+      ),
     );
   }
 
@@ -349,6 +404,9 @@ class TabBarThemeData with Diagnosticable {
     this.textScaler,
     this.indicatorAnimation,
     this.splashBorderRadius,
+    this.unselectedIndicator,
+    this.unselectedIndicatorColor,
+    this.unselectedIndicatorWeight,
   });
 
   /// Overrides the default value for [TabBar.indicator].
@@ -414,6 +472,15 @@ class TabBarThemeData with Diagnosticable {
   /// Defines the clipping radius of splashes that extend outside the bounds of the tab.
   final BorderRadius? splashBorderRadius;
 
+  /// Overrides the default value for [TabBar.unselectedIndicator].
+  final Decoration? unselectedIndicator;
+
+  /// Overrides the default value for [TabBar.unselectedIndicatorColor].
+  final Color? unselectedIndicatorColor;
+
+  /// Overrides the default value for [TabBar.unselectedIndicatorWeight].
+  final double? unselectedIndicatorWeight;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   TabBarThemeData copyWith({
@@ -434,6 +501,9 @@ class TabBarThemeData with Diagnosticable {
     TextScaler? textScaler,
     TabIndicatorAnimation? indicatorAnimation,
     BorderRadius? splashBorderRadius,
+    Decoration? unselectedIndicator,
+    Color? unselectedIndicatorColor,
+    double? unselectedIndicatorWeight,
   }) {
     return TabBarThemeData(
       indicator: indicator ?? this.indicator,
@@ -453,6 +523,9 @@ class TabBarThemeData with Diagnosticable {
       textScaler: textScaler ?? this.textScaler,
       indicatorAnimation: indicatorAnimation ?? this.indicatorAnimation,
       splashBorderRadius: splashBorderRadius ?? this.splashBorderRadius,
+      unselectedIndicator: unselectedIndicator ?? this.unselectedIndicator,
+      unselectedIndicatorColor: unselectedIndicatorColor ?? this.unselectedIndicatorColor,
+      unselectedIndicatorWeight: unselectedIndicatorWeight ?? this.unselectedIndicatorWeight,
     );
   }
 
@@ -480,7 +553,18 @@ class TabBarThemeData with Diagnosticable {
       tabAlignment: t < 0.5 ? a.tabAlignment : b.tabAlignment,
       textScaler: t < 0.5 ? a.textScaler : b.textScaler,
       indicatorAnimation: t < 0.5 ? a.indicatorAnimation : b.indicatorAnimation,
-      splashBorderRadius: BorderRadius.lerp(a.splashBorderRadius, a.splashBorderRadius, t),
+      splashBorderRadius: BorderRadius.lerp(a.splashBorderRadius, b.splashBorderRadius, t),
+      unselectedIndicator: Decoration.lerp(a.unselectedIndicator, b.unselectedIndicator, t),
+      unselectedIndicatorColor: Color.lerp(
+        a.unselectedIndicatorColor,
+        b.unselectedIndicatorColor,
+        t,
+      ),
+      unselectedIndicatorWeight: lerpDouble(
+        a.unselectedIndicatorWeight,
+        b.unselectedIndicatorWeight,
+        t,
+      ),
     );
   }
 
@@ -503,6 +587,9 @@ class TabBarThemeData with Diagnosticable {
     textScaler,
     indicatorAnimation,
     splashBorderRadius,
+    unselectedIndicator,
+    unselectedIndicatorColor,
+    unselectedIndicatorWeight,
   );
 
   @override
@@ -530,7 +617,10 @@ class TabBarThemeData with Diagnosticable {
         other.tabAlignment == tabAlignment &&
         other.textScaler == textScaler &&
         other.indicatorAnimation == indicatorAnimation &&
-        other.splashBorderRadius == splashBorderRadius;
+        other.splashBorderRadius == splashBorderRadius &&
+        other.unselectedIndicator == unselectedIndicator &&
+        other.unselectedIndicatorColor == unselectedIndicatorColor &&
+        other.unselectedIndicatorWeight == unselectedIndicatorWeight;
   }
 
   @override
@@ -598,6 +688,27 @@ class TabBarThemeData with Diagnosticable {
       DiagnosticsProperty<BorderRadius?>(
         'splashBorderRadius',
         splashBorderRadius,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<Decoration?>(
+        'unselectedIndicator',
+        unselectedIndicator,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<Color?>(
+        'unselectedIndicatorColor',
+        unselectedIndicatorColor,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<double?>(
+        'unselectedIndicatorWeight',
+        unselectedIndicatorWeight,
         defaultValue: null,
       ),
     );

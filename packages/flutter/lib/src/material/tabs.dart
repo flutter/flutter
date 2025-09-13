@@ -1677,9 +1677,12 @@ class _TabBarState extends State<TabBar> {
                 tabBarTheme.indicatorAnimation ??
                 defaultTabIndicatorAnimation,
             textDirection: Directionality.of(context),
-            unselectedIndicator: widget.unselectedIndicator,
-            unselectedIndicatorColor: widget.unselectedIndicatorColor,
-            unselectedIndicatorWeight: widget.unselectedIndicatorWeight,
+            // Updated to check theme values for unselected indicator properties
+            unselectedIndicator: widget.unselectedIndicator ?? tabBarTheme.unselectedIndicator,
+            unselectedIndicatorColor:
+                widget.unselectedIndicatorColor ?? tabBarTheme.unselectedIndicatorColor,
+            unselectedIndicatorWeight:
+                widget.unselectedIndicatorWeight ?? tabBarTheme.unselectedIndicatorWeight,
           );
 
     oldPainter?.dispose();
@@ -1732,7 +1735,7 @@ class _TabBarState extends State<TabBar> {
 
   @override
   void dispose() {
-    _indicatorPainter!.dispose();
+    _indicatorPainter?.dispose(); // Changed from ! to ? for null safety
     if (_controllerIsValid) {
       _controller!.animation!.removeListener(_handleTabControllerAnimationTick);
       _controller!.removeListener(_handleTabControllerTick);
