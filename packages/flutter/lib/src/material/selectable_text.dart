@@ -774,7 +774,7 @@ class _SelectableTextState extends State<SelectableText>
         autofocus: widget.autofocus,
         forceLine: false,
         minLines: widget.minLines,
-        maxLines: widget.maxLines ?? defaultTextStyle.maxLines,
+        maxLines: (widget.maxLines ?? defaultTextStyle.maxLines)?.toDouble(),
         selectionColor: widget.selectionColor ?? selectionColor,
         selectionControls: widget.selectionEnabled ? textSelectionControls : null,
         onSelectionChanged: _handleSelectionChanged,
