@@ -3445,6 +3445,7 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
         Expanded(
           child: TextField(
             controller: _startController,
+            inputFormatters: [DateTextInputFormatter()],
             decoration: InputDecoration(
               border: inputBorder,
               filled: inputTheme.filled,
@@ -3462,6 +3463,7 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
         Expanded(
           child: TextField(
             controller: _endController,
+            inputFormatters: [DateTextInputFormatter()],
             decoration: InputDecoration(
               border: inputBorder,
               filled: inputTheme.filled,
@@ -3475,6 +3477,42 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
           ),
         ),
       ],
+    );
+  }
+}
+ // A text input formatter that formats the input as a date in MM/DD/YYYY format
+class DateTextInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    // Remove all slashes
+    var text = newValue.text.replaceAll('/', '');
+
+    // Limit to 8 digits (MMDDYYYY)
+    if (text.length > 8) {
+      text = text.substring(0, 8);
+    }
+
+    final buffer = StringBuffer();
+    for (int i = 0; i < text.length; i++) {
+      buffer.write(text[i]);
+      // Insert '/' after MM and DD
+      if ((i == 1 || i == 3) && i != text.length - 1) {
+        buffer.write('/');
+      }
+    }
+
+    // Limit the formatted text to 10 characters (MM/DD/YYYY)
+    final formatted = buffer.toString().substring(
+      0,
+      buffer.length.clamp(0, 10),
+    );
+
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
     );
   }
 }
