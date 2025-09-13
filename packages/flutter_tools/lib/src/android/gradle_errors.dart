@@ -10,7 +10,7 @@ import '../base/process.dart';
 import '../base/terminal.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
-import 'gradle_utils.dart';
+import 'gradle_utils.dart' as utils;
 
 typedef GradleErrorTest = bool Function(String);
 
@@ -402,18 +402,18 @@ final outdatedGradleHandler = GradleHandledError(
     final File gradleFile = project.android.hostAppGradleFile;
     final File gradlePropertiesFile = project.directory
         .childDirectory('android')
-        .childDirectory(gradleDirectoryName)
-        .childDirectory(gradleWrapperDirectoryName)
-        .childFile(gradleWrapperPropertiesFilename);
+        .childDirectory(utils.gradleDirectoryName)
+        .childDirectory(utils.gradleWrapperDirectoryName)
+        .childFile(utils.gradleWrapperPropertiesFilename);
     globals.printBox(
       '${globals.logger.terminal.warningMark} Your project needs to upgrade Gradle and the Android Gradle plugin.\n\n'
       'To fix this issue, replace the following content:\n'
       '${gradleFile.path}:\n'
       '    ${globals.terminal.color("- classpath 'com.android.tools.build:gradle:<current-version>'", TerminalColor.red)}\n'
-      '    ${globals.terminal.color("+ classpath 'com.android.tools.build:gradle:$templateAndroidGradlePluginVersion'", TerminalColor.green)}\n'
+      '    ${globals.terminal.color("+ classpath 'com.android.tools.build:gradle:${utils.templateAndroidGradlePluginVersion}'", TerminalColor.green)}\n'
       '${gradlePropertiesFile.path}:\n'
       '    ${globals.terminal.color('- https://services.gradle.org/distributions/gradle-<current-version>-all.zip', TerminalColor.red)}\n'
-      '    ${globals.terminal.color('+ https://services.gradle.org/distributions/gradle-$templateDefaultGradleVersion-all.zip', TerminalColor.green)}',
+      '    ${globals.terminal.color('+ https://services.gradle.org/distributions/gradle-${utils.templateDefaultGradleVersion}-all.zip', TerminalColor.green)}',
       title: _boxTitle,
     );
     return GradleBuildStatus.exit;
@@ -509,9 +509,9 @@ final incompatibleJavaAndGradleVersionsHandler = GradleHandledError(
       ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
         final File gradlePropertiesFile = project.directory
             .childDirectory('android')
-            .childDirectory(gradleDirectoryName)
-            .childDirectory(gradleWrapperDirectoryName)
-            .childFile(gradleWrapperPropertiesFilename);
+            .childDirectory(utils.gradleDirectoryName)
+            .childDirectory(utils.gradleWrapperDirectoryName)
+            .childFile(utils.gradleWrapperPropertiesFilename);
         globals.printBox(
           "${globals.logger.terminal.warningMark} Your project's Gradle version "
           'is incompatible with the Java version that Flutter is using for Gradle.\n\n'
