@@ -140,6 +140,20 @@ Future<XcodeBuildResult> buildXcodeProject({
   XcodeBuildAction buildAction = XcodeBuildAction.build,
   bool disablePortPublication = false,
 }) async {
+  final String? homePath = globals.platform.environment['HOME'];
+  Directory? derivedData;
+  if (homePath != null) {
+    derivedData = globals.fs.directory(
+      globals.fs.path.join(homePath, 'Library', 'Developer', 'Xcode', 'DerivedData'),
+    );
+  }
+  print("BEFORE BUILD DerivedData");
+  if (derivedData != null) {
+    for (final FileSystemEntity file in derivedData.listSync()) {
+      print(file.path);
+    }
+  }
+
   if (!upgradePbxProjWithFlutterAssets(app.project, globals.logger)) {
     return XcodeBuildResult(success: false);
   }
@@ -496,6 +510,13 @@ Future<XcodeBuildResult> buildXcodeProject({
     initialBuildStatus = globals.logger.startProgress('Running Xcode build...');
 
     buildResult = await _runBuildWithRetries(buildCommands, app, resultBundleDirectory);
+
+    print("AFTER BUILD DerivedData");
+    if (derivedData != null) {
+      for (final FileSystemEntity file in derivedData.listSync()) {
+        print(file.path);
+      }
+    }
 
     // Notifies listener that no more output is coming.
     scriptOutputPipeFile?.writeAsStringSync('all done');
