@@ -6,6 +6,7 @@ import 'package:code_assets/code_assets.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -94,6 +95,58 @@ void main() {
 
       final CCompilerConfig result = await cCompilerConfigLinux();
       expect(result.compiler, Uri.file('/some/path/to/clang'));
+    },
+  );
+
+  const kDependentExecutables = <String>['ld.lld', 'llvm-ar', 'clang'];
+  testUsingContext(
+    'cCompilerConfigLinux when executables are not installed alongside clang++',
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <Pattern>['which', 'clang++'], stdout: '/path/to/clang++'),
+        for (final String executableName in kDependentExecutables) ...[
+          FakeCommand(
+            command: <Pattern>['which', executableName],
+            stdout: '/different/path/to/$executableName',
+          ),
+        ],
+      ]),
+    },
+    () async {
+      if (!const LocalPlatform().isLinux) {
+        return;
+      }
+
+      await fileSystem.file('/path/to/clang++').create(recursive: true);
+      for (final executableName in kDependentExecutables) {
+        await fileSystem.file('/different/path/to/$executableName').create(recursive: true);
+      }
+
+      final CCompilerConfig result = await cCompilerConfigLinux();
+      expect(result.linker, Uri.file('/different/path/to/ld.lld'));
+      expect(result.archiver, Uri.file('/different/path/to/llvm-ar'));
+      expect(result.compiler, Uri.file('/different/path/to/clang'));
+    },
+  );
+
+  const kAllExecutables = <String>['clang++', 'ld.lld', 'llvm-ar', 'clang'];
+  testUsingContext(
+    'cCompilerConfigLinux when no executables are found on PATH',
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        for (final String executableName in kAllExecutables) ...[
+          FakeCommand(command: <Pattern>['which', executableName], exitCode: 1),
+        ],
+      ]),
+    },
+    () async {
+      if (!const LocalPlatform().isLinux) {
+        return;
+      }
+
+      expect(cCompilerConfigLinux(), throwsA(isA<ToolExit>()));
     },
   );
 }
