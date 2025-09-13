@@ -318,6 +318,8 @@ class _TableElement extends RenderObjectElement {
     // in [_updateRenderObjectChildren].
     if (!_doingMountOrUpdate) {
       renderObject.setChild(slot.column, slot.row, child);
+    } else {
+      renderObject.shelterChild(child);
     }
   }
 

@@ -394,6 +394,10 @@ class RenderTable extends RenderBox {
        _textBaseline = textBaseline,
        _defaultVerticalAlignment = defaultVerticalAlignment,
        _configuration = configuration {
+    assert(() {
+      _debugShelteredChildren = <RenderBox>[];
+      return true;
+    }());
     _children = <RenderBox?>[]..length = _columns * _rows;
     this.rowDecorations = rowDecorations; // must use setter to initialize box painters array
     children?.forEach(addRow);
@@ -843,7 +847,18 @@ class RenderTable extends RenderBox {
         if (cells[xyNew] != null &&
             (x >= _columns || y >= _rows || _children[xyOld] != cells[xyNew])) {
           if (!lostChildren.remove(cells[xyNew])) {
-            adoptChild(cells[xyNew]!);
+            assert(() {
+              if (!_debugShelteredChildren.remove(cells[xyNew])) {
+                throw FlutterError.fromParts(<DiagnosticsNode>[
+                  ErrorSummary('The newly added child did not call shelterChild.'),
+                  ErrorHint(
+                    'If you are not writing your own RenderTable subclass, then this is not '
+                    'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
+                  ),
+                ]);
+              }
+              return true;
+            }());
           }
         }
       }
@@ -914,6 +929,24 @@ class RenderTable extends RenderBox {
     if (value != null) {
       adoptChild(value);
     }
+  }
+
+  late final List<RenderBox> _debugShelteredChildren;
+
+  /// Before using [setFlatChildren], you need to shelter the new child with this method
+  /// to attach it to the tree. Allowing children that are not attached to the tree to
+  /// participate in building is dangerous.
+  ///
+  /// See this issue for reference: https://github.com/flutter/flutter/issues/174133.
+  void shelterChild(RenderBox child) {
+    assert(child != this);
+    assert(!_children.contains(child));
+    assert(!_debugShelteredChildren.contains(child));
+    assert(() {
+      _debugShelteredChildren.add(child);
+      return true;
+    }());
+    adoptChild(child);
   }
 
   @override
@@ -1308,6 +1341,7 @@ class RenderTable extends RenderBox {
 
   @override
   void performLayout() {
+    assert(_debugShelteredChildren.isEmpty);
     final BoxConstraints constraints = this.constraints;
     final int rows = this.rows;
     final int columns = this.columns;
@@ -1454,6 +1488,7 @@ class RenderTable extends RenderBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    assert(_debugShelteredChildren.isEmpty);
     assert(_children.length == rows * columns);
     if (rows * columns == 0) {
       if (border != null) {
