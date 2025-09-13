@@ -116,6 +116,66 @@ void main() {
       );
       expect(actual, 0);
     });
+
+    test('should handle NaN scroll offset gracefully', () {
+      final int actual = testGetMaxChildIndexForScrollOffset(double.nan, genericItemExtent);
+      expect(actual, 0);
+    });
+
+    test('should handle infinite scroll offset gracefully', () {
+      final int actual = testGetMaxChildIndexForScrollOffset(double.infinity, genericItemExtent);
+      expect(actual, 0);
+    });
+
+    test('should handle negative infinite scroll offset gracefully', () {
+      final int actual = testGetMaxChildIndexForScrollOffset(
+        double.negativeInfinity,
+        genericItemExtent,
+      );
+      expect(actual, 0);
+    });
+
+    test('should handle NaN item extent gracefully', () {
+      final int actual = testGetMaxChildIndexForScrollOffset(genericItemExtent, double.nan);
+      expect(actual, 0);
+    });
+
+    test('should handle infinite item extent gracefully', () {
+      final int actual = testGetMaxChildIndexForScrollOffset(genericItemExtent, double.infinity);
+      expect(actual, 0);
+    });
+  });
+
+  group('getMinChildIndexForScrollOffset', () {
+    const double genericItemExtent = 600.0;
+
+    test('should handle NaN scroll offset gracefully', () {
+      final int actual = testGetMinChildIndexForScrollOffset(double.nan, genericItemExtent);
+      expect(actual, 0);
+    });
+
+    test('should handle infinite scroll offset gracefully', () {
+      final int actual = testGetMinChildIndexForScrollOffset(double.infinity, genericItemExtent);
+      expect(actual, 0);
+    });
+
+    test('should handle negative infinite scroll offset gracefully', () {
+      final int actual = testGetMinChildIndexForScrollOffset(
+        double.negativeInfinity,
+        genericItemExtent,
+      );
+      expect(actual, 0);
+    });
+
+    test('should handle NaN item extent gracefully', () {
+      final int actual = testGetMinChildIndexForScrollOffset(genericItemExtent, double.nan);
+      expect(actual, 0);
+    });
+
+    test('should handle infinite item extent gracefully', () {
+      final int actual = testGetMinChildIndexForScrollOffset(genericItemExtent, double.infinity);
+      expect(actual, 0);
+    });
   });
 
   test('Implements paintsChild correctly', () {
@@ -372,6 +432,13 @@ int testGetMaxChildIndexForScrollOffset(double scrollOffset, double itemExtent) 
   return renderSliver.getMaxChildIndexForScrollOffset(scrollOffset, itemExtent);
 }
 
+int testGetMinChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
+  final TestRenderSliverFixedExtentBoxAdaptor renderSliver = TestRenderSliverFixedExtentBoxAdaptor(
+    itemExtent: itemExtent,
+  );
+  return renderSliver.getMinChildIndexForScrollOffset(scrollOffset, itemExtent);
+}
+
 class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   TestRenderSliverBoxChildManager({required this.children});
 
@@ -449,6 +516,11 @@ class TestRenderSliverFixedExtentBoxAdaptor extends RenderSliverFixedExtentBoxAd
   @override
   int getMaxChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
     return super.getMaxChildIndexForScrollOffset(scrollOffset, itemExtent);
+  }
+
+  @override
+  int getMinChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
+    return super.getMinChildIndexForScrollOffset(scrollOffset, itemExtent);
   }
 
   @override
