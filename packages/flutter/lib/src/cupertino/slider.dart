@@ -84,6 +84,7 @@ class CupertinoSlider extends StatefulWidget {
     this.min = 0.0,
     this.max = 1.0,
     this.divisions,
+    this.integralDivisions = false,
     this.activeColor,
     this.thumbColor = CupertinoColors.white,
   }) : assert(value >= min && value <= max),
@@ -208,7 +209,23 @@ class CupertinoSlider extends StatefulWidget {
   /// The number of discrete divisions.
   ///
   /// If null, the slider is continuous.
+  ///
+  /// See also:
+  ///
+  ///   * [integralDivisions], which controls whether to automatically align
+  ///     all division points to integer values.
   final int? divisions;
+
+  /// Whether to automatically align all division points to integer values.
+  ///
+  /// When [divisions] is non-null, setting this to true ensures that each
+  /// division point corresponds exactly to an integer value. This is useful
+  /// when the divisions are intended to correspond to whole numbers, as
+  /// standard floating-point math can sometimes produce imprecise values (e.g.,
+  /// 4.999... instead of 5.0), leading to unexpected behavior.
+  ///
+  /// This property has no effect if [divisions] is null.
+  final bool integralDivisions;
 
   /// The color to use for the portion of the slider that has been selected.
   ///
@@ -235,7 +252,10 @@ class CupertinoSlider extends StatefulWidget {
 class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderStateMixin {
   void _handleChanged(double value, bool isFastDrag) {
     assert(widget.onChanged != null);
-    final double lerpValue = lerpDouble(widget.min, widget.max, value)!;
+    double lerpValue = lerpDouble(widget.min, widget.max, value)!;
+    if (widget.integralDivisions && widget.divisions != null) {
+      lerpValue = lerpValue.roundToDouble();
+    }
     final bool isAtEdge = lerpValue == widget.max || lerpValue == widget.min;
 
     if (lerpValue != widget.value) {
