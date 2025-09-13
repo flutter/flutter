@@ -461,7 +461,7 @@ mixin WidgetsBinding
       return true;
     }());
     platformMenuDelegate = DefaultPlatformMenuDelegate();
-    _windowingOwner = WindowingOwner.createDefaultOwner();
+    _windowingOwner = createDefaultOwner();
   }
 
   /// The current [WidgetsBinding], if one has been created.
