@@ -203,7 +203,6 @@ class DlPaint {
   }
 
   bool operator==(DlPaint const& other) const;
-  bool operator!=(DlPaint const& other) const { return !(*this == other); }
 
  private:
 #define ASSERT_ENUM_FITS(last_enum, num_bits)                    \
