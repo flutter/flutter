@@ -1453,4 +1453,78 @@ void main() {
       );
     });
   });
+
+  testWidgets('CupertinoContextMenu respects available screen width - Portrait', (
+    WidgetTester tester,
+  ) async {
+    const Size portraitScreenSize = Size(300.0, 350.0);
+    await binding.setSurfaceSize(portraitScreenSize);
+    addTearDown(() => binding.setSurfaceSize(null));
+
+    final Widget child = getChild();
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(size: portraitScreenSize),
+        child: CupertinoApp(
+          home: Center(
+            child: CupertinoContextMenu(
+              actions: <Widget>[
+                CupertinoContextMenuAction(child: const Text('Test'), onPressed: () {}),
+              ],
+              child: child,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byWidget(child), findsOneWidget);
+    final Rect childRect = tester.getRect(find.byWidget(child));
+
+    // Start a press on the child.
+    final TestGesture gesture = await tester.startGesture(childRect.center);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), null);
+  });
+
+  testWidgets('CupertinoContextMenu respects available screen width - Landscape', (
+    WidgetTester tester,
+  ) async {
+    const Size landscapeScreenSize = Size(350.0, 300.0);
+    await binding.setSurfaceSize(landscapeScreenSize);
+    addTearDown(() => binding.setSurfaceSize(null));
+
+    final Widget child = getChild(width: 500);
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(size: landscapeScreenSize),
+        child: CupertinoApp(
+          home: Center(
+            child: CupertinoContextMenu(
+              actions: <Widget>[
+                CupertinoContextMenuAction(child: const Text('Test'), onPressed: () {}),
+              ],
+              child: child,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byWidget(child), findsOneWidget);
+    final Rect childRect = tester.getRect(find.byWidget(child));
+
+    // Start a press on the child.
+    final TestGesture gesture = await tester.startGesture(childRect.center);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), null);
+  });
 }
