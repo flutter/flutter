@@ -27,31 +27,8 @@ class ProgressIndicatorExample extends StatefulWidget {
   State<ProgressIndicatorExample> createState() => _ProgressIndicatorExampleState();
 }
 
-class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
-    with TickerProviderStateMixin {
-  late AnimationController controller;
+class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample> {
   bool determinate = false;
-
-  @override
-  void initState() {
-    controller =
-        AnimationController(
-          /// [AnimationController]s can be created with `vsync: this` because of
-          /// [TickerProviderStateMixin].
-          vsync: this,
-          duration: const Duration(seconds: 2),
-        )..addListener(() {
-          setState(() {});
-        });
-    controller.repeat(reverse: true);
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,9 +40,17 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text('Circular progress indicator', style: Theme.of(context).textTheme.titleLarge),
-            CircularProgressIndicator(
-              value: controller.value,
-              semanticsLabel: 'Circular progress indicator',
+            RepeatingTweenAnimationBuilder<double>(
+              tween: Tween<double>(begin: 0.0, end: 1.0),
+              duration: const Duration(seconds: 2),
+              reverse: true,
+              paused: determinate,
+              builder: (BuildContext context, Animation<double> animation, Widget? child) {
+                return CircularProgressIndicator(
+                  value: determinate ? animation.value : null,
+                  semanticsLabel: 'Circular progress indicator',
+                );
+              },
             ),
             Row(
               children: <Widget>[
@@ -77,13 +62,6 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
                   onChanged: (bool value) {
                     setState(() {
                       determinate = value;
-                      if (determinate) {
-                        controller.stop();
-                      } else {
-                        controller
-                          ..forward(from: controller.value)
-                          ..repeat();
-                      }
                     });
                   },
                 ),
