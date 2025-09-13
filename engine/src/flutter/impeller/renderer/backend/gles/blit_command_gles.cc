@@ -344,10 +344,10 @@ bool BlitCopyTextureToBufferCommandGLES::Encode(
 
   GLuint read_fbo = GL_NONE;
   fml::ScopedCleanupClosure delete_fbos(
-      [&gl, &read_fbo]() { DeleteFBO(gl, read_fbo, GL_READ_FRAMEBUFFER); });
+      [&gl, &read_fbo]() { DeleteFBO(gl, read_fbo, GL_FRAMEBUFFER); });
 
   {
-    auto read = ConfigureFBO(gl, source, GL_READ_FRAMEBUFFER);
+    auto read = ConfigureFBO(gl, source, GL_FRAMEBUFFER);
     if (!read.has_value()) {
       return false;
     }
