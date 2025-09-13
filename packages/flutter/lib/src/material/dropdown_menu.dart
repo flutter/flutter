@@ -912,7 +912,9 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
                     text: entry.label,
                     selection: TextSelection.collapsed(offset: entry.label.length),
                   );
-                  _selectedEntryIndex = i;
+                  _selectedEntryIndex = widget.dropdownMenuEntries.indexWhere(
+                    (DropdownMenuEntry<T> entry) => entry.value == filteredEntries[i].value,
+                  );
                   currentHighlight = widget.enableSearch ? i : null;
                   widget.onSelected?.call(entry.value);
                   _enableFilter = false;
@@ -1005,7 +1007,9 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           text: entry.label,
           selection: TextSelection.collapsed(offset: entry.label.length),
         );
-        _selectedEntryIndex = currentHighlight;
+        _selectedEntryIndex = widget.dropdownMenuEntries.indexWhere(
+          (DropdownMenuEntry<T> entry) => entry.value == filteredEntries[currentHighlight!].value,
+        );
         widget.onSelected?.call(entry.value);
       }
     } else {
