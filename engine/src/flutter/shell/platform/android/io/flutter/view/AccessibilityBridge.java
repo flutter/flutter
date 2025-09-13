@@ -44,6 +44,7 @@ import io.flutter.view.AccessibilityStringBuilder.StringAttributeType;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -2651,7 +2652,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
               attribute.start = start;
               attribute.end = end;
               attribute.type = type;
-              attribute.locale = Charset.forName("UTF-8").decode(args).toString();
+              attribute.locale = StandardCharsets.UTF_8.decode(args).toString();
               result.add(attribute);
               break;
             }
