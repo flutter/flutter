@@ -26,6 +26,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 import androidx.annotation.VisibleForTesting;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.os.LocaleListCompat;
 import com.getkeepsafe.relinker.ReLinker;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterEngine.EngineLifecycleListener;
@@ -801,6 +803,15 @@ public class FlutterJNI {
     if (accessibilityDelegate != null) {
       accessibilityDelegate.updateSemantics(buffer, strings, stringAttributeArgs);
     }
+  }
+
+  /** Invoked by native to set application locale in Android. */
+  @SuppressWarnings("unused")
+  @UiThread
+  private void setApplicationLocale(String locale) {
+    ensureRunningOnMainThread();
+    LocaleListCompat appLocale = LocaleListCompat.forLanguageTags(locale);
+    AppCompatDelegate.setApplicationLocales(appLocale);
   }
 
   /**
