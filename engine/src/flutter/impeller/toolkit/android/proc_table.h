@@ -39,7 +39,6 @@ ASurfaceTransaction* ASurfaceTransaction_fromJava(JNIEnv* env,
 ///
 #define FOR_EACH_ANDROID_PROC(INVOKE)                            \
   INVOKE(AChoreographer_getInstance, 24)                         \
-  INVOKE(AChoreographer_postFrameCallback, 24)                   \
   INVOKE(AChoreographer_postFrameCallback64, 29)                 \
   INVOKE(AHardwareBuffer_acquire, 26)                            \
   INVOKE(AHardwareBuffer_allocate, 26)                           \
