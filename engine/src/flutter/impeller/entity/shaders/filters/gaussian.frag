@@ -19,6 +19,12 @@ uniform KernelSamples {
 }
 kernel_samples;
 
+uniform BlurParams {
+  // LTRB
+  vec4 blur_bounds;
+}
+blur_params;
+
 f16vec4 Sample(f16sampler2D tex, vec2 coords) {
   if (supports_decal == 1.0) {
     return texture(tex, coords);
@@ -32,13 +38,20 @@ out f16vec4 frag_color;
 
 void main() {
   f16vec4 total_color = f16vec4(0.0hf);
+  float16_t total_coeff = 0;
 
   for (int i = 0; i < int(kernel_samples.sample_count); i++) {
+    vec2 coord = v_texture_coords + kernel_samples.sample_data[i].xy;
+    if (any(lessThan(coord, blur_params.blur_bounds.xy))) {
+      continue;
+    }
+    if (any(greaterThan(coord, blur_params.blur_bounds.zw))) {
+      break;
+    }
     float16_t coefficient = float16_t(kernel_samples.sample_data[i].z);
-    total_color += coefficient *
-                   Sample(texture_sampler,
-                          v_texture_coords + kernel_samples.sample_data[i].xy);
+    total_coeff += coefficient;
+    total_color += coefficient * Sample(texture_sampler, coord);
   }
 
-  frag_color = total_color;
+  frag_color = total_coeff == 0 ? total_color : (total_color / total_coeff);
 }

@@ -21,6 +21,7 @@ static_assert(sizeof(GaussianBlurPipeline::FragmentShader::KernelSamples) ==
 
 struct BlurParameters {
   Point blur_uv_offset;
+  Rect blur_uv_bounds;
   Scalar blur_sigma;
   int blur_radius;
   int step_size;
