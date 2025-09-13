@@ -6210,6 +6210,21 @@ void main() {
           );
         }, throwsAssertionError);
       });
+
+      // Regression test for https://github.com/flutter/flutter/issues/174784.
+      testWidgets('InputDecorator error widget text style defaults to errorStyle', (
+        WidgetTester tester,
+      ) async {
+        await tester.pumpWidget(
+          buildInputDecorator(decoration: const InputDecoration(error: Text(errorText))),
+        );
+
+        expect(findError(), findsOneWidget);
+        final ThemeData theme = Theme.of(tester.element(findDecorator()));
+        final Color expectedColor = theme.colorScheme.error;
+        final TextStyle expectedStyle = theme.textTheme.bodySmall!.copyWith(color: expectedColor);
+        expect(getErrorStyle(tester), expectedStyle);
+      });
     });
 
     testWidgets('InputDecorator with counter does not crash when given a 0 size', (
