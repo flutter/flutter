@@ -20,6 +20,7 @@ import '../../build_system/exceptions.dart';
 import '../../cache.dart';
 import '../../convert.dart';
 import '../../features.dart';
+import '../../font_asset.dart';
 import '../../globals.dart' as globals;
 import 'android/native_assets.dart';
 import 'dart_hook_result.dart';
@@ -521,6 +522,7 @@ Future<DartHooksResult> _runDartHooks({
 
   final codeAssets = <FlutterCodeAsset>[];
   final dataAssets = <DataAsset>[];
+  final fontAssets = <FontAsset>[];
   final dependencies = <Uri>{};
   for (var i = 0; i < targets.length; i++) {
     final AssetBuildTarget target = targets[i];
@@ -545,6 +547,7 @@ Future<DartHooksResult> _runDartHooks({
         );
       }
       dataAssets.addAll(_filterDataAssets(linkResult.encodedAssets));
+      fontAssets.addAll(_filterFontAssets(linkResult.encodedAssets));
       dependencies.addAll(linkResult.dependencies);
     }
     if (target is CodeAssetTarget) {
@@ -556,6 +559,7 @@ Future<DartHooksResult> _runDartHooks({
       );
     }
     dataAssets.addAll(_filterDataAssets(buildResult.encodedAssets));
+    fontAssets.addAll(_filterFontAssets(buildResult.encodedAssets));
     dependencies.addAll(buildResult.dependencies);
   }
   if (codeAssets.isNotEmpty) {
@@ -585,6 +589,7 @@ Future<DartHooksResult> _runDartHooks({
     buildEnd: DateTime.now(),
     codeAssets: codeAssets,
     dataAssets: dataAssets,
+    fontAssets: fontAssets,
     dependencies: dependencies.toList(),
   );
 }
@@ -598,6 +603,9 @@ Iterable<FlutterCodeAsset> _filterCodeAssets(Iterable<EncodedAsset> assets, Targ
 
 Iterable<DataAsset> _filterDataAssets(Iterable<EncodedAsset> assets) =>
     assets.where((EncodedAsset asset) => asset.isDataAsset).map<DataAsset>(DataAsset.fromEncoded);
+
+Iterable<FontAsset> _filterFontAssets(Iterable<EncodedAsset> assets) =>
+    assets.where((EncodedAsset asset) => asset.isFontAsset).map<FontAsset>(FontAsset.fromEncoded);
 
 Future<BuildResult> _build(
   FlutterNativeAssetsBuildRunner buildRunner,
