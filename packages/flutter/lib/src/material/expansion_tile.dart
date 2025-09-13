@@ -869,3 +869,34 @@ class _ExpansionTileDefaultsM3 extends ExpansionTileThemeData {
 // dart format on
 
 // END GENERATED TOKEN PROPERTIES - ExpansionTile
+
+// BEGIN GENERATED TOKEN PROPERTIES - ExpansionTile
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// dart format off
+class _ExpansionTileDefaultsM3 extends ExpansionTileThemeData {
+  _ExpansionTileDefaultsM3(this.context);
+
+  final BuildContext context;
+  late final ThemeData _theme = Theme.of(context);
+  late final ColorScheme _colors = _theme.colorScheme;
+
+  @override
+  Color? get textColor => _colors.onSurface;
+
+  @override
+  Color? get iconColor => _colors.primary;
+
+  @override
+  Color? get collapsedTextColor => _colors.onSurface;
+
+  @override
+  Color? get collapsedIconColor => _colors.onSurfaceVariant;
+}
+// dart format on
+
+// END GENERATED TOKEN PROPERTIES - ExpansionTile

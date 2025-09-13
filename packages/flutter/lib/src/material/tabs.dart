@@ -5,6 +5,8 @@
 /// @docImport 'no_splash.dart';
 library;
 
+// BEGIN GENERATED TOKEN PROPERTIES - Tabs
+
 import 'dart:math' as math;
 import 'dart:ui' show SemanticsRole, lerpDouble;
 
@@ -336,8 +338,6 @@ class _TabStyle extends AnimatedWidget {
     final TextStyle textStyle = isSelected
         ? TextStyle.lerp(selectedStyle, unselectedStyle, animation.value)!
         : TextStyle.lerp(unselectedStyle, selectedStyle, animation.value)!;
-
-    // Rest of the method remains the same...
     final Color defaultIconColor = switch (theme.colorScheme.brightness) {
       Brightness.light => kDefaultIconDarkColor,
       Brightness.dark => kDefaultIconLightColor,
@@ -1919,7 +1919,6 @@ class _TabBarState extends State<TabBar> {
 
   @override
   Widget build(BuildContext context) {
-    // ... rest of the build method remains the same
     assert(debugCheckHasMaterialLocalizations(context));
     assert(_debugScheduleCheckHasValidTabsCount());
     final ThemeData theme = Theme.of(context);
@@ -2907,4 +2906,161 @@ class _TabsSecondaryDefaultsM3 extends TabBarThemeData {
 }
 // dart format on
 
+// END GENERATED TOKEN PROPERTIES - Tabs
+
+// BEGIN GENERATED TOKEN PROPERTIES - Tabs
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// dart format off
+class _TabsPrimaryDefaultsM3 extends TabBarThemeData {
+  _TabsPrimaryDefaultsM3(this.context, this.isScrollable)
+    : super(indicatorSize: TabBarIndicatorSize.label);
+
+  final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
+  final bool isScrollable;
+
+  // This value comes from Divider widget defaults. Token db deprecated 'primary-navigation-tab.divider.color' token.
+  @override
+  Color? get dividerColor => _colors.outlineVariant;
+
+  // This value comes from Divider widget defaults. Token db deprecated 'primary-navigation-tab.divider.height' token.
+  @override
+  double? get dividerHeight => 1.0;
+
+  @override
+  Color? get indicatorColor => _colors.primary;
+
+  @override
+  Color? get labelColor => _colors.primary;
+
+  @override
+  TextStyle? get labelStyle => _textTheme.titleSmall;
+
+  @override
+  Color? get unselectedLabelColor => _colors.onSurfaceVariant;
+
+  @override
+  TextStyle? get unselectedLabelStyle => _textTheme.titleSmall;
+
+  @override
+  WidgetStateProperty<Color?> get overlayColor {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
+        if (states.contains(WidgetState.pressed)) {
+          return _colors.primary.withOpacity(0.1);
+        }
+        if (states.contains(WidgetState.hovered)) {
+          return _colors.primary.withOpacity(0.08);
+        }
+        if (states.contains(WidgetState.focused)) {
+          return _colors.primary.withOpacity(0.1);
+        }
+        return null;
+      }
+      if (states.contains(WidgetState.pressed)) {
+        return _colors.primary.withOpacity(0.1);
+      }
+      if (states.contains(WidgetState.hovered)) {
+        return _colors.onSurface.withOpacity(0.08);
+      }
+      if (states.contains(WidgetState.focused)) {
+        return _colors.onSurface.withOpacity(0.1);
+      }
+      return null;
+    });
+  }
+
+  @override
+  InteractiveInkFeatureFactory? get splashFactory => Theme.of(context).splashFactory;
+
+  @override
+  TabAlignment? get tabAlignment => isScrollable ? TabAlignment.startOffset : TabAlignment.fill;
+
+  static double indicatorWeight(TabBarIndicatorSize indicatorSize) {
+    return switch (indicatorSize) {
+      TabBarIndicatorSize.label => 3.0,
+      TabBarIndicatorSize.tab   => 2.0,
+    };
+  }
+
+  // TODO(davidmartos96): This value doesn't currently exist in
+  // https://m3.material.io/components/tabs/specs
+  // Update this when the token is available.
+  static const EdgeInsetsGeometry iconMargin = EdgeInsets.only(bottom: 2);
+}
+
+class _TabsSecondaryDefaultsM3 extends TabBarThemeData {
+  _TabsSecondaryDefaultsM3(this.context, this.isScrollable)
+    : super(indicatorSize: TabBarIndicatorSize.tab);
+
+  final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
+  final bool isScrollable;
+
+  // This value comes from Divider widget defaults. Token db deprecated 'secondary-navigation-tab.divider.color' token.
+  @override
+  Color? get dividerColor => _colors.outlineVariant;
+
+  // This value comes from Divider widget defaults. Token db deprecated 'secondary-navigation-tab.divider.height' token.
+  @override
+  double? get dividerHeight => 1.0;
+
+  @override
+  Color? get indicatorColor => _colors.primary;
+
+  @override
+  Color? get labelColor => _colors.onSurface;
+
+  @override
+  TextStyle? get labelStyle => _textTheme.titleSmall;
+
+  @override
+  Color? get unselectedLabelColor => _colors.onSurfaceVariant;
+
+  @override
+  TextStyle? get unselectedLabelStyle => _textTheme.titleSmall;
+
+  @override
+  WidgetStateProperty<Color?> get overlayColor {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
+        if (states.contains(WidgetState.pressed)) {
+          return _colors.onSurface.withOpacity(0.1);
+        }
+        if (states.contains(WidgetState.hovered)) {
+          return _colors.onSurface.withOpacity(0.08);
+        }
+        if (states.contains(WidgetState.focused)) {
+          return _colors.onSurface.withOpacity(0.1);
+        }
+        return null;
+      }
+      if (states.contains(WidgetState.pressed)) {
+        return _colors.onSurface.withOpacity(0.1);
+      }
+      if (states.contains(WidgetState.hovered)) {
+        return _colors.onSurface.withOpacity(0.08);
+      }
+      if (states.contains(WidgetState.focused)) {
+        return _colors.onSurface.withOpacity(0.1);
+      }
+      return null;
+    });
+  }
+
+  @override
+  InteractiveInkFeatureFactory? get splashFactory => Theme.of(context).splashFactory;
+
+  @override
+  TabAlignment? get tabAlignment => isScrollable ? TabAlignment.startOffset : TabAlignment.fill;
+
+  static double indicatorWeight = 2.0;
+}
 // END GENERATED TOKEN PROPERTIES - Tabs

@@ -1462,3 +1462,45 @@ class _BottomSheetDefaultsM3 extends BottomSheetThemeData {
 // dart format on
 
 // END GENERATED TOKEN PROPERTIES - BottomSheet
+
+// BEGIN GENERATED TOKEN PROPERTIES - BottomSheet
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// dart format off
+class _BottomSheetDefaultsM3 extends BottomSheetThemeData {
+  _BottomSheetDefaultsM3(this.context)
+    : super(
+      elevation: 1.0,
+      modalElevation: 1.0,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28.0))),
+      constraints: const BoxConstraints(maxWidth: 640),
+    );
+
+  final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+
+  @override
+  Color? get backgroundColor => _colors.surfaceContainerLow;
+
+  @override
+  Color? get surfaceTintColor => Colors.transparent;
+
+  @override
+  Color? get shadowColor => Colors.transparent;
+
+  @override
+  Color? get dragHandleColor => _colors.onSurfaceVariant;
+
+  @override
+  Size? get dragHandleSize => const Size(32, 4);
+
+  @override
+  BoxConstraints? get constraints => const BoxConstraints(maxWidth: 640.0);
+}
+// dart format on
+
+// END GENERATED TOKEN PROPERTIES - BottomSheet

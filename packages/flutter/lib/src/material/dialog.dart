@@ -1824,3 +1824,69 @@ class _DialogDefaultsM3 extends DialogThemeData {
 // dart format on
 
 // END GENERATED TOKEN PROPERTIES - Dialog
+
+// BEGIN GENERATED TOKEN PROPERTIES - DialogFullscreen
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// dart format off
+class _DialogFullscreenDefaultsM3 extends DialogThemeData {
+  const _DialogFullscreenDefaultsM3(this.context): super(clipBehavior: Clip.none);
+
+  final BuildContext context;
+
+  @override
+  Color? get backgroundColor => Theme.of(context).colorScheme.surface;
+}
+// dart format on
+
+// END GENERATED TOKEN PROPERTIES - DialogFullscreen
+
+// BEGIN GENERATED TOKEN PROPERTIES - Dialog
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// dart format off
+class _DialogDefaultsM3 extends DialogThemeData {
+  _DialogDefaultsM3(this.context)
+    : super(
+        alignment: Alignment.center,
+        elevation: 6.0,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(28.0))),
+        clipBehavior: Clip.none,
+      );
+
+  final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
+
+  @override
+  Color? get iconColor => _colors.secondary;
+
+  @override
+  Color? get backgroundColor => _colors.surfaceContainerHigh;
+
+  @override
+  Color? get shadowColor => Colors.transparent;
+
+  @override
+  Color? get surfaceTintColor => Colors.transparent;
+
+  @override
+  TextStyle? get titleTextStyle => _textTheme.headlineSmall;
+
+  @override
+  TextStyle? get contentTextStyle => _textTheme.bodyMedium;
+
+  @override
+  EdgeInsetsGeometry? get actionsPadding => const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 24.0);
+}
+// dart format on
+
+// END GENERATED TOKEN PROPERTIES - Dialog

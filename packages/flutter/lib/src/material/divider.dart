@@ -371,3 +371,27 @@ class _DividerDefaultsM3 extends DividerThemeData {
 // dart format on
 
 // END GENERATED TOKEN PROPERTIES - Divider
+
+// BEGIN GENERATED TOKEN PROPERTIES - Divider
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// dart format off
+class _DividerDefaultsM3 extends DividerThemeData {
+  const _DividerDefaultsM3(this.context) : super(
+    space: 16,
+    thickness: 1.0,
+    indent: 0,
+    endIndent: 0,
+  );
+
+  final BuildContext context;
+
+  @override Color? get color => Theme.of(context).colorScheme.outlineVariant;
+}
+// dart format on
+
+// END GENERATED TOKEN PROPERTIES - Divider
