@@ -15,7 +15,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
+import 'package:vector_math/vector_math_64.dart';
 
+import 'binding.dart';
 import 'box.dart';
 import 'image_filter_config.dart';
 import 'layer.dart';
@@ -1303,8 +1305,13 @@ class RenderBackdropFilter extends RenderProxyBox {
 
     ui.ImageFilter? effectiveFilter = _filter;
     if (_filterConfig != null) {
+      final Matrix4 transform = Matrix4.identity();
+      for (RenderObject current = this; current.parent != null; current = current.parent!) {
+        current.parent!.applyPaintTransform(current, transform);
+      }
+      transform.setTranslation(Vector3(0, 0, 0));
       effectiveFilter = _filterConfig!.resolve(
-        MatrixUtils.transformRect(getTransformTo(null), offset & size),
+        MatrixUtils.transformRect(transform, Offset.zero & size),
       );
     }
 

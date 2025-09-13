@@ -62,7 +62,9 @@ abstract class ImageFilterConfig {
     Matrix4 matrix4, {
     ui.FilterQuality filterQuality = ui.FilterQuality.low,
   }) {
-    return _MatrixImageFilterConfig(matrix4, filterQuality);
+    return ImageFilterConfig.filter(
+      ui.ImageFilter.matrix(matrix4.storage, filterQuality: filterQuality),
+    );
   }
 
   /// Creates a configuration for a composition of two filters.
@@ -131,31 +133,6 @@ class _BlurImageFilterConfig extends ImageFilterConfig {
 
   @override
   int get hashCode => Object.hash(sigmaX, sigmaY, tileMode, useObjectBounds);
-}
-
-class _MatrixImageFilterConfig extends ImageFilterConfig {
-  const _MatrixImageFilterConfig(this.matrix, this.filterQuality);
-
-  final Matrix4 matrix;
-  final ui.FilterQuality filterQuality;
-
-  @override
-  ui.ImageFilter resolve(ui.Rect bounds) {
-    return ui.ImageFilter.matrix(matrix.storage, filterQuality: filterQuality);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
-    return other is _MatrixImageFilterConfig &&
-           other.matrix == matrix &&
-           other.filterQuality == filterQuality;
-  }
-
-  @override
-  int get hashCode => Object.hash(matrix, filterQuality);
 }
 
 class _ComposeImageFilterConfig extends ImageFilterConfig {

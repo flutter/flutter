@@ -26,6 +26,17 @@ namespace {
 
 constexpr Scalar kMaxSigma = 500.0f;
 
+void PrintRect(const std::optional<Rect>& rect, const char* label) {
+  if (rect.has_value()) {
+    const Rect& r = rect.value();
+    printf("%s: %.2f, %.2f, %.2f, %.2f\n", label, r.GetLeft(), r.GetTop(),
+            r.GetRight(), r.GetBottom());
+  } else {
+    printf("%s: none\n", label);
+    fflush(stdout);
+  }
+}
+
 SamplerDescriptor MakeSamplerDescriptor(MinMagFilter filter,
                                         SamplerAddressMode address_mode) {
   SamplerDescriptor sampler_desc;
@@ -257,18 +268,8 @@ DownsamplePassArgs CalculateDownsamplePassArgs(
 
   std::optional<Rect> snapshot_coverage = input_snapshot.GetCoverage();
 
-  auto print_rect = [](const std::optional<Rect>& rect, const char* label) {
-    if (rect.has_value()) {
-      const Rect& r = rect.value();
-      printf("%s: %.2f, %.2f, %.2f, %.2f\n", label, r.GetLeft(), r.GetTop(),
-             r.GetRight(), r.GetBottom());
-    } else {
-      printf("%s: none\n", label);
-      fflush(stdout);
-    }
-  };
-  print_rect(source_expanded_coverage_hint, "source_expanded_coverage_hint");
-  print_rect(source_bounds, "source_bounds");
+  PrintRect(source_expanded_coverage_hint, "source_expanded_coverage_hint");
+  PrintRect(source_bounds, "source_bounds");
   if (input_snapshot.transform.Equals(snapshot_entity.GetTransform()) &&
       source_expanded_coverage_hint.has_value() &&
       snapshot_coverage.has_value() &&
@@ -747,6 +748,8 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
     const Matrix& effect_transform,
     const Rect& coverage,
     const std::optional<Rect>& coverage_hint) const {
+  PrintRect(bounds_, "original bounds");
+  PrintRect(coverage_hint, "original coverage_hint");
   if (inputs.empty()) {
     return std::nullopt;
   }
@@ -769,6 +772,13 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
   std::optional<Rect> source_expanded_coverage_hint;
   if (expanded_coverage_hint.has_value()) {
     source_expanded_coverage_hint = expanded_coverage_hint->TransformBounds(
+        Matrix::MakeTranslation(blur_info.source_space_offset) *
+        Matrix::MakeScale(blur_info.source_space_scalar) *
+        entity.GetTransform().Invert());
+  }
+  std::optional<Rect> source_bounds;
+  if (bounds_.has_value()) {
+    source_bounds = bounds_->TransformBounds(
         Matrix::MakeTranslation(blur_info.source_space_offset) *
         Matrix::MakeScale(blur_info.source_space_scalar) *
         entity.GetTransform().Invert());
@@ -807,7 +817,7 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
 
   DownsamplePassArgs downsample_pass_args = CalculateDownsamplePassArgs(
       blur_info.scaled_sigma, blur_info.padding, input_snapshot.value(),
-      source_expanded_coverage_hint, bounds_, inputs[0], snapshot_entity);
+      source_expanded_coverage_hint, source_bounds, inputs[0], snapshot_entity);
 
   fml::StatusOr<RenderTarget> pass1_out = MakeDownsampleSubpass(
       renderer, command_buffer_1, input_snapshot->texture,
