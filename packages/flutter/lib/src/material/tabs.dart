@@ -306,23 +306,39 @@ class _TabStyle extends AnimatedWidget {
     final TabBarThemeData tabBarTheme = TabBarTheme.of(context);
     final Animation<double> animation = listenable as Animation<double>;
 
-    final Set<MaterialState> states = isSelected
-        ? const <MaterialState>{MaterialState.selected}
-        : const <MaterialState>{};
+    final Set<WidgetState> states = isSelected
+        ? const <WidgetState>{WidgetState.selected}
+        : const <WidgetState>{};
 
     // To enable TextStyle.lerp(style1, style2, value), both styles must have
     // the same value of inherit. Force that to be inherit=true here.
-    final TextStyle selectedStyle = (labelStyle ?? tabBarTheme.labelStyle ?? defaults.labelStyle!)
-        .copyWith(inherit: true);
-    final TextStyle unselectedStyle =
-        (unselectedLabelStyle ??
-                tabBarTheme.unselectedLabelStyle ??
-                labelStyle ??
-                defaults.unselectedLabelStyle!)
-            .copyWith(inherit: true);
+
+    // Build the selected style by merging in order: defaults -> theme -> widget
+    TextStyle selectedStyle = defaults.labelStyle!.copyWith(inherit: true);
+    if (tabBarTheme.labelStyle != null) {
+      selectedStyle = selectedStyle.merge(tabBarTheme.labelStyle);
+    }
+    if (labelStyle != null) {
+      selectedStyle = selectedStyle.merge(labelStyle);
+    }
+
+    // Build the unselected style
+    TextStyle unselectedStyle = defaults.unselectedLabelStyle!.copyWith(inherit: true);
+    if (tabBarTheme.unselectedLabelStyle != null) {
+      unselectedStyle = unselectedStyle.merge(tabBarTheme.unselectedLabelStyle);
+    }
+    if (unselectedLabelStyle != null) {
+      unselectedStyle = unselectedStyle.merge(unselectedLabelStyle);
+    } else if (labelStyle != null && tabBarTheme.unselectedLabelStyle == null) {
+      // If only labelStyle is provided and no theme unselectedLabelStyle, use labelStyle
+      unselectedStyle = unselectedStyle.merge(labelStyle);
+    }
+
     final TextStyle textStyle = isSelected
         ? TextStyle.lerp(selectedStyle, unselectedStyle, animation.value)!
         : TextStyle.lerp(unselectedStyle, selectedStyle, animation.value)!;
+
+    // Rest of the method remains the same...
     final Color defaultIconColor = switch (theme.colorScheme.brightness) {
       Brightness.light => kDefaultIconDarkColor,
       Brightness.dark => kDefaultIconLightColor,
