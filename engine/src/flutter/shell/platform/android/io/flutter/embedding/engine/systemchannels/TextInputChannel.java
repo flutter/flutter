@@ -262,7 +262,7 @@ public class TextInputChannel {
     Log.v(
         TAG,
         "Sending message to update editing state for "
-            + String.valueOf(editStates.size())
+            + editStates.size()
             + " field(s).");
 
     final HashMap<String, HashMap<Object, Object>> json = new HashMap<>();
@@ -809,9 +809,9 @@ public class TextInputChannel {
           && (selectionStart < 0 || selectionEnd < 0)) {
         throw new IndexOutOfBoundsException(
             "invalid selection: ("
-                + String.valueOf(selectionStart)
+                + selectionStart
                 + ", "
-                + String.valueOf(selectionEnd)
+                + selectionEnd
                 + ")");
       }
 
@@ -819,25 +819,25 @@ public class TextInputChannel {
           && (composingStart < 0 || composingStart > composingEnd)) {
         throw new IndexOutOfBoundsException(
             "invalid composing range: ("
-                + String.valueOf(composingStart)
+                + composingStart
                 + ", "
-                + String.valueOf(composingEnd)
+                + composingEnd
                 + ")");
       }
 
       if (composingEnd > text.length()) {
         throw new IndexOutOfBoundsException(
-            "invalid composing start: " + String.valueOf(composingStart));
+            "invalid composing start: " + composingStart);
       }
 
       if (selectionStart > text.length()) {
         throw new IndexOutOfBoundsException(
-            "invalid selection start: " + String.valueOf(selectionStart));
+            "invalid selection start: " + selectionStart);
       }
 
       if (selectionEnd > text.length()) {
         throw new IndexOutOfBoundsException(
-            "invalid selection end: " + String.valueOf(selectionEnd));
+            "invalid selection end: " + selectionEnd);
       }
 
       this.text = text;
