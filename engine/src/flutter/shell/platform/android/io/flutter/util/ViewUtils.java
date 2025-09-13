@@ -79,7 +79,7 @@ public final class ViewUtils {
     return traverseHierarchy(
         root,
         (View view) -> {
-          for (final Class<? extends View> viewType : viewTypes) {
+            for (final Class<? extends View> viewType : viewTypes) {
                 if (viewType.isInstance(view)) {
                     return true;
                 }
