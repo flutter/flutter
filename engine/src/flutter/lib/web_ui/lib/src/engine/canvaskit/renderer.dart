@@ -52,10 +52,6 @@ class CanvasKitRenderer extends Renderer {
   @override
   FlutterFontCollection get fontCollection => _fontCollection;
 
-  /// The scene host, where the root canvas and overlay canvases are added to.
-  DomElement? _sceneHost;
-  DomElement? get sceneHost => _sceneHost;
-
   static Rasterizer _createRasterizer() {
     if (configuration.canvasKitForceMultiSurfaceRasterizer || isSafari || isFirefox) {
       return MultiSurfaceRasterizer();
