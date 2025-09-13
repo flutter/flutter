@@ -192,5 +192,14 @@ void main() {
       );
       expect(result.exitCode, 1);
     });
+
+    test('passes build mode to the test', () async {
+      final ProcessResult result = await runScript(
+        <String>['build_mode_test'],
+        <String>['--build-mode=debug'],
+      );
+      expect(result.exitCode, 0);
+      expect(result.stdout, contains('buildMode: debug'));
+    });
   });
 }
