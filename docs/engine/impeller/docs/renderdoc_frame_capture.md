@@ -49,4 +49,4 @@
 
 _See also:_
 
- * [Learning to Read GPU Frame Captures](https://github.com/flutter/flutter/blob/main/engine/src/flutter/impeller/docs/read_frame_captures.md)
+ * [Learning to Read GPU Frame Captures](https://github.com/flutter/flutter/blob/main/docs/engine/impeller/docs/read_frame_captures.md)

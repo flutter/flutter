@@ -42,7 +42,7 @@ Run the following steps to set up your environment:
 >   * `GYP_MSVS_OVERRIDE_PATH=C:\Program Files\Microsoft Visual Studio\2022\Community`
 >     * Use the path of your installation.
 
-Clone the Flutter source code. As of late 2024, the engine source is part of the main [flutter/flutter repo](https://github.com/flutter/flutter). The convention is to fork this repo and point `origin` to your fork and `upstream` to `git@github.com:flutter/flutter.git`. See [Setting up the Framework development environment](https://github.com/flutter/flutter/blob/master/docs/contributing/Setting-up-the-Framework-development-environment.md#set-up-your-environment) for more.
+Clone the Flutter source code. As of late 2024, the engine source is part of the main [flutter/flutter repo](https://github.com/flutter/flutter). The convention is to fork this repo and point `origin` to your fork and `upstream` to `git@github.com:flutter/flutter.git`. See [Setting up the Framework development environment](https://github.com/flutter/flutter/blob/main/docs/contributing/Setting-up-the-Framework-development-environment.md#set-up-your-environment) for more.
 
 > [!IMPORTANT]
 > On Windows, the following must be run as an Administrator due to [a known issue](https://github.com/flutter/flutter/issues/94580).
@@ -75,8 +75,8 @@ gclient sync
 ## Next steps:
 
  * [Compiling the engine](Compiling-the-engine.md) explains how to actually get builds, now that you have the code.
- * The docs for the flutter tool have a section on [using a locally built engine with the flutter tool](https://github.com/flutter/flutter/blob/master/docs/tool/README.md#using-a-locally-built-engine-with-the-flutter-tool).
- * [Signing commits](https://github.com/flutter/flutter/blob/master/docs/contributing/Signing-commits.md), to configure your environment to securely sign your commits.
+ * The docs for the flutter tool have a section on [using a locally built engine with the flutter tool](https://github.com/flutter/flutter/blob/main/docs/tool/README.md#using-a-locally-built-engine-with-the-flutter-tool).
+ * [Signing commits](https://github.com/flutter/flutter/blob/main/docs/contributing/Signing-commits.md), to configure your environment to securely sign your commits.
 
 ## Editor autocomplete support
 
@@ -175,11 +175,11 @@ To set up:
 ### Using Android Studio as an IDE for the Android Embedding [Java]
 
 Alternatively, Android Studio can be used as an IDE for the Android Embedding Java code. See docs
-at https://github.com/flutter/flutter/blob/master/engine/src/flutter/shell/platform/android/README.md#editing-java-code for
+at https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/android/README.md#editing-java-code for
 instructions.
 
 ## VSCode Additional Useful Configuration
 
-1. Create [snippets](https://code.visualstudio.com/docs/editor/userdefinedsnippets) for header files with [this configuration](https://github.com/chromium/chromium/blob/master/tools/vscode/settings.json5). This will let you use `hdr` keyboard macro to create the boiler plate header code. Also consider some of [these settings](https://github.com/chromium/chromium/blob/master/tools/vscode/settings.json5) and [more tips](https://chromium.googlesource.com/chromium/src/+show/lkgr/docs/vscode.md).
+1. Create [snippets](https://code.visualstudio.com/docs/editor/userdefinedsnippets) for header files with [this configuration](https://github.com/chromium/chromium/blob/main/tools/vscode/settings.json5). This will let you use `hdr` keyboard macro to create the boiler plate header code. Also consider some of [these settings](https://github.com/chromium/chromium/blob/main/tools/vscode/settings.json5) and [more tips](https://chromium.googlesource.com/chromium/src/+show/lkgr/docs/vscode.md).
 
 2. To format GN files on save, [consider using this extension](https://marketplace.visualstudio.com/items?itemName=persidskiy.vscode-gnformat).
