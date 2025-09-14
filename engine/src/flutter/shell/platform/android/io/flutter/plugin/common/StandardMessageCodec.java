@@ -190,8 +190,7 @@ public class StandardMessageCodec implements MessageCodec<Object> {
   }
 
   /** Writes the length and then the actual bytes of the specified array to the specified stream. */
-  protected static void writeBytes(
-          @NonNull ByteArrayOutputStream stream, @NonNull byte[] bytes) {
+  protected static void writeBytes(@NonNull ByteArrayOutputStream stream, @NonNull byte[] bytes) {
     writeSize(stream, bytes.length);
     stream.write(bytes, 0, bytes.length);
   }
