@@ -260,12 +260,7 @@ public final class BasicMessageChannel<T> {
       try {
         handler.onMessage(
             codec.decodeMessage(message),
-            new Reply<T>() {
-              @Override
-              public void reply(T reply) {
-                callback.reply(codec.encodeMessage(reply));
-              }
-            });
+                reply -> callback.reply(codec.encodeMessage(reply)));
       } catch (RuntimeException e) {
         Log.e(TAG + name, "Failed to handle message", e);
         callback.reply(null);
