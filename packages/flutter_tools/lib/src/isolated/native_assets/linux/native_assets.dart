@@ -46,8 +46,6 @@ Uri _findExecutableIfExists({
   return possibleExecutableNames
           .map((execName) => path.childFile(execName))
           .where((file) => file.existsSync())
-          .map((file) => file.resolveSymbolicLinksSync())
-          .map((filePath) => globals.fs.file(filePath))
           .map((file) => file.uri)
           .firstOrNull ??
       throwToolExit('Failed to find any of $possibleExecutableNames in $path');
