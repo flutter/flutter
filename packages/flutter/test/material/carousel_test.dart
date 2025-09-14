@@ -1938,7 +1938,7 @@ void main() {
       expect(material.clipBehavior, Clip.antiAlias);
     });
 
-    testWidgets('CarouselView item clipBehavior respects carouselItemClipBehavior', (
+    testWidgets('CarouselView item clipBehavior respects itemClipBehavior', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
@@ -1946,7 +1946,7 @@ void main() {
           home: Scaffold(
             body: CarouselView(
               itemExtent: 350,
-              carouselItemClipBehavior: Clip.hardEdge,
+              itemClipBehavior: Clip.hardEdge,
               children: List<Widget>.generate(3, (int index) {
                 return Text('Item $index');
               }),
@@ -1962,7 +1962,7 @@ void main() {
       expect(material.clipBehavior, Clip.hardEdge);
     });
 
-    testWidgets('CarouselView.weighted item clipBehavior respects carouselItemClipBehavior', (
+    testWidgets('CarouselView.weighted item clipBehavior respects itemClipBehavior', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
@@ -1970,7 +1970,7 @@ void main() {
           home: Scaffold(
             body: CarouselView.weighted(
               flexWeights: const <int>[1, 1, 1],
-              carouselItemClipBehavior: Clip.hardEdge,
+              itemClipBehavior: Clip.hardEdge,
               children: List<Widget>.generate(3, (int index) {
                 return Text('Item $index');
               }),

@@ -142,7 +142,7 @@ class CarouselView extends StatefulWidget {
     this.reverse = false,
     this.onTap,
     this.enableSplash = true,
-    this.carouselItemClipBehavior = Clip.antiAlias,
+    this.itemClipBehavior = Clip.antiAlias,
     required double this.itemExtent,
     required this.children,
   }) : consumeMaxWeight = true,
@@ -204,7 +204,7 @@ class CarouselView extends StatefulWidget {
     this.consumeMaxWeight = true,
     this.onTap,
     this.enableSplash = true,
-    this.carouselItemClipBehavior = Clip.antiAlias,
+    this.itemClipBehavior = Clip.antiAlias,
     required List<int> this.flexWeights,
     required this.children,
   }) : itemExtent = null;
@@ -340,7 +340,7 @@ class CarouselView extends StatefulWidget {
   /// Refer to the [Clip] enum for more details on the different clip options.
   ///
   /// Defaults to [Clip.antiAlias].
-  final Clip carouselItemClipBehavior;
+  final Clip itemClipBehavior;
 
   /// The child widgets for the carousel.
   final List<Widget> children;
@@ -463,7 +463,7 @@ class _CarouselViewState extends State<CarouselView> {
     return Padding(
       padding: effectivePadding,
       child: Material(
-        clipBehavior: widget.carouselItemClipBehavior,
+        clipBehavior: widget.itemClipBehavior,
         color: effectiveBackgroundColor,
         elevation: effectiveElevation,
         shape: effectiveShape,
