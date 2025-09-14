@@ -25,11 +25,11 @@ public final class ViewUtils {
    * updater.
    */
   public static void calculateMaximumDisplayMetrics(
-      @Nullable Context context, @NonNull DisplayUpdater updater) {
+          @Nullable Context context, @NonNull DisplayUpdater updater) {
     Activity activity = getActivity(context);
     if (activity != null) {
       WindowMetrics metrics =
-          WindowMetricsCalculator.getOrCreate().computeMaximumWindowMetrics(activity);
+              WindowMetricsCalculator.getOrCreate().computeMaximumWindowMetrics(activity);
       float width = metrics.getBounds().width();
       float height = metrics.getBounds().height();
       float density = context.getResources().getDisplayMetrics().density;
@@ -77,15 +77,15 @@ public final class ViewUtils {
    */
   public static boolean hasChildViewOfType(@Nullable View root, Class<? extends View>[] viewTypes) {
     return traverseHierarchy(
-        root,
-        (View view) -> {
-            for (final Class<? extends View> viewType : viewTypes) {
+            root,
+            (View view) -> {
+              for (final Class<? extends View> viewType : viewTypes) {
                 if (viewType.isInstance(view)) {
-                    return true;
+                  return true;
                 }
-            }
-          return false;
-        });
+              }
+              return false;
+            });
   }
 
   /** Allows to visit a view. */
