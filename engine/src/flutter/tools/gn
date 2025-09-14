@@ -1234,7 +1234,12 @@ def parse_args(args):
       help='Whether the produced Flutter.framework is app extension safe. Only for iOS.'
   )
 
-  parser.add_argument('--ccache', default=False, action='store_true', help='Use ccache to speed up compilation. Requires ccache to be installed.')
+  parser.add_argument(
+      '--ccache',
+      default=False,
+      action='store_true',
+      help='Use ccache to speed up compilation. Requires ccache to be installed.'
+  )
 
   # Verbose output.
   parser.add_argument('--verbose', default=False, action='store_true')
