@@ -14,9 +14,9 @@ import '../../../globals.dart' as globals;
 /// Search for the accompanying `clang`, `ar`, and `ld`.
 Future<CCompilerConfig> cCompilerConfigLinux() async {
   const kClangPlusPlusBinary = 'clang++';
-  const kClangBinary = 'clang';
-  const kArBinary = 'llvm-ar';
-  const kLdBinary = 'ld.lld';
+  const kClangBinaryOptions = ['clang'];
+  const kArBinaryOptions = ['llvm-ar', 'ar'];
+  const kLdBinaryOptions = ['ld.lld', 'ld'];
 
   final ProcessResult whichResult = await globals.processManager.run(<String>[
     'which',
@@ -29,19 +29,26 @@ Future<CCompilerConfig> cCompilerConfigLinux() async {
   clangPpFile = globals.fs.file(await clangPpFile.resolveSymbolicLinks());
 
   final Directory clangDir = clangPpFile.parent;
-  final binaryPaths = <String, Uri>{};
-  for (final binary in <String>[kClangBinary, kArBinary, kLdBinary]) {
-    final File binaryFile = clangDir.childFile(binary);
-    if (!await binaryFile.exists()) {
-      throwToolExit("Failed to find $binary relative to $clangPpFile: $binaryFile doesn't exist.");
-    }
-    binaryPaths[binary] = binaryFile.uri;
-  }
-  final Uri? archiver = binaryPaths[kArBinary];
-  final Uri? compiler = binaryPaths[kClangBinary];
-  final Uri? linker = binaryPaths[kLdBinary];
-  if (archiver == null || compiler == null || linker == null) {
-    throwToolExit('Clang could not be found.');
-  }
-  return CCompilerConfig(archiver: archiver, compiler: compiler, linker: linker);
+  return CCompilerConfig(
+    linker: _findExecutableIfExists(path: clangDir, possibleExecutableNames: kLdBinaryOptions),
+    compiler: _findExecutableIfExists(path: clangDir, possibleExecutableNames: kClangBinaryOptions),
+    archiver: _findExecutableIfExists(path: clangDir, possibleExecutableNames: kArBinaryOptions),
+  );
+}
+
+/// Searches for an executable with a name in [possibleExecutableNames]
+/// at [path] and returns the first one it finds, if one is found.
+/// Otherwise, throws an error.
+Uri _findExecutableIfExists({
+  required List<String> possibleExecutableNames,
+  required Directory path,
+}) {
+  return possibleExecutableNames
+          .map((execName) => path.childFile(execName))
+          .where((file) => file.existsSync())
+          .map((file) => file.resolveSymbolicLinksSync())
+          .map((filePath) => globals.fs.file(filePath))
+          .map((file) => file.uri)
+          .firstOrNull ??
+      throwToolExit('Failed to find any of $possibleExecutableNames in $path');
 }
