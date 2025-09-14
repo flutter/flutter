@@ -4,8 +4,6 @@
 
 package io.flutter.embedding.engine.mutatorsstack;
 
-import static android.view.View.OnFocusChangeListener;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
