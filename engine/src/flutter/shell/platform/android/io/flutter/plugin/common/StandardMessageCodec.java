@@ -293,7 +293,7 @@ public class StandardMessageCodec implements MessageCodec<Object> {
       }
     } else {
       throw new IllegalArgumentException(
-          "Unsupported value: '" + value + "' of type '" + value.getClass() + "'");
+              "Unsupported value: '" + value + "' of type '" + value.getClass() + "'");
     }
   }
 
@@ -365,86 +365,86 @@ public class StandardMessageCodec implements MessageCodec<Object> {
         result = buffer.getLong();
         break;
       case BIGINT:
-        {
-          final byte[] hex = readBytes(buffer);
-          result = new BigInteger(new String(hex, UTF8), 16);
-          break;
-        }
+      {
+        final byte[] hex = readBytes(buffer);
+        result = new BigInteger(new String(hex, UTF8), 16);
+        break;
+      }
       case DOUBLE:
         readAlignment(buffer, 8);
         result = buffer.getDouble();
         break;
       case STRING:
-        {
-          final byte[] bytes = readBytes(buffer);
-          result = new String(bytes, UTF8);
-          break;
-        }
+      {
+        final byte[] bytes = readBytes(buffer);
+        result = new String(bytes, UTF8);
+        break;
+      }
       case BYTE_ARRAY:
-        {
-          result = readBytes(buffer);
-          break;
-        }
+      {
+        result = readBytes(buffer);
+        break;
+      }
       case INT_ARRAY:
-        {
-          final int length = readSize(buffer);
-          final int[] array = new int[length];
-          readAlignment(buffer, 4);
-          buffer.asIntBuffer().get(array);
-          result = array;
-          buffer.position(buffer.position() + 4 * length);
-          break;
-        }
+      {
+        final int length = readSize(buffer);
+        final int[] array = new int[length];
+        readAlignment(buffer, 4);
+        buffer.asIntBuffer().get(array);
+        result = array;
+        buffer.position(buffer.position() + 4 * length);
+        break;
+      }
       case LONG_ARRAY:
-        {
-          final int length = readSize(buffer);
-          final long[] array = new long[length];
-          readAlignment(buffer, 8);
-          buffer.asLongBuffer().get(array);
-          result = array;
-          buffer.position(buffer.position() + 8 * length);
-          break;
-        }
+      {
+        final int length = readSize(buffer);
+        final long[] array = new long[length];
+        readAlignment(buffer, 8);
+        buffer.asLongBuffer().get(array);
+        result = array;
+        buffer.position(buffer.position() + 8 * length);
+        break;
+      }
       case DOUBLE_ARRAY:
-        {
-          final int length = readSize(buffer);
-          final double[] array = new double[length];
-          readAlignment(buffer, 8);
-          buffer.asDoubleBuffer().get(array);
-          result = array;
-          buffer.position(buffer.position() + 8 * length);
-          break;
-        }
+      {
+        final int length = readSize(buffer);
+        final double[] array = new double[length];
+        readAlignment(buffer, 8);
+        buffer.asDoubleBuffer().get(array);
+        result = array;
+        buffer.position(buffer.position() + 8 * length);
+        break;
+      }
       case LIST:
-        {
-          final int size = readSize(buffer);
-          final List<Object> list = new ArrayList<>(size);
-          for (int i = 0; i < size; i++) {
-            list.add(readValue(buffer));
-          }
-          result = list;
-          break;
+      {
+        final int size = readSize(buffer);
+        final List<Object> list = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+          list.add(readValue(buffer));
         }
+        result = list;
+        break;
+      }
       case MAP:
-        {
-          final int size = readSize(buffer);
-          final Map<Object, Object> map = new HashMap<>();
-          for (int i = 0; i < size; i++) {
-            map.put(readValue(buffer), readValue(buffer));
-          }
-          result = map;
-          break;
+      {
+        final int size = readSize(buffer);
+        final Map<Object, Object> map = new HashMap<>();
+        for (int i = 0; i < size; i++) {
+          map.put(readValue(buffer), readValue(buffer));
         }
+        result = map;
+        break;
+      }
       case FLOAT_ARRAY:
-        {
-          final int length = readSize(buffer);
-          final float[] array = new float[length];
-          readAlignment(buffer, 4);
-          buffer.asFloatBuffer().get(array);
-          result = array;
-          buffer.position(buffer.position() + 4 * length);
-          break;
-        }
+      {
+        final int length = readSize(buffer);
+        final float[] array = new float[length];
+        readAlignment(buffer, 4);
+        buffer.asFloatBuffer().get(array);
+        result = array;
+        buffer.position(buffer.position() + 4 * length);
+        break;
+      }
       default:
         throw new IllegalArgumentException("Message corrupted");
     }
