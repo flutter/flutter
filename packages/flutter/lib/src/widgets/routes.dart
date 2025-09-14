@@ -2195,8 +2195,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   }
 
   @override
-  void changedInternalState() {
-    super.changedInternalState();
+  void changedInternalState({bool notifyNeighbors = false}) {
+    super.changedInternalState(notifyNeighbors: notifyNeighbors);
     // No need to mark dirty if this method is called during build phase.
     if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
       setState(() {

@@ -520,13 +520,22 @@ abstract class Route<T> extends _RoutePlaceholder {
   /// It is used by [ModalRoute], for example, to report the new information via
   /// its inherited widget to any children of the route.
   ///
+  /// When [notifyNeighbors] is true, this method will also notify adjacent routes
+  /// in the navigation stack about the state change, allowing them to update
+  /// their references to this route (e.g., updating previousPageTitle when a
+  /// route's title changes).
+  ///
   /// See also:
   ///
   ///  * [changedExternalState], which is called when the [Navigator] has
   ///    updated in some manner that might affect the routes.
   @protected
   @mustCallSuper
-  void changedInternalState() {}
+  void changedInternalState({bool notifyNeighbors = false}) {
+    if (notifyNeighbors && navigator != null) {
+      navigator!._notifyNeighborRoutes(this);
+    }
+  }
 
   /// Called whenever the [Navigator] has updated in some manner that might
   /// affect routes, to indicate that the route may wish to rebuild as well.
@@ -4619,6 +4628,40 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       index += 1;
     }
     return index < _history.length ? _history[index] : null;
+  }
+
+  /// Notifies neighbor routes about a state change in the given route.
+  ///
+  /// This method is called when a route's internal state changes and needs to
+  /// notify adjacent routes in the navigation stack. It triggers the appropriate
+  /// didChangePrevious/didChangeNext callbacks on neighboring routes.
+  void _notifyNeighborRoutes(Route<dynamic> changedRoute) {
+    final int routeIndex = _history.indexWhere((_RouteEntry entry) => entry.route == changedRoute);
+    if (routeIndex == -1) {
+      return; // Route not found in history
+    }
+
+    final _RouteEntry changedEntry = _history[routeIndex];
+
+    // Notify the next route (if any) that this route's state changed
+    final _RouteEntry? nextEntry = _getRouteAfter(
+      routeIndex + 1,
+      _RouteEntry.suitableForTransitionAnimationPredicate,
+    );
+    if (nextEntry != null && nextEntry.shouldAnnounceChangeToNext(changedEntry.route)) {
+      nextEntry.route.didChangePrevious(changedRoute);
+      nextEntry.lastAnnouncedPreviousRoute = changedRoute;
+    }
+
+    // Notify the previous route (if any) that this route's state changed
+    final _RouteEntry? previousEntry = _getRouteBefore(
+      routeIndex - 1,
+      _RouteEntry.suitableForTransitionAnimationPredicate,
+    );
+    if (previousEntry != null) {
+      previousEntry.route.didChangeNext(changedRoute);
+      previousEntry.lastAnnouncedNextRoute = changedRoute;
+    }
   }
 
   Route<T?>? _routeNamed<T>(String name, {required Object? arguments, bool allowNull = false}) {
