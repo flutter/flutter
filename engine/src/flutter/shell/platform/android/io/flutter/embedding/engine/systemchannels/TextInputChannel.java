@@ -54,113 +54,113 @@ public class TextInputChannel {
 
   @NonNull @VisibleForTesting
   final MethodChannel.MethodCallHandler parsingMethodHandler =
-      new MethodChannel.MethodCallHandler() {
-        @Override
-        public void onMethodCall(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
-          if (textInputMethodHandler == null) {
-            // If no explicit TextInputMethodHandler has been registered then we don't
-            // need to forward this call to an API. Return.
-            return;
-          }
+          new MethodChannel.MethodCallHandler() {
+            @Override
+            public void onMethodCall(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
+              if (textInputMethodHandler == null) {
+                // If no explicit TextInputMethodHandler has been registered then we don't
+                // need to forward this call to an API. Return.
+                return;
+              }
 
-          String method = call.method;
-          Object args = call.arguments;
-          Log.v(TAG, "Received '" + method + "' message.");
-          switch (method) {
-            case "TextInput.show":
-              textInputMethodHandler.show();
-              result.success(null);
-              break;
-            case "TextInput.hide":
-              textInputMethodHandler.hide();
-              result.success(null);
-              break;
-            case "TextInput.setClient":
-              try {
-                final JSONArray argumentList = (JSONArray) args;
-                final int textInputClientId = argumentList.getInt(0);
-                final JSONObject jsonConfiguration = argumentList.getJSONObject(1);
-                textInputMethodHandler.setClient(
-                    textInputClientId, Configuration.fromJson(jsonConfiguration));
-                result.success(null);
-              } catch (JSONException | NoSuchFieldException exception) {
-                // JSONException: missing keys or bad value types.
-                // NoSuchFieldException: one or more values were invalid.
-                result.error("error", exception.getMessage(), null);
-              }
-              break;
-            case "TextInput.requestAutofill":
-              textInputMethodHandler.requestAutofill();
-              result.success(null);
-              break;
-            case "TextInput.setPlatformViewClient":
-              try {
-                final JSONObject arguments = (JSONObject) args;
-                final int platformViewId = arguments.getInt("platformViewId");
-                final boolean usesVirtualDisplay =
-                    arguments.optBoolean("usesVirtualDisplay", false);
-                textInputMethodHandler.setPlatformViewClient(platformViewId, usesVirtualDisplay);
-                result.success(null);
-              } catch (JSONException exception) {
-                result.error("error", exception.getMessage(), null);
-              }
-              break;
-            case "TextInput.setEditingState":
-              try {
-                final JSONObject editingState = (JSONObject) args;
-                textInputMethodHandler.setEditingState(TextEditState.fromJson(editingState));
-                result.success(null);
-              } catch (JSONException exception) {
-                result.error("error", exception.getMessage(), null);
-              }
-              break;
-            case "TextInput.setEditableSizeAndTransform":
-              try {
-                final JSONObject arguments = (JSONObject) args;
-                final double width = arguments.getDouble("width");
-                final double height = arguments.getDouble("height");
-                final JSONArray jsonMatrix = arguments.getJSONArray("transform");
-                final double[] matrix = new double[16];
-                for (int i = 0; i < 16; i++) {
-                  matrix[i] = jsonMatrix.getDouble(i);
-                }
+              String method = call.method;
+              Object args = call.arguments;
+              Log.v(TAG, "Received '" + method + "' message.");
+              switch (method) {
+                case "TextInput.show":
+                  textInputMethodHandler.show();
+                  result.success(null);
+                  break;
+                case "TextInput.hide":
+                  textInputMethodHandler.hide();
+                  result.success(null);
+                  break;
+                case "TextInput.setClient":
+                  try {
+                    final JSONArray argumentList = (JSONArray) args;
+                    final int textInputClientId = argumentList.getInt(0);
+                    final JSONObject jsonConfiguration = argumentList.getJSONObject(1);
+                    textInputMethodHandler.setClient(
+                            textInputClientId, Configuration.fromJson(jsonConfiguration));
+                    result.success(null);
+                  } catch (JSONException | NoSuchFieldException exception) {
+                    // JSONException: missing keys or bad value types.
+                    // NoSuchFieldException: one or more values were invalid.
+                    result.error("error", exception.getMessage(), null);
+                  }
+                  break;
+                case "TextInput.requestAutofill":
+                  textInputMethodHandler.requestAutofill();
+                  result.success(null);
+                  break;
+                case "TextInput.setPlatformViewClient":
+                  try {
+                    final JSONObject arguments = (JSONObject) args;
+                    final int platformViewId = arguments.getInt("platformViewId");
+                    final boolean usesVirtualDisplay =
+                            arguments.optBoolean("usesVirtualDisplay", false);
+                    textInputMethodHandler.setPlatformViewClient(platformViewId, usesVirtualDisplay);
+                    result.success(null);
+                  } catch (JSONException exception) {
+                    result.error("error", exception.getMessage(), null);
+                  }
+                  break;
+                case "TextInput.setEditingState":
+                  try {
+                    final JSONObject editingState = (JSONObject) args;
+                    textInputMethodHandler.setEditingState(TextEditState.fromJson(editingState));
+                    result.success(null);
+                  } catch (JSONException exception) {
+                    result.error("error", exception.getMessage(), null);
+                  }
+                  break;
+                case "TextInput.setEditableSizeAndTransform":
+                  try {
+                    final JSONObject arguments = (JSONObject) args;
+                    final double width = arguments.getDouble("width");
+                    final double height = arguments.getDouble("height");
+                    final JSONArray jsonMatrix = arguments.getJSONArray("transform");
+                    final double[] matrix = new double[16];
+                    for (int i = 0; i < 16; i++) {
+                      matrix[i] = jsonMatrix.getDouble(i);
+                    }
 
-                textInputMethodHandler.setEditableSizeAndTransform(width, height, matrix);
-                result.success(null);
-              } catch (JSONException exception) {
-                result.error("error", exception.getMessage(), null);
+                    textInputMethodHandler.setEditableSizeAndTransform(width, height, matrix);
+                    result.success(null);
+                  } catch (JSONException exception) {
+                    result.error("error", exception.getMessage(), null);
+                  }
+                  break;
+                case "TextInput.clearClient":
+                  textInputMethodHandler.clearClient();
+                  result.success(null);
+                  break;
+                case "TextInput.sendAppPrivateCommand":
+                  try {
+                    final JSONObject arguments = (JSONObject) args;
+                    final String action = arguments.getString("action");
+                    final String data = arguments.getString("data");
+                    Bundle bundle = null;
+                    if (data != null && !data.isEmpty()) {
+                      bundle = new Bundle();
+                      bundle.putString("data", data);
+                    }
+                    textInputMethodHandler.sendAppPrivateCommand(action, bundle);
+                    result.success(null);
+                  } catch (JSONException exception) {
+                    result.error("error", exception.getMessage(), null);
+                  }
+                  break;
+                case "TextInput.finishAutofillContext":
+                  textInputMethodHandler.finishAutofillContext((boolean) args);
+                  result.success(null);
+                  break;
+                default:
+                  result.notImplemented();
+                  break;
               }
-              break;
-            case "TextInput.clearClient":
-              textInputMethodHandler.clearClient();
-              result.success(null);
-              break;
-            case "TextInput.sendAppPrivateCommand":
-              try {
-                final JSONObject arguments = (JSONObject) args;
-                final String action = arguments.getString("action");
-                final String data = arguments.getString("data");
-                Bundle bundle = null;
-                if (data != null && !data.isEmpty()) {
-                  bundle = new Bundle();
-                  bundle.putString("data", data);
-                }
-                textInputMethodHandler.sendAppPrivateCommand(action, bundle);
-                result.success(null);
-              } catch (JSONException exception) {
-                result.error("error", exception.getMessage(), null);
-              }
-              break;
-            case "TextInput.finishAutofillContext":
-              textInputMethodHandler.finishAutofillContext((boolean) args);
-              result.success(null);
-              break;
-            default:
-              result.notImplemented();
-              break;
-          }
-        }
-      };
+            }
+          };
 
   /**
    * Constructs a {@code TextInputChannel} that connects Android to the Dart code running in {@code
@@ -187,7 +187,7 @@ public class TextInputChannel {
   }
 
   private static HashMap<Object, Object> createEditingStateJSON(
-      String text, int selectionStart, int selectionEnd, int composingStart, int composingEnd) {
+          String text, int selectionStart, int selectionEnd, int composingStart, int composingEnd) {
     HashMap<Object, Object> state = new HashMap<>();
     state.put("text", text);
     state.put("selectionBase", selectionStart);
@@ -198,7 +198,7 @@ public class TextInputChannel {
   }
 
   private static HashMap<Object, Object> createEditingDeltaJSON(
-      ArrayList<TextEditingDelta> batchDeltas) {
+          ArrayList<TextEditingDelta> batchDeltas) {
     HashMap<Object, Object> state = new HashMap<>();
 
     JSONArray deltas = new JSONArray();
@@ -212,137 +212,137 @@ public class TextInputChannel {
    * Instructs Flutter to update its text input editing state to reflect the given configuration.
    */
   public void updateEditingState(
-      int inputClientId,
-      @NonNull String text,
-      int selectionStart,
-      int selectionEnd,
-      int composingStart,
-      int composingEnd) {
+          int inputClientId,
+          @NonNull String text,
+          int selectionStart,
+          int selectionEnd,
+          int composingStart,
+          int composingEnd) {
     Log.v(
-        TAG,
-        "Sending message to update editing state: \n"
-            + "Text: "
-            + text
-            + "\n"
-            + "Selection start: "
-            + selectionStart
-            + "\n"
-            + "Selection end: "
-            + selectionEnd
-            + "\n"
-            + "Composing start: "
-            + composingStart
-            + "\n"
-            + "Composing end: "
-            + composingEnd);
+            TAG,
+            "Sending message to update editing state: \n"
+                    + "Text: "
+                    + text
+                    + "\n"
+                    + "Selection start: "
+                    + selectionStart
+                    + "\n"
+                    + "Selection end: "
+                    + selectionEnd
+                    + "\n"
+                    + "Composing start: "
+                    + composingStart
+                    + "\n"
+                    + "Composing end: "
+                    + composingEnd);
 
     final HashMap<Object, Object> state =
-        createEditingStateJSON(text, selectionStart, selectionEnd, composingStart, composingEnd);
+            createEditingStateJSON(text, selectionStart, selectionEnd, composingStart, composingEnd);
 
     channel.invokeMethod("TextInputClient.updateEditingState", Arrays.asList(inputClientId, state));
   }
 
   public void updateEditingStateWithDeltas(
-      int inputClientId, @NonNull ArrayList<TextEditingDelta> batchDeltas) {
+          int inputClientId, @NonNull ArrayList<TextEditingDelta> batchDeltas) {
 
     Log.v(
-        TAG,
-        "Sending message to update editing state with deltas: \n"
-            + "Number of deltas: "
-            + batchDeltas.size());
+            TAG,
+            "Sending message to update editing state with deltas: \n"
+                    + "Number of deltas: "
+                    + batchDeltas.size());
 
     final HashMap<Object, Object> state = createEditingDeltaJSON(batchDeltas);
 
     channel.invokeMethod(
-        "TextInputClient.updateEditingStateWithDeltas", Arrays.asList(inputClientId, state));
+            "TextInputClient.updateEditingStateWithDeltas", Arrays.asList(inputClientId, state));
   }
 
   public void updateEditingStateWithTag(
-      int inputClientId, @NonNull HashMap<String, TextEditState> editStates) {
+          int inputClientId, @NonNull HashMap<String, TextEditState> editStates) {
     Log.v(
-        TAG,
-        "Sending message to update editing state for "
-            + editStates.size()
-            + " field(s).");
+            TAG,
+            "Sending message to update editing state for "
+                    + editStates.size()
+                    + " field(s).");
 
     final HashMap<String, HashMap<Object, Object>> json = new HashMap<>();
     for (Map.Entry<String, TextEditState> element : editStates.entrySet()) {
       final TextEditState state = element.getValue();
       json.put(
-          element.getKey(),
-          createEditingStateJSON(state.text, state.selectionStart, state.selectionEnd, -1, -1));
+              element.getKey(),
+              createEditingStateJSON(state.text, state.selectionStart, state.selectionEnd, -1, -1));
     }
     channel.invokeMethod(
-        "TextInputClient.updateEditingStateWithTag", Arrays.asList(inputClientId, json));
+            "TextInputClient.updateEditingStateWithTag", Arrays.asList(inputClientId, json));
   }
 
   /** Instructs Flutter to execute a "newline" action. */
   public void newline(int inputClientId) {
     Log.v(TAG, "Sending 'newline' message.");
     channel.invokeMethod(
-        "TextInputClient.performAction", Arrays.asList(inputClientId, "TextInputAction.newline"));
+            "TextInputClient.performAction", Arrays.asList(inputClientId, "TextInputAction.newline"));
   }
 
   /** Instructs Flutter to execute a "go" action. */
   public void go(int inputClientId) {
     Log.v(TAG, "Sending 'go' message.");
     channel.invokeMethod(
-        "TextInputClient.performAction", Arrays.asList(inputClientId, "TextInputAction.go"));
+            "TextInputClient.performAction", Arrays.asList(inputClientId, "TextInputAction.go"));
   }
 
   /** Instructs Flutter to execute a "search" action. */
   public void search(int inputClientId) {
     Log.v(TAG, "Sending 'search' message.");
     channel.invokeMethod(
-        "TextInputClient.performAction", Arrays.asList(inputClientId, "TextInputAction.search"));
+            "TextInputClient.performAction", Arrays.asList(inputClientId, "TextInputAction.search"));
   }
 
   /** Instructs Flutter to execute a "send" action. */
   public void send(int inputClientId) {
     Log.v(TAG, "Sending 'send' message.");
     channel.invokeMethod(
-        "TextInputClient.performAction", Arrays.asList(inputClientId, "TextInputAction.send"));
+            "TextInputClient.performAction", Arrays.asList(inputClientId, "TextInputAction.send"));
   }
 
   /** Instructs Flutter to execute a "done" action. */
   public void done(int inputClientId) {
     Log.v(TAG, "Sending 'done' message.");
     channel.invokeMethod(
-        "TextInputClient.performAction", Arrays.asList(inputClientId, "TextInputAction.done"));
+            "TextInputClient.performAction", Arrays.asList(inputClientId, "TextInputAction.done"));
   }
 
   /** Instructs Flutter to execute a "next" action. */
   public void next(int inputClientId) {
     Log.v(TAG, "Sending 'next' message.");
     channel.invokeMethod(
-        "TextInputClient.performAction", Arrays.asList(inputClientId, "TextInputAction.next"));
+            "TextInputClient.performAction", Arrays.asList(inputClientId, "TextInputAction.next"));
   }
 
   /** Instructs Flutter to execute a "previous" action. */
   public void previous(int inputClientId) {
     Log.v(TAG, "Sending 'previous' message.");
     channel.invokeMethod(
-        "TextInputClient.performAction", Arrays.asList(inputClientId, "TextInputAction.previous"));
+            "TextInputClient.performAction", Arrays.asList(inputClientId, "TextInputAction.previous"));
   }
 
   /** Instructs Flutter to execute an "unspecified" action. */
   public void unspecifiedAction(int inputClientId) {
     Log.v(TAG, "Sending 'unspecified' message.");
     channel.invokeMethod(
-        "TextInputClient.performAction",
-        Arrays.asList(inputClientId, "TextInputAction.unspecified"));
+            "TextInputClient.performAction",
+            Arrays.asList(inputClientId, "TextInputAction.unspecified"));
   }
 
   /** Instructs Flutter to commit inserted content back to the text channel. */
   public void commitContent(int inputClientId, Map<String, Object> content) {
     Log.v(TAG, "Sending 'commitContent' message.");
     channel.invokeMethod(
-        "TextInputClient.performAction",
-        Arrays.asList(inputClientId, "TextInputAction.commitContent", content));
+            "TextInputClient.performAction",
+            Arrays.asList(inputClientId, "TextInputAction.commitContent", content));
   }
 
   public void performPrivateCommand(
-      int inputClientId, @NonNull String action, @NonNull Bundle data) {
+          int inputClientId, @NonNull String action, @NonNull Bundle data) {
     HashMap<Object, Object> json = new HashMap<>();
     json.put("action", action);
     if (data != null) {
@@ -371,7 +371,7 @@ public class TextInputChannel {
       json.put("data", dataMap);
     }
     channel.invokeMethod(
-        "TextInputClient.performPrivateCommand", Arrays.asList(inputClientId, json));
+            "TextInputClient.performPrivateCommand", Arrays.asList(inputClientId, json));
   }
 
   /**
@@ -456,7 +456,7 @@ public class TextInputChannel {
   public static class Configuration {
     @NonNull
     public static Configuration fromJson(@NonNull JSONObject json)
-        throws JSONException, NoSuchFieldException {
+            throws JSONException, NoSuchFieldException {
       final String inputActionName = json.getString("inputAction");
       if (inputActionName == null) {
         throw new JSONException("Configuration JSON missing 'inputAction' property.");
@@ -474,9 +474,9 @@ public class TextInputChannel {
       // Build list of content commit mime types from the data in the JSON list.
       List<String> contentList = new ArrayList<String>();
       JSONArray contentCommitMimeTypes =
-          json.isNull("contentCommitMimeTypes")
-              ? null
-              : json.getJSONArray("contentCommitMimeTypes");
+              json.isNull("contentCommitMimeTypes")
+                      ? null
+                      : json.getJSONArray("contentCommitMimeTypes");
       if (contentCommitMimeTypes != null) {
         for (int i = 0; i < contentCommitMimeTypes.length(); i++) {
           contentList.add(contentCommitMimeTypes.optString(i));
@@ -494,19 +494,19 @@ public class TextInputChannel {
       }
 
       return new Configuration(
-          json.optBoolean("obscureText"),
-          json.optBoolean("autocorrect", true),
-          json.optBoolean("enableSuggestions"),
-          json.optBoolean("enableIMEPersonalizedLearning"),
-          json.optBoolean("enableDeltaModel"),
-          TextCapitalization.fromValue(json.getString("textCapitalization")),
-          InputType.fromJson(json.getJSONObject("inputType")),
-          inputAction,
-          json.isNull("actionLabel") ? null : json.getString("actionLabel"),
-          json.isNull("autofill") ? null : Autofill.fromJson(json.getJSONObject("autofill")),
-          contentList.toArray(new String[contentList.size()]),
-          fields,
-          hintLocales);
+              json.optBoolean("obscureText"),
+              json.optBoolean("autocorrect", true),
+              json.optBoolean("enableSuggestions"),
+              json.optBoolean("enableIMEPersonalizedLearning"),
+              json.optBoolean("enableDeltaModel"),
+              TextCapitalization.fromValue(json.getString("textCapitalization")),
+              InputType.fromJson(json.getJSONObject("inputType")),
+              inputAction,
+              json.isNull("actionLabel") ? null : json.getString("actionLabel"),
+              json.isNull("autofill") ? null : Autofill.fromJson(json.getJSONObject("autofill")),
+              contentList.toArray(new String[contentList.size()]),
+              fields,
+              hintLocales);
     }
 
     @NonNull
@@ -539,7 +539,7 @@ public class TextInputChannel {
     public static class Autofill {
       @NonNull
       public static Autofill fromJson(@NonNull JSONObject json)
-          throws JSONException, NoSuchFieldException {
+              throws JSONException, NoSuchFieldException {
         final String uniqueIdentifier = json.getString("uniqueIdentifier");
         final JSONArray hints = json.getJSONArray("hints");
         final String hintText = json.isNull("hintText") ? null : json.getString("hintText");
@@ -550,7 +550,7 @@ public class TextInputChannel {
           autofillHints[i] = translateAutofillHint(hints.getString(i));
         }
         return new Autofill(
-            uniqueIdentifier, autofillHints, hintText, TextEditState.fromJson(editingState));
+                uniqueIdentifier, autofillHints, hintText, TextEditState.fromJson(editingState));
       }
 
       public final String uniqueIdentifier;
@@ -642,10 +642,10 @@ public class TextInputChannel {
       }
 
       public Autofill(
-          @NonNull String uniqueIdentifier,
-          @NonNull String[] hints,
-          @Nullable String hintText,
-          @NonNull TextEditState editingState) {
+              @NonNull String uniqueIdentifier,
+              @NonNull String[] hints,
+              @Nullable String hintText,
+              @NonNull TextEditState editingState) {
         this.uniqueIdentifier = uniqueIdentifier;
         this.hints = hints;
         this.hintText = hintText;
@@ -668,19 +668,19 @@ public class TextInputChannel {
     @Nullable public final Locale[] hintLocales;
 
     public Configuration(
-        boolean obscureText,
-        boolean autocorrect,
-        boolean enableSuggestions,
-        boolean enableIMEPersonalizedLearning,
-        boolean enableDeltaModel,
-        @NonNull TextCapitalization textCapitalization,
-        @NonNull InputType inputType,
-        @Nullable Integer inputAction,
-        @Nullable String actionLabel,
-        @Nullable Autofill autofill,
-        @Nullable String[] contentCommitMimeTypes,
-        @Nullable Configuration[] fields,
-        @Nullable Locale[] hintLocales) {
+            boolean obscureText,
+            boolean autocorrect,
+            boolean enableSuggestions,
+            boolean enableIMEPersonalizedLearning,
+            boolean enableDeltaModel,
+            @NonNull TextCapitalization textCapitalization,
+            @NonNull InputType inputType,
+            @Nullable Integer inputAction,
+            @Nullable String actionLabel,
+            @Nullable Autofill autofill,
+            @Nullable String[] contentCommitMimeTypes,
+            @Nullable Configuration[] fields,
+            @Nullable Locale[] hintLocales) {
       this.obscureText = obscureText;
       this.autocorrect = autocorrect;
       this.enableSuggestions = enableSuggestions;
@@ -706,11 +706,11 @@ public class TextInputChannel {
   public static class InputType {
     @NonNull
     public static InputType fromJson(@NonNull JSONObject json)
-        throws JSONException, NoSuchFieldException {
+            throws JSONException, NoSuchFieldException {
       return new InputType(
-          TextInputType.fromValue(json.getString("name")),
-          json.optBoolean("signed", false),
-          json.optBoolean("decimal", false));
+              TextInputType.fromValue(json.getString("name")),
+              json.optBoolean("signed", false),
+              json.optBoolean("decimal", false));
     }
 
     @NonNull public final TextInputType type;
@@ -784,11 +784,11 @@ public class TextInputChannel {
     @NonNull
     public static TextEditState fromJson(@NonNull JSONObject textEditState) throws JSONException {
       return new TextEditState(
-          textEditState.getString("text"),
-          textEditState.getInt("selectionBase"),
-          textEditState.getInt("selectionExtent"),
-          textEditState.getInt("composingBase"),
-          textEditState.getInt("composingExtent"));
+              textEditState.getString("text"),
+              textEditState.getInt("selectionBase"),
+              textEditState.getInt("selectionExtent"),
+              textEditState.getInt("composingBase"),
+              textEditState.getInt("composingExtent"));
     }
 
     @NonNull public final String text;
@@ -798,46 +798,46 @@ public class TextInputChannel {
     public final int composingEnd;
 
     public TextEditState(
-        @NonNull String text,
-        int selectionStart,
-        int selectionEnd,
-        int composingStart,
-        int composingEnd)
-        throws IndexOutOfBoundsException {
+            @NonNull String text,
+            int selectionStart,
+            int selectionEnd,
+            int composingStart,
+            int composingEnd)
+            throws IndexOutOfBoundsException {
 
       if ((selectionStart != -1 || selectionEnd != -1)
-          && (selectionStart < 0 || selectionEnd < 0)) {
+              && (selectionStart < 0 || selectionEnd < 0)) {
         throw new IndexOutOfBoundsException(
-            "invalid selection: ("
-                + selectionStart
-                + ", "
-                + selectionEnd
-                + ")");
+                "invalid selection: ("
+                        + selectionStart
+                        + ", "
+                        + selectionEnd
+                        + ")");
       }
 
       if ((composingStart != -1 || composingEnd != -1)
-          && (composingStart < 0 || composingStart > composingEnd)) {
+              && (composingStart < 0 || composingStart > composingEnd)) {
         throw new IndexOutOfBoundsException(
-            "invalid composing range: ("
-                + composingStart
-                + ", "
-                + composingEnd
-                + ")");
+                "invalid composing range: ("
+                        + composingStart
+                        + ", "
+                        + composingEnd
+                        + ")");
       }
 
       if (composingEnd > text.length()) {
         throw new IndexOutOfBoundsException(
-            "invalid composing start: " + composingStart);
+                "invalid composing start: " + composingStart);
       }
 
       if (selectionStart > text.length()) {
         throw new IndexOutOfBoundsException(
-            "invalid selection start: " + selectionStart);
+                "invalid selection start: " + selectionStart);
       }
 
       if (selectionEnd > text.length()) {
         throw new IndexOutOfBoundsException(
-            "invalid selection end: " + selectionEnd);
+                "invalid selection end: " + selectionEnd);
       }
 
       this.text = text;
