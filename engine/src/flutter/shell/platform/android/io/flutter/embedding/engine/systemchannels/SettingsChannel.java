@@ -50,7 +50,7 @@ public class SettingsChannel {
   public static DisplayMetrics getPastDisplayMetrics(int configId) {
     assert hasNonlinearTextScalingSupport();
     final ConfigurationQueue.SentConfiguration configuration =
-        CONFIGURATION_QUEUE.getConfiguration(configId);
+            CONFIGURATION_QUEUE.getConfiguration(configId);
     return configuration == null ? null : configuration.displayMetrics;
   }
 
@@ -82,7 +82,7 @@ public class SettingsChannel {
 
     @NonNull
     public MessageBuilder setNativeSpellCheckServiceDefined(
-        boolean nativeSpellCheckServiceDefined) {
+            boolean nativeSpellCheckServiceDefined) {
       message.put(NATIVE_SPELL_CHECK_SERVICE_DEFINED, nativeSpellCheckServiceDefined);
       return this;
     }
@@ -107,25 +107,25 @@ public class SettingsChannel {
 
     public void send() {
       Log.v(
-          TAG,
-          "Sending message: \n"
-              + "textScaleFactor: "
-              + message.get(TEXT_SCALE_FACTOR)
-              + "\n"
-              + "alwaysUse24HourFormat: "
-              + message.get(ALWAYS_USE_24_HOUR_FORMAT)
-              + "\n"
-              + "platformBrightness: "
-              + message.get(PLATFORM_BRIGHTNESS));
+              TAG,
+              "Sending message: \n"
+                      + "textScaleFactor: "
+                      + message.get(TEXT_SCALE_FACTOR)
+                      + "\n"
+                      + "alwaysUse24HourFormat: "
+                      + message.get(ALWAYS_USE_24_HOUR_FORMAT)
+                      + "\n"
+                      + "platformBrightness: "
+                      + message.get(PLATFORM_BRIGHTNESS));
       final DisplayMetrics metrics = this.displayMetrics;
       if (!hasNonlinearTextScalingSupport() || metrics == null) {
         channel.send(message);
         return;
       }
       final ConfigurationQueue.SentConfiguration sentConfiguration =
-          new ConfigurationQueue.SentConfiguration(metrics);
+              new ConfigurationQueue.SentConfiguration(metrics);
       final BasicMessageChannel.Reply deleteCallback =
-          CONFIGURATION_QUEUE.enqueueConfiguration(sentConfiguration);
+              CONFIGURATION_QUEUE.enqueueConfiguration(sentConfiguration);
       message.put(CONFIGURATION_ID, sentConfiguration.generationNumber);
       channel.send(message, deleteCallback);
     }
@@ -178,7 +178,7 @@ public class SettingsChannel {
   @VisibleForTesting
   public static class ConfigurationQueue {
     private final ConcurrentLinkedQueue<SentConfiguration> sentQueue =
-        new ConcurrentLinkedQueue<>();
+            new ConcurrentLinkedQueue<>();
 
     // The current SentConfiguration the Flutter application is using, according
     // to the most recent getConfiguration call.
@@ -200,24 +200,24 @@ public class SettingsChannel {
       // Remove the older entries, up to the entry associated with
       // configGeneration. Here we assume the generationNumber never overflows.
       while (currentConfiguration != null
-          && currentConfiguration.generationNumber < configGeneration) {
+              && currentConfiguration.generationNumber < configGeneration) {
         currentConfiguration = sentQueue.poll();
       }
 
       if (currentConfiguration == null) {
         Log.e(
-            TAG,
-            "Cannot find config with generation: "
-                + configGeneration
-                + ", after exhausting the queue.");
+                TAG,
+                "Cannot find config with generation: "
+                        + configGeneration
+                        + ", after exhausting the queue.");
         return null;
       } else if (currentConfiguration.generationNumber != configGeneration) {
         Log.e(
-            TAG,
-            "Cannot find config with generation: "
-                + configGeneration
-                + ", the oldest config is now: "
-                + currentConfiguration.generationNumber);
+                TAG,
+                "Cannot find config with generation: "
+                        + configGeneration
+                        + ", the oldest config is now: "
+                        + currentConfiguration.generationNumber);
         return null;
       }
       return currentConfiguration;
@@ -239,23 +239,23 @@ public class SettingsChannel {
       final SentConfiguration configurationToRemove = previousEnqueuedConfiguration;
       previousEnqueuedConfiguration = config;
       return configurationToRemove == null
-          ? null
-          : new BasicMessageChannel.Reply() {
-            @UiThread
-            @Override
-            public void reply(Object reply) {
-              // Removes the SentConfiguration sent right before `config`. Since
-              // platform messages are also FIFO older messages will be removed
-              // before newer ones.
-              sentQueue.remove(configurationToRemove);
-              if (!sentQueue.isEmpty()) {
-                Log.e(
+              ? null
+              : new BasicMessageChannel.Reply() {
+        @UiThread
+        @Override
+        public void reply(Object reply) {
+          // Removes the SentConfiguration sent right before `config`. Since
+          // platform messages are also FIFO older messages will be removed
+          // before newer ones.
+          sentQueue.remove(configurationToRemove);
+          if (!sentQueue.isEmpty()) {
+            Log.e(
                     TAG,
                     "The queue becomes empty after removing config generation "
-                        + configurationToRemove.generationNumber);
-              }
-            }
-          };
+                            + configurationToRemove.generationNumber);
+          }
+        }
+      };
     }
 
     public static class SentConfiguration {
