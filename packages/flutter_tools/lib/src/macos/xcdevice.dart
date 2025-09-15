@@ -450,16 +450,16 @@ class XCDevice {
       return const <IOSDevice>[];
     }
 
-    final coreDeviceMap = <String, IOSCoreDevice>{};
-    if (_xcode.isDevicectlInstalled) {
-      final List<IOSCoreDevice> coreDevices = await _coreDeviceControl.getCoreDevices();
-      for (final device in coreDevices) {
-        if (device.udid == null) {
-          continue;
-        }
-        coreDeviceMap[device.udid!] = device;
-      }
-    }
+    // final coreDeviceMap = <String, IOSCoreDevice>{};
+    // if (_xcode.isDevicectlInstalled) {
+    //   final List<IOSCoreDevice> coreDevices = await _coreDeviceControl.getCoreDevices();
+    //   for (final device in coreDevices) {
+    //     if (device.udid == null) {
+    //       continue;
+    //     }
+    //     coreDeviceMap[device.udid!] = device;
+    //   }
+    // }
 
     // [
     //  {
@@ -576,21 +576,22 @@ class XCDevice {
           }
         }
 
-        DeviceConnectionInterface connectionInterface = _interfaceType(device);
+        // DeviceConnectionInterface connectionInterface = _interfaceType(device);
+        const DeviceConnectionInterface connectionInterface = DeviceConnectionInterface.attached;
 
         // CoreDevices (devices with iOS 17 and greater) no longer reflect the
         // correct connection interface or developer mode status in `xcdevice`.
         // Use `devicectl` to get that information for CoreDevices.
-        final IOSCoreDevice? coreDevice = coreDeviceMap[identifier];
-        if (coreDevice != null) {
-          if (coreDevice.connectionInterface != null) {
-            connectionInterface = coreDevice.connectionInterface!;
-          }
+        // final IOSCoreDevice? coreDevice = coreDeviceMap[identifier];
+        // if (coreDevice != null) {
+        //   if (coreDevice.connectionInterface != null) {
+        //     connectionInterface = coreDevice.connectionInterface!;
+        //   }
 
-          if (coreDevice.deviceProperties?.developerModeStatus != 'enabled') {
-            devModeEnabled = false;
-          }
-        }
+        //   if (coreDevice.deviceProperties?.developerModeStatus != 'enabled') {
+        //     devModeEnabled = false;
+        //   }
+        // }
 
         deviceMap[identifier] = IOSDevice(
           identifier,
@@ -617,7 +618,7 @@ class XCDevice {
           platform: globals.platform,
           devModeEnabled: devModeEnabled,
           isPaired: isPaired,
-          isCoreDevice: coreDevice != null,
+          isCoreDevice: true,
         );
       }
     }
