@@ -10,9 +10,9 @@ reactive framework, and a rich set of platform, layout and foundation widgets.
 
 More tooling is available to make development experiences easier:
 
-| Target            | Tool                                            |
-| ----------------- | ----------------------------------------------- |
-| Web               | [`felt`](lib/web_ui/README.md#using-felt)       |
-| Mobile or Desktop | [`et`](tools/engine_tool/README.md#engine-tool) |
+| Target            | Tool                                                    |
+| ----------------- | ------------------------------------------------------- |
+| Web               | [`felt`](flutter/lib/web_ui/README.md#using-felt)       |
+| Mobile or Desktop | [`et`](flutter/tools/engine_tool/README.md#engine-tool) |
 
 To learn about running tests, see [testing the engine](flutter/docs/testing/Testing-the-engine.md).
