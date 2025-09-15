@@ -113,30 +113,30 @@ class _RegularWindowEditDialogState extends State<_RegularWindowEditDialog> {
 
   @override
   void dispose() {
-    super.dispose();
     widget.controller.removeListener(_onNotification);
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text("Edit Window Properties"),
+      title: Text('Edit Window Properties'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
             controller: widthController,
             keyboardType: TextInputType.number,
-            decoration: InputDecoration(labelText: "Width"),
+            decoration: InputDecoration(labelText: 'Width'),
           ),
           TextField(
             controller: heightController,
             keyboardType: TextInputType.number,
-            decoration: InputDecoration(labelText: "Height"),
+            decoration: InputDecoration(labelText: 'Height'),
           ),
           TextField(
             controller: titleController,
-            decoration: InputDecoration(labelText: "Title"),
+            decoration: InputDecoration(labelText: 'Title'),
           ),
           CheckboxListTile(
             title: const Text('Fullscreen'),
@@ -168,8 +168,8 @@ class _RegularWindowEditDialogState extends State<_RegularWindowEditDialog> {
         ],
       ),
       actions: [
-        TextButton(onPressed: () => widget.onClose(), child: Text("Cancel")),
-        TextButton(onPressed: () => _onSave(), child: Text("Save")),
+        TextButton(onPressed: () => widget.onClose(), child: Text('Cancel')),
+        TextButton(onPressed: () => _onSave(), child: Text('Save')),
       ],
     );
   }

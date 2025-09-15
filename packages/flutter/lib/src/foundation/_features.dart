@@ -14,7 +14,7 @@ import 'package:meta/meta.dart';
 /// files will throw an `UnsupportedError`:
 ///
 /// 1. packages/flutter/lib/src/widgets/_window.dart
-/// 2. packages/flutter/lib/src/widgets/_window_ffi.dart
+/// 2. packages/flutter/lib/src/widgets/_window_io.dart
 /// 3. packages/flutter/lib/src/widgets/_window_web.dart
 /// 4. packages/flutter/lib/src/widgets/_window_win32.dart
 ///

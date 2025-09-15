@@ -118,7 +118,7 @@ class _RegularWindowContentState extends State<RegularWindowContent>
                             onDestroyed: () =>
                                 widget.windowManagerModel.remove(key),
                           ),
-                          title: "Regular",
+                          title: 'Regular',
                         ),
                       ),
                     );

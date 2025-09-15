@@ -23,7 +23,7 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   final RegularWindowController controller = RegularWindowController(
     preferredSize: const Size(800, 600),
-    title: "Multi-Window Reference Application",
+    title: 'Multi-Window Reference Application',
     delegate: MainControllerWindowDelegate(),
   );
   runWidget(

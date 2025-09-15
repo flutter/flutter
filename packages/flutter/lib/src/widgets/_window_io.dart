@@ -10,7 +10,7 @@
 //
 // 1. Have the `@internal` attribute.
 // 2. Throw an `UnsupportedError` if `isWindowingEnabled`
-//    is `false.
+//    is `false`.
 //
 // See: https://github.com/flutter/flutter/issues/30701.
 

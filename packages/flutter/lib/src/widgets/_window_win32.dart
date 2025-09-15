@@ -10,7 +10,7 @@
 //
 // 1. Have the `@internal` attribute.
 // 2. Throw an `UnsupportedError` if `isWindowingEnabled`
-//    is `false.
+//    is `false`.
 //
 // See: https://github.com/flutter/flutter/issues/30701.
 
@@ -469,11 +469,11 @@ class _Win32PlatformInterface {
     BoxConstraints? preferredConstraints,
     String? title,
   ) {
-    final ffi.Pointer<_WindowCreationRequest> request = allocator<_WindowCreationRequest>()
-      ..ref.preferredSize.from(preferredSize)
-      ..ref.preferredConstraints.from(preferredConstraints)
-      ..ref.title = (title ?? 'Regular window').toNativeUtf16(allocator: allocator);
+    final ffi.Pointer<_WindowCreationRequest> request = allocator<_WindowCreationRequest>();
     try {
+      request.ref.preferredSize.from(preferredSize);
+      request.ref.preferredConstraints.from(preferredConstraints);
+      request.ref.title = (title ?? 'Regular window').toNativeUtf16(allocator: allocator);
       return _createWindow(engineId, request);
     } finally {
       allocator.free(request);
@@ -511,8 +511,9 @@ class _Win32PlatformInterface {
   external static void _setWindowTitle(HWND windowHandle, ffi.Pointer<_Utf16> title);
 
   static void setWindowContentSize(ffi.Allocator allocator, HWND windowHandle, Size? size) {
-    final ffi.Pointer<_WindowSizeRequest> request = allocator<_WindowSizeRequest>()..ref.from(size);
+    final ffi.Pointer<_WindowSizeRequest> request = allocator<_WindowSizeRequest>();
     try {
+      request.ref.from(size);
       _setWindowContentSize(windowHandle, request);
     } finally {
       allocator.free(request);
@@ -532,9 +533,9 @@ class _Win32PlatformInterface {
     HWND windowHandle,
     BoxConstraints? constraints,
   ) {
-    final ffi.Pointer<_WindowConstraintsRequest> request = allocator<_WindowConstraintsRequest>()
-      ..ref.from(constraints);
+    final ffi.Pointer<_WindowConstraintsRequest> request = allocator<_WindowConstraintsRequest>();
     try {
+      request.ref.from(constraints);
       _setWindowConstraints(windowHandle, request);
     } finally {
       allocator.free(request);
@@ -564,11 +565,11 @@ class _Win32PlatformInterface {
     bool fullscreen, {
     Display? display,
   }) {
-    final ffi.Pointer<_WindowFullscreenRequest> request = allocator<_WindowFullscreenRequest>()
-      ..ref.fullscreen = fullscreen
-      ..ref.hasDisplayId = display != null
-      ..ref.displayId = display?.id ?? 0;
+    final ffi.Pointer<_WindowFullscreenRequest> request = allocator<_WindowFullscreenRequest>();
     try {
+      request.ref.fullscreen = fullscreen;
+      request.ref.hasDisplayId = display != null;
+      request.ref.displayId = display?.id ?? 0;
       _setFullscreen(windowHandle, request);
     } finally {
       allocator.free(request);
