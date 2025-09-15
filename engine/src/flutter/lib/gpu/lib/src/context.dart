@@ -117,10 +117,12 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     sampleCount = 1,
     TextureCoordinateSystem coordinateSystem =
         TextureCoordinateSystem.renderToTexture,
+    TextureType? textureType,
     bool enableRenderTargetUsage = true,
     bool enableShaderReadUsage = true,
     bool enableShaderWriteUsage = false,
   }) {
+    final _textureType = textureType ?? ((sampleCount == 1) ? TextureType.texture2D : TextureType.texture2DMultisample)
     Texture result = Texture._initialize(
       this,
       storageMode,
@@ -129,6 +131,7 @@ base class GpuContext extends NativeFieldWrapperClass1 {
       height,
       sampleCount,
       coordinateSystem,
+      _textureType,
       enableRenderTargetUsage,
       enableShaderReadUsage,
       enableShaderWriteUsage,

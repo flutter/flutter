@@ -21,6 +21,7 @@ base class Texture extends NativeFieldWrapperClass1 {
     this.height,
     this.sampleCount,
     TextureCoordinateSystem coordinateSystem,
+    this.textureType,
     this.enableRenderTargetUsage,
     this.enableShaderReadUsage,
     this.enableShaderWriteUsage,
@@ -37,6 +38,7 @@ base class Texture extends NativeFieldWrapperClass1 {
       height,
       sampleCount,
       coordinateSystem.index,
+      textureType.index,
       enableRenderTargetUsage,
       enableShaderReadUsage,
       enableShaderWriteUsage,
@@ -50,6 +52,7 @@ base class Texture extends NativeFieldWrapperClass1 {
   final int width;
   final int height;
   final int sampleCount;
+  final TextureType textureType;
 
   /// Enable using this texture as a render pass attachment.
   final bool enableRenderTargetUsage;
@@ -128,6 +131,7 @@ base class Texture extends NativeFieldWrapperClass1 {
       Int,
       Int,
       Int,
+      Int,
       Bool,
       Bool,
       Bool,
@@ -141,6 +145,7 @@ base class Texture extends NativeFieldWrapperClass1 {
     int height,
     int sampleCount,
     int coordinateSystem,
+    int textureType,
     bool enableRenderTargetUsage,
     bool enableShaderReadUsage,
     bool enableShaderWriteUsage,

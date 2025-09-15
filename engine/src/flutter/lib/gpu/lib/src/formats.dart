@@ -162,3 +162,10 @@ enum StencilOperation {
   /// Decrement the current stencil value by 1. If at zero, set to maximum.
   decrementWrap,
 }
+
+enum TextureType {
+  texture2D,
+  texture2DMultisample,
+  textureCube,
+  textureExternalOES,
+}
