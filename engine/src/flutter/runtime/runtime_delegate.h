@@ -36,6 +36,8 @@ class RuntimeDelegate {
                                SemanticsNodeUpdates update,
                                CustomAccessibilityActionUpdates actions) = 0;
 
+  virtual void SetApplicationLocale(const std::string& locale) = 0;
+
   virtual void SetSemanticsTreeEnabled(bool enabled) = 0;
 
   virtual void HandlePlatformMessage(

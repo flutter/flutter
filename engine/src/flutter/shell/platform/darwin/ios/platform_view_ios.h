@@ -111,6 +111,9 @@ class PlatformViewIOS final : public PlatformView {
                        flutter::CustomAccessibilityActionUpdates actions) override;
 
   // |PlatformView|
+  void SetApplicationLocale(const std::string& locale) override;
+
+  // |PlatformView|
   std::unique_ptr<VsyncWaiter> CreateVSyncWaiter() override;
 
   // |PlatformView|

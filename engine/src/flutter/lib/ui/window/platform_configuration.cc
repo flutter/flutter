@@ -677,6 +677,15 @@ void PlatformConfigurationNativeApi::UpdateSemantics(int64_t view_id,
       view_id, update);
 }
 
+void PlatformConfigurationNativeApi::SetApplicationLocale(
+    const std::string& locale) {
+  UIDartState::ThrowIfUIOperationsProhibited();
+  UIDartState::Current()
+      ->platform_configuration()
+      ->client()
+      ->SetApplicationLocale(locale);
+}
+
 void PlatformConfigurationNativeApi::SetSemanticsTreeEnabled(bool enabled) {
   UIDartState::ThrowIfUIOperationsProhibited();
   UIDartState::Current()

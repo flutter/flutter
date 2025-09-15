@@ -227,6 +227,16 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   // a bitmask whose values comes from {@link AccessibilityFeature}.
   private int accessibilityFeatureFlags = 0;
 
+  // The main locale for assistive technologies in BCP 47 format.
+  //
+  // For example "en-US", "de-DE", "fr-FR".
+  private String mainLocale;
+
+  @VisibleForTesting
+  public void setLocale(String locale) {
+    mainLocale = locale;
+  }
+
   // The {@code SemanticsNode} within Flutter that currently has the focus of Android's input
   // system.
   //
@@ -371,6 +381,11 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
             args.order(ByteOrder.LITTLE_ENDIAN);
           }
           AccessibilityBridge.this.updateSemantics(buffer, strings, stringAttributeArgs);
+        }
+
+        @Override
+        public void setLocale(String locale) {
+          AccessibilityBridge.this.setLocale(locale);
         }
       };
 
@@ -2795,6 +2810,13 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       return null;
     }
 
+    private String getEffectiveLocale() {
+      if (locale != null && !locale.isEmpty()) {
+        return locale;
+      }
+      return accessibilityBridge.mainLocale;
+    }
+
     private void updateRecursively(
         float[] ancestorTransform, Set<SemanticsNode> visitedObjects, boolean forceUpdate) {
       visitedObjects.add(this);
@@ -2890,7 +2912,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       return new AccessibilityStringBuilder()
           .addString(value)
           .addAttributes(valueAttributes)
-          .addLocale(locale)
+          .addLocale(getEffectiveLocale())
           .build();
     }
 
@@ -2899,7 +2921,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
           .addString(label)
           .addAttributes(labelAttributes)
           .addUrl(linkUrl)
-          .addLocale(locale)
+          .addLocale(getEffectiveLocale())
           .build();
     }
 
@@ -2907,7 +2929,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       return new AccessibilityStringBuilder()
           .addString(hint)
           .addAttributes(hintAttributes)
-          .addLocale(locale)
+          .addLocale(getEffectiveLocale())
           .build();
     }
 

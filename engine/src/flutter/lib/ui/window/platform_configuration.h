@@ -99,6 +99,13 @@ class PlatformConfigurationClient {
   virtual void UpdateSemantics(int64_t viewId, SemanticsUpdate* update) = 0;
 
   //--------------------------------------------------------------------------
+  /// @brief      Framework sets the application locale
+  ///
+  /// @param[in] locale The application locale.
+  ///
+  virtual void SetApplicationLocale(const std::string& locale) = 0;
+
+  //--------------------------------------------------------------------------
   /// @brief      Notifies whether Framework starts generating semantics tree.
   ///
   /// @param[in] enabled True if Framework starts generating semantics tree.
@@ -632,6 +639,8 @@ class PlatformConfigurationNativeApi {
                      double height);
 
   static void UpdateSemantics(int64_t viewId, SemanticsUpdate* update);
+
+  static void SetApplicationLocale(const std::string& locale);
 
   static void SetSemanticsTreeEnabled(bool enabled);
 

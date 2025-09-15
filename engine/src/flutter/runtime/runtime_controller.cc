@@ -445,6 +445,11 @@ void RuntimeController::UpdateSemantics(int64_t view_id,
 }
 
 // |PlatformConfigurationClient|
+void RuntimeController::SetApplicationLocale(const std::string& locale) {
+  client_.SetApplicationLocale(locale);
+}
+
+// |PlatformConfigurationClient|
 void RuntimeController::SetSemanticsTreeEnabled(bool enabled) {
   client_.SetSemanticsTreeEnabled(enabled);
 }
