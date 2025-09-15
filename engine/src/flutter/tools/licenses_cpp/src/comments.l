@@ -54,8 +54,6 @@ COMMENT_START (\/\/|#)
   .*\*\/.*\n {
     BEGIN(INITIAL);
     CommentsUtil::AddCEndTrimLine(&yyextra->buffer, yytext, yyleng - 2);
-    yyextra->callback(yyextra->buffer);
-    yyextra->buffer.clear();
   }
   .*\n {
     CommentsUtil::AddCTrimLine(&yyextra->buffer, yytext, yyleng);
