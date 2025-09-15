@@ -164,6 +164,7 @@ enum StencilOperation {
 }
 
 enum TextureType {
+<<<<<<< HEAD
   /// A 2-dimensional texture.
   texture2D,
 
@@ -174,5 +175,10 @@ enum TextureType {
   textureCube,
 
   /// A texture sourced from an external source.
+=======
+  texture2D,
+  texture2DMultisample,
+  textureCube,
+>>>>>>> a7738e804b48a49557cb574e6e4aaa7aeb5b795d
   textureExternalOES,
 }
