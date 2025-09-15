@@ -439,6 +439,8 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
           effectiveValue((ButtonStyle? style) => style?.overlayColor?.resolve(states)),
     );
 
+      final double? splashRadius = effectiveValue((ButtonStyle? style) => style?.splashRadius);
+
     final VisualDensity? resolvedVisualDensity = effectiveValue(
       (ButtonStyle? style) => style?.visualDensity,
     );
@@ -567,6 +569,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
         highlightColor: Colors.transparent,
         customBorder: resolvedShape!.copyWith(side: resolvedSide),
         statesController: statesController,
+        radius: splashRadius,
         child: result,
       ),
     );

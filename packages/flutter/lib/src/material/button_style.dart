@@ -184,6 +184,7 @@ class ButtonStyle with Diagnosticable {
     this.animationDuration,
     this.enableFeedback,
     this.alignment,
+    this.splashRadius,
     this.splashFactory,
     this.backgroundBuilder,
     this.foregroundBuilder,
@@ -372,6 +373,16 @@ class ButtonStyle with Diagnosticable {
   /// Always defaults to [Alignment.center].
   final AlignmentGeometry? alignment;
 
+  /// The radius of the splash created by the underlying [InkWell] or [InkResponse].
+  ///
+  /// If null, the default splash radius defined by the widget (such as
+  /// [IconButton]) will be used. This value affects how large the ripple effect
+  /// appears when the button is pressed.
+  ///
+  /// This property has no visual effect unless the button is interactive.
+  final double? splashRadius;
+
+
   /// Creates the [InkWell] splash factory, which defines the appearance of
   /// "ink" splashes that occur in response to taps.
   ///
@@ -448,6 +459,7 @@ class ButtonStyle with Diagnosticable {
     Duration? animationDuration,
     bool? enableFeedback,
     AlignmentGeometry? alignment,
+    double? splashRadius,
     InteractiveInkFeatureFactory? splashFactory,
     ButtonLayerBuilder? backgroundBuilder,
     ButtonLayerBuilder? foregroundBuilder,
@@ -475,6 +487,7 @@ class ButtonStyle with Diagnosticable {
       animationDuration: animationDuration ?? this.animationDuration,
       enableFeedback: enableFeedback ?? this.enableFeedback,
       alignment: alignment ?? this.alignment,
+      splashRadius: splashRadius ?? this.splashRadius,
       splashFactory: splashFactory ?? this.splashFactory,
       backgroundBuilder: backgroundBuilder ?? this.backgroundBuilder,
       foregroundBuilder: foregroundBuilder ?? this.foregroundBuilder,
@@ -513,6 +526,7 @@ class ButtonStyle with Diagnosticable {
       animationDuration: animationDuration ?? style.animationDuration,
       enableFeedback: enableFeedback ?? style.enableFeedback,
       alignment: alignment ?? style.alignment,
+      splashRadius: splashRadius ?? style.splashRadius,
       splashFactory: splashFactory ?? style.splashFactory,
       backgroundBuilder: backgroundBuilder ?? style.backgroundBuilder,
       foregroundBuilder: foregroundBuilder ?? style.foregroundBuilder,
@@ -544,6 +558,7 @@ class ButtonStyle with Diagnosticable {
       animationDuration,
       enableFeedback,
       alignment,
+      splashRadius,
       splashFactory,
       backgroundBuilder,
       foregroundBuilder,
@@ -582,6 +597,7 @@ class ButtonStyle with Diagnosticable {
         other.animationDuration == animationDuration &&
         other.enableFeedback == enableFeedback &&
         other.alignment == alignment &&
+        other.splashRadius == splashRadius &&
         other.splashFactory == splashFactory &&
         other.backgroundBuilder == backgroundBuilder &&
         other.foregroundBuilder == foregroundBuilder;
@@ -706,6 +722,7 @@ class ButtonStyle with Diagnosticable {
         defaultValue: null,
       ),
     );
+    properties.add(DoubleProperty('splashRadius', splashRadius, defaultValue: null));
   }
 
   /// Linearly interpolate between two [ButtonStyle]s.
@@ -766,6 +783,7 @@ class ButtonStyle with Diagnosticable {
       animationDuration: t < 0.5 ? a?.animationDuration : b?.animationDuration,
       enableFeedback: t < 0.5 ? a?.enableFeedback : b?.enableFeedback,
       alignment: AlignmentGeometry.lerp(a?.alignment, b?.alignment, t),
+      splashRadius: t < 0.5 ? a?.splashRadius : b?.splashRadius,
       splashFactory: t < 0.5 ? a?.splashFactory : b?.splashFactory,
       backgroundBuilder: t < 0.5 ? a?.backgroundBuilder : b?.backgroundBuilder,
       foregroundBuilder: t < 0.5 ? a?.foregroundBuilder : b?.foregroundBuilder,

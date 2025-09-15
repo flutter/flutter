@@ -39,7 +39,7 @@ class IconButtonThemeData with Diagnosticable {
   /// Creates a [IconButtonThemeData].
   ///
   /// The [style] may be null.
-  const IconButtonThemeData({this.style});
+  const IconButtonThemeData({this.style, this.splashRadius});
 
   /// Overrides for [IconButton]'s default style if [ThemeData.useMaterial3]
   /// is set to true.
@@ -50,16 +50,41 @@ class IconButtonThemeData with Diagnosticable {
   /// If [style] is null, then this theme doesn't override anything.
   final ButtonStyle? style;
 
+  /// The splash radius for [IconButton]s in this theme.
+  ///
+  /// If null, [IconButton] will use its default splash radius of 24.0.
+  ///
+  /// This property is particularly useful for Material 2 design where
+  /// splash effects are more prominent. For Material 3 design, the framework
+  /// will automatically adjust padding when necessary to ensure the splash
+  /// radius is visible.
+  final double? splashRadius;
+
+  /// Creates a copy of this object but with the given fields replaced with the
+  /// new values.
+  IconButtonThemeData copyWith({
+    ButtonStyle? style,
+    double? splashRadius,
+  }) {
+    return IconButtonThemeData(
+      style: style ?? this.style,
+      splashRadius: splashRadius ?? this.splashRadius,
+    );
+  }
+
   /// Linearly interpolate between two icon button themes.
   static IconButtonThemeData? lerp(IconButtonThemeData? a, IconButtonThemeData? b, double t) {
     if (identical(a, b)) {
       return a;
     }
-    return IconButtonThemeData(style: ButtonStyle.lerp(a?.style, b?.style, t));
+    return IconButtonThemeData(
+      style: ButtonStyle.lerp(a?.style, b?.style, t),
+      splashRadius: t < 0.5 ? a?.splashRadius : b?.splashRadius,
+    );
   }
 
   @override
-  int get hashCode => style.hashCode;
+  int get hashCode => Object.hash(style, splashRadius);
 
   @override
   bool operator ==(Object other) {
@@ -69,13 +94,16 @@ class IconButtonThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is IconButtonThemeData && other.style == style;
+    return other is IconButtonThemeData &&
+           other.style == style &&
+           other.splashRadius == splashRadius;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ButtonStyle>('style', style, defaultValue: null));
+    properties.add(DoubleProperty('splashRadius', splashRadius, defaultValue: null));
   }
 }
 
