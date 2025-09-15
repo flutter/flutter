@@ -242,7 +242,7 @@ absl::Status MatchLicenseFile(const fs::path& path,
             std::string_view(license->GetData(), license->GetSize()));
 
     if (matches.ok()) {
-     for (const Catalog::Match& match : matches.value()) {
+      for (const Catalog::Match& match : matches.value()) {
         license_map->Add(package.name, match.GetMatchedText());
         VLOG(1) << "OK: " << path << " : " << match.GetMatcher();
       }

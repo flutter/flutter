@@ -163,7 +163,6 @@ TEST(CommentsTest, JoinCCommentsNegative) {
   EXPECT_EQ(comments[1], "World");
 }
 
-
 TEST(CommentsTest, MixmatchComments) {
   std::string test = R"test(
 // Hello
