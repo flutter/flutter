@@ -1223,8 +1223,8 @@ flutter:
             'Flutter run key commands.',
             commandHelp.r,
             commandHelp.R,
-            commandHelp.v,
             commandHelp.s,
+            commandHelp.v,
             commandHelp.w,
             commandHelp.t,
             commandHelp.L,
@@ -1311,7 +1311,6 @@ flutter:
         equals(
           <dynamic>[
             'Flutter run key commands.',
-            commandHelp.v,
             commandHelp.s,
             commandHelp.hWithDetails,
             commandHelp.c,
@@ -1355,6 +1354,32 @@ flutter:
           ].join('\n'),
         ),
       );
+    }),
+  );
+
+  testUsingContext(
+    'ResidentRunner printHelpDetails hides v on web in profile mode',
+    () => testbed.run(() async {
+      final FlutterDevice flutterDevice = await FlutterDevice.create(
+        FakeDevice(targetPlatform: TargetPlatform.web_javascript),
+        target: 'lib/main.dart',
+        buildInfo: BuildInfo.profile,
+        platform: FakePlatform(),
+      );
+
+      final ResidentRunner residentRunner = HotRunner(
+        <FlutterDevice>[flutterDevice],
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.profile),
+        target: 'lib/main.dart',
+        analytics: fakeAnalytics,
+      );
+
+      residentRunner.printHelp(details: true);
+
+      final CommandHelp commandHelp = residentRunner.commandHelp;
+
+      expect(residentRunner.isRunningDebug, false);
+      expect(testLogger.statusText, isNot(contains(commandHelp.v)));
     }),
   );
 
