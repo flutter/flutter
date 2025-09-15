@@ -39,7 +39,7 @@ open class FlutterExtension {
      * and in packages/flutter_tools/gradle/build.gradle.kts as found in
      * https://developer.android.com/studio/projects/install-ndk#default-ndk-per-agp.
      */
-    val ndkVersion: String = "28.2.13676358"
+    val ndkVersion: String = "27.0.12077973"
 
     /**
      * Specifies the relative directory to the Flutter project directory.
