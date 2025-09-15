@@ -44,7 +44,8 @@ void main() {
       'Luiza': <double>[8.0, 9.0],
     });
 
-    expect(alunos.keys, <String>['Maria', 'Bruna', 'Carla', 'Elena', 'Luiza']);
+    // Corrigido: convertemos keys para List
+    expect(alunos.keys.toList(), <String>['Maria', 'Bruna', 'Carla', 'Elena', 'Luiza']);
     expect(alunos['Maria'], <double>[8.0, 9.0]);
 
     double soma = 0;
