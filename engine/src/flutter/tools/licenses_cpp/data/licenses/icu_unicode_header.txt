@@ -2,5 +2,5 @@ icu unicode header
 ^© \d\d\d\d.*Unicode, Inc. and others.
 (?s)^© \d\d\d\d.*Unicode, Inc. and others.
 License & terms of use: http://www.unicode.org/copyright.html(.*?)(?:Copyright.*All Rights Reserved.)?
-Copyright \([Cc]\) [ {}\d-,]+,? (?:International Business Machines Corporation|IBM Corp|IBM and others).*All [Rr]ights [Rr]eserved.
+Copyright \([Cc]\) [ {}\d-,]+,? (?:International Business Machines Corporation|IBM Corp|IBM and others|Google, International Business Machines Corporation and others).*All [Rr]ights [Rr]eserved.
 (?:Copyright[^\n]+[\n])*
