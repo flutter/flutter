@@ -420,8 +420,6 @@ abstract class WidgetStateMouseCursor extends MouseCursor
   ///
   /// By default this cursor resolves to [SystemMouseCursors.click]. If the widget is
   /// disabled, the cursor resolves to [SystemMouseCursors.basic].
-  ///
-  /// This cursor is the default for many widgets.
   static const WidgetStateMouseCursor clickable = WidgetStateMouseCursor.resolveWith(
     _clickable,
     debugDescription: 'WidgetStateMouseCursor(clickable)',
