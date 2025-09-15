@@ -14,6 +14,7 @@ class PreviewDetailsMatcher extends Matcher {
     required this.packageName,
     required this.functionName,
     required this.isBuilder,
+    this.group = 'Default',
     this.name,
     this.size,
     this.textScaleFactor,
@@ -27,6 +28,7 @@ class PreviewDetailsMatcher extends Matcher {
   final bool isBuilder;
   final String packageName;
 
+  final String? group;
   final String? name;
   final String? size;
   final double? textScaleFactor;
@@ -80,6 +82,11 @@ class PreviewDetailsMatcher extends Matcher {
     checkPropertyMatch(name: 'packageName', actual: item.packageName, expected: packageName);
     checkPropertyMatch(name: 'functionName', actual: item.functionName, expected: functionName);
     checkPropertyMatch(name: 'isBuilder', actual: item.isBuilder, expected: isBuilder);
+    checkPropertyMatch(
+      name: PreviewDetails.kGroup,
+      actual: item.group.toStringValue(),
+      expected: group,
+    );
     checkPropertyMatch(
       name: PreviewDetails.kName,
       actual: item.name.toStringValue(),

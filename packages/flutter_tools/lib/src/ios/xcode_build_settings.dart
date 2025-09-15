@@ -180,9 +180,6 @@ Future<List<String>> _xcodeBuildSettingsLines({
       parsedBuildNumber(manifest: project.manifest, buildInfo: buildInfo) ?? '1';
   xcodeBuildSettings.add('FLUTTER_BUILD_NUMBER=$buildNumber');
 
-  // The current build mode being targeted.
-  xcodeBuildSettings.add('FLUTTER_CLI_BUILD_MODE=${buildInfo.mode.cliName}');
-
   // CoreDevices in debug and profile mode are launched, but not built, via Xcode.
   // Set the CONFIGURATION_BUILD_DIR so Xcode knows where to find the app
   // bundle to launch.
