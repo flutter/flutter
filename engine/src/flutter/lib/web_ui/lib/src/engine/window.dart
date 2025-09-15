@@ -751,9 +751,6 @@ class ViewConstraints implements ui.ViewConstraints {
   }
 
   @override
-  bool get isEmpty => minWidth == 0.0 && maxWidth == 0.0 && minHeight == 0.0 && maxHeight == 0.0;
-
-  @override
   bool get isTight => minWidth >= maxWidth && minHeight >= maxHeight;
 
   ViewConstraints operator *(double factor) {

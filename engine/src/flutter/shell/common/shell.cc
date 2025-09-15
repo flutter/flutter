@@ -171,7 +171,7 @@ bool ValidateViewportMetrics(const ViewportMetrics& metrics) {
     return false;
   }
 
-  // If not tight constraints, check the width fits in the constraints
+  // If not tight constraints, check the width fits in the constraints.
   if (metrics.physical_min_width_constraint !=
       metrics.physical_max_width_constraint) {
     if (metrics.physical_min_width_constraint > metrics.physical_width ||
@@ -187,7 +187,7 @@ bool ValidateViewportMetrics(const ViewportMetrics& metrics) {
     return false;
   }
 
-  // If not tight constraints, check the height fits in the constraints
+  // If not tight constraints, check the height fits in the constraints.
   if (metrics.physical_min_height_constraint !=
       metrics.physical_max_height_constraint) {
     if (metrics.physical_min_height_constraint > metrics.physical_height ||
@@ -1810,9 +1810,8 @@ bool Shell::ShouldDiscardLayerTree(int64_t view_id,
                                    const flutter::LayerTree& tree) {
   std::scoped_lock<std::mutex> lock(resize_mutex_);
   auto expected_frame_constraints = ExpectedFrameConstraints(view_id);
-  return !expected_frame_constraints.IsEmpty() &&
-         !expected_frame_constraints.IsSatisfiedBy(
-             fml::Size(tree.frame_size().width, tree.frame_size().height));
+  return !expected_frame_constraints.IsSatisfiedBy(
+      fml::Size(tree.frame_size().width, tree.frame_size().height));
 }
 
 // |ServiceProtocol::Handler|

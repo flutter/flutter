@@ -347,7 +347,6 @@ abstract class ViewConstraints {
   double get minHeight;
   double get maxHeight;
   bool isSatisfiedBy(Size size);
-  bool get isEmpty;
   bool get isTight;
   ViewConstraints operator /(double factor);
 }

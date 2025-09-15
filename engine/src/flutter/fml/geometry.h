@@ -93,11 +93,6 @@ class BoxConstraints {
   Size biggest() const { return biggest_; }
   Size smallest() const { return smallest_; }
 
-  bool IsEmpty() {
-    return smallest().width() == 0 && biggest().width() == 0 &&
-           smallest().height() == 0 && biggest().height() == 0;
-  }
-
   bool IsSatisfiedBy(Size size) {
     return smallest().width() <= size.width() &&
            size.width() <= biggest().width() &&

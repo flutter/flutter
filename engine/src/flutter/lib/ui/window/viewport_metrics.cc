@@ -114,10 +114,10 @@ std::ostream& operator<<(std::ostream& os, const ViewportMetrics& a) {
      << "W " << a.physical_height << "H] " << "Padding: ["
      << a.physical_padding_top << "T " << a.physical_padding_right << "R "
      << a.physical_padding_bottom << "B " << a.physical_padding_left << "L] "
-     << "View Constraints: [" << a.physical_min_width_constraint
-     << "- min width " << a.physical_max_width_constraint << "max width "
-     << a.physical_min_height_constraint << "- min height "
-     << a.physical_max_height_constraint << "max height] "
+     << "View Constraints: [" << a.physical_min_width_constraint << "-"
+     << a.physical_max_width_constraint << "W "
+     << a.physical_min_height_constraint << "-"
+     << a.physical_max_height_constraint << "H] "
      << "Insets: [" << a.physical_view_inset_top << "T "
      << a.physical_view_inset_right << "R " << a.physical_view_inset_bottom
      << "B " << a.physical_view_inset_left << "L] " << "Gesture Insets: ["
