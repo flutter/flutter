@@ -10,8 +10,9 @@ practices.
 
 ## Package Management
 *   To manage packages, use the `pub` tool, if available.
-*   If a new feature requires an external package, identify the most suitable
-    and stable package from pub.dev.
+*   If a new feature requires an external package, use the `pub_dev_search`
+    tool, if it is available. Otherwise, identify the most suitable and stable
+    package from pub.dev.
 *   To add a regular dependency, use the `pub` tool, if it is available,
     otherwise execute `flutter pub add <package_name>`.
 *   To add a development dependency, use the `pub` tool, if it is available,
