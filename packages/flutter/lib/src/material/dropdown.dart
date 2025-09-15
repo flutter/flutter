@@ -1648,14 +1648,13 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       );
     }
 
-    final MouseCursor webCursor =
-        widget.mouseCursor ??
-        WidgetStateProperty.resolveAs<MouseCursor>(WidgetStateMouseCursor.clickable, <WidgetState>{
-          if (!_enabled) WidgetState.disabled,
-        });
-    final MouseCursor nonWebCursor =
-        widget.mouseCursor ?? WidgetStateMouseCursor.statelessClickable;
-    final MouseCursor effectiveMouseCursor = kIsWeb ? webCursor : nonWebCursor;
+    const MouseCursor fallbackCursor = kIsWeb
+        ? WidgetStateMouseCursor.clickable
+        : WidgetStateMouseCursor.statelessClickable;
+    final MouseCursor effectiveMouseCursor = WidgetStateProperty.resolveAs<MouseCursor>(
+      widget.mouseCursor ?? fallbackCursor,
+      <WidgetState>{if (!_enabled) WidgetState.disabled},
+    );
 
     // When an InputDecoration is provided, use it instead of using an InkWell
     // that overflows in some cases (such as showing an errorText) and requires
