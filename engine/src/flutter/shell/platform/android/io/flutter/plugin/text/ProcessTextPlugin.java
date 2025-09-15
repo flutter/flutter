@@ -71,12 +71,7 @@ public class ProcessTextPlugin
       return;
     }
 
-    if (Build.VERSION.SDK_INT < API_LEVELS.API_23) {
-      result.error("error", "Android version not supported", null);
-      return;
-    }
-
-    if (resolveInfosById == null) {
+      if (resolveInfosById == null) {
       result.error("error", "Can not process text actions before calling queryTextActions", null);
       return;
     }
@@ -106,11 +101,7 @@ public class ProcessTextPlugin
   private void cacheResolveInfos() {
     resolveInfosById = new HashMap<String, ResolveInfo>();
 
-    if (Build.VERSION.SDK_INT < API_LEVELS.API_23) {
-      return;
-    }
-
-    Intent intent = new Intent().setAction(Intent.ACTION_PROCESS_TEXT).setType("text/plain");
+      Intent intent = new Intent().setAction(Intent.ACTION_PROCESS_TEXT).setType("text/plain");
 
     List<ResolveInfo> infos;
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_33) {
@@ -178,9 +169,9 @@ public class ProcessTextPlugin
   public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
     this.activityBinding = binding;
     this.activityBinding.addActivityResultListener(this);
-  };
+  }
 
-  public void onDetachedFromActivityForConfigChanges() {
+    public void onDetachedFromActivityForConfigChanges() {
     this.activityBinding.removeActivityResultListener(this);
     this.activityBinding = null;
   }
