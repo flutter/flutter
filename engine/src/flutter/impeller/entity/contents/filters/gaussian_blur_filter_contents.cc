@@ -277,8 +277,6 @@ DownsamplePassArgs CalculateDownsamplePassArgs(
   //     .Contains(coverage_hint.value()))
 
   std::optional<Rect> snapshot_coverage = input_snapshot.GetCoverage();
-
-  PrintRect(source_expanded_coverage_hint, "source_expanded_coverage_hint");
   if (input_snapshot.transform.Equals(snapshot_entity.GetTransform()) &&
       source_expanded_coverage_hint.has_value() &&
       snapshot_coverage.has_value() &&
@@ -326,6 +324,10 @@ DownsamplePassArgs CalculateDownsamplePassArgs(
         .transform = Matrix::MakeTranslation(
             {aligned_coverage_hint.GetX(), aligned_coverage_hint.GetY(), 0})};
   } else {
+    printf("Going else %d %d %d %d\n", input_snapshot.transform.Equals(snapshot_entity.GetTransform()),
+      source_expanded_coverage_hint.has_value(),
+      snapshot_coverage.has_value(),
+      snapshot_coverage->Contains(source_expanded_coverage_hint.value()));
     //////////////////////////////////////////////////////////////////////////////
     auto input_snapshot_size = input_snapshot.texture->GetSize();
     Rect source_rect = Rect::MakeSize(input_snapshot_size);
@@ -352,11 +354,21 @@ DownsamplePassArgs CalculateDownsamplePassArgs(
 
     Vector2 effective_scalar =
         Vector2(subpass_size) / source_rect_padded.GetSize();
+    PrintRect(source_rect, "source_rect");
+    PrintRect(source_rect_padded, "source_rect_padded");
+    PrintRect(source_bounds, "source_bounds");
     Quad uvs = GaussianBlurFilterContents::CalculateUVs(
         input, snapshot_entity, source_rect_padded, input_snapshot_size);
+    std::optional<Rect> bounds_uvs;
+    if (source_bounds.has_value()) {
+      Quad uv_quad = GaussianBlurFilterContents::CalculateUVs(
+          input, snapshot_entity, source_bounds.value(), input_snapshot_size);
+      bounds_uvs = Rect::MakePointBounds(uv_quad);
+    }
     return {
         .subpass_size = subpass_size,
         .uvs = uvs,
+        .bounds_uvs = bounds_uvs,
         .effective_scalar = effective_scalar,
         .transform = input_snapshot.transform *
                      Matrix::MakeTranslation(-divisible_padding),
@@ -526,6 +538,7 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
         frame_info.texture_sampler_y_coord_scale =
             input_texture->GetYCoordScale();
 
+        PrintRect(blur_info.blur_uv_bounds, "blur_info.blur_uv_bounds");
         GaussianBlurFragmentShader::BlurParams blur_params;
         blur_params.blur_bounds = Vector4(blur_info.blur_uv_bounds.GetLeft(),
                                           blur_info.blur_uv_bounds.GetTop(),
@@ -555,9 +568,16 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
                 linear_sampler_descriptor));
         GaussianBlurVertexShader::BindFrameInfo(
             pass, data_host_buffer.EmplaceUniform(frame_info));
+        auto printKernal = [](GaussianBlurPipeline::FragmentShader::KernelSamples samples) {
+          for (int i = 0; i < 50; i++) {
+            Vector4 d = samples.sample_data[i];
+            printf("Sample #%02d: %.2f, %.2f, %.2f, %.2f\n", i, d.x, d.y, d.z, d.w);
+          }
+          return samples;
+        };
         GaussianBlurFragmentShader::BindKernelSamples(
             pass, data_host_buffer.EmplaceUniform(
-                      LerpHackKernelSamples(GenerateBlurInfo(blur_info))));
+                      printKernal(LerpHackKernelSamples(GenerateBlurInfo(blur_info)))));
         GaussianBlurFragmentShader::BindBlurParams(
             pass, data_host_buffer.EmplaceUniform(blur_params));
         return pass.Draw().ok();
@@ -769,8 +789,6 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
     const Matrix& effect_transform,
     const Rect& coverage,
     const std::optional<Rect>& coverage_hint) const {
-  PrintRect(bounds_, "original bounds");
-  PrintRect(coverage_hint, "original coverage_hint");
   if (inputs.empty()) {
     return std::nullopt;
   }
@@ -781,8 +799,12 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
   // be ignored so must be accounted for in the downsample pass by adding a
   // transparent gutter.
   std::optional<Rect> expanded_coverage_hint;
+  std::optional<Rect> shifted_bounds = bounds_;
   if (coverage_hint.has_value()) {
     expanded_coverage_hint = coverage_hint->Expand(blur_info.local_padding);
+    if (bounds_.has_value()) {
+      shifted_bounds = bounds_->Shift(blur_info.local_padding);
+    }
   }
 
   Entity snapshot_entity = entity.Clone();
@@ -799,8 +821,8 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
   }
 
   std::optional<Rect> source_bounds;
-  if (bounds_.has_value()) {
-    source_bounds = bounds_->TransformBounds(
+  if (shifted_bounds.has_value()) {
+    source_bounds = shifted_bounds->TransformBounds(
         Matrix::MakeTranslation(blur_info.source_space_offset) *
         Matrix::MakeScale(blur_info.source_space_scalar) *
         entity.GetTransform().Invert());
@@ -840,6 +862,9 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
   DownsamplePassArgs downsample_pass_args = CalculateDownsamplePassArgs(
       blur_info.scaled_sigma, blur_info.padding, input_snapshot.value(),
       source_expanded_coverage_hint, source_bounds, inputs[0], snapshot_entity);
+
+  PrintRect(downsample_pass_args.bounds_uvs, "bounds_uvs");
+  PrintRect(Rect::MakePointBounds(downsample_pass_args.uvs), "uvs");
 
   fml::StatusOr<RenderTarget> pass1_out = MakeDownsampleSubpass(
       renderer, command_buffer_1, input_snapshot->texture,
