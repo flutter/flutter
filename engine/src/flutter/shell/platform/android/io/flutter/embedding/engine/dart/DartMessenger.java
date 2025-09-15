@@ -158,8 +158,7 @@ class DartMessenger implements BinaryMessenger, PlatformMessageHandler {
     @Override
     public void dispatch(@NonNull Runnable runnable) {
       queue.add(runnable);
-      executor.execute(
-              this::flush);
+      executor.execute(this::flush);
     }
 
     private void flush() {
@@ -174,8 +173,7 @@ class DartMessenger implements BinaryMessenger, PlatformMessageHandler {
           isRunning.set(false);
           if (!queue.isEmpty()) {
             // Schedule the next event.
-            executor.execute(
-                    this::flush);
+            executor.execute(this::flush);
           }
         }
       }
