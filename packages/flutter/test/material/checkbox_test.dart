@@ -1336,8 +1336,8 @@ void main() {
     const Color activeEnabledFillColor = Color(0xFF000001);
     const Color activeDisabledFillColor = Color(0xFF000002);
 
-    Color getFillColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    Color getFillColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return activeDisabledFillColor;
       }
       return activeEnabledFillColor;
@@ -1385,11 +1385,11 @@ void main() {
     const Color hoveredFillColor = Color(0xFF000001);
     const Color focusedFillColor = Color(0xFF000002);
 
-    Color getFillColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.hovered)) {
+    Color getFillColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.hovered)) {
         return hoveredFillColor;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return focusedFillColor;
       }
       return Colors.transparent;
@@ -1652,17 +1652,17 @@ void main() {
     const Color hoverColor = Color(0xFF000005);
     const Color focusColor = Color(0xFF000006);
 
-    Color? getOverlayColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
-        if (states.contains(MaterialState.selected)) {
+    Color? getOverlayColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
+        if (states.contains(WidgetState.selected)) {
           return activePressedOverlayColor;
         }
         return inactivePressedOverlayColor;
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return hoverOverlayColor;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return focusOverlayColor;
       }
       return null;
@@ -1767,9 +1767,9 @@ void main() {
     const Color activePressedOverlayColor = Color(0xFF000001);
     const Color inactivePressedOverlayColor = Color(0xFF000002);
 
-    Color? getOverlayColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
-        if (states.contains(MaterialState.selected)) {
+    Color? getOverlayColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
+        if (states.contains(WidgetState.selected)) {
           return activePressedOverlayColor;
         }
         return inactivePressedOverlayColor;
@@ -1958,7 +1958,7 @@ void main() {
               value: value,
               tristate: value == null,
               onChanged: enabled ? (bool? newValue) {} : null,
-              side: MaterialStateBorderSide.resolveWith((Set<MaterialState> states) => side),
+              side: MaterialStateBorderSide.resolveWith((Set<WidgetState> states) => side),
             ),
           ),
         ),
@@ -2009,7 +2009,7 @@ void main() {
               value: value,
               tristate: value == null,
               onChanged: enabled ? (bool? newValue) {} : null,
-              side: MaterialStateBorderSide.resolveWith((Set<MaterialState> states) => side),
+              side: MaterialStateBorderSide.resolveWith((Set<WidgetState> states) => side),
             ),
           ),
         ),
@@ -2199,8 +2199,8 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return Checkbox(
                   isError: true,
-                  side: MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
-                    if (states.contains(MaterialState.error)) {
+                  side: MaterialStateBorderSide.resolveWith((Set<WidgetState> states) {
+                    if (states.contains(WidgetState.error)) {
                       return const BorderSide(color: borderColor, width: 4);
                     }
                     return const BorderSide(color: Colors.red, width: 2);
@@ -2401,8 +2401,8 @@ void main() {
         home: Material(
           child: Center(
             child: Checkbox(
-              fillColor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-                if (states.contains(MaterialState.selected)) {
+              fillColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+                if (states.contains(WidgetState.selected)) {
                   return activeBackgroundColor;
                 }
                 return inactiveBackgroundColor;
@@ -2444,8 +2444,8 @@ void main() {
         home: Material(
           child: Center(
             child: Checkbox(
-              fillColor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-                if (states.contains(MaterialState.selected)) {
+              fillColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+                if (states.contains(WidgetState.selected)) {
                   return activeBackgroundColor;
                 }
                 return inactiveBackgroundColor;
@@ -2493,8 +2493,8 @@ class _SelectedGrabMouseCursor extends MaterialStateMouseCursor {
   const _SelectedGrabMouseCursor();
 
   @override
-  MouseCursor resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.selected)) {
+  MouseCursor resolve(Set<WidgetState> states) {
+    if (states.contains(WidgetState.selected)) {
       return SystemMouseCursors.grab;
     }
     return SystemMouseCursors.basic;
