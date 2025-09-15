@@ -15,6 +15,10 @@
 using namespace Skwasm;
 using namespace flutter;
 
+namespace flutter {
+extern std::shared_ptr<DlText> textFromBlob(const sk_sp<SkTextBlob>& blob);
+}
+
 namespace {
 class SkwasmParagraphPainter : public skia::textlayout::ParagraphPainter {
  public:
@@ -32,7 +36,7 @@ class SkwasmParagraphPainter : public skia::textlayout::ParagraphPainter {
 
     const int* paintID = std::get_if<PaintID>(&paint);
     auto dlPaint = paintID ? _paints[*paintID] : DlPaint();
-    _builder.DrawText(DlTextSkia::Make(blob), x, y, dlPaint);
+    _builder.DrawText(textFromBlob(blob), x, y, dlPaint);
   }
 
   virtual void drawTextShadow(const sk_sp<SkTextBlob>& blob,
@@ -50,7 +54,7 @@ class SkwasmParagraphPainter : public skia::textlayout::ParagraphPainter {
       DlBlurMaskFilter filter(DlBlurStyle::kNormal, blurSigma, false);
       paint.setMaskFilter(&filter);
     }
-    _builder.DrawText(DlTextSkia::Make(blob), x, y, paint);
+    _builder.DrawText(textFromBlob(blob), x, y, paint);
   }
 
   virtual void drawRect(const SkRect& rect, const SkPaintOrID& paint) override {

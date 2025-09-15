@@ -4,6 +4,7 @@
 
 #include "render_context.h"
 
+#include "export.h"
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/entity/gles3/entity_shaders_gles.h"
 #include "impeller/renderer/backend/gles/context_gles.h"
@@ -13,6 +14,10 @@
 
 using namespace Skwasm;
 using namespace flutter;
+
+SKWASM_EXPORT bool skwasm_isWimp() {
+  return true;
+}
 
 namespace {
 std::vector<std::shared_ptr<fml::Mapping>>

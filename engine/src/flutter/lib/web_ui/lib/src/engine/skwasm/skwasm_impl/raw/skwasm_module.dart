@@ -26,6 +26,9 @@ external WasmI32 addFunction(WasmFuncRef function);
 @Native<Bool Function()>(symbol: 'skwasm_isMultiThreaded', isLeaf: true)
 external bool skwasmIsMultiThreaded();
 
+@Native<Bool Function()>(symbol: 'skwasm_isWimp')
+external bool skwasmIsWimp();
+
 @Native<Bool Function()>(symbol: 'skwasm_isHeavy', isLeaf: true)
 external bool skwasmIsHeavy();
 

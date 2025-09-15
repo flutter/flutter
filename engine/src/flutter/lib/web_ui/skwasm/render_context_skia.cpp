@@ -4,6 +4,7 @@
 
 #include "render_context.h"
 
+#include "export.h"
 #include "flutter/display_list/skia/dl_sk_dispatcher.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/ganesh/GrBackendSurface.h"
@@ -17,6 +18,10 @@
 
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
+
+SKWASM_EXPORT bool skwasm_isWimp() {
+  return false;
+}
 
 using namespace Skwasm;
 namespace {

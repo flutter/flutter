@@ -16,6 +16,44 @@ void blurp() {
   skwasm_disposeAssociatedObjectOnThread(0, nullptr);
   skwasm_createGlTextureFromTextureSource(object, 0, 0);
 }
+
+// TODO(jacksongardner): Implement proper image support in wimp.
+// See https://github.com/flutter/flutter/issues/175371
+class StubImage : public DlImage {
+ public:
+  StubImage(int width, int height) : _width(width), _height(height) {}
+
+  static sk_sp<StubImage> Make(int width, int height) {
+    return sk_make_sp<StubImage>(width, height);
+  }
+
+  // |DlImage|
+  sk_sp<SkImage> skia_image() const override { return nullptr; }
+
+  // |DlImage|
+  std::shared_ptr<impeller::Texture> impeller_texture() const override {
+    return nullptr;
+  }
+
+  // |DlImage|
+  bool isOpaque() const override { return false; }
+
+  // |DlImage|
+  bool isTextureBacked() const override { return false; }
+
+  // |DlImage|
+  bool isUIThreadSafe() const override { return true; }
+
+  // |DlImage|
+  DlISize GetSize() const override { return DlISize::MakeWH(_width, _height); }
+
+  // |DlImage|
+  size_t GetApproximateByteSize() const override { return 0; }
+
+ private:
+  int _width;
+  int _height;
+};
 }  // namespace
 
 namespace Skwasm {
@@ -23,14 +61,14 @@ namespace Skwasm {
 sk_sp<DlImage> MakeImageFromPicture(flutter::DisplayList* displayList,
                                     int32_t width,
                                     int32_t height) {
-  return nullptr;
+  return StubImage::Make(width, height);
 }
 
 sk_sp<DlImage> MakeImageFromTexture(SkwasmObject textureSource,
                                     int width,
                                     int height,
                                     Skwasm::Surface* surface) {
-  return nullptr;
+  return StubImage::Make(width, height);
 }
 
 sk_sp<DlImage> MakeImageFromPixels(SkData* data,
@@ -41,6 +79,6 @@ sk_sp<DlImage> MakeImageFromPixels(SkData* data,
   if (rowByteCount < -1) {
     blurp();
   }
-  return nullptr;
+  return StubImage::Make(width, height);
 }
 }  // namespace Skwasm

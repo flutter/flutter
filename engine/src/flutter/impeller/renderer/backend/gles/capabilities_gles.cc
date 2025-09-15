@@ -240,7 +240,11 @@ size_t CapabilitiesGLES::GetMinimumUniformAlignment() const {
 }
 
 bool CapabilitiesGLES::NeedsPartitionedHostBuffer() const {
+#ifdef FML_OS_EMSCRIPTEN
+  return true;
+#else
   return false;
+#endif
 }
 
 }  // namespace impeller

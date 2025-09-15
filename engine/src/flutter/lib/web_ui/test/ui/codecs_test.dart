@@ -12,6 +12,7 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../common/test_initialization.dart';
+import 'utils.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -254,7 +255,7 @@ Future<void> testMain() async {
       for (final testCodec in testCodecs) {
         testCodec.dispose();
       }
-    });
+    }, skip: isWimp); // https://github.com/flutter/flutter/issues/175371
   });
 
   test('crossOrigin requests cause an error', () async {
