@@ -1466,12 +1466,8 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
 
-    final TestGesture gesture = await tester.createGesture(
-      kind: PointerDeviceKind.mouse,
-      pointer: 1,
-    );
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer(location: const Offset(10, 10));
     await tester.pump();
     expect(
