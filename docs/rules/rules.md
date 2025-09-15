@@ -9,12 +9,17 @@ practices.
     primary application entry point.
 
 ## Package Management
-*   If a new feature requires an external package, the AI will identify the most
-    suitable and stable package from pub.dev.
-*   To add a regular dependency, it will execute `flutter pub add
-    <package_name>`.
-*   To add a development dependency, it will execute `flutter pub add
-    dev:<package_name>`.
+*   To manage packages, use the `pub` tool, if available.
+*   If a new feature requires an external package, identify the most suitable
+    and stable package from pub.dev.
+*   To add a regular dependency, use the `pub` tool, if it is available,
+    otherwise execute `flutter pub add <package_name>`.
+*   To add a development dependency, use the `pub` tool, if it is available,
+    with `dev:<package name>`. otherwise run
+    `flutter pub add dev:<package_name>`.
+*   To add a dependency override, use the `pub` tool, if it is available,
+    with `override:<package name>:1.0.0`. otherwise run
+    `flutter pub add override:<package_name>:1.0.0`.
 
 ## Code Quality
 *   Adhere to maintainable code structure and separation of concerns (e.g., UI
@@ -22,7 +27,8 @@ practices.
 *   Adhere to meaningful and consistent naming conventions.
 
 ## Dart Best Practices
-*   Follow the official Effective Dart guidelines.
+*   Follow the official Effective Dart guidelines
+    (https://dart.dev/effective-dart)
 *   Define related classes within the same library file. For large libraries,
     export smaller, private libraries from a single top-level library.
 *   Group related libraries in the same folder.
@@ -203,6 +209,8 @@ ValueListenableBuilder<int>(
     ```
 
 ## Testing
+*   To run tests, use the `run_tests` tool if it is available, otherwise use
+    `flutter test`.
 *   Use `package:test` for unit tests.
 *   Use `package:flutter_test` for widget tests.
 *   Use `package:integration_test` for integration tests.
