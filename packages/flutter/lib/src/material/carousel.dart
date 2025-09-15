@@ -134,6 +134,7 @@ class CarouselView extends StatefulWidget {
     this.backgroundColor,
     this.elevation,
     this.shape,
+    this.itemClipBehavior,
     this.overlayColor,
     this.itemSnapping = false,
     this.shrinkExtent = 0.0,
@@ -142,7 +143,6 @@ class CarouselView extends StatefulWidget {
     this.reverse = false,
     this.onTap,
     this.enableSplash = true,
-    this.itemClipBehavior = Clip.antiAlias,
     required double this.itemExtent,
     required this.children,
   }) : consumeMaxWeight = true,
@@ -195,6 +195,7 @@ class CarouselView extends StatefulWidget {
     this.backgroundColor,
     this.elevation,
     this.shape,
+    this.itemClipBehavior,
     this.overlayColor,
     this.itemSnapping = false,
     this.shrinkExtent = 0.0,
@@ -204,7 +205,6 @@ class CarouselView extends StatefulWidget {
     this.consumeMaxWeight = true,
     this.onTap,
     this.enableSplash = true,
-    this.itemClipBehavior = Clip.antiAlias,
     required List<int> this.flexWeights,
     required this.children,
   }) : itemExtent = null;
@@ -231,6 +231,14 @@ class CarouselView extends StatefulWidget {
   /// Defaults to a [RoundedRectangleBorder] with a circular corner radius
   /// of 28.0.
   final ShapeBorder? shape;
+
+  /// The clip behavior for each carousel item.
+  ///
+  /// The item content will be clipped (or not) according to this option.
+  /// Refer to the [Clip] enum for more details on the different clip options.
+  ///
+  /// Defaults to [Clip.antiAlias].
+  final Clip? itemClipBehavior;
 
   /// The highlight color to indicate the carousel items are in pressed, hovered
   /// or focused states.
@@ -334,14 +342,6 @@ class CarouselView extends StatefulWidget {
   /// for default [CarouselView]. The integers must be greater than 0.
   final List<int>? flexWeights;
 
-  /// The clip behavior for each carousel item.
-  ///
-  /// The item content will be clipped (or not) according to this option.
-  /// Refer to the [Clip] enum for more details on the different clip options.
-  ///
-  /// Defaults to [Clip.antiAlias].
-  final Clip itemClipBehavior;
-
   /// The child widgets for the carousel.
   final List<Widget> children;
 
@@ -425,6 +425,8 @@ class _CarouselViewState extends State<CarouselView> {
         widget.shape ??
         carouselTheme.shape ??
         const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(28.0)));
+    final Clip effectiveItemClipBehavior =
+        widget.itemClipBehavior ?? carouselTheme.itemClipBehavior ?? Clip.antiAlias;
     final WidgetStateProperty<Color?> effectiveOverlayColor =
         widget.overlayColor ??
         carouselTheme.overlayColor ??
@@ -463,7 +465,7 @@ class _CarouselViewState extends State<CarouselView> {
     return Padding(
       padding: effectivePadding,
       child: Material(
-        clipBehavior: widget.itemClipBehavior,
+        clipBehavior: effectiveItemClipBehavior,
         color: effectiveBackgroundColor,
         elevation: effectiveElevation,
         shape: effectiveShape,
