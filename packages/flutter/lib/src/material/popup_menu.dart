@@ -337,19 +337,17 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// On web, if [mouseCursor] is a [WidgetStateMouseCursor],
+  /// If [mouseCursor] is a [WidgetStateMouseCursor],
   /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
   ///  * [WidgetState.hovered].
   ///  * [WidgetState.focused].
   ///  * [WidgetState.disabled].
-  ///
-  /// On all other platforms, [mouseCursor] will be used directly.
   /// {@endtemplate}
   ///
   /// If null, then the value of [PopupMenuThemeData.mouseCursor] is used. If
   /// that is also null, then:
-  ///
+
   ///  * On web, [WidgetStateMouseCursor.clickable] is used.
   ///  * On other platforms, [WidgetStateMouseCursor.statelessClickable] is used.
   final MouseCursor? mouseCursor;
@@ -1810,11 +1808,12 @@ class _EffectiveMouseCursor extends MaterialStateMouseCursor {
 
   @override
   MouseCursor resolve(Set<WidgetState> states) {
+    const WidgetStateMouseCursor fallbackCursor = kIsWeb
+        ? WidgetStateMouseCursor.clickable
+        : WidgetStateMouseCursor.statelessClickable;
     return WidgetStateProperty.resolveAs<MouseCursor?>(widgetCursor, states) ??
         themeCursor?.resolve(states) ??
-        (kIsWeb
-            ? WidgetStateMouseCursor.clickable.resolve(states)
-            : WidgetStateMouseCursor.statelessClickable.resolve(states));
+        fallbackCursor.resolve(states);
   }
 
   @override

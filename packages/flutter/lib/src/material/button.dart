@@ -124,6 +124,7 @@ class RawMaterialButton extends StatefulWidget {
   /// {@endtemplate}
   ///
   /// If this property is null,
+  ///
   ///   * On web, [WidgetStateMouseCursor.clickable] will be used.
   ///   * On other platforms, [WidgetStateMouseCursor.statelessClickable] will be used.
   final MouseCursor? mouseCursor;
