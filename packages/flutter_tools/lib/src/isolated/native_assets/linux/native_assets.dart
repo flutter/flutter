@@ -14,6 +14,8 @@ import '../../../globals.dart' as globals;
 /// Search for the accompanying `clang`, `ar`, and `ld`.
 Future<CCompilerConfig> cCompilerConfigLinux() async {
   const kClangPlusPlusBinary = 'clang++';
+  // NOTE: these binaries sometimes have different names depending on the installation;
+  // thus, we check for a few possible options (in order of preference).
   const kClangBinaryOptions = ['clang'];
   const kArBinaryOptions = ['llvm-ar', 'ar'];
   const kLdBinaryOptions = ['ld.lld', 'ld'];
