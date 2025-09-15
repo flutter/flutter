@@ -887,8 +887,7 @@ class _CupertinoDragGestureController<T> {
     } else {
       if (isCurrent) {
         // This route is destined to pop at this point. Reuse navigator's pop.
-        final NavigatorState rootNavigator = Navigator.of(navigator.context, rootNavigator: true);
-        rootNavigator.pop();
+        navigator.pop();
       }
 
       if (popDragController.isAnimating) {
