@@ -1,6 +1,6 @@
 MIT
 (?s)(?:\n|^)\s*Copyright[^\n]*\d+.*\nPermission is hereby\s+granted.*\n.*following conditions:.*The above.*copyright.*THE SOFTWARE\s+IS PROVIDED "AS\s+IS"
-(?s)(?:\n|^)(?:\s*Copyright[^\n]*\d+[^\n]*)+
+(?s)(?:\n|^)(?:\s*Copyright[^\n]*\d+[^\n]*(?:\n[^\n]*)?)+
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files \(the "Software"\), to deal in
 the Software without restriction, including without limitation the rights to
