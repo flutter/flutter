@@ -170,9 +170,12 @@ void ImageEncodingImpeller::ConvertDlImageToSkImage(
   // commands.  The thread may not already have a context if the raster
   // task runner was assigned to a new thread and no previous rendering
   // task has run on that thread.
-  if (!(snapshot_delegate && snapshot_delegate->MakeRenderContextCurrent())) {
-    encode_task(fml::Status(fml::StatusCode::kFailedPrecondition,
-                            "Failed to bind the render context."));
+  if (snapshot_delegate) {
+    if (!snapshot_delegate->MakeRenderContextCurrent()) {
+      encode_task(fml::Status(fml::StatusCode::kFailedPrecondition,
+                              "Failed to bind the render context."));
+      return;
+    }
   }
 
   impeller::DeviceBufferDescriptor buffer_desc;
@@ -235,8 +238,8 @@ void ImageEncodingImpeller::ConvertImageToRaster(
 
   if (dl_image->owning_context() != DlImage::OwningContext::kRaster) {
     DoConvertImageToRasterImpellerWithRetry(
-        dl_image, std::move(encode_task), snapshot_delegate,
-        is_gpu_disabled_sync_switch, impeller_context,
+        dl_image, std::move(encode_task),
+        /*snapshot_delegate=*/{}, is_gpu_disabled_sync_switch, impeller_context,
         /*retry_runner=*/nullptr);
     return;
   }
