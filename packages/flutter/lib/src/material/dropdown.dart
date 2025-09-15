@@ -115,6 +115,7 @@ class _DropdownMenuItemButton<T> extends StatefulWidget {
     required this.itemIndex,
     required this.enableFeedback,
     required this.scrollController,
+    this.mouseCursor,
   });
 
   final _DropdownRoute<T> route;
@@ -124,6 +125,7 @@ class _DropdownMenuItemButton<T> extends StatefulWidget {
   final BoxConstraints constraints;
   final int itemIndex;
   final bool enableFeedback;
+  final MouseCursor? mouseCursor;
 
   @override
   _DropdownMenuItemButtonState<T> createState() => _DropdownMenuItemButtonState<T>();
@@ -226,6 +228,7 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
         enableFeedback: widget.enableFeedback,
         onTap: _handleOnTap,
         onFocusChange: _handleFocusChange,
+        mouseCursor: widget.mouseCursor,
         // When highlightMode is traditional, the InkWell draws the selected item background color.
         // When highlightMode is touch, insert an Ink to force the selected item background color.
         child: highlightMode == FocusHighlightMode.touch
@@ -253,6 +256,7 @@ class _DropdownMenu<T> extends StatefulWidget {
     this.borderRadius,
     required this.scrollController,
     this.menuWidth,
+    this.mouseCursor,
   });
 
   final _DropdownRoute<T> route;
@@ -264,6 +268,7 @@ class _DropdownMenu<T> extends StatefulWidget {
   final BorderRadius? borderRadius;
   final ScrollController scrollController;
   final double? menuWidth;
+  final MouseCursor? mouseCursor;
 
   @override
   _DropdownMenuState<T> createState() => _DropdownMenuState<T>();
@@ -322,6 +327,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
           itemIndex: itemIndex,
           enableFeedback: widget.enableFeedback,
           scrollController: widget.scrollController,
+          mouseCursor: widget.mouseCursor,
         ),
     ];
 
@@ -488,6 +494,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     required this.enableFeedback,
     this.borderRadius,
     this.barrierDismissible = true,
+    this.mouseCursor,
   }) : itemHeights = List<double>.filled(items.length, itemHeight ?? kMinInteractiveDimension);
 
   final List<_MenuItem<T>> items;
@@ -503,6 +510,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   final double? menuMaxHeight;
   final bool enableFeedback;
   final BorderRadius? borderRadius;
+  final MouseCursor? mouseCursor;
 
   final List<double> itemHeights;
 
@@ -540,6 +548,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
           enableFeedback: enableFeedback,
           borderRadius: borderRadius,
           menuWidth: menuWidth,
+          mouseCursor: mouseCursor,
         );
       },
     );
@@ -651,6 +660,7 @@ class _DropdownRoutePage<T> extends StatefulWidget {
     required this.enableFeedback,
     this.borderRadius,
     this.menuWidth,
+    this.mouseCursor,
   });
 
   final _DropdownRoute<T> route;
@@ -666,6 +676,7 @@ class _DropdownRoutePage<T> extends StatefulWidget {
   final bool enableFeedback;
   final BorderRadius? borderRadius;
   final double? menuWidth;
+  final MouseCursor? mouseCursor;
 
   @override
   State<_DropdownRoutePage<T>> createState() => _DropdownRoutePageState<T>();
@@ -706,6 +717,7 @@ class _DropdownRoutePageState<T> extends State<_DropdownRoutePage<T>> {
       enableFeedback: widget.enableFeedback,
       borderRadius: widget.borderRadius,
       scrollController: _scrollController,
+      mouseCursor: widget.mouseCursor,
     );
 
     return MediaQuery.removePadding(
@@ -1471,6 +1483,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       enableFeedback: widget.enableFeedback ?? true,
       borderRadius: widget.borderRadius,
       barrierDismissible: widget.barrierDismissible,
+      mouseCursor: widget.mouseCursor,
     );
 
     focusNode.requestFocus();

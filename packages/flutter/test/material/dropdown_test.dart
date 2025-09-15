@@ -4103,7 +4103,6 @@ void main() {
       await gesture.moveTo(onMenuItem);
       await tester.pump();
 
-      // TODO(camsim99): fix.
       expect(
         RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
         SystemMouseCursors.cell,

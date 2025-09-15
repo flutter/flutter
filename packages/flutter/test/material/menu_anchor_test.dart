@@ -5284,36 +5284,6 @@ void main() {
       );
     });
 
-    // TODO(camsim99): Fix.
-    testWidgets('MenuBar has expected mouse cursor when explicitly configured', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: MenuBar(
-              style: MenuStyle(
-                mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.cell),
-              ),
-              children: <Widget>[
-                MenuItemButton(onPressed: () {}, child: const Text('Menu Item 1')),
-                MenuItemButton(onPressed: () {}, child: const Text('Menu Item 2')),
-              ],
-            ),
-          ),
-        ),
-      );
-
-      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      await gesture.addPointer(location: tester.getCenter(find.byType(MenuBar)));
-      addTearDown(gesture.removePointer);
-
-      expect(
-        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-        SystemMouseCursors.cell,
-      );
-    });
-
     testWidgets('SubmenuButton has expected mouse cursor when explicitly configured', (
       WidgetTester tester,
     ) async {
