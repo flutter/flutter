@@ -5075,7 +5075,7 @@ void main() {
       );
 
       await gesture.moveTo(tester.getCenter(find.byType(SubmenuButton)));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(
         RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
@@ -5119,7 +5119,7 @@ void main() {
 
       // Move to MenuItemButton.
       await gesture.moveTo(tester.getCenter(menuItemFinder));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(
         RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
@@ -5155,7 +5155,7 @@ void main() {
       );
 
       await gesture.moveTo(tester.getCenter(find.byType(CheckboxMenuButton)));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(
         RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
@@ -5192,7 +5192,7 @@ void main() {
       );
 
       await gesture.moveTo(tester.getCenter(find.byType(RadioMenuButton<int>)));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(
         RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),

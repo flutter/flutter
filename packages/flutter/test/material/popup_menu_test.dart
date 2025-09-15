@@ -2492,7 +2492,6 @@ void main() {
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer(location: tester.getCenter(find.byKey(key)));
     addTearDown(gesture.removePointer);
-
     await tester.pump();
 
     expect(

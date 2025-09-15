@@ -778,20 +778,18 @@ void main() {
       ),
     );
 
-    final TestGesture gesture = await tester.createGesture(
-      kind: PointerDeviceKind.mouse,
-      pointer: 1,
-    );
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer(location: const Offset(10, 10));
-    await tester.pump();
+
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       SystemMouseCursors.basic,
     );
 
-    final Offset chip = tester.getCenter(find.text('Chip'));
+    final Offset chip = tester.getCenter(find.byType(ChoiceChip));
     await gesture.moveTo(chip);
     await tester.pump();
+
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,

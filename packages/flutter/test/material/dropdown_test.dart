@@ -3955,16 +3955,13 @@ void main() {
 
     // Open DropdownButton.
     await tester.tap(find.byKey(menuKey));
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     // Find DropdownMenuItem.
     final Finder menuItemFinder = find.byKey(itemKey);
     final Offset onMenuItem = tester.getCenter(menuItemFinder);
     final Offset offMenuItem = tester.getBottomRight(menuItemFinder) + const Offset(1, 1);
-    final TestGesture gesture = await tester.createGesture(
-      kind: PointerDeviceKind.mouse,
-      pointer: 1,
-    );
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
 
     await gesture.addPointer(location: onMenuItem);
     await tester.pump();
@@ -3975,6 +3972,7 @@ void main() {
     );
 
     await gesture.moveTo(offMenuItem);
+
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       SystemMouseCursors.basic,

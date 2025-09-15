@@ -1489,8 +1489,9 @@ void main() {
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       SystemMouseCursors.basic,
     );
+
     await gesture.moveTo(tester.getCenter(find.byType(DropdownButtonFormField<String>)));
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
@@ -1521,7 +1522,6 @@ void main() {
     await gesture.addPointer(
       location: tester.getCenter(find.byType(DropdownButtonFormField<String>)),
     );
-    await tester.pumpAndSettle();
     addTearDown(gesture.removePointer);
 
     expect(

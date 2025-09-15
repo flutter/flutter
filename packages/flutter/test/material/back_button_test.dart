@@ -364,7 +364,7 @@ void main() {
       SystemMouseCursors.basic,
     );
     await gesture.moveTo(tester.getCenter(find.byType(BackButton)));
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
@@ -386,7 +386,7 @@ void main() {
       SystemMouseCursors.basic,
     );
     await gesture.moveTo(tester.getCenter(find.byType(CloseButton)));
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
@@ -411,7 +411,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer(location: tester.getCenter(find.byType(BackButton)));
-    await tester.pumpAndSettle();
     addTearDown(gesture.removePointer);
 
     expect(
@@ -437,7 +436,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer(location: tester.getCenter(find.byType(CloseButton)));
-    await tester.pumpAndSettle();
     addTearDown(gesture.removePointer);
 
     expect(

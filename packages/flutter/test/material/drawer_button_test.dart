@@ -303,6 +303,7 @@ void main() {
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       SystemMouseCursors.basic,
     );
+
     await gesture.moveTo(tester.getCenter(find.byType(DrawerButton)));
     await tester.pumpAndSettle();
 
@@ -325,6 +326,7 @@ void main() {
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       SystemMouseCursors.basic,
     );
+
     await gesture.moveTo(tester.getCenter(find.byType(EndDrawerButton)));
     await tester.pumpAndSettle();
 
