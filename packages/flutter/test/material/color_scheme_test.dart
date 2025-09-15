@@ -1260,23 +1260,31 @@ void main() {
     expect(colorSchemeFromContext, colorScheme);
   });
 
-  testWidgets('ColorScheme from an invalid network image should only throw one error', (
-    WidgetTester tester,
-  ) async {
-    // Regression test for https://github.com/flutter/flutter/issues/170413
-    final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
-    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
-    FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
+  testWidgets(
+    'ColorScheme from an invalid network image should only throw one error',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/170413
+      final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
 
-    await tester.pumpWidget(
-      const MaterialApp(home: _NetworkImageScheme(imageUrl: 'random_non_exist_image.png')),
-    );
+      await tester.pumpWidget(
+        const MaterialApp(home: _NetworkImageScheme(imageUrl: 'random_non_exist_image.png')),
+      );
 
-    FlutterError.onError = oldHandler;
+      FlutterError.onError = oldHandler;
 
-    expect(errors.single.exception, isA<Exception>());
-    expect(errors.single.exception.toString(), contains('Failed to render image:'));
-  });
+      expect(errors.single.exception, isA<Exception>());
+      expect(errors.single.exception.toString(), contains('Failed to render image:'));
+
+      // Skip this test on Web. Testing on Web requires mocking the HTTP request
+      // factory (as in `_network_image_test_web.dart`) so that the HTTP
+      // requests can fail. The target issue is about the number of thrown
+      // errors, which is handled by `ColorScheme`, and testing it only on
+      // non-Web should be fine.
+    },
+    skip: kIsWeb, // [intended]
+  );
 }
 
 Future<void> _testFilledButtonColor(
