@@ -38,7 +38,9 @@ void testMain() {
       await drawTestPicture(canvas as LayerCanvas);
       await drawPictureUsingCurrentRenderer(recorder.endRecording());
       await matchGoldenFile('ui_weakref_picture.png', region: kDefaultRegion);
-    });
+      // Unskip when Skwasm and CanvasKit are unified:
+      // https://github.com/flutter/flutter/issues/172311
+    }, skip: isSkwasm);
 
     test('text style - foreground/background/color do not leak across paragraphs', () async {
       const double testWidth = 440;

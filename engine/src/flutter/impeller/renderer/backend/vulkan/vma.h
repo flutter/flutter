@@ -38,13 +38,7 @@ struct PoolVMA {
   VmaAllocator allocator = {};
   VmaPool pool = {};
 
-  constexpr bool operator==(const PoolVMA& other) const {
-    return allocator == other.allocator && pool == other.pool;
-  }
-
-  constexpr bool operator!=(const PoolVMA& other) const {
-    return !(*this == other);
-  }
+  constexpr bool operator==(const PoolVMA& other) const = default;
 };
 
 struct PoolVMATraits {

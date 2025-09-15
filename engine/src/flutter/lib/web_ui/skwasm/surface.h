@@ -58,7 +58,6 @@ class Surface {
 
   // Main thread only
   void dispose();
-  void setResourceCacheLimit(int bytes);
   uint32_t renderPictures(flutter::DisplayList** picture,
                           int width,
                           int height,

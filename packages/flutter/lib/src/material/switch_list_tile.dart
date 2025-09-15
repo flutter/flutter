@@ -18,7 +18,6 @@ import 'package:flutter/widgets.dart';
 
 import 'list_tile.dart';
 import 'list_tile_theme.dart';
-import 'material_state.dart';
 import 'switch.dart';
 import 'switch_theme.dart';
 import 'theme.dart';
@@ -618,7 +617,7 @@ class SwitchListTile extends StatelessWidget {
 
     final ThemeData theme = Theme.of(context);
     final SwitchThemeData switchTheme = SwitchTheme.of(context);
-    final Set<MaterialState> states = <MaterialState>{if (selected) MaterialState.selected};
+    final Set<WidgetState> states = <WidgetState>{if (selected) WidgetState.selected};
     final Color effectiveActiveColor =
         activeThumbColor ??
         activeColor ??

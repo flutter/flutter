@@ -137,6 +137,9 @@ class CapabilitiesGLES final
   // |Capabilities|
   size_t GetMinimumUniformAlignment() const override;
 
+  // |Capabilities|
+  bool NeedsPartitionedHostBuffer() const override;
+
  private:
   bool supports_texture_to_texture_blits_ = false;
   bool supports_framebuffer_fetch_ = false;
