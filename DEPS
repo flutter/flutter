@@ -899,6 +899,15 @@ hooks = [
       '--arch=arm64'],
   },
   {
+    'name': 'linux_sysroot_riscv64',
+    'pattern': '.',
+    'condition': 'download_linux_deps',
+    'action': [
+      'python3',
+      'engine/src/build/linux/sysroot_scripts/install-sysroot.py',
+      '--arch=riscv64'],
+  },
+  {
     'name': 'pub get --offline',
     'pattern': '.',
     'action': [
