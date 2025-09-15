@@ -803,6 +803,16 @@ public class FlutterJNI {
     }
   }
 
+  /** Invoked by native to set application locale in Android. */
+  @SuppressWarnings("unused")
+  @UiThread
+  private void setApplicationLocale(String locale) {
+    ensureRunningOnMainThread();
+    if (accessibilityDelegate != null) {
+      accessibilityDelegate.setLocale(locale);
+    }
+  }
+
   /**
    * Invoked by native to send new custom accessibility events from Flutter to Android.
    *
@@ -1631,6 +1641,9 @@ public class FlutterJNI {
         @NonNull ByteBuffer buffer,
         @NonNull String[] strings,
         @NonNull ByteBuffer[] stringAttributeArgs);
+
+    /** Sets the locale for the assistive technologies. */
+    void setLocale(String locale);
   }
 
   public interface AsyncWaitForVsyncDelegate {

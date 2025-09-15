@@ -64,6 +64,13 @@ class PlatformViewAndroidJNI {
       std::vector<std::vector<uint8_t>> string_attribute_args) = 0;
 
   //----------------------------------------------------------------------------
+  /// @brief      Set application locale to a given language.
+  ///
+  /// @note       Must be called from the platform thread.
+  ///
+  virtual void FlutterViewSetApplicationLocale(const std::string& locale) = 0;
+
+  //----------------------------------------------------------------------------
   /// @brief      Sends new custom accessibility events.
   ///
   /// @note       Must be called from the platform thread.
