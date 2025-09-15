@@ -49,7 +49,7 @@ SECTIONS = {
 
 
 def generate_doxyfile(section, output_dir, log_file, doxy_file):
-  doxyfile = open('../../../docs/engine/Doxyfile.template', 'r').read()
+  doxyfile = open('docs/Doxyfile.template', 'r').read()
   doxyfile = doxyfile.replace('@@OUTPUT_DIRECTORY@@', output_dir)
   doxyfile = doxyfile.replace('@@LOG_FILE@@', log_file)
   doxyfile = doxyfile.replace('@@INPUT_DIRECTORIES@@', '"{}"'.format('" "'.join(section.inputs)))
