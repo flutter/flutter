@@ -202,10 +202,8 @@ public class PlatformPlugin {
         view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
         break;
       case HEAVY_IMPACT:
-        if (Build.VERSION.SDK_INT >= API_LEVELS.API_23) {
           view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
-        }
-        break;
+          break;
       case SELECTION_CLICK:
         view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
         break;
@@ -371,7 +369,7 @@ public class PlatformPlugin {
             | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
 
-    if (overlaysToShow.size() == 0) {
+    if (overlaysToShow.isEmpty()) {
       enabledOverlays |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
     }
 
@@ -448,27 +446,25 @@ public class PlatformPlugin {
     // If transparent, SDK 29 and higher may apply a translucent scrim behind the bar to ensure
     // proper contrast. This can be overridden with
     // SystemChromeStyle.systemStatusBarContrastEnforced.
-    if (Build.VERSION.SDK_INT >= API_LEVELS.API_23) {
       if (systemChromeStyle.statusBarIconBrightness != null) {
-        switch (systemChromeStyle.statusBarIconBrightness) {
-          case DARK:
-            // Dark status bar icon brightness.
-            // Light status bar appearance.
-            windowInsetsControllerCompat.setAppearanceLightStatusBars(true);
-            break;
-          case LIGHT:
-            // Light status bar icon brightness.
-            // Dark status bar appearance.
-            windowInsetsControllerCompat.setAppearanceLightStatusBars(false);
-            break;
-        }
+          switch (systemChromeStyle.statusBarIconBrightness) {
+              case DARK:
+                  // Dark status bar icon brightness.
+                  // Light status bar appearance.
+                  windowInsetsControllerCompat.setAppearanceLightStatusBars(true);
+                  break;
+              case LIGHT:
+                  // Light status bar icon brightness.
+                  // Dark status bar appearance.
+                  windowInsetsControllerCompat.setAppearanceLightStatusBars(false);
+                  break;
+          }
       }
 
       if (systemChromeStyle.statusBarColor != null) {
         window.setStatusBarColor(systemChromeStyle.statusBarColor);
       }
-    }
-    // You can't override the enforced contrast for a transparent status bar until SDK 29.
+      // You can't override the enforced contrast for a transparent status bar until SDK 29.
     // This overrides the translucent scrim that may be placed behind the bar on SDK 29+ to ensure
     // contrast is appropriate when using full screen layout modes like Edge to Edge.
     if (systemChromeStyle.systemStatusBarContrastEnforced != null
