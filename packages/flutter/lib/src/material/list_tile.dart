@@ -696,9 +696,14 @@ class ListTile extends StatelessWidget {
 
   /// Defines the background color of `ListTile` when [selected] is true.
   ///
-  /// When the value if null, the [selectedTileColor] is set to [ListTileTheme.selectedTileColor]
+  /// When the value is null, the [selectedTileColor] is set to [ListTileTheme.selectedTileColor]
   /// if it's not null and to [Colors.transparent] if it's null.
+  ///
+  /// **Note:** If the [ListTile] is placed inside a [Container] (or another widget
+  /// with an opaque background color), the [selectedTileColor] may not be
+  /// visible. In such cases, consider using an [Ink] widget instead of [Container].
   final Color? selectedTileColor;
+
 
   /// {@template flutter.material.ListTile.enableFeedback}
   /// Whether detected gestures should provide acoustic and/or haptic feedback.
