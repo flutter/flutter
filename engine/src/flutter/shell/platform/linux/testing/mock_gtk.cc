@@ -140,18 +140,6 @@ GdkGLContext* gdk_window_create_gl_context(GdkWindow* window, GError** error) {
   return nullptr;
 }
 
-void gdk_cairo_draw_from_gl(cairo_t* cr,
-                            GdkWindow* window,
-                            int source,
-                            int source_type,
-                            int buffer_scale,
-                            int x,
-                            int y,
-                            int width,
-                            int height) {
-  check_thread();
-}
-
 void gdk_cairo_set_source_rgba(cairo_t* cr, const GdkRGBA* rgba) {
   check_thread();
 }
@@ -176,7 +164,9 @@ void gdk_cairo_draw_from_gl(cairo_t* cr,
                             int x,
                             int y,
                             int width,
-                            int height) {}
+                            int height) {
+  check_thread();
+}
 
 GtkWidget* gtk_window_new(GtkWindowType type) {
   check_thread();
