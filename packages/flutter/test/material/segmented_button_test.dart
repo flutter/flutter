@@ -1487,6 +1487,39 @@ void main() {
       kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
   });
+
+  testWidgets('SegmentedButton has expected mouse cursor when explicitly configured', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SegmentedButton<int>(
+              style: ButtonStyle(
+                mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.grab),
+              ),
+              segments: const <ButtonSegment<int>>[
+                ButtonSegment<int>(value: 0, label: Text('0')),
+                ButtonSegment<int>(value: 1, label: Text('1')),
+              ],
+              selected: const <int>{0},
+              onSelectionChanged: (Set<int> newSelection) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: tester.getCenter(find.byType(SegmentedButton<int>)));
+    addTearDown(gesture.removePointer);
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.grab,
+    );
+  });
 }
 
 Set<MaterialState> enabled = const <MaterialState>{};

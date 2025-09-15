@@ -333,4 +333,54 @@ void main() {
       kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
   });
+
+  testWidgets('DrawerButton has expected mouse cursor when explicitly configured', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DrawerButton(
+            style: ButtonStyle(
+              mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.cell),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: tester.getCenter(find.byType(DrawerButton)));
+    addTearDown(gesture.removePointer);
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.cell,
+    );
+  });
+
+  testWidgets('EndDrawerButton has expected mouse cursor when explicitly configured', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: EndDrawerButton(
+            style: ButtonStyle(
+              mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.cell),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: tester.getCenter(find.byType(EndDrawerButton)));
+    addTearDown(gesture.removePointer);
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.cell,
+    );
+  });
 }

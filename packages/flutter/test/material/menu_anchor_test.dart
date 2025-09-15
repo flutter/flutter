@@ -5199,6 +5199,153 @@ void main() {
         kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
       );
     });
+
+    testWidgets('MenuItemButton has expected mouse cursor when explicitly configured', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuItemButton(
+              onPressed: () {},
+              style: ButtonStyle(
+                mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.cell),
+              ),
+              child: const Text('Menu Item'),
+            ),
+          ),
+        ),
+      );
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: tester.getCenter(find.byType(MenuItemButton)));
+      addTearDown(gesture.removePointer);
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.cell,
+      );
+    });
+
+    testWidgets('CheckboxMenuButton has expected mouse cursor when explicitly configured', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: CheckboxMenuButton(
+              style: ButtonStyle(
+                mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.cell),
+              ),
+              value: true,
+              onChanged: (bool? value) {},
+              child: const Text('Menu Item'),
+            ),
+          ),
+        ),
+      );
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: tester.getCenter(find.byType(CheckboxMenuButton)));
+      addTearDown(gesture.removePointer);
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.cell,
+      );
+    });
+
+    testWidgets('RadioMenuButton has expected mouse cursor when explicitly configured', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: RadioMenuButton<bool>(
+              style: ButtonStyle(
+                mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.cell),
+              ),
+              value: false,
+              onChanged: (bool? value) {},
+              groupValue: null,
+              child: const Text('Menu Item'),
+            ),
+          ),
+        ),
+      );
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: tester.getCenter(find.byType(RadioMenuButton<bool>)));
+      addTearDown(gesture.removePointer);
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.cell,
+      );
+    });
+
+    // TODO(camsim99): Fix.
+    testWidgets('MenuBar has expected mouse cursor when explicitly configured', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuBar(
+              style: MenuStyle(
+                mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.cell),
+              ),
+              children: <Widget>[
+                MenuItemButton(onPressed: () {}, child: const Text('Menu Item 1')),
+                MenuItemButton(onPressed: () {}, child: const Text('Menu Item 2')),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: tester.getCenter(find.byType(MenuBar)));
+      addTearDown(gesture.removePointer);
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.cell,
+      );
+    });
+
+    testWidgets('SubmenuButton has expected mouse cursor when explicitly configured', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuBar(
+              children: <Widget>[
+                SubmenuButton(
+                  style: ButtonStyle(
+                    mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.cell),
+                  ),
+                  menuChildren: <Widget>[
+                    MenuItemButton(onPressed: () {}, child: const Text('Test menu item')),
+                  ],
+                  child: const Text('File'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: tester.getCenter(find.byType(SubmenuButton)));
+      addTearDown(gesture.removePointer);
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.cell,
+      );
+    });
   });
 
   testWidgets('Menu panel default reserved padding', (WidgetTester tester) async {
@@ -5224,7 +5371,6 @@ void main() {
     const double defaultReservedPadding = 8.0; // See _kMenuViewPadding.
     expect(tester.getRect(findMenuPanels()).width, 800.0 - defaultReservedPadding * 2);
   });
-
   testWidgets('Menu panel accepts custom reserved padding', (WidgetTester tester) async {
     const EdgeInsetsGeometry reservedPadding = EdgeInsets.symmetric(horizontal: 13.0);
     await tester.pumpWidget(

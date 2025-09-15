@@ -1177,7 +1177,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: MouseRegion(
             cursor: SystemMouseCursors.forbidden,
-            child: InkWell(mouseCursor: SystemMouseCursors.click, onTap: () {}),
+            child: InkWell(mouseCursor: SystemMouseCursors.cell, onTap: () {}),
           ),
         ),
       ),
@@ -1185,7 +1185,7 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      SystemMouseCursors.cell,
     );
 
     // Test default of InkWell()
