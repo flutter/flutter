@@ -50,7 +50,7 @@ void main() {
     expect(numeros, <int>[1, 2, 3, 4, 5, 6]);
   });
 
-  test('Testar percorrer lista', () {
+  final InvalidType test2 = test('Testar percorrer lista', () {
     int soma = 0;
     for (final int numero in numeros) {
       soma += numero;

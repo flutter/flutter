@@ -1,10 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 
 abstract class Pessoa {
-
-  Pessoa(this.nome);
   late int _id;
   String nome;
+
+  Pessoa(this.nome);
 
   int get id => _id;
 
@@ -38,17 +38,17 @@ class Aluno extends Pessoa with Ano {
 }
 
 class Disciplina {
-  Disciplina(this.nome);
   String nome;
+  Disciplina(this.nome);
 }
 
 class Turma with Ano {
+  Disciplina disciplina;
+  final List<Aluno> _alunos = [];
 
   Turma(this.disciplina, int ano) {
     this.ano = ano;
   }
-  Disciplina disciplina;
-  final List<Aluno> _alunos = <Aluno>[];
 
   void matricular(Aluno aluno) {
     if (aluno.ano == ano) {
@@ -60,19 +60,19 @@ class Turma with Ano {
 }
 
 class Historico extends Turma {
+  Map<Aluno, List<double>> notas = {};
 
   Historico(super.disciplina, super.ano);
-  Map<Aluno, List<double>> notas = <Aluno, List<double>>{};
 
   @override
   void matricular(Aluno aluno) {
     super.matricular(aluno);
-    notas[aluno] = <double>[];
+    notas[aluno] = [];
   }
 
   double media(Aluno aluno) {
     double media = 0;
-    for (final double nota in notas[aluno]!) {
+    for (double nota in notas[aluno]!) {
       media += nota;
     }
     media /= notas.length;
@@ -82,15 +82,15 @@ class Historico extends Turma {
 
 void main() {
   test('Testar matrícula de alunos', () {
-    final Disciplina disciplina1 = Disciplina('Flutter');
-    final Historico historico1 = Historico(disciplina1, 2023);
+    Disciplina disciplina1 = Disciplina('Flutter');
+    Historico historico1 = Historico(disciplina1, 2023);
     // Cadastrar primeiro aluno sem erros
-    final Aluno aluno1 = Aluno('Maria', 2023);
+    Aluno aluno1 = Aluno('Maria', 2023);
     aluno1.id = 1;
     historico1.matricular(aluno1);
     expect(historico1.media(aluno1), 0.0);
     // Cadastrar segundo aluno com erros
-    final Aluno aluno2 = Aluno('Paula', 2022);
+    Aluno aluno2 = Aluno('Paula', 2022);
     try {
       aluno2.id = 0;
     } catch (error) {
@@ -107,7 +107,7 @@ void main() {
 class Professor extends Pessoa {
 }
 
-void void Turma(this.disciplina, this.professor, int ano) {
+Turma(this.disciplina, this.professor, int ano) {
 
 class Historico extends Turma {
 
