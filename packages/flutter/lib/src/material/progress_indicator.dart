@@ -832,7 +832,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 /// of multiple [CircularProgressIndicator]s using a [Theme].
 ///
 /// Tapping the buttons adds or removes indicators. By default, they all
-/// share a [ProgressIndicatorTheme.controller], which keeps their
+/// share a [ProgressIndicatorThemeData.controller], which keeps their
 /// animations in sync.
 ///
 /// Tapping the "Toggle" button sets the theme's controller to null.
