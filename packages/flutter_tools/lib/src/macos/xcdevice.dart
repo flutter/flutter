@@ -453,7 +453,7 @@ class XCDevice {
     final coreDeviceMap = <String, IOSCoreDevice>{};
     if (_xcode.isDevicectlInstalled) {
       final List<IOSCoreDevice> coreDevices = await _coreDeviceControl.getCoreDevices();
-      print("COMPLETED GETTING CORE DEVICES");
+      _logger.printTrace('COMPLETED GETTING CORE DEVICES');
       for (final device in coreDevices) {
         if (device.udid == null) {
           continue;
