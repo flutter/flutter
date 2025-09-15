@@ -585,27 +585,6 @@ void InternalFlutterGpu_RenderPass_SetViewport(
   wrapper->viewport = viewport;
 }
 
-void InternalFlutterGpu_RenderPass_SetViewport(
-    flutter::gpu::RenderPass* wrapper,
-    int x,
-    int y,
-    int width,
-    int height,
-    float z_near,
-    float z_far) {
-  auto rect = impeller::TRect<float>::MakeXYWH(x, y, width, height);
-
-  auto depth_range = impeller::DepthRange();
-  depth_range.z_near = z_near;
-  depth_range.z_far = z_far;
-
-  auto viewport = impeller::Viewport();
-  viewport.rect = rect;
-  viewport.depth_range = depth_range;
-
-  wrapper->viewport = viewport;
-}
-
 void InternalFlutterGpu_RenderPass_SetStencilConfig(
     flutter::gpu::RenderPass* wrapper,
     int stencil_compare_operation,
