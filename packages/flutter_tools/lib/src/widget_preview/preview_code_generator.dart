@@ -6,8 +6,6 @@ import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element2.dart' as analyzer;
 import 'package:analyzer/dart/element/element2.dart';
 import 'package:analyzer/dart/element/type.dart';
-// ignore: implementation_imports, can be removed when package:analyzer 8.1.0 is released.
-import 'package:analyzer/src/dart/constant/value.dart';
 import 'package:built_collection/built_collection.dart';
 import 'package:code_builder/code_builder.dart' as cb;
 import 'package:dart_style/dart_style.dart';
@@ -36,7 +34,10 @@ class PreviewCodeGenerator {
   static const _kBuilderProperty = 'builder';
   static const _kListType = 'List';
   static const _kPreviewsFunctionName = 'previews';
+  static const _kGroupNameProperty = 'name';
+  static const _kGroupPreviewsProperty = 'previews';
   static const _kWidgetPreviewClass = 'WidgetPreview';
+  static const _kWidgetPreviewGroupClass = 'WidgetPreviewGroup';
   static const _kWidgetPreviewLibraryUri = 'widget_preview.dart';
 
   static String getGeneratedPreviewFilePath(FileSystem fs) =>
@@ -118,7 +119,6 @@ class PreviewCodeGenerator {
     required cb.Allocator allocator,
     required cb.MethodBuilder builder,
   }) {
-    final previewExpressions = <cb.Expression>[];
     // Sort the entries by URI so that the code generator assigns import prefixes in a
     // deterministic manner, mainly for testing purposes. This also results in previews being
     // displayed in the same order across platforms with differing path styles.
@@ -126,32 +126,45 @@ class PreviewCodeGenerator {
       ..sort((_PreviewMappingEntry a, _PreviewMappingEntry b) {
         return a.key.uri.toString().compareTo(b.key.uri.toString());
       });
-    for (final _PreviewMappingEntry(
-          key: (path: String _, :Uri uri),
-          value: LibraryPreviewNode libraryDetails,
-        )
+
+    // Iterate over all detected previews and build groups of previews based on shared 'group'
+    // names.
+    final previewGroups = <String, List<cb.Expression>>{};
+    for (final _PreviewMappingEntry(key: (path: _, :uri), value: libraryDetails)
         in sortedPreviews) {
       for (final PreviewDetails preview in libraryDetails.previews) {
-        previewExpressions.add(
-          _buildPreviewWidget(
-            allocator: allocator,
-            preview: preview,
-            uri: uri,
-            libraryDetails: libraryDetails,
-          ),
-        );
+        final String group = preview.group.toStringValue()!;
+        previewGroups
+            .putIfAbsent(group, () => <cb.Expression>[])
+            .add(
+              _buildPreviewWidget(
+                allocator: allocator,
+                preview: preview,
+                uri: uri,
+                libraryDetails: libraryDetails,
+              ),
+            );
       }
     }
     builder
-      ..body = cb.literalList(previewExpressions).code
+      ..body = cb.literalList(previewGroups.entries.map(_buildPreviewGroup)).code
       ..name = _kPreviewsFunctionName
       ..returns =
           (cb.TypeReferenceBuilder()
                 ..symbol = _kListType
                 ..types = ListBuilder<cb.Reference>(<cb.Reference>[
-                  cb.refer(_kWidgetPreviewClass, _kWidgetPreviewLibraryUri),
+                  cb.refer(_kWidgetPreviewGroupClass, _kWidgetPreviewLibraryUri),
                 ]))
               .build();
+  }
+
+  cb.Expression _buildPreviewGroup(MapEntry<String, List<cb.Expression>> group) {
+    return cb
+        .refer(_kWidgetPreviewGroupClass, _kWidgetPreviewLibraryUri)
+        .newInstance(<cb.Expression>[], <String, cb.Expression>{
+          _kGroupNameProperty: cb.literalString(group.key),
+          _kGroupPreviewsProperty: cb.literalList(group.value),
+        });
   }
 
   cb.Expression _buildPreviewWidget({
@@ -192,43 +205,19 @@ class PreviewCodeGenerator {
     return cb.refer(_kWidgetPreviewClass, _kWidgetPreviewLibraryUri).newInstance(
       <cb.Expression>[],
       <String, cb.Expression>{
+        PreviewDetails.kScriptUri: cb.literalString(preview.scriptUri.toString()),
         // TODO(bkonyi): try to display the preview name, even if the preview can't be displayed.
         if (!libraryDetails.dependencyHasErrors &&
             !libraryDetails.hasErrors) ...<String, cb.Expression>{
           if (preview.packageName != null)
             PreviewDetails.kPackageName: cb.literalString(preview.packageName!),
-          ...?_generateCodeFromAnalyzerExpression(
-            allocator: allocator,
-            key: PreviewDetails.kName,
-            object: preview.name,
-          ),
-          ...?_generateCodeFromAnalyzerExpression(
-            allocator: allocator,
-            key: PreviewDetails.kSize,
-            object: preview.size,
-          ),
-          ...?_generateCodeFromAnalyzerExpression(
-            allocator: allocator,
-            key: PreviewDetails.kTextScaleFactor,
-            object: preview.textScaleFactor,
-          ),
-          ...?_generateCodeFromAnalyzerExpression(
-            allocator: allocator,
-            key: PreviewDetails.kTheme,
-            object: preview.theme,
-            isCallback: true,
-          ),
-          ...?_generateCodeFromAnalyzerExpression(
-            allocator: allocator,
-            key: PreviewDetails.kBrightness,
-            object: preview.brightness,
-          ),
-          ...?_generateCodeFromAnalyzerExpression(
-            allocator: allocator,
-            key: PreviewDetails.kLocalizations,
-            object: preview.localizations,
-            isCallback: true,
-          ),
+          for (final (:key, :object, :isCallback) in preview.toDartObjectProperties())
+            ...?_generateCodeFromAnalyzerExpression(
+              allocator: allocator,
+              key: key,
+              object: object,
+              isCallback: isCallback,
+            ),
         },
         _kBuilderProperty: previewWidget,
       },
@@ -254,7 +243,6 @@ class PreviewCodeGenerator {
 
 extension on DartObject {
   cb.Expression toExpression() {
-    final objectImpl = this as DartObjectImpl;
     final DartType type = this.type!;
     return switch (type) {
       DartType(isDartCoreBool: true) => cb.literalBool(toBoolValue()!),
@@ -262,27 +250,27 @@ extension on DartObject {
       DartType(isDartCoreInt: true) => cb.literalNum(toIntValue()!),
       DartType(isDartCoreString: true) => cb.literalString(toStringValue()!),
       DartType(isDartCoreNull: true) => cb.literalNull,
-      InterfaceType(element3: EnumElement2()) => _createEnumInstance(objectImpl),
-      InterfaceType() => _createInstance(type, objectImpl),
-      FunctionType() => _createTearoff(toFunctionValue2()!),
+      InterfaceType(element3: EnumElement()) => _createEnumInstance(this),
+      InterfaceType() => _createInstance(type, this),
+      FunctionType() => _createTearoff(toFunctionValue()!),
       _ => throw UnsupportedError('Unexpected DartObject type: $runtimeType'),
     };
   }
 
-  cb.Expression _createTearoff(ExecutableElement2 element) {
+  cb.Expression _createTearoff(ExecutableElement element) {
     return cb.refer(element.displayName, _elementToLibraryIdentifier(element));
   }
 
-  cb.Expression _createEnumInstance(DartObjectImpl object) {
-    final VariableElement2 variable = object.variable2!;
+  cb.Expression _createEnumInstance(DartObject object) {
+    final VariableElement variable = object.variable!;
     return switch (variable) {
-      FieldElement2(
+      FieldElement(
         isEnumConstant: true,
         displayName: final enumValue,
-        enclosingElement2: EnumElement2(displayName: final enumName),
+        enclosingElement: EnumElement(displayName: final enumName),
       ) =>
         cb.refer('$enumName.$enumValue', _elementToLibraryIdentifier(variable)),
-      PropertyInducingElement2(:final displayName) => cb.refer(
+      PropertyInducingElement(:final displayName) => cb.refer(
         displayName,
         _elementToLibraryIdentifier(variable),
       ),
@@ -290,9 +278,9 @@ extension on DartObject {
     };
   }
 
-  cb.Expression _createInstance(InterfaceType dartType, DartObjectImpl object) {
-    final ConstructorInvocation constructorInvocation = object.getInvocation()!;
-    final ConstructorElement2 constructor = constructorInvocation.constructor2;
+  cb.Expression _createInstance(InterfaceType dartType, DartObject object) {
+    final ConstructorInvocation constructorInvocation = object.constructorInvocation!;
+    final ConstructorElement constructor = constructorInvocation.constructor;
     final cb.Expression type = cb.refer(
       dartType.element3.name3!,
       _elementToLibraryIdentifier(dartType.element3),
@@ -317,6 +305,6 @@ extension on DartObject {
     );
   }
 
-  /// Returns the import URI for the [analyzer.LibraryElement2] containing [element].
-  String? _elementToLibraryIdentifier(analyzer.Element2? element) => element?.library2!.identifier;
+  /// Returns the import URI for the [analyzer.LibraryElement] containing [element].
+  String? _elementToLibraryIdentifier(analyzer.Element? element) => element?.library!.identifier;
 }

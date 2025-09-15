@@ -24,7 +24,6 @@ import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'material.dart';
-import 'material_state.dart';
 import 'slider_parts.dart';
 import 'slider_theme.dart';
 import 'slider_value_indicator_shape.dart';
@@ -494,7 +493,7 @@ class Slider extends StatefulWidget {
   /// slider thumb is hovered and with an opacity of 0.1 when slider thumb
   /// is focused or dragged, If [ThemeData.useMaterial3] is false, defaults
   /// to [ColorScheme.primary] with an opacity of 0.12.
-  final MaterialStateProperty<Color?>? overlayColor;
+  final WidgetStateProperty<Color?>? overlayColor;
 
   /// {@template flutter.material.slider.mouseCursor}
   /// The cursor for a mouse pointer when it enters or is hovering over the
@@ -718,12 +717,16 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   }
 
   void _handleDragStart(double value) {
-    _dragging = true;
+    setState(() {
+      _dragging = true;
+    });
     widget.onChangeStart?.call(_lerp(value));
   }
 
   void _handleDragEnd(double value) {
-    _dragging = false;
+    setState(() {
+      _dragging = false;
+    });
     _currentChangedValue = null;
     widget.onChangeEnd?.call(_lerp(value));
   }
@@ -836,11 +839,11 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     const ShowValueIndicator defaultShowValueIndicator = ShowValueIndicator.onlyForDiscrete;
     const SliderInteraction defaultAllowedInteraction = SliderInteraction.tapAndSlide;
 
-    final Set<MaterialState> states = <MaterialState>{
-      if (!_enabled) MaterialState.disabled,
-      if (_hovering) MaterialState.hovered,
-      if (_focused) MaterialState.focused,
-      if (_dragging) MaterialState.dragged,
+    final Set<WidgetState> states = <WidgetState>{
+      if (!_enabled) WidgetState.disabled,
+      if (_hovering) WidgetState.hovered,
+      if (_focused) WidgetState.focused,
+      if (_dragging) WidgetState.dragged,
     };
 
     // The value indicator's color is not the same as the thumb and active track
@@ -865,8 +868,8 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     Color? effectiveOverlayColor() {
       return widget.overlayColor?.resolve(states) ??
           widget.activeColor?.withOpacity(0.12) ??
-          MaterialStateProperty.resolveAs<Color?>(sliderTheme.overlayColor, states) ??
-          MaterialStateProperty.resolveAs<Color?>(defaults.overlayColor, states);
+          WidgetStateProperty.resolveAs<Color?>(sliderTheme.overlayColor, states) ??
+          WidgetStateProperty.resolveAs<Color?>(defaults.overlayColor, states);
     }
 
     TextStyle valueIndicatorTextStyle =
@@ -919,9 +922,9 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       trackGap: sliderTheme.trackGap ?? defaults.trackGap,
     );
     final MouseCursor effectiveMouseCursor =
-        MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
+        WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
         sliderTheme.mouseCursor?.resolve(states) ??
-        MaterialStateMouseCursor.clickable.resolve(states);
+        WidgetStateMouseCursor.clickable.resolve(states);
     final SliderInteraction effectiveAllowedInteraction =
         widget.allowedInteraction ?? sliderTheme.allowedInteraction ?? defaultAllowedInteraction;
 
@@ -1768,11 +1771,11 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     // If [Slider.year2023] is false, the thumb uses handle thumb shape and gapped track shape.
     // The handle width and track gap are adjusted when the thumb is pressed.
-    double? thumbWidth = _sliderTheme.thumbSize?.resolve(<MaterialState>{})?.width;
-    final double? thumbHeight = _sliderTheme.thumbSize?.resolve(<MaterialState>{})?.height;
+    double? thumbWidth = _sliderTheme.thumbSize?.resolve(<WidgetState>{})?.width;
+    final double? thumbHeight = _sliderTheme.thumbSize?.resolve(<WidgetState>{})?.height;
     double? trackGap = _sliderTheme.trackGap;
-    final double? pressedThumbWidth = _sliderTheme.thumbSize?.resolve(<MaterialState>{
-      MaterialState.pressed,
+    final double? pressedThumbWidth = _sliderTheme.thumbSize?.resolve(<WidgetState>{
+      WidgetState.pressed,
     })?.width;
     final double delta;
     if (_active && thumbWidth != null && pressedThumbWidth != null && trackGap != null) {
@@ -1882,7 +1885,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       parentBox: this,
       sliderTheme: thumbWidth != null && thumbHeight != null
           ? _sliderTheme.copyWith(
-              thumbSize: MaterialStatePropertyAll<Size?>(Size(thumbWidth, thumbHeight)),
+              thumbSize: WidgetStatePropertyAll<Size?>(Size(thumbWidth, thumbHeight)),
             )
           : _sliderTheme,
       textDirection: _textDirection,
@@ -2165,14 +2168,14 @@ class _SliderDefaultsM3Year2023 extends SliderThemeData {
       Color.alphaBlend(_colors.onSurface.withOpacity(0.38), _colors.surface);
 
   @override
-  Color? get overlayColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.dragged)) {
+  Color? get overlayColor => WidgetStateColor.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.dragged)) {
       return _colors.primary.withOpacity(0.1);
     }
-    if (states.contains(MaterialState.hovered)) {
+    if (states.contains(WidgetState.hovered)) {
       return _colors.primary.withOpacity(0.08);
     }
-    if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.focused)) {
       return _colors.primary.withOpacity(0.1);
     }
 
@@ -2254,14 +2257,14 @@ class _SliderDefaultsM3 extends SliderThemeData {
   Color? get disabledThumbColor => _colors.onSurface.withOpacity(0.38);
 
   @override
-  Color? get overlayColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.dragged)) {
+  Color? get overlayColor => WidgetStateColor.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.dragged)) {
       return _colors.primary.withOpacity(0.1);
     }
-    if (states.contains(MaterialState.hovered)) {
+    if (states.contains(WidgetState.hovered)) {
       return _colors.primary.withOpacity(0.08);
     }
-    if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.focused)) {
       return _colors.primary.withOpacity(0.1);
     }
 
@@ -2292,18 +2295,18 @@ class _SliderDefaultsM3 extends SliderThemeData {
   SliderTickMarkShape? get tickMarkShape => const RoundSliderTickMarkShape(tickMarkRadius: 4.0 / 2);
 
   @override
-  MaterialStateProperty<Size?>? get thumbSize {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+  WidgetStateProperty<Size?>? get thumbSize {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return const Size(4.0, 44.0);
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return const Size(4.0, 44.0);
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return const Size(2.0, 44.0);
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return const Size(2.0, 44.0);
       }
       return const Size(4.0, 44.0);

@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'ink_well.dart';
-import 'material_state.dart';
 import 'tabs.dart';
 import 'theme.dart';
 
@@ -92,9 +91,9 @@ class TabBarTheme extends InheritedTheme with Diagnosticable {
   final TextStyle? _labelStyle;
   final Color? _unselectedLabelColor;
   final TextStyle? _unselectedLabelStyle;
-  final MaterialStateProperty<Color?>? _overlayColor;
+  final WidgetStateProperty<Color?>? _overlayColor;
   final InteractiveInkFeatureFactory? _splashFactory;
-  final MaterialStateProperty<MouseCursor?>? _mouseCursor;
+  final WidgetStateProperty<MouseCursor?>? _mouseCursor;
   final TabAlignment? _tabAlignment;
   final TextScaler? _textScaler;
   final TabIndicatorAnimation? _indicatorAnimation;
@@ -165,7 +164,7 @@ class TabBarTheme extends InheritedTheme with Diagnosticable {
   ///
   /// This property is obsolete and will be deprecated in a future release:
   /// please use the [TabBarThemeData.overlayColor] property in [data] instead.
-  MaterialStateProperty<Color?>? get overlayColor =>
+  WidgetStateProperty<Color?>? get overlayColor =>
       _data != null ? _data.overlayColor : _overlayColor;
 
   /// Overrides the default value for [TabBar.splashFactory].
@@ -179,7 +178,7 @@ class TabBarTheme extends InheritedTheme with Diagnosticable {
   ///
   /// This property is obsolete and will be deprecated in a future release:
   /// please use the [TabBarThemeData.mouseCursor] property in [data] instead.
-  MaterialStateProperty<MouseCursor?>? get mouseCursor =>
+  WidgetStateProperty<MouseCursor?>? get mouseCursor =>
       _data != null ? _data.mouseCursor : _mouseCursor;
 
   /// Overrides the default value for [TabBar.tabAlignment].
@@ -239,9 +238,9 @@ class TabBarTheme extends InheritedTheme with Diagnosticable {
     TextStyle? labelStyle,
     Color? unselectedLabelColor,
     TextStyle? unselectedLabelStyle,
-    MaterialStateProperty<Color?>? overlayColor,
+    WidgetStateProperty<Color?>? overlayColor,
     InteractiveInkFeatureFactory? splashFactory,
-    MaterialStateProperty<MouseCursor?>? mouseCursor,
+    WidgetStateProperty<MouseCursor?>? mouseCursor,
     TabAlignment? tabAlignment,
     TextScaler? textScaler,
     TabIndicatorAnimation? indicatorAnimation,
@@ -293,12 +292,7 @@ class TabBarTheme extends InheritedTheme with Diagnosticable {
       labelStyle: TextStyle.lerp(a.labelStyle, b.labelStyle, t),
       unselectedLabelColor: Color.lerp(a.unselectedLabelColor, b.unselectedLabelColor, t),
       unselectedLabelStyle: TextStyle.lerp(a.unselectedLabelStyle, b.unselectedLabelStyle, t),
-      overlayColor: MaterialStateProperty.lerp<Color?>(
-        a.overlayColor,
-        b.overlayColor,
-        t,
-        Color.lerp,
-      ),
+      overlayColor: WidgetStateProperty.lerp<Color?>(a.overlayColor, b.overlayColor, t, Color.lerp),
       splashFactory: t < 0.5 ? a.splashFactory : b.splashFactory,
       mouseCursor: t < 0.5 ? a.mouseCursor : b.mouseCursor,
       tabAlignment: t < 0.5 ? a.tabAlignment : b.tabAlignment,
@@ -398,7 +392,7 @@ class TabBarThemeData with Diagnosticable {
   final TextStyle? unselectedLabelStyle;
 
   /// Overrides the default value for [TabBar.overlayColor].
-  final MaterialStateProperty<Color?>? overlayColor;
+  final WidgetStateProperty<Color?>? overlayColor;
 
   /// Overrides the default value for [TabBar.splashFactory].
   final InteractiveInkFeatureFactory? splashFactory;
@@ -406,7 +400,7 @@ class TabBarThemeData with Diagnosticable {
   /// {@macro flutter.material.tabs.mouseCursor}
   ///
   /// If specified, overrides the default value of [TabBar.mouseCursor].
-  final MaterialStateProperty<MouseCursor?>? mouseCursor;
+  final WidgetStateProperty<MouseCursor?>? mouseCursor;
 
   /// Overrides the default value for [TabBar.tabAlignment].
   final TabAlignment? tabAlignment;
@@ -433,9 +427,9 @@ class TabBarThemeData with Diagnosticable {
     TextStyle? labelStyle,
     Color? unselectedLabelColor,
     TextStyle? unselectedLabelStyle,
-    MaterialStateProperty<Color?>? overlayColor,
+    WidgetStateProperty<Color?>? overlayColor,
     InteractiveInkFeatureFactory? splashFactory,
-    MaterialStateProperty<MouseCursor?>? mouseCursor,
+    WidgetStateProperty<MouseCursor?>? mouseCursor,
     TabAlignment? tabAlignment,
     TextScaler? textScaler,
     TabIndicatorAnimation? indicatorAnimation,
@@ -480,12 +474,7 @@ class TabBarThemeData with Diagnosticable {
       labelStyle: TextStyle.lerp(a.labelStyle, b.labelStyle, t),
       unselectedLabelColor: Color.lerp(a.unselectedLabelColor, b.unselectedLabelColor, t),
       unselectedLabelStyle: TextStyle.lerp(a.unselectedLabelStyle, b.unselectedLabelStyle, t),
-      overlayColor: MaterialStateProperty.lerp<Color?>(
-        a.overlayColor,
-        b.overlayColor,
-        t,
-        Color.lerp,
-      ),
+      overlayColor: WidgetStateProperty.lerp<Color?>(a.overlayColor, b.overlayColor, t, Color.lerp),
       splashFactory: t < 0.5 ? a.splashFactory : b.splashFactory,
       mouseCursor: t < 0.5 ? a.mouseCursor : b.mouseCursor,
       tabAlignment: t < 0.5 ? a.tabAlignment : b.tabAlignment,
@@ -574,7 +563,7 @@ class TabBarThemeData with Diagnosticable {
       ),
     );
     properties.add(
-      DiagnosticsProperty<MaterialStateProperty<Color?>?>(
+      DiagnosticsProperty<WidgetStateProperty<Color?>?>(
         'overlayColor',
         overlayColor,
         defaultValue: null,
@@ -588,7 +577,7 @@ class TabBarThemeData with Diagnosticable {
       ),
     );
     properties.add(
-      DiagnosticsProperty<MaterialStateProperty<MouseCursor?>?>(
+      DiagnosticsProperty<WidgetStateProperty<MouseCursor?>?>(
         'mouseCursor',
         mouseCursor,
         defaultValue: null,

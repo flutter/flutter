@@ -16,15 +16,13 @@ void main() {
       await tester.pumpWidget(
         DecoratedBox(
           decoration: const BoxDecoration(),
-          child: SliverList(delegate: SliverChildListDelegate(const <Widget>[])),
+          child: SliverList.list(children: const <Widget>[]),
         ),
       );
 
       expect(tester.takeException(), isFlutterError);
 
-      await tester.pumpWidget(
-        Row(children: <Widget>[SliverList(delegate: SliverChildListDelegate(const <Widget>[]))]),
-      );
+      await tester.pumpWidget(Row(children: <Widget>[SliverList.list(children: const <Widget>[])]));
 
       expect(tester.takeException(), isFlutterError);
     },

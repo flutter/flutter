@@ -574,6 +574,7 @@ void main() {
                             inputType: ui.SemanticsInputType.text,
                             flags: <SemanticsFlag>[
                               SemanticsFlag.isTextField,
+                              SemanticsFlag.isFocusable,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isEnabled,
                             ],
@@ -7775,6 +7776,7 @@ void main() {
       ),
       matchesSemantics(
         isTextField: true,
+        isFocusable: true,
         isEnabled: true,
         hasEnabledState: true,
         hasTapAction: true,
@@ -7801,7 +7803,12 @@ void main() {
             .descendant(of: find.byType(CupertinoTextField), matching: find.byType(Semantics))
             .first,
       ),
-      matchesSemantics(hasEnabledState: true, isTextField: true, isReadOnly: true),
+      matchesSemantics(
+        hasEnabledState: true,
+        isTextField: true,
+        isFocusable: true,
+        isReadOnly: true,
+      ),
     );
   });
 
@@ -10475,6 +10482,36 @@ void main() {
     expect(find.byType(EditableText).hitTestable(), findsOne);
   });
 
+  testWidgets('Text field with placeholder has correct intrinsic height', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: IntrinsicHeight(child: CupertinoTextField(placeholder: 'placeholder')),
+        ),
+      ),
+    );
+
+    expect(find.byType(CupertinoTextField), findsOneWidget);
+    expect(tester.getSize(find.byType(CupertinoTextField)).height, greaterThan(0.0));
+  });
+
+  testWidgets('Text field with placeholder has correct intrinsic width', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: IntrinsicWidth(child: CupertinoTextField(placeholder: 'placeholder')),
+        ),
+      ),
+    );
+
+    expect(find.byType(CupertinoTextField), findsOneWidget);
+    expect(tester.getSize(find.byType(CupertinoTextField)).width, greaterThan(0.0));
+  });
+
   testWidgets('Start the floating cursor on long tap', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
     final TextEditingController controller = TextEditingController(text: 'abcd');
@@ -10538,6 +10575,7 @@ void main() {
                           inputType: ui.SemanticsInputType.text,
                           flags: <SemanticsFlag>[
                             SemanticsFlag.isTextField,
+                            SemanticsFlag.isFocusable,
                             SemanticsFlag.hasEnabledState,
                             SemanticsFlag.isEnabled,
                           ],
@@ -10605,6 +10643,7 @@ void main() {
                             inputType: ui.SemanticsInputType.text,
                             flags: <SemanticsFlag>[
                               SemanticsFlag.isTextField,
+                              SemanticsFlag.isFocusable,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isReadOnly,
                             ],

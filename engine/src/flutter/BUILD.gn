@@ -78,10 +78,12 @@ group("flutter") {
 
   if (!is_qnx) {
     public_deps = [
-      ":unittests",
       "//flutter/shell/platform/embedder:flutter_engine",
       "//flutter/sky",
     ]
+    if (enable_unittests) {
+      public_deps += [ ":unittests" ]
+    }
   }
 
   # Ensure the example for a sample embedder compiles.
@@ -172,6 +174,12 @@ group("flutter") {
   if ((flutter_runtime_mode == "debug" || flutter_runtime_mode == "profile") &&
       is_ios) {
     public_deps += [ "//flutter/testing/ios_scenario_app" ]
+  }
+
+  # Build the standalone Embedder API SDK for platforms that don't vend all
+  # their engine artifacts (via `build_engine_artifacts`).
+  if (is_android && flutter_runtime_mode == "debug") {
+    public_deps += [ "//flutter/shell/platform/embedder:embedder-archive" ]
   }
 }
 

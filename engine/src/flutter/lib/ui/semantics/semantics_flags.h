@@ -10,15 +10,28 @@
 
 namespace flutter {
 
+enum class SemanticsTristate : int32_t {
+  kNone = 0,
+  kTrue = 1,
+  kFalse = 2,
+};
+enum class SemanticsCheckState : int32_t {
+  kNone = 0,
+  kTrue = 1,
+  kFalse = 2,
+  kMixed = 3,
+};
+
 struct SemanticsFlags {
-  bool hasCheckedState = false;
-  bool isChecked = false;
-  bool isSelected = false;
+  SemanticsCheckState isChecked = SemanticsCheckState::kNone;
+  SemanticsTristate isSelected = SemanticsTristate::kNone;
+  SemanticsTristate isEnabled = SemanticsTristate::kNone;
+  SemanticsTristate isToggled = SemanticsTristate::kNone;
+  SemanticsTristate isExpanded = SemanticsTristate::kNone;
+  SemanticsTristate isRequired = SemanticsTristate::kNone;
+  SemanticsTristate isFocused = SemanticsTristate::kNone;
   bool isButton = false;
   bool isTextField = false;
-  bool isFocused = false;
-  bool hasEnabledState = false;
-  bool isEnabled = false;
   bool isInMutuallyExclusiveGroup = false;
   bool isHeader = false;
   bool isObscured = false;
@@ -27,21 +40,12 @@ struct SemanticsFlags {
   bool isHidden = false;
   bool isImage = false;
   bool isLiveRegion = false;
-  bool hasToggledState = false;
-  bool isToggled = false;
   bool hasImplicitScrolling = false;
   bool isMultiline = false;
   bool isReadOnly = false;
-  bool isFocusable = false;
   bool isLink = false;
   bool isSlider = false;
   bool isKeyboardKey = false;
-  bool isCheckStateMixed = false;
-  bool hasExpandedState = false;
-  bool isExpanded = false;
-  bool hasSelectedState = false;
-  bool hasRequiredState = false;
-  bool isRequired = false;
 };
 
 //------------------------------------------------------------------------------
@@ -57,14 +61,15 @@ class NativeSemanticsFlags
   //----------------------------------------------------------------------------
   /// The init method
   static void initSemanticsFlags(Dart_Handle semantics_flags_handle,
-                                 bool hasCheckedState,
-                                 bool isChecked,
-                                 bool isSelected,
+                                 int isChecked,
+                                 int isSelected,
+                                 int isEnabled,
+                                 int isToggled,
+                                 int isExpanded,
+                                 int isRequired,
+                                 int isFocused,
                                  bool isButton,
                                  bool isTextField,
-                                 bool isFocused,
-                                 bool hasEnabledState,
-                                 bool isEnabled,
                                  bool isInMutuallyExclusiveGroup,
                                  bool isHeader,
                                  bool isObscured,
@@ -73,21 +78,13 @@ class NativeSemanticsFlags
                                  bool isHidden,
                                  bool isImage,
                                  bool isLiveRegion,
-                                 bool hasToggledState,
-                                 bool isToggled,
                                  bool hasImplicitScrolling,
                                  bool isMultiline,
                                  bool isReadOnly,
                                  bool isFocusable,
                                  bool isLink,
                                  bool isSlider,
-                                 bool isKeyboardKey,
-                                 bool isCheckStateMixed,
-                                 bool hasExpandedState,
-                                 bool isExpanded,
-                                 bool hasSelectedState,
-                                 bool hasRequiredState,
-                                 bool isRequired);
+                                 bool isKeyboardKey);
 
   //----------------------------------------------------------------------------
   /// Returns the c++ representataion of SemanticsFlags.
