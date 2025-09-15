@@ -4838,6 +4838,30 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
     }, getCurrentDirectory: () => out);
     expect(logger.statusText, isNot(contains(r'  $ cd')));
   }, overrides: {Logger: () => logger});
+
+  testUsingContext(
+    'default project locks known dependencies to known versions with pubspec.lock',
+    () async {
+      await _createProject(projectDir, <String>['--no-pub'], <String>['pubspec.lock']);
+
+      final projectPubspecLock =
+          jsonDecode(await projectDir.childFile('pubspec.lock').readAsString()) as Map;
+      final projectPackages = projectPubspecLock['packages'] as Map;
+      expect(projectPackages, isNotEmpty);
+
+      final flutterPubspecLock =
+          loadYaml(
+                globals.fs
+                    .file(globals.fs.path.join(getFlutterRoot(), 'pubspec.lock'))
+                    .readAsStringSync(),
+              )
+              as YamlMap;
+      final flutterPackages = flutterPubspecLock['packages'] as YamlMap;
+      for (final MapEntry<Object?, Object?> p in projectPackages.entries) {
+        expect(flutterPackages[p.key], p.value);
+      }
+    },
+  );
 }
 
 Future<void> _createProject(

@@ -4,6 +4,7 @@
 
 import 'package:meta/meta.dart';
 import 'package:unified_analytics/unified_analytics.dart';
+import 'package:yaml/yaml.dart';
 
 import '../android/gradle_utils.dart' as gradle;
 import '../base/common.dart';
@@ -14,6 +15,7 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../base/version_range.dart';
+import '../cache.dart';
 import '../convert.dart';
 import '../dart/pub.dart';
 import '../darwin/darwin.dart';
@@ -514,6 +516,8 @@ class CreateCommand extends FlutterCommand with CreateBase {
         );
         pubContext = PubContext.createPackage;
     }
+
+    _generatePubspecLock(relativeDir);
 
     if (shouldCallPubGet) {
       final FlutterProject project = FlutterProject.fromDirectory(relativeDir);
@@ -1232,3 +1236,49 @@ List<String>? _getBuildGradleConfigurationFilePaths(
   }
   return buildGradleConfigurationFilePaths;
 }
+
+/// Generate a pubspec.lock file that locks the versions of all dependencies to
+/// the exact versions the Flutter SDK is tested with.
+///
+/// This ensures that a breaking change accidentally published to one of these
+/// packages that the Flutter SDK depends on cannot break the `flutter create`
+/// command.
+void _generatePubspecLock(Directory directory) {
+  final FileSystem fs = directory.fileSystem;
+  final String flutterRoot = Cache.flutterRoot!;
+  final flutterPubspecLock =
+      loadYaml(fs.file(fs.path.join(flutterRoot, 'pubspec.lock')).readAsStringSync()) as YamlMap;
+
+  final flutterPackages = flutterPubspecLock['packages'] as YamlMap;
+
+  final packages = <String, Object?>{
+    for (final package in _fixedPackages) package: flutterPackages[package],
+  };
+
+  /// Pub will rewrite this file as yaml pretty after resolution.
+  directory
+      .childFile('pubspec.lock')
+      .writeAsStringSync(const JsonEncoder.withIndent('  ').convert({'packages': packages}));
+}
+
+/// These are the external dependencies from the SDK packages flutter,
+/// flutter_test, flutter_localization.
+const _fixedPackages = [
+  'characters',
+  'collection',
+  'material_color_utilities',
+  'meta',
+  'vector_math',
+  'intl',
+  'path',
+  'test_api',
+  'matcher',
+  'fake_async',
+  'clock',
+  'stack_trace',
+  'vector_math',
+  'leak_tracker_flutter_testing',
+  'collection',
+  'meta',
+  'stream_channel',
+];
