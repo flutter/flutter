@@ -329,6 +329,11 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 /// ** See code in examples/api/lib/material/progress_indicator/linear_progress_indicator.1.dart **
 /// {@end-tool}
 ///
+/// {@macro flutter.material.ProgressIndicator.AnimationSynchronization}
+///
+/// See the documentation of [CircularProgressIndicator] for an example on this
+/// topic.
+///
 /// See also:
 ///
 ///  * [CircularProgressIndicator], which shows progress along a circular arc.
@@ -762,6 +767,21 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 /// Alternatively, a specific [AnimationController] can be passed directly to the
 /// [controller] property of an individual indicator.
 /// {@endtemplate}
+///
+/// {@tool dartpad}
+/// This sample demonstrates how to synchronize the indeterminate animations
+/// of multiple [CircularProgressIndicator]s using a [Theme].
+///
+/// Tapping the buttons adds or removes indicators. By default, they all
+/// share a [ProgressIndicatorTheme.controller], which keeps their
+/// animations in sync.
+///
+/// Tapping the "Toggle" button sets the theme's controller to null.
+/// This forces each indicator to create its own internal controller,
+/// causing their animations to become desynchronized.
+///
+/// ** See code in examples/api/lib/material/progress_indicator/circular_progress_indicator.2.dart **
+/// {@end-tool}
 ///
 /// See also:
 ///
