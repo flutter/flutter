@@ -5341,6 +5341,7 @@ void main() {
     const double defaultReservedPadding = 8.0; // See _kMenuViewPadding.
     expect(tester.getRect(findMenuPanels()).width, 800.0 - defaultReservedPadding * 2);
   });
+
   testWidgets('Menu panel accepts custom reserved padding', (WidgetTester tester) async {
     const EdgeInsetsGeometry reservedPadding = EdgeInsets.symmetric(horizontal: 13.0);
     await tester.pumpWidget(
