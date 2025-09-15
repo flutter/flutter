@@ -33,7 +33,7 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 ## Flutter 3.35 Changes
 ### [3.35.4](https://github.com/flutter/flutter/releases/tag/3.35.4)
 - [flutter/173474](https://github.com/flutter/flutter/issues/173474) - On all platforms PlatformDispatchers.instance.engineId no longer returns null after hot restart.
-- [flutter/174513](https://github.com/flutter/flutter/issues/174513) - On iOS 26 Fix a bug where platform view's gesture blocking fails and lets touches fall through to underlying flutter views.
+- [flutter/174513](https://github.com/flutter/flutter/issues/174513) - On iOS 26, fix a bug where platform view's gesture blocking fails and lets touches on Flutter views fall through to underlying platform views.
 
 ### [3.35.3](https://github.com/flutter/flutter/releases/tag/3.35.3)
 
