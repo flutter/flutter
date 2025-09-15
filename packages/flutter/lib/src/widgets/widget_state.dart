@@ -435,9 +435,7 @@ abstract class WidgetStateMouseCursor extends MouseCursor
   }
 
   /// A mouse cursor for clickable widgets, which always resolves to [SystemMouseCursors.basic]
-  /// regardless of whether or ont the widget is disabled.
-  ///
-  /// This cursor is the default for Material buttons on non-web platforms.
+  /// regardless of whether the widget is disabled.
   static const WidgetStateMouseCursor statelessClickable = WidgetStateMouseCursor.resolveWith(
     _statelessClickable,
     debugDescription: 'WidgetStateMouseCursor(statelessClickable)',
