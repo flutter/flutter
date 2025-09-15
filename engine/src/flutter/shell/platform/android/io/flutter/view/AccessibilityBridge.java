@@ -687,10 +687,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       if (flutterSemanticsTree.containsKey(ROOT_NODE_ID)) {
         result.addChild(rootAccessibilityView, ROOT_NODE_ID);
       }
-      if (Build.VERSION.SDK_INT >= API_LEVELS.API_24) {
         result.setImportantForAccessibility(false);
-      }
-      return result;
+        return result;
     }
 
     SemanticsNode semanticsNode = flutterSemanticsTree.get(virtualViewId);
@@ -723,11 +721,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
     // Accessibility Scanner uses isImportantForAccessibility to decide whether to check
     // or skip this node.
-    if (Build.VERSION.SDK_INT >= API_LEVELS.API_24) {
       result.setImportantForAccessibility(isImportant(semanticsNode));
-    }
 
-    // Work around for https://github.com/flutter/flutter/issues/21030
+      // Work around for https://github.com/flutter/flutter/issues/21030
     result.setViewIdResourceName("");
     if (semanticsNode.identifier != null) {
       result.setViewIdResourceName(semanticsNode.identifier);
@@ -2467,7 +2463,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       if (label == null && previousLabel == null) {
         return false;
       }
-      return label == null || previousLabel == null || !label.equals(previousLabel);
+      return label == null || !label.equals(previousLabel);
     }
 
     private void log(@NonNull String indent, boolean recursive) {
