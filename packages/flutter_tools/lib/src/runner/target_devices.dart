@@ -387,11 +387,11 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
   @override
   void startExtendedWirelessDeviceDiscovery({Duration? deviceDiscoveryTimeout}) {
     _logger.printTrace("startExtendedWirelessDeviceDiscovery");
-    if (deviceDiscoveryTimeout == null && _includeWirelessDevices) {
-      _wirelessDevicesRefresh ??= _deviceManager.refreshExtendedWirelessDeviceDiscoverers(
-        timeout: DeviceManager.minimumWirelessDeviceDiscoveryTimeout,
-      );
-    }
+    // if (deviceDiscoveryTimeout == null && _includeWirelessDevices) {
+    //   _wirelessDevicesRefresh ??= _deviceManager.refreshExtendedWirelessDeviceDiscoverers(
+    //     timeout: DeviceManager.minimumWirelessDeviceDiscoveryTimeout,
+    //   );
+    // }
     return;
   }
 
