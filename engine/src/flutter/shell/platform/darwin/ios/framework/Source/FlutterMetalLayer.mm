@@ -248,20 +248,26 @@ extern CFTimeInterval display_link_target;
 }
 
 - (void)setDrawableSize:(CGSize)drawableSize {
-  [_availableTextures removeAllObjects];
-  _front = nil;
-  _totalTextures = 0;
-  _drawableSize = drawableSize;
+  @synchronized(self) {
+    [_availableTextures removeAllObjects];
+    _front = nil;
+    _totalTextures = 0;
+    _drawableSize = drawableSize;
+  }
 }
 
 - (void)didEnterBackground:(id)notification {
-  [_availableTextures removeAllObjects];
-  _totalTextures = _front != nil ? 1 : 0;
+  @synchronized(self) {
+    [_availableTextures removeAllObjects];
+    _totalTextures = _front != nil ? 1 : 0;
+  }
   _displayLink.paused = YES;
 }
 
 - (CGSize)drawableSize {
-  return _drawableSize;
+  @synchronized(self) {
+    return _drawableSize;
+  }
 }
 
 - (IOSurface*)createIOSurface {
@@ -418,6 +424,10 @@ extern CFTimeInterval display_link_target;
 
 - (void)presentTexture:(FlutterTexture*)texture {
   @synchronized(self) {
+    if (texture.texture.width != _drawableSize.width ||
+        texture.texture.height != _drawableSize.height) {
+      return;
+    }
     if (_front != nil) {
       [_availableTextures addObject:_front];
     }
