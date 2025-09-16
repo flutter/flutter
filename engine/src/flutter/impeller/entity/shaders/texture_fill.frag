@@ -20,15 +20,16 @@ in highp vec2 v_texture_coords;
 out f16vec4 frag_color;
 
 vec4 Sample(vec2 uv, vec4 bounds_uv) {
-// #ifdef SUPPORTS_DECAL
-//   return texture(texture_sampler, uv, float16_t(kDefaultMipBias));
-// #else
-  if ((uv.x < bounds_uv.x || uv.y < bounds_uv.y || uv.x > bounds_uv.z || uv.y > bounds_uv.w)) {
+  // #ifdef SUPPORTS_DECAL
+  //   return texture(texture_sampler, uv, float16_t(kDefaultMipBias));
+  // #else
+  if ((uv.x < bounds_uv.x || uv.y < bounds_uv.y || uv.x > bounds_uv.z ||
+       uv.y > bounds_uv.w)) {
     return vec4(0, 1., 0., 0.5);
   } else {
     return texture(texture_sampler, uv, float16_t(kDefaultMipBias));
   }
-// #endif
+  // #endif
 }
 
 void main() {

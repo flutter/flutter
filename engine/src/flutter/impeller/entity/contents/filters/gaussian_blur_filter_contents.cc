@@ -324,10 +324,11 @@ DownsamplePassArgs CalculateDownsamplePassArgs(
         .transform = Matrix::MakeTranslation(
             {aligned_coverage_hint.GetX(), aligned_coverage_hint.GetY(), 0})};
   } else {
-    printf("Going else %d %d %d %d\n", input_snapshot.transform.Equals(snapshot_entity.GetTransform()),
-      source_expanded_coverage_hint.has_value(),
-      snapshot_coverage.has_value(),
-      snapshot_coverage->Contains(source_expanded_coverage_hint.value()));
+    printf("Going else %d %d %d %d\n",
+           input_snapshot.transform.Equals(snapshot_entity.GetTransform()),
+           source_expanded_coverage_hint.has_value(),
+           snapshot_coverage.has_value(),
+           snapshot_coverage->Contains(source_expanded_coverage_hint.value()));
     //////////////////////////////////////////////////////////////////////////////
     auto input_snapshot_size = input_snapshot.texture->GetSize();
     Rect source_rect = Rect::MakeSize(input_snapshot_size);
@@ -388,7 +389,8 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
   using VS = TextureFillVertexShader;
 
   Rect bounds_rect = pass_args.bounds_uvs.value_or(Rect::MakeLTRB(0, 0, 1, 1));
-  Vector4 bounds_vector = {bounds_rect.GetLeft(), bounds_rect.GetTop(), bounds_rect.GetRight(), bounds_rect.GetBottom()};
+  Vector4 bounds_vector = {bounds_rect.GetLeft(), bounds_rect.GetTop(),
+                           bounds_rect.GetRight(), bounds_rect.GetBottom()};
 
   // If the texture already had mip levels generated, then we can use the
   // original downsample shader.
@@ -575,16 +577,18 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
                 linear_sampler_descriptor));
         GaussianBlurVertexShader::BindFrameInfo(
             pass, data_host_buffer.EmplaceUniform(frame_info));
-        auto printKernal = [](GaussianBlurPipeline::FragmentShader::KernelSamples samples) {
-          for (int i = 0; i < 50; i++) {
-            Vector4 d = samples.sample_data[i];
-            printf("Sample #%02d: %.2f, %.2f, %.2f, %.2f\n", i, d.x, d.y, d.z, d.w);
-          }
-          return samples;
-        };
+        auto printKernal =
+            [](GaussianBlurPipeline::FragmentShader::KernelSamples samples) {
+              for (int i = 0; i < 50; i++) {
+                Vector4 d = samples.sample_data[i];
+                printf("Sample #%02d: %.2f, %.2f, %.2f, %.2f\n", i, d.x, d.y,
+                       d.z, d.w);
+              }
+              return samples;
+            };
         GaussianBlurFragmentShader::BindKernelSamples(
-            pass, data_host_buffer.EmplaceUniform(
-                      printKernal(LerpHackKernelSamples(GenerateBlurInfo(blur_info)))));
+            pass, data_host_buffer.EmplaceUniform(printKernal(
+                      LerpHackKernelSamples(GenerateBlurInfo(blur_info)))));
         GaussianBlurFragmentShader::BindBlurParams(
             pass, data_host_buffer.EmplaceUniform(blur_params));
         return pass.Draw().ok();
