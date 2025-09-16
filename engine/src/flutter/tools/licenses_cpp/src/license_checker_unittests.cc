@@ -893,6 +893,45 @@ v2.0
 )output");
 }
 
+TEST_F(LicenseCheckerTest, IgnoredDirHasContent) {
+  absl::StatusOr<fs::path> temp_path = MakeTempDir();
+  ASSERT_TRUE(temp_path.ok());
+
+  absl::StatusOr<Data> data = MakeTestData();
+  ASSERT_TRUE(data.ok());
+
+  fs::current_path(*temp_path);
+  fs::create_directories("third_party/vulkan-deps");
+  fs::create_directories("third_party/vulkan-deps/foobar");
+
+  ASSERT_TRUE(
+      WriteFile(kLicense, *temp_path / "third_party/vulkan-deps/LICENSE")
+          .ok());
+  ASSERT_TRUE(WriteFile(kHeader,
+                        *temp_path / "third_party/vulkan-deps/foobar.cc")
+                  .ok());
+
+  Repo repo;
+  repo.Add(*temp_path / "third_party/vulkan-deps/LICENSE");
+  repo.Add(*temp_path / "third_party/vulkan-deps/foobar.cc");
+  ASSERT_TRUE(repo.Commit().ok());
+
+  std::stringstream ss;
+  std::vector<absl::Status> errors =
+      LicenseChecker::Run(temp_path->string(), ss, *data);
+  EXPECT_EQ(errors.size(), 0u) << errors[0];
+
+  EXPECT_EQ(ss.str(), R"output(vulkan-deps
+
+Copyright Test
+--------------------------------------------------------------------------------
+vulkan-deps
+
+Test License
+v2.0
+)output");
+}
+
 TEST_F(LicenseCheckerTest, DoubleLicenseFiles) {
   absl::StatusOr<fs::path> temp_path = MakeTempDir();
   ASSERT_TRUE(temp_path.ok());

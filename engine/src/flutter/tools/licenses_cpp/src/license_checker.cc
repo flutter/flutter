@@ -174,11 +174,12 @@ Package GetPackage(const Data& data,
     if (current_license.has_value()) {
       result.license_file = current_license;
     }
-    if (after_third_party &&
-        std::find(kThirdPartyIgnore.begin(), kThirdPartyIgnore.end(),
-                  component) == kThirdPartyIgnore.end()) {
+    if (after_third_party) {
+      if (std::find(kThirdPartyIgnore.begin(), kThirdPartyIgnore.end(),
+                    component) == kThirdPartyIgnore.end()) {
+        after_third_party = false;
+      }
       result.name = component;
-      after_third_party = false;
     } else if (component.string() == "third_party") {
       after_third_party = true;
       result.license_file = std::nullopt;
