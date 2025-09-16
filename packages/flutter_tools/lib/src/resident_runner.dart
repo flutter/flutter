@@ -1521,12 +1521,12 @@ abstract class ResidentRunner extends ResidentHandlers {
   }
 
   void printHelpDetails() {
-    commandHelp.v.print();
     if (flutterDevices.any((FlutterDevice? d) => d!.device!.supportsScreenshot)) {
       commandHelp.s.print();
     }
     if (supportsServiceProtocol) {
       if (isRunningDebug) {
+        commandHelp.v.print();
         commandHelp.w.print();
         commandHelp.t.print();
         commandHelp.L.print();
@@ -1539,6 +1539,15 @@ abstract class ResidentRunner extends ResidentHandlers {
         commandHelp.o.print();
         commandHelp.b.print();
       } else {
+        final bool isRunningOnWeb = flutterDevices.every((FlutterDevice? flutterDevice) {
+          return flutterDevice?.targetPlatform == TargetPlatform.web_javascript;
+        });
+
+        if (!isRunningOnWeb) {
+          // DevTools are only supported in debug mode for web, see https://docs.flutter.dev/testing/build-modes#profile
+          commandHelp.v.print();
+        }
+
         commandHelp.S.print();
         commandHelp.U.print();
       }
@@ -1791,9 +1800,20 @@ class TerminalHandler {
         return residentRunner.debugDumpSemanticsTreeInInverseHitTestOrder();
       case 'v':
       case 'V':
-        return residentRunner.residentDevtoolsHandler!.launchDevToolsInBrowser(
-          flutterDevices: residentRunner.flutterDevices,
-        );
+        final bool isRunningOnWeb = residentRunner.flutterDevices.every((
+          FlutterDevice? flutterDevice,
+        ) {
+          return flutterDevice?.targetPlatform == TargetPlatform.web_javascript;
+        });
+
+        if (residentRunner.isRunningDebug || !isRunningOnWeb) {
+          // DevTools are only supported in debug mode for web, see https://docs.flutter.dev/testing/build-modes#profile
+          return residentRunner.residentDevtoolsHandler!.launchDevToolsInBrowser(
+            flutterDevices: residentRunner.flutterDevices,
+          );
+        }
+
+        return false;
       case 'w':
       case 'W':
         return residentRunner.debugDumpApp();

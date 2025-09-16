@@ -5267,7 +5267,6 @@ targets:
   - name: Mac_ios microbenchmarks_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
