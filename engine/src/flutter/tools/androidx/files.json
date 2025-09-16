@@ -68,12 +68,6 @@
     ]
   },
   {
-    "url": "https://dl.google.com/android/maven2/androidx/appcompat/appcompat/1.7.0/appcompat-1.7.0.aar",
-    "out_file_name": "androidx_appcompat.aar",
-    "maven_dependency": "androidx.appcompat:appcompat:1.7.0",
-    "provides": ["androidx.appcompat.app"]
-  },
-  {
     "url": "https://maven.google.com/androidx/window/window-java/1.2.0/window-java-1.2.0.aar",
     "out_file_name": "androidx_window_java.aar",
     "maven_dependency": "androidx.window:window-java:1.2.0",
