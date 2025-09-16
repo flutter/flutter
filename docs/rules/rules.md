@@ -70,11 +70,11 @@ practices.
     operation that will complete in the future.
 *   Use `ValueNotifier` with `ValueListenableBuilder` for simple, local state
     that involves a single value.
-    
+
     ```dart
     // Define a ValueNotifier to hold the state.
     final ValueNotifier<int> _counter = ValueNotifier<int>(0);
-    
+
     // Use ValueListenableBuilder to listen and rebuild.
     ValueListenableBuilder<int>(
       valueListenable: _counter,
@@ -109,7 +109,7 @@ practices.
     ```dart
     // 1. Add the dependency
     // flutter pub add go_router
-    
+
     // 2. Configure the router
     final GoRouter _router = GoRouter(
       routes: <RouteBase>[
@@ -128,7 +128,7 @@ practices.
         ),
       ],
     );
-    
+
     // 3. Use it in your MaterialApp
     MaterialApp.router(
       routerConfig: _router,
@@ -144,7 +144,7 @@ practices.
       context,
       MaterialPageRoute(builder: (context) => const DetailsScreen()),
     );
-    
+
     // Pop the current screen to go back
     Navigator.pop(context);
     ```
@@ -158,16 +158,16 @@ practices.
     ```dart
     // In your model file
     import 'package:json_annotation/json_annotation.dart';
-    
+
     part 'user.g.dart';
-    
+
     @JsonSerializable(fieldRename: FieldRename.snake)
     class User {
       final String firstName;
       final String lastName;
-    
+ 
       User({required this.firstName, required this.lastName});
-    
+ 
       factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
       Map<String, dynamic> toJson() => _$UserToJson(this);
     }
@@ -179,10 +179,10 @@ practices.
 
     ```dart
     import 'dart:developer' as developer;
-    
+ 
     // For simple messages
     developer.log('User logged in successfully.');
-    
+ 
     // For structured error logging
     try {
       // ... code that might fail
@@ -267,7 +267,7 @@ practices.
     ```dart
     // 1. Add the dependency
     // flutter pub add google_fonts
-    
+
     // 2. Define a TextTheme with a custom font
     final TextTheme appTextTheme = TextTheme(
       displayLarge: GoogleFonts.oswald(fontSize: 57, fontWeight: FontWeight.bold),
