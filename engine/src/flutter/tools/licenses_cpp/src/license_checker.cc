@@ -166,6 +166,7 @@ Package GetPackage(const Data& data,
       .is_root_package = true,
   };
   bool after_third_party = false;
+  bool after_ignored_third_party = false;
   fs::path current = ".";
   for (const fs::path& component : relative_path.parent_path()) {
     current /= component;
@@ -174,11 +175,15 @@ Package GetPackage(const Data& data,
     if (current_license.has_value()) {
       result.license_file = current_license;
     }
-    if (after_third_party) {
+    if (after_ignored_third_party) {
+      after_ignored_third_party = false;
+      result.name = component;
+    } else if (after_third_party) {
       if (std::find(kThirdPartyIgnore.begin(), kThirdPartyIgnore.end(),
-                    component) == kThirdPartyIgnore.end()) {
-        after_third_party = false;
+                    component.string()) != kThirdPartyIgnore.end()) {
+        after_ignored_third_party = true;
       }
+      after_third_party = false;
       result.name = component;
     } else if (component.string() == "third_party") {
       after_third_party = true;
