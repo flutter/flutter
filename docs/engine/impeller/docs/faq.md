@@ -313,7 +313,6 @@ flowchart TD
         OpenGL --> GraphicsHardware
         Metal --> GraphicsHardware
         Vulkan --> GraphicsHardware
-        
 ```
 
 WebGPU, or Dawn/wgpu.rs in JS garb, purports to be a sensible and portable abstraction layer over the [client APIs](https://dawn.googlesource.com/dawn/+/HEAD/docs/support.md). For middleware, that presents an interesting value proposition. Instead of doing mostly the same thing multiple times, you just target one API and let the WebGPU library take care of the rest.
