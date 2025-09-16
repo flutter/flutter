@@ -1158,10 +1158,10 @@ void Shell::OnPlatformViewSetViewportMetrics(int64_t view_id,
     std::scoped_lock<std::mutex> lock(resize_mutex_);
 
     expected_frame_constraints_[view_id] =
-        fml::BoxConstraints(fml::Size(metrics.physical_min_width_constraint,
-                                      metrics.physical_min_height_constraint),
-                            fml::Size(metrics.physical_max_width_constraint,
-                                      metrics.physical_max_height_constraint));
+        BoxConstraints(Size(metrics.physical_min_width_constraint,
+                            metrics.physical_min_height_constraint),
+                       Size(metrics.physical_max_width_constraint,
+                            metrics.physical_max_height_constraint));
     device_pixel_ratio_ = metrics.device_pixel_ratio;
   }
 }
@@ -1811,7 +1811,7 @@ bool Shell::ShouldDiscardLayerTree(int64_t view_id,
   std::scoped_lock<std::mutex> lock(resize_mutex_);
   auto expected_frame_constraints = ExpectedFrameConstraints(view_id);
   return !expected_frame_constraints.IsSatisfiedBy(
-      fml::Size(tree.frame_size().width, tree.frame_size().height));
+      Size(tree.frame_size().width, tree.frame_size().height));
 }
 
 // |ServiceProtocol::Handler|
@@ -2418,7 +2418,7 @@ Shell::GetConcurrentWorkerTaskRunner() const {
   return vm_->GetConcurrentWorkerTaskRunner();
 }
 
-fml::BoxConstraints Shell::ExpectedFrameConstraints(int64_t view_id) {
+BoxConstraints Shell::ExpectedFrameConstraints(int64_t view_id) {
   auto found = expected_frame_constraints_.find(view_id);
 
   if (found == expected_frame_constraints_.end()) {

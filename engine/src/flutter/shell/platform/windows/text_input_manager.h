@@ -11,8 +11,8 @@
 #include <optional>
 #include <string>
 
-#include "flutter/fml/geometry.h"
 #include "flutter/fml/macros.h"
+#include "flutter/shell/geometry/geometry.h"
 
 namespace flutter {
 
@@ -55,7 +55,7 @@ class TextInputManager {
   // Updates the current IME window and system caret position.
   //
   // This method should be invoked when handling cursor position/size updates.
-  void UpdateCaretRect(const fml::Rect& rect);
+  void UpdateCaretRect(const Rect& rect);
 
   // Returns the cursor position relative to the start of the composing range.
   virtual long GetComposingCursorPosition() const;
@@ -97,7 +97,7 @@ class TextInputManager {
   bool ime_active_ = false;
 
   // The system caret rect.
-  fml::Rect caret_rect_ = {{0, 0}, {0, 0}};
+  Rect caret_rect_ = {{0, 0}, {0, 0}};
 
   FML_DISALLOW_COPY_AND_ASSIGN(TextInputManager);
 };

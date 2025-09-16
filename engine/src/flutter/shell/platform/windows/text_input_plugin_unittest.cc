@@ -128,7 +128,7 @@ class MockFlutterWindowsView : public FlutterWindowsView {
       : FlutterWindowsView(kImplicitViewId, engine, std::move(window)) {}
   virtual ~MockFlutterWindowsView() = default;
 
-  MOCK_METHOD(void, OnCursorRectUpdated, (const fml::Rect&), (override));
+  MOCK_METHOD(void, OnCursorRectUpdated, (const Rect&), (override));
   MOCK_METHOD(void, OnResetImeComposing, (), (override));
 
  private:
@@ -642,8 +642,7 @@ TEST_F(TextInputPluginTest, TransformCursorRect) {
 
   auto& codec = JsonMethodCodec::GetInstance();
 
-  EXPECT_CALL(*view(),
-              OnCursorRectUpdated(fml::Rect{{view_x, view_y}, {0, 0}}));
+  EXPECT_CALL(*view(), OnCursorRectUpdated(Rect{{view_x, view_y}, {0, 0}}));
 
   {
     auto arguments =
@@ -665,8 +664,8 @@ TEST_F(TextInputPluginTest, TransformCursorRect) {
   }
 
   EXPECT_CALL(*view(),
-              OnCursorRectUpdated(fml::Rect{{view_x + ime_x, view_y + ime_y},
-                                            {ime_width, ime_height}}));
+              OnCursorRectUpdated(Rect{{view_x + ime_x, view_y + ime_y},
+                                       {ime_width, ime_height}}));
 
   {
     auto arguments =

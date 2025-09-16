@@ -357,7 +357,7 @@ gfx::NativeViewAccessible FlutterWindowsView::GetNativeViewAccessible() {
   return accessibility_bridge_->GetChildOfAXFragmentRoot();
 }
 
-void FlutterWindowsView::OnCursorRectUpdated(const fml::Rect& rect) {
+void FlutterWindowsView::OnCursorRectUpdated(const Rect& rect) {
   binding_handler_->OnCursorRectUpdated(rect);
 }
 

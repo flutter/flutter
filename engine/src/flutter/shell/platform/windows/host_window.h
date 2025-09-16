@@ -11,8 +11,8 @@
 #include <memory>
 #include <optional>
 
-#include "flutter/fml/geometry.h"
 #include "flutter/fml/macros.h"
+#include "flutter/shell/geometry/geometry.h"
 #include "flutter/shell/platform/common/windowing.h"
 #include "flutter/shell/platform/windows/window_manager.h"
 
@@ -89,7 +89,7 @@ class HostWindow {
              FlutterWindowsEngine* engine,
              WindowArchetype archetype,
              std::unique_ptr<FlutterWindowsViewController> view_controller,
-             const fml::BoxConstraints& constraints,
+             const BoxConstraints& constraints,
              HWND hwnd);
 
   // Sets the focus to the child view window of |window|.
@@ -124,7 +124,7 @@ class HostWindow {
   HWND window_handle_ = nullptr;
 
   // The constraints on the window's client area.
-  fml::BoxConstraints box_constraints_;
+  BoxConstraints box_constraints_;
 
   // Whether or not the window is currently in a fullscreen state.
   bool is_fullscreen_ = false;

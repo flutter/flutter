@@ -366,7 +366,7 @@ void TextInputPlugin::HandleMethodCall(
     composing_rect_ = {{x->value.GetDouble(), y->value.GetDouble()},
                        {width->value.GetDouble(), height->value.GetDouble()}};
 
-    fml::Rect transformed_rect = GetCursorRect();
+    Rect transformed_rect = GetCursorRect();
     view->OnCursorRectUpdated(transformed_rect);
   } else if (method.compare(kSetEditableSizeAndTransform) == 0) {
     FlutterWindowsView* view = engine_->view(view_id_);
@@ -399,7 +399,7 @@ void TextInputPlugin::HandleMethodCall(
       editabletext_transform_[i / 4][i % 4] = entry.GetDouble();
       ++i;
     }
-    fml::Rect transformed_rect = GetCursorRect();
+    Rect transformed_rect = GetCursorRect();
     view->OnCursorRectUpdated(transformed_rect);
   } else {
     result->NotImplemented();
@@ -410,8 +410,8 @@ void TextInputPlugin::HandleMethodCall(
   result->Success();
 }
 
-fml::Rect TextInputPlugin::GetCursorRect() const {
-  fml::Point transformed_point = {
+Rect TextInputPlugin::GetCursorRect() const {
+  Point transformed_point = {
       composing_rect_.left() * editabletext_transform_[0][0] +
           composing_rect_.top() * editabletext_transform_[1][0] +
           editabletext_transform_[3][0],

@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_FML_GEOMETRY_H_
-#define FLUTTER_FML_GEOMETRY_H_
+#ifndef FLUTTER_SHELL_GEOMETRY_GEOMETRY_H_
+#define FLUTTER_SHELL_GEOMETRY_GEOMETRY_H_
 
 #include <cmath>
 #include <limits>
 #include <optional>
 
-namespace fml {
+namespace flutter {
 
 // A point in Cartesian space relative to a separately-maintained origin.
 class Point {
@@ -106,6 +106,6 @@ class BoxConstraints {
                        std::numeric_limits<double>::infinity());
 };
 
-}  // namespace fml
+}  // namespace flutter
 
-#endif  // FLUTTER_FML_GEOMETRY_H_
+#endif  // FLUTTER_SHELL_GEOMETRY_GEOMETRY_H_

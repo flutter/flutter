@@ -10,7 +10,7 @@
 #include <string>
 #include <variant>
 
-#include "flutter/fml/geometry.h"
+#include "flutter/shell/geometry/geometry.h"
 #include "flutter/shell/platform/common/alert_platform_node_delegate.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/windows/public/flutter_windows.h"
@@ -56,7 +56,7 @@ class WindowBindingHandler {
   virtual PhysicalWindowBounds GetPhysicalWindowBounds() = 0;
 
   // Invoked when the cursor/composing rect has been updated in the framework.
-  virtual void OnCursorRectUpdated(const fml::Rect& rect) = 0;
+  virtual void OnCursorRectUpdated(const Rect& rect) = 0;
 
   // Invoked when the embedder clears the contents of this Flutter view.
   //

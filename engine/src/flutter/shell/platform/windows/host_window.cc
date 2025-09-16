@@ -20,12 +20,12 @@ constexpr wchar_t kWindowClassName[] = L"FLUTTER_HOST_WINDOW";
 
 // Clamps |size| to the size of the virtual screen. Both the parameter and
 // return size are in physical coordinates.
-fml::Size ClampToVirtualScreen(fml::Size size) {
+Size ClampToVirtualScreen(Size size) {
   double const virtual_screen_width = GetSystemMetrics(SM_CXVIRTUALSCREEN);
   double const virtual_screen_height = GetSystemMetrics(SM_CYVIRTUALSCREEN);
 
-  return fml::Size(std::clamp(size.width(), 0.0, virtual_screen_width),
-                   std::clamp(size.height(), 0.0, virtual_screen_height));
+  return Size(std::clamp(size.width(), 0.0, virtual_screen_width),
+              std::clamp(size.height(), 0.0, virtual_screen_height));
 }
 
 void EnableTransparentWindowBackground(HWND hwnd,
@@ -98,11 +98,11 @@ std::string GetLastErrorAsString() {
 // used for the calculation; otherwise, the primary display's DPI is used. The
 // resulting size includes window borders, non-client areas, and drop shadows.
 // On error, returns std::nullopt and logs an error message.
-std::optional<fml::Size> GetWindowSizeForClientSize(
+std::optional<Size> GetWindowSizeForClientSize(
     flutter::WindowsProcTable const& win32,
-    fml::Size const& client_size,
-    std::optional<fml::Size> smallest,
-    std::optional<fml::Size> biggest,
+    Size const& client_size,
+    std::optional<Size> smallest,
+    std::optional<Size> biggest,
     DWORD window_style,
     DWORD extended_window_style,
     HWND owner_hwnd) {
@@ -128,21 +128,21 @@ std::optional<fml::Size> GetWindowSizeForClientSize(
   double const non_client_height =
       height - (client_size.height() * scale_factor);
   if (smallest) {
-    fml::Size min_physical_size = ClampToVirtualScreen(
-        fml::Size(smallest->width() * scale_factor + non_client_width,
-                  smallest->height() * scale_factor + non_client_height));
+    Size min_physical_size = ClampToVirtualScreen(
+        Size(smallest->width() * scale_factor + non_client_width,
+             smallest->height() * scale_factor + non_client_height));
     width = std::max(width, min_physical_size.width());
     height = std::max(height, min_physical_size.height());
   }
   if (biggest) {
-    fml::Size max_physical_size = ClampToVirtualScreen(
-        fml::Size(biggest->width() * scale_factor + non_client_width,
-                  biggest->height() * scale_factor + non_client_height));
+    Size max_physical_size = ClampToVirtualScreen(
+        Size(biggest->width() * scale_factor + non_client_width,
+             biggest->height() * scale_factor + non_client_height));
     width = std::min(width, max_physical_size.width());
     height = std::min(height, max_physical_size.height());
   }
 
-  return fml::Size{width, height};
+  return Size{width, height};
 }
 
 // Checks whether the window class of name |class_name| is registered for the
@@ -234,20 +234,20 @@ RECT AdjustToFit(const RECT& parent, const RECT& child) {
   return result;
 }
 
-fml::BoxConstraints FromWindowConstraints(
+BoxConstraints FromWindowConstraints(
     const flutter::WindowConstraints& preferred_constraints) {
-  std::optional<fml::Size> smallest, biggest;
+  std::optional<Size> smallest, biggest;
   if (preferred_constraints.has_view_constraints) {
-    smallest = fml::Size(preferred_constraints.view_min_width,
-                         preferred_constraints.view_min_height);
+    smallest = Size(preferred_constraints.view_min_width,
+                    preferred_constraints.view_min_height);
     if (preferred_constraints.view_max_width > 0 &&
         preferred_constraints.view_max_height > 0) {
-      biggest = fml::Size(preferred_constraints.view_max_width,
-                          preferred_constraints.view_max_height);
+      biggest = Size(preferred_constraints.view_max_width,
+                     preferred_constraints.view_max_height);
     }
   }
 
-  return fml::BoxConstraints(smallest, biggest);
+  return BoxConstraints(smallest, biggest);
 }
 
 }  // namespace
@@ -270,16 +270,15 @@ std::unique_ptr<HostWindow> HostWindow::CreateRegularWindow(
   // Calculate the screen space window rectangle for the new window.
   // Default positioning values (CW_USEDEFAULT) are used
   // if the window has no owner.
-  fml::Rect const initial_window_rect = [&]() -> fml::Rect {
-    std::optional<fml::Size> const window_size = GetWindowSizeForClientSize(
+  Rect const initial_window_rect = [&]() -> Rect {
+    std::optional<Size> const window_size = GetWindowSizeForClientSize(
         *engine->windows_proc_table(),
-        fml::Size(preferred_size.preferred_view_width,
-                  preferred_size.preferred_view_height),
+        Size(preferred_size.preferred_view_width,
+             preferred_size.preferred_view_height),
         box_constraints.smallest(), box_constraints.biggest(), window_style,
         extended_window_style, nullptr);
-    return {
-        {CW_USEDEFAULT, CW_USEDEFAULT},
-        window_size ? *window_size : fml::Size{CW_USEDEFAULT, CW_USEDEFAULT}};
+    return {{CW_USEDEFAULT, CW_USEDEFAULT},
+            window_size ? *window_size : Size{CW_USEDEFAULT, CW_USEDEFAULT}};
   }();
 
   // Set up the view.
@@ -372,7 +371,7 @@ HostWindow::HostWindow(
     FlutterWindowsEngine* engine,
     WindowArchetype archetype,
     std::unique_ptr<FlutterWindowsViewController> view_controller,
-    const fml::BoxConstraints& box_constraints,
+    const BoxConstraints& box_constraints,
     HWND hwnd)
     : window_manager_(window_manager),
       engine_(engine),
@@ -464,14 +463,14 @@ LRESULT HostWindow::HandleMessage(HWND hwnd,
           static_cast<double>(dpi) / USER_DEFAULT_SCREEN_DPI;
 
       MINMAXINFO* info = reinterpret_cast<MINMAXINFO*>(lparam);
-      fml::Size const min_physical_size = ClampToVirtualScreen(fml::Size(
+      Size const min_physical_size = ClampToVirtualScreen(Size(
           box_constraints_.smallest().width() * scale_factor + non_client_width,
           box_constraints_.smallest().height() * scale_factor +
               non_client_height));
 
       info->ptMinTrackSize.x = min_physical_size.width();
       info->ptMinTrackSize.y = min_physical_size.height();
-      fml::Size const max_physical_size = ClampToVirtualScreen(fml::Size(
+      Size const max_physical_size = ClampToVirtualScreen(Size(
           box_constraints_.biggest().width() * scale_factor + non_client_width,
           box_constraints_.biggest().height() * scale_factor +
               non_client_height));
@@ -523,9 +522,9 @@ void HostWindow::SetContentSize(const WindowSizeRequest& size) {
   }
 
   if (GetFullscreen()) {
-    std::optional<fml::Size> const window_size = GetWindowSizeForClientSize(
+    std::optional<Size> const window_size = GetWindowSizeForClientSize(
         *engine_->windows_proc_table(),
-        fml::Size(size.preferred_view_width, size.preferred_view_height),
+        Size(size.preferred_view_width, size.preferred_view_height),
         box_constraints_.smallest(), box_constraints_.biggest(),
         saved_window_info_.style, saved_window_info_.ex_style, nullptr);
     if (!window_size) {
@@ -543,9 +542,9 @@ void HostWindow::SetContentSize(const WindowSizeRequest& size) {
     WINDOWINFO window_info = {.cbSize = sizeof(WINDOWINFO)};
     GetWindowInfo(window_handle_, &window_info);
 
-    std::optional<fml::Size> const window_size = GetWindowSizeForClientSize(
+    std::optional<Size> const window_size = GetWindowSizeForClientSize(
         *engine_->windows_proc_table(),
-        fml::Size(size.preferred_view_width, size.preferred_view_height),
+        Size(size.preferred_view_width, size.preferred_view_height),
         box_constraints_.smallest(), box_constraints_.biggest(),
         window_info.dwStyle, window_info.dwExStyle, nullptr);
 
@@ -563,10 +562,10 @@ void HostWindow::SetConstraints(const WindowConstraints& constraints) {
   box_constraints_ = FromWindowConstraints(constraints);
 
   if (GetFullscreen()) {
-    std::optional<fml::Size> const window_size = GetWindowSizeForClientSize(
+    std::optional<Size> const window_size = GetWindowSizeForClientSize(
         *engine_->windows_proc_table(),
-        fml::Size(saved_window_info_.client_size.width,
-                  saved_window_info_.client_size.height),
+        Size(saved_window_info_.client_size.width,
+             saved_window_info_.client_size.height),
         box_constraints_.smallest(), box_constraints_.biggest(),
         saved_window_info_.style, saved_window_info_.ex_style, nullptr);
     if (!window_size) {
@@ -579,10 +578,10 @@ void HostWindow::SetConstraints(const WindowConstraints& constraints) {
         saved_window_info_.rect.top + static_cast<LONG>(window_size->height());
   } else {
     auto const client_size = GetWindowContentSize(window_handle_);
-    auto const current_size = fml::Size(client_size.width, client_size.height);
+    auto const current_size = Size(client_size.width, client_size.height);
     WINDOWINFO window_info = {.cbSize = sizeof(WINDOWINFO)};
     GetWindowInfo(window_handle_, &window_info);
-    std::optional<fml::Size> const window_size = GetWindowSizeForClientSize(
+    std::optional<Size> const window_size = GetWindowSizeForClientSize(
         *engine_->windows_proc_table(), current_size,
         box_constraints_.smallest(), box_constraints_.biggest(),
         window_info.dwStyle, window_info.dwExStyle, nullptr);
