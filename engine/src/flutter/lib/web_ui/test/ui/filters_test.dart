@@ -536,7 +536,7 @@ Future<void> testMain() async {
         expect(() => paint.maskFilter = filter, isNot(throwsException));
       });
     });
-  }, skip: isWimp);
+  }, skip: isWimp); // https://github.com/flutter/flutter/issues/175371
 }
 
 List<ui.ColorFilter> createColorFilters() {
