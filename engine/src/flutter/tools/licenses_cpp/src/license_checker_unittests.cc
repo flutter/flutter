@@ -905,11 +905,10 @@ TEST_F(LicenseCheckerTest, IgnoredDirHasContent) {
   fs::create_directories("third_party/vulkan-deps/foobar");
 
   ASSERT_TRUE(
-      WriteFile(kLicense, *temp_path / "third_party/vulkan-deps/LICENSE")
+      WriteFile(kLicense, *temp_path / "third_party/vulkan-deps/LICENSE").ok());
+  ASSERT_TRUE(
+      WriteFile(kHeader, *temp_path / "third_party/vulkan-deps/foobar.cc")
           .ok());
-  ASSERT_TRUE(WriteFile(kHeader,
-                        *temp_path / "third_party/vulkan-deps/foobar.cc")
-                  .ok());
 
   Repo repo;
   repo.Add(*temp_path / "third_party/vulkan-deps/LICENSE");
