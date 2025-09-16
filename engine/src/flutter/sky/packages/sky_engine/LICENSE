@@ -16180,9 +16180,9 @@ Copyright 2021 The ANGLE Project. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
 --------------------------------------------------------------------------------
-flutter
 libjxl
 skia
+vulkan-deps
 
 Copyright 2021 The Chromium Authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
