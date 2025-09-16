@@ -594,6 +594,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(overlayColor(), paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.08)));
 
+    await gesture.moveTo(tester.getCenter(find.text(selectedValue)));
+    await tester.pumpAndSettle();
+    expect(overlayColor(), paints..rect(color: theme.colorScheme.primary.withOpacity(0.08)));
+
     await gesture.down(tester.getCenter(find.text(selectedValue)));
     await tester.pumpAndSettle();
     expect(
