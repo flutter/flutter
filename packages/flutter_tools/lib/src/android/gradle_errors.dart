@@ -512,6 +512,8 @@ final incompatibleJavaAndGradleVersionsHandler = GradleHandledError(
             .childDirectory(utils.gradleDirectoryName)
             .childDirectory(utils.gradleWrapperDirectoryName)
             .childFile(utils.gradleWrapperPropertiesFilename);
+        // TODO(reidbaker): Replace URL with constant defined in
+        // https://github.com/flutter/flutter/pull/123916.
         globals.printBox(
           "${globals.logger.terminal.warningMark} Your project's Gradle version "
           'is incompatible with the Java version that Flutter is using for Gradle.\n\n'
