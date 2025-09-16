@@ -6407,7 +6407,7 @@ void main() {
 class _MaterialStateOutlinedBorder extends StadiumBorder implements MaterialStateOutlinedBorder {
   const _MaterialStateOutlinedBorder(this.resolver);
 
-  final MaterialPropertyResolver<OutlinedBorder?> resolver;
+  final WidgetPropertyResolver<OutlinedBorder?> resolver;
 
   @override
   OutlinedBorder? resolve(Set<WidgetState> states) => resolver(states);
@@ -6416,7 +6416,7 @@ class _MaterialStateOutlinedBorder extends StadiumBorder implements MaterialStat
 class _MaterialStateBorderSide extends MaterialStateBorderSide {
   const _MaterialStateBorderSide(this.resolver);
 
-  final MaterialPropertyResolver<BorderSide?> resolver;
+  final WidgetPropertyResolver<BorderSide?> resolver;
 
   @override
   BorderSide? resolve(Set<WidgetState> states) => resolver(states);
