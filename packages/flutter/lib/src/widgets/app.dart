@@ -429,7 +429,7 @@ class WidgetsApp extends StatefulWidget {
   /// This sample shows how to handle nested [Navigator]s when using
   /// [WidgetsApp.router].
   ///
-  /// ** See code in examples/api/lib/widgets/app/app.1.dart **
+  /// ** See code in examples/api/lib/widgets/app/widgets_app.1.dart **
   /// {@end-tool}
   WidgetsApp.router({
     super.key,
