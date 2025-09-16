@@ -649,8 +649,11 @@ class TextLayout {
   }
 }
 
-extension on ui.TextRange {
+extension EnhancedTextRange on ui.TextRange {
   int get size => end - start;
+
+  bool get isEmpty => start == end;
+  bool get isNotEmpty => !isEmpty;
 
   ui.TextRange intersect(ui.TextRange other) {
     return ui.TextRange(start: math.max(start, other.start), end: math.min(end, other.end));

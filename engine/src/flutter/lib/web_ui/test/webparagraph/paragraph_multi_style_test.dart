@@ -34,7 +34,7 @@ Future<void> testMain() async {
     builder.pop();
     final WebParagraph paragraph = builder.build();
     expect(paragraph.text, 'Arial, 30px;Roboto, 40px;Arial, 50px;');
-    expect(paragraph.styledTextRanges.length, 3);
+    expect(paragraph.spans, hasLength(3));
 
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
   });

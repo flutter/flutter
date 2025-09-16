@@ -16,6 +16,9 @@ import 'layout.dart';
 import 'paint.dart';
 import 'painter.dart';
 
+@visibleForTesting
+const String kPlaceholderChar = '\uFFFC';
+
 /// A single canvas2d context to use for text layout.
 @visibleForTesting
 final DomCanvasRenderingContext2D layoutContext =
@@ -572,6 +575,25 @@ class PlaceholderSpan extends ParagraphSpan {
   List<PlaceholderCluster> _getClusters() {
     return <PlaceholderCluster>[PlaceholderCluster(this)];
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is PlaceholderSpan &&
+        other.start == start &&
+        other.end == end &&
+        other.style == style &&
+        other.width == width &&
+        other.height == height &&
+        other.alignment == alignment &&
+        other.baseline == baseline &&
+        other.baselineOffset == baselineOffset;
+  }
+
+  @override
+  int get hashCode => Object.hash(start, end, style, width, height, alignment, baseline);
 }
 
 class TextSpan extends ParagraphSpan {
@@ -633,6 +655,21 @@ class TextSpan extends ParagraphSpan {
   String toString() {
     return 'TextSpan($start, $end, "$text", $style)';
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is TextSpan &&
+        other.start == start &&
+        other.end == end &&
+        other.style == style &&
+        other.text == text;
+  }
+
+  @override
+  int get hashCode => Object.hash(start, end, style, text);
 }
 
 class WebStrutStyle implements ui.StrutStyle {
@@ -975,8 +1012,6 @@ class WebLineMetrics implements ui.LineMetrics {
   }
 }
 
-const String _kPlaceholderChar = '\uFFFC';
-
 class WebParagraphBuilder implements ui.ParagraphBuilder {
   WebParagraphBuilder(ui.ParagraphStyle paragraphStyle)
     : _paragraphStyle = paragraphStyle as WebParagraphStyle,
@@ -1019,7 +1054,7 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
     _closeTextSpan();
 
     final start = _fullTextBuffer.length;
-    addText(_kPlaceholderChar);
+    addText(kPlaceholderChar);
     final end = _fullTextBuffer.length;
 
     _spans.add(
