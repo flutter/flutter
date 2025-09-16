@@ -96,7 +96,6 @@ std::unique_ptr<RenderContext> Skwasm::RenderContext::Make(int sampleCount,
                                                            int stencil) {
   auto clearDepthEmulated = [](float depth) {};
   auto depthRangeEmulated = [](float nearVal, float farVal) {};
-  auto checkFrameBufferEmulated = [](GLenum target) { return GL_FRAMEBUFFER_COMPLETE; };
 
   static std::map<std::string, void*> gl_procs;
 
@@ -108,13 +107,6 @@ std::unique_ptr<RenderContext> Skwasm::RenderContext::Make(int sampleCount,
   FOR_EACH_IMPELLER_PROC(IMPELLER_PROC);
   FOR_EACH_IMPELLER_ES_ONLY_PROC(IMPELLER_PROC);
   FOR_EACH_IMPELLER_GLES3_PROC(IMPELLER_PROC);
-  // IMPELLER_PROC(DebugMessageControlKHR);
-  // IMPELLER_PROC(DiscardFramebufferEXT);
-  // IMPELLER_PROC(FramebufferTexture2DMultisampleEXT);
-  // IMPELLER_PROC(PushDebugGroupKHR);
-  // IMPELLER_PROC(PopDebugGroupKHR);
-  // IMPELLER_PROC(ObjectLabelKHR);
-  // IMPELLER_PROC(RenderbufferStorageMultisampleEXT);
   IMPELLER_PROC(GenQueriesEXT);
   IMPELLER_PROC(DeleteQueriesEXT);
   IMPELLER_PROC(GetQueryObjectui64vEXT);
