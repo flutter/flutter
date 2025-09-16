@@ -1507,6 +1507,18 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --------------------------------------------------------------------------------
+vulkan-utility-libraries
+
+
+Copyright (c) 2015-2024 The Khronos Group Inc.
+Copyright (c) 2015-2024 Valve Corporation
+Copyright (c) 2015-2024 LunarG, Inc.
+Copyright (c) 2015-2024 Google Inc.
+
+SPDX-License-Identifier: Apache-2.0
+
+
+--------------------------------------------------------------------------------
 vulkan-validation-layers
 
 
@@ -10556,6 +10568,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --------------------------------------------------------------------------------
+vulkan-utility-libraries
+
+Copyright (c) 2015-2017, 2019-2024 The Khronos Group Inc.
+Copyright (c) 2015-2017, 2019-2024 Valve Corporation
+Copyright (c) 2015-2017, 2019-2024 LunarG, Inc.
+
+SPDX-License-Identifier: Apache-2.0
+
+
+--------------------------------------------------------------------------------
 vulkan-validation-layers
 
 Copyright (c) 2015-2017, 2019-2025 The Khronos Group Inc.
@@ -12432,6 +12454,17 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+--------------------------------------------------------------------------------
+vulkan-utility-libraries
+
+Copyright (c) 2019-2024 The Khronos Group Inc.
+Copyright (c) 2019-2024 Valve Corporation
+Copyright (c) 2019-2024 LunarG, Inc.
+Copyright (C) 2019-2024 Google Inc.
+
+SPDX-License-Identifier: Apache-2.0
+
+
 --------------------------------------------------------------------------------
 vulkan-validation-layers
 
@@ -14816,6 +14849,17 @@ Copyright 2015-2023 The Khronos Group Inc.
 SPDX-License-Identifier: Apache-2.0
 
 --------------------------------------------------------------------------------
+swiftshader
+vulkan
+vulkan-headers
+
+Copyright 2015-2023 The Khronos Group Inc.
+Copyright 2015-2023 Valve Corporation
+Copyright 2015-2023 LunarG, Inc.
+
+SPDX-License-Identifier: Apache-2.0
+
+--------------------------------------------------------------------------------
 vulkan
 vulkan-headers
 
@@ -16598,6 +16642,16 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+--------------------------------------------------------------------------------
+vulkan-utility-libraries
+
+Copyright 2023 The Khronos Group Inc.
+Copyright 2023 Valve Corporation
+Copyright 2023 LunarG, Inc.
+
+SPDX-License-Identifier: Apache-2.0
+
+
 --------------------------------------------------------------------------------
 re2
 
