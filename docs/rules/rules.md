@@ -165,9 +165,9 @@ practices.
     class User {
       final String firstName;
       final String lastName;
- 
+
       User({required this.firstName, required this.lastName});
- 
+
       factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
       Map<String, dynamic> toJson() => _$UserToJson(this);
     }
@@ -179,10 +179,10 @@ practices.
 
     ```dart
     import 'dart:developer' as developer;
- 
+
     // For simple messages
     developer.log('User logged in successfully.');
- 
+
     // For structured error logging
     try {
       // ... code that might fail
