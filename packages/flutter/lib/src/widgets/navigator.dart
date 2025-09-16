@@ -3699,7 +3699,22 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   late GlobalKey<OverlayState> _overlayKey;
   final _History _history = _History();
   late bool _isRootNavigator;
-  bool? _lastCanPop;
+
+  bool _lastCanPopCached = false; // Because history is empty to start.
+  bool get _lastCanPop => _lastCanPopCached;
+  set _lastCanPop(bool value) {
+    // If this Navigator handles back gestures, then rebuild when canPop changes
+    // so that the PopScope can be updated.
+    if (_handlesBackGestures && value != _lastCanPop) {
+      ServicesBinding.instance.addPostFrameCallback((Duration timestamp) {
+        if (!mounted) {
+          return;
+        }
+        setState(() {});
+      });
+    }
+    _lastCanPopCached = value;
+  }
 
   // If this is a nested Navigator, handle system backs so that the root
   // Navigator doesn't get all of them.
@@ -3730,21 +3745,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   bool get _usingPagesAPI => widget.pages != const <Page<dynamic>>[];
 
   void _handleHistoryChanged() {
-    // If this Navigator handles back gestures, then rebuild when canPop changes
-    // so that the PopScope can be updated.
-    final bool navigatorCanPop = canPop();
-    if (_handlesBackGestures && navigatorCanPop != _lastCanPop) {
-      ServicesBinding.instance.addPostFrameCallback((Duration timestamp) {
-        if (!mounted) {
-          return;
-        }
-        setState(() {});
-      });
-    }
-    _lastCanPop = navigatorCanPop;
+    _lastCanPop = canPop();
 
     final bool routeBlocksPop;
-    if (!navigatorCanPop) {
+    if (!_lastCanPop) {
       final _RouteEntry? lastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
       routeBlocksPop =
           lastEntry != null && lastEntry.route.popDisposition == RoutePopDisposition.doNotPop;
@@ -3752,7 +3756,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       routeBlocksPop = false;
     }
     final NavigationNotification notification = NavigationNotification(
-      canHandlePop: navigatorCanPop || routeBlocksPop,
+      canHandlePop: _lastCanPop || routeBlocksPop,
     );
     // Avoid dispatching a notification in the middle of a build.
     switch (SchedulerBinding.instance.schedulerPhase) {
