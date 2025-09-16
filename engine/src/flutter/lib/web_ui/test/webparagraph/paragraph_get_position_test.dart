@@ -13,7 +13,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
+  setUpUnitTests();
 
   test('Paragraph getPositionForOffset 1 Infinity line', () {
     final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);

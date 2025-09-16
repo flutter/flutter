@@ -14,7 +14,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
+  setUpUnitTests();
 
   test('Paragraph bidi 1 LTR only', () {
     final WebParagraphStyle paragraphStyle = WebParagraphStyle(

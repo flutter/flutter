@@ -64,7 +64,7 @@ class TextWrapper {
           _minIntrinsicWidth = math.max(_minIntrinsicWidth, line.widthTrailingText);
           line.markSoftLineBreak(index);
 
-          // TODO(mdebbar): Not sure about this one..
+          // TODO(mdebbar=>jlavrova): Not sure about this one..
 
           // // Close the softBreak sequence
           // _whitespaces.end = index;
@@ -121,12 +121,15 @@ class TextWrapper {
       line.addTrailingText(index, widthCluster);
     }
 
-    // Treat the end of text as a line break
-    _minIntrinsicWidth = math.max(_minIntrinsicWidth, line.widthTrailingText);
-    line.markSoftLineBreak(_layout.allClusters.length);
+    // Add the last line if there's anything left to add.
+    if (line.start < _layout.allClusters.length) {
+      // Treat the end of text as a line break
+      _minIntrinsicWidth = math.max(_minIntrinsicWidth, line.widthTrailingText);
+      line.markSoftLineBreak(_layout.allClusters.length);
 
-    _maxIntrinsicWidth = math.max(_maxIntrinsicWidth, line.widthText);
-    line.build(hardLineBreak);
+      _maxIntrinsicWidth = math.max(_maxIntrinsicWidth, line.widthText);
+      line.build(hardLineBreak);
+    }
 
     // TODO(mdebbar=>jlavrova): Discuss with Mouad
     // Flutter wants to have another (empty) line if \n is the last codepoint in the text
@@ -255,6 +258,8 @@ class _LineBuilder {
     );
 
     // Reset the line builder to be ready for the next line.
+
+    _hasSoftLineBreak = false;
 
     start = whitespaceEnd;
     whitespaceStart = start;

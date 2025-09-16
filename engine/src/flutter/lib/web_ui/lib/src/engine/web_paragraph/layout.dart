@@ -195,6 +195,11 @@ class TextLayout {
       }
     }
 
+    if (overlapEnd == -1) {
+      // The overlap continued until the end of text.
+      overlapEnd = bidiRuns.length;
+    }
+
     final Iterable<BidiRun> lineVisualRuns = bidiRuns.inVisualOrder(overlapStart, overlapEnd);
 
     // We need to take the VISUALLY first cluster on the line (in case of LTR/RTL it could be anywhere)
@@ -703,6 +708,11 @@ class _TextClusterMapping {
     assert(start <= end);
     assert(end <= _size);
 
+    if (start == _size) {
+      // The entire range is at the end of text.
+      return ClusterRange.collapsed(_clusters.length);
+    }
+
     if (start == end) {
       // For an empty text range, we create a collapsed (empty) cluster range at the same position.
       final int clusterIndex = toClusterIndex(start);
@@ -715,6 +725,11 @@ class _TextClusterMapping {
     assert(clusterRange.start >= 0);
     assert(clusterRange.start <= clusterRange.end);
     assert(clusterRange.end <= _clusters.length);
+
+    if (clusterRange.start == _clusters.length) {
+      // The entire cluster range is at the end of text.
+      return ui.TextRange.collapsed(_size);
+    }
 
     final startCluster = _clusters[clusterRange.start];
 

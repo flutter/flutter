@@ -15,7 +15,7 @@ void main() {
 const double EPSILON = 0.001;
 
 Future<void> testMain() async {
-  setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
+  setUpUnitTests();
 
   test('Paragraph getPositionForOffset scales, rtl, multiline', () {
     final WebParagraphStyle paragraphStyle = WebParagraphStyle(

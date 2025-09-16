@@ -7,14 +7,11 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine/web_paragraph/paragraph.dart';
 import 'package:ui/ui.dart';
 
-import '../common/test_initialization.dart';
-
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
 Future<void> testMain() async {
-  setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
   test('Build paragraph for Flutter Gallery', () {
     final WebParagraphStyle paragraphStyle = WebParagraphStyle(
       fontFamily: 'GoogleSans',

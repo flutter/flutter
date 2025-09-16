@@ -17,7 +17,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
+  setUpUnitTests();
 
   test(
     'Text wrapper, 10 lines, 3 trailing whitespaces on each line except the one that has a cluster break',
