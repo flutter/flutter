@@ -2590,4 +2590,18 @@ void main() {
 
     controller.dispose();
   });
+
+  testWidgets('InkResponse does not crash in zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(child: SizedBox.shrink(child: InkResponse())),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(InkResponse)), Size.zero);
+  });
 }
