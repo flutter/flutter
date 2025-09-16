@@ -531,6 +531,7 @@ class CupertinoPopupSurface extends StatelessWidget {
   /// Creates an iOS-style rounded rectangle popup surface.
   const CupertinoPopupSurface({
     super.key,
+    this.boundByObject = true,
     this.blurSigma = defaultBlurSigma,
     this.isSurfacePainted = true,
     required this.child,
@@ -554,6 +555,8 @@ class CupertinoPopupSurface extends StatelessWidget {
   ///
   /// Defaults to true.
   final bool isSurfacePainted;
+
+  final bool boundByObject;
 
   /// The widget below this widget in the tree.
   // Because [CupertinoPopupSurface] is composed of proxy boxes, which mimic
@@ -686,7 +689,7 @@ class CupertinoPopupSurface extends StatelessWidget {
       if (blurSigma == 0) {
         return null;
       }
-      return ImageFilterConfig.blur(sigmaX: blurSigma, sigmaY: blurSigma, useObjectBounds: true);
+      return ImageFilterConfig.blur(sigmaX: blurSigma, sigmaY: blurSigma, useObjectBounds: boundByObject);
     }
 
     final ImageFilterConfig colorFilter = ImageFilterConfig.filter(switch (brightness) {
@@ -700,7 +703,7 @@ class CupertinoPopupSurface extends StatelessWidget {
 
     return ImageFilterConfig.compose(
       inner: colorFilter,
-      outer: ImageFilterConfig.blur(sigmaX: blurSigma, sigmaY: blurSigma, useObjectBounds: true),
+      outer: ImageFilterConfig.blur(sigmaX: blurSigma, sigmaY: blurSigma, useObjectBounds: boundByObject),
     );
   }
 
