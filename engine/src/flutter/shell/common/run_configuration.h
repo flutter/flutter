@@ -197,7 +197,7 @@ class RunConfiguration {
   //----------------------------------------------------------------------------
   /// @brief      Sets the engine identifier to be passed to the platform
   ///             dispatcher.
-  void SetEngineId(int64_t engine_id);
+  void SetEngineId(std::optional<int64_t> engine_id);
 
   ///----------------------------------------------------------------------------
   /// @return     Engine identifier to be passed to the platform dispatcher.
