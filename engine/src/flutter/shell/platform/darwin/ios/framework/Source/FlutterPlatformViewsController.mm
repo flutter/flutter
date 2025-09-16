@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#import "shell/platform/darwin/ios/framework/Source/FlutterPlatformViewsController.h"
-
 #include "flutter/display_list/effects/image_filters/dl_blur_image_filter.h"
 #include "flutter/display_list/utils/dl_matrix_clip_tracker.h"
 #include "flutter/flow/surface_frame.h"
@@ -810,7 +808,6 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
                    (const std::vector<std::unique_ptr<flutter::SurfaceFrame>>&)surfaceFrames {
   TRACE_EVENT0("flutter", "PlatformViewsController::PerformSubmit");
   FML_DCHECK([[NSThread currentThread] isMainThread]);
-
   [CATransaction begin];
 
   // Configure Flutter overlay views.
