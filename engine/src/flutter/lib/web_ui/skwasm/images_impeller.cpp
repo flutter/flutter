@@ -5,11 +5,16 @@
 #include "images.h"
 
 using namespace flutter;
+using namespace Skwasm;
 
-namespace {
-// TODO(jacksongardner): Remove this. This just hacks around weird LTO problems
-// with emscripten.
-void blurp() {
+SKWASM_EXPORT void dummyAPICalls() {
+  // TODO(jacksongardner):
+  // This function is just here so that we have references to these API
+  // functions in the build. If we don't reference them, they get LTO'd out and
+  // then emscripten gets fails to build the javascript support library. These
+  // all will eventually be actually used when we implement proper image
+  // support, at which time we can just remove this function entirely.
+  // https://github.com/flutter/flutter/issues/175371
   auto object = __builtin_wasm_ref_null_extern();
   skwasm_setAssociatedObjectOnThread(0, nullptr, object);
   skwasm_getAssociatedObject(nullptr);
@@ -17,6 +22,7 @@ void blurp() {
   skwasm_createGlTextureFromTextureSource(object, 0, 0);
 }
 
+namespace {
 // TODO(jacksongardner): Implement proper image support in wimp.
 // See https://github.com/flutter/flutter/issues/175371
 class StubImage : public DlImage {
@@ -76,9 +82,6 @@ sk_sp<DlImage> MakeImageFromPixels(SkData* data,
                                    int height,
                                    PixelFormat pixelFormat,
                                    size_t rowByteCount) {
-  if (rowByteCount < -1) {
-    blurp();
-  }
   return StubImage::Make(width, height);
 }
 }  // namespace Skwasm

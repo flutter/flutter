@@ -76,12 +76,14 @@ template("skwasm_variant") {
         "canvas_text_impeller.cpp",
         "images_impeller.cpp",
         "render_context_impeller.cpp",
+        "shaders_impeller.cpp",
       ]
     } else {
       sources += [
         "canvas_text_skia.cpp",
         "images_skia.cpp",
         "render_context_skia.cpp",
+        "shaders_skia.cpp",
       ]
     }
 
