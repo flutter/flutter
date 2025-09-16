@@ -335,7 +335,7 @@ Once you know the version for the Emscripten SDK, change the line in
 
 
 
-[1]: https://github.com/flutter/flutter/blob/main/engine/src/flutter/docs/contributing/Setting-up-the-Engine-development-environment.md
+[1]: https://github.com/flutter/flutter/blob/main/docs/engine/contributing/Setting-up-the-Engine-development-environment.md
 [2]: https://github.com/flutter/flutter/blob/main/engine/src/flutter/lib/web_ui/test/README.md
 [3]: https://github.com/flutter/flutter/blob/main/engine/src/flutter/lib/web_ui/dev/package_lock.yaml
 [4]: https://chrome-infra-packages.appspot.com/p/flutter_internal

@@ -23,7 +23,7 @@ If you need help, consider asking for advice on the #hackers-new channel on [Dis
 [test-exempt]: https://github.com/flutter/flutter/blob/master/docs/contributing/Tree-hygiene.md#tests
 [Flutter Style Guide]: https://github.com/flutter/flutter/blob/master/docs/contributing/Style-guide-for-Flutter-repo.md
 [C++, Objective-C, Java style guides]: https://github.com/flutter/flutter/blob/main/engine/src/flutter/CONTRIBUTING.md#style
-[testing the engine]: https://github.com/flutter/flutter/blob/main/engine/src/flutter/docs/testing/Testing-the-engine.md
+[testing the engine]: https://github.com/flutter/flutter/blob/main/docs/engine/testing/Testing-the-engine.md
 [CLA]: https://cla.developers.google.com/
 [flutter/tests]: https://github.com/flutter/tests
 [breaking change policy]: https://github.com/flutter/flutter/blob/master/docs/contributing/Tree-hygiene.md#handling-breaking-changes

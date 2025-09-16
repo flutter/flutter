@@ -152,7 +152,7 @@ feel empowered to ask for tests.
 ## Using git
 
 Assuming your environment has been configured according to the instructions in
-[Setting up the Engine development environment](../../engine/src/flutter/docs/contributing/Setting-up-the-Engine-development-environment.md),
+[Setting up the Engine development environment](../../docs/engine/contributing/Setting-up-the-Engine-development-environment.md),
 [Setting up the Framework development environment](Setting-up-the-Framework-development-environment.md), or
 [Setting up the Packages development environment](../ecosystem/contributing/Setting-up-the-Packages-development-environment.md),
 follow these steps to start working on a patch:

@@ -87,7 +87,7 @@ You can also set a breakpoint directly with [lldb](https://lldb.llvm.org/tutoria
 
 ## Debugging Android builds with gdb
 
-See https://github.com/flutter/flutter/blob/master/engine/src/flutter/sky/tools/flutter_gdb
+See https://github.com/flutter/flutter/blob/main/engine/src/flutter/sky/tools/flutter_gdb
 
 ## Debugging native engine code on Android with Android Studio
 
