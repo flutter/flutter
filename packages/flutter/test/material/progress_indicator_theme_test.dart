@@ -575,8 +575,6 @@ void main() {
             child: Theme(
               data: ThemeData(
                 progressIndicatorTheme: ProgressIndicatorThemeData(
-                  color: Colors.black,
-                  linearTrackColor: Colors.green,
                   controller: globalThemeController,
                 ),
               ),
@@ -594,12 +592,17 @@ void main() {
     }
 
     void expectProgressAt({required double left, required double right}) {
-      expect(
-        find.byType(LinearProgressIndicator),
-        paints
-          ..rect() // Background
-          ..rect(rect: Rect.fromLTRB(left, 0.0, right, 4.0)),
-      );
+      final PaintPattern expectedPaints = paints;
+      if (right < 200) {
+        // Right track
+        expectedPaints.rect(rect: Rect.fromLTRB(right, 0.0, 200, 4.0));
+      }
+      expectedPaints.rect(rect: Rect.fromLTRB(left, 0.0, right, 4.0));
+      if (left > 0) {
+        // Left track
+        expectedPaints.rect(rect: Rect.fromLTRB(0, 0.0, left, 4.0));
+      }
+      expect(find.byType(LinearProgressIndicator), expectedPaints);
     }
 
     await tester.pumpWidget(buildApp());
