@@ -18,7 +18,6 @@ import 'package:flutter/widgets.dart';
 
 import 'list_tile.dart';
 import 'list_tile_theme.dart';
-import 'material_state.dart';
 import 'radio.dart';
 import 'radio_theme.dart';
 import 'theme.dart';
@@ -692,7 +691,7 @@ class _RadioListTileState<T> extends State<RadioListTile<T>> with RadioClient<T>
     };
     final ThemeData theme = Theme.of(context);
     final RadioThemeData radioThemeData = RadioTheme.of(context);
-    final Set<MaterialState> states = <MaterialState>{if (widget.selected) MaterialState.selected};
+    final Set<WidgetState> states = <WidgetState>{if (widget.selected) WidgetState.selected};
     final Color effectiveActiveColor =
         widget.activeColor ??
         radioThemeData.fillColor?.resolve(states) ??

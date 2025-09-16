@@ -29,6 +29,7 @@ import '../devfs.dart';
 import '../device.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
+import '../hook_runner.dart' show hookRunner;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../resident_devtools_handler.dart';
@@ -125,6 +126,7 @@ class ResidentWebRunner extends ResidentRunner {
            platform: platform,
            outputPreferences: outputPreferences,
          ),
+         dartBuilder: hookRunner,
        );
 
   final FileSystem _fileSystem;
@@ -486,6 +488,12 @@ class ResidentWebRunner extends ResidentRunner {
       }
     }
 
+    if (_connectionResult == null) {
+      status.stop();
+      _logger.printStatus('Recompile complete. No client connected..');
+      return OperationResult.ok;
+    }
+
     // Both will be null when not assigned.
     Duration? reloadDuration;
     Duration? reassembleDuration;
@@ -704,6 +712,11 @@ class ResidentWebRunner extends ResidentRunner {
     if (rebuildBundle) {
       _logger.printTrace('Updating assets');
       final int result = await assetBundle.build(
+        flutterHookResult: await dartBuilder?.runHooks(
+          targetPlatform: TargetPlatform.web_javascript,
+          environment: environment,
+          logger: _logger,
+        ),
         packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
         targetPlatform: TargetPlatform.web_javascript,
       );
@@ -770,7 +783,6 @@ class ResidentWebRunner extends ResidentRunner {
       }
       _wipConnection = await chromeTab.connect();
     }
-    Uri? websocketUri;
     if (supportsServiceProtocol) {
       assert(connectDebug != null);
       unawaited(
@@ -838,7 +850,7 @@ class ResidentWebRunner extends ResidentRunner {
             vmService: _vmService.service,
           );
 
-          websocketUri = Uri.parse(_connectionResult!.debugConnection!.uri);
+          final Uri websocketUri = Uri.parse(_connectionResult!.debugConnection!.uri);
           device!.vmService = _vmService;
 
           // Run main immediately if the app is not started paused or if there
@@ -856,14 +868,15 @@ class ResidentWebRunner extends ResidentRunner {
             });
           }
 
-          if (websocketUri != null) {
-            if (debuggingOptions.vmserviceOutFile != null) {
-              _fileSystem.file(debuggingOptions.vmserviceOutFile)
-                ..createSync(recursive: true)
-                ..writeAsStringSync(websocketUri.toString());
-            }
-            _logger.printStatus('Debug service listening on $websocketUri');
+          if (debuggingOptions.vmserviceOutFile != null) {
+            _fileSystem.file(debuggingOptions.vmserviceOutFile)
+              ..createSync(recursive: true)
+              ..writeAsStringSync(websocketUri.toString());
           }
+          // TODO(bkonyi): consider removing this log message and using only the standard VM
+          // service message instead.
+          _logger.printStatus('Debug service listening on $websocketUri');
+          printDebuggerList();
           connectionInfoCompleter?.complete(DebugConnectionInfo(wsUri: websocketUri));
         }),
       );
@@ -915,6 +928,9 @@ class ResidentWebRunner extends ResidentRunner {
 
 Uri _httpUriFromWebsocketUri(Uri websocketUri) {
   const wsPath = '/ws';
-  final String path = websocketUri.path;
-  return websocketUri.replace(scheme: 'http', path: path.substring(0, path.length - wsPath.length));
+  String path = websocketUri.path;
+  if (path.endsWith(wsPath)) {
+    path = path.substring(0, path.length - wsPath.length);
+  }
+  return websocketUri.replace(scheme: 'http', path: path);
 }
