@@ -48,20 +48,15 @@ class ImpellerRenderContext : public RenderContext {
                         std::shared_ptr<ReactorWorker> worker)
       : _context(std::move(context)),
         _worker(std::move(worker)),
-        _typographerContext(impeller::TypographerContextSkia::Make()) {}
+        _typographerContext(impeller::TypographerContextSkia::Make()),
+        _contentContext(
+            std::make_unique<impeller::ContentContext>(_context,
+                                                       _typographerContext,
+                                                       nullptr)) {}
 
   virtual void renderPicture(
       const sk_sp<flutter::DisplayList> displayList) override {
-    auto surface = impeller::SurfaceGLES::WrapFBO(
-        _context,                                  // context
-        []() { return true; },                     // swap callback
-        0u,                                        // fbo
-        impeller::PixelFormat::kR8G8B8A8UNormInt,  // pixel format
-        {_width, _height}                          // surface size
-    );
-    auto contentContext = std::make_unique<impeller::ContentContext>(
-        _context, _typographerContext, nullptr);
-    RenderToTarget(*contentContext, surface->GetRenderTarget(), displayList,
+    RenderToTarget(*_contentContext, _surface->GetRenderTarget(), displayList,
                    impeller::Rect::MakeLTRB(0, 0, _width, _height), true);
   }
 
@@ -69,14 +64,29 @@ class ImpellerRenderContext : public RenderContext {
                            ImageByteFormat format) override {}
 
   virtual void resize(int width, int height) override {
-    _width = width;
-    _height = height;
+    if (_width != width || _height != height) {
+      _width = width;
+      _height = height;
+      _recreateSurface();
+    }
   }
 
  private:
+  void _recreateSurface() {
+    _surface = impeller::SurfaceGLES::WrapFBO(
+        _context,                                  // context
+        []() { return true; },                     // swap callback
+        0u,                                        // fbo
+        impeller::PixelFormat::kR8G8B8A8UNormInt,  // pixel format
+        {_width, _height}                          // surface size
+    );
+  }
+
   std::shared_ptr<impeller::ContextGLES> _context;
   std::shared_ptr<ReactorWorker> _worker;
   std::shared_ptr<impeller::TypographerContext> _typographerContext;
+  std::unique_ptr<impeller::ContentContext> _contentContext;
+  std::unique_ptr<impeller::Surface> _surface;
   int _width = 0;
   int _height = 0;
 };
@@ -86,6 +96,7 @@ std::unique_ptr<RenderContext> Skwasm::RenderContext::Make(int sampleCount,
                                                            int stencil) {
   auto clearDepthEmulated = [](float depth) {};
   auto depthRangeEmulated = [](float nearVal, float farVal) {};
+  auto checkFrameBufferEmulated = [](GLenum target) { return GL_FRAMEBUFFER_COMPLETE; };
 
   static std::map<std::string, void*> gl_procs;
 
