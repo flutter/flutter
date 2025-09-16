@@ -3652,7 +3652,9 @@ class EditableTextState extends State<EditableText>
         renderEditable.setFloatingCursor(point.state, _lastBoundedOffset!, _lastTextPosition!);
       case FloatingCursorDragState.End:
         // Resume cursor blinking.
-        _startCursorBlink();
+        if (_hasFocus) {
+          _startCursorBlink();
+        }
         // We skip animation if no update has happened.
         if (_lastTextPosition != null && _lastBoundedOffset != null) {
           _floatingCursorResetController!.value = 0.0;
