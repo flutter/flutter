@@ -35,23 +35,25 @@ class LogInterestListenerFuchsia : public ::loop_fixture::RealLoop,
 
 TEST_F(LogInterestListenerFuchsia, SeverityChanges) {
   ScopedSetLogSettings backup({.min_log_level = kLogInfo});
-  {
+
+  const struct {
+    Severity severity;
+    int expected_log_level;
+    const char* name;
+  } kTestCases[] = {
+      {Severity::kTrace, -1, "VERBOSE"},
+      {Severity::kInfo, kLogInfo, "INFO"},
+      {Severity::kWarn, kLogWarning, "WARNING"},
+      {Severity::kError, kLogError, "ERROR"},
+      {Severity::kFatal, kLogFatal, "FATAL"},
+  };
+
+  for (const auto& test_case : kTestCases) {
+    SCOPED_TRACE(test_case.name);
     Interest interest;
-    interest.min_severity(Severity::kTrace);
+    interest.min_severity(test_case.severity);
     LogInterestListener::HandleInterestChange(interest);
-    EXPECT_EQ(GetMinLogLevel(), -1);  // VERBOSE
-  }
-  {
-    Interest interest;
-    interest.min_severity(Severity::kInfo);
-    LogInterestListener::HandleInterestChange(interest);
-    EXPECT_EQ(GetMinLogLevel(), kLogInfo);
-  }
-  {
-    Interest interest;
-    interest.min_severity(Severity::kError);
-    LogInterestListener::HandleInterestChange(interest);
-    EXPECT_EQ(GetMinLogLevel(), kLogError);
+    EXPECT_EQ(GetMinLogLevel(), test_case.expected_log_level);
   }
 }
 
