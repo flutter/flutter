@@ -253,6 +253,7 @@ abstract class RegularWindowController extends BaseWindowController {
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
+  @protected
   RegularWindowController.empty();
 
   /// The current title of the window.
