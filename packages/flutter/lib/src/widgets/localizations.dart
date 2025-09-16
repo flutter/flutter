@@ -639,7 +639,7 @@ class _LocalizationsState extends State<Localizations> {
     if (_locale == locale) {
       return;
     }
-    PlatformDispatcher.instance.setApplicationLocale(locale!);
+    WidgetsBinding.instance.platformDispatcher.setApplicationLocale(locale!);
     _locale = locale;
   }
 
