@@ -13,14 +13,16 @@ practices.
 *   If a new feature requires an external package, use the `pub_dev_search`
     tool, if it is available. Otherwise, identify the most suitable and stable
     package from pub.dev.
-*   To add a regular dependency, use the `pub` tool, if it is available,
-    otherwise execute `flutter pub add <package_name>`.
+*   To add a regular dependency, use the `pub` tool, if it is available.
+    Otherwise, run `flutter pub add <package_name>`.
 *   To add a development dependency, use the `pub` tool, if it is available,
-    with `dev:<package name>`. otherwise run
+    with `dev:<package name>`. Otherwise, run
     `flutter pub add dev:<package_name>`.
 *   To add a dependency override, use the `pub` tool, if it is available,
-    with `override:<package name>:1.0.0`. otherwise run
+    with `override:<package name>:1.0.0`. Otherwise, run
     `flutter pub add override:<package_name>:1.0.0`.
+*   To remove a dependency, use the `pub` tool, if it is available. Otherwise,
+    run `dart pub remove <package_name>`.
 
 ## Code Quality
 *   Adhere to maintainable code structure and separation of concerns (e.g., UI
@@ -60,7 +62,7 @@ practices.
     View, and ViewModel/Controller roles.
 
 ### State Management
-*   Default to Flutter's built-in state management solutions. Do not use a
+*   Prefer Flutter's built-in state management solutions. Do not use a
     third-party package unless explicitly requested.
 *   Use `Streams` and `StreamBuilder` for handling a sequence of asynchronous
     events.
@@ -68,19 +70,19 @@ practices.
     operation that will complete in the future.
 *   Use `ValueNotifier` with `ValueListenableBuilder` for simple, local state
     that involves a single value.
-
-```dart
-// Define a ValueNotifier to hold the state.
-final ValueNotifier<int> _counter = ValueNotifier<int>(0);
-
-// Use ValueListenableBuilder to listen and rebuild.
-ValueListenableBuilder<int>(
-  valueListenable: _counter,
-  builder: (context, value, child) {
-    return Text('Count: $value');
-  },
-);
-```
+    
+    ```dart
+    // Define a ValueNotifier to hold the state.
+    final ValueNotifier<int> _counter = ValueNotifier<int>(0);
+    
+    // Use ValueListenableBuilder to listen and rebuild.
+    ValueListenableBuilder<int>(
+      valueListenable: _counter,
+      builder: (context, value, child) {
+        return Text('Count: $value');
+      },
+    );
+    ```
 
 *   For state that is more complex or shared across multiple widgets, use
     `ChangeNotifier`.
