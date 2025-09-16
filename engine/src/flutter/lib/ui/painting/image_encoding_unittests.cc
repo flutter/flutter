@@ -312,9 +312,6 @@ TEST_F(ShellTest, EncodeImageRetries) {
 
   ASSERT_TRUE(shell->IsSetup());
 
-  SetViewportMetrics(shell.get(), 800, 600);
-  shell->GetPlatformView()->NotifyCreated();
-
   auto configuration = RunConfiguration::InferFromSettings(settings);
   configuration.SetEntrypoint("toByteDataRetries");
 
@@ -363,9 +360,6 @@ TEST_F(ShellTest, EncodeImageRetryOverflows) {
   AddNativeCallback("ValidateNotNull", CREATE_NATIVE_ENTRY(validate_not_null));
 
   ASSERT_TRUE(shell->IsSetup());
-
-  SetViewportMetrics(shell.get(), 800, 600);
-  shell->GetPlatformView()->NotifyCreated();
 
   auto configuration = RunConfiguration::InferFromSettings(settings);
   configuration.SetEntrypoint("toByteDataRetryOverflows");
