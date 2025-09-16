@@ -3703,24 +3703,18 @@ class SemanticsNode with DiagnosticableTreeMixin {
       final int toDepth = parentSemanticsNode.depth;
 
       if (fromDepth >= toDepth) {
-        assert(
-          childSemanticsNode.parent != null,
-          '$parent and $child are not in the same render tree.',
-        );
         childToCommonAncestorTransform ??= Matrix4.identity();
         childToCommonAncestorTransform.multiply(childSemanticsNode.transform ?? Matrix4.identity());
         childSemanticsNode = childSemanticsNode.traversalOwner!;
       }
       if (fromDepth <= toDepth) {
-        assert(
-          parentSemanticsNode.parent != null,
-          '$parent and $child are not in the same render tree.',
-        );
-
         parentToCommonAncestorTransform ??= Matrix4.identity();
         parentToCommonAncestorTransform.multiply(
           parentSemanticsNode.transform ?? Matrix4.identity(),
         );
+        if (parentSemanticsNode.traversalOwner == null) {
+          break;
+        }
         parentSemanticsNode = parentSemanticsNode.traversalOwner!;
       }
     }
