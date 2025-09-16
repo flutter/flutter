@@ -1,0 +1,73 @@
+name: darvin_app
+description: A Darvin-generated Flutter app
+publish_to: none
+version: 1.0.0+1
+environment:
+  sdk: ^3.7.2
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  dio: ^5.8.0
+  provider: ^6.1.1
+  url_launcher: ^6.3.2
+  share_plus: ^11.0.0
+  connectivity_plus: ^6.1.4
+  awesome_notifications: ^0.10.1
+  wakelock_plus: ^1.3.2
+  path: ^1.9.1
+  flutter_bloc: ^8.1.3
+  equatable: ^2.0.7
+  collection: ^1.19.1
+  async: ^2.13.0
+  shared_preferences: ^2.5.3
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  path_provider: ^2.1.5
+  flutter_secure_storage: ^9.2.4
+  supabase_flutter: ^2.9.1
+  http: ^1.4.0
+  go_router: ^14.1.4
+  geolocator: ^14.0.2
+  flutter_map: ^8.2.1
+  file_picker: ^10.2.0
+  just_audio: ^0.10.4
+  image: ^4.5.4
+  video_player: 2.10.0
+  flutter_svg: ^2.2.0
+  google_fonts: ^6.1.0
+  flex_color_scheme: ^8.2.0
+  flutter_hooks: ^0.20.5
+  loading_animation_widget: ^1.2.1
+  flutter_staggered_grid_view: ^0.7.0
+  animations: ^2.0.11
+  flutter_spinkit: ^5.2.1
+  cached_network_image: ^3.3.1
+  flutter_animate: ^4.5.2
+  fl_chart: ^0.71.0
+  shimmer_animation: ^2.2.2
+  responsive_framework: ^1.5.1
+  table_calendar: ^3.2.0
+  carousel_slider: ^5.1.1
+  file_selector: ^1.0.3
+  intl: ^0.20.2
+  uuid: ^4.2.1
+  vector_math: ^2.1.4
+  http_parser: ^4.1.2
+  crypto: ^3.0.6
+  mime: ^2.0.0
+  archive: ^4.0.7
+  package_info_plus: ^8.3.1
+  get_it: ^7.6.7
+  rename_app: ^1.6.5
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+  mockito: ^5.4.4
+  change_app_package_name: ^1.5.0
+  flutter_launcher_icons: ^0.14.4
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/icons/

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!--
+    If you are serving your web app in a path other than the root, change the
+    href value below to reflect the base path you are serving from.
+
+    The path provided below has to start and end with a slash "/" in order for
+    it to work correctly.
+
+    For more details:
+    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+
+    This is a placeholder for base href that will be replaced by the value of
+    the `--base-href` argument provided to `flutter build`.
+  -->
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="A new Flutter project.">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="web_build_test">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>web_build_test</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    body {
+      background-color: #1e1e1e;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+    #loading {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: #ffffff;
+    }
+    .fancy-loader {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 15px;
+    }
+    .dot {
+      width: 12px;
+      height: 12px;
+      margin: 0 5px;
+      border-radius: 50%;
+      background-color: #2196f3;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    .dot:nth-child(2) {
+      animation-delay: 0.2s;
+      background-color: #4caf50;
+    }
+    .dot:nth-child(3) {
+      animation-delay: 0.4s;
+      background-color: #ff9800;
+    }
+    .dot:nth-child(4) {
+      animation-delay: 0.6s;
+      background-color: #f44336;
+    }
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(0.5);
+        opacity: 0.5;
+      }
+      50% {
+        transform: scale(1.2);
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <script>
+    window.addEventListener('load', function() {
+      var intervalId = setInterval(function() {
+        if (document.querySelector('flt-glass-pane')) {
+          window.addEventListener('blur', function() {
+            const activeElement = document.activeElement;
+            if (activeElement) {
+              activeElement.blur();
+            }
+          });
+          clearInterval(intervalId);
+        }
+      }, 100);
+   });
+  </script>
+  <div id="loading">
+    <div class="fancy-loader">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+  </div>
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>
