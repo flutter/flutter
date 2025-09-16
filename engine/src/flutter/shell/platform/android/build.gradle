@@ -22,7 +22,7 @@ repositories {
 apply plugin: "com.android.library"
 
 android {
-    namespace "io.flutter.embedding"
+    namespace = "io.flutter.embedding"
     compileSdk = 36
 
     defaultConfig {
