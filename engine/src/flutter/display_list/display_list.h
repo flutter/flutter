@@ -243,9 +243,6 @@ class SaveLayerOptions {
   bool operator==(const SaveLayerOptions& other) const {
     return flags_ == other.flags_;
   }
-  bool operator!=(const SaveLayerOptions& other) const {
-    return flags_ != other.flags_;
-  }
 
  private:
   union {
