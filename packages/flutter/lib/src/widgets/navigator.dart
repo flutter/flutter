@@ -3698,9 +3698,12 @@ class _History extends Iterable<_RouteEntry> with ChangeNotifier {
 class NavigatorState extends State<Navigator> with TickerProviderStateMixin, RestorationMixin {
   late GlobalKey<OverlayState> _overlayKey;
   final _History _history = _History();
-  bool _handlesBackGestures = false;
   late bool _isRootNavigator;
   bool? _lastCanPop;
+
+  // If this is a nested Navigator, handle system backs so that the root
+  // Navigator doesn't get all of them.
+  bool get _handlesBackGestures => widget.handlesBacksWhenNested && !_isRootNavigator;
 
   /// A set for entries that are waiting to dispose until their subtrees are
   /// disposed.
@@ -3937,10 +3940,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         entry.route.changedExternalState();
       }
     }
-
-    // If this is a nested Navigator, handle system backs so that the root
-    // Navigator doesn't get all of them.
-    _handlesBackGestures = widget.handlesBacksWhenNested && !_isRootNavigator;
   }
 
   bool _getIsRootNavigator() => Navigator.maybeOf(context, rootNavigator: true) == this;
