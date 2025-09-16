@@ -273,4 +273,3 @@ And with that, you should see animated triangle shading.
 ## Conclusion
 
 You have learned how to draw a triangle, modify its vertices, access varying information in the fragment shader, and specify uniform data to your shaders. You'll find that its somewhat annoying that you can't color outside the confines of your triangle. So add more, the rest is Flutter doesn't do anything more (conceptually) complicated.
-
