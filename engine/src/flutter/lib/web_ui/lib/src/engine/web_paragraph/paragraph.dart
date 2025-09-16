@@ -480,50 +480,28 @@ class WebTextStyle implements ui.TextStyle {
   }
 }
 
-abstract class _RangeStartEnd {
-  _RangeStartEnd(int start, int end) {
-    this.start = start;
-    this.end = end;
-  }
+class ClusterRange {
+  ClusterRange({required this.start, required this.end})
+    : assert(start >= -1, 'Start index cannot be negative: $start'),
+      assert(end >= -1, 'End index cannot be negative: $end');
 
-  _RangeStartEnd.collapsed(int offset) : this(offset, offset);
+  ClusterRange.collapsed(int offset) : this(start: offset, end: offset);
 
-  _RangeStartEnd.zero() : this.collapsed(0);
+  final int start;
+  final int end;
 
-  int _start = -1;
+  int get size => end - start;
 
-  int get start => _start;
-
-  set start(int value) {
-    assert(value >= -1, 'Start index cannot be negative: $value');
-    _start = value;
-  }
-
-  int _end = -1;
-
-  int get end => _end;
-
-  set end(int value) {
-    assert(value >= -1, 'End index cannot be negative: $value');
-    _end = value;
-  }
-
-  int get size => _end - _start;
-
-  bool get isEmpty => _start == _end;
+  bool get isEmpty => start == end;
   bool get isNotEmpty => !isEmpty;
 
-  bool isBefore(int otherStart) {
-    return end <= otherStart;
-  }
-
-  bool isAfter(int otherEnd) {
-    return otherEnd <= start;
+  ClusterRange intersect(ClusterRange other) {
+    return ClusterRange(start: math.max(start, other.start), end: math.min(end, other.end));
   }
 
   /// Whether this range overlaps with the given range from [start] to [end].
   bool overlapsWith(int start, int end) {
-    return !(isBefore(start) || isAfter(end));
+    return start < this.end && this.start < end;
   }
 
   @override
@@ -531,95 +509,32 @@ abstract class _RangeStartEnd {
     if (identical(this, other)) {
       return true;
     }
-    return other is _RangeStartEnd && other._start == _start && other._end == _end;
+    return other is ClusterRange && other.start == start && other.end == end;
   }
 
   @override
   int get hashCode {
-    return Object.hash(_start, _end);
+    return Object.hash(start, end);
   }
 
   @override
   String toString() {
-    return '[$start:$end)';
+    return 'ClusterRange [$start:$end)';
   }
 }
 
-class ClusterRange extends _RangeStartEnd {
-  ClusterRange({required int start, required int end}) : super(start, end);
-
-  ClusterRange.collapsed(super.offset) : super.collapsed();
-
-  ClusterRange.zero() : super.zero();
-
-  ClusterRange clone() {
-    return ClusterRange(start: start, end: end);
-  }
-
-  @override
-  // No need to override hashCode, since _RangeStartEnd already does it.
-  // ignore: hash_and_equals
-  bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
-    }
-    return other is ClusterRange && super == other;
-  }
-
-  static ClusterRange intersectClusterRange(ClusterRange a, ClusterRange b) {
-    return ClusterRange(start: math.max(a.start, b.start), end: math.min(a.end, b.end));
-  }
-}
-
-/// A range of text, represented by its [start] (inclusive) and [end] (exclusive) indices.
-///
-/// The indices point to the UTF-16 code units of the text string.
-///
-/// Note that this is different from [ClusterRange], which points to the text cluster list.
-/// The main source of confusion is that these two ranges often look identical but really are not
-/// (in case of one codepoint = one text cluster, often happens in English text).
-///
-/// This is also different from [ui.TextRange] in that this is a mutable range.
-// TODO(mdebbar): Can we remove this class and use ui.TextRange instead?
-class MutTextRange extends _RangeStartEnd {
-  MutTextRange(super.start, super.end);
-  MutTextRange.collapsed(super.offset) : super.collapsed();
-  MutTextRange.zero() : super.zero();
-
-  MutTextRange clone() => MutTextRange(start, end);
-
-  MutTextRange translate(int offset) {
-    return MutTextRange(start + offset, end + offset);
-  }
-
-  MutTextRange intersect(MutTextRange other) {
-    return MutTextRange(math.max(start, other.start), math.min(end, other.end));
-  }
-
-  @override
-  // No need to override hashCode, since _RangeStartEnd already does it.
-  // ignore: hash_and_equals
-  bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
-    }
-    return other is MutTextRange && super == other;
-  }
-
-  @override
-  String toString() {
-    return '[$start:$end)';
-  }
-}
-
-abstract class ParagraphSpan extends MutTextRange {
-  ParagraphSpan(super.start, super.end, this.style);
+abstract class ParagraphSpan extends ui.TextRange {
+  ParagraphSpan({required super.start, required super.end, required this.style});
   ParagraphSpan.collapsed(super.offset, this.style) : super.collapsed();
-  ParagraphSpan.zero(this.style) : super.zero();
 
   final WebTextStyle style;
 
   late final clusters = _getClusters();
+
+  int get size => end - start;
+
+  bool get isEmpty => start == end;
+  bool get isNotEmpty => !isEmpty;
 
   double get fontBoundingBoxAscent;
   double get fontBoundingBoxDescent;
@@ -628,10 +543,10 @@ abstract class ParagraphSpan extends MutTextRange {
 }
 
 class PlaceholderSpan extends ParagraphSpan {
-  PlaceholderSpan(
-    super.start,
-    super.end,
-    super.style, {
+  PlaceholderSpan({
+    required super.start,
+    required super.end,
+    required super.style,
     required this.width,
     required this.height,
     required this.alignment,
@@ -660,9 +575,7 @@ class PlaceholderSpan extends ParagraphSpan {
 }
 
 class TextSpan extends ParagraphSpan {
-  TextSpan(super.start, super.end, super.style, this.text);
-  TextSpan.collapsed(super.offset, super.style, this.text) : super.collapsed();
-  TextSpan.zero(super.style, this.text) : super.zero();
+  TextSpan({required super.start, required super.end, required super.style, required this.text});
 
   final String text;
 
@@ -964,7 +877,7 @@ class WebParagraph implements ui.Paragraph {
   }
 
   // TODO(mdebbar): Remove this in favor of `getText1`.
-  String getText(MutTextRange textRange) {
+  String getText(ui.TextRange textRange) {
     return getText1(textRange.start, textRange.end);
   }
 
@@ -1111,9 +1024,9 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
 
     _spans.add(
       PlaceholderSpan(
-        start,
-        end,
-        _currentStyle,
+        start: start,
+        end: end,
+        style: _currentStyle,
         width: width,
         height: height,
         alignment: alignment,
@@ -1165,10 +1078,10 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
     assert(_spanTextBuffer.isNotEmpty);
     _spans.add(
       TextSpan(
-        _fullTextBuffer.length - _spanTextBuffer.length,
-        _fullTextBuffer.length,
-        _spanStyle!,
-        _spanTextBuffer.toString(),
+        start: _fullTextBuffer.length - _spanTextBuffer.length,
+        end: _fullTextBuffer.length,
+        style: _spanStyle!,
+        text: _spanTextBuffer.toString(),
       ),
     );
 

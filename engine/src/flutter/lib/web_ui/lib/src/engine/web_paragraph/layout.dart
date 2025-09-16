@@ -153,9 +153,12 @@ class TextLayout {
 
     // Arrange line vertically, calculate metrics and bounds
 
-    final MutTextRange contentTextRange = _mapping.toTextRange(contentRange);
-    final MutTextRange whitespaceTextRange = _mapping.toTextRange(whitespaceRange);
-    final MutTextRange allTextRange = MutTextRange(contentTextRange.start, whitespaceTextRange.end);
+    final ui.TextRange contentTextRange = _mapping.toTextRange(contentRange);
+    final ui.TextRange whitespaceTextRange = _mapping.toTextRange(whitespaceRange);
+    final ui.TextRange allTextRange = ui.TextRange(
+      start: contentTextRange.start,
+      end: whitespaceTextRange.end,
+    );
 
     assert(contentTextRange.end == whitespaceTextRange.start);
 
@@ -200,16 +203,13 @@ class TextLayout {
     double blockAdvanceInLine = 0.0;
     for (final BidiRun bidiRun in lineVisualRuns) {
       // TODO(jlavrova): we (almost always true) assume that trailing whitespaces do not affect the line height
-      final ClusterRange textIntersection = ClusterRange.intersectClusterRange(
-        bidiRun.clusterRange,
-        contentRange,
-      );
-      final ClusterRange whitespaceIntersection = ClusterRange.intersectClusterRange(
-        bidiRun.clusterRange,
-        whitespaceRange,
-      );
-      // One of the intersections must be non-empty, or we did something wrong.
-      assert(textIntersection.isNotEmpty || whitespaceIntersection.isNotEmpty);
+      final ClusterRange textIntersection = bidiRun.clusterRange.intersect(contentRange);
+
+      assert(() {
+        final ClusterRange whitespaceIntersection = bidiRun.clusterRange.intersect(whitespaceRange);
+        // One of the intersections must be non-empty, or we did something wrong.
+        return textIntersection.isNotEmpty || whitespaceIntersection.isNotEmpty;
+      }());
 
       // We ignore whitespaces because for now we only use these textStyles for decoration
       // (and we do not decorate trailing whitespaces)
@@ -219,7 +219,7 @@ class TextLayout {
       }
 
       // This is the part of the line that intersects with the `bidiRun` being processed now.
-      final MutTextRange bidiLineTextRange = _mapping.toTextRange(textIntersection);
+      final ui.TextRange bidiLineTextRange = _mapping.toTextRange(textIntersection);
 
       if (WebParagraphDebug.logging) {
         WebParagraphDebug.log(
@@ -238,9 +238,9 @@ class TextLayout {
         }
 
         // This is the intersection of the bidi region + line + span.
-        final MutTextRange bidiLineSpanTextRange = bidiLineTextRange.intersect(span);
+        final ui.TextRange bidiLineSpanTextRange = bidiLineTextRange.intersect(span);
         WebParagraphDebug.log(
-          'Style: ${span as MutTextRange} & $bidiLineTextRange = $bidiLineSpanTextRange ',
+          'Style: ${span as ui.TextRange} & $bidiLineTextRange = $bidiLineSpanTextRange ',
         );
 
         final ClusterRange bidiLineSpanRange = _mapping.toClusterRange(
@@ -393,7 +393,7 @@ class TextLayout {
     ui.BoxHeightStyle boxHeightStyle,
     ui.BoxWidthStyle boxWidthStyle,
   ) {
-    final MutTextRange textRange = MutTextRange(start, end);
+    final textRange = ui.TextRange(start: start, end: end);
     final List<ui.TextBox> result = <ui.TextBox>[];
     // TODO(mdebbar): Instead of nested loops, make them two consecutive loops.
     for (final line in lines) {
@@ -649,6 +649,18 @@ class TextLayout {
   }
 }
 
+extension on ui.TextRange {
+  int get size => end - start;
+
+  ui.TextRange intersect(ui.TextRange other) {
+    return ui.TextRange(start: math.max(start, other.start), end: math.min(end, other.end));
+  }
+
+  bool overlapsWith(int start, int end) {
+    return start < this.end && this.start < end;
+  }
+}
+
 class _TextClusterMapping {
   _TextClusterMapping(this._size, this._clusters) : _textToCluster = Uint32List(_size);
 
@@ -696,7 +708,7 @@ class _TextClusterMapping {
     return ClusterRange(start: toClusterIndex(start), end: toClusterIndex(end - 1) + 1);
   }
 
-  MutTextRange toTextRange(ClusterRange clusterRange) {
+  ui.TextRange toTextRange(ClusterRange clusterRange) {
     assert(clusterRange.start >= 0);
     assert(clusterRange.start <= clusterRange.end);
     assert(clusterRange.end <= _clusters.length);
@@ -704,11 +716,11 @@ class _TextClusterMapping {
     final startCluster = _clusters[clusterRange.start];
 
     if (clusterRange.isEmpty) {
-      return MutTextRange.collapsed(startCluster.globalStart);
+      return ui.TextRange.collapsed(startCluster.globalStart);
     }
 
     final endCluster = _clusters[clusterRange.end - 1];
-    return MutTextRange(startCluster.globalStart, endCluster.globalEnd);
+    return ui.TextRange(start: startCluster.globalStart, end: endCluster.globalEnd);
   }
 }
 
@@ -838,7 +850,7 @@ abstract class LineBlock {
   bool get isRtl => !isLtr;
 
   final ClusterRange clusterRange;
-  final MutTextRange textRange; // within the entire text
+  final ui.TextRange textRange; // within the entire text
   ui.Rect get advance;
 
   //
@@ -990,9 +1002,9 @@ class TextLine {
 
   final ClusterRange textClusterRange;
   final ClusterRange whitespacesClusterRange;
-  final MutTextRange textRange;
-  final MutTextRange whitespacesRange;
-  final MutTextRange allLineTextRange;
+  final ui.TextRange textRange;
+  final ui.TextRange whitespacesRange;
+  final ui.TextRange allLineTextRange;
   final bool hardLineBreak;
   final int lineNumber;
 
