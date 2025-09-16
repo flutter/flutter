@@ -585,8 +585,7 @@ void main() {
 
     expect(
       find.byType(LinearProgressIndicator),
-      paints
-        ..rect(rect: const Rect.fromLTRB(127.79541015625, 0.0, 200.0, 4.0)),
+      paints..rect(rect: const Rect.fromLTRB(127.79541015625, 0.0, 200.0, 4.0)),
     );
   });
 
