@@ -2417,15 +2417,15 @@ void main() {
                     cursor: SystemMouseCursors.forbidden,
                     child: RangeSlider(
                       mouseCursor: WidgetStateProperty.resolveWith<MouseCursor?>((
-                        Set<MaterialState> states,
+                        Set<WidgetState> states,
                       ) {
-                        if (states.contains(MaterialState.disabled)) {
+                        if (states.contains(WidgetState.disabled)) {
                           return disabledCursor;
                         }
-                        if (states.contains(MaterialState.dragged)) {
+                        if (states.contains(WidgetState.dragged)) {
                           return draggedCursor;
                         }
-                        if (states.contains(MaterialState.hovered)) {
+                        if (states.contains(WidgetState.hovered)) {
                           return hoveredCursor;
                         }
 
@@ -2775,12 +2775,12 @@ void main() {
                     values: values,
                     max: 100.0,
                     overlayColor: WidgetStateProperty.resolveWith<Color?>((
-                      Set<MaterialState> states,
+                      Set<WidgetState> states,
                     ) {
-                      if (states.contains(MaterialState.hovered)) {
+                      if (states.contains(WidgetState.hovered)) {
                         return hoverColor;
                       }
-                      if (states.contains(MaterialState.dragged)) {
+                      if (states.contains(WidgetState.dragged)) {
                         return draggedColor;
                       }
 
