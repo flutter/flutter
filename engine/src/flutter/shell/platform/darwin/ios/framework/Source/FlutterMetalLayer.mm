@@ -446,7 +446,10 @@ extern CFTimeInterval display_link_target;
 
 - (void)returnTexture:(FlutterTexture*)texture {
   @synchronized(self) {
-    [_availableTextures addObject:texture];
+    if (texture.texture.width == _drawableSize.width &&
+        texture.texture.height == _drawableSize.height) {
+      [_availableTextures addObject:texture];
+    }
   }
 }
 
