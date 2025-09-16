@@ -237,7 +237,11 @@ struct DownsamplePassArgs {
   /// The UVs that will be used for drawing to the down-sampling pass.
   /// This effectively is chopping out a region of the input.
   Quad uvs;
-
+  /// The bounds used for a bounded blur, in the unit of the same UV space as
+  /// `uvs`.
+  ///
+  /// During downsampling and blurring, out-of-bound pixels are treated as
+  /// transparent.
   std::optional<Rect> bounds_uvs;
   /// The effective scalar of the down-sample pass.
   /// This isn't usually exactly as we'd calculate because it has to be rounded
@@ -307,14 +311,9 @@ DownsamplePassArgs CalculateDownsamplePassArgs(
 
     std::optional<Rect> bounds_uvs;
     if (source_bounds.has_value()) {
-      std::optional<Rect> input_snapshot_coverage =
-          input_snapshot.GetCoverage();
-      if (input_snapshot_coverage.has_value()) {
-        Rect aligned_bounds = ExpandToDivisible(source_bounds.value(), divisor);
-        bounds_uvs =
-            MakeReferenceUVs(input_snapshot_coverage.value(), aligned_bounds)
-                .Intersection(Rect::MakeSize(Size(1, 1)));
-      }
+      Rect aligned_bounds = ExpandToDivisible(source_bounds.value(), divisor);
+      bounds_uvs = Rect::MakePointBounds(
+          CalculateSnapshotUVs(input_snapshot, aligned_bounds));
     }
     return {
         .subpass_size = subpass_size,
