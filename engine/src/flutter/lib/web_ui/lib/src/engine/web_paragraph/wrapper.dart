@@ -36,7 +36,7 @@ class TextWrapper {
     // LTR: "words":[startLine:whitespaces.start) "whitespaces":[whitespaces.start:whitespaces.end) "letters":[whitespaces.end:...)
     // RTL: "letters":(...:whitespaces.end] "whitespaces":(whitespaces.end:whitespaces.start] "words":(whitespaces.start:startLine]
 
-    _LineBuilder line = _LineBuilder.first(_layout, maxWidth);
+    final _LineBuilder line = _LineBuilder(_layout, maxWidth);
 
     bool hardLineBreak = false;
     for (int index = 0; index < _layout.allClusters.length; index += 1) {
@@ -52,7 +52,7 @@ class TextWrapper {
         line.subsumeTrailingText();
 
         _maxIntrinsicWidth = math.max(_maxIntrinsicWidth, line.widthText);
-        line = line.next(hardLineBreak);
+        line.build(hardLineBreak);
       } else if (isSoftLineBreak(cluster) && index != line.start) {
         // Mark the potential line break and then continue with the current cluster as usual
         WebParagraphDebug.log('isSoftLineBreak: $index');
@@ -110,7 +110,7 @@ class TextWrapper {
 
         // Add the line
         _maxIntrinsicWidth = math.max(_maxIntrinsicWidth, line.widthText);
-        line = line.next(hardLineBreak);
+        line.build(hardLineBreak);
 
         if (clusterAdded) {
           continue;
@@ -158,18 +158,19 @@ class TextWrapper {
 }
 
 class _LineBuilder {
-  _LineBuilder._(this._layout, this._maxWidth, this.start, this._top)
-    : whitespaceStart = start,
-      whitespaceEnd = start,
-      trailingTextEnd = start;
-
-  _LineBuilder.first(TextLayout layout, double maxWidth) : this._(layout, maxWidth, 0, 0.0);
+  _LineBuilder(this._layout, this._maxWidth)
+    : start = 0,
+      whitespaceStart = 0,
+      whitespaceEnd = 0,
+      trailingTextEnd = 0,
+      _top = 0.0;
 
   final TextLayout _layout;
   final double _maxWidth;
-  final double _top;
 
-  final int start;
+  double _top;
+
+  int start;
 
   int whitespaceStart;
   int whitespaceEnd;
@@ -242,24 +243,30 @@ class _LineBuilder {
 
   /// Builds a line and adds it to [_layout].
   ///
+  /// After calling [build], the line builder instance is ready for the next line.
+  ///
   /// Returns the height of the line.
   double build(bool hardLineBreak) {
-    return _layout.addLine(
+    final double height = _layout.addLine(
       ClusterRange(start: start, end: whitespaceStart),
       ClusterRange(start: whitespaceStart, end: whitespaceEnd),
       hardLineBreak,
       _top,
     );
-  }
 
-  // TODO(mdebbar): Can we reuse the same _LineBuilder instance for the next line?
-  _LineBuilder next(bool hardLineBreak) {
-    final double height = build(hardLineBreak);
-    final nextLine = _LineBuilder._(_layout, _maxWidth, whitespaceEnd, _top + height);
-    if (_hasTrailingText) {
-      nextLine.trailingTextEnd = trailingTextEnd;
-      nextLine.widthTrailingText = widthTrailingText;
-    }
-    return nextLine;
+    // Reset the line builder to be ready for the next line.
+
+    start = whitespaceEnd;
+    whitespaceStart = start;
+    whitespaceEnd = start;
+
+    widthText = 0.0;
+    widthWhitespaces = 0.0;
+
+    // Leave `trailingTextEnd` and `widthTrailingText` untouched so they are used in the next line.
+
+    _top += height;
+
+    return height;
   }
 }
