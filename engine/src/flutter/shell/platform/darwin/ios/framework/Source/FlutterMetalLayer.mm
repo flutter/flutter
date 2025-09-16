@@ -30,9 +30,9 @@ extern CFTimeInterval display_link_target;
 
   NSUInteger _nextDrawableId;
 
+  // Access to these variables must be synchronized.
   NSMutableSet<FlutterTexture*>* _availableTextures;
   NSUInteger _totalTextures;
-
   FlutterTexture* _front;
 
   // There must be a CADisplayLink scheduled *on main thread* otherwise
@@ -445,6 +445,9 @@ extern CFTimeInterval display_link_target;
 }
 
 - (void)returnTexture:(FlutterTexture*)texture {
+  if (texture == nil) {
+    return;
+  }
   @synchronized(self) {
     if (texture.texture.width == _drawableSize.width &&
         texture.texture.height == _drawableSize.height) {
