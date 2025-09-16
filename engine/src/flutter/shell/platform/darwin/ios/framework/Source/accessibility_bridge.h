@@ -68,10 +68,6 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
 
   UIView* view() const override { return view_controller_.view; }
 
-  // TODO(chunhtai): wires this up to the accessibilityLanguage selector of SemanticsObject
-  // once https://github.com/flutter/flutter/pull/175005 is landed.
-  NSString* GetApplicationLocale() { return view_controller_.applicationLocale; }
-
   bool isVoiceOverRunning() const override { return view_controller_.isVoiceOverRunning; }
 
   fml::WeakPtr<AccessibilityBridge> GetWeakPtr();

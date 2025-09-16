@@ -518,7 +518,7 @@ class PlatformView {
   /// @brief      Used by the framework to set application locale in the
   ///             embedding
   ///
-  /// @param[in]  locale The application locale.
+  /// @param[in]  locale The application locale in BCP 47 format.
   ///
   virtual void SetApplicationLocale(const std::string& locale);
 
