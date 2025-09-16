@@ -2,19 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 /// A script for converting license files found in
 /// `//engine/src/flutter/ci/licenses_golden/` to the licenses format.
 
-import 'dart:io';
-
 // A simple class to hold the parsed license information.
 class License {
-  final String library;
-  final List<String> origins;
-  final String type;
-  final List<String> files;
-  final String licenseText;
-
   License({
     required this.library,
     required this.origins,
@@ -22,6 +16,12 @@ class License {
     required this.files,
     required this.licenseText,
   });
+
+  final String library;
+  final List<String> origins;
+  final String type;
+  final List<String> files;
+  final String licenseText;
 
   @override
   String toString() {
@@ -38,7 +38,7 @@ class License {
 // Parses the licenses file and returns a list of License objects.
 Future<List<License>> parseLicenses(String filePath) async {
   final file = File(filePath);
-  if (!await file.exists()) {
+  if (!file.existsSync()) {
     throw FileSystemException('File not found', filePath);
   }
 
