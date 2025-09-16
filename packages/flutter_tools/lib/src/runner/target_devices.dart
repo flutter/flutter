@@ -386,6 +386,7 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
 
   @override
   void startExtendedWirelessDeviceDiscovery({Duration? deviceDiscoveryTimeout}) {
+    _logger.printTrace("startExtendedWirelessDeviceDiscovery");
     if (deviceDiscoveryTimeout == null && _includeWirelessDevices) {
       _wirelessDevicesRefresh ??= _deviceManager.refreshExtendedWirelessDeviceDiscoverers(
         timeout: DeviceManager.minimumWirelessDeviceDiscoveryTimeout,
@@ -454,6 +455,7 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
     Duration? deviceDiscoveryTimeout,
     bool includeDevicesUnsupportedByProject = false,
   }) async {
+    _logger.printTrace("findAllTargetDevices");
     if (!globals.doctor!.canLaunchAnything) {
       _logger.printError(globals.userMessages.flutterNoDevelopmentDevice);
       return null;

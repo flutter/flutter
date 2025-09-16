@@ -147,7 +147,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       globals.fs.path.join(homePath, 'Library', 'Developer', 'Xcode', 'DerivedData'),
     );
   }
-  print("BEFORE BUILD DerivedData");
+  print("PRE BUILD DerivedData");
   if (derivedData != null) {
     for (final FileSystemEntity file in derivedData.listSync()) {
       print(file.path);
@@ -508,6 +508,13 @@ Future<XcodeBuildResult> buildXcodeProject({
 
     final sw = Stopwatch()..start();
     initialBuildStatus = globals.logger.startProgress('Running Xcode build...');
+
+    print("START BUILD DerivedData");
+    if (derivedData != null) {
+      for (final FileSystemEntity file in derivedData.listSync()) {
+        print(file.path);
+      }
+    }
 
     buildResult = await _runBuildWithRetries(buildCommands, app, resultBundleDirectory);
 
