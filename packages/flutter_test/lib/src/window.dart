@@ -484,7 +484,9 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   bool get semanticsEnabled => _semanticsEnabledTestValue ?? _platformDispatcher.semanticsEnabled;
   bool? _semanticsEnabledTestValue;
 
+  /// The application locale set during the test.
   Locale? applicationLocale;
+
   @override
   void setApplicationLocale(Locale locale) {
     applicationLocale = locale;
