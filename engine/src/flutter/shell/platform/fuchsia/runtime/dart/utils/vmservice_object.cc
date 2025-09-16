@@ -48,8 +48,7 @@ void VMServiceObject::GetContents(LazyEntryVector* out_vector) const {
     if ((file == ".") || (file == "..")) {
       continue;
     }
-    out_vector->push_back(
-        {std::stoul(file) + GetStartingId(), file, S_IFREG});
+    out_vector->push_back({std::stoul(file) + GetStartingId(), file, S_IFREG});
   }
 }
 
