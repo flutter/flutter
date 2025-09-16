@@ -164,15 +164,32 @@ FLUTTER_ASSERT_ARC
   id mockEngine = mocks[@"mockEngine"];
   id mockWindow = mocks[@"mockWindow"];
 
-  [view willMoveToWindow:mockWindow];
+  id mockView = OCMPartialMock(view);
+  OCMStub([mockView window]).andReturn(mockWindow);
 
-  OCMVerify(times(1), [mockLifecycleDelegate addFlutterEngine:mockEngine]);
-  XCTAssertEqual(lifecycleDelegate.engines.count, 1.0);
-
-  [view willMoveToWindow:nil];
+  [mockView willMoveToWindow:nil];
 
   OCMVerify(times(1), [mockLifecycleDelegate removeFlutterEngine:mockEngine]);
   XCTAssertEqual(lifecycleDelegate.engines.count, 0.0);
+}
+
+- (void)testNilWindowForViewWhenPreviousEqualsNew {
+  NSDictionary* mocks = [self createWindowMocks];
+  FlutterView* view = (FlutterView*)mocks[@"view"];
+  id mockLifecycleDelegate = mocks[@"mockLifecycleDelegate"];
+  FlutterPluginSceneLifeCycleDelegate* lifecycleDelegate =
+      (FlutterPluginSceneLifeCycleDelegate*)mocks[@"lifecycleDelegate"];
+  id mockEngine = mocks[@"mockEngine"];
+  id mockWindow = mocks[@"mockWindow"];
+
+  id mockView = OCMPartialMock(view);
+  OCMStub([mockView window]).andReturn(mockWindow);
+
+  [mockView willMoveToWindow:mockWindow];
+
+  OCMVerify(times(1), [mockLifecycleDelegate addFlutterEngine:mockEngine]);
+  OCMVerify(times(0), [mockLifecycleDelegate removeFlutterEngine:[OCMArg any]]);
+  XCTAssertEqual(lifecycleDelegate.engines.count, 1.0);
 }
 
 - (NSDictionary*)createWindowMocks {
