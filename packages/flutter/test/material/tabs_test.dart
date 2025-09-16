@@ -4753,11 +4753,11 @@ void main() {
             length: 1,
             child: TabBar(
               tabs: const <Tab>[Tab(text: 'A')],
-              overlayColor: WidgetStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-                if (states.contains(MaterialState.hovered)) {
+              overlayColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+                if (states.contains(WidgetState.hovered)) {
                   return const Color(0xff00ff00);
                 }
-                if (states.contains(MaterialState.pressed)) {
+                if (states.contains(WidgetState.pressed)) {
                   return const Color(0xf00fffff);
                 }
                 return const Color(0xffbadbad); // Shouldn't happen.
@@ -4783,7 +4783,7 @@ void main() {
     });
 
     testWidgets(
-      "Tab's ink response splashColor matches resolved Tab overlayColor for MaterialState.pressed",
+      "Tab's ink response splashColor matches resolved Tab overlayColor for WidgetState.pressed",
       (WidgetTester tester) async {
         const Color splashColor = Color(0xf00fffff);
         await tester.pumpWidget(
@@ -4793,11 +4793,11 @@ void main() {
               length: 1,
               child: TabBar(
                 tabs: const <Tab>[Tab(text: 'A')],
-                overlayColor: WidgetStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-                  if (states.contains(MaterialState.hovered)) {
+                overlayColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+                  if (states.contains(WidgetState.hovered)) {
                     return const Color(0xff00ff00);
                   }
-                  if (states.contains(MaterialState.pressed)) {
+                  if (states.contains(WidgetState.pressed)) {
                     return splashColor;
                   }
                   return const Color(0xffbadbad); // Shouldn't happen.
@@ -5037,10 +5037,8 @@ void main() {
 
     const Color selectedColor = Color(0xff00ff00);
     const Color unselectedColor = Color(0xffff0000);
-    final MaterialStateColor labelColor = MaterialStateColor.resolveWith((
-      Set<MaterialState> states,
-    ) {
-      if (states.contains(MaterialState.selected)) {
+    final MaterialStateColor labelColor = MaterialStateColor.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         return selectedColor;
       }
       return unselectedColor;
@@ -5081,10 +5079,8 @@ void main() {
 
     const Color selectedStateColor = Color(0xff00ff00);
     const Color unselectedStateColor = Color(0xffff0000);
-    final MaterialStateColor labelColor = MaterialStateColor.resolveWith((
-      Set<MaterialState> states,
-    ) {
-      if (states.contains(MaterialState.selected)) {
+    final MaterialStateColor labelColor = MaterialStateColor.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         return selectedStateColor;
       }
       return unselectedStateColor;
@@ -5521,8 +5517,8 @@ void main() {
 
     Widget buildTabBar({bool stateColor = false}) {
       final Color labelColor = stateColor
-          ? MaterialStateColor.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
+          ? MaterialStateColor.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
                 return Colors.white;
               } else {
                 // this is a third color to also test if unselectedLabelColor
@@ -6273,7 +6269,7 @@ void main() {
   testWidgets('TabBar InkWell splashFactory and overlayColor', (WidgetTester tester) async {
     const InteractiveInkFeatureFactory splashFactory = NoSplash.splashFactory;
     final WidgetStateProperty<Color?> overlayColor = WidgetStateProperty.resolveWith<Color?>(
-      (Set<MaterialState> states) => Colors.transparent,
+      (Set<WidgetState> states) => Colors.transparent,
     );
 
     // TabBarTheme splashFactory and overlayColor
@@ -6328,8 +6324,8 @@ void main() {
         child: DefaultTabController(
           length: 1,
           child: TabBar(
-            overlayColor: WidgetStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-              if (states.contains(MaterialState.hovered)) {
+            overlayColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+              if (states.contains(WidgetState.hovered)) {
                 return hoverColor;
               }
               return Colors.black54;
