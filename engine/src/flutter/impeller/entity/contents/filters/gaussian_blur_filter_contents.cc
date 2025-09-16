@@ -387,11 +387,15 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
     Entity::TileMode tile_mode) {
   using VS = TextureFillVertexShader;
 
+  Rect bounds_rect = pass_args.bounds_uvs.value_or(Rect::MakeLTRB(0, 0, 1, 1));
+  Vector4 bounds_vector = {bounds_rect.GetLeft(), bounds_rect.GetTop(), bounds_rect.GetRight(), bounds_rect.GetBottom()};
+
   // If the texture already had mip levels generated, then we can use the
   // original downsample shader.
   if (pass_args.effective_scalar.x >= 0.5f ||
       (!input_texture->NeedsMipmapGeneration() &&
        input_texture->GetTextureDescriptor().mip_count > 1)) {
+    printf("Downsample: 1\n");
     ContentContext::SubpassCallback subpass_callback =
         [&](const ContentContext& renderer, RenderPass& pass) {
           HostBuffer& data_host_buffer = renderer.GetTransientsDataBuffer();
@@ -408,6 +412,7 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
 
           TextureFillFragmentShader::FragInfo frag_info;
           frag_info.alpha = 1.0;
+          frag_info.bounds_uv = bounds_vector;
 
           const Quad& uvs = pass_args.uvs;
           std::array<VS::PerVertexData, 4> vertices = {
@@ -438,6 +443,7 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
                                 /*msaa_enabled=*/false,
                                 /*depth_stencil_enabled=*/false);
   } else {
+    printf("Downsample: 2\n");
     // This assumes we don't scale below 1/16.
     Scalar edge = 1.0;
     Scalar ratio = 0.25;
@@ -479,6 +485,7 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
           frag_info.edge = edge;
           frag_info.ratio = ratio;
           frag_info.pixel_size = Vector2(1.0f / Size(input_texture->GetSize()));
+          frag_info.bounds_uv = bounds_vector;
 
           const Quad& uvs = pass_args.uvs;
           std::array<VS::PerVertexData, 4> vertices = {
