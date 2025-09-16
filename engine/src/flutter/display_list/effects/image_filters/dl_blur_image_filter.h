@@ -13,11 +13,6 @@ namespace flutter {
 
 class DlBlurImageFilter final : public DlImageFilter {
  public:
-  DlBlurImageFilter(DlScalar sigma_x, DlScalar sigma_y, DlTileMode tile_mode)
-      : sigma_x_(sigma_x),
-        sigma_y_(sigma_y),
-        bounds_(std::nullopt),
-        tile_mode_(tile_mode) {}
   DlBlurImageFilter(DlScalar sigma_x,
                     DlScalar sigma_y,
                     std::optional<DlRect> bounds,
@@ -29,18 +24,15 @@ class DlBlurImageFilter final : public DlImageFilter {
   explicit DlBlurImageFilter(const DlBlurImageFilter* filter)
       : DlBlurImageFilter(filter->sigma_x_,
                           filter->sigma_y_,
+                          filter->bounds_,
                           filter->tile_mode_) {}
-  DlBlurImageFilter(const DlBlurImageFilter& filter)
+  explicit DlBlurImageFilter(const DlBlurImageFilter& filter)
       : DlBlurImageFilter(&filter) {}
 
   static std::shared_ptr<DlImageFilter> Make(DlScalar sigma_x,
                                              DlScalar sigma_y,
+                                             std::optional<DlRect> bounds,
                                              DlTileMode tile_mode);
-
-  static std::shared_ptr<DlImageFilter> Make(DlScalar sigma_x,
-                                             DlScalar sigma_y,
-                                             DlTileMode tile_mode,
-                                             std::optional<DlRect> bounds);
 
   std::shared_ptr<DlImageFilter> shared() const override {
     return std::make_shared<DlBlurImageFilter>(this);
