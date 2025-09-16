@@ -406,7 +406,7 @@ abstract class WindowingOwner {
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 @internal
-WindowingOwner createDefaultOwner() {
+WindowingOwner createDefaultWindowingOwner() {
   if (!isWindowingEnabled) {
     return _WindowingOwnerUnsupported(errorMessage: _kWindowingDisabledErrorMessage);
   }

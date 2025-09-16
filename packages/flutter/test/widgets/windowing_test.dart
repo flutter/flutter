@@ -12,7 +12,7 @@ import 'package:flutter/src/widgets/_window.dart'
         RegularWindowControllerDelegate,
         WindowScope,
         WindowingOwner,
-        createDefaultOwner;
+        createDefaultWindowingOwner;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -74,12 +74,12 @@ void main() {
       });
 
       test('createDefaultOwner returns a WindowingOwner', () {
-        final WindowingOwner owner = createDefaultOwner();
+        final WindowingOwner owner = createDefaultWindowingOwner();
         expect(owner, isA<WindowingOwner>());
       });
 
       test('default WindowingOwner throws when accessing createRegularWindowController', () {
-        final WindowingOwner owner = createDefaultOwner();
+        final WindowingOwner owner = createDefaultWindowingOwner();
         expect(
           () => owner.createRegularWindowController(delegate: RegularWindowControllerDelegate()),
           throwsUnsupportedError,
@@ -87,7 +87,7 @@ void main() {
       });
 
       test('default WindowingOwner throws when accessing hasTopLevelWindows', () {
-        final WindowingOwner owner = createDefaultOwner();
+        final WindowingOwner owner = createDefaultWindowingOwner();
         expect(() => owner.hasTopLevelWindows(), throwsUnsupportedError);
       });
 
@@ -113,16 +113,16 @@ void main() {
 
       testWidgets('RegularWindow does not throw', (WidgetTester tester) async {
         final _StubWindowController controller = _StubWindowController(tester);
+        addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
           RegularWindow(controller: controller, child: Container()),
         );
-
-        addTearDown(controller.dispose);
       });
 
       testWidgets('Can access WindowScope.of', (WidgetTester tester) async {
         final _StubWindowController controller = _StubWindowController(tester);
+        addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
           RegularWindow(
@@ -136,12 +136,11 @@ void main() {
             ),
           ),
         );
-
-        addTearDown(controller.dispose);
       });
 
       testWidgets('Can access WindowScope.maybeOf', (WidgetTester tester) async {
         final _StubWindowController controller = _StubWindowController(tester);
+        addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
           RegularWindow(
@@ -155,12 +154,11 @@ void main() {
             ),
           ),
         );
-
-        addTearDown(controller.dispose);
       });
 
       testWidgets('Can access WindowScope.contentSizeOf', (WidgetTester tester) async {
         final _StubWindowController controller = _StubWindowController(tester);
+        addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
           RegularWindow(
@@ -174,12 +172,11 @@ void main() {
             ),
           ),
         );
-
-        addTearDown(controller.dispose);
       });
 
       testWidgets('Can access WindowScope.maybeContentSizeOf', (WidgetTester tester) async {
         final _StubWindowController controller = _StubWindowController(tester);
+        addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
           RegularWindow(
@@ -193,12 +190,11 @@ void main() {
             ),
           ),
         );
-
-        addTearDown(controller.dispose);
       });
 
       testWidgets('Can access WindowScope.titleOf', (WidgetTester tester) async {
         final _StubWindowController controller = _StubWindowController(tester);
+        addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
           RegularWindow(
@@ -212,12 +208,11 @@ void main() {
             ),
           ),
         );
-
-        addTearDown(controller.dispose);
       });
 
       testWidgets('Can access WindowScope.maybeTitleOf', (WidgetTester tester) async {
         final _StubWindowController controller = _StubWindowController(tester);
+        addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
           RegularWindow(
@@ -231,12 +226,11 @@ void main() {
             ),
           ),
         );
-
-        addTearDown(controller.dispose);
       });
 
       testWidgets('Can access WindowScope.isActivatedOf', (WidgetTester tester) async {
         final _StubWindowController controller = _StubWindowController(tester);
+        addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
           RegularWindow(
@@ -250,12 +244,11 @@ void main() {
             ),
           ),
         );
-
-        addTearDown(controller.dispose);
       });
 
       testWidgets('Can access WindowScope.maybeIsActivatedOf', (WidgetTester tester) async {
         final _StubWindowController controller = _StubWindowController(tester);
+        addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
           RegularWindow(
@@ -269,12 +262,11 @@ void main() {
             ),
           ),
         );
-
-        addTearDown(controller.dispose);
       });
 
       testWidgets('Can access WindowScope.isMinimizedOf', (WidgetTester tester) async {
         final _StubWindowController controller = _StubWindowController(tester);
+        addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
           RegularWindow(
@@ -288,12 +280,11 @@ void main() {
             ),
           ),
         );
-
-        addTearDown(controller.dispose);
       });
 
       testWidgets('Can access WindowScope.maybeIsMinimizedOf', (WidgetTester tester) async {
         final _StubWindowController controller = _StubWindowController(tester);
+        addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
           RegularWindow(
@@ -307,12 +298,11 @@ void main() {
             ),
           ),
         );
-
-        addTearDown(controller.dispose);
       });
 
       testWidgets('Can access WindowScope.isMaximizedOf', (WidgetTester tester) async {
         final _StubWindowController controller = _StubWindowController(tester);
+        addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
           RegularWindow(
@@ -326,12 +316,11 @@ void main() {
             ),
           ),
         );
-
-        addTearDown(controller.dispose);
       });
 
       testWidgets('Can access WindowScope.maybeIsMaximizedOf', (WidgetTester tester) async {
         final _StubWindowController controller = _StubWindowController(tester);
+        addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
           RegularWindow(
@@ -345,12 +334,11 @@ void main() {
             ),
           ),
         );
-
-        addTearDown(controller.dispose);
       });
 
       testWidgets('Can access WindowScope.isFullscreenOf', (WidgetTester tester) async {
         final _StubWindowController controller = _StubWindowController(tester);
+        addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
           RegularWindow(
@@ -364,12 +352,11 @@ void main() {
             ),
           ),
         );
-
-        addTearDown(controller.dispose);
       });
 
       testWidgets('Can access WindowScope.maybeIsFullscreenOf', (WidgetTester tester) async {
         final _StubWindowController controller = _StubWindowController(tester);
+        addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
           RegularWindow(
@@ -383,8 +370,6 @@ void main() {
             ),
           ),
         );
-
-        addTearDown(controller.dispose);
       });
     });
   });
