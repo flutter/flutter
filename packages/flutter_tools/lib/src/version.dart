@@ -1106,9 +1106,9 @@ class GitTagVersion {
     }
 
     final List<String?> matchGroups = match.groups(<int>[1, 2, 3, 4, 5, 6]);
-    final int? x = matchGroups[0] == null ? null : int.tryParse(matchGroups[0]!);
-    final int? y = matchGroups[1] == null ? null : int.tryParse(matchGroups[1]!);
-    final int? z = matchGroups[2] == null ? null : int.tryParse(matchGroups[2]!);
+    final int? x = int.tryParse(matchGroups[0].toString());
+    final int? y = int.tryParse(matchGroups[1].toString());
+    final int? z = int.tryParse(matchGroups[2].toString());
     final String? devString = matchGroups[3];
     int? devVersion, devPatch;
     if (devString != null) {
