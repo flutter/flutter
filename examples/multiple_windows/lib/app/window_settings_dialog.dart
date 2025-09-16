@@ -51,31 +51,26 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
       titlePadding: const EdgeInsets.fromLTRB(24, 10, 24, 0),
       title: const Center(child: Text('Window Settings')),
       children: [
-        Expanded(
-          child: ListTile(
-            title: const Text('Regular'),
-            subtitle: Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _regularWidthController,
-                    initialValue: widget.settings.regularSize.width.toString(),
-                    decoration: const InputDecoration(
-                      labelText: 'Initial width',
-                    ),
+        ListTile(
+          title: const Text('Regular'),
+          subtitle: Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: _regularWidthController,
+                  decoration: const InputDecoration(labelText: 'Initial width'),
+                ),
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: TextFormField(
+                  controller: _regularHeightController,
+                  decoration: const InputDecoration(
+                    labelText: 'Initial height',
                   ),
                 ),
-                const SizedBox(width: 20),
-                Expanded(
-                  child: TextFormField(
-                    initialValue: widget.settings.regularSize.height.toString(),
-                    decoration: const InputDecoration(
-                      labelText: 'Initial height',
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
         Padding(
