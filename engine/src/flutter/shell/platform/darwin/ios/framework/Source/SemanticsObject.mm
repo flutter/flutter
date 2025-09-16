@@ -454,6 +454,17 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   return [self isFocusable];
 }
 
+- (NSString*)accessibilityLanguage {
+  if (![self isAccessibilityBridgeAlive]) {
+    return nil;
+  }
+
+  if (self.node.locale.empty()) {
+    return nil;
+  }
+  return @(self.node.locale.data());
+}
+
 - (bool)isFocusable {
   // If the node is scrollable AND hidden OR
   // The node has a label, value, or hint OR
