@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <fidl/fuchsia.diagnostics/cpp/fidl.h>
+#include <fidl/fuchsia.diagnostics.types/cpp/fidl.h>
 #include <fidl/fuchsia.logger/cpp/fidl.h>
 #include <lib/async-loop/cpp/loop.h>
 #include <lib/async-loop/default.h>
@@ -27,26 +27,29 @@ namespace testing {
 
 constexpr static char kLogSink[] = "log_sink";
 
+using fuchsia_diagnostics_types::Interest;
+using fuchsia_diagnostics_types::Severity;
+
 class LogInterestListenerFuchsia : public ::loop_fixture::RealLoop,
                                    public ::testing::Test {};
 
 TEST_F(LogInterestListenerFuchsia, SeverityChanges) {
   ScopedSetLogSettings backup({.min_log_level = kLogInfo});
   {
-    ::fuchsia_diagnostics::Interest interest;
-    interest.min_severity(::fuchsia_diagnostics::Severity::kTrace);
+    Interest interest;
+    interest.min_severity(Severity::kTrace);
     LogInterestListener::HandleInterestChange(interest);
     EXPECT_EQ(GetMinLogLevel(), -1);  // VERBOSE
   }
   {
-    ::fuchsia_diagnostics::Interest interest;
-    interest.min_severity(::fuchsia_diagnostics::Severity::kInfo);
+    Interest interest;
+    interest.min_severity(Severity::kInfo);
     LogInterestListener::HandleInterestChange(interest);
     EXPECT_EQ(GetMinLogLevel(), kLogInfo);
   }
   {
-    ::fuchsia_diagnostics::Interest interest;
-    interest.min_severity(::fuchsia_diagnostics::Severity::kError);
+    Interest interest;
+    interest.min_severity(Severity::kError);
     LogInterestListener::HandleInterestChange(interest);
     EXPECT_EQ(GetMinLogLevel(), kLogError);
   }
@@ -64,7 +67,7 @@ class MockLogSink : public component_testing::LocalComponentImpl,
     if (first_call_) {
       // If it has not been called before, then return a result right away.
       fuchsia_logger::LogSinkWaitForInterestChangeResponse response = {
-          {.data = {{.min_severity = fuchsia_diagnostics::Severity::kWarn}}}};
+          {.data = {{.min_severity = Severity::kWarn}}}};
       completer.Reply(fit::ok(response));
       first_call_ = false;
     } else {
