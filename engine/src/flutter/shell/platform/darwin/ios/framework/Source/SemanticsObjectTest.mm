@@ -585,6 +585,37 @@ const float kFloatCompareEpsilon = 0.001;
   XCTAssertTrue([object.accessibilityLanguage isEqualToString:@"es-MX"]);
 }
 
+- (void)testFlutterSemanticsObjectUseMainLocale {
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
+  mock->isVoiceOverRunningValue = true;
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+
+  flutter::SemanticsNode node;
+  mock->mockedLocale = @"es-MX";
+
+  FlutterSemanticsObject* object = [[FlutterSemanticsObject alloc] initWithBridge:bridge uid:0];
+  [object setSemanticsNode:&node];
+  XCTAssertTrue([object.accessibilityLanguage isEqualToString:@"es-MX"]);
+}
+
+- (void)testFlutterSemanticsObjectPrioritizedSectionLocale {
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
+  mock->isVoiceOverRunningValue = true;
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+
+  flutter::SemanticsNode node;
+  // Set both locales.
+  mock->mockedLocale = @"es-MX";
+  node.locale = "zh-TW";
+
+  FlutterSemanticsObject* object = [[FlutterSemanticsObject alloc] initWithBridge:bridge uid:0];
+  [object setSemanticsNode:&node];
+  // node.locale takes priority.
+  XCTAssertTrue([object.accessibilityLanguage isEqualToString:@"zh-TW"]);
+}
+
 - (void)testFlutterSemanticsObjectLocaleNil {
   flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
   mock->isVoiceOverRunningValue = true;

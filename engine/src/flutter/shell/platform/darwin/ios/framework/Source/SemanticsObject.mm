@@ -459,10 +459,10 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
     return nil;
   }
 
-  if (self.node.locale.empty()) {
-    return nil;
+  if (!self.node.locale.empty()) {
+    return @(self.node.locale.data());
   }
-  return @(self.node.locale.data());
+  return self.bridge->GetMainLocale();
 }
 
 - (bool)isFocusable {
