@@ -3,17 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter_devicelab/framework/framework.dart';
-import 'package:flutter_devicelab/tasks/web_benchmarks.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
 
-/// Runs all Web benchmarks using DDC.
+const String buildMode = String.fromEnvironment('buildMode');
+
 Future<void> main() async {
   await task(() async {
-    return runWebBenchmark((
-      useWasm: false,
-      forceSingleThreadedSkwasm: false,
-      useDdc: true,
-      withHotReload: true,
-      buildMode: 'debug',
-    ));
+    print('buildMode: $buildMode');
+    return TaskResult.success(null);
   });
 }
