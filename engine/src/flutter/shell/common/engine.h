@@ -164,7 +164,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
     //--------------------------------------------------------------------------
     /// @brief      Framework sets the application locale.
     ///
-    /// @param[in]  locale  The application locale
+    /// @param[in]  locale  The application locale in BCP 47 format.
     ///
     virtual void OnEngineSetApplicationLocale(const std::string& locale) = 0;
 

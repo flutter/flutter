@@ -101,7 +101,7 @@ class PlatformConfigurationClient {
   //--------------------------------------------------------------------------
   /// @brief      Framework sets the application locale
   ///
-  /// @param[in] locale The application locale.
+  /// @param[in] locale The application locale in BCP 47 format.
   ///
   virtual void SetApplicationLocale(const std::string& locale) = 0;
 

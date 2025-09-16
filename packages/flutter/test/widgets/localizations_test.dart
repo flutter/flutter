@@ -61,6 +61,24 @@ void main() {
     expect(find.text('loaded'), findsOneWidget);
   });
 
+  testWidgets('Locale is send to engine if this is a top level Localizations', (
+    WidgetTester tester,
+  ) async {
+    final FakeLocalizationsDelegate delegate = FakeLocalizationsDelegate();
+    await tester.pumpWidget(
+      Localizations(
+        locale: const Locale('fo'),
+        isApplicationLevel: true,
+        delegates: <LocalizationsDelegate<dynamic>>[WidgetsLocalizationsDelegate(), delegate],
+        child: const Text('loaded'),
+      ),
+    );
+    delegate.completer.complete('foo');
+    await tester.idle();
+    await tester.pump();
+    expect(tester.binding.platformDispatcher.applicationLocale, const Locale('fo'));
+  });
+
   testWidgets('Localizations.localeOf throws when no localizations exist', (
     WidgetTester tester,
   ) async {
