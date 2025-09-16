@@ -19,7 +19,7 @@ class _LeadCaptureFormState extends State<LeadCaptureForm> {
   final _addressController = TextEditingController();
   final _projectDetailsController = TextEditingController();
   final LeadRepository _leadRepository = LeadRepository();
-  
+
   String _selectedService = 'Interior Painting';
   String _selectedTimeline = 'Within 1 month';
   bool _isSubmitting = false;
@@ -58,16 +58,13 @@ class _LeadCaptureFormState extends State<LeadCaptureForm> {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFF2E5BBA),
-            Color(0xFF1A365D),
-          ],
+          colors: [Color(0xFF2E5BBA), Color(0xFF1A365D)],
         ),
       ),
       child: Column(
         children: [
           const SizedBox(height: 60),
-          
+
           Text(
             'Get Your Free Quote Today',
             style: TextStyle(
@@ -77,9 +74,9 @@ class _LeadCaptureFormState extends State<LeadCaptureForm> {
             ),
             textAlign: TextAlign.center,
           ),
-          
+
           SizedBox(height: ResponsiveLayout.getSpacing(context)),
-          
+
           Text(
             'Ready to transform your space? Fill out our quick form and we\'ll provide a detailed estimate within 24 hours.',
             style: TextStyle(
@@ -88,18 +85,18 @@ class _LeadCaptureFormState extends State<LeadCaptureForm> {
             ),
             textAlign: TextAlign.center,
           ),
-          
+
           SizedBox(height: ResponsiveLayout.getSpacing(context) * 3),
-          
+
           if (ResponsiveLayout.isMobileLayout(context))
             _buildMobileForm(context)
           else
             _buildDesktopForm(context),
-            
+
           const SizedBox(height: 40),
-          
+
           _buildContactInfo(context),
-          
+
           const SizedBox(height: 60),
         ],
       ),
@@ -164,12 +161,10 @@ class _LeadCaptureFormState extends State<LeadCaptureForm> {
             ),
           ),
         ),
-        
+
         const SizedBox(width: 40),
-        
-        Expanded(
-          child: _buildFormBenefits(context),
-        ),
+
+        Expanded(child: _buildFormBenefits(context)),
       ],
     );
   }
@@ -191,14 +186,15 @@ class _LeadCaptureFormState extends State<LeadCaptureForm> {
                   filled: true,
                   fillColor: const Color(0xFFF7FAFC),
                 ),
-                validator: (value) => value?.isEmpty == true ? 'Name is required' : null,
+                validator: (value) =>
+                    value?.isEmpty == true ? 'Name is required' : null,
               ),
             ),
           ],
         ),
-        
+
         const SizedBox(height: 16),
-        
+
         Row(
           children: [
             Expanded(
@@ -214,7 +210,8 @@ class _LeadCaptureFormState extends State<LeadCaptureForm> {
                   filled: true,
                   fillColor: const Color(0xFFF7FAFC),
                 ),
-                validator: (value) => value?.isEmpty == true ? 'Phone is required' : null,
+                validator: (value) =>
+                    value?.isEmpty == true ? 'Phone is required' : null,
               ),
             ),
             const SizedBox(width: 16),
@@ -235,30 +232,29 @@ class _LeadCaptureFormState extends State<LeadCaptureForm> {
             ),
           ],
         ),
-        
+
         const SizedBox(height: 16),
-        
+
         TextFormField(
           controller: _addressController,
           decoration: InputDecoration(
             labelText: 'Property Address *',
             prefixIcon: const Icon(Icons.location_on),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             filled: true,
             fillColor: const Color(0xFFF7FAFC),
           ),
-          validator: (value) => value?.isEmpty == true ? 'Address is required' : null,
+          validator: (value) =>
+              value?.isEmpty == true ? 'Address is required' : null,
         ),
-        
+
         const SizedBox(height: 16),
-        
+
         Row(
           children: [
             Expanded(
               child: DropdownButtonFormField<String>(
-                value: _selectedService,
+                initialValue: _selectedService,
                 decoration: InputDecoration(
                   labelText: 'Service Needed',
                   prefixIcon: const Icon(Icons.build),
@@ -269,10 +265,7 @@ class _LeadCaptureFormState extends State<LeadCaptureForm> {
                   fillColor: const Color(0xFFF7FAFC),
                 ),
                 items: _services.map((service) {
-                  return DropdownMenuItem(
-                    value: service,
-                    child: Text(service),
-                  );
+                  return DropdownMenuItem(value: service, child: Text(service));
                 }).toList(),
                 onChanged: (value) {
                   if (value != null) {
@@ -284,7 +277,7 @@ class _LeadCaptureFormState extends State<LeadCaptureForm> {
             const SizedBox(width: 16),
             Expanded(
               child: DropdownButtonFormField<String>(
-                value: _selectedTimeline,
+                initialValue: _selectedTimeline,
                 decoration: InputDecoration(
                   labelText: 'Timeline',
                   prefixIcon: const Icon(Icons.schedule),
@@ -309,20 +302,19 @@ class _LeadCaptureFormState extends State<LeadCaptureForm> {
             ),
           ],
         ),
-        
+
         const SizedBox(height: 16),
-        
+
         TextFormField(
           controller: _projectDetailsController,
           maxLines: 4,
           decoration: InputDecoration(
             labelText: 'Project Details',
-            hintText: 'Tell us about your project, rooms to be painted, any special requirements...',
+            hintText:
+                'Tell us about your project, rooms to be painted, any special requirements...',
             prefixIcon: const Icon(Icons.description),
             alignLabelWithHint: true,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             filled: true,
             fillColor: const Color(0xFFF7FAFC),
           ),
@@ -340,9 +332,7 @@ class _LeadCaptureFormState extends State<LeadCaptureForm> {
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF2E5BBA),
           foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           elevation: 4,
         ),
         child: _isSubmitting
@@ -370,17 +360,20 @@ class _LeadCaptureFormState extends State<LeadCaptureForm> {
       {
         'icon': Icons.speed,
         'title': '24-Hour Response',
-        'description': 'We\'ll get back to you within 24 hours with a detailed quote',
+        'description':
+            'We\'ll get back to you within 24 hours with a detailed quote',
       },
       {
         'icon': Icons.money_off,
         'title': 'No Obligation',
-        'description': 'Free consultation and estimate with no strings attached',
+        'description':
+            'Free consultation and estimate with no strings attached',
       },
       {
         'icon': Icons.verified_user,
         'title': 'Licensed & Insured',
-        'description': 'Fully licensed painters with comprehensive insurance coverage',
+        'description':
+            'Fully licensed painters with comprehensive insurance coverage',
       },
       {
         'icon': Icons.star,
@@ -390,52 +383,60 @@ class _LeadCaptureFormState extends State<LeadCaptureForm> {
     ];
 
     return Column(
-      children: benefits.map((benefit) => 
-        Container(
-          margin: const EdgeInsets.only(bottom: 24),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  benefit['icon'] as IconData,
-                  color: Colors.white,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      benefit['title'] as String,
-                      style: TextStyle(
-                        fontSize: ResponsiveLayout.getFontSize(context, base: 16),
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+      children: benefits
+          .map(
+            (benefit) => Container(
+              margin: const EdgeInsets.only(bottom: 24),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      benefit['description'] as String,
-                      style: TextStyle(
-                        fontSize: ResponsiveLayout.getFontSize(context, base: 14),
-                        color: Colors.white.withOpacity(0.9),
-                        height: 1.4,
-                      ),
+                    child: Icon(
+                      benefit['icon'] as IconData,
+                      color: Colors.white,
+                      size: 24,
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          benefit['title'] as String,
+                          style: TextStyle(
+                            fontSize: ResponsiveLayout.getFontSize(
+                              context,
+                              base: 16,
+                            ),
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          benefit['description'] as String,
+                          style: TextStyle(
+                            fontSize: ResponsiveLayout.getFontSize(
+                              context,
+                              base: 14,
+                            ),
+                            color: Colors.white.withOpacity(0.9),
+                            height: 1.4,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-      ).toList(),
+            ),
+          )
+          .toList(),
     );
   }
 
@@ -457,26 +458,56 @@ class _LeadCaptureFormState extends State<LeadCaptureForm> {
               color: Colors.white,
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           if (ResponsiveLayout.isMobileLayout(context))
             Column(
               children: [
-                _buildContactItem(context, Icons.phone, '(08) 9123 4567', 'Call us now'),
+                _buildContactItem(
+                  context,
+                  Icons.phone,
+                  '(08) 9123 4567',
+                  'Call us now',
+                ),
                 const SizedBox(height: 12),
-                _buildContactItem(context, Icons.email, 'info@hwrpainting.com.au', 'Send us an email'),
+                _buildContactItem(
+                  context,
+                  Icons.email,
+                  'info@hwrpainting.com.au',
+                  'Send us an email',
+                ),
                 const SizedBox(height: 12),
-                _buildContactItem(context, Icons.schedule, 'Mon-Fri 7AM-6PM, Sat 8AM-4PM', 'Business hours'),
+                _buildContactItem(
+                  context,
+                  Icons.schedule,
+                  'Mon-Fri 7AM-6PM, Sat 8AM-4PM',
+                  'Business hours',
+                ),
               ],
             )
           else
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildContactItem(context, Icons.phone, '(08) 9123 4567', 'Call us now'),
-                _buildContactItem(context, Icons.email, 'info@hwrpainting.com.au', 'Send us an email'),
-                _buildContactItem(context, Icons.schedule, 'Mon-Fri 7AM-6PM, Sat 8AM-4PM', 'Business hours'),
+                _buildContactItem(
+                  context,
+                  Icons.phone,
+                  '(08) 9123 4567',
+                  'Call us now',
+                ),
+                _buildContactItem(
+                  context,
+                  Icons.email,
+                  'info@hwrpainting.com.au',
+                  'Send us an email',
+                ),
+                _buildContactItem(
+                  context,
+                  Icons.schedule,
+                  'Mon-Fri 7AM-6PM, Sat 8AM-4PM',
+                  'Business hours',
+                ),
               ],
             ),
         ],
@@ -484,7 +515,12 @@ class _LeadCaptureFormState extends State<LeadCaptureForm> {
     );
   }
 
-  Widget _buildContactItem(BuildContext context, IconData icon, String title, String subtitle) {
+  Widget _buildContactItem(
+    BuildContext context,
+    IconData icon,
+    String title,
+    String subtitle,
+  ) {
     return Column(
       children: [
         Icon(
@@ -516,9 +552,9 @@ class _LeadCaptureFormState extends State<LeadCaptureForm> {
 
   Future<void> _handleSubmit() async {
     if (!_formKey.currentState!.validate()) return;
-    
+
     setState(() => _isSubmitting = true);
-    
+
     try {
       final lead = LeadModel(
         id: '',
@@ -534,7 +570,7 @@ class _LeadCaptureFormState extends State<LeadCaptureForm> {
       );
 
       final success = await _leadRepository.createLead(lead);
-      
+
       if (success) {
         if (mounted) {
           // Show success dialog
@@ -556,9 +592,13 @@ class _LeadCaptureFormState extends State<LeadCaptureForm> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Thank you for your interest in HWR Painting Services, ${_nameController.text}!'),
+                  Text(
+                    'Thank you for your interest in HWR Painting Services, ${_nameController.text}!',
+                  ),
                   const SizedBox(height: 12),
-                  const Text('We\'ve received your quote request and will contact you within 24 hours to discuss your project and schedule a consultation.'),
+                  const Text(
+                    'We\'ve received your quote request and will contact you within 24 hours to discuss your project and schedule a consultation.',
+                  ),
                   const SizedBox(height: 12),
                   Container(
                     padding: const EdgeInsets.all(12),
@@ -568,7 +608,11 @@ class _LeadCaptureFormState extends State<LeadCaptureForm> {
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.info, color: const Color(0xFF2E5BBA), size: 20),
+                        Icon(
+                          Icons.info,
+                          color: const Color(0xFF2E5BBA),
+                          size: 20,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -606,10 +650,14 @@ class _LeadCaptureFormState extends State<LeadCaptureForm> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to submit form: Please try again or call us directly.'),
+            content: Text(
+              'Failed to submit form: Please try again or call us directly.',
+            ),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
         );
       }

@@ -14,22 +14,23 @@ class LandingPageAdminScreen extends StatefulWidget {
   State<LandingPageAdminScreen> createState() => _LandingPageAdminScreenState();
 }
 
-class _LandingPageAdminScreenState extends State<LandingPageAdminScreen> with TickerProviderStateMixin {
+class _LandingPageAdminScreenState extends State<LandingPageAdminScreen>
+    with TickerProviderStateMixin {
   late TabController _tabController;
   final LandingPageRepository _repository = LandingPageRepository();
-  
+
   // Hero Section Data
   final _heroTitleController = TextEditingController();
   final _heroSubtitleController = TextEditingController();
   final _heroPrimaryCtaController = TextEditingController();
   final _heroSecondaryCtaController = TextEditingController();
-  
+
   // Service Sections Data
   final List<Map<String, TextEditingController>> _services = [];
-  
+
   // Portfolio Data
   final List<Map<String, dynamic>> _portfolioItems = [];
-  
+
   // Business Info Data
   final _businessNameController = TextEditingController();
   final _businessAddressController = TextEditingController();
@@ -69,7 +70,7 @@ class _LandingPageAdminScreenState extends State<LandingPageAdminScreen> with Ti
 
   Future<void> _loadContent() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final content = await _repository.getLandingPageContent();
       if (content != null) {
@@ -110,14 +111,18 @@ class _LandingPageAdminScreenState extends State<LandingPageAdminScreen> with Ti
 
     // Populate portfolio
     _portfolioItems.clear();
-    _portfolioItems.addAll(content.portfolio.map((item) => {
-      'id': item.id,
-      'title': item.title,
-      'description': item.description,
-      'category': item.category,
-      'beforeImage': item.beforeImageUrl,
-      'afterImage': item.afterImageUrl,
-    }));
+    _portfolioItems.addAll(
+      content.portfolio.map(
+        (item) => {
+          'id': item.id,
+          'title': item.title,
+          'description': item.description,
+          'category': item.category,
+          'beforeImage': item.beforeImageUrl,
+          'afterImage': item.afterImageUrl,
+        },
+      ),
+    );
 
     // Populate business info
     _businessNameController.text = content.businessInfo.name;
@@ -136,9 +141,7 @@ class _LandingPageAdminScreenState extends State<LandingPageAdminScreen> with Ti
           backgroundColor: const Color(0xFF2E5BBA),
           foregroundColor: Colors.white,
         ),
-        body: const Center(
-          child: CircularProgressIndicator(),
-        ),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -155,7 +158,7 @@ class _LandingPageAdminScreenState extends State<LandingPageAdminScreen> with Ti
             tooltip: 'Preview Landing Page',
           ),
           IconButton(
-            icon: _isSaving 
+            icon: _isSaving
                 ? const SizedBox(
                     width: 20,
                     height: 20,
@@ -235,25 +238,23 @@ class _LandingPageAdminScreenState extends State<LandingPageAdminScreen> with Ti
                     maxLines: 3,
                   ),
                   SizedBox(height: ResponsiveLayout.getSpacing(context)),
-                  if (ResponsiveLayout.isMobileLayout(context))
-                    ...[
-                      TextFormField(
-                        controller: _heroPrimaryCtaController,
-                        decoration: const InputDecoration(
-                          labelText: 'Primary CTA Button',
-                          border: OutlineInputBorder(),
-                        ),
+                  if (ResponsiveLayout.isMobileLayout(context)) ...[
+                    TextFormField(
+                      controller: _heroPrimaryCtaController,
+                      decoration: const InputDecoration(
+                        labelText: 'Primary CTA Button',
+                        border: OutlineInputBorder(),
                       ),
-                      SizedBox(height: ResponsiveLayout.getSpacing(context)),
-                      TextFormField(
-                        controller: _heroSecondaryCtaController,
-                        decoration: const InputDecoration(
-                          labelText: 'Secondary CTA Button',
-                          border: OutlineInputBorder(),
-                        ),
+                    ),
+                    SizedBox(height: ResponsiveLayout.getSpacing(context)),
+                    TextFormField(
+                      controller: _heroSecondaryCtaController,
+                      decoration: const InputDecoration(
+                        labelText: 'Secondary CTA Button',
+                        border: OutlineInputBorder(),
                       ),
-                    ]
-                  else
+                    ),
+                  ] else
                     Row(
                       children: [
                         Expanded(
@@ -297,7 +298,9 @@ class _LandingPageAdminScreenState extends State<LandingPageAdminScreen> with Ti
                   ),
                   SizedBox(height: ResponsiveLayout.getSpacing(context)),
                   Container(
-                    height: ResponsiveLayout.isMobileLayout(context) ? 150 : 200,
+                    height: ResponsiveLayout.isMobileLayout(context)
+                        ? 150
+                        : 200,
                     width: double.infinity,
                     decoration: BoxDecoration(
                       color: Colors.grey[200],
@@ -308,15 +311,19 @@ class _LandingPageAdminScreenState extends State<LandingPageAdminScreen> with Ti
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          Icons.image, 
-                          size: ResponsiveLayout.isMobileLayout(context) ? 48 : 64, 
+                          Icons.image,
+                          size: ResponsiveLayout.isMobileLayout(context)
+                              ? 48
+                              : 64,
                           color: Colors.grey,
                         ),
                         SizedBox(height: ResponsiveLayout.getSpacing(context)),
                         const Text('Hero Background Image'),
                         const SizedBox(height: 8),
                         Text(
-                          kIsWeb ? 'Click to upload new image' : 'Tap to upload new image',
+                          kIsWeb
+                              ? 'Click to upload new image'
+                              : 'Tap to upload new image',
                           style: const TextStyle(color: Colors.grey),
                         ),
                       ],
@@ -385,14 +392,21 @@ class _LandingPageAdminScreenState extends State<LandingPageAdminScreen> with Ti
                     child: Text(
                       'Service Offerings',
                       style: TextStyle(
-                        fontSize: ResponsiveLayout.getFontSize(context, base: 20),
+                        fontSize: ResponsiveLayout.getFontSize(
+                          context,
+                          base: 20,
+                        ),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
                   ElevatedButton.icon(
                     icon: const Icon(Icons.add),
-                    label: Text(ResponsiveLayout.isMobileLayout(context) ? 'Add' : 'Add Service'),
+                    label: Text(
+                      ResponsiveLayout.isMobileLayout(context)
+                          ? 'Add'
+                          : 'Add Service',
+                    ),
                     onPressed: _addNewService,
                   ),
                 ],
@@ -404,7 +418,9 @@ class _LandingPageAdminScreenState extends State<LandingPageAdminScreen> with Ti
             final index = entry.key;
             final service = entry.value;
             return Card(
-              margin: EdgeInsets.only(bottom: ResponsiveLayout.getSpacing(context)),
+              margin: EdgeInsets.only(
+                bottom: ResponsiveLayout.getSpacing(context),
+              ),
               child: Padding(
                 padding: ResponsiveLayout.getPadding(context),
                 child: Column(
@@ -416,7 +432,10 @@ class _LandingPageAdminScreenState extends State<LandingPageAdminScreen> with Ti
                           child: Text(
                             'Service ${index + 1}',
                             style: TextStyle(
-                              fontSize: ResponsiveLayout.getFontSize(context, base: 16),
+                              fontSize: ResponsiveLayout.getFontSize(
+                                context,
+                                base: 16,
+                              ),
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -448,7 +467,9 @@ class _LandingPageAdminScreenState extends State<LandingPageAdminScreen> with Ti
                     InkWell(
                       onTap: () => _showUploadDialog('service_$index'),
                       child: Container(
-                        height: ResponsiveLayout.isMobileLayout(context) ? 100 : 120,
+                        height: ResponsiveLayout.isMobileLayout(context)
+                            ? 100
+                            : 120,
                         width: double.infinity,
                         decoration: BoxDecoration(
                           color: Colors.grey[200],
@@ -459,15 +480,20 @@ class _LandingPageAdminScreenState extends State<LandingPageAdminScreen> with Ti
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(
-                              Icons.image, 
-                              size: ResponsiveLayout.isMobileLayout(context) ? 24 : 32, 
+                              Icons.image,
+                              size: ResponsiveLayout.isMobileLayout(context)
+                                  ? 24
+                                  : 32,
                               color: Colors.grey,
                             ),
                             const SizedBox(height: 8),
                             Text('Service Image ${index + 1}'),
                             Text(
                               kIsWeb ? 'Click to upload' : 'Tap to upload',
-                              style: const TextStyle(color: Colors.grey, fontSize: 12),
+                              style: const TextStyle(
+                                color: Colors.grey,
+                                fontSize: 12,
+                              ),
                             ),
                           ],
                         ),
@@ -498,14 +524,21 @@ class _LandingPageAdminScreenState extends State<LandingPageAdminScreen> with Ti
                     child: Text(
                       'Portfolio Gallery',
                       style: TextStyle(
-                        fontSize: ResponsiveLayout.getFontSize(context, base: 20),
+                        fontSize: ResponsiveLayout.getFontSize(
+                          context,
+                          base: 20,
+                        ),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
                   ElevatedButton.icon(
                     icon: const Icon(Icons.add),
-                    label: Text(ResponsiveLayout.isMobileLayout(context) ? 'Add' : 'Add Project'),
+                    label: Text(
+                      ResponsiveLayout.isMobileLayout(context)
+                          ? 'Add'
+                          : 'Add Project',
+                    ),
                     onPressed: _addNewPortfolioItem,
                   ),
                 ],
@@ -517,7 +550,9 @@ class _LandingPageAdminScreenState extends State<LandingPageAdminScreen> with Ti
             final index = entry.key;
             final item = entry.value;
             return Card(
-              margin: EdgeInsets.only(bottom: ResponsiveLayout.getSpacing(context)),
+              margin: EdgeInsets.only(
+                bottom: ResponsiveLayout.getSpacing(context),
+              ),
               child: Padding(
                 padding: ResponsiveLayout.getPadding(context),
                 child: Column(
@@ -529,14 +564,19 @@ class _LandingPageAdminScreenState extends State<LandingPageAdminScreen> with Ti
                           child: Text(
                             item['title'] ?? 'Portfolio Item ${index + 1}',
                             style: TextStyle(
-                              fontSize: ResponsiveLayout.getFontSize(context, base: 16),
+                              fontSize: ResponsiveLayout.getFontSize(
+                                context,
+                                base: 16,
+                              ),
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
                         Chip(
                           label: Text(item['category'] ?? 'Interior'),
-                          backgroundColor: const Color(0xFF2E5BBA).withOpacity(0.1),
+                          backgroundColor: const Color(
+                            0xFF2E5BBA,
+                          ).withOpacity(0.1),
                         ),
                         const SizedBox(width: 8),
                         IconButton(
@@ -556,7 +596,8 @@ class _LandingPageAdminScreenState extends State<LandingPageAdminScreen> with Ti
                       Column(
                         children: [
                           InkWell(
-                            onTap: () => _showUploadDialog('portfolio_before_$index'),
+                            onTap: () =>
+                                _showUploadDialog('portfolio_before_$index'),
                             child: Container(
                               height: 100,
                               width: double.infinity,
@@ -568,16 +609,26 @@ class _LandingPageAdminScreenState extends State<LandingPageAdminScreen> with Ti
                               child: const Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(Icons.image, size: 24, color: Colors.grey),
+                                  Icon(
+                                    Icons.image,
+                                    size: 24,
+                                    color: Colors.grey,
+                                  ),
                                   SizedBox(height: 4),
-                                  Text('Before Image', style: TextStyle(fontSize: 12)),
+                                  Text(
+                                    'Before Image',
+                                    style: TextStyle(fontSize: 12),
+                                  ),
                                 ],
                               ),
                             ),
                           ),
-                          SizedBox(height: ResponsiveLayout.getSpacing(context)),
+                          SizedBox(
+                            height: ResponsiveLayout.getSpacing(context),
+                          ),
                           InkWell(
-                            onTap: () => _showUploadDialog('portfolio_after_$index'),
+                            onTap: () =>
+                                _showUploadDialog('portfolio_after_$index'),
                             child: Container(
                               height: 100,
                               width: double.infinity,
@@ -589,9 +640,16 @@ class _LandingPageAdminScreenState extends State<LandingPageAdminScreen> with Ti
                               child: const Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(Icons.image, size: 24, color: Colors.grey),
+                                  Icon(
+                                    Icons.image,
+                                    size: 24,
+                                    color: Colors.grey,
+                                  ),
                                   SizedBox(height: 4),
-                                  Text('After Image', style: TextStyle(fontSize: 12)),
+                                  Text(
+                                    'After Image',
+                                    style: TextStyle(fontSize: 12),
+                                  ),
                                 ],
                               ),
                             ),
@@ -603,7 +661,8 @@ class _LandingPageAdminScreenState extends State<LandingPageAdminScreen> with Ti
                         children: [
                           Expanded(
                             child: InkWell(
-                              onTap: () => _showUploadDialog('portfolio_before_$index'),
+                              onTap: () =>
+                                  _showUploadDialog('portfolio_before_$index'),
                               child: Container(
                                 height: 120,
                                 decoration: BoxDecoration(
@@ -614,10 +673,20 @@ class _LandingPageAdminScreenState extends State<LandingPageAdminScreen> with Ti
                                 child: const Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.image, size: 32, color: Colors.grey),
+                                    Icon(
+                                      Icons.image,
+                                      size: 32,
+                                      color: Colors.grey,
+                                    ),
                                     SizedBox(height: 8),
                                     Text('Before Image'),
-                                    Text('Click to upload', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                                    Text(
+                                      'Click to upload',
+                                      style: TextStyle(
+                                        color: Colors.grey,
+                                        fontSize: 12,
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -626,7 +695,8 @@ class _LandingPageAdminScreenState extends State<LandingPageAdminScreen> with Ti
                           SizedBox(width: ResponsiveLayout.getSpacing(context)),
                           Expanded(
                             child: InkWell(
-                              onTap: () => _showUploadDialog('portfolio_after_$index'),
+                              onTap: () =>
+                                  _showUploadDialog('portfolio_after_$index'),
                               child: Container(
                                 height: 120,
                                 decoration: BoxDecoration(
@@ -637,10 +707,20 @@ class _LandingPageAdminScreenState extends State<LandingPageAdminScreen> with Ti
                                 child: const Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.image, size: 32, color: Colors.grey),
+                                    Icon(
+                                      Icons.image,
+                                      size: 32,
+                                      color: Colors.grey,
+                                    ),
                                     SizedBox(height: 8),
                                     Text('After Image'),
-                                    Text('Click to upload', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                                    Text(
+                                      'Click to upload',
+                                      style: TextStyle(
+                                        color: Colors.grey,
+                                        fontSize: 12,
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -694,27 +774,25 @@ class _LandingPageAdminScreenState extends State<LandingPageAdminScreen> with Ti
                     ),
                   ),
                   SizedBox(height: ResponsiveLayout.getSpacing(context)),
-                  if (ResponsiveLayout.isMobileLayout(context))
-                    ...[
-                      TextFormField(
-                        controller: _businessPhoneController,
-                        decoration: const InputDecoration(
-                          labelText: 'Phone Number',
-                          border: OutlineInputBorder(),
-                        ),
-                        keyboardType: TextInputType.phone,
+                  if (ResponsiveLayout.isMobileLayout(context)) ...[
+                    TextFormField(
+                      controller: _businessPhoneController,
+                      decoration: const InputDecoration(
+                        labelText: 'Phone Number',
+                        border: OutlineInputBorder(),
                       ),
-                      SizedBox(height: ResponsiveLayout.getSpacing(context)),
-                      TextFormField(
-                        controller: _businessEmailController,
-                        decoration: const InputDecoration(
-                          labelText: 'Email Address',
-                          border: OutlineInputBorder(),
-                        ),
-                        keyboardType: TextInputType.emailAddress,
+                      keyboardType: TextInputType.phone,
+                    ),
+                    SizedBox(height: ResponsiveLayout.getSpacing(context)),
+                    TextFormField(
+                      controller: _businessEmailController,
+                      decoration: const InputDecoration(
+                        labelText: 'Email Address',
+                        border: OutlineInputBorder(),
                       ),
-                    ]
-                  else
+                      keyboardType: TextInputType.emailAddress,
+                    ),
+                  ] else
                     Row(
                       children: [
                         Expanded(
@@ -800,21 +878,29 @@ class _LandingPageAdminScreenState extends State<LandingPageAdminScreen> with Ti
     setState(() => _isSaving = true);
 
     try {
-      final services = _services.map((service) => ServiceContent(
-        id: service['id']?.text ?? '',
-        title: service['title']?.text ?? '',
-        description: service['description']?.text ?? '',
-        imageUrl: service['imageUrl']?.text ?? '',
-      )).toList();
+      final services = _services
+          .map(
+            (service) => ServiceContent(
+              id: service['id']?.text ?? '',
+              title: service['title']?.text ?? '',
+              description: service['description']?.text ?? '',
+              imageUrl: service['imageUrl']?.text ?? '',
+            ),
+          )
+          .toList();
 
-      final portfolio = _portfolioItems.map((item) => PortfolioItem(
-        id: item['id'] ?? '',
-        title: item['title'] ?? '',
-        description: item['description'] ?? '',
-        category: item['category'] ?? '',
-        beforeImageUrl: item['beforeImage'] ?? '',
-        afterImageUrl: item['afterImage'] ?? '',
-      )).toList();
+      final portfolio = _portfolioItems
+          .map(
+            (item) => PortfolioItem(
+              id: item['id'] ?? '',
+              title: item['title'] ?? '',
+              description: item['description'] ?? '',
+              category: item['category'] ?? '',
+              beforeImageUrl: item['beforeImage'] ?? '',
+              afterImageUrl: item['afterImage'] ?? '',
+            ),
+          )
+          .toList();
 
       final businessInfo = BusinessInfo(
         name: _businessNameController.text,
@@ -838,7 +924,7 @@ class _LandingPageAdminScreenState extends State<LandingPageAdminScreen> with Ti
       );
 
       final success = await _repository.saveLandingPageContent(content);
-      
+
       if (success) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -846,7 +932,9 @@ class _LandingPageAdminScreenState extends State<LandingPageAdminScreen> with Ti
               content: const Text('Changes saved successfully!'),
               backgroundColor: Colors.green,
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
           );
         }
@@ -861,7 +949,9 @@ class _LandingPageAdminScreenState extends State<LandingPageAdminScreen> with Ti
             content: Text('Failed to save changes: $e'),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
         );
       }
@@ -892,7 +982,7 @@ class _LandingPageAdminScreenState extends State<LandingPageAdminScreen> with Ti
               const Text('• Automatic image compression'),
               const Text('• Upload to Supabase Storage'),
               const Text('• URL saved to database'),
-            }
+            },
           ],
         ),
         actions: [
@@ -905,7 +995,9 @@ class _LandingPageAdminScreenState extends State<LandingPageAdminScreen> with Ti
               Navigator.of(context).pop();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Image upload feature will be implemented with ${kIsWeb ? 'file picker' : 'camera/gallery picker'} and Supabase Storage'),
+                  content: Text(
+                    'Image upload feature will be implemented with ${kIsWeb ? 'file picker' : 'camera/gallery picker'} and Supabase Storage',
+                  ),
                   behavior: SnackBarBehavior.floating,
                 ),
               );
@@ -1003,16 +1095,20 @@ class _LandingPageAdminScreenState extends State<LandingPageAdminScreen> with Ti
   void _editPortfolioItem(int index) {
     final item = _portfolioItems[index];
     final titleController = TextEditingController(text: item['title'] ?? '');
-    final descController = TextEditingController(text: item['description'] ?? '');
+    final descController = TextEditingController(
+      text: item['description'] ?? '',
+    );
     String selectedCategory = item['category'] ?? 'Interior';
-    
+
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           title: const Text('Edit Portfolio Item'),
           content: SizedBox(
-            width: ResponsiveLayout.isMobileLayout(context) ? double.infinity : 400,
+            width: ResponsiveLayout.isMobileLayout(context)
+                ? double.infinity
+                : 400,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -1028,10 +1124,12 @@ class _LandingPageAdminScreenState extends State<LandingPageAdminScreen> with Ti
                 ),
                 SizedBox(height: ResponsiveLayout.getSpacing(context)),
                 DropdownButtonFormField<String>(
-                  value: selectedCategory,
+                  initialValue: selectedCategory,
                   decoration: const InputDecoration(labelText: 'Category'),
                   items: ['Interior', 'Exterior', 'Commercial', 'Specialty']
-                      .map((cat) => DropdownMenuItem(value: cat, child: Text(cat)))
+                      .map(
+                        (cat) => DropdownMenuItem(value: cat, child: Text(cat)),
+                      )
                       .toList(),
                   onChanged: (value) => selectedCategory = value!,
                 ),
@@ -1065,7 +1163,9 @@ class _LandingPageAdminScreenState extends State<LandingPageAdminScreen> with Ti
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Remove Portfolio Item'),
-        content: const Text('Are you sure you want to remove this portfolio item?'),
+        content: const Text(
+          'Are you sure you want to remove this portfolio item?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),

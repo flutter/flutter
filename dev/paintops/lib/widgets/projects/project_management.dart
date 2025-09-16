@@ -34,10 +34,7 @@ class _ProjectManagementState extends State<ProjectManagement> {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFFF8F9FA),
-            Color(0xFFECEFF1),
-          ],
+          colors: [Color(0xFFF8F9FA), Color(0xFFECEFF1)],
         ),
       ),
       child: SingleChildScrollView(
@@ -47,7 +44,7 @@ class _ProjectManagementState extends State<ProjectManagement> {
           children: [
             _buildHeader(),
             SizedBox(height: ResponsiveLayout.getSpacing(context) * 2),
-            
+
             if (operationsProvider.isLoadingProjects)
               const Center(
                 child: Padding(
@@ -135,9 +132,12 @@ class _ProjectManagementState extends State<ProjectManagement> {
     );
   }
 
-  Widget _buildProjectsList(OperationsProvider provider, AuthProvider authProvider) {
+  Widget _buildProjectsList(
+    OperationsProvider provider,
+    AuthProvider authProvider,
+  ) {
     final projects = provider.projects;
-    
+
     return Column(
       children: [
         if (ResponsiveLayout.isMobileLayout(context))
@@ -148,7 +148,10 @@ class _ProjectManagementState extends State<ProjectManagement> {
     );
   }
 
-  Widget _buildProjectListMobile(List<ProjectModel> projects, AuthProvider authProvider) {
+  Widget _buildProjectListMobile(
+    List<ProjectModel> projects,
+    AuthProvider authProvider,
+  ) {
     return Column(
       children: projects.map((project) {
         return Container(
@@ -159,7 +162,10 @@ class _ProjectManagementState extends State<ProjectManagement> {
     );
   }
 
-  Widget _buildProjectGrid(List<ProjectModel> projects, AuthProvider authProvider) {
+  Widget _buildProjectGrid(
+    List<ProjectModel> projects,
+    AuthProvider authProvider,
+  ) {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -211,9 +217,7 @@ class _ProjectManagementState extends State<ProjectManagement> {
                   fit: BoxFit.cover,
                   placeholder: (context, url) => Container(
                     color: const Color(0xFFF8F9FA),
-                    child: const Center(
-                      child: CircularProgressIndicator(),
-                    ),
+                    child: const Center(child: CircularProgressIndicator()),
                   ),
                   errorWidget: (context, url, error) => Container(
                     color: const Color(0xFFF8F9FA),
@@ -239,14 +243,20 @@ class _ProjectManagementState extends State<ProjectManagement> {
                       child: Text(
                         project.name,
                         style: TextStyle(
-                          fontSize: ResponsiveLayout.getFontSize(context, base: 18),
+                          fontSize: ResponsiveLayout.getFontSize(
+                            context,
+                            base: 18,
+                          ),
                           fontWeight: FontWeight.bold,
                           color: const Color(0xFF37474F),
                         ),
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
@@ -299,7 +309,10 @@ class _ProjectManagementState extends State<ProjectManagement> {
                           child: Text(
                             project.clientName!,
                             style: TextStyle(
-                              fontSize: ResponsiveLayout.getFontSize(context, base: 14),
+                              fontSize: ResponsiveLayout.getFontSize(
+                                context,
+                                base: 14,
+                              ),
                               color: const Color(0xFF37474F),
                               fontWeight: FontWeight.w600,
                             ),
@@ -321,7 +334,10 @@ class _ProjectManagementState extends State<ProjectManagement> {
                           Text(
                             'Start Date',
                             style: TextStyle(
-                              fontSize: ResponsiveLayout.getFontSize(context, base: 12),
+                              fontSize: ResponsiveLayout.getFontSize(
+                                context,
+                                base: 12,
+                              ),
                               color: const Color(0xFF78909C),
                               fontWeight: FontWeight.w600,
                             ),
@@ -329,7 +345,10 @@ class _ProjectManagementState extends State<ProjectManagement> {
                           Text(
                             DateFormat('MMM d, yyyy').format(project.startDate),
                             style: TextStyle(
-                              fontSize: ResponsiveLayout.getFontSize(context, base: 14),
+                              fontSize: ResponsiveLayout.getFontSize(
+                                context,
+                                base: 14,
+                              ),
                               fontWeight: FontWeight.bold,
                               color: const Color(0xFF37474F),
                             ),
@@ -345,17 +364,25 @@ class _ProjectManagementState extends State<ProjectManagement> {
                             Text(
                               'End Date',
                               style: TextStyle(
-                                fontSize: ResponsiveLayout.getFontSize(context, base: 12),
+                                fontSize: ResponsiveLayout.getFontSize(
+                                  context,
+                                  base: 12,
+                                ),
                                 color: const Color(0xFF78909C),
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
                             Text(
-                              DateFormat('MMM d, yyyy').format(project.endDate!),
+                              DateFormat(
+                                'MMM d, yyyy',
+                              ).format(project.endDate!),
                               style: TextStyle(
-                                fontSize: ResponsiveLayout.getFontSize(context, base: 14),
+                                fontSize: ResponsiveLayout.getFontSize(
+                                  context,
+                                  base: 14,
+                                ),
                                 fontWeight: FontWeight.bold,
-                                color: project.isOverdue 
+                                color: project.isOverdue
                                     ? const Color(0xFFEF4444)
                                     : const Color(0xFF37474F),
                               ),
@@ -381,7 +408,10 @@ class _ProjectManagementState extends State<ProjectManagement> {
                             Text(
                               'Budget',
                               style: TextStyle(
-                                fontSize: ResponsiveLayout.getFontSize(context, base: 12),
+                                fontSize: ResponsiveLayout.getFontSize(
+                                  context,
+                                  base: 12,
+                                ),
                                 color: const Color(0xFF78909C),
                                 fontWeight: FontWeight.w600,
                               ),
@@ -389,7 +419,10 @@ class _ProjectManagementState extends State<ProjectManagement> {
                             Text(
                               '\$${project.budgetAmount.toStringAsFixed(0)}',
                               style: TextStyle(
-                                fontSize: ResponsiveLayout.getFontSize(context, base: 16),
+                                fontSize: ResponsiveLayout.getFontSize(
+                                  context,
+                                  base: 16,
+                                ),
                                 fontWeight: FontWeight.bold,
                                 color: const Color(0xFF37474F),
                               ),
@@ -404,7 +437,10 @@ class _ProjectManagementState extends State<ProjectManagement> {
                             Text(
                               'Actual Cost',
                               style: TextStyle(
-                                fontSize: ResponsiveLayout.getFontSize(context, base: 12),
+                                fontSize: ResponsiveLayout.getFontSize(
+                                  context,
+                                  base: 12,
+                                ),
                                 color: const Color(0xFF78909C),
                                 fontWeight: FontWeight.w600,
                               ),
@@ -412,9 +448,12 @@ class _ProjectManagementState extends State<ProjectManagement> {
                             Text(
                               '\$${project.actualCosts.toStringAsFixed(0)}',
                               style: TextStyle(
-                                fontSize: ResponsiveLayout.getFontSize(context, base: 16),
+                                fontSize: ResponsiveLayout.getFontSize(
+                                  context,
+                                  base: 16,
+                                ),
                                 fontWeight: FontWeight.bold,
-                                color: project.isOnBudget 
+                                color: project.isOnBudget
                                     ? const Color(0xFF10B981)
                                     : const Color(0xFFEF4444),
                               ),
@@ -429,7 +468,10 @@ class _ProjectManagementState extends State<ProjectManagement> {
                             Text(
                               'Margin',
                               style: TextStyle(
-                                fontSize: ResponsiveLayout.getFontSize(context, base: 12),
+                                fontSize: ResponsiveLayout.getFontSize(
+                                  context,
+                                  base: 12,
+                                ),
                                 color: const Color(0xFF78909C),
                                 fontWeight: FontWeight.w600,
                               ),
@@ -437,9 +479,12 @@ class _ProjectManagementState extends State<ProjectManagement> {
                             Text(
                               '${project.profitMargin.toStringAsFixed(1)}%',
                               style: TextStyle(
-                                fontSize: ResponsiveLayout.getFontSize(context, base: 16),
+                                fontSize: ResponsiveLayout.getFontSize(
+                                  context,
+                                  base: 16,
+                                ),
                                 fontWeight: FontWeight.bold,
-                                color: project.profitMargin >= 0 
+                                color: project.profitMargin >= 0
                                     ? const Color(0xFF10B981)
                                     : const Color(0xFFEF4444),
                               ),
@@ -459,7 +504,10 @@ class _ProjectManagementState extends State<ProjectManagement> {
                     Expanded(
                       child: Container(
                         decoration: BoxDecoration(
-                          border: Border.all(color: const Color(0xFF37474F), width: 2),
+                          border: Border.all(
+                            color: const Color(0xFF37474F),
+                            width: 2,
+                          ),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: OutlinedButton.icon(
@@ -473,7 +521,7 @@ class _ProjectManagementState extends State<ProjectManagement> {
                         ),
                       ),
                     ),
-                    
+
                     if (authProvider.canManageProjects()) ...{
                       const SizedBox(width: 12),
                       Expanded(
@@ -565,12 +613,12 @@ class _ProjectManagementState extends State<ProjectManagement> {
     showDialog(
       context: context,
       builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: Container(
           constraints: BoxConstraints(
-            maxWidth: ResponsiveLayout.isMobileLayout(context) ? double.infinity : 500,
+            maxWidth: ResponsiveLayout.isMobileLayout(context)
+                ? double.infinity
+                : 500,
             maxHeight: MediaQuery.of(context).size.height * 0.8,
           ),
           child: Column(
@@ -618,7 +666,10 @@ class _ProjectManagementState extends State<ProjectManagement> {
                             ),
                           ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 colors: [
@@ -642,7 +693,8 @@ class _ProjectManagementState extends State<ProjectManagement> {
 
                       const SizedBox(height: 16),
 
-                      if (project.description != null && project.description!.isNotEmpty) ...{
+                      if (project.description != null &&
+                          project.description!.isNotEmpty) ...{
                         const Text(
                           'Description',
                           style: TextStyle(
@@ -760,16 +812,18 @@ class _ProjectManagementState extends State<ProjectManagement> {
 
   void _showEditProjectDialog(ProjectModel project) {
     final nameController = TextEditingController(text: project.name);
-    final descriptionController = TextEditingController(text: project.description);
-    final budgetController = TextEditingController(text: project.budgetAmount.toString());
+    final descriptionController = TextEditingController(
+      text: project.description,
+    );
+    final budgetController = TextEditingController(
+      text: project.budgetAmount.toString(),
+    );
     ProjectStatus selectedStatus = project.status;
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Edit Project'),
         content: SizedBox(
           width: 400,
@@ -805,24 +859,25 @@ class _ProjectManagementState extends State<ProjectManagement> {
                 ),
                 const SizedBox(height: 16),
                 StatefulBuilder(
-                  builder: (context, setState) => DropdownButtonFormField<ProjectStatus>(
-                    value: selectedStatus,
-                    decoration: const InputDecoration(
-                      labelText: 'Project Status',
-                      border: OutlineInputBorder(),
-                    ),
-                    items: ProjectStatus.values.map((status) {
-                      return DropdownMenuItem(
-                        value: status,
-                        child: Text(status.displayName),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() => selectedStatus = value);
-                      }
-                    },
-                  ),
+                  builder: (context, setState) =>
+                      DropdownButtonFormField<ProjectStatus>(
+                        initialValue: selectedStatus,
+                        decoration: const InputDecoration(
+                          labelText: 'Project Status',
+                          border: OutlineInputBorder(),
+                        ),
+                        items: ProjectStatus.values.map((status) {
+                          return DropdownMenuItem(
+                            value: status,
+                            child: Text(status.displayName),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          if (value != null) {
+                            setState(() => selectedStatus = value);
+                          }
+                        },
+                      ),
                 ),
               ],
             ),
@@ -839,22 +894,29 @@ class _ProjectManagementState extends State<ProjectManagement> {
               final updatedProject = project.copyWith(
                 name: nameController.text.trim(),
                 description: descriptionController.text.trim(),
-                budgetAmount: double.tryParse(budgetController.text) ?? project.budgetAmount,
+                budgetAmount:
+                    double.tryParse(budgetController.text) ??
+                    project.budgetAmount,
                 status: selectedStatus,
               );
-              
+
               // Update in repository
-              final provider = Provider.of<OperationsProvider>(context, listen: false);
+              final provider = Provider.of<OperationsProvider>(
+                context,
+                listen: false,
+              );
               // Here you would call provider.updateProject(updatedProject)
-              
+
               Navigator.of(context).pop();
-              
+
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: const Text('Project updated successfully'),
                   backgroundColor: Colors.green,
                   behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
               );
             },

@@ -17,11 +17,13 @@ class LogTimeForm extends StatefulWidget {
 class _LogTimeFormState extends State<LogTimeForm> {
   final _formKey = GlobalKey<FormState>();
   final _descriptionController = TextEditingController();
-  
+
   ProjectModel? _selectedProject;
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _startTime = TimeOfDay.now();
-  TimeOfDay _endTime = TimeOfDay.now().replacing(hour: TimeOfDay.now().hour + 1);
+  TimeOfDay _endTime = TimeOfDay.now().replacing(
+    hour: TimeOfDay.now().hour + 1,
+  );
   bool _isSubmitting = false;
 
   @override
@@ -33,9 +35,7 @@ class _LogTimeFormState extends State<LogTimeForm> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         width: ResponsiveLayout.isMobileLayout(context) ? null : 600,
         padding: const EdgeInsets.all(24),
@@ -78,11 +78,7 @@ class _LogTimeFormState extends State<LogTimeForm> {
             ),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: const Icon(
-            Icons.access_time,
-            color: Colors.white,
-            size: 24,
-          ),
+          child: const Icon(Icons.access_time, color: Colors.white, size: 24),
         ),
         const SizedBox(width: 16),
         const Expanded(
@@ -91,17 +87,11 @@ class _LogTimeFormState extends State<LogTimeForm> {
             children: [
               Text(
                 'Log Work Time',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               Text(
                 'Record your work hours for a project',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 14,
-                ),
+                style: TextStyle(color: Colors.grey, fontSize: 14),
               ),
             ],
           ),
@@ -119,7 +109,11 @@ class _LogTimeFormState extends State<LogTimeForm> {
       builder: (context, operationsProvider, child) {
         final projects = operationsProvider.projects;
         final activeProjects = projects
-            .where((p) => p.status == ProjectStatus.inProgress || p.status == ProjectStatus.planning)
+            .where(
+              (p) =>
+                  p.status == ProjectStatus.inProgress ||
+                  p.status == ProjectStatus.planning,
+            )
             .toList();
 
         if (activeProjects.isEmpty) {
@@ -132,7 +126,9 @@ class _LogTimeFormState extends State<LogTimeForm> {
                   Icon(Icons.info, color: Colors.orange[600]),
                   const SizedBox(width: 12),
                   const Expanded(
-                    child: Text('No active projects available. Contact your supervisor to get assigned to a project.'),
+                    child: Text(
+                      'No active projects available. Contact your supervisor to get assigned to a project.',
+                    ),
                   ),
                 ],
               ),
@@ -145,14 +141,11 @@ class _LogTimeFormState extends State<LogTimeForm> {
           children: [
             const Text(
               'Project *',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
             DropdownButtonFormField<ProjectModel>(
-              value: _selectedProject,
+              initialValue: _selectedProject,
               decoration: InputDecoration(
                 hintText: 'Select a project',
                 prefixIcon: const Icon(Icons.work),
@@ -171,16 +164,11 @@ class _LogTimeFormState extends State<LogTimeForm> {
                     children: [
                       Text(
                         project.name,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
                       Text(
                         project.clientName ?? 'Unknown Client',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       ),
                     ],
                   ),
@@ -210,10 +198,7 @@ class _LogTimeFormState extends State<LogTimeForm> {
       children: [
         const Text(
           'Work Date *',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
         InkWell(
@@ -252,16 +237,16 @@ class _LogTimeFormState extends State<LogTimeForm> {
             children: [
               const Text(
                 'Start Time *',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 8),
               InkWell(
                 onTap: () => _selectTime(isStartTime: true),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.grey[300]!),
                     borderRadius: BorderRadius.circular(12),
@@ -289,16 +274,16 @@ class _LogTimeFormState extends State<LogTimeForm> {
             children: [
               const Text(
                 'End Time *',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 8),
               InkWell(
                 onTap: () => _selectTime(isStartTime: false),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.grey[300]!),
                     borderRadius: BorderRadius.circular(12),
@@ -329,10 +314,7 @@ class _LogTimeFormState extends State<LogTimeForm> {
       children: [
         const Text(
           'Work Description',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
         TextFormField(
@@ -342,9 +324,7 @@ class _LogTimeFormState extends State<LogTimeForm> {
             hintText: 'Describe the work performed...',
             prefixIcon: const Icon(Icons.description, size: 20),
             alignLabelWithHint: true,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             filled: true,
             fillColor: const Color(0xFFF8F9FA),
           ),
@@ -356,22 +336,17 @@ class _LogTimeFormState extends State<LogTimeForm> {
   Widget _buildDurationSummary() {
     final duration = _calculateDuration();
     final hours = duration.inMinutes / 60;
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: const Color(0xFF37474F).withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: const Color(0xFF37474F).withOpacity(0.2),
-        ),
+        border: Border.all(color: const Color(0xFF37474F).withOpacity(0.2)),
       ),
       child: Row(
         children: [
-          const Icon(
-            Icons.timer,
-            color: Color(0xFF37474F),
-          ),
+          const Icon(Icons.timer, color: Color(0xFF37474F)),
           const SizedBox(width: 12),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -384,7 +359,7 @@ class _LogTimeFormState extends State<LogTimeForm> {
                 ),
               ),
               Text(
-                hours >= 1 
+                hours >= 1
                     ? '${hours.toStringAsFixed(1)} hours'
                     : '${duration.inMinutes} minutes',
                 style: const TextStyle(
@@ -452,9 +427,9 @@ class _LogTimeFormState extends State<LogTimeForm> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: const Color(0xFF37474F),
-            ),
+            colorScheme: Theme.of(
+              context,
+            ).colorScheme.copyWith(primary: const Color(0xFF37474F)),
           ),
           child: child!,
         );
@@ -475,9 +450,9 @@ class _LogTimeFormState extends State<LogTimeForm> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: const Color(0xFF37474F),
-            ),
+            colorScheme: Theme.of(
+              context,
+            ).colorScheme.copyWith(primary: const Color(0xFF37474F)),
           ),
           child: child!,
         );
@@ -489,7 +464,9 @@ class _LogTimeFormState extends State<LogTimeForm> {
         if (isStartTime) {
           _startTime = picked;
           // Auto-adjust end time if it's before start time
-          if (_endTime.hour < picked.hour || (_endTime.hour == picked.hour && _endTime.minute <= picked.minute)) {
+          if (_endTime.hour < picked.hour ||
+              (_endTime.hour == picked.hour &&
+                  _endTime.minute <= picked.minute)) {
             _endTime = picked.replacing(hour: picked.hour + 1);
           }
         } else {
@@ -500,14 +477,26 @@ class _LogTimeFormState extends State<LogTimeForm> {
   }
 
   Duration _calculateDuration() {
-    final startDateTime = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day, _startTime.hour, _startTime.minute);
-    final endDateTime = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day, _endTime.hour, _endTime.minute);
-    
+    final startDateTime = DateTime(
+      _selectedDate.year,
+      _selectedDate.month,
+      _selectedDate.day,
+      _startTime.hour,
+      _startTime.minute,
+    );
+    final endDateTime = DateTime(
+      _selectedDate.year,
+      _selectedDate.month,
+      _selectedDate.day,
+      _endTime.hour,
+      _endTime.minute,
+    );
+
     if (endDateTime.isBefore(startDateTime)) {
       // End time is next day
       return endDateTime.add(const Duration(days: 1)).difference(startDateTime);
     }
-    
+
     return endDateTime.difference(startDateTime);
   }
 
@@ -515,7 +504,7 @@ class _LogTimeFormState extends State<LogTimeForm> {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final selectedDay = DateTime(date.year, date.month, date.day);
-    
+
     if (selectedDay == today) {
       return 'Today';
     } else if (selectedDay == today.subtract(const Duration(days: 1))) {
@@ -544,8 +533,11 @@ class _LogTimeFormState extends State<LogTimeForm> {
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final operationsProvider = Provider.of<OperationsProvider>(context, listen: false);
-      
+      final operationsProvider = Provider.of<OperationsProvider>(
+        context,
+        listen: false,
+      );
+
       final startDateTime = DateTime(
         _selectedDate.year,
         _selectedDate.month,
@@ -553,7 +545,7 @@ class _LogTimeFormState extends State<LogTimeForm> {
         _startTime.hour,
         _startTime.minute,
       );
-      
+
       final endDateTime = DateTime(
         _selectedDate.year,
         _selectedDate.month,
@@ -577,16 +569,20 @@ class _LogTimeFormState extends State<LogTimeForm> {
       );
 
       final success = await operationsProvider.submitTimesheet(timesheet);
-      
+
       if (success) {
         if (mounted) {
           Navigator.of(context).pop();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Time logged successfully for ${_selectedProject!.name}'),
+              content: Text(
+                'Time logged successfully for ${_selectedProject!.name}',
+              ),
               backgroundColor: Colors.green,
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
           );
         }
@@ -600,7 +596,9 @@ class _LogTimeFormState extends State<LogTimeForm> {
             content: Text('Failed to log time: ${e.toString()}'),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
         );
       }

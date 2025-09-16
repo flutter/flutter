@@ -21,27 +21,28 @@ const supabaseUrl = String.fromEnvironment(
 );
 
 const supabaseKey = String.fromEnvironment(
-  'SUPABASE_ANON_KEY', 
-  defaultValue: kDebugMode ? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpoaHNvbG14dGxveHNtbGdjZXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4NTE1NDYsImV4cCI6MjA3MzQyNzU0Nn0.XsBuNPcVP9QvCjdjAn-dHwi_KAilaNbSZmlQbbtwIaM' : '',
+  'SUPABASE_ANON_KEY',
+  defaultValue: kDebugMode
+      ? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpoaHNvbG14dGxveHNtbGdjZXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4NTE1NDYsImV4cCI6MjA3MzQyNzU0Nn0.XsBuNPcVP9QvCjdjAn-dHwi_KAilaNbSZmlQbbtwIaM'
+      : '',
 );
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Validate environment configuration
   if (supabaseUrl.isEmpty || supabaseKey.isEmpty) {
     if (kDebugMode) {
-      print('WARNING: Supabase configuration missing. Please set SUPABASE_URL and SUPABASE_ANON_KEY environment variables.');
+      print(
+        'WARNING: Supabase configuration missing. Please set SUPABASE_URL and SUPABASE_ANON_KEY environment variables.',
+      );
     }
     // In production, you might want to show an error screen or use fallback configuration
   }
-  
+
   try {
-    await Supabase.initialize(
-      url: supabaseUrl,
-      anonKey: supabaseKey,
-    );
-    
+    await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
+
     if (kDebugMode) {
       print('Supabase initialized successfully');
       print('Platform: ${kIsWeb ? 'Web' : 'Mobile'}');
@@ -53,7 +54,7 @@ Future<void> main() async {
     // Continue app initialization even if Supabase fails
     // This allows the app to function in offline mode or with fallback data
   }
-  
+
   runApp(const PaintOpsApp());
 }
 
@@ -68,14 +69,29 @@ class PaintOpsApp extends StatelessWidget {
         Provider(create: (_) => ProjectRepository()),
         Provider(create: (_) => TimesheetRepository()),
         Provider(create: (_) => ExpenseRepository()),
-        ChangeNotifierProxyProvider4<AuthProvider, ProjectRepository, TimesheetRepository, ExpenseRepository, OperationsProvider>(
+        ChangeNotifierProxyProvider4<
+          AuthProvider,
+          ProjectRepository,
+          TimesheetRepository,
+          ExpenseRepository,
+          OperationsProvider
+        >(
           create: (context) => OperationsProvider(
             context.read<ProjectRepository>(),
             context.read<TimesheetRepository>(),
             context.read<ExpenseRepository>(),
           ),
-          update: (context, auth, projectRepo, timesheetRepo, expenseRepo, previous) =>
-              previous ?? OperationsProvider(projectRepo, timesheetRepo, expenseRepo),
+          update:
+              (
+                context,
+                auth,
+                projectRepo,
+                timesheetRepo,
+                expenseRepo,
+                previous,
+              ) =>
+                  previous ??
+                  OperationsProvider(projectRepo, timesheetRepo, expenseRepo),
         ),
       ],
       child: MaterialApp(
@@ -94,7 +110,9 @@ class PaintOpsApp extends StatelessWidget {
           return MediaQuery(
             data: MediaQuery.of(context).copyWith(
               // Ensure proper text scaling on web
-              textScaleFactor: kIsWeb ? 1.0 : MediaQuery.of(context).textScaleFactor,
+              textScaler: TextScaler.linear(
+                kIsWeb ? 1.0 : MediaQuery.of(context).textScaleFactor,
+              ),
             ),
             child: child!,
           );
@@ -133,9 +151,7 @@ class PaintOpsApp extends StatelessWidget {
       cardTheme: CardThemeData(
         elevation: kIsWeb ? 6 : 8,
         shadowColor: Colors.black.withOpacity(kIsWeb ? 0.12 : 0.15),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -160,7 +176,7 @@ class PaintOpsApp extends StatelessWidget {
         style: OutlinedButton.styleFrom(
           foregroundColor: const Color(0xFF37474F),
           side: BorderSide(
-            color: const Color(0xFF37474F), 
+            color: const Color(0xFF37474F),
             width: kIsWeb ? 1.5 : 2,
           ),
           shape: RoundedRectangleBorder(
@@ -191,7 +207,10 @@ class PaintOpsApp extends StatelessWidget {
         ),
         filled: true,
         fillColor: const Color(0xFFF8F9FA),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
         labelStyle: GoogleFonts.inter(
           color: const Color(0xFF37474F),
           fontWeight: FontWeight.w500,

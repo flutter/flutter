@@ -28,8 +28,11 @@ class ProjectRepository {
           status: _parseProjectStatus(project['status']),
           budgetAmount: (project['budget_amount'] ?? 0.0).toDouble(),
           actualCosts: (project['actual_costs'] ?? 0.0).toDouble(),
-          startDate: DateTime.tryParse(project['start_date'] ?? '') ?? DateTime.now(),
-          endDate: DateTime.tryParse(project['end_date'] ?? '') ?? DateTime.now().add(const Duration(days: 30)),
+          startDate:
+              DateTime.tryParse(project['start_date'] ?? '') ?? DateTime.now(),
+          endDate:
+              DateTime.tryParse(project['end_date'] ?? '') ??
+              DateTime.now().add(const Duration(days: 30)),
           description: project['description'] ?? '',
           imageUrl: project['image_url'],
         );
@@ -65,8 +68,11 @@ class ProjectRepository {
           status: _parseProjectStatus(response['status']),
           budgetAmount: (response['budget_amount'] ?? 0.0).toDouble(),
           actualCosts: (response['actual_costs'] ?? 0.0).toDouble(),
-          startDate: DateTime.tryParse(response['start_date'] ?? '') ?? DateTime.now(),
-          endDate: DateTime.tryParse(response['end_date'] ?? '') ?? DateTime.now().add(const Duration(days: 30)),
+          startDate:
+              DateTime.tryParse(response['start_date'] ?? '') ?? DateTime.now(),
+          endDate:
+              DateTime.tryParse(response['end_date'] ?? '') ??
+              DateTime.now().add(const Duration(days: 30)),
           description: response['description'] ?? '',
           imageUrl: response['image_url'],
         );
@@ -80,7 +86,11 @@ class ProjectRepository {
     }
   }
 
-  Future<bool> createProject(ProjectModel project, {String? clientName, String? clientEmail}) async {
+  Future<bool> createProject(
+    ProjectModel project, {
+    String? clientName,
+    String? clientEmail,
+  }) async {
     try {
       String? clientId;
 
@@ -134,7 +144,11 @@ class ProjectRepository {
     }
   }
 
-  Future<bool> updateProject(ProjectModel project, {String? clientName, String? clientEmail}) async {
+  Future<bool> updateProject(
+    ProjectModel project, {
+    String? clientName,
+    String? clientEmail,
+  }) async {
     try {
       String? clientId;
 
@@ -153,7 +167,7 @@ class ProjectRepository {
             await _supabase
                 .from('clients')
                 .update({'email': clientEmail})
-                .eq('id', clientId!);
+                .eq('id', clientId);
           }
         } else {
           // Create new client
@@ -184,11 +198,8 @@ class ProjectRepository {
         'updated_at': DateTime.now().toIso8601String(),
       };
 
-      await _supabase
-          .from('projects')
-          .update(data)
-          .eq('id', project.id);
-      
+      await _supabase.from('projects').update(data).eq('id', project.id);
+
       return true;
     } catch (e) {
       if (kDebugMode) {
@@ -207,7 +218,7 @@ class ProjectRepository {
             'updated_at': DateTime.now().toIso8601String(),
           })
           .eq('id', projectId);
-      
+
       return true;
     } catch (e) {
       if (kDebugMode) {
@@ -219,11 +230,8 @@ class ProjectRepository {
 
   Future<bool> deleteProject(String id) async {
     try {
-      await _supabase
-          .from('projects')
-          .delete()
-          .eq('id', id);
-      
+      await _supabase.from('projects').delete().eq('id', id);
+
       return true;
     } catch (e) {
       if (kDebugMode) {
@@ -236,18 +244,26 @@ class ProjectRepository {
   Future<Map<String, double>> getFinancialSummary() async {
     try {
       final projects = await getProjects();
-      
-      final totalBudget = projects.fold(0.0, (sum, project) => sum + project.budgetAmount);
-      final totalActualCosts = projects.fold(0.0, (sum, project) => sum + project.actualCosts);
+
+      final totalBudget = projects.fold(
+        0.0,
+        (sum, project) => sum + project.budgetAmount,
+      );
+      final totalActualCosts = projects.fold(
+        0.0,
+        (sum, project) => sum + project.actualCosts,
+      );
       final activeProjectsBudget = projects
           .where((p) => p.status == ProjectStatus.inProgress)
           .fold(0.0, (sum, project) => sum + project.budgetAmount);
       final completedProjectsRevenue = projects
           .where((p) => p.status == ProjectStatus.completed)
           .fold(0.0, (sum, project) => sum + project.budgetAmount);
-      
-      final profitMargin = totalBudget > 0 ? ((totalBudget - totalActualCosts) / totalBudget) * 100 : 0.0;
-      
+
+      final profitMargin = totalBudget > 0
+          ? ((totalBudget - totalActualCosts) / totalBudget) * 100
+          : 0.0;
+
       return {
         'totalBudget': totalBudget,
         'totalActualCosts': totalActualCosts,
@@ -275,17 +291,28 @@ class ProjectRepository {
     try {
       final projects = await getProjects();
       final now = DateTime.now();
-      
-      final activeProjects = projects.where((p) => p.status == ProjectStatus.inProgress).length;
-      final completedProjects = projects.where((p) => p.status == ProjectStatus.completed).length;
-      final overdueProjects = projects.where((p) => 
-          p.endDate != null && 
-          p.endDate!.isBefore(now) && 
-          p.status != ProjectStatus.completed
-      ).length;
-      final planningProjects = projects.where((p) => p.status == ProjectStatus.planning).length;
-      final onHoldProjects = projects.where((p) => p.status == ProjectStatus.onHold).length;
-      
+
+      final activeProjects = projects
+          .where((p) => p.status == ProjectStatus.inProgress)
+          .length;
+      final completedProjects = projects
+          .where((p) => p.status == ProjectStatus.completed)
+          .length;
+      final overdueProjects = projects
+          .where(
+            (p) =>
+                p.endDate != null &&
+                p.endDate!.isBefore(now) &&
+                p.status != ProjectStatus.completed,
+          )
+          .length;
+      final planningProjects = projects
+          .where((p) => p.status == ProjectStatus.planning)
+          .length;
+      final onHoldProjects = projects
+          .where((p) => p.status == ProjectStatus.onHold)
+          .length;
+
       return {
         'totalProjects': projects.length,
         'activeProjects': activeProjects,
@@ -325,10 +352,14 @@ class ProjectRepository {
     }
   }
 
-  Future<String?> uploadProjectImage(String projectId, List<int> imageBytes, String fileName) async {
+  Future<String?> uploadProjectImage(
+    String projectId,
+    List<int> imageBytes,
+    String fileName,
+  ) async {
     try {
       final filePath = 'projects/$projectId/$fileName';
-      
+
       if (kIsWeb) {
         // Web-specific image upload handling
         await _supabase.storage

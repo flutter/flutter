@@ -19,7 +19,7 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
   final _supplierController = TextEditingController();
   final _amountController = TextEditingController();
   final _descriptionController = TextEditingController();
-  
+
   String? _selectedProjectId;
   ExpenseCategory _selectedCategory = ExpenseCategory.materials;
   DateTime _selectedDate = DateTime.now();
@@ -37,11 +37,13 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
   Widget build(BuildContext context) {
     final operationsProvider = Provider.of<OperationsProvider>(context);
     final authProvider = Provider.of<AuthProvider>(context);
-    
+
     return Dialog(
       child: Container(
         constraints: BoxConstraints(
-          maxWidth: ResponsiveLayout.isMobileLayout(context) ? double.infinity : 500,
+          maxWidth: ResponsiveLayout.isMobileLayout(context)
+              ? double.infinity
+              : 500,
           maxHeight: MediaQuery.of(context).size.height * 0.9,
         ),
         child: Column(
@@ -59,11 +61,7 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
               ),
               child: Row(
                 children: [
-                  const Icon(
-                    Icons.receipt_long,
-                    color: Colors.white,
-                    size: 28,
-                  ),
+                  const Icon(Icons.receipt_long, color: Colors.white, size: 28),
                   const SizedBox(width: 12),
                   const Expanded(
                     child: Text(
@@ -103,13 +101,16 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
                       ),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
-                        value: _selectedProjectId,
+                        initialValue: _selectedProjectId,
                         decoration: InputDecoration(
                           hintText: 'Select a project',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
                         ),
                         items: operationsProvider.projects.map((project) {
                           return DropdownMenuItem(
@@ -120,8 +121,10 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
                             ),
                           );
                         }).toList(),
-                        onChanged: (value) => setState(() => _selectedProjectId = value),
-                        validator: (value) => value == null ? 'Please select a project' : null,
+                        onChanged: (value) =>
+                            setState(() => _selectedProjectId = value),
+                        validator: (value) =>
+                            value == null ? 'Please select a project' : null,
                       ),
 
                       const SizedBox(height: 20),
@@ -137,12 +140,15 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
                       ),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<ExpenseCategory>(
-                        value: _selectedCategory,
+                        initialValue: _selectedCategory,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
                         ),
                         items: ExpenseCategory.values.map((category) {
                           return DropdownMenuItem(
@@ -160,7 +166,8 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
                             ),
                           );
                         }).toList(),
-                        onChanged: (value) => setState(() => _selectedCategory = value!),
+                        onChanged: (value) =>
+                            setState(() => _selectedCategory = value!),
                       ),
 
                       const SizedBox(height: 20),
@@ -182,7 +189,10 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
                         ),
                       ),
 
@@ -206,11 +216,18 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
                         ),
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
                         inputFormatters: [
-                          FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                          FilteringTextInputFormatter.allow(
+                            RegExp(r'^\d+\.?\d{0,2}'),
+                          ),
                         ],
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -239,7 +256,10 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
                       InkWell(
                         onTap: _selectDate,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
                           decoration: BoxDecoration(
                             border: Border.all(color: Colors.grey.shade400),
                             borderRadius: BorderRadius.circular(8),
@@ -276,7 +296,10 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
                         ),
                         maxLines: 3,
                       ),
@@ -342,7 +365,9 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
+                      onPressed: _isSubmitting
+                          ? null
+                          : () => Navigator.of(context).pop(),
                       child: const Text('Cancel'),
                     ),
                   ),
@@ -360,7 +385,9 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
                               height: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
                               ),
                             )
                           : const Text('Add Expense'),
@@ -392,7 +419,10 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
 
     setState(() => _isSubmitting = true);
 
-    final operationsProvider = Provider.of<OperationsProvider>(context, listen: false);
+    final operationsProvider = Provider.of<OperationsProvider>(
+      context,
+      listen: false,
+    );
     final selectedProject = operationsProvider.projects.firstWhere(
       (p) => p.id == _selectedProjectId,
     );
@@ -414,7 +444,7 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
 
     try {
       final success = await operationsProvider.submitExpense(expense);
-      
+
       if (mounted) {
         if (success) {
           Navigator.of(context).pop();

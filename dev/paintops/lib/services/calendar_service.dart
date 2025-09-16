@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
 
 class CalendarService {
@@ -60,7 +59,7 @@ class CalendarService {
 
       // Open Google Calendar in new tab (web only)
       print('Opening Google Calendar URL: $googleCalendarUrl');
-      
+
       // In a real implementation, you would use url_launcher
       // For now, we'll log the URL
       return true;
@@ -81,7 +80,7 @@ class CalendarService {
     try {
       // For mobile, we would integrate with the device calendar
       // This would typically use add_2_calendar package or similar
-      
+
       print('Scheduling mobile appointment: $title');
       return true;
     } catch (e) {
@@ -99,7 +98,7 @@ class CalendarService {
   }) {
     final String startTimeFormatted = _formatDateTimeForGoogle(startTime);
     final String endTimeFormatted = _formatDateTimeForGoogle(endTime);
-    
+
     final Map<String, String> params = {
       'action': 'TEMPLATE',
       'text': title,
@@ -109,7 +108,10 @@ class CalendarService {
     };
 
     final String queryString = params.entries
-        .map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
+        .map(
+          (e) =>
+              '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}',
+        )
         .join('&');
 
     return 'https://calendar.google.com/calendar/render?$queryString';
@@ -145,18 +147,20 @@ class CalendarService {
     ics.writeln('VERSION:2.0');
     ics.writeln('PRODID:-//HWR Painting Services//PaintOps//EN');
     ics.writeln('BEGIN:VEVENT');
-    ics.writeln('UID:${DateTime.now().millisecondsSinceEpoch}@hwrpainting.com.au');
+    ics.writeln(
+      'UID:${DateTime.now().millisecondsSinceEpoch}@hwrpainting.com.au',
+    );
     ics.writeln('DTSTAMP:$now');
     ics.writeln('DTSTART:$startFormatted');
     ics.writeln('DTEND:$endFormatted');
     ics.writeln('SUMMARY:$title');
     ics.writeln('DESCRIPTION:$description');
     ics.writeln('LOCATION:$location');
-    
+
     if (attendeeEmail != null && attendeeEmail.isNotEmpty) {
       ics.writeln('ATTENDEE:mailto:$attendeeEmail');
     }
-    
+
     ics.writeln('STATUS:CONFIRMED');
     ics.writeln('END:VEVENT');
     ics.writeln('END:VCALENDAR');
@@ -186,10 +190,11 @@ class CalendarService {
     int durationMinutes = 60,
   }) async {
     final endTime = proposedTime.add(Duration(minutes: durationMinutes));
-    
+
     return await scheduleAppointment(
       title: 'Painting Consultation - $leadName',
-      description: 'On-site consultation for painting project.\n\n'
+      description:
+          'On-site consultation for painting project.\n\n'
           'Client: $leadName\n'
           'Phone: $leadPhone\n'
           'Email: $leadEmail\n\n'
@@ -214,14 +219,15 @@ class CalendarService {
     int durationMinutes = 30,
   }) async {
     final endTime = meetingTime.add(Duration(minutes: durationMinutes));
-    
+
     String title;
     String description;
-    
+
     switch (meetingType.toLowerCase()) {
       case 'kickoff':
         title = 'Project Kickoff - $projectName';
-        description = 'Project kickoff meeting with $clientName\n\n'
+        description =
+            'Project kickoff meeting with $clientName\n\n'
             'Agenda:\n'
             '- Project timeline review\n'
             '- Color and material confirmation\n'
@@ -230,7 +236,8 @@ class CalendarService {
         break;
       case 'progress':
         title = 'Progress Review - $projectName';
-        description = 'Progress review meeting with $clientName\n\n'
+        description =
+            'Progress review meeting with $clientName\n\n'
             'Agenda:\n'
             '- Current progress update\n'
             '- Quality inspection\n'
@@ -239,7 +246,8 @@ class CalendarService {
         break;
       case 'completion':
         title = 'Project Completion - $projectName';
-        description = 'Project completion walkthrough with $clientName\n\n'
+        description =
+            'Project completion walkthrough with $clientName\n\n'
             'Agenda:\n'
             '- Final inspection\n'
             '- Touch-up identification\n'
@@ -281,40 +289,44 @@ class CalendarService {
     List<Map<String, dynamic>> projects,
   ) {
     final List<CalendarEvent> events = [];
-    
+
     for (final project in projects) {
-      final startDate = project['start_date'] != null 
+      final startDate = project['start_date'] != null
           ? DateTime.tryParse(project['start_date'])
           : null;
-      final endDate = project['end_date'] != null 
+      final endDate = project['end_date'] != null
           ? DateTime.tryParse(project['end_date'])
           : null;
-      
+
       if (startDate != null) {
-        events.add(CalendarEvent(
-          id: '${project['id']}_start',
-          title: '${project['name']} - Start',
-          description: 'Project start date',
-          startTime: startDate,
-          endTime: startDate.add(const Duration(hours: 1)),
-          type: CalendarEventType.projectStart,
-          isApproved: true,
-        ));
+        events.add(
+          CalendarEvent(
+            id: '${project['id']}_start',
+            title: '${project['name']} - Start',
+            description: 'Project start date',
+            startTime: startDate,
+            endTime: startDate.add(const Duration(hours: 1)),
+            type: CalendarEventType.projectStart,
+            isApproved: true,
+          ),
+        );
       }
-      
+
       if (endDate != null) {
-        events.add(CalendarEvent(
-          id: '${project['id']}_end',
-          title: '${project['name']} - Deadline',
-          description: 'Project deadline',
-          startTime: endDate,
-          endTime: endDate.add(const Duration(hours: 1)),
-          type: CalendarEventType.projectDeadline,
-          isApproved: true,
-        ));
+        events.add(
+          CalendarEvent(
+            id: '${project['id']}_end',
+            title: '${project['name']} - Deadline',
+            description: 'Project deadline',
+            startTime: endDate,
+            endTime: endDate.add(const Duration(hours: 1)),
+            type: CalendarEventType.projectDeadline,
+            isApproved: true,
+          ),
+        );
       }
     }
-    
+
     return events;
   }
 }
