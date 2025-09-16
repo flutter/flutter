@@ -51,6 +51,18 @@ void main() {
       expect(waitForCondition.timeout, equals(const Duration(milliseconds: 10)));
     });
 
+    test('WaitForCondition deserialize with missing conditionName', () {
+      final Map<String, String> jsonMap = <String, String>{'command': 'waitForCondition'};
+      expect(
+        () => WaitForCondition.deserialize(jsonMap),
+        throwsA(
+          isA<ArgumentError>()
+              .having((ArgumentError e) => e.message, 'message', 'Must not be null')
+              .having((ArgumentError e) => e.name, 'name', 'conditionName'),
+        ),
+      );
+    });
+
     test('WaitForCondition requiresRootWidget', () {
       expect(const WaitForCondition(NoTransientCallbacks()).requiresRootWidgetAttached, isTrue);
       expect(const WaitForCondition(FirstFrameRasterized()).requiresRootWidgetAttached, isFalse);

@@ -1312,10 +1312,10 @@ class _TextFieldState extends State<TextField>
     }
 
     if (widget.statesController == oldWidget.statesController) {
-      _statesController.update(MaterialState.disabled, !_isEnabled);
-      _statesController.update(MaterialState.hovered, _isHovering);
-      _statesController.update(MaterialState.focused, _effectiveFocusNode.hasFocus);
-      _statesController.update(MaterialState.error, _hasError);
+      _statesController.update(WidgetState.disabled, !_isEnabled);
+      _statesController.update(WidgetState.hovered, _isHovering);
+      _statesController.update(WidgetState.focused, _effectiveFocusNode.hasFocus);
+      _statesController.update(WidgetState.error, _hasError);
     } else {
       oldWidget.statesController?.removeListener(_handleStatesControllerChange);
       if (widget.statesController != null) {
@@ -1404,7 +1404,7 @@ class _TextFieldState extends State<TextField>
       // Rebuild the widget on focus change to show/hide the text selection
       // highlight.
     });
-    _statesController.update(MaterialState.focused, _effectiveFocusNode.hasFocus);
+    _statesController.update(WidgetState.focused, _effectiveFocusNode.hasFocus);
   }
 
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
@@ -1453,7 +1453,7 @@ class _TextFieldState extends State<TextField>
       setState(() {
         _isHovering = hovering;
       });
-      _statesController.update(MaterialState.hovered, _isHovering);
+      _statesController.update(WidgetState.hovered, _isHovering);
     }
   }
 
@@ -1461,7 +1461,7 @@ class _TextFieldState extends State<TextField>
   MaterialStatesController? _internalStatesController;
 
   void _handleStatesControllerChange() {
-    // Force a rebuild to resolve MaterialStateProperty properties.
+    // Force a rebuild to resolve WidgetStateProperty properties.
     setState(() {});
   }
 
@@ -1472,10 +1472,10 @@ class _TextFieldState extends State<TextField>
     if (widget.statesController == null) {
       _internalStatesController = MaterialStatesController();
     }
-    _statesController.update(MaterialState.disabled, !_isEnabled);
-    _statesController.update(MaterialState.hovered, _isHovering);
-    _statesController.update(MaterialState.focused, _effectiveFocusNode.hasFocus);
-    _statesController.update(MaterialState.error, _hasError);
+    _statesController.update(WidgetState.disabled, !_isEnabled);
+    _statesController.update(WidgetState.hovered, _isHovering);
+    _statesController.update(WidgetState.focused, _effectiveFocusNode.hasFocus);
+    _statesController.update(WidgetState.error, _hasError);
     _statesController.addListener(_handleStatesControllerChange);
   }
 
@@ -1506,11 +1506,11 @@ class _TextFieldState extends State<TextField>
 
   TextStyle _getInputStyleForState(TextStyle style) {
     final ThemeData theme = Theme.of(context);
-    final TextStyle stateStyle = MaterialStateProperty.resolveAs(
+    final TextStyle stateStyle = WidgetStateProperty.resolveAs(
       theme.useMaterial3 ? _m3StateInputStyle(context)! : _m2StateInputStyle(context)!,
       _statesController.value,
     );
-    final TextStyle providedStyle = MaterialStateProperty.resolveAs(style, _statesController.value);
+    final TextStyle providedStyle = WidgetStateProperty.resolveAs(style, _statesController.value);
     return providedStyle.merge(stateStyle);
   }
 
@@ -1528,7 +1528,7 @@ class _TextFieldState extends State<TextField>
 
     final ThemeData theme = Theme.of(context);
     final DefaultSelectionStyle selectionStyle = DefaultSelectionStyle.of(context);
-    final TextStyle? providedStyle = MaterialStateProperty.resolveAs(
+    final TextStyle? providedStyle = WidgetStateProperty.resolveAs(
       widget.style,
       _statesController.value,
     );
@@ -1767,7 +1767,7 @@ class _TextFieldState extends State<TextField>
         child: child,
       );
     }
-    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
+    final MouseCursor effectiveMouseCursor = WidgetStateProperty.resolveAs<MouseCursor>(
       widget.mouseCursor ?? MaterialStateMouseCursor.textable,
       _statesController.value,
     );
@@ -1851,9 +1851,9 @@ class _TextFieldState extends State<TextField>
 }
 
 TextStyle? _m2StateInputStyle(BuildContext context) =>
-    MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+    MaterialStateTextStyle.resolveWith((Set<WidgetState> states) {
       final ThemeData theme = Theme.of(context);
-      if (states.contains(MaterialState.disabled)) {
+      if (states.contains(WidgetState.disabled)) {
         return TextStyle(color: theme.disabledColor);
       }
       return TextStyle(color: theme.textTheme.titleMedium?.color);
@@ -1870,8 +1870,8 @@ TextStyle _m2CounterErrorStyle(BuildContext context) =>
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
 // dart format off
-TextStyle? _m3StateInputStyle(BuildContext context) => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-  if (states.contains(MaterialState.disabled)) {
+TextStyle? _m3StateInputStyle(BuildContext context) => MaterialStateTextStyle.resolveWith((Set<WidgetState> states) {
+  if (states.contains(WidgetState.disabled)) {
     return TextStyle(color: Theme.of(context).textTheme.bodyLarge!.color?.withOpacity(0.38));
   }
   return TextStyle(color: Theme.of(context).textTheme.bodyLarge!.color);

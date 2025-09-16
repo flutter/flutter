@@ -1053,7 +1053,7 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
       _styleStack = <CkTextStyle>[],
       _paragraphBuilder = canvasKit.ParagraphBuilder.MakeFromFontCollection(
         style.skParagraphStyle,
-        CanvasKitRenderer.instance.fontCollection.skFontCollection,
+        (CanvasKitRenderer.instance.fontCollection as SkiaFontCollection).skFontCollection,
       ) {
     _styleStack.add(_style.getTextStyle());
   }
@@ -1138,6 +1138,22 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
   CkParagraph build() {
     final SkParagraph builtParagraph = _buildSkParagraph();
     return CkParagraph(builtParagraph, _style);
+  }
+
+  /// Injects required ICU data into the [builder].
+  ///
+  /// This should only be used with the CanvasKit Chromium variant that's compiled
+  /// without ICU data.
+  static void injectClientICU(SkParagraphBuilder builder) {
+    assert(
+      canvasKit.ParagraphBuilder.RequiresClientICU(),
+      'This method should only be used with the CanvasKit Chromium variant.',
+    );
+
+    final SegmentationResult result = segmentText(builder.getText());
+    builder.setWordsUtf16(result.words);
+    builder.setGraphemeBreaksUtf16(result.graphemes);
+    builder.setLineBreaksUtf16(result.breaks);
   }
 
   /// Builds the CkParagraph with the builder and deletes the builder.
