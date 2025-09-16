@@ -17,7 +17,11 @@ import 'material.dart';
 import 'progress_indicator_theme.dart';
 import 'theme.dart';
 
+// This value is extracted from
+// https://cs.android.com/android/platform/superproject/+/master:frameworks/base/core/res/res/anim/progress_indeterminate_material.xml;drc=9cb5b4c2d93acb9d6f5e14167e265c328c487d6b
 const int _kIndeterminateLinearDuration = 1800;
+// This value is extracted from
+// https://cs.android.com/android/platform/superproject/+/master:frameworks/base/core/res/res/anim/progress_indeterminate_rotation_material.xml;drc=077b44912b879174cec48a25307f1c19b96c2a78
 const int _kIndeterminateCircularDuration = 1333 * 2222;
 
 // The progress value below which the track gap is scaled proportionally to
@@ -25,6 +29,12 @@ const int _kIndeterminateCircularDuration = 1333 * 2222;
 const double _kTrackGapRampDownThreshold = 0.01;
 
 enum _ActivityIndicatorType { material, adaptive }
+
+const String _kValueControllerAssertion =
+    'A progress indicator cannot have both a value and a controller.\n'
+    'The "value" property is for a determinate indicator with a specific progress, '
+    'while the "controller" is for controlling the animation of an indeterminate indicator.\n'
+    'To resolve this, provide only one of the two properties.';
 
 /// A base class for Material Design progress indicators.
 ///
@@ -378,6 +388,11 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 /// ** See code in examples/api/lib/material/progress_indicator/linear_progress_indicator.1.dart **
 /// {@end-tool}
 ///
+/// {@macro flutter.material.ProgressIndicator.AnimationSynchronization}
+///
+/// See the documentation of [CircularProgressIndicator] for an example on this
+/// topic.
+///
 /// See also:
 ///
 ///  * [CircularProgressIndicator], which shows progress along a circular arc.
@@ -407,7 +422,9 @@ class LinearProgressIndicator extends ProgressIndicator {
       'This feature was deprecated after v3.26.0-0.1.pre.',
     )
     this.year2023,
-  }) : assert(minHeight == null || minHeight > 0);
+    this.controller,
+  }) : assert(minHeight == null || minHeight > 0),
+       assert(value == null || controller == null, _kValueControllerAssertion);
 
   /// {@template flutter.material.LinearProgressIndicator.trackColor}
   /// Color of the track being filled by the linear indicator.
@@ -486,40 +503,79 @@ class LinearProgressIndicator extends ProgressIndicator {
   )
   final bool? year2023;
 
+  /// {@template flutter.material.ProgressIndicator.controller}
+  /// An optional [AnimationController] that controls the animation of this
+  /// indeterminate progress indicator.
+  ///
+  /// This controller is only used when the indicator is indeterminate (i.e.,
+  /// when [value] is null). If this property is non-null, [value] must be null.
+  ///
+  /// The controller's value is expected to be a linear progression from 0.0 to
+  /// 1.0, which represents one full cycle of the indeterminate animation.
+  ///
+  /// If this controller is null (and [value] is also null), the widget will
+  /// look for a [ProgressIndicatorThemeData.controller]. If that is also null,
+  /// the widget will create and manage its own internal [AnimationController]
+  /// to drive the default indeterminate animation.
+  /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///  * [LinearProgressIndicator.defaultAnimationDuration], default duration
+  ///    for one full cycle of the indeterminate animation.
+  final AnimationController? controller;
+
+  /// The default duration for one full cycle of the indeterminate animation.
+  ///
+  /// This duration is used when the widget creates its own [AnimationController]
+  /// because no [controller] was provided, either directly or through a
+  /// [ProgressIndicatorTheme].
+  static const Duration defaultAnimationDuration = Duration(
+    milliseconds: _kIndeterminateLinearDuration,
+  );
+
   @override
   State<LinearProgressIndicator> createState() => _LinearProgressIndicatorState();
 }
 
 class _LinearProgressIndicatorState extends State<LinearProgressIndicator>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
+  late final AnimationController _internalController;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: _kIndeterminateLinearDuration),
+    _internalController = AnimationController(
+      duration: LinearProgressIndicator.defaultAnimationDuration,
       vsync: this,
     );
-    if (widget.value == null) {
-      _controller.repeat();
-    }
+    _updateControllerAnimatingStatus();
   }
 
   @override
   void didUpdateWidget(LinearProgressIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.value == null && !_controller.isAnimating) {
-      _controller.repeat();
-    } else if (widget.value != null && _controller.isAnimating) {
-      _controller.stop();
-    }
+    _updateControllerAnimatingStatus();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _internalController.dispose();
     super.dispose();
+  }
+
+  AnimationController get _controller =>
+      widget.controller ??
+      context.getInheritedWidgetOfExactType<ProgressIndicatorTheme>()?.data.controller ??
+      context.findAncestorWidgetOfExactType<Theme>()?.data.progressIndicatorTheme.controller ??
+      _internalController;
+
+  void _updateControllerAnimatingStatus() {
+    if (widget.value == null && !_internalController.isAnimating) {
+      _internalController.repeat();
+    } else if (widget.value != null && _internalController.isAnimating) {
+      _internalController.stop();
+    }
   }
 
   Widget _buildIndicator(BuildContext context, double animationValue, TextDirection textDirection) {
@@ -751,6 +807,41 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 /// ** See code in examples/api/lib/material/progress_indicator/circular_progress_indicator.1.dart **
 /// {@end-tool}
 ///
+/// {@template flutter.material.ProgressIndicator.AnimationSynchronization}
+/// ## Animation synchronization
+///
+/// When multiple [CircularProgressIndicator]s or [LinearProgressIndicator]s are
+/// animating on screen simultaneously (e.g., in a list of loading items), their
+/// uncoordinated animations can appear visually cluttered. To address this, the
+/// animation of an indicator can be driven by a custom [AnimationController].
+///
+/// This allows multiple indicators to be synchronized to a single animation
+/// source. The most convenient way to achieve this for a group of indicators is
+/// by providing a controller via [ProgressIndicatorTheme] (see
+/// [ProgressIndicatorThemeData.controller]). All [CircularProgressIndicator]s
+/// or [LinearProgressIndicator]s within that theme's subtree will then share
+/// the same animation, resulting in a more coordinated and visually pleasing
+/// effect.
+///
+/// Alternatively, a specific [AnimationController] can be passed directly to the
+/// [controller] property of an individual indicator.
+/// {@endtemplate}
+///
+/// {@tool dartpad}
+/// This sample demonstrates how to synchronize the indeterminate animations
+/// of multiple [CircularProgressIndicator]s using a [Theme].
+///
+/// Tapping the buttons adds or removes indicators. By default, they all
+/// share a [ProgressIndicatorThemeData.controller], which keeps their
+/// animations in sync.
+///
+/// Tapping the "Toggle" button sets the theme's controller to null.
+/// This forces each indicator to create its own internal controller,
+/// causing their animations to become desynchronized.
+///
+/// ** See code in examples/api/lib/material/progress_indicator/circular_progress_indicator.2.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [LinearProgressIndicator], which displays progress along a line.
@@ -781,7 +872,9 @@ class CircularProgressIndicator extends ProgressIndicator {
     )
     this.year2023,
     this.padding,
-  }) : _indicatorType = _ActivityIndicatorType.material;
+    this.controller,
+  }) : assert(value == null || controller == null, _kValueControllerAssertion),
+       _indicatorType = _ActivityIndicatorType.material;
 
   /// Creates an adaptive progress indicator that is a
   /// [CupertinoActivityIndicator] on [TargetPlatform.iOS] &
@@ -812,7 +905,9 @@ class CircularProgressIndicator extends ProgressIndicator {
     )
     this.year2023,
     this.padding,
-  }) : _indicatorType = _ActivityIndicatorType.adaptive;
+    this.controller,
+  }) : assert(value == null || controller == null, _kValueControllerAssertion),
+       _indicatorType = _ActivityIndicatorType.adaptive;
 
   final _ActivityIndicatorType _indicatorType;
 
@@ -903,6 +998,14 @@ class CircularProgressIndicator extends ProgressIndicator {
   /// padding. Otherwise, defaults to zero padding.
   final EdgeInsetsGeometry? padding;
 
+  /// {@macro flutter.material.ProgressIndicator.controller}
+  ///
+  /// See also:
+  ///
+  ///  * [CircularProgressIndicator.defaultAnimationDuration], default duration
+  ///    for one full cycle of the indeterminate animation.
+  final AnimationController? controller;
+
   /// The indicator stroke is drawn fully inside of the indicator path.
   ///
   /// This is a constant for use with [strokeAlign].
@@ -921,6 +1024,17 @@ class CircularProgressIndicator extends ProgressIndicator {
   ///
   /// This is a constant for use with [strokeAlign].
   static const double strokeAlignOutside = 1.0;
+
+  /// The default duration for one full cycle of the indeterminate animation.
+  ///
+  /// During this period, the indicator completes several full rotations.
+  ///
+  /// This duration is used when the widget creates its own [AnimationController]
+  /// because no [controller] was provided, either directly or through a
+  /// [ProgressIndicatorTheme].
+  static const Duration defaultAnimationDuration = Duration(
+    milliseconds: _kIndeterminateCircularDuration,
+  );
 
   @override
   State<CircularProgressIndicator> createState() => _CircularProgressIndicatorState();
@@ -942,34 +1056,42 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
     curve: const SawTooth(_rotationCount),
   );
 
-  late AnimationController _controller;
+  late final AnimationController _internalController;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: _kIndeterminateCircularDuration),
+    _internalController = AnimationController(
+      duration: CircularProgressIndicator.defaultAnimationDuration,
       vsync: this,
     );
-    if (widget.value == null) {
-      _controller.repeat();
-    }
+    _updateControllerAnimatingStatus();
   }
 
   @override
   void didUpdateWidget(CircularProgressIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.value == null && !_controller.isAnimating) {
-      _controller.repeat();
-    } else if (widget.value != null && _controller.isAnimating) {
-      _controller.stop();
-    }
+    _updateControllerAnimatingStatus();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _internalController.dispose();
     super.dispose();
+  }
+
+  AnimationController get _controller =>
+      widget.controller ??
+      context.getInheritedWidgetOfExactType<ProgressIndicatorTheme>()?.data.controller ??
+      context.findAncestorWidgetOfExactType<Theme>()?.data.progressIndicatorTheme.controller ??
+      _internalController;
+
+  void _updateControllerAnimatingStatus() {
+    if (widget.value == null && !_internalController.isAnimating) {
+      _internalController.repeat();
+    } else if (widget.value != null && _internalController.isAnimating) {
+      _internalController.stop();
+    }
   }
 
   Widget _buildCupertinoIndicator(BuildContext context) {
