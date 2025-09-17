@@ -4,7 +4,6 @@
 
 package io.flutter.util;
 
-
 import android.content.Context;
 import androidx.annotation.NonNull;
 import java.io.File;
