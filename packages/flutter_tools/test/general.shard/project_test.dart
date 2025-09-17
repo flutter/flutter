@@ -1559,6 +1559,31 @@ plugins {
         expect(updatedPubspecContents, validPubspecWithDependenciesAndNullValues);
       });
     });
+    
+    group('Android project file getters', () {
+      _testInMemory(
+        'Project.android.gradleWrapperPropertiesFile resolves to gradle/wrapper/gradle-wrapper.properties',
+        () async {
+          final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
+            'flutter_project_test.',
+          );
+          final Directory androidDir = tempDir.childDirectory('android')
+            ..createSync(recursive: true);
+
+          // Create gradle/wrapper/gradle-wrapper.properties inside the fake android dir
+          final File expected =
+              androidDir
+                  .childDirectory('gradle')
+                  .childDirectory('wrapper')
+                  .childFile('gradle-wrapper.properties')
+                ..createSync(recursive: true);
+
+          final FlutterProject project = FlutterProject.fromDirectory(tempDir);
+
+          expect(project.android.gradleWrapperPropertiesFile.path, expected.path);
+        },
+      );
+    });
 
     group('workspaces', () {
       _testInMemory('fails on invalid pubspec.yaml', () async {
