@@ -571,7 +571,7 @@ class CupertinoPopupSurface extends StatelessWidget {
   static const double defaultBlurSigma = 30.0;
 
   /// The default corner radius of a [CupertinoPopupSurface].
-  static const BorderRadius _clipper = BorderRadius.all(Radius.circular(13));
+  static const BorderRadius _clipper = BorderRadius.all(Radius.circular(0));
 
   // The [ColorFilter] matrix used to saturate widgets underlying a
   // [CupertinoPopupSurface] when the ambient [CupertinoThemeData.brightness] is
@@ -598,26 +598,10 @@ class CupertinoPopupSurface extends StatelessWidget {
   //    ];
   //  }
   static const List<double> _lightSaturationMatrix = <double>[
-    1.74,
-    -0.40,
-    -0.17,
-    0.00,
-    0.00,
-    -0.26,
-    1.60,
-    -0.17,
-    0.00,
-    0.00,
-    -0.26,
-    -0.40,
-    1.83,
-    0.00,
-    0.00,
-    0.00,
-    0.00,
-    0.00,
-    1.00,
-    0.00,
+    0.5643277629, 0.0503040064, 0.004916969851, 0, 90, //
+    0.01454388332, 0.6001652209, 0.00492659852, 0, 89, //
+    0.01452121122, 0.05031594338, 0.5548243817, 0, 91, //
+    0.00, 0.00, 0.00, 1.00, 0.00,
   ];
 
   // The [ColorFilter] matrix used to saturate widgets underlying a

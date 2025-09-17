@@ -558,18 +558,9 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
                 linear_sampler_descriptor));
         GaussianBlurVertexShader::BindFrameInfo(
             pass, data_host_buffer.EmplaceUniform(frame_info));
-        auto printKernal =
-            [](GaussianBlurPipeline::FragmentShader::KernelSamples samples) {
-              for (int i = 0; i < 50; i++) {
-                Vector4 d = samples.sample_data[i];
-                printf("Sample #%02d: %.2f, %.2f, %.2f, %.2f\n", i, d.x, d.y,
-                       d.z, d.w);
-              }
-              return samples;
-            };
         GaussianBlurFragmentShader::BindKernelSamples(
-            pass, data_host_buffer.EmplaceUniform(printKernal(
-                      LerpHackKernelSamples(GenerateBlurInfo(blur_info)))));
+            pass, data_host_buffer.EmplaceUniform(
+                      LerpHackKernelSamples(GenerateBlurInfo(blur_info))));
         GaussianBlurFragmentShader::BindFragInfo(
             pass, data_host_buffer.EmplaceUniform(frag_info));
         return pass.Draw().ok();
