@@ -11,7 +11,7 @@ import 'package:ui/ui.dart' as ui;
 
 typedef ImageFilterHandleBorrow<T> = T Function(ImageFilterHandle handle);
 
-abstract class SkwasmImageFilter implements SceneImageFilter {
+abstract class SkwasmImageFilter implements LayerImageFilter {
   const SkwasmImageFilter();
 
   factory SkwasmImageFilter.blur({

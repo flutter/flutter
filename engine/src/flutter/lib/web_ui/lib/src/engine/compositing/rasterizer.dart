@@ -56,6 +56,11 @@ abstract class ViewRasterizer {
     final ui.Size frameSize = view.physicalSize;
     if (frameSize.isEmpty) {
       // Available drawing area is empty. Skip drawing.
+      // Record all the draw steps as happening instantly so we don't crash
+      // when submitting frame timings.
+      recorder?.recordBuildFinish();
+      recorder?.recordRasterStart();
+      recorder?.recordRasterFinish();
       return;
     }
 
