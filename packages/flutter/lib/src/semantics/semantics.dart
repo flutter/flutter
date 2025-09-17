@@ -5653,15 +5653,14 @@ class SemanticsConfiguration {
   set isFocused(bool? value) {
     _flags = _flags.copyWith(isFocused: _tristateFromBoolOrNull(value));
     _hasBeenAnnotated = true;
+  }
 
   /// Whether the owning [RenderObject] can hold the a11y focus (different from input focus).
-    }
   bool? get isA11yFocusable => _flags.isA11yFocusable.toBoolOrNull();
   set isA11yFocusable(bool? value) {
     _flags = _flags.copyWith(isA11yFocusable: _tristateFromBoolOrNull(value));
     _hasBeenAnnotated = true;
   }
-
 
   /// Whether the owning [RenderObject] is a button (true) or not (false).
   bool get isButton => _flags.isButton;

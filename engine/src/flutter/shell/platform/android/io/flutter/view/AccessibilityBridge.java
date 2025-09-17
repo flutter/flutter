@@ -2217,7 +2217,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     IS_EXPANDED(1 << 27),
     HAS_SELECTED_STATE(1 << 28),
     HAS_REQUIRED_STATE(1 << 29),
-    IS_REQUIRED(1 << 30);
+    IS_REQUIRED(1 << 30),
+    IS_A11y_FOCUSABLE_SET(1 << 31),
+    IS_A11y_FOCUSABLE(1 << 32);
 
     final int value;
 
