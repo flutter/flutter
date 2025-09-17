@@ -495,7 +495,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     }
 
     final String? concurrencyString = stringArg('concurrency');
-    int? jobs = concurrencyString == null ? null : int.tryParse(concurrencyString);
+    int? jobs = int.tryParse(concurrencyString.toString());
     if (jobs != null && (jobs <= 0 || !jobs.isFinite)) {
       throwToolExit(
         'Could not parse -j/--concurrency argument. It must be an integer greater than zero.',
