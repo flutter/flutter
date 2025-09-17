@@ -6,30 +6,23 @@
 // ignore_for_file: implementation_imports
 
 import 'package:flutter/material.dart';
-import 'window_controller_render.dart';
+import 'window_content.dart';
 import 'models.dart';
+import 'rotated_wire_cube.dart';
 import 'dart:math';
-import 'package:vector_math/vector_math_64.dart';
 import 'package:flutter/src/widgets/_window.dart';
 
 class RegularWindowContent extends StatefulWidget {
-  const RegularWindowContent({
-    super.key,
-    required this.window,
-    required this.windowSettings,
-    required this.windowManagerModel,
-  });
+  const RegularWindowContent({super.key, required this.window});
 
   final RegularWindowController window;
-  final WindowSettings windowSettings;
-  final WindowManagerModel windowManagerModel;
 
   @override
   State<StatefulWidget> createState() => _RegularWindowContentState();
 }
 
 class CallbackRegularWindowControllerDelegate
-    extends RegularWindowControllerDelegate {
+    with RegularWindowControllerDelegate {
   CallbackRegularWindowControllerDelegate({required this.onDestroyed});
 
   @override
@@ -78,6 +71,8 @@ class _RegularWindowContentState extends State<RegularWindowContent>
   Widget build(BuildContext context) {
     final dpr = MediaQuery.of(context).devicePixelRatio;
     final windowSize = WindowScope.contentSizeOf(context);
+    final WindowManager windowManager = WindowManagerAccessor.of(context);
+    final WindowSettings windowSettings = WindowSettingsAccessor.of(context);
 
     final child = Scaffold(
       appBar: AppBar(title: Text('Regular Window')),
@@ -88,18 +83,7 @@ class _RegularWindowContentState extends State<RegularWindowContent>
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                AnimatedBuilder(
-                  animation: _animation,
-                  builder: (context, child) {
-                    return CustomPaint(
-                      size: const Size(200, 200),
-                      painter: _RotatedWireCube(
-                        angle: _animation.value,
-                        color: cubeColor,
-                      ),
-                    );
-                  },
-                ),
+                RotatedWireCube(animation: _animation, cubeColor: cubeColor),
               ],
             ),
             Column(
@@ -109,14 +93,13 @@ class _RegularWindowContentState extends State<RegularWindowContent>
                 ElevatedButton(
                   onPressed: () {
                     final UniqueKey key = UniqueKey();
-                    widget.windowManagerModel.add(
+                    windowManager.add(
                       KeyedWindow(
                         key: key,
                         controller: RegularWindowController(
-                          preferredSize: widget.windowSettings.regularSize,
+                          preferredSize: windowSettings.regularSize,
                           delegate: CallbackRegularWindowControllerDelegate(
-                            onDestroyed: () =>
-                                widget.windowManagerModel.remove(key),
+                            onDestroyed: () => windowManager.remove(key),
                           ),
                           title: 'Regular',
                         ),
@@ -141,20 +124,17 @@ class _RegularWindowContentState extends State<RegularWindowContent>
 
     return ViewAnchor(
       view: ListenableBuilder(
-        listenable: widget.windowManagerModel,
+        listenable: windowManager,
         builder: (BuildContext context, Widget? _) {
           final List<Widget> childViews = <Widget>[];
-          for (final KeyedWindow window in widget.windowManagerModel.windows) {
+          for (final KeyedWindow window in windowManager.windows) {
             if (window.parent == widget.window) {
               childViews.add(
-                WindowControllerRender(
+                WindowContent(
                   controller: window.controller,
-                  key: window.key,
-                  windowSettings: widget.windowSettings,
-                  windowManagerModel: widget.windowManagerModel,
-                  onDestroyed: () =>
-                      widget.windowManagerModel.remove(window.key),
-                  onError: () => widget.windowManagerModel.remove(window.key),
+                  windowKey: window.key,
+                  onDestroyed: () => windowManager.remove(window.key),
+                  onError: () => windowManager.remove(window.key),
                 ),
               );
             }
@@ -166,58 +146,4 @@ class _RegularWindowContentState extends State<RegularWindowContent>
       child: child,
     );
   }
-}
-
-class _RotatedWireCube extends CustomPainter {
-  static List<Vector3> vertices = [
-    Vector3(-0.5, -0.5, -0.5),
-    Vector3(0.5, -0.5, -0.5),
-    Vector3(0.5, 0.5, -0.5),
-    Vector3(-0.5, 0.5, -0.5),
-    Vector3(-0.5, -0.5, 0.5),
-    Vector3(0.5, -0.5, 0.5),
-    Vector3(0.5, 0.5, 0.5),
-    Vector3(-0.5, 0.5, 0.5),
-  ];
-
-  static const List<List<int>> edges = [
-    [0, 1], [1, 2], [2, 3], [3, 0], // Front face
-    [4, 5], [5, 6], [6, 7], [7, 4], // Back face
-    [0, 4], [1, 5], [2, 6], [3, 7], // Connecting front and back
-  ];
-
-  final double angle;
-  final Color color;
-
-  _RotatedWireCube({required this.angle, required this.color});
-
-  Offset scaleAndCenter(Vector3 point, double size, Offset center) {
-    final scale = size / 2;
-    return Offset(center.dx + point.x * scale, center.dy - point.y * scale);
-  }
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rotatedVertices = vertices
-        .map((vertex) => Matrix4.rotationX(angle).transformed3(vertex))
-        .map((vertex) => Matrix4.rotationY(angle).transformed3(vertex))
-        .map((vertex) => Matrix4.rotationZ(angle).transformed3(vertex))
-        .toList();
-
-    final center = Offset(size.width / 2, size.height / 2);
-
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2;
-
-    for (var edge in edges) {
-      final p1 = scaleAndCenter(rotatedVertices[edge[0]], size.width, center);
-      final p2 = scaleAndCenter(rotatedVertices[edge[1]], size.width, center);
-      canvas.drawLine(p1, p2, paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(_RotatedWireCube oldDelegate) => true;
 }

@@ -8,7 +8,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/_window.dart';
 
-import 'window_controller_render.dart';
+import 'window_content.dart';
 
 import 'regular_window_content.dart';
 import 'window_settings_dialog.dart';
@@ -17,7 +17,7 @@ import 'regular_window_edit_dialog.dart';
 
 class MainWindow extends StatelessWidget {
   MainWindow({super.key, required BaseWindowController mainController}) {
-    windowManagerModel.add(
+    windowManager.add(
       KeyedWindow(
         isMainWindow: true,
         key: UniqueKey(),
@@ -26,65 +26,69 @@ class MainWindow extends StatelessWidget {
     );
   }
 
-  final WindowManagerModel windowManagerModel = WindowManagerModel();
+  final WindowManager windowManager = WindowManager();
   final WindowSettings settings = WindowSettings();
 
   @override
   Widget build(BuildContext context) {
-    return ViewAnchor(
-      view: ListenableBuilder(
-        listenable: windowManagerModel,
-        builder: (BuildContext context, Widget? _) {
-          final List<Widget> childViews = <Widget>[];
-          for (final KeyedWindow window in windowManagerModel.windows) {
-            if (window.parent == null && !window.isMainWindow) {
-              childViews.add(
-                WindowControllerRender(
-                  controller: window.controller,
-                  key: window.key,
-                  windowSettings: settings,
-                  windowManagerModel: windowManagerModel,
-                  onDestroyed: () => windowManagerModel.remove(window.key),
-                  onError: () => windowManagerModel.remove(window.key),
-                ),
-              );
-            }
-          }
+    return WindowManagerAccessor(
+      windowManager: windowManager,
+      child: WindowSettingsAccessor(
+        windowSettings: settings,
+        child: ViewAnchor(
+          view: ListenableBuilder(
+            listenable: windowManager,
+            builder: (BuildContext context, Widget? _) {
+              final List<Widget> childViews = <Widget>[];
+              for (final KeyedWindow window in windowManager.windows) {
+                if (window.parent == null && !window.isMainWindow) {
+                  childViews.add(
+                    WindowContent(
+                      controller: window.controller,
+                      windowKey: window.key,
+                      onDestroyed: () => windowManager.remove(window.key),
+                      onError: () => windowManager.remove(window.key),
+                    ),
+                  );
+                }
+              }
 
-          return ViewCollection(views: childViews);
-        },
-      ),
-      child: Scaffold(
-        appBar: AppBar(title: const Text('Multi Window Reference App')),
-        body: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              flex: 60,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.vertical,
-                child: _WindowsTable(windowManagerModel: windowManagerModel),
-              ),
-            ),
-            Expanded(
-              flex: 40,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  ListenableBuilder(
-                    listenable: windowManagerModel,
-                    builder: (BuildContext context, Widget? child) {
-                      return _WindowCreatorCard(
-                        selectedWindow: windowManagerModel.selected,
-                        windowManagerModel: windowManagerModel,
-                        windowSettings: settings,
-                      );
-                    },
+              return ViewCollection(views: childViews);
+            },
+          ),
+          child: Scaffold(
+            appBar: AppBar(title: const Text('Multi Window Reference App')),
+            body: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  flex: 60,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: _WindowsTable(windowManager: windowManager),
                   ),
-                ],
-              ),
+                ),
+                Expanded(
+                  flex: 40,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      ListenableBuilder(
+                        listenable: windowManager,
+                        builder: (BuildContext context, Widget? child) {
+                          return _WindowCreatorCard(
+                            selectedWindow: windowManager.selected,
+                            windowManagerModel: windowManager,
+                            windowSettings: settings,
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -92,19 +96,19 @@ class MainWindow extends StatelessWidget {
 }
 
 class _WindowsTable extends StatelessWidget {
-  const _WindowsTable({required this.windowManagerModel});
+  const _WindowsTable({required this.windowManager});
 
-  final WindowManagerModel windowManagerModel;
+  final WindowManager windowManager;
 
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: windowManagerModel,
+      listenable: windowManager,
       builder: (BuildContext context, Widget? widget) {
         return DataTable(
           showBottomBorder: true,
           onSelectAll: (selected) {
-            windowManagerModel.select(null);
+            windowManager.select(null);
           },
           columns: const [
             DataColumn(
@@ -125,48 +129,51 @@ class _WindowsTable extends StatelessWidget {
             ),
           ],
           rows: <DataRow>[
-            for (KeyedWindow controller in windowManagerModel.windows)
-              DataRow(
-                key: controller.key,
-                color: WidgetStateColor.resolveWith((states) {
-                  if (states.contains(WidgetState.selected)) {
-                    return Theme.of(context).colorScheme.primary.withAlpha(20);
-                  }
-                  return Colors.transparent;
-                }),
-                selected: controller.controller == windowManagerModel.selected,
-                onSelectChanged: (bool? selected) {
-                  if (selected != null) {
-                    windowManagerModel.select(
-                      selected ? controller.controller.rootView.viewId : null,
-                    );
-                  }
-                },
-                cells: [
-                  DataCell(Text('${controller.controller.rootView.viewId}')),
-                  DataCell(Text(_getWindowTypeName(controller.controller))),
-                  DataCell(
-                    Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.edit_outlined),
-                          onPressed: () =>
-                              _showWindowEditDialog(controller, context),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.delete_outlined),
-                          onPressed: () async {
-                            controller.controller.destroy();
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+            for (KeyedWindow controller in windowManager.windows)
+              _rowForKeyedController(controller, context),
           ],
         );
       },
+    );
+  }
+
+  DataRow _rowForKeyedController(KeyedWindow controller, BuildContext context) {
+    return DataRow(
+      key: controller.key,
+      color: WidgetStateColor.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return Theme.of(context).colorScheme.primary.withAlpha(20);
+        }
+        return Colors.transparent;
+      }),
+      selected: controller.controller == windowManager.selected,
+      onSelectChanged: (bool? selected) {
+        if (selected != null) {
+          windowManager.select(
+            selected ? controller.controller.rootView.viewId : null,
+          );
+        }
+      },
+      cells: [
+        DataCell(Text('${controller.controller.rootView.viewId}')),
+        DataCell(Text(_getWindowTypeName(controller.controller))),
+        DataCell(
+          Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.edit_outlined),
+                onPressed: () => _showWindowEditDialog(controller, context),
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete_outlined),
+                onPressed: () async {
+                  controller.controller.destroy();
+                },
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -194,7 +201,7 @@ class _WindowCreatorCard extends StatelessWidget {
   });
 
   final BaseWindowController? selectedWindow;
-  final WindowManagerModel windowManagerModel;
+  final WindowManager windowManagerModel;
   final WindowSettings windowSettings;
 
   @override

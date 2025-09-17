@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 import 'app/main_window.dart';
 import 'package:flutter/src/widgets/_window.dart';
 
-class MainControllerWindowDelegate extends RegularWindowControllerDelegate {
+class MainControllerWindowDelegate with RegularWindowControllerDelegate {
   @override
   void onWindowDestroyed() {
     super.onWindowDestroyed();
@@ -21,15 +21,34 @@ class MainControllerWindowDelegate extends RegularWindowControllerDelegate {
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  runWidget(MultiWindowApp());
+}
+
+class MultiWindowApp extends StatefulWidget {
+  const MultiWindowApp({super.key});
+
+  @override
+  State<MultiWindowApp> createState() => _MultiWindowAppState();
+}
+
+class _MultiWindowAppState extends State<MultiWindowApp> {
   final RegularWindowController controller = RegularWindowController(
     preferredSize: const Size(800, 600),
     title: 'Multi-Window Reference Application',
     delegate: MainControllerWindowDelegate(),
   );
-  runWidget(
-    RegularWindow(
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return RegularWindow(
       controller: controller,
       child: MaterialApp(home: MainWindow(mainController: controller)),
-    ),
-  );
+    );
+  }
 }

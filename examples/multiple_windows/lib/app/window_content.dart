@@ -7,36 +7,30 @@
 
 import 'package:flutter/material.dart';
 import 'regular_window_content.dart';
-import 'models.dart';
 import 'package:flutter/src/widgets/_window.dart';
 
-class WindowControllerRender extends StatelessWidget {
-  const WindowControllerRender({
-    required super.key,
+/// Responsible for rendering the appropriate content for a window based on
+/// the type of the window.
+class WindowContent extends StatelessWidget {
+  const WindowContent({
+    required this.windowKey,
     required this.controller,
     required this.onDestroyed,
     required this.onError,
-    required this.windowSettings,
-    required this.windowManagerModel,
   });
 
+  final Key windowKey;
   final BaseWindowController controller;
   final VoidCallback onDestroyed;
   final VoidCallback onError;
-  final WindowSettings windowSettings;
-  final WindowManagerModel windowManagerModel;
 
   @override
   Widget build(BuildContext context) {
     return switch (controller) {
       final RegularWindowController regular => RegularWindow(
-        key: key,
+        key: windowKey,
         controller: regular,
-        child: RegularWindowContent(
-          window: regular,
-          windowSettings: windowSettings,
-          windowManagerModel: windowManagerModel,
-        ),
+        child: RegularWindowContent(window: regular),
       ),
     };
   }
