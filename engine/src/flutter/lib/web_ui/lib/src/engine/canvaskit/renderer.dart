@@ -45,14 +45,12 @@ class CanvasKitRenderer extends Renderer {
   @override
   String get rendererTag => 'canvaskit';
 
-  late final SkiaFontCollection _fontCollection = SkiaFontCollection();
+  late final FlutterFontCollection _fontCollection = isExperimentalWebParagraph
+      ? WebFontCollection()
+      : SkiaFontCollection();
 
   @override
-  SkiaFontCollection get fontCollection => _fontCollection;
-
-  /// The scene host, where the root canvas and overlay canvases are added to.
-  DomElement? _sceneHost;
-  DomElement? get sceneHost => _sceneHost;
+  FlutterFontCollection get fontCollection => _fontCollection;
 
   static Rasterizer _createRasterizer() {
     if (configuration.canvasKitForceMultiSurfaceRasterizer || isSafari || isFirefox) {
@@ -126,7 +124,7 @@ class CanvasKitRenderer extends Renderer {
 
   @override
   ui.Canvas createCanvas(ui.PictureRecorder recorder, [ui.Rect? cullRect]) =>
-      CanvasKitCanvas(recorder, cullRect);
+      CkCanvas(recorder, cullRect);
 
   @override
   ui.Gradient createLinearGradient(
@@ -488,7 +486,7 @@ class CanvasKitRenderer extends Renderer {
     recorder?.recordBuildFinish();
     recorder?.recordRasterStart();
 
-    await rasterizer.draw((scene as LayerScene).layerTree);
+    await rasterizer.draw((scene as LayerScene).layerTree, null);
     recorder?.recordRasterFinish();
     recorder?.submitTimings();
   }
