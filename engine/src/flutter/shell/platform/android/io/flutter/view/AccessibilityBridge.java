@@ -1033,7 +1033,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
     // Heading support
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_28) {
-      result.setHeading(semanticsNode.hasFlag(Flag.IS_HEADER));
+      result.setHeading(semanticsNode.headingLevel > 0);
     }
 
     // Accessibility Focus
@@ -2225,7 +2225,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     HAS_ENABLED_STATE(1 << 6),
     IS_ENABLED(1 << 7),
     IS_IN_MUTUALLY_EXCLUSIVE_GROUP(1 << 8),
-    IS_HEADER(1 << 9),
     IS_OBSCURED(1 << 10),
     SCOPES_ROUTE(1 << 11),
     NAMES_ROUTE(1 << 12),
@@ -2391,6 +2390,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     // The locale of the content of this node.
     @Nullable private String locale;
 
+    // The heading level for this node (0 means not a heading).
+    private int headingLevel;
+
     // The id of the sibling node that is before this node in traversal
     // order.
     //
@@ -2516,6 +2518,10 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                 + flags
                 + "\n"
                 + indent
+                + "  +-- headingLevel="
+                + headingLevel
+                + "\n"
+                + indent
                 + "  +-- textDirection="
                 + textDirection
                 + "\n"
@@ -2591,6 +2597,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       linkUrl = getStringFromBuffer(buffer, strings);
       locale = getStringFromBuffer(buffer, strings);
 
+      headingLevel = buffer.getInt();
       textDirection = TextDirection.fromInt(buffer.getInt());
 
       left = buffer.getFloat();
