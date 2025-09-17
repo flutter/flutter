@@ -49,7 +49,7 @@ bool SolidColorContents::Render(const ContentContext& renderer,
                                 RenderPass& pass) const {
   using VS = SolidFillPipeline::VertexShader;
   using FS = SolidFillPipeline::FragmentShader;
-  auto& host_buffer = renderer.GetTransientsBuffer();
+  auto& data_host_buffer = renderer.GetTransientsDataBuffer();
 
   VS::FrameInfo frame_info;
   FS::FragInfo frag_info;
@@ -62,8 +62,8 @@ bool SolidColorContents::Render(const ContentContext& renderer,
       };
   return ColorSourceContents::DrawGeometry<VS>(
       renderer, entity, pass, pipeline_callback, frame_info,
-      [&frag_info, &host_buffer](RenderPass& pass) {
-        FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
+      [&frag_info, &data_host_buffer](RenderPass& pass) {
+        FS::BindFragInfo(pass, data_host_buffer.EmplaceUniform(frag_info));
         pass.SetCommandLabel("Solid Fill");
         return true;
       });

@@ -11,6 +11,7 @@
 #include "flutter/shell/platform/windows/flutter_window.h"
 #include "flutter/shell/platform/windows/flutter_windows_view_controller.h"
 #include "flutter/shell/platform/windows/rect_helper.h"
+#include "flutter/shell/platform/windows/wchar_util.h"
 #include "flutter/shell/platform/windows/window_manager.h"
 
 namespace {
@@ -283,7 +284,7 @@ std::unique_ptr<HostWindow> HostWindow::CreateRegularWindow(
   // Set up the view.
   auto view_window = std::make_unique<FlutterWindow>(
       initial_window_rect.width(), initial_window_rect.height(),
-      engine->windows_proc_table());
+      engine->display_monitor(), engine->windows_proc_table());
 
   std::unique_ptr<FlutterWindowsView> view =
       engine->CreateView(std::move(view_window));
@@ -317,8 +318,9 @@ std::unique_ptr<HostWindow> HostWindow::CreateRegularWindow(
     window_class.lpszClassName = kWindowClassName;
 
     if (!RegisterClassEx(&window_class)) {
-      FML_LOG(ERROR) << "Cannot register window class " << kWindowClassName
-                     << ": " << GetLastErrorAsString();
+      FML_LOG(ERROR) << "Cannot register window class "
+                     << WCharBufferToString(kWindowClassName) << ": "
+                     << GetLastErrorAsString();
       return nullptr;
     }
   }
@@ -627,11 +629,9 @@ void HostWindow::SetFullscreen(
     HMONITOR monitor =
         MonitorFromWindow(window_handle_, MONITOR_DEFAULTTONEAREST);
     if (display_id) {
-      for (auto const& display : engine_->display_monitor()->GetDisplays()) {
-        if (display.display_id == display_id) {
-          monitor = reinterpret_cast<HMONITOR>(display.display_id);
-          break;
-        }
+      if (auto const display =
+              engine_->display_monitor()->FindById(display_id.value())) {
+        monitor = reinterpret_cast<HMONITOR>(display->display_id);
       }
     }
 
