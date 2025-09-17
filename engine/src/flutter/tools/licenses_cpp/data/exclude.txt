@@ -69,6 +69,7 @@
 ^third_party/vulkan-deps/vulkan-headers/src/LICENSE\.md$
 ^third_party/vulkan-deps/vulkan-loader/.*
 ^third_party/vulkan-deps/vulkan-utility-libraries/src/LICENSE.md$
+^third_party/vulkan-deps/vulkan-utility-libraries/src/scripts/.*
 ^tools/android_sdk/packages\.txt$
 ^tools/fuchsia/.*
 ^tools/licenses_cpp/data/.*
