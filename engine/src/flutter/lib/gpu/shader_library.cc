@@ -185,10 +185,12 @@ fml::RefPtr<ShaderLibrary> ShaderLibrary::MakeFromFlatbuffer(
     return nullptr;
   }
 
-  if (bundle->format_version() != static_cast<uint32_t>(impeller::fb::shaderbundle::ShaderBundleFormatVersion::kVersion)) {
-    VALIDATION_LOG << "Unsupported shader bundle format version: "
-                   << bundle->format_version()
-                   << ". Expected: " << static_cast<uint32_t>(impeller::fb::shaderbundle::ShaderBundleFormatVersion::kVersion);
+  const auto version = bundle->format_version();
+  const auto expected = static_cast<uint32_t>(
+      impeller::fb::shaderbundle::ShaderBundleFormatVersion::kVersion);
+  if (version != expected) {
+    VALIDATION_LOG << "Unsupported shader bundle format version: " << version
+                   << ". Expected: " << expected;
     return nullptr;
   }
 
