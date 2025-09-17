@@ -136,7 +136,7 @@ class TextFormField extends FormField<String> {
     SmartQuotesType? smartQuotesType,
     bool enableSuggestions = true,
     MaxLengthEnforcement? maxLengthEnforcement,
-    double? maxLines = 1.0,
+    double? maxLines = 1,
     int? minLines,
     bool expands = false,
     int? maxLength,
@@ -193,7 +193,7 @@ class TextFormField extends FormField<String> {
     List<Locale>? hintLocales,
   }) : assert(initialValue == null || controller == null),
        assert(obscuringCharacter.length == 1),
-       assert(maxLines == null || maxLines > 0.0),
+       assert(maxLines == null || maxLines > 0),
        assert(minLines == null || minLines > 0),
        assert(
          (maxLines == null) || (minLines == null) || (maxLines >= minLines),
@@ -203,7 +203,7 @@ class TextFormField extends FormField<String> {
          !expands || (maxLines == null && minLines == null),
          'minLines and maxLines must be null when expands is true.',
        ),
-       assert(!obscureText || maxLines == 1.0, 'Obscured fields cannot be multiline.'),
+       assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
        assert(maxLength == null || maxLength == TextField.noMaxLength || maxLength > 0),
        super(
          initialValue: controller != null ? controller.text : (initialValue ?? ''),

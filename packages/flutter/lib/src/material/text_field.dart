@@ -277,7 +277,7 @@ class TextField extends StatefulWidget {
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
     this.enableSuggestions = true,
-    this.maxLines = 1.0,
+    this.maxLines = 1,
     this.minLines,
     this.expands = false,
     this.maxLength,
@@ -332,7 +332,7 @@ class TextField extends StatefulWidget {
            smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType =
            smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
-       assert(maxLines == null || maxLines > 0.0),
+       assert(maxLines == null || maxLines > 0),
        assert(minLines == null || minLines > 0),
        assert(
          (maxLines == null) || (minLines == null) || (maxLines >= minLines),
@@ -342,17 +342,17 @@ class TextField extends StatefulWidget {
          !expands || (maxLines == null && minLines == null),
          'minLines and maxLines must be null when expands is true.',
        ),
-       assert(!obscureText || maxLines == 1.0, 'Obscured fields cannot be multiline.'),
+       assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
        assert(maxLength == null || maxLength == TextField.noMaxLength || maxLength > 0),
        // Assert the following instead of setting it directly to avoid surprising the user by silently changing the value they set.
        assert(
          !identical(textInputAction, TextInputAction.newline) ||
-             maxLines == 1.0 ||
+             maxLines == 1 ||
              !identical(keyboardType, TextInputType.text),
          'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.',
        ),
        keyboardType =
-           keyboardType ?? (maxLines == 1.0 ? TextInputType.text : TextInputType.multiline),
+           keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText);
 
   /// The configuration for the magnifier of this text field.
@@ -1019,7 +1019,7 @@ class TextField extends StatefulWidget {
     properties.add(
       DiagnosticsProperty<bool>('enableSuggestions', enableSuggestions, defaultValue: true),
     );
-    properties.add(DoubleProperty('maxLines', maxLines, defaultValue: 1.0));
+    properties.add(DoubleProperty('maxLines', maxLines, defaultValue: 1));
     properties.add(IntProperty('minLines', minLines, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
     properties.add(IntProperty('maxLength', maxLength, defaultValue: null));
