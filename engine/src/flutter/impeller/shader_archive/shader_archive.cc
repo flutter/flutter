@@ -43,7 +43,8 @@ ShaderArchive::ShaderArchive(std::shared_ptr<fml::Mapping> payload)
   }
 
   const auto version = shader_archive->format_version();
-  const auto expected = static_cast<uint32_t>(fb::ShaderArchiveFormatVersion::kVersion);
+  const auto expected =
+      static_cast<uint32_t>(fb::ShaderArchiveFormatVersion::kVersion);
   if (version != expected) {
     VALIDATION_LOG << "Unsupported shader archive format version: " << version
                    << ". Expected: " << expected;

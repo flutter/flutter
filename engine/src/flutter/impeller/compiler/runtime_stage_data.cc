@@ -234,7 +234,8 @@ std::shared_ptr<fml::Mapping> RuntimeStageData::CreateJsonMapping() const {
   //   },
   nlohmann::json root;
 
-  root[kFormatVersionKey] = static_cast<uint32_t>(fb::RuntimeStagesFormatVersion::kVersion);
+  root[kFormatVersionKey] =
+      static_cast<uint32_t>(fb::RuntimeStagesFormatVersion::kVersion);
   for (const auto& kvp : data_) {
     nlohmann::json platform_object;
 
@@ -373,7 +374,8 @@ RuntimeStageData::CreateMultiStageFlatbuffer() const {
   // The high level object API is used here for writing to the buffer. This is
   // just a convenience.
   auto runtime_stages = std::make_unique<fb::RuntimeStagesT>();
-  runtime_stages->format_version = static_cast<uint32_t>(fb::RuntimeStagesFormatVersion::kVersion);
+  runtime_stages->format_version =
+      static_cast<uint32_t>(fb::RuntimeStagesFormatVersion::kVersion);
 
   for (const auto& kvp : data_) {
     auto runtime_stage = CreateStageFlatbuffer(kvp.first);

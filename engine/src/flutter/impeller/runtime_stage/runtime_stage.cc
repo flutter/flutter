@@ -74,7 +74,8 @@ RuntimeStage::Map RuntimeStage::DecodeRuntimeStages(
   }
 
   const auto version = raw_stages->format_version();
-  const auto expected = static_cast<uint32_t>(fb::RuntimeStagesFormatVersion::kVersion);
+  const auto expected =
+      static_cast<uint32_t>(fb::RuntimeStagesFormatVersion::kVersion);
   if (version != expected) {
     VALIDATION_LOG << "Unsupported runtime stages format version: " << version
                    << ". Expected: " << expected;

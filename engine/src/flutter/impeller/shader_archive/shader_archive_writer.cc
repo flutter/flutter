@@ -106,7 +106,8 @@ constexpr fb::Stage ToStage(ArchiveShaderType type) {
 
 std::shared_ptr<fml::Mapping> ShaderArchiveWriter::CreateMapping() const {
   fb::ShaderArchiveT shader_archive;
-  shader_archive.format_version = static_cast<uint32_t>(fb::ShaderArchiveFormatVersion::kVersion);
+  shader_archive.format_version =
+      static_cast<uint32_t>(fb::ShaderArchiveFormatVersion::kVersion);
   for (const auto& shader_description : shader_descriptions_) {
     auto mapping = shader_description.mapping;
     if (!mapping) {
