@@ -19,11 +19,10 @@ uniform KernelSamples {
 }
 kernel_samples;
 
-uniform BlurParams {
-  // LTRB
-  vec4 blur_bounds;
+uniform FragInfo {
+  vec4 bounds_uv;
 }
-blur_params;
+frag_info;
 
 f16vec4 Sample(f16sampler2D tex, vec2 coords) {
   if (supports_decal == 1.0) {
@@ -41,10 +40,10 @@ void main() {
 
   for (int i = 0; i < int(kernel_samples.sample_count); i++) {
     vec2 coord = v_texture_coords + kernel_samples.sample_data[i].xy;
-    if (any(lessThan(coord, blur_params.blur_bounds.xy))) {
+    if (any(lessThan(coord, frag_info.bounds_uv.xy))) {
       continue;
     }
-    if (any(greaterThan(coord, blur_params.blur_bounds.zw))) {
+    if (any(greaterThan(coord, frag_info.bounds_uv.zw))) {
       break;
     }
     float16_t coefficient = float16_t(kernel_samples.sample_data[i].z);
