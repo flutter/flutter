@@ -2795,23 +2795,19 @@ void main() {
   testWidgets('Chip uses the resolved color based on its state for the delete icon color', (
     WidgetTester tester,
   ) async {
-    final ThemeData themeData = ThemeData(primarySwatch: Colors.blue);
     Widget buildApp({required ChipThemeData chipTheme, bool isSelected = false}) {
       return wrapForChip(
-        child: Theme(
-          data: themeData,
-          child: ChipTheme(
-            data: chipTheme,
-            child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                return InputChip(
-                  label: const Text('Label'),
-                  selected: isSelected,
-                  onSelected: (_) {},
-                  onDeleted: () {},
-                );
-              },
-            ),
+        child: ChipTheme(
+          data: chipTheme,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return InputChip(
+                label: const Text('Label'),
+                selected: isSelected,
+                onSelected: (_) {},
+                onDeleted: () {},
+              );
+            },
           ),
         ),
       );
