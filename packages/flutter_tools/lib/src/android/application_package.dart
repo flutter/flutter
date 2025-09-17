@@ -79,7 +79,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
     return AndroidApk(
       id: packageName,
       applicationPackage: apk,
-      versionCode: data.versionCode == null ? null : int.tryParse(data.versionCode!),
+      versionCode: int.tryParse(data.versionCode.toString()),
       launchActivity: '${data.packageName}/${data.launchableActivityName}',
     );
   }
