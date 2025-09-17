@@ -11,6 +11,8 @@ import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
+const String _kWeightAxisTag = 'wght';
+
 final List<String> _testFonts = <String>['FlutterTest', 'Ahem'];
 List<String> _computeEffectiveFontFamilies(List<String> fontFamilies) {
   if (!ui_web.TestEnvironment.instance.forceTestFonts) {
@@ -18,6 +20,11 @@ List<String> _computeEffectiveFontFamilies(List<String> fontFamilies) {
   }
   final Iterable<String> filteredFonts = fontFamilies.where(_testFonts.contains);
   return filteredFonts.isEmpty ? _testFonts : filteredFonts.toList();
+}
+
+int getFourByteTag(String s) {
+  assert(s.length == 4);
+  return s.codeUnitAt(0) << 24 | s.codeUnitAt(1) << 16 | s.codeUnitAt(2) << 8 | s.codeUnitAt(3);
 }
 
 class SkwasmLineMetrics implements ui.LineMetrics {
@@ -433,26 +440,30 @@ class SkwasmTextStyle implements ui.TextStyle {
       }
     }
 
-    if (fontVariations != null && fontVariations!.isNotEmpty) {
-      final int variationCount = fontVariations!.length;
-      withStackScope((StackScope scope) {
-        final Pointer<Uint32> axisBuffer = scope.allocUint32Array(variationCount);
-        final Pointer<Float> valueBuffer = scope.allocFloatArray(variationCount);
-        for (int i = 0; i < variationCount; i++) {
-          final ui.FontVariation variation = fontVariations![i];
-          final String axis = variation.axis;
-          assert(axis.length == 4); // 4 byte code
-          final int axisNumber =
-              axis.codeUnitAt(0) << 24 |
-              axis.codeUnitAt(1) << 16 |
-              axis.codeUnitAt(2) << 8 |
-              axis.codeUnitAt(3);
-          axisBuffer[i] = axisNumber;
-          valueBuffer[i] = variation.value;
-        }
-        textStyleSetFontVariations(handle, axisBuffer, valueBuffer, variationCount);
-      });
+    final int weightValue = fontWeight?.value ?? ui.FontWeight.normal.value;
+    final List<ui.FontVariation> weightVariation = <ui.FontVariation>[
+      ui.FontVariation(_kWeightAxisTag, weightValue.toDouble()),
+    ];
+    Iterable<ui.FontVariation> allFontVariations;
+    if (fontVariations == null) {
+      allFontVariations = weightVariation;
+    } else if (fontVariations!.any((ui.FontVariation v) => v.axis == _kWeightAxisTag)) {
+      allFontVariations = fontVariations!;
+    } else {
+      allFontVariations = fontVariations!.followedBy(weightVariation);
     }
+    final int variationCount = allFontVariations.length;
+    withStackScope((StackScope scope) {
+      final Pointer<Uint32> axisBuffer = scope.allocUint32Array(variationCount);
+      final Pointer<Float> valueBuffer = scope.allocFloatArray(variationCount);
+      int i = 0;
+      for (final ui.FontVariation variation in allFontVariations) {
+        axisBuffer[i] = getFourByteTag(variation.axis);
+        valueBuffer[i] = variation.value;
+        i++;
+      }
+      textStyleSetFontVariations(handle, axisBuffer, valueBuffer, variationCount);
+    });
   }
 
   List<String> get fontFamilies => <String>[?fontFamily, ...?fontFamilyFallback];
@@ -792,6 +803,14 @@ class SkwasmParagraphStyle implements ui.ParagraphStyle {
         (_fontStyle ?? ui.FontStyle.normal).index,
       );
     }
+    withStackScope((StackScope scope) {
+      final Pointer<Uint32> axisBuffer = scope.allocUint32Array(1);
+      final Pointer<Float> valueBuffer = scope.allocFloatArray(1);
+      axisBuffer[0] = getFourByteTag(_kWeightAxisTag);
+      final int weightValue = _fontWeight?.value ?? ui.FontWeight.normal.value;
+      valueBuffer[0] = weightValue.toDouble();
+      textStyleSetFontVariations(textStyleHandle, axisBuffer, valueBuffer, 1);
+    });
     if (_textHeightBehavior != null) {
       textStyleSetHalfLeading(
         textStyleHandle,
