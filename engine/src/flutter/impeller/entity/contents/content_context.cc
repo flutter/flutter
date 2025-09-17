@@ -293,6 +293,7 @@ struct ContentContext::Pipelines {
   Variants<SweepGradientSSBOFillPipeline> sweep_gradient_ssbo_fill;
   Variants<SweepGradientUniformFillPipeline> sweep_gradient_uniform_fill;
   Variants<TextureDownsamplePipeline> texture_downsample;
+  Variants<TextureDownsampleSoftwareDecalPipeline> texture_downsample_software_decal;
   Variants<TexturePipeline> texture;
   Variants<TextureStrictSrcPipeline> texture_strict_src;
   Variants<TiledTexturePipeline> tiled_texture;
@@ -302,7 +303,6 @@ struct ContentContext::Pipelines {
 
 #ifdef IMPELLER_ENABLE_OPENGLES
   Variants<TiledTextureExternalPipeline> tiled_texture_external;
-  Variants<TextureDownsampleGlesPipeline> texture_downsample_gles;
   Variants<TiledTextureUvExternalPipeline> tiled_texture_uv_external;
 #endif  // IMPELLER_ENABLE_OPENGLES
   // clang-format on
@@ -696,6 +696,8 @@ ContentContext::ContentContext(
     }
     pipelines_->texture_downsample.CreateDefault(
         *context_, options_no_msaa_no_depth_stencil);
+    pipelines_->texture_downsample_software_decal.CreateDefault(
+        *context_, options_trianglestrip);
     pipelines_->rrect_blur.CreateDefault(*context_, options_trianglestrip);
     pipelines_->rsuperellipse_blur.CreateDefault(*context_,
                                                  options_trianglestrip);
@@ -856,8 +858,6 @@ ContentContext::ContentContext(
     pipelines_->tiled_texture_external.CreateDefault(*context_, options);
     pipelines_->tiled_texture_uv_external.CreateDefault(*context_, options);
 #endif  // !defined(FML_OS_MACOSX)
-    pipelines_->texture_downsample_gles.CreateDefault(*context_,
-                                                      options_trianglestrip);
   }
 #endif  // IMPELLER_ENABLE_OPENGLES
 
@@ -1396,6 +1396,11 @@ PipelineRef ContentContext::GetDownsamplePipeline(
   return GetPipeline(this, pipelines_->texture_downsample, opts);
 }
 
+PipelineRef ContentContext::GetDownsampleSoftwareDecalPipeline(
+    ContentContextOptions opts) const {
+  return GetPipeline(this, pipelines_->texture_downsample_software_decal, opts);
+}
+
 PipelineRef ContentContext::GetFramebufferBlendColorPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
@@ -1501,11 +1506,6 @@ PipelineRef ContentContext::GetLinePipeline(ContentContextOptions opts) const {
 }
 
 #ifdef IMPELLER_ENABLE_OPENGLES
-PipelineRef ContentContext::GetDownsampleTextureGlesPipeline(
-    ContentContextOptions opts) const {
-  return GetPipeline(this, pipelines_->texture_downsample_gles, opts);
-}
-
 PipelineRef ContentContext::GetTiledTextureExternalPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetContext()->GetBackendType() == Context::BackendType::kOpenGLES);
