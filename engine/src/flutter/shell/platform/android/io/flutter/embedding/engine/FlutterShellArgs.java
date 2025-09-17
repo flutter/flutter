@@ -21,7 +21,6 @@ import java.util.*;
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class FlutterShellArgs {
   public static final String ARG_TRACE_STARTUP = "--trace-startup";
-  public static final String ARG_KEY_START_PAUSED = "start-paused";
   public static final String ARG_START_PAUSED = "--start-paused";
   public static final String ARG_KEY_DISABLE_SERVICE_AUTH_CODES = "disable-service-auth-codes";
   public static final String ARG_DISABLE_SERVICE_AUTH_CODES = "--disable-service-auth-codes";
@@ -74,9 +73,6 @@ public class FlutterShellArgs {
     // there are many security-sensitive args in the binary.
     ArrayList<String> args = new ArrayList<>();
 
-    if (intent.getBooleanExtra(ARG_KEY_START_PAUSED, false)) {
-      args.add(ARG_START_PAUSED);
-    }
     int vmServicePort = intent.getIntExtra(ARG_KEY_VM_SERVICE_PORT, 0);
     if (vmServicePort > 0) {
       args.add(ARG_VM_SERVICE_PORT + Integer.toString(vmServicePort));

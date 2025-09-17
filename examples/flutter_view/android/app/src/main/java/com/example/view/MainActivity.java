@@ -21,6 +21,7 @@ import io.flutter.plugin.common.BasicMessageChannel.Reply;
 import io.flutter.plugin.common.StringCodec;
 import java.util.ArrayList;
 
+// TODO(camsim99): Rework after Intent support is removed.
 public class MainActivity extends AppCompatActivity {
     private static FlutterEngine flutterEngine;
 
