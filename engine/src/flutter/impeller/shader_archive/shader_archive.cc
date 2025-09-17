@@ -42,6 +42,13 @@ ShaderArchive::ShaderArchive(std::shared_ptr<fml::Mapping> payload)
     return;
   }
 
+  if (shader_archive->format_version() != static_cast<uint32_t>(fb::ShaderArchiveFormatVersion::kVersion)) {
+    VALIDATION_LOG << "Unsupported shader archive format version: "
+                   << shader_archive->format_version()
+                   << ". Expected: " << static_cast<uint32_t>(fb::ShaderArchiveFormatVersion::kVersion);
+    return;
+  }
+
   if (auto items = shader_archive->items()) {
     for (auto i = items->begin(), end = items->end(); i != end; i++) {
       ShaderKey key;
