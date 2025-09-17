@@ -257,158 +257,22 @@ class WebTextStyle implements ui.TextStyle {
     );
   }
 
-  bool paintsEqual(ui.Paint? a, ui.Paint? b) {
-    if (a == null) {
-      return b == null;
-    }
-    if (b == null) {
-      //WebParagraphDebug.log('!null != null');
-      return false;
-    }
-    // TODO(mdebbar=>jlavrova): Explain this?
-    // if (a == ui.Paint() && b == ui.Paint()) {
-    //   WebParagraphDebug.log('Paint() are equal');
-    //   return true;
-    // }
-    if (a.blendMode != b.blendMode) {
-      WebParagraphDebug.log('blendMode are not equal');
-      return false;
-    }
-    if (a.color != b.color) {
-      WebParagraphDebug.log('color are not equal');
-      return false;
-    }
-    if (a.colorFilter != b.colorFilter) {
-      WebParagraphDebug.log('colorFilter are not equal');
-      return false;
-    }
-    if (a.filterQuality != b.filterQuality) {
-      WebParagraphDebug.log('filterQuality are not equal');
-      return false;
-    }
-    if (a.imageFilter != b.imageFilter) {
-      WebParagraphDebug.log('imageFilter are not equal');
-      return false;
-    }
-    if (a.invertColors != b.invertColors) {
-      WebParagraphDebug.log('invertColors are not equal');
-      return false;
-    }
-    if (a.isAntiAlias != b.isAntiAlias) {
-      WebParagraphDebug.log('isAntiAlias are not equal');
-      return false;
-    }
-    if (a.maskFilter != b.maskFilter) {
-      WebParagraphDebug.log('maskFilter are not equal');
-      return false;
-    }
-    if (a.shader != b.shader) {
-      WebParagraphDebug.log('shader are not equal');
-      return false;
-    }
-    if (a.strokeCap != b.strokeCap) {
-      WebParagraphDebug.log('strokeCap are not equal');
-      return false;
-    }
-    if (a.strokeJoin != b.strokeJoin) {
-      WebParagraphDebug.log('strokeJoin are not equal');
-      return false;
-    }
-    if (a.strokeMiterLimit != b.strokeMiterLimit) {
-      WebParagraphDebug.log('strokeMiterLimit are not equal');
-      return false;
-    }
-    if (a.strokeWidth != b.strokeWidth) {
-      WebParagraphDebug.log('strokeWidth are not equal');
-      return false;
-    }
-    if (a.style != b.style) {
-      WebParagraphDebug.log('strokeWidth are not equal');
-      return false;
-    }
-    return true;
-  }
-
   @override
   bool operator ==(Object other) {
-    //WebParagraphDebug.log('WebTextStyle ==');
     if (identical(this, other)) {
       return true;
     }
     if (other is! WebTextStyle) {
-      WebParagraphDebug.log('other is not WebTextStyle: $other');
       return false;
     }
-    final WebTextStyle otherStyle = other as WebTextStyle;
-    if (!(otherStyle.originalFontFamily == originalFontFamily)) {
-      WebParagraphDebug.log(
-        'originalFontFamily $originalFontFamily != ${otherStyle.originalFontFamily}',
-      );
-    }
-    if (!(otherStyle.fontStyle == fontStyle)) {
-      WebParagraphDebug.log('fontStyle $fontStyle != ${otherStyle.fontStyle}');
-    }
-    if (!(otherStyle.fontSize == fontSize)) {
-      WebParagraphDebug.log('fontSize $fontSize != ${otherStyle.fontSize}');
-    }
-    if (!(otherStyle.fontWeight == fontWeight)) {
-      WebParagraphDebug.log('fontWeight $fontWeight != ${otherStyle.fontWeight}');
-    }
-    if (!paintsEqual(otherStyle.foreground, foreground)) {
-      WebParagraphDebug.log('foreground $foreground != ${otherStyle.foreground}');
-    }
-    if (!paintsEqual(otherStyle.background, background)) {
-      WebParagraphDebug.log('background $background != ${otherStyle.background}');
-    }
-    if (!(otherStyle.shadows == shadows)) {
-      WebParagraphDebug.log('shadows $shadows != ${otherStyle.shadows}');
-    }
-    if (!(otherStyle.decoration == decoration)) {
-      WebParagraphDebug.log('decoration $decoration != ${otherStyle.decoration}');
-    }
-    if (!(otherStyle.decorationColor == decorationColor)) {
-      WebParagraphDebug.log('decorationColor $decorationColor != ${otherStyle.decorationColor}');
-    }
-    if (!(otherStyle.decorationStyle == decorationStyle)) {
-      WebParagraphDebug.log('decorationStyle $decorationStyle != ${otherStyle.decorationStyle}');
-    }
-    if (!(otherStyle.decorationThickness == decorationThickness)) {
-      WebParagraphDebug.log(
-        'decorationThickness $decorationThickness != ${otherStyle.decorationThickness}',
-      );
-    }
-    if (!(otherStyle.letterSpacing == letterSpacing)) {
-      WebParagraphDebug.log('letterSpacing $letterSpacing != ${otherStyle.letterSpacing}');
-    }
-    if (!(otherStyle.wordSpacing == wordSpacing)) {
-      WebParagraphDebug.log('wordSpacing $wordSpacing != ${otherStyle.wordSpacing}');
-    }
-    if (!(otherStyle.height == height)) {
-      WebParagraphDebug.log('height $height != ${otherStyle.height}');
-    }
-    if (!(otherStyle.fontFeatures == fontFeatures)) {
-      WebParagraphDebug.log('fontFeatures $fontFeatures != ${otherStyle.fontFeatures}');
-    }
-    if (!(otherStyle.fontVariations == fontVariations)) {
-      WebParagraphDebug.log('fontVariations $fontVariations != ${otherStyle.fontVariations}');
-    }
-    /*
-    if (!(otherStyle.foreground == foreground)) {
-      WebParagraphDebug.log('foreground are not ==');
-    }
-    if (!(otherStyle.background == background)) {
-      WebParagraphDebug.log('background are not ==\n');
-    }
-    */
-    return other is WebTextStyle &&
-        other.originalFontFamily == originalFontFamily &&
+    return other.originalFontFamily == originalFontFamily &&
         listEquals<String>(other.fontFamilyFallback, fontFamilyFallback) &&
         other.fontSize == fontSize &&
         other.fontStyle == fontStyle &&
         other.fontWeight == fontWeight &&
         other.color == color &&
-        paintsEqual(other.foreground, foreground) &&
-        paintsEqual(other.background, background) &&
+        paintEquals(other.foreground, foreground) &&
+        paintEquals(other.background, background) &&
         listEquals<ui.Shadow>(other.shadows, shadows) &&
         other.decoration == decoration &&
         other.decorationColor == decorationColor &&
@@ -458,27 +322,27 @@ class WebTextStyle implements ui.TextStyle {
     );
   }
 
-  String _simplePaintToString(ui.Paint? paint) {
-    if (paint != null) {
-      return paint.color.toCssString();
-      /*
-          'colorFilter:${paint.colorFilter}\n'
-          'strokeWidth:${paint.strokeWidth}\n'
-          'strokeMiterLimit:${paint.strokeMiterLimit}\n'
-          'strokeCap:${paint.strokeCap}\n'
-          'strokeJoin:${paint.strokeJoin}\n'
-          'style:${paint.style}\n'
-          '${paint.shader != null ? 'shader,' : 'null shader'}\n'
-          '${paint.maskFilter != null ? 'maskFilter,' : 'null maskFilter'}\n'
-          '${paint.colorFilter != null ? 'colorFilter,' : 'null colorFilter'}\n'
-          '${paint.imageFilter != null ? 'imageFilter,' : 'null imageFilter'}\n'
-          'blendMode:${paint.blendMode}\n'
-          'isAntiAlias:${paint.isAntiAlias}\n'
-          '${paint.invertColors ? 'invertColors,' : 'null invertColors'}\n'
-          '${paint.filterQuality != ui.FilterQuality.none ? 'filterQuality:${paint.filterQuality},' : 'none filterQuality'}'
-          */
+  String _debugPaintToString(ui.Paint? paint) {
+    if (paint == null) {
+      return '';
     }
-    return 'null';
+    return paint.color.toCssString();
+    /*
+      'colorFilter:${paint.colorFilter}\n'
+      'strokeWidth:${paint.strokeWidth}\n'
+      'strokeMiterLimit:${paint.strokeMiterLimit}\n'
+      'strokeCap:${paint.strokeCap}\n'
+      'strokeJoin:${paint.strokeJoin}\n'
+      'style:${paint.style}\n'
+      '${paint.shader != null ? 'shader,' : 'null shader'}\n'
+      '${paint.maskFilter != null ? 'maskFilter,' : 'null maskFilter'}\n'
+      '${paint.colorFilter != null ? 'colorFilter,' : 'null colorFilter'}\n'
+      '${paint.imageFilter != null ? 'imageFilter,' : 'null imageFilter'}\n'
+      'blendMode:${paint.blendMode}\n'
+      'isAntiAlias:${paint.isAntiAlias}\n'
+      '${paint.invertColors ? 'invertColors,' : 'null invertColors'}\n'
+      '${paint.filterQuality != ui.FilterQuality.none ? 'filterQuality:${paint.filterQuality},' : 'none filterQuality'}'
+      */
   }
 
   @override
@@ -492,8 +356,8 @@ class WebTextStyle implements ui.TextStyle {
           'fontStyle: ${fontStyle != null ? fontStyle.toString().replaceFirst("FontStyle.", "") : ""} '
           'fontWeight: ${fontWeight != null ? fontWeight.toString().replaceFirst("FontWeight.", "") : ""} '
           'color: ${color != null ? color!.toCssString() : ""} '
-          'foreground: ${_simplePaintToString(foreground)} '
-          'background: ${_simplePaintToString(background)} ';
+          'foreground: ${_debugPaintToString(foreground)} '
+          'background: ${_debugPaintToString(background)} ';
       if (shadows != null && shadows!.isNotEmpty) {
         result += 'shadows(${shadows!.length}) ';
         for (final ui.Shadow shadow in shadows!) {
@@ -582,6 +446,7 @@ class WebTextStyle implements ui.TextStyle {
     }
 
     if (fontFeatureSettings.isNotEmpty) {
+      // TODO(mdebbar=>jlavrova): I wonder if this is causing text to look worse?
       context.textRendering = optimizeLegibility ? 'optimizeLegibility' : 'optimizeSpeed';
       context.canvas!.style.fontFeatureSettings = fontFeatureListToCss(fontFeatureSettings);
     }

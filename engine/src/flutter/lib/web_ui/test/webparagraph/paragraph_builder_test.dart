@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math';
-
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine/web_paragraph/paragraph.dart';
@@ -49,7 +47,6 @@ Future<void> testMain() async {
     builder.addText('some text');
     final WebParagraph paragraph = builder.build();
     final WebTextStyle defaultStyle = paragraphStyle.getTextStyle();
-    defaultStyle.fillMissingFields();
     expect(paragraph.text, 'some text');
     expect(paragraph.paragraphStyle, paragraphStyle);
     expect(paragraph.styledTextRanges.length, 1);
@@ -81,9 +78,6 @@ Future<void> testMain() async {
     builder.pushStyle(textStyle2);
     builder.pushStyle(textStyle3);
     final WebParagraph paragraph = builder.build();
-    textStyle1.fillMissingFields();
-    textStyle2.fillMissingFields();
-    textStyle3.fillMissingFields();
     expect(paragraph.text, 'some text');
     expect(paragraph.paragraphStyle, paragraphStyle);
     expect(paragraph.styledTextRanges.length, 1);
@@ -104,9 +98,6 @@ Future<void> testMain() async {
     builder.pushStyle(textStyle3);
     builder.addText('some text');
     final WebParagraph paragraph = builder.build();
-    textStyle1.fillMissingFields();
-    textStyle2.fillMissingFields();
-    textStyle3.fillMissingFields();
     expect(paragraph.text, 'some text');
     expect(paragraph.paragraphStyle, paragraphStyle);
     expect(paragraph.styledTextRanges.length, 1);
@@ -132,9 +123,6 @@ Future<void> testMain() async {
     builder.addText('[3]');
     builder.pop();
     final WebParagraph paragraph = builder.build();
-    textStyle1.fillMissingFields();
-    textStyle2.fillMissingFields();
-    textStyle3.fillMissingFields();
     expect(paragraph.text, '[1][2][3]');
     expect(paragraph.paragraphStyle, paragraphStyle);
     expect(paragraph.styledTextRanges.length, 3);
@@ -163,9 +151,6 @@ Future<void> testMain() async {
     builder.pushStyle(textStyle3);
     builder.addText('[3]]]');
     final WebParagraph paragraph = builder.build();
-    textStyle1.fillMissingFields();
-    textStyle2.fillMissingFields();
-    textStyle3.fillMissingFields();
     expect(paragraph.text, '[1[2[3]]]');
     expect(paragraph.paragraphStyle, paragraphStyle);
     expect(paragraph.styledTextRanges.length, 3);
@@ -196,11 +181,6 @@ Future<void> testMain() async {
     final WebParagraph paragraph = builder.build();
     final WebTextStyle merged12 = textStyle1.mergeWith(textStyle2);
     final WebTextStyle merged123 = textStyle1.mergeWith(textStyle2).mergeWith(textStyle3);
-    textStyle1.fillMissingFields();
-    textStyle2.fillMissingFields();
-    textStyle3.fillMissingFields();
-    merged12.fillMissingFields();
-    merged123.fillMissingFields();
     expect(paragraph.text, '[1[2[3]]]');
     expect(paragraph.paragraphStyle, paragraphStyle);
     expect(paragraph.styledTextRanges.length, 3);
@@ -237,11 +217,6 @@ Future<void> testMain() async {
     final WebParagraph paragraph = builder.build();
     final WebTextStyle merged12 = textStyle1.mergeWith(textStyle2);
     final WebTextStyle merged123 = merged12.mergeWith(textStyle3);
-    textStyle1.fillMissingFields();
-    textStyle2.fillMissingFields();
-    textStyle3.fillMissingFields();
-    merged12.fillMissingFields();
-    merged123.fillMissingFields();
     expect(paragraph.text, '[1[2[3]]]');
     expect(paragraph.paragraphStyle, paragraphStyle);
     expect(paragraph.styledTextRanges.length, 3);
@@ -264,10 +239,6 @@ Future<void> testMain() async {
     final WebTextStyle textStyle3 = WebTextStyle(fontFamily: 'Roboto', fontSize: 40);
     final WebTextStyle textStyle4 = WebTextStyle(fontFamily: 'Roboto', fontSize: 45);
     final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
-    textStyle1.fillMissingFields();
-    textStyle2.fillMissingFields();
-    textStyle3.fillMissingFields();
-    textStyle4.fillMissingFields();
 
     builder.pushStyle(textStyle1);
     builder.addText('[1');
