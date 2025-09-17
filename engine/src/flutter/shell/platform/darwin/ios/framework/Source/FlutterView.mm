@@ -247,16 +247,16 @@ static void PrintWideGamutWarningOnce() {
   // from the FlutterSceneLifeCycleProvider.sceneLifeCycleDelegate if it changes scenes.
   UIWindowScene* newScene = newWindow.windowScene;
   UIWindowScene* previousScene = self.window.windowScene;
-  if (newScene) {
-    if ([newScene.delegate conformsToProtocol:@protocol(FlutterSceneLifeCycleProvider)]) {
-      id<FlutterSceneLifeCycleProvider> lifeCycleProvider =
-          (id<FlutterSceneLifeCycleProvider>)newScene.delegate;
-      [lifeCycleProvider.sceneLifeCycleDelegate addFlutterEngine:(FlutterEngine*)self.delegate];
-    }
+  if (newScene == previousScene) {
+    return;
+  }
+  if ([newScene.delegate conformsToProtocol:@protocol(FlutterSceneLifeCycleProvider)]) {
+    id<FlutterSceneLifeCycleProvider> lifeCycleProvider =
+        (id<FlutterSceneLifeCycleProvider>)newScene.delegate;
+    [lifeCycleProvider.sceneLifeCycleDelegate addFlutterEngine:(FlutterEngine*)self.delegate];
   }
 
-  if (newScene != previousScene &&
-      [previousScene.delegate conformsToProtocol:@protocol(FlutterSceneLifeCycleProvider)]) {
+  if ([previousScene.delegate conformsToProtocol:@protocol(FlutterSceneLifeCycleProvider)]) {
     // The window, and therefore windowScene, property may be nil if the receiver does not currently
     // reside in any window. This occurs when the receiver has just been removed from its superview
     // or when the receiver has just been added to a superview that is not attached to a window.
