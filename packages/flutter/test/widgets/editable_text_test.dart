@@ -8568,7 +8568,7 @@ void main() {
             child: SizedBox(
               width: 400,
               child: EditableText(
-                minLines: lines.floor(),
+                minLines: lines.toInt(),
                 maxLines: lines,
                 controller: controller,
                 scrollController: scrollController,
