@@ -9,8 +9,9 @@ import 'widget_preview.dart';
 /// Define the Enum for Layout Types
 enum LayoutType { gridView, listView }
 
+typedef WidgetPreviews = Iterable<WidgetPreview>;
 typedef WidgetPreviewGroups = Iterable<WidgetPreviewGroup>;
-typedef PreviewsCallback = WidgetPreviewGroups Function();
+typedef PreviewsCallback = WidgetPreviews Function();
 
 /// Controller used to process events and determine which previews should be
 /// displayed and how they should be displayed in the [WidgetPreviewScaffold].
@@ -91,8 +92,20 @@ class WidgetPreviewScaffoldController {
 
   void _handleSelectedSourceFileChanged() {
     final selectedSourceFile = dtdServices.selectedSourceFile.value;
+    final previews = _previews();
+    final previewGroups = <String, WidgetPreviewGroup>{};
+    for (final preview in previews) {
+      final group = preview.previewData.group;
+      previewGroups
+          .putIfAbsent(
+            group,
+            () => WidgetPreviewGroup(name: group, previews: []),
+          )
+          .previews
+          .add(preview);
+    }
     if (selectedSourceFile != null && _filterBySelectedFile.value) {
-      _filteredPreviewSet.value = _previews()
+      _filteredPreviewSet.value = previewGroups.values
           .map(
             (group) => WidgetPreviewGroup(
               name: group.name,
@@ -108,6 +121,6 @@ class WidgetPreviewScaffoldController {
           .toList();
       return;
     }
-    _filteredPreviewSet.value = _previews();
+    _filteredPreviewSet.value = previewGroups.values;
   }
 }

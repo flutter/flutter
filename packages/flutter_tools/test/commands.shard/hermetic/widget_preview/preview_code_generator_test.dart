@@ -21,6 +21,7 @@ import 'package:process/process.dart';
 import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fakes.dart';
+import 'utils/preview_detector_test_utils.dart';
 
 const kPubspec = '''
 name: foo_project
@@ -137,6 +138,62 @@ import 'package:flutter/widget_previews.dart';
 Widget preview() => Text('Error in dependency');
 ''';
 
+const kCustomPreviews = r'''
+import 'package:flutter/widgets.dart';
+import 'package:flutter/widget_previews.dart';
+
+base class BrightnessPreview extends MultiPreview {
+  const BrightnessPreview({required this.name});
+
+  final String name;
+
+  @override
+  final previews = const <Preview>[
+    Preview(name: '(Light)', brightness: Brightness.light),
+    Preview(name: '(Dark)', brightness: Brightness.dark),
+  ];
+
+  Widget _wrapper(Widget child) {
+    return Container(child: child);
+  }
+
+  @override
+  List<Preview> transform() {
+    final parentPreviews = super.transform();
+    final transformed = <Preview>[];
+    for (final preview in parentPreviews) {
+      final builder = PreviewBuilder.fromPreview(preview)
+        ..name = '$name ${preview.name}'
+        ..addWrapper(_wrapper);
+      transformed.add(builder.build());
+    }
+    return transformed;
+  }
+}
+
+base class FixedSizePreview extends Preview {
+  const FixedSizePreview({required super.name})
+    : super(size: const Size(100, 100));
+
+  Widget _wrapper(Widget child) {
+    return Container(child: child);
+  }
+
+  @override
+  Preview transform() {
+    final parent = super.transform();
+    final builder = PreviewBuilder.fromPreview(parent)
+      ..name = 'FixedSizePreview: $name'
+      ..addWrapper(_wrapper);
+    return builder.build();
+  }
+}
+
+@BrightnessPreview(name: 'Foo')
+@FixedSizePreview(name: 'Bar')
+Widget preview() => Text('Brightness Preview');
+''';
+
 // Note: this test isn't under the general.shard since tests under that directory
 // have a 2000ms time out and these tests write to the real file system and watch
 // directories for changes. This can be slow on heavily loaded machines and cause
@@ -169,7 +226,8 @@ void main() {
         ..childFile('lib/src/wrapper.dart').writeAsStringSync(kWrapperDart)
         ..childFile('lib/src/theme.dart').writeAsStringSync(kThemeDart)
         ..childFile('lib/src/error.dart').writeAsStringSync(kErrorContainingLibrary)
-        ..childFile('lib/src/transitive_error.dart').writeAsStringSync(kTransitiveErrorLibrary);
+        ..childFile('lib/src/transitive_error.dart').writeAsStringSync(kTransitiveErrorLibrary)
+        ..childFile('lib/src/custom_previews.dart').writeAsStringSync(kCustomPreviews);
       project = FlutterProject.fromDirectoryTest(projectDir);
       previewDetector = PreviewDetector(
         platform: FakePlatform(),
@@ -219,78 +277,93 @@ void main() {
         codeGenerator.populatePreviewsInGeneratedPreviewScaffold(details);
         expect(generatedPreviewFile, exists);
 
+        print(generatedPreviewFile.readAsStringSync().stripScriptUris);
+
         const expectedGeneratedPreviewFileContents = '''
+// ignore_for_file: implementation_imports
+
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'widget_preview.dart' as _i1;
-import 'package:foo_project/foo.dart' as _i2;
-import 'package:foo_project/src/brightness.dart' as _i3;
-import 'package:foo_project/src/bar.dart' as _i4;
-import 'package:flutter/material.dart' as _i5;
-import 'dart:ui' as _i6;
-import 'package:foo_project/src/theme.dart' as _i7;
-import 'package:foo_project/src/localizations.dart' as _i8;
-import 'package:foo_project/src/wrapper.dart' as _i9;
-import 'package:flutter/widgets.dart' as _i10;
+import 'utils.dart' as _i2;
+import 'package:foo_project/foo.dart' as _i3;
+import 'package:flutter/src/widget_previews/widget_previews.dart' as _i4;
+import 'package:foo_project/src/bar.dart' as _i5;
+import 'package:foo_project/src/brightness.dart' as _i6;
+import 'dart:ui' as _i7;
+import 'package:foo_project/src/wrapper.dart' as _i8;
+import 'package:foo_project/src/theme.dart' as _i9;
+import 'package:foo_project/src/localizations.dart' as _i10;
+import 'package:foo_project/src/custom_previews.dart' as _i11;
 
-List<_i1.WidgetPreviewGroup> previews() => [
-      _i1.WidgetPreviewGroup(
-        name: 'Default',
-        previews: [
-          _i1.WidgetPreview(
-            scriptUri: 'STRIPPED',
-            packageName: 'foo_project',
-            builder: () => _i2.preview(),
-          ),
-          _i1.WidgetPreview(
-            scriptUri: 'STRIPPED',
-            packageName: 'foo_project',
-            brightness: _i3.brightnessConstant,
-            builder: () => _i4.barPreview2(),
-          ),
-          _i1.WidgetPreview(
-            scriptUri: 'STRIPPED',
-            builder: () =>
-                _i5.Text('package:foo_project/src/error.dart has errors!'),
-          ),
-          _i1.WidgetPreview(
-            scriptUri: 'STRIPPED',
-            builder: () => _i5.Text(
-                'Dependency of package:foo_project/src/transitive_error.dart has errors!'),
-          ),
-        ],
+List<_i1.WidgetPreview> previews() => [
+      _i2.buildWidgetPreview(
+        packageName: 'foo_project',
+        scriptUri: 'STRIPPED',
+        previewFunction: () => _i3.preview(),
+        transformedPreview: const _i4.Preview().transform(),
       ),
-      _i1.WidgetPreviewGroup(
-        name: 'group',
-        previews: [
-          _i1.WidgetPreview(
-            scriptUri: 'STRIPPED',
-            packageName: 'foo_project',
-            builder: () => _i4.barPreview1(),
+      _i2.buildWidgetPreview(
+        packageName: 'foo_project',
+        scriptUri: 'STRIPPED',
+        previewFunction: () => _i5.barPreview1(),
+        transformedPreview: const _i4.Preview(group: 'group').transform(),
+      ),
+      _i2.buildWidgetPreview(
+        packageName: 'foo_project',
+        scriptUri: 'STRIPPED',
+        previewFunction: () => _i5.barPreview2(),
+        transformedPreview:
+            const _i4.Preview(brightness: _i6.brightnessConstant).transform(),
+      ),
+      _i2.buildWidgetPreview(
+        packageName: 'foo_project',
+        scriptUri: 'STRIPPED',
+        previewFunction: () => _i5.barPreview3(),
+        transformedPreview: const _i4.Preview(
+          group: 'group',
+          name: 'Foo',
+          size: _i7.Size(
+            123.0,
+            456.0,
           ),
-          _i1.WidgetPreview(
-            scriptUri: 'STRIPPED',
-            packageName: 'foo_project',
-            name: 'Foo',
-            size: const _i6.Size(
-              123.0,
-              456.0,
-            ),
-            textScaleFactor: 50.0,
-            theme: _i7.myThemeData(),
-            brightness: _i6.Brightness.dark,
-            localizations: _i8.myLocalizations(),
-            builder: () =>
-                _i9.wrapper(_i10.Builder(builder: _i4.barPreview3())),
-          ),
-        ],
+          textScaleFactor: 50.0,
+          wrapper: _i8.wrapper,
+          brightness: _i7.Brightness.dark,
+          theme: _i9.myThemeData,
+          localizations: _i10.myLocalizations,
+        ).transform(),
+      ),
+      ..._i2.buildMultiWidgetPreview(
+        packageName: 'foo_project',
+        scriptUri: 'STRIPPED',
+        previewFunction: () => _i11.preview(),
+        preview: const _i11.BrightnessPreview(name: 'Foo'),
+      ),
+      _i2.buildWidgetPreview(
+        packageName: 'foo_project',
+        scriptUri: 'STRIPPED',
+        previewFunction: () => _i11.preview(),
+        transformedPreview:
+            const _i11.FixedSizePreview(name: 'Bar').transform(),
+      ),
+      _i2.buildWidgetPreviewError(
+        packageName: 'foo_project',
+        scriptUri: 'STRIPPED',
+        packageUri: 'package:foo_project/src/error.dart',
+        functionName: 'preview',
+        dependencyHasErrors: false,
+      ),
+      _i2.buildWidgetPreviewError(
+        packageName: 'foo_project',
+        scriptUri: 'STRIPPED',
+        packageUri: 'package:foo_project/src/transitive_error.dart',
+        functionName: 'preview',
+        dependencyHasErrors: true,
       ),
     ];
 ''';
         expect(
-          generatedPreviewFile.readAsStringSync().replaceAll(
-            RegExp(r"scriptUri:\s*'file:\/\/\/\S*',"),
-            "scriptUri: 'STRIPPED',",
-          ),
+          generatedPreviewFile.readAsStringSync().stripScriptUris,
           expectedGeneratedPreviewFileContents,
         );
 
@@ -304,10 +377,12 @@ List<_i1.WidgetPreviewGroup> previews() => [
         // - An import of the widget preview library
         // - A top-level function 'List<WidgetPreviewGroup> previews()' that returns an empty list.
         const emptyGeneratedPreviewFileContents = '''
+// ignore_for_file: implementation_imports
+
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'widget_preview.dart' as _i1;
 
-List<_i1.WidgetPreviewGroup> previews() => [];
+List<_i1.WidgetPreview> previews() => [];
 ''';
         expect(generatedPreviewFile.readAsStringSync(), emptyGeneratedPreviewFileContents);
       },

@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/widget_previews.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:widget_preview_scaffold/src/widget_preview.dart';
-import 'package:widget_preview_scaffold/src/widget_preview_rendering.dart';
+import 'package:widget_preview_scaffold/src/widget_preview_rendering.dart'
+    hide PreviewWidget;
 import 'package:widget_preview_scaffold/src/widget_preview_scaffold_controller.dart';
 
 import 'utils/widget_preview_scaffold_test_utils.dart';
@@ -14,7 +16,7 @@ void main() {
   testWidgets(
     'Help message is displayed with link to documentation when no previews are detected',
     (tester) async {
-      final currentPreviews = <WidgetPreviewGroup>[];
+      final currentPreviews = <WidgetPreview>[];
 
       final controller = WidgetPreviewScaffoldController(
         dtdServicesOverride: FakeWidgetPreviewScaffoldDtdServices(),
@@ -41,11 +43,11 @@ void main() {
       expect(widgetPreviewWidgetFinder, findsNothing);
 
       currentPreviews.add(
-        WidgetPreviewGroup(
-          name: 'group',
-          previews: <WidgetPreview>[
-            WidgetPreview(scriptUri: '', builder: () => const Text('Foo')),
-          ],
+        WidgetPreview(
+          scriptUri: '',
+          builder: () => const Text('Foo'),
+          previewData: Preview(),
+          packageName: '',
         ),
       );
 
