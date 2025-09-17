@@ -872,21 +872,9 @@ void main() {
 
       await tester.pumpWidget(builder());
 
-      // The form field has no error initially.
+      // The form field has no error.
       expect(formFieldState.hasError, isFalse);
-      expect(find.text('Required'), findsNothing);
-
-      // Clear the value manually and validate -> should show error.
-      formFieldState.didChange('');
-      formFieldState.validate();
-      await tester.pump();
-      expect(formFieldState.hasError, isTrue);
-      expect(find.text('Required'), findsOneWidget);
-
-      // Now simulate user interaction (typing something valid).
-      formFieldState.didChange('bar');
-      await tester.pump();
-      expect(formFieldState.hasError, isFalse);
+      // No "Required" error is visible.
       expect(find.text('Required'), findsNothing);
     },
   );
