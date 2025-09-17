@@ -14040,7 +14040,7 @@ void main() {
       'autocorrect: false',
       'smartDashesType: disabled',
       'smartQuotesType: disabled',
-      'maxLines: 10.0',
+      'maxLines: 10',
       'maxLength: 100',
       'maxLengthEnforcement: none',
       'textInputAction: done',

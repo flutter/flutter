@@ -193,7 +193,7 @@ class DropdownMenu<T> extends StatefulWidget {
     required this.dropdownMenuEntries,
     this.inputFormatters,
     this.closeBehavior = DropdownMenuCloseBehavior.all,
-    this.maxLines = 1.0,
+    this.maxLines = 1,
     this.textInputAction,
     this.cursorHeight,
     this.restorationId,
