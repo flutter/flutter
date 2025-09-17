@@ -1559,7 +1559,7 @@ plugins {
         expect(updatedPubspecContents, validPubspecWithDependenciesAndNullValues);
       });
     });
-    
+
     group('Android project file getters', () {
       _testInMemory(
         'Project.android.gradleWrapperPropertiesFile resolves to gradle/wrapper/gradle-wrapper.properties',
@@ -1570,6 +1570,7 @@ plugins {
           final Directory androidDir = tempDir.childDirectory('android')
             ..createSync(recursive: true);
 
+          // Create gradle/wrapper/gradle-wrapper.properties inside the fake android dir
           final File expected =
               androidDir
                   .childDirectory('gradle')
