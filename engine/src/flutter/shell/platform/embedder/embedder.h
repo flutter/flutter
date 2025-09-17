@@ -1569,6 +1569,10 @@ typedef struct {
   /// The reading direction for `label`, `value`, `hint`, `increasedValue`,
   /// `decreasedValue`, and `tooltip`.
   FlutterTextDirection text_direction;
+  /// The heading level for this node. A value of 0 means the node is not a
+  /// heading; higher values (1, 2, …) indicate the heading rank, with lower
+  /// numbers being higher-level headings.
+  int32_t heading_level;
   /// The bounding box for this node in its coordinate system.
   FlutterRect rect;
   /// The transform from this node's coordinate system to its parent's
@@ -1648,6 +1652,10 @@ typedef struct {
   /// The reading direction for `label`, `value`, `hint`, `increasedValue`,
   /// `decreasedValue`, and `tooltip`.
   FlutterTextDirection text_direction;
+  /// The heading level for this node. A value of 0 means the node is not a
+  /// heading; higher values (1, 2, …) indicate the heading rank, with lower
+  /// numbers being higher-level headings.
+  int32_t heading_level;
   /// The bounding box for this node in its coordinate system.
   FlutterRect rect;
   /// The transform from this node's coordinate system to its parent's
