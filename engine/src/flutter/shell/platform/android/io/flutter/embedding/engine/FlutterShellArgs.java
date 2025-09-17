@@ -20,7 +20,6 @@ import java.util.*;
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class FlutterShellArgs {
-  public static final String ARG_KEY_TRACE_STARTUP = "trace-startup";
   public static final String ARG_TRACE_STARTUP = "--trace-startup";
   public static final String ARG_KEY_START_PAUSED = "start-paused";
   public static final String ARG_START_PAUSED = "--start-paused";
@@ -75,9 +74,6 @@ public class FlutterShellArgs {
     // there are many security-sensitive args in the binary.
     ArrayList<String> args = new ArrayList<>();
 
-    if (intent.getBooleanExtra(ARG_KEY_TRACE_STARTUP, false)) {
-      args.add(ARG_TRACE_STARTUP);
-    }
     if (intent.getBooleanExtra(ARG_KEY_START_PAUSED, false)) {
       args.add(ARG_START_PAUSED);
     }
