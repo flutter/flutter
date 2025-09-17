@@ -531,7 +531,6 @@ class CupertinoPopupSurface extends StatelessWidget {
   /// Creates an iOS-style rounded rectangle popup surface.
   const CupertinoPopupSurface({
     super.key,
-    this.boundByObject = true,
     this.blurSigma = defaultBlurSigma,
     this.isSurfacePainted = true,
     required this.child,
@@ -556,8 +555,6 @@ class CupertinoPopupSurface extends StatelessWidget {
   /// Defaults to true.
   final bool isSurfacePainted;
 
-  final bool boundByObject;
-
   /// The widget below this widget in the tree.
   // Because [CupertinoPopupSurface] is composed of proxy boxes, which mimic
   // the size of their child, a [child] is required to ensure that this surface
@@ -571,7 +568,7 @@ class CupertinoPopupSurface extends StatelessWidget {
   static const double defaultBlurSigma = 30.0;
 
   /// The default corner radius of a [CupertinoPopupSurface].
-  static const BorderRadius _clipper = BorderRadius.all(Radius.circular(0));
+  static const BorderRadius _clipper = BorderRadius.all(Radius.circular(13));
 
   // The [ColorFilter] matrix used to saturate widgets underlying a
   // [CupertinoPopupSurface] when the ambient [CupertinoThemeData.brightness] is
@@ -598,10 +595,26 @@ class CupertinoPopupSurface extends StatelessWidget {
   //    ];
   //  }
   static const List<double> _lightSaturationMatrix = <double>[
-    0.5643277629, 0.0503040064, 0.004916969851, 0, 90, //
-    0.01454388332, 0.6001652209, 0.00492659852, 0, 89, //
-    0.01452121122, 0.05031594338, 0.5548243817, 0, 91, //
-    0.00, 0.00, 0.00, 1.00, 0.00,
+    1.74,
+    -0.40,
+    -0.17,
+    0.00,
+    0.00,
+    -0.26,
+    1.60,
+    -0.17,
+    0.00,
+    0.00,
+    -0.26,
+    -0.40,
+    1.83,
+    0.00,
+    0.00,
+    0.00,
+    0.00,
+    0.00,
+    1.00,
+    0.00,
   ];
 
   // The [ColorFilter] matrix used to saturate widgets underlying a
@@ -663,7 +676,7 @@ class CupertinoPopupSurface extends StatelessWidget {
   /// Defaults to true.
   static bool debugIsVibrancePainted = true;
 
-  ImageFilterConfig? _buildFilter(Brightness? brightness) {
+  ImageFilter? _buildFilter(Brightness? brightness) {
     bool isVibrancePainted = true;
     assert(() {
       isVibrancePainted = debugIsVibrancePainted;
@@ -673,27 +686,27 @@ class CupertinoPopupSurface extends StatelessWidget {
       if (blurSigma == 0) {
         return null;
       }
-      return ImageFilterConfig.blur(sigmaX: blurSigma, sigmaY: blurSigma, useObjectBounds: boundByObject);
+      return ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma);
     }
 
-    final ImageFilterConfig colorFilter = ImageFilterConfig.filter(switch (brightness) {
+    final ColorFilter colorFilter = switch (brightness) {
       Brightness.dark => const ColorFilter.matrix(_darkSaturationMatrix),
       Brightness.light || null => const ColorFilter.matrix(_lightSaturationMatrix),
-    });
+    };
 
     if (blurSigma == 0) {
       return colorFilter;
     }
 
-    return ImageFilterConfig.compose(
+    return ImageFilter.compose(
       inner: colorFilter,
-      outer: ImageFilterConfig.blur(sigmaX: blurSigma, sigmaY: blurSigma, useObjectBounds: boundByObject),
+      outer: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final ImageFilterConfig? filter = _buildFilter(CupertinoTheme.maybeBrightnessOf(context));
+    final ImageFilter? filter = _buildFilter(CupertinoTheme.maybeBrightnessOf(context));
     Widget contents = child;
 
     if (isSurfacePainted) {
@@ -706,7 +719,7 @@ class CupertinoPopupSurface extends StatelessWidget {
     if (filter != null) {
       return ClipRSuperellipse(
         borderRadius: _clipper,
-        child: BackdropFilter(filterConfig: filter, child: contents),
+        child: BackdropFilter(filter: filter, child: contents),
       );
     }
 
