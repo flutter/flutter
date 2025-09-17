@@ -39,6 +39,7 @@ std::unique_ptr<FlutterSemanticsFlags> ConvertToFlutterSemanticsFlags(
       .is_expanded = ToFlutterTristate(source.isExpanded),
       .is_required = ToFlutterTristate(source.isRequired),
       .is_focused = ToFlutterTristate(source.isFocused),
+      .is_a11y_focusable = ToFlutterTristate(source.isA11yFocusable),
       .is_button = source.isButton,
       .is_text_field = source.isTextField,
       .is_in_mutually_exclusive_group = source.isInMutuallyExclusiveGroup,

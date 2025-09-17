@@ -30,6 +30,7 @@ struct SemanticsFlags {
   SemanticsTristate isExpanded = SemanticsTristate::kNone;
   SemanticsTristate isRequired = SemanticsTristate::kNone;
   SemanticsTristate isFocused = SemanticsTristate::kNone;
+  SemanticsTristate isA11yFocusable = SemanticsTristate::kNone;
   bool isButton = false;
   bool isTextField = false;
   bool isInMutuallyExclusiveGroup = false;
@@ -68,6 +69,7 @@ class NativeSemanticsFlags
                                  int isExpanded,
                                  int isRequired,
                                  int isFocused,
+                                 int isA11yFocusable,
                                  bool isButton,
                                  bool isTextField,
                                  bool isInMutuallyExclusiveGroup,
