@@ -41,13 +41,12 @@ out f16vec4 frag_color;
 
 void main() {
   f16vec4 total_color = f16vec4(0.0hf);
-  vec4 bounds = frag_info.bounds_uv;
 
   for (int i = 0; i < int(kernel_samples.sample_count); i++) {
-    vec2 coord = v_texture_coords + kernel_samples.sample_data[i].xy;
     float16_t coefficient = float16_t(kernel_samples.sample_data[i].z);
-
-    total_color += Sample(texture_sampler, coord) * coefficient;
+    total_color += coefficient *
+                   Sample(texture_sampler,
+                          v_texture_coords + kernel_samples.sample_data[i].xy);
   }
 
   frag_color = (frag_info.bounded == 1.0 && total_color.w != 0)
