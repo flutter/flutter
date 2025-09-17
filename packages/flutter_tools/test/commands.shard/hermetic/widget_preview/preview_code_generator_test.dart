@@ -277,8 +277,6 @@ void main() {
         codeGenerator.populatePreviewsInGeneratedPreviewScaffold(details);
         expect(generatedPreviewFile, exists);
 
-        print(generatedPreviewFile.readAsStringSync().stripScriptUris);
-
         const expectedGeneratedPreviewFileContents = '''
 // ignore_for_file: implementation_imports
 
