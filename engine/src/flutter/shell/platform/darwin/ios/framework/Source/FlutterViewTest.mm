@@ -173,7 +173,7 @@ FLUTTER_ASSERT_ARC
   XCTAssertEqual(lifecycleDelegate.engines.count, 0.0);
 }
 
-- (void)testNilWindowForViewWhenPreviousEqualsNew {
+- (void)testViewWillMoveToWindowWhenPreviousEqualsNew {
   NSDictionary* mocks = [self createWindowMocks];
   FlutterView* view = (FlutterView*)mocks[@"view"];
   id mockLifecycleDelegate = mocks[@"mockLifecycleDelegate"];
@@ -187,9 +187,9 @@ FLUTTER_ASSERT_ARC
 
   [mockView willMoveToWindow:mockWindow];
 
-  OCMVerify(times(1), [mockLifecycleDelegate addFlutterEngine:mockEngine]);
+  OCMVerify(times(0), [mockLifecycleDelegate addFlutterEngine:mockEngine]);
   OCMVerify(times(0), [mockLifecycleDelegate removeFlutterEngine:[OCMArg any]]);
-  XCTAssertEqual(lifecycleDelegate.engines.count, 1.0);
+  XCTAssertEqual(lifecycleDelegate.engines.count, 0.0);
 }
 
 - (NSDictionary*)createWindowMocks {
