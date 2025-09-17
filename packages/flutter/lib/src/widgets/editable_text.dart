@@ -1071,6 +1071,10 @@ class EditableText extends StatefulWidget {
   final bool enableSuggestions;
 
   /// The text style to use for the editable text.
+  ///
+  /// This [style]s [TextStyle.fontWeight], [TextStyle.height], [TextStyle.letterSpacing],
+  /// and [TextStyle.wordSpacing] will be overriden by text spacing values from the nearest
+  /// [MediaQuery] ancestor, regardless of its [TextStyle.inherit] value.
   final TextStyle style;
 
   /// Controls the undo state of the current editable text.
