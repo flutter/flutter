@@ -1570,7 +1570,6 @@ plugins {
           final Directory androidDir = tempDir.childDirectory('android')
             ..createSync(recursive: true);
 
-          // Create gradle/wrapper/gradle-wrapper.properties inside the fake android dir
           final File expected =
               androidDir
                   .childDirectory('gradle')
