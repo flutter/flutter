@@ -1,5 +1,6 @@
 # RBE for Flutter Engine Developers
 
+g
 ## Overview
 
 This is documentation on setting up RBE for building the Flutter engine. It is
@@ -211,7 +212,7 @@ The logs for RBE live under the system `/tmp` folder in the files `/tmp/reproxy.
 In CI runs, the RBE logs are also available by following the links as in the
 screenshot below under `teardown remote execution > collect rbe logs`:
 
-![LUCI logs links](luci.png "LUCI logs links")
+![LUCI logs links](../../engine/src/flutter/docs/rbe/luci.png "LUCI logs links")
 
 ### Dependency analysis failures
 
