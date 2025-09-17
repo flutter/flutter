@@ -971,7 +971,16 @@ Future<bool> _handleIssues(
   } else if (hasProvisioningProfileIssue) {
     logger.printError('');
     logger.printError(
-      'It appears that there was a problem signing your application prior to installation on the device.',
+      'It appears there was a code signing problem before installing the app on the device.\n'
+      '\n'
+      'Try these steps in Xcode:\n'
+      '  1. Open ios/Runner.xcworkspace\n'
+      '  2. Select the Runner target > Signing & Capabilities\n'
+      '  3. Choose a Team and ensure the Bundle Identifier is unique\n'
+      '  4. Add your Apple ID in Xcode (Settings > Accounts) if needed\n'
+      '  5. Build the Runner once from Xcode to generate provisioning\n'
+      '\n'
+      'Then, return to the terminal and re-run the Flutter command.',
     );
     logger.printError('');
     logger.printError(
