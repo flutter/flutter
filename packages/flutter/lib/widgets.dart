@@ -93,6 +93,7 @@ export 'src/widgets/overflow_bar.dart';
 export 'src/widgets/overlay.dart';
 export 'src/widgets/overscroll_indicator.dart';
 export 'src/widgets/page_storage.dart';
+export 'src/widgets/page_transitions_builder.dart';
 export 'src/widgets/page_view.dart';
 export 'src/widgets/pages.dart';
 export 'src/widgets/performance_overlay.dart';
