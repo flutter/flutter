@@ -202,9 +202,7 @@ public class PlatformPlugin {
         view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
         break;
       case HEAVY_IMPACT:
-        if (Build.VERSION.SDK_INT >= API_LEVELS.API_23) {
-          view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
-        }
+        view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
         break;
       case SELECTION_CLICK:
         view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
@@ -233,33 +231,30 @@ public class PlatformPlugin {
     // Set up a listener to notify the framework when the system ui has changed.
     View decorView = activity.getWindow().getDecorView();
     decorView.setOnSystemUiVisibilityChangeListener(
-        new View.OnSystemUiVisibilityChangeListener() {
-          @Override
-          public void onSystemUiVisibilityChange(int visibility) {
-            // `platformChannel.systemChromeChanged` may trigger a callback that eventually results
-            // in a call to `setSystemUiVisibility`.
-            // `setSystemUiVisibility` must not be called in the same frame as when
-            // `onSystemUiVisibilityChange` is received though.
-            //
-            // As such, post `platformChannel.systemChromeChanged` to the view handler to ensure
-            // that downstream callbacks are trigged on the next frame.
-            decorView.post(
-                () -> {
-                  if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
-                    // The system bars are visible. Make any desired adjustments to
-                    // your UI, such as showing the action bar or other navigational
-                    // controls. Another common action is to set a timer to dismiss
-                    // the system bars and restore the fullscreen mode that was
-                    // previously enabled.
-                    platformChannel.systemChromeChanged(true);
-                  } else {
-                    // The system bars are NOT visible. Make any desired adjustments
-                    // to your UI, such as hiding the action bar or other
-                    // navigational controls.
-                    platformChannel.systemChromeChanged(false);
-                  }
-                });
-          }
+        visibility -> {
+          // `platformChannel.systemChromeChanged` may trigger a callback that eventually results
+          // in a call to `setSystemUiVisibility`.
+          // `setSystemUiVisibility` must not be called in the same frame as when
+          // `onSystemUiVisibilityChange` is received though.
+          //
+          // As such, post `platformChannel.systemChromeChanged` to the view handler to ensure
+          // that downstream callbacks are trigged on the next frame.
+          decorView.post(
+              () -> {
+                if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
+                  // The system bars are visible. Make any desired adjustments to
+                  // your UI, such as showing the action bar or other navigational
+                  // controls. Another common action is to set a timer to dismiss
+                  // the system bars and restore the fullscreen mode that was
+                  // previously enabled.
+                  platformChannel.systemChromeChanged(true);
+                } else {
+                  // The system bars are NOT visible. Make any desired adjustments
+                  // to your UI, such as hiding the action bar or other
+                  // navigational controls.
+                  platformChannel.systemChromeChanged(false);
+                }
+              });
         });
   }
 
@@ -448,25 +443,23 @@ public class PlatformPlugin {
     // If transparent, SDK 29 and higher may apply a translucent scrim behind the bar to ensure
     // proper contrast. This can be overridden with
     // SystemChromeStyle.systemStatusBarContrastEnforced.
-    if (Build.VERSION.SDK_INT >= API_LEVELS.API_23) {
-      if (systemChromeStyle.statusBarIconBrightness != null) {
-        switch (systemChromeStyle.statusBarIconBrightness) {
-          case DARK:
-            // Dark status bar icon brightness.
-            // Light status bar appearance.
-            windowInsetsControllerCompat.setAppearanceLightStatusBars(true);
-            break;
-          case LIGHT:
-            // Light status bar icon brightness.
-            // Dark status bar appearance.
-            windowInsetsControllerCompat.setAppearanceLightStatusBars(false);
-            break;
-        }
+    if (systemChromeStyle.statusBarIconBrightness != null) {
+      switch (systemChromeStyle.statusBarIconBrightness) {
+        case DARK:
+          // Dark status bar icon brightness.
+          // Light status bar appearance.
+          windowInsetsControllerCompat.setAppearanceLightStatusBars(true);
+          break;
+        case LIGHT:
+          // Light status bar icon brightness.
+          // Dark status bar appearance.
+          windowInsetsControllerCompat.setAppearanceLightStatusBars(false);
+          break;
       }
+    }
 
-      if (systemChromeStyle.statusBarColor != null) {
-        window.setStatusBarColor(systemChromeStyle.statusBarColor);
-      }
+    if (systemChromeStyle.statusBarColor != null) {
+      window.setStatusBarColor(systemChromeStyle.statusBarColor);
     }
     // You can't override the enforced contrast for a transparent status bar until SDK 29.
     // This overrides the translucent scrim that may be placed behind the bar on SDK 29+ to ensure
