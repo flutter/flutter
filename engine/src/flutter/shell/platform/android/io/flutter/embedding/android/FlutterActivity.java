@@ -809,6 +809,13 @@ public class FlutterActivity extends Activity
         /*shouldDelayFirstAndroidViewDraw=*/ getRenderMode() == RenderMode.surface);
   }
 
+  /**
+   * Configures the status bar for a fullscreen Flutter experience.
+   *
+   * <p>On API levels before 35, this sets a translucent status bar. On API level 35 and above, this
+   * is a no-op as the system handles the status bar appearance, resulting in a fully transparent
+   * status bar.
+   */
   private void configureStatusBarForFullscreenFlutterExperience() {
     Window window = getWindow();
     window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
