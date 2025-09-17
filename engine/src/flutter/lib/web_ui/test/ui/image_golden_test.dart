@@ -311,7 +311,7 @@ Future<void> testMain() async {
         expect(pngData, isNotNull);
         expect(pngData!.lengthInBytes, isNonZero);
       });
-    });
+    }, skip: isWimp);
   }
 
   emitImageTests('picture_toImage', () {

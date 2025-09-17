@@ -72,7 +72,8 @@ impeller_shaders("entity_shaders") {
 impeller_shaders("modern_entity_shaders") {
   name = "modern"
 
-  if (impeller_enable_opengles) {
+  # wasm only builds GLES3, which has a hard coded language version
+  if (impeller_enable_opengles && !is_wasm) {
     gles_language_version = 460
   }
 

@@ -136,6 +136,7 @@ class CopyArtifactsStep implements PipelineStep {
       copied.add('Skwasm');
       await copyWasmLibrary('skwasm', skwasmSourceDirectory, 'canvaskit');
       await copyWasmLibrary('skwasm_heavy', skwasmHeavySourceDirectory, 'canvaskit');
+      await copyWasmLibrary('wimp', skwasmSourceDirectory, 'canvaskit');
     }
     print('Copied artifacts: ${copied.join(', ')}');
   }

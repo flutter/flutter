@@ -26,6 +26,8 @@ class DlRuntimeEffectImpeller final : public DlRuntimeEffect {
   // |DlRuntimeEffect|
   std::shared_ptr<impeller::RuntimeStage> runtime_stage() const override;
 
+  size_t uniform_size() const override;
+
  private:
   DlRuntimeEffectImpeller() = delete;
 
