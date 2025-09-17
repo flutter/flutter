@@ -73,6 +73,7 @@
 ^tools/android_sdk/packages\.txt$
 ^tools/fuchsia/.*
 ^tools/licenses_cpp/data/.*
+^third_party/vulkan-deps/LICENSE$
 ################################################################################
 # Instances that don't have a clear resolution yet.
 ################################################################################
