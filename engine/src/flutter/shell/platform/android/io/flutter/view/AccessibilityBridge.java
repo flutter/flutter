@@ -1728,7 +1728,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     }
 
     // If all the routes are in the previous route, get the last route.
-    if (lastAdded == null && newRoutes.size() > 0) {
+    if (lastAdded == null && !newRoutes.isEmpty()) {
       lastAdded = newRoutes.get(newRoutes.size() - 1);
     }
 
@@ -2467,7 +2467,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       if (label == null && previousLabel == null) {
         return false;
       }
-      return label == null || previousLabel == null || !label.equals(previousLabel);
+      return label == null || !label.equals(previousLabel);
     }
 
     private void log(@NonNull String indent, boolean recursive) {

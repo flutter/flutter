@@ -18,12 +18,12 @@ flowchart TD
     vulkan_exts{Vulkan Supports Extensions}
     vulkan[Use Vulkan Backend]
     opengl[Use OpenGL Backend]
-    
+
     start-->device_support
-    
+
     device_support-->|Yes|android_api
     device_support-->|No|opengl
-    
+
     android_api-->|>= Android 29|vulkan_version
     android_api-->|< Android 29|opengl
 
@@ -88,4 +88,3 @@ There are no issues with SurfaceTextures when using the GLES backend.
 We do not currently support rendering these textures when using the Vulkan
 backend. Supporting this will require adding support for importing GL textures
 into Vulkan textures which will have performance implications.
-
