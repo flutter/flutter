@@ -270,6 +270,27 @@ void main() {
     variant: TargetPlatformVariant.all(),
   );
 
+  testWidgets(
+    'Builds empty toolbar when children and buttonItems are null',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Center(
+            child: AdaptiveTextSelectionToolbar(
+              anchors: TextSelectionToolbarAnchors(primaryAnchor: Offset.zero),
+              children: null,
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.getSize(find.byType(AdaptiveTextSelectionToolbar)), Size.zero);
+      expect(tester.takeException(), isNull);
+    },
+    skip: isBrowser, // [intended] on web the browser handles the context menu.
+    variant: TargetPlatformVariant.all(),
+  );
+
   group('buttonItems', () {
     testWidgets(
       'getEditableTextButtonItems builds the correct button items per-platform',

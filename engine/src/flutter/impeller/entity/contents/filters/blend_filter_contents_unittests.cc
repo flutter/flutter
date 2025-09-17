@@ -52,8 +52,8 @@ TEST_P(BlendFilterContentsTest, AdvancedBlendColorAlignsColorTo4) {
   std::shared_ptr<ContentContext> renderer = GetContentContext();
   // Add random byte to get the HostBuffer in a bad alignment.
   uint8_t byte = 0xff;
-  BufferView buffer_view =
-      renderer->GetTransientsBuffer().Emplace(&byte, /*length=*/1, /*align=*/1);
+  BufferView buffer_view = renderer->GetTransientsDataBuffer().Emplace(
+      &byte, /*length=*/1, /*align=*/1);
   EXPECT_EQ(buffer_view.GetRange().offset, 4u);
   EXPECT_EQ(buffer_view.GetRange().length, 1u);
   Entity entity;
