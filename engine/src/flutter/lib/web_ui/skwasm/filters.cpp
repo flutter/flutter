@@ -69,6 +69,8 @@ SKWASM_EXPORT void imageFilter_getFilterBounds(
     DlIRect* inOutBounds) {
   auto dlFilter = filter->shared();
   if (dlFilter == nullptr) {
+    // If there is no filter, the output bounds are the same as the input
+    // bounds.
     return;
   }
   DlIRect inRect = *inOutBounds;
