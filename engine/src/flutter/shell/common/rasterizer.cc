@@ -463,6 +463,11 @@ void Rasterizer::CacheRuntimeStage(
   }
 }
 
+// |SnapshotDelegate|
+bool Rasterizer::MakeRenderContextCurrent() {
+  return snapshot_controller_->MakeRenderContextCurrent();
+}
+
 fml::Milliseconds Rasterizer::GetFrameBudget() const {
   return delegate_.GetFrameBudget();
 };

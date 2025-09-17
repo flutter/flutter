@@ -10,6 +10,7 @@
 #include "flutter/common/task_runners.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/lib/ui/painting/image.h"
+#include "flutter/lib/ui/snapshot_delegate.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/shell/common/shell_test.h"
 #include "flutter/shell/common/thread_host.h"
@@ -66,6 +67,47 @@ class MockSyncSwitch {
 
   MOCK_METHOD(void, Execute, (const Handlers& handlers), (const));
   MOCK_METHOD(void, SetSwitch, (bool value));
+};
+
+class MockSnapshotDelegate : public SnapshotDelegate {
+ public:
+  MockSnapshotDelegate() : weak_factory_(this) {}
+
+  MOCK_METHOD(std::unique_ptr<GpuImageResult>,
+              MakeSkiaGpuImage,
+              (sk_sp<DisplayList>, const SkImageInfo&),
+              (override));
+  MOCK_METHOD(std::shared_ptr<TextureRegistry>,
+              GetTextureRegistry,
+              (),
+              (override));
+  MOCK_METHOD(GrDirectContext*, GetGrContext, (), (override));
+  MOCK_METHOD(void,
+              MakeRasterSnapshot,
+              (sk_sp<DisplayList>,
+               DlISize,
+               std::function<void(sk_sp<DlImage>)>),
+              (override));
+  MOCK_METHOD(sk_sp<DlImage>,
+              MakeRasterSnapshotSync,
+              (sk_sp<DisplayList>, DlISize),
+              (override));
+  MOCK_METHOD(sk_sp<SkImage>,
+              ConvertToRasterImage,
+              (sk_sp<SkImage>),
+              (override));
+  MOCK_METHOD(void,
+              CacheRuntimeStage,
+              (const std::shared_ptr<impeller::RuntimeStage>&),
+              (override));
+  MOCK_METHOD(bool, MakeRenderContextCurrent, (), (override));
+
+  fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> GetWeakPtr() {
+    return weak_factory_.GetWeakPtr();
+  }
+
+ private:
+  fml::TaskRunnerAffineWeakPtrFactory<MockSnapshotDelegate> weak_factory_;
 };
 
 TEST_F(ShellTest, EncodeImageGivesExternalTypedData) {
@@ -269,6 +311,7 @@ TEST_F(ShellTest, EncodeImageRetries) {
   AddNativeCallback("ValidateNotNull", CREATE_NATIVE_ENTRY(validate_not_null));
 
   ASSERT_TRUE(shell->IsSetup());
+
   auto configuration = RunConfiguration::InferFromSettings(settings);
   configuration.SetEntrypoint("toByteDataRetries");
 
@@ -317,6 +360,7 @@ TEST_F(ShellTest, EncodeImageRetryOverflows) {
   AddNativeCallback("ValidateNotNull", CREATE_NATIVE_ENTRY(validate_not_null));
 
   ASSERT_TRUE(shell->IsSetup());
+
   auto configuration = RunConfiguration::InferFromSettings(settings);
   configuration.SetEntrypoint("toByteDataRetryOverflows");
 
@@ -505,6 +549,9 @@ TEST(ImageEncodingImpellerTest, ConvertDlImageToSkImage16Float) {
   buffer.reserve(100 * 100 * 8);
   auto context = MakeConvertDlImageToSkImageContext(buffer);
   bool did_call = false;
+  MockSnapshotDelegate snapshot_delegate;
+  EXPECT_CALL(snapshot_delegate, MakeRenderContextCurrent)
+      .WillRepeatedly(Return(true));
   ImageEncodingImpeller::ConvertDlImageToSkImage(
       image,
       [&did_call](const fml::StatusOr<sk_sp<SkImage>>& image) {
@@ -516,7 +563,7 @@ TEST(ImageEncodingImpellerTest, ConvertDlImageToSkImage16Float) {
         EXPECT_EQ(kRGBA_F16_SkColorType, image.value()->colorType());
         EXPECT_EQ(nullptr, image.value()->colorSpace());
       },
-      context);
+      snapshot_delegate.GetWeakPtr(), context);
   EXPECT_TRUE(did_call);
 }
 
@@ -532,6 +579,9 @@ TEST(ImageEncodingImpellerTest, ConvertDlImageToSkImage10XR) {
   buffer.reserve(100 * 100 * 4);
   auto context = MakeConvertDlImageToSkImageContext(buffer);
   bool did_call = false;
+  MockSnapshotDelegate snapshot_delegate;
+  EXPECT_CALL(snapshot_delegate, MakeRenderContextCurrent)
+      .WillRepeatedly(Return(true));
   ImageEncodingImpeller::ConvertDlImageToSkImage(
       image,
       [&did_call](const fml::StatusOr<sk_sp<SkImage>>& image) {
@@ -543,7 +593,7 @@ TEST(ImageEncodingImpellerTest, ConvertDlImageToSkImage10XR) {
         EXPECT_EQ(kBGR_101010x_XR_SkColorType, image.value()->colorType());
         EXPECT_EQ(nullptr, image.value()->colorSpace());
       },
-      context);
+      snapshot_delegate.GetWeakPtr(), context);
   EXPECT_TRUE(did_call);
 }
 
