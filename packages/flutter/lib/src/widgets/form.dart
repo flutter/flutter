@@ -80,7 +80,8 @@ class Form extends StatefulWidget {
          'onPopInvoked is deprecated; use onPopInvokedWithResult',
        ),
        assert(
-         ((onPopInvokedWithResult ?? onPopInvoked ?? canPop) == null) || onWillPop == null,
+         ((onPopInvokedWithResult ?? onPopInvoked ?? canPop) == null) ||
+             onWillPop == null,
          'onWillPop is deprecated; use canPop and/or onPopInvokedWithResult.',
        );
 
@@ -102,7 +103,8 @@ class Form extends StatefulWidget {
   /// * [Form.of], which is similar to this method, but asserts if no [Form]
   ///   ancestor is found.
   static FormState? maybeOf(BuildContext context) {
-    final _FormScope? scope = context.dependOnInheritedWidgetOfExactType<_FormScope>();
+    final _FormScope? scope =
+        context.dependOnInheritedWidgetOfExactType<_FormScope>();
     return scope?._formState;
   }
 
@@ -239,6 +241,7 @@ class Form extends StatefulWidget {
 class FormState extends State<Form> {
   int _generation = 0;
   bool _hasInteractedByUser = false;
+  bool _hasError = false;
   final Set<FormFieldState<dynamic>> _fields = <FormFieldState<dynamic>>{};
 
   // Called when a form field has changed. This will cause all form fields
@@ -249,6 +252,7 @@ class FormState extends State<Form> {
     _hasInteractedByUser = _fields.any(
       (FormFieldState<dynamic> field) => field._hasInteractedByUser.value,
     );
+    _hasError = _fields.any((FormFieldState<dynamic> field) => field.hasError);
     _forceRebuild();
   }
 
@@ -276,22 +280,35 @@ class FormState extends State<Form> {
         if (_hasInteractedByUser) {
           _validate();
         }
+      case AutovalidateMode.onUserInteractionIfError:
+        if (_hasInteractedByUser && _hasError) {
+          _validate();
+        }
       case AutovalidateMode.onUnfocus:
       case AutovalidateMode.disabled:
         break;
     }
 
     final Widget form;
-    if (widget.canPop != null || (widget.onPopInvokedWithResult ?? widget.onPopInvoked) != null) {
+    if (widget.canPop != null ||
+        (widget.onPopInvokedWithResult ?? widget.onPopInvoked) != null) {
       form = PopScope<Object?>(
         canPop: widget.canPop ?? true,
         onPopInvokedWithResult: widget._callPopInvoked,
-        child: _FormScope(formState: this, generation: _generation, child: widget.child),
+        child: _FormScope(
+          formState: this,
+          generation: _generation,
+          child: widget.child,
+        ),
       );
     } else {
       form = WillPopScope(
         onWillPop: widget.onWillPop,
-        child: _FormScope(formState: this, generation: _generation, child: widget.child),
+        child: _FormScope(
+          formState: this,
+          generation: _generation,
+          child: widget.child,
+        ),
       );
     }
     return Semantics(
@@ -349,7 +366,8 @@ class FormState extends State<Form> {
   ///  * [validate], which also validates descendant [FormField]s,
   /// and return true if there are no errors.
   Set<FormFieldState<Object?>> validateGranularly() {
-    final Set<FormFieldState<Object?>> invalidFields = <FormFieldState<Object?>>{};
+    final Set<FormFieldState<Object?>> invalidFields =
+        <FormFieldState<Object?>>{};
     _hasInteractedByUser = true;
     _forceRebuild();
     _validate(invalidFields);
@@ -359,12 +377,15 @@ class FormState extends State<Form> {
   bool _validate([Set<FormFieldState<Object?>>? invalidFields]) {
     bool hasError = false;
     String errorMessage = '';
-    final bool validateOnFocusChange = widget.autovalidateMode == AutovalidateMode.onUnfocus;
+    final bool validateOnFocusChange =
+        widget.autovalidateMode == AutovalidateMode.onUnfocus;
 
     for (final FormFieldState<dynamic> field in _fields) {
       final bool hasFocus = field._focusNode.hasFocus;
 
-      if (!validateOnFocusChange || !hasFocus || (validateOnFocusChange && hasFocus)) {
+      if (!validateOnFocusChange ||
+          !hasFocus ||
+          (validateOnFocusChange && hasFocus)) {
         final bool isFieldValid = field.validate();
         hasError |= !isFieldValid;
         // Ensure that only the first error message gets announced to the user.
@@ -404,9 +425,12 @@ class FormState extends State<Form> {
 }
 
 class _FormScope extends InheritedWidget {
-  const _FormScope({required super.child, required FormState formState, required int generation})
-    : _formState = formState,
-      _generation = generation;
+  const _FormScope({
+    required super.child,
+    required FormState formState,
+    required int generation,
+  }) : _formState = formState,
+       _generation = generation;
 
   final FormState _formState;
 
@@ -435,7 +459,8 @@ typedef FormFieldValidator<T> = String? Function(T? value);
 ///
 ///  * [FormField.errorBuilder], which is of this type, and passes the result error
 /// given by [TextFormField.validator].
-typedef FormFieldErrorBuilder = Widget Function(BuildContext context, String errorText);
+typedef FormFieldErrorBuilder =
+    Widget Function(BuildContext context, String errorText);
 
 /// Signature for being notified when a form field changes value.
 ///
@@ -627,7 +652,8 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   ///  * [validate], which may update [errorText] and [hasError].
   ///
   ///  * [FormField.forceErrorText], which also may update [errorText] and [hasError].
-  bool get isValid => widget.forceErrorText == null && widget.validator?.call(_value) == null;
+  bool get isValid =>
+      widget.forceErrorText == null && widget.validator?.call(_value) == null;
 
   /// Calls the [FormField]'s onSaved method with the current value.
   void save() {
@@ -747,6 +773,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
         });
       case AutovalidateMode.onUnfocus:
       case AutovalidateMode.onUserInteraction:
+      case AutovalidateMode.onUserInteractionIfError:
       case AutovalidateMode.disabled:
       case null:
         break;
@@ -772,6 +799,10 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
           if (_hasInteractedByUser.value) {
             _validate();
           }
+        case AutovalidateMode.onUserInteractionIfError:
+          if (_hasInteractedByUser.value && hasError) {
+            _validate();
+          }
         case AutovalidateMode.onUnfocus:
         case AutovalidateMode.disabled:
           break;
@@ -781,13 +812,15 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
     Form.maybeOf(context)?._register(this);
 
     final Widget child = Semantics(
-      validationResult: hasError
-          ? SemanticsValidationResult.invalid
-          : SemanticsValidationResult.valid,
+      validationResult:
+          hasError
+              ? SemanticsValidationResult.invalid
+              : SemanticsValidationResult.valid,
       child: widget.builder(this),
     );
 
-    if (Form.maybeOf(context)?.widget.autovalidateMode == AutovalidateMode.onUnfocus &&
+    if (Form.maybeOf(context)?.widget.autovalidateMode ==
+                AutovalidateMode.onUnfocus &&
             widget.autovalidateMode != AutovalidateMode.always ||
         widget.autovalidateMode == AutovalidateMode.onUnfocus) {
       return Focus(
@@ -827,4 +860,11 @@ enum AutovalidateMode {
   /// In order to validate all fields of a [Form] after the first time the user interacts
   /// with one, use [always] instead.
   onUnfocus,
+
+  /// Used to auto-validate [Form] and [FormField] only when a field
+  /// already has an error, and the user starts interacting with it again.
+  ///
+  /// This is useful for reducing unnecessary validation calls while
+  /// still ensuring errors are re-checked when the user attempts to fix them.
+  onUserInteractionIfError,
 }
