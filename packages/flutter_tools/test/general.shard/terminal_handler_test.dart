@@ -760,11 +760,11 @@ void main() {
       );
 
       final runner = terminalHandler.residentRunner as FakeResidentRunner;
-      final devtoolsHandler = runner.residentDevtoolsHandler as FakeResidentDevtoolsHandler;
+      final DartDevelopmentService dds = runner.flutterDevices.single.device!.dds;
 
-      expect(devtoolsHandler.calledLaunchDevToolsInBrowser, isFalse);
+      expect(dds.calledLaunchDevToolsInBrowser, isFalse);
       await terminalHandler.processTerminalInput('v');
-      expect(devtoolsHandler.calledLaunchDevToolsInBrowser, isFalse);
+      expect(dds.calledLaunchDevToolsInBrowser, isFalse);
     });
 
     testWithoutContext('w,W - debugDumpApp without service protocol is skipped', () async {
