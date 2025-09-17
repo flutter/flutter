@@ -133,9 +133,6 @@ public class LocalizationPlugin {
       }
       return supportedLocales.get(0);
     }
-
-    // Legacy locale resolution
-    // https://developer.android.com/guide/topics/resources/multilingual-support#preN
   }
 
   /**
