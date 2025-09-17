@@ -1881,8 +1881,11 @@ Waiting for the application to terminate...
 This log happens before the application is launched and should not be sent to FakeIOSCoreDeviceLogForwarder
 Launched application with com.example.my_app bundle identifier.
 Waiting for the application to terminate...
-[PreviewsAgentExecutorLibrary] This log happens after the application is launched but matches an ignore pattern and should be skipped
+2025-09-16 12:15:47.939171-0500 Runner[1230:133819] [PreviewsAgentExecutorLibrary] This log happens after the application is launched but matches an ignore pattern and should be skipped
+2025-09-16 12:15:47.939171-0500 Runner[1230:133819] This log happens after the application is launched but matches an ignore pattern and should be skipped
 This log happens after the application is launched and should be sent to FakeIOSCoreDeviceLogForwarder
+2025-09-16 12:15:47.939171-0500 Runner[1230:133819] flutter: This log happens after the application is launched and should be sent to FakeIOSCoreDeviceLogForwarder
+2025-09-16 12:15:47.939171-0500 Runner[1230:133819] [INFO:flutter/runtime/service_protocol.cc(121)] This log happens after the application is launched and should be sent to FakeIOSCoreDeviceLogForwarder
 ''',
           ),
         );
@@ -1896,12 +1899,14 @@ This log happens after the application is launched and should be sent to FakeIOS
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
         expect(logger.errorText, isEmpty);
-        expect(logForwarder.logs.length, 1);
+        expect(logForwarder.logs.length, 3);
         expect(
           logForwarder.logs,
-          contains(
+          containsAll([
             'This log happens after the application is launched and should be sent to FakeIOSCoreDeviceLogForwarder',
-          ),
+            '2025-09-16 12:15:47.939171-0500 Runner[1230:133819] flutter: This log happens after the application is launched and should be sent to FakeIOSCoreDeviceLogForwarder',
+            '2025-09-16 12:15:47.939171-0500 Runner[1230:133819] [INFO:flutter/runtime/service_protocol.cc(121)] This log happens after the application is launched and should be sent to FakeIOSCoreDeviceLogForwarder',
+          ]),
         );
         expect(
           logger.traceText,
@@ -1912,7 +1917,8 @@ This log happens after the application is launched and should be sent to FakeIOS
 This log happens before the application is launched and should not be sent to FakeIOSCoreDeviceLogForwarder
 Launched application with com.example.my_app bundle identifier.
 Waiting for the application to terminate...
-[PreviewsAgentExecutorLibrary] This log happens after the application is launched but matches an ignore pattern and should be skipped
+2025-09-16 12:15:47.939171-0500 Runner[1230:133819] [PreviewsAgentExecutorLibrary] This log happens after the application is launched but matches an ignore pattern and should be skipped
+2025-09-16 12:15:47.939171-0500 Runner[1230:133819] This log happens after the application is launched but matches an ignore pattern and should be skipped
 '''),
         );
         expect(result, isTrue);
