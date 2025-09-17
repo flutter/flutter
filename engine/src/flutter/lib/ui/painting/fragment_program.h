@@ -19,7 +19,8 @@
 
 namespace tonic {
 
-// DartConverter template for converting a Dart Uint8List to a C++ std::vector<uint8_t>.
+// DartConverter template for converting a Dart Uint8List to a C++
+// std::vector<uint8_t>.
 template <>
 struct DartConverter<std::vector<uint8_t>> {
   using NativeType = std::vector<uint8_t>;
@@ -52,8 +53,8 @@ struct DartConverter<std::vector<uint8_t>> {
   }
 
   static NativeType FromArguments(Dart_NativeArguments args,
-                                    int index,
-                                    Dart_Handle& exception) {
+                                  int index,
+                                  Dart_Handle& exception) {
     Dart_Handle handle = Dart_GetNativeArgument(args, index);
     if (Dart_IsError(handle)) {
       exception = handle;
@@ -71,7 +72,7 @@ struct DartConverter<std::vector<uint8_t>> {
   static bool AllowedInLeafCall() { return kAllowedInLeafCall; }
 };
 
-} // namespace tonic
+}  // namespace tonic
 
 namespace flutter {
 
@@ -87,7 +88,8 @@ class FragmentProgram : public RefCountedDartWrappable<FragmentProgram> {
 
   std::string initFromAsset(const std::string& asset_name);
 
-  std::string initFromBytes(const std::string& asset_name, std::vector<uint8_t> bytes);
+  std::string initFromBytes(const std::string& asset_name,
+                            std::vector<uint8_t> bytes);
 
   fml::RefPtr<FragmentShader> shader(Dart_Handle shader,
                                      Dart_Handle uniforms_handle,
@@ -103,7 +105,8 @@ class FragmentProgram : public RefCountedDartWrappable<FragmentProgram> {
 
  private:
   FragmentProgram();
-  std::string Init(const std::string& asset_name, std::unique_ptr<fml::Mapping> data);
+  std::string Init(const std::string& asset_name,
+                   std::unique_ptr<fml::Mapping> data);
   sk_sp<DlRuntimeEffect> runtime_effect_;
 };
 

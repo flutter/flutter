@@ -44,7 +44,8 @@ static std::string RuntimeStageBackendToString(
   }
 }
 
-std::string FragmentProgram::Init(const std::string& asset_name, std::unique_ptr<fml::Mapping> data) {
+std::string FragmentProgram::Init(const std::string& asset_name,
+                                  std::unique_ptr<fml::Mapping> data) {
   auto runtime_stages =
       impeller::RuntimeStage::DecodeRuntimeStages(std::move(data));
 
@@ -152,7 +153,8 @@ std::string FragmentProgram::initFromAsset(const std::string& asset_name) {
   return Init(asset_name, std::move(data));
 }
 
-std::string FragmentProgram::initFromBytes(const std::string& asset_name, std::vector<uint8_t> bytes) {
+std::string FragmentProgram::initFromBytes(const std::string& asset_name,
+                                           std::vector<uint8_t> bytes) {
   FML_TRACE_EVENT("flutter", "FragmentProgram::initFromBytes", "size",
                   bytes.size());
 
