@@ -3203,7 +3203,14 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   [(FlutterTouchInterceptingView*)touchInteceptorView blockGesture];
 
-  if (@available(iOS 18.2, *)) {
+  BOOL shouldReAddDelayingRecognizer = NO;
+  if (@available(iOS 26.0, *)) {
+    // TODO(hellohuanlin): find a solution for iOS 26,
+    // https://github.com/flutter/flutter/issues/175099.
+  } else if (@available(iOS 18.2, *)) {
+    shouldReAddDelayingRecognizer = YES;
+  }
+  if (shouldReAddDelayingRecognizer) {
     // Since we remove and add back delayingRecognizer, it would be reordered to the last.
     XCTAssertEqual(touchInteceptorView.gestureRecognizers[0], forwardingRecognizer);
     XCTAssertEqual(touchInteceptorView.gestureRecognizers[1], delayingRecognizer);
@@ -3266,7 +3273,14 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   [(FlutterTouchInterceptingView*)touchInteceptorView blockGesture];
 
-  if (@available(iOS 18.2, *)) {
+  BOOL shouldReAddDelayingRecognizer = NO;
+  if (@available(iOS 26.0, *)) {
+    // TODO(hellohuanlin): find a solution for iOS 26,
+    // https://github.com/flutter/flutter/issues/175099.
+  } else if (@available(iOS 18.2, *)) {
+    shouldReAddDelayingRecognizer = YES;
+  }
+  if (shouldReAddDelayingRecognizer) {
     // Since we remove and add back delayingRecognizer, it would be reordered to the last.
     XCTAssertEqual(touchInteceptorView.gestureRecognizers[0], forwardingRecognizer);
     XCTAssertEqual(touchInteceptorView.gestureRecognizers[1], delayingRecognizer);
@@ -3817,8 +3831,10 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
 
   // Draw the pixel on `point` in the context.
-  CGContextRef context = CGBitmapContextCreate(
-      pixel, 1, 1, 8, 4, colorSpace, kCGBitmapAlphaInfoMask & kCGImageAlphaPremultipliedLast);
+  CGContextRef context =
+      CGBitmapContextCreate(pixel, 1, 1, 8, 4, colorSpace,
+                            static_cast<uint32_t>(kCGBitmapAlphaInfoMask) &
+                                static_cast<uint32_t>(kCGImageAlphaPremultipliedLast));
   CGContextTranslateCTM(context, -point.x, -point.y);
   [view.layer renderInContext:context];
 

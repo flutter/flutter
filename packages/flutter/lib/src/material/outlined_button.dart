@@ -450,7 +450,7 @@ class _OutlinedButtonWithIcon extends OutlinedButton {
     }
     final ButtonStyle buttonStyle = super.defaultStyleOf(context);
     final double defaultFontSize =
-        buttonStyle.textStyle?.resolve(const <MaterialState>{})?.fontSize ?? 14.0;
+        buttonStyle.textStyle?.resolve(const <WidgetState>{})?.fontSize ?? 14.0;
     final double effectiveTextScale =
         MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0;
     final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
@@ -481,7 +481,7 @@ class _OutlinedButtonWithIconChild extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double defaultFontSize =
-        buttonStyle?.textStyle?.resolve(const <MaterialState>{})?.fontSize ?? 14.0;
+        buttonStyle?.textStyle?.resolve(const <WidgetState>{})?.fontSize ?? 14.0;
     final double scale =
         clampDouble(MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0, 1.0, 2.0) - 1.0;
 

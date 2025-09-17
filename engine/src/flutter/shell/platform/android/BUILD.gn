@@ -366,6 +366,7 @@ android_java_sources = [
   "io/flutter/util/TraceSection.java",
   "io/flutter/util/ViewUtils.java",
   "io/flutter/view/AccessibilityBridge.java",
+  "io/flutter/view/AccessibilityStringBuilder.java",
   "io/flutter/view/AccessibilityViewEmbedder.java",
   "io/flutter/view/FlutterCallbackInformation.java",
   "io/flutter/view/FlutterRunArguments.java",

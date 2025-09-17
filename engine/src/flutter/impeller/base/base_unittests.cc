@@ -81,13 +81,6 @@ TEST(ThreadTest, CanCreateRWMutexLock) {
   // f.mtx.UnlockReader(); <--- Static analysis error.
 }
 
-TEST(StringsTest, CanSPrintF) {
-  ASSERT_EQ(SPrintF("%sx%d", "Hello", 12), "Hellox12");
-  ASSERT_EQ(SPrintF(""), "");
-  ASSERT_EQ(SPrintF("Hello"), "Hello");
-  ASSERT_EQ(SPrintF("%sx%.2f", "Hello", 12.122222), "Hellox12.12");
-}
-
 struct CVTest {
   Mutex mutex;
   ConditionVariable cv;

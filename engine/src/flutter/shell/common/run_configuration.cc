@@ -105,7 +105,7 @@ const std::vector<std::string>& RunConfiguration::GetEntrypointArgs() const {
   return entrypoint_args_;
 }
 
-void RunConfiguration::SetEngineId(int64_t engine_id) {
+void RunConfiguration::SetEngineId(std::optional<int64_t> engine_id) {
   engine_id_ = engine_id;
 }
 
