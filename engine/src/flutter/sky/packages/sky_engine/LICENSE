@@ -1507,18 +1507,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --------------------------------------------------------------------------------
-vulkan-utility-libraries
-
-
-Copyright (c) 2015-2024 The Khronos Group Inc.
-Copyright (c) 2015-2024 Valve Corporation
-Copyright (c) 2015-2024 LunarG, Inc.
-Copyright (c) 2015-2024 Google Inc.
-
-SPDX-License-Identifier: Apache-2.0
-
-
---------------------------------------------------------------------------------
 vulkan-validation-layers
 
 
@@ -4177,36 +4165,6 @@ expat
 harfbuzz
 
 // Copyright (c) 2021 Google Inc. All rights reserved.
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are
-// met:
-//
-//    * Redistributions of source code must retain the above copyright
-// notice, this list of conditions and the following disclaimer.
-//    * Redistributions in binary form must reproduce the above
-// copyright notice, this list of conditions and the following disclaimer
-// in the documentation and/or other materials provided with the
-// distribution.
-//    * Neither the name of Google Inc. nor the names of its
-// contributors may be used to endorse or promote products derived from
-// this software without specific prior written permission.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
---------------------------------------------------------------------------------
-vulkan-utility-libraries
-
-// Copyright 2015 The Chromium Authors. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -10575,8 +10533,15 @@ Copyright (c) 2015-2017, 2019-2024 Valve Corporation
 Copyright (c) 2015-2017, 2019-2024 LunarG, Inc.
 
 SPDX-License-Identifier: Apache-2.0
+--------------------------------------------------------------------------------
+vulkan-utility-libraries
 
+Copyright (c) 2015-2017, 2019-2024 The Khronos Group Inc.
+Copyright (c) 2015-2017, 2019-2024 Valve Corporation
+Copyright (c) 2015-2017, 2019-2024 LunarG, Inc.
+Modifications Copyright (C) 2022 RasterGrid Kft.
 
+SPDX-License-Identifier: Apache-2.0
 --------------------------------------------------------------------------------
 vulkan-validation-layers
 
@@ -11012,6 +10977,15 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+--------------------------------------------------------------------------------
+vulkan-utility-libraries
+
+Copyright (c) 2015-2024 The Khronos Group Inc.
+Copyright (c) 2015-2024 Valve Corporation
+Copyright (c) 2015-2024 LunarG, Inc.
+Copyright (c) 2015-2024 Google Inc.
+
+SPDX-License-Identifier: Apache-2.0
 --------------------------------------------------------------------------------
 vulkan-validation-layers
 
@@ -12077,6 +12051,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 --------------------------------------------------------------------------------
+vulkan-headers
+
+Copyright (c) 2018-2019 Collabora, Ltd.
+Copyright 2013-2025 The Khronos Group Inc.
+
+SPDX-License-Identifier: Apache-2.0
+--------------------------------------------------------------------------------
 angle
 
 Copyright (c) 2018-2020 The Khronos Group Inc.
@@ -12463,8 +12444,6 @@ Copyright (c) 2019-2024 LunarG, Inc.
 Copyright (C) 2019-2024 Google Inc.
 
 SPDX-License-Identifier: Apache-2.0
-
-
 --------------------------------------------------------------------------------
 vulkan-validation-layers
 
@@ -14188,7 +14167,6 @@ angle
 
 Copyright 2007-2020 The Khronos Group Inc.
 SPDX-License-Identifier: Apache-2.0
-
 --------------------------------------------------------------------------------
 skia
 
@@ -14606,8 +14584,12 @@ angle
 
 Copyright 2013-2020 The Khronos Group Inc.
 SPDX-License-Identifier: Apache-2.0
+--------------------------------------------------------------------------------
+vulkan-headers
 
+Copyright 2013-2025 The Khronos Group Inc.
 
+SPDX-License-Identifier: Apache-2.0
 --------------------------------------------------------------------------------
 skia
 
@@ -14728,6 +14710,25 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --------------------------------------------------------------------------------
+glfw
+
+Copyright 2014-2022 The Khronos Group Inc.
+
+SPDX-License-Identifier: Apache-2.0
+--------------------------------------------------------------------------------
+swiftshader
+
+Copyright 2014-2023 The Khronos Group Inc.
+
+SPDX-License-Identifier: Apache-2.0
+--------------------------------------------------------------------------------
+vulkan
+vulkan-headers
+
+Copyright 2014-2025 The Khronos Group Inc.
+
+SPDX-License-Identifier: Apache-2.0
+--------------------------------------------------------------------------------
 skia
 
 Copyright 2015 Google Inc.
@@ -14847,7 +14848,6 @@ swiftshader
 Copyright 2015-2023 The Khronos Group Inc.
 
 SPDX-License-Identifier: Apache-2.0
-
 --------------------------------------------------------------------------------
 swiftshader
 vulkan
@@ -14858,7 +14858,6 @@ Copyright 2015-2023 Valve Corporation
 Copyright 2015-2023 LunarG, Inc.
 
 SPDX-License-Identifier: Apache-2.0
-
 --------------------------------------------------------------------------------
 vulkan
 vulkan-headers
@@ -14866,7 +14865,6 @@ vulkan-headers
 Copyright 2015-2025 The Khronos Group Inc.
 
 SPDX-License-Identifier: Apache-2.0
-
 --------------------------------------------------------------------------------
 skia
 
@@ -15027,6 +15025,11 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+--------------------------------------------------------------------------------
+spirv-cross
+
+Copyright 2016-2021 The Khronos Group Inc.
+SPDX-License-Identifier: Apache-2.0
 --------------------------------------------------------------------------------
 skia
 
@@ -15193,7 +15196,6 @@ limitations under the License.
 --------------------------------------------------------------------------------
 lunarg-vulkantools
 vulkan-tools
-vulkan-utility-libraries
 
 Copyright 2017 The Glslang Authors. All rights reserved.
 Copyright (c) 2018-2023 Valve Corporation
@@ -15287,7 +15289,6 @@ angle
 
 Copyright 2017-2020 The Khronos Group Inc.
 SPDX-License-Identifier: Apache-2.0
-
 --------------------------------------------------------------------------------
 flatbuffers
 
@@ -16293,6 +16294,11 @@ Copyright 2021-2022 The ANGLE Project Authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
 --------------------------------------------------------------------------------
+vulkan-headers
+
+Copyright 2021-2025 The Khronos Group Inc.
+SPDX-License-Identifier: Apache-2.0
+--------------------------------------------------------------------------------
 yapf
 
 Copyright 2022 Bill Wendling, All Rights Reserved.
@@ -16643,6 +16649,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --------------------------------------------------------------------------------
+vulkan-tools
 vulkan-utility-libraries
 
 Copyright 2023 The Khronos Group Inc.
@@ -16650,14 +16657,34 @@ Copyright 2023 Valve Corporation
 Copyright 2023 LunarG, Inc.
 
 SPDX-License-Identifier: Apache-2.0
-
-
 --------------------------------------------------------------------------------
 re2
 
 Copyright 2023 The RE2 Authors.  All Rights Reserved.
 Use of this source code is governed by a BSD-style
 license that can be found in the LICENSE file.
+--------------------------------------------------------------------------------
+lunarg-vulkantools
+vulkan-validation-layers
+
+Copyright 2023-2024 The Khronos Group Inc.
+Copyright 2023-2024 Valve Corporation
+Copyright 2023-2024 LunarG, Inc.
+
+SPDX-License-Identifier: Apache-2.0
+--------------------------------------------------------------------------------
+vulkan-utility-libraries
+
+Copyright 2023-2025 The Khronos Group Inc.
+Copyright 2023-2025 Valve Corporation
+Copyright 2023-2025 LunarG, Inc.
+
+SPDX-License-Identifier: Apache-2.0
+--------------------------------------------------------------------------------
+vulkan-headers
+
+Copyright 2023-2025 The Khronos Group Inc.
+SPDX-License-Identifier: Apache-2.0
 --------------------------------------------------------------------------------
 skia
 
