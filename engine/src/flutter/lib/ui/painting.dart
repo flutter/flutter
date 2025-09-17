@@ -5203,6 +5203,19 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
     }());
   }
 
+  @pragma('vm:entry-point')
+  FragmentProgram._fromBytes(String nameForShaderRegistry, Uint8List bytes) {
+    _constructor();
+    final String result = _initFromBytes(nameForShaderRegistry, bytes);
+    if (result.isNotEmpty) {
+      throw Exception(result);
+    }
+    assert(() {
+      _debugName = nameForShaderRegistry;
+      return true;
+    }());
+  }
+
   String? _debugName;
 
   /// Creates a fragment program from the asset with key [assetKey].
@@ -5228,8 +5241,27 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
     });
   }
 
+  /// Creates a fragment program from the provided byte data.
+  ///
+  /// The byte data must be produced as the output of the `impellerc`
+  /// compiler. The constructed object should then be reused via the
+  /// [fragmentShader] method to create [Shader] objects that can be used by
+  /// [Paint.shader].
+  static Future<FragmentProgram> fromBytes(String nameForShaderRegistry, Uint8List bytes) {
+    final FragmentProgram? program = _shaderRegistry[nameForShaderRegistry];
+    if (program != null) {
+      return Future<FragmentProgram>.value(program);
+    }
+    return Future<FragmentProgram>.microtask(() {
+      final FragmentProgram program = FragmentProgram._fromBytes(nameForShaderRegistry,bytes);
+      _shaderRegistry[nameForShaderRegistry] = program;
+      return program;
+    });
+  }
+
   // This is a cache of shaders that have been loaded by
-  // FragmentProgram.fromAsset. It holds a strong reference to theFragmentPrograms
+  // FragmentProgram.fromAsset or FragmentProgram.fromBytes.
+  // It holds a strong reference to the FragmentPrograms.
   // The native engine will retain the resources associated with this shader
   // program (PSO variants) until shutdown, so maintaining a strong reference
   // here ensures we do not perform extra work if the dart object is continually
@@ -5262,6 +5294,9 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
 
   @Native<Handle Function(Pointer<Void>, Handle)>(symbol: 'FragmentProgram::initFromAsset')
   external String _initFromAsset(String assetKey);
+
+  @Native<Handle Function(Pointer<Void>, Handle, Handle)>(symbol: 'FragmentProgram::initFromBytes')
+  external String _initFromBytes(String nameForShaderRegistry, Uint8List bytes);
 
   /// Returns a fresh instance of [FragmentShader].
   FragmentShader fragmentShader() => FragmentShader._(this, debugName: _debugName);
