@@ -809,16 +809,12 @@ public class FlutterActivity extends Activity
         /*shouldDelayFirstAndroidViewDraw=*/ getRenderMode() == RenderMode.surface);
   }
 
-  /**
-   * @deprecated This method is outdated because it calls {@code setStatusBarColor}, which is
-   *     deprecated in Android 15 and above. Consider using the new WindowInsetsController or other
-   *     Android 15+ APIs for system UI styling.
-   */
-  @Deprecated
   private void configureStatusBarForFullscreenFlutterExperience() {
     Window window = getWindow();
     window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-    window.setStatusBarColor(0x40000000);
+    if (Build.VERSION.SDK_INT < API_LEVELS.API_35) {
+      window.setStatusBarColor(0x40000000);
+    }
     window.getDecorView().setSystemUiVisibility(PlatformPlugin.DEFAULT_SYSTEM_UI);
   }
 
