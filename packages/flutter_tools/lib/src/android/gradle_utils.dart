@@ -70,7 +70,7 @@ const oneMajorVersionHigherJavaVersion = '24';
 //
 // Supported here means supported by the tooling for
 // flutter analyze --suggestions and does not imply broader flutter support.
-const maxKnownAndSupportedGradleVersion = '8.12';
+const maxKnownAndSupportedGradleVersion = '9.0.0';
 
 // Update this with new KGP versions come out including minor versions.
 //
