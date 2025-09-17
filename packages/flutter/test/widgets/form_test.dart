@@ -1087,6 +1087,7 @@ void main() {
       expect(find.text('Required'), findsNothing);
 
       // Clear the input (invalid) → submit form manually → error should show.
+      await tester.enterText(find.byType(TextFormField), '');
       formState.currentState!.validate();
       await tester.pump();
       expect(find.text('Required'), findsOneWidget);
