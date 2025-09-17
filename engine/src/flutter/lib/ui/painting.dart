@@ -5253,7 +5253,7 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
       return Future<FragmentProgram>.value(program);
     }
     return Future<FragmentProgram>.microtask(() {
-      final FragmentProgram program = FragmentProgram._fromBytes(nameForShaderRegistry,bytes);
+      final FragmentProgram program = FragmentProgram._fromBytes(nameForShaderRegistry, bytes);
       _shaderRegistry[nameForShaderRegistry] = program;
       return program;
     });

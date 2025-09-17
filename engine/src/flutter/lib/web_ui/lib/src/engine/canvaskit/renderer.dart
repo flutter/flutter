@@ -514,7 +514,10 @@ class CanvasKitRenderer extends Renderer {
   }
 
   @override
-  Future<ui.FragmentProgram> createFragmentProgramFromBytes(String nameForShaderRegistry, Uint8List bytes) {
+  Future<ui.FragmentProgram> createFragmentProgramFromBytes(
+    String nameForShaderRegistry,
+    Uint8List bytes,
+  ) {
     if (_programs.containsKey(nameForShaderRegistry)) {
       return _programs[nameForShaderRegistry]!;
     }

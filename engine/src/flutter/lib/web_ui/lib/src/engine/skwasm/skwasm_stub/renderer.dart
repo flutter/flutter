@@ -288,7 +288,10 @@ class SkwasmRenderer extends Renderer {
   }
 
   @override
-  Future<ui.FragmentProgram> createFragmentProgramFromBytes(String nameForShaderRegistry, Uint8List bytes) {
+  Future<ui.FragmentProgram> createFragmentProgramFromBytes(
+    String nameForShaderRegistry,
+    Uint8List bytes,
+  ) {
     throw UnimplementedError('Skwasm not implemented on this platform.');
   }
 
