@@ -471,18 +471,21 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     // Tell Flutter whether touch exploration is initially active or not. Then register a listener
     // to be notified of changes in the future.
     touchExplorationStateChangeListener =
-        isTouchExplorationEnabled -> {
-          if (isReleased) {
-            return;
-          }
-          if (!isTouchExplorationEnabled) {
-            setAccessibleNavigation(false);
-            onTouchExplorationExit();
-          }
+        new AccessibilityManager.TouchExplorationStateChangeListener() {
+          @Override
+          public void onTouchExplorationStateChanged(boolean isTouchExplorationEnabled) {
+            if (isReleased) {
+              return;
+            }
+            if (!isTouchExplorationEnabled) {
+              setAccessibleNavigation(false);
+              onTouchExplorationExit();
+            }
 
-          if (onAccessibilityChangeListener != null) {
-            onAccessibilityChangeListener.onAccessibilityChanged(
-                accessibilityManager.isEnabled(), isTouchExplorationEnabled);
+            if (onAccessibilityChangeListener != null) {
+              onAccessibilityChangeListener.onAccessibilityChanged(
+                  accessibilityManager.isEnabled(), isTouchExplorationEnabled);
+            }
           }
         };
     touchExplorationStateChangeListener.onTouchExplorationStateChanged(
