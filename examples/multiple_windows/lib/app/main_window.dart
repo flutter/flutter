@@ -107,9 +107,6 @@ class _WindowsTable extends StatelessWidget {
       builder: (BuildContext context, Widget? widget) {
         return DataTable(
           showBottomBorder: true,
-          onSelectAll: (selected) {
-            windowManager.select(null);
-          },
           columns: const [
             DataColumn(
               label: SizedBox(
