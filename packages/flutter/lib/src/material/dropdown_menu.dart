@@ -166,6 +166,9 @@ class DropdownMenu<T> extends StatefulWidget {
     this.menuHeight,
     this.leadingIcon,
     this.trailingIcon,
+    this.leadingIconPadding,
+    this.trailingIconPadding,
+    this.trailingIconButtonStyle,
     this.showTrailingIcon = true,
     this.trailingIconFocusNode,
     this.label,
@@ -237,10 +240,34 @@ class DropdownMenu<T> extends StatefulWidget {
 
   /// An optional icon at the end of the text field.
   ///
-  /// Defaults to an [Icon] with [Icons.arrow_drop_down].
+  /// Defaults to an [Button] with [Icons.arrow_drop_down].
   ///
   /// If [showTrailingIcon] is false, the trailing icon will not be shown.
   final Widget? trailingIcon;
+
+  /// Defines the extra padding around [leadingIcon].
+  ///
+  /// This padding is not the property of leading icon widget,
+  /// it is an extra layer of padding between leading icon widget and the text input field.
+  ///
+  /// Defaults to EdgeInsets.all(8.0).
+  final EdgeInsetsGeometry? leadingIconPadding;
+
+  /// Defines the extra padding around [trailingIcon].
+  ///
+  /// This padding is not the property of trailing icon widget,
+  /// it is an extra layer of padding between trailing icon widget and the text input field.
+  ///
+  /// Defaults to EdgeInsets.all(4.0).
+  final EdgeInsetsGeometry? trailingIconPadding;
+
+  /// Defines the style for trailing icon button.
+  ///
+  /// A [DropdownMenu]'s trailing icon is default to an [IconButton], the [trailingIcon] widget provided in DropdownMenu constructor is served as the [IconButton.icon] of the icon button.
+  /// The [trailingIconButtonStyle] property allows extra specification on how the trailing icon button should be constructed, such as specifying the [IconButton.padding] and [IconButton.iconSize].
+  ///
+  /// Defaults to null.
+  final DropDownMenuTrailingIconButtonStyle? trailingIconButtonStyle;
 
   /// Specifies if the [DropdownMenu] should show a [trailingIcon].
   ///
@@ -1117,27 +1144,46 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       builder: (BuildContext context, MenuController controller, Widget? child) {
         assert(_initialMenu != null);
         final bool isCollapsed = widget.inputDecorationTheme?.isCollapsed ?? false;
+        final DropDownMenuTrailingIconButtonStyle? trailingIconButtonStyle = widget.trailingIconButtonStyle;
         final Widget trailingButton = widget.showTrailingIcon
             ? Padding(
-                padding: isCollapsed ? EdgeInsets.zero : const EdgeInsets.all(4.0),
+                padding: isCollapsed ? EdgeInsets.zero : widget.trailingIconPadding ?? const EdgeInsets.all(4.0),
                 child: IconButton(
+                  iconSize: trailingIconButtonStyle?.iconSize,
+                  visualDensity: trailingIconButtonStyle?.visualDensity,
+                  alignment: trailingIconButtonStyle?.alignment,
+                  splashRadius: trailingIconButtonStyle?.splashRadius,
+                  color: trailingIconButtonStyle?.color,
+                  focusColor: trailingIconButtonStyle?.focusColor,
+                  hoverColor: trailingIconButtonStyle?.hoverColor,
+                  highlightColor: trailingIconButtonStyle?.highlightColor,
+                  splashColor: trailingIconButtonStyle?.splashColor,
+                  disabledColor: trailingIconButtonStyle?.disableColor,
+                  mouseCursor: trailingIconButtonStyle?.mouseCursor,
+                  autofocus: trailingIconButtonStyle?.autoFocus ?? false,
+                  tooltip: trailingIconButtonStyle?.tooltip,
+                  enableFeedback: trailingIconButtonStyle?.enableFeedback,
+                  style: trailingIconButtonStyle?.style,
                   focusNode: _trailingIconButtonFocusNode,
                   isSelected: controller.isOpen,
                   constraints: widget.inputDecorationTheme?.suffixIconConstraints,
-                  padding: isCollapsed ? EdgeInsets.zero : null,
+                  padding: isCollapsed ? EdgeInsets.zero : trailingIconButtonStyle?.padding,
                   icon: widget.trailingIcon ?? const Icon(Icons.arrow_drop_down),
                   selectedIcon: widget.selectedTrailingIcon ?? const Icon(Icons.arrow_drop_up),
                   onPressed: !widget.enabled
                       ? null
                       : () {
+                          trailingIconButtonStyle?.onPressed?.call();
                           handlePressed(controller);
                         },
+                  onHover: trailingIconButtonStyle?.onHover,
+                  onLongPress: trailingIconButtonStyle?.onLongPress,
                 ),
               )
             : const SizedBox.shrink();
 
         final Widget leadingButton = Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: widget.leadingIconPadding ?? const EdgeInsets.all(8.0),
           child: widget.leadingIcon ?? const SizedBox.shrink(),
         );
 
@@ -1566,4 +1612,144 @@ class _DropdownMenuDefaultsM3 extends DropdownMenuThemeData {
   InputDecorationThemeData get inputDecorationTheme {
     return const InputDecorationThemeData(border: OutlineInputBorder());
   }
+}
+
+/// A [DropDownMenuTrailingIconButtonStyle] that can be used by [DropdownMenu.trailingIconButtonStyle] to define the properties of trailing icon button of [DropdownMenu].
+///
+/// A [DropdownMenu]'s trailing icon is default to an [IconButton], the [DropdownMenu.trailingIcon] widget provided in DropdownMenu constructor is served as the [IconButton.icon] of the icon button.
+/// The [DropdownMenu.trailingIconButtonStyle] property of type [DropDownMenuTrailingIconButtonStyle] allows extra specification on how the trailing icon button should be constructed, such as specifying the [IconButton.padding] and [IconButton.iconSize].
+///
+/// The properties in a [DropDownMenuTrailingIconButtonStyle] are similar to the properties in an [IconButton],
+/// as it is used to specify how the trailing icon button in a [DropdownMenu] should be constructed.
+/// However, some of the properties are excluded as these properties should be specified in the constructor of [DropdownMenu].
+///
+/// Excludeed properties:
+/// 1. [IconButton.constraints] : the constraints of the trailing icon button should be defined in [DropdownMenu.inputDecorationTheme]'s [InputDecoration.suffixIconConstraints],
+/// as the trailing icon button of a [DropdownMenu] is set as the [InputDecoration.suffixIcon] of the [DropdownMenu]'s [TextField].
+///
+/// 2. [IconButton.icon] : the icon of the trailing icon button should be defined by [DropdownMenu.trailingIcon].
+///
+/// 3. [IconButton.selectedIcon] : the selected icon of the trailing icon button should be defined by [DropdownMenu.selectedTrailingIcon].
+///
+/// 4. [IconButton.focusNode] : the focus node of the trailing icon button should be defined by [DropdownMenu.trailingIconFocusNode].
+///
+/// 5. [IconButton.isSelected] : the selection state of the trailing icon button is determined by the [MenuController]'s [MenuController.isOpen] property of [DropdownMenu].
+class DropDownMenuTrailingIconButtonStyle{
+  /// Creates a [DropDownMenuTrailingIconButtonStyle] that is used by [DropdownMenu.trailingIconButtonStyle].
+  const DropDownMenuTrailingIconButtonStyle({
+    this.iconSize,
+    this.visualDensity,
+    this.padding,
+    this.alignment,
+    this.splashRadius,
+    this.color,
+    this.focusColor,
+    this.hoverColor,
+    this.highlightColor,
+    this.splashColor,
+    this.disableColor,
+    this.onPressed,
+    this.onHover,
+    this.onLongPress,
+    this.mouseCursor,
+    this.autoFocus,
+    this.tooltip,
+    this.enableFeedback,
+    this.style,
+  });
+
+  /// Defines the size of icon inside the [DropdownMenu]'s trailing icon button.
+  ///
+  /// The usage is similar as [IconButton.iconSize],
+  final double? iconSize;
+
+  /// Defines how compact the [DropdownMenu]'s trailing icon button's layout will be.
+  ///
+  /// The usage is similar as [IconButton.visualDensity].
+  final VisualDensity? visualDensity;
+
+  /// Defines the padding around [DropdownMenu]'s trailing icon button's icon. The entire padded icon will react to input gesture.
+  ///
+  /// The usage is similar as [IconButton.padding].
+  final EdgeInsetsGeometry? padding;
+
+  /// Defines how the icon is positioned within the [DropdownMenu]'s trailing icon button.
+  ///
+  /// The usage is similar as [IconButton.alignment].
+  final AlignmentGeometry? alignment;
+
+  /// Defines the splash radius of [DropdownMenu]'s trailing icon button.
+  ///
+  /// The usage is similar as [IconButton.splashRadius].
+  final double? splashRadius;
+
+  /// Defines the color to use for the icon inside the [DropdownMenu]'s trailing icon button.
+  ///
+  /// The usage is similar as [IconButton.color].
+  final Color? color;
+
+  /// Defines the color for the [DropdownMenu]'s trailing icon button when it has the input focus.
+  ///
+  /// The usage is similar as [IconButton.focusColor].
+  final Color? focusColor;
+
+  /// Defines the color for the [DropdownMenu]'s trailing icon button when a pointer is hovering over it.
+  ///
+  /// The usage is similar as [IconButton.hoverColor].
+  final Color? hoverColor;
+
+  /// Defines the secondary color of the [DropdownMenu]'s trailing icon button when the button is in the down (pressed) state.
+  ///
+  /// The usage is similar as [IconButton.highlightColor].
+  final Color? highlightColor;
+
+  /// Defines the primary color of the [DropdownMenu]'s trailing icon button when the button is in the down (pressed) state.
+  ///
+  /// The usage is similar as [IconButton.splashColor].
+  final Color? splashColor;
+
+  /// Defines the color to use for the icon inside the [DropdownMenu]'s trailing icon button, if the icon is disabled.
+  ///
+  /// The usage is similar as [IconButton.disabledColor].
+  final Color? disableColor;
+
+  /// Defines the callback that is called when the [DropdownMenu]'s trailing icon button is tapped or otherwise activated.
+  ///
+  /// The usage is similar as [IconButton.onPressed].
+  final VoidCallback? onPressed;
+
+  /// Defines the callback that is called when the [DropdownMenu]'s trailing icon button is hovered.
+  ///
+  /// The usage is similar as [IconButton.onHover].
+  final ValueChanged<bool>? onHover;
+
+  /// Defines the callback that is called when the [DropdownMenu]'s trailing icon button is long-pressed.
+  ///
+  /// The usage is similar as [IconButton.onLongPress].
+  final VoidCallback? onLongPress;
+
+  /// Defines the cursor for a mouse pointer when it enters or is hovering over the [DropdownMenu]'s trailing icon button.
+  ///
+  /// The usage is similar as [IconButton.mouseCursor].
+  final MouseCursor? mouseCursor;
+
+  /// Defines if the [DropdownMenu]'s trailing icon button should be selected as the initial focus when no other node in its scope is currently focused.
+  ///
+  /// The usage is similar as [IconButton.autofocus].
+  final bool? autoFocus;
+
+  /// Defines the text that describes the action that will occur when the b[DropdownMenu]'s trailing icon button is pressed.
+  ///
+  /// The usage is similar as [IconButton.tooltip].
+  final String? tooltip;
+
+  /// Defines whether detected gesture should provide acoustic and/or haptic feedback.
+  ///
+  /// The usage is similar as [IconButton.enableFeedback].
+  final bool? enableFeedback;
+
+  /// Defines the [DropdownMenu]'s trailing icon button's appearance.
+  ///
+  /// The usage is similar as [IconButton.style].
+  final ButtonStyle? style;
 }
