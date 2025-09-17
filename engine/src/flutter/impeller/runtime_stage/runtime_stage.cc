@@ -73,10 +73,11 @@ RuntimeStage::Map RuntimeStage::DecodeRuntimeStages(
     return {};
   }
 
-  if (raw_stages->format_version() != static_cast<uint32_t>(fb::RuntimeStagesFormatVersion::kVersion)) {
-    VALIDATION_LOG << "Unsupported runtime stages format version: "
-                   << raw_stages->format_version()
-                   << ". Expected: " << static_cast<uint32_t>(fb::RuntimeStagesFormatVersion::kVersion);
+  const auto version = raw_stages->format_version();
+  const auto expected = static_cast<uint32_t>(fb::RuntimeStagesFormatVersion::kVersion);
+  if (version != expected) {
+    VALIDATION_LOG << "Unsupported runtime stages format version: " << version
+                   << ". Expected: " << expected;
     return {};
   }
 
