@@ -73,10 +73,13 @@
 ^tools/android_sdk/packages\.txt$
 ^tools/fuchsia/.*
 ^tools/licenses_cpp/data/.*
-^third_party/vulkan-deps/LICENSE$
 ################################################################################
 # Instances that don't have a clear resolution yet.
 ################################################################################
+# I'm not sure why this LICENSE seems to generate a different package name on
+# ci than locally. It isn't necessary because each vulkan-dep has its own
+# license
+^third_party/vulkan-deps/LICENSE$
 # This isn't in the sky license, nor excluded.
 ^third_party/expat/expat/lib/siphash.h
 # This directory isn't excluded explicitly but probably should be.
