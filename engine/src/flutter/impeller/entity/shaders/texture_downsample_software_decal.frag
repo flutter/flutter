@@ -15,7 +15,6 @@ vec4 Sample(highp vec2 uv) {
        uv.y > bounds.w)) {
     return vec4(0);
   } else {
-    vec4 color = texture(texture_sampler, uv, float16_t(kDefaultMipBias));
-    return color.w == 0 ? color : color / color.w;
+    return texture(texture_sampler, uv, float16_t(kDefaultMipBias));
   }
 }

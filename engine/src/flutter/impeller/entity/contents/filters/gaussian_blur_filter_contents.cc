@@ -26,17 +26,6 @@ namespace {
 
 constexpr Scalar kMaxSigma = 500.0f;
 
-void PrintRect(const std::optional<Rect>& rect, const char* label) {
-  if (rect.has_value()) {
-    const Rect& r = rect.value();
-    printf("%s: %.2f, %.2f, %.2f, %.2f\n", label, r.GetLeft(), r.GetTop(),
-           r.GetRight(), r.GetBottom());
-  } else {
-    printf("%s: none\n", label);
-    fflush(stdout);
-  }
-}
-
 SamplerDescriptor MakeSamplerDescriptor(MinMagFilter filter,
                                         SamplerAddressMode address_mode) {
   SamplerDescriptor sampler_desc;
@@ -539,12 +528,12 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
         frame_info.texture_sampler_y_coord_scale =
             input_texture->GetYCoordScale();
 
-        PrintRect(blur_info.blur_uv_bounds, "blur_info.blur_uv_bounds");
         GaussianBlurFragmentShader::FragInfo frag_info;
-        frag_info.bounds_uv = Vector4(blur_info.blur_uv_bounds.GetLeft(),
-                                      blur_info.blur_uv_bounds.GetTop(),
-                                      blur_info.blur_uv_bounds.GetRight(),
-                                      blur_info.blur_uv_bounds.GetBottom());
+        frag_info.bounded = blur_info.blur_uv_bounds.has_value();
+        Rect bounds_uv = blur_info.blur_uv_bounds.value_or(Rect::MakeMaximum());
+        frag_info.bounds_uv =
+            Vector4(bounds_uv.GetLeft(), bounds_uv.GetTop(),
+                    bounds_uv.GetRight(), bounds_uv.GetBottom());
 
         HostBuffer& data_host_buffer = renderer.GetTransientsDataBuffer();
 
@@ -879,8 +868,6 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
       1.0 / Vector2(pass1_out.value().GetRenderTargetTexture()->GetSize());
 
   Quad blur_uvs = {Point(0, 0), Point(1, 0), Point(0, 1), Point(1, 1)};
-  Rect blur_uv_bounds =
-      downsample_pass_args.bounds_uv.value_or(Rect::MakeMaximum());
 
   std::shared_ptr<CommandBuffer> command_buffer_2 =
       renderer.GetContext()->CreateCommandBuffer();
@@ -893,7 +880,7 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
       input_snapshot->sampler_descriptor,
       BlurParameters{
           .blur_uv_offset = Point(0.0, pass1_pixel_size.y),
-          .blur_uv_bounds = blur_uv_bounds,
+          .blur_uv_bounds = downsample_pass_args.bounds_uv,
           .blur_sigma = blur_info.scaled_sigma.y *
                         downsample_pass_args.effective_scalar.y,
           .blur_radius = ScaleBlurRadius(
@@ -923,7 +910,7 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
       input_snapshot->sampler_descriptor,
       BlurParameters{
           .blur_uv_offset = Point(pass1_pixel_size.x, 0.0),
-          .blur_uv_bounds = blur_uv_bounds,
+          .blur_uv_bounds = downsample_pass_args.bounds_uv,
           .blur_sigma = blur_info.scaled_sigma.x *
                         downsample_pass_args.effective_scalar.x,
           .blur_radius = ScaleBlurRadius(

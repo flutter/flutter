@@ -20,11 +20,15 @@ uniform KernelSamples {
 kernel_samples;
 
 uniform FragInfo {
+  float bounded;
   vec4 bounds_uv;
 }
 frag_info;
 
 f16vec4 Sample(f16sampler2D tex, vec2 coords) {
+  if (frag_info.bounded == 1.0) {
+    return IPHalfSampleDecalBounded(tex, coords, frag_info.bounds_uv);
+  }
   if (supports_decal == 1.0) {
     return texture(tex, coords);
   }
@@ -37,27 +41,16 @@ out f16vec4 frag_color;
 
 void main() {
   f16vec4 total_color = f16vec4(0.0hf);
+  vec4 bounds = frag_info.bounds_uv;
 
   for (int i = 0; i < int(kernel_samples.sample_count); i++) {
     vec2 coord = v_texture_coords + kernel_samples.sample_data[i].xy;
-    if (any(lessThan(coord, frag_info.bounds_uv.xy))) {
-      continue;
-    }
-    if (any(greaterThan(coord, frag_info.bounds_uv.zw))) {
-      break;
-    }
     float16_t coefficient = float16_t(kernel_samples.sample_data[i].z);
-
-    // // DEBUG
-    // if (coefficient > max_coeff) {
-    //   max_coeff = coefficient;
-    //   total_color = Sample(texture_sampler, coord);
-    // }
-    // continue;
-    // END DEBUG
 
     total_color += Sample(texture_sampler, coord) * coefficient;
   }
 
-  frag_color = total_color.w == 0 ? total_color : (total_color / total_color.w);
+  frag_color = (frag_info.bounded == 1.0 && total_color.w != 0)
+                   ? (total_color / total_color.w)
+                   : total_color;
 }
