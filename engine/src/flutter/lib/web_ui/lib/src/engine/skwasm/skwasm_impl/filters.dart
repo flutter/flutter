@@ -65,9 +65,6 @@ abstract class SkwasmImageFilter implements SceneImageFilter {
 
   @override
   ui.Rect filterBounds(ui.Rect inputBounds) => withRawImageFilter((handle) {
-    if (handle == nullptr) {
-      return inputBounds;
-    }
     return withStackScope((StackScope scope) {
       final RawIRect rawRect = scope.convertIRectToNative(inputBounds);
       imageFilterGetFilterBounds(handle, rawRect);
