@@ -241,7 +241,7 @@ public class KeyboardManager
       Log.w(
           TAG,
           "A KeyboardManager was destroyed with "
-              + String.valueOf(remainingRedispatchCount)
+              + remainingRedispatchCount
               + " unhandled redispatch event(s).");
     }
   }
