@@ -511,7 +511,7 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
     final SegmentedButtonThemeData theme = SegmentedButtonTheme.of(context);
     final SegmentedButtonThemeData defaults = _SegmentedButtonDefaultsM3(context);
     final TextDirection textDirection = Directionality.of(context);
-    const Set<MaterialState> disabledState = <MaterialState>{MaterialState.disabled};
+    const Set<WidgetState> disabledState = <WidgetState>{WidgetState.disabled};
 
     P? effectiveValue<P>(P? Function(ButtonStyle? style) getProperty) {
       late final P? widgetValue = getProperty(widget.style);
@@ -522,7 +522,7 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
 
     P? resolve<P>(
       WidgetStateProperty<P>? Function(ButtonStyle? style) getProperty, [
-      Set<MaterialState>? states,
+      Set<WidgetState>? states,
     ]) {
       return effectiveValue((ButtonStyle? style) => getProperty(style)?.resolve(states ?? _states));
     }
@@ -579,7 +579,7 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
         // TODO(bleroux): remove once https://github.com/flutter/flutter/issues/173944 is fixed.
         final bool useMaterial3 = Theme.of(context).useMaterial3;
         final double defaultFontSize =
-            segmentStyle.textStyle?.resolve(const <MaterialState>{})?.fontSize ?? 14.0;
+            segmentStyle.textStyle?.resolve(const <WidgetState>{})?.fontSize ?? 14.0;
         final double effectiveTextScale =
             MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0;
         final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
