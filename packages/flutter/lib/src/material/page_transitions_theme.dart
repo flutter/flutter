@@ -596,61 +596,6 @@ class _FadeForwardsPageTransition extends StatelessWidget {
   }
 }
 
-/// Used by [PageTransitionsTheme] to define a [MaterialPageRoute] page
-/// transition animation.
-///
-/// Apps can configure the map of builders for [ThemeData.pageTransitionsTheme]
-/// to customize the default [MaterialPageRoute] page transition animation
-/// for different platforms.
-///
-/// See also:
-///
-///  * [FadeUpwardsPageTransitionsBuilder], which defines a page transition
-///    that's similar to the one provided by Android O.
-///  * [OpenUpwardsPageTransitionsBuilder], which defines a page transition
-///    that's similar to the one provided by Android P.
-///  * [ZoomPageTransitionsBuilder], which defines the default page transition
-///    that's similar to the one provided in Android Q.
-///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
-///    transition that matches native iOS page transitions.
-///  * [FadeForwardsPageTransitionsBuilder], which defines a page transition
-///    that's similar to the one provided by Android U.
-abstract class PageTransitionsBuilder {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
-  const PageTransitionsBuilder();
-
-  /// Provides a secondary transition to the previous route.
-  ///
-  /// {@macro flutter.widgets.delegatedTransition}
-  DelegatedTransitionBuilder? get delegatedTransition => null;
-
-  /// {@macro flutter.widgets.TransitionRoute.transitionDuration}
-  ///
-  /// Defaults to 300 milliseconds.
-  Duration get transitionDuration => const Duration(milliseconds: 300);
-
-  /// {@macro flutter.widgets.TransitionRoute.reverseTransitionDuration}
-  ///
-  /// Defaults to 300 milliseconds.
-  Duration get reverseTransitionDuration => transitionDuration;
-
-  /// Wraps the child with one or more transition widgets which define how [route]
-  /// arrives on and leaves the screen.
-  ///
-  /// The [MaterialPageRoute.buildTransitions] method looks up the
-  /// current [PageTransitionsTheme] with `Theme.of(context).pageTransitionsTheme`
-  /// and delegates to this method with a [PageTransitionsBuilder] based
-  /// on the theme's [ThemeData.platform].
-  Widget buildTransitions<T>(
-    PageRoute<T> route,
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  );
-}
-
 /// Used by [PageTransitionsTheme] to define a vertically fading
 /// [MaterialPageRoute] page transition animation that looks like
 /// the default page transition used on Android O.
