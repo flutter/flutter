@@ -15,8 +15,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
+import 'package:vector_math/vector_math_64.dart';
 
+import 'binding.dart';
 import 'box.dart';
+import 'image_filter_config.dart';
 import 'layer.dart';
 import 'layout_helper.dart';
 import 'object.dart';
@@ -1201,11 +1204,15 @@ class RenderBackdropFilter extends RenderProxyBox {
   /// The [blendMode] argument defaults to [BlendMode.srcOver].
   RenderBackdropFilter({
     RenderBox? child,
-    required ui.ImageFilter filter,
+    ui.ImageFilter? filter,
+    ImageFilterConfig? filterConfig,
     BlendMode blendMode = BlendMode.srcOver,
     bool enabled = true,
     BackdropKey? backdropKey,
-  }) : _filter = filter,
+  }) : assert(filter != null || filterConfig != null, 'Either filter or filterConfig must be provided.'),
+       assert(filter == null || filterConfig == null, 'Cannot provide both a filter and a filterConfig.'),
+       _filter = filter,
+       _filterConfig = filterConfig,
        _enabled = enabled,
        _blendMode = blendMode,
        _backdropKey = backdropKey,
@@ -1230,13 +1237,31 @@ class RenderBackdropFilter extends RenderProxyBox {
   ///
   /// For example, consider using [ui.ImageFilter.blur] to create a backdrop
   /// blur effect.
-  ui.ImageFilter get filter => _filter;
-  ui.ImageFilter _filter;
-  set filter(ui.ImageFilter value) {
+  ///
+  /// If [filterConfig] is also provided, this field will be ignored.
+  ui.ImageFilter? get filter => _filter;
+  ui.ImageFilter? _filter;
+  set filter(ui.ImageFilter? value) {
     if (_filter == value) {
       return;
     }
     _filter = value;
+    markNeedsPaint();
+  }
+
+  /// The configuration for the image filter to apply to the existing painted content.
+  ///
+  /// This is the framework-level configuration object that can be resolved
+  /// into a [ui.ImageFilter] at layout time.
+  ///
+  /// If this is provided, the [filter] property will be ignored.
+  ImageFilterConfig? get filterConfig => _filterConfig;
+  ImageFilterConfig? _filterConfig;
+  set filterConfig(ImageFilterConfig? value) {
+    if (_filterConfig == value) {
+      return;
+    }
+    _filterConfig = value;
     markNeedsPaint();
   }
 
@@ -1278,10 +1303,22 @@ class RenderBackdropFilter extends RenderProxyBox {
       return;
     }
 
+    ui.ImageFilter? effectiveFilter = _filter;
+    if (_filterConfig != null) {
+      final Matrix4 transform = Matrix4.identity();
+      for (RenderObject current = this; current.parent != null; current = current.parent!) {
+        current.parent!.applyPaintTransform(current, transform);
+      }
+      transform.setTranslation(Vector3(0, 0, 0));
+      effectiveFilter = _filterConfig!.resolve(
+        MatrixUtils.transformRect(transform, Offset.zero & size),
+      );
+    }
+
     if (child != null) {
       assert(needsCompositing);
       layer ??= BackdropFilterLayer();
-      layer!.filter = _filter;
+      layer!.filter = effectiveFilter;
       layer!.blendMode = _blendMode;
       layer!.backdropKey = _backdropKey;
       context.pushLayer(layer!, super.paint, offset);
@@ -1292,6 +1329,15 @@ class RenderBackdropFilter extends RenderProxyBox {
     } else {
       layer = null;
     }
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ui.ImageFilter>('filter', filter, defaultValue: null));
+    properties.add(DiagnosticsProperty<ImageFilterConfig>('filterConfig', filterConfig, defaultValue: null));
+    properties.add(EnumProperty<BlendMode>('blendMode', blendMode));
+    properties.add(FlagProperty('enabled', value: enabled, ifTrue: 'enabled'));
   }
 }
 

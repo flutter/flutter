@@ -676,7 +676,7 @@ class CupertinoPopupSurface extends StatelessWidget {
   /// Defaults to true.
   static bool debugIsVibrancePainted = true;
 
-  ImageFilter? _buildFilter(Brightness? brightness) {
+  ImageFilterConfig? _buildFilter(Brightness? brightness) {
     bool isVibrancePainted = true;
     assert(() {
       isVibrancePainted = debugIsVibrancePainted;
@@ -686,27 +686,27 @@ class CupertinoPopupSurface extends StatelessWidget {
       if (blurSigma == 0) {
         return null;
       }
-      return ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma);
+      return ImageFilterConfig.blur(sigmaX: blurSigma, sigmaY: blurSigma, useObjectBounds: boundByObject);
     }
 
-    final ColorFilter colorFilter = switch (brightness) {
+    final ImageFilterConfig colorFilter = ImageFilterConfig.filter(switch (brightness) {
       Brightness.dark => const ColorFilter.matrix(_darkSaturationMatrix),
       Brightness.light || null => const ColorFilter.matrix(_lightSaturationMatrix),
-    };
+    });
 
     if (blurSigma == 0) {
       return colorFilter;
     }
 
-    return ImageFilter.compose(
+    return ImageFilterConfig.compose(
       inner: colorFilter,
-      outer: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
+      outer: ImageFilterConfig.blur(sigmaX: blurSigma, sigmaY: blurSigma, bounded: bounded),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final ImageFilter? filter = _buildFilter(CupertinoTheme.maybeBrightnessOf(context));
+    final ImageFilterConfig? filter = _buildFilter(CupertinoTheme.maybeBrightnessOf(context));
     Widget contents = child;
 
     if (isSurfacePainted) {
@@ -719,7 +719,7 @@ class CupertinoPopupSurface extends StatelessWidget {
     if (filter != null) {
       return ClipRSuperellipse(
         borderRadius: _clipper,
-        child: BackdropFilter(filter: filter, child: contents),
+        child: BackdropFilter(filterConfig: filter, child: contents),
       );
     }
 
