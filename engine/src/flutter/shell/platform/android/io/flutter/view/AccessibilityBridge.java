@@ -687,9 +687,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       if (flutterSemanticsTree.containsKey(ROOT_NODE_ID)) {
         result.addChild(rootAccessibilityView, ROOT_NODE_ID);
       }
-      if (Build.VERSION.SDK_INT >= API_LEVELS.API_24) {
-        result.setImportantForAccessibility(false);
-      }
+      result.setImportantForAccessibility(false);
       return result;
     }
 
@@ -723,9 +721,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
     // Accessibility Scanner uses isImportantForAccessibility to decide whether to check
     // or skip this node.
-    if (Build.VERSION.SDK_INT >= API_LEVELS.API_24) {
-      result.setImportantForAccessibility(isImportant(semanticsNode));
-    }
+    result.setImportantForAccessibility(isImportant(semanticsNode));
 
     // Work around for https://github.com/flutter/flutter/issues/21030
     result.setViewIdResourceName("");
