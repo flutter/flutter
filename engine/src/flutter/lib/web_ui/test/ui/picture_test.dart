@@ -8,7 +8,6 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../common/test_initialization.dart';
-import 'utils.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -33,9 +32,7 @@ Future<void> testMain() async {
 
     picture.dispose();
     expect(picture.debugDisposed, true);
-    // Unskip when Skwasm and CanvasKit are unified:
-    // https://github.com/flutter/flutter/issues/172311
-  }, skip: isSkwasm);
+  });
 
   test('Picture construction invokes onCreate once', () async {
     int onCreateInvokedCount = 0;

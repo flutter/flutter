@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:collection';
+import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -797,4 +798,25 @@ class BitmapSize {
   bool get isEmpty => width == 0 || height == 0;
 
   static const BitmapSize zero = BitmapSize(0, 0);
+}
+
+String _generateDebugFilename(String filePrefix) {
+  final now = DateTime.now();
+  final String y = now.year.toString().padLeft(4, '0');
+  final String mo = now.month.toString().padLeft(2, '0');
+  final String d = now.day.toString().padLeft(2, '0');
+  final String h = now.hour.toString().padLeft(2, '0');
+  final String mi = now.minute.toString().padLeft(2, '0');
+  final String s = now.second.toString().padLeft(2, '0');
+  return '$filePrefix-$y-$mo-$d-$h-$mi-$s.json';
+}
+
+void downloadDebugInfo(String filePrefix, Map<String, dynamic> json) {
+  final String jsonString = const JsonEncoder.withIndent(' ').convert(json);
+  final blob = createDomBlob([jsonString], {'type': 'application/json'});
+  final url = domWindow.URL.createObjectURL(blob);
+  final element = domDocument.createElement('a');
+  element.setAttribute('href', url);
+  element.setAttribute('download', _generateDebugFilename(filePrefix));
+  element.click();
 }
