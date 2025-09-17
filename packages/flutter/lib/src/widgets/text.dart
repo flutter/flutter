@@ -32,6 +32,9 @@ import 'selection_container.dart';
 /// The text style to apply to descendant [Text] widgets which don't have an
 /// explicit style.
 ///
+/// A [MediaQuery] ancestor of a [Text] widget may still override the text spacing
+/// properties of the [TextStyle] set by this [DefaultTextStyle] widget.
+///
 /// {@tool dartpad}
 /// This example shows how to use [DefaultTextStyle.merge] to create a default
 /// text style that inherits styling information from the current default text
@@ -579,6 +582,10 @@ class Text extends StatelessWidget {
   /// If the style's "inherit" property is true, the style will be merged with
   /// the closest enclosing [DefaultTextStyle]. Otherwise, the style will
   /// replace the closest enclosing [DefaultTextStyle].
+  ///
+  /// This [style]s [TextStyle.fontWeight], [TextStyle.height], [TextStyle.letterSpacing],
+  /// and [TextStyle.wordSpacing] will be overriden by text spacing values from the nearest
+  /// [MediaQuery] ancestor, regardless of its [TextStyle.inherit] value.
   final TextStyle? style;
 
   /// {@macro flutter.painting.textPainter.strutStyle}
