@@ -1489,6 +1489,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), null);
+
+    // Verify the child width is constrained correctly.
+    expect(findStatic(), findsOneWidget);
+    final Size fittedBoxSize = tester.getSize(findFittedBox());
+    // availableWidth = 300.0 (screen width) - 2 * 20.0 (padding) = 260.0
+    expect(fittedBoxSize.width, 260.0);
   });
 
   testWidgets('CupertinoContextMenu respects available screen width - Landscape', (
@@ -1526,5 +1532,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), null);
+
+    // Verify the child width is constrained correctly.
+    expect(findStatic(), findsOneWidget);
+    final Size fittedBoxSize = tester.getSize(findFittedBox());
+    // availableWidth = 350.0 (screen width) - 2 * 20.0 (padding) = 310.0
+    // availableWidthForChild = 310.0 - 250.0 (menu width) = 60.0
+    expect(fittedBoxSize.width, 60.0);
   });
 }
