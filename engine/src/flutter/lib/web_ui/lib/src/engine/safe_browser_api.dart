@@ -62,14 +62,7 @@ num? parseFontSize(DomElement element) {
 /// Returns `null` if the property value is not numeric (e.g., 'normal',
 /// 'auto') or cannot be parsed.
 num? parseNumericStyleProperty(DomElement element, String attributeName) {
-  num? styleProperty;
-
-  final String stylePropertyString = domWindow
-      .getComputedStyle(element)
-      .getPropertyValue(attributeName);
-  styleProperty = parseFloat(stylePropertyString);
-
-  return styleProperty;
+  return parseFloat(domWindow.getComputedStyle(element).getPropertyValue(attributeName));
 }
 
 /// Provides haptic feedback.
