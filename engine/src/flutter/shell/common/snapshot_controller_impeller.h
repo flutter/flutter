@@ -29,6 +29,8 @@ class SnapshotControllerImpeller : public SnapshotController {
   void CacheRuntimeStage(
       const std::shared_ptr<impeller::RuntimeStage>& runtime_stage) override;
 
+  virtual bool MakeRenderContextCurrent() override;
+
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(SnapshotControllerImpeller);
 };
