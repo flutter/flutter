@@ -229,9 +229,9 @@ class Visibility extends StatelessWidget {
   /// To set this to true, [maintainState] must also be set to true.
   ///
   /// By default, with [maintainFocusability] set to false, focus events cannot
-  /// reach the [child] because an [ExcludeFocus] widget is used to exclude
-  /// the child subtree from the focus tree. If this flag is set to true,
-  /// then focus events will reach the child subtree.
+  /// reach the [child] when this widget is not [visible] because an [ExcludeFocus]
+  /// widget is used to exclude the child subtree from the focus tree. If this flag
+  /// is set to true, then focus events will reach the child subtree.
   final bool maintainFocusability;
 
   /// Tells the visibility state of an element in the tree based off its
