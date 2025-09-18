@@ -75,7 +75,7 @@ mobile platforms.
     * Use `PascalCase` for classes, `camelCase` for
       members/variables/functions/enums, and `snake_case` for files.
 * **Functions:**
-    * functions short and with a single purpose (strive for less than 20 lines).
+    * Functions short and with a single purpose (strive for less than 20 lines).
 * **Testing:** Write code with testing in mind. Use the `file`, `process`, and
   `platform` packages, if appropriate, so you can inject in-memory and fake
   versions of the objects.
@@ -103,7 +103,7 @@ mobile platforms.
   code.
 * **Records:** Use records to return multiple types in situations where defining
   an entire class is cumbersome.
-* **Switch Statements:** Don't use `break;` statements inside a `switch`.
+* **Switch Statements:** Prefer using exhaustive `switch` statements or expressions, which don't require `break` statements.
 * **Exception Handling:** Use `try-catch` blocks for handling exceptions, and
   use exceptions appropriate for the type of exception. Use custom exceptions
   for situations specific to your code.
@@ -336,9 +336,7 @@ linter:
 * **Widget Tests:** Write widget tests for UI components.
 * **Integration Tests:** For broader application validation, use integration
   tests to verify end-to-end user flows.
-* **integration_test package:** Do not use the discontinued integration_test
-  package, use the one that is built into the Flutter SDK. This is one instance
-  where you can add a dependency by editing the pubspec.yaml directly.
+* **integration_test package:** Use the `integration_test` package from the Flutter SDK for integration tests. Add it as a `dev_dependency` in `pubspec.yaml` by specifying `sdk: flutter`.
 * **Mocks:** Prefer fakes or stubs over mocks. If mocks are absolutely
   necessary, use `mockito` or `mocktail` to create mocks for dependencies. While
   code generation is common for state management (e.g., with `freezed`), try to
@@ -445,8 +443,8 @@ linter:
 * **Responsiveness:** Use `LayoutBuilder` or `MediaQuery` to create responsive
   UIs. * **Text:** Use `Theme.of(context).textTheme` for text styles.
 * **Text Fields:** Configure `textCapitalization`, `keyboardType`, and
-  `textInputAction` appropriately for the data being entered.
-* **Images:** Use `Image.asset` for local images and `cached_network_image` for
+* **Responsiveness:** Use `LayoutBuilder` or `MediaQuery` to create responsive UIs.
+* **Text:** Use `Theme.of(context).textTheme` for text styles.
   remote images.
 
 ```dart
