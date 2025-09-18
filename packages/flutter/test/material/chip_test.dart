@@ -14,6 +14,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
 
@@ -2792,6 +2793,47 @@ void main() {
     expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
   });
 
+  testWidgets('Chip uses the resolved color based on its state for the delete icon color', (
+    WidgetTester tester,
+  ) async {
+    Widget buildApp({required ChipThemeData chipTheme, bool isSelected = false}) {
+      return wrapForChip(
+        child: ChipTheme(
+          data: chipTheme,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return InputChip(
+                label: const Text('Label'),
+                selected: isSelected,
+                onSelected: (_) {},
+                onDeleted: () {},
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    final ChipThemeData chipTheme = ChipThemeData(
+      deleteIconColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.selected)) {
+          return Colors.green;
+        }
+        return Colors.blue;
+      }),
+    );
+
+    await tester.pumpWidget(buildApp(chipTheme: chipTheme));
+
+    IconThemeData iconData = getIconData(tester);
+    expect(iconData.color, equals(Colors.blue));
+
+    await tester.pumpWidget(buildApp(chipTheme: chipTheme, isSelected: true));
+
+    iconData = getIconData(tester);
+    expect(iconData.color, equals(Colors.green));
+  });
+
   group('Chip semantics', () {
     testWidgets('label only', (WidgetTester tester) async {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
@@ -3566,24 +3608,24 @@ void main() {
     const Color selectedColor = Color(0x00000005);
     const Color disabledColor = Color(0x00000006);
 
-    Color getTextColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    Color getTextColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return disabledColor;
       }
 
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return pressedColor;
       }
 
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return hoverColor;
       }
 
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return focusedColor;
       }
 
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return selectedColor;
       }
 
@@ -3656,17 +3698,17 @@ void main() {
     const Color selectedColor = Color(0x00000005);
     const Color disabledColor = Color(0x00000006);
 
-    BorderSide getBorderSide(Set<MaterialState> states) {
+    BorderSide getBorderSide(Set<WidgetState> states) {
       Color sideColor = defaultColor;
-      if (states.contains(MaterialState.disabled)) {
+      if (states.contains(WidgetState.disabled)) {
         sideColor = disabledColor;
-      } else if (states.contains(MaterialState.pressed)) {
+      } else if (states.contains(WidgetState.pressed)) {
         sideColor = pressedColor;
-      } else if (states.contains(MaterialState.hovered)) {
+      } else if (states.contains(WidgetState.hovered)) {
         sideColor = hoverColor;
-      } else if (states.contains(MaterialState.focused)) {
+      } else if (states.contains(WidgetState.focused)) {
         sideColor = focusedColor;
-      } else if (states.contains(MaterialState.selected)) {
+      } else if (states.contains(WidgetState.selected)) {
         sideColor = selectedColor;
       }
       return BorderSide(color: sideColor);
@@ -3765,17 +3807,17 @@ void main() {
     const Color selectedColor = Color(0x00000005);
     const Color disabledColor = Color(0x00000006);
 
-    BorderSide getBorderSide(Set<MaterialState> states) {
+    BorderSide getBorderSide(Set<WidgetState> states) {
       Color sideColor = defaultColor;
-      if (states.contains(MaterialState.disabled)) {
+      if (states.contains(WidgetState.disabled)) {
         sideColor = disabledColor;
-      } else if (states.contains(MaterialState.pressed)) {
+      } else if (states.contains(WidgetState.pressed)) {
         sideColor = pressedColor;
-      } else if (states.contains(MaterialState.hovered)) {
+      } else if (states.contains(WidgetState.hovered)) {
         sideColor = hoverColor;
-      } else if (states.contains(MaterialState.focused)) {
+      } else if (states.contains(WidgetState.focused)) {
         sideColor = focusedColor;
-      } else if (states.contains(MaterialState.selected)) {
+      } else if (states.contains(WidgetState.selected)) {
         sideColor = selectedColor;
       }
       return BorderSide(color: sideColor);
@@ -3843,17 +3885,17 @@ void main() {
     const Color selectedColor = Color(0x00000005);
     const Color disabledColor = Color(0x00000006);
 
-    BorderSide getBorderSide(Set<MaterialState> states) {
+    BorderSide getBorderSide(Set<WidgetState> states) {
       Color sideColor = defaultColor;
-      if (states.contains(MaterialState.disabled)) {
+      if (states.contains(WidgetState.disabled)) {
         sideColor = disabledColor;
-      } else if (states.contains(MaterialState.pressed)) {
+      } else if (states.contains(WidgetState.pressed)) {
         sideColor = pressedColor;
-      } else if (states.contains(MaterialState.hovered)) {
+      } else if (states.contains(WidgetState.hovered)) {
         sideColor = hoverColor;
-      } else if (states.contains(MaterialState.focused)) {
+      } else if (states.contains(WidgetState.focused)) {
         sideColor = focusedColor;
-      } else if (states.contains(MaterialState.selected)) {
+      } else if (states.contains(WidgetState.selected)) {
         sideColor = selectedColor;
       }
       return BorderSide(color: sideColor);
@@ -3952,17 +3994,17 @@ void main() {
     const Color selectedColor = Color(0x00000005);
     const Color disabledColor = Color(0x00000006);
 
-    BorderSide getBorderSide(Set<MaterialState> states) {
+    BorderSide getBorderSide(Set<WidgetState> states) {
       Color sideColor = defaultColor;
-      if (states.contains(MaterialState.disabled)) {
+      if (states.contains(WidgetState.disabled)) {
         sideColor = disabledColor;
-      } else if (states.contains(MaterialState.pressed)) {
+      } else if (states.contains(WidgetState.pressed)) {
         sideColor = pressedColor;
-      } else if (states.contains(MaterialState.hovered)) {
+      } else if (states.contains(WidgetState.hovered)) {
         sideColor = hoverColor;
-      } else if (states.contains(MaterialState.focused)) {
+      } else if (states.contains(WidgetState.focused)) {
         sideColor = focusedColor;
-      } else if (states.contains(MaterialState.selected)) {
+      } else if (states.contains(WidgetState.selected)) {
         sideColor = selectedColor;
       }
       return BorderSide(color: sideColor);
@@ -4032,17 +4074,17 @@ void main() {
     const Color fallbackThemeColor = Color(0x00000007);
     const BorderSide defaultBorderSide = BorderSide(color: fallbackThemeColor, width: 10.0);
 
-    BorderSide? getBorderSide(Set<MaterialState> states) {
+    BorderSide? getBorderSide(Set<WidgetState> states) {
       Color sideColor = defaultColor;
-      if (states.contains(MaterialState.disabled)) {
+      if (states.contains(WidgetState.disabled)) {
         sideColor = disabledColor;
-      } else if (states.contains(MaterialState.pressed)) {
+      } else if (states.contains(WidgetState.pressed)) {
         sideColor = pressedColor;
-      } else if (states.contains(MaterialState.hovered)) {
+      } else if (states.contains(WidgetState.hovered)) {
         sideColor = hoverColor;
-      } else if (states.contains(MaterialState.focused)) {
+      } else if (states.contains(WidgetState.focused)) {
         sideColor = focusedColor;
-      } else if (states.contains(MaterialState.selected)) {
+      } else if (states.contains(WidgetState.selected)) {
         return null;
       }
       return BorderSide(color: sideColor);
@@ -4148,17 +4190,17 @@ void main() {
     const Color fallbackThemeColor = Color(0x00000007);
     const BorderSide defaultBorderSide = BorderSide(color: fallbackThemeColor, width: 10.0);
 
-    BorderSide? getBorderSide(Set<MaterialState> states) {
+    BorderSide? getBorderSide(Set<WidgetState> states) {
       Color sideColor = defaultColor;
-      if (states.contains(MaterialState.disabled)) {
+      if (states.contains(WidgetState.disabled)) {
         sideColor = disabledColor;
-      } else if (states.contains(MaterialState.pressed)) {
+      } else if (states.contains(WidgetState.pressed)) {
         sideColor = pressedColor;
-      } else if (states.contains(MaterialState.hovered)) {
+      } else if (states.contains(WidgetState.hovered)) {
         sideColor = hoverColor;
-      } else if (states.contains(MaterialState.focused)) {
+      } else if (states.contains(WidgetState.focused)) {
         sideColor = focusedColor;
-      } else if (states.contains(MaterialState.selected)) {
+      } else if (states.contains(WidgetState.selected)) {
         return null;
       }
       return BorderSide(color: sideColor);
@@ -4224,16 +4266,16 @@ void main() {
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
-    OutlinedBorder? getShape(Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    OutlinedBorder? getShape(Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return const BeveledRectangleBorder();
-      } else if (states.contains(MaterialState.pressed)) {
+      } else if (states.contains(WidgetState.pressed)) {
         return const CircleBorder();
-      } else if (states.contains(MaterialState.hovered)) {
+      } else if (states.contains(WidgetState.hovered)) {
         return const ContinuousRectangleBorder();
-      } else if (states.contains(MaterialState.focused)) {
+      } else if (states.contains(WidgetState.focused)) {
         return const RoundedRectangleBorder();
-      } else if (states.contains(MaterialState.selected)) {
+      } else if (states.contains(WidgetState.selected)) {
         return const BeveledRectangleBorder();
       }
       return null;
@@ -4295,16 +4337,16 @@ void main() {
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
-    OutlinedBorder? getShape(Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    OutlinedBorder? getShape(Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return const BeveledRectangleBorder();
-      } else if (states.contains(MaterialState.pressed)) {
+      } else if (states.contains(WidgetState.pressed)) {
         return const CircleBorder();
-      } else if (states.contains(MaterialState.hovered)) {
+      } else if (states.contains(WidgetState.hovered)) {
         return const ContinuousRectangleBorder();
-      } else if (states.contains(MaterialState.focused)) {
+      } else if (states.contains(WidgetState.focused)) {
         return const RoundedRectangleBorder();
-      } else if (states.contains(MaterialState.selected)) {
+      } else if (states.contains(WidgetState.selected)) {
         return const BeveledRectangleBorder();
       }
       return null;
@@ -4367,15 +4409,15 @@ void main() {
     const BorderSide themeBorderSide = BorderSide(color: Color(0x00000001));
     const BorderSide selectedBorderSide = BorderSide(color: Color(0x00000002));
 
-    OutlinedBorder? getShape(Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
+    OutlinedBorder? getShape(Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         return selectedShape;
       }
       return null;
     }
 
-    BorderSide? getBorderSide(Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
+    BorderSide? getBorderSide(Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         return selectedBorderSide;
       }
       return null;
@@ -4428,15 +4470,15 @@ void main() {
     const BorderSide themeBorderSide = BorderSide(color: Color(0x00000001));
     const BorderSide selectedBorderSide = BorderSide(color: Color(0x00000002));
 
-    OutlinedBorder? getShape(Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
+    OutlinedBorder? getShape(Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         return selectedShape;
       }
       return null;
     }
 
-    BorderSide? getBorderSide(Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
+    BorderSide? getBorderSide(Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         return selectedBorderSide;
       }
       return null;
@@ -4887,15 +4929,14 @@ void main() {
         child: RawChip(
           isEnabled: enabled,
           selected: selected,
-          color: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-            if (states.contains(MaterialState.disabled) &&
-                states.contains(MaterialState.selected)) {
+          color: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+            if (states.contains(WidgetState.disabled) && states.contains(WidgetState.selected)) {
               return disabledSelectedColor;
             }
-            if (states.contains(MaterialState.disabled)) {
+            if (states.contains(WidgetState.disabled)) {
               return disabledColor;
             }
-            if (states.contains(MaterialState.selected)) {
+            if (states.contains(WidgetState.selected)) {
               return selectedColor;
             }
             return backgroundColor;
@@ -6410,7 +6451,7 @@ class _MaterialStateOutlinedBorder extends StadiumBorder implements MaterialStat
   final MaterialPropertyResolver<OutlinedBorder?> resolver;
 
   @override
-  OutlinedBorder? resolve(Set<MaterialState> states) => resolver(states);
+  OutlinedBorder? resolve(Set<WidgetState> states) => resolver(states);
 }
 
 class _MaterialStateBorderSide extends MaterialStateBorderSide {
@@ -6419,7 +6460,7 @@ class _MaterialStateBorderSide extends MaterialStateBorderSide {
   final MaterialPropertyResolver<BorderSide?> resolver;
 
   @override
-  BorderSide? resolve(Set<MaterialState> states) => resolver(states);
+  BorderSide? resolve(Set<WidgetState> states) => resolver(states);
 }
 
 class RenderLayoutCount extends RenderBox {

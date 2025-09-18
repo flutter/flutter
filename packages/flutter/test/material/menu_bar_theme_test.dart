@@ -207,7 +207,7 @@ void main() {
         )
         .style;
     expect(
-      textButtonStyle?.overlayColor?.resolve(<MaterialState>{MaterialState.hovered}),
+      textButtonStyle?.overlayColor?.resolve(<WidgetState>{WidgetState.hovered}),
       equals(Colors.blueGrey),
     );
   });
