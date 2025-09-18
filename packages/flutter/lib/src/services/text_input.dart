@@ -3110,7 +3110,8 @@ final class IOSSystemContextMenuItemDataLiveText extends IOSSystemContextMenuIte
 /// See also:
 ///
 ///  * <https://developer.apple.com/documentation/uikit/uimenuelement/attributes?language=objc>
-class IOSSystemContextMenuItemCustomAttributes with Diagnosticable {
+@immutable
+final class IOSSystemContextMenuItemCustomAttributes with Diagnosticable {
   const IOSSystemContextMenuItemCustomAttributes._(this._index);
 
   /// The numerical value for this attribute.
@@ -3152,13 +3153,6 @@ class IOSSystemContextMenuItemCustomAttributes with Diagnosticable {
   static const IOSSystemContextMenuItemCustomAttributes none =
       IOSSystemContextMenuItemCustomAttributes._(0);
 
-  /// Combines two [IOSSystemContextMenuItemCustomAttributes] values using logical "or".
-  IOSSystemContextMenuItemCustomAttributes operator |(
-    IOSSystemContextMenuItemCustomAttributes other,
-  ) {
-    return IOSSystemContextMenuItemCustomAttributes._(_index | other._index);
-  }
-
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -3183,30 +3177,23 @@ class IOSSystemContextMenuItemCustomAttributes with Diagnosticable {
     );
   }
 
-  // @override
-  // String toString() {
-  //   if (_index == 0) {
-  //     return 'IOSSystemContextMenuItemCustomAttributes.none';
-  //   }
-  //   final List<String> parts = <String>[];
-  //   if ((_index & destructive._index) != 0) {
-  //     parts.add('IOSSystemContextMenuItemCustomAttributes.destructive');
-  //   }
-  //   if ((_index & disabled._index) != 0) {
-  //     parts.add('IOSSystemContextMenuItemCustomAttributes.disabled');
-  //   }
-  //   if ((_index & hidden._index) != 0) {
-  //     parts.add('IOSSystemContextMenuItemCustomAttributes.hidden');
-  //   }
-  //   if ((_index & keepsMenuPresented._index) != 0) {
-  //     parts.add('IOSSystemContextMenuItemCustomAttributes.keepsMenuPresented');
-  //   }
-  //   if (parts.isEmpty) {
-  //     // This should not happen if _index is not 0 and constants are defined as powers of 2.
-  //     return 'IOSSystemContextMenuItemCustomAttributes(value: $_index)';
-  //   }
-  //   return parts.join(' | ');
-  // }
+  @override
+  int get hashCode => _index.hashCode;
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! IOSSystemContextMenuItemCustomAttributes) {
+      return false;
+    }
+    return other._index == _index;
+  }
+
+  /// Combines two [IOSSystemContextMenuItemCustomAttributes] values using logical "or".
+  IOSSystemContextMenuItemCustomAttributes operator |(
+    IOSSystemContextMenuItemCustomAttributes other,
+  ) {
+    return IOSSystemContextMenuItemCustomAttributes._(_index | other._index);
+  }
 }
 
 /// An [IOSSystemContextMenuItemData] for custom action buttons defined by the developer.
