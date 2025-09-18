@@ -1265,8 +1265,8 @@ void main() {
                 return Stepper(
                   type: StepperType.horizontal,
                   connectorColor: WidgetStateProperty.resolveWith<Color>(
-                    (Set<MaterialState> states) =>
-                        states.contains(MaterialState.selected) ? selectedColor : disabledColor,
+                    (Set<WidgetState> states) =>
+                        states.contains(WidgetState.selected) ? selectedColor : disabledColor,
                   ),
                   onStepTapped: (int i) => setState(() => index = i),
                   currentStep: index,
@@ -1654,8 +1654,8 @@ void main() {
               controlsBuilder: (_, _) => const SizedBox.shrink(),
               connectorThickness: 3,
               connectorColor: MaterialStateProperty.resolveWith<Color>(
-                (Set<MaterialState> states) =>
-                    states.contains(MaterialState.selected) ? activeColor : inactiveColor,
+                (Set<WidgetState> states) =>
+                    states.contains(WidgetState.selected) ? activeColor : inactiveColor,
               ),
               steps: const <Step>[
                 Step(title: Text('step1'), content: Text('step1 content'), isActive: true),

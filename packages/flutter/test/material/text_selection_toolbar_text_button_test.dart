@@ -86,7 +86,7 @@ void main() {
       // The foreground color is hardcoded to black or white by default, not the
       // default value from ColorScheme.onSurface.
       expect(
-        textButton.style!.foregroundColor!.resolve(<MaterialState>{}),
+        textButton.style!.foregroundColor!.resolve(<WidgetState>{}),
         switch (colorScheme.brightness) {
           Brightness.light => const Color(0xff000000),
           Brightness.dark => const Color(0xffffffff),
@@ -114,7 +114,7 @@ void main() {
       expect(find.byType(TextButton), findsOneWidget);
 
       final TextButton textButton = tester.widget(find.byType(TextButton));
-      expect(textButton.style!.foregroundColor!.resolve(<MaterialState>{}), customForegroundColor);
+      expect(textButton.style!.foregroundColor!.resolve(<WidgetState>{}), customForegroundColor);
     });
 
     testWidgets('background color by default', (WidgetTester tester) async {
@@ -140,7 +140,7 @@ void main() {
       // are the color of the container behind them. For example TextSelectionToolbar
       // hardcodes the color value, and TextSelectionToolbarTextButton that are its
       // children should be that color.
-      expect(textButton.style!.backgroundColor!.resolve(<MaterialState>{}), Colors.transparent);
+      expect(textButton.style!.backgroundColor!.resolve(<WidgetState>{}), Colors.transparent);
     });
 
     testWidgets('textButtonTheme should not override default background color', (
@@ -173,7 +173,7 @@ void main() {
       // are the color of the container behind them. For example TextSelectionToolbar
       // hardcodes the color value, and TextSelectionToolbarTextButton that are its
       // children should be that color.
-      expect(textButton.style!.backgroundColor!.resolve(<MaterialState>{}), Colors.transparent);
+      expect(textButton.style!.backgroundColor!.resolve(<WidgetState>{}), Colors.transparent);
     });
   }
 }

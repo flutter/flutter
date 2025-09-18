@@ -230,9 +230,9 @@ void main() {
       matching: find.byType(InkWell),
     );
 
-    const Set<MaterialState> hovered = <MaterialState>{MaterialState.hovered};
-    const Set<MaterialState> focused = <MaterialState>{MaterialState.focused};
-    const Set<MaterialState> pressed = <MaterialState>{MaterialState.pressed};
+    const Set<WidgetState> hovered = <WidgetState>{WidgetState.hovered};
+    const Set<WidgetState> focused = <WidgetState>{WidgetState.focused};
+    const Set<WidgetState> pressed = <WidgetState>{WidgetState.pressed};
 
     Future<void> checkSearchBar(WidgetTester tester) async {
       final Material material = tester.widget<Material>(findMaterial);

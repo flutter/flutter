@@ -367,14 +367,14 @@ void main() {
     const double hoveredElevation = 1.0;
     const double focusedElevation = 2.0;
     const double defaultElevation = 3.0;
-    double getElevation(Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
+    double getElevation(Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
         return pressedElevation;
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return hoveredElevation;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return focusedElevation;
       }
       return defaultElevation;
@@ -607,27 +607,27 @@ void main() {
     const OutlinedBorder hoveredShape = ContinuousRectangleBorder();
     const OutlinedBorder focusedShape = CircleBorder();
     const OutlinedBorder defaultShape = StadiumBorder();
-    BorderSide getSide(Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
+    BorderSide getSide(Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
         return pressedSide;
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return hoveredSide;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return focusedSide;
       }
       return defaultSide;
     }
 
-    OutlinedBorder getShape(Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
+    OutlinedBorder getShape(Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
         return pressedShape;
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return hoveredShape;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return focusedShape;
       }
       return defaultShape;
@@ -3022,7 +3022,7 @@ void main() {
     expect(find.byWidget(iconButtonMaterial), findsOneWidget);
     expect(
       iconButtonMaterial.color,
-      localTheme.iconButtonTheme.style?.backgroundColor?.resolve(<MaterialState>{}),
+      localTheme.iconButtonTheme.style?.backgroundColor?.resolve(<WidgetState>{}),
     );
 
     // Test the suggestion card color.
@@ -4290,14 +4290,14 @@ const Color hoveredColor = Colors.orange;
 const Color focusedColor = Colors.yellow;
 const Color defaultColor = Colors.green;
 
-Color _getColor(Set<MaterialState> states) {
-  if (states.contains(MaterialState.pressed)) {
+Color _getColor(Set<WidgetState> states) {
+  if (states.contains(WidgetState.pressed)) {
     return pressedColor;
   }
-  if (states.contains(MaterialState.hovered)) {
+  if (states.contains(WidgetState.hovered)) {
     return hoveredColor;
   }
-  if (states.contains(MaterialState.focused)) {
+  if (states.contains(WidgetState.focused)) {
     return focusedColor;
   }
   return defaultColor;
@@ -4308,14 +4308,14 @@ final TextStyle? pressedStyle = theme.textTheme.bodyLarge?.copyWith(color: press
 final TextStyle? hoveredStyle = theme.textTheme.bodyLarge?.copyWith(color: hoveredColor);
 final TextStyle? focusedStyle = theme.textTheme.bodyLarge?.copyWith(color: focusedColor);
 
-TextStyle? _getTextStyle(Set<MaterialState> states) {
-  if (states.contains(MaterialState.pressed)) {
+TextStyle? _getTextStyle(Set<WidgetState> states) {
+  if (states.contains(WidgetState.pressed)) {
     return pressedStyle;
   }
-  if (states.contains(MaterialState.hovered)) {
+  if (states.contains(WidgetState.hovered)) {
     return hoveredStyle;
   }
-  if (states.contains(MaterialState.focused)) {
+  if (states.contains(WidgetState.focused)) {
     return focusedStyle;
   }
   return null;
