@@ -1147,7 +1147,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         final DropDownMenuTrailingIconButtonStyle? trailingIconButtonStyle = widget.trailingIconButtonStyle;
         final Widget trailingButton = widget.showTrailingIcon
             ? Padding(
-                padding: isCollapsed ? EdgeInsets.zero : widget.trailingIconPadding ?? const EdgeInsets.all(4.0),
+                padding: widget.trailingIconPadding ?? (isCollapsed ? EdgeInsets.zero : const EdgeInsets.all(4)),
                 child: IconButton(
                   iconSize: trailingIconButtonStyle?.iconSize,
                   visualDensity: trailingIconButtonStyle?.visualDensity,
@@ -1167,7 +1167,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
                   focusNode: _trailingIconButtonFocusNode,
                   isSelected: controller.isOpen,
                   constraints: widget.inputDecorationTheme?.suffixIconConstraints,
-                  padding: isCollapsed ? EdgeInsets.zero : trailingIconButtonStyle?.padding,
+                  padding: trailingIconButtonStyle?.padding,
                   icon: widget.trailingIcon ?? const Icon(Icons.arrow_drop_down),
                   selectedIcon: widget.selectedTrailingIcon ?? const Icon(Icons.arrow_drop_up),
                   onPressed: !widget.enabled
