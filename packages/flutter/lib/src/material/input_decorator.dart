@@ -401,8 +401,11 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
 
   Widget _buildError() {
     assert(widget.error != null || widget.errorText != null);
-    final Widget? capturedError = widget.error;
     final String? capturedErrorText = widget.errorText;
+    Widget? capturedError = widget.error;
+    if (capturedError != null && widget.errorStyle != null) {
+      capturedError = DefaultTextStyle(style: widget.errorStyle!, child: capturedError);
+    }
     return Builder(
       builder: (BuildContext context) {
         return Semantics(
