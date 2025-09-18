@@ -367,8 +367,6 @@ linter:
 ### Theming
 * **Centralized Theme:** Define a centralized `ThemeData` object to ensure a
   consistent application-wide style.
-* **Material 3:** Use Material 3 by setting `useMaterial3: true` in your
-  `ThemeData`.
 * **Light and Dark Themes:** Implement support for both light and dark themes,
   ideal for a user-facing theme toggle (`ThemeMode.light`, `ThemeMode.dark`,
   `ThemeMode.system`).
@@ -377,7 +375,6 @@ linter:
 
   ```dart
   final ThemeData lightTheme = ThemeData(
-    useMaterial3: true,
     colorScheme: ColorScheme.fromSeed(
       seedColor: Colors.deepPurple,
       brightness: Brightness.light,
@@ -483,7 +480,6 @@ Image.network(
 // main.dart
 MaterialApp(
   theme: ThemeData(
-    useMaterial3: true,
     colorScheme: ColorScheme.fromSeed(
       seedColor: Colors.deepPurple,
       brightness: Brightness.light,
@@ -494,7 +490,6 @@ MaterialApp(
     ),
   ),
   darkTheme: ThemeData(
-    useMaterial3: true,
     colorScheme: ColorScheme.fromSeed(
       seedColor: Colors.deepPurple,
       brightness: Brightness.dark,
