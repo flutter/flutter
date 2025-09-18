@@ -1887,10 +1887,7 @@ void main() {
       );
 
       expect(adaptiveString, 'Adaptive theme.');
-      expect(
-        adaptiveSwitchTheme.thumbColor?.resolve(<MaterialState>{}),
-        isSameColorAs(Colors.brown),
-      );
+      expect(adaptiveSwitchTheme.thumbColor?.resolve(<WidgetState>{}), isSameColorAs(Colors.brown));
     });
 
     testWidgets('should return null on extension not found', (WidgetTester tester) async {

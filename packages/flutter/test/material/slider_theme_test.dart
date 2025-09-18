@@ -920,8 +920,8 @@ void main() {
   testWidgets('Slider can use theme overlay with material states', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(platform: TargetPlatform.android, primarySwatch: Colors.blue);
     final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(
-      overlayColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.focused)) {
+      overlayColor: MaterialStateColor.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.focused)) {
           return Colors.brown[500]!;
         }
 

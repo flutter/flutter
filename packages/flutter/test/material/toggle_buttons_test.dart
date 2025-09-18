@@ -551,7 +551,7 @@ void main() {
     expect(material.type, MaterialType.button);
   });
 
-  testWidgets('Custom button fillColor - Non MaterialState', (WidgetTester tester) async {
+  testWidgets('Custom button fillColor - Non WidgetState', (WidgetTester tester) async {
     Material buttonColor(String text) {
       return tester.widget<Material>(
         find.descendant(of: find.byType(TextButton), matching: find.widgetWithText(Material, text)),
@@ -593,7 +593,7 @@ void main() {
     expect(buttonColor('Second child').color, theme.colorScheme.surface.withOpacity(0.0));
   });
 
-  testWidgets('Custom button fillColor - MaterialState', (WidgetTester tester) async {
+  testWidgets('Custom button fillColor - WidgetState', (WidgetTester tester) async {
     Material buttonColor(String text) {
       return tester.widget<Material>(
         find.descendant(of: find.byType(TextButton), matching: find.widgetWithText(Material, text)),
@@ -603,8 +603,8 @@ void main() {
     const Color selectedFillColor = Colors.orange;
     const Color defaultFillColor = Colors.blue;
 
-    Color getFillColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
+    Color getFillColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         return selectedFillColor;
       }
       return defaultFillColor;
