@@ -304,18 +304,23 @@ flutter:
         expect(assetBundle.inputFiles.map((File f) => f.path), <String>[]);
       });
 
+      final testShaders = <String>['ink_sparkle.frag', 'stretch_effect.frag'];
+
       testWithoutContext('bundles material shaders on non-web platforms', () async {
-        final String shaderPath = fileSystem.path.join(
-          flutterRoot,
-          'packages',
-          'flutter',
-          'lib',
-          'src',
-          'material',
-          'shaders',
-          'ink_sparkle.frag',
-        );
-        fileSystem.file(shaderPath).createSync(recursive: true);
+        for (final shader in testShaders) {
+          final String shaderPath = fileSystem.path.join(
+            flutterRoot,
+            'packages',
+            'flutter',
+            'lib',
+            'src',
+            'material',
+            'shaders',
+            shader,
+          );
+          fileSystem.file(shaderPath).createSync(recursive: true);
+        }
+
         writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_package');
         fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_package');
         final assetBundle = ManifestAssetBundle(
@@ -331,21 +336,26 @@ flutter:
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         );
 
-        expect(assetBundle.entries.keys, contains('shaders/ink_sparkle.frag'));
+        for (final shader in testShaders) {
+          expect(assetBundle.entries.keys, contains('shaders/$shader'));
+        }
       });
 
       testWithoutContext('bundles material shaders on web platforms', () async {
-        final String shaderPath = fileSystem.path.join(
-          flutterRoot,
-          'packages',
-          'flutter',
-          'lib',
-          'src',
-          'material',
-          'shaders',
-          'ink_sparkle.frag',
-        );
-        fileSystem.file(shaderPath).createSync(recursive: true);
+        for (final shader in testShaders) {
+          final String shaderPath = fileSystem.path.join(
+            flutterRoot,
+            'packages',
+            'flutter',
+            'lib',
+            'src',
+            'material',
+            'shaders',
+            shader,
+          );
+          fileSystem.file(shaderPath).createSync(recursive: true);
+        }
+
         writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_package');
         fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_package');
         final assetBundle = ManifestAssetBundle(
@@ -361,7 +371,9 @@ flutter:
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         );
 
-        expect(assetBundle.entries.keys, contains('shaders/ink_sparkle.frag'));
+        for (final shader in testShaders) {
+          expect(assetBundle.entries.keys, contains('shaders/$shader'));
+        }
       });
     });
   }

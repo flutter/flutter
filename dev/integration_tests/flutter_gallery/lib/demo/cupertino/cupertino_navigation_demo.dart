@@ -165,8 +165,9 @@ class CupertinoDemoTab1 extends StatelessWidget {
             padding: MediaQuery.of(
               context,
             ).removePadding(removeTop: true, removeLeft: true, removeRight: true).padding,
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+            sliver: SliverList.builder(
+              itemCount: _kChildCount,
+              itemBuilder: (BuildContext context, int index) {
                 return Tab1RowItem(
                   index: index,
                   lastItem: index == _kChildCount - 1,
@@ -174,7 +175,7 @@ class CupertinoDemoTab1 extends StatelessWidget {
                   colorName: colorNameItems![index],
                   randomSeed: randomSeed,
                 );
-              }, childCount: _kChildCount),
+              },
             ),
           ),
         ],

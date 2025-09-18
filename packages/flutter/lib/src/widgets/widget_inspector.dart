@@ -3072,7 +3072,7 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
 ///
 /// See also:
 ///
-///  * [DisableWidgetInspectorScope], the widget used to enable the inspector for a widget subtree.
+///  * [DisableWidgetInspectorScope], the widget used to disable the inspector for a widget subtree.
 ///  * [WidgetInspector], the widget used to provide inspector support for a widget subtree.
 class EnableWidgetInspectorScope extends ProxyWidget {
   /// Enables the Flutter DevTools Widget Inspector for the [Widget] subtree rooted at [child].
@@ -4074,12 +4074,7 @@ class _Location {
   final String? name;
 
   Map<String, Object?> toJsonMap() {
-    return <String, Object?>{
-      'file': file,
-      'line': line,
-      'column': column,
-      if (name != null) 'name': name,
-    };
+    return <String, Object?>{'file': file, 'line': line, 'column': column, 'name': ?name};
   }
 
   @override

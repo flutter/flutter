@@ -998,25 +998,23 @@ void main() {
                                   // SliverFixedExtentList. However, one could use any
                                   // sliver widget here, e.g. SliverList or
                                   // SliverGrid.
-                                  sliver: SliverFixedExtentList(
+                                  sliver: SliverFixedExtentList.builder(
                                     // The items in this example are fixed to 48
                                     // pixels high. This matches the Material Design
                                     // spec for ListTile widgets.
                                     itemExtent: 48.0,
-                                    delegate: SliverChildBuilderDelegate(
-                                      (BuildContext context, int index) {
-                                        // This builder is called for each child.
-                                        // In this example, we just number each list
-                                        // item.
-                                        return ListTile(title: Text('Item $index'));
-                                      },
-                                      // The childCount of the
-                                      // SliverChildBuilderDelegate specifies how many
-                                      // children this inner list has. In this
-                                      // example, each tab has a list of exactly 30
-                                      // items, but this is arbitrary.
-                                      childCount: 30,
-                                    ),
+                                    // The itemCount of the
+                                    // SliverFixedExtentList.builder specifies
+                                    // how many children this inner list has. In
+                                    // this example, each tab has a list of exactly
+                                    // 30 items, but this is arbitrary.
+                                    itemCount: 30,
+                                    itemBuilder: (BuildContext context, int index) {
+                                      // This builder is called for each child.
+                                      // In this example, we just number each list
+                                      // item.
+                                      return ListTile(title: Text('Item $index'));
+                                    },
                                   ),
                                 ),
                               ],
@@ -1670,12 +1668,11 @@ void main() {
                     SliverOverlapInjector(
                       handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
                     ),
-                    SliverFixedExtentList(
+                    SliverFixedExtentList.builder(
                       itemExtent: 50.0,
-                      delegate: SliverChildBuilderDelegate(
-                        (BuildContext context, int index) => ListTile(title: Text('Item $index')),
-                        childCount: 30,
-                      ),
+                      itemCount: 30,
+                      itemBuilder: (BuildContext context, int index) =>
+                          ListTile(title: Text('Item $index')),
                     ),
                   ],
                 );
@@ -2633,10 +2630,11 @@ void main() {
                 },
                 body: CustomScrollView(
                   slivers: <Widget>[
-                    SliverList(
-                      delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+                    SliverList.builder(
+                      itemCount: 10,
+                      itemBuilder: (BuildContext context, int index) {
                         return const Text('');
-                      }, childCount: 10),
+                      },
                     ),
                   ],
                 ),
@@ -2715,11 +2713,12 @@ void main() {
               slivers: <Widget>[
                 SliverPadding(
                   padding: const EdgeInsets.all(8.0),
-                  sliver: SliverFixedExtentList(
+                  sliver: SliverFixedExtentList.builder(
                     itemExtent: 48.0,
-                    delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+                    itemCount: 30,
+                    itemBuilder: (BuildContext context, int index) {
                       return ListTile(title: Text('Item $index'));
-                    }, childCount: 30),
+                    },
                   ),
                 ),
               ],
@@ -2770,11 +2769,12 @@ void main() {
                 slivers: <Widget>[
                   SliverPadding(
                     padding: const EdgeInsets.all(8.0),
-                    sliver: SliverFixedExtentList(
+                    sliver: SliverFixedExtentList.builder(
                       itemExtent: 48.0,
-                      delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+                      itemCount: 30,
+                      itemBuilder: (BuildContext context, int index) {
                         return ListTile(title: Text('Item $index'));
-                      }, childCount: 30),
+                      },
                     ),
                   ),
                 ],
@@ -2823,12 +2823,11 @@ void main() {
                     SliverOverlapInjector(
                       handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
                     ),
-                    SliverFixedExtentList(
+                    SliverFixedExtentList.builder(
                       itemExtent: 50.0,
-                      delegate: SliverChildBuilderDelegate(
-                        (BuildContext context, int index) => ListTile(title: Text('Item $index')),
-                        childCount: 30,
-                      ),
+                      itemCount: 30,
+                      itemBuilder: (BuildContext context, int index) =>
+                          ListTile(title: Text('Item $index')),
                     ),
                   ],
                 );
@@ -2912,12 +2911,11 @@ void main() {
                     SliverOverlapInjector(
                       handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
                     ),
-                    SliverFixedExtentList(
+                    SliverFixedExtentList.builder(
                       itemExtent: 50.0,
-                      delegate: SliverChildBuilderDelegate(
-                        (BuildContext context, int index) => ListTile(title: Text('Item $index')),
-                        childCount: 30,
-                      ),
+                      itemCount: 30,
+                      itemBuilder: (BuildContext context, int index) =>
+                          ListTile(title: Text('Item $index')),
                     ),
                   ],
                 );
@@ -3321,13 +3319,11 @@ void main() {
                 ),
                 SliverPadding(
                   padding: const EdgeInsets.all(8.0),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(childCount: 30, (
-                      BuildContext context,
-                      int index,
-                    ) {
+                  sliver: SliverList.builder(
+                    itemCount: 30,
+                    itemBuilder: (BuildContext context, int index) {
                       return ListTile(title: Text('Item $index'));
-                    }),
+                    },
                   ),
                 ),
               ],

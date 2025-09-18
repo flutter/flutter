@@ -10,8 +10,12 @@
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPluginAppLifeCycleDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterSceneDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneDelegate_Test.h"
 
 @interface FlutterSceneDelegateTest : XCTestCase
+@end
+
+@implementation TestAppDelegate
 @end
 
 @implementation FlutterSceneDelegateTest
@@ -20,6 +24,52 @@
 }
 
 - (void)tearDown {
+}
+
+- (void)testMoveRootViewControllerWhenWindow {
+  id mockApplication = OCMClassMock([UIApplication class]);
+  OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+
+  id mockAppDelegate = OCMClassMock([FlutterAppDelegate class]);
+  OCMStub([mockApplication delegate]).andReturn(mockAppDelegate);
+
+  id mockWindow = OCMClassMock([UIWindow class]);
+  OCMStub([mockAppDelegate window]).andReturn(mockWindow);
+
+  id mockRootViewController = OCMClassMock([UIViewController class]);
+  OCMStub([mockWindow rootViewController]).andReturn(mockRootViewController);
+
+  id scene = OCMClassMock([UIWindowScene class]);
+  id session = OCMClassMock([UISceneSession class]);
+  id connectionOptions = OCMClassMock([UISceneConnectionOptions class]);
+
+  FlutterSceneDelegate* sceneDelegate = [[FlutterSceneDelegate alloc] init];
+  id mockSceneDelegate = OCMPartialMock(sceneDelegate);
+  OCMStub([mockSceneDelegate moveRootViewControllerFrom:[OCMArg any] to:[OCMArg any]]);
+
+  [mockSceneDelegate scene:scene willConnectToSession:session options:connectionOptions];
+
+  OCMVerify(times(1), [mockSceneDelegate moveRootViewControllerFrom:mockAppDelegate to:scene]);
+}
+
+- (void)testMoveRootViewControllerWhenNoWindow {
+  id mockApplication = OCMClassMock([UIApplication class]);
+  OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+
+  id testAppDelegate = [[TestAppDelegate alloc] init];
+  OCMStub([mockApplication delegate]).andReturn(testAppDelegate);
+
+  id scene = OCMClassMock([UIWindowScene class]);
+  id session = OCMClassMock([UISceneSession class]);
+  id connectionOptions = OCMClassMock([UISceneConnectionOptions class]);
+
+  FlutterSceneDelegate* sceneDelegate = [[FlutterSceneDelegate alloc] init];
+  id mockSceneDelegate = OCMPartialMock(sceneDelegate);
+  OCMStub([mockSceneDelegate moveRootViewControllerFrom:[OCMArg any] to:[OCMArg any]]);
+
+  [mockSceneDelegate scene:scene willConnectToSession:session options:connectionOptions];
+
+  OCMReject([mockSceneDelegate moveRootViewControllerFrom:[OCMArg any] to:[OCMArg any]]);
 }
 
 - (void)testBridgeShortcut {

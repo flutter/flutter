@@ -7,6 +7,7 @@ library;
 
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
+import 'base/logger.dart';
 import 'base/template.dart';
 import 'base/utils.dart';
 import 'base/version.dart';
@@ -204,6 +205,22 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   }
 
   XcodeProjectInfo? _projectInfo;
+
+  /// Get the scheme using the Xcode's project [XcodeProjectInfo.schemes] and
+  /// the [BuildInfo.flavor].
+  Future<String?> schemeForBuildInfo(BuildInfo buildInfo, {Logger? logger}) async {
+    final XcodeProjectInfo? info = await projectInfo();
+    if (info == null) {
+      logger?.printError('Xcode project info not found.');
+      return null;
+    }
+
+    final String? scheme = info.schemeFor(buildInfo);
+    if (scheme == null) {
+      info.reportFlavorNotFoundAndExit();
+    }
+    return scheme;
+  }
 
   /// The build settings for the host app of this project, as a detached map.
   ///

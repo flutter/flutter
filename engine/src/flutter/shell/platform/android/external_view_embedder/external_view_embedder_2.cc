@@ -73,14 +73,11 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
   if (!FrameHasPlatformLayers()) {
     frame->Submit();
     // If the previous frame had platform views, hide the overlay surface.
-    if (previous_frame_view_count_ > 0) {
-      jni_facade_->hideOverlaySurface2();
-    }
+    HideOverlayLayerIfNeeded();
     jni_facade_->applyTransaction();
     return;
   }
 
-  bool prev_frame_no_platform_views = previous_frame_view_count_ == 0;
   std::unordered_map<int64_t, DlRect> view_rects;
   for (auto platform_id : composition_order_) {
     view_rects[platform_id] = GetViewRect(platform_id, view_params_);
@@ -124,7 +121,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
       if (overlay_frame == nullptr) {
         std::shared_ptr<OverlayLayer> layer = surface_pool_->GetLayer(
             context, android_context_, jni_facade_, surface_factory_);
-        overlay_frame = layer->surface->AcquireFrame(ToSkISize(frame_size_));
+        overlay_frame = layer->surface->AcquireFrame(frame_size_);
         overlay_frame->Canvas()->Clear(flutter::DlColor::kTransparent());
       }
 
@@ -146,20 +143,27 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
       overlay_canvas->RestoreToCount(restore_count);
     }
   }
+  bool overlay_layer_has_content_this_frame_;
   if (overlay_frame != nullptr) {
     overlay_frame->set_submit_info({.frame_boundary = false});
     overlay_frame->Submit();
+    overlay_layer_has_content_this_frame_ = true;
+  } else {
+    overlay_layer_has_content_this_frame_ = false;
   }
   frame->Submit();
 
   task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
       [&, composition_order = composition_order_, view_params = view_params_,
        jni_facade = jni_facade_, device_pixel_ratio = device_pixel_ratio_,
-       slices = std::move(slices_), prev_frame_no_platform_views]() -> void {
+       slices = std::move(slices_),
+       overlay_layer_has_content_this_frame_]() -> void {
         jni_facade->swapTransaction();
 
-        if (prev_frame_no_platform_views) {
-          jni_facade_->showOverlaySurface2();
+        if (overlay_layer_has_content_this_frame_) {
+          ShowOverlayLayerIfNeeded();
+        } else {
+          HideOverlayLayerIfNeeded();
         }
 
         for (int64_t view_id : composition_order) {
@@ -197,8 +201,6 @@ DlCanvas* AndroidExternalViewEmbedder2::GetRootCanvas() {
 }
 
 void AndroidExternalViewEmbedder2::Reset() {
-  previous_frame_view_count_ = composition_order_.size();
-
   composition_order_.clear();
   slices_.clear();
 }
@@ -219,7 +221,7 @@ void AndroidExternalViewEmbedder2::PrepareFlutterView(
   if (frame_size_ != frame_size) {
     DestroySurfaces();
   }
-  surface_pool_->SetFrameSize(ToSkISize(frame_size));
+  surface_pool_->SetFrameSize(frame_size);
 
   frame_size_ = frame_size;
   device_pixel_ratio_ = device_pixel_ratio;
@@ -257,6 +259,21 @@ void AndroidExternalViewEmbedder2::DestroySurfaces() {
                                       latch.Signal();
                                     });
   latch.Wait();
+  overlay_layer_is_shown_ = false;
+}
+
+void AndroidExternalViewEmbedder2::ShowOverlayLayerIfNeeded() {
+  if (!overlay_layer_is_shown_) {
+    jni_facade_->showOverlaySurface2();
+    overlay_layer_is_shown_ = true;
+  }
+}
+
+void AndroidExternalViewEmbedder2::HideOverlayLayerIfNeeded() {
+  if (overlay_layer_is_shown_) {
+    jni_facade_->hideOverlaySurface2();
+    overlay_layer_is_shown_ = false;
+  }
 }
 
 }  // namespace flutter

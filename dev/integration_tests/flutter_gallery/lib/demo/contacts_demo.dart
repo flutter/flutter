@@ -181,8 +181,8 @@ class ContactsDemoState extends State<ContactsDemo> {
                 ),
               ),
             ),
-            SliverList(
-              delegate: SliverChildListDelegate(<Widget>[
+            SliverList.list(
+              children: <Widget>[
                 AnnotatedRegion<SystemUiOverlayStyle>(
                   value: SystemUiOverlayStyle.dark,
                   child: _ContactCategory(
@@ -306,7 +306,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                     _ContactItem(lines: const <String>['Last day in office', 'August 9th, 2018']),
                   ],
                 ),
-              ]),
+              ],
             ),
           ],
         ),

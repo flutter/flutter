@@ -6,21 +6,31 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widget_previews.dart';
 import 'package:flutter/widgets.dart';
 
+/// A group of [WidgetPreview] instances sharing the same group name.
+class WidgetPreviewGroup {
+  const WidgetPreviewGroup({required this.name, required this.previews});
+
+  /// Returns `false` if the group has no previews.
+  ///
+  /// This can happen if a filter is applied that results in no previews matching
+  /// the filter being part of the group.
+  bool get hasPreviews => previews.isNotEmpty;
+
+  /// The name of the group, as specified by the 'group' parameter in [Preview].
+  final String name;
+
+  /// The set of preview instances which are part of a group with a given [name].
+  final List<WidgetPreview> previews;
+}
+
 /// Wraps a [Widget], initializing various state and properties to allow for
 /// previewing of the [Widget] in the widget previewer.
-///
-/// WARNING: This interface is not stable and **will change**.
-///
-/// See also:
-///
-///  * [Preview], an annotation class used to mark functions returning widget
-///    previews.
-// TODO(bkonyi): link to actual documentation when available.
 class WidgetPreview {
   /// Wraps [builder] in a [WidgetPreview] instance that applies some set of
   /// properties.
   const WidgetPreview({
     required this.builder,
+    required this.scriptUri,
     this.packageName,
     this.name,
     this.size,
@@ -29,6 +39,11 @@ class WidgetPreview {
     this.theme,
     this.localizations,
   });
+
+  /// The absolute file:// URI pointing to the script containing this preview.
+  ///
+  /// This matches the URI format sent by IDEs for active location change events.
+  final String scriptUri;
 
   /// The name of the package in which a preview was defined.
   ///

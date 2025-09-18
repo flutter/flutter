@@ -191,8 +191,6 @@
 /dev/devicelab/bin/tasks/hot_mode_dev_cycle_ios__benchmark.dart @louisehsu @flutter/tool
 /dev/devicelab/bin/tasks/imitation_game_flutter__compile.dart @louisehsu @flutter/tool
 /dev/devicelab/bin/tasks/imitation_game_swiftui__compile.dart @louisehsu @flutter/tool
-# TODO(vashworth): Remove once https://github.com/flutter/flutter/issues/142305 is fixed.
-/dev/devicelab/bin/tasks/hot_mode_dev_cycle_ios__benchmark_no_dds.dart @louisehsu @flutter/tool
 /dev/devicelab/bin/tasks/imagefiltered_transform_animation_perf_ios__timeline_summary.dart @louisehsu @flutter/engine
 /dev/devicelab/bin/tasks/integration_test_test_ios.dart @LongCatIsLooong @flutter/engine
 /dev/devicelab/bin/tasks/integration_ui_ios_driver.dart LongCatIsLooong @flutter/tool
@@ -270,6 +268,7 @@
 /dev/devicelab/bin/tasks/hot_mode_dev_cycle_macos_target__benchmark.dart @cbracken @flutter/tool
 /dev/devicelab/bin/tasks/hot_mode_dev_cycle_win_target__benchmark.dart @cbracken @flutter/desktop
 /dev/devicelab/bin/tasks/integration_ui_test_test_macos.dart @cbracken @flutter/desktop
+/dev/devicelab/bin/tasks/ios_debug_workflow.dart @vashworth @flutter/ios
 /dev/devicelab/bin/tasks/macos_chrome_dev_mode.dart @bkonyi @flutter/tool
 /dev/devicelab/bin/tasks/module_custom_host_app_name_test.dart @bkonyi @flutter/tool
 /dev/devicelab/bin/tasks/module_host_with_custom_build_test.dart @bkonyi @flutter/tool
@@ -283,7 +282,8 @@
 /dev/devicelab/bin/tasks/platform_view_macos__start_up.dart @cbracken @flutter/desktop
 /dev/devicelab/bin/tasks/platform_view_win_desktop__start_up.dart @yaakovschectman @flutter/desktop
 /dev/devicelab/bin/tasks/plugin_lint_mac.dart @stuartmorgan-g @flutter/plugin
-/dev/devicelab/bin/tasks/plugin_test.dart @stuartmorgan-g @flutter/plugin
+/dev/devicelab/bin/tasks/plugin_test_android_standard.dart @stuartmorgan-g @flutter/plugin
+/dev/devicelab/bin/tasks/plugin_test_android_variants.dart @stuartmorgan-g @flutter/plugin
 /dev/devicelab/bin/tasks/plugin_test_ios.dart @stuartmorgan-g @flutter/ios
 /dev/devicelab/bin/tasks/plugin_test_linux.dart @stuartmorgan-g @flutter/desktop
 /dev/devicelab/bin/tasks/plugin_test_macos.dart @vashworth @flutter/desktop

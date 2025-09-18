@@ -1149,6 +1149,286 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(find.text('1')), const Offset(0.0, 50.0));
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/173274
+  testWidgets(
+    'In multiple SliverMainAxisGroups, children after a PinnedHeaderSliver do not overscroll.',
+    (WidgetTester tester) async {
+      final ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
+      final Key key = GlobalKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              height: 100,
+              child: CustomScrollView(
+                controller: controller,
+                slivers: <Widget>[
+                  SliverMainAxisGroup(
+                    slivers: <Widget>[
+                      const PinnedHeaderSliver(child: SizedBox(height: 20)),
+                      const SliverToBoxAdapter(child: SizedBox(height: 20)),
+                      SliverToBoxAdapter(child: SizedBox(height: 60, key: key)),
+                    ],
+                  ),
+                  const SliverMainAxisGroup(
+                    slivers: <Widget>[
+                      PinnedHeaderSliver(child: SizedBox(height: 20)),
+                      SliverToBoxAdapter(child: SizedBox(height: 20)),
+                      SliverToBoxAdapter(child: SizedBox(height: 60)),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      controller.jumpTo(70);
+      await tester.pumpAndSettle();
+      final Offset offset = tester.getBottomRight(find.byKey(key));
+      controller.jumpTo(80);
+      await tester.pumpAndSettle();
+      expect(tester.getBottomRight(find.byKey(key)), offset - const Offset(0.0, 10.0));
+      controller.jumpTo(90);
+      await tester.pumpAndSettle();
+      expect(tester.getBottomRight(find.byKey(key)), offset - const Offset(0.0, 20.0));
+    },
+  );
+
+  // Regression test for https://github.com/flutter/flutter/issues/173029.
+  testWidgets('SliverMainAxisGroup pointer event positions', (WidgetTester tester) async {
+    final List<({int index, TapDownDetails details})> tapDownLog =
+        <({int index, TapDownDetails details})>[];
+
+    Widget buildItem(int index) {
+      return SliverToBoxAdapter(
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTapDown: (TapDownDetails details) => tapDownLog.add((index: index, details: details)),
+          child: const SizedBox(height: 20),
+        ),
+      );
+    }
+
+    Future<void> checkTapDown({
+      required Offset tapAt,
+      required int expectedIndex,
+      required Offset expectedLocalPosition,
+    }) async {
+      await tester.tapAt(tapAt);
+      expect(tapDownLog.last.index, expectedIndex);
+      expect(tapDownLog.last.details.localPosition, expectedLocalPosition);
+      expect(tapDownLog.last.details.globalPosition, tapAt);
+    }
+
+    // Forward direction.
+    final ScrollController controller1 = ScrollController();
+    addTearDown(controller1.dispose);
+    await tester.pumpWidget(
+      KeyedSubtree(
+        key: const ObjectKey('froward'),
+        child: _buildSliverMainAxisGroup(
+          // x1.5 of item height, so only half of the second item is visible.
+          viewportHeight: 30,
+          viewportWidth: 30,
+          controller: controller1,
+          slivers: <Widget>[buildItem(0), buildItem(1)],
+        ),
+      ),
+    );
+
+    await checkTapDown(
+      tapAt: const Offset(15, 5),
+      expectedIndex: 0,
+      expectedLocalPosition: const Offset(15, 5),
+    );
+    await checkTapDown(
+      tapAt: const Offset(15, 15),
+      expectedIndex: 0,
+      expectedLocalPosition: const Offset(15, 15),
+    );
+    await checkTapDown(
+      tapAt: const Offset(15, 25),
+      expectedIndex: 1,
+      expectedLocalPosition: const Offset(15, 5),
+    );
+
+    // Scroll to the end to fully reveal the second item.
+    controller1.jumpTo(10);
+    await tester.pump();
+
+    await checkTapDown(
+      tapAt: const Offset(15, 5),
+      expectedIndex: 0,
+      expectedLocalPosition: const Offset(15, 15),
+    );
+    await checkTapDown(
+      tapAt: const Offset(15, 15),
+      expectedIndex: 1,
+      expectedLocalPosition: const Offset(15, 5),
+    );
+    await checkTapDown(
+      tapAt: const Offset(15, 25),
+      expectedIndex: 1,
+      expectedLocalPosition: const Offset(15, 15),
+    );
+
+    tapDownLog.clear();
+
+    // Reverse direction.
+    final ScrollController controller2 = ScrollController();
+    addTearDown(controller2.dispose);
+    await tester.pumpWidget(
+      KeyedSubtree(
+        key: const ObjectKey('reverse'),
+        child: _buildSliverMainAxisGroup(
+          reverse: true,
+          // x1.5 of item height, so only half of the second item is visible.
+          viewportHeight: 30,
+          viewportWidth: 30,
+          controller: controller2,
+          slivers: <Widget>[buildItem(0), buildItem(1)],
+        ),
+      ),
+    );
+
+    await checkTapDown(
+      tapAt: const Offset(15, 5),
+      expectedIndex: 1,
+      expectedLocalPosition: const Offset(15, 15),
+    );
+    await checkTapDown(
+      tapAt: const Offset(15, 15),
+      expectedIndex: 0,
+      expectedLocalPosition: const Offset(15, 5),
+    );
+    await checkTapDown(
+      tapAt: const Offset(15, 25),
+      expectedIndex: 0,
+      expectedLocalPosition: const Offset(15, 15),
+    );
+
+    // Scroll to the end to fully reveal the second item.
+    controller2.jumpTo(10);
+    await tester.pump();
+
+    await checkTapDown(
+      tapAt: const Offset(15, 5),
+      expectedIndex: 1,
+      expectedLocalPosition: const Offset(15, 5),
+    );
+    await checkTapDown(
+      tapAt: const Offset(15, 15),
+      expectedIndex: 1,
+      expectedLocalPosition: const Offset(15, 15),
+    );
+    await checkTapDown(
+      tapAt: const Offset(15, 25),
+      expectedIndex: 0,
+      expectedLocalPosition: const Offset(15, 5),
+    );
+  });
+  testWidgets(
+    'With SliverList can handle inaccurate scroll offset due to changes in children list',
+    (WidgetTester tester) async {
+      bool skip = true;
+      Widget buildItem(BuildContext context, int index) {
+        return !skip || index.isEven
+            ? Card(
+                child: ListTile(title: Text('item$index', style: const TextStyle(fontSize: 80))),
+              )
+            : Container();
+      }
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Scaffold(
+            body: CustomScrollView(
+              slivers: <Widget>[
+                SliverMainAxisGroup(
+                  slivers: <Widget>[
+                    SliverList(delegate: SliverChildBuilderDelegate(buildItem, childCount: 30)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      // Only even items 0~12 are on the screen.
+      for (int index = 0; index <= 12; index++) {
+        expect(find.text('item$index'), index.isEven ? findsOneWidget : findsNothing);
+      }
+      expect(find.text('item12'), findsOneWidget);
+      expect(find.text('item14'), findsNothing);
+
+      await tester.drag(find.byType(CustomScrollView), const Offset(0.0, -750.0));
+      await tester.pump();
+      // Only even items 16~28 are on the screen.
+      expect(find.text('item15'), findsNothing);
+      expect(find.text('item16'), findsOneWidget);
+      expect(find.text('item28'), findsOneWidget);
+
+      skip = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CustomScrollView(
+              slivers: <Widget>[
+                SliverMainAxisGroup(
+                  slivers: <Widget>[
+                    SliverList(delegate: SliverChildBuilderDelegate(buildItem, childCount: 30)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // Only items 12~19 are on the screen.
+      expect(find.text('item11'), findsNothing);
+      expect(find.text('item12'), findsOneWidget);
+      expect(find.text('item19'), findsOneWidget);
+      expect(find.text('item20'), findsNothing);
+
+      await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 250.0));
+      await tester.pump();
+
+      // Only items 10~16 are on the screen.
+      expect(find.text('item9'), findsNothing);
+      expect(find.text('item10'), findsOneWidget);
+      expect(find.text('item16'), findsOneWidget);
+      expect(find.text('item17'), findsNothing);
+
+      // The inaccurate scroll offset should reach zero at this point
+      await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 250.0));
+      await tester.pump();
+
+      // Only items 7~13 are on the screen.
+      expect(find.text('item6'), findsNothing);
+      expect(find.text('item7'), findsOneWidget);
+      expect(find.text('item13'), findsOneWidget);
+      expect(find.text('item14'), findsNothing);
+
+      // It will be corrected as we scroll, so we have to drag multiple times.
+      await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 250.0));
+      await tester.pump();
+      await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 250.0));
+      await tester.pump();
+      await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 250.0));
+      await tester.pump();
+
+      // Only items 0~6 are on the screen.
+      expect(find.text('item0'), findsOneWidget);
+      expect(find.text('item6'), findsOneWidget);
+      expect(find.text('item7'), findsNothing);
+    },
+  );
 }
 
 Widget _buildSliverList({

@@ -32,16 +32,16 @@ class GPUSurfaceNoop : public Surface {
  private:
   // |Surface|
   std::unique_ptr<SurfaceFrame> AcquireFrame(
-      const SkISize& frame_size) override;
+      const DlISize& frame_size) override;
 
   std::unique_ptr<SurfaceFrame> AcquireFrameFromCAMetalLayer(
-      const SkISize& frame_size);
+      const DlISize& frame_size);
 
   std::unique_ptr<SurfaceFrame> AcquireFrameFromMTLTexture(
-      const SkISize& frame_size);
+      const DlISize& frame_size);
 
   // |Surface|
-  SkMatrix GetRootTransformation() const override;
+  DlMatrix GetRootTransformation() const override;
 
   // |Surface|
   GrDirectContext* GetContext() override;

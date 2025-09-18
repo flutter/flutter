@@ -4,14 +4,18 @@
 
 import 'package:analyzer/dart/constant/value.dart';
 
+typedef PreviewProperty = ({String key, DartObject object, bool isCallback});
+
 /// Contains details related to a single preview instance.
 final class PreviewDetails {
   PreviewDetails({
+    required this.scriptUri,
     required this.packageName,
     required this.functionName,
     required this.isBuilder,
     required DartObject previewAnnotation,
-  }) : name = previewAnnotation.getField(kName)!,
+  }) : group = previewAnnotation.getField(kGroup)!,
+       name = previewAnnotation.getField(kName)!,
        size = previewAnnotation.getField(kSize)!,
        textScaleFactor = previewAnnotation.getField(kTextScaleFactor)!,
        wrapper = previewAnnotation.getField(kWrapper)!,
@@ -19,7 +23,9 @@ final class PreviewDetails {
        brightness = previewAnnotation.getField(kBrightness)!,
        localizations = previewAnnotation.getField(kLocalizations)!;
 
+  static const kScriptUri = 'scriptUri';
   static const kPackageName = 'packageName';
+  static const kGroup = 'group';
   static const kName = 'name';
   static const kSize = 'size';
   static const kTextScaleFactor = 'textScaleFactor';
@@ -27,6 +33,9 @@ final class PreviewDetails {
   static const kTheme = 'theme';
   static const kBrightness = 'brightness';
   static const kLocalizations = 'localizations';
+
+  /// The file:// URI pointing to the script in which the preview is defined.
+  final Uri scriptUri;
 
   /// The name of the package in which the preview was defined.
   ///
@@ -43,6 +52,9 @@ final class PreviewDetails {
   /// Set to `true` if the preview function is returning a `WidgetBuilder`
   /// instead of a `Widget`.
   final bool isBuilder;
+
+  /// The group the preview belongs to.
+  final DartObject group;
 
   /// A description to be displayed alongside the preview.
   ///
@@ -106,6 +118,23 @@ final class PreviewDetails {
       'PreviewDetails(function: $functionName packageName: $packageName isBuilder: $isBuilder '
       '$kName: $name $kSize: $size $kTextScaleFactor: $textScaleFactor $kWrapper: $wrapper '
       '$kTheme: $theme $kBrightness: $brightness $kLocalizations: $localizations)';
+
+  /// Returns a list of mappings of parameter names to their evaluated constants.
+  // TODO(bkonyi): update return type
+  List<PreviewProperty> toDartObjectProperties() {
+    PreviewProperty buildProperty(String key, DartObject object, [bool isCallback = false]) {
+      return (key: key, object: object, isCallback: isCallback);
+    }
+
+    return [
+      buildProperty(kName, name),
+      buildProperty(kSize, size),
+      buildProperty(kTextScaleFactor, textScaleFactor),
+      buildProperty(kTheme, theme, true),
+      buildProperty(kBrightness, brightness),
+      buildProperty(kLocalizations, localizations, true),
+    ];
+  }
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes

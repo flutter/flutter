@@ -61,10 +61,14 @@ typedef PreviewLocalizations = PreviewLocalizationsData Function();
 ///
 /// **Important Note:** all values provided to the `@Preview()` annotation must
 /// be constant and non-private.
-// TODO(bkonyi): link to actual documentation when available.
+///
+/// See also:
+///   - [flutter.dev/to/widget-previews](https://flutter.dev/to/widget-previews)
+///     for details on getting started with widget previews.
 final class Preview {
   /// Annotation used to mark functions that return widget previews.
   const Preview({
+    this.group = 'Default',
     this.name,
     this.size,
     this.textScaleFactor,
@@ -73,6 +77,12 @@ final class Preview {
     this.brightness,
     this.localizations,
   });
+
+  /// The group the preview belongs to.
+  ///
+  /// Previews with the same group name will be displayed together in the
+  /// previewer. If not provided, 'Default' is used.
+  final String group;
 
   /// A description to be displayed alongside the preview.
   ///
@@ -254,6 +264,8 @@ base class PreviewLocalizationsData {
 
 /// A collection of [ThemeData] and [CupertinoThemeData] instances for use in
 /// widget previews.
+///
+/// NOTE: this interface is not stable and **will change**.
 base class PreviewThemeData {
   /// Creates a collection of [ThemeData] and [CupertinoThemeData] instances
   /// for use in widget previews.

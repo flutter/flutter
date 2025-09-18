@@ -243,14 +243,14 @@ void main() {
               title: Text('A'),
             ),
             const SliverAppBar(primary: false, pinned: true, title: Text('B')),
-            SliverList(
-              delegate: SliverChildListDelegate(const <Widget>[
+            SliverList.list(
+              children: const <Widget>[
                 Text('C'),
                 Text('D'),
                 SizedBox(height: 500.0),
                 Text('E'),
                 SizedBox(height: 500.0),
-              ]),
+              ],
             ),
           ],
         ),
@@ -312,12 +312,11 @@ void main() {
               controller: controller,
               slivers: <Widget>[
                 const SliverAppBar(pinned: true, floating: true, expandedHeight: 120.0),
-                SliverList(
-                  delegate: SliverChildListDelegate(
-                    List<Widget>.generate(20, (int i) {
-                      return SizedBox(height: 100.0, child: Text('Tile $i'));
-                    }),
-                  ),
+                SliverList.builder(
+                  itemCount: 20,
+                  itemBuilder: (BuildContext context, int index) {
+                    return SizedBox(height: 100.0, child: Text('Tile $index'));
+                  },
                 ),
               ],
             ),

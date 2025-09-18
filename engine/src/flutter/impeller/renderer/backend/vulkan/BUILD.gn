@@ -10,6 +10,7 @@ impeller_component("vulkan_unittests") {
   testonly = true
   sources = [
     "allocator_vk_unittests.cc",
+    "blit_pass_vk_unittests.cc",
     "command_encoder_vk_unittests.cc",
     "command_pool_vk_unittests.cc",
     "context_vk_unittests.cc",

@@ -711,8 +711,8 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           radioTheme: RadioThemeData(
-            fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-              return states.contains(MaterialState.selected) ? fillColor : null;
+            fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+              return states.contains(WidgetState.selected) ? fillColor : null;
             }),
           ),
         ),
@@ -890,20 +890,20 @@ void main() {
     const Color inactiveEnabledFillColor = Color(0xFF000003);
     const Color inactiveDisabledFillColor = Color(0xFF000004);
 
-    Color getFillColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        if (states.contains(MaterialState.selected)) {
+    Color getFillColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
+        if (states.contains(WidgetState.selected)) {
           return activeDisabledFillColor;
         }
         return inactiveDisabledFillColor;
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return activeEnabledFillColor;
       }
       return inactiveEnabledFillColor;
     }
 
-    final MaterialStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
+    final WidgetStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
 
     int? groupValue = 0;
     Widget buildApp({required bool enabled}) {
@@ -982,14 +982,14 @@ void main() {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const Color hoveredFillColor = Color(0xFF000001);
 
-    Color getFillColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.hovered)) {
+    Color getFillColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.hovered)) {
         return hoveredFillColor;
       }
       return Colors.transparent;
     }
 
-    final MaterialStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
+    final WidgetStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
 
     int? groupValue = 0;
     Widget buildApp() {
@@ -1115,14 +1115,14 @@ void main() {
     const Color hoverOverlayColor = Color(0xFF000003);
     const Color hoverColor = Color(0xFF000005);
 
-    Color? getOverlayColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
-        if (states.contains(MaterialState.selected)) {
+    Color? getOverlayColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
+        if (states.contains(WidgetState.selected)) {
           return activePressedOverlayColor;
         }
         return inactivePressedOverlayColor;
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return hoverOverlayColor;
       }
       return null;
@@ -1136,7 +1136,7 @@ void main() {
             groupValue: true,
             onChanged: (_) {},
             fillColor: const MaterialStatePropertyAll<Color>(fillColor),
-            overlayColor: useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
+            overlayColor: useOverlay ? WidgetStateProperty.resolveWith(getOverlayColor) : null,
             hoverColor: hoverColor,
           ),
         ),
@@ -1408,14 +1408,14 @@ void main() {
         const Color hoverOverlayColor = Color(0xFF000003);
         const Color hoverColor = Color(0xFF000005);
 
-        Color? getOverlayColor(Set<MaterialState> states) {
-          if (states.contains(MaterialState.pressed)) {
-            if (states.contains(MaterialState.selected)) {
+        Color? getOverlayColor(Set<WidgetState> states) {
+          if (states.contains(WidgetState.pressed)) {
+            if (states.contains(WidgetState.selected)) {
               return activePressedOverlayColor;
             }
             return inactivePressedOverlayColor;
           }
-          if (states.contains(MaterialState.hovered)) {
+          if (states.contains(WidgetState.hovered)) {
             return hoverOverlayColor;
           }
           return null;
@@ -1430,9 +1430,7 @@ void main() {
                 groupValue: true,
                 onChanged: (_) {},
                 fillColor: const MaterialStatePropertyAll<Color>(fillColor),
-                overlayColor: useOverlay
-                    ? MaterialStateProperty.resolveWith(getOverlayColor)
-                    : null,
+                overlayColor: useOverlay ? WidgetStateProperty.resolveWith(getOverlayColor) : null,
                 hoverColor: hoverColor,
               ),
             ),
@@ -2145,20 +2143,20 @@ void main() {
     const Color inactiveEnabledBackgroundColor = Color(0xFF000003);
     const Color inactiveDisabledBackgroundColor = Color(0xFF000004);
 
-    Color getBackgroundColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        if (states.contains(MaterialState.selected)) {
+    Color getBackgroundColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
+        if (states.contains(WidgetState.selected)) {
           return activeDisabledBackgroundColor;
         }
         return inactiveDisabledBackgroundColor;
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return activeEnabledBackgroundColor;
       }
       return inactiveEnabledBackgroundColor;
     }
 
-    final MaterialStateProperty<Color> backgroundColor = MaterialStateColor.resolveWith(
+    final WidgetStateProperty<Color> backgroundColor = MaterialStateColor.resolveWith(
       getBackgroundColor,
     );
 
@@ -2238,14 +2236,14 @@ void main() {
 
     final ThemeData theme = ThemeData();
 
-    Color getBackgroundColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.hovered)) {
+    Color getBackgroundColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.hovered)) {
         return hoveredBackgroundColor;
       }
       return Colors.transparent;
     }
 
-    final MaterialStateProperty<Color> backgroundColor = MaterialStateColor.resolveWith(
+    final WidgetStateProperty<Color> backgroundColor = MaterialStateColor.resolveWith(
       getBackgroundColor,
     );
 
@@ -2296,7 +2294,7 @@ void main() {
   });
 
   testWidgets('radioInnerRadius is passed to the Radio', (WidgetTester tester) async {
-    final WidgetStateProperty<double?> innerRadius = MaterialStateProperty.all(6);
+    final WidgetStateProperty<double?> innerRadius = WidgetStateProperty.all(6);
     await tester.pumpWidget(
       MaterialApp(
         home: Material(

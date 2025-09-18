@@ -414,8 +414,8 @@ class FlutterProject {
     final String? buildNumber = manifest.buildNumber;
     final versionFileJson = <String, String>{
       'app_name': manifest.appName,
-      if (buildName != null) 'version': buildName,
-      if (buildNumber != null) 'build_number': buildNumber,
+      'version': ?buildName,
+      'build_number': ?buildNumber,
       'package_name': manifest.appName,
     };
     return jsonEncode(versionFileJson);
@@ -599,8 +599,8 @@ class AndroidProject extends FlutterProjectPlatform {
 
   /// Gets the project root level Gradle settings file.
   ///
-  /// The file must exist and it must be written in either Groovy (build.gradle)
-  /// or Kotlin (build.gradle.kts).
+  /// The file must exist and it must be written in either Groovy (settings.gradle)
+  /// or Kotlin (settings.gradle.kts).
   File get settingsGradleFile {
     return getGroovyOrKotlin(hostAppGradleRoot, 'settings.gradle');
   }

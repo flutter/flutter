@@ -17,6 +17,10 @@ final class RawRuntimeEffect extends Opaque {}
 
 typedef RuntimeEffectHandle = Pointer<RawRuntimeEffect>;
 
+final class RawUniformData extends Opaque {}
+
+typedef UniformDataHandle = Pointer<RawUniformData>;
+
 @Native<ShaderHandle Function(RawPointArray, RawColorArray, Pointer<Float>, Int, Int, RawMatrix33)>(
   symbol: 'shader_createLinearGradient',
   isLeaf: true,
@@ -104,13 +108,13 @@ external void runtimeEffectDispose(RuntimeEffectHandle handle);
 @Native<Size Function(RuntimeEffectHandle)>(symbol: 'runtimeEffect_getUniformSize', isLeaf: true)
 external int runtimeEffectGetUniformSize(RuntimeEffectHandle handle);
 
-@Native<ShaderHandle Function(RuntimeEffectHandle, SkDataHandle, Pointer<ShaderHandle>, Size)>(
+@Native<ShaderHandle Function(RuntimeEffectHandle, UniformDataHandle, Pointer<ShaderHandle>, Size)>(
   symbol: 'shader_createRuntimeEffectShader',
   isLeaf: true,
 )
 external ShaderHandle shaderCreateRuntimeEffectShader(
   RuntimeEffectHandle runtimeEffect,
-  SkDataHandle uniforms,
+  UniformDataHandle uniforms,
   Pointer<ShaderHandle> childShaders,
   int childCount,
 );
@@ -126,3 +130,12 @@ external ShaderHandle shaderCreateFromImage(
   int quality,
   RawMatrix33 localMatrix,
 );
+
+@Native<UniformDataHandle Function(Int)>(symbol: 'uniformData_create')
+external UniformDataHandle uniformDataCreate(int size);
+
+@Native<Void Function(UniformDataHandle)>(symbol: 'uniformData_dispose')
+external void uniformDataDispose(UniformDataHandle handle);
+
+@Native<Pointer<Void> Function(UniformDataHandle)>(symbol: 'uniformData_getPointer')
+external Pointer<Void> uniformDataGetPointer(UniformDataHandle handle);

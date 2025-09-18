@@ -232,7 +232,6 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
     required DebuggingOptions debuggingOptions,
     int? hostVmServicePort,
     bool? ipv6 = false,
-    bool allowExistingDdsInstance = false,
   }) async {}
 
   @override
@@ -281,7 +280,6 @@ class FakeDelegateFlutterDevice extends FlutterDevice {
     required DebuggingOptions debuggingOptions,
     int? hostVmServicePort,
     bool? ipv6 = false,
-    bool allowExistingDdsInstance = false,
   }) async {}
 
   final DevFS fakeDevFS;
