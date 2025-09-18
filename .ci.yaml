@@ -708,6 +708,7 @@ targets:
       task_name: release_smoke_test
       physical_devices: >-
         [
+          "--device", "model=tokay,version=36",
           "--device", "model=shiba,version=34",
           "--device", "model=redfin,version=30",
           "--device", "model=griffin,version=24"
