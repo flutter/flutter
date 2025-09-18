@@ -55,6 +55,8 @@ std::unique_ptr<FlutterSemanticsFlags> ConvertToFlutterSemanticsFlags(
       .is_link = source.isLink,
       .is_slider = source.isSlider,
       .is_keyboard_key = source.isKeyboardKey,
+      .is_accessibility_focusable =
+          ToFlutterTristate(source.isAccessibilityFocusable),
   });
 }
 

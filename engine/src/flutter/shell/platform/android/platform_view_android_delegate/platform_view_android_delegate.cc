@@ -144,6 +144,12 @@ int64_t flagsToInt64(flutter::SemanticsFlags flags) {
   if (flags.isRequired == flutter::SemanticsTristate::kTrue) {
     result |= (INT64_C(1) << 30);
   }
+  if (flags.isAccessibilityFocusable != flutter::SemanticsTristate::kNone) {
+    result |= (INT64_C(1) << 31);
+  }
+  if (flags.isAccessibilityFocusable == flutter::SemanticsTristate::kTrue) {
+    result |= (INT64_C(1) << 32);
+  }
   return result;
 }
 }  // namespace

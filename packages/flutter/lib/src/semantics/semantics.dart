@@ -489,6 +489,10 @@ sealed class _DebugSemanticsRoleChecks {
         return FlutterError('A collapsed node cannot have a collapse action.');
       }
     }
+    if (data.flagsCollection.isFocused != Tristate.none &&
+        data.flagsCollection.isAccessibilityFocusable == Tristate.isFalse) {
+      return FlutterError('A node that is keyboard focusable cannot be set to accessibility unfocusable');
+    }
 
     return null;
   }
@@ -1537,6 +1541,7 @@ class SemanticsProperties extends DiagnosticableTree {
     )
     this.focusable,
     this.focused,
+    this.subTreeAccessibilityFocusable,
     this.inMutuallyExclusiveGroup,
     this.hidden,
     this.obscured,
@@ -1742,6 +1747,16 @@ class SemanticsProperties extends DiagnosticableTree {
   /// green/black rectangular highlight that TalkBack/VoiceOver draws around the
   /// element it is reading, and is separate from input focus.
   final bool? focused;
+
+  /// If non-null, whether the subtree can be focused by accessibility services.
+  ///
+  /// If null, the a11y focusability is determined based on
+  /// the node's role and other properties, such as whether it is a button.
+  ///
+  /// This is for accessibility focus, which is the focus used by screen readers
+  /// like TalkBack and VoiceOver. It is different from input focus, which is
+  /// usually held by the element that currently responds to keyboard inputs.
+  final bool? subTreeAccessibilityFocusable;
 
   /// If non-null, whether a semantic node is in a mutually exclusive group.
   ///
@@ -6106,6 +6121,14 @@ class SemanticsConfiguration {
   bool? get isFocused => _flags.isFocused.toBoolOrNull();
   set isFocused(bool? value) {
     _flags = _flags.copyWith(isFocused: _tristateFromBoolOrNull(value));
+    _hasBeenAnnotated = true;
+  }
+
+  /// Whether the owning [RenderObject] and its subtree
+  /// can hold the a11y focus (different from input focus).
+  bool? get isSubTreeAccessibilityFocusable => _flags.isAccessibilityFocusable.toBoolOrNull();
+  set isSubTreeAccessibilityFocusable(bool? value) {
+    _flags = _flags.copyWith(isAccessibilityFocusable: _tristateFromBoolOrNull(value));
     _hasBeenAnnotated = true;
   }
 
