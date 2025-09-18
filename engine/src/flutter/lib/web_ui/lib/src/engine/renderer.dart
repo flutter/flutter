@@ -304,16 +304,19 @@ abstract class Renderer {
 
   Future<void> _kickRenderLoop(ViewRasterizer rasterizer) async {
     final RenderQueue renderQueue = rasterizer.queue;
-    while (renderQueue.current != null) {
-      final RenderRequest current = renderQueue.current!;
-      try {
-        await _renderScene(current.scene, rasterizer, current.recorder);
-        current.completer.complete();
-      } catch (error, stackTrace) {
-        current.completer.completeError(error, stackTrace);
-      }
-      renderQueue.current = renderQueue.next;
-      renderQueue.next = null;
+    final RenderRequest current = renderQueue.current!;
+    try {
+      await _renderScene(current.scene, rasterizer, current.recorder);
+      current.completer.complete();
+    } catch (error, stackTrace) {
+      current.completer.completeError(error, stackTrace);
+    }
+    renderQueue.current = renderQueue.next;
+    renderQueue.next = null;
+    if (renderQueue.current == null) {
+      return;
+    } else {
+      return _kickRenderLoop(rasterizer);
     }
   }
 
