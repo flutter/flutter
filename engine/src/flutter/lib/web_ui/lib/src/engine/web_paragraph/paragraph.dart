@@ -542,7 +542,7 @@ abstract class ParagraphSpan extends ui.TextRange {
   double get fontBoundingBoxAscent;
   double get fontBoundingBoxDescent;
 
-  List<ExtendedTextCluster> _getClusters();
+  List<WebCluster> _getClusters();
 }
 
 class PlaceholderSpan extends ParagraphSpan {
@@ -627,11 +627,11 @@ class TextSpan extends ParagraphSpan {
   }
 
   ui.Rect getClusterBounds(TextCluster cluster) {
-    return _metrics.getBounds(cluster.start, cluster.end);
+    return _metrics.getBounds(cluster.startInSpan, cluster.endInSpan);
   }
 
   ui.Rect getClusterSelection(TextCluster cluster) {
-    return _metrics.getSelection(cluster.start, cluster.end);
+    return _metrics.getSelection(cluster.startInSpan, cluster.endInSpan);
   }
 
   ui.Rect getBlockSelection(LineBlock block) {
@@ -645,10 +645,15 @@ class TextSpan extends ParagraphSpan {
 
     // `metrics.getSelection` calculates the rect relative to the span. It has no idea about the
     // span's position within the line or the paragraph. In order to make the rect's position relative
-    // to the line, we need to use `block.advanceInLine`.
+    // to the line, we need to add `block.shiftFromLineStart`.
     //
-    // See [LineBlock.advanceInLine] for a clarifying diagram.
-    return ui.Rect.fromLTWH(block.advanceInLine, selection.top, selection.width, selection.height);
+    // See [LineBlock.shiftFromLineStart] for a clarifying diagram.
+    return ui.Rect.fromLTWH(
+      block.shiftFromLineStart,
+      selection.top,
+      selection.width,
+      selection.height,
+    );
   }
 
   @override

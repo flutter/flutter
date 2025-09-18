@@ -20,16 +20,16 @@ class TextWrapper {
   double get minIntrinsicWidth => _minIntrinsicWidth;
   double _minIntrinsicWidth = 0.0;
 
-  bool _isWhitespace(ExtendedTextCluster cluster) {
-    return _layout.codeUnitFlags.hasFlag(cluster.globalStart, CodeUnitFlag.whitespace);
+  bool _isWhitespace(WebCluster cluster) {
+    return _layout.codeUnitFlags.hasFlag(cluster.start, CodeUnitFlag.whitespace);
   }
 
-  bool _isSoftLineBreak(ExtendedTextCluster cluster) {
-    return _layout.codeUnitFlags.hasFlag(cluster.globalStart, CodeUnitFlag.softLineBreak);
+  bool _isSoftLineBreak(WebCluster cluster) {
+    return _layout.codeUnitFlags.hasFlag(cluster.start, CodeUnitFlag.softLineBreak);
   }
 
-  bool _isHardLineBreak(ExtendedTextCluster cluster) {
-    return _layout.codeUnitFlags.hasFlag(cluster.globalStart, CodeUnitFlag.hardLineBreak);
+  bool _isHardLineBreak(WebCluster cluster) {
+    return _layout.codeUnitFlags.hasFlag(cluster.start, CodeUnitFlag.hardLineBreak);
   }
 
   void breakLines(double maxWidth) {
@@ -40,7 +40,7 @@ class TextWrapper {
 
     bool hardLineBreak = false;
     for (int index = 0; index < _layout.allClusters.length; index += 1) {
-      final ExtendedTextCluster cluster = _layout.allClusters[index];
+      final WebCluster cluster = _layout.allClusters[index];
       final double widthCluster = cluster.advance.width;
       hardLineBreak = _isHardLineBreak(cluster);
 

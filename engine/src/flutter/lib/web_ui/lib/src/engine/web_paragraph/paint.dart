@@ -40,7 +40,7 @@ class TextPaint {
       // Let's calculate the sizes
       final (ui.Rect sourceRect, ui.Rect targetRect) = calculateBlock(
         layout,
-        block as ClusterBlock,
+        block as TextBlock,
         ui.Offset(
           line.advance.left + line.formattingShift,
           line.advance.top + line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent,
@@ -94,8 +94,8 @@ class TextPaint {
           block,
           clusterText,
           ui.Offset(
-            // TODO(mdebbar): Avoid use of `block.spanAdvanceInLine` (similar to `getPositionForOffset`)
-            line.advance.left + line.formattingShift + block.spanAdvanceInLine,
+            // TODO(mdebbar): Avoid use of `block.spanShiftFromLineStart` (similar to `getPositionForOffset`)
+            line.advance.left + line.formattingShift + block.spanShiftFromLineStart,
             line.advance.top + line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent,
           ),
           ui.Offset(x, y),
@@ -121,7 +121,7 @@ class TextPaint {
   (ui.Rect sourceRect, ui.Rect targetRect) calculateCluster(
     TextLayout layout,
     LineBlock block,
-    ExtendedTextCluster webTextCluster,
+    WebCluster webTextCluster,
     ui.Offset clusterOffset,
     ui.Offset lineOffset,
   ) {
@@ -148,7 +148,7 @@ class TextPaint {
         .translate(-shift, 0);
 
     if (WebParagraphDebug.logging) {
-      final String text = paragraph.getText1(webTextCluster.globalStart, webTextCluster.globalEnd);
+      final String text = paragraph.getText1(webTextCluster.start, webTextCluster.end);
       WebParagraphDebug.log(
         'calculateCluster "$text" ${block.textRange}-${block.span.start} ${block.clusterRange} source: $sourceRect => target: $targetRect',
       );
@@ -159,14 +159,14 @@ class TextPaint {
 
   (ui.Rect sourceRect, ui.Rect targetRect) calculateBlock(
     TextLayout layout,
-    ClusterBlock block,
+    TextBlock block,
     ui.Offset blockOffset,
     ui.Offset paragraphOffset,
   ) {
     final ui.Rect advance = block.advance;
 
     final int start = block.isLtr ? block.clusterRange.start : block.clusterRange.end - 1;
-    final ExtendedTextCluster startCluster = layout.allClusters[start];
+    final WebCluster startCluster = layout.allClusters[start];
 
     // Define the text clusters rect (using advances, not selected rects)
     final ui.Rect zeroRect = ui.Rect.fromLTWH(0, 0, advance.width, advance.height);

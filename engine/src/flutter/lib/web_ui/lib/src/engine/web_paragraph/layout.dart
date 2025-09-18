@@ -29,7 +29,7 @@ class TextLayout {
   final bidiRuns = <BidiRun>[];
   final lines = <TextLine>[];
 
-  final allClusters = <ExtendedTextCluster>[];
+  final allClusters = <WebCluster>[];
   late final _mapping = _TextClusterMapping(paragraph.text.length, allClusters);
 
   bool get isDefaultLtr => paragraph.paragraphStyle.textDirection == ui.TextDirection.ltr;
@@ -80,7 +80,7 @@ class TextLayout {
 
       for (final cluster in span.clusters) {
         allClusters.add(cluster);
-        for (int i = cluster.globalStart; i < cluster.globalEnd; i++) {
+        for (int i = cluster.start; i < cluster.end; i++) {
           _mapping.add(textIndex: i, clusterIndex: allClusters.length - 1);
         }
       }
@@ -201,7 +201,7 @@ class TextLayout {
     // We need to take the VISUALLY first cluster on the line (in case of LTR/RTL it could be anywhere)
     // and shift all runs for this line so this first cluster starts from 0
     // Break the line into the blocks that belong to the same bidi run (monodirectional text) and to the same style block (the same text metrics)
-    double blockAdvanceInLine = 0.0;
+    double blockShiftFromLineStart = 0.0;
     for (final BidiRun bidiRun in lineVisualRuns) {
       // TODO(jlavrova): we (almost always true) assume that trailing whitespaces do not affect the line height
       final ClusterRange textIntersection = bidiRun.clusterRange.intersect(contentRange);
@@ -258,7 +258,7 @@ class TextLayout {
               bidiRun.bidiLevel,
               bidiLineSpanRange,
               bidiLineSpanTextRange,
-              blockAdvanceInLine,
+              blockShiftFromLineStart,
             ),
           );
           // TODO(mdebbar=>jlavrova): Is this how it's done in SkParagraph? I feel like placholder
@@ -271,18 +271,18 @@ class TextLayout {
           line.fontBoundingBoxDescent = math.max(line.fontBoundingBoxDescent, 0);
           blockWidth = span.width;
         } else {
-          final ExtendedTextCluster firstVisualClusterInBlock = bidiRun.isLtr
+          final WebCluster firstVisualClusterInBlock = bidiRun.isLtr
               ? allClusters[bidiLineSpanRange.start]
               : allClusters[bidiLineSpanRange.end - 1];
-          final double blockAdvanceInSpan = firstVisualClusterInBlock.advance.left;
+          final double blockShiftFromSpanStart = firstVisualClusterInBlock.advance.left;
           line.visualBlocks.add(
-            block = ClusterBlock(
+            block = TextBlock(
               span as TextSpan,
               bidiRun.bidiLevel,
               bidiLineSpanRange,
               bidiLineSpanTextRange,
-              blockAdvanceInLine,
-              blockAdvanceInSpan,
+              blockShiftFromLineStart,
+              blockShiftFromSpanStart,
             ),
           );
 
@@ -302,16 +302,16 @@ class TextLayout {
           final String styledText = paragraph.getText(bidiLineSpanTextRange);
           WebParagraphDebug.log(
             'Styled text: "$styledText" clusterRange: $bidiLineSpanRange '
-            'width:$blockWidth advanceInLine:$blockAdvanceInLine ',
+            'width:$blockWidth shiftFromLineStart:$blockShiftFromLineStart ',
           );
         }
-        blockAdvanceInLine += blockWidth;
+        blockShiftFromLineStart += blockWidth;
       }
     }
 
     // Now when we calculated all line metrics we have to correct placeholders that depend on it
     for (final LineBlock block in line.visualBlocks) {
-      if (block is ClusterBlock) {
+      if (block is TextBlock) {
         continue;
       }
       final placeholderBlock = block as PlaceholderBlock;
@@ -332,7 +332,7 @@ class TextLayout {
     line.advance = ui.Rect.fromLTWH(
       0,
       top,
-      blockAdvanceInLine,
+      blockShiftFromLineStart,
       // At the end this shift is equal to the entire line width
       line.height,
     );
@@ -513,7 +513,7 @@ class TextLayout {
     final List<ui.TextBox> result = <ui.TextBox>[];
     for (final TextLine line in lines) {
       for (final LineBlock block in line.visualBlocks) {
-        if (block is ClusterBlock) {
+        if (block is TextBlock) {
           continue;
         }
         final ui.Rect rect = block.advance.translate(
@@ -590,10 +590,10 @@ class TextLayout {
           final cluster = allClusters[i];
           final ui.Rect rect = cluster.advance
               .translate(
-                // TODO(mdebbar): Using `block.spanAdvanceInLine` here is unfortunate. We should try
+                // TODO(mdebbar): Using `block.spanShiftFromLineStart` here is unfortunate. We should try
                 //                to come up with a better API and probably not use `cluster.advance` directly.
-                //                See other TODO above [ExtendedTextCluster.bounds].
-                line.advance.left + line.formattingShift + block.spanAdvanceInLine,
+                //                See other TODO above [WebCluster.bounds].
+                line.advance.left + line.formattingShift + block.spanShiftFromLineStart,
                 line.advance.top + line.fontBoundingBoxAscent,
               )
               .inflate(epsilon);
@@ -602,14 +602,11 @@ class TextLayout {
             // TODO(jlavrova): proportionally calculate the text position? I wouldn't...
             if (offset.dx - rect.left <= rect.right - offset.dx) {
               return ui.TextPosition(
-                offset: cluster.globalStart,
+                offset: cluster.start,
                 /* affinity: ui.TextAffinity.downstream, */
               );
             } else {
-              return ui.TextPosition(
-                offset: cluster.globalEnd - 1,
-                affinity: ui.TextAffinity.upstream,
-              );
+              return ui.TextPosition(offset: cluster.end - 1, affinity: ui.TextAffinity.upstream);
             }
           }
         }
@@ -669,7 +666,7 @@ class _TextClusterMapping {
   _TextClusterMapping(this._size, this._clusters) : _textToCluster = Uint32List(_size);
 
   final int _size;
-  final List<ExtendedTextCluster> _clusters;
+  final List<WebCluster> _clusters;
   final Uint32List _textToCluster;
 
   // This counts how many indices were added to this mapping. It's used later to confirm that the
@@ -730,18 +727,20 @@ class _TextClusterMapping {
     final startCluster = _clusters[clusterRange.start];
 
     if (clusterRange.isEmpty) {
-      return ui.TextRange.collapsed(startCluster.globalStart);
+      return ui.TextRange.collapsed(startCluster.start);
     }
 
     final endCluster = _clusters[clusterRange.end - 1];
-    return ui.TextRange(start: startCluster.globalStart, end: endCluster.globalEnd);
+    return ui.TextRange(start: startCluster.start, end: endCluster.end);
   }
 }
 
-// TODO(mdebbar): Rename this to ParagraphCluster or WebCluster?
-abstract class ExtendedTextCluster {
-  int get start;
-  int get end;
+abstract class WebCluster {
+  int get start => span.start + startInSpan;
+  int get end => span.start + endInSpan;
+
+  int get startInSpan;
+  int get endInSpan;
 
   // TODO(mdebbar): Cluster's `bounds` and `advance` are relative to the span, which isn't very useful
   //                most of the time. Should we hide those and only show `width`/`height` since those
@@ -755,36 +754,26 @@ abstract class ExtendedTextCluster {
   ParagraphSpan get span;
   WebTextStyle get style;
 
-  int get globalStart; // => span.start + start;
-  int get globalEnd; // => span.start + end;
-
   void fillOnContext(DomCanvasRenderingContext2D context, {required double x, required double y});
 }
 
-class TextCluster implements ExtendedTextCluster {
-  TextCluster(this.span, this._cluster) : start = _cluster.start, end = _cluster.end;
+class TextCluster extends WebCluster {
+  TextCluster(this.span, this._cluster) : startInSpan = _cluster.start, endInSpan = _cluster.end;
 
   @override
   final TextSpan span;
   @override
   WebTextStyle get style => span.style;
 
-  // TODO(mdebbar): Rename these to `startInSpan` and `endInSpan` or similar.
   @override
-  final int start;
+  final int startInSpan;
   @override
-  final int end;
+  final int endInSpan;
 
   @override
   late final ui.Rect bounds = span.getClusterBounds(this);
   @override
   late final ui.Rect advance = span.getClusterSelection(this);
-
-  // TODO(mdebbar): Rename these to `start` and `end`.
-  @override
-  int get globalStart => span.start + start;
-  @override
-  int get globalEnd => span.start + end;
 
   final DomTextCluster _cluster;
 
@@ -800,20 +789,16 @@ class TextCluster implements ExtendedTextCluster {
   }
 }
 
-class PlaceholderCluster implements ExtendedTextCluster {
+class PlaceholderCluster extends WebCluster {
   PlaceholderCluster(this.span);
 
   @override
   final PlaceholderSpan span;
 
   @override
-  final int start = 0;
+  final int startInSpan = 0;
   @override
-  final int end = 0;
-  @override
-  int get globalStart => span.start;
-  @override
-  int get globalEnd => span.end;
+  final int endInSpan = 0;
 
   @override
   WebTextStyle get style => span.style;
@@ -839,7 +824,7 @@ abstract class LineBlock {
     // TODO(mdebbar): Do we actually need both `clusterRange` and `textRange`?
     this.clusterRange,
     this.textRange,
-    this.advanceInLine,
+    this.shiftFromLineStart,
   );
 
   double get _heightMultiplier;
@@ -873,24 +858,23 @@ abstract class LineBlock {
   //               [ BLOCK ]
   // |--------{----[-------]--}----|
   //
-  //          ^----^ advanceInSpan
-  // ^-------------^ advanceInLine
-  // ^--------^      spanAdvanceInLine
-  final double advanceInLine;
+  //          ^----^ shiftFromSpanStart
+  // ^-------------^ shiftFromLineStart
+  // ^--------^      spanShiftFromLineStart
+  final double shiftFromLineStart;
   // TODO(mdebbar): Remove when possible!
-  double get spanAdvanceInLine;
+  double get spanShiftFromLineStart;
 }
 
-// TODO(mdebbar): Rename to `TextBlock`.
-class ClusterBlock extends LineBlock {
-  ClusterBlock(
+class TextBlock extends LineBlock {
+  TextBlock(
     super.span,
     super._bidiLevel,
     super.clusterRange,
     super.textRange,
-    super.advanceInLine,
-    double advanceInSpan,
-  ) : spanAdvanceInLine = advanceInLine - advanceInSpan;
+    super.shiftFromLineStart,
+    double shiftFromSpanStart,
+  ) : spanShiftFromLineStart = shiftFromLineStart - shiftFromSpanStart;
 
   @override
   TextSpan get span => super.span as TextSpan;
@@ -899,7 +883,7 @@ class ClusterBlock extends LineBlock {
   late final ui.Rect advance = span.getBlockSelection(this);
 
   @override
-  final double spanAdvanceInLine;
+  final double spanShiftFromLineStart;
 
   @override
   // TODO(mdebbar=>jlavrova): Why are we defaulting to 1.0? In Chrome, the default line-height is `1.2` most of the time.
@@ -912,10 +896,10 @@ class PlaceholderBlock extends LineBlock {
     super._bidiLevel,
     super.clusterRange,
     super.textRange,
-    super.advanceInLine,
-  ) : // Placeholders have a single block in the span, so the block's `advanceInLine` and
-      // `spanAdvanceInLine` are identical.
-      spanAdvanceInLine = advanceInLine;
+    super.shiftFromLineStart,
+  ) : // Placeholders have a single block in the span, so the block's `shiftFromLineStart` and
+      // `spanShiftFromLineStart` are identical.
+      spanShiftFromLineStart = shiftFromLineStart;
 
   @override
   PlaceholderSpan get span => super.span as PlaceholderSpan;
@@ -924,7 +908,7 @@ class PlaceholderBlock extends LineBlock {
   late final ui.Rect advance;
 
   @override
-  final double spanAdvanceInLine;
+  final double spanShiftFromLineStart;
 
   @override
   double get _heightMultiplier => 1.0;
@@ -976,7 +960,7 @@ class PlaceholderBlock extends LineBlock {
     final double top = lineAscent - ascent;
     // The advance needs to be calculated relative to the line. In order to do that, we need to start
     // from the span's own advance within the line.
-    advance = ui.Rect.fromLTWH(spanAdvanceInLine, top, span.width, span.height);
+    advance = ui.Rect.fromLTWH(spanShiftFromLineStart, top, span.width, span.height);
     WebParagraphDebug.log('PlaceholderBlock calculated advance: $advance $ascent $descent');
   }
 

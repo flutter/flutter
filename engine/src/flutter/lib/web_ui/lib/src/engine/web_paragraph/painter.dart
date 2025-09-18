@@ -19,27 +19,22 @@ abstract class Painter {
   Painter();
 
   /// Fills out the information needed to paint the text cluster.
-  void fillTextCluster(ExtendedTextCluster webTextCluster, bool isDefaultLtr);
+  void fillTextCluster(WebCluster webTextCluster, bool isDefaultLtr);
 
   /// Paints the text cluster previously filled by [fillTextCluster].
   void paintTextCluster(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect);
 
   /// Fills out the information needed to paint the text cluster shadow.
-  void fillShadow(ExtendedTextCluster webTextCluster, ui.Shadow shadow, bool isDefaultLtr);
+  void fillShadow(WebCluster webTextCluster, ui.Shadow shadow, bool isDefaultLtr);
 
   /// Paints the text cluster shadow previously filled by [fillShadow].
   void paintShadow(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect);
 
   /// Fills out the information needed to paint the background.
-  void paintBackground(
-    ui.Canvas canvas,
-    ClusterBlock block,
-    ui.Rect sourceRect,
-    ui.Rect targetRect,
-  );
+  void paintBackground(ui.Canvas canvas, TextBlock block, ui.Rect sourceRect, ui.Rect targetRect);
 
   /// Fills out the information needed to paint the decorations.
-  void fillDecorations(ClusterBlock block, ui.Rect sourceRect);
+  void fillDecorations(TextBlock block, ui.Rect sourceRect);
 
   /// Paints the decorations previously filled by [fillDecorations].
   void paintDecorations(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect);
@@ -58,7 +53,7 @@ class CanvasKitPainter extends Painter {
   }
 
   @override
-  void fillDecorations(ClusterBlock block, ui.Rect sourceRect) {
+  void fillDecorations(TextBlock block, ui.Rect sourceRect) {
     paintContext.fillStyle = block.style.foreground?.color.toCssString();
 
     final double thickness = calculateThickness(block.style);
@@ -147,7 +142,7 @@ class CanvasKitPainter extends Painter {
   }
 
   @override
-  void fillShadow(ExtendedTextCluster webTextCluster, ui.Shadow shadow, bool isDefaultLtr) {
+  void fillShadow(WebCluster webTextCluster, ui.Shadow shadow, bool isDefaultLtr) {
     final WebTextStyle style = webTextCluster.style;
 
     // TODO(jlavrova): see if we can implement shadowing ourself avoiding redrawing text clusters many times.
@@ -197,7 +192,7 @@ class CanvasKitPainter extends Painter {
   }
 
   @override
-  void fillTextCluster(ExtendedTextCluster webTextCluster, bool isDefaultLtr) {
+  void fillTextCluster(WebCluster webTextCluster, bool isDefaultLtr) {
     final WebTextStyle style = webTextCluster.style;
     // TODO(mdebbar=>jlavrova): Check `style.color` first.
     paintContext.fillStyle = style.foreground?.color.toCssString();
