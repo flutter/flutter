@@ -286,7 +286,7 @@ typedef WidgetPropertyResolver<T> = T Function(Set<WidgetState> states);
 ///
 /// See also:
 ///
-///  * [MaterialStateColor], the Material specific version of `WidgetStateColor`.
+///  * [WidgetStateColor], the Material specific version of `WidgetStateColor`.
 abstract class WidgetStateColor extends Color implements WidgetStateProperty<Color> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
