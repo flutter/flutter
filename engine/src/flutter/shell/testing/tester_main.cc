@@ -140,6 +140,10 @@ static void ConfigureShell(Shell* shell) {
   metrics.physical_width = physical_width;
   metrics.physical_height = physical_height;
   metrics.display_id = 0;
+  metrics.physical_min_width_constraint = physical_width;
+  metrics.physical_max_width_constraint = physical_width;
+  metrics.physical_min_height_constraint = physical_height;
+  metrics.physical_max_height_constraint = physical_height;
   shell->GetPlatformView()->SetViewportMetrics(kImplicitViewId, metrics);
 }
 

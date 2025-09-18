@@ -18,13 +18,20 @@ ViewportMetrics::ViewportMetrics(double p_device_pixel_ratio,
     : device_pixel_ratio(p_device_pixel_ratio),
       physical_width(p_physical_width),
       physical_height(p_physical_height),
+      physical_min_width_constraint(p_physical_width),
+      physical_max_width_constraint(p_physical_width),
+      physical_min_height_constraint(p_physical_height),
+      physical_max_height_constraint(p_physical_height),
       physical_touch_slop(p_physical_touch_slop),
       display_id(p_display_id) {}
-
 ViewportMetrics::ViewportMetrics(
     double p_device_pixel_ratio,
     double p_physical_width,
     double p_physical_height,
+    double p_physical_min_width_constraint,
+    double p_physical_max_width_constraint,
+    double p_physical_min_height_constraint,
+    double p_physical_max_height_constraint,
     double p_physical_padding_top,
     double p_physical_padding_right,
     double p_physical_padding_bottom,
@@ -45,6 +52,10 @@ ViewportMetrics::ViewportMetrics(
     : device_pixel_ratio(p_device_pixel_ratio),
       physical_width(p_physical_width),
       physical_height(p_physical_height),
+      physical_min_width_constraint(p_physical_min_width_constraint),
+      physical_max_width_constraint(p_physical_max_width_constraint),
+      physical_min_height_constraint(p_physical_min_height_constraint),
+      physical_max_height_constraint(p_physical_max_height_constraint),
       physical_padding_top(p_physical_padding_top),
       physical_padding_right(p_physical_padding_right),
       physical_padding_bottom(p_physical_padding_bottom),
@@ -69,6 +80,10 @@ bool operator==(const ViewportMetrics& a, const ViewportMetrics& b) {
   return a.device_pixel_ratio == b.device_pixel_ratio &&
          a.physical_width == b.physical_width &&
          a.physical_height == b.physical_height &&
+         a.physical_min_width_constraint == b.physical_min_width_constraint &&
+         a.physical_max_width_constraint == b.physical_max_width_constraint &&
+         a.physical_min_height_constraint == b.physical_min_height_constraint &&
+         a.physical_max_height_constraint == b.physical_max_height_constraint &&
          a.physical_padding_top == b.physical_padding_top &&
          a.physical_padding_right == b.physical_padding_right &&
          a.physical_padding_bottom == b.physical_padding_bottom &&
@@ -99,6 +114,10 @@ std::ostream& operator<<(std::ostream& os, const ViewportMetrics& a) {
      << "W " << a.physical_height << "H] " << "Padding: ["
      << a.physical_padding_top << "T " << a.physical_padding_right << "R "
      << a.physical_padding_bottom << "B " << a.physical_padding_left << "L] "
+     << "View Constraints: [" << a.physical_min_width_constraint << "-"
+     << a.physical_max_width_constraint << "W "
+     << a.physical_min_height_constraint << "-"
+     << a.physical_max_height_constraint << "H] "
      << "Insets: [" << a.physical_view_inset_top << "T "
      << a.physical_view_inset_right << "R " << a.physical_view_inset_bottom
      << "B " << a.physical_view_inset_left << "L] " << "Gesture Insets: ["

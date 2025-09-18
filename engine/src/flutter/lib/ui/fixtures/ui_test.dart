@@ -730,7 +730,7 @@ void hooksTests() async {
     window.onMetricsChanged!();
     _callHook(
       '_updateWindowMetrics',
-      21,
+      25,
       0, // window Id
       0.1234, // device pixel ratio
       0.0, // width
@@ -752,6 +752,10 @@ void hooksTests() async {
       <int>[], // display features types
       <int>[], // display features states
       0, // Display ID
+      0.0, // minWidth
+      0.0, // maxWidth
+      0.0, // minHeight
+      0.0, // maxHeight
     );
 
     expectIdentical(originalZone, callbackZone);
@@ -844,7 +848,7 @@ void hooksTests() async {
   await test('View padding/insets/viewPadding/systemGestureInsets', () {
     _callHook(
       '_updateWindowMetrics',
-      21,
+      25,
       0, // window Id
       1.0, // devicePixelRatio
       800.0, // width
@@ -866,6 +870,10 @@ void hooksTests() async {
       <int>[], // display features types
       <int>[], // display features states
       0, // Display ID
+      0.0, // minWidth
+      1000.0, // maxWidth
+      0.0, // minHeight
+      1000.0, // maxHeight
     );
 
     expectEquals(window.viewInsets.bottom, 0.0);
@@ -875,7 +883,7 @@ void hooksTests() async {
 
     _callHook(
       '_updateWindowMetrics',
-      21,
+      25,
       0, // window Id
       1.0, // devicePixelRatio
       800.0, // width
@@ -897,6 +905,10 @@ void hooksTests() async {
       <int>[], // display features types
       <int>[], // display features states
       0, // Display ID
+      0.0, // minWidth
+      0.0, // maxWidth
+      0.0, // minHeight
+      0.0, // maxHeight
     );
 
     expectEquals(window.viewInsets.bottom, 400.0);
@@ -908,7 +920,7 @@ void hooksTests() async {
   await test('Window physical touch slop', () {
     _callHook(
       '_updateWindowMetrics',
-      21,
+      25,
       0, // window Id
       1.0, // devicePixelRatio
       800.0, // width
@@ -930,13 +942,17 @@ void hooksTests() async {
       <int>[], // display features types
       <int>[], // display features states
       0, // Display ID
+      0.0, // minWidth
+      0.0, // maxWidth
+      0.0, // minHeight
+      0.0, // maxHeight
     );
 
     expectEquals(window.gestureSettings, GestureSettings(physicalTouchSlop: 11.0));
 
     _callHook(
       '_updateWindowMetrics',
-      21,
+      25,
       0, // window Id
       1.0, // devicePixelRatio
       800.0, // width
@@ -958,13 +974,17 @@ void hooksTests() async {
       <int>[], // display features types
       <int>[], // display features states
       0, // Display ID
+      0.0, // minWidth
+      0.0, // maxWidth
+      0.0, // minHeight
+      0.0, // maxHeight
     );
 
     expectEquals(window.gestureSettings, GestureSettings(physicalTouchSlop: null));
 
     _callHook(
       '_updateWindowMetrics',
-      21,
+      25,
       0, // window Id
       1.0, // devicePixelRatio
       800.0, // width
@@ -986,6 +1006,10 @@ void hooksTests() async {
       <int>[], // display features types
       <int>[], // display features states
       0, // Display ID
+      0.0, // minWidth
+      0.0, // maxWidth
+      0.0, // minHeight
+      0.0, // maxHeight
     );
 
     expectEquals(window.gestureSettings, GestureSettings(physicalTouchSlop: 22.0));
@@ -1382,4 +1406,8 @@ external void _callHook(
   Object? arg19,
   Object? arg20,
   Object? arg21,
+  Object? arg22,
+  Object? arg23,
+  Object? arg24,
+  Object? arg25,
 ]);

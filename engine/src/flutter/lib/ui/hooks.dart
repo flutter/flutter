@@ -27,6 +27,10 @@ void _addView(
   List<int> displayFeaturesType,
   List<int> displayFeaturesState,
   int displayId,
+  double minWidth,
+  double maxWidth,
+  double minHeight,
+  double maxHeight,
 ) {
   final _ViewConfiguration viewConfiguration = _buildViewConfiguration(
     devicePixelRatio,
@@ -49,6 +53,10 @@ void _addView(
     displayFeaturesType,
     displayFeaturesState,
     displayId,
+    minWidth,
+    maxWidth,
+    minHeight,
+    maxHeight,
   );
   PlatformDispatcher.instance._addView(viewId, viewConfiguration);
 }
@@ -151,6 +159,10 @@ _ViewConfiguration _buildViewConfiguration(
   List<int> displayFeaturesType,
   List<int> displayFeaturesState,
   int displayId,
+  double minWidth,
+  double maxWidth,
+  double minHeight,
+  double maxHeight,
 ) {
   return _ViewConfiguration(
     devicePixelRatio: devicePixelRatio,
@@ -189,6 +201,12 @@ _ViewConfiguration _buildViewConfiguration(
       devicePixelRatio: devicePixelRatio,
     ),
     displayId: displayId,
+    viewConstraints: ViewConstraints(
+      minWidth: minWidth,
+      maxWidth: maxWidth,
+      minHeight: minHeight,
+      maxHeight: maxHeight,
+    ),
   );
 }
 
@@ -215,6 +233,10 @@ void _updateWindowMetrics(
   List<int> displayFeaturesType,
   List<int> displayFeaturesState,
   int displayId,
+  double minWidth,
+  double maxWidth,
+  double minHeight,
+  double maxHeight,
 ) {
   final _ViewConfiguration viewConfiguration = _buildViewConfiguration(
     devicePixelRatio,
@@ -237,6 +259,10 @@ void _updateWindowMetrics(
     displayFeaturesType,
     displayFeaturesState,
     displayId,
+    minWidth,
+    maxWidth,
+    minHeight,
+    maxHeight,
   );
   PlatformDispatcher.instance._updateWindowMetrics(viewId, viewConfiguration);
 }
