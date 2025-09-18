@@ -3634,6 +3634,8 @@
 ../../../flutter/third_party/web_locale_keymap/pubspec.yaml
 ../../../flutter/third_party/web_locale_keymap/test
 ../../../flutter/third_party/web_test_fonts/pubspec.yaml
+../../../flutter/third_party/web_unicode/README.md
+../../../flutter/third_party/web_unicode/pubspec.yaml
 ../../../flutter/third_party/wuffs/.git
 ../../../flutter/third_party/wuffs/.github
 ../../../flutter/third_party/wuffs/README.md
