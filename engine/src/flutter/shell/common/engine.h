@@ -910,6 +910,11 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   const std::string& GetLastEntrypoint() const;
 
   //----------------------------------------------------------------------------
+  /// @brief      Get the last Engine Id that was used in the RunConfiguration
+  ///             when |Engine::Run| was called.
+  std::optional<int64_t> GetLastEngineId() const;
+
+  //----------------------------------------------------------------------------
   /// @brief      Get the last Entrypoint Library that was used in the
   ///             RunConfiguration when |Engine::Run| was called.
   ///
@@ -1088,6 +1093,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   std::string last_entry_point_;
   std::string last_entry_point_library_;
   std::vector<std::string> last_entry_point_args_;
+  std::optional<int64_t> last_engine_id_;
   std::string initial_route_;
   std::shared_ptr<AssetManager> asset_manager_;
   std::shared_ptr<FontCollection> font_collection_;

@@ -53,6 +53,8 @@ class SnapshotController {
   virtual void CacheRuntimeStage(
       const std::shared_ptr<impeller::RuntimeStage>& runtime_stage) = 0;
 
+  virtual bool MakeRenderContextCurrent() = 0;
+
  protected:
   explicit SnapshotController(const Delegate& delegate);
   const Delegate& GetDelegate() { return delegate_; }

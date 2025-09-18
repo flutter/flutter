@@ -444,6 +444,14 @@ def invoke_swift_compiler(args, extras_args, build_cache_dir, output_file_map):
         args.file_prefix_map,
     ])
 
+  # Since iOS/macOS 26, building host engine requires setting -plugin-path for the `testing` plugin under XcodeDefault.xctoolchain.
+  testing_plugin_path = os.path.join(args.mac_host_toolchain_path, 'usr/lib/swift/host/plugins/testing')
+  if os.path.isdir(testing_plugin_path):
+    swiftc_args.extend([
+      '-plugin-path',
+      testing_plugin_path,
+    ])
+
   swift_toolchain_path = args.swift_toolchain_path
   if not swift_toolchain_path:
     swift_toolchain_path = os.path.join(os.path.dirname(args.sdk_path),
@@ -585,6 +593,10 @@ def main(args):
   parser.add_argument('--swift-toolchain-path',
                       default='',
                       help='path to the Swift toolchain to use')
+
+  parser.add_argument('--mac-host-toolchain-path',
+                      default='',
+                      help='path to the mac host toolchain to use')
 
   parser.add_argument('--whole-module-optimization',
                       default=False,

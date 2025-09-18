@@ -50,6 +50,19 @@ FLUTTER_DARWIN_EXPORT
 @property(nullable, readonly) NSView* view;
 
 /**
+ * The `NSViewController` that hosts |view|.
+ *
+ * The plugin typically should not store a strong reference to this view
+ * controller.
+ *
+ * This property is provided for backwards compatibility for apps that assume
+ * a single view, and will eventually be replaced by the multi-view API variant.
+ *
+ * This property is |nil| when |view| is |nil|.
+ */
+@property(nullable, readonly) NSViewController* viewController;
+
+/**
  * Registers |delegate| to receive handleMethodCall:result: callbacks for the given |channel|.
  */
 - (void)addMethodCallDelegate:(nonnull id<FlutterPlugin>)delegate
