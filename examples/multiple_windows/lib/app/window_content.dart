@@ -17,6 +17,7 @@ class WindowContent extends StatelessWidget {
     required this.controller,
     required this.onDestroyed,
     required this.onError,
+    super.key,
   });
 
   final Key windowKey;

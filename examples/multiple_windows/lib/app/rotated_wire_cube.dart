@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 class RotatedWireCube extends StatelessWidget {
-  RotatedWireCube({
+  const RotatedWireCube({
     required this.animation,
     required this.cubeColor,
     super.key,
