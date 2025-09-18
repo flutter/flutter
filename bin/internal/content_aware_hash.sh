@@ -44,7 +44,7 @@ if [[ "$CURRENT_BRANCH" != "main" && \
       "$CURRENT_BRANCH" != "beta" && \
       "$CURRENT_BRANCH" != "gh-readonly-queue/master/pr-"* && \
       "$CURRENT_BRANCH" != "flutter-"*"-candidate."* && \
-      "$CURRENT_BRANCH" != "HEAD" && \
+      ! ( "$CURRENT_BRANCH" == "HEAD" && -n "$LUCI_CI" ) && \
       ! -f "$FLUTTER_ROOT/.git/shallow" ]]; then
 
   # This is a development branch. Find the merge-base.
