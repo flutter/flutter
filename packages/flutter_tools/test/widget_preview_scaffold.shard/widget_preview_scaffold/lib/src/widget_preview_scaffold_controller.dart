@@ -82,11 +82,18 @@ class WidgetPreviewScaffoldController {
       _updateFilteredPreviewSet();
     });
     // Set the initial state.
-    _updateFilteredPreviewSet();
+    _updateFilteredPreviewSet(initial: true);
   }
 
-  void _updateFilteredPreviewSet() {
-    if (!_filterBySelectedFile.value) {
+  void _updateFilteredPreviewSet({bool initial = false}) {
+    // When we set the initial preview set, we always display all previews,
+    // regardless of selection mode as we're unable to query the currently
+    // selected file.
+    //
+    // This special case can be removed when https://github.com/dart-lang/sdk/issues/61538
+    // is resolved.
+    // TODO(bkonyi): remove special case
+    if (!_filterBySelectedFile.value || initial) {
       _filteredPreviewSet.value = _previews();
       return;
     }

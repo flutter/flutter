@@ -38,11 +38,16 @@ void main() {
       controller: controller,
     );
 
-    // No file is selected, so no previews should be visible.
+    // No file is selected, so all previews should be visible until
+    // https://github.com/dart-lang/sdk/issues/61538 is resolved.
     await tester.pumpWidget(widgetPreview);
     expect(controller.filterBySelectedFileListenable.value, true);
     expect(dtdServices.selectedSourceFile.value, isNull);
-    expect(controller.filteredPreviewSetListenable.value, isEmpty);
+    expect(controller.filteredPreviewSetListenable.value, groups);
+    expect(
+      controller.filteredPreviewSetListenable.value.single.previews,
+      hasLength(2),
+    );
 
     // Select kScript1
     dtdServices.selectedSourceFile.value = TextDocument(
