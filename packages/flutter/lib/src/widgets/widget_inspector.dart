@@ -3072,7 +3072,7 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
 ///
 /// See also:
 ///
-///  * [DisableWidgetInspectorScope], the widget used to enable the inspector for a widget subtree.
+///  * [DisableWidgetInspectorScope], the widget used to disable the inspector for a widget subtree.
 ///  * [WidgetInspector], the widget used to provide inspector support for a widget subtree.
 class EnableWidgetInspectorScope extends ProxyWidget {
   /// Enables the Flutter DevTools Widget Inspector for the [Widget] subtree rooted at [child].
@@ -3808,10 +3808,7 @@ class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup
   @override
   Widget build(BuildContext context) {
     final Widget selectionModeButtons = Column(
-      children: <Widget>[
-        if (_tapBehaviorButton != null) _tapBehaviorButton!,
-        _exitWidgetSelectionButton,
-      ],
+      children: <Widget>[?_tapBehaviorButton, _exitWidgetSelectionButton],
     );
 
     final Widget buttonGroup = Stack(
@@ -3829,7 +3826,7 @@ class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             if (_usesDefaultAlignment) selectionModeButtons,
-            if (_moveExitWidgetSelectionButton != null) _moveExitWidgetSelectionButton!,
+            ?_moveExitWidgetSelectionButton,
             if (!_usesDefaultAlignment) selectionModeButtons,
           ],
         ),
@@ -4077,16 +4074,11 @@ class _Location {
   final String? name;
 
   Map<String, Object?> toJsonMap() {
-    return <String, Object?>{
-      'file': file,
-      'line': line,
-      'column': column,
-      if (name != null) 'name': name,
-    };
+    return <String, Object?>{'file': file, 'line': line, 'column': column, 'name': ?name};
   }
 
   @override
-  String toString() => <String>[if (name != null) name!, file, '$line', '$column'].join(':');
+  String toString() => <String>[?name, file, '$line', '$column'].join(':');
 }
 
 bool _isDebugCreator(DiagnosticsNode node) => node is DiagnosticsDebugCreator;

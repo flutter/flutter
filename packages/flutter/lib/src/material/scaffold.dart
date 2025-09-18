@@ -198,23 +198,12 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
       Queue<ScaffoldFeatureController<SnackBar, SnackBarClosedReason>>();
   AnimationController? _snackBarController;
   Timer? _snackBarTimer;
-  bool? _accessibleNavigation;
+  late bool _accessibleNavigation;
 
   @protected
   @override
   void didChangeDependencies() {
-    final bool accessibleNavigation = MediaQuery.accessibleNavigationOf(context);
-    // If we transition from accessible navigation to non-accessible navigation
-    // and there is a SnackBar that would have timed out that has already
-    // completed its timer, dismiss that SnackBar. If the timer hasn't finished
-    // yet, let it timeout as normal.
-    if ((_accessibleNavigation ?? false) &&
-        !accessibleNavigation &&
-        _snackBarTimer != null &&
-        !_snackBarTimer!.isActive) {
-      hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
-    }
-    _accessibleNavigation = accessibleNavigation;
+    _accessibleNavigation = MediaQuery.accessibleNavigationOf(context);
     super.didChangeDependencies();
   }
 
@@ -453,7 +442,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
       return;
     }
     final Completer<SnackBarClosedReason> completer = _snackBars.first._completer;
-    if (_accessibleNavigation!) {
+    if (_accessibleNavigation) {
       _snackBarController!.value = 0.0;
       completer.complete(reason);
     } else {
@@ -589,7 +578,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
       return;
     }
     final Completer<MaterialBannerClosedReason> completer = _materialBanners.first._completer;
-    if (_accessibleNavigation!) {
+    if (_accessibleNavigation) {
       _materialBannerController!.value = 0.0;
       completer.complete(reason);
     } else {
@@ -629,7 +618,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
           _snackBarTimer = Timer(snackBar.duration, () {
             assert(_snackBarController!.isForwardOrCompleted);
             // Look up MediaQuery again in case the setting changed.
-            if (snackBar.action != null && MediaQuery.accessibleNavigationOf(context)) {
+            if (snackBar.persist) {
               return;
             }
             hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
@@ -886,6 +875,7 @@ class _ScaffoldGeometryNotifier extends ChangeNotifier
       }
       return true;
     }());
+
     return geometry._scaleFloatingActionButton(floatingActionButtonScale!);
   }
 
@@ -1375,6 +1365,9 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
       // If we start out with a child, have the child appear fully visible instead
       // of animating in.
       widget.currentController.value = 1.0;
+      // With FloatingActionButtonAnimator.noAnimation, floatingActionButtonScale is null.
+      // Default to a scale of 1.0 to ensure the button remains visible.
+      _updateGeometryScale(1.0);
     } else {
       // If we start without a child we update the geometry object with a
       // floating action button scale of 0, as it is not showing on the screen.
@@ -2244,6 +2237,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   ///    [Scaffold].
   bool get isDrawerOpen => _drawerOpened.value;
 
+  /// Whether the [Scaffold.drawerBarrierDismissible] flag is set.
+  bool get isDrawerBarrierDismissible => widget.drawerBarrierDismissible;
+
   /// Whether the [Scaffold.endDrawer] is opened.
   ///
   /// See also:
@@ -3039,10 +3035,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     if (_currentBottomSheet != null || _dismissedBottomSheets.isNotEmpty) {
       final Widget stack = Stack(
         alignment: Alignment.bottomCenter,
-        children: <Widget>[
-          ..._dismissedBottomSheets,
-          if (_currentBottomSheet != null) _currentBottomSheet!._widget,
-        ],
+        children: <Widget>[..._dismissedBottomSheets, ?_currentBottomSheet?._widget],
       );
       _addIfNonNull(
         children,
@@ -3250,13 +3243,18 @@ class _DismissDrawerAction extends DismissAction {
 
   @override
   bool isEnabled(DismissIntent intent) {
-    return Scaffold.of(context).isDrawerOpen || Scaffold.of(context).isEndDrawerOpen;
+    final ScaffoldState scaffold = Scaffold.of(context);
+    return (scaffold.isDrawerOpen || scaffold.isEndDrawerOpen) &&
+        scaffold.isDrawerBarrierDismissible;
   }
 
   @override
   void invoke(DismissIntent intent) {
-    Scaffold.of(context).closeDrawer();
-    Scaffold.of(context).closeEndDrawer();
+    final ScaffoldState scaffold = Scaffold.of(context);
+    if (isEnabled(intent)) {
+      scaffold.closeDrawer();
+      scaffold.closeEndDrawer();
+    }
   }
 }
 

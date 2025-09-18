@@ -291,9 +291,8 @@ void main() {
             command: <String>['git', 'rev-parse', '--verify', '@{upstream}'],
             stdout: revision,
           ),
-          const FakeCommand(command: <String>['git', 'tag', '--points-at', revision]),
           const FakeCommand(
-            command: <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', revision],
+            command: <String>['git', 'tag', '--points-at', revision],
             stdout: version,
           ),
         ]);

@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <climits>
+#include <format>
 #include <memory>
 #include <vector>
 
@@ -160,7 +161,7 @@ void ImGui_ImplImpeller_RenderDrawData(ImDrawData* draw_data,
   buffer_desc.storage_mode = impeller::StorageMode::kHostVisible;
 
   auto buffer = bd->context->GetResourceAllocator()->CreateBuffer(buffer_desc);
-  buffer->SetLabel(impeller::SPrintF("ImGui vertex+index buffer"));
+  buffer->SetLabel("ImGui vertex+index buffer");
 
   auto display_rect = impeller::Rect::MakeXYWH(
       draw_data->DisplayPos.x, draw_data->DisplayPos.y,
@@ -250,10 +251,10 @@ void ImGui_ImplImpeller_RenderDrawData(ImDrawData* draw_data,
           clip_rect = visible_clip.value();
         }
 
-        render_pass.SetCommandLabel(impeller::SPrintF(
-            "ImGui draw list %d (command %d)", draw_list_i, cmd_i));
+        render_pass.SetCommandLabel(
+            std::format("ImGui draw list {} (command {})", draw_list_i, cmd_i));
         render_pass.SetViewport(viewport);
-        render_pass.SetScissor(impeller::IRect::RoundOut(clip_rect));
+        render_pass.SetScissor(impeller::IRect32::RoundOut(clip_rect));
         render_pass.SetPipeline(bd->pipeline);
         VS::BindUniformBuffer(render_pass, vtx_uniforms);
         FS::BindTex(render_pass, bd->font_texture, bd->sampler);

@@ -381,12 +381,14 @@ void FlutterWindowsView::SendWindowMetrics(size_t width,
 FlutterWindowMetricsEvent FlutterWindowsView::CreateWindowMetricsEvent() const {
   PhysicalWindowBounds bounds = binding_handler_->GetPhysicalWindowBounds();
   double pixel_ratio = binding_handler_->GetDpiScale();
+  FlutterEngineDisplayId display_id = binding_handler_->GetDisplayId();
 
   FlutterWindowMetricsEvent event = {};
   event.struct_size = sizeof(event);
   event.width = bounds.width;
   event.height = bounds.height;
   event.pixel_ratio = pixel_ratio;
+  event.display_id = display_id;
   event.view_id = view_id_;
 
   return event;

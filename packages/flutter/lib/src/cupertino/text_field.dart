@@ -1383,7 +1383,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
           children: <Widget>[
             // Insert a prefix at the front if the prefix visibility mode matches
             // the current text state.
-            if (prefixWidget != null) prefixWidget,
+            ?prefixWidget,
             // In the middle part, stack the placeholder on top of the main EditableText
             // if needed.
             Expanded(
@@ -1397,7 +1397,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
                 ),
               ),
             ),
-            if (suffixWidget != null) suffixWidget,
+            ?suffixWidget,
           ],
         );
       },
@@ -1778,6 +1778,38 @@ class _RenderBaselineAlignedStack extends RenderBox
     final RenderBox? child = childForSlot(_BaselineAlignedStackSlot.editableText);
     assert(child != null);
     return child!;
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    return math.max(
+      _placeholderChild?.getMinIntrinsicHeight(width) ?? 0.0,
+      _editableTextChild.getMinIntrinsicHeight(width),
+    );
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    return math.max(
+      _placeholderChild?.getMaxIntrinsicHeight(width) ?? 0.0,
+      _editableTextChild.getMaxIntrinsicHeight(width),
+    );
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    return math.max(
+      _placeholderChild?.getMinIntrinsicWidth(height) ?? 0.0,
+      _editableTextChild.getMinIntrinsicWidth(height),
+    );
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    return math.max(
+      _placeholderChild?.getMaxIntrinsicWidth(height) ?? 0.0,
+      _editableTextChild.getMaxIntrinsicWidth(height),
+    );
   }
 
   @override

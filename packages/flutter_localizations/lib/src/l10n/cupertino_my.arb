@@ -29,5 +29,11 @@
   "shareButtonLabel": "မျှဝေရန်...",
   "clearButtonLabel": "ဖယ်ရှားရန်",
   "cancelButtonLabel": "မလုပ်တော့",
-  "backButtonLabel": "နောက်သို့"
+  "backButtonLabel": "နောက်သို့",
+  "expansionTileExpandedHint": "double tap to collapse",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

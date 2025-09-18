@@ -1383,6 +1383,7 @@ class RenderEditable extends RenderBox
       ..isMultiline = _isMultiline
       ..textDirection = textDirection
       ..isFocused = hasFocus
+      ..isFocusable = true
       ..isTextField = true
       ..isReadOnly = readOnly
       // This is the default for customer that uses RenderEditable directly.

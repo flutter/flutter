@@ -38,10 +38,10 @@ class GPUSurfaceGLSkia : public Surface {
   bool IsValid() override;
 
   // |Surface|
-  std::unique_ptr<SurfaceFrame> AcquireFrame(const SkISize& size) override;
+  std::unique_ptr<SurfaceFrame> AcquireFrame(const DlISize& size) override;
 
   // |Surface|
-  SkMatrix GetRootTransformation() const override;
+  DlMatrix GetRootTransformation() const override;
 
   // |Surface|
   GrDirectContext* GetContext() override;
@@ -56,11 +56,11 @@ class GPUSurfaceGLSkia : public Surface {
   bool AllowsDrawingWhenGpuDisabled() const override;
 
  private:
-  bool CreateOrUpdateSurfaces(const SkISize& size);
+  bool CreateOrUpdateSurfaces(const DlISize& size);
 
   sk_sp<SkSurface> AcquireRenderSurface(
-      const SkISize& untransformed_size,
-      const SkMatrix& root_surface_transformation);
+      const DlISize& untransformed_size,
+      const DlMatrix& root_surface_transformation);
 
   bool PresentSurface(const SurfaceFrame& frame);
 
@@ -72,7 +72,7 @@ class GPUSurfaceGLSkia : public Surface {
   // The current FBO's existing damage, as tracked by the GPU surface, delegates
   // still have an option of overriding this damage with their own in
   // `GLContextFrameBufferInfo`.
-  std::optional<SkIRect> existing_damage_ = std::nullopt;
+  std::optional<DlIRect> existing_damage_ = std::nullopt;
   bool context_owner_ = false;
   // TODO(38466): Refactor GPU surface APIs take into account the fact that an
   // external view embedder may want to render to the root surface. This is a

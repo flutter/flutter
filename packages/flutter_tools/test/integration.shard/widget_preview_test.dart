@@ -10,32 +10,42 @@ import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/widget_preview.dart';
+import 'package:flutter_tools/src/devtools_launcher.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
+import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/widget_preview/dtd_services.dart';
 import 'package:process/process.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
 import 'test_data/basic_project.dart';
 import 'test_utils.dart';
 
-const firstLaunchMessagesWeb = <String>[
+final launchingOnDeviceRegExp = RegExp(r'Launching the Widget Preview Scaffold on [a-zA-Z]+...');
+
+final firstLaunchMessagesWeb = <Pattern>[
   'Creating widget preview scaffolding at:',
-  'Launching the Widget Preview Scaffold...',
+  launchingOnDeviceRegExp,
   'Done loading previews.',
 ];
 
-const subsequentLaunchMessagesWeb = <String>[
-  'Launching the Widget Preview Scaffold...',
+final firstLaunchMessagesWebServer = <Pattern>[
+  'Creating widget preview scaffolding at:',
+  launchingOnDeviceRegExp,
+  'main.dart is being served at',
   'Done loading previews.',
 ];
+
+final subsequentLaunchMessagesWeb = <Pattern>[launchingOnDeviceRegExp, 'Done loading previews.'];
 
 void main() {
   late Directory tempDir;
   Process? process;
   Logger? logger;
   DtdLauncher? dtdLauncher;
+  DevtoolsLauncher? devtoolsLauncher;
   final project = BasicProject();
   const ProcessManager processManager = LocalProcessManager();
 
@@ -49,11 +59,18 @@ void main() {
     process?.kill();
     process = null;
     await dtdLauncher?.dispose();
+    await devtoolsLauncher?.close();
+    devtoolsLauncher = null;
     dtdLauncher = null;
     tryToDelete(tempDir);
   });
 
-  Future<void> runWidgetPreview({required List<String> expectedMessages, Uri? dtdUri}) async {
+  Future<void> runWidgetPreview({
+    required List<Pattern> expectedMessages,
+    Uri? dtdUri,
+    bool useWebServer = false,
+    Uri? devToolsServerAddress,
+  }) async {
     expect(expectedMessages, isNotEmpty);
     var i = 0;
     process = await processManager.start(<String>[
@@ -62,7 +79,10 @@ void main() {
       'start',
       '--verbose',
       '--${WidgetPreviewStartCommand.kHeadless}',
-      if (dtdUri != null) '--${FlutterGlobalOptions.kDtdUrl}=$dtdUri',
+      if (useWebServer) '--${WidgetPreviewStartCommand.kWebServer}',
+      if (dtdUri != null) '--${WidgetPreviewStartCommand.kDtdUrl}=$dtdUri',
+      if (devToolsServerAddress != null)
+        '--${FlutterCommand.kDevToolsServerAddress}=$devToolsServerAddress',
     ], workingDirectory: tempDir.path);
 
     final completer = Completer<void>();
@@ -101,6 +121,10 @@ void main() {
       await runWidgetPreview(expectedMessages: firstLaunchMessagesWeb);
     });
 
+    testWithoutContext('--web-server starts a web server instance', () async {
+      await runWidgetPreview(expectedMessages: firstLaunchMessagesWebServer, useWebServer: true);
+    });
+
     testWithoutContext('does not recreate project on subsequent runs', () async {
       // The first run of 'flutter widget-preview start' should generate a new preview scaffold
       await runWidgetPreview(expectedMessages: firstLaunchMessagesWeb);
@@ -136,6 +160,26 @@ void main() {
       // Start the widget preview and wait for the 'Connected' event.
       await runWidgetPreview(expectedMessages: firstLaunchMessagesWeb, dtdUri: dtdUri);
       await completer.future;
+    });
+
+    testUsingContext('can connect to an existing DevTools instance', () async {
+      devtoolsLauncher = DevtoolsServerLauncher(
+        processManager: processManager,
+        logger: logger!,
+        botDetector: const FakeBotDetector(true),
+        artifacts: globals.artifacts!,
+      );
+
+      // Start a DevTools instance.
+      final Uri devtoolsUri = (await devtoolsLauncher!.serve())!.uri!;
+
+      // Start the widget preview and wait for the DevTools message.
+      await runWidgetPreview(
+        expectedMessages: [
+          'The Flutter DevTools debugger and profiler on Chrome is available at: $devtoolsUri',
+        ],
+        devToolsServerAddress: devtoolsUri,
+      );
     });
   });
 }

@@ -227,16 +227,16 @@ class TesterPlatformView : public PlatformView,
   }
 
   // |GPUSurfaceSoftwareDelegate|
-  sk_sp<SkSurface> AcquireBackingStore(const SkISize& size) override {
-    if (sk_surface_ != nullptr &&
-        SkISize::Make(sk_surface_->width(), sk_surface_->height()) == size) {
+  sk_sp<SkSurface> AcquireBackingStore(const DlISize& size) override {
+    if (sk_surface_ != nullptr &&  //
+        sk_surface_->width() == size.width &&
+        sk_surface_->height() == size.height) {
       // The old and new surface sizes are the same. Nothing to do here.
       return sk_surface_;
     }
 
-    SkImageInfo info =
-        SkImageInfo::MakeN32(size.fWidth, size.fHeight, kPremul_SkAlphaType,
-                             SkColorSpace::MakeSRGB());
+    SkImageInfo info = SkImageInfo::MakeN32(
+        size.width, size.height, kPremul_SkAlphaType, SkColorSpace::MakeSRGB());
     sk_surface_ = SkSurfaces::Raster(info, nullptr);
 
     if (sk_surface_ == nullptr) {

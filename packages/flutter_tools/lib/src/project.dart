@@ -414,8 +414,8 @@ class FlutterProject {
     final String? buildNumber = manifest.buildNumber;
     final versionFileJson = <String, String>{
       'app_name': manifest.appName,
-      if (buildName != null) 'version': buildName,
-      if (buildNumber != null) 'build_number': buildNumber,
+      'version': ?buildName,
+      'build_number': ?buildNumber,
       'package_name': manifest.appName,
     };
     return jsonEncode(versionFileJson);

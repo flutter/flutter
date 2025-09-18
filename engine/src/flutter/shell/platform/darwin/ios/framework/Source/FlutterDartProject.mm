@@ -56,7 +56,7 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
     bundle = FLTFrameworkBundleWithIdentifier([FlutterDartProject defaultBundleIdentifier]);
   }
 
-  auto settings = flutter::SettingsFromCommandLine(command_line);
+  auto settings = flutter::SettingsFromCommandLine(command_line, true);
 
   settings.task_observer_add = [](intptr_t key, const fml::closure& callback) {
     fml::TaskQueueId queue_id = fml::MessageLoop::GetCurrentTaskQueueId();
@@ -95,32 +95,32 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
     if (hasExplicitBundle) {
       NSString* executablePath = bundle.executablePath;
       if ([[NSFileManager defaultManager] fileExistsAtPath:executablePath]) {
-        settings.application_library_path.push_back(executablePath.UTF8String);
+        settings.application_library_paths.push_back(executablePath.UTF8String);
       }
     }
 
     // No application bundle specified.  Try a known location from the main bundle's Info.plist.
-    if (settings.application_library_path.empty()) {
+    if (settings.application_library_paths.empty()) {
       NSString* libraryName = [mainBundle objectForInfoDictionaryKey:@"FLTLibraryPath"];
       NSString* libraryPath = [mainBundle pathForResource:libraryName ofType:@""];
       if (libraryPath.length > 0) {
         NSString* executablePath = [NSBundle bundleWithPath:libraryPath].executablePath;
         if (executablePath.length > 0) {
-          settings.application_library_path.push_back(executablePath.UTF8String);
+          settings.application_library_paths.push_back(executablePath.UTF8String);
         }
       }
     }
 
     // In case the application bundle is still not specified, look for the App.framework in the
     // Frameworks directory.
-    if (settings.application_library_path.empty()) {
+    if (settings.application_library_paths.empty()) {
       NSString* applicationFrameworkPath = [mainBundle pathForResource:@"Frameworks/App.framework"
                                                                 ofType:@""];
       if (applicationFrameworkPath.length > 0) {
         NSString* executablePath =
             [NSBundle bundleWithPath:applicationFrameworkPath].executablePath;
         if (executablePath.length > 0) {
-          settings.application_library_path.push_back(executablePath.UTF8String);
+          settings.application_library_paths.push_back(executablePath.UTF8String);
         }
       }
     }
@@ -200,6 +200,12 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
     settings.enable_dart_profiling = enableDartProfiling.boolValue;
   }
 
+  NSNumber* profileStartup = [mainBundle objectForInfoDictionaryKey:@"FLTProfileStartup"];
+  // Change the default only if the option is present.
+  if (profileStartup != nil) {
+    settings.profile_startup = profileStartup.boolValue;
+  }
+
   // Leak Dart VM settings, set whether leave or clean up the VM after the last shell shuts down.
   NSNumber* leakDartVM = [mainBundle objectForInfoDictionaryKey:@"FLTLeakDartVM"];
   // It will change the default leak_vm value in settings only if the key exists.
@@ -210,9 +216,8 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
   NSNumber* enableMergedPlatformUIThread =
       [mainBundle objectForInfoDictionaryKey:@"FLTEnableMergedPlatformUIThread"];
   if (enableMergedPlatformUIThread != nil) {
-    settings.merged_platform_ui_thread = enableMergedPlatformUIThread.boolValue
-                                             ? flutter::Settings::MergedPlatformUIThread::kEnabled
-                                             : flutter::Settings::MergedPlatformUIThread::kDisabled;
+    FML_CHECK(enableMergedPlatformUIThread.boolValue)
+        << "FLTEnableMergedPlatformUIThread=false is no longer allowed.";
   }
 
   NSNumber* enableFlutterGPU = [mainBundle objectForInfoDictionaryKey:@"FLTEnableFlutterGPU"];

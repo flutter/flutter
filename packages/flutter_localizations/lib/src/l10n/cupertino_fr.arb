@@ -29,5 +29,11 @@
   "shareButtonLabel": "Partager…",
   "clearButtonLabel": "Effacer",
   "cancelButtonLabel": "Annuler",
-  "backButtonLabel": "Retour"
+  "backButtonLabel": "Retour",
+  "expansionTileExpandedHint": "double tap to collapse",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

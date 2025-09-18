@@ -565,7 +565,7 @@ class FloatingActionButton extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                if (child != null) child!,
+                ?child,
                 if (child != null && isExtended) SizedBox(width: iconLabelSpacing),
                 if (isExtended) _extendedLabel!,
               ],
@@ -637,18 +637,18 @@ class FloatingActionButton extends StatelessWidget {
   }
 }
 
-// This MaterialStateProperty is passed along to RawMaterialButton which
-// resolves the property against MaterialState.pressed, MaterialState.hovered,
-// MaterialState.focused, MaterialState.disabled.
+// This WidgetStateProperty is passed along to RawMaterialButton which
+// resolves the property against WidgetState.pressed, WidgetState.hovered,
+// WidgetState.focused, WidgetState.disabled.
 class _EffectiveMouseCursor extends MaterialStateMouseCursor {
   const _EffectiveMouseCursor(this.widgetCursor, this.themeCursor);
 
   final MouseCursor? widgetCursor;
-  final MaterialStateProperty<MouseCursor?>? themeCursor;
+  final WidgetStateProperty<MouseCursor?>? themeCursor;
 
   @override
-  MouseCursor resolve(Set<MaterialState> states) {
-    return MaterialStateProperty.resolveAs<MouseCursor?>(widgetCursor, states) ??
+  MouseCursor resolve(Set<WidgetState> states) {
+    return WidgetStateProperty.resolveAs<MouseCursor?>(widgetCursor, states) ??
         themeCursor?.resolve(states) ??
         MaterialStateMouseCursor.clickable.resolve(states);
   }

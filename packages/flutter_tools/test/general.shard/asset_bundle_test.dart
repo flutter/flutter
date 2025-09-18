@@ -477,97 +477,84 @@ flutter:
   });
 
   group('AssetBundle.build', () {
-    testWithoutContext(
-      'throws ToolExit when directory entry contains invalid characters (Windows only)',
-      () async {
-        final fileSystem = MemoryFileSystem(style: FileSystemStyle.windows);
-        final logger = BufferLogger.test();
-        final platform = FakePlatform(operatingSystem: 'windows');
-        final String flutterRoot = Cache.defaultFlutterRoot(
-          platform: platform,
-          fileSystem: fileSystem,
-          userMessages: UserMessages(),
-        );
+    testWithoutContext('throws ToolExit when directory entry has an invalid scheme', () async {
+      final fileSystem = MemoryFileSystem(style: FileSystemStyle.windows);
+      final logger = BufferLogger.test();
+      final platform = FakePlatform(operatingSystem: 'windows');
+      final String flutterRoot = Cache.defaultFlutterRoot(
+        platform: platform,
+        fileSystem: fileSystem,
+        userMessages: UserMessages(),
+      );
 
-        writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
-        fileSystem.file('pubspec.yaml')
-          ..createSync()
-          ..writeAsStringSync(r'''
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+      fileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
 name: my_app
 flutter:
   assets:
     - https://mywebsite.com/images/
 ''');
-        final bundle = ManifestAssetBundle(
-          logger: logger,
-          fileSystem: fileSystem,
-          platform: platform,
-          flutterRoot: flutterRoot,
-        );
+      final bundle = ManifestAssetBundle(
+        logger: logger,
+        fileSystem: fileSystem,
+        platform: platform,
+        flutterRoot: flutterRoot,
+      );
 
-        expect(
-          () => bundle.build(
-            packageConfigPath: '.dart_tool/package_config.json',
-            flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          ),
-          throwsToolExit(
-            message:
-                'Unable to search for asset files in directory path "https%3A//mywebsite.com/images/". '
-                'Please ensure that this entry in pubspec.yaml is a valid file path.\n'
-                'Error details:\n'
-                'Unsupported operation: Illegal character in path: https:',
-          ),
-        );
-      },
-    );
+      expect(
+        () => bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        ),
+        throwsToolExit(
+          message:
+              'Asset path "https://mywebsite.com/images/" has scheme "https" and is not a valid '
+              'file or directory path. Please update this entry in the pubspec.yaml to point to a '
+              'valid file path.',
+        ),
+      );
+    });
 
-    testWithoutContext(
-      'throws ToolExit when file entry contains invalid characters (Windows only)',
-      () async {
-        final FileSystem fileSystem = MemoryFileSystem(
-          style: FileSystemStyle.windows,
-          opHandle: (String context, FileSystemOp operation) {
-            if (operation == FileSystemOp.exists && context == r'C:\http:\\website.com') {
-              throw const FileSystemException(
-                r"FileSystemException: Exists failed, path = 'C:\http:\\website.com' "
-                '(OS Error: The filename, directory name, or volume label syntax is '
-                'incorrect., errno = 123)',
-              );
-            }
-          },
-        );
-        final logger = BufferLogger.test();
-        final platform = FakePlatform(operatingSystem: 'windows');
-        final String flutterRoot = Cache.defaultFlutterRoot(
-          platform: platform,
-          fileSystem: fileSystem,
-          userMessages: UserMessages(),
-        );
-        writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
-        fileSystem.file('pubspec.yaml')
-          ..createSync()
-          ..writeAsStringSync(r'''
+    testWithoutContext('throws ToolExit when file entry has an invalid scheme', () async {
+      final FileSystem fileSystem = MemoryFileSystem(style: FileSystemStyle.windows);
+      final logger = BufferLogger.test();
+      final platform = FakePlatform(operatingSystem: 'windows');
+      final String flutterRoot = Cache.defaultFlutterRoot(
+        platform: platform,
+        fileSystem: fileSystem,
+        userMessages: UserMessages(),
+      );
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+      fileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
 name: example
 flutter:
   assets:
     - http://website.com/hi.png
 ''');
-        final bundle = ManifestAssetBundle(
-          logger: logger,
-          fileSystem: fileSystem,
-          platform: platform,
-          flutterRoot: flutterRoot,
-        );
+      final bundle = ManifestAssetBundle(
+        logger: logger,
+        fileSystem: fileSystem,
+        platform: platform,
+        flutterRoot: flutterRoot,
+      );
 
-        expect(
-          () => bundle.build(
-            packageConfigPath: '.dart_tool/package_config.json',
-            flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          ),
-          throwsToolExit(message: 'Unable to check the existence of asset file '),
-        );
-      },
-    );
+      expect(
+        () => bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        ),
+        throwsToolExit(
+          message:
+              'Asset path "http://website.com/hi.png" has scheme "http" and is not a valid '
+              'file or directory path. Please update this entry in the pubspec.yaml to point to a '
+              'valid file path.',
+        ),
+      );
+    });
 
     testWithoutContext(
       "AssetBundleEntry::content::isModified is true when an asset's transformers change in between builds",
@@ -1017,26 +1004,30 @@ flutter:
           materialDir.childFile(shader).createSync(recursive: true);
         }
 
-        (globals.processManager as FakeProcessManager).addCommand(
-          FakeCommand(
-            command: <String>[
-              impellerc,
-              '--sksl',
-              '--iplr',
-              '--json',
-              '--sl=${fileSystem.path.join(output.path, 'shaders', 'ink_sparkle.frag')}',
-              '--spirv=${fileSystem.path.join(output.path, 'shaders', 'ink_sparkle.frag.spirv')}',
-              '--input=${fileSystem.path.join(materialDir.path, 'shaders', 'ink_sparkle.frag')}',
-              '--input-type=frag',
-              '--include=${fileSystem.path.join(materialDir.path, 'shaders')}',
-              '--include=$shaderLibDir',
-            ],
-            onRun: (_) {
-              fileSystem.file(outputPath).createSync(recursive: true);
-              fileSystem.file('$outputPath.spirv').createSync(recursive: true);
-            },
-          ),
-        );
+        final testShaders = <String>['ink_sparkle.frag', 'stretch_effect.frag'];
+
+        for (final shader in testShaders) {
+          (globals.processManager as FakeProcessManager).addCommand(
+            FakeCommand(
+              command: <String>[
+                impellerc,
+                '--sksl',
+                '--iplr',
+                '--json',
+                '--sl=${fileSystem.path.join(output.path, 'shaders', shader)}',
+                '--spirv=${fileSystem.path.join(output.path, 'shaders', '$shader.spirv')}',
+                '--input=${fileSystem.path.join(materialDir.path, 'shaders', shader)}',
+                '--input-type=frag',
+                '--include=${fileSystem.path.join(materialDir.path, 'shaders')}',
+                '--include=$shaderLibDir',
+              ],
+              onRun: (_) {
+                fileSystem.file(outputPath).createSync(recursive: true);
+                fileSystem.file('$outputPath.spirv').createSync(recursive: true);
+              },
+            ),
+          );
+        }
 
         fileSystem.file('pubspec.yaml')
           ..createSync()
@@ -1354,4 +1345,105 @@ flutter:
       Platform: () => FakePlatform(),
     },
   );
+
+  group('reports error for absolute paths', () {
+    Future<void> testCase({
+      required String pubspecContents,
+      required Uri assetPath,
+      required FileSystem fileSystem,
+      required Platform platform,
+    }) async {
+      final logger = BufferLogger.test();
+      expect(pubspecContents, contains(assetPath.toString()));
+      final String flutterRoot = Cache.defaultFlutterRoot(
+        platform: platform,
+        fileSystem: fileSystem,
+        userMessages: UserMessages(),
+      );
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+      fileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(pubspecContents);
+
+      final bundle = ManifestAssetBundle(
+        logger: logger,
+        fileSystem: fileSystem,
+        platform: platform,
+        flutterRoot: flutterRoot,
+      );
+      expect(
+        () => bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        ),
+        throwsToolExit(
+          message:
+              'is not a valid asset path. Asset paths must be relative to the location of '
+              'pubspec.yaml. Please update this entry in the pubspec.yaml to use a relative path.',
+        ),
+      );
+    }
+
+    for (final platform in <FakePlatform>[
+      FakePlatform(),
+      FakePlatform(operatingSystem: 'windows'),
+    ]) {
+      group('on ${platform.isWindows ? 'Windows' : 'POSIX'} for', () {
+        final FileSystem fileSystem = MemoryFileSystem(
+          style: platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
+        );
+        fileSystem.currentDirectory = fileSystem.systemTempDirectory;
+        final assetPath = Uri.file(
+          platform.isWindows ? r'c:\asset\path.json' : '/asset/path.json',
+          windows: platform.isWindows,
+        );
+        testWithoutContext('standard assets', () async {
+          await testCase(
+            pubspecContents:
+                '''
+name: my_app
+flutter:
+  assets:
+    - $assetPath
+''',
+            assetPath: assetPath,
+            fileSystem: fileSystem,
+            platform: platform,
+          );
+        });
+
+        testWithoutContext('font assets', () async {
+          await testCase(
+            pubspecContents:
+                '''
+name: my_app
+flutter:
+  fonts:
+    - family: Foo
+      fonts:
+        - asset: $assetPath
+''',
+            assetPath: assetPath,
+            fileSystem: fileSystem,
+            platform: platform,
+          );
+        });
+
+        testWithoutContext('shader assets', () async {
+          await testCase(
+            pubspecContents:
+                '''
+name: my_app
+flutter:
+  shaders:
+    - $assetPath
+''',
+            assetPath: assetPath,
+            fileSystem: fileSystem,
+            platform: platform,
+          );
+        });
+      });
+    }
+  });
 }

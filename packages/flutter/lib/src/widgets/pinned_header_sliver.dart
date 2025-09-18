@@ -31,7 +31,7 @@ import 'framework.dart';
 ///
 /// {@tool dartpad}
 /// A more elaborate example which creates an app bar that's similar to the one
-/// that appears in the iOS Settings app. In this example the pinned header
+/// that appears in the iOS Settings app. In this example, the pinned header
 /// starts out transparent and the first item in the list serves as the app's
 /// "Settings" title. When the title item has been scrolled completely behind
 /// the pinned header, the header animates its opacity from 0 to 1 and its
