@@ -49,6 +49,18 @@ import 'widget_inspector.dart';
 
 export 'dart:ui' show AppLifecycleState, Locale;
 
+/// Response from a [WidgetsBindingObserver] to a predictive back gesture start.
+enum PredictiveBackObserverBehavior {
+  /// Take control of the gesture, managing route animation and navigation completion.
+  takeControl,
+
+  /// Only receive gesture progress updates, without controlling animation or navigation.
+  updateOnly,
+
+  /// Receive updates only if another observer has taken control.
+  updateIfControlled,
+}
+
 // Examples can assume:
 // late FlutterView myFlutterView;
 // class MyApp extends StatelessWidget { const MyApp({super.key}); @override Widget build(BuildContext context) => const Placeholder(); }
@@ -103,24 +115,15 @@ abstract mixin class WidgetsBindingObserver {
 
   /// Called at the start of a predictive back gesture.
   ///
-  /// Observers are notified in registration order until one returns true or all
-  /// observers have been notified. If an observer returns true then that
-  /// observer, and only that observer, will be notified of subsequent events in
-  /// this same gesture (for example [handleUpdateBackGestureProgress], etc.).
-  ///
-  /// Observers are expected to return true if they were able to handle the
-  /// notification, for example by starting a predictive back animation, and
-  /// false otherwise. [PredictiveBackPageTransitionsBuilder] uses this
-  /// mechanism to listen for predictive back gestures.
-  ///
-  /// If all observers indicate they are not handling this back gesture by
-  /// returning false, then a navigation pop will result when
-  /// [handleCommitBackGesture] is called, as in a non-predictive system back
-  /// gesture.
+  /// Observers are notified in registration order. If any observer returns
+  /// [PredictiveBackObserverBehavior.takeControl], only that observer will
+  /// receive subsequent updates. Otherwise, all observers that returned
+  /// [PredictiveBackObserverBehavior.updateOnly] or
+  /// [PredictiveBackObserverBehavior.updateIfControlled] will receive updates.
   ///
   /// Currently, this is only used on Android devices that support the
   /// predictive back feature.
-  bool handleStartBackGesture(PredictiveBackEvent backEvent) => false;
+  PredictiveBackObserverBehavior? handleStartBackGesture(PredictiveBackEvent backEvent) => null;
 
   /// Called when a predictive back gesture moves.
   ///
@@ -952,14 +955,35 @@ mixin WidgetsBinding
 
   // The observers that are currently handling an active predictive back gesture.
   final List<WidgetsBindingObserver> _backGestureObservers = <WidgetsBindingObserver>[];
+  WidgetsBindingObserver? _controllingObserver;
 
   bool _handleStartBackGesture(Map<String?, Object?> arguments) {
     _backGestureObservers.clear();
+    _controllingObserver = null;
+
     final PredictiveBackEvent backEvent = PredictiveBackEvent.fromMap(arguments);
+    final List<WidgetsBindingObserver> updateIfControlledObservers = <WidgetsBindingObserver>[];
+
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
-      if (observer.handleStartBackGesture(backEvent)) {
-        _backGestureObservers.add(observer);
+      switch (observer.handleStartBackGesture(backEvent)) {
+        case PredictiveBackObserverBehavior.takeControl:
+          assert(
+            _controllingObserver == null,
+            'Only one observer can take control of the back gesture. '
+            'Both $_controllingObserver and $observer tried to take control.',
+          );
+          _controllingObserver = observer;
+          _backGestureObservers.add(observer);
+        case PredictiveBackObserverBehavior.updateOnly:
+          _backGestureObservers.add(observer);
+        case PredictiveBackObserverBehavior.updateIfControlled:
+          updateIfControlledObservers.add(observer);
+        case null:
+          {}
       }
+    }
+    if (_controllingObserver != null) {
+      _backGestureObservers.addAll(updateIfControlledObservers);
     }
     return _backGestureObservers.isNotEmpty;
   }
@@ -976,7 +1000,10 @@ mixin WidgetsBinding
   }
 
   Future<void> _handleCommitBackGesture() async {
-    if (_backGestureObservers.isEmpty) {
+    for (final WidgetsBindingObserver observer in _backGestureObservers) {
+      observer.handleCommitBackGesture();
+    }
+    if (_controllingObserver == null) {
       // If the predictive back was not handled, then the route should be popped
       // like a normal, non-predictive back. For example, this will happen if a
       // back gesture occurs but no predictive back route transition exists to
@@ -984,9 +1011,6 @@ mixin WidgetsBinding
       // doesn't cause a predictive transition.
       await handlePopRoute();
       return;
-    }
-    for (final WidgetsBindingObserver observer in _backGestureObservers) {
-      observer.handleCommitBackGesture();
     }
   }
 
