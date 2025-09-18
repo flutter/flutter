@@ -69,12 +69,17 @@
 ^third_party/vulkan-deps/vulkan-headers/src/LICENSE\.md$
 ^third_party/vulkan-deps/vulkan-loader/.*
 ^third_party/vulkan-deps/vulkan-utility-libraries/src/LICENSE.md$
+^third_party/vulkan-deps/vulkan-utility-libraries/src/scripts/.*
 ^tools/android_sdk/packages\.txt$
 ^tools/fuchsia/.*
 ^tools/licenses_cpp/data/.*
 ################################################################################
 # Instances that don't have a clear resolution yet.
 ################################################################################
+# I'm not sure why this LICENSE seems to generate a different package name on
+# ci than locally. It isn't necessary because each vulkan-dep has its own
+# license
+^third_party/vulkan-deps/LICENSE$
 # This isn't in the sky license, nor excluded.
 ^third_party/expat/expat/lib/siphash.h
 # This directory isn't excluded explicitly but probably should be.
@@ -105,8 +110,6 @@ third_party/freetype2/include/freetype/config/ftmodule.h
 third_party/freetype2/include/freetype/ftchapters.h
 third_party/freetype2/LICENSE.TXT
 third_party/freetype2/src/gxvalid/gxvfgen.c
-third_party/freetype2/src/gzip/.*
-third_party/freetype2/src/pcf/pcfutil.c
 third_party/freetype2/src/psaux/.*
 third_party/freetype2/src/tools/.*
 third_party/freetype2/src/truetype/ttpload.c

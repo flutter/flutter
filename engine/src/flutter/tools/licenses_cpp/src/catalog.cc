@@ -229,7 +229,8 @@ absl::StatusOr<std::vector<Catalog::Match>> Catalog::FindMatch(
                      results[j].GetMatchedText())) {
           return absl::InvalidArgumentError(absl::StrCat(
               "Selected matchers overlap (", results[i].GetMatcher(), ", ",
-              results[j].GetMatcher(), ")."));
+              results[j].GetMatcher(), ").\n", results[i].GetMatchedText(),
+              "\n############\n", results[j].GetMatchedText()));
         }
       }
     }
