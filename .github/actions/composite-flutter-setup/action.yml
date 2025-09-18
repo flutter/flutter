@@ -67,8 +67,19 @@ runs:
         shell: bash
         id: android-sdk-version
         if: env.ACT
-        run: |
-          echo "revision=${{inputs.ANDROID_TOOLS_VERSION}};${{inputs.ANDROID_PLATFORM}};build-tools;${{inputs.ANDROID_BUILDTOOLS}}" >> "$GITHUB_OUTPUT"
+      env:
+        INPUT_CHANNEL: ${{ inputs.channel }}
+        RUNNER_OS: ${{ runner.os }}
+      run: |
+        echo "FLUTTER_ROOT=${{ steps.flutter_version.outputs.flutter-root }}" >> $GITHUB_ENV
+        echo "${{ steps.flutter_version.outputs.flutter-root }}/bin" >> $GITHUB_PATH
+        echo "PUB_CACHE=${{ steps.flutter_version.outputs.pub-cache }}" >> $GITHUB_ENV
+        echo "${{ steps.flutter_version.outputs.pub-cache }}/bin" >> $GITHUB_PATH
+        # The following is a workaround for https://github.com/flutter/flutter/issues/57332
+        # We can remove this when we no longer support versions of flutter that have this bug.
+        if [[ "$INPUT_CHANNEL" == "beta" && "$RUNNER_OS" == "Windows" ]]; then
+          git config --global --add safe.directory "${{ steps.flutter_version.outputs.flutter-root }}"
+        fi
       - name: Android SDK Cache
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
         id: android-sdk-setup
