@@ -1349,7 +1349,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
                       // text does not shrink vertically as you type (however in
                       // rare circumstances, the height may still change when
                       // there's no placeholder text).
-                      maxLines: (hasText ? 1 : widget.maxLines)?.ceil(),
+                      maxLines: hasText ? 1 : widget.maxLines,
                       overflow: placeholderStyle.overflow,
                       style: placeholderStyle,
                       textAlign: widget.textAlign,
