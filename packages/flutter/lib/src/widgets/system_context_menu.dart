@@ -163,7 +163,7 @@ class SystemContextMenu extends StatefulWidget {
       if (editableTextState.selectAllEnabled)
         IOSSystemContextMenuItemCustom(
           title: 'Select All',
-          attributes: IOSSystemContextMenuItemCustomAttributes.keepsMenuPresented | IOSSystemContextMenuItemCustomAttributes.disabled,
+          attributes: IOSSystemContextMenuItemCustomAttributes.keepsMenuPresented,
           onPressed: () {
             editableTextState.selectAll(SelectionChangedCause.toolbar);
           },
@@ -506,6 +506,8 @@ class IOSSystemContextMenuItemCustom extends IOSSystemContextMenuItem with Diagn
   /// The callback that is called when the button is pressed.
   final VoidCallback onPressed;
 
+  /// The [IOSSystemContextMenuItemCustomAttributes] indicating
+  /// additional configurations for this button.
   final IOSSystemContextMenuItemCustomAttributes attributes;
 
   @override
@@ -535,7 +537,9 @@ class IOSSystemContextMenuItemCustom extends IOSSystemContextMenuItem with Diagn
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('title', title));
-    // properties.add(FlagProperty('attributes', value: attributes));
+    properties.add(
+      DiagnosticsProperty<IOSSystemContextMenuItemCustomAttributes>('attributes', attributes),
+    );
     properties.add(ObjectFlagProperty<VoidCallback>.has('onPressed', onPressed));
   }
 }
