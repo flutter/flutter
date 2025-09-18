@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -557,6 +558,7 @@ void main() {
         readOnly: true,
         focused: true,
         focusable: true,
+        accessibilityFocusable: true,
         inMutuallyExclusiveGroup: true,
         header: true,
         obscured: true,
@@ -569,12 +571,28 @@ void main() {
         isRequired: true,
       ),
     );
-    final List<SemanticsFlag> flags = SemanticsFlag.values.toList();
-    flags
-      ..remove(SemanticsFlag.hasToggledState)
-      ..remove(SemanticsFlag.isToggled)
-      ..remove(SemanticsFlag.hasImplicitScrolling)
-      ..remove(SemanticsFlag.isCheckStateMixed);
+    SemanticsFlags flags = SemanticsFlags(
+      isChecked: CheckedState.isTrue,
+      isSelected: Tristate.isTrue,
+      isEnabled: Tristate.isTrue,
+      isExpanded: Tristate.isTrue,
+      isRequired: Tristate.isTrue,
+      isFocused: Tristate.isTrue,
+      isAccessibilityFocusable: Tristate.isTrue,
+      isButton: true,
+      isTextField: true,
+      isObscured: true,
+      scopesRoute: true,
+      namesRoute: true,
+      isHidden: true,
+      isImage: true,
+      isLiveRegion: true,
+      isMultiline: true,
+      isReadOnly: true,
+      isLink: true,
+      isSlider: true,
+      isKeyboardKey: true,
+    );
 
     TestSemantics expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
@@ -623,6 +641,7 @@ void main() {
         readOnly: true,
         focused: true,
         focusable: true,
+        accessibilityFocusable: true,
         inMutuallyExclusiveGroup: true,
         header: true,
         obscured: true,
@@ -635,9 +654,7 @@ void main() {
         isRequired: true,
       ),
     );
-    flags
-      ..remove(SemanticsFlag.isChecked)
-      ..add(SemanticsFlag.isCheckStateMixed);
+    flags = flags.copyWith(isChecked: CheckedState.mixed);
     semantics.dispose();
     expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[

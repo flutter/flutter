@@ -25,6 +25,7 @@ void NativeSemanticsFlags::initSemanticsFlags(
     int isExpanded,
     int isRequired,
     int isFocused,
+    int isAccessibilityFocusable,
     bool isButton,
     bool isTextField,
     bool isInMutuallyExclusiveGroup,
@@ -53,6 +54,8 @@ void NativeSemanticsFlags::initSemanticsFlags(
       .isExpanded = static_cast<SemanticsTristate>(isExpanded),
       .isRequired = static_cast<SemanticsTristate>(isRequired),
       .isFocused = static_cast<SemanticsTristate>(isFocused),
+      .isAccessibilityFocusable =
+          static_cast<SemanticsTristate>(isAccessibilityFocusable),
       .isButton = isButton,
       .isTextField = isTextField,
       .isInMutuallyExclusiveGroup = isInMutuallyExclusiveGroup,
