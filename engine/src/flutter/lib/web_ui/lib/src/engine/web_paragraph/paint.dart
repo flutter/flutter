@@ -82,11 +82,11 @@ class TextPaint {
       WebParagraphDebug.log(
         'paintByClusters: ${line.fontBoundingBoxAscent} - ${block.rawFontBoundingBoxAscent}',
       );
+      // We are painting clusters in visual order so that if they step on each other, the paint
+      // order is correct.
       final int start = block.isLtr ? block.clusterRange.start : block.clusterRange.end - 1;
       final int end = block.isLtr ? block.clusterRange.end : block.clusterRange.start - 1;
       final int step = block.isLtr ? 1 : -1;
-      // TODO(mdebbar=>jlavrova): Do we need to paint in visual order? Why not paint in logical order?
-      //                          Within a block, all clusters have the same font, style, etc.
       for (int i = start; i != end; i += step) {
         final clusterText = layout.allClusters[i];
         final (ui.Rect sourceRect, ui.Rect targetRect) = calculateCluster(

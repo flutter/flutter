@@ -39,10 +39,17 @@ class TextLayout {
   void performLayout(double width) {
     // TODO(jlavrova): find a less clumsy way to deal with edge cases like empty text
     if (paragraph.text.isEmpty) {
+      // TODO(mdebbar): We need to populate at least `height` here.
+      // I think we may need to ensure there's at least one span. The span's style should match the
+      // last effective style when `build()` is called.
+      //
+      // Julia said calling measureText with an empty string also works!!
+      // metrics = measureText('');
       return;
     }
 
     // TODO(mdebbar=>jlavrova): Skip layout if `width` is the same as the last layout.
+    // TODO(mdebbar=>jlavrova): Skip layout if `width` is greater than `maxIntrinsicWidth`.
 
     // Some things are only computed once, and reused in future layouts.
     if (_isFirstLayout) {
@@ -374,6 +381,7 @@ class TextLayout {
       } else if (effectiveAlign == ui.TextAlign.center) {
         line.formattingShift = delta / 2;
       }
+      // TODO(mdebbar=>jlavrova): Why does `longestLine` include `formattingShift`?
       paragraph.longestLine = math.max(
         paragraph.longestLine,
         line.advance.width + line.formattingShift,

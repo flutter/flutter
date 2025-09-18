@@ -532,6 +532,7 @@ abstract class ParagraphSpan extends ui.TextRange {
 
   final WebTextStyle style;
 
+  // TODO(mdebbar): Is this list of `clusters` necessary?
   late final clusters = _getClusters();
 
   int get size => end - start;
