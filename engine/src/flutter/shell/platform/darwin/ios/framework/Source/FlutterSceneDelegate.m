@@ -6,11 +6,24 @@
 
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifecycle.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 
 FLUTTER_ASSERT_ARC
 
+@interface FlutterSceneDelegate () <FlutterSceneLifeCycleProvider>
+@end
+
 @implementation FlutterSceneDelegate
+
+@synthesize sceneLifeCycleDelegate = _sceneLifeCycleDelegate;
+
+- (instancetype)init {
+  if (self = [super init]) {
+    _sceneLifeCycleDelegate = [[FlutterPluginSceneLifeCycleDelegate alloc] init];
+  }
+  return self;
+}
 
 - (void)scene:(UIScene*)scene
     willConnectToSession:(UISceneSession*)session
