@@ -287,7 +287,7 @@ void main() {
     expect(customCallbackWasCalled, true);
   });
 
-  testWidgets('DrawerButton renders at zero area', (WidgetTester tester) async {
+  testWidgets('DrawerButton does not crash at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Center(
@@ -295,7 +295,6 @@ void main() {
         ),
       ),
     );
-    final Finder drawerButtonIcon = find.byType(DrawerButtonIcon);
-    expect(tester.getSize(drawerButtonIcon).isEmpty, isTrue);
+    expect(tester.getSize(find.byType(DrawerButton)), Size.zero);
   });
 }
