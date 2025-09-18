@@ -2,31 +2,51 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import '../canvaskit/canvaskit_api.dart';
 import '../text_fragmenter.dart';
-import 'paragraph.dart';
 
-class CodeUnitFlags {
-  CodeUnitFlags(this._value);
+class AllCodeUnitFlags {
+  AllCodeUnitFlags(this._text) : _allFlags = Uint8List(_text.length + 1) {
+    _extract();
+  }
 
-  static List<CodeUnitFlags> extractForParagraph(WebParagraph paragraph) {
-    // TODO(mdebbar=>jlavrova): If these are mostly hardcoded, let's move them to Dart instead of
-    //                          calling to CanvasKit.
-    final List<CodeUnitInfo> ckFlags = canvasKit.CodeUnits.compute(paragraph.text);
-    assert(ckFlags.length == (paragraph.text.length + 1));
+  final String _text;
+  final Uint8List _allFlags;
 
-    final codeUnitFlags = ckFlags.map((info) => CodeUnitFlags(info.flags)).toList();
+  int get length => _allFlags.length;
 
+  bool hasFlag(int index, CodeUnitFlag flag) {
+    assert(index >= 0);
+    assert(index < _allFlags.length);
+
+    return (_allFlags[index] & flag._bitmask) != 0;
+  }
+
+  void _extract() {
+    // TODO(mdebbar=>jlavrova): 1. This call to CanvasKit is not going to work with Skwasm.
+    //                          2. We are only using `whitespace` flags from CanvasKit. Can we
+    //                             hardcode them here to avoid calling CanvasKit?
+    //                          3. Do we need other flags like `control` and `space`?
+    final List<CodeUnitInfo> ckFlags = canvasKit.CodeUnits.compute(_text);
+    assert(ckFlags.length == _allFlags.length);
+
+    for (int i = 0; i < _allFlags.length; i++) {
+      _allFlags[i] = ckFlags[i].flags;
+    }
+
+    // TODO(mdebbar): OPTIMIZATION: can we make `segmentText` update `codeUnitFlags` in-place?
     // Get text segmentation resuls using browser APIs.
-    final SegmentationResult result = segmentText(paragraph.text);
+    final SegmentationResult result = segmentText(_text);
 
     // Fill out grapheme flags
     for (final index in result.graphemes) {
-      codeUnitFlags[index].graphemeStart = true;
+      _allFlags[index] |= CodeUnitFlag.grapheme._bitmask;
     }
     // Fill out word flags
     for (final index in result.words) {
-      codeUnitFlags[index].wordBreak = true;
+      _allFlags[index] |= CodeUnitFlag.wordBreak._bitmask;
     }
     // Fill out line break flags
     for (int i = 0; i < result.breaks.length; i += 2) {
@@ -34,53 +54,22 @@ class CodeUnitFlags {
       final int type = result.breaks[i + 1];
 
       if (type == kSoftLineBreak) {
-        codeUnitFlags[index].softLineBreak = true;
+        _allFlags[index] |= CodeUnitFlag.softLineBreak._bitmask;
       } else {
-        codeUnitFlags[index].hardLineBreak = true;
+        _allFlags[index] |= CodeUnitFlag.hardLineBreak._bitmask;
       }
     }
-    return codeUnitFlags;
   }
+}
 
-  bool get isWhitespace => hasFlag(kWhitespaceFlag);
-  set whitespace(bool enable) => _setFlag(kWhitespaceFlag, enable);
+enum CodeUnitFlag {
+  whitespace(0x01), // 1 << 0
+  grapheme(0x02), // 1 << 1
+  softLineBreak(0x04), // 1 << 2
+  hardLineBreak(0x08), // 1 << 3
+  wordBreak(0x10); // 1 << 4
 
-  bool get isGraphemeStart => hasFlag(kGraphemeFlag);
-  set graphemeStart(bool enable) => _setFlag(kGraphemeFlag, enable);
+  const CodeUnitFlag(this._bitmask);
 
-  bool get isSoftLineBreak => hasFlag(kSoftLineBreakFlag);
-  set softLineBreak(bool enable) => _setFlag(kSoftLineBreakFlag, enable);
-
-  bool get isHardLineBreak => hasFlag(kHardLineBreakFlag);
-  set hardLineBreak(bool enable) => _setFlag(kHardLineBreakFlag, enable);
-
-  bool get isWordBreak => hasFlag(kWordBreakFlag);
-  set wordBreak(bool enable) => _setFlag(kWordBreakFlag, enable);
-
-  bool hasFlag(int flag) {
-    return (_value & flag) != 0;
-  }
-
-  void _setFlag(int flag, bool enable) {
-    _value = enable ? (_value | flag) : (_value & ~flag);
-  }
-
-  int _value;
-
-  @override
-  String toString() {
-    return [
-      if (isWhitespace) 'whitespace',
-      if (isGraphemeStart) 'grapheme',
-      if (isSoftLineBreak) 'softBreak',
-      if (isHardLineBreak) 'hardBreak',
-      if (isWordBreak) 'word',
-    ].join(' ');
-  }
-
-  static const int kWhitespaceFlag = 1 << 0;
-  static const int kGraphemeFlag = 1 << 1;
-  static const int kSoftLineBreakFlag = 1 << 2;
-  static const int kHardLineBreakFlag = 1 << 3;
-  static const int kWordBreakFlag = 1 << 4;
+  final int _bitmask;
 }

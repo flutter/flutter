@@ -21,15 +21,15 @@ class TextWrapper {
   double _minIntrinsicWidth = double.infinity;
 
   bool isWhitespace(ExtendedTextCluster cluster) {
-    return _layout.hasFlag(cluster.globalStart, CodeUnitFlags.kWhitespaceFlag);
+    return _layout.codeUnitFlags.hasFlag(cluster.globalStart, CodeUnitFlag.whitespace);
   }
 
   bool isSoftLineBreak(ExtendedTextCluster cluster) {
-    return _layout.hasFlag(cluster.globalStart, CodeUnitFlags.kSoftLineBreakFlag);
+    return _layout.codeUnitFlags.hasFlag(cluster.globalStart, CodeUnitFlag.softLineBreak);
   }
 
   bool isHardLineBreak(ExtendedTextCluster cluster) {
-    return _layout.hasFlag(cluster.globalStart, CodeUnitFlags.kHardLineBreakFlag);
+    return _layout.codeUnitFlags.hasFlag(cluster.globalStart, CodeUnitFlag.hardLineBreak);
   }
 
   void breakLines(double maxWidth) {

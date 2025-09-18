@@ -25,16 +25,12 @@ class TextLayout {
 
   bool _isFirstLayout = true;
 
-  late final List<CodeUnitFlags> _codeUnitFlags;
+  late final AllCodeUnitFlags codeUnitFlags;
   final bidiRuns = <BidiRun>[];
   final lines = <TextLine>[];
 
   final allClusters = <ExtendedTextCluster>[];
   late final _mapping = _TextClusterMapping(paragraph.text.length, allClusters);
-
-  bool hasFlag(int index, int flag) {
-    return _codeUnitFlags[index].hasFlag(flag);
-  }
 
   bool get isDefaultLtr => paragraph.paragraphStyle.textDirection == ui.TextDirection.ltr;
 
@@ -52,7 +48,7 @@ class TextLayout {
     if (_isFirstLayout) {
       _isFirstLayout = false;
 
-      _codeUnitFlags = CodeUnitFlags.extractForParagraph(paragraph);
+      codeUnitFlags = AllCodeUnitFlags(paragraph.text);
       extractTextClusters();
       extractBidiRuns();
     }
@@ -639,13 +635,13 @@ class TextLayout {
     int start = position + 1;
     while (start > 0) {
       start -= 1;
-      if (_codeUnitFlags[start].hasFlag(CodeUnitFlags.kWordBreakFlag)) {
+      if (codeUnitFlags.hasFlag(start, CodeUnitFlag.wordBreak)) {
         break;
       }
     }
     int end = position + 1;
-    while (end < _codeUnitFlags.length) {
-      if (_codeUnitFlags[end].hasFlag(CodeUnitFlags.kWordBreakFlag)) {
+    while (end < codeUnitFlags.length) {
+      if (codeUnitFlags.hasFlag(end, CodeUnitFlag.wordBreak)) {
         break;
       }
       end += 1;
