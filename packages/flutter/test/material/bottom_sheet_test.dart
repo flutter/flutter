@@ -1254,7 +1254,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Drag handle color can take MaterialStateProperty', (WidgetTester tester) async {
+  testWidgets('Drag handle color can take WidgetStateProperty', (WidgetTester tester) async {
     const Color defaultColor = Colors.blue;
     const Color hoveringColor = Colors.green;
 
@@ -1312,8 +1312,8 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           bottomSheetTheme: BottomSheetThemeData(
-            dragHandleColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.hovered)) {
+            dragHandleColor: MaterialStateColor.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.hovered)) {
                 return hoveringColor;
               }
               return defaultColor;

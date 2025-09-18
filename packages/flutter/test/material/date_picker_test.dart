@@ -1734,10 +1734,12 @@ void main() {
           matchesSemantics(
             label: '3, Sunday, January 3, 2016, Today',
             isButton: true,
+            hasEnabledState: true,
             hasTapAction: true,
             hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
+            isEnabled: true,
           ),
         );
 
@@ -1908,7 +1910,7 @@ void main() {
 
       final SemanticsNode node = tester.semantics.find(find.byType(DatePickerDialog));
       final SemanticsData semanticsData = node.getSemanticsData();
-      expect(semanticsData.flagsCollection.isFocusable, false);
+      expect(semanticsData.flagsCollection.isFocused, Tristate.none);
     });
   });
 
@@ -2754,11 +2756,14 @@ void main() {
   testWidgets('DatePickerDialog renders at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        home: SizedBox.shrink(
-          child: DatePickerDialog(firstDate: firstDate, lastDate: lastDate),
+        home: Center(
+          child: SizedBox.shrink(
+            child: DatePickerDialog(firstDate: firstDate, lastDate: lastDate),
+          ),
         ),
       ),
     );
+    expect(tester.getSize(find.byType(DatePickerDialog)).isEmpty, isTrue);
   });
 }
 
