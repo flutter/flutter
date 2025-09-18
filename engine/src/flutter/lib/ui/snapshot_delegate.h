@@ -91,6 +91,11 @@ class SnapshotDelegate {
   /// Impeller only.
   virtual void CacheRuntimeStage(
       const std::shared_ptr<impeller::RuntimeStage>& runtime_stage) = 0;
+
+  /// Bind a context to the current thread that can execute rendering commands.
+  ///
+  /// Impeller only.
+  virtual bool MakeRenderContextCurrent() = 0;
 };
 
 }  // namespace flutter

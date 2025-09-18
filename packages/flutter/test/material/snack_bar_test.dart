@@ -1007,7 +1007,7 @@ void main() {
       final ButtonStyle buttonStyle = textButton.style!;
       if (buttonStyle.foregroundColor is MaterialStateColor) {
         // Same color when resolved
-        expect(buttonStyle.foregroundColor!.resolve(<MaterialState>{}), usedColor);
+        expect(buttonStyle.foregroundColor!.resolve(<WidgetState>{}), usedColor);
       } else {
         expect(false, true);
       }
@@ -3785,9 +3785,9 @@ void main() {
     WidgetTester tester,
   ) async {
     final MaterialStateColor backgroundColor = MaterialStateColor.resolveWith((
-      Set<MaterialState> states,
+      Set<WidgetState> states,
     ) {
-      if (states.contains(MaterialState.disabled)) {
+      if (states.contains(WidgetState.disabled)) {
         return Colors.blue;
       }
       return Colors.purple;
@@ -3903,8 +3903,8 @@ void main() {
   testWidgets(
     'SnackBarAction asserts when backgroundColor is a MaterialStateColor and disabledBackgroundColor is also provided',
     (WidgetTester tester) async {
-      final Color backgroundColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
+      final Color backgroundColor = MaterialStateColor.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
           return Colors.blue;
         }
         return Colors.purple;
@@ -4196,7 +4196,7 @@ void main() {
         .widget<TextButton>(find.widgetWithText(TextButton, 'ACTION'))
         .style;
     expect(
-      actionButtonStyle?.overlayColor?.resolve(<MaterialState>{MaterialState.hovered}),
+      actionButtonStyle?.overlayColor?.resolve(<WidgetState>{WidgetState.hovered}),
       theme.colorScheme.inversePrimary.withOpacity(0.08),
     );
   });
@@ -4479,8 +4479,8 @@ class _TestMaterialStateColor extends MaterialStateColor {
   static const int _colorBlue = 0xFF2196F3;
 
   @override
-  Color resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.pressed)) {
+  Color resolve(Set<WidgetState> states) {
+    if (states.contains(WidgetState.pressed)) {
       return const Color(_colorBlue);
     }
 
