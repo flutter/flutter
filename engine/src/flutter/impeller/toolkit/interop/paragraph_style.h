@@ -44,7 +44,7 @@ class ParagraphStyle final
 
   void SetTextDecoration(const ImpellerTextDecoration& decoration);
 
-  void SetMaxLines(size_t max_lines);
+  void SetMaxLines(double max_lines);
 
   void SetLocale(std::string locale);
 

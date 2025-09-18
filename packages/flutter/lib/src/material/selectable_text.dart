@@ -339,7 +339,7 @@ class SelectableText extends StatefulWidget {
   final int? minLines;
 
   /// {@macro flutter.widgets.editableText.maxLines}
-  final int? maxLines;
+  final double? maxLines;
 
   /// {@macro flutter.widgets.editableText.showCursor}
   final bool showCursor;
@@ -474,7 +474,7 @@ class SelectableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('showCursor', showCursor, defaultValue: false));
     properties.add(IntProperty('minLines', minLines, defaultValue: null));
-    properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
+    properties.add(DoubleProperty('maxLines', maxLines, defaultValue: null));
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
@@ -774,7 +774,7 @@ class _SelectableTextState extends State<SelectableText>
         autofocus: widget.autofocus,
         forceLine: false,
         minLines: widget.minLines,
-        maxLines: (widget.maxLines ?? defaultTextStyle.maxLines)?.toDouble(),
+        maxLines: widget.maxLines ?? defaultTextStyle.maxLines,
         selectionColor: widget.selectionColor ?? selectionColor,
         selectionControls: widget.selectionEnabled ? textSelectionControls : null,
         onSelectionChanged: _handleSelectionChanged,

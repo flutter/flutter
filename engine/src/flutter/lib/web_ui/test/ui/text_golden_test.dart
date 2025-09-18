@@ -637,7 +637,7 @@ Future<void> testTextStyle(
   // ParagraphStyle properties
   ui.TextAlign? paragraphTextAlign,
   ui.TextDirection? paragraphTextDirection,
-  int? paragraphMaxLines,
+  double? paragraphMaxLines,
   String? paragraphFontFamily,
   double? paragraphFontSize,
   double? paragraphHeight,

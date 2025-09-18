@@ -83,7 +83,7 @@ class ParagraphStyle {
   // General paragraph properties.
   TextAlign text_align = TextAlign::start;
   TextDirection text_direction = TextDirection::ltr;
-  size_t max_lines = std::numeric_limits<size_t>::max();
+  double max_lines = std::numeric_limits<double>::max();
   std::u16string ellipsis;
   std::string locale;
 

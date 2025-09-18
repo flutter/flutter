@@ -23,7 +23,7 @@ TextStyle ParagraphStyle::GetTextStyle() const {
 }
 
 bool ParagraphStyle::unlimited_lines() const {
-  return max_lines == std::numeric_limits<size_t>::max();
+  return max_lines == std::numeric_limits<double>::max();
 };
 
 bool ParagraphStyle::ellipsized() const {

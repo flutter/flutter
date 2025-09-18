@@ -38,7 +38,7 @@ SKWASM_EXPORT void paragraphStyle_setTextDirection(
 }
 
 SKWASM_EXPORT void paragraphStyle_setMaxLines(ParagraphStyle* style,
-                                              size_t maxLines) {
+                                              SkScalar maxLines) {
   style->skiaParagraphStyle.setMaxLines(maxLines);
 }
 

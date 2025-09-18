@@ -302,11 +302,11 @@ class _HelperError extends StatefulWidget {
   final Widget? helper;
   final String? helperText;
   final TextStyle? helperStyle;
-  final int? helperMaxLines;
+  final double? helperMaxLines;
   final Widget? error;
   final String? errorText;
   final TextStyle? errorStyle;
-  final int? errorMaxLines;
+  final double? errorMaxLines;
 
   @override
   _HelperErrorState createState() => _HelperErrorState();
@@ -3109,7 +3109,7 @@ class InputDecoration {
   /// See also:
   ///
   ///  * [errorMaxLines], the equivalent but for the [errorText].
-  final int? helperMaxLines;
+  final double? helperMaxLines;
 
   /// Text that suggests what sort of input the field accepts.
   ///
@@ -3151,7 +3151,7 @@ class InputDecoration {
   /// This value is passed along to the [Text.maxLines] attribute
   /// of the [Text] widget used to display the hint text. [TextOverflow.ellipsis] is
   /// used to handle the overflow when it is limited to single line.
-  final int? hintMaxLines;
+  final double? hintMaxLines;
 
   /// The duration of the [hintText] fade in and fade out animations.
   ///
@@ -3234,7 +3234,7 @@ class InputDecoration {
   /// See also:
   ///
   ///  * [helperMaxLines], the equivalent but for the [helperText].
-  final int? errorMaxLines;
+  final double? errorMaxLines;
 
   /// {@template flutter.material.inputDecoration.floatingLabelBehavior}
   /// Defines **how** the floating label should behave.
@@ -3884,19 +3884,19 @@ class InputDecoration {
     Widget? helper,
     String? helperText,
     TextStyle? helperStyle,
-    int? helperMaxLines,
+    double? helperMaxLines,
     String? hintText,
     Widget? hint,
     TextStyle? hintStyle,
     TextDirection? hintTextDirection,
     Duration? hintFadeDuration,
-    int? hintMaxLines,
+    double? hintMaxLines,
     bool? maintainHintHeight,
     bool? maintainHintSize,
     Widget? error,
     String? errorText,
     TextStyle? errorStyle,
-    int? errorMaxLines,
+    double? errorMaxLines,
     FloatingLabelBehavior? floatingLabelBehavior,
     FloatingLabelAlignment? floatingLabelAlignment,
     bool? isCollapsed,
@@ -4263,12 +4263,12 @@ class InputDecorationTheme extends InheritedTheme with Diagnosticable {
     TextStyle? labelStyle,
     TextStyle? floatingLabelStyle,
     TextStyle? helperStyle,
-    int? helperMaxLines,
+    double? helperMaxLines,
     TextStyle? hintStyle,
     Duration? hintFadeDuration,
-    int? hintMaxLines,
+    double? hintMaxLines,
     TextStyle? errorStyle,
-    int? errorMaxLines,
+    double? errorMaxLines,
     FloatingLabelBehavior? floatingLabelBehavior,
     FloatingLabelAlignment? floatingLabelAlignment,
     bool? isDense,
@@ -4384,12 +4384,12 @@ class InputDecorationTheme extends InheritedTheme with Diagnosticable {
   final TextStyle? _labelStyle;
   final TextStyle? _floatingLabelStyle;
   final TextStyle? _helperStyle;
-  final int? _helperMaxLines;
+  final double? _helperMaxLines;
   final TextStyle? _hintStyle;
   final Duration? _hintFadeDuration;
-  final int? _hintMaxLines;
+  final double? _hintMaxLines;
   final TextStyle? _errorStyle;
-  final int? _errorMaxLines;
+  final double? _errorMaxLines;
   final FloatingLabelBehavior _floatingLabelBehavior;
   final FloatingLabelAlignment _floatingLabelAlignment;
   final bool _isDense;
@@ -4442,7 +4442,7 @@ class InputDecorationTheme extends InheritedTheme with Diagnosticable {
   ///
   /// This property is obsolete and will be deprecated in a future release:
   /// please use the [InputDecorationThemeData.helperMaxLines] property in [data] instead.
-  int? get helperMaxLines => _data != null ? _data.helperMaxLines : _helperMaxLines;
+  double? get helperMaxLines => _data != null ? _data.helperMaxLines : _helperMaxLines;
 
   /// Overrides the default value for [InputDecoration.hintStyle].
   ///
@@ -4460,7 +4460,7 @@ class InputDecorationTheme extends InheritedTheme with Diagnosticable {
   ///
   /// This property is obsolete and will be deprecated in a future release:
   /// please use the [InputDecorationThemeData.hintMaxLines] property in [data] instead.
-  int? get hintMaxLines => _data != null ? _data.hintMaxLines : _hintMaxLines;
+  double? get hintMaxLines => _data != null ? _data.hintMaxLines : _hintMaxLines;
 
   /// Overrides the default value for [InputDecoration.errorStyle].
   ///
@@ -4472,7 +4472,7 @@ class InputDecorationTheme extends InheritedTheme with Diagnosticable {
   ///
   /// This property is obsolete and will be deprecated in a future release:
   /// please use the [InputDecorationThemeData.errorMaxLines] property in [data] instead.
-  int? get errorMaxLines => _data != null ? _data.errorMaxLines : _errorMaxLines;
+  double? get errorMaxLines => _data != null ? _data.errorMaxLines : _errorMaxLines;
 
   /// Overrides the default value for [InputDecoration.floatingLabelBehavior].
   ///
@@ -4716,12 +4716,12 @@ class InputDecorationTheme extends InheritedTheme with Diagnosticable {
     TextStyle? labelStyle,
     TextStyle? floatingLabelStyle,
     TextStyle? helperStyle,
-    int? helperMaxLines,
+    double? helperMaxLines,
     TextStyle? hintStyle,
     Duration? hintFadeDuration,
-    int? hintMaxLines,
+    double? hintMaxLines,
     TextStyle? errorStyle,
-    int? errorMaxLines,
+    double? errorMaxLines,
     FloatingLabelBehavior? floatingLabelBehavior,
     FloatingLabelAlignment? floatingLabelAlignment,
     bool? isDense,
@@ -4930,7 +4930,7 @@ class InputDecorationThemeData with Diagnosticable {
   /// See also:
   ///
   ///  * [errorMaxLines], the equivalent but for the [InputDecoration.errorText].
-  final int? helperMaxLines;
+  final double? helperMaxLines;
 
   /// The style to use for the [InputDecoration.hintText].
   ///
@@ -4957,7 +4957,7 @@ class InputDecorationThemeData with Diagnosticable {
   ///
   /// This value is passed along to the [Text.maxLines] attribute
   /// of the [Text] widget used to display the hint text.
-  final int? hintMaxLines;
+  final double? hintMaxLines;
 
   /// {@macro flutter.material.inputDecoration.errorStyle}
   final TextStyle? errorStyle;
@@ -4973,7 +4973,7 @@ class InputDecorationThemeData with Diagnosticable {
   /// See also:
   ///
   ///  * [helperMaxLines], the equivalent but for the [InputDecoration.helperText].
-  final int? errorMaxLines;
+  final double? errorMaxLines;
 
   /// {@macro flutter.material.inputDecoration.floatingLabelBehavior}
   ///
@@ -5348,12 +5348,12 @@ class InputDecorationThemeData with Diagnosticable {
     TextStyle? labelStyle,
     TextStyle? floatingLabelStyle,
     TextStyle? helperStyle,
-    int? helperMaxLines,
+    double? helperMaxLines,
     TextStyle? hintStyle,
     Duration? hintFadeDuration,
-    int? hintMaxLines,
+    double? hintMaxLines,
     TextStyle? errorStyle,
-    int? errorMaxLines,
+    double? errorMaxLines,
     FloatingLabelBehavior? floatingLabelBehavior,
     FloatingLabelAlignment? floatingLabelAlignment,
     bool? isDense,
@@ -5592,7 +5592,7 @@ class InputDecorationThemeData with Diagnosticable {
       ),
     );
     properties.add(
-      IntProperty('helperMaxLines', helperMaxLines, defaultValue: defaultTheme.helperMaxLines),
+      DoubleProperty('helperMaxLines', helperMaxLines, defaultValue: defaultTheme.helperMaxLines),
     );
     properties.add(
       DiagnosticsProperty<TextStyle>('hintStyle', hintStyle, defaultValue: defaultTheme.hintStyle),
@@ -5605,7 +5605,7 @@ class InputDecorationThemeData with Diagnosticable {
       ),
     );
     properties.add(
-      IntProperty('hintMaxLines', hintMaxLines, defaultValue: defaultTheme.hintMaxLines),
+      DoubleProperty('hintMaxLines', hintMaxLines, defaultValue: defaultTheme.hintMaxLines),
     );
     properties.add(
       DiagnosticsProperty<TextStyle>(
@@ -5615,7 +5615,7 @@ class InputDecorationThemeData with Diagnosticable {
       ),
     );
     properties.add(
-      IntProperty('errorMaxLines', errorMaxLines, defaultValue: defaultTheme.errorMaxLines),
+      DoubleProperty('errorMaxLines', errorMaxLines, defaultValue: defaultTheme.errorMaxLines),
     );
     properties.add(
       DiagnosticsProperty<FloatingLabelBehavior>(

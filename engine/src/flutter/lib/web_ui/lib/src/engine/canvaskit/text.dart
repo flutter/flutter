@@ -23,7 +23,7 @@ class CkParagraphStyle implements ui.ParagraphStyle {
   CkParagraphStyle({
     ui.TextAlign? textAlign,
     ui.TextDirection? textDirection,
-    int? maxLines,
+    double? maxLines,
     String? fontFamily,
     double? fontSize,
     double? height,
@@ -67,7 +67,7 @@ class CkParagraphStyle implements ui.ParagraphStyle {
   final ui.TextDirection? _textDirection;
   final ui.FontWeight? _fontWeight;
   final ui.FontStyle? _fontStyle;
-  final int? _maxLines;
+  final double? _maxLines;
   final String? _originalFontFamily;
   final String? _effectiveFontFamily;
   final double? _fontSize;
@@ -158,7 +158,7 @@ class CkParagraphStyle implements ui.ParagraphStyle {
   static SkParagraphStyle toSkParagraphStyle(
     ui.TextAlign? textAlign,
     ui.TextDirection? textDirection,
-    int? maxLines,
+    double? maxLines,
     String? fontFamily,
     double? fontSize,
     double? height,

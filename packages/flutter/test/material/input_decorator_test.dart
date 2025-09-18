@@ -5946,7 +5946,7 @@ void main() {
 
     group('Multiline error/helper', () {
       testWidgets('Error height grows to accommodate error text', (WidgetTester tester) async {
-        const int maxLines = 3;
+        const double maxLines = 3;
         await tester.pumpWidget(
           buildInputDecorator(
             decoration: const InputDecoration(
@@ -5969,7 +5969,7 @@ void main() {
       testWidgets('Error height is correct when errorMaxLines is restricted', (
         WidgetTester tester,
       ) async {
-        const int maxLines = 2;
+        const double maxLines = 2;
         await tester.pumpWidget(
           buildInputDecorator(
             decoration: const InputDecoration(
@@ -5993,7 +5993,7 @@ void main() {
         'Error height is correct when errorMaxLines is bigger than the number of lines in errorText',
         (WidgetTester tester) async {
           const int numberOfLines = 2;
-          const int maxLines = 3;
+          const double maxLines = 3;
           await tester.pumpWidget(
             buildInputDecorator(
               decoration: const InputDecoration(
@@ -6037,7 +6037,7 @@ void main() {
       testWidgets('InputDecorationThemeData.hintMaxLines behaves as default value', (
         WidgetTester tester,
       ) async {
-        const int numberOfLines = 2;
+        const double numberOfLines = 2;
         await tester.pumpWidget(
           buildInputDecorator(
             inputDecorationTheme: const InputDecorationThemeData(hintMaxLines: numberOfLines),
@@ -6069,7 +6069,7 @@ void main() {
       });
 
       testWidgets('Helper height grows to accommodate helper text', (WidgetTester tester) async {
-        const int maxLines = 3;
+        const double maxLines = 3;
         await tester.pumpWidget(
           buildInputDecorator(
             decoration: const InputDecoration(
@@ -6092,7 +6092,7 @@ void main() {
       testWidgets('Helper height is correct when maxLines is restricted', (
         WidgetTester tester,
       ) async {
-        const int maxLines = 2;
+        const double maxLines = 2;
         await tester.pumpWidget(
           buildInputDecorator(
             decoration: const InputDecoration(
@@ -6116,7 +6116,7 @@ void main() {
         'Helper height is correct when helperMaxLines is bigger than the number of lines in helperText',
         (WidgetTester tester) async {
           const int numberOfLines = 2;
-          const int maxLines = 3;
+          const double maxLines = 3;
           await tester.pumpWidget(
             buildInputDecorator(
               decoration: const InputDecoration(
@@ -9612,7 +9612,7 @@ void main() {
     });
 
     testWidgets('helperMaxLines', (WidgetTester tester) async {
-      const int helperMaxLines = 2;
+      const double helperMaxLines = 2;
       await tester.pumpWidget(
         buildInputDecorator(
           localInputDecorationTheme: const InputDecorationThemeData(helperMaxLines: helperMaxLines),
@@ -9683,7 +9683,7 @@ void main() {
     });
 
     testWidgets('hintMaxLines', (WidgetTester tester) async {
-      const int hintMaxLines = 2;
+      const double hintMaxLines = 2;
       await tester.pumpWidget(
         buildInputDecorator(
           localInputDecorationTheme: const InputDecorationThemeData(hintMaxLines: hintMaxLines),
@@ -9709,7 +9709,7 @@ void main() {
     });
 
     testWidgets('errorMaxLines', (WidgetTester tester) async {
-      const int errorMaxLines = 2;
+      const double errorMaxLines = 2;
       await tester.pumpWidget(
         buildInputDecorator(
           localInputDecorationTheme: const InputDecorationThemeData(errorMaxLines: errorMaxLines),

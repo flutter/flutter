@@ -1199,9 +1199,7 @@ class _TextFieldState extends State<TextField>
         .copyWith(
           enabled: _isEnabled,
           hintMaxLines:
-              widget.decoration?.hintMaxLines ??
-              decorationTheme.hintMaxLines ??
-              widget.maxLines?.floor(),
+              widget.decoration?.hintMaxLines ?? decorationTheme.hintMaxLines ?? widget.maxLines,
         );
 
     // No need to build anything if counter or counterText were given directly.
