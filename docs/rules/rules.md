@@ -103,7 +103,8 @@ mobile platforms.
   code.
 * **Records:** Use records to return multiple types in situations where defining
   an entire class is cumbersome.
-* **Switch Statements:** Prefer using exhaustive `switch` statements or expressions, which don't require `break` statements.
+* **Switch Statements:** Prefer using exhaustive `switch` statements or
+  expressions, which don't require `break` statements.
 * **Exception Handling:** Use `try-catch` blocks for handling exceptions, and
   use exceptions appropriate for the type of exception. Use custom exceptions
   for situations specific to your code.
@@ -336,7 +337,9 @@ linter:
 * **Widget Tests:** Write widget tests for UI components.
 * **Integration Tests:** For broader application validation, use integration
   tests to verify end-to-end user flows.
-* **integration_test package:** Use the `integration_test` package from the Flutter SDK for integration tests. Add it as a `dev_dependency` in `pubspec.yaml` by specifying `sdk: flutter`.
+* **integration_test package:** Use the `integration_test` package from the
+  Flutter SDK for integration tests. Add it as a `dev_dependency` in
+  `pubspec.yaml` by specifying `sdk: flutter`.
 * **Mocks:** Prefer fakes or stubs over mocks. If mocks are absolutely
   necessary, use `mockito` or `mocktail` to create mocks for dependencies. While
   code generation is common for state management (e.g., with `freezed`), try to
@@ -413,13 +416,15 @@ linter:
         - assets/images/
     ```
 
-* **Local Images:** Use `Image.asset` to display local images from your asset
+* **Local Images:** Use `Image.asset` for local images from your asset
   bundle.
 
     ```dart
     Image.asset('assets/images/placeholder.png')
     ```
-
+* **Network images:** Use NetworkImage for images loaded from the network.
+* **Cached images:** For cached images, use NetworkImage a package like
+  `cached_network_image`.
 * **Custom Icons:** Use `ImageIcon` to display an icon from an `ImageProvider`,
   useful for custom icons not in the `Icons` class.
 * **Network Images:** Use `Image.network` to display images from a URL, and
@@ -428,7 +433,7 @@ linter:
 
     ```dart
     Image.network(
-      '[https://picsum.photos/200/300](https://picsum.photos/200/300)',
+      'https://picsum.photos/200/300',
       loadingBuilder: (context, child, progress) {
         if (progress == null) return child;
         return const Center(child: CircularProgressIndicator());
@@ -441,9 +446,11 @@ linter:
 ## UI Theming and Styling Code
 
 * **Responsiveness:** Use `LayoutBuilder` or `MediaQuery` to create responsive
-  UIs. * **Text:** Use `Theme.of(context).textTheme` for text styles.
+  UIs.
+* **Text:** Use `Theme.of(context).textTheme` for text styles.
 * **Text Fields:** Configure `textCapitalization`, `keyboardType`, and
-* **Responsiveness:** Use `LayoutBuilder` or `MediaQuery` to create responsive UIs.
+* **Responsiveness:** Use `LayoutBuilder` or `MediaQuery` to create responsive
+  UIs.
 * **Text:** Use `Theme.of(context).textTheme` for text styles.
   remote images.
 
