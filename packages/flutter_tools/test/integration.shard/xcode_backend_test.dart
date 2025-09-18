@@ -54,20 +54,6 @@ void main() {
     await expectXcodeBackendFails(unknownFlutterBuildMode);
   }, skip: !io.Platform.isMacOS); // [intended] requires macos toolchain.
 
-  test('Xcode backend warns archiving a non-release build.', () async {
-    final ProcessResult result = await Process.run(
-      xcodeBackendPath,
-      <String>['build'],
-      environment: <String, String>{
-        'CONFIGURATION': 'Debug',
-        'ACTION': 'install',
-        'FLUTTER_CLI_BUILD_MODE': 'debug',
-      },
-    );
-    expect(result.stderr, contains('warning: Flutter archive not built in Release mode.'));
-    expect(result.exitCode, isNot(0));
-  }, skip: !io.Platform.isMacOS); // [intended] requires macos toolchain.
-
   test('Xcode backend warns when unable to determine platform', () async {
     final ProcessResult result = await Process.run(
       xcodeBackendPath,

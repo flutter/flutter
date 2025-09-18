@@ -138,7 +138,7 @@ template("proto_library") {
   assert(!generate_go || !generate_go_grpc,
          "Only one of generate_go or generate_go_grpc can be enabled!")
 
-  not_needed(invoker, ["propagate_imports_configs"])
+  not_needed(invoker, [ "propagate_imports_configs" ])
 
   if (defined(invoker.generator_plugin_label)) {
     # Straightforward way to get the name of executable doesn't work because
@@ -218,10 +218,8 @@ template("proto_library") {
     assert(!defined(invoker.generate_descriptor))
     descriptor_set_path_ = "${target_out_dir}/${target_name}.desc.pb"
   } else if (defined(invoker.generate_descriptor)) {
-    descriptor_set_path_ =
-        "$root_gen_dir/" + 
-        rebase_path(proto_out_dir, "//") +
-        invoker.generate_descriptor
+    descriptor_set_path_ = "$root_gen_dir/" + rebase_path(proto_out_dir, "//") +
+                           invoker.generate_descriptor
   }
   if (descriptor_set_path_ != "") {
     protogens += [ descriptor_set_path_ ]
@@ -255,7 +253,7 @@ template("proto_library") {
     }
     if (descriptor_set_path_ != "") {
       # Descriptor-only protobuf targets do not use |proto_path|
-      not_needed(["proto_path"])
+      not_needed([ "proto_path" ])
     }
   }
 
@@ -471,8 +469,7 @@ template("proto_library") {
 
         # Allows generated protobufs to use #include subpaths rooted from
         # |proto_out_dir|.
-        include_dirs = [ "${root_gen_dir}/" +
-                         rebase_path(proto_out_dir, "//") ]
+        include_dirs = [ "${root_gen_dir}/" + rebase_path(proto_out_dir, "//") ]
       }
     }
   }
