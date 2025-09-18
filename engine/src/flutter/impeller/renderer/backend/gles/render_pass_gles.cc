@@ -578,19 +578,21 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
     // to discard the entire render target. Until we know the reason, default to
     // storing.
     bool angle_safe = gl.GetCapabilities()->IsANGLE() ? !is_default_fbo : true;
+    const bool is_default_fbo_bound = fbo.has_value() && fbo.value() != 0;
 
     if (pass_data.discard_color_attachment) {
       attachments[attachment_count++] =
-          (is_default_fbo ? GL_COLOR_EXT : GL_COLOR_ATTACHMENT0);
+          (is_default_fbo_bound ? GL_COLOR_EXT : GL_COLOR_ATTACHMENT0);
     }
+
     if (pass_data.discard_depth_attachment && angle_safe) {
       attachments[attachment_count++] =
-          (is_default_fbo ? GL_DEPTH_EXT : GL_DEPTH_ATTACHMENT);
+          (is_default_fbo_bound ? GL_DEPTH_EXT : GL_DEPTH_ATTACHMENT);
     }
 
     if (pass_data.discard_stencil_attachment && angle_safe) {
       attachments[attachment_count++] =
-          (is_default_fbo ? GL_STENCIL_EXT : GL_STENCIL_ATTACHMENT);
+          (is_default_fbo_bound ? GL_STENCIL_EXT : GL_STENCIL_ATTACHMENT);
     }
     gl.DiscardFramebufferEXT(GL_FRAMEBUFFER,     // target
                              attachment_count,   // attachments to discard
