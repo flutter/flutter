@@ -4859,6 +4859,9 @@ mixin SemanticsAnnotationsMixin on RenderObject {
     if (_properties.focused != null) {
       config.isFocused = _properties.focused;
     }
+    if (_properties.a11yFocusable != null) {
+      config.isA11yFocusable = _properties.a11yFocusable;
+    }
     if (_properties.inMutuallyExclusiveGroup != null) {
       config.isInMutuallyExclusiveGroup = _properties.inMutuallyExclusiveGroup!;
     }

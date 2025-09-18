@@ -737,6 +737,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     result.setClassName("android.view.View");
     result.setSource(rootAccessibilityView, virtualViewId);
     result.setFocusable(semanticsNode.isFocusable());
+    result.setScreenReaderFocusable(semanticsNode.isScreenReaderFocusable());
     if (inputFocusedSemanticsNode != null) {
       result.setFocused(inputFocusedSemanticsNode.id == virtualViewId);
     }
@@ -2218,7 +2219,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     IS_EXPANDED(1 << 27),
     HAS_SELECTED_STATE(1 << 28),
     HAS_REQUIRED_STATE(1 << 29),
-    IS_REQUIRED(1 << 30);
+    IS_REQUIRED(1 << 30),
+    IS_A11Y_FOCUSABLE_SET(1 << 31),
+    IS_A11Y_FOCUSABLE(1 << 32);
 
     final int value;
 
@@ -2731,6 +2734,23 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
           || (label != null && !label.isEmpty())
           || (value != null && !value.isEmpty())
           || (hint != null && !hint.isEmpty());
+    }
+    // From the Android doc
+    // https://developer.android.com/reference/android/view/accessibility/AccessibilityNodeInfo#isScreenReaderFocusable()
+    // `true` indicates the node is specifically marked as a focusable unit for screen readers.
+    // `false` indicates that it is not explicitly marked, not that the node is not
+    // a focusable unit. Screen readers should generally use other signals, such as
+    // isFocusable(), or the presence of text in a node, to determine what should
+    // receive focus.
+    //
+    // TODO(hangyujin): To explictly make a node a11y non-focusable,
+    // might also need to mark the keyboard `focusable` to false. But we need to make sure
+    // it doesnt break existing behaviours.
+    private boolean isScreenReaderFocusable() {
+      if (hasFlag(Flags.IS_A11Y_FOCUSABLE_SET)) {
+        return hasFlag(Flags.IS_A11Y_FOCUSABLE);
+      }
+      return false;
     }
 
     private void collectRoutes(List<SemanticsNode> edges) {
