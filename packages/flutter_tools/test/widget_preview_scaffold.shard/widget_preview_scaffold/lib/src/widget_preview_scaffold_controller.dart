@@ -70,17 +70,7 @@ class WidgetPreviewScaffoldController {
 
   void _registerListeners() {
     dtdServices.selectedSourceFile.addListener(_updateFilteredPreviewSet);
-    filterBySelectedFileListenable.addListener(() {
-      if (filterBySelectedFileListenable.value) {
-        dtdServices.selectedSourceFile.addListener(_updateFilteredPreviewSet);
-      } else {
-        dtdServices.selectedSourceFile.removeListener(
-          _updateFilteredPreviewSet,
-        );
-      }
-      // Update the state if filtering has changed.
-      _updateFilteredPreviewSet();
-    });
+    filterBySelectedFileListenable.addListener(_updateFilteredPreviewSet);
     // Set the initial state.
     _updateFilteredPreviewSet(initial: true);
   }
