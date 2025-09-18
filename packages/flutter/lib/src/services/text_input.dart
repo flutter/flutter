@@ -3110,7 +3110,7 @@ final class IOSSystemContextMenuItemDataLiveText extends IOSSystemContextMenuIte
 /// See also:
 ///
 ///  * <https://developer.apple.com/documentation/uikit/uimenuelement/attributes?language=objc>
-class IOSSystemContextMenuItemCustomAttributes {
+class IOSSystemContextMenuItemCustomAttributes with Diagnosticable {
   const IOSSystemContextMenuItemCustomAttributes._(this._index);
 
   /// The numerical value for this attribute.
@@ -3158,6 +3158,55 @@ class IOSSystemContextMenuItemCustomAttributes {
   ) {
     return IOSSystemContextMenuItemCustomAttributes._(_index | other._index);
   }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    if (_index == none._index) {
+      properties.add(StringProperty('attributes', 'no attributes', quoted: false));
+      return;
+    }
+
+    final List<String> flags = <String>[
+      if ((_index & destructive._index) != 0) 'destructive',
+      if ((_index & disabled._index) != 0) 'disabled',
+      if ((_index & hidden._index) != 0) 'hidden',
+      if ((_index & keepsMenuPresented._index) != 0) 'keepsMenuPresented',
+    ];
+
+    properties.add(
+      StringProperty(
+        'attributes',
+        flags.isEmpty ? 'no attributes' : flags.join(', '),
+        quoted: false,
+      ),
+    );
+  }
+
+  // @override
+  // String toString() {
+  //   if (_index == 0) {
+  //     return 'IOSSystemContextMenuItemCustomAttributes.none';
+  //   }
+  //   final List<String> parts = <String>[];
+  //   if ((_index & destructive._index) != 0) {
+  //     parts.add('IOSSystemContextMenuItemCustomAttributes.destructive');
+  //   }
+  //   if ((_index & disabled._index) != 0) {
+  //     parts.add('IOSSystemContextMenuItemCustomAttributes.disabled');
+  //   }
+  //   if ((_index & hidden._index) != 0) {
+  //     parts.add('IOSSystemContextMenuItemCustomAttributes.hidden');
+  //   }
+  //   if ((_index & keepsMenuPresented._index) != 0) {
+  //     parts.add('IOSSystemContextMenuItemCustomAttributes.keepsMenuPresented');
+  //   }
+  //   if (parts.isEmpty) {
+  //     // This should not happen if _index is not 0 and constants are defined as powers of 2.
+  //     return 'IOSSystemContextMenuItemCustomAttributes(value: $_index)';
+  //   }
+  //   return parts.join(' | ');
+  // }
 }
 
 /// An [IOSSystemContextMenuItemData] for custom action buttons defined by the developer.
