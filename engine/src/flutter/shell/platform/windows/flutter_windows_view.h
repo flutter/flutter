@@ -13,8 +13,8 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
+#include "flutter/shell/geometry/geometry.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/plugin_registrar.h"
-#include "flutter/shell/platform/common/geometry.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/windows/accessibility_bridge_windows.h"
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"

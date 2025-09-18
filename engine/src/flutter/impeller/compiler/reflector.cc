@@ -7,6 +7,7 @@
 #include "impeller/compiler/reflector.h"
 
 #include <atomic>
+#include <format>
 #include <optional>
 #include <set>
 #include <sstream>
@@ -827,13 +828,13 @@ std::vector<StructMember> Reflector::ReadStructMembers(
       result.emplace_back(StructMember{
           TypeNameWithPaddingOfSize(alignment_pad),  // type
           spirv_cross::SPIRType::BaseType::Void,     // basetype
-          SPrintF("_PADDING_%s_",
-                  GetMemberNameAtIndex(struct_type, i).c_str()),  // name
-          current_byte_offset,                                    // offset
-          alignment_pad,                                          // size
-          alignment_pad,                                          // byte_length
-          std::nullopt,  // array_elements
-          0,             // element_padding
+          std::format("_PADDING_{}_",
+                      GetMemberNameAtIndex(struct_type, i)),  // name
+          current_byte_offset,                                // offset
+          alignment_pad,                                      // size
+          alignment_pad,                                      // byte_length
+          std::nullopt,                                       // array_elements
+          0,                                                  // element_padding
       });
       current_byte_offset += alignment_pad;
     }

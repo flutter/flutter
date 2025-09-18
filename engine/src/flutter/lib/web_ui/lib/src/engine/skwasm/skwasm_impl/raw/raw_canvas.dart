@@ -63,6 +63,9 @@ external void canvasClipPath(CanvasHandle canvas, PathHandle path, bool antialia
 @Native<Void Function(CanvasHandle, Int32, Int)>(symbol: 'canvas_drawColor', isLeaf: true)
 external void canvasDrawColor(CanvasHandle canvas, int color, int blendMode);
 
+@Native<Void Function(CanvasHandle, Int32)>(symbol: 'canvas_clear', isLeaf: true)
+external void canvasClear(CanvasHandle canvas, int color);
+
 @Native<Void Function(CanvasHandle, Float, Float, Float, Float, PaintHandle)>(
   symbol: 'canvas_drawLine',
   isLeaf: true,
@@ -255,3 +258,6 @@ external void canvasGetLocalClipBounds(CanvasHandle canvas, RawRect outRect);
 
 @Native<Void Function(CanvasHandle, RawIRect)>(symbol: 'canvas_getDeviceClipBounds', isLeaf: true)
 external void canvasGetDeviceClipBounds(CanvasHandle canvas, RawIRect outRect);
+
+@Native<Bool Function(CanvasHandle, RawRect)>(symbol: 'canvas_quickReject', isLeaf: true)
+external bool canvasQuickReject(CanvasHandle canvas, RawRect rect);

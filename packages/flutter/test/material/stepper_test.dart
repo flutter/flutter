@@ -1264,9 +1264,9 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return Stepper(
                   type: StepperType.horizontal,
-                  connectorColor: MaterialStateProperty.resolveWith<Color>(
-                    (Set<MaterialState> states) =>
-                        states.contains(MaterialState.selected) ? selectedColor : disabledColor,
+                  connectorColor: WidgetStateProperty.resolveWith<Color>(
+                    (Set<WidgetState> states) =>
+                        states.contains(WidgetState.selected) ? selectedColor : disabledColor,
                   ),
                   onStepTapped: (int i) => setState(() => index = i),
                   currentStep: index,
@@ -1639,6 +1639,49 @@ void main() {
       await tester.pump(duration);
       verifyConnector();
     }
+  });
+
+  testWidgets('Vertical stepper active step has fully colored connector line', (
+    WidgetTester tester,
+  ) async {
+    const Color activeColor = Color(0xFF2196F3);
+    const Color inactiveColor = Color(0xFF9E9E9E);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Stepper(
+              controlsBuilder: (_, _) => const SizedBox.shrink(),
+              connectorThickness: 3,
+              connectorColor: MaterialStateProperty.resolveWith<Color>(
+                (Set<WidgetState> states) =>
+                    states.contains(WidgetState.selected) ? activeColor : inactiveColor,
+              ),
+              steps: const <Step>[
+                Step(title: Text('step1'), content: Text('step1 content'), isActive: true),
+                Step(title: Text('step2'), content: Text('step2 content')),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder connectorLines = find.byWidgetPredicate(
+      (Widget widget) =>
+          widget is ColoredBox &&
+          widget.child is SizedBox &&
+          (widget.child! as SizedBox).width == 3.0,
+    );
+
+    expect(connectorLines, findsWidgets);
+
+    final List<ColoredBox> lineWidgets = tester.widgetList<ColoredBox>(connectorLines).toList();
+    final List<Color> colors = lineWidgets.map((ColoredBox box) => box.color).toList();
+    // Both top and bottom box should be colored.
+    expect(colors.where((Color c) => c == activeColor).length, equals(2));
+    expect(colors.first, equals(activeColor));
+    expect(colors.last, equals(activeColor));
   });
 }
 

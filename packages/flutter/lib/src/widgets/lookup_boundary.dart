@@ -105,6 +105,29 @@ class LookupBoundary extends InheritedWidget {
     return candidate.widget as T;
   }
 
+  /// Obtains the nearest widget of the given type `T` within the current
+  /// [LookupBoundary] of `context`, which must be the type of a concrete
+  /// [InheritedWidget] subclass.
+  ///
+  /// This method behaves exactly like
+  /// [BuildContext.getInheritedWidgetOfExactType], except it only
+  /// considers [InheritedWidget]s of the specified type `T` between the
+  /// provided [BuildContext] and its closest [LookupBoundary] ancestor.
+  /// [InheritedWidget]s past that [LookupBoundary] are invisible to this
+  /// method. The root of the tree is treated as an implicit lookup boundary.
+  ///
+  /// {@macro flutter.widgets.BuildContext.getInheritedWidgetOfExactType}
+  static T? getInheritedWidgetOfExactType<T extends InheritedWidget>(
+    BuildContext context, {
+    Object? aspect,
+  }) {
+    final InheritedElement? candidate = getElementForInheritedWidgetOfExactType<T>(context);
+    if (candidate == null) {
+      return null;
+    }
+    return candidate.widget as T;
+  }
+
   /// Obtains the element corresponding to the nearest widget of the given type
   /// `T` within the current [LookupBoundary] of `context`.
   ///

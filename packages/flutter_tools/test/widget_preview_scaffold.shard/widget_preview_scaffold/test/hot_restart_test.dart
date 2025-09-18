@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:widget_preview_scaffold/src/controls.dart';
-import 'package:widget_preview_scaffold/src/widget_preview.dart';
 import 'package:widget_preview_scaffold/src/widget_preview_rendering.dart';
 
 import 'utils/widget_preview_scaffold_test_utils.dart';
@@ -16,12 +14,10 @@ void main() {
     (tester) async {
       final FakeWidgetPreviewScaffoldDtdServices dtdServices =
           FakeWidgetPreviewScaffoldDtdServices();
-      const String kTestText = 'Foo';
       final WidgetPreviewScaffold widgetPreview = WidgetPreviewScaffold(
-        dtdServices: dtdServices,
-        previews: () => <WidgetPreview>[
-          WidgetPreview(builder: () => const Text(kTestText)),
-        ],
+        controller: FakeWidgetPreviewScaffoldController(
+          dtdServicesOverride: dtdServices,
+        ),
       );
 
       await tester.pumpWidget(widgetPreview);
