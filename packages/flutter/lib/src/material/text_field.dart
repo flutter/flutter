@@ -1198,7 +1198,7 @@ class _TextFieldState extends State<TextField>
           hintMaxLines:
               widget.decoration?.hintMaxLines ??
               themeData.inputDecorationTheme.hintMaxLines ??
-              widget.maxLines?.floor(),
+              widget.maxLines,
         );
 
     // No need to build anything if counter or counterText were given directly.
