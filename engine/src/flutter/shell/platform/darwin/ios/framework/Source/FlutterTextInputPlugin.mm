@@ -1006,8 +1006,8 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
     } else if ([type isEqualToString:@"custom"]) {
       NSString* callbackId = encodedItem[@"id"];
       NSString* title = encodedItem[@"title"];
-      NSString* keepsMenuPresented = encodedItem[@"keepsMenuPresented"];
-      if (callbackId && title) {
+      NSNumber* attributes = encodedItem[@"attributes"];
+      if (callbackId && title && attributes) {
         __weak FlutterTextInputView* weakSelf = self;
         UIAction* action = [UIAction
             actionWithTitle:title
@@ -1022,8 +1022,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
                                                                            _textInputClient];
                       }
                     }];
-        action.attributes =
-            [keepsMenuPresented boolValue] ? UIMenuElementAttributesKeepsMenuPresented : 0;
+        action.attributes = [attributes intValue];
         [items addObject:action];
       }
     }

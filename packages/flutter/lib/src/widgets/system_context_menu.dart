@@ -163,7 +163,7 @@ class SystemContextMenu extends StatefulWidget {
       if (editableTextState.selectAllEnabled)
         IOSSystemContextMenuItemCustom(
           title: 'Select All',
-          keepsMenuPresented: true,
+          attributes: IOSSystemContextMenuItemCustomAttributes.keepsMenuPresented | IOSSystemContextMenuItemCustomAttributes.disabled,
           onPressed: () {
             editableTextState.selectAll(SelectionChangedCause.toolbar);
           },
@@ -171,29 +171,6 @@ class SystemContextMenu extends StatefulWidget {
       if (editableTextState.lookUpEnabled) const IOSSystemContextMenuItemLookUp(),
       if (editableTextState.searchWebEnabled) const IOSSystemContextMenuItemSearchWeb(),
       if (editableTextState.liveTextInputEnabled) const IOSSystemContextMenuItemLiveText(),
-      // if (editableTextState.copyEnabled) IOSSystemContextMenuItemCustom(
-      //   title: 'Copy',
-      //   onPressed: () => editableTextState.copySelection(SelectionChangedCause.toolbar),
-      // ),
-      // if (editableTextState.cutEnabled) IOSSystemContextMenuItemCustom(
-      //   title: 'Cut',
-      //   onPressed: () => editableTextState.cutSelection(SelectionChangedCause.toolbar),
-      // ),
-      // if (editableTextState.pasteEnabled) const IOSSystemContextMenuItemPaste(),
-      // if (editableTextState.selectAllEnabled) IOSSystemContextMenuItemCustom(
-      //   title: 'Select All',
-      //   onPressed: () => editableTextState.selectAll(SelectionChangedCause.toolbar),
-      // ),
-      // if (editableTextState.selectAllEnabled) const IOSSystemContextMenuItemSelectAll(),
-      // if (editableTextState.lookUpEnabled) IOSSystemContextMenuItemCustom(
-      //   title: 'Look Up',
-      //   onPressed: () => editableTextState.lookUpSelection(SelectionChangedCause.toolbar),
-      // ),
-      // if (editableTextState.searchWebEnabled) IOSSystemContextMenuItemCustom(
-      //   title: 'Search Web',
-      //   onPressed: () => editableTextState.searchWebForSelection(SelectionChangedCause.toolbar),
-      // ),
-      // if (editableTextState.liveTextInputEnabled) const IOSSystemContextMenuItemLiveText(),
     ];
   }
 
@@ -520,7 +497,7 @@ class IOSSystemContextMenuItemCustom extends IOSSystemContextMenuItem with Diagn
   const IOSSystemContextMenuItemCustom({
     required this.title,
     required this.onPressed,
-    this.keepsMenuPresented = false,
+    this.attributes = IOSSystemContextMenuItemCustomAttributes.none,
   });
 
   @override
@@ -529,19 +506,19 @@ class IOSSystemContextMenuItemCustom extends IOSSystemContextMenuItem with Diagn
   /// The callback that is called when the button is pressed.
   final VoidCallback onPressed;
 
-  final bool keepsMenuPresented;
+  final IOSSystemContextMenuItemCustomAttributes attributes;
 
   @override
   IOSSystemContextMenuItemData getData(WidgetsLocalizations localizations) {
     return IOSSystemContextMenuItemDataCustom(
       title: title,
-      keepsMenuPresented: keepsMenuPresented,
+      attributes: attributes,
       onPressed: onPressed,
     );
   }
 
   @override
-  int get hashCode => Object.hash(title, keepsMenuPresented, onPressed);
+  int get hashCode => Object.hash(title, attributes, onPressed);
 
   @override
   bool operator ==(Object other) {
@@ -550,7 +527,7 @@ class IOSSystemContextMenuItemCustom extends IOSSystemContextMenuItem with Diagn
     }
     return other is IOSSystemContextMenuItemCustom &&
         other.title == title &&
-        other.keepsMenuPresented == keepsMenuPresented &&
+        other.attributes == attributes &&
         other.onPressed == onPressed;
   }
 
@@ -558,7 +535,7 @@ class IOSSystemContextMenuItemCustom extends IOSSystemContextMenuItem with Diagn
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('title', title));
-    properties.add(FlagProperty('keepsMenuPresented', value: keepsMenuPresented));
+    // properties.add(FlagProperty('attributes', value: attributes));
     properties.add(ObjectFlagProperty<VoidCallback>.has('onPressed', onPressed));
   }
 }
