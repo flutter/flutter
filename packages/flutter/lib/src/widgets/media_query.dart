@@ -1876,7 +1876,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
-  static ui.TypographySettings? typographySettingsOf(BuildContext context) =>
+  static ui.TypographySettings typographySettingsOf(BuildContext context) =>
       _of(context, _MediaQueryAspect.typographySettings).typographySettings;
 
   /// Returns the [MediaQueryData.typographySettings] for the
