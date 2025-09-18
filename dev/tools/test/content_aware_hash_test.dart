@@ -230,7 +230,26 @@ void main() {
       equals('HEAD'),
     );
 
+    // Simulate being in a LUCI environment.
+    environment['LUCI_CI'] = 'true';
     expect(runContentAwareHash(), processStdout('f049fdcd4300c8c0d5041b5e35b3d11c2d289bdf'));
+  });
+
+  test('generates a hash based on merge-base in local detached HEAD', () {
+    // This test validates the workflow with a detached HEAD, which is common
+    // when working with jj.
+    initGitRepoWithBlankInitialCommit(branch: 'main');
+    writeFileAndCommit(testRoot.deps, 'deps changed');
+
+    final String headSha = gitShaFor('HEAD');
+    run('git', <String>['checkout', '-f', headSha]);
+    run('git', <String>['--no-pager', 'log', '--decorate=short', '--pretty=oneline']);
+    expect(
+      (run('git', <String>['rev-parse', '--abbrev-ref', 'HEAD']).stdout as String).trim(),
+      equals('HEAD'),
+    );
+
+    expect(runContentAwareHash(), processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'));
   });
 
   group('stable branches calculate hash locally', () {
