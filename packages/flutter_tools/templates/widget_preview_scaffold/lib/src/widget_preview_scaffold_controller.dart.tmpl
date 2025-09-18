@@ -102,9 +102,8 @@ class WidgetPreviewScaffoldController {
     // window is selected (e.g., the widget previewer itself in VSCode), so we
     // ignore these updates.
     final selectedSourceFile = dtdServices.selectedSourceFile.value;
-    var previews = Iterable<WidgetPreviewGroup>.empty();
     if (selectedSourceFile != null) {
-      previews = _previews()
+      final previews = _previews()
           .map(
             (group) => WidgetPreviewGroup(
               name: group.name,
