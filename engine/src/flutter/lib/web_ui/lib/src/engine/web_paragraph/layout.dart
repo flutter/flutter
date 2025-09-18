@@ -268,14 +268,6 @@ class TextLayout {
               blockShiftFromLineStart,
             ),
           );
-          // TODO(mdebbar=>jlavrova): Is this how it's done in SkParagraph? I feel like placholder
-          //                          height shouldn't affect line ascent/descent at this stage.
-          //                          After all text blocks have been added, we can go back and "correctMetrics"
-          //                          on placeholder blocks, and only then we should use placeholders
-          //                          to adjust line ascent/descent.
-          // TODO(jlavrova): sort our alphabetic/ideographic baseline and how it affects ascent & descent
-          line.fontBoundingBoxAscent = math.max(line.fontBoundingBoxAscent, span.height);
-          line.fontBoundingBoxDescent = math.max(line.fontBoundingBoxDescent, 0);
           blockWidth = span.width;
         } else {
           final WebCluster firstVisualClusterInBlock = bidiRun.isLtr
@@ -327,6 +319,7 @@ class TextLayout {
         line.fontBoundingBoxDescent,
       );
       // Line always counts multipled metrics (no need for the others)
+      // TODO(jlavrova): sort our alphabetic/ideographic baseline and how it affects ascent & descent
       line.fontBoundingBoxAscent = math.max(line.fontBoundingBoxAscent, placeholderBlock.ascent);
       line.fontBoundingBoxDescent = math.max(line.fontBoundingBoxDescent, placeholderBlock.descent);
       WebParagraphDebug.log(
