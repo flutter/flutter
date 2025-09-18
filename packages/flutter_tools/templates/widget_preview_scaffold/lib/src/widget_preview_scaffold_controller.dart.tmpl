@@ -103,7 +103,7 @@ class WidgetPreviewScaffoldController {
     // ignore these updates.
     final selectedSourceFile = dtdServices.selectedSourceFile.value;
     if (selectedSourceFile != null) {
-      final previews = _previews()
+      _filteredPreviewSet.value = _previews()
           .map(
             (group) => WidgetPreviewGroup(
               name: group.name,
@@ -115,8 +115,8 @@ class WidgetPreviewScaffoldController {
                   .toList(),
             ),
           )
-          .where((group) => group.hasPreviews);
-      _filteredPreviewSet.value = previews.toList();
+          .where((group) => group.hasPreviews)
+          .toList();
     }
   }
 }
