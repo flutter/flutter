@@ -18,7 +18,6 @@ import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
@@ -744,11 +743,13 @@ void main() {
     testWithoutContext('v - launchDevToolsInBrowser', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[]);
       final runner = terminalHandler.residentRunner as FakeResidentRunner;
-      final devtoolsHandler = runner.residentDevtoolsHandler as FakeResidentDevtoolsHandler;
-
-      expect(devtoolsHandler.calledLaunchDevToolsInBrowser, isFalse);
+      for (final FlutterDevice? device in runner.flutterDevices) {
+        expect(device!.device!.dds.calledLaunchDevToolsInBrowser, isFalse);
+      }
       await terminalHandler.processTerminalInput('v');
-      expect(devtoolsHandler.calledLaunchDevToolsInBrowser, isTrue);
+      for (final FlutterDevice? device in runner.flutterDevices) {
+        expect(device!.device!.dds.calledLaunchDevToolsInBrowser, isTrue);
+      }
     });
 
     testWithoutContext('v - does not launchDevToolsInBrowser on web in profile mode', () async {
@@ -759,11 +760,11 @@ void main() {
       );
 
       final runner = terminalHandler.residentRunner as FakeResidentRunner;
-      final devtoolsHandler = runner.residentDevtoolsHandler as FakeResidentDevtoolsHandler;
+      final DartDevelopmentService dds = runner.flutterDevices.single.device!.dds;
 
-      expect(devtoolsHandler.calledLaunchDevToolsInBrowser, isFalse);
+      expect(dds.calledLaunchDevToolsInBrowser, isFalse);
       await terminalHandler.processTerminalInput('v');
-      expect(devtoolsHandler.calledLaunchDevToolsInBrowser, isFalse);
+      expect(dds.calledLaunchDevToolsInBrowser, isFalse);
     });
 
     testWithoutContext('w,W - debugDumpApp without service protocol is skipped', () async {
@@ -1292,21 +1293,6 @@ class FakeResidentRunner extends ResidentHandlers {
       calledReload = true;
     }
     return OperationResult(reloadExitCode, '', fatal: fatalReloadError);
-  }
-
-  // TODO(bkonyi): remove when ready to serve DevTools from DDS.
-  @override
-  ResidentDevtoolsHandler get residentDevtoolsHandler => _residentDevtoolsHandler;
-  final ResidentDevtoolsHandler _residentDevtoolsHandler = FakeResidentDevtoolsHandler();
-}
-
-// TODO(bkonyi): remove when ready to serve DevTools from DDS.
-class FakeResidentDevtoolsHandler extends Fake implements ResidentDevtoolsHandler {
-  var calledLaunchDevToolsInBrowser = false;
-
-  @override
-  bool launchDevToolsInBrowser({List<FlutterDevice?>? flutterDevices}) {
-    return calledLaunchDevToolsInBrowser = true;
   }
 }
 
