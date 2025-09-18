@@ -177,11 +177,11 @@ class AccessibilityBridge
     std::string decreased_value;
     std::string tooltip;
     FlutterTextDirection text_direction;
-    int32_t heading_level;
     FlutterRect rect;
     FlutterTransformation transform;
     std::vector<int32_t> children_in_traversal_order;
     std::vector<int32_t> custom_accessibility_actions;
+    int32_t heading_level;
   } SemanticsNode;
 
   // See FlutterSemanticsCustomAction in embedder.h

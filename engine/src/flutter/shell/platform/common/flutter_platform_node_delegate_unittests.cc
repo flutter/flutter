@@ -226,8 +226,8 @@ TEST(FlutterPlatformNodeDelegateTest, canUseOwnerBridge) {
   root.increased_value = "";
   root.decreased_value = "";
   root.tooltip = "";
-  root.child_count = 1;
   root.heading_level = 0;
+  root.child_count = 1;
   root.flags2 = &flags;
   int32_t children[] = {1};
   root.children_in_traversal_order = children;
