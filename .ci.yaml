@@ -53,7 +53,7 @@ platform_properties:
         [
           {"dependency": "android_sdk", "version": "version:36v1"},
           {"dependency": "android_virtual_device", "version": "android_36_google_apis_x64.textpb"},
-          {"dependency": "avd_cipd_version", "version": "build_id:8719362231152674241"},
+          {"dependency": "avd_cipd_version", "version": "build_id:8703409618351671137"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       os: Ubuntu
@@ -74,27 +74,6 @@ platform_properties:
           {"dependency": "android_sdk", "version": "version:36v1"},
           {"dependency": "android_virtual_device", "version": "android_36_google_apis_x64.textpb"},
           {"dependency": "avd_cipd_version", "version": "build_id:8719362231152674241"},
-          {"dependency": "open_jdk", "version": "version:21"}
-        ]
-      os: Ubuntu
-      cores: "8"
-      device_type: none
-      kvm: "1"
-
-  # linux_android_emu_vulkan_stable temporarily depends on an API 35 AVD while all
-  # other linux_android_emu test targets depend on an API 36 AVD due to a potential issue with
-  # virtual display on API 36: https://github.com/flutter/flutter/issues/170024.
-  linux_android_emu_vulkan_stable:
-    properties:
-      contexts: >-
-        [
-          "android_virtual_device"
-        ]
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:36v1"},
-          {"dependency": "android_virtual_device", "version": "android_35_google_apis_x64.textpb"},
-          {"dependency": "avd_cipd_version", "version": "build_id:8733065022087935185"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       os: Ubuntu
@@ -1687,7 +1666,7 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Linux_android_emu_vulkan_stable android_engine_vulkan_tests
+  - name: Linux_android_emu android_engine_vulkan_tests
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
