@@ -578,7 +578,9 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
     // to discard the entire render target. Until we know the reason, default to
     // storing.
     bool angle_safe = gl.GetCapabilities()->IsANGLE() ? !is_default_fbo : true;
-    const bool is_default_fbo_bound = fbo.has_value() && fbo.value() != 0;
+    GLint framebuffer_id = 0;
+    gl.GetIntegerv(GL_FRAMEBUFFER_BINDING, &framebuffer_id);
+    const bool is_default_fbo_bound = framebuffer_id == 0;
 
     if (pass_data.discard_color_attachment) {
       attachments[attachment_count++] =
