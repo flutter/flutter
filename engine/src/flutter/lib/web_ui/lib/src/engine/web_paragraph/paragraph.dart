@@ -502,9 +502,19 @@ class ClusterRange {
     return ClusterRange(start: math.max(start, other.start), end: math.min(end, other.end));
   }
 
+  bool isBefore(int index) {
+    // `end` is exclusive.
+    return end <= index;
+  }
+
+  bool isAfter(int index) {
+    return start > index;
+  }
+
   /// Whether this range overlaps with the given range from [start] to [end].
   bool overlapsWith(int start, int end) {
-    return start < this.end && this.start < end;
+    // `end` is exclusive.
+    return !isBefore(start) && !isAfter(end - 1);
   }
 
   @override
@@ -752,7 +762,7 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   ui.GlyphInfo? getClosestGlyphInfoForOffset(ui.Offset offset) {
-    final position = _layout.getPositionForOffset(offset);
+    final position = getPositionForOffset(offset);
     WebParagraphDebug.log('getClosestGlyphInfoForOffset($offset): $position');
     assert(position.offset != 0 || position.affinity != ui.TextAffinity.upstream);
     assert(position.offset < text.length);
@@ -760,52 +770,12 @@ class WebParagraph implements ui.Paragraph {
   }
 
   @override
-  // TODO(mdebbar=>jlavrova): Why is this implemented here, not in `_layout`?
   ui.GlyphInfo? getGlyphInfoAt(int codeUnitOffset) {
     WebParagraphDebug.log('getGlyphInfoAt($codeUnitOffset)');
-    final clusterRange = _layout.convertTextToClusterRange(
-      TextRange(start: codeUnitOffset, end: codeUnitOffset + 1),
-    );
-    if (clusterRange.isEmpty) {
+    if (codeUnitOffset < 0 || codeUnitOffset >= text.length) {
       return null;
     }
-    for (final line in _layout.lines) {
-      if (line.allLineTextRange.start > codeUnitOffset) {
-        // No more lines can contain the cluster
-        break;
-      } else if (line.allLineTextRange.end <= codeUnitOffset) {
-        // The cluster is not on this line
-        continue;
-      }
-      // The cluster is on this line
-      for (final visualBlock in line.visualBlocks) {
-        if (visualBlock.clusterRange.start > clusterRange.start) {
-          // No more visual blocks can contain the cluster
-          break;
-        } else if (visualBlock.clusterRange.end <= clusterRange.start) {
-          // The cluster is not in this visual block
-          continue;
-        }
-        // The cluster is in this visual block
-        for (int i = visualBlock.clusterRange.start; i < visualBlock.clusterRange.end; i++) {
-          if (i < clusterRange.start) {
-            continue;
-          } else if (i >= clusterRange.end) {
-            break;
-          }
-          final cluster = _layout.allClusters[i];
-          return ui.GlyphInfo(
-            cluster.advance.translate(
-              line.advance.left + line.formattingShift + visualBlock.spanAdvanceInLine,
-              line.advance.top + line.fontBoundingBoxAscent,
-            ),
-            ui.TextRange(start: cluster.globalStart, end: cluster.globalEnd),
-            _layout.detectTextDirection(clusterRange),
-          );
-        }
-      }
-    }
-    return null;
+    return _layout.getGlyphInfoAt(codeUnitOffset);
   }
 
   @override
@@ -842,13 +812,13 @@ class WebParagraph implements ui.Paragraph {
       ui.TextAffinity.upstream => position.offset - 1,
       ui.TextAffinity.downstream => position.offset,
     };
-    for (final line in _layout.lines) {
-      if (line.allLineTextRange.start <= codepointPosition &&
-          line.allLineTextRange.end > codepointPosition) {
-        return ui.TextRange(start: line.allLineTextRange.start, end: line.allLineTextRange.end);
-      }
+
+    final int? lineNumber = getLineNumberAt(codepointPosition);
+    if (lineNumber == null) {
+      return ui.TextRange.empty;
     }
-    return ui.TextRange.empty;
+
+    return lines[lineNumber].allLineTextRange;
   }
 
   @override
@@ -877,13 +847,27 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   int? getLineNumberAt(int codeUnitOffset) {
+    if (codeUnitOffset < 0 || codeUnitOffset >= text.length) {
+      // When the offset is outside of the paragraph's range, we know it doesn't belong to any of
+      // the lines.
+      return null;
+    }
+
+    // TODO(mdebbar=>jlavrova): At this point, we know there must be a line, right?
     WebParagraphDebug.log('getLineNumberAt($codeUnitOffset)');
     for (final line in _layout.lines) {
-      if (line.allLineTextRange.start <= codeUnitOffset &&
-          line.allLineTextRange.end > codeUnitOffset) {
-        return line.lineNumber;
+      if (line.allLineTextRange.isAfter(codeUnitOffset)) {
+        // No more lines can contain the offset.
+        break;
       }
+      if (line.allLineTextRange.isBefore(codeUnitOffset)) {
+        // We haven't reached the offset yet, keep going.
+        continue;
+      }
+
+      return line.lineNumber;
     }
+
     return null;
   }
 

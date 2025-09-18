@@ -65,14 +65,9 @@ class TextLayout {
     formatLines(width);
   }
 
-  // TODO(mdebbar): Review.
-  ui.TextDirection detectTextDirection(ClusterRange clusterRange) {
+  ui.TextDirection _detectTextDirection(ClusterRange clusterRange) {
     for (final bidiRun in bidiRuns) {
-      final ClusterRange intersection = ClusterRange.intersectClusterRange(
-        bidiRun.clusterRange,
-        clusterRange,
-      );
-      if (intersection.size > 0) {
+      if (bidiRun.clusterRange.overlapsWith(clusterRange.start, clusterRange.end)) {
         return bidiRun.bidiLevel.isEven ? ui.TextDirection.ltr : ui.TextDirection.rtl;
       }
     }
@@ -629,7 +624,56 @@ class TextLayout {
     return ui.TextPosition(offset: paragraph.text.length - 1, affinity: ui.TextAffinity.upstream);
   }
 
+  ui.GlyphInfo? getGlyphInfoAt(int codeUnitOffset) {
+    assert(codeUnitOffset >= 0);
+    assert(codeUnitOffset < paragraph.text.length);
+
+    final clusterRange = _mapping.toClusterRange(codeUnitOffset, codeUnitOffset + 1);
+    if (clusterRange.isEmpty) {
+      return null;
+    }
+
+    final int? lineNumber = paragraph.getLineNumberAt(codeUnitOffset);
+    if (lineNumber == null) {
+      return null;
+    }
+    final TextLine line = lines[lineNumber];
+
+    // The cluster is on this line.
+    for (final visualBlock in line.visualBlocks) {
+      if (visualBlock.clusterRange.isAfter(clusterRange.start)) {
+        // No more visual blocks can contain the cluster.
+        break;
+      } else if (visualBlock.clusterRange.isBefore(clusterRange.start)) {
+        // We haven't reached the cluster yet, keep going.
+        continue;
+      }
+
+      assert(visualBlock.clusterRange.overlapsWith(clusterRange.start, clusterRange.end));
+
+      // TODO(mdebbar=>jlavrova): Please review the code below, I made significant changes (I removed a for loop).
+
+      final ClusterRange intersection = visualBlock.clusterRange.intersect(clusterRange);
+      assert(intersection.isNotEmpty);
+
+      final cluster = allClusters[intersection.start];
+      return ui.GlyphInfo(
+        cluster.advance.translate(
+          line.advance.left + line.formattingShift + visualBlock.spanShiftFromLineStart,
+          line.advance.top + line.fontBoundingBoxAscent,
+        ),
+        ui.TextRange(start: cluster.start, end: cluster.end),
+        _detectTextDirection(clusterRange),
+      );
+    }
+
+    return null;
+  }
+
   ui.TextRange getWordBoundary(int position) {
+    assert(0 <= position);
+    assert(position < paragraph.text.length);
+
     int start = position + 1;
     while (start > 0) {
       start -= 1;
@@ -658,8 +702,19 @@ extension EnhancedTextRange on ui.TextRange {
     return ui.TextRange(start: math.max(start, other.start), end: math.min(end, other.end));
   }
 
+  bool isBefore(int index) {
+    // `end` is exclusive.
+    return end <= index;
+  }
+
+  bool isAfter(int index) {
+    return start > index;
+  }
+
+  /// Whether this range overlaps with the given range from [start] to [end].
   bool overlapsWith(int start, int end) {
-    return start < this.end && this.start < end;
+    // `end` is exclusive.
+    return !isBefore(start) && !isAfter(end - 1);
   }
 }
 
