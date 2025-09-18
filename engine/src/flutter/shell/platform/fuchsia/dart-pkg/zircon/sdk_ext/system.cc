@@ -10,7 +10,6 @@
 #include <lib/fdio/directory.h>
 #include <lib/fdio/fd.h>
 #include <lib/fdio/io.h>
-#include <lib/fdio/limits.h>
 #include <lib/fdio/namespace.h>
 #include <lib/zx/channel.h>
 #include <sys/stat.h>
