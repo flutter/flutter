@@ -935,10 +935,7 @@ void main() {
             scrollbarTheme: ScrollbarThemeData(
               thumbVisibility: WidgetStateProperty.all(true),
               trackVisibility: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-                if (states.contains(WidgetState.hovered)) {
-                  return true;
-                }
-                return false;
+                return states.contains(WidgetState.hovered);
               }),
             ),
           ),
@@ -1087,10 +1084,7 @@ void main() {
             scrollbarTheme: ScrollbarThemeData(
               thumbVisibility: WidgetStateProperty.all(true),
               trackVisibility: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-                if (states.contains(WidgetState.hovered)) {
-                  return true;
-                }
-                return false;
+                return states.contains(WidgetState.hovered);
               }),
             ),
           ),
@@ -1155,10 +1149,7 @@ void main() {
             scrollbarTheme: ScrollbarThemeData(
               thumbVisibility: WidgetStateProperty.all(true),
               trackVisibility: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-                if (states.contains(WidgetState.hovered)) {
-                  return true;
-                }
-                return false;
+                return states.contains(WidgetState.hovered);
               }),
             ),
           ),

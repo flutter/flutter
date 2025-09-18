@@ -39,10 +39,7 @@ void main() {
             useMaterial3: false,
             scrollbarTheme: ScrollbarThemeData(
               trackVisibility: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-                if (states.contains(WidgetState.hovered)) {
-                  return true;
-                }
-                return false;
+                return states.contains(WidgetState.hovered);
               }),
             ),
           ),
@@ -388,10 +385,7 @@ void main() {
             colorScheme: const ColorScheme.light(),
             scrollbarTheme: ScrollbarThemeData(
               trackVisibility: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-                if (states.contains(WidgetState.hovered)) {
-                  return true;
-                }
-                return false;
+                return states.contains(WidgetState.hovered);
               }),
             ),
           ),
@@ -493,10 +487,7 @@ void main() {
         final ThemeData theme = appTheme.copyWith(
           scrollbarTheme: ScrollbarThemeData(
             trackVisibility: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-              if (states.contains(WidgetState.hovered)) {
-                return true;
-              }
-              return false;
+              return states.contains(WidgetState.hovered);
             }),
           ),
         );
@@ -790,10 +781,7 @@ ScrollbarThemeData _scrollbarTheme({
     trackVisibility:
         trackVisibility ??
         WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-          if (states.contains(WidgetState.hovered)) {
-            return true;
-          }
-          return false;
+          return states.contains(WidgetState.hovered);
         }),
     thumbVisibility: thumbVisibility,
     radius: radius,
