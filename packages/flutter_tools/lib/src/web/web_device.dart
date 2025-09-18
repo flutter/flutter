@@ -32,8 +32,19 @@ class WebApplicationPackage extends ApplicationPackage {
   Directory get webSourcePath => flutterProject.directory.childDirectory('web');
 }
 
+abstract class WebDevice extends Device {
+  WebDevice(super.id, {required super.logger})
+    : super(category: Category.web, platformType: PlatformType.web, ephemeral: false);
+
+  @override
+  Uri? get devToolsUri => _devToolsUri;
+  Uri? _devToolsUri;
+
+  set devToolsUri(Uri? uri) => _devToolsUri = uri;
+}
+
 /// A web device that supports a chromium browser.
-abstract class ChromiumDevice extends Device {
+abstract class ChromiumDevice extends WebDevice {
   ChromiumDevice({
     required String name,
     required this.chromeLauncher,
@@ -41,7 +52,7 @@ abstract class ChromiumDevice extends Device {
     required super.logger,
   }) : _fileSystem = fileSystem,
        _logger = logger,
-       super(name, category: Category.web, platformType: PlatformType.web, ephemeral: false);
+       super(name);
 
   final ChromiumLauncher chromeLauncher;
 
@@ -364,10 +375,8 @@ String parseVersionForWindows(String input) {
 }
 
 /// A special device type to allow serving for arbitrary browsers.
-class WebServerDevice extends Device {
-  WebServerDevice({required super.logger})
-    : _logger = logger,
-      super('web-server', platformType: PlatformType.web, category: Category.web, ephemeral: false);
+class WebServerDevice extends WebDevice {
+  WebServerDevice({required super.logger}) : _logger = logger, super('web-server');
 
   static const kWebServerDeviceId = 'web-server';
   static var showWebServerDevice = false;

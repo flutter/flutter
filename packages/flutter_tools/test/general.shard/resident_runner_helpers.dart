@@ -124,6 +124,15 @@ class FakeDartDevelopmentService extends Fake
   Uri? get uri => null;
 
   @override
+  Uri? get devToolsUri => null;
+
+  @override
+  Uri? get dtdUri => null;
+
+  @override
+  Future<void> handleHotRestart(FlutterDevice? device) async {}
+
+  @override
   void shutdown() {}
 }
 
@@ -256,6 +265,9 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   Future<void> updateReloadStatus(bool wasReloadSuccessful) async {}
+
+  @override
+  Future<void> handleHotRestart() async {}
 }
 
 class FakeDelegateFlutterDevice extends FlutterDevice {
@@ -387,6 +399,9 @@ class FakeDevice extends Fake implements Device {
 
   @override
   String get displayName => name;
+
+  @override
+  Uri? devToolsUri;
 
   @override
   late DartDevelopmentService dds = FakeDartDevelopmentService();
