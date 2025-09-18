@@ -3178,15 +3178,12 @@ final class IOSSystemContextMenuItemCustomAttributes with Diagnosticable {
   }
 
   @override
-  int get hashCode => _index.hashCode;
+  int get hashCode => Object.hash(_index);
 
-  @override
-  bool operator ==(Object other) {
-    if (other is! IOSSystemContextMenuItemCustomAttributes) {
-      return false;
-    }
-    return other._index == _index;
-  }
+  // @override
+  // bool operator ==(Object other) {
+  //   return (other is IOSSystemContextMenuItemCustomAttributes)._index == _index;
+  // }
 
   /// Combines two [IOSSystemContextMenuItemCustomAttributes] values using logical "or".
   IOSSystemContextMenuItemCustomAttributes operator |(
