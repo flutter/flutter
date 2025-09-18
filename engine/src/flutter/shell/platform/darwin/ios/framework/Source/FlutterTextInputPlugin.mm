@@ -1007,7 +1007,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
       NSString* callbackId = encodedItem[@"id"];
       NSString* title = encodedItem[@"title"];
       NSNumber* attributes = encodedItem[@"attributes"];
-      if (callbackId && title && attributes) {
+      if (callbackId && title) {
         __weak FlutterTextInputView* weakSelf = self;
         UIAction* action = [UIAction
             actionWithTitle:title
