@@ -85,7 +85,7 @@ class TextLayout {
     for (final span in paragraph.spans) {
       assert(span.isNotEmpty);
 
-      for (final cluster in span.clusters) {
+      for (final cluster in span.extractClusters()) {
         allClusters.add(cluster);
         for (int i = cluster.start; i < cluster.end; i++) {
           _mapping.add(textIndex: i, clusterIndex: allClusters.length - 1);
@@ -124,7 +124,7 @@ class TextLayout {
     for (int i = 0; i < paragraph.spans.length; i++) {
       final span = paragraph.spans[i];
       if (span is TextSpan) {
-        WebParagraphDebug.log('spans[$i]: "${span.text}" clusters:${span.clusters.length}');
+        WebParagraphDebug.log('spans[$i]: "${span.text}"');
       } else if (span is PlaceholderSpan) {
         WebParagraphDebug.log('spans[$i]: PLACEHOLDER ${span.width}x${span.height}');
       }

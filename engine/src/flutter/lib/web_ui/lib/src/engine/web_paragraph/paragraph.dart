@@ -532,9 +532,6 @@ abstract class ParagraphSpan extends ui.TextRange {
 
   final WebTextStyle style;
 
-  // TODO(mdebbar): Is this list of `clusters` necessary?
-  late final clusters = _getClusters();
-
   int get size => end - start;
 
   bool get isEmpty => start == end;
@@ -543,7 +540,7 @@ abstract class ParagraphSpan extends ui.TextRange {
   double get fontBoundingBoxAscent;
   double get fontBoundingBoxDescent;
 
-  List<WebCluster> _getClusters();
+  List<WebCluster> extractClusters();
 }
 
 class PlaceholderSpan extends ParagraphSpan {
@@ -564,8 +561,6 @@ class PlaceholderSpan extends ParagraphSpan {
   final ui.TextBaseline baseline;
   final double baselineOffset;
 
-  PlaceholderCluster get singleCluster => clusters.single as PlaceholderCluster;
-
   @override
   double get fontBoundingBoxAscent => height;
 
@@ -573,7 +568,7 @@ class PlaceholderSpan extends ParagraphSpan {
   double get fontBoundingBoxDescent => 0.0;
 
   @override
-  List<PlaceholderCluster> _getClusters() {
+  List<PlaceholderCluster> extractClusters() {
     return <PlaceholderCluster>[PlaceholderCluster(this)];
   }
 
@@ -619,7 +614,7 @@ class TextSpan extends ParagraphSpan {
   }
 
   @override
-  List<TextCluster> _getClusters() {
+  List<TextCluster> extractClusters() {
     final clusters = <TextCluster>[];
     for (final DomTextCluster cluster in _metrics.getTextClusters()) {
       clusters.add(TextCluster(this, cluster));
