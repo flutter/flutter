@@ -412,7 +412,7 @@ void main() {
     expect(value, isTrue);
   });
 
-  testWidgets('Checkbox respects shape and side', (WidgetTester tester) async {
+  testWidgets('Checkbox respects shape and side on mobile', (WidgetTester tester) async {
     const RoundedRectangleBorder roundedRectangleBorder = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(5)),
     );
@@ -450,6 +450,77 @@ void main() {
         color: const Color(0xfff44336),
         outer: RRect.fromLTRBR(15.0, 15.0, 29.0, 29.0, const Radius.circular(5)),
         inner: RRect.fromLTRBR(19.0, 19.0, 25.0, 25.0, const Radius.circular(1)),
+      ),
+    );
+  }, variant: TargetPlatformVariant.mobile());
+
+  testWidgets('Checkbox respects shape and side on desktop', (WidgetTester tester) async {
+    const RoundedRectangleBorder roundedRectangleBorder = RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(5)),
+    );
+
+    const BorderSide side = BorderSide(width: 4, color: Color(0xfff44336));
+
+    Widget buildApp() {
+      return CupertinoApp(
+        home: Center(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return CupertinoCheckbox(
+                value: false,
+                onChanged: (bool? newValue) {},
+                shape: roundedRectangleBorder,
+                side: side,
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.widget<CupertinoCheckbox>(find.byType(CupertinoCheckbox)).shape,
+      roundedRectangleBorder,
+    );
+    expect(tester.widget<CupertinoCheckbox>(find.byType(CupertinoCheckbox)).side, side);
+    expect(
+      find.byType(CupertinoCheckbox),
+      paints..drrect(
+        color: const Color(0xfff44336),
+        outer: RRect.fromLTRBR(0.0, 0.0, 14.0, 14.0, const Radius.circular(5)),
+        inner: RRect.fromLTRBR(4.0, 4.0, 10.0, 10.0, const Radius.circular(1)),
+      ),
+    );
+  }, variant: TargetPlatformVariant.desktop());
+
+  testWidgets('Checkbox respects tap target size', (WidgetTester tester) async {
+    Widget buildApp() {
+      return CupertinoApp(
+        home: Center(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return CupertinoCheckbox(
+                value: false,
+                onChanged: (bool? newValue) {},
+                tapTargetSize: const Size.square(20.0),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(CupertinoCheckbox),
+      paints..drrect(
+        outer: RRect.fromLTRBR(3.0, 3.0, 17.0, 17.0, const Radius.circular(4)),
+        inner: RRect.fromLTRBR(4.0, 4.0, 16.0, 16.0, const Radius.circular(3)),
       ),
     );
   });
