@@ -38,7 +38,7 @@ class WidgetPreviewScaffoldController {
 
   /// Update state after the project has been reassembled due to a hot reload.
   void onHotReload() {
-    _handleSelectedSourceFileChanged();
+    _updateFilteredPreviewSet();
   }
 
   /// The active DTD connection used to communicate with other developer tooling.
@@ -69,30 +69,35 @@ class WidgetPreviewScaffoldController {
   final _filteredPreviewSet = ValueNotifier<WidgetPreviewGroups>([]);
 
   void _registerListeners() {
-    dtdServices.selectedSourceFile.addListener(
-      _handleSelectedSourceFileChanged,
-    );
+    dtdServices.selectedSourceFile.addListener(_updateFilteredPreviewSet);
     filterBySelectedFileListenable.addListener(() {
       if (filterBySelectedFileListenable.value) {
-        dtdServices.selectedSourceFile.addListener(
-          _handleSelectedSourceFileChanged,
-        );
+        dtdServices.selectedSourceFile.addListener(_updateFilteredPreviewSet);
       } else {
         dtdServices.selectedSourceFile.removeListener(
-          _handleSelectedSourceFileChanged,
+          _updateFilteredPreviewSet,
         );
       }
       // Update the state if filtering has changed.
-      _handleSelectedSourceFileChanged();
+      _updateFilteredPreviewSet();
     });
     // Set the initial state.
-    _handleSelectedSourceFileChanged();
+    _updateFilteredPreviewSet();
   }
 
-  void _handleSelectedSourceFileChanged() {
+  void _updateFilteredPreviewSet() {
+    if (!_filterBySelectedFile.value) {
+      _filteredPreviewSet.value = _previews();
+      return;
+    }
+    // If filtering by selected file, we don't update the filtered preview set
+    // if the currently selected file is null. This can happen when a non-source
+    // window is selected (e.g., the widget previewer itself in VSCode), so we
+    // ignore these updates.
     final selectedSourceFile = dtdServices.selectedSourceFile.value;
-    if (selectedSourceFile != null && _filterBySelectedFile.value) {
-      _filteredPreviewSet.value = _previews()
+    var previews = Iterable<WidgetPreviewGroup>.empty();
+    if (selectedSourceFile != null) {
+      previews = _previews()
           .map(
             (group) => WidgetPreviewGroup(
               name: group.name,
@@ -104,10 +109,8 @@ class WidgetPreviewScaffoldController {
                   .toList(),
             ),
           )
-          .where((group) => group.hasPreviews)
-          .toList();
-      return;
+          .where((group) => group.hasPreviews);
+      _filteredPreviewSet.value = previews.toList();
     }
-    _filteredPreviewSet.value = _previews();
   }
 }
