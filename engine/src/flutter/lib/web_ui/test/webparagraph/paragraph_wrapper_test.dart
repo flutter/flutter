@@ -77,6 +77,20 @@ Future<void> testMain() async {
     expect(length, paragraph.text.length);
   });
 
+  test('1 line, one cluster that does not fit', () {
+    final WebParagraphBuilder builder = WebParagraphBuilder(ahemStyle);
+    builder.pushStyle(WebTextStyle(fontSize: 500));
+    builder.addText('a');
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 50));
+    final List<TextLine> lines = paragraph.lines;
+    expect(lines, hasLength(1));
+
+    final singleLine = lines.single;
+    expect(singleLine.textRange.size, paragraph.text.length);
+    expect(singleLine.whitespacesRange.size, 0);
+  });
+
   test('Text wrapper, leading spaces', () {
     final WebParagraphBuilder builder = WebParagraphBuilder(ahemStyle);
     builder.addText('   abcdefghijklmnopqrstuvwxyz');
