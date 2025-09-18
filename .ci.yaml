@@ -1668,6 +1668,7 @@ targets:
 
   - name: Linux_android_emu android_engine_vulkan_tests
     recipe: flutter/flutter_drone
+    bringup: true
     timeout: 60
     properties:
       shard: android_engine_vulkan_tests
