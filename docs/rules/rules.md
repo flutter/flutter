@@ -291,10 +291,10 @@ linter:
 
   ```dart
   import 'dart:developer' as developer;
- 
+
   // For simple messages
   developer.log('User logged in successfully.');
- 
+
   // For structured error logging
   try {
     // ... code that might fail
