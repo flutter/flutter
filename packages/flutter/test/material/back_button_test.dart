@@ -337,7 +337,7 @@ void main() {
     expect(customCallbackWasCalled, true);
   });
 
-  testWidgets('CloseButton renders at zero area', (WidgetTester tester) async {
+  testWidgets('CloseButton does not crash at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Center(
@@ -345,8 +345,7 @@ void main() {
         ),
       ),
     );
-    final Finder closeButtonIcon = find.byType(CloseButtonIcon);
-    expect(tester.getSize(closeButtonIcon).isEmpty, isTrue);
+    expect(tester.getSize(find.byType(CloseButton)), Size.zero);
   });
 
   testWidgets('BackButton renders at zero area', (WidgetTester tester) async {
