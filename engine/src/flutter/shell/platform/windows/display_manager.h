@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_DISPLAY_MANAGER_H
-#define FLUTTER_SHELL_PLATFORM_WINDOWS_DISPLAY_MANAGER_H
+#ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_DISPLAY_MANAGER_H_
+#define FLUTTER_SHELL_PLATFORM_WINDOWS_DISPLAY_MANAGER_H_
 
 #include <windows.h>
 #include <memory>
@@ -52,4 +52,4 @@ class DisplayManager {
   std::shared_ptr<WindowsProcTable> win32_;
 };
 }  // namespace flutter
-#endif  // FLUTTER_SHELL_PLATFORM_WINDOWS_DISPLAY_MANAGER_H
+#endif  // FLUTTER_SHELL_PLATFORM_WINDOWS_DISPLAY_MANAGER_H_
