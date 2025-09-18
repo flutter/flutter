@@ -618,7 +618,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
 class _MouseCursor extends MaterialStateMouseCursor {
   const _MouseCursor(this.resolveCallback);
 
-  final MaterialPropertyResolver<MouseCursor?> resolveCallback;
+  final WidgetPropertyResolver<MouseCursor?> resolveCallback;
 
   @override
   MouseCursor resolve(Set<WidgetState> states) => resolveCallback(states)!;
