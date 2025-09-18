@@ -1649,6 +1649,11 @@ MakeViewportMetricsFromWindowMetrics(
            "physical height or width.";
   }
 
+  metrics.physical_min_width_constraint = metrics.physical_width;
+  metrics.physical_max_width_constraint = metrics.physical_width;
+  metrics.physical_min_height_constraint = metrics.physical_height;
+  metrics.physical_max_height_constraint = metrics.physical_height;
+
   return metrics;
 }
 

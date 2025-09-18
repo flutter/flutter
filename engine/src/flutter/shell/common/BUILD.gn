@@ -148,6 +148,7 @@ source_set("common") {
     "//flutter/lib/ui",
     "//flutter/runtime",
     "//flutter/shell/common:base64",
+    "//flutter/shell/geometry",
     "//flutter/shell/profiling",
     "//flutter/skia",
   ]
