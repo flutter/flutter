@@ -253,6 +253,7 @@ void main() {
     FlutterError.onError = (FlutterErrorDetails details) {
       error = details;
     };
+    addTearDown(() => FlutterError.onError = handler);
 
     final UniqueKey key1 = UniqueKey();
     await tester.pumpWidget(
@@ -286,8 +287,6 @@ void main() {
         "RadioGroupPolicy can't be used for a radio group that allows multiple selection.",
       ),
     );
-
-    FlutterError.onError = handler;
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/175258.
@@ -299,6 +298,7 @@ void main() {
     FlutterError.onError = (FlutterErrorDetails details) {
       error = details;
     };
+    addTearDown(() => FlutterError.onError = handler);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -342,8 +342,6 @@ void main() {
     );
 
     expect(error, isNull);
-
-    FlutterError.onError = handler;
   });
 }
 

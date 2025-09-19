@@ -98,6 +98,9 @@ class _RadioGroupState<T> extends State<RadioGroup<T>> implements RadioGroupRegi
   final Set<RadioClient<T>> _radios = <RadioClient<T>>{};
 
   bool _debugHasScheduledSingleSelectionCheck = false;
+
+  /// Schedules a check for the next frame to verify that there is only one
+  /// radio with the group value.
   bool _debugScheduleSingleSelectionCheck() {
     if (_debugHasScheduledSingleSelectionCheck) {
       return true;
