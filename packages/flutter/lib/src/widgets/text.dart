@@ -802,7 +802,7 @@ class Text extends StatelessWidget {
     }
     if (typographySettings?.paragraphSpacing != null) {
       result = Padding(
-        padding: EdgeInsets.only(bottom: typographySettings?.paragraphSpacing!),
+        padding: EdgeInsets.only(bottom: typographySettings!.paragraphSpacing!),
         child: result,
       );
     }
