@@ -246,11 +246,11 @@ void main() {
                 title: Text('Title'),
                 flexibleSpace: FlexibleSpaceBar(background: Text('Expanded title')),
               ),
-              SliverList(
-                delegate: SliverChildListDelegate(<Widget>[
-                  for (int i = 0; i < 50; i++)
-                    SizedBox(height: 200, child: Center(child: Text('Item $i'))),
-                ]),
+              SliverList.builder(
+                itemCount: 50,
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(height: 200, child: Center(child: Text('Item $index')));
+                },
               ),
             ],
           ),
@@ -512,11 +512,11 @@ void main() {
                 title: Text('Title'),
                 flexibleSpace: FlexibleSpaceBar(background: Text('Expanded title')),
               ),
-              SliverList(
-                delegate: SliverChildListDelegate(<Widget>[
-                  for (int i = 0; i < 50; i++)
-                    SizedBox(height: 200, child: Center(child: Text('Item $i'))),
-                ]),
+              SliverList.builder(
+                itemCount: 50,
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(height: 200, child: Center(child: Text('Item $index')));
+                },
               ),
             ],
           ),
@@ -893,11 +893,11 @@ void main() {
                     centerTitle: false,
                   ),
                 ),
-                SliverList(
-                  delegate: SliverChildListDelegate(<Widget>[
-                    for (int i = 0; i < 3; i++)
-                      SizedBox(height: 200.0, child: Center(child: Text('Item $i'))),
-                  ]),
+                SliverList.builder(
+                  itemCount: 3,
+                  itemBuilder: (BuildContext context, int index) {
+                    return SizedBox(height: 200.0, child: Center(child: Text('Item $index')));
+                  },
                 ),
               ],
             ),
@@ -963,11 +963,11 @@ void main() {
                     centerTitle: false,
                   ),
                 ),
-                SliverList(
-                  delegate: SliverChildListDelegate(<Widget>[
-                    for (int i = 0; i < 3; i++)
-                      SizedBox(height: 200.0, child: Center(child: Text('Item $i'))),
-                  ]),
+                SliverList.builder(
+                  itemCount: 3,
+                  itemBuilder: (BuildContext context, int index) {
+                    return SizedBox(height: 200.0, child: Center(child: Text('Item $index')));
+                  },
                 ),
               ],
             ),
@@ -1024,11 +1024,11 @@ void main() {
                   ),
                 ),
               ),
-              SliverList(
-                delegate: SliverChildListDelegate(<Widget>[
-                  for (int i = 0; i < 3; i += 1)
-                    SizedBox(height: 200.0, child: Center(child: Text('Item $i'))),
-                ]),
+              SliverList.builder(
+                itemCount: 3,
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(height: 200.0, child: Center(child: Text('Item $index')));
+                },
               ),
             ],
           ),
@@ -1079,11 +1079,11 @@ void main() {
                   ),
                 ),
               ),
-              SliverList(
-                delegate: SliverChildListDelegate(<Widget>[
-                  for (int i = 0; i < 3; i += 1)
-                    SizedBox(height: 200.0, child: Center(child: Text('Item $i'))),
-                ]),
+              SliverList.builder(
+                itemCount: 3,
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(height: 200.0, child: Center(child: Text('Item $index')));
+                },
               ),
             ],
           ),
@@ -1137,11 +1137,11 @@ void main() {
                   ),
                 ),
               ),
-              SliverList(
-                delegate: SliverChildListDelegate(<Widget>[
-                  for (int i = 0; i < 3; i += 1)
-                    SizedBox(height: 200.0, child: Center(child: Text('Item $i'))),
-                ]),
+              SliverList.builder(
+                itemCount: 3,
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(height: 200.0, child: Center(child: Text('Item $index')));
+                },
               ),
             ],
           ),
@@ -1197,11 +1197,11 @@ void main() {
                   ),
                 ),
               ),
-              SliverList(
-                delegate: SliverChildListDelegate(<Widget>[
-                  for (int i = 0; i < 3; i += 1)
-                    SizedBox(height: 200.0, child: Center(child: Text('Item $i'))),
-                ]),
+              SliverList.builder(
+                itemCount: 3,
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(height: 200.0, child: Center(child: Text('Item $index')));
+                },
               ),
             ],
           ),
@@ -1462,7 +1462,18 @@ void main() {
   });
 
   testWidgets('FlexibleSpaceBar rebuilds when scrolling.', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(home: SubCategoryScreenView()));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: const SubCategoryScreenView(),
+        theme: ThemeData(
+          pageTransitionsTheme: const PageTransitionsTheme(
+            builders: <TargetPlatform, PageTransitionsBuilder>{
+              TargetPlatform.android: ZoomPageTransitionsBuilder(),
+            },
+          ),
+        ),
+      ),
+    );
 
     expect(RenderRebuildTracker.count, 1);
     expect(

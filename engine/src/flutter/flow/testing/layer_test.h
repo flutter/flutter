@@ -17,9 +17,6 @@
 #include "flutter/testing/assertions_skia.h"
 #include "flutter/testing/canvas_test.h"
 #include "flutter/testing/display_list_testing.h"
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkImageInfo.h"
-#include "third_party/skia/include/utils/SkNWayCanvas.h"
 
 namespace flutter {
 namespace testing {

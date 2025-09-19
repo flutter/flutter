@@ -21,10 +21,11 @@ void main() {
 
   int testListLength = 10;
   SliverList buildAListOfStuff() {
-    return SliverList(
-      delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+    return SliverList.builder(
+      itemCount: testListLength,
+      itemBuilder: (BuildContext context, int index) {
         return SizedBox(height: 200.0, child: Center(child: Text(index.toString())));
-      }, childCount: testListLength),
+      },
     );
   }
 
@@ -1824,11 +1825,9 @@ void main() {
           physics: const BouncingScrollPhysics(),
           slivers: <Widget>[
             const CupertinoSliverRefreshControl(),
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) => const SizedBox(height: 100),
-                childCount: 20,
-              ),
+            SliverList.builder(
+              itemCount: 20,
+              itemBuilder: (BuildContext context, int index) => const SizedBox(height: 100),
             ),
           ],
         ),

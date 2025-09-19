@@ -32,6 +32,7 @@ import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
+import 'hook_runner.dart' show FlutterHookRunner;
 import 'ios/application_package.dart';
 import 'ios/devices.dart';
 import 'project.dart';
@@ -72,6 +73,7 @@ class FlutterDevice {
              logger: globals.logger,
              platform: globals.platform,
              fileSystem: globals.fs,
+             shutdownHooks: globals.shutdownHooks,
            );
 
   /// Create a [FlutterDevice] with optional code generation enabled.
@@ -152,6 +154,7 @@ class FlutterDevice {
         logger: globals.logger,
         fileSystem: globals.fs,
         platform: platform,
+        shutdownHooks: globals.shutdownHooks,
       );
     } else {
       List<String> extraFrontEndOptions = buildInfo.extraFrontEndOptions;
@@ -187,6 +190,7 @@ class FlutterDevice {
         logger: globals.logger,
         platform: platform,
         fileSystem: globals.fs,
+        shutdownHooks: globals.shutdownHooks,
       );
     }
 
@@ -235,7 +239,6 @@ class FlutterDevice {
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,
     int? hostVmServicePort,
-    required bool allowExistingDdsInstance,
   }) {
     final completer = Completer<void>();
     late StreamSubscription<void> subscription;
@@ -256,41 +259,99 @@ class FlutterDevice {
             }
           }
 
-          // First check if the VM service is actually listening on vmServiceUri as
-          // this may not be the case when scraping logcat for URIs. If this URI is
-          // from an old application instance, we shouldn't try and start DDS.
-          try {
-            service = await connectToVmService(vmServiceUri!, logger: globals.logger);
-            await service.dispose();
-          } on Exception catch (exception) {
-            globals.printTrace('Fail to connect to service protocol: $vmServiceUri: $exception');
-            if (!completer.isCompleted && !_isListeningForVmServiceUri!) {
-              completer.completeError('failed to connect to $vmServiceUri $exception');
+          const kMaxAttempts = 3;
+          for (var attempts = 1; attempts <= kMaxAttempts; ++attempts) {
+            void handleVmServiceCheckException(Exception e) {
+              globals.printTrace('Fail to connect to service protocol: $vmServiceUri: $e');
+              if (!completer.isCompleted && !_isListeningForVmServiceUri!) {
+                completer.completeError('failed to connect to $vmServiceUri $e');
+              }
             }
-            return;
+
+            // First check if the VM service is actually listening on vmServiceUri as
+            // this may not be the case when scraping logcat for URIs. If this URI is
+            // from an old application instance, we shouldn't try and start DDS.
+            try {
+              service = await connectToVmService(vmServiceUri!, logger: globals.logger);
+              await service.dispose();
+            } on vm_service.RPCError catch (e, st) {
+              if (!e.isConnectionDisposedException) {
+                handleVmServiceCheckException(e);
+                return;
+              }
+              // It's possible (but unlikely) that two DDS instances can try and start at the same
+              // time (e.g., a "flutter run" is initiated while an existing "flutter attach" is
+              // waiting for a target to attach to). This can lead to the initial VM service connection
+              // failing for one of the processes when the VM service disconnects it after the other
+              // instance successfully invoked the "_yieldControlToDDS" RPC.
+              //
+              // To handle this, we retry connecting to the VM service, which should successfully
+              // be redirected to the DDS instance.
+              //
+              // See https://github.com/flutter/flutter/issues/169265 for details.
+              if (attempts == kMaxAttempts) {
+                globals.printTrace(
+                  'Failed to make initial connection to VM Service (attempt $attempts of $kMaxAttempts).',
+                );
+                handleError(e, st);
+                return;
+              }
+              // Exponential backoff.
+              final int backoffPeriod = (1 << (attempts - 1)) * 100;
+              globals.printTrace(
+                'Failed to make initial connection to VM Service (attempt $attempts of $kMaxAttempts). '
+                'Retrying in ${backoffPeriod}ms...',
+              );
+              await Future<void>.delayed(Duration(milliseconds: backoffPeriod));
+            } on Exception catch (e) {
+              handleVmServiceCheckException(e);
+              return;
+            }
           }
 
-          // This first try block is meant to catch errors that occur during DDS startup
-          // (e.g., failure to bind to a port, failure to connect to the VM service,
-          // attaching to a VM service with existing clients, etc.).
-          try {
-            await device!.dds.startDartDevelopmentServiceFromDebuggingOptions(
-              vmServiceUri,
-              debuggingOptions: debuggingOptions,
-            );
-          } on DartDevelopmentServiceException catch (e, st) {
-            if (!allowExistingDdsInstance ||
-                (e.errorCode != DartDevelopmentServiceException.existingDdsInstanceError)) {
+          for (var attempts = 1; attempts <= kMaxAttempts; ++attempts) {
+            // This try block is meant to catch errors that occur during DDS startup
+            // (e.g., failure to bind to a port, failure to connect to the VM service,
+            // attaching to a VM service with existing clients, etc.).
+            try {
+              await device!.dds.startDartDevelopmentServiceFromDebuggingOptions(
+                vmServiceUri!,
+                debuggingOptions: debuggingOptions,
+              );
+              break;
+            } on DartDevelopmentServiceException catch (e, st) {
+              if (e.errorCode == DartDevelopmentServiceException.existingDdsInstanceError) {
+                existingDds = true;
+                break;
+              }
+              // It's possible (but unlikely) that two DDS instances can try and start at the same
+              // time (e.g., a "flutter run" is initiated while an existing "flutter attach" is
+              // waiting for a target to attach to). This leads to DDS failing to initialize for
+              // one of the processes when the VM service disconnects it after the other instance
+              // successfully invoked the "_yieldControlToDDS" RPC.
+              //
+              // To handle this, we retry to start DDS after a short delay, which should result in
+              // an existingDdsInstanceError if the failure to start was due to a startup race.
+              //
+              // See https://github.com/flutter/flutter/issues/169265 for details.
+              if (attempts == kMaxAttempts) {
+                globals.printTrace('Failed to start DDS (attempt $attempts of $kMaxAttempts).');
+                handleError(e, st);
+                return;
+              }
+              // Exponential backoff.
+              final int backoffPeriod = (1 << (attempts - 1)) * 100;
+              globals.printTrace(
+                'Failed to start DDS (attempt $attempts of $kMaxAttempts). '
+                'Retrying in ${backoffPeriod}ms...',
+              );
+              await Future<void>.delayed(Duration(milliseconds: backoffPeriod));
+            } on ToolExit {
+              rethrow;
+            } on Exception catch (e, st) {
               handleError(e, st);
               return;
-            } else {
-              existingDds = true;
             }
-          } on ToolExit {
-            rethrow;
-          } on Exception catch (e, st) {
-            handleError(e, st);
-            return;
           }
         }
         // This second try block handles cases where the VM service connection goes down
@@ -983,6 +1044,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     this.machine = false,
     ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
     CommandHelp? commandHelp,
+    this.dartBuilder,
   }) : mainPath = globals.fs.file(target).absolute.path,
        packagesFilePath = debuggingOptions.buildInfo.packageConfigPath,
        projectRootPath = projectRootPath ?? globals.fs.currentDirectory.path,
@@ -1052,7 +1114,32 @@ abstract class ResidentRunner extends ResidentHandlers {
   var _exited = false;
   var _finished = Completer<int>();
   BuildResult? _lastBuild;
-  Environment? _environment;
+
+  late final _environment = Environment(
+    artifacts: globals.artifacts!,
+    logger: globals.logger,
+    cacheDir: globals.cache.getRoot(),
+    engineVersion: globals.flutterVersion.engineRevision,
+    fileSystem: globals.fs,
+    flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+    outputDir: globals.fs.directory(getBuildDirectory()),
+    processManager: globals.processManager,
+    platform: globals.platform,
+    analytics: globals.analytics,
+    projectDir: globals.fs.currentDirectory,
+    packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
+    generateDartPluginRegistry: generateDartPluginRegistry,
+    defines: <String, String>{
+      // Needed for Dart plugin registry generation.
+      kTargetFile: mainPath,
+      kBuildMode: debuggingOptions.buildInfo.mode.cliName,
+    },
+  );
+
+  Environment get environment => _environment;
+
+  /// Can dispatch [FlutterHookRunner.runHooks] to get new assets from the hooks.
+  final FlutterHookRunner? dartBuilder;
 
   @override
   bool hotMode;
@@ -1144,32 +1231,11 @@ abstract class ResidentRunner extends ResidentHandlers {
   Future<int?> attach({
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
-    bool allowExistingDdsInstance = false,
     bool needsFullRestart = true,
   });
 
   @override
   Future<void> runSourceGenerators() async {
-    _environment ??= Environment(
-      artifacts: globals.artifacts!,
-      logger: globals.logger,
-      cacheDir: globals.cache.getRoot(),
-      engineVersion: globals.flutterVersion.engineRevision,
-      fileSystem: globals.fs,
-      flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-      outputDir: globals.fs.directory(getBuildDirectory()),
-      processManager: globals.processManager,
-      platform: globals.platform,
-      analytics: globals.analytics,
-      projectDir: globals.fs.currentDirectory,
-      packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
-      generateDartPluginRegistry: generateDartPluginRegistry,
-      defines: <String, String>{
-        // Needed for Dart plugin registry generation.
-        kTargetFile: mainPath,
-      },
-    );
-
     final compositeTarget = CompositeTarget(<Target>[
       globals.buildTargets.generateLocalizationsTarget,
       globals.buildTargets.dartPluginRegistrantTarget,
@@ -1177,7 +1243,7 @@ abstract class ResidentRunner extends ResidentHandlers {
 
     _lastBuild = await globals.buildSystem.buildIncremental(
       compositeTarget,
-      _environment!,
+      _environment,
       _lastBuild,
     );
     if (!_lastBuild!.success) {
@@ -1227,7 +1293,6 @@ abstract class ResidentRunner extends ResidentHandlers {
     await residentDevtoolsHandler!.shutdown();
     await stopEchoingDeviceLog();
     await preExit();
-    shutdownDartDevelopmentService();
     appFinished();
   }
 
@@ -1298,7 +1363,6 @@ abstract class ResidentRunner extends ResidentHandlers {
     ReloadSources? reloadSources,
     Restart? restart,
     CompileExpression? compileExpression,
-    required bool allowExistingDdsInstance,
   }) async {
     if (!debuggingOptions.debuggingEnabled) {
       throw Exception('The service protocol is not enabled.');
@@ -1311,7 +1375,6 @@ abstract class ResidentRunner extends ResidentHandlers {
         reloadSources: reloadSources,
         restart: restart,
         compileExpression: compileExpression,
-        allowExistingDdsInstance: allowExistingDdsInstance,
         hostVmServicePort: debuggingOptions.hostVmServicePort,
         printStructuredErrorLogMethod: printStructuredErrorLog,
       );
@@ -1458,12 +1521,12 @@ abstract class ResidentRunner extends ResidentHandlers {
   }
 
   void printHelpDetails() {
-    commandHelp.v.print();
     if (flutterDevices.any((FlutterDevice? d) => d!.device!.supportsScreenshot)) {
       commandHelp.s.print();
     }
     if (supportsServiceProtocol) {
       if (isRunningDebug) {
+        commandHelp.v.print();
         commandHelp.w.print();
         commandHelp.t.print();
         commandHelp.L.print();
@@ -1476,6 +1539,15 @@ abstract class ResidentRunner extends ResidentHandlers {
         commandHelp.o.print();
         commandHelp.b.print();
       } else {
+        final bool isRunningOnWeb = flutterDevices.every((FlutterDevice? flutterDevice) {
+          return flutterDevice?.targetPlatform == TargetPlatform.web_javascript;
+        });
+
+        if (!isRunningOnWeb) {
+          // DevTools are only supported in debug mode for web, see https://docs.flutter.dev/testing/build-modes#profile
+          commandHelp.v.print();
+        }
+
         commandHelp.S.print();
         commandHelp.U.print();
       }
@@ -1728,9 +1800,20 @@ class TerminalHandler {
         return residentRunner.debugDumpSemanticsTreeInInverseHitTestOrder();
       case 'v':
       case 'V':
-        return residentRunner.residentDevtoolsHandler!.launchDevToolsInBrowser(
-          flutterDevices: residentRunner.flutterDevices,
-        );
+        final bool isRunningOnWeb = residentRunner.flutterDevices.every((
+          FlutterDevice? flutterDevice,
+        ) {
+          return flutterDevice?.targetPlatform == TargetPlatform.web_javascript;
+        });
+
+        if (residentRunner.isRunningDebug || !isRunningOnWeb) {
+          // DevTools are only supported in debug mode for web, see https://docs.flutter.dev/testing/build-modes#profile
+          return residentRunner.residentDevtoolsHandler!.launchDevToolsInBrowser(
+            flutterDevices: residentRunner.flutterDevices,
+          );
+        }
+
+        return false;
       case 'w':
       case 'W':
         return residentRunner.debugDumpApp();

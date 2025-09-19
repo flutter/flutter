@@ -264,7 +264,7 @@ static void DrawGlyph(SkCanvas* canvas,
 /// This is only safe for use when updating a fresh texture.
 static bool BulkUpdateAtlasBitmap(const GlyphAtlas& atlas,
                                   std::shared_ptr<BlitPass>& blit_pass,
-                                  HostBuffer& host_buffer,
+                                  HostBuffer& data_host_buffer,
                                   const std::shared_ptr<Texture>& texture,
                                   const std::vector<FontGlyphPair>& new_pairs,
                                   size_t start_index,
@@ -308,12 +308,12 @@ static bool BulkUpdateAtlasBitmap(const GlyphAtlas& atlas,
 
   // Writing to a malloc'd buffer and then copying to the staging buffers
   // benchmarks as substantially faster on a number of Android devices.
-  BufferView buffer_view = host_buffer.Emplace(
+  BufferView buffer_view = data_host_buffer.Emplace(
       bitmap.getAddr(0, 0),
       texture->GetSize().Area() *
           BytesPerPixelForPixelFormat(
               atlas.GetTexture()->GetTextureDescriptor().format),
-      host_buffer.GetMinimumUniformAlignment());
+      data_host_buffer.GetMinimumUniformAlignment());
 
   return blit_pass->AddCopy(std::move(buffer_view),  //
                             texture,                 //
@@ -323,7 +323,7 @@ static bool BulkUpdateAtlasBitmap(const GlyphAtlas& atlas,
 
 static bool UpdateAtlasBitmap(const GlyphAtlas& atlas,
                               std::shared_ptr<BlitPass>& blit_pass,
-                              HostBuffer& host_buffer,
+                              HostBuffer& data_host_buffer,
                               const std::shared_ptr<Texture>& texture,
                               const std::vector<FontGlyphPair>& new_pairs,
                               size_t start_index,
@@ -370,11 +370,11 @@ static bool UpdateAtlasBitmap(const GlyphAtlas& atlas,
 
     // Writing to a malloc'd buffer and then copying to the staging buffers
     // benchmarks as substantially faster on a number of Android devices.
-    BufferView buffer_view = host_buffer.Emplace(
+    BufferView buffer_view = data_host_buffer.Emplace(
         bitmap.getAddr(0, 0),
         size.Area() * BytesPerPixelForPixelFormat(
                           atlas.GetTexture()->GetTextureDescriptor().format),
-        host_buffer.GetMinimumUniformAlignment());
+        data_host_buffer.GetMinimumUniformAlignment());
 
     // convert_to_read is set to false so that the texture remains in a transfer
     // dst layout until we finish writing to it below. This only has an impact
@@ -502,7 +502,7 @@ TypographerContextSkia::CollectNewGlyphs(
 std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
     Context& context,
     GlyphAtlas::Type type,
-    HostBuffer& host_buffer,
+    HostBuffer& data_host_buffer,
     const std::shared_ptr<GlyphAtlasContext>& atlas_context,
     const std::vector<std::shared_ptr<TextFrame>>& text_frames) const {
   TRACE_EVENT0("impeller", __FUNCTION__);
@@ -564,7 +564,7 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
     // Step 4a: Draw new font-glyph pairs into the a host buffer and encode
     // the uploads into the blit pass.
     // ---------------------------------------------------------------------------
-    if (!UpdateAtlasBitmap(*last_atlas, blit_pass, host_buffer,
+    if (!UpdateAtlasBitmap(*last_atlas, blit_pass, data_host_buffer,
                            last_atlas->GetTexture(), new_glyphs, 0,
                            first_missing_index)) {
       return nullptr;
@@ -670,7 +670,7 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
   // Step 4a: Draw new font-glyph pairs into the a host buffer and encode
   // the uploads into the blit pass.
   // ---------------------------------------------------------------------------
-  if (!BulkUpdateAtlasBitmap(*new_atlas, blit_pass, host_buffer,
+  if (!BulkUpdateAtlasBitmap(*new_atlas, blit_pass, data_host_buffer,
                              new_atlas->GetTexture(), new_glyphs,
                              first_missing_index, new_glyphs.size())) {
     return nullptr;

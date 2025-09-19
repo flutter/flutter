@@ -561,7 +561,7 @@ void InternalFlutterGpu_RenderPass_SetScissor(flutter::gpu::RenderPass* wrapper,
                                               int y,
                                               int width,
                                               int height) {
-  wrapper->scissor = impeller::TRect<int64_t>::MakeXYWH(x, y, width, height);
+  wrapper->scissor = impeller::IRect32::MakeXYWH(x, y, width, height);
 }
 
 void InternalFlutterGpu_RenderPass_SetViewport(

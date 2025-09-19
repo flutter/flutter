@@ -219,7 +219,7 @@ void main() {
     expect(material.color, localBackgroundColor);
     expect(material.elevation, localElevation);
     expect(material.shape, localShape);
-    expect(inkWell.overlayColor?.resolve(<MaterialState>{}), localOverlayColor);
+    expect(inkWell.overlayColor?.resolve(<WidgetState>{}), localOverlayColor);
   });
 }
 
