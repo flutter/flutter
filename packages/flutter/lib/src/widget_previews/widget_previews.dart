@@ -103,17 +103,22 @@ base class Preview {
     required this.localizations,
   });
 
+  /// {@template widget_preview_group}
   /// The group the preview belongs to.
   ///
   /// Previews with the same group name will be displayed together in the
   /// previewer. If not provided, 'Default' is used.
+  /// {@endtemplate}
   final String group;
 
+  /// {@template widget_preview_name}
   /// A description to be displayed alongside the preview.
   ///
   /// If not provided, no name will be associated with the preview.
+  /// {@endtemplate}
   final String? name;
 
+  /// {@template widget_preview_size}
   /// Artificial constraints to be applied to the previewed widget.
   ///
   /// If not provided, the previewed widget will attempt to set its own
@@ -124,41 +129,52 @@ base class Preview {
   ///
   /// To set a single dimension and allow the other to set its own constraints, use
   /// [Size.fromHeight] or [Size.fromWidth].
+  /// {@endtemplate}
   final Size? size;
 
+  /// {@template widget_preview_text_scale_factor}
   /// Applies font scaling to text within the previewed widget.
   ///
   /// If not provided, the default text scaling factor provided by [MediaQuery]
   /// will be used.
+  /// {@endtemplate}
   final double? textScaleFactor;
 
+  /// {@template widget_preview_wrapper}
   /// Wraps the previewed [Widget] in a [Widget] tree.
   ///
   /// This function can be used to perform dependency injection or setup
   /// additional scaffolding needed to correctly render the preview.
+  /// {@endtemplate}
   ///
-  /// Note: this must be a reference to a static, public function defined as
-  /// either a top-level function or static member in a class.
+  /// {@template widget_preview_must_be_static_const}
+  /// Note: when provided as an argument to an annotation, this must be a reference to a static,
+  /// public function defined as either a top-level function or static member in a class.
+  /// {@endtemplate}
   // TODO(bkonyi): provide an example.
   final WidgetWrapper? wrapper;
 
+  /// {@template widget_preview_theme}
   /// A callback to return Material and Cupertino theming data to be applied
   /// to the previewed [Widget].
+  /// {@endtemplate}
   ///
-  /// Note: this must be a reference to a static, public function defined as
-  /// either a top-level function or static member in a class.
+  /// {@macro widget_preview_must_be_static_const}
   final PreviewTheme? theme;
 
+  /// {@template widget_preview_brightness}
   /// Sets the initial theme brightness.
   ///
   /// If not provided, the current system default brightness will be used.
+  /// {@endtemplate}
   final Brightness? brightness;
 
+  /// {@template widget_preview_localizations}
   /// A callback to return a localization configuration to be applied to the
   /// previewed [Widget].
+  /// {@endtemplate}
   ///
-  /// Note: this must be a reference to a static, public function defined as
-  /// either a top-level function or static member in a class.
+  /// {@macro widget_preview_must_be_static_const}
   final PreviewLocalizations? localizations;
 
   /// Applies a transformation to the current [Preview].
@@ -263,40 +279,19 @@ final class PreviewBuilder {
       brightness = preview.brightness,
       localizations = preview.localizations;
 
-  /// The group the preview belongs to.
-  ///
-  /// Previews with the same group name will be displayed together in the
-  /// previewer. If not provided, 'Default' is used.
+  /// {@macro widget_preview_group}
   String? group;
 
-  /// A description to be displayed alongside the preview.
-  ///
-  /// If not provided, no name will be associated with the preview.
+  /// {@macro widget_preview_name}
   String? name;
 
-  /// Artificial constraints to be applied to the previewed widget.
-  ///
-  /// If not provided, the previewed widget will attempt to set its own
-  /// constraints.
-  ///
-  /// If a dimension has a value of `double.infinity`, the previewed widget
-  /// will attempt to set its own constraints in the relevant dimension.
-  ///
-  /// To set a single dimension and allow the other to set its own constraints, use
-  /// [Size.fromHeight] or [Size.fromWidth].
+  /// {@macro widget_preview_size}
   Size? size;
 
-  /// Applies font scaling to text within the previewed widget.
-  ///
-  /// If not provided, the default text scaling factor provided by [MediaQuery]
-  /// will be used.
+  /// {@macro widget_preview_text_scale_factor}
   double? textScaleFactor;
 
-  /// Wraps the previewed [Widget] in a [Widget] tree.
-  ///
-  /// This function can be used to perform dependency injection or setup
-  /// additional scaffolding needed to correctly render the preview.
-  // TODO(bkonyi): provide an example.
+  /// {@macro widget_preview_wrapper}
   WidgetWrapper? wrapper;
 
   /// Applies [newWrapper] to the returned value of the current [wrapper].
@@ -309,17 +304,13 @@ final class PreviewBuilder {
     wrapper = newWrapper;
   }
 
-  /// A callback to return Material and Cupertino theming data to be applied
-  /// to the previewed [Widget].
+  /// {@macro widget_preview_theme}
   PreviewTheme? theme;
 
-  /// Sets the initial theme brightness.
-  ///
-  /// If not provided, the current system default brightness will be used.
+  /// {@macro widget_preview_brightness}
   Brightness? brightness;
 
-  /// A callback to return a localization configuration to be applied to the
-  /// previewed [Widget].
+  /// {@macro widget_preview_localizations}
   PreviewLocalizations? localizations;
 
   /// Returns the [Preview] instance created from the builder's state.

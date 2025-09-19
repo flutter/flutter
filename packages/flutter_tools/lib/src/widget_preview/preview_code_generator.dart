@@ -29,23 +29,23 @@ class PreviewCodeGenerator {
   /// project.
   final FlutterProject widgetPreviewScaffoldProject;
 
-  static const _kListType = 'List';
-  static const _kPreviewsFunctionName = 'previews';
-  static const _kWidgetPreviewClass = 'WidgetPreview';
-  static const _kWidgetPreviewLibraryUri = 'widget_preview.dart';
-  static const _kBuildWidgetPreviewError = 'buildWidgetPreviewError';
   static const _kBuildMultiWidgetPreview = 'buildMultiWidgetPreview';
   static const _kBuildWidgetPreview = 'buildWidgetPreview';
-  static const _kUtilsUri = 'utils.dart';
-  static const _kPackageName = 'packageName';
-  static const _kScriptUri = 'scriptUri';
-  static const _kPackageUri = 'packageUri';
+  static const _kBuildWidgetPreviewError = 'buildWidgetPreviewError';
   static const _kDependencyHasErrors = 'dependencyHasErrors';
+  static const _kListType = 'List';
+  static const _kPackageName = 'packageName';
+  static const _kPackageUri = 'packageUri';
   static const _kPreview = 'preview';
-  static const _kPreviewFunctionName = 'functionName';
   static const _kPreviewFunction = 'previewFunction';
-  static const _kTransformedPreview = 'transformedPreview';
+  static const _kPreviewFunctionName = 'functionName';
+  static const _kPreviewsFunctionName = 'previews';
+  static const _kScriptUri = 'scriptUri';
   static const _kTransform = 'transform';
+  static const _kTransformedPreview = 'transformedPreview';
+  static const _kUtilsUri = 'utils.dart';
+  static const _kWidgetPreviewClass = 'WidgetPreview';
+  static const _kWidgetPreviewLibraryUri = 'widget_preview.dart';
 
   static String getGeneratedPreviewFilePath(FileSystem fs) =>
       fs.path.join('lib', 'src', 'generated_preview.dart');

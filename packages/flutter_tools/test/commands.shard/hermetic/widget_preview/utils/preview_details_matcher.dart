@@ -37,16 +37,16 @@ class PreviewMatcher extends Matcher {
     this.localizations,
   });
 
-  static const kScriptUri = 'scriptUri';
-  static const kPackageName = 'packageName';
+  static const kBrightness = 'brightness';
   static const kGroup = 'group';
+  static const kLocalizations = 'localizations';
   static const kName = 'name';
+  static const kPackageName = 'packageName';
+  static const kScriptUri = 'scriptUri';
   static const kSize = 'size';
   static const kTextScaleFactor = 'textScaleFactor';
-  static const kWrapper = 'wrapper';
   static const kTheme = 'theme';
-  static const kBrightness = 'brightness';
-  static const kLocalizations = 'localizations';
+  static const kWrapper = 'wrapper';
 
   final String? group;
   final String? name;
