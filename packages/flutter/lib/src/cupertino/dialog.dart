@@ -1442,7 +1442,7 @@ class CupertinoActionSheetAction extends StatefulWidget {
 
 class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
     implements _SlideTarget {
-  bool _isFocused = false;
+  bool _showHighlight = false;
 
   // |_SlideTarget|
   @override
@@ -1462,7 +1462,7 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
 
   void _onShowFocusHighlight(bool showHighlight) {
     setState(() {
-      _isFocused = showHighlight;
+      _showHighlight = showHighlight;
     });
   }
 
@@ -1499,7 +1499,7 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
             child: Semantics(
               button: true,
               onTap: widget.onPressed,
-              child: _isFocused
+              child: _showHighlight
                   ? DecoratedBox(
                       decoration: BoxDecoration(color: effectiveFocusBackgroundColor),
                       child: _ActionSheetActionContent(

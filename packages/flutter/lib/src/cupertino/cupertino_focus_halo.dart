@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'constants.dart';
 
-/// Applies a Cupertino-style focus border around its child when any of child focus nodes gain focus.
+/// Applies an iOS-style focus border around its child when any of child focus nodes gain focus.
 ///
 /// The shape of the focus halo does not automatically adapt to the child widget
 /// it encloses. You are responsible for specifying a shape that correctly
@@ -18,7 +18,7 @@ import 'constants.dart';
 ///
 /// * <https://developer.apple.com/design/human-interface-guidelines/focus-and-selection/>
 class CupertinoFocusHalo extends StatefulWidget {
-  /// Creates a rectangular [CupertinoFocusHalo] around the child
+  /// Creates a rectangular [CupertinoFocusHalo] around the child.
   ///
   /// For example, to highlight a rectangular section of the widget tree when any button inside that
   /// section has focus, one could write:
@@ -64,6 +64,9 @@ class CupertinoFocusHalo extends StatefulWidget {
   ///
   /// Since [CupertinoFocusHalo] can't request focus to itself, this [child] should
   /// contain widget(s) that can request focus.
+  ///
+  /// The child widget is responsible for its own visual shape, for example by
+  /// using an appropriate clipping.
   final Widget child;
 
   @override
