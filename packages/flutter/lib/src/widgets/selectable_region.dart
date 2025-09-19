@@ -56,8 +56,8 @@ const double _kSelectableVerticalComparingThreshold = 3.0;
 /// with a [SelectableRegion] widget enables selection within that subtree (for
 /// example, [Text] widgets automatically look for selectable regions to enable
 /// selection). The wrapped subtree can be selected by users using mouse or
-/// touch gestures. For example, users can select widgets by holding the mouse
-/// left-click and dragging across widgets, or they can use long-press gestures
+/// touch gestures, e.g. users can select widgets by holding the mouse
+/// left-click and dragging across widgets, or they can use long press gestures
 /// to select words on touch devices.
 ///
 /// [RichText] widgets do not automatically become selectable when wrapped
