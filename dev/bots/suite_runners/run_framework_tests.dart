@@ -298,6 +298,7 @@ Future<void> frameworkTestsRunner() async {
       path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'),
       fatalWarnings: false,
     );
+    await runFlutterTest(path.join(flutterRoot, 'dev', 'flutter_analyzer_plugin'));
     await runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'ui'));
     await runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
     await runFlutterTest(path.join(flutterRoot, 'dev', 'tools'));

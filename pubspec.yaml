@@ -5,6 +5,7 @@ environment:
 
 workspace:
   - dev/a11y_assessments
+  - dev/flutter_analyzer_plugin
   - dev/automated_tests
   - dev/benchmarks/complex_layout
   - dev/benchmarks/imitation_game_flutter
@@ -199,7 +200,7 @@ dependencies:
   webview_flutter: 4.9.0
   webview_flutter_android: 3.16.9
   webview_flutter_platform_interface: 2.14.0
-  webview_flutter_wkwebview: 3.23.0
+  webview_flutter_wkwebview: 3.23.1
   xdg_directories: 1.1.0
   xml: 6.5.0
   yaml: 3.1.3
@@ -212,4 +213,4 @@ dependencies:
   pedantic: 1.11.1
   quiver: 3.2.2
   yaml_edit: 2.2.2
-# PUBSPEC CHECKSUM: 1vbbbn
+# PUBSPEC CHECKSUM: scit2n

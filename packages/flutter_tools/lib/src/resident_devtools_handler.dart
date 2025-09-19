@@ -191,12 +191,18 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
           .toString();
       _logger.printStatus('Launching Flutter DevTools for ${device.device!.name} at $devToolsUrl');
 
-      _chromiumLauncher.launch(devToolsUrl).catchError((Object e) {
-        _logger.printError('Failed to launch web browser: $e');
-        throw ProcessException('Chrome', <String>[
-          devToolsUrl,
-        ], 'Failed to launch browser for dev tools');
-      }).ignore();
+      _chromiumLauncher
+          .launch(devToolsUrl)
+          .then(
+            (_) => null,
+            onError: (Object e) {
+              _logger.printError('Failed to launch web browser: $e');
+              throw ProcessException('Chrome', <String>[
+                devToolsUrl,
+              ], 'Failed to launch browser for dev tools');
+            },
+          )
+          .ignore();
     }
     launchedInBrowser = true;
   }
