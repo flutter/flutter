@@ -13,9 +13,6 @@ dependencies:
   web_test_fonts:
     path: ../../third_party/web_test_fonts
 
-  web_unicode:
-    path: ../../third_party/web_unicode
-
 
 dev_dependencies:
   archive: 4.0.3
