@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
@@ -248,13 +247,6 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/175258.
   testWidgets('Radio group throws on multiple selection', (WidgetTester tester) async {
-    final FlutterExceptionHandler? handler = FlutterError.onError;
-    FlutterErrorDetails? error;
-    FlutterError.onError = (FlutterErrorDetails details) {
-      error = details;
-    };
-    addTearDown(() => FlutterError.onError = handler);
-
     final UniqueKey key1 = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -273,14 +265,13 @@ void main() {
       ),
     );
 
-    expect(error, isNull);
+    expect(tester.takeException(), isNull);
 
     await tester.tap(find.byKey(key1));
     await tester.pump();
 
-    expect(error, isNotNull);
     expect(
-      error!.exception,
+      tester.takeException(),
       isA<FlutterError>().having(
         (FlutterError e) => e.message,
         'message',
@@ -293,13 +284,6 @@ void main() {
   testWidgets('Radio group does not throw when number of children decreases', (
     WidgetTester tester,
   ) async {
-    final FlutterExceptionHandler? handler = FlutterError.onError;
-    FlutterErrorDetails? error;
-    FlutterError.onError = (FlutterErrorDetails details) {
-      error = details;
-    };
-    addTearDown(() => FlutterError.onError = handler);
-
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -320,7 +304,7 @@ void main() {
       ),
     );
 
-    expect(error, isNull);
+    expect(tester.takeException(), isNull);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -341,7 +325,7 @@ void main() {
       ),
     );
 
-    expect(error, isNull);
+    expect(tester.takeException(), isNull);
   });
 }
 
