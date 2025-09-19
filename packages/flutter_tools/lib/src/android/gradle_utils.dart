@@ -51,10 +51,10 @@ const templateKotlinGradlePluginVersion = '2.1.0';
 // so new versions are picked up after a Flutter upgrade.
 //
 // Please see the README before changing any of these values.
-const compileSdkVersion = '36';
-final int compileSdkVersionInt = int.parse(compileSdkVersion);
-const minSdkVersion = '24';
-final int minSdkVersionInt = int.parse(minSdkVersion);
+const compileSdkVersionInt = 36;
+const compileSdkVersion = '$compileSdkVersionInt';
+const minSdkVersionInt = 24;
+const minSdkVersion = '$minSdkVersionInt';
 const targetSdkVersion = '36';
 const ndkVersion = '27.0.12077973';
 final minBuildToolsVersion = Version(28, 0, 3);
@@ -171,8 +171,15 @@ final gradleOrgVersionMatch = RegExp(
 // This matches uncommented minSdkVersion lines in the module-level build.gradle
 // file which have minSdkVersion 16, 17, 18, 19, 20, 21, 22, 23 set with space sytax,
 // equals syntax and when using minSdk or minSdkVersion.
-final tooOldMinSdkVersionMatch = RegExp(
-  r'(?<=^\s*)minSdk(Version)?\s=?\s?(1[6789]|2[0123])(?=\s*(?://|$))',
+// Matches uncommented minSdkVersion lines using equals syntax (=)
+final tooOldMinSdkVersionEqualsMatch = RegExp(
+  r'(?<=^\s*)minSdk(Version)?\s*=\s*(1[6789]|2[0123])(?=\s*(?://|$))',
+  multiLine: true,
+);
+
+// Matches uncommented minSdkVersion lines using space syntax (no =)
+final tooOldMinSdkVersionSpaceMatch = RegExp(
+  r'(?<=^\s*)minSdk(Version)?\s+(1[6789]|2[0123])(?=\s*(?://|$))',
   multiLine: true,
 );
 

@@ -127,7 +127,6 @@ class ProxiedDevices extends PollingDeviceDiscovery {
       supportsHotRestart: _cast<bool>(capabilities['hotRestart']),
       supportsFlutterExit: _cast<bool>(capabilities['flutterExit']),
       supportsScreenshot: _cast<bool>(capabilities['screenshot']),
-      supportsFastStart: _cast<bool>(capabilities['fastStart']),
       supportsHardwareRendering: _cast<bool>(capabilities['hardwareRendering']),
       logger: _logger,
       fileTransfer: _fileTransfer,
@@ -184,7 +183,6 @@ class ProxiedDevice extends Device {
     required this.supportsHotRestart,
     required this.supportsFlutterExit,
     required this.supportsScreenshot,
-    required this.supportsFastStart,
     required bool supportsHardwareRendering,
     required super.logger,
     FileTransfer fileTransfer = const FileTransfer(),
@@ -388,9 +386,6 @@ class ProxiedDevice extends Device {
   final bool supportsScreenshot;
 
   @override
-  final bool supportsFastStart;
-
-  @override
   Future<bool> stopApp(covariant PrebuiltApplicationPackage? app, {String? userIdentifier}) async {
     return _cast<bool>(
       await connection.sendRequest('device.stopApp', <String, Object?>{
@@ -519,7 +514,7 @@ class _ProxiedLogReader extends DeviceLogReader {
       (String? applicationPackageId) async => _cast<String>(
         await connection.sendRequest('device.logReader.start', <String, Object>{
           'deviceId': device.id,
-          if (applicationPackageId != null) 'applicationPackageId': applicationPackageId,
+          'applicationPackageId': ?applicationPackageId,
         }),
       ),
     );
@@ -834,6 +829,14 @@ class ProxiedDartDevelopmentService
   Uri? _localUri;
 
   @override
+  Uri? get devToolsUri => _ddsStartedLocally ? _localDds.devToolsUri : _remoteDevToolsUri;
+  Uri? _remoteDevToolsUri;
+
+  @override
+  Uri? get dtdUri => _ddsStartedLocally ? _localDds.dtdUri : _remoteDtdUri;
+  Uri? _remoteDtdUri;
+
+  @override
   Future<void> get done => _completer.future;
   final _completer = Completer<void>();
 
@@ -872,6 +875,7 @@ class ProxiedDartDevelopmentService
         google3WorkspaceRoot: google3WorkspaceRoot,
         devToolsServerAddress: devToolsServerAddress,
       );
+      unawaited(_localDds.invokeServiceExtensions(device));
       unawaited(_localDds.done.then(_completer.complete));
     }
 
@@ -902,10 +906,21 @@ class ProxiedDartDevelopmentService
         'deviceId': deviceId,
         'vmServiceUri': remoteVMServiceUri.toString(),
         'disableServiceAuthCodes': disableServiceAuthCodes,
+        'enableDevTools': enableDevTools,
+        if (devToolsServerAddress != null)
+          'devToolsServerAddress': devToolsServerAddress.toString(),
       });
 
       if (response is Map<String, Object?>) {
         remoteUriStr = response['ddsUri'] as String?;
+        final devToolsUriStr = response['devToolsUri'] as String?;
+        if (devToolsUriStr != null) {
+          _remoteDevToolsUri = Uri.parse(devToolsUriStr);
+        }
+        final dtdUriStr = response['dtdUri'] as String?;
+        if (dtdUriStr != null) {
+          _remoteDtdUri = Uri.parse(dtdUriStr);
+        }
       } else {
         // For backwards compatibility in google3.
         // TODO(bkonyi): remove once a newer version of the flutter_tool is rolled out.

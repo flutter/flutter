@@ -29,5 +29,11 @@
   "shareButtonLabel": "Chia sẻ...",
   "clearButtonLabel": "Xoá",
   "cancelButtonLabel": "Huỷ",
-  "backButtonLabel": "Quay lại"
+  "backButtonLabel": "Quay lại",
+  "expansionTileExpandedHint": "double tap to collapse",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

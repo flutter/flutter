@@ -102,6 +102,7 @@ TEST_F(AccessibilityBridgeMacWindowTest, SendsAccessibilityCreateNotificationFlu
   FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
   root.id = 0;
   root.flags2 = &flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   root.actions = static_cast<FlutterSemanticsAction>(0);
   root.text_selection_base = -1;
   root.text_selection_extent = -1;
@@ -162,6 +163,7 @@ TEST_F(AccessibilityBridgeMacWindowTest, NonZeroRootNodeId) {
   std::vector<int32_t> node1_children{2};
   node1.id = 1;
   node1.flags2 = &flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   node1.actions = static_cast<FlutterSemanticsAction>(0);
   node1.text_selection_base = -1;
   node1.text_selection_extent = -1;
@@ -179,6 +181,7 @@ TEST_F(AccessibilityBridgeMacWindowTest, NonZeroRootNodeId) {
   FlutterSemanticsNode2 node2;
   node2.id = 2;
   node2.flags2 = &flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   node2.actions = static_cast<FlutterSemanticsAction>(0);
   node2.text_selection_base = -1;
   node2.text_selection_extent = -1;
@@ -225,6 +228,7 @@ TEST_F(AccessibilityBridgeMacTest, DoesNotSendAccessibilityCreateNotificationWhe
   FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
   root.id = 0;
   root.flags2 = &flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   root.actions = static_cast<FlutterSemanticsAction>(0);
   root.text_selection_base = -1;
   root.text_selection_extent = -1;
@@ -272,6 +276,7 @@ TEST_F(AccessibilityBridgeMacTest, DoesNotSendAccessibilityCreateNotificationWhe
   FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
   root.id = 0;
   root.flags2 = &flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   root.actions = static_cast<FlutterSemanticsAction>(0);
   root.text_selection_base = -1;
   root.text_selection_extent = -1;

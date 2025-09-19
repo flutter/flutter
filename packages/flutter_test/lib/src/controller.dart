@@ -367,7 +367,11 @@ class SemanticsController {
       return true;
     }
 
-    final bool hasContent = data.label.isNotEmpty || data.value.isNotEmpty || data.hint.isNotEmpty;
+    final bool hasContent =
+        data.label.isNotEmpty ||
+        data.value.isNotEmpty ||
+        data.hint.isNotEmpty ||
+        data.tooltip.isNotEmpty;
     if (hasContent) {
       return true;
     }

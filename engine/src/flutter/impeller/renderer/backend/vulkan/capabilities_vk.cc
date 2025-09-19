@@ -12,6 +12,9 @@
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/backend/vulkan/workarounds_vk.h"
 
+// vulkan.hpp generates some clang-tidy warnings.
+// NOLINTBEGIN(clang-analyzer-security.PointerSub)
+
 namespace impeller {
 
 static constexpr const char* kInstanceLayer = "ImpellerInstance";
@@ -727,6 +730,10 @@ size_t CapabilitiesVK::GetMinimumUniformAlignment() const {
   return minimum_uniform_alignment_;
 }
 
+bool CapabilitiesVK::NeedsPartitionedHostBuffer() const {
+  return false;
+}
+
 bool CapabilitiesVK::HasExtension(RequiredCommonDeviceExtensionVK ext) const {
   return required_common_device_extensions_.find(ext) !=
          required_common_device_extensions_.end();
@@ -826,3 +833,5 @@ bool CapabilitiesVK::SupportsExtendedRangeFormats() const {
 }
 
 }  // namespace impeller
+
+// NOLINTEND(clang-analyzer-security.PointerSub)

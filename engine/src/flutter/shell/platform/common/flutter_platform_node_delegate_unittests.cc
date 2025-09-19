@@ -48,6 +48,7 @@ TEST(FlutterPlatformNodeDelegateTest, canPerfomActions) {
   FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
   flags.is_text_field = true;
   root.flags2 = &flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   root.actions = static_cast<FlutterSemanticsAction>(0);
   root.text_selection_base = -1;
   root.text_selection_extent = -1;
@@ -95,6 +96,7 @@ TEST(FlutterPlatformNodeDelegateTest, canGetAXNode) {
   FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
   flags.is_text_field = true;
   root.flags2 = &flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   root.actions = static_cast<FlutterSemanticsAction>(0);
   root.text_selection_base = -1;
   root.text_selection_extent = -1;

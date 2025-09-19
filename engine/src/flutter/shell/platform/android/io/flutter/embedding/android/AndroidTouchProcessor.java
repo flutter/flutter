@@ -315,7 +315,7 @@ public class AndroidTouchProcessor {
     int pointerKind = getPointerDeviceTypeForToolType(event.getToolType(pointerIndex));
     // We use this in lieu of using event.getRawX and event.getRawY as we wish to support
     // earlier versions than API level 29.
-    float viewToScreenCoords[] = {event.getX(pointerIndex), event.getY(pointerIndex)};
+    float[] viewToScreenCoords = {event.getX(pointerIndex), event.getY(pointerIndex)};
     transformMatrix.mapPoints(viewToScreenCoords);
     long buttons;
     if (pointerKind == PointerDeviceKind.MOUSE) {

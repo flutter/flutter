@@ -11,5 +11,7 @@
   "searchWebButtonLabel": "Hae verkosta",
   "shareButtonLabel": "Jaa",
   "pasteButtonLabel": "Liitä",
-  "selectAllButtonLabel": "Valitse kaikki"
+  "selectAllButtonLabel": "Valitse kaikki",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found"
 }

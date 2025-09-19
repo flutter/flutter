@@ -56,6 +56,9 @@ abstract class FeatureFlags {
   /// Whether native assets compilation and bundling is enabled.
   bool get isNativeAssetsEnabled;
 
+  /// Whether dart data assets building and bundling is enabled.
+  bool get isDartDataAssetsEnabled => false;
+
   /// Whether Swift Package Manager dependency management is enabled.
   bool get isSwiftPackageManagerEnabled;
 
@@ -87,6 +90,7 @@ abstract class FeatureFlags {
     flutterCustomDevicesFeature,
     cliAnimation,
     nativeAssets,
+    dartDataAssets,
     swiftPackageManager,
     omitLegacyVersionFile,
     windowingFeature,
@@ -186,6 +190,14 @@ const nativeAssets = Feature(
   beta: FeatureChannelSetting(available: true, enabledByDefault: true),
 );
 
+/// Enable Dart data assets building and bundling.
+const dartDataAssets = Feature(
+  name: 'Dart data assets building and bundling',
+  configSetting: 'enable-dart-data-assets',
+  environmentOverride: 'FLUTTER_DART_DATA_ASSETS',
+  master: FeatureChannelSetting(available: true),
+);
+
 /// Enable Swift Package Manager as a darwin dependency manager.
 const swiftPackageManager = Feature(
   name: 'support for Swift Package Manager for iOS and macOS',
@@ -199,16 +211,13 @@ const swiftPackageManager = Feature(
 /// Whether to continue writing the `{FLUTTER_ROOT}/version` legacy file.
 ///
 /// Tracking removal: <https://github.com/flutter/flutter/issues/171900>.
-const omitLegacyVersionFile = Feature(
+const omitLegacyVersionFile = Feature.fullyEnabled(
   name: 'stops writing the legacy version file',
   configSetting: 'omit-legacy-version-file',
   extraHelpText:
       'If set, the file {FLUTTER_ROOT}/version is no longer written as part of '
       'the flutter tool execution; a newer file format has existed for some '
       'time in {FLUTTER_ROOT}/bin/cache/flutter.version.json.',
-  master: FeatureChannelSetting(available: true),
-  beta: FeatureChannelSetting(available: true),
-  stable: FeatureChannelSetting(available: true),
 );
 
 /// Whether desktop windowing is enabled.

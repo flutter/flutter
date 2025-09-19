@@ -2951,6 +2951,71 @@ void main() {
       // TODO(bleroux): fix input decorator to not rely on forcing the label text line height to 1.0.
     });
 
+    testWidgets('When the label appears within the input its padding is correct', (
+      WidgetTester tester,
+    ) async {
+      // Define a label larger than the available decorator, the label will fill
+      // all the available space (decorator width minus padding and affixes).
+      const Widget largeLabel = SizedBox(key: customLabelKey, width: 1000, height: 16);
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          decoration: const InputDecoration(filled: true, label: largeLabel),
+        ),
+      );
+
+      // For filled and/or outlined decoration, the horizontal padding is 16.
+      const double horizontalPadding = 16.0;
+      expect(getCustomLabelRect(tester).left, horizontalPadding);
+      expect(getCustomLabelRect(tester).right, 800 - horizontalPadding);
+
+      // Outlined decorator.
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          decoration: const InputDecoration(border: OutlineInputBorder(), label: largeLabel),
+        ),
+      );
+
+      expect(getCustomLabelRect(tester).left, horizontalPadding);
+      expect(getCustomLabelRect(tester).right, 800 - horizontalPadding);
+
+      // Rebuild with affixes.
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          decoration: const InputDecoration(
+            filled: true,
+            label: largeLabel,
+            suffixIcon: Icon(Icons.align_horizontal_left_sharp),
+            prefixIcon: Icon(Icons.align_horizontal_right_sharp),
+          ),
+        ),
+      );
+
+      // When suffixIcon and/or prefixIcon are set, the corresponding horizontal
+      // padding is 52 (48 for the icon + 4 input gap based on M3 spec).
+      const double affixesHorizontalPadding = 52.0;
+      expect(getCustomLabelRect(tester).left, affixesHorizontalPadding);
+      expect(getCustomLabelRect(tester).right, 800 - affixesHorizontalPadding);
+
+      // Outlined decorator.
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            label: largeLabel,
+            suffixIcon: Icon(Icons.align_horizontal_left_sharp),
+            prefixIcon: Icon(Icons.align_horizontal_right_sharp),
+          ),
+        ),
+      );
+
+      expect(getCustomLabelRect(tester).left, affixesHorizontalPadding);
+      expect(getCustomLabelRect(tester).right, 800 - affixesHorizontalPadding);
+    });
+
     testWidgets(
       'The label appears above the input when there is no content and floatingLabelBehavior is always',
       (WidgetTester tester) async {
@@ -6145,6 +6210,21 @@ void main() {
           );
         }, throwsAssertionError);
       });
+
+      // Regression test for https://github.com/flutter/flutter/issues/174784.
+      testWidgets('InputDecorator error widget text style defaults to errorStyle', (
+        WidgetTester tester,
+      ) async {
+        await tester.pumpWidget(
+          buildInputDecorator(decoration: const InputDecoration(error: Text(errorText))),
+        );
+
+        expect(findError(), findsOneWidget);
+        final ThemeData theme = Theme.of(tester.element(findDecorator()));
+        final Color expectedColor = theme.colorScheme.error;
+        final TextStyle expectedStyle = theme.textTheme.bodySmall!.copyWith(color: expectedColor);
+        expect(getErrorStyle(tester), expectedStyle);
+      });
     });
 
     testWidgets('InputDecorator with counter does not crash when given a 0 size', (
@@ -8321,17 +8401,17 @@ void main() {
     },
   );
 
-  testWidgets('InputDecorationThemeData.inputDecoration with MaterialState', (
+  testWidgets('InputDecorationThemeData.inputDecoration with WidgetState', (
     WidgetTester tester,
   ) async {
     final MaterialStateTextStyle themeStyle = MaterialStateTextStyle.resolveWith((
-      Set<MaterialState> states,
+      Set<WidgetState> states,
     ) {
       return const TextStyle(color: Colors.green);
     });
 
     final MaterialStateTextStyle decorationStyle = MaterialStateTextStyle.resolveWith((
-      Set<MaterialState> states,
+      Set<WidgetState> states,
     ) {
       return const TextStyle(color: Colors.blue);
     });
@@ -8377,7 +8457,7 @@ void main() {
 
     // InputDecoration (baseDecoration) defines InputDecoration properties
     final MaterialStateOutlineInputBorder border = MaterialStateOutlineInputBorder.resolveWith((
-      Set<MaterialState> states,
+      Set<WidgetState> states,
     ) {
       return const OutlineInputBorder();
     });
@@ -8770,15 +8850,19 @@ void main() {
           'Flutter is Google’s UI toolkit for building beautiful, natively compiled applications for mobile, web, and desktop from a single codebase.';
 
       Widget getLabeledInputDecorator(FloatingLabelBehavior floatingLabelBehavior) => MaterialApp(
-        home: Material(
-          child: SizedBox(
-            width: 300,
-            child: TextField(
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(borderSide: BorderSide(color: Colors.greenAccent)),
-                suffixIcon: const Icon(Icons.arrow_drop_down),
-                floatingLabelBehavior: floatingLabelBehavior,
-                labelText: labelText,
+        home: MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: 300,
+              child: TextField(
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.greenAccent),
+                  ),
+                  suffixIcon: const Icon(Icons.arrow_drop_down),
+                  floatingLabelBehavior: floatingLabelBehavior,
+                  labelText: labelText,
+                ),
               ),
             ),
           ),
@@ -10056,8 +10140,8 @@ void main() {
     const Color iconErrorColor = Color(0xffff0000);
     const Color iconColor = Color(0xff00ff00);
     final ButtonStyle iconButtonStyle = ButtonStyle(
-      foregroundColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-        if (states.contains(MaterialState.error)) {
+      foregroundColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+        if (states.contains(WidgetState.error)) {
           return iconErrorColor;
         }
         return iconColor;
@@ -10098,8 +10182,8 @@ void main() {
     const Color iconErrorColor = Color(0xffff0000);
     const Color iconColor = Color(0xff00ff00);
     final ButtonStyle iconButtonStyle = ButtonStyle(
-      foregroundColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-        if (states.contains(MaterialState.error)) {
+      foregroundColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+        if (states.contains(WidgetState.error)) {
           return iconErrorColor;
         }
         return iconColor;

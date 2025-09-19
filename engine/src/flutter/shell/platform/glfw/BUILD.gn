@@ -73,6 +73,8 @@ source_set("flutter_glfw") {
       "IOKit.framework",
     ]
   }
+
+  cflags_cc = [ "-Wno-deprecated-declarations" ]
 }
 
 test_fixtures("flutter_glfw_fixtures") {

@@ -29,9 +29,9 @@ import '../devfs.dart';
 import '../device.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
+import '../hook_runner.dart' show hookRunner;
 import '../project.dart';
 import '../reporting/reporting.dart';
-import '../resident_devtools_handler.dart';
 import '../resident_runner.dart';
 import '../run_hot.dart';
 import '../vmservice.dart';
@@ -104,8 +104,6 @@ class ResidentWebRunner extends ResidentRunner {
     required SystemClock systemClock,
     required Analytics analytics,
     UrlTunneller? urlTunneller,
-    // TODO(bkonyi): remove when ready to serve DevTools from DDS.
-    ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _platform = platform,
@@ -118,13 +116,13 @@ class ResidentWebRunner extends ResidentRunner {
          debuggingOptions: debuggingOptions,
          stayResident: stayResident,
          machine: machine,
-         devtoolsHandler: devtoolsHandler,
          commandHelp: CommandHelp(
            logger: logger,
            terminal: terminal,
            platform: platform,
            outputPreferences: outputPreferences,
          ),
+         dartBuilder: hookRunner,
        );
 
   final FileSystem _fileSystem;
@@ -152,29 +150,21 @@ class ResidentWebRunner extends ResidentRunner {
 
   // Only non-wasm debug builds of the web support the service protocol.
   @override
-  bool get supportsServiceProtocol =>
-      !debuggingOptions.webUseWasm && isRunningDebug && deviceIsDebuggable;
-
-  @override
-  bool get debuggingEnabled => isRunningDebug && deviceIsDebuggable;
+  late final bool supportsServiceProtocol =
+      !debuggingOptions.webUseWasm && isRunningDebug && _deviceIsDebuggable;
 
   /// Device is debuggable if not a WebServer device, or if running with
   /// --start-paused or using DWDS WebSocket connection (WebServer device).
-  bool get deviceIsDebuggable =>
+  late final bool _deviceIsDebuggable =
       device!.device is! WebServerDevice ||
       debuggingOptions.startPaused ||
-      _useDwdsWebSocketConnection;
+      useDwdsWebSocketConnection;
 
-  bool get _useDwdsWebSocketConnection {
-    final DevFS? devFS = device?.devFS;
-    return devFS is WebDevFS && devFS.useDwdsWebSocketConnection;
-  }
+  late final useDwdsWebSocketConnection = device!.device is! ChromiumDevice;
 
   @override
   // Web uses a different plugin registry.
   bool get generateDartPluginRegistry => false;
-
-  bool get _enableDwds => debuggingEnabled;
 
   @override
   bool get reloadIsRestart =>
@@ -224,8 +214,6 @@ class ResidentWebRunner extends ResidentRunner {
     if (_exited) {
       return;
     }
-    // TODO(bkonyi): remove when ready to serve DevTools from DDS.
-    await residentDevtoolsHandler!.shutdown();
     await _stdOutSub?.cancel();
     await _stdErrSub?.cancel();
     await _serviceSub?.cancel();
@@ -295,24 +283,6 @@ class ResidentWebRunner extends ResidentRunner {
             ? WebExpressionCompiler(device!.generator!, fileSystem: _fileSystem)
             : null;
 
-        // Retrieve connected web devices, excluding the web server device.
-        final List<Device>? devices = await globals.deviceManager?.getAllDevices();
-        final nonWebServerConnectedDeviceIds = <String>{
-          for (final Device d in devices!.where(
-            (Device d) =>
-                d.platformType == PlatformType.web &&
-                d.isConnected &&
-                d.id != WebServerDevice.kWebServerDeviceId,
-          ))
-            d.id,
-        };
-
-        // Use Chrome-based connection only if we have a connected ChromiumDevice
-        // Otherwise, use DWDS WebSocket connection
-        final bool useDwdsWebSocketConnection =
-            !(_chromiumLauncher != null &&
-                nonWebServerConnectedDeviceIds.contains(device!.device!.id));
-
         device!.devFS = WebDevFS(
           webDevServerConfig: updatedConfig,
           packagesFilePath: packagesFilePath,
@@ -321,8 +291,13 @@ class ResidentWebRunner extends ResidentRunner {
           useSseForDebugBackend: debuggingOptions.webUseSseForDebugBackend,
           useSseForInjectedClient: debuggingOptions.webUseSseForInjectedClient,
           buildInfo: debuggingOptions.buildInfo,
-          enableDwds: _enableDwds,
-          enableDds: debuggingOptions.enableDds,
+          enableDwds: supportsServiceProtocol,
+          ddsConfig: DartDevelopmentServiceConfiguration(
+            enable: debuggingOptions.enableDds,
+            port: debuggingOptions.ddsPort,
+            serveDevTools: debuggingOptions.enableDevTools,
+            devToolsServerAddress: debuggingOptions.devToolsServerAddress,
+          ),
           entrypoint: _fileSystem.file(target).uri,
           expressionCompiler: expressionCompiler,
           chromiumLauncher: _chromiumLauncher,
@@ -511,11 +486,17 @@ class ResidentWebRunner extends ResidentRunner {
       }
     }
 
+    if (_connectionResult == null) {
+      status.stop();
+      _logger.printStatus('Recompile complete. No client connected..');
+      return OperationResult.ok;
+    }
+
     // Both will be null when not assigned.
     Duration? reloadDuration;
     Duration? reassembleDuration;
     try {
-      if (!deviceIsDebuggable) {
+      if (!_deviceIsDebuggable) {
         _logger.printStatus('Recompile complete. Page requires refresh.');
       } else if (isRunningDebug) {
         if (fullRestart) {
@@ -580,11 +561,13 @@ class ResidentWebRunner extends ResidentRunner {
     _logger.printStatus('${fullRestart ? 'Restarted' : 'Reloaded'} application in $elapsedMS.');
 
     if (fullRestart) {
-      unawaited(residentDevtoolsHandler!.hotRestart(flutterDevices));
+      for (final FlutterDevice? device in flutterDevices) {
+        unawaited(device?.handleHotRestart());
+      }
     }
 
     // Don't track restart times for dart2js builds or web-server devices.
-    if (debuggingOptions.buildInfo.isDebug && deviceIsDebuggable) {
+    if (debuggingOptions.buildInfo.isDebug && _deviceIsDebuggable) {
       if (fullRestart) {
         _analytics.send(
           Event.timing(
@@ -729,6 +712,11 @@ class ResidentWebRunner extends ResidentRunner {
     if (rebuildBundle) {
       _logger.printTrace('Updating assets');
       final int result = await assetBundle.build(
+        flutterHookResult: await dartBuilder?.runHooks(
+          targetPlatform: TargetPlatform.web_javascript,
+          environment: environment,
+          logger: _logger,
+        ),
         packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
         targetPlatform: TargetPlatform.web_javascript,
       );
@@ -774,7 +762,6 @@ class ResidentWebRunner extends ResidentRunner {
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
     Future<ConnectionResult?>? connectDebug,
-    bool allowExistingDdsInstance = false,
     bool needsFullRestart = true,
   }) async {
     if (_chromiumLauncher != null) {
@@ -796,13 +783,13 @@ class ResidentWebRunner extends ResidentRunner {
       }
       _wipConnection = await chromeTab.connect();
     }
-    Uri? websocketUri;
     if (supportsServiceProtocol) {
       assert(connectDebug != null);
       unawaited(
         connectDebug!.then((connectionResult) async {
           _connectionResult = connectionResult;
-          unawaited(_connectionResult!.debugConnection!.onDone.whenComplete(_cleanupAndExit));
+          final DebugConnection debugConnection = connectionResult!.debugConnection!;
+          unawaited(debugConnection.onDone.whenComplete(_cleanupAndExit));
 
           void onLogEvent(vmservice.Event event) {
             final String message = processVmServiceMessage(event);
@@ -864,8 +851,11 @@ class ResidentWebRunner extends ResidentRunner {
             vmService: _vmService.service,
           );
 
-          websocketUri = Uri.parse(_connectionResult!.debugConnection!.uri);
+          final Uri websocketUri = Uri.parse(debugConnection.uri);
           device!.vmService = _vmService;
+          if (debugConnection.devToolsUri != null) {
+            (device!.device! as WebDevice).devToolsUri = Uri.parse(debugConnection.devToolsUri!);
+          }
 
           // Run main immediately if the app is not started paused or if there
           // is no debugger attached. Otherwise, runMain when a resume event
@@ -882,29 +872,20 @@ class ResidentWebRunner extends ResidentRunner {
             });
           }
 
-          if (websocketUri != null) {
-            if (debuggingOptions.vmserviceOutFile != null) {
-              _fileSystem.file(debuggingOptions.vmserviceOutFile)
-                ..createSync(recursive: true)
-                ..writeAsStringSync(websocketUri.toString());
-            }
-            _logger.printStatus('Debug service listening on $websocketUri');
+          if (debuggingOptions.vmserviceOutFile != null) {
+            _fileSystem.file(debuggingOptions.vmserviceOutFile)
+              ..createSync(recursive: true)
+              ..writeAsStringSync(websocketUri.toString());
           }
+          // TODO(bkonyi): consider removing this log message and using only the standard VM
+          // service message instead.
+          _logger.printStatus('Debug service listening on $websocketUri');
+          printDebuggerList();
           connectionInfoCompleter?.complete(DebugConnectionInfo(wsUri: websocketUri));
         }),
       );
     } else {
       connectionInfoCompleter?.complete(DebugConnectionInfo());
-    }
-    // TODO(bkonyi): remove when ready to serve DevTools from DDS.
-    if (debuggingOptions.enableDevTools) {
-      // The method below is guaranteed never to return a failing future.
-      unawaited(
-        residentDevtoolsHandler!.serveAndAnnounceDevTools(
-          devToolsServerAddress: debuggingOptions.devToolsServerAddress,
-          flutterDevices: flutterDevices,
-        ),
-      );
     }
 
     appStartedCompleter?.complete();
@@ -941,6 +922,9 @@ class ResidentWebRunner extends ResidentRunner {
 
 Uri _httpUriFromWebsocketUri(Uri websocketUri) {
   const wsPath = '/ws';
-  final String path = websocketUri.path;
-  return websocketUri.replace(scheme: 'http', path: path.substring(0, path.length - wsPath.length));
+  String path = websocketUri.path;
+  if (path.endsWith(wsPath)) {
+    path = path.substring(0, path.length - wsPath.length);
+  }
+  return websocketUri.replace(scheme: 'http', path: path);
 }

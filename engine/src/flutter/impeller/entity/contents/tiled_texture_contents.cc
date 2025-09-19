@@ -140,7 +140,7 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
         },
         frame_info,
         [this, &renderer](RenderPass& pass) {
-          auto& host_buffer = renderer.GetTransientsBuffer();
+          auto& data_host_buffer = renderer.GetTransientsDataBuffer();
 #ifdef IMPELLER_DEBUG
           pass.SetCommandLabel("TextureFill External");
 #endif  // IMPELLER_DEBUG
@@ -152,7 +152,8 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
           frag_info.y_tile_mode =
               static_cast<Scalar>(sampler_descriptor_.height_address_mode);
           frag_info.alpha = GetOpacityFactor();
-          FSExternal::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
+          FSExternal::BindFragInfo(pass,
+                                   data_host_buffer.EmplaceUniform(frag_info));
 
           SamplerDescriptor sampler_desc;
           // OES_EGL_image_external states that only CLAMP_TO_EDGE is valid,
@@ -180,7 +181,7 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
   return ColorSourceContents::DrawGeometry<VS>(
       renderer, entity, pass, pipeline_callback, frame_info,
       [this, &renderer, &entity](RenderPass& pass) {
-        auto& host_buffer = renderer.GetTransientsBuffer();
+        auto& data_host_buffer = renderer.GetTransientsDataBuffer();
 #ifdef IMPELLER_DEBUG
         pass.SetCommandLabel("TextureFill");
 #endif  // IMPELLER_DEBUG
@@ -191,7 +192,7 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
         frag_info.alpha =
             GetOpacityFactor() *
             GetGeometry()->ComputeAlphaCoverage(entity.GetTransform());
-        FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
+        FS::BindFragInfo(pass, data_host_buffer.EmplaceUniform(frag_info));
 
         if (color_filter_) {
           auto filtered_texture = CreateFilterTexture(renderer);
