@@ -223,6 +223,15 @@ abstract class DeviceManager {
     ]);
   }
 
+  /// Stop any running extended wireless device discoverers.
+  void stopExtendedWirelessDeviceDiscoverers() {
+    for (final DeviceDiscovery discoverer in _platformDiscoverers) {
+      if (discoverer.requiresExtendedWirelessDeviceDiscovery) {
+        discoverer.stopPolling();
+      }
+    }
+  }
+
   /// Whether we're capable of listing any devices given the current environment configuration.
   bool get canListAnything {
     return _platformDiscoverers.any((DeviceDiscovery discoverer) => discoverer.canListAnything);
@@ -454,6 +463,9 @@ abstract class DeviceDiscovery {
   ///
   /// For example, 'windows' or 'linux'.
   List<String> get wellKnownIds;
+
+  /// Stop the discoverer from polling for devices.
+  void stopPolling() {}
 }
 
 /// A [DeviceDiscovery] implementation that uses polling to discover device adds
@@ -493,6 +505,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
     });
   }
 
+  @override
   void stopPolling() {
     _timer?.cancel();
     _timer = null;
