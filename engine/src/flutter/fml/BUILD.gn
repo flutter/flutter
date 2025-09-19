@@ -214,7 +214,7 @@ source_set("fml") {
     ]
 
     public_deps += [
-      "${fuchsia_sdk}/fidl/fuchsia.diagnostics:fuchsia.diagnostics_cpp",
+      "${fuchsia_sdk}/fidl/fuchsia.diagnostics.types:fuchsia.diagnostics.types_cpp",
       "${fuchsia_sdk}/fidl/fuchsia.logger:fuchsia.logger_cpp",
       "${fuchsia_sdk}/pkg/async-cpp",
       "${fuchsia_sdk}/pkg/async-loop-cpp",

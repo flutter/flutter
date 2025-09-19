@@ -112,8 +112,8 @@ void main() {
                 elevation: elevation,
                 indicatorColor: indicatorColor,
                 indicatorShape: indicatorShape,
-                iconTheme: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-                  if (states.contains(MaterialState.selected)) {
+                iconTheme: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+                  if (states.contains(WidgetState.selected)) {
                     return const IconThemeData(
                       size: selectedIconSize,
                       color: selectedIconColor,
@@ -126,8 +126,8 @@ void main() {
                     opacity: unselectedIconOpacity,
                   );
                 }),
-                labelTextStyle: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-                  if (states.contains(MaterialState.selected)) {
+                labelTextStyle: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+                  if (states.contains(WidgetState.selected)) {
                     return const TextStyle(fontSize: selectedLabelFontSize);
                   }
                   return const TextStyle(fontSize: unselectedLabelFontSize);
@@ -249,15 +249,15 @@ void main() {
       const Color focusColor = Color(0xff00ffff);
       const Color pressedColor = Color(0xffff00ff);
       final WidgetStateProperty<Color?> overlayColor = WidgetStateProperty.resolveWith<Color>((
-        Set<MaterialState> states,
+        Set<WidgetState> states,
       ) {
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return hoverColor;
         }
-        if (states.contains(MaterialState.focused)) {
+        if (states.contains(WidgetState.focused)) {
           return focusColor;
         }
-        if (states.contains(MaterialState.pressed)) {
+        if (states.contains(WidgetState.pressed)) {
           return pressedColor;
         }
         return Colors.transparent;

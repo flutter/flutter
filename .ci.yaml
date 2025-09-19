@@ -708,6 +708,7 @@ targets:
       task_name: release_smoke_test
       physical_devices: >-
         [
+          "--device", "model=tokay,version=36",
           "--device", "model=shiba,version=34",
           "--device", "model=redfin,version=30",
           "--device", "model=griffin,version=24"
@@ -1093,7 +1094,6 @@ targets:
       - DEPS
 
   - name: Linux plugin_test_android_variants
-    bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 45
     properties:
@@ -1119,7 +1119,6 @@ targets:
       - DEPS
 
   - name: Linux plugin_test_android_standard
-    bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 45
     properties:
@@ -2446,6 +2445,7 @@ targets:
 
   # Uses Impeller.
   - name: Linux_pixel_7pro static_path_stroke_tessellation_perf__timeline_summary
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/175173
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -4385,7 +4385,6 @@ targets:
       - DEPS
 
   - name: Mac plugin_test_android_variants
-    bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 45
     properties:
@@ -4406,7 +4405,6 @@ targets:
       - DEPS
 
   - name: Mac plugin_test_android_standard
-    bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 45
     properties:
@@ -5270,7 +5268,6 @@ targets:
   - name: Mac_ios microbenchmarks_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -6190,7 +6187,6 @@ targets:
       - DEPS
 
   - name: Windows plugin_test_android_variants
-    bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 45
     properties:
@@ -6212,7 +6208,6 @@ targets:
       - DEPS
 
   - name: Windows plugin_test_android_standard
-    bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 45
     properties:

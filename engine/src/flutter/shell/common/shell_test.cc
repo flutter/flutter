@@ -165,6 +165,10 @@ void ShellTest::SetViewportMetrics(Shell* shell, double width, double height) {
       1,                      // device pixel ratio
       width,                  // physical width
       height,                 // physical height
+      0,                      // min width constraint
+      0,                      // max width constraint
+      0,                      // min height constraint
+      0,                      // max height constraint
       0,                      // padding top
       0,                      // padding right
       0,                      // padding bottom
@@ -423,6 +427,12 @@ void ShellTest::DestroyShell(std::unique_ptr<Shell> shell,
 
 void ShellTest::TurnOffGPU(Shell* shell, bool value) {
   shell->is_gpu_disabled_sync_switch_->SetSwitch(value);
+}
+
+bool ShellTest::ShouldDiscardLayerTree(Shell* shell,
+                                       int64_t view_id,
+                                       const flutter::LayerTree& tree) {
+  return shell->ShouldDiscardLayerTree(view_id, tree);
 }
 
 }  // namespace testing

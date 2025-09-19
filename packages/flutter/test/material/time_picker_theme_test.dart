@@ -483,7 +483,7 @@ void main() {
     expect(
       hourDecoration.fillColor,
       MaterialStateColor.resolveWith(
-        (Set<MaterialState> states) => defaultTheme.colorScheme.onSurface.withOpacity(0.12),
+        (Set<WidgetState> states) => defaultTheme.colorScheme.onSurface.withOpacity(0.12),
       ),
     );
     expect(
@@ -965,10 +965,8 @@ void main() {
   testWidgets('Time picker dayPeriodColor does the right thing with MaterialStateColor', (
     WidgetTester tester,
   ) async {
-    final MaterialStateColor testColor = MaterialStateColor.resolveWith((
-      Set<MaterialState> states,
-    ) {
-      if (states.contains(MaterialState.selected)) {
+    final MaterialStateColor testColor = MaterialStateColor.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         return Colors.green;
       }
       return Colors.blue;
@@ -1073,8 +1071,8 @@ final Color _selectedColor = Colors.green[100]!;
 final Color _unselectedColor = Colors.green[200]!;
 
 TimePickerThemeData _timePickerTheme({bool includeInputDecoration = false}) {
-  Color getColor(Set<MaterialState> states) {
-    return states.contains(MaterialState.selected) ? _selectedColor : _unselectedColor;
+  Color getColor(Set<WidgetState> states) {
+    return states.contains(WidgetState.selected) ? _selectedColor : _unselectedColor;
   }
 
   final MaterialStateColor materialStateColor = MaterialStateColor.resolveWith(getColor);

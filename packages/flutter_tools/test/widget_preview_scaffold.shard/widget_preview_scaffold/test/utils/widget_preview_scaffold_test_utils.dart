@@ -84,7 +84,7 @@ class FakeWidgetPreviewScaffoldController
     extends WidgetPreviewScaffoldController {
   FakeWidgetPreviewScaffoldController({
     WidgetPreviewScaffoldDtdServices? dtdServicesOverride,
-    List<WidgetPreview>? previews,
+    List<WidgetPreviewGroup>? previews,
   }) : super(
          previews: () => previews ?? [],
          dtdServicesOverride:
