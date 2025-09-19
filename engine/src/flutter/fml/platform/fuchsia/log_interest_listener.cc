@@ -4,7 +4,7 @@
 
 #include "flutter/fml/platform/fuchsia/log_interest_listener.h"
 
-#include <fidl/fuchsia.diagnostics/cpp/fidl.h>
+#include <fidl/fuchsia.diagnostics.types/cpp/fidl.h>
 #include <fidl/fuchsia.logger/cpp/fidl.h>
 #include <zircon/assert.h>
 
@@ -31,16 +31,16 @@ void LogInterestListener::AsyncWaitForInterestChanged() {
 }
 
 void LogInterestListener::HandleInterestChange(
-    const fuchsia_diagnostics::Interest& interest) {
-  auto severity =
-      interest.min_severity().value_or(fuchsia_diagnostics::Severity::kInfo);
-  if (severity <= fuchsia_diagnostics::Severity::kDebug) {
+    const fuchsia_diagnostics_types::Interest& interest) {
+  using fuchsia_diagnostics_types::Severity;
+  auto severity = interest.min_severity().value_or(Severity::kInfo);
+  if (severity <= Severity::kDebug) {
     fml::SetLogSettings({.min_log_level = -1});  // Verbose
-  } else if (severity <= fuchsia_diagnostics::Severity::kInfo) {
+  } else if (severity <= Severity::kInfo) {
     fml::SetLogSettings({.min_log_level = kLogInfo});
-  } else if (severity <= fuchsia_diagnostics::Severity::kWarn) {
+  } else if (severity <= Severity::kWarn) {
     fml::SetLogSettings({.min_log_level = kLogWarning});
-  } else if (severity <= fuchsia_diagnostics::Severity::kError) {
+  } else if (severity <= Severity::kError) {
     fml::SetLogSettings({.min_log_level = kLogError});
   } else {
     fml::SetLogSettings({.min_log_level = kLogFatal});
