@@ -163,7 +163,7 @@ class SystemContextMenu extends StatefulWidget {
       if (editableTextState.selectAllEnabled)
         IOSSystemContextMenuItemCustom(
           title: WidgetsLocalizations.of(editableTextState.context).selectAllButtonLabel,
-          attributes: IOSSystemContextMenuItemCustomAttributes.keepsMenuPresented,
+          attributes: IOSSystemContextMenuItemAttributes.keepsMenuPresented,
           onPressed: () {
             editableTextState.selectAll(SelectionChangedCause.toolbar);
           },
@@ -497,7 +497,7 @@ class IOSSystemContextMenuItemCustom extends IOSSystemContextMenuItem with Diagn
   const IOSSystemContextMenuItemCustom({
     required this.title,
     required this.onPressed,
-    this.attributes = IOSSystemContextMenuItemCustomAttributes.none,
+    this.attributes = IOSSystemContextMenuItemAttributes.none,
   });
 
   @override
@@ -506,9 +506,9 @@ class IOSSystemContextMenuItemCustom extends IOSSystemContextMenuItem with Diagn
   /// The callback that is called when the button is pressed.
   final VoidCallback onPressed;
 
-  /// The [IOSSystemContextMenuItemCustomAttributes] indicating
+  /// The [IOSSystemContextMenuItemAttributes] indicating
   /// additional configurations for this button.
-  final IOSSystemContextMenuItemCustomAttributes attributes;
+  final IOSSystemContextMenuItemAttributes attributes;
 
   @override
   IOSSystemContextMenuItemData getData(WidgetsLocalizations localizations) {
@@ -538,7 +538,7 @@ class IOSSystemContextMenuItemCustom extends IOSSystemContextMenuItem with Diagn
     super.debugFillProperties(properties);
     properties.add(StringProperty('title', title));
     properties.add(
-      DiagnosticsProperty<IOSSystemContextMenuItemCustomAttributes>('attributes', attributes),
+      DiagnosticsProperty<IOSSystemContextMenuItemAttributes>('attributes', attributes),
     );
     properties.add(ObjectFlagProperty<VoidCallback>.has('onPressed', onPressed));
   }

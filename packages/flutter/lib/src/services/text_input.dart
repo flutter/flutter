@@ -3111,8 +3111,8 @@ final class IOSSystemContextMenuItemDataLiveText extends IOSSystemContextMenuIte
 ///
 ///  * <https://developer.apple.com/documentation/uikit/uimenuelement/attributes?language=objc>
 @immutable
-final class IOSSystemContextMenuItemCustomAttributes with Diagnosticable {
-  const IOSSystemContextMenuItemCustomAttributes._(this._index);
+final class IOSSystemContextMenuItemAttributes with Diagnosticable {
+  const IOSSystemContextMenuItemAttributes._(this._index);
 
   /// The numerical value for this attribute.
   ///
@@ -3124,34 +3124,34 @@ final class IOSSystemContextMenuItemCustomAttributes with Diagnosticable {
   ///
   /// This corresponds to the
   /// [UIMenuElementAttributesDestructive value of UIMenuElementAttributes](https://developer.apple.com/documentation/uikit/uimenuelement/attributes/destructive?language=objc).
-  static const IOSSystemContextMenuItemCustomAttributes destructive =
-      IOSSystemContextMenuItemCustomAttributes._(1 << 1);
+  static const IOSSystemContextMenuItemAttributes destructive =
+      IOSSystemContextMenuItemAttributes._(1 << 1);
 
   /// An attribute indicating that the menu item is disabled and cannot be selected.
   ///
   /// This corresponds to the
   /// [UIMenuElementAttributesDisabled value of UIMenuElementAttributes](https://developer.apple.com/documentation/uikit/uimenuelement/attributes/disabled?language=objc).
-  static const IOSSystemContextMenuItemCustomAttributes disabled =
-      IOSSystemContextMenuItemCustomAttributes._(1 << 0);
+  static const IOSSystemContextMenuItemAttributes disabled =
+      IOSSystemContextMenuItemAttributes._(1 << 0);
 
   /// An attribute indicating that the menu should not display the menu item.
   ///
   /// This corresponds to the
   /// [UIMenuElementAttributesHidden value of UIMenuElementAttributes](https://developer.apple.com/documentation/uikit/uimenuelement/attributes/hidden?language=objc).
-  static const IOSSystemContextMenuItemCustomAttributes hidden =
-      IOSSystemContextMenuItemCustomAttributes._(1 << 2);
+  static const IOSSystemContextMenuItemAttributes hidden =
+      IOSSystemContextMenuItemAttributes._(1 << 2);
 
   /// An attribute indicating that the menu remains presented after pressing on
   /// the menu item.
   ///
   /// This corresponds to the
   /// [UIMenuElementAttributesKeepsMenuPresented value of UIMenuElementAttributes](https://developer.apple.com/documentation/uikit/uimenuelement/attributes/keepsmenupresented?language=objc).
-  static const IOSSystemContextMenuItemCustomAttributes keepsMenuPresented =
-      IOSSystemContextMenuItemCustomAttributes._(1 << 3);
+  static const IOSSystemContextMenuItemAttributes keepsMenuPresented =
+      IOSSystemContextMenuItemAttributes._(1 << 3);
 
   /// No attributes.
-  static const IOSSystemContextMenuItemCustomAttributes none =
-      IOSSystemContextMenuItemCustomAttributes._(0);
+  static const IOSSystemContextMenuItemAttributes none =
+      IOSSystemContextMenuItemAttributes._(0);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -3182,17 +3182,17 @@ final class IOSSystemContextMenuItemCustomAttributes with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (other is! IOSSystemContextMenuItemCustomAttributes) {
+    if (other is! IOSSystemContextMenuItemAttributes) {
       return false;
     }
     return other._index == _index;
   }
 
-  /// Combines two [IOSSystemContextMenuItemCustomAttributes] values using logical "or".
-  IOSSystemContextMenuItemCustomAttributes operator |(
-    IOSSystemContextMenuItemCustomAttributes other,
+  /// Combines two [IOSSystemContextMenuItemAttributes] values using logical "or".
+  IOSSystemContextMenuItemAttributes operator |(
+    IOSSystemContextMenuItemAttributes other,
   ) {
-    return IOSSystemContextMenuItemCustomAttributes._(_index | other._index);
+    return IOSSystemContextMenuItemAttributes._(_index | other._index);
   }
 }
 
@@ -3220,9 +3220,9 @@ final class IOSSystemContextMenuItemDataCustom extends IOSSystemContextMenuItemD
   @override
   final String title;
 
-  /// The [IOSSystemContextMenuItemCustomAttributes] indicating
+  /// The [IOSSystemContextMenuItemAttributes] indicating
   /// additional configurations for this menu item.
-  final IOSSystemContextMenuItemCustomAttributes attributes;
+  final IOSSystemContextMenuItemAttributes attributes;
 
   /// The callback to be executed when the item is selected.
   final VoidCallback onPressed;
@@ -3249,7 +3249,7 @@ final class IOSSystemContextMenuItemDataCustom extends IOSSystemContextMenuItemD
     properties.add(StringProperty('title', title));
     properties.add(StringProperty('callbackId', callbackId));
     properties.add(
-      DiagnosticsProperty<IOSSystemContextMenuItemCustomAttributes>('attributes', attributes),
+      DiagnosticsProperty<IOSSystemContextMenuItemAttributes>('attributes', attributes),
     );
     properties.add(DiagnosticsProperty<VoidCallback>('onPressed', onPressed));
   }
