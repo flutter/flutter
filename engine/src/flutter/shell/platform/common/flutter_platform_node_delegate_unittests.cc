@@ -218,7 +218,7 @@ TEST(FlutterPlatformNodeDelegateTest, canUseOwnerBridge) {
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();
   FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
-  FlutterSemanticsNode2 root;
+  FlutterSemanticsNode2 root{sizeof(FlutterSemanticsNode2), 0};
   root.id = 0;
   root.label = "root";
   root.hint = "";
@@ -236,7 +236,7 @@ TEST(FlutterPlatformNodeDelegateTest, canUseOwnerBridge) {
   root.transform = {1, 0, 0, 0, 1, 0, 0, 0, 1};
   bridge->AddFlutterSemanticsNodeUpdate(root);
 
-  FlutterSemanticsNode2 child1;
+  FlutterSemanticsNode2 child1{sizeof(FlutterSemanticsNode2), 1};
   child1.id = 1;
   child1.label = "child 1";
   child1.hint = "";
