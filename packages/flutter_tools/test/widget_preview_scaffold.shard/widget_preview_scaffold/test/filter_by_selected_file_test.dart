@@ -38,11 +38,12 @@ void main() {
       controller: controller,
     );
 
-    // No file is selected, so all previews should be visible.
+    // No file is selected, so all previews should be visible until
+    // https://github.com/dart-lang/sdk/issues/61538 is resolved.
     await tester.pumpWidget(widgetPreview);
     expect(controller.filterBySelectedFileListenable.value, true);
     expect(dtdServices.selectedSourceFile.value, isNull);
-    expect(controller.filteredPreviewSetListenable.value, hasLength(1));
+    expect(controller.filteredPreviewSetListenable.value, groups);
     expect(
       controller.filteredPreviewSetListenable.value.single.previews,
       hasLength(2),
@@ -57,6 +58,24 @@ void main() {
 
     // Verify only previews from kScript1 are displayed.
     expect(dtdServices.selectedSourceFile.value?.uriAsString, kScript1);
+    expect(
+      controller
+          .filteredPreviewSetListenable
+          .value
+          .single
+          .previews
+          .single
+          .scriptUri,
+      kScript1,
+    );
+
+    // Select a 'null' script. This simulates focusing on a non-source file
+    // (e.g., the embedded widget previewer).
+    dtdServices.selectedSourceFile.value = null;
+
+    // Verify the selected source file is null but previews from kScript1 are
+    // still displayed.
+    expect(dtdServices.selectedSourceFile.value?.uriAsString, null);
     expect(
       controller
           .filteredPreviewSetListenable
