@@ -187,6 +187,9 @@ base class Preview {
   ///   - [PreviewBuilder], a utility for building and modifying [Preview]s.
   @mustCallSuper
   Preview transform() => this;
+
+  /// Creates a [PreviewBuilder] initialized with the values set in this preview.
+  PreviewBuilder toBuilder() => PreviewBuilder._fromPreview(this);
 }
 
 /// The base class used to define a custom 'multi-preview' annotation.
@@ -269,7 +272,7 @@ final class PreviewBuilder {
   PreviewBuilder();
 
   /// Creates a [PreviewBuilder] initialized with the values set in [preview].
-  PreviewBuilder.fromPreview(Preview preview)
+  PreviewBuilder._fromPreview(Preview preview)
     : group = preview.group,
       name = preview.name,
       size = preview.size,

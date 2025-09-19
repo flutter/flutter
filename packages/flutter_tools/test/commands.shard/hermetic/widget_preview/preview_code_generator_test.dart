@@ -162,7 +162,7 @@ base class BrightnessPreview extends MultiPreview {
     final parentPreviews = super.transform();
     final transformed = <Preview>[];
     for (final preview in parentPreviews) {
-      final builder = PreviewBuilder.fromPreview(preview)
+      final builder = preview.toBuilder()
         ..name = '$name ${preview.name}'
         ..addWrapper(_wrapper);
       transformed.add(builder.build());
@@ -182,7 +182,7 @@ base class FixedSizePreview extends Preview {
   @override
   Preview transform() {
     final parent = super.transform();
-    final builder = PreviewBuilder.fromPreview(parent)
+    final builder = parent.toBuilder()
       ..name = 'FixedSizePreview: $name'
       ..addWrapper(_wrapper);
     return builder.build();
