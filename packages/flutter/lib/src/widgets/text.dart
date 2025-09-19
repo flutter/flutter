@@ -710,18 +710,18 @@ class Text extends StatelessWidget {
     if (style == null || style!.inherit) {
       effectiveTextStyle = defaultTextStyle.style.merge(style);
     }
-    final ui.TypographySettings typographySettings = MediaQuery.typographySettingsOf(context);
+    final ui.TypographySettings? typographySettings = MediaQuery.maybeTypographySettingsOf(context);
     final bool boldText = MediaQuery.boldTextOf(context);
     if (boldText ||
-        typographySettings.lineHeight != null ||
-        typographySettings.letterSpacing != null ||
-        typographySettings.wordSpacing != null) {
+        typographySettings?.lineHeight != null ||
+        typographySettings?.letterSpacing != null ||
+        typographySettings?.wordSpacing != null) {
       effectiveTextStyle = effectiveTextStyle!.merge(
         TextStyle(
-          height: typographySettings.lineHeight,
-          letterSpacing: typographySettings.letterSpacing,
-          wordSpacing: typographySettings.wordSpacing,
-          fontWeight: MediaQuery.boldTextOf(context) ? FontWeight.bold : null,
+          height: typographySettings?.lineHeight,
+          letterSpacing: typographySettings?.letterSpacing,
+          wordSpacing: typographySettings?.wordSpacing,
+          fontWeight: boldText ? FontWeight.bold : null,
         ),
       );
     }
@@ -800,9 +800,9 @@ class Text extends StatelessWidget {
         child: ExcludeSemantics(excluding: semanticsLabel != null, child: result),
       );
     }
-    if (typographySettings.paragraphSpacing != null) {
+    if (typographySettings?.paragraphSpacing != null) {
       result = Padding(
-        padding: EdgeInsets.only(bottom: typographySettings.paragraphSpacing!),
+        padding: EdgeInsets.only(bottom: typographySettings?.paragraphSpacing!),
         child: result,
       );
     }
