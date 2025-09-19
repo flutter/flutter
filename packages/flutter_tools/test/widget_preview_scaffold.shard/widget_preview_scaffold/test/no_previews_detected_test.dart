@@ -20,6 +20,11 @@ void main() {
         dtdServicesOverride: FakeWidgetPreviewScaffoldDtdServices(),
         previews: () => currentPreviews,
       );
+
+      if (controller.filterBySelectedFileListenable.value) {
+        // Don't filter by selected file.
+        controller.toggleFilterBySelectedFile();
+      }
       // Start with no previews populated and verify the help message is displayed with a link to
       // documentation.
       await tester.pumpWidget(WidgetPreviewScaffold(controller: controller));
