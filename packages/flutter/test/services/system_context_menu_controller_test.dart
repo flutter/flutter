@@ -565,12 +565,14 @@ void main() {
     final List<IOSSystemContextMenuItemData> items = <IOSSystemContextMenuItemData>[
       IOSSystemContextMenuItemDataCustom(
         title: 'Action 1',
+        attributes: IOSSystemContextMenuItemCustomAttributes.none,
         onPressed: () {
           action1Called = true;
         },
       ),
       IOSSystemContextMenuItemDataCustom(
         title: 'Action 2',
+        attributes: IOSSystemContextMenuItemCustomAttributes.none,
         onPressed: () {
           action2Called = true;
         },
@@ -620,6 +622,7 @@ void main() {
     final List<IOSSystemContextMenuItemData> items1 = <IOSSystemContextMenuItemData>[
       IOSSystemContextMenuItemDataCustom(
         title: 'Controller 1 Action',
+        attributes: IOSSystemContextMenuItemCustomAttributes.none,
         onPressed: () {
           controller1ActionCalled = true;
         },
@@ -629,6 +632,7 @@ void main() {
     final List<IOSSystemContextMenuItemData> items2 = <IOSSystemContextMenuItemData>[
       IOSSystemContextMenuItemDataCustom(
         title: 'Controller 2 Action',
+        attributes: IOSSystemContextMenuItemCustomAttributes.none,
         onPressed: () {
           controller2ActionCalled = true;
         },
@@ -677,6 +681,7 @@ void main() {
     final List<IOSSystemContextMenuItemData> items = <IOSSystemContextMenuItemData>[
       IOSSystemContextMenuItemDataCustom(
         title: 'Test Action',
+        attributes: IOSSystemContextMenuItemCustomAttributes.none,
         onPressed: () {
           actionCalled = true;
         },
@@ -726,7 +731,11 @@ void main() {
     });
 
     final List<IOSSystemContextMenuItemData> items = <IOSSystemContextMenuItemData>[
-      IOSSystemContextMenuItemDataCustom(title: 'Test Action', onPressed: () {}),
+      IOSSystemContextMenuItemDataCustom(
+        title: 'Test Action',
+        attributes: IOSSystemContextMenuItemCustomAttributes.none,
+        onPressed: () {},
+      ),
     ];
 
     const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
@@ -753,6 +762,7 @@ void main() {
     final List<IOSSystemContextMenuItemData> items = <IOSSystemContextMenuItemData>[
       IOSSystemContextMenuItemDataCustom(
         title: 'Test Action',
+        attributes: IOSSystemContextMenuItemCustomAttributes.none,
         onPressed: () {
           actionCalled = true;
         },
@@ -796,6 +806,7 @@ void main() {
     final List<IOSSystemContextMenuItemData> oldItems = <IOSSystemContextMenuItemData>[
       IOSSystemContextMenuItemDataCustom(
         title: 'Old Action',
+        attributes: IOSSystemContextMenuItemCustomAttributes.none,
         onPressed: () {
           oldActionCalled = true;
         },
@@ -812,6 +823,7 @@ void main() {
     final List<IOSSystemContextMenuItemData> newItems = <IOSSystemContextMenuItemData>[
       IOSSystemContextMenuItemDataCustom(
         title: 'New Action',
+        attributes: IOSSystemContextMenuItemCustomAttributes.none,
         onPressed: () {
           newActionCalled = true;
         },

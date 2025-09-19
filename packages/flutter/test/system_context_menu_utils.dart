@@ -19,7 +19,11 @@ IOSSystemContextMenuItemData systemContextMenuItemDataFromJson(Map<String, dynam
     'share' => IOSSystemContextMenuItemDataShare(title: title!),
     'lookUp' => IOSSystemContextMenuItemDataLookUp(title: title!),
     'captureTextFromCamera' => const IOSSystemContextMenuItemDataLiveText(),
-    'custom' => IOSSystemContextMenuItemDataCustom(title: title!, onPressed: () {}),
+    'custom' => IOSSystemContextMenuItemDataCustom(
+      title: title!,
+      attributes: IOSSystemContextMenuItemCustomAttributes.none,
+      onPressed: () {},
+    ),
     _ => throw FlutterError('Invalid json for IOSSystemContextMenuItem.type $type.'),
   };
 }
