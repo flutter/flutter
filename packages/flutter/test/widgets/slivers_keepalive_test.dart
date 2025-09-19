@@ -497,7 +497,7 @@ class SwitchingSliverListTest extends StatelessWidget {
           height: 100,
           child: CustomScrollView(
             cacheExtent: 0,
-            slivers: <Widget>[SliverList(delegate: SliverChildListDelegate(children))],
+            slivers: <Widget>[SliverList.list(children: children)],
           ),
         ),
       ),

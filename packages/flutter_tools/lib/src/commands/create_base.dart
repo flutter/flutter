@@ -6,8 +6,6 @@ import 'package:meta/meta.dart';
 import 'package:uuid/uuid.dart';
 import 'package:yaml/yaml.dart';
 
-import '../android/android.dart' as android_common;
-import '../android/android_workflow.dart';
 import '../android/gradle_utils.dart' as gradle;
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -298,7 +296,6 @@ mixin CreateBase on FlutterCommand {
     String? projectDescription,
     String? androidLanguage,
     String? iosDevelopmentTeam,
-    String? iosLanguage,
     required String flutterRoot,
     required String dartSdkVersionBounds,
     String? agpVersion,
@@ -343,8 +340,8 @@ mixin CreateBase on FlutterCommand {
       'windowsIdentifier': windowsIdentifier,
       'description': projectDescription,
       'dartSdk': '$flutterRoot/bin/cache/dart-sdk',
-      'androidMinApiLevel': android_common.minApiLevel,
-      'androidSdkVersion': kAndroidSdkMinVersion,
+      'androidMinApiLevel': gradle.minSdkVersion,
+      'androidSdkVersion': gradle.minSdkVersion,
       'pluginClass': pluginClass,
       'pluginClassSnakeCase': pluginClassSnakeCase,
       'pluginClassLowerCamelCase': pluginClassLowerCamelCase,
@@ -359,7 +356,6 @@ mixin CreateBase on FlutterCommand {
       'withPluginHook': withFfiPluginHook || withFfiPackage || withPlatformChannelPluginHook,
       'withEmptyMain': withEmptyMain,
       'androidLanguage': androidLanguage,
-      'iosLanguage': iosLanguage,
       'hasIosDevelopmentTeam': iosDevelopmentTeam != null && iosDevelopmentTeam.isNotEmpty,
       'iosDevelopmentTeam': iosDevelopmentTeam ?? '',
       'flutterRevision': escapeYamlString(globals.flutterVersion.frameworkRevision),

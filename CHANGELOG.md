@@ -29,6 +29,43 @@ Our goal is to make the list easy for them to scan.
 More information and tips:
 docs/releases/Hotfix-Documentation-Best-Practices.md
 -->
+
+## Flutter 3.35 Changes
+
+### [3.35.4](https://github.com/flutter/flutter/releases/tag/3.35.4)
+- [flutter/173474](https://github.com/flutter/flutter/issues/173474) - On all platforms PlatformDispatchers.instance.engineId no longer returns null after hot restart.
+- [flutter/174513](https://github.com/flutter/flutter/issues/174513) - On iOS 26, fix a bug where platform view's gesture blocking fails and lets touches on Flutter views fall through to underlying platform views.
+
+### [3.35.3](https://github.com/flutter/flutter/releases/tag/3.35.3)
+
+- [flutter/172627](https://github.com/flutter/flutter/issues/172627) - Unnecessary output is printed in non-verbose mode.
+- [flutter/173917](https://github.com/flutter/flutter/issues/173917) - On Android, `flutter build apk` may fail to calculate the version code when using `--build-number`.
+- [flutter/174437](https://github.com/flutter/flutter/issues/174437) - When running a Flutter web application in debug mode, the console is spammed with non-fatal error messages.
+- [flutter/174267](https://github.com/flutter/flutter/issues/174267) - Golden test failures can cause the test harness to stall.
+- [flutter/171691](https://github.com/flutter/flutter/issues/171691) - A race condition can cause crashes in the Impeller Vulkan back end.
+- [flutter/174100](https://github.com/flutter/flutter/issues/174100) - Superellipses may not render correctly when using Impeller.
+- [flutter/174015](https://github.com/flutter/flutter/issues/174015) - Obsolete warning and error messages are shown when switching between build modes in Xcode.
+
+### [3.35.2](https://github.com/flutter/flutter/releases/tag/3.35.2)
+
+- [flutter/173823](https://github.com/flutter/flutter/issues/173823) - On Android builds that do not use flutter.minSdkVersion and do use a value lower than 24 in a kotlin build file, correct flutters auto migration to update value with kotlin syntax.
+- [flutter/173741](https://github.com/flutter/flutter/issues/173741) - Fixes an issue that prevents (web) screen readers from pressing buttons through keyboard shortcuts.
+- [flutter/173960](https://github.com/flutter/flutter/issues/173960) - Fixes an issue where starting a widget preview fails if Chrome or Edge is not installed.
+- [flutter/174017](https://github.com/flutter/flutter/issues/174017) - Fixes an issue when running a 32-bit process on a 64-bit Windows system.
+- [flutter/173895](https://github.com/flutter/flutter/issues/173895) - Don't crash widget preview when a directory watcher restarts on Windows.
+- [flutter/171992](https://github.com/flutter/flutter/issues/171992) - Blocks `exynos9820` chip from using the Impeller Vulkan backend.
+- [flutter/173959](https://github.com/flutter/flutter/issues/173959) - Fixes a null assertion when trying to add `@Preview()` to invalid nodes.
+- [flutter/174184](https://github.com/flutter/flutter/pull/174184) - Fixes an issue where WASM builds were incorrectly triggered when dry run is disabled and --wasm is not specified.
+- [flutter/171758](https://github.com/flutter/flutter/issues/171758) - Fixes an ExistingDartDevelopmentServiceException that could be thrown when running flutter run on a device with an existing Dart development service.
+
+### [3.35.1](https://github.com/flutter/flutter/releases/tag/3.35.1)
+
+- [flutter/173785](https://github.com/flutter/flutter/issues/173785) - Fixes an issue that prevented downloading the Flutter SDK for Windows from `flutter.dev`.
+
+### [3.35.0](https://github.com/flutter/flutter/releases/tag/3.35.0)
+
+Initial stable release.
+
 ## Flutter 3.32 Changes
 
 ### [3.32.8](https://github.com/flutter/flutter/releases/tag/3.32.8)

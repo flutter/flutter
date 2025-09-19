@@ -36,7 +36,7 @@ class GPUSurfaceSoftwareDelegate {
   ///
   /// @return     A raster surface returned by the platform.
   ///
-  virtual sk_sp<SkSurface> AcquireBackingStore(const SkISize& size) = 0;
+  virtual sk_sp<SkSurface> AcquireBackingStore(const DlISize& size) = 0;
 
   //----------------------------------------------------------------------------
   /// @brief      Called by the platform when a frame has been rendered into the

@@ -92,7 +92,6 @@ class DlPath : public impeller::PathSource {
   DlPathFillType GetFillType() const override;
 
   bool operator==(const DlPath& other) const;
-  bool operator!=(const DlPath& other) const { return !(*this == other); }
 
   bool IsVolatile() const;
   bool IsConvex() const override;
