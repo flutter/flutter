@@ -1965,8 +1965,8 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return Slider(
                   value: value,
-                  overlayColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-                    if (states.contains(MaterialState.focused)) {
+                  overlayColor: MaterialStateColor.resolveWith((Set<WidgetState> states) {
+                    if (states.contains(WidgetState.focused)) {
                       return Colors.purple[500]!;
                     }
 
@@ -2095,8 +2095,8 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return Slider(
                   value: value,
-                  overlayColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-                    if (states.contains(MaterialState.hovered)) {
+                  overlayColor: MaterialStateColor.resolveWith((Set<WidgetState> states) {
+                    if (states.contains(WidgetState.hovered)) {
                       return Colors.cyan[500]!;
                     }
 
@@ -2247,8 +2247,8 @@ void main() {
                   key: sliderKey,
                   value: value,
                   focusNode: focusNode,
-                  overlayColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-                    if (states.contains(MaterialState.dragged)) {
+                  overlayColor: MaterialStateColor.resolveWith((Set<WidgetState> states) {
+                    if (states.contains(WidgetState.dragged)) {
                       return Colors.lime[500]!;
                     }
 
