@@ -853,6 +853,23 @@ class _StretchSimulation extends Simulation {
   // Physical constants ported directly from Android's EdgeEffect.java.
   static const double _naturalFrequency = 24.657;
   static const double _dampingRatio = 0.98;
+
+  /// A correction factor applied to the simulation time.
+  ///
+  /// The physical constants `_naturalFrequency` and `_dampingRatio` were ported
+  /// directly from Android's `EdgeEffect.java` source. However, using these
+  /// constants as-is resulted in an animation that was noticeably faster than
+  /// the native Android behavior. The underlying reason for this discrepancy is
+  /// unknown.
+  ///
+  /// This factor, determined by visual comparison ("eyeballing") to match the
+  /// platform's timing, is applied to the elapsed time `t` to slow down the
+  /// simulation.
+  ///
+  /// Based on the damped harmonic oscillator equations, an alternative,
+  /// mathematically equivalent, approach would be to multiply both the
+  /// `_naturalFrequency` and the initial velocity by this same factor,
+  /// rather than scaling the time input.
   static const double _timeCorrectionFactor = 0.8;
 
   @override
@@ -934,9 +951,17 @@ class _StretchController extends Listenable {
   /// to a value between -1 and 1 when gesture fling.
   static const double _flingVelocityFriction = 1 / 6000;
 
+  /// A fraction used to scale the absorbed impact velocity,
+  /// converting raw velocity into a normalized value for simulation.
+  static const double _absorbImpactVelocityFriction = 1 / 3000;
+
   /// The maximum velocity allowed for a fling after scaling
   /// to prevent applying an excessive stretch effect.
   static const double _maxFlingVelocity = 0.5;
+
+  /// The maximum velocity allowed when absorbing an impact,
+  /// ensuring the stretch effect does not exceed a reasonable limit.
+  static const double _maxAbsorbImpactVelocity = 1.25;
 
   @override
   void addListener(VoidCallback listener) {
@@ -953,21 +978,6 @@ class _StretchController extends Listenable {
     return _StretchSimulation(overscroll, velocity, Tolerance.defaultTolerance);
   }
 
-  /// Uses the saturation function approach to scale velocity.
-  /// Small velocities remain roughly proportional, while large
-  /// velocities gradually saturate. Returns the scaled velocity
-  /// with the original direction preserved.
-  double _calculateVelocityScale(double velocity) {
-    const double referenceVelocity = 3000.0;
-    final double absVelocity = velocity.abs();
-
-    // Normalizes using 3,000px/s as the reference.
-    final double normalizedVelocity = absVelocity / referenceVelocity;
-    final double saturatedScale = normalizedVelocity / (1.0 + normalizedVelocity);
-
-    return saturatedScale * velocity.sign * 2;
-  }
-
   /// Handle a fling to the edge of the viewport at a particular velocity.
   ///
   /// The velocity must be positive.
@@ -975,7 +985,12 @@ class _StretchController extends Listenable {
     if (velocity == 0.0) {
       return;
     }
-    final double scaledVelocity = _calculateVelocityScale(velocity);
+    final double scaledVelocity = clampDouble(
+      velocity * _absorbImpactVelocityFriction,
+      -_maxAbsorbImpactVelocity,
+      _maxAbsorbImpactVelocity,
+    );
+
     animate(_createStretchSimulation(scaledVelocity));
   }
 
