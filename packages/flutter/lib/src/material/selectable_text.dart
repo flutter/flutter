@@ -798,10 +798,10 @@ class _SelectableTextState extends State<SelectableText>
       autofillHints: null,
       contextMenuBuilder: widget.contextMenuBuilder,
     );
-    final ui.TypographySettings typographySettings = MediaQuery.typographySettingsOf(context);
-    if (typographySettings.paragraphSpacing != null) {
+    final ui.TypographySettings? typographySettings = MediaQuery.maybeTypographySettingsOf(context);
+    if (typographySettings?.paragraphSpacing != null) {
       editable = Padding(
-        padding: EdgeInsets.only(bottom: typographySettings.paragraphSpacing!),
+        padding: EdgeInsets.only(bottom: typographySettings?.paragraphSpacing!),
         child: editable,
       );
     }
