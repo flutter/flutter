@@ -163,7 +163,7 @@ class SystemContextMenu extends StatefulWidget {
       if (editableTextState.selectAllEnabled)
         IOSSystemContextMenuItemCustom(
           title: WidgetsLocalizations.of(editableTextState.context).selectAllButtonLabel,
-          attributes: IOSSystemContextMenuItemCustomAttributes.keepsMenuPresented,
+          attributes: IOSSystemContextMenuItemAttributes.keepsMenuPresented,
           onPressed: () {
             editableTextState.selectAll(SelectionChangedCause.toolbar);
           },
@@ -223,13 +223,15 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
 ///    context menus.
 @immutable
 sealed class IOSSystemContextMenuItem {
-  const IOSSystemContextMenuItem();
+  const IOSSystemContextMenuItem({required this.attributes});
 
   /// The text to display to the user.
   ///
   /// Not exposed for some built-in menu items whose title is always set by the
   /// platform.
   String? get title => null;
+
+  final IOSSystemContextMenuItemAttributes attributes;
 
   /// Returns the representation of this class used by method channels.
   IOSSystemContextMenuItemData getData(WidgetsLocalizations localizations);
@@ -264,7 +266,7 @@ sealed class IOSSystemContextMenuItem {
 ///    the platform for this same button.
 final class IOSSystemContextMenuItemCopy extends IOSSystemContextMenuItem {
   /// Creates an instance of [IOSSystemContextMenuItemCopy].
-  const IOSSystemContextMenuItemCopy();
+  const IOSSystemContextMenuItemCopy({super.attributes = IOSSystemContextMenuItemAttributes.none});
 
   @override
   IOSSystemContextMenuItemDataCopy getData(WidgetsLocalizations localizations) {
@@ -287,11 +289,11 @@ final class IOSSystemContextMenuItemCopy extends IOSSystemContextMenuItem {
 ///    the platform for this same button.
 final class IOSSystemContextMenuItemCut extends IOSSystemContextMenuItem {
   /// Creates an instance of [IOSSystemContextMenuItemCut].
-  const IOSSystemContextMenuItemCut();
+  const IOSSystemContextMenuItemCut({super.attributes = IOSSystemContextMenuItemAttributes.none});
 
   @override
   IOSSystemContextMenuItemDataCut getData(WidgetsLocalizations localizations) {
-    return const IOSSystemContextMenuItemDataCut();
+    return const IOSSystemContextMenuItemDataCut(attributes: attributes);
   }
 }
 
@@ -310,7 +312,7 @@ final class IOSSystemContextMenuItemCut extends IOSSystemContextMenuItem {
 ///     to the platform for this same button.
 final class IOSSystemContextMenuItemPaste extends IOSSystemContextMenuItem {
   /// Creates an instance of [IOSSystemContextMenuItemPaste].
-  const IOSSystemContextMenuItemPaste();
+  const IOSSystemContextMenuItemPaste({super.attributes = IOSSystemContextMenuItemAttributes.none});
 
   @override
   IOSSystemContextMenuItemDataPaste getData(WidgetsLocalizations localizations) {
@@ -333,7 +335,9 @@ final class IOSSystemContextMenuItemPaste extends IOSSystemContextMenuItem {
 ///     sent to the platform for this same button.
 final class IOSSystemContextMenuItemSelectAll extends IOSSystemContextMenuItem {
   /// Creates an instance of [IOSSystemContextMenuItemSelectAll].
-  const IOSSystemContextMenuItemSelectAll();
+  const IOSSystemContextMenuItemSelectAll({
+    super.attributes = IOSSystemContextMenuItemAttributes.none,
+  });
 
   @override
   IOSSystemContextMenuItemDataSelectAll getData(WidgetsLocalizations localizations) {
@@ -360,7 +364,10 @@ final class IOSSystemContextMenuItemSelectAll extends IOSSystemContextMenuItem {
 ///    to the platform for this same button.
 final class IOSSystemContextMenuItemLookUp extends IOSSystemContextMenuItem with Diagnosticable {
   /// Creates an instance of [IOSSystemContextMenuItemLookUp].
-  const IOSSystemContextMenuItemLookUp({this.title});
+  const IOSSystemContextMenuItemLookUp({
+    this.title,
+    super.attributes = IOSSystemContextMenuItemAttributes.none,
+  });
 
   @override
   final String? title;
@@ -396,7 +403,10 @@ final class IOSSystemContextMenuItemLookUp extends IOSSystemContextMenuItem with
 ///    sent to the platform for this same button.
 final class IOSSystemContextMenuItemSearchWeb extends IOSSystemContextMenuItem with Diagnosticable {
   /// Creates an instance of [IOSSystemContextMenuItemSearchWeb].
-  const IOSSystemContextMenuItemSearchWeb({this.title});
+  const IOSSystemContextMenuItemSearchWeb({
+    this.title,
+    super.attributes = IOSSystemContextMenuItemAttributes.none,
+  });
 
   @override
   final String? title;
@@ -434,7 +444,10 @@ final class IOSSystemContextMenuItemSearchWeb extends IOSSystemContextMenuItem w
 ///    to the platform for this same button.
 final class IOSSystemContextMenuItemShare extends IOSSystemContextMenuItem with Diagnosticable {
   /// Creates an instance of [IOSSystemContextMenuItemShare].
-  const IOSSystemContextMenuItemShare({this.title});
+  const IOSSystemContextMenuItemShare({
+    this.title,
+    super.attributes = IOSSystemContextMenuItemAttributes.none,
+  });
 
   @override
   final String? title;
@@ -464,7 +477,9 @@ final class IOSSystemContextMenuItemShare extends IOSSystemContextMenuItem with 
 ///    to the platform for this same button.
 final class IOSSystemContextMenuItemLiveText extends IOSSystemContextMenuItem {
   /// Creates an instance of [IOSSystemContextMenuItemLiveText].
-  const IOSSystemContextMenuItemLiveText();
+  const IOSSystemContextMenuItemLiveText({
+    super.attributes = IOSSystemContextMenuItemAttributes.none,
+  });
 
   @override
   IOSSystemContextMenuItemData getData(WidgetsLocalizations localizations) {
@@ -497,7 +512,7 @@ class IOSSystemContextMenuItemCustom extends IOSSystemContextMenuItem with Diagn
   const IOSSystemContextMenuItemCustom({
     required this.title,
     required this.onPressed,
-    this.attributes = IOSSystemContextMenuItemCustomAttributes.none,
+    super.attributes = IOSSystemContextMenuItemAttributes.none,
   });
 
   @override
@@ -505,10 +520,6 @@ class IOSSystemContextMenuItemCustom extends IOSSystemContextMenuItem with Diagn
 
   /// The callback that is called when the button is pressed.
   final VoidCallback onPressed;
-
-  /// The [IOSSystemContextMenuItemCustomAttributes] indicating
-  /// additional configurations for this button.
-  final IOSSystemContextMenuItemCustomAttributes attributes;
 
   @override
   IOSSystemContextMenuItemData getData(WidgetsLocalizations localizations) {
@@ -538,7 +549,7 @@ class IOSSystemContextMenuItemCustom extends IOSSystemContextMenuItem with Diagn
     super.debugFillProperties(properties);
     properties.add(StringProperty('title', title));
     properties.add(
-      DiagnosticsProperty<IOSSystemContextMenuItemCustomAttributes>('attributes', attributes),
+      DiagnosticsProperty<IOSSystemContextMenuItemAttributes>('attributes', attributes),
     );
     properties.add(ObjectFlagProperty<VoidCallback>.has('onPressed', onPressed));
   }

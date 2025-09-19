@@ -916,8 +916,10 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 - (void)addBasicEditingCommandToItems:(NSMutableArray*)items
                                  type:(NSString*)type
                              selector:(SEL)selector
-                        suggestedMenu:(UIMenu*)suggestedMenu {
+                        suggestedMenu:(UIMenu*)suggestedMenu
+                           attributes:(NSNumber*)attributes {
   UICommand* command = [self searchCommandWithSelector:selector element:suggestedMenu];
+  command.attributes = [attributes intValue];
   if (command) {
     [items addObject:command];
   } else {
@@ -932,11 +934,13 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
                                 selector:(SEL)selector
                              encodedItem:(NSDictionary<NSString*, id>*)encodedItem {
   NSString* title = encodedItem[@"title"];
+  NSNumber* attributes = encodedItem[@"attributes"];
   if (title) {
     UICommand* command = [UICommand commandWithTitle:title
                                                image:nil
                                               action:selector
                                         propertyList:nil];
+    command.attributes = [attributes intValue];
     [items addObject:command];
   } else {
     NSString* errorMessage =
@@ -956,31 +960,37 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   NSMutableArray* items = [NSMutableArray array];
   for (NSDictionary<NSString*, id>* encodedItem in _editMenuItems) {
     NSString* type = encodedItem[@"type"];
+    NSNumber* attributes = encodedItem[@"attributes"];
     if ([type isEqualToString:@"copy"]) {
       [self addBasicEditingCommandToItems:items
                                      type:type
                                  selector:@selector(copy:)
-                            suggestedMenu:suggestedMenu];
+                            suggestedMenu:suggestedMenu
+                               attributes:attributes];
     } else if ([type isEqualToString:@"paste"]) {
       [self addBasicEditingCommandToItems:items
                                      type:type
                                  selector:@selector(paste:)
-                            suggestedMenu:suggestedMenu];
+                            suggestedMenu:suggestedMenu
+                               attributes:attributes];
     } else if ([type isEqualToString:@"cut"]) {
       [self addBasicEditingCommandToItems:items
                                      type:type
                                  selector:@selector(cut:)
-                            suggestedMenu:suggestedMenu];
+                            suggestedMenu:suggestedMenu
+                               attributes:attributes];
     } else if ([type isEqualToString:@"delete"]) {
       [self addBasicEditingCommandToItems:items
                                      type:type
                                  selector:@selector(delete:)
-                            suggestedMenu:suggestedMenu];
+                            suggestedMenu:suggestedMenu
+                               attributes:attributes];
     } else if ([type isEqualToString:@"selectAll"]) {
       [self addBasicEditingCommandToItems:items
                                      type:type
                                  selector:@selector(selectAll:)
-                            suggestedMenu:suggestedMenu];
+                            suggestedMenu:suggestedMenu
+                               attributes:attributes];
     } else if ([type isEqualToString:@"searchWeb"]) {
       [self addAdditionalBasicCommandToItems:items
                                         type:type
@@ -1001,7 +1011,8 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
         [self addBasicEditingCommandToItems:items
                                        type:type
                                    selector:@selector(captureTextFromCamera:)
-                              suggestedMenu:suggestedMenu];
+                              suggestedMenu:suggestedMenu
+                              attributes:attributes];
       }
     } else if ([type isEqualToString:@"custom"]) {
       NSString* callbackId = encodedItem[@"id"];
