@@ -51,10 +51,10 @@ const templateKotlinGradlePluginVersion = '2.1.0';
 // so new versions are picked up after a Flutter upgrade.
 //
 // Please see the README before changing any of these values.
-const compileSdkVersion = '36';
-final int compileSdkVersionInt = int.parse(compileSdkVersion);
-const minSdkVersion = '24';
-final int minSdkVersionInt = int.parse(minSdkVersion);
+const compileSdkVersionInt = 36;
+const compileSdkVersion = '$compileSdkVersionInt';
+const minSdkVersionInt = 24;
+const minSdkVersion = '$minSdkVersionInt';
 const targetSdkVersion = '36';
 const ndkVersion = '27.0.12077973';
 final minBuildToolsVersion = Version(28, 0, 3);
