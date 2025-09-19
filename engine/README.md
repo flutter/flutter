@@ -14,3 +14,4 @@ If you've already cloned the flutter repository:
     1. Googlers: copy `rbe.gclient` to enable faster builds with [RBE](https://github.com/flutter/flutter/blob/master/docs/engine/rbe/rbe.md)
     2. Everyone else: copy `standard.gclient`
 2. run `gclient sync` from the [root](../) folder
+
