@@ -1247,9 +1247,11 @@ mixin TextSelectionDelegate {
 
   /// Toggles the visibility of the toolbar.
   ///
-  /// If the toolbar is hidden calling this method should show the toolbar.
+  /// If the toolbar is hidden calling this method shows the toolbar.
   ///
-  /// If the toolbar is visible calling this method should hide the toolbar.
+  /// If the toolbar is visible calling this method hides the toolbar.
+  ///
+  /// The handles will remain visible if they were already visible.
   void toggleToolbar();
 
   /// Brings the provided [TextPosition] into the visible area of the text
