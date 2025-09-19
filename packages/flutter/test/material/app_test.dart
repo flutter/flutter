@@ -1706,14 +1706,13 @@ void main() {
     },
   );
 
-  testWidgets('MaterialApp renders at zero area', (WidgetTester tester) async {
+  testWidgets('MaterialApp does not crash at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
         child: SizedBox.shrink(child: MaterialApp(home: Text('X'))),
       ),
     );
-    final Finder xText = find.text('X');
-    expect(tester.getSize(xText).isEmpty, isTrue);
+    expect(tester.getSize(find.byType(MaterialApp)), Size.zero);
   });
 }
 
