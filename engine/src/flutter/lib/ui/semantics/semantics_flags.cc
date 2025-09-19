@@ -41,7 +41,8 @@ void NativeSemanticsFlags::initSemanticsFlags(
     bool isFocusable,
     bool isLink,
     bool isSlider,
-    bool isKeyboardKey) {
+    bool isKeyboardKey,
+    bool isComboBox) {
   UIDartState::ThrowIfUIOperationsProhibited();
   auto native_semantics_flags = fml::MakeRefCounted<NativeSemanticsFlags>();
   native_semantics_flags->AssociateWithDartWrapper(semantics_flags_handle);
@@ -70,6 +71,7 @@ void NativeSemanticsFlags::initSemanticsFlags(
       .isLink = isLink,
       .isSlider = isSlider,
       .isKeyboardKey = isKeyboardKey,
+      .isComboBox = isComboBox,
   };
 }
 
