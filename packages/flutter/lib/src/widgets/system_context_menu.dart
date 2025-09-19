@@ -162,7 +162,7 @@ class SystemContextMenu extends StatefulWidget {
       if (editableTextState.pasteEnabled) const IOSSystemContextMenuItemPaste(),
       if (editableTextState.selectAllEnabled)
         IOSSystemContextMenuItemCustom(
-          title: 'Select All',
+          title: WidgetsLocalizations.of(editableTextState.context).selectAllButtonLabel,
           attributes: IOSSystemContextMenuItemCustomAttributes.keepsMenuPresented,
           onPressed: () {
             editableTextState.selectAll(SelectionChangedCause.toolbar);
