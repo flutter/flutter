@@ -3395,11 +3395,28 @@ class EditableTextState extends State<EditableText>
     }
 
     if (widget.style != oldWidget.style) {
+      // Apply platform settings to text style.
+      final ui.TypographySettings? typographySettings = MediaQuery.maybeTypographySettingsOf(
+        context,
+      );
+      final bool boldText = MediaQuery.boldTextOf(context);
+      if (!boldText &&
+          typographySettings?.lineHeight == null &&
+          typographySettings?.letterSpacing == null &&
+          typographySettings?.wordSpacing == null) {
+        _style = widget.style;
+      } else {
+        _style = widget.style.merge(
+          TextStyle(
+            height: typographySettings?.lineHeight,
+            letterSpacing: typographySettings?.letterSpacing,
+            wordSpacing: typographySettings?.wordSpacing,
+            fontWeight: boldText ? FontWeight.bold : null,
+          ),
+        );
+      }
       // The _textInputConnection will pick up the new style when it attaches in
       // _openInputConnection.
-      _style = MediaQuery.boldTextOf(context)
-          ? widget.style.merge(const TextStyle(fontWeight: FontWeight.bold))
-          : widget.style;
       if (_hasInputConnection) {
         _textInputConnection!.setStyle(
           fontFamily: _style.fontFamily,
