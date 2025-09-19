@@ -13,7 +13,9 @@ import 'run_command.dart';
 import 'test/common.dart';
 import 'utils.dart';
 
+final String _bat = Platform.isWindows ? '.bat' : '';
 final String _flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
+final String _flutter = path.join(_flutterRoot, 'bin', 'flutter$_bat');
 final String _testAppDirectory = path.join(_flutterRoot, 'dev', 'integration_tests', 'web');
 final String _appBuildDirectory = path.join(_testAppDirectory, 'build', 'web');
 final String _target = path.join('lib', 'service_worker_test.dart');
@@ -114,9 +116,11 @@ self.addEventListener('activate', (event) => {
 
   try {
     cleanupWorkerFile.writeAsStringSync(cleanupWorkerContent);
-    await runCommand('flutter', <String>[
+    await runCommand(_flutter, <String>['clean'], workingDirectory: _testAppDirectory);
+    await runCommand(_flutter, <String>[
       'build',
       'web',
+      '--no-web-resources-cdn',
       '--profile',
       '-t',
       _target,

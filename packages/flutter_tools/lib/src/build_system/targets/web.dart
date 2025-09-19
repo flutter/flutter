@@ -4,7 +4,6 @@
 
 import 'dart:math';
 
-import 'package:crypto/crypto.dart';
 import 'package:package_config/package_config.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -807,23 +806,6 @@ class WebServiceWorker extends Target {
               !environment.fileSystem.path.basename(file.path).startsWith('.'),
         )
         .toList();
-
-    final urlToHash = <String, String>{};
-    for (final file in contents) {
-      // Do not force caching of source maps.
-      if (file.path.endsWith('main.dart.js.map') || file.path.endsWith('.part.js.map')) {
-        continue;
-      }
-      final url = environment.fileSystem.path
-          .toUri(environment.fileSystem.path.relative(file.path, from: environment.outputDir.path))
-          .toString();
-      final hash = md5.convert(await file.readAsBytes()).toString();
-      urlToHash[url] = hash;
-      // Add an additional entry for the base URL.
-      if (url == 'index.html') {
-        urlToHash['/'] = hash;
-      }
-    }
 
     final File serviceWorkerFile = environment.outputDir.childFile('flutter_service_worker.js');
     final depfile = Depfile(contents, <File>[serviceWorkerFile]);
