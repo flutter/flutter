@@ -1401,46 +1401,10 @@ name: foo
       );
       final String result = generateServiceWorker(
         fileGeneratorsPath,
-        <String, String>{'/foo': 'abcd'},
-        <String>[],
         serviceWorkerStrategy: ServiceWorkerStrategy.none,
       );
 
       expect(result, '');
-    }),
-  );
-
-  test(
-    'Generated service worker correctly inlines file hashes',
-    () => testbed.run(() {
-      final String fileGeneratorsPath = environment.artifacts.getArtifactPath(
-        Artifact.flutterToolsFileGenerators,
-      );
-      final String result = generateServiceWorker(
-        fileGeneratorsPath,
-        <String, String>{'/foo': 'abcd'},
-        <String>[],
-        serviceWorkerStrategy: ServiceWorkerStrategy.offlineFirst,
-      );
-
-      expect(result, contains('{"/foo": "abcd"};'));
-    }),
-  );
-
-  test(
-    'Generated service worker includes core files',
-    () => testbed.run(() {
-      final String fileGeneratorsPath = environment.artifacts.getArtifactPath(
-        Artifact.flutterToolsFileGenerators,
-      );
-      final String result = generateServiceWorker(
-        fileGeneratorsPath,
-        <String, String>{'/foo': 'abcd'},
-        <String>['foo', 'bar'],
-        serviceWorkerStrategy: ServiceWorkerStrategy.offlineFirst,
-      );
-
-      expect(result, contains('"foo",\n"bar"'));
     }),
   );
 
