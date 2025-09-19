@@ -828,31 +828,32 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
 
 /// A physics simulation modeling the stretch behavior of an edge effect.
 ///
-/// This class is a direct port of Android's EdgeEffect.java:
+/// This class is a port of Android's EdgeEffect.java:
 /// https://cs.android.com/android/platform/superproject/main/+/main:frameworks/base/core/java/android/widget/EdgeEffect.java
 ///
 /// It reproduces the damped harmonic oscillator behavior of Android's
 /// overscroll effect in Flutter, using the same physical constants:
 /// - natural frequency
 /// - damping ratio
-///
-/// The formulas and coefficients are derived directly from the Android source.
-class _StretchSimulation extends Simulation {
-  _StretchSimulation(double distance, double velocity, Tolerance tolerance)
-    : _dampedFreq = _naturalFrequency * math.sqrt(1 - _dampingRatio * _dampingRatio),
-      _cosCoeff = distance,
-      _sinCoeff =
-          (1 / (_naturalFrequency * math.sqrt(1 - _dampingRatio * _dampingRatio))) *
-          (_dampingRatio * _naturalFrequency * distance + velocity),
-      super(tolerance: tolerance);
-
-  final double _dampedFreq;
-  final double _cosCoeff;
-  final double _sinCoeff;
+class _StretchSimulation extends SpringSimulation {
+  _StretchSimulation(double overscroll, double velocity)
+    : super(
+        SpringDescription.withDampingRatio(
+          mass: 1,
+          stiffness:
+              (kNaturalFrequency * kNaturalFrequency) *
+              kTimeCorrectionFactor *
+              kTimeCorrectionFactor,
+          ratio: kDampingRatio,
+        ),
+        overscroll,
+        0.0,
+        velocity * kTimeCorrectionFactor,
+      );
 
   // Physical constants ported directly from Android's EdgeEffect.java.
-  static const double _naturalFrequency = 24.657;
-  static const double _dampingRatio = 0.98;
+  static const double kNaturalFrequency = 24.657;
+  static const double kDampingRatio = 0.98;
 
   /// A correction factor applied to the simulation time.
   ///
@@ -870,43 +871,7 @@ class _StretchSimulation extends Simulation {
   /// mathematically equivalent, approach would be to multiply both the
   /// `_naturalFrequency` and the initial velocity by this same factor,
   /// rather than scaling the time input.
-  static const double _timeCorrectionFactor = 0.8;
-
-  @override
-  double x(double time) {
-    final double correctedTime = time * _timeCorrectionFactor;
-
-    // This is the direct port of the distance calculation from Android's
-    // damped harmonic oscillator formula.
-    return math.pow(math.e, -_dampingRatio * _naturalFrequency * correctedTime) *
-        (_cosCoeff * math.cos(_dampedFreq * correctedTime) +
-            _sinCoeff * math.sin(_dampedFreq * correctedTime));
-  }
-
-  @override
-  double dx(double time) {
-    // To calculate the velocity (the derivative of x(t)), we apply the same
-    // time correction.
-    final double correctedTime = time * _timeCorrectionFactor;
-
-    // The derivative calculation ported from the original Android 12 code.
-    final double position = x(time);
-    final double uncorrectedDx =
-        position * (-_naturalFrequency) * _dampingRatio +
-        math.pow(math.e, -_dampingRatio * _naturalFrequency * correctedTime) *
-            (-_dampedFreq * _cosCoeff * math.sin(_dampedFreq * correctedTime) +
-                _dampedFreq * _sinCoeff * math.cos(_dampedFreq * correctedTime));
-
-    return uncorrectedDx * _timeCorrectionFactor;
-  }
-
-  @override
-  bool isDone(double time) {
-    // The simulation is considered done when both position and velocity
-    // are within the tolerance thresholds. This logic is similar to Android's
-    // isAtEquilibrium().
-    return x(time).abs() < tolerance.distance && dx(time).abs() < tolerance.velocity;
-  }
+  static const double kTimeCorrectionFactor = 0.8;
 }
 
 class _StretchController extends Listenable {
@@ -975,7 +940,7 @@ class _StretchController extends Listenable {
 
   /// Creates a stretching-only [Simulation] ported from Android 12.
   _StretchSimulation _createStretchSimulation(double velocity) {
-    return _StretchSimulation(overscroll, velocity, Tolerance.defaultTolerance);
+    return _StretchSimulation(overscroll, velocity);
   }
 
   /// Handle a fling to the edge of the viewport at a particular velocity.
