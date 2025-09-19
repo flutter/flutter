@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/sliver_utils.dart';
+import 'semantics_tester.dart';
 
 const double VIEWPORT_HEIGHT = 600;
 const double VIEWPORT_WIDTH = 300;
@@ -1429,6 +1430,40 @@ void main() {
       expect(find.text('item7'), findsNothing);
     },
   );
+
+  testWidgets('SliverMainAxisGroup ensure semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    await tester.pumpWidget(
+      _buildSliverMainAxisGroup(
+        slivers: <Widget>[
+          const SliverEnsureSemantics(sliver: SliverToBoxAdapter(child: Text('a'))),
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (BuildContext context, int index) {
+                return Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text('Lorem Ipsum $index'),
+                  ),
+                );
+              },
+              childCount: 50,
+              semanticIndexOffset: 1,
+            ),
+          ),
+          const SliverEnsureSemantics(sliver: SliverToBoxAdapter(child: Text('b'))),
+        ],
+      ),
+    );
+
+    // Even though 'b' is outside of the Viewport and cacheExtent, since it is
+    // wrapped with a `SliverEnsureSemantics` it will still be included in the
+    // semantics tree.
+    expect(semantics.nodesWith(label: 'b'), hasLength(1));
+    expect(find.text('b'), findsNothing);
+    expect(find.byType(SliverEnsureSemantics, skipOffstage: false), findsNWidgets(2));
+    semantics.dispose();
+  });
 }
 
 Widget _buildSliverList({
