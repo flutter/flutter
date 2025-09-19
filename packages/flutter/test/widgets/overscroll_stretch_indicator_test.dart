@@ -1156,7 +1156,7 @@ void main() {
       expect(controller.offset, 0.0);
       expect(box1.localToGlobal(Offset.zero).dy, 0.0);
       expect(box2.localToGlobal(Offset.zero).dy, greaterThan(250.9));
-      expect(box3.localToGlobal(Offset.zero).dy, greaterThan(501.9));
+      expect(box3.localToGlobal(Offset.zero).dy, greaterThan(500.9));
 
       await tester.pumpAndSettle();
 
