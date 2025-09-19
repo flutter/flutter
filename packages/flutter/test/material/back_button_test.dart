@@ -343,7 +343,7 @@ void main() {
     });
   });
 
-  testWidgets('EndDrawerButton renders at zero area', (WidgetTester tester) async {
+  testWidgets('EndDrawerButton does not crash at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Center(
@@ -351,8 +351,7 @@ void main() {
         ),
       ),
     );
-    final Finder endDrawerButtonIcon = find.byType(EndDrawerButtonIcon);
-    expect(tester.getSize(endDrawerButtonIcon).isEmpty, isTrue);
+    expect(tester.getSize(find.byType(EndDrawerButton)), Size.zero);
   });
 
   testWidgets('BackButton renders at zero area', (WidgetTester tester) async {
