@@ -60,7 +60,6 @@ void testNoDoubleClamp(int input) {
       lint(815, 5),
       lint(1084, 5),
       lint(1214, 5),
-      lint(1214, 6), // Expected failure
     ]);
   }
 }
