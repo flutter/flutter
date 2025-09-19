@@ -1012,7 +1012,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
                                        type:type
                                    selector:@selector(captureTextFromCamera:)
                               suggestedMenu:suggestedMenu
-                              attributes:attributes];
+                                 attributes:attributes];
       }
     } else if ([type isEqualToString:@"custom"]) {
       NSString* callbackId = encodedItem[@"id"];
