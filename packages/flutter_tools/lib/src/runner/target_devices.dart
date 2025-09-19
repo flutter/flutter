@@ -130,6 +130,8 @@ class TargetDevices {
 
   void startExtendedWirelessDeviceDiscovery({Duration? deviceDiscoveryTimeout}) {}
 
+  void stopExtendedWirelessDeviceDiscovery() {}
+
   /// Find and return all target [Device]s based upon criteria entered by the
   /// user on the command line.
   ///
@@ -394,6 +396,11 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
     return;
   }
 
+  @override
+  void stopExtendedWirelessDeviceDiscovery() {
+    _deviceManager.stopExtendedWirelessDeviceDiscoverers();
+  }
+
   Future<List<Device>> _getRefreshedWirelessDevices({
     bool includeDevicesUnsupportedByProject = false,
   }) async {
@@ -494,12 +501,14 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
           // If the only matching device is not paired, print a warning
           if (!matchedDevice.isPaired) {
             _logger.printStatus(flutterSpecifiedDeviceUnpaired(matchedDevice.displayName));
+            stopExtendedWirelessDeviceDiscovery();
             return null;
           }
           // If the only matching device does not have Developer Mode enabled,
           // print a warning
           if (!matchedDevice.devModeEnabled) {
             _logger.printStatus(flutterSpecifiedDeviceDevModeDisabled(matchedDevice.displayName));
+            stopExtendedWirelessDeviceDiscovery();
             return null;
           }
 
@@ -509,6 +518,7 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
         }
 
         if (matchedDevice != null && matchedDevice.isConnected) {
+          stopExtendedWirelessDeviceDiscovery();
           return <Device>[matchedDevice];
         }
       } else {
@@ -605,6 +615,7 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
   ) async {
     final Device? ephemeralDevice = _deviceManager.getSingleEphemeralDevice(attachedDevices);
     if (ephemeralDevice != null) {
+      stopExtendedWirelessDeviceDiscovery();
       return <Device>[ephemeralDevice];
     }
 
@@ -612,6 +623,7 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
       _logger.printStatus(_checkingForWirelessDevicesMessage);
       final List<Device> wirelessDevices = await futureWirelessDevices;
       if (attachedDevices.length + wirelessDevices.length == 1) {
+        stopExtendedWirelessDeviceDiscovery();
         return attachedDevices + wirelessDevices;
       }
       _logger.printStatus('');
@@ -621,7 +633,9 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
         return _handleMultipleDevices(attachedDevices, wirelessDevices);
       }
       // If terminal does not have stdin, print out device list.
-      return _printMultipleDevices(attachedDevices, wirelessDevices);
+      final List<Device>? devices = await _printMultipleDevices(attachedDevices, wirelessDevices);
+      stopExtendedWirelessDeviceDiscovery();
+      return devices;
     }
 
     return _selectFromDevicesAndCheckForWireless(attachedDevices, futureWirelessDevices);
@@ -703,6 +717,7 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
     // be prompted again.
     _deviceManager.specifiedDeviceId = chosenDevice.id;
 
+    stopExtendedWirelessDeviceDiscovery();
     return <Device>[chosenDevice];
   }
 

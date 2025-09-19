@@ -1950,6 +1950,7 @@ abstract class FlutterCommand extends Command<void> {
       includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
     );
     if (deviceList == null) {
+      _targetDevices.stopExtendedWirelessDeviceDiscovery();
       return null;
     }
     if (deviceList.length > 1) {
@@ -1957,8 +1958,10 @@ abstract class FlutterCommand extends Command<void> {
       deviceList = await globals.deviceManager!.getAllDevices();
       globals.printStatus('');
       await Device.printDevices(deviceList, globals.logger);
+      _targetDevices.stopExtendedWirelessDeviceDiscovery();
       return null;
     }
+    _targetDevices.stopExtendedWirelessDeviceDiscovery();
     return deviceList.single;
   }
 
