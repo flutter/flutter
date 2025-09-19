@@ -113,7 +113,7 @@ void main() {
       testUsingContext(
         '$CleanCommand removes build and ephemeral directories, cleans Xcode for iOS and macOS, '
         'deletes .dart_tools except .dart_tools/widget_preview_scaffold',
-        () => removesBuildAndDartToolShared(false),
+        () => removesBuildAndDartToolShared(true),
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
