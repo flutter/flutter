@@ -244,6 +244,89 @@ void main() {
     expect(radio1.hasFocus, isTrue);
     expect(textFieldAfter.hasFocus, isFalse);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/175258.
+  testWidgets('Radio group throws on multiple selection', (WidgetTester tester) async {
+    final UniqueKey key1 = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TestRadioGroup<int>(
+            child: Column(
+              children: <Widget>[
+                const Radio<int>(value: 0),
+                Radio<int>(key: key1, value: 1),
+                const Radio<int>(value: 1),
+                const Radio<int>(value: 2),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(find.byKey(key1));
+    await tester.pump();
+
+    expect(
+      tester.takeException(),
+      isA<FlutterError>().having(
+        (FlutterError e) => e.message,
+        'message',
+        "RadioGroupPolicy can't be used for a radio group that allows multiple selection.",
+      ),
+    );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/175258.
+  testWidgets('Radio group does not throw when number of children decreases', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: RadioGroup<int>(
+            onChanged: (_) {},
+            groupValue: 4,
+            child: const Column(
+              children: <Widget>[
+                Radio<int>(value: 0),
+                Radio<int>(value: 1),
+                Radio<int>(value: 2),
+                Radio<int>(value: 3),
+                Radio<int>(value: 4),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: RadioGroup<int>(
+            onChanged: (_) {},
+            groupValue: 4,
+            child: const Column(
+              children: <Widget>[
+                Radio<int>(value: 1),
+                Radio<int>(value: 2),
+                Radio<int>(value: 3),
+                Radio<int>(value: 4),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
 }
 
 class TestRadioGroup<T> extends StatefulWidget {
