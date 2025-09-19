@@ -36,6 +36,7 @@ class _MainWidgetState extends State<_MainWidget> {
     VoidCallback onFieldSubmitted,
   ) {
     return TextFormField(
+      decoration: const InputDecoration(labelText: 'Fruit'),
       focusNode: focusNode,
       controller: textEditingController,
       onFieldSubmitted: (String value) {
