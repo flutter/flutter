@@ -25,7 +25,7 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
             dropdownMenuEntries: <DropdownMenuEntry<String>>[
               DropdownMenuEntry<String>(value: 'Hewwo', label: 'Hewwo')
             ],
-            trailingIconButtonStyle: DropDownMenuTrailingIconButtonStyle(
+            trailingIconButtonStyle: DropdownMenuTrailingIconButtonStyle(
               iconSize: 12,
               padding: EdgeInsets.zero,
               style: ButtonStyle(

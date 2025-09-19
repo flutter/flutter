@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets(
-    'The DropdownMenu should allow customization on how its trailing icon button being construct',
+    'The DropdownMenu should allow customization on how its trailing icon button is being constructed',
     (WidgetTester tester) async {
       const example.DropdownMenuExample dropdownMenuExample = example.DropdownMenuExample();
 
