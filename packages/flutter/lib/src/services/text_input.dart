@@ -2888,13 +2888,23 @@ sealed class IOSSystemContextMenuItemData {
   /// platform.
   String? get title => null;
 
+  /// The attributes to assign to the menu item.
+  ///
+  /// Not exposed for built-in menu items.
+  IOSSystemContextMenuItemAttributes? get attributes => null;
+
   /// The type string used when serialized to json, recognized by the engine.
   String get _jsonType;
 
   /// Returns json for use in method channel calls, specifically
   /// `ContextMenu.showSystemContextMenu`.
   Map<String, dynamic> get _json {
-    return <String, dynamic>{'callbackId': hashCode, 'title': ?title, 'type': _jsonType};
+    return <String, dynamic>{
+      'callbackId': hashCode,
+      'title': ?title,
+      'type': _jsonType,
+      'attributes': ?attributes?._index,
+    };
   }
 
   @override
@@ -3131,15 +3141,17 @@ final class IOSSystemContextMenuItemAttributes with Diagnosticable {
   ///
   /// This corresponds to the
   /// [UIMenuElementAttributesDisabled value of UIMenuElementAttributes](https://developer.apple.com/documentation/uikit/uimenuelement/attributes/disabled?language=objc).
-  static const IOSSystemContextMenuItemAttributes disabled =
-      IOSSystemContextMenuItemAttributes._(1 << 0);
+  static const IOSSystemContextMenuItemAttributes disabled = IOSSystemContextMenuItemAttributes._(
+    1 << 0,
+  );
 
   /// An attribute indicating that the menu should not display the menu item.
   ///
   /// This corresponds to the
   /// [UIMenuElementAttributesHidden value of UIMenuElementAttributes](https://developer.apple.com/documentation/uikit/uimenuelement/attributes/hidden?language=objc).
-  static const IOSSystemContextMenuItemAttributes hidden =
-      IOSSystemContextMenuItemAttributes._(1 << 2);
+  static const IOSSystemContextMenuItemAttributes hidden = IOSSystemContextMenuItemAttributes._(
+    1 << 2,
+  );
 
   /// An attribute indicating that the menu remains presented after pressing on
   /// the menu item.
@@ -3150,8 +3162,7 @@ final class IOSSystemContextMenuItemAttributes with Diagnosticable {
       IOSSystemContextMenuItemAttributes._(1 << 3);
 
   /// No attributes.
-  static const IOSSystemContextMenuItemAttributes none =
-      IOSSystemContextMenuItemAttributes._(0);
+  static const IOSSystemContextMenuItemAttributes none = IOSSystemContextMenuItemAttributes._(0);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -3189,9 +3200,7 @@ final class IOSSystemContextMenuItemAttributes with Diagnosticable {
   }
 
   /// Combines two [IOSSystemContextMenuItemAttributes] values using logical "or".
-  IOSSystemContextMenuItemAttributes operator |(
-    IOSSystemContextMenuItemAttributes other,
-  ) {
+  IOSSystemContextMenuItemAttributes operator |(IOSSystemContextMenuItemAttributes other) {
     return IOSSystemContextMenuItemAttributes._(_index | other._index);
   }
 }
@@ -3222,6 +3231,7 @@ final class IOSSystemContextMenuItemDataCustom extends IOSSystemContextMenuItemD
 
   /// The [IOSSystemContextMenuItemAttributes] indicating
   /// additional configurations for this menu item.
+  @override
   final IOSSystemContextMenuItemAttributes attributes;
 
   /// The callback to be executed when the item is selected.
