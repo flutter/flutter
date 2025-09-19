@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
@@ -243,6 +244,106 @@ void main() {
     expect(radio0.hasFocus, isFalse);
     expect(radio1.hasFocus, isTrue);
     expect(textFieldAfter.hasFocus, isFalse);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/175258.
+  testWidgets('Radio group throws on multiple selection', (WidgetTester tester) async {
+    final FlutterExceptionHandler? handler = FlutterError.onError;
+    FlutterErrorDetails? error;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      error = details;
+    };
+
+    final UniqueKey key1 = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TestRadioGroup<int>(
+            child: Column(
+              children: <Widget>[
+                const Radio<int>(value: 0),
+                Radio<int>(key: key1, value: 1),
+                const Radio<int>(value: 1),
+                const Radio<int>(value: 2),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(error, isNull);
+
+    await tester.tap(find.byKey(key1));
+    await tester.pump();
+
+    expect(error, isNotNull);
+    expect(
+      error!.exception,
+      isA<FlutterError>().having(
+        (FlutterError e) => e.message,
+        'message',
+        "RadioGroupPolicy can't be used for a radio group that allows multiple selection.",
+      ),
+    );
+
+    FlutterError.onError = handler;
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/175258.
+  testWidgets('Radio group does not throw when number of children decreases', (
+    WidgetTester tester,
+  ) async {
+    final FlutterExceptionHandler? handler = FlutterError.onError;
+    FlutterErrorDetails? error;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      error = details;
+    };
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: RadioGroup<int>(
+            onChanged: (_) {},
+            groupValue: 4,
+            child: const Column(
+              children: <Widget>[
+                Radio<int>(value: 0),
+                Radio<int>(value: 1),
+                Radio<int>(value: 2),
+                Radio<int>(value: 3),
+                Radio<int>(value: 4),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(error, isNull);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: RadioGroup<int>(
+            onChanged: (_) {},
+            groupValue: 4,
+            child: const Column(
+              children: <Widget>[
+                Radio<int>(value: 1),
+                Radio<int>(value: 2),
+                Radio<int>(value: 3),
+                Radio<int>(value: 4),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(error, isNull);
+
+    FlutterError.onError = handler;
   });
 }
 

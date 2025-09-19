@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 
 import 'actions.dart';
 import 'basic.dart';
+import 'binding.dart';
 import 'focus_manager.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
@@ -96,6 +97,24 @@ class _RadioGroupState<T> extends State<RadioGroup<T>> implements RadioGroupRegi
 
   final Set<RadioClient<T>> _radios = <RadioClient<T>>{};
 
+  bool _debugHasScheduledSingleSelectionCheck = false;
+  bool _debugScheduleSingleSelectionCheck() {
+    if (_debugHasScheduledSingleSelectionCheck) {
+      return true;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _debugHasScheduledSingleSelectionCheck = false;
+      if (!mounted || _debugCheckOnlySingleSelection()) {
+        return;
+      }
+      throw FlutterError(
+        "RadioGroupPolicy can't be used for a radio group that allows multiple selection.",
+      );
+    }, debugLabel: 'RadioGroup.singleSelectionCheck');
+    _debugHasScheduledSingleSelectionCheck = true;
+    return true;
+  }
+
   bool _debugCheckOnlySingleSelection() {
     return _radios.where((RadioClient<T> radio) => radio.radioValue == groupValue).length < 2;
   }
@@ -106,10 +125,7 @@ class _RadioGroupState<T> extends State<RadioGroup<T>> implements RadioGroupRegi
   @override
   void registerClient(RadioClient<T> radio) {
     _radios.add(radio);
-    assert(
-      _debugCheckOnlySingleSelection(),
-      "RadioGroupPolicy can't be used for a radio group that allows multiple selection",
-    );
+    assert(_debugScheduleSingleSelectionCheck());
   }
 
   @override
@@ -176,6 +192,8 @@ class _RadioGroupState<T> extends State<RadioGroup<T>> implements RadioGroupRegi
 
   @override
   Widget build(BuildContext context) {
+    assert(_debugScheduleSingleSelectionCheck());
+
     return Semantics(
       container: true,
       role: SemanticsRole.radioGroup,
