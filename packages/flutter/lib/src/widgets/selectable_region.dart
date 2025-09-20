@@ -60,6 +60,14 @@ const double _kSelectableVerticalComparingThreshold = 3.0;
 /// left-click and dragging across widgets, or they can use long press gestures
 /// to select words on touch devices.
 ///
+/// [RichText] widgets do not automatically become selectable when wrapped
+/// with a [SelectableRegion] or [SelectionArea]. To enable selection on
+/// [RichText], provide it with a [SelectionRegistrar] via [RichText.selectionRegistrar].
+/// The registrar can be obtained from an ancestor [SelectionContainer] (such as
+/// a [SelectionArea] or [SelectableRegion]) using [SelectionContainer.maybeOf].
+/// The [BuildContext] provided to [SelectionContainer.maybeOf] should be a descendant
+/// of the [SelectionContainer] whose registrar is being sought.
+///
 /// A [SelectableRegion] widget requires configuration; in particular specific
 /// [selectionControls] must be provided.
 ///

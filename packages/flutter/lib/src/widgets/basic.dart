@@ -6489,17 +6489,25 @@ class Flow extends MultiChildRenderObjectWidget {
 ///
 /// {@tool snippet}
 ///
-/// This sample demonstrates how to assign a [SelectionRegistrar] for RichTexts
-/// in the SelectionArea subtree.
+/// This sample demonstrates how to assign a [SelectionRegistrar] for [RichText]s
+/// in the [SelectionArea] subtree.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/rich_text.png)
 ///
 /// ```dart
-/// RichText(
-///   text: const TextSpan(text: 'Hello'),
-///   selectionRegistrar: SelectionContainer.maybeOf(context),
-///   selectionColor: const Color(0xAF6694e8),
-/// )
+/// Widget build(BuildContext context) {
+///   return SelectionArea(
+///     child: Builder(
+///       builder: (BuildContext context) {
+///         return RichText(
+///           text: const TextSpan(text: 'Hello'),
+///           selectionRegistrar: SelectionContainer.maybeOf(context),
+///           selectionColor: const Color(0xAF6694e8),
+///         );
+///       }
+///     ),
+///   );
+/// }
 /// ```
 /// {@end-tool}
 ///
