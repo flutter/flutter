@@ -4,10 +4,7 @@
 
 package io.flutter.util;
 
-import static io.flutter.Build.API_LEVELS;
-
 import android.content.Context;
-import android.os.Build;
 import androidx.annotation.NonNull;
 import java.io.File;
 
@@ -50,10 +47,6 @@ public final class PathUtils {
   }
 
   private static String getDataDirPath(Context applicationContext) {
-    if (Build.VERSION.SDK_INT >= API_LEVELS.API_24) {
-      return applicationContext.getDataDir().getPath();
-    } else {
-      return applicationContext.getApplicationInfo().dataDir;
-    }
+    return applicationContext.getDataDir().getPath();
   }
 }
