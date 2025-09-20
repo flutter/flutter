@@ -301,13 +301,16 @@ class _${blockName}DefaultsM3 extends ButtonStyle {
   WidgetStateProperty<OutlinedBorder>? get shape =>${_shape()};
 
   @override
-  WidgetStateProperty<MouseCursor?>? get mouseCursor =>
-    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-      if (states.contains(WidgetState.disabled)) {
-        return SystemMouseCursors.basic;
-      }
-      return SystemMouseCursors.click;
-    });
+  WidgetStateProperty<MouseCursor?>? get mouseCursor {
+    return WidgetStateProperty.resolveWith(
+      (Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
+          return SystemMouseCursors.basic;
+        }
+        return kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic;
+      },
+    );
+  }
 
   @override
   VisualDensity? get visualDensity => VisualDensity.standard;

@@ -20,7 +20,6 @@ import 'button_theme.dart';
 import 'constants.dart';
 import 'ink_well.dart';
 import 'material.dart';
-import 'material_state.dart';
 import 'material_state_mixin.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -124,7 +123,10 @@ class RawMaterialButton extends StatefulWidget {
   ///  * [WidgetState.disabled].
   /// {@endtemplate}
   ///
-  /// If this property is null, [WidgetStateMouseCursor.clickable] will be used.
+  /// If this property is null,
+  ///
+  ///   * On web, [WidgetStateMouseCursor.clickable] will be used.
+  ///   * On other platforms, [WidgetStateMouseCursor.statelessClickable] will be used.
   final MouseCursor? mouseCursor;
 
   /// Defines the default text style, with [Material.textStyle], for the
@@ -362,10 +364,15 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
     final BoxConstraints effectiveConstraints = widget.visualDensity.effectiveConstraints(
       widget.constraints,
     );
+
+    const MouseCursor fallbackCursor = kIsWeb
+        ? WidgetStateMouseCursor.clickable
+        : WidgetStateMouseCursor.statelessClickable;
     final MouseCursor? effectiveMouseCursor = WidgetStateProperty.resolveAs<MouseCursor?>(
-      widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
+      widget.mouseCursor ?? fallbackCursor,
       materialStates,
     );
+
     final EdgeInsetsGeometry padding = widget.padding
         .add(
           EdgeInsets.only(
