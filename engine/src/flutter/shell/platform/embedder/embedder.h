@@ -169,6 +169,10 @@ typedef enum {
   /// Request that scrolls the current scrollable container to a given scroll
   /// offset.
   kFlutterSemanticsActionScrollToOffset = 1 << 23,
+  /// A request that the node should be expanded.
+  kFlutterSemanticsActionExpand = 1 << 24,
+  /// A request that the node should be collapsed.
+  kFlutterSemanticsActionCollapse = 1 << 25,
 } FlutterSemanticsAction;
 
 /// The set of properties that may be associated with a semantics node.
