@@ -334,6 +334,104 @@ class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMi
   String get debugLabel => '${super.debugLabel}(${settings.name})';
 }
 
+/// A page route for use in an iOS designed app with support for dynamic titles.
+///
+/// This route extends [CupertinoPageRoute] to support [ValueListenable<String?>]
+/// for the title, allowing the title to be updated dynamically after the route
+/// is created. When the title value changes, neighboring routes will be notified
+/// to update their references (e.g., [CupertinoNavigationBar.previousPageTitle] in navigation bars).
+///
+/// Example:
+///
+/// ```dart
+/// class MyPage extends StatelessWidget {
+///   const MyPage({super.key, required this.titleNotifier});
+///   final ValueNotifier<String?> titleNotifier;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return const CupertinoPageScaffold(
+///       child: Center(child: Text('Page Content')),
+///     );
+///   }
+/// }
+///
+/// void pushDynamicRoute(BuildContext context) {
+///   final ValueNotifier<String?> titleNotifier = ValueNotifier<String?>('Loading...');
+///
+///   Navigator.push(
+///     context,
+///     CupertinoPageRouteWithDynamicTitle<void>(
+///       builder: (BuildContext context) => MyPage(titleNotifier: titleNotifier),
+///       titleListenable: titleNotifier,
+///     ),
+///   );
+///
+///   // Later, update the title
+///   titleNotifier.value = 'Product Details';
+/// }
+/// ```
+///
+/// See also:
+///
+///  * [CupertinoPageRoute], for routes with static titles.
+///  * [CupertinoRouteTransitionMixin], for the underlying transition mixin.
+class CupertinoPageRouteWithDynamicTitle<T> extends PageRoute<T>
+    with CupertinoRouteTransitionMixin<T> {
+  /// Creates a page route for use in an iOS designed app with dynamic title support.
+  ///
+  /// The [builder] and [titleListenable] arguments must not be null.
+  CupertinoPageRouteWithDynamicTitle({
+    required this.builder,
+    required this.titleListenable,
+    super.settings,
+    super.requestFocus,
+    this.maintainState = true,
+    super.fullscreenDialog,
+    super.allowSnapshotting = true,
+    super.barrierDismissible = false,
+  }) {
+    assert(opaque);
+    titleListenable.addListener(_handleTitleChanged);
+  }
+
+  @override
+  DelegatedTransitionBuilder? get delegatedTransition =>
+      CupertinoPageTransition.delegatedTransition;
+
+  /// Builds the primary contents of the route.
+  final WidgetBuilder builder;
+
+  @override
+  Widget buildContent(BuildContext context) => builder(context);
+
+  /// The dynamic title for this route.
+  ///
+  /// When the value of this [ValueListenable] changes, neighboring routes
+  /// will be notified to update their references to this route's title.
+  final ValueListenable<String?> titleListenable;
+
+  @override
+  String? get title => titleListenable.value;
+
+  @override
+  final bool maintainState;
+
+  @override
+  String get debugLabel => '${super.debugLabel}(${settings.name})';
+
+  void _handleTitleChanged() {
+    // Notify neighboring routes when title changes
+    changedInternalState(notifyNeighbors: true);
+  }
+
+  @override
+  void dispose() {
+    titleListenable.removeListener(_handleTitleChanged);
+    super.dispose();
+  }
+}
+
 // A page-based version of CupertinoPageRoute.
 //
 // This route uses the builder from the page to build its content. This ensures
