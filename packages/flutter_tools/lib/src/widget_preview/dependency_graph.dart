@@ -35,8 +35,7 @@ typedef PreviewDependencyGraph = Map<PreviewPath, LibraryPreviewNode>;
 class _PreviewVisitor extends RecursiveAstVisitor<void> {
   _PreviewVisitor({required LibraryElement2 lib})
     : packageName = lib.uri.scheme == 'package' ? lib.uri.pathSegments.first : null,
-      _context = lib.session.analysisContext,
-      _currentScriptUri = null;
+      _context = lib.session.analysisContext;
 
   late final String? packageName;
 
@@ -47,7 +46,7 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
   ConstructorDeclaration? _currentConstructor;
   MethodDeclaration? _currentMethod;
 
-  Uri? _currentScriptUri;
+  late Uri _currentScriptUri;
 
   void findPreviewsInResolvedUnitResult(ResolvedUnitResult unit) {
     _scopedVisitChildren(unit.unit, (_) => _currentScriptUri = unit.file.toUri());
@@ -111,7 +110,7 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
           if (returnType.isWidget || returnType.isWidgetBuilder) {
             previewEntries.add(
               PreviewDetails(
-                scriptUri: _currentScriptUri!,
+                scriptUri: _currentScriptUri,
                 packageName: packageName,
                 functionName: _currentFunction!.name.toString(),
                 isBuilder: returnType.isWidgetBuilder,
@@ -126,7 +125,7 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
         final Token? name = _currentConstructor!.name;
         previewEntries.add(
           PreviewDetails(
-            scriptUri: _currentScriptUri!,
+            scriptUri: _currentScriptUri,
             packageName: packageName,
             functionName: '$returnType${name == null ? '' : '.$name'}',
             isBuilder: false,
@@ -141,7 +140,7 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
             final parentClass = _currentMethod!.parent! as ClassDeclaration;
             previewEntries.add(
               PreviewDetails(
-                scriptUri: _currentScriptUri!,
+                scriptUri: _currentScriptUri,
                 packageName: packageName,
                 functionName: '${parentClass.name}.${_currentMethod!.name}',
                 isBuilder: returnType.isWidgetBuilder,

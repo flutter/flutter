@@ -128,10 +128,6 @@ struct RoundRect {
     return bounds_ == rr.bounds_ && radii_ == rr.radii_;
   }
 
-  [[nodiscard]] constexpr bool operator!=(const RoundRect& r) const {
-    return !(*this == r);
-  }
-
  private:
   constexpr RoundRect(const Rect& bounds, const RoundingRadii& radii)
       : bounds_(bounds), radii_(radii) {}

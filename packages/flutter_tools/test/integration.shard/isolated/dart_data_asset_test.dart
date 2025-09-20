@@ -91,7 +91,14 @@ void main() {
           writeHelperLibrary(root, 'version1', assets.keys.toList());
 
           final ProcessTestResult result = await runFlutter(
-            <String>['run', '-v', '-d', device, '--$mode'],
+            <String>[
+              'run',
+              '-v',
+              '-d',
+              device,
+              '--$mode',
+              if (device == 'chrome') '--no-web-resources-cdn',
+            ],
             root.path,
             <Transition>[
               Barrier.contains('Launching lib${Platform.pathSeparator}main.dart on'),

@@ -85,13 +85,13 @@ void main() {
     DataTableThemeData(
       decoration: const BoxDecoration(color: Color(0xfffffff0)),
       dataRowColor: WidgetStateProperty.resolveWith<Color>(
-        (Set<MaterialState> states) => const Color(0xfffffff1),
+        (Set<WidgetState> states) => const Color(0xfffffff1),
       ),
       dataRowMinHeight: 41.0,
       dataRowMaxHeight: 42.0,
       dataTextStyle: const TextStyle(fontSize: 12.0),
       headingRowColor: WidgetStateProperty.resolveWith<Color>(
-        (Set<MaterialState> states) => const Color(0xfffffff2),
+        (Set<WidgetState> states) => const Color(0xfffffff2),
       ),
       headingRowHeight: 52.0,
       headingTextStyle: const TextStyle(fontSize: 14.0),
@@ -198,7 +198,7 @@ void main() {
     expect(dataRowTextStyle.fontSize, dataTextStyle.fontSize);
     expect(
       _tableRowBoxDecoration(tester: tester, index: 1).color,
-      dataRowColor.resolve(<MaterialState>{}),
+      dataRowColor.resolve(<WidgetState>{}),
     );
     expect(_tableRowBoxDecoration(tester: tester, index: 1).border!.top.width, dividerThickness);
     expect(tester.getSize(_findFirstContainerFor('Data')).height, minMaxDataRowHeight);
@@ -210,7 +210,7 @@ void main() {
     expect(headingRowTextStyle.fontSize, headingTextStyle.fontSize);
     expect(
       _tableRowBoxDecoration(tester: tester, index: 0).color,
-      headingRowColor.resolve(<MaterialState>{}),
+      headingRowColor.resolve(<WidgetState>{}),
     );
 
     expect(tester.getSize(_findFirstContainerFor('A')).height, headingRowHeight);
@@ -374,7 +374,7 @@ void main() {
     expect(dataRowTextStyle.fontSize, dataTextStyle.fontSize);
     expect(
       _tableRowBoxDecoration(tester: tester, index: 1).color,
-      dataRowColor.resolve(<MaterialState>{}),
+      dataRowColor.resolve(<WidgetState>{}),
     );
     expect(_tableRowBoxDecoration(tester: tester, index: 1).border!.top.width, dividerThickness);
     expect(tester.getSize(_findFirstContainerFor('Data')).height, minMaxDataRowHeight);
@@ -386,7 +386,7 @@ void main() {
     expect(headingRowTextStyle.fontSize, headingTextStyle.fontSize);
     expect(
       _tableRowBoxDecoration(tester: tester, index: 0).color,
-      headingRowColor.resolve(<MaterialState>{}),
+      headingRowColor.resolve(<WidgetState>{}),
     );
 
     expect(tester.getSize(_findFirstContainerFor('A')).height, headingRowHeight);
@@ -405,7 +405,7 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      headingCellCursor.resolve(<MaterialState>{}),
+      headingCellCursor.resolve(<WidgetState>{}),
     );
 
     await gesture.moveTo(tester.getCenter(find.text('Data')));
@@ -413,7 +413,7 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      dataRowCursor.resolve(<MaterialState>{}),
+      dataRowCursor.resolve(<WidgetState>{}),
     );
   });
 
@@ -560,7 +560,7 @@ void main() {
     expect(dataRowTextStyle.fontSize, localThemeDataTextStyle.fontSize);
     expect(
       _tableRowBoxDecoration(tester: tester, index: 1).color,
-      localThemeDataRowColor.resolve(<MaterialState>{}),
+      localThemeDataRowColor.resolve(<WidgetState>{}),
     );
     expect(
       _tableRowBoxDecoration(tester: tester, index: 1).border!.top.width,
@@ -575,7 +575,7 @@ void main() {
     expect(headingRowTextStyle.fontSize, localThemeHeadingTextStyle.fontSize);
     expect(
       _tableRowBoxDecoration(tester: tester, index: 0).color,
-      localThemeHeadingRowColor.resolve(<MaterialState>{}),
+      localThemeHeadingRowColor.resolve(<WidgetState>{}),
     );
 
     expect(tester.getSize(_findFirstContainerFor('A')).height, localThemeHeadingRowHeight);
@@ -594,7 +594,7 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      localHeadingCellCursor.resolve(<MaterialState>{}),
+      localHeadingCellCursor.resolve(<WidgetState>{}),
     );
 
     await gesture.moveTo(tester.getCenter(find.text('Data')));
@@ -602,7 +602,7 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      localDataRowCursor.resolve(<MaterialState>{}),
+      localDataRowCursor.resolve(<WidgetState>{}),
     );
   });
 
