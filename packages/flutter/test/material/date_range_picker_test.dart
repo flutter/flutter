@@ -1978,7 +1978,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.getSize(find.byType(DateRangePickerDialog)).isEmpty, isTrue);
+    expect(tester.getSize(find.byType(DateRangePickerDialog)), Size.zero);
   });
 }
 
