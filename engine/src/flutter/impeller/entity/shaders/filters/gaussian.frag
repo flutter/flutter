@@ -19,7 +19,16 @@ uniform KernelSamples {
 }
 kernel_samples;
 
+uniform FragInfo {
+  float bounded;
+  vec4 bounds_uv;
+}
+frag_info;
+
 f16vec4 Sample(f16sampler2D tex, vec2 coords) {
+  if (frag_info.bounded == 1.0) {
+    return IPHalfSampleDecalBounded(tex, coords, frag_info.bounds_uv);
+  }
   if (supports_decal == 1.0) {
     return texture(tex, coords);
   }
@@ -40,5 +49,7 @@ void main() {
                           v_texture_coords + kernel_samples.sample_data[i].xy);
   }
 
-  frag_color = total_color;
+  frag_color = (frag_info.bounded == 1.0 && total_color.w != 0)
+                   ? (total_color / total_color.w)
+                   : total_color;
 }

@@ -6896,10 +6896,10 @@
       }
     }
   },
-  "flutter/impeller/entity/gles/texture_downsample_gles.frag.gles": {
+  "flutter/impeller/entity/gles/texture_downsample_software_decal.frag.gles": {
     "Mali-G78": {
       "core": "Mali-G78",
-      "filename": "flutter/impeller/entity/gles/texture_downsample_gles.frag.gles",
+      "filename": "flutter/impeller/entity/gles/texture_downsample_software_decal.frag.gles",
       "has_side_effects": false,
       "has_uniform_computation": true,
       "modifies_coverage": false,
@@ -6969,7 +6969,7 @@
     },
     "Mali-T880": {
       "core": "Mali-T880",
-      "filename": "flutter/impeller/entity/gles/texture_downsample_gles.frag.gles",
+      "filename": "flutter/impeller/entity/gles/texture_downsample_software_decal.frag.gles",
       "has_uniform_computation": false,
       "type": "Fragment",
       "variants": {
@@ -10261,10 +10261,10 @@
       }
     }
   },
-  "flutter/impeller/entity/texture_downsample_gles.frag.vkspv": {
+  "flutter/impeller/entity/texture_downsample_software_decal.frag.vkspv": {
     "Mali-G78": {
       "core": "Mali-G78",
-      "filename": "flutter/impeller/entity/texture_downsample_gles.frag.vkspv",
+      "filename": "flutter/impeller/entity/texture_downsample_software_decal.frag.vkspv",
       "has_side_effects": false,
       "has_uniform_computation": true,
       "modifies_coverage": false,
