@@ -705,13 +705,19 @@ void main() {
       ),
     );
 
-    expect(find.byType(Material), paints..rect(color: theme.tileColor));
+    expect(
+      find.descendant(of: find.byType(ListTile), matching: find.byType(Material)),
+      paints..path(color: theme.tileColor),
+    );
 
     // Tap on tile to change isSelected.
     await tester.tap(find.byType(ListTile));
     await tester.pumpAndSettle();
 
-    expect(find.byType(Material), paints..rect(color: theme.selectedTileColor));
+    expect(
+      find.descendant(of: find.byType(ListTile), matching: find.byType(Material)),
+      paints..path(color: theme.selectedTileColor),
+    );
   });
 
   testWidgets(
@@ -746,13 +752,19 @@ void main() {
         ),
       );
 
-      expect(find.byType(Material), paints..rect(color: tileColor));
+      expect(
+        find.descendant(of: find.byType(ListTile), matching: find.byType(Material)),
+        paints..path(color: tileColor),
+      );
 
       // Tap on tile to change isSelected.
       await tester.tap(find.byType(ListTile));
       await tester.pumpAndSettle();
 
-      expect(find.byType(Material), paints..rect(color: selectedTileColor));
+      expect(
+        find.descendant(of: find.byType(ListTile), matching: find.byType(Material)),
+        paints..path(color: selectedTileColor),
+      );
     },
   );
 
