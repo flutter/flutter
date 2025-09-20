@@ -53,7 +53,7 @@ class _${blockName}DefaultsM3 extends _TimePickerDefaults {
 
   @override
   Color get dayPeriodColor {
-    return MaterialStateColor.resolveWith((Set<WidgetState> states) {
+    return WidgetStateColor.resolveWith((Set<WidgetState> states) {
       if (states.contains(WidgetState.selected)) {
         return ${componentColor("$dayPeriodComponent.selected.container")};
       }
@@ -88,7 +88,7 @@ class _${blockName}DefaultsM3 extends _TimePickerDefaults {
 
   @override
   Color get dayPeriodTextColor {
-    return MaterialStateColor.resolveWith((Set<WidgetState> states) {
+    return WidgetStateColor.resolveWith((Set<WidgetState> states) {
       if (states.contains(WidgetState.selected)) {
         if (states.contains(WidgetState.focused)) {
           return ${componentColor("$dayPeriodComponent.selected.focus.label-text")};
@@ -151,7 +151,7 @@ class _${blockName}DefaultsM3 extends _TimePickerDefaults {
 
   @override
   Color get dialTextColor {
-    return MaterialStateColor.resolveWith((Set<WidgetState> states) {
+    return WidgetStateColor.resolveWith((Set<WidgetState> states) {
       if (states.contains(WidgetState.selected)) {
         return ${componentColor('$dialComponent.selected.label-text')};
       }
@@ -189,7 +189,7 @@ class _${blockName}DefaultsM3 extends _TimePickerDefaults {
 
   @override
   Color get hourMinuteColor {
-    return MaterialStateColor.resolveWith((Set<WidgetState> states) {
+    return WidgetStateColor.resolveWith((Set<WidgetState> states) {
       if (states.contains(WidgetState.selected)) {
         Color overlayColor = ${componentColor('$hourMinuteComponent.selected.container')};
         if (states.contains(WidgetState.pressed)) {
@@ -249,7 +249,7 @@ class _${blockName}DefaultsM3 extends _TimePickerDefaults {
 
   @override
   Color get hourMinuteTextColor {
-    return MaterialStateColor.resolveWith((Set<WidgetState> states) {
+    return WidgetStateColor.resolveWith((Set<WidgetState> states) {
       return _hourMinuteTextColor.resolve(states);
     });
   }
