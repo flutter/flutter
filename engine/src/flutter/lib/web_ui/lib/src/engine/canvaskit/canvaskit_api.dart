@@ -1800,6 +1800,7 @@ extension type BidiIndex(JSObject _) implements JSObject {
 
 extension type BidiNamespace(JSObject _) implements JSObject {
   @JS('getBidiRegions')
+  // TODO(jlavrova): Use a JSInt32Array return type instead of `List<BidiIndex>`
   external JSArray<JSAny?> _getBidiRegions(String text, SkTextDirection dir);
   List<BidiRegion> getBidiRegions(String text, ui.TextDirection dir) =>
       _getBidiRegions(text, toSkTextDirection(dir)).toDart.cast<BidiRegion>();
