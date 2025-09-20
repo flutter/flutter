@@ -13,7 +13,7 @@
 library;
 
 import 'dart:math';
-import 'dart:ui' as ui show TextHeightBehavior;
+import 'dart:ui' as ui show TextHeightBehavior, TypographySettings;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -31,6 +31,9 @@ import 'selection_container.dart';
 
 /// The text style to apply to descendant [Text] widgets which don't have an
 /// explicit style.
+///
+/// A [MediaQuery] ancestor of a [Text] widget may still override the text spacing
+/// properties of the [TextStyle] set by this [DefaultTextStyle] widget.
 ///
 /// {@tool dartpad}
 /// This example shows how to use [DefaultTextStyle.merge] to create a default
@@ -579,6 +582,10 @@ class Text extends StatelessWidget {
   /// If the style's "inherit" property is true, the style will be merged with
   /// the closest enclosing [DefaultTextStyle]. Otherwise, the style will
   /// replace the closest enclosing [DefaultTextStyle].
+  ///
+  /// This [style]s [TextStyle.fontWeight], [TextStyle.height], [TextStyle.letterSpacing],
+  /// and [TextStyle.wordSpacing] will be overriden by text spacing values from the nearest
+  /// [MediaQuery] ancestor, regardless of its [TextStyle.inherit] value.
   final TextStyle? style;
 
   /// {@macro flutter.painting.textPainter.strutStyle}
@@ -703,8 +710,20 @@ class Text extends StatelessWidget {
     if (style == null || style!.inherit) {
       effectiveTextStyle = defaultTextStyle.style.merge(style);
     }
-    if (MediaQuery.boldTextOf(context)) {
-      effectiveTextStyle = effectiveTextStyle!.merge(const TextStyle(fontWeight: FontWeight.bold));
+    final ui.TypographySettings? typographySettings = MediaQuery.maybeTypographySettingsOf(context);
+    final bool boldText = MediaQuery.boldTextOf(context);
+    if (boldText ||
+        typographySettings?.lineHeight != null ||
+        typographySettings?.letterSpacing != null ||
+        typographySettings?.wordSpacing != null) {
+      effectiveTextStyle = effectiveTextStyle!.merge(
+        TextStyle(
+          height: typographySettings?.lineHeight,
+          letterSpacing: typographySettings?.letterSpacing,
+          wordSpacing: typographySettings?.wordSpacing,
+          fontWeight: boldText ? FontWeight.bold : null,
+        ),
+      );
     }
     final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
     final TextScaler textScaler = switch ((this.textScaler, textScaleFactor)) {
@@ -779,6 +798,12 @@ class Text extends StatelessWidget {
         label: semanticsLabel,
         identifier: semanticsIdentifier,
         child: ExcludeSemantics(excluding: semanticsLabel != null, child: result),
+      );
+    }
+    if (typographySettings?.paragraphSpacing != null) {
+      result = Padding(
+        padding: EdgeInsets.only(bottom: typographySettings!.paragraphSpacing!),
+        child: result,
       );
     }
     return result;
