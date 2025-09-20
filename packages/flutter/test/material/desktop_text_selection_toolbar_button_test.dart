@@ -55,6 +55,6 @@ void main() {
         ),
       ),
     );
-    expect(tester.getSize(find.byType(DesktopTextSelectionToolbarButton)).isEmpty, isTrue);
+    expect(tester.getSize(find.byType(DesktopTextSelectionToolbarButton)), Size.zero);
   });
 }
