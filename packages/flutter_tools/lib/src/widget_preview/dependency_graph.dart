@@ -46,6 +46,12 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
   ConstructorDeclaration? _currentConstructor;
   MethodDeclaration? _currentMethod;
 
+  late Uri _currentScriptUri;
+
+  void findPreviewsInResolvedUnitResult(ResolvedUnitResult unit) {
+    _scopedVisitChildren(unit.unit, (_) => _currentScriptUri = unit.file.toUri());
+  }
+
   /// Handles previews defined on top-level functions.
   @override
   void visitFunctionDeclaration(FunctionDeclaration node) {
@@ -76,51 +82,73 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
     _scopedVisitChildren(node, (MethodDeclaration? node) => _currentMethod = node);
   }
 
+  bool hasRequiredParams(FormalParameterList? params) {
+    return params?.parameters.any((p) => p.isRequired) ?? false;
+  }
+
   @override
   void visitAnnotation(Annotation node) {
     final previewsToProcess = <DartObject>[];
     if (node.isMultiPreview) {
       previewsToProcess.addAll(node.findMultiPreviewPreviewNodes(context: _context));
     } else if (node.isPreview) {
-      previewsToProcess.add(node.elementAnnotation!.computeConstantValue()!);
+      final DartObject? evaluatedAnnotation = node.elementAnnotation!.computeConstantValue();
+      if (evaluatedAnnotation == null) {
+        return;
+      }
+      previewsToProcess.add(evaluatedAnnotation);
     } else {
       return;
     }
 
     for (final preview in previewsToProcess) {
-      assert(_currentFunction != null || _currentConstructor != null || _currentMethod != null);
-      if (_currentFunction != null) {
-        final returnType = _currentFunction!.returnType! as NamedType;
-        previewEntries.add(
-          PreviewDetails(
-            packageName: packageName,
-            functionName: _currentFunction!.name.toString(),
-            isBuilder: returnType.name2.isWidgetBuilder,
-            previewAnnotation: preview,
-          ),
-        );
-      } else if (_currentConstructor != null) {
+      if (_currentFunction != null &&
+          !hasRequiredParams(_currentFunction!.functionExpression.parameters)) {
+        final TypeAnnotation? returnTypeAnnotation = _currentFunction!.returnType;
+        if (returnTypeAnnotation is NamedType) {
+          final Token returnType = returnTypeAnnotation.name;
+          if (returnType.isWidget || returnType.isWidgetBuilder) {
+            previewEntries.add(
+              PreviewDetails(
+                scriptUri: _currentScriptUri,
+                packageName: packageName,
+                functionName: _currentFunction!.name.toString(),
+                isBuilder: returnType.isWidgetBuilder,
+                previewAnnotation: preview,
+              ),
+            );
+          }
+        }
+      } else if (_currentConstructor != null &&
+          !hasRequiredParams(_currentConstructor!.parameters)) {
         final returnType = _currentConstructor!.returnType as SimpleIdentifier;
         final Token? name = _currentConstructor!.name;
         previewEntries.add(
           PreviewDetails(
+            scriptUri: _currentScriptUri,
             packageName: packageName,
             functionName: '$returnType${name == null ? '' : '.$name'}',
             isBuilder: false,
             previewAnnotation: preview,
           ),
         );
-      } else if (_currentMethod != null) {
-        final returnType = _currentMethod!.returnType! as NamedType;
-        final parentClass = _currentMethod!.parent! as ClassDeclaration;
-        previewEntries.add(
-          PreviewDetails(
-            packageName: packageName,
-            functionName: '${parentClass.name}.${_currentMethod!.name}',
-            isBuilder: returnType.name2.isWidgetBuilder,
-            previewAnnotation: preview,
-          ),
-        );
+      } else if (_currentMethod != null && !hasRequiredParams(_currentMethod!.parameters)) {
+        final TypeAnnotation? returnTypeAnnotation = _currentMethod!.returnType;
+        if (returnTypeAnnotation is NamedType) {
+          final Token returnType = returnTypeAnnotation.name;
+          if (returnType.isWidget || returnType.isWidgetBuilder) {
+            final parentClass = _currentMethod!.parent! as ClassDeclaration;
+            previewEntries.add(
+              PreviewDetails(
+                scriptUri: _currentScriptUri,
+                packageName: packageName,
+                functionName: '${parentClass.name}.${_currentMethod!.name}',
+                isBuilder: returnType.isWidgetBuilder,
+                previewAnnotation: preview,
+              ),
+            );
+          }
+        }
       }
     }
   }
@@ -134,7 +162,7 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
 
 /// Contains all the information related to a library being watched by [PreviewDetector].
 final class LibraryPreviewNode {
-  LibraryPreviewNode({required LibraryElement2 library, required this.logger})
+  LibraryPreviewNode({required LibraryElement library, required this.logger})
     : path = library.toPreviewPath() {
     final libraryFilePaths = <String>[
       for (final LibraryFragment fragment in library.fragments) fragment.source.fullName,
@@ -190,10 +218,8 @@ final class LibraryPreviewNode {
   /// Finds all previews defined in the [lib] and adds them to [previews].
   void findPreviews({required ResolvedLibraryResult lib}) {
     // Iterate over the compilation unit's AST to find previews.
-    final visitor = _PreviewVisitor(lib: lib.element2);
-    for (final ResolvedUnitResult libUnit in lib.units) {
-      libUnit.unit.visitChildren(visitor);
-    }
+    final visitor = _PreviewVisitor(lib: lib.element);
+    lib.units.forEach(visitor.findPreviewsInResolvedUnitResult);
     previews
       ..clear()
       ..addAll(visitor.previewEntries);
@@ -212,13 +238,13 @@ final class LibraryPreviewNode {
 
     for (final unit in units) {
       final LibraryFragment fragment = unit.libraryFragment;
-      for (final LibraryImport importedLib in fragment.libraryImports2) {
-        if (importedLib.importedLibrary2 == null) {
+      for (final LibraryImport importedLib in fragment.libraryImports) {
+        if (importedLib.importedLibrary == null) {
           // This is an import for a file that's not analyzed (likely an import of a package from
           // the pub-cache) and isn't necessary to track as part of the dependency graph.
           continue;
         }
-        final LibraryElement2 importedLibrary = importedLib.importedLibrary2!;
+        final LibraryElement importedLibrary = importedLib.importedLibrary!;
         final LibraryPreviewNode result = graph.putIfAbsent(
           importedLibrary.toPreviewPath(),
           () => LibraryPreviewNode(library: importedLibrary, logger: logger),

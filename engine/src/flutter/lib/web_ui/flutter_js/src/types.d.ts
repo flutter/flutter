@@ -39,6 +39,7 @@ export interface BrowserEnvironment {
   hasChromiumBreakIterators: boolean;
   supportsWasmGC: boolean;
   crossOriginIsolated: boolean;
+  webGLVersion: number;
 }
 
 type CanvasKitVariant =
