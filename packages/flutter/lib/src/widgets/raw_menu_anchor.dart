@@ -982,7 +982,7 @@ class _RawMenuAnchorGroupState extends State<RawMenuAnchorGroup>
 ///   [MenuController].
 /// * [SubmenuButton], a widget that has a button that manages a submenu.
 /// * [RawMenuAnchor], a widget that defines a region that has submenu.
-final class MenuController {
+class MenuController {
   // The anchor that this controller controls.
   //
   // This is set automatically when this `MenuController` is attached to an
