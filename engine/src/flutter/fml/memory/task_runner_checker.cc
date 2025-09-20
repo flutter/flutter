@@ -10,7 +10,7 @@ TaskRunnerChecker::TaskRunnerChecker()
     : initialized_queue_id_(InitTaskQueueId()),
       subsumed_queue_ids_(
           MessageLoopTaskQueues::GetInstance()->GetSubsumedTaskQueueId(
-              initialized_queue_id_)){};
+              initialized_queue_id_)) {};
 
 TaskRunnerChecker::~TaskRunnerChecker() = default;
 

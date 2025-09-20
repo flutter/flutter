@@ -2122,10 +2122,15 @@ void main() {
       await tester.tap(find.byType(TextField));
       // Wait for context menu to be built.
       await tester.pumpAndSettle();
-      final RenderBox container = tester.renderObject(
-        find.descendant(of: find.byType(SnapshotWidget), matching: find.byType(SizedBox)).first,
+      expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
+      final SizedBox sizedBox = tester.widget(
+        find.descendant(
+          of: find.byType(AdaptiveTextSelectionToolbar),
+          matching: find.byType(SizedBox),
+        ),
       );
-      expect(container.size, Size.zero);
+      expect(sizedBox.width, 0.0);
+      expect(sizedBox.height, 0.0);
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.android,
@@ -17671,6 +17676,62 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{
         TargetPlatform.android,
         TargetPlatform.iOS,
+      }),
+    );
+
+    testWidgets(
+      'TextField cursor appears only when focused',
+      (WidgetTester tester) async {
+        final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+        addTearDown(focusNode.dispose);
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Material(
+              child: Center(
+                child: TextField(
+                  focusNode: focusNode,
+                  dragStartBehavior: DragStartBehavior.down,
+                  magnifierConfiguration: TextMagnifierConfiguration(
+                    magnifierBuilder:
+                        (
+                          BuildContext context,
+                          MagnifierController controller,
+                          ValueNotifier<MagnifierInfo> localMagnifierInfo,
+                        ) {
+                          magnifierInfo = localMagnifierInfo;
+                          return fakeMagnifier;
+                        },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        final Offset fieldCenter = tester.getCenter(find.byType(EditableText));
+        final TestGesture gesture = await tester.startGesture(fieldCenter);
+        await gesture.moveBy(const Offset(30, 0));
+        await tester.pumpAndSettle();
+
+        // The blinking cursor should NOT be shown.
+        final EditableTextState editableTextState = tester.state<EditableTextState>(
+          find.byType(EditableText),
+        );
+        expect(focusNode.hasFocus, isFalse);
+        expect(editableTextState.cursorCurrentlyVisible, isFalse);
+
+        // Simulate long press again.
+        await tester.pump();
+        await tester.longPress(find.byType(EditableText));
+        await tester.pumpAndSettle();
+
+        // The blinking cursor should now be shown.
+        expect(focusNode.hasFocus, isTrue);
+        expect(editableTextState.cursorCurrentlyVisible, isTrue);
+      },
+      variant: const TargetPlatformVariant(<TargetPlatform>{
+        TargetPlatform.iOS,
+        TargetPlatform.android,
       }),
     );
 

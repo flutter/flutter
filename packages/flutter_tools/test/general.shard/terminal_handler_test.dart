@@ -751,6 +751,21 @@ void main() {
       expect(devtoolsHandler.calledLaunchDevToolsInBrowser, isTrue);
     });
 
+    testWithoutContext('v - does not launchDevToolsInBrowser on web in profile mode', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(
+        <FakeVmServiceRequest>[],
+        web: true,
+        buildMode: BuildMode.profile,
+      );
+
+      final runner = terminalHandler.residentRunner as FakeResidentRunner;
+      final devtoolsHandler = runner.residentDevtoolsHandler as FakeResidentDevtoolsHandler;
+
+      expect(devtoolsHandler.calledLaunchDevToolsInBrowser, isFalse);
+      await terminalHandler.processTerminalInput('v');
+      expect(devtoolsHandler.calledLaunchDevToolsInBrowser, isFalse);
+    });
+
     testWithoutContext('w,W - debugDumpApp without service protocol is skipped', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(
         <FakeVmServiceRequest>[],
@@ -1415,7 +1430,6 @@ class TestRunner extends Fake implements ResidentRunner {
   Future<int?> attach({
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
-    bool allowExistingDdsInstance = false,
     bool enableDevTools = false,
     bool needsFullRestart = true,
   }) async => null;
