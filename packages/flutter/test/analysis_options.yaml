@@ -1,5 +1,11 @@
 include: ../analysis_options.yaml
 
+plugins:
+  flutter_analyzer_plugin:
+    path: ../dev/flutter_analyzer_plugin
+    diagnostics:
+      no_stopwatches: true
+
 linter:
   rules:
     # Tests try to throw and catch things in exciting ways all the time, so

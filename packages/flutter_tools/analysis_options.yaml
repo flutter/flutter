@@ -1,5 +1,11 @@
 include: ../analysis_options.yaml
 
+plugins:
+  flutter_analyzer_plugin:
+    path: ../../dev/flutter_analyzer_plugin
+    diagnostics:
+      avoid_future_catch_error: true
+
 linter:
   rules:
     always_specify_types: false # This isn't necessary for tool code which doesn't have the same explicit readability requirements as the framework.

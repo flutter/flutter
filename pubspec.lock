@@ -25,6 +25,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.1.7"
+  analysis_server_plugin:
+    dependency: transitive
+    description:
+      name: analysis_server_plugin
+      sha256: "271b1af21eced5d49aa03b0b27934621f73a287ce9dcefdcea5078a87f22c3cc"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.2"
   analyzer:
     dependency: "direct main"
     description:
@@ -33,6 +41,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "8.1.1"
+  analyzer_plugin:
+    dependency: transitive
+    description:
+      name: analyzer_plugin
+      sha256: dd574a0ab77de88b7d9c12bc4b626109a5ca9078216a79041a5c24c3a1bd103c
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.13.7"
+  analyzer_testing:
+    dependency: transitive
+    description:
+      name: analyzer_testing
+      sha256: "5331874225c9220a842a327e4702525ed177e534f9abeb34231b413189e733a6"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.2"
   animations:
     dependency: "direct main"
     description:
@@ -847,6 +871,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.12"
+  test_reflective_loader:
+    dependency: transitive
+    description:
+      name: test_reflective_loader
+      sha256: b94229c9ae2a9ebe77d7abfee30641842e7e427b8bd851709de517970b905096
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.0"
   typed_data:
     dependency: "direct main"
     description:
@@ -1059,10 +1091,10 @@ packages:
     dependency: "direct main"
     description:
       name: webview_flutter_wkwebview
-      sha256: fb46db8216131a3e55bcf44040ca808423539bc6732e7ed34fb6d8044e3d512f
+      sha256: fea63576b3b7e02b2df8b78ba92b48ed66caec2bb041e9a0b1cbd586d5d80bfd
       url: "https://pub.dev"
     source: hosted
-    version: "3.23.0"
+    version: "3.23.1"
   xdg_directories:
     dependency: "direct main"
     description:
