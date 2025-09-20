@@ -1154,7 +1154,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
             ? Padding(
                 padding:
                     widget.trailingIconPadding ??
-                    (isCollapsed ? EdgeInsets.zero : const EdgeInsets.all(4)),
+                    (isCollapsed ? EdgeInsets.zero : const EdgeInsets.all(4.0)),
                 child: IconButton(
                   iconSize: trailingIconButtonStyle?.iconSize,
                   visualDensity: trailingIconButtonStyle?.visualDensity,
@@ -1671,7 +1671,7 @@ class DropdownMenuTrailingIconButtonStyle {
 
   /// Defines the size of icon inside the [DropdownMenu]'s trailing icon button.
   ///
-  /// The usage is similar as [IconButton.iconSize],
+  /// The usage is similar as [IconButton.iconSize].
   final double? iconSize;
 
   /// Defines how compact the [DropdownMenu]'s trailing icon button's layout will be.
@@ -1725,6 +1725,9 @@ class DropdownMenuTrailingIconButtonStyle {
   final Color? disabledColor;
 
   /// Defines the callback that is called when the [DropdownMenu]'s trailing icon button is tapped or otherwise activated.
+  ///
+  /// This callback is called before the menu is opened or closed, and does not
+  /// override the default behavior of the trailing icon button.
   ///
   /// The usage is similar as [IconButton.onPressed].
   final VoidCallback? onPressed;
