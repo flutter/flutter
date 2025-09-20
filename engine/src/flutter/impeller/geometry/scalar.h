@@ -18,6 +18,17 @@ namespace impeller {
 
 using Scalar = float;
 
+template <class T>
+constexpr bool IsFinite(T arg) {
+  return arg == arg && arg != std::numeric_limits<T>::infinity() &&
+         arg != -std::numeric_limits<T>::infinity();
+}
+
+template <typename T>
+constexpr T Fmod(T x, T y) {
+  return x - static_cast<int>(x / y) * y;
+}
+
 template <class T, class = std::enable_if_t<std::is_arithmetic_v<T>>>
 constexpr T Absolute(const T& val) {
   return val >= T{} ? val : -val;
@@ -48,7 +59,7 @@ struct Radians {
 
   explicit constexpr Radians(Scalar p_radians) : radians(p_radians) {}
 
-  constexpr bool IsFinite() const { return std::isfinite(radians); }
+  constexpr bool IsFinite() const { return impeller::IsFinite(radians); }
 
   constexpr Radians operator-() { return Radians{-radians}; }
 
@@ -74,7 +85,7 @@ struct Degrees {
     return Radians{degrees * kPi / 180.0f};
   };
 
-  constexpr bool IsFinite() const { return std::isfinite(degrees); }
+  constexpr bool IsFinite() const { return impeller::IsFinite(degrees); }
 
   constexpr Degrees operator-() const { return Degrees{-degrees}; }
 
@@ -89,7 +100,7 @@ struct Degrees {
   constexpr auto operator<=>(const Degrees& d) const = default;
 
   constexpr Degrees GetPositive() const {
-    Scalar deg = std::fmod(degrees, 360.0f);
+    Scalar deg = Fmod(degrees, 360.0f);
     if (deg < 0.0f) {
       deg += 360.0f;
     }
