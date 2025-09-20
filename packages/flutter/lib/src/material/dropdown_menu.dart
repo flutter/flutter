@@ -267,6 +267,10 @@ class DropdownMenu<T> extends StatefulWidget {
   /// The [trailingIconButtonStyle] property allows extra specification on how the trailing icon button should be constructed, such as specifying the [IconButton.padding] and [IconButton.iconSize].
   ///
   /// Defaults to null.
+  /// {@tool dartpad}
+  /// This sample demonstrates how the [trailingIconButtonStyle] property allows customization on the construction of trailing icon button.
+  /// ** See code in examples/api/lib/material/dropdown_menu/dropdown_menu.customize_trailing_icon_button.0.dart **
+  /// {@end-tool}
   final DropdownMenuTrailingIconButtonStyle? trailingIconButtonStyle;
 
   /// Specifies if the [DropdownMenu] should show a [trailingIcon].
@@ -1144,10 +1148,13 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       builder: (BuildContext context, MenuController controller, Widget? child) {
         assert(_initialMenu != null);
         final bool isCollapsed = widget.inputDecorationTheme?.isCollapsed ?? false;
-        final DropdownMenuTrailingIconButtonStyle? trailingIconButtonStyle = widget.trailingIconButtonStyle;
+        final DropdownMenuTrailingIconButtonStyle? trailingIconButtonStyle =
+            widget.trailingIconButtonStyle;
         final Widget trailingButton = widget.showTrailingIcon
             ? Padding(
-                padding: widget.trailingIconPadding ?? (isCollapsed ? EdgeInsets.zero : const EdgeInsets.all(4)),
+                padding:
+                    widget.trailingIconPadding ??
+                    (isCollapsed ? EdgeInsets.zero : const EdgeInsets.all(4)),
                 child: IconButton(
                   iconSize: trailingIconButtonStyle?.iconSize,
                   visualDensity: trailingIconButtonStyle?.visualDensity,
@@ -1634,7 +1641,7 @@ class _DropdownMenuDefaultsM3 extends DropdownMenuThemeData {
 /// 4. [IconButton.focusNode] : the focus node of the trailing icon button should be defined by [DropdownMenu.trailingIconFocusNode].
 ///
 /// 5. [IconButton.isSelected] : the selection state of the trailing icon button is determined by the [MenuController]'s [MenuController.isOpen] property of [DropdownMenu].
-class DropdownMenuTrailingIconButtonStyle{
+class DropdownMenuTrailingIconButtonStyle {
   /// Creates a [DropdownMenuTrailingIconButtonStyle] that is used by [DropdownMenu.trailingIconButtonStyle].
   const DropdownMenuTrailingIconButtonStyle({
     this.iconSize,

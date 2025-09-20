@@ -23,22 +23,22 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
         body: SafeArea(
           child: DropdownMenu<String>(
             dropdownMenuEntries: <DropdownMenuEntry<String>>[
-              DropdownMenuEntry<String>(value: 'Hewwo', label: 'Hewwo')
+              DropdownMenuEntry<String>(value: 'Hewwo', label: 'Hewwo'),
             ],
             trailingIconButtonStyle: DropdownMenuTrailingIconButtonStyle(
               iconSize: 12,
               padding: EdgeInsets.zero,
-              style: ButtonStyle(
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap
-              )
+              style: ButtonStyle(tapTargetSize: MaterialTapTargetSize.shrinkWrap),
             ),
+            trailingIconPadding: EdgeInsets.zero,
             inputDecorationTheme: InputDecorationTheme(
-              isCollapsed: true,
+              isDense: true,
+              contentPadding: EdgeInsets.zero,
               suffixIconConstraints: BoxConstraints(),
             ),
-          )
+          ),
         ),
-      )
+      ),
     );
   }
 }

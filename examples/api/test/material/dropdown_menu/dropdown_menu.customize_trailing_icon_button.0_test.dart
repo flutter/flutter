@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/dropdown_menu/dropdown_menu.customize_trailing_icon_button.0.dart' as example;
+import 'package:flutter_api_samples/material/dropdown_menu/dropdown_menu.customize_trailing_icon_button.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -19,6 +20,6 @@ void main() {
       // check if the padding and icon size of the trailing icon button in DropdownMenu is 0 and 12 respectively
       expect(trailingIconButton.padding, EdgeInsets.zero);
       expect(trailingIconButton.iconSize, 12);
-    }
+    },
   );
 }
