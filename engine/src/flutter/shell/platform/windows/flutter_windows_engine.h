@@ -56,7 +56,7 @@ namespace flutter {
 constexpr FlutterViewId kImplicitViewId = 0;
 
 class FlutterWindowsView;
-class DisplayMonitor;
+class DisplayManager;
 
 // Update the thread priority for the Windows engine.
 static void WindowsPlatformThreadPrioritySetter(
@@ -160,7 +160,7 @@ class FlutterWindowsEngine {
     return message_dispatcher_.get();
   }
 
-  std::shared_ptr<DisplayMonitor> display_monitor() { return display_monitor_; }
+  std::shared_ptr<DisplayManager> display_manager() { return display_manager_; }
 
   // Notifies the engine about a display update.
   void UpdateDisplay(const std::vector<FlutterEngineDisplay>& displays);
@@ -425,7 +425,7 @@ class FlutterWindowsEngine {
   mutable std::shared_mutex views_mutex_;
 
   // The display monitor.
-  std::shared_ptr<DisplayMonitor> display_monitor_;
+  std::shared_ptr<DisplayManager> display_manager_;
 
   // Task runner for tasks posted from the engine.
   std::unique_ptr<TaskRunner> task_runner_;
