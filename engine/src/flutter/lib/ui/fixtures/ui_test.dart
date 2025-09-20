@@ -176,6 +176,7 @@ void sendSemanticsUpdate() {
   String tooltip = "tooltip";
 
   final Float64List transform = Float64List(16);
+  final Float64List hitTestTransform = Float64List(16);
   final Int32List childrenInTraversalOrder = Int32List(0);
   final Int32List childrenInHitTestOrder = Int32List(0);
   final Int32List additionalActions = Int32List(0);
@@ -209,6 +210,7 @@ void sendSemanticsUpdate() {
     platformViewId: -1,
     scrollChildren: 0,
     scrollIndex: 0,
+    traversalOwner: 0,
     scrollPosition: 0,
     scrollExtentMax: 0,
     scrollExtentMin: 0,
@@ -227,6 +229,7 @@ void sendSemanticsUpdate() {
     tooltip: tooltip,
     textDirection: TextDirection.ltr,
     transform: transform,
+    hitTestTransform: hitTestTransform,
     childrenInTraversalOrder: childrenInTraversalOrder,
     childrenInHitTestOrder: childrenInHitTestOrder,
     additionalActions: additionalActions,
@@ -244,6 +247,7 @@ void sendSemanticsUpdateWithRole() {
   final SemanticsUpdateBuilder builder = SemanticsUpdateBuilder();
 
   final Float64List transform = Float64List(16);
+  final Float64List hitTestTransform = Float64List(16);
   final Int32List childrenInTraversalOrder = Int32List(0);
   final Int32List childrenInHitTestOrder = Int32List(0);
   final Int32List additionalActions = Int32List(0);
@@ -262,6 +266,7 @@ void sendSemanticsUpdateWithRole() {
     platformViewId: -1,
     scrollChildren: 0,
     scrollIndex: 0,
+    traversalOwner: 0,
     scrollPosition: 0,
     scrollExtentMax: 0,
     scrollExtentMin: 0,
@@ -280,6 +285,7 @@ void sendSemanticsUpdateWithRole() {
     tooltip: "tooltip",
     textDirection: TextDirection.ltr,
     transform: transform,
+    hitTestTransform: hitTestTransform,
     childrenInTraversalOrder: childrenInTraversalOrder,
     childrenInHitTestOrder: childrenInHitTestOrder,
     additionalActions: additionalActions,
@@ -298,6 +304,7 @@ void sendSemanticsUpdateWithLocale() {
   final SemanticsUpdateBuilder builder = SemanticsUpdateBuilder();
 
   final Float64List transform = Float64List(16);
+  final Float64List hitTestTransform = Float64List(16);
   final Int32List childrenInTraversalOrder = Int32List(0);
   final Int32List childrenInHitTestOrder = Int32List(0);
   final Int32List additionalActions = Int32List(0);
@@ -319,6 +326,7 @@ void sendSemanticsUpdateWithLocale() {
     scrollPosition: 0,
     scrollExtentMax: 0,
     scrollExtentMin: 0,
+    traversalOwner: 0,
     rect: Rect.fromLTRB(0, 0, 10, 10),
     identifier: "identifier",
     label: "label",
@@ -334,6 +342,7 @@ void sendSemanticsUpdateWithLocale() {
     tooltip: "tooltip",
     textDirection: TextDirection.ltr,
     transform: transform,
+    hitTestTransform: hitTestTransform,
     childrenInTraversalOrder: childrenInTraversalOrder,
     childrenInHitTestOrder: childrenInHitTestOrder,
     additionalActions: additionalActions,
