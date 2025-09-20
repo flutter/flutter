@@ -635,12 +635,15 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   /// null if provided.
   const BackdropFilter({
     super.key,
-    required this.filter,
+    this.filter,
+    this.filterConfig,
     super.child,
     this.blendMode = BlendMode.srcOver,
     this.enabled = true,
     this.backdropGroupKey,
-  }) : _useSharedKey = false;
+  }) : assert(filter != null || filterConfig != null, 'Either filter or filterConfig must be provided.'),
+       assert(filter == null || filterConfig == null, 'Cannot provide both a filter and a filterConfig.'),
+       _useSharedKey = false;
 
   /// Creates a backdrop filter that groups itself with the nearest parent
   /// [BackdropGroup].
@@ -653,18 +656,35 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   /// widgets.
   const BackdropFilter.grouped({
     super.key,
-    required this.filter,
+    this.filter,
+    this.filterConfig,
     super.child,
     this.blendMode = BlendMode.srcOver,
     this.enabled = true,
-  }) : backdropGroupKey = null,
+  }) : assert(filter != null || filterConfig != null, 'Either filter or filterConfig must be provided.'),
+       assert(filter == null || filterConfig == null, 'Cannot provide both a filter and a filterConfig.'),
+       backdropGroupKey = null,
        _useSharedKey = true;
 
   /// The image filter to apply to the existing painted content before painting the child.
   ///
   /// For example, consider using [ImageFilter.blur] to create a backdrop
   /// blur effect.
-  final ui.ImageFilter filter;
+  ///
+  /// This is the engine-level filter object. If you want to create a
+  /// filter that depends on the layout of the widget, consider using
+  /// [filterConfig] instead.
+  final ui.ImageFilter? filter;
+
+  /// The configuration for the image filter to apply to the existing painted content.
+  ///
+  /// This is the framework-level configuration object that can be resolved
+  /// into a [ui.ImageFilter] at layout time.
+  ///
+  /// See also:
+  ///
+  ///  * [ImageFilterConfig], the class that defines the configuration.
+  final ImageFilterConfig? filterConfig;
 
   /// The blend mode to use to apply the filtered background content onto the background
   /// surface.
@@ -698,6 +718,7 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   RenderBackdropFilter createRenderObject(BuildContext context) {
     return RenderBackdropFilter(
       filter: filter,
+      filterConfig: filterConfig,
       blendMode: blendMode,
       enabled: enabled,
       backdropKey: _getBackdropGroupKey(context),
@@ -708,9 +729,19 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderBackdropFilter renderObject) {
     renderObject
       ..filter = filter
+      ..filterConfig = filterConfig
       ..enabled = enabled
       ..blendMode = blendMode
       ..backdropKey = _getBackdropGroupKey(context);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ui.ImageFilter>('filter', filter, defaultValue: null));
+    properties.add(DiagnosticsProperty<ImageFilterConfig>('filterConfig', filterConfig, defaultValue: null));
+    properties.add(EnumProperty<BlendMode>('blendMode', blendMode));
+    properties.add(FlagProperty('enabled', value: enabled, ifTrue: 'enabled'));
   }
 }
 
