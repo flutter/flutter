@@ -240,7 +240,7 @@ class DropdownMenu<T> extends StatefulWidget {
 
   /// An optional icon at the end of the text field.
   ///
-  /// Defaults to an [IconButton] with [Icons.arrow_drop_down].
+  /// Defaults to an [Icon] with [Icons.arrow_drop_down].
   ///
   /// If [showTrailingIcon] is false, the trailing icon will not be shown.
   final Widget? trailingIcon;
@@ -1628,6 +1628,10 @@ class _DropdownMenuDefaultsM3 extends DropdownMenuThemeData {
 ///
 /// The properties in a [DropdownMenuTrailingIconButtonStyle] are similar to the properties in an [IconButton],
 /// as it is used to specify how the trailing icon button in a [DropdownMenu] should be constructed.
+///
+/// If [DropdownMenuTrailingIconButtonStyle.style] is also specified, properties from [style] will take
+/// precedence over the individual properties of this class, such as [iconSize] and [padding].
+///
 /// However, some of the properties are excluded as these properties should be specified in the constructor of [DropdownMenu].
 ///
 /// Excluded properties:
