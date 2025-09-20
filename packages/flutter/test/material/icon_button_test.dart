@@ -3560,6 +3560,26 @@ void main() {
   });
 }
 
+testWidgets('IconButton M3 respects splashRadius from ButtonStyle', (WidgetTester tester) async {
+    const double splashRadius = 42.0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: IconButton(
+          onPressed: () {},
+          icon: const Icon(Icons.add),
+          style: const ButtonStyle(splashRadius: splashRadius),
+        ),
+      ),
+    );
+
+    final InkWell inkWell = tester.widget(find.byType(InkWell));
+    expect(inkWell.radius, splashRadius);
+  });
+
+
+
 Widget buildAllVariants({
   bool enabled = true,
   bool useMaterial3 = true,

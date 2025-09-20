@@ -660,6 +660,7 @@ class IconButton extends StatelessWidget {
     Size? fixedSize,
     Size? maximumSize,
     double? iconSize,
+    double? splashRadius,
     BorderSide? side,
     OutlinedBorder? shape,
     EdgeInsetsGeometry? padding,
@@ -701,7 +702,7 @@ class IconButton extends StatelessWidget {
       shape: ButtonStyleButton.allOrNull<OutlinedBorder>(shape),
       mouseCursor: disabledMouseCursor == null && enabledMouseCursor == null
           ? null
-          : WidgetStateProperty<MouseCursor?>.fromMap(<WidgetStatesConstraint, MouseCursor?>{
+          : WidgetStateProperty<MouseCursor?>.fromMap(<WidgetState, MouseCursor?>{
               WidgetState.disabled: disabledMouseCursor,
               WidgetState.any: enabledMouseCursor,
             }),
@@ -710,6 +711,7 @@ class IconButton extends StatelessWidget {
       animationDuration: animationDuration,
       enableFeedback: enableFeedback,
       alignment: alignment,
+      splashRadius: splashRadius,
       splashFactory: splashFactory,
     );
   }
@@ -717,6 +719,20 @@ class IconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final IconButtonThemeData iconButtonTheme = IconButtonTheme.of(context);
+
+    // Get effective splash radius from theme if not explicitly set
+    double? effectiveSplashRadius = splashRadius ?? iconButtonTheme.splashRadius;
+
+    // Adjust padding for Material 3 when splash radius is large
+    EdgeInsetsGeometry? effectivePadding = padding;
+    if (theme.useMaterial3 &&
+        effectiveSplashRadius != null &&
+        effectiveSplashRadius > 24.0 &&
+        padding == null) {
+      final double extraPadding = math.max(0, (effectiveSplashRadius - 24.0) / 2);
+      effectivePadding = EdgeInsets.all(8.0 + extraPadding);
+    }
 
     if (theme.useMaterial3) {
       final Size? minSize = constraints == null
@@ -733,7 +749,7 @@ class IconButton extends StatelessWidget {
         focusColor: focusColor,
         hoverColor: hoverColor,
         highlightColor: highlightColor,
-        padding: padding,
+        padding: effectivePadding,
         minimumSize: minSize,
         maximumSize: maxSize,
         iconSize: iconSize,
@@ -741,6 +757,7 @@ class IconButton extends StatelessWidget {
         enabledMouseCursor: mouseCursor,
         disabledMouseCursor: mouseCursor,
         enableFeedback: enableFeedback,
+        splashRadius: effectiveSplashRadius,
       );
       if (style != null) {
         adjustedStyle = style!.merge(adjustedStyle);
@@ -821,8 +838,7 @@ class IconButton extends StatelessWidget {
       hoverColor: hoverColor ?? theme.hoverColor,
       highlightColor: highlightColor ?? theme.highlightColor,
       splashColor: splashColor ?? theme.splashColor,
-      radius:
-          splashRadius ??
+      radius: effectiveSplashRadius ??
           math.max(
             Material.defaultSplashRadius,
             (effectiveIconSize + math.min(effectivePadding.horizontal, effectivePadding.vertical)) *
