@@ -69,6 +69,19 @@ RuntimeStage::Map RuntimeStage::DecodeRuntimeStages(
   }
 
   auto raw_stages = fb::GetRuntimeStages(payload->GetMapping());
+  if (!raw_stages) {
+    return {};
+  }
+
+  const auto version = raw_stages->format_version();
+  const auto expected =
+      static_cast<uint32_t>(fb::RuntimeStagesFormatVersion::kVersion);
+  if (version != expected) {
+    VALIDATION_LOG << "Unsupported runtime stages format version: " << version
+                   << ". Expected: " << expected;
+    return {};
+  }
+
   return {
       {RuntimeStageBackend::kSkSL,
        RuntimeStageIfPresent(raw_stages->sksl(), payload)},

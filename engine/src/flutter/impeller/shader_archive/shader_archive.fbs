@@ -4,6 +4,13 @@
 
 namespace impeller.fb;
 
+// This is the shader archive format version number - it's value should be
+// incremented any time there is a change to this file which changes the
+// resulting flat buffer format.
+enum ShaderArchiveFormatVersion:uint32 {
+  kVersion = 1
+}
+
 enum Stage:byte {
   kVertex,
   kFragment,
@@ -17,6 +24,7 @@ table ShaderBlob {
 }
 
 table ShaderArchive {
+  format_version: uint32; // This is intended to hold ShaderArchiveFormatVersion.kVersion.
   items: [ShaderBlob];
 }
 
