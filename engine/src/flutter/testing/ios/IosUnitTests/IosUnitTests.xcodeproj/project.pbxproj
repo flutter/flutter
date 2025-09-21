@@ -75,6 +75,8 @@
 		689EC1E2281B30D3008FEB58 /* FlutterSpellCheckPluginTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterSpellCheckPluginTest.mm; sourceTree = "<group>"; };
 		68B6091227F62F990036AC78 /* VsyncWaiterIosTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = VsyncWaiterIosTest.mm; sourceTree = "<group>"; };
 		7802C4F12E67A0CC002C7D6D /* FlutterSceneDelegateTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FlutterSceneDelegateTest.m; sourceTree = "<group>"; };
+		78136AF72E68D14D00900DCE /* FlutterSceneLifecycleTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterSceneLifecycleTest.mm; sourceTree = "<group>"; };
+		78A9D2512E6F56DA00BEE2FC /* FlutterViewTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterViewTest.mm; sourceTree = "<group>"; };
 		78E4ED342D88A77C00FD954E /* FlutterSharedApplicationTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterSharedApplicationTest.mm; sourceTree = "<group>"; };
 		D2D361A52B234EAC0018964E /* FlutterMetalLayerTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterMetalLayerTest.mm; sourceTree = "<group>"; };
 		F7521D7226BB671E005F15C5 /* libios_test_flutter.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libios_test_flutter.dylib; path = "../../../../out/$(FLUTTER_ENGINE)/libios_test_flutter.dylib"; sourceTree = "<group>"; };
@@ -105,6 +107,7 @@
 		0AC232E924BA71D300A85907 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				78136AF72E68D14D00900DCE /* FlutterSceneLifecycleTest.mm */,
 				7802C4F12E67A0CC002C7D6D /* FlutterSceneDelegateTest.m */,
 				78E4ED342D88A77C00FD954E /* FlutterSharedApplicationTest.mm */,
 				F76A3A892BE48F2F00A654F1 /* FlutterPlatformViewsTest.mm */,
@@ -114,6 +117,7 @@
 				F7A3FDE026B9E0A300EADD61 /* FlutterAppDelegateTest.mm */,
 				0AC232F424BA71D300A85907 /* SemanticsObjectTest.mm */,
 				0AC232F724BA71D300A85907 /* FlutterEngineTest.mm */,
+				78A9D2512E6F56DA00BEE2FC /* FlutterViewTest.mm */,
 				0AC2330324BA71D300A85907 /* accessibility_bridge_test.mm */,
 				0AC2330B24BA71D300A85907 /* FlutterTextInputPluginTest.mm */,
 				0AC2331024BA71D300A85907 /* connection_collection_test.mm */,

@@ -11,7 +11,7 @@ import 'package:ui/ui.dart' as ui;
 
 typedef ImageFilterHandleBorrow<T> = T Function(ImageFilterHandle handle);
 
-abstract class SkwasmImageFilter implements SceneImageFilter {
+abstract class SkwasmImageFilter implements LayerImageFilter {
   const SkwasmImageFilter();
 
   factory SkwasmImageFilter.blur({
@@ -65,9 +65,6 @@ abstract class SkwasmImageFilter implements SceneImageFilter {
 
   @override
   ui.Rect filterBounds(ui.Rect inputBounds) => withRawImageFilter((handle) {
-    if (handle == nullptr) {
-      return inputBounds;
-    }
     return withStackScope((StackScope scope) {
       final RawIRect rawRect = scope.convertIRectToNative(inputBounds);
       imageFilterGetFilterBounds(handle, rawRect);
