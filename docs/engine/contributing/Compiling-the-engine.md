@@ -162,7 +162,7 @@ These steps build the desktop embedding, and the engine used by `flutter test` o
 
 3. `./flutter/tools/gn --unoptimized` to prepare your build files.
    * `--unoptimized` disables C++ compiler optimizations. On macOS, binaries are emitted unstripped; on Linux, unstripped binaries are emitted to an `exe.unstripped` subdirectory of the build.
-   * use `./flutter/tools/gn --unoptimized --mac-cpu=arm64` on Apple Silicon 
+   * For Apple Silicon, use `./flutter/tools/gn --unoptimized --mac-cpu=arm64`.
 
 4. `ninja -C out/host_debug_unopt` to build a desktop unoptimized binary.
     * If you skipped `--unoptimized`, use `ninja -C out/host_debug` instead.
