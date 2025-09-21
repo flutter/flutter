@@ -116,14 +116,14 @@ enum OptionsViewOpenDirection {
 
   /// Open in the direction with the most available space within the overlay.
   ///
-  /// This is equivalent to using [OptionsViewOpenDirectionBuilder] with:
+  /// This is equivalent to using [RawAutocomplete.optionsViewOpenDirectionBuilder] with:
   /// ```dart
   /// (spaceAbove, spaceBelow) => spaceAbove > spaceBelow
   ///     ? OptionsViewOpenDirection.up
   ///     : OptionsViewOpenDirection.down
   /// ```
   ///
-  /// Consider using [optionsViewOpenDirectionBuilder] if you need more control
+  /// Consider using [RawAutocomplete.optionsViewOpenDirectionBuilder] if you need more control
   /// over the direction logic, such as minimum space requirements or different
   /// thresholds for each direction.
   automatic,
