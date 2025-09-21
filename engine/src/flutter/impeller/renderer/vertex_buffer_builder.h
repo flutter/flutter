@@ -5,12 +5,12 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_VERTEX_BUFFER_BUILDER_H_
 #define FLUTTER_IMPELLER_RENDERER_VERTEX_BUFFER_BUILDER_H_
 
+#include <format>
 #include <initializer_list>
 #include <memory>
 #include <type_traits>
 #include <vector>
 
-#include "impeller/base/strings.h"
 #include "impeller/core/allocator.h"
 #include "impeller/core/device_buffer.h"
 #include "impeller/core/formats.h"
@@ -137,7 +137,7 @@ class VertexBufferBuilder {
       return {};
     }
     if (!label_.empty()) {
-      buffer->SetLabel(SPrintF("%s Vertices", label_.c_str()));
+      buffer->SetLabel(std::format("{} Vertices", label_));
     }
     return DeviceBuffer::AsBufferView(std::move(buffer));
   }
@@ -166,7 +166,7 @@ class VertexBufferBuilder {
       return {};
     }
     if (!label_.empty()) {
-      buffer->SetLabel(SPrintF("%s Indices", label_.c_str()));
+      buffer->SetLabel(std::format("{} Indices", label_));
     }
     return DeviceBuffer::AsBufferView(std::move(buffer));
   }

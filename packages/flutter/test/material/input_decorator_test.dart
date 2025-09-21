@@ -6210,6 +6210,21 @@ void main() {
           );
         }, throwsAssertionError);
       });
+
+      // Regression test for https://github.com/flutter/flutter/issues/174784.
+      testWidgets('InputDecorator error widget text style defaults to errorStyle', (
+        WidgetTester tester,
+      ) async {
+        await tester.pumpWidget(
+          buildInputDecorator(decoration: const InputDecoration(error: Text(errorText))),
+        );
+
+        expect(findError(), findsOneWidget);
+        final ThemeData theme = Theme.of(tester.element(findDecorator()));
+        final Color expectedColor = theme.colorScheme.error;
+        final TextStyle expectedStyle = theme.textTheme.bodySmall!.copyWith(color: expectedColor);
+        expect(getErrorStyle(tester), expectedStyle);
+      });
     });
 
     testWidgets('InputDecorator with counter does not crash when given a 0 size', (
@@ -8386,17 +8401,17 @@ void main() {
     },
   );
 
-  testWidgets('InputDecorationThemeData.inputDecoration with MaterialState', (
+  testWidgets('InputDecorationThemeData.inputDecoration with WidgetState', (
     WidgetTester tester,
   ) async {
     final MaterialStateTextStyle themeStyle = MaterialStateTextStyle.resolveWith((
-      Set<MaterialState> states,
+      Set<WidgetState> states,
     ) {
       return const TextStyle(color: Colors.green);
     });
 
     final MaterialStateTextStyle decorationStyle = MaterialStateTextStyle.resolveWith((
-      Set<MaterialState> states,
+      Set<WidgetState> states,
     ) {
       return const TextStyle(color: Colors.blue);
     });
@@ -8442,7 +8457,7 @@ void main() {
 
     // InputDecoration (baseDecoration) defines InputDecoration properties
     final MaterialStateOutlineInputBorder border = MaterialStateOutlineInputBorder.resolveWith((
-      Set<MaterialState> states,
+      Set<WidgetState> states,
     ) {
       return const OutlineInputBorder();
     });
@@ -10125,8 +10140,8 @@ void main() {
     const Color iconErrorColor = Color(0xffff0000);
     const Color iconColor = Color(0xff00ff00);
     final ButtonStyle iconButtonStyle = ButtonStyle(
-      foregroundColor: WidgetStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-        if (states.contains(MaterialState.error)) {
+      foregroundColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+        if (states.contains(WidgetState.error)) {
           return iconErrorColor;
         }
         return iconColor;
@@ -10167,8 +10182,8 @@ void main() {
     const Color iconErrorColor = Color(0xffff0000);
     const Color iconColor = Color(0xff00ff00);
     final ButtonStyle iconButtonStyle = ButtonStyle(
-      foregroundColor: WidgetStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-        if (states.contains(MaterialState.error)) {
+      foregroundColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+        if (states.contains(WidgetState.error)) {
           return iconErrorColor;
         }
         return iconColor;

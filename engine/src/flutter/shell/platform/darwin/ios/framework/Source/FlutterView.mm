@@ -5,6 +5,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 
 #include "flutter/fml/platform/darwin/cf_utils.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifecycle.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.h"
 
@@ -239,6 +240,32 @@ static void PrintWideGamutWarningOnce() {
   // the focus engine should only interact with the designated focus items
   // (SemanticsObjects).
   return nil;
+}
+
+- (void)willMoveToWindow:(UIWindow*)newWindow {
+  // When a FlutterView moves windows, it may also be moving scenes. Add/remove the FlutterEngine
+  // from the FlutterSceneLifeCycleProvider.sceneLifeCycleDelegate if it changes scenes.
+  UIWindowScene* newScene = newWindow.windowScene;
+  UIWindowScene* previousScene = self.window.windowScene;
+  if (newScene == previousScene) {
+    return;
+  }
+  if ([newScene.delegate conformsToProtocol:@protocol(FlutterSceneLifeCycleProvider)]) {
+    id<FlutterSceneLifeCycleProvider> lifeCycleProvider =
+        (id<FlutterSceneLifeCycleProvider>)newScene.delegate;
+    [lifeCycleProvider.sceneLifeCycleDelegate addFlutterEngine:(FlutterEngine*)self.delegate];
+  }
+
+  if ([previousScene.delegate conformsToProtocol:@protocol(FlutterSceneLifeCycleProvider)]) {
+    // The window, and therefore windowScene, property may be nil if the receiver does not currently
+    // reside in any window. This occurs when the receiver has just been removed from its superview
+    // or when the receiver has just been added to a superview that is not attached to a window.
+    // Remove the engine from the previous scene if set since it is no longer in that window and
+    // scene.
+    id<FlutterSceneLifeCycleProvider> lifeCycleProvider =
+        (id<FlutterSceneLifeCycleProvider>)previousScene.delegate;
+    [lifeCycleProvider.sceneLifeCycleDelegate removeFlutterEngine:(FlutterEngine*)self.delegate];
+  }
 }
 
 @end
