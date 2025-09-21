@@ -170,22 +170,24 @@ Future<void> codesignDylib(
 ///
 /// Use the `clang`, `ar`, and `ld` that would be used if run with `xcrun`.
 Future<CCompilerConfig> cCompilerConfigMacOS() async {
+  return CCompilerConfig(
+    compiler: await _findXcrunBinary('clang'),
+    archiver: await _findXcrunBinary('ar'),
+    linker: await _findXcrunBinary('ld'),
+  );
+}
+
+/// Invokes `xcrun --find` to find the full path to [binaryName].
+Future<Uri> _findXcrunBinary(String binaryName) async {
   final ProcessResult xcrunResult = await globals.processManager.run(<String>[
     'xcrun',
-    'clang',
-    '--version',
+    '--find',
+    binaryName,
   ]);
   if (xcrunResult.exitCode != 0) {
-    throwToolExit('Failed to find clang with xcrun:\n${xcrunResult.stderr}');
+    throwToolExit('Failed to find $binaryName with xcrun:\n${xcrunResult.stderr}');
   }
-  final String installPath = LineSplitter.split(
-    xcrunResult.stdout as String,
-  ).firstWhere((String s) => s.startsWith('InstalledDir: ')).split(' ').last;
-  return CCompilerConfig(
-    compiler: Uri.file('$installPath/clang'),
-    archiver: Uri.file('$installPath/ar'),
-    linker: Uri.file('$installPath/ld'),
-  );
+  return Uri.file((xcrunResult.stdout as String).trim());
 }
 
 /// Converts [fileName] into a suitable framework name.
