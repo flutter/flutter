@@ -2828,6 +2828,11 @@ class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
               'Duplicate callback ID "${item.callbackId}" with different callbacks. '
               'Each custom menu item must have a unique ID or the same callback.',
             );
+            // TODO(Renzo-Olivares): If we do this, then the framework will have updated callbackIds
+            // (since right now it still considers onPressed), and they won't match the engines callbackIds.
+            //
+            // Ideally the callbackIds would not be based on the onPressed to make it more deterministic
+            // across rebuilds, so if an onPressed lambda hasn't changed the id should also not change.
             _customActionCallbacks[item.callbackId] = item.onPressed;
           }
         }
