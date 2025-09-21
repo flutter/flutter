@@ -10,7 +10,6 @@ import '../../../base/common.dart';
 import '../../../base/file_system.dart';
 import '../../../base/io.dart';
 import '../../../build_info.dart';
-import '../../../convert.dart';
 import '../../../globals.dart' as globals;
 
 /// Create an `Info.plist` in [target] for a framework with a single dylib.
