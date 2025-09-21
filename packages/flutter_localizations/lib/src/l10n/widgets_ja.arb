@@ -11,5 +11,7 @@
   "searchWebButtonLabel": "ウェブを検索",
   "shareButtonLabel": "共有",
   "pasteButtonLabel": "貼り付け",
-  "selectAllButtonLabel": "すべてを選択"
+  "selectAllButtonLabel": "すべてを選択",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found"
 }

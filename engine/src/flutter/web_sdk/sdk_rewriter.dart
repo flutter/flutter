@@ -113,7 +113,6 @@ final Map<Pattern, String> extraImportsMap = <Pattern, String>{
       "import 'dart:_skwasm_impl' if (dart.library.html) 'dart:_skwasm_stub';",
   'ui_web': "import 'dart:ui_web' as ui_web;",
   'engine': "import 'dart:_engine';",
-  'web_unicode': "import 'dart:_web_unicode';",
   'web_test_fonts': "import 'dart:_web_test_fonts';",
   'web_locale_keymap': "import 'dart:_web_locale_keymap' as locale_keymap;",
 };

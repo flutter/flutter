@@ -1634,7 +1634,11 @@ void main() {
     await pumpWidget();
     expect(
       tester.getSemantics(find.byType(TextFormField).last),
-      containsSemantics(isTextField: true, validationResult: SemanticsValidationResult.valid),
+      containsSemantics(
+        isTextField: true,
+        isFocusable: true,
+        validationResult: SemanticsValidationResult.valid,
+      ),
     );
 
     // Test invalid case
@@ -1642,7 +1646,11 @@ void main() {
     await pumpWidget();
     expect(
       tester.getSemantics(find.byType(TextFormField).last),
-      containsSemantics(isTextField: true, validationResult: SemanticsValidationResult.invalid),
+      containsSemantics(
+        isTextField: true,
+        isFocusable: true,
+        validationResult: SemanticsValidationResult.invalid,
+      ),
     );
   });
 }
