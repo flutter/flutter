@@ -147,19 +147,6 @@ Rect MakeReferenceUVs(const Rect& reference, const Rect& rect) {
   return result.Scale(1.0f / Vector2(reference.GetSize()));
 }
 
-// std::optional<Rect> OptionalRectIntersection(const std::optional<Rect>& a,
-//                                              const std::optional<Rect>& b) {
-//   if (a.has_value()) {
-//     if (b.has_value()) {
-//       return a.value().Intersection(b.value());
-//     } else {
-//       return a;
-//     }
-//   } else {
-//     return b;
-//   }
-// }
-
 Quad CalculateSnapshotUVs(
     const Snapshot& input_snapshot,
     const std::optional<Rect>& source_expanded_coverage_hint) {
@@ -781,6 +768,10 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
   // Apply as much of the desired padding as possible from the source. This may
   // be ignored so must be accounted for in the downsample pass by adding a
   // transparent gutter.
+  //
+  // This effectively consistutes a coordinate space shift by `local_padding`,
+  // which must be applied to `bounds_`, since it resides in the same coordinate
+  // space as `coverage_hint`.
   std::optional<Rect> expanded_coverage_hint;
   std::optional<Rect> shifted_bounds = bounds_;
   if (coverage_hint.has_value()) {
