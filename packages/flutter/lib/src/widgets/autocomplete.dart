@@ -118,9 +118,10 @@ enum OptionsViewOpenDirection {
   ///
   /// This is equivalent to using [RawAutocomplete.optionsViewOpenDirectionBuilder] with:
   /// ```dart
-  /// (spaceAbove, spaceBelow) => spaceAbove > spaceBelow
-  ///     ? OptionsViewOpenDirection.up
-  ///     : OptionsViewOpenDirection.down
+  /// (double spaceAbove, double spaceBelow) =>
+  ///     spaceAbove > spaceBelow
+  ///         ? OptionsViewOpenDirection.up
+  ///         : OptionsViewOpenDirection.down
   /// ```
   ///
   /// Consider using [RawAutocomplete.optionsViewOpenDirectionBuilder] if you need more control
