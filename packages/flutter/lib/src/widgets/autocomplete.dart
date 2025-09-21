@@ -300,9 +300,11 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   ///
   /// If non-null, this overrides the [optionsViewOpenDirection] property.
   ///
-  /// The [spaceAbove] and [spaceBelow] parameters represent the available space
-  /// in logical pixels from the text field to the top and bottom edges of the
-  /// overlay, respectively.
+  /// The parameters of the builder are:
+  /// * `spaceAbove`: The available space in logical pixels from the text field
+  ///   to the top edge of the overlay.
+  /// * `spaceBelow`: The available space in logical pixels from the text field
+  ///   to the bottom edge of the overlay.
   ///
   /// See also:
   ///
