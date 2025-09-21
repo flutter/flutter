@@ -110,7 +110,10 @@ abstract class AssetBundle {
   /// The result is not cached by the default implementation; the parser is run
   /// each time the resource is fetched. However, some subclasses may implement
   /// caching (notably, subclasses of [CachingAssetBundle]).
-  Future<T> loadStructuredData<T>(String key, Future<T> Function(String value) parser) async {
+  Future<T> loadStructuredData<T>(
+    String key,
+    Future<T> Function(String value) parser,
+  ) async {
     return parser(await loadString(key));
   }
 
@@ -146,7 +149,9 @@ abstract class AssetBundle {
 class NetworkAssetBundle extends AssetBundle {
   /// Creates a network asset bundle that resolves asset keys as URLs relative
   /// to the given base URL.
-  NetworkAssetBundle(Uri baseUrl) : _baseUrl = baseUrl, _httpClient = HttpClient();
+  NetworkAssetBundle(Uri baseUrl)
+    : _baseUrl = baseUrl,
+      _httpClient = HttpClient();
 
   final Uri _baseUrl;
   final HttpClient _httpClient;
@@ -155,7 +160,9 @@ class NetworkAssetBundle extends AssetBundle {
 
   @override
   Future<ByteData> load(String key) async {
-    final HttpClientRequest request = await _httpClient.getUrl(_urlFromKey(key));
+    final HttpClientRequest request = await _httpClient.getUrl(
+      _urlFromKey(key),
+    );
     final HttpClientResponse response = await request.close();
     if (response.statusCode != HttpStatus.ok) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -184,8 +191,10 @@ class NetworkAssetBundle extends AssetBundle {
 /// Binary resources (from [load]) are not cached.
 abstract class CachingAssetBundle extends AssetBundle {
   final Map<String, Future<String>> _stringCache = <String, Future<String>>{};
-  final Map<String, Future<dynamic>> _structuredDataCache = <String, Future<dynamic>>{};
-  final Map<String, Future<dynamic>> _structuredBinaryDataCache = <String, Future<dynamic>>{};
+  final Map<String, Future<dynamic>> _structuredDataCache =
+      <String, Future<dynamic>>{};
+  final Map<String, Future<dynamic>> _structuredBinaryDataCache =
+      <String, Future<dynamic>>{};
 
   @override
   Future<String> loadString(String key, {bool cache = true}) {
@@ -208,7 +217,10 @@ abstract class CachingAssetBundle extends AssetBundle {
   ///
   /// Failures are not cached, and are returned as [Future]s with errors.
   @override
-  Future<T> loadStructuredData<T>(String key, Future<T> Function(String value) parser) {
+  Future<T> loadStructuredData<T>(
+    String key,
+    Future<T> Function(String value) parser,
+  ) {
     if (_structuredDataCache.containsKey(key)) {
       return _structuredDataCache[key]! as Future<T>;
     }
@@ -259,7 +271,10 @@ abstract class CachingAssetBundle extends AssetBundle {
   ///
   /// Failures are not cached, and are returned as [Future]s with errors.
   @override
-  Future<T> loadStructuredBinaryData<T>(String key, FutureOr<T> Function(ByteData data) parser) {
+  Future<T> loadStructuredBinaryData<T>(
+    String key,
+    FutureOr<T> Function(ByteData data) parser,
+  ) {
     if (_structuredBinaryDataCache.containsKey(key)) {
       return _structuredBinaryDataCache[key]! as Future<T>;
     }
@@ -325,7 +340,9 @@ class PlatformAssetBundle extends CachingAssetBundle {
   @override
   Future<ByteData> load(String key) {
     final Uint8List encoded = utf8.encode(Uri(path: Uri.encodeFull(key)).path);
-    final Future<ByteData>? future = ServicesBinding.instance.defaultBinaryMessenger
+    final Future<ByteData>? future = ServicesBinding
+        .instance
+        .defaultBinaryMessenger
         .send('flutter/assets', ByteData.sublistView(encoded))
         ?.then((ByteData? asset) {
           if (asset == null) {
