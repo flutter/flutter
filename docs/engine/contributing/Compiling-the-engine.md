@@ -166,7 +166,7 @@ These steps build the desktop embedding, and the engine used by `flutter test` o
 
 4. `ninja -C out/host_debug_unopt` to build a desktop unoptimized binary.
     * If you skipped `--unoptimized`, use `ninja -C out/host_debug` instead.
-    * use `ninja -C out/host_debug_unopt_arm64` on Apple Silicon
+    * For Apple Silicon, use `ninja -C out/host_debug_unopt_arm64`.
 
 See [The flutter tool](https://github.com/flutter/flutter/blob/main/docs/tool/README.md) for instructions on how to use the `flutter` tool with a local engine.
 You will typically use the `host_debug_unopt` build in this setup. Modifying dart sources in the engine will
