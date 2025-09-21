@@ -35,6 +35,8 @@ Depending on the platform you are making changes for, you may be interested in a
 - Make sure to exclude the `out` directory from any backup scripts, as many large binary
   artifacts are generated. This is also generally true for all of the directories outside
   of the `engine/src/flutter` directory.
+- See [gclient bootstrap](https://github.com/flutter/flutter/tree/main/engine#gclient-bootstrap)
+  section for details on how to setup `gclient`.
 
 ## Updating the engine
 Before compiling, you should typically make sure that your engine code is up to date with the latest `master`:
@@ -156,11 +158,15 @@ These steps build the desktop embedding, and the engine used by `flutter test` o
 
 1. Make sure your engine code is [up to date](https://github.com/flutter/flutter/blob/main/docs/engine/contributing/Compiling-the-engine.md#updating-the-engine).
 
-2. `./flutter/tools/gn --unoptimized` to prepare your build files.
-   * `--unoptimized` disables C++ compiler optimizations. On macOS, binaries are emitted unstripped; on Linux, unstripped binaries are emitted to an `exe.unstripped` subdirectory of the build.
+2. On macOS install Metal build tools: `xcodebuild -downloadComponent MetalToolchain`
 
-3. `ninja -C out/host_debug_unopt` to build a desktop unoptimized binary.
+3. `./flutter/tools/gn --unoptimized` to prepare your build files.
+   * `--unoptimized` disables C++ compiler optimizations. On macOS, binaries are emitted unstripped; on Linux, unstripped binaries are emitted to an `exe.unstripped` subdirectory of the build.
+   * use `./flutter/tools/gn --unoptimized --mac-cpu=arm64` on Apple Silicon 
+
+4. `ninja -C out/host_debug_unopt` to build a desktop unoptimized binary.
     * If you skipped `--unoptimized`, use `ninja -C out/host_debug` instead.
+    * use `ninja -C out/host_debug_unopt_arm64` on Apple Silicon
 
 See [The flutter tool](https://github.com/flutter/flutter/blob/main/docs/tool/README.md) for instructions on how to use the `flutter` tool with a local engine.
 You will typically use the `host_debug_unopt` build in this setup. Modifying dart sources in the engine will
