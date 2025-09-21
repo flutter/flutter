@@ -29,5 +29,11 @@
   "shareButtonLabel": "Deila...",
   "clearButtonLabel": "Hreinsa",
   "cancelButtonLabel": "Hætta við",
-  "backButtonLabel": "Til baka"
+  "backButtonLabel": "Til baka",
+  "expansionTileExpandedHint": "double tap to collapse",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

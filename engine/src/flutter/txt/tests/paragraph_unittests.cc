@@ -19,6 +19,7 @@
 namespace flutter {
 namespace testing {
 
+[[maybe_unused]]
 static const std::string kEmojiFontFile =
 #if FML_OS_MACOSX
     "Apple Color Emoji.ttc";
@@ -26,6 +27,7 @@ static const std::string kEmojiFontFile =
     "NotoColorEmoji.ttf";
 #endif
 
+[[maybe_unused]]
 static const std::string kEmojiFontName =
 #if FML_OS_MACOSX
     "Apple Color Emoji";
@@ -60,16 +62,17 @@ class DlOpRecorder final : public virtual DlOpReceiver,
     dashed_lines_.emplace_back(p0, p1, DlPoint(on_length, off_length));
   }
 
-  void drawTextFrame(const std::shared_ptr<impeller::TextFrame>& text_frame,
-                     SkScalar x,
-                     SkScalar y) override {
-    text_frames_.push_back(text_frame);
-  }
-
-  void drawTextBlob(const sk_sp<SkTextBlob> blob,
-                    SkScalar x,
-                    SkScalar y) override {
-    blobs_.push_back(blob);
+  void drawText(const std::shared_ptr<DlText>& text,
+                SkScalar x,
+                SkScalar y) override {
+    auto blob = text->GetTextBlob();
+    if (blob) {
+      blobs_.push_back(sk_ref_sp(blob));
+    } else {
+      auto frame = text->GetTextFrame();
+      FML_CHECK(frame);
+      text_frames_.push_back(frame);
+    }
   }
 
   void drawRect(const DlRect& rect) override { rects_.push_back(rect); }
@@ -232,7 +235,7 @@ TEST_F(PainterTest, DrawDashedLineImpeller) {
   EXPECT_EQ(recorder.dashedLineCount(), 1);
 }
 
-TEST_F(PainterTest, DrawTextFrameImpeller) {
+TEST_F(PainterTest, DrawTextImpeller) {
   PretendImpellerIsEnabled(true);
 
   auto recorder = DlOpRecorder();

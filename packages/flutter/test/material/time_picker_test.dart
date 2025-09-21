@@ -1699,6 +1699,46 @@ void main() {
         expect(minuteSize.width, greaterThanOrEqualTo(48));
         expect(minuteSize.height, greaterThanOrEqualTo(48));
       });
+
+      testWidgets(
+        'Period selector touch target respects accessibility guidelines - Portrait mode',
+        (WidgetTester tester) async {
+          final SemanticsTester semantics = SemanticsTester(tester);
+          const Size minInteractiveSize = Size(kMinInteractiveDimension, kMinInteractiveDimension);
+
+          // Ensure picker is displayed in portrait mode.
+          tester.view.physicalSize = const Size(600, 1000);
+          addTearDown(tester.view.reset);
+
+          await mediaQueryBoilerplate(tester, materialType: materialType);
+
+          final SemanticsNode amButton = semantics.nodesWith(label: amString).single;
+          expect(amButton.rect.size >= minInteractiveSize, isTrue);
+
+          final SemanticsNode pmButton = semantics.nodesWith(label: pmString).single;
+          expect(pmButton.rect.size >= minInteractiveSize, isTrue);
+
+          semantics.dispose();
+        },
+      );
+
+      testWidgets(
+        'Period selector touch target respects accessibility guidelines - Landscape mode',
+        (WidgetTester tester) async {
+          final SemanticsTester semantics = SemanticsTester(tester);
+          const Size minInteractiveSize = Size(kMinInteractiveDimension, kMinInteractiveDimension);
+
+          await mediaQueryBoilerplate(tester, materialType: materialType);
+
+          final SemanticsNode amButton = semantics.nodesWith(label: amString).single;
+          expect(amButton.rect.size >= minInteractiveSize, isTrue);
+
+          final SemanticsNode pmButton = semantics.nodesWith(label: pmString).single;
+          expect(pmButton.rect.size >= minInteractiveSize, isTrue);
+
+          semantics.dispose();
+        },
+      );
     });
 
     group('Time picker - Input (${materialType.name})', () {
@@ -2384,41 +2424,24 @@ void main() {
     WidgetTester tester,
   ) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    await mediaQueryBoilerplate(tester, materialType: MaterialType.material3);
+    const TimeOfDay time = TimeOfDay(hour: 8, minute: 12);
+
+    await mediaQueryBoilerplate(tester, initialTime: time, materialType: MaterialType.material3);
 
     final MaterialLocalizations localizations = MaterialLocalizations.of(
       tester.element(find.byType(TimePickerDialog)),
     );
-    final Finder semanticsFinder = find.bySemanticsLabel(
-      localizations.timePickerHourModeAnnouncement,
-    );
 
-    final SemanticsNode semanticsNode = tester.getSemantics(semanticsFinder);
+    final String formattedHour = localizations.formatHour(time);
+    final String formattedMinute = localizations.formatMinute(time);
+
     expect(
-      semanticsNode.label,
-      localizations.timePickerHourModeAnnouncement,
-      reason: 'Label should announce hour mode initially',
+      find.semantics.byValue('${localizations.timePickerHourModeAnnouncement} $formattedHour'),
+      findsOne,
     );
     expect(
-      semanticsNode.hasFlag(SemanticsFlag.isLiveRegion),
-      isTrue,
-      reason: 'Node should be a live region to announce changes',
-    );
-
-    // --- Switch to minute mode ---
-    final Finder minuteControlInkWell = find.descendant(
-      of: _minuteControl,
-      matching: find.byType(InkWell),
-    );
-    expect(minuteControlInkWell, findsOneWidget, reason: 'Minute control should exist');
-    await tester.tap(minuteControlInkWell);
-    await tester.pumpAndSettle();
-
-    // Get the updated node properties
-    expect(
-      semanticsNode.label,
-      localizations.timePickerMinuteModeAnnouncement,
-      reason: 'Label should announce minute mode after switching',
+      find.semantics.byValue('${localizations.timePickerMinuteModeAnnouncement} $formattedMinute'),
+      findsOne,
     );
 
     semantics.dispose();
@@ -2490,8 +2513,9 @@ void main() {
     (WidgetTester tester) async {
       addTearDown(tester.view.reset);
 
-      final Finder dayPeriodControlFinder = find.byWidgetPredicate(
-        (Widget w) => '${w.runtimeType}' == '_DayPeriodControl',
+      final Finder amMaterialFinder = find.descendant(
+        of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_AmPmButton').first,
+        matching: find.byType(Material),
       );
       final Finder timeControlFinder = find
           .ancestor(of: find.text('7'), matching: find.byType(Row))
@@ -2506,10 +2530,10 @@ void main() {
         locale: const Locale('ko', 'KR'),
       );
 
+      const double dayPeriodPortraitGap = 12.0; // From Material spec.
       expect(
-        tester.getBottomLeft(timeControlFinder).dx -
-            tester.getBottomRight(dayPeriodControlFinder).dx,
-        12,
+        tester.getBottomLeft(timeControlFinder).dx - tester.getBottomRight(amMaterialFinder).dx,
+        dayPeriodPortraitGap,
       );
 
       // Dismiss the dialog.
@@ -2528,9 +2552,10 @@ void main() {
         locale: const Locale('ko', 'KR'),
       );
 
+      const double dayPeriodLandscapeGap = 16.0; // From Material spec.
       expect(
-        tester.getTopLeft(timeControlFinder).dy - tester.getBottomLeft(dayPeriodControlFinder).dy,
-        12,
+        tester.getTopLeft(timeControlFinder).dy - tester.getBottomLeft(amMaterialFinder).dy,
+        dayPeriodLandscapeGap,
       );
     },
   );

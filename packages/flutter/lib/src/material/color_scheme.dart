@@ -2144,8 +2144,9 @@ class ColorScheme with Diagnosticable {
         imageCompleter.complete(info.image);
       },
       onError: (Object exception, StackTrace? stackTrace) {
+        loadFailureTimeout?.cancel();
         stream.removeListener(listener);
-        throw Exception('Failed to render image: $exception');
+        imageCompleter.completeError(Exception('Failed to render image: $exception'), stackTrace);
       },
     );
 
