@@ -13,6 +13,7 @@
 #include "flutter/display_list/effects/dl_color_source.h"
 #include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/display_list/effects/dl_mask_filter.h"
+#include "flutter/display_list/effects/image_filters/dl_blur_image_filter.h"
 #include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
 
@@ -360,6 +361,24 @@ TEST_P(AiksTest, CanRenderBackdropBlurHugeSigma) {
 
   auto backdrop_filter =
       DlImageFilter::MakeBlur(999999, 999999, DlTileMode::kClamp);
+  builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter.get());
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CanRenderBackdropBlurBounded) {
+  DisplayListBuilder builder;
+
+  DlPaint paint;
+  paint.setColor(DlColor::kGreen());
+  builder.DrawRect(DlRect::MakeLTRB(-180, -190, 200, 210), paint);
+
+  DlPaint save_paint;
+  save_paint.setBlendMode(DlBlendMode::kSrc);
+
+  auto backdrop_filter = DlBlurImageFilter::Make(
+      20, 20, Rect::MakeLTRB(-200, -200, 200, 200), DlTileMode::kClamp);
   builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter.get());
   builder.Restore();
 
