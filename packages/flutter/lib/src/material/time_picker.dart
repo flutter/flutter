@@ -3039,24 +3039,17 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
 
         final Widget dial = Padding(
           padding: dialPadding,
-          child: Semantics(
-            label: switch (_hourMinuteMode.value) {
-              _HourMinuteMode.hour => localizations.timePickerHourModeAnnouncement,
-              _HourMinuteMode.minute => localizations.timePickerMinuteModeAnnouncement,
-            },
-            liveRegion: true,
-            child: ExcludeSemantics(
-              child: SizedBox.fromSize(
-                size: defaultTheme.dialSize,
-                child: AspectRatio(
-                  aspectRatio: 1,
-                  child: _Dial(
-                    hourMinuteMode: _hourMinuteMode.value,
-                    hourDialType: hourMode,
-                    selectedTime: _selectedTime.value,
-                    onChanged: _handleTimeChanged,
-                    onHourSelected: _handleHourSelected,
-                  ),
+          child: ExcludeSemantics(
+            child: SizedBox.fromSize(
+              size: defaultTheme.dialSize,
+              child: AspectRatio(
+                aspectRatio: 1,
+                child: _Dial(
+                  hourMinuteMode: _hourMinuteMode.value,
+                  hourDialType: hourMode,
+                  selectedTime: _selectedTime.value,
+                  onChanged: _handleTimeChanged,
+                  onHourSelected: _handleHourSelected,
                 ),
               ),
             ),

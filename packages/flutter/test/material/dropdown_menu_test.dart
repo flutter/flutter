@@ -4740,6 +4740,27 @@ void main() {
     final EditableText editableText = tester.widget(find.byType(EditableText));
     expect(editableText.cursorHeight, cursorHeight);
   });
+
+  testWidgets('DropdownMenu accepts a MenuController', (WidgetTester tester) async {
+    final MenuController menuController = MenuController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            menuController: menuController,
+            dropdownMenuEntries: menuChildren,
+          ),
+        ),
+      ),
+    );
+    expect(findMenuItemButton('Item 0').hitTestable(), findsNothing);
+    menuController.open();
+    await tester.pumpAndSettle();
+    expect(findMenuItemButton('Item 0').hitTestable(), findsOne);
+    menuController.close();
+    await tester.pumpAndSettle();
+    expect(findMenuItemButton('Item 0').hitTestable(), findsNothing);
+  });
 }
 
 enum TestMenu {
