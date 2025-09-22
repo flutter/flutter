@@ -10,6 +10,7 @@
 uniform f16sampler2D texture_sampler;
 
 layout(constant_id = 0) const float supports_decal = 1.0;
+layout(constant_id = 1) const float bounded_blur = 0.0;
 
 uniform KernelSamples {
   float sample_count;
@@ -20,13 +21,12 @@ uniform KernelSamples {
 kernel_samples;
 
 uniform FragInfo {
-  float bounded;
   vec4 bounds_uv;
 }
 frag_info;
 
 f16vec4 Sample(f16sampler2D tex, vec2 coords) {
-  if (frag_info.bounded == 1.0) {
+  if (bounded_blur == 1.0) {
     return IPHalfSampleDecalBounded(tex, coords, frag_info.bounds_uv);
   }
   if (supports_decal == 1.0) {
@@ -49,7 +49,10 @@ void main() {
                           v_texture_coords + kernel_samples.sample_data[i].xy);
   }
 
-  frag_color = (frag_info.bounded == 1.0 && total_color.w != 0)
-                   ? (total_color / total_color.w)
-                   : total_color;
+  if (bounded_blur == 1.0) {
+    frag_color =
+        (total_color.w != 0) ? (total_color / total_color.w) : total_color;
+  } else {
+    frag_color = total_color;
+  }
 }

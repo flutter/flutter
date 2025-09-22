@@ -519,7 +519,6 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
             input_texture->GetYCoordScale();
 
         GaussianBlurFragmentShader::FragInfo frag_info;
-        frag_info.bounded = blur_info.blur_uv_bounds.has_value();
         Rect bounds_uv = blur_info.blur_uv_bounds.value_or(Rect::MakeMaximum());
         frag_info.bounds_uv =
             Vector4(bounds_uv.GetLeft(), bounds_uv.GetTop(),
@@ -529,7 +528,11 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
 
         ContentContextOptions options = OptionsFromPass(pass);
         options.primitive_type = PrimitiveType::kTriangleStrip;
-        pass.SetPipeline(renderer.GetGaussianBlurPipeline(options));
+        if (!blur_info.blur_uv_bounds.has_value()) {
+          pass.SetPipeline(renderer.GetGaussianBlurPipeline(options));
+        } else {
+          pass.SetPipeline(renderer.GetGaussianBlurBoundedPipeline(options));
+        }
 
         std::array<VS::PerVertexData, 4> vertices = {
             VS::PerVertexData{blur_uvs[0], blur_uvs[0]},
