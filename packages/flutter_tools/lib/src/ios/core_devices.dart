@@ -304,6 +304,8 @@ class IOSCoreDeviceControl {
   final Xcode _xcode;
   final FileSystem _fileSystem;
 
+  Process? _devicectlListProcess;
+
   /// When the `--timeout` flag is used with `devicectl`, it must be at
   /// least 5 seconds. If lower than 5 seconds, `devicectl` will error and not
   /// run the command.
@@ -333,6 +335,14 @@ class IOSCoreDeviceControl {
     RegExp(r'Dart execution mode: .*'),
     'Failed to execute code (error: EXC_BAD_ACCESS, debugger assist: not detected)',
   ];
+
+  void stopListDevices() {
+    if (_devicectlListProcess != null) {
+      _logger.printTrace('Killing devicectl list devices process');
+      _devicectlListProcess!.kill();
+    }
+    _devicectlListProcess = null;
+  }
 
   /// Executes `devicectl` command to get list of devices. The command will
   /// likely complete before [timeout] is reached. If [timeout] is reached,
@@ -371,7 +381,17 @@ class IOSCoreDeviceControl {
     ];
 
     try {
-      final RunResult result = await _processUtils.run(command, throwOnError: true);
+      _devicectlListProcess = await _processUtils.start(command);
+      final int exitCode = await _devicectlListProcess!.exitCode;
+      if (exitCode != 0) {
+        // If the process was killed by `stopListDevices`, the exit code will be
+        // non-zero. This is expected, so just return.
+        if (_devicectlListProcess == null) {
+          return <Object?>[];
+        }
+        _logger.printError('devicectl exited with a non-zero exit code: $exitCode');
+        return <Object?>[];
+      }
       var isToolPossiblyShutdown = false;
       if (_fileSystem is ErrorHandlingFileSystem) {
         final FileSystem delegate = _fileSystem.fileSystem;
@@ -390,9 +410,7 @@ class IOSCoreDeviceControl {
       if (!isToolPossiblyShutdown && !output.existsSync()) {
         _logger.printError('After running the command ${command.join(' ')} the file');
         _logger.printError('${output.path} was expected to exist, but it did not.');
-        _logger.printError('The process exited with code ${result.exitCode} and');
-        _logger.printError('Stdout:\n\n${result.stdout.trim()}\n');
-        _logger.printError('Stderr:\n\n${result.stderr.trim()}');
+        _logger.printError('The process exited with code $exitCode');
         throw StateError('Expected the file ${output.path} to exist but it did not');
       } else if (isToolPossiblyShutdown) {
         return <Object?>[];
@@ -419,6 +437,7 @@ class IOSCoreDeviceControl {
       _logger.printError('Error executing devicectl: $err');
       return <Object?>[];
     } finally {
+      _devicectlListProcess = null;
       ErrorHandlingFileSystem.deleteIfExists(tempDirectory, recursive: true);
     }
   }
