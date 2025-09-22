@@ -15,9 +15,10 @@
 namespace flutter {
 
 class FlutterWindowsEngine;
-class DisplayManager {
+class DisplayManagerWin32 {
  public:
-  explicit DisplayManager(FlutterWindowsEngine* engine);
+  explicit DisplayManagerWin32(FlutterWindowsEngine* engine);
+  ~DisplayManagerWin32();
 
   // Updates the display information and notifies the engine
   void UpdateDisplays();

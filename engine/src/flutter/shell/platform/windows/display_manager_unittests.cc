@@ -28,10 +28,10 @@ using ::testing::Return;
 using ::testing::SetArgPointee;
 using ::testing::StrEq;
 
-class DisplayManagerTest : public WindowsTest {};
+class DisplayManagerWin32Test : public WindowsTest {};
 
-// Test that the display monitor correctly handles multiple monitors
-TEST_F(DisplayManagerTest, MultipleMonitors) {
+// Test that the display manager correctly handles multiple monitors
+TEST_F(DisplayManagerWin32Test, MultipleMonitors) {
   auto mock_windows_proc_table =
       std::make_shared<NiceMock<MockWindowsProcTable>>();
 
@@ -79,14 +79,14 @@ TEST_F(DisplayManagerTest, MultipleMonitors) {
   EXPECT_CALL(*mock_windows_proc_table, EnumDisplaySettings(_, _, _))
       .WillRepeatedly(Return(TRUE));
 
-  // Create the display monitor with the mock engine
-  auto display_manager = std::make_unique<DisplayManager>(engine.get());
+  // Create the display manager with the mock engine
+  auto display_manager = std::make_unique<DisplayManagerWin32>(engine.get());
 
   display_manager->UpdateDisplays();
 }
 
-// Test that the display monitor correctly handles a display change message
-TEST_F(DisplayManagerTest, HandleDisplayChangeMessage) {
+// Test that the display manager correctly handles a display change message
+TEST_F(DisplayManagerWin32Test, HandleDisplayChangeMessage) {
   // Create a mock Windows proc table
   auto mock_windows_proc_table =
       std::make_shared<NiceMock<MockWindowsProcTable>>();
@@ -99,8 +99,8 @@ TEST_F(DisplayManagerTest, HandleDisplayChangeMessage) {
   EXPECT_CALL(*mock_windows_proc_table, EnumDisplayMonitors(_, _, _, _))
       .WillRepeatedly(Return(TRUE));
 
-  // Create the display monitor with the mock engine
-  auto display_manager = std::make_unique<DisplayManager>(engine.get());
+  // Create the display manager with the mock engine
+  auto display_manager = std::make_unique<DisplayManagerWin32>(engine.get());
 
   // Test handling a display change message
   HWND dummy_hwnd = reinterpret_cast<HWND>(1);

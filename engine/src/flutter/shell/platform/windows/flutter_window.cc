@@ -77,7 +77,7 @@ static uint64_t ConvertWinButtonToFlutterButton(UINT button) {
 FlutterWindow::FlutterWindow(
     int width,
     int height,
-    std::shared_ptr<DisplayManager> const& display_manager,
+    std::shared_ptr<DisplayManagerWin32> const& display_manager,
     std::shared_ptr<WindowsProcTable> windows_proc_table,
     std::unique_ptr<TextInputManager> text_input_manager)
     : touch_id_generator_(kMinTouchDeviceId, kMaxTouchDeviceId),

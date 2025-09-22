@@ -201,7 +201,7 @@ FlutterWindowsEngine::FlutterWindowsEngine(
       static_cast<egl::GpuPreference>(project_->gpu_preference()));
   window_proc_delegate_manager_ = std::make_unique<WindowProcDelegateManager>();
 
-  display_manager_ = std::make_shared<DisplayManager>(this);
+  display_manager_ = std::make_shared<DisplayManagerWin32>(this);
 
   window_proc_delegate_manager_->RegisterTopLevelWindowProcDelegate(
       [](HWND hwnd, UINT msg, WPARAM wpar, LPARAM lpar, void* user_data,
