@@ -3,7 +3,7 @@ When triaging web issues follow the following process:
 * Make sure there are no [unassigned P0 and P1 issues](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3Ateam-web+label%3AP1%2CP0+no%3Aassignee).
 * Make sure there are no [P1 issues outside the backlog](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3Ateam-web+label%3AP1%2CP0+-project%3Aflutter%2F41+).
 * Make sure there are no [P3 issues in the backlog](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+project%3Aflutter%2F41+label%3AP3).
-* Make sure there are no assigned P2 and P3 issues (if you'd like to become a regular Flutter Web contributor, please ping yjbanov on Discord to be added to this list, and we'll watch that your issues are properly triaged):
+* Make sure all assigned issues are either P0 or P1 (if you'd like to become a regular Flutter Web contributor, please ping yjbanov on Discord to be added to this list, and we'll watch that your issues are properly triaged):
   * [harryterkelsen](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3Ateam-web+-label%3AP0%2CP1+assignee%3Aharryterkelsen)
   * [kevmoo](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3Ateam-web+-label%3AP0%2CP1+assignee%3Akevmoo)
   * [mdebbar](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3Ateam-web+-label%3AP0%2CP1+assignee%3Amdebbar)
