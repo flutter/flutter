@@ -16,13 +16,16 @@ class DlBlurImageFilter final : public DlImageFilter {
   /**
    * @brief Creates an ImageFilter that applies a Gaussian blur to its input.
    *
-   * @param sigma_x The standard deviation of the Gaussian kernel in the X direction.
-   * @param sigma_y The standard deviation of the Gaussian kernel in the Y direction.
+   * @param sigma_x The standard deviation of the Gaussian kernel in the X
+   * direction.
+   * @param sigma_y The standard deviation of the Gaussian kernel in the Y
+   * direction.
    * @param bounds An optional rectangle that enables "bounded blur" mode.
    * @param tile_mode The tile mode used for sampling pixels at the edges
    * when performing a standard, unbounded blur.
    *
-   * The [bounds] parameter is optional and dictates the blur's sampling behavior:
+   * The [bounds] parameter is optional and dictates the blur's sampling
+   * behavior:
    *
    * - If [bounds] is provided (i.e., not std::nullopt), the filter performs a
    * "bounded blur." This means the blur kernel will only sample pixels

@@ -426,9 +426,12 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
       pass.SetCommandLabel("Gaussian blur downsample");
       auto pipeline_options = OptionsFromPass(pass);
       pipeline_options.primitive_type = PrimitiveType::kTriangleStrip;
-      // The GLES backend conditionally supports decal tile mode, while
-      // decal is always supported for Vulkan and Metal.
-      // Also, `bounds_uv` requires software decal whatsoever.
+      // If the blur is unbounded, then the pipeline is selected based on
+      // whether the platform supports decal tile mode: The GLES backend
+      // conditionally supports decal tile mode, while decal is always supported
+      // for Vulkan and Metal.
+      //
+      // If the blur is bounded, software decal is always needed.
       if ((renderer.GetDeviceCapabilities().SupportsDecalSamplerAddressMode() ||
            tile_mode != Entity::TileMode::kDecal) &&
           !pass_args.bounds_uv.has_value()) {
