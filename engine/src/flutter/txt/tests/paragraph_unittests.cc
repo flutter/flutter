@@ -122,7 +122,8 @@ class PainterTestBase : public CanvasTestBase<T> {
     return t_style;
   }
 
-  sk_sp<DisplayList> drawText(txt::TextStyle style, std::u16string text) const {
+  sk_sp<DisplayList> drawText(const txt::TextStyle& style,
+                              const std::u16string& text) const {
     auto pb_skia = makeParagraphBuilder();
     pb_skia.PushStyle(style);
     pb_skia.AddText(text);
@@ -136,7 +137,7 @@ class PainterTestBase : public CanvasTestBase<T> {
     return builder.Build();
   }
 
-  sk_sp<DisplayList> draw(txt::TextStyle style) const {
+  sk_sp<DisplayList> draw(const txt::TextStyle& style) const {
     auto pb_skia = makeParagraphBuilder();
     pb_skia.PushStyle(style);
     pb_skia.AddText(u"Hello World!");
