@@ -58,7 +58,7 @@ object FlutterTaskHelper {
             val matcher = Regex("""(\\ |\S)+""").findAll(fileString)
             // then we replace all escaped spaces with regular spaces
             val depList =
-                matcher.map { it.value.replace("\\\\ ", " ") }.toList()
+                matcher.map { it.value.replace("\\ ", " ") }.toList()
             return project.files(depList)
         }
         return project.files()
