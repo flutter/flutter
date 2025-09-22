@@ -66,6 +66,11 @@ class RenderBoxSubclass1 extends RenderBox {
   void computeDistanceToActualBaseline() {
     computeMaxIntrinsicHeight(); // ERROR: computeMaxIntrinsicHeight(). Consider calling getMaxIntrinsicHeight instead.
   }
+
+  /// [RenderBox.computeDryLayout]: // OK
+  double? getDryBaseline() {
+    return 0;
+  }
 }
 
 class RenderBoxSubclass2 extends RenderBox with ARenderBoxMixin {
@@ -82,12 +87,12 @@ class RenderBoxSubclass2 extends RenderBox with ARenderBoxMixin {
   // ignore: non_constant_identifier_names
   Future<void> test_render_box_intrinsics() async {
     await assertDiagnostics(source, <ExpectedDiagnostic>[
-      lint(629, 24),
-      lint(830, 24),
-      lint(1024, 18),
-      lint(1123, 16),
-      lint(1308, 31),
-      lint(1532, 25),
+      lint(585, 24),
+      lint(786, 24),
+      lint(980, 18),
+      lint(1079, 16),
+      lint(1264, 31),
+      lint(1488, 25),
     ]);
   }
 }

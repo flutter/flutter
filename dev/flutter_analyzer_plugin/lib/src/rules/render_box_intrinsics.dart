@@ -6,6 +6,7 @@ import 'package:analyzer/analysis_rule/analysis_rule.dart';
 import 'package:analyzer/analysis_rule/rule_context.dart';
 import 'package:analyzer/analysis_rule/rule_visitor_registry.dart';
 import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
@@ -44,7 +45,8 @@ class RenderBoxIntrinsicCalculationRule extends AnalysisRule {
   @override
   void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
     final _Visitor visitor = _Visitor(this, context);
-    registry.addClassDeclaration(this, visitor);
+    registry
+      .addSimpleIdentifier(this, visitor);
   }
 }
 
@@ -74,20 +76,38 @@ class _Visitor extends SimpleAstVisitor<void> {
       (InterfaceType interface) => _implementsRenderBox(interface.element),
     );
   }
-
-  @override
-  void visitClassDeclaration(ClassDeclaration node) {
-    // Ignore the RenderBox class implementation: that's the only place the
-    // compute* methods are supposed to be called.
-    if (node.name.lexeme != 'RenderBox') {
-      super.visitClassDeclaration(node);
+  static bool _checkIfRenderBoxParent(AstNode? node) {
+    if (node == null) {
+      return false;
     }
+    if (node case ClassDeclaration(:final Token name)) {
+      // Ignore the RenderBox class implementation: that's the only place the
+      // compute* methods are supposed to be called.
+      return name.lexeme == 'RenderBox';
+    }
+    return _checkIfRenderBoxParent(node.parent);
+  }
+
+  static bool _checkForCommentContext(AstNode? node) {
+    if (node == null) {
+      return false;
+    }
+    if (node is CommentReference) {
+      return true;
+    }
+    return _checkForCommentContext(node.parent);
   }
 
   @override
   void visitSimpleIdentifier(SimpleIdentifier node) {
+    if (node.parent is CommentReference) {
+      return;
+    }
     final String? correctMethodName = candidates[node.name];
     if (correctMethodName == null) {
+      return;
+    }
+    if (_checkIfRenderBoxParent(node.parent) || _checkForCommentContext(node.parent)) {
       return;
     }
     final bool isCallingSuperImplementation = switch (node.parent) {
