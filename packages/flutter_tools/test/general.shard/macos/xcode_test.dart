@@ -1917,9 +1917,7 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
   }
 
   @override
-  void stopListDevices() {
-    // No-op for this fake.
-  }
+  void stopListDevices() {}
 }
 
 class FakeIOSCoreDevice extends Fake implements IOSCoreDevice {
