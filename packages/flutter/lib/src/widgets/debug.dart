@@ -21,6 +21,7 @@ import 'localizations.dart';
 import 'lookup_boundary.dart';
 import 'media_query.dart';
 import 'overlay.dart';
+import 'selection_container.dart';
 import 'table.dart';
 
 // Examples can assume:
@@ -315,6 +316,49 @@ bool debugCheckHasMediaQuery(BuildContext context) {
           'that was passed to MediaQuery.of(). This can happen because the '
           'context used is not a descendant of a View widget, which introduces '
           'a MediaQuery.',
+        ),
+      ]);
+    }
+    return true;
+  }());
+  return true;
+}
+
+/// Asserts that the given context has a [SelectionRegistrarScope] ancestor.
+///
+/// Used by various widgets to make sure that they are only used in an
+/// appropriate context.
+///
+/// To invoke this function, use the following pattern, typically in the
+/// relevant Widget's build method:
+///
+/// ```dart
+/// assert(debugCheckHasSelectionRegistrar(context));
+/// ```
+///
+/// Always place this before any early returns, so that the invariant is checked
+/// in all cases. This prevents bugs from hiding until a particular codepath is
+/// hit.
+///
+/// Does nothing if asserts are disabled. Always returns true.
+bool debugCheckHasSelectionRegistrar(BuildContext context) {
+  assert(() {
+    if (context.widget is! SelectionRegistrarScope &&
+        context.getElementForInheritedWidgetOfExactType<SelectionRegistrarScope>() == null) {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('No SelectionRegistrarScope widget ancestor found.'),
+        ErrorDescription(
+          '${context.widget.runtimeType} widgets require a MediaQuery widget ancestor.',
+        ),
+        context.describeWidget(
+          'The specific widget that could not find a SelectionRegistrarScope ancestor was',
+        ),
+        context.describeOwnershipChain('The ownership chain for the affected widget is'),
+        ErrorHint(
+          'No SelectionRegistrarScope ancestor could be found starting from the context '
+          'that was passed to SelectionContainer.of(). This can happen because the '
+          'context used is not a descendant of a SelectionArea, SelectableRegion, or '
+          'SelectionContainer widget, which introduces a SelectionRegistrarScope.',
         ),
       ]);
     }

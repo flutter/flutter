@@ -6504,7 +6504,7 @@ class Flow extends MultiChildRenderObjectWidget {
 ///       builder: (BuildContext innerContext) {
 ///         return RichText(
 ///           text: const TextSpan(text: 'Hello'),
-///           selectionRegistrar: SelectionContainer.maybeOf(innerContext),
+///           selectionRegistrar: SelectionContainer.of(innerContext),
 ///           selectionColor: const Color(0xAF6694e8),
 ///         );
 ///       }
