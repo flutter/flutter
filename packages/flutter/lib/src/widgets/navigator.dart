@@ -2810,28 +2810,9 @@ class Navigator extends StatefulWidget {
   /// given context until the predicate returns true, returning the [result] to
   /// the last popped route.
   ///
-  /// {@template flutter.widgets.navigator.popUntil}
-  /// The predicate may be applied to the same route more than once if
-  /// [Route.willHandlePopInternally] is true.
-  ///
-  /// To pop until a route with a certain name, use the [RoutePredicate]
-  /// returned from [ModalRoute.withName].
-  ///
   /// The `T` type argument is the type of the return value of the last popped route.
   ///
-  /// See [pop] for more details of the semantics of popping a route.
-  /// {@endtemplate}
-  ///
-  /// {@tool snippet}
-  ///
-  /// Typical usage is as follows:
-  ///
-  /// ```dart
-  /// void _logout() {
-  ///   Navigator.popUntil(context, ModalRoute.withName('/login'));
-  /// }
-  /// ```
-  /// {@end-tool}
+  /// {@macro flutter.widgets.navigator.popUntil}
   @optionalTypeArgs
   static void popUntilWithResult<T extends Object?>(
     BuildContext context,
@@ -5672,16 +5653,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.popUntil}
   ///
-  /// {@tool snippet}
-  ///
-  /// Typical usage is as follows:
-  ///
-  /// ```dart
-  /// void _doLogout() {
-  ///   navigator.popUntil(ModalRoute.withName('/login'));
-  /// }
-  /// ```
-  /// {@end-tool}
   @optionalTypeArgs
   void popUntilWithResult<T extends Object?>(RoutePredicate predicate, T? result) {
     _RouteEntry? candidate = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
