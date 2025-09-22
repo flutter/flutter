@@ -141,6 +141,42 @@ class FlutterTaskHelperTest {
     }
 
     @Test
+    fun `getSourceFiles correctly replaces spaces`(
+        @TempDir tempDir: Path
+    ) {
+        val mockProjectFileCollection = mockk<ConfigurableFileCollection>(relaxed = true)
+        val mockDependenciesFileCollection = mockk<FileCollection>()
+        val project = mockk<Project>()
+        val mockFlutterTask = mockk<FlutterTask>()
+
+        every { project.files() } returns mockProjectFileCollection
+        every { project.files(any()) } returns mockProjectFileCollection
+
+        every { mockFlutterTask.intermediateDir } returns tempDir.toFile()
+        every { mockFlutterTask.getDependenciesFiles() } returns mockDependenciesFileCollection
+        val dependenciesFile =
+            tempDir
+                .resolve("${mockFlutterTask.intermediateDir}/flutter_build.d")
+                .toFile()
+        dependenciesFile.writeText(
+            " ${tempDir.toFile().path}/pre/delimiter\\ space/one: ${tempDir.toFile().path}/post/delimiter\\ space/one"
+        )
+        every { mockDependenciesFileCollection.iterator() } returns (mutableListOf(dependenciesFile).iterator())
+
+        FlutterTaskHelper.getSourceFiles(project, mockFlutterTask)
+
+        verify {
+            project.files(
+                listOf(
+                    "${tempDir.toFile().path}/post/delimiter space/one",
+                )
+            )
+        }
+
+        verify { project.files("pubspec.yaml") }
+    }
+
+    @Test
     fun `getOutputFiles returns files when dependenciesFile exists`(
         @TempDir tempDir: Path
     ) {
