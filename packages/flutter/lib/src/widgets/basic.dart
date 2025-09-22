@@ -6498,10 +6498,10 @@ class Flow extends MultiChildRenderObjectWidget {
 /// Widget build(BuildContext context) {
 ///   return SelectionArea(
 ///     child: Builder(
-///       builder: (BuildContext context) {
+///       builder: (BuildContext innerContext) {
 ///         return RichText(
 ///           text: const TextSpan(text: 'Hello'),
-///           selectionRegistrar: SelectionContainer.maybeOf(context),
+///           selectionRegistrar: SelectionContainer.maybeOf(innerContext),
 ///           selectionColor: const Color(0xAF6694e8),
 ///         );
 ///       }
