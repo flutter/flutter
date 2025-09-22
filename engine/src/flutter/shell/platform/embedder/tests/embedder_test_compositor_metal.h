@@ -14,7 +14,7 @@ namespace testing {
 
 class EmbedderTestCompositorMetal : public EmbedderTestCompositor {
  public:
-  EmbedderTestCompositorMetal(SkISize surface_size,
+  EmbedderTestCompositorMetal(DlISize surface_size,
                               sk_sp<GrDirectContext> context);
 
   ~EmbedderTestCompositorMetal() override;

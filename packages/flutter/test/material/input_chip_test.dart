@@ -40,7 +40,7 @@ Widget selectedInputChip({Color? checkmarkColor, bool enabled = false}) {
     isEnabled: enabled,
     // When [enabled] is true we also need to provide one of the chip
     // callbacks, otherwise the chip would have a 'disabled'
-    // [MaterialState], which is not the intention.
+    // [WidgetState], which is not the intention.
     onSelected: enabled ? (_) {} : null,
     showCheckmark: true,
     checkmarkColor: checkmarkColor,
@@ -128,15 +128,14 @@ void main() {
         child: InputChip(
           onSelected: enabled ? (bool value) {} : null,
           selected: selected,
-          color: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-            if (states.contains(MaterialState.disabled) &&
-                states.contains(MaterialState.selected)) {
+          color: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+            if (states.contains(WidgetState.disabled) && states.contains(WidgetState.selected)) {
               return disabledSelectedColor;
             }
-            if (states.contains(MaterialState.disabled)) {
+            if (states.contains(WidgetState.disabled)) {
               return disabledColor;
             }
-            if (states.contains(MaterialState.selected)) {
+            if (states.contains(WidgetState.selected)) {
               return selectedColor;
             }
             return backgroundColor;
@@ -214,7 +213,9 @@ void main() {
 
   testWidgets('InputChip can be tapped', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: InputChip(label: Text('input chip')))),
+      const MaterialApp(
+        home: Material(child: InputChip(label: Text('input chip'))),
+      ),
     );
 
     await tester.tap(find.byType(InputChip));
@@ -375,7 +376,9 @@ void main() {
     checkChipMaterialClipBehavior(tester, Clip.none);
 
     await tester.pumpWidget(
-      wrapForChip(child: const InputChip(label: label, clipBehavior: Clip.antiAlias)),
+      wrapForChip(
+        child: const InputChip(label: label, clipBehavior: Clip.antiAlias),
+      ),
     );
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
@@ -429,7 +432,9 @@ void main() {
 
   testWidgets('Delete button is visible on disabled InputChip', (WidgetTester tester) async {
     await tester.pumpWidget(
-      wrapForChip(child: InputChip(isEnabled: false, label: const Text('Label'), onDeleted: () {})),
+      wrapForChip(
+        child: InputChip(isEnabled: false, label: const Text('Label'), onDeleted: () {}),
+      ),
     );
 
     // Delete button should be visible.
@@ -605,7 +610,9 @@ void main() {
 
     await tester.pumpWidget(
       wrapForChip(
-        child: const Center(child: InputChip(mouseCursor: customCursor, label: Text('Chip'))),
+        child: const Center(
+          child: InputChip(mouseCursor: customCursor, label: Text('Chip')),
+        ),
       ),
     );
 

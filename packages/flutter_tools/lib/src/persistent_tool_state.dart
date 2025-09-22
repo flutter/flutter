@@ -59,16 +59,16 @@ class _DefaultPersistentToolState implements PersistentToolState {
   _DefaultPersistentToolState.test({required Directory directory, required Logger logger})
     : _config = Config.test(name: _kFileName, directory: directory, logger: logger);
 
-  static const String _kFileName = 'tool_state';
-  static const String _kRedisplayWelcomeMessage = 'redisplay-welcome-message';
-  static const Map<Channel, String> _lastActiveVersionKeys = <Channel, String>{
+  static const _kFileName = 'tool_state';
+  static const _kRedisplayWelcomeMessage = 'redisplay-welcome-message';
+  static const _lastActiveVersionKeys = <Channel, String>{
     Channel.master: 'last-active-master-version',
     Channel.main: 'last-active-main-version',
     Channel.beta: 'last-active-beta-version',
     Channel.stable: 'last-active-stable-version',
   };
-  static const String _kBotKey = 'is-bot';
-  static const String _kLicenseHash = 'license-hash';
+  static const _kBotKey = 'is-bot';
+  static const _kLicenseHash = 'license-hash';
 
   final Config _config;
 

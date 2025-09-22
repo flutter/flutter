@@ -25,7 +25,7 @@ void main() {
         ...getLocalEngineArguments(),
         'clean',
       ], workingDirectory: workingDirectory);
-      final List<String> buildCommand = <String>[
+      final buildCommand = <String>[
         flutterBin,
         ...getLocalEngineArguments(),
         'build',

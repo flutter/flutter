@@ -100,14 +100,15 @@ class _IsScrollingListenerExampleState extends State<IsScrollingListenerExample>
             child: CustomScrollView(
               controller: scrollController,
               slivers: <Widget>[
-                SliverFixedExtentList(
+                SliverFixedExtentList.builder(
                   itemExtent: itemExtent,
-                  delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+                  itemCount: itemCount,
+                  itemBuilder: (BuildContext context, int index) {
                     return Item(
                       title: 'Item $index',
                       color: Color.lerp(Colors.red, Colors.blue, index / itemCount)!,
                     );
-                  }, childCount: itemCount),
+                  },
                 ),
               ],
             ),
@@ -126,6 +127,9 @@ class Item extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(color: color, child: ListTile(textColor: Colors.white, title: Text(title)));
+    return Card(
+      color: color,
+      child: ListTile(textColor: Colors.white, title: Text(title)),
+    );
   }
 }

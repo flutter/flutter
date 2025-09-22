@@ -590,8 +590,9 @@ void main() {
         await summarize(<Map<String, String>>[
           <String, String>{'foo': 'bar'},
         ]).writeTimelineToFile('test', destinationDirectory: tempDir.path, includeSummary: false);
-        final String written =
-            await fs.file(path.join(tempDir.path, 'test.timeline.json')).readAsString();
+        final String written = await fs
+            .file(path.join(tempDir.path, 'test.timeline.json'))
+            .readAsString();
         expect(written, '{"traceEvents":[{"foo":"bar"}]}');
       });
 
@@ -603,8 +604,9 @@ void main() {
           frameBegin(1000),
           frameEnd(18000),
         ]).writeTimelineToFile('test', destinationDirectory: tempDir.path);
-        final String written =
-            await fs.file(path.join(tempDir.path, 'test.timeline.json')).readAsString();
+        final String written = await fs
+            .file(path.join(tempDir.path, 'test.timeline.json'))
+            .readAsString();
         expect(
           written,
           '{"traceEvents":[{"foo":"bar"},'
@@ -650,8 +652,9 @@ void main() {
           frameRequestPendingStart('3', 6000),
           frameRequestPendingEnd('3', 9000),
         ]).writeTimelineToFile('test', destinationDirectory: tempDir.path);
-        final String written =
-            await fs.file(path.join(tempDir.path, 'test.timeline_summary.json')).readAsString();
+        final String written = await fs
+            .file(path.join(tempDir.path, 'test.timeline_summary.json'))
+            .readAsString();
         expect(json.decode(written), <String, dynamic>{
           'average_frame_build_time_millis': 15.0,
           'worst_frame_build_time_millis': 19.0,

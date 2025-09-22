@@ -12,25 +12,20 @@
 /packages/flutter_tools/lib/src/ios/ @vashworth
 
 # Internal dev infra that is closely tied to team-infra.
-/bin/internal/update_engine_version.ps1 @matanlurey
-/bin/internal/update_engine_version.sh @matanlurey
-/dev/bots/** @matanlurey
-/dev/conductor/** @matanlurey
-/dev/devicelab/** @matanlurey
-/dev/tools/test/update_engine_version_test.dart @matanlurey
-
-# flutter_drver, integration_test. Intentionally omit root files (i.e. pubspec.yaml upgrades).
-/dev/tools/android_driver_extensions @matanlurey
-/packages/flutter_driver/lib/** @matanlurey
-/packages/flutter_driver/test/** @matanlurey
-/packages/integration_test/lib/** @matanlurey
-/packages/integration_test/test/** @matanlurey
+/bin/internal/** @jtmcdole
+/dev/tools/test/** @jtmcdole
 
 # The following files define an Application Binary Interface (ABI) that must maintain
 # both forward and backward compatibility. Changes should be heavily
 # scrutinized as mistakes are irreversible.
-/engine/src/flutter/shell/platform/embedder/embedder.h @cbracken @chinmaygarde @loic-sharma
-/engine/src/flutter/shell/platform/embedder/tests/embedder_frozen.h @cbracken @chinmaygarde @loic-sharma
+/engine/src/flutter/shell/platform/embedder/embedder.h @chinmaygarde @loic-sharma
+/engine/src/flutter/shell/platform/embedder/tests/embedder_frozen.h @chinmaygarde @loic-sharma
+
+# Android team - keep this synced with .github/labeler.yml's team-android section.
+/docs/platform/android/** @flutter/android-reviewers
+/engine/src/flutter/shell/platform/android/** @flutter/android-reviewers
+/packages/flutter_tools/**/*android* @flutter/android-reviewers
+/packages/flutter_tools/**/*gradle* @flutter/android-reviewers
 
 # iOS team - keep this synced with .github/labeler.yml's team-ios section.
 /engine/src/flutter/shell/platform/darwin/common/ @flutter/ios-reviewers

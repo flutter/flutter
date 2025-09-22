@@ -108,7 +108,7 @@ void main() {
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(1000, 0, 0);
 
-          final CleanCommand command = CleanCommand();
+          final command = CleanCommand();
           final CommandRunner<void> runner = createTestCommandRunner(command);
           await runner.run(<String>['clean', '--scheme=custom-scheme']);
 
@@ -152,7 +152,7 @@ void main() {
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(1000, 0, 0);
 
-          final CleanCommand command = CleanCommand();
+          final command = CleanCommand();
           expect(
             () => createTestCommandRunner(command).run(<String>['clean', '--scheme']),
             throwsUsageException(),
@@ -219,7 +219,7 @@ void main() {
             const FileSystemException('Deletion failed'),
           );
 
-          final CleanCommand command = CleanCommand();
+          final command = CleanCommand();
           command.deleteFile(file);
           expect(testLogger.errorText, contains('A program may still be using a file'));
         },
@@ -234,7 +234,7 @@ void main() {
       testUsingContext(
         '$CleanCommand handles missing delete permissions',
         () async {
-          final FileExceptionHandler handler = FileExceptionHandler();
+          final handler = FileExceptionHandler();
 
           // Ensures we handle ErrorHandlingFileSystem appropriately in prod.
           // See https://github.com/flutter/flutter/issues/108978.
@@ -251,7 +251,7 @@ void main() {
 
           xcodeProjectInterpreter.isInstalled = false;
 
-          final CleanCommand command = CleanCommand();
+          final command = CleanCommand();
           command.deleteFile(throwingFile);
 
           expect(
@@ -304,10 +304,10 @@ FlutterProject setupProjectUnderTest(Directory currentDirectory, bool setupXcode
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
   @override
-  bool isInstalled = true;
+  var isInstalled = true;
 
   @override
-  Version version = Version(0, 0, 0);
+  var version = Version(0, 0, 0);
 
   @override
   Future<XcodeProjectInfo> getInfo(String projectPath, {String? projectFilename}) async {
@@ -317,7 +317,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
     ], BufferLogger.test());
   }
 
-  final List<CleanWorkspaceCall> workspaces = <CleanWorkspaceCall>[];
+  final workspaces = <CleanWorkspaceCall>[];
 
   @override
   Future<void> cleanWorkspace(String workspacePath, String scheme, {bool verbose = false}) async {

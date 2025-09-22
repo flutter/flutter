@@ -95,6 +95,8 @@ mergeInto(LibraryManager.library, {
             _surface_renderPicturesOnWorker(
               data.surface,
               data.pictures,
+              data.width,
+              data.height,
               data.pictureCount,
               data.callbackId,
               skwasm_getCurrentTimestamp());
@@ -144,11 +146,13 @@ mergeInto(LibraryManager.library, {
       };
       skwasm_registerMessageListener(threadId, eventListener);
     };
-    _skwasm_dispatchRenderPictures = function(threadId, surfaceHandle, pictures, pictureCount, callbackId) {
+    _skwasm_dispatchRenderPictures = function (threadId, surfaceHandle, pictures, width, height, pictureCount, callbackId) {
       skwasm_postMessage({
         skwasmMessage: 'renderPictures',
         surface: surfaceHandle,
         pictures,
+        width,
+        height,
         pictureCount,
         callbackId,
       }, [], threadId);
@@ -176,13 +180,14 @@ mergeInto(LibraryManager.library, {
       canvas.width = width;
       canvas.height = height;
     };
-    _skwasm_captureImageBitmap = function(contextHandle, images) {
-      if (!images) images = Array();
+    _skwasm_captureImageBitmap = function (contextHandle, imageBitmaps) {
+      if (!imageBitmaps) imageBitmaps = Array();
       const canvas = handleToCanvasMap.get(contextHandle);
-      images.push(canvas.transferToImageBitmap());
-      return images;
+      imageBitmaps.push(canvas.transferToImageBitmap());
+      return imageBitmaps;
     };
-    _skwasm_postImages = async function(surfaceHandle, imageBitmaps, rasterStart, callbackId) {
+    _skwasm_resolveAndPostImages = async function (surfaceHandle, imageBitmaps, rasterStart, callbackId) {
+      if (!imageBitmaps) imageBitmaps = Array();
       const rasterEnd = skwasm_getCurrentTimestamp();
       skwasm_postMessage({
         skwasmMessage: 'onRenderComplete',
@@ -262,8 +267,8 @@ mergeInto(LibraryManager.library, {
   skwasm_resizeCanvas__deps: ['$skwasm_support_setup'],
   skwasm_captureImageBitmap: function () {},
   skwasm_captureImageBitmap__deps: ['$skwasm_support_setup'],
-  skwasm_postImages: function () {},
-  skwasm_postImages__deps: ['$skwasm_support_setup'],
+  skwasm_resolveAndPostImages: function () {},
+  skwasm_resolveAndPostImages__deps: ['$skwasm_support_setup'],
   skwasm_createGlTextureFromTextureSource: function () {},
   skwasm_createGlTextureFromTextureSource__deps: ['$skwasm_support_setup'],
   skwasm_dispatchDisposeSurface: function() {},

@@ -143,17 +143,6 @@ class ModuleTest {
         await flutter('clean', output: stdout, stderr: stderr);
       });
 
-      section('Make Android host app editable');
-
-      await inDirectory(projectDir, () async {
-        await flutter(
-          'make-host-app-editable',
-          options: <String>['android'],
-          output: stdout,
-          stderr: stderr,
-        );
-      });
-
       section('Build editable host app');
 
       await inDirectory(projectDir, () async {
@@ -391,7 +380,8 @@ class ModuleTest {
       return TaskResult.success(null);
     } on TaskResult catch (taskResult) {
       return taskResult;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('Task exception stack trace:\n$stackTrace');
       return TaskResult.failure(e.toString());
     } finally {
       rmTree(tempDir);

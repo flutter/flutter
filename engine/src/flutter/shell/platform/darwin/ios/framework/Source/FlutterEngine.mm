@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <UIKit/UIKit.h>
 #include "common/settings.h"
 #define FML_USED_ON_EMBEDDER
 
@@ -660,8 +661,8 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
     NSData* data = [NSData dataWithBytes:screenshot.data->writable_data()
                                   length:screenshot.data->size()];
     NSString* format = [NSString stringWithUTF8String:screenshot.format.c_str()];
-    NSNumber* width = @(screenshot.frame_size.fWidth);
-    NSNumber* height = @(screenshot.frame_size.fHeight);
+    NSNumber* width = @(screenshot.frame_size.width);
+    NSNumber* height = @(screenshot.frame_size.height);
     return result(@[ width, height, format ?: [NSNull null], data ]);
   }];
 }
@@ -848,7 +849,11 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   );
 
   // Disable GPU if the app or scene is running in the background.
-  self.isGpuDisabled = self.viewController.stateIsBackground;
+  self.isGpuDisabled = self.viewController
+                           ? self.viewController.stateIsBackground
+                           : FlutterSharedApplication.application &&
+                                 FlutterSharedApplication.application.applicationState ==
+                                     UIApplicationStateBackground;
 
   // Create the shell. This is a blocking operation.
   std::unique_ptr<flutter::Shell> shell = flutter::Shell::Create(
@@ -1054,6 +1059,13 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
           lookUpSelectedText:(NSString*)selectedText {
   [self.platformPlugin showLookUpViewController:selectedText];
+}
+
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+    performContextMenuCustomActionWithActionID:(NSString*)actionID
+                               textInputClient:(int)client {
+  [self.platformChannel invokeMethod:@"ContextMenu.onPerformCustomAction"
+                           arguments:@[ @(client), actionID ]];
 }
 
 #pragma mark - FlutterViewEngineDelegate
@@ -1508,6 +1520,10 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
 - (NSObject<FlutterTextureRegistry>*)textures {
   return _flutterEngine.textureRegistry;
+}
+
+- (nullable UIViewController*)viewController {
+  return _flutterEngine.viewController;
 }
 
 - (void)publish:(NSObject*)value {

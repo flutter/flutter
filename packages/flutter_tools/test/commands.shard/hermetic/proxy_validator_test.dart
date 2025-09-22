@@ -19,7 +19,7 @@ void main() {
       bool includeLinkLocal = true,
       InternetAddressType type = InternetAddressType.any,
     }) async {
-      final List<FakeNetworkInterface> interfaces = <FakeNetworkInterface>[
+      final interfaces = <FakeNetworkInterface>[
         FakeNetworkInterface(<FakeInternetAddress>[const FakeInternetAddress('127.0.0.1')]),
         FakeNetworkInterface(<FakeInternetAddress>[const FakeInternetAddress('::1')]),
       ];
@@ -203,6 +203,25 @@ void main() {
       ]);
     },
   );
+
+  // Regression test for https://github.com/flutter/flutter/issues/35598
+  testWithoutContext('ProxyValidator reports issues when NO_PROXY is malformed', () async {
+    final Platform platform = FakePlatform(
+      environment: <String, String>{
+        'HTTP_PROXY': 'fakeproxy.local',
+        'NO_PROXY': 'localhost;127.0.0.1',
+      },
+    );
+    final ValidationResult results = await ProxyValidator(platform: platform).validate();
+
+    expect(results.messages, const <ValidationMessage>[
+      ValidationMessage('HTTP_PROXY is set'),
+      ValidationMessage('NO_PROXY is localhost;127.0.0.1'),
+      ValidationMessage.hint('NO_PROXY does not contain localhost'),
+      ValidationMessage.hint('NO_PROXY does not contain 127.0.0.1'),
+      ValidationMessage.hint('NO_PROXY does not contain ::1'),
+    ]);
+  });
 }
 
 class FakeNetworkInterface extends NetworkInterface {

@@ -12,13 +12,9 @@ import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart' show isSkwasm;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-// TODO(yjbanov): on the web text rendered with perspective produces flaky goldens: https://github.com/flutter/flutter/issues/110785
-final bool skipPerspectiveTextGoldens = isBrowser && isSkwasm;
 
 // A number of the hit tests below say "warnIfMissed: false". This is because
 // the way the CupertinoPicker works, the hits don't actually reach the labels,
@@ -209,6 +205,41 @@ void main() {
         tester.getCenter(find.text('sec.')).dx - tester.getCenter(find.text('12')).dx,
         distance,
       );
+    });
+
+    testWidgets('onScrollEnd behavior reports changes correctly', (WidgetTester tester) async {
+      final List<Duration> selectedDurations = <Duration>[];
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: SizedBox(
+              height: 400.0,
+              width: 400.0,
+              child: CupertinoTimerPicker(
+                initialTimerDuration: const Duration(hours: 1, minutes: 30, seconds: 15),
+                changeReportingBehavior: ChangeReportingBehavior.onScrollEnd,
+                onTimerDurationChanged: (Duration duration) => selectedDurations.add(duration),
+              ),
+            ),
+          ),
+        ),
+      );
+      final Offset initialOffset = tester.getTopLeft(find.text('30'));
+
+      final TestGesture scrollGesture = await tester.startGesture(initialOffset);
+      // Should not report changes until the gesture ends.
+      await scrollGesture.moveBy(const Offset(0.0, 32.0));
+      expect(selectedDurations, isEmpty);
+
+      await scrollGesture.moveBy(const Offset(0.0, 32.0));
+      expect(selectedDurations, isEmpty);
+
+      await scrollGesture.up();
+      await tester.pumpAndSettle();
+
+      // Only reports the last change.
+      expect(selectedDurations, hasLength(1));
+      expect(selectedDurations.first, const Duration(hours: 1, minutes: 28, seconds: 15));
     });
   });
 
@@ -1564,36 +1595,28 @@ void main() {
       }
 
       await tester.pumpWidget(buildApp(CupertinoDatePickerMode.time));
-      if (!skipPerspectiveTextGoldens) {
-        await expectLater(
-          find.byType(CupertinoDatePicker),
-          matchesGoldenFile('date_picker_test.time.initial.png'),
-        );
-      }
+      await expectLater(
+        find.byType(CupertinoDatePicker),
+        matchesGoldenFile('date_picker_test.time.initial.png'),
+      );
 
       await tester.pumpWidget(buildApp(CupertinoDatePickerMode.date));
-      if (!skipPerspectiveTextGoldens) {
-        await expectLater(
-          find.byType(CupertinoDatePicker),
-          matchesGoldenFile('date_picker_test.date.initial.png'),
-        );
-      }
+      await expectLater(
+        find.byType(CupertinoDatePicker),
+        matchesGoldenFile('date_picker_test.date.initial.png'),
+      );
 
       await tester.pumpWidget(buildApp(CupertinoDatePickerMode.monthYear));
-      if (!skipPerspectiveTextGoldens) {
-        await expectLater(
-          find.byType(CupertinoDatePicker),
-          matchesGoldenFile('date_picker_test.monthyear.initial.png'),
-        );
-      }
+      await expectLater(
+        find.byType(CupertinoDatePicker),
+        matchesGoldenFile('date_picker_test.monthyear.initial.png'),
+      );
 
       await tester.pumpWidget(buildApp(CupertinoDatePickerMode.dateAndTime));
-      if (!skipPerspectiveTextGoldens) {
-        await expectLater(
-          find.byType(CupertinoDatePicker),
-          matchesGoldenFile('date_picker_test.datetime.initial.png'),
-        );
-      }
+      await expectLater(
+        find.byType(CupertinoDatePicker),
+        matchesGoldenFile('date_picker_test.datetime.initial.png'),
+      );
 
       // Slightly drag the hour component to make the current hour off-center.
       await tester.drag(
@@ -1603,12 +1626,10 @@ void main() {
       ); // see top of file
       await tester.pump();
 
-      if (!skipPerspectiveTextGoldens) {
-        await expectLater(
-          find.byType(CupertinoDatePicker),
-          matchesGoldenFile('date_picker_test.datetime.drag.png'),
-        );
-      }
+      await expectLater(
+        find.byType(CupertinoDatePicker),
+        matchesGoldenFile('date_picker_test.datetime.drag.png'),
+      );
     });
 
     testWidgets('DatePicker displays the date in correct order', (WidgetTester tester) async {
@@ -1711,6 +1732,42 @@ void main() {
       final double minuteLeft = tester.getTopLeft(find.text('00')).dx;
       expect(hourLeft, lessThan(minuteLeft));
     });
+
+    testWidgets('onScrollEnd behavior reports changes correctly', (WidgetTester tester) async {
+      final List<DateTime> selectedDateTime = <DateTime>[];
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: SizedBox(
+              height: 400.0,
+              width: 400.0,
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.date,
+                changeReportingBehavior: ChangeReportingBehavior.onScrollEnd,
+                onDateTimeChanged: (DateTime dateTime) => selectedDateTime.add(dateTime),
+                initialDateTime: DateTime(2025),
+              ),
+            ),
+          ),
+        ),
+      );
+      final Offset initialOffset = tester.getTopLeft(find.text('2025'));
+
+      final TestGesture scrollGesture = await tester.startGesture(initialOffset);
+      // Should not report changes until the gesture ends.
+      await scrollGesture.moveBy(const Offset(0.0, -32.0));
+      expect(selectedDateTime, isEmpty);
+
+      await scrollGesture.moveBy(const Offset(0.0, -32.0));
+      expect(selectedDateTime, isEmpty);
+
+      await scrollGesture.up();
+      await tester.pumpAndSettle();
+
+      // Only reports the last change.
+      expect(selectedDateTime, hasLength(1));
+      expect(selectedDateTime.first, DateTime(2027));
+    });
   });
 
   testWidgets('TimerPicker golden tests', (WidgetTester tester) async {
@@ -1738,12 +1795,10 @@ void main() {
       ),
     );
 
-    if (!skipPerspectiveTextGoldens) {
-      await expectLater(
-        find.byType(CupertinoTimerPicker),
-        matchesGoldenFile('timer_picker_test.datetime.initial.png'),
-      );
-    }
+    await expectLater(
+      find.byType(CupertinoTimerPicker),
+      matchesGoldenFile('timer_picker_test.datetime.initial.png'),
+    );
 
     // Slightly drag the minute component to make the current minute off-center.
     await tester.drag(
@@ -1753,12 +1808,10 @@ void main() {
     ); // see top of file
     await tester.pump();
 
-    if (!skipPerspectiveTextGoldens) {
-      await expectLater(
-        find.byType(CupertinoTimerPicker),
-        matchesGoldenFile('timer_picker_test.datetime.drag.png'),
-      );
-    }
+    await expectLater(
+      find.byType(CupertinoTimerPicker),
+      matchesGoldenFile('timer_picker_test.datetime.drag.png'),
+    );
   });
 
   testWidgets('TimerPicker only changes hour label after scrolling stops', (
@@ -2167,13 +2220,10 @@ void main() {
             mode: CupertinoDatePickerMode.monthYear,
             onDateTimeChanged: (DateTime date) {},
             initialDateTime: DateTime(2018, 9, 15),
-            selectionOverlayBuilder: (
-              BuildContext context, {
-              required int selectedIndex,
-              required int columnCount,
-            }) {
-              return selectionOverlay;
-            },
+            selectionOverlayBuilder:
+                (BuildContext context, {required int selectedIndex, required int columnCount}) {
+                  return selectionOverlay;
+                },
           ),
         ),
       ),
@@ -2196,13 +2246,10 @@ void main() {
             mode: CupertinoDatePickerMode.date,
             onDateTimeChanged: (DateTime date) {},
             initialDateTime: DateTime(2018, 9, 15),
-            selectionOverlayBuilder: (
-              BuildContext context, {
-              required int selectedIndex,
-              required int columnCount,
-            }) {
-              return selectionOverlay;
-            },
+            selectionOverlayBuilder:
+                (BuildContext context, {required int selectedIndex, required int columnCount}) {
+                  return selectionOverlay;
+                },
           ),
         ),
       ),
@@ -2225,13 +2272,10 @@ void main() {
             mode: CupertinoDatePickerMode.time,
             onDateTimeChanged: (DateTime date) {},
             initialDateTime: DateTime(2018, 9, 15),
-            selectionOverlayBuilder: (
-              BuildContext context, {
-              required int selectedIndex,
-              required int columnCount,
-            }) {
-              return selectionOverlay;
-            },
+            selectionOverlayBuilder:
+                (BuildContext context, {required int selectedIndex, required int columnCount}) {
+                  return selectionOverlay;
+                },
           ),
         ),
       ),
@@ -2253,13 +2297,10 @@ void main() {
           child: CupertinoDatePicker(
             onDateTimeChanged: (DateTime date) {},
             initialDateTime: DateTime(2018, 9, 15),
-            selectionOverlayBuilder: (
-              BuildContext context, {
-              required int selectedIndex,
-              required int columnCount,
-            }) {
-              return selectionOverlay;
-            },
+            selectionOverlayBuilder:
+                (BuildContext context, {required int selectedIndex, required int columnCount}) {
+                  return selectionOverlay;
+                },
           ),
         ),
       ),
@@ -2281,13 +2322,10 @@ void main() {
           child: CupertinoTimerPicker(
             onTimerDurationChanged: (Duration duration) {},
             initialTimerDuration: const Duration(hours: 1, minutes: 1, seconds: 1),
-            selectionOverlayBuilder: (
-              BuildContext context, {
-              required int selectedIndex,
-              required int columnCount,
-            }) {
-              return selectionOverlay;
-            },
+            selectionOverlayBuilder:
+                (BuildContext context, {required int selectedIndex, required int columnCount}) {
+                  return selectionOverlay;
+                },
           ),
         ),
       ),
@@ -2310,13 +2348,10 @@ void main() {
             onTimerDurationChanged: (Duration duration) {},
             mode: CupertinoTimerPickerMode.ms,
             initialTimerDuration: const Duration(hours: 1, minutes: 1, seconds: 1),
-            selectionOverlayBuilder: (
-              BuildContext context, {
-              required int selectedIndex,
-              required int columnCount,
-            }) {
-              return selectionOverlay;
-            },
+            selectionOverlayBuilder:
+                (BuildContext context, {required int selectedIndex, required int columnCount}) {
+                  return selectionOverlay;
+                },
           ),
         ),
       ),
@@ -2339,13 +2374,10 @@ void main() {
             onTimerDurationChanged: (Duration duration) {},
             mode: CupertinoTimerPickerMode.hm,
             initialTimerDuration: const Duration(hours: 1, minutes: 1, seconds: 1),
-            selectionOverlayBuilder: (
-              BuildContext context, {
-              required int selectedIndex,
-              required int columnCount,
-            }) {
-              return selectionOverlay;
-            },
+            selectionOverlayBuilder:
+                (BuildContext context, {required int selectedIndex, required int columnCount}) {
+                  return selectionOverlay;
+                },
           ),
         ),
       ),
@@ -2364,13 +2396,10 @@ void main() {
           child: CupertinoDatePicker(
             onDateTimeChanged: (DateTime date) {},
             initialDateTime: DateTime(2018, 9, 15),
-            selectionOverlayBuilder: (
-              BuildContext context, {
-              required int selectedIndex,
-              required int columnCount,
-            }) {
-              return null;
-            },
+            selectionOverlayBuilder:
+                (BuildContext context, {required int selectedIndex, required int columnCount}) {
+                  return null;
+                },
           ),
         ),
       ),
@@ -2389,13 +2418,10 @@ void main() {
             onTimerDurationChanged: (Duration duration) {},
             mode: CupertinoTimerPickerMode.hm,
             initialTimerDuration: const Duration(hours: 1, minutes: 1, seconds: 1),
-            selectionOverlayBuilder: (
-              BuildContext context, {
-              required int selectedIndex,
-              required int columnCount,
-            }) {
-              return null;
-            },
+            selectionOverlayBuilder:
+                (BuildContext context, {required int selectedIndex, required int columnCount}) {
+                  return null;
+                },
           ),
         ),
       ),
@@ -2471,8 +2497,9 @@ void main() {
       color: CupertinoColors.label,
     );
 
-    final List<double> widths =
-        testWords.map((String word) => getColumnWidth(word, textStyle, context)).toList();
+    final List<double> widths = testWords
+        .map((String word) => getColumnWidth(word, textStyle, context))
+        .toList();
 
     final double largestWidth = widths.reduce(math.max);
 

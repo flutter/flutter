@@ -9,11 +9,9 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-final bool _ckRequiresClientICU = canvasKit.ParagraphBuilder.RequiresClientICU();
-
 final List<String> _testFonts = <String>['FlutterTest', 'Ahem'];
 String? _computeEffectiveFontFamily(String? fontFamily) {
-  return ui_web.debugEmulateFlutterTesterEnvironment && !_testFonts.contains(fontFamily)
+  return ui_web.TestEnvironment.instance.forceTestFonts && !_testFonts.contains(fontFamily)
       ? _testFonts.first
       : fontFamily;
 }
@@ -348,8 +346,9 @@ class CkTextStyle implements ui.TextStyle {
       originalFontFamily: fontFamily,
       effectiveFontFamily: _computeEffectiveFontFamily(fontFamily),
       originalFontFamilyFallback: fontFamilyFallback,
-      effectiveFontFamilyFallback:
-          ui_web.debugEmulateFlutterTesterEnvironment ? null : fontFamilyFallback,
+      effectiveFontFamilyFallback: ui_web.TestEnvironment.instance.forceTestFonts
+          ? null
+          : fontFamilyFallback,
       fontSize: fontSize,
       letterSpacing: letterSpacing,
       wordSpacing: wordSpacing,
@@ -707,8 +706,9 @@ class CkStrutStyle implements ui.StrutStyle {
     ui.FontStyle? fontStyle,
     bool? forceStrutHeight,
   }) : _fontFamily = _computeEffectiveFontFamily(fontFamily),
-       _fontFamilyFallback =
-           ui_web.debugEmulateFlutterTesterEnvironment ? null : fontFamilyFallback,
+       _fontFamilyFallback = ui_web.TestEnvironment.instance.forceTestFonts
+           ? null
+           : fontFamilyFallback,
        _fontSize = fontSize,
        _height = height == ui.kTextHeightNone ? null : height,
        _leadingDistribution = leadingDistribution,
@@ -1051,7 +1051,7 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
       _styleStack = <CkTextStyle>[],
       _paragraphBuilder = canvasKit.ParagraphBuilder.MakeFromFontCollection(
         style.skParagraphStyle,
-        CanvasKitRenderer.instance.fontCollection.skFontCollection,
+        (CanvasKitRenderer.instance.fontCollection as SkiaFontCollection).skFontCollection,
       ) {
     _styleStack.add(_style.getTextStyle());
   }
@@ -1140,9 +1140,7 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
 
   /// Builds the CkParagraph with the builder and deletes the builder.
   SkParagraph _buildSkParagraph() {
-    if (_ckRequiresClientICU) {
-      injectClientICU(_paragraphBuilder);
-    }
+    _paragraphBuilder.injectClientICUIfNeeded();
     final SkParagraph result = _paragraphBuilder.build();
     _paragraphBuilder.delete();
     return result;

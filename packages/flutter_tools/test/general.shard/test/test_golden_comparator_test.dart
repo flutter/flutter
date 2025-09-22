@@ -17,11 +17,11 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 
 void main() {
-  final Uri testUri1 = Uri(scheme: 'file', path: 'test_file_1');
-  final Uri testUri2 = Uri(scheme: 'file', path: 'test_file_2');
-  final Uri goldenKey1 = Uri(path: 'golden_key_1');
-  final Uri goldenKey2 = Uri(path: 'golden_key_2');
-  final Uint8List imageBytes = Uint8List.fromList(<int>[1, 2, 3, 4, 5]);
+  final testUri1 = Uri(scheme: 'file', path: 'test_file_1');
+  final testUri2 = Uri(scheme: 'file', path: 'test_file_2');
+  final goldenKey1 = Uri(path: 'golden_key_1');
+  final goldenKey2 = Uri(path: 'golden_key_2');
+  final imageBytes = Uint8List.fromList(<int>[1, 2, 3, 4, 5]);
 
   late FileSystem fileSystem;
   late BufferLogger logger;
@@ -52,7 +52,7 @@ void main() {
   }
 
   testWithoutContext('should succeed when a golden-file comparison matched', () async {
-    final TestGoldenComparator comparator = TestGoldenComparator(
+    final comparator = TestGoldenComparator(
       compilerFactory: _FakeTestCompiler.new,
       flutterTesterBinPath: 'flutter_tester',
       processManager: FakeProcessManager.list(<FakeCommand>[
@@ -67,7 +67,7 @@ void main() {
   });
 
   testWithoutContext('should succeed when a golden-file comparison does not match', () async {
-    final TestGoldenComparator comparator = TestGoldenComparator(
+    final comparator = TestGoldenComparator(
       compilerFactory: _FakeTestCompiler.new,
       flutterTesterBinPath: 'flutter_tester',
       processManager: FakeProcessManager.list(<FakeCommand>[
@@ -86,7 +86,7 @@ void main() {
   });
 
   testWithoutContext('should return an error when a golden-file comparison errors', () async {
-    final TestGoldenComparator comparator = TestGoldenComparator(
+    final comparator = TestGoldenComparator(
       compilerFactory: _FakeTestCompiler.new,
       flutterTesterBinPath: 'flutter_tester',
       processManager: FakeProcessManager.list(<FakeCommand>[
@@ -105,7 +105,7 @@ void main() {
   });
 
   testWithoutContext('should succeed when a golden-file update completes', () async {
-    final TestGoldenComparator comparator = TestGoldenComparator(
+    final comparator = TestGoldenComparator(
       compilerFactory: _FakeTestCompiler.new,
       flutterTesterBinPath: 'flutter_tester',
       processManager: FakeProcessManager.list(<FakeCommand>[
@@ -120,7 +120,7 @@ void main() {
   });
 
   testWithoutContext('should error when a golden-file update errors', () async {
-    final TestGoldenComparator comparator = TestGoldenComparator(
+    final comparator = TestGoldenComparator(
       compilerFactory: _FakeTestCompiler.new,
       flutterTesterBinPath: 'flutter_tester',
       processManager: FakeProcessManager.list(<FakeCommand>[
@@ -139,7 +139,7 @@ void main() {
   });
 
   testWithoutContext('provides environment variables to the process', () async {
-    final TestGoldenComparator comparator = TestGoldenComparator(
+    final comparator = TestGoldenComparator(
       compilerFactory: _FakeTestCompiler.new,
       flutterTesterBinPath: 'flutter_tester',
       processManager: FakeProcessManager.list(<FakeCommand>[
@@ -160,7 +160,7 @@ void main() {
   });
 
   testWithoutContext('reuses the process for the same test file', () async {
-    final TestGoldenComparator comparator = TestGoldenComparator(
+    final comparator = TestGoldenComparator(
       compilerFactory: _FakeTestCompiler.new,
       flutterTesterBinPath: 'flutter_tester',
       processManager: FakeProcessManager.list(<FakeCommand>[
@@ -185,7 +185,7 @@ void main() {
   });
 
   testWithoutContext('does not reuse the process for different test file', () async {
-    final TestGoldenComparator comparator = TestGoldenComparator(
+    final comparator = TestGoldenComparator(
       compilerFactory: _FakeTestCompiler.new,
       flutterTesterBinPath: 'flutter_tester',
       processManager: FakeProcessManager.list(<FakeCommand>[
@@ -212,7 +212,7 @@ void main() {
   });
 
   testWithoutContext('deletes the temporary directory when closed', () async {
-    final TestGoldenComparator comparator = TestGoldenComparator(
+    final comparator = TestGoldenComparator(
       compilerFactory: _FakeTestCompiler.new,
       flutterTesterBinPath: 'flutter_tester',
       processManager: FakeProcessManager.empty(),
@@ -226,8 +226,8 @@ void main() {
   });
 
   testWithoutContext('disposes the test compiler when closed', () async {
-    final _FakeTestCompiler testCompiler = _FakeTestCompiler();
-    final TestGoldenComparator comparator = TestGoldenComparator(
+    final testCompiler = _FakeTestCompiler();
+    final comparator = TestGoldenComparator(
       compilerFactory: () => testCompiler,
       flutterTesterBinPath: 'flutter_tester',
       processManager: FakeProcessManager.empty(),
@@ -242,11 +242,11 @@ void main() {
 }
 
 String _encodeStdout({required bool success, String? message}) {
-  return jsonEncode(<String, Object?>{'success': success, if (message != null) 'message': message});
+  return jsonEncode(<String, Object?>{'success': success, 'message': ?message});
 }
 
 final class _FakeTestCompiler extends Fake implements TestCompiler {
-  bool disposed = false;
+  var disposed = false;
 
   @override
   Future<TestCompilerResult> compile(Uri mainDart) async {

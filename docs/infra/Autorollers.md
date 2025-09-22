@@ -34,6 +34,6 @@ If there are any issues with this process or the autoroller dashboard, contact b
 ## Flutter Pub Roller
 
 The bot account [flutter-pub-roller-bot](https://github.com/flutter-pub-roller-bot) runs the script at
-[`packages_autoroller`](../../dev/conductor/bin/packages_autoroller) on post-submit of
-every framework commit to keep the pub dependencies in the [framework](https://github.com/flutter/flutter)
+[`packages_autoroller`](../../dev/packages_autoroller) on post-submit of every
+framework commit to keep the pub dependencies in the [framework](https://github.com/flutter/flutter)
 up to date.

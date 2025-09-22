@@ -51,7 +51,8 @@ Future<void> main() async {
       return TaskResult.success(null);
     } on TaskResult catch (taskResult) {
       return taskResult;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('Task exception stack trace:\n$stackTrace');
       return TaskResult.failure(e.toString());
     } finally {
       rmTree(tempDir);
@@ -449,14 +450,6 @@ Future<void> _testBuildIosFramework(Directory projectDir, {bool isModule = false
 
   if (File(path.join(outputPath, 'GeneratedPluginRegistrant.m')).existsSync() == isModule) {
     throw TaskResult.failure('Unexpected GeneratedPluginRegistrant.m.');
-  }
-
-  if (File(path.join(outputPath, 'flutter_lldbinit')).existsSync() == isModule) {
-    throw TaskResult.failure('Unexpected flutter_lldbinit');
-  }
-
-  if (File(path.join(outputPath, 'flutter_lldb_helper.py')).existsSync() == isModule) {
-    throw TaskResult.failure('Unexpected flutter_lldb_helper.py.');
   }
 
   section('Build frameworks without plugins');

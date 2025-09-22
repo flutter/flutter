@@ -732,6 +732,29 @@ void main() {
     },
   );
 
+  testWidgets(
+    'Container with BorderRadiusDirectional and no Directionality throws a detailed error',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(),
+            borderRadius: const BorderRadiusDirectional.all(Radius.circular(1.0)),
+          ),
+        ),
+      );
+
+      expect(
+        tester.takeException(),
+        isFlutterError.having(
+          (FlutterError e) => e.message,
+          'message',
+          allOf(contains('No TextDirection found.'), contains('without a Directionality ancestor')),
+        ),
+      );
+    },
+  );
+
   testWidgets('using clipBehaviour and shadow, should not clip the shadow', (
     WidgetTester tester,
   ) async {
@@ -746,7 +769,9 @@ void main() {
     );
 
     await tester.pumpWidget(
-      RepaintBoundary(child: Padding(padding: const EdgeInsets.all(30.0), child: container)),
+      RepaintBoundary(
+        child: Padding(padding: const EdgeInsets.all(30.0), child: container),
+      ),
     );
 
     await expectLater(

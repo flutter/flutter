@@ -30,6 +30,11 @@ function pub_upgrade_with_retry {
     >&2 echo "Command 'pub upgrade' still failed after $total_tries tries, giving up."
     return 1
   fi
+
+  # Touch the pubspec.lock to ensure, even if this was a NOP, it is newer than pubspec.yaml.
+  # See https://github.com/flutter/flutter/issues/171024.
+  touch "$FLUTTER_TOOLS_DIR/pubspec.lock" >&2
+
   return 0
 }
 

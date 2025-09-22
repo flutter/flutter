@@ -28,11 +28,10 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const CarouselViewThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -47,11 +46,10 @@ void main() {
       overlayColor: MaterialStatePropertyAll<Color>(Colors.red),
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'backgroundColor: ${const Color(0xffffffff)}',
@@ -221,7 +219,7 @@ void main() {
     expect(material.color, localBackgroundColor);
     expect(material.elevation, localElevation);
     expect(material.shape, localShape);
-    expect(inkWell.overlayColor?.resolve(<MaterialState>{}), localOverlayColor);
+    expect(inkWell.overlayColor?.resolve(<WidgetState>{}), localOverlayColor);
   });
 }
 

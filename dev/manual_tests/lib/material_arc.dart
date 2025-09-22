@@ -48,10 +48,9 @@ class _PointDemoPainter extends CustomPainter {
   final Animation<double>? _repaint;
 
   void drawPoint(Canvas canvas, Offset point, Color color) {
-    final Paint paint =
-        Paint()
-          ..color = color.withOpacity(0.25)
-          ..style = PaintingStyle.fill;
+    final Paint paint = Paint()
+      ..color = color.withOpacity(0.25)
+      ..style = PaintingStyle.fill;
     canvas.drawCircle(point, _kPointRadius, paint);
     paint
       ..color = color
@@ -226,10 +225,9 @@ class _RectangleDemoPainter extends CustomPainter {
   final Animation<double> _repaint;
 
   void drawPoint(Canvas canvas, Offset p, Color color) {
-    final Paint paint =
-        Paint()
-          ..color = color.withOpacity(0.25)
-          ..style = PaintingStyle.fill;
+    final Paint paint = Paint()
+      ..color = color.withOpacity(0.25)
+      ..style = PaintingStyle.fill;
     canvas.drawCircle(p, _kPointRadius, paint);
     paint
       ..color = color
@@ -239,11 +237,10 @@ class _RectangleDemoPainter extends CustomPainter {
   }
 
   void drawRect(Canvas canvas, Rect rect, Color color) {
-    final Paint paint =
-        Paint()
-          ..color = color.withOpacity(0.25)
-          ..strokeWidth = 4.0
-          ..style = PaintingStyle.stroke;
+    final Paint paint = Paint()
+      ..color = color.withOpacity(0.25)
+      ..strokeWidth = 4.0
+      ..style = PaintingStyle.stroke;
     canvas.drawRect(rect, paint);
     drawPoint(canvas, rect.center, color);
   }

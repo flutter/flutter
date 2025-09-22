@@ -37,7 +37,7 @@ String get testSelector {
 
 /// Runs a specific web test
 Future<void> runWebTest(WebTest test) async {
-  ui_web.debugEmulateFlutterTesterEnvironment = true;
+  ui_web.TestEnvironment.setUp(const ui_web.TestEnvironment.flutterTester());
   final Completer<void> completer = Completer<void>();
   await ui_web.bootstrapEngine(runApp: () => completer.complete());
   await completer.future;
@@ -73,10 +73,9 @@ StreamChannel<Object?> _postMessageChannel() {
     <JSObject>[channel.port2].toJS,
   );
 
-  final JSFunction eventCallback =
-      (web.Event event) {
-        controller.local.sink.add(event.data.dartify());
-      }.toJS;
+  final JSFunction eventCallback = (web.Event event) {
+    controller.local.sink.add(event.data.dartify());
+  }.toJS;
   channel.port1.addEventListener('message'.toJS, eventCallback);
   channel.port1.start();
   controller.local.stream.listen(

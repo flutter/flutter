@@ -101,10 +101,6 @@ flutter:
       await const CopyAssets().build(environment);
 
       expect(
-        fileSystem.file('${environment.buildDir.path}/flutter_assets/AssetManifest.json'),
-        exists,
-      );
-      expect(
         fileSystem.file('${environment.buildDir.path}/flutter_assets/FontManifest.json'),
         exists,
       );
@@ -237,7 +233,7 @@ flutter:
         userMessages: UserMessages(),
       );
 
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         processManager: globals.processManager,
         artifacts: Artifacts.test(),
@@ -275,22 +271,22 @@ flutter:
       Logger: () => logger,
       FileSystem: () => fileSystem,
       Platform: () => FakePlatform(),
-      ProcessManager:
-          () => FakeProcessManager.list(<FakeCommand>[
-            FakeCommand(
-              command: <Pattern>[
-                Artifacts.test().getArtifactPath(Artifact.engineDartBinary),
-                'run',
-                'my_capitalizer_transformer',
-                RegExp('--input=.*'),
-                RegExp('--output=.*'),
-                '-a',
-                '-b',
-                '--color',
-                'green',
-              ],
-              onRun: (List<String> args) {
-                final ArgResults parsedArgs = (ArgParser()
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <Pattern>[
+            Artifacts.test().getArtifactPath(Artifact.engineDartBinary),
+            'run',
+            'my_capitalizer_transformer',
+            RegExp('--input=.*'),
+            RegExp('--output=.*'),
+            '-a',
+            '-b',
+            '--color',
+            'green',
+          ],
+          onRun: (List<String> args) {
+            final ArgResults parsedArgs =
+                (ArgParser()
                       ..addOption('input')
                       ..addOption('output')
                       ..addOption('color')
@@ -298,20 +294,20 @@ flutter:
                       ..addFlag('bbb', abbr: 'b'))
                     .parse(args);
 
-                expect(parsedArgs['aaa'], true);
-                expect(parsedArgs['bbb'], true);
-                expect(parsedArgs['color'], 'green');
+            expect(parsedArgs['aaa'], true);
+            expect(parsedArgs['bbb'], true);
+            expect(parsedArgs['color'], 'green');
 
-                final File input = fileSystem.file(parsedArgs['input'] as String);
-                expect(input, exists);
-                final String inputContents = input.readAsStringSync();
-                expect(inputContents, 'abc');
-                fileSystem.file(parsedArgs['output'])
-                  ..createSync()
-                  ..writeAsStringSync(inputContents.toUpperCase());
-              },
-            ),
-          ]),
+            final File input = fileSystem.file(parsedArgs['input'] as String);
+            expect(input, exists);
+            final String inputContents = input.readAsStringSync();
+            expect(inputContents, 'abc');
+            fileSystem.file(parsedArgs['output'])
+              ..createSync()
+              ..writeAsStringSync(inputContents.toUpperCase());
+          },
+        ),
+      ]),
     },
   );
 
@@ -324,7 +320,7 @@ flutter:
         userMessages: UserMessages(),
       );
 
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         processManager: globals.processManager,
         artifacts: Artifacts.test(),
@@ -360,33 +356,32 @@ flutter:
       Logger: () => logger,
       FileSystem: () => fileSystem,
       Platform: () => FakePlatform(),
-      ProcessManager:
-          () => FakeProcessManager.list(<FakeCommand>[
-            FakeCommand(
-              command: <Pattern>[
-                Artifacts.test().getArtifactPath(Artifact.engineDartBinary),
-                'run',
-                'my_transformer',
-                RegExp('--input=.*'),
-                RegExp('--output=.*'),
-                '-a',
-                '-b',
-                '--color',
-                'green',
-              ],
-              exitCode: 1,
-            ),
-          ]),
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <Pattern>[
+            Artifacts.test().getArtifactPath(Artifact.engineDartBinary),
+            'run',
+            'my_transformer',
+            RegExp('--input=.*'),
+            RegExp('--output=.*'),
+            '-a',
+            '-b',
+            '--color',
+            'green',
+          ],
+          exitCode: 1,
+        ),
+      ]),
     },
   );
 
   testUsingContext(
     'asset transformation, per each asset, uses unique paths for temporary files',
     () async {
-      final List<String> inputFilePaths = <String>[];
-      final List<String> outputFilePaths = <String>[];
+      final inputFilePaths = <String>[];
+      final outputFilePaths = <String>[];
 
-      final FakeCommand transformerCommand = FakeCommand(
+      final transformerCommand = FakeCommand(
         command: <Pattern>[
           Artifacts.test().getArtifactPath(Artifact.engineDartBinary),
           'run',
@@ -395,13 +390,14 @@ flutter:
           RegExp('--output=.*'),
         ],
         onRun: (List<String> args) {
-          final ArgResults parsedArgs = (ArgParser()
-                ..addOption('input')
-                ..addOption('output'))
-              .parse(args);
+          final ArgResults parsedArgs =
+              (ArgParser()
+                    ..addOption('input')
+                    ..addOption('output'))
+                  .parse(args);
 
-          final String input = parsedArgs['input'] as String;
-          final String output = parsedArgs['output'] as String;
+          final input = parsedArgs['input'] as String;
+          final output = parsedArgs['output'] as String;
 
           inputFilePaths.add(input);
           outputFilePaths.add(output);
@@ -418,7 +414,7 @@ flutter:
         userMessages: UserMessages(),
       );
 
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         processManager: FakeProcessManager.list(<FakeCommand>[
           transformerCommand,
@@ -468,14 +464,14 @@ flutter:
   testUsingContext(
     'Uses processors~/2 to transform assets',
     () async {
-      const int assetsToTransform = 5;
+      const assetsToTransform = 5;
 
-      final List<String> inputFilePaths = <String>[];
-      final List<String> outputFilePaths = <String>[];
-      final Completer<void> markTransformDone = Completer<void>();
-      int totalTransformsRunning = 0;
+      final inputFilePaths = <String>[];
+      final outputFilePaths = <String>[];
+      final markTransformDone = Completer<void>();
+      var totalTransformsRunning = 0;
 
-      final FakeCommand transformerCommand = FakeCommand(
+      final transformerCommand = FakeCommand(
         command: <Pattern>[
           Artifacts.test().getArtifactPath(Artifact.engineDartBinary),
           'run',
@@ -485,13 +481,14 @@ flutter:
         ],
         onRun: (List<String> args) {
           totalTransformsRunning++;
-          final ArgResults parsedArgs = (ArgParser()
-                ..addOption('input')
-                ..addOption('output'))
-              .parse(args);
+          final ArgResults parsedArgs =
+              (ArgParser()
+                    ..addOption('input')
+                    ..addOption('output'))
+                  .parse(args);
 
-          final String input = parsedArgs['input'] as String;
-          final String output = parsedArgs['output'] as String;
+          final input = parsedArgs['input'] as String;
+          final output = parsedArgs['output'] as String;
 
           inputFilePaths.add(input);
           outputFilePaths.add(output);
@@ -509,7 +506,7 @@ flutter:
         userMessages: UserMessages(),
       );
 
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         processManager: FakeProcessManager.list(
           List<FakeCommand>.filled(assetsToTransform, transformerCommand, growable: true),
@@ -538,7 +535,7 @@ flutter:
         ..createSync(recursive: true)
         ..writeAsStringSync('abc');
 
-      for (int i = 0; i < assetsToTransform - 1; i++) {
+      for (var i = 0; i < assetsToTransform - 1; i++) {
         fileSystem.directory('${i + 2}x').childFile('input.txt')
           ..createSync(recursive: true)
           ..writeAsStringSync('def');

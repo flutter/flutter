@@ -329,6 +329,9 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
     if (widget.controller != oldWidget.controller) {
       oldWidget.controller.removeListener(_toggleExpansion);
       widget.controller.addListener(_toggleExpansion);
+      if (oldWidget.controller.isExpanded != widget.controller.isExpanded) {
+        _toggleExpansion();
+      }
     }
   }
 
@@ -374,7 +377,9 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
       animation: _animationController.view,
       builder: (BuildContext context, Widget? child) {
         final Widget header = widget.headerBuilder(context, _animationController);
-        final Widget body = ClipRect(child: Align(heightFactor: _heightFactor.value, child: child));
+        final Widget body = ClipRect(
+          child: Align(heightFactor: _heightFactor.value, child: child),
+        );
         return widget.expansibleBuilder(context, header, body, _animationController);
       },
       child: shouldRemoveBody ? null : result,

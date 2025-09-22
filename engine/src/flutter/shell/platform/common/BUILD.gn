@@ -57,6 +57,16 @@ source_set("common_cpp_input") {
   deps = [ "//flutter/fml:fml" ]
 }
 
+source_set("common_cpp_isolate_scope") {
+  public = [ "isolate_scope.h" ]
+  sources = [ "isolate_scope.cc" ]
+
+  deps = [
+    "$dart_src/runtime:dart_api",
+    "//flutter/fml:fml",
+  ]
+}
+
 source_set("common_cpp_enums") {
   public = [
     "app_lifecycle_state.h",
@@ -140,13 +150,18 @@ source_set("common_cpp") {
 # API surface there will be.
 source_set("common_cpp_core") {
   public = [
-    "geometry.h",
     "path_utils.h",
+    "windowing.h",
   ]
 
   sources = [ "path_utils.cc" ]
 
   public_configs = [ "//flutter:config" ]
+
+  deps = [
+    "//flutter/fml:fml",
+    "//flutter/shell/geometry:geometry",
+  ]
 }
 
 if (enable_unittests) {
@@ -178,7 +193,6 @@ if (enable_unittests) {
 
     sources = [
       "engine_switches_unittests.cc",
-      "geometry_unittests.cc",
       "incoming_message_dispatcher_unittests.cc",
       "json_message_codec_unittests.cc",
       "json_method_codec_unittests.cc",

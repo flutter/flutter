@@ -10,7 +10,10 @@ void main() {
   testWidgets('Chip demo has semantic labels', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
-      MaterialApp(theme: ThemeData(platform: TargetPlatform.iOS), home: const ChipDemo()),
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
+        home: const ChipDemo(),
+      ),
     );
 
     expect(

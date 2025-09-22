@@ -166,8 +166,9 @@ class SnippetSample extends CodeSample {
     required int index,
     required SourceLine lineProto,
   }) {
-    final List<SourceLine> code =
-        sections.expand((SnippetSample section) => section.input).toList();
+    final List<SourceLine> code = sections
+        .expand((SnippetSample section) => section.input)
+        .toList();
     return SnippetSample(code, index: index, lineProto: lineProto);
   }
 
@@ -444,10 +445,9 @@ class SourceElement {
   int get dartpadSampleCount => samples.whereType<DartpadSample>().length;
 
   /// The number of [ApplicationSample]s in the dartdoc comment for this element.
-  int get applicationSampleCount =>
-      samples.where((CodeSample sample) {
-        return sample is ApplicationSample && sample is! DartpadSample;
-      }).length;
+  int get applicationSampleCount => samples.where((CodeSample sample) {
+    return sample is ApplicationSample && sample is! DartpadSample;
+  }).length;
 
   /// The number of [SnippetSample]s in the dartdoc comment for this element.
   int get snippetCount => samples.whereType<SnippetSample>().length;

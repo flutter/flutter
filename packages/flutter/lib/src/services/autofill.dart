@@ -730,11 +730,11 @@ class AutofillConfiguration {
   Map<String, dynamic>? toJson() {
     return enabled
         ? <String, dynamic>{
-          'uniqueIdentifier': uniqueIdentifier,
-          'hints': autofillHints,
-          'editingValue': currentEditingValue.toJSON(),
-          if (hintText != null) 'hintText': hintText,
-        }
+            'uniqueIdentifier': uniqueIdentifier,
+            'hints': autofillHints,
+            'editingValue': currentEditingValue.toJSON(),
+            'hintText': ?hintText,
+          }
         : null;
   }
 

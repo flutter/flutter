@@ -25,6 +25,7 @@ import 'checkable.dart';
 import 'disable.dart';
 import 'expandable.dart';
 import 'focusable.dart';
+import 'form.dart';
 import 'header.dart';
 import 'heading.dart';
 import 'image.dart';
@@ -44,6 +45,8 @@ import 'table.dart';
 import 'tabs.dart';
 import 'tappable.dart';
 import 'text_field.dart';
+
+const String kFlutterSemanticNodePrefix = 'flt-semantic-node-';
 
 class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
   const EngineAccessibilityFeatures(this._index);
@@ -268,6 +271,7 @@ class SemanticsNodeUpdate {
     required this.controlsNodes,
     required this.validationResult,
     required this.inputType,
+    required this.locale,
   });
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
@@ -380,6 +384,9 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final ui.SemanticsInputType inputType;
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final ui.Locale? locale;
 }
 
 /// Identifies [SemanticRole] implementations.
@@ -522,6 +529,9 @@ enum EngineSemanticsRole {
   /// of the other landmark roles, such as main, contentinfo, complementary, or
   /// navigation.
   region,
+
+  /// An area that represents a form.
+  form,
 }
 
 /// Responsible for setting the `role` ARIA attribute, for attaching
@@ -600,7 +610,7 @@ abstract class SemanticRole {
     element.style
       ..position = 'absolute'
       ..overflow = 'visible';
-    element.setAttribute('id', 'flt-semantic-node-${semanticsObject.id}');
+    element.setAttribute('id', '$kFlutterSemanticNodePrefix${semanticsObject.id}');
 
     // The root node has some properties that other nodes do not.
     if (semanticsObject.id == 0 && !configuration.debugShowSemanticsNodes) {
@@ -780,6 +790,10 @@ abstract class SemanticRole {
     if (semanticsObject.isControlsNodesDirty) {
       _updateControls();
     }
+
+    if (semanticsObject.isLocaleDirty) {
+      semanticsObject.owner.addOneTimePostUpdateCallback(_updateLocale);
+    }
   }
 
   void _updateIdentifier() {
@@ -799,7 +813,7 @@ abstract class SemanticRole {
           if (semanticNodeId == null) {
             continue;
           }
-          elementIds.add('flt-semantic-node-$semanticNodeId');
+          elementIds.add('$kFlutterSemanticNodePrefix$semanticNodeId');
         }
         if (elementIds.isNotEmpty) {
           setAttribute('aria-controls', elementIds.join(' '));
@@ -808,6 +822,16 @@ abstract class SemanticRole {
       });
     }
     removeAttribute('aria-controls');
+  }
+
+  void _updateLocale() {
+    final String locale = semanticsObject.locale?.toString() ?? '';
+    final isSameAsParent = semanticsObject.locale == semanticsObject.parent?.locale;
+    if (locale.isEmpty || isSameAsParent) {
+      removeAttribute('lang');
+      return;
+    }
+    setAttribute('lang', locale);
   }
 
   /// Applies the current [SemanticsObject.validationResult] to the DOM managed
@@ -1470,6 +1494,18 @@ class SemanticsObject {
     _dirtyFields |= _controlsNodesIndex;
   }
 
+  /// The language of this node.
+  ui.Locale? locale;
+
+  static const int _localeIndex = 1 << 28;
+
+  /// Whether the [locale] field has been updated but has not been
+  /// applied to the DOM yet.
+  bool get isLocaleDirty => _isDirty(_localeIndex);
+  void _markLocaleDirty() {
+    _dirtyFields |= _localeIndex;
+  }
+
   /// Bitfield showing which fields have been updated but have not yet been
   /// applied to the DOM.
   ///
@@ -1502,25 +1538,25 @@ class SemanticsObject {
   bool hasAction(ui.SemanticsAction action) => (_actions! & action.index) != 0;
 
   /// Whether this object represents a widget that can receive input focus.
-  bool get isFocusable => flags.isFocusable;
+  bool get isFocusable => flags.isFocused != ui.Tristate.none;
 
   /// Whether this object currently has input focus.
   ///
   /// This value only makes sense if [isFocusable] is true.
-  bool get hasFocus => flags.isFocused;
+  bool get hasFocus => flags.isFocused == ui.Tristate.isTrue;
 
   /// Whether this object can be in one of "enabled" or "disabled" state.
   ///
   /// If this is true, [isEnabled] communicates the state.
-  bool get hasEnabledState => flags.hasEnabledState;
+  bool get hasEnabledState => flags.isEnabled != ui.Tristate.none;
 
   /// Whether this object is enabled.
   ///
   /// This field is only meaningful if [hasEnabledState] is true.
-  bool get isEnabled => flags.isEnabled;
+  bool get isEnabled => flags.isEnabled == ui.Tristate.isTrue;
 
   /// Whether this object can be in one of "expanded" or "collapsed" state.
-  bool get hasExpandedState => flags.hasExpandedState;
+  bool get hasExpandedState => flags.isExpanded != ui.Tristate.none;
 
   /// Whether this object represents a vertically scrollable area.
   bool get isVerticalScrollContainer =>
@@ -1564,14 +1600,13 @@ class SemanticsObject {
   ///
   /// See [EnabledState] for more details.
   EnabledState enabledState() {
-    if (flags.hasEnabledState) {
-      if (flags.isEnabled) {
+    switch (flags.isEnabled) {
+      case ui.Tristate.none:
+        return EnabledState.noOpinion;
+      case ui.Tristate.isTrue:
         return EnabledState.enabled;
-      } else {
+      case ui.Tristate.isFalse:
         return EnabledState.disabled;
-      }
-    } else {
-      return EnabledState.noOpinion;
     }
   }
 
@@ -1750,6 +1785,11 @@ class SemanticsObject {
     if (!unorderedListEqual<String>(controlsNodes, update.controlsNodes)) {
       controlsNodes = update.controlsNodes;
       _markControlsNodesDirty();
+    }
+
+    if (locale != update.locale) {
+      locale = update.locale;
+      _markLocaleDirty();
     }
 
     // Apply updates to the DOM.
@@ -1988,12 +2028,13 @@ class SemanticsObject {
         return EngineSemanticsRole.navigation;
       case ui.SemanticsRole.region:
         return EngineSemanticsRole.region;
+      case ui.SemanticsRole.form:
+        return EngineSemanticsRole.form;
       // TODO(chunhtai): implement these roles.
       // https://github.com/flutter/flutter/issues/159741.
       case ui.SemanticsRole.dragHandle:
       case ui.SemanticsRole.spinButton:
       case ui.SemanticsRole.comboBox:
-      case ui.SemanticsRole.form:
       case ui.SemanticsRole.tooltip:
       case ui.SemanticsRole.loadingSpinner:
       case ui.SemanticsRole.progressBar:
@@ -2014,14 +2055,14 @@ class SemanticsObject {
       return EngineSemanticsRole.image;
     } else if (isCheckable) {
       return EngineSemanticsRole.checkable;
+    } else if (isLink) {
+      return EngineSemanticsRole.link;
     } else if (isButton) {
       return EngineSemanticsRole.button;
     } else if (isScrollContainer) {
       return EngineSemanticsRole.scrollable;
     } else if (scopesRoute) {
       return EngineSemanticsRole.route;
-    } else if (isLink) {
-      return EngineSemanticsRole.link;
     } else if (isHeader) {
       return EngineSemanticsRole.header;
     } else if (isButtonLike) {
@@ -2069,6 +2110,7 @@ class SemanticsObject {
       EngineSemanticsRole.main => SemanticMain(this),
       EngineSemanticsRole.navigation => SemanticNavigation(this),
       EngineSemanticsRole.region => SemanticRegion(this),
+      EngineSemanticsRole.form => SemanticForm(this),
     };
   }
 
@@ -2147,15 +2189,16 @@ class SemanticsObject {
   /// Because such widgets require the use of specific ARIA roles and HTML
   /// elements, they are managed by the [SemanticCheckable] role, and they do
   /// not use the [Selectable] behavior.
-  bool get isCheckable => flags.hasCheckedState || flags.hasToggledState;
+  bool get isCheckable =>
+      flags.isChecked != ui.CheckedState.none || flags.isToggled != ui.Tristate.none;
 
   /// If true, this node represents something that can be in a "checked" or
   /// state, such as checkboxes, radios, and switches.
-  bool get isChecked => flags.isChecked;
+  bool get isChecked => flags.isChecked == ui.CheckedState.isTrue;
 
   /// If true, this node represents something that can be in a "mixed" or
   /// state, such as checkboxes.
-  bool get isMixed => flags.isCheckStateMixed;
+  bool get isMixed => flags.isChecked == ui.CheckedState.mixed;
 
   /// If true, this node represents something that can be annotated as
   /// "selected", such as a tab, or an item in a list.
@@ -2170,11 +2213,11 @@ class SemanticsObject {
   /// See also:
   ///
   ///   * [isSelected], which indicates whether the node is currently selected.
-  bool get isSelectable => flags.hasSelectedState;
+  bool get isSelectable => flags.isSelected != ui.Tristate.none;
 
   /// If [isSelectable] is true, indicates whether the node is currently
   /// selected.
-  bool get isSelected => flags.isSelected;
+  bool get isSelected => flags.isSelected == ui.Tristate.isTrue;
 
   /// If true, this node represents something that currently requires user input
   /// before a form can be submitted.
@@ -2187,10 +2230,10 @@ class SemanticsObject {
   /// See also:
   ///
   ///   * [isRequired], which indicates whether the is currently required.
-  bool get isRequirable => flags.hasRequiredState;
+  bool get isRequirable => flags.isRequired != ui.Tristate.none;
 
   /// If [isRequirable] is true, indicates whether the node is required.
-  bool get isRequired => flags.isRequired;
+  bool get isRequired => flags.isRequired == ui.Tristate.isTrue;
 
   /// If true, this node represents something that can be annotated as
   /// "expanded", such as a expansion tile or drop down menu
@@ -2200,10 +2243,10 @@ class SemanticsObject {
   /// See also:
   ///
   ///   * [isExpanded], which indicates whether the node is currently selected.
-  bool get isExpandable => flags.hasExpandedState;
+  bool get isExpandable => flags.isExpanded != ui.Tristate.none;
 
   /// Indicates whether the node is currently expanded.
-  bool get isExpanded => flags.isExpanded;
+  bool get isExpanded => flags.isExpanded == ui.Tristate.isTrue;
 
   /// Role-specific adjustment of the vertical position of the children.
   ///
@@ -2390,8 +2433,8 @@ class SemanticsObject {
     assert(() {
       final String children =
           _childrenInTraversalOrder != null && _childrenInTraversalOrder!.isNotEmpty
-              ? '[${_childrenInTraversalOrder!.join(', ')}]'
-              : '<empty>';
+          ? '[${_childrenInTraversalOrder!.join(', ')}]'
+          : '<empty>';
       result = '$runtimeType(#$id, children: $children)';
       return true;
     }());
@@ -2559,7 +2602,7 @@ class EngineSemantics {
   /// actually updating the semantic DOM.
   void didReceiveSemanticsUpdate() {
     if (!_semanticsEnabled) {
-      if (ui_web.debugEmulateFlutterTesterEnvironment) {
+      if (ui_web.TestEnvironment.instance.keepSemanticsDisabledOnUpdate) {
         // Running Flutter widget tests in a fake environment. Don't enable
         // engine semantics. Test semantics trees violate invariants in ways
         // production implementation isn't built to handle. For example, tests

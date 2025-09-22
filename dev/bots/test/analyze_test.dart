@@ -27,12 +27,11 @@ Future<String> capture(AsyncVoidCallback callback, {bool shouldHaveErrors = fals
     expect(
       hasError,
       shouldHaveErrors,
-      reason:
-          buffer.isEmpty
-              ? '(No output to report.)'
-              : hasError
-              ? 'Unexpected errors:\n$buffer'
-              : 'Unexpected success:\n$buffer',
+      reason: buffer.isEmpty
+          ? '(No output to report.)'
+          : hasError
+          ? 'Unexpected errors:\n$buffer'
+          : 'Unexpected success:\n$buffer',
     );
   } finally {
     print = oldPrint;
@@ -95,11 +94,10 @@ void main() {
         'at the top of the file before import statements.';
     const String missingTag =
         "Files containing golden tests must be tagged with 'reduced-test-set'.";
-    final List<String> lines =
-        <String>[
-          '║ test/analyze-test-input/root/packages/foo/golden_missing_tag.dart: $missingTag',
-          '║ test/analyze-test-input/root/packages/foo/golden_no_tag.dart: $noTag',
-        ].map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/')).toList();
+    final List<String> lines = <String>[
+      '║ test/analyze-test-input/root/packages/foo/golden_missing_tag.dart: $missingTag',
+      '║ test/analyze-test-input/root/packages/foo/golden_no_tag.dart: $noTag',
+    ].map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/')).toList();
     expect(
       result.length,
       4 + lines.length,
@@ -167,10 +165,9 @@ void main() {
       shouldHaveErrors: true,
     );
     const String bannedBranch = 'master';
-    final String file =
-        Platform.isWindows
-            ? r'test\analyze-test-input\root\packages\foo\bad_repository_links.dart'
-            : 'test/analyze-test-input/root/packages/foo/bad_repository_links.dart';
+    final String file = Platform.isWindows
+        ? r'test\analyze-test-input\root\packages\foo\bad_repository_links.dart'
+        : 'test/analyze-test-input/root/packages/foo/bad_repository_links.dart';
     final String lines = <String>[
       '║ $file contains https://android.googlesource.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
       '║ $file contains https://chromium.googlesource.com/+/$bannedBranch/file1, which uses the banned "master" branch.',

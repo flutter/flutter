@@ -33,7 +33,11 @@ void main() {
     await tester.pumpWidget(Center(child: SizedBox(height: 100.0, child: error)));
     expect(tester.takeException(), null);
 
-    await tester.pumpWidget(Center(child: SizedBox(key: UniqueKey(), height: 100.0, child: error)));
+    await tester.pumpWidget(
+      Center(
+        child: SizedBox(key: UniqueKey(), height: 100.0, child: error),
+      ),
+    );
     expect(tester.takeException(), 'pillow');
     expect(
       find.byType(ErrorWidget),

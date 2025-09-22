@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'bottom_navigation_bar.dart';
-import 'material_state.dart';
 import 'theme.dart';
 
 // Examples can assume:
@@ -130,7 +129,7 @@ class BottomNavigationBarThemeData with Diagnosticable {
   final BottomNavigationBarLandscapeLayout? landscapeLayout;
 
   /// If specified, overrides the default value of [BottomNavigationBar.mouseCursor].
-  final MaterialStateProperty<MouseCursor?>? mouseCursor;
+  final WidgetStateProperty<MouseCursor?>? mouseCursor;
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
@@ -148,7 +147,7 @@ class BottomNavigationBarThemeData with Diagnosticable {
     BottomNavigationBarType? type,
     bool? enableFeedback,
     BottomNavigationBarLandscapeLayout? landscapeLayout,
-    MaterialStateProperty<MouseCursor?>? mouseCursor,
+    WidgetStateProperty<MouseCursor?>? mouseCursor,
   }) {
     return BottomNavigationBarThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -287,7 +286,7 @@ class BottomNavigationBarThemeData with Diagnosticable {
       ),
     );
     properties.add(
-      DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>(
+      DiagnosticsProperty<WidgetStateProperty<MouseCursor?>>(
         'mouseCursor',
         mouseCursor,
         defaultValue: null,
@@ -330,8 +329,8 @@ class BottomNavigationBarTheme extends InheritedWidget {
   /// BottomNavigationBarThemeData theme = BottomNavigationBarTheme.of(context);
   /// ```
   static BottomNavigationBarThemeData of(BuildContext context) {
-    final BottomNavigationBarTheme? bottomNavTheme =
-        context.dependOnInheritedWidgetOfExactType<BottomNavigationBarTheme>();
+    final BottomNavigationBarTheme? bottomNavTheme = context
+        .dependOnInheritedWidgetOfExactType<BottomNavigationBarTheme>();
     return bottomNavTheme?.data ?? Theme.of(context).bottomNavigationBarTheme;
   }
 

@@ -1,0 +1,3 @@
+bsd header
+(?s)Copyright.*governed by a BD-style license.*in the LICENSE file
+(?s)Copyright .*(?:\. All rights reserved.\s+)?Use of this source code is governed by a BD-style license that can be\s+found\s+in the LICENSE file.

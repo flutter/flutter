@@ -237,7 +237,7 @@ List the currently configured custom devices, both enabled and disabled, reachab
       logger.printStatus('No custom devices found in "${customDevicesConfig.configPath}"');
     } else {
       logger.printStatus('List of custom devices in "${customDevicesConfig.configPath}":');
-      for (final CustomDeviceConfig device in devices) {
+      for (final device in devices) {
         logger.printStatus(
           'id: ${device.id}, label: ${device.label}, enabled: ${device.enabled}',
           indent: 2,
@@ -281,7 +281,7 @@ If a file already exists at the backup location, it will be overwritten.
     logger.printStatus(
       wasBackedUp
           ? 'Successfully reset the custom devices config file and created a '
-              'backup at "$configBackupPath".'
+                'backup at "$configBackupPath".'
           : 'Successfully reset the custom devices config file.',
     );
     return FlutterCommandResult.success();
@@ -342,15 +342,15 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     );
   }
 
-  static const String _kJson = 'json';
-  static const List<String> _kJsonAliases = <String>['js'];
-  static const String _kCheck = 'check';
-  static const String _kSsh = 'ssh';
+  static const _kJson = 'json';
+  static const _kJsonAliases = <String>['js'];
+  static const _kCheck = 'check';
+  static const _kSsh = 'ssh';
 
   // A hostname consists of one or more "names", separated by a dot.
   // A name may consist of alpha-numeric characters. Hyphens are also allowed,
   // but not as the first or last character of the name.
-  static final RegExp _hostnameRegex = RegExp(
+  static final _hostnameRegex = RegExp(
     r'^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$',
   );
 
@@ -373,13 +373,9 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   /// Check this config by executing some of the commands, see if they run
   /// fine.
   Future<bool> _checkConfigWithLogging(final CustomDeviceConfig config) async {
-    final CustomDevice device = CustomDevice(
-      config: config,
-      logger: logger,
-      processManager: _processManager,
-    );
+    final device = CustomDevice(config: config, logger: logger, processManager: _processManager);
 
-    bool result = true;
+    var result = true;
 
     try {
       final bool reachable = await device.tryPing();
@@ -419,7 +415,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     }
 
     if (config.usesPortForwarding) {
-      final CustomDevicePortForwarder portForwarder = CustomDevicePortForwarder(
+      final portForwarder = CustomDevicePortForwarder(
         deviceName: device.displayName,
         forwardPortCommand: config.forwardPortCommand!,
         forwardPortSuccessRegex: config.forwardPortSuccessRegex!,
@@ -530,7 +526,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
 
   /// Ask the user for a y(es) / n(o) or empty input.
   Future<bool> askForBool(String name, {String? description, bool defaultsTo = true}) async {
-    final String defaultsToStr = defaultsTo ? '[Y/n]' : '[y/N]';
+    final defaultsToStr = defaultsTo ? '[Y/n]' : '[y/N]';
     logger.printStatus('$description $defaultsToStr (empty for default)');
     while (true) {
       final String input = await inputs.next;
@@ -554,11 +550,10 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   Future<bool> askApplyConfig({bool hasErrorsOrWarnings = false}) {
     return askForBool(
       'apply',
-      description:
-          hasErrorsOrWarnings
-              ? 'Warnings or errors exist in custom device. '
-                  'Would you like to add the custom device to the config anyway?'
-              : 'Would you like to add the custom device to the config now?',
+      description: hasErrorsOrWarnings
+          ? 'Warnings or errors exist in custom device. '
+                'Would you like to add the custom device to the config anyway?'
+          : 'Would you like to add the custom device to the config now?',
       defaultsTo: !hasErrorsOrWarnings,
     );
   }
@@ -577,7 +572,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     // custom-devices add command is waiting for user input.
     // So instead, we add the keystrokes stream events to a new single-subscription
     // stream and listen to that instead.
-    final StreamController<String> nonClosingKeystrokes = StreamController<String>();
+    final nonClosingKeystrokes = StreamController<String>();
     final StreamSubscription<String> keystrokesSubscription = _terminal.keystrokes.listen(
       (String s) => nonClosingKeystrokes.add(s.trim()),
       cancelOnError: true,
@@ -585,60 +580,58 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
 
     inputs = StreamQueue<String>(nonClosingKeystrokes.stream);
 
-    final String id =
-        (await askForString(
-          'id',
-          description:
-              'Please enter the id you want to device to have. Must contain only '
-              'alphanumeric or underscore characters.',
-          example: 'pi',
-          validator: (String s) async => RegExp(r'^\w+$').hasMatch(s),
-        ))!;
+    final String id = (await askForString(
+      'id',
+      description:
+          'Please enter the id you want to device to have. Must contain only '
+          'alphanumeric or underscore characters.',
+      example: 'pi',
+      validator: (String s) async => RegExp(r'^\w+$').hasMatch(s),
+    ))!;
 
-    final String label =
-        (await askForString(
-          'label',
-          description:
-              'Please enter the label of the device, which is a slightly more verbose '
-              'name for the device.',
-          example: 'Raspberry Pi',
-        ))!;
+    final String label = (await askForString(
+      'label',
+      description:
+          'Please enter the label of the device, which is a slightly more verbose '
+          'name for the device.',
+      example: 'Raspberry Pi',
+    ))!;
 
-    final String sdkNameAndVersion =
-        (await askForString('SDK name and version', example: 'Raspberry Pi 4 Model B+'))!;
+    final String sdkNameAndVersion = (await askForString(
+      'SDK name and version',
+      example: 'Raspberry Pi 4 Model B+',
+    ))!;
 
     final bool enabled = await askForBool('enabled', description: 'Should the device be enabled?');
 
-    final String targetStr =
-        (await askForString(
-          'target',
-          description: 'Please enter the hostname or IPv4/v6 address of the device.',
-          example: 'raspberrypi',
-          validator: (String s) async => _isValidHostname(s) || _isValidIpAddr(s),
-        ))!;
+    final String targetStr = (await askForString(
+      'target',
+      description: 'Please enter the hostname or IPv4/v6 address of the device.',
+      example: 'raspberrypi',
+      validator: (String s) async => _isValidHostname(s) || _isValidIpAddr(s),
+    ))!;
 
     final InternetAddress? targetIp = InternetAddress.tryParse(targetStr);
-    final bool useIp = targetIp != null;
+    final useIp = targetIp != null;
     final bool ipv6 = useIp && targetIp.type == InternetAddressType.IPv6;
-    final InternetAddress loopbackIp =
-        ipv6 ? InternetAddress.loopbackIPv6 : InternetAddress.loopbackIPv4;
+    final InternetAddress loopbackIp = ipv6
+        ? InternetAddress.loopbackIPv6
+        : InternetAddress.loopbackIPv4;
 
-    final String username =
-        (await askForString(
-          'username',
-          description: 'Please enter the username used for ssh-ing into the remote device.',
-          example: 'pi',
-          defaultsTo: 'no username',
-        ))!;
+    final String username = (await askForString(
+      'username',
+      description: 'Please enter the username used for ssh-ing into the remote device.',
+      example: 'pi',
+      defaultsTo: 'no username',
+    ))!;
 
-    final String remoteRunDebugCommand =
-        (await askForString(
-          'run command',
-          description:
-              'Please enter the command executed on the remote device for starting '
-              r'the app. "/tmp/${appName}" is the path to the asset bundle.',
-          example: r'flutter-pi /tmp/${appName}',
-        ))!;
+    final String remoteRunDebugCommand = (await askForString(
+      'run command',
+      description:
+          'Please enter the command executed on the remote device for starting '
+          r'the app. "/tmp/${appName}" is the path to the asset bundle.',
+      example: r'flutter-pi /tmp/${appName}',
+    ))!;
 
     final bool usePortForwarding = await askForBool(
       'use port forwarding',
@@ -650,14 +643,12 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
           'not using port forwarding.',
     );
 
-    final String screenshotCommand =
-        (await askForString(
-          'screenshot command',
-          description: 'Enter the command executed on the remote device for taking a screenshot.',
-          example:
-              r"fbgrab /tmp/screenshot.png && cat /tmp/screenshot.png | base64 | tr -d ' \n\t'",
-          defaultsTo: 'no screenshotting support',
-        ))!;
+    final String screenshotCommand = (await askForString(
+      'screenshot command',
+      description: 'Enter the command executed on the remote device for taking a screenshot.',
+      example: r"fbgrab /tmp/screenshot.png && cat /tmp/screenshot.png | base64 | tr -d ' \n\t'",
+      defaultsTo: 'no screenshotting support',
+    ))!;
 
     // SSH expects IPv6 addresses to use the bracket syntax like URIs do too,
     // but the IPv6 the user enters is a raw IPv6 address, so we need to wrap it.
@@ -666,7 +657,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
 
     final String formattedLoopbackIp = ipv6 ? '[${loopbackIp.address}]' : loopbackIp.address;
 
-    CustomDeviceConfig config = CustomDeviceConfig(
+    var config = CustomDeviceConfig(
       id: id,
       label: label,
       sdkNameAndVersion: sdkNameAndVersion,
@@ -706,27 +697,25 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
         remoteRunDebugCommand,
       ],
 
-      forwardPortCommand:
-          usePortForwarding
-              ? <String>[
-                'ssh',
-                '-o',
-                'BatchMode=yes',
-                '-o',
-                'ExitOnForwardFailure=yes',
-                if (ipv6) '-6',
-                '-L',
-                '$formattedLoopbackIp:\${hostPort}:$formattedLoopbackIp:\${devicePort}',
-                sshTarget,
-                "echo 'Port forwarding success'; read",
-              ]
-              : null,
+      forwardPortCommand: usePortForwarding
+          ? <String>[
+              'ssh',
+              '-o',
+              'BatchMode=yes',
+              '-o',
+              'ExitOnForwardFailure=yes',
+              if (ipv6) '-6',
+              '-L',
+              '$formattedLoopbackIp:\${hostPort}:$formattedLoopbackIp:\${devicePort}',
+              sshTarget,
+              "echo 'Port forwarding success'; read",
+            ]
+          : null,
       forwardPortSuccessRegex: usePortForwarding ? RegExp('Port forwarding success') : null,
 
-      screenshotCommand:
-          screenshotCommand.isNotEmpty
-              ? <String>['ssh', '-o', 'BatchMode=yes', if (ipv6) '-6', sshTarget, screenshotCommand]
-              : null,
+      screenshotCommand: screenshotCommand.isNotEmpty
+          ? <String>['ssh', '-o', 'BatchMode=yes', if (ipv6) '-6', sshTarget, screenshotCommand]
+          : null,
     );
 
     if (_platform.isWindows) {
@@ -793,7 +782,7 @@ Delete a device from the config file.
   Future<FlutterCommandResult> runCommand() async {
     checkFeatureEnabled();
 
-    final String? id = globalResults![FlutterGlobalOptions.kDeviceIdOption] as String?;
+    final id = globalResults![FlutterGlobalOptions.kDeviceIdOption] as String?;
     if (id == null || !customDevicesConfig.contains(id)) {
       throwToolExit(
         'Couldn\'t find device with id "$id" in config at "${customDevicesConfig.configPath}"',

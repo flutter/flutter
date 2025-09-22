@@ -21,8 +21,10 @@ void main() {
       ),
     );
 
-    final List<Element> elements =
-        collectAllElementsFrom(key.currentContext! as Element, skipOffstage: false).toList();
+    final List<Element> elements = collectAllElementsFrom(
+      key.currentContext! as Element,
+      skipOffstage: false,
+    ).toList();
 
     expect(elements.length, 3);
     expect(elements[0].widget, isA<Row>());

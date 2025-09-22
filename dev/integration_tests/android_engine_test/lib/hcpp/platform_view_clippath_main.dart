@@ -131,14 +131,13 @@ class _ClipperHomePageState extends State<ClipperHomePage> {
               spacing: 8.0,
               runSpacing: 4.0,
               alignment: WrapAlignment.center,
-              children:
-                  ClipperType.values.map((ClipperType type) {
-                    return ElevatedButton(
-                      key: ValueKey<String>('clipper_button_${type.name}'), // Use enum name in key
-                      onPressed: () => _toggleClipper(type),
-                      child: Text(type.name), // Display clipper name on button
-                    );
-                  }).toList(),
+              children: ClipperType.values.map((ClipperType type) {
+                return ElevatedButton(
+                  key: ValueKey<String>('clipper_button_${type.name}'), // Use enum name in key
+                  onPressed: () => _toggleClipper(type),
+                  child: Text(type.name), // Display clipper name on button
+                );
+              }).toList(),
             ),
           ),
           // Expanded takes remaining space for the clipped content

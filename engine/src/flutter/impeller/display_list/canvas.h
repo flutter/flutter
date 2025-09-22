@@ -96,25 +96,23 @@ enum class ContentBoundsPromise {
   kMayClipContents,
 };
 
-struct LazyRenderingConfig {
-  std::unique_ptr<EntityPassTarget> entity_pass_target;
-  std::unique_ptr<InlinePassContext> inline_pass_context;
+class LazyRenderingConfig {
+ public:
+  LazyRenderingConfig(ContentContext& renderer,
+                      std::unique_ptr<EntityPassTarget> p_entity_pass_target);
+
+  LazyRenderingConfig(LazyRenderingConfig&&) = default;
 
   /// Whether or not the clear color texture can still be updated.
-  bool IsApplyingClearColor() const { return !inline_pass_context->IsActive(); }
+  bool IsApplyingClearColor() const;
 
-  LazyRenderingConfig(ContentContext& renderer,
-                      std::unique_ptr<EntityPassTarget> p_entity_pass_target)
-      : entity_pass_target(std::move(p_entity_pass_target)) {
-    inline_pass_context =
-        std::make_unique<InlinePassContext>(renderer, *entity_pass_target);
-  }
+  EntityPassTarget* GetEntityPassTarget() const;
 
-  LazyRenderingConfig(ContentContext& renderer,
-                      std::unique_ptr<EntityPassTarget> entity_pass_target,
-                      std::unique_ptr<InlinePassContext> inline_pass_context)
-      : entity_pass_target(std::move(entity_pass_target)),
-        inline_pass_context(std::move(inline_pass_context)) {}
+  InlinePassContext* GetInlinePassContext() const;
+
+ private:
+  std::unique_ptr<EntityPassTarget> entity_pass_target_;
+  std::unique_ptr<InlinePassContext> inline_pass_context_;
 };
 
 class Canvas {
@@ -141,7 +139,7 @@ class Canvas {
                   const RenderTarget& render_target,
                   bool is_onscreen,
                   bool requires_readback,
-                  IRect cull_rect);
+                  IRect32 cull_rect);
 
   ~Canvas() = default;
 

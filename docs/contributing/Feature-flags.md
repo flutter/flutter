@@ -6,10 +6,6 @@ The Flutter tool (`flutter`) supports the concept of _feature flags_, or boolean
 flags that can inform, change, allow, or deny access to behavior, either in the
 tool itself, or in the framework (`package:flutter`, and related).
 
-> [!WARNING]
->
-> This document is based on the unmerged PR [#168437](https://github.com/flutter/flutter/pull/168437).
-
 ---
 
 Table of Contents
@@ -20,10 +16,12 @@ Table of Contents
   - [Allowing flags to be enabled](#allowing-flags-to-be-enabled)
   - [Enabling a flag by default](#enabling-a-flag-by-default)
   - [Removing a flag](#removing-a-flag)
+  - [Precedence](#precedence)
 - [Using a flag to drive behavior](#using-a-flag-to-drive-behavior)
   - [Tool](#tool)
   - [Framework](#framework)
   - [Tests](#tests)
+- [Limitations](#limitations)
 
 ## Overview
 
@@ -116,7 +114,7 @@ The following steps are required:
    ```dart
    abstract class FeatureFlags {
      /// Whether to add unicorm emojis in lots of fun places.
-     bool get isUnicornEmojisEnabled => false;
+     bool get isUnicornEmojisEnabled;
    }
    ```
 
@@ -130,6 +128,38 @@ The following steps are required:
    ```
 
    [`FlutterFeatureFlagsIsEnabled`]: ../../packages/flutter_tools/lib/src/flutter_features.dart
+
+1. Add a new entry in `FeatureFlags.allFeatures`:
+
+   ```dart
+   List<Feature> get allFeatures => const <Feature>[
+     // ...
+     unicornEmojis,
+   ];
+   ```
+
+1. Create a [G3Fix][] to update google3's [`Google3Features`][]:
+
+   [G3Fix]: http://go/g3fix
+   [`Google3Features`]: http://go/flutter-google3features
+
+    1. Add a new field to `Google3Features` :
+
+       ```dart
+       class Google3Features extends FeatureFlags {
+         @override
+         bool get isUnicornEmojisEnabled => true;
+       }
+       ```
+
+    2. Add a new entry to `Google3Features.allFeatures`:
+
+       ```dart
+       List<Feature> get allFeatures => const <Feature>[
+         // ...
+         unicornEmojis,
+       ];
+       ```
 
 ### Allowing flags to be enabled
 
@@ -206,6 +236,43 @@ integration tests as well.
 
 [^1]: Some flags might have a longer or indefinite lifespan, but this is rare.
 
+### Precedence
+
+Users have several options to configure flags. Assuming the following feature:
+
+```dart
+const Feature unicornEmojis = Feature(
+  name: 'add unicorn emojis in lots of fun places',
+  configSetting: 'enable-unicorn-emojis',
+  environmentOverride: 'FLUTTER_ENABLE_UNICORN_EMOJIS',
+);
+```
+
+Flutter uses the following precendence order:
+
+1. The app's `pubspec.yaml` file:
+
+   ```yaml
+   flutter:
+     config:
+       enable-unicorn-emojis: true
+   ```
+
+2. The tool's global configuration:
+
+   ```sh
+   flutter config --enable-unicorn-emojis
+   ```
+
+3. Environment variables:
+
+   ```sh
+   FLUTTER_ENABLE_UNICORN_EMOJIS=true flutter some-command
+   ```
+
+If none of these are set, Flutter falls back to the feature's
+default value for the current release channel.
+
 ## Using a flag to drive behavior
 
 Once you have a flag, you can use it to conditionally enable something or
@@ -273,6 +340,10 @@ final class SensitiveContent extends StatelessWidget {
 Note that feature flag usage in the framework runtime is very new, and is likely
 to evolve over time.
 
+Feature flags are not designed to help tree shaking. For example, you
+cannot conditionally import Dart code depending on the enabled feature flags.
+Tree shaking might not remove code that is feature flagged off.
+
 ### Tests
 
 #### Integration tests
@@ -331,3 +402,39 @@ test('sensitive content should fail if the flag is disabled', () {
 
 Note that feature flag usage in the framework runtime is very new, and is likely
 to evolve over time.
+
+# Limitations
+
+The Flutter engine and embedders cannot use Flutter's feature flags directly.
+
+If an embedder needs feature flags, you can instead use the project's platform-specific configuration.
+
+On Android, use `AndroidManifest.xml`:
+
+```xml
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <application ...>
+    <meta-data
+      android:name="io.flutter.embedding.android.EnableUnicornEmojis"
+      android:value="true" />
+  </application>
+</manifest>
+```
+
+On iOS and macOS, use `Info.plist`:
+
+```xml
+...
+<plist version="1.0">
+<dict>
+  <key>FLTEnableUnicornEmojis</key>
+  <true />
+</dict>
+</plist>
+```
+
+See Impeller and UI thread merging for prior art.
+
+> [!IMPORTANT]
+> If possible, prefer to use Flutter feature flags instead of platform-specific configuration files.
+> Flutter feature flags are easier for Flutter app developers.

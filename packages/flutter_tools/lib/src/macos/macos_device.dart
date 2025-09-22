@@ -42,7 +42,7 @@ class MacOSDevice extends DesktopDevice {
   final OperatingSystemUtils _operatingSystemUtils;
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   String get name => 'macOS';

@@ -39,6 +39,11 @@ mixin SemanticsBinding on BindingBase {
         }
       };
     _handleSemanticsEnabledChanged();
+    addSemanticsEnabledListener(_handleFrameworkSemanticsEnabledChanged);
+    // Ensure the initial value is set.
+    if (semanticsEnabled) {
+      _handleFrameworkSemanticsEnabledChanged();
+    }
   }
 
   /// The current [SemanticsBinding], if one has been created.
@@ -149,10 +154,9 @@ mixin SemanticsBinding on BindingBase {
 
   void _handleSemanticsActionEvent(ui.SemanticsActionEvent action) {
     final Object? arguments = action.arguments;
-    final ui.SemanticsActionEvent decodedAction =
-        arguments is ByteData
-            ? action.copyWith(arguments: const StandardMessageCodec().decodeMessage(arguments))
-            : action;
+    final ui.SemanticsActionEvent decodedAction = arguments is ByteData
+        ? action.copyWith(arguments: const StandardMessageCodec().decodeMessage(arguments))
+        : action;
     // Listeners may get added/removed while the iteration is in progress. Since the list cannot
     // be modified while iterating, we are creating a local copy for the iteration.
     final List<ValueSetter<ui.SemanticsActionEvent>> localListeners = _semanticsActionListeners
@@ -163,6 +167,10 @@ mixin SemanticsBinding on BindingBase {
       }
     }
     performSemanticsAction(decodedAction);
+  }
+
+  void _handleFrameworkSemanticsEnabledChanged() {
+    platformDispatcher.setSemanticsTreeEnabled(semanticsEnabled);
   }
 
   /// Called whenever the platform requests an action to be performed on a

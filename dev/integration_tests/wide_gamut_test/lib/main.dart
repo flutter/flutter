@@ -210,10 +210,10 @@ Future<ui.Image> _drawImage() async {
   final Canvas canvas = Canvas(recorder, Rect.fromLTWH(0, 0, canvasSize, canvasSize));
 
   final Paint ovalPaint = Paint()..color = const Color(0xff00ff00);
-  final Path ovalPath =
-      Path()..addOval(
-        Rect.fromLTWH((canvasSize - markerSize.width) / 2, 1, markerSize.width, markerSize.height),
-      );
+  final Path ovalPath = Path()
+    ..addOval(
+      Rect.fromLTWH((canvasSize - markerSize.width) / 2, 1, markerSize.width, markerSize.height),
+    );
   canvas.drawPath(ovalPath, ovalPaint);
 
   final ui.Picture picture = recorder.endRecording();

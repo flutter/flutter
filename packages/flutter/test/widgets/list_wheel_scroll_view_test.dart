@@ -27,8 +27,9 @@ void main() {
     );
 
     // 1st, check that the render object has received the default clip behavior.
-    final RenderListWheelViewport renderObject =
-        tester.allRenderObjects.whereType<RenderListWheelViewport>().first;
+    final RenderListWheelViewport renderObject = tester.allRenderObjects
+        .whereType<RenderListWheelViewport>()
+        .first;
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
     // 2nd, check that the painting context has received the default clip behavior.
@@ -132,10 +133,9 @@ void main() {
                 key: UniqueKey(),
                 itemExtent: 100.0,
                 controller: controller,
-                children:
-                    List<Widget>.generate(100, (int index) {
-                      return SizedBox(height: 100.0, width: 400.0, child: Text('Item $index'));
-                    }).toList(),
+                children: List<Widget>.generate(100, (int index) {
+                  return SizedBox(height: 100.0, width: 400.0, child: Text('Item $index'));
+                }).toList(),
               ),
             ),
           ),
@@ -680,7 +680,12 @@ void main() {
             textDirection: TextDirection.ltr,
             child: ListWheelScrollView(
               itemExtent: 100.0,
-              children: <Widget>[SizedBox(width: width, child: const Center(child: Text('blah')))],
+              children: <Widget>[
+                SizedBox(
+                  width: width,
+                  child: const Center(child: Text('blah')),
+                ),
+              ],
             ),
           ),
         );
@@ -1716,25 +1721,24 @@ void main() {
             child: ListWheelScrollView(
               controller: controller,
               itemExtent: 100.0,
-              children:
-                  outerChildren = List<Widget>.generate(10, (int i) {
-                    return Center(
-                      child:
-                          innerChildren[i] = SizedBox(
-                            height: 50.0,
-                            width: 50.0,
-                            child: Text('Item $i'),
-                          ),
-                    );
-                  }),
+              children: outerChildren = List<Widget>.generate(10, (int i) {
+                return Center(
+                  child: innerChildren[i] = SizedBox(
+                    height: 50.0,
+                    width: 50.0,
+                    child: Text('Item $i'),
+                  ),
+                );
+              }),
             ),
           ),
         ),
       ),
     );
 
-    final RenderListWheelViewport viewport =
-        tester.allRenderObjects.whereType<RenderListWheelViewport>().first;
+    final RenderListWheelViewport viewport = tester.allRenderObjects
+        .whereType<RenderListWheelViewport>()
+        .first;
 
     // direct child of viewport
     RenderObject target = tester.renderObject(find.byWidget(outerChildren[5]));
@@ -1812,8 +1816,9 @@ void main() {
       ),
     );
 
-    final RenderListWheelViewport viewport =
-        tester.allRenderObjects.whereType<RenderListWheelViewport>().first;
+    final RenderListWheelViewport viewport = tester.allRenderObjects
+        .whereType<RenderListWheelViewport>()
+        .first;
     final RenderObject target = tester.renderObject(find.text('Item 5'));
     viewport.getOffsetToReveal(target, 0.0, axis: Axis.horizontal);
   });
@@ -1834,17 +1839,15 @@ void main() {
             child: ListWheelScrollView(
               controller: controller,
               itemExtent: 100.0,
-              children:
-                  outerChildren = List<Widget>.generate(10, (int i) {
-                    return Center(
-                      child:
-                          innerChildren[i] = SizedBox(
-                            height: 50.0,
-                            width: 50.0,
-                            child: Text('Item $i'),
-                          ),
-                    );
-                  }),
+              children: outerChildren = List<Widget>.generate(10, (int i) {
+                return Center(
+                  child: innerChildren[i] = SizedBox(
+                    height: 50.0,
+                    width: 50.0,
+                    child: Text('Item $i'),
+                  ),
+                );
+              }),
             ),
           ),
         ),
@@ -1891,28 +1894,27 @@ void main() {
           child: ListWheelScrollView(
             controller: controller,
             itemExtent: 100,
-            children:
-                children
-                    .map(
-                      (int index) => GestureDetector(
-                        key: ValueKey<int>(index),
-                        onTap: () {
-                          tappedChildren.add(index);
-                        },
-                        child: SizedBox(
-                          width: 100,
-                          height: 100,
-                          child: CustomPaint(
-                            painter: TestCallbackPainter(
-                              onPaint: () {
-                                paintedChildren.add(index);
-                              },
-                            ),
-                          ),
+            children: children
+                .map(
+                  (int index) => GestureDetector(
+                    key: ValueKey<int>(index),
+                    onTap: () {
+                      tappedChildren.add(index);
+                    },
+                    child: SizedBox(
+                      width: 100,
+                      height: 100,
+                      child: CustomPaint(
+                        painter: TestCallbackPainter(
+                          onPaint: () {
+                            paintedChildren.add(index);
+                          },
                         ),
                       ),
-                    )
-                    .toList(),
+                    ),
+                  ),
+                )
+                .toList(),
           ),
         ),
       );
@@ -1940,11 +1942,10 @@ void main() {
             children: <Widget>[
               PageView(
                 controller: pageController,
-                children:
-                    List<int>.generate(
-                      100,
-                      (int index) => index,
-                    ).map((int index) => Text(index.toString())).toList(),
+                children: List<int>.generate(
+                  100,
+                  (int index) => index,
+                ).map((int index) => Text(index.toString())).toList(),
               ),
             ],
           ),
@@ -1982,28 +1983,27 @@ void main() {
                   itemExtent: 55,
                   squeeze: 1.45,
                   childDelegate: ListWheelChildListDelegate(
-                    children:
-                        children
-                            .map(
-                              (int index) => GestureDetector(
-                                key: ValueKey<int>(index),
-                                onTap: () {
-                                  tappedChildren.add(index);
-                                },
-                                child: SizedBox(
-                                  width: 55,
-                                  height: 55,
-                                  child: CustomPaint(
-                                    painter: TestCallbackPainter(
-                                      onPaint: () {
-                                        paintedChildren.add(index);
-                                      },
-                                    ),
-                                  ),
+                    children: children
+                        .map(
+                          (int index) => GestureDetector(
+                            key: ValueKey<int>(index),
+                            onTap: () {
+                              tappedChildren.add(index);
+                            },
+                            child: SizedBox(
+                              width: 55,
+                              height: 55,
+                              child: CustomPaint(
+                                painter: TestCallbackPainter(
+                                  onPaint: () {
+                                    paintedChildren.add(index);
+                                  },
                                 ),
                               ),
-                            )
-                            .toList(),
+                            ),
+                          ),
+                        )
+                        .toList(),
                   ),
                 ),
               ),

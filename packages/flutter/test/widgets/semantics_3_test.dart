@@ -60,7 +60,10 @@ void main() {
 
     // change what it says
     await tester.pumpWidget(
-      Semantics(container: true, child: Semantics(label: 'test', textDirection: TextDirection.ltr)),
+      Semantics(
+        container: true,
+        child: Semantics(label: 'test', textDirection: TextDirection.ltr),
+      ),
     );
 
     expect(

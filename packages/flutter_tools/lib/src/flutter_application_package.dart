@@ -101,8 +101,8 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
             : WindowsApp.fromPrebuiltApp(applicationBinary);
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
-        // Unsupported yet.
-        throw UnimplementedError();
+      case TargetPlatform.unsupported:
+        TargetPlatform.throwUnsupportedTarget();
     }
   }
 }

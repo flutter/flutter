@@ -14,14 +14,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix3;
 
 SemanticsFlags allFlags = SemanticsFlags(
-  hasCheckedState: true,
-  isChecked: true,
-  isSelected: true,
+  isChecked: ui.CheckedState.isTrue,
+  isSelected: ui.Tristate.isTrue,
+  isEnabled: ui.Tristate.isTrue,
+  isToggled: ui.Tristate.isTrue,
+  isExpanded: ui.Tristate.isTrue,
+  isRequired: ui.Tristate.isTrue,
+  isFocused: ui.Tristate.isTrue,
   isButton: true,
   isTextField: true,
-  isFocused: true,
-  hasEnabledState: true,
-  isEnabled: true,
   isInMutuallyExclusiveGroup: true,
   isHeader: true,
   isObscured: true,
@@ -30,21 +31,12 @@ SemanticsFlags allFlags = SemanticsFlags(
   isHidden: true,
   isImage: true,
   isLiveRegion: true,
-  hasToggledState: true,
-  isToggled: true,
   hasImplicitScrolling: true,
   isMultiline: true,
   isReadOnly: true,
-  isFocusable: true,
   isLink: true,
   isSlider: true,
   isKeyboardKey: true,
-  isCheckStateMixed: true,
-  hasExpandedState: true,
-  isExpanded: true,
-  hasSelectedState: true,
-  hasRequiredState: true,
-  isRequired: true,
 );
 
 /// Class that makes it easy to mock common toStringDeep behavior.
@@ -465,13 +457,12 @@ void main() {
 
     test('differently constructed rects match', () {
       final Path rectPath = Path()..addRect(const Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
-      final Path linePath =
-          Path()
-            ..moveTo(5.0, 5.0)
-            ..lineTo(5.0, 6.0)
-            ..lineTo(6.0, 6.0)
-            ..lineTo(6.0, 5.0)
-            ..close();
+      final Path linePath = Path()
+        ..moveTo(5.0, 5.0)
+        ..lineTo(5.0, 6.0)
+        ..lineTo(6.0, 6.0)
+        ..lineTo(6.0, 5.0)
+        ..close();
       expect(
         linePath,
         coversSameAreaAs(rectPath, areaToCompare: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)),
@@ -480,13 +471,12 @@ void main() {
 
     test('partially overlapping paths', () {
       final Path rectPath = Path()..addRect(const Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
-      final Path linePath =
-          Path()
-            ..moveTo(5.0, 5.0)
-            ..lineTo(5.0, 6.0)
-            ..lineTo(6.0, 6.0)
-            ..lineTo(6.0, 5.5)
-            ..close();
+      final Path linePath = Path()
+        ..moveTo(5.0, 5.0)
+        ..lineTo(5.0, 6.0)
+        ..lineTo(6.0, 6.0)
+        ..lineTo(6.0, 5.5)
+        ..close();
       expect(
         linePath,
         isNot(coversSameAreaAs(rectPath, areaToCompare: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0))),
@@ -762,6 +752,7 @@ void main() {
         controlsNodes: null,
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
+        locale: null,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -778,7 +769,6 @@ void main() {
           /* Flags */
           hasCheckedState: true,
           isChecked: true,
-          isCheckStateMixed: true,
           hasSelectedState: true,
           isSelected: true,
           isButton: true,
@@ -1062,6 +1052,7 @@ void main() {
         controlsNodes: null,
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
+        locale: null,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1161,6 +1152,7 @@ void main() {
         controlsNodes: null,
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
+        locale: null,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1265,6 +1257,7 @@ void main() {
         controlsNodes: null,
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
+        locale: null,
       );
       final _FakeSemanticsNode emptyNode = _FakeSemanticsNode(emptyData);
 
@@ -1297,6 +1290,7 @@ void main() {
         controlsNodes: null,
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
+        locale: null,
       );
       final _FakeSemanticsNode fullNode = _FakeSemanticsNode(fullData);
 
@@ -1354,6 +1348,49 @@ void main() {
 
       handle.dispose();
     });
+    testWidgets('can match validation result', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      const Key key = Key('a');
+      await tester.pumpWidget(
+        Semantics(
+          key: key,
+          label: 'Foo',
+          validationResult: SemanticsValidationResult.valid,
+          textDirection: TextDirection.ltr,
+        ),
+      );
+      final SemanticsNode node = tester.getSemantics(find.byKey(key));
+
+      expect(
+        node,
+        containsSemantics(
+          label: 'Foo',
+          validationResult: SemanticsValidationResult.valid,
+          textDirection: TextDirection.ltr,
+        ),
+      );
+
+      handle.dispose();
+    });
+
+    testWidgets('can ignore validation result', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      const Key key = Key('a');
+      await tester.pumpWidget(
+        Semantics(
+          key: key,
+          label: 'Foo',
+          validationResult: SemanticsValidationResult.valid,
+          textDirection: TextDirection.ltr,
+        ),
+      );
+      final SemanticsNode node = tester.getSemantics(find.byKey(key));
+      // It is important that validationResult is passed as null to containsSemantics,
+      // because this is testing that null means "ignore the validation result value".
+      expect(node, containsSemantics(label: 'Foo', textDirection: TextDirection.ltr));
+
+      handle.dispose();
+    });
 
     testWidgets('can match only custom actions', (WidgetTester tester) async {
       const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
@@ -1385,6 +1422,7 @@ void main() {
         controlsNodes: null,
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
+        locale: null,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 

@@ -34,10 +34,12 @@ bool PipelineCacheDataPersist(const fml::UniqueFD& cache_directory,
     VALIDATION_LOG << "Could not allocate pipeline cache data staging buffer.";
     return false;
   }
-  const auto header = PipelineCacheHeaderVK{props, data_size};
-  std::memcpy(allocation->GetBuffer(), &header, sizeof(header));
+  // Read the cache data and obtain the actual data size (which may be smaller
+  // than the original query for the data size if rendering operations happened
+  // after that call)
   vk::Result lookup_result = cache.getOwner().getPipelineCacheData(
-      *cache, &data_size, allocation->GetBuffer() + sizeof(header));
+      *cache, &data_size,
+      allocation->GetBuffer() + sizeof(PipelineCacheHeaderVK));
 
   // Some drivers may return incomplete erroneously, but this is not an
   // error condition as some/all data was still written.
@@ -47,12 +49,13 @@ bool PipelineCacheDataPersist(const fml::UniqueFD& cache_directory,
     return false;
   }
 
-  auto allocation_mapping = CreateMappingFromAllocation(allocation);
-  if (!allocation_mapping) {
-    return false;
-  }
+  const auto header = PipelineCacheHeaderVK{props, data_size};
+  std::memcpy(allocation->GetBuffer(), &header, sizeof(header));
+
+  fml::NonOwnedMapping allocation_mapping(
+      allocation->GetBuffer(), sizeof(PipelineCacheHeaderVK) + data_size);
   if (!fml::WriteAtomically(cache_directory, kPipelineCacheFileName,
-                            *allocation_mapping)) {
+                            allocation_mapping)) {
     VALIDATION_LOG << "Could not write cache file to disk.";
     return false;
   }

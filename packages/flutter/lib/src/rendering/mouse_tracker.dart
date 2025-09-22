@@ -334,10 +334,9 @@ class MouseTracker extends ChangeNotifier {
         final _MouseState targetState = _mouseStates[device] ?? existingState!;
 
         final PointerEvent lastEvent = targetState.replaceLatestEvent(event);
-        final Map<MouseTrackerAnnotation, Matrix4> nextAnnotations =
-            event is PointerRemovedEvent
-                ? <MouseTrackerAnnotation, Matrix4>{}
-                : _hitTestInViewResultToAnnotations(result);
+        final Map<MouseTrackerAnnotation, Matrix4> nextAnnotations = event is PointerRemovedEvent
+            ? <MouseTrackerAnnotation, Matrix4>{}
+            : _hitTestInViewResultToAnnotations(result);
         final Map<MouseTrackerAnnotation, Matrix4> lastAnnotations = targetState.replaceAnnotations(
           nextAnnotations,
         );
@@ -419,10 +418,9 @@ class MouseTracker extends ChangeNotifier {
 
     // Send enter events to annotations that are not in last but in next, in
     // reverse hit-test order.
-    final List<MouseTrackerAnnotation> enteringAnnotations =
-        nextAnnotations.keys
-            .where((MouseTrackerAnnotation annotation) => !lastAnnotations.containsKey(annotation))
-            .toList();
+    final List<MouseTrackerAnnotation> enteringAnnotations = nextAnnotations.keys
+        .where((MouseTrackerAnnotation annotation) => !lastAnnotations.containsKey(annotation))
+        .toList();
     final PointerEnterEvent baseEnterEvent = PointerEnterEvent.fromMouseEvent(latestEvent);
     for (final MouseTrackerAnnotation annotation in enteringAnnotations.reversed) {
       if (annotation.validForMouseTracker) {

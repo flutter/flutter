@@ -41,8 +41,9 @@ class SkwasmFontCollection implements FlutterFontCollection {
   final Map<String, List<SkwasmTypeface>> registeredTypefaces = <String, List<SkwasmTypeface>>{};
 
   void setDefaultFontFamilies(List<String> families) => withStackScope((StackScope scope) {
-    final Pointer<SkStringHandle> familyPointers =
-        scope.allocPointerArray(families.length).cast<SkStringHandle>();
+    final Pointer<SkStringHandle> familyPointers = scope
+        .allocPointerArray(families.length)
+        .cast<SkStringHandle>();
     for (int i = 0; i < families.length; i++) {
       familyPointers[i] = skStringFromDartString(families[i]);
     }
@@ -199,17 +200,17 @@ class SkwasmFallbackRegistry implements FallbackFontRegistry {
   @override
   List<int> getMissingCodePoints(List<int> codePoints, List<String> fontFamilies) =>
       withStackScope((StackScope scope) {
-        final List<SkwasmTypeface> typefaces =
-            fontFamilies
-                .map((String family) => _fontCollection.registeredTypefaces[family])
-                .fold(
-                  const Iterable<SkwasmTypeface>.empty(),
-                  (Iterable<SkwasmTypeface> accumulated, List<SkwasmTypeface>? typefaces) =>
-                      typefaces == null ? accumulated : accumulated.followedBy(typefaces),
-                )
-                .toList();
-        final Pointer<TypefaceHandle> typefaceBuffer =
-            scope.allocPointerArray(typefaces.length).cast<TypefaceHandle>();
+        final List<SkwasmTypeface> typefaces = fontFamilies
+            .map((String family) => _fontCollection.registeredTypefaces[family])
+            .fold(
+              const Iterable<SkwasmTypeface>.empty(),
+              (Iterable<SkwasmTypeface> accumulated, List<SkwasmTypeface>? typefaces) =>
+                  typefaces == null ? accumulated : accumulated.followedBy(typefaces),
+            )
+            .toList();
+        final Pointer<TypefaceHandle> typefaceBuffer = scope
+            .allocPointerArray(typefaces.length)
+            .cast<TypefaceHandle>();
         for (int i = 0; i < typefaces.length; i++) {
           typefaceBuffer[i] = typefaces[i].handle;
         }

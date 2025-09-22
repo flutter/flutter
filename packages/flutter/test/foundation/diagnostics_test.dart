@@ -137,8 +137,9 @@ void validateIterablePropertyJsonSerialization(IterableProperty<Object> property
   final Map<String, Object?> json = simulateJsonSerialization(property);
   if (property.value != null) {
     final List<Object?> valuesJson = json['values']! as List<Object?>;
-    final List<String> expectedValues =
-        property.value!.map<String>((Object value) => value.toString()).toList();
+    final List<String> expectedValues = property.value!
+        .map<String>((Object value) => value.toString())
+        .toList();
     expect(listEquals(valuesJson, expectedValues), isTrue);
   } else {
     expect(json.containsKey('values'), isFalse);

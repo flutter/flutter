@@ -30,7 +30,10 @@ void expectRects(WidgetTester tester, List<Rect> expected) {
 void main() {
   testWidgets('ListBody down', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const Flex(direction: Axis.vertical, children: <Widget>[ListBody(children: children)]),
+      const Flex(
+        direction: Axis.vertical,
+        children: <Widget>[ListBody(children: children)],
+      ),
     );
 
     expectRects(tester, <Rect>[
