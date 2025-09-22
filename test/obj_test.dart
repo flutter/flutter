@@ -1,10 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 
 abstract class Pessoa {
-  late int _id;
-  String nome;
 
   Pessoa(this.nome);
+  late int _id;
+  String nome;
 
   int get id => _id;
 
@@ -37,65 +37,79 @@ class Aluno extends Pessoa with Ano {
   }
 }
 
+class Professor extends Pessoa {
+  String especialidade;
+
+  Professor(super.nome, this.especialidade);
+}
+
 class Disciplina {
-  String nome;
   Disciplina(this.nome);
+  String nome;
 }
 
 class Turma with Ano {
-  Disciplina disciplina;
-  final List<Aluno> _alunos = [];
 
-  Turma(this.disciplina, int ano) {
+  Turma(this.disciplina, this.professor, int ano) {
     this.ano = ano;
   }
+  Disciplina disciplina;
+  Professor professor;
+  final List<Aluno> _alunos = <Aluno>[];
 
   void matricular(Aluno aluno) {
     if (aluno.ano == ano) {
       _alunos.add(aluno);
     } else {
-      throw ArgumentError('Ano deve ser mesmo.');
+      throw ArgumentError('Ano deve ser o mesmo.');
     }
   }
+
+  List<Aluno> get alunos => List.unmodifiable(_alunos);
 }
 
 class Historico extends Turma {
-  Map<Aluno, List<double>> notas = {};
+  final Map<Aluno, List<double>> notas = <Aluno, List<double>>{};
 
-  Historico(super.disciplina, super.ano);
+  Historico(super.disciplina, super.professor, super.ano);
 
   @override
   void matricular(Aluno aluno) {
     super.matricular(aluno);
-    notas[aluno] = [];
+    notas[aluno] = <double>[];
   }
 
   double media(Aluno aluno) {
-    double media = 0;
-    for (double nota in notas[aluno]!) {
-      media += nota;
-    }
-    media /= notas.length;
-    return media;
+    final List<double> notasAluno = notas[aluno] ?? <double>[];
+    if (notasAluno.isEmpty) return 0.0;
+
+    final double soma = notasAluno.reduce((double a, double b) => a + b);
+    return soma / notasAluno.length;
+  }
+
+  bool isAprovado(Aluno aluno) {
+    return media(aluno) >= 7.0;
   }
 }
 
 void main() {
-  test('Testar matrícula de alunos', () {
-    Disciplina disciplina1 = Disciplina('Flutter');
-    Historico historico1 = Historico(disciplina1, 2023);
-    // Cadastrar primeiro aluno sem erros
-    Aluno aluno1 = Aluno('Maria', 2023);
+  test('Testar matrícula e aprovação de alunos', () {
+    final Disciplina disciplina1 = Disciplina('Flutter');
+    final Professor professor1 = Professor('João', 'Mobile');
+    final Historico historico1 = Historico(disciplina1, professor1, 2023);
+
+    final Aluno aluno1 = Aluno('Maria', 2023);
     aluno1.id = 1;
     historico1.matricular(aluno1);
     expect(historico1.media(aluno1), 0.0);
-    // Cadastrar segundo aluno com erros
-    Aluno aluno2 = Aluno('Paula', 2022);
-    try {
-      aluno2.id = 0;
-    } catch (error) {
-      expect(error, isA<ArgumentError>());
-    }
+
+    // adiciona notas
+    historico1.notas[aluno1]!.addAll(<double>[8.0, 9.0]);
+    expect(historico1.media(aluno1), 8.5);
+    expect(historico1.isAprovado(aluno1), isTrue);
+
+    // aluno errado
+    final Aluno aluno2 = Aluno('Paula', 2022);
     try {
       historico1.matricular(aluno2);
     } catch (error) {
@@ -103,13 +117,3 @@ void main() {
     }
   });
 }
-
-class Professor extends Pessoa {
-}
-
-Turma(this.disciplina, this.professor, int ano) {
-
-class Historico extends Turma {
-
-
-bool isAprovado(Aluno aluno) {

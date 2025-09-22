@@ -4,5 +4,10 @@ environment:
   sdk: ^3.7.0-0
 
 dependencies:
+  animations: ^2.0.11
   flutter:
     sdk: flutter
+  geolocator: ^14.0.2
+  http: ^1.5.0
+dev_dependencies:
+  firebase_core: ^4.1.0
