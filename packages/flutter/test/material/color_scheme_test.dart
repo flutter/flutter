@@ -673,24 +673,27 @@ void main() {
     );
   });
 
-  test('fromImageProvider() propagates TimeoutException when image cannot be rendered', () async {
-    final Uint8List blueSquareBytes = Uint8List.fromList(kBlueSquarePng);
+  test(
+    'fromImageProvider() propagates TimeoutException or Failed to render image when image cannot be rendered',
+    () async {
+      final Uint8List blueSquareBytes = Uint8List.fromList(kBlueSquarePng);
 
-    // Corrupt the image's bytelist so it cannot be read.
-    final Uint8List corruptImage = blueSquareBytes.sublist(5);
-    final ImageProvider image = MemoryImage(corruptImage);
+      // Corrupt the image's bytelist so it cannot be read.
+      final Uint8List corruptImage = blueSquareBytes.sublist(5);
+      final ImageProvider image = MemoryImage(corruptImage);
 
-    expect(
-      () async => ColorScheme.fromImageProvider(provider: image),
-      throwsA(
-        isA<Exception>().having(
-          (Exception e) => e.toString(),
-          'Timeout occurred trying to load image',
-          contains('TimeoutException'),
+      expect(
+        () async => ColorScheme.fromImageProvider(provider: image),
+        throwsA(
+          isA<Exception>().having(
+            (Exception e) => e.toString(),
+            'image',
+            anyOf(contains('Failed to render image'), contains('TimeoutException')),
+          ),
         ),
-      ),
-    );
-  });
+      );
+    },
+  );
 
   testWidgets(
     'generated scheme "on" colors meet a11y contrast guidelines',
@@ -1256,6 +1259,32 @@ void main() {
     expect(colorSchemeOfTheme, colorScheme);
     expect(colorSchemeFromContext, colorScheme);
   });
+
+  testWidgets(
+    'ColorScheme from an invalid network image should only throw one error',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/170413
+      final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
+
+      await tester.pumpWidget(
+        const MaterialApp(home: _NetworkImageScheme(imageUrl: 'random_non_exist_image.png')),
+      );
+
+      FlutterError.onError = oldHandler;
+
+      expect(errors.single.exception, isA<Exception>());
+      expect(errors.single.exception.toString(), contains('Failed to render image:'));
+
+      // Skip this test on Web. Testing on Web requires mocking the HTTP request
+      // factory (as in `_network_image_test_web.dart`) so that the HTTP
+      // requests can fail. The target issue is about the number of thrown
+      // errors, which is handled by `ColorScheme`, and testing it only on
+      // non-Web should be fine.
+    },
+    skip: kIsWeb, // [intended]
+  );
 }
 
 Future<void> _testFilledButtonColor(
@@ -1279,4 +1308,47 @@ Future<void> _testFilledButtonColor(
   final Material material = tester.widget<Material>(buttonMaterial);
 
   expect(material.color, expectation);
+}
+
+// This widget fetches a [ColorScheme] from a network image, and displays
+// its content based on the scheme's color.
+class _NetworkImageScheme extends StatefulWidget {
+  const _NetworkImageScheme({required this.imageUrl});
+
+  final String imageUrl;
+
+  @override
+  _NetworkImageSchemeState createState() => _NetworkImageSchemeState();
+}
+
+class _NetworkImageSchemeState extends State<_NetworkImageScheme> {
+  Color? _textColors;
+
+  @override
+  void initState() {
+    super.initState();
+    _init();
+  }
+
+  Future<void> _init() async {
+    try {
+      final ColorScheme dynamicColorScheme = await ColorScheme.fromImageProvider(
+        provider: NetworkImage(widget.imageUrl),
+      );
+      setState(() {
+        _textColors = dynamicColorScheme.primary;
+      });
+    } catch (e) {
+      FlutterError.reportError(FlutterErrorDetails(exception: e));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Text(style: TextStyle(color: _textColors ?? Colors.black), 'Dynamic color text'),
+      ),
+    );
+  }
 }
