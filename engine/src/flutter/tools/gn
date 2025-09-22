@@ -339,7 +339,7 @@ def get_content_hash():
 
   hash_command = []
   if sys.platform.startswith(('cygwin', 'win')):
-    hash_command = hash_command + ['cmd.exe', '/c', 'powershell.exe']
+    hash_command = hash_command + ['cmd.exe', '/c', 'powershell.exe',  '-ExecutionPolicy', 'Bypass', '-File']
   hash_command = hash_command + [hash_method]
 
   version = subprocess.check_output(hash_command)
