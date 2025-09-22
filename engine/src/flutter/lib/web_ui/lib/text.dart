@@ -52,6 +52,9 @@ class FontWeight {
     return other is FontWeight && other.value == value;
   }
 
+  @override
+  int get hashCode => value;
+
   static FontWeight? lerp(FontWeight? a, FontWeight? b, double t) {
     if (a == null && b == null) {
       return null;
