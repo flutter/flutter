@@ -722,6 +722,9 @@ abstract class Device {
   /// Get the DDS instance for this device.
   final DartDevelopmentService dds;
 
+  /// Get the DevTools URI for the application instance.
+  Uri? get devToolsUri => dds.devToolsUri;
+
   /// Clear the device's logs.
   void clearLogs();
 
