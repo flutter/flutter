@@ -111,21 +111,21 @@ class OutlinedButton extends ButtonStyleButton {
     required Widget label,
     IconAlignment? iconAlignment,
   }) {
-    if (icon == null) {
-      return OutlinedButton(
-        key: key,
-        onPressed: onPressed,
-        onLongPress: onLongPress,
-        onHover: onHover,
-        onFocusChange: onFocusChange,
-        style: style,
-        focusNode: focusNode,
-        autofocus: autofocus ?? false,
-        clipBehavior: clipBehavior ?? Clip.none,
-        statesController: statesController,
-        child: label,
-      );
-    }
+    // if (icon == null) {
+    //   return OutlinedButton(
+    //     key: key,
+    //     onPressed: onPressed,
+    //     onLongPress: onLongPress,
+    //     onHover: onHover,
+    //     onFocusChange: onFocusChange,
+    //     style: style,
+    //     focusNode: focusNode,
+    //     autofocus: autofocus ?? false,
+    //     clipBehavior: clipBehavior ?? Clip.none,
+    //     statesController: statesController,
+    //     child: label,
+    //   );
+    // }
     return _OutlinedButtonWithIcon(
       key: key,
       onPressed: onPressed,
@@ -429,7 +429,7 @@ class _OutlinedButtonWithIcon extends OutlinedButton {
     bool? autofocus,
     super.clipBehavior,
     super.statesController,
-    required Widget icon,
+    required Widget? icon,
     required Widget label,
     IconAlignment? iconAlignment,
   }) : super(
@@ -468,13 +468,13 @@ class _OutlinedButtonWithIcon extends OutlinedButton {
 class _OutlinedButtonWithIconChild extends StatelessWidget {
   const _OutlinedButtonWithIconChild({
     required this.label,
-    required this.icon,
+    this.icon,
     required this.buttonStyle,
     required this.iconAlignment,
   });
 
   final Widget label;
-  final Widget icon;
+  final Widget? icon;
   final ButtonStyle? buttonStyle;
   final IconAlignment? iconAlignment;
 
@@ -491,12 +491,19 @@ class _OutlinedButtonWithIconChild extends StatelessWidget {
         outlinedButtonTheme.style?.iconAlignment ??
         buttonStyle?.iconAlignment ??
         IconAlignment.start;
+    final Widget? icon = this.icon;
     return Row(
       mainAxisSize: MainAxisSize.min,
-      spacing: lerpDouble(8, 4, scale)!,
+      spacing: icon == null ? 0 : lerpDouble(8, 4, scale)!,
       children: effectiveIconAlignment == IconAlignment.start
-          ? <Widget>[icon, Flexible(child: label)]
-          : <Widget>[Flexible(child: label), icon],
+          ? <Widget>[
+              if (icon != null) icon,
+              Flexible(child: label),
+            ]
+          : <Widget>[
+              Flexible(child: label),
+              if (icon != null) icon,
+            ],
     );
   }
 }
