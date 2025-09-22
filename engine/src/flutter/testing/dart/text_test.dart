@@ -434,7 +434,7 @@ void testFontVariation() {
     pb.pushStyle(TextStyle(fontWeight: FontWeight.w900));
     pb.addText('Black - 900\n');
 
-    final ParagraphConstraints paragraphConstraints = ParagraphConstraints(width: 300);
+    const ParagraphConstraints paragraphConstraints = ParagraphConstraints(width: 300);
     final Paragraph paragraph = pb.build()..layout(paragraphConstraints);
 
     final PictureRecorder recorder = PictureRecorder();
@@ -443,7 +443,7 @@ void testFontVariation() {
       recorder,
       Rect.fromLTWH(0.0, 0.0, imageSize.toDouble(), imageSize.toDouble()),
     );
-    canvas.drawParagraph(paragraph, Offset(10, 10));
+    canvas.drawParagraph(paragraph, const Offset(10, 10));
     final Image image = await recorder.endRecording().toImage(imageSize, imageSize);
 
     final ImageComparer comparer = await ImageComparer.create();
