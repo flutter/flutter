@@ -13,6 +13,28 @@ namespace flutter {
 
 class DlBlurImageFilter final : public DlImageFilter {
  public:
+  /**
+   * @brief Creates an ImageFilter that applies a Gaussian blur to its input.
+   *
+   * @param sigma_x The standard deviation of the Gaussian kernel in the X direction.
+   * @param sigma_y The standard deviation of the Gaussian kernel in the Y direction.
+   * @param bounds An optional rectangle that enables "bounded blur" mode.
+   * @param tile_mode The tile mode used for sampling pixels at the edges
+   * when performing a standard, unbounded blur.
+   *
+   * The [bounds] parameter is optional and dictates the blur's sampling behavior:
+   *
+   * - If [bounds] is provided (i.e., not std::nullopt), the filter performs a
+   * "bounded blur." This means the blur kernel will only sample pixels
+   * from *within* this rectangle, treating all pixels outside of it as
+   * transparent. This mode is used to implement high-fidelity iOS-style blurs.
+   *
+   * - If [bounds] is std::nullopt, a standard, unbounded blur is performed,
+   * with edge behavior defined by [tile_mode].
+   *
+   * The [bounds] rectangle must be specified in the current coordinate space
+   * of the canvas (i.e., it is subject to the canvas's current transform).
+   */
   DlBlurImageFilter(DlScalar sigma_x,
                     DlScalar sigma_y,
                     std::optional<DlRect> bounds,
