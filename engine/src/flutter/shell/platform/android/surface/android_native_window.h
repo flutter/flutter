@@ -7,9 +7,9 @@
 
 #include "flutter/fml/build_config.h"
 
+#include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/ref_counted.h"
-#include "third_party/skia/include/core/SkSize.h"
 
 #if FML_OS_ANDROID
 #include <android/native_window.h>
@@ -30,7 +30,7 @@ class AndroidNativeWindow
 
   Handle handle() const;
 
-  SkISize GetSize() const;
+  DlISize GetSize() const;
 
   /// Returns true when this AndroidNativeWindow is not backed by a real window
   /// (used for testing).

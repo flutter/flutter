@@ -455,10 +455,7 @@ class SkwasmTextStyle implements ui.TextStyle {
     }
   }
 
-  List<String> get fontFamilies => <String>[
-    if (fontFamily != null) fontFamily!,
-    if (fontFamilyFallback != null) ...fontFamilyFallback!,
-  ];
+  List<String> get fontFamilies => <String>[?fontFamily, ...?fontFamilyFallback];
 
   final ui.Color? color;
   final ui.TextDecoration? decoration;
@@ -616,8 +613,8 @@ final class SkwasmStrutStyle implements ui.StrutStyle {
   StrutStyleHandle createNativeHandle() {
     final StrutStyleHandle handle = strutStyleCreate();
     final List<String> effectiveFontFamilies = _computeEffectiveFontFamilies(<String>[
-      if (_fontFamily != null) _fontFamily,
-      if (_fontFamilyFallback != null) ..._fontFamilyFallback,
+      ?_fontFamily,
+      ...?_fontFamilyFallback,
     ]);
     if (effectiveFontFamilies.isNotEmpty) {
       withScopedFontList(
@@ -773,7 +770,7 @@ class SkwasmParagraphStyle implements ui.ParagraphStyle {
     final TextStyleHandle textStyleHandle = textStyle.handle;
 
     final List<String> effectiveFontFamilies = _computeEffectiveFontFamilies(<String>[
-      if (_fontFamily != null) _fontFamily,
+      ?_fontFamily,
     ]);
     if (effectiveFontFamilies.isNotEmpty) {
       withScopedFontList(

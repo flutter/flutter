@@ -56,7 +56,7 @@ void RecordingRenderPass::SetViewport(Viewport viewport) {
 }
 
 // |RenderPass|
-void RecordingRenderPass::SetScissor(IRect scissor) {
+void RecordingRenderPass::SetScissor(IRect32 scissor) {
   pending_.scissor = scissor;
   if (delegate_) {
     delegate_->SetScissor(scissor);

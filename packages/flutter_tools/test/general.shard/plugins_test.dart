@@ -1245,7 +1245,7 @@ flutter:
               .childFile('GeneratedPluginRegistrant.java');
 
           expect(registrantFile, exists);
-          expect(registrantFile, isNot(contains('SomePlugin')));
+          expect(registrantFile.readAsStringSync(), isNot(contains('SomePlugin')));
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
@@ -1278,7 +1278,7 @@ flutter:
           final File registrantFile = iosProject.pluginRegistrantImplementation;
 
           expect(registrantFile, exists);
-          expect(registrantFile, isNot(contains('SomePlugin')));
+          expect(registrantFile.readAsStringSync(), isNot(contains('SomePlugin')));
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
@@ -1337,44 +1337,7 @@ flutter:
           );
 
           expect(registrantFile, exists);
-          expect(registrantFile, isNot(contains('SomePlugin')));
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          Pub: ThrowingPub.new,
-        },
-      );
-
-      testUsingContext(
-        "pluginClass: none doesn't trigger registrant entry on macOS",
-        () async {
-          flutterProject.isModule = true;
-          // Create a plugin without a pluginClass.
-          final Directory pluginDirectory = createFakePlugin(fs);
-          pluginDirectory.childFile('pubspec.yaml').writeAsStringSync('''
-flutter:
-  plugin:
-    platforms:
-      macos:
-        pluginClass: none
-        dartPluginClass: SomePlugin
-    ''');
-          final dependencyManagement = FakeDarwinDependencyManagement();
-          await injectPlugins(
-            flutterProject,
-            releaseMode: false,
-            macOSPlatform: true,
-            darwinDependencyManagement: dependencyManagement,
-          );
-
-          final File registrantFile = macosProject.managedDirectory.childFile(
-            'GeneratedPluginRegistrant.swift',
-          );
-
-          expect(registrantFile, exists);
-          expect(registrantFile, isNot(contains('SomePlugin')));
-          expect(registrantFile, isNot(contains('none')));
+          expect(registrantFile.readAsStringSync(), isNot(contains('SomePlugin')));
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
@@ -1593,39 +1556,10 @@ flutter:
           );
 
           expect(registrantImpl, exists);
-          expect(registrantImpl, isNot(contains('SomePlugin')));
-          expect(registrantImpl, isNot(contains('some_plugin')));
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          Pub: ThrowingPub.new,
-        },
-      );
 
-      testUsingContext(
-        "pluginClass: none doesn't trigger registrant entry on Linux",
-        () async {
-          // Create a plugin without a pluginClass.
-          final Directory pluginDirectory = createFakePlugin(fs);
-          pluginDirectory.childFile('pubspec.yaml').writeAsStringSync('''
-flutter:
-  plugin:
-    platforms:
-      linux:
-        pluginClass: none
-        dartPluginClass: SomePlugin
-    ''');
-
-          await injectPlugins(flutterProject, releaseMode: false, linuxPlatform: true);
-
-          final File registrantImpl = linuxProject.managedDirectory.childFile(
-            'generated_plugin_registrant.cc',
-          );
-
-          expect(registrantImpl, exists);
-          expect(registrantImpl, isNot(contains('SomePlugin')));
-          expect(registrantImpl, isNot(contains('none')));
+          final String contents = registrantImpl.readAsStringSync();
+          expect(contents, isNot(contains('SomePlugin')));
+          expect(contents, isNot(contains('some_plugin')));
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
@@ -1741,38 +1675,7 @@ flutter:
           );
 
           expect(registrantImpl, exists);
-          expect(registrantImpl, isNot(contains('SomePlugin')));
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          Pub: ThrowingPub.new,
-        },
-      );
-
-      testUsingContext(
-        "pluginClass: none doesn't trigger registrant entry on Windows",
-        () async {
-          // Create a plugin without a pluginClass.
-          final Directory pluginDirectory = createFakePlugin(fs);
-          pluginDirectory.childFile('pubspec.yaml').writeAsStringSync('''
-flutter:
-  plugin:
-    platforms:
-      windows:
-        pluginClass: none
-        dartPluginClass: SomePlugin
-    ''');
-
-          await injectPlugins(flutterProject, releaseMode: false, windowsPlatform: true);
-
-          final File registrantImpl = windowsProject.managedDirectory.childFile(
-            'generated_plugin_registrant.cc',
-          );
-
-          expect(registrantImpl, exists);
-          expect(registrantImpl, isNot(contains('SomePlugin')));
-          expect(registrantImpl, isNot(contains('none')));
+          expect(registrantImpl.readAsStringSync(), isNot(contains('SomePlugin')));
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,

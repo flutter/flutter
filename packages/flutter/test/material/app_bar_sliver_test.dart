@@ -112,6 +112,70 @@ void main() {
     expect(titleOffset.dx, backButtonOffset.dx + titleSpacing);
   });
 
+  testWidgets(
+    'SliverAppBar does not draw menu for end drawer if automaticallyImplyActions is false and actions is null',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            endDrawer: const Drawer(),
+            body: CustomScrollView(
+              primary: true,
+              slivers: <Widget>[
+                const SliverAppBar(automaticallyImplyActions: false),
+                SliverToBoxAdapter(child: Container(height: 1200, color: Colors.orange[400])),
+              ],
+            ),
+          ),
+        ),
+      );
+      expect(find.byIcon(Icons.menu), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'SliverAppBar draws menu for end drawer if automaticallyImplyActions is true (default) and actions is null',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            endDrawer: const Drawer(),
+            body: CustomScrollView(
+              primary: true,
+              slivers: <Widget>[
+                const SliverAppBar(),
+                SliverToBoxAdapter(child: Container(height: 1200, color: Colors.orange[400])),
+              ],
+            ),
+          ),
+        ),
+      );
+      expect(find.byIcon(Icons.menu), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'SliverAppBar does not draw menu for end drawer if automaticallyImplyActions is true (default) but actions are explicitly provided',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            endDrawer: const Drawer(),
+            body: CustomScrollView(
+              primary: true,
+              slivers: <Widget>[
+                const SliverAppBar(actions: <Widget>[Icon(Icons.settings)]),
+                SliverToBoxAdapter(child: Container(height: 1200, color: Colors.orange[400])),
+              ],
+            ),
+          ),
+        ),
+      );
+      expect(find.byIcon(Icons.menu), findsNothing);
+      expect(find.byIcon(Icons.settings), findsOneWidget);
+    },
+  );
+
   testWidgets('SliverAppBar.medium with bottom widget', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/115091
     const double collapsedAppBarHeight = 64;
@@ -774,10 +838,8 @@ void main() {
             slivers: <Widget>[
               SliverAppBar(
                 elevation: 0,
-                backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-                  return states.contains(MaterialState.scrolledUnder)
-                      ? scrolledColor
-                      : defaultColor;
+                backgroundColor: MaterialStateColor.resolveWith((Set<WidgetState> states) {
+                  return states.contains(WidgetState.scrolledUnder) ? scrolledColor : defaultColor;
                 }),
                 expandedHeight: expandedHeight,
                 pinned: true,
@@ -785,10 +847,8 @@ void main() {
                     ? const FlexibleSpaceBar(title: Text('SliverAppBar'))
                     : null,
               ),
-              SliverList(
-                delegate: SliverChildListDelegate(<Widget>[
-                  Container(height: contentHeight, color: Colors.teal),
-                ]),
+              SliverList.list(
+                children: <Widget>[Container(height: contentHeight, color: Colors.teal)],
               ),
             ],
           ),
@@ -1490,8 +1550,9 @@ void main() {
                   forceMaterialTransparency: forceMaterialTransparency,
                   title: const Text('AppBar'),
                 ),
-                SliverList(
-                  delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+                SliverList.builder(
+                  itemCount: 20,
+                  itemBuilder: (BuildContext context, int index) {
                     return SizedBox(
                       height: appBarHeight,
                       child: index == 0
@@ -1501,7 +1562,7 @@ void main() {
                             )
                           : const SizedBox(),
                     );
-                  }, childCount: 20),
+                  },
                 ),
               ],
             ),
@@ -1974,10 +2035,8 @@ void main() {
                       background: Container(height: appBarHeight, color: Colors.orange),
                     ),
                   ),
-                  SliverList(
-                    delegate: SliverChildListDelegate(<Widget>[
-                      Container(height: 1200.0, color: Colors.teal),
-                    ]),
+                  SliverList.list(
+                    children: <Widget>[Container(height: 1200.0, color: Colors.teal)],
                   ),
                 ],
               ),

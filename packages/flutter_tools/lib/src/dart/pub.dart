@@ -21,6 +21,7 @@ import '../base/process.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
+import '../git.dart';
 import '../project.dart';
 import '../version.dart';
 
@@ -208,7 +209,9 @@ class _DefaultPub implements Pub {
        _botDetector = botDetector,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        _processManager = processManager,
-       _stdio = null;
+       _stdio = null {
+    _git = Git(currentPlatform: platform, runProcessWith: _processUtils);
+  }
 
   @visibleForTesting
   _DefaultPub.test({
@@ -224,7 +227,9 @@ class _DefaultPub implements Pub {
        _botDetector = botDetector,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        _processManager = processManager,
-       _stdio = stdio;
+       _stdio = stdio {
+    _git = Git(currentPlatform: platform, runProcessWith: _processUtils);
+  }
 
   final FileSystem _fileSystem;
   final Logger _logger;
@@ -233,6 +238,7 @@ class _DefaultPub implements Pub {
   final BotDetector _botDetector;
   final ProcessManager _processManager;
   final Stdio? _stdio;
+  late final Git _git;
 
   @override
   Future<void> get({
@@ -285,8 +291,10 @@ class _DefaultPub implements Pub {
     if (packageConfigFile.existsSync()) {
       final Directory workspaceRoot = packageConfigFile.parent.parent;
       final File lastVersion = workspaceRoot.childDirectory('.dart_tool').childFile('version');
-      final File currentVersion = _fileSystem.file(
-        _fileSystem.path.join(Cache.flutterRoot!, 'version'),
+      final versionFromFile = FlutterVersion(
+        flutterRoot: Cache.flutterRoot!,
+        fs: _fileSystem,
+        git: _git,
       );
       final File pubspecYaml = project.pubspecFile;
       final File pubLockFile = workspaceRoot.childFile('pubspec.lock');
@@ -319,7 +327,7 @@ class _DefaultPub implements Pub {
           pubspecYaml.lastModifiedSync().isBefore(pubLockFile.lastModifiedSync()) &&
           pubspecYaml.lastModifiedSync().isBefore(packageConfigFile.lastModifiedSync()) &&
           lastVersion.existsSync() &&
-          lastVersion.readAsStringSync() == currentVersion.readAsStringSync()) {
+          lastVersion.readAsStringSync() == versionFromFile.frameworkVersion) {
         _logger.printTrace('Skipping pub get: version match.');
         return;
       }
@@ -675,10 +683,12 @@ class _DefaultPub implements Pub {
     final File lastVersion = _fileSystem.file(
       _fileSystem.path.join(packageConfig.parent.path, 'version'),
     );
-    final File currentVersion = _fileSystem.file(
-      _fileSystem.path.join(Cache.flutterRoot!, 'version'),
+    final versionFromFile = FlutterVersion(
+      flutterRoot: Cache.flutterRoot!,
+      fs: _fileSystem,
+      git: _git,
     );
-    lastVersion.writeAsStringSync(currentVersion.readAsStringSync());
+    lastVersion.writeAsStringSync(versionFromFile.frameworkVersion);
 
     if (project.hasExampleApp && project.example.pubspecFile.existsSync()) {
       final File? examplePackageConfig = findPackageConfigFile(project.example.directory);

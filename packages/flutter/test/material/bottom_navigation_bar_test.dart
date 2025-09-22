@@ -3092,6 +3092,29 @@ void main() {
     expect(find.byKey(key1), findsOneWidget);
     expect(find.byKey(key2), findsOneWidget);
   });
+
+  testWidgets('BottomNavigationBar and BottomNavigationBarItem render at zero size', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: Scaffold(
+              bottomNavigationBar: BottomNavigationBar(
+                items: const <BottomNavigationBarItem>[
+                  BottomNavigationBarItem(icon: Icon(Icons.favorite_border), label: 'X'),
+                  BottomNavigationBarItem(icon: Icon(Icons.access_alarm), label: 'Y'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    final Finder xText = find.text('X');
+    expect(tester.getSize(xText).isEmpty, isTrue);
+  });
 }
 
 Widget boilerplate({

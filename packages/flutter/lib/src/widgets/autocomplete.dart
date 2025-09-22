@@ -19,6 +19,8 @@ import 'editable_text.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
 import 'inherited_notifier.dart';
+import 'localizations.dart';
+import 'media_query.dart';
 import 'overlay.dart';
 import 'shortcuts.dart';
 import 'tap_region.dart';
@@ -404,6 +406,17 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     }
   }
 
+  void _announceSemantics(bool resultsAvailable) {
+    if (!MediaQuery.supportsAnnounceOf(context)) {
+      return;
+    }
+    final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
+    final String optionsHint = resultsAvailable
+        ? localizations.searchResultsFound
+        : localizations.noResultsFound;
+    SemanticsService.announce(optionsHint, localizations.textDirection);
+  }
+
   // Assigning an ID to every call of _onChangedField is necessary to avoid a
   // situation where _options is updated by an older call when multiple
   // _onChangedField calls are running simultaneously.
@@ -425,6 +438,9 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     // Makes sure that previous call results do not replace new ones.
     if (callId != _onChangedCallId || !shouldUpdateOptions) {
       return;
+    }
+    if (_options.isEmpty != options.isEmpty) {
+      _announceSemantics(options.isNotEmpty);
     }
     _options = options;
     _updateHighlight(_highlightedOptionIndex.value);

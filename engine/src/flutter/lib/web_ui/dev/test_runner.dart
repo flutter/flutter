@@ -260,13 +260,13 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
     final FileFilter? fileFilter = makeFileFilter();
     return <SuiteFilter>[
       PlatformBrowserFilter(),
-      if (browserFilter != null) browserFilter,
-      if (compilerFilter != null) compilerFilter,
-      if (rendererFilter != null) rendererFilter,
-      if (canvaskitVariantFilter != null) canvaskitVariantFilter,
-      if (suiteNameFilter != null) suiteNameFilter,
-      if (bundleNameFilter != null) bundleNameFilter,
-      if (fileFilter != null) fileFilter,
+      ?browserFilter,
+      ?compilerFilter,
+      ?rendererFilter,
+      ?canvaskitVariantFilter,
+      ?suiteNameFilter,
+      ?bundleNameFilter,
+      ?fileFilter,
     ];
   }
 

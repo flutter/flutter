@@ -56,6 +56,7 @@ enum DeviceOperatingSystem {
   ios,
   linux,
   macos,
+  webServer,
   windows,
 }
 
@@ -80,6 +81,8 @@ abstract class DeviceDiscovery {
         return LinuxDeviceDiscovery();
       case DeviceOperatingSystem.macos:
         return MacosDeviceDiscovery();
+      case DeviceOperatingSystem.webServer:
+        return WebServerDeviceDiscovery();
       case DeviceOperatingSystem.windows:
         return WindowsDeviceDiscovery();
       case DeviceOperatingSystem.fake:
@@ -431,6 +434,40 @@ class MacosDeviceDiscovery implements DeviceDiscovery {
   Future<Device> get workingDevice async => _device;
 }
 
+class WebServerDeviceDiscovery implements DeviceDiscovery {
+  factory WebServerDeviceDiscovery() {
+    return _instance ??= WebServerDeviceDiscovery._();
+  }
+
+  WebServerDeviceDiscovery._();
+
+  static WebServerDeviceDiscovery? _instance;
+
+  static const WebServerDevice _device = WebServerDevice();
+
+  @override
+  Future<Map<String, HealthCheckResult>> checkDevices() async {
+    return <String, HealthCheckResult>{};
+  }
+
+  @override
+  Future<void> chooseWorkingDevice() async {}
+
+  @override
+  Future<void> chooseWorkingDeviceById(String deviceId) async {}
+
+  @override
+  Future<List<String>> discoverDevices() async {
+    return <String>['web-server'];
+  }
+
+  @override
+  Future<void> performPreflightTasks() async {}
+
+  @override
+  Future<Device> get workingDevice async => _device;
+}
+
 class WindowsDeviceDiscovery implements DeviceDiscovery {
   factory WindowsDeviceDiscovery() {
     return _instance ??= WindowsDeviceDiscovery._();
@@ -648,9 +685,10 @@ class AndroidDevice extends Device {
     final String powerInfo = await shellEval('dumpsys', <String>['power']);
     // A motoG4 phone returns `mWakefulness=Awake`.
     // A Samsung phone returns `getWakefullnessLocked()=Awake`.
-    final RegExp wakefulnessRegexp = RegExp(r'.*(mWakefulness=|getWakefulnessLocked\(\)=).*');
-    final String wakefulness = grep(wakefulnessRegexp, from: powerInfo).single.split('=')[1].trim();
-    return wakefulness;
+    final RegExp wakefulnessRegexp = RegExp(
+      r'(?:mWakefulness|getWakefulnessLocked\(\))=\s*([a-zA-Z]+)',
+    );
+    return wakefulnessRegexp.allMatches(powerInfo).single.group(1)!;
   }
 
   Future<bool> isArm64() async {
@@ -981,7 +1019,6 @@ class IosDeviceDiscovery implements DeviceDiscovery {
     //       "hotReload": true,
     //       "hotRestart": true,
     //       "screenshot": true,
-    //       "fastStart": false,
     //       "flutterExit": true,
     //       "hardwareRendering": false,
     //       "startPaused": false
@@ -1210,6 +1247,61 @@ class MacosDevice extends Device {
 
   @override
   String get deviceId => 'macos';
+
+  @override
+  Future<Map<String, dynamic>> getMemoryStats(String packageName) async {
+    return <String, dynamic>{};
+  }
+
+  @override
+  Future<void> home() async {}
+
+  @override
+  Future<bool> isAsleep() async {
+    return false;
+  }
+
+  @override
+  Future<bool> isAwake() async {
+    return true;
+  }
+
+  @override
+  Stream<String> get logcat => const Stream<String>.empty();
+
+  @override
+  Future<void> clearLogs() async {}
+
+  @override
+  Future<void> reboot() async {}
+
+  @override
+  Future<void> sendToSleep() async {}
+
+  @override
+  Future<void> stop(String packageName) async {}
+
+  @override
+  Future<void> tap(int x, int y) async {}
+
+  @override
+  Future<void> togglePower() async {}
+
+  @override
+  Future<void> unlock() async {}
+
+  @override
+  Future<void> wakeUp() async {}
+
+  @override
+  Future<void> awaitDevice() async {}
+}
+
+class WebServerDevice extends Device {
+  const WebServerDevice();
+
+  @override
+  String get deviceId => 'web-server';
 
   @override
   Future<Map<String, dynamic>> getMemoryStats(String packageName) async {

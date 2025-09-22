@@ -7,6 +7,8 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class SnackBarUseCase extends UseCase {
+  SnackBarUseCase() : super(useCaseCategory: UseCaseCategory.core);
+
   @override
   String get name => 'SnackBar';
 

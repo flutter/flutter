@@ -17,7 +17,6 @@
 #include "flutter/flow/raster_cache_util.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
-#include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkColorSpace.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkSurface.h"

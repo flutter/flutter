@@ -21,7 +21,9 @@ void LogLastEGLError() {
   };
 
 #define _EGL_ERROR_DESC(a) \
-  { #a, a }
+  {                        \
+    #a, a                  \
+  }
 
   const EGLNameErrorPair pairs[] = {
       _EGL_ERROR_DESC(EGL_SUCCESS),
@@ -64,19 +66,19 @@ class AndroidEGLSurfaceDamage {
 
   void SetDamageRegion(EGLDisplay display,
                        EGLSurface surface,
-                       const std::optional<SkIRect>& region) {}
+                       const std::optional<DlIRect>& region) {}
 
   /// This was disabled after discussion in
   /// https://github.com/flutter/flutter/issues/123353
   bool SupportsPartialRepaint() const { return false; }
 
-  std::optional<SkIRect> InitialDamage(EGLDisplay display, EGLSurface surface) {
+  std::optional<DlIRect> InitialDamage(EGLDisplay display, EGLSurface surface) {
     return std::nullopt;
   }
 
   bool SwapBuffersWithDamage(EGLDisplay display,
                              EGLSurface surface,
-                             const std::optional<SkIRect>& damage) {
+                             const std::optional<DlIRect>& damage) {
     return eglSwapBuffers(display, surface);
   }
 };
@@ -137,7 +139,7 @@ AndroidEGLSurfaceMakeCurrentStatus AndroidEGLSurface::MakeCurrent() const {
 }
 
 void AndroidEGLSurface::SetDamageRegion(
-    const std::optional<SkIRect>& buffer_damage) {
+    const std::optional<DlIRect>& buffer_damage) {
   damage_->SetDamageRegion(display_, surface_, buffer_damage);
 }
 
@@ -152,7 +154,7 @@ bool AndroidEGLSurface::SetPresentationTime(
 }
 
 bool AndroidEGLSurface::SwapBuffers(
-    const std::optional<SkIRect>& surface_damage) {
+    const std::optional<DlIRect>& surface_damage) {
   TRACE_EVENT0("flutter", "AndroidContextGL::SwapBuffers");
   return damage_->SwapBuffersWithDamage(display_, surface_, surface_damage);
 }
@@ -161,11 +163,11 @@ bool AndroidEGLSurface::SupportsPartialRepaint() const {
   return damage_->SupportsPartialRepaint();
 }
 
-std::optional<SkIRect> AndroidEGLSurface::InitialDamage() {
+std::optional<DlIRect> AndroidEGLSurface::InitialDamage() {
   return damage_->InitialDamage(display_, surface_);
 }
 
-SkISize AndroidEGLSurface::GetSize() const {
+DlISize AndroidEGLSurface::GetSize() const {
   EGLint width = 0;
   EGLint height = 0;
 
@@ -173,9 +175,9 @@ SkISize AndroidEGLSurface::GetSize() const {
       !eglQuerySurface(display_, surface_, EGL_HEIGHT, &height)) {
     FML_LOG(ERROR) << "Unable to query EGL surface size";
     LogLastEGLError();
-    return SkISize::Make(0, 0);
+    return DlISize();
   }
-  return SkISize::Make(width, height);
+  return DlISize(width, height);
 }
 
 }  // namespace flutter

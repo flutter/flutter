@@ -85,20 +85,16 @@ class WebDriverService extends DriverService {
       debuggingOptions: buildInfo.isRelease
           ? DebuggingOptions.disabled(
               buildInfo,
-              port: debuggingOptions.port,
-              hostname: debuggingOptions.hostname,
+              webDevServerConfig: debuggingOptions.webDevServerConfig,
               webRenderer: debuggingOptions.webRenderer,
               webUseWasm: debuggingOptions.webUseWasm,
-              webHeaders: debuggingOptions.webHeaders,
             )
           : DebuggingOptions.enabled(
               buildInfo,
-              port: debuggingOptions.port,
-              hostname: debuggingOptions.hostname,
+              webDevServerConfig: debuggingOptions.webDevServerConfig,
               disablePortPublication: debuggingOptions.disablePortPublication,
               webRenderer: debuggingOptions.webRenderer,
               webUseWasm: debuggingOptions.webUseWasm,
-              webHeaders: debuggingOptions.webHeaders,
             ),
       stayResident: true,
       flutterProject: FlutterProject.current(),
@@ -356,8 +352,8 @@ Map<String, dynamic> getDesiredCapabilities(
             'v8,blink.console,benchmark,blink,'
             'blink.user_timing',
       },
-      if (chromeBinary != null) 'binary': chromeBinary,
-      if (mobileEmulation != null) 'mobileEmulation': mobileEmulation,
+      'binary': ?chromeBinary,
+      'mobileEmulation': ?mobileEmulation,
     },
   },
   Browser.firefox => <String, dynamic>{

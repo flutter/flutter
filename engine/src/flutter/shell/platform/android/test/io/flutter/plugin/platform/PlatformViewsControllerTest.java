@@ -5,7 +5,6 @@
 package io.flutter.plugin.platform;
 
 import static android.os.Looper.getMainLooper;
-import static io.flutter.embedding.engine.systemchannels.PlatformViewsChannel.PlatformViewTouch;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -42,8 +41,8 @@ import io.flutter.embedding.engine.mutatorsstack.FlutterMutatorsStack;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
 import io.flutter.embedding.engine.systemchannels.MouseCursorChannel;
-import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel;
-import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel.PlatformViewTouch;
+import io.flutter.embedding.engine.systemchannels.PlatformViewCreationRequest;
+import io.flutter.embedding.engine.systemchannels.PlatformViewTouch;
 import io.flutter.embedding.engine.systemchannels.ScribeChannel;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
@@ -129,8 +128,8 @@ public class PlatformViewsControllerTest {
 
     // Create the platform view.
     int viewId = 0;
-    final PlatformViewsChannel.PlatformViewCreationRequest request =
-        new PlatformViewsChannel.PlatformViewCreationRequest(
+    final PlatformViewCreationRequest request =
+        new PlatformViewCreationRequest(
             viewId,
             CountingPlatformView.VIEW_TYPE_ID,
             0,
@@ -175,8 +174,8 @@ public class PlatformViewsControllerTest {
 
     // Create the platform view.
     int viewId = 0;
-    final PlatformViewsChannel.PlatformViewCreationRequest request =
-        new PlatformViewsChannel.PlatformViewCreationRequest(
+    final PlatformViewCreationRequest request =
+        new PlatformViewCreationRequest(
             viewId,
             CountingPlatformView.VIEW_TYPE_ID,
             0,
@@ -215,8 +214,8 @@ public class PlatformViewsControllerTest {
 
     // Create the platform view.
     int viewId = 0;
-    final PlatformViewsChannel.PlatformViewCreationRequest request =
-        new PlatformViewsChannel.PlatformViewCreationRequest(
+    final PlatformViewCreationRequest request =
+        new PlatformViewCreationRequest(
             viewId,
             CountingPlatformView.VIEW_TYPE_ID,
             0,
@@ -601,6 +600,8 @@ public class PlatformViewsControllerTest {
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
   public void createPlatformViewMessage_setsAndroidViewLayoutDirection() {
     PlatformViewsController platformViewsController = new PlatformViewsController();
+    PlatformViewsControllerDelegator platformViewsControllerDelegator =
+        new PlatformViewsControllerDelegator(platformViewsController, null);
     platformViewsController.setSoftwareRendering(true);
 
     int platformViewId = 0;
@@ -1752,10 +1753,11 @@ public class PlatformViewsControllerTest {
               }
             });
 
-    platformViewsController.attach(context, registry, executor);
-
     PlatformViewsController2 secondController = new PlatformViewsController2();
     secondController.setRegistry(new PlatformViewRegistryImpl());
+
+    PlatformViewsControllerDelegator platformViewsControllerDelegator =
+        new PlatformViewsControllerDelegator(platformViewsController, secondController);
 
     final FlutterEngine engine = mock(FlutterEngine.class);
     when(engine.getRenderer()).thenReturn(new FlutterRenderer(jni));
@@ -1765,12 +1767,14 @@ public class PlatformViewsControllerTest {
     when(engine.getScribeChannel()).thenReturn(mock(ScribeChannel.class));
     when(engine.getPlatformViewsController()).thenReturn(platformViewsController);
     when(engine.getPlatformViewsController2()).thenReturn(secondController);
+    when(engine.getPlatformViewsControllerDelegator()).thenReturn(platformViewsControllerDelegator);
     when(engine.getLocalizationPlugin()).thenReturn(mock(LocalizationPlugin.class));
     when(engine.getAccessibilityChannel()).thenReturn(mock(AccessibilityChannel.class));
     when(engine.getDartExecutor()).thenReturn(executor);
 
     flutterView.attachToFlutterEngine(engine);
     platformViewsController.attachToView(flutterView);
+    platformViewsControllerDelegator.attach(context, registry, executor);
   }
 
   /**

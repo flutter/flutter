@@ -223,12 +223,7 @@ abstract class FlutterVersion {
 
   String _getTimeSinceCommit({String? revision}) {
     return _git
-        .logSync([
-          '-n',
-          '1',
-          '--pretty=format:%ar',
-          if (revision != null) revision,
-        ], workingDirectory: flutterRoot)
+        .logSync(['-n', '1', '--pretty=format:%ar', ?revision], workingDirectory: flutterRoot)
         .stdout
         .trim();
   }
@@ -276,9 +271,9 @@ abstract class FlutterVersion {
     'frameworkRevision': frameworkRevision,
     'frameworkCommitDate': frameworkCommitDate,
     'engineRevision': engineRevision,
-    if (engineCommitDate != null) 'engineCommitDate': engineCommitDate!,
-    if (engineContentHash != null) 'engineContentHash': engineContentHash!,
-    if (engineBuildDate != null) 'engineBuildDate': engineBuildDate!,
+    'engineCommitDate': ?engineCommitDate,
+    'engineContentHash': ?engineContentHash,
+    'engineBuildDate': ?engineBuildDate,
     'dartSdkVersion': dartSdkVersion,
     'devToolsVersion': devToolsVersion,
     'flutterVersion': frameworkVersion,
@@ -1054,21 +1049,45 @@ class GitTagVersion {
       }
     }
 
-    // If we're not currently on a tag, use git describe to find the most
-    // recent tag and number of commits past.
-    return parse(
-      git
-          .runSync([
-            'describe',
-            '--match',
-            '*.*.*',
-            '--long',
-            '--tags',
-            gitRef,
-          ], workingDirectory: workingDirectory)
-          .stdout
-          .trim(),
+    // If we don't exist in a tag, use git to find the latest tag.
+    return _useNewestTagAndCommitsPastFallback(
+      git: git,
+      workingDirectory: workingDirectory,
+      gitRef: gitRef,
     );
+  }
+
+  static GitTagVersion _useNewestTagAndCommitsPastFallback({
+    required Git git,
+    required String? workingDirectory,
+    required String gitRef,
+  }) {
+    final String latestTag = git
+        .runSync([
+          'for-each-ref',
+          '--sort=-v:refname',
+          '--count=1',
+          '--format=%(refname:short)',
+          'refs/tags/[0-9]*.*.*',
+        ], workingDirectory: workingDirectory)
+        .stdout
+        .trim();
+
+    final String ancestorRef = git
+        .runSync(['merge-base', gitRef, latestTag], workingDirectory: workingDirectory)
+        .stdout
+        .trim();
+
+    final String commitCount = git
+        .runSync([
+          'rev-list',
+          '--count',
+          '$ancestorRef..$gitRef',
+        ], workingDirectory: workingDirectory)
+        .stdout
+        .trim();
+
+    return parse('$latestTag-$commitCount');
   }
 
   /// Parse a version string.
@@ -1114,6 +1133,7 @@ class GitTagVersion {
     );
   }
 
+  @visibleForTesting
   static GitTagVersion parse(String version) {
     GitTagVersion gitTagVersion;
 

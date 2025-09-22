@@ -14,14 +14,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix3;
 
 SemanticsFlags allFlags = SemanticsFlags(
-  hasCheckedState: true,
-  isChecked: true,
-  isSelected: true,
+  isChecked: ui.CheckedState.isTrue,
+  isSelected: ui.Tristate.isTrue,
+  isEnabled: ui.Tristate.isTrue,
+  isToggled: ui.Tristate.isTrue,
+  isExpanded: ui.Tristate.isTrue,
+  isRequired: ui.Tristate.isTrue,
+  isFocused: ui.Tristate.isTrue,
   isButton: true,
   isTextField: true,
-  isFocused: true,
-  hasEnabledState: true,
-  isEnabled: true,
   isInMutuallyExclusiveGroup: true,
   isHeader: true,
   isObscured: true,
@@ -30,21 +31,12 @@ SemanticsFlags allFlags = SemanticsFlags(
   isHidden: true,
   isImage: true,
   isLiveRegion: true,
-  hasToggledState: true,
-  isToggled: true,
   hasImplicitScrolling: true,
   isMultiline: true,
   isReadOnly: true,
-  isFocusable: true,
   isLink: true,
   isSlider: true,
   isKeyboardKey: true,
-  isCheckStateMixed: true,
-  hasExpandedState: true,
-  isExpanded: true,
-  hasSelectedState: true,
-  hasRequiredState: true,
-  isRequired: true,
 );
 
 /// Class that makes it easy to mock common toStringDeep behavior.
@@ -777,7 +769,6 @@ void main() {
           /* Flags */
           hasCheckedState: true,
           isChecked: true,
-          isCheckStateMixed: true,
           hasSelectedState: true,
           isSelected: true,
           isButton: true,
@@ -1354,6 +1345,49 @@ void main() {
           children: <Matcher>[containsSemantics(label: 'Bar', textDirection: TextDirection.ltr)],
         ),
       );
+
+      handle.dispose();
+    });
+    testWidgets('can match validation result', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      const Key key = Key('a');
+      await tester.pumpWidget(
+        Semantics(
+          key: key,
+          label: 'Foo',
+          validationResult: SemanticsValidationResult.valid,
+          textDirection: TextDirection.ltr,
+        ),
+      );
+      final SemanticsNode node = tester.getSemantics(find.byKey(key));
+
+      expect(
+        node,
+        containsSemantics(
+          label: 'Foo',
+          validationResult: SemanticsValidationResult.valid,
+          textDirection: TextDirection.ltr,
+        ),
+      );
+
+      handle.dispose();
+    });
+
+    testWidgets('can ignore validation result', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      const Key key = Key('a');
+      await tester.pumpWidget(
+        Semantics(
+          key: key,
+          label: 'Foo',
+          validationResult: SemanticsValidationResult.valid,
+          textDirection: TextDirection.ltr,
+        ),
+      );
+      final SemanticsNode node = tester.getSemantics(find.byKey(key));
+      // It is important that validationResult is passed as null to containsSemantics,
+      // because this is testing that null means "ignore the validation result value".
+      expect(node, containsSemantics(label: 'Foo', textDirection: TextDirection.ltr));
 
       handle.dispose();
     });

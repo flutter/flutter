@@ -64,7 +64,7 @@ DATA_DIR="$SCRIPT_DIR/../tools/licenses_cpp/data"
 # in the directory where you *run* the script from (your current working directory).
 LICENSES_OUTPUT_PATH="$SCRIPT_DIR/../sky/packages/sky_engine/LICENSE_CPP.new"
 
-LICENSES_PATH="$SCRIPT_DIR/../sky/packages/sky_engine/LICENSE_CPP"
+LICENSES_PATH="$SCRIPT_DIR/../sky/packages/sky_engine/LICENSE"
 
 # --- Validation ---
 
@@ -93,6 +93,8 @@ if ! git diff \
   echo "The licenses have changed."
   echo "Please review added licenses and update //engine/src/flutter/sky/packages/sky_engine/LICENSE"
   echo "The license check can be repeated locally with //engine/src/flutter/ci/licenses_cpp.sh"
+  echo "Make sure your licenses_cpp executable is built. For example:"
+  echo "    et build -c host_profile_arm64 //flutter/tools/licenses_cpp"
   echo "When executed locally the following command can update the licenses after a run:"
   echo "cp $LICENSES_OUTPUT_PATH $LICENSES_PATH"
   exit 1

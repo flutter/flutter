@@ -185,7 +185,7 @@ class AndroidSdk {
     final String? avdHome = globals.platform.environment['ANDROID_AVD_HOME'];
     final String? home = globals.platform.environment['HOME'];
     final searchPaths = <String>[
-      if (avdHome != null) avdHome,
+      ?avdHome,
       if (home != null) globals.fs.path.join(home, '.android', 'avd'),
     ];
 

@@ -132,6 +132,9 @@ declare_args() {
   # Debug build.
   is_debug = true
 
+  # Whether this is a minimal linux instance without x11, etc.
+  is_minimal_linux = false
+
   # Whether we're a traditional desktop unix.
   is_desktop_linux = current_os == "linux" && current_os != "chromeos"
 
@@ -344,7 +347,8 @@ default_library_type = "static_library"
 
 # These Sanitizers all imply using the Clang compiler. On Windows they either
 # don't work or work differently.
-using_sanitizer = !is_win && (is_asan || is_hwasan || is_lsan || is_tsan || is_msan)
+using_sanitizer =
+    !is_win && (is_asan || is_hwasan || is_lsan || is_tsan || is_msan)
 if (!is_clang && using_sanitizer) {
   is_clang = true
 }

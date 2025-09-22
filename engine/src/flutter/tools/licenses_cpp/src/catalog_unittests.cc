@@ -75,7 +75,7 @@ TEST(CatalogTest, Simple) {
   ASSERT_TRUE(catalog.ok());
   absl::StatusOr<std::vector<Catalog::Match>> match = catalog->FindMatch("foo");
   ASSERT_TRUE(match.ok());
-  ASSERT_EQ(match->front().matcher, "foobar");
+  ASSERT_EQ(match->front().GetMatcher(), "foobar");
 }
 
 TEST(CatalogTest, MultipleMatchOverlapping) {
@@ -216,7 +216,7 @@ TEST(CatalogTest, SkiaLicenseIgnoreWhitespace) {
       catalog->FindMatch(no_newline_license);
   ASSERT_TRUE(match.ok()) << match.status();
   ASSERT_EQ(match->size(), 1u);
-  EXPECT_EQ(match->at(0).matched_text, no_newline_license);
+  EXPECT_EQ(match->at(0).GetMatchedText(), no_newline_license);
 }
 
 TEST(CatalogTest, SkiaLicenseIgnoreTrailing) {
@@ -231,9 +231,27 @@ TEST(CatalogTest, SkiaLicenseIgnoreTrailing) {
   ASSERT_EQ(no_end.back(), '\n');
   no_end.pop_back();
 
-  std::cout << no_end << std::endl;
-
   absl::StatusOr<std::vector<Catalog::Match>> match =
       catalog->FindMatch(no_end);
   EXPECT_TRUE(match.ok()) << match.status();
+}
+
+TEST(CatalogTest, ExtractsGroups) {
+  std::string entry_text = R"entry(entry
+start.*stop.*last
+start(.*)stop(.*)last
+)entry";
+  std::stringstream ss;
+  ss << entry_text;
+  absl::StatusOr<Catalog::Entry> entry = Catalog::ParseEntry(ss);
+  ASSERT_TRUE(entry.ok()) << entry.status();
+  absl::StatusOr<Catalog> catalog = Catalog::Make({*entry});
+  ASSERT_TRUE(catalog.ok());
+
+  std::string text = "start hello stop world last";
+
+  absl::StatusOr<std::vector<Catalog::Match>> match = catalog->FindMatch(text);
+  EXPECT_TRUE(match.ok()) << match.status();
+  ASSERT_EQ(match->size(), 1u);
+  EXPECT_EQ(match->at(0).GetMatchedText(), "startstoplast");
 }

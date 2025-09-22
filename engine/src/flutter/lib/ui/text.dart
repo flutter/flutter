@@ -3526,10 +3526,7 @@ base class _NativeParagraphBuilder extends NativeFieldWrapperClass1 implements P
     final ByteData? encodedStrutStyle;
     if (strutStyle != null && strutStyle._enabled) {
       final String? fontFamily = strutStyle._fontFamily;
-      strutFontFamilies = <String>[
-        if (fontFamily != null) fontFamily,
-        ...?strutStyle._fontFamilyFallback,
-      ];
+      strutFontFamilies = <String>[?fontFamily, ...?strutStyle._fontFamilyFallback];
 
       assert(TextLeadingDistribution.values.length <= 2);
       final TextLeadingDistribution leadingDistribution =

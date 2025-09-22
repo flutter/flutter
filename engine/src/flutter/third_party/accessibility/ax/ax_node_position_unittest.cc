@@ -113,6 +113,16 @@ class AXPositionTest : public testing::Test, public TestAXTreeManager {
 struct ExpandToEnclosingTextBoundaryTestParam {
   ExpandToEnclosingTextBoundaryTestParam() = default;
 
+  ExpandToEnclosingTextBoundaryTestParam(
+      ax::mojom::TextBoundary p_boundary,
+      AXRangeExpandBehavior p_expand_behavior,
+      std::string p_expected_anchor_position,
+      std::string p_expected_focus_position)
+      : boundary(p_boundary),
+        expand_behavior(p_expand_behavior),
+        expected_anchor_position(std::move(p_expected_anchor_position)),
+        expected_focus_position(std::move(p_expected_focus_position)) {}
+
   // Required by GTest framework.
   ExpandToEnclosingTextBoundaryTestParam(
       const ExpandToEnclosingTextBoundaryTestParam& other) = default;
@@ -156,6 +166,15 @@ class AXPositionExpandToEnclosingTextBoundaryTestWithParam
 // struct.
 struct CreatePositionAtTextBoundaryTestParam {
   CreatePositionAtTextBoundaryTestParam() = default;
+
+  CreatePositionAtTextBoundaryTestParam(ax::mojom::TextBoundary p_boundary,
+                                        ax::mojom::MoveDirection p_direction,
+                                        AXBoundaryBehavior p_boundary_behavior,
+                                        std::string p_expected_text_position)
+      : boundary(p_boundary),
+        direction(p_direction),
+        boundary_behavior(p_boundary_behavior),
+        expected_text_position(std::move(p_expected_text_position)) {}
 
   // Required by GTest framework.
   CreatePositionAtTextBoundaryTestParam(
@@ -202,6 +221,16 @@ class AXPositionCreatePositionAtTextBoundaryTestWithParam
 // expectations.
 struct TextNavigationTestParam {
   TextNavigationTestParam() = default;
+
+  TextNavigationTestParam(
+      std::function<TestPositionType(const TestPositionType&)> p_TestMethod,
+      AXNode::AXID p_start_node_id,
+      int p_start_offset,
+      std::vector<std::string> p_expectations)
+      : TestMethod(std::move(p_TestMethod)),
+        start_node_id(p_start_node_id),
+        start_offset(p_start_offset),
+        expectations(std::move(p_expectations)) {}
 
   // Required by GTest framework.
   TextNavigationTestParam(const TextNavigationTestParam& other) = default;
