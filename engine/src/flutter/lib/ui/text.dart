@@ -58,6 +58,8 @@ enum FontStyle {
 /// When using these fonts, applications can specify [FontWeight] instances
 /// constructed using values other than the predefined values.
 class FontWeight {
+  /// Create a [FontWeight] object, which can be added to a [TextStyle] to
+  /// select the thickness of a font's glyphs.
   const FontWeight(this.value)
     : assert(value >= 1, 'Font weight must be between 1 and 1000'),
       assert(value <= 1000, 'Font weight must be between 1 and 1000');
@@ -121,6 +123,9 @@ class FontWeight {
     }
     return other is FontWeight && other.value == value;
   }
+
+  @override
+  int get hashCode => value;
 
   /// Linearly interpolates between two font weights.
   ///
