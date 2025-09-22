@@ -9,6 +9,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'test_utils.dart';
 
 void main() {
+  testWidgets('text field label is visible', (WidgetTester tester) async {
+    await pumpsUseCase(tester, AutoCompleteUseCase());
+    expect(find.text('Fruit'), findsOneWidget);
+  });
+
   testWidgets('auto complete can run', (WidgetTester tester) async {
     await pumpsUseCase(tester, AutoCompleteUseCase());
     await tester.enterText(find.byType(TextFormField), 'a');

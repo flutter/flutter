@@ -805,6 +805,23 @@ void main() {
     );
   });
 
+  test('validation result debug properties', () {
+    final SemanticsNode nodeWithValidationResult = SemanticsNode()
+      ..updateWith(
+        config: SemanticsConfiguration()..validationResult = SemanticsValidationResult.valid,
+      );
+
+    expect(
+      nodeWithValidationResult.toStringDeep(),
+      'SemanticsNode#1\n'
+      '   STALE\n'
+      '   owner: null\n'
+      '   Rect.fromLTRB(0.0, 0.0, 0.0, 0.0)\n'
+      '   invisible\n'
+      '   validationResult: valid\n',
+    );
+  });
+
   test('Custom actions debug properties', () {
     final SemanticsConfiguration configuration = SemanticsConfiguration();
     const CustomSemanticsAction action1 = CustomSemanticsAction(label: 'action1');
@@ -937,7 +954,7 @@ void main() {
     expect(config.isChecked, null);
     expect(config.isSelected, isFalse);
     expect(config.isBlockingSemanticsOfPreviouslyPaintedNodes, isFalse);
-    expect(config.isFocused, isFalse);
+    expect(config.isFocused, null);
     expect(config.isTextField, isFalse);
 
     expect(config.onShowOnScreen, isNull);

@@ -3783,10 +3783,10 @@ void main() {
     WidgetTester tester,
   ) async {
     final Key popupMenuButtonKey = UniqueKey();
-    final MaterialStateProperty<TextStyle?> labelTextStyle = MaterialStateProperty.resolveWith((
-      Set<MaterialState> states,
+    final WidgetStateProperty<TextStyle?> labelTextStyle = WidgetStateProperty.resolveWith((
+      Set<WidgetState> states,
     ) {
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return const TextStyle(color: Colors.red, fontSize: 24.0);
       }
 
@@ -3822,10 +3822,10 @@ void main() {
     await tester.tap(find.byKey(popupMenuButtonKey));
     await tester.pumpAndSettle();
 
-    expect(_labelStyle(tester, 'Item 1'), labelTextStyle.resolve(<MaterialState>{}));
+    expect(_labelStyle(tester, 'Item 1'), labelTextStyle.resolve(<WidgetState>{}));
     expect(
       _labelStyle(tester, 'Item 2'),
-      labelTextStyle.resolve(<MaterialState>{MaterialState.selected}),
+      labelTextStyle.resolve(<WidgetState>{WidgetState.selected}),
     );
   });
 

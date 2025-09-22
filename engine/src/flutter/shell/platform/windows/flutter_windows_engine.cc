@@ -201,7 +201,7 @@ FlutterWindowsEngine::FlutterWindowsEngine(
       static_cast<egl::GpuPreference>(project_->gpu_preference()));
   window_proc_delegate_manager_ = std::make_unique<WindowProcDelegateManager>();
 
-  display_monitor_ = std::make_unique<DisplayMonitor>(this);
+  display_monitor_ = std::make_shared<DisplayMonitor>(this);
 
   window_proc_delegate_manager_->RegisterTopLevelWindowProcDelegate(
       [](HWND hwnd, UINT msg, WPARAM wpar, LPARAM lpar, void* user_data,
@@ -274,8 +274,8 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
     FML_LOG(ERROR) << "Missing or unresolvable paths to assets.";
     return false;
   }
-  std::string assets_path_string = project_->assets_path().u8string();
-  std::string icu_path_string = project_->icu_path().u8string();
+  std::string assets_path_string = project_->assets_path().string();
+  std::string icu_path_string = project_->icu_path().string();
   if (embedder_api_.RunsAOTCompiledDartCode()) {
     aot_data_ = project_->LoadAotData(embedder_api_);
     if (!aot_data_) {

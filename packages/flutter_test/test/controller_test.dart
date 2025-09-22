@@ -1036,6 +1036,19 @@ void main() {
           orderedEquals(<Matcher>[containsSemantics(label: '1\n2\n3')]),
         );
       });
+      testWidgets('a node with only a tooltip is important for accessibility', (
+        WidgetTester tester,
+      ) async {
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: Tooltip(message: 'My tooltip', child: SizedBox()),
+          ),
+        );
+        expect(
+          tester.semantics.simulatedAccessibilityTraversal(),
+          contains(containsSemantics(tooltip: 'My tooltip')),
+        );
+      });
     });
 
     group('actions', () {
