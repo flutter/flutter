@@ -47,7 +47,7 @@ dependencies:
   shelf_web_socket: 2.0.1
   shelf_static: 1.1.3
   pub_semver: 2.2.0
-  pool: 1.5.1
+  pool: 1.5.2
   path: 1.9.1
   mime: 2.0.0
   logging: 1.3.0
@@ -127,4 +127,4 @@ dev_dependencies:
 dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
-# PUBSPEC CHECKSUM: vblucv
+# PUBSPEC CHECKSUM: gpjqs
