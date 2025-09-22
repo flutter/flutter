@@ -1084,6 +1084,9 @@ class FakeXcdevice extends Fake implements XCDevice {
   var isInstalled = true;
 
   @override
+  void dispose() {}
+
+  @override
   Future<List<String>> getDiagnostics() async {
     return diagnostics;
   }
