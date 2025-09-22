@@ -1159,6 +1159,10 @@ pluginManagement {
         JavaGradleTestData(true, javaVersion: '1.10', gradleVersion: '5.4'),
         JavaGradleTestData(true, javaVersion: '1.9', gradleVersion: '5.0'),
         JavaGradleTestData(true, javaVersion: '1.8', gradleVersion: '4.3'),
+        // https://github.com/flutter/flutter/issues/175669
+        JavaGradleTestData(true, javaVersion: '17.0.15', gradleVersion: '8.13'),
+        JavaGradleTestData(true, javaVersion: '21.0.7', gradleVersion: '8.13'),
+
       ];
 
       for (final data in testData) {
