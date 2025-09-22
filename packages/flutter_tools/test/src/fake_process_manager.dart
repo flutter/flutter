@@ -334,7 +334,7 @@ abstract class FakeProcessManager implements ProcessManager {
       fakeCommand.onRun!(command);
     }
 
-    final FakeProcess process = FakeProcess(
+    final process = FakeProcess(
       duration: fakeCommand.duration,
       exitCode: fakeCommand.exitCode,
       pid: _pid,
