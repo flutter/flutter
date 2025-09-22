@@ -674,12 +674,12 @@ dependencies {
       final testData = <GradleAgpTestData>[
         // Values too new *these need to be updated* when
         // max known gradle and max known agp versions are updated:
-        // Newer tools version supports max gradle version.
-        GradleAgpTestData(true, agpVersion: '8.2', gradleVersion: '8.0'),
-        // Newer tools version does not even meet current gradle version requirements.
-        GradleAgpTestData(false, agpVersion: '8.2', gradleVersion: '7.3'),
-        // Newer tools version requires newer gradle version.
-        GradleAgpTestData(true, agpVersion: '8.3', gradleVersion: '8.1'),
+        // Newer AGP version supports max gradle version.
+        GradleAgpTestData(true, agpVersion: '9.1', gradleVersion: maxKnownAndSupportedGradleVersion),
+        // Newer AGP version does not even meet current gradle version requirements.
+        GradleAgpTestData(false, agpVersion: '9.1', gradleVersion: '7.3'),
+        // Newer AGP version requires newer gradle version.
+        GradleAgpTestData(true, agpVersion: '9.1', gradleVersion: '9.1'),
 
         // Template versions of Gradle/AGP.
         GradleAgpTestData(
@@ -695,6 +695,19 @@ dependencies {
 
         // Minimums as defined in
         // https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
+        GradleAgpTestData(true, agpVersion: '9.0', gradleVersion: '9.0.0'),
+        GradleAgpTestData(true, agpVersion: '8.13', gradleVersion: '8.13'),
+        GradleAgpTestData(true, agpVersion: '8.12', gradleVersion: '8.13'),
+        GradleAgpTestData(true, agpVersion: '8.11', gradleVersion: '8.13'),
+        GradleAgpTestData(true, agpVersion: '8.10', gradleVersion: '8.11.1'),
+        GradleAgpTestData(true, agpVersion: '8.9', gradleVersion: '8.11.1'),
+        GradleAgpTestData(true, agpVersion: '8.8', gradleVersion: '8.10.2'),
+        GradleAgpTestData(true, agpVersion: '8.7', gradleVersion: '8.9'),
+        GradleAgpTestData(true, agpVersion: '8.5', gradleVersion: '8.7'),
+        GradleAgpTestData(true, agpVersion: '8.4', gradleVersion: '8.6'),
+        GradleAgpTestData(true, agpVersion: '8.3', gradleVersion: '8.4'),
+        GradleAgpTestData(true, agpVersion: '8.2', gradleVersion: '8.2'),
+        GradleAgpTestData(true, agpVersion: '8.1', gradleVersion: '8.0'),
         GradleAgpTestData(true, agpVersion: '8.1', gradleVersion: '8.0'),
         GradleAgpTestData(true, agpVersion: '8.0', gradleVersion: '8.0'),
         GradleAgpTestData(true, agpVersion: '7.4', gradleVersion: '7.5'),
@@ -722,6 +735,7 @@ dependencies {
         GradleAgpTestData(false, agpVersion: null, gradleVersion: null),
         // Middle AGP cases:
         GradleAgpTestData(true, agpVersion: '8.0.1', gradleVersion: '8.0'),
+        GradleAgpTestData(true, agpVersion: '8.0.1', gradleVersion: '8.0'),
         GradleAgpTestData(true, agpVersion: '7.4.1', gradleVersion: '7.5'),
         GradleAgpTestData(true, agpVersion: '7.3.1', gradleVersion: '7.4'),
         GradleAgpTestData(true, agpVersion: '7.2.1', gradleVersion: '7.3.3'),
@@ -736,6 +750,19 @@ dependencies {
         GradleAgpTestData(true, agpVersion: '3.3.1', gradleVersion: '4.10.1'),
 
         // Higher gradle cases:
+        GradleAgpTestData(true, agpVersion: '9.0', gradleVersion: '9.0.0'),
+        GradleAgpTestData(true, agpVersion: '8.13', gradleVersion: '8.14'),
+        GradleAgpTestData(true, agpVersion: '8.12', gradleVersion: '9.0'),
+        GradleAgpTestData(true, agpVersion: '8.11', gradleVersion: '8.14'),
+        GradleAgpTestData(true, agpVersion: '8.10', gradleVersion: '8.13'),
+        GradleAgpTestData(true, agpVersion: '8.9', gradleVersion: '8.13'),
+        GradleAgpTestData(true, agpVersion: '8.8', gradleVersion: '8.11.1'),
+        GradleAgpTestData(true, agpVersion: '8.7', gradleVersion: '8.10'),
+        GradleAgpTestData(true, agpVersion: '8.5', gradleVersion: '8.8'),
+        GradleAgpTestData(true, agpVersion: '8.4', gradleVersion: '8.7'),
+        GradleAgpTestData(true, agpVersion: '8.3', gradleVersion: '8.5'),
+        GradleAgpTestData(true, agpVersion: '8.2', gradleVersion: '8.3'),
+        GradleAgpTestData(true, agpVersion: '8.1', gradleVersion: '8.1'),
         GradleAgpTestData(true, agpVersion: '7.4', gradleVersion: '8.0'),
         GradleAgpTestData(true, agpVersion: '7.3', gradleVersion: '7.5'),
         GradleAgpTestData(true, agpVersion: '7.2', gradleVersion: '7.4'),
@@ -1221,19 +1248,43 @@ allprojects {
       JavaAgpTestData(false, javaVersion: '1.8', agpVersion: '4.1'),
       JavaAgpTestData(false, javaVersion: '1.8', agpVersion: '2.3'),
       // Strictly too new Java versions for defined AGP versions.
-      JavaAgpTestData(true, javaVersion: '18', agpVersion: '8.1'),
-      JavaAgpTestData(true, javaVersion: '18', agpVersion: '7.4'),
       JavaAgpTestData(true, javaVersion: '18', agpVersion: '4.2'),
+      JavaAgpTestData(true, javaVersion: '11', agpVersion: '4.2.0'),
+      JavaAgpTestData(true, javaVersion: '12', agpVersion: '7.0'),
+      JavaAgpTestData(true, javaVersion: '13', agpVersion: '7.1.3'),
+      JavaAgpTestData(true, javaVersion: '14', agpVersion: '7.2.2'),
+      JavaAgpTestData(true, javaVersion: '17', agpVersion: '7.3'),
+      JavaAgpTestData(true, javaVersion: '18', agpVersion: '7.4'),
+      JavaAgpTestData(true, javaVersion: '19', agpVersion: '8.0'),
+      JavaAgpTestData(true, javaVersion: '19', agpVersion: '8.1'),
+      JavaAgpTestData(true, javaVersion: '19', agpVersion: '8.2'),
+      JavaAgpTestData(true, javaVersion: '20', agpVersion: '8.3'),
+      JavaAgpTestData(true, javaVersion: '21', agpVersion: '8.4'),
+      JavaAgpTestData(true, javaVersion: '21', agpVersion: '8.5'),
+      JavaAgpTestData(true, javaVersion: '21', agpVersion: '8.6'),
+      JavaAgpTestData(true, javaVersion: '22', agpVersion: '8.7'),
+      JavaAgpTestData(true, javaVersion: '23', agpVersion: '8.8'),
+      JavaAgpTestData(true, javaVersion: '23', agpVersion: '8.9'),
+      JavaAgpTestData(true, javaVersion: '23', agpVersion: '8.10'),
+      JavaAgpTestData(true, javaVersion: '23', agpVersion: '8.11'),
+      JavaAgpTestData(true, javaVersion: '23', agpVersion: '8.12'),
+      JavaAgpTestData(true, javaVersion: '23', agpVersion: '8.13'),
+      JavaAgpTestData(true, javaVersion: '25', agpVersion: '9.0'),
       // Strictly too new AGP versions.
       // *The tests that follow need to be updated* when max supported AGP versions are updated:
-      JavaAgpTestData(false, javaVersion: '24', agpVersion: '9.0'),
-      JavaAgpTestData(false, javaVersion: '20', agpVersion: '9.0'),
-      JavaAgpTestData(false, javaVersion: '17', agpVersion: '9.0'),
+      JavaAgpTestData(false, javaVersion: '26', agpVersion: '10.0'),
+      JavaAgpTestData(false, javaVersion: '21', agpVersion: '10.0'),
+      JavaAgpTestData(true, javaVersion: '25', agpVersion: maxKnownAndSupportedAgpVersion),
       // Java 17 & patch versions compatibility cases
       // *The tests that follow need to be updated* when maxKnownAndSupportedAgpVersion is
       // updated:
-      JavaAgpTestData(false, javaVersion: '17', agpVersion: '9.0'),
       JavaAgpTestData(true, javaVersion: '17', agpVersion: maxKnownAndSupportedAgpVersion),
+      JavaAgpTestData(true, javaVersion: '17', agpVersion: '9.0'),
+      JavaAgpTestData(true, javaVersion: '17', agpVersion: '8.13'),
+      JavaAgpTestData(true, javaVersion: '17', agpVersion: '8.12'),
+      JavaAgpTestData(true, javaVersion: '17', agpVersion: '8.11'),
+      JavaAgpTestData(true, javaVersion: '17', agpVersion: '8.10'),
+      JavaAgpTestData(true, javaVersion: '17', agpVersion: '8.9.1'),
       JavaAgpTestData(true, javaVersion: '17', agpVersion: '8.8'),
       JavaAgpTestData(true, javaVersion: '17', agpVersion: '8.7'),
       JavaAgpTestData(true, javaVersion: '17', agpVersion: '8.6'),
@@ -1243,8 +1294,8 @@ allprojects {
       JavaAgpTestData(true, javaVersion: '17', agpVersion: '8.1'),
       JavaAgpTestData(true, javaVersion: '17', agpVersion: '8.0'),
       JavaAgpTestData(true, javaVersion: '17', agpVersion: '7.4'),
-      JavaAgpTestData(false, javaVersion: '17.0.3', agpVersion: '9.0'),
-      JavaAgpTestData(true, javaVersion: '17.0.3', agpVersion: maxKnownAndSupportedAgpVersion),
+      JavaAgpTestData(false, javaVersion: '17.0.3', agpVersion: '10.0'),
+      JavaAgpTestData(true, javaVersion: '25', agpVersion: maxKnownAndSupportedAgpVersion),
       JavaAgpTestData(true, javaVersion: '17.0.3', agpVersion: '8.8'),
       JavaAgpTestData(true, javaVersion: '17.0.3', agpVersion: '8.7'),
       JavaAgpTestData(true, javaVersion: '17.0.3', agpVersion: '8.6'),
@@ -1288,7 +1339,7 @@ allprojects {
         expect(
           validateJavaAndAgp(BufferLogger.test(), javaV: data.javaVersion, agpV: data.agpVersion),
           data.validPair ? isTrue : isFalse,
-          reason: 'J: ${data.javaVersion}, G: ${data.agpVersion}',
+          reason: 'J: ${data.javaVersion}, AGP: ${data.agpVersion}',
         );
       });
     }
@@ -1310,10 +1361,37 @@ allprojects {
         // Maximum known Java version.
         // *The test case that follows needs to be updated* when higher versions of Java are supported:
         expect(
+          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '26'),
+          allOf(
+            equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '26.0.2')),
+            isNull,
+          ),
+        );
+        // Known supported Java versions.
+        expect(
+          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '25'),
+          allOf(
+            equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '25.0.2')),
+            equals(
+              const JavaGradleCompat(
+                javaMin: '25',
+                javaMax: '26',
+                gradleMin: '9.1.0',
+              ),
+            ),
+          ),
+        );
+        expect(
           getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '24'),
           allOf(
             equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '24.0.2')),
-            isNull,
+            equals(
+              const JavaGradleCompat(
+                javaMin: '24',
+                javaMax: '25',
+                gradleMin: '8.14',
+              ),
+            ),
           ),
         );
         expect(
@@ -1325,12 +1403,10 @@ allprojects {
                 javaMin: '23',
                 javaMax: '24',
                 gradleMin: '8.10',
-                gradleMax: maxKnownAndSupportedGradleVersion,
               ),
             ),
           ),
         );
-        // Known supported Java versions.
         expect(
           getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '22'),
           allOf(
@@ -1340,7 +1416,6 @@ allprojects {
                 javaMin: '22',
                 javaMax: '23',
                 gradleMin: '8.7',
-                gradleMax: maxKnownAndSupportedGradleVersion,
               ),
             ),
           ),
@@ -1354,7 +1429,6 @@ allprojects {
                 javaMin: '21',
                 javaMax: '22',
                 gradleMin: '8.4',
-                gradleMax: maxKnownAndSupportedGradleVersion,
               ),
             ),
           ),
@@ -1368,7 +1442,6 @@ allprojects {
                 javaMin: '20',
                 javaMax: '21',
                 gradleMin: '8.1',
-                gradleMax: maxKnownAndSupportedGradleVersion,
               ),
             ),
           ),
@@ -1382,7 +1455,6 @@ allprojects {
                 javaMin: '19',
                 javaMax: '20',
                 gradleMin: '7.6',
-                gradleMax: maxKnownAndSupportedGradleVersion,
               ),
             ),
           ),
@@ -1396,7 +1468,6 @@ allprojects {
                 javaMin: '18',
                 javaMax: '19',
                 gradleMin: '7.5',
-                gradleMax: maxKnownAndSupportedGradleVersion,
               ),
             ),
           ),
@@ -1410,7 +1481,6 @@ allprojects {
                 javaMin: '17',
                 javaMax: '18',
                 gradleMin: '7.3',
-                gradleMax: maxKnownAndSupportedGradleVersion,
               ),
             ),
           ),
@@ -1646,20 +1716,20 @@ allprojects {
       );
       // Strictly too new Gradle and AGP versions.
       expect(
-        getJavaVersionFor(gradleV: '8.13', agpV: '9.0'),
+        getJavaVersionFor(gradleV: '9.10', agpV: '10.0'),
         equals(const VersionRange(null, null)),
       );
       // Strictly too new Gradle version and maximum version of AGP.
       //*This test case will need its expected Java range updated when a new version of AGP is supported.*
       expect(
-        getJavaVersionFor(gradleV: '8.13', agpV: maxKnownAndSupportedAgpVersion),
+        getJavaVersionFor(gradleV: '9.10', agpV: maxKnownAndSupportedAgpVersion),
         equals(const VersionRange('17', null)),
       );
       // Strictly too new AGP version and maximum version of Gradle.
       //*This test case will need its expected Java range updated when a new version of Gradle is supported.*
       expect(
-        getJavaVersionFor(gradleV: maxKnownAndSupportedGradleVersion, agpV: '9.0'),
-        equals(const VersionRange(null, '24')),
+        getJavaVersionFor(gradleV: maxKnownAndSupportedGradleVersion, agpV: '10.0'),
+        equals(const VersionRange(null, oneMajorVersionHigherJavaVersion)),
       );
       // Tests with a known compatible Gradle/AGP version pair.
       expect(

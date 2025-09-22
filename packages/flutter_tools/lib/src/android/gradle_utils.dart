@@ -63,7 +63,7 @@ final minJavaMinVersionAndroid = Version(11, 0, 0);
 // Update these when new major versions of Java are supported by new Gradle
 // versions that we support.
 // Source of truth: https://docs.gradle.org/current/userguide/compatibility.html
-const oneMajorVersionHigherJavaVersion = '25';
+const oneMajorVersionHigherJavaVersion = '26';
 
 // Update this when new versions of Gradle come out including minor versions
 // and should correspond to the maximum Gradle version we test in CI.
@@ -1198,6 +1198,11 @@ class JavaGradleCompat {
 
   @override
   int get hashCode => Object.hash(javaMin, javaMax, gradleMin, gradleMax);
+
+  @override
+  String toString() {
+    return '$javaMin, $javaMax, $gradleMin, $gradleMax';
+  }
 }
 
 // Data class to hold defined Java <-> AGP compatibility criteria.

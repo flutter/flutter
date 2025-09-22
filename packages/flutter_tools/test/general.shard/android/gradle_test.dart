@@ -703,7 +703,8 @@ flutter:
       );
     });
 
-    final List<({String javaV, String agpV, bool isValid})> javaGradleData = [
+    //TODO audit and move to android/gradle_utils_test.dart
+    final List<({String javaV, String agpV, bool isValid})> javaAgpData = [
       // Valid Minimums
       (javaV: '1.8', agpV: '4.2.0', isValid: true),
       (javaV: '11', agpV: '7.0', isValid: true),
@@ -773,7 +774,7 @@ flutter:
     ];
 
     logger = BufferLogger.test();
-    for (final data in javaGradleData) {
+    for (final data in javaAgpData) {
       testWithoutContext('validate java ${data.javaV} and AGP ${data.agpV}', () {
         expect(gradle_utils.validateJavaAndAgp(logger, javaV: data.javaV, agpV: data.agpV), data.isValid);
       });
