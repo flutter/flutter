@@ -2817,11 +2817,6 @@ class Navigator extends StatefulWidget {
   /// To pop until a route with a certain name, use the [RoutePredicate]
   /// returned from [ModalRoute.withName].
   ///
-  /// If `result` is not specified, then all routes are closed
-  /// with null as their `return` value.
-  /// If `result` is specified, then the last popped route will be closed with
-  /// `result` as its return value.
-  ///
   /// The `T` type argument is the type of the return value of the last popped route.
   ///
   /// See [pop] for more details of the semantics of popping a route.
