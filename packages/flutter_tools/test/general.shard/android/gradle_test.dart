@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/version_range.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -624,13 +625,146 @@ flutter:
       expect(gradle_utils.getGradleVersionFor('8.5'), '8.7');
       expect(gradle_utils.getGradleVersionFor('8.7'), '8.9');
       expect(gradle_utils.getGradleVersionFor('8.8'), '8.10.2');
-      expect(gradle_utils.getGradleVersionFor(gradle_utils.maxKnownAgpVersion), '8.11.1');
+      expect(gradle_utils.getGradleVersionFor('8.9'), '8.11.1');
+      expect(gradle_utils.getGradleVersionFor('8.10'), '8.11.1');
+      expect(gradle_utils.getGradleVersionFor('8.11'), '8.13');
+      expect(gradle_utils.getGradleVersionFor('8.12'), '8.13');
+      expect(gradle_utils.getGradleVersionFor('8.13'), '8.13');
+      expect(gradle_utils.getGradleVersionFor('9.0'), '9.0.0');
     });
 
     testWithoutContext('throws on unsupported versions', () {
       expect(
         () => gradle_utils.getGradleVersionFor('3.6.0'),
         throwsA(predicate<Exception>((Exception e) => e is ToolExit)),
+      );
+    });
+  });
+
+  group('java version', () {
+    // TODO make tests in a loop with input data.
+    testWithoutContext('should be compatible with AGP version', () {
+      // Gradle version Ranges.
+      expect(
+        gradle_utils.getJavaVersionFor(agpV: '4.2.0', gradleV: '6.7.1'),
+        const VersionRange('1.8', '16'),
+      );
+      expect(
+        gradle_utils.getJavaVersionFor(agpV: '4.2.0', gradleV: '7.0'),
+        const VersionRange('1.8', '17'),
+      );
+      expect(
+        gradle_utils.getJavaVersionFor(agpV: '4.2.0', gradleV: '8.0'),
+        const VersionRange('1.8', '20'),
+      );
+      expect(
+        gradle_utils.getJavaVersionFor(agpV: '4.2.0', gradleV: '8.5'),
+        const VersionRange('1.8', '22'),
+      );
+      expect(
+        gradle_utils.getJavaVersionFor(agpV: '4.2.0', gradleV: '8.9.1'),
+        const VersionRange('1.8', '23'),
+      );
+      expect(
+        gradle_utils.getJavaVersionFor(agpV: '4.2.0', gradleV: '8.11'),
+        const VersionRange('1.8', '24'),
+      );
+      expect(
+        gradle_utils.getJavaVersionFor(agpV: '4.2.0', gradleV: '8.13'),
+        const VersionRange('1.8', '24'),
+      );
+      expect(
+        gradle_utils.getJavaVersionFor(agpV: '7.4', gradleV: '7.5'),
+        const VersionRange('11', '19'),
+      );
+      expect(
+        gradle_utils.getJavaVersionFor(agpV: '7.4', gradleV: '8.0'),
+        const VersionRange('11', '20'),
+      );
+      expect(
+        gradle_utils.getJavaVersionFor(agpV: '7.4', gradleV: '8.4'),
+        const VersionRange('11', '22'),
+      );
+      expect(
+        gradle_utils.getJavaVersionFor(agpV: '7.4', gradleV: '8.9.1'),
+        const VersionRange('11', '23'),
+      );
+      expect(
+        gradle_utils.getJavaVersionFor(agpV: '7.4', gradleV: '8.10'),
+        const VersionRange('11', '24'),
+      );
+      expect(
+        gradle_utils.getJavaVersionFor(agpV: '7.4', gradleV: '8.12'),
+        const VersionRange('11', '24'),
+      );
+      expect(
+        gradle_utils.getJavaVersionFor(agpV: '7.4', gradleV: '8.14'),
+        const VersionRange('11', '25'),
+      );
+      expect(
+        gradle_utils.getJavaVersionFor(agpV: '8.0', gradleV: '8.0'),
+        const VersionRange('17', '20'),
+      );
+      expect(
+        gradle_utils.getJavaVersionFor(agpV: '8.0', gradleV: '8.4'),
+        const VersionRange('17', '22'),
+      );
+      expect(
+        gradle_utils.getJavaVersionFor(agpV: '8.0', gradleV: '8.9.1'),
+        const VersionRange('17', '23'),
+      );
+      expect(
+        gradle_utils.getJavaVersionFor(agpV: '8.0', gradleV: '8.10'),
+        const VersionRange('17', '24'),
+      );
+      expect(
+        gradle_utils.getJavaVersionFor(agpV: '8.0', gradleV: '8.12'),
+        const VersionRange('17', '24'),
+      );
+      expect(
+        gradle_utils.getJavaVersionFor(agpV: '8.0', gradleV: '8.14'),
+        const VersionRange('17', '25'),
+      );
+      expect(
+        gradle_utils.getJavaVersionFor(agpV: '8.9.1', gradleV: '8.11.1'),
+        const VersionRange('17', '24'),
+      );
+      expect(
+        gradle_utils.getJavaVersionFor(agpV: '8.9.1', gradleV: '8.12'),
+        const VersionRange('17', '24'),
+      );
+      expect(
+        gradle_utils.getJavaVersionFor(agpV: '8.9.1', gradleV: '8.13'),
+        const VersionRange('17', '24'),
+      );
+      expect(
+        gradle_utils.getJavaVersionFor(agpV: '9.0', gradleV: '9.0'),
+        const VersionRange('17', '25'),
+      );
+      // Max values
+      expect(
+        gradle_utils
+            .getJavaVersionFor(
+              agpV: gradle_utils.maxKnownAndSupportedAgpVersion,
+              gradleV: gradle_utils.maxKnownAndSupportedGradleVersion,
+            )
+            .versionMin,
+        '17',
+      );
+      // Granular versions.
+      expect(
+        gradle_utils.getJavaVersionFor(agpV: '8.0.1', gradleV: '8.1.1'),
+        const VersionRange('17', '21'),
+      );
+      // Template versions.
+      expect(
+        gradle_utils
+            .getJavaVersionFor(
+              agpV: gradle_utils.templateAndroidGradlePluginVersion,
+              gradleV: gradle_utils.templateAndroidGradlePluginVersion,
+            )
+            .versionMin,
+        '17',
       );
     });
   });
