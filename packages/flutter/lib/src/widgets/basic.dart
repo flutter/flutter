@@ -6497,6 +6497,9 @@ class Flow extends MultiChildRenderObjectWidget {
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return SelectionArea(
+///     // SelectionArea adds a SelectionRegistrar inherited widget
+///     // to its subtree through SelectionContainer. A new BuildContext
+///     // is necessary to access this inherited widget.
 ///     child: Builder(
 ///       builder: (BuildContext innerContext) {
 ///         return RichText(
