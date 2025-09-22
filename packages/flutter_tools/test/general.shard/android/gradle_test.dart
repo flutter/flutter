@@ -7,11 +7,9 @@ import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart' as gradle_utils;
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/version_range.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -30,7 +28,6 @@ flutter:
 
 void main() {
   Cache.flutterRoot = getFlutterRoot();
-  late BufferLogger logger;
 
   group('build artifacts', () {
     late FileSystem fileSystem;
@@ -571,214 +568,6 @@ flutter:
         ),
       );
     });
-  });
-
-  group('gradle version', () {
-    testWithoutContext('should be compatible with the Android plugin version', () {
-      // Granular versions.
-      expect(gradle_utils.getGradleVersionFor('1.0.0'), '2.3');
-      expect(gradle_utils.getGradleVersionFor('1.0.1'), '2.3');
-      expect(gradle_utils.getGradleVersionFor('1.0.2'), '2.3');
-      expect(gradle_utils.getGradleVersionFor('1.0.4'), '2.3');
-      expect(gradle_utils.getGradleVersionFor('1.0.8'), '2.3');
-      expect(gradle_utils.getGradleVersionFor('1.1.0'), '2.3');
-      expect(gradle_utils.getGradleVersionFor('1.1.2'), '2.3');
-      expect(gradle_utils.getGradleVersionFor('1.1.2'), '2.3');
-      expect(gradle_utils.getGradleVersionFor('1.1.3'), '2.3');
-      // Version Ranges.
-      expect(gradle_utils.getGradleVersionFor('1.2.0'), '2.9');
-      expect(gradle_utils.getGradleVersionFor('1.3.1'), '2.9');
-
-      expect(gradle_utils.getGradleVersionFor('1.5.0'), '2.2.1');
-
-      expect(gradle_utils.getGradleVersionFor('2.0.0'), '2.13');
-      expect(gradle_utils.getGradleVersionFor('2.1.2'), '2.13');
-
-      expect(gradle_utils.getGradleVersionFor('2.1.3'), '2.14.1');
-      expect(gradle_utils.getGradleVersionFor('2.2.3'), '2.14.1');
-
-      expect(gradle_utils.getGradleVersionFor('2.3.0'), '3.3');
-
-      expect(gradle_utils.getGradleVersionFor('3.0.0'), '4.1');
-
-      expect(gradle_utils.getGradleVersionFor('3.1.0'), '4.4');
-
-      expect(gradle_utils.getGradleVersionFor('3.2.0'), '4.6');
-      expect(gradle_utils.getGradleVersionFor('3.2.1'), '4.6');
-
-      expect(gradle_utils.getGradleVersionFor('3.3.0'), '4.10.2');
-      expect(gradle_utils.getGradleVersionFor('3.3.2'), '4.10.2');
-
-      expect(gradle_utils.getGradleVersionFor('3.4.0'), '5.6.2');
-      expect(gradle_utils.getGradleVersionFor('3.5.0'), '5.6.2');
-
-      expect(gradle_utils.getGradleVersionFor('4.0.0'), '6.7');
-      expect(gradle_utils.getGradleVersionFor('4.1.0'), '6.7');
-
-      expect(gradle_utils.getGradleVersionFor('7.0'), '7.5');
-      expect(gradle_utils.getGradleVersionFor('7.1.2'), '7.5');
-      expect(gradle_utils.getGradleVersionFor('7.2'), '7.5');
-      expect(gradle_utils.getGradleVersionFor('8.0'), '8.0');
-      expect(gradle_utils.getGradleVersionFor('8.1'), '8.0');
-      expect(gradle_utils.getGradleVersionFor('8.2'), '8.2');
-      expect(gradle_utils.getGradleVersionFor('8.3'), '8.4');
-      expect(gradle_utils.getGradleVersionFor('8.4'), '8.6');
-      expect(gradle_utils.getGradleVersionFor('8.5'), '8.7');
-      expect(gradle_utils.getGradleVersionFor('8.7'), '8.9');
-      expect(gradle_utils.getGradleVersionFor('8.8'), '8.10.2');
-      expect(gradle_utils.getGradleVersionFor('8.9'), '8.11.1');
-      expect(gradle_utils.getGradleVersionFor('8.10'), '8.11.1');
-      expect(gradle_utils.getGradleVersionFor('8.11'), '8.13');
-      expect(gradle_utils.getGradleVersionFor('8.12'), '8.13');
-      expect(gradle_utils.getGradleVersionFor('8.13'), '8.13');
-      expect(gradle_utils.getGradleVersionFor('9.0'), '9.0.0');
-    });
-
-    testWithoutContext('throws on unsupported versions', () {
-      expect(
-        () => gradle_utils.getGradleVersionFor('3.6.0'),
-        throwsA(predicate<Exception>((Exception e) => e is ToolExit)),
-      );
-    });
-  });
-
-  group('java version', () {
-    final List<({String agpV, String gradleV, VersionRange expected})> agpGradleData = [
-      // Gradle version Ranges.
-      (agpV: '4.2.0', gradleV: '6.7.1', expected: const VersionRange('1.8', '16')),
-      (agpV: '4.2.0', gradleV: '7.0', expected: const VersionRange('1.8', '17')),
-      (agpV: '4.2.0', gradleV: '8.0', expected: const VersionRange('1.8', '20')),
-      (agpV: '4.2.0', gradleV: '8.5', expected: const VersionRange('1.8', '22')),
-      (agpV: '4.2.0', gradleV: '8.9.1', expected: const VersionRange('1.8', '23')),
-      (agpV: '4.2.0', gradleV: '8.11', expected: const VersionRange('1.8', '24')), 
-      (agpV: '4.2.0', gradleV: '8.13', expected: const VersionRange('1.8', '24')),
-      (agpV: '7.4', gradleV: '7.5', expected: const VersionRange('11', '19')),
-      (agpV: '7.4', gradleV: '8.0', expected: const VersionRange('11', '20')),
-      (agpV: '7.4', gradleV: '8.4', expected: const VersionRange('11', '22')),
-      (agpV: '7.4', gradleV: '8.9.1', expected: const VersionRange('11', '23')),
-      (agpV: '7.4', gradleV: '8.10', expected: const VersionRange('11', '24')),
-      (agpV: '7.4', gradleV: '8.12', expected: const VersionRange('11', '24')),
-      (agpV: '7.4', gradleV: '8.14', expected: const VersionRange('11', '25')),
-      (agpV: '8.0', gradleV: '8.0', expected: const VersionRange('17', '20')),
-      (agpV: '8.0', gradleV: '8.4', expected: const VersionRange('17', '22')),
-      (agpV: '8.0', gradleV: '8.9.1', expected: const VersionRange('17', '23')),
-      (agpV: '8.0', gradleV: '8.10', expected: const VersionRange('17', '24')),
-      (agpV: '8.0', gradleV: '8.12', expected: const VersionRange('17', '24')),
-      (agpV: '8.0', gradleV: '8.14', expected: const VersionRange('17', '25')),
-      (agpV: '8.9.1', gradleV: '8.11.1', expected: const VersionRange('17', '24')),
-      (agpV: '8.9.1', gradleV: '8.12', expected: const VersionRange('17', '24')),
-      (agpV: '8.9.1', gradleV: '8.13', expected: const VersionRange('17', '24')),
-      (agpV: '9.0', gradleV: '9.0', expected: const VersionRange('17', '25')),
-      // Granular versions.
-      (agpV: '8.0.1', gradleV: '8.1.1', expected: const VersionRange('17', '21')),
-    ];
-    for (final data in agpGradleData) {
-      testWithoutContext('for AGP ${data.agpV}, gradle ${data.gradleV}', () {
-        expect(
-          gradle_utils.getJavaVersionFor(agpV: data.agpV, gradleV: data.gradleV),
-          data.expected,
-        );
-      });
-    }
-    testWithoutContext('for agp/gradle', () {
-      // Max values
-      expect(
-        gradle_utils
-            .getJavaVersionFor(
-              agpV: gradle_utils.maxKnownAndSupportedAgpVersion,
-              gradleV: gradle_utils.maxKnownAndSupportedGradleVersion,
-            )
-            .versionMin,
-        '17',
-      );
-      // Template versions.
-      expect(
-        gradle_utils
-            .getJavaVersionFor(
-              agpV: gradle_utils.templateAndroidGradlePluginVersion,
-              gradleV: gradle_utils.templateAndroidGradlePluginVersion,
-            )
-            .versionMin,
-        '17',
-      );
-    });
-
-    //TODO audit and move to android/gradle_utils_test.dart
-    final List<({String javaV, String agpV, bool isValid})> javaAgpData = [
-      // Valid Minimums
-      (javaV: '1.8', agpV: '4.2.0', isValid: true),
-      (javaV: '11', agpV: '7.0', isValid: true),
-      (javaV: '11', agpV: '7.1.3', isValid: true),
-      (javaV: '11', agpV: '7.2.2', isValid: true),
-      (javaV: '11', agpV: '7.3', isValid: true),
-      (javaV: '11', agpV: '7.4', isValid: true),
-      (javaV: '17', agpV: '8.0', isValid: true),
-      (javaV: '17', agpV: '8.1', isValid: true),
-      (javaV: '17', agpV: '8.2', isValid: true),
-      (javaV: '17', agpV: '8.3', isValid: true),
-      (javaV: '17', agpV: '8.4', isValid: true),
-      (javaV: '17', agpV: '8.5', isValid: true),
-      (javaV: '17', agpV: '8.6', isValid: true),
-      (javaV: '17', agpV: '8.7', isValid: true),
-      (javaV: '17', agpV: '8.8', isValid: true),
-      (javaV: '17', agpV: '8.9', isValid: true),
-      (javaV: '17', agpV: '8.10', isValid: true),
-      (javaV: '17', agpV: '8.11', isValid: true),
-      (javaV: '17', agpV: '8.12', isValid: true),
-      (javaV: '17', agpV: '8.13', isValid: true),
-      (javaV: '17', agpV: '9.0', isValid: true),
-      // Below Minimums
-      (javaV: '1.7', agpV: '4.2.0', isValid: false),
-      (javaV: '1.8', agpV: '7.0', isValid: false),
-      (javaV: '1.8', agpV: '7.1.3', isValid: false),
-      (javaV: '1.8', agpV: '7.2.2', isValid: false),
-      (javaV: '1.8', agpV: '7.3', isValid: false),
-      (javaV: '1.8', agpV: '7.4', isValid: false),
-      (javaV: '12', agpV: '8.0', isValid: false),
-      (javaV: '13', agpV: '8.1', isValid: false),
-      (javaV: '14', agpV: '8.2', isValid: false),
-      (javaV: '15', agpV: '8.3', isValid: false),
-      (javaV: '16', agpV: '8.4', isValid: false),
-      (javaV: '16', agpV: '8.5', isValid: false),
-      (javaV: '16', agpV: '8.6', isValid: false),
-      (javaV: '16', agpV: '8.7', isValid: false),
-      (javaV: '16', agpV: '8.8', isValid: false),
-      (javaV: '16', agpV: '8.9', isValid: false),
-      (javaV: '16', agpV: '8.10', isValid: false),
-      (javaV: '16', agpV: '8.11', isValid: false),
-      (javaV: '16', agpV: '8.12', isValid: false),
-      (javaV: '16', agpV: '8.13', isValid: false),
-      (javaV: '16', agpV: '9.0', isValid: false),
-      // Above Minimums
-      (javaV: '11', agpV: '4.2.0', isValid: true),
-      (javaV: '12', agpV: '7.0', isValid: true),
-      (javaV: '13', agpV: '7.1.3', isValid: true),
-      (javaV: '14', agpV: '7.2.2', isValid: true),
-      (javaV: '17', agpV: '7.3', isValid: true),
-      (javaV: '18', agpV: '7.4', isValid: true),
-      (javaV: '19', agpV: '8.0', isValid: true),
-      (javaV: '19', agpV: '8.1', isValid: true),
-      (javaV: '19', agpV: '8.2', isValid: true),
-      (javaV: '20', agpV: '8.3', isValid: true),
-      (javaV: '21', agpV: '8.4', isValid: true),
-      (javaV: '21', agpV: '8.5', isValid: true),
-      (javaV: '21', agpV: '8.6', isValid: true),
-      (javaV: '22', agpV: '8.7', isValid: true),
-      (javaV: '23', agpV: '8.8', isValid: true),
-      (javaV: '23', agpV: '8.9', isValid: true),
-      (javaV: '23', agpV: '8.10', isValid: true),
-      (javaV: '23', agpV: '8.11', isValid: true),
-      (javaV: '23', agpV: '8.12', isValid: true),
-      (javaV: '23', agpV: '8.13', isValid: true),
-      (javaV: '25', agpV: '9.0', isValid: true),
-    ];
-
-    logger = BufferLogger.test();
-    for (final data in javaAgpData) {
-      testWithoutContext('validate java ${data.javaV} and AGP ${data.agpV}', () {
-        expect(gradle_utils.validateJavaAndAgp(logger, javaV: data.javaV, agpV: data.agpV), data.isValid);
-      });
-    }
   });
 
 
