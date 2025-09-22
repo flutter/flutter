@@ -1717,6 +1717,7 @@ class FakeWebRunnerFactory extends Fake implements WebRunnerFactory {
     required Terminal terminal,
     bool machine = false,
     Future<String> Function(String)? urlTunneller,
+    Map<String, String>? webDefines,
   }) {
     lastOptions = debuggingOptions;
     return FakeResidentRunner();
