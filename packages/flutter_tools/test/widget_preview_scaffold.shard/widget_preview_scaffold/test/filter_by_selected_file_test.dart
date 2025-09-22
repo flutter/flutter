@@ -137,11 +137,11 @@ void main() {
   testWidgets('Filter previews based on currently selected file (Windows)', (
     tester,
   ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/175524
     const kScript1 = 'file:///C:/script1';
     const kScript2 = 'file:///C:/script2';
-    final kTextEditorScript1 = 'file:///C%3A/script1';
-    final kTextEditorScript2 = Uri.encodeFull(kScript2);
-    print(kTextEditorScript1);
+    const kTextEditorScript1 = 'file:///C%3A/script1';
+    const kTextEditorScript2 = 'file:///C%3A/script2';
     await testImpl(
       tester: tester,
       script1Uri: kScript1,
