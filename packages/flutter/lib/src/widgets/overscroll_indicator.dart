@@ -889,7 +889,7 @@ class _StretchController extends Listenable {
 
   /// A correction factor applied to the simulation time.
   ///
-  /// The physical constants `_naturalFrequency` and `_dampingRatio` were ported
+  /// The physical constants `kNaturalFrequency ` and `kDampingRatio ` were ported
   /// directly from Android's `EdgeEffect.java` source. However, using these
   /// constants as-is resulted in an animation that was noticeably faster than
   /// the native Android behavior. The underlying reason for this discrepancy is
