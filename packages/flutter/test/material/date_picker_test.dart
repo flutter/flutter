@@ -1734,10 +1734,12 @@ void main() {
           matchesSemantics(
             label: '3, Sunday, January 3, 2016, Today',
             isButton: true,
+            hasEnabledState: true,
             hasTapAction: true,
             hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
+            isEnabled: true,
           ),
         );
 
@@ -1847,6 +1849,7 @@ void main() {
             isEnabled: true,
             hasEnabledState: true,
             isTextField: true,
+            isFocusable: true,
             isFocused: true,
             value: '01/15/2016',
             hasTapAction: true,
@@ -1907,7 +1910,7 @@ void main() {
 
       final SemanticsNode node = tester.semantics.find(find.byType(DatePickerDialog));
       final SemanticsData semanticsData = node.getSemanticsData();
-      expect(semanticsData.flagsCollection.isFocusable, false);
+      expect(semanticsData.flagsCollection.isFocused, Tristate.none);
     });
   });
 
@@ -2677,7 +2680,6 @@ void main() {
     testWidgets('Defaults to Gregorian calendar system', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: true),
           home: Material(
             child: DatePickerDialog(
               initialDate: initialDate,
@@ -2695,7 +2697,6 @@ void main() {
     testWidgets('Using custom calendar delegate implementation', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: true),
           home: Material(
             child: DatePickerDialog(
               initialDate: initialDate,
@@ -2719,7 +2720,6 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: true),
           home: Material(
             child: DatePickerDialog(
               initialDate: initialDate,
@@ -2751,6 +2751,19 @@ void main() {
       expect(find.text('March 2016'), findsOneWidget);
       expect(lastDayText.data, equals('28'));
     });
+  });
+
+  testWidgets('DatePickerDialog renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: DatePickerDialog(firstDate: firstDate, lastDate: lastDate),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(DatePickerDialog)).isEmpty, isTrue);
   });
 }
 

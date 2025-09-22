@@ -766,6 +766,7 @@ void main() {
                             id: 4,
                             flags: <SemanticsFlag>[
                               SemanticsFlag.isTextField,
+                              SemanticsFlag.isFocusable,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isEnabled,
                             ],
@@ -2005,6 +2006,7 @@ void main() {
               id: 1,
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.isFocused,
@@ -2120,10 +2122,15 @@ void main() {
       await tester.tap(find.byType(TextField));
       // Wait for context menu to be built.
       await tester.pumpAndSettle();
-      final RenderBox container = tester.renderObject(
-        find.descendant(of: find.byType(SnapshotWidget), matching: find.byType(SizedBox)).first,
+      expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
+      final SizedBox sizedBox = tester.widget(
+        find.descendant(
+          of: find.byType(AdaptiveTextSelectionToolbar),
+          matching: find.byType(SizedBox),
+        ),
       );
-      expect(container.size, Size.zero);
+      expect(sizedBox.width, 0.0);
+      expect(sizedBox.height, 0.0);
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.android,
@@ -5661,10 +5668,54 @@ void main() {
               currentValueLength: 9,
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
               ],
             ),
+            TestSemantics.rootChild(id: 3, textDirection: TextDirection.ltr, label: 'Suffix'),
+          ],
+        ),
+        ignoreTransform: true,
+        ignoreRect: true,
+      ),
+    );
+    semantics.dispose();
+  });
+
+  testWidgets('TextField prefix icon and suffix icon create a sibling node', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          controller: _textEditingController(text: 'some text'),
+          decoration: const InputDecoration(prefixIcon: Text('Prefix'), suffixIcon: Text('Suffix')),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics.rootChild(
+              id: 1,
+              textDirection: TextDirection.ltr,
+              value: 'some text',
+              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+              inputType: ui.SemanticsInputType.text,
+              currentValueLength: 9,
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
+                SemanticsFlag.hasEnabledState,
+                SemanticsFlag.isEnabled,
+              ],
+            ),
+            TestSemantics.rootChild(id: 2, textDirection: TextDirection.ltr, label: 'Prefix'),
             TestSemantics.rootChild(id: 3, textDirection: TextDirection.ltr, label: 'Suffix'),
           ],
         ),
@@ -6946,6 +6997,7 @@ void main() {
         currentValueLength: 0,
         flags: <SemanticsFlag>[
           SemanticsFlag.isTextField,
+          SemanticsFlag.isFocusable,
           SemanticsFlag.hasEnabledState,
           SemanticsFlag.isEnabled,
         ],
@@ -7195,29 +7247,29 @@ void main() {
     final Offset center = tester.getCenter(find.byType(EditableText).first);
     await gesture.moveTo(center);
     await tester.pump();
-    expect(statesController.value, <MaterialState>{MaterialState.hovered});
+    expect(statesController.value, <WidgetState>{WidgetState.hovered});
     expect(count, 1);
 
     await gesture.moveTo(Offset.zero);
     await tester.pump();
-    expect(statesController.value, <MaterialState>{});
+    expect(statesController.value, <WidgetState>{});
     expect(count, 2);
 
     await gesture.down(center);
     await tester.pump();
     await gesture.up();
     await tester.pump();
-    expect(statesController.value, <MaterialState>{MaterialState.hovered, MaterialState.focused});
+    expect(statesController.value, <WidgetState>{WidgetState.hovered, WidgetState.focused});
     expect(count, 4); // adds hovered and pressed - two changes.
 
     await gesture.moveTo(Offset.zero);
     await tester.pump();
-    expect(statesController.value, <MaterialState>{MaterialState.focused});
+    expect(statesController.value, <WidgetState>{WidgetState.focused});
     expect(count, 5);
 
     await gesture.down(Offset.zero);
     await tester.pump();
-    expect(statesController.value, <MaterialState>{});
+    expect(statesController.value, <WidgetState>{});
     expect(count, 6);
     await gesture.up();
     await tester.pump();
@@ -7226,7 +7278,7 @@ void main() {
     await tester.pump();
     await gesture.up();
     await tester.pump();
-    expect(statesController.value, <MaterialState>{MaterialState.hovered, MaterialState.focused});
+    expect(statesController.value, <WidgetState>{WidgetState.hovered, WidgetState.focused});
     expect(count, 8); // adds hovered and pressed - two changes.
 
     // If the text field is rebuilt disabled, then the focused state is
@@ -7245,12 +7297,12 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(statesController.value, <MaterialState>{MaterialState.hovered, MaterialState.disabled});
+    expect(statesController.value, <WidgetState>{WidgetState.hovered, WidgetState.disabled});
     expect(count, 10); // removes focused and adds disabled - two changes.
 
     await gesture.moveTo(Offset.zero);
     await tester.pump();
-    expect(statesController.value, <MaterialState>{MaterialState.disabled});
+    expect(statesController.value, <WidgetState>{WidgetState.disabled});
     expect(count, 11);
 
     // If the text field is rebuilt enabled and in an error state, then the error
@@ -7269,7 +7321,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(statesController.value, <MaterialState>{MaterialState.error});
+    expect(statesController.value, <WidgetState>{WidgetState.error});
     expect(count, 13); // removes disabled and adds error - two changes.
 
     // If the text field is rebuilt without an error, then the error
@@ -7284,7 +7336,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(statesController.value, <MaterialState>{});
+    expect(statesController.value, <WidgetState>{});
     expect(count, 14);
   });
 
@@ -7304,7 +7356,7 @@ void main() {
         ),
       ),
     );
-    expect(controller.value, <MaterialState>{MaterialState.disabled});
+    expect(controller.value, <WidgetState>{WidgetState.disabled});
     expect(count, 1);
   });
 
@@ -7323,8 +7375,8 @@ void main() {
             child: TextField(
               controller: controller,
               enabled: enabled,
-              style: MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-                if (states.contains(MaterialState.disabled)) {
+              style: MaterialStateTextStyle.resolveWith((Set<WidgetState> states) {
+                if (states.contains(WidgetState.disabled)) {
                   return const TextStyle(color: Colors.red);
                 }
                 return const TextStyle(color: Colors.blue);
@@ -7362,6 +7414,7 @@ void main() {
         currentValueLength: 0,
         flags: <SemanticsFlag>[
           SemanticsFlag.isTextField,
+          SemanticsFlag.isFocusable,
           SemanticsFlag.hasEnabledState,
           SemanticsFlag.isEnabled,
         ],
@@ -7386,6 +7439,7 @@ void main() {
         inputType: ui.SemanticsInputType.text,
         flags: <SemanticsFlag>[
           SemanticsFlag.isTextField,
+          SemanticsFlag.isFocusable,
           SemanticsFlag.hasEnabledState,
           SemanticsFlag.isEnabled,
           SemanticsFlag.isFocused,
@@ -7416,6 +7470,7 @@ void main() {
         currentValueLength: 0,
         flags: <SemanticsFlag>[
           SemanticsFlag.isTextField,
+          SemanticsFlag.isFocusable,
           SemanticsFlag.hasEnabledState,
           SemanticsFlag.isEnabled,
           SemanticsFlag.isReadOnly,
@@ -8395,6 +8450,7 @@ void main() {
               actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
               ],
@@ -8423,6 +8479,7 @@ void main() {
               actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
               ],
@@ -8460,6 +8517,7 @@ void main() {
               ],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.isFocused,
@@ -8500,6 +8558,7 @@ void main() {
               ],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.isFocused,
@@ -8539,6 +8598,7 @@ void main() {
               ],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.isFocused,
@@ -8570,6 +8630,7 @@ void main() {
         textDirection: TextDirection.ltr,
         flags: <SemanticsFlag>[
           SemanticsFlag.isTextField,
+          SemanticsFlag.isFocusable,
           SemanticsFlag.hasEnabledState,
           SemanticsFlag.isEnabled,
         ],
@@ -8589,6 +8650,7 @@ void main() {
         inputType: ui.SemanticsInputType.text,
         flags: <SemanticsFlag>[
           SemanticsFlag.isTextField,
+          SemanticsFlag.isFocusable,
           SemanticsFlag.hasEnabledState,
           SemanticsFlag.isEnabled,
           SemanticsFlag.isObscured,
@@ -8606,6 +8668,7 @@ void main() {
         textDirection: TextDirection.ltr,
         flags: <SemanticsFlag>[
           SemanticsFlag.isTextField,
+          SemanticsFlag.isFocusable,
           SemanticsFlag.hasEnabledState,
           SemanticsFlag.isEnabled,
         ],
@@ -8655,6 +8718,7 @@ void main() {
               ],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.isFocused,
@@ -8695,6 +8759,7 @@ void main() {
               actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
               ],
@@ -8733,6 +8798,7 @@ void main() {
               ],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.isFocused,
@@ -8775,6 +8841,7 @@ void main() {
               ],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.isFocused,
@@ -8835,6 +8902,7 @@ void main() {
               ],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.isFocused,
@@ -8895,6 +8963,7 @@ void main() {
               ],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.isFocused,
@@ -8939,6 +9008,7 @@ void main() {
               id: inputFieldId,
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
               ],
@@ -8967,6 +9037,7 @@ void main() {
               id: inputFieldId,
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.isFocused,
@@ -9027,6 +9098,7 @@ void main() {
               id: inputFieldId,
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
               ],
@@ -9055,6 +9127,7 @@ void main() {
               id: inputFieldId,
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.isFocused,
@@ -9220,6 +9293,7 @@ void main() {
               actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
               ],
@@ -9264,6 +9338,7 @@ void main() {
               ],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.isFocused,
@@ -9326,6 +9401,7 @@ void main() {
               actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
               ],
@@ -9381,6 +9457,7 @@ void main() {
                 actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                 flags: <SemanticsFlag>[
                   SemanticsFlag.isTextField,
+                  SemanticsFlag.isFocusable,
                   SemanticsFlag.hasEnabledState,
                   SemanticsFlag.isEnabled,
                 ],
@@ -17603,6 +17680,62 @@ void main() {
     );
 
     testWidgets(
+      'TextField cursor appears only when focused',
+      (WidgetTester tester) async {
+        final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+        addTearDown(focusNode.dispose);
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Material(
+              child: Center(
+                child: TextField(
+                  focusNode: focusNode,
+                  dragStartBehavior: DragStartBehavior.down,
+                  magnifierConfiguration: TextMagnifierConfiguration(
+                    magnifierBuilder:
+                        (
+                          BuildContext context,
+                          MagnifierController controller,
+                          ValueNotifier<MagnifierInfo> localMagnifierInfo,
+                        ) {
+                          magnifierInfo = localMagnifierInfo;
+                          return fakeMagnifier;
+                        },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        final Offset fieldCenter = tester.getCenter(find.byType(EditableText));
+        final TestGesture gesture = await tester.startGesture(fieldCenter);
+        await gesture.moveBy(const Offset(30, 0));
+        await tester.pumpAndSettle();
+
+        // The blinking cursor should NOT be shown.
+        final EditableTextState editableTextState = tester.state<EditableTextState>(
+          find.byType(EditableText),
+        );
+        expect(focusNode.hasFocus, isFalse);
+        expect(editableTextState.cursorCurrentlyVisible, isFalse);
+
+        // Simulate long press again.
+        await tester.pump();
+        await tester.longPress(find.byType(EditableText));
+        await tester.pumpAndSettle();
+
+        // The blinking cursor should now be shown.
+        expect(focusNode.hasFocus, isTrue);
+        expect(editableTextState.cursorCurrentlyVisible, isTrue);
+      },
+      variant: const TargetPlatformVariant(<TargetPlatform>{
+        TargetPlatform.iOS,
+        TargetPlatform.android,
+      }),
+    );
+
+    testWidgets(
       'magnifier does not show when tapping outside field',
       (WidgetTester tester) async {
         // Regression test for https://github.com/flutter/flutter/issues/128321
@@ -18463,6 +18596,7 @@ void main() {
                           currentValueLength: 0,
                           flags: <SemanticsFlag>[
                             SemanticsFlag.isTextField,
+                            SemanticsFlag.isFocusable,
                             SemanticsFlag.hasEnabledState,
                             SemanticsFlag.isEnabled,
                           ],
@@ -18535,6 +18669,7 @@ void main() {
                             currentValueLength: 0,
                             flags: <SemanticsFlag>[
                               SemanticsFlag.isTextField,
+                              SemanticsFlag.isFocusable,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isReadOnly,
                             ],
@@ -18640,6 +18775,90 @@ void main() {
     final EditableText editableText = tester.widget(find.byType(EditableText));
     expect(editableText.hintLocales, hintLocales);
   });
+
+  testWidgets(
+    'readOnly disallows SystemContextMenu',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/170521.
+      tester.platformDispatcher.supportsShowingSystemContextMenu = true;
+      final TextEditingController controller = TextEditingController(text: 'abcdefghijklmnopqr');
+      addTearDown(() {
+        tester.platformDispatcher.resetSupportsShowingSystemContextMenu();
+        tester.view.reset();
+        controller.dispose();
+      });
+
+      bool readOnly = true;
+      late StateSetter setState;
+
+      await tester.pumpWidget(
+        // Don't wrap with the global View so that the change to
+        // platformDispatcher is read.
+        wrapWithView: false,
+        View(
+          view: tester.view,
+          child: MaterialApp(
+            home: Material(
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setter) {
+                  setState = setter;
+                  return TextField(readOnly: readOnly, controller: controller);
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Duration waitDuration = SelectionOverlay.fadeDuration > kDoubleTapTimeout
+          ? SelectionOverlay.fadeDuration
+          : kDoubleTapTimeout;
+
+      // Double tap to select the text.
+      await tester.tapAt(textOffsetToPosition(tester, 5));
+      await tester.pump(kDoubleTapTimeout ~/ 2);
+      await tester.tapAt(textOffsetToPosition(tester, 5));
+      await tester.pump(waitDuration);
+
+      // No error as in https://github.com/flutter/flutter/issues/170521.
+
+      // The Flutter-drawn context menu is shown. The SystemContextMenu is not
+      // shown because readOnly is true.
+      expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
+      expect(find.byType(SystemContextMenu), findsNothing);
+
+      // Turn off readOnly and hide the context menu.
+      setState(() {
+        readOnly = false;
+      });
+      await tester.tap(find.text('Copy'));
+      await tester.pump(waitDuration);
+
+      expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+      expect(find.byType(SystemContextMenu), findsNothing);
+
+      // Double tap to show the context menu again.
+      await tester.tapAt(textOffsetToPosition(tester, 5));
+      await tester.pump(kDoubleTapTimeout ~/ 2);
+      await tester.tapAt(textOffsetToPosition(tester, 5));
+      await tester.pump(waitDuration);
+
+      // Now iOS is showing the SystemContextMenu while others continue to show
+      // the Flutter-drawn context menu.
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+          expect(find.byType(SystemContextMenu), findsOneWidget);
+        case TargetPlatform.macOS:
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
+      }
+    },
+    variant: TargetPlatformVariant.all(),
+    skip: kIsWeb, // [intended] on web the browser handles the context menu.
+  );
 }
 
 /// A Simple widget for testing the obscure text.

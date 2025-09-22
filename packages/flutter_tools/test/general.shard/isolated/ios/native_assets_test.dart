@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:hooks/hooks.dart';
 
@@ -46,7 +47,7 @@ void main() {
     projectUri = environment.projectDir.uri;
   });
 
-  for (final BuildMode buildMode in <BuildMode>[BuildMode.debug, BuildMode.release]) {
+  for (final buildMode in <BuildMode>[BuildMode.debug, BuildMode.release]) {
     testUsingContext(
       'build with assets $buildMode',
       overrides: <Type, Generator>{
@@ -166,7 +167,7 @@ void main() {
             file: Uri.file('${codeConfig.targetArchitecture}/libbuz.dylib'),
           ),
         ];
-        final FakeFlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
+        final buildRunner = FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
           onBuild: (BuildInput input) => FakeFlutterNativeAssetsBuilderResult.fromAssets(
             codeAssets: buildMode == BuildMode.debug
@@ -179,12 +180,12 @@ void main() {
                   codeAssets: codeAssets(input.config.code.targetOS, input.config.code),
                 ),
         );
-        final Map<String, String> environmentDefines = <String, String>{
+        final environmentDefines = <String, String>{
           kBuildMode: buildMode.cliName,
           kSdkRoot: '.../iPhone Simulator',
           kIosArchs: 'arm64 x86_64',
         };
-        final DartBuildResult dartBuildResult = await runFlutterSpecificDartBuild(
+        final DartHooksResult dartHookResult = await runFlutterSpecificHooks(
           environmentDefines: environmentDefines,
           targetPlatform: TargetPlatform.ios,
           projectUri: projectUri,
@@ -192,7 +193,7 @@ void main() {
           buildRunner: buildRunner,
         );
         await installCodeAssets(
-          dartBuildResult: dartBuildResult,
+          dartHookResult: dartHookResult,
           environmentDefines: environmentDefines,
           targetPlatform: TargetPlatform.ios,
           projectUri: projectUri,
@@ -202,8 +203,8 @@ void main() {
         expect(
           (globals.logger as BufferLogger).traceText,
           stringContainsInOrder(<String>[
-            'Building native assets for ios [arm64, x64].',
-            'Building native assets for ios [arm64, x64] done.',
+            'Building native assets for ios_arm64, ios_x64.',
+            'Building native assets for ios_arm64, ios_x64 done.',
           ]),
         );
         expect(environment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename), exists);

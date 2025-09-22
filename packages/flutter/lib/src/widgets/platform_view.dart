@@ -11,7 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
-import '_html_element_view_io.dart' if (dart.library.js_util) '_html_element_view_web.dart';
+import '_html_element_view_io.dart' if (dart.library.js_interop) '_html_element_view_web.dart';
 import 'basic.dart';
 import 'debug.dart';
 import 'focus_manager.dart';

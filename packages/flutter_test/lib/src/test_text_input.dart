@@ -126,6 +126,7 @@ class TestTextInput {
     setClientArgs = null;
     editingState = null;
     _isVisible = false;
+    _keyHandler = null;
   }
 
   Future<dynamic> _handleTextInputCall(MethodCall methodCall) async {

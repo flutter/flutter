@@ -7,6 +7,7 @@ library;
 
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
+import 'base/logger.dart';
 import 'base/template.dart';
 import 'base/utils.dart';
 import 'base/version.dart';
@@ -31,7 +32,7 @@ import 'template.dart';
 ///
 /// This defines interfaces common to iOS and macOS projects.
 abstract class XcodeBasedProject extends FlutterProjectPlatform {
-  static const String _defaultHostAppName = 'Runner';
+  static const _defaultHostAppName = 'Runner';
 
   /// The Xcode workspace (.xcworkspace directory) of the host app.
   Directory? get xcodeWorkspace {
@@ -54,7 +55,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
 
   Directory? _xcodeDirectoryWithExtension(String extension) {
     final List<FileSystemEntity> contents = hostAppRoot.listSync();
-    for (final FileSystemEntity entity in contents) {
+    for (final entity in contents) {
       if (globals.fs.path.extension(entity.path) == extension &&
           !globals.fs.path.basename(entity.path).startsWith('.')) {
         return hostAppRoot.childDirectory(entity.basename);
@@ -205,6 +206,22 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
 
   XcodeProjectInfo? _projectInfo;
 
+  /// Get the scheme using the Xcode's project [XcodeProjectInfo.schemes] and
+  /// the [BuildInfo.flavor].
+  Future<String?> schemeForBuildInfo(BuildInfo buildInfo, {Logger? logger}) async {
+    final XcodeProjectInfo? info = await projectInfo();
+    if (info == null) {
+      logger?.printError('Xcode project info not found.');
+      return null;
+    }
+
+    final String? scheme = info.schemeFor(buildInfo);
+    if (scheme == null) {
+      info.reportFlavorNotFoundAndExit();
+    }
+    return scheme;
+  }
+
   /// The build settings for the host app of this project, as a detached map.
   ///
   /// Returns null, if Xcode tooling is unavailable.
@@ -270,8 +287,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
     return _buildSettingsByBuildContext[buildContext];
   }
 
-  final Map<XcodeProjectBuildContext, Map<String, String>> _buildSettingsByBuildContext =
-      <XcodeProjectBuildContext, Map<String, String>>{};
+  final _buildSettingsByBuildContext = <XcodeProjectBuildContext, Map<String, String>>{};
 
   Future<Map<String, String>?> _xcodeProjectBuildSettings(
     XcodeProjectBuildContext buildContext,
@@ -343,22 +359,22 @@ class IosProject extends XcodeBasedProject {
   String get pluginConfigKey => IOSPlugin.kConfigKey;
 
   // build setting keys
-  static const String kProductBundleIdKey = 'PRODUCT_BUNDLE_IDENTIFIER';
-  static const String kTeamIdKey = 'DEVELOPMENT_TEAM';
-  static const String kEntitlementFilePathKey = 'CODE_SIGN_ENTITLEMENTS';
-  static const String kProductNameKey = 'PRODUCT_NAME';
+  static const kProductBundleIdKey = 'PRODUCT_BUNDLE_IDENTIFIER';
+  static const kTeamIdKey = 'DEVELOPMENT_TEAM';
+  static const kEntitlementFilePathKey = 'CODE_SIGN_ENTITLEMENTS';
+  static const kProductNameKey = 'PRODUCT_NAME';
 
-  static final RegExp _productBundleIdPattern = RegExp(
+  static final _productBundleIdPattern = RegExp(
     '^\\s*$kProductBundleIdKey\\s*=\\s*(["\']?)(.*?)\\1;\\s*\$',
   );
-  static const String _kProductBundleIdVariable = '\$($kProductBundleIdKey)';
+  static const _kProductBundleIdVariable = '\$($kProductBundleIdKey)';
 
   // The string starts with `applinks:` and ignores the query param which starts with `?`.
-  static final RegExp _associatedDomainPattern = RegExp(r'^applinks:([^?]+)');
+  static final _associatedDomainPattern = RegExp(r'^applinks:([^?]+)');
 
-  static const String _lldbPythonHelperTemplateName = 'flutter_lldb_helper.py';
+  static const _lldbPythonHelperTemplateName = 'flutter_lldb_helper.py';
 
-  static const String _lldbInitTemplate =
+  static const _lldbInitTemplate =
       '''
 #
 # Generated file, do not edit.
@@ -367,7 +383,7 @@ class IosProject extends XcodeBasedProject {
 command script import --relative-to-command-file $_lldbPythonHelperTemplateName
 ''';
 
-  static const String _lldbPythonHelperTemplate = r'''
+  static const _lldbPythonHelperTemplate = r'''
 #
 # Generated file, do not edit.
 #
@@ -494,10 +510,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
     required String configuration,
     required String target,
   }) async {
-    final XcodeProjectBuildContext context = XcodeProjectBuildContext(
-      configuration: configuration,
-      target: target,
-    );
+    final context = XcodeProjectBuildContext(configuration: configuration, target: target);
     final File file = await parent.buildDirectory
         .childDirectory('deeplink_data')
         .childFile('universal-link-settings-$configuration-$target.json')
@@ -547,8 +560,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
     );
   }
 
-  final Map<XcodeProjectBuildContext?, String?> _productBundleIdentifiers =
-      <XcodeProjectBuildContext?, String?>{};
+  final _productBundleIdentifiers = <XcodeProjectBuildContext?, String?>{};
 
   Future<String?> _parseProductBundleIdentifier(XcodeProjectBuildContext? buildContext) async {
     String? fromPlist;

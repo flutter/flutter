@@ -108,10 +108,7 @@ const std::shared_ptr<RenderPass>& InlinePassContext::GetRenderPass() {
   bool is_msaa = color0.resolve_texture != nullptr;
 
   if (pass_count_ > 0) {
-    // When MSAA is being used, we end up overriding the entire backdrop by
-    // drawing the previous pass texture, and so we don't have to clear it and
-    // can use kDontCare.
-    color0.load_action = is_msaa ? LoadAction::kDontCare : LoadAction::kLoad;
+    color0.load_action = is_msaa ? LoadAction::kClear : LoadAction::kLoad;
   } else {
     color0.load_action = LoadAction::kClear;
   }

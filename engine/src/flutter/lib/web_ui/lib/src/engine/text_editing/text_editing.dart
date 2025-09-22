@@ -1027,6 +1027,7 @@ class InputConfiguration {
     this.autofill,
     this.autofillGroup,
     this.enableDeltaModel = false,
+    this.enableInteractiveSelection = true,
   });
 
   InputConfiguration.fromFrameworkMessage(Map<String, dynamic> flutterInputConfiguration)
@@ -1052,7 +1053,9 @@ class InputConfiguration {
         flutterInputConfiguration.tryJson('autofill'),
         flutterInputConfiguration.tryList('fields'),
       ),
-      enableDeltaModel = flutterInputConfiguration.tryBool('enableDeltaModel') ?? false;
+      enableDeltaModel = flutterInputConfiguration.tryBool('enableDeltaModel') ?? false,
+      enableInteractiveSelection =
+          flutterInputConfiguration.tryBool('enableInteractiveSelection') ?? true;
 
   /// The ID of the view that contains the text field.
   final int viewId;
@@ -1087,6 +1090,13 @@ class InputConfiguration {
   final EngineAutofillForm? autofillGroup;
 
   final TextCapitalizationConfig textCapitalization;
+
+  /// Whether the user can change the text selection.
+  ///
+  /// When this is false, the text selection cannot be adjusted by
+  /// the user, text cannot be copied, and the user cannot paste into
+  /// the text field from the clipboard.
+  final bool enableInteractiveSelection;
 }
 
 typedef OnChangeCallback =
@@ -1401,6 +1411,14 @@ abstract class DefaultTextEditingStrategy
       );
     }
 
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'copy', createDomEventListener(handleClipboardEvent)),
+    );
+
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'paste', createDomEventListener(handleClipboardEvent)),
+    );
+
     addCompositionEventHandlers(activeDomElement);
 
     preventDefaultForMouseEvents();
@@ -1482,6 +1500,7 @@ abstract class DefaultTextEditingStrategy
     assert(isEnabled);
 
     EditingState newEditingState = EditingState.fromDomElement(activeDomElement);
+    newEditingState = suppressInteractiveSelectionIfNeeded(newEditingState);
     newEditingState = determineCompositionState(newEditingState);
 
     TextEditingDeltaState? newTextEditingDeltaState;
@@ -1502,6 +1521,24 @@ abstract class DefaultTextEditingStrategy
     }
     // Flush delta state.
     _editingDeltaState = null;
+  }
+
+  EditingState suppressInteractiveSelectionIfNeeded(EditingState editingState) {
+    if (inputConfiguration.enableInteractiveSelection) {
+      return editingState;
+    }
+
+    if (editingState.baseOffset == editingState.extentOffset) {
+      return editingState;
+    }
+
+    // If interactive selection is disabled, collapse the selection to the end.
+    final newEditingState = editingState.copyWith(
+      baseOffset: editingState.extentOffset,
+      extentOffset: editingState.extentOffset,
+    );
+    newEditingState.applyToDomElement(activeDomElement);
+    return newEditingState;
   }
 
   void handleBeforeInput(DomEvent event) {
@@ -1568,6 +1605,13 @@ abstract class DefaultTextEditingStrategy
       // UX. We should reevaluate what it is we're trying to do here. Perhaps
       // there's a better way.
       moveFocusToActiveDomElement();
+    }
+  }
+
+  void handleClipboardEvent(DomEvent event) {
+    // Prevent clipboard copy/paste if interactive selection is disabled.
+    if (!inputConfiguration.enableInteractiveSelection) {
+      event.preventDefault();
     }
   }
 
@@ -1754,6 +1798,14 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
       DomSubscription(activeDomElement, 'blur', createDomEventListener(handleBlur)),
     );
 
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'copy', createDomEventListener(handleClipboardEvent)),
+    );
+
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'paste', createDomEventListener(handleClipboardEvent)),
+    );
+
     addCompositionEventHandlers(activeDomElement);
 
     // Position the DOM element after it is focused.
@@ -1892,6 +1944,14 @@ class AndroidTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
       DomSubscription(activeDomElement, 'blur', createDomEventListener(handleBlur)),
     );
 
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'copy', createDomEventListener(handleClipboardEvent)),
+    );
+
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'paste', createDomEventListener(handleClipboardEvent)),
+    );
+
     addCompositionEventHandlers(activeDomElement);
 
     preventDefaultForMouseEvents();
@@ -1976,6 +2036,14 @@ class FirefoxTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
 
     subscriptions.add(
       DomSubscription(activeDomElement, 'blur', createDomEventListener(handleBlur)),
+    );
+
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'copy', createDomEventListener(handleClipboardEvent)),
+    );
+
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'paste', createDomEventListener(handleClipboardEvent)),
     );
 
     preventDefaultForMouseEvents();

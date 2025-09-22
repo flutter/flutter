@@ -15,9 +15,9 @@ import '../globals.dart' as globals;
 import '../vmservice.dart';
 import 'test_device.dart';
 
-const String kIntegrationTestExtension = 'Flutter.IntegrationTest';
-const String kIntegrationTestData = 'data';
-const String kIntegrationTestMethod = 'ext.flutter.integrationTest';
+const kIntegrationTestExtension = 'Flutter.IntegrationTest';
+const kIntegrationTestData = 'data';
+const kIntegrationTestMethod = 'ext.flutter.integrationTest';
 
 class IntegrationTestTestDevice implements TestDevice {
   IntegrationTestTestDevice({
@@ -33,11 +33,11 @@ class IntegrationTestTestDevice implements TestDevice {
   final DebuggingOptions debuggingOptions;
   final String? userIdentifier;
   final CompileExpression? compileExpression;
-  late final DartDevelopmentService _ddsLauncher = DartDevelopmentService(logger: globals.logger);
+  late final _ddsLauncher = DartDevelopmentService(logger: globals.logger);
 
   ApplicationPackage? _applicationPackage;
-  final Completer<void> _finished = Completer<void>();
-  final Completer<Uri> _gotProcessVmServiceUri = Completer<Uri>();
+  final _finished = Completer<void>();
+  final _gotProcessVmServiceUri = Completer<Uri>();
 
   /// Starts the device.
   ///
@@ -112,7 +112,7 @@ class IntegrationTestTestDevice implements TestDevice {
         .where((vm_service.Event e) => e.extensionKind == kIntegrationTestExtension)
         .map((vm_service.Event e) => e.extensionData!.data[kIntegrationTestData] as String);
 
-    final StreamChannelController<String> controller = StreamChannelController<String>();
+    final controller = StreamChannelController<String>();
 
     controller.local.stream.listen((String event) {
       vmService.service.callServiceExtension(

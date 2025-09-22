@@ -37,7 +37,7 @@ String kebabCase(String str) {
   return _reCase(str, '-');
 }
 
-final RegExp _upperRegex = RegExp(r'[A-Z]');
+final _upperRegex = RegExp(r'[A-Z]');
 
 /// Convert `fooBar` to `foo_bar`.
 String snakeCase(String str) {
@@ -87,16 +87,24 @@ String toPrettyJson(Object jsonable) {
   return '$value\n';
 }
 
-final NumberFormat kSecondsFormat = NumberFormat('0.0');
-final NumberFormat kMillisecondsFormat = NumberFormat.decimalPattern();
+final _singleDigitPrecision = NumberFormat('0.0');
+final _decimalPattern = NumberFormat.decimalPattern();
+
+String getElapsedAsMinutesOrSeconds(Duration duration) {
+  if (duration.inMinutes < 1) {
+    return getElapsedAsSeconds(duration);
+  }
+  final double minutes = duration.inSeconds / Duration.secondsPerMinute;
+  return '${_singleDigitPrecision.format(minutes)}m';
+}
 
 String getElapsedAsSeconds(Duration duration) {
   final double seconds = duration.inMilliseconds / Duration.millisecondsPerSecond;
-  return '${kSecondsFormat.format(seconds)}s';
+  return '${_singleDigitPrecision.format(seconds)}s';
 }
 
 String getElapsedAsMilliseconds(Duration duration) {
-  return '${kMillisecondsFormat.format(duration.inMilliseconds)}ms';
+  return '${_decimalPattern.format(duration.inMilliseconds)}ms';
 }
 
 /// Return a platform-appropriate [String] representing the size of the given number of bytes.
@@ -120,8 +128,8 @@ class ItemListNotifier<T> {
 
   Set<T> _items;
 
-  final StreamController<T> _addedController = StreamController<T>.broadcast();
-  final StreamController<T> _removedController = StreamController<T>.broadcast();
+  final _addedController = StreamController<T>.broadcast();
+  final _removedController = StreamController<T>.broadcast();
 
   Stream<T> get onAdded => _addedController.stream;
   Stream<T> get onRemoved => _removedController.stream;
@@ -134,7 +142,7 @@ class ItemListNotifier<T> {
   bool get isPopulated => _isPopulated;
 
   void updateWithNewList(List<T> updatedList) {
-    final Set<T> updatedSet = Set<T>.of(updatedList);
+    final updatedSet = Set<T>.of(updatedList);
 
     final Set<T> addedItems = updatedSet.difference(_items);
     final Set<T> removedItems = _items.difference(updatedSet);
@@ -177,7 +185,7 @@ class SettingsFile {
 
   SettingsFile.parseFromFile(File file) : this.parse(file.readAsStringSync());
 
-  final Map<String, String> values = <String, String>{};
+  final values = <String, String>{};
 
   void writeContents(File file) {
     file.parent.createSync(recursive: true);
@@ -194,13 +202,13 @@ class SettingsFile {
 /// Given a data structure which is a Map of String to dynamic values, return
 /// the same structure (`Map<String, dynamic>`) with the correct runtime types.
 Map<String, Object?>? castStringKeyedMap(Object? untyped) {
-  final Map<dynamic, dynamic>? map = untyped as Map<dynamic, dynamic>?;
+  final map = untyped as Map<dynamic, dynamic>?;
   return map?.cast<String, Object?>();
 }
 
 /// Smallest column that will be used for text wrapping. If the requested column
 /// width is smaller than this, then this is what will be used.
-const int kMinColumnWidth = 10;
+const kMinColumnWidth = 10;
 
 /// Wraps a block of text into lines no longer than [columnWidth].
 ///
@@ -250,8 +258,8 @@ String wrapText(
   indent ??= 0;
   hangingIndent ??= 0;
   final List<String> splitText = text.split('\n');
-  final List<String> result = <String>[];
-  for (final String line in splitText) {
+  final result = <String>[];
+  for (final line in splitText) {
     String trimmedText = line.trimLeft();
     final String leadingWhitespace = line.substring(0, line.length - trimmedText.length);
     List<String> notIndented;
@@ -290,14 +298,14 @@ String wrapText(
         if (line.isEmpty) {
           return '';
         }
-        String truncatedIndent = '$indentString${hangingIndentString ?? ''}$leadingWhitespace';
+        var truncatedIndent = '$indentString${hangingIndentString ?? ''}$leadingWhitespace';
         if (truncatedIndent.length > columnWidth - kMinColumnWidth) {
           truncatedIndent = truncatedIndent.substring(
             0,
             math.max(columnWidth - kMinColumnWidth, 0),
           );
         }
-        final String result = '$truncatedIndent$line';
+        final result = '$truncatedIndent$line';
         hangingIndentString ??= ' ' * hangingIndent!;
         return result;
       }),
@@ -349,9 +357,9 @@ List<String> _wrapTextAsLines(
   // reconstitute the original string. This is useful for manipulating "visible"
   // characters in the presence of ANSI control codes.
   List<_AnsiRun> splitWithCodes(String input) {
-    final RegExp characterOrCode = RegExp('(\u001b\\[[0-9;]*m|.)', multiLine: true);
-    List<_AnsiRun> result = <_AnsiRun>[];
-    final StringBuffer current = StringBuffer();
+    final characterOrCode = RegExp('(\u001b\\[[0-9;]*m|.)', multiLine: true);
+    var result = <_AnsiRun>[];
+    final current = StringBuffer();
     for (final Match match in characterOrCode.allMatches(input)) {
       current.write(match[0]);
       if (match[0]!.length < 4) {
@@ -378,7 +386,7 @@ List<String> _wrapTextAsLines(
     return list.sublist(start, end).map<String>((_AnsiRun run) => run.original).join().trim();
   }
 
-  final List<String> result = <String>[];
+  final result = <String>[];
   final int effectiveLength = math.max(columnWidth - start, kMinColumnWidth);
   for (final String line in text.split('\n')) {
     // If the line is short enough, even with ANSI codes, then we can just add
@@ -393,10 +401,10 @@ List<String> _wrapTextAsLines(
       continue;
     }
 
-    int currentLineStart = 0;
+    var currentLineStart = 0;
     int? lastWhitespace;
     // Find the start of the current line.
-    for (int index = 0; index < splitLine.length; ++index) {
+    for (var index = 0; index < splitLine.length; ++index) {
       if (splitLine[index].character.isNotEmpty && _isWhitespace(splitLine[index])) {
         lastWhitespace = index;
       }
@@ -444,7 +452,7 @@ bool _isWhitespace(_AnsiRun run) {
       rune == 0xFEFF;
 }
 
-final RegExp _interpolationRegex = RegExp(r'\$\{([^}]*)\}');
+final _interpolationRegex = RegExp(r'\$\{([^}]*)\}');
 
 /// Given a string that possibly contains string interpolation sequences
 /// (so for example, something like `ping -n 1 ${host}`), replace all those
@@ -542,7 +550,7 @@ bool listEquals<T>(List<T> a, List<T> b) {
   if (a.length != b.length) {
     return false;
   }
-  for (int index = 0; index < a.length; index++) {
+  for (var index = 0; index < a.length; index++) {
     if (a[index] != b[index]) {
       return false;
     }
@@ -563,5 +571,12 @@ extension DurationAgo on Duration {
       return '$inHours hours ago';
     }
     return '$inMinutes minutes ago';
+  }
+}
+
+extension UriExtension on Uri {
+  /// Returns this [Uri] with its query parameters removed.
+  Uri withoutQueryParameters() {
+    return Uri(scheme: scheme, userInfo: userInfo, host: host, port: port, path: this.path);
   }
 }

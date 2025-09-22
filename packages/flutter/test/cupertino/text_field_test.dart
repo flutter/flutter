@@ -574,6 +574,7 @@ void main() {
                             inputType: ui.SemanticsInputType.text,
                             flags: <SemanticsFlag>[
                               SemanticsFlag.isTextField,
+                              SemanticsFlag.isFocusable,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isEnabled,
                             ],
@@ -7775,6 +7776,7 @@ void main() {
       ),
       matchesSemantics(
         isTextField: true,
+        isFocusable: true,
         isEnabled: true,
         hasEnabledState: true,
         hasTapAction: true,
@@ -7801,7 +7803,12 @@ void main() {
             .descendant(of: find.byType(CupertinoTextField), matching: find.byType(Semantics))
             .first,
       ),
-      matchesSemantics(hasEnabledState: true, isTextField: true, isReadOnly: true),
+      matchesSemantics(
+        hasEnabledState: true,
+        isTextField: true,
+        isFocusable: true,
+        isReadOnly: true,
+      ),
     );
   });
 
@@ -9968,6 +9975,48 @@ void main() {
         TargetPlatform.iOS,
       }),
     );
+    testWidgets(
+      'TextField cursor appears only when focused',
+      (WidgetTester tester) async {
+        final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+        addTearDown(focusNode.dispose);
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: Center(
+              child: CupertinoTextField(
+                focusNode: focusNode,
+                dragStartBehavior: DragStartBehavior.down,
+              ),
+            ),
+          ),
+        );
+
+        final Offset fieldCenter = tester.getCenter(find.byType(EditableText));
+        final TestGesture gesture = await tester.startGesture(fieldCenter);
+        await gesture.moveBy(const Offset(30, 0));
+        await tester.pumpAndSettle();
+
+        // The blinking cursor should NOT be shown.
+        final EditableTextState editableTextState = tester.state<EditableTextState>(
+          find.byType(EditableText),
+        );
+        expect(focusNode.hasFocus, isFalse);
+        expect(editableTextState.cursorCurrentlyVisible, isFalse);
+
+        // Simulate long press again.
+        await tester.pump();
+        await tester.longPress(find.byType(EditableText));
+        await tester.pumpAndSettle();
+
+        // The blinking cursor should now be shown.
+        expect(focusNode.hasFocus, isTrue);
+        expect(editableTextState.cursorCurrentlyVisible, isTrue);
+      },
+      variant: const TargetPlatformVariant(<TargetPlatform>{
+        TargetPlatform.iOS,
+        TargetPlatform.android,
+      }),
+    );
   });
 
   group('TapRegion integration', () {
@@ -10462,6 +10511,49 @@ void main() {
     await performBaselineAlignmentCheck(20.0, 40.0);
   });
 
+  testWidgets('Editable text in text field with placeholder is hit-testable', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(child: CupertinoTextField(placeholder: 'placeholder')),
+      ),
+    );
+
+    expect(find.byType(CupertinoTextField), findsOneWidget);
+    expect(find.byType(EditableText).hitTestable(), findsOne);
+  });
+
+  testWidgets('Text field with placeholder has correct intrinsic height', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: IntrinsicHeight(child: CupertinoTextField(placeholder: 'placeholder')),
+        ),
+      ),
+    );
+
+    expect(find.byType(CupertinoTextField), findsOneWidget);
+    expect(tester.getSize(find.byType(CupertinoTextField)).height, greaterThan(0.0));
+  });
+
+  testWidgets('Text field with placeholder has correct intrinsic width', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: IntrinsicWidth(child: CupertinoTextField(placeholder: 'placeholder')),
+        ),
+      ),
+    );
+
+    expect(find.byType(CupertinoTextField), findsOneWidget);
+    expect(tester.getSize(find.byType(CupertinoTextField)).width, greaterThan(0.0));
+  });
+
   testWidgets('Start the floating cursor on long tap', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
     final TextEditingController controller = TextEditingController(text: 'abcd');
@@ -10525,6 +10617,7 @@ void main() {
                           inputType: ui.SemanticsInputType.text,
                           flags: <SemanticsFlag>[
                             SemanticsFlag.isTextField,
+                            SemanticsFlag.isFocusable,
                             SemanticsFlag.hasEnabledState,
                             SemanticsFlag.isEnabled,
                           ],
@@ -10592,6 +10685,7 @@ void main() {
                             inputType: ui.SemanticsInputType.text,
                             flags: <SemanticsFlag>[
                               SemanticsFlag.isTextField,
+                              SemanticsFlag.isFocusable,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isReadOnly,
                             ],
@@ -10673,5 +10767,87 @@ void main() {
       semantics.dispose();
     },
     variant: TargetPlatformVariant.all(),
+  );
+
+  testWidgets(
+    'readOnly disallows SystemContextMenu',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/170521.
+      tester.platformDispatcher.supportsShowingSystemContextMenu = true;
+      final TextEditingController controller = TextEditingController(text: 'abcdefghijklmnopqr');
+      addTearDown(() {
+        tester.platformDispatcher.resetSupportsShowingSystemContextMenu();
+        tester.view.reset();
+        controller.dispose();
+      });
+
+      bool readOnly = true;
+      late StateSetter setState;
+
+      await tester.pumpWidget(
+        // Don't wrap with the global View so that the change to
+        // platformDispatcher is read.
+        wrapWithView: false,
+        View(
+          view: tester.view,
+          child: CupertinoApp(
+            home: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setter) {
+                setState = setter;
+                return CupertinoTextField(readOnly: readOnly, controller: controller);
+              },
+            ),
+          ),
+        ),
+      );
+
+      final Duration waitDuration = SelectionOverlay.fadeDuration > kDoubleTapTimeout
+          ? SelectionOverlay.fadeDuration
+          : kDoubleTapTimeout;
+
+      // Double tap to select the text.
+      await tester.tapAt(textOffsetToPosition(tester, 5));
+      await tester.pump(kDoubleTapTimeout ~/ 2);
+      await tester.tapAt(textOffsetToPosition(tester, 5));
+      await tester.pump(waitDuration);
+
+      // No error as in https://github.com/flutter/flutter/issues/170521.
+
+      // The Flutter-drawn context menu is shown. The SystemContextMenu is not
+      // shown because readOnly is true.
+      expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsOneWidget);
+      expect(find.byType(SystemContextMenu), findsNothing);
+
+      // Turn off readOnly and hide the context menu.
+      setState(() {
+        readOnly = false;
+      });
+      await tester.tap(find.text('Copy'));
+      await tester.pump(waitDuration);
+
+      expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
+      expect(find.byType(SystemContextMenu), findsNothing);
+
+      // Double tap to show the context menu again.
+      await tester.tapAt(textOffsetToPosition(tester, 5));
+      await tester.pump(kDoubleTapTimeout ~/ 2);
+      await tester.tapAt(textOffsetToPosition(tester, 5));
+      await tester.pump(waitDuration);
+
+      // Now iOS is showing the SystemContextMenu while others continue to show
+      // the Flutter-drawn context menu.
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+          expect(find.byType(SystemContextMenu), findsOneWidget);
+        case TargetPlatform.macOS:
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsOneWidget);
+      }
+    },
+    variant: TargetPlatformVariant.all(),
+    skip: kIsWeb, // [intended] on web the browser handles the context menu.
   );
 }

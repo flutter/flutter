@@ -54,9 +54,9 @@ class SwiftPackageManagerUtils {
     required List<String> options,
     bool usesSwiftPackageManager = false,
   }) async {
-    final String appTemplateType = usesSwiftPackageManager ? 'spm' : 'default';
+    final appTemplateType = usesSwiftPackageManager ? 'spm' : 'default';
 
-    final String appName = '${platform}_${appTemplateType}_app';
+    final appName = '${platform}_${appTemplateType}_app';
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
@@ -87,13 +87,8 @@ class SwiftPackageManagerUtils {
     List<String>? unexpectedLines,
   }) async {
     final List<Pattern> remainingExpectedLines = expectedLines ?? <Pattern>[];
-    final List<String> unexpectedLinesFound = <String>[];
-    final List<String> command = <String>[
-      flutterBin,
-      ...getLocalEngineArguments(),
-      'build',
-      ...options,
-    ];
+    final unexpectedLinesFound = <String>[];
+    final command = <String>[flutterBin, ...getLocalEngineArguments(), 'build', ...options];
 
     final ProcessResult result = await processManager.run(
       command,
@@ -103,7 +98,7 @@ class SwiftPackageManagerUtils {
     final List<String> stdout = LineSplitter.split(result.stdout.toString()).toList();
     final List<String> stderr = LineSplitter.split(result.stderr.toString()).toList();
     final List<String> output = stdout + stderr;
-    for (final String line in output) {
+    for (final line in output) {
       // Remove "[   +3 ms] " prefix
       String trimmedLine = line.trim();
       if (trimmedLine.startsWith('[')) {
@@ -171,13 +166,12 @@ class SwiftPackageManagerUtils {
     String flutterBin,
     String workingDirectory, {
     required String platform,
-    required String iosLanguage,
     bool usesSwiftPackageManager = false,
   }) async {
-    final String dependencyManager = usesSwiftPackageManager ? 'spm' : 'cocoapods';
+    final dependencyManager = usesSwiftPackageManager ? 'spm' : 'cocoapods';
 
     // Create plugin
-    final String pluginName = '${platform}_${iosLanguage}_${dependencyManager}_plugin';
+    final pluginName = '${platform}_${dependencyManager}_plugin';
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
@@ -186,8 +180,6 @@ class SwiftPackageManagerUtils {
       'io.flutter.devicelab',
       '--template=plugin',
       '--platforms=$platform',
-      '-i',
-      iosLanguage,
       pluginName,
     ], workingDirectory: workingDirectory);
 
@@ -208,8 +200,7 @@ class SwiftPackageManagerUtils {
       pluginName: pluginName,
       pluginPath: pluginDirectory.path,
       platform: platform,
-      className:
-          '${_capitalize(platform)}${_capitalize(iosLanguage)}${_capitalize(dependencyManager)}Plugin',
+      className: '${_capitalize(platform)}${_capitalize(dependencyManager)}Plugin',
     );
   }
 
@@ -283,10 +274,10 @@ class SwiftPackageManagerUtils {
     bool swiftPackageMangerEnabled = false,
     bool migrated = false,
   }) {
-    final String frameworkName = platform == 'ios' ? 'Flutter' : 'FlutterMacOS';
+    final frameworkName = platform == 'ios' ? 'Flutter' : 'FlutterMacOS';
     final String appPlatformDirectoryPath = fileSystem.path.join(appDirectoryPath, platform);
 
-    final List<Pattern> expectedLines = <Pattern>[];
+    final expectedLines = <Pattern>[];
     if (swiftPackageMangerEnabled) {
       expectedLines.addAll(<String>[
         'FlutterGeneratedPluginSwiftPackage: $appPlatformDirectoryPath/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage',
@@ -337,10 +328,10 @@ class SwiftPackageManagerUtils {
     bool swiftPackageMangerEnabled = false,
     bool migrated = false,
   }) {
-    final String frameworkName = platform == 'ios' ? 'Flutter' : 'FlutterMacOS';
+    final frameworkName = platform == 'ios' ? 'Flutter' : 'FlutterMacOS';
     final String appPlatformDirectoryPath = fileSystem.path.join(appDirectoryPath, platform);
 
-    final List<String> unexpectedLines = <String>[];
+    final unexpectedLines = <String>[];
     if (cocoaPodsPlugin == null && !migrated) {
       unexpectedLines.addAll(<String>[
         'Running pod install...',

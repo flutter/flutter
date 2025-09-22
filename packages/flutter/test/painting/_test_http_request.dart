@@ -123,8 +123,8 @@ class TestImgElement {
   late ImgElementMock _mock;
 
   String src = '';
-  int naturalWidth = -1;
-  int naturalHeight = -1;
+  int naturalWidth = 1;
+  int naturalHeight = 1;
 
   // Either `decode` or `decodeSuccess/Failure` may be called first.
   // The following fields allow properly handling either case.

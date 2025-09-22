@@ -14,7 +14,7 @@ enum PathDirection { clockwise, counterClockwise }
 
 enum PathArcSize { small, large }
 
-class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements ScenePath, DisposablePath {
+class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements LayerPath, DisposablePath {
   factory SkwasmPath() {
     return SkwasmPath.fromHandle(pathCreate());
   }
@@ -174,9 +174,8 @@ class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements ScenePath, Disp
 
   @override
   void addRSuperellipse(ui.RSuperellipse rsuperellipse) {
-    // TODO(dkwingsmt): Properly implement RSuperellipse on Web instead of falling
-    // back to RRect.  https://github.com/flutter/flutter/issues/163718
-    addRRect(rsuperellipse.toApproximateRRect());
+    final (ui.Path path, ui.Offset offset) = rsuperellipse.toPathOffset();
+    addPath((path as LazyPath).builtPath, offset);
   }
 
   @override

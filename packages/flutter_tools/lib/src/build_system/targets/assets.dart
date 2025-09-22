@@ -12,6 +12,7 @@ import '../../build_info.dart';
 import '../../dart/package_map.dart';
 import '../../devfs.dart';
 import '../../flutter_manifest.dart';
+import '../../isolated/native_assets/dart_hook_result.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
@@ -27,12 +28,13 @@ import 'native_assets.dart';
 /// Throws [Exception] if [AssetBundle.build] returns a non-zero exit code.
 ///
 /// [additionalContent] may contain additional DevFS entries that will be
-/// included in the final bundle, but not the AssetManifest.json file.
+/// included in the final bundle, but not the AssetManifest.bin file.
 ///
 /// Returns a [Depfile] containing all assets used in the build.
 Future<Depfile> copyAssets(
   Environment environment,
   Directory outputDirectory, {
+  required DartHooksResult dartHookResult,
   Map<String, DevFSContent> additionalContent = const <String, DevFSContent>{},
   required TargetPlatform targetPlatform,
   required BuildMode buildMode,
@@ -48,6 +50,7 @@ Future<Depfile> copyAssets(
     splitDeferredAssets: buildMode != BuildMode.debug && buildMode != BuildMode.jitRelease,
   ).createBundle();
   final int resultCode = await assetBundle.build(
+    flutterHookResult: dartHookResult.asFlutterResult,
     manifestPath: pubspecFile.path,
     packageConfigPath: findPackageConfigFileOrDefault(environment.projectDir).path,
     deferredComponentsEnabled: environment.defines[kDeferredComponents] == 'true',
@@ -57,19 +60,19 @@ Future<Depfile> copyAssets(
   if (resultCode != 0) {
     throw Exception('Failed to bundle asset files.');
   }
-  final Pool copyFilesPool = Pool(kMaxOpenFiles);
-  final Pool transformPool = Pool(
+  final copyFilesPool = Pool(kMaxOpenFiles);
+  final transformPool = Pool(
     (environment.platform.numberOfProcessors ~/ 2).clamp(1, kMaxOpenFiles),
   );
-  final List<File> inputs = <File>[
+  final inputs = <File>[
     // An asset manifest with no assets would have zero inputs if not
     // for this pubspec file.
     pubspecFile,
     ...additionalInputs,
   ];
-  final List<File> outputs = <File>[];
+  final outputs = <File>[];
 
-  final IconTreeShaker iconTreeShaker = IconTreeShaker(
+  final iconTreeShaker = IconTreeShaker(
     environment,
     assetBundle.entries[kFontManifestJson]?.content as DevFSStringContent?,
     processManager: environment.processManager,
@@ -78,20 +81,20 @@ Future<Depfile> copyAssets(
     artifacts: environment.artifacts,
     targetPlatform: targetPlatform,
   );
-  final ShaderCompiler shaderCompiler = ShaderCompiler(
+  final shaderCompiler = ShaderCompiler(
     processManager: environment.processManager,
     logger: environment.logger,
     fileSystem: environment.fileSystem,
     artifacts: environment.artifacts,
   );
-  final AssetTransformer assetTransformer = AssetTransformer(
+  final assetTransformer = AssetTransformer(
     processManager: environment.processManager,
     fileSystem: environment.fileSystem,
     dartBinaryPath: environment.artifacts.getArtifactPath(Artifact.engineDartBinary),
     buildMode: buildMode,
   );
 
-  final Map<String, AssetBundleEntry> assetEntries = <String, AssetBundleEntry>{
+  final assetEntries = <String, AssetBundleEntry>{
     ...assetBundle.entries,
     ...additionalContent.map((String key, DevFSContent value) {
       return MapEntry<String, AssetBundleEntry>(
@@ -124,7 +127,7 @@ Future<Depfile> copyAssets(
         final DevFSContent content = entry.value.content;
         if (content is DevFSFileContent && content.file is File) {
           inputs.add(content.file as File);
-          bool doCopy = true;
+          var doCopy = true;
           switch (entry.value.kind) {
             case AssetKind.regular:
               if (entry.value.transformers.isNotEmpty) {
@@ -232,7 +235,7 @@ Future<Depfile> copyAssets(
       }),
     );
   }
-  final Depfile depfile = Depfile(inputs + assetBundle.additionalDependencies, outputs);
+  final depfile = Depfile(inputs + assetBundle.additionalDependencies, outputs);
   return depfile;
 }
 
@@ -244,7 +247,11 @@ class CopyAssets extends Target {
   String get name => 'copy_assets';
 
   @override
-  List<Target> get dependencies => const <Target>[KernelSnapshot(), InstallCodeAssets()];
+  List<Target> get dependencies => const <Target>[
+    DartBuildForNative(),
+    KernelSnapshot(),
+    InstallCodeAssets(),
+  ];
 
   @override
   List<Source> get inputs => const <Source>[
@@ -267,12 +274,14 @@ class CopyAssets extends Target {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, name);
     }
-    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
+    final buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Directory output = environment.buildDir.childDirectory('flutter_assets');
     output.createSync(recursive: true);
+    final DartHooksResult dartHookResult = await DartBuild.loadHookResult(environment);
     final Depfile depfile = await copyAssets(
       environment,
       output,
+      dartHookResult: dartHookResult,
       targetPlatform: TargetPlatform.android,
       buildMode: buildMode,
       flavor: environment.defines[kFlavor],

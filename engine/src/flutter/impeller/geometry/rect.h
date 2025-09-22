@@ -199,10 +199,6 @@ struct TRect {
            bottom_ == r.bottom_;
   }
 
-  [[nodiscard]] constexpr bool operator!=(const TRect& r) const {
-    return !(*this == r);
-  }
-
   [[nodiscard]] constexpr TRect Scale(Type scale) const {
     return TRect(left_ * scale,   //
                  top_ * scale,    //

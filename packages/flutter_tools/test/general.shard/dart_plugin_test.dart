@@ -41,7 +41,7 @@ void main() {
 
     group('resolvePlatformImplementation', () {
       testWithoutContext('selects uncontested implementation from direct dependency', () async {
-        final Set<String> directDependencies = <String>{'url_launcher_linux', 'url_launcher_macos'};
+        final directDependencies = <String>{'url_launcher_linux', 'url_launcher_macos'};
         final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
           Plugin.fromYaml(
             'url_launcher_linux',
@@ -99,10 +99,7 @@ void main() {
       testWithoutContext(
         'selects uncontested implementation from direct dependency with additional native implementation',
         () async {
-          final Set<String> directDependencies = <String>{
-            'url_launcher_linux',
-            'url_launcher_macos',
-          };
+          final directDependencies = <String>{'url_launcher_linux', 'url_launcher_macos'};
           final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
             <Plugin>[
               // Following plugin is native only and is not resolved as a dart plugin:
@@ -156,7 +153,7 @@ void main() {
       );
 
       testWithoutContext('selects uncontested implementation from transitive dependency', () async {
-        final Set<String> directDependencies = <String>{'url_launcher_macos'};
+        final directDependencies = <String>{'url_launcher_macos'};
         final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
           Plugin.fromYaml(
             'url_launcher_macos',
@@ -212,7 +209,7 @@ void main() {
       });
 
       testWithoutContext('selects inline implementation on mobile', () async {
-        final Set<String> directDependencies = <String>{};
+        final directDependencies = <String>{};
 
         final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
           Plugin.fromYaml(
@@ -255,7 +252,7 @@ void main() {
       // See https://github.com/flutter/flutter/issues/87862 for details.
       testWithoutContext('does not select inline implementation on desktop for '
           'missing min Flutter SDK constraint', () async {
-        final Set<String> directDependencies = <String>{};
+        final directDependencies = <String>{};
 
         final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
           Plugin.fromYaml(
@@ -281,7 +278,7 @@ void main() {
       // See https://github.com/flutter/flutter/issues/87862 for details.
       testWithoutContext('does not select inline implementation on desktop for '
           'min Flutter SDK constraint < 2.11', () async {
-        final Set<String> directDependencies = <String>{};
+        final directDependencies = <String>{};
 
         final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
           Plugin.fromYaml(
@@ -306,7 +303,7 @@ void main() {
 
       testWithoutContext('selects inline implementation on desktop for '
           'min Flutter SDK requirement of at least 2.11', () async {
-        final Set<String> directDependencies = <String>{};
+        final directDependencies = <String>{};
 
         final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
           Plugin.fromYaml(
@@ -353,7 +350,7 @@ void main() {
       });
 
       testWithoutContext('selects default implementation', () async {
-        final Set<String> directDependencies = <String>{};
+        final directDependencies = <String>{};
 
         final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
           Plugin.fromYaml(
@@ -434,7 +431,7 @@ void main() {
       testWithoutContext(
         'selects default implementation if interface is direct dependency',
         () async {
-          final Set<String> directDependencies = <String>{'url_launcher'};
+          final directDependencies = <String>{'url_launcher'};
 
           final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
             <Plugin>[
@@ -484,7 +481,7 @@ void main() {
       );
 
       testWithoutContext('user-selected implementation overrides default implementation', () async {
-        final Set<String> directDependencies = <String>{
+        final directDependencies = <String>{
           'user_selected_url_launcher_implementation',
           'url_launcher',
         };
@@ -548,7 +545,7 @@ void main() {
       });
 
       testWithoutContext('user-selected implementation overrides inline implementation', () async {
-        final Set<String> directDependencies = <String>{
+        final directDependencies = <String>{
           'user_selected_url_launcher_implementation',
           'url_launcher',
         };
@@ -609,7 +606,7 @@ void main() {
       testUsingContext(
         'provides error when a plugin has a default implementation and implements another plugin',
         () async {
-          final Set<String> directDependencies = <String>{'url_launcher'};
+          final directDependencies = <String>{'url_launcher'};
           expect(() {
             resolvePlatformImplementation(<Plugin>[
               Plugin.fromYaml(
@@ -673,7 +670,7 @@ void main() {
       testUsingContext(
         'provides error when a plugin has a default implementation and an inline implementation',
         () async {
-          final Set<String> directDependencies = <String>{'url_launcher'};
+          final directDependencies = <String>{'url_launcher'};
           expect(() {
             resolvePlatformImplementation(<Plugin>[
               Plugin.fromYaml(
@@ -725,7 +722,7 @@ void main() {
       testUsingContext(
         'provides warning when a plugin references a default plugin without implementation',
         () async {
-          final Set<String> directDependencies = <String>{'url_launcher'};
+          final directDependencies = <String>{'url_launcher'};
           final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
             <Plugin>[
               Plugin.fromYaml(
@@ -774,7 +771,7 @@ void main() {
       testUsingContext(
         'avoid warning when a plugin references a default plugin with a native implementation only',
         () async {
-          final Set<String> directDependencies = <String>{'url_launcher'};
+          final directDependencies = <String>{'url_launcher'};
           final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
             <Plugin>[
               Plugin.fromYaml(
@@ -818,7 +815,7 @@ void main() {
       testUsingContext(
         'selects default Dart implementation without warning, while choosing plugin selection for nativeOrDart',
         () async {
-          final Set<String> directDependencies = <String>{'url_launcher'};
+          final directDependencies = <String>{'url_launcher'};
           final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
             <Plugin>[
               Plugin.fromYaml(
@@ -872,7 +869,7 @@ void main() {
       testUsingContext(
         'provides warning when a plugin references a default plugin which does not exist',
         () async {
-          final Set<String> directDependencies = <String>{'url_launcher'};
+          final directDependencies = <String>{'url_launcher'};
           final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
             <Plugin>[
               Plugin.fromYaml(
@@ -906,10 +903,7 @@ void main() {
       );
 
       testUsingContext('provides error when user selected multiple implementations', () async {
-        final Set<String> directDependencies = <String>{
-          'url_launcher_linux_1',
-          'url_launcher_linux_2',
-        };
+        final directDependencies = <String>{'url_launcher_linux_1', 'url_launcher_linux_2'};
         expect(() {
           resolvePlatformImplementation(<Plugin>[
             Plugin.fromYaml(
@@ -956,7 +950,7 @@ void main() {
       });
 
       testUsingContext('provides all errors when user selected multiple implementations', () async {
-        final Set<String> directDependencies = <String>{
+        final directDependencies = <String>{
           'url_launcher_linux_1',
           'url_launcher_linux_2',
           'url_launcher_windows_1',
@@ -1045,7 +1039,7 @@ void main() {
       testUsingContext(
         'provides error when user needs to select among multiple implementations',
         () async {
-          final Set<String> directDependencies = <String>{};
+          final directDependencies = <String>{};
           expect(() {
             resolvePlatformImplementation(<Plugin>[
               Plugin.fromYaml(
@@ -1178,12 +1172,12 @@ void main() {
             '// @dart = 2.8\n'
             '\n'
             "import 'dart:io'; // flutter_ignore: dart_io_import.\n"
-            "import 'package:url_launcher_android/url_launcher_android.dart';\n"
-            "import 'package:url_launcher_ios/url_launcher_ios.dart';\n"
-            "import 'package:url_launcher_linux/url_launcher_linux.dart';\n"
-            "import 'package:awesome_macos/awesome_macos.dart';\n"
-            "import 'package:url_launcher_macos/url_launcher_macos.dart';\n"
-            "import 'package:url_launcher_windows/url_launcher_windows.dart';\n"
+            "import 'package:url_launcher_android/url_launcher_android.dart' as url_launcher_android;\n"
+            "import 'package:url_launcher_ios/url_launcher_ios.dart' as url_launcher_ios;\n"
+            "import 'package:url_launcher_linux/url_launcher_linux.dart' as url_launcher_linux;\n"
+            "import 'package:awesome_macos/awesome_macos.dart' as awesome_macos;\n"
+            "import 'package:url_launcher_macos/url_launcher_macos.dart' as url_launcher_macos;\n"
+            "import 'package:url_launcher_windows/url_launcher_windows.dart' as url_launcher_windows;\n"
             '\n'
             "@pragma('vm:entry-point')\n"
             'class _PluginRegistrant {\n'
@@ -1192,7 +1186,7 @@ void main() {
             '  static void register() {\n'
             '    if (Platform.isAndroid) {\n'
             '      try {\n'
-            '        AndroidPlugin.registerWith();\n'
+            '        url_launcher_android.AndroidPlugin.registerWith();\n'
             '      } catch (err) {\n'
             '        print(\n'
             "          '`url_launcher_android` threw an error: \$err. '\n"
@@ -1202,7 +1196,7 @@ void main() {
             '\n'
             '    } else if (Platform.isIOS) {\n'
             '      try {\n'
-            '        IosPlugin.registerWith();\n'
+            '        url_launcher_ios.IosPlugin.registerWith();\n'
             '      } catch (err) {\n'
             '        print(\n'
             "          '`url_launcher_ios` threw an error: \$err. '\n"
@@ -1212,7 +1206,7 @@ void main() {
             '\n'
             '    } else if (Platform.isLinux) {\n'
             '      try {\n'
-            '        LinuxPlugin.registerWith();\n'
+            '        url_launcher_linux.LinuxPlugin.registerWith();\n'
             '      } catch (err) {\n'
             '        print(\n'
             "          '`url_launcher_linux` threw an error: \$err. '\n"
@@ -1222,7 +1216,7 @@ void main() {
             '\n'
             '    } else if (Platform.isMacOS) {\n'
             '      try {\n'
-            '        AwesomeMacOS.registerWith();\n'
+            '        awesome_macos.AwesomeMacOS.registerWith();\n'
             '      } catch (err) {\n'
             '        print(\n'
             "          '`awesome_macos` threw an error: \$err. '\n"
@@ -1231,7 +1225,7 @@ void main() {
             '      }\n'
             '\n'
             '      try {\n'
-            '        MacOSPlugin.registerWith();\n'
+            '        url_launcher_macos.MacOSPlugin.registerWith();\n'
             '      } catch (err) {\n'
             '        print(\n'
             "          '`url_launcher_macos` threw an error: \$err. '\n"
@@ -1241,7 +1235,7 @@ void main() {
             '\n'
             '    } else if (Platform.isWindows) {\n'
             '      try {\n'
-            '        WindowsPlugin.registerWith();\n'
+            '        url_launcher_windows.WindowsPlugin.registerWith();\n'
             '      } catch (err) {\n'
             '        print(\n'
             "          '`url_launcher_windows` threw an error: \$err. '\n"
@@ -1464,7 +1458,7 @@ void createFakeDartPlugins(
 
 class FakeFlutterManifest extends Fake implements FlutterManifest {
   @override
-  Set<String> dependencies = <String>{};
+  var dependencies = <String>{};
 
   @override
   String get appName => 'myapp';
@@ -1472,7 +1466,7 @@ class FakeFlutterManifest extends Fake implements FlutterManifest {
 
 class FakeFlutterProject extends Fake implements FlutterProject {
   @override
-  bool isModule = false;
+  var isModule = false;
 
   @override
   late FlutterManifest manifest;

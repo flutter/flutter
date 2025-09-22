@@ -59,7 +59,7 @@ class DeferredComponentsGenSnapshotValidatorTarget extends Target {
 
   @override
   List<Target> get dependencies {
-    final List<Target> deps = <Target>[CompositeTarget(deferredComponentsDependencies)];
+    final deps = <Target>[CompositeTarget(deferredComponentsDependencies)];
     deps.addAll(nonDeferredComponentsDependencies);
     return deps;
   }

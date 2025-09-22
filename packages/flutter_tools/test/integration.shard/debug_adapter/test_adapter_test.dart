@@ -110,7 +110,7 @@ void main() {
   });
 
   group('integration tests', () {
-    const List<String> toolArgs = <String>['-d', 'flutter-tester'];
+    const toolArgs = <String>['-d', 'flutter-tester'];
 
     setUp(() async {
       project = IntegrationTestsProject();
@@ -122,7 +122,7 @@ void main() {
 }
 
 /// Matchers for the expected console output of [TestsProject].
-final List<Object> _testsProjectExpectedOutput = <Object>[
+final _testsProjectExpectedOutput = <Object>[
   // First test
   '✓ Flutter tests can pass',
   // Second test

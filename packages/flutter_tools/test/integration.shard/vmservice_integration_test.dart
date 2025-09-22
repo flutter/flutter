@@ -24,7 +24,7 @@ void main() {
     setUp(() async {
       tempDir = createResolvedTempDirectorySync('vmservice_integration_test.');
 
-      final BasicProject project = BasicProject();
+      final project = BasicProject();
       await project.setUpIn(tempDir);
 
       flutter = FlutterRunTestDriver(tempDir);
@@ -32,6 +32,8 @@ void main() {
       final int? port = flutter.vmServicePort;
       expect(port != null, true);
       vmService = await vmServiceConnectUri('ws://localhost:$port/ws');
+      vmService.onSend.listen((String s) => flutter.debugPrint(s, topic: '=vm=>'));
+      vmService.onReceive.listen((String s) => flutter.debugPrint(s, topic: '<=vm='));
     });
 
     tearDown(() async {
@@ -48,14 +50,18 @@ void main() {
     });
 
     testWithoutContext('flutterVersion can be called', () async {
-      final Response response = await vmService.callServiceExtension('s0.flutterVersion');
+      final Response response = await vmService.callServiceExtension(
+        await flutter.flutterVersionService,
+      );
       expect(response.type, 'Success');
       expect(response.json, containsPair('frameworkRevisionShort', isNotNull));
       expect(response.json, containsPair('engineRevisionShort', isNotNull));
     });
 
     testWithoutContext('flutterMemoryInfo can be called', () async {
-      final Response response = await vmService.callServiceExtension('s0.flutterMemoryInfo');
+      final Response response = await vmService.callServiceExtension(
+        await flutter.flutterMemoryInfoService,
+      );
       expect(response.type, 'Success');
     });
 
@@ -64,14 +70,17 @@ void main() {
       final IsolateRef? isolateRef = vm.isolates?.first;
       expect(isolateRef != null, true);
       final Response response = await vmService.callMethod(
-        's0.reloadSources',
+        await flutter.reloadSourcesService,
         isolateId: isolateRef!.id,
       );
       expect(response.type, 'Success');
     });
 
     testWithoutContext('reloadSources fails on bad params', () async {
-      final Future<Response> response = vmService.callMethod('s0.reloadSources', isolateId: '');
+      final Future<Response> response = vmService.callMethod(
+        await flutter.reloadSourcesService,
+        isolateId: '',
+      );
       expect(response, throwsA(const TypeMatcher<RPCError>()));
     });
 
@@ -80,7 +89,7 @@ void main() {
       final IsolateRef? isolateRef = vm.isolates?.first;
       expect(isolateRef != null, true);
       final Response response = await vmService.callMethod(
-        's0.hotRestart',
+        await flutter.hotRestartService,
         isolateId: isolateRef!.id,
       );
       expect(response.type, 'Success');
@@ -88,7 +97,7 @@ void main() {
 
     testWithoutContext('hotRestart fails on bad params', () async {
       final Future<Response> response = vmService.callMethod(
-        's0.hotRestart',
+        await flutter.hotRestartService,
         args: <String, dynamic>{'pause': 'not_a_bool'},
       );
       expect(response, throwsA(const TypeMatcher<RPCError>()));

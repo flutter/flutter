@@ -7,7 +7,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 
@@ -37,12 +36,9 @@ void main() {
   testUsingContext(
     'use the nativeAssetsYamlFile when provided',
     () => testbed.run(() async {
-      final FakeDevice device = FakeDevice(
-        targetPlatform: TargetPlatform.darwin,
-        sdkNameAndVersion: 'Macos',
-      );
-      final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
-      final FakeFlutterDevice flutterDevice = FakeFlutterDevice()
+      final device = FakeDevice(targetPlatform: TargetPlatform.darwin, sdkNameAndVersion: 'Macos');
+      final residentCompiler = FakeResidentCompiler();
+      final flutterDevice = FakeFlutterDevice()
         ..testUri = testUri
         ..vmServiceHost = (() => fakeVmServiceHost)
         ..device = device
@@ -52,7 +48,7 @@ void main() {
 
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[listViews, listViews]);
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-      final HotRunner residentRunner = HotRunner(
+      final residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(
@@ -65,12 +61,12 @@ void main() {
           ),
         ),
         target: 'main.dart',
-        devtoolsHandler: createNoOpHandler,
         analytics: getInitializedFakeAnalyticsInstance(
           fs: MemoryFileSystem.test(),
           fakeFlutterVersion: FakeFlutterVersion(),
         ),
         nativeAssetsYamlFile: 'foo.yaml',
+        logger: globals.logger,
       );
 
       final int result = await residentRunner.run();

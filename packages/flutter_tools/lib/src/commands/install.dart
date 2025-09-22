@@ -27,10 +27,10 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
   }
 
   @override
-  final String name = 'install';
+  final name = 'install';
 
   @override
-  final String description = 'Install a Flutter app on an attached device.';
+  final description = 'Install a Flutter app on an attached device.';
 
   @override
   final String category = FlutterCommandCategory.tools;

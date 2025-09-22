@@ -13,7 +13,7 @@ import '../base/process.dart';
 import '../base/version.dart';
 import 'android_studio.dart';
 
-const String _javaExecutable = 'java';
+const _javaExecutable = 'java';
 
 enum JavaSource {
   /// JDK bundled with latest Android Studio installation.
@@ -56,7 +56,7 @@ class Java {
   /// Tools that depend on Java and need to find it will often check this
   /// variable. If you are looking to set `JAVA_HOME` when stating a process,
   /// consider using the [environment] instance property instead.
-  static String javaHomeEnvironmentVariable = 'JAVA_HOME';
+  static var javaHomeEnvironmentVariable = 'JAVA_HOME';
 
   /// Finds the Java runtime environment that should be used for all java-dependent
   /// operations across the tool.
@@ -76,7 +76,7 @@ class Java {
     required Platform platform,
     required ProcessManager processManager,
   }) {
-    final OperatingSystemUtils os = OperatingSystemUtils(
+    final os = OperatingSystemUtils(
       fileSystem: fileSystem,
       logger: logger,
       platform: platform,
@@ -152,7 +152,7 @@ class Java {
   /// This map should be used as the environment when invoking any Java-dependent
   /// processes, such as Gradle or Android SDK tools (avdmanager, sdkmanager, etc.)
   Map<String, String> get environment => <String, String>{
-    if (javaHome != null) javaHomeEnvironmentVariable: javaHome!,
+    javaHomeEnvironmentVariable: ?javaHome,
     'PATH':
         _fileSystem.path.dirname(binaryPath) +
         _os.pathVarSeparator +
@@ -183,11 +183,11 @@ class Java {
     final String longVersionText = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
 
     // The contents that matter come in the format '11.0.18', '1.8.0_202 or 21'.
-    final RegExp jdkVersionRegex = RegExp(r'(?<version>\d+(\.\d+(\.\d+(?:_\d+)?)?)?)');
+    final jdkVersionRegex = RegExp(r'(?<version>\d+(\.\d+(\.\d+(?:_\d+)?)?)?)');
     final Iterable<RegExpMatch> matches = jdkVersionRegex.allMatches(rawVersionOutput);
     if (matches.isEmpty) {
       // Fallback to second string format like "java 21.0.1 2023-09-19 LTS"
-      final RegExp secondJdkVersionRegex = RegExp(
+      final secondJdkVersionRegex = RegExp(
         r'java\s+(?<version>\d+(\.\d+)?(\.\d+)?)\s+\d\d\d\d-\d\d-\d\d',
       );
       final RegExpMatch? match = secondJdkVersionRegex.firstMatch(versionLines[0]);

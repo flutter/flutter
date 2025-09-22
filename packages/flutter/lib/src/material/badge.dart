@@ -57,11 +57,13 @@ class Badge extends StatelessWidget {
     this.child,
   });
 
-  /// Convenience constructor for creating a badge with a numeric
-  /// label with 1-3 digits based on [count].
+  /// Convenience constructor for creating a badge with a numeric label based on [count].
   ///
-  /// Initializes [label] with a [Text] widget that contains [count].
-  /// If [count] is greater than 999, then the label is '999+'.
+  /// Initializes [label] with a [Text] widget that shows:
+  /// - the [count] value if it is less than or equal to [maxCount],
+  /// - otherwise, shows '[maxCount]+'.
+  ///
+  /// For example, if [count] is 1000 and [maxCount] is 99, the label will display '99+'.
   Badge.count({
     super.key,
     this.backgroundColor,
@@ -73,9 +75,12 @@ class Badge extends StatelessWidget {
     this.alignment,
     this.offset,
     required int count,
+    int maxCount = 999,
     this.isLabelVisible = true,
     this.child,
-  }) : label = Text(count > 999 ? '999+' : '$count');
+  }) : assert(count >= 0, 'count must be non-negative'),
+       assert(maxCount > 0, 'maxCount must be positive'),
+       label = Text(count > maxCount ? '$maxCount+' : '$count');
 
   /// The badge's fill color.
   ///

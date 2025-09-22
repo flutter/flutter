@@ -16,7 +16,7 @@ import '../src/common.dart';
 
 void main() {
   late Directory tempDir;
-  final BasicProjectWithUnaryMain project = BasicProjectWithUnaryMain();
+  final project = BasicProjectWithUnaryMain();
   late FlutterRunTestDriver flutter;
 
   setUp(() async {
@@ -36,4 +36,17 @@ void main() {
       additionalCommandArgs: <String>['--verbose', '--no-web-resources-cdn'],
     );
   });
+
+  testWithoutContext(
+    'flutter run --wasm --machine works on chrome devices with a unary main function',
+    () async {
+      // Regression test for https://github.com/flutter/flutter/issues/174330
+      await flutter.run(
+        device: GoogleChromeDevice.kChromeDeviceId,
+        wasm: true,
+        additionalCommandArgs: <String>['--verbose', '--no-web-resources-cdn'],
+      );
+      expect(await flutter.stop(), 0, reason: 'Flutter tool exited unexpectedly');
+    },
+  );
 }

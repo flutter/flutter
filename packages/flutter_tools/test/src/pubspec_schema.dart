@@ -24,10 +24,10 @@ void validatePubspecForPlugin({
     fileSystem: globals.fs,
     logger: globals.logger,
   )!;
-  final YamlMap platformMaps = YamlMap.wrap(manifest.supportedPlatforms!);
-  for (final String platform in expectedPlatforms) {
+  final platformMaps = YamlMap.wrap(manifest.supportedPlatforms!);
+  for (final platform in expectedPlatforms) {
     expect(platformMaps[platform], isNotNull);
-    final YamlMap platformMap = platformMaps[platform]! as YamlMap;
+    final platformMap = platformMaps[platform]! as YamlMap;
     if (pluginClass != null) {
       expect(platformMap['pluginClass'], pluginClass);
     }
@@ -38,7 +38,7 @@ void validatePubspecForPlugin({
       expect(platformMap['fileName'], webFileName);
     }
   }
-  for (final String platform in unexpectedPlatforms) {
+  for (final platform in unexpectedPlatforms) {
     expect(platformMaps[platform], isNull);
   }
 }

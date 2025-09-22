@@ -1722,14 +1722,49 @@ class Transform extends SingleChildRenderObjectWidget {
   /// The matrix to transform the child by during painting.
   final Matrix4 transform;
 
-  /// The origin of the coordinate system (relative to the upper left corner of
-  /// this render object) in which to apply the matrix.
+  /// The origin of the coordinate system in which to apply the matrix,
+  /// described relative to the point given by [alignment].
   ///
   /// Setting an origin is equivalent to conjugating the transform matrix by a
   /// translation. This property is provided just for convenience.
+  ///
+  /// This offset is applied in addition to any [alignment] transformation, so in this
+  /// example, the child is rotated about its center, since [alignment]
+  /// in [Transform.rotate] defaults to [Alignment.center]:
+  ///
+  /// ```dart
+  /// Transform.rotate(
+  ///   angle: math.pi,
+  ///   child: Container(
+  ///    width: 150.0,
+  ///    height: 150.0,
+  ///    color: Colors.blue,
+  ///  ),
+  /// )
+  /// ```
+  ///
+  /// However, in this example the [origin] offset is applied after the
+  /// `alignment`, so the child rotates about its bottom-right corner:
+  ///
+  /// ```dart
+  /// Transform.rotate(
+  ///   angle: math.pi,
+  ///   origin: const Offset(75.0, 75.0),
+  ///   child: Container(
+  ///    width: 150.0,
+  ///    height: 150.0,
+  ///    color: Colors.blue,
+  ///  ),
+  /// )
+  /// ```
   final Offset? origin;
 
   /// The alignment of the origin, relative to the size of the box.
+  ///
+  /// When this and [origin] are both null, the origin is the upper-left corner
+  /// of this render object.
+  /// The default for this field is null for some constructors,
+  /// and [Alignment.center] for others.
   ///
   /// This is equivalent to setting an origin based on the size of the box.
   /// If it is specified at the same time as the [origin], both are applied.
@@ -1743,7 +1778,53 @@ class Transform extends SingleChildRenderObjectWidget {
   /// [Directionality.of] returns [TextDirection.rtl].
   final AlignmentGeometry? alignment;
 
-  /// Whether to apply the transformation when performing hit tests.
+  /// Whether to transform registered hits into the child's resulting coordinate system.
+  ///
+  /// When `true`, hit coordinates within the parent's bounds are transformed to match
+  /// where the child appears visually after any transformation such as translation,
+  /// rotation, scaling, or skewing.
+  ///
+  /// When `false`, hit coordinates are not transformed, potentially causing taps to
+  /// register in a different location relative to the child's visual position.
+  ///
+  /// **Important:** Even when [transformHitTests] is true, children cannot
+  /// receive events outside the parent's bounds. Hit testing always starts
+  /// with the parent's own bounds check in [RenderBox.hitTest]. If the pointer
+  /// is outside the parent's bounds, [RenderBox.hitTestChildren] is not
+  /// invoked and the children are not considered for hit testing.
+  ///
+  /// For interactive elements that need to be tappable outside their parent's
+  /// original bounds, consider:
+  /// - Expanding the parent widget's bounds to encompass the transformed child.
+  /// - Using an [OverlayEntry] or [OverlayPortal] to place the widget in an
+  ///   [Overlay].
+  /// - Restructuring the widget hierarchy.
+  ///
+  /// {@tool snippet}
+  /// This example shows a `Container` that is scaled up. Even though it appears
+  /// larger, taps are only registered within the original 100x100 area of the
+  /// parent `SizedBox`.
+  ///
+  /// ```dart
+  /// Center(
+  ///   child: SizedBox(
+  ///     width: 100.0,
+  ///     height: 100.0,
+  ///     child: Transform.scale(
+  ///       scale: 2.0,
+  ///       child: GestureDetector(
+  ///         onTap: () => debugPrint('Tapped!'),
+  ///         child: const ColoredBox(
+  ///           color: Colors.purple,
+  ///         ),
+  ///       ),
+  ///     ),
+  ///   ),
+  /// )
+  /// ```
+  /// {@end-tool}
+  ///
+  /// Defaults to true.
   final bool transformHitTests;
 
   /// The filter quality with which to apply the transform as a bitmap operation.

@@ -141,7 +141,7 @@ class Xcode {
       'flutter_tools',
     );
 
-    final String filePath = '$flutterToolsAbsolutePath/bin/xcode_debug.js';
+    final filePath = '$flutterToolsAbsolutePath/bin/xcode_debug.js';
     if (!_fileSystem.file(filePath).existsSync()) {
       throwToolExit('Unable to find Xcode automation script at $filePath');
     }

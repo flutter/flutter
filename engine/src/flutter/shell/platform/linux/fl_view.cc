@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
 
 #include <atk/atk.h>
+#include <gdk/gdkwayland.h>
 #include <gtk/gtk-a11y.h>
 
 #include <cstring>
@@ -33,11 +34,17 @@ struct _FlView {
   // Event box the render area goes inside.
   GtkWidget* event_box;
 
-  // The widget rendering the Flutter view, either GtkGLArea or GtkDrawingArea.
-  GtkWidget* render_area;
+  // The widget rendering the Flutter view.
+  GtkDrawingArea* render_area;
+
+  // Rendering context when using OpenGL.
+  GdkGLContext* render_context;
 
   // Engine this view is showing.
   FlEngine* engine;
+
+  // Combines layers into frame.
+  FlCompositor* compositor;
 
   // Signal subscription for engine restart signal.
   guint on_pre_engine_restart_cb_id;
@@ -92,11 +99,16 @@ G_DEFINE_TYPE_WITH_CODE(
         G_IMPLEMENT_INTERFACE(fl_plugin_registry_get_type(),
                               fl_view_plugin_registry_iface_init))
 
-// Emit the first frame signal in the main thread.
-static gboolean first_frame_idle_cb(gpointer user_data) {
+// Redraw the view from the GTK thread.
+static gboolean redraw_cb(gpointer user_data) {
   FlView* self = FL_VIEW(user_data);
 
-  g_signal_emit(self, fl_view_signals[SIGNAL_FIRST_FRAME], 0);
+  gtk_widget_queue_draw(GTK_WIDGET(self->render_area));
+
+  if (!self->have_first_frame) {
+    self->have_first_frame = TRUE;
+    g_signal_emit(self, fl_view_signals[SIGNAL_FIRST_FRAME], 0);
+  }
 
   return FALSE;
 }
@@ -190,19 +202,6 @@ static void handle_geometry_changed(FlView* self) {
   fl_engine_send_window_metrics_event(
       self->engine, display_id, self->view_id, allocation.width * scale_factor,
       allocation.height * scale_factor, scale_factor);
-
-  // Make sure the view has been realized and its size has been allocated before
-  // waiting for a frame. `fl_view_realize()` and `fl_view_size_allocate()` may
-  // be called in either order depending on the order in which the window is
-  // shown and the view is added to a container in the app runner.
-  //
-  // Note: `gtk_widget_init()` initializes the size allocation to 1x1.
-  if (allocation.width > 1 && allocation.height > 1 &&
-      gtk_widget_get_realized(GTK_WIDGET(self))) {
-    fl_compositor_wait_for_frame(fl_engine_get_compositor(self->engine),
-                                 allocation.width * scale_factor,
-                                 allocation.height * scale_factor);
-  }
 }
 
 static void view_added_cb(GObject* object,
@@ -245,24 +244,16 @@ static void on_pre_engine_restart_cb(FlView* self) {
   init_touch(self);
 }
 
-// Implements FlRenderable::redraw
-static void fl_view_redraw(FlRenderable* renderable) {
+// Implements FlRenderable::present_layers
+static void fl_view_present_layers(FlRenderable* renderable,
+                                   const FlutterLayer** layers,
+                                   size_t layers_count) {
   FlView* self = FL_VIEW(renderable);
 
-  gtk_widget_queue_draw(self->render_area);
+  fl_compositor_present_layers(self->compositor, layers, layers_count);
 
-  if (!self->have_first_frame) {
-    self->have_first_frame = TRUE;
-    // This is not the main thread, so the signal needs to be done via an idle
-    // callback.
-    g_idle_add(first_frame_idle_cb, self);
-  }
-}
-
-// Implements FlRenderable::make_current
-static void fl_view_make_current(FlRenderable* renderable) {
-  FlView* self = FL_VIEW(renderable);
-  gtk_gl_area_make_current(GTK_GL_AREA(self->render_area));
+  // Perform the redraw in the GTK thead.
+  g_idle_add(redraw_cb, self);
 }
 
 // Implements FlPluginRegistry::get_registrar_for_plugin.
@@ -277,8 +268,7 @@ static FlPluginRegistrar* fl_view_get_registrar_for_plugin(
 }
 
 static void fl_renderable_iface_init(FlRenderableInterface* iface) {
-  iface->redraw = fl_view_redraw;
-  iface->make_current = fl_view_make_current;
+  iface->present_layers = fl_view_present_layers;
 }
 
 static void fl_view_plugin_registry_iface_init(
@@ -441,31 +431,52 @@ static void gesture_zoom_end_cb(FlView* self) {
   fl_scrolling_manager_handle_zoom_end(self->scrolling_manager);
 }
 
-static GdkGLContext* create_context_cb(FlView* self) {
-  if (self->view_id != flutter::kFlutterImplicitViewId) {
-    return nullptr;
-  }
-
-  FlOpenGLManager* opengl_manager = fl_engine_get_opengl_manager(self->engine);
+static void setup_opengl(FlView* self) {
   g_autoptr(GError) error = nullptr;
-  if (!fl_opengl_manager_create_contexts(
-          opengl_manager, gtk_widget_get_parent_window(GTK_WIDGET(self)),
-          &error)) {
-    gtk_gl_area_set_error(GTK_GL_AREA(self->render_area), error);
-    return nullptr;
+
+  self->render_context = gdk_window_create_gl_context(
+      gtk_widget_get_window(GTK_WIDGET(self->render_area)), &error);
+  if (self->render_context == nullptr) {
+    g_warning("Failed to create OpenGL context: %s", error->message);
+    return;
   }
 
-  return GDK_GL_CONTEXT(
-      g_object_ref(fl_opengl_manager_get_context(opengl_manager)));
+  if (!gdk_gl_context_realize(self->render_context, &error)) {
+    g_warning("Failed to realize OpenGL context: %s", error->message);
+    return;
+  }
+
+  // If using Wayland, then EGL is in use and we can access the frame
+  // from the Flutter context using EGLImage. If not (i.e. X11 using GLX)
+  // then we have to copy the texture via the CPU.
+  gboolean shareable =
+      GDK_IS_WAYLAND_DISPLAY(gtk_widget_get_display(GTK_WIDGET(self)));
+  self->compositor = FL_COMPOSITOR(fl_compositor_opengl_new(
+      fl_engine_get_task_runner(self->engine),
+      fl_engine_get_opengl_manager(self->engine), shareable));
+}
+
+static void setup_software(FlView* self) {
+  self->compositor = FL_COMPOSITOR(
+      fl_compositor_software_new(fl_engine_get_task_runner(self->engine)));
 }
 
 static void realize_cb(FlView* self) {
+  switch (fl_engine_get_renderer_type(self->engine)) {
+    case kOpenGL:
+      setup_opengl(self);
+      break;
+    case kSoftware:
+      setup_software(self);
+      break;
+    default:
+      break;
+  }
+
   if (self->view_id != flutter::kFlutterImplicitViewId) {
     setup_cursor(self);
     return;
   }
-
-  fl_compositor_setup(fl_engine_get_compositor(self->engine));
 
   GtkWidget* toplevel_window = gtk_widget_get_toplevel(GTK_WIDGET(self));
 
@@ -492,6 +503,10 @@ static void realize_cb(FlView* self) {
   handle_geometry_changed(self);
 }
 
+static void size_allocate_cb(FlView* self) {
+  handle_geometry_changed(self);
+}
+
 static void paint_background(FlView* self, cairo_t* cr) {
   // Don't bother drawing if fully transparent - the widget above this will
   // already be drawn by GTK.
@@ -504,54 +519,22 @@ static void paint_background(FlView* self, cairo_t* cr) {
   cairo_paint(cr);
 }
 
-static gboolean opengl_draw_cb(FlView* self, cairo_t* cr) {
+static gboolean draw_cb(FlView* self, cairo_t* cr) {
   paint_background(self, cr);
 
-  return FALSE;
-}
-
-static gboolean render_cb(FlView* self, GdkGLContext* context) {
-  if (gtk_gl_area_get_error(GTK_GL_AREA(self->render_area)) != NULL) {
-    return FALSE;
+  if (self->render_context) {
+    gdk_gl_context_make_current(self->render_context);
   }
 
-  int width = gtk_widget_get_allocated_width(self->render_area);
-  int height = gtk_widget_get_allocated_height(self->render_area);
-  gint scale_factor = gtk_widget_get_scale_factor(self->render_area);
-  fl_compositor_opengl_render(
-      FL_COMPOSITOR_OPENGL(fl_engine_get_compositor(self->engine)),
-      self->view_id, width * scale_factor, height * scale_factor);
+  gboolean result = fl_compositor_render(
+      self->compositor, cr,
+      gtk_widget_get_window(GTK_WIDGET(self->render_area)));
 
-  return TRUE;
-}
-
-static gboolean software_draw_cb(FlView* self, cairo_t* cr) {
-  paint_background(self, cr);
-
-  return fl_compositor_software_render(
-      FL_COMPOSITOR_SOFTWARE(fl_engine_get_compositor(self->engine)),
-      self->view_id, cr, gtk_widget_get_scale_factor(GTK_WIDGET(self)));
-}
-
-static void unrealize_cb(FlView* self) {
-  if (self->view_id != flutter::kFlutterImplicitViewId) {
-    return;
+  if (self->render_context) {
+    gdk_gl_context_clear_current();
   }
 
-  fl_opengl_manager_make_current(fl_engine_get_opengl_manager(self->engine));
-
-  GError* gl_error = gtk_gl_area_get_error(GTK_GL_AREA(self->render_area));
-  if (gl_error != NULL) {
-    g_warning("Failed to uninitialize GLArea: %s", gl_error->message);
-    return;
-  }
-
-  fl_compositor_opengl_cleanup(
-      FL_COMPOSITOR_OPENGL(fl_engine_get_compositor(self->engine)));
-}
-
-static void size_allocate_cb(FlView* self) {
-  handle_geometry_changed(self);
+  return result;
 }
 
 static void fl_view_notify(GObject* object, GParamSpec* pspec) {
@@ -595,7 +578,9 @@ static void fl_view_dispose(GObject* object) {
     self->update_semantics_cb_id = 0;
   }
 
+  g_clear_object(&self->render_context);
   g_clear_object(&self->engine);
+  g_clear_object(&self->compositor);
   g_clear_pointer(&self->background_color, gdk_rgba_free);
   g_clear_object(&self->window_state_monitor);
   g_clear_object(&self->scrolling_manager);
@@ -614,7 +599,7 @@ static void fl_view_realize(GtkWidget* widget) {
   GTK_WIDGET_CLASS(fl_view_parent_class)->realize(widget);
 
   // Realize the child widgets.
-  gtk_widget_realize(self->render_area);
+  gtk_widget_realize(GTK_WIDGET(self->render_area));
 }
 
 static gboolean handle_key_event(FlView* self, GdkEventKey* key_event) {
@@ -697,36 +682,6 @@ static void fl_view_class_init(FlViewClass* klass) {
 
 // Engine related construction.
 static void setup_engine(FlView* self) {
-  FlutterRendererType renderer_type =
-      fl_compositor_get_renderer_type(fl_engine_get_compositor(self->engine));
-  switch (renderer_type) {
-    case kOpenGL:
-      self->render_area = gtk_gl_area_new();
-      gtk_gl_area_set_has_alpha(GTK_GL_AREA(self->render_area), TRUE);
-      g_signal_connect_swapped(self->render_area, "draw",
-                               G_CALLBACK(opengl_draw_cb), self);
-      g_signal_connect_swapped(self->render_area, "render",
-                               G_CALLBACK(render_cb), self);
-      g_signal_connect_swapped(self->render_area, "create-context",
-                               G_CALLBACK(create_context_cb), self);
-      g_signal_connect_swapped(self->render_area, "unrealize",
-                               G_CALLBACK(unrealize_cb), self);
-      break;
-    case kSoftware:
-      self->render_area = gtk_drawing_area_new();
-      g_signal_connect_swapped(self->render_area, "draw",
-                               G_CALLBACK(software_draw_cb), self);
-      break;
-    default:
-      self->render_area = gtk_label_new("Unsupported Flutter renderer type");
-      break;
-  }
-
-  gtk_widget_show(self->render_area);
-  gtk_container_add(GTK_CONTAINER(self->event_box), self->render_area);
-  g_signal_connect_swapped(self->render_area, "realize", G_CALLBACK(realize_cb),
-                           self);
-
   self->view_accessible = fl_view_accessible_new(self->engine, self->view_id);
   fl_socket_accessible_embed(
       FL_SOCKET_ACCESSIBLE(gtk_widget_get_accessible(GTK_WIDGET(self))),
@@ -793,7 +748,15 @@ static void fl_view_init(FlView* self) {
   g_signal_connect_swapped(self->event_box, "touch-event",
                            G_CALLBACK(touch_event_cb), self);
 
-  g_signal_connect_swapped(self, "size-allocate", G_CALLBACK(size_allocate_cb),
+  self->render_area = GTK_DRAWING_AREA(gtk_drawing_area_new());
+  gtk_widget_show(GTK_WIDGET(self->render_area));
+  gtk_container_add(GTK_CONTAINER(self->event_box),
+                    GTK_WIDGET(self->render_area));
+  g_signal_connect_swapped(self->render_area, "realize", G_CALLBACK(realize_cb),
+                           self);
+  g_signal_connect_swapped(self->render_area, "size-allocate",
+                           G_CALLBACK(size_allocate_cb), self);
+  g_signal_connect_swapped(self->render_area, "draw", G_CALLBACK(draw_cb),
                            self);
 }
 

@@ -1291,6 +1291,22 @@ class TextPainter {
     _layoutCache = newLayoutCache;
   }
 
+  /// Causes the paragraph to paint the layout boxes of the text.
+  ///
+  /// {@template flutter.painting.textPainter.debugPaintTextLayoutBoxes}
+  /// Each painted box illustrates how the encompassed text contributes to the
+  /// overall text layout. For instance, for paragraphs whose [StrutStyle] is
+  /// disabled, the line height of a line is the smallest vertical extent that
+  /// covers all text boxes on that line.
+  ///
+  /// Typically, only characters with a non-zero horizontal advance produce
+  /// these boxes. No boxes will be painted for lines that only consist of a new
+  /// line character.
+  /// {@endtemplate}
+  ///
+  /// The [paint] method reads this flag only in debug mode.
+  bool debugPaintTextLayoutBoxes = false;
+
   /// Paints the text onto the given canvas at the given offset.
   ///
   /// Valid only after [layout] has been called.
@@ -1335,7 +1351,29 @@ class TextPainter {
       assert(debugSize == size);
     }
     assert(!_rebuildParagraphForPaint);
+
+    assert(
+      !debugPaintTextLayoutBoxes || _debugPaintCharacterLayoutBoxes(canvas, layoutCache, offset),
+    );
     canvas.drawParagraph(layoutCache.paragraph, offset + layoutCache.paintOffset);
+  }
+
+  bool _debugPaintCharacterLayoutBoxes(
+    Canvas canvas,
+    _TextPainterLayoutCacheWithOffset layout,
+    Offset offset,
+  ) {
+    final Paint paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0
+      ..color = const Color(0xFF00FFFF);
+    final List<TextBox> textBoxes = getBoxesForSelection(
+      TextSelection(baseOffset: 0, extentOffset: plainText.length),
+    );
+    for (final TextBox textBox in textBoxes) {
+      canvas.drawRect(textBox.toRect().shift(offset), paint);
+    }
+    return true;
   }
 
   // Returns true if value falls in the valid range of the UTF16 encoding.
@@ -1441,17 +1479,22 @@ class TextPainter {
     return Offset(adjustedDx, rawOffset.dy + layoutCache.paintOffset.dy);
   }
 
+  // The condition is derived from
+  // https://github.com/google/skia/blob/0086a17e0d4cc676cf88cae671ba5ee967eb7241/modules/skparagraph/src/TextLine.cpp#L1244-L1246
+  // which is set here:
+  // https://github.com/flutter/engine/blob/a821b8790c9fd0e095013cd5bd1f20273bc1ee47/third_party/txt/src/skia/paragraph_builder_skia.cc#L134
+  bool get _strutDisabled => switch (strutStyle) {
+    null || StrutStyle.disabled => true,
+    StrutStyle(:final double? fontSize) => fontSize == 0.0,
+  };
+
   /// {@template flutter.painting.textPainter.getFullHeightForCaret}
   /// Returns the strut bounded height of the glyph at the given `position`.
   /// {@endtemplate}
   ///
   /// Valid only after [layout] has been called.
   double getFullHeightForCaret(TextPosition position, Rect caretPrototype) {
-    // The if condition is derived from
-    // https://github.com/google/skia/blob/0086a17e0d4cc676cf88cae671ba5ee967eb7241/modules/skparagraph/src/TextLine.cpp#L1244-L1246
-    // which is set here:
-    // https://github.com/flutter/engine/blob/a821b8790c9fd0e095013cd5bd1f20273bc1ee47/third_party/txt/src/skia/paragraph_builder_skia.cc#L134
-    if (strutStyle == null || strutStyle == StrutStyle.disabled || strutStyle?.fontSize == 0.0) {
+    if (_strutDisabled) {
       final double? heightFromCaretMetrics = _computeCaretMetrics(position)?.height;
       if (heightFromCaretMetrics != null) {
         return heightFromCaretMetrics;

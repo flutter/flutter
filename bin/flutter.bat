@@ -32,8 +32,8 @@ IF "%ERRORLEVEL%" NEQ "0" (
 REM Detect which PowerShell executable is available on the host
 REM PowerShell version <= 5: PowerShell.exe
 REM PowerShell version >= 6: pwsh.exe
-WHERE /Q pwsh.exe && (
-    SET powershell_executable=pwsh.exe
+WHERE /Q pwsh && (
+    SET "powershell_executable=call pwsh"
 ) || WHERE /Q PowerShell.exe && (
     SET powershell_executable=PowerShell.exe
 ) || (

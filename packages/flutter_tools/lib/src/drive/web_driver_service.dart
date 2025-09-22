@@ -85,20 +85,16 @@ class WebDriverService extends DriverService {
       debuggingOptions: buildInfo.isRelease
           ? DebuggingOptions.disabled(
               buildInfo,
-              port: debuggingOptions.port,
-              hostname: debuggingOptions.hostname,
+              webDevServerConfig: debuggingOptions.webDevServerConfig,
               webRenderer: debuggingOptions.webRenderer,
               webUseWasm: debuggingOptions.webUseWasm,
-              webHeaders: debuggingOptions.webHeaders,
             )
           : DebuggingOptions.enabled(
               buildInfo,
-              port: debuggingOptions.port,
-              hostname: debuggingOptions.hostname,
+              webDevServerConfig: debuggingOptions.webDevServerConfig,
               disablePortPublication: debuggingOptions.disablePortPublication,
               webRenderer: debuggingOptions.webRenderer,
               webUseWasm: debuggingOptions.webUseWasm,
-              webHeaders: debuggingOptions.webHeaders,
             ),
       stayResident: true,
       flutterProject: FlutterProject.current(),
@@ -110,13 +106,13 @@ class WebDriverService extends DriverService {
       outputPreferences: _outputPreferences,
       systemClock: globals.systemClock,
     );
-    final Completer<void> appStartedCompleter = Completer<void>.sync();
+    final appStartedCompleter = Completer<void>.sync();
     final Future<int?> runFuture = _residentRunner.run(
       appStartedCompleter: appStartedCompleter,
       route: route,
     );
 
-    bool isAppStarted = false;
+    var isAppStarted = false;
     await Future.any(<Future<Object?>>[
       runFuture.then((int? result) {
         _runResult = result;
@@ -167,7 +163,7 @@ class WebDriverService extends DriverService {
   }) async {
     late async_io.WebDriver webDriver;
     final Browser browser = Browser.fromCliName(browserName);
-    final bool isAndroidChrome = browser == Browser.androidChrome;
+    final isAndroidChrome = browser == Browser.androidChrome;
     late int width;
     late int height;
     Map<String, dynamic>? mobileEmulation;
@@ -239,7 +235,7 @@ class WebDriverService extends DriverService {
 
   @override
   Future<void> stop({String? userIdentifier}) async {
-    final bool appDidFinishPrematurely = _runResult != null;
+    final appDidFinishPrematurely = _runResult != null;
     await _residentRunner.exitApp();
     await _residentRunner.cleanupAtFinish();
 
@@ -356,8 +352,8 @@ Map<String, dynamic> getDesiredCapabilities(
             'v8,blink.console,benchmark,blink,'
             'blink.user_timing',
       },
-      if (chromeBinary != null) 'binary': chromeBinary,
-      if (mobileEmulation != null) 'mobileEmulation': mobileEmulation,
+      'binary': ?chromeBinary,
+      'mobileEmulation': ?mobileEmulation,
     },
   },
   Browser.firefox => <String, dynamic>{

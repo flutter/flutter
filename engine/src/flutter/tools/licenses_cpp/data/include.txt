@@ -8,6 +8,7 @@
 .*\.glsl$
 .*\.go$
 .*\.h$
+.*\.hh$
 .*\.hpp$
 .*\.hxx$
 .*\.java$
@@ -17,7 +18,13 @@
 .*\.mm$
 .*\.py$
 .*\.rb$
+.*\.S$
 .*\.sh$
 .*\.swift$
 .*\.ts$
+.*\.txt$
+.*\.ucm$
 .*\.vert$
+.*\.y$
+^ci/licenses_golden/third_party/fuchsia_sdk/NOTICES$
+^third_party/libjpeg-turbo/src/README\.ijg$

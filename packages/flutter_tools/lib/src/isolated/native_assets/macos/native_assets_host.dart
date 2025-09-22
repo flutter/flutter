@@ -143,7 +143,7 @@ Future<void> codesignDylib(
   if (codesignIdentity == null || codesignIdentity.isEmpty) {
     codesignIdentity = '-';
   }
-  final List<String> codesignCommand = <String>[
+  final codesignCommand = <String>[
     'codesign',
     '--force',
     '--sign',
@@ -222,8 +222,8 @@ Uri frameworkUri(String fileName, Set<String> alreadyTakenNames) {
   }
   fileName = fileName.replaceAll(RegExp(r'[^A-Za-z0-9_-]'), '');
   if (alreadyTakenNames.contains(fileName)) {
-    final String prefixName = fileName;
-    for (int i = 1; i < 1000; i++) {
+    final prefixName = fileName;
+    for (var i = 1; i < 1000; i++) {
       fileName = '$prefixName$i';
       if (!alreadyTakenNames.contains(fileName)) {
         break;
@@ -252,15 +252,15 @@ Map<Architecture?, List<String>> parseOtoolArchitectureSections(String output) {
   // /build/native_assets/ios/buz.framework/buz:
   // @rpath/libbuz.dylib
 
-  const Map<String, Architecture> outputArchitectures = <String, Architecture>{
+  const outputArchitectures = <String, Architecture>{
     'arm': Architecture.arm,
     'arm64': Architecture.arm64,
     'x86_64': Architecture.x64,
   };
-  final RegExp architectureHeaderPattern = RegExp(r'^[^(]+( \(architecture (.+)\))?:$');
+  final architectureHeaderPattern = RegExp(r'^[^(]+( \(architecture (.+)\))?:$');
   final Iterator<String> lines = output.trim().split('\n').iterator;
   Architecture? currentArchitecture;
-  final Map<Architecture?, List<String>> architectureSections = <Architecture?, List<String>>{};
+  final architectureSections = <Architecture?, List<String>>{};
 
   while (lines.moveNext()) {
     final String line = lines.current;

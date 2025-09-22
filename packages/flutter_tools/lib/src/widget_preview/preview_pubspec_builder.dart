@@ -43,7 +43,7 @@ class PreviewPubspecBuilder {
   ///   - stack_trace, which is used to generate terse stack traces for displaying errors thrown
   ///     by widgets being previewed.
   ///   - url_launcher, which is used to open a browser to the preview documentation.
-  static const List<String> _kWidgetPreviewScaffoldDeps = <String>[
+  static const _kWidgetPreviewScaffoldDeps = <String>[
     'dtd',
     'flutter_lints',
     'google_fonts',
@@ -102,8 +102,8 @@ class PreviewPubspecBuilder {
 
     // Adds a path dependency on the parent project so previews can be
     // imported directly into the preview scaffold.
-    const String pubAdd = 'add';
-    final Map<String, String> workspacePackages = <String, String>{
+    const pubAdd = 'add';
+    final workspacePackages = <String, String>{
       for (final FlutterProject project in <FlutterProject>[
         rootProject,
         ...rootProject.workspaceProjects,
@@ -172,7 +172,7 @@ class PreviewPubspecBuilder {
     required FlutterProject rootProject,
     required FlutterManifest widgetPreviewManifest,
   }) {
-    final List<DeferredComponent> deferredComponents = <DeferredComponent>[
+    final deferredComponents = <DeferredComponent>[
       ...?rootProject.manifest.deferredComponents?.map(transformDeferredComponent),
       for (final FlutterProject project in rootProject.workspaceProjects)
         ...?project.manifest.deferredComponents?.map(transformDeferredComponent),

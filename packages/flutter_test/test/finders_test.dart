@@ -470,6 +470,95 @@ void main() {
       expect(hitTestable, findsOneWidget);
       expect(tester.widget(hitTestable).key, const ValueKey<int>(0));
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/67743.
+    testWidgets('tapping directly on a Sliver produces an error', (WidgetTester tester) async {
+      int sliverToBoxAdapterTapped = 0;
+      await tester.pumpWidget(
+        MaterialApp(
+          title: 'Flutter Demo',
+          theme: ThemeData(primarySwatch: Colors.blue),
+          home: Scaffold(
+            body: SafeArea(
+              child: CustomScrollView(
+                slivers: <Widget>[
+                  SliverToBoxAdapter(
+                    child: GestureDetector(
+                      onTap: () {
+                        sliverToBoxAdapterTapped++;
+                      },
+                      child: Container(
+                        color: Colors.orange,
+                        padding: const EdgeInsets.all(16.0),
+                        child: const Text('Sliver Grid Header', style: TextStyle(fontSize: 28)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(
+        () => tester.tap(find.byType(SliverToBoxAdapter)),
+        throwsA(
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('whose corresponding render object is not a RenderBox'),
+          ),
+        ),
+      );
+      expect(sliverToBoxAdapterTapped, 0);
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/67743.
+    testWidgets('tapping by filtering by .hitTestable excludes Slivers', (
+      WidgetTester tester,
+    ) async {
+      int sliverToBoxAdapterTapped = 0;
+      await tester.pumpWidget(
+        MaterialApp(
+          title: 'Flutter Demo',
+          theme: ThemeData(primarySwatch: Colors.blue),
+          home: Scaffold(
+            body: SafeArea(
+              child: CustomScrollView(
+                slivers: <Widget>[
+                  SliverToBoxAdapter(
+                    child: GestureDetector(
+                      onTap: () {
+                        sliverToBoxAdapterTapped++;
+                      },
+                      child: Container(
+                        color: Colors.orange,
+                        padding: const EdgeInsets.all(16.0),
+                        child: const Text('Sliver Grid Header', style: TextStyle(fontSize: 28)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(
+        () => tester.tap(find.byType(SliverToBoxAdapter).hitTestable()),
+        throwsA(
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            stringContainsInOrder(<String>[
+              'considering only hit-testable widgets with a RenderBox',
+              'could not find any matching widgets',
+            ]),
+          ),
+        ),
+      );
+      expect(sliverToBoxAdapterTapped, 0);
+    });
   });
 
   group('text range finders', () {

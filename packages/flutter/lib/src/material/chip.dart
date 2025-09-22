@@ -13,7 +13,7 @@ library;
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart' show clampDouble;
+import 'package:flutter/foundation.dart' show clampDouble, kIsWeb;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -27,7 +27,6 @@ import 'ink_decoration.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
-import 'material_state.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -1278,13 +1277,15 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
         chipTheme.iconTheme ??
         theme.chipTheme.iconTheme ??
         _ChipDefaultsM3(context, widget.isEnabled).iconTheme!;
-    final Color? effectiveDeleteIconColor =
-        widget.deleteIconColor ??
-        chipTheme.deleteIconColor ??
-        theme.chipTheme.deleteIconColor ??
-        widget.iconTheme?.color ??
-        chipTheme.iconTheme?.color ??
-        chipDefaults.deleteIconColor;
+    final Color? effectiveDeleteIconColor = WidgetStateProperty.resolveAs(
+      widget.deleteIconColor ??
+          chipTheme.deleteIconColor ??
+          theme.chipTheme.deleteIconColor ??
+          widget.iconTheme?.color ??
+          chipTheme.iconTheme?.color ??
+          chipDefaults.deleteIconColor,
+      statesController.value,
+    );
     final double effectiveIconSize =
         widget.iconTheme?.size ??
         chipTheme.iconTheme?.size ??
@@ -1502,7 +1503,13 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     return Semantics(
       button: widget.tapEnabled,
       container: true,
-      selected: widget.selected,
+      // On web, aria-selected only works for certain roles: gridcell, option, row and tab.
+      // https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Attributes/aria-selected
+      // If the role doesn't support aria-selected, aria-current will be set instead in flutter engine.
+      // But in this case, aria-checked makes more sense than aria-current for a selected chip.
+      // So use checked on web instead.
+      selected: kIsWeb ? null : widget.selected,
+      checked: kIsWeb ? widget.selected : null,
       enabled: widget.tapEnabled ? canTap : null,
       child: result,
     );
@@ -1798,11 +1805,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     final RenderBox? avatar = childForSlot(_ChipSlot.avatar);
     final RenderBox? label = childForSlot(_ChipSlot.label);
     final RenderBox? deleteIcon = childForSlot(_ChipSlot.deleteIcon);
-    return <RenderBox>[
-      if (avatar != null) avatar,
-      if (label != null) label,
-      if (deleteIcon != null) deleteIcon,
-    ];
+    return <RenderBox>[?avatar, ?label, ?deleteIcon];
   }
 
   bool get isDrawingCheckmark => theme.showCheckmark && !checkmarkAnimation.isDismissed;
@@ -2506,7 +2509,7 @@ class _ChipDefaultsM3 extends ChipThemeData {
   );
 
   @override
-  MaterialStateProperty<Color?>? get color => null; // Subclasses override this getter
+  WidgetStateProperty<Color?>? get color => null; // Subclasses override this getter
 
   @override
   Color? get shadowColor => Colors.transparent;

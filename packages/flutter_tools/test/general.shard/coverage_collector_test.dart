@@ -21,7 +21,7 @@ import '../src/logging_logger.dart';
 
 void main() {
   testWithoutContext('Coverage collector Can handle coverage SentinelException', () async {
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+    final fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
         FakeVmServiceRequest(
           method: 'getVM',
@@ -59,7 +59,7 @@ void main() {
   });
 
   testWithoutContext('Coverage collector processes coverage and script data', () async {
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+    final fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
         FakeVmServiceRequest(
           method: 'getVM',
@@ -163,7 +163,7 @@ void main() {
   });
 
   testWithoutContext('Coverage collector with libraryFilters', () async {
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+    final fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
         FakeVmServiceRequest(
           method: 'getVM',
@@ -227,7 +227,7 @@ void main() {
   });
 
   testWithoutContext('Coverage collector with libraryFilters and null libraryNames', () async {
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+    final fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
         FakeVmServiceRequest(
           method: 'getVM',
@@ -290,7 +290,7 @@ void main() {
   });
 
   testWithoutContext('Coverage collector with branch coverage', () async {
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+    final fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
         FakeVmServiceRequest(
           method: 'getVM',
@@ -361,13 +361,13 @@ void main() {
     try {
       tempDir = Directory.systemTemp.createTempSync('flutter_coverage_collector_test.');
       final File packagesFile = writeFooBarPackagesJson(tempDir);
-      final Directory fooDir = Directory('${tempDir.path}/foo/');
+      final fooDir = Directory('${tempDir.path}/foo/');
       fooDir.createSync();
-      final File fooFile = File('${fooDir.path}/foo.dart');
+      final fooFile = File('${fooDir.path}/foo.dart');
       fooFile.writeAsStringSync('hit\nnohit but ignored // coverage:ignore-line\nhit\n');
 
       final String packagesPath = packagesFile.path;
-      final CoverageCollector collector = CoverageCollector(
+      final collector = CoverageCollector(
         libraryNames: <String>{'foo', 'bar'},
         verbose: false,
         packagesPath: packagesPath,
@@ -381,7 +381,7 @@ void main() {
       );
 
       Future<void> getHitMapAndVerify() async {
-        final Map<String, HitMap> gottenHitmap = <String, HitMap>{};
+        final gottenHitmap = <String, HitMap>{};
         await collector.finalizeCoverage(
           formatter: (Map<String, HitMap> hitmap) {
             gottenHitmap.addAll(hitmap);
@@ -405,7 +405,7 @@ void main() {
       }
 
       Future<void> verifyHitmapEmpty() async {
-        final Map<String, HitMap> gottenHitmap = <String, HitMap>{};
+        final gottenHitmap = <String, HitMap>{};
         await collector.finalizeCoverage(
           formatter: (Map<String, HitMap> hitmap) {
             gottenHitmap.addAll(hitmap);
@@ -442,13 +442,13 @@ void main() {
     try {
       tempDir = Directory.systemTemp.createTempSync('flutter_coverage_collector_test.');
       final File packagesFile = writeFooBarPackagesJson(tempDir);
-      final Directory fooDir = Directory('${tempDir.path}/foo/');
+      final fooDir = Directory('${tempDir.path}/foo/');
       fooDir.createSync();
-      final File fooFile = File('${fooDir.path}/foo.dart');
+      final fooFile = File('${fooDir.path}/foo.dart');
       fooFile.writeAsStringSync('hit\nnohit but ignored // coverage:ignore-file\nhit\n');
 
       final String packagesPath = packagesFile.path;
-      final CoverageCollector collector = CoverageCollector(
+      final collector = CoverageCollector(
         libraryNames: <String>{'foo', 'bar'},
         verbose: false,
         packagesPath: packagesPath,
@@ -461,7 +461,7 @@ void main() {
         ).vmService,
       );
 
-      final Map<String, HitMap> gottenHitmap = <String, HitMap>{};
+      final gottenHitmap = <String, HitMap>{};
       await collector.finalizeCoverage(
         formatter: (Map<String, HitMap> hitmap) {
           gottenHitmap.addAll(hitmap);
@@ -491,7 +491,7 @@ void main() {
         File('${tempDir.path}/bar/bar.dart').createSync(recursive: true);
 
         final String packagesPath = packagesFile.path;
-        CoverageCollector collector = CoverageCollector(
+        var collector = CoverageCollector(
           libraryNames: <String>{'foo', 'bar'},
           verbose: false,
           packagesPath: packagesPath,
@@ -541,15 +541,15 @@ void main() {
       try {
         tempDir = Directory.systemTemp.createTempSync('flutter_coverage_collector_test.');
         final File packagesFile = writeFooBarPackagesJson(tempDir);
-        final Directory fooDir = Directory('${tempDir.path}/foo/');
+        final fooDir = Directory('${tempDir.path}/foo/');
         fooDir.createSync();
-        final File fooFile = File('${fooDir.path}/foo.dart');
+        final fooFile = File('${fooDir.path}/foo.dart');
         fooFile.writeAsStringSync('hit\nnohit but ignored // coverage:ignore-line\nhit\n');
 
         final String packagesPath = packagesFile.path;
-        final LoggingLogger logger = LoggingLogger();
-        final TestTimeRecorder testTimeRecorder = TestTimeRecorder(logger);
-        final CoverageCollector collector = CoverageCollector(
+        final logger = LoggingLogger();
+        final testTimeRecorder = TestTimeRecorder(logger);
+        final collector = CoverageCollector(
           libraryNames: <String>{'foo', 'bar'},
           verbose: false,
           packagesPath: packagesPath,
@@ -583,7 +583,7 @@ void main() {
   );
 
   testWithoutContext('Coverage collector fills coverableLineCache', () async {
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+    final fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
         FakeVmServiceRequest(
           method: 'getVM',
@@ -620,7 +620,7 @@ void main() {
       ],
     );
 
-    final Map<String, Set<int>> coverableLineCache = <String, Set<int>>{};
+    final coverableLineCache = <String, Set<int>>{};
     final Map<String, Object?> result = await collect(
       Uri(),
       <String>{'foo'},
@@ -656,7 +656,7 @@ void main() {
   testWithoutContext(
     'Coverage collector avoids recompiling libraries in coverableLineCache',
     () async {
-      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      final fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           FakeVmServiceRequest(
             method: 'getVM',
@@ -696,7 +696,7 @@ void main() {
         ],
       );
 
-      final Map<String, Set<int>> coverableLineCache = <String, Set<int>>{
+      final coverableLineCache = <String, Set<int>>{
         'package:foo/foo.dart': <int>{1, 2, 3},
       };
       final Map<String, Object?> result2 = await collect(
@@ -734,7 +734,7 @@ void main() {
 }
 
 File writeFooBarPackagesJson(Directory tempDir) {
-  final File file = File('${tempDir.path}/packages.json');
+  final file = File('${tempDir.path}/packages.json');
   file.writeAsStringSync(
     jsonEncode(<String, dynamic>{
       'configVersion': 2,
@@ -770,7 +770,7 @@ FakeVmServiceHost createFakeVmServiceHostWithFooAndBar({
           'forceCompile': true,
           'reportLines': true,
           'librariesAlreadyCompiled': librariesAlreadyCompiled,
-          if (libraryFilters != null) 'libraryFilters': libraryFilters,
+          'libraryFilters': ?libraryFilters,
         },
         jsonResponse: SourceReport(
           ranges: <SourceReportRange>[

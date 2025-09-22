@@ -32,18 +32,21 @@ class WebTestCompiler {
     required Platform platform,
     required ProcessManager processManager,
     required Config config,
+    required ShutdownHooks shutdownHooks,
   }) : _logger = logger,
        _fileSystem = fileSystem,
        _artifacts = artifacts,
        _platform = platform,
        _processManager = processManager,
-       _config = config;
+       _config = config,
+       _shutdownHooks = shutdownHooks;
 
   final Logger _logger;
   final FileSystem _fileSystem;
   final Artifacts _artifacts;
   final Platform _platform;
   final ProcessManager _processManager;
+  final ShutdownHooks _shutdownHooks;
   final Config _config;
 
   Future<File> _generateTestEntrypoint({
@@ -137,7 +140,7 @@ class WebTestCompiler {
       config: _config,
     );
     final List<String> dartDefines = webRenderer.updateDartDefines(buildInfo.dartDefines);
-    final ResidentCompiler residentCompiler = ResidentCompiler(
+    final residentCompiler = ResidentCompiler(
       _artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path,
       buildMode: buildInfo.mode,
       trackWidgetCreation: buildInfo.trackWidgetCreation,
@@ -160,6 +163,7 @@ class WebTestCompiler {
       logger: _logger,
       platform: _platform,
       fileSystem: _fileSystem,
+      shutdownHooks: _shutdownHooks,
     );
 
     final CompilerOutput? output = await residentCompiler.recompile(
@@ -211,7 +215,7 @@ class WebTestCompiler {
     final List<String> dartDefines = webRenderer.updateDartDefines(buildInfo.dartDefines);
     final File outputWasmFile = outputDirectory.childFile('main.dart.wasm');
 
-    final List<String> compilationArgs = <String>[
+    final compilationArgs = <String>[
       _artifacts.getArtifactPath(
         Artifact.engineDartBinary,
         platform: TargetPlatform.web_javascript,
@@ -238,10 +242,7 @@ class WebTestCompiler {
       testFile.path, // dartfile
     ];
 
-    final ProcessUtils processUtils = ProcessUtils(
-      logger: _logger,
-      processManager: _processManager,
-    );
+    final processUtils = ProcessUtils(logger: _logger, processManager: _processManager);
 
     await processUtils.stream(compilationArgs);
 

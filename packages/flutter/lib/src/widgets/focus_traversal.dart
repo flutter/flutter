@@ -815,7 +815,6 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     TraversalDirection direction, {
     bool forward = true,
   }) {
-    final ScrollableState? focusedScrollable = Scrollable.maybeOf(focusedChild.context!);
     switch (direction) {
       case TraversalDirection.down:
       case TraversalDirection.up:
@@ -828,9 +827,14 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
         if (eligibleNodes.isEmpty) {
           break;
         }
-        if (focusedScrollable != null && !focusedScrollable.position.atEdge) {
+        final ScrollableState? focusedScrollable = Scrollable.maybeOf(
+          focusedChild.context!,
+          axis: Axis.vertical,
+        );
+        if (focusedScrollable != null) {
           final Iterable<FocusNode> filteredEligibleNodes = eligibleNodes.where(
-            (FocusNode node) => Scrollable.maybeOf(node.context!) == focusedScrollable,
+            (FocusNode node) =>
+                Scrollable.maybeOf(node.context!, axis: Axis.vertical) == focusedScrollable,
           );
           if (filteredEligibleNodes.isNotEmpty) {
             eligibleNodes = filteredEligibleNodes;
@@ -879,9 +883,14 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
         if (eligibleNodes.isEmpty) {
           break;
         }
-        if (focusedScrollable != null && !focusedScrollable.position.atEdge) {
+        final ScrollableState? focusedScrollable = Scrollable.maybeOf(
+          focusedChild.context!,
+          axis: Axis.horizontal,
+        );
+        if (focusedScrollable != null) {
           final Iterable<FocusNode> filteredEligibleNodes = eligibleNodes.where(
-            (FocusNode node) => Scrollable.maybeOf(node.context!) == focusedScrollable,
+            (FocusNode node) =>
+                Scrollable.maybeOf(node.context!, axis: Axis.horizontal) == focusedScrollable,
           );
           if (filteredEligibleNodes.isNotEmpty) {
             eligibleNodes = filteredEligibleNodes;
@@ -2038,6 +2047,7 @@ class FocusTraversalGroup extends StatefulWidget {
     FocusTraversalPolicy? policy,
     this.descendantsAreFocusable = true,
     this.descendantsAreTraversable = true,
+    this.onFocusNodeCreated,
     required this.child,
   }) : policy = policy ?? ReadingOrderTraversalPolicy();
 
@@ -2068,6 +2078,9 @@ class FocusTraversalGroup extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
+
+  /// Called when the [FocusNode] of this widget is created.
+  final void Function(FocusNode)? onFocusNodeCreated;
 
   /// Returns the [FocusTraversalPolicy] that applies to the nearest ancestor of
   /// the given [FocusNode].
@@ -2205,6 +2218,12 @@ class _FocusTraversalGroupState extends State<FocusTraversalGroup> {
     debugLabel: 'FocusTraversalGroup',
     policy: widget.policy,
   );
+
+  @override
+  void initState() {
+    super.initState();
+    widget.onFocusNodeCreated?.call(focusNode);
+  }
 
   @override
   void dispose() {

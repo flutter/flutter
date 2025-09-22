@@ -621,14 +621,17 @@ Future<void> main() async {
   });
 
   testWidgets('Heroes animation is fastOutSlowIn', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(routes: routes));
+    final TransitionDurationObserver observer = TransitionDurationObserver();
+    await tester.pumpWidget(
+      MaterialApp(navigatorObservers: <NavigatorObserver>[observer], routes: routes),
+    );
     await tester.tap(find.text('two'));
     await tester.pump(); // begin navigation
 
     // Expect the height of the secondKey Hero to vary from 100 to 150
     // over duration and according to curve.
 
-    const Duration duration = Duration(milliseconds: 300);
+    final Duration duration = observer.transitionDuration;
     const Curve curve = Curves.fastOutSlowIn;
     final double initialHeight = tester.getSize(find.byKey(firstKey, skipOffstage: false)).height;
     final double finalHeight = tester.getSize(find.byKey(secondKey, skipOffstage: false)).height;
@@ -844,7 +847,10 @@ Future<void> main() async {
   });
 
   testWidgets('Hero push transition interrupted by a pop', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(routes: routes));
+    final TransitionDurationObserver observer = TransitionDurationObserver();
+    await tester.pumpWidget(
+      MaterialApp(navigatorObservers: <NavigatorObserver>[observer], routes: routes),
+    );
 
     // Initially the firstKey Card on the '/' route is visible
     expect(find.byKey(firstKey), isOnstage);
@@ -878,12 +884,10 @@ Future<void> main() async {
     expect(find.byKey(firstKey), findsNothing);
     expect(find.byKey(secondKey), isOnstage);
 
-    // The duration of a MaterialPageRoute's transition is 300ms.
-    // At 150ms Hero 'a' is mid-flight.
-    await tester.pump(const Duration(milliseconds: 150));
-    final double height150ms = tester.getSize(find.byKey(secondKey)).height;
-    expect(height150ms, greaterThan(initialHeight));
-    expect(height150ms, lessThan(finalHeight));
+    await tester.pump(observer.transitionDuration ~/ 2);
+    final double heightMidFlight = tester.getSize(find.byKey(secondKey)).height;
+    expect(heightMidFlight, greaterThan(initialHeight));
+    expect(heightMidFlight, lessThan(finalHeight));
 
     // Pop route '/two' before the push transition to '/two' has finished.
     await tester.tap(find.text('pop'));
@@ -895,9 +899,9 @@ Future<void> main() async {
     // After flying in the opposite direction for 50ms Hero 'a' will
     // be smaller than it was, but bigger than its initial size.
     await tester.pump(const Duration(milliseconds: 50));
-    final double height100ms = tester.getSize(find.byKey(secondKey)).height;
-    expect(height100ms, lessThan(height150ms));
-    expect(finalHeight, greaterThan(height100ms));
+    final double heightBeforeMid = tester.getSize(find.byKey(secondKey)).height;
+    expect(heightBeforeMid, lessThan(heightMidFlight));
+    expect(finalHeight, greaterThan(heightBeforeMid));
 
     // Hero a's return flight at 149ms. The outgoing (push) flight took
     // 150ms so we should be just about back to where Hero 'a' started.
@@ -909,7 +913,7 @@ Future<void> main() async {
     );
 
     // The flight is finished. We're back to where we started.
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(observer.transitionDuration);
     expect(find.byKey(firstKey), isOnstage);
     expect(find.byKey(firstKey), isInCard);
     expect(find.byKey(secondKey), findsNothing);
@@ -918,9 +922,11 @@ Future<void> main() async {
   testWidgets(
     'Hero pop transition interrupted by a push',
     (WidgetTester tester) async {
+      final TransitionDurationObserver observer = TransitionDurationObserver();
       await tester.pumpWidget(
         MaterialApp(
           routes: routes,
+          navigatorObservers: <NavigatorObserver>[observer],
           theme: ThemeData(
             pageTransitionsTheme: const PageTransitionsTheme(
               builders: <TargetPlatform, PageTransitionsBuilder>{
@@ -999,7 +1005,7 @@ Future<void> main() async {
       );
 
       // The flight is finished. We're back to where we started.
-      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pump(observer.transitionDuration);
       expect(find.byKey(secondKey), isOnstage);
       expect(find.byKey(secondKey), isInCard);
       expect(find.byKey(firstKey), findsNothing);
@@ -1013,6 +1019,7 @@ Future<void> main() async {
   testWidgets('Destination hero disappears mid-flight', (WidgetTester tester) async {
     const Key homeHeroKey = Key('home hero');
     const Key routeHeroKey = Key('route hero');
+    final TransitionDurationObserver observer = TransitionDurationObserver();
     bool routeIncludesHero = true;
     late StateSetter heroCardSetState;
 
@@ -1050,6 +1057,7 @@ Future<void> main() async {
     // Show a 100x100 Hero tagged 'H' with key homeHeroKey
     await tester.pumpWidget(
       MaterialApp(
+        navigatorObservers: <NavigatorObserver>[observer],
         home: Scaffold(
           body: Builder(
             builder: (BuildContext context) {
@@ -1087,7 +1095,7 @@ Future<void> main() async {
     expect(midflightHeight, greaterThan(initialHeight));
     expect(midflightHeight, lessThan(200.0));
 
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(observer.transitionDuration);
     await tester.pump();
     double finalHeight = tester.getSize(find.byKey(routeHeroKey)).height;
     expect(finalHeight, 200.0);
@@ -1118,7 +1126,7 @@ Future<void> main() async {
     });
     await tester.pump();
 
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(observer.transitionDuration);
     finalHeight = tester.getSize(find.byKey(homeHeroKey)).height;
     expect(finalHeight, 100.0);
   });
@@ -1127,6 +1135,7 @@ Future<void> main() async {
     const Key homeHeroKey = Key('home hero');
     const Key routeHeroKey = Key('route hero');
     const Key routeContainerKey = Key('route hero container');
+    final TransitionDurationObserver observer = TransitionDurationObserver();
 
     // Show a 200x200 Hero tagged 'H', with key routeHeroKey
     final MaterialPageRoute<void> route = MaterialPageRoute<void>(
@@ -1159,6 +1168,7 @@ Future<void> main() async {
     // Show a 100x100 Hero tagged 'H' with key homeHeroKey
     await tester.pumpWidget(
       MaterialApp(
+        navigatorObservers: <NavigatorObserver>[observer],
         theme: ThemeData(
           pageTransitionsTheme: const PageTransitionsTheme(
             builders: <TargetPlatform, PageTransitionsBuilder>{
@@ -1219,7 +1229,7 @@ Future<void> main() async {
     expect(yAt110ms, lessThan(yAt100ms));
     expect(yAt110ms, greaterThan(75.0));
 
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(observer.transitionDuration);
     await tester.pump();
     final double finalHeroY = tester.getTopLeft(find.byKey(routeHeroKey)).dy;
     expect(finalHeroY, 75.0); // 100 less 25 for the scroll
@@ -1229,6 +1239,7 @@ Future<void> main() async {
     const Key homeHeroKey = Key('home hero');
     const Key routeHeroKey = Key('route hero');
     const Key routeContainerKey = Key('route hero container');
+    final TransitionDurationObserver observer = TransitionDurationObserver();
 
     // Show a 200x200 Hero tagged 'H', with key routeHeroKey
     final MaterialPageRoute<void> route = MaterialPageRoute<void>(
@@ -1256,6 +1267,7 @@ Future<void> main() async {
     // Show a 100x100 Hero tagged 'H' with key homeHeroKey
     await tester.pumpWidget(
       MaterialApp(
+        navigatorObservers: <NavigatorObserver>[observer],
         home: Scaffold(
           body: Builder(
             builder: (BuildContext context) {
@@ -1310,8 +1322,7 @@ Future<void> main() async {
     expect(yAt110ms, lessThan(yAt100ms));
     expect(yAt110ms, greaterThan(100.0));
 
-    await tester.pump(const Duration(milliseconds: 300));
-    await tester.pump();
+    await tester.pump(observer.transitionDuration);
     expect(find.byKey(routeHeroKey), findsNothing);
   });
 
@@ -1319,6 +1330,7 @@ Future<void> main() async {
     // See https://github.com/flutter/flutter/issues/5798
     const Key heroABKey = Key('AB hero');
     const Key heroBCKey = Key('BC hero');
+    final TransitionDurationObserver observer = TransitionDurationObserver();
 
     // Show a 150x150 Hero tagged 'BC'
     final MaterialPageRoute<void> routeC = MaterialPageRoute<void>(
@@ -1370,6 +1382,7 @@ Future<void> main() async {
     // Show a 100x100 Hero tagged 'AB' with key heroABKey
     await tester.pumpWidget(
       MaterialApp(
+        navigatorObservers: <NavigatorObserver>[observer],
         home: Scaffold(
           body: Builder(
             builder: (BuildContext context) {
@@ -1404,7 +1417,7 @@ Future<void> main() async {
     final double initialY = tester.getTopLeft(find.byKey(heroABKey)).dy;
     expect(initialY, 200.0);
 
-    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump(observer.transitionDuration * 2 ~/ 3);
     final double yAt200ms = tester.getTopLeft(find.byKey(heroABKey)).dy;
     // Hero AB is mid flight.
     expect(yAt200ms, lessThan(200.0));
@@ -1417,8 +1430,8 @@ Future<void> main() async {
 
     // Hero AB's aborted flight finishes where it was expected although
     // it's been faded out.
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(tester.getTopLeft(find.byKey(heroABKey)).dy, 100.0);
+    await tester.pump(observer.transitionDuration ~/ 3);
+    expect(tester.getTopLeft(find.byKey(heroABKey)).dy, moreOrLessEquals(100.0, epsilon: 0.1));
 
     bool isVisible(RenderObject node) {
       RenderObject? currentNode = node;
@@ -1436,14 +1449,16 @@ Future<void> main() async {
         .text('Hero')
         .evaluate()
         .map((Element e) => e.renderObject!);
+    await tester.pump(const Duration(milliseconds: 1));
     expect(renderObjects.where(isVisible).length, 1);
 
     // Hero BC's flight finishes normally.
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(observer.transitionDuration);
     expect(tester.getTopLeft(find.byKey(heroBCKey)).dy, 0.0);
   });
 
   testWidgets('Stateful hero child state survives flight', (WidgetTester tester) async {
+    final TransitionDurationObserver observer = TransitionDurationObserver();
     final MaterialPageRoute<void> route = MaterialPageRoute<void>(
       builder: (BuildContext context) {
         return Material(
@@ -1469,6 +1484,7 @@ Future<void> main() async {
 
     await tester.pumpWidget(
       MaterialApp(
+        navigatorObservers: <NavigatorObserver>[observer],
         home: Scaffold(
           body: Builder(
             builder: (BuildContext context) {
@@ -1508,7 +1524,7 @@ Future<void> main() async {
     expect(find.text('456'), findsOneWidget);
 
     // Push flight finished.
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(observer.transitionDuration);
     expect(find.text('456'), findsOneWidget);
 
     // Pop route.
@@ -1521,7 +1537,7 @@ Future<void> main() async {
     expect(find.text('456'), findsOneWidget);
 
     // Pop flight finished
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(observer.transitionDuration);
     expect(find.text('456'), findsOneWidget);
   });
 
@@ -1571,11 +1587,17 @@ Future<void> main() async {
       ),
     };
 
-    await tester.pumpWidget(MaterialApp(routes: createRectTweenHeroRoutes));
+    final TransitionDurationObserver observer = TransitionDurationObserver();
+    await tester.pumpWidget(
+      MaterialApp(
+        routes: createRectTweenHeroRoutes,
+        navigatorObservers: <NavigatorObserver>[observer],
+      ),
+    );
     expect(tester.getCenter(find.byKey(firstKey)), const Offset(50.0, 50.0));
 
     const double epsilon = 0.001;
-    const Duration duration = Duration(milliseconds: 300);
+    final Duration duration = observer.transitionDuration;
     const Curve curve = Curves.fastOutSlowIn;
     final MaterialPointArcTween pushCenterTween = MaterialPointArcTween(
       begin: const Offset(50.0, 50.0),
@@ -1694,16 +1716,20 @@ Future<void> main() async {
     const double leftPadding = 10.0;
 
     // MaterialApp and its Navigator are offset from the left
+    final TransitionDurationObserver observer = TransitionDurationObserver();
     await tester.pumpWidget(
       Padding(
         padding: const EdgeInsets.only(left: leftPadding),
-        child: MaterialApp(routes: createRectTweenHeroRoutes),
+        child: MaterialApp(
+          routes: createRectTweenHeroRoutes,
+          navigatorObservers: <NavigatorObserver>[observer],
+        ),
       ),
     );
     expect(tester.getCenter(find.byKey(firstKey)), const Offset(leftPadding + 50.0, 50.0));
 
     const double epsilon = 0.001;
-    const Duration duration = Duration(milliseconds: 300);
+    final Duration duration = observer.transitionDuration;
     const Curve curve = Curves.fastOutSlowIn;
     final RectTween pushRectTween = RectTween(
       begin: const Rect.fromLTWH(leftPadding, 0.0, 100.0, 100.0),
@@ -1770,12 +1796,15 @@ Future<void> main() async {
   });
 
   testWidgets('Pop interrupts push, reverses flight', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(routes: routes));
+    final TransitionDurationObserver observer = TransitionDurationObserver();
+    await tester.pumpWidget(
+      MaterialApp(routes: routes, navigatorObservers: <NavigatorObserver>[observer]),
+    );
     await tester.tap(find.text('twoInset'));
     await tester.pump(); // begin navigation from / to /twoInset.
 
     const double epsilon = 0.001;
-    const Duration duration = Duration(milliseconds: 300);
+    final Duration duration = observer.transitionDuration;
 
     await tester.pump();
     final double x0 = tester.getTopLeft(find.byKey(secondKey)).dx;
@@ -3157,6 +3186,7 @@ Future<void> main() async {
     final Key container1 = UniqueKey();
     final Key container2 = UniqueKey();
     final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    final TransitionDurationObserver observer = TransitionDurationObserver();
 
     final Animatable<Size?> tween = SizeTween(
       begin: const Size(200, 200),
@@ -3166,6 +3196,7 @@ Future<void> main() async {
     await tester.pumpWidget(
       MaterialApp(
         navigatorKey: navigator,
+        navigatorObservers: <NavigatorObserver>[observer],
         home: Scaffold(
           body: Center(
             child: Hero(
@@ -3206,23 +3237,23 @@ Future<void> main() async {
     navigator.currentState!.pop();
     await tester.pump();
 
-    // Jump 25% into the transition (total length = 300ms)
-    await tester.pump(const Duration(milliseconds: 75)); // 25% of 300ms
+    // Jump 25% into the transition.
+    await tester.pump(observer.transitionDuration ~/ 4);
     Size heroSize = tester.getSize(find.byKey(container1));
     expect(heroSize, tween.transform(0.25));
 
     // Jump to 50% into the transition.
-    await tester.pump(const Duration(milliseconds: 75)); // 25% of 300ms
+    await tester.pump(observer.transitionDuration ~/ 4);
     heroSize = tester.getSize(find.byKey(container1));
     expect(heroSize, tween.transform(0.50));
 
     // Jump to 75% into the transition.
-    await tester.pump(const Duration(milliseconds: 75)); // 25% of 300ms
+    await tester.pump(observer.transitionDuration ~/ 4);
     heroSize = tester.getSize(find.byKey(container1));
     expect(heroSize, tween.transform(0.75));
 
     // Jump to 100% into the transition.
-    await tester.pump(const Duration(milliseconds: 75)); // 25% of 300ms
+    await tester.pump(observer.transitionDuration ~/ 4);
     heroSize = tester.getSize(find.byKey(container1));
     expect(heroSize, tween.transform(1.0));
   });
@@ -3574,9 +3605,11 @@ Future<void> main() async {
 
     tester.view.padding = const FakeViewPadding(top: 50);
 
+    final TransitionDurationObserver observer = TransitionDurationObserver();
     await tester.pumpWidget(
       MaterialApp(
         navigatorKey: navigatorKey,
+        navigatorObservers: <NavigatorObserver>[observer],
         home: Scaffold(
           appBar: AppBar(title: const Text('test')),
           body: Hero(
@@ -3619,7 +3652,7 @@ Future<void> main() async {
 
     navigatorKey.currentState!.pop(route2);
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(observer.transitionDuration);
     expect(tester.getTopLeft(find.byType(Image)).dy, moreOrLessEquals(forwardRest, epsilon: 0.1));
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(find.byType(Image)).dy, moreOrLessEquals(forwardRest, epsilon: 0.1));

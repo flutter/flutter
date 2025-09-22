@@ -12,7 +12,7 @@ import 'resident_runner.dart';
 import 'tracing.dart';
 import 'vmservice.dart';
 
-const String kFlutterTestOutputsDirEnvName = 'FLUTTER_TEST_OUTPUTS_DIR';
+const kFlutterTestOutputsDirEnvName = 'FLUTTER_TEST_OUTPUTS_DIR';
 
 class ColdRunner extends ResidentRunner {
   ColdRunner(
@@ -24,13 +24,13 @@ class ColdRunner extends ResidentRunner {
     this.applicationBinary,
     super.stayResident,
     super.machine,
-    super.devtoolsHandler,
+    super.dartBuilder,
   }) : super(hotMode: false);
 
   final bool traceStartup;
   final bool awaitFirstFrameWhenTracing;
   final File? applicationBinary;
-  bool _didAttach = false;
+  var _didAttach = false;
 
   @override
   bool get canHotReload => false;
@@ -67,24 +67,12 @@ class ColdRunner extends ResidentRunner {
     // Connect to the VM Service.
     if (debuggingEnabled) {
       try {
-        await connectToServiceProtocol(allowExistingDdsInstance: false);
+        await connectToServiceProtocol();
       } on Exception catch (exception) {
         globals.printError(exception.toString());
         appFailedToStart();
         return 2;
       }
-    }
-
-    // TODO(bkonyi): remove when ready to serve DevTools from DDS.
-    if (debuggingEnabled && debuggingOptions.enableDevTools) {
-      // The method below is guaranteed never to return a failing future.
-      unawaited(
-        residentDevtoolsHandler!.serveAndAnnounceDevTools(
-          devToolsServerAddress: debuggingOptions.devToolsServerAddress,
-          flutterDevices: flutterDevices,
-          isStartPaused: debuggingOptions.startPaused,
-        ),
-      );
     }
 
     if (flutterDevices.first.vmServiceUris != null) {
@@ -138,12 +126,11 @@ class ColdRunner extends ResidentRunner {
   Future<int> attach({
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
-    bool allowExistingDdsInstance = false,
     bool needsFullRestart = true,
   }) async {
     _didAttach = true;
     try {
-      await connectToServiceProtocol(allowExistingDdsInstance: allowExistingDdsInstance);
+      await connectToServiceProtocol();
     } on Exception catch (error) {
       globals.printError('Error connecting to the service protocol: $error');
       return 2;
@@ -151,7 +138,7 @@ class ColdRunner extends ResidentRunner {
 
     for (final FlutterDevice? device in flutterDevices) {
       final List<FlutterView> views = await device!.vmService!.getFlutterViews();
-      for (final FlutterView view in views) {
+      for (final view in views) {
         globals.printTrace('Connected to $view.');
       }
     }
@@ -178,7 +165,6 @@ class ColdRunner extends ResidentRunner {
     for (final FlutterDevice? flutterDevice in flutterDevices) {
       await flutterDevice!.device!.dispose();
     }
-    await residentDevtoolsHandler!.shutdown();
     await stopEchoingDeviceLog();
   }
 

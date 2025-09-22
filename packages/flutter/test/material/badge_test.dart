@@ -444,4 +444,86 @@ void main() {
     // Badge should scale with content
     expect(box, paints..rrect(rrect: RRect.fromLTRBR(0, -7, 30 + 8, 23, badgeRadius)));
   });
+
+  testWidgets('Badge renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: Badge(label: Text('X'))),
+        ),
+      ),
+    );
+    final Finder label = find.text('X');
+    expect(tester.getSize(label), Size.zero);
+  });
+
+  testWidgets('Badge.count maxCount limits displayed value', (WidgetTester tester) async {
+    Widget buildFrame(int count, [int maxCount = 999]) {
+      return MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: Badge.count(count: count, maxCount: maxCount, child: const Icon(Icons.add)),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(5, 99));
+    expect(find.text('5'), findsOneWidget);
+
+    await tester.pumpWidget(buildFrame(99, 99));
+    expect(find.text('99'), findsOneWidget);
+
+    await tester.pumpWidget(buildFrame(100, 99));
+    expect(find.text('99+'), findsOneWidget);
+
+    await tester.pumpWidget(buildFrame(999));
+    expect(find.text('999'), findsOneWidget);
+
+    await tester.pumpWidget(buildFrame(1000));
+    expect(find.text('999+'), findsOneWidget);
+
+    // Test default maxCount (999)
+    await tester.pumpWidget(buildFrame(1001));
+    expect(find.text('999+'), findsOneWidget);
+  });
+
+  testWidgets('Badge.count asserts on negative count', (WidgetTester tester) async {
+    Widget buildFrame(int count, [int maxCount = 999]) {
+      return MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: Badge.count(count: count, maxCount: maxCount, child: const Icon(Icons.add)),
+        ),
+      );
+    }
+
+    expect(() => buildFrame(-1), throwsAssertionError);
+  });
+
+  testWidgets('Badge.count asserts on non-positive maxCount', (WidgetTester tester) async {
+    Widget buildFrame(int count, [int maxCount = 999]) {
+      return MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: Badge.count(count: count, maxCount: maxCount, child: const Icon(Icons.add)),
+        ),
+      );
+    }
+
+    expect(() => buildFrame(5, 0), throwsAssertionError);
+  });
+
+  testWidgets('Badge.count displays "0" when count is zero', (WidgetTester tester) async {
+    Widget buildFrame(int count, [int maxCount = 999]) {
+      return MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: Badge.count(count: count, maxCount: maxCount, child: const Icon(Icons.add)),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(0, 5));
+    expect(find.text('0'), findsOneWidget);
+  });
 }

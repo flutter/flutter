@@ -10,7 +10,7 @@ import '../base/process.dart';
 import '../base/terminal.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
-import 'gradle_utils.dart';
+import 'gradle_utils.dart' as utils;
 
 typedef GradleErrorTest = bool Function(String);
 
@@ -62,7 +62,7 @@ GradleErrorTest _lineMatcher(List<String> errorMessages) {
 /// [GradleHandledError.test] function returns `true` is handled.
 /// As a result, sort error handlers based on how strict
 /// the [GradleHandledError.test] function is to eliminate false positives.
-final List<GradleHandledError> gradleErrors = <GradleHandledError>[
+final gradleErrors = <GradleHandledError>[
   licenseNotAcceptedHandler,
   networkErrorHandler,
   permissionDeniedErrorHandler,
@@ -86,11 +86,11 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   incompatibleKotlinVersionHandler, // This handler should always be last, as its key log output is sometimes in error messages with other root causes.
 ];
 
-const String _boxTitle = 'Flutter Fix';
+const _boxTitle = 'Flutter Fix';
 
 // Permission defined error message.
 @visibleForTesting
-final GradleHandledError permissionDeniedErrorHandler = GradleHandledError(
+final permissionDeniedErrorHandler = GradleHandledError(
   test: _lineMatcher(const <String>['Permission denied']),
   handler:
       ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
@@ -108,7 +108,7 @@ final GradleHandledError permissionDeniedErrorHandler = GradleHandledError(
 /// Gradle crashes for several known reasons when downloading that are not
 /// actionable by Flutter.
 @visibleForTesting
-final GradleHandledError networkErrorHandler = GradleHandledError(
+final networkErrorHandler = GradleHandledError(
   test: _lineMatcher(const <String>[
     "> Could not get resource 'http",
     'java.io.FileNotFoundException',
@@ -144,7 +144,7 @@ final GradleHandledError networkErrorHandler = GradleHandledError(
 ///  * https://github.com/flutter/flutter/issues/89959
 ///  * https://docs.gradle.org/current/userguide/directory_layout.html#dir:gradle_user_home
 @visibleForTesting
-final GradleHandledError zipExceptionHandler = GradleHandledError(
+final zipExceptionHandler = GradleHandledError(
   test: _lineMatcher(const <String>['java.util.zip.ZipException: error in opening zip file']),
   handler:
       ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
@@ -193,15 +193,15 @@ final GradleHandledError zipExceptionHandler = GradleHandledError(
 /// Android SDK components (e.g. Platform Tools), and the license
 /// for that component has not been accepted.
 @visibleForTesting
-final GradleHandledError licenseNotAcceptedHandler = GradleHandledError(
+final licenseNotAcceptedHandler = GradleHandledError(
   test: _lineMatcher(const <String>[
     'You have not accepted the license agreements of the following SDK components',
   ]),
   handler: ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
-    const String licenseNotAcceptedMatcher =
+    const licenseNotAcceptedMatcher =
         r'You have not accepted the license agreements of the following SDK components:\s*\[(.+)\]';
 
-    final RegExp licenseFailure = RegExp(licenseNotAcceptedMatcher, multiLine: true);
+    final licenseFailure = RegExp(licenseNotAcceptedMatcher, multiLine: true);
     final Match? licenseMatch = licenseFailure.firstMatch(line);
     globals.printBox(
       '${globals.logger.terminal.warningMark} Unable to download needed Android SDK components, as the '
@@ -216,13 +216,13 @@ final GradleHandledError licenseNotAcceptedHandler = GradleHandledError(
   eventLabel: 'license-not-accepted',
 );
 
-final RegExp _undefinedTaskPattern = RegExp(r'Task .+ not found in root project.');
+final _undefinedTaskPattern = RegExp(r'Task .+ not found in root project.');
 
-final RegExp _assembleTaskPattern = RegExp(r'assemble(\S+)');
+final _assembleTaskPattern = RegExp(r'assemble(\S+)');
 
 /// Handler when a flavor is undefined.
 @visibleForTesting
-final GradleHandledError flavorUndefinedHandler = GradleHandledError(
+final flavorUndefinedHandler = GradleHandledError(
   test: (String line) {
     return _undefinedTaskPattern.hasMatch(line);
   },
@@ -234,7 +234,7 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
       environment: globals.java?.environment,
     );
     // Extract build types and product flavors.
-    final Set<String> variants = <String>{};
+    final variants = <String>{};
     for (final String task in tasksRunResult.stdout.split('\n')) {
       final Match? match = _assembleTaskPattern.matchAsPrefix(task);
       if (match != null) {
@@ -244,9 +244,9 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
         }
       }
     }
-    final Set<String> productFlavors = <String>{};
-    for (final String variant1 in variants) {
-      for (final String variant2 in variants) {
+    final productFlavors = <String>{};
+    for (final variant1 in variants) {
+      for (final variant2 in variants) {
         if (variant2.startsWith(variant1) && variant2 != variant1) {
           final String buildType = variant2.substring(variant1.length);
           if (variants.contains(buildType)) {
@@ -255,7 +255,7 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
         }
       }
     }
-    final String errorMessage =
+    final errorMessage =
         '${globals.logger.terminal.warningMark}  Gradle project does not define a task suitable for the requested build.';
     final File buildGradle = project.android.appGradleFile;
     if (productFlavors.isEmpty) {
@@ -280,13 +280,13 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
   eventLabel: 'flavor-undefined',
 );
 
-final RegExp _minSdkVersionPattern = RegExp(
+final _minSdkVersionPattern = RegExp(
   r'uses-sdk:minSdkVersion ([0-9]+) cannot be smaller than version ([0-9]+) declared in library \[:(.+)\]',
 );
 
 /// Handler when a plugin requires a higher Android API level.
 @visibleForTesting
-final GradleHandledError minSdkVersionHandler = GradleHandledError(
+final minSdkVersionHandler = GradleHandledError(
   test: (String line) {
     return _minSdkVersionPattern.hasMatch(line);
   },
@@ -319,7 +319,7 @@ final GradleHandledError minSdkVersionHandler = GradleHandledError(
 /// Handler when https://issuetracker.google.com/issues/141126614 or
 /// https://github.com/flutter/flutter/issues/58247 is triggered.
 @visibleForTesting
-final GradleHandledError transformInputIssueHandler = GradleHandledError(
+final transformInputIssueHandler = GradleHandledError(
   test: (String line) {
     return line.contains('https://issuetracker.google.com/issues/158753935');
   },
@@ -346,15 +346,13 @@ final GradleHandledError transformInputIssueHandler = GradleHandledError(
 
 /// Handler when a dependency is missing in the lockfile.
 @visibleForTesting
-final GradleHandledError lockFileDepMissingHandler = GradleHandledError(
+final lockFileDepMissingHandler = GradleHandledError(
   test: (String line) {
     return line.contains('which is not part of the dependency lock state');
   },
   handler: ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
     final File gradleFile = project.android.hostAppGradleFile;
-    final String generatedGradleCommand = globals.platform.isWindows
-        ? r'.\gradlew.bat'
-        : './gradlew';
+    final generatedGradleCommand = globals.platform.isWindows ? r'.\gradlew.bat' : './gradlew';
     final String textInBold = globals.logger.terminal.bolden(
       'To regenerate the lockfiles run: `$generatedGradleCommand :generateLockfiles` in ${gradleFile.path}\n'
       'To remove dependency locking, remove the `dependencyLocking` from ${gradleFile.path}',
@@ -371,7 +369,7 @@ final GradleHandledError lockFileDepMissingHandler = GradleHandledError(
 
 // This handler is made visible in other files so that we can uniquely set it
 // to be the lowest priority error.
-final GradleHandledError incompatibleKotlinVersionHandler = GradleHandledError(
+final incompatibleKotlinVersionHandler = GradleHandledError(
   test: _lineMatcher(const <String>['was compiled with an incompatible version of Kotlin']),
   handler: ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
     final File gradleFile = project.android.hostAppGradleFile;
@@ -393,29 +391,29 @@ final GradleHandledError incompatibleKotlinVersionHandler = GradleHandledError(
   eventLabel: 'incompatible-kotlin-version',
 );
 
-final RegExp _outdatedGradlePattern = RegExp(
+final _outdatedGradlePattern = RegExp(
   r'The current Gradle version (.+) is not compatible with the Kotlin Gradle plugin',
 );
 
 @visibleForTesting
-final GradleHandledError outdatedGradleHandler = GradleHandledError(
+final outdatedGradleHandler = GradleHandledError(
   test: _outdatedGradlePattern.hasMatch,
   handler: ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
     final File gradleFile = project.android.hostAppGradleFile;
     final File gradlePropertiesFile = project.directory
         .childDirectory('android')
-        .childDirectory('gradle')
-        .childDirectory('wrapper')
-        .childFile('gradle-wrapper.properties');
+        .childDirectory(utils.gradleDirectoryName)
+        .childDirectory(utils.gradleWrapperDirectoryName)
+        .childFile(utils.gradleWrapperPropertiesFilename);
     globals.printBox(
       '${globals.logger.terminal.warningMark} Your project needs to upgrade Gradle and the Android Gradle plugin.\n\n'
       'To fix this issue, replace the following content:\n'
       '${gradleFile.path}:\n'
       '    ${globals.terminal.color("- classpath 'com.android.tools.build:gradle:<current-version>'", TerminalColor.red)}\n'
-      '    ${globals.terminal.color("+ classpath 'com.android.tools.build:gradle:$templateAndroidGradlePluginVersion'", TerminalColor.green)}\n'
+      '    ${globals.terminal.color("+ classpath 'com.android.tools.build:gradle:${utils.templateAndroidGradlePluginVersion}'", TerminalColor.green)}\n'
       '${gradlePropertiesFile.path}:\n'
       '    ${globals.terminal.color('- https://services.gradle.org/distributions/gradle-<current-version>-all.zip', TerminalColor.red)}\n'
-      '    ${globals.terminal.color('+ https://services.gradle.org/distributions/gradle-$templateDefaultGradleVersion-all.zip', TerminalColor.green)}',
+      '    ${globals.terminal.color('+ https://services.gradle.org/distributions/gradle-${utils.templateDefaultGradleVersion}-all.zip', TerminalColor.green)}',
       title: _boxTitle,
     );
     return GradleBuildStatus.exit;
@@ -423,12 +421,10 @@ final GradleHandledError outdatedGradleHandler = GradleHandledError(
   eventLabel: 'outdated-gradle-version',
 );
 
-final RegExp _minCompileSdkVersionPattern = RegExp(
-  r'The minCompileSdk \(([0-9]+)\) specified in a',
-);
+final _minCompileSdkVersionPattern = RegExp(r'The minCompileSdk \(([0-9]+)\) specified in a');
 
 @visibleForTesting
-final GradleHandledError minCompileSdkVersionHandler = GradleHandledError(
+final minCompileSdkVersionHandler = GradleHandledError(
   test: _minCompileSdkVersionPattern.hasMatch,
   handler:
       ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
@@ -449,7 +445,7 @@ final GradleHandledError minCompileSdkVersionHandler = GradleHandledError(
   eventLabel: 'min-compile-sdk-version',
 );
 
-final RegExp _agpJavaError = RegExp(r'Android Gradle plugin requires Java (\d+\.?\d*) to run');
+final _agpJavaError = RegExp(r'Android Gradle plugin requires Java (\d+\.?\d*) to run');
 
 // If an incompatible Java and Android Gradle Plugin error is caught,
 // Android Gradle Plugin throws the required Java version to fix the error.
@@ -459,7 +455,7 @@ final RegExp _agpJavaError = RegExp(r'Android Gradle plugin requires Java (\d+\.
 // we can find the Java and Android Gradle Plugin compatibility here:
 // 'https://developer.android.com/build/releases/past-releases'
 @visibleForTesting
-final GradleHandledError incompatibleJavaAndAgpVersionsHandler = GradleHandledError(
+final incompatibleJavaAndAgpVersionsHandler = GradleHandledError(
   test: (String line) {
     return _agpJavaError.hasMatch(line);
   },
@@ -481,7 +477,7 @@ final GradleHandledError incompatibleJavaAndAgpVersionsHandler = GradleHandledEr
 
 /// Handles SSL exceptions: https://github.com/flutter/flutter/issues/104628
 @visibleForTesting
-final GradleHandledError sslExceptionHandler = GradleHandledError(
+final sslExceptionHandler = GradleHandledError(
   test: _lineMatcher(const <String>[
     'javax.net.ssl.SSLException: Tag mismatch!',
     'javax.crypto.AEADBadTagException: Tag mismatch!',
@@ -500,12 +496,12 @@ final GradleHandledError sslExceptionHandler = GradleHandledError(
 /// If an incompatible Java and Gradle versions error is caught, we expect an
 /// error specifying that the Java major class file version, one of
 /// https://javaalmanac.io/bytecode/versions/, is unsupported by Gradle.
-final RegExp _unsupportedClassFileMajorVersionPattern = RegExp(
+final _unsupportedClassFileMajorVersionPattern = RegExp(
   r'Unsupported class file major version\s+\d+',
 );
 
 @visibleForTesting
-final GradleHandledError incompatibleJavaAndGradleVersionsHandler = GradleHandledError(
+final incompatibleJavaAndGradleVersionsHandler = GradleHandledError(
   test: (String line) {
     return _unsupportedClassFileMajorVersionPattern.hasMatch(line);
   },
@@ -513,9 +509,9 @@ final GradleHandledError incompatibleJavaAndGradleVersionsHandler = GradleHandle
       ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
         final File gradlePropertiesFile = project.directory
             .childDirectory('android')
-            .childDirectory('gradle')
-            .childDirectory('wrapper')
-            .childFile('gradle-wrapper.properties');
+            .childDirectory(utils.gradleDirectoryName)
+            .childDirectory(utils.gradleWrapperDirectoryName)
+            .childFile(utils.gradleWrapperPropertiesFilename);
         // TODO(reidbaker): Replace URL with constant defined in
         // https://github.com/flutter/flutter/pull/123916.
         globals.printBox(
@@ -535,7 +531,7 @@ final GradleHandledError incompatibleJavaAndGradleVersionsHandler = GradleHandle
 );
 
 @visibleForTesting
-final GradleHandledError remoteTerminatedHandshakeHandler = GradleHandledError(
+final remoteTerminatedHandshakeHandler = GradleHandledError(
   test: (String line) => line.contains('Remote host terminated the handshake'),
   handler:
       ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
@@ -550,7 +546,7 @@ final GradleHandledError remoteTerminatedHandshakeHandler = GradleHandledError(
 );
 
 @visibleForTesting
-final GradleHandledError couldNotOpenCacheDirectoryHandler = GradleHandledError(
+final couldNotOpenCacheDirectoryHandler = GradleHandledError(
   test: (String line) => line.contains('> Could not open cache directory '),
   handler:
       ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
@@ -576,7 +572,7 @@ as the number following "com.android.tools.build:gradle:".''';
 }
 
 @visibleForTesting
-final GradleHandledError incompatibleCompileSdk35AndAgpVersionHandler = GradleHandledError(
+final incompatibleCompileSdk35AndAgpVersionHandler = GradleHandledError(
   test: (String line) =>
       line.contains('RES_TABLE_TYPE_TYPE entry offsets overlap actual entry data'),
   handler: ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
@@ -593,7 +589,7 @@ final GradleHandledError incompatibleCompileSdk35AndAgpVersionHandler = GradleHa
 );
 
 @visibleForTesting
-final GradleHandledError r8DexingBugInAgp73Handler = GradleHandledError(
+final r8DexingBugInAgp73Handler = GradleHandledError(
   test: (String line) =>
       line.contains('com.android.tools.r8.internal') &&
       line.contains(': Unused argument with users'),
@@ -613,7 +609,7 @@ ${_getAgpLocation(project)}''', title: _boxTitle);
 // Handler for when an outdated plugin is still using v1 embedding references that
 // were possibly removed in more recent plugin versions.
 @visibleForTesting
-final GradleHandledError usageOfV1EmbeddingReferencesHandler = GradleHandledError(
+final usageOfV1EmbeddingReferencesHandler = GradleHandledError(
   test: (String line) =>
       line.contains('io.flutter.plugin.common.PluginRegistry.Registrar registrar'),
   handler:
@@ -633,7 +629,7 @@ If that does not work, please file an issue for the problematic plugin(s) here: 
 );
 
 @visibleForTesting
-final GradleHandledError jlinkErrorWithJava21AndSourceCompatibility = GradleHandledError(
+final jlinkErrorWithJava21AndSourceCompatibility = GradleHandledError(
   test: (String line) => line.contains('> Error while executing process') && line.contains('jlink'),
   handler:
       ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
@@ -652,13 +648,13 @@ https://github.com/flutter/flutter/issues/156304''', title: _boxTitle);
   eventLabel: 'java21-and-source-compatibility',
 );
 
-final RegExp _missingNdkSourcePropertiesRegexp = RegExp(
+final _missingNdkSourcePropertiesRegexp = RegExp(
   r'NDK at ((?:/|[a-zA-Z]:\\).+?) did not have a source\.properties file',
   multiLine: true,
 );
 
 @visibleForTesting
-final GradleHandledError missingNdkSourcePropertiesFile = GradleHandledError(
+final missingNdkSourcePropertiesFile = GradleHandledError(
   test: (String line) => _missingNdkSourcePropertiesRegexp.hasMatch(line),
   handler:
       ({required String line, required FlutterProject project, required bool usesAndroidX}) async {

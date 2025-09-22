@@ -9,6 +9,7 @@ import 'package:args/args.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
+import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -23,22 +24,22 @@ import 'package:flutter_tools/src/test/runner.dart';
 import 'package:flutter_tools/src/test/test_wrapper.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
-const String _kOptionPackages = 'packages';
-const String _kOptionShell = 'shell';
-const String _kOptionTestDirectory = 'test-directory';
-const String _kOptionSdkRoot = 'sdk-root';
-const String _kOptionIcudtl = 'icudtl';
-const String _kOptionTests = 'tests';
-const String _kOptionCoverageDirectory = 'coverage-directory';
-const List<String> _kRequiredOptions = <String>[
+const _kOptionPackages = 'packages';
+const _kOptionShell = 'shell';
+const _kOptionTestDirectory = 'test-directory';
+const _kOptionSdkRoot = 'sdk-root';
+const _kOptionIcudtl = 'icudtl';
+const _kOptionTests = 'tests';
+const _kOptionCoverageDirectory = 'coverage-directory';
+const _kRequiredOptions = <String>[
   _kOptionPackages,
   _kOptionShell,
   _kOptionSdkRoot,
   _kOptionIcudtl,
   _kOptionTests,
 ];
-const String _kOptionCoverage = 'coverage';
-const String _kOptionCoveragePath = 'coverage-path';
+const _kOptionCoverage = 'coverage';
+const _kOptionCoveragePath = 'coverage-path';
 
 void main(List<String> args) {
   runInContext<void>(
@@ -48,8 +49,8 @@ void main(List<String> args) {
 }
 
 Future<void> run(List<String> args) async {
-  final ArgParser parser = ArgParser()
-    ..addOption(_kOptionPackages, help: 'The .packages file')
+  final parser = ArgParser()
+    ..addOption(_kOptionPackages, help: 'The .dart_tool/package_config.json file')
     ..addOption(_kOptionShell, help: 'The flutter_tester binary')
     ..addOption(_kOptionTestDirectory, help: 'Directory containing the tests')
     ..addOption(_kOptionSdkRoot, help: 'Path to the SDK platform files')
@@ -90,7 +91,7 @@ Future<void> run(List<String> args) async {
       throwToolExit('Cannot find SDK files at ${sdkRootSrc.path}');
     }
     Directory? coverageDirectory;
-    final String? coverageDirectoryPath = argResults[_kOptionCoverageDirectory] as String?;
+    final coverageDirectoryPath = argResults[_kOptionCoverageDirectory] as String?;
     if (coverageDirectoryPath != null) {
       if (!globals.fs.isDirectorySync(coverageDirectoryPath)) {
         throwToolExit('Cannot find coverage directory at $coverageDirectoryPath');
@@ -137,19 +138,19 @@ Future<void> run(List<String> args) async {
       testDirectory = globals.fs.directory(argResults[_kOptionTestDirectory]);
     }
 
-    final Map<String, String> tests = <String, String>{};
-    final List<Map<String, dynamic>> jsonList = List<Map<String, dynamic>>.from(
+    final tests = <String, String>{};
+    final jsonList = List<Map<String, dynamic>>.from(
       (json.decode(globals.fs.file(argResults[_kOptionTests]).readAsStringSync()) as List<dynamic>)
           .cast<Map<String, dynamic>>(),
     );
-    for (final Map<String, dynamic> map in jsonList) {
+    for (final map in jsonList) {
       final String source = globals.fs.file(map['source']).resolveSymbolicLinksSync();
       final String dill = globals.fs.file(map['dill']).resolveSymbolicLinksSync();
       tests[source] = dill;
     }
 
     // TODO(dnfield): This should be injected.
-    final BuildInfo buildInfo = BuildInfo(
+    final buildInfo = BuildInfo(
       BuildMode.debug,
       '',
       treeShakeIcons: false,

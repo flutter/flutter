@@ -9,9 +9,9 @@ import 'package:package_config/package_config.dart';
 
 import '../../src/common.dart';
 
-const String flutterRoot = '';
-const String testVersionString = '2.13';
-final LanguageVersion testCurrentLanguageVersion = LanguageVersion(2, 13);
+const flutterRoot = '';
+const testVersionString = '2.13';
+final testCurrentLanguageVersion = LanguageVersion(2, 13);
 
 void setUpLanguageVersion(FileSystem fileSystem, [String version = testVersionString]) {
   fileSystem.file(fileSystem.path.join('bin', 'cache', 'dart-sdk', 'version'))
@@ -264,7 +264,7 @@ library funstuff;
       ..writeAsStringSync('''
 // Some license
 ''');
-    final Package package = Package(
+    final package = Package(
       'foo',
       Uri.parse('file://foo/'),
       languageVersion: LanguageVersion(2, 7),
@@ -280,7 +280,7 @@ library funstuff;
       ..writeAsStringSync('''
 // Some license
 ''');
-    final Package package = Package('foo', Uri.parse('file://foo/'));
+    final package = Package('foo', Uri.parse('file://foo/'));
 
     expect(determineLanguageVersion(file, package, flutterRoot), testCurrentLanguageVersion);
   });
@@ -288,13 +288,13 @@ library funstuff;
   testWithoutContext(
     'Returns null safe error if reading the file throws a FileSystemException',
     () {
-      final FileExceptionHandler handler = FileExceptionHandler();
+      final handler = FileExceptionHandler();
       final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
       setUpLanguageVersion(fileSystem);
       final File errorFile = fileSystem.file('foo');
       handler.addError(errorFile, FileSystemOp.read, const FileSystemException());
 
-      final Package package = Package(
+      final package = Package(
         'foo',
         Uri.parse('file://foo/'),
         languageVersion: LanguageVersion(2, 7),

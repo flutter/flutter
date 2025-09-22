@@ -21,7 +21,7 @@ import 'globals.dart' as globals;
 import 'runner/flutter_command.dart' show FlutterOptions;
 
 /// Whether icon font subsetting is enabled by default.
-const bool kIconTreeShakerEnabledDefault = true;
+const kIconTreeShakerEnabledDefault = true;
 
 /// Information about a build to be performed or used.
 class BuildInfo {
@@ -188,7 +188,7 @@ class BuildInfo {
   final bool webEnableHotReload;
 
   /// Can be used when the actual information is not needed.
-  static const BuildInfo dummy = BuildInfo(
+  static const dummy = BuildInfo(
     BuildMode.debug,
     null,
     trackWidgetCreation: true,
@@ -197,7 +197,7 @@ class BuildInfo {
   );
 
   @visibleForTesting
-  static const BuildInfo debug = BuildInfo(
+  static const debug = BuildInfo(
     BuildMode.debug,
     null,
     trackWidgetCreation: true,
@@ -206,7 +206,7 @@ class BuildInfo {
   );
 
   @visibleForTesting
-  static const BuildInfo profile = BuildInfo(
+  static const profile = BuildInfo(
     BuildMode.profile,
     null,
     treeShakeIcons: kIconTreeShakerEnabledDefault,
@@ -214,7 +214,7 @@ class BuildInfo {
   );
 
   @visibleForTesting
-  static const BuildInfo jitRelease = BuildInfo(
+  static const jitRelease = BuildInfo(
     BuildMode.jitRelease,
     null,
     treeShakeIcons: kIconTreeShakerEnabledDefault,
@@ -222,7 +222,7 @@ class BuildInfo {
   );
 
   @visibleForTesting
-  static const BuildInfo release = BuildInfo(
+  static const release = BuildInfo(
     BuildMode.release,
     null,
     treeShakeIcons: kIconTreeShakerEnabledDefault,
@@ -313,18 +313,18 @@ class BuildInfo {
       kBuildMode: mode.cliName,
       if (dartDefines.isNotEmpty) kDartDefines: encodeDartDefines(dartDefines),
       kDartObfuscation: dartObfuscation.toString(),
-      if (frontendServerStarterPath != null) kFrontendServerStarterPath: frontendServerStarterPath!,
+      kFrontendServerStarterPath: ?frontendServerStarterPath,
       if (extraFrontEndOptions.isNotEmpty) kExtraFrontEndOptions: extraFrontEndOptions.join(','),
       if (extraGenSnapshotOptions.isNotEmpty)
         kExtraGenSnapshotOptions: extraGenSnapshotOptions.join(','),
-      if (splitDebugInfoPath != null) kSplitDebugInfo: splitDebugInfoPath!,
+      kSplitDebugInfo: ?splitDebugInfoPath,
       kTrackWidgetCreation: trackWidgetCreation.toString(),
       kIconTreeShakerFlag: treeShakeIcons.toString(),
-      if (codeSizeDirectory != null) kCodeSizeDirectory: codeSizeDirectory!,
+      kCodeSizeDirectory: ?codeSizeDirectory,
       if (fileSystemRoots.isNotEmpty) kFileSystemRoots: fileSystemRoots.join(','),
-      if (fileSystemScheme != null) kFileSystemScheme: fileSystemScheme!,
-      if (buildName != null) kBuildName: buildName!,
-      if (buildNumber != null) kBuildNumber: buildNumber!,
+      kFileSystemScheme: ?fileSystemScheme,
+      kBuildName: ?buildName,
+      kBuildNumber: ?buildNumber,
       if (useLocalCanvasKit) kUseLocalCanvasKitFlag: useLocalCanvasKit.toString(),
     };
   }
@@ -343,14 +343,14 @@ class BuildInfo {
         'EXTRA_FRONT_END_OPTIONS': extraFrontEndOptions.join(','),
       if (extraGenSnapshotOptions.isNotEmpty)
         'EXTRA_GEN_SNAPSHOT_OPTIONS': extraGenSnapshotOptions.join(','),
-      if (splitDebugInfoPath != null) 'SPLIT_DEBUG_INFO': splitDebugInfoPath!,
+      'SPLIT_DEBUG_INFO': ?splitDebugInfoPath,
       'TRACK_WIDGET_CREATION': trackWidgetCreation.toString(),
       'TREE_SHAKE_ICONS': treeShakeIcons.toString(),
       if (performanceMeasurementFile != null)
         'PERFORMANCE_MEASUREMENT_FILE': performanceMeasurementFile!,
       'PACKAGE_CONFIG': packageConfigPath,
-      if (codeSizeDirectory != null) 'CODE_SIZE_DIRECTORY': codeSizeDirectory!,
-      if (flavor != null) 'FLAVOR': flavor!,
+      'CODE_SIZE_DIRECTORY': ?codeSizeDirectory,
+      'FLAVOR': ?flavor,
     };
   }
 
@@ -389,7 +389,6 @@ class AndroidBuildInfo {
       AndroidArch.x86_64,
     ],
     this.splitPerAbi = false,
-    this.fastStart = false,
   });
 
   // The build info containing the mode and flavor.
@@ -404,9 +403,6 @@ class AndroidBuildInfo {
 
   /// The target platforms for the build.
   final Iterable<AndroidArch> targetArchs;
-
-  /// Whether to bootstrap an empty application.
-  final bool fastStart;
 }
 
 /// A summary of the compilation strategy used for Dart.
@@ -428,8 +424,8 @@ enum BuildMode {
     orElse: () => throw ArgumentError('$value is not a supported build mode'),
   );
 
-  static const Set<BuildMode> releaseModes = <BuildMode>{release, jitRelease};
-  static const Set<BuildMode> jitModes = <BuildMode>{debug, jitRelease};
+  static const releaseModes = <BuildMode>{release, jitRelease};
+  static const jitModes = <BuildMode>{debug, jitRelease};
 
   /// Whether this mode is considered release.
   ///
@@ -480,7 +476,7 @@ String? validatedBuildNumberForPlatform(
   }
   if (targetPlatform == TargetPlatform.ios || targetPlatform == TargetPlatform.darwin) {
     // See CFBundleVersion at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-    final RegExp disallowed = RegExp(r'[^\d\.]');
+    final disallowed = RegExp(r'[^\d\.]');
     String tmpBuildNumber = buildNumber.replaceAll(disallowed, '');
     if (tmpBuildNumber.isEmpty) {
       return null;
@@ -505,7 +501,7 @@ String? validatedBuildNumberForPlatform(
       targetPlatform == TargetPlatform.android_arm64 ||
       targetPlatform == TargetPlatform.android_x64) {
     // See versionCode at https://developer.android.com/studio/publish/versioning
-    final RegExp disallowed = RegExp(r'[^\d]');
+    final disallowed = RegExp(r'[^\d]');
     String tmpBuildNumberStr = buildNumber.replaceAll(disallowed, '');
     int tmpBuildNumberInt = int.tryParse(tmpBuildNumberStr) ?? 0;
     if (tmpBuildNumberInt < 1) {
@@ -533,7 +529,7 @@ String? validatedBuildNameForPlatform(
   }
   if (targetPlatform == TargetPlatform.ios || targetPlatform == TargetPlatform.darwin) {
     // See CFBundleShortVersionString at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-    final RegExp disallowed = RegExp(r'[^\d\.]');
+    final disallowed = RegExp(r'[^\d\.]');
     String tmpBuildName = buildName.replaceAll(disallowed, '');
     if (tmpBuildName.isEmpty) {
       return null;
@@ -615,6 +611,35 @@ enum TargetPlatform {
       case TargetPlatform.windows_arm64:
       case TargetPlatform.unsupported:
         throw UnsupportedError('Unexpected Fuchsia platform $this');
+    }
+  }
+
+  String get osName {
+    switch (this) {
+      case TargetPlatform.linux_x64:
+      case TargetPlatform.linux_arm64:
+        return 'linux';
+      case TargetPlatform.darwin:
+        return 'macos';
+      case TargetPlatform.windows_x64:
+      case TargetPlatform.windows_arm64:
+        return 'windows';
+      case TargetPlatform.android:
+      case TargetPlatform.android_arm:
+      case TargetPlatform.android_arm64:
+      case TargetPlatform.android_x64:
+        return 'android';
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
+        return 'fuchsia';
+      case TargetPlatform.ios:
+        return 'ios';
+      case TargetPlatform.tester:
+        return 'flutter-tester';
+      case TargetPlatform.web_javascript:
+        return 'web';
+      case TargetPlatform.unsupported:
+        throw UnsupportedError('Unexpected target platform $this');
     }
   }
 
@@ -742,6 +767,12 @@ DarwinArch getDarwinArchForName(String arch) {
     'x86_64' => DarwinArch.x86_64,
     _ => throw Exception('Unsupported MacOS arch name "$arch"'),
   };
+}
+
+List<DarwinArch> getDarwinArchsFromEnv(Map<String, String> defines) {
+  const defaultDarwinArchitectures = <DarwinArch>[DarwinArch.x86_64, DarwinArch.arm64];
+  return defines[kDarwinArchs]?.split(' ').map(getDarwinArchForName).toList() ??
+      defaultDarwinArchitectures;
 }
 
 String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch? darwinArch}) {
@@ -882,7 +913,7 @@ String getLinuxBuildDirectory([TargetPlatform? targetPlatform]) {
   final String arch = (targetPlatform == null)
       ? _getCurrentHostPlatformArchName()
       : targetPlatform.simpleName;
-  final String subDirs = 'linux/$arch';
+  final subDirs = 'linux/$arch';
   return globals.fs.path.join(getBuildDirectory(), subDirs);
 }
 
@@ -900,56 +931,56 @@ String getFuchsiaBuildDirectory() {
 /// Defines specified via the `--dart-define` command-line option.
 ///
 /// These values are URI-encoded and then combined into a comma-separated string.
-const String kDartDefines = 'DartDefines';
+const kDartDefines = 'DartDefines';
 
 /// The define to pass a [BuildMode].
-const String kBuildMode = 'BuildMode';
+const kBuildMode = 'BuildMode';
 
 /// The define to pass whether we compile 64-bit android-arm code.
-const String kTargetPlatform = 'TargetPlatform';
+const kTargetPlatform = 'TargetPlatform';
 
 /// The define to control what target file is used.
-const String kTargetFile = 'TargetFile';
+const kTargetFile = 'TargetFile';
 
 /// Whether to enable or disable track widget creation.
-const String kTrackWidgetCreation = 'TrackWidgetCreation';
+const kTrackWidgetCreation = 'TrackWidgetCreation';
 
 /// If provided, the frontend server will be started in JIT mode from this file.
-const String kFrontendServerStarterPath = 'FrontendServerStarterPath';
+const kFrontendServerStarterPath = 'FrontendServerStarterPath';
 
 /// Additional configuration passed to the dart front end.
 ///
 /// This is expected to be a comma separated list of strings.
-const String kExtraFrontEndOptions = 'ExtraFrontEndOptions';
+const kExtraFrontEndOptions = 'ExtraFrontEndOptions';
 
 /// Additional configuration passed to gen_snapshot.
 ///
 /// This is expected to be a comma separated list of strings.
-const String kExtraGenSnapshotOptions = 'ExtraGenSnapshotOptions';
+const kExtraGenSnapshotOptions = 'ExtraGenSnapshotOptions';
 
 /// Whether the build should run gen_snapshot as a split aot build for deferred
 /// components.
-const String kDeferredComponents = 'DeferredComponents';
+const kDeferredComponents = 'DeferredComponents';
 
 /// Whether to strip source code information out of release builds and where to save it.
-const String kSplitDebugInfo = 'SplitDebugInfo';
+const kSplitDebugInfo = 'SplitDebugInfo';
 
 /// Alternative scheme for file URIs.
 ///
 /// May be used along with [kFileSystemRoots] to support a multi-root
 /// filesystem.
-const String kFileSystemScheme = 'FileSystemScheme';
+const kFileSystemScheme = 'FileSystemScheme';
 
 /// Additional filesystem roots.
 ///
 /// If provided, must be used along with [kFileSystemScheme].
-const String kFileSystemRoots = 'FileSystemRoots';
+const kFileSystemRoots = 'FileSystemRoots';
 
 /// The define to control what iOS architectures are built for.
 ///
 /// This is expected to be a space-delimited list of architectures. If not
 /// provided, defaults to arm64.
-const String kIosArchs = 'IosArchs';
+const kIosArchs = 'IosArchs';
 
 /// The define to control what macOS architectures are built for.
 ///
@@ -957,12 +988,12 @@ const String kIosArchs = 'IosArchs';
 /// provided, defaults to x86_64 and arm64.
 ///
 /// Supported values are x86_64 and arm64.
-const String kDarwinArchs = 'DarwinArchs';
+const kDarwinArchs = 'DarwinArchs';
 
 /// The define to control what Android architectures are built for.
 ///
 /// This is expected to be a space-delimited list of architectures.
-const String kAndroidArchs = 'AndroidArchs';
+const kAndroidArchs = 'AndroidArchs';
 
 /// The define to control what min Android SDK version is built for.
 ///
@@ -975,79 +1006,71 @@ const String kAndroidArchs = 'AndroidArchs';
 /// For more info, see:
 /// https://developer.android.com/ndk/guides/sdk-versions#minsdkversion
 /// https://developer.android.com/ndk/guides/other_build_systems#overview
-const String kMinSdkVersion = 'MinSdkVersion';
+const kMinSdkVersion = 'MinSdkVersion';
 
 /// Path to the SDK root to be used as the isysroot.
-const String kSdkRoot = 'SdkRoot';
+const kSdkRoot = 'SdkRoot';
 
 /// Whether to enable Dart obfuscation and where to save the symbol map.
-const String kDartObfuscation = 'DartObfuscation';
-
-/// Whether to enable Native Assets.
-///
-/// If true, native assets are built and the mapping for native assets lookup
-/// at runtime is embedded in the kernel file.
-///
-/// If false, native assets are not built, and an empty mapping is embedded in
-/// the kernel file. Used for targets that trigger kernel builds but
-/// are not OS/architecture specific.
-///
-/// Supported values are 'true' and 'false'.
-///
-/// Defaults to 'true'.
-const String kNativeAssets = 'NativeAssets';
+const kDartObfuscation = 'DartObfuscation';
 
 /// An output directory where one or more code-size measurements may be written.
-const String kCodeSizeDirectory = 'CodeSizeDirectory';
+const kCodeSizeDirectory = 'CodeSizeDirectory';
 
 /// SHA identifier of the Apple developer code signing identity.
 ///
 /// Same as EXPANDED_CODE_SIGN_IDENTITY Xcode build setting.
 /// Also discoverable via `security find-identity -p codesigning`.
-const String kCodesignIdentity = 'CodesignIdentity';
+const kCodesignIdentity = 'CodesignIdentity';
 
 /// The build define controlling whether icon fonts should be stripped down to
 /// only the glyphs used by the application.
-const String kIconTreeShakerFlag = 'TreeShakeIcons';
+const kIconTreeShakerFlag = 'TreeShakeIcons';
 
 /// Controls whether a web build should use local canvaskit or the CDN
-const String kUseLocalCanvasKitFlag = 'UseLocalCanvasKit';
+const kUseLocalCanvasKitFlag = 'UseLocalCanvasKit';
 
 /// The define to pass build name
-const String kBuildName = 'BuildName';
+const kBuildName = 'BuildName';
 
 /// The app flavor to build.
-const String kFlavor = 'Flavor';
+const kFlavor = 'Flavor';
 
 /// Environment variable of the flavor to be set in dartDefines to be accessed
 /// by the `appFlavor` service.
-const String kAppFlavor = 'FLUTTER_APP_FLAVOR';
+const kAppFlavor = 'FLUTTER_APP_FLAVOR';
+
+/// Environment variable of the enabled feature flags to be set in the
+/// dartDefines.
+///
+/// This tells the framework which features are on.
+const kEnabledFeatureFlags = 'FLUTTER_ENABLED_FEATURE_FLAGS';
 
 /// The Xcode configuration used to build the project.
-const String kXcodeConfiguration = 'Configuration';
+const kXcodeConfiguration = 'Configuration';
 
 /// The Xcode build setting SRCROOT. Identifies the directory containing the
 /// Xcode target's source files.
-const String kSrcRoot = 'SrcRoot';
+const kSrcRoot = 'SrcRoot';
 
 /// The Xcode build setting TARGET_DEVICE_OS_VERSION. The iOS version of the
 /// target device. Only available if a specific device is being targeted during
 /// the build.
-const String kTargetDeviceOSVersion = 'TargetDeviceOSVersion';
+const kTargetDeviceOSVersion = 'TargetDeviceOSVersion';
 
 /// The define to pass build number
-const String kBuildNumber = 'BuildNumber';
+const kBuildNumber = 'BuildNumber';
 
 /// The action Xcode is taking.
 ///
 /// Will be "build" when building and "install" when archiving.
-const String kXcodeAction = 'Action';
+const kXcodeAction = 'Action';
 
 /// The define of the Xcode build Pre-action.
 ///
 /// Will be "PrepareFramework" when copying the Flutter/FlutterMacOS framework
 /// to the BUILT_PRODUCTS_DIR prior to the build.
-const String kXcodePreAction = 'PreBuildAction';
+const kXcodePreAction = 'PreBuildAction';
 
 final Converter<String, String> _defineEncoder = utf8.encoder.fuse(base64.encoder);
 final Converter<String, String> _defineDecoder = base64.decoder.fuse(utf8.decoder);
@@ -1095,8 +1118,8 @@ _ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(List<String>? extraFrontEndArg
   DdcModuleFormat? ddcModuleFormat;
   bool? canaryFeatures;
   if (extraFrontEndArgs != null) {
-    const String ddcModuleFormatArg = '--dartdevc-module-format=';
-    const String canaryFeaturesArg = '--dartdevc-canary';
+    const ddcModuleFormatArg = '--dartdevc-module-format=';
+    const canaryFeaturesArg = '--dartdevc-canary';
     for (final String flag in extraFrontEndArgs) {
       if (flag.startsWith(ddcModuleFormatArg)) {
         final String moduleFormatString = flag.substring(ddcModuleFormatArg.length, flag.length);

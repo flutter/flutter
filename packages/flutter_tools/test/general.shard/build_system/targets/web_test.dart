@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/file_generators/flutter_service_worker_js.dart';
 import 'package:flutter_tools/src/web_template.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../../src/common.dart';
 import '../../../src/fake_process_manager.dart';
@@ -24,7 +25,7 @@ import '../../../src/package_config.dart';
 import '../../../src/testbed.dart';
 import '../../../src/throwing_pub.dart';
 
-const List<String> _kDart2jsLinuxArgs = <String>[
+const _kDart2jsLinuxArgs = <String>[
   'Artifact.engineDartBinary.TargetPlatform.web_javascript',
   'compile',
   'js',
@@ -32,13 +33,13 @@ const List<String> _kDart2jsLinuxArgs = <String>[
   '--invoker=flutter_tool',
 ];
 
-const List<String> _kStandardFlutterWebDefines = <String>[
+const _kStandardFlutterWebDefines = <String>[
   '-DFLUTTER_WEB_USE_SKIA=true',
   '-DFLUTTER_WEB_USE_SKWASM=false',
   '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
 ];
 
-const List<String> _kDart2WasmLinuxArgs = <String>[
+const _kDart2WasmLinuxArgs = <String>[
   'Artifact.engineDartBinary.TargetPlatform.web_javascript',
   'compile',
   'wasm',
@@ -133,7 +134,9 @@ name: foo
       final Directory webResources = environment.projectDir.childDirectory('web');
       webResources.childFile('index.html').createSync(recursive: true);
       environment.buildDir.childFile('main.dart.js').createSync();
-      await WebReleaseBundle(<WebCompilerConfig>[const JsCompilerConfig()]).build(environment);
+      await WebReleaseBundle(<WebCompilerConfig>[
+        const JsCompilerConfig(),
+      ], const NoOpAnalytics()).build(environment);
 
       expect(environment.outputDir.childFile('version.json'), exists);
     }),
@@ -148,7 +151,9 @@ name: foo
       final Directory webResources = environment.projectDir.childDirectory('web');
       webResources.childFile('index.html').createSync(recursive: true);
       environment.buildDir.childFile('main.dart.js').createSync();
-      await WebReleaseBundle(<WebCompilerConfig>[const JsCompilerConfig()]).build(environment);
+      await WebReleaseBundle(<WebCompilerConfig>[
+        const JsCompilerConfig(),
+      ], const NoOpAnalytics()).build(environment);
 
       final String versionFile = environment.outputDir.childFile('version.json').readAsStringSync();
       expect(versionFile, contains('"version":"2.0.0"'));
@@ -249,6 +254,45 @@ name: foo
     }),
   );
 
+  group('--static-assets-url', () {
+    test(
+      'WebTemplatedFiles replaces placeholder with given value',
+      () => testbed.run(() async {
+        environment.defines[kStaticAssetsUrl] = 'https://static.example.com/example-app/';
+        final Directory webResources = environment.projectDir.childDirectory('web');
+        webResources.childFile('index.html').createSync(recursive: true);
+        webResources.childFile('index.html').writeAsStringSync('''
+<!DOCTYPE html><html><body><script>const staticAssetsUrl = "$kStaticAssetsUrlPlaceholder";</script></body></html>
+    ''');
+        environment.buildDir.childFile('main.dart.js').createSync();
+        await WebTemplatedFiles(<Map<String, Object?>>[]).build(environment);
+
+        expect(
+          environment.outputDir.childFile('index.html').readAsStringSync(),
+          contains('https://static.example.com/example-app/'),
+        );
+      }),
+    );
+
+    test(
+      'WebTemplatedFiles replaces placeholder with / when not set',
+      () => testbed.run(() async {
+        final Directory webResources = environment.projectDir.childDirectory('web');
+        webResources.childFile('index.html').createSync(recursive: true);
+        webResources.childFile('index.html').writeAsStringSync('''
+<!DOCTYPE html><html><body><script>const staticAssetsUrl = "$kStaticAssetsUrlPlaceholder";</script></body></html>
+    ''');
+        environment.buildDir.childFile('main.dart.js').createSync();
+        await WebTemplatedFiles(<Map<String, Object?>>[]).build(environment);
+
+        expect(
+          environment.outputDir.childFile('index.html').readAsStringSync(),
+          contains('staticAssetsUrl = "/"'),
+        );
+      }),
+    );
+  });
+
   test(
     'WebReleaseBundle copies dart2js output and resource files to output directory',
     () => testbed.run(() async {
@@ -265,7 +309,7 @@ name: foo
 
       await WebReleaseBundle(<WebCompilerConfig>[
         const JsCompilerConfig(dumpInfo: true),
-      ]).build(environment);
+      ], const NoOpAnalytics()).build(environment);
 
       expect(environment.outputDir.childFile('foo.txt').readAsStringSync(), 'A');
       expect(environment.outputDir.childFile('main.dart.js').existsSync(), true);
@@ -284,7 +328,9 @@ name: foo
       // Update to arbitrary resource file triggers rebuild.
       webResources.childFile('foo.txt').writeAsStringSync('B');
 
-      await WebReleaseBundle(<WebCompilerConfig>[const JsCompilerConfig()]).build(environment);
+      await WebReleaseBundle(<WebCompilerConfig>[
+        const JsCompilerConfig(),
+      ], const NoOpAnalytics()).build(environment);
 
       expect(environment.outputDir.childFile('foo.txt').readAsStringSync(), 'B');
     }),
@@ -304,7 +350,9 @@ name: foo
       environment.buildDir.childFile('main.dart.mjs')
         ..createSync()
         ..writeAsStringSync('old mjs');
-      await WebReleaseBundle(<WebCompilerConfig>[const WasmCompilerConfig()]).build(environment);
+      await WebReleaseBundle(<WebCompilerConfig>[
+        const WasmCompilerConfig(),
+      ], const NoOpAnalytics()).build(environment);
       expect(environment.outputDir.childFile('main.dart.wasm').readAsStringSync(), 'old wasm');
       expect(environment.outputDir.childFile('main.dart.mjs').readAsStringSync(), 'old mjs');
 
@@ -315,7 +363,9 @@ name: foo
         ..createSync()
         ..writeAsStringSync('new mjs');
 
-      await WebReleaseBundle(<WebCompilerConfig>[const WasmCompilerConfig()]).build(environment);
+      await WebReleaseBundle(<WebCompilerConfig>[
+        const WasmCompilerConfig(),
+      ], const NoOpAnalytics()).build(environment);
 
       expect(environment.outputDir.childFile('main.dart.wasm').readAsStringSync(), 'new wasm');
       expect(environment.outputDir.childFile('main.dart.mjs').readAsStringSync(), 'new mjs');
@@ -512,7 +562,7 @@ name: foo
     'Dart2JSTarget calls dart2js with expected args with csp',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'profile';
-      final List<String> common = <String>[
+      final common = <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
         ..._kStandardFlutterWebDefines,
@@ -551,7 +601,7 @@ name: foo
     'Dart2JSTarget calls dart2js with expected args with minify false',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'release';
-      final List<String> common = <String>[
+      final common = <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
         ..._kStandardFlutterWebDefines,
@@ -589,7 +639,7 @@ name: foo
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'profile';
       environment.defines[kFrontendServerStarterPath] = 'path/to/frontend_server_starter.dart';
-      final List<String> common = <String>[
+      final common = <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
         ..._kStandardFlutterWebDefines,
@@ -628,7 +678,7 @@ name: foo
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'profile';
       environment.defines[kExtraFrontEndOptions] = '--enable-experiment=non-nullable';
-      final List<String> common = <String>[
+      final common = <String>[
         ..._kDart2jsLinuxArgs,
         '--enable-experiment=non-nullable',
         '-Ddart.vm.profile=true',
@@ -667,7 +717,7 @@ name: foo
     'Dart2JSTarget calls dart2js with expected args in profile mode',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'profile';
-      final List<String> common = <String>[
+      final common = <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
         ..._kStandardFlutterWebDefines,
@@ -705,7 +755,7 @@ name: foo
     'Dart2JSTarget calls dart2js with expected args in release mode',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'release';
-      final List<String> common = <String>[
+      final common = <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
         ..._kStandardFlutterWebDefines,
@@ -743,7 +793,7 @@ name: foo
     'Dart2JSTarget calls dart2js with expected args in release mode with native null assertions',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'release';
-      final List<String> common = <String>[
+      final common = <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
         ..._kStandardFlutterWebDefines,
@@ -784,7 +834,7 @@ name: foo
     'Dart2JSTarget calls dart2js with expected args in release with dart2js optimization override',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'release';
-      final List<String> common = <String>[
+      final common = <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
         ..._kStandardFlutterWebDefines,
@@ -824,7 +874,7 @@ name: foo
     'Dart2JSTarget produces expected depfile',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'release';
-      final List<String> common = <String>[
+      final common = <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
         ..._kStandardFlutterWebDefines,
@@ -877,7 +927,7 @@ name: foo
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'release';
       environment.defines[kDartDefines] = encodeDartDefines(<String>['FOO=bar', 'BAZ=qux']);
-      final List<String> common = <String>[
+      final common = <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
         '-DFOO=bar',
@@ -918,7 +968,7 @@ name: foo
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'release';
       environment.defines[WebCompilerConfig.kSourceMapsEnabled] = 'true';
-      final List<String> common = <String>[
+      final common = <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
         ..._kStandardFlutterWebDefines,
@@ -956,7 +1006,7 @@ name: foo
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'profile';
       environment.defines[kDartDefines] = encodeDartDefines(<String>['FOO=bar', 'BAZ=qux']);
-      final List<String> common = <String>[
+      final common = <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
         '-DFOO=bar',
@@ -997,7 +1047,7 @@ name: foo
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'debug';
       environment.defines[kDartDefines] = encodeDartDefines(<String>['FOO=bar', 'BAZ=qux']);
-      final List<String> common = <String>[
+      final common = <String>[
         ..._kDart2jsLinuxArgs,
         '-DFOO=bar',
         '-DBAZ=qux',
@@ -1037,7 +1087,7 @@ name: foo
     'Dart2JSTarget calls dart2js with expected args with dump-info',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'profile';
-      final List<String> common = <String>[
+      final common = <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
         ..._kStandardFlutterWebDefines,
@@ -1080,7 +1130,7 @@ name: foo
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'profile';
 
-      final List<String> common = <String>[
+      final common = <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
         ..._kStandardFlutterWebDefines,
@@ -1118,19 +1168,16 @@ name: foo
     }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
   );
 
-  for (final WebRendererMode renderer in <WebRendererMode>[
-    WebRendererMode.canvaskit,
-    WebRendererMode.skwasm,
-  ]) {
-    for (final int? level in <int?>[null, 0, 1, 2, 3, 4]) {
-      for (final bool strip in <bool>[true, false]) {
-        for (final List<String> defines in const <List<String>>[
+  for (final renderer in <WebRendererMode>[WebRendererMode.canvaskit, WebRendererMode.skwasm]) {
+    for (final level in <int?>[null, 0, 1, 2, 3, 4]) {
+      for (final strip in <bool>[true, false]) {
+        for (final defines in const <List<String>>[
           <String>[],
           <String>['FOO=bar', 'BAZ=qux'],
         ]) {
-          for (final String buildMode in const <String>['profile', 'release', 'debug']) {
-            for (final bool sourceMaps in const <bool>[true, false]) {
-              for (final bool minify in const <bool>[true, false]) {
+          for (final buildMode in const <String>['profile', 'release', 'debug']) {
+            for (final sourceMaps in const <bool>[true, false]) {
+              for (final minify in const <bool>[true, false]) {
                 test(
                   'Dart2WasmTarget invokes dart2wasm with renderer=$renderer, -O$level, stripping=$strip, defines=$defines, modeMode=$buildMode sourceMaps=$sourceMaps minify=$minify',
                   () => testbed.run(() async {
@@ -1198,6 +1245,7 @@ name: foo
                         sourceMaps: sourceMaps,
                         minify: minify,
                       ),
+                      const NoOpAnalytics(),
                     ).build(environment);
 
                     expect(outputJsFile.existsSync(), isTrue);
@@ -1212,7 +1260,7 @@ name: foo
   }
 
   test('Dart2JSTarget has unique build keys for compiler configurations', () {
-    const List<JsCompilerConfig> testConfigs = <JsCompilerConfig>[
+    const testConfigs = <JsCompilerConfig>[
       // Default values
       JsCompilerConfig(),
 
@@ -1237,7 +1285,7 @@ name: foo
     ];
 
     final Iterable<String> buildKeys = testConfigs.map((JsCompilerConfig config) {
-      final Dart2JSTarget target = Dart2JSTarget(config);
+      final target = Dart2JSTarget(config);
       return target.buildKey;
     });
 
@@ -1246,7 +1294,7 @@ name: foo
   });
 
   test('Dart2Wasm has unique build keys for compiler configurations', () {
-    const List<WasmCompilerConfig> testConfigs = <WasmCompilerConfig>[
+    const testConfigs = <WasmCompilerConfig>[
       // Default values
       WasmCompilerConfig(),
 
@@ -1267,7 +1315,7 @@ name: foo
     ];
 
     final Iterable<String> buildKeys = testConfigs.map((WasmCompilerConfig config) {
-      final Dart2WasmTarget target = Dart2WasmTarget(config);
+      final target = Dart2WasmTarget(config, const NoOpAnalytics());
       return target.buildKey;
     });
 
@@ -1404,7 +1452,7 @@ name: foo
         ..writeAsStringSync('A');
       await WebServiceWorker(globals.fs, <WebCompilerConfig>[
         const JsCompilerConfig(),
-      ]).build(environment);
+      ], const NoOpAnalytics()).build(environment);
 
       expect(environment.outputDir.childFile('flutter_service_worker.js'), exists);
       // Contains file hash.
@@ -1435,11 +1483,11 @@ name: foo
         ..writeAsStringSync('A');
       await WebServiceWorker(globals.fs, <WebCompilerConfig>[
         const JsCompilerConfig(),
-      ]).build(environment);
+      ], const NoOpAnalytics()).build(environment);
 
       expect(environment.outputDir.childFile('flutter_service_worker.js'), exists);
       // Contains the same file hash for both `/` and the root index.html file.
-      const String rootIndexHash = 'd41d8cd98f00b204e9800998ecf8427e';
+      const rootIndexHash = 'd41d8cd98f00b204e9800998ecf8427e';
       expect(
         environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
         contains('"/": "$rootIndexHash"'),
@@ -1464,7 +1512,7 @@ name: foo
       environment.outputDir.childFile('main.dart.js.map').createSync(recursive: true);
       await WebServiceWorker(globals.fs, <WebCompilerConfig>[
         const JsCompilerConfig(),
-      ]).build(environment);
+      ], const NoOpAnalytics()).build(environment);
 
       // No caching of source maps.
       expect(

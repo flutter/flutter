@@ -94,23 +94,21 @@ class NestedScrollViewExample extends StatelessWidget {
                           // fixed-height list items, hence the use of
                           // SliverFixedExtentList. However, one could use any
                           // sliver widget here, e.g. SliverList or SliverGrid.
-                          sliver: SliverFixedExtentList(
+                          sliver: SliverFixedExtentList.builder(
                             // The items in this example are fixed to 48 pixels
                             // high. This matches the Material Design spec for
                             // ListTile widgets.
                             itemExtent: 48.0,
-                            delegate: SliverChildBuilderDelegate(
-                              (BuildContext context, int index) {
-                                // This builder is called for each child.
-                                // In this example, we just number each list item.
-                                return ListTile(title: Text('Item $index'));
-                              },
-                              // The childCount of the SliverChildBuilderDelegate
-                              // specifies how many children this inner list
-                              // has. In this example, each tab has a list of
-                              // exactly 30 items, but this is arbitrary.
-                              childCount: 30,
-                            ),
+                            // The itemCount of the SliverFixedExtentList.builder
+                            // specifies how many children this inner list
+                            // has. In this example, each tab has a list of
+                            // exactly 30 items, but this is arbitrary.
+                            itemCount: 30,
+                            itemBuilder: (BuildContext context, int index) {
+                              // This builder is called for each child.
+                              // In this example, we just number each list item.
+                              return ListTile(title: Text('Item $index'));
+                            },
                           ),
                         ),
                       ],

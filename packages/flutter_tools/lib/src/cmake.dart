@@ -15,7 +15,7 @@ String? getCmakeExecutableName(CmakeBasedProject project) {
   if (!project.cmakeFile.existsSync()) {
     return null;
   }
-  final RegExp nameSetPattern = RegExp(r'^\s*set\(BINARY_NAME\s*"(.*)"\s*\)\s*$');
+  final nameSetPattern = RegExp(r'^\s*set\(BINARY_NAME\s*"(.*)"\s*\)\s*$');
   for (final String line in project.cmakeFile.readAsLinesSync()) {
     final RegExpMatch? match = nameSetPattern.firstMatch(line);
     if (match != null) {
@@ -95,7 +95,7 @@ void writeGeneratedCmakeConfig(
     );
   }
 
-  final StringBuffer buffer = StringBuffer('''
+  final buffer = StringBuffer('''
 # Generated code do not commit.
 file(TO_CMAKE_PATH "$escapedFlutterRoot" FLUTTER_ROOT)
 file(TO_CMAKE_PATH "$escapedProjectDir" PROJECT_DIR)

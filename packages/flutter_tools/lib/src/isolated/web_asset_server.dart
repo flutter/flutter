@@ -28,16 +28,18 @@ import '../globals.dart' as globals;
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
+import '../web/devfs_config.dart';
+import '../web/devfs_proxy.dart';
 import '../web/memory_fs.dart';
 import '../web/module_metadata.dart';
 import '../web_template.dart';
-
+import 'proxy_middleware.dart';
 import 'release_asset_server.dart';
 import 'web_server_utlities.dart';
 
 // A minimal index for projects that do not yet support web. A meta tag is used
 // to ensure loaded scripts are always parsed as UTF-8.
-const String _kDefaultIndex = '''
+const _kDefaultIndex = '''
 <html>
     <head>
         <meta charset='utf-8'>
@@ -58,7 +60,7 @@ typedef DwdsLauncher =
       bool useDwdsWebSocketConnection,
     });
 
-const String kLuciEnvName = 'LUCI_CONTEXT';
+const kLuciEnvName = 'LUCI_CONTEXT';
 
 /// A web server which handles serving JavaScript and assets.
 ///
@@ -86,7 +88,7 @@ class WebAssetServer implements AssetReader {
 
   // Fallback to "application/octet-stream" on null which
   // makes no claims as to the structure of the data.
-  static const String _kDefaultMimeType = 'application/octet-stream';
+  static const _kDefaultMimeType = 'application/octet-stream';
 
   final Map<String, String> _modules;
   final Map<String, String> _digests;
@@ -95,22 +97,8 @@ class WebAssetServer implements AssetReader {
 
   /// Given a list of [modules] that need to be loaded, compute module names and
   /// digests.
-  ///
-  /// If [writeRestartScripts] is true, writes a list of sources mapped to their
-  /// ids to the file system that can then be consumed by the hot restart
-  /// callback.
-  ///
-  /// For example:
-  /// ```json
-  /// [
-  ///   {
-  ///     "src": "<file_name>",
-  ///     "id": "<id>",
-  ///   },
-  /// ]
-  /// ```
-  void performRestart(List<String> modules, {required bool writeRestartScripts}) {
-    for (final String module in modules) {
+  void updateModulesAndDigests(List<String> modules) {
+    for (final module in modules) {
       // We skip computing the digest by using the hashCode of the underlying buffer.
       // Whenever a file is updated, the corresponding Uint8List.view it corresponds
       // to will change.
@@ -120,18 +108,13 @@ class WebAssetServer implements AssetReader {
       _modules[name] = path;
       _digests[name] = _webMemoryFS.files[moduleName].hashCode.toString();
     }
-    if (writeRestartScripts) {
-      final List<Map<String, String>> srcIdsList = <Map<String, String>>[
-        for (final String src in modules) <String, String>{'src': src, 'id': src},
-      ];
-      writeFile('restart_scripts.json', json.encode(srcIdsList));
-    }
   }
 
-  static const String _reloadScriptsFileName = 'reload_scripts.json';
+  static const _reloadedSourcesFileName = 'reloaded_sources.json';
 
-  /// Given a list of [modules] that need to be reloaded, writes a file that
-  /// contains a list of objects each with three fields:
+  /// Given a list of [modules] that need to be reloaded during a hot restart or
+  /// hot reload, writes a file that contains a list of objects each with three
+  /// fields:
   ///
   /// `src`: A string that corresponds to the file path containing a DDC library
   /// bundle. To support embedded libraries, the path should include the
@@ -153,22 +136,22 @@ class WebAssetServer implements AssetReader {
   ///
   /// The path of the output file should stay consistent across the lifetime of
   /// the app.
-  void performReload(List<String> modules) {
-    final List<Map<String, Object>> moduleToLibrary = <Map<String, Object>>[];
-    for (final String module in modules) {
-      final ModuleMetadata metadata = ModuleMetadata.fromJson(
+  void writeReloadedSources(List<String> modules) {
+    final moduleToLibrary = <Map<String, Object>>[];
+    for (final module in modules) {
+      final metadata = ModuleMetadata.fromJson(
         json.decode(utf8.decode(_webMemoryFS.metadataFiles['$module.metadata']!.toList()))
             as Map<String, dynamic>,
       );
       final List<String> libraries = metadata.libraries.keys.toList();
-      final String moduleUri = baseUri != null ? '$baseUri/$module' : module;
+      final moduleUri = '$baseUri/$module';
       moduleToLibrary.add(<String, Object>{
         'src': moduleUri,
         'module': metadata.name,
         'libraries': libraries,
       });
     }
-    writeFile(_reloadScriptsFileName, json.encode(moduleToLibrary));
+    writeFile(_reloadedSourcesFileName, json.encode(moduleToLibrary));
   }
 
   @visibleForTesting
@@ -176,10 +159,10 @@ class WebAssetServer implements AssetReader {
     return _webMemoryFS.write(codeFile, manifestFile, sourcemapFile, metadataFile);
   }
 
-  Uri? get baseUri => _baseUri;
-  Uri? _baseUri;
+  Uri get baseUri => _baseUri;
+  late Uri _baseUri;
 
-  /// Start the web asset server on a [hostname] and [port].
+  /// Start the web asset server with configuration provided by [webDevServerConfig].
   ///
   /// If [testMode] is true, do not actually initialize dwds or the shelf static
   /// server.
@@ -188,20 +171,16 @@ class WebAssetServer implements AssetReader {
   /// trace.
   static Future<WebAssetServer> start(
     ChromiumLauncher? chromiumLauncher,
-    String hostname,
-    int port,
-    String? tlsCertPath,
-    String? tlsCertKeyPath,
     UrlTunneller? urlTunneller,
     bool useSseForDebugProxy,
     bool useSseForDebugBackend,
     bool useSseForInjectedClient,
     BuildInfo buildInfo,
     bool enableDwds,
-    bool enableDds,
+    DartDevelopmentServiceConfiguration ddsConfig,
     Uri entrypoint,
-    ExpressionCompiler? expressionCompiler,
-    Map<String, String> extraHeaders, {
+    ExpressionCompiler? expressionCompiler, {
+    required WebDevServerConfig webDevServerConfig,
     required WebRendererMode webRenderer,
     required bool isWasm,
     required bool useLocalCanvasKit,
@@ -216,6 +195,13 @@ class WebAssetServer implements AssetReader {
     required Platform platform,
     bool shouldEnableMiddleware = true,
   }) async {
+    final String hostname = webDevServerConfig.host;
+    final int port = webDevServerConfig.port;
+    final String? tlsCertPath = webDevServerConfig.https?.certPath;
+    final String? tlsCertKeyPath = webDevServerConfig.https?.certKeyPath;
+    final Map<String, String> extraHeaders = webDevServerConfig.headers;
+    final List<ProxyRule> proxy = webDevServerConfig.proxy;
+
     // TODO(srujzs): Remove this assertion when the library bundle format is
     // supported without canary mode.
     if (ddcModuleSystem) {
@@ -228,11 +214,11 @@ class WebAssetServer implements AssetReader {
       address = (await InternetAddress.lookup(hostname)).first;
     }
     HttpServer? httpServer;
-    const int kMaxRetries = 4;
-    for (int i = 0; i <= kMaxRetries; i++) {
+    const kMaxRetries = 4;
+    for (var i = 0; i <= kMaxRetries; i++) {
       try {
         if (tlsCertPath != null && tlsCertKeyPath != null) {
-          final SecurityContext serverContext = SecurityContext()
+          final serverContext = SecurityContext()
             ..useCertificateChain(tlsCertPath)
             ..usePrivateKey(tlsCertKeyPath);
           httpServer = await HttpServer.bindSecure(address, port, serverContext);
@@ -257,9 +243,9 @@ class WebAssetServer implements AssetReader {
     }
 
     final PackageConfig packageConfig = buildInfo.packageConfig;
-    final Map<String, String> modules = <String, String>{};
-    final Map<String, String> digests = <String, String>{};
-    final WebAssetServer server = WebAssetServer(
+    final modules = <String, String>{};
+    final digests = <String, String>{};
+    final server = WebAssetServer(
       httpServer,
       packageConfig,
       address,
@@ -272,7 +258,7 @@ class WebAssetServer implements AssetReader {
       fileSystem: fileSystem,
     );
     final int selectedPort = server.selectedPort;
-    String url = '$hostname:$selectedPort';
+    var url = '$hostname:$selectedPort';
     if (hostname == 'any') {
       url = 'localhost:$selectedPort';
     }
@@ -286,7 +272,7 @@ class WebAssetServer implements AssetReader {
 
     // In release builds (or wasm builds) deploy a simpler proxy server.
     if (buildInfo.mode != BuildMode.debug || isWasm) {
-      final ReleaseAssetServer releaseAssetServer = ReleaseAssetServer(
+      final releaseAssetServer = ReleaseAssetServer(
         entrypoint,
         fileSystem: fileSystem,
         platform: platform,
@@ -351,9 +337,9 @@ class WebAssetServer implements AssetReader {
                   ),
                 ),
                 packageConfigPath: buildInfo.packageConfigPath,
-                hotReloadSourcesUri: server._baseUri!.replace(
-                  pathSegments: List<String>.from(server._baseUri!.pathSegments)
-                    ..add(_reloadScriptsFileName),
+                reloadedSourcesUri: server._baseUri.replace(
+                  pathSegments: List<String>.from(server._baseUri.pathSegments)
+                    ..add(_reloadedSourcesFileName),
                 ),
               ).strategy
             : FrontendServerRequireStrategyProvider(
@@ -375,17 +361,18 @@ class WebAssetServer implements AssetReader {
           useSseForDebugBackend: useSseForDebugBackend,
           useSseForInjectedClient: useSseForInjectedClient,
           expressionCompiler: expressionCompiler,
-          spawnDds: enableDds,
+          ddsConfiguration: ddsConfig,
         ),
         appMetadata: AppMetadata(hostname: hostname),
       ),
       // Use DWDS WebSocket-based connection instead of Chrome-based connection for debugging
       useDwdsWebSocketConnection: useDwdsWebSocketConnection,
     );
-    shelf.Pipeline pipeline = const shelf.Pipeline();
+    var pipeline = const shelf.Pipeline();
     if (shouldEnableMiddleware) {
       pipeline = pipeline.addMiddleware(middleware).addMiddleware(dwds.middleware);
     }
+    pipeline = pipeline.addMiddleware(proxyMiddleware(proxy, globals.logger));
     final shelf.Handler dwdsHandler = pipeline.addHandler(server.handleRequest);
     final shelf.Cascade cascade = shelf.Cascade().add(dwds.handler).add(dwdsHandler);
     runZonedGuarded(
@@ -404,12 +391,12 @@ class WebAssetServer implements AssetReader {
   final bool _ddcModuleSystem;
   final bool _canaryFeatures;
   final HttpServer _httpServer;
-  final WebMemoryFS _webMemoryFS = WebMemoryFS();
+  final _webMemoryFS = WebMemoryFS();
   final PackageConfig _packages;
   final InternetAddress internetAddress;
   late final Dwds dwds;
   late Directory entrypointCacheDirectory;
-  bool _dwdsInit = false;
+  var _dwdsInit = false;
   WebMemoryFS get webMemoryFS => _webMemoryFS;
 
   @visibleForTesting
@@ -454,7 +441,7 @@ class WebAssetServer implements AssetReader {
       return _serveFlutterBootstrapJs();
     }
 
-    final Map<String, String> headers = <String, String>{};
+    final headers = <String, String>{};
 
     // Track etag headers for better caching of resources.
     final String? ifNoneMatch = request.headers[HttpHeaders.ifNoneMatchHeader];
@@ -469,7 +456,7 @@ class WebAssetServer implements AssetReader {
       // Use the underlying buffer hashCode as a revision string. This buffer is
       // replaced whenever the frontend_server produces new output files, which
       // will also change the hashCode.
-      final String etag = bytes.hashCode.toString();
+      final etag = bytes.hashCode.toString();
       if (ifNoneMatch == etag) {
         return shelf.Response.notModified();
       }
@@ -481,7 +468,7 @@ class WebAssetServer implements AssetReader {
     // Attempt to lookup the file by URI.
     if (_webMemoryFS.sourcemaps.containsKey(requestPath)) {
       final List<int>? bytes = getSourceMap(requestPath);
-      final String etag = bytes.hashCode.toString();
+      final etag = bytes.hashCode.toString();
       if (ifNoneMatch == etag) {
         return shelf.Response.notModified();
       }
@@ -494,7 +481,7 @@ class WebAssetServer implements AssetReader {
     // Attempt to lookup the file by URI.
     if (_webMemoryFS.metadataFiles.containsKey(requestPath)) {
       final List<int>? bytes = getMetadata(requestPath);
-      final String etag = bytes.hashCode.toString();
+      final etag = bytes.hashCode.toString();
       if (ifNoneMatch == etag) {
         return shelf.Response.notModified();
       }
@@ -595,7 +582,7 @@ class WebAssetServer implements AssetReader {
   final FileSystem fileSystem;
 
   String get _buildConfigString {
-    final Map<String, Object> buildConfig = <String, Object>{
+    final buildConfig = <String, Object>{
       'engineRevision': globals.flutterVersion.engineRevision,
       'builds': <Object>[
         <String, Object>{
@@ -648,6 +635,8 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
       indexHtml.withSubstitutions(
         // Currently, we don't support --base-href for the "run" command.
         baseHref: '/',
+        // Currently, we don't support --static-assets-url for the "run" command.
+        staticAssetsUrl: '/',
         serviceWorkerVersion: null,
         buildConfig: _buildConfigString,
         flutterJsFile: _flutterJsFile,

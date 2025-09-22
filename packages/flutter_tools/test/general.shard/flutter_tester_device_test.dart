@@ -58,7 +58,7 @@ void main() {
   testUsingContext(
     'Missing dir error caught for FontConfigManger.dispose',
     () async {
-      final FontConfigManager fontConfigManager = FontConfigManager();
+      final fontConfigManager = FontConfigManager();
 
       final Directory fontsDirectory = fileSystem.file(fontConfigManager.fontConfigFile).parent;
       fontsDirectory.deleteSync(recursive: true);

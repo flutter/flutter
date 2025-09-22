@@ -16,10 +16,10 @@ sealed class WebCompilerConfig {
   });
 
   /// Build environment flag for [optimizationLevel].
-  static const String kOptimizationLevel = 'OptimizationLevel';
+  static const kOptimizationLevel = 'OptimizationLevel';
 
   /// Build environment flag for [sourceMaps].
-  static const String kSourceMapsEnabled = 'SourceMaps';
+  static const kSourceMapsEnabled = 'SourceMaps';
 
   /// Calculates the optimization level for the compiler for the given
   /// build mode.
@@ -43,7 +43,7 @@ sealed class WebCompilerConfig {
   String get buildKey;
 
   Map<String, Object> get buildEventAnalyticsValues => <String, Object>{
-    if (optimizationLevel != null) 'optimizationLevel': optimizationLevel!,
+    'optimizationLevel': ?optimizationLevel,
   };
 
   Map<String, dynamic> get _buildKeyMap => <String, dynamic>{
@@ -128,7 +128,7 @@ class JsCompilerConfig extends WebCompilerConfig {
 
   @override
   String get buildKey {
-    final Map<String, dynamic> settings = <String, dynamic>{
+    final settings = <String, dynamic>{
       ...super._buildKeyMap,
       'csp': csp,
       'dumpInfo': dumpInfo,
@@ -153,7 +153,7 @@ class WasmCompilerConfig extends WebCompilerConfig {
   });
 
   /// Build environment for [stripWasm].
-  static const String kStripWasm = 'StripWasm';
+  static const kStripWasm = 'StripWasm';
 
   /// Whether to strip the wasm file of static symbols.
   final bool stripWasm;
@@ -193,7 +193,7 @@ class WasmCompilerConfig extends WebCompilerConfig {
 
   @override
   String get buildKey {
-    final Map<String, dynamic> settings = <String, dynamic>{
+    final settings = <String, dynamic>{
       ...super._buildKeyMap,
       kStripWasm: stripWasm,
       'minify': minify,

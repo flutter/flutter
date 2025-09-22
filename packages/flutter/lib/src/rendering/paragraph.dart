@@ -1007,6 +1007,11 @@ class RenderParagraph extends RenderBox
       }
     }
 
+    assert(() {
+      _textPainter.debugPaintTextLayoutBoxes = debugPaintTextLayoutBoxes;
+      return true;
+    }());
+
     _textPainter.paint(context.canvas, offset);
 
     paintInlineChildren(context, offset);

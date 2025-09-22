@@ -524,28 +524,31 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
       mainGroup = SingleChildScrollView(child: mainGroup);
     }
 
-    return _ExtendedNavigationRailAnimation(
-      animation: _extendedAnimation,
-      child: Semantics(
-        explicitChildNodes: true,
-        child: Material(
-          elevation: elevation,
-          color: backgroundColor,
-          child: SafeArea(
-            right: isRTLDirection,
-            left: !isRTLDirection,
-            child: Column(
-              children: <Widget>[
-                _verticalSpacer,
-                if (widget.leadingAtTop && widget.leading != null) ...<Widget>[
-                  widget.leading!,
+    return Semantics(
+      container: true,
+      child: _ExtendedNavigationRailAnimation(
+        animation: _extendedAnimation,
+        child: Semantics(
+          explicitChildNodes: true,
+          child: Material(
+            elevation: elevation,
+            color: backgroundColor,
+            child: SafeArea(
+              right: isRTLDirection,
+              left: !isRTLDirection,
+              child: Column(
+                children: <Widget>[
                   _verticalSpacer,
+                  if (widget.leadingAtTop && widget.leading != null) ...<Widget>[
+                    widget.leading!,
+                    _verticalSpacer,
+                  ],
+                  Flexible(
+                    child: Align(alignment: Alignment(0, groupAlignment), child: mainGroup),
+                  ),
+                  if (widget.trailingAtBottom && widget.trailing != null) widget.trailing!,
                 ],
-                Flexible(
-                  child: Align(alignment: Alignment(0, groupAlignment), child: mainGroup),
-                ),
-                if (widget.trailingAtBottom && widget.trailing != null) widget.trailing!,
-              ],
+              ),
             ),
           ),
         ),
@@ -725,7 +728,7 @@ class _RailDestinationState extends State<_RailDestination> {
         );
         final Widget iconPart = Column(
           children: <Widget>[
-            if (spacing != null) spacing,
+            ?spacing,
             SizedBox(
               width: widget.minWidth,
               height: material3 ? null : widget.minWidth,
@@ -740,7 +743,7 @@ class _RailDestinationState extends State<_RailDestination> {
                 ),
               ),
             ),
-            if (spacing != null) spacing,
+            ?spacing,
           ],
         );
         if (widget.extendedTransitionAnimation.value == 0) {

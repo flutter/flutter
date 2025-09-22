@@ -25,12 +25,12 @@ import '../src/context.dart';
 void main() {
   testUsingContext('Exits with code 2 when HttpException is thrown '
       'during VM service connection', () async {
-    final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
-    final FakeDevice device = FakeDevice()
+    final residentCompiler = FakeResidentCompiler();
+    final device = FakeDevice()
       ..supportsHotReload = true
       ..supportsHotRestart = false;
 
-    final List<FlutterDevice> devices = <FlutterDevice>[
+    final devices = <FlutterDevice>[
       TestFlutterDevice(
         device: device,
         generator: residentCompiler,
@@ -51,12 +51,12 @@ void main() {
 
   group('cleanupAtFinish()', () {
     testUsingContext('disposes each device', () async {
-      final FakeDevice device1 = FakeDevice();
-      final FakeDevice device2 = FakeDevice();
-      final FakeFlutterDevice flutterDevice1 = FakeFlutterDevice(device1);
-      final FakeFlutterDevice flutterDevice2 = FakeFlutterDevice(device2);
+      final device1 = FakeDevice();
+      final device2 = FakeDevice();
+      final flutterDevice1 = FakeFlutterDevice(device1);
+      final flutterDevice2 = FakeFlutterDevice(device2);
 
-      final List<FlutterDevice> devices = <FlutterDevice>[flutterDevice1, flutterDevice2];
+      final devices = <FlutterDevice>[flutterDevice1, flutterDevice2];
 
       await ColdRunner(
         devices,
@@ -81,9 +81,9 @@ void main() {
     });
 
     testUsingContext('calls runCold on attached device', () async {
-      final FakeDevice device = FakeDevice();
-      final FakeFlutterDevice flutterDevice = FakeFlutterDevice(device)..runColdCode = 1;
-      final List<FlutterDevice> devices = <FlutterDevice>[flutterDevice];
+      final device = FakeDevice();
+      final flutterDevice = FakeFlutterDevice(device)..runColdCode = 1;
+      final devices = <FlutterDevice>[flutterDevice];
       final File applicationBinary = MemoryFileSystem.test().file('binary');
       final int result = await ColdRunner(
         devices,
@@ -98,9 +98,9 @@ void main() {
     testUsingContext(
       'with traceStartup, no env variable',
       () async {
-        final FakeDevice device = FakeDevice();
-        final FakeFlutterDevice flutterDevice = FakeFlutterDevice(device);
-        final List<FlutterDevice> devices = <FlutterDevice>[flutterDevice];
+        final device = FakeDevice();
+        final flutterDevice = FakeFlutterDevice(device);
+        final devices = <FlutterDevice>[flutterDevice];
         final File applicationBinary = MemoryFileSystem.test().file('binary');
         final int result = await ColdRunner(
           devices,
@@ -131,9 +131,9 @@ void main() {
       () async {
         fakePlatform.environment[kFlutterTestOutputsDirEnvName] = 'test_output_dir';
 
-        final FakeDevice device = FakeDevice();
-        final FakeFlutterDevice flutterDevice = FakeFlutterDevice(device);
-        final List<FlutterDevice> devices = <FlutterDevice>[flutterDevice];
+        final device = FakeDevice();
+        final flutterDevice = FakeFlutterDevice(device);
+        final devices = <FlutterDevice>[flutterDevice];
         final File applicationBinary = MemoryFileSystem.test().file('binary');
         final int result = await ColdRunner(
           devices,
@@ -170,7 +170,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   @override
   final Device device;
 
-  int stopEchoingDeviceLogCount = 0;
+  var stopEchoingDeviceLogCount = 0;
 
   @override
   Future<void> stopEchoingDeviceLog() async {
@@ -180,7 +180,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   @override
   FlutterVmService get vmService => FakeFlutterVmService();
 
-  int runColdCode = 0;
+  var runColdCode = 0;
 
   @override
   Future<int> runCold({ColdRunner? coldRunner, String? route}) async {
@@ -193,10 +193,10 @@ class FakeDevice extends Fake implements Device {
   Future<bool> isSupported() async => true;
 
   @override
-  bool supportsHotReload = false;
+  var supportsHotReload = false;
 
   @override
-  bool supportsHotRestart = false;
+  var supportsHotRestart = false;
 
   @override
   Future<String> get sdkNameAndVersion async => 'Android 10';
@@ -210,7 +210,7 @@ class FakeDevice extends Fake implements Device {
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
 
-  bool wasDisposed = false;
+  var wasDisposed = false;
 
   @override
   Future<void> dispose() async {
@@ -242,7 +242,6 @@ class TestFlutterDevice extends FlutterDevice {
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,
     int? hostVmServicePort,
-    required bool allowExistingDdsInstance,
   }) async {
     throw exception;
   }

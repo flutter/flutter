@@ -71,7 +71,7 @@ interface class FlutterTestRunner {
     final String flutterTesterBinPath = globals.artifacts!.getArtifactPath(Artifact.flutterTester);
 
     // Compute the command-line arguments for package:test.
-    final List<String> testArgs = <String>[
+    final testArgs = <String>[
       if (!globals.terminal.supportsColor) '--no-color',
       if (debuggingOptions.startPaused) '--pause-after-load',
       if (machine) ...<String>['-r', 'json'] else if (reporter != null) ...<String>['-r', reporter],
@@ -105,6 +105,7 @@ interface class FlutterTestRunner {
             artifacts: globals.artifacts!,
             processManager: globals.processManager,
             config: globals.config,
+            shutdownHooks: globals.shutdownHooks,
           ).initialize(
             projectDirectory: flutterProject!.directory,
             testOutputDir: tempBuildDir,
@@ -238,18 +239,16 @@ interface class FlutterTestRunner {
       flutterToolsPackageConfigFile.uri,
     );
 
-    final List<Package> mergedPackages = <Package>[...projectPackageConfig.packages];
-    final Set<String> projectPackageNames = Set<String>.from(
-      mergedPackages.map((Package p) => p.name),
-    );
+    final mergedPackages = <Package>[...projectPackageConfig.packages];
+    final projectPackageNames = Set<String>.from(mergedPackages.map((Package p) => p.name));
     for (final Package p in flutterToolsPackageConfig.packages) {
       if (!projectPackageNames.contains(p.name)) {
         mergedPackages.add(p);
       }
     }
 
-    final PackageConfig mergedPackageConfig = PackageConfig(mergedPackages);
-    final StringBuffer buffer = StringBuffer();
+    final mergedPackageConfig = PackageConfig(mergedPackages);
+    final buffer = StringBuffer();
     PackageConfig.writeString(mergedPackageConfig, buffer);
     isolateSpawningTesterPackageConfigFile.writeAsStringSync(buffer.toString());
   }
@@ -260,9 +259,9 @@ interface class FlutterTestRunner {
     required bool autoUpdateGoldenFiles,
     required File childTestIsolateSpawnerSourceFile,
   }) {
-    final Map<String, String> testConfigPaths = <String, String>{};
+    final testConfigPaths = <String, String>{};
 
-    final StringBuffer buffer = StringBuffer();
+    final buffer = StringBuffer();
     buffer.writeln('''
 import 'dart:ffi';
 import 'dart:isolate';
@@ -284,9 +283,9 @@ import 'package:test_api/backend.dart'; // flutter_ignore: test_api_import
           .replaceRange(path.length - '.dart'.length, null, '');
     }
 
-    final Map<String, String> testImports = <String, String>{};
-    final Set<String> seenTestConfigPaths = <String>{};
-    for (final Uri path in paths) {
+    final testImports = <String, String>{};
+    final seenTestConfigPaths = <String>{};
+    for (final path in paths) {
       final String sanitizedPath = !path.path.endsWith('?')
           ? path.path
           : path.path.substring(0, path.path.length - 1);
@@ -314,14 +313,14 @@ import 'package:test_api/backend.dart'; // flutter_ignore: test_api_import
     buffer.writeln();
 
     buffer.writeln('const List<String> packageTestArgs = <String>[');
-    for (final String arg in packageTestArgs) {
+    for (final arg in packageTestArgs) {
       buffer.writeln("  '$arg',");
     }
     buffer.writeln('];');
     buffer.writeln();
 
     buffer.writeln('const List<String> testPaths = <String>[');
-    for (final Uri path in paths) {
+    for (final path in paths) {
       buffer.writeln("  '$path',");
     }
     buffer.writeln('];');
@@ -403,7 +402,7 @@ void main([dynamic sendPort]) {
     required File childTestIsolateSpawnerDillFile,
     required File rootTestIsolateSpawnerSourceFile,
   }) {
-    final StringBuffer buffer = StringBuffer();
+    final buffer = StringBuffer();
     buffer.writeln('''
 import 'dart:async';
 import 'dart:ffi';
@@ -555,10 +554,10 @@ class SpawnPlugin extends PlatformPlugin {
     Uri? nativeAssetsYaml,
   }) async {
     globals.printTrace('Compiling ${sourceFile.absolute.uri}');
-    final Stopwatch compilerTime = Stopwatch()..start();
+    final compilerTime = Stopwatch()..start();
     final Stopwatch? testTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Compile);
 
-    final ResidentCompiler residentCompiler = ResidentCompiler(
+    final residentCompiler = ResidentCompiler(
       globals.artifacts!.getArtifactPath(Artifact.flutterPatchedSdkPath),
       artifacts: globals.artifacts!,
       logger: globals.logger,
@@ -574,6 +573,7 @@ class SpawnPlugin extends PlatformPlugin {
       fileSystem: globals.fs,
       fileSystemRoots: debuggingOptions.buildInfo.fileSystemRoots,
       fileSystemScheme: debuggingOptions.buildInfo.fileSystemScheme,
+      shutdownHooks: globals.shutdownHooks,
     );
 
     await residentCompiler.recompile(
@@ -656,7 +656,7 @@ class SpawnPlugin extends PlatformPlugin {
     );
 
     // Compute the command-line arguments for package:test.
-    final List<String> packageTestArgs = <String>[
+    final packageTestArgs = <String>[
       if (!globals.terminal.supportsColor) '--no-color',
       if (machine) ...<String>['-r', 'json'] else if (reporter != null) ...<String>['-r', reporter],
       if (fileReporter != null) '--file-reporter=$fileReporter',
@@ -706,7 +706,7 @@ class SpawnPlugin extends PlatformPlugin {
       testTimeRecorder: testTimeRecorder,
     );
 
-    final List<String> command = <String>[
+    final command = <String>[
       globals.artifacts!.getArtifactPath(Artifact.flutterTester),
       '--disable-vm-service',
       if (icudtlPath != null) '--icu-data-file-path=$icudtlPath',
@@ -732,11 +732,11 @@ class SpawnPlugin extends PlatformPlugin {
     final String flutterTest = globals.platform.environment.containsKey('FLUTTER_TEST')
         ? globals.platform.environment['FLUTTER_TEST']!
         : 'true';
-    final Map<String, String> environment = <String, String>{
+    final environment = <String, String>{
       'FLUTTER_TEST': flutterTest,
       'FONTCONFIG_FILE': FontConfigManager().fontConfigFile.path,
       'APP_NAME': flutterProject.manifest.appName,
-      if (testAssetDirectory != null) 'UNIT_TEST_ASSETS': testAssetDirectory,
+      'UNIT_TEST_ASSETS': ?testAssetDirectory,
       if (nativeAssetsBuilder != null && globals.platform.isWindows)
         'PATH':
             '${nativeAssetsBuilder.windowsBuildDirectory(flutterProject)};${globals.platform.environment['PATH']}',
@@ -749,7 +749,7 @@ class SpawnPlugin extends PlatformPlugin {
     final Process process = await globals.processManager.start(command, environment: environment);
     globals.logger.printTrace('Started flutter_tester process at pid ${process.pid}');
 
-    for (final Stream<List<int>> stream in <Stream<List<int>>>[process.stderr, process.stdout]) {
+    for (final stream in <Stream<List<int>>>[process.stderr, process.stdout]) {
       stream.transform<String>(utf8.decoder).listen(globals.stdio.stdoutWrite);
     }
 

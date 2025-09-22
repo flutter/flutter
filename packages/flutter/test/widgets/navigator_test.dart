@@ -2919,8 +2919,8 @@ void main() {
   testWidgets('pushAndRemove until animates the push', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/25080.
 
-    const Duration kFourTenthsOfTheTransitionDuration = Duration(milliseconds: 120);
     final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    final TransitionDurationObserver observer = TransitionDurationObserver();
     final Map<String, MaterialPageRoute<dynamic>> routeNameToContext =
         <String, MaterialPageRoute<dynamic>>{};
 
@@ -2928,6 +2928,7 @@ void main() {
       TestDependencies(
         child: Navigator(
           key: navigator,
+          observers: <NavigatorObserver>[observer],
           initialRoute: 'root',
           onGenerateRoute: (RouteSettings settings) {
             return MaterialPageRoute<void>(
@@ -2971,15 +2972,16 @@ void main() {
     final Animation<double> route4Entry = routeNameToContext['4']!.animation!;
     expect(route4Entry.value, 0.0); // Entry animation has not started.
 
+    final Duration kFourTenthsOfTheTransitionDuration = observer.transitionDuration * 2 ~/ 5;
     await tester.pump(kFourTenthsOfTheTransitionDuration);
     expect(find.text('Route: 3'), findsOneWidget);
     expect(find.text('Route: 4'), findsOneWidget);
-    expect(route4Entry.value, 0.4);
+    expect(route4Entry.value, moreOrLessEquals(0.4));
 
     await tester.pump(kFourTenthsOfTheTransitionDuration);
     expect(find.text('Route: 3'), findsOneWidget);
     expect(find.text('Route: 4'), findsOneWidget);
-    expect(route4Entry.value, 0.8);
+    expect(route4Entry.value, moreOrLessEquals(0.8));
     expect(find.text('Route: 2', skipOffstage: false), findsOneWidget);
     expect(find.text('Route: 1', skipOffstage: false), findsOneWidget);
     expect(find.text('Route: root', skipOffstage: false), findsOneWidget);

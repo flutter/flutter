@@ -167,6 +167,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.leadingIcon,
     this.trailingIcon,
     this.showTrailingIcon = true,
+    this.trailingIconFocusNode,
     this.label,
     this.hintText,
     this.helperText,
@@ -194,13 +195,16 @@ class DropdownMenu<T> extends StatefulWidget {
     this.closeBehavior = DropdownMenuCloseBehavior.all,
     this.maxLines = 1,
     this.textInputAction,
+    this.cursorHeight,
     this.restorationId,
+    this.menuController,
   }) : assert(filterCallback == null || enableFilter),
        assert(
          inputDecorationTheme == null ||
              (inputDecorationTheme is InputDecorationTheme ||
                  inputDecorationTheme is InputDecorationThemeData),
        ),
+       assert(trailingIconFocusNode == null || showTrailingIcon),
        _inputDecorationTheme = inputDecorationTheme;
 
   /// Determine if the [DropdownMenu] is enabled.
@@ -244,8 +248,36 @@ class DropdownMenu<T> extends StatefulWidget {
   /// If [trailingIcon] is set, [DropdownMenu] will use that trailing icon,
   /// otherwise a default trailing icon will be created.
   ///
+  /// If [showTrailingIcon] is false, [trailingIconFocusNode] must be null.
+  ///
   /// Defaults to true.
   final bool showTrailingIcon;
+
+  /// Defines the FocusNode for the trailing icon.
+  ///
+  /// If [showTrailingIcon] is false, [trailingIconFocusNode] must be null.
+  ///
+  /// The [focusNode] is a long-lived object that's typically managed by a
+  /// [StatefulWidget] parent. See [FocusNode] for more information.
+  ///
+  /// To give the keyboard focus to this widget, provide a [focusNode] and then
+  /// use the current [FocusScope] to request the focus:
+  ///
+  /// ```dart
+  /// FocusScope.of(context).requestFocus(myFocusNode);
+  /// ```
+  ///
+  /// This happens automatically when the widget is tapped.
+  ///
+  /// To be notified when the widget gains or loses the focus, add a listener
+  /// to the [focusNode]:
+  ///
+  /// ```dart
+  /// myFocusNode.addListener(() { print(myFocusNode.hasFocus); });
+  /// ```
+  ///
+  /// If null, this widget will create its own [FocusNode].
+  final FocusNode? trailingIconFocusNode;
 
   /// Optional widget that describes the input field.
   ///
@@ -558,8 +590,15 @@ class DropdownMenu<T> extends StatefulWidget {
   /// {@macro flutter.widgets.TextField.textInputAction}
   final TextInputAction? textInputAction;
 
+  /// {@macro flutter.widgets.editableText.cursorHeight}
+  final double? cursorHeight;
+
   /// {@macro flutter.material.textfield.restorationId}
   final String? restorationId;
+
+  /// An optional controller that allows opening and closing of the menu from
+  /// other widgets.
+  final MenuController? menuController;
 
   @override
   State<DropdownMenu<T>> createState() => _DropdownMenuState<T>();
@@ -569,7 +608,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   final GlobalKey _anchorKey = GlobalKey();
   final GlobalKey _leadingKey = GlobalKey();
   late List<GlobalKey> buttonItemKeys;
-  final MenuController _controller = MenuController();
+  late MenuController _controller;
   bool _enableFilter = false;
   late bool _enableSearch;
   late List<DropdownMenuEntry<T>> filteredEntries;
@@ -583,6 +622,10 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   final FocusNode _internalFocudeNode = FocusNode();
   int? _selectedEntryIndex;
   late final void Function() _clearSelectedEntryIndex;
+
+  FocusNode? _localTrailingIconButtonFocusNode;
+  FocusNode get _trailingIconButtonFocusNode =>
+      widget.trailingIconFocusNode ?? (_localTrailingIconButtonFocusNode ??= FocusNode());
 
   @override
   void initState() {
@@ -604,6 +647,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       _selectedEntryIndex = index;
     }
     refreshLeadingPadding();
+    _controller = widget.menuController ?? MenuController();
   }
 
   @override
@@ -612,6 +656,8 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     _localTextEditingController?.dispose();
     _localTextEditingController = null;
     _internalFocudeNode.dispose();
+    _localTrailingIconButtonFocusNode?.dispose();
+    _localTrailingIconButtonFocusNode = null;
     super.dispose();
   }
 
@@ -671,6 +717,9 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         );
         _selectedEntryIndex = index;
       }
+    }
+    if (oldWidget.menuController != widget.menuController) {
+      _controller = widget.menuController ?? MenuController();
     }
   }
 
@@ -804,7 +853,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         final ButtonStyle defaultStyle = const MenuItemButton().defaultStyleOf(context);
 
         Color? resolveFocusedColor(WidgetStateProperty<Color?>? colorStateProperty) {
-          return colorStateProperty?.resolve(<MaterialState>{MaterialState.focused});
+          return colorStateProperty?.resolve(<WidgetState>{WidgetState.focused});
         }
 
         final Color focusedForegroundColor = resolveFocusedColor(
@@ -1036,20 +1085,20 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     final double? anchorWidth = getWidth(_anchorKey);
     if (widget.width != null) {
       effectiveMenuStyle = effectiveMenuStyle.copyWith(
-        minimumSize: MaterialStateProperty.resolveWith<Size?>((Set<MaterialState> states) {
+        minimumSize: WidgetStateProperty.resolveWith<Size?>((Set<WidgetState> states) {
           final double? effectiveMaximumWidth = effectiveMenuStyle!.maximumSize
               ?.resolve(states)
               ?.width;
-          return Size(math.min(widget.width!, effectiveMaximumWidth ?? 0.0), 0.0);
+          return Size(math.min(widget.width!, effectiveMaximumWidth ?? widget.width!), 0.0);
         }),
       );
     } else if (anchorWidth != null) {
       effectiveMenuStyle = effectiveMenuStyle.copyWith(
-        minimumSize: MaterialStateProperty.resolveWith<Size?>((Set<MaterialState> states) {
+        minimumSize: WidgetStateProperty.resolveWith<Size?>((Set<WidgetState> states) {
           final double? effectiveMaximumWidth = effectiveMenuStyle!.maximumSize
               ?.resolve(states)
               ?.width;
-          return Size(math.min(anchorWidth, effectiveMaximumWidth ?? 0.0), 0.0);
+          return Size(math.min(anchorWidth, effectiveMaximumWidth ?? anchorWidth), 0.0);
         }),
       );
     }
@@ -1070,6 +1119,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     Widget menuAnchor = MenuAnchor(
       style: effectiveMenuStyle,
       alignmentOffset: widget.alignmentOffset,
+      reservedPadding: EdgeInsets.zero,
       controller: _controller,
       menuChildren: menu,
       crossAxisUnconstrained: false,
@@ -1080,6 +1130,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
             ? Padding(
                 padding: isCollapsed ? EdgeInsets.zero : const EdgeInsets.all(4.0),
                 child: IconButton(
+                  focusNode: _trailingIconButtonFocusNode,
                   isSelected: controller.isOpen,
                   constraints: widget.inputDecorationTheme?.suffixIconConstraints,
                   padding: isCollapsed ? EdgeInsets.zero : null,
@@ -1112,6 +1163,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           textAlignVertical: TextAlignVertical.center,
           maxLines: widget.maxLines,
           textInputAction: widget.textInputAction,
+          cursorHeight: widget.cursorHeight,
           style: effectiveTextStyle,
           controller: _effectiveTextEditingController,
           onEditingComplete: _handleEditingComplete,
@@ -1399,16 +1451,16 @@ class _RenderDropdownMenuBody extends RenderBox
         child = childParentData.nextSibling;
         continue;
       }
-      final double maxIntrinsicWidth = child.getMinIntrinsicWidth(height);
+      final double minIntrinsicWidth = child.getMinIntrinsicWidth(height);
       // Add the width of leading icon.
       if (child == lastChild) {
-        width += maxIntrinsicWidth;
+        width += minIntrinsicWidth;
       }
       // Add the width of trailing icon.
       if (child == childBefore(lastChild!)) {
-        width += maxIntrinsicWidth;
+        width += minIntrinsicWidth;
       }
-      width = math.max(width, maxIntrinsicWidth);
+      width = math.max(width, minIntrinsicWidth);
       final _DropdownMenuBodyParentData childParentData =
           child.parentData! as _DropdownMenuBodyParentData;
       child = childParentData.nextSibling;

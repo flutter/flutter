@@ -242,15 +242,19 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is NetworkImage && other.url == url && other.scale == scale;
+    return other is NetworkImage &&
+        other.url == url &&
+        other.scale == scale &&
+        other.webHtmlElementStrategy == webHtmlElementStrategy &&
+        mapEquals(other.headers, headers);
   }
 
   @override
-  int get hashCode => Object.hash(url, scale);
+  int get hashCode => Object.hash(url, scale, webHtmlElementStrategy, headers);
 
   @override
   String toString() =>
-      '${objectRuntimeType(this, 'NetworkImage')}("$url", scale: ${scale.toStringAsFixed(1)})';
+      '${objectRuntimeType(this, 'NetworkImage')}("$url", scale: ${scale.toStringAsFixed(1)}, webHtmlElementStrategy: ${webHtmlElementStrategy.name}, headers: $headers)';
 }
 
 /// An [ImageStreamCompleter] that delegates to another [ImageStreamCompleter]

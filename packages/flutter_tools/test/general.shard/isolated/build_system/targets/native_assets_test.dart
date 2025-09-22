@@ -66,7 +66,7 @@ void main() {
   });
 
   testWithoutContext('no dependency on KernelSnapshot', () async {
-    const DartBuildForNative target = DartBuildForNative();
+    const target = DartBuildForNative();
     expect(target.dependencies, isNot(isA<KernelSnapshot>()));
   });
 
@@ -112,8 +112,8 @@ void main() {
 
   // The NativeAssets Target should _always_ be creating a yaml an d file.
   // The caching logic depends on this.
-  for (final bool isNativeAssetsEnabled in <bool>[true, false]) {
-    final String postFix = isNativeAssetsEnabled ? 'enabled' : 'disabled';
+  for (final isNativeAssetsEnabled in <bool>[true, false]) {
+    final postFix = isNativeAssetsEnabled ? 'enabled' : 'disabled';
     testUsingContext(
       'Successful native_assets.json and native_assets.d creation with feature $postFix',
       overrides: <Type, Generator>{
@@ -192,7 +192,7 @@ void main() {
     () async {
       writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
 
-      final List<CodeAsset> codeAssets = <CodeAsset>[
+      final codeAssets = <CodeAsset>[
         CodeAsset(
           package: 'foo',
           name: 'foo.dart',
@@ -214,14 +214,14 @@ void main() {
       //  * dart build output should depend on C source
       //  * installation output should depend on shared library from dart build
 
-      final File dartBuildResult = iosEnvironment.buildDir.childFile(
-        DartBuild.dartBuildResultFilename,
+      final File dartHookResult = iosEnvironment.buildDir.childFile(
+        DartBuild.dartHookResultFilename,
       );
       final File buildDepsFile = iosEnvironment.buildDir.childFile(DartBuild.depFilename);
       expect(buildDepsFile, exists);
       expect(
         buildDepsFile.readAsStringSync(),
-        stringContainsInOrder(<String>[dartBuildResult.path, ':', 'src/foo.c']),
+        stringContainsInOrder(<String>[dartHookResult.path, ':', 'src/foo.c']),
       );
 
       final File nativeAssetsYaml = iosEnvironment.buildDir.childFile(
@@ -243,8 +243,8 @@ void main() {
     },
   );
 
-  for (final bool hasAssets in <bool>[true, false]) {
-    final String withOrWithout = hasAssets ? 'with' : 'without';
+  for (final hasAssets in <bool>[true, false]) {
+    final withOrWithout = hasAssets ? 'with' : 'without';
     testUsingContext(
       'flutter build $withOrWithout native assets',
       overrides: <Type, Generator>{
@@ -255,7 +255,7 @@ void main() {
         writePackageConfigFiles(directory: androidEnvironment.projectDir, mainLibName: 'my_app');
         await fileSystem.file('libfoo.so').create();
 
-        final List<CodeAsset> codeAssets = <CodeAsset>[
+        final codeAssets = <CodeAsset>[
           if (hasAssets)
             CodeAsset(
               package: 'foo',
@@ -264,7 +264,7 @@ void main() {
               file: Uri.file('libfoo.so'),
             ),
         ];
-        final FakeFlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
+        final buildRunner = FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['foo'],
           buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
             dependencies: <Uri>[Uri.file('src/foo.c')],

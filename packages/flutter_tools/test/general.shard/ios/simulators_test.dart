@@ -55,7 +55,7 @@ void main() {
     testUsingContext(
       'dispose() does not throw an exception',
       () async {
-        final IOSSimulator simulator = IOSSimulator(
+        final simulator = IOSSimulator(
           '123',
           name: 'iPhone 11',
           simControl: simControl,
@@ -86,7 +86,7 @@ void main() {
   testUsingContext(
     'simulators only support debug mode',
     () async {
-      final IOSSimulator simulator = IOSSimulator(
+      final simulator = IOSSimulator(
         '123',
         name: 'iPhone 11',
         simControl: FakeSimControl(),
@@ -117,7 +117,7 @@ void main() {
       'defaults to rooted from HOME',
       () {
         osx.environment['HOME'] = '/foo/bar';
-        final IOSSimulator simulator = IOSSimulator(
+        final simulator = IOSSimulator(
           '123',
           name: 'iPhone 11',
           simControl: simControl,
@@ -140,7 +140,7 @@ void main() {
       () {
         osx.environment['HOME'] = '/foo/bar';
         osx.environment['IOS_SIMULATOR_LOG_FILE_PATH'] = '/baz/qux/%{id}/system.log';
-        final IOSSimulator simulator = IOSSimulator(
+        final simulator = IOSSimulator(
           '456',
           name: 'iPhone 11',
           simControl: simControl,
@@ -167,7 +167,7 @@ void main() {
 
     // This new version string appears in SimulatorApp-850 CoreSimulator-518.16 beta.
     testWithoutContext('can be parsed from iOS-11-3', () async {
-      final IOSSimulator device = IOSSimulator(
+      final device = IOSSimulator(
         'x',
         name: 'iPhone SE',
         simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
@@ -179,7 +179,7 @@ void main() {
     });
 
     testWithoutContext('can be parsed from iOS 11.2', () async {
-      final IOSSimulator device = IOSSimulator(
+      final device = IOSSimulator(
         'x',
         name: 'iPhone SE',
         simulatorCategory: 'iOS 11.2',
@@ -191,7 +191,7 @@ void main() {
     });
 
     testWithoutContext('Has a simulator category', () async {
-      final IOSSimulator device = IOSSimulator(
+      final device = IOSSimulator(
         'x',
         name: 'iPhone SE',
         simulatorCategory: 'iOS 11.2',
@@ -213,7 +213,7 @@ void main() {
     testUsingContext(
       'Apple TV is unsupported',
       () async {
-        final IOSSimulator simulator = IOSSimulator(
+        final simulator = IOSSimulator(
           'x',
           name: 'Apple TV',
           simControl: simControl,
@@ -400,22 +400,22 @@ void main() {
 
   group('Simulator screenshot', () {
     testWithoutContext('supports screenshots', () async {
-      final Xcode xcode = Xcode.test(processManager: FakeProcessManager.any());
+      final xcode = Xcode.test(processManager: FakeProcessManager.any());
       final Logger logger = BufferLogger.test();
-      final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+      final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>['xcrun', 'simctl', 'io', 'x', 'screenshot', 'screenshot.png'],
         ),
       ]);
 
       // Test a real one. Screenshot doesn't require instance states.
-      final SimControl simControl = SimControl(
+      final simControl = SimControl(
         processManager: fakeProcessManager,
         logger: logger,
         xcode: xcode,
       );
       // Doesn't matter what the device is.
-      final IOSSimulator deviceUnderTest = IOSSimulator(
+      final deviceUnderTest = IOSSimulator(
         'x',
         name: 'iPhone SE',
         simControl: simControl,
@@ -441,7 +441,7 @@ void main() {
     testUsingContext(
       'syslog uses tail',
       () async {
-        final IOSSimulator device = IOSSimulator(
+        final device = IOSSimulator(
           'x',
           name: 'iPhone SE',
           simulatorCategory: 'iOS 9.3',
@@ -467,14 +467,14 @@ void main() {
     testUsingContext(
       'unified logging with app name',
       () async {
-        final IOSSimulator device = IOSSimulator(
+        final device = IOSSimulator(
           'x',
           name: 'iPhone SE',
           simulatorCategory: 'iOS 11.0',
           simControl: simControl,
           logger: logger,
         );
-        const String expectedPredicate =
+        const expectedPredicate =
             'eventType = logEvent AND '
             'processImagePath ENDSWITH "My Super Awesome App" AND '
             '(senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" OR processImageUUID == senderImageUUID) AND '
@@ -510,14 +510,14 @@ void main() {
     testUsingContext(
       'unified logging without app name',
       () async {
-        final IOSSimulator device = IOSSimulator(
+        final device = IOSSimulator(
           'x',
           name: 'iPhone SE',
           simulatorCategory: 'iOS 11.0',
           simControl: simControl,
           logger: logger,
         );
-        const String expectedPredicate =
+        const expectedPredicate =
             'eventType = logEvent AND '
             '(senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" OR processImageUUID == senderImageUUID) AND '
             'NOT(eventMessage CONTAINS ": could not find icon for representation -> com.apple.") AND '
@@ -587,7 +587,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
               ),
             );
 
-          final IOSSimulator device = IOSSimulator(
+          final device = IOSSimulator(
             '123456',
             name: 'iPhone 11',
             simulatorCategory: 'iOS 10.0',
@@ -631,7 +631,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
               ),
             );
 
-          final IOSSimulator device = IOSSimulator(
+          final device = IOSSimulator(
             '123456',
             name: 'iPhone 11',
             simulatorCategory: 'iOS 10.3',
@@ -688,7 +688,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
               ),
             );
 
-          final IOSSimulator device = IOSSimulator(
+          final device = IOSSimulator(
             '123456',
             name: 'iPhone 11',
             simulatorCategory: 'iOS 10.3',
@@ -731,7 +731,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       testUsingContext(
         'log reader handles escaped multiline messages',
         () async {
-          const String logPredicate =
+          const logPredicate =
               'eventType = logEvent AND processImagePath ENDSWITH "My Super Awesome App" '
               'AND (senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" '
               'OR processImageUUID == senderImageUUID) AND NOT(eventMessage CONTAINS ": could not find icon '
@@ -768,7 +768,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             ),
           );
 
-          final IOSSimulator device = IOSSimulator(
+          final device = IOSSimulator(
             '123456',
             name: 'iPhone 11',
             simulatorCategory: 'iOS 11.0',
@@ -796,7 +796,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       testUsingContext(
         'log reader handles bad output',
         () async {
-          const String logPredicate =
+          const logPredicate =
               'eventType = logEvent AND processImagePath ENDSWITH "My Super Awesome App" '
               'AND (senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" '
               'OR processImageUUID == senderImageUUID) AND NOT(eventMessage CONTAINS ": could not find icon '
@@ -820,7 +820,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             ),
           );
 
-          final IOSSimulator device = IOSSimulator(
+          final device = IOSSimulator(
             '123456',
             name: 'iPhone 11',
             simulatorCategory: 'iOS 11.0',
@@ -846,7 +846,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
   });
 
   group('SimControl', () {
-    const String validSimControlOutput = '''
+    const validSimControlOutput = '''
 {
   "devices" : {
     "com.apple.CoreSimulator.SimRuntime.iOS-14-0" : [
@@ -899,14 +899,14 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
     late IOSSimulatorUtils simulatorUtils;
     late IOSSimulatorUtils simulatorUtilsBadSimctl;
     late BufferLogger logger;
-    const String deviceId = 'smart-phone';
-    const String appId = 'flutterApp';
+    const deviceId = 'smart-phone';
+    const appId = 'flutterApp';
 
     setUp(() {
       fakeProcessManager = FakeProcessManager.empty();
       xcode = Xcode.test(processManager: FakeProcessManager.any());
 
-      final FakeProcessManager fakeProcessManagerBadSimctl = FakeProcessManager.list(<FakeCommand>[
+      final fakeProcessManagerBadSimctl = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>['which', 'sysctl']),
         const FakeCommand(
           command: <String>['sysctl', 'hw.optional.arm64'],
@@ -1012,7 +1012,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
     );
 
     testWithoutContext('sdkMajorVersion defaults to 11 when sdkNameAndVersion is junk', () async {
-      final IOSSimulator iosSimulatorA = IOSSimulator(
+      final iosSimulatorA = IOSSimulator(
         'x',
         name: 'Testo',
         simulatorCategory: 'NaN',
@@ -1081,7 +1081,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
     });
 
     testWithoutContext('simulator stopApp handles null app package', () async {
-      final IOSSimulator iosSimulator = IOSSimulator(
+      final iosSimulator = IOSSimulator(
         'x',
         name: 'Testo',
         simulatorCategory: 'NaN',
@@ -1093,7 +1093,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
     });
 
     testWithoutContext('listAvailableIOSRuntimes succeeds', () async {
-      const String validRuntimesOutput = '''
+      const validRuntimesOutput = '''
 {
   "runtimes" : [
     {
@@ -1279,7 +1279,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
     testUsingContext(
       "startApp uses compiled app's Info.plist to find CFBundleIdentifier",
       () async {
-        final IOSSimulator device = IOSSimulator(
+        final device = IOSSimulator(
           'x',
           name: 'iPhone SE',
           simulatorCategory: 'iOS 11.2',
@@ -1296,13 +1296,13 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           applicationPackage: mockDir,
         );
 
-        const BuildInfo mockInfo = BuildInfo(
+        const mockInfo = BuildInfo(
           BuildMode.debug,
           'flavor',
           treeShakeIcons: false,
           packageConfigPath: '.dart_tool/package_config.json',
         );
-        final DebuggingOptions mockOptions = DebuggingOptions.disabled(mockInfo);
+        final mockOptions = DebuggingOptions.disabled(mockInfo);
         await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
 
         expect(simControl.requests.single.appIdentifier, 'correct');
@@ -1318,7 +1318,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
     testUsingContext(
       'startApp fails when cannot find CFBundleIdentifier',
       () async {
-        final IOSSimulator device = IOSSimulator(
+        final device = IOSSimulator(
           'x',
           name: 'iPhone SE',
           simulatorCategory: 'iOS 11.2',
@@ -1334,13 +1334,13 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           applicationPackage: mockDir,
         );
 
-        const BuildInfo mockInfo = BuildInfo(
+        const mockInfo = BuildInfo(
           BuildMode.debug,
           'flavor',
           treeShakeIcons: false,
           packageConfigPath: '.dart_tool/package_config.json',
         );
-        final DebuggingOptions mockOptions = DebuggingOptions.disabled(mockInfo);
+        final mockOptions = DebuggingOptions.disabled(mockInfo);
         final LaunchResult result = await device.startApp(
           package,
           prebuiltApplication: true,
@@ -1366,7 +1366,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
     testUsingContext(
       'startApp forwards all supported debugging options',
       () async {
-        final IOSSimulator device = IOSSimulator(
+        final device = IOSSimulator(
           'x',
           name: 'iPhone SE',
           simulatorCategory: 'iOS 11.2',
@@ -1383,13 +1383,13 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           applicationPackage: mockDir,
         );
 
-        const BuildInfo mockInfo = BuildInfo(
+        const mockInfo = BuildInfo(
           BuildMode.debug,
           'flavor',
           treeShakeIcons: false,
           packageConfigPath: '.dart_tool/package_config.json',
         );
-        final DebuggingOptions mockOptions = DebuggingOptions.enabled(
+        final mockOptions = DebuggingOptions.enabled(
           mockInfo,
           enableSoftwareRendering: true,
           traceSystrace: true,
@@ -1403,6 +1403,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           traceSkiaAllowlist: 'skia.a,skia.b',
           endlessTraceBuffer: true,
           profileMicrotasks: true,
+          profileStartup: true,
           verboseSystemLogs: true,
           purgePersistentCache: true,
           dartFlags: '--baz',
@@ -1415,6 +1416,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           simControl.requests.single.launchArgs,
           unorderedEquals(<String>[
             '--enable-dart-profiling',
+            '--profile-startup',
             '--enable-checked-mode',
             '--verify-entry-points',
             '--enable-software-rendering',
@@ -1448,7 +1450,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
     testUsingContext(
       'startApp using route',
       () async {
-        final IOSSimulator device = IOSSimulator(
+        final device = IOSSimulator(
           'x',
           name: 'iPhone SE',
           simulatorCategory: 'iOS 11.2',
@@ -1465,16 +1467,13 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           applicationPackage: mockDir,
         );
 
-        const BuildInfo mockInfo = BuildInfo(
+        const mockInfo = BuildInfo(
           BuildMode.debug,
           'flavor',
           treeShakeIcons: false,
           packageConfigPath: '.dart_tool/package_config.json',
         );
-        final DebuggingOptions mockOptions = DebuggingOptions.enabled(
-          mockInfo,
-          enableSoftwareRendering: true,
-        );
+        final mockOptions = DebuggingOptions.enabled(mockInfo, enableSoftwareRendering: true);
         await device.startApp(
           package,
           prebuiltApplication: true,
@@ -1517,7 +1516,7 @@ flutter:
           globals.fs.currentDirectory,
         );
 
-        final IOSSimulator simulator = IOSSimulator(
+        final simulator = IOSSimulator(
           'test',
           name: 'iPhone 11',
           simControl: simControl,
@@ -1542,7 +1541,7 @@ flutter:
           globals.fs.currentDirectory,
         );
 
-        final IOSSimulator simulator = IOSSimulator(
+        final simulator = IOSSimulator(
           'test',
           name: 'iPhone 11',
           simControl: simControl,
@@ -1566,7 +1565,7 @@ flutter:
           globals.fs.currentDirectory,
         );
 
-        final IOSSimulator simulator = IOSSimulator(
+        final simulator = IOSSimulator(
           'test',
           name: 'iPhone 11',
           simControl: simControl,
@@ -1583,7 +1582,7 @@ flutter:
     );
 
     testUsingContext('createDevFSWriter returns a LocalDevFSWriter', () {
-      final IOSSimulator simulator = IOSSimulator(
+      final simulator = IOSSimulator(
         'test',
         name: 'iPhone 11',
         simControl: simControl,
@@ -1605,7 +1604,7 @@ class FakeIosProject extends Fake implements IosProject {
 }
 
 class FakeSimControl extends Fake implements SimControl {
-  final List<LaunchRequest> requests = <LaunchRequest>[];
+  final requests = <LaunchRequest>[];
 
   @override
   Future<RunResult> launch(

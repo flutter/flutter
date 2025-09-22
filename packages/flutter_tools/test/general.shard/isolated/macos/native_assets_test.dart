@@ -12,15 +12,15 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
-import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
+import 'package:flutter_tools/src/isolated/native_assets/macos/native_assets_host.dart'
+    show cCompilerConfigMacOS;
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:hooks/hooks.dart';
-import 'package:package_config/package_config_types.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
-import '../../../src/package_config.dart';
 import '../fake_native_assets_build_runner.dart';
 
 void main() {
@@ -30,7 +30,6 @@ void main() {
   late FileSystem fileSystem;
   late BufferLogger logger;
   late Uri projectUri;
-  late String runPackageName;
 
   setUp(() {
     processManager = FakeProcessManager.empty();
@@ -47,13 +46,12 @@ void main() {
     );
     environment.buildDir.createSync(recursive: true);
     projectUri = environment.projectDir.uri;
-    runPackageName = environment.projectDir.basename;
   });
 
-  for (final bool flutterTester in <bool>[false, true]) {
-    final bool isArm64 = Architecture.current == Architecture.arm64;
+  for (final flutterTester in <bool>[false, true]) {
+    final isArm64 = Architecture.current == Architecture.arm64;
 
-    String testName = '';
+    var testName = '';
     if (flutterTester) {
       testName += ' flutter tester';
     }
@@ -75,10 +73,7 @@ void main() {
       dylibPathBuz = '/build/native_assets/macos/buz.framework/Versions/A/buz';
       signPathBuz = '/build/native_assets/macos/buz.framework';
     }
-    for (final BuildMode buildMode in <BuildMode>[
-      BuildMode.debug,
-      if (!flutterTester) BuildMode.release,
-    ]) {
+    for (final buildMode in <BuildMode>[BuildMode.debug, if (!flutterTester) BuildMode.release]) {
       testUsingContext(
         'build with assets $buildMode$testName',
         overrides: <Type, Generator>{
@@ -274,7 +269,7 @@ void main() {
               file: Uri.file('${codeConfig.targetArchitecture}/libbuz.dylib'),
             ),
           ];
-          final FakeFlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
+          final buildRunner = FakeFlutterNativeAssetsBuildRunner(
             packagesWithNativeAssetsResult: <String>['bar'],
             onBuild: (BuildInput input) => FakeFlutterNativeAssetsBuilderResult.fromAssets(
               codeAssets: buildMode == BuildMode.debug
@@ -287,14 +282,14 @@ void main() {
                     codeAssets: codeAssets(input.config.code.targetOS, input.config.code),
                   ),
           );
-          final Map<String, String> environmentDefines = <String, String>{
+          final environmentDefines = <String, String>{
             kBuildMode: buildMode.cliName,
             kDarwinArchs: 'arm64 x86_64',
           };
           final TargetPlatform targetPlatform = flutterTester
               ? TargetPlatform.tester
               : TargetPlatform.darwin;
-          final DartBuildResult dartBuildResult = await runFlutterSpecificDartBuild(
+          final DartHooksResult dartHookResult = await runFlutterSpecificHooks(
             environmentDefines: environmentDefines,
             targetPlatform: targetPlatform,
             projectUri: projectUri,
@@ -308,21 +303,21 @@ void main() {
               : nonFlutterTesterAssetUri;
 
           await installCodeAssets(
-            dartBuildResult: dartBuildResult,
+            dartHookResult: dartHookResult,
             environmentDefines: environmentDefines,
             targetPlatform: targetPlatform,
             projectUri: projectUri,
             fileSystem: fileSystem,
             nativeAssetsFileUri: nativeAssetsFileUri,
           );
-          final String expectedArchsBeingBuilt = flutterTester
-              ? (isArm64 ? 'arm64' : 'x64')
-              : '[arm64, x64]';
+          final expectedArchsBeingBuilt = flutterTester
+              ? (isArm64 ? 'macos_arm64' : 'macos_x64')
+              : 'macos_arm64, macos_x64';
           expect(
             (globals.logger as BufferLogger).traceText,
             stringContainsInOrder(<String>[
-              'Building native assets for macos $expectedArchsBeingBuilt.',
-              'Building native assets for macos $expectedArchsBeingBuilt done.',
+              'Building native assets for $expectedArchsBeingBuilt.',
+              'Building native assets for $expectedArchsBeingBuilt done.',
             ]),
           );
           final String nativeAssetsFileContent = await fileSystem
@@ -382,28 +377,7 @@ InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault
         return;
       }
 
-      final File packageConfigFile = writePackageConfigFiles(
-        directory: fileSystem.directory(projectUri),
-        mainLibName: 'my_app',
-      );
-      final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-        packageConfigFile,
-        logger: environment.logger,
-      );
-      final File pubspecFile = fileSystem.file(projectUri.resolve('pubspec.yaml'));
-      await pubspecFile.writeAsString('''
-name: my_app
-''');
-      final FlutterNativeAssetsBuildRunner runner = FlutterNativeAssetsBuildRunnerImpl(
-        packageConfigFile.path,
-        packageConfig,
-        fileSystem,
-        logger,
-        runPackageName,
-        includeDevDependencies: false,
-        pubspecFile.path,
-      );
-      final CCompilerConfig result = (await runner.cCompilerConfig)!;
+      final CCompilerConfig result = await cCompilerConfigMacOS();
       expect(
         result.compiler,
         Uri.file(
