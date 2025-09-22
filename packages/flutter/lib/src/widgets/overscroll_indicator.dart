@@ -826,54 +826,6 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
   }
 }
 
-/// A physics simulation modeling the stretch behavior of an edge effect.
-///
-/// This class is a port of Android's EdgeEffect.java:
-/// https://cs.android.com/android/platform/superproject/main/+/main:frameworks/base/core/java/android/widget/EdgeEffect.java
-///
-/// It reproduces the damped harmonic oscillator behavior of Android's
-/// overscroll effect in Flutter, using the same physical constants:
-/// - natural frequency
-/// - damping ratio
-class _StretchSimulation extends SpringSimulation {
-  _StretchSimulation(double overscroll, double velocity)
-    : super(
-        SpringDescription.withDampingRatio(
-          mass: 1,
-          stiffness:
-              (kNaturalFrequency * kNaturalFrequency) *
-              kTimeCorrectionFactor *
-              kTimeCorrectionFactor,
-          ratio: kDampingRatio,
-        ),
-        overscroll,
-        0.0,
-        velocity * kTimeCorrectionFactor,
-      );
-
-  // Physical constants ported directly from Android's EdgeEffect.java.
-  static const double kNaturalFrequency = 24.657;
-  static const double kDampingRatio = 0.98;
-
-  /// A correction factor applied to the simulation time.
-  ///
-  /// The physical constants `_naturalFrequency` and `_dampingRatio` were ported
-  /// directly from Android's `EdgeEffect.java` source. However, using these
-  /// constants as-is resulted in an animation that was noticeably faster than
-  /// the native Android behavior. The underlying reason for this discrepancy is
-  /// unknown.
-  ///
-  /// This factor, determined by visual comparison ("eyeballing") to match the
-  /// platform's timing, is applied to the elapsed time `t` to slow down the
-  /// simulation.
-  ///
-  /// Based on the damped harmonic oscillator equations, an alternative,
-  /// mathematically equivalent, approach would be to multiply both the
-  /// `_naturalFrequency` and the initial velocity by this same factor,
-  /// rather than scaling the time input.
-  static const double kTimeCorrectionFactor = 0.8;
-}
-
 class _StretchController extends Listenable {
   _StretchController({required this.vsync});
 
@@ -928,6 +880,49 @@ class _StretchController extends Listenable {
   /// ensuring the stretch effect does not exceed a reasonable limit.
   static const double _maxAbsorbImpactVelocity = 1.25;
 
+  // Physical constants ported directly from Android's EdgeEffect.java.
+  //
+  // Android's EdgeEffect.java:
+  // https://cs.android.com/android/platform/superproject/main/+/main:frameworks/base/core/java/android/widget/EdgeEffect.java
+  static const double kNaturalFrequency = 24.657;
+  static const double kDampingRatio = 0.98;
+
+  /// A correction factor applied to the simulation time.
+  ///
+  /// The physical constants `_naturalFrequency` and `_dampingRatio` were ported
+  /// directly from Android's `EdgeEffect.java` source. However, using these
+  /// constants as-is resulted in an animation that was noticeably faster than
+  /// the native Android behavior. The underlying reason for this discrepancy is
+  /// unknown.
+  ///
+  /// This factor, determined by visual comparison ("eyeballing") to match the
+  /// platform's timing, is applied to the elapsed time `t` to slow down the
+  /// simulation.
+  ///
+  /// Based on the damped harmonic oscillator equations, an alternative,
+  /// mathematically equivalent, approach would be to multiply both the
+  /// `_naturalFrequency` and the initial velocity by this same factor,
+  /// rather than scaling the time input.
+  static const double kTimeCorrectionFactor = 0.8;
+
+  /// Stiffness coefficient for the spring, derived from the natural frequency.
+  ///
+  /// Calculated as `kStiffness = kNaturalFrequency^2`, this is the baseline
+  /// spring constant used in the damped harmonic oscillator model.
+  static const double kStiffness = kNaturalFrequency * kNaturalFrequency;
+
+  /// Spring description representing the stretch behavior of the edge effect.
+  ///
+  /// This [SpringDescription] is used to simulate the overscroll stretch
+  /// in Flutter. The spring has a mass of 1, a stiffness adjusted by the
+  /// [kTimeCorrectionFactor] squared to match platform timing, and
+  /// a damping ratio corresponding to Android's native `EdgeEffect`.
+  static final SpringDescription _kStretchSpringDescription = SpringDescription.withDampingRatio(
+    mass: 1,
+    stiffness: kStiffness * kTimeCorrectionFactor * kTimeCorrectionFactor,
+    ratio: kDampingRatio,
+  );
+
   @override
   void addListener(VoidCallback listener) {
     _overscrollNotifier.addListener(listener);
@@ -939,8 +934,13 @@ class _StretchController extends Listenable {
   }
 
   /// Creates a stretching-only [Simulation] ported from Android 12.
-  _StretchSimulation _createStretchSimulation(double velocity) {
-    return _StretchSimulation(overscroll, velocity);
+  SpringSimulation _createStretchSimulation(double velocity) {
+    return SpringSimulation(
+      _kStretchSpringDescription,
+      overscroll,
+      0.0,
+      velocity * kTimeCorrectionFactor,
+    );
   }
 
   /// Handle a fling to the edge of the viewport at a particular velocity.
