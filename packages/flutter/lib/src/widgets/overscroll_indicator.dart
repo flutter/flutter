@@ -901,7 +901,7 @@ class _StretchController extends Listenable {
   ///
   /// Based on the damped harmonic oscillator equations, an alternative,
   /// mathematically equivalent, approach would be to multiply both the
-  /// `_naturalFrequency` and the initial velocity by this same factor,
+  /// `kNaturalFrequency ` and the initial velocity by this same factor,
   /// rather than scaling the time input.
   static const double kTimeCorrectionFactor = 0.8;
 
