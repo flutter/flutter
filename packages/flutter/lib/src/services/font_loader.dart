@@ -32,7 +32,7 @@ class FontLoader {
   /// The [bytes] argument specifies the actual font asset bytes. Currently,
   /// only OpenType (OTF) and TrueType (TTF) fonts are supported.
   ///
-  /// [load] will load fonts in the order this is called.
+  /// The [load] method will load fonts in the order this is called.
   void addFont(Future<ByteData> bytes) {
     if (_loaded) {
       throw StateError('FontLoader is already loaded');
