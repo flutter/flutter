@@ -1312,7 +1312,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('popUntil with a return value', (WidgetTester tester) async {
+  testWidgets('popUntilWithResult return value to the last popped route', (
+    WidgetTester tester,
+  ) async {
     bool? firstReturnValue;
     bool? secondReturnValue;
 
@@ -1348,7 +1350,7 @@ void main() {
                 builder: (BuildContext context) => OnTapPage(
                   id: 'B',
                   onTap: () async {
-                    Navigator.popUntil<bool>(
+                    Navigator.popUntilWithResult<bool>(
                       context,
                       (Route<dynamic> route) => route.isFirst,
                       true,
