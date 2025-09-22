@@ -33,18 +33,14 @@ export 'xcode_project.dart';
 
 /// Enum for each officially supported platform.
 enum SupportedPlatform {
-  android(name: 'android'),
-  ios(name: 'ios'),
-  linux(name: 'linux'),
-  macos(name: 'macos'),
-  web(name: 'web'),
-  windows(name: 'windows'),
-  fuchsia(name: 'fuchsia'),
-  root(name: 'root'); // Special platform to represent the root project directory
-
-  const SupportedPlatform({required this.name});
-
-  final String name;
+  android,
+  ios,
+  linux,
+  macos,
+  web,
+  windows,
+  fuchsia,
+  root, // Special platform to represent the root project directory
 }
 
 class FlutterProjectFactory {
