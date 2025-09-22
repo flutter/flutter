@@ -27,6 +27,8 @@ enum FontStyle {
 
 /// The thickness of the glyphs used to draw the text.
 ///
+/// Values must be in the range 1..1000.
+///
 /// Fonts are typically weighted on a 9-point scale, which, for historical
 /// reasons, uses the names 100 to 900. In Flutter, these are named `w100` to
 /// `w900` and have the following conventional meanings:
@@ -56,7 +58,9 @@ enum FontStyle {
 /// When using these fonts, applications can specify [FontWeight] instances
 /// constructed using values other than the predefined values.
 class FontWeight {
-  const FontWeight(this.value);
+  const FontWeight(this.value)
+    : assert(value >= 1, 'Font weight must be between 1 and 1000'),
+      assert(value <= 1000, 'Font weight must be between 1 and 1000');
 
   /// The encoded integer value of this font weight.
   int get index => (value ~/ 100 - 1).clamp(0, 8);

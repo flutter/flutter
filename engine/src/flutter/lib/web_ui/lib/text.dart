@@ -14,7 +14,9 @@ enum FontStyle { normal, italic }
 enum PlaceholderAlignment { baseline, aboveBaseline, belowBaseline, top, bottom, middle }
 
 class FontWeight {
-  const FontWeight(this.value);
+  const FontWeight(this.value)
+    : assert(value >= 1, 'Font weight must be between 1 and 1000'),
+      assert(value <= 1000, 'Font weight must be between 1 and 1000');
 
   final int value;
   int get index => (value ~/ 100 - 1).clamp(0, 8);
