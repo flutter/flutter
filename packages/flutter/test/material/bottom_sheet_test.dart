@@ -2890,21 +2890,22 @@ void main() {
     expect(focusNode.hasFocus, true);
   });
 
-  testWidgets('BottomSheet renders at zero area', (WidgetTester tester) async {
+  testWidgets('BottomSheet does not crash at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: SizedBox.shrink(
-            child: BottomSheet(
-              onClosing: () {},
-              builder: (BuildContext context) => const Text('X'),
+          body: Center(
+            child: SizedBox.shrink(
+              child: BottomSheet(
+                onClosing: () {},
+                builder: (BuildContext context) => const Text('X'),
+              ),
             ),
           ),
         ),
       ),
     );
-    final Finder xText = find.text('X');
-    expect(tester.getSize(xText).isEmpty, isTrue);
+    expect(tester.getSize(find.byType(BottomSheet)), Size.zero);
   });
 }
 
