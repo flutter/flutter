@@ -709,7 +709,6 @@ dependencies {
         GradleAgpTestData(true, agpVersion: '8.3', gradleVersion: '8.4'),
         GradleAgpTestData(true, agpVersion: '8.2', gradleVersion: '8.2'),
         GradleAgpTestData(true, agpVersion: '8.1', gradleVersion: '8.0'),
-        GradleAgpTestData(true, agpVersion: '8.1', gradleVersion: '8.0'),
         GradleAgpTestData(true, agpVersion: '8.0', gradleVersion: '8.0'),
         GradleAgpTestData(true, agpVersion: '7.4', gradleVersion: '7.5'),
         GradleAgpTestData(true, agpVersion: '7.3', gradleVersion: '7.4'),
@@ -735,7 +734,6 @@ dependencies {
         // ignore: avoid_redundant_argument_values
         GradleAgpTestData(false, agpVersion: null, gradleVersion: null),
         // Middle AGP cases:
-        GradleAgpTestData(true, agpVersion: '8.0.1', gradleVersion: '8.0'),
         GradleAgpTestData(true, agpVersion: '8.0.1', gradleVersion: '8.0'),
         GradleAgpTestData(true, agpVersion: '7.4.1', gradleVersion: '7.5'),
         GradleAgpTestData(true, agpVersion: '7.3.1', gradleVersion: '7.4'),
