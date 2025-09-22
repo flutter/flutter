@@ -25,7 +25,6 @@ import 'package:flutter/widgets.dart';
 
 import 'button_style_button.dart';
 import 'ink_well.dart';
-import 'material_state.dart';
 import 'theme_data.dart';
 
 // Examples can assume:
@@ -37,7 +36,7 @@ import 'theme_data.dart';
 /// The [states] parameter is the button's current pressed/hovered/etc state. The [child] is
 /// typically a descendant of the returned widget.
 typedef ButtonLayerBuilder =
-    Widget Function(BuildContext context, Set<MaterialState> states, Widget? child);
+    Widget Function(BuildContext context, Set<WidgetState> states, Widget? child);
 
 /// The visual properties that most buttons have in common.
 ///
