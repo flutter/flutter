@@ -326,9 +326,6 @@ bool debugCheckHasMediaQuery(BuildContext context) {
 
 /// Asserts that the given context has a [SelectionRegistrarScope] ancestor.
 ///
-/// Used by various widgets to make sure that they are only used in an
-/// appropriate context.
-///
 /// To invoke this function, use the following pattern, typically in the
 /// relevant Widget's build method:
 ///
@@ -348,7 +345,7 @@ bool debugCheckHasSelectionRegistrar(BuildContext context) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('No SelectionRegistrarScope widget ancestor found.'),
         ErrorDescription(
-          '${context.widget.runtimeType} widgets require a MediaQuery widget ancestor.',
+          '${context.widget.runtimeType} widgets require a SelectionRegistrarScope widget ancestor.',
         ),
         context.describeWidget(
           'The specific widget that could not find a SelectionRegistrarScope ancestor was',
