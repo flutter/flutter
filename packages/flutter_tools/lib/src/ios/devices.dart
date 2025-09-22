@@ -239,6 +239,8 @@ class IOSDevices extends PollingDeviceDiscovery {
   @override
   Future<void> stopPolling() async {
     await _observedDeviceEventsSubscription?.cancel();
+    _observedDeviceEventsSubscription = null;
+    xcdevice.dispose();
   }
 
   @override

@@ -106,6 +106,7 @@ class XCDevice {
     _stopObservingTetheredIOSDevices();
     _usbDeviceWaitProcess?.kill();
     _wifiDeviceWaitProcess?.kill();
+    _coreDeviceControl.stopListDevices();
   }
 
   final ProcessUtils _processUtils;
