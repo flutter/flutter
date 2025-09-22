@@ -156,7 +156,7 @@ class WebTemplate {
   String _applyWebDefineSubstitutions(String content, Map<String, String> webDefines) {
     // Pattern to match {{VARIABLE_NAME}} format (letters, numbers, underscore)
     final RegExp variablePattern = RegExp(r'\{\{([A-Za-z_][A-Za-z0-9_]*)\}\}');
-    final List<String> missingVariables = <String>[];
+    final Set<String> missingVariables = <String>{};
 
     // Find all variable placeholders
     final Iterable<RegExpMatch> matches = variablePattern.allMatches(content);
