@@ -59,6 +59,9 @@ abstract class Renderer {
   // Listens for view disposal events from the view manager.
   late StreamSubscription<int> _onViewDisposedListener;
 
+  /// Set the maximum number of bytes that can be held in the GPU resource cache.
+  set resourceCacheMaxBytes(int bytes) => rasterizer.setResourceCacheMaxBytes(bytes);
+
   @mustCallSuper
   FutureOr<void> initialize() {
     // Views may have been registered before this renderer was initialized.
