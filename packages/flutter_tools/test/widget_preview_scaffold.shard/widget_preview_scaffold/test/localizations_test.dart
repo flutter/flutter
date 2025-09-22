@@ -7,7 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:widget_preview_scaffold/src/widget_preview.dart';
-import 'package:widget_preview_scaffold/src/widget_preview_rendering.dart';
+import 'package:widget_preview_scaffold/src/widget_preview_rendering.dart'
+    hide PreviewWidget;
 
 import 'utils/localizations_utils.dart';
 import 'utils/widget_preview_scaffold_test_utils.dart';
@@ -30,14 +31,15 @@ void expectLocalization<T extends AppLocalizations?>({
 
 WidgetPreviewerWidgetScaffolding previewForLocalizations({
   required Key key,
-  PreviewLocalizationsData? previewLocalizationsData,
+  PreviewLocalizations? previewLocalizationsData,
 }) {
   return WidgetPreviewerWidgetScaffolding(
     child: WidgetPreviewWidget(
       preview: WidgetPreview(
         scriptUri: '',
         builder: () => Text('Foo', key: key),
-        localizations: previewLocalizationsData,
+        previewData: Preview(localizations: previewLocalizationsData),
+        packageName: '',
       ),
     ),
   );
@@ -53,7 +55,7 @@ void main() {
       // Check that both en and es localizations are available to the previewed widget.
       WidgetPreviewerWidgetScaffolding widgetPreview = previewForLocalizations(
         key: key,
-        previewLocalizationsData: previewLocalizationsData,
+        previewLocalizationsData: () => previewLocalizationsData,
       );
       await tester.pumpWidget(widgetPreview);
 
@@ -65,7 +67,7 @@ void main() {
       previewLocalizationsData = forLocale('es');
       widgetPreview = previewForLocalizations(
         key: key,
-        previewLocalizationsData: previewLocalizationsData,
+        previewLocalizationsData: () => previewLocalizationsData,
       );
       await tester.pumpWidget(widgetPreview);
 

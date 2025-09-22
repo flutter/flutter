@@ -146,8 +146,8 @@ class NoPreviewsDetectedWidget extends StatelessWidget {
   }
 }
 
-class Preview extends StatelessWidget {
-  const Preview({super.key, required this.preview, required this.child});
+class PreviewWidget extends StatelessWidget {
+  const PreviewWidget({super.key, required this.preview, required this.child});
 
   final WidgetPreview preview;
   final Widget child;
@@ -330,9 +330,9 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
             child: WidgetPreviewTheming(
               theme: widget.preview.theme,
               child: EnableWidgetInspectorScope(
-                child: Preview(
+                child: PreviewWidget(
                   preview: widget.preview,
-                  child: widget.preview.builder(),
+                  child: widget.preview.previewBuilder(),
                 ),
               ),
             ),
