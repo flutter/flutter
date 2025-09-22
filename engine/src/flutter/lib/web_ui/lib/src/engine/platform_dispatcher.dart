@@ -480,17 +480,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         final MethodCall decoded = jsonCodec.decodeMethodCall(data);
         switch (decoded.method) {
           case 'Skia.setResourceCacheMaxBytes':
-            if (renderer is CanvasKitRenderer) {
-              assert(
-                decoded.arguments is int,
-                'Argument to Skia.setResourceCacheMaxBytes must be an int, but was ${(decoded.arguments as Object?).runtimeType}',
-              );
-              final int cacheSizeInBytes = decoded.arguments as int;
-              CanvasKitRenderer.instance.resourceCacheMaxBytes = cacheSizeInBytes;
-            }
+            assert(
+              decoded.arguments is int,
+              'Argument to Skia.setResourceCacheMaxBytes must be an int, but was ${(decoded.arguments as Object?).runtimeType}',
+            );
+            final int cacheSizeInBytes = decoded.arguments as int;
+            renderer.resourceCacheMaxBytes = cacheSizeInBytes;
 
-            // Also respond in HTML mode. Otherwise, apps would have to detect
-            // CanvasKit vs HTML before invoking this method.
             replyToPlatformMessage(callback, jsonCodec.encodeSuccessEnvelope(<bool>[true]));
         }
         return;
