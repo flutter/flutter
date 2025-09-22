@@ -19,7 +19,7 @@ final String _flutter = path.join(_flutterRoot, 'bin', 'flutter$_bat');
 final String _testAppDirectory = path.join(_flutterRoot, 'dev', 'integration_tests', 'web');
 final String _appBuildDirectory = path.join(_testAppDirectory, 'build', 'web');
 final String _target = path.join('lib', 'service_worker_test.dart');
-final Map<String, int> _requestedPathCounts = <String, int>{};
+final Set<String> _requestedPaths = <String>{};
 
 Future<void> main() async {
   await runServiceWorkerCleanupTest(headless: false);
@@ -129,14 +129,15 @@ self.addEventListener('activate', (event) => {
     serviceWorkerBuildFile.writeAsStringSync(oldCachingWorkerContent);
 
     server = await _startServer(headless: headless);
-    await _waitForAppToLoad(server, waitForCounts: <String, int>{'main.dart.js': 1});
-    _requestedPathCounts.clear();
+    await _waitForAppToRequest(server, 'main.dart.js');
+    _requestedPaths.clear();
+    print('== RELOADING PAGE ==');
     await server.chrome.reloadPage();
-    await _waitForAppToLoad(server, waitForCounts: <String, int>{'flutter_service_worker.js': 1});
+    await _waitForAppToRequest(server, 'flutter_service_worker.js');
 
     expect(
-      _requestedPathCounts.containsKey('main.dart.js'),
-      false,
+      _requestedPaths,
+      isNot(contains('main.dart.js')),
       reason:
           'On a simple reload, main.dart.js should have been served from the cache, so no network request was expected.',
     );
@@ -147,13 +148,14 @@ self.addEventListener('activate', (event) => {
     serviceWorkerBuildFile.writeAsStringSync(cleanupWorkerContent);
 
     server = await _startServer(headless: headless);
-    await _waitForAppToLoad(server, waitForCounts: <String, int>{'main.dart.js': 1});
+    await _waitForAppToRequest(server, 'main.dart.js');
+    print('== RELOADING PAGE ==');
     await server.chrome.reloadPage();
-    await _waitForAppToLoad(server, waitForCounts: <String, int>{'main.dart.js': 1});
+    await _waitForAppToRequest(server, 'main.dart.js');
 
     expect(
-      _requestedPathCounts.containsKey('main.dart.js'),
-      true,
+      _requestedPaths,
+      contains('main.dart.js'),
       reason:
           'After cleanup, main.dart.js should be requested from the network because the caching worker is gone.',
     );
@@ -182,27 +184,25 @@ Future<AppServer> _startServer({required bool headless}) async {
     cacheControl: 'max-age=0',
     additionalRequestHandlers: <Handler>[
       (Request request) {
-        final String requestedPath = request.url.path.split('/').last;
-        _requestedPathCounts.putIfAbsent(requestedPath, () => 0);
-        _requestedPathCounts[requestedPath] = _requestedPathCounts[requestedPath]! + 1;
+        _requestedPaths.add(request.url.path.split('/').last);
         return Response.notFound('');
       },
     ],
   );
 }
 
-Future<void> _waitForAppToLoad(AppServer server, {required Map<String, int> waitForCounts}) async {
+Future<void> _waitForAppToRequest(AppServer server, String file) async {
+  print('Waiting for app to request "$file" (requested so far: $_requestedPaths)');
   await Future.any(<Future<Object?>>[
     () async {
       int tries = 1;
-      while (!waitForCounts.entries.every(
-        (MapEntry<String, int> entry) => (_requestedPathCounts[entry.key] ?? 0) >= entry.value,
-      )) {
+      while (!_requestedPaths.contains(file)) {
         if (tries++ % 40 == 0) {
-          print('Still waiting for app to load. Requested so far: $_requestedPathCounts');
+          print('-- Still waiting for app to request "$file". Requested so far: $_requestedPaths');
         }
         await Future<void>.delayed(const Duration(milliseconds: 100));
       }
+      print('++ App has requested "$file" (requested so far: $_requestedPaths)');
     }(),
     server.onChromeError.then((String error) {
       throw Exception('Chrome error: $error');
