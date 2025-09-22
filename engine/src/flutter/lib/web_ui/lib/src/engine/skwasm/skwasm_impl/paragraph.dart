@@ -440,17 +440,20 @@ class SkwasmTextStyle implements ui.TextStyle {
       }
     }
 
-    final int weightValue = fontWeight?.value ?? ui.FontWeight.normal.value;
-    final List<ui.FontVariation> weightVariation = <ui.FontVariation>[
-      ui.FontVariation(_kWeightAxisTag, weightValue.toDouble()),
-    ];
     Iterable<ui.FontVariation> allFontVariations;
-    if (fontVariations == null) {
-      allFontVariations = weightVariation;
-    } else if (fontVariations!.any((ui.FontVariation v) => v.axis == _kWeightAxisTag)) {
+    if (fontVariations != null &&
+        fontVariations!.any((ui.FontVariation v) => v.axis == _kWeightAxisTag)) {
       allFontVariations = fontVariations!;
     } else {
-      allFontVariations = fontVariations!.followedBy(weightVariation);
+      final int weightValue = fontWeight?.value ?? ui.FontWeight.normal.value;
+      final List<ui.FontVariation> weightVariation = <ui.FontVariation>[
+        ui.FontVariation(_kWeightAxisTag, weightValue.toDouble()),
+      ];
+      if (fontVariations == null) {
+        allFontVariations = weightVariation;
+      } else {
+        allFontVariations = fontVariations!.followedBy(weightVariation);
+      }
     }
     final int variationCount = allFontVariations.length;
     withStackScope((StackScope scope) {
