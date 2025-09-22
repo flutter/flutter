@@ -158,7 +158,10 @@ class ActiveLocationChangedEvent extends EditorEvent {
 /// The [version] is an integer corresponding to LSP's
 /// [VersionedTextDocumentIdentifier](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#versionedTextDocumentIdentifier)
 class TextDocument {
-  TextDocument({required this.uriAsString, required this.version});
+  TextDocument({required String uriAsString, required this.version})
+    // Resolve any percent encoding.
+    // See https://github.com/flutter/flutter/issues/175524.
+    : uriAsString = Uri.decodeFull(uriAsString);
 
   TextDocument.fromJson(Map<String, Object?> map)
     : this(
