@@ -27,9 +27,7 @@ class WidgetPreviewScaffoldController {
   Future<void> initialize() async {
     await dtdServices.connect();
     context = path.Context(
-      style: dtdServices.isWindows
-          ? path.Style.windows
-          : path.Style.posix,
+      style: dtdServices.isWindows ? path.Style.windows : path.Style.posix,
     );
     _registerListeners();
   }
@@ -101,7 +99,9 @@ class WidgetPreviewScaffoldController {
     // ignore these updates.
     final selectedSourceFile = dtdServices.selectedSourceFile.value;
     if (selectedSourceFile != null) {
-      final isWindows = dtdServices.isWindows;
+      // Resolve any percent encoding
+      // See https://github.com/flutter/flutter/issues/175524.
+      final selectedSourceUri = context.fromUri(selectedSourceFile.uriAsString);
       _filteredPreviewSet.value = _previews()
           .map(
             (group) => WidgetPreviewGroup(
@@ -111,10 +111,8 @@ class WidgetPreviewScaffoldController {
                     (preview) => context.equals(
                       // TODO(bkonyi): we can probably save some cycles by caching the file URI
                       // rather than computing it on each filter.
-                      Uri.parse(
-                        preview.scriptUri,
-                      ).toFilePath(windows: isWindows),
-                      selectedSourceFile.uriAsString,
+                      context.fromUri(preview.scriptUri),
+                      selectedSourceUri,
                     ),
                   )
                   .toList(),

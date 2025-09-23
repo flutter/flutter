@@ -66,7 +66,6 @@ Future<void> testImpl({
   dtdServices.selectedSourceFile.value = TextDocument(
     uriAsString: textEditorScript1Uri,
     version: 0,
-    isWindows: isWindows,
   );
   await tester.pumpWidget(widgetPreview);
 
@@ -111,7 +110,6 @@ Future<void> testImpl({
   dtdServices.selectedSourceFile.value = TextDocument(
     uriAsString: textEditorScript2Uri,
     version: 0,
-    isWindows: isWindows,
   );
   await tester.pumpWidget(widgetPreview);
 
