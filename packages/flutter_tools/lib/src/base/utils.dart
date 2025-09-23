@@ -573,3 +573,10 @@ extension DurationAgo on Duration {
     return '$inMinutes minutes ago';
   }
 }
+
+extension UriExtension on Uri {
+  /// Returns this [Uri] with its query parameters removed.
+  Uri withoutQueryParameters() {
+    return Uri(scheme: scheme, userInfo: userInfo, host: host, port: port, path: this.path);
+  }
+}

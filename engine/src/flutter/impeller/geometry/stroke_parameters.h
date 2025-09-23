@@ -31,14 +31,7 @@ struct StrokeParameters {
   Join join = Join::kMiter;
   Scalar miter_limit = 4.0f;
 
-  constexpr bool operator==(const StrokeParameters& parameters) const {
-    return parameters.width == width && parameters.cap == cap &&
-           parameters.join == join && parameters.miter_limit == miter_limit;
-  }
-
-  constexpr bool operator!=(const StrokeParameters& parameters) const {
-    return !(*this == parameters);
-  }
+  constexpr bool operator==(const StrokeParameters& parameters) const = default;
 };
 
 }  // namespace impeller

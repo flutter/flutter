@@ -2424,41 +2424,24 @@ void main() {
     WidgetTester tester,
   ) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    await mediaQueryBoilerplate(tester, materialType: MaterialType.material3);
+    const TimeOfDay time = TimeOfDay(hour: 8, minute: 12);
+
+    await mediaQueryBoilerplate(tester, initialTime: time, materialType: MaterialType.material3);
 
     final MaterialLocalizations localizations = MaterialLocalizations.of(
       tester.element(find.byType(TimePickerDialog)),
     );
-    final Finder semanticsFinder = find.bySemanticsLabel(
-      localizations.timePickerHourModeAnnouncement,
-    );
 
-    final SemanticsNode semanticsNode = tester.getSemantics(semanticsFinder);
+    final String formattedHour = localizations.formatHour(time);
+    final String formattedMinute = localizations.formatMinute(time);
+
     expect(
-      semanticsNode.label,
-      localizations.timePickerHourModeAnnouncement,
-      reason: 'Label should announce hour mode initially',
+      find.semantics.byValue('${localizations.timePickerHourModeAnnouncement} $formattedHour'),
+      findsOne,
     );
     expect(
-      semanticsNode.hasFlag(SemanticsFlag.isLiveRegion),
-      isTrue,
-      reason: 'Node should be a live region to announce changes',
-    );
-
-    // --- Switch to minute mode ---
-    final Finder minuteControlInkWell = find.descendant(
-      of: _dialMinuteControl,
-      matching: find.byType(InkWell),
-    );
-    expect(minuteControlInkWell, findsOneWidget, reason: 'Minute control should exist');
-    await tester.tap(minuteControlInkWell);
-    await tester.pumpAndSettle();
-
-    // Get the updated node properties
-    expect(
-      semanticsNode.label,
-      localizations.timePickerMinuteModeAnnouncement,
-      reason: 'Label should announce minute mode after switching',
+      find.semantics.byValue('${localizations.timePickerMinuteModeAnnouncement} $formattedMinute'),
+      findsOne,
     );
 
     semantics.dispose();
