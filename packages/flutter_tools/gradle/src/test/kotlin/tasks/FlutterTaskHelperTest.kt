@@ -141,7 +141,7 @@ class FlutterTaskHelperTest {
     }
 
     @Test
-    fun `getSourceFiles correctly replaces spaces`(
+    fun `getSourceFiles correctly replaces escaped spaces`(
         @TempDir tempDir: Path
     ) {
         val mockProjectFileCollection = mockk<ConfigurableFileCollection>(relaxed = true)
@@ -168,7 +168,7 @@ class FlutterTaskHelperTest {
         verify {
             project.files(
                 listOf(
-                    "${tempDir.toFile().path}/post/delimiter space/one",
+                    "${tempDir.toFile().path}/post/delimiter space/one"
                 )
             )
         }
