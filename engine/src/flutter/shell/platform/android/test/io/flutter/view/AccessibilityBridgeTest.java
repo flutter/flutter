@@ -58,6 +58,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -1597,6 +1598,8 @@ public class AccessibilityBridgeTest {
     assertNotEquals(event.getEventType(), AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED);
   }
 
+  @Ignore(
+      "Fails on JDK 19+ due to https://github.com/flutter/flutter/issues/175623. Not an actual bug on device; test-specific only.")
   @Test
   public void itCanPredictCursorMovementsWithGranularityWordUnicode() {
     AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
