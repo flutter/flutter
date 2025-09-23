@@ -372,7 +372,7 @@ TEST_P(AiksTest, CanRenderBackdropBlurBounded) {
 
   DlPaint paint;
   paint.setColor(DlColor::kGreen());
-  builder.DrawRect(DlRect::MakeLTRB(-180, -190, 200, 210), paint);
+  builder.DrawRect(DlRect::MakeLTRB(-190, -199, 201, 210), paint);
 
   DlPaint save_paint;
   save_paint.setBlendMode(DlBlendMode::kSrc);
