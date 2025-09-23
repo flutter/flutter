@@ -441,18 +441,7 @@ Future<void> testMain() async {
     );
   });
 
-  test('does not throw for both sigmaX and sigmaY set to 0', () async {
-    // Ignoring redundant arguments (the default sigma is 0) to make the
-    // test clearer.
-    final ui.ImageFilter imageFilter = ui.ImageFilter.blur(
-      // ignore: avoid_redundant_argument_values
-      sigmaX: 0,
-      // ignore: avoid_redundant_argument_values
-      sigmaY: 0,
-      tileMode: ui.TileMode.clamp,
-    );
-    expect(imageFilter, isNotNull);
-
+  Future<ui.Rect> drawTestCirclesComparison(ui.ImageFilter filter) async {
     const ui.Rect region = ui.Rect.fromLTRB(0, 0, 500, 250);
 
     final ui.SceneBuilder builder = ui.SceneBuilder();
@@ -468,10 +457,10 @@ Future<void> testMain() async {
     final ui.Picture redCircle1 = recorder.endRecording();
     builder.addPicture(ui.Offset.zero, redCircle1);
 
-    builder.pushImageFilter(imageFilter);
+    builder.pushImageFilter(filter);
 
     // Draw another red circle and apply it to the scene.
-    // This one should also be red with the image filter doing nothing
+    // This one will be affected by the image filter.
     final ui.PictureRecorder recorder2 = ui.PictureRecorder();
     final ui.Canvas canvas2 = ui.Canvas(recorder2, region);
     canvas2.drawCircle(
@@ -485,10 +474,62 @@ Future<void> testMain() async {
 
     await renderScene(builder.build());
 
+    return region;
+  }
+
+  test('does not throw for blur filter with sigmaX and sigmaY set to 0', () async {
+    // Ignoring redundant arguments (the default sigma is 0) to make the
+    // test clearer.
+    final ui.ImageFilter imageFilter = ui.ImageFilter.blur(
+      // ignore: avoid_redundant_argument_values
+      sigmaX: 0,
+      // ignore: avoid_redundant_argument_values
+      sigmaY: 0,
+      tileMode: ui.TileMode.clamp,
+    );
+    expect(imageFilter, isNotNull);
+
+    final region = await drawTestCirclesComparison(imageFilter);
     await matchGoldenFile('ui_zero_sigma_blur.png', region: region);
-    // Unskip when Skwasm and CanvasKit are unified:
-    // https://github.com/flutter/flutter/issues/172311
-  }, skip: isSkwasm);
+  });
+
+  test('does not throw for dilate filter with both radiusX and radiusY set to 0', () async {
+    // Ignoring redundant arguments (the default radius is 0) to make the
+    // test clearer.
+    final ui.ImageFilter imageFilter = ui.ImageFilter.dilate(
+      // ignore: avoid_redundant_argument_values
+      radiusX: 0,
+      // ignore: avoid_redundant_argument_values
+      radiusY: 0,
+    );
+    expect(imageFilter, isNotNull);
+
+    final region = await drawTestCirclesComparison(imageFilter);
+    await matchGoldenFile('ui_filter_dilate_imagefilter_with_zeros.png', region: region);
+  });
+
+  test('does not throw for erode filter with both radiusX and radiusY set to 0', () async {
+    // Ignoring redundant arguments (the default radius is 0) to make the
+    // test clearer.
+    final ui.ImageFilter imageFilter = ui.ImageFilter.erode(
+      // ignore: avoid_redundant_argument_values
+      radiusX: 0,
+      // ignore: avoid_redundant_argument_values
+      radiusY: 0,
+    );
+    expect(imageFilter, isNotNull);
+
+    final region = await drawTestCirclesComparison(imageFilter);
+    await matchGoldenFile('ui_filter_erode_imagefilter_with_zeros.png', region: region);
+  });
+
+  test('does not throw for matrix filter with identity matrix', () async {
+    final ui.ImageFilter imageFilter = ui.ImageFilter.matrix(Matrix4.identity().toFloat64());
+    expect(imageFilter, isNotNull);
+
+    final region = await drawTestCirclesComparison(imageFilter);
+    await matchGoldenFile('ui_filter_matrix_imagefilter_with_identity_matrix.png', region: region);
+  });
 
   test('== operator', () {
     final List<ui.ImageFilter> filters1 = <ui.ImageFilter>[

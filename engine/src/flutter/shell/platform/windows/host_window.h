@@ -12,7 +12,7 @@
 #include <optional>
 
 #include "flutter/fml/macros.h"
-#include "flutter/shell/platform/common/geometry.h"
+#include "flutter/shell/geometry/geometry.h"
 #include "flutter/shell/platform/common/windowing.h"
 #include "flutter/shell/platform/windows/window_manager.h"
 
