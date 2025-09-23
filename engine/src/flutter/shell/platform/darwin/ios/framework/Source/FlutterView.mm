@@ -5,7 +5,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 
 #include "flutter/fml/platform/darwin/cf_utils.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifecycle.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifecycle_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.h"
 
@@ -253,7 +253,8 @@ static void PrintWideGamutWarningOnce() {
   if ([newScene.delegate conformsToProtocol:@protocol(FlutterSceneLifeCycleProvider)]) {
     id<FlutterSceneLifeCycleProvider> lifeCycleProvider =
         (id<FlutterSceneLifeCycleProvider>)newScene.delegate;
-    [lifeCycleProvider.sceneLifeCycleDelegate addFlutterEngine:(FlutterEngine*)self.delegate];
+    [lifeCycleProvider.sceneLifeCycleDelegate addFlutterEngine:(FlutterEngine*)self.delegate
+                                                         scene:newScene];
   }
 
   if ([previousScene.delegate conformsToProtocol:@protocol(FlutterSceneLifeCycleProvider)]) {

@@ -35,6 +35,7 @@ _flutter_framework_headers = [
   "framework/Headers/FlutterPlugin.h",
   "framework/Headers/FlutterPluginAppLifeCycleDelegate.h",
   "framework/Headers/FlutterSceneDelegate.h",
+  "framework/Headers/FlutterSceneLifecycle.h",
   "framework/Headers/FlutterViewController.h",
 ]
 
@@ -111,8 +112,8 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterRestorationPlugin.h",
     "framework/Source/FlutterRestorationPlugin.mm",
     "framework/Source/FlutterSceneDelegate.m",
-    "framework/Source/FlutterSceneLifecycle.h",
     "framework/Source/FlutterSceneLifecycle.mm",
+    "framework/Source/FlutterSceneLifecycle_Internal.h",
     "framework/Source/FlutterSemanticsScrollView.h",
     "framework/Source/FlutterSemanticsScrollView.mm",
     "framework/Source/FlutterSharedApplication.h",
