@@ -177,7 +177,7 @@ class WebAssetServer implements AssetReader {
     bool useSseForInjectedClient,
     BuildInfo buildInfo,
     bool enableDwds,
-    bool enableDds,
+    DartDevelopmentServiceConfiguration ddsConfig,
     Uri entrypoint,
     ExpressionCompiler? expressionCompiler, {
     required WebDevServerConfig webDevServerConfig,
@@ -361,7 +361,7 @@ class WebAssetServer implements AssetReader {
           useSseForDebugBackend: useSseForDebugBackend,
           useSseForInjectedClient: useSseForInjectedClient,
           expressionCompiler: expressionCompiler,
-          spawnDds: enableDds,
+          ddsConfiguration: ddsConfig,
         ),
         appMetadata: AppMetadata(hostname: hostname),
       ),

@@ -161,6 +161,7 @@ class MenuAnchor extends StatefulWidget {
     this.childFocusNode,
     this.style,
     this.alignmentOffset = Offset.zero,
+    this.reservedPadding,
     this.layerLink,
     this.clipBehavior = Clip.hardEdge,
     @Deprecated(
@@ -318,6 +319,11 @@ class MenuAnchor extends StatefulWidget {
   /// to rebuild this child when those change.
   final Widget? child;
 
+  /// The padding between the edge of the safe area and the menu panel.
+  ///
+  /// Defaults to EdgeInsets.all(8).
+  final EdgeInsetsGeometry? reservedPadding;
+
   @override
   State<MenuAnchor> createState() => _MenuAnchorState();
 
@@ -406,6 +412,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
       menuPosition: position,
       anchor: this,
       alignmentOffset: widget.alignmentOffset ?? Offset.zero,
+      reservedPadding: widget.reservedPadding ?? const EdgeInsets.all(_kMenuViewPadding),
     );
   }
 
@@ -1521,7 +1528,7 @@ class SubmenuButton extends StatefulWidget {
   /// If this is null, then the value of [MenuThemeData.submenuIcon] is used.
   /// If that is also null, then defaults to a right arrow icon with the size
   /// of 24 pixels.
-  final MaterialStateProperty<Widget?>? submenuIcon;
+  final WidgetStateProperty<Widget?>? submenuIcon;
 
   /// An optional icon to display after the [child].
   final Widget? trailingIcon;
@@ -1756,10 +1763,10 @@ class _SubmenuButtonState extends State<SubmenuButton> {
       (Axis.vertical, TextDirection.rtl) => Offset(0, -menuPadding.top),
       (Axis.vertical, TextDirection.ltr) => Offset(0, -menuPadding.top),
     };
-    final Set<MaterialState> states = <MaterialState>{
-      if (!_enabled) MaterialState.disabled,
-      if (_isHovered) MaterialState.hovered,
-      if (_buttonFocusNode.hasFocus) MaterialState.focused,
+    final Set<WidgetState> states = <WidgetState>{
+      if (!_enabled) WidgetState.disabled,
+      if (_isHovered) WidgetState.hovered,
+      if (_buttonFocusNode.hasFocus) WidgetState.focused,
     };
     final Widget submenuIcon =
         widget.submenuIcon?.resolve(states) ??
@@ -1907,12 +1914,12 @@ class _SubmenuButtonState extends State<SubmenuButton> {
   }
 
   EdgeInsets _computeMenuPadding(BuildContext context) {
-    final MaterialStateProperty<EdgeInsetsGeometry?> insets =
+    final WidgetStateProperty<EdgeInsetsGeometry?> insets =
         widget.menuStyle?.padding ??
         MenuTheme.of(context).style?.padding ??
         _MenuDefaultsM3(context).padding!;
     return insets
-        .resolve(widget.statesController?.value ?? const <MaterialState>{})!
+        .resolve(widget.statesController?.value ?? const <WidgetState>{})!
         .resolve(Directionality.of(context));
   }
 
@@ -2920,6 +2927,7 @@ class _MenuLayout extends SingleChildLayoutDelegate {
     required this.avoidBounds,
     required this.orientation,
     required this.parentOrientation,
+    required this.reservedPadding,
   });
 
   // Rectangle of underlying button, relative to the overlay's dimensions.
@@ -2951,13 +2959,14 @@ class _MenuLayout extends SingleChildLayoutDelegate {
   // The orientation of this menu's parent.
   final Axis parentOrientation;
 
+  // How close to the edge of the safe area the menu will be placed.
+  final EdgeInsetsGeometry reservedPadding;
+
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
-    // The menu can be at most the size of the overlay minus _kMenuViewPadding
-    // pixels in each direction.
-    return BoxConstraints.loose(
-      constraints.biggest,
-    ).deflate(const EdgeInsets.all(_kMenuViewPadding));
+    // The menu can be at most the size of the overlay minus the view padding
+    // in each direction.
+    return BoxConstraints.loose(constraints.biggest).deflate(reservedPadding);
   }
 
   @override
@@ -3151,9 +3160,9 @@ class _MenuPanelState extends State<_MenuPanel> {
       return getProperty(widgetStyle) ?? getProperty(themeStyle) ?? getProperty(defaultStyle);
     }
 
-    T? resolve<T>(MaterialStateProperty<T>? Function(MenuStyle? style) getProperty) {
+    T? resolve<T>(WidgetStateProperty<T>? Function(MenuStyle? style) getProperty) {
       return effectiveValue((MenuStyle? style) {
-        return getProperty(style)?.resolve(<MaterialState>{});
+        return getProperty(style)?.resolve(<WidgetState>{});
       });
     }
 
@@ -3289,6 +3298,7 @@ class _Submenu extends StatelessWidget {
     this.crossAxisUnconstrained = true,
     required this.menuChildren,
     required this.menuScopeNode,
+    required this.reservedPadding,
   });
 
   final FocusScopeNode menuScopeNode;
@@ -3301,6 +3311,7 @@ class _Submenu extends StatelessWidget {
   final Clip clipBehavior;
   final bool crossAxisUnconstrained;
   final List<Widget> menuChildren;
+  final EdgeInsetsGeometry reservedPadding;
 
   @override
   Widget build(BuildContext context) {
@@ -3314,14 +3325,14 @@ class _Submenu extends StatelessWidget {
       return getProperty(menuStyle) ?? getProperty(themeStyle) ?? getProperty(defaultStyle);
     }
 
-    T? resolve<T>(MaterialStateProperty<T>? Function(MenuStyle? style) getProperty) {
+    T? resolve<T>(WidgetStateProperty<T>? Function(MenuStyle? style) getProperty) {
       return effectiveValue((MenuStyle? style) {
-        return getProperty(style)?.resolve(<MaterialState>{});
+        return getProperty(style)?.resolve(<WidgetState>{});
       });
     }
 
     final MaterialStateMouseCursor mouseCursor = _MouseCursor(
-      (Set<MaterialState> states) =>
+      (Set<WidgetState> states) =>
           effectiveValue((MenuStyle? style) => style?.mouseCursor?.resolve(states)),
     );
 
@@ -3399,6 +3410,7 @@ class _Submenu extends StatelessWidget {
                 menuPosition: menuPosition.position,
                 orientation: anchor._orientation,
                 parentOrientation: anchor._parent?._orientation ?? Axis.horizontal,
+                reservedPadding: reservedPadding,
               ),
               child: menuPanel,
             );
@@ -3424,10 +3436,10 @@ class _Submenu extends StatelessWidget {
 class _MouseCursor extends MaterialStateMouseCursor {
   const _MouseCursor(this.resolveCallback);
 
-  final MaterialPropertyResolver<MouseCursor?> resolveCallback;
+  final WidgetPropertyResolver<MouseCursor?> resolveCallback;
 
   @override
-  MouseCursor resolve(Set<MaterialState> states) =>
+  MouseCursor resolve(Set<WidgetState> states) =>
       resolveCallback(states) ?? MouseCursor.uncontrolled;
 
   @override
@@ -3570,17 +3582,17 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
 
   @override
   WidgetStateProperty<Color?>? get foregroundColor {
-    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return _colors.onSurface.withOpacity(0.38);
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return _colors.onSurface;
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return _colors.onSurface;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return _colors.onSurface;
       }
       return _colors.onSurface;
@@ -3589,17 +3601,17 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
 
   @override
   WidgetStateProperty<Color?>? get iconColor {
-    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return _colors.onSurface.withOpacity(0.38);
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return _colors.onSurfaceVariant;
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return _colors.onSurfaceVariant;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return _colors.onSurfaceVariant;
       }
       return _colors.onSurfaceVariant;
@@ -3626,8 +3638,8 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
   @override
   WidgetStateProperty<MouseCursor?>? get mouseCursor {
     return WidgetStateProperty.resolveWith(
-      (Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
+      (Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
           return SystemMouseCursors.basic;
         }
         return SystemMouseCursors.click;
@@ -3638,14 +3650,14 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
   @override
   WidgetStateProperty<Color?>? get overlayColor {
     return WidgetStateProperty.resolveWith(
-      (Set<MaterialState> states) {
-        if (states.contains(MaterialState.pressed)) {
+      (Set<WidgetState> states) {
+        if (states.contains(WidgetState.pressed)) {
           return _colors.onSurface.withOpacity(0.1);
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return _colors.onSurface.withOpacity(0.08);
         }
-        if (states.contains(MaterialState.focused)) {
+        if (states.contains(WidgetState.focused)) {
           return _colors.onSurface.withOpacity(0.1);
         }
         return Colors.transparent;
