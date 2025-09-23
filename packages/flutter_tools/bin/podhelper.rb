@@ -90,7 +90,14 @@ def flutter_additional_ios_build_settings(target)
 
     # Profile can't be derived from the CocoaPods build configuration. Use release framework (for linking only).
     # TODO(stuartmorgan): Handle local engines here; see https://github.com/flutter/flutter/issues/132228
-    configuration_engine_dir = build_configuration.type == :debug ? debug_framework_dir : release_framework_dir
+    local_engine = "/Users/vashworth/Development/flutter/engine/src/out/ios_debug_sim_unopt_arm64"
+    if local_engine
+      configuration_engine_dir = File.expand_path(File.join(local_engine, 'Flutter.xcframework'), __FILE__)
+    else
+      # Profile can't be derived from the CocoaPods build configuration. Use release framework (for linking only).
+      configuration_engine_dir = (build_configuration.type == :debug ? debug_framework_dir : release_framework_dir)
+    end
+
     Dir.new(configuration_engine_dir).each_child do |xcframework_file|
       next if xcframework_file.start_with?('.') # Hidden file, possibly on external disk.
       if xcframework_file.end_with?('-simulator') # ios-arm64_x86_64-simulator

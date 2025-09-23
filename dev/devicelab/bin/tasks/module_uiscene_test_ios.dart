@@ -162,10 +162,10 @@ Future<Directory> _createNativeApp({
     case XcodeProjectType.UIKitSwift:
       xcodeProjectName = 'xcode_uikit_swift';
     case XcodeProjectType.UIKitObjC:
-      // TODO: Handle this case.
+      // TODO(vashworth): add Objective C integration test
       throw UnimplementedError();
     case XcodeProjectType.SwiftUI:
-      // TODO: Handle this case.
+      // TODO(vashworth): add SwiftUI integration test
       throw UnimplementedError();
   }
   // Copy Xcode project
@@ -383,7 +383,6 @@ class Scenarios {
         path.join(templatesDir.path, 'flutterplugin', 'ios', 'LifecyclePlugin-migrated.swift'),
         path.join(pluginDir.path, 'ios', 'Classes', 'MyPlugin.swift'),
       ),
-      // TODO
       FileReplacements(
         path.join(templatesDir.path, 'native', 'UITests-ApplicationEvents-AppNotMigrated.swift'),
         path.join(

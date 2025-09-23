@@ -16,4 +16,3 @@ class AppDelegate: FlutterAppDelegate {
     return super.application(application, didFinishLaunchingWithOptions: launchOptions);
   }
 }
-
