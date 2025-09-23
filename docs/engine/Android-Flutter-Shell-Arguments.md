@@ -6,9 +6,11 @@
 | `--start-paused` | Launches app and pauses all Dart code execution until a debugger is connected and it is resumed. |
 | `--vm-service-port` | Specifies a custom Dart VM Service port. |
 
+# TODO(camsim99): Note that all command line args should be settable in manifest (at least those deleted from FlutterShellArgs). Please note that eventually.
 ## Flags that must be set in the manifest:
 | Flag     | Description |
 | -------- | ----------- |
+
 
 
 # TODO(camsim99): Rework this note.
