@@ -319,7 +319,7 @@ class _RepeatingTweenAnimationBuilderState<T extends Object>
     _controller = AnimationController(duration: widget.duration, vsync: this);
     _updateAnimation();
 
-    // Start the animation if not paused and begin != end
+    // Start the animation if not paused and begin != end.
     if (!widget.paused && widget.tween.begin != widget.tween.end) {
       _controller.repeat(reverse: widget.reverse);
     }
