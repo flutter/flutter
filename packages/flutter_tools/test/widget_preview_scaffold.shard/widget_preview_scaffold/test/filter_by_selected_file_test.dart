@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/widget_previews.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as path;
 import 'package:widget_preview_scaffold/src/controls.dart';
@@ -27,24 +28,23 @@ Future<void> testImpl({
   final dtdServices = FakeWidgetPreviewScaffoldDtdServices(
     isWindows: isWindows,
   );
-  final groups = <WidgetPreviewGroup>[
-    WidgetPreviewGroup(
-      name: 'group',
-      previews: <WidgetPreview>[
-        WidgetPreview(
-          builder: () => Text('widget1'),
-          scriptUri: script1Uri.toString(),
-        ),
-        WidgetPreview(
-          builder: () => Text('widget2'),
-          scriptUri: script2Uri.toString(),
-        ),
-      ],
+  final previews = <WidgetPreview>[
+    WidgetPreview(
+      builder: () => Text('widget1'),
+      scriptUri: script1Uri.toString(),
+      previewData: Preview(group: 'group'),
+      packageName: '',
+    ),
+    WidgetPreview(
+      builder: () => Text('widget2'),
+      scriptUri: script2Uri.toString(),
+      previewData: Preview(group: 'group'),
+      packageName: '',
     ),
   ];
   final controller = FakeWidgetPreviewScaffoldController(
     dtdServicesOverride: dtdServices,
-    previews: groups,
+    previews: previews,
   );
   await controller.initialize();
   final WidgetPreviewScaffold widgetPreview = WidgetPreviewScaffold(
@@ -56,7 +56,7 @@ Future<void> testImpl({
   await tester.pumpWidget(widgetPreview);
   expect(controller.filterBySelectedFileListenable.value, true);
   expect(dtdServices.selectedSourceFile.value, isNull);
-  expect(controller.filteredPreviewSetListenable.value, groups);
+  expect(controller.filteredPreviewSetListenable.value, hasLength(1));
   expect(
     controller.filteredPreviewSetListenable.value.single.previews,
     hasLength(2),
@@ -72,8 +72,8 @@ Future<void> testImpl({
   // Verify only previews from script1Uri are displayed.
   expect(
     context.equals(
-      dtdServices.selectedSourceFile.value!.uriAsString,
-      script1Uri.toFilePath(windows: isWindows),
+      context.fromUri(dtdServices.selectedSourceFile.value!.uriAsString),
+      context.fromUri(script1Uri),
     ),
     true,
   );
@@ -116,8 +116,8 @@ Future<void> testImpl({
   // Verify only previews from script2Uri are displayed.
   expect(
     context.equals(
-      dtdServices.selectedSourceFile.value!.uriAsString,
-      script2Uri.toFilePath(windows: isWindows),
+      context.fromUri(dtdServices.selectedSourceFile.value!.uriAsString),
+      context.fromUri(script2Uri),
     ),
     true,
   );
@@ -143,12 +143,16 @@ Future<void> testImpl({
   // Verify the currently selected source is still script2Uri but all previews are displayed.
   expect(
     context.equals(
-      dtdServices.selectedSourceFile.value!.uriAsString,
-      script2Uri.toFilePath(windows: isWindows),
+      context.fromUri(dtdServices.selectedSourceFile.value!.uriAsString),
+      context.fromUri(script2Uri),
     ),
     true,
   );
-  expect(controller.filteredPreviewSetListenable.value, groups);
+  expect(controller.filteredPreviewSetListenable.value, hasLength(1));
+  expect(
+    controller.filteredPreviewSetListenable.value.single.previews,
+    previews,
+  );
 }
 
 void main() {
