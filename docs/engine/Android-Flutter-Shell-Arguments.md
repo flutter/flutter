@@ -22,6 +22,7 @@
 | `--enable-impeller=true` or `--enable-impeller=false` | Enables or disables the Impeller renderer. |
 | `--enable-vulkan-validation` | Loads Vulkan validation layers if available. |
 | `--dump-skp-on-shader-compilation` | Dumps SKP files that trigger shader compilations. |
+# TODO(camsim99): delete:
 | `--cache-sksl` | Caches shaders in SkSL format during development. |
 | `--purge-persistent-cache` | Removes all persistent cache files for debugging. |
 | `--verbose-logging` | Enables logging at all severity levels. |
@@ -50,20 +51,32 @@ the following in your manifest:
 </manifest>
 ```
 
-| Flag                       | Description |
-|----------------------------|-------------|
-| `OldGenHeapSize`           | Sets the old generation heap size for the Dart VM in megabytes. |
-| `EnableImpeller`             | Enables or disables the Impeller renderer. |
-| `EnableVulkanValidation`     | Enables Vulkan validation layers if available. |
-| `ImpellerBackend`            | Specifies the backend to use for Impeller rendering. |
-| `EnableOpenGLGPUTracing`     | Enables GPU tracing for OpenGL. |
-| `EnableVulkanGPUTracing`     | Enables GPU tracing for Vulkan. |
-| `DisableMergedPlatformUIThread` | (Deprecated) Was used to disable merging of platform and UI threads. |
-| `EnableSurfaceControl`       | Enables Android SurfaceControl for rendering. |
-| `EnableFlutterGPU`           | Enables the Flutter GPU backend. |
-| `ImpellerLazyShaderInitialization` | Enables lazy initialization of Impeller shaders. |
-| `ImpellerAntialiasLines`     | Enables antialiasing for lines in Impeller. |
-| `LeakVM`                     | Controls whether the Dart VM is left running after the last shell shuts down. |
+# TODO(camsim99): determine if I can keep dart-flags deleted or un-included in manifest.
+| Flag                              | Description                                                      | Can Set in Release Mode? |
+|------------------------------------|------------------------------------------------------------------|--------------------------|
+| `OldGenHeapSize`                   | Sets the old generation heap size for the Dart VM in megabytes.  | Yes                      |
+| `EnableImpeller`                   | Enables or disables the Impeller renderer.                       | Yes                      |
+| `EnableVulkanValidation`           | Enables Vulkan validation layers if available.                   | No                       |
+| `ImpellerBackend`                  | Specifies the backend to use for Impeller rendering.             | Yes                      |
+| `EnableOpenGLGPUTracing`           | Enables GPU tracing for OpenGL.                                  | No                       |
+| `EnableVulkanGPUTracing`           | Enables GPU tracing for Vulkan.                                  | No                       |
+| `DisableMergedPlatformUIThread`    | (Deprecated) Was used to disable merging of platform and UI threads. | Yes                  |
+| `EnableSurfaceControl`             | Enables Android SurfaceControl for rendering.                    | Yes                      |
+| `EnableFlutterGPU`                 | Enables the Flutter GPU backend.                                 | Yes                      |
+| `ImpellerLazyShaderInitialization` | Enables lazy initialization of Impeller shaders.                 | Yes                      |
+| `ImpellerAntialiasLines`           | Enables antialiasing for lines in Impeller.                      | Yes                      |
+| `LeakVM`                           | Controls whether the Dart VM is left running after the last shell shuts down. | No               |
+| `VMServicePort`                    | Sets the port for the Dart VM Service.                           | No                       |
+| `UseTestFonts`                     | Uses the Ahem test font for font resolution.                     | No                       |
+| `EnableSoftwareRendering`          | Uses Skia software backend for rendering.                        | Yes                      |
+| `SkiaDeterministicRendering`       | Ensures deterministic Skia rendering by skipping CPU feature swaps. | Yes                  |
+| `AotSharedLibraryName`             | Specifies the path to the AOT shared library containing compiled Dart code. | Yes              |
+| `SnapshotAssetPath`                | Sets the path to the directory containing snapshot assets.        | Yes                      |
+| `VMSnapshotData`                   | Specifies the path to the VM snapshot data file.                 | Yes                      |
+| `IsolateSnapshotData`              | Specifies the path to the isolate snapshot data file.            | Yes                      |
+| `FlutterAssetsDir`                 | Sets the directory containing Flutter assets.                    | Yes                      |
+| `AutomaticallyRegisterPlugins`     | Enables automatic registration of plugins with the Flutter engine. | Yes                   |
+
 
 # TODO(camsim99): Rework this note.
 > **Note:**  
