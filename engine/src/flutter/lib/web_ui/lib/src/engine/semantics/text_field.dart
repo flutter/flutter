@@ -353,13 +353,26 @@ class SemanticTextField extends SemanticRole {
     if (semanticsObject.flags.isObscured) {
       input.type = 'password';
     } else {
-      input.type = switch (semanticsObject.inputType) {
+      // For email inputs, prefer type="text" with inputmode="email" so that
+      // browsers keep selection APIs enabled while still providing email
+      // keyboards and hints. This avoids InvalidStateError and enables
+      // proper selection/cursor operations.
+      final String resolvedType = switch (semanticsObject.inputType) {
         ui.SemanticsInputType.search => 'search',
-        ui.SemanticsInputType.email => 'email',
+        ui.SemanticsInputType.email => 'text',
         ui.SemanticsInputType.url => 'url',
         ui.SemanticsInputType.phone => 'tel',
         _ => 'text',
       };
+      input.type = resolvedType;
+      if (semanticsObject.inputType == ui.SemanticsInputType.email) {
+        input.setAttribute('inputmode', 'email');
+        input.setAttribute('autocapitalize', 'none');
+        input.autocomplete = 'email';
+      } else {
+        input.removeAttribute('inputmode');
+        input.removeAttribute('autocapitalize');
+      }
     }
   }
 
