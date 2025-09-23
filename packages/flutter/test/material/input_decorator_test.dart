@@ -9962,6 +9962,96 @@ void main() {
       );
     });
 
+    testWidgets('errorBorder', (WidgetTester tester) async {
+      const InputBorder errorBorder = OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.red, width: 1.5),
+      );
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          localInputDecorationTheme: const InputDecorationThemeData(errorBorder: errorBorder),
+          decoration: const InputDecoration(errorText: 'error'),
+        ),
+      );
+      await tester.pumpAndSettle(); // Border changes are animated.
+      expect(getBorder(tester), errorBorder);
+    });
+
+    testWidgets('focusedErrorBorder', (WidgetTester tester) async {
+      const InputBorder focusedErrorBorder = OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.red, width: 1.5),
+      );
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isFocused: true,
+          localInputDecorationTheme: const InputDecorationThemeData(
+            focusedErrorBorder: focusedErrorBorder,
+          ),
+          decoration: const InputDecoration(errorText: 'error'),
+        ),
+      );
+      await tester.pumpAndSettle(); // Border changes are animated.
+      expect(getBorder(tester), focusedErrorBorder);
+    });
+
+    testWidgets('focusedBorder', (WidgetTester tester) async {
+      const InputBorder focusedBorder = OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.green, width: 1.5),
+      );
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isFocused: true,
+          localInputDecorationTheme: const InputDecorationThemeData(focusedBorder: focusedBorder),
+        ),
+      );
+      await tester.pumpAndSettle(); // Border changes are animated.
+      expect(getBorder(tester), focusedBorder);
+    });
+
+    testWidgets('enabledBorder', (WidgetTester tester) async {
+      const InputBorder enabledBorder = OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.teal, width: 5.0),
+      );
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          localInputDecorationTheme: const InputDecorationThemeData(enabledBorder: enabledBorder),
+        ),
+      );
+      await tester.pumpAndSettle(); // Border changes are animated.
+      expect(getBorder(tester), enabledBorder);
+    });
+
+    testWidgets('disabledBorder', (WidgetTester tester) async {
+      const InputBorder disabledBorder = OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.teal, width: 3.0),
+      );
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          localInputDecorationTheme: const InputDecorationThemeData(disabledBorder: disabledBorder),
+          decoration: const InputDecoration(enabled: false),
+        ),
+      );
+      await tester.pumpAndSettle(); // Border changes are animated.
+      expect(getBorder(tester), disabledBorder);
+    });
+
+    testWidgets('border', (WidgetTester tester) async {
+      final BorderRadius borderRadius = BorderRadius.circular(6.0);
+      final InputBorder border = OutlineInputBorder(borderRadius: borderRadius);
+      await tester.pumpWidget(
+        buildInputDecorator(localInputDecorationTheme: InputDecorationThemeData(border: border)),
+      );
+
+      // The real instance of border is created based on the given border.
+      // The type and the borderRadius should be the same as the given border.
+      expect(getBorder(tester), isA<OutlineInputBorder>());
+      expect(getBorderRadius(tester), borderRadius);
+    });
+
     testWidgets('alignLabelWithHint', (WidgetTester tester) async {
       await tester.pumpWidget(
         buildInputDecorator(
@@ -10215,6 +10305,142 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(getIconStyle(tester, suffixIcon)?.color, iconColor);
+  });
+
+  group('Custom borders', () {
+    testWidgets('InputDecoration shows custom focused border', (WidgetTester tester) async {
+      const InputBorder focusedBorder = OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.teal, width: 5.0),
+      );
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isFocused: true,
+          decoration: const InputDecoration(focusedBorder: focusedBorder),
+        ),
+      );
+      await tester.pumpAndSettle(); // Border changes are animated.
+      expect(getBorder(tester), focusedBorder);
+    });
+
+    testWidgets('InputDecoration shows custom error borders', (WidgetTester tester) async {
+      const InputBorder errorBorder = OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.red, width: 1.5),
+      );
+      const InputBorder focusedErrorBorder = OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.teal, width: 5.0),
+      );
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isFocused: true,
+          decoration: const InputDecoration(
+            errorText: 'error',
+            // enabled: true (default)
+            errorBorder: errorBorder,
+            focusedErrorBorder: focusedErrorBorder,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle(); // Border changes are animated.
+      expect(getBorder(tester), focusedErrorBorder);
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          // isFocused: false (default)
+          decoration: const InputDecoration(
+            errorText: 'error',
+            // enabled: true (default)
+            errorBorder: errorBorder,
+            focusedErrorBorder: focusedErrorBorder,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle(); // Border changes are animated.
+      expect(getBorder(tester), errorBorder);
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          // isFocused: false (default)
+          decoration: const InputDecoration(
+            errorText: 'error',
+            enabled: false,
+            errorBorder: errorBorder,
+            focusedErrorBorder: focusedErrorBorder,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle(); // Border changes are animated.
+      expect(getBorder(tester), errorBorder);
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isFocused: true,
+          decoration: const InputDecoration(
+            error: Text('error'),
+            // enabled: true (default)
+            errorBorder: errorBorder,
+            focusedErrorBorder: focusedErrorBorder,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle(); // Border changes are animated.
+      expect(getBorder(tester), focusedErrorBorder);
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          // isFocused: false (default)
+          decoration: const InputDecoration(
+            error: Text('error'),
+            // enabled: true (default)
+            errorBorder: errorBorder,
+            focusedErrorBorder: focusedErrorBorder,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle(); // Border changes are animated.
+      expect(getBorder(tester), errorBorder);
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          // isFocused: false (default)
+          decoration: const InputDecoration(
+            error: Text('error'),
+            enabled: false,
+            errorBorder: errorBorder,
+            focusedErrorBorder: focusedErrorBorder,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle(); // Border changes are animated.
+      expect(getBorder(tester), errorBorder);
+    });
+
+    testWidgets('InputDecoration shows custom enabled border', (WidgetTester tester) async {
+      const InputBorder enabledBorder = OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.teal, width: 5.0),
+      );
+
+      await tester.pumpWidget(
+        buildInputDecorator(decoration: const InputDecoration(enabledBorder: enabledBorder)),
+      );
+      await tester.pumpAndSettle(); // Border changes are animated.
+      expect(getBorder(tester), enabledBorder);
+    });
+
+    testWidgets('InputDecoration shows custom disabled border', (WidgetTester tester) async {
+      const InputBorder disabledBorder = OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.teal, width: 3.0),
+      );
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          decoration: const InputDecoration(enabled: false, disabledBorder: disabledBorder),
+        ),
+      );
+      await tester.pumpAndSettle(); // Border changes are animated.
+      expect(getBorder(tester), disabledBorder);
+    });
   });
 
   group('Material2', () {
