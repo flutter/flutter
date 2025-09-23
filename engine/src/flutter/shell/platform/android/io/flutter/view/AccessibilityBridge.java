@@ -227,14 +227,14 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   // a bitmask whose values comes from {@link AccessibilityFeature}.
   private int accessibilityFeatureFlags = 0;
 
-  // The main locale for assistive technologies in BCP 47 format.
+  // The default locale for assistive technologies in BCP 47 format.
   //
   // For example "en-US", "de-DE", "fr-FR".
-  private String mainLocale;
+  @Nullable private String defaultLocale;
 
   @VisibleForTesting
-  public void setLocale(String locale) {
-    mainLocale = locale;
+  public void setLocale(@NonNull String locale) {
+    defaultLocale = locale;
   }
 
   // The {@code SemanticsNode} within Flutter that currently has the focus of Android's input
@@ -2810,11 +2810,19 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       return null;
     }
 
-    private String getEffectiveLocale() {
+    /**
+     * Returns the effective locale for this semantics node after taking app default locale into
+     * account.
+     *
+     * <p>Can be null if there is no preference.
+     *
+     * @return the effective locale.
+     */
+    private @Nullable String getEffectiveLocale() {
       if (locale != null && !locale.isEmpty()) {
         return locale;
       }
-      return accessibilityBridge.mainLocale;
+      return accessibilityBridge.defaultLocale;
     }
 
     private void updateRecursively(

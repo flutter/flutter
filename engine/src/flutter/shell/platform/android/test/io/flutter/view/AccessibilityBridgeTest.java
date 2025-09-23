@@ -887,7 +887,7 @@ public class AccessibilityBridgeTest {
 
   @Test
   @Config(minSdk = API_LEVELS.FLUTTER_MIN)
-  public void itSetsMainLocale() {
+  public void itSetsDefaultLocale() {
     AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
     AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
     AccessibilityManager mockManager = mock(AccessibilityManager.class);
