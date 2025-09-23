@@ -660,6 +660,9 @@ class Rasterizer final : public SnapshotDelegate,
   void CacheRuntimeStage(
       const std::shared_ptr<impeller::RuntimeStage>& runtime_stage) override;
 
+  // |SnapshotDelegate|
+  bool MakeRenderContextCurrent() override;
+
   // |Stopwatch::Delegate|
   /// Time limit for a smooth frame.
   ///
