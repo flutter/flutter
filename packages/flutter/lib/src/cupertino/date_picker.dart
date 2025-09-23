@@ -369,7 +369,7 @@ class CupertinoDatePicker extends StatefulWidget {
          selectableDayPredicate == null ||
              initialDateTime == null ||
              selectableDayPredicate(initialDateTime),
-         '${initialDateTime} must satisfy provided selectableDayPredicate.',
+         '$initialDateTime must satisfy provided selectableDayPredicate.',
        );
 
   /// The mode of the date picker as one of [CupertinoDatePickerMode]. Defaults
