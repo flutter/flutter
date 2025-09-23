@@ -341,7 +341,7 @@ class _RepeatingTweenAnimationBuilderState<T extends Object>
     }
 
     // Update animation if curve or tween changed
-    final bool tweenChanged =
+    final bool tweenChanged = widget.tween.runtimeType != oldWidget.tween.runtimeType ||
         widget.tween.begin != oldWidget.tween.begin || widget.tween.end != oldWidget.tween.end;
     if (widget.curve != oldWidget.curve || tweenChanged) {
       _updateAnimation();
