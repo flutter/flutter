@@ -641,12 +641,10 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator>
       return _buildIndicator(context, _controller.value, textDirection);
     }
 
-    // For indeterminate progress, use repeating animation
-    return RepeatingTweenAnimationBuilder<double>(
-      tween: Tween<double>(begin: 0, end: 1),
-      duration: const Duration(milliseconds: _kIndeterminateLinearDuration),
-      builder: (BuildContext context, Animation<double> animation, Widget? child) {
-        return _buildIndicator(context, animation.value, textDirection);
+    return AnimatedBuilder(
+      animation: _controller.view,
+      builder: (BuildContext context, Widget? child) {
+        return _buildIndicator(context, _controller.value, textDirection);
       },
     );
   }
@@ -1171,17 +1169,15 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
   }
 
   Widget _buildAnimation() {
-    return RepeatingTweenAnimationBuilder<double>(
-      tween: Tween<double>(begin: 0, end: 1),
-      duration: const Duration(milliseconds: _kIndeterminateCircularDuration),
-      paused: widget.value != null,
-      builder: (BuildContext context, Animation<double> animation, Widget? child) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (BuildContext context, Widget? child) {
         return _buildMaterialIndicator(
           context,
-          _strokeHeadTween.transform(animation.value),
-          _strokeTailTween.transform(animation.value),
-          _offsetTween.transform(animation.value),
-          _rotationTween.transform(animation.value),
+          _strokeHeadTween.evaluate(_controller),
+          _strokeTailTween.evaluate(_controller),
+          _offsetTween.evaluate(_controller),
+          _rotationTween.evaluate(_controller),
         );
       },
     );
