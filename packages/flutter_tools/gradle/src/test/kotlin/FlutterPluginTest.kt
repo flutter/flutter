@@ -22,6 +22,7 @@ import org.gradle.api.file.Directory
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.api.UnknownTaskException
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.io.TempDir
@@ -84,6 +85,7 @@ class FlutterPluginTest {
         // mock method calls that are invoked by the args to NativePluginLoaderReflectionBridge
         every { project.extraProperties } returns mockk()
         every { project.file(flutterExtension.source!!) } returns mockk()
+        every { project.tasks.findByName("generateLockfiles") } returns null
         val flutterPlugin = FlutterPlugin()
         flutterPlugin.apply(project)
 
@@ -235,6 +237,12 @@ class FlutterPluginTest {
         every {
             taskContainer.named(any<String>())
         } returns mockTaskProvider
+        every { project.tasks.findByName("generateLockfiles") } returns null
+        every { project.tasks.named("packageDebugAssets") } throws UnknownTaskException("mock")
+        every { project.tasks.named("cleanPackageDebugAssets") } throws UnknownTaskException("mock")
+        // the following mock does not work yet. Execute test by hand with:
+        // flutter/packages/flutter_tools/gradle$ .\gradlew test --tests com.flutter.gradle.FlutterPluginTest
+        every { taskContainer.register(eq("compileFlutterBuildDebug"), eq(FlutterTask::class.java), any()) } throws Exception("mock")
         val flutterPlugin = FlutterPlugin()
         flutterPlugin.apply(project)
 
