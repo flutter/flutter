@@ -570,7 +570,6 @@ flutter:
     });
   });
 
-
   group('isAppUsingAndroidX', () {
     late FileSystem fs;
 
