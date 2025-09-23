@@ -71,6 +71,13 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
   TRACE_EVENT0("flutter", "AndroidExternalViewEmbedder2::SubmitFlutterView");
 
   if (!FrameHasPlatformLayers()) {
+    // task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
+    //     [&, jni_facade = jni_facade_]() {
+    //       HideOverlayLayerIfNeeded();
+    //       jni_facade->applyTransaction();
+    //     }));
+    // frame->Submit();
+    // return;
     frame->Submit();
     // If the previous frame had platform views, hide the overlay surface.
     HideOverlayLayerIfNeeded();

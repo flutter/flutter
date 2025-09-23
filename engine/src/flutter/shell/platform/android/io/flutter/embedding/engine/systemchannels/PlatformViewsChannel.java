@@ -92,6 +92,7 @@ public class PlatformViewsChannel {
                   : null;
 
           try {
+            Log.e("HI GRAY", "creating HCPP view");
             if (handler.isHcppEnabled()) {
               final PlatformViewCreationRequest request =
                   PlatformViewCreationRequest.createHCPPRequest(
