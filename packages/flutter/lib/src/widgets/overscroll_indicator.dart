@@ -756,9 +756,10 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
         }
       }
     } else if (notification is ScrollEndNotification) {
-      final double velocity = widget.axis == Axis.vertical
-          ? notification.dragDetails?.velocity.pixelsPerSecond.dy ?? 0.0
-          : notification.dragDetails?.velocity.pixelsPerSecond.dx ?? 0.0;
+      final double velocity = switch (widget.axis) {
+        Axis.vertical => notification.dragDetails?.velocity.pixelsPerSecond.dy ?? 0.0,
+        Axis.horizontal => notification.dragDetails?.velocity.pixelsPerSecond.dx ?? 0.0,
+      };
 
       // Since the overscrolling ended, we reset the total overscroll amount.
       _totalOverscroll = 0.0;
