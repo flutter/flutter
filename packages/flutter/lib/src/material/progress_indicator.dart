@@ -538,7 +538,46 @@ class LinearProgressIndicator extends ProgressIndicator {
   State<LinearProgressIndicator> createState() => _LinearProgressIndicatorState();
 }
 
-class _LinearProgressIndicatorState extends State<LinearProgressIndicator> {
+class _LinearProgressIndicatorState extends State<LinearProgressIndicator>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _internalController;
+
+  @override
+  void initState() {
+    super.initState();
+    _internalController = AnimationController(
+      duration: LinearProgressIndicator.defaultAnimationDuration,
+      vsync: this,
+    );
+    _updateControllerAnimatingStatus();
+  }
+
+  @override
+  void didUpdateWidget(LinearProgressIndicator oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _updateControllerAnimatingStatus();
+  }
+
+  @override
+  void dispose() {
+    _internalController.dispose();
+    super.dispose();
+  }
+
+  AnimationController get _controller =>
+      widget.controller ??
+      context.getInheritedWidgetOfExactType<ProgressIndicatorTheme>()?.data.controller ??
+      context.findAncestorWidgetOfExactType<Theme>()?.data.progressIndicatorTheme.controller ??
+      _internalController;
+
+  void _updateControllerAnimatingStatus() {
+    if (widget.value == null && !_internalController.isAnimating) {
+      _internalController.repeat();
+    } else if (widget.value != null && _internalController.isAnimating) {
+      _internalController.stop();
+    }
+  }
+
   Widget _buildIndicator(BuildContext context, double animationValue, TextDirection textDirection) {
     final ProgressIndicatorThemeData indicatorTheme = ProgressIndicatorTheme.of(context);
     final bool year2023 = widget.year2023 ?? indicatorTheme.year2023 ?? true;
@@ -599,8 +638,7 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> {
     final TextDirection textDirection = Directionality.of(context);
 
     if (widget.value != null) {
-      // For determinate progress, just build directly without animation
-      return _buildIndicator(context, 0, textDirection);
+      return _buildIndicator(context, _controller.value, textDirection);
     }
 
     // For indeterminate progress, use repeating animation
@@ -1004,7 +1042,8 @@ class CircularProgressIndicator extends ProgressIndicator {
   State<CircularProgressIndicator> createState() => _CircularProgressIndicatorState();
 }
 
-class _CircularProgressIndicatorState extends State<CircularProgressIndicator> {
+class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
+    with SingleTickerProviderStateMixin {
   static const int _pathCount = _kIndeterminateCircularDuration ~/ 1333;
   static const int _rotationCount = _kIndeterminateCircularDuration ~/ 2222;
 
@@ -1019,34 +1058,42 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> {
     curve: const SawTooth(_rotationCount),
   );
 
-  late AnimationController _controller;
+  late final AnimationController _internalController;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: _kIndeterminateCircularDuration),
+    _internalController = AnimationController(
+      duration: CircularProgressIndicator.defaultAnimationDuration,
       vsync: this,
     );
-    if (widget.value == null) {
-      _controller.repeat();
-    }
+    _updateControllerAnimatingStatus();
   }
 
   @override
   void didUpdateWidget(CircularProgressIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.value == null && !_controller.isAnimating) {
-      _controller.repeat();
-    } else if (widget.value != null && _controller.isAnimating) {
-      _controller.stop();
-    }
+    _updateControllerAnimatingStatus();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _internalController.dispose();
     super.dispose();
+  }
+
+  AnimationController get _controller =>
+      widget.controller ??
+      context.getInheritedWidgetOfExactType<ProgressIndicatorTheme>()?.data.controller ??
+      context.findAncestorWidgetOfExactType<Theme>()?.data.progressIndicatorTheme.controller ??
+      _internalController;
+
+  void _updateControllerAnimatingStatus() {
+    if (widget.value == null && !_internalController.isAnimating) {
+      _internalController.repeat();
+    } else if (widget.value != null && _internalController.isAnimating) {
+      _internalController.stop();
+    }
   }
 
   Widget _buildCupertinoIndicator(BuildContext context) {
@@ -1284,8 +1331,7 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
   State<CircularProgressIndicator> createState() => _RefreshProgressIndicatorState();
 }
 
-class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState
-    with SingleTickerProviderStateMixin {
+class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
   static const double _indicatorSize = 41.0;
 
   /// Interval for arrow head to fully grow.
@@ -1313,40 +1359,9 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState
   // Last value received from the widget before null.
   double? _lastValue;
 
-  // Controller to manage the animation state when switching between modes
-  late AnimationController _controller;
-
   /// Force casting the widget as [RefreshProgressIndicator].
   @override
   RefreshProgressIndicator get widget => super.widget as RefreshProgressIndicator;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: _kIndeterminateCircularDuration),
-      vsync: this,
-    );
-    if (widget.value == null) {
-      _controller.repeat();
-    }
-  }
-
-  @override
-  void didUpdateWidget(RefreshProgressIndicator oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.value == null && !_controller.isAnimating) {
-      _controller.repeat();
-    } else if (widget.value != null && _controller.isAnimating) {
-      _controller.stop();
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
 
   // Always show the indeterminate version of the circular progress indicator.
   //
