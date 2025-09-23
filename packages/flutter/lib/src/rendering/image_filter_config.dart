@@ -5,15 +5,19 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 /// A configuration for a [ui.ImageFilter].
 ///
-/// This class is a framework-level representation of a filter that can be
-/// applied to a backdrop. Unlike a [ui.ImageFilter], which is an engine-level
-/// object, an [ImageFilterConfig] can be created at the widget level and later
-/// resolved into a `ui.ImageFilter` at layout time, potentially using
-//  layout-dependent information such as the widget's bounds.
+/// This class provides a framework-level abstraction for image filters that can
+/// be applied to widgets or render objects. Unlike [ui.ImageFilter], which is an
+/// engine-level object, [ImageFilterConfig] instances are created at the widget
+/// or render object level and can be resolved into a [ui.ImageFilter] at layout
+/// time, allowing them to incorporate layout-dependent information such as the
+/// widget's bounds.
+///
+/// Most filters can be used via [ImageFilterConfig.filter]. The most notable
+/// filter that requires this class is [ImageFilterConfig.blur] with the
+/// `bounded` option set to true.
 ///
 /// See also:
 ///
@@ -25,6 +29,7 @@ abstract class ImageFilterConfig {
   /// const constructors so that they can be used in const expressions.
   const ImageFilterConfig();
 
+  /// Creates a configuration that directly uses the given filter.
   factory ImageFilterConfig.filter(ui.ImageFilter filter) {
     return _DirectImageFilterConfig(filter);
   }
@@ -36,15 +41,15 @@ abstract class ImageFilterConfig {
   ///
   /// The `tileMode` argument determines how the blur should handle edges.
   ///
-  /// If `alphaPremultiplied` is true, the blur will be an alpha-premultiplied
-  /// blur, which is a blur that correctly handles transparent edges. This is
-  /// often used to match iOS's native blur effect. When this is true, the
-  /// [resolve] method will use the provided bounds to create a bounded blur.
+  /// If `bounded` is true, the filter performs a "bounded blur". This means the
+  /// blur kernel will only sample pixels from within the provided attached
+  /// render object, treating all pixels outside of it as transparent. This
+  /// mode is typically used to implement high-fidelity iOS-style blurs.
   factory ImageFilterConfig.blur({
     double sigmaX = 0.0,
     double sigmaY = 0.0,
     ui.TileMode tileMode = ui.TileMode.clamp,
-    bool bounded = true,
+    bool bounded = false,
   }) {
     return _BlurImageFilterConfig(
       sigmaX: sigmaX,
@@ -54,22 +59,12 @@ abstract class ImageFilterConfig {
     );
   }
 
-  /// Creates a configuration for a matrix transformation.
+  /// Composes the `inner` filter configuration with `outer`, to combine their
+  /// effects.
   ///
-  /// The `matrix4` argument is the matrix to apply.
-  /// The `filterQuality` argument is the quality of the filter.
-  factory ImageFilterConfig.matrix(
-    Matrix4 matrix4, {
-    ui.FilterQuality filterQuality = ui.FilterQuality.low,
-  }) {
-    return ImageFilterConfig.filter(
-      ui.ImageFilter.matrix(matrix4.storage, filterQuality: filterQuality),
-    );
-  }
-
-  /// Creates a configuration for a composition of two filters.
-  ///
-  /// The `outer` filter is applied after the `inner` filter.
+  /// Creates a single [ImageFilterConfig] that when applied, has the same
+  /// effect as subsequently applying `inner` and `outer`, i.e., result =
+  /// outer(inner(source)).
   factory ImageFilterConfig.compose({
     required ImageFilterConfig outer,
     required ImageFilterConfig inner,
@@ -128,11 +123,11 @@ class _BlurImageFilterConfig extends ImageFilterConfig {
            other.sigmaX == sigmaX &&
            other.sigmaY == sigmaY &&
            other.tileMode == tileMode &&
-           other.useObjectBounds == useObjectBounds;
+           other.bounded == bounded;
   }
 
   @override
-  int get hashCode => Object.hash(sigmaX, sigmaY, tileMode, useObjectBounds);
+  int get hashCode => Object.hash(sigmaX, sigmaY, tileMode, bounded);
 }
 
 class _ComposeImageFilterConfig extends ImageFilterConfig {
