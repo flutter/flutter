@@ -372,6 +372,7 @@ class SemanticTextField extends SemanticRole {
       } else {
         input.removeAttribute('inputmode');
         input.removeAttribute('autocapitalize');
+        input.autocomplete = 'off';
       }
     }
   }
