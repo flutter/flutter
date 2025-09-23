@@ -489,7 +489,8 @@ class AndroidProject extends FlutterProjectPlatform {
   static final _groupPattern = RegExp('^\\s*group\\s*=?\\s*[\'"](.*)[\'"]\\s*\$');
 
   /// True if this project has a `build.gradle[.kts]` file in the project root directory.
-  bool get hasGradleSettingsInProjectRoot => getGroovyOrKotlin(parent.directory, 'build.gradle').existsSync();
+  bool get hasGradleSettingsInProjectRoot =>
+      getGroovyOrKotlin(parent.directory, 'build.gradle').existsSync();
 
   /// The Gradle root directory of the Android host app. This is the directory
   /// containing the `android/app/` subdirectory and the `settings.gradle` file that
@@ -795,7 +796,8 @@ See the link below for more information:
   }
 
   bool get isUsingGradle {
-    return hostAppGradleFile.existsSync() || getGroovyOrKotlin(parent.directory, 'build.gradle').existsSync();
+    return hostAppGradleFile.existsSync() ||
+        getGroovyOrKotlin(parent.directory, 'build.gradle').existsSync();
   }
 
   String? get applicationId {
