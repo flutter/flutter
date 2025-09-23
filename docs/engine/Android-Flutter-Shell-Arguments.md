@@ -1,36 +1,69 @@
 # Cross-platform Flags
+
+# TODO(camsim99): note switches.whatever where you can get the whole vision
 ## Flags that can be set from the command line:
 | Flag     | Description |
 | -------- | ----------- |
-| `--trace-startup` | Measures startup time on a device. The results should be in the logs. Automatically switches to an endless trace buffer when set. |
-| `--start-paused` | Launches app and pauses all Dart code execution until a debugger is connected and it is resumed. |
-| `--vm-service-port` | Specifies a custom Dart VM Service port. |
-| `--disable-service-auth-codes` | Disable the requirement for authentication codes for communicating with the VM service. |
-| `--endless-trace-buffer` | Enable an endless trace buffer so that old events can be viewed. |
-| `--use-test-fonts` | Will make font resolution default to the Ahem test font on all platforms. Only available on the desktop test shells. |
-| `--enable-dart-profiling` | Enable Dart profiling. Profiling information can be viewed from Dart / Flutter DevTools. |
-| `--profile-startup` | Make the profiler discard new samples once the profiler sample buffer is full. When this flag is not set, the profiler sample buffer is used as a ring buffer, meaning that once it is full, new samples start overwriting the oldest ones. This switch is only meaningful when set in conjunction with --enable-dart-profiling. |
-| `--enable-software-rendering` | Enable rendering using the Skia software backend. This is useful when testing Flutter on emulators. By default, Flutter will attempt to either use OpenGL, Metal, or Vulkan. |
-| `--skia-deterministic-rendering` | Skips the call to SkGraphics::Init(), thus avoiding swapping out some Skia function pointers based on available CPU features. This is used to obtain 100% deterministic behavior in Skia rendering. |
-| `--trace-skia` | Trace Skia calls. This is useful when debugging the GPU thread. By default, Skia tracing is not enabled to reduce the number of traced events. |
-| `--trace-skia-allowlist=<value>` | Filters out all Skia trace event categories except those that are specified in this comma separated list. |
-| `--trace-systrace` | Trace to the system tracer (instead of the timeline) on platforms where such a tracer is available. Currently only supported on Android and Fuchsia. |
-| `--trace-to-file=<value>` | Write the timeline trace to a file at the specified path. The file will be in Perfetto's proto format; it will be possible to load the file into Perfetto's trace viewer. |
-| `--profile-microtasks` | Enable collection of information about each microtask. Information about completed microtasks will be written to the "Microtask" timeline stream. Information about queued microtasks will be accessible from Dart / Flutter DevTools. |
-| `--enable-impeller=true` or `--enable-impeller=false` | Enable the Impeller renderer on supported platforms. Ignored if Impeller is not supported on the platform. |
-| `--enable-vulkan-validation` | Enable loading Vulkan validation layers. The layers must be available to the application and loadable. On non-Vulkan backends, this flag does nothing. |
-| `--dump-skp-on-shader-compilation` | Automatically dump the skp that triggers new shader compilations. This is useful for writing custom ShaderWarmUp to reduce jank. By default, this is not enabled to reduce the overhead. |
-| `--cache-sksl` | Only cache the shader in SkSL instead of binary or GLSL. This should only be used during development phases. The generated SkSLs can later be used in the release build for shader precompilation at launch in order to eliminate the shader-compile jank. |
-| `--purge-persistent-cache` | Remove all existing persistent cache. This is mainly for debugging purposes such as reproducing the shader compilation jank. |
-| `--verbose-logging` | By default, only errors are logged. This flag enables logging at all severity levels. This is NOT a per shell flag and affects log levels for all shells in the process. |
-| `--dart-flags=<value>` | Flags passed directly to the Dart VM without being interpreted by the Flutter shell. |
+| `--trace-startup` | Measures startup time and switches to an endless trace buffer. |
+| `--start-paused` | Pauses Dart code execution at launch until a debugger is attached. |
+| `--vm-service-port` | Sets a custom port for the Dart VM Service. |
+| `--disable-service-auth-codes` | Disables authentication codes for VM service communication. |
+| `--endless-trace-buffer` | Enables an endless trace buffer for timeline events. |
+| `--use-test-fonts` | Uses the Ahem test font for font resolution on desktop test shells. |
+| `--enable-dart-profiling` | Enables Dart profiling for use with DevTools. |
+| `--profile-startup` | Discards new profiler samples once the buffer is full. |
+| `--enable-software-rendering` | Uses Skia software backend for rendering. |
+| `--skia-deterministic-rendering` | Ensures deterministic Skia rendering by skipping CPU feature swaps. |
+| `--trace-skia` | Enables tracing of Skia GPU calls. |
+| `--trace-skia-allowlist=<value>` | Only traces specified Skia event categories. |
+| `--trace-systrace` | Traces to the system tracer on supported platforms. |
+| `--trace-to-file=<value>` | Writes timeline trace to a file in Perfetto format. |
+| `--profile-microtasks` | Collects and logs information about microtasks. |
+| `--enable-impeller=true` or `--enable-impeller=false` | Enables or disables the Impeller renderer. |
+| `--enable-vulkan-validation` | Loads Vulkan validation layers if available. |
+| `--dump-skp-on-shader-compilation` | Dumps SKP files that trigger shader compilations. |
+| `--cache-sksl` | Caches shaders in SkSL format during development. |
+| `--purge-persistent-cache` | Removes all persistent cache files for debugging. |
+| `--verbose-logging` | Enables logging at all severity levels. |
+| `--dart-flags=<value>` | Passes flags directly to the Dart VM. |
+| `--aot-shared-library-name=<path>` | Specifies the path to the AOT shared library containing compiled Dart code. |
+| `--aot-vmservice-shared-library-name=<path>` | Specifies the path to the AOT shared library for the Dart VM service isolate. |
+| `--snapshot-asset-path=<path>` | Sets the path to the directory containing snapshot assets. |
+| `--vm-snapshot-data=<path>` | Specifies the path to the VM snapshot data file. |
+| `--isolate-snapshot-data=<path>` | Specifies the path to the isolate snapshot data file. |
+| `--flutter-assets-dir=<path>` | Sets the directory containing Flutter assets. |
+| `--automatically-register-plugins` | Enables automatic registration of plugins with the Flutter engine. |
 
 # TODO(camsim99): Note that all command line args could be settable in manifest (at least those deleted from FlutterShellArgs). Please audit and figure out what makes sense. I can use other platforms as guidance.
 ## Flags that can be set in the manifest:
-| Flag     | Description |
-| -------- | ----------- |
+All flags but be prefixed with package name `io.flutter.embedding.android`, e.g. to specify the `OldGenHeapSize` flag with size 322w, you would place
+the following in your manifest:
+```xml
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.myapp">
+    <application ...>
+        <meta-data
+            android:name="io.flutter.embedding.android.OldGenHeapSize"
+            android:value="322" />
+            ...
+    </application>
+</manifest>
+```
 
-
+| Flag                       | Description |
+|----------------------------|-------------|
+| `OldGenHeapSize`           | Sets the old generation heap size for the Dart VM in megabytes. |
+| `EnableImpeller`             | Enables or disables the Impeller renderer. |
+| `EnableVulkanValidation`     | Enables Vulkan validation layers if available. |
+| `ImpellerBackend`            | Specifies the backend to use for Impeller rendering. |
+| `EnableOpenGLGPUTracing`     | Enables GPU tracing for OpenGL. |
+| `EnableVulkanGPUTracing`     | Enables GPU tracing for Vulkan. |
+| `DisableMergedPlatformUIThread` | (Deprecated) Was used to disable merging of platform and UI threads. |
+| `EnableSurfaceControl`       | Enables Android SurfaceControl for rendering. |
+| `EnableFlutterGPU`           | Enables the Flutter GPU backend. |
+| `ImpellerLazyShaderInitialization` | Enables lazy initialization of Impeller shaders. |
+| `ImpellerAntialiasLines`     | Enables antialiasing for lines in Impeller. |
+| `LeakVM`                     | Controls whether the Dart VM is left running after the last shell shuts down. |
 
 # TODO(camsim99): Rework this note.
 > **Note:**  
