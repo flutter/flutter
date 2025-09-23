@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:path/path.dart' as path;
 import 'dtd/dtd_services.dart';
 import 'widget_preview.dart';
 
@@ -25,6 +26,11 @@ class WidgetPreviewScaffoldController {
   /// listening for events.
   Future<void> initialize() async {
     await dtdServices.connect();
+    context = path.Context(
+      style: dtdServices.isWindows
+          ? path.Style.windows
+          : path.Style.posix,
+    );
     _registerListeners();
   }
 
@@ -45,6 +51,8 @@ class WidgetPreviewScaffoldController {
   final WidgetPreviewScaffoldDtdServices dtdServices;
 
   final PreviewsCallback _previews;
+
+  late final path.Context context;
 
   /// Specifies how the previews should be laid out.
   ValueListenable<LayoutType> get layoutTypeListenable => _layoutType;
@@ -93,14 +101,21 @@ class WidgetPreviewScaffoldController {
     // ignore these updates.
     final selectedSourceFile = dtdServices.selectedSourceFile.value;
     if (selectedSourceFile != null) {
+      final isWindows = dtdServices.isWindows;
       _filteredPreviewSet.value = _previews()
           .map(
             (group) => WidgetPreviewGroup(
               name: group.name,
               previews: group.previews
                   .where(
-                    (preview) =>
-                        preview.scriptUri == selectedSourceFile.uriAsString,
+                    (preview) => context.equals(
+                      // TODO(bkonyi): we can probably save some cycles by caching the file URI
+                      // rather than computing it on each filter.
+                      Uri.parse(
+                        preview.scriptUri,
+                      ).toFilePath(windows: isWindows),
+                      selectedSourceFile.uriAsString,
+                    ),
                   )
                   .toList(),
             ),

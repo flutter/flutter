@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path/path.dart' as path;
 import 'package:widget_preview_scaffold/src/controls.dart';
 import 'package:widget_preview_scaffold/src/dtd/editor_service.dart';
 import 'package:widget_preview_scaffold/src/widget_preview.dart';
@@ -13,19 +14,31 @@ import 'utils/widget_preview_scaffold_test_utils.dart';
 
 Future<void> testImpl({
   required WidgetTester tester,
-  required String script1Uri,
-  required String script2Uri,
+  required Uri script1Uri,
+  required Uri script2Uri,
   required String textEditorScript1Uri,
   required String textEditorScript2Uri,
+  required bool isWindows,
 }) async {
-  final FakeWidgetPreviewScaffoldDtdServices dtdServices =
-      FakeWidgetPreviewScaffoldDtdServices();
+  // Use a Context to handle platform-specific strangeness around paths.
+  final context = path.Context(
+    style: isWindows ? path.Style.windows : path.Style.posix,
+  );
+  final dtdServices = FakeWidgetPreviewScaffoldDtdServices(
+    isWindows: isWindows,
+  );
   final groups = <WidgetPreviewGroup>[
     WidgetPreviewGroup(
       name: 'group',
       previews: <WidgetPreview>[
-        WidgetPreview(builder: () => Text('widget1'), scriptUri: script1Uri),
-        WidgetPreview(builder: () => Text('widget2'), scriptUri: script2Uri),
+        WidgetPreview(
+          builder: () => Text('widget1'),
+          scriptUri: script1Uri.toString(),
+        ),
+        WidgetPreview(
+          builder: () => Text('widget2'),
+          scriptUri: script2Uri.toString(),
+        ),
       ],
     ),
   ];
@@ -53,11 +66,18 @@ Future<void> testImpl({
   dtdServices.selectedSourceFile.value = TextDocument(
     uriAsString: textEditorScript1Uri,
     version: 0,
+    isWindows: isWindows,
   );
   await tester.pumpWidget(widgetPreview);
 
   // Verify only previews from script1Uri are displayed.
-  expect(dtdServices.selectedSourceFile.value?.uriAsString, script1Uri);
+  expect(
+    context.equals(
+      dtdServices.selectedSourceFile.value!.uriAsString,
+      script1Uri.toFilePath(windows: isWindows),
+    ),
+    true,
+  );
   expect(
     controller
         .filteredPreviewSetListenable
@@ -66,7 +86,7 @@ Future<void> testImpl({
         .previews
         .single
         .scriptUri,
-    script1Uri,
+    script1Uri.toString(),
   );
 
   // Select a 'null' script. This simulates focusing on a non-source file
@@ -84,18 +104,25 @@ Future<void> testImpl({
         .previews
         .single
         .scriptUri,
-    script1Uri,
+    script1Uri.toString(),
   );
 
   // Select textEditorScript2Uri
   dtdServices.selectedSourceFile.value = TextDocument(
     uriAsString: textEditorScript2Uri,
     version: 0,
+    isWindows: isWindows,
   );
   await tester.pumpWidget(widgetPreview);
 
   // Verify only previews from script2Uri are displayed.
-  expect(dtdServices.selectedSourceFile.value?.uriAsString, script2Uri);
+  expect(
+    context.equals(
+      dtdServices.selectedSourceFile.value!.uriAsString,
+      script2Uri.toFilePath(windows: isWindows),
+    ),
+    true,
+  );
   expect(
     controller
         .filteredPreviewSetListenable
@@ -104,7 +131,7 @@ Future<void> testImpl({
         .previews
         .single
         .scriptUri,
-    script2Uri,
+    script2Uri.toString(),
   );
 
   final Finder filterBySelectedFileToggle = find.byType(
@@ -116,7 +143,13 @@ Future<void> testImpl({
   await tester.tap(filterBySelectedFileToggle);
   expect(controller.filterBySelectedFileListenable.value, false);
   // Verify the currently selected source is still script2Uri but all previews are displayed.
-  expect(dtdServices.selectedSourceFile.value?.uriAsString, script2Uri);
+  expect(
+    context.equals(
+      dtdServices.selectedSourceFile.value!.uriAsString,
+      script2Uri.toFilePath(windows: isWindows),
+    ),
+    true,
+  );
   expect(controller.filteredPreviewSetListenable.value, groups);
 }
 
@@ -124,30 +157,32 @@ void main() {
   testWidgets('Filter previews based on currently selected file (POSIX)', (
     tester,
   ) async {
-    const kScript1 = 'file:///script1';
-    const kScript2 = 'file:///script2';
+    final kScript1 = Uri.parse('file:///script1');
+    final kScript2 = Uri.parse('file:///script2');
     await testImpl(
       tester: tester,
       script1Uri: kScript1,
       script2Uri: kScript2,
-      textEditorScript1Uri: kScript1,
-      textEditorScript2Uri: kScript2,
+      textEditorScript1Uri: kScript1.toString(),
+      textEditorScript2Uri: kScript2.toString(),
+      isWindows: false,
     );
   });
   testWidgets('Filter previews based on currently selected file (Windows)', (
     tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/175524
-    const kScript1 = 'file:///C:/script1';
-    const kScript2 = 'file:///C:/script2';
+    final kScript1 = Uri.parse('file:///c:/script1');
+    final kScript2 = Uri.parse('file:///C:/script2');
     const kTextEditorScript1 = 'file:///C%3A/script1';
-    const kTextEditorScript2 = 'file:///C%3A/script2';
+    const kTextEditorScript2 = 'file:///c%3A/script2';
     await testImpl(
       tester: tester,
       script1Uri: kScript1,
       script2Uri: kScript2,
       textEditorScript1Uri: kTextEditorScript1,
       textEditorScript2Uri: kTextEditorScript2,
+      isWindows: true,
     );
   });
 }

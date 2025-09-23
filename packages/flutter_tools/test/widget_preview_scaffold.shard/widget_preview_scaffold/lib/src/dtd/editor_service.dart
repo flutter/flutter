@@ -4,6 +4,7 @@
 
 import 'package:dtd/dtd.dart';
 import 'package:flutter/foundation.dart';
+import 'package:widget_preview_scaffold/src/dtd/dtd_services.dart';
 
 /// Provides support for interacting with the Editor DTD service registered by IDE plugins.
 mixin DtdEditorService {
@@ -21,7 +22,7 @@ mixin DtdEditorService {
   static final _editorTheme = ValueNotifier<EditorTheme?>(null);
 
   /// Start listening for events on the Editor stream.
-  Future<void> initializeEditorService() async {
+  Future<void> initializeEditorService(WidgetPreviewScaffoldDtdServices dtdServices) async {
     final editorKindMap = EditorEventKind.values.asNameMap();
     dtd.onEvent(kEditorService).listen((data) {
       final kind = editorKindMap[data.kind];
@@ -35,6 +36,7 @@ mixin DtdEditorService {
         case EditorEventKind.activeLocationChanged:
           _selectedSourceFile.value = ActiveLocationChangedEvent.fromJson(
             data.data,
+            isWindows: dtdServices.isWindows,
           ).textDocument;
       }
     });
@@ -126,18 +128,21 @@ class ActiveLocationChangedEvent extends EditorEvent {
     required this.textDocument,
   });
 
-  ActiveLocationChangedEvent.fromJson(Map<String, Object?> map)
-    : this(
-        textDocument: map.containsKey(Field.textDocument)
-            ? TextDocument.fromJson(
-                map[Field.textDocument] as Map<String, Object?>,
-              )
-            : null,
-        selections: (map[Field.selections] as List<Object?>)
-            .cast<Map<String, Object?>>()
-            .map(EditorSelection.fromJson)
-            .toList(),
-      );
+  ActiveLocationChangedEvent.fromJson(
+    Map<String, Object?> map, {
+    required bool isWindows,
+  }) : this(
+         textDocument: map.containsKey(Field.textDocument)
+             ? TextDocument.fromJson(
+                 map[Field.textDocument] as Map<String, Object?>,
+                 isWindows: isWindows,
+               )
+             : null,
+         selections: (map[Field.selections] as List<Object?>)
+             .cast<Map<String, Object?>>()
+             .map(EditorSelection.fromJson)
+             .toList(),
+       );
 
   final List<EditorSelection> selections;
   final TextDocument? textDocument;
@@ -158,15 +163,20 @@ class ActiveLocationChangedEvent extends EditorEvent {
 /// The [version] is an integer corresponding to LSP's
 /// [VersionedTextDocumentIdentifier](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#versionedTextDocumentIdentifier)
 class TextDocument {
-  TextDocument({required String uriAsString, required this.version})
-    // Resolve any percent encoding.
+  TextDocument({
+    required bool isWindows,
+    required String uriAsString,
+    required this.version,
+  })
+    // Resolve any percent encoding
     // See https://github.com/flutter/flutter/issues/175524.
-    : uriAsString = Uri.decodeFull(uriAsString);
+    : uriAsString = Uri.parse(uriAsString).toFilePath(windows: isWindows);
 
-  TextDocument.fromJson(Map<String, Object?> map)
+  TextDocument.fromJson(Map<String, Object?> map, {required bool isWindows})
     : this(
         uriAsString: map[Field.uri] as String,
         version: map[Field.version] as int?,
+        isWindows: isWindows,
       );
 
   final String uriAsString;
