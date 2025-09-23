@@ -686,7 +686,7 @@ class CupertinoPopupSurface extends StatelessWidget {
       if (blurSigma == 0) {
         return null;
       }
-      return ImageFilterConfig.blur(sigmaX: blurSigma, sigmaY: blurSigma, useObjectBounds: boundByObject);
+      return ImageFilterConfig.blur(sigmaX: blurSigma, sigmaY: blurSigma, bounded: true);
     }
 
     final ImageFilterConfig colorFilter = ImageFilterConfig.filter(switch (brightness) {
@@ -700,7 +700,7 @@ class CupertinoPopupSurface extends StatelessWidget {
 
     return ImageFilterConfig.compose(
       inner: colorFilter,
-      outer: ImageFilterConfig.blur(sigmaX: blurSigma, sigmaY: blurSigma, bounded: bounded),
+      outer: ImageFilterConfig.blur(sigmaX: blurSigma, sigmaY: blurSigma, bounded: true),
     );
   }
 
