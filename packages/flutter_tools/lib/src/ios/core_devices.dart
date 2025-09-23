@@ -311,10 +311,27 @@ class IOSCoreDeviceControl {
 
   /// A list of log patterns to ignore.
   static final _ignorePatterns = <Pattern>[
-    RegExp(r'\[PreviewsAgentExecutorLibrary\].*'),
-    RegExp(r'\[UIKit App Config\].*'),
-    RegExp(r'\[UIFocus\].*'),
+    // Ignore process logs that don't contain Flutter or user logs.
+    // Example:
+    //   * Ignore logs with prefix in brackets that doesn't match FML:
+    //     2025-09-16 12:15:47.939171-0500 Runner[1230:133819] [UIKit App Config] ...
+    //   * Ignore logs with timestamp/process prefix:
+    //     2025-09-16 12:15:47.939171-0500 Runner[1230:133819] CoreText note: ...
+    //   * Don't ignore FML logs:
+    //     2025-09-16 12:05:54.162621-0500 Runner[1215:129795] [FATAL:flutter/runtime/service_protocol.cc(121)] ...
+    //   * Don't ignore logs with no timestamp/process prefix:
+    //     A log with no prefix (NSLog, print in Swift, and FlutterLogger)
+    //   * Don't ignore flutter logs:
+    //     2025-09-16 12:50:07.953318-0500 Runner[1279:149305] flutter: ...
+    RegExp(
+      r'^\S* \S* \S*\[[0-9:]*] ((?!(\[INFO|\[WARNING|\[ERROR|\[IMPORTANT|\[FATAL):))(?!(flutter:)).*',
+    ),
+    // Ignore iOS execution mode and potential error. This is not meaningful to the developer.
+    // Example:
+    //   * Dart execution mode: JIT
+    //   * Dart execution mode: simulator
     RegExp(r'Dart execution mode: .*'),
+    'Failed to execute code (error: EXC_BAD_ACCESS, debugger assist: not detected)',
   ];
 
   /// Executes `devicectl` command to get list of devices. The command will
