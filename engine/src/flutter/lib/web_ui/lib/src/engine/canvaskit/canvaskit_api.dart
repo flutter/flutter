@@ -17,12 +17,8 @@ import 'dart:js_interop_unsafe';
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
-
-import '../browser_detection.dart';
-import '../configuration.dart';
-import '../dom.dart';
-import 'renderer.dart';
 
 /// Entrypoint into the CanvasKit API.
 late CanvasKit canvasKit;
@@ -1835,6 +1831,8 @@ extension type SkParagraphBuilderNamespace(JSObject _) implements JSObject {
   }
 }
 
+final bool _ckRequiresClientICU = canvasKit.ParagraphBuilder.RequiresClientICU();
+
 extension type SkParagraphBuilder(JSObject _) implements JSObject {
   external void addText(String text);
   external void pushStyle(SkTextStyle textStyle);
@@ -1853,6 +1851,21 @@ extension type SkParagraphBuilder(JSObject _) implements JSObject {
   // SkParagraphBuilder.getText() returns a utf8 string, we need to decode it
   // into a utf16 string.
   String getText() => utf8.decode(getTextUtf8().codeUnits);
+
+  /// Injects required ICU data into the [SkParagraphBuilder] instance if needed.
+  ///
+  /// This only works in the CanvasKit Chromium variant that's compiled
+  /// without ICU data. In other variants, it's a no-op.
+  void injectClientICUIfNeeded() {
+    if (!_ckRequiresClientICU) {
+      return;
+    }
+
+    final SegmentationResult result = segmentText(getText());
+    setWordsUtf16(result.words);
+    setGraphemeBreaksUtf16(result.graphemes);
+    setLineBreaksUtf16(result.breaks);
+  }
 
   @JS('setWordsUtf8')
   external void _setWordsUtf8(JSUint32Array words);
