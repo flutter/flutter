@@ -67,7 +67,7 @@ class WebDevFS implements DevFS {
     required this.useSseForInjectedClient,
     required this.buildInfo,
     required this.enableDwds,
-    required this.enableDds,
+    required this.ddsConfig,
     required this.entrypoint,
     required this.expressionCompiler,
     required this.chromiumLauncher,
@@ -100,7 +100,7 @@ class WebDevFS implements DevFS {
   final bool useSseForInjectedClient;
   final BuildInfo buildInfo;
   final bool enableDwds;
-  final bool enableDds;
+  final DartDevelopmentServiceConfiguration ddsConfig;
   final bool testMode;
   final bool ddcModuleSystem;
   final bool canaryFeatures;
@@ -206,7 +206,7 @@ class WebDevFS implements DevFS {
       useSseForInjectedClient,
       buildInfo,
       enableDwds,
-      enableDds,
+      ddsConfig,
       entrypoint,
       expressionCompiler,
       webRenderer: webRenderer,

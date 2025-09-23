@@ -112,6 +112,9 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
   // The task runners.
   const TaskRunners task_runners_;
 
+  // If the overlay layer is currently shown.
+  bool overlay_layer_is_shown_ = false;
+
   // The size of the root canvas.
   DlISize frame_size_;
 
@@ -132,9 +135,6 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
   // mutation stack.
   std::unordered_map<int64_t, EmbeddedViewParams> view_params_;
 
-  // The number of platform views in the previous frame.
-  int64_t previous_frame_view_count_;
-
   // Destroys the surfaces created from the surface factory.
   // This method schedules a task on the platform thread, and waits for
   // the task until it completes.
@@ -145,6 +145,13 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
 
   // Whether the layer tree in the current frame has platform layers.
   bool FrameHasPlatformLayers();
+
+  // Shows the overlay layer if it has content and the previous frame did not.
+  void ShowOverlayLayerIfNeeded();
+
+  // Hides the overlay layer if it does not have content and the previous
+  // frame did have content.
+  void HideOverlayLayerIfNeeded();
 };
 
 }  // namespace flutter
