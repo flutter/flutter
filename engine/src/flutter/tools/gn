@@ -746,6 +746,12 @@ def to_gn_args(args):
   if args.fstack_protector:
     gn_args['use_fstack_protector'] = True
 
+  if args.enable_minimal_linux:
+    gn_args['is_minimal_linux'] = True
+
+  if args.ccache:
+    gn_args['use_ccache'] = True
+
   enable_vulkan_validation = args.enable_vulkan_validation_layers
 
   # Enable Vulkan validation layer automatically on debug builds for arm64.
@@ -857,6 +863,7 @@ def to_gn_wasm_args(args, gn_args):
   gn_args['skia_use_freetype'] = True
   gn_args['flutter_use_freetype_woff2'] = True
   gn_args['skia_use_harfbuzz'] = True
+  gn_args['skia_use_fontations'] = False
   gn_args['skia_use_fontconfig'] = False
   gn_args['skia_use_libheif'] = False
   gn_args['skia_enable_fontmgr_custom_directory'] = False
@@ -944,7 +951,7 @@ def parse_args(args):
   )
   parser.add_argument('--android', dest='target_os', action='store_const', const='android')
   parser.add_argument(
-      '--android-cpu', type=str, choices=['arm', 'x64', 'x86', 'arm64'], default='arm'
+      '--android-cpu', type=str, choices=['arm', 'x64', 'x86', 'arm64', 'riscv64'], default='arm'
   )
   parser.add_argument('--ios', dest='target_os', action='store_const', const='ios')
   parser.add_argument('--mac', dest='target_os', action='store_const', const='mac')
@@ -1068,6 +1075,8 @@ def parse_args(args):
 
   parser.add_argument('--enable-fontconfig', action='store_true', default=False)
   parser.add_argument('--enable-vulkan-validation-layers', action='store_true', default=False)
+
+  parser.add_argument('--enable-minimal-linux', action='store_true', default=False)
 
   parser.add_argument(
       '--embedder-for-target', dest='embedder_for_target', action='store_true', default=False
@@ -1223,6 +1232,13 @@ def parse_args(args):
       default=False,
       action='store_true',
       help='Whether the produced Flutter.framework is app extension safe. Only for iOS.'
+  )
+
+  parser.add_argument(
+      '--ccache',
+      default=False,
+      action='store_true',
+      help='Use ccache to speed up compilation. Requires ccache to be installed.'
   )
 
   # Verbose output.

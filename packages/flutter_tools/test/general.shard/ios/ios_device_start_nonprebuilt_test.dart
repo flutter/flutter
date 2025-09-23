@@ -219,11 +219,13 @@ void main() {
     testUsingContext(
       'with buildable app',
       () async {
+        final fakeExactAnalytics = FakeExactAnalytics();
         final IOSDevice iosDevice = setUpIOSDevice(
           fileSystem: fileSystem,
           processManager: processManager,
           logger: logger,
           artifacts: artifacts,
+          analytics: fakeExactAnalytics,
         );
         setUpIOSProject(fileSystem);
         final FlutterProject flutterProject = FlutterProject.fromDirectory(
@@ -279,6 +281,13 @@ void main() {
         expect(fileSystem.directory('build/ios/iphoneos'), exists);
         expect(launchResult.started, true);
         expect(processManager, hasNoRemainingExpectations);
+        expect(fakeExactAnalytics.sentEvents, [
+          Event.appleUsageEvent(
+            workflow: 'ios-physical-deployment',
+            parameter: IOSDeploymentMethod.iosDeployLaunch.name,
+            result: 'release success',
+          ),
+        ]);
       },
       overrides: <Type, Generator>{
         ProcessManager: () => processManager,
@@ -296,11 +305,13 @@ void main() {
       'ONLY_ACTIVE_ARCH is NO if different host and target architectures',
       () async {
         // Host architecture is x64, target architecture is arm64.
+        final fakeExactAnalytics = FakeExactAnalytics();
         final IOSDevice iosDevice = setUpIOSDevice(
           fileSystem: fileSystem,
           processManager: processManager,
           logger: logger,
           artifacts: artifacts,
+          analytics: fakeExactAnalytics,
         );
         setUpIOSProject(fileSystem);
         final FlutterProject flutterProject = FlutterProject.fromDirectory(
@@ -385,6 +396,13 @@ void main() {
         expect(fileSystem.directory('build/ios/iphoneos'), exists);
         expect(launchResult.started, true);
         expect(processManager, hasNoRemainingExpectations);
+        expect(fakeExactAnalytics.sentEvents, [
+          Event.appleUsageEvent(
+            workflow: 'ios-physical-deployment',
+            parameter: IOSDeploymentMethod.iosDeployLaunch.name,
+            result: 'release success',
+          ),
+        ]);
       },
       overrides: <Type, Generator>{
         ProcessManager: () => processManager,
@@ -401,11 +419,13 @@ void main() {
     testUsingContext(
       'with concurrent build failures',
       () async {
+        final fakeExactAnalytics = FakeExactAnalytics();
         final IOSDevice iosDevice = setUpIOSDevice(
           fileSystem: fileSystem,
           processManager: processManager,
           logger: logger,
           artifacts: artifacts,
+          analytics: fakeExactAnalytics,
         );
         setUpIOSProject(fileSystem);
         final FlutterProject flutterProject = FlutterProject.fromDirectory(
@@ -464,6 +484,13 @@ void main() {
               );
               expect(launchResult.started, true);
               expect(processManager, hasNoRemainingExpectations);
+              expect(fakeExactAnalytics.sentEvents, [
+                Event.appleUsageEvent(
+                  workflow: 'ios-physical-deployment',
+                  parameter: IOSDeploymentMethod.iosDeployLaunch.name,
+                  result: 'release success',
+                ),
+              ]);
             }),
           ),
         );
@@ -502,7 +529,10 @@ void main() {
       projectInfo = XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Release'], <String>[
         'Runner',
       ], logger);
-      fakeXcodeProjectInterpreter = FakeXcodeProjectInterpreter(projectInfo: projectInfo);
+      fakeXcodeProjectInterpreter = FakeXcodeProjectInterpreter(
+        projectInfo: projectInfo,
+        xcodeVersion: Version(15, 0, 0),
+      );
       xcode = Xcode.test(
         processManager: FakeProcessManager.any(),
         xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
@@ -513,6 +543,7 @@ void main() {
       testUsingContext(
         'succeeds when install and launch succeed',
         () async {
+          final fakeExactAnalytics = FakeExactAnalytics();
           final IOSDevice iosDevice = setUpIOSDevice(
             fileSystem: fileSystem,
             processManager: FakeProcessManager.any(),
@@ -520,6 +551,7 @@ void main() {
             artifacts: artifacts,
             isCoreDevice: true,
             coreDeviceControl: FakeIOSCoreDeviceControl(),
+            analytics: fakeExactAnalytics,
           );
           setUpIOSProject(fileSystem);
           final FlutterProject flutterProject = FlutterProject.fromDirectory(
@@ -543,6 +575,13 @@ void main() {
           expect(fileSystem.directory('build/ios/iphoneos'), exists);
           expect(launchResult.started, true);
           expect(processManager, hasNoRemainingExpectations);
+          expect(fakeExactAnalytics.sentEvents, [
+            Event.appleUsageEvent(
+              workflow: 'ios-physical-deployment',
+              parameter: IOSDeploymentMethod.coreDeviceWithoutDebugger.name,
+              result: 'release success',
+            ),
+          ]);
         },
         overrides: <Type, Generator>{
           ProcessManager: () => FakeProcessManager.any(),
@@ -559,6 +598,7 @@ void main() {
       testUsingContext(
         'fails when install fails',
         () async {
+          final fakeExactAnalytics = FakeExactAnalytics();
           final IOSDevice iosDevice = setUpIOSDevice(
             fileSystem: fileSystem,
             processManager: FakeProcessManager.any(),
@@ -566,6 +606,8 @@ void main() {
             artifacts: artifacts,
             isCoreDevice: true,
             coreDeviceControl: FakeIOSCoreDeviceControl(installSuccess: false),
+            coreDeviceLauncher: FakeIOSCoreDeviceLauncher(launchResult: false),
+            analytics: fakeExactAnalytics,
           );
           setUpIOSProject(fileSystem);
           final FlutterProject flutterProject = FlutterProject.fromDirectory(
@@ -589,6 +631,13 @@ void main() {
           expect(fileSystem.directory('build/ios/iphoneos'), exists);
           expect(launchResult.started, false);
           expect(processManager, hasNoRemainingExpectations);
+          expect(fakeExactAnalytics.sentEvents, [
+            Event.appleUsageEvent(
+              workflow: 'ios-physical-deployment',
+              parameter: IOSDeploymentMethod.coreDeviceWithoutDebugger.name,
+              result: 'launch failed',
+            ),
+          ]);
         },
         overrides: <Type, Generator>{
           ProcessManager: () => FakeProcessManager.any(),
@@ -652,6 +701,7 @@ void main() {
         'ensure arguments passed to launch',
         () async {
           final coreDeviceControl = FakeIOSCoreDeviceControl();
+          final fakeExactAnalytics = FakeExactAnalytics();
           final IOSDevice iosDevice = setUpIOSDevice(
             fileSystem: fileSystem,
             processManager: FakeProcessManager.any(),
@@ -659,6 +709,7 @@ void main() {
             artifacts: artifacts,
             isCoreDevice: true,
             coreDeviceControl: coreDeviceControl,
+            analytics: fakeExactAnalytics,
           );
           setUpIOSProject(fileSystem);
           final FlutterProject flutterProject = FlutterProject.fromDirectory(
@@ -684,6 +735,13 @@ void main() {
           expect(processManager, hasNoRemainingExpectations);
           expect(coreDeviceControl.argumentsUsedForLaunch, isNotNull);
           expect(coreDeviceControl.argumentsUsedForLaunch, contains('--enable-dart-profiling'));
+          expect(fakeExactAnalytics.sentEvents, [
+            Event.appleUsageEvent(
+              workflow: 'ios-physical-deployment',
+              parameter: IOSDeploymentMethod.coreDeviceWithoutDebugger.name,
+              result: 'release success',
+            ),
+          ]);
         },
         overrides: <Type, Generator>{
           ProcessManager: () => FakeProcessManager.any(),
@@ -1174,8 +1232,10 @@ IOSDevice setUpIOSDevice({
   Artifacts? artifacts,
   bool isCoreDevice = false,
   IOSCoreDeviceControl? coreDeviceControl,
+  IOSCoreDeviceLauncher? coreDeviceLauncher,
   FakeXcodeDebug? xcodeDebug,
   DarwinArch cpuArchitecture = DarwinArch.arm64,
+  FakeExactAnalytics? analytics,
 }) {
   artifacts ??= Artifacts.test();
   final cache = Cache.test(
@@ -1199,6 +1259,7 @@ IOSDevice setUpIOSDevice({
       artifacts: artifacts,
       cache: cache,
     ),
+    analytics: analytics ?? FakeExactAnalytics(),
     iMobileDevice: IMobileDevice(
       logger: logger,
       processManager: processManager ?? FakeProcessManager.any(),
@@ -1206,6 +1267,7 @@ IOSDevice setUpIOSDevice({
       cache: cache,
     ),
     coreDeviceControl: coreDeviceControl ?? FakeIOSCoreDeviceControl(),
+    coreDeviceLauncher: coreDeviceLauncher ?? FakeIOSCoreDeviceLauncher(),
     xcodeDebug: xcodeDebug ?? FakeXcodeDebug(),
     cpuArchitecture: cpuArchitecture,
     connectionInterface: DeviceConnectionInterface.attached,
@@ -1224,7 +1286,8 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
       'WRAPPER_NAME': 'My Super Awesome App.app',
       'DEVELOPMENT_TEAM': '3333CCCC33',
     },
-  });
+    Version? xcodeVersion,
+  }) : version = xcodeVersion ?? Version(1000, 0, 0);
 
   final Map<String, String> buildSettings;
   final XcodeProjectInfo? projectInfo;
@@ -1233,7 +1296,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   final isInstalled = true;
 
   @override
-  final version = Version(1000, 0, 0);
+  Version? version;
 
   @override
   String get versionText => version.toString();
@@ -1312,18 +1375,28 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
   List<String>? get argumentsUsedForLaunch => _launchArguments;
 
   @override
-  Future<bool> installApp({required String deviceId, required String bundlePath}) async {
-    return installSuccess;
+  Future<(bool, IOSCoreDeviceInstallResult?)> installApp({
+    required String deviceId,
+    required String bundlePath,
+  }) async {
+    final result = IOSCoreDeviceInstallResult.fromJson(<String, Object?>{
+      'info': <String, Object?>{'outcome': installSuccess ? 'success' : 'failure'},
+    });
+    return (installSuccess, result);
   }
 
   @override
-  Future<bool> launchApp({
+  Future<IOSCoreDeviceLaunchResult?> launchApp({
     required String deviceId,
     required String bundleId,
     List<String> launchArguments = const <String>[],
+    bool startStopped = false,
   }) async {
     _launchArguments = launchArguments;
-    return launchSuccess;
+    final outcome = launchSuccess ? 'success' : 'failed';
+    return IOSCoreDeviceLaunchResult.fromJson(<String, Object?>{
+      'info': {'outcome': outcome},
+    });
   }
 }
 
@@ -1392,3 +1465,37 @@ const _validScheme = '''
    </ArchiveAction>
 </Scheme>
 ''';
+
+class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {
+  FakeIOSCoreDeviceLauncher({this.launchResult = true});
+  bool launchResult;
+
+  @override
+  Future<bool> launchAppWithoutDebugger({
+    required String deviceId,
+    required String bundlePath,
+    required String bundleId,
+    required List<String> launchArguments,
+  }) async {
+    return launchResult;
+  }
+
+  @override
+  Future<bool> launchAppWithLLDBDebugger({
+    required String deviceId,
+    required String bundlePath,
+    required String bundleId,
+    required List<String> launchArguments,
+  }) async {
+    return true;
+  }
+}
+
+class FakeExactAnalytics extends Fake implements Analytics {
+  final sentEvents = <Event>[];
+
+  @override
+  void send(Event event) {
+    sentEvents.add(event);
+  }
+}

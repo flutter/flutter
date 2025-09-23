@@ -92,13 +92,22 @@ var _kDefaultTargets = <Target>[
 /// system.
 class AssembleCommand extends FlutterCommand {
   AssembleCommand({bool verboseHelp = false, required BuildSystem buildSystem})
-    : _buildSystem = buildSystem {
+    : _verboseHelp = verboseHelp,
+      _buildSystem = buildSystem {
     argParser.addMultiOption(
       'define',
       abbr: 'd',
       valueHelp: 'target=key=value',
-      help: 'Allows passing configuration to a target, as in "--define=target=key=value".',
+      hide: !verboseHelp,
+      help:
+          'DEPRECATED. Use "--dart-define" or "-D" instead for consistency.\n'
+          '\n'
+          'Allows passing configuration to a target, as in "--define=target=key=value".',
     );
+
+    // New -D/--dart-define (consistent across app)
+    usesDartDefineOption();
+
     argParser.addOption(
       'performance-measurement-file',
       help: 'Output individual target performance to a JSON file.',
@@ -142,12 +151,16 @@ class AssembleCommand extends FlutterCommand {
           'root of the current Flutter project.',
     );
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
-    usesDartDefineOption();
     argParser.addOption(
       'resource-pool-size',
       help: 'The maximum number of concurrent tasks the build system will run.',
     );
   }
+
+  final bool _verboseHelp;
+
+  @override
+  bool get hidden => !_verboseHelp;
 
   final BuildSystem _buildSystem;
 
@@ -243,7 +256,7 @@ class AssembleCommand extends FlutterCommand {
           .childDirectory('flutter_build'),
       projectDir: _flutterProject.directory,
       packageConfigPath: packageConfigPath(),
-      defines: _parseDefines(stringsArg('define')),
+      defines: _parseDefines([...stringsArg('define'), ...stringsArg('dart-define')]),
       inputs: _parseDefines(stringsArg('input')),
       cacheDir: globals.cache.getRoot(),
       flutterRootDir: globals.fs.directory(Cache.flutterRoot),

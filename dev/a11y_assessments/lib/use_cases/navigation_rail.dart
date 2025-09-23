@@ -7,6 +7,8 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class NavigationRailUseCase extends UseCase {
+  NavigationRailUseCase() : super(useCaseCategory: UseCaseCategory.core);
+
   @override
   String get name => 'NavigationRail';
 
@@ -49,6 +51,7 @@ class _NavRailExampleState extends State<NavRailExample> {
             labelType: labelType,
             leading: showLeading
                 ? FloatingActionButton(
+                    tooltip: 'Add',
                     elevation: 0,
                     onPressed: () {
                       // Add your onPressed code here!
@@ -58,6 +61,7 @@ class _NavRailExampleState extends State<NavRailExample> {
                 : const SizedBox(),
             trailing: showTrailing
                 ? IconButton(
+                    tooltip: 'More',
                     onPressed: () {
                       // Add your onPressed code here!
                     },

@@ -57,7 +57,7 @@ shelf.Handler createDirectoryHandler(Directory directory, {required bool crossOr
     return shelf.Response.ok(
       file.openRead(),
       headers: <String, String>{
-        if (contentType != null) 'Content-Type': contentType,
+        'Content-Type': ?contentType,
         if (needsCrossOriginIsolated) ...kMultiThreadedHeaders,
       },
     );
@@ -580,7 +580,7 @@ class FlutterWebPlatform extends PlatformPlugin {
 
     final Runtime browser = platform.runtime;
     try {
-      _browserManager = await _launchBrowser(browser);
+      _browserManager ??= await _launchBrowser(browser);
     } on Error catch (_) {
       await _suiteLock.close();
       rethrow;
@@ -600,8 +600,6 @@ class FlutterWebPlatform extends PlatformPlugin {
       suiteConfig,
       message,
       onDone: () async {
-        await _browserManager!.close();
-        _browserManager = null;
         lockResource.release();
         if (_logger.isVerbose) {
           _logger.printTrace('Test suite $relativePath finished.');
@@ -661,7 +659,7 @@ class FlutterWebPlatform extends PlatformPlugin {
   @override
   Future<void> close() => _closeMemo.runOnce(() async {
     await Future.wait<void>(<Future<dynamic>>[
-      if (_browserManager != null) _browserManager!.close(),
+      ?_browserManager?.close(),
       _server.close(),
       _testGoldenComparator.close(),
     ]);

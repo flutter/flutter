@@ -51,22 +51,26 @@ const templateKotlinGradlePluginVersion = '2.1.0';
 // so new versions are picked up after a Flutter upgrade.
 //
 // Please see the README before changing any of these values.
-const compileSdkVersion = '36';
-const minSdkVersion = '24';
+const compileSdkVersionInt = 36;
+const compileSdkVersion = '$compileSdkVersionInt';
+const minSdkVersionInt = 24;
+const minSdkVersion = '$minSdkVersionInt';
 const targetSdkVersion = '36';
 const ndkVersion = '27.0.12077973';
+final minBuildToolsVersion = Version(28, 0, 3);
+final minJavaMinVersionAndroid = Version(11, 0, 0);
 
 // Update these when new major versions of Java are supported by new Gradle
 // versions that we support.
 // Source of truth: https://docs.gradle.org/current/userguide/compatibility.html
-const oneMajorVersionHigherJavaVersion = '24';
+const oneMajorVersionHigherJavaVersion = '26';
 
 // Update this when new versions of Gradle come out including minor versions
 // and should correspond to the maximum Gradle version we test in CI.
 //
 // Supported here means supported by the tooling for
 // flutter analyze --suggestions and does not imply broader flutter support.
-const maxKnownAndSupportedGradleVersion = '8.12';
+const maxKnownAndSupportedGradleVersion = '9.1.0';
 
 // Update this with new KGP versions come out including minor versions.
 //
@@ -115,9 +119,11 @@ const _versionGroupName = 'version';
 // Groovy DSL with single quotes - 'com.android.tools.build:gradle:{{agpVersion}}'
 // Groovy DSL with double quotes - "com.android.tools.build:gradle:{{agpVersion}}"
 // Kotlin DSL - ("com.android.tools.build.gradle:{{agpVersion}}")
-// ?<version> is used to name the version group which helps with extraction.
+// `(?<=^[^/]*)` is a positive look behind to ensure that the line is not commented out.
+// `?<version>` is used to name the version group which helps with extraction.
+// `\k<quote>` takes advanatage of the precviously declared `(?<quote>['"])` for reuse.
 final _androidGradlePluginRegExpFromDependencies = RegExp(
-  r"""[^\/]*\s*((\bclasspath\b)|(\bcompileOnly\b))\s*\(?['"]com\.android\.tools\.build:gradle:(?<version>\d+(\.\d+){1,2})\)?""",
+  r"""\b(?:classpath|compileOnly)\b(?<=^[^/]*)\s*\(?(?<quote>['"])com\.android\.tools\.build:gradle:(?<version>\d+(?:.\d+){1,2}).*\k<quote>""",
   multiLine: true,
 );
 
@@ -127,9 +133,11 @@ final _androidGradlePluginRegExpFromDependencies = RegExp(
 // Groovy DSL with single quotes - id 'com.android.application' version '{{agpVersion}}'
 // Groovy DSL with double quotes - id "com.android.application" version "{{agpVersion}}"
 // Kotlin DSL - id("com.android.application") version "{{agpVersion}}"
-// ?<version> is used to name the version group which helps with extraction.
+// `(?<=^[^/]*)` is a positive look behind to ensure that the line is not commented out.
+// `?<version>` is used to name the version group which helps with extraction.
+// `\k<quote>` takes advanatage of the precviously declared `(?<quote>['"])` for reuse.
 final _androidGradlePluginRegExpFromId = RegExp(
-  r"""[^\/]*s*id\s*\(?['"]com\.android\.application['"]\)?\s+version\s+['"](?<version>\d+(\.\d+){1,2})\)?""",
+  r"""\b(?:id)\b(?<=^[^/]*)\s*\(?(?<quote>['"])com\.android\.application\k<quote>\)?\s+version\s+\k<quote>(?<version>\d+(\.\d+){1,2})\)?""",
   multiLine: true,
 );
 
@@ -138,9 +146,11 @@ final _androidGradlePluginRegExpFromId = RegExp(
 // Expected content:
 // Groovy DSL - id "org.jetbrains.kotlin.android" version "{{kgpVersion}}"
 // Kotlin DSL - id("org.jetbrains.kotlin.android") version "{{kgpVersion}}"
-// ?<version> is used to name the version group which helps with extraction.
+// `(?<=^[^/]*)` is a positive look behind to ensure that the line is not commented out.
+// `?<version>` is used to name the version group which helps with extraction.
+// `\k<quote>` takes advanatage of the precviously declared `(?<quote>['"])` for reuse.
 final _kotlinGradlePluginRegExpFromId = RegExp(
-  r"""[^\/]*s*id\s*\(?['"]org\.jetbrains\.kotlin\.android['"]\)?\s+version\s+['"](?<version>\d+(\.\d+){1,2})\)?""",
+  r"""\b(?:id)\b(?<=^[^/]*)\s*\(?(?<quote>['"])org\.jetbrains\.kotlin\.android\k<quote>\)?\s+version\s+\k<quote>(?<version>\d+(\.\d+){1,2})\)?""",
   multiLine: true,
 );
 
@@ -154,15 +164,22 @@ final distributionUrlRegex = RegExp(r'^\s*distributionUrl\s*=\s*.*\.zip', multiL
 // gradle.org urls so that we can guarantee any modifications to the url
 // still points to a hosted zip.
 final gradleOrgVersionMatch = RegExp(
-  r'^\s*distributionUrl\s*=\s*https\\://services\.gradle\.org/distributions/gradle-((?:\d|\.)+)-(.*)\.zip',
+  r'^\s*distributionUrl\s*=\s*https\\://services\.gradle\.org/distributions/gradle-([\d.]+)-(.*)\.zip',
   multiLine: true,
 );
 
 // This matches uncommented minSdkVersion lines in the module-level build.gradle
 // file which have minSdkVersion 16, 17, 18, 19, 20, 21, 22, 23 set with space sytax,
 // equals syntax and when using minSdk or minSdkVersion.
-final tooOldMinSdkVersionMatch = RegExp(
-  r'(?<=^\s*)minSdk(Version)?\s=?\s?(1[6789]|2[0123])(?=\s*(?://|$))',
+// Matches uncommented minSdkVersion lines using equals syntax (=)
+final tooOldMinSdkVersionEqualsMatch = RegExp(
+  r'(?<=^\s*)minSdk(Version)?\s*=\s*(1[6789]|2[0123])(?=\s*(?://|$))',
+  multiLine: true,
+);
+
+// Matches uncommented minSdkVersion lines using space syntax (no =)
+final tooOldMinSdkVersionSpaceMatch = RegExp(
+  r'(?<=^\s*)minSdk(Version)?\s+(1[6789]|2[0123])(?=\s*(?://|$))',
   multiLine: true,
 );
 
@@ -1197,6 +1214,18 @@ String getGradlewFileName(Platform platform) {
 /// of Gradle, as https://docs.gradle.org/current/userguide/compatibility.html
 /// details.
 var _javaGradleCompatList = const <JavaGradleCompat>[
+  JavaGradleCompat(
+    javaMin: '25',
+    javaMax: '26',
+    gradleMin: '9.1.0',
+    gradleMax: maxKnownAndSupportedGradleVersion,
+  ),
+  JavaGradleCompat(
+    javaMin: '24',
+    javaMax: '25',
+    gradleMin: '8.14',
+    gradleMax: maxKnownAndSupportedGradleVersion,
+  ),
   JavaGradleCompat(
     javaMin: '23',
     javaMax: '24',

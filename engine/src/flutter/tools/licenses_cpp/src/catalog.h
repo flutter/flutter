@@ -27,9 +27,36 @@ class Catalog {
     std::string matcher;
   };
 
-  struct Match {
-    std::string_view matcher;
-    std::string_view matched_text;
+  class Match {
+   public:
+    static Match MakeWithString(std::string_view matcher,
+                                std::string matched_text) {
+      return Match(matcher, std::move(matched_text));
+    }
+
+    static Match MakeWithView(std::string_view matcher,
+                              std::string_view matched_text) {
+      return Match(matcher, matched_text);
+    }
+
+    std::string_view GetMatcher() const { return matcher_; }
+    std::string_view GetMatchedText() const {
+      if (matched_text_.empty()) {
+        return owned_matched_text_;
+      } else {
+        return matched_text_;
+      }
+    }
+
+   private:
+    Match(std::string_view matcher, std::string_view matched_text)
+        : matcher_(matcher), matched_text_(matched_text) {}
+    Match(std::string_view matcher, std::string matched_text)
+        : matcher_(matcher), owned_matched_text_(std::move(matched_text)) {}
+
+    std::string_view matcher_;
+    std::string_view matched_text_;
+    std::string owned_matched_text_;
   };
 
   static absl::StatusOr<Catalog> Open(std::string_view data_dir);

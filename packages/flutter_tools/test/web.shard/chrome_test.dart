@@ -30,6 +30,7 @@ const kChromeArgs = <String>[
   '--disable-default-apps',
   '--disable-translate',
   '--disable-search-engine-choice-screen',
+  '--no-sandbox',
 ];
 
 const kCodeCache = <String>['Cache', 'Code Cache', 'GPUCache'];
@@ -537,7 +538,6 @@ void main() {
           ...kChromeArgs,
           '--headless',
           '--disable-gpu',
-          '--no-sandbox',
           '--window-size=2400,1800',
           'example_url',
         ],
@@ -623,7 +623,6 @@ void main() {
       ...kChromeArgs,
       '--headless',
       '--disable-gpu',
-      '--no-sandbox',
       '--window-size=2400,1800',
       'example_url',
     ];
@@ -657,7 +656,6 @@ void main() {
       ...kChromeArgs,
       '--headless',
       '--disable-gpu',
-      '--no-sandbox',
       '--window-size=2400,1800',
       'example_url',
     ];
@@ -695,7 +693,6 @@ void main() {
             ...kChromeArgs,
             '--headless',
             '--disable-gpu',
-            '--no-sandbox',
             '--window-size=2400,1800',
             'example_url',
           ],
@@ -931,6 +928,30 @@ void main() {
       await chrome.close();
     },
   );
+
+  testWithoutContext('respects custom user data directory flag', () async {
+    const customUserDataDir = '/custom/chrome/data/dir';
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>[
+          'example_chrome',
+          '--user-data-dir=$customUserDataDir',
+          '--remote-debugging-port=12345',
+          ...kChromeArgs,
+          'example_url',
+        ],
+        stderr: kDevtoolsStderr,
+      ),
+    );
+
+    await expectReturnsNormallyLater(
+      chromeLauncher.launch(
+        'example_url',
+        skipCheck: true,
+        webBrowserFlags: <String>['--user-data-dir=$customUserDataDir'],
+      ),
+    );
+  });
 }
 
 /// Fake chrome connection that fails to get tabs a few times.

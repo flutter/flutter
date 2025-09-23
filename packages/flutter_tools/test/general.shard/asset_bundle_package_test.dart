@@ -76,16 +76,6 @@ $assetsSection
 ''');
   }
 
-  Map<Object, Object> assetManifestBinToJson(Map<Object, Object> manifest) {
-    List<Object> convertList(List<Object> variants) =>
-        variants.map((Object variant) => (variant as Map<Object?, Object?>)['asset']!).toList();
-
-    return manifest.map(
-      (Object key, Object value) =>
-          MapEntry<Object, Object>(key, convertList(value as List<Object>)),
-    );
-  }
-
   Future<void> buildAndVerifyAssets(
     List<String> assets,
     List<String> packages,
@@ -111,10 +101,6 @@ $assetsSection
             )
             as Map<Object?, Object?>;
 
-    expect(
-      json.decode(utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes())),
-      assetManifestBinToJson(expectedAssetManifest),
-    );
     expect(assetManifest, expectedAssetManifest);
   }
 
@@ -155,17 +141,7 @@ $assetsSection
         await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
         expect(
           bundle.entries.keys,
-          unorderedEquals(<String>[
-            'NOTICES.Z',
-            'AssetManifest.json',
-            'AssetManifest.bin',
-            'FontManifest.json',
-          ]),
-        );
-        const expectedAssetManifest = '{}';
-        expect(
-          utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
-          expectedAssetManifest,
+          unorderedEquals(<String>['NOTICES.Z', 'AssetManifest.bin', 'FontManifest.json']),
         );
         expect(utf8.decode(await bundle.entries['FontManifest.json']!.contentsAsBytes()), '[]');
       },
@@ -193,17 +169,7 @@ $assetsSection
         await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
         expect(
           bundle.entries.keys,
-          unorderedEquals(<String>[
-            'NOTICES.Z',
-            'AssetManifest.json',
-            'AssetManifest.bin',
-            'FontManifest.json',
-          ]),
-        );
-        const expectedAssetManifest = '{}';
-        expect(
-          utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
-          expectedAssetManifest,
+          unorderedEquals(<String>['NOTICES.Z', 'AssetManifest.bin', 'FontManifest.json']),
         );
         expect(utf8.decode(await bundle.entries['FontManifest.json']!.contentsAsBytes()), '[]');
       },
@@ -702,9 +668,9 @@ $assetsSection
         await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
 
         expect(
-          bundle.entries['AssetManifest.json'],
+          bundle.entries['AssetManifest.bin'],
           isNull,
-          reason: 'Invalid pubspec.yaml should not generate AssetManifest.json',
+          reason: 'Invalid pubspec.yaml should not generate AssetManifest.bin',
         );
       },
       overrides: <Type, Generator>{

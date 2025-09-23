@@ -26,8 +26,16 @@ namespace fs = std::filesystem;
 const char* LicenseChecker::kHeaderLicenseRegex = "(?i)(license|copyright)";
 
 namespace {
-const std::array<std::string_view, 5> kLicenseFileNames = {
-    "LICENSE", "LICENSE.TXT", "LICENSE.md", "LICENSE.MIT", "COPYING"};
+// TODO(): Move this into the data directory.
+const std::array<std::string_view, 9> kLicenseFileNames = {
+    "LICENSE", "LICENSE.TXT", "LICENSE.txt",  "LICENSE.md", "LICENSE.MIT",
+    "COPYING", "License.txt", "docs/FTL.TXT", "README.ijg"};
+
+// TODO(): Move this into the data directory
+//  These are directories that when they are found in third_party directories
+//  are ignored as package names.
+const std::array<std::string_view, 2> kThirdPartyIgnore = {"pkg",
+                                                           "vulkan-deps"};
 
 RE2 kHeaderLicense(LicenseChecker::kHeaderLicenseRegex);
 
@@ -138,15 +146,27 @@ struct Package {
   bool is_root_package;
 };
 
+/// This makes sure trailing slashes on paths are treated the same.
+/// Example:
+///   f("/foo/") == f("/foo") == "foo"
+std::string GetDirFilename(const fs::path& working_dir) {
+  std::string result = working_dir.filename();
+  if (result.empty()) {
+    result = working_dir.parent_path().filename();
+  }
+  return result;
+}
+
 Package GetPackage(const Data& data,
                    const fs::path& working_dir,
                    const fs::path& relative_path) {
   Package result = {
-      .name = working_dir.filename(),
+      .name = GetDirFilename(working_dir),
       .license_file = FindLicense(data, working_dir, "."),
       .is_root_package = true,
   };
   bool after_third_party = false;
+  bool after_ignored_third_party = false;
   fs::path current = ".";
   for (const fs::path& component : relative_path.parent_path()) {
     current /= component;
@@ -155,14 +175,25 @@ Package GetPackage(const Data& data,
     if (current_license.has_value()) {
       result.license_file = current_license;
     }
-    if (after_third_party) {
+    if (after_ignored_third_party) {
+      after_ignored_third_party = false;
       result.name = component;
+    } else if (after_third_party) {
+      if (std::find(kThirdPartyIgnore.begin(), kThirdPartyIgnore.end(),
+                    component.string()) != kThirdPartyIgnore.end()) {
+        after_ignored_third_party = true;
+      }
       after_third_party = false;
+      result.name = component;
     } else if (component.string() == "third_party") {
       after_third_party = true;
       result.license_file = std::nullopt;
       result.is_root_package = false;
     }
+  }
+  if (std::find(kLicenseFileNames.begin(), kLicenseFileNames.end(),
+                relative_path.filename()) != kLicenseFileNames.end()) {
+    result.license_file = working_dir / relative_path;
   }
 
   return result;
@@ -218,8 +249,8 @@ absl::Status MatchLicenseFile(const fs::path& path,
 
     if (matches.ok()) {
       for (const Catalog::Match& match : matches.value()) {
-        license_map->Add(package.name, match.matched_text);
-        VLOG(1) << "OK: " << path << " : " << match.matcher;
+        license_map->Add(package.name, match.GetMatchedText());
+        VLOG(1) << "OK: " << path << " : " << match.GetMatcher();
       }
     } else {
       return absl::NotFoundError(
@@ -248,35 +279,46 @@ bool ProcessSourceCode(const fs::path& relative_path,
   bool did_find_copyright = false;
   std::vector<absl::Status>* errors = &state->errors;
   LicenseMap* license_map = &state->license_map;
-  IterateComments(
-      file.GetData(), file.GetSize(), [&](std::string_view comment) {
-        VLOG(4) << comment;
-        re2::StringPiece match;
-        if (RE2::PartialMatch(comment, kHeaderLicense, &match)) {
-          if (!VLOG_IS_ON(4)) {
-            VLOG(3) << comment;
-          }
-          absl::StatusOr<std::vector<Catalog::Match>> matches =
-              data.catalog.FindMatch(comment);
-          if (matches.ok()) {
-            did_find_copyright = true;
-            for (const Catalog::Match& match : matches.value()) {
-              license_map->Add(package.name, match.matched_text);
-              VLOG(1) << "OK: " << relative_path.lexically_normal() << " : "
-                      << match.matcher;
-            }
-          } else {
-            if (flags.treat_unmatched_comments_as_errors) {
-              errors->push_back(absl::NotFoundError(
-                  absl::StrCat(relative_path.lexically_normal().string(), " : ",
-                               matches.status().message(), "\n", comment)));
-            }
-            VLOG(2) << "NOT_FOUND: " << relative_path.lexically_normal()
-                    << " : " << matches.status().message() << "\n"
-                    << comment;
-          }
+  int32_t comment_count = 0;
+
+  auto comment_handler = [&](std::string_view comment) -> void {
+    comment_count += 1;
+    VLOG(4) << comment;
+    re2::StringPiece match;
+    if (RE2::PartialMatch(comment, kHeaderLicense, &match)) {
+      if (!VLOG_IS_ON(4)) {
+        VLOG(3) << comment;
+      }
+      absl::StatusOr<std::vector<Catalog::Match>> matches =
+          data.catalog.FindMatch(comment);
+      if (matches.ok()) {
+        did_find_copyright = true;
+        for (const Catalog::Match& match : matches.value()) {
+          license_map->Add(package.name, match.GetMatchedText());
+          VLOG(1) << "OK: " << relative_path.lexically_normal() << " : "
+                  << match.GetMatcher();
         }
-      });
+      } else {
+        if (flags.treat_unmatched_comments_as_errors) {
+          errors->push_back(absl::NotFoundError(
+              absl::StrCat(relative_path.lexically_normal().string(), " : ",
+                           matches.status().message(), "\n", comment)));
+        }
+        VLOG(2) << "NOT_FOUND: " << relative_path.lexically_normal() << " : "
+                << matches.status().message() << "\n"
+                << comment;
+      }
+    }
+  };
+
+  IterateComments(file.GetData(), file.GetSize(), comment_handler);
+
+  // If we didn't find any comments, the input may be a text file, not source
+  // code. So, we attempt to match the full text.
+  if (comment_count <= 0) {
+    comment_handler(std::string_view(file.GetData(), file.GetSize()));
+  }
+
   return did_find_copyright;
 }
 
@@ -324,15 +366,17 @@ bool ProcessNotices(const fs::path& relative_path,
   while (RE2::FindAndConsume(&input, regex, &projects_text, &license)) {
     std::vector<std::string_view> projects = SplitLines(projects_text);
 
+    VLOG(4) << license;
+
     absl::StatusOr<std::vector<Catalog::Match>> matches =
         data.catalog.FindMatch(license);
     if (matches.ok()) {
       for (const Catalog::Match& match : matches.value()) {
         for (std::string_view project : projects) {
-          license_map->Add(project, match.matched_text);
+          license_map->Add(project, match.GetMatchedText());
         }
         VLOG(1) << "OK: " << relative_path.lexically_normal() << " : "
-                << match.matcher;
+                << match.GetMatcher();
       }
     } else {
       VLOG(2) << "NOT_FOUND: " << relative_path.lexically_normal() << " : "
@@ -363,8 +407,8 @@ absl::Status ProcessFile(const fs::path& working_dir_path,
       &state->seen_license_files;
 
   bool did_find_copyright = false;
-  fs::path relative_path = fs::relative(full_path, working_dir_path);
-  VLOG(2) << relative_path;
+  fs::path relative_path = full_path.lexically_relative(working_dir_path);
+  VLOG(2) << "Process: " << relative_path;
   if (!data.include_filter.Matches(relative_path.string()) ||
       data.exclude_filter.Matches(relative_path.string())) {
     VLOG(1) << "EXCLUDE: " << relative_path.lexically_normal();
@@ -382,6 +426,8 @@ absl::Status ProcessFile(const fs::path& working_dir_path,
         errors->emplace_back(std::move(match_status));
       }
     }
+  } else {
+    VLOG(3) << "No license file: " << relative_path.lexically_normal();
   }
 
   absl::StatusOr<MMapFile> file = MMapFile::Make(full_path.string());
@@ -411,7 +457,7 @@ absl::Status ProcessFile(const fs::path& working_dir_path,
                                 relative_path.lexically_normal().string()));
       } else {
         fs::path relative_license_path =
-            fs::relative(*package.license_file, working_dir_path);
+            package.license_file->lexically_relative(working_dir_path);
         VLOG(1) << "OK: " << relative_path.lexically_normal()
                 << " : dir license(" << relative_license_path.lexically_normal()
                 << ")";
@@ -454,9 +500,9 @@ std::vector<absl::Status> LicenseChecker::Run(
     std::ostream& licenses,
     const Data& data,
     const LicenseChecker::Flags& flags) {
-  std::vector<fs::path> git_repos = GetGitRepos(working_dir);
   fs::path working_dir_path =
       fs::absolute(fs::path(working_dir)).lexically_normal();
+  std::vector<fs::path> git_repos = GetGitRepos(working_dir_path.string());
 
   size_t count = 0;
   ProcessState state;
@@ -584,8 +630,12 @@ int LicenseChecker::FileRun(std::string_view working_dir,
   }
 
   ProcessState state;
-  absl::Status process_result = ProcessFile(working_dir, licenses, data.value(),
-                                            full_path, flags, &state);
+  fs::path working_dir_path =
+      fs::absolute(fs::path(working_dir)).lexically_normal();
+  fs::path absolute_full_path = fs::absolute(fs::path(full_path));
+  absl::Status process_result =
+      ProcessFile(working_dir_path, licenses, data.value(), absolute_full_path,
+                  flags, &state);
 
   if (!process_result.ok()) {
     std::cerr << process_result << std::endl;

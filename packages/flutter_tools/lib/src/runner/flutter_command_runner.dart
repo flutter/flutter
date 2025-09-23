@@ -36,7 +36,6 @@ abstract final class FlutterGlobalOptions {
   static const kMachineFlag = 'machine';
   static const kPackagesOption = 'packages';
   static const kPrefixedErrorsFlag = 'prefixed-errors';
-  static const kDtdUrl = 'dtd-url';
   static const kPrintDtd = 'print-dtd';
   static const kQuietFlag = 'quiet';
   static const kShowTestDeviceFlag = 'show-test-device';
@@ -151,12 +150,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
       FlutterGlobalOptions.kPackagesOption,
       hide: !verboseHelp,
       help: 'Path to your "package_config.json" file.',
-    );
-    argParser.addOption(
-      FlutterGlobalOptions.kDtdUrl,
-      help:
-          'The address of an existing Dart Tooling Daemon instance to be used by the Flutter CLI.',
-      hide: !verboseHelp,
     );
     argParser.addFlag(
       FlutterGlobalOptions.kPrintDtd,
@@ -314,15 +307,11 @@ class FlutterCommandRunner extends CommandRunner<void> {
   ///
   /// This method should be narrowly used in the following manner:
   /// ```dart
-  /// final bool topLevelMachineFlag = topLevelResults[FlutterGlobalOptions.kMachineFlag] as bool? ?? false;
-  /// if (await _shouldCheckForUpdates(topLevelResults, topLevelMachineFlag: topLevelMachineFlag)) {
+  /// if (await _shouldCheckForUpdates(topLevelResult)) {
   ///   await globals.flutterVersion.checkFlutterVersionFreshness();
   /// }
   /// ```
-  Future<bool> _shouldCheckForUpdates(
-    ArgResults topLevelResults, {
-    required bool topLevelMachineFlag,
-  }) async {
+  Future<bool> _shouldCheckForUpdates(ArgResults topLevelResults) async {
     // Check if the user has explicitly requested a version check.
     final bool versionCheckFlag =
         topLevelResults[FlutterGlobalOptions.kVersionCheckFlag] as bool? ?? false;
@@ -330,11 +319,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
         topLevelResults.wasParsed(FlutterGlobalOptions.kVersionCheckFlag) && versionCheckFlag;
     if (explicitVersionCheckPassed) {
       return true;
-    }
-
-    // If the top level --machine flag is set, we don't want to check for updates.
-    if (topLevelMachineFlag) {
-      return false;
     }
 
     // Running the "upgrade" command is already checking, don't check twice.
@@ -454,9 +438,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         await globals.cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.informative});
 
         globals.flutterVersion.ensureVersionFile();
-        final bool machineFlag =
-            topLevelResults[FlutterGlobalOptions.kMachineFlag] as bool? ?? false;
-        if (await _shouldCheckForUpdates(topLevelResults, topLevelMachineFlag: machineFlag)) {
+        if (await _shouldCheckForUpdates(topLevelResults)) {
           await globals.flutterVersion.checkFlutterVersionFreshness();
         }
 
@@ -466,6 +448,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
           globals.deviceManager?.specifiedDeviceId = specifiedDeviceId;
         }
 
+        final bool topLevelMachineFlag =
+            topLevelResults[FlutterGlobalOptions.kMachineFlag] as bool? ?? false;
         if ((topLevelResults[FlutterGlobalOptions.kVersionFlag] as bool?) ?? false) {
           globals.analytics.send(
             Event.flutterCommandResult(
@@ -478,7 +462,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
             clock: globals.systemClock,
           );
           final String status;
-          if (machineFlag) {
+          if (topLevelMachineFlag) {
             final Map<String, Object> jsonOut = version.toJson();
             jsonOut['flutterRoot'] = Cache.flutterRoot!;
             status = const JsonEncoder.withIndent('  ').convert(jsonOut);
@@ -488,7 +472,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
           globals.printStatus(status);
           return;
         }
-        if (machineFlag && topLevelResults.command?.name != 'analyze') {
+        if (topLevelMachineFlag && topLevelResults.command?.name != 'analyze') {
           throwToolExit(
             'The "--machine" flag is only valid with the "--version" flag or the "analyze --suggestions" command.',
             exitCode: 2,

@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
+import 'package:flutter_tools/src/commands/widget_preview.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -37,6 +38,7 @@ void main() {
         prefixedErrors: false,
         machine: false,
         daemon: false,
+        widgetPreviews: false,
         windows: false,
       ),
       isA<StdoutLogger>(),
@@ -47,6 +49,7 @@ void main() {
         prefixedErrors: false,
         machine: false,
         daemon: false,
+        widgetPreviews: false,
         windows: true,
       ),
       isA<WindowsStdoutLogger>(),
@@ -57,6 +60,7 @@ void main() {
         prefixedErrors: false,
         machine: false,
         daemon: false,
+        widgetPreviews: false,
         windows: true,
       ),
       isA<VerboseLogger>(),
@@ -67,6 +71,7 @@ void main() {
         prefixedErrors: false,
         machine: false,
         daemon: false,
+        widgetPreviews: false,
         windows: false,
       ),
       isA<VerboseLogger>(),
@@ -77,6 +82,7 @@ void main() {
         prefixedErrors: true,
         machine: false,
         daemon: false,
+        widgetPreviews: false,
         windows: false,
       ),
       isA<PrefixedErrorLogger>(),
@@ -87,6 +93,7 @@ void main() {
         prefixedErrors: false,
         machine: false,
         daemon: true,
+        widgetPreviews: false,
         windows: false,
       ),
       isA<NotifyingLogger>(),
@@ -97,10 +104,32 @@ void main() {
         prefixedErrors: false,
         machine: true,
         daemon: false,
+        widgetPreviews: false,
         windows: false,
       ),
-      isA<AppRunLogger>(),
+      isA<MachineOutputLogger>(),
     );
+
+    for (final verbose in [false, true]) {
+      for (final machine in [false, true]) {
+        for (final windows in [false, true]) {
+          expect(
+            loggerFactory.createLogger(
+              verbose: verbose,
+              prefixedErrors: false,
+              machine: machine,
+              daemon: false,
+              widgetPreviews: true,
+              windows: windows,
+            ),
+            isA<WidgetPreviewMachineAwareLogger>(),
+            reason:
+                'Did not produce WidgetPreviewMachineAwareLogger for '
+                'verbose: $verbose machine: $machine windows: $windows.',
+          );
+        }
+      }
+    }
   });
 
   testWithoutContext(
@@ -249,7 +278,7 @@ void main() {
     expect(asLogger<VerboseLogger>(notifyingLogger), verboseLogger);
     expect(asLogger<FakeLogger>(notifyingLogger), fakeLogger);
 
-    expect(() => asLogger<AppRunLogger>(notifyingLogger), throwsStateError);
+    expect(() => asLogger<MachineOutputLogger>(notifyingLogger), throwsStateError);
   });
 
   group('AppContext', () {
@@ -796,13 +825,13 @@ void main() {
       expect(lines[3], equals('0123456789' * 3));
     });
 
-    testWithoutContext('AppRunLogger writes plain text statuses when no app is active', () async {
+    testWithoutContext('MachineFlagLogger does not output text statuses', () async {
       final buffer = BufferLogger.test();
-      final logger = AppRunLogger(parent: buffer);
+      final logger = MachineOutputLogger(parent: buffer);
 
       logger.startProgress('Test status...').stop();
 
-      expect(buffer.statusText.trim(), equals('Test status...'));
+      expect(buffer.statusText, isEmpty);
     });
 
     testWithoutContext('Error logs are wrapped and can be indented.', () async {

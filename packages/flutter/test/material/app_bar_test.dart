@@ -954,6 +954,49 @@ void main() {
     expect(find.byIcon(Icons.menu), findsNothing);
   });
 
+  testWidgets(
+    'AppBar does not draw menu for end drawer if automaticallyImplyActions is false and actions is null',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            endDrawer: const Drawer(),
+            appBar: AppBar(automaticallyImplyActions: false),
+          ),
+        ),
+      );
+      expect(find.byIcon(Icons.menu), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'AppBar draws menu for end drawer if automaticallyImplyActions is true (default) and actions is null',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(endDrawer: const Drawer(), appBar: AppBar()),
+        ),
+      );
+      expect(find.byIcon(Icons.menu), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'AppBar does not draw menu for end drawer if automaticallyImplyActions is true (default) but actions are explicitly provided',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            endDrawer: const Drawer(),
+            appBar: AppBar(actions: const <Widget>[Icon(Icons.settings)]),
+          ),
+        ),
+      );
+      expect(find.byIcon(Icons.menu), findsNothing);
+      expect(find.byIcon(Icons.settings), findsOneWidget);
+    },
+  );
+
   testWidgets('AppBar does not update the leading if a route is popped case 1', (
     WidgetTester tester,
   ) async {
@@ -2299,8 +2342,8 @@ void main() {
           appBar: AppBar(
             elevation: 0,
             scrolledUnderElevation: scrolledUnderElevation,
-            backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-              return states.contains(MaterialState.scrolledUnder) ? scrolledColor : defaultColor;
+            backgroundColor: MaterialStateColor.resolveWith((Set<WidgetState> states) {
+              return states.contains(WidgetState.scrolledUnder) ? scrolledColor : defaultColor;
             }),
             title: const Text('AppBar'),
             flexibleSpace: includeFlexibleSpace
@@ -2322,8 +2365,8 @@ void main() {
           home: Scaffold(
             appBar: AppBar(
               elevation: 0,
-              backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-                return states.contains(MaterialState.scrolledUnder) ? scrolledColor : defaultColor;
+              backgroundColor: MaterialStateColor.resolveWith((Set<WidgetState> states) {
+                return states.contains(WidgetState.scrolledUnder) ? scrolledColor : defaultColor;
               }),
               title: const Text('AppBar'),
               notificationPredicate: (ScrollNotification notification) {
@@ -2531,8 +2574,8 @@ void main() {
           home: Scaffold(
             appBar: AppBar(
               elevation: 0,
-              backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-                return states.contains(MaterialState.scrolledUnder) ? scrolledColor : defaultColor;
+              backgroundColor: MaterialStateColor.resolveWith((Set<WidgetState> states) {
+                return states.contains(WidgetState.scrolledUnder) ? scrolledColor : defaultColor;
               }),
               title: const Text('AppBar'),
             ),
@@ -2613,8 +2656,8 @@ void main() {
           home: Scaffold(
             appBar: AppBar(
               elevation: 0,
-              backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-                return states.contains(MaterialState.scrolledUnder) ? scrolledColor : defaultColor;
+              backgroundColor: MaterialStateColor.resolveWith((Set<WidgetState> states) {
+                return states.contains(WidgetState.scrolledUnder) ? scrolledColor : defaultColor;
               }),
               title: const Text('AppBar'),
             ),
@@ -2688,8 +2731,8 @@ void main() {
           home: Scaffold(
             appBar: AppBar(
               elevation: 0,
-              backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-                return states.contains(MaterialState.scrolledUnder) ? scrolledColor : defaultColor;
+              backgroundColor: MaterialStateColor.resolveWith((Set<WidgetState> states) {
+                return states.contains(WidgetState.scrolledUnder) ? scrolledColor : defaultColor;
               }),
               title: const Text('AppBar'),
             ),

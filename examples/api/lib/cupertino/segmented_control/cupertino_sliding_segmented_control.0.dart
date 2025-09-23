@@ -37,6 +37,7 @@ class SegmentedControlExample extends StatefulWidget {
 
 class _SegmentedControlExampleState extends State<SegmentedControlExample> {
   Sky _selectedSegment = Sky.midnight;
+  bool _isMomentary = false;
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +50,7 @@ class _SegmentedControlExampleState extends State<SegmentedControlExample> {
           thumbColor: skyColors[_selectedSegment]!,
           // This represents the currently selected segmented control.
           groupValue: _selectedSegment,
+          isMomentary: _isMomentary,
           // Callback that sets the selected segmented control.
           onValueChanged: (Sky? value) {
             if (value != null) {
@@ -74,9 +76,29 @@ class _SegmentedControlExampleState extends State<SegmentedControlExample> {
         ),
       ),
       child: Center(
-        child: Text(
-          'Selected Segment: ${_selectedSegment.name}',
-          style: const TextStyle(color: CupertinoColors.white),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text(
+              'Selected Segment: ${_selectedSegment.name}',
+              style: const TextStyle(color: CupertinoColors.white),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                const Text('Momentary mode: ', style: TextStyle(color: CupertinoColors.white)),
+                CupertinoSwitch(
+                  value: _isMomentary,
+                  onChanged: (bool value) {
+                    setState(() {
+                      _isMomentary = value;
+                    });
+                  },
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

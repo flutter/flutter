@@ -28,7 +28,8 @@
 ^third_party/dart/third_party/pkg/.*
 ^third_party/dart/third_party/requirejs/.*
 ^third_party/depot_tools/.*
-^third_party/freetype2/docs/.*
+^third_party/expat/expat/lib/internal\.h$
+^third_party/freetype2/docs/[^F].*$
 ^third_party/google_fonts_for_unit_tests/.*
 ^third_party/gradle/.*
 ^third_party/harfbuzz/.*\.py
@@ -63,13 +64,22 @@
 ^third_party/swiftshader/third_party/.*
 ^third_party/swiftshader/third_party/llvm-10.0/.*
 ^third_party/swiftshader/third_party/llvm-16.0/.*
+(?i)^third_party/vulkan-deps/glslang/src/LICENSE\.txt$
 ^third_party/vulkan-deps/spirv-headers/.*
+^third_party/vulkan-deps/vulkan-headers/src/LICENSE\.md$
 ^third_party/vulkan-deps/vulkan-loader/.*
+^third_party/vulkan-deps/vulkan-utility-libraries/src/LICENSE.md$
+^third_party/vulkan-deps/vulkan-utility-libraries/src/scripts/.*
 ^tools/android_sdk/packages\.txt$
+^tools/fuchsia/.*
 ^tools/licenses_cpp/data/.*
 ################################################################################
 # Instances that don't have a clear resolution yet.
 ################################################################################
+# I'm not sure why this LICENSE seems to generate a different package name on
+# ci than locally. It isn't necessary because each vulkan-dep has its own
+# license
+^third_party/vulkan-deps/LICENSE$
 # This isn't in the sky license, nor excluded.
 ^third_party/expat/expat/lib/siphash.h
 # This directory isn't excluded explicitly but probably should be.
@@ -90,7 +100,7 @@
 # These files have no header, but they are generated files.
 ^third_party/harfbuzz/src/hb-ot-shaper-indic-table.cc
 ^third_party/harfbuzz/src/hb-ot-shaper-vowel-constraints.cc
-# These files don't seem to be explicitly excluded but aren't present in the 
+# These files don't seem to be explicitly excluded but aren't present in the
 # sky license.
 third_party/freetype2/autogen.sh
 third_party/freetype2/builds/.*
@@ -100,8 +110,6 @@ third_party/freetype2/include/freetype/config/ftmodule.h
 third_party/freetype2/include/freetype/ftchapters.h
 third_party/freetype2/LICENSE.TXT
 third_party/freetype2/src/gxvalid/gxvfgen.c
-third_party/freetype2/src/gzip/.*
-third_party/freetype2/src/pcf/pcfutil.c
 third_party/freetype2/src/psaux/.*
 third_party/freetype2/src/tools/.*
 third_party/freetype2/src/truetype/ttpload.c

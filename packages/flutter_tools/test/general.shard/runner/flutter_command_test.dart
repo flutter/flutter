@@ -47,7 +47,7 @@ void main() {
     late MemoryFileSystem fileSystem;
     late Platform platform;
     late FileSystemUtils fileSystemUtils;
-    late Logger logger;
+    late BufferLogger logger;
     late FakeProcessManager processManager;
     late PreRunValidator preRunValidator;
 
@@ -720,48 +720,6 @@ void main() {
         final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);
         await runner.run(<String>['test', '--no-dds']);
         expect(ddsCommand.enableDds, isFalse);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
-    );
-
-    testUsingContext(
-      'dds options --disable-dds',
-      () async {
-        final ddsCommand = FakeDdsCommand();
-        final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);
-        await runner.run(<String>['test', '--disable-dds']);
-        expect(ddsCommand.enableDds, isFalse);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
-    );
-
-    testUsingContext(
-      'dds options --no-disable-dds',
-      () async {
-        final ddsCommand = FakeDdsCommand();
-        final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);
-        await runner.run(<String>['test', '--no-disable-dds']);
-        expect(ddsCommand.enableDds, isTrue);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
-    );
-
-    testUsingContext(
-      'dds options --dds --disable-dds',
-      () async {
-        final ddsCommand = FakeDdsCommand();
-        final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);
-        await runner.run(<String>['test', '--dds', '--disable-dds']);
-        expect(() => ddsCommand.enableDds, throwsToolExit());
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
@@ -1587,8 +1545,7 @@ Use the "flutter config" command to enable feature flags.''',
             final fileSystem = MemoryFileSystem.test();
             fileSystem
               ..file('lib/main.dart').createSync(recursive: true)
-              ..file('pubspec.yaml').createSync()
-              ..file('.packages').createSync();
+              ..file('pubspec.yaml').createSync();
             fileSystem.file('config.json')
               ..createSync()
               ..writeAsStringSync('{"FLUTTER_ENABLED_FEATURE_FLAGS": "AlreadySet"}');

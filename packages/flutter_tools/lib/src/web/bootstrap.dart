@@ -8,14 +8,14 @@ import 'package:package_config/package_config.dart';
 const _simpleLoaderScript = r'''
 window.$dartCreateScript = (function() {
   // Find the nonce value. (Note, this is only computed once.)
-  var scripts = Array.from(document.getElementsByTagName("script"));
-  var nonce;
+  const scripts = Array.from(document.getElementsByTagName("script"));
+  let nonce;
   scripts.some(
       script => (nonce = script.nonce || script.getAttribute("nonce")));
   // If present, return a closure that automatically appends the nonce.
   if (nonce) {
     return function() {
-      var script = document.createElement("script");
+      const script = document.createElement("script");
       script.nonce = nonce;
       return script;
     };
@@ -29,10 +29,10 @@ window.$dartCreateScript = (function() {
 // Loads a module [relativeUrl] relative to [root].
 //
 // If not specified, [root] defaults to the directory serving the main app.
-var forceLoadModule = function (relativeUrl, root) {
-  var actualRoot = root ?? _currentDirectory;
+const forceLoadModule = function (relativeUrl, root) {
+  const actualRoot = root ?? _currentDirectory;
   return new Promise(function(resolve, reject) {
-    var script = self.$dartCreateScript();
+    const script = self.$dartCreateScript();
     let policy = {
       createScriptURL: function(src) {return src;}
     };
@@ -150,11 +150,11 @@ String generateDDCLibraryBundleBootstrapScript({
   return '''
 ${generateLoadingIndicator ? _generateLoadingIndicator() : ""}
 // Save the current directory so we can access it in a closure.
-var _currentDirectory = (function () {
-  var _url = document.currentScript.src;
-  var lastSlash = _url.lastIndexOf('/');
+const _currentDirectory = (function () {
+  const _url = document.currentScript.src;
+  const lastSlash = _url.lastIndexOf('/');
   if (lastSlash == -1) return _url;
-  var currentDirectory = _url.substring(0, lastSlash + 1);
+  const currentDirectory = _url.substring(0, lastSlash + 1);
   return currentDirectory;
 })();
 
@@ -184,7 +184,7 @@ $_simpleLoaderScript
   Promise.all(prerequisiteLoads).then((_) => afterPrerequisiteLogic());
 
   // Save the current script so we can access it in a closure.
-  var _currentScript = document.currentScript;
+  const _currentScript = document.currentScript;
 
   // Create a policy if needed to load the files during a hot restart.
   let policy = {
@@ -194,7 +194,7 @@ $_simpleLoaderScript
     policy = self.trustedTypes.createPolicy('dartDdcModuleUrl', policy);
   }
 
-  var afterPrerequisiteLogic = function() {
+  const afterPrerequisiteLogic = function() {
     window.\$dartLoader.rootDirectories.push(_currentDirectory);
     let scripts = [
       {
@@ -238,7 +238,7 @@ $_simpleLoaderScript
         !window.\$dartStackTraceUtility.ready) {
       window.\$dartStackTraceUtility.ready = true;
       window.\$dartStackTraceUtility.setSourceMapProvider(function(url) {
-        var baseUrl = window.location.protocol + '//' + window.location.host;
+        const baseUrl = window.location.protocol + '//' + window.location.host;
         url = url.replace(baseUrl + '/', '');
         if (url == 'dart_sdk.js') {
           return dartDevEmbedder.debugger.getSourceMap('dart_sdk');
@@ -252,40 +252,44 @@ $_simpleLoaderScript
     // We should have written a file containing all the scripts that need to be
     // reloaded into the page. This is then read when a hot restart is triggered
     // in DDC via the `\$dartReloadModifiedModules` callback.
-    let restartScripts = _currentDirectory + 'restart_scripts.json';
+    // TODO(srujzs): We should avoid using a callback here in the bootstrap once
+    // the embedder supports passing a list of files/libraries to `hotRestart`
+    // instead. Currently, we're forced to read this file twice.
+    let reloadedSources = _currentDirectory + 'reloaded_sources.json';
 
     if (!window.\$dartReloadModifiedModules) {
       window.\$dartReloadModifiedModules = (function(appName, callback) {
-        var xhttp = new XMLHttpRequest();
+        const xhttp = new XMLHttpRequest();
         xhttp.withCredentials = true;
         xhttp.onreadystatechange = function() {
           // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/readyState
           if (this.readyState == 4 && this.status == 200 || this.status == 304) {
-            var scripts = JSON.parse(this.responseText);
-            var numToLoad = 0;
-            var numLoaded = 0;
-            for (var i = 0; i < scripts.length; i++) {
-              var script = scripts[i];
-              if (script.id == null) continue;
-              var src = _currentDirectory + script.src.toString();
-              var oldSrc = window.\$dartLoader.moduleIdToUrl.get(script.id);
+            const scripts = JSON.parse(this.responseText);
+            let numToLoad = 0;
+            let numLoaded = 0;
+            for (let i = 0; i < scripts.length; i++) {
+              const script = scripts[i];
+              const module = script.module;
+              if (module == null) continue;
+              const src = script.src;
+              const oldSrc = window.\$dartLoader.moduleIdToUrl.get(module);
 
               // We might actually load from a different uri, delete the old one
               // just to be sure.
               window.\$dartLoader.urlToModuleId.delete(oldSrc);
 
-              window.\$dartLoader.moduleIdToUrl.set(script.id, src);
-              window.\$dartLoader.urlToModuleId.set(src, script.id);
+              window.\$dartLoader.moduleIdToUrl.set(module, src);
+              window.\$dartLoader.urlToModuleId.set(src, module);
 
               numToLoad++;
 
-              var el = document.getElementById(script.id);
+              let el = document.getElementById(module);
               if (el) el.remove();
               el = window.\$dartCreateScript();
               el.src = policy.createScriptURL(src);
               el.async = false;
               el.defer = true;
-              el.id = script.id;
+              el.id = module;
               el.onload = function() {
                 numLoaded++;
                 if (numToLoad == numLoaded) callback();
@@ -296,7 +300,7 @@ $_simpleLoaderScript
             if (numToLoad == 0) callback();
           }
         };
-        xhttp.open("GET", restartScripts, true);
+        xhttp.open("GET", reloadedSources, true);
         xhttp.send();
       });
     }
@@ -381,7 +385,7 @@ document.head.appendChild(requireEl);
 /// or `flutter build web --debug` should not use this indicator.
 String _generateLoadingIndicator() {
   return '''
-var styles = `
+const styles = `
   .flutter-loader {
     width: 100%;
     height: 8px;
@@ -437,16 +441,16 @@ var styles = `
   }
 `;
 
-var styleSheet = document.createElement("style")
+const styleSheet = document.createElement("style")
 styleSheet.type = "text/css";
 styleSheet.innerText = styles;
 document.head.appendChild(styleSheet);
 
-var loader = document.createElement('div');
+const loader = document.createElement('div');
 loader.className = "flutter-loader";
 document.body.append(loader);
 
-var indeterminate = document.createElement('div');
+const indeterminate = document.createElement('div');
 indeterminate.className = "indeterminate";
 loader.appendChild(indeterminate);
 
@@ -474,14 +478,14 @@ String generateDDCLibraryBundleMainModule({
 /* ENTRYPOINT_EXTENTION_MARKER */
 
 (function() {
-  let appName = "org-dartlang-app:/$entrypoint";
+  const appName = "org-dartlang-app:/$entrypoint";
 
   dartDevEmbedder.debugger.registerDevtoolsFormatter();
 
   $setMaxRequests
   // Set up a final script that lets us know when all scripts have been loaded.
   // Only then can we call the main method.
-  let onLoadEndSrc = '$onLoadEndBootstrap';
+  const onLoadEndSrc = '$onLoadEndBootstrap';
   window.\$dartLoader.loadConfig.bootstrapScript = {
     src: onLoadEndSrc,
     id: onLoadEndSrc,
@@ -490,9 +494,9 @@ String generateDDCLibraryBundleMainModule({
   // Should be called by $onLoadEndBootstrap once all the scripts have been
   // loaded.
   window.$_onLoadEndCallback = function() {
-    let child = {};
+    const child = {};
     child.main = function() {
-      let sdkOptions = {
+      const sdkOptions = {
         nativeNonNullAsserts: $nativeNullAssertions,
       };
       dartDevEmbedder.runMain(appName, sdkOptions);

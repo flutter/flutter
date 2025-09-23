@@ -132,11 +132,6 @@ String getAarTaskFor(BuildInfo buildInfo) {
   return _taskFor('assembleAar', buildInfo);
 }
 
-@visibleForTesting
-const androidX86DeprecationWarning =
-    'Support for Android x86 targets will be removed in the next stable release after 3.27. '
-    'See https://github.com/flutter/flutter/issues/157543 for details.';
-
 /// Returns the output APK file names for a given [AndroidBuildInfo].
 ///
 /// For example, when [AndroidBuildInfo.splitPerAbi] is `true`, multiple APKs are created.
@@ -310,7 +305,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       );
       _logger.printStatus(
         'To avoid potential build failures, you can quickly migrate your app '
-        'by following the steps on https://goo.gl/CP92wY .',
+        'by following the steps on https://docs.flutter.dev/release/breaking-changes/androidx-migration .',
         indent: 4,
       );
     }
@@ -570,9 +565,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
     }
     if (androidBuildInfo.splitPerAbi) {
       options.add('-Psplit-per-abi=true');
-    }
-    if (androidBuildInfo.fastStart) {
-      options.add('-Pfast-start=true');
     }
     late Stopwatch sw;
     final int exitCode = await _runGradleTask(

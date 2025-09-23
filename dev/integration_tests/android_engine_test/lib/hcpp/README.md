@@ -1,0 +1,2 @@
+Everything under this file path will have hcpp enabled, see the configuration here:
+https://github.com/flutter/flutter/blob/337a007f5cfb66d0ecc84b1545539231a0be4d61/dev/bots/suite_runners/run_android_engine_tests.dart#L34

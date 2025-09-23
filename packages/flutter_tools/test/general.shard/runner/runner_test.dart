@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/executable.dart';
 import 'package:flutter_tools/runner.dart' as runner;
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
@@ -17,6 +18,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/commands/devices.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
@@ -106,6 +108,64 @@ void main() {
         // *original* crash, and not the crash from the first crash report
         // attempt.
         expect(fakeAnalytics.sentEvents, contains(Event.exception(exception: '_Exception')));
+      },
+      overrides: <Type, Generator>{
+        Platform: () => FakePlatform(
+          environment: <String, String>{'FLUTTER_ANALYTICS_LOG_FILE': 'test', 'FLUTTER_ROOT': '/'},
+        ),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Artifacts: () => Artifacts.test(),
+        HttpClientFactory: () =>
+            () => FakeHttpClient.any(),
+        Analytics: () => fakeAnalytics,
+      },
+    );
+
+    testUsingContext(
+      'error handling crash report (local engine)',
+      () async {
+        fileSystem
+            .directory('engine')
+            .childDirectory('src')
+            .childDirectory('out')
+            .createSync(recursive: true);
+
+        final completer = Completer<void>();
+        unawaited(
+          runZonedGuarded<Future<void>?>(
+            () {
+              unawaited(
+                runner.run(
+                  <String>[
+                    '--local-engine=host_debug',
+                    '--local-engine-src-path=./engine/src',
+                    'crash',
+                  ],
+                  () => <FlutterCommand>[CrashingFlutterCommand()],
+                  // This flutterVersion disables crash reporting.
+                  flutterVersion: '[user-branch]/',
+                  reportCrashes: true,
+                  shutdownHooks: ShutdownHooks(),
+                ),
+              );
+              return null;
+            },
+            (Object error, StackTrace stack) {
+              expect(firstExitCode, isNotNull);
+              expect(firstExitCode, isNot(0));
+              expect(error.toString(), 'Exception: test exit');
+              completer.complete();
+            },
+          ),
+        );
+        await completer.future;
+
+        expect(
+          fakeAnalytics.sentEvents,
+          isNot(contains(Event.exception(exception: '_Exception'))),
+          reason: 'Does not send a report when using --local-engine',
+        );
       },
       overrides: <Type, Generator>{
         Platform: () => FakePlatform(
@@ -518,6 +578,48 @@ void main() {
         BotDetector: () => const FakeBotDetector(true),
       },
     );
+
+    testUsingContext(
+      'do not print download messages when --machine is provided',
+      () async {
+        // Regression test for https://github.com/flutter/flutter/issues/154119.
+        final stdio = FakeStdio();
+        await runner.run(
+          <String>['devices', '--machine'],
+          () => <FlutterCommand>[DevicesCommand()],
+          // This flutterVersion disables crash reporting.
+          flutterVersion: '[user-branch]/',
+          shutdownHooks: ShutdownHooks(),
+          overrides: {
+            Logger: () {
+              final loggerFactory = LoggerFactory(
+                outputPreferences: globals.outputPreferences,
+                terminal: globals.terminal,
+                stdio: stdio,
+              );
+              return loggerFactory.createLogger(
+                daemon: false,
+                // This is set to true when --machine is detected as an argument in
+                // executable.dart.
+                machine: true,
+                verbose: false,
+                prefixedErrors: false,
+                widgetPreviews: false,
+                windows: globals.platform.isWindows,
+              );
+            },
+          },
+        );
+        expect(stdio.writtenToStdout.join(), isNot(contains('Downloading')));
+        expect(stdio.writtenToStderr.join(), isNot(contains('Downloading')));
+      },
+      overrides: <Type, Generator>{
+        Cache: () => FakeCache(),
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+        BotDetector: () => const FakeBotDetector(true),
+      },
+    );
   });
 
   group('unified_analytics', () {
@@ -762,5 +864,18 @@ class _ErrorOnCanRunFakeProcessManager extends Fake implements FakeProcessManage
       throw Exception("oh no, we couldn't check for git!");
     }
     return delegate.canRun(executable, workingDirectory: workingDirectory);
+  }
+}
+
+class FakeCache extends Fake implements Cache {
+  @override
+  Future<void> lock() async {}
+
+  @override
+  void releaseLock() {}
+
+  @override
+  Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts, {bool offline = false}) async {
+    globals.logger.startProgress('Downloading package Foo').stop();
   }
 }

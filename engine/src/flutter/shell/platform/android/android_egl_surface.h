@@ -10,10 +10,10 @@
 #include <KHR/khrplatform.h>
 #include <optional>
 
+#include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/time/time_point.h"
 #include "flutter/shell/platform/android/android_environment_gl.h"
-#include "third_party/skia/include/core/SkRect.h"
 
 namespace flutter {
 
@@ -74,12 +74,12 @@ class AndroidEGLSurface {
   ///
   /// @return     The area of current surface where it is behind front buffer.
   ///
-  std::optional<SkIRect> InitialDamage();
+  std::optional<DlIRect> InitialDamage();
 
   //----------------------------------------------------------------------------
   /// @brief      Sets the damage region for current surface. Corresponds to
   //              eglSetDamageRegionKHR
-  void SetDamageRegion(const std::optional<SkIRect>& buffer_damage);
+  void SetDamageRegion(const std::optional<DlIRect>& buffer_damage);
 
   //----------------------------------------------------------------------------
   /// @brief      Sets the presentation time for the current surface. This
@@ -93,12 +93,12 @@ class AndroidEGLSurface {
   ///
   /// @return     Whether the EGL surface color buffer was swapped.
   ///
-  bool SwapBuffers(const std::optional<SkIRect>& surface_damage);
+  bool SwapBuffers(const std::optional<DlIRect>& surface_damage);
 
   //----------------------------------------------------------------------------
   /// @return     The size of an `EGLSurface`.
   ///
-  SkISize GetSize() const;
+  DlISize GetSize() const;
 
  private:
   /// Returns true if the EGLContext held is current for the display and surface

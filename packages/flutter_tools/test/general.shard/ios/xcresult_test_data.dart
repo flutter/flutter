@@ -12,6 +12,48 @@ const kSampleResultJsonInvalidIssuesMap = r'''
 }
 ''';
 
+/// Simulates the output of `xcrun xcresulttool get build-results` on Xcode 16+.
+const kNewFormatResultJsonWithIssues = r'''
+{
+  "actionTitle": "Build Runner",
+  "status": "failed",
+  "errorCount": 1,
+  "warningCount": 1,
+  "errors": [
+    {
+      "issueType": "Swift Compiler Error",
+      "message": "consecutive statements on a line must be separated by ';'",
+      "sourceURL": "file:///Users/m/Projects/test_create/ios/Runner/AppDelegate.swift#CharacterRangeLen=0&EndingColumnNumber=82&EndingLineNumber=11&StartingColumnNumber=82&StartingLineNumber=11"
+    }
+  ],
+  "warnings": [
+    {
+      "issueType": "Deprecation",
+      "message": "'openURL' was deprecated in iOS 10.0",
+      "sourceURL": "file:///Users/m/Projects/test_create/ios/Runner/AppDelegate.swift#CharacterRangeLen=0&EndingColumnNumber=30&EndingLineNumber=15&StartingColumnNumber=20&StartingLineNumber=15"
+    }
+  ],
+  "analyzerWarnings": []
+}
+''';
+
+/// Simulates the output for the new format with a malformed sourceURL.
+const kNewFormatResultJsonWithInvalidUrl = r'''
+{
+  "status": "failed",
+  "errorCount": 1,
+  "errors": [
+    {
+      "issueType": "Swift Compiler Error",
+      "message": "consecutive statements on a line must be separated by ';'",
+      "sourceURL": "invalid-url-format"
+    }
+  ],
+  "warnings": [],
+  "analyzerWarnings": []
+}
+''';
+
 /// An example xcresult bundle json that contains warnings and errors that needs to be discarded per https://github.com/flutter/flutter/issues/95354.
 const kSampleResultJsonWithIssuesToBeDiscarded = r'''
 {

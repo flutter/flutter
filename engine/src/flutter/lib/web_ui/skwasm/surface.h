@@ -15,7 +15,6 @@
 #include "export.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkColorSpace.h"
-#include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/encode/SkPngEncoder.h"
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
@@ -23,6 +22,10 @@
 #include "third_party/skia/include/gpu/ganesh/gl/GrGLInterface.h"
 #include "third_party/skia/include/gpu/ganesh/gl/GrGLTypes.h"
 #include "wrappers.h"
+
+namespace flutter {
+class DisplayList;
+}
 
 namespace Skwasm {
 // This must be kept in sync with the `ImageByteFormat` enum in dart:ui.
@@ -55,7 +58,11 @@ class Surface {
 
   // Main thread only
   void dispose();
-  uint32_t renderPictures(SkPicture** picture, int count);
+  void setResourceCacheLimit(int bytes);
+  uint32_t renderPictures(flutter::DisplayList** picture,
+                          int width,
+                          int height,
+                          int count);
   uint32_t rasterizeImage(SkImage* image, ImageByteFormat format);
   void setCallbackHandler(CallbackHandler* callbackHandler);
   void onRenderComplete(uint32_t callbackId, SkwasmObject imageBitmap);
@@ -66,7 +73,9 @@ class Surface {
       SkwasmObject textureSource);
 
   // Worker thread
-  void renderPicturesOnWorker(sk_sp<SkPicture>* picture,
+  void renderPicturesOnWorker(sk_sp<flutter::DisplayList>* picture,
+                              int width,
+                              int height,
                               int pictureCount,
                               uint32_t callbackId,
                               double rasterStart);
@@ -76,7 +85,7 @@ class Surface {
 
  private:
   void _init();
-  void _resizeCanvasToFit(int width, int height);
+  void _resizeSurface(int width, int height);
   void _recreateSurface();
 
   CallbackHandler* _callbackHandler = nullptr;

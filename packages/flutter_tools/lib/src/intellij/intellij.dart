@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'intellij_validator.dart';
-library;
-
 import 'package:archive/archive.dart';
 
 import '../base/file_system.dart';
@@ -35,10 +32,6 @@ import '../doctor_validator.dart';
 ///
 /// Intellij Flutter plugin's files can be found here:
 ///   https://plugins.jetbrains.com/plugin/9212-flutter/versions/stable
-///
-/// See also:
-///   * [IntelliJValidator], the validator base class that uses this to check
-///     plugin versions.
 class IntelliJPlugins {
   IntelliJPlugins(this.pluginsPath, {required FileSystem fileSystem}) : _fileSystem = fileSystem;
 

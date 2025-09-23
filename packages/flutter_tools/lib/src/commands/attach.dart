@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -21,6 +22,7 @@ import '../compile.dart';
 import '../daemon.dart';
 import '../device.dart';
 import '../device_vm_service_discovery_for_attach.dart';
+import '../hook_runner.dart' show hookRunner;
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
 import '../macos/macos_ipad_device.dart';
@@ -332,10 +334,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       vmServiceUri = vmServiceDiscovery.uris;
 
       // Stop the timer once we receive the first uri.
-      vmServiceUri = vmServiceUri.map((Uri uri) {
-        discoveryStatus.stop();
-        return uri;
-      });
+      vmServiceUri = streamWithCallbackOnFirstItem(vmServiceUri, () => discoveryStatus.stop());
     } else {
       vmServiceUri = Stream<Uri>.fromFuture(
         buildVMServiceUri(
@@ -370,7 +369,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
               return runner.attach(
                 connectionInfoCompleter: connectionInfoCompleter,
                 appStartedCompleter: appStartedCompleter,
-                allowExistingDdsInstance: true,
               );
             },
             device,
@@ -378,7 +376,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             true,
             _fileSystem.currentDirectory,
             LaunchMode.attach,
-            _logger as AppRunLogger,
+            _logger as MachineOutputLogger,
           );
         } on Exception catch (error) {
           throwToolExit(error.toString());
@@ -411,10 +409,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
                   ..setupTerminal();
           }),
         );
-        result = await runner.attach(
-          appStartedCompleter: onAppStart,
-          allowExistingDdsInstance: true,
-        );
+        result = await runner.attach(appStartedCompleter: onAppStart);
         if (result != 0) {
           throwToolExit(null, exitCode: result);
         }
@@ -487,8 +482,14 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             flutterProject: flutterProject,
             nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
             analytics: analytics,
+            logger: _logger,
           )
-        : ColdRunner(flutterDevices, target: targetFile, debuggingOptions: debuggingOptions);
+        : ColdRunner(
+            flutterDevices,
+            target: targetFile,
+            debuggingOptions: debuggingOptions,
+            dartBuilder: hookRunner,
+          );
   }
 
   Future<void> _validateArguments() async {}
@@ -513,6 +514,7 @@ class HotRunnerFactory {
     FlutterProject? flutterProject,
     String? nativeAssetsYamlFile,
     required Analytics analytics,
+    Logger? logger,
   }) => HotRunner(
     devices,
     target: target,
@@ -525,5 +527,19 @@ class HotRunnerFactory {
     stayResident: stayResident,
     nativeAssetsYamlFile: nativeAssetsYamlFile,
     analytics: analytics,
+    dartBuilder: hookRunner,
+    logger: logger,
   );
+}
+
+@visibleForTesting
+Stream<T> streamWithCallbackOnFirstItem<T>(Stream<T> stream, void Function() callback) {
+  var called = false;
+  return stream.map((i) {
+    if (!called) {
+      callback();
+      called = true;
+    }
+    return i;
+  });
 }
