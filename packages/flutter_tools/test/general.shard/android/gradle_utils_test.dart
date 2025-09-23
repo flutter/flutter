@@ -1226,21 +1226,21 @@ allprojects {
         // Maximum known Java version.
         // *The test case that follows needs to be updated* when higher versions of Java are supported:
         expect(
-          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '24'),
+          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '26'),
           allOf(
-            equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '24.0.2')),
+            equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '26.0.2')),
             isNull,
           ),
         );
         expect(
-          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '23'),
+          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '24'),
           allOf(
-            equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '23.0.2')),
+            equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '24.0.2')),
             equals(
               const JavaGradleCompat(
-                javaMin: '23',
-                javaMax: '24',
-                gradleMin: '8.10',
+                javaMin: '24',
+                javaMax: '25',
+                gradleMin: '8.14',
                 gradleMax: maxKnownAndSupportedGradleVersion,
               ),
             ),
@@ -1562,20 +1562,20 @@ allprojects {
       );
       // Strictly too new Gradle and AGP versions.
       expect(
-        getJavaVersionFor(gradleV: '8.13', agpV: '9.0'),
+        getJavaVersionFor(gradleV: '10.0', agpV: '9.0'),
         equals(const VersionRange(null, null)),
       );
       // Strictly too new Gradle version and maximum version of AGP.
       //*This test case will need its expected Java range updated when a new version of AGP is supported.*
       expect(
-        getJavaVersionFor(gradleV: '8.13', agpV: maxKnownAndSupportedAgpVersion),
+        getJavaVersionFor(gradleV: '9.2.0', agpV: maxKnownAndSupportedAgpVersion),
         equals(const VersionRange('17', null)),
       );
       // Strictly too new AGP version and maximum version of Gradle.
       //*This test case will need its expected Java range updated when a new version of Gradle is supported.*
       expect(
         getJavaVersionFor(gradleV: maxKnownAndSupportedGradleVersion, agpV: '9.0'),
-        equals(const VersionRange(null, '24')),
+        equals(const VersionRange(null, '26')),
       );
       // Tests with a known compatible Gradle/AGP version pair.
       expect(
