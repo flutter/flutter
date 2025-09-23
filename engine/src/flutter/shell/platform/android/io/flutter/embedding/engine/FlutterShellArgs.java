@@ -24,7 +24,6 @@ public class FlutterShellArgs {
   public static final String ARG_START_PAUSED = "--start-paused";
   public static final String ARG_DISABLE_SERVICE_AUTH_CODES = "--disable-service-auth-codes";
   public static final String ARG_ENDLESS_TRACE_BUFFER = "--endless-trace-buffer";
-  public static final String ARG_KEY_USE_TEST_FONTS = "use-test-fonts";
   public static final String ARG_USE_TEST_FONTS = "--use-test-fonts";
   public static final String ARG_KEY_ENABLE_DART_PROFILING = "enable-dart-profiling";
   public static final String ARG_ENABLE_DART_PROFILING = "--enable-dart-profiling";
@@ -70,9 +69,6 @@ public class FlutterShellArgs {
     // there are many security-sensitive args in the binary.
     ArrayList<String> args = new ArrayList<>();
 
-    if (intent.getBooleanExtra(ARG_KEY_USE_TEST_FONTS, false)) {
-      args.add(ARG_USE_TEST_FONTS);
-    }
     if (intent.getBooleanExtra(ARG_KEY_ENABLE_DART_PROFILING, false)) {
       args.add(ARG_ENABLE_DART_PROFILING);
     }

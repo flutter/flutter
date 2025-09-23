@@ -7,10 +7,11 @@
 | `--vm-service-port` | Specifies a custom Dart VM Service port. |
 | `--disable-service-auth-codes` | Disable the requirement for authentication codes for communicating with the VM service. |
 | `--endless-trace-buffer` | Enable an endless trace buffer so that old events can be viewed. |
+| `--use-test-fonts` | Will make font resolution default to the Ahem test font on all platforms. Only available on the desktop test shells. |
 
 
-# TODO(camsim99): Note that all command line args should be settable in manifest (at least those deleted from FlutterShellArgs). Please note that eventually.
-## Flags that must be set in the manifest:
+# TODO(camsim99): Note that all command line args could be settable in manifest (at least those deleted from FlutterShellArgs). Please audit and figure out what makes sense. I can use other platforms as guidance.
+## Flags that can be set in the manifest:
 | Flag     | Description |
 | -------- | ----------- |
 
