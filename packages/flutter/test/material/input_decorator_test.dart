@@ -10331,89 +10331,39 @@ void main() {
         borderSide: BorderSide(color: Colors.teal, width: 5.0),
       );
 
-      await tester.pumpWidget(
-        buildInputDecorator(
-          isFocused: true,
-          decoration: const InputDecoration(
-            errorText: 'error',
-            // enabled: true (default)
-            errorBorder: errorBorder,
-            focusedErrorBorder: focusedErrorBorder,
+      Future<void> checkBorders({
+        bool isFocused = false,
+        bool enabled = true,
+        String? errorText,
+        Widget? error,
+        required InputBorder expectedBorder,
+      }) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            isFocused: isFocused,
+            decoration: InputDecoration(
+              errorText: errorText,
+              error: error,
+              enabled: enabled,
+              errorBorder: errorBorder,
+              focusedErrorBorder: focusedErrorBorder,
+            ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle(); // Border changes are animated.
-      expect(getBorder(tester), focusedErrorBorder);
+        );
+        await tester.pumpAndSettle(); // Border changes are animated.
+        expect(getBorder(tester), expectedBorder);
+      }
 
-      await tester.pumpWidget(
-        buildInputDecorator(
-          // isFocused: false (default)
-          decoration: const InputDecoration(
-            errorText: 'error',
-            // enabled: true (default)
-            errorBorder: errorBorder,
-            focusedErrorBorder: focusedErrorBorder,
-          ),
-        ),
-      );
-      await tester.pumpAndSettle(); // Border changes are animated.
-      expect(getBorder(tester), errorBorder);
+      // Test with errorText.
+      await checkBorders(isFocused: true, errorText: 'error', expectedBorder: focusedErrorBorder);
+      await checkBorders(errorText: 'error', expectedBorder: errorBorder);
+      await checkBorders(enabled: false, errorText: 'error', expectedBorder: errorBorder);
 
-      await tester.pumpWidget(
-        buildInputDecorator(
-          // isFocused: false (default)
-          decoration: const InputDecoration(
-            errorText: 'error',
-            enabled: false,
-            errorBorder: errorBorder,
-            focusedErrorBorder: focusedErrorBorder,
-          ),
-        ),
-      );
-      await tester.pumpAndSettle(); // Border changes are animated.
-      expect(getBorder(tester), errorBorder);
-
-      await tester.pumpWidget(
-        buildInputDecorator(
-          isFocused: true,
-          decoration: const InputDecoration(
-            error: Text('error'),
-            // enabled: true (default)
-            errorBorder: errorBorder,
-            focusedErrorBorder: focusedErrorBorder,
-          ),
-        ),
-      );
-      await tester.pumpAndSettle(); // Border changes are animated.
-      expect(getBorder(tester), focusedErrorBorder);
-
-      await tester.pumpWidget(
-        buildInputDecorator(
-          // isFocused: false (default)
-          decoration: const InputDecoration(
-            error: Text('error'),
-            // enabled: true (default)
-            errorBorder: errorBorder,
-            focusedErrorBorder: focusedErrorBorder,
-          ),
-        ),
-      );
-      await tester.pumpAndSettle(); // Border changes are animated.
-      expect(getBorder(tester), errorBorder);
-
-      await tester.pumpWidget(
-        buildInputDecorator(
-          // isFocused: false (default)
-          decoration: const InputDecoration(
-            error: Text('error'),
-            enabled: false,
-            errorBorder: errorBorder,
-            focusedErrorBorder: focusedErrorBorder,
-          ),
-        ),
-      );
-      await tester.pumpAndSettle(); // Border changes are animated.
-      expect(getBorder(tester), errorBorder);
+      // Test with error widget.
+      const Widget error = Text('error');
+      await checkBorders(isFocused: true, error: error, expectedBorder: focusedErrorBorder);
+      await checkBorders(error: error, expectedBorder: errorBorder);
+      await checkBorders(enabled: false, error: error, expectedBorder: errorBorder);
     });
 
     testWidgets('InputDecoration shows custom enabled border', (WidgetTester tester) async {
