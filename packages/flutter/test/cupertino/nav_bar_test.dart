@@ -451,6 +451,52 @@ void main() {
     expect(count, 0x010101);
   });
 
+  testWidgets('Nav bar static components respect MediaQueryData', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/174642
+    const double value = 10.0;
+
+    void expectCustomMediaQueryData(BuildContext context) {
+      expect(MediaQuery.platformBrightnessOf(context), Brightness.dark);
+      expect(MediaQuery.devicePixelRatioOf(context), value);
+      expect(MediaQuery.viewInsetsOf(context), const EdgeInsets.all(value));
+    }
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: MediaQuery(
+          data: const MediaQueryData(
+            devicePixelRatio: value,
+            viewInsets: EdgeInsets.all(value),
+            platformBrightness: Brightness.dark,
+          ),
+          child: CupertinoNavigationBar(
+            leading: Builder(
+              builder: (BuildContext context) {
+                expectCustomMediaQueryData(context);
+                return CupertinoButton(onPressed: () {}, child: const Text('leading'));
+              },
+            ),
+            middle: Builder(
+              builder: (BuildContext context) {
+                expectCustomMediaQueryData(context);
+                return CupertinoButton(onPressed: () {}, child: const Text('middle'));
+              },
+            ),
+            trailing: Builder(
+              builder: (BuildContext context) {
+                expectCustomMediaQueryData(context);
+                return CupertinoButton(onPressed: () {}, child: const Text('trailing'));
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(find.text('leading'), findsOneWidget);
+    expect(find.text('middle'), findsOneWidget);
+    expect(find.text('trailing'), findsOneWidget);
+  });
+
   testWidgets('No slivers with no large titles', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(

@@ -51,10 +51,10 @@ const templateKotlinGradlePluginVersion = '2.1.0';
 // so new versions are picked up after a Flutter upgrade.
 //
 // Please see the README before changing any of these values.
-const compileSdkVersion = '36';
-final int compileSdkVersionInt = int.parse(compileSdkVersion);
-const minSdkVersion = '24';
-final int minSdkVersionInt = int.parse(minSdkVersion);
+const compileSdkVersionInt = 36;
+const compileSdkVersion = '$compileSdkVersionInt';
+const minSdkVersionInt = 24;
+const minSdkVersion = '$minSdkVersionInt';
 const targetSdkVersion = '36';
 const ndkVersion = '27.0.12077973';
 final minBuildToolsVersion = Version(28, 0, 3);
@@ -63,14 +63,14 @@ final minJavaMinVersionAndroid = Version(11, 0, 0);
 // Update these when new major versions of Java are supported by new Gradle
 // versions that we support.
 // Source of truth: https://docs.gradle.org/current/userguide/compatibility.html
-const oneMajorVersionHigherJavaVersion = '24';
+const oneMajorVersionHigherJavaVersion = '26';
 
 // Update this when new versions of Gradle come out including minor versions
 // and should correspond to the maximum Gradle version we test in CI.
 //
 // Supported here means supported by the tooling for
 // flutter analyze --suggestions and does not imply broader flutter support.
-const maxKnownAndSupportedGradleVersion = '8.12';
+const maxKnownAndSupportedGradleVersion = '9.1.0';
 
 // Update this with new KGP versions come out including minor versions.
 //
@@ -1214,6 +1214,18 @@ String getGradlewFileName(Platform platform) {
 /// of Gradle, as https://docs.gradle.org/current/userguide/compatibility.html
 /// details.
 var _javaGradleCompatList = const <JavaGradleCompat>[
+  JavaGradleCompat(
+    javaMin: '25',
+    javaMax: '26',
+    gradleMin: '9.1.0',
+    gradleMax: maxKnownAndSupportedGradleVersion,
+  ),
+  JavaGradleCompat(
+    javaMin: '24',
+    javaMax: '25',
+    gradleMin: '8.14',
+    gradleMax: maxKnownAndSupportedGradleVersion,
+  ),
   JavaGradleCompat(
     javaMin: '23',
     javaMax: '24',

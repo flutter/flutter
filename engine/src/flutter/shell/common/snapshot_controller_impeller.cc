@@ -163,4 +163,14 @@ sk_sp<SkImage> SnapshotControllerImpeller::ConvertToRasterImage(
   FML_UNREACHABLE();
 }
 
+bool SnapshotControllerImpeller::MakeRenderContextCurrent() {
+  const std::unique_ptr<Surface>& surface = GetDelegate().GetSurface();
+  if (!surface) {
+    // Some backends (such as Metal) can operate without a surface and do not
+    // require MakeRenderContextCurrent.
+    return true;
+  }
+  return surface->MakeRenderContextCurrent()->GetResult();
+}
+
 }  // namespace flutter
