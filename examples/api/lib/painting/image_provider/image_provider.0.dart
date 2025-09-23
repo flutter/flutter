@@ -1,13 +1,9 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 import 'dart:async';
-import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 @immutable
 class CustomNetworkImage extends ImageProvider<Uri> {
@@ -30,48 +26,18 @@ class CustomNetworkImage extends ImageProvider<Uri> {
     return SynchronousFuture<Uri>(result);
   }
 
-  static HttpClient get _httpClient {
-    HttpClient? client;
-    assert(() {
-      if (debugNetworkImageHttpClientProvider != null) {
-        client = debugNetworkImageHttpClientProvider!();
-      }
-      return true;
-    }());
-    return client ?? HttpClient()
-      ..autoUncompress = false;
-  }
-
   @override
   ImageStreamCompleter loadImage(Uri key, ImageDecoderCallback decode) {
-    final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
+    final StreamController<ImageChunkEvent> chunkEvents =
+        StreamController<ImageChunkEvent>();
+
     debugPrint('Fetching "$key"...');
+
     return MultiFrameImageStreamCompleter(
-      codec: _httpClient
-          .getUrl(key)
-          .then<HttpClientResponse>((HttpClientRequest request) => request.close())
-          .then<Uint8List>((HttpClientResponse response) {
-            return consolidateHttpClientResponseBytes(
-              response,
-              onBytesReceived: (int cumulative, int? total) {
-                chunkEvents.add(
-                  ImageChunkEvent(cumulativeBytesLoaded: cumulative, expectedTotalBytes: total),
-                );
-              },
-            );
-          })
-          .catchError((Object e, StackTrace stack) {
-            scheduleMicrotask(() {
-              PaintingBinding.instance.imageCache.evict(key);
-            });
-            return Future<Uint8List>.error(e, stack);
-          })
-          .whenComplete(chunkEvents.close)
-          .then<ui.ImmutableBuffer>(ui.ImmutableBuffer.fromUint8List)
-          .then<ui.Codec>(decode),
+      codec: _loadAsync(key, decode, chunkEvents),
       chunkEvents: chunkEvents.stream,
       scale: 1.0,
-      debugLabel: '"key"',
+      debugLabel: '"$key"',
       informationCollector: () => <DiagnosticsNode>[
         DiagnosticsProperty<ImageProvider>('Image provider', this),
         DiagnosticsProperty<Uri>('URL', key),
@@ -79,8 +45,48 @@ class CustomNetworkImage extends ImageProvider<Uri> {
     );
   }
 
+  Future<ui.Codec> _loadAsync(
+    Uri key,
+    ImageDecoderCallback decode,
+    StreamController<ImageChunkEvent> chunkEvents,
+  ) async {
+    try {
+      final http.Request request = http.Request('GET', key);
+      final http.StreamedResponse response = await request.send();
+
+      final int? contentLength = response.contentLength;
+      int received = 0;
+      final List<int> bytes = [];
+
+      await for (final chunk in response.stream) {
+        bytes.addAll(chunk);
+        received += chunk.length;
+        chunkEvents.add(
+          ImageChunkEvent(
+            cumulativeBytesLoaded: received,
+            expectedTotalBytes: contentLength,
+          ),
+        );
+      }
+
+      final Uint8List data = Uint8List.fromList(bytes);
+      final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(
+        data,
+      );
+      return decode(buffer);
+    } catch (e, _) {
+      scheduleMicrotask(() {
+        PaintingBinding.instance.imageCache.evict(key);
+      });
+      rethrow;
+    } finally {
+      await chunkEvents.close();
+    }
+  }
+
   @override
-  String toString() => '${objectRuntimeType(this, 'CustomNetworkImage')}("$url")';
+  String toString() =>
+      '${objectRuntimeType(this, 'CustomNetworkImage')}("$url")';
 }
 
 void main() => runApp(const ExampleApp());
