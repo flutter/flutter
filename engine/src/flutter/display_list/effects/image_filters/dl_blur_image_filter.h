@@ -51,7 +51,7 @@ class DlBlurImageFilter final : public DlImageFilter {
                           filter->sigma_y_,
                           filter->bounds_,
                           filter->tile_mode_) {}
-  explicit DlBlurImageFilter(const DlBlurImageFilter& filter)
+  DlBlurImageFilter(const DlBlurImageFilter& filter)
       : DlBlurImageFilter(&filter) {}
 
   static std::shared_ptr<DlImageFilter> Make(DlScalar sigma_x,
