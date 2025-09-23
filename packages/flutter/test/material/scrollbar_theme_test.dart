@@ -38,9 +38,9 @@ void main() {
           theme: ThemeData(
             useMaterial3: false,
             scrollbarTheme: ScrollbarThemeData(
-              trackVisibility: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-                return states.contains(WidgetState.hovered);
-              }),
+              trackVisibility: WidgetStateProperty.resolveWith(
+                (Set<WidgetState> states) => states.contains(WidgetState.hovered),
+              ),
             ),
           ),
           home: ScrollConfiguration(
@@ -384,9 +384,9 @@ void main() {
           theme: ThemeData(
             colorScheme: const ColorScheme.light(),
             scrollbarTheme: ScrollbarThemeData(
-              trackVisibility: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-                return states.contains(WidgetState.hovered);
-              }),
+              trackVisibility: WidgetStateProperty.resolveWith(
+                (Set<WidgetState> states) => states.contains(WidgetState.hovered),
+              ),
             ),
           ),
           home: ScrollConfiguration(
@@ -486,9 +486,9 @@ void main() {
         final ScrollController scrollController = ScrollController();
         final ThemeData theme = appTheme.copyWith(
           scrollbarTheme: ScrollbarThemeData(
-            trackVisibility: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-              return states.contains(WidgetState.hovered);
-            }),
+            trackVisibility: WidgetStateProperty.resolveWith(
+              (Set<WidgetState> states) => states.contains(WidgetState.hovered),
+            ),
           ),
         );
         return (
@@ -780,9 +780,9 @@ ScrollbarThemeData _scrollbarTheme({
     thickness: thickness ?? WidgetStateProperty.resolveWith(_getThickness),
     trackVisibility:
         trackVisibility ??
-        WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-          return states.contains(WidgetState.hovered);
-        }),
+        WidgetStateProperty.resolveWith(
+          (Set<WidgetState> states) => states.contains(WidgetState.hovered),
+        ),
     thumbVisibility: thumbVisibility,
     radius: radius,
     thumbColor: thumbColor ?? WidgetStateProperty.resolveWith(_getThumbColor),
