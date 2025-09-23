@@ -183,10 +183,7 @@ class GeneralInfoProjectValidator extends ProjectValidator {
   }
 
   String _getSupportedPlatforms(FlutterProject project) {
-    return project
-        .getSupportedPlatforms()
-        .map((SupportedPlatform platform) => platform.name)
-        .join(', ');
+    return project.getSupportedPlatforms().join(', ');
   }
 
   ProjectValidatorResult _pluginValidatorResult(FlutterManifest flutterManifest) {
