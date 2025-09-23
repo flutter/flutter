@@ -348,7 +348,7 @@ typedef ImageDecoderCallback =
 ///
 /// ## Creating an [ImageProvider]
 ///
-/// {@tool dartpad}
+/// {@tool sample}
 /// In this example, a variant of [NetworkImage] is created that passes all the
 /// [ImageConfiguration] information (locale, platform, size, etc) to the server
 /// using query arguments in the image URL.
