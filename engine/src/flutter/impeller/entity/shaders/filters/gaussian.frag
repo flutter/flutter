@@ -51,7 +51,7 @@ void main() {
 
   if (bounded_blur == 1.0) {
     frag_color =
-        (total_color.w != 0) ? (total_color / total_color.w) : total_color;
+        (total_color.w != 0.0) ? (total_color / total_color.w) : total_color;
   } else {
     frag_color = total_color;
   }
