@@ -585,7 +585,7 @@ const float kFloatCompareEpsilon = 0.001;
   XCTAssertTrue([object.accessibilityLanguage isEqualToString:@"es-MX"]);
 }
 
-- (void)testFlutterSemanticsObjectUseMainLocale {
+- (void)testFlutterSemanticsObjectUseDefaultLocale {
   flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
   mock->isVoiceOverRunningValue = true;
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);

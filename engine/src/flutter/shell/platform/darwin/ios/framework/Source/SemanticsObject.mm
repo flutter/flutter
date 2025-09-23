@@ -462,7 +462,7 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   if (!self.node.locale.empty()) {
     return @(self.node.locale.data());
   }
-  return self.bridge->GetMainLocale();
+  return self.bridge->GetDefaultLocale();
 }
 
 - (bool)isFocusable {
