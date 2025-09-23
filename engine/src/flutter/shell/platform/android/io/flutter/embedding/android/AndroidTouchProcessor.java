@@ -269,7 +269,7 @@ public class AndroidTouchProcessor {
 
   /// Calls addPointerForIndex with null for context.
   ///
-  /// Without context the scroll wheel will not mimick android's scroll speed.
+  /// Without context the scroll wheel will not mimic android's scroll speed.
   private void addPointerForIndex(
       MotionEvent event,
       int pointerIndex,
