@@ -15,6 +15,9 @@ void main() {
 void testMain() {
   group('FrameService', () {
     void resetFrameService() {
+      // Emulate a hot restart to clear listeners from previous tests.
+      debugEmulateHotRestart();
+
       FrameService.debugOverrideFrameService(null);
       expect(FrameService.instance.runtimeType, FrameService);
       EnginePlatformDispatcher.instance.onBeginFrame = null;
