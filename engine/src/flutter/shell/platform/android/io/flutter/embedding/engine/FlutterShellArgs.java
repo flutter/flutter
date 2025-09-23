@@ -22,7 +22,6 @@ import java.util.*;
 public class FlutterShellArgs {
   public static final String ARG_TRACE_STARTUP = "--trace-startup";
   public static final String ARG_START_PAUSED = "--start-paused";
-  public static final String ARG_KEY_DISABLE_SERVICE_AUTH_CODES = "disable-service-auth-codes";
   public static final String ARG_DISABLE_SERVICE_AUTH_CODES = "--disable-service-auth-codes";
   public static final String ARG_KEY_ENDLESS_TRACE_BUFFER = "endless-trace-buffer";
   public static final String ARG_ENDLESS_TRACE_BUFFER = "--endless-trace-buffer";
