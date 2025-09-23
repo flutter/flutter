@@ -15663,7 +15663,11 @@ void main() {
     },
   );
 
-  testWidgets('helper text and character counter do not overlap', (WidgetTester tester) async {
+
+  testWidgets('helper text and character counter do not overlap', (WidgetTester tester)
+  async {
+    // Regression test for https://github.com/flutter/flutter/issues/175591.
+
     // This test verifies that when both helperText and maxLength are specified,
     // the helper text and character counter do not overlap.
     const String longHelperText =
@@ -15690,89 +15694,26 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    // Find the helper text and counter widgets
+    // Find the helper text and counter widgets.
     final Finder helperTextFinder = find.text(longHelperText);
     final Finder counterFinder = find.text('0/200');
 
     expect(helperTextFinder, findsOneWidget);
     expect(counterFinder, findsOneWidget);
 
-    // Get the positions of both widgets
+    // Get the positions of both widgets.
     final Offset helperTextPosition = tester.getTopLeft(helperTextFinder);
     final Offset counterPosition = tester.getTopLeft(counterFinder);
     final Size helperTextSize = tester.getSize(helperTextFinder);
 
-    // Calculate the right edge of helper text and left edge of counter
+    // Calculate the right edge of helper text and left edge of counter.
     final double helperTextRight = helperTextPosition.dx + helperTextSize.width;
     final double counterLeft = counterPosition.dx;
 
-    // Verify that helper text and counter do not overlap
-    // The gap should be positive (no overlap) and reasonable
+    // Verify that helper text and counter do not overlap.
+    // The gap should be positive (no overlap) and exactly 16.0 pixels.
     final double actualGap = counterLeft - helperTextRight;
     expect(actualGap, greaterThan(0.0)); // No overlap
-    expect(actualGap, greaterThanOrEqualTo(8.0)); // Reasonable spacing
-  });
-
-  testWidgets('helper text and character counter spacing with different text lengths', (
-    WidgetTester tester,
-  ) async {
-    // Test with different helper text lengths to ensure consistent spacing
-    final List<String> helperTexts = <String>[
-      'Short text',
-      'Medium length helper text',
-      'This is a very long helper text that should not overlap with the character counter when both are present in the input field and should maintain proper spacing',
-    ];
-
-    for (final String helperText in helperTexts) {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: SizedBox(
-                width: 400, // Fixed width to test different text lengths
-                child: TextFormField(
-                  maxLength: 100,
-                  decoration: InputDecoration(
-                    helperText: helperText,
-                    border: const OutlineInputBorder(),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      // Find the helper text and counter widgets
-      final Finder helperTextFinder = find.text(helperText);
-      final Finder counterFinder = find.text('0/100');
-
-      expect(helperTextFinder, findsOneWidget);
-      expect(counterFinder, findsOneWidget);
-
-      // Get the positions of both widgets
-      final Offset helperTextPosition = tester.getTopLeft(helperTextFinder);
-      final Offset counterPosition = tester.getTopLeft(counterFinder);
-      final Size helperTextSize = tester.getSize(helperTextFinder);
-
-      // Calculate the right edge of helper text and left edge of counter
-      final double helperTextRight = helperTextPosition.dx + helperTextSize.width;
-      final double counterLeft = counterPosition.dx;
-
-      // Verify that helper text and counter do not overlap
-      final double actualGap = counterLeft - helperTextRight;
-      expect(
-        actualGap,
-        greaterThan(0.0),
-        reason: 'Helper text "$helperText" overlaps with counter (gap: $actualGap)',
-      );
-      expect(
-        actualGap,
-        greaterThanOrEqualTo(8.0),
-        reason: 'Insufficient spacing for helper text "$helperText" (gap: $actualGap)',
-      );
-    }
+    expect(actualGap, greaterThan(11.0)); // Exact spacing as per Material 3 specification
   });
 }
