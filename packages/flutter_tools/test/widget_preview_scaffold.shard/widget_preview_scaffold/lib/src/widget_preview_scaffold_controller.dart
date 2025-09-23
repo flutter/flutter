@@ -9,8 +9,9 @@ import 'widget_preview.dart';
 /// Define the Enum for Layout Types
 enum LayoutType { gridView, listView }
 
+typedef WidgetPreviews = Iterable<WidgetPreview>;
 typedef WidgetPreviewGroups = Iterable<WidgetPreviewGroup>;
-typedef PreviewsCallback = WidgetPreviewGroups Function();
+typedef PreviewsCallback = WidgetPreviews Function();
 
 /// Controller used to process events and determine which previews should be
 /// displayed and how they should be displayed in the [WidgetPreviewScaffold].
@@ -38,7 +39,7 @@ class WidgetPreviewScaffoldController {
 
   /// Update state after the project has been reassembled due to a hot reload.
   void onHotReload() {
-    _handleSelectedSourceFileChanged();
+    _updateFilteredPreviewSet();
   }
 
   /// The active DTD connection used to communicate with other developer tooling.
@@ -69,30 +70,44 @@ class WidgetPreviewScaffoldController {
   final _filteredPreviewSet = ValueNotifier<WidgetPreviewGroups>([]);
 
   void _registerListeners() {
-    dtdServices.selectedSourceFile.addListener(
-      _handleSelectedSourceFileChanged,
-    );
-    filterBySelectedFileListenable.addListener(() {
-      if (filterBySelectedFileListenable.value) {
-        dtdServices.selectedSourceFile.addListener(
-          _handleSelectedSourceFileChanged,
-        );
-      } else {
-        dtdServices.selectedSourceFile.removeListener(
-          _handleSelectedSourceFileChanged,
-        );
-      }
-      // Update the state if filtering has changed.
-      _handleSelectedSourceFileChanged();
-    });
+    dtdServices.selectedSourceFile.addListener(_updateFilteredPreviewSet);
+    filterBySelectedFileListenable.addListener(_updateFilteredPreviewSet);
     // Set the initial state.
-    _handleSelectedSourceFileChanged();
+    _updateFilteredPreviewSet(initial: true);
   }
 
-  void _handleSelectedSourceFileChanged() {
+  void _updateFilteredPreviewSet({bool initial = false}) {
+    final previews = _previews();
+    final previewGroups = <String, WidgetPreviewGroup>{};
+    for (final preview in previews) {
+      final group = preview.previewData.group;
+      previewGroups
+          .putIfAbsent(
+            group,
+            () => WidgetPreviewGroup(name: group, previews: []),
+          )
+          .previews
+          .add(preview);
+    }
+
+    // When we set the initial preview set, we always display all previews,
+    // regardless of selection mode as we're unable to query the currently
+    // selected file.
+    //
+    // This special case can be removed when https://github.com/dart-lang/sdk/issues/61538
+    // is resolved.
+    // TODO(bkonyi): remove special case
+    if (!_filterBySelectedFile.value || initial) {
+      _filteredPreviewSet.value = previewGroups.values;
+      return;
+    }
+    // If filtering by selected file, we don't update the filtered preview set
+    // if the currently selected file is null. This can happen when a non-source
+    // window is selected (e.g., the widget previewer itself in VSCode), so we
+    // ignore these updates.
     final selectedSourceFile = dtdServices.selectedSourceFile.value;
-    if (selectedSourceFile != null && _filterBySelectedFile.value) {
-      _filteredPreviewSet.value = _previews()
+    if (selectedSourceFile != null) {
+      _filteredPreviewSet.value = previewGroups.values
           .map(
             (group) => WidgetPreviewGroup(
               name: group.name,
@@ -106,8 +121,6 @@ class WidgetPreviewScaffoldController {
           )
           .where((group) => group.hasPreviews)
           .toList();
-      return;
     }
-    _filteredPreviewSet.value = _previews();
   }
 }

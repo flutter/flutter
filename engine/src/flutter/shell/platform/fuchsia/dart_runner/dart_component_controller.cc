@@ -227,7 +227,7 @@ bool DartComponentController::CreateAndBindNamespace() {
       fidl::ClientEnd<fuchsia_io::Directory>(dart_public_dir.TakeChannel()));
 
   // Request an event from the directory to ensure it is servicing requests.
-  dart_outgoing_dir_ptr_->Open3(
+  dart_outgoing_dir_ptr_->Open(
       ".",
       fuchsia::io::Flags::PROTOCOL_NODE |
           fuchsia::io::Flags::FLAG_SEND_REPRESENTATION,

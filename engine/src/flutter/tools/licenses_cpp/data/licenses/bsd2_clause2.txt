@@ -8,8 +8,11 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-[\s\*]*Redistributions\s+of\s+source\s+code\s+must\s+retain\s+the\s+above\s+copyright\s+notice,\s+this\s+list\s+of\s+conditions\s+and\s+the\s+following\s+disclaimer.
-[\s\*]*Redistributions\s+in\s+binary\s+form\s+must\s+reproduce\s+the\s+above\s+copyright\s+notice,\s+this\s+list\s+of\s+conditions\s+and\s+the\s+following\s+disclaimer\s+in\s+the\s+documentation\s+and/or\s+other\s+materials\s+provided\s+with\s+the\s+distribution.
+[\s\*]*Redistributions of source code must retain the above copyright notice,
+this list of conditions and the following disclaimer.
+[\s\*]*Redistributions in binary form must reproduce the above copyright notice,
+this list of conditions and the following disclaimer in the documentation and/or
+other materials provided with the distribution.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
