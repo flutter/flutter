@@ -5,6 +5,7 @@
 | `--trace-startup` | Measures startup time on a device. The results should be in the logs. Automatically switches to an endless trace buffer when set. |
 | `--start-paused` | Launches app and pauses all Dart code execution until a debugger is connected and it is resumed. |
 | `--vm-service-port` | Specifies a custom Dart VM Service port. |
+| `--disable-service-auth-codes` | Disable the requirement for authentication codes for communicating with the VM service. |
 
 # TODO(camsim99): Note that all command line args should be settable in manifest (at least those deleted from FlutterShellArgs). Please note that eventually.
 ## Flags that must be set in the manifest:
