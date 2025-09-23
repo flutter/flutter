@@ -548,7 +548,8 @@ class TextField extends StatefulWidget {
   /// field showing how many characters have been entered. If set to a number
   /// greater than 0, it will also display the maximum number allowed. If set
   /// to [TextField.noMaxLength] then only the current character count is displayed.
-  /// To remove the counter, set [InputDecoration.counterText] to an empty string.
+  /// To remove the counter, set [InputDecoration.counterText] to an empty string or
+  /// return null from [TextField.buildCounter] callback.
   ///
   /// After [maxLength] characters have been input, additional input
   /// is ignored, unless [maxLengthEnforcement] is set to
