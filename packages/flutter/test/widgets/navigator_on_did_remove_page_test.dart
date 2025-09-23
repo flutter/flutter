@@ -24,7 +24,7 @@ void main() {
   }
 
   testWidgets('Page API will not call onDidRemovePage', (WidgetTester tester) async {
-    final List<Page<void>> removedPage = <Page<void>>[];
+    final List<Page<void>> removedPages = <Page<void>>[];
 
     const MaterialPage<void> page = MaterialPage<void>(
       key: ValueKey<String>('page'),
@@ -54,25 +54,25 @@ void main() {
       key: ValueKey<String>('page6'),
       child: Text('page6'),
     );
-    await buildPages(<Page<void>>[page], tester, removedPage: removedPage);
+    await buildPages(<Page<void>>[page], tester, removedPage: removedPages);
 
     expect(find.text('page'), findsOneWidget);
 
-    await buildPages(<Page<void>>[page, page1, page2, page3], tester, removedPage: removedPage);
-    await buildPages(<Page<void>>[page, page4, page5, page6], tester, removedPage: removedPage);
+    await buildPages(<Page<void>>[page, page1, page2, page3], tester, removedPage: removedPages);
+    await buildPages(<Page<void>>[page, page4, page5, page6], tester, removedPage: removedPages);
     await tester.pumpAndSettle();
     expect(find.text('page6'), findsOneWidget);
-    expect(removedPage, isEmpty);
+    expect(removedPages, isEmpty);
 
-    await buildPages(<Page<void>>[page, page4, page5], tester, removedPage: removedPage);
+    await buildPages(<Page<void>>[page, page4, page5], tester, removedPage: removedPages);
     await tester.pumpAndSettle();
     expect(find.text('page5'), findsOneWidget);
-    expect(removedPage, isEmpty);
+    expect(removedPages, isEmpty);
 
-    await buildPages(<Page<void>>[page], tester, removedPage: removedPage);
+    await buildPages(<Page<void>>[page], tester, removedPage: removedPages);
     await tester.pumpAndSettle();
     expect(find.text('page'), findsOneWidget);
-    expect(removedPage, isEmpty);
+    expect(removedPages, isEmpty);
   });
 
   testWidgets('pop calls onDidRemovePage', (WidgetTester tester) async {

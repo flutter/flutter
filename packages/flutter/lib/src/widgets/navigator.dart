@@ -3163,8 +3163,8 @@ class _RouteEntry extends RouteTransitionRecord {
   _RoutePlaceholder? lastAnnouncedNextRoute = notAnnounced; // last argument to Route.didChangeNext
   int? lastFocusNode; // The last focused semantic node for the route entry.
 
-  // Whether this route is removed through Navigator.pop or
-  // Navigator.pushReplacement.
+  // Whether this route is removed without using a Navigator.pages api.
+  // For example, Navigator.pop or Navigator.pushReplacement.
   bool imperativeRemoval = false;
 
   /// Restoration ID to be used for the encapsulating route when restoration is
@@ -3359,7 +3359,7 @@ class _RouteEntry extends RouteTransitionRecord {
   bool _reportRemovalToObserver = true;
 
   // Route completes with `result` and is removed.
-  void complete<T>(T result, {bool isReplaced = false, required bool imperativeRemoval}) {
+  void complete<T>(T result, {required bool isReplaced, required bool imperativeRemoval}) {
     if (currentState.index >= _RouteLifecycle.remove.index) {
       return;
     }
@@ -3544,7 +3544,7 @@ class _RouteEntry extends RouteTransitionRecord {
       'been made or it does not require an explicit decision on how to transition '
       'out.',
     );
-    complete<dynamic>(result, imperativeRemoval: false);
+    complete<dynamic>(result, isReplaced: false, imperativeRemoval: false);
     _isWaitingForExitingDecision = false;
   }
 
@@ -5289,7 +5289,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     _history.add(entry);
     while (index >= 0 && !predicate(_history[index].route)) {
       if (_history[index].isPresent) {
-        _history[index].complete(null, imperativeRemoval: true);
+        _history[index].complete(null, isReplaced: false, imperativeRemoval: true);
       }
       index -= 1;
     }
@@ -5639,7 +5639,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     assert(route._navigator == this);
     final bool wasCurrent = route.isCurrent;
     final _RouteEntry entry = _history.firstWhere(_RouteEntry.isRoutePredicate(route));
-    entry.complete(result, imperativeRemoval: true);
+    entry.complete(result, isReplaced: false, imperativeRemoval: true);
     _flushHistoryUpdates(rearrangeOverlay: false);
     assert(() {
       _debugLocked = false;
@@ -5676,7 +5676,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       index -= 1;
     }
     assert(index >= 0, 'There are no routes below the specified anchorRoute.');
-    _history[index].complete(result, imperativeRemoval: true);
+    _history[index].complete(result, isReplaced: false, imperativeRemoval: true);
     _flushHistoryUpdates(rearrangeOverlay: false);
     assert(() {
       _debugLocked = false;
