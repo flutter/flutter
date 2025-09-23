@@ -14,15 +14,18 @@
 #include "flutter/impeller/renderer/backend/metal/swapchain_transients_mtl.h"
 #include "flutter/shell/gpu/gpu_surface_metal_delegate.h"
 #include "third_party/skia/include/gpu/ganesh/mtl/GrMtlTypes.h"
+#include "flutter/common/constants.h"
 
 namespace flutter {
 
 class IMPELLER_CA_METAL_LAYER_AVAILABLE GPUSurfaceMetalImpeller
     : public Surface {
  public:
+  using GetGPUSurfaceMetalDelegateCallback = std::function<GPUSurfaceMetalDelegate*(int64_t view_id)>;
   GPUSurfaceMetalImpeller(GPUSurfaceMetalDelegate* delegate,
                           const std::shared_ptr<impeller::AiksContext>& context,
-                          bool render_to_surface = true);
+                          bool render_to_surface = true,
+                          const GetGPUSurfaceMetalDelegateCallback& get_gpu_surface_metal_delegate = {});
 
   // |Surface|
   ~GPUSurfaceMetalImpeller();
@@ -34,7 +37,8 @@ class IMPELLER_CA_METAL_LAYER_AVAILABLE GPUSurfaceMetalImpeller
 
  private:
   const GPUSurfaceMetalDelegate* delegate_;
-  const MTLRenderTargetType render_target_type_;
+  const GetGPUSurfaceMetalDelegateCallback get_gpu_surface_metal_delegate_;
+//   const MTLRenderTargetType render_target_type_;
   std::shared_ptr<impeller::AiksContext> aiks_context_;
   id<MTLTexture> last_texture_;
   // TODO(38466): Refactor GPU surface APIs take into account the fact that an
@@ -51,16 +55,27 @@ class IMPELLER_CA_METAL_LAYER_AVAILABLE GPUSurfaceMetalImpeller
 
   // |Surface|
   std::unique_ptr<SurfaceFrame> AcquireFrame(
+      int64_t view_id,
       const DlISize& frame_size) override;
 
+  std::unique_ptr<SurfaceFrame> AcquireFrame(
+      const DlISize& frame_size) override {
+    return AcquireFrame(kFlutterImplicitViewId, frame_size);
+  }
+
   std::unique_ptr<SurfaceFrame> AcquireFrameFromCAMetalLayer(
+      const GPUSurfaceMetalDelegate* delegate,
       const DlISize& frame_size);
 
   std::unique_ptr<SurfaceFrame> AcquireFrameFromMTLTexture(
+      const GPUSurfaceMetalDelegate* delegate,
       const DlISize& frame_size);
 
   // |Surface|
   DlMatrix GetRootTransformation() const override;
+
+  // |Surface|
+  DlMatrix GetRootTransformation(int64_t view_id) const override;
 
   // |Surface|
   GrDirectContext* GetContext() override;

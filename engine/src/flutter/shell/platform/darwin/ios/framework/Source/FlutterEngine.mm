@@ -97,6 +97,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 
 @interface FlutterEngine () <FlutterIndirectScribbleDelegate,
                              FlutterUndoManagerDelegate,
+                             FlutterTextInputPluginDelegate,
                              FlutterTextInputDelegate,
                              FlutterBinaryMessenger,
                              FlutterTextureRegistry>
@@ -118,6 +119,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 @property(nonatomic, readwrite, copy) NSString* isolateId;
 @property(nonatomic, copy) NSString* initialRoute;
 @property(nonatomic, strong) id<NSObject> flutterViewControllerWillDeallocObserver;
+@property(nonatomic, strong) NSMutableDictionary<NSNumber *, id<NSObject>>* flutterViewControllerWillDeallocObservers;
 @property(nonatomic, strong) FlutterDartVMServicePublisher* publisher;
 @property(nonatomic, strong) FlutterConnectionCollection* connections;
 @property(nonatomic, assign) int64_t nextTextureId;
@@ -150,6 +152,24 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 // Function pointers for interacting with the embedder.h API.
 @property(nonatomic) FlutterEngineProcTable& embedderAPI;
 
+/**
+ * An internal method that adds the view controller with the given ID.
+ *
+ * This method assigns the controller with the ID, puts the controller into the
+ * map, and does assertions related to the implicit view ID.
+ */
+- (void)registerViewController:(FlutterViewController*)controller
+                 forIdentifier:(FlutterViewIdentifier)viewIdentifier;
+
+/**
+ * An internal method that removes the view controller with the given ID.
+ *
+ * This method clears the ID of the controller, removes the controller from the
+ * map. This is an no-op if the view ID is not associated with any view
+ * controllers.
+ */
+- (void)deregisterViewControllerForIdentifier:(FlutterViewIdentifier)viewIdentifier;
+
 @end
 
 @implementation FlutterEngine {
@@ -161,6 +181,13 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 
   FlutterBinaryMessengerRelay* _binaryMessenger;
   FlutterTextureRegistryRelay* _textureRegistry;
+
+  // It can't use NSDictionary, because the values need to be weak references.
+  NSMapTable* _viewControllers;
+
+    // View identifier for the next view to be created.
+  // Only used when multiview is enabled.
+  FlutterViewIdentifier _nextViewIdentifier;
 }
 
 - (int64_t)engineIdentifier {
@@ -200,6 +227,8 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   _allowHeadlessExecution = allowHeadlessExecution;
   _labelPrefix = [labelPrefix copy];
   _dartProject = project ?: [[FlutterDartProject alloc] init];
+  _viewControllers = [NSMapTable weakToWeakObjectsMapTable];
+  _nextViewIdentifier = flutter::kFlutterImplicitViewId;
 
   _enableEmbedderAPI = _dartProject.settings.enable_embedder_api;
   if (_enableEmbedderAPI) {
@@ -223,6 +252,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   _binaryMessenger = [[FlutterBinaryMessengerRelay alloc] initWithParent:self];
   _textureRegistry = [[FlutterTextureRegistryRelay alloc] initWithParent:self];
   _connections = [[FlutterConnectionCollection alloc] init];
+  _flutterViewControllerWillDeallocObservers = [[NSMutableDictionary alloc] init];
 
   NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
   [center addObserver:self
@@ -299,9 +329,15 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   _textureRegistry.parent = nil;
 
   NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
-  if (_flutterViewControllerWillDeallocObserver) {
-    [center removeObserver:_flutterViewControllerWillDeallocObserver];
+//  if ([self.flutterViewControllerWillDeallocObservers count] > 0) {
+//    [center removeObserver:_flutterViewControllerWillDeallocObserver];
+//  }
+  if ([self.flutterViewControllerWillDeallocObservers count] > 0) {
+    [self.flutterViewControllerWillDeallocObservers enumerateKeysAndObjectsUsingBlock:^(NSNumber *key, id<NSObject> observer, BOOL *stop) {
+      [center removeObserver:observer];
+    }];
   }
+  
   [center removeObserver:self];
 }
 
@@ -310,11 +346,14 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   return *_shell;
 }
 
-- (void)updateViewportMetrics:(flutter::ViewportMetrics)viewportMetrics {
+- (void)updateViewportMetrics:(flutter::ViewportMetrics)viewportMetrics viewIdentifier:(FlutterViewIdentifier)viewIdentifier {
   if (!self.platformView) {
     return;
   }
-  self.platformView->SetViewportMetrics(flutter::kFlutterImplicitViewId, viewportMetrics);
+  if ([_viewControllers objectForKey:@(viewIdentifier)] == nil) {
+    return;
+  }
+  self.platformView->SetViewportMetrics(viewIdentifier, viewportMetrics);
 }
 
 - (void)dispatchPointerDataPacket:(std::unique_ptr<flutter::PointerDataPacket>)packet {
@@ -355,14 +394,20 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   if (!self.platformView) {
     return;
   }
-  self.platformView->NotifyCreated();
+
+  if ([_viewControllers count] == 1) {
+    self.platformView->NotifyCreated();
+  }
 }
 
 - (void)notifyViewDestroyed {
   if (!self.platformView) {
     return;
   }
-  self.platformView->NotifyDestroyed();
+
+  if ([_viewControllers count] == 0) {
+    self.platformView->NotifyDestroyed();
+  }
 }
 
 - (flutter::PlatformViewIOS*)platformView {
@@ -449,30 +494,232 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 
 - (void)setViewController:(FlutterViewController*)viewController {
   FML_DCHECK(self.platformView);
-  _viewController = viewController;
-  self.platformView->SetOwnerViewController(_viewController);
+  // _viewController = viewController;
+  // self.platformView->SetOwnerViewController(_viewController);
+//  self.platformView->SetOwnerViewController(viewController);
+  self.platformView->AddOwnerViewController(viewController);
   [self maybeSetupPlatformViewChannels];
   [self updateDisplays];
-  self.textInputPlugin.viewController = viewController;
+//  self.textInputPlugin.viewController = viewController;
 
-  if (viewController) {
-    __weak __block FlutterEngine* weakSelf = self;
-    self.flutterViewControllerWillDeallocObserver =
-        [[NSNotificationCenter defaultCenter] addObserverForName:FlutterViewControllerWillDealloc
-                                                          object:viewController
-                                                           queue:[NSOperationQueue mainQueue]
-                                                      usingBlock:^(NSNotification* note) {
-                                                        [weakSelf notifyViewControllerDeallocated];
-                                                      }];
+//  if (viewController) {
+//    __weak __block FlutterEngine* weakSelf = self;
+//    self.flutterViewControllerWillDeallocObserver =
+//        [[NSNotificationCenter defaultCenter] addObserverForName:FlutterViewControllerWillDealloc
+//                                                          object:viewController
+//                                                           queue:[NSOperationQueue mainQueue]
+//                                                      usingBlock:^(NSNotification* note) {
+//                                                        [weakSelf notifyViewControllerDeallocated];
+//                                                      }];
+//  } else {
+//    self.flutterViewControllerWillDeallocObserver = nil;
+//    [self notifyLowMemory];
+//  }
+}
+
+- (void)registerViewController:(FlutterViewController*)controller
+                 forIdentifier:(FlutterViewIdentifier)viewIdentifier {
+  // _macOSCompositor->AddView(viewIdentifier);
+  // NSAssert(controller != nil, @"The controller must not be nil.");
+  // if (!_multiViewEnabled) {
+  //   NSAssert(controller.engine == nil,
+  //            @"The FlutterViewController is unexpectedly attached to "
+  //            @"engine %@ before initialization.",
+  //            controller.engine);
+  // }
+  NSAssert([_viewControllers objectForKey:@(viewIdentifier)] == nil,
+           @"The requested view ID is occupied.");
+  [_viewControllers setObject:controller forKey:@(viewIdentifier)];
+  // [controller setUpWithEngine:self viewIdentifier:viewIdentifier];
+  [controller setupViewIdentifier:viewIdentifier];
+   NSAssert(controller.viewIdentifier == viewIdentifier, @"Failed to assign view ID.");
+  // // Verify that the controller's property are updated accordingly. Failing the
+  // // assertions is likely because either the FlutterViewController or the
+  // // FlutterEngine is mocked. Please subclass these classes instead.
+  // NSAssert(controller.attached, @"The FlutterViewController should switch to the attached mode "
+  //                               @"after it is added to a FlutterEngine.");
+  // NSAssert(controller.engine == self,
+  //          @"The FlutterViewController was added to %@, but its engine unexpectedly became %@.",
+  //          self, controller.engine);
+
+  // if (controller.viewLoaded) {
+  //   [self viewControllerViewDidLoad:controller];
+  // }
+  
+  __weak __block FlutterEngine* weakSelf = self;
+  id <NSObject> observer =
+      [[NSNotificationCenter defaultCenter] addObserverForName:FlutterViewControllerWillDealloc
+                                                        object:controller
+                                                         queue:[NSOperationQueue mainQueue]
+                                                    usingBlock:^(NSNotification* note) {
+                                                      [weakSelf notifyViewControllerDeallocated:viewIdentifier];
+                                                    }];
+  [self.flutterViewControllerWillDeallocObservers setObject:observer forKey:@(viewIdentifier)];
+  
+//  if (viewController) {
+//    __weak __block FlutterEngine* weakSelf = self;
+//    (id <NSObject>) observer =
+//        [[NSNotificationCenter defaultCenter] addObserverForName:FlutterViewControllerWillDealloc
+//                                                          object:viewController
+//                                                           queue:[NSOperationQueue mainQueue]
+//                                                      usingBlock:^(NSNotification* note) {
+//                                                        [weakSelf notifyViewControllerDeallocated];
+//                                                      }];
+//  }
+//  else {
+//    self.flutterViewControllerWillDeallocObserver = nil;
+//    [self notifyLowMemory];
+//  }
+
+  if (viewIdentifier == flutter::kFlutterImplicitViewId) {
+    [self setViewController:controller];
   } else {
-    self.flutterViewControllerWillDeallocObserver = nil;
+//    self.platformView->SetOwnerViewController(controller);
+    self.platformView->AddOwnerViewController(controller);
+     // These will be overriden immediately after the FlutterView is created
+     // by actual values.
+    //  FlutterWindowMetricsEvent metrics{
+    //      .struct_size = sizeof(FlutterWindowMetricsEvent),
+    //      .width = 0,
+    //      .height = 0,
+    //      .pixel_ratio = 1.0,
+    //  };
+     flutter::ViewportMetrics metrics = {};
+     bool added = false;
+//     FlutterAddViewInfo info{.struct_size = sizeof(FlutterAddViewInfo),
+//                             .view_id = viewIdentifier,
+//                             .view_metrics = &metrics,
+//                             .user_data = &added,
+//                             .add_view_callback = [](const FlutterAddViewResult* r) {
+//                               auto added = reinterpret_cast<bool*>(r->user_data);
+//                               *added = true;
+//                             }};
+//     void AddView(int64_t view_id,
+//                  const ViewportMetrics& viewport_metrics,
+//                  AddViewCallback callback);
+     self.platformView->AddView(viewIdentifier, metrics, [&added] (bool result){
+       added = result;
+     });
+     // The callback should be called synchronously from platform thread.
+//     _embedderAPI.AddView(_engine, &info);
+     FML_DCHECK(added);
+     if (!added) {
+       NSLog(@"Failed to add view with ID %llu", viewIdentifier);
+     }
+   }
+}
+
+- (void)deregisterViewControllerForIdentifier:(FlutterViewIdentifier)viewIdentifier {
+  id<NSObject> observer = [self.flutterViewControllerWillDeallocObservers objectForKey:@(viewIdentifier)];
+  [[NSNotificationCenter defaultCenter] removeObserver:observer];
+  [self.flutterViewControllerWillDeallocObservers removeObjectForKey:@(viewIdentifier)];
+  
+  if (viewIdentifier == flutter::kFlutterImplicitViewId) {
+//    self.flutterViewControllerWillDeallocObserver = nil;
     [self notifyLowMemory];
+  } else {
+//     bool removed = false;
+    //  FlutterRemoveViewInfo info;
+    //  info.struct_size = sizeof(FlutterRemoveViewInfo);
+    //  info.view_id = viewIdentifier;
+    //  info.user_data = &removed;
+    //  // RemoveViewCallback is not finished synchronously, the remove_view_callback
+    //  // is called from raster thread when the engine knows for sure that the resources
+    //  // associated with the view are no longer needed.
+    //  info.remove_view_callback = [](const FlutterRemoveViewResult* r) {
+    //    auto removed = reinterpret_cast<bool*>(r->user_data);
+    //    [FlutterRunLoop.mainRunLoop performBlock:^{
+    //      *removed = true;
+    //    }];
+    //  };
+
+    bool removed = NO;
+    dispatch_semaphore_t sem = dispatch_semaphore_create(0);
+
+     self.platformView->RemoveView(viewIdentifier, [&removed, &sem](bool result) {
+//       dispatch_async(dispatch_get_main_queue(), ^{
+         removed = result;
+         dispatch_semaphore_signal(sem);
+//       });
+     });
+
+//     _embedderAPI.RemoveView(_engine, &info);
+//     while (!removed) {
+//       [currentRunLoop runMode:NSDefaultRunLoopMode
+//                    beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
+//     }
+    
+    dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
+   }
+  
+  self.platformView->RemoveOwnerViewController(viewIdentifier);
+
+  // _macOSCompositor->RemoveView(viewIdentifier);
+
+  // FlutterViewController* controller = [self viewControllerForIdentifier:viewIdentifier];
+  // // The controller can be nil. The engine stores only a weak ref, and this
+  // // method could have been called from the controller's dealloc.
+  // if (controller != nil) {
+  //   [controller detachFromEngine];
+  //   NSAssert(!controller.attached,
+  //            @"The FlutterViewController unexpectedly stays attached after being removed. "
+  //            @"In unit tests, this is likely because either the FlutterViewController or "
+  //            @"the FlutterEngine is mocked. Please subclass these classes instead.");
+  // }
+   [_viewControllers removeObjectForKey:@(viewIdentifier)];
+
+  // FlutterVSyncWaiter* waiter = nil;
+  // @synchronized(_vsyncWaiters) {
+  //   waiter = [_vsyncWaiters objectForKey:@(viewIdentifier)];
+  //   [_vsyncWaiters removeObjectForKey:@(viewIdentifier)];
+  // }
+  // [waiter invalidate];
+}
+
+- (FlutterViewIdentifier)addViewController:(FlutterViewController*)controller {
+  // if (!_multiViewEnabled) {
+  //   // When multiview is disabled, the engine will only assign views to the implicit view ID.
+  //   // The implicit view ID can be reused if and only if the implicit view is unassigned.
+  //   NSAssert(self.viewController == nil,
+  //            @"The engine already has a view controller for the implicit view.");
+  //   self.viewController = controller;
+  // } else {
+  //   // When multiview is enabled, the engine will assign views to a self-incrementing ID.
+  //   // The implicit view ID can not be reused.
+     FlutterViewIdentifier viewIdentifier = _nextViewIdentifier++;
+     [self registerViewController:controller forIdentifier:viewIdentifier];
+  return viewIdentifier;
+  // }
+//  return kFlutterImplicitViewId;
+}
+
+- (void)removeViewController:(FlutterViewIdentifier)viewIdentifier {
+//   [self deregisterViewControllerForIdentifier:viewController.viewIdentifier];
+  // [self shutDownIfNeeded];
+  
+  if ([_viewControllers count] == 1 && !_allowHeadlessExecution) {
+//  if (!self.allowHeadlessExecution) {
+    [self destroyContext];
+  } else if (self.platformView) {
+    [self deregisterViewControllerForIdentifier:viewIdentifier];
+//    self.platformView->SetOwnerViewController({});
+//    self.platformView->RemoveOwnerViewController(viewIdentifier);
   }
 }
 
-- (void)attachView {
+- (FlutterViewController*)viewControllerForIdentifier:(FlutterViewIdentifier)viewIdentifier {
+  FlutterViewController* controller = [_viewControllers objectForKey:@(viewIdentifier)];
+  NSAssert(controller == nil || controller.viewIdentifier == viewIdentifier,
+           @"The stored controller has unexpected view ID.");
+  return controller;
+}
+
+- (void)attachView:(FlutterViewIdentifier)viewIdentifier {
   FML_DCHECK(self.platformView);
-  self.platformView->attachView();
+  if ([_viewControllers objectForKey:@(viewIdentifier)] == nil) {
+    return;
+  }
+  self.platformView->attachView(viewIdentifier);
 }
 
 - (void)setFlutterViewControllerWillDeallocObserver:(id<NSObject>)observer {
@@ -485,14 +732,21 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   }
 }
 
-- (void)notifyViewControllerDeallocated {
-  [self.lifecycleChannel sendMessage:@"AppLifecycleState.detached"];
-  self.textInputPlugin.viewController = nil;
-  if (!self.allowHeadlessExecution) {
-    [self destroyContext];
-  } else if (self.platformView) {
-    self.platformView->SetOwnerViewController({});
+- (void)notifyViewControllerDeallocated:(FlutterViewIdentifier)viewIdentifier {
+  if (viewIdentifier == flutter::kFlutterImplicitViewId) {
+    [self.lifecycleChannel sendMessage:@"AppLifecycleState.detached"];
   }
+
+//  self.textInputPlugin.viewController = nil;
+//  if ([_viewControllers count] == 1 && !_allowHeadlessExecution) {
+////  if (!self.allowHeadlessExecution) {
+//    [self destroyContext];
+//  } else if (self.platformView) {
+//    [self deregisterViewControllerForIdentifier:viewIdentifier];
+////    self.platformView->SetOwnerViewController({});
+//    self.platformView->RemoveOwnerViewController(viewIdentifier);
+//  }
+  [self removeViewController:viewIdentifier];
   [self.textInputPlugin resetViewResponder];
   _viewController = nil;
 }
@@ -624,7 +878,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
                                        binaryMessenger:self.binaryMessenger
                                                  codec:[FlutterJSONMessageCodec sharedInstance]];
 
-  self.textInputPlugin = [[FlutterTextInputPlugin alloc] initWithDelegate:self];
+  self.textInputPlugin = [[FlutterTextInputPlugin alloc] initWithDelegate:self textInputDelegate:self];
   self.textInputPlugin.indirectScribbleDelegate = self;
   [self.textInputPlugin setUpIndirectScribbleInteraction:self.viewController];
 

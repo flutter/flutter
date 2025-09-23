@@ -20,6 +20,10 @@ IOSExternalViewEmbedder::IOSExternalViewEmbedder(
 
 IOSExternalViewEmbedder::~IOSExternalViewEmbedder() = default;
 
+void IOSExternalViewEmbedder::SetCurrentProcessingView(int64_t flutter_view_id) {
+  platform_views_controller_.currentProcessingFlutterViewId = flutter_view_id;
+}
+
 // |ExternalViewEmbedder|
 DlCanvas* IOSExternalViewEmbedder::GetRootCanvas() {
   // On iOS, the root surface is created from the on-screen render target. Only the surfaces for the
@@ -81,7 +85,7 @@ void IOSExternalViewEmbedder::SubmitFlutterView(
 
   // TODO(dkwingsmt): This class only supports rendering into the implicit view.
   // Properly support multi-view in the future.
-  FML_DCHECK(flutter_view_id == kFlutterImplicitViewId);
+//  FML_DCHECK(flutter_view_id == kFlutterImplicitViewId);
   FML_CHECK(platform_views_controller_);
   [platform_views_controller_ submitFrame:std::move(frame) withIosContext:ios_context_];
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::DidSubmitFrame");
@@ -111,6 +115,10 @@ void IOSExternalViewEmbedder::PushFilterToVisitedPlatformViews(
 // |ExternalViewEmbedder|
 void IOSExternalViewEmbedder::PushVisitedPlatformView(int64_t view_id) {
   [platform_views_controller_ pushVisitedPlatformViewId:view_id];
+}
+
+void IOSExternalViewEmbedder::CollectView(int64_t view_id) {
+  [platform_views_controller_ collectView:view_id];
 }
 
 }  // namespace flutter

@@ -73,7 +73,8 @@ public class FlutterRenderer implements TextureRegistry {
 
   @NonNull private final FlutterJNI flutterJNI;
   @NonNull private final AtomicLong nextTextureId = new AtomicLong(0L);
-  @Nullable private Surface surface;
+  // @Nullable private Surface surface;
+//  private HashMap<Long, Surface> viewSurfaceMap = new HashMap<>();
   private boolean isDisplayingFlutterUi = false;
   private final Handler handler = new Handler();
 
@@ -1101,23 +1102,25 @@ public class FlutterRenderer implements TextureRegistry {
    * @param surface The render surface.
    * @param onlySwap True if the current active surface should not be detached.
    */
-  public void startRenderingToSurface(@NonNull Surface surface, boolean onlySwap) {
+  public void startRenderingToSurface(long viewId, @NonNull Surface surface, boolean onlySwap) {
     if (!onlySwap) {
       // Stop rendering to the surface releases the associated native resources, which causes
       // a glitch when toggling between rendering to an image view (hybrid composition) and
       // rendering directly to a Surface or Texture view. For more,
       // https://github.com/flutter/flutter/issues/95343
-      stopRenderingToSurface();
+      stopRenderingToSurface(viewId);
     }
 
-    this.surface = surface;
+    // this.surface = surface;
+
+//    this.viewSurfaceMap.put(viewId, surface);
 
     if (onlySwap) {
       // In the swap case we are just swapping the surface that we render to.
-      flutterJNI.onSurfaceWindowChanged(surface);
+      flutterJNI.onSurfaceWindowChanged(viewId, surface);
     } else {
       // In the non-swap case we are creating a new surface to render to.
-      flutterJNI.onSurfaceCreated(surface);
+      flutterJNI.onSurfaceCreated(viewId, surface);
     }
   }
 
@@ -1128,14 +1131,14 @@ public class FlutterRenderer implements TextureRegistry {
    * android.view.SurfaceHolder#getSurface()} to {@link android.media.ImageReader#getSurface()} when
    * a platform view is in the current frame.
    */
-  public void swapSurface(@NonNull Surface surface) {
-    this.surface = surface;
-    flutterJNI.onSurfaceWindowChanged(surface);
+  public void swapSurface(long viewId, @NonNull Surface surface) {
+//    this.surface = surface;
+    flutterJNI.onSurfaceWindowChanged(viewId, surface);
   }
 
   /**
    * Notifies Flutter that a {@code surface} previously registered with {@link
-   * #startRenderingToSurface(Surface, boolean)} has changed size to the given {@code width} and
+   * #startRenderingToSurface(long, Surface, boolean)} has changed size to the given {@code width} and
    * {@code height}.
    *
    * <p>See {@link android.view.SurfaceHolder.Callback} and {@link
@@ -1145,17 +1148,22 @@ public class FlutterRenderer implements TextureRegistry {
     flutterJNI.onSurfaceChanged(width, height);
   }
 
+  public void surfaceChanged(long viewId, int width, int height) {
+    flutterJNI.onSurfaceChanged(viewId, width, height);
+  }
+
   /**
    * Notifies Flutter that a {@code surface} previously registered with {@link
-   * #startRenderingToSurface(Surface, boolean)} has been destroyed and needs to be released and
+   * #startRenderingToSurface(long, Surface, boolean)} has been destroyed and needs to be released and
    * cleaned up on the Flutter side.
    *
    * <p>See {@link android.view.SurfaceHolder.Callback} and {@link
    * android.view.TextureView.SurfaceTextureListener}
    */
-  public void stopRenderingToSurface() {
-    if (surface != null) {
-      flutterJNI.onSurfaceDestroyed();
+  public void stopRenderingToSurface(long viewId) {
+
+//    if (viewSurfaceMap.containsKey(viewId)) {
+      flutterJNI.onSurfaceDestroyed(viewId);
 
       // TODO(mattcarroll): the source of truth for this call should be FlutterJNI, which is
       // where the call to onFlutterUiDisplayed() comes from. However, no such native callback
@@ -1166,8 +1174,9 @@ public class FlutterRenderer implements TextureRegistry {
       }
 
       isDisplayingFlutterUi = false;
-      surface = null;
-    }
+      // surface = null;
+//      viewSurfaceMap.remove(viewId);
+//    }
   }
 
   private void translateFeatureBounds(int[] displayFeatureBounds, int offset, Rect bounds) {
@@ -1185,7 +1194,7 @@ public class FlutterRenderer implements TextureRegistry {
    *
    * @param viewportMetrics The metrics to send to the Dart application.
    */
-  public void setViewportMetrics(@NonNull ViewportMetrics viewportMetrics) {
+  public void setViewportMetrics(long viewId, @NonNull ViewportMetrics viewportMetrics) {
     // We might get called with just the DPR if width/height aren't available yet.
     // Just ignore, as it will get called again when width/height are set.
     if (!viewportMetrics.validate()) {
@@ -1193,7 +1202,7 @@ public class FlutterRenderer implements TextureRegistry {
     }
     Log.v(
         TAG,
-        "Setting viewport metrics\n"
+        "Setting viewport metrics[viewid: ]" + viewId + "\n"
             + "Size: "
             + viewportMetrics.width
             + " x "
@@ -1254,6 +1263,7 @@ public class FlutterRenderer implements TextureRegistry {
     }
 
     flutterJNI.setViewportMetrics(
+            viewId,
         viewportMetrics.devicePixelRatio,
         viewportMetrics.width,
         viewportMetrics.height,
@@ -1273,6 +1283,101 @@ public class FlutterRenderer implements TextureRegistry {
         displayFeaturesBounds,
         displayFeaturesType,
         displayFeaturesState);
+  }
+
+  public void addViewIfNeeded(long viewId, @NonNull ViewportMetrics viewportMetrics) {
+    // We might get called with just the DPR if width/height aren't available yet.
+    // Just ignore, as it will get called again when width/height are set.
+    // if (!viewportMetrics.validate()) {
+    //   return;
+    // }
+    Log.v(
+            TAG,
+            "Adding viewport metrics\n"
+                    + "Size: "
+                    + viewportMetrics.width
+                    + " x "
+                    + viewportMetrics.height
+                    + "\n"
+                    + "Padding - L: "
+                    + viewportMetrics.viewPaddingLeft
+                    + ", T: "
+                    + viewportMetrics.viewPaddingTop
+                    + ", R: "
+                    + viewportMetrics.viewPaddingRight
+                    + ", B: "
+                    + viewportMetrics.viewPaddingBottom
+                    + "\n"
+                    + "Insets - L: "
+                    + viewportMetrics.viewInsetLeft
+                    + ", T: "
+                    + viewportMetrics.viewInsetTop
+                    + ", R: "
+                    + viewportMetrics.viewInsetRight
+                    + ", B: "
+                    + viewportMetrics.viewInsetBottom
+                    + "\n"
+                    + "System Gesture Insets - L: "
+                    + viewportMetrics.systemGestureInsetLeft
+                    + ", T: "
+                    + viewportMetrics.systemGestureInsetTop
+                    + ", R: "
+                    + viewportMetrics.systemGestureInsetRight
+                    + ", B: "
+                    + viewportMetrics.systemGestureInsetRight
+                    + "\n"
+                    + "Display Features: "
+                    + viewportMetrics.displayFeatures.size()
+                    + "\n"
+                    + "Display Cutouts: "
+                    + viewportMetrics.displayCutouts.size());
+
+    int totalFeaturesAndCutouts =
+            viewportMetrics.displayFeatures.size() + viewportMetrics.displayCutouts.size();
+    int[] displayFeaturesBounds = new int[totalFeaturesAndCutouts * 4];
+    int[] displayFeaturesType = new int[totalFeaturesAndCutouts];
+    int[] displayFeaturesState = new int[totalFeaturesAndCutouts];
+    for (int i = 0; i < viewportMetrics.displayFeatures.size(); i++) {
+      DisplayFeature displayFeature = viewportMetrics.displayFeatures.get(i);
+      translateFeatureBounds(displayFeaturesBounds, 4 * i, displayFeature.bounds);
+      displayFeaturesType[i] = displayFeature.type.encodedValue;
+      displayFeaturesState[i] = displayFeature.state.encodedValue;
+    }
+    int cutoutOffset = viewportMetrics.displayFeatures.size() * 4;
+    for (int i = 0; i < viewportMetrics.displayCutouts.size(); i++) {
+      DisplayFeature displayCutout = viewportMetrics.displayCutouts.get(i);
+      translateFeatureBounds(displayFeaturesBounds, cutoutOffset + 4 * i, displayCutout.bounds);
+      displayFeaturesType[viewportMetrics.displayFeatures.size() + i] =
+              displayCutout.type.encodedValue;
+      displayFeaturesState[viewportMetrics.displayFeatures.size() + i] =
+              displayCutout.state.encodedValue;
+    }
+
+    flutterJNI.addView(
+            viewId,
+            viewportMetrics.devicePixelRatio,
+            viewportMetrics.width,
+            viewportMetrics.height,
+            viewportMetrics.viewPaddingTop,
+            viewportMetrics.viewPaddingRight,
+            viewportMetrics.viewPaddingBottom,
+            viewportMetrics.viewPaddingLeft,
+            viewportMetrics.viewInsetTop,
+            viewportMetrics.viewInsetRight,
+            viewportMetrics.viewInsetBottom,
+            viewportMetrics.viewInsetLeft,
+            viewportMetrics.systemGestureInsetTop,
+            viewportMetrics.systemGestureInsetRight,
+            viewportMetrics.systemGestureInsetBottom,
+            viewportMetrics.systemGestureInsetLeft,
+            viewportMetrics.physicalTouchSlop,
+            displayFeaturesBounds,
+            displayFeaturesType,
+            displayFeaturesState);
+  }
+
+  public void removeView(long viewId) {
+    flutterJNI.removeView(viewId);
   }
 
   public Bitmap getBitmap() {
@@ -1356,6 +1461,7 @@ public class FlutterRenderer implements TextureRegistry {
      * @return True if width, height, and devicePixelRatio are > 0; false otherwise.
      */
     boolean validate() {
+      Log.v("FlutterRenderer", "validate: width: " + width + ", height: " + height + ", devicePixelRatio: " + devicePixelRatio);
       return width > 0 && height > 0 && devicePixelRatio > 0;
     }
 

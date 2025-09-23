@@ -7,11 +7,18 @@ package io.flutter.embedding.engine;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
+import android.view.PointerIcon;
+import android.view.textservice.TextServicesManager;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
+
+import io.flutter.Build;
 import io.flutter.FlutterInjector;
 import io.flutter.Log;
+import io.flutter.embedding.android.KeyboardManager;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.dart.DartExecutor.DartEntrypoint;
 import io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager;
@@ -40,7 +47,11 @@ import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.embedding.engine.systemchannels.SpellCheckChannel;
 import io.flutter.embedding.engine.systemchannels.SystemChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
+import io.flutter.plugin.editing.ScribePlugin;
+import io.flutter.plugin.editing.SpellCheckPlugin;
+import io.flutter.plugin.editing.TextInputPlugin;
 import io.flutter.plugin.localization.LocalizationPlugin;
+import io.flutter.plugin.mouse.MouseCursorPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.plugin.platform.PlatformViewsController2;
 import io.flutter.plugin.platform.PlatformViewsControllerDelegator;
@@ -113,6 +124,16 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
   @NonNull private final SystemChannel systemChannel;
   @NonNull private final TextInputChannel textInputChannel;
 
+  @NonNull private TextInputPlugin textInputPlugin;
+
+  @NonNull private KeyboardManager keyboardManager;
+
+  @NonNull private MouseCursorPlugin mouseCursorPlugin;
+
+  @NonNull private ScribePlugin scribePlugin;
+
+  @Nullable private SpellCheckPlugin spellCheckPlugin;
+
   // Platform Views.
   @NonNull private final PlatformViewsController platformViewsController;
   @NonNull private final PlatformViewsController2 platformViewsController2;
@@ -166,7 +187,7 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
    *
    * <p>A new {@code FlutterEngine} will not display any UI until a {@link RenderSurface} is
    * registered. See {@link #getRenderer()} and {@link
-   * FlutterRenderer#startRenderingToSurface(Surface, boolean)}.
+   * FlutterRenderer#startRenderingToSurface(long, Surface, boolean)}.
    *
    * <p>A new {@code FlutterEngine} automatically attaches all plugins. See {@link #getPlugins()}.
    *
@@ -413,6 +434,33 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
 
     this.platformViewsControllerDelegator =
         new PlatformViewsControllerDelegator(platformViewsController, platformViewsController2);
+    textInputPlugin =
+        new TextInputPlugin(
+            this,
+            this.flutterEngine.getTextInputChannel(),
+            this.flutterEngine.getScribeChannel(),
+            this.flutterEngine
+                .getPlatformViewsController(), // TODO(gmackall): this can be changed to take a pvc
+            // delegator.
+            this.flutterEngine.getPlatformViewsController2());
+
+    keyboardManager = new KeyboardManager(dartExecutor);
+
+    mouseCursorPlugin = new MouseCursorPlugin(this.mouseCursorChannel);
+
+    scribePlugin =
+            new ScribePlugin(
+                    textInputPlugin, this.scribeChannel);
+
+    try {
+      TextServicesManager textServicesManager =
+              (TextServicesManager)
+                      context.getSystemService(Context.TEXT_SERVICES_MANAGER_SERVICE);
+      spellCheckPlugin =
+              new SpellCheckPlugin(textServicesManager, this.spellCheckChannel);
+    } catch (Exception e) {
+      Log.e(TAG, "TextServicesManager not supported by device, spell check disabled.");
+    }
 
     this.pluginRegistry =
         new FlutterEngineConnectionRegistry(
@@ -504,6 +552,15 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
     Log.v(TAG, "Destroying.");
     for (EngineLifecycleListener listener : engineLifecycleListeners) {
       listener.onEngineWillDestroy();
+    }
+    textInputPlugin.destroy();
+    keyboardManager.destroy();
+    if (spellCheckPlugin != null) {
+      spellCheckPlugin.destroy();
+    }
+
+    if (mouseCursorPlugin != null) {
+      mouseCursorPlugin.destroy();
     }
     // The order that these things are destroyed is important.
     pluginRegistry.destroy();
@@ -651,6 +708,17 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
     return textInputChannel;
   }
 
+  @NonNull
+  public TextInputPlugin getTextInputPlugin() { return textInputPlugin;  }
+
+  @NonNull
+  public KeyboardManager getKeyboardManager() { return keyboardManager; }
+
+  @NonNull
+  public MouseCursorPlugin getMouseCursorPlugin() {
+    return mouseCursorPlugin;
+  }
+
   /** System channel that sends and receives Scribe requests and results. */
   @NonNull
   public ScribeChannel getScribeChannel() {
@@ -757,4 +825,11 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
   public void updateDisplayMetrics(float width, float height, float density) {
     flutterJNI.updateDisplayMetrics(0 /* display ID */, width, height, density);
   }
+
+//  @Override
+//  @RequiresApi(Build.API_LEVELS.API_24)
+//  @NonNull
+//  public PointerIcon getSystemPointerIcon(int type) {
+//    return PointerIcon.getSystemIcon(getContext(), type);
+//  }
 }

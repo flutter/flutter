@@ -48,8 +48,9 @@ class WrappedTextureSourceVK : public impeller::TextureSourceVK {
 
 GPUSurfaceVulkanImpeller::GPUSurfaceVulkanImpeller(
     GPUSurfaceVulkanDelegate* delegate,
-    std::shared_ptr<impeller::Context> context)
-    : delegate_(delegate) {
+    std::shared_ptr<impeller::Context> context,
+    const GetSurfaceContextVKCallback& get_surface_context_vk_callback)
+    : delegate_(delegate), get_surface_context_vk_callback_(get_surface_context_vk_callback) {
   if (!context || !context->IsValid()) {
     return;
   }
@@ -60,7 +61,7 @@ GPUSurfaceVulkanImpeller::GPUSurfaceVulkanImpeller(
     return;
   }
 
-  impeller_context_ = std::move(context);
+  // impeller_context_ = std::move(context);
   aiks_context_ = std::move(aiks_context);
   is_valid_ = !!aiks_context_;
 }
@@ -75,6 +76,7 @@ bool GPUSurfaceVulkanImpeller::IsValid() {
 
 // |Surface|
 std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
+    int64_t view_id,
     const DlISize& size) {
   if (!IsValid()) {
     FML_LOG(ERROR) << "Vulkan surface was invalid.";
@@ -86,8 +88,10 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
     return nullptr;
   }
 
+  auto impeller_context = get_surface_context_vk_callback_(view_id);
   if (delegate_ == nullptr) {
-    auto& context_vk = impeller::SurfaceContextVK::Cast(*impeller_context_);
+    // auto& context_vk = impeller::SurfaceContextVK::Cast(*impeller_context_);
+    auto& context_vk = impeller::SurfaceContextVK::Cast(*impeller_context);
     std::unique_ptr<impeller::Surface> surface =
         context_vk.AcquireNextSurface();
 
@@ -162,8 +166,9 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
     desc.compression_type = impeller::CompressionType::kLossless;
     desc.usage = impeller::TextureUsage::kRenderTarget;
 
+    // auto surface_context_vk = get_surface_context_vk_callback_(view_id);
     impeller::ContextVK& context_vk =
-        impeller::ContextVK::Cast(*impeller_context_);
+        impeller::ContextVK::Cast(*impeller_context);
 
     impeller::vk::ImageViewCreateInfo view_info = {};
     view_info.viewType = impeller::vk::ImageViewType::e2D;
@@ -186,7 +191,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
 
     if (transients_ == nullptr) {
       transients_ = std::make_shared<impeller::SwapchainTransientsVK>(
-          impeller_context_, desc,
+          impeller_context, desc,
           /*enable_msaa=*/true);
     }
 
@@ -223,7 +228,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
 
     SurfaceFrame::SubmitCallback submit_callback =
         [image = flutter_image, delegate = delegate_,
-         impeller_context = impeller_context_,
+         impeller_context = impeller_context,
          wrapped_onscreen](const SurfaceFrame&) -> bool {
       TRACE_EVENT0("flutter", "GPUSurfaceVulkan::PresentImage");
 

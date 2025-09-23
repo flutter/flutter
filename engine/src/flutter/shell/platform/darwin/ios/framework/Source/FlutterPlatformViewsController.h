@@ -18,6 +18,7 @@
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlatformViews.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlugin.h"
+#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/overlay_layer_pool.h"
 #import "flutter/shell/platform/darwin/ios/ios_context.h"
@@ -33,6 +34,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// The task runner used to post rendering tasks to the platform thread.
 @property(nonatomic, assign) const fml::RefPtr<fml::TaskRunner>& taskRunner;
+
+@property(nonatomic, assign) int64_t currentProcessingFlutterViewId;
 
 /// The flutter view.
 @property(nonatomic, weak) UIView* _Nullable flutterView;
@@ -113,6 +116,17 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// @brief Pushes the view id of a visted platform view to the list of visied platform views.
 - (void)pushVisitedPlatformViewId:(int64_t)viewId;
+
+- (void)collectView:(int64_t)flutterViewId;
+
+- (void)attachFlutterView:(int64_t)flutterViewId withView:(__weak UIView*)view;
+
+- (void)detachFlutterView:(int64_t)flutterViewId;
+
+- (void)attachToFlutterViewController:(int64_t)flutterViewId
+                   withViewController:(__weak FlutterViewController*)controller;
+
+- (void)detachFromFlutterViewController:(int64_t)flutterViewId;
 
 @end
 

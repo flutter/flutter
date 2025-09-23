@@ -17,7 +17,7 @@
 
 #include "flutter/shell/platform/embedder/embedder.h"
 
-#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h"
+#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterIndirectScribbleDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
@@ -31,7 +31,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface FlutterEngine () <FlutterViewEngineDelegate>
 
-- (void)updateViewportMetrics:(flutter::ViewportMetrics)viewportMetrics;
+- (void)updateViewportMetrics:(flutter::ViewportMetrics)viewportMetrics viewIdentifier:(FlutterViewIdentifier)viewIdentifier;
 - (void)dispatchPointerDataPacket:(std::unique_ptr<flutter::PointerDataPacket>)packet;
 
 - (fml::RefPtr<fml::TaskRunner>)platformTaskRunner;
@@ -55,7 +55,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)createShell:(nullable NSString*)entrypoint
          libraryURI:(nullable NSString*)libraryOrNil
        initialRoute:(nullable NSString*)initialRoute;
-- (void)attachView;
+- (void)attachView:(FlutterViewIdentifier)viewIdentifier;
 - (void)notifyLowMemory;
 
 /// Blocks until the first frame is presented or the timeout is exceeded, then invokes callback.
@@ -102,6 +102,37 @@ NS_ASSUME_NONNULL_BEGIN
  * This function must be called on the main thread.
  */
 + (nullable FlutterEngine*)engineForIdentifier:(int64_t)identifier;
+
+/**
+ * Attach a view controller to the engine as its default controller.
+ *
+ * Since FlutterEngine can only handle the implicit view for now, the given
+ * controller will always be assigned to the implicit view, if there isn't an
+ * implicit view yet. If the engine already has an implicit view, this call
+ * throws an assertion.
+ *
+ * The engine holds a weak reference to the attached view controller.
+ *
+ * If the given view controller is already attached to an engine, this call
+ * throws an assertion.
+ */
+- (FlutterViewIdentifier)addViewController:(FlutterViewController*)viewController;
+
+/**
+ * Notify the engine that a view for the given view controller has been loaded.
+ */
+// - (void)viewControllerViewDidLoad:(FlutterViewController*)viewController;
+
+/**
+ * Dissociate the given view controller from this engine.
+ *
+ * If the view controller is not associated with this engine, this call throws an
+ * assertion.
+ */
+- (void)removeViewController:(FlutterViewIdentifier)viewIdentifier;
+
+- (nullable FlutterViewController*)viewControllerForIdentifier:
+    (FlutterViewIdentifier)viewIdentifier;
 
 @end
 

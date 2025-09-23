@@ -19,6 +19,9 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import java.util.List;
 
+import io.flutter.Log;
+import io.flutter.embedding.android.FlutterView;
+
 // Loosely based off of
 // https://github.com/android/user-interface-samples/blob/main/WindowInsetsAnimation/app/src/main/java/com/google/android/samples/insetsanimation/RootViewDeferringInsetsCallback.kt
 //
@@ -183,6 +186,7 @@ class ImeSyncDeferringInsetsCallback {
         // cycle happen, but this happens too late resulting in a visual flicker.
         // Instead we manually dispatch the most recent WindowInsets to the view.
         if (lastWindowInsets != null && view != null) {
+          Log.e("ImeSyncDeferringInsetsCallback", "ImeSyncDeferringInsetsCallback viewId: " + ((FlutterView)view).getViewId());
           view.dispatchApplyWindowInsets(lastWindowInsets);
         }
       }
@@ -212,6 +216,8 @@ class ImeSyncDeferringInsetsCallback {
         // onApplyWindowInsets directly to avoid being consumed here.
         return WindowInsets.CONSUMED;
       }
+
+      Log.e("ImeSyncDeferringInsetsCallback", "onApplyWindowInsets viewId: " + ((FlutterView)view).getViewId());
 
       // If no animation is happening, pass the insets on to the view's own
       // inset handling.

@@ -346,6 +346,8 @@ class ExternalViewEmbedder {
 
   virtual ~ExternalViewEmbedder() = default;
 
+  virtual void SetCurrentProcessingView(int64_t flutter_view_id) {}
+
   // Deallocate the resources for displaying a view.
   //
   // This method must be called when a view is removed from the engine.
@@ -391,7 +393,7 @@ class ExternalViewEmbedder {
 
   // Prepare for a view to be drawn.
   virtual void PrepareFlutterView(DlISize frame_size,
-                                  double device_pixel_ratio) = 0;
+                          double device_pixel_ratio) = 0;
 
   // Submits the content stored since |PrepareFlutterView| to the specified
   // Flutter view.

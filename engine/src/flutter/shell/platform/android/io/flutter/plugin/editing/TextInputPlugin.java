@@ -31,6 +31,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.inputmethod.EditorInfoCompat;
 import io.flutter.Log;
+import io.flutter.embedding.android.FlutterView;
 import io.flutter.embedding.android.KeyboardManager;
 import io.flutter.embedding.engine.systemchannels.ScribeChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
@@ -44,7 +45,8 @@ import java.util.HashMap;
 public class TextInputPlugin implements ListenableEditingState.EditingStateWatcher {
   private static final String TAG = "TextInputPlugin";
 
-  @NonNull private final View mView;
+  private final HashMap<Long, View> attachedViews;
+  @Nullable private View mCurrentView;
   @NonNull private final InputMethodManager mImm;
   @NonNull private final AutofillManager afm;
   @NonNull private final ScribeChannel scribeChannel;
@@ -52,13 +54,14 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
   @NonNull private InputTarget inputTarget = new InputTarget(InputTarget.Type.NO_TARGET, 0);
   @Nullable private TextInputChannel.Configuration configuration;
   @Nullable private SparseArray<TextInputChannel.Configuration> autofillConfiguration;
-  @NonNull private ListenableEditingState mEditable;
+  private ListenableEditingState mEditable;
   private boolean mRestartInputPending;
   @Nullable private InputConnection lastInputConnection;
   @NonNull private PlatformViewsController platformViewsController;
   @NonNull private PlatformViewsController2 platformViewsController2;
   @Nullable private Rect lastClientRect;
-  private ImeSyncDeferringInsetsCallback imeSyncCallback;
+//  private ImeSyncDeferringInsetsCallback imeSyncCallback;
+  private final HashMap<Long, ImeSyncDeferringInsetsCallback> imeSyncCallbacks;
 
   // Initialize the "last seen" text editing values to a non-null value.
   private TextEditState mLastKnownFrameworkTextEditingState;
@@ -71,39 +74,38 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
 
   @SuppressLint("NewApi")
   public TextInputPlugin(
-      @NonNull View view,
+//      @NonNull View view,
+          @NonNull Context context,
       @NonNull TextInputChannel textInputChannel,
       @NonNull ScribeChannel scribeChannel,
       @NonNull PlatformViewsController platformViewsController,
       @NonNull PlatformViewsController2 platformViewsController2) {
-    mView = view;
-    // Create a default object.
-    mEditable = new ListenableEditingState(null, mView);
-    mImm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+//    mView = view;
+//    // Create a default object.
+//    mEditable = new ListenableEditingState(null, mView);
+//    mImm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+//    if (Build.VERSION.SDK_INT >= API_LEVELS.API_26) {
+//      afm = view.getContext().getSystemService(AutofillManager.class);
+//    } else {
+//      afm = null;
+//    }
+//
+//    // Sets up syncing ime insets with the framework, allowing
+//    // the Flutter view to grow and shrink to accommodate Android
+//    // controlled keyboard animations.
+//    if (Build.VERSION.SDK_INT >= API_LEVELS.API_30) {
+//      imeSyncCallback = new ImeSyncDeferringInsetsCallback(view);
+//      imeSyncCallback.install();
+//    }
+
+    attachedViews = new HashMap<>();
+    imeSyncCallbacks = new HashMap<>();
+
+    mImm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_26) {
-      afm = view.getContext().getSystemService(AutofillManager.class);
+      afm = context.getSystemService(AutofillManager.class);
     } else {
       afm = null;
-    }
-
-    // Sets up syncing ime insets with the framework, allowing
-    // the Flutter view to grow and shrink to accommodate Android
-    // controlled keyboard animations.
-    if (Build.VERSION.SDK_INT >= API_LEVELS.API_30) {
-      imeSyncCallback = new ImeSyncDeferringInsetsCallback(view);
-      imeSyncCallback.install();
-
-      // When the IME is hidden, we need to restart the input method manager to accomodate
-      // some keyboards like the Samsung keyboard that may be caching old state.
-      imeSyncCallback.setImeVisibilityListener(
-          new ImeSyncDeferringInsetsCallback.ImeVisibilityListener() {
-            @Override
-            public void onImeVisibilityChanged(boolean visible) {
-              if (!visible) {
-                mImm.restartInput(mView);
-              }
-            }
-          });
     }
 
     this.textInputChannel = textInputChannel;
@@ -111,7 +113,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
         new TextInputChannel.TextInputMethodHandler() {
           @Override
           public void show() {
-            showTextInput(mView);
+            showTextInput(mCurrentView);
           }
 
           @Override
@@ -119,7 +121,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
             if (inputTarget.type == InputTarget.Type.PHYSICAL_DISPLAY_PLATFORM_VIEW) {
               notifyViewExited();
             } else {
-              hideTextInput(mView);
+              hideTextInput(mCurrentView);
             }
           }
 
@@ -153,7 +155,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
 
           @Override
           public void setEditingState(TextInputChannel.TextEditState editingState) {
-            setTextInputEditingState(mView, editingState);
+            setTextInputEditingState(mCurrentView, editingState);
           }
 
           @Override
@@ -182,9 +184,66 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     this.platformViewsController2.attachTextInputPlugin(this);
   }
 
+  public  void attachToView(FlutterView view) {
+    attachedViews.put(view.getViewId(), view);
+
+    if (mEditable != null) {
+      mEditable.removeEditingStateListener(this);
+    }
+
+//    mView = view;
+    // Create a default object.
+    mEditable = new ListenableEditingState(null, view);
+//    mImm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+//    if (Build.VERSION.SDK_INT >= API_LEVELS.API_26) {
+//      afm = view.getContext().getSystemService(AutofillManager.class);
+//    } else {
+//      afm = null;
+//    }
+
+    // Sets up syncing ime insets with the framework, allowing
+    // the Flutter view to grow and shrink to accommodate Android
+    // controlled keyboard animations.
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_30) {
+      imeSyncCallback = new ImeSyncDeferringInsetsCallback(view);
+      imeSyncCallback.install();
+
+      // When the IME is hidden, we need to restart the input method manager to accomodate
+      // some keyboards like the Samsung keyboard that may be caching old state.
+      imeSyncCallback.setImeVisibilityListener(
+          new ImeSyncDeferringInsetsCallback.ImeVisibilityListener() {
+            @Override
+            public void onImeVisibilityChanged(boolean visible) {
+              if (!visible) {
+                mImm.restartInput(mView);
+              }
+            }
+          });
+    }
+  }
+
+  public void detachFromView(long flutterViewId) {
+    final View view = attachedViews.remove(flutterViewId);
+    if (view == mCurrentView) {
+      notifyViewExited();
+      mEditable.removeEditingStateListener(this);
+      if (Build.VERSION.SDK_INT >= API_LEVELS.API_30) {
+        final ImeSyncDeferringInsetsCallback imeSyncCallback = imeSyncCallbacks.get(flutterViewId);
+        if (imeSyncCallback != null) {
+          imeSyncCallback.remove();
+        }
+      }
+    }
+  }
+
   @NonNull
   public InputMethodManager getInputMethodManager() {
     return mImm;
+  }
+
+  @Nullable
+  public View getCurrentView() {
+    return mCurrentView;
   }
 
   @VisibleForTesting
@@ -194,7 +253,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
 
   @VisibleForTesting
   ImeSyncDeferringInsetsCallback getImeSyncCallback() {
-    return imeSyncCallback;
+    return imeSyncCallbacks.get(0L);
   }
 
   /**
@@ -237,11 +296,14 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     platformViewsController.detachTextInputPlugin();
     platformViewsController2.detachTextInputPlugin();
     textInputChannel.setTextInputMethodHandler(null);
-    notifyViewExited();
-    mEditable.removeEditingStateListener(this);
-    if (imeSyncCallback != null) {
-      imeSyncCallback.remove();
-    }
+//    notifyViewExited();
+//    mEditable.removeEditingStateListener(this);
+//    if (imeSyncCallback != null) {
+//      imeSyncCallback.remove();
+//    }
+
+    attachedViews.clear();
+    imeSyncCallbacks.clear();
   }
 
   private static int inputTypeFromTextInputType(
@@ -414,14 +476,14 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
         && inputTarget.id == platformViewId) {
       inputTarget = new InputTarget(InputTarget.Type.NO_TARGET, 0);
       notifyViewExited();
-      mImm.hideSoftInputFromWindow(mView.getApplicationWindowToken(), 0);
-      mImm.restartInput(mView);
+      mImm.hideSoftInputFromWindow(mCurrentView.getApplicationWindowToken(), 0);
+      mImm.restartInput(mCurrentView);
       mRestartInputPending = false;
     }
   }
 
   public void sendTextInputAppPrivateCommand(@NonNull String action, @NonNull Bundle data) {
-    mImm.sendAppPrivateCommand(mView, action, data);
+    mImm.sendAppPrivateCommand(mCurrentView, action, data);
   }
 
   @VisibleForTesting
@@ -454,11 +516,31 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     this.configuration = configuration;
     inputTarget = new InputTarget(InputTarget.Type.FRAMEWORK_CLIENT, client);
 
+    Log.e("TextInputPlugin", "configuration.viewId: " + configuration.viewId);
+
+//    if (Build.VERSION.SDK_INT >= API_LEVELS.API_30) {
+//      if (imeSyncCallback != null) {
+//        imeSyncCallback.remove();
+//      }
+//      imeSyncCallback = new ImeSyncDeferringInsetsCallback(view);
+//      imeSyncCallback.install();
+//    }
+
+    mCurrentView = attachedViews.get(configuration.viewId);
+
     mEditable.removeEditingStateListener(this);
     mEditable =
         new ListenableEditingState(
-            configuration.autofill != null ? configuration.autofill.editState : null, mView);
+            configuration.autofill != null ? configuration.autofill.editState : null, mCurrentView);
     updateAutofillConfigurationIfNeeded(configuration);
+
+//    if (Build.VERSION.SDK_INT >= API_LEVELS.API_30) {
+//      if (imeSyncCallback != null) {
+//        imeSyncCallback.remove();
+//      }
+//      imeSyncCallback = new ImeSyncDeferringInsetsCallback(mCurrentView);
+//      imeSyncCallback.install();
+//    }
 
     // setTextInputClient will be followed by a call to setTextInputEditingState.
     // Do a restartInput at that time.
@@ -474,9 +556,9 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
       // circuited.
       // Not asking for focus here specifically manifested in a bug on API 28 devices where the
       // platform view's request to show a keyboard was ignored.
-      mView.requestFocus();
+      mCurrentView.requestFocus();
       inputTarget = new InputTarget(InputTarget.Type.VIRTUAL_DISPLAY_PLATFORM_VIEW, platformViewId);
-      mImm.restartInput(mView);
+      mImm.restartInput(mCurrentView);
       mRestartInputPending = false;
     } else {
       inputTarget =
@@ -562,7 +644,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     finder.inspect(width, 0);
     finder.inspect(width, height);
     finder.inspect(0, height);
-    final Float density = mView.getContext().getResources().getDisplayMetrics().density;
+    final Float density = mCurrentView.getContext().getResources().getDisplayMetrics().density;
     lastClientRect =
         new Rect(
             (int) (minMax[0] * density),
@@ -732,10 +814,10 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
 
     final String triggerIdentifier = configuration.autofill.uniqueIdentifier;
     final int[] offset = new int[2];
-    mView.getLocationOnScreen(offset);
+    mCurrentView.getLocationOnScreen(offset);
     Rect rect = new Rect(lastClientRect);
     rect.offset(offset[0], offset[1]);
-    afm.notifyViewEntered(mView, triggerIdentifier.hashCode(), rect);
+    afm.notifyViewEntered(mCurrentView, triggerIdentifier.hashCode(), rect);
   }
 
   private void notifyViewExited() {
@@ -748,7 +830,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     }
 
     final String triggerIdentifier = configuration.autofill.uniqueIdentifier;
-    afm.notifyViewExited(mView, triggerIdentifier.hashCode());
+    afm.notifyViewExited(mCurrentView, triggerIdentifier.hashCode());
   }
 
   private void notifyValueChanged(String newValue) {
@@ -757,7 +839,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     }
 
     final String triggerIdentifier = configuration.autofill.uniqueIdentifier;
-    afm.notifyValueChanged(mView, triggerIdentifier.hashCode(), AutofillValue.forText(newValue));
+    afm.notifyValueChanged(mCurrentView, triggerIdentifier.hashCode(), AutofillValue.forText(newValue));
   }
 
   private void updateAutofillConfigurationIfNeeded(TextInputChannel.Configuration configuration) {
@@ -782,7 +864,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
         if (autofill != null) {
           autofillConfiguration.put(autofill.uniqueIdentifier.hashCode(), config);
           afm.notifyValueChanged(
-              mView,
+                  mCurrentView,
               autofill.uniqueIdentifier.hashCode(),
               AutofillValue.forText(autofill.editState.text));
         }

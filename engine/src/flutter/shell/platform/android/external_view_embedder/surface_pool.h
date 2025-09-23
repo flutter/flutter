@@ -56,7 +56,8 @@ class SurfacePool {
       GrDirectContext* gr_context,
       const AndroidContext& android_context,
       const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
-      const std::shared_ptr<AndroidSurfaceFactory>& surface_factory);
+      const std::shared_ptr<AndroidSurfaceFactory>& surface_factory,
+      int64_t flutter_view_id);
 
   // Gets the layers in the pool that aren't currently used.
   // This method doesn't mark the layers as unused.
@@ -66,7 +67,7 @@ class SurfacePool {
   void RecycleLayers();
 
   // Destroys all the layers in the pool.
-  void DestroyLayers(const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade);
+  void DestroyLayers(const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade, int64_t flutter_view_id);
 
   // Sets the frame size used by the layers in the pool.
   // If the current layers in the pool have a different frame size,
@@ -110,7 +111,7 @@ class SurfacePool {
   bool use_new_surface_methods_ = false;
 
   void DestroyLayersLocked(
-      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade);
+      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade, int64_t flutter_view_id);
 };
 
 }  // namespace flutter

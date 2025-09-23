@@ -144,6 +144,7 @@ class PlatformViewAndroidJNI {
   /// @note       Must be called from the platform thread.
   ///
   virtual void FlutterViewOnDisplayPlatformView(
+      int64_t flutter_view_id,
       int view_id,
       int x,
       int y,
@@ -158,7 +159,8 @@ class PlatformViewAndroidJNI {
   ///
   /// @note       Must be called from the platform thread.
   ///
-  virtual void FlutterViewDisplayOverlaySurface(int surface_id,
+  virtual void FlutterViewDisplayOverlaySurface(int64_t flutter_view_id,
+                                                int surface_id,
                                                 int x,
                                                 int y,
                                                 int width,
@@ -205,14 +207,14 @@ class PlatformViewAndroidJNI {
   /// @note       Must be called from the platform thread.
   ///
   virtual std::unique_ptr<PlatformViewAndroidJNI::OverlayMetadata>
-  FlutterViewCreateOverlaySurface() = 0;
+  FlutterViewCreateOverlaySurface(int64_t flutter_view_id) = 0;
 
   //----------------------------------------------------------------------------
   /// @brief      Destroys the overlay surfaces.
   ///
   /// @note       Must be called from the platform thread.
   ///
-  virtual void FlutterViewDestroyOverlaySurfaces() = 0;
+  virtual void FlutterViewDestroyOverlaySurfaces(int64_t flutter_view_id) = 0;
 
   // New Platform View Support.
   virtual ASurfaceTransaction* createTransaction() = 0;

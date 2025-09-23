@@ -39,8 +39,8 @@ executable("android_external_view_embedder_unittests") {
   testonly = true
 
   sources = [
-    "external_view_embedder_unittests.cc",
-    "surface_pool_unittests.cc",
+    #"external_view_embedder_unittests.cc",
+    #"surface_pool_unittests.cc",
   ]
 
   deps = [

@@ -18,8 +18,11 @@ namespace flutter {
 
 class GPUSurfaceVulkanImpeller final : public Surface {
  public:
+  using GetSurfaceContextVKCallback = std::function<std::shared_ptr<impeller::Context>(int64_t view_id)>;
+
   explicit GPUSurfaceVulkanImpeller(GPUSurfaceVulkanDelegate* delegate,
-                                    std::shared_ptr<impeller::Context> context);
+                                    std::shared_ptr<impeller::Context> context,
+                                    const GetSurfaceContextVKCallback& get_surface_context_vk_callback = {});
 
   // |Surface|
   ~GPUSurfaceVulkanImpeller() override;
@@ -29,13 +32,19 @@ class GPUSurfaceVulkanImpeller final : public Surface {
 
  private:
   GPUSurfaceVulkanDelegate* delegate_;
-  std::shared_ptr<impeller::Context> impeller_context_;
+  // std::shared_ptr<impeller::Context> impeller_context_;
   std::shared_ptr<impeller::AiksContext> aiks_context_;
   std::shared_ptr<impeller::SwapchainTransientsVK> transients_;
   bool is_valid_ = false;
+  const GetSurfaceContextVKCallback get_surface_context_vk_callback_;
 
   // |Surface|
-  std::unique_ptr<SurfaceFrame> AcquireFrame(const DlISize& size) override;
+  std::unique_ptr<SurfaceFrame> AcquireFrame(const DlISize& size) override {
+    return nullptr;
+  }
+
+  // |Surface|
+  std::unique_ptr<SurfaceFrame> AcquireFrame(int64_t view_id, const DlISize& size) override;
 
   // |Surface|
   DlMatrix GetRootTransformation() const override;

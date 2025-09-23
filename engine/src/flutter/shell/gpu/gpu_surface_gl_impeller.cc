@@ -4,6 +4,7 @@
 
 #include "flutter/shell/gpu/gpu_surface_gl_impeller.h"
 
+#include "common/constants.h"
 #include "flow/surface_frame.h"
 #include "flutter/fml/make_copyable.h"
 #include "impeller/display_list/dl_dispatcher.h"
@@ -15,9 +16,11 @@ namespace flutter {
 GPUSurfaceGLImpeller::GPUSurfaceGLImpeller(
     GPUSurfaceGLDelegate* delegate,
     std::shared_ptr<impeller::Context> context,
-    bool render_to_surface)
-    : weak_factory_(this) {
-  if (delegate == nullptr) {
+    bool render_to_surface,
+  const GetGPUSurfaceGLDelegateCallback& get_gpu_surface_delegate)
+    :
+    weak_factory_(this) ,get_gpu_surface_delegate_(get_gpu_surface_delegate) {
+  if (!delegate && !get_gpu_surface_delegate) {
     return;
   }
 
@@ -36,7 +39,9 @@ GPUSurfaceGLImpeller::GPUSurfaceGLImpeller(
   impeller_context_ = std::move(context);
   render_to_surface_ = render_to_surface;
   aiks_context_ = std::move(aiks_context);
+
   is_valid_ = true;
+  FML_LOG(ERROR) << "GPUSurfaceGLImpeller::GPUSurfaceGLImpeller is_valid_" << (is_valid_);
 }
 
 // |Surface|
@@ -47,9 +52,116 @@ bool GPUSurfaceGLImpeller::IsValid() {
   return is_valid_;
 }
 
+std::unique_ptr<SurfaceFrame> GPUSurfaceGLImpeller::AcquireFrame(int64_t view_id, const DlISize& size) {
+  // FML_LOG(ERROR) << "GPUSurfaceGLImpeller::AcquireFrame view_id: " << view_id;
+    if (!IsValid()) {
+    FML_LOG(ERROR) << "OpenGL surface was invalid.";
+    return nullptr;
+  }
+
+  GPUSurfaceGLDelegate* delegate = nullptr;
+  if (get_gpu_surface_delegate_) {
+    delegate = get_gpu_surface_delegate_(view_id);
+  } else if (delegate_) {
+delegate =delegate_;
+  }
+
+  // if (!delegate) {
+  //   FML_LOG(ERROR) << "fail to get delegate view_id: " << view_id;
+  //   return nullptr;
+  // } else {
+  //   FML_LOG(ERROR) << "got delegate view_id: " << view_id;
+  // }
+
+  FML_DCHECK(delegate);
+
+  auto swap_callback = [weak = weak_factory_.GetWeakPtr(),
+                        delegate = delegate]() -> bool {
+    if (weak) {
+      GLPresentInfo present_info = {
+          .fbo_id = 0u,
+          .frame_damage = std::nullopt,
+          // TODO (https://github.com/flutter/flutter/issues/105597): wire-up
+          // presentation time to impeller backend.
+          .presentation_time = std::nullopt,
+          .buffer_damage = std::nullopt,
+      };
+      delegate->GLContextPresent(present_info);
+    }
+    return true;
+  };
+
+  auto context_switch = delegate->GLContextMakeCurrent();
+  if (!context_switch->GetResult()) {
+    FML_LOG(ERROR)
+        << "Could not make the context current to acquire the frame.";
+    return nullptr;
+  }
+
+  if (!render_to_surface_) {
+    return std::make_unique<SurfaceFrame>(
+        nullptr, SurfaceFrame::FramebufferInfo{.supports_readback = true},
+        [](const SurfaceFrame& surface_frame, DlCanvas* canvas) {
+          return true;
+        },
+        [](const SurfaceFrame& surface_frame) { return true; }, size);
+  }
+
+  GLFrameInfo frame_info = {static_cast<uint32_t>(size.width),
+                            static_cast<uint32_t>(size.height)};
+  const GLFBOInfo fbo_info = delegate->GLContextFBO(frame_info);
+  auto surface = impeller::SurfaceGLES::WrapFBO(
+      impeller_context_,                            // context
+      swap_callback,                                // swap_callback
+      fbo_info.fbo_id,                              // fbo
+      impeller::PixelFormat::kR8G8B8A8UNormInt,     // color_format
+      impeller::ISize{size.width, size.height}  // fbo_size
+  );
+
+  impeller::RenderTarget render_target = surface->GetRenderTarget();
+
+  SurfaceFrame::EncodeCallback encode_callback =
+      [aiks_context = aiks_context_,  //
+       render_target](SurfaceFrame& surface_frame,
+                      DlCanvas* canvas) mutable -> bool {
+    if (!aiks_context) {
+      return false;
+    }
+
+    auto display_list = surface_frame.BuildDisplayList();
+    if (!display_list) {
+      FML_LOG(ERROR) << "Could not build display list for surface frame.";
+      return false;
+    }
+
+    auto cull_rect =
+        impeller::Rect::MakeSize(render_target.GetRenderTargetSize());
+    return impeller::RenderToTarget(aiks_context->GetContentContext(),  //
+                                    render_target,                      //
+                                    display_list,                       //
+                                    cull_rect,                          //
+                                    /*reset_host_buffer=*/true          //
+    );
+    return true;
+  };
+
+  return std::make_unique<SurfaceFrame>(
+      nullptr,                                // surface
+      delegate->GLContextFramebufferInfo(),  // framebuffer info
+      encode_callback,                        // encode callback
+      fml::MakeCopyable([surface = std::move(surface)](const SurfaceFrame&) {
+        return surface->Present();
+      }),                         // submit callback
+      size,                       // frame size
+      std::move(context_switch),  // context result
+      true                        // display list fallback
+  );
+}
+
 // |Surface|
 std::unique_ptr<SurfaceFrame> GPUSurfaceGLImpeller::AcquireFrame(
     const DlISize& size) {
+
   if (!IsValid()) {
     FML_LOG(ERROR) << "OpenGL surface was invalid.";
     return nullptr;
@@ -154,15 +266,31 @@ GrDirectContext* GPUSurfaceGLImpeller::GetContext() {
 // |Surface|
 std::unique_ptr<GLContextResult>
 GPUSurfaceGLImpeller::MakeRenderContextCurrent() {
+  // TODO(littlegnal): Implement surface less make current
+  FML_LOG(ERROR) << "GPUSurfaceGLImpeller::MakeRenderContextCurrent";
+  if (get_gpu_surface_delegate_) {
+    auto *delegate = get_gpu_surface_delegate_(kFlutterImplicitViewId);
+    FML_LOG(ERROR) << "GPUSurfaceGLImpeller::MakeRenderContextCurrent1111";
+    return delegate->GLContextMakeCurrent();
+  }
   return delegate_->GLContextMakeCurrent();
 }
 
 // |Surface|
 bool GPUSurfaceGLImpeller::ClearRenderContext() {
+    // TODO(littlegnal): Implement surface less clear current
+  if (get_gpu_surface_delegate_) {
+    auto *delegate = get_gpu_surface_delegate_(kFlutterImplicitViewId);
+    return delegate->GLContextClearCurrent();
+  }
   return delegate_->GLContextClearCurrent();
 }
 
 bool GPUSurfaceGLImpeller::AllowsDrawingWhenGpuDisabled() const {
+    if (get_gpu_surface_delegate_) {
+    auto *delegate = get_gpu_surface_delegate_(kFlutterImplicitViewId);
+    return delegate->AllowsDrawingWhenGpuDisabled();
+  }
   return delegate_->AllowsDrawingWhenGpuDisabled();
 }
 

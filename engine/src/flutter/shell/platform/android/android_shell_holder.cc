@@ -250,13 +250,16 @@ std::unique_ptr<AndroidShellHolder> AndroidShellHolder::Spawn(
 
   // This is a synchronous call, so the captures don't have race checks.
   Shell::CreateCallback<PlatformView> on_create_platform_view =
-      [&jni_facade, android_context, &weak_platform_view](Shell& shell) {
+      [&jni_facade, android_context,
+       android_rendering_api = android_rendering_api_,
+       &weak_platform_view](Shell& shell) {
         std::unique_ptr<PlatformViewAndroid> platform_view_android;
         platform_view_android = std::make_unique<PlatformViewAndroid>(
             shell,                   // delegate
             shell.GetTaskRunners(),  // task runners
             jni_facade,              // JNI interop
-            android_context          // Android context
+            android_context,          // Android context
+            android_rendering_api   // rendering_api
         );
         weak_platform_view = platform_view_android->GetWeakPtr();
         return platform_view_android;

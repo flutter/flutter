@@ -494,6 +494,7 @@ public class TextInputChannel {
       }
 
       return new Configuration(
+          json.getLong("viewId"),
           json.optBoolean("obscureText"),
           json.optBoolean("autocorrect", true),
           json.optBoolean("enableSuggestions"),
@@ -653,6 +654,8 @@ public class TextInputChannel {
       }
     }
 
+    public final long viewId;
+
     public final boolean obscureText;
     public final boolean autocorrect;
     public final boolean enableSuggestions;
@@ -668,6 +671,7 @@ public class TextInputChannel {
     @Nullable public final Locale[] hintLocales;
 
     public Configuration(
+        long viewId,
         boolean obscureText,
         boolean autocorrect,
         boolean enableSuggestions,
@@ -681,6 +685,7 @@ public class TextInputChannel {
         @Nullable String[] contentCommitMimeTypes,
         @Nullable Configuration[] fields,
         @Nullable Locale[] hintLocales) {
+      this.viewId = viewId;
       this.obscureText = obscureText;
       this.autocorrect = autocorrect;
       this.enableSuggestions = enableSuggestions;

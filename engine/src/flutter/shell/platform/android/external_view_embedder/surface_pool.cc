@@ -26,11 +26,12 @@ std::shared_ptr<OverlayLayer> SurfacePool::GetLayer(
     GrDirectContext* gr_context,
     const AndroidContext& android_context,
     const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
-    const std::shared_ptr<AndroidSurfaceFactory>& surface_factory) {
+    const std::shared_ptr<AndroidSurfaceFactory>& surface_factory,
+    int64_t flutter_view_id) {
   std::lock_guard lock(mutex_);
   // Destroy current layers in the pool if the frame size has changed.
   if (requested_frame_size_ != current_frame_size_) {
-    DestroyLayersLocked(jni_facade);
+    DestroyLayersLocked(jni_facade, flutter_view_id);
   }
   intptr_t gr_context_key = reinterpret_cast<intptr_t>(gr_context);
   // Allocate a new surface if there isn't one available.
@@ -45,7 +46,7 @@ std::shared_ptr<OverlayLayer> SurfacePool::GetLayer(
     std::unique_ptr<PlatformViewAndroidJNI::OverlayMetadata> java_metadata =
         use_new_surface_methods_
             ? jni_facade->createOverlaySurface2()
-            : jni_facade->FlutterViewCreateOverlaySurface();
+            : jni_facade->FlutterViewCreateOverlaySurface(flutter_view_id);
 
     FML_CHECK(java_metadata->window);
     android_surface->SetNativeWindow(java_metadata->window, jni_facade);
@@ -90,20 +91,21 @@ bool SurfacePool::HasLayers() {
 }
 
 void SurfacePool::DestroyLayers(
-    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade) {
+    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
+    int64_t flutter_view_id) {
   std::lock_guard lock(mutex_);
-  DestroyLayersLocked(jni_facade);
+  DestroyLayersLocked(jni_facade, flutter_view_id);
 }
 
 void SurfacePool::DestroyLayersLocked(
-    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade) {
+    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade, int64_t flutter_view_id) {
   if (layers_.empty()) {
     return;
   }
   if (use_new_surface_methods_) {
     jni_facade->destroyOverlaySurface2();
   } else {
-    jni_facade->FlutterViewDestroyOverlaySurfaces();
+    jni_facade->FlutterViewDestroyOverlaySurfaces(flutter_view_id);
   }
   layers_.clear();
   available_layer_index_ = 0;

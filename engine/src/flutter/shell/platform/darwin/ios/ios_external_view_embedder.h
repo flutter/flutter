@@ -23,6 +23,10 @@ class IOSExternalViewEmbedder : public ExternalViewEmbedder {
   __weak FlutterPlatformViewsController* platform_views_controller_;
   std::shared_ptr<IOSContext> ios_context_;
 
+  void SetCurrentProcessingView(int64_t flutter_view_id) override;
+  
+  void CollectView(int64_t view_id) override;
+
   // |ExternalViewEmbedder|
   DlCanvas* GetRootCanvas() override;
 

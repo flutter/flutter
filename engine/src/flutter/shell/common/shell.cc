@@ -2195,6 +2195,7 @@ bool Shell::OnServiceProtocolReloadAssetFonts(
 void Shell::OnPlatformViewAddView(int64_t view_id,
                                   const ViewportMetrics& viewport_metrics,
                                   AddViewCallback callback) {
+  FML_LOG(ERROR) << "Shell::OnPlatformViewAddView: " << view_id;
   TRACE_EVENT0("flutter", "Shell::AddView");
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());

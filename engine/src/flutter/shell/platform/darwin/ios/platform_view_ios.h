@@ -24,6 +24,35 @@
 
 namespace flutter {
 
+class IOSSurfacesManager {
+public:
+  IOSSurfacesManager(const std::shared_ptr<IOSContext>& context);
+
+  ~IOSSurfacesManager() = default;
+
+  void AddSurface(int64_t view_id, std::unique_ptr<IOSSurface> surface);
+
+  void RemoveSurface(int64_t view_id);
+
+  IOSSurface* GetSurface(int64_t view_id) const;
+
+  std::unique_ptr<Surface> CreateGPUSurface();
+
+  private:
+
+    const std::shared_ptr<impeller::Context> impeller_context_;
+    std::shared_ptr<impeller::AiksContext> aiks_context_;
+    // bool is_valid_ = false;
+
+    std::unordered_map<int64_t, std::unique_ptr<IOSSurface>> ios_surfaces_;
+
+    // Since the `ios_surface_` is created on the platform thread but
+    // used on the raster thread we need to protect it with a mutex.
+    mutable std::shared_mutex ios_surface_mutex_;
+
+    FML_DISALLOW_COPY_AND_ASSIGN(IOSSurfacesManager);
+};
+
 /**
  * A bridge connecting the platform agnostic shell and the iOS embedding.
  *
@@ -66,6 +95,10 @@ class PlatformViewIOS final : public PlatformView {
    */
   void SetOwnerViewController(__weak FlutterViewController* owner_controller);
 
+  void AddOwnerViewController(__weak FlutterViewController* owner_controller);
+
+  void RemoveOwnerViewController(FlutterViewIdentifier viewIdentifier);
+
   /**
    * Called one time per `FlutterViewController` when the `FlutterViewController`'s
    * UIView is first loaded.
@@ -73,7 +106,7 @@ class PlatformViewIOS final : public PlatformView {
    * Can be used to perform late initialization after `FlutterViewController`'s
    * init.
    */
-  void attachView();
+  void attachView(FlutterViewIdentifier viewIdentifier);
 
   /**
    * Called through when an external texture such as video or camera is
@@ -162,6 +195,9 @@ class PlatformViewIOS final : public PlatformView {
   ScopedObserver dealloc_view_controller_observer_;
   std::vector<std::string> platform_resolved_locale_;
   std::shared_ptr<PlatformMessageHandlerIos> platform_message_handler_;
+  std::unique_ptr<IOSSurfacesManager> ios_surfaces_manager_;
+  // It can't use NSDictionary, because the values need to be weak references.
+  NSMapTable* viewControllers_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewIOS);
 };

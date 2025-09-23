@@ -17,9 +17,11 @@ namespace flutter {
 
 class GPUSurfaceGLImpeller final : public Surface {
  public:
+ using GetGPUSurfaceGLDelegateCallback = std::function<GPUSurfaceGLDelegate*(int64_t view_id)>;
   explicit GPUSurfaceGLImpeller(GPUSurfaceGLDelegate* delegate,
                                 std::shared_ptr<impeller::Context> context,
-                                bool render_to_surface);
+                                bool render_to_surface,
+                              const GetGPUSurfaceGLDelegateCallback& get_gpu_surface_delegate = {});
 
   // |Surface|
   ~GPUSurfaceGLImpeller() override;
@@ -35,8 +37,12 @@ class GPUSurfaceGLImpeller final : public Surface {
   bool is_valid_ = false;
   fml::TaskRunnerAffineWeakPtrFactory<GPUSurfaceGLImpeller> weak_factory_;
 
+  const GetGPUSurfaceGLDelegateCallback get_gpu_surface_delegate_;
+
   // |Surface|
   std::unique_ptr<SurfaceFrame> AcquireFrame(const DlISize& size) override;
+
+   std::unique_ptr<SurfaceFrame> AcquireFrame(int64_t view_id, const DlISize& size) override;
 
   // |Surface|
   DlMatrix GetRootTransformation() const override;

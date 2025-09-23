@@ -16,7 +16,7 @@ import 'package:flutter/gestures.dart';
 import 'message_codec.dart';
 import 'system_channels.dart';
 
-export 'dart:ui' show Offset, Size, TextDirection, VoidCallback;
+export 'dart:ui' show Offset, PlatformDispatcher, Size, TextDirection, VoidCallback;
 
 export 'package:flutter/gestures.dart' show PointerEvent;
 
@@ -1051,6 +1051,7 @@ class SurfaceAndroidViewController extends AndroidViewController {
     );
 
     final dynamic response = await _AndroidViewControllerInternals.sendCreateMessage(
+      flutterViewId: flutterViewId,
       viewId: viewId,
       viewType: _viewType,
       hybrid: false,
@@ -1116,6 +1117,7 @@ class ExpensiveAndroidViewController extends AndroidViewController {
   @override
   Future<void> _sendCreateMessage({required Size? size, Offset? position}) async {
     await _AndroidViewControllerInternals.sendCreateMessage(
+      flutterViewId: flutterViewId,
       viewId: viewId,
       viewType: _viewType,
       hybrid: true,
@@ -1176,6 +1178,7 @@ class HybridAndroidViewController extends AndroidViewController {
   @override
   Future<void> _sendCreateMessage({required Size? size, Offset? position}) async {
     await _AndroidViewControllerInternals.sendCreateMessage(
+      flutterViewId: flutterViewId,
       viewId: viewId,
       viewType: _viewType,
       hybrid: true,
@@ -1248,6 +1251,7 @@ class TextureAndroidViewController extends AndroidViewController {
 
     _internals.textureId =
         await _AndroidViewControllerInternals.sendCreateMessage(
+              flutterViewId: flutterViewId,
               viewId: viewId,
               viewType: _viewType,
               hybrid: false,
@@ -1297,6 +1301,7 @@ abstract class _AndroidViewControllerInternals {
   // on the native side, the return type is different. Callers should cast
   // depending on the possible return types for their arguments.
   static Future<dynamic> sendCreateMessage({
+    required int flutterViewId,
     required int viewId,
     required String viewType,
     required TextDirection layoutDirection,
@@ -1308,6 +1313,7 @@ abstract class _AndroidViewControllerInternals {
     Offset? position,
   }) {
     final Map<String, dynamic> args = <String, dynamic>{
+      'flutterViewId': flutterViewId,
       'id': viewId,
       'viewType': viewType,
       'direction': AndroidViewController._getAndroidDirection(layoutDirection),
@@ -1621,4 +1627,10 @@ abstract class PlatformViewController {
 
   /// Clears the view's focus on the platform side.
   Future<void> clearFocus();
+
+  int _flutterViewId = -1;
+  int get flutterViewId => _flutterViewId; //PlatformDispatcher.instance.implicitViewId;
+   set flutterViewId(int flutterViewId) {
+    _flutterViewId = flutterViewId;
+  }
 }

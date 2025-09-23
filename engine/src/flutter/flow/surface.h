@@ -39,7 +39,15 @@ class Surface {
 
   virtual std::unique_ptr<SurfaceFrame> AcquireFrame(const DlISize& size) = 0;
 
+  virtual std::unique_ptr<SurfaceFrame> AcquireFrame(int64_t view_id, const DlISize& size) {
+    return AcquireFrame(size);
+  }
+
   virtual DlMatrix GetRootTransformation() const = 0;
+
+  virtual DlMatrix GetRootTransformation(int64_t view_id) const {
+return GetRootTransformation();
+  }
 
   virtual GrDirectContext* GetContext() = 0;
 

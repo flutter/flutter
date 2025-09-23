@@ -112,17 +112,17 @@ public class KeyboardManager
   /**
    * Construct a {@link KeyboardManager}.
    *
-   * @param viewDelegate provides a set of interfaces that the keyboard manager needs to interact
+   * viewDelegate provides a set of interfaces that the keyboard manager needs to interact
    *     with other components and the platform, and is typically implements by {@link FlutterView}.
    */
-  public KeyboardManager(@NonNull ViewDelegate viewDelegate) {
-    this.viewDelegate = viewDelegate;
+  public KeyboardManager(@NonNull BinaryMessenger binaryMessenger) {
+//    this.viewDelegate = viewDelegate;
     this.responders =
         new Responder[] {
-          new KeyEmbedderResponder(viewDelegate.getBinaryMessenger()),
-          new KeyChannelResponder(new KeyEventChannel(viewDelegate.getBinaryMessenger())),
+          new KeyEmbedderResponder(binaryMessenger),
+          new KeyChannelResponder(new KeyEventChannel(binaryMessenger)),
         };
-    final KeyboardChannel keyboardChannel = new KeyboardChannel(viewDelegate.getBinaryMessenger());
+    final KeyboardChannel keyboardChannel = new KeyboardChannel(binaryMessenger);
     keyboardChannel.setKeyboardMethodHandler(this);
   }
 
@@ -164,7 +164,7 @@ public class KeyboardManager
    */
   public interface ViewDelegate {
     /** Returns a {@link BinaryMessenger} to send platform messages with. */
-    public BinaryMessenger getBinaryMessenger();
+//    public BinaryMessenger getBinaryMessenger();
 
     /**
      * Send a {@link KeyEvent} that is not handled by the keyboard responders to the text input
@@ -194,16 +194,20 @@ public class KeyboardManager
         unrepliedCount -= 1;
         isEventHandled |= canHandleEvent;
         if (unrepliedCount == 0 && !isEventHandled) {
-          onUnhandled(keyEvent);
+          onUnhandled(keyEvent, viewDelegate);
         }
       }
     }
 
-    PerEventCallbackBuilder(@NonNull KeyEvent keyEvent) {
+    PerEventCallbackBuilder(@NonNull KeyEvent keyEvent, ViewDelegate viewDelegate) {
       this.keyEvent = keyEvent;
+      this.viewDelegate = viewDelegate;
     }
 
     final KeyEvent keyEvent;
+
+    final ViewDelegate viewDelegate;
+
     int unrepliedCount = responders.length;
     boolean isEventHandled = false;
 
@@ -214,22 +218,22 @@ public class KeyboardManager
 
   protected final Responder[] responders;
   private final HashSet<KeyEvent> redispatchedEvents = new HashSet<>();
-  private final ViewDelegate viewDelegate;
+//  private final ViewDelegate viewDelegate;
 
   @Override
-  public boolean handleEvent(@NonNull KeyEvent keyEvent) {
+  public boolean handleEvent(@NonNull KeyEvent keyEvent, ViewDelegate viewDelegate) {
     final boolean isRedispatchedEvent = redispatchedEvents.remove(keyEvent);
     if (isRedispatchedEvent) {
       return false;
     }
 
     if (responders.length > 0) {
-      final PerEventCallbackBuilder callbackBuilder = new PerEventCallbackBuilder(keyEvent);
+      final PerEventCallbackBuilder callbackBuilder = new PerEventCallbackBuilder(keyEvent, viewDelegate);
       for (final Responder primaryResponder : responders) {
         primaryResponder.handleEvent(keyEvent, callbackBuilder.buildCallback());
       }
     } else {
-      onUnhandled(keyEvent);
+      onUnhandled(keyEvent, viewDelegate);
     }
 
     return true;
@@ -246,7 +250,7 @@ public class KeyboardManager
     }
   }
 
-  private void onUnhandled(@NonNull KeyEvent keyEvent) {
+  private void onUnhandled(@NonNull KeyEvent keyEvent, ViewDelegate viewDelegate) {
     if (viewDelegate == null || viewDelegate.onTextInputKeyEvent(keyEvent)) {
       return;
     }

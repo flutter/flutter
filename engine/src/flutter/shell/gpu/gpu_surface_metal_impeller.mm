@@ -26,9 +26,11 @@ namespace flutter {
 GPUSurfaceMetalImpeller::GPUSurfaceMetalImpeller(
     GPUSurfaceMetalDelegate* delegate,
     const std::shared_ptr<impeller::AiksContext>& context,
-    bool render_to_surface)
+    bool render_to_surface,
+    const GetGPUSurfaceMetalDelegateCallback& get_gpu_surface_metal_delegate)
     : delegate_(delegate),
-      render_target_type_(delegate->GetRenderTargetType()),
+      get_gpu_surface_metal_delegate_(get_gpu_surface_metal_delegate),
+      // render_target_type_(delegate->GetRenderTargetType()),
       aiks_context_(context),
       render_to_surface_(render_to_surface) {
   // If this preference is explicitly set, we allow for disabling partial repaint.
@@ -51,7 +53,7 @@ bool GPUSurfaceMetalImpeller::IsValid() {
 }
 
 // |Surface|
-std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrame(const DlISize& frame_size) {
+std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrame(int64_t view_id, const DlISize& frame_size) {
   TRACE_EVENT0("impeller", "GPUSurfaceMetalImpeller::AcquireFrame");
 
   if (!IsValid()) {
@@ -71,11 +73,16 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrame(const DlISiz
         [](const SurfaceFrame& surface_frame) { return true; }, frame_size);
   }
 
-  switch (render_target_type_) {
+  const GPUSurfaceMetalDelegate* delegate = get_gpu_surface_metal_delegate_
+                                              ? get_gpu_surface_metal_delegate_(view_id)
+                                              : delegate_;
+  FML_CHECK(delegate);
+  const auto render_target_type = const_cast<GPUSurfaceMetalDelegate*>(delegate)->GetRenderTargetType();
+  switch (render_target_type) {
     case MTLRenderTargetType::kCAMetalLayer:
-      return AcquireFrameFromCAMetalLayer(frame_size);
+      return AcquireFrameFromCAMetalLayer(delegate, frame_size);
     case MTLRenderTargetType::kMTLTexture:
-      return AcquireFrameFromMTLTexture(frame_size);
+      return AcquireFrameFromMTLTexture(delegate, frame_size);
     default:
       FML_CHECK(false) << "Unknown MTLRenderTargetType type.";
   }
@@ -84,8 +91,14 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrame(const DlISiz
 }
 
 std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLayer(
+    const GPUSurfaceMetalDelegate* delegate,
     const DlISize& frame_size) {
-  CAMetalLayer* layer = (__bridge CAMetalLayer*)delegate_->GetCAMetalLayer(frame_size);
+  // const GPUSurfaceMetalDelegate* delegate = get_gpu_surface_metal_delegate_
+  //                                             ? get_gpu_surface_metal_delegate_(view_id)
+  //                                             : delegate_;
+  // FML_CHECK(delegate);
+
+  CAMetalLayer* layer = (__bridge CAMetalLayer*)delegate->GetCAMetalLayer(frame_size);
   if (!layer) {
     FML_LOG(ERROR) << "Invalid CAMetalLayer given by the embedder.";
     return nullptr;
@@ -218,8 +231,14 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
 }
 
 std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromMTLTexture(
+    const GPUSurfaceMetalDelegate* delegate,
     const DlISize& frame_size) {
-  GPUMTLTextureInfo texture_info = delegate_->GetMTLTexture(frame_size);
+  // const GPUSurfaceMetalDelegate* delegate = get_gpu_surface_metal_delegate_
+  //                                             ? get_gpu_surface_metal_delegate_(view_id)
+  //                                             : delegate_;
+  // FML_CHECK(delegate);
+
+  GPUMTLTextureInfo texture_info = delegate->GetMTLTexture(frame_size);
   id<MTLTexture> mtl_texture = (__bridge id<MTLTexture>)texture_info.texture;
   if (!mtl_texture) {
     FML_LOG(ERROR) << "Invalid MTLTexture given by the embedder.";
@@ -343,6 +362,13 @@ DlMatrix GPUSurfaceMetalImpeller::GetRootTransformation() const {
 }
 
 // |Surface|
+DlMatrix GPUSurfaceMetalImpeller::GetRootTransformation(int64_t view_id) const {
+  // This backend does not currently support root surface transformations. Just
+  // return identity.
+  return {};
+}
+
+// |Surface|
 GrDirectContext* GPUSurfaceMetalImpeller::GetContext() {
   return nullptr;
 }
@@ -354,7 +380,11 @@ std::unique_ptr<GLContextResult> GPUSurfaceMetalImpeller::MakeRenderContextCurre
 }
 
 bool GPUSurfaceMetalImpeller::AllowsDrawingWhenGpuDisabled() const {
-  return delegate_->AllowsDrawingWhenGpuDisabled();
+//   const GPUSurfaceMetalDelegate* delegate = get_gpu_surface_metal_delegate_
+//                                               ? get_gpu_surface_metal_delegate_(kFlutterImplicitViewId)
+//                                               : delegate_;
+//  return delegate->AllowsDrawingWhenGpuDisabled();
+  return false;
 }
 
 // |Surface|

@@ -7,12 +7,15 @@
 namespace flutter {
 
 AndroidSnapshotSurfaceProducer::AndroidSnapshotSurfaceProducer(
-    AndroidSurface& android_surface)
-    : android_surface_(android_surface) {}
+    const GetAndroidSurfaceCallback& get_android_surface_callback)
+    : get_android_surface_callback_(get_android_surface_callback) {}
 
 std::unique_ptr<Surface>
 AndroidSnapshotSurfaceProducer::CreateSnapshotSurface() {
-  return android_surface_.CreateSnapshotSurface();
+  if (get_android_surface_callback_) {
+return get_android_surface_callback_().CreateSnapshotSurface();
+  }
+  return nullptr;
 }
 
 }  // namespace flutter

@@ -76,10 +76,12 @@ void PlatformView::NotifyCreated() {
     FML_LOG(ERROR) << "Failed to create platform view rendering surface";
     return;
   }
+  FML_LOG(ERROR) << "delegate_.OnPlatformViewCreated";
   delegate_.OnPlatformViewCreated(std::move(surface));
 }
 
 void PlatformView::NotifyDestroyed() {
+  FML_LOG(ERROR) << "PlatformView::NotifyDestroyed";
   delegate_.OnPlatformViewDestroyed();
 }
 
