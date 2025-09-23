@@ -44,6 +44,7 @@ import io.flutter.view.AccessibilityStringBuilder.StringAttributeType;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -1758,7 +1759,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     }
 
     // If all the routes are in the previous route, get the last route.
-    if (lastAdded == null && newRoutes.size() > 0) {
+    if (lastAdded == null && !newRoutes.isEmpty()) {
       lastAdded = newRoutes.get(newRoutes.size() - 1);
     }
 
@@ -2499,7 +2500,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       if (label == null && previousLabel == null) {
         return false;
       }
-      return label == null || previousLabel == null || !label.equals(previousLabel);
+      return label == null || !label.equals(previousLabel);
     }
 
     private void log(@NonNull String indent, boolean recursive) {
@@ -2683,7 +2684,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
               attribute.start = start;
               attribute.end = end;
               attribute.type = type;
-              attribute.locale = Charset.forName("UTF-8").decode(args).toString();
+              attribute.locale = StandardCharsets.UTF_8.decode(args).toString();
               result.add(attribute);
               break;
             }
