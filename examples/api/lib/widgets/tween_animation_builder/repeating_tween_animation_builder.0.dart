@@ -50,7 +50,7 @@ class _RepeatingTweenAnimationBuilderExampleState
       ),
       body: RepeatingTweenAnimationBuilder<double>(
         tween: Tween<double>(begin: 0.0, end: 1.0),
-        duration: const Duration(seconds: 15),
+        duration: const Duration(seconds: 4),
         paused: _isPaused,
         reverse: _isReversing,
         curve: Curves.easeInOut,
@@ -58,7 +58,7 @@ class _RepeatingTweenAnimationBuilderExampleState
           return Stack(
             children: <Widget>[
               Center(
-                child: Transform.rotate(angle: animation.value * 2.0 * math.pi, child: child),
+                child: Transform.rotate(angle: animation.value * 0.5 * math.pi, child: child),
               ),
               _buildControls(colors, animation),
             ],
@@ -186,7 +186,7 @@ class _RepeatingTweenAnimationBuilderExampleState
     );
   }
 
-  /// Builds the Reverse toggle control.
+  /// Builds the animation mode toggle control.
   Widget _buildReverseToggle(ColorScheme colors) {
     return GestureDetector(
       // The entire area is clickable.
@@ -200,7 +200,16 @@ class _RepeatingTweenAnimationBuilderExampleState
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Text('Reverse Direction', style: TextStyle(color: colors.onSurface)),
+            Icon(
+              _isReversing ? Icons.sync : Icons.sync_disabled,
+              color: colors.onSurface,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              _isReversing ? 'Back & Forth' : 'Forward Only',
+              style: TextStyle(color: colors.onSurface, fontWeight: FontWeight.w500),
+            ),
             const SizedBox(width: 8),
             Switch(
               value: _isReversing,
