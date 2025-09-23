@@ -1487,9 +1487,9 @@ group('gradle version', () {
           ),
         );
         expect(
-          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '23'),
+          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '24'),
           allOf(
-            equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '23.0.2')),
+            equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '24.0.2')),
             equals(
               const JavaGradleCompat(
                 javaMin: '23',
