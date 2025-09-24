@@ -236,14 +236,14 @@ void main() {
               width: 100,
               height: 100,
               child: InkWell(
-                overlayColor: WidgetStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-                  if (states.contains(MaterialState.hovered)) {
+                overlayColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+                  if (states.contains(WidgetState.hovered)) {
                     return const Color(0xff00ff00);
                   }
-                  if (states.contains(MaterialState.focused)) {
+                  if (states.contains(WidgetState.focused)) {
                     return const Color(0xff0000ff);
                   }
-                  if (states.contains(MaterialState.pressed)) {
+                  if (states.contains(WidgetState.pressed)) {
                     return const Color(0xf00fffff);
                   }
                   return const Color(0xffbadbad); // Shouldn't happen.
@@ -329,14 +329,14 @@ void main() {
               height: 100,
               child: InkWell(
                 focusNode: focusNode,
-                overlayColor: WidgetStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-                  if (states.contains(MaterialState.hovered)) {
+                overlayColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+                  if (states.contains(WidgetState.hovered)) {
                     return const Color(0xff00ff00);
                   }
-                  if (states.contains(MaterialState.focused)) {
+                  if (states.contains(WidgetState.focused)) {
                     return const Color(0xff0000ff);
                   }
-                  if (states.contains(MaterialState.pressed)) {
+                  if (states.contains(WidgetState.pressed)) {
                     return const Color(0xf00fffff);
                   }
                   return const Color(0xffbadbad); // Shouldn't happen.
@@ -381,8 +381,8 @@ void main() {
               height: 100,
               child: InkWell(
                 splashFactory: NoSplash.splashFactory,
-                overlayColor: WidgetStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-                  if (states.contains(MaterialState.pressed)) {
+                overlayColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+                  if (states.contains(WidgetState.pressed)) {
                     return pressedColor;
                   }
                   return const Color(0xffbadbad); // Shouldn't happen.
@@ -418,8 +418,8 @@ void main() {
     const Rect inkRect = Rect.fromLTRB(0, 0, 100, 100);
 
     Widget boilerplate({FocusNode? focusNode}) {
-      final WidgetStatesController statesController = WidgetStatesController(<MaterialState>{
-        MaterialState.selected,
+      final WidgetStatesController statesController = WidgetStatesController(<WidgetState>{
+        WidgetState.selected,
       });
       addTearDown(statesController.dispose);
 
@@ -549,7 +549,7 @@ void main() {
     focusNode.dispose();
   });
 
-  testWidgets('ink response splashColor matches resolved overlayColor for MaterialState.pressed', (
+  testWidgets('ink response splashColor matches resolved overlayColor for WidgetState.pressed', (
     WidgetTester tester,
   ) async {
     // Same test as 'ink response splashColor matches splashColor
@@ -571,16 +571,14 @@ void main() {
                   width: 100,
                   height: 100,
                   child: InkWell(
-                    overlayColor: WidgetStateProperty.resolveWith<Color>((
-                      Set<MaterialState> states,
-                    ) {
-                      if (states.contains(MaterialState.hovered)) {
+                    overlayColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+                      if (states.contains(WidgetState.hovered)) {
                         return const Color(0xff00ff00);
                       }
-                      if (states.contains(MaterialState.focused)) {
+                      if (states.contains(WidgetState.focused)) {
                         return const Color(0xff0000ff);
                       }
-                      if (states.contains(MaterialState.pressed)) {
+                      if (states.contains(WidgetState.pressed)) {
                         return splashColor;
                       }
                       return const Color(0xffbadbad); // Shouldn't happen.
@@ -2383,7 +2381,7 @@ void main() {
     addTearDown(controller.dispose);
     int pressedCount = 0;
     controller.addListener(() {
-      if (controller.value.contains(MaterialState.pressed)) {
+      if (controller.value.contains(WidgetState.pressed)) {
         pressedCount += 1;
       }
     });
@@ -2420,8 +2418,8 @@ void main() {
               width: 100,
               height: 100,
               child: InkWell(
-                overlayColor: WidgetStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-                  if (states.contains(MaterialState.hovered)) {
+                overlayColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+                  if (states.contains(WidgetState.hovered)) {
                     return const Color(0xff00ff00);
                   }
                   return null;
@@ -2583,10 +2581,10 @@ void main() {
 
     // The InkWell is in pressed state.
     await tester.pump(const Duration(milliseconds: 99));
-    expect(controller.value.contains(MaterialState.pressed), isTrue);
+    expect(controller.value.contains(WidgetState.pressed), isTrue);
 
     await tester.pumpAndSettle();
-    expect(controller.value.contains(MaterialState.pressed), isFalse);
+    expect(controller.value.contains(WidgetState.pressed), isFalse);
 
     controller.dispose();
   });

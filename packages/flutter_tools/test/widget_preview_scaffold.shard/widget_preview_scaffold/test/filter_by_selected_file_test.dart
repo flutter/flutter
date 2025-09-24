@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/widget_previews.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:widget_preview_scaffold/src/controls.dart';
 import 'package:widget_preview_scaffold/src/dtd/editor_service.dart';
@@ -20,25 +21,31 @@ void main() {
 
     final FakeWidgetPreviewScaffoldDtdServices dtdServices =
         FakeWidgetPreviewScaffoldDtdServices();
-    final groups = <WidgetPreviewGroup>[
-      WidgetPreviewGroup(
-        name: 'group',
-        previews: <WidgetPreview>[
-          WidgetPreview(builder: () => Text('widget1'), scriptUri: kScript1),
-          WidgetPreview(builder: () => Text('widget2'), scriptUri: kScript2),
-        ],
+    final previews = <WidgetPreview>[
+      WidgetPreview(
+        builder: () => Text('widget1'),
+        scriptUri: kScript1,
+        previewData: Preview(group: 'group'),
+        packageName: '',
+      ),
+      WidgetPreview(
+        builder: () => Text('widget2'),
+        scriptUri: kScript2,
+        previewData: Preview(group: 'group'),
+        packageName: '',
       ),
     ];
     final controller = FakeWidgetPreviewScaffoldController(
       dtdServicesOverride: dtdServices,
-      previews: groups,
+      previews: previews,
     );
     await controller.initialize();
     final WidgetPreviewScaffold widgetPreview = WidgetPreviewScaffold(
       controller: controller,
     );
 
-    // No file is selected, so all previews should be visible.
+    // No file is selected, so all previews should be visible until
+    // https://github.com/dart-lang/sdk/issues/61538 is resolved.
     await tester.pumpWidget(widgetPreview);
     expect(controller.filterBySelectedFileListenable.value, true);
     expect(dtdServices.selectedSourceFile.value, isNull);
@@ -57,6 +64,24 @@ void main() {
 
     // Verify only previews from kScript1 are displayed.
     expect(dtdServices.selectedSourceFile.value?.uriAsString, kScript1);
+    expect(
+      controller
+          .filteredPreviewSetListenable
+          .value
+          .single
+          .previews
+          .single
+          .scriptUri,
+      kScript1,
+    );
+
+    // Select a 'null' script. This simulates focusing on a non-source file
+    // (e.g., the embedded widget previewer).
+    dtdServices.selectedSourceFile.value = null;
+
+    // Verify the selected source file is null but previews from kScript1 are
+    // still displayed.
+    expect(dtdServices.selectedSourceFile.value?.uriAsString, null);
     expect(
       controller
           .filteredPreviewSetListenable
@@ -98,6 +123,10 @@ void main() {
     expect(controller.filterBySelectedFileListenable.value, false);
     // Verify the currently selected source is still kScript2 but all previews are displayed.
     expect(dtdServices.selectedSourceFile.value?.uriAsString, kScript2);
-    expect(controller.filteredPreviewSetListenable.value, groups);
+    expect(controller.filteredPreviewSetListenable.value, hasLength(1));
+    expect(
+      controller.filteredPreviewSetListenable.value.first.previews,
+      previews,
+    );
   });
 }

@@ -42,7 +42,7 @@ class BenchMouseRegionGridHover extends WidgetRecorder {
   late _Tester _tester;
 
   void handleDataPoint(Duration duration) {
-    profile!.addDataPoint('hitTestDuration', duration, reported: true);
+    profile?.addDataPoint('hitTestDuration', duration, reported: true);
   }
 
   // Use a non-trivial border to force Web to switch painter
@@ -136,6 +136,8 @@ class _Tester {
   static const Duration hoverDuration = Duration(milliseconds: 20);
 
   bool _stopped = false;
+  final Completer<void> _finished = Completer<void>();
+  Future<void> get finished => _finished.future;
 
   TestGesture get gesture {
     return _gesture ??= TestGesture(
@@ -167,6 +169,7 @@ class _Tester {
       await _hoverTo(const Offset(370, 390), hoverDuration);
       await _hoverTo(const Offset(390, 30), hoverDuration);
     }
+    _finished.complete();
   }
 
   void stop() {
