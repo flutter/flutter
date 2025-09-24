@@ -75,8 +75,8 @@ class FlutterTaskHelperTest {
         copySpecActionSlot.captured.execute(mockCopySpec)
 
         verify { mockCopySpec.from(fakeIntermediateDirectoryPath) }
-        verify { mockCopySpec.include("${FlutterPluginConstants.PLATFORM_ARCH_MAP["arm64-v8a"]}/app.so") }
-        verify { mockCopySpec.include("${FlutterPluginConstants.PLATFORM_ARCH_MAP["x64"]}/app.so") }
+        verify { mockCopySpec.include("${FlutterPluginConstants.PLATFORM_ARCH_MAP["arm64-v8a"]}${File.separator}app.so") }
+        verify { mockCopySpec.include("${FlutterPluginConstants.PLATFORM_ARCH_MAP["x64"]}${File.separator}app.so") }
     }
 
     @Test
