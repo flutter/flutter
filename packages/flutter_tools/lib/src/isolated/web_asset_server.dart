@@ -329,7 +329,7 @@ class WebAssetServer implements AssetReader {
             ? FrontendServerDdcLibraryBundleStrategyProvider(
                 ReloadConfiguration.none,
                 server,
-                PackageUriMapper(packageConfig),
+                PackageUriMapper(packageConfig, useDebuggerModuleNames: true),
                 digestProvider,
                 BuildSettings(
                   appEntrypoint: packageConfig.toPackageUri(
@@ -345,7 +345,7 @@ class WebAssetServer implements AssetReader {
             : FrontendServerRequireStrategyProvider(
                 ReloadConfiguration.none,
                 server,
-                PackageUriMapper(packageConfig),
+                PackageUriMapper(packageConfig, useDebuggerModuleNames: true),
                 digestProvider,
                 BuildSettings(
                   appEntrypoint: packageConfig.toPackageUri(
