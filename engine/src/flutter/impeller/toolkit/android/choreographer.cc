@@ -58,16 +58,6 @@ bool Choreographer::PostFrameCallback(FrameCallback callback) const {
         },
         data.release());
     return true;
-  } else if (table.AChoreographer_postFrameCallback) {
-    table.AChoreographer_postFrameCallback(
-        const_cast<AChoreographer*>(instance_),
-        [](long /*NOLINT*/ nanos, void* p_data) {
-          auto data = reinterpret_cast<InFlightData*>(p_data);
-          data->callback(ClockMonotonicNanosToFrameTimePoint(nanos));
-          delete data;
-        },
-        data.release());
-    return true;
   }
 
   // The validity check should have tripped by now.
@@ -77,8 +67,7 @@ bool Choreographer::PostFrameCallback(FrameCallback callback) const {
 
 bool Choreographer::IsAvailableOnPlatform() {
   return GetProcTable().AChoreographer_getInstance &&
-         (GetProcTable().AChoreographer_postFrameCallback64 ||
-          GetProcTable().AChoreographer_postFrameCallback);
+         GetProcTable().AChoreographer_postFrameCallback64;
 }
 
 }  // namespace impeller::android
