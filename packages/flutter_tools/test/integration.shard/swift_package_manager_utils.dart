@@ -166,13 +166,12 @@ class SwiftPackageManagerUtils {
     String flutterBin,
     String workingDirectory, {
     required String platform,
-    required String iosLanguage,
     bool usesSwiftPackageManager = false,
   }) async {
     final dependencyManager = usesSwiftPackageManager ? 'spm' : 'cocoapods';
 
     // Create plugin
-    final pluginName = '${platform}_${iosLanguage}_${dependencyManager}_plugin';
+    final pluginName = '${platform}_${dependencyManager}_plugin';
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
@@ -181,8 +180,6 @@ class SwiftPackageManagerUtils {
       'io.flutter.devicelab',
       '--template=plugin',
       '--platforms=$platform',
-      '-i',
-      iosLanguage,
       pluginName,
     ], workingDirectory: workingDirectory);
 
@@ -203,8 +200,7 @@ class SwiftPackageManagerUtils {
       pluginName: pluginName,
       pluginPath: pluginDirectory.path,
       platform: platform,
-      className:
-          '${_capitalize(platform)}${_capitalize(iosLanguage)}${_capitalize(dependencyManager)}Plugin',
+      className: '${_capitalize(platform)}${_capitalize(dependencyManager)}Plugin',
     );
   }
 

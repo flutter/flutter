@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -333,10 +334,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       vmServiceUri = vmServiceDiscovery.uris;
 
       // Stop the timer once we receive the first uri.
-      vmServiceUri = vmServiceUri.map((Uri uri) {
-        discoveryStatus.stop();
-        return uri;
-      });
+      vmServiceUri = streamWithCallbackOnFirstItem(vmServiceUri, () => discoveryStatus.stop());
     } else {
       vmServiceUri = Stream<Uri>.fromFuture(
         buildVMServiceUri(
@@ -532,4 +530,16 @@ class HotRunnerFactory {
     dartBuilder: hookRunner,
     logger: logger,
   );
+}
+
+@visibleForTesting
+Stream<T> streamWithCallbackOnFirstItem<T>(Stream<T> stream, void Function() callback) {
+  var called = false;
+  return stream.map((i) {
+    if (!called) {
+      callback();
+      called = true;
+    }
+    return i;
+  });
 }
