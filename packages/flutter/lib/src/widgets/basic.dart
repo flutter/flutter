@@ -633,6 +633,9 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   ///
   /// The [blendMode] argument will default to [BlendMode.srcOver] and must not be
   /// null if provided.
+  ///
+  /// Exactly one of [filter] or [filterConfig] must be provided.
+  /// Providing both or neither will result in an assertion error.
   const BackdropFilter({
     super.key,
     this.filter,
@@ -654,6 +657,9 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   /// This constructor will automatically look up the nearest [BackdropGroup]
   /// and will share the backdrop input with sibling and child [BackdropFilter]
   /// widgets.
+  ///
+  /// Exactly one of [filter] or [filterConfig] must be provided.
+  /// Providing both or neither will result in an assertion error.
   const BackdropFilter.grouped({
     super.key,
     this.filter,
@@ -670,16 +676,12 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   ///
   /// For example, consider using [ImageFilter.blur] to create a backdrop
   /// blur effect.
-  ///
-  /// This is the engine-level filter object. If you want to create a
-  /// filter that depends on the layout of the widget, consider using
-  /// [filterConfig] instead.
   final ui.ImageFilter? filter;
 
   /// The configuration for the image filter to apply to the existing painted content.
   ///
-  /// This is the framework-level configuration object that can be resolved
-  /// into a [ui.ImageFilter] at layout time.
+  /// For example, consider using [ImageFilterConfig.blur] to create a backdrop
+  /// blur effect.
   ///
   /// See also:
   ///
@@ -714,11 +716,14 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
     return backdropGroupKey;
   }
 
+  ImageFilterConfig get _effectiveFilterConfig {
+    return filterConfig ?? ImageFilterConfig.fromImageFilter(filter!);
+  }
+
   @override
   RenderBackdropFilter createRenderObject(BuildContext context) {
     return RenderBackdropFilter(
-      filter: filter,
-      filterConfig: filterConfig,
+      filterConfig: _effectiveFilterConfig,
       blendMode: blendMode,
       enabled: enabled,
       backdropKey: _getBackdropGroupKey(context),
@@ -728,8 +733,7 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, RenderBackdropFilter renderObject) {
     renderObject
-      ..filter = filter
-      ..filterConfig = filterConfig
+      ..filterConfig = _effectiveFilterConfig
       ..enabled = enabled
       ..blendMode = blendMode
       ..backdropKey = _getBackdropGroupKey(context);

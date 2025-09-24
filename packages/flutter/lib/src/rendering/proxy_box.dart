@@ -1204,15 +1204,11 @@ class RenderBackdropFilter extends RenderProxyBox {
   /// The [blendMode] argument defaults to [BlendMode.srcOver].
   RenderBackdropFilter({
     RenderBox? child,
-    ui.ImageFilter? filter,
     ImageFilterConfig? filterConfig,
     BlendMode blendMode = BlendMode.srcOver,
     bool enabled = true,
     BackdropKey? backdropKey,
-  }) : assert(filter != null || filterConfig != null, 'Either filter or filterConfig must be provided.'),
-       assert(filter == null || filterConfig == null, 'Cannot provide both a filter and a filterConfig.'),
-       _filter = filter,
-       _filterConfig = filterConfig,
+  }) : _filterConfig = filterConfig,
        _enabled = enabled,
        _blendMode = blendMode,
        _backdropKey = backdropKey,
@@ -1232,29 +1228,10 @@ class RenderBackdropFilter extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  /// The image filter to apply to the existing painted content before painting
-  /// the child.
-  ///
-  /// For example, consider using [ui.ImageFilter.blur] to create a backdrop
-  /// blur effect.
-  ///
-  /// If [filterConfig] is also provided, this field will be ignored.
-  ui.ImageFilter? get filter => _filter;
-  ui.ImageFilter? _filter;
-  set filter(ui.ImageFilter? value) {
-    if (_filter == value) {
-      return;
-    }
-    _filter = value;
-    markNeedsPaint();
-  }
-
   /// The configuration for the image filter to apply to the existing painted content.
   ///
   /// This is the framework-level configuration object that can be resolved
   /// into a [ui.ImageFilter] at layout time.
-  ///
-  /// If this is provided, the [filter] property will be ignored.
   ImageFilterConfig? get filterConfig => _filterConfig;
   ImageFilterConfig? _filterConfig;
   set filterConfig(ImageFilterConfig? value) {
@@ -1343,7 +1320,9 @@ class RenderBackdropFilter extends RenderProxyBox {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ui.ImageFilter>('filter', filter, defaultValue: null));
-    properties.add(DiagnosticsProperty<ImageFilterConfig>('filterConfig', filterConfig, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<ImageFilterConfig>('filterConfig', filterConfig, defaultValue: null),
+    );
     properties.add(EnumProperty<BlendMode>('blendMode', blendMode));
     properties.add(FlagProperty('enabled', value: enabled, ifTrue: 'enabled'));
   }

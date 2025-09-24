@@ -30,7 +30,7 @@ abstract class ImageFilterConfig {
   const ImageFilterConfig();
 
   /// Creates a configuration that directly uses the given filter.
-  factory ImageFilterConfig.filter(ui.ImageFilter filter) {
+  factory ImageFilterConfig.fromImageFilter(ui.ImageFilter filter) {
     return _DirectImageFilterConfig(filter);
   }
 
