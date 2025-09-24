@@ -165,6 +165,7 @@ source_set("flutter_windows_source") {
     ":flutter_windows_headers",
     "//flutter/fml:fml",
     "//flutter/impeller/renderer/backend/gles",
+    "//flutter/shell/geometry:geometry",
     "//flutter/shell/platform/common:common_cpp",
     "//flutter/shell/platform/common:common_cpp_input",
     "//flutter/shell/platform/common:common_cpp_isolate_scope",
