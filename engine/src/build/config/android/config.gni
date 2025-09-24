@@ -19,7 +19,7 @@ if (is_android) {
     # Unused. Required for GN files maintained in other buildroots.
     enable_java_templates = false
 
-    android_api_level = 22
+    android_api_level = 24
   }
 
   # Host stuff -----------------------------------------------------------------
