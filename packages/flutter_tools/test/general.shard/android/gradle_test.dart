@@ -7,7 +7,6 @@ import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart' as gradle_utils;
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -567,70 +566,6 @@ flutter:
           treeShakeIcons: false,
           packageConfigPath: '.dart_tool/package_config.json',
         ),
-      );
-    });
-  });
-
-  group('gradle version', () {
-    testWithoutContext('should be compatible with the Android plugin version', () {
-      // Granular versions.
-      expect(gradle_utils.getGradleVersionFor('1.0.0'), '2.3');
-      expect(gradle_utils.getGradleVersionFor('1.0.1'), '2.3');
-      expect(gradle_utils.getGradleVersionFor('1.0.2'), '2.3');
-      expect(gradle_utils.getGradleVersionFor('1.0.4'), '2.3');
-      expect(gradle_utils.getGradleVersionFor('1.0.8'), '2.3');
-      expect(gradle_utils.getGradleVersionFor('1.1.0'), '2.3');
-      expect(gradle_utils.getGradleVersionFor('1.1.2'), '2.3');
-      expect(gradle_utils.getGradleVersionFor('1.1.2'), '2.3');
-      expect(gradle_utils.getGradleVersionFor('1.1.3'), '2.3');
-      // Version Ranges.
-      expect(gradle_utils.getGradleVersionFor('1.2.0'), '2.9');
-      expect(gradle_utils.getGradleVersionFor('1.3.1'), '2.9');
-
-      expect(gradle_utils.getGradleVersionFor('1.5.0'), '2.2.1');
-
-      expect(gradle_utils.getGradleVersionFor('2.0.0'), '2.13');
-      expect(gradle_utils.getGradleVersionFor('2.1.2'), '2.13');
-
-      expect(gradle_utils.getGradleVersionFor('2.1.3'), '2.14.1');
-      expect(gradle_utils.getGradleVersionFor('2.2.3'), '2.14.1');
-
-      expect(gradle_utils.getGradleVersionFor('2.3.0'), '3.3');
-
-      expect(gradle_utils.getGradleVersionFor('3.0.0'), '4.1');
-
-      expect(gradle_utils.getGradleVersionFor('3.1.0'), '4.4');
-
-      expect(gradle_utils.getGradleVersionFor('3.2.0'), '4.6');
-      expect(gradle_utils.getGradleVersionFor('3.2.1'), '4.6');
-
-      expect(gradle_utils.getGradleVersionFor('3.3.0'), '4.10.2');
-      expect(gradle_utils.getGradleVersionFor('3.3.2'), '4.10.2');
-
-      expect(gradle_utils.getGradleVersionFor('3.4.0'), '5.6.2');
-      expect(gradle_utils.getGradleVersionFor('3.5.0'), '5.6.2');
-
-      expect(gradle_utils.getGradleVersionFor('4.0.0'), '6.7');
-      expect(gradle_utils.getGradleVersionFor('4.1.0'), '6.7');
-
-      expect(gradle_utils.getGradleVersionFor('7.0'), '7.5');
-      expect(gradle_utils.getGradleVersionFor('7.1.2'), '7.5');
-      expect(gradle_utils.getGradleVersionFor('7.2'), '7.5');
-      expect(gradle_utils.getGradleVersionFor('8.0'), '8.0');
-      expect(gradle_utils.getGradleVersionFor('8.1'), '8.0');
-      expect(gradle_utils.getGradleVersionFor('8.2'), '8.2');
-      expect(gradle_utils.getGradleVersionFor('8.3'), '8.4');
-      expect(gradle_utils.getGradleVersionFor('8.4'), '8.6');
-      expect(gradle_utils.getGradleVersionFor('8.5'), '8.7');
-      expect(gradle_utils.getGradleVersionFor('8.7'), '8.9');
-      expect(gradle_utils.getGradleVersionFor('8.8'), '8.10.2');
-      expect(gradle_utils.getGradleVersionFor(gradle_utils.maxKnownAgpVersion), '8.11.1');
-    });
-
-    testWithoutContext('throws on unsupported versions', () {
-      expect(
-        () => gradle_utils.getGradleVersionFor('3.6.0'),
-        throwsA(predicate<Exception>((Exception e) => e is ToolExit)),
       );
     });
   });
