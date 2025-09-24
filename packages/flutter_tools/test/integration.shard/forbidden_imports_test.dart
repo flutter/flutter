@@ -167,6 +167,17 @@ void main() {
         'test',
         'widget_preview_scaffold.shard',
         'widget_preview_scaffold',
+        'test',
+        'filter_by_selected_file_test.dart',
+      ),
+      fileSystem.path.join(
+        flutterTools,
+        'test',
+        'widget_preview_scaffold.shard',
+        'widget_preview_scaffold',
+        'lib',
+        'src',
+        'widget_preview_scaffold_controller.dart',
       ),
     ];
     for (final dirName in <String>['lib', 'bin', 'test']) {
