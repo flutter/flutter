@@ -559,10 +559,12 @@ class ImageFilter {
     double sigmaY = 0.0,
     TileMode? tileMode,
     Rect? bounds,
-  }) =>
-      // TODO(dkwingsmt): `bounds` is currently not implemented on Web.
-      // https://github.com/flutter/flutter/issues/175899
-      engine.renderer.createBlurImageFilter(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
+  }) => engine.renderer.createBlurImageFilter(
+    sigmaX: sigmaX,
+    sigmaY: sigmaY,
+    tileMode: tileMode,
+    bounds: bounds,
+  );
 
   factory ImageFilter.dilate({double radiusX = 0.0, double radiusY = 0.0}) =>
       engine.renderer.createDilateImageFilter(radiusX: radiusX, radiusY: radiusY);
