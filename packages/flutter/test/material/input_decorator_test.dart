@@ -15663,9 +15663,7 @@ void main() {
     },
   );
 
-
-  testWidgets('helper text and character counter do not overlap', (WidgetTester tester)
-  async {
+  testWidgets('helper text and character counter do not overlap', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/175591.
 
     // This test verifies that when both helperText and maxLength are specified,
