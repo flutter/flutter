@@ -19,6 +19,9 @@ extension TokenExtension on Token {
 
   /// Convenience getter to identify WidgetBuilder types.
   bool get isWidgetBuilder => toString() == 'WidgetBuilder';
+
+  /// Convenience getter to identify Widget types.
+  bool get isWidget => toString() == 'Widget';
 }
 
 extension AnnotationExtension on Annotation {

@@ -20,16 +20,15 @@ import '../src/context.dart';
 import 'test_data/basic_project.dart';
 import 'test_utils.dart';
 
-const firstLaunchMessagesWeb = <String>[
+final launchingOnDeviceRegExp = RegExp(r'Launching the Widget Preview Scaffold on [a-zA-Z]+...');
+
+final firstLaunchMessagesWeb = <Pattern>[
   'Creating widget preview scaffolding at:',
-  'Launching the Widget Preview Scaffold...',
+  launchingOnDeviceRegExp,
   'Done loading previews.',
 ];
 
-const subsequentLaunchMessagesWeb = <String>[
-  'Launching the Widget Preview Scaffold...',
-  'Done loading previews.',
-];
+final subsequentLaunchMessagesWeb = <Pattern>[launchingOnDeviceRegExp, 'Done loading previews.'];
 
 void main() {
   late Directory tempDir;
@@ -53,7 +52,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  Future<void> runWidgetPreview({required List<String> expectedMessages, Uri? dtdUri}) async {
+  Future<void> runWidgetPreview({required List<Pattern> expectedMessages, Uri? dtdUri}) async {
     expect(expectedMessages, isNotEmpty);
     var i = 0;
     process = await processManager.start(<String>[

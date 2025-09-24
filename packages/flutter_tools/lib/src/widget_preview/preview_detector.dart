@@ -13,28 +13,44 @@ import 'package:watcher/watcher.dart';
 
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/utils.dart';
 import 'analytics.dart';
 import 'dependency_graph.dart';
 import 'utils.dart';
 
+typedef WatcherBuilder = Watcher Function(String path);
+
+Watcher _defaultWatcherBuilder(String path) {
+  return Watcher(path);
+}
+
 class PreviewDetector {
   PreviewDetector({
+    required this.platform,
     required this.previewAnalytics,
     required this.projectRoot,
     required this.fs,
     required this.logger,
     required this.onChangeDetected,
     required this.onPubspecChangeDetected,
+    @visibleForTesting this.watcherBuilder = _defaultWatcherBuilder,
   });
 
+  final Platform platform;
   final WidgetPreviewAnalytics previewAnalytics;
   final Directory projectRoot;
   final FileSystem fs;
   final Logger logger;
   final void Function(PreviewDependencyGraph) onChangeDetected;
   final void Function(String path) onPubspecChangeDetected;
+  final WatcherBuilder watcherBuilder;
 
+  @visibleForTesting
+  static const kDirectoryWatcherClosedUnexpectedlyPrefix = 'Directory watcher closed unexpectedly';
+  @visibleForTesting
+  static const kWindowsFileWatcherRestartedMessage =
+      'WindowsDirectoryWatcher has closed and been restarted.';
   StreamSubscription<WatchEvent>? _fileWatcher;
   final _mutex = PreviewDetectorMutex();
 
@@ -56,8 +72,22 @@ class PreviewDetector {
     // Determine which files have transitive dependencies with compile time errors.
     _propagateErrors();
 
-    final watcher = Watcher(projectRoot.path);
-    _fileWatcher = watcher.events.listen(_onFileSystemEvent);
+    final Watcher watcher = watcherBuilder(projectRoot.path);
+    _fileWatcher = watcher.events.listen(
+      _onFileSystemEvent,
+      onError: (Object e, StackTrace st) {
+        if (platform.isWindows &&
+            e is FileSystemException &&
+            e.message.startsWith(kDirectoryWatcherClosedUnexpectedlyPrefix)) {
+          // The Windows directory watcher sometimes decides to shutdown on its own. It's
+          // automatically restarted by package:watcher, but we need to handle this exception.
+          // See https://github.com/dart-lang/tools/issues/1713 for details.
+          logger.printTrace(kWindowsFileWatcherRestartedMessage);
+          return;
+        }
+        Error.throwWithStackTrace(e, st);
+      },
+    );
 
     // Wait for file watcher to finish initializing, otherwise we might miss changes and cause
     // tests to flake.
@@ -70,6 +100,7 @@ class PreviewDetector {
     // processing the latest file updates to avoid throwing an exception.
     await _mutex.runGuarded(() async {
       await _fileWatcher?.cancel();
+      _fileWatcher = null;
       await collection.dispose();
     });
   }

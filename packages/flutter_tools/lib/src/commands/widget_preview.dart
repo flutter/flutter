@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:args/args.dart';
+import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
@@ -26,6 +27,7 @@ import '../project.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
+import '../web/web_device.dart';
 import '../widget_preview/analytics.dart';
 import '../widget_preview/dependency_graph.dart';
 import '../widget_preview/dtd_services.dart';
@@ -161,6 +163,10 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   /// Environment variable used to pass the DTD URI to the widget preview scaffold.
   static const kWidgetPreviewDtdUriEnvVar = 'WIDGET_PREVIEW_DTD_URI';
 
+  @visibleForTesting
+  static const kBrowserNotFoundErrorMessage =
+      'Failed to locate browser. Make sure you are using an up-to-date Chrome or Edge.';
+
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
     // Ensure the Flutter Web SDK is installed.
@@ -209,6 +215,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   );
 
   late final _previewDetector = PreviewDetector(
+    platform: platform,
     previewAnalytics: previewAnalytics,
     projectRoot: rootProject.directory,
     logger: logger,
@@ -302,12 +309,14 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       await _previewPubspecBuilder.populatePreviewPubspec(rootProject: rootProject);
     }
 
+    shutdownHooks.addShutdownHook(() async {
+      await _widgetPreviewApp?.exitApp();
+      await _previewDetector.dispose();
+    });
+
     final PreviewDependencyGraph graph = await _previewDetector.initialize();
     _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffold(graph);
 
-    shutdownHooks.addShutdownHook(() async {
-      await _widgetPreviewApp?.exitApp();
-    });
     await configureDtd();
     final int result = await runPreviewEnvironment(
       widgetPreviewScaffoldProject: rootProject.widgetPreviewScaffoldProject,
@@ -316,7 +325,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       throwToolExit('Failed to launch the widget previewer.', exitCode: result);
     }
 
-    await _previewDetector.dispose();
     return FlutterCommandResult.success();
   }
 
@@ -368,11 +376,25 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           deviceConnectionInterface: DeviceConnectionInterface.attached,
         ),
       );
-      assert(devices.length == 1);
-      final Device device = devices.first;
+      if (devices.isEmpty) {
+        throwToolExit(kBrowserNotFoundErrorMessage);
+      }
+      final Device device;
+      if (devices.length > 1) {
+        // Prefer Google Chrome as the target browser.
+        device =
+            devices.firstWhereOrNull((device) => device is GoogleChromeDevice) ?? devices.first;
+
+        logger.printTrace(
+          'Detected ${devices.length} web devices (${devices.map((e) => e.displayName).join(', ')}). '
+          'Defaulting to ${device.displayName}.',
+        );
+      } else {
+        device = devices.single;
+      }
 
       // WARNING: this log message is used by test/integration.shard/widget_preview_test.dart
-      logger.printStatus('Launching the Widget Preview Scaffold...');
+      logger.printStatus('Launching the Widget Preview Scaffold on ${device.displayName}...');
 
       final debuggingOptions = DebuggingOptions.enabled(
         BuildInfo(
