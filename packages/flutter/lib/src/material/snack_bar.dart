@@ -177,8 +177,8 @@ class _SnackBarActionState extends State<SnackBarAction> {
         }
       }
 
-      return MaterialStateColor.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
+      return MaterialStateColor.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
           return widget.disabledTextColor ??
               snackBarTheme.disabledActionTextColor ??
               defaults.disabledActionTextColor!;
@@ -194,8 +194,8 @@ class _SnackBarActionState extends State<SnackBarAction> {
       if (snackBarTheme.actionBackgroundColor is MaterialStateColor) {
         return snackBarTheme.actionBackgroundColor! as MaterialStateColor;
       }
-      return MaterialStateColor.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
+      return MaterialStateColor.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
           return widget.disabledBackgroundColor ??
               snackBarTheme.disabledActionBackgroundColor ??
               Colors.transparent;

@@ -724,6 +724,7 @@ class AppDomain extends Domain {
         hostIsIde: true,
         machine: machine,
         analytics: globals.analytics,
+        logger: globals.logger,
       );
     } else {
       runner = ColdRunner(
@@ -1279,7 +1280,11 @@ class DeviceDomain extends Domain {
       devToolsServerAddress: devToolsServerAddress,
     );
     unawaited(device.dds.done.whenComplete(() => sendEvent('device.dds.done.$deviceId')));
-    return <String, Object?>{'ddsUri': device.dds.uri?.toString()};
+    return <String, Object?>{
+      'ddsUri': device.dds.uri?.toString(),
+      'devToolsUri': device.dds.devToolsUri?.toString(),
+      'dtdUri': device.dds.dtdUri?.toString(),
+    };
   }
 
   /// Starts DDS for the device.
@@ -1402,7 +1407,8 @@ Future<Map<String, Object?>> _deviceToMap(Device device) async {
       'hotReload': device.supportsHotReload,
       'hotRestart': device.supportsHotRestart,
       'screenshot': device.supportsScreenshot,
-      'fastStart': device.supportsFastStart,
+      // TODO(bkonyi): remove once fg3 is updated.
+      'fastStart': false,
       'flutterExit': device.supportsFlutterExit,
       'hardwareRendering': await device.supportsHardwareRendering,
       'startPaused': device.supportsStartPaused,

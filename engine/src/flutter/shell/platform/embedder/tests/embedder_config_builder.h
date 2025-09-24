@@ -18,7 +18,7 @@ struct UniqueEngineTraits {
 
   static bool IsValid(const FlutterEngine& value) { return value != nullptr; }
 
-  static void Free(FlutterEngine& engine) {
+  static void Free(FlutterEngine engine) {
     auto result = FlutterEngineShutdown(engine);
     FML_CHECK(result == kSuccess);
   }

@@ -432,14 +432,7 @@ class FlutterPlugin : Plugin<Project> {
                         filename += "-${FlutterPluginUtils.buildModeFor(variant.buildType)}"
                         projectToAddTasksTo.copy {
                             from(File("$outputDirectoryStr/${output.outputFileName}"))
-                            into(
-                                File(
-                                    "${
-                                        projectToAddTasksTo.layout.buildDirectory.dir("outputs/flutter-apk")
-                                            .get()
-                                    }"
-                                )
-                            )
+                            into(projectToAddTasksTo.layout.buildDirectory.dir("outputs/flutter-apk"))
                             rename { "$filename.apk" }
                         }
                     }
@@ -687,7 +680,6 @@ class FlutterPlugin : Plugin<Project> {
                     localEngineSrcPath = flutterPlugin.localEngineSrcPath
                     targetPath = FlutterPluginUtils.getFlutterTarget(project)
                     verbose = FlutterPluginUtils.isProjectVerbose(project)
-                    fastStart = FlutterPluginUtils.isProjectFastStart(project)
                     fileSystemRoots = fileSystemRootsValue
                     fileSystemScheme = fileSystemSchemeValue
                     trackWidgetCreation = trackWidgetCreationValue

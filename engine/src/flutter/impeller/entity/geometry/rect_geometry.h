@@ -54,11 +54,6 @@ class StrokeRectGeometry final : public Geometry {
   const Join stroke_join_;
 
   static Join AdjustStrokeJoin(const StrokeParameters& stroke);
-
-  static Point* AppendRoundCornerJoin(Point* buffer,
-                                      Point corner,
-                                      Vector2 offset,
-                                      const Tessellator::Trigs& trigs);
 };
 
 }  // namespace impeller

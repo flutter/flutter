@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/widget_previews.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:widget_preview_scaffold/src/widget_preview.dart';
@@ -22,7 +23,12 @@ void main() {
               children: <Widget>[
                 for (int i = 0; i < kNumPreviewedWidgets; ++i)
                   WidgetPreviewWidget(
-                    preview: WidgetPreview(builder: () => Text('$kTestText$i')),
+                    preview: WidgetPreview(
+                      scriptUri: '',
+                      builder: () => Text('$kTestText$i'),
+                      previewData: Preview(),
+                      packageName: '',
+                    ),
                   ),
               ],
             ),
