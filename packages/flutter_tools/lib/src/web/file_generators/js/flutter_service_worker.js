@@ -1,15 +1,13 @@
 'use strict';
 
-const OLD_CACHE_NAMES = [
-  'flutter-app-cache',
-  'flutter-temp-cache',
-  'flutter-app-manifest',
-];
+const OLD_CACHE_NAMES = ['flutter-app-manifest', 'flutter-app-cache', 'flutter-temp-cache'];
 
 self.addEventListener('install', () => {
   self.skipWaiting();
+  console.log('Deprecated service worker installed. It will not be used.');
 });
 
+// remove old caches and unregister the service worker
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     (async () => {
@@ -17,7 +15,7 @@ self.addEventListener('activate', (event) => {
         const deletePromises = OLD_CACHE_NAMES.map((key) => self.caches.delete(key));
         await Promise.all(deletePromises);
       } catch (e) {
-        console.warn('Failed to delete old caches:', e);
+        console.warn('Failed to delete old service worker caches:', e);
       }
 
       try {
@@ -31,14 +29,14 @@ self.addEventListener('activate', (event) => {
           type: 'window',
           includeUncontrolled: true,
         });
-
-        for (const client of clients) {
+        // Reload clients to ensure they are not using the old service worker.
+        clients.forEach((client) => {
           if (client.url && 'navigate' in client) {
             client.navigate(client.url);
           }
-        }
+        });
       } catch (e) {
-        console.warn('Failed to navigate clients:', e);
+        console.warn('Failed to navigate service worker clients:', e);
       }
     })()
   );
