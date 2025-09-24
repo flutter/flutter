@@ -357,22 +357,28 @@ class SemanticTextField extends SemanticRole {
       // browsers keep selection APIs enabled while still providing email
       // keyboards and hints. This avoids InvalidStateError and enables
       // proper selection/cursor operations.
-      final String resolvedType = switch (semanticsObject.inputType) {
-        ui.SemanticsInputType.search => 'search',
-        ui.SemanticsInputType.email => 'text',
-        ui.SemanticsInputType.url => 'url',
-        ui.SemanticsInputType.phone => 'tel',
-        _ => 'text',
-      };
-      input.type = resolvedType;
-      if (semanticsObject.inputType == ui.SemanticsInputType.email) {
-        input.setAttribute('inputmode', 'email');
-        input.setAttribute('autocapitalize', 'none');
-        input.autocomplete = 'email';
-      } else {
-        input.removeAttribute('inputmode');
-        input.removeAttribute('autocapitalize');
-        input.autocomplete = 'off';
+      input.removeAttribute('inputmode');
+      input.removeAttribute('autocapitalize');
+      input.autocomplete = 'off';
+      input.type = 'text';
+
+      switch (semanticsObject.inputType) {
+        case ui.SemanticsInputType.search:
+          input.type = 'search';
+          break;
+        case ui.SemanticsInputType.url:
+          input.type = 'url';
+          break;
+        case ui.SemanticsInputType.phone:
+          input.type = 'tel';
+          break;
+        case ui.SemanticsInputType.email:
+          input.setAttribute('inputmode', 'email');
+          input.setAttribute('autocapitalize', 'none');
+          input.autocomplete = 'email';
+          break;
+        default:
+          break;
       }
     }
   }
