@@ -24,9 +24,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
-import androidx.lifecycle.DefaultLifecycleObserver;
-import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.ProcessLifecycleOwner;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.view.TextureRegistry;
@@ -100,23 +97,12 @@ public class FlutterRenderer implements TextureRegistry {
   public FlutterRenderer(@NonNull FlutterJNI flutterJNI) {
     this.flutterJNI = flutterJNI;
     this.flutterJNI.addIsDisplayingFlutterUiListener(flutterUiDisplayListener);
-    // ProcessLifecycleOwner.get()
-    //     .getLifecycle()
-    //     .addObserver(
-    //         new DefaultLifecycleObserver() {
-    //           @Override
-    //           public void onResume(@NonNull LifecycleOwner owner) {
-    //             Log.v(TAG, "onResume called; notifying SurfaceProducers");
-    //             for (ImageReaderSurfaceProducer producer : imageReaderProducers) {
-    //               if (producer.callback != null && producer.notifiedDestroy) {
-    //                 producer.notifiedDestroy = false;
-    //                 producer.callback.onSurfaceAvailable();
-    //               }
-    //             }
-    //           }
-    //         });
   }
 
+  /**
+   * Restores {@code ImageReaderSurfaceProducer}s that were previously destroyed due to {@code
+   * onTrimMemory} being called during an {@code onResume} app lifecycle event.
+   */
   public void restoreSurfaceProducers() {
     Log.v(TAG, "restoreSurfaceProducers called; notifying SurfaceProducers");
     for (ImageReaderSurfaceProducer producer : imageReaderProducers) {
