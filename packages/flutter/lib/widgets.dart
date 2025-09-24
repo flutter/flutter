@@ -38,6 +38,7 @@ export 'src/widgets/color_filter.dart';
 export 'src/widgets/container.dart';
 export 'src/widgets/context_menu_button_item.dart';
 export 'src/widgets/context_menu_controller.dart';
+export 'src/widgets/date.dart';
 export 'src/widgets/debug.dart';
 export 'src/widgets/decorated_sliver.dart';
 export 'src/widgets/default_selection_style.dart';
