@@ -284,8 +284,6 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
 }
 
 - (void)sceneDidBecomeActiveFallback {
-  // This method may be called as a fallback for plugins that don't conform to
-  // FlutterSceneLifeCycleDelegate yet, so skip if the plugin does conform.
   UIApplication* application = FlutterSharedApplication.application;
   if (!application) {
     return;
