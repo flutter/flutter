@@ -269,7 +269,7 @@ public class AndroidTouchProcessor {
 
   /// Calls addPointerForIndex with null for context.
   ///
-  /// Without context the scroll wheel will not mimick android's scroll speed.
+  /// Without context the scroll wheel will not mimic android's scroll speed.
   private void addPointerForIndex(
       MotionEvent event,
       int pointerIndex,
@@ -315,7 +315,7 @@ public class AndroidTouchProcessor {
     int pointerKind = getPointerDeviceTypeForToolType(event.getToolType(pointerIndex));
     // We use this in lieu of using event.getRawX and event.getRawY as we wish to support
     // earlier versions than API level 29.
-    float viewToScreenCoords[] = {event.getX(pointerIndex), event.getY(pointerIndex)};
+    float[] viewToScreenCoords = {event.getX(pointerIndex), event.getY(pointerIndex)};
     transformMatrix.mapPoints(viewToScreenCoords);
     long buttons;
     if (pointerKind == PointerDeviceKind.MOUSE) {
