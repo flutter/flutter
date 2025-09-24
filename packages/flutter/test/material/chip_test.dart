@@ -3641,7 +3641,7 @@ void main() {
               label: const Text('Chip'),
               selected: selected,
               onSelected: enabled ? (_) {} : null,
-              labelStyle: TextStyle(color: MaterialStateColor.resolveWith(getTextColor)),
+              labelStyle: TextStyle(color: WidgetStateColor.resolveWith(getTextColor)),
             ),
           ),
         ),

@@ -647,7 +647,7 @@ void main() {
       return activeEnabledFillColor;
     }
 
-    final WidgetStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
+    final WidgetStateProperty<Color> fillColor = WidgetStateColor.resolveWith(getFillColor);
 
     Widget buildFrame({required bool enabled}) {
       return wrap(
@@ -683,7 +683,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final WidgetStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
+    final WidgetStateProperty<Color> fillColor = WidgetStateColor.resolveWith(getFillColor);
 
     Widget buildFrame() {
       return wrap(
