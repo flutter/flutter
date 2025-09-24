@@ -8,6 +8,8 @@
 
 #include "flutter/fml/logging.h"
 
+#include <timeapi.h>
+
 namespace flutter {
 
 static const uintptr_t kTimerId = 0;
@@ -16,6 +18,9 @@ static const uintptr_t kTimerId = 0;
 static const uintptr_t kPollTimeoutTimerId = 1;
 
 TaskRunnerWindow::TaskRunnerWindow() {
+  // Increase timer resolution for this process.
+  timeBeginPeriod(1);
+
   WNDCLASS window_class = RegisterWindowClass();
   window_handle_ =
       CreateWindowEx(0, window_class.lpszClassName, L"", 0, 0, 0, 0, 0,
@@ -43,6 +48,7 @@ TaskRunnerWindow::~TaskRunnerWindow() {
     window_handle_ = nullptr;
   }
   UnregisterClass(window_class_name_.c_str(), nullptr);
+  timeEndPeriod(1);
 }
 
 std::shared_ptr<TaskRunnerWindow> TaskRunnerWindow::GetSharedInstance() {
@@ -57,9 +63,9 @@ std::shared_ptr<TaskRunnerWindow> TaskRunnerWindow::GetSharedInstance() {
 }
 
 void TaskRunnerWindow::WakeUp() {
-  if (!PostMessage(window_handle_, WM_NULL, 0, 0)) {
-    FML_LOG(ERROR) << "Failed to post message to main thread.";
-  }
+  // Always use timer to wake up the event loop (see
+  // https://github.com/flutter/flutter/issues/173843#issuecomment-3321196059)
+  SetTimer(std::chrono::nanoseconds::zero());
 }
 
 void TaskRunnerWindow::AddDelegate(Delegate* delegate) {
@@ -135,9 +141,6 @@ TaskRunnerWindow::HandleMessage(UINT const message,
         return 0;
       }
       FML_DCHECK(wparam == kTimerId);
-      ProcessTasks();
-      return 0;
-    case WM_NULL:
       ProcessTasks();
       return 0;
   }
