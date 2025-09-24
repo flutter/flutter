@@ -452,7 +452,7 @@ void main() {
                 'hotReload': true,
                 'hotRestart': true,
                 'screenshot': true,
-                'fastStart': true,
+                'fastStart': false,
                 'flutterExit': true,
                 'hardwareRendering': true,
                 'startPaused': true,
@@ -662,6 +662,7 @@ void main() {
               'deviceId': 'device',
               'disableServiceAuthCodes': false,
               'vmServiceUri': 'http://fake_uri/auth_code',
+              'enableDevTools': true,
             },
           }),
         );
@@ -676,6 +677,7 @@ void main() {
         expect(device.dds.startCalled, true);
         expect(device.dds.startDisableServiceAuthCodes, false);
         expect(device.dds.startVMServiceUri, Uri.parse('http://fake_uri/auth_code'));
+        expect(device.dds.enableDevTools, true);
 
         // dds.done event should be sent to the client.
         ddsDoneCompleter.complete();
@@ -1173,9 +1175,6 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   bool get supportsScreenshot => true;
 
   @override
-  bool get supportsFastStart => true;
-
-  @override
   bool get supportsFlutterExit => true;
 
   @override
@@ -1232,12 +1231,19 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   bool? startDisableServiceAuthCodes;
 
   var shutdownCalled = false;
+  var enableDevTools = false;
 
   @override
   late Future<void> done;
 
   @override
   Uri? uri;
+
+  @override
+  Uri? devToolsUri;
+
+  @override
+  Uri? dtdUri;
 
   @override
   Future<void> startDartDevelopmentService(
@@ -1254,6 +1260,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
     startCalled = true;
     startVMServiceUri = vmServiceUri;
     startDisableServiceAuthCodes = disableServiceAuthCodes;
+    this.enableDevTools = enableDevTools;
   }
 
   @override

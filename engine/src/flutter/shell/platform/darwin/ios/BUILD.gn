@@ -111,6 +111,8 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterRestorationPlugin.h",
     "framework/Source/FlutterRestorationPlugin.mm",
     "framework/Source/FlutterSceneDelegate.m",
+    "framework/Source/FlutterSceneLifecycle.h",
+    "framework/Source/FlutterSceneLifecycle.mm",
     "framework/Source/FlutterSemanticsScrollView.h",
     "framework/Source/FlutterSemanticsScrollView.mm",
     "framework/Source/FlutterSharedApplication.h",
@@ -262,6 +264,7 @@ if (enable_ios_unittests) {
       "framework/Source/FlutterPluginAppLifeCycleDelegateTest.mm",
       "framework/Source/FlutterRestorationPluginTest.mm",
       "framework/Source/FlutterSceneDelegateTest.m",
+      "framework/Source/FlutterSceneLifecycleTest.mm",
       "framework/Source/FlutterSharedApplicationTest.mm",
       "framework/Source/FlutterSpellCheckPluginTest.mm",
       "framework/Source/FlutterTextInputPluginTest.mm",
@@ -279,6 +282,7 @@ if (enable_ios_unittests) {
       "ios_context_noop_unittests.mm",
       "ios_surface_noop_unittests.mm",
       "platform_message_handler_ios_test.mm",
+      "platform_view_ios_test.mm",
     ]
     deps = [
       ":flutter_framework",
