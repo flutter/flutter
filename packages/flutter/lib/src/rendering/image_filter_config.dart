@@ -76,19 +76,8 @@ abstract class ImageFilterConfig {
   /// `bounds` of the widget applying the filter.
   ///
   /// The `bounds` can be used to create layout-dependent filters, such as
-  /// a blur that is clipped to the widget's bounds.
+  /// a blur that only samples pixels within the bounds.
   ui.ImageFilter resolve(ui.Rect bounds);
-
-  @override
-  bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
-    return other is ImageFilterConfig;
-  }
-
-  @override
-  int get hashCode => runtimeType.hashCode;
 }
 
 class _BlurImageFilterConfig extends ImageFilterConfig {
@@ -116,14 +105,17 @@ class _BlurImageFilterConfig extends ImageFilterConfig {
 
   @override
   bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
     if (other.runtimeType != runtimeType) {
       return false;
     }
     return other is _BlurImageFilterConfig &&
-           other.sigmaX == sigmaX &&
-           other.sigmaY == sigmaY &&
-           other.tileMode == tileMode &&
-           other.bounded == bounded;
+        other.sigmaX == sigmaX &&
+        other.sigmaY == sigmaY &&
+        other.tileMode == tileMode &&
+        other.bounded == bounded;
   }
 
   @override
@@ -138,20 +130,18 @@ class _ComposeImageFilterConfig extends ImageFilterConfig {
 
   @override
   ui.ImageFilter resolve(ui.Rect bounds) {
-    return ui.ImageFilter.compose(
-      outer: outer.resolve(bounds),
-      inner: inner.resolve(bounds),
-    );
+    return ui.ImageFilter.compose(outer: outer.resolve(bounds), inner: inner.resolve(bounds));
   }
 
   @override
   bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is _ComposeImageFilterConfig &&
-           other.outer == outer &&
-           other.inner == inner;
+    return other is _ComposeImageFilterConfig && other.outer == outer && other.inner == inner;
   }
 
   @override
@@ -170,11 +160,13 @@ class _DirectImageFilterConfig extends ImageFilterConfig {
 
   @override
   bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is _DirectImageFilterConfig &&
-           other.filter == filter;
+    return other is _DirectImageFilterConfig && other.filter == filter;
   }
 
   @override
