@@ -1022,15 +1022,11 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
             isExpanded
                 ? AccessibilityNodeInfo.EXPANDED_STATE_FULL
                 : AccessibilityNodeInfo.EXPANDED_STATE_COLLAPSED);
-
-        if (isExpanded) {
-          if (semanticsNode.hasAction(Action.COLLAPSE)) {
-            result.addAction(AccessibilityNodeInfo.ACTION_COLLAPSE);
-          }
-        } else {
-          if (semanticsNode.hasAction(Action.EXPAND)) {
-            result.addAction(AccessibilityNodeInfo.ACTION_EXPAND);
-          }
+        if (semanticsNode.hasAction(Action.EXPAND)) {
+          result.addAction(AccessibilityNodeInfo.ACTION_EXPAND);
+        }
+        if (semanticsNode.hasAction(Action.COLLAPSE)) {
+          result.addAction(AccessibilityNodeInfo.ACTION_COLLAPSE);
         }
       }
     }
