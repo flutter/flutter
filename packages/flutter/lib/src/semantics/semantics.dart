@@ -121,7 +121,7 @@ final int _kUnblockedUserActions =
 /// A static class to conduct semantics role checks.
 sealed class _DebugSemanticsRoleChecks {
   static FlutterError? _checkSemanticsData(SemanticsNode node) {
-    FlutterError? error = switch (node.role) {
+    final FlutterError? error = switch (node.role) {
       SemanticsRole.alertDialog => _noCheckRequired,
       SemanticsRole.dialog => _noCheckRequired,
       SemanticsRole.none => _noCheckRequired,
@@ -163,13 +163,7 @@ sealed class _DebugSemanticsRoleChecks {
       return error;
     }
 
-    final SemanticsData data = node.getSemanticsData();
-
-    if (data.flagsCollection.isExpanded != Tristate.none) {
-      error = _semanticsExpandable(node, data);
-    }
-
-    return error ?? _noCheckRequired(node);
+    return _semanticsGeneral(node);
   }
 
   static FlutterError? _unimplemented(SemanticsNode node) =>
@@ -475,21 +469,25 @@ sealed class _DebugSemanticsRoleChecks {
     return null;
   }
 
-  static FlutterError? _semanticsExpandable(SemanticsNode node, SemanticsData data) {
-    final bool isExpanded = data.flagsCollection.isExpanded == Tristate.isTrue;
-    final bool hasExpandAction = data.hasAction(SemanticsAction.expand);
-    final bool hasCollapseAction = data.hasAction(SemanticsAction.collapse);
+  static FlutterError? _semanticsGeneral(SemanticsNode node) {
+    final SemanticsData data = node.getSemanticsData();
+    final bool? isExpanded = data.flagsCollection.isExpanded.toBoolOrNull();
 
-    if (hasExpandAction && hasCollapseAction) {
-      return FlutterError(
-        'An expandable node cannot have both expand and collapse actions set at the same time.',
-      );
-    }
-    if (isExpanded && hasExpandAction) {
-      return FlutterError('An expanded node cannot have an expand action.');
-    }
-    if (!isExpanded && hasCollapseAction) {
-      return FlutterError('A collapsed node cannot have a collapse action.');
+    if (isExpanded != null) {
+      final bool hasExpandAction = data.hasAction(SemanticsAction.expand);
+      final bool hasCollapseAction = data.hasAction(SemanticsAction.collapse);
+
+      if (hasExpandAction && hasCollapseAction) {
+        return FlutterError(
+          'An expandable node cannot have both expand and collapse actions set at the same time.',
+        );
+      }
+      if (isExpanded && hasExpandAction) {
+        return FlutterError('An expanded node cannot have an expand action.');
+      }
+      if (!isExpanded && hasCollapseAction) {
+        return FlutterError('A collapsed node cannot have a collapse action.');
+      }
     }
 
     return null;
