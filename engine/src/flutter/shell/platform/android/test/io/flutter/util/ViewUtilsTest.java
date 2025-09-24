@@ -6,6 +6,7 @@ package io.flutter.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -25,7 +26,7 @@ public class ViewUtilsTest {
   public void canGetActivity() {
     // Non activity context returns null
     Context nonActivityContext = mock(Context.class);
-    assertEquals(null, ViewUtils.getActivity(nonActivityContext));
+    assertNull(ViewUtils.getActivity(nonActivityContext));
 
     Activity activity = mock(Activity.class);
     assertEquals(activity, ViewUtils.getActivity(activity));
