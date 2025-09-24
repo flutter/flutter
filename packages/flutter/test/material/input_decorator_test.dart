@@ -15712,6 +15712,6 @@ void main() {
     // The gap should be positive (no overlap) and exactly 16.0 pixels.
     final double actualGap = counterLeft - helperTextRight;
     expect(actualGap, greaterThan(0.0)); // No overlap
-    expect(actualGap, equals(16.0)); // Exact spacing as per Material 3 specification
+    expect(actualGap, equals(16.0)); // Exact spacing as per Material 3 specification.
   });
 }
