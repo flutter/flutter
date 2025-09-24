@@ -934,8 +934,8 @@ void main() {
             useMaterial3: false,
             scrollbarTheme: ScrollbarThemeData(
               thumbVisibility: WidgetStateProperty.all(true),
-              trackVisibility: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-                if (states.contains(MaterialState.hovered)) {
+              trackVisibility: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+                if (states.contains(WidgetState.hovered)) {
                   return true;
                 }
                 return false;
@@ -1013,12 +1013,12 @@ void main() {
           theme: ThemeData(
             useMaterial3: false,
             scrollbarTheme: ScrollbarThemeData(
-              thumbVisibility: WidgetStateProperty.resolveWith((Set<MaterialState> states) => true),
-              trackVisibility: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-                return states.contains(MaterialState.hovered);
+              thumbVisibility: WidgetStateProperty.resolveWith((Set<WidgetState> states) => true),
+              trackVisibility: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+                return states.contains(WidgetState.hovered);
               }),
-              thickness: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-                if (states.contains(MaterialState.hovered)) {
+              thickness: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+                if (states.contains(WidgetState.hovered)) {
                   return 40.0;
                 }
                 // Default thickness
@@ -1086,8 +1086,8 @@ void main() {
             useMaterial3: false,
             scrollbarTheme: ScrollbarThemeData(
               thumbVisibility: WidgetStateProperty.all(true),
-              trackVisibility: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-                if (states.contains(MaterialState.hovered)) {
+              trackVisibility: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+                if (states.contains(WidgetState.hovered)) {
                   return true;
                 }
                 return false;
@@ -1154,8 +1154,8 @@ void main() {
             useMaterial3: false,
             scrollbarTheme: ScrollbarThemeData(
               thumbVisibility: WidgetStateProperty.all(true),
-              trackVisibility: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-                if (states.contains(MaterialState.hovered)) {
+              trackVisibility: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+                if (states.contains(WidgetState.hovered)) {
                   return true;
                 }
                 return false;
