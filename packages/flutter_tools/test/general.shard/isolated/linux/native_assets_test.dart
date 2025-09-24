@@ -6,6 +6,7 @@ import 'package:code_assets/code_assets.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -94,6 +95,49 @@ void main() {
 
       final CCompilerConfig result = await cCompilerConfigLinux();
       expect(result.compiler, Uri.file('/some/path/to/clang'));
+    },
+  );
+
+  testUsingContext(
+    'cCompilerConfigLinux using differing binary names for ld and ar',
+    overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <Pattern>['which', 'clang++'], stdout: '/path/to/clang++'),
+      ]),
+      FileSystem: () => fileSystem,
+    },
+    () async {
+      if (!const LocalPlatform().isLinux) {
+        return;
+      }
+
+      for (final execName in ['clang++', 'clang', 'ar', 'ld']) {
+        await fileSystem.file('/path/to/$execName').create(recursive: true);
+      }
+
+      final CCompilerConfig result = await cCompilerConfigLinux();
+      expect(result.linker, Uri.file('/path/to/ld'));
+      expect(result.compiler, Uri.file('/path/to/clang'));
+      expect(result.archiver, Uri.file('/path/to/ar'));
+    },
+  );
+
+  testUsingContext(
+    'cCompilerConfigLinux with missing binaries',
+    overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <Pattern>['which', 'clang++'], stdout: '/a/path/to/clang++'),
+      ]),
+      FileSystem: () => fileSystem,
+    },
+    () async {
+      if (!const LocalPlatform().isLinux) {
+        return;
+      }
+
+      await fileSystem.file('/a/path/to/clang++').create(recursive: true);
+
+      expect(cCompilerConfigLinux(), throwsA(isA<ToolExit>()));
     },
   );
 }

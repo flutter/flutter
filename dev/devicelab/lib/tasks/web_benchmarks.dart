@@ -31,6 +31,7 @@ typedef WebBenchmarkOptions = ({
   bool forceSingleThreadedSkwasm,
   bool useDdc,
   bool withHotReload,
+  String buildMode,
 });
 
 Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
@@ -107,7 +108,7 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
           '--no-tree-shake-icons', // local engine builds are frequently out of sync with the Dart Kernel version
           if (benchmarkOptions.useWasm) ...<String>['--wasm', '--no-strip-wasm'],
           '--dart-define=FLUTTER_WEB_ENABLE_PROFILING=true',
-          '--profile',
+          '--${benchmarkOptions.buildMode}',
           '--no-web-resources-cdn',
           '-t',
           'lib/web_benchmarks.dart',

@@ -664,10 +664,10 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     // the default shapes and text styles are aligned to the Material
     // Guidelines.
 
-    final Set<MaterialState> states = <MaterialState>{
-      if (!_enabled) MaterialState.disabled,
-      if (_hovering) MaterialState.hovered,
-      if (_dragging) MaterialState.dragged,
+    final Set<WidgetState> states = <WidgetState>{
+      if (!_enabled) WidgetState.disabled,
+      if (_hovering) WidgetState.hovered,
+      if (_dragging) WidgetState.dragged,
     };
 
     // The value indicator's color is not the same as the thumb and active track
@@ -1574,11 +1574,11 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
 
     // If [RangeSlider.year2023] is false, the thumbs uses handle thumb shape and gapped track shape.
     // The handle width and track gaps are adjusted when the thumb is pressed.
-    double? thumbWidth = _sliderTheme.thumbSize?.resolve(<MaterialState>{})?.width;
-    final double? thumbHeight = _sliderTheme.thumbSize?.resolve(<MaterialState>{})?.height;
+    double? thumbWidth = _sliderTheme.thumbSize?.resolve(<WidgetState>{})?.width;
+    final double? thumbHeight = _sliderTheme.thumbSize?.resolve(<WidgetState>{})?.height;
     double? trackGap = _sliderTheme.trackGap;
-    final double? pressedThumbWidth = _sliderTheme.thumbSize?.resolve(<MaterialState>{
-      MaterialState.pressed,
+    final double? pressedThumbWidth = _sliderTheme.thumbSize?.resolve(<WidgetState>{
+      WidgetState.pressed,
     })?.width;
     final double delta;
     if (_active && thumbWidth != null && pressedThumbWidth != null && trackGap != null) {

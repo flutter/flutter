@@ -213,3 +213,8 @@ void expectPreviewDependencyGraphIsWellFormed({
 
 String platformPath(List<String> pathSegments) =>
     pathSegments.join(const LocalPlatform().pathSeparator);
+
+extension ScriptHelper on String {
+  String get stripScriptUris =>
+      replaceAll(RegExp(r"scriptUri:\s*'file:\/\/\/\S*',"), "scriptUri: 'STRIPPED',");
+}

@@ -412,7 +412,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
     final PopupMenuThemeData defaults = theme.useMaterial3
         ? _PopupMenuDefaultsM3(context)
         : _PopupMenuDefaultsM2(context);
-    final Set<MaterialState> states = <MaterialState>{if (!widget.enabled) MaterialState.disabled};
+    final Set<WidgetState> states = <WidgetState>{if (!widget.enabled) WidgetState.disabled};
 
     TextStyle style = theme.useMaterial3
         ? (widget.labelTextStyle?.resolve(states) ??
@@ -641,7 +641,7 @@ class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMe
     final PopupMenuThemeData defaults = theme.useMaterial3
         ? _PopupMenuDefaultsM3(context)
         : _PopupMenuDefaultsM2(context);
-    final Set<MaterialState> states = <MaterialState>{if (widget.checked) MaterialState.selected};
+    final Set<WidgetState> states = <WidgetState>{if (widget.checked) WidgetState.selected};
     final WidgetStateProperty<TextStyle?>? effectiveLabelTextStyle =
         widget.labelTextStyle ?? popupMenuTheme.labelTextStyle ?? defaults.labelTextStyle;
     return IgnorePointer(
@@ -1795,8 +1795,8 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
 }
 
 // This WidgetStateProperty is passed along to the menu item's InkWell which
-// resolves the property against MaterialState.disabled, MaterialState.hovered,
-// MaterialState.focused.
+// resolves the property against WidgetState.disabled, WidgetState.hovered,
+// WidgetState.focused.
 class _EffectiveMouseCursor extends MaterialStateMouseCursor {
   const _EffectiveMouseCursor(this.widgetCursor, this.themeCursor);
 
@@ -1804,7 +1804,7 @@ class _EffectiveMouseCursor extends MaterialStateMouseCursor {
   final WidgetStateProperty<MouseCursor?>? themeCursor;
 
   @override
-  MouseCursor resolve(Set<MaterialState> states) {
+  MouseCursor resolve(Set<WidgetState> states) {
     return WidgetStateProperty.resolveAs<MouseCursor?>(widgetCursor, states) ??
         themeCursor?.resolve(states) ??
         MaterialStateMouseCursor.clickable.resolve(states);

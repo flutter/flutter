@@ -5,7 +5,7 @@
 #ifndef FLUTTER_FML_PLATFORM_FUCHSIA_LOG_INTEREST_LISTENER_H_
 #define FLUTTER_FML_PLATFORM_FUCHSIA_LOG_INTEREST_LISTENER_H_
 
-#include <fidl/fuchsia.diagnostics/cpp/fidl.h>
+#include <fidl/fuchsia.diagnostics.types/cpp/fidl.h>
 #include <fidl/fuchsia.logger/cpp/fidl.h>
 #include <lib/fidl/cpp/client.h>
 
@@ -26,7 +26,7 @@ class LogInterestListener {
 
   // Updates the global log settings in response to a log interest change.
   static void HandleInterestChange(
-      const fuchsia_diagnostics::Interest& interest);
+      const fuchsia_diagnostics_types::Interest& interest);
 
  private:
   fidl::Client<::fuchsia_logger::LogSink> log_sink_;

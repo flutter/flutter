@@ -1449,7 +1449,7 @@ void main() {
     final Table table = tester.widget(find.byType(Table));
     final TableRow tableRow = table.children[0];
     final BoxDecoration tableRowBoxDecoration = tableRow.decoration! as BoxDecoration;
-    expect(tableRowBoxDecoration.color, headingRowColor.resolve(<MaterialState>{}));
+    expect(tableRowBoxDecoration.color, headingRowColor.resolve(<WidgetState>{}));
   });
 
   testWidgets('PaginatedDataTable respects custom dividerThickness', (WidgetTester tester) async {
