@@ -1260,7 +1260,9 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('When an OutlinedButton gains an icon, preserves the same Semantic Node ID', (WidgetTester tester) async {
+  testWidgets('When an OutlinedButton gains an icon, preserves the same Semantic Node ID', (
+    WidgetTester tester,
+  ) async {
     bool toggled = false;
 
     const Key key = Key('button');
@@ -1311,7 +1313,6 @@ void main() {
 
     expect(semanticsNodeWithIcon, origSemanticsNode);
   });
-
 
   testWidgets('OutlinedButton scales textScaleFactor', (WidgetTester tester) async {
     await tester.pumpWidget(
