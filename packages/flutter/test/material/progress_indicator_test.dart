@@ -569,6 +569,26 @@ void main() {
     expect(tester.binding.transientCallbackCount, 0);
   });
 
+  testWidgets('LinearProgressIndicator reflects controller value', (WidgetTester tester) async {
+    final AnimationController controller = AnimationController(vsync: tester, value: 0.5);
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SizedBox(width: 200, child: LinearProgressIndicator(controller: controller)),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.byType(LinearProgressIndicator),
+      paints..rect(rect: const Rect.fromLTRB(127.79541015625, 0.0, 200.0, 4.0)),
+    );
+  });
+
   testWidgets('CircularProgressIndicator paint colors', (WidgetTester tester) async {
     const Color green = Color(0xFF00FF00);
     const Color blue = Color(0xFF0000FF);
@@ -1918,6 +1938,35 @@ void main() {
           indicatorBoxSize.height + padding.vertical,
         ),
       ),
+    );
+  });
+
+  testWidgets('CircularProgressIndicator reflects controller value', (WidgetTester tester) async {
+    final AnimationController controller = AnimationController(vsync: tester, value: 0.5);
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SizedBox(
+              width: 200,
+              height: 200,
+              child: AnimatedBuilder(
+                animation: controller,
+                builder: (BuildContext context, Widget? child) {
+                  return CircularProgressIndicator(controller: controller);
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.byType(CircularProgressIndicator),
+      paints..arc(startAngle: 1.5707963267948966, sweepAngle: 0.001),
     );
   });
 }

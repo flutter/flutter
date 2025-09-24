@@ -41,4 +41,18 @@ void main() {
     expect(dialogTitle, findsNothing);
     expect(nextPageTitle, findsNothing);
   });
+
+  testWidgets('Go Back button uses maybePop and handles edge cases', (WidgetTester tester) async {
+    await tester.pumpWidget(const example.CupertinoSheetApp());
+
+    await tester.tap(find.byType(CupertinoButton));
+    await tester.pumpAndSettle();
+    expect(find.text('CupertinoSheetRoute'), findsOneWidget);
+
+    await tester.tap(find.text('Go Back'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('CupertinoSheetRoute'), findsNothing);
+    expect(find.text('Open Bottom Sheet'), findsOneWidget);
+  });
 }
