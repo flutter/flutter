@@ -113,9 +113,11 @@ class WidgetPreviewScaffoldController {
     // ignore these updates.
     final selectedSourceFile = dtdServices.selectedSourceFile.value;
     if (selectedSourceFile != null) {
-      // Resolve any percent encoding
+      // Convert to a file path for comparing to avoid issues with optional encoding in URIs.
       // See https://github.com/flutter/flutter/issues/175524.
-      final selectedSourceUri = context.fromUri(selectedSourceFile.uriAsString);
+      final selectedSourcePath = context.fromUri(
+        selectedSourceFile.uriAsString,
+      );
       _filteredPreviewSet.value = previewGroups.values
           .map(
             (group) => WidgetPreviewGroup(
@@ -123,10 +125,10 @@ class WidgetPreviewScaffoldController {
               previews: group.previews
                   .where(
                     (preview) => context.equals(
-                      // TODO(bkonyi): we can probably save some cycles by caching the file URI
+                      // TODO(bkonyi): we can probably save some cycles by caching the file path
                       // rather than computing it on each filter.
                       context.fromUri(preview.scriptUri),
-                      selectedSourceUri,
+                      selectedSourcePath,
                     ),
                   )
                   .toList(),
