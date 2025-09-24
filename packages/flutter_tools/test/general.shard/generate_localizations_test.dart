@@ -417,9 +417,12 @@ void main() {
 
     final Directory projectRoot = fs.directory('/my/project/root/')..createSync(recursive: true);
     final Directory current = fs.currentDirectory;
-    fs.currentDirectory = projectRoot;
-    _standardFlutterDirectoryL10nSetup(fs);
-    fs.currentDirectory = current;
+    try {
+      fs.currentDirectory = projectRoot;
+      _standardFlutterDirectoryL10nSetup(fs);
+    } finally {
+      fs.currentDirectory = current;
+    }
     final generator =
         LocalizationsGenerator(
             fileSystem: fs,
