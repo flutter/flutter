@@ -109,6 +109,7 @@ public class FlutterSurfaceView extends SurfaceView implements RenderSurface {
   }
 
   private void init() {
+    Log.setLogLevel(Log.VERBOSE);
     // If transparency is desired then we'll enable a transparent pixel format and place
     // our Window above everything else to get transparent background rendering.
     if (renderTransparently) {
@@ -119,6 +120,36 @@ public class FlutterSurfaceView extends SurfaceView implements RenderSurface {
     // Grab a reference to our underlying Surface and register callbacks with that Surface so we
     // can monitor changes and forward those changes on to native Flutter code.
     getHolder().addCallback(surfaceHolderCallbackCompat);
+  }
+
+  /**
+   * SurfaceView Has No Intrinsic Size: Unlike a TextView which can measure its text or an ImageView
+   * which can measure its image, a SurfaceView has no content of its own to measure by default. Its
+   * content is drawn externally by the Flutter engine. Therefore, when asked how big it wants to
+   * be, the default onMeasure() implementation has no information to work with and reports a size
+   * of 0 (or sometimes the minimum size of the view).
+   *
+   * @param widthMeasureSpec horizontal space requirements as imposed by the parent. The
+   *     requirements are encoded with {@link android.view.View.MeasureSpec}.
+   * @param heightMeasureSpec vertical space requirements as imposed by the parent. The requirements
+   *     are encoded with {@link android.view.View.MeasureSpec}.
+   */
+  @Override
+  protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+    int parentSuggestedWidth = MeasureSpec.getSize(widthMeasureSpec);
+    int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+    int parentSuggestedHeight = MeasureSpec.getSize(heightMeasureSpec);
+
+    // Unspecified means the parent is set to wrap_content, default it to 1 px to allow the engine
+    // to start up on the creation of the surface, then constraints will trigger the framework to
+    // content size the view.  The size will be reported back.
+    int finalHeight =
+        Math.max(parentSuggestedHeight, heightMode == MeasureSpec.UNSPECIFIED ? 1 : 0);
+    int finalWidth = Math.max(parentSuggestedWidth, widthMode == MeasureSpec.UNSPECIFIED ? 1 : 0);
+
+    // Report the final dimensions. This MUST be called.
+    setMeasuredDimension(finalWidth, finalHeight);
   }
 
   // This is a work around for TalkBack.
