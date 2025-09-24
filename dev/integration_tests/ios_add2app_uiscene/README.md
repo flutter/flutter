@@ -22,6 +22,8 @@ The test checks whether the correct lifecycle events (e.g., scene-based or appli
 *   `flutterapp`: Contains the `main.dart` and `pubspec.yaml` files for the Flutter module (`my_module`) used in the test.
 *   `flutterplugin`: Contains the files for the Flutter plugin (`my_plugin`) used in the test, including different implementations for migrated and unmigrated lifecycle event handling.
 
+Dart template files don't have a .dart extension so the analyzer will ignore them. They don't work on their own outside of the module, app, or plugin they're copied into.
+
 ## How to run the test
 
 This test is intended to be run as a Flutter devicelab test. To run it locally, you can use the following command from the `flutter/dev/devicelab` directory:

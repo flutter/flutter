@@ -11,7 +11,20 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- * Protocol for listener of events from the UIWindowSceneDelegate, typically a FlutterPlugin.
+ * A protocol for delegates that handle `UISceneDelegate` and `UIWindowSceneDelegate` life-cycle
+ * events.
+ *
+ * This protocol provides a way for Flutter plugins to observe and react to scene-based life-cycle
+ * events. To use this, a `FlutterPlugin` can conform to this protocol and implement the desired
+ * methods. The methods in this protocol correspond to methods in `UISceneDelegate` and
+ * `UIWindowSceneDelegate`.
+ *
+ * See also:
+ *
+ *  * `UISceneDelegate`, core methods you use to respond to life-cycle events occurring within a
+ *    scene: https://developer.apple.com/documentation/uikit/uiscenedelegate
+ *  * `UIWindowSceneDelegate`, additional methods that you use to manage app-specific tasks
+ *    occurring in a scene: https://developer.apple.com/documentation/uikit/uiwindowscenedelegate
  */
 @protocol FlutterSceneLifeCycleDelegate
 
@@ -19,6 +32,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - Connecting and disconnecting the scene
 
+/**
+ * A Flutter-specific equivalent of `-[UISceneDelegate scene:willConnectToSession:options:]`.
+ *
+ * This method is called when a `FlutterViewController`'s view is able to access the scene.
+ *
+ * @param scene The scene that is being connected.
+ * @param connectionOptions The options that were passed to the scene.
+ */
 - (void)flutterViewDidConnectTo:(UIScene*)scene
                         options:(UISceneConnectionOptions*)connectionOptions;
 
@@ -53,8 +74,11 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 /**
- * Forwards `UIWindowSceneDelegate` callbacks to the `FlutterEngine`'s
- * `FlutterPluginSceneLifeCycleDelegate` to then be forwarded to registered plugins.
+ * Forwards `UISceneDelegate` and `UIWindowSceneDelegate` callbacks to plugins that register for
+ * them.
+ *
+ * This class is responsible for receiving `UISceneDelegate` and `UIWindowSceneDelegate` callbacks
+ * and forwarding them to any plugins.
  */
 FLUTTER_DARWIN_EXPORT
 @interface FlutterPluginSceneLifeCycleDelegate : NSObject
@@ -96,8 +120,13 @@ FLUTTER_DARWIN_EXPORT
 @end
 
 /**
- * Implement this in the `UIWindowSceneDelegate` of your app to enable Flutter plugins to register
- * themselves to the scene life cycle events.
+ * A protocol for `UIWindowSceneDelegate` objects that vend a `FlutterPluginSceneLifeCycleDelegate`.
+ *
+ * By conforming to this protocol, a `UIWindowSceneDelegate` can vend a
+ * `FlutterPluginSceneLifeCycleDelegate` that can be used to forward scene life-cycle events to
+ * Flutter plugins.
+ *
+ * This is typically implemented by the app's `SceneDelegate`.
  */
 @protocol FlutterSceneLifeCycleProvider
 @property(nonatomic, strong) FlutterPluginSceneLifeCycleDelegate* sceneLifeCycleDelegate;

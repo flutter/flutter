@@ -96,22 +96,16 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
   // Flutter should not use the notifications to forward application events to plugins since they
   // are not expected to be called.
   // See https://flutter.dev/go/ios-ui-scene-lifecycle-migration?tab=t.0#heading=h.eq8gyd4ds50u
-  if (FlutterSharedApplication.hasSceneDelegate) {
-    return NO;
-  }
-  return YES;
+  return !FlutterSharedApplication.hasSceneDelegate;
 }
 
-- (BOOL)unnecessaryFallbackFor:(NSObject<FlutterApplicationLifeCycleDelegate>*)delegate {
+- (BOOL)pluginSupportsSceneLifecycle:(NSObject<FlutterApplicationLifeCycleDelegate>*)delegate {
   // The fallback is unnecessary if the plugin conforms to FlutterSceneLifeCycleDelegate.
   // This means that the plugin has migrated to scene lifecycle events and shouldn't require
   // application events. However, the plugin may still have the application event implemented to
   // maintain compatibility with un-migrated apps, which is why the fallback should be checked
   // before checking that the delegate responds to the selector.
-  if ([delegate conformsToProtocol:@protocol(FlutterSceneLifeCycleDelegate)]) {
-    return YES;
-  }
-  return NO;
+  return [delegate conformsToProtocol:@protocol(FlutterSceneLifeCycleDelegate)];
 }
 
 - (void)addDelegate:(NSObject<FlutterApplicationLifeCycleDelegate>*)delegate {
@@ -192,10 +186,7 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
 - (void)applicationDidEnterBackground:(UIApplication*)application
                    isFallbackForScene:(BOOL)isFallback {
   for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
-    if (!delegate) {
-      continue;
-    }
-    if (isFallback && [self unnecessaryFallbackFor:delegate]) {
+    if (!delegate || (isFallback && [self pluginSupportsSceneLifecycle:delegate])) {
       continue;
     }
     if ([delegate respondsToSelector:@selector(applicationDidEnterBackground:)]) {
@@ -230,10 +221,7 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
 - (void)applicationWillEnterForeground:(UIApplication*)application
                     isFallbackForScene:(BOOL)isFallback {
   for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
-    if (!delegate) {
-      continue;
-    }
-    if (isFallback && [self unnecessaryFallbackFor:delegate]) {
+    if (!delegate || (isFallback && [self pluginSupportsSceneLifecycle:delegate])) {
       continue;
     }
     if ([delegate respondsToSelector:@selector(applicationWillEnterForeground:)]) {
@@ -262,10 +250,7 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
 - (void)applicationWillResignActive:(UIApplication*)application
                  isFallbackForScene:(BOOL)isFallback {
   for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
-    if (!delegate) {
-      continue;
-    }
-    if (isFallback && [self unnecessaryFallbackFor:delegate]) {
+    if (!delegate || (isFallback && [self pluginSupportsSceneLifecycle:delegate])) {
       continue;
     }
     if ([delegate respondsToSelector:@selector(applicationWillResignActive:)]) {
@@ -293,10 +278,7 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
 
 - (void)applicationDidBecomeActive:(UIApplication*)application isFallbackForScene:(BOOL)isFallback {
   for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
-    if (!delegate) {
-      continue;
-    }
-    if (isFallback && [self unnecessaryFallbackFor:delegate]) {
+    if (!delegate || (isFallback && [self pluginSupportsSceneLifecycle:delegate])) {
       continue;
     }
     if ([delegate respondsToSelector:@selector(applicationDidBecomeActive:)]) {
@@ -435,10 +417,7 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
                options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*)options
     isFallbackForScene:(BOOL)isFallback {
   for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
-    if (!delegate) {
-      continue;
-    }
-    if (isFallback && [self unnecessaryFallbackFor:delegate]) {
+    if (!delegate || (isFallback && [self pluginSupportsSceneLifecycle:delegate])) {
       continue;
     }
     if ([delegate respondsToSelector:@selector(application:openURL:options:)]) {
@@ -450,30 +429,32 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
   return NO;
 }
 
+/* Converts UISceneOpenURLOptions from the scene event (`sceneFallbackOpenURLContexts`) to a
+ * NSDictionary of options used to the application lifecycle event.
+ *
+ * For more information on UISceneOpenURLOptions, see
+ * https://developer.apple.com/documentation/uikit/uiopenurlcontext/options.
+ *
+ * For information about the possible keys in the NSDictionary and how to handle them, see
+ * https://developer.apple.com/documentation/uikit/uiapplication/openurloptionskey
+ */
 static NSDictionary<UIApplicationOpenURLOptionsKey, id>* ConvertOptions(
     UISceneOpenURLOptions* options) {
-  if (@available(iOS 14.5, *)) {
-    return @{
-      UIApplicationOpenURLOptionsSourceApplicationKey : options.sourceApplication
-          ? options.sourceApplication
-          : [NSNull null],
-      UIApplicationOpenURLOptionsAnnotationKey : options.annotation ? options.annotation
-                                                                    : [NSNull null],
-      UIApplicationOpenURLOptionsOpenInPlaceKey : @(options.openInPlace),
-      UIApplicationOpenURLOptionsEventAttributionKey : options.eventAttribution
-          ? options.eventAttribution
-          : [NSNull null],
-    };
-  } else {
-    return @{
-      UIApplicationOpenURLOptionsSourceApplicationKey : options.sourceApplication
-          ? options.sourceApplication
-          : [NSNull null],
-      UIApplicationOpenURLOptionsAnnotationKey : options.annotation ? options.annotation
-                                                                    : [NSNull null],
-      UIApplicationOpenURLOptionsOpenInPlaceKey : @(options.openInPlace),
-    };
+  NSMutableDictionary<UIApplicationOpenURLOptionsKey, id>* convertedOptions =
+      [NSMutableDictionary dictionary];
+  if (options.sourceApplication) {
+    convertedOptions[UIApplicationOpenURLOptionsSourceApplicationKey] = options.sourceApplication;
   }
+  if (options.annotation) {
+    convertedOptions[UIApplicationOpenURLOptionsAnnotationKey] = options.annotation;
+  }
+  convertedOptions[UIApplicationOpenURLOptionsOpenInPlaceKey] = @(options.openInPlace);
+  if (@available(iOS 14.5, *)) {
+    if (options.eventAttribution) {
+      convertedOptions[UIApplicationOpenURLOptionsEventAttributionKey] = options.eventAttribution;
+    }
+  }
+  return convertedOptions;
 }
 
 - (BOOL)application:(UIApplication*)application handleOpenURL:(NSURL*)url {
@@ -536,10 +517,7 @@ static NSDictionary<UIApplicationOpenURLOptionsKey, id>* ConvertOptions(
                completionHandler:(void (^)(BOOL succeeded))completionHandler
               isFallbackForScene:(BOOL)isFallback {
   for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
-    if (!delegate) {
-      continue;
-    }
-    if (isFallback && [self unnecessaryFallbackFor:delegate]) {
+    if (!delegate || (isFallback && [self pluginSupportsSceneLifecycle:delegate])) {
       continue;
     }
     if ([delegate respondsToSelector:@selector(application:
@@ -611,10 +589,7 @@ static NSDictionary<UIApplicationOpenURLOptionsKey, id>* ConvertOptions(
       restorationHandler:(void (^)(NSArray*))restorationHandler
       isFallbackForScene:(BOOL)isFallback {
   for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
-    if (!delegate) {
-      continue;
-    }
-    if (isFallback && [self unnecessaryFallbackFor:delegate]) {
+    if (!delegate || (isFallback && [self pluginSupportsSceneLifecycle:delegate])) {
       continue;
     }
     if ([delegate respondsToSelector:@selector(application:

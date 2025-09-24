@@ -1552,7 +1552,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
     [_flutterEngine addSceneLifeCycleDelegate:lifecycleDelegate];
   } else {
     // TODO(vashworth): If the plugin doesn't conform to the FlutterSceneLifeCycleDelegate,
-    // print a warning pointing to documentation.
+    // print a warning pointing to documentation: https://github.com/flutter/flutter/issues/175956
     // [FlutterLogger logWarning:[NSString stringWithFormat:@"Plugin %@ has not migrated to
     // scenes.", _pluginKey]];
   }

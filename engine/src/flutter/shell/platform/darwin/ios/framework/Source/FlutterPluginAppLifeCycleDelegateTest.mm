@@ -279,10 +279,50 @@ FLUTTER_ASSERT_ARC
   OCMStub([urlContext URL]).andReturn(url);
   NSSet<UIOpenURLContext*>* urlContexts = [NSSet setWithObjects:urlContext, nil];
 
+  NSDictionary<UIApplicationOpenURLOptionsKey, id>* expectedApplicationOptions = @{
+    UIApplicationOpenURLOptionsOpenInPlaceKey : @(NO),
+  };
+
   [delegate sceneFallbackOpenURLContexts:urlContexts];
   OCMVerify([mockPlugin application:[UIApplication sharedApplication]
                             openURL:url
-                            options:[OCMArg any]]);
+                            options:expectedApplicationOptions]);
+}
+
+- (void)testConvertURLOptions {
+  FlutterPluginAppLifeCycleDelegate* delegate = [[FlutterPluginAppLifeCycleDelegate alloc] init];
+  id plugin = [[FakePlugin alloc] init];
+  id mockPlugin = OCMPartialMock(plugin);
+  [delegate addDelegate:mockPlugin];
+
+  NSString* bundleId = @"app.bundle.id";
+  id annotation = @{@"key" : @"value"};
+  id eventAttribution = OCMClassMock([UIEventAttribution class]);
+
+  UIOpenURLContext* urlContext = OCMClassMock([UIOpenURLContext class]);
+  NSURL* url = [NSURL URLWithString:@"http://example.com"];
+  OCMStub([urlContext URL]).andReturn(url);
+  id sceneOptions = OCMClassMock([UISceneOpenURLOptions class]);
+  OCMStub([sceneOptions sourceApplication]).andReturn(bundleId);
+  OCMStub([sceneOptions annotation]).andReturn(annotation);
+  OCMStub([sceneOptions openInPlace]).andReturn(YES);
+  OCMStub([sceneOptions eventAttribution]).andReturn(eventAttribution);
+
+  OCMStub([urlContext options]).andReturn(sceneOptions);
+  NSSet<UIOpenURLContext*>* urlContexts = [NSSet setWithObjects:urlContext, nil];
+
+  [delegate sceneFallbackOpenURLContexts:urlContexts];
+
+  NSDictionary<UIApplicationOpenURLOptionsKey, id>* expectedApplicationOptions = @{
+    UIApplicationOpenURLOptionsSourceApplicationKey : bundleId,
+    UIApplicationOpenURLOptionsAnnotationKey : annotation,
+    UIApplicationOpenURLOptionsOpenInPlaceKey : @(YES),
+    UIApplicationOpenURLOptionsEventAttributionKey : eventAttribution,
+  };
+
+  OCMVerify([mockPlugin application:[UIApplication sharedApplication]
+                            openURL:url
+                            options:expectedApplicationOptions]);
 }
 
 - (void)testUnnecessarySceneFallbackOpenURLContexts {

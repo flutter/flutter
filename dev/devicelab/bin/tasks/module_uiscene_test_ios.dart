@@ -23,7 +23,7 @@ import 'package:path/path.dart' as path;
 /// `--task-args destination=[/path/to/copy/destination]` can be used to override the destination
 /// of the generated apps/plugins.
 ///
-/// e.g. `../../bin/cache/dart-sdk/bin/dart bin/test_runner.dart test -t module_uiscene_test_ios --local-engine ios_debug_sim_unopt_arm64 --local-engine-host host_debug --task-args destination=/Users/vashworth/Development/flutter/dev/integration_tests/ios_add2app_uiscene/temp`
+/// e.g. `../../bin/cache/dart-sdk/bin/dart bin/test_runner.dart test -t module_uiscene_test_ios --local-engine ios_debug_sim_unopt_arm64 --local-engine-host host_debug --task-args destination=/path/to/copy/destination`
 Future<void> main(List<String> args) async {
   final ArgParser argParser = ArgParser()..addOption('destination');
 
@@ -122,7 +122,7 @@ Future<Directory> _createFlutterModuleApp({
   const String moduleName = 'my_module';
   await flutter(
     'create',
-    options: <String>['--org', 'io.flutter.devicelab', '--template=module', moduleName],
+    options: <String>['--org', 'dev.flutter.devicelab', '--template=module', moduleName],
     workingDirectory: destinationDir.path,
   );
   return Directory(path.join(destinationDir.path, moduleName));
@@ -139,7 +139,7 @@ Future<Directory> _createFlutterPlugin({
     'create',
     options: <String>[
       '--org',
-      'io.flutter.devicelab',
+      'dev.flutter.devicelab',
       '--template=plugin',
       '--platform=ios',
       pluginName,
@@ -181,7 +181,8 @@ Future<void> _installPlugins({
   required Directory appDir,
   required Directory xcodeProjectDir,
 }) async {
-  // Poke the pubspec to make sure the tooling generates an updated Podfile.
+  // Poke the pubspec to reset the fingerprinter to ensure the module is re-generated.
+  // See [_regenerateModuleFromTemplateIfNeeded] in packages/flutter_tools/lib/src/xcode_project.dart.
   final File pubspec = File(path.join(appDir.path, 'pubspec.yaml'));
   pubspec.writeAsStringSync(pubspec.readAsStringSync());
 
@@ -210,6 +211,9 @@ class FileReplacements {
 
   void replace() {
     final File templateFile = File(templatePath);
+    if (!File(destinationPath).existsSync()) {
+      File(destinationPath).createSync(recursive: true);
+    }
     templateFile.copySync(destinationPath);
   }
 }
@@ -287,8 +291,13 @@ class Scenarios {
   final Directory pluginDir;
   final Directory appDir;
 
+  /// A map of scenario names to a list of file replacements.
+  ///
+  /// Each scenario is a different configuration for testing the Flutter module
+  /// in a native iOS app. The file replacements are used to set up the
+  /// specific configuration for each scenario.
   late Map<String, List<FileReplacements>> scenarios = <String, List<FileReplacements>>{
-    // When both the app and the plugin has migrated to scenes,
+    // When both the app and the plugin have migrated to scenes,
     // we expect scene events.
     'AppMigrated-FlutterSceneDelegate-PluginMigrated': <FileReplacements>[
       ...sharedLifecycleFiles,
@@ -313,6 +322,7 @@ class Scenarios {
     // When the app has migrated but the plugin hasn't,
     // we expect application events to be used as a fallback.
     'AppMigrated-FlutterSceneDelegate-PluginNotMigrated': <FileReplacements>[
+      ...sharedLifecycleFiles,
       FileReplacements(
         path.join(templatesDir.path, 'native', 'SceneDelegate-FlutterSceneDelegate.swift'),
         path.join(xcodeProjectDir.path, 'xcode_uikit_swift', 'SceneDelegate.swift'),
@@ -334,6 +344,7 @@ class Scenarios {
     // When both the app and the plugin has migrated to scenes,
     // we expect scene events.
     'AppMigrated-FlutterSceneLifeCycleProvider-PluginMigrated': <FileReplacements>[
+      ...sharedLifecycleFiles,
       FileReplacements(
         path.join(templatesDir.path, 'native', 'SceneDelegate-FlutterSceneLifeCycleProvider.swift'),
         path.join(xcodeProjectDir.path, 'xcode_uikit_swift', 'SceneDelegate.swift'),
@@ -355,6 +366,7 @@ class Scenarios {
     // When the app has migrated but the plugin hasn't,
     // we expect application events to be used as a fallback.
     'AppMigrated-FlutterSceneLifeCycleProvider-PluginNotMigrated': <FileReplacements>[
+      ...sharedLifecycleFiles,
       FileReplacements(
         path.join(templatesDir.path, 'native', 'SceneDelegate-FlutterSceneLifeCycleProvider.swift'),
         path.join(xcodeProjectDir.path, 'xcode_uikit_swift', 'SceneDelegate.swift'),
@@ -375,6 +387,7 @@ class Scenarios {
 
     // When the app has not migrated, but the plugin has, we expect no events.
     'AppNotMigrated-FlutterSceneDelegate-PluginMigrated': <FileReplacements>[
+      ...sharedLifecycleFiles,
       FileReplacements(
         path.join(templatesDir.path, 'native', 'Info-unmigrated.plist'),
         path.join(xcodeProjectDir.path, 'xcode_uikit_swift', 'Info.plist'),
@@ -395,6 +408,7 @@ class Scenarios {
 
     // When the app and plugin have not migrated, we expect application events.
     'AppNotMigrated-FlutterSceneDelegate-PluginNotMigrated': <FileReplacements>[
+      ...sharedLifecycleFiles,
       FileReplacements(
         path.join(templatesDir.path, 'native', 'Info-unmigrated.plist'),
         path.join(xcodeProjectDir.path, 'xcode_uikit_swift', 'Info.plist'),

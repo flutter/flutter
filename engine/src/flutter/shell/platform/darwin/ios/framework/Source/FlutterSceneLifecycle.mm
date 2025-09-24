@@ -119,10 +119,7 @@ FLUTTER_ASSERT_ARC
 
 - (void)sceneDidDisconnect:(UIScene*)scene {
   [self updateEnginesInScene:scene];
-  for (FlutterEngine* engine in [_engines allObjects]) {
-    if (!engine) {
-      continue;
-    }
+  for (FlutterEngine* engine in _engines.allObjects) {
     [engine.sceneLifeCycleDelegate sceneDidDisconnect:scene];
   }
   // There is no application equivalent for this event and therefore no fallback.
@@ -132,10 +129,7 @@ FLUTTER_ASSERT_ARC
 
 - (void)sceneWillEnterForeground:(UIScene*)scene {
   [self updateEnginesInScene:scene];
-  for (FlutterEngine* engine in [_engines allObjects]) {
-    if (!engine) {
-      continue;
-    }
+  for (FlutterEngine* engine in _engines.allObjects) {
     [engine.sceneLifeCycleDelegate sceneWillEnterForeground:scene];
   }
   [[self applicationLifeCycleDelegate] sceneWillEnterForegroundFallback];
@@ -143,10 +137,7 @@ FLUTTER_ASSERT_ARC
 
 - (void)sceneDidBecomeActive:(UIScene*)scene {
   [self updateEnginesInScene:scene];
-  for (FlutterEngine* engine in [_engines allObjects]) {
-    if (!engine) {
-      continue;
-    }
+  for (FlutterEngine* engine in _engines.allObjects) {
     [engine.sceneLifeCycleDelegate sceneDidBecomeActive:scene];
   }
   [[self applicationLifeCycleDelegate] sceneDidBecomeActiveFallback];
@@ -156,10 +147,7 @@ FLUTTER_ASSERT_ARC
 
 - (void)sceneWillResignActive:(UIScene*)scene {
   [self updateEnginesInScene:scene];
-  for (FlutterEngine* engine in [_engines allObjects]) {
-    if (!engine) {
-      continue;
-    }
+  for (FlutterEngine* engine in _engines.allObjects) {
     [engine.sceneLifeCycleDelegate sceneWillResignActive:scene];
   }
   [[self applicationLifeCycleDelegate] sceneWillResignActiveFallback];
@@ -167,10 +155,7 @@ FLUTTER_ASSERT_ARC
 
 - (void)sceneDidEnterBackground:(UIScene*)scene {
   [self updateEnginesInScene:scene];
-  for (FlutterEngine* engine in [_engines allObjects]) {
-    if (!engine) {
-      continue;
-    }
+  for (FlutterEngine* engine in _engines.allObjects) {
     [engine.sceneLifeCycleDelegate sceneDidEnterBackground:scene];
   }
   [[self applicationLifeCycleDelegate] sceneDidEnterBackgroundFallback];
@@ -180,10 +165,7 @@ FLUTTER_ASSERT_ARC
 
 - (void)scene:(UIScene*)scene openURLContexts:(NSSet<UIOpenURLContext*>*)URLContexts {
   [self updateEnginesInScene:scene];
-  for (FlutterEngine* engine in [_engines allObjects]) {
-    if (!engine) {
-      continue;
-    }
+  for (FlutterEngine* engine in _engines.allObjects) {
     [engine.sceneLifeCycleDelegate scene:scene openURLContexts:URLContexts];
   }
   [[self applicationLifeCycleDelegate] sceneFallbackOpenURLContexts:URLContexts];
@@ -193,10 +175,7 @@ FLUTTER_ASSERT_ARC
 
 - (void)scene:(UIScene*)scene continueUserActivity:(NSUserActivity*)userActivity {
   [self updateEnginesInScene:scene];
-  for (FlutterEngine* engine in [_engines allObjects]) {
-    if (!engine) {
-      continue;
-    }
+  for (FlutterEngine* engine in _engines.allObjects) {
     [engine.sceneLifeCycleDelegate scene:scene continueUserActivity:userActivity];
   }
   [[self applicationLifeCycleDelegate] sceneFallbackContinueUserActivity:userActivity];
@@ -208,10 +187,7 @@ FLUTTER_ASSERT_ARC
     performActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
                completionHandler:(void (^)(BOOL succeeded))completionHandler {
   [self updateEnginesInScene:windowScene];
-  for (FlutterEngine* engine in [_engines allObjects]) {
-    if (!engine) {
-      continue;
-    }
+  for (FlutterEngine* engine in _engines.allObjects) {
     [engine.sceneLifeCycleDelegate windowScene:windowScene
                   performActionForShortcutItem:shortcutItem
                              completionHandler:completionHandler];
@@ -248,7 +224,7 @@ FLUTTER_ASSERT_ARC
 
 - (void)flutterViewDidConnectTo:(UIScene*)scene
                         options:(UISceneConnectionOptions*)connectionOptions {
-  for (NSObject<FlutterSceneLifeCycleDelegate>* delegate in [_delegates allObjects]) {
+  for (NSObject<FlutterSceneLifeCycleDelegate>* delegate in _delegates.allObjects) {
     if ([delegate respondsToSelector:_cmd]) {
       [delegate flutterViewDidConnectTo:scene options:connectionOptions];
     }
@@ -256,7 +232,7 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)sceneDidDisconnect:(UIScene*)scene {
-  for (NSObject<FlutterSceneLifeCycleDelegate>* delegate in [_delegates allObjects]) {
+  for (NSObject<FlutterSceneLifeCycleDelegate>* delegate in _delegates.allObjects) {
     if ([delegate respondsToSelector:_cmd]) {
       [delegate sceneDidDisconnect:scene];
     }
@@ -266,7 +242,7 @@ FLUTTER_ASSERT_ARC
 #pragma mark - Transitioning to the foreground
 
 - (void)sceneWillEnterForeground:(UIScene*)scene {
-  for (NSObject<FlutterSceneLifeCycleDelegate>* delegate in [_delegates allObjects]) {
+  for (NSObject<FlutterSceneLifeCycleDelegate>* delegate in _delegates.allObjects) {
     if ([delegate respondsToSelector:_cmd]) {
       [delegate sceneWillEnterForeground:scene];
     }
@@ -274,7 +250,7 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)sceneDidBecomeActive:(UIScene*)scene {
-  for (NSObject<FlutterSceneLifeCycleDelegate>* delegate in [_delegates allObjects]) {
+  for (NSObject<FlutterSceneLifeCycleDelegate>* delegate in _delegates.allObjects) {
     if ([delegate respondsToSelector:_cmd]) {
       [delegate sceneDidBecomeActive:scene];
     }
@@ -284,7 +260,7 @@ FLUTTER_ASSERT_ARC
 #pragma mark - Transitioning to the background
 
 - (void)sceneWillResignActive:(UIScene*)scene {
-  for (NSObject<FlutterSceneLifeCycleDelegate>* delegate in [_delegates allObjects]) {
+  for (NSObject<FlutterSceneLifeCycleDelegate>* delegate in _delegates.allObjects) {
     if ([delegate respondsToSelector:_cmd]) {
       [delegate sceneWillResignActive:scene];
     }
@@ -292,7 +268,7 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)sceneDidEnterBackground:(UIScene*)scene {
-  for (NSObject<FlutterSceneLifeCycleDelegate>* delegate in [_delegates allObjects]) {
+  for (NSObject<FlutterSceneLifeCycleDelegate>* delegate in _delegates.allObjects) {
     if ([delegate respondsToSelector:_cmd]) {
       [delegate sceneDidEnterBackground:scene];
     }
@@ -302,7 +278,7 @@ FLUTTER_ASSERT_ARC
 #pragma mark - Opening URLs
 
 - (void)scene:(UIScene*)scene openURLContexts:(NSSet<UIOpenURLContext*>*)URLContexts {
-  for (NSObject<FlutterSceneLifeCycleDelegate>* delegate in [_delegates allObjects]) {
+  for (NSObject<FlutterSceneLifeCycleDelegate>* delegate in _delegates.allObjects) {
     if ([delegate respondsToSelector:_cmd]) {
       [delegate scene:scene openURLContexts:URLContexts];
     }
@@ -312,7 +288,7 @@ FLUTTER_ASSERT_ARC
 #pragma mark - Continuing user activities
 
 - (void)scene:(UIScene*)scene continueUserActivity:(NSUserActivity*)userActivity {
-  for (NSObject<FlutterSceneLifeCycleDelegate>* delegate in [_delegates allObjects]) {
+  for (NSObject<FlutterSceneLifeCycleDelegate>* delegate in _delegates.allObjects) {
     if ([delegate respondsToSelector:_cmd]) {
       [delegate scene:scene continueUserActivity:userActivity];
     }
@@ -324,7 +300,7 @@ FLUTTER_ASSERT_ARC
 - (void)windowScene:(UIWindowScene*)windowScene
     performActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
                completionHandler:(void (^)(BOOL succeeded))completionHandler {
-  for (NSObject<FlutterSceneLifeCycleDelegate>* delegate in [_delegates allObjects]) {
+  for (NSObject<FlutterSceneLifeCycleDelegate>* delegate in _delegates.allObjects) {
     if ([delegate respondsToSelector:_cmd]) {
       [delegate windowScene:windowScene
           performActionForShortcutItem:shortcutItem
