@@ -121,7 +121,7 @@ public class MouseCursorPlugin {
      * with the context associated with this view.
      */
     @NonNull
-    public PointerIcon getSystemPointerIcon(int type);
+    PointerIcon getSystemPointerIcon(int type);
 
     /**
      * Request the pointer to display the specified icon object.
@@ -129,6 +129,6 @@ public class MouseCursorPlugin {
      * <p>If the delegate is implemented by a {@link android.view.View}, then this method is
      * automatically implemented by View.
      */
-    public void setPointerIcon(@NonNull PointerIcon icon);
+    void setPointerIcon(@NonNull PointerIcon icon);
   }
 }

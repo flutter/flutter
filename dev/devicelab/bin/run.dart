@@ -32,6 +32,8 @@ Future<void> main(List<String> rawArgs) async {
   /// Suppresses standard output, prints only standard error output.
   final bool silent = (args['silent'] as bool?) ?? false;
 
+  final String buildMode = args['build-mode'] as String;
+
   /// The build of the local engine to use.
   ///
   /// Required for A/B test mode.
@@ -120,6 +122,7 @@ Future<void> main(List<String> rawArgs) async {
       resultsFile: resultsFile,
       taskName: taskNames.single,
       onlyLocalEngine: (args['ab-local-engine-only'] as bool?) ?? false,
+      buildMode: buildMode,
     );
   } else {
     await runTasks(
@@ -128,6 +131,7 @@ Future<void> main(List<String> rawArgs) async {
       localEngine: localEngine,
       localEngineHost: localEngineHost,
       localEngineSrcPath: localEngineSrcPath,
+      localWebSdk: localWebSdk,
       deviceId: deviceId,
       exitOnFirstTestFailure: exitOnFirstTestFailure,
       terminateStrayDartProcesses: terminateStrayDartProcesses,
@@ -135,6 +139,7 @@ Future<void> main(List<String> rawArgs) async {
       luciBuilder: luciBuilder,
       resultsPath: resultsPath,
       useEmulator: useEmulator,
+      buildMode: buildMode,
     );
   }
 }
@@ -145,6 +150,7 @@ Future<void> _runABTest({
   required String? localEngine,
   required String? localEngineHost,
   required String? localWebSdk,
+  required String buildMode,
   required String? localEngineSrcPath,
   required String? deviceId,
   required String resultsFile,
@@ -171,6 +177,7 @@ Future<void> _runABTest({
         taskName,
         silent: silent,
         deviceId: deviceId,
+        buildMode: buildMode,
       );
 
       print('Default engine result:');
@@ -192,6 +199,7 @@ Future<void> _runABTest({
       localEngineHost: localEngineHost,
       localWebSdk: localWebSdk,
       localEngineSrcPath: localEngineSrcPath,
+      buildMode: buildMode,
       deviceId: deviceId,
     );
 
@@ -254,6 +262,12 @@ ArgParser createArgParser(List<String> taskNames) {
       callback: (List<String> tasks) {
         taskNames.addAll(tasks);
       },
+    )
+    ..addOption(
+      'build-mode',
+      defaultsTo: 'profile',
+      allowed: <String>['debug', 'profile'],
+      help: 'The build mode to use for the benchmark.',
     )
     ..addOption(
       'device-id',

@@ -807,11 +807,11 @@ class _MaterialSwitchState extends State<_MaterialSwitch>
   }
 
   WidgetStateProperty<Color?> get _widgetThumbColor {
-    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return widget.inactiveThumbColor;
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return widget.activeThumbColor;
       }
       return widget.inactiveThumbColor;
@@ -819,8 +819,8 @@ class _MaterialSwitchState extends State<_MaterialSwitch>
   }
 
   WidgetStateProperty<Color?> get _widgetTrackColor {
-    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         return widget.activeTrackColor;
       }
       return widget.inactiveTrackColor;
@@ -955,8 +955,8 @@ class _MaterialSwitchState extends State<_MaterialSwitch>
 
     // Colors need to be resolved in selected and non selected states separately
     // so that they can be lerped between.
-    final Set<MaterialState> activeStates = states..add(MaterialState.selected);
-    final Set<MaterialState> inactiveStates = states..remove(MaterialState.selected);
+    final Set<WidgetState> activeStates = states..add(WidgetState.selected);
+    final Set<WidgetState> inactiveStates = states..remove(WidgetState.selected);
 
     final Color? activeThumbColor =
         widget.thumbColor?.resolve(activeStates) ??
@@ -1011,7 +1011,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch>
     final Color effectiveInactiveIconColor =
         effectiveInactiveIcon?.color ?? switchConfig.iconColor.resolve(inactiveStates);
 
-    final Set<MaterialState> focusedStates = states..add(MaterialState.focused);
+    final Set<WidgetState> focusedStates = states..add(WidgetState.focused);
     final Color effectiveFocusOverlayColor =
         widget.overlayColor?.resolve(focusedStates) ??
         widget.focusColor ??
@@ -1023,14 +1023,14 @@ class _MaterialSwitchState extends State<_MaterialSwitch>
             : null) ??
         defaults.overlayColor!.resolve(focusedStates)!;
 
-    final Set<MaterialState> hoveredStates = states..add(MaterialState.hovered);
+    final Set<WidgetState> hoveredStates = states..add(WidgetState.hovered);
     final Color effectiveHoverOverlayColor =
         widget.overlayColor?.resolve(hoveredStates) ??
         widget.hoverColor ??
         switchTheme.overlayColor?.resolve(hoveredStates) ??
         defaults.overlayColor!.resolve(hoveredStates)!;
 
-    final Set<MaterialState> activePressedStates = activeStates..add(MaterialState.pressed);
+    final Set<WidgetState> activePressedStates = activeStates..add(WidgetState.pressed);
     final Color effectiveActivePressedThumbColor =
         widget.thumbColor?.resolve(activePressedStates) ??
         _widgetThumbColor.resolve(activePressedStates) ??
@@ -1042,7 +1042,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch>
         activeThumbColor?.withAlpha(kRadialReactionAlpha) ??
         defaults.overlayColor!.resolve(activePressedStates)!;
 
-    final Set<MaterialState> inactivePressedStates = inactiveStates..add(MaterialState.pressed);
+    final Set<WidgetState> inactivePressedStates = inactiveStates..add(WidgetState.pressed);
     final Color effectiveInactivePressedThumbColor =
         widget.thumbColor?.resolve(inactivePressedStates) ??
         _widgetThumbColor.resolve(inactivePressedStates) ??
@@ -1055,7 +1055,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch>
         defaults.overlayColor!.resolve(inactivePressedStates)!;
 
     final WidgetStateProperty<MouseCursor> effectiveMouseCursor =
-        WidgetStateProperty.resolveWith<MouseCursor>((Set<MaterialState> states) {
+        WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
           return WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
               switchTheme.mouseCursor?.resolve(states) ??
               defaults.mouseCursor!.resolve(states)!;
@@ -1098,8 +1098,8 @@ class _MaterialSwitchState extends State<_MaterialSwitch>
               ..focusColor = effectiveFocusOverlayColor
               ..splashRadius = effectiveSplashRadius
               ..downPosition = downPosition
-              ..isFocused = states.contains(MaterialState.focused)
-              ..isHovered = states.contains(MaterialState.hovered)
+              ..isFocused = states.contains(WidgetState.focused)
+              ..isHovered = states.contains(WidgetState.hovered)
               ..activeColor = effectiveActiveThumbColor
               ..inactiveColor = effectiveInactiveThumbColor
               ..activePressedColor = effectiveActivePressedThumbColor
@@ -1936,8 +1936,8 @@ class _SwitchDefaultsCupertino extends SwitchThemeData {
 
   @override
   WidgetStateProperty<MouseCursor?> get mouseCursor {
-    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return SystemMouseCursors.basic;
       }
       return kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic;
@@ -1949,8 +1949,8 @@ class _SwitchDefaultsCupertino extends SwitchThemeData {
 
   @override
   WidgetStateProperty<Color> get trackColor {
-    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         return CupertinoDynamicColor.resolve(CupertinoColors.systemGreen, context);
       }
       return CupertinoDynamicColor.resolve(CupertinoColors.secondarySystemFill, context);
@@ -1963,8 +1963,8 @@ class _SwitchDefaultsCupertino extends SwitchThemeData {
 
   @override
   WidgetStateProperty<Color?> get overlayColor {
-    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.focused)) {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.focused)) {
         return HSLColor.fromColor(
           CupertinoDynamicColor.resolve(CupertinoColors.systemGreen, context).withOpacity(0.80),
         ).withLightness(0.69).withSaturation(0.835).toColor();
@@ -1987,8 +1987,8 @@ class _SwitchConfigCupertino with _SwitchConfig {
 
   @override
   WidgetStateProperty<Color> get iconColor {
-    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return _colors.onSurface.withOpacity(0.38);
       }
       return _colors.onPrimaryContainer;
@@ -2106,11 +2106,11 @@ class _SwitchDefaultsM2 extends SwitchThemeData {
   WidgetStateProperty<Color> get thumbColor {
     final bool isDark = _theme.brightness == Brightness.dark;
 
-    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return isDark ? Colors.grey.shade800 : Colors.grey.shade400;
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return _colors.secondary;
       }
       return isDark ? Colors.grey.shade400 : Colors.grey.shade50;
@@ -2122,11 +2122,11 @@ class _SwitchDefaultsM2 extends SwitchThemeData {
     final bool isDark = _theme.brightness == Brightness.dark;
     const Color black32 = Color(0x52000000); // Black with 32% opacity
 
-    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return isDark ? Colors.white10 : Colors.black12;
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         final Color activeColor = _colors.secondary;
         return activeColor.withAlpha(0x80);
       }
@@ -2143,19 +2143,19 @@ class _SwitchDefaultsM2 extends SwitchThemeData {
 
   @override
   WidgetStateProperty<MouseCursor> get mouseCursor => WidgetStateProperty.resolveWith(
-    (Set<MaterialState> states) => MaterialStateMouseCursor.clickable.resolve(states),
+    (Set<WidgetState> states) => MaterialStateMouseCursor.clickable.resolve(states),
   );
 
   @override
   WidgetStateProperty<Color?> get overlayColor {
-    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
         return thumbColor.resolve(states).withAlpha(kRadialReactionAlpha);
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return _theme.hoverColor;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return _theme.focusColor;
       }
       return null;
