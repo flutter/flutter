@@ -477,17 +477,22 @@ class _OutlinedButtonWithIconChild extends StatelessWidget {
         buttonStyle?.iconAlignment ??
         IconAlignment.start;
     final Widget? icon = this.icon;
+
+    if (icon == null) {
+      return label;
+    }
+
     return Row(
       mainAxisSize: MainAxisSize.min,
-      spacing: icon == null ? 0 : lerpDouble(8, 4, scale)!,
+      spacing: lerpDouble(8, 4, scale)!,
       children: effectiveIconAlignment == IconAlignment.start
           ? <Widget>[
-              if (icon != null) icon,
+              icon,
               Flexible(child: label),
             ]
           : <Widget>[
               Flexible(child: label),
-              if (icon != null) icon,
+              icon,
             ],
     );
   }
