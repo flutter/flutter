@@ -111,21 +111,6 @@ class OutlinedButton extends ButtonStyleButton {
     required Widget label,
     IconAlignment? iconAlignment,
   }) {
-    // if (icon == null) {
-    //   return OutlinedButton(
-    //     key: key,
-    //     onPressed: onPressed,
-    //     onLongPress: onLongPress,
-    //     onHover: onHover,
-    //     onFocusChange: onFocusChange,
-    //     style: style,
-    //     focusNode: focusNode,
-    //     autofocus: autofocus ?? false,
-    //     clipBehavior: clipBehavior ?? Clip.none,
-    //     statesController: statesController,
-    //     child: label,
-    //   );
-    // }
     return _OutlinedButtonWithIcon(
       key: key,
       onPressed: onPressed,
