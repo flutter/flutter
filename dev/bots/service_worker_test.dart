@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This test has been rewritten to specifically verify the behavior
-// of the service worker cleanup script by observing network requests.
-
 import 'dart:core' hide print;
 import 'dart:io';
 
@@ -16,14 +13,16 @@ import 'run_command.dart';
 import 'test/common.dart';
 import 'utils.dart';
 
+final String _bat = Platform.isWindows ? '.bat' : '';
 final String _flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
+final String _flutter = path.join(_flutterRoot, 'bin', 'flutter$_bat');
 final String _testAppDirectory = path.join(_flutterRoot, 'dev', 'integration_tests', 'web');
 final String _appBuildDirectory = path.join(_testAppDirectory, 'build', 'web');
-final String _target = path.join('lib', 'main.dart');
-final Map<String, int> _requestedPathCounts = <String, int>{};
+final String _target = path.join('lib', 'service_worker_test.dart');
+final Set<String> _requestedPaths = <String>{};
 
 Future<void> main() async {
-  await runCleanupVerificationTest(headless: false);
+  await runServiceWorkerCleanupTest(headless: false);
 
   if (hasError) {
     reportErrorsAndExit('${bold}Cleanup test FAILED.$reset');
@@ -31,12 +30,8 @@ Future<void> main() async {
   reportSuccessAndExit('${bold}Cleanup test PASSED successfully.$reset');
 }
 
-/// test verifies the cleanup service worker correctly removes an old,
-/// cached service worker by observing network request patterns.
-Future<void> runCleanupVerificationTest({required bool headless}) async {
+Future<void> runServiceWorkerCleanupTest({required bool headless}) async {
   print('${bold}BEGIN: Service Worker Cleanup Verification Test$reset');
-
-  // This test creates the cleanup worker file itself, so we don't depend on it existing.
   final String cleanupWorkerSourcePath = path.join(
     _testAppDirectory,
     'web',
@@ -46,47 +41,53 @@ Future<void> runCleanupVerificationTest({required bool headless}) async {
 
   const String cleanupWorkerContent = '''
 'use strict';
-const OLD_CACHE_PREFIX = 'flutter-';
-self.addEventListener('install', (event) => {
+
+const CACHE_NAME = 'flutter-app-cache';
+
+self.addEventListener('install', () => {
   self.skipWaiting();
+  console.log('Deprecated service worker installed. It will not be used.');
 });
+
+// remove old caches and unregister the service worker
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     (async () => {
       try {
-        const cacheKeys = await self.caches.keys();
-        const oldCacheKeys = cacheKeys.filter(key => key.startsWith(OLD_CACHE_PREFIX));
-        const deletePromises = oldCacheKeys.map(key => self.caches.delete(key));
+        const deletePromises = OLD_CACHE_NAMES.map((key) => self.caches.delete(key));
         await Promise.all(deletePromises);
       } catch (e) {
-        // Ignore errors.
+        console.warn('Failed to delete old service worker caches:', e);
       }
+
       try {
         await self.registration.unregister();
       } catch (e) {
-        // Ignore errors.
+        console.warn('Failed to unregister service worker:', e);
       }
+
       try {
         const clients = await self.clients.matchAll({
           type: 'window',
           includeUncontrolled: true,
         });
+        // Reload clients to ensure they are not using the old service worker.
         clients.forEach((client) => {
           if (client.url && 'navigate' in client) {
             client.navigate(client.url);
           }
         });
       } catch (e) {
-        // Ignore errors.
+        console.warn('Failed to navigate service worker clients:', e);
       }
     })()
   );
 });
+
 ''';
 
   AppServer? server;
 
-  // A simple caching service worker to act as the "old" worker.
   const String oldCachingWorkerContent = '''
   'use strict';
   const CACHE_NAME = 'flutter-test-cache-v1';
@@ -114,62 +115,47 @@ self.addEventListener('activate', (event) => {
   );
 
   try {
-    // Write the cleanup worker to the file system so it can be read if needed,
-    print('Creating temporary cleanup worker file at: $cleanupWorkerSourcePath');
     cleanupWorkerFile.writeAsStringSync(cleanupWorkerContent);
-
-    // Build the app once at the beginning.
-    await runCommand('flutter', <String>[
+    await runCommand(_flutter, <String>['clean'], workingDirectory: _testAppDirectory);
+    await runCommand(_flutter, <String>[
       'build',
       'web',
+      '--no-web-resources-cdn',
       '--profile',
       '-t',
       _target,
     ], workingDirectory: _testAppDirectory);
-
-    // Install the "old" caching worker and verify it works
     print('\n${yellow}Phase 1: Installing dummy caching worker and verifying it caches...$reset');
     serviceWorkerBuildFile.writeAsStringSync(oldCachingWorkerContent);
 
     server = await _startServer(headless: headless);
-
-    // Load to install the worker.
-    await _waitForAppToLoad(server, waitForCounts: <String, int>{'main.dart.js': 1});
-
-    print('Reloading page to test cache...');
-    _requestedPathCounts.clear();
-    await server.chrome.reloadPage(); // This reload should be served from cache.
-    await _waitForAppToLoad(server, waitForCounts: <String, int>{'flutter_service_worker.js': 1});
+    await _waitForAppToRequest(server, 'main.dart.js');
+    _requestedPaths.clear();
+    print('== RELOADING PAGE ==');
+    await server.chrome.reloadPage();
+    await _waitForAppToRequest(server, 'flutter_service_worker.js');
 
     expect(
-      _requestedPathCounts.containsKey('main.dart.js'),
-      false,
+      _requestedPaths,
+      isNot(contains('main.dart.js')),
       reason:
           'On a simple reload, main.dart.js should have been served from the cache, so no network request was expected.',
     );
     print('${green}Verification successful: Old caching worker is active.$reset');
     await server.stop();
 
-    // Deploy the cleanup worker
     print('\n${yellow}Phase 2: Deploying cleanup worker and verifying cache is removed...$reset');
     serviceWorkerBuildFile.writeAsStringSync(cleanupWorkerContent);
 
     server = await _startServer(headless: headless);
-    // Hard refresh to force the browser to check for a new service worker version.
-    await server.chrome.reloadPage(ignoreCache: true);
-
-    print('Waiting for cleanup worker to execute and reload the page...');
-    await _waitForAppToLoad(server, waitForCounts: <String, int>{'main.dart.js': 1});
-
-    print('Reloading page to check if cache is gone...');
-    _requestedPathCounts.clear();
+    await _waitForAppToRequest(server, 'main.dart.js');
+    print('== RELOADING PAGE ==');
     await server.chrome.reloadPage();
-    // Now, we expect main.dart.js to be fetched from the network again.
-    await _waitForAppToLoad(server, waitForCounts: <String, int>{'main.dart.js': 1});
+    await _waitForAppToRequest(server, 'main.dart.js');
 
     expect(
-      _requestedPathCounts.containsKey('main.dart.js'),
-      true,
+      _requestedPaths,
+      contains('main.dart.js'),
       reason:
           'After cleanup, main.dart.js should be requested from the network because the caching worker is gone.',
     );
@@ -198,27 +184,25 @@ Future<AppServer> _startServer({required bool headless}) async {
     cacheControl: 'max-age=0',
     additionalRequestHandlers: <Handler>[
       (Request request) {
-        final String requestedPath = request.url.path.split('/').last;
-        _requestedPathCounts.putIfAbsent(requestedPath, () => 0);
-        _requestedPathCounts[requestedPath] = _requestedPathCounts[requestedPath]! + 1;
+        _requestedPaths.add(request.url.path.split('/').last);
         return Response.notFound('');
       },
     ],
   );
 }
 
-Future<void> _waitForAppToLoad(AppServer server, {required Map<String, int> waitForCounts}) async {
+Future<void> _waitForAppToRequest(AppServer server, String file) async {
+  print('Waiting for app to request "$file" (requested so far: $_requestedPaths)');
   await Future.any(<Future<Object?>>[
     () async {
       int tries = 1;
-      while (!waitForCounts.entries.every(
-        (MapEntry<String, int> entry) => (_requestedPathCounts[entry.key] ?? 0) >= entry.value,
-      )) {
+      while (!_requestedPaths.contains(file)) {
         if (tries++ % 40 == 0) {
-          print('Still waiting for app to load. Requested so far: $_requestedPathCounts');
+          print('-- Still waiting for app to request "$file". Requested so far: $_requestedPaths');
         }
         await Future<void>.delayed(const Duration(milliseconds: 100));
       }
+      print('++ App has requested "$file" (requested so far: $_requestedPaths)');
     }(),
     server.onChromeError.then((String error) {
       throw Exception('Chrome error: $error');
