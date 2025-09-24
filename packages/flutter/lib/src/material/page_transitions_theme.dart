@@ -17,6 +17,7 @@ import 'package:flutter/services.dart';
 
 import 'color_scheme.dart';
 import 'colors.dart';
+import 'predictive_back_page_transitions_builder.dart';
 import 'theme.dart';
 
 // Slides the page upwards and fades it in, starting from 1/4 screen
@@ -595,61 +596,6 @@ class _FadeForwardsPageTransition extends StatelessWidget {
   }
 }
 
-/// Used by [PageTransitionsTheme] to define a [MaterialPageRoute] page
-/// transition animation.
-///
-/// Apps can configure the map of builders for [ThemeData.pageTransitionsTheme]
-/// to customize the default [MaterialPageRoute] page transition animation
-/// for different platforms.
-///
-/// See also:
-///
-///  * [FadeUpwardsPageTransitionsBuilder], which defines a page transition
-///    that's similar to the one provided by Android O.
-///  * [OpenUpwardsPageTransitionsBuilder], which defines a page transition
-///    that's similar to the one provided by Android P.
-///  * [ZoomPageTransitionsBuilder], which defines the default page transition
-///    that's similar to the one provided in Android Q.
-///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
-///    transition that matches native iOS page transitions.
-///  * [FadeForwardsPageTransitionsBuilder], which defines a page transition
-///    that's similar to the one provided by Android U.
-abstract class PageTransitionsBuilder {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
-  const PageTransitionsBuilder();
-
-  /// Provides a secondary transition to the previous route.
-  ///
-  /// {@macro flutter.widgets.delegatedTransition}
-  DelegatedTransitionBuilder? get delegatedTransition => null;
-
-  /// {@macro flutter.widgets.TransitionRoute.transitionDuration}
-  ///
-  /// Defaults to 300 milliseconds.
-  Duration get transitionDuration => const Duration(milliseconds: 300);
-
-  /// {@macro flutter.widgets.TransitionRoute.reverseTransitionDuration}
-  ///
-  /// Defaults to 300 milliseconds.
-  Duration get reverseTransitionDuration => transitionDuration;
-
-  /// Wraps the child with one or more transition widgets which define how [route]
-  /// arrives on and leaves the screen.
-  ///
-  /// The [MaterialPageRoute.buildTransitions] method looks up the
-  /// current [PageTransitionsTheme] with `Theme.of(context).pageTransitionsTheme`
-  /// and delegates to this method with a [PageTransitionsBuilder] based
-  /// on the theme's [ThemeData.platform].
-  Widget buildTransitions<T>(
-    PageRoute<T> route,
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  );
-}
-
 /// Used by [PageTransitionsTheme] to define a vertically fading
 /// [MaterialPageRoute] page transition animation that looks like
 /// the default page transition used on Android O.
@@ -759,7 +705,12 @@ class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
   final Color? backgroundColor;
 
   /// The value of [transitionDuration] in milliseconds.
-  static const int kTransitionMilliseconds = 800;
+  ///
+  /// Eyeballed on a physical Pixel 9 running Android 16. This does not match
+  /// the actual value used by native Android, which is 800ms, because native
+  /// Android is using Material 3 Expressive springs that are not currently
+  /// supported by Flutter. So for now at least, this is an approximation.
+  static const int kTransitionMilliseconds = 450;
 
   @override
   Duration get transitionDuration => const Duration(milliseconds: kTransitionMilliseconds);
@@ -1097,7 +1048,7 @@ class PageTransitionsTheme with Diagnosticable {
 
   static const Map<TargetPlatform, PageTransitionsBuilder> _defaultBuilders =
       <TargetPlatform, PageTransitionsBuilder>{
-        TargetPlatform.android: ZoomPageTransitionsBuilder(),
+        TargetPlatform.android: PredictiveBackPageTransitionsBuilder(),
         TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
         TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
         TargetPlatform.windows: ZoomPageTransitionsBuilder(),

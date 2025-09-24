@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
@@ -27,7 +28,6 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/isolated/resident_web_runner.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
@@ -143,6 +143,7 @@ name: my_app
     debugConnection.fakeVmServiceHost = () => fakeVmServiceHost;
     webDevFS.result = ConnectionResult(appConnection, debugConnection, debugConnection.vmService);
     debugConnection.uri = 'ws://127.0.0.1/abcd/';
+    debugConnection.devToolsUri = 'http://127.0.0.1/abcd/';
     chromeConnection.tabs.add(chromeTab);
   }
 
@@ -368,7 +369,6 @@ name: my_app
         outputPreferences: OutputPreferences.test(),
         analytics: globals.analytics,
         systemClock: globals.systemClock,
-        devtoolsHandler: createNoOpHandler,
       );
 
       expect(await residentWebRunner.run(), 0);
@@ -398,7 +398,6 @@ name: my_app
         outputPreferences: OutputPreferences.test(),
         analytics: globals.analytics,
         systemClock: globals.systemClock,
-        devtoolsHandler: createNoOpHandler,
       );
 
       expect(await residentWebRunner.run(), 0);
@@ -428,10 +427,7 @@ name: my_app
         outputPreferences: OutputPreferences.test(),
         analytics: globals.analytics,
         systemClock: globals.systemClock,
-        devtoolsHandler: createNoOpHandler,
       );
-
-      mockDevice.dds = DartDevelopmentService(logger: logger);
 
       expect(mockDevice.isRunning, false);
       final connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -469,10 +465,7 @@ name: my_app
         outputPreferences: OutputPreferences.test(),
         analytics: globals.analytics,
         systemClock: globals.systemClock,
-        devtoolsHandler: createNoOpHandler,
       );
-
-      mockDevice.dds = DartDevelopmentService(logger: logger);
 
       expect(mockDevice.isRunning, false);
       final connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -652,6 +645,8 @@ name: my_app
         'Launching lib/main.dart on FakeDevice in debug mode...\n'
         'Waiting for connection from debug service on FakeDevice...\n'
         'Debug service listening on ws://127.0.0.1/abcd/\n'
+        'A Dart VM Service on FakeDevice is available at: http://127.0.0.1/abcd/\n'
+        'The Flutter DevTools debugger and profiler on FakeDevice is available at: http://127.0.0.1/abcd/\n'
         '\n'
         'first\n'
         '\n'
@@ -691,7 +686,6 @@ name: my_app
         outputPreferences: OutputPreferences.test(),
         analytics: globals.analytics,
         systemClock: globals.systemClock,
-        devtoolsHandler: createNoOpHandler,
       );
       fakeVmServiceHost = FakeVmServiceHost(requests: kStartPausedAndAttachExpectations.toList());
       setupMocks();
@@ -969,7 +963,7 @@ name: my_app
       expect(debugConnectionInfo, isNotNull);
 
       final OperationResult result = await residentWebRunner.restart();
-      expect(logger.statusText, contains('Reloaded application in'));
+      expect(logger.statusText, contains('Recompile complete. No client connected.'));
       expect(result.code, 0);
     },
     overrides: <Type, Generator>{
@@ -1132,6 +1126,47 @@ name: my_app
           ),
         ),
       );
+    },
+    overrides: <Type, Generator>{
+      Analytics: () => fakeAnalytics,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+    },
+  );
+
+  testUsingContext(
+    'Does not fail hot restart when not attached',
+    () async {
+      final logger = BufferLogger.test();
+      final ResidentRunner residentWebRunner = setUpResidentRunner(
+        flutterDevice,
+        logger: logger,
+        systemClock: SystemClock.fixed(DateTime(2001)),
+      );
+      fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          ...kAttachExpectations,
+          const FakeVmServiceRequest(method: 'hotRestart'),
+        ],
+      );
+      flutterDevice.device = WebServerDevice(logger: logger);
+      webDevFS.report = UpdateFSReport(success: true);
+
+      final appStartedCompleter = Completer<void>();
+      unawaited(residentWebRunner.run(appStartedCompleter: appStartedCompleter));
+
+      await appStartedCompleter.future;
+
+      late final OperationResult result;
+
+      await expectReturnsNormallyLater(() async {
+        result = await residentWebRunner.restart(fullRestart: true);
+      }());
+
+      expect(result.code, 0);
+      expect(result.isOk, isTrue);
+      expect(logger.statusText, contains('Recompile complete. No client connected.'));
     },
     overrides: <Type, Generator>{
       Analytics: () => fakeAnalytics,
@@ -1444,7 +1479,6 @@ name: my_app
     'cleanup of resources is safe to call multiple times',
     () async {
       final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
-      mockDevice.dds = DartDevelopmentService(logger: test_fakes.FakeLogger());
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[...kAttachExpectations],
       );
@@ -1564,7 +1598,6 @@ name: my_app
         outputPreferences: OutputPreferences.test(),
         analytics: globals.analytics,
         systemClock: globals.systemClock,
-        devtoolsHandler: createNoOpHandler,
       );
 
       final connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -1610,7 +1643,6 @@ name: my_app
         outputPreferences: OutputPreferences.test(),
         analytics: globals.analytics,
         systemClock: globals.systemClock,
-        devtoolsHandler: createNoOpHandler,
       );
 
       final connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -1653,7 +1685,6 @@ name: my_app
         outputPreferences: OutputPreferences.test(),
         analytics: globals.analytics,
         systemClock: globals.systemClock,
-        devtoolsHandler: createNoOpHandler,
       );
 
       // Create necessary files.
@@ -1932,18 +1963,20 @@ ResidentRunner setUpResidentRunner(
     terminal: Terminal.test(),
     platform: FakePlatform(),
     outputPreferences: OutputPreferences.test(),
-    devtoolsHandler: createNoOpHandler,
   );
 }
 
 class FakeWebServerDevice extends FakeDevice implements WebServerDevice {}
 
-class FakeDevice extends Fake implements Device {
+class FakeDevice extends Fake implements WebDevice {
   @override
   var name = 'FakeDevice';
 
   @override
   String get displayName => name;
+
+  @override
+  Uri? devToolsUri;
 
   var count = 0;
 
@@ -1953,7 +1986,7 @@ class FakeDevice extends Fake implements Device {
   Future<String> get sdkNameAndVersion async => 'SDK Name and Version';
 
   @override
-  late DartDevelopmentService dds;
+  final dds = DartDevelopmentService(logger: test_fakes.FakeLogger());
 
   @override
   bool get supportsHotRestart => true;
@@ -1992,6 +2025,9 @@ class FakeDebugConnection extends Fake implements DebugConnection {
 
   @override
   late String uri;
+
+  @override
+  late String devToolsUri;
 
   final completer = Completer<void>();
   var didClose = false;
@@ -2053,6 +2089,8 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
 
 class FakeWebDevFS extends Fake implements WebDevFS {
   Object? exception;
+
+  final resultCompleter = Completer<ConnectionResult?>();
   ConnectionResult? result;
   late UpdateFSReport report;
 
@@ -2111,7 +2149,11 @@ class FakeWebDevFS extends Fake implements WebDevFS {
       // ignore: only_throw_errors, exception is either Error or Exception here.
       throw exception!;
     }
-    return result;
+    // Automatically complete the future if a non-null result has been set.
+    if (result != null) {
+      resultCompleter.complete(result);
+    }
+    return resultCompleter.future;
   }
 }
 
@@ -2279,6 +2321,9 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   Future<void> updateReloadStatus(bool wasReloadSuccessful) async {}
+
+  @override
+  Future<void> handleHotRestart() async {}
 }
 
 class FakeShaderCompiler implements DevelopmentShaderCompiler {

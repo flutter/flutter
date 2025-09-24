@@ -47,6 +47,11 @@ void main() {
             onLongPress: () {
               log.add('onLongPress: ${dessert.name}');
             },
+            onHover: (bool hovering) {
+              if (hovering) {
+                log.add('onHover: ${dessert.name}');
+              }
+            },
             cells: <DataCell>[
               DataCell(Text(dessert.name)),
               DataCell(
@@ -91,6 +96,15 @@ void main() {
     expect(log, <String>['onLongPress: Cupcake']);
     log.clear();
 
+    TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: Offset.zero);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(find.text('Cupcake')));
+
+    expect(log, <String>['onHover: Cupcake']);
+    log.clear();
+
     await tester.tap(find.text('Calories'));
 
     expect(log, <String>['column-sort: 1 true']);
@@ -123,7 +137,7 @@ void main() {
     expect(log, <String>['cell-tapDown: 375', 'cell-tapCancel: 375', 'cell-longPress: 375']);
     log.clear();
 
-    TestGesture gesture = await tester.startGesture(tester.getRect(find.text('375')).center);
+    gesture = await tester.startGesture(tester.getRect(find.text('375')).center);
     await tester.pump(const Duration(milliseconds: 100));
     // onTapDown callback is registered.
     expect(log, equals(<String>['cell-tapDown: 375']));
@@ -1341,8 +1355,8 @@ void main() {
           rows: <DataRow>[
             DataRow(
               selected: selected,
-              color: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-                if (states.contains(MaterialState.selected)) {
+              color: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+                if (states.contains(WidgetState.selected)) {
                   return selectedColor;
                 }
                 return defaultColor;
@@ -1381,8 +1395,8 @@ void main() {
               onSelectChanged: (bool? value) {},
             ),
             DataRow(
-              color: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-                if (states.contains(MaterialState.disabled)) {
+              color: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+                if (states.contains(WidgetState.disabled)) {
                   return disabledColor;
                 }
                 return defaultColor;
@@ -1417,8 +1431,8 @@ void main() {
         columns: const <DataColumn>[DataColumn(label: Text('Column1'))],
         rows: <DataRow>[
           DataRow(
-            color: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-              if (states.contains(MaterialState.pressed)) {
+            color: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+              if (states.contains(WidgetState.pressed)) {
                 return pressedColor;
               }
               return Colors.transparent;
@@ -1453,8 +1467,8 @@ void main() {
         columns: const <DataColumn>[DataColumn(label: Text('Column1'))],
         rows: <DataRow>[
           DataRow(
-            color: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-              if (states.contains(MaterialState.pressed)) {
+            color: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+              if (states.contains(WidgetState.pressed)) {
                 return pressedColor;
               }
               return Colors.transparent;
@@ -1769,8 +1783,8 @@ void main() {
           rows: <DataRow>[
             DataRow(
               selected: selected,
-              color: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-                if (states.contains(MaterialState.selected)) {
+              color: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+                if (states.contains(WidgetState.selected)) {
                   return selectedColor;
                 }
                 return defaultColor;
@@ -1934,8 +1948,8 @@ void main() {
             columns: <DataColumn>[
               // This column can be sorted.
               DataColumn(
-                mouseCursor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-                  if (states.contains(MaterialState.disabled)) {
+                mouseCursor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+                  if (states.contains(WidgetState.disabled)) {
                     return SystemMouseCursors.forbidden;
                   }
                   return SystemMouseCursors.copy;
@@ -1946,8 +1960,8 @@ void main() {
               ),
               // This column cannot be sorted.
               DataColumn(
-                mouseCursor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-                  if (states.contains(MaterialState.disabled)) {
+                mouseCursor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+                  if (states.contains(WidgetState.disabled)) {
                     return SystemMouseCursors.forbidden;
                   }
                   return SystemMouseCursors.copy;
@@ -2000,8 +2014,8 @@ void main() {
             rows: <DataRow>[
               // This row can be selected.
               DataRow(
-                mouseCursor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-                  if (states.contains(MaterialState.selected)) {
+                mouseCursor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+                  if (states.contains(WidgetState.selected)) {
                     return SystemMouseCursors.copy;
                   }
                   return SystemMouseCursors.forbidden;
@@ -2013,8 +2027,8 @@ void main() {
               DataRow(
                 selected: true,
                 onSelectChanged: (bool? selected) {},
-                mouseCursor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-                  if (states.contains(MaterialState.selected)) {
+                mouseCursor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+                  if (states.contains(WidgetState.selected)) {
                     return SystemMouseCursors.copy;
                   }
                   return SystemMouseCursors.forbidden;
@@ -2328,6 +2342,43 @@ void main() {
       semantics,
       hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true),
     );
+
+    semantics.dispose();
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/171264
+  testWidgets('DataTable cell has correct semantics rect ', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DataTable(
+            dataRowMaxHeight: double.infinity,
+            dataRowMinHeight: 70,
+            columns: const <DataColumn>[
+              // Set width so the Column width is not determined by text.
+              DataColumn(label: SizedBox(width: 250, child: Text('Column 1'))),
+              DataColumn(label: SizedBox(width: 250, child: Text('Column 2'))),
+            ],
+            rows: const <DataRow>[
+              DataRow(
+                cells: <DataCell>[DataCell(Text('Data Cell 1')), DataCell(Text('Data Cell 2'))],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final SemanticsFinder cell1 = find.semantics.byLabel('Data Cell 1');
+
+    expect(cell1, findsOne);
+
+    final SemanticsNode cell1Node = cell1.evaluate().first;
+
+    // The semantics node of cell 1 should not have a transform
+    expect(cell1Node.transform, null);
+    expect(cell1Node.rect, const Rect.fromLTRB(0.0, 0.0, 302.0, 70.0));
 
     semantics.dispose();
   });

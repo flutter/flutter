@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:ffi';
 import 'dart:js_interop';
 import 'dart:math' as math;
@@ -14,10 +13,8 @@ import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-class SkwasmRenderer implements Renderer {
+class SkwasmRenderer extends Renderer {
   late SkwasmSurface surface;
-  final Map<EngineFlutterView, EngineSceneView> _sceneViews =
-      <EngineFlutterView, EngineSceneView>{};
 
   bool get isMultiThreaded => skwasmIsMultiThreaded();
 
@@ -178,7 +175,7 @@ class SkwasmRenderer implements Renderer {
   );
 
   @override
-  ui.SceneBuilder createSceneBuilder() => EngineSceneBuilder();
+  ui.SceneBuilder createSceneBuilder() => LayerSceneBuilder();
 
   @override
   ui.StrutStyle createStrutStyle({
@@ -324,6 +321,8 @@ class SkwasmRenderer implements Renderer {
   @override
   FutureOr<void> initialize() {
     surface = SkwasmSurface();
+    rasterizer = SkwasmOffscreenCanvasRasterizer(surface);
+    return super.initialize();
   }
 
   @override
@@ -395,25 +394,6 @@ class SkwasmRenderer implements Renderer {
         return SkwasmDomImageDecoder(blob);
       }
     }
-  }
-
-  @override
-  Future<void> renderScene(ui.Scene scene, EngineFlutterView view) {
-    final FrameTimingRecorder? recorder = FrameTimingRecorder.frameTimingsEnabled
-        ? FrameTimingRecorder()
-        : null;
-    recorder?.recordBuildFinish();
-
-    final EngineSceneView sceneView = _getSceneViewForView(view);
-    return sceneView.renderScene(scene as EngineScene, recorder);
-  }
-
-  EngineSceneView _getSceneViewForView(EngineFlutterView view) {
-    return _sceneViews.putIfAbsent(view, () {
-      final EngineSceneView sceneView = EngineSceneView(SkwasmPictureRenderer(surface), view);
-      view.dom.setScene(sceneView.sceneElement);
-      return sceneView;
-    });
   }
 
   @override
@@ -492,27 +472,6 @@ class SkwasmRenderer implements Renderer {
     );
   }
 
-  String _generateDebugFilename(String filePrefix) {
-    final now = DateTime.now();
-    final String y = now.year.toString().padLeft(4, '0');
-    final String mo = now.month.toString().padLeft(2, '0');
-    final String d = now.day.toString().padLeft(2, '0');
-    final String h = now.hour.toString().padLeft(2, '0');
-    final String mi = now.minute.toString().padLeft(2, '0');
-    final String s = now.second.toString().padLeft(2, '0');
-    return '$filePrefix-$y-$mo-$d-$h-$mi-$s.json';
-  }
-
-  void _dumpDebugInfo(String filePrefix, Map<String, dynamic> json) {
-    final String jsonString = const JsonEncoder.withIndent(' ').convert(json);
-    final blob = createDomBlob([jsonString], {'type': 'application/json'});
-    final url = domWindow.URL.createObjectURL(blob);
-    final element = domDocument.createElement('a');
-    element.setAttribute('href', url);
-    element.setAttribute('download', _generateDebugFilename(filePrefix));
-    element.click();
-  }
-
   @override
   void dumpDebugInfo() {
     if (kDebugMode) {
@@ -549,14 +508,14 @@ class SkwasmRenderer implements Renderer {
           'surfaceCount': counts[26],
           'verticesCount': counts[27],
         };
-        _dumpDebugInfo('live_object_counts', countsJson);
+        downloadDebugInfo('live_object_counts', countsJson);
       });
 
       int i = 0;
-      for (final view in _sceneViews.values) {
-        final Map<String, dynamic>? debugJson = view.dumpDebugInfo();
+      for (final viewRasterizer in rasterizers.values) {
+        final Map<String, dynamic>? debugJson = viewRasterizer.dumpDebugInfo();
         if (debugJson != null) {
-          _dumpDebugInfo('flutter-scene$i', debugJson);
+          downloadDebugInfo('flutter-scene$i', debugJson);
           i++;
         }
       }
@@ -564,28 +523,7 @@ class SkwasmRenderer implements Renderer {
   }
 
   @override
-  void debugClear() {
-    // TODO(harryterkelsen): See what needs to be cleaned up for tests and clear
-    // it here.
-  }
-}
-
-class SkwasmPictureRenderer implements PictureRenderer {
-  SkwasmPictureRenderer(this.surface);
-
-  SkwasmSurface surface;
-
-  @override
-  FutureOr<RenderResult> renderPictures(List<ScenePicture> pictures) =>
-      surface.renderPictures(pictures.cast<SkwasmPicture>());
-
-  @override
-  ScenePicture clipPicture(ScenePicture picture, ui.Rect clip) {
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final ui.Canvas canvas = ui.Canvas(recorder, clip);
-    canvas.clipRect(clip);
-    canvas.drawPicture(picture);
-
-    return recorder.endRecording() as ScenePicture;
+  void debugResetRasterizer() {
+    rasterizer = SkwasmOffscreenCanvasRasterizer(surface);
   }
 }

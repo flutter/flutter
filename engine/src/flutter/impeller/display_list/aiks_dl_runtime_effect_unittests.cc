@@ -10,6 +10,7 @@
 #include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/display_list/effects/dl_runtime_effect.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
+#include "flutter/impeller/display_list/dl_runtime_effect_impeller.h"
 
 namespace impeller {
 namespace testing {
@@ -28,7 +29,7 @@ std::shared_ptr<DlColorSource> MakeRuntimeEffect(
   FML_CHECK(runtime_stage);
   FML_CHECK(runtime_stage->IsDirty());
 
-  auto dl_runtime_effect = DlRuntimeEffect::MakeImpeller(runtime_stage);
+  auto dl_runtime_effect = DlRuntimeEffectImpeller::Make(runtime_stage);
 
   return DlColorSource::MakeRuntimeEffect(dl_runtime_effect, samplers,
                                           uniform_data);
@@ -99,7 +100,7 @@ TEST_P(AiksTest, CanRenderRuntimeEffectFilter) {
   DlPaint paint;
   paint.setColor(DlColor::kAqua());
   paint.setImageFilter(DlImageFilter::MakeRuntimeEffect(
-      DlRuntimeEffect::MakeImpeller(runtime_stage), sampler_inputs,
+      DlRuntimeEffectImpeller::Make(runtime_stage), sampler_inputs,
       uniform_data));
 
   DisplayListBuilder builder;

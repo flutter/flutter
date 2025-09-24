@@ -2449,6 +2449,7 @@ abstract class BuildContext {
   /// Returns the nearest widget of the given [InheritedWidget] subclass `T` or
   /// null if an appropriate ancestor is not found.
   ///
+  /// {@template flutter.widgets.BuildContext.getInheritedWidgetOfExactType}
   /// This method does not introduce a dependency the way that the more typical
   /// [dependOnInheritedWidgetOfExactType] does, so this context will not be
   /// rebuilt if the [InheritedWidget] changes. This function is meant for those
@@ -2465,6 +2466,7 @@ abstract class BuildContext {
   /// that value is not cached and/or reused later.
   ///
   /// Calling this method is O(1) with a small constant factor.
+  /// {@endtemplate}
   T? getInheritedWidgetOfExactType<T extends InheritedWidget>();
 
   /// Obtains the element corresponding to the nearest widget of the given type `T`,

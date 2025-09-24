@@ -45,7 +45,7 @@ const double _kIndicatorHeight = 32;
 /// Adaptive layouts can build different instances of the [Scaffold] in order to
 /// have a navigation rail for more horizontal layouts and a bottom navigation
 /// bar for more vertical layouts. See
-/// [the adaptive_scaffold.dart sample](https://github.com/flutter/samples/blob/main/experimental/web_dashboard/lib/src/widgets/third_party/adaptive_scaffold.dart)
+/// [the adaptive_scaffold.dart sample](https://github.com/flutter/demos/blob/main/web_dashboard/lib/src/widgets/third_party/adaptive_scaffold.dart)
 /// for an example.
 ///
 /// {@tool dartpad}
@@ -524,28 +524,31 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
       mainGroup = SingleChildScrollView(child: mainGroup);
     }
 
-    return _ExtendedNavigationRailAnimation(
-      animation: _extendedAnimation,
-      child: Semantics(
-        explicitChildNodes: true,
-        child: Material(
-          elevation: elevation,
-          color: backgroundColor,
-          child: SafeArea(
-            right: isRTLDirection,
-            left: !isRTLDirection,
-            child: Column(
-              children: <Widget>[
-                _verticalSpacer,
-                if (widget.leadingAtTop && widget.leading != null) ...<Widget>[
-                  widget.leading!,
+    return Semantics(
+      container: true,
+      child: _ExtendedNavigationRailAnimation(
+        animation: _extendedAnimation,
+        child: Semantics(
+          explicitChildNodes: true,
+          child: Material(
+            elevation: elevation,
+            color: backgroundColor,
+            child: SafeArea(
+              right: isRTLDirection,
+              left: !isRTLDirection,
+              child: Column(
+                children: <Widget>[
                   _verticalSpacer,
+                  if (widget.leadingAtTop && widget.leading != null) ...<Widget>[
+                    widget.leading!,
+                    _verticalSpacer,
+                  ],
+                  Flexible(
+                    child: Align(alignment: Alignment(0, groupAlignment), child: mainGroup),
+                  ),
+                  if (widget.trailingAtBottom && widget.trailing != null) widget.trailing!,
                 ],
-                Flexible(
-                  child: Align(alignment: Alignment(0, groupAlignment), child: mainGroup),
-                ),
-                if (widget.trailingAtBottom && widget.trailing != null) widget.trailing!,
-              ],
+              ),
             ),
           ),
         ),

@@ -27,7 +27,6 @@ import 'ink_decoration.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
-import 'material_state.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -1278,13 +1277,15 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
         chipTheme.iconTheme ??
         theme.chipTheme.iconTheme ??
         _ChipDefaultsM3(context, widget.isEnabled).iconTheme!;
-    final Color? effectiveDeleteIconColor =
-        widget.deleteIconColor ??
-        chipTheme.deleteIconColor ??
-        theme.chipTheme.deleteIconColor ??
-        widget.iconTheme?.color ??
-        chipTheme.iconTheme?.color ??
-        chipDefaults.deleteIconColor;
+    final Color? effectiveDeleteIconColor = WidgetStateProperty.resolveAs(
+      widget.deleteIconColor ??
+          chipTheme.deleteIconColor ??
+          theme.chipTheme.deleteIconColor ??
+          widget.iconTheme?.color ??
+          chipTheme.iconTheme?.color ??
+          chipDefaults.deleteIconColor,
+      statesController.value,
+    );
     final double effectiveIconSize =
         widget.iconTheme?.size ??
         chipTheme.iconTheme?.size ??
@@ -2508,7 +2509,7 @@ class _ChipDefaultsM3 extends ChipThemeData {
   );
 
   @override
-  MaterialStateProperty<Color?>? get color => null; // Subclasses override this getter
+  WidgetStateProperty<Color?>? get color => null; // Subclasses override this getter
 
   @override
   Color? get shadowColor => Colors.transparent;
