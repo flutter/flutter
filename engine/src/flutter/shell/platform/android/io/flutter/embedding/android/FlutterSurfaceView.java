@@ -109,6 +109,7 @@ public class FlutterSurfaceView extends SurfaceView implements RenderSurface {
   }
 
   private void init() {
+    Log.setLogLevel(Log.VERBOSE);
     // If transparency is desired then we'll enable a transparent pixel format and place
     // our Window above everything else to get transparent background rendering.
     if (renderTransparently) {
@@ -119,6 +120,11 @@ public class FlutterSurfaceView extends SurfaceView implements RenderSurface {
     // Grab a reference to our underlying Surface and register callbacks with that Surface so we
     // can monitor changes and forward those changes on to native Flutter code.
     getHolder().addCallback(surfaceHolderCallbackCompat);
+  }
+
+  @Override
+  protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    FlutterMeasureSpec.onMeasure(widthMeasureSpec, heightMeasureSpec, this::setMeasuredDimension);
   }
 
   // This is a work around for TalkBack.

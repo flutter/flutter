@@ -134,6 +134,8 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
 
   void onEndFrame2() override;
 
+  void MaybeResizeSurfaceView(int32_t width, int32_t height) const override;
+
  private:
   // Reference to FlutterJNI object.
   const fml::jni::JavaObjectWeakGlobalRef java_object_;
