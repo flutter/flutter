@@ -820,7 +820,7 @@ void main() {
     expect(titleOffset.dx, titleSpacing);
   });
 
-  group('MaterialStateColor scrolledUnder', () {
+  group('WidgetStateColor scrolledUnder', () {
     const double collapsedHeight = kToolbarHeight;
     const double expandedHeight = 200.0;
     const Color scrolledColor = Color(0xff00ff00);
@@ -838,7 +838,7 @@ void main() {
             slivers: <Widget>[
               SliverAppBar(
                 elevation: 0,
-                backgroundColor: MaterialStateColor.resolveWith((Set<WidgetState> states) {
+                backgroundColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
                   return states.contains(WidgetState.scrolledUnder) ? scrolledColor : defaultColor;
                 }),
                 expandedHeight: expandedHeight,

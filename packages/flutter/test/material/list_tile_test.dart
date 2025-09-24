@@ -2176,7 +2176,7 @@ void main() {
     );
   });
 
-  testWidgets('ListTile.textColor respects MaterialStateColor', (WidgetTester tester) async {
+  testWidgets('ListTile.textColor respects WidgetStateColor', (WidgetTester tester) async {
     bool enabled = false;
     bool selected = false;
     const Color defaultColor = Colors.blue;
@@ -2192,7 +2192,7 @@ void main() {
                 return ListTile(
                   enabled: enabled,
                   selected: selected,
-                  textColor: MaterialStateColor.resolveWith((Set<WidgetState> states) {
+                  textColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
                     if (states.contains(WidgetState.disabled)) {
                       return disabledColor;
                     }
@@ -2231,7 +2231,7 @@ void main() {
     expect(title.text.style!.color, selectedColor);
   });
 
-  testWidgets('ListTile.iconColor respects MaterialStateColor', (WidgetTester tester) async {
+  testWidgets('ListTile.iconColor respects WidgetStateColor', (WidgetTester tester) async {
     bool enabled = false;
     bool selected = false;
     const Color defaultColor = Colors.blue;
@@ -2248,7 +2248,7 @@ void main() {
                 return ListTile(
                   enabled: enabled,
                   selected: selected,
-                  iconColor: MaterialStateColor.resolveWith((Set<WidgetState> states) {
+                  iconColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
                     if (states.contains(WidgetState.disabled)) {
                       return disabledColor;
                     }

@@ -387,7 +387,7 @@ void main() {
       Material(
         child: boilerplate(
           child: ToggleButtonsTheme(
-            data: ToggleButtonsThemeData(fillColor: MaterialStateColor.resolveWith(getColor)),
+            data: ToggleButtonsThemeData(fillColor: WidgetStateColor.resolveWith(getColor)),
             child: ToggleButtons(
               isSelected: const <bool>[true, false],
               onPressed: (int index) {},
@@ -407,7 +407,7 @@ void main() {
       Material(
         child: boilerplate(
           child: ToggleButtonsTheme(
-            data: ToggleButtonsThemeData(fillColor: MaterialStateColor.resolveWith(getColor)),
+            data: ToggleButtonsThemeData(fillColor: WidgetStateColor.resolveWith(getColor)),
             child: ToggleButtons(
               isSelected: const <bool>[true, false],
               children: const <Widget>[Text('First child'), Text('Second child')],

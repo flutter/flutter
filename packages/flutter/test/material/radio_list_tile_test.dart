@@ -903,7 +903,7 @@ void main() {
       return inactiveEnabledFillColor;
     }
 
-    final WidgetStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
+    final WidgetStateProperty<Color> fillColor = WidgetStateColor.resolveWith(getFillColor);
 
     int? groupValue = 0;
     Widget buildApp({required bool enabled}) {
@@ -989,7 +989,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final WidgetStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
+    final WidgetStateProperty<Color> fillColor = WidgetStateColor.resolveWith(getFillColor);
 
     int? groupValue = 0;
     Widget buildApp() {
@@ -2156,7 +2156,7 @@ void main() {
       return inactiveEnabledBackgroundColor;
     }
 
-    final WidgetStateProperty<Color> backgroundColor = MaterialStateColor.resolveWith(
+    final WidgetStateProperty<Color> backgroundColor = WidgetStateColor.resolveWith(
       getBackgroundColor,
     );
 
@@ -2243,7 +2243,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final WidgetStateProperty<Color> backgroundColor = MaterialStateColor.resolveWith(
+    final WidgetStateProperty<Color> backgroundColor = WidgetStateColor.resolveWith(
       getBackgroundColor,
     );
 

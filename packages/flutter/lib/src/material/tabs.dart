@@ -258,7 +258,7 @@ class _TabStyle extends AnimatedWidget {
   final TabBarThemeData defaults;
   final Widget child;
 
-  MaterialStateColor _resolveWithLabelColor(BuildContext context, {IconThemeData? iconTheme}) {
+  WidgetStateColor _resolveWithLabelColor(BuildContext context, {IconThemeData? iconTheme}) {
     final ThemeData themeData = Theme.of(context);
     final TabBarThemeData tabBarTheme = TabBarTheme.of(context);
     final Animation<double> animation = listenable as Animation<double>;
@@ -275,12 +275,12 @@ class _TabStyle extends AnimatedWidget {
 
     final Color unselectedColor;
 
-    if (selectedColor is MaterialStateColor) {
+    if (selectedColor is WidgetStateColor) {
       unselectedColor = selectedColor.resolve(const <WidgetState>{});
       selectedColor = selectedColor.resolve(const <WidgetState>{WidgetState.selected});
     } else {
       // unselectedLabelColor and tabBarTheme.unselectedLabelColor are ignored
-      // when labelColor is a MaterialStateColor.
+      // when labelColor is a WidgetStateColor.
       unselectedColor =
           unselectedLabelColor ??
           tabBarTheme.unselectedLabelColor ??
@@ -292,7 +292,7 @@ class _TabStyle extends AnimatedWidget {
               : selectedColor.withAlpha(0xB2)); // 70% alpha
     }
 
-    return MaterialStateColor.resolveWith((Set<WidgetState> states) {
+    return WidgetStateColor.resolveWith((Set<WidgetState> states) {
       if (states.contains(WidgetState.selected)) {
         return Color.lerp(selectedColor, unselectedColor, animation.value)!;
       }

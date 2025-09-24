@@ -748,7 +748,7 @@ void main() {
       return inactiveEnabledThumbColor;
     }
 
-    final WidgetStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
+    final WidgetStateProperty<Color> thumbColor = WidgetStateColor.resolveWith(getThumbColor);
 
     Widget buildSwitchListTile({required bool enabled, required bool selected}) {
       return MaterialApp(
@@ -843,7 +843,7 @@ void main() {
       return inactiveEnabledThumbColor;
     }
 
-    final WidgetStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
+    final WidgetStateProperty<Color> thumbColor = WidgetStateColor.resolveWith(getThumbColor);
 
     Widget buildSwitchListTile({required bool enabled, required bool selected}) {
       return MaterialApp(
@@ -921,7 +921,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final WidgetStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
+    final WidgetStateProperty<Color> thumbColor = WidgetStateColor.resolveWith(getThumbColor);
 
     Widget buildSwitchListTile() {
       return MaterialApp(
@@ -988,7 +988,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final WidgetStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
+    final WidgetStateProperty<Color> thumbColor = WidgetStateColor.resolveWith(getThumbColor);
 
     Widget buildSwitchListTile() {
       return MaterialApp(
@@ -1052,7 +1052,7 @@ void main() {
       return inactiveEnabledTrackColor;
     }
 
-    final WidgetStateProperty<Color> trackColor = MaterialStateColor.resolveWith(getTrackColor);
+    final WidgetStateProperty<Color> trackColor = WidgetStateColor.resolveWith(getTrackColor);
 
     Widget buildSwitchListTile({required bool enabled, required bool selected}) {
       return wrap(
@@ -1110,7 +1110,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final WidgetStateProperty<Color> trackColor = MaterialStateColor.resolveWith(getTrackColor);
+    final WidgetStateProperty<Color> trackColor = WidgetStateColor.resolveWith(getTrackColor);
 
     Widget buildSwitchListTile() {
       return wrap(
@@ -1717,7 +1717,7 @@ void main() {
       return inactiveEnabledTrackOutlineColor;
     }
 
-    final WidgetStateProperty<Color> trackOutlineColor = MaterialStateColor.resolveWith(
+    final WidgetStateProperty<Color> trackOutlineColor = WidgetStateColor.resolveWith(
       getOutlineColor,
     );
 
@@ -1787,7 +1787,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final WidgetStateProperty<Color> outlineColor = MaterialStateColor.resolveWith(
+    final WidgetStateProperty<Color> outlineColor = WidgetStateColor.resolveWith(
       getTrackOutlineColor,
     );
 
