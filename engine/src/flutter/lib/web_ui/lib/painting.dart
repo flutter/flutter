@@ -554,7 +554,14 @@ _ColorTransform _getColorTransform(ColorSpace source, ColorSpace destination) {
 enum FilterQuality { none, low, medium, high }
 
 class ImageFilter {
-  factory ImageFilter.blur({double sigmaX = 0.0, double sigmaY = 0.0, TileMode? tileMode}) =>
+  factory ImageFilter.blur({
+    double sigmaX = 0.0,
+    double sigmaY = 0.0,
+    TileMode? tileMode,
+    Rect? bounds,
+  }) =>
+      // TODO(dkwingsmt): `bounds` is currently not implemented on Web.
+      // https://github.com/flutter/flutter/issues/175899
       engine.renderer.createBlurImageFilter(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
 
   factory ImageFilter.dilate({double radiusX = 0.0, double radiusY = 0.0}) =>
