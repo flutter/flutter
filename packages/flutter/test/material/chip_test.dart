@@ -2793,6 +2793,47 @@ void main() {
     expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
   });
 
+  testWidgets('Chip uses the resolved color based on its state for the delete icon color', (
+    WidgetTester tester,
+  ) async {
+    Widget buildApp({required ChipThemeData chipTheme, bool isSelected = false}) {
+      return wrapForChip(
+        child: ChipTheme(
+          data: chipTheme,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return InputChip(
+                label: const Text('Label'),
+                selected: isSelected,
+                onSelected: (_) {},
+                onDeleted: () {},
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    final ChipThemeData chipTheme = ChipThemeData(
+      deleteIconColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.selected)) {
+          return Colors.green;
+        }
+        return Colors.blue;
+      }),
+    );
+
+    await tester.pumpWidget(buildApp(chipTheme: chipTheme));
+
+    IconThemeData iconData = getIconData(tester);
+    expect(iconData.color, equals(Colors.blue));
+
+    await tester.pumpWidget(buildApp(chipTheme: chipTheme, isSelected: true));
+
+    iconData = getIconData(tester);
+    expect(iconData.color, equals(Colors.green));
+  });
+
   group('Chip semantics', () {
     testWidgets('label only', (WidgetTester tester) async {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
@@ -6407,7 +6448,7 @@ void main() {
 class _MaterialStateOutlinedBorder extends StadiumBorder implements MaterialStateOutlinedBorder {
   const _MaterialStateOutlinedBorder(this.resolver);
 
-  final MaterialPropertyResolver<OutlinedBorder?> resolver;
+  final WidgetPropertyResolver<OutlinedBorder?> resolver;
 
   @override
   OutlinedBorder? resolve(Set<WidgetState> states) => resolver(states);
@@ -6416,7 +6457,7 @@ class _MaterialStateOutlinedBorder extends StadiumBorder implements MaterialStat
 class _MaterialStateBorderSide extends MaterialStateBorderSide {
   const _MaterialStateBorderSide(this.resolver);
 
-  final MaterialPropertyResolver<BorderSide?> resolver;
+  final WidgetPropertyResolver<BorderSide?> resolver;
 
   @override
   BorderSide? resolve(Set<WidgetState> states) => resolver(states);
