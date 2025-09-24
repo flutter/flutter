@@ -121,7 +121,7 @@ void main() {
         suppressWarnings: suppressWarnings,
         useRelaxedSyntax: relaxSyntax,
         useNamedParameters: useNamedParameters,
-        projectPathString: fs.currentDirectory.path,
+        projectPathString: (fileSystem ?? fs).currentDirectory.path,
       )
       ..loadResources()
       ..writeOutputFiles(isFromYaml: isFromYaml);
