@@ -492,6 +492,18 @@ void main() {
     },
   );
 
+  testWidgets(
+    'Visibility throws assertion error if maintainFocusability is true without maintainState',
+    (WidgetTester tester) async {
+      expect(() {
+        Visibility(
+          maintainFocusability: true,
+          child: const Text('hello', textDirection: TextDirection.ltr),
+        );
+      }, throwsAssertionError);
+    },
+  );
+
   testWidgets('Visibility does not force compositing when visible and maintain*', (
     WidgetTester tester,
   ) async {
