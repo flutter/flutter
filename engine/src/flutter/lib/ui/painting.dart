@@ -4536,7 +4536,7 @@ base class _ImageFilter extends NativeFieldWrapperClass1 {
   /// Creates an image filter that applies a Gaussian blur.
   _ImageFilter.blur(_GaussianBlurImageFilter filter) : creator = filter {
     _constructor();
-    final Rect bounds = filter.bounds ?? const Rect.fromLTRB(0, 0, 0, 0);
+    final Rect bounds = filter.bounds ?? Rect.zero;
     _initBlur(
       filter.sigmaX,
       filter.sigmaY,
