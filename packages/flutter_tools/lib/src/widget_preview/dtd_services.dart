@@ -12,6 +12,7 @@ import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../convert.dart';
 
@@ -37,10 +38,11 @@ class WidgetPreviewDtdServices {
   // START KEEP SYNCED
 
   static const kWidgetPreviewService = 'widget-preview';
+  static const kIsWindows = 'isWindows';
   static const kHotRestartPreviewer = 'hotRestartPreviewer';
 
   /// The list of DTD service methods registered by the tool.
-  late final services = <DtdService>[(kHotRestartPreviewer, _hotRestart)];
+  late final services = <DtdService>[(kHotRestartPreviewer, _hotRestart), (kIsWindows, _isWindows)];
 
   // END KEEP SYNCED
 
@@ -88,6 +90,10 @@ class WidgetPreviewDtdServices {
   Future<Map<String, Object?>> _hotRestart(Parameters params) async {
     onHotRestartPreviewerRequest();
     return const Success().toJson();
+  }
+
+  Future<Map<String, Object?>> _isWindows(Parameters _) async {
+    return BoolResponse(const LocalPlatform().isWindows).toJson();
   }
 }
 
