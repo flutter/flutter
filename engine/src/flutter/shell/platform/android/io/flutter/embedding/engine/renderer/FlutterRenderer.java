@@ -100,21 +100,31 @@ public class FlutterRenderer implements TextureRegistry {
   public FlutterRenderer(@NonNull FlutterJNI flutterJNI) {
     this.flutterJNI = flutterJNI;
     this.flutterJNI.addIsDisplayingFlutterUiListener(flutterUiDisplayListener);
-    ProcessLifecycleOwner.get()
-        .getLifecycle()
-        .addObserver(
-            new DefaultLifecycleObserver() {
-              @Override
-              public void onResume(@NonNull LifecycleOwner owner) {
-                Log.v(TAG, "onResume called; notifying SurfaceProducers");
-                for (ImageReaderSurfaceProducer producer : imageReaderProducers) {
-                  if (producer.callback != null && producer.notifiedDestroy) {
-                    producer.notifiedDestroy = false;
-                    producer.callback.onSurfaceAvailable();
-                  }
-                }
-              }
-            });
+    // ProcessLifecycleOwner.get()
+    //     .getLifecycle()
+    //     .addObserver(
+    //         new DefaultLifecycleObserver() {
+    //           @Override
+    //           public void onResume(@NonNull LifecycleOwner owner) {
+    //             Log.v(TAG, "onResume called; notifying SurfaceProducers");
+    //             for (ImageReaderSurfaceProducer producer : imageReaderProducers) {
+    //               if (producer.callback != null && producer.notifiedDestroy) {
+    //                 producer.notifiedDestroy = false;
+    //                 producer.callback.onSurfaceAvailable();
+    //               }
+    //             }
+    //           }
+    //         });
+  }
+
+  public void restoreSurfaceProducers() {
+    Log.v(TAG, "restoreSurfaceProducers called; notifying SurfaceProducers");
+    for (ImageReaderSurfaceProducer producer : imageReaderProducers) {
+      if (producer.callback != null && producer.notifiedDestroy) {
+        producer.notifiedDestroy = false;
+        producer.callback.onSurfaceAvailable();
+      }
+    }
   }
 
   /**
