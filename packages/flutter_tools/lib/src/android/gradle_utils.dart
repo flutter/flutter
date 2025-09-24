@@ -1173,7 +1173,7 @@ void exitWithNoSdkMessage() {
 //
 // The [javaMax] is exclusive in terms of supporting the noted [gradleMin],
 // whereas [javaMin] is inclusive.
-// Gradle Max is not required and when set should mean unbound.
+// Gradle Max is not required and when unset should mean unbound.
 @immutable
 class JavaGradleCompat {
   const JavaGradleCompat({
