@@ -57,7 +57,7 @@ if (![string]::IsNullOrEmpty($env:FLUTTER_PREBUILT_ENGINE_VERSION)) {
 # the current branch is forked from, which would be the last version of the
 # engine artifacts built from CI.
 } else {
-  $engineVersion = Invoke-Expression "$flutterRoot/bin/internal/content_aware_hash.ps1"
+  $engineVersion = Invoke-Expression "& '$flutterRoot/bin/internal/content_aware_hash.ps1'"
 }
 
 # Write the engine version out so downstream tools know what to look for.
