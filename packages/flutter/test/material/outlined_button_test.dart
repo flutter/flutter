@@ -1294,7 +1294,7 @@ void main() {
     expect(find.byIcon(Icons.favorite), findsNothing);
 
     // Find the original OutlinedButton with no icon and get it's SemanticsNode
-    final Finder outlinedButton = find.bySemanticsLabel("Button");
+    final Finder outlinedButton = find.bySemanticsLabel('Button');
     expect(outlinedButton, findsOneWidget);
 
     final SemanticsNode origSemanticsNode = tester.getSemantics(outlinedButton);
