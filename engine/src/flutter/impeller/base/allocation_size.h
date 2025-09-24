@@ -6,6 +6,7 @@
 #define FLUTTER_IMPELLER_BASE_ALLOCATION_SIZE_H_
 
 #include <cmath>
+#include <compare>
 #include <cstddef>
 #include <cstdint>
 #include <type_traits>
@@ -91,32 +92,9 @@ class AllocationSize {
     return AllocationSize{GetByteSize(), FromBytesTag::kFromBytes};
   }
 
-  // The following relational operators can be replaced with a defaulted
-  // spaceship operator post C++20.
+  // Comparison operators.
 
-  constexpr bool operator<(const AllocationSize& other) const {
-    return bytes_ < other.bytes_;
-  }
-
-  constexpr bool operator>(const AllocationSize& other) const {
-    return bytes_ > other.bytes_;
-  }
-
-  constexpr bool operator>=(const AllocationSize& other) const {
-    return bytes_ >= other.bytes_;
-  }
-
-  constexpr bool operator<=(const AllocationSize& other) const {
-    return bytes_ <= other.bytes_;
-  }
-
-  constexpr bool operator==(const AllocationSize& other) const {
-    return bytes_ == other.bytes_;
-  }
-
-  constexpr bool operator!=(const AllocationSize& other) const {
-    return bytes_ != other.bytes_;
-  }
+  constexpr auto operator<=>(const AllocationSize& other) const = default;
 
   // Explicit casts.
 

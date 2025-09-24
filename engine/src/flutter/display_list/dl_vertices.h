@@ -231,8 +231,6 @@ class DlVertices {
 
   bool operator==(DlVertices const& other) const;
 
-  bool operator!=(DlVertices const& other) const { return !(*this == other); }
-
  private:
   // Constructors are designed to encapsulate arrays sequentially in memory
   // which means they can only be called by intantiations that use the

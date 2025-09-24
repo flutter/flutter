@@ -12,7 +12,7 @@ const Color trueColor = Colors.red;
 const Color falseColor = Colors.green;
 
 /// Mock widget which plays the role of a button -- it can emit notifications
-/// that [MaterialState] values are now in or out of play.
+/// that [WidgetState] values are now in or out of play.
 class _InnerWidget extends StatefulWidget {
   const _InnerWidget({required this.onValueChanged, required this.controller});
   final ValueChanged<bool> onValueChanged;
@@ -45,7 +45,7 @@ class _MyWidget extends StatefulWidget {
   final StreamController<bool> controller;
 
   /// The value we're watching in the given test.
-  final MaterialState materialState;
+  final WidgetState materialState;
 
   @override
   State createState() => _MyWidgetState();
@@ -79,82 +79,82 @@ void main() {
     expect(tester.widget<ColoredBox>(find.byKey(key)).color, falseColor);
   }
 
-  testWidgets('MaterialState.pressed is tracked', (WidgetTester tester) async {
+  testWidgets('WidgetState.pressed is tracked', (WidgetTester tester) async {
     final StreamController<bool> controller = StreamController<bool>();
     final _MyWidget widget = _MyWidget(
       controller: controller,
       evaluator: (_MyWidgetState state) => state.isPressed,
-      materialState: MaterialState.pressed,
+      materialState: WidgetState.pressed,
     );
     await verify(tester, widget, controller);
   });
 
-  testWidgets('MaterialState.focused is tracked', (WidgetTester tester) async {
+  testWidgets('WidgetState.focused is tracked', (WidgetTester tester) async {
     final StreamController<bool> controller = StreamController<bool>();
     final _MyWidget widget = _MyWidget(
       controller: controller,
       evaluator: (_MyWidgetState state) => state.isFocused,
-      materialState: MaterialState.focused,
+      materialState: WidgetState.focused,
     );
     await verify(tester, widget, controller);
   });
 
-  testWidgets('MaterialState.hovered is tracked', (WidgetTester tester) async {
+  testWidgets('WidgetState.hovered is tracked', (WidgetTester tester) async {
     final StreamController<bool> controller = StreamController<bool>();
     final _MyWidget widget = _MyWidget(
       controller: controller,
       evaluator: (_MyWidgetState state) => state.isHovered,
-      materialState: MaterialState.hovered,
+      materialState: WidgetState.hovered,
     );
     await verify(tester, widget, controller);
   });
 
-  testWidgets('MaterialState.disabled is tracked', (WidgetTester tester) async {
+  testWidgets('WidgetState.disabled is tracked', (WidgetTester tester) async {
     final StreamController<bool> controller = StreamController<bool>();
     final _MyWidget widget = _MyWidget(
       controller: controller,
       evaluator: (_MyWidgetState state) => state.isDisabled,
-      materialState: MaterialState.disabled,
+      materialState: WidgetState.disabled,
     );
     await verify(tester, widget, controller);
   });
 
-  testWidgets('MaterialState.selected is tracked', (WidgetTester tester) async {
+  testWidgets('WidgetState.selected is tracked', (WidgetTester tester) async {
     final StreamController<bool> controller = StreamController<bool>();
     final _MyWidget widget = _MyWidget(
       controller: controller,
       evaluator: (_MyWidgetState state) => state.isSelected,
-      materialState: MaterialState.selected,
+      materialState: WidgetState.selected,
     );
     await verify(tester, widget, controller);
   });
 
-  testWidgets('MaterialState.scrolledUnder is tracked', (WidgetTester tester) async {
+  testWidgets('WidgetState.scrolledUnder is tracked', (WidgetTester tester) async {
     final StreamController<bool> controller = StreamController<bool>();
     final _MyWidget widget = _MyWidget(
       controller: controller,
       evaluator: (_MyWidgetState state) => state.isScrolledUnder,
-      materialState: MaterialState.scrolledUnder,
+      materialState: WidgetState.scrolledUnder,
     );
     await verify(tester, widget, controller);
   });
 
-  testWidgets('MaterialState.dragged is tracked', (WidgetTester tester) async {
+  testWidgets('WidgetState.dragged is tracked', (WidgetTester tester) async {
     final StreamController<bool> controller = StreamController<bool>();
     final _MyWidget widget = _MyWidget(
       controller: controller,
       evaluator: (_MyWidgetState state) => state.isDragged,
-      materialState: MaterialState.dragged,
+      materialState: WidgetState.dragged,
     );
     await verify(tester, widget, controller);
   });
 
-  testWidgets('MaterialState.error is tracked', (WidgetTester tester) async {
+  testWidgets('WidgetState.error is tracked', (WidgetTester tester) async {
     final StreamController<bool> controller = StreamController<bool>();
     final _MyWidget widget = _MyWidget(
       controller: controller,
       evaluator: (_MyWidgetState state) => state.isErrored,
-      materialState: MaterialState.error,
+      materialState: WidgetState.error,
     );
     await verify(tester, widget, controller);
   });
