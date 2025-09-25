@@ -322,7 +322,8 @@ public class FlutterLoader {
               + DEFAULT_LIBRARY);
 
       // Add engine flags provided by the command line. These settings will take
-      // precedent over any defaults set below.
+      // precedent over any overlapping flags set in the application manifest and
+      // any defaults set below.
       if (args != null) {
         for (String arg : args) {
           // Only allow known flags to be passed to the engine.
@@ -351,6 +352,32 @@ public class FlutterLoader {
           shellArgs.add(arg);
         }
       }
+
+      // Add engine flags provided by metadata in the application manifest. These settings will take
+      // precedent over any defaults set below, but can be overridden by command line args.
+      Bundle applicationMetaData = applicationInfo.metaData;
+      for (String metadataKey : applicationMetaData.keySet()) {
+        FlutterEngineManifestFlags.Flag flag =
+            FlutterEngineManifestFlags.getFlagByMetaDataKey(metadataKey);
+        if (flag != null) {
+          // Only add flags that are allowed in the current build mode.
+          if (flag.allowedInRelease || !BuildConfig.RELEASE) {
+            // TODO(camsim99): fix. this includes package name and is in camel case.
+            shellArgs.add("--" + metadataKey + "=" + applicationMetaData.get(metadataKey));
+          }
+        } else {
+          Log.w(
+                  TAG,
+                  "Flag with metadata key "
+                      + metadataKey
+                      + " is not recognized. Please ensure that the flag is defined in the FlutterEngineManifestFlags.");
+              continue;
+            }
+          }
+        }
+      }
+
+
 
       String kernelPath = null;
       if (BuildConfig.DEBUG || BuildConfig.JIT_RELEASE) {
