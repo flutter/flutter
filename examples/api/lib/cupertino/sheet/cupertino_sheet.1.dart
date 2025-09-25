@@ -73,7 +73,7 @@ class _SheetBody extends StatelessWidget {
           Text(title),
           CupertinoButton.filled(
             onPressed: () {
-              Navigator.of(context).pop();
+              Navigator.of(context).maybePop();
             },
             child: const Text('Go Back'),
           ),

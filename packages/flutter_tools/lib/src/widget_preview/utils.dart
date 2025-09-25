@@ -5,14 +5,13 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:analyzer/dart/analysis/analysis_context.dart';
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/token.dart';
-import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element2.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/source/source.dart';
+import 'package:collection/collection.dart';
 
 import 'dependency_graph.dart';
 
@@ -27,40 +26,37 @@ extension TokenExtension on Token {
   bool get isWidget => toString() == 'Widget';
 }
 
+extension on InterfaceType {
+  bool isType({required String typeName, required Uri uri}) {
+    if (getDisplayString() == typeName && element.library.uri == uri) {
+      return true;
+    }
+    return allSupertypes.firstWhereOrNull((e) {
+          return e.getDisplayString() == typeName && e.element.library.uri == uri;
+        }) !=
+        null;
+  }
+}
+
 extension AnnotationExtension on Annotation {
   static final Uri widgetPreviewsLibraryUri = Uri.parse(
     'package:flutter/src/widget_previews/widget_previews.dart',
   );
 
-  /// Convenience getter to identify `@Preview` annotations
-  bool get isPreview =>
-      name.name == 'Preview' &&
-      elementAnnotation!.element?.library!.uri == widgetPreviewsLibraryUri;
-
-  bool get isMultiPreview {
+  bool _isPreviewType(String typeName) {
     final Element? element = elementAnnotation!.element;
     if (element is ConstructorElement) {
-      final InterfaceType type = element.enclosingElement.supertype!;
-      return type.getDisplayString() == 'MultiPreview' &&
-          type.element.library.uri == widgetPreviewsLibraryUri;
+      final InterfaceType type = element.enclosingElement.thisType;
+      return type.isType(typeName: typeName, uri: widgetPreviewsLibraryUri);
     }
     return false;
   }
 
-  List<DartObject> findMultiPreviewPreviewNodes({required AnalysisContext context}) {
-    final DartObject? evaluatedAnnotation = elementAnnotation!.computeConstantValue();
-    final Element? element = evaluatedAnnotation?.type?.element;
-    if (element is ClassElement) {
-      final InterfaceType type = element.supertype!;
-      if (type.getDisplayString() != 'MultiPreview') {
-        throw StateError('$element is not a MultiPreview!');
-      }
-      final DartObject? previewsField = evaluatedAnnotation!.getField('previews');
-      return previewsField?.toListValue() ?? <DartObject>[];
-    }
-    // Invalid preview.
-    return <DartObject>[];
-  }
+  /// Convenience getter to identify `@Preview` annotations
+  bool get isPreview => _isPreviewType('Preview');
+
+  /// Convenience getter to identify `@MultiPreview` annotations
+  bool get isMultiPreview => _isPreviewType('MultiPreview');
 }
 
 /// Convenience getters for examining [String] paths.

@@ -89,7 +89,6 @@ class HotRunner extends ResidentRunner {
     super.dillOutputPath,
     super.stayResident,
     super.machine,
-    super.devtoolsHandler,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
     ReloadSourcesHelper reloadSourcesHelper = defaultReloadSourcesHelper,
     ReassembleHelper reassembleHelper = _defaultReassembleHelper,
@@ -271,17 +270,6 @@ class HotRunner extends ResidentRunner {
       }
       globals.printError('Error connecting to the service protocol: $error');
       return 2;
-    }
-    // TODO(bkonyi): remove when ready to serve DevTools from DDS.
-    if (debuggingOptions.enableDevTools) {
-      // The method below is guaranteed never to return a failing future.
-      unawaited(
-        residentDevtoolsHandler!.serveAndAnnounceDevTools(
-          devToolsServerAddress: debuggingOptions.devToolsServerAddress,
-          flutterDevices: flutterDevices,
-          isStartPaused: debuggingOptions.startPaused,
-        ),
-      );
     }
 
     for (final FlutterDevice? device in flutterDevices) {
@@ -805,11 +793,9 @@ class HotRunner extends ResidentRunner {
       if (!silent) {
         globals.printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
       }
-      // TODO(bkonyi): remove when ready to serve DevTools from DDS.
-      unawaited(residentDevtoolsHandler!.hotRestart(flutterDevices));
-      // for (final FlutterDevice? device in flutterDevices) {
-      //   unawaited(device?.handleHotRestart());
-      // }
+      for (final FlutterDevice? device in flutterDevices) {
+        unawaited(device?.handleHotRestart());
+      }
       return result;
     }
     final OperationResult result = await _hotReloadHelper(
@@ -1242,7 +1228,6 @@ class HotRunner extends ResidentRunner {
 
   @override
   Future<void> cleanupAfterSignal() async {
-    await residentDevtoolsHandler!.shutdown();
     await stopEchoingDeviceLog();
     await hotRunnerConfig!.runPreShutdownOperations();
     shutdownDartDevelopmentService();
@@ -1265,7 +1250,6 @@ class HotRunner extends ResidentRunner {
       await flutterDevice!.device!.dispose();
     }
     await _cleanupDevFS();
-    await residentDevtoolsHandler!.shutdown();
     await stopEchoingDeviceLog();
   }
 }

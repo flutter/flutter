@@ -401,8 +401,11 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
 
   Widget _buildError() {
     assert(widget.error != null || widget.errorText != null);
-    final Widget? capturedError = widget.error;
     final String? capturedErrorText = widget.errorText;
+    Widget? capturedError = widget.error;
+    if (capturedError != null && widget.errorStyle != null) {
+      capturedError = DefaultTextStyle(style: widget.errorStyle!, child: capturedError);
+    }
     return Builder(
       builder: (BuildContext context) {
         return Semantics(
@@ -5818,7 +5821,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationThemeData {
   });
 
   @override
-  Color? get fillColor => MaterialStateColor.resolveWith((Set<WidgetState> states) {
+  Color? get fillColor => WidgetStateColor.resolveWith((Set<WidgetState> states) {
     return switch ((Theme.brightnessOf(context), states.contains(WidgetState.disabled))) {
       (Brightness.dark, true) => const Color(0x0DFFFFFF), //  5% white
       (Brightness.dark, false) => const Color(0x1AFFFFFF), // 10% white
@@ -5828,7 +5831,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationThemeData {
   });
 
   @override
-  Color? get iconColor => MaterialStateColor.resolveWith((Set<WidgetState> states) {
+  Color? get iconColor => WidgetStateColor.resolveWith((Set<WidgetState> states) {
     if (states.contains(WidgetState.disabled) && !states.contains(WidgetState.focused)) {
       return Theme.of(context).disabledColor;
     }
@@ -5842,7 +5845,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationThemeData {
   });
 
   @override
-  Color? get prefixIconColor => MaterialStateColor.resolveWith((Set<WidgetState> states) {
+  Color? get prefixIconColor => WidgetStateColor.resolveWith((Set<WidgetState> states) {
     if (states.contains(WidgetState.disabled) && !states.contains(WidgetState.focused)) {
       return Theme.of(context).disabledColor;
     }
@@ -5856,7 +5859,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationThemeData {
   });
 
   @override
-  Color? get suffixIconColor => MaterialStateColor.resolveWith((Set<WidgetState> states) {
+  Color? get suffixIconColor => WidgetStateColor.resolveWith((Set<WidgetState> states) {
     if (states.contains(WidgetState.disabled) && !states.contains(WidgetState.focused)) {
       return Theme.of(context).disabledColor;
     }
@@ -5909,7 +5912,7 @@ class _InputDecoratorDefaultsM3 extends InputDecorationThemeData {
   });
 
   @override
-  Color? get fillColor => MaterialStateColor.resolveWith((Set<WidgetState> states) {
+  Color? get fillColor => WidgetStateColor.resolveWith((Set<WidgetState> states) {
     if (states.contains(WidgetState.disabled)) {
       return _colors.onSurface.withOpacity(0.04);
     }
@@ -5966,7 +5969,7 @@ class _InputDecoratorDefaultsM3 extends InputDecorationThemeData {
   Color? get iconColor => _colors.onSurfaceVariant;
 
   @override
-  Color? get prefixIconColor => MaterialStateColor.resolveWith((Set<WidgetState> states) {
+  Color? get prefixIconColor => WidgetStateColor.resolveWith((Set<WidgetState> states) {
     if (states.contains(WidgetState.disabled)) {
       return _colors.onSurface.withOpacity(0.38);
     }
@@ -5974,7 +5977,7 @@ class _InputDecoratorDefaultsM3 extends InputDecorationThemeData {
   });
 
   @override
-  Color? get suffixIconColor => MaterialStateColor.resolveWith((Set<WidgetState> states) {
+  Color? get suffixIconColor => WidgetStateColor.resolveWith((Set<WidgetState> states) {
     if (states.contains(WidgetState.disabled)) {
       return _colors.onSurface.withOpacity(0.38);
     }

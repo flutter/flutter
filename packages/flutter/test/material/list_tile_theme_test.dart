@@ -230,8 +230,8 @@ void main() {
                 iconColor: iconColor,
                 textColor: textColor,
                 minVerticalPadding: 25.0,
-                mouseCursor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-                  if (states.contains(MaterialState.disabled)) {
+                mouseCursor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+                  if (states.contains(WidgetState.disabled)) {
                     return SystemMouseCursors.forbidden;
                   }
 
@@ -787,7 +787,7 @@ void main() {
     expect(inkWellBorder, shapeBorder);
   });
 
-  testWidgets('ListTile respects MaterialStateColor LisTileTheme.textColor', (
+  testWidgets('ListTile respects WidgetStateColor LisTileTheme.textColor', (
     WidgetTester tester,
   ) async {
     bool enabled = false;
@@ -798,11 +798,11 @@ void main() {
 
     final ThemeData theme = ThemeData(
       listTileTheme: ListTileThemeData(
-        textColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.disabled)) {
+        textColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.disabled)) {
             return disabledColor;
           }
-          if (states.contains(MaterialState.selected)) {
+          if (states.contains(WidgetState.selected)) {
             return selectedColor;
           }
           return defaultColor;
@@ -849,7 +849,7 @@ void main() {
     expect(title.text.style!.color, selectedColor);
   });
 
-  testWidgets('ListTile respects MaterialStateColor LisTileTheme.iconColor', (
+  testWidgets('ListTile respects WidgetStateColor LisTileTheme.iconColor', (
     WidgetTester tester,
   ) async {
     bool enabled = false;
@@ -861,11 +861,11 @@ void main() {
 
     final ThemeData theme = ThemeData(
       listTileTheme: ListTileThemeData(
-        iconColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.disabled)) {
+        iconColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.disabled)) {
             return disabledColor;
           }
-          if (states.contains(MaterialState.selected)) {
+          if (states.contains(WidgetState.selected)) {
             return selectedColor;
           }
           return defaultColor;

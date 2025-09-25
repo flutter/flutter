@@ -144,26 +144,26 @@ void main() {
     const Color defaultOverlayColor = Color(0xffffff00);
 
     final ButtonStyle customButtonStyle = ButtonStyle(
-      backgroundColor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.focused)) {
+      backgroundColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.focused)) {
           return focusedBackgroundColor;
         }
         return defaultBackgroundColor;
       }),
-      foregroundColor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.focused)) {
+      foregroundColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.focused)) {
           return focusedForegroundColor;
         }
         return defaultForegroundColor;
       }),
-      iconColor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.focused)) {
+      iconColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.focused)) {
           return focusedIconColor;
         }
         return defaultIconColor;
       }),
-      overlayColor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.focused)) {
+      overlayColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.focused)) {
           return focusedOverlayColor;
         }
         return defaultOverlayColor;
@@ -925,6 +925,31 @@ void main() {
     await tester.pumpAndSettle();
     buttonSize = tester.getSize(findMenuItemButton('I0'));
     expect(buttonSize.width, parentWidth - 35.0 - 20.0);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/172680.
+  testWidgets('Menu panel width can expand to full-screen width', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<int>(
+            expandedInsets: EdgeInsets.zero,
+            dropdownMenuEntries: <DropdownMenuEntry<int>>[
+              DropdownMenuEntry<int>(value: 0, label: 'Flutter'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final double dropdownWidth = tester.getSize(find.byType(DropdownMenu<int>)).width;
+    expect(dropdownWidth, 800);
+
+    await tester.tap(find.byType(DropdownMenu<int>));
+    await tester.pump();
+
+    final double menuWidth = tester.getSize(findMenuItemButton('Flutter')).width;
+    expect(dropdownWidth, menuWidth);
   });
 
   testWidgets(
@@ -4714,6 +4739,27 @@ void main() {
 
     final EditableText editableText = tester.widget(find.byType(EditableText));
     expect(editableText.cursorHeight, cursorHeight);
+  });
+
+  testWidgets('DropdownMenu accepts a MenuController', (WidgetTester tester) async {
+    final MenuController menuController = MenuController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            menuController: menuController,
+            dropdownMenuEntries: menuChildren,
+          ),
+        ),
+      ),
+    );
+    expect(findMenuItemButton('Item 0').hitTestable(), findsNothing);
+    menuController.open();
+    await tester.pumpAndSettle();
+    expect(findMenuItemButton('Item 0').hitTestable(), findsOne);
+    menuController.close();
+    await tester.pumpAndSettle();
+    expect(findMenuItemButton('Item 0').hitTestable(), findsNothing);
   });
 }
 

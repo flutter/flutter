@@ -4,6 +4,7 @@
 
 import 'package:dtd/dtd.dart';
 import 'package:flutter/foundation.dart';
+import 'package:widget_preview_scaffold/src/dtd/dtd_services.dart';
 
 /// Provides support for interacting with the Editor DTD service registered by IDE plugins.
 mixin DtdEditorService {
@@ -21,7 +22,9 @@ mixin DtdEditorService {
   static final _editorTheme = ValueNotifier<EditorTheme?>(null);
 
   /// Start listening for events on the Editor stream.
-  Future<void> initializeEditorService() async {
+  Future<void> initializeEditorService(
+    WidgetPreviewScaffoldDtdServices dtdServices,
+  ) async {
     final editorKindMap = EditorEventKind.values.asNameMap();
     dtd.onEvent(kEditorService).listen((data) {
       final kind = editorKindMap[data.kind];

@@ -4,6 +4,8 @@
 
 #include "vertices_contents.h"
 
+#include <format>
+
 #include "fml/logging.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
@@ -144,8 +146,8 @@ bool VerticesSimpleBlendContents::Render(const ContentContext& renderer,
     using FS = PorterDuffBlendPipeline::FragmentShader;
 
 #ifdef IMPELLER_DEBUG
-    pass.SetCommandLabel(SPrintF("DrawVertices Porterduff Blend (%s)",
-                                 BlendModeToString(blend_mode)));
+    pass.SetCommandLabel(std::format("DrawVertices Porterduff Blend ({})",
+                                     BlendModeToString(blend_mode)));
 #endif  // IMPELLER_DEBUG
     pass.SetVertexBuffer(std::move(geometry_result.vertex_buffer));
 
@@ -180,8 +182,8 @@ bool VerticesSimpleBlendContents::Render(const ContentContext& renderer,
   using FS = VerticesUber1Shader::FragmentShader;
 
 #ifdef IMPELLER_DEBUG
-  pass.SetCommandLabel(SPrintF("DrawVertices Advanced Blend (%s)",
-                               BlendModeToString(blend_mode)));
+  pass.SetCommandLabel(std::format("DrawVertices Advanced Blend ({})",
+                                   BlendModeToString(blend_mode)));
 #endif  // IMPELLER_DEBUG
   pass.SetVertexBuffer(std::move(geometry_result.vertex_buffer));
 
