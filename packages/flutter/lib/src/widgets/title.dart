@@ -9,6 +9,10 @@ import 'basic.dart';
 import 'framework.dart';
 
 /// A widget that describes this app in the operating system.
+///
+/// `SystemChrome.setApplicationSwitcherDescription` is called once on
+/// `initState` in `StatefulWidget` and each time only when [title] and/or
+/// [color] is changed
 class Title extends StatefulWidget {
   /// Creates a widget that describes this app to the Android operating system.
   ///
