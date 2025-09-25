@@ -27,21 +27,19 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
     Colors.cyan,
   ];
 
-  static final List<Widget> items =
-      List<Widget>.generate(
-        colors.length,
-        (int index) => Container(color: colors[index], height: 150.0),
-      ).reversed.toList();
+  static final List<Widget> items = List<Widget>.generate(
+    colors.length,
+    (int index) => Container(color: colors[index], height: 150.0),
+  ).reversed.toList();
 
   late ScrollController _controller;
   bool _showFab = true;
   bool _isElevated = true;
   bool _isVisible = true;
 
-  FloatingActionButtonLocation get _fabLocation =>
-      _isVisible
-          ? FloatingActionButtonLocation.endContained
-          : FloatingActionButtonLocation.endFloat;
+  FloatingActionButtonLocation get _fabLocation => _isVisible
+      ? FloatingActionButtonLocation.endContained
+      : FloatingActionButtonLocation.endFloat;
 
   void _listen() {
     switch (_controller.position.userScrollDirection) {
@@ -115,18 +113,19 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
               value: _isElevated,
               onChanged: _onElevatedChanged,
             ),
-            Expanded(child: ListView(controller: _controller, children: items.toList())),
+            Expanded(
+              child: ListView(controller: _controller, children: items.toList()),
+            ),
           ],
         ),
-        floatingActionButton:
-            _showFab
-                ? FloatingActionButton(
-                  onPressed: _addNewItem,
-                  tooltip: 'Add New Item',
-                  elevation: _isVisible ? 0.0 : null,
-                  child: const Icon(Icons.add),
-                )
-                : null,
+        floatingActionButton: _showFab
+            ? FloatingActionButton(
+                onPressed: _addNewItem,
+                tooltip: 'Add New Item',
+                elevation: _isVisible ? 0.0 : null,
+                child: const Icon(Icons.add),
+              )
+            : null,
         floatingActionButtonLocation: _fabLocation,
         bottomNavigationBar: _DemoBottomAppBar(isElevated: _isElevated, isVisible: _isVisible),
       ),

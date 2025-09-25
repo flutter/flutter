@@ -357,12 +357,12 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
 
   @override
   List<String> get timerPickerHourLabels => <String>[
-    if (timerPickerHourLabelZero != null) timerPickerHourLabelZero!,
-    if (timerPickerHourLabelOne != null) timerPickerHourLabelOne!,
-    if (timerPickerHourLabelTwo != null) timerPickerHourLabelTwo!,
-    if (timerPickerHourLabelFew != null) timerPickerHourLabelFew!,
-    if (timerPickerHourLabelMany != null) timerPickerHourLabelMany!,
-    if (timerPickerHourLabelOther != null) timerPickerHourLabelOther!,
+    ?timerPickerHourLabelZero,
+    ?timerPickerHourLabelOne,
+    ?timerPickerHourLabelTwo,
+    ?timerPickerHourLabelFew,
+    ?timerPickerHourLabelMany,
+    ?timerPickerHourLabelOther,
   ];
 
   /// Subclasses should provide the optional zero pluralization of [timerPickerMinuteLabel] based on the ARB file.
@@ -405,12 +405,12 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
 
   @override
   List<String> get timerPickerMinuteLabels => <String>[
-    if (timerPickerMinuteLabelZero != null) timerPickerMinuteLabelZero!,
-    if (timerPickerMinuteLabelOne != null) timerPickerMinuteLabelOne!,
-    if (timerPickerMinuteLabelTwo != null) timerPickerMinuteLabelTwo!,
-    if (timerPickerMinuteLabelFew != null) timerPickerMinuteLabelFew!,
-    if (timerPickerMinuteLabelMany != null) timerPickerMinuteLabelMany!,
-    if (timerPickerMinuteLabelOther != null) timerPickerMinuteLabelOther!,
+    ?timerPickerMinuteLabelZero,
+    ?timerPickerMinuteLabelOne,
+    ?timerPickerMinuteLabelTwo,
+    ?timerPickerMinuteLabelFew,
+    ?timerPickerMinuteLabelMany,
+    ?timerPickerMinuteLabelOther,
   ];
 
   /// Subclasses should provide the optional zero pluralization of [timerPickerSecondLabel] based on the ARB file.
@@ -453,12 +453,12 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
 
   @override
   List<String> get timerPickerSecondLabels => <String>[
-    if (timerPickerSecondLabelZero != null) timerPickerSecondLabelZero!,
-    if (timerPickerSecondLabelOne != null) timerPickerSecondLabelOne!,
-    if (timerPickerSecondLabelTwo != null) timerPickerSecondLabelTwo!,
-    if (timerPickerSecondLabelFew != null) timerPickerSecondLabelFew!,
-    if (timerPickerSecondLabelMany != null) timerPickerSecondLabelMany!,
-    if (timerPickerSecondLabelOther != null) timerPickerSecondLabelOther!,
+    ?timerPickerSecondLabelZero,
+    ?timerPickerSecondLabelOne,
+    ?timerPickerSecondLabelTwo,
+    ?timerPickerSecondLabelFew,
+    ?timerPickerSecondLabelMany,
+    ?timerPickerSecondLabelOther,
   ];
 
   /// A [LocalizationsDelegate] for [CupertinoLocalizations].

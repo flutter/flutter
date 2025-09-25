@@ -161,8 +161,11 @@ void main() {
     expect(ShapeBorder.lerp(r, c, 0.1).hashCode, ShapeBorder.lerp(r, c, 0.1).hashCode);
 
     final ShapeBorder direct50 = ShapeBorder.lerp(r, c, 0.5)!;
-    final ShapeBorder indirect50 =
-        ShapeBorder.lerp(ShapeBorder.lerp(c, r, 0.1), ShapeBorder.lerp(c, r, 0.9), 0.5)!;
+    final ShapeBorder indirect50 = ShapeBorder.lerp(
+      ShapeBorder.lerp(c, r, 0.1),
+      ShapeBorder.lerp(c, r, 0.9),
+      0.5,
+    )!;
     expect(direct50, indirect50);
     expect(direct50.hashCode, indirect50.hashCode);
     expect(direct50.toString(), indirect50.toString());
@@ -248,6 +251,30 @@ void main() {
     await expectLater(
       find.byType(Container),
       matchesGoldenFile('painting.rounded_superellipse_border.all_elliptical.png'),
+    );
+
+    await tester.pumpWidget(
+      containerWithBorder(const Size(120, 300), const BorderRadius.all(Radius.circular(600))),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('painting.rounded_superellipse_border.clamping_uniform.png'),
+    );
+
+    await tester.pumpWidget(
+      containerWithBorder(
+        const Size(120, 300),
+        const BorderRadius.only(
+          topLeft: Radius.elliptical(1000, 1000),
+          topRight: Radius.elliptical(0, 1000),
+          bottomRight: Radius.elliptical(800, 1000),
+          bottomLeft: Radius.elliptical(100, 500),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('painting.rounded_superellipse_border.clamping_non_uniform.png'),
     );
 
     // Regression test for https://github.com/flutter/flutter/issues/170593

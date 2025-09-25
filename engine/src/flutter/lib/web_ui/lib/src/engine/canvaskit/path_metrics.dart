@@ -16,8 +16,9 @@ class CkPathMetrics extends IterableBase<ui.PathMetric> implements DisposablePat
 
   /// The [CkPath.isEmpty] case is special-cased to avoid booting the WASM machinery just to find out there are no contours.
   @override
-  late final DisposablePathMetricIterator iterator =
-      _path.isEmpty ? const CkPathMetricIteratorEmpty._() : CkContourMeasureIter(this);
+  late final DisposablePathMetricIterator iterator = _path.isEmpty
+      ? const CkPathMetricIteratorEmpty._()
+      : CkContourMeasureIter(this);
 }
 
 class CkContourMeasureIter implements DisposablePathMetricIterator {

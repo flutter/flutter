@@ -30,18 +30,19 @@ import 'android_sdk.dart';
 // Please see the README before changing any of these values.
 
 // See https://gradle.org/releases
-const String templateDefaultGradleVersion = '8.12';
+const templateDefaultGradleVersion = '8.12';
 
 // When bumping, also update:
 //  * ndkVersion constant in this file
 //  * ndkVersion in FlutterExtension in packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt
 //  * AGP version constants in packages/flutter_tools/gradle/build.gradle.kts
+//  * AGP test constants in packages/flutter_tools/gradle/src/test/kotlin/DependencyVersionCheckerTest.kt
 // See https://mvnrepository.com/artifact/com.android.tools.build/gradle
-const String templateAndroidGradlePluginVersion = '8.9.1';
-const String templateAndroidGradlePluginVersionForModule = '8.9.1';
+const templateAndroidGradlePluginVersion = '8.9.1';
+const templateAndroidGradlePluginVersionForModule = '8.9.1';
 
 // See https://kotlinlang.org/docs/releases.html#release-details
-const String templateKotlinGradlePluginVersion = '2.1.0';
+const templateKotlinGradlePluginVersion = '2.1.0';
 
 // The Flutter Gradle Plugin is only applied to app projects, and modules that
 // are built from source using (`include_flutter.groovy`). The remaining
@@ -50,73 +51,79 @@ const String templateKotlinGradlePluginVersion = '2.1.0';
 // so new versions are picked up after a Flutter upgrade.
 //
 // Please see the README before changing any of these values.
-const String compileSdkVersion = '36';
-const String minSdkVersion = '24';
-const String targetSdkVersion = '36';
-const String ndkVersion = '27.0.12077973';
+const compileSdkVersionInt = 36;
+const compileSdkVersion = '$compileSdkVersionInt';
+const minSdkVersionInt = 24;
+const minSdkVersion = '$minSdkVersionInt';
+const targetSdkVersion = '36';
+const ndkVersion = '27.0.12077973';
+final minBuildToolsVersion = Version(28, 0, 3);
+final minJavaMinVersionAndroid = Version(11, 0, 0);
 
 // Update these when new major versions of Java are supported by new Gradle
 // versions that we support.
 // Source of truth: https://docs.gradle.org/current/userguide/compatibility.html
-const String oneMajorVersionHigherJavaVersion = '24';
+const oneMajorVersionHigherJavaVersion = '26';
 
 // Update this when new versions of Gradle come out including minor versions
 // and should correspond to the maximum Gradle version we test in CI.
 //
 // Supported here means supported by the tooling for
 // flutter analyze --suggestions and does not imply broader flutter support.
-const String maxKnownAndSupportedGradleVersion = '8.12';
+const maxKnownAndSupportedGradleVersion = '9.1.0';
 
 // Update this with new KGP versions come out including minor versions.
 //
 // Supported here means supported by the tooling for
 // flutter analyze --suggestions and does not imply broader flutter support.
-const String maxKnownAndSupportedKgpVersion = '2.1.20';
+const maxKnownAndSupportedKgpVersion = '2.1.20';
 
 // Update this when new versions of AGP come out.
 //
 // Supported here means tooling is aware of this version's Java <-> AGP
 // compatibility.
 @visibleForTesting
-const String maxKnownAndSupportedAgpVersion = '8.9.1';
+const maxKnownAndSupportedAgpVersion = '9.0';
 
 // Update this when new versions of AGP come out.
-const String maxKnownAgpVersion = '8.9.1';
+const maxKnownAgpVersion = '9.0';
 
 // Supported here means tooling is aware of this versions
 // Java <-> AGP compatibility and does not imply broader flutter support.
 // For use in flutter see the code in:
 // flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt
 @visibleForTesting
-const String oldestConsideredAgpVersion = '3.3.0';
+const oldestConsideredAgpVersion = '3.3.0';
 
 // Supported here means tooling is aware of this versions
 // gradle compatibility and does not imply broader flutter support.
 @visibleForTesting
-const String oldestConsideredGradleVersion = '4.10.1';
+const oldestConsideredGradleVersion = '4.10.1';
 
 // Supported here means tooling is aware of this versions
 // gradle/AGP compatibility and does not imply broader flutter support.
 @visibleForTesting
-const String oldestDocumentedKgpCompatabilityVersion = '1.6.20';
+const oldestDocumentedKgpCompatabilityVersion = '1.6.20';
 
 // Oldest documented version of AGP that has a listed minimum
 // compatible Java version.
-const String oldestDocumentedJavaAgpCompatibilityVersion = '4.2';
+const oldestDocumentedJavaAgpCompatibilityVersion = '4.2';
 
 // Constant used in [_buildAndroidGradlePluginRegExp] and
 // [_settingsAndroidGradlePluginRegExp] and [_kotlinGradlePluginRegExpFromId]
 // to identify the version section.
-const String _versionGroupName = 'version';
+const _versionGroupName = 'version';
 
 // AGP can be defined in the dependencies block of [build.gradle] or [build.gradle.kts].
 // Expected content (covers both classpath and compileOnly cases):
 // Groovy DSL with single quotes - 'com.android.tools.build:gradle:{{agpVersion}}'
 // Groovy DSL with double quotes - "com.android.tools.build:gradle:{{agpVersion}}"
 // Kotlin DSL - ("com.android.tools.build.gradle:{{agpVersion}}")
-// ?<version> is used to name the version group which helps with extraction.
-final RegExp _androidGradlePluginRegExpFromDependencies = RegExp(
-  r"""[^\/]*\s*((\bclasspath\b)|(\bcompileOnly\b))\s*\(?['"]com\.android\.tools\.build:gradle:(?<version>\d+(\.\d+){1,2})\)?""",
+// `(?<=^[^/]*)` is a positive look behind to ensure that the line is not commented out.
+// `?<version>` is used to name the version group which helps with extraction.
+// `\k<quote>` takes advanatage of the precviously declared `(?<quote>['"])` for reuse.
+final _androidGradlePluginRegExpFromDependencies = RegExp(
+  r"""\b(?:classpath|compileOnly)\b(?<=^[^/]*)\s*\(?(?<quote>['"])com\.android\.tools\.build:gradle:(?<version>\d+(?:.\d+){1,2}).*\k<quote>""",
   multiLine: true,
 );
 
@@ -126,9 +133,11 @@ final RegExp _androidGradlePluginRegExpFromDependencies = RegExp(
 // Groovy DSL with single quotes - id 'com.android.application' version '{{agpVersion}}'
 // Groovy DSL with double quotes - id "com.android.application" version "{{agpVersion}}"
 // Kotlin DSL - id("com.android.application") version "{{agpVersion}}"
-// ?<version> is used to name the version group which helps with extraction.
-final RegExp _androidGradlePluginRegExpFromId = RegExp(
-  r"""[^\/]*s*id\s*\(?['"]com\.android\.application['"]\)?\s+version\s+['"](?<version>\d+(\.\d+){1,2})\)?""",
+// `(?<=^[^/]*)` is a positive look behind to ensure that the line is not commented out.
+// `?<version>` is used to name the version group which helps with extraction.
+// `\k<quote>` takes advanatage of the precviously declared `(?<quote>['"])` for reuse.
+final _androidGradlePluginRegExpFromId = RegExp(
+  r"""\b(?:id)\b(?<=^[^/]*)\s*\(?(?<quote>['"])com\.android\.application\k<quote>\)?\s+version\s+\k<quote>(?<version>\d+(\.\d+){1,2})\)?""",
   multiLine: true,
 );
 
@@ -137,9 +146,11 @@ final RegExp _androidGradlePluginRegExpFromId = RegExp(
 // Expected content:
 // Groovy DSL - id "org.jetbrains.kotlin.android" version "{{kgpVersion}}"
 // Kotlin DSL - id("org.jetbrains.kotlin.android") version "{{kgpVersion}}"
-// ?<version> is used to name the version group which helps with extraction.
-final RegExp _kotlinGradlePluginRegExpFromId = RegExp(
-  r"""[^\/]*s*id\s*\(?['"]org\.jetbrains\.kotlin\.android['"]\)?\s+version\s+['"](?<version>\d+(\.\d+){1,2})\)?""",
+// `(?<=^[^/]*)` is a positive look behind to ensure that the line is not commented out.
+// `?<version>` is used to name the version group which helps with extraction.
+// `\k<quote>` takes advanatage of the precviously declared `(?<quote>['"])` for reuse.
+final _kotlinGradlePluginRegExpFromId = RegExp(
+  r"""\b(?:id)\b(?<=^[^/]*)\s*\(?(?<quote>['"])org\.jetbrains\.kotlin\.android\k<quote>\)?\s+version\s+\k<quote>(?<version>\d+(\.\d+){1,2})\)?""",
   multiLine: true,
 );
 
@@ -147,36 +158,43 @@ final RegExp _kotlinGradlePluginRegExpFromId = RegExp(
 // Version can have 2 or 3 numbers.
 // 'distributionUrl=https\://services.gradle.org/distributions/gradle-7.4.2-all.zip'
 // '^\s*' protects against commented out lines.
-final RegExp distributionUrlRegex = RegExp(r'^\s*distributionUrl\s*=\s*.*\.zip', multiLine: true);
+final distributionUrlRegex = RegExp(r'^\s*distributionUrl\s*=\s*.*\.zip', multiLine: true);
 
 // Modified version of the gradle distribution url match designed to only match
 // gradle.org urls so that we can guarantee any modifications to the url
 // still points to a hosted zip.
-final RegExp gradleOrgVersionMatch = RegExp(
-  r'^\s*distributionUrl\s*=\s*https\\://services\.gradle\.org/distributions/gradle-((?:\d|\.)+)-(.*)\.zip',
+final gradleOrgVersionMatch = RegExp(
+  r'^\s*distributionUrl\s*=\s*https\\://services\.gradle\.org/distributions/gradle-([\d.]+)-(.*)\.zip',
   multiLine: true,
 );
 
 // This matches uncommented minSdkVersion lines in the module-level build.gradle
 // file which have minSdkVersion 16, 17, 18, 19, 20, 21, 22, 23 set with space sytax,
 // equals syntax and when using minSdk or minSdkVersion.
-final RegExp tooOldMinSdkVersionMatch = RegExp(
-  r'(?<=^\s*)minSdk(Version)?\s=?\s?(1[6789]|2[0123])(?=\s*(?://|$))',
+// Matches uncommented minSdkVersion lines using equals syntax (=)
+final tooOldMinSdkVersionEqualsMatch = RegExp(
+  r'(?<=^\s*)minSdk(Version)?\s*=\s*(1[6789]|2[0123])(?=\s*(?://|$))',
+  multiLine: true,
+);
+
+// Matches uncommented minSdkVersion lines using space syntax (no =)
+final tooOldMinSdkVersionSpaceMatch = RegExp(
+  r'(?<=^\s*)minSdk(Version)?\s+(1[6789]|2[0123])(?=\s*(?://|$))',
   multiLine: true,
 );
 
 // From https://docs.gradle.org/current/userguide/command_line_interface.html#command_line_interface
 // Flag to print the versions for gradle, kotlin dsl, groovy, etc.
-const String gradleVersionsFlag = r'--version';
+const gradleVersionsFlag = r'--version';
 
 // Directory under android/ that gradle uses to store gradle information.
 // Regularly used with [gradleWrapperDirectory] and
 // [gradleWrapperPropertiesFilename].
 // Different from the directory of gradle files stored in
 // `_cache.getArtifactDirectory('gradle_wrapper')`
-const String gradleDirectoryName = 'gradle';
-const String gradleWrapperDirectoryName = 'wrapper';
-const String gradleWrapperPropertiesFilename = 'gradle-wrapper.properties';
+const gradleDirectoryName = 'gradle';
+const gradleWrapperDirectoryName = 'wrapper';
+const gradleWrapperPropertiesFilename = 'gradle-wrapper.properties';
 
 /// Provides utilities to run a Gradle task, such as finding the Gradle executable
 /// or constructing a Gradle project.
@@ -241,7 +259,8 @@ class GradleUtils {
     }
     propertiesDirectory.createSync(recursive: true);
     final String gradleVersion = getGradleVersionForAndroidPlugin(directory, _logger);
-    final String propertyContents = '''
+    final propertyContents =
+        '''
 distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
 zipStoreBase=GRADLE_USER_HOME
@@ -331,7 +350,7 @@ Future<String?> getGradleVersion(
   // System installed Gradle version.
   // TODO(reidbaker): Modify this gradle execution to use gradlew.
   if (processManager.canRun('gradle')) {
-    final String gradleVersionsVerbose =
+    final gradleVersionsVerbose =
         (await processManager.run(<String>['gradle', gradleVersionsFlag])).stdout as String;
     // Expected format:
     /*
@@ -353,7 +372,7 @@ OS:           Mac OS X 13.2.1 aarch64
     // Inner parentheticals `(\.\d+)?` denote the optional third value.
     // Outer parentheticals `Gradle (...)` denote a grouping used to extract
     // the version number.
-    final RegExp gradleVersionRegex = RegExp(r'Gradle\s+(\d+\.\d+(?:\.\d+)?)');
+    final gradleVersionRegex = RegExp(r'Gradle\s+(\d+\.\d+(?:\.\d+)?)');
     final RegExpMatch? version = gradleVersionRegex.firstMatch(gradleVersionsVerbose);
     if (version == null) {
       // Most likely a bug in our parse implementation/regex.
@@ -395,11 +414,11 @@ Future<String?> getKgpVersion(
       '-q',
     ], workingDirectory: androidDirectory.path);
     if (command.exitCode == 0) {
-      final String kgpVersionOutput = command.stdout as String;
+      final kgpVersionOutput = command.stdout as String;
 
       // See expected output defined in
       // flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPluginUtils.kt addTaskForKGPVersion
-      final RegExp kotlinVersionRegex = RegExp(r'KGP Version:\s+(\d+\.\d+(?:\.\d+)?)');
+      final kotlinVersionRegex = RegExp(r'KGP Version:\s+(\d+\.\d+(?:\.\d+)?)');
       final RegExpMatch? version = kotlinVersionRegex.firstMatch(kgpVersionOutput);
       if (version != null) {
         return version.group(1);
@@ -618,7 +637,7 @@ bool validateAgpAndKgp(Logger logger, {required String? kgpV, required String? a
       'AGP version ($agpV) older than oldest supported $oldestConsideredAgpVersion.',
     );
   }
-  const String maxKnownAgpVersionWithFullKotinSupport = '8.7.2';
+  const maxKnownAgpVersionWithFullKotinSupport = '8.7.2';
 
   if (isWithinVersionRange(
         kgpV,
@@ -726,13 +745,14 @@ bool validateGradleAndAgp(Logger logger, {required String? gradleV, required Str
   }
 
   // Check highest supported version before checking unknown versions.
-  if (isWithinVersionRange(agpV, min: '8.0', max: maxKnownAndSupportedAgpVersion)) {
-    return isWithinVersionRange(gradleV, min: '8.0', max: maxKnownAndSupportedGradleVersion);
+  // https://developer.android.com/build/releases/agp-preview#android-gradle-plugin-compatibility
+  if (isWithinVersionRange(agpV, min: '9.0', max: '9.0.99')) {
+    return isWithinVersionRange(gradleV, min: '9.0', max: maxKnownAndSupportedGradleVersion);
   }
   // Check if versions are newer than the max known versions.
   if (isWithinVersionRange(agpV, min: maxKnownAndSupportedAgpVersion, max: '100.100')) {
     // Assume versions we do not know about are valid but log.
-    final bool validGradle = isWithinVersionRange(gradleV, min: '8.0', max: '100.00');
+    final bool validGradle = isWithinVersionRange(gradleV, min: '9.1.0', max: '100.00');
     logger.printTrace(
       'Newer than known AGP version ($agpV), gradle ($gradleV).'
       '\n Treating as valid configuration.',
@@ -741,6 +761,33 @@ bool validateGradleAndAgp(Logger logger, {required String? gradleV, required Str
   }
 
   // Begin Known Gradle <-> AGP validation.
+  if (isWithinVersionRange(agpV, min: '8.13.0', max: '8.13.99')) {
+    return isWithinVersionRange(gradleV, min: '8.13', max: maxKnownAndSupportedGradleVersion);
+  }
+  if (isWithinVersionRange(agpV, min: '8.12.0', max: '8.12.99')) {
+    return isWithinVersionRange(gradleV, min: '8.13', max: maxKnownAndSupportedGradleVersion);
+  }
+  if (isWithinVersionRange(agpV, min: '8.11.0', max: '8.11.99')) {
+    return isWithinVersionRange(gradleV, min: '8.13', max: maxKnownAndSupportedGradleVersion);
+  }
+  if (isWithinVersionRange(agpV, min: '8.10.0', max: '8.10.99')) {
+    return isWithinVersionRange(gradleV, min: '8.11.1', max: maxKnownAndSupportedGradleVersion);
+  }
+  if (isWithinVersionRange(agpV, min: '8.9.0', max: '8.9.99')) {
+    return isWithinVersionRange(gradleV, min: '8.11.1', max: maxKnownAndSupportedGradleVersion);
+  }
+  if (isWithinVersionRange(agpV, min: '8.8.0', max: '8.8.99')) {
+    return isWithinVersionRange(gradleV, min: '8.10.2', max: maxKnownAndSupportedGradleVersion);
+  }
+  if (isWithinVersionRange(agpV, min: '8.7.0', max: '8.7.99')) {
+    return isWithinVersionRange(gradleV, min: '8.9', max: maxKnownAndSupportedGradleVersion);
+  }
+  if (isWithinVersionRange(agpV, min: '8.6.0', max: '8.6.99')) {
+    return isWithinVersionRange(gradleV, min: '8.7', max: maxKnownAndSupportedGradleVersion);
+  }
+  if (isWithinVersionRange(agpV, min: '8.5.0', max: '8.5.99')) {
+    return isWithinVersionRange(gradleV, min: '8.7', max: maxKnownAndSupportedGradleVersion);
+  }
   if (isWithinVersionRange(agpV, min: '8.4.0', max: '8.4.99')) {
     return isWithinVersionRange(gradleV, min: '8.6', max: maxKnownAndSupportedGradleVersion);
   }
@@ -806,8 +853,8 @@ bool validateJavaAndGradle(
   required String? gradleVersion,
 }) {
   // https://docs.gradle.org/current/userguide/compatibility.html#java
-  const String oldestConsideredJavaVersion = '1.8';
-  const String oldestDocumentedJavaGradleCompatibility = '2.0';
+  const oldestConsideredJavaVersion = '1.8';
+  const oldestDocumentedJavaGradleCompatibility = '2.0';
 
   // Begin Java <-> Gradle validation.
 
@@ -860,7 +907,12 @@ bool validateJavaAndGradle(
       max: data.javaMax,
       inclusiveMax: false,
     )) {
-      return isWithinVersionRange(gradleVersion, min: data.gradleMin, max: data.gradleMax);
+      // Null max value should be treated as unbounded on the max side.
+      return isWithinVersionRange(
+        gradleVersion,
+        min: data.gradleMin,
+        max: data.gradleMax ?? '100.100',
+      );
     }
   }
 
@@ -978,8 +1030,8 @@ VersionRange getJavaVersionFor({required String gradleV, required String agpV}) 
 /// Returns the Gradle version that is required by the given Android Gradle plugin version
 /// by picking the largest compatible version from
 /// https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
-String getGradleVersionFor(String androidPluginVersion) {
-  final List<GradleForAgp> compatList = <GradleForAgp>[
+String getGradleVersionFor(String agpV) {
+  final compatList = <GradleForAgp>[
     GradleForAgp(agpMin: '1.0.0', agpMax: '1.1.3', minRequiredGradle: '2.3'),
     GradleForAgp(agpMin: '1.2.0', agpMax: '1.3.1', minRequiredGradle: '2.9'),
     GradleForAgp(agpMin: '1.5.0', agpMax: '1.5.0', minRequiredGradle: '2.2.1'),
@@ -1004,7 +1056,12 @@ String getGradleVersionFor(String androidPluginVersion) {
     GradleForAgp(agpMin: '8.7.0', agpMax: '8.7.99', minRequiredGradle: '8.9'),
     GradleForAgp(agpMin: '8.8.0', agpMax: '8.8.99', minRequiredGradle: '8.10.2'),
     GradleForAgp(agpMin: '8.9.0', agpMax: '8.9.99', minRequiredGradle: '8.11.1'),
-    // Assume if AGP is newer than this code know about return the highest gradle
+    GradleForAgp(agpMin: '8.10.0', agpMax: '8.10.99', minRequiredGradle: '8.11.1'),
+    GradleForAgp(agpMin: '8.11.0', agpMax: '8.11.99', minRequiredGradle: '8.13'),
+    GradleForAgp(agpMin: '8.12.0', agpMax: '8.12.99', minRequiredGradle: '8.13'),
+    GradleForAgp(agpMin: '8.13.0', agpMax: '8.13.99', minRequiredGradle: '8.13'),
+    GradleForAgp(agpMin: '9.0', agpMax: '9.0.99', minRequiredGradle: '9.0.0'),
+    // Assume if AGP is newer than this code knows about return the highest gradle
     // version we know about.
     GradleForAgp(
       agpMin: maxKnownAgpVersion,
@@ -1012,15 +1069,15 @@ String getGradleVersionFor(String androidPluginVersion) {
       minRequiredGradle: maxKnownAndSupportedGradleVersion,
     ),
   ];
-  for (final GradleForAgp data in compatList) {
-    if (isWithinVersionRange(androidPluginVersion, min: data.agpMin, max: data.agpMax)) {
+  for (final data in compatList) {
+    if (isWithinVersionRange(agpV, min: data.agpMin, max: data.agpMax)) {
       return data.minRequiredGradle;
     }
   }
-  if (isWithinVersionRange(androidPluginVersion, min: maxKnownAgpVersion, max: '100.100')) {
+  if (isWithinVersionRange(agpV, min: maxKnownAgpVersion, max: '100.100')) {
     return maxKnownAndSupportedGradleVersion;
   }
-  throwToolExit('Unsupported Android Plugin version: $androidPluginVersion.');
+  throwToolExit('Unsupported Android Plugin version: $agpV.');
 }
 
 /// Overwrite local.properties in the specified Flutter project's Android
@@ -1037,7 +1094,7 @@ void updateLocalProperties({
     exitWithNoSdkMessage();
   }
   final File localProperties = project.android.localPropertiesFile;
-  bool changed = false;
+  var changed = false;
 
   SettingsFile settings;
   if (localProperties.existsSync()) {
@@ -1090,7 +1147,7 @@ void updateLocalProperties({
 ///
 /// Writes the path to the Android SDK, if known.
 void writeLocalProperties(File properties) {
-  final SettingsFile settings = SettingsFile();
+  final settings = SettingsFile();
   final AndroidSdk? androidSdk = globals.androidSdk;
   if (androidSdk != null) {
     settings.values['sdk.dir'] = globals.fsUtils.escapePath(androidSdk.directory.path);
@@ -1116,19 +1173,20 @@ void exitWithNoSdkMessage() {
 //
 // The [javaMax] is exclusive in terms of supporting the noted [gradleMin],
 // whereas [javaMin] is inclusive.
+// Gradle Max is not required and when unset should mean unbound.
 @immutable
 class JavaGradleCompat {
   const JavaGradleCompat({
     required this.javaMin,
     required this.javaMax,
     required this.gradleMin,
-    required this.gradleMax,
+    this.gradleMax,
   });
 
   final String javaMin;
   final String javaMax;
   final String gradleMin;
-  final String gradleMax;
+  final String? gradleMax;
 
   @override
   bool operator ==(Object other) =>
@@ -1140,6 +1198,11 @@ class JavaGradleCompat {
 
   @override
   int get hashCode => Object.hash(javaMin, javaMax, gradleMin, gradleMax);
+
+  @override
+  String toString() {
+    return '$javaMin, $javaMax, $gradleMin, $gradleMax';
+  }
 }
 
 // Data class to hold defined Java <-> AGP compatibility criteria.
@@ -1194,49 +1257,16 @@ String getGradlewFileName(Platform platform) {
 /// Should be updated when a new version of Java is supported by a new version
 /// of Gradle, as https://docs.gradle.org/current/userguide/compatibility.html
 /// details.
-List<JavaGradleCompat> _javaGradleCompatList = const <JavaGradleCompat>[
-  JavaGradleCompat(
-    javaMin: '23',
-    javaMax: '24',
-    gradleMin: '8.10',
-    gradleMax: maxKnownAndSupportedGradleVersion,
-  ),
-  JavaGradleCompat(
-    javaMin: '22',
-    javaMax: '23',
-    gradleMin: '8.7',
-    gradleMax: maxKnownAndSupportedGradleVersion,
-  ),
-  JavaGradleCompat(
-    javaMin: '21',
-    javaMax: '22',
-    gradleMin: '8.4',
-    gradleMax: maxKnownAndSupportedGradleVersion,
-  ),
-  JavaGradleCompat(
-    javaMin: '20',
-    javaMax: '21',
-    gradleMin: '8.1',
-    gradleMax: maxKnownAndSupportedGradleVersion,
-  ),
-  JavaGradleCompat(
-    javaMin: '19',
-    javaMax: '20',
-    gradleMin: '7.6',
-    gradleMax: maxKnownAndSupportedGradleVersion,
-  ),
-  JavaGradleCompat(
-    javaMin: '18',
-    javaMax: '19',
-    gradleMin: '7.5',
-    gradleMax: maxKnownAndSupportedGradleVersion,
-  ),
-  JavaGradleCompat(
-    javaMin: '17',
-    javaMax: '18',
-    gradleMin: '7.3',
-    gradleMax: maxKnownAndSupportedGradleVersion,
-  ),
+var _javaGradleCompatList = const <JavaGradleCompat>[
+  JavaGradleCompat(javaMin: '25', javaMax: '26', gradleMin: '9.1.0'),
+  JavaGradleCompat(javaMin: '24', javaMax: '25', gradleMin: '8.14'),
+  JavaGradleCompat(javaMin: '23', javaMax: '24', gradleMin: '8.10'),
+  JavaGradleCompat(javaMin: '22', javaMax: '23', gradleMin: '8.7'),
+  JavaGradleCompat(javaMin: '21', javaMax: '22', gradleMin: '8.4'),
+  JavaGradleCompat(javaMin: '20', javaMax: '21', gradleMin: '8.1'),
+  JavaGradleCompat(javaMin: '19', javaMax: '20', gradleMin: '7.6'),
+  JavaGradleCompat(javaMin: '18', javaMax: '19', gradleMin: '7.5'),
+  JavaGradleCompat(javaMin: '17', javaMax: '18', gradleMin: '7.3'),
   JavaGradleCompat(
     javaMin: '16',
     javaMax: '17',
@@ -1298,7 +1328,7 @@ List<JavaGradleCompat> _javaGradleCompatList = const <JavaGradleCompat>[
 //
 // Should be updated whenever a new version of AGP is released as
 // https://developer.android.com/build/releases/gradle-plugin details.
-List<JavaAgpCompat> _javaAgpCompatList = const <JavaAgpCompat>[
+var _javaAgpCompatList = const <JavaAgpCompat>[
   JavaAgpCompat(
     javaMin: '17',
     javaDefault: '17',

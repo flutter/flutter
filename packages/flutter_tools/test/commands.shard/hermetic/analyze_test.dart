@@ -22,8 +22,8 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/test_flutter_command_runner.dart';
 
-const String _kFlutterRoot = '/data/flutter';
-const int SIGABRT = -6;
+const _kFlutterRoot = '/data/flutter';
+const SIGABRT = -6;
 
 void main() {
   testWithoutContext('analyze generate correct errors message', () async {
@@ -70,9 +70,9 @@ void main() {
       runner = createTestCommandRunner(command);
 
       // Setup repo roots
-      const String homePath = '/home/user/flutter';
+      const homePath = '/home/user/flutter';
       Cache.flutterRoot = homePath;
-      for (final String dir in <String>['dev', 'examples', 'packages']) {
+      for (final dir in <String>['dev', 'examples', 'packages']) {
         fileSystem.directory(homePath).childDirectory(dir).createSync(recursive: true);
       }
     });
@@ -80,7 +80,7 @@ void main() {
     testUsingContext(
       'SIGABRT throws Exception',
       () async {
-        const String stderr = 'Something bad happened!';
+        const stderr = 'Something bad happened!';
         processManager.addCommands(<FakeCommand>[
           const FakeCommand(
             // artifact paths are from Artifacts.test() and stable
@@ -117,8 +117,8 @@ void main() {
     testUsingContext(
       '--flutter-repo analyzes everything in the flutterRoot',
       () async {
-        final StreamController<List<int>> streamController = StreamController<List<int>>();
-        final IOSink sink = IOSink(streamController.sink);
+        final streamController = StreamController<List<int>>();
+        final sink = IOSink(streamController.sink);
         processManager.addCommands(<FakeCommand>[
           FakeCommand(
             // artifact paths are from Artifacts.test() and stable
@@ -136,7 +136,7 @@ void main() {
           ),
         ]);
         await runner.run(<String>['analyze', '--flutter-repo']);
-        final Map<String, Object?> setAnalysisRootsCommand =
+        final setAnalysisRootsCommand =
             jsonDecode(
                   await streamController.stream
                       .transform(utf8.decoder)
@@ -145,8 +145,7 @@ void main() {
                 )
                 as Map<String, Object?>;
         expect(setAnalysisRootsCommand['method'], 'analysis.setAnalysisRoots');
-        final Map<String, Object?> params =
-            setAnalysisRootsCommand['params']! as Map<String, Object?>;
+        final params = setAnalysisRootsCommand['params']! as Map<String, Object?>;
         expect(params['included'], <String?>[Cache.flutterRoot]);
         expect(params['excluded'], isEmpty);
       },
@@ -185,7 +184,7 @@ void main() {
   });
 
   testWithoutContext('AnalysisError from json write correct', () {
-    final Map<String, dynamic> json = <String, dynamic>{
+    final json = <String, dynamic>{
       'severity': 'INFO',
       'type': 'TODO',
       'location': <String, dynamic>{

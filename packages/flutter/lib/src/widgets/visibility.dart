@@ -83,6 +83,10 @@ class Visibility extends StatelessWidget {
        assert(
          maintainSize || !maintainInteractivity,
          'Cannot maintain interactivity if size is not maintained.',
+       ),
+       assert(
+         maintainState || !maintainFocusability,
+         'Cannot maintain focusability if the state is not also maintained.',
        );
 
   /// Control whether the given [child] is [visible].
@@ -142,6 +146,8 @@ class Visibility extends StatelessWidget {
   /// instead of replacing it with [replacement].
   ///
   /// If this property is false, then [maintainAnimation] must also be false.
+  ///
+  /// If this property is false, then [maintainFocusability] must also be false.
   ///
   /// Dynamically changing this value may cause the current state of the
   /// subtree to be lost (and a new instance of the subtree, with new [State]
@@ -220,7 +226,12 @@ class Visibility extends StatelessWidget {
 
   /// Whether to allow the widget to receive focus when hidden. Only in effect if [visible] is false.
   ///
-  /// Defaults to false.
+  /// To set this to true, [maintainState] must also be set to true.
+  ///
+  /// By default, with [maintainFocusability] set to false, focus events cannot
+  /// reach the [child] when this widget is not [visible] because an [ExcludeFocus]
+  /// widget is used to exclude the child subtree from the focus tree. If this flag
+  /// is set to true, then focus events will reach the child subtree.
   final bool maintainFocusability;
 
   /// Tells the visibility state of an element in the tree based off its
@@ -237,8 +248,8 @@ class Visibility extends StatelessWidget {
   static bool of(BuildContext context) {
     bool isVisible = true;
     BuildContext ancestorContext = context;
-    InheritedElement? ancestor =
-        ancestorContext.getElementForInheritedWidgetOfExactType<_VisibilityScope>();
+    InheritedElement? ancestor = ancestorContext
+        .getElementForInheritedWidgetOfExactType<_VisibilityScope>();
     while (isVisible && ancestor != null) {
       final _VisibilityScope scope = context.dependOnInheritedElement(ancestor) as _VisibilityScope;
       isVisible = scope.isVisible;

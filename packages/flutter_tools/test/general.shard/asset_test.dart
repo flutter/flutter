@@ -21,9 +21,9 @@ import '../src/package_config.dart';
 void main() {
   final Style posix = Style.posix;
   final Style windows = Style.windows;
-  final List<Style> styles = <Style>[posix, windows];
+  final styles = <Style>[posix, windows];
 
-  for (final Style style in styles) {
+  for (final style in styles) {
     group('Assets (${style.name} file system)', () {
       late FileSystem fileSystem;
       late BufferLogger logger;
@@ -45,7 +45,7 @@ void main() {
 
       testWithoutContext('app font uses local font file', () async {
         final String manifestPath = fileSystem.path.join('main', 'pubspec.yaml');
-        final ManifestAssetBundle assetBundle = ManifestAssetBundle(
+        final assetBundle = ManifestAssetBundle(
           logger: logger,
           fileSystem: fileSystem,
           platform: platform,
@@ -73,12 +73,11 @@ flutter:
           ..createSync(recursive: true)
           ..writeAsStringSync('This is a fake font.');
 
-        final String packageConfigPath =
-            writePackageConfigFiles(
-              directory: fileSystem.directory('main'),
-              mainLibName: 'main',
-              packages: <String, String>{'font': '../font'},
-            ).path;
+        final String packageConfigPath = writePackageConfigFiles(
+          directory: fileSystem.directory('main'),
+          mainLibName: 'main',
+          packages: <String, String>{'font': '../font'},
+        ).path;
         fileSystem.file(manifestPath)
           ..createSync(recursive: true)
           ..writeAsStringSync(r'''
@@ -120,7 +119,7 @@ dependencies:
         'does not pick up assets from dev-dependencies and workspace packages not in the transitive closure',
         () async {
           final String manifestPath = fileSystem.path.join('main', 'pubspec.yaml');
-          final ManifestAssetBundle assetBundle = ManifestAssetBundle(
+          final assetBundle = ManifestAssetBundle(
             logger: logger,
             fileSystem: fileSystem,
             platform: platform,
@@ -287,7 +286,7 @@ flutter:
         fileSystem.directory(fileSystem.file(manifestPath)).parent.createSync(recursive: true);
         fileSystem.directory(fileSystem.file(packageConfigPath)).parent.createSync(recursive: true);
 
-        final ManifestAssetBundle assetBundle = ManifestAssetBundle(
+        final assetBundle = ManifestAssetBundle(
           logger: logger,
           fileSystem: fileSystem,
           platform: platform,
@@ -305,21 +304,26 @@ flutter:
         expect(assetBundle.inputFiles.map((File f) => f.path), <String>[]);
       });
 
+      final testShaders = <String>['ink_sparkle.frag', 'stretch_effect.frag'];
+
       testWithoutContext('bundles material shaders on non-web platforms', () async {
-        final String shaderPath = fileSystem.path.join(
-          flutterRoot,
-          'packages',
-          'flutter',
-          'lib',
-          'src',
-          'material',
-          'shaders',
-          'ink_sparkle.frag',
-        );
-        fileSystem.file(shaderPath).createSync(recursive: true);
+        for (final shader in testShaders) {
+          final String shaderPath = fileSystem.path.join(
+            flutterRoot,
+            'packages',
+            'flutter',
+            'lib',
+            'src',
+            'material',
+            'shaders',
+            shader,
+          );
+          fileSystem.file(shaderPath).createSync(recursive: true);
+        }
+
         writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_package');
         fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_package');
-        final ManifestAssetBundle assetBundle = ManifestAssetBundle(
+        final assetBundle = ManifestAssetBundle(
           logger: logger,
           fileSystem: fileSystem,
           platform: platform,
@@ -332,24 +336,29 @@ flutter:
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         );
 
-        expect(assetBundle.entries.keys, contains('shaders/ink_sparkle.frag'));
+        for (final shader in testShaders) {
+          expect(assetBundle.entries.keys, contains('shaders/$shader'));
+        }
       });
 
       testWithoutContext('bundles material shaders on web platforms', () async {
-        final String shaderPath = fileSystem.path.join(
-          flutterRoot,
-          'packages',
-          'flutter',
-          'lib',
-          'src',
-          'material',
-          'shaders',
-          'ink_sparkle.frag',
-        );
-        fileSystem.file(shaderPath).createSync(recursive: true);
+        for (final shader in testShaders) {
+          final String shaderPath = fileSystem.path.join(
+            flutterRoot,
+            'packages',
+            'flutter',
+            'lib',
+            'src',
+            'material',
+            'shaders',
+            shader,
+          );
+          fileSystem.file(shaderPath).createSync(recursive: true);
+        }
+
         writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_package');
         fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_package');
-        final ManifestAssetBundle assetBundle = ManifestAssetBundle(
+        final assetBundle = ManifestAssetBundle(
           logger: logger,
           fileSystem: fileSystem,
           platform: platform,
@@ -362,7 +371,9 @@ flutter:
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         );
 
-        expect(assetBundle.entries.keys, contains('shaders/ink_sparkle.frag'));
+        for (final shader in testShaders) {
+          expect(assetBundle.entries.keys, contains('shaders/$shader'));
+        }
       });
     });
   }

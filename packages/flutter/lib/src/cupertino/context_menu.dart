@@ -384,12 +384,11 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
       upperBound: CupertinoContextMenu.animationOpensAt,
     );
     _openController.addStatusListener(_onDecoyAnimationStatusChange);
-    _tapGestureRecognizer =
-        TapGestureRecognizer()
-          ..onTapCancel = _onTapCancel
-          ..onTapDown = _onTapDown
-          ..onTapUp = _onTapUp
-          ..onTap = _onTap;
+    _tapGestureRecognizer = TapGestureRecognizer()
+      ..onTapCancel = _onTapCancel
+      ..onTapDown = _onTapDown
+      ..onTapUp = _onTapUp
+      ..onTap = _onTap;
   }
 
   void _listenerCallback() {
@@ -859,17 +858,20 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   ) {
     switch (contextMenuLocation) {
       case _ContextMenuLocation.center:
-        final Offset target =
-            orientation == Orientation.portrait ? childRect.bottomCenter : childRect.topCenter;
+        final Offset target = orientation == Orientation.portrait
+            ? childRect.bottomCenter
+            : childRect.topCenter;
         final Offset centered = target - Offset(sheetRect.width / 2, 0.0);
         return centered & sheetRect.size;
       case _ContextMenuLocation.right:
-        final Offset target =
-            orientation == Orientation.portrait ? childRect.bottomRight : childRect.topRight;
+        final Offset target = orientation == Orientation.portrait
+            ? childRect.bottomRight
+            : childRect.topRight;
         return (target - Offset(sheetRect.width, 0.0)) & sheetRect.size;
       case _ContextMenuLocation.left:
-        final Offset target =
-            orientation == Orientation.portrait ? childRect.bottomLeft : childRect.topLeft;
+        final Offset target = orientation == Orientation.portrait
+            ? childRect.bottomLeft
+            : childRect.topLeft;
         return target & sheetRect.size;
     }
   }
@@ -888,8 +890,9 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   // Take measurements on the child and _ContextMenuSheet and update the
   // animation tweens to match.
   void _updateTweenRects() {
-    final Rect childRect =
-        _scale == null ? _getRect(_childGlobalKey) : _getScaledRect(_childGlobalKey, _scale!);
+    final Rect childRect = _scale == null
+        ? _getRect(_childGlobalKey)
+        : _getScaledRect(_childGlobalKey, _scale!);
     _rectTween.begin = _previousChildRect;
     _rectTween.end = childRect;
 
@@ -992,18 +995,15 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
         // they're movable.
         if (!animation.isCompleted) {
           final bool reverse = animation.status == AnimationStatus.reverse;
-          final Rect rect =
-              reverse
-                  ? _rectAnimatableReverse.evaluate(animation)!
-                  : _rectAnimatable.evaluate(animation)!;
-          final Rect sheetRect =
-              reverse
-                  ? _sheetRectAnimatableReverse.evaluate(animation)!
-                  : _sheetRectAnimatable.evaluate(animation)!;
-          final double sheetScale =
-              reverse
-                  ? _sheetScaleAnimatableReverse.evaluate(animation)
-                  : _sheetScaleAnimatable.evaluate(animation);
+          final Rect rect = reverse
+              ? _rectAnimatableReverse.evaluate(animation)!
+              : _rectAnimatable.evaluate(animation)!;
+          final Rect sheetRect = reverse
+              ? _sheetRectAnimatableReverse.evaluate(animation)!
+              : _sheetRectAnimatable.evaluate(animation)!;
+          final double sheetScale = reverse
+              ? _sheetScaleAnimatableReverse.evaluate(animation)
+              : _sheetScaleAnimatable.evaluate(animation);
           return Stack(
             children: <Widget>[
               Positioned.fromRect(
@@ -1182,8 +1182,9 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic>
   void _setDragOffset(Offset dragOffset) {
     // Allow horizontal and negative vertical movement, but damp it.
     final double endX = _kPadding * dragOffset.dx / _kDamping;
-    final double endY =
-        dragOffset.dy >= 0.0 ? dragOffset.dy : _kPadding * dragOffset.dy / _kDamping;
+    final double endY = dragOffset.dy >= 0.0
+        ? dragOffset.dy
+        : _kPadding * dragOffset.dy / _kDamping;
     setState(() {
       _dragOffset = dragOffset;
       _moveAnimation = Tween<Offset>(
@@ -1462,10 +1463,17 @@ class _ContextMenuAlignedChildrenDelegate extends MultiChildLayoutDelegate {
 
     final double availableHeightForChild =
         screenBounds.height - _ContextMenuRouteStaticState._kPadding;
+    final double availableWidth = screenBounds.width - _ContextMenuRouteStaticState._kPadding * 2;
+    final double availableWidthForChild = switch (orientation) {
+      Orientation.portrait => availableWidth,
+      Orientation.landscape => availableWidth - _ContextMenuSheetState._kMenuWidth,
+    };
+    assert(availableWidthForChild >= 0.0);
+    assert(availableHeightForChild >= 0.0);
 
     final Size childSize = layoutChild(
       _ContextMenuChild.child,
-      constraints.copyWith(maxHeight: availableHeightForChild),
+      constraints.copyWith(maxHeight: availableHeightForChild, maxWidth: availableWidthForChild),
     );
 
     // In portrait orientation, the child is atop the menu, while in landscape

@@ -1733,11 +1733,10 @@ void main() {
 
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     menuAnchor.debugFillProperties(builder);
-    final List<String> properties =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> properties = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(properties, const <String>['has focusNode', 'use nearest overlay']);
   });
@@ -2873,6 +2872,55 @@ void main() {
       expect(onCloseRequestedCalled, equals(1));
     });
   });
+
+  testWidgets('MenuController can be overridden after removing final modifier', (
+    WidgetTester tester,
+  ) async {
+    final CustomMenuController customController = CustomMenuController();
+
+    await tester.pumpWidget(
+      App(
+        Menu(
+          controller: customController,
+          menuPanel: Panel(children: <Widget>[Text(Tag.a.text)]),
+          child: const AnchorButton(Tag.anchor),
+        ),
+      ),
+    );
+
+    customController.open();
+    await tester.pump();
+
+    expect(customController.isOpen, isTrue);
+    expect(customController.openCallCount, equals(1));
+    expect(find.text(Tag.a.text), findsOneWidget);
+
+    customController.close();
+    await tester.pump();
+
+    expect(customController.isOpen, isFalse);
+    expect(customController.closeCallCount, equals(1));
+    expect(find.text(Tag.a.text), findsNothing);
+  });
+}
+
+// Custom MenuController that extends the base MenuController
+// This verifies that the final modifier has been removed
+class CustomMenuController extends MenuController {
+  int openCallCount = 0;
+  int closeCallCount = 0;
+
+  @override
+  void open({Offset? position}) {
+    openCallCount++;
+    super.open(position: position);
+  }
+
+  @override
+  void close() {
+    closeCallCount++;
+    super.close();
+  }
 }
 
 // ********* UTILITIES *********  //

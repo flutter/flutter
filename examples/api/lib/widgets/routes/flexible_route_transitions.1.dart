@@ -124,18 +124,17 @@ class MyRouterDelegate extends RouterDelegate<MyPageConfiguration> {
       onDidRemovePage: (Page<dynamic> page) {
         _pages.remove(MyPageConfiguration.fromName(page.name!));
       },
-      pages:
-          _pages
-              .map(
-                (MyPageConfiguration page) => switch (page) {
-                  MyPageConfiguration.unknown => _MyUnknownPage<void>(),
-                  MyPageConfiguration.home => _MyHomePage<void>(routerDelegate: this),
-                  MyPageConfiguration.zoom => _ZoomPage<void>(routerDelegate: this),
-                  MyPageConfiguration.iOS => _IOSPage<void>(routerDelegate: this),
-                  MyPageConfiguration.vertical => _VerticalPage<void>(routerDelegate: this),
-                },
-              )
-              .toList(),
+      pages: _pages
+          .map(
+            (MyPageConfiguration page) => switch (page) {
+              MyPageConfiguration.unknown => _MyUnknownPage<void>(),
+              MyPageConfiguration.home => _MyHomePage<void>(routerDelegate: this),
+              MyPageConfiguration.zoom => _ZoomPage<void>(routerDelegate: this),
+              MyPageConfiguration.iOS => _IOSPage<void>(routerDelegate: this),
+              MyPageConfiguration.vertical => _VerticalPage<void>(routerDelegate: this),
+            },
+          )
+          .toList(),
     );
   }
 }

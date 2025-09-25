@@ -18,7 +18,6 @@ import 'package:flutter/widgets.dart';
 
 import 'list_tile.dart';
 import 'list_tile_theme.dart';
-import 'material_state.dart';
 import 'radio.dart';
 import 'radio_theme.dart';
 import 'theme.dart';
@@ -201,6 +200,8 @@ class RadioListTile<T> extends StatefulWidget {
     this.enabled,
     this.internalAddSemanticForOnTap = false,
     this.radioBackgroundColor,
+    this.radioSide,
+    this.radioInnerRadius,
   }) : _radioType = _RadioType.material,
        useCupertinoCheckmarkStyle = false,
        assert(isThreeLine != true || subtitle != null);
@@ -254,6 +255,8 @@ class RadioListTile<T> extends StatefulWidget {
     this.titleAlignment,
     this.internalAddSemanticForOnTap = false,
     this.radioBackgroundColor,
+    this.radioSide,
+    this.radioInnerRadius,
   }) : _radioType = _RadioType.adaptive,
        assert(isThreeLine != true || subtitle != null);
 
@@ -359,7 +362,7 @@ class RadioListTile<T> extends StatefulWidget {
   /// If null, then the value of [activeColor] is used in the selected state. If
   /// that is also null, then the value of [RadioThemeData.fillColor] is used.
   /// If that is also null, then the default value is used.
-  final MaterialStateProperty<Color?>? fillColor;
+  final WidgetStateProperty<Color?>? fillColor;
 
   /// {@macro flutter.material.radio.materialTapTargetSize}
   ///
@@ -380,7 +383,7 @@ class RadioListTile<T> extends StatefulWidget {
   /// and [hoverColor] is used in the pressed and hovered state. If that is also
   /// null, the value of [SwitchThemeData.overlayColor] is used. If that is
   /// also null, then the default value is used in the pressed and hovered state.
-  final MaterialStateProperty<Color?>? overlayColor;
+  final WidgetStateProperty<Color?>? overlayColor;
 
   /// {@macro flutter.material.radio.splashRadius}
   ///
@@ -527,6 +530,29 @@ class RadioListTile<T> extends StatefulWidget {
   /// If null, then it is transparent in all states.
   final WidgetStateProperty<Color?>? radioBackgroundColor;
 
+  /// The side for the circular border of the radio button, in all
+  /// [WidgetState]s.
+  ///
+  /// This property can be a [BorderSide] or a [WidgetStateBorderSide] to leverage
+  /// widget state resolution.
+  ///
+  /// Resolves in the following states:
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.disabled].
+  ///
+  /// If null, then it defaults to a border using the fill color.
+  final BorderSide? radioSide;
+
+  /// The radius of the inner circle of the radio button, in all [WidgetState]s.
+  ///
+  /// Resolves in the following states:
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.disabled].
+  ///
+  /// If null, then it defaults to `4.5` in all states.
+  final WidgetStateProperty<double?>? radioInnerRadius;
+
   /// Whether this radio button is checked.
   ///
   /// To control this value, set [value] and [groupValue] appropriately.
@@ -622,6 +648,8 @@ class _RadioListTileState<T> extends State<RadioListTile<T>> with RadioClient<T>
             enabled: _enabled,
             groupRegistry: _radioRegistry,
             backgroundColor: widget.radioBackgroundColor,
+            side: widget.radioSide,
+            innerRadius: widget.radioInnerRadius,
           ),
         );
       case _RadioType.adaptive:
@@ -642,6 +670,8 @@ class _RadioListTileState<T> extends State<RadioListTile<T>> with RadioClient<T>
             enabled: _enabled,
             groupRegistry: _radioRegistry,
             backgroundColor: widget.radioBackgroundColor,
+            side: widget.radioSide,
+            innerRadius: widget.radioInnerRadius,
           ),
         );
     }
@@ -661,7 +691,7 @@ class _RadioListTileState<T> extends State<RadioListTile<T>> with RadioClient<T>
     };
     final ThemeData theme = Theme.of(context);
     final RadioThemeData radioThemeData = RadioTheme.of(context);
-    final Set<MaterialState> states = <MaterialState>{if (widget.selected) MaterialState.selected};
+    final Set<WidgetState> states = <WidgetState>{if (widget.selected) WidgetState.selected};
     final Color effectiveActiveColor =
         widget.activeColor ??
         radioThemeData.fillColor?.resolve(states) ??

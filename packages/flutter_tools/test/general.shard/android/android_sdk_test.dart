@@ -121,8 +121,8 @@ void main() {
         config.setValue('android-sdk', sdkDir.path);
 
         final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
-        final List<String> versions = <String>['3.0', '2.1', '1.0'];
-        for (final String version in versions) {
+        final versions = <String>['3.0', '2.1', '1.0'];
+        for (final version in versions) {
           fileSystem
               .file(
                 fileSystem.path.join(
@@ -332,8 +332,8 @@ void main() {
         );
         config.setValue('android-sdk', sdkDir.path);
 
-        final List<String> validationIssues =
-            AndroidSdk.locateAndroidSdk()!.validateSdkWellFormed();
+        final List<String> validationIssues = AndroidSdk.locateAndroidSdk()!
+            .validateSdkWellFormed();
         expect(validationIssues.first, contains('Android SDK location currently contains spaces'));
       },
       overrides: <Type, Generator>{
@@ -512,13 +512,13 @@ void main() {
     );
   });
 
-  const Map<String, String> llvmHostDirectoryName = <String, String>{
+  const llvmHostDirectoryName = <String, String>{
     'macos': 'darwin-x86_64',
     'linux': 'linux-x86_64',
     'windows': 'windows-x86_64',
   };
 
-  for (final String operatingSystem in <String>['windows', 'linux', 'macos']) {
+  for (final operatingSystem in <String>['windows', 'linux', 'macos']) {
     final FileSystem fileSystem;
     final String extension;
     if (operatingSystem == 'windows') {
@@ -533,20 +533,22 @@ void main() {
       final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem, platform: platform);
       config.setValue('android-sdk', sdkDir.path);
 
-      final AndroidSdk sdk = AndroidSdk(sdkDir, fileSystem: fileSystem);
+      final sdk = AndroidSdk(sdkDir, fileSystem: fileSystem);
       late File clang;
       late File ar;
       late File ld;
-      const List<String> versions = <String>['22.1.7171670', '24.0.8215888'];
-      for (final String version in versions) {
-        final Directory binDir = sdk.directory
-          .childDirectory('ndk')
-          .childDirectory(version)
-          .childDirectory('toolchains')
-          .childDirectory('llvm')
-          .childDirectory('prebuilt')
-          .childDirectory(llvmHostDirectoryName[operatingSystem]!)
-          .childDirectory('bin')..createSync(recursive: true);
+      const versions = <String>['22.1.7171670', '24.0.8215888'];
+      for (final version in versions) {
+        final Directory binDir =
+            sdk.directory
+                .childDirectory('ndk')
+                .childDirectory(version)
+                .childDirectory('toolchains')
+                .childDirectory('llvm')
+                .childDirectory('prebuilt')
+                .childDirectory(llvmHostDirectoryName[operatingSystem]!)
+                .childDirectory('bin')
+              ..createSync(recursive: true);
         // Save the last version.
         clang = binDir.childFile('clang$extension')..createSync();
         ar = binDir.childFile('llvm-ar$extension')..createSync();
@@ -558,7 +560,7 @@ void main() {
       expect(sdk.getNdkLdPath(platform: platform, config: config), ld.path);
     });
 
-    for (final String envVar in <String>[kAndroidNdkHome, kAndroidNdkPath, kAndroidNdkRoot]) {
+    for (final envVar in <String>[kAndroidNdkHome, kAndroidNdkPath, kAndroidNdkRoot]) {
       final Directory ndkDir = fileSystem.systemTempDirectory.createTempSync(
         'flutter_mock_android_ndk.',
       );
@@ -570,17 +572,19 @@ void main() {
         final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem, platform: platform);
         config.setValue('android-sdk', sdkDir.path);
 
-        final Directory binDir = ndkDir
-          .childDirectory('toolchains')
-          .childDirectory('llvm')
-          .childDirectory('prebuilt')
-          .childDirectory(llvmHostDirectoryName[operatingSystem]!)
-          .childDirectory('bin')..createSync(recursive: true);
+        final Directory binDir =
+            ndkDir
+                .childDirectory('toolchains')
+                .childDirectory('llvm')
+                .childDirectory('prebuilt')
+                .childDirectory(llvmHostDirectoryName[operatingSystem]!)
+                .childDirectory('bin')
+              ..createSync(recursive: true);
         final File clang = binDir.childFile('clang$extension')..createSync();
         final File ar = binDir.childFile('llvm-ar$extension')..createSync();
         final File ld = binDir.childFile('ld.lld$extension')..createSync();
 
-        final AndroidSdk sdk = AndroidSdk(sdkDir, fileSystem: fileSystem);
+        final sdk = AndroidSdk(sdkDir, fileSystem: fileSystem);
         expect(sdk.getNdkClangPath(platform: platform, config: config), clang.path);
         expect(sdk.getNdkArPath(platform: platform, config: config), ar.path);
         expect(sdk.getNdkLdPath(platform: platform, config: config), ld.path);
@@ -596,17 +600,19 @@ void main() {
       config.setValue('android-sdk', sdkDir.path);
       config.setValue('android-ndk', ndkDir.path);
 
-      final Directory binDir = ndkDir
-        .childDirectory('toolchains')
-        .childDirectory('llvm')
-        .childDirectory('prebuilt')
-        .childDirectory(llvmHostDirectoryName[operatingSystem]!)
-        .childDirectory('bin')..createSync(recursive: true);
+      final Directory binDir =
+          ndkDir
+              .childDirectory('toolchains')
+              .childDirectory('llvm')
+              .childDirectory('prebuilt')
+              .childDirectory(llvmHostDirectoryName[operatingSystem]!)
+              .childDirectory('bin')
+            ..createSync(recursive: true);
       final File clang = binDir.childFile('clang$extension')..createSync();
       final File ar = binDir.childFile('llvm-ar$extension')..createSync();
       final File ld = binDir.childFile('ld.lld$extension')..createSync();
 
-      final AndroidSdk sdk = AndroidSdk(sdkDir, fileSystem: fileSystem);
+      final sdk = AndroidSdk(sdkDir, fileSystem: fileSystem);
       expect(sdk.getNdkClangPath(platform: platform, config: config), clang.path);
       expect(sdk.getNdkArPath(platform: platform, config: config), ar.path);
       expect(sdk.getNdkLdPath(platform: platform, config: config), ld.path);
@@ -654,8 +660,8 @@ Directory createSdkDirectory({
 }) {
   platform ??= globals.platform;
   final Directory dir = fileSystem.systemTempDirectory.createTempSync(directoryName);
-  final String exe = platform.isWindows ? '.exe' : '';
-  final String bat = platform.isWindows ? '.bat' : '';
+  final exe = platform.isWindows ? '.exe' : '';
+  final bat = platform.isWindows ? '.bat' : '';
 
   void createDir(Directory dir, String path) {
     final Directory directory = dir.fileSystem.directory(dir.fileSystem.path.join(dir.path, path));
@@ -690,7 +696,7 @@ Directory createSdkDirectory({
   return dir;
 }
 
-const String _buildProp = r'''
+const _buildProp = r'''
 ro.build.version.incremental=1624448
 ro.build.version.sdk=24
 ro.build.version.codename=REL

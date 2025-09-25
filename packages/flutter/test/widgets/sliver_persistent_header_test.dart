@@ -35,8 +35,9 @@ void main() {
       isNotEmpty,
     );
 
-    final RenderSliverScrollingPersistentHeader render =
-        tester.allRenderObjects.whereType<RenderSliverScrollingPersistentHeader>().first;
+    final RenderSliverScrollingPersistentHeader render = tester.allRenderObjects
+        .whereType<RenderSliverScrollingPersistentHeader>()
+        .first;
     expect(render.stretchConfiguration?.stretchTriggerOffset, 20);
   });
 
@@ -69,8 +70,9 @@ void main() {
       isNotEmpty,
     );
 
-    final RenderSliverPinnedPersistentHeader render =
-        tester.allRenderObjects.whereType<RenderSliverPinnedPersistentHeader>().first;
+    final RenderSliverPinnedPersistentHeader render = tester.allRenderObjects
+        .whereType<RenderSliverPinnedPersistentHeader>()
+        .first;
     expect(render.stretchConfiguration?.stretchTriggerOffset, 20);
   });
 
@@ -103,8 +105,9 @@ void main() {
       isNotEmpty,
     );
 
-    final RenderSliverPinnedPersistentHeader render =
-        tester.allRenderObjects.whereType<RenderSliverPinnedPersistentHeader>().first;
+    final RenderSliverPinnedPersistentHeader render = tester.allRenderObjects
+        .whereType<RenderSliverPinnedPersistentHeader>()
+        .first;
     expect(render.showOnScreenConfiguration?.maxShowOnScreenExtent, 2000);
   });
 }

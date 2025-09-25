@@ -133,8 +133,9 @@ abstract class BrowserImageDecoder implements ui.Codec {
       );
     }
 
-    final DecodeResult result =
-        await webDecoder.decode(DecodeOptions(frameIndex: _nextFrameIndex)).toDart;
+    final DecodeResult result = await webDecoder
+        .decode(DecodeOptions(frameIndex: _nextFrameIndex))
+        .toDart;
     final VideoFrame frame = result.image;
     _nextFrameIndex = (_nextFrameIndex + 1) % frameCount;
 
@@ -265,4 +266,15 @@ ui.Image scaleImageIfNeeded(
   picture.dispose();
   image.dispose();
   return finalImage;
+}
+
+/// Thrown when the web engine fails to decode an image, either due to a
+/// network issue, corrupted image contents, or missing codec.
+class ImageCodecException implements Exception {
+  ImageCodecException(this._message);
+
+  final String _message;
+
+  @override
+  String toString() => 'ImageCodecException: $_message';
 }

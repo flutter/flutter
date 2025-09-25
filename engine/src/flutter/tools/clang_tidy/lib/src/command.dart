@@ -62,17 +62,16 @@ class Command {
 
   /// The command line arguments of the command.
   String get tidyArgs {
-    return _tidyArgs ??=
-        (() {
-          String result = command;
-          result = result.replaceAll(r'\s+', ' ');
-          // Remove everything that comes before the compiler command.
-          result = result.split(' ').skipWhile((String s) => !_pathRegex.hasMatch(s)).join(' ');
-          result = result.replaceAll(_pathRegex, '');
-          result = result.replaceAll(_argRegex, '');
-          result = result.replaceAll(_extraCommandRegex, '');
-          return result;
-        })();
+    return _tidyArgs ??= (() {
+      String result = command;
+      result = result.replaceAll(r'\s+', ' ');
+      // Remove everything that comes before the compiler command.
+      result = result.split(' ').skipWhile((String s) => !_pathRegex.hasMatch(s)).join(' ');
+      result = result.replaceAll(_pathRegex, '');
+      result = result.replaceAll(_argRegex, '');
+      result = result.replaceAll(_extraCommandRegex, '');
+      return result;
+    })();
   }
 
   String? _tidyPath;

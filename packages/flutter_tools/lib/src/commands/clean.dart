@@ -27,10 +27,10 @@ class CleanCommand extends FlutterCommand {
   final bool _verbose;
 
   @override
-  final String name = 'clean';
+  final name = 'clean';
 
   @override
-  final String description = 'Delete the build/ and .dart_tool/ directories.';
+  final description = 'Delete the build/ and .dart_tool/ directories.';
 
   @override
   String get category => FlutterCommandCategory.project;
@@ -53,7 +53,6 @@ class CleanCommand extends FlutterCommand {
     deleteFile(buildDir);
 
     deleteFile(flutterProject.dartTool);
-    deleteFile(flutterProject.directory.childFile('.packages'));
 
     deleteFile(flutterProject.android.ephemeralDirectory);
 
@@ -81,10 +80,11 @@ class CleanCommand extends FlutterCommand {
     final Status xcodeStatus = globals.logger.startProgress('Cleaning Xcode workspace...');
     try {
       final XcodeProjectInterpreter xcodeProjectInterpreter = globals.xcodeProjectInterpreter!;
-      final XcodeProjectInfo projectInfo =
-          (await xcodeProjectInterpreter.getInfo(xcodeWorkspace.parent.path))!;
+      final XcodeProjectInfo projectInfo = (await xcodeProjectInterpreter.getInfo(
+        xcodeWorkspace.parent.path,
+      ))!;
       if (argResults?.wasParsed('scheme') ?? false) {
-        final String scheme = argResults!['scheme'] as String;
+        final scheme = argResults!['scheme'] as String;
         if (scheme.isEmpty) {
           throwToolExit('No scheme was specified for --scheme');
         }
@@ -106,7 +106,7 @@ class CleanCommand extends FlutterCommand {
         }
       }
     } on Exception catch (error) {
-      final String message = 'Could not clean Xcode workspace: $error';
+      final message = 'Could not clean Xcode workspace: $error';
       if (argResults?.wasParsed('scheme') ?? false) {
         throwToolExit(message);
       } else {

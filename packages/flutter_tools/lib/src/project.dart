@@ -33,18 +33,14 @@ export 'xcode_project.dart';
 
 /// Enum for each officially supported platform.
 enum SupportedPlatform {
-  android(name: 'android'),
-  ios(name: 'ios'),
-  linux(name: 'linux'),
-  macos(name: 'macos'),
-  web(name: 'web'),
-  windows(name: 'windows'),
-  fuchsia(name: 'fuchsia'),
-  root(name: 'root'); // Special platform to represent the root project directory
-
-  const SupportedPlatform({required this.name});
-
-  final String name;
+  android,
+  ios,
+  linux,
+  macos,
+  web,
+  windows,
+  fuchsia,
+  root, // Special platform to represent the root project directory
 }
 
 class FlutterProjectFactory {
@@ -56,7 +52,7 @@ class FlutterProjectFactory {
   final FileSystem _fileSystem;
 
   @visibleForTesting
-  final Map<String, FlutterProject> projects = <String, FlutterProject>{};
+  final projects = <String, FlutterProject>{};
 
   /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
@@ -132,20 +128,19 @@ class FlutterProject {
   final FlutterManifest _exampleManifest;
 
   /// List of [FlutterProject]s corresponding to the workspace entries.
-  List<FlutterProject> get workspaceProjects =>
-      manifest.workspace
-          .map(
-            (String entry) => FlutterProject.fromDirectory(
-              directory.childDirectory(directory.fileSystem.path.normalize(entry)),
-            ),
-          )
-          .toList();
+  List<FlutterProject> get workspaceProjects => manifest.workspace
+      .map(
+        (String entry) => FlutterProject.fromDirectory(
+          directory.childDirectory(directory.fileSystem.path.normalize(entry)),
+        ),
+      )
+      .toList();
 
   /// The set of organization names found in this project as
   /// part of iOS product bundle identifier, Android application ID, or
   /// Gradle group ID.
   Future<Set<String>> get organizationNames async {
-    final List<String> candidates = <String>[];
+    final candidates = <String>[];
 
     if (ios.existsSync()) {
       // Don't require iOS build info, this method is only
@@ -166,10 +161,7 @@ class FlutterProject {
     if (android.existsSync()) {
       final String? applicationId = android.applicationId;
       final String? group = android.group;
-      candidates.addAll(<String>[
-        if (applicationId != null) applicationId,
-        if (group != null) group,
-      ]);
+      candidates.addAll(<String>[?applicationId, ?group]);
     }
     if (example.android.existsSync()) {
       final String? applicationId = example.android.applicationId;
@@ -196,25 +188,25 @@ class FlutterProject {
   }
 
   /// The iOS sub project of this project.
-  late final IosProject ios = IosProject.fromFlutter(this);
+  late final ios = IosProject.fromFlutter(this);
 
   /// The Android sub project of this project.
-  late final AndroidProject android = AndroidProject._(this);
+  late final android = AndroidProject._(this);
 
   /// The web sub project of this project.
-  late final WebProject web = WebProject._(this);
+  late final web = WebProject._(this);
 
   /// The MacOS sub project of this project.
-  late final MacOSProject macos = MacOSProject.fromFlutter(this);
+  late final macos = MacOSProject.fromFlutter(this);
 
   /// The Linux sub project of this project.
-  late final LinuxProject linux = LinuxProject.fromFlutter(this);
+  late final linux = LinuxProject.fromFlutter(this);
 
   /// The Windows sub project of this project.
-  late final WindowsProject windows = WindowsProject.fromFlutter(this);
+  late final windows = WindowsProject.fromFlutter(this);
 
   /// The Fuchsia sub project of this project.
-  late final FuchsiaProject fuchsia = FuchsiaProject._(this);
+  late final fuchsia = FuchsiaProject._(this);
 
   /// The `pubspec.yaml` file of this project.
   File get pubspecFile => directory.childFile('pubspec.yaml');
@@ -416,10 +408,10 @@ class FlutterProject {
   String getVersionInfo() {
     final String? buildName = manifest.buildName;
     final String? buildNumber = manifest.buildNumber;
-    final Map<String, String> versionFileJson = <String, String>{
+    final versionFileJson = <String, String>{
       'app_name': manifest.appName,
-      if (buildName != null) 'version': buildName,
-      if (buildNumber != null) 'build_number': buildNumber,
+      'version': ?buildName,
+      'build_number': ?buildNumber,
       'package_name': manifest.appName,
     };
     return jsonEncode(versionFileJson);
@@ -444,26 +436,26 @@ class AndroidProject extends FlutterProjectPlatform {
 
   // User facing string when java/gradle/agp/kgp versions are compatible.
   @visibleForTesting
-  static const String validJavaGradleAgpKgpString = 'compatible java/gradle/agp/kgp';
+  static const validJavaGradleAgpKgpString = 'compatible java/gradle/agp/kgp';
 
   // User facing link that describes compatibility between gradle and
   // android gradle plugin.
-  static const String gradleAgpCompatUrl =
+  static const gradleAgpCompatUrl =
       'https://developer.android.com/studio/releases/gradle-plugin#updating-gradle';
 
   // User facing link that describes compatibility between java and the first
   // version of gradle to support it.
-  static const String javaGradleCompatUrl =
+  static const javaGradleCompatUrl =
       'https://docs.gradle.org/current/userguide/compatibility.html#java';
 
   // User facing link that describes compatibility between KGP and Gradle
   // and AGP.
-  static const String kgpCompatUrl =
+  static const kgpCompatUrl =
       'https://kotlinlang.org/docs/gradle-configure-project.html#apply-the-plugin';
 
   // User facing link that describes instructions for downloading
   // the latest version of Android Studio.
-  static const String installAndroidStudioUrl = 'https://developer.android.com/studio/install';
+  static const installAndroidStudioUrl = 'https://developer.android.com/studio/install';
 
   /// The parent of this project.
   final FlutterProject parent;
@@ -471,13 +463,11 @@ class AndroidProject extends FlutterProjectPlatform {
   @override
   String get pluginConfigKey => AndroidPlugin.kConfigKey;
 
-  static final RegExp _androidNamespacePattern = RegExp(
+  static final _androidNamespacePattern = RegExp(
     'android {[\\S\\s]+namespace\\s*=?\\s*[\'"](.+)[\'"]',
   );
-  static final RegExp _applicationIdPattern = RegExp(
-    '^\\s*applicationId\\s*=?\\s*[\'"](.*)[\'"]\\s*\$',
-  );
-  static final RegExp _imperativeKotlinPluginPattern = RegExp(
+  static final _applicationIdPattern = RegExp('^\\s*applicationId\\s*=?\\s*[\'"](.*)[\'"]\\s*\$');
+  static final _imperativeKotlinPluginPattern = RegExp(
     '^\\s*apply plugin\\:\\s+[\'"]kotlin-android[\'"]\\s*\$',
   );
 
@@ -488,7 +478,7 @@ class AndroidProject extends FlutterProjectPlatform {
   /// - `id "org.jetbrains.kotlin.android"`
   /// - `id("org.jetbrains.kotlin.android")`
   /// - `id ( "org.jetbrains.kotlin.android" )`
-  static final List<RegExp> _declarativeKotlinPluginPatterns = <RegExp>[
+  static final _declarativeKotlinPluginPatterns = <RegExp>[
     RegExp('^\\s*id\\s*\\(?\\s*[\'"]kotlin-android[\'"]\\s*\\)?\\s*\$'),
     RegExp('^\\s*id\\s*\\(?\\s*[\'"]org.jetbrains.kotlin.android[\'"]\\s*\\)?\\s*\$'),
   ];
@@ -496,7 +486,7 @@ class AndroidProject extends FlutterProjectPlatform {
   /// Pattern used to find the assignment of the "group" property in Gradle.
   /// Expected example: `group "dev.flutter.plugin"`
   /// Regex is used in both Groovy and Kotlin Gradle files.
-  static final RegExp _groupPattern = RegExp('^\\s*group\\s*=?\\s*[\'"](.*)[\'"]\\s*\$');
+  static final _groupPattern = RegExp('^\\s*group\\s*=?\\s*[\'"](.*)[\'"]\\s*\$');
 
   /// The Gradle root directory of the Android host app. This is the directory
   /// containing the `app/` subdirectory and the `settings.gradle` file that
@@ -587,8 +577,7 @@ class AndroidProject extends FlutterProjectPlatform {
 
   /// True, if the app project is using Kotlin.
   bool get isKotlin {
-    final bool imperativeMatch =
-        firstMatchInFile(appGradleFile, _imperativeKotlinPluginPattern) != null;
+    final imperativeMatch = firstMatchInFile(appGradleFile, _imperativeKotlinPluginPattern) != null;
     final bool declarativeMatch = _declarativeKotlinPluginPatterns.any((RegExp pattern) {
       return (firstMatchInFile(appGradleFile, pattern) != null);
     });
@@ -606,8 +595,8 @@ class AndroidProject extends FlutterProjectPlatform {
 
   /// Gets the project root level Gradle settings file.
   ///
-  /// The file must exist and it must be written in either Groovy (build.gradle)
-  /// or Kotlin (build.gradle.kts).
+  /// The file must exist and it must be written in either Groovy (settings.gradle)
+  /// or Kotlin (settings.gradle.kts).
   File get settingsGradleFile {
     return getGroovyOrKotlin(hostAppGradleRoot, 'settings.gradle');
   }
@@ -652,6 +641,18 @@ class AndroidProject extends FlutterProjectPlatform {
     return hostAppGradleRoot.childFile('AndroidManifest.xml');
   }
 
+  /// Gets the Gradle wrapper properties file.
+  ///
+  /// This file is located under `gradle/wrapper/gradle-wrapper.properties`
+  /// in the host app's Gradle root directory. It defines the distribution
+  /// settings for the Gradle wrapper.
+  File get gradleWrapperPropertiesFile {
+    return hostAppGradleRoot
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .childFile('gradle-wrapper.properties');
+  }
+
   File get generatedPluginRegistrantFile {
     return hostAppGradleRoot
         .childDirectory('app')
@@ -686,16 +687,15 @@ class AndroidProject extends FlutterProjectPlatform {
     // Constructing ProjectValidatorResult happens here and not in
     // flutter_tools/lib/src/project_validator.dart because of the additional
     // Complexity of variable status values and error string formatting.
-    const String visibleName = 'Java/Gradle/KGP/Android Gradle Plugin';
+    const visibleName = 'Java/Gradle/KGP/Android Gradle Plugin';
     final CompatibilityResult validJavaGradleAgpVersions = await hasValidJavaGradleAgpVersions();
 
     return ProjectValidatorResult(
       name: visibleName,
       value: validJavaGradleAgpVersions.description,
-      status:
-          validJavaGradleAgpVersions.success
-              ? StatusProjectValidator.success
-              : StatusProjectValidator.error,
+      status: validJavaGradleAgpVersions.success
+          ? StatusProjectValidator.success
+          : StatusProjectValidator.error,
     );
   }
 
@@ -745,11 +745,11 @@ class AndroidProject extends FlutterProjectPlatform {
 
     // Begin description formatting.
     if (!compatibleGradleAgp) {
-      final String gradleDescription =
-          agpVersion != null
-              ? 'Update Gradle to at least "${gradle.getGradleVersionFor(agpVersion)}".'
-              : '';
-      description = '''
+      final gradleDescription = agpVersion != null
+          ? 'Update Gradle to at least "${gradle.getGradleVersionFor(agpVersion)}".'
+          : '';
+      description =
+          '''
 Incompatible Gradle/AGP versions. \n
 Gradle Version: $gradleVersion, AGP Version: $agpVersion
 $gradleDescription\n
@@ -759,7 +759,8 @@ $gradleAgpCompatUrl
     }
     if (!compatibleJavaGradle) {
       // Should contain the agp error (if present) but not the valid String.
-      description = '''
+      description =
+          '''
 ${compatibleGradleAgp ? '' : description}
 Incompatible Java/Gradle versions.
 Java Version: $javaVersion, Gradle Version: $gradleVersion\n
@@ -768,7 +769,8 @@ $javaGradleCompatUrl
 ''';
     }
     if (!compatibleKgpGradle) {
-      description = '''
+      description =
+          '''
 ${compatibleGradleAgp ? '' : description}
 Incompatible KGP/Gradle versions.
 Gradle Version: $gradleVersion, Kotlin Version: $kgpVersion\n
@@ -777,7 +779,8 @@ See the link below for more information:
 ''';
     }
     if (!compatibleAgpKgp) {
-      description = '''
+      description =
+          '''
 ${compatibleGradleAgp ? '' : description}
 Incompatible AGP/KGP versions.
 AGP Version: $agpVersion, KGP Version: $kgpVersion\n
@@ -983,7 +986,7 @@ See the link below for more information:
     );
   }
 
-  static const bool _impellerEnabledByDefault = true;
+  static const _impellerEnabledByDefault = true;
 
   /// Returns the `io.flutter.embedding.android.EnableImpeller` manifest value.
   ///

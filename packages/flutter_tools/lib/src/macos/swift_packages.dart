@@ -7,9 +7,9 @@ import '../base/template.dart';
 import '../base/version.dart';
 
 /// Swift toolchain version included with Xcode 15.0.
-const String minimumSwiftToolchainVersion = '5.9';
+const minimumSwiftToolchainVersion = '5.9';
 
-const String _swiftPackageTemplate = '''
+const _swiftPackageTemplate = '''
 // swift-tools-version: {{swiftToolsVersion}}
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 //
@@ -37,14 +37,14 @@ let package = Package(
 )
 ''';
 
-const String _swiftPackageSourceTemplate = '''
+const _swiftPackageSourceTemplate = '''
 //
 //  Generated file. Do not edit.
 //
 ''';
 
-const String _singleIndent = '    ';
-const String _doubleIndent = '$_singleIndent$_singleIndent';
+const _singleIndent = '    ';
+const _doubleIndent = '$_singleIndent$_singleIndent';
 
 /// A Swift Package is reusable code that can be shared across projects and
 /// with other developers in iOS and macOS applications. A Swift Package
@@ -132,8 +132,9 @@ class SwiftPackage {
     if (_platforms.isEmpty) {
       return null;
     }
-    final List<String> platformStrings =
-        _platforms.map((SwiftPackageSupportedPlatform platform) => platform.format()).toList();
+    final List<String> platformStrings = _platforms
+        .map((SwiftPackageSupportedPlatform platform) => platform.format())
+        .toList();
     return platformStrings.join(',\n$_doubleIndent');
   }
 
@@ -141,8 +142,9 @@ class SwiftPackage {
     if (_products.isEmpty) {
       return '';
     }
-    final List<String> libraries =
-        _products.map((SwiftPackageProduct product) => product.format()).toList();
+    final List<String> libraries = _products
+        .map((SwiftPackageProduct product) => product.format())
+        .toList();
     return libraries.join(',\n$_doubleIndent');
   }
 
@@ -150,10 +152,9 @@ class SwiftPackage {
     if (_dependencies.isEmpty) {
       return '';
     }
-    final List<String> packages =
-        _dependencies
-            .map((SwiftPackagePackageDependency dependency) => dependency.format())
-            .toList();
+    final List<String> packages = _dependencies
+        .map((SwiftPackagePackageDependency dependency) => dependency.format())
+        .toList();
     return packages.join(',\n$_doubleIndent');
   }
 
@@ -161,8 +162,9 @@ class SwiftPackage {
     if (_targets.isEmpty) {
       return '';
     }
-    final List<String> targetList =
-        _targets.map((SwiftPackageTarget target) => target.format()).toList();
+    final List<String> targetList = _targets
+        .map((SwiftPackageTarget target) => target.format())
+        .toList();
     return targetList.join(',\n$_doubleIndent');
   }
 }
@@ -227,12 +229,12 @@ class SwiftPackageProduct {
     //     .library(name: "FlutterGeneratedPluginSwiftPackage", targets: ["FlutterGeneratedPluginSwiftPackage"]),
     //     .library(name: "FlutterDependenciesPackage", type: .dynamic, targets: ["FlutterDependenciesPackage"]),
     // ],
-    String targetsString = '';
+    var targetsString = '';
     if (targets.isNotEmpty) {
       final List<String> quotedTargets = targets.map((String target) => '"$target"').toList();
       targetsString = ', targets: [${quotedTargets.join(', ')}]';
     }
-    String libraryTypeString = '';
+    var libraryTypeString = '';
     if (libraryType != null) {
       libraryTypeString = ', type: ${libraryType!.name}';
     }
@@ -306,24 +308,24 @@ class SwiftPackageTarget {
     //     ),
     // ]
     const String targetIndent = _doubleIndent;
-    const String targetDetailsIndent = '$_doubleIndent$_singleIndent';
+    const targetDetailsIndent = '$_doubleIndent$_singleIndent';
 
-    final List<String> targetDetails = <String>[];
+    final targetDetails = <String>[];
 
-    final String nameString = 'name: "$name"';
+    final nameString = 'name: "$name"';
     targetDetails.add(nameString);
 
     if (path != null) {
-      final String pathString = 'path: "$path"';
+      final pathString = 'path: "$path"';
       targetDetails.add(pathString);
     }
 
     if (dependencies != null && dependencies!.isNotEmpty) {
-      final List<String> targetDependencies =
-          dependencies!
-              .map((SwiftPackageTargetDependency dependency) => dependency.format())
-              .toList();
-      final String dependenciesString = '''
+      final List<String> targetDependencies = dependencies!
+          .map((SwiftPackageTargetDependency dependency) => dependency.format())
+          .toList();
+      final dependenciesString =
+          '''
 dependencies: [
 ${targetDependencies.join(",\n")}
 $targetDetailsIndent]''';

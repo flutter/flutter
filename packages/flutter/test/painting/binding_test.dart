@@ -22,8 +22,9 @@ Future<void> main() async {
 
     await tester.idle();
     expect(imageCache.currentSize, 1);
-    final ByteData message =
-        const JSONMessageCodec().encodeMessage(<String, dynamic>{'type': 'memoryPressure'})!;
+    final ByteData message = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+      'type': 'memoryPressure',
+    })!;
     await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       message,

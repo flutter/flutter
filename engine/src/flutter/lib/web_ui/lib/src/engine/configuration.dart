@@ -47,8 +47,29 @@ library configuration;
 import 'dart:js_interop';
 
 import 'package:meta/meta.dart';
-import 'canvaskit/renderer.dart';
 import 'dom.dart';
+
+enum CanvasKitVariant {
+  /// The appropriate variant is chosen based on the browser.
+  ///
+  /// This is the default variant.
+  auto,
+
+  /// The full variant that can be used in any browser.
+  full,
+
+  /// The variant that is optimized for Chromium browsers.
+  ///
+  /// WARNING: In most cases, you should use [auto] instead of this variant. Using
+  /// this variant in a non-Chromium browser will result in a broken app.
+  chromium,
+
+  /// The variant that contains the new WebParagraph implementation on top of Chrome's Text Clusters
+  /// API: https://github.com/fserb/canvas2D/blob/master/spec/enhanced-textmetrics.md
+  ///
+  /// WARNING: This is an experimental variant that's not yet ready for production use.
+  experimentalWebParagraph,
+}
 
 /// The Web Engine configuration for the current application.
 FlutterConfiguration get configuration {
@@ -348,7 +369,21 @@ external JsFlutterConfiguration? get _jsConfiguration;
 
 /// The JS bindings for the object that's set as `window.flutterConfiguration`.
 extension type JsFlutterConfiguration._(JSObject _) implements JSObject {
-  factory JsFlutterConfiguration() => JSObject() as JsFlutterConfiguration;
+  external JsFlutterConfiguration({
+    String? assetBase,
+    String? canvasKitBaseUrl,
+    String? canvasKitVariant,
+    bool? canvasKitForceCpuOnly,
+    bool? canvasKitForceMultiSurfaceRasterizer,
+    double? canvasKitMaximumSurfaces,
+    bool? debugShowSemanticsNodes,
+    DomElement? hostElement,
+    bool? multiViewEnabled,
+    String? nonce,
+    String? renderer,
+    String? fontFallbackBaseUrl,
+    bool? forceSingleThreadedSkwasm,
+  });
 
   external String? get assetBase;
   external String? get canvasKitBaseUrl;

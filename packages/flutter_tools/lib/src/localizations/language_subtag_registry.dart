@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 /// Cache of https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry.
-const String languageSubtagRegistry = '''
+const languageSubtagRegistry = '''
 File-Date: 2020-03-16
 %%
 Type: language

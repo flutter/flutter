@@ -343,8 +343,9 @@ class _MaterialBannerState extends State<MaterialBanner> {
 
     final ThemeData theme = Theme.of(context);
     final MaterialBannerThemeData bannerTheme = MaterialBannerTheme.of(context);
-    final MaterialBannerThemeData defaults =
-        theme.useMaterial3 ? _BannerDefaultsM3(context) : _BannerDefaultsM2(context);
+    final MaterialBannerThemeData defaults = theme.useMaterial3
+        ? _BannerDefaultsM3(context)
+        : _BannerDefaultsM2(context);
 
     final bool isSingleRow = widget.actions.length == 1 && !widget.forceActionsBelow;
     final EdgeInsetsGeometry padding =
@@ -449,10 +450,9 @@ class _MaterialBannerState extends State<MaterialBanner> {
           context,
         ).removeCurrentMaterialBanner(reason: MaterialBannerClosedReason.dismiss);
       },
-      child:
-          accessibleNavigation
-              ? materialBanner
-              : SlideTransition(position: slideOutAnimation, child: materialBanner),
+      child: accessibleNavigation
+          ? materialBanner
+          : SlideTransition(position: slideOutAnimation, child: materialBanner),
     );
 
     final Widget materialBannerTransition;

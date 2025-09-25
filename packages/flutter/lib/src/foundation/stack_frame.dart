@@ -105,10 +105,9 @@ class StackFrame {
     // This RegExp is only partially correct for flutter run/test differences.
     // https://github.com/flutter/flutter/issues/52685
     final bool hasPackage = line.startsWith('package');
-    final RegExp parser =
-        hasPackage
-            ? RegExp(r'^(package.+) (\d+):(\d+)\s+(.+)$')
-            : RegExp(r'^(.+) (\d+):(\d+)\s+(.+)$');
+    final RegExp parser = hasPackage
+        ? RegExp(r'^(package.+) (\d+):(\d+)\s+(.+)$')
+        : RegExp(r'^(.+) (\d+):(\d+)\s+(.+)$');
 
     final Match? match = parser.firstMatch(line);
 
@@ -167,8 +166,9 @@ class StackFrame {
 
     final List<String> classAndMethod = match.group(1)!.split('.');
     final String className = classAndMethod.length > 1 ? classAndMethod.first : '<unknown>';
-    final String method =
-        classAndMethod.length > 1 ? classAndMethod.skip(1).join('.') : classAndMethod.single;
+    final String method = classAndMethod.length > 1
+        ? classAndMethod.skip(1).join('.')
+        : classAndMethod.single;
 
     return StackFrame(
       number: -1,

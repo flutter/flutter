@@ -151,14 +151,16 @@ class SemanticIncrementable extends SemanticRole {
     _element.setAttribute('aria-valuetext', semanticsObject.value!);
 
     final bool canIncrease = semanticsObject.increasedValue!.isNotEmpty;
-    final String surrogateMaxTextValue =
-        canIncrease ? '${_currentSurrogateValue + 1}' : surrogateTextValue;
+    final String surrogateMaxTextValue = canIncrease
+        ? '${_currentSurrogateValue + 1}'
+        : surrogateTextValue;
     _element.max = surrogateMaxTextValue;
     _element.setAttribute('aria-valuemax', surrogateMaxTextValue);
 
     final bool canDecrease = semanticsObject.decreasedValue!.isNotEmpty;
-    final String surrogateMinTextValue =
-        canDecrease ? '${_currentSurrogateValue - 1}' : surrogateTextValue;
+    final String surrogateMinTextValue = canDecrease
+        ? '${_currentSurrogateValue - 1}'
+        : surrogateTextValue;
     _element.min = surrogateMinTextValue;
     _element.setAttribute('aria-valuemin', surrogateMinTextValue);
   }

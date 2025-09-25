@@ -12,6 +12,7 @@ import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../convert.dart';
 
@@ -36,11 +37,12 @@ class WidgetPreviewDtdServices {
   //
   // START KEEP SYNCED
 
-  static const String kWidgetPreviewService = 'widget-preview';
-  static const String kHotRestartPreviewer = 'hotRestartPreviewer';
+  static const kWidgetPreviewService = 'widget-preview';
+  static const kIsWindows = 'isWindows';
+  static const kHotRestartPreviewer = 'hotRestartPreviewer';
 
   /// The list of DTD service methods registered by the tool.
-  late final List<DtdService> services = <DtdService>[(kHotRestartPreviewer, _hotRestart)];
+  late final services = <DtdService>[(kHotRestartPreviewer, _hotRestart), (kIsWindows, _isWindows)];
 
   // END KEEP SYNCED
 
@@ -89,6 +91,10 @@ class WidgetPreviewDtdServices {
     onHotRestartPreviewerRequest();
     return const Success().toJson();
   }
+
+  Future<Map<String, Object?>> _isWindows(Parameters _) async {
+    return BoolResponse(const LocalPlatform().isWindows).toJson();
+  }
 }
 
 /// Manages the lifecycle of a Dart Tooling Daemon (DTD) instance.
@@ -109,11 +115,11 @@ class DtdLauncher {
     ]);
 
     // Wait for the DTD connection information.
-    final Completer<Uri> dtdUri = Completer<Uri>();
+    final dtdUri = Completer<Uri>();
     late final StreamSubscription<String> sub;
     sub = _dtdProcess!.stdout.transform(const Utf8Decoder()).listen((String data) async {
       await sub.cancel();
-      final Map<String, Object?> jsonData = json.decode(data) as Map<String, Object?>;
+      final jsonData = json.decode(data) as Map<String, Object?>;
       if (jsonData case {'tooling_daemon_details': {'uri': final String dtdUriString}}) {
         dtdUri.complete(Uri.parse(dtdUriString));
       } else {

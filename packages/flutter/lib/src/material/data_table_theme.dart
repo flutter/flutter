@@ -10,7 +10,6 @@ import 'dart:ui' show lerpDouble;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'material_state.dart';
 import 'theme.dart';
 
 // Examples can assume:
@@ -78,7 +77,7 @@ class DataTableThemeData with Diagnosticable {
 
   /// {@macro flutter.material.dataTable.dataRowColor}
   /// {@macro flutter.material.DataTable.dataRowColor}
-  final MaterialStateProperty<Color?>? dataRowColor;
+  final WidgetStateProperty<Color?>? dataRowColor;
 
   /// {@macro flutter.material.dataTable.dataRowHeight}
   @Deprecated(
@@ -98,7 +97,7 @@ class DataTableThemeData with Diagnosticable {
 
   /// {@macro flutter.material.dataTable.headingRowColor}
   /// {@macro flutter.material.DataTable.headingRowColor}
-  final MaterialStateProperty<Color?>? headingRowColor;
+  final WidgetStateProperty<Color?>? headingRowColor;
 
   /// {@macro flutter.material.dataTable.headingRowHeight}
   final double? headingRowHeight;
@@ -119,10 +118,10 @@ class DataTableThemeData with Diagnosticable {
   final double? checkboxHorizontalMargin;
 
   /// If specified, overrides the default value of [DataColumn.mouseCursor].
-  final MaterialStateProperty<MouseCursor?>? headingCellCursor;
+  final WidgetStateProperty<MouseCursor?>? headingCellCursor;
 
   /// If specified, overrides the default value of [DataRow.mouseCursor].
-  final MaterialStateProperty<MouseCursor?>? dataRowCursor;
+  final WidgetStateProperty<MouseCursor?>? dataRowCursor;
 
   /// If specified, overrides the default value of [DataColumn.headingRowAlignment].
   final MainAxisAlignment? headingRowAlignment;
@@ -131,7 +130,7 @@ class DataTableThemeData with Diagnosticable {
   /// new values.
   DataTableThemeData copyWith({
     Decoration? decoration,
-    MaterialStateProperty<Color?>? dataRowColor,
+    WidgetStateProperty<Color?>? dataRowColor,
     @Deprecated(
       'Migrate to use dataRowMinHeight and dataRowMaxHeight instead. '
       'This feature was deprecated after v3.7.0-5.0.pre.',
@@ -140,15 +139,15 @@ class DataTableThemeData with Diagnosticable {
     double? dataRowMinHeight,
     double? dataRowMaxHeight,
     TextStyle? dataTextStyle,
-    MaterialStateProperty<Color?>? headingRowColor,
+    WidgetStateProperty<Color?>? headingRowColor,
     double? headingRowHeight,
     TextStyle? headingTextStyle,
     double? horizontalMargin,
     double? columnSpacing,
     double? dividerThickness,
     double? checkboxHorizontalMargin,
-    MaterialStateProperty<MouseCursor?>? headingCellCursor,
-    MaterialStateProperty<MouseCursor?>? dataRowCursor,
+    WidgetStateProperty<MouseCursor?>? headingCellCursor,
+    WidgetStateProperty<MouseCursor?>? dataRowCursor,
     MainAxisAlignment? headingRowAlignment,
   }) {
     assert(
@@ -186,16 +185,11 @@ class DataTableThemeData with Diagnosticable {
     }
     return DataTableThemeData(
       decoration: Decoration.lerp(a.decoration, b.decoration, t),
-      dataRowColor: MaterialStateProperty.lerp<Color?>(
-        a.dataRowColor,
-        b.dataRowColor,
-        t,
-        Color.lerp,
-      ),
+      dataRowColor: WidgetStateProperty.lerp<Color?>(a.dataRowColor, b.dataRowColor, t, Color.lerp),
       dataRowMinHeight: lerpDouble(a.dataRowMinHeight, b.dataRowMinHeight, t),
       dataRowMaxHeight: lerpDouble(a.dataRowMaxHeight, b.dataRowMaxHeight, t),
       dataTextStyle: TextStyle.lerp(a.dataTextStyle, b.dataTextStyle, t),
-      headingRowColor: MaterialStateProperty.lerp<Color?>(
+      headingRowColor: WidgetStateProperty.lerp<Color?>(
         a.headingRowColor,
         b.headingRowColor,
         t,
@@ -267,7 +261,7 @@ class DataTableThemeData with Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Decoration>('decoration', decoration, defaultValue: null));
     properties.add(
-      DiagnosticsProperty<MaterialStateProperty<Color?>>(
+      DiagnosticsProperty<WidgetStateProperty<Color?>>(
         'dataRowColor',
         dataRowColor,
         defaultValue: null,
@@ -279,7 +273,7 @@ class DataTableThemeData with Diagnosticable {
       DiagnosticsProperty<TextStyle>('dataTextStyle', dataTextStyle, defaultValue: null),
     );
     properties.add(
-      DiagnosticsProperty<MaterialStateProperty<Color?>>(
+      DiagnosticsProperty<WidgetStateProperty<Color?>>(
         'headingRowColor',
         headingRowColor,
         defaultValue: null,
@@ -296,14 +290,14 @@ class DataTableThemeData with Diagnosticable {
       DoubleProperty('checkboxHorizontalMargin', checkboxHorizontalMargin, defaultValue: null),
     );
     properties.add(
-      DiagnosticsProperty<MaterialStateProperty<MouseCursor?>?>(
+      DiagnosticsProperty<WidgetStateProperty<MouseCursor?>?>(
         'headingCellCursor',
         headingCellCursor,
         defaultValue: null,
       ),
     );
     properties.add(
-      DiagnosticsProperty<MaterialStateProperty<MouseCursor?>?>(
+      DiagnosticsProperty<WidgetStateProperty<MouseCursor?>?>(
         'dataRowCursor',
         dataRowCursor,
         defaultValue: null,
@@ -351,8 +345,8 @@ class DataTableTheme extends InheritedWidget {
   /// DataTableThemeData theme = DataTableTheme.of(context);
   /// ```
   static DataTableThemeData of(BuildContext context) {
-    final DataTableTheme? dataTableTheme =
-        context.dependOnInheritedWidgetOfExactType<DataTableTheme>();
+    final DataTableTheme? dataTableTheme = context
+        .dependOnInheritedWidgetOfExactType<DataTableTheme>();
     return dataTableTheme?.data ?? Theme.of(context).dataTableTheme;
   }
 

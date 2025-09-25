@@ -660,7 +660,9 @@ void main() {
 
   testWidgets('ExpansionTile platform controlAffinity test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: ExpansionTile(title: Text('Title')))),
+      const MaterialApp(
+        home: Material(child: ExpansionTile(title: Text('Title'))),
+      ),
     );
 
     final ListTile listTile = tester.widget(find.byType(ListTile));
@@ -1598,13 +1600,14 @@ void main() {
     expect(controller2, isNull);
   });
 
-  testWidgets('Check if dense, enableFeedback, visualDensity parameter is working', (
+  testWidgets('Check if dense, splashColor, enableFeedback, visualDensity parameter is working', (
     WidgetTester tester,
   ) async {
     final GlobalKey titleKey = GlobalKey();
     final GlobalKey nonDescendantKey = GlobalKey();
 
     const bool dense = true;
+    const Color splashColor = Colors.blue;
     const bool enableFeedback = false;
     const VisualDensity visualDensity = VisualDensity.compact;
 
@@ -1615,6 +1618,7 @@ void main() {
             children: <Widget>[
               ExpansionTile(
                 dense: dense,
+                splashColor: splashColor,
                 enableFeedback: enableFeedback,
                 visualDensity: visualDensity,
                 title: Text('Title', key: titleKey),
@@ -1630,6 +1634,7 @@ void main() {
     final Finder tileFinder = find.byType(ListTile);
     final ListTile tileWidget = tester.widget<ListTile>(tileFinder);
     expect(tileWidget.dense, dense);
+    expect(tileWidget.splashColor, splashColor);
     expect(tileWidget.enableFeedback, enableFeedback);
     expect(tileWidget.visualDensity, visualDensity);
   });
@@ -1685,7 +1690,9 @@ void main() {
       );
 
       final Size materialAppSize = tester.getSize(find.byType(MaterialApp));
-      final Size titleSize = tester.getSize(find.byType(ColoredBox));
+      final Size titleSize = tester.getSize(
+        find.descendant(of: find.byType(ExpansionTile), matching: find.byType(ColoredBox)),
+      );
 
       expect(titleSize.width, materialAppSize.width);
     },
@@ -1708,7 +1715,9 @@ void main() {
       );
 
       final Size materialAppSize = tester.getSize(find.byType(MaterialApp));
-      final Size titleSize = tester.getSize(find.byType(ColoredBox));
+      final Size titleSize = tester.getSize(
+        find.descendant(of: find.byType(ExpansionTile), matching: find.byType(ColoredBox)),
+      );
 
       expect(titleSize.width, materialAppSize.width - 32.0);
     },
@@ -1738,5 +1747,107 @@ void main() {
     final Finder platform = find.text('ExpansionTile');
     final Offset offsetPlatform = tester.getTopLeft(platform);
     expect(offsetPlatform, const Offset(16.0, 17.0));
+  });
+
+  testWidgets('ExpansionTile can accept a new controller', (WidgetTester tester) async {
+    final ExpansibleController controller1 = ExpansibleController();
+    final ExpansibleController controller2 = ExpansibleController();
+    addTearDown(() {
+      controller1.dispose();
+      controller2.dispose();
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ExpansionTile(
+            controller: controller1,
+            title: const Text('Title'),
+            initiallyExpanded: true,
+            children: const <Widget>[Text('Child 0')],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Child 0'), findsOne);
+    expect(controller1.isExpanded, isTrue);
+    controller1.collapse();
+    expect(controller1.isExpanded, isFalse);
+    await tester.pumpAndSettle();
+    expect(find.text('Child 0'), findsNothing);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ExpansionTile(
+            controller: controller2,
+            title: const Text('Title'),
+            initiallyExpanded: true,
+            children: const <Widget>[Text('Child 0')],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Child 0'), findsNothing);
+    controller2.expand();
+    expect(controller2.isExpanded, isTrue);
+    await tester.pumpAndSettle();
+    expect(find.text('Child 0'), findsOne);
+  });
+
+  testWidgets('ExpansionTile can accept a new controller with a different state', (
+    WidgetTester tester,
+  ) async {
+    final ExpansibleController controller1 = ExpansibleController();
+    final ExpansibleController controller2 = ExpansibleController();
+    addTearDown(() {
+      controller1.dispose();
+      controller2.dispose();
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ExpansionTile(
+            controller: controller1,
+            title: const Text('Title'),
+            children: const <Widget>[Text('Child 0')],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Child 0'), findsNothing);
+    expect(controller1.isExpanded, isFalse);
+    controller1.expand();
+    expect(controller1.isExpanded, isTrue);
+    await tester.pumpAndSettle();
+    expect(find.text('Child 0'), findsOne);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ExpansionTile(
+            controller: controller2,
+            title: const Text('Title'),
+            children: const <Widget>[Text('Child 0')],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Child 0'),
+      findsNothing,
+      reason: 'The widget should update to the state of the new controller',
+    );
+    controller2.expand();
+    expect(controller2.isExpanded, isTrue);
+    await tester.pumpAndSettle();
+    expect(find.text('Child 0'), findsOne);
   });
 }

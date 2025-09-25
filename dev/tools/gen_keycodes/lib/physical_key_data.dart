@@ -26,11 +26,11 @@ class PhysicalKeyData {
       chromiumHidCodes,
       nameToAndroidScanCodes,
     );
-    final List<MapEntry<String, PhysicalKeyEntry>> sortedEntries =
-        data.entries.toList()..sort(
-          (MapEntry<String, PhysicalKeyEntry> a, MapEntry<String, PhysicalKeyEntry> b) =>
-              PhysicalKeyEntry.compareByUsbHidCode(a.value, b.value),
-        );
+    final List<MapEntry<String, PhysicalKeyEntry>> sortedEntries = data.entries.toList()
+      ..sort(
+        (MapEntry<String, PhysicalKeyEntry> a, MapEntry<String, PhysicalKeyEntry> b) =>
+            PhysicalKeyEntry.compareByUsbHidCode(a.value, b.value),
+      );
     data
       ..clear()
       ..addEntries(sortedEntries);
@@ -122,12 +122,12 @@ class PhysicalKeyData {
     }
 
     // Cast Android dom map
-    final Map<String, List<String>> nameToAndroidNames = (json.decode(nameMap)
-            as Map<String, dynamic>)
-        .cast<String, List<dynamic>>()
-        .map<String, List<String>>((String key, List<dynamic> value) {
-          return MapEntry<String, List<String>>(key, value.cast<String>());
-        });
+    final Map<String, List<String>> nameToAndroidNames =
+        (json.decode(nameMap) as Map<String, dynamic>)
+            .cast<String, List<dynamic>>()
+            .map<String, List<String>>((String key, List<dynamic> value) {
+              return MapEntry<String, List<String>>(key, value.cast<String>());
+            });
 
     final Map<String, List<int>> result = nameToAndroidNames.map((
       String name,
@@ -340,26 +340,26 @@ class PhysicalKeyEntry {
   /// the name from the various different names available, making sure that the
   /// name isn't a Dart reserved word (if it is, then it adds the word "Key" to
   /// the end of the name).
-  late final String constantName =
-      (() {
-        String? result;
-        if (name.isEmpty) {
-          // If it doesn't have a DomKey name then use the Chromium symbol name.
-          result = chromiumCode;
-        } else {
-          result = upperCamelToLowerCamel(name);
-        }
-        result ??= 'Key${toHex(usbHidCode)}';
-        if (kDartReservedWords.contains(result)) {
-          return '${result}Key';
-        }
-        return result;
-      })();
+  late final String constantName = (() {
+    String? result;
+    if (name.isEmpty) {
+      // If it doesn't have a DomKey name then use the Chromium symbol name.
+      result = chromiumCode;
+    } else {
+      result = upperCamelToLowerCamel(name);
+    }
+    result ??= 'Key${toHex(usbHidCode)}';
+    if (kDartReservedWords.contains(result)) {
+      return '${result}Key';
+    }
+    return result;
+  })();
 
   @override
   String toString() {
-    final String otherWebStr =
-        otherWebCodes.isEmpty ? '' : ', otherWebCodes: [${otherWebCodes.join(', ')}]';
+    final String otherWebStr = otherWebCodes.isEmpty
+        ? ''
+        : ', otherWebCodes: [${otherWebCodes.join(', ')}]';
     return """'$constantName': (name: "$name", usbHidCode: ${toHex(usbHidCode)}, """
         'linuxScanCode: ${toHex(evdevCode)}, xKbScanCode: ${toHex(xKbScanCode)}, '
         'windowsKeyCode: ${toHex(windowsScanCode)}, macOSScanCode: ${toHex(macOSScanCode)}, '

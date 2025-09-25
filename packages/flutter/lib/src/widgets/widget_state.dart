@@ -283,10 +283,6 @@ typedef WidgetPropertyResolver<T> = T Function(Set<WidgetState> states);
 /// }
 /// ```
 /// {@end-tool}
-///
-/// See also:
-///
-///  * [MaterialStateColor], the Material specific version of `WidgetStateColor`.
 abstract class WidgetStateColor extends Color implements WidgetStateProperty<Color> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -581,6 +577,9 @@ abstract class WidgetStateBorderSide extends BorderSide
     // Avoid creating a _LerpSides object for a common case.
     if (a == null && b == null) {
       return null;
+    }
+    if (identical(a, b)) {
+      return a;
     }
     return _LerpSides(a, b, t);
   }

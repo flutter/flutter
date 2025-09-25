@@ -145,10 +145,9 @@ class ColorsDemo extends StatelessWidget {
           ),
         ),
         body: TabBarView(
-          children:
-              allPalettes.map<Widget>((Palette colors) {
-                return PaletteTabView(colors: colors);
-              }).toList(),
+          children: allPalettes.map<Widget>((Palette colors) {
+            return PaletteTabView(colors: colors);
+          }).toList(),
         ),
       ),
     );

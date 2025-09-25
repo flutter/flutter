@@ -13,6 +13,7 @@ import 'dart:core';
 import 'dart:math' as math;
 import 'dart:ui'
     show
+        CheckedState,
         Locale,
         Offset,
         Rect,
@@ -25,7 +26,8 @@ import 'dart:ui'
         SemanticsUpdateBuilder,
         SemanticsValidationResult,
         StringAttribute,
-        TextDirection;
+        TextDirection,
+        Tristate;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
@@ -163,7 +165,7 @@ sealed class _DebugSemanticsRoleChecks {
 
   static FlutterError? _semanticsTab(SemanticsNode node) {
     final SemanticsData data = node.getSemanticsData();
-    if (!data.flagsCollection.hasSelectedState) {
+    if (data.flagsCollection.isSelected == Tristate.none) {
       return FlutterError('A tab needs selected states');
     }
 
@@ -171,13 +173,11 @@ sealed class _DebugSemanticsRoleChecks {
       return null;
     }
 
-    if (!data.flagsCollection.hasEnabledState) {
-      if (!data.hasAction(SemanticsAction.tap)) {
-        return FlutterError('A tab must have a tap action');
-      }
-    } else if (data.flagsCollection.isEnabled && !data.hasAction(SemanticsAction.tap)) {
+    if (data.flagsCollection.isEnabled != Tristate.isFalse &&
+        !data.hasAction(SemanticsAction.tap)) {
       return FlutterError('A tab must have a tap action');
     }
+
     return null;
   }
 
@@ -250,7 +250,7 @@ sealed class _DebugSemanticsRoleChecks {
         return error == null;
       }
 
-      if (data.flagsCollection.isChecked) {
+      if (data.flagsCollection.isChecked == CheckedState.isTrue) {
         if (hasCheckedChild) {
           error = FlutterError('Radio groups must not have multiple checked children');
           return false;
@@ -296,7 +296,7 @@ sealed class _DebugSemanticsRoleChecks {
 
   static FlutterError? _semanticsMenuItemCheckbox(SemanticsNode node) {
     final SemanticsData data = node.getSemanticsData();
-    if (!data.flagsCollection.hasCheckedState) {
+    if (data.flagsCollection.isChecked == CheckedState.none) {
       return FlutterError('a menu item checkbox must be checkable');
     }
 
@@ -313,7 +313,7 @@ sealed class _DebugSemanticsRoleChecks {
 
   static FlutterError? _semanticsMenuItemRadio(SemanticsNode node) {
     final SemanticsData data = node.getSemanticsData();
-    if (!data.flagsCollection.hasCheckedState) {
+    if (data.flagsCollection.isChecked == CheckedState.none) {
       return FlutterError('a menu item radio must be checkable');
     }
 
@@ -805,6 +805,108 @@ class AttributedStringProperty extends DiagnosticsProperty<AttributedString> {
   }
 }
 
+typedef _LabelPart = (String text, TextDirection? textDirection);
+
+/// Builder for creating semantically correct concatenated labels with proper
+/// text direction handling and spacing.
+///
+/// This builder helps address the complexity of concatenating multiple text
+/// parts while handling language-specific nuances like RTL vs LTR text direction
+/// and proper spacing.
+///
+/// Example usage:
+/// ```dart
+/// SemanticsLabelBuilder builder = SemanticsLabelBuilder()
+///   ..addPart('Hello')
+///   ..addPart('world');
+/// String label = builder.build(); // "Hello world"
+/// ```
+///
+/// For multilingual text with proper RTL support:
+/// ```dart
+/// SemanticsLabelBuilder builder = SemanticsLabelBuilder(textDirection: TextDirection.ltr)
+///   ..addPart('Welcome', textDirection: TextDirection.ltr)
+///   ..addPart('مرحبا', textDirection: TextDirection.rtl); // Arabic
+/// String label = builder.build(); // "Welcome \u202Bمرحبا\u202C" (with Unicode embedding)
+/// ```
+final class SemanticsLabelBuilder {
+  /// Creates a new [SemanticsLabelBuilder].
+  ///
+  /// The [separator] is used between text parts (defaults to space).
+  /// The [textDirection] specifies the overall text direction for the concatenated label.
+  SemanticsLabelBuilder({this.separator = ' ', this.textDirection});
+
+  /// The separator used between text parts.
+  final String separator;
+
+  /// The overall text direction for the concatenated label.
+  final TextDirection? textDirection;
+
+  final List<_LabelPart> _parts = <_LabelPart>[];
+
+  /// Adds a text part.
+  ///
+  /// If [textDirection] is specified, it will be used for this specific part.
+  /// Empty parts are ignored.
+  void addPart(String label, {TextDirection? textDirection}) {
+    if (label.isNotEmpty) {
+      _parts.add((label, textDirection));
+    }
+  }
+
+  /// Returns true if no parts have been added to this builder.
+  bool get isEmpty => _parts.isEmpty;
+
+  /// Returns the number of parts added to this builder.
+  int get length => _parts.length;
+
+  /// Builds and returns the concatenated label from the added parts.
+  ///
+  /// This method concatenates all parts with proper text direction handling
+  /// and spacing.
+  String build() {
+    if (_parts.isEmpty) {
+      return '';
+    }
+
+    if (_parts.length == 1) {
+      final (String text, TextDirection? _) = _parts.first;
+      return text;
+    }
+
+    // Concatenate multiple parts with proper text direction handling
+    final StringBuffer buffer = StringBuffer();
+    final (String firstText, TextDirection? _) = _parts.first;
+    buffer.write(firstText);
+
+    for (final (String partText, TextDirection? partTextDirection) in _parts.skip(1)) {
+      final TextDirection? partDirection = partTextDirection ?? textDirection;
+
+      if (separator.isNotEmpty) {
+        buffer.write(separator);
+      }
+
+      String processedText = partText;
+      if (textDirection != null && partDirection != null && textDirection != partDirection) {
+        final String directionalEmbedding = switch (partDirection) {
+          TextDirection.rtl => Unicode.RLE,
+          TextDirection.ltr => Unicode.LRE,
+        };
+        processedText = directionalEmbedding + partText + Unicode.PDF;
+      }
+
+      buffer.write(processedText);
+    }
+
+    return buffer.toString();
+  }
+
+  /// Clears all parts from this builder, allowing it to be reused.
+  void clear() {
+    _parts.clear();
+  }
+}
+
 /// Summary information about a [SemanticsNode] object.
 ///
 /// A semantics node might [SemanticsNode.mergeAllDescendantsIntoThisNode],
@@ -1137,10 +1239,9 @@ class SemanticsData with Diagnosticable {
       for (final SemanticsAction action in SemanticsAction.values)
         if ((actions & action.index) != 0) action.name,
     ];
-    final List<String?> customSemanticsActionSummary =
-        customSemanticsActionIds!
-            .map<String?>((int actionId) => CustomSemanticsAction.getAction(actionId)!.label)
-            .toList();
+    final List<String?> customSemanticsActionSummary = customSemanticsActionIds!
+        .map<String?>((int actionId) => CustomSemanticsAction.getAction(actionId)!.label)
+        .toList();
     properties.add(IterableProperty<String>('actions', actionSummary, ifEmpty: null));
     properties.add(
       IterableProperty<String?>('customActions', customSemanticsActionSummary, ifEmpty: null),
@@ -1371,6 +1472,11 @@ class SemanticsProperties extends DiagnosticableTree {
     this.slider,
     this.keyboardKey,
     this.readOnly,
+    @Deprecated(
+      'Use focused instead. '
+      'Setting focused automatically set focusable. '
+      'This feature was deprecated after v3.36.0-0.0.pre.',
+    )
     this.focusable,
     this.focused,
     this.inMutuallyExclusiveGroup,
@@ -1555,9 +1661,16 @@ class SemanticsProperties extends DiagnosticableTree {
   /// to be confused with accessibility focus. Accessibility focus is the
   /// green/black rectangular highlight that TalkBack/VoiceOver draws around the
   /// element it is reading, and is separate from input focus.
+  @Deprecated(
+    'Use focused instead. '
+    'Setting focused automatically set focusable. '
+    'This feature was deprecated after v3.36.0-0.0.pre.',
+  )
   final bool? focusable;
 
   /// If non-null, whether the node currently holds input focus.
+  ///
+  /// If null, the node is not fosusable.
   ///
   /// At most one node in the tree should hold input focus at any point in time,
   /// and it should not be set to true if [focusable] is false.
@@ -3702,10 +3815,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
             )
             .toList()
           ..sort();
-    final List<String?> customSemanticsActions =
-        _customSemanticsActions.keys
-            .map<String?>((CustomSemanticsAction action) => action.label)
-            .toList();
+    final List<String?> customSemanticsActions = _customSemanticsActions.keys
+        .map<String?>((CustomSemanticsAction action) => action.label)
+        .toList();
     properties.add(IterableProperty<String>('actions', actions, ifEmpty: null));
     properties.add(
       IterableProperty<String?>('customActions', customSemanticsActions, ifEmpty: null),
@@ -3745,6 +3857,15 @@ class SemanticsNode with DiagnosticableTreeMixin {
     properties.add(IntProperty('headingLevel', _headingLevel, defaultValue: 0));
     if (_inputType != SemanticsInputType.none) {
       properties.add(EnumProperty<SemanticsInputType>('inputType', _inputType));
+    }
+    if (validationResult != SemanticsValidationResult.none) {
+      properties.add(
+        EnumProperty<SemanticsValidationResult>(
+          'validationResult',
+          validationResult,
+          defaultValue: SemanticsValidationResult.none,
+        ),
+      );
     }
   }
 
@@ -3970,16 +4091,16 @@ class _SemanticsSortGroup implements Comparable<_SemanticsSortGroup> {
 
     final List<int> sortedIds = <int>[];
     final Set<int> visitedIds = <int>{};
-    final List<SemanticsNode> startNodes =
-        nodes.toList()..sort((SemanticsNode a, SemanticsNode b) {
-          final Offset aTopLeft = _pointInParentCoordinates(a, a.rect.topLeft);
-          final Offset bTopLeft = _pointInParentCoordinates(b, b.rect.topLeft);
-          final int verticalDiff = aTopLeft.dy.compareTo(bTopLeft.dy);
-          if (verticalDiff != 0) {
-            return -verticalDiff;
-          }
-          return -aTopLeft.dx.compareTo(bTopLeft.dx);
-        });
+    final List<SemanticsNode> startNodes = nodes.toList()
+      ..sort((SemanticsNode a, SemanticsNode b) {
+        final Offset aTopLeft = _pointInParentCoordinates(a, a.rect.topLeft);
+        final Offset bTopLeft = _pointInParentCoordinates(b, b.rect.topLeft);
+        final int verticalDiff = aTopLeft.dy.compareTo(bTopLeft.dy);
+        if (verticalDiff != 0) {
+          return -verticalDiff;
+        }
+        return -aTopLeft.dx.compareTo(bTopLeft.dx);
+      });
 
     void search(int id) {
       if (visitedIds.contains(id)) {
@@ -4207,8 +4328,9 @@ class SemanticsOwner extends ChangeNotifier {
     final Set<int> customSemanticsActionIds = <int>{};
     final List<SemanticsNode> visitedNodes = <SemanticsNode>[];
     while (_dirtyNodes.isNotEmpty) {
-      final List<SemanticsNode> localDirtyNodes =
-          _dirtyNodes.where((SemanticsNode node) => !_detachedNodes.contains(node)).toList();
+      final List<SemanticsNode> localDirtyNodes = _dirtyNodes
+          .where((SemanticsNode node) => !_detachedNodes.contains(node))
+          .toList();
       _dirtyNodes.clear();
       _detachedNodes.clear();
       localDirtyNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
@@ -5389,9 +5511,9 @@ class SemanticsConfiguration {
   /// accessibility focused may or may not be selected; e.g. a [ListTile] can have
   /// accessibility focus but have its [ListTile.selected] property set to false,
   /// in which case it will not be flagged as selected.
-  bool get isSelected => _flags.isSelected;
+  bool get isSelected => _flags.isSelected == Tristate.isTrue;
   set isSelected(bool value) {
-    _flags = _flags.copyWith(hasSelectedState: true, isSelected: value);
+    _flags = _flags.copyWith(isSelected: _tristateFromBoolOrNull(value));
     _hasBeenAnnotated = true;
   }
 
@@ -5403,9 +5525,9 @@ class SemanticsConfiguration {
   ///
   /// The getter returns null if the owning [RenderObject] does not have
   /// expanded/collapsed state.
-  bool? get isExpanded => _flags.hasExpandedState ? _flags.isExpanded : null;
+  bool? get isExpanded => _flags.isExpanded.toBoolOrNull();
   set isExpanded(bool? value) {
-    _flags = _flags.copyWith(hasExpandedState: true, isExpanded: value);
+    _flags = _flags.copyWith(isExpanded: _tristateFromBoolOrNull(value));
     _hasBeenAnnotated = true;
   }
 
@@ -5424,10 +5546,9 @@ class SemanticsConfiguration {
   /// This property does not control whether semantics are enabled. If you wish to
   /// disable semantics for a particular widget, you should use an [ExcludeSemantics]
   /// widget.
-  bool? get isEnabled => _flags.hasEnabledState ? _flags.isEnabled : null;
+  bool? get isEnabled => _flags.isEnabled.toBoolOrNull();
   set isEnabled(bool? value) {
-    _flags = _flags.copyWith(hasEnabledState: true, isEnabled: value);
-
+    _flags = _flags.copyWith(isEnabled: _tristateFromBoolOrNull(value));
     _hasBeenAnnotated = true;
   }
 
@@ -5440,10 +5561,12 @@ class SemanticsConfiguration {
   ///
   /// The getter returns null if the owning [RenderObject] does not have
   /// checked/unchecked state.
-  bool? get isChecked => _flags.hasCheckedState ? _flags.isChecked : null;
+  bool? get isChecked =>
+      _flags.isChecked == CheckedState.none ? null : _flags.isChecked == CheckedState.isTrue;
   set isChecked(bool? value) {
-    assert(value != true || isCheckStateMixed != true);
-    _flags = _flags.copyWith(hasCheckedState: true, isChecked: value);
+    if (value != null) {
+      _flags = _flags.copyWith(isChecked: value ? CheckedState.isTrue : CheckedState.isFalse);
+    }
     _hasBeenAnnotated = true;
   }
 
@@ -5455,10 +5578,12 @@ class SemanticsConfiguration {
   ///
   /// The getter returns null if the owning [RenderObject] does not have
   /// mixed checked state.
-  bool? get isCheckStateMixed => _flags.hasCheckedState ? _flags.isCheckStateMixed : null;
+  bool? get isCheckStateMixed =>
+      _flags.isChecked == CheckedState.none ? null : _flags.isChecked == CheckedState.mixed;
   set isCheckStateMixed(bool? value) {
-    assert(value != true || isChecked != true);
-    _flags = _flags.copyWith(hasCheckedState: true, isCheckStateMixed: value);
+    if (value ?? false) {
+      _flags = _flags.copyWith(isChecked: CheckedState.mixed);
+    }
     _hasBeenAnnotated = true;
   }
 
@@ -5470,9 +5595,9 @@ class SemanticsConfiguration {
   ///
   /// The getter returns null if the owning [RenderObject] does not have
   /// on/off state.
-  bool? get isToggled => _flags.hasToggledState ? _flags.isToggled : null;
+  bool? get isToggled => _flags.isToggled.toBoolOrNull();
   set isToggled(bool? value) {
-    _flags = _flags.copyWith(hasToggledState: true, isToggled: value);
+    _flags = _flags.copyWith(isToggled: _tristateFromBoolOrNull(value));
     _hasBeenAnnotated = true;
   }
 
@@ -5488,16 +5613,34 @@ class SemanticsConfiguration {
   }
 
   /// Whether the owning [RenderObject] can hold the input focus.
-  bool get isFocusable => _flags.isFocusable;
+  @Deprecated(
+    'Check if isFocused is null instead. '
+    'This feature was deprecated after v3.36.0-0.0.pre.',
+  )
+  bool get isFocusable => _flags.isFocused != Tristate.none;
+
+  @Deprecated(
+    'Setting isFocused automatically set this to true. '
+    'This feature was deprecated after v3.36.0-0.0.pre.',
+  )
   set isFocusable(bool value) {
-    _flags = _flags.copyWith(isFocusable: value);
+    // If value is false, set `isFocused` to none.
+    // If value is true, `isFocused` should be true or false. If `isFocused` is not none,
+    // don't change it, if `isFocused` is `none`, change it to `false`.
+    if (!value) {
+      _flags = _flags.copyWith(isFocused: Tristate.none);
+    } else {
+      if (_flags.isFocused == Tristate.none) {
+        _flags = _flags.copyWith(isFocused: Tristate.isFalse);
+      }
+    }
     _hasBeenAnnotated = true;
   }
 
   /// Whether the owning [RenderObject] currently holds the input focus.
-  bool get isFocused => _flags.isFocused;
-  set isFocused(bool value) {
-    _flags = _flags.copyWith(isFocused: value);
+  bool? get isFocused => _flags.isFocused.toBoolOrNull();
+  set isFocused(bool? value) {
+    _flags = _flags.copyWith(isFocused: _tristateFromBoolOrNull(value));
     _hasBeenAnnotated = true;
   }
 
@@ -5634,9 +5777,9 @@ class SemanticsConfiguration {
   /// See also:
   ///
   ///  * [SemanticsFlag.isRequired], for a full description of required nodes.
-  bool? get isRequired => _flags.hasRequiredState ? _flags.isRequired : null;
+  bool? get isRequired => _flags.isRequired.toBoolOrNull();
   set isRequired(bool? value) {
-    _flags = _flags.copyWith(hasRequiredState: true, isRequired: value);
+    _flags = _flags.copyWith(isRequired: _tristateFromBoolOrNull(value));
     _hasBeenAnnotated = true;
   }
 
@@ -5860,6 +6003,7 @@ class SemanticsConfiguration {
     _actionsAsBits |= child._effectiveActionsAsBits;
     _customSemanticsActions.addAll(child._customSemanticsActions);
     _flags = _flags.merge(child._flags);
+    _linkUrl ??= child._linkUrl;
     _textSelection ??= child._textSelection;
     _scrollPosition ??= child._scrollPosition;
     _scrollExtentMax ??= child._scrollExtentMax;
@@ -6151,16 +6295,27 @@ int _mergeHeadingLevels({required int sourceLevel, required int targetLevel}) {
   return targetLevel == 0 ? sourceLevel : targetLevel;
 }
 
+Tristate _tristateFromBoolOrNull(bool? value) {
+  if (value == null) {
+    return Tristate.none;
+  }
+
+  if (value) {
+    return Tristate.isTrue;
+  }
+  return Tristate.isFalse;
+}
+
 /// This is just to support flag 0-30, new flags don't need to be in the bitmask.
 int _toBitMask(SemanticsFlags flags) {
   int bitmask = 0;
-  if (flags.hasCheckedState) {
+  if (flags.isChecked != CheckedState.none) {
     bitmask |= 1 << 0;
   }
-  if (flags.isChecked) {
+  if (flags.isChecked == CheckedState.isTrue) {
     bitmask |= 1 << 1;
   }
-  if (flags.isSelected) {
+  if (flags.isSelected == Tristate.isTrue) {
     bitmask |= 1 << 2;
   }
   if (flags.isButton) {
@@ -6169,13 +6324,13 @@ int _toBitMask(SemanticsFlags flags) {
   if (flags.isTextField) {
     bitmask |= 1 << 4;
   }
-  if (flags.isFocused) {
+  if (flags.isFocused == Tristate.isTrue) {
     bitmask |= 1 << 5;
   }
-  if (flags.hasEnabledState) {
+  if (flags.isEnabled != Tristate.none) {
     bitmask |= 1 << 6;
   }
-  if (flags.isEnabled) {
+  if (flags.isEnabled == Tristate.isTrue) {
     bitmask |= 1 << 7;
   }
   if (flags.isInMutuallyExclusiveGroup) {
@@ -6202,10 +6357,10 @@ int _toBitMask(SemanticsFlags flags) {
   if (flags.isLiveRegion) {
     bitmask |= 1 << 15;
   }
-  if (flags.hasToggledState) {
+  if (flags.isToggled != Tristate.none) {
     bitmask |= 1 << 16;
   }
-  if (flags.isToggled) {
+  if (flags.isToggled == Tristate.isTrue) {
     bitmask |= 1 << 17;
   }
   if (flags.hasImplicitScrolling) {
@@ -6217,7 +6372,7 @@ int _toBitMask(SemanticsFlags flags) {
   if (flags.isReadOnly) {
     bitmask |= 1 << 20;
   }
-  if (flags.isFocusable) {
+  if (flags.isFocused != Tristate.none) {
     bitmask |= 1 << 21;
   }
   if (flags.isLink) {
@@ -6229,22 +6384,22 @@ int _toBitMask(SemanticsFlags flags) {
   if (flags.isKeyboardKey) {
     bitmask |= 1 << 24;
   }
-  if (flags.isCheckStateMixed) {
+  if (flags.isChecked == CheckedState.mixed) {
     bitmask |= 1 << 25;
   }
-  if (flags.hasExpandedState) {
+  if (flags.isExpanded != Tristate.none) {
     bitmask |= 1 << 26;
   }
-  if (flags.isExpanded) {
+  if (flags.isExpanded == Tristate.isTrue) {
     bitmask |= 1 << 27;
   }
-  if (flags.hasSelectedState) {
+  if (flags.isSelected != Tristate.none) {
     bitmask |= 1 << 28;
   }
-  if (flags.hasRequiredState) {
+  if (flags.isRequired != Tristate.none) {
     bitmask |= 1 << 29;
   }
-  if (flags.isRequired) {
+  if (flags.isRequired == Tristate.isTrue) {
     bitmask |= 1 << 30;
   }
   return bitmask;

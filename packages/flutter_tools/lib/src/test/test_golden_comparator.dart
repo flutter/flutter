@@ -111,7 +111,7 @@ final class TestGoldenComparator {
         _logger.printWarning('An error occurred compiling ${listenerFile.uri}: $error.');
         return null;
       case TestCompilerComplete(:final String outputPath):
-        final List<String> command = <String>[
+        final command = <String>[
           _flutterTesterBinPath,
           '--disable-vm-service',
           '--non-interactive',
@@ -349,8 +349,8 @@ void main() async {
         try {
           bool success = await goldenFileComparator.compare(bytes, goldenKey);
           print(jsonEncode({'success': success}));
-        } on Exception catch (ex) {
-          print(jsonEncode({'success': false, 'message': '\$ex'}));
+        } on /*FlutterError*/ Object? catch (e) {
+          print(jsonEncode({'success': false, 'message': '\$e'}));
         }
       }
     } else {

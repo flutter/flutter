@@ -13,24 +13,24 @@ import '../../src/fake_http_client.dart';
 import '../../src/fakes.dart';
 
 // The environment variables used to override some URLs
-const String kTestEnvPubHost = 'https://pub.flutter-io.cn';
-const String kTestEnvGCloudHost = 'https://storage.flutter-io.cn';
-const Map<String, String> kTestEnvironment = <String, String>{
+const kTestEnvPubHost = 'https://pub.flutter-io.cn';
+const kTestEnvGCloudHost = 'https://storage.flutter-io.cn';
+const kTestEnvironment = <String, String>{
   'PUB_HOSTED_URL': kTestEnvPubHost,
   'FLUTTER_STORAGE_BASE_URL': kTestEnvGCloudHost,
 };
 
 void main() {
   group('http host validator', () {
-    const List<String> osTested = <String>['windows', 'macos', 'linux'];
+    const osTested = <String>['windows', 'macos', 'linux'];
 
     group('no env variables', () {
       testWithoutContext('all http hosts are available', () async {
-        final FakeHttpClient mockClient = FakeHttpClient.any();
+        final mockClient = FakeHttpClient.any();
 
         // Run the check for all operating systems one by one
-        for (final String os in osTested) {
-          final HttpHostValidator httpHostValidator = HttpHostValidator(
+        for (final os in osTested) {
+          final httpHostValidator = HttpHostValidator(
             platform: FakePlatform(operatingSystem: os),
             featureFlags: TestFeatureFlags(),
             httpClient: mockClient,
@@ -46,9 +46,9 @@ void main() {
 
       testWithoutContext('all http hosts are not available', () async {
         // Run the check for all operating systems one by one
-        for (final String os in osTested) {
+        for (final os in osTested) {
           final Platform platform = FakePlatform(operatingSystem: os);
-          final HttpHostValidator httpHostValidator = HttpHostValidator(
+          final httpHostValidator = HttpHostValidator(
             platform: platform,
             featureFlags: TestFeatureFlags(),
             httpClient: FakeHttpClient.list(<FakeRequest>[
@@ -90,9 +90,9 @@ void main() {
 
       testWithoutContext('one http host is not available', () async {
         // Run the check for all operating systems one by one
-        for (final String os in osTested) {
+        for (final os in osTested) {
           final Platform platform = FakePlatform(operatingSystem: os);
-          final HttpHostValidator httpHostValidator = HttpHostValidator(
+          final httpHostValidator = HttpHostValidator(
             platform: platform,
             featureFlags: TestFeatureFlags(),
             httpClient: FakeHttpClient.list(<FakeRequest>[
@@ -119,11 +119,11 @@ void main() {
 
     group('with env variables', () {
       testWithoutContext('all http hosts are available', () async {
-        final FakeHttpClient mockClient = FakeHttpClient.any();
+        final mockClient = FakeHttpClient.any();
 
         // Run the check for all operating systems one by one
-        for (final String os in osTested) {
-          final HttpHostValidator httpHostValidator = HttpHostValidator(
+        for (final os in osTested) {
+          final httpHostValidator = HttpHostValidator(
             platform: FakePlatform(operatingSystem: os, environment: kTestEnvironment),
             featureFlags: TestFeatureFlags(),
             httpClient: mockClient,
@@ -139,12 +139,12 @@ void main() {
 
       testWithoutContext('all http hosts are not available', () async {
         // Run the check for all operating systems one by one
-        for (final String os in osTested) {
+        for (final os in osTested) {
           final Platform platform = FakePlatform(
             operatingSystem: os,
             environment: kTestEnvironment,
           );
-          final HttpHostValidator httpHostValidator = HttpHostValidator(
+          final httpHostValidator = HttpHostValidator(
             platform: platform,
             featureFlags: TestFeatureFlags(),
             httpClient: FakeHttpClient.list(<FakeRequest>[
@@ -181,12 +181,12 @@ void main() {
 
       testWithoutContext('one http host is not available', () async {
         // Run the check for all operating systems one by one
-        for (final String os in osTested) {
+        for (final os in osTested) {
           final Platform platform = FakePlatform(
             operatingSystem: os,
             environment: kTestEnvironment,
           );
-          final HttpHostValidator httpHostValidator = HttpHostValidator(
+          final httpHostValidator = HttpHostValidator(
             platform: platform,
             featureFlags: TestFeatureFlags(),
             httpClient: FakeHttpClient.list(<FakeRequest>[
@@ -214,7 +214,7 @@ void main() {
       });
 
       testWithoutContext('does not throw on unparseable user-defined host uri', () async {
-        final HttpHostValidator httpHostValidator = HttpHostValidator(
+        final httpHostValidator = HttpHostValidator(
           platform: FakePlatform(
             environment: <String, String>{
               'PUB_HOSTED_URL': '::Not A Uri::',
@@ -241,7 +241,7 @@ void main() {
       });
 
       testWithoutContext('does not throw on invalid user-defined host', () async {
-        final HttpHostValidator httpHostValidator = HttpHostValidator(
+        final httpHostValidator = HttpHostValidator(
           platform: FakePlatform(
             environment: <String, String>{
               'PUB_HOSTED_URL': kTestEnvPubHost,
@@ -271,8 +271,8 @@ void main() {
     group('specific os disabled', () {
       testWithoutContext('all http hosts are available - android disabled', () async {
         // Run the check for all operating systems one by one
-        for (final String os in osTested) {
-          final HttpHostValidator httpHostValidator = HttpHostValidator(
+        for (final os in osTested) {
+          final httpHostValidator = HttpHostValidator(
             platform: FakePlatform(operatingSystem: os),
             featureFlags: TestFeatureFlags(isAndroidEnabled: false),
             httpClient: FakeHttpClient.list(<FakeRequest>[
@@ -293,9 +293,9 @@ void main() {
 
       testWithoutContext('all http hosts are available - iOS disabled', () async {
         // Run the check for all operating systems one by one
-        for (final String os in osTested) {
+        for (final os in osTested) {
           final Platform platform = FakePlatform(operatingSystem: os);
-          final HttpHostValidator httpHostValidator = HttpHostValidator(
+          final httpHostValidator = HttpHostValidator(
             platform: platform,
             featureFlags: TestFeatureFlags(isIOSEnabled: false),
             httpClient: FakeHttpClient.list(<FakeRequest>[
@@ -316,8 +316,8 @@ void main() {
 
       testWithoutContext('all http hosts are available - android, iOS disabled', () async {
         // Run the check for all operating systems one by one
-        for (final String os in osTested) {
-          final HttpHostValidator httpHostValidator = HttpHostValidator(
+        for (final os in osTested) {
+          final httpHostValidator = HttpHostValidator(
             platform: FakePlatform(operatingSystem: os),
             featureFlags: TestFeatureFlags(isAndroidEnabled: false, isIOSEnabled: false),
             httpClient: FakeHttpClient.list(<FakeRequest>[
@@ -338,14 +338,14 @@ void main() {
   });
 
   testWithoutContext('Does not throw on HandshakeException', () async {
-    const String handshakeMessage = '''
+    const handshakeMessage = '''
 Handshake error in client (OS Error:
         BLOCK_TYPE_IS_NOT_01(../../third_party/boringssl/src/crypto/fipsmodule/rsa/padding.c:108)
         PADDING_CHECK_FAILED(../../third_party/boringssl/src/crypto/fipsmodule/rsa/rsa_impl.c:676)
         public key routines(../../third_party/boringssl/src/crypto/x509/a_verify.c:108)
         CERTIFICATE_VERIFY_FAILED: certificate signature failure(../../third_party/boringssl/src/ssl/handshake.cc:393))
 ''';
-    final HttpHostValidator httpHostValidator = HttpHostValidator(
+    final httpHostValidator = HttpHostValidator(
       platform: FakePlatform(environment: kTestEnvironment),
       featureFlags: TestFeatureFlags(isAndroidEnabled: false),
       httpClient: FakeHttpClient.list(<FakeRequest>[

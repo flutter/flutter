@@ -23,10 +23,9 @@ class BuildLinuxCommand extends BuildSubCommand {
   }) : _operatingSystemUtils = operatingSystemUtils,
        super(verboseHelp: verboseHelp) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
-    final String defaultTargetPlatform =
-        (_operatingSystemUtils.hostPlatform == HostPlatform.linux_arm64)
-            ? 'linux-arm64'
-            : 'linux-x64';
+    final defaultTargetPlatform = (_operatingSystemUtils.hostPlatform == HostPlatform.linux_arm64)
+        ? 'linux-arm64'
+        : 'linux-x64';
     argParser.addOption(
       'target-platform',
       defaultsTo: defaultTargetPlatform,
@@ -41,12 +40,16 @@ class BuildLinuxCommand extends BuildSubCommand {
           'the app is compiled. This option is valid only '
           'if the current host and target architectures are different.',
     );
+    argParser.addFlag(
+      'config-only',
+      help: 'Update the project configuration without performing a build.',
+    );
   }
 
   final OperatingSystemUtils _operatingSystemUtils;
 
   @override
-  final String name = 'linux';
+  final name = 'linux';
 
   @override
   bool get hidden => !featureFlags.isLinuxEnabled || !globals.platform.isLinux;
@@ -59,11 +62,13 @@ class BuildLinuxCommand extends BuildSubCommand {
   @override
   String get description => 'Build a Linux desktop application.';
 
+  bool get configOnly => boolArg('config-only');
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     final BuildInfo buildInfo = await getBuildInfo();
     final TargetPlatform targetPlatform = getTargetPlatformForName(stringArg('target-platform')!);
-    final bool needCrossBuild =
+    final needCrossBuild =
         _operatingSystemUtils.hostPlatform.platformName != targetPlatform.simpleName;
 
     if (!featureFlags.isLinuxEnabled) {
@@ -96,6 +101,7 @@ class BuildLinuxCommand extends BuildSubCommand {
       targetPlatform: targetPlatform,
       targetSysroot: stringArg('target-sysroot')!,
       logger: logger,
+      configOnly: configOnly,
     );
     return FlutterCommandResult.success();
   }

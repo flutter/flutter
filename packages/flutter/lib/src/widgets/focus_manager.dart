@@ -1521,10 +1521,9 @@ class FocusScopeNode extends FocusNode {
     if (_focusedChildren.isEmpty) {
       return;
     }
-    final List<String> childList =
-        _focusedChildren.reversed.map<String>((FocusNode child) {
-          return child.toStringShort();
-        }).toList();
+    final List<String> childList = _focusedChildren.reversed.map<String>((FocusNode child) {
+      return child.toStringShort();
+    }).toList();
     properties.add(
       IterableProperty<String>(
         'focusedChildren',
@@ -2152,14 +2151,13 @@ class _HighlightModeManager {
       } catch (exception, stack) {
         InformationCollector? collector;
         assert(() {
-          collector =
-              () => <DiagnosticsNode>[
-                DiagnosticsProperty<_HighlightModeManager>(
-                  'The $runtimeType sending notification was',
-                  this,
-                  style: DiagnosticsTreeStyle.errorProperty,
-                ),
-              ];
+          collector = () => <DiagnosticsNode>[
+            DiagnosticsProperty<_HighlightModeManager>(
+              'The $runtimeType sending notification was',
+              this,
+              style: DiagnosticsTreeStyle.errorProperty,
+            ),
+          ];
           return true;
         }());
         FlutterError.reportError(

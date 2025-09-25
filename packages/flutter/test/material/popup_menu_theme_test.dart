@@ -13,8 +13,8 @@ PopupMenuThemeData _popupMenuThemeM2() {
     shape: const BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
     elevation: 12.0,
     textStyle: const TextStyle(color: Color(0xffffffff), textBaseline: TextBaseline.alphabetic),
-    mouseCursor: MaterialStateProperty.resolveWith<MouseCursor?>((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    mouseCursor: WidgetStateProperty.resolveWith<MouseCursor?>((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return SystemMouseCursors.contextMenu;
       }
       return SystemMouseCursors.alias;
@@ -30,14 +30,14 @@ PopupMenuThemeData _popupMenuThemeM3() {
     elevation: 12.0,
     shadowColor: const Color(0xff00ff00),
     surfaceTintColor: const Color(0xff00ff00),
-    labelTextStyle: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    labelTextStyle: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return const TextStyle(color: Color(0xfff99ff0), fontSize: 12.0);
       }
       return const TextStyle(color: Color(0xfff12099), fontSize: 17.0);
     }),
-    mouseCursor: MaterialStateProperty.resolveWith<MouseCursor?>((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    mouseCursor: WidgetStateProperty.resolveWith<MouseCursor?>((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return SystemMouseCursors.contextMenu;
       }
       return SystemMouseCursors.alias;
@@ -77,11 +77,10 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const PopupMenuThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -96,8 +95,8 @@ void main() {
       shadowColor: const Color(0xfffffff2),
       surfaceTintColor: const Color(0xfffffff3),
       textStyle: const TextStyle(color: Color(0xfffffff4)),
-      labelTextStyle: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
+      labelTextStyle: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
           return const TextStyle(color: Color(0xfffffff5), fontSize: 12.0);
         }
         return const TextStyle(color: Color(0xfffffff6), fontSize: 17.0);
@@ -109,11 +108,10 @@ void main() {
       iconSize: 31.0,
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'color: ${const Color(0xfffffff1)}',
@@ -405,13 +403,13 @@ void main() {
                   return <PopupMenuEntry<void>>[
                     PopupMenuItem<void>(
                       key: popupItemKey,
-                      labelTextStyle: MaterialStateProperty.all<TextStyle>(textStyle),
+                      labelTextStyle: WidgetStateProperty.all<TextStyle>(textStyle),
                       mouseCursor: cursor,
                       child: const Text('Example'),
                     ),
                     CheckedPopupMenuItem<void>(
                       checked: true,
-                      labelTextStyle: MaterialStateProperty.all<TextStyle>(textStyle),
+                      labelTextStyle: WidgetStateProperty.all<TextStyle>(textStyle),
                       child: const Text('Checked item'),
                     ),
                   ];
@@ -706,7 +704,7 @@ void main() {
                     return <PopupMenuEntry<void>>[
                       PopupMenuItem<void>(
                         key: popupItemKey,
-                        labelTextStyle: MaterialStateProperty.all<TextStyle>(textStyle),
+                        labelTextStyle: WidgetStateProperty.all<TextStyle>(textStyle),
                         mouseCursor: cursor,
                         child: const Text('Example'),
                       ),
@@ -754,8 +752,8 @@ void main() {
   });
 }
 
-Set<MaterialState> enabled = <MaterialState>{};
-Set<MaterialState> disabled = <MaterialState>{MaterialState.disabled};
+Set<WidgetState> enabled = <WidgetState>{};
+Set<WidgetState> disabled = <WidgetState>{WidgetState.disabled};
 
 TextStyle? _iconStyle(WidgetTester tester, IconData icon) {
   return tester

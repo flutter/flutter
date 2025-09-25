@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'dart:io' hide Platform;
 
 import 'package:collection/collection.dart';
@@ -50,12 +51,12 @@ void main() {
         '1.2.3-5.0.pre.12',
       ];
       for (final String version in valid_versions) {
-        final File file = fileSystem.file('version');
-        file.writeAsStringSync(version);
+        final fs.File file = fileSystem.file('version');
+        file.writeAsStringSync(jsonEncode(<String, String>{'flutterVersion': version}));
 
-        expect(
-          await verifyVersion(file),
-          isNull,
+        await expectLater(
+          Version.resolveFile(file),
+          completion(isA<VersionOk>()),
           reason: '$version is valid but verifyVersionFile said it was bad',
         );
       }
@@ -72,12 +73,18 @@ void main() {
         '1.2.3-hotfix.1',
       ];
       for (final String version in invalid_versions) {
-        final File file = fileSystem.file('version');
-        file.writeAsStringSync(version);
+        final fs.File file = fileSystem.file('version');
+        file.writeAsStringSync(jsonEncode(<String, String>{'flutterVersion': version}));
 
-        expect(
-          await verifyVersion(file),
-          'The version logic generated an invalid version string: "$version".',
+        await expectLater(
+          Version.resolveFile(file),
+          completion(
+            isA<VersionError>().having(
+              (VersionError e) => e.error,
+              'error',
+              'The version logic generated an invalid version string: "$version".',
+            ),
+          ),
           reason: '$version is invalid but verifyVersionFile said it was fine',
         );
       }

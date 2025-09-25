@@ -20,6 +20,9 @@ absl::flat_hash_set<std::string_view> GetCopyrights(const MMapFile& filemap) {
   absl::flat_hash_set<std::string_view> copyrights;
   std::string_view clause;
   while (RE2::FindAndConsume(&string_view, copyright_regex, &clause)) {
+    while (!clause.empty() && (clause.back() == '*' || clause.back() == ' ')) {
+      clause = std::string_view(clause.data(), clause.size() - 1);
+    }
     copyrights.insert(clause);
   }
   return copyrights;

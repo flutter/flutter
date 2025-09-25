@@ -4,7 +4,6 @@
 
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -280,7 +279,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
     BuildContext context,
     EditableTextState editableTextState,
   ) {
-    if (defaultTargetPlatform == TargetPlatform.iOS && SystemContextMenu.isSupported(context)) {
+    if (SystemContextMenu.isSupportedByField(editableTextState)) {
       return SystemContextMenu.editableText(editableTextState: editableTextState);
     }
     return CupertinoAdaptiveTextSelectionToolbar.editableText(editableTextState: editableTextState);
@@ -317,10 +316,9 @@ class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
 
   void _createLocalController([TextEditingValue? value]) {
     assert(_controller == null);
-    _controller =
-        value == null
-            ? RestorableTextEditingController()
-            : RestorableTextEditingController.fromValue(value);
+    _controller = value == null
+        ? RestorableTextEditingController()
+        : RestorableTextEditingController.fromValue(value);
     if (!restorePending) {
       _registerController();
     }

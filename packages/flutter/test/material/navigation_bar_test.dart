@@ -975,10 +975,9 @@ void main() {
 
     await tester.pumpWidget(buildNavigationBar());
     await tester.pumpAndSettle();
-    final Finder transformFinder =
-        find
-            .descendant(of: find.byType(NavigationIndicator), matching: find.byType(Transform))
-            .last;
+    final Finder transformFinder = find
+        .descendant(of: find.byType(NavigationIndicator), matching: find.byType(Transform))
+        .last;
     Matrix4 transform = tester.widget<Transform>(transformFinder).transform;
     expect(transform.getColumn(0)[0], 0.0);
 
@@ -1087,16 +1086,16 @@ void main() {
     const Color hoverColor = Color(0xff0000ff);
     const Color focusColor = Color(0xff00ffff);
     const Color pressedColor = Color(0xffff00ff);
-    final MaterialStateProperty<Color?> overlayColor = MaterialStateProperty.resolveWith<Color>((
-      Set<MaterialState> states,
+    final WidgetStateProperty<Color?> overlayColor = WidgetStateProperty.resolveWith<Color>((
+      Set<WidgetState> states,
     ) {
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return hoverColor;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return focusColor;
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return pressedColor;
       }
       return Colors.transparent;
@@ -1133,9 +1132,9 @@ void main() {
       inkFeatures,
       kIsWeb
           ? (paints
-            ..rrect()
-            ..rrect()
-            ..circle(color: hoverColor))
+              ..rrect()
+              ..rrect()
+              ..circle(color: hoverColor))
           : (paints..circle(color: hoverColor)),
     );
 
@@ -1147,12 +1146,12 @@ void main() {
       inkFeatures,
       kIsWeb
           ? (paints
-            ..circle()
-            ..circle()
-            ..circle(color: pressedColor))
+              ..circle()
+              ..circle()
+              ..circle(color: pressedColor))
           : (paints
-            ..circle()
-            ..circle(color: pressedColor)),
+              ..circle()
+              ..circle(color: pressedColor)),
     );
 
     await gesture.up();
@@ -1167,11 +1166,11 @@ void main() {
       inkFeatures,
       kIsWeb
           ? (paints
-            ..circle()
-            ..circle(color: focusColor))
+              ..circle()
+              ..circle(color: focusColor))
           : (paints
-            ..circle()
-            ..circle(color: focusColor)),
+              ..circle()
+              ..circle(color: focusColor)),
     );
   });
 
@@ -1695,8 +1694,11 @@ void main() {
       ),
     );
 
-    final double safeAreaBottomPadding =
-        tester.widget<Padding>(find.byType(Padding).first).padding.resolve(textDirection).bottom;
+    final double safeAreaBottomPadding = tester
+        .widget<Padding>(find.byType(Padding).first)
+        .padding
+        .resolve(textDirection)
+        .bottom;
     expect(safeAreaBottomPadding, equals(0));
   });
 }

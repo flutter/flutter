@@ -398,10 +398,13 @@ void main() {
     final List<String> filePaths = <String>[
       for (int i = 0; i < 10; ++i) '/path/to/a/source_file_$i.cc',
     ];
-    final List<Map<String, String>> buildCommandsData =
-        filePaths.map((String e) => makeBuildCommandEntry(e)).toList();
-    final List<Map<String, String>> shardBuildCommandsData =
-        filePaths.sublist(6).map((String e) => makeBuildCommandEntry(e)).toList();
+    final List<Map<String, String>> buildCommandsData = filePaths
+        .map((String e) => makeBuildCommandEntry(e))
+        .toList();
+    final List<Map<String, String>> shardBuildCommandsData = filePaths
+        .sublist(6)
+        .map((String e) => makeBuildCommandEntry(e))
+        .toList();
 
     {
       final List<Command> commands = await fixture.tool.getLintCommandsForFiles(

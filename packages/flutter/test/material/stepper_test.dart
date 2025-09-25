@@ -1112,15 +1112,14 @@ void main() {
     await tester.pumpWidget(widget);
 
     // Set up a getter to examine the MacGuffin's color
-    Color getColor() =>
-        tester
-            .widget<ColoredBox>(
-              find.descendant(
-                of: find.byKey(const Key('tappable-color')),
-                matching: find.byType(ColoredBox),
-              ),
-            )
-            .color;
+    Color getColor() => tester
+        .widget<ColoredBox>(
+          find.descendant(
+            of: find.byKey(const Key('tappable-color')),
+            matching: find.byType(ColoredBox),
+          ),
+        )
+        .color;
 
     // We are on step 1
     expect(find.text('Step 2 Content'), findsNothing);
@@ -1265,9 +1264,9 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return Stepper(
                   type: StepperType.horizontal,
-                  connectorColor: MaterialStateProperty.resolveWith<Color>(
-                    (Set<MaterialState> states) =>
-                        states.contains(MaterialState.selected) ? selectedColor : disabledColor,
+                  connectorColor: WidgetStateProperty.resolveWith<Color>(
+                    (Set<WidgetState> states) =>
+                        states.contains(WidgetState.selected) ? selectedColor : disabledColor,
                   ),
                   onStepTapped: (int i) => setState(() => index = i),
                   currentStep: index,
@@ -1298,10 +1297,10 @@ void main() {
                 as BoxDecoration?)
             ?.color;
 
-    Color lineColor(String keyStep) {
+    Color lineColor() {
       return tester
           .widget<ColoredBox>(
-            find.descendant(of: find.byKey(Key(keyStep)), matching: find.byType(ColoredBox).last),
+            find.descendant(of: find.byType(Stepper), matching: find.byType(ColoredBox)),
           )
           .color;
     }
@@ -1314,7 +1313,7 @@ void main() {
     expect(circleColor('1'), selectedColor);
     expect(circleColor('2'), disabledColor);
     // in two steps case there will be single line
-    expect(lineColor('line0'), selectedColor);
+    expect(lineColor(), selectedColor);
 
     // now hitting step two
     await tester.tap(find.text('step2'));
@@ -1327,7 +1326,7 @@ void main() {
     expect(circleColor('1'), selectedColor);
     expect(circleColor('2'), selectedColor);
 
-    expect(lineColor('line0'), selectedColor);
+    expect(lineColor(), selectedColor);
   });
 
   testWidgets('Stepper stepIconBuilder test', (WidgetTester tester) async {
@@ -1640,6 +1639,49 @@ void main() {
       await tester.pump(duration);
       verifyConnector();
     }
+  });
+
+  testWidgets('Vertical stepper active step has fully colored connector line', (
+    WidgetTester tester,
+  ) async {
+    const Color activeColor = Color(0xFF2196F3);
+    const Color inactiveColor = Color(0xFF9E9E9E);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Stepper(
+              controlsBuilder: (_, _) => const SizedBox.shrink(),
+              connectorThickness: 3,
+              connectorColor: MaterialStateProperty.resolveWith<Color>(
+                (Set<WidgetState> states) =>
+                    states.contains(WidgetState.selected) ? activeColor : inactiveColor,
+              ),
+              steps: const <Step>[
+                Step(title: Text('step1'), content: Text('step1 content'), isActive: true),
+                Step(title: Text('step2'), content: Text('step2 content')),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder connectorLines = find.byWidgetPredicate(
+      (Widget widget) =>
+          widget is ColoredBox &&
+          widget.child is SizedBox &&
+          (widget.child! as SizedBox).width == 3.0,
+    );
+
+    expect(connectorLines, findsWidgets);
+
+    final List<ColoredBox> lineWidgets = tester.widgetList<ColoredBox>(connectorLines).toList();
+    final List<Color> colors = lineWidgets.map((ColoredBox box) => box.color).toList();
+    // Both top and bottom box should be colored.
+    expect(colors.where((Color c) => c == activeColor).length, equals(2));
+    expect(colors.first, equals(activeColor));
+    expect(colors.last, equals(activeColor));
   });
 }
 

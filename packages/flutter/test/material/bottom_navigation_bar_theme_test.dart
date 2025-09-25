@@ -63,11 +63,10 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const BottomNavigationBarThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -91,11 +90,10 @@ void main() {
       mouseCursor: MaterialStateMouseCursor.clickable,
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description[0], 'backgroundColor: ${const Color(0xfffffff0)}');
     expect(description[1], 'elevation: 10.0');
@@ -141,10 +139,8 @@ void main() {
             type: BottomNavigationBarType.fixed,
             selectedLabelStyle: selectedTextStyle,
             unselectedLabelStyle: unselectedTextStyle,
-            mouseCursor: MaterialStateProperty.resolveWith<MouseCursor?>((
-              Set<MaterialState> states,
-            ) {
-              if (states.contains(MaterialState.selected)) {
+            mouseCursor: WidgetStateProperty.resolveWith<MouseCursor?>((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
                 return SystemMouseCursors.grab;
               }
               return SystemMouseCursors.move;
@@ -170,8 +166,10 @@ void main() {
       of: find.byType(BottomNavigationBar),
       matching: find.ancestor(of: find.text('Alarm'), matching: find.byType(Transform)),
     );
-    final TextStyle selectedFontStyle =
-        tester.renderObject<RenderParagraph>(find.text('AC')).text.style!;
+    final TextStyle selectedFontStyle = tester
+        .renderObject<RenderParagraph>(find.text('AC'))
+        .text
+        .style!;
     final TextStyle selectedIcon = _iconStyle(tester, Icons.ac_unit);
     final TextStyle unselectedIcon = _iconStyle(tester, Icons.access_alarm);
     expect(selectedFontStyle.fontSize, selectedFontStyle.fontSize);
@@ -293,8 +291,10 @@ void main() {
       return find.descendant(of: find.byType(BottomNavigationBar), matching: finder);
     }
 
-    final TextStyle selectedFontStyle =
-        tester.renderObject<RenderParagraph>(find.text('AC')).text.style!;
+    final TextStyle selectedFontStyle = tester
+        .renderObject<RenderParagraph>(find.text('AC'))
+        .text
+        .style!;
     final TextStyle selectedIcon = _iconStyle(tester, Icons.ac_unit);
     final TextStyle unselectedIcon = _iconStyle(tester, Icons.access_alarm);
     expect(selectedFontStyle.fontSize, selectedFontStyle.fontSize);

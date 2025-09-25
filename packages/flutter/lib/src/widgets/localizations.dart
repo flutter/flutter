@@ -194,6 +194,14 @@ abstract class WidgetsLocalizations {
   /// list one space right in the list.
   String get reorderItemRight;
 
+  /// The semantics label used for [RawAutocomplete] when the options list goes
+  /// from empty to non-empty.
+  String get searchResultsFound => 'Search results found';
+
+  /// The semantics label used for [RawAutocomplete] when the options list goes
+  /// from non-empty to empty.
+  String get noResultsFound => 'No results found';
+
   /// Label for "copy" edit buttons and menu items.
   String get copyButtonLabel;
 
@@ -285,6 +293,12 @@ class DefaultWidgetsLocalizations implements WidgetsLocalizations {
   String get reorderItemToStart => 'Move to the start';
 
   @override
+  String get searchResultsFound => 'Search results found';
+
+  @override
+  String get noResultsFound => 'No results found';
+
+  @override
   String get copyButtonLabel => 'Copy';
 
   @override
@@ -354,7 +368,7 @@ class _LocalizationsScope extends InheritedWidget {
 /// {@tool snippet}
 ///
 /// This following class is defined in terms of the
-/// [Dart `intl` package](https://github.com/dart-lang/intl). Using the `intl`
+/// [Dart `intl` package](https://github.com/dart-lang/i18n/tree/main/pkgs/intl). Using the `intl`
 /// package isn't required.
 ///
 /// ```dart
@@ -542,8 +556,8 @@ class Localizations extends StatefulWidget {
   /// If no [Localizations] widget is in scope then the [Localizations.localeOf]
   /// method will throw an exception.
   static Locale localeOf(BuildContext context) {
-    final _LocalizationsScope? scope =
-        context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
+    final _LocalizationsScope? scope = context
+        .dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
     assert(() {
       if (scope == null) {
         throw FlutterError(
@@ -568,16 +582,16 @@ class Localizations extends StatefulWidget {
   /// If no [Localizations] widget is in scope then this function will return
   /// null.
   static Locale? maybeLocaleOf(BuildContext context) {
-    final _LocalizationsScope? scope =
-        context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
+    final _LocalizationsScope? scope = context
+        .dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
     return scope?.localizationsState.locale;
   }
 
   // There doesn't appear to be a need to make this public. See the
   // Localizations.override factory constructor.
   static List<LocalizationsDelegate<dynamic>> _delegatesOf(BuildContext context) {
-    final _LocalizationsScope? scope =
-        context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
+    final _LocalizationsScope? scope = context
+        .dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
     assert(scope != null, 'a Localizations ancestor was not found');
     return List<LocalizationsDelegate<dynamic>>.of(scope!.localizationsState.widget.delegates);
   }
@@ -598,8 +612,8 @@ class Localizations extends StatefulWidget {
   /// }
   /// ```
   static T? of<T>(BuildContext context, Type type) {
-    final _LocalizationsScope? scope =
-        context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
+    final _LocalizationsScope? scope = context
+        .dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
     return scope?.localizationsState.resourcesFor<T?>(type);
   }
 
@@ -659,12 +673,10 @@ class _LocalizationsState extends State<Localizations> {
     }
 
     Map<Type, dynamic>? typeToResources;
-    final Future<Map<Type, dynamic>> typeToResourcesFuture = _loadAll(
-      locale,
-      delegates,
-    ).then<Map<Type, dynamic>>((Map<Type, dynamic> value) {
-      return typeToResources = value;
-    });
+    final Future<Map<Type, dynamic>> typeToResourcesFuture = _loadAll(locale, delegates)
+        .then<Map<Type, dynamic>>((Map<Type, dynamic> value) {
+          return typeToResources = value;
+        });
 
     if (typeToResources != null) {
       // All of the delegates' resources loaded synchronously.
@@ -790,8 +802,9 @@ class LocalizationsResolver extends ChangeNotifier with WidgetsBindingObserver {
   /// The currently resolved [Locale] based on the current platform locale and
   /// the provided set of [supportedLocales].
   Locale get locale {
-    final Locale appLocale =
-        _locale != null ? _resolveLocales(<Locale>[_locale!], supportedLocales) : _resolvedLocale!;
+    final Locale appLocale = _locale != null
+        ? _resolveLocales(<Locale>[_locale!], supportedLocales)
+        : _resolvedLocale!;
     assert(_debugCheckLocalizations(appLocale));
     return appLocale;
   }
@@ -804,7 +817,7 @@ class LocalizationsResolver extends ChangeNotifier with WidgetsBindingObserver {
     // localizationsDelegate parameter can be used to override
     // WidgetsLocalizations.delegate.
     return <LocalizationsDelegate<Object?>>[
-      if (_localizationsDelegates != null) ..._localizationsDelegates!,
+      ...?_localizationsDelegates,
       DefaultWidgetsLocalizations.delegate,
     ];
   }
@@ -876,10 +889,9 @@ class LocalizationsResolver extends ChangeNotifier with WidgetsBindingObserver {
 
   bool _debugCheckLocalizations(Locale locale) {
     assert(() {
-      final Set<Type> unsupportedTypes =
-          localizationsDelegates
-              .map<Type>((LocalizationsDelegate<dynamic> delegate) => delegate.type)
-              .toSet();
+      final Set<Type> unsupportedTypes = localizationsDelegates
+          .map<Type>((LocalizationsDelegate<dynamic> delegate) => delegate.type)
+          .toSet();
       for (final LocalizationsDelegate<dynamic> delegate in localizationsDelegates) {
         if (!unsupportedTypes.contains(delegate.type)) {
           continue;
@@ -897,35 +909,34 @@ class LocalizationsResolver extends ChangeNotifier with WidgetsBindingObserver {
           exception:
               "Warning: This application's locale, $locale, is not supported by all of its localization delegates.",
           library: 'widgets',
-          informationCollector:
-              () => <DiagnosticsNode>[
-                for (final Type unsupportedType in unsupportedTypes)
-                  ErrorDescription(
-                    '• A $unsupportedType delegate that supports the $locale locale was not found.',
-                  ),
-                ErrorSpacer(),
-                if (unsupportedTypes.length == 1 &&
-                    unsupportedTypes.single.toString() == 'CupertinoLocalizations')
-                // We previously explicitly avoided checking for this class so it's not uncommon for applications
-                // to have omitted importing the required delegate.
-                ...<DiagnosticsNode>[
-                  ErrorHint(
-                    'If the application is built using GlobalMaterialLocalizations.delegate, consider using '
-                    'GlobalMaterialLocalizations.delegates (plural) instead, as that will automatically declare '
-                    'the appropriate Cupertino localizations.',
-                  ),
-                  ErrorSpacer(),
-                ],
-                ErrorHint(
-                  'The declared supported locales for this app are: ${supportedLocales.join(", ")}',
-                ),
-                ErrorSpacer(),
-                ErrorDescription(
-                  'See https://flutter.dev/to/internationalization/ for more '
-                  "information about configuring an app's locale, supportedLocales, "
-                  'and localizationsDelegates parameters.',
-                ),
-              ],
+          informationCollector: () => <DiagnosticsNode>[
+            for (final Type unsupportedType in unsupportedTypes)
+              ErrorDescription(
+                '• A $unsupportedType delegate that supports the $locale locale was not found.',
+              ),
+            ErrorSpacer(),
+            if (unsupportedTypes.length == 1 &&
+                unsupportedTypes.single.toString() == 'CupertinoLocalizations')
+            // We previously explicitly avoided checking for this class so it's not uncommon for applications
+            // to have omitted importing the required delegate.
+            ...<DiagnosticsNode>[
+              ErrorHint(
+                'If the application is built using GlobalMaterialLocalizations.delegate, consider using '
+                'GlobalMaterialLocalizations.delegates (plural) instead, as that will automatically declare '
+                'the appropriate Cupertino localizations.',
+              ),
+              ErrorSpacer(),
+            ],
+            ErrorHint(
+              'The declared supported locales for this app are: ${supportedLocales.join(", ")}',
+            ),
+            ErrorSpacer(),
+            ErrorDescription(
+              'See https://flutter.dev/to/internationalization/ for more '
+              "information about configuring an app's locale, supportedLocales, "
+              'and localizationsDelegates parameters.',
+            ),
+          ],
         ),
       );
       return true;

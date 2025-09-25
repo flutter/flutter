@@ -12,23 +12,23 @@ class WidgetPreviewAnalytics {
 
   final Analytics analytics;
 
-  final Stopwatch _launchTimer = Stopwatch();
-  final Stopwatch _reloadTimer = Stopwatch();
+  final _launchTimer = Stopwatch();
+  final _reloadTimer = Stopwatch();
 
-  bool _launchIncludedProjectGeneration = false;
+  var _launchIncludedProjectGeneration = false;
 
   /// The analytics workflow for tracking widget previewer timings.
-  static const String kWorkflow = 'widget-preview';
+  static const kWorkflow = 'widget-preview';
 
   /// The analytics event tracking widget previewer launch times.
-  static const String kLaunchTime = 'launch-time';
+  static const kLaunchTime = 'launch-time';
 
   /// The analytics event tracking widget preview reload times.
-  static const String kPreviewReloadTime = 'preview-reload-time';
+  static const kPreviewReloadTime = 'preview-reload-time';
 
   /// Provided as the label to [kLaunchTime] events if the widget preview scaffold project was
   /// generated as part of the widget previewer starting up.
-  static const String kScaffoldGeneratedLabel = 'scaffold-generated';
+  static const kScaffoldGeneratedLabel = 'scaffold-generated';
 
   /// Starts the stopwatch tracking the widget previewer launch time.
   void initializeLaunchStopwatch() {
@@ -58,7 +58,7 @@ class WidgetPreviewAnalytics {
   ///
   /// This should be invoked when a file system event is detected in the preview detector.
   void startPreviewReloadStopwatch() {
-    assert(!_launchTimer.isRunning);
+    assert(!_reloadTimer.isRunning);
     _reloadTimer.start();
   }
 

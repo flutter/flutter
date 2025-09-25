@@ -26,10 +26,14 @@ void main() {
       ),
     );
 
-    final TextStyle actualSelectedTextStyle =
-        tester.renderObject<RenderParagraph>(find.text('Abc')).text.style!;
-    final TextStyle actualUnselectedTextStyle =
-        tester.renderObject<RenderParagraph>(find.text('Def')).text.style!;
+    final TextStyle actualSelectedTextStyle = tester
+        .renderObject<RenderParagraph>(find.text('Abc'))
+        .text
+        .style!;
+    final TextStyle actualUnselectedTextStyle = tester
+        .renderObject<RenderParagraph>(find.text('Def'))
+        .text
+        .style!;
     expect(actualSelectedTextStyle.fontSize, equals(selectedTextStyle.fontSize));
     expect(actualSelectedTextStyle.fontWeight, equals(selectedTextStyle.fontWeight));
     expect(actualUnselectedTextStyle.fontSize, equals(actualUnselectedTextStyle.fontSize));
@@ -3716,10 +3720,9 @@ void main() {
 
     await buildWidget();
     await tester.pumpAndSettle();
-    final Finder transformFinder =
-        find
-            .descendant(of: find.byType(NavigationIndicator), matching: find.byType(Transform))
-            .last;
+    final Finder transformFinder = find
+        .descendant(of: find.byType(NavigationIndicator), matching: find.byType(Transform))
+        .last;
     Matrix4 transform = tester.widget<Transform>(transformFinder).transform;
     expect(transform.getColumn(0)[0], 0.0);
 
@@ -6198,7 +6201,7 @@ TestSemantics _expectedSemantics({bool scrollable = false}) {
               TestSemantics(
                 flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                 children: <TestSemantics>[
-                  ...destinations,
+                  TestSemantics(children: destinations),
                   TestSemantics(label: 'body', textDirection: TextDirection.ltr),
                 ],
               ),
@@ -6251,7 +6254,12 @@ Future<void> _pumpNavigationRail(
             minScaleFactor: textScaleFactor,
             maxScaleFactor: textScaleFactor,
             child: Scaffold(
-              body: Row(children: <Widget>[navigationRail, const Expanded(child: Text('body'))]),
+              body: Row(
+                children: <Widget>[
+                  navigationRail,
+                  const Expanded(child: Text('body')),
+                ],
+              ),
             ),
           );
         },
@@ -6347,7 +6355,14 @@ Widget _buildWidget(Widget child, {bool useMaterial3 = true, bool isRTL = false}
     theme: ThemeData(useMaterial3: useMaterial3),
     home: Directionality(
       textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
-      child: Scaffold(body: Row(children: <Widget>[child, const Expanded(child: Text('body'))])),
+      child: Scaffold(
+        body: Row(
+          children: <Widget>[
+            child,
+            const Expanded(child: Text('body')),
+          ],
+        ),
+      ),
     ),
   );
 }

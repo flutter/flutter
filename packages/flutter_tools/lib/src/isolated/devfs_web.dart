@@ -29,11 +29,11 @@ import '../vmservice.dart';
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
+import '../web/devfs_config.dart';
 import '../web_template.dart';
-
 import 'web_asset_server.dart';
 
-const String kLuciEnvName = 'LUCI_CONTEXT';
+const kLuciEnvName = 'LUCI_CONTEXT';
 
 /// A web server which handles serving JavaScript and assets.
 ///
@@ -60,10 +60,6 @@ class WebDevFS implements DevFS {
   /// [testMode] is true, do not actually initialize dwds or the shelf static
   /// server.
   WebDevFS({
-    required this.hostname,
-    required int port,
-    required this.tlsCertPath,
-    required this.tlsCertKeyPath,
     required this.packagesFilePath,
     required this.urlTunneller,
     required this.useSseForDebugProxy,
@@ -71,14 +67,14 @@ class WebDevFS implements DevFS {
     required this.useSseForInjectedClient,
     required this.buildInfo,
     required this.enableDwds,
-    required this.enableDds,
+    required this.ddsConfig,
     required this.entrypoint,
     required this.expressionCompiler,
-    required this.extraHeaders,
     required this.chromiumLauncher,
     required this.nativeNullAssertions,
     required this.ddcModuleSystem,
     required this.canaryFeatures,
+    required this.webDevServerConfig,
     required this.webRenderer,
     required this.isWasm,
     required this.useLocalCanvasKit,
@@ -88,7 +84,7 @@ class WebDevFS implements DevFS {
     required this.logger,
     required this.platform,
     this.testMode = false,
-  }) : _port = port {
+  }) {
     // TODO(srujzs): Remove this assertion when the library bundle format is
     // supported without canary mode.
     if (ddcModuleSystem) {
@@ -97,7 +93,6 @@ class WebDevFS implements DevFS {
   }
 
   final Uri entrypoint;
-  final String hostname;
   final String packagesFilePath;
   final UrlTunneller? urlTunneller;
   final bool useSseForDebugProxy;
@@ -105,20 +100,17 @@ class WebDevFS implements DevFS {
   final bool useSseForInjectedClient;
   final BuildInfo buildInfo;
   final bool enableDwds;
-  final bool enableDds;
-  final Map<String, String> extraHeaders;
+  final DartDevelopmentServiceConfiguration ddsConfig;
   final bool testMode;
   final bool ddcModuleSystem;
   final bool canaryFeatures;
   final ExpressionCompiler? expressionCompiler;
   final ChromiumLauncher? chromiumLauncher;
   final bool nativeNullAssertions;
-  final int _port;
-  final String? tlsCertPath;
-  final String? tlsCertKeyPath;
   final WebRendererMode webRenderer;
   final bool isWasm;
   final bool useLocalCanvasKit;
+  final WebDevServerConfig webDevServerConfig;
   final bool useDwdsWebSocketConnection;
   final FileSystem fileSystem;
   final Logger logger;
@@ -134,10 +126,10 @@ class WebDevFS implements DevFS {
 
   // A flag to indicate whether we have called `setAssetDirectory` on the target device.
   @override
-  bool hasSetAssetDirectory = false;
+  var hasSetAssetDirectory = false;
 
   @override
-  bool didUpdateFontManifest = false;
+  var didUpdateFontManifest = false;
 
   Future<DebugConnection>? _cachedExtensionFuture;
   StreamSubscription<void>? _connectedApps;
@@ -151,18 +143,17 @@ class WebDevFS implements DevFS {
     bool useDebugExtension, {
     @visibleForTesting VmServiceFactory vmServiceFactory = createVmServiceDelegate,
   }) {
-    final Completer<ConnectionResult> firstConnection = Completer<ConnectionResult>();
+    final firstConnection = Completer<ConnectionResult>();
     // Note there is an asynchronous gap between this being set to true and
     // [firstConnection] completing; thus test the boolean to determine if
     // the current connection is the first.
-    bool foundFirstConnection = false;
+    var foundFirstConnection = false;
     _connectedApps = dwds.connectedApps.listen(
       (AppConnection appConnection) async {
         try {
-          final DebugConnection debugConnection =
-              useDebugExtension
-                  ? await (_cachedExtensionFuture ??= dwds.extensionDebugConnections.stream.first)
-                  : await dwds.debugConnection(appConnection);
+          final DebugConnection debugConnection = useDebugExtension
+              ? await (_cachedExtensionFuture ??= dwds.extensionDebugConnections.stream.first)
+              : await dwds.debugConnection(appConnection);
           if (foundFirstConnection) {
             appConnection.runMain();
           } else {
@@ -190,7 +181,7 @@ class WebDevFS implements DevFS {
   }
 
   @override
-  List<Uri> sources = <Uri>[];
+  var sources = <Uri>[];
 
   @override
   DateTime? lastCompiled;
@@ -203,39 +194,35 @@ class WebDevFS implements DevFS {
   Set<String> get assetPathsToEvict => const <String>{};
 
   @override
-  Uri? get baseUri => webAssetServer.baseUri;
+  Uri get baseUri => webAssetServer.baseUri;
 
   @override
   Future<Uri> create() async {
     webAssetServer = await WebAssetServer.start(
       chromiumLauncher,
-      hostname,
-      _port,
-      tlsCertPath,
-      tlsCertKeyPath,
       urlTunneller,
       useSseForDebugProxy,
       useSseForDebugBackend,
       useSseForInjectedClient,
       buildInfo,
       enableDwds,
-      enableDds,
+      ddsConfig,
       entrypoint,
       expressionCompiler,
-      extraHeaders,
       webRenderer: webRenderer,
       isWasm: isWasm,
       useLocalCanvasKit: useLocalCanvasKit,
       testMode: testMode,
       ddcModuleSystem: ddcModuleSystem,
       canaryFeatures: canaryFeatures,
+      webDevServerConfig: webDevServerConfig,
       useDwdsWebSocketConnection: useDwdsWebSocketConnection,
       fileSystem: fileSystem,
       logger: logger,
       platform: platform,
       shouldEnableMiddleware: shouldEnableMiddleware,
     );
-    return baseUri!;
+    return baseUri;
   }
 
   @override
@@ -261,7 +248,7 @@ class WebDevFS implements DevFS {
       return;
     }
 
-    final WebTemplate template = WebTemplate(await file.readAsString());
+    final template = WebTemplate(await file.readAsString());
     for (final WebTemplateWarning warning in template.getWarnings()) {
       logger.printWarning('Warning: In $filename:${warning.lineNumber}: ${warning.warningText}');
     }
@@ -312,19 +299,19 @@ class WebDevFS implements DevFS {
         'main.dart.js',
         ddcModuleSystem
             ? generateDDCLibraryBundleBootstrapScript(
-              entrypoint: entrypoint,
-              ddcModuleLoaderUrl: 'ddc_module_loader.js',
-              mapperUrl: 'stack_trace_mapper.js',
-              generateLoadingIndicator: shouldEnableMiddleware,
-              isWindows: platform.isWindows,
-            )
+                entrypoint: entrypoint,
+                ddcModuleLoaderUrl: 'ddc_module_loader.js',
+                mapperUrl: 'stack_trace_mapper.js',
+                generateLoadingIndicator: shouldEnableMiddleware,
+                isWindows: platform.isWindows,
+              )
             : generateBootstrapScript(
-              requireUrl: 'require.js',
-              mapperUrl: 'stack_trace_mapper.js',
-              generateLoadingIndicator: shouldEnableMiddleware,
-            ),
+                requireUrl: 'require.js',
+                mapperUrl: 'stack_trace_mapper.js',
+                generateLoadingIndicator: shouldEnableMiddleware,
+              ),
       );
-      const String onLoadEndBootstrap = 'on_load_end_bootstrap.js';
+      const onLoadEndBootstrap = 'on_load_end_bootstrap.js';
       if (ddcModuleSystem) {
         webAssetServer.writeFile(onLoadEndBootstrap, generateDDCLibraryBundleOnLoadEndBootstrap());
       }
@@ -332,16 +319,16 @@ class WebDevFS implements DevFS {
         'main_module.bootstrap.js',
         ddcModuleSystem
             ? generateDDCLibraryBundleMainModule(
-              entrypoint: entrypoint,
-              nativeNullAssertions: nativeNullAssertions,
-              onLoadEndBootstrap: onLoadEndBootstrap,
-              isCi: platform.environment.containsKey(kLuciEnvName),
-            )
+                entrypoint: entrypoint,
+                nativeNullAssertions: nativeNullAssertions,
+                onLoadEndBootstrap: onLoadEndBootstrap,
+                isCi: platform.environment.containsKey(kLuciEnvName),
+              )
             : generateMainModule(
-              entrypoint: entrypoint,
-              nativeNullAssertions: nativeNullAssertions,
-              loaderRootDirectory: baseUri.toString(),
-            ),
+                entrypoint: entrypoint,
+                nativeNullAssertions: nativeNullAssertions,
+                loaderRootDirectory: baseUri.toString(),
+              ),
       );
       // TODO(zanderso): refactor the asset code in this and the regular devfs to
       // be shared.
@@ -362,7 +349,7 @@ class WebDevFS implements DevFS {
     }
     await _validateTemplateFile('index.html');
     await _validateTemplateFile('flutter_bootstrap.js');
-    final DateTime candidateCompileTime = DateTime.now();
+    final candidateCompileTime = DateTime.now();
     if (resetCompiler) {
       generator.reset();
     }
@@ -416,13 +403,9 @@ class WebDevFS implements DevFS {
     } on FileSystemException catch (err) {
       throwToolExit('Failed to load recompiled sources:\n$err');
     }
-    if (fullRestart) {
-      webAssetServer.performRestart(
-        modules,
-        writeRestartScripts: ddcModuleSystem && !bundleFirstUpload,
-      );
-    } else {
-      webAssetServer.performReload(modules);
+    webAssetServer.updateModulesAndDigests(modules);
+    if (!bundleFirstUpload && ddcModuleSystem) {
+      webAssetServer.writeReloadedSources(modules);
     }
     return UpdateFSReport(
       success: true,
