@@ -202,6 +202,12 @@ abstract class WidgetsLocalizations {
   /// from non-empty to empty.
   String get noResultsFound => 'No results found';
 
+  /// The semantics hint to describe the [Expansible] expanded state.
+  String get expandedHint => 'Collapsed';
+
+  /// The semantics hint to describe the [Expansible] collapsed state.
+  String get collapsedHint => 'Expanded';
+
   /// Label for "copy" edit buttons and menu items.
   String get copyButtonLabel;
 
@@ -297,6 +303,12 @@ class DefaultWidgetsLocalizations implements WidgetsLocalizations {
 
   @override
   String get noResultsFound => 'No results found';
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get collapsedHint => 'Expanded';
 
   @override
   String get copyButtonLabel => 'Copy';

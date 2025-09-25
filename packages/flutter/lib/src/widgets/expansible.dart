@@ -5,11 +5,19 @@
 /// @docImport 'package:flutter/material.dart';
 library;
 
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/semantics.dart';
+
 import 'basic.dart';
 import 'framework.dart';
+import 'localizations.dart';
+import 'media_query.dart';
 import 'page_storage.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
+import 'view.dart';
 
 /// The type of the callback that returns the header or body of an [Expansible].
 ///
@@ -292,13 +300,16 @@ class Expansible extends StatefulWidget {
 class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late CurvedAnimation _heightFactor;
+  Timer? _timer;
+
+  bool get _isExpanded => widget.controller.isExpanded;
 
   @override
   void initState() {
     super.initState();
     _animationController = AnimationController(duration: widget.duration, vsync: this);
     final bool initiallyExpanded =
-        PageStorage.maybeOf(context)?.readState(context) as bool? ?? widget.controller.isExpanded;
+        PageStorage.maybeOf(context)?.readState(context) as bool? ?? _isExpanded;
     if (initiallyExpanded) {
       _animationController.value = 1.0;
       widget.controller.expand();
@@ -340,13 +351,36 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
     widget.controller.removeListener(_toggleExpansion);
     _animationController.dispose();
     _heightFactor.dispose();
+    _timer?.cancel();
+    _timer = null;
     super.dispose();
+  }
+
+  void _announceSemantics() {
+    if (!MediaQuery.supportsAnnounceOf(context)) {
+      return;
+    }
+    final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
+    final String stateHint = _isExpanded ? localizations.collapsedHint : localizations.expandedHint;
+
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      // TODO(tahatesser): This is a workaround for VoiceOver interrupting
+      // semantic announcements on iOS. https://github.com/flutter/flutter/issues/122101.
+      _timer?.cancel();
+      _timer = Timer(const Duration(seconds: 1), () {
+        SemanticsService.sendAnnouncement(View.of(context), stateHint, localizations.textDirection);
+        _timer?.cancel();
+        _timer = null;
+      });
+    } else {
+      SemanticsService.sendAnnouncement(View.of(context), stateHint, localizations.textDirection);
+    }
   }
 
   void _toggleExpansion() {
     setState(() {
       // Rebuild with the header and the animating body.
-      if (widget.controller.isExpanded) {
+      if (_isExpanded) {
         _animationController.forward();
       } else {
         _animationController.reverse().then<void>((void value) {
@@ -358,14 +392,15 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
           });
         });
       }
-      PageStorage.maybeOf(context)?.writeState(context, widget.controller.isExpanded);
+      PageStorage.maybeOf(context)?.writeState(context, _isExpanded);
+      _announceSemantics();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    assert(!_animationController.isDismissed || !widget.controller.isExpanded);
-    final bool closed = !widget.controller.isExpanded && _animationController.isDismissed;
+    assert(!_isExpanded || !_animationController.isDismissed);
+    final bool closed = !_isExpanded && _animationController.isDismissed;
     final bool shouldRemoveBody = closed && !widget.maintainState;
 
     final Widget result = Offstage(

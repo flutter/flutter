@@ -15,6 +15,14 @@
   "@searchResultsFound": {"description":"The audio announcement when Autocomplete search results become available."},
   "noResultsFound": "No results found",
   "@noResultsFound": {"description":"The audio announcement when Autocomplete search results become unavailable."},
+  "expandedHint": "Collapsed",
+  "@expandedHint": {
+    "description": "The verb which describes the ExpansionTile state when an expanded ExpansionTile is pressed."
+  },
+  "collapsedHint": "Expanded",
+  "@collapsedHint": {
+    "description": "The verb which describes the ExpansionTile state when a collapsed ExpansionTile is pressed."
+  },
   "copyButtonLabel": "Copy",
   "@copyButtonLabel": {"description":"The label for copy buttons and menu items."},
   "cutButtonLabel": "Cut",
