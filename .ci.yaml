@@ -4306,7 +4306,7 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Mac_arm64 module_uiscene_test_ios
+  - name: Mac module_uiscene_test_ios
     recipe: devicelab/devicelab_drone
     bringup: true
     timeout: 60

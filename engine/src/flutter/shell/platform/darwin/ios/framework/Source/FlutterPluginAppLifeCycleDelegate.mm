@@ -90,13 +90,13 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
   return NO;
 }
 
-- (BOOL)shouldHandleNotification {
+- (BOOL)appSupportsSceneLifecycle {
   // When UIScene lifecycle is being used, some application lifecycle events are not call by UIKit.
   // However, the notifications are still sent. When a Flutter app has been migrated to UIScene,
   // Flutter should not use the notifications to forward application events to plugins since they
   // are not expected to be called.
   // See https://flutter.dev/go/ios-ui-scene-lifecycle-migration?tab=t.0#heading=h.eq8gyd4ds50u
-  return !FlutterSharedApplication.hasSceneDelegate;
+  return FlutterSharedApplication.hasSceneDelegate;
 }
 
 - (BOOL)pluginSupportsSceneLifecycle:(NSObject<FlutterApplicationLifeCycleDelegate>*)delegate {
@@ -148,7 +148,7 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
 
 - (void)handleDidEnterBackground:(NSNotification*)notification
     NS_EXTENSION_UNAVAILABLE_IOS("Disallowed in app extensions") {
-  if (![self shouldHandleNotification]) {
+  if ([self appSupportsSceneLifecycle]) {
     return;
   }
   UIApplication* application = [UIApplication sharedApplication];
@@ -197,7 +197,7 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
 
 - (void)handleWillEnterForeground:(NSNotification*)notification
     NS_EXTENSION_UNAVAILABLE_IOS("Disallowed in app extensions") {
-  if (![self shouldHandleNotification]) {
+  if ([self appSupportsSceneLifecycle]) {
     return;
   }
   UIApplication* application = [UIApplication sharedApplication];
@@ -232,7 +232,7 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
 
 - (void)handleWillResignActive:(NSNotification*)notification
     NS_EXTENSION_UNAVAILABLE_IOS("Disallowed in app extensions") {
-  if (![self shouldHandleNotification]) {
+  if ([self appSupportsSceneLifecycle]) {
     return;
   }
   UIApplication* application = [UIApplication sharedApplication];
@@ -261,7 +261,7 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
 
 - (void)handleDidBecomeActive:(NSNotification*)notification
     NS_EXTENSION_UNAVAILABLE_IOS("Disallowed in app extensions") {
-  if (![self shouldHandleNotification]) {
+  if ([self appSupportsSceneLifecycle]) {
     return;
   }
   UIApplication* application = [UIApplication sharedApplication];

@@ -104,7 +104,10 @@ FLUTTER_ASSERT_ARC
 - (FlutterPluginAppLifeCycleDelegate*)applicationLifeCycleDelegate {
   id appDelegate = FlutterSharedApplication.application.delegate;
   if ([appDelegate respondsToSelector:@selector(lifeCycleDelegate)]) {
-    return [appDelegate lifeCycleDelegate];
+    id lifecycleDelegate = [appDelegate lifeCycleDelegate];
+    if ([lifecycleDelegate isKindOfClass:[FlutterPluginAppLifeCycleDelegate class]]) {
+      return lifecycleDelegate;
+    }
   }
   return nil;
 }
