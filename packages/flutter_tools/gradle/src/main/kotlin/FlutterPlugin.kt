@@ -4,11 +4,15 @@
 
 package com.flutter.gradle
 
+import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.variant.AndroidComponentsExtension
+import com.android.build.api.variant.Variant
 import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.LibraryExtension
 import com.android.build.gradle.api.ApkVariant
+import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.tasks.PackageAndroidArtifact
 import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.flutter.gradle.FlutterPluginUtils.readPropertiesIfExist
@@ -59,7 +63,7 @@ class FlutterPlugin : Plugin<Project> {
             resolveFlutterSdkProperty(flutterRootSystemVal)
                 ?: throw GradleException(
                     "Flutter SDK not found. Define location with flutter.sdk in the " +
-                        "local.properties file or with a FLUTTER_ROOT environment variable."
+                        "local.properties file or with a FLUTTER_ROOT environment variable.",
                 )
 
         flutterRoot = project.file(flutterRootPath)
@@ -114,8 +118,8 @@ class FlutterPlugin : Plugin<Project> {
                     "src",
                     "main",
                     "scripts",
-                    "native_plugin_loader.gradle.kts"
-                )
+                    "native_plugin_loader.gradle.kts",
+                ),
             )
         }
 
@@ -227,7 +231,7 @@ class FlutterPlugin : Plugin<Project> {
                     project.logger.error(
                         "Warning: Flutter was unable to detect project Gradle, Java, " +
                             "AGP, and KGP versions. Skipping dependency version checking. Error was: " +
-                            e
+                            e,
                     )
                 } else {
                     // If usesUnsupportedDependencyVersions is set, the exception was thrown by us
@@ -245,7 +249,7 @@ class FlutterPlugin : Plugin<Project> {
                     "packages",
                     "flutter_tools",
                     "gradle",
-                    "flutter_proguard_rules.pro"
+                    "flutter_proguard_rules.pro",
                 ).toString()
         // TODO(gmackall): reconsider getting the android extension every time
         FlutterPluginUtils.getAndroidExtension(project).buildTypes {
@@ -274,7 +278,7 @@ class FlutterPlugin : Plugin<Project> {
                             .getAndroidExtension(project)
                             .getDefaultProguardFile("proguard-android-optimize.txt"),
                         flutterProguardRules,
-                        "proguard-rules.pro"
+                        "proguard-rules.pro",
                     )
                 }
             }
@@ -309,7 +313,7 @@ class FlutterPlugin : Plugin<Project> {
             project!!,
             buildType,
             getPluginHandler(project!!),
-            engineVersion!!
+            engineVersion!!,
         )
     }
 
@@ -324,7 +328,7 @@ class FlutterPlugin : Plugin<Project> {
         }
         return project?.findProperty(propertyName) as? String ?: localProperties!!.getProperty(
             propertyName,
-            defaultValue
+            defaultValue,
         )
     }
 
@@ -370,74 +374,134 @@ class FlutterPlugin : Plugin<Project> {
             // TODO(gmackall): I think this can be BaseExtension, with findByType.
             val android: AbstractAppExtension =
                 projectToAddTasksTo.extensions.findByName("android") as AbstractAppExtension
-            android.applicationVariants.configureEach {
-                val variant = this
-                val assembleTask = variant.assembleProvider.get()
+
+            val androidComponents = projectToAddTasksTo.extensions.getByType(AndroidComponentsExtension::class.java)
+            androidComponents.onVariants { variant ->
+                // assemble task name is always "assemble<CapitalizedVariantName>"
+                val assembleTaskName = "assemble${variant.name.replaceFirstChar { it.uppercase() }}"
+
+                // Get the provider for the assemble task
+                val assembleTaskProvider = projectToAddTasksTo.tasks.named(assembleTaskName)
+
                 if (!FlutterPluginUtils.shouldConfigureFlutterTask(
                         projectToAddTasksTo,
-                        assembleTask
+                        assembleTaskProvider.get(),
                     )
                 ) {
-                    return@configureEach
+                    return@onVariants
                 }
                 val copyFlutterAssetsTask: Task =
-                    addFlutterDeps(variant, flutterPlugin, targetPlatforms)
+                    addFlutterDeps(variant as BaseVariant, flutterPlugin, targetPlatforms)
 
-                // TODO(gmackall): Migrate to AGPs variant api.
-                //    https://github.com/flutter/flutter/issues/166550
-                @Suppress("DEPRECATION")
-                val variantOutput: com.android.build.gradle.api.BaseVariantOutput = variant.outputs.first()
-                val processResources: ProcessAndroidResources =
-                    try {
-                        variantOutput.processResourcesProvider.get()
-                    } catch (e: UnknownTaskException) {
-                        // TODO(gmackall): Migrate to AGPs variant api.
-                        //    https://github.com/flutter/flutter/issues/166550
-                        @Suppress("DEPRECATION")
-                        variantOutput.processResources
-                    }
-                processResources.dependsOn(copyFlutterAssetsTask)
+                val processResourcesTaskName =
+                    "process${variant.name.replaceFirstChar { it.uppercase() }}Resources"
 
-                // Copy the output APKs into a known location, so `flutter run` or `flutter build apk`
-                // can discover them. By default, this is `<app-dir>/build/app/outputs/flutter-apk/<filename>.apk`.
-                //
-                // The filename consists of `app<-abi>?<-flavor-name>?-<build-mode>.apk`.
-                // Where:
-                //   * `abi` can be `armeabi-v7a|arm64-v8a|x86_64` only if the flag `split-per-abi` is set.
-                //   * `flavor-name` is the flavor used to build the app in lower case if the assemble task is called.
-                //   * `build-mode` can be `release|debug|profile`.
-                variant.outputs.forEach { output ->
-                    assembleTask.doLast {
-                        // TODO(gmackall): Migrate to AGPs variant api.
-                        //    https://github.com/flutter/flutter/issues/166550
-                        @Suppress("DEPRECATION")
-                        output as com.android.build.gradle.api.ApkVariantOutput
-                        val packageApplicationProvider: PackageAndroidArtifact =
-                            variant.packageApplicationProvider.get()
-                        val outputDirectory: Directory =
-                            packageApplicationProvider.outputDirectory.get()
-                        val outputDirectoryStr: String = outputDirectory.toString()
+                // Lazily get the task provider
+                val processResourcesProvider =
+                    projectToAddTasksTo.tasks.named(processResourcesTaskName)
+
+// Wire dependencies lazily
+                processResourcesProvider.configure {
+                    dependsOn(copyFlutterAssetsTask)
+                }
+                // Compute the package task name
+                val packageTaskName = "package${variant.name.replaceFirstChar { it.uppercase() }}"
+
+                val packageTaskProvider = projectToAddTasksTo.tasks.named(packageTaskName)
+
+                assembleTaskProvider.configure {
+                    doLast {
+                        // Get APK file from package task outputs
+                        val packageTask = packageTaskProvider.get()
+                        val apkFile = packageTask.outputs.files.singleFile
+
+                        // Construct filename
                         var filename = "app"
 
-                        // TODO(gmackall): Migrate to AGPs variant api.
-                        //    https://github.com/flutter/flutter/issues/166550
-                        @Suppress("DEPRECATION")
-                        val abi = output.getFilter(com.android.build.VariantOutput.FilterType.ABI)
-                        if (abi != null && abi.isNotEmpty()) {
-                            filename += "-$abi"
+                        val flavorName = variant.flavorName // store in local variable
+                        if (!flavorName.isNullOrEmpty()) {
+                            filename += "-${flavorName.lowercase()}"
                         }
-                        if (variant.flavorName != null && variant.flavorName.isNotEmpty()) {
-                            filename += "-${FlutterPluginUtils.lowercase(variant.flavorName)}"
-                        }
-                        filename += "-${FlutterPluginUtils.buildModeFor(variant.buildType)}"
+
+                        filename += "-${variant.buildType}"
+
+                        // Copy APK to custom directory
                         projectToAddTasksTo.copy {
-                            from(File("$outputDirectoryStr/${output.outputFileName}"))
+                            from(apkFile)
                             into(projectToAddTasksTo.layout.buildDirectory.dir("outputs/flutter-apk"))
                             rename { "$filename.apk" }
                         }
                     }
                 }
             }
+//            android.applicationVariants.configureEach {
+//                val variant = this
+//                val assembleTask = variant.assembleProvider.get()
+//                if (!FlutterPluginUtils.shouldConfigureFlutterTask(
+//                        projectToAddTasksTo,
+//                        assembleTask,
+//                    )
+//                ) {
+//                    return@configureEach
+//                }
+//                val copyFlutterAssetsTask: Task =
+//                    addFlutterDeps(variant, flutterPlugin, targetPlatforms)
+//
+//                // TODO(gmackall): Migrate to AGPs variant api.
+//                //    https://github.com/flutter/flutter/issues/166550
+//                @Suppress("DEPRECATION")
+//                val variantOutput: com.android.build.gradle.api.BaseVariantOutput = variant.outputs.first()
+//                val processResources: ProcessAndroidResources =
+//                    try {
+//                        variantOutput.processResourcesProvider.get()
+//                    } catch (e: UnknownTaskException) {
+//                        // TODO(gmackall): Migrate to AGPs variant api.
+//                        //    https://github.com/flutter/flutter/issues/166550
+//                        @Suppress("DEPRECATION")
+//                        variantOutput.processResources
+//                    }
+//                processResources.dependsOn(copyFlutterAssetsTask)
+//
+//                // Copy the output APKs into a known location, so `flutter run` or `flutter build apk`
+//                // can discover them. By default, this is `<app-dir>/build/app/outputs/flutter-apk/<filename>.apk`.
+//                //
+//                // The filename consists of `app<-abi>?<-flavor-name>?-<build-mode>.apk`.
+//                // Where:
+//                //   * `abi` can be `armeabi-v7a|arm64-v8a|x86_64` only if the flag `split-per-abi` is set.
+//                //   * `flavor-name` is the flavor used to build the app in lower case if the assemble task is called.
+//                //   * `build-mode` can be `release|debug|profile`.
+//                variant.outputs.forEach { output ->
+//                    assembleTask.doLast {
+//                        // TODO(gmackall): Migrate to AGPs variant api.
+//                        //    https://github.com/flutter/flutter/issues/166550
+//                        @Suppress("DEPRECATION")
+//                        output as com.android.build.gradle.api.ApkVariantOutput
+//                        val packageApplicationProvider: PackageAndroidArtifact =
+//                            variant.packageApplicationProvider.get()
+//                        val outputDirectory: Directory =
+//                            packageApplicationProvider.outputDirectory.get()
+//                        val outputDirectoryStr: String = outputDirectory.toString()
+//                        var filename = "app"
+//
+//                        // TODO(gmackall): Migrate to AGPs variant api.
+//                        //    https://github.com/flutter/flutter/issues/166550
+//                        @Suppress("DEPRECATION")
+//                        val abi = output.getFilter(com.android.build.VariantOutput.FilterType.ABI)
+//                        if (abi != null && abi.isNotEmpty()) {
+//                            filename += "-$abi"
+//                        }
+//                        if (variant.flavorName != null && variant.flavorName.isNotEmpty()) {
+//                            filename += "-${FlutterPluginUtils.lowercase(variant.flavorName)}"
+//                        }
+//                        filename += "-${FlutterPluginUtils.buildModeFor(variant.buildType)}"
+//                        projectToAddTasksTo.copy {
+//                            from(File("$outputDirectoryStr/${output.outputFileName}"))
+//                            into(projectToAddTasksTo.layout.buildDirectory.dir("outputs/flutter-apk"))
+//                            rename { "$filename.apk" }
+//                        }
+//                    }
+//                }
+//            }
             // Copy the native assets created by build.dart and placed here by flutter assemble.
             // This path is not flavor specific and must only be added once.
             // If support for flavors is added to native assets, then they must only be added
@@ -451,7 +515,7 @@ class FlutterPlugin : Plugin<Project> {
             getPluginHandler(projectToAddTasksTo).configurePlugins(engineVersion!!)
             FlutterPluginUtils.detectLowCompileSdkVersionOrNdkVersion(
                 projectToAddTasksTo,
-                getPluginHandler(projectToAddTasksTo).getPluginList()
+                getPluginHandler(projectToAddTasksTo).getPluginList(),
             )
             return
         }
@@ -459,7 +523,7 @@ class FlutterPlugin : Plugin<Project> {
         val hostAppProjectName: String? =
             if (projectToAddTasksTo.rootProject.hasProperty("flutter.hostAppProjectName")) {
                 projectToAddTasksTo.rootProject.property(
-                    "flutter.hostAppProjectName"
+                    "flutter.hostAppProjectName",
                 ) as? String
             } else {
                 "app"
@@ -514,7 +578,7 @@ class FlutterPlugin : Plugin<Project> {
                     copyFlutterAssetsTask = copyFlutterAssetsTask ?: addFlutterDeps(
                         libraryVariant,
                         flutterPlugin,
-                        targetPlatforms
+                        targetPlatforms,
                     )
                     // TODO(gmackall): Migrate to AGPs variant api.
                     //    https://github.com/flutter/flutter/issues/166550
@@ -530,7 +594,7 @@ class FlutterPlugin : Plugin<Project> {
         getPluginHandler(projectToAddTasksTo).configurePlugins(engineVersion!!)
         FlutterPluginUtils.detectLowCompileSdkVersionOrNdkVersion(
             projectToAddTasksTo,
-            getPluginHandler(projectToAddTasksTo).getPluginList()
+            getPluginHandler(projectToAddTasksTo).getPluginList(),
         )
     }
 
@@ -558,7 +622,7 @@ class FlutterPlugin : Plugin<Project> {
          */
         private fun findTaskOrNull(
             project: Project,
-            taskName: String
+            taskName: String,
         ): Task? =
             try {
                 project.tasks.named(taskName).get()
@@ -571,7 +635,7 @@ class FlutterPlugin : Plugin<Project> {
         private fun addFlutterDeps(
             @Suppress("DEPRECATION") variant: com.android.build.gradle.api.BaseVariant,
             flutterPlugin: FlutterPlugin,
-            targetPlatforms: List<String>
+            targetPlatforms: List<String>,
         ): Task {
             // Shorthand
             val project: Project = flutterPlugin.project!!
@@ -639,12 +703,12 @@ class FlutterPlugin : Plugin<Project> {
             val packageAssets: Task? =
                 findTaskOrNull(
                     project,
-                    "package${FlutterPluginUtils.capitalize(variant.name)}Assets"
+                    "package${FlutterPluginUtils.capitalize(variant.name)}Assets",
                 )
             val cleanPackageAssets: Task? =
                 findTaskOrNull(
                     project,
-                    "cleanPackage${FlutterPluginUtils.capitalize(variant.name)}Assets"
+                    "cleanPackage${FlutterPluginUtils.capitalize(variant.name)}Assets",
                 )
 
             val isUsedAsSubproject: Boolean =
@@ -657,8 +721,8 @@ class FlutterPlugin : Plugin<Project> {
                     listOf(
                         "compile",
                         FLUTTER_BUILD_PREFIX,
-                        variant.name
-                    )
+                        variant.name,
+                    ),
                 )
             // The task provider below will shadow a lot of the variable names, so provide this reference
             // to access them within that scope.
@@ -687,7 +751,7 @@ class FlutterPlugin : Plugin<Project> {
                     sourceDir = FlutterPluginUtils.getFlutterSourceDirectory(project)
                     intermediateDir =
                         project.file(
-                            project.layout.buildDirectory.dir("${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${variant.name}/")
+                            project.layout.buildDirectory.dir("${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${variant.name}/"),
                         )
                     frontendServerStarterPath = frontendServerStarterPathValue
                     extraFrontEndOptions = extraFrontEndOptionsValue
@@ -705,12 +769,12 @@ class FlutterPlugin : Plugin<Project> {
             val flutterCompileTask: FlutterTask = compileTaskProvider.get()
             val libJar: File =
                 project.file(
-                    project.layout.buildDirectory.dir("${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${variant.name}/libs.jar")
+                    project.layout.buildDirectory.dir("${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${variant.name}/libs.jar"),
                 )
             val packJniLibsTaskProvider: TaskProvider<Jar> =
                 project.tasks.register(
                     "packJniLibs${FLUTTER_BUILD_PREFIX}${FlutterPluginUtils.capitalize(variant.name)}",
-                    Jar::class.java
+                    Jar::class.java,
                 ) {
                     destinationDirectory.set(libJar.parentFile)
                     archiveFileName.set(libJar.name)
@@ -740,12 +804,12 @@ class FlutterPlugin : Plugin<Project> {
                 variant.name,
                 project.files({
                     packJniLibsTask
-                })
+                }),
             )
             val copyFlutterAssetsTaskProvider: TaskProvider<Copy> =
                 project.tasks.register(
                     "copyFlutterAssets${FlutterPluginUtils.capitalize(variant.name)}",
-                    Copy::class.java
+                    Copy::class.java,
                 ) {
                     dependsOn(flutterCompileTask)
                     with(flutterCompileTask.assets)
@@ -799,7 +863,7 @@ class FlutterPlugin : Plugin<Project> {
                 listOf(
                     "compress${FlutterPluginUtils.capitalize(variant.name)}Assets",
                     "bundle${FlutterPluginUtils.capitalize(variant.name)}Aar",
-                    "bundle${FlutterPluginUtils.capitalize(variant.name)}LocalLintAar"
+                    "bundle${FlutterPluginUtils.capitalize(variant.name)}LocalLintAar",
                 )
             tasksToCheck.forEach { taskTocheck ->
                 try {
@@ -827,7 +891,7 @@ class FlutterPlugin : Plugin<Project> {
 
     private fun maybeAddAndroidStudioNativeConfiguration(
         plugins: PluginContainer,
-        dependencies: DependencyHandler
+        dependencies: DependencyHandler,
     ) {
         if (shouldAddAndroidStudioNativeConfiguration(plugins)) {
             dependencies.add("compileOnly", "io.flutter:flutter_embedding_debug:$engineVersion")
