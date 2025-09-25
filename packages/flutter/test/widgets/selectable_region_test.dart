@@ -3946,6 +3946,96 @@ void main() {
       variant: TargetPlatformVariant.only(TargetPlatform.macOS),
     );
 
+    testWidgets('can show the toolbar programmatically', (WidgetTester tester) async {
+      final GlobalKey<SelectionAreaState> selectionAreaKey = GlobalKey<SelectionAreaState>();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: SelectionArea(key: selectionAreaKey, child: const Text('abc')),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final SelectionAreaState selectionAreaState = selectionAreaKey.currentState!;
+      final SelectableRegionState selectableRegionState = selectionAreaState.selectableRegion;
+
+      // The toolbar should not be visible initially.
+      expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+      expect(selectableRegionState.selectionOverlay, isNull);
+
+      // Tap to set the selection.
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+        find.descendant(of: find.text('abc'), matching: find.byType(RichText)),
+      );
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 1));
+      addTearDown(gesture.removePointer);
+      await tester.pump(const Duration(milliseconds: 500));
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Programmatically show the toolbar.
+      selectableRegionState.showToolbar();
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
+      expect(selectableRegionState.selectionOverlay?.toolbarIsVisible, isTrue);
+    }, skip: kIsWeb); // [intended] Web uses its native context menu.
+
+    testWidgets('can toggle the toolbar programmatically', (WidgetTester tester) async {
+      final GlobalKey<SelectionAreaState> selectionAreaKey = GlobalKey<SelectionAreaState>();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: SelectionArea(key: selectionAreaKey, child: const Text('abc')),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final SelectionAreaState selectionAreaState = selectionAreaKey.currentState!;
+      final SelectableRegionState selectableRegionState = selectionAreaState.selectableRegion;
+
+      // The toolbar should not be visible initially.
+      expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+      expect(selectableRegionState.selectionOverlay, isNull);
+
+      // Tap to set the selection.
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+        find.descendant(of: find.text('abc'), matching: find.byType(RichText)),
+      );
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 1));
+      addTearDown(gesture.removePointer);
+      await tester.pump(const Duration(milliseconds: 500));
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Programmatically show the toolbar.
+      selectableRegionState.showToolbar();
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
+      expect(selectableRegionState.selectionOverlay?.toolbarIsVisible, isTrue);
+
+      // Programatically toggle the toolbar, should hide it.
+      selectableRegionState.toggleToolbar();
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+      expect(selectableRegionState.selectionOverlay?.toolbarIsVisible, isFalse);
+
+      // Programatically toggle the toolbar, should show it.
+      selectableRegionState.toggleToolbar();
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
+      expect(selectableRegionState.selectionOverlay?.toolbarIsVisible, isTrue);
+    }, skip: kIsWeb); // [intended] Web uses its native context menu.
+
     testWidgets(
       'can select word when a selectables rect is completely inside of another selectables rect',
       (WidgetTester tester) async {
