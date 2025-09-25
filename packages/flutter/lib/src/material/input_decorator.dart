@@ -592,6 +592,7 @@ class _Decoration {
     required this.visualDensity,
     required this.inputGap,
     required this.maintainHintSize,
+    required this.subtextGap,
     this.icon,
     this.input,
     this.label,
@@ -618,6 +619,7 @@ class _Decoration {
   final VisualDensity visualDensity;
   final double inputGap;
   final bool maintainHintSize;
+  final double subtextGap;
   final Widget? icon;
   final Widget? input;
   final Widget? label;
@@ -652,6 +654,7 @@ class _Decoration {
         other.visualDensity == visualDensity &&
         other.inputGap == inputGap &&
         other.maintainHintSize == maintainHintSize &&
+        other.subtextGap == subtextGap &&
         other.icon == icon &&
         other.input == input &&
         other.label == label &&
@@ -686,7 +689,7 @@ class _Decoration {
     prefix,
     suffix,
     prefixIcon,
-    Object.hash(suffixIcon, helperError, counter, container),
+    Object.hash(suffixIcon, helperError, counter, container, subtextGap),
   );
 }
 
@@ -728,9 +731,7 @@ class _RenderDecoration extends RenderBox
        _expands = expands,
        _material3 = material3;
 
-  // TODO(bleroux): consider defining this value as a Material token and making it
-  // configurable by InputDecorationThemeData.
-  double get subtextGap => material3 ? 4.0 : 8.0;
+  double get subtextGap => _decoration.subtextGap;
   double get prefixToInputGap => material3 ? 4.0 : 0.0;
   double get inputToSuffixGap => material3 ? 4.0 : 0.0;
 
@@ -2625,6 +2626,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       }
     }
 
+    final double subtextGap = defaults.subtextGap ?? (useMaterial3 ? 4.0 : 8.0);
+
     final _Decorator decorator = _Decorator(
       decoration: _Decoration(
         contentPadding: contentPadding,
@@ -2640,6 +2643,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         isEmpty: isEmpty,
         visualDensity: visualDensity,
         maintainHintSize: maintainHintSize,
+        subtextGap: subtextGap,
         icon: icon,
         input: input,
         label: label,
@@ -4893,6 +4897,7 @@ class InputDecorationThemeData with Diagnosticable {
     this.alignLabelWithHint = false,
     this.constraints,
     this.visualDensity,
+    this.subtextGap,
   });
 
   /// {@macro flutter.material.inputDecoration.labelStyle}
@@ -5331,6 +5336,14 @@ class InputDecorationThemeData with Diagnosticable {
   ///    given decorator.
   final VisualDensity? visualDensity;
 
+  /// The vertical gap between the input field and the subtext (helper text or error text).
+  ///
+  /// If null, defaults to 4.0 for Material 3 and 8.0 for Material 2.
+  ///
+  /// This value controls the spacing between the input field and any helper text,
+  /// error text, or counter text displayed below the input field.
+  final double? subtextGap;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   InputDecorationThemeData copyWith({
@@ -5371,6 +5384,7 @@ class InputDecorationThemeData with Diagnosticable {
     bool? alignLabelWithHint,
     BoxConstraints? constraints,
     VisualDensity? visualDensity,
+    double? subtextGap,
   }) {
     return InputDecorationThemeData(
       labelStyle: labelStyle ?? this.labelStyle,
@@ -5410,6 +5424,7 @@ class InputDecorationThemeData with Diagnosticable {
       alignLabelWithHint: alignLabelWithHint ?? this.alignLabelWithHint,
       constraints: constraints ?? this.constraints,
       visualDensity: visualDensity ?? this.visualDensity,
+      subtextGap: subtextGap ?? this.subtextGap,
     );
   }
 
@@ -5460,6 +5475,7 @@ class InputDecorationThemeData with Diagnosticable {
       border: border ?? other.border,
       constraints: constraints ?? other.constraints,
       visualDensity: visualDensity ?? other.visualDensity,
+      subtextGap: subtextGap ?? other.subtextGap,
     );
   }
 
@@ -5503,6 +5519,7 @@ class InputDecorationThemeData with Diagnosticable {
       constraints,
       hintFadeDuration,
       visualDensity,
+      subtextGap,
     ),
   );
 
@@ -5552,7 +5569,8 @@ class InputDecorationThemeData with Diagnosticable {
         other.alignLabelWithHint == alignLabelWithHint &&
         other.constraints == constraints &&
         other.disabledBorder == disabledBorder &&
-        other.visualDensity == visualDensity;
+        other.visualDensity == visualDensity &&
+        other.subtextGap == subtextGap;
   }
 
   @override
@@ -5760,6 +5778,13 @@ class InputDecorationThemeData with Diagnosticable {
         'visualDensity',
         visualDensity,
         defaultValue: defaultTheme.visualDensity,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<double>(
+        'subtextGap',
+        subtextGap,
+        defaultValue: defaultTheme.subtextGap,
       ),
     );
   }
