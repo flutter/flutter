@@ -13,7 +13,6 @@ uniform FragInfo {
   float edge;
   float ratio;
   vec2 pixel_size;
-  vec4 bounds_uv;
 }
 frag_info;
 
