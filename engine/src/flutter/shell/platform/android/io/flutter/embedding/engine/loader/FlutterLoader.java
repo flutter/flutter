@@ -312,14 +312,17 @@ public class FlutterLoader {
       InitResult result = initResultFuture.get();
 
       List<String> shellArgs = new ArrayList<>();
-      shellArgs.add("--icu-symbol-prefix=_binary_icudtl_dat");
 
+      // Add engine flags for which defaults set internally take precedent.
+      shellArgs.add("--icu-symbol-prefix=_binary_icudtl_dat");
       shellArgs.add(
           "--icu-native-lib-path="
               + flutterApplicationInfo.nativeLibraryDir
               + File.separator
               + DEFAULT_LIBRARY);
 
+      // Add engine flags provided by the command line. These settings will take
+      // precedent over any defaults set below.
       if (args != null) {
         for (String arg : args) {
           // Only allow known flags to be passed to the engine.
