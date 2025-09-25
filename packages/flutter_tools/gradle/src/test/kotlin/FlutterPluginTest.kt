@@ -10,7 +10,6 @@ import com.android.build.gradle.internal.core.InternalBaseVariant
 import com.android.build.gradle.tasks.MergeSourceSetFolders
 import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.flutter.gradle.tasks.FlutterTask
-import groovy.lang.Closure
 import io.mockk.CapturingSlot
 import io.mockk.every
 import io.mockk.mockk
@@ -18,38 +17,23 @@ import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.verify
 import org.gradle.api.Action
-import org.gradle.api.DomainObjectCollection
-import org.gradle.api.NamedDomainObjectCollectionSchema
-import org.gradle.api.NamedDomainObjectContainer
-import org.gradle.api.Namer
 import org.gradle.api.Project
-import org.gradle.api.Rule
 import org.gradle.api.Task
-import org.gradle.api.Transformer
 import org.gradle.api.file.Directory
-import org.gradle.api.internal.project.ProjectInternal
-import org.gradle.api.internal.tasks.DefaultTaskContainer
-import org.gradle.api.internal.tasks.TaskContainerInternal
 import org.gradle.api.tasks.Copy
-import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.TaskProvider
-import org.gradle.api.provider.Provider
-import org.gradle.api.specs.Spec
-import org.gradle.api.tasks.TaskCollection
-import org.gradle.internal.reflect.Instantiator
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
-import java.util.SortedMap
-import java.util.SortedSet
-import java.util.function.BiFunction
 import kotlin.io.path.writeText
 import kotlin.test.Test
 
 class FakeTaskContainer(private val copyTaskActionCaptor: CapturingSlot<Action<Copy>>) : TaskContainerMock() {
-    override fun register(name: String, configurationAction: Action<in Task>): TaskProvider<Task?> =
-        mockk<TaskProvider<Task?>>(relaxed = true)
+    override fun register(
+        name: String,
+        configurationAction: Action<in Task>
+    ): TaskProvider<Task?> = mockk<TaskProvider<Task?>>(relaxed = true)
 
     override fun <T : Task?> register(
         name: String,
@@ -201,7 +185,7 @@ class FlutterPluginTest {
         // mock return of NativePluginLoaderReflectionBridge.getPlugins
         mockkObject(NativePluginLoaderReflectionBridge)
         every { NativePluginLoaderReflectionBridge.getPlugins(any(), any()) } returns
-                listOf()
+            listOf()
         // mock method calls that are invoked by the args to NativePluginLoaderReflectionBridge
         every { project.extraProperties } returns mockk()
         every { project.file(flutterExtension.source!!) } returns mockk()
@@ -246,7 +230,7 @@ class FlutterPluginTest {
             variants.forEach { firstArg<Action<com.android.build.gradle.api.ApplicationVariant>>().execute(it) }
         }
         every { mockVariant.mergeAssetsProvider.hint(MergeSourceSetFolders::class).get() } returns
-                mockk<MergeSourceSetFolders>(relaxed = true)
+            mockk<MergeSourceSetFolders>(relaxed = true)
         val flutterPlugin = FlutterPlugin()
         flutterPlugin.apply(project)
 
