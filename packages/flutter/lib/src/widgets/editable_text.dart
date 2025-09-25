@@ -219,17 +219,6 @@ class _RenderCompositionCallback extends RenderProxyBox {
 ///    controlled with a [TextEditingController].
 ///  * Learn how to use a [TextEditingController] in one of our [cookbook recipes](https://docs.flutter.dev/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller).
 class TextEditingController extends ValueNotifier<TextEditingValue> {
-  /// The original text value when this controller was created.
-  ///
-  /// This field is used to track if the text has been modified from its original
-  /// value. It remains unchanged when:
-  /// - [clear] is called
-  /// - [value] is updated directly
-  /// - [text] is updated
-  ///
-  /// This field is automatically cleared when the controller is disposed.
-  String? _originalText;
-
   /// Creates a controller for an editable text field, with no initial selection.
   ///
   /// This constructor treats a null [text] argument as if it were the empty
@@ -272,6 +261,19 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
         'even for readonly text fields.',
       ),
       super(value ?? TextEditingValue.empty);
+
+
+  /// The original text value when this controller was created.
+  ///
+  /// This field is used to track if the text has been modified from its original
+  /// value. It remains unchanged when:
+  /// - [clear] is called
+  /// - [value] is updated directly
+  /// - [text] is updated
+  ///
+  /// The field will be garbage collected when the controller is no longer
+  /// referenced, along with the rest of the controller's state.
+  String? _originalText;
 
   /// The current string the user is editing.
   String get text => value.text;
