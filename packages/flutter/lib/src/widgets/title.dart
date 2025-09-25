@@ -42,16 +42,16 @@ class Title extends StatefulWidget {
 class _TitleState extends State<Title> {
   @override
   void initState() {
-    _updateChrome();
     super.initState();
+    _updateChrome();
   }
 
   @override
   void didUpdateWidget(covariant Title oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (oldWidget.title != widget.title || oldWidget.color != widget.color) {
       _updateChrome();
     }
-    super.didUpdateWidget(oldWidget);
   }
 
   void _updateChrome() {
