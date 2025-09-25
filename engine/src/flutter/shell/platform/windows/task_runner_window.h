@@ -68,8 +68,8 @@ class TaskRunnerWindow {
   HWND window_handle_;
   std::wstring window_class_name_;
   std::vector<Delegate*> delegates_;
-  PTP_TIMER timer_;
-  DWORD thread_id_;
+  PTP_TIMER timer_ = nullptr;
+  DWORD thread_id_ = 0;
 
   FML_DISALLOW_COPY_AND_ASSIGN(TaskRunnerWindow);
 };
