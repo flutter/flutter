@@ -929,7 +929,7 @@ class _RenderDecoration extends RenderBox
     // Only add padding when counter is present (maxLength is used).
     final double counterPadding = counter != null ? _kSubtextCounterPadding : 0.0;
     final BoxConstraints helperErrorConstraints = constraints.deflate(
-      EdgeInsets.only(left: counterSize.width + decoration.inputGap + counterPadding),
+      EdgeInsets.only(left: counterSize.width + counterPadding),
     );
     final double helperErrorHeight = layoutChild(helperError, helperErrorConstraints).height;
 
@@ -1273,10 +1273,7 @@ class _RenderDecoration extends RenderBox
 
     // Only add padding when counter is present (maxLength is used).
     final double counterPadding = counter != null ? _kSubtextCounterPadding : 0.0;
-    final double helperErrorAvailableWidth = math.max(
-      width - counterWidth - decoration.inputGap - counterPadding,
-      0.0,
-    );
+    final double helperErrorAvailableWidth = math.max(width - counterWidth - counterPadding, 0.0);
     final double helperErrorHeight = _minHeight(helperError, helperErrorAvailableWidth);
     double subtextHeight = math.max(counterHeight, helperErrorHeight);
     if (subtextHeight > 0.0) {
