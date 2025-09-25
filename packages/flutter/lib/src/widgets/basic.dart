@@ -2241,20 +2241,26 @@ class RotatedBox extends SingleChildRenderObjectWidget {
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Padding extends SingleChildRenderObjectWidget {
   /// Creates a widget that insets its child.
-  const Padding({super.key, required this.padding, super.child});
+  const Padding({super.key, required this.padding, this.enabled = true, super.child});
 
   /// The amount of space by which to inset the child.
   final EdgeInsetsGeometry padding;
 
+  /// Whether to apply the padding or not.
+  final bool enabled;
+
   @override
   RenderPadding createRenderObject(BuildContext context) {
-    return RenderPadding(padding: padding, textDirection: Directionality.maybeOf(context));
+    return RenderPadding(
+      padding: enabled ? padding : EdgeInsets.zero,
+      textDirection: Directionality.maybeOf(context),
+    );
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderPadding renderObject) {
     renderObject
-      ..padding = padding
+      ..padding = enabled ? padding : EdgeInsets.zero
       ..textDirection = Directionality.maybeOf(context);
   }
 
@@ -2262,6 +2268,7 @@ class Padding extends SingleChildRenderObjectWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding));
+    properties.add(DiagnosticsProperty<bool>('enabled', enabled));
   }
 }
 
@@ -2410,12 +2417,12 @@ class Align extends SingleChildRenderObjectWidget {
     this.alignment = Alignment.center,
     this.widthFactor,
     this.heightFactor,
+    this.enabled = true,
     super.child,
   }) : assert(widthFactor == null || widthFactor >= 0.0),
        assert(heightFactor == null || heightFactor >= 0.0);
 
   /// How to align the child.
-  ///
   /// The x and y values of the [Alignment] control the horizontal and vertical
   /// alignment, respectively. An x value of -1.0 means that the left edge of
   /// the child is aligned with the left edge of the parent whereas an x value
@@ -2442,12 +2449,17 @@ class Align extends SingleChildRenderObjectWidget {
   /// Can be both greater and less than 1.0 but must be non-negative.
   final double? heightFactor;
 
+  /// Whether alignment should be applied or not.
+  ///
+  /// If `false`, this widget will behave as if it were just a passthrough to [child].
+  final bool enabled;
+
   @override
-  RenderPositionedBox createRenderObject(BuildContext context) {
+  RenderObject createRenderObject(BuildContext context) {
     return RenderPositionedBox(
-      alignment: alignment,
-      widthFactor: widthFactor,
-      heightFactor: heightFactor,
+      alignment: enabled ? alignment : Alignment.topLeft,
+      widthFactor: enabled ? widthFactor : null,
+      heightFactor: enabled ? heightFactor : null,
       textDirection: Directionality.maybeOf(context),
     );
   }
@@ -2455,9 +2467,9 @@ class Align extends SingleChildRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, RenderPositionedBox renderObject) {
     renderObject
-      ..alignment = alignment
-      ..widthFactor = widthFactor
-      ..heightFactor = heightFactor
+      ..alignment = enabled ? alignment : Alignment.topLeft
+      ..widthFactor = enabled ? widthFactor : null
+      ..heightFactor = enabled ? heightFactor : null
       ..textDirection = Directionality.maybeOf(context);
   }
 
@@ -2467,6 +2479,7 @@ class Align extends SingleChildRenderObjectWidget {
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
     properties.add(DoubleProperty('widthFactor', widthFactor, defaultValue: null));
     properties.add(DoubleProperty('heightFactor', heightFactor, defaultValue: null));
+    properties.add(FlagProperty('enabled', value: enabled, ifFalse: 'disabled'));
   }
 }
 
@@ -5964,7 +5977,13 @@ class Column extends Flex {
 class Flexible extends ParentDataWidget<FlexParentData> {
   /// Creates a widget that controls how a child of a [Row], [Column], or [Flex]
   /// flexes.
-  const Flexible({super.key, this.flex = 1, this.fit = FlexFit.loose, required super.child});
+  const Flexible({
+    super.key,
+    this.flex = 1,
+    this.fit = FlexFit.loose,
+    this.enabled = true,
+    required super.child,
+  });
 
   /// The flex factor to use for this child.
   ///
@@ -5983,24 +6002,38 @@ class Flexible extends ParentDataWidget<FlexParentData> {
   /// space (but is allowed to be smaller).
   final FlexFit fit;
 
+  /// Whether to apply flexible behavior or treat as a normal child.
+  final bool enabled;
+
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is FlexParentData);
     final FlexParentData parentData = renderObject.parentData! as FlexParentData;
     bool needsLayout = false;
 
-    if (parentData.flex != flex) {
-      parentData.flex = flex;
-      needsLayout = true;
-    }
+    if (enabled) {
+      if (parentData.flex != flex) {
+        parentData.flex = flex;
+        needsLayout = true;
+      }
 
-    if (parentData.fit != fit) {
-      parentData.fit = fit;
-      needsLayout = true;
+      if (parentData.fit != fit) {
+        parentData.fit = fit;
+        needsLayout = true;
+      }
+    } else {
+      if (parentData.flex != null || parentData.fit != null) {
+        parentData.flex = null;
+        parentData.fit = null;
+        needsLayout = true;
+      }
     }
 
     if (needsLayout) {
-      renderObject.parent?.markNeedsLayout();
+      final RenderObject? targetParent = renderObject.parent;
+      if (targetParent is RenderObject) {
+        targetParent.markNeedsLayout();
+      }
     }
   }
 
@@ -6011,6 +6044,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(IntProperty('flex', flex));
+    properties.add(FlagProperty('enabled', value: enabled, ifTrue: 'enabled'));
   }
 }
 
@@ -6056,7 +6090,8 @@ class Expanded extends Flexible {
   /// Creates a widget that expands a child of a [Row], [Column], or [Flex]
   /// so that the child fills the available space along the flex widget's
   /// main axis.
-  const Expanded({super.key, super.flex, required super.child}) : super(fit: FlexFit.tight);
+  const Expanded({super.key, super.flex, super.enabled, required super.child})
+    : super(fit: FlexFit.tight);
 }
 
 /// A widget that displays its children in multiple horizontal or vertical runs.
