@@ -2064,7 +2064,17 @@ void main() {
                   flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                   children: <TestSemantics>[
                     TestSemantics(id: 2, label: 'before'),
-                    TestSemantics(id: 3, label: 'child', tooltip: 'B'),
+                    TestSemantics(
+                      id: 3,
+                      label: 'child',
+                      tooltip: 'B',
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          id: 6,
+                          children: <TestSemantics>[TestSemantics(id: 7, label: 'B')],
+                        ),
+                      ],
+                    ),
                     TestSemantics(id: 4, label: 'after'),
                   ],
                 ),
@@ -2072,7 +2082,7 @@ void main() {
             ),
           ],
         ),
-        // ignoreId: true,
+        ignoreId: true,
         ignoreRect: true,
         ignoreTransform: true,
       ),
