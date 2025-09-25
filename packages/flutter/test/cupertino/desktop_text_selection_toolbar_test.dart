@@ -143,6 +143,6 @@ void main() {
         ),
       ),
     );
-    expect(tester.getSize(find.byType(CupertinoDesktopTextSelectionToolbar)).isEmpty, isTrue);
+    expect(tester.getSize(find.byType(CupertinoDesktopTextSelectionToolbar)), Size.zero);
   });
 }
