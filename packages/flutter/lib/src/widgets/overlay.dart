@@ -2718,7 +2718,10 @@ class _RenderLayoutBuilder extends RenderProxyBox
   Iterable<RenderBox> _childrenInHitTestOrder() => _childrenInPaintOrder();
 
   @override
-  _RenderTheater get theater => _findDeferredLayoutBoxParent().theater;
+  _RenderTheater get theater => switch (parent) {
+    final _RenderDeferredLayoutBox parent => parent.theater,
+    _ => throw FlutterError('$parent of $this is not a _RenderDeferredLayoutBox'),
+  };
 
   @override
   bool get sizedByParent => true;
@@ -2739,25 +2742,9 @@ class _RenderLayoutBuilder extends RenderProxyBox
   // The size here is the child size of the regular child in its own parent's coordinates.
   OverlayChildLayoutInfo? _layoutInfo;
 
-  // Helper method to find the _RenderDeferredLayoutBox parent
-  _RenderDeferredLayoutBox _findDeferredLayoutBoxParent() {
-    RenderObject? currentParent = parent;
-    while (currentParent != null) {
-      if (currentParent is _RenderDeferredLayoutBox) {
-        break;
-      }
-      if (currentParent is! RenderSemanticsAnnotations) {
-        throw FlutterError('$currentParent of $this is not a _RenderDeferredLayoutBox');
-      }
-      currentParent = currentParent.parent;
-    }
-    assert(currentParent != null);
-    return currentParent! as _RenderDeferredLayoutBox;
-  }
-
   OverlayChildLayoutInfo _computeNewLayoutInfo() {
     final _RenderTheater theater = this.theater;
-    final _RenderDeferredLayoutBox parent = _findDeferredLayoutBoxParent();
+    final _RenderDeferredLayoutBox parent = this.parent! as _RenderDeferredLayoutBox;
     final _RenderLayoutSurrogateProxyBox layoutSurrogate = parent._layoutSurrogate;
     assert(() {
       for (
