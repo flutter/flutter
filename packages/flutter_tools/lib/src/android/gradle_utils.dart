@@ -1252,6 +1252,9 @@ String getGradlewFileName(Platform platform) {
   }
 }
 
+@visibleForTesting
+const maxGradleVersionForJavaPre17 = '8.14.100';
+
 /// List of compatible Java/Gradle versions.
 ///
 /// Should be updated when a new version of Java is supported by a new version
@@ -1271,56 +1274,56 @@ var _javaGradleCompatList = const <JavaGradleCompat>[
     javaMin: '16',
     javaMax: '17',
     gradleMin: '7.0',
-    gradleMax: maxKnownAndSupportedGradleVersion,
+    gradleMax: maxGradleVersionForJavaPre17,
   ),
   JavaGradleCompat(
     javaMin: '15',
     javaMax: '16',
     gradleMin: '6.7',
-    gradleMax: maxKnownAndSupportedGradleVersion,
+    gradleMax: maxGradleVersionForJavaPre17,
   ),
   JavaGradleCompat(
     javaMin: '14',
     javaMax: '15',
     gradleMin: '6.3',
-    gradleMax: maxKnownAndSupportedGradleVersion,
+    gradleMax: maxGradleVersionForJavaPre17,
   ),
   JavaGradleCompat(
     javaMin: '13',
     javaMax: '14',
     gradleMin: '6.0',
-    gradleMax: maxKnownAndSupportedGradleVersion,
+    gradleMax: maxGradleVersionForJavaPre17,
   ),
   JavaGradleCompat(
     javaMin: '12',
     javaMax: '13',
     gradleMin: '5.4',
-    gradleMax: maxKnownAndSupportedGradleVersion,
+    gradleMax: maxGradleVersionForJavaPre17,
   ),
   JavaGradleCompat(
     javaMin: '11',
     javaMax: '12',
     gradleMin: '5.0',
-    gradleMax: maxKnownAndSupportedGradleVersion,
+    gradleMax: maxGradleVersionForJavaPre17,
   ),
   // 1.11 is a made up java version to cover everything in 1.10.*
   JavaGradleCompat(
     javaMin: '1.10',
     javaMax: '1.11',
     gradleMin: '4.7',
-    gradleMax: maxKnownAndSupportedGradleVersion,
+    gradleMax: maxGradleVersionForJavaPre17,
   ),
   JavaGradleCompat(
     javaMin: '1.9',
     javaMax: '1.10',
     gradleMin: '4.3',
-    gradleMax: maxKnownAndSupportedGradleVersion,
+    gradleMax: maxGradleVersionForJavaPre17,
   ),
   JavaGradleCompat(
     javaMin: '1.8',
     javaMax: '1.9',
     gradleMin: '2.0',
-    gradleMax: maxKnownAndSupportedGradleVersion,
+    gradleMax: maxGradleVersionForJavaPre17,
   ),
 ];
 
