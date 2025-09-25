@@ -18,6 +18,10 @@ import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
+  setUp(() {
+    Cache.disableLocking();
+  });
+
   testUsingContext('flutter build without arguments prints help and exits with code 1', () async {
     final command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
