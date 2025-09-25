@@ -67,24 +67,22 @@ class MainWindow extends StatelessWidget {
               children: [
                 Expanded(
                   flex: 60,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
-                    child: _WindowsTable(),
+                  child: Column(
+                    children: [
+                      SingleChildScrollView(
+                        scrollDirection: Axis.vertical,
+                        child: _WindowsTable(),
+                      ),
+                    ],
                   ),
                 ),
                 Expanded(
                   flex: 40,
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      ListenableBuilder(
-                        listenable: windowManager,
-                        builder: (BuildContext context, Widget? child) {
-                          return _WindowCreatorCard(
-                            windowManager: windowManager,
-                            windowSettings: settings,
-                          );
-                        },
+                      _WindowCreatorCard(
+                        windowManager: windowManager,
+                        windowSettings: settings,
                       ),
                     ],
                   ),

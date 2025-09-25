@@ -29,7 +29,7 @@ class KeyedWindow {
 /// currently selected by the UI.
 class WindowManager extends ChangeNotifier {
   WindowManager({required List<KeyedWindow> initialWindows})
-    : _windows=initialWindows;
+    : _windows = initialWindows;
 
   final List<KeyedWindow> _windows;
   List<KeyedWindow> get windows => _windows;
@@ -65,25 +65,18 @@ class WindowManager extends ChangeNotifier {
 }
 
 /// Provides access to the [WindowManager] from the widget tree.
-class WindowManagerAccessor extends InheritedWidget {
+class WindowManagerAccessor extends InheritedNotifier<WindowManager> {
   const WindowManagerAccessor({
     super.key,
     required super.child,
-    required this.windowManager,
-  });
-
-  final WindowManager windowManager;
+    required WindowManager windowManager,
+  }) : super(notifier: windowManager);
 
   static WindowManager of(BuildContext context) {
     final WindowManagerAccessor? result = context
         .dependOnInheritedWidgetOfExactType<WindowManagerAccessor>();
     assert(result != null, 'No WindowManager found in context');
-    return result!.windowManager;
-  }
-
-  @override
-  bool updateShouldNotify(WindowManagerAccessor oldWidget) {
-    return windowManager != oldWidget.windowManager;
+    return result!.notifier!;
   }
 }
 
