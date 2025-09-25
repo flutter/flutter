@@ -29,9 +29,9 @@ import '../devfs.dart';
 import '../device.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
+import '../hook_runner.dart' show hookRunner;
 import '../project.dart';
 import '../reporting/reporting.dart';
-import '../resident_devtools_handler.dart';
 import '../resident_runner.dart';
 import '../run_hot.dart';
 import '../vmservice.dart';
@@ -104,8 +104,6 @@ class ResidentWebRunner extends ResidentRunner {
     required SystemClock systemClock,
     required Analytics analytics,
     UrlTunneller? urlTunneller,
-    // TODO(bkonyi): remove when ready to serve DevTools from DDS.
-    ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _platform = platform,
@@ -118,13 +116,13 @@ class ResidentWebRunner extends ResidentRunner {
          debuggingOptions: debuggingOptions,
          stayResident: stayResident,
          machine: machine,
-         devtoolsHandler: devtoolsHandler,
          commandHelp: CommandHelp(
            logger: logger,
            terminal: terminal,
            platform: platform,
            outputPreferences: outputPreferences,
          ),
+         dartBuilder: hookRunner,
        );
 
   final FileSystem _fileSystem;
@@ -216,8 +214,6 @@ class ResidentWebRunner extends ResidentRunner {
     if (_exited) {
       return;
     }
-    // TODO(bkonyi): remove when ready to serve DevTools from DDS.
-    await residentDevtoolsHandler!.shutdown();
     await _stdOutSub?.cancel();
     await _stdErrSub?.cancel();
     await _serviceSub?.cancel();
@@ -296,8 +292,12 @@ class ResidentWebRunner extends ResidentRunner {
           useSseForInjectedClient: debuggingOptions.webUseSseForInjectedClient,
           buildInfo: debuggingOptions.buildInfo,
           enableDwds: supportsServiceProtocol,
-          enableDds: debuggingOptions.enableDds,
-          ddsPort: debuggingOptions.ddsPort,
+          ddsConfig: DartDevelopmentServiceConfiguration(
+            enable: debuggingOptions.enableDds,
+            port: debuggingOptions.ddsPort,
+            serveDevTools: debuggingOptions.enableDevTools,
+            devToolsServerAddress: debuggingOptions.devToolsServerAddress,
+          ),
           entrypoint: _fileSystem.file(target).uri,
           expressionCompiler: expressionCompiler,
           chromiumLauncher: _chromiumLauncher,
@@ -561,7 +561,9 @@ class ResidentWebRunner extends ResidentRunner {
     _logger.printStatus('${fullRestart ? 'Restarted' : 'Reloaded'} application in $elapsedMS.');
 
     if (fullRestart) {
-      unawaited(residentDevtoolsHandler!.hotRestart(flutterDevices));
+      for (final FlutterDevice? device in flutterDevices) {
+        unawaited(device?.handleHotRestart());
+      }
     }
 
     // Don't track restart times for dart2js builds or web-server devices.
@@ -710,6 +712,11 @@ class ResidentWebRunner extends ResidentRunner {
     if (rebuildBundle) {
       _logger.printTrace('Updating assets');
       final int result = await assetBundle.build(
+        flutterHookResult: await dartBuilder?.runHooks(
+          targetPlatform: TargetPlatform.web_javascript,
+          environment: environment,
+          logger: _logger,
+        ),
         packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
         targetPlatform: TargetPlatform.web_javascript,
       );
@@ -781,7 +788,8 @@ class ResidentWebRunner extends ResidentRunner {
       unawaited(
         connectDebug!.then((connectionResult) async {
           _connectionResult = connectionResult;
-          unawaited(_connectionResult!.debugConnection!.onDone.whenComplete(_cleanupAndExit));
+          final DebugConnection debugConnection = connectionResult!.debugConnection!;
+          unawaited(debugConnection.onDone.whenComplete(_cleanupAndExit));
 
           void onLogEvent(vmservice.Event event) {
             final String message = processVmServiceMessage(event);
@@ -843,8 +851,11 @@ class ResidentWebRunner extends ResidentRunner {
             vmService: _vmService.service,
           );
 
-          final Uri websocketUri = Uri.parse(_connectionResult!.debugConnection!.uri);
+          final Uri websocketUri = Uri.parse(debugConnection.uri);
           device!.vmService = _vmService;
+          if (debugConnection.devToolsUri != null) {
+            (device!.device! as WebDevice).devToolsUri = Uri.parse(debugConnection.devToolsUri!);
+          }
 
           // Run main immediately if the app is not started paused or if there
           // is no debugger attached. Otherwise, runMain when a resume event
@@ -875,16 +886,6 @@ class ResidentWebRunner extends ResidentRunner {
       );
     } else {
       connectionInfoCompleter?.complete(DebugConnectionInfo());
-    }
-    // TODO(bkonyi): remove when ready to serve DevTools from DDS.
-    if (debuggingOptions.enableDevTools) {
-      // The method below is guaranteed never to return a failing future.
-      unawaited(
-        residentDevtoolsHandler!.serveAndAnnounceDevTools(
-          devToolsServerAddress: debuggingOptions.devToolsServerAddress,
-          flutterDevices: flutterDevices,
-        ),
-      );
     }
 
     appStartedCompleter?.complete();

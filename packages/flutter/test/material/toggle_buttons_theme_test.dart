@@ -374,10 +374,10 @@ void main() {
     const Color selectedFillColor = Colors.blue;
     const Color disabledFillColor = Colors.yellow;
 
-    Color getColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
+    Color getColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         return selectedFillColor;
-      } else if (states.contains(MaterialState.disabled)) {
+      } else if (states.contains(WidgetState.disabled)) {
         return disabledFillColor;
       }
       return enabledFillColor;
