@@ -21,6 +21,10 @@ TaskRunnerWindow::TaskRunnerWindow() {
                      HWND_MESSAGE, nullptr, window_class.hInstance, nullptr);
 
   timer_ = CreateThreadpoolTimer(TimerProc, this, nullptr);
+  if (!timer_) {
+    FML_LOG(ERROR) << "Failed to create threadpool timer, error: "
+                   << GetLastError();
+  }
 
   if (window_handle_) {
     SetWindowLongPtr(window_handle_, GWLP_USERDATA,
