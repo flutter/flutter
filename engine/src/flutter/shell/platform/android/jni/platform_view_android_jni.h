@@ -68,7 +68,7 @@ class PlatformViewAndroidJNI {
   ///
   /// @note       Must be called from the platform thread.
   ///
-  virtual void FlutterViewSetApplicationLocale(const std::string& locale) = 0;
+  virtual void FlutterViewSetApplicationLocale(std::string locale) = 0;
 
   //----------------------------------------------------------------------------
   /// @brief      Sends new custom accessibility events.

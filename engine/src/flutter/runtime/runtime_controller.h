@@ -637,7 +637,7 @@ class RuntimeController : public PlatformConfigurationClient,
   void UpdateSemantics(int64_t view_id, SemanticsUpdate* update) override;
 
   // |PlatformConfigurationClient|
-  void SetApplicationLocale(const std::string& locale) override;
+  void SetApplicationLocale(std::string locale) override;
 
   // |PlatformConfigurationClient|
   void SetSemanticsTreeEnabled(bool enabled) override;

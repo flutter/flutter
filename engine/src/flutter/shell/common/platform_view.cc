@@ -131,7 +131,7 @@ void PlatformView::UpdateSemantics(
     CustomAccessibilityActionUpdates actions) {}
 
 void PlatformView::SetApplicationLocale(
-    const std::string& locale  // NOLINT(performance-unnecessary-value-param)
+    std::string locale  // NOLINT(performance-unnecessary-value-param)
 ) {}
 
 void PlatformView::SetSemanticsTreeEnabled(

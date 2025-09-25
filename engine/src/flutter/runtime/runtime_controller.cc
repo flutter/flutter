@@ -445,8 +445,8 @@ void RuntimeController::UpdateSemantics(int64_t view_id,
 }
 
 // |PlatformConfigurationClient|
-void RuntimeController::SetApplicationLocale(const std::string& locale) {
-  client_.SetApplicationLocale(locale);
+void RuntimeController::SetApplicationLocale(std::string locale) {
+  client_.SetApplicationLocale(std::move(locale));
 }
 
 // |PlatformConfigurationClient|

@@ -1361,7 +1361,7 @@ void PlatformViewAndroidJNIImpl::FlutterViewHandlePlatformMessage(
 }
 
 void PlatformViewAndroidJNIImpl::FlutterViewSetApplicationLocale(
-    const std::string& locale) {
+    std::string locale) {
   JNIEnv* env = fml::jni::AttachCurrentThread();
 
   auto java_object = java_object_.get(env);

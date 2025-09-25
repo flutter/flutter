@@ -34,7 +34,7 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
       std::vector<std::string> strings,
       std::vector<std::vector<uint8_t>> string_attribute_args) override;
 
-  void FlutterViewSetApplicationLocale(const std::string& locale) override;
+  void FlutterViewSetApplicationLocale(std::string locale) override;
 
   void FlutterViewUpdateCustomAccessibilityActions(
       std::vector<uint8_t> actions_buffer,
