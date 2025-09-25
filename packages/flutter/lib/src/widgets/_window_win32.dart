@@ -742,7 +742,7 @@ extension _Utf16Pointer on ffi.Pointer<_Utf16> {
   /// contain NUL characters.
   ///
   /// If [length] is not provided, the returned string is the string up til
-  /// but not including  the first NUL character.
+  /// but not including the first NUL character.
   String toDartString({int? length}) {
     _ensureNotNullptr('toDartString');
     final ffi.Pointer<ffi.Uint16> codeUnits = cast<ffi.Uint16>();
@@ -796,14 +796,10 @@ extension _StringUtf16Pointer on String {
   }
 }
 
-// ignore: always_specify_types
-typedef _WinCoTaskMemAllocNative = ffi.Pointer Function(ffi.Size);
-// ignore: always_specify_types
-typedef _WinCoTaskMemAlloc = ffi.Pointer Function(int);
-// ignore: always_specify_types
-typedef _WinCoTaskMemFreeNative = ffi.Void Function(ffi.Pointer);
-// ignore: always_specify_types
-typedef _WinCoTaskMemFree = void Function(ffi.Pointer);
+typedef _WinCoTaskMemAllocNative = ffi.Pointer<ffi.NativeType> Function(ffi.Size);
+typedef _WinCoTaskMemAlloc = ffi.Pointer<ffi.NativeType> Function(int);
+typedef _WinCoTaskMemFreeNative = ffi.Void Function(ffi.Pointer<ffi.NativeType>);
+typedef _WinCoTaskMemFree = void Function(ffi.Pointer<ffi.NativeType>);
 
 final class _CallocAllocator implements ffi.Allocator {
   _CallocAllocator() {

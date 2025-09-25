@@ -12,52 +12,14 @@ import 'rotated_wire_cube.dart';
 import 'dart:math';
 import 'package:flutter/src/widgets/_window.dart';
 
-class RegularWindowContent extends StatefulWidget {
-  const RegularWindowContent({super.key, required this.window});
+class RegularWindowContent extends StatelessWidget {
+  RegularWindowContent({super.key, required this.window})
+    : cubeColor = _generateRandomDarkColor();
 
   final RegularWindowController window;
+  final Color cubeColor;
 
-  @override
-  State<StatefulWidget> createState() => _RegularWindowContentState();
-}
-
-class CallbackRegularWindowControllerDelegate
-    with RegularWindowControllerDelegate {
-  CallbackRegularWindowControllerDelegate({required this.onDestroyed});
-
-  @override
-  void onWindowDestroyed() {
-    onDestroyed();
-    super.onWindowDestroyed();
-  }
-
-  final VoidCallback onDestroyed;
-}
-
-class _RegularWindowContentState extends State<RegularWindowContent>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _animation;
-  late final Color cubeColor;
-
-  @override
-  void initState() {
-    super.initState();
-    _animation = AnimationController(
-      vsync: this,
-      lowerBound: 0,
-      upperBound: 2 * pi,
-      duration: const Duration(seconds: 15),
-    )..repeat();
-    cubeColor = _generateRandomDarkColor();
-  }
-
-  @override
-  void dispose() {
-    _animation.dispose();
-    super.dispose();
-  }
-
-  Color _generateRandomDarkColor() {
+  static Color _generateRandomDarkColor() {
     final random = Random();
     const int lowerBound = 32;
     const int span = 160;
@@ -82,9 +44,7 @@ class _RegularWindowContentState extends State<RegularWindowContent>
           children: [
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                RotatedWireCube(animation: _animation, cubeColor: cubeColor),
-              ],
+              children: [RotatedWireCube(cubeColor: cubeColor)],
             ),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -110,7 +70,7 @@ class _RegularWindowContentState extends State<RegularWindowContent>
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  'View #${widget.window.rootView.viewId}\n'
+                  'View #${window.rootView.viewId}\n'
                   'Size: ${(windowSize.width).toStringAsFixed(1)}\u00D7${(windowSize.height).toStringAsFixed(1)}\n'
                   'Device Pixel Ratio: $dpr',
                   textAlign: TextAlign.center,
@@ -125,10 +85,10 @@ class _RegularWindowContentState extends State<RegularWindowContent>
     return ViewAnchor(
       view: ListenableBuilder(
         listenable: windowManager,
-        builder: (BuildContext context, Widget? _) {
+        builder: (BuildContext context, Widget? child) {
           final List<Widget> childViews = <Widget>[];
           for (final KeyedWindow window in windowManager.windows) {
-            if (window.parent == widget.window) {
+            if (window.parent == window) {
               childViews.add(
                 WindowContent(
                   controller: window.controller,
@@ -146,4 +106,17 @@ class _RegularWindowContentState extends State<RegularWindowContent>
       child: child,
     );
   }
+}
+
+class CallbackRegularWindowControllerDelegate
+    with RegularWindowControllerDelegate {
+  CallbackRegularWindowControllerDelegate({required this.onDestroyed});
+
+  @override
+  void onWindowDestroyed() {
+    onDestroyed();
+    super.onWindowDestroyed();
+  }
+
+  final VoidCallback onDestroyed;
 }

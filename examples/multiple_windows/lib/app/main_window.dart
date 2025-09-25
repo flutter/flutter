@@ -17,13 +17,15 @@ import 'regular_window_edit_dialog.dart';
 
 class MainWindow extends StatelessWidget {
   MainWindow({super.key, required BaseWindowController mainController})
-    : windowManager=WindowManager(initialWindows: <KeyedWindow>[
-      KeyedWindow(
-        isMainWindow: true,
-        key: UniqueKey(),
-        controller: mainController,
-      )
-    ]);
+    : windowManager = WindowManager(
+        initialWindows: <KeyedWindow>[
+          KeyedWindow(
+            isMainWindow: true,
+            key: UniqueKey(),
+            controller: mainController,
+          ),
+        ],
+      );
 
   final WindowManager windowManager;
   final WindowSettings settings = WindowSettings();
@@ -40,6 +42,9 @@ class MainWindow extends StatelessWidget {
             builder: (BuildContext context, Widget? child) {
               final List<Widget> childViews = <Widget>[];
               for (final KeyedWindow window in windowManager.windows) {
+                // This check renders windows that are not nested below another window as
+                // a child window (e.g. a popup for a window) in addition to the main window,
+                // which is special as it is the one that is currently being rendered.
                 if (window.parent == null && !window.isMainWindow) {
                   childViews.add(
                     WindowContent(
@@ -64,7 +69,7 @@ class MainWindow extends StatelessWidget {
                   flex: 60,
                   child: SingleChildScrollView(
                     scrollDirection: Axis.vertical,
-                    child: _WindowsTable(windowManager: windowManager),
+                    child: _WindowsTable(),
                   ),
                 ),
                 Expanded(
@@ -94,50 +99,48 @@ class MainWindow extends StatelessWidget {
 }
 
 class _WindowsTable extends StatelessWidget {
-  const _WindowsTable({required this.windowManager});
-
-  final WindowManager windowManager;
-
-  List<DataRow> _buildRows(BuildContext context) {
+  List<DataRow> _buildRows(WindowManager windowManager, BuildContext context) {
     List<DataRow> rows = [];
     for (KeyedWindow controller in windowManager.windows) {
-      rows.add(DataRow(
-        key: controller.key,
-        color: WidgetStateColor.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) {
-            return Theme.of(context).colorScheme.primary.withAlpha(20);
-          }
-          return Colors.transparent;
-        }),
-        selected: controller.controller == windowManager.selected,
-        onSelectChanged: (bool? selected) {
-          if (selected != null) {
-            windowManager.select(
-              selected ? controller.controller.rootView.viewId : null,
-            );
-          }
-        },
-        cells: [
-          DataCell(Text('${controller.controller.rootView.viewId}')),
-          DataCell(Text(_getWindowTypeName(controller.controller))),
-          DataCell(
-            Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.edit_outlined),
-                  onPressed: () => _showWindowEditDialog(controller, context),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete_outlined),
-                  onPressed: () async {
-                    controller.controller.destroy();
-                  },
-                ),
-              ],
+      rows.add(
+        DataRow(
+          key: controller.key,
+          color: WidgetStateColor.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return Theme.of(context).colorScheme.primary.withAlpha(20);
+            }
+            return Colors.transparent;
+          }),
+          selected: controller.controller == windowManager.selected,
+          onSelectChanged: (bool? selected) {
+            if (selected != null) {
+              windowManager.select(
+                selected ? controller.controller.rootView.viewId : null,
+              );
+            }
+          },
+          cells: [
+            DataCell(Text('${controller.controller.rootView.viewId}')),
+            DataCell(Text(_getWindowTypeName(controller.controller))),
+            DataCell(
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.edit_outlined),
+                    onPressed: () => _showWindowEditDialog(controller, context),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outlined),
+                    onPressed: () async {
+                      controller.controller.destroy();
+                    },
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
-      ));
+          ],
+        ),
+      );
     }
 
     return rows;
@@ -158,34 +161,27 @@ class _WindowsTable extends StatelessWidget {
     };
   }
 
-   @override
+  @override
   Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: windowManager,
-      builder: (BuildContext context, Widget? widget) {
-        return DataTable(
-          showBottomBorder: true,
-          columns: const [
-            DataColumn(
-              label: SizedBox(
-                width: 20,
-                child: Text('ID', style: TextStyle(fontSize: 16)),
-              ),
-            ),
-            DataColumn(
-              label: SizedBox(
-                width: 120,
-                child: Text('Type', style: TextStyle(fontSize: 16)),
-              ),
-            ),
-            DataColumn(
-              label: SizedBox(width: 20, child: Text('')),
-              numeric: true,
-            ),
-          ],
-          rows: _buildRows(context),
-        );
-      },
+    final WindowManager windowManager = WindowManagerAccessor.of(context);
+    return DataTable(
+      showBottomBorder: true,
+      columns: const [
+        DataColumn(
+          label: SizedBox(
+            width: 20,
+            child: Text('ID', style: TextStyle(fontSize: 16)),
+          ),
+        ),
+        DataColumn(
+          label: SizedBox(
+            width: 120,
+            child: Text('Type', style: TextStyle(fontSize: 16)),
+          ),
+        ),
+        DataColumn(label: SizedBox(width: 20, child: Text('')), numeric: true),
+      ],
+      rows: _buildRows(windowManager, context),
     );
   }
 }

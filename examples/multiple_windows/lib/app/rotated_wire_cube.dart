@@ -4,27 +4,48 @@
 
 import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math_64.dart';
+import 'dart:math';
 
-class RotatedWireCube extends StatelessWidget {
-  const RotatedWireCube({
-    required this.animation,
-    required this.cubeColor,
-    super.key,
-  });
+class RotatedWireCube extends StatefulWidget {
+  RotatedWireCube({required this.cubeColor, super.key});
 
-  final AnimationController animation;
   final Color cubeColor;
+
+  @override
+  State<StatefulWidget> createState() => _RotatedWireCubeState();
+}
+
+class _RotatedWireCubeState extends State<RotatedWireCube>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animation = AnimationController(
+      vsync: this,
+      lowerBound: 0,
+      upperBound: 2 * pi,
+      duration: const Duration(seconds: 15),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _animation.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: animation,
+      animation: _animation,
       builder: (context, child) {
         return CustomPaint(
           size: const Size(200, 200),
           painter: _RotatedWireCubePainter(
-            angle: animation.value,
-            color: cubeColor,
+            angle: _animation.value,
+            color: widget.cubeColor,
           ),
         );
       },

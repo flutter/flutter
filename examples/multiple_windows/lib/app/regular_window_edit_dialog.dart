@@ -117,6 +117,31 @@ class _RegularWindowEditDialogState extends State<_RegularWindowEditDialog> {
     super.dispose();
   }
 
+  void _onSave() {
+    double? width = double.tryParse(widthController.text);
+    double? height = double.tryParse(heightController.text);
+    String? title = titleController.text.isEmpty ? null : titleController.text;
+    if (width != null &&
+        height != null &&
+        (width != initialSize.width || height != initialSize.height)) {
+      widget.controller.setSize(Size(width, height));
+    }
+    if (title != null && title != initialTitle) {
+      widget.controller.setTitle(title);
+    }
+    if (nextIsFullscreen != null && nextIsFullscreen != initialFullscreen) {
+      widget.controller.setFullscreen(nextIsFullscreen!);
+    }
+    if (nextIsMaximized != null && nextIsMaximized != initialMaximized) {
+      widget.controller.setMaximized(nextIsMaximized!);
+    }
+    if (nextIsMinized != null && nextIsMinized != initialMinimized) {
+      widget.controller.setMinimized(nextIsMinized!);
+    }
+
+    widget.onClose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -172,30 +197,5 @@ class _RegularWindowEditDialogState extends State<_RegularWindowEditDialog> {
         TextButton(onPressed: () => _onSave(), child: Text('Save')),
       ],
     );
-  }
-
-  void _onSave() {
-    double? width = double.tryParse(widthController.text);
-    double? height = double.tryParse(heightController.text);
-    String? title = titleController.text.isEmpty ? null : titleController.text;
-    if (width != null &&
-        height != null &&
-        (width != initialSize.width || height != initialSize.height)) {
-      widget.controller.setSize(Size(width, height));
-    }
-    if (title != null && title != initialTitle) {
-      widget.controller.setTitle(title);
-    }
-    if (nextIsFullscreen != null && nextIsFullscreen != initialFullscreen) {
-      widget.controller.setFullscreen(nextIsFullscreen!);
-    }
-    if (nextIsMaximized != null && nextIsMaximized != initialMaximized) {
-      widget.controller.setMaximized(nextIsMaximized!);
-    }
-    if (nextIsMinized != null && nextIsMinized != initialMinimized) {
-      widget.controller.setMinimized(nextIsMinized!);
-    }
-
-    widget.onClose();
   }
 }
