@@ -297,8 +297,7 @@ class Scenarios {
   /// in a native iOS app. The file replacements are used to set up the
   /// specific configuration for each scenario.
   late Map<String, List<FileReplacements>> scenarios = <String, List<FileReplacements>>{
-    // When both the app and the plugin have migrated to scenes,
-    // we expect scene events.
+    // When both the app and the plugin have migrated to scenes, we expect scene events.
     'AppMigrated-FlutterSceneDelegate-PluginMigrated': <FileReplacements>[
       ...sharedLifecycleFiles,
       FileReplacements(
@@ -319,8 +318,8 @@ class Scenarios {
       ),
     ],
 
-    // When the app has migrated but the plugin hasn't,
-    // we expect application events to be used as a fallback.
+    // When the app has migrated but the plugin hasn't, we expect application events to be used as
+    // a fallback.
     'AppMigrated-FlutterSceneDelegate-PluginNotMigrated': <FileReplacements>[
       ...sharedLifecycleFiles,
       FileReplacements(
@@ -341,8 +340,7 @@ class Scenarios {
       ),
     ],
 
-    // When both the app and the plugin has migrated to scenes,
-    // we expect scene events.
+    // When both the app and the plugin have migrated to scenes, we expect scene events.
     'AppMigrated-FlutterSceneLifeCycleProvider-PluginMigrated': <FileReplacements>[
       ...sharedLifecycleFiles,
       FileReplacements(
@@ -363,8 +361,8 @@ class Scenarios {
       ),
     ],
 
-    // When the app has migrated but the plugin hasn't,
-    // we expect application events to be used as a fallback.
+    // When the app has migrated but the plugin hasn't, we expect application events to be used as
+    // a fallback.
     'AppMigrated-FlutterSceneLifeCycleProvider-PluginNotMigrated': <FileReplacements>[
       ...sharedLifecycleFiles,
       FileReplacements(
@@ -385,7 +383,7 @@ class Scenarios {
       ),
     ],
 
-    // When the app has not migrated, but the plugin has, we expect no events.
+    // When the app has not migrated, but the plugin supports both, we expect application events.
     'AppNotMigrated-FlutterSceneDelegate-PluginMigrated': <FileReplacements>[
       ...sharedLifecycleFiles,
       FileReplacements(

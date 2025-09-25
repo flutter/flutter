@@ -16,6 +16,7 @@ public class MyPlugin: NSObject, FlutterPlugin, FlutterSceneLifeCycleDelegate {
     let instance = MyPlugin()
     registrar.addMethodCallDelegate(instance, channel: channel)
     registrar.addApplicationDelegate(instance)
+    registrar.addSceneDelegate(instance)
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult)

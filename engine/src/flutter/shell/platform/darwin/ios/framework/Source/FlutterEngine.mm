@@ -1545,6 +1545,15 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 }
 
 - (void)addApplicationDelegate:(NSObject<FlutterPlugin>*)delegate {
+  id<UIApplicationDelegate> appDelegate = FlutterSharedApplication.application.delegate;
+  if ([appDelegate conformsToProtocol:@protocol(FlutterAppLifeCycleProvider)]) {
+    id<FlutterAppLifeCycleProvider> lifeCycleProvider =
+        (id<FlutterAppLifeCycleProvider>)appDelegate;
+    [lifeCycleProvider addApplicationLifeCycleDelegate:delegate];
+  }
+}
+
+- (void)addSceneDelegate:(NSObject<FlutterPlugin>*)delegate {
   // If the plugin conforms to FlutterSceneLifeCycleDelegate, add it to the engine.
   if ([delegate conformsToProtocol:@protocol(FlutterSceneLifeCycleDelegate)]) {
     NSObject<FlutterSceneLifeCycleDelegate>* lifecycleDelegate =
@@ -1555,13 +1564,6 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
     // print a warning pointing to documentation: https://github.com/flutter/flutter/issues/175956
     // [FlutterLogger logWarning:[NSString stringWithFormat:@"Plugin %@ has not migrated to
     // scenes.", _pluginKey]];
-  }
-
-  id<UIApplicationDelegate> appDelegate = FlutterSharedApplication.application.delegate;
-  if ([appDelegate conformsToProtocol:@protocol(FlutterAppLifeCycleProvider)]) {
-    id<FlutterAppLifeCycleProvider> lifeCycleProvider =
-        (id<FlutterAppLifeCycleProvider>)appDelegate;
-    [lifeCycleProvider addApplicationLifeCycleDelegate:delegate];
   }
 }
 

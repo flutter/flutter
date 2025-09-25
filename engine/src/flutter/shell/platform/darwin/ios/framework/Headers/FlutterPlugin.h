@@ -373,6 +373,13 @@ typedef enum {
     NS_EXTENSION_UNAVAILABLE_IOS("Disallowed in plugins used in app extensions");
 
 /**
+ * Registers the plugin as a receiver of `UISceneDelegate` and `UIWindowSceneDelegate` calls.
+ *
+ * @param delegate The receiving object, such as the plugin's main class.
+ */
+- (void)addSceneDelegate:(NSObject<FlutterPlugin>*)delegate;
+
+/**
  * Returns the file name for the given asset.
  * The returned file name can be used to access the asset in the application's main bundle.
  *

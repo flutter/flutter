@@ -552,13 +552,13 @@ FLUTTER_ASSERT_ARC
 #endif  // defined(TARGET_IPHONE_SIMULATOR) && TARGET_IPHONE_SIMULATOR
 }
 
-- (void)testAddApplicationDelegateToRegistrar {
+- (void)testAddSceneDelegateToRegistrar {
   FlutterDartProject* project = [[FlutterDartProject alloc] init];
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"engine" project:project];
   id mockEngine = OCMPartialMock(engine);
   NSObject<FlutterPluginRegistrar>* registrar = [mockEngine registrarForPlugin:@"plugin"];
   id mockPlugin = OCMProtocolMock(@protocol(TestFlutterPluginWithSceneEvents));
-  [registrar addApplicationDelegate:mockPlugin];
+  [registrar addSceneDelegate:mockPlugin];
 
   OCMVerify(times(1), [mockEngine addSceneLifeCycleDelegate:[OCMArg any]]);
 }

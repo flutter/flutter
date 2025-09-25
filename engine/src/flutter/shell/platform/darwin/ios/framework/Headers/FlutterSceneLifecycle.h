@@ -15,8 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
  * events.
  *
  * This protocol provides a way for Flutter plugins to observe and react to scene-based life-cycle
- * events. To use this, a `FlutterPlugin` can conform to this protocol and implement the desired
- * methods. The methods in this protocol correspond to methods in `UISceneDelegate` and
+ * events. The methods in this protocol correspond to methods in `UISceneDelegate` and
  * `UIWindowSceneDelegate`.
  *
  * See also:
