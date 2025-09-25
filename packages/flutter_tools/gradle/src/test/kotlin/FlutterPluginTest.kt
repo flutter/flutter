@@ -10,25 +10,82 @@ import com.android.build.gradle.internal.core.InternalBaseVariant
 import com.android.build.gradle.tasks.MergeSourceSetFolders
 import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.flutter.gradle.tasks.FlutterTask
+import groovy.lang.Closure
+import io.mockk.CapturingSlot
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.verify
 import org.gradle.api.Action
+import org.gradle.api.DomainObjectCollection
+import org.gradle.api.NamedDomainObjectCollectionSchema
+import org.gradle.api.NamedDomainObjectContainer
+import org.gradle.api.Namer
 import org.gradle.api.Project
+import org.gradle.api.Rule
 import org.gradle.api.Task
+import org.gradle.api.Transformer
 import org.gradle.api.file.Directory
+import org.gradle.api.internal.project.ProjectInternal
+import org.gradle.api.internal.tasks.DefaultTaskContainer
+import org.gradle.api.internal.tasks.TaskContainerInternal
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.TaskProvider
-import org.gradle.api.UnknownTaskException
+import org.gradle.api.provider.Provider
+import org.gradle.api.specs.Spec
+import org.gradle.api.tasks.TaskCollection
+import org.gradle.internal.reflect.Instantiator
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
+import java.util.SortedMap
+import java.util.SortedSet
+import java.util.function.BiFunction
 import kotlin.io.path.writeText
 import kotlin.test.Test
+
+class FakeTaskContainer(private val copyTaskActionCaptor: CapturingSlot<Action<Copy>>) : TaskContainerMock() {
+    override fun register(name: String, configurationAction: Action<in Task>): TaskProvider<Task?> =
+        mockk<TaskProvider<Task?>>(relaxed = true)
+
+    override fun <T : Task?> register(
+        name: String,
+        type: Class<T?>,
+        configurationAction: Action<in T>
+    ): TaskProvider<T?> {
+        val flutterTask = mockk<FlutterTask>(relaxed = true)
+        if (name.startsWith("copyFlutterAssets")) {
+            copyTaskActionCaptor.captured = configurationAction as Action<Copy>
+        }
+        val copySpec = mockk<org.gradle.api.file.CopySpec>(relaxed = true)
+        every {
+            (flutterTask).assets
+        } returns copySpec
+        val flutterTaskProvider = mockk<TaskProvider<FlutterTask>>(relaxed = true)
+        every {
+            flutterTaskProvider.hint(FlutterTask::class).get()
+        } returns flutterTask
+        return flutterTaskProvider as TaskProvider<T?>
+    }
+
+    override fun named(name: String): TaskProvider<Task> {
+        val flutterTask = mockk<FlutterTask>(relaxed = true)
+        val copySpec = mockk<org.gradle.api.file.CopySpec>(relaxed = true)
+        every {
+            (flutterTask).assets
+        } returns copySpec
+        val flutterTaskProvider = mockk<TaskProvider<FlutterTask>>(relaxed = true)
+        every {
+            flutterTaskProvider.hint(FlutterTask::class).get()
+        } returns flutterTask
+        return flutterTaskProvider as TaskProvider<Task>
+    }
+
+    override fun findByName(name: String): Task? = null
+}
 
 class FlutterPluginTest {
     @Test
@@ -144,14 +201,14 @@ class FlutterPluginTest {
         // mock return of NativePluginLoaderReflectionBridge.getPlugins
         mockkObject(NativePluginLoaderReflectionBridge)
         every { NativePluginLoaderReflectionBridge.getPlugins(any(), any()) } returns
-            listOf()
+                listOf()
         // mock method calls that are invoked by the args to NativePluginLoaderReflectionBridge
         every { project.extraProperties } returns mockk()
         every { project.file(flutterExtension.source!!) } returns mockk()
-        // Set up the task container and our task capture
-        val taskContainer = mockk<TaskContainer>(relaxed = true)
-        every { project.tasks } returns taskContainer
         val copyTaskActionCaptor = slot<Action<Copy>>()
+        // Set up the task container and our task capture
+        val taskContainer = FakeTaskContainer(copyTaskActionCaptor)
+        every { project.tasks } returns taskContainer
         val copyTask = mockk<Copy>(relaxed = true)
         val mockVariant = mockk<com.android.build.gradle.api.ApplicationVariant>(relaxed = true)
         every { mockVariant.name } returns "debug"
@@ -189,60 +246,7 @@ class FlutterPluginTest {
             variants.forEach { firstArg<Action<com.android.build.gradle.api.ApplicationVariant>>().execute(it) }
         }
         every { mockVariant.mergeAssetsProvider.hint(MergeSourceSetFolders::class).get() } returns
-            mockk<MergeSourceSetFolders>(relaxed = true)
-        val flutterTask = mockk<FlutterTask>(relaxed = true)
-        val copySpec = mockk<org.gradle.api.file.CopySpec>(relaxed = true)
-        every {
-            (flutterTask).assets
-        } returns copySpec
-        val flutterTaskProvider = mockk<TaskProvider<FlutterTask>>(relaxed = true)
-        every {
-            flutterTaskProvider.hint(FlutterTask::class).get()
-        } returns flutterTask
-        every {
-            taskContainer.register(
-                match { it.contains("compileFlutterBuild") },
-                any<Class<FlutterTask>>(),
-                any()
-            )
-        } answers {
-            flutterTaskProvider
-        }
-        // Actual task that should be captured to test if permissions have been set
-        val mockCopyTaskProvider = mockk<TaskProvider<Copy>>(relaxed = true)
-        every { mockCopyTaskProvider.hint(Copy::class).get() } returns copyTask
-        every {
-            taskContainer.register(
-                match { it.startsWith("copyFlutterAssets") },
-                eq(Copy::class.java),
-                capture(copyTaskActionCaptor)
-            )
-        } answers {
-            mockCopyTaskProvider
-        }
-        val mockJarTaskProvider = mockk<TaskProvider<org.gradle.api.tasks.bundling.Jar>>(relaxed = true)
-        every { mockJarTaskProvider.hint(org.gradle.api.tasks.bundling.Jar::class).get() } returns
-            mockk<org.gradle.api.tasks.bundling.Jar>(relaxed = true)
-        every {
-            taskContainer.register(
-                match { it.contains("packJniLibs") },
-                eq(org.gradle.api.tasks.bundling.Jar::class.java),
-                any()
-            )
-        } answers {
-            mockJarTaskProvider
-        }
-        val mockTaskProvider = mockk<TaskProvider<Task>>(relaxed = true)
-        every { mockTaskProvider.hint(Task::class).get() } returns mockk<Task>(relaxed = true)
-        every {
-            taskContainer.named(any<String>())
-        } returns mockTaskProvider
-        every { project.tasks.findByName("generateLockfiles") } returns null
-        every { project.tasks.named("packageDebugAssets") } throws UnknownTaskException("mock")
-        every { project.tasks.named("cleanPackageDebugAssets") } throws UnknownTaskException("mock")
-        // the following mock does not work yet. Execute test by hand with:
-        // flutter/packages/flutter_tools/gradle$ .\gradlew test --tests com.flutter.gradle.FlutterPluginTest
-        every { taskContainer.register(eq("compileFlutterBuildDebug"), eq(FlutterTask::class.java), any()) } throws Exception("mock")
+                mockk<MergeSourceSetFolders>(relaxed = true)
         val flutterPlugin = FlutterPlugin()
         flutterPlugin.apply(project)
 
