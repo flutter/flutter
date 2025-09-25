@@ -31,7 +31,7 @@ class WindowContent extends StatelessWidget {
       final RegularWindowController regular => RegularWindow(
         key: windowKey,
         controller: regular,
-        child: RegularWindowContent(window: regular),
+        child: MaterialApp(home: RegularWindowContent(window: regular)),
       ),
     };
   }

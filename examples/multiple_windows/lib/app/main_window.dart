@@ -8,89 +8,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/_window.dart';
 
-import 'window_content.dart';
-
 import 'regular_window_content.dart';
 import 'window_settings_dialog.dart';
 import 'models.dart';
 import 'regular_window_edit_dialog.dart';
 
 class MainWindow extends StatelessWidget {
-  MainWindow({super.key, required BaseWindowController mainController})
-    : windowManager = WindowManager(
-        initialWindows: <KeyedWindow>[
-          KeyedWindow(
-            isMainWindow: true,
-            key: UniqueKey(),
-            controller: mainController,
-          ),
-        ],
-      );
-
-  final WindowManager windowManager;
-  final WindowSettings settings = WindowSettings();
-
   @override
   Widget build(BuildContext context) {
-    return WindowManagerAccessor(
-      windowManager: windowManager,
-      child: WindowSettingsAccessor(
-        windowSettings: settings,
-        child: ViewAnchor(
-          view: ListenableBuilder(
-            listenable: windowManager,
-            builder: (BuildContext context, Widget? child) {
-              final List<Widget> childViews = <Widget>[];
-              for (final KeyedWindow window in windowManager.windows) {
-                // This check renders windows that are not nested below another window as
-                // a child window (e.g. a popup for a window) in addition to the main window,
-                // which is special as it is the one that is currently being rendered.
-                if (window.parent == null && !window.isMainWindow) {
-                  childViews.add(
-                    WindowContent(
-                      controller: window.controller,
-                      windowKey: window.key,
-                      onDestroyed: () => windowManager.remove(window.key),
-                      onError: () => windowManager.remove(window.key),
-                    ),
-                  );
-                }
-              }
-
-              return ViewCollection(views: childViews);
-            },
-          ),
-          child: Scaffold(
-            appBar: AppBar(title: const Text('Multi Window Reference App')),
-            body: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return Scaffold(
+      appBar: AppBar(title: const Text('Multi Window Reference App')),
+      body: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 60,
+            child: Column(
               children: [
                 Expanded(
-                  flex: 60,
-                  child: Column(
-                    children: [
-                      SingleChildScrollView(
-                        scrollDirection: Axis.vertical,
-                        child: _WindowsTable(),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  flex: 40,
-                  child: Column(
-                    children: [
-                      _WindowCreatorCard(
-                        windowManager: windowManager,
-                        windowSettings: settings,
-                      ),
-                    ],
+                  // <-- This gives the scroll view bounded height
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: _WindowsTable(),
                   ),
                 ),
               ],
             ),
           ),
-        ),
+          Expanded(flex: 40, child: Column(children: [_WindowCreatorCard()])),
+        ],
       ),
     );
   }
@@ -185,16 +131,10 @@ class _WindowsTable extends StatelessWidget {
 }
 
 class _WindowCreatorCard extends StatelessWidget {
-  const _WindowCreatorCard({
-    required this.windowManager,
-    required this.windowSettings,
-  });
-
-  final WindowManager windowManager;
-  final WindowSettings windowSettings;
-
   @override
   Widget build(BuildContext context) {
+    final WindowManager windowManager = WindowManagerAccessor.of(context);
+    final WindowSettings windowSettings = WindowSettingsAccessor.of(context);
     return Card.outlined(
       margin: const EdgeInsets.symmetric(horizontal: 25),
       child: Padding(
