@@ -1062,4 +1062,24 @@ public class FlutterRendererTest {
 
     assertEquals(firstSurface, secondSurface);
   }
+
+  @Test
+  public void restoreSurfaceProducers_restoresImageReaderSurfaceProducersAsIfApplicationResumed() {
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
+    FlutterRenderer.ImageReaderSurfaceProducer imageReaderProducer1 =
+        (FlutterRenderer.ImageReaderSurfaceProducer) flutterRenderer.createSurfaceProducer();
+    FlutterRenderer.ImageReaderSurfaceProducer imageReaderProducer2 =
+        (FlutterRenderer.ImageReaderSurfaceProducer) flutterRenderer.createSurfaceProducer();
+    imageReaderProducer1.callback = mock(TextureRegistry.SurfaceProducer.Callback.class);
+    imageReaderProducer2.callback = mock(TextureRegistry.SurfaceProducer.Callback.class);
+    imageReaderProducer1.notifiedDestroy = true;
+    imageReaderProducer2.notifiedDestroy = true;
+
+    flutterRenderer.restoreSurfaceProducers();
+
+    verify(imageReaderProducer1.callback).onSurfaceAvailable();
+    verify(imageReaderProducer2.callback).onSurfaceAvailable();
+    assertFalse(imageReaderProducer1.notifiedDestroy);
+    assertFalse(imageReaderProducer2.notifiedDestroy);
+  }
 }

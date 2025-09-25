@@ -448,7 +448,7 @@ public class FlutterRenderer implements TextureRegistry {
      *
      * <p>Used to avoid signaling {@link Callback#onSurfaceAvailable()} unnecessarily.
      */
-    private boolean notifiedDestroy = false;
+    @VisibleForTesting boolean notifiedDestroy = false;
 
     // State held to track latency of various stages.
     private long lastDequeueTime = 0;
@@ -462,7 +462,8 @@ public class FlutterRenderer implements TextureRegistry {
     private final HashMap<ImageReader, PerImageReader> perImageReaders = new HashMap<>();
     private ArrayList<PerImage> lastDequeuedImage = new ArrayList<PerImage>();
     private PerImageReader lastReaderDequeuedFrom = null;
-    private Callback callback = null;
+
+    @VisibleForTesting Callback callback = null;
 
     /** Internal class: state held per Image produced by ImageReaders. */
     private class PerImage {
