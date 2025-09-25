@@ -6298,6 +6298,8 @@ class SemanticsConfiguration {
     _platformViewId ??= child._platformViewId;
     _maxValueLength ??= child._maxValueLength;
     _currentValueLength ??= child._currentValueLength;
+    _traversalParentIdentifier ??= child._traversalParentIdentifier;
+    _traversalChildIdentifier ??= child._traversalChildIdentifier;
 
     _headingLevel = _mergeHeadingLevels(
       sourceLevel: child._headingLevel,
