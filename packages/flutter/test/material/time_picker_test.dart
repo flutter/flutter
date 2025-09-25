@@ -1589,13 +1589,13 @@ void main() {
           final SemanticsNode elevenHours = semantics
               .nodesWith(
                 value: 'Select hours $initialValue',
-                ancestor: tester.renderObject(_hourControl).debugSemantics,
+                ancestor: tester.renderObject(_dialHourControl).debugSemantics,
               )
               .single;
           tester.binding.pipelineOwner.semanticsOwner!.performAction(elevenHours.id, action);
           await tester.pumpAndSettle();
           expect(
-            find.descendant(of: _hourControl, matching: find.text(finalValue)),
+            find.descendant(of: _dialHourControl, matching: find.text(finalValue)),
             findsOneWidget,
           );
         }
@@ -1643,13 +1643,13 @@ void main() {
           final SemanticsNode elevenHours = semantics
               .nodesWith(
                 value: 'Select minutes $initialValue',
-                ancestor: tester.renderObject(_minuteControl).debugSemantics,
+                ancestor: tester.renderObject(_dialMinuteControl).debugSemantics,
               )
               .single;
           tester.binding.pipelineOwner.semanticsOwner!.performAction(elevenHours.id, action);
           await tester.pumpAndSettle();
           expect(
-            find.descendant(of: _minuteControl, matching: find.text(finalValue)),
+            find.descendant(of: _dialMinuteControl, matching: find.text(finalValue)),
             findsOneWidget,
           );
         }
@@ -2660,11 +2660,11 @@ Future<void> mediaQueryBoilerplate(
   await tester.pumpAndSettle();
 }
 
-final Finder _hourControl = find.byWidgetPredicate(
-  (Widget w) => '${w.runtimeType}' == '_HourControl',
+final Finder _dialHourControl = find.byWidgetPredicate(
+  (Widget w) => '${w.runtimeType}' == '_DialHourControl',
 );
-final Finder _minuteControl = find.byWidgetPredicate(
-  (Widget widget) => '${widget.runtimeType}' == '_MinuteControl',
+final Finder _dialMinuteControl = find.byWidgetPredicate(
+  (Widget widget) => '${widget.runtimeType}' == '_DialMinuteControl',
 );
 final Finder _timePicker = find.byWidgetPredicate(
   (Widget widget) => '${widget.runtimeType}' == '_TimePicker',
