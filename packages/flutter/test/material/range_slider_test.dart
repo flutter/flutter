@@ -2397,7 +2397,7 @@ void main() {
     );
   });
 
-  testWidgets('RangeSlider MaterialStateMouseCursor resolves correctly', (
+  testWidgets('RangeSlider WidgetStateMouseCursor resolves correctly', (
     WidgetTester tester,
   ) async {
     RangeValues values = const RangeValues(50, 70);

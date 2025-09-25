@@ -546,7 +546,7 @@ class _RadioState<T> extends State<Radio<T>> {
           return WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
               radioTheme.mouseCursor?.resolve(states) ??
               WidgetStateProperty.resolveAs<MouseCursor>(
-                MaterialStateMouseCursor.clickable,
+                WidgetStateMouseCursor.clickable,
                 states,
               );
         });
