@@ -88,7 +88,7 @@ class RegularWindowContent extends StatelessWidget {
         builder: (BuildContext context, Widget? child) {
           final List<Widget> childViews = <Widget>[];
           for (final KeyedWindow window in windowManager.windows) {
-            if (window.parent == window) {
+            if (window.parent == window.controller) {
               childViews.add(
                 WindowContent(
                   controller: window.controller,

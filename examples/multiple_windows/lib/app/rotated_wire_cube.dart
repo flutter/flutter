@@ -7,7 +7,7 @@ import 'package:vector_math/vector_math_64.dart';
 import 'dart:math';
 
 class RotatedWireCube extends StatefulWidget {
-  RotatedWireCube({required this.cubeColor, super.key});
+  const RotatedWireCube({required this.cubeColor, super.key});
 
   final Color cubeColor;
 

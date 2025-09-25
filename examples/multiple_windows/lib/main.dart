@@ -8,8 +8,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:multiple_windows/app/models.dart';
-import 'package:multiple_windows/app/window_content.dart';
+import 'app/models.dart';
+import 'app/window_content.dart';
 import 'app/main_window.dart';
 import 'package:flutter/src/widgets/_window.dart';
 

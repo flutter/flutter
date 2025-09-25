@@ -14,6 +14,8 @@ import 'models.dart';
 import 'regular_window_edit_dialog.dart';
 
 class MainWindow extends StatelessWidget {
+  MainWindow({super.key});
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
