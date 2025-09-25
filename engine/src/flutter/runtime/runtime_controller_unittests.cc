@@ -36,8 +36,8 @@ class MockRuntimeDelegate : public RuntimeDelegate {
     this->actions.push_back(actions);
   }
 
-  void SetApplicationLocale(const std::string& locale) override {
-    this->locale = locale;
+  void SetApplicationLocale(std::string locale) override {
+    this->locale = std::move(locale);
   }
 
   void SetSemanticsTreeEnabled(bool enabled) override {}

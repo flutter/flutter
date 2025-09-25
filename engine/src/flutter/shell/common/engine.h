@@ -166,7 +166,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
     ///
     /// @param[in]  locale  The application locale in BCP 47 format.
     ///
-    virtual void OnEngineSetApplicationLocale(const std::string& locale) = 0;
+    virtual void OnEngineSetApplicationLocale(std::string locale) = 0;
 
     //--------------------------------------------------------------------------
     /// @brief      When the Framework starts or stops generating semantics
@@ -1037,7 +1037,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
                        CustomAccessibilityActionUpdates actions) override;
 
   // |RuntimeDelegate|
-  void SetApplicationLocale(const std::string& locale) override;
+  void SetApplicationLocale(std::string locale) override;
 
   // |RuntimeDelegate|
   void SetSemanticsTreeEnabled(bool enabled) override;

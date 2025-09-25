@@ -59,7 +59,7 @@ class MockDelegate : public Engine::Delegate {
               (override));
   MOCK_METHOD(void,
               OnEngineSetApplicationLocale,
-              (const std::string&),
+              (const std::string),
               (override));
   MOCK_METHOD(void, OnEngineSetSemanticsTreeEnabled, (bool), (override));
   MOCK_METHOD(void,

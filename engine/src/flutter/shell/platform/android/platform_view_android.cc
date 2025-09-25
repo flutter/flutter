@@ -326,8 +326,8 @@ void PlatformViewAndroid::UpdateSemantics(
 }
 
 // |PlatformView|
-void PlatformViewAndroid::SetApplicationLocale(const std::string& locale) {
-  jni_facade_->FlutterViewSetApplicationLocale(locale);
+void PlatformViewAndroid::SetApplicationLocale(std::string locale) {
+  jni_facade_->FlutterViewSetApplicationLocale(std::move(locale));
 }
 
 void PlatformViewAndroid::RegisterExternalTexture(

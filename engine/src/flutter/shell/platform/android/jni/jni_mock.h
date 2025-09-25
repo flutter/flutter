@@ -35,7 +35,7 @@ class JNIMock final : public PlatformViewAndroidJNI {
               (override));
   MOCK_METHOD(void,
               FlutterViewSetApplicationLocale,
-              (const std::string& locale),
+              (std::string locale),
               (override));
 
   MOCK_METHOD(void,

@@ -103,7 +103,7 @@ class PlatformConfigurationClient {
   ///
   /// @param[in] locale The application locale in BCP 47 format.
   ///
-  virtual void SetApplicationLocale(const std::string& locale) = 0;
+  virtual void SetApplicationLocale(std::string locale) = 0;
 
   //--------------------------------------------------------------------------
   /// @brief      Notifies whether Framework starts generating semantics tree.
@@ -640,7 +640,7 @@ class PlatformConfigurationNativeApi {
 
   static void UpdateSemantics(int64_t viewId, SemanticsUpdate* update);
 
-  static void SetApplicationLocale(const std::string& locale);
+  static void SetApplicationLocale(std::string locale);
 
   static void SetSemanticsTreeEnabled(bool enabled);
 

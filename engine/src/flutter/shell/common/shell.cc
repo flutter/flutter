@@ -1449,15 +1449,15 @@ void Shell::OnEngineUpdateSemantics(int64_t view_id,
 }
 
 // |Engine::Delegate|
-void Shell::OnEngineSetApplicationLocale(const std::string& locale) {
+void Shell::OnEngineSetApplicationLocale(std::string locale) {
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
 
   task_runners_.GetPlatformTaskRunner()->RunNowOrPostTask(
       task_runners_.GetPlatformTaskRunner(),
-      [view = platform_view_->GetWeakPtr(), locale] {
+      [view = platform_view_->GetWeakPtr(), localeHolder = std::move(locale)] {
         if (view) {
-          view->SetApplicationLocale(locale);
+          view->SetApplicationLocale(std::move(localeHolder));
         }
       });
 }
