@@ -51,9 +51,19 @@ the following in your manifest:
 </manifest>
 ```
 
-# TODO(camsim99): determine if I can keep dart-flags deleted or un-included in manifest.
+# TODO(camsim99): refactor first table based on this ones order 
 | Flag                              | Description                                                      | Can Set in Release Mode? |
 |------------------------------------|------------------------------------------------------------------|--------------------------|
+| `VMServicePort`                    | Sets the port for the Dart VM Service.                           | No                       | 
+| `UseTestFonts`                     | Uses the Ahem test font for font resolution.                     | No                       |
+| `EnableSoftwareRendering`          | Uses Skia software backend for rendering.                        | Yes                      |
+| `SkiaDeterministicRendering`       | Ensures deterministic Skia rendering by skipping CPU feature swaps. | Yes                  |
+| `AotSharedLibraryName`             | Specifies the path to the AOT shared library containing compiled Dart code. | Yes              |
+| `SnapshotAssetPath`                | Sets the path to the directory containing snapshot assets.        | Yes                      |
+| `VMSnapshotData`                   | Specifies the path to the VM snapshot data file.                 | Yes                      |
+| `IsolateSnapshotData`              | Specifies the path to the isolate snapshot data file.            | Yes                      |
+| `FlutterAssetsDir`                 | Sets the directory containing Flutter assets.                    | Yes                      |
+| `AutomaticallyRegisterPlugins`     | Enables automatic registration of plugins with the Flutter engine. | Yes                   |
 | `OldGenHeapSize`                   | Sets the old generation heap size for the Dart VM in megabytes.  | Yes                      |
 | `EnableImpeller`                   | Enables or disables the Impeller renderer.                       | Yes                      |
 | `EnableVulkanValidation`           | Enables Vulkan validation layers if available.                   | No                       |
@@ -66,16 +76,6 @@ the following in your manifest:
 | `ImpellerLazyShaderInitialization` | Enables lazy initialization of Impeller shaders.                 | Yes                      |
 | `ImpellerAntialiasLines`           | Enables antialiasing for lines in Impeller.                      | Yes                      |
 | `LeakVM`                           | Controls whether the Dart VM is left running after the last shell shuts down. | No               |
-| `VMServicePort`                    | Sets the port for the Dart VM Service.                           | No                       |
-| `UseTestFonts`                     | Uses the Ahem test font for font resolution.                     | No                       |
-| `EnableSoftwareRendering`          | Uses Skia software backend for rendering.                        | Yes                      |
-| `SkiaDeterministicRendering`       | Ensures deterministic Skia rendering by skipping CPU feature swaps. | Yes                  |
-| `AotSharedLibraryName`             | Specifies the path to the AOT shared library containing compiled Dart code. | Yes              |
-| `SnapshotAssetPath`                | Sets the path to the directory containing snapshot assets.        | Yes                      |
-| `VMSnapshotData`                   | Specifies the path to the VM snapshot data file.                 | Yes                      |
-| `IsolateSnapshotData`              | Specifies the path to the isolate snapshot data file.            | Yes                      |
-| `FlutterAssetsDir`                 | Sets the directory containing Flutter assets.                    | Yes                      |
-| `AutomaticallyRegisterPlugins`     | Enables automatic registration of plugins with the Flutter engine. | Yes                   |
 
 
 # TODO(camsim99): Rework this note.
