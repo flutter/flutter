@@ -479,6 +479,7 @@ Future<void> sendSemanticsTreeInfo() async {
     return builder.build();
   }
 
+  ui.PlatformDispatcher.instance.setSemanticsTreeEnabled(true);
   view1.updateSemantics(createSemanticsUpdate(view1.viewId + 1));
   view2.updateSemantics(createSemanticsUpdate(view2.viewId + 1));
   signal();

@@ -53,8 +53,8 @@ class _${blockName}DefaultsM3 extends _TimePickerDefaults {
 
   @override
   Color get dayPeriodColor {
-    return MaterialStateColor.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
+    return WidgetStateColor.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         return ${componentColor("$dayPeriodComponent.selected.container")};
       }
       // The unselected day period should match the overall picker dialog color.
@@ -88,26 +88,26 @@ class _${blockName}DefaultsM3 extends _TimePickerDefaults {
 
   @override
   Color get dayPeriodTextColor {
-    return MaterialStateColor.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
-        if (states.contains(MaterialState.focused)) {
+    return WidgetStateColor.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
+        if (states.contains(WidgetState.focused)) {
           return ${componentColor("$dayPeriodComponent.selected.focus.label-text")};
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return ${componentColor("$dayPeriodComponent.selected.hover.label-text")};
         }
-        if (states.contains(MaterialState.pressed)) {
+        if (states.contains(WidgetState.pressed)) {
           return ${componentColor("$dayPeriodComponent.selected.pressed.label-text")};
         }
         return ${componentColor("$dayPeriodComponent.selected.label-text")};
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return ${componentColor("$dayPeriodComponent.unselected.focus.label-text")};
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return ${componentColor("$dayPeriodComponent.unselected.hover.label-text")};
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return ${componentColor("$dayPeriodComponent.unselected.pressed.label-text")};
       }
       return ${componentColor("$dayPeriodComponent.unselected.label-text")};
@@ -151,8 +151,8 @@ class _${blockName}DefaultsM3 extends _TimePickerDefaults {
 
   @override
   Color get dialTextColor {
-    return MaterialStateColor.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
+    return WidgetStateColor.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         return ${componentColor('$dialComponent.selected.label-text')};
       }
       return ${componentColor('$dialComponent.unselected.label-text')};
@@ -176,7 +176,7 @@ class _${blockName}DefaultsM3 extends _TimePickerDefaults {
 
   @override
   TextStyle get helpTextStyle {
-    return MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+    return MaterialStateTextStyle.resolveWith((Set<WidgetState> states) {
       final TextStyle textStyle = ${textStyle('$tokenGroup.headline')}!;
       return textStyle.copyWith(color: ${componentColor('$tokenGroup.headline')});
     });
@@ -189,27 +189,27 @@ class _${blockName}DefaultsM3 extends _TimePickerDefaults {
 
   @override
   Color get hourMinuteColor {
-    return MaterialStateColor.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
+    return WidgetStateColor.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         Color overlayColor = ${componentColor('$hourMinuteComponent.selected.container')};
-        if (states.contains(MaterialState.pressed)) {
+        if (states.contains(WidgetState.pressed)) {
           overlayColor = ${componentColor('$hourMinuteComponent.selected.pressed.state-layer')};
-        } else if (states.contains(MaterialState.hovered)) {
+        } else if (states.contains(WidgetState.hovered)) {
           const double hoverOpacity = ${opacity('$hourMinuteComponent.hover.state-layer.opacity')};
           overlayColor = ${componentColor('$hourMinuteComponent.selected.hover.state-layer')}.withOpacity(hoverOpacity);
-        } else if (states.contains(MaterialState.focused)) {
+        } else if (states.contains(WidgetState.focused)) {
           const double focusOpacity = ${opacity('$hourMinuteComponent.focus.state-layer.opacity')};
           overlayColor = ${componentColor('$hourMinuteComponent.selected.focus.state-layer')}.withOpacity(focusOpacity);
         }
         return Color.alphaBlend(overlayColor, ${componentColor('$hourMinuteComponent.selected.container')});
       } else {
         Color overlayColor = ${componentColor('$hourMinuteComponent.unselected.container')};
-        if (states.contains(MaterialState.pressed)) {
+        if (states.contains(WidgetState.pressed)) {
           overlayColor = ${componentColor('$hourMinuteComponent.unselected.pressed.state-layer')};
-        } else if (states.contains(MaterialState.hovered)) {
+        } else if (states.contains(WidgetState.hovered)) {
           const double hoverOpacity = ${opacity('$hourMinuteComponent.hover.state-layer.opacity')};
           overlayColor = ${componentColor('$hourMinuteComponent.unselected.hover.state-layer')}.withOpacity(hoverOpacity);
-        } else if (states.contains(MaterialState.focused)) {
+        } else if (states.contains(WidgetState.focused)) {
           const double focusOpacity = ${opacity('$hourMinuteComponent.focus.state-layer.opacity')};
           overlayColor = ${componentColor('$hourMinuteComponent.unselected.focus.state-layer')}.withOpacity(focusOpacity);
         }
@@ -249,33 +249,33 @@ class _${blockName}DefaultsM3 extends _TimePickerDefaults {
 
   @override
   Color get hourMinuteTextColor {
-    return MaterialStateColor.resolveWith((Set<MaterialState> states) {
+    return WidgetStateColor.resolveWith((Set<WidgetState> states) {
       return _hourMinuteTextColor.resolve(states);
     });
   }
 
   WidgetStateProperty<Color> get _hourMinuteTextColor {
-    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
-        if (states.contains(MaterialState.pressed)) {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
+        if (states.contains(WidgetState.pressed)) {
           return ${componentColor("$hourMinuteComponent.selected.pressed.label-text")};
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return ${componentColor("$hourMinuteComponent.selected.hover.label-text")};
         }
-        if (states.contains(MaterialState.focused)) {
+        if (states.contains(WidgetState.focused)) {
           return ${componentColor("$hourMinuteComponent.selected.focus.label-text")};
         }
         return ${componentColor("$hourMinuteComponent.selected.label-text")};
       } else {
         // unselected
-        if (states.contains(MaterialState.pressed)) {
+        if (states.contains(WidgetState.pressed)) {
           return ${componentColor("$hourMinuteComponent.unselected.pressed.label-text")};
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return ${componentColor("$hourMinuteComponent.unselected.hover.label-text")};
         }
-        if (states.contains(MaterialState.focused)) {
+        if (states.contains(WidgetState.focused)) {
           return ${componentColor("$hourMinuteComponent.unselected.focus.label-text")};
         }
         return ${componentColor("$hourMinuteComponent.unselected.label-text")};
@@ -285,7 +285,7 @@ class _${blockName}DefaultsM3 extends _TimePickerDefaults {
 
   @override
   TextStyle get hourMinuteTextStyle {
-    return MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+    return MaterialStateTextStyle.resolveWith((Set<WidgetState> states) {
       // TODO(tahatesser): Update this when https://github.com/flutter/flutter/issues/131247 is fixed.
       // This is using the correct text style from Material 3 spec.
       // https://m3.material.io/components/time-pickers/specs#fd0b6939-edab-4058-82e1-93d163945215

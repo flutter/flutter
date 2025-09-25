@@ -280,4 +280,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   FlutterVmService? vmService;
+
+  @override
+  Future<void> handleHotRestart() async {}
 }

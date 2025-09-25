@@ -123,32 +123,30 @@ void main() {
     const TextStyle textStyleValue = TextStyle(color: Color(0xff000005), fontSize: 20.0);
     const TextStyle hintStyleValue = TextStyle(color: Color(0xff000006), fontSize: 18.0);
 
-    const MaterialStateProperty<double?> elevation = MaterialStatePropertyAll<double>(
-      elevationValue,
-    );
-    const MaterialStateProperty<Color?> backgroundColor = MaterialStatePropertyAll<Color>(
+    const WidgetStateProperty<double?> elevation = MaterialStatePropertyAll<double>(elevationValue);
+    const WidgetStateProperty<Color?> backgroundColor = MaterialStatePropertyAll<Color>(
       backgroundColorValue,
     );
-    const MaterialStateProperty<Color?> shadowColor = MaterialStatePropertyAll<Color>(
+    const WidgetStateProperty<Color?> shadowColor = MaterialStatePropertyAll<Color>(
       shadowColorValue,
     );
-    const MaterialStateProperty<Color?> surfaceTintColor = MaterialStatePropertyAll<Color>(
+    const WidgetStateProperty<Color?> surfaceTintColor = MaterialStatePropertyAll<Color>(
       surfaceTintColorValue,
     );
-    const MaterialStateProperty<Color?> overlayColor = MaterialStatePropertyAll<Color>(
+    const WidgetStateProperty<Color?> overlayColor = MaterialStatePropertyAll<Color>(
       overlayColorValue,
     );
-    const MaterialStateProperty<BorderSide?> side = MaterialStatePropertyAll<BorderSide>(sideValue);
-    const MaterialStateProperty<OutlinedBorder?> shape = MaterialStatePropertyAll<OutlinedBorder>(
+    const WidgetStateProperty<BorderSide?> side = MaterialStatePropertyAll<BorderSide>(sideValue);
+    const WidgetStateProperty<OutlinedBorder?> shape = MaterialStatePropertyAll<OutlinedBorder>(
       shapeValue,
     );
-    const MaterialStateProperty<EdgeInsetsGeometry?> padding = MaterialStatePropertyAll<EdgeInsets>(
+    const WidgetStateProperty<EdgeInsetsGeometry?> padding = MaterialStatePropertyAll<EdgeInsets>(
       paddingValue,
     );
-    const MaterialStateProperty<TextStyle?> textStyle = MaterialStatePropertyAll<TextStyle>(
+    const WidgetStateProperty<TextStyle?> textStyle = MaterialStatePropertyAll<TextStyle>(
       textStyleValue,
     );
-    const MaterialStateProperty<TextStyle?> hintStyle = MaterialStatePropertyAll<TextStyle>(
+    const WidgetStateProperty<TextStyle?> hintStyle = MaterialStatePropertyAll<TextStyle>(
       hintStyleValue,
     );
     const BoxConstraints constraints = BoxConstraints(
@@ -232,9 +230,9 @@ void main() {
       matching: find.byType(InkWell),
     );
 
-    const Set<MaterialState> hovered = <MaterialState>{MaterialState.hovered};
-    const Set<MaterialState> focused = <MaterialState>{MaterialState.focused};
-    const Set<MaterialState> pressed = <MaterialState>{MaterialState.pressed};
+    const Set<WidgetState> hovered = <WidgetState>{WidgetState.hovered};
+    const Set<WidgetState> focused = <WidgetState>{WidgetState.focused};
+    const Set<WidgetState> pressed = <WidgetState>{WidgetState.pressed};
 
     Future<void> checkSearchBar(WidgetTester tester) async {
       final Material material = tester.widget<Material>(findMaterial);

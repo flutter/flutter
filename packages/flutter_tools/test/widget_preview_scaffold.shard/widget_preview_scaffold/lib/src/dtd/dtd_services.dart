@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:dtd/dtd.dart';
-import 'package:widget_preview_scaffold/src/dtd/editor_service.dart';
+import 'editor_service.dart';
 
 /// Provides services, streams, and RPC invocations to interact with Flutter developer tooling.
 class WidgetPreviewScaffoldDtdServices with DtdEditorService {
@@ -17,8 +17,9 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   //
   // START KEEP SYNCED
 
-  static const String kWidgetPreviewService = 'widget-preview';
-  static const String kHotRestartPreviewer = 'hotRestartPreviewer';
+  static const kWidgetPreviewService = 'widget-preview';
+  static const kIsWindows = 'isWindows';
+  static const kHotRestartPreviewer = 'hotRestartPreviewer';
 
   // END KEEP SYNCED
 
@@ -38,14 +39,28 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
         const <String, Object?>{},
       ),
     );
+    await _determineIfWindows();
+    await initializeEditorService(this);
+  }
 
-    await initializeEditorService();
+  /// Disposes the DTD connection.
+  @override
+  Future<void> dispose() async {
+    super.dispose();
+    await dtd.close();
   }
 
   Future<DTDResponse> _call(
     String methodName, {
     Map<String, Object?>? params,
   }) => dtd.call(kWidgetPreviewService, methodName, params: params);
+
+  /// Returns `true` if the operating system is Windows.
+  late final bool isWindows;
+
+  Future<void> _determineIfWindows() async {
+    isWindows = ((await _call(kIsWindows)) as BoolResponse).value!;
+  }
 
   /// Trigger a hot restart of the widget preview scaffold.
   Future<void> hotRestartPreviewer() => _call(kHotRestartPreviewer);

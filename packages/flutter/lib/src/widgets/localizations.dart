@@ -380,7 +380,7 @@ class _LocalizationsScope extends InheritedWidget {
 /// {@tool snippet}
 ///
 /// This following class is defined in terms of the
-/// [Dart `intl` package](https://github.com/dart-lang/intl). Using the `intl`
+/// [Dart `intl` package](https://github.com/dart-lang/i18n/tree/main/pkgs/intl). Using the `intl`
 /// package isn't required.
 ///
 /// ```dart
