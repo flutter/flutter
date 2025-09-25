@@ -7,7 +7,7 @@
 
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPluginAppLifeCycleDelegate.h"
-#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterSceneLifecycle.h"
+#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterSceneLifeCycle.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPluginAppLifeCycleDelegate_internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 

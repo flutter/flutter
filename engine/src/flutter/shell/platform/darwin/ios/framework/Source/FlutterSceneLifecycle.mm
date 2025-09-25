@@ -7,7 +7,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPluginAppLifeCycleDelegate_internal.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifecycle_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifeCycle_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 
 FLUTTER_ASSERT_ARC

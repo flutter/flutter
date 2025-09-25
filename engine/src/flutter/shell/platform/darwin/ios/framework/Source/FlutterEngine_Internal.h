@@ -23,7 +23,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterRestorationPlugin.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifecycle_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifeCycle_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"

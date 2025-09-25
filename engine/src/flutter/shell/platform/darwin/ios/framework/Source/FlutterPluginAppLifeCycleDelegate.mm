@@ -8,7 +8,7 @@
 #include "flutter/lib/ui/plugins/callback_cache.h"
 #import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterCallbackCache_Internal.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifecycle_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifeCycle_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 
 FLUTTER_ASSERT_ARC

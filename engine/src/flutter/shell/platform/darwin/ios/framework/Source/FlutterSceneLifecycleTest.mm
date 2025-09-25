@@ -7,8 +7,8 @@
 #import <XCTest/XCTest.h>
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPluginAppLifeCycleDelegate_internal.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifecycle_Internal.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifecycle_Test.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifeCycle_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifeCycle_Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 
 FLUTTER_ASSERT_ARC
