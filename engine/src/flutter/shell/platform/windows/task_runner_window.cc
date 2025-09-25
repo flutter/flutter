@@ -139,7 +139,7 @@ void TaskRunnerWindow::SetTimer(std::chrono::nanoseconds when) {
     FILETIME ft;
     ft.dwLowDateTime = ticks.LowPart;
     ft.dwHighDateTime = ticks.HighPart;
-    SetThreadpoolTimer(timer_, &ft, 1, 0);
+    SetThreadpoolTimer(timer_, &ft, 0, 0);
   }
 }
 
