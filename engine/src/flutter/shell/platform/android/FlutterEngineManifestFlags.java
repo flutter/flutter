@@ -32,6 +32,26 @@ public final class FlutterEngineManifestFlags {
         }
     }
 
+    public static final Flag VM_SERVICE_PORT =
+        new Flag("VmServicePort", false);
+    public static final Flag USE_TEST_FONTS =
+        new Flag("UseTestFonts", false);
+    public static final Flag ENABLE_SOFTWARE_RENDERING =
+        new Flag("EnableSoftwareRendering", true);
+    public static final Flag SKIA_DETERMINISTIC_RENDERING =
+        new Flag("SkiaDeterministicRendering", true);
+    public static final Flag AOT_SHARED_LIBRARY_NAME =
+        new Flag("AotSharedLibraryName", true);
+    public static final Flag SNAPSHOT_ASSET_PATH =
+        new Flag("SnapshotAssetPath", true);
+    public static final Flag VM_SNAPSHOT_DATA =
+        new Flag("VmSnapshotData", true);
+    public static final Flag ISOLATE_SNAPSHOT_DATA =
+        new Flag("IsolateSnapshotData", true);
+    public static final Flag FLUTTER_ASSETS_DIR =
+        new Flag("FlutterAssetsDir", true);
+    public static final Flag AUTOMATICALLY_REGISTER_PLUGINS =
+        new Flag("AutomaticallyRegisterPlugins", true);
     public static final Flag OLD_GEN_HEAP_SIZE =
         new Flag("OldGenHeapSize", true);
     public static final Flag ENABLE_IMPELLER =
@@ -56,26 +76,6 @@ public final class FlutterEngineManifestFlags {
         new Flag("ImpellerAntialiasLines", true);
     public static final Flag LEAK_VM =
         new Flag("LeakVM", false);
-    public static final Flag VM_SERVICE_PORT =
-        new Flag("VmServicePort", false);
-    public static final Flag USE_TEST_FONTS =
-        new Flag("UseTestFonts", false);
-    public static final Flag ENABLE_SOFTWARE_RENDERING =
-        new Flag("EnableSoftwareRendering", true);
-    public static final Flag SKIA_DETERMINISTIC_RENDERING =
-        new Flag("SkiaDeterministicRendering", true);
-    public static final Flag AOT_SHARED_LIBRARY_NAME =
-        new Flag("AotSharedLibraryName", true);
-    public static final Flag SNAPSHOT_ASSET_PATH =
-        new Flag("SnapshotAssetPath", true);
-    public static final Flag VM_SNAPSHOT_DATA =
-        new Flag("VmSnapshotData", true);
-    public static final Flag ISOLATE_SNAPSHOT_DATA =
-        new Flag("IsolateSnapshotData", true);
-    public static final Flag FLUTTER_ASSETS_DIR =
-        new Flag("FlutterAssetsDir", true);
-    public static final Flag AUTOMATICALLY_REGISTER_PLUGINS =
-        new Flag("AutomaticallyRegisterPlugins", true);
 
     // public static final List<Flag> ALL_FLAGS = Collections.unmodifiableList(Arrays.asList(
     //     VM_SERVICE_PORT,
