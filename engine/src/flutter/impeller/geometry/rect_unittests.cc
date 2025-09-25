@@ -3243,5 +3243,25 @@ TEST(RectTest, TransformAndClipBounds) {
   }
 }
 
+TEST(RectTest, TransformBoundsTranslateScale) {
+  std::vector<Matrix> matrices = {
+      Matrix::MakeTranslateScale({2, 2, 1}, {10, 10, 0}),
+      Matrix::MakeTranslateScale({-2, 2, 1}, {10, 10, 0}),
+      Matrix::MakeTranslateScale({2, -2, 1}, {10, 10, 0}),
+      Matrix::MakeTranslateScale({-2, -2, 1}, {10, 10, 0}),
+  };
+  std::vector<Rect> rects = {
+      Rect::MakeLTRB(0, 0, 10, 10), Rect::MakeLTRB(100, 100, 110, 110),
+      Rect::MakeLTRB(0, 0, 0, 0), Rect::MakeLTRB(-10, -10, 10, 10)};
+
+  for (auto i = 0u; i < matrices.size(); i++) {
+    for (auto j = 0u; j < rects.size(); j++) {
+      EXPECT_EQ(rects[j].TransformBounds(matrices[i]),
+                rects[j].TransformBoundsTranslateScale2D(matrices[i]))
+          << rects[j] << " * " << matrices[i];
+    }
+  }
+}
+
 }  // namespace testing
 }  // namespace impeller
