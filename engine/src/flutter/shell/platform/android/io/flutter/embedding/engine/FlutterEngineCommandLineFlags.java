@@ -5,7 +5,6 @@
 package io.flutter.embedding.engine;
 
 import android.content.Context;
-import android.content.Intent;
 import androidx.annotation.NonNull;
 import java.util.*;
 
@@ -20,28 +19,55 @@ import java.util.*;
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class FlutterEngineCommandLineFlags {
-public static final String TRACE_STARTUP_FLAG = "--trace-startup";
-public static final String START_PAUSED_FLAG = "--start-paused";
-public static final String DISABLE_SERVICE_AUTH_CODES_FLAG = "--disable-service-auth-codes";
-public static final String ENDLESS_TRACE_BUFFER_FLAG = "--endless-trace-buffer";
-public static final String USE_TEST_FONTS_FLAG = "--use-test-fonts";
-public static final String ENABLE_DART_PROFILING_FLAG = "--enable-dart-profiling";
-public static final String PROFILE_STARTUP_FLAG = "--profile-startup";
-public static final String ENABLE_SOFTWARE_RENDERING_FLAG = "--enable-software-rendering";
-public static final String SKIA_DETERMINISTIC_RENDERING_FLAG = "--skia-deterministic-rendering";
-public static final String TRACE_SKIA_FLAG = "--trace-skia";
-public static final String TRACE_SKIA_ALLOWLIST_FLAG = "--trace-skia-allowlist=";
-public static final String TRACE_SYSTRACE_FLAG = "--trace-systrace";
-public static final String TRACE_TO_FILE_FLAG = "--trace-to-file";
-public static final String PROFILE_MICROTASKS_FLAG = "--profile-microtasks";
-public static final String ENABLE_IMPELLER_FLAG = "--enable-impeller=";
-public static final String ENABLE_VULKAN_VALIDATION_FLAG = "--enable-vulkan-validation";
-public static final String DUMP_SHADER_SKP_ON_SHADER_COMPILATION_FLAG = "--dump-skp-on-shader-compilation";
-public static final String CACHE_SKSL_FLAG = "--cache-sksl";
-public static final String PURGE_PERSISTENT_CACHE_FLAG = "--purge-persistent-cache";
-public static final String VERBOSE_LOGGING_FLAG = "--verbose-logging";
-public static final String VM_SERVICE_PORT_FLAG = "--vm-service-port=";
-public static final String DART_FLAGS_FLAG = "--dart-flags=";
+  public static final String TRACE_STARTUP_FLAG = "--trace-startup";
+  public static final String START_PAUSED_FLAG = "--start-paused";
+  public static final String DISABLE_SERVICE_AUTH_CODES_FLAG = "--disable-service-auth-codes";
+  public static final String ENDLESS_TRACE_BUFFER_FLAG = "--endless-trace-buffer";
+  public static final String USE_TEST_FONTS_FLAG = "--use-test-fonts";
+  public static final String ENABLE_DART_PROFILING_FLAG = "--enable-dart-profiling";
+  public static final String PROFILE_STARTUP_FLAG = "--profile-startup";
+  public static final String ENABLE_SOFTWARE_RENDERING_FLAG = "--enable-software-rendering";
+  public static final String SKIA_DETERMINISTIC_RENDERING_FLAG = "--skia-deterministic-rendering";
+  public static final String TRACE_SKIA_FLAG = "--trace-skia";
+  public static final String TRACE_SKIA_ALLOWLIST_FLAG = "--trace-skia-allowlist=";
+  public static final String TRACE_SYSTRACE_FLAG = "--trace-systrace";
+  public static final String TRACE_TO_FILE_FLAG = "--trace-to-file";
+  public static final String PROFILE_MICROTASKS_FLAG = "--profile-microtasks";
+  public static final String ENABLE_IMPELLER_FLAG = "--enable-impeller=";
+  public static final String ENABLE_VULKAN_VALIDATION_FLAG = "--enable-vulkan-validation";
+  public static final String DUMP_SHADER_SKP_ON_SHADER_COMPILATION_FLAG =
+      "--dump-skp-on-shader-compilation";
+  public static final String CACHE_SKSL_FLAG = "--cache-sksl";
+  public static final String PURGE_PERSISTENT_CACHE_FLAG = "--purge-persistent-cache";
+  public static final String VERBOSE_LOGGING_FLAG = "--verbose-logging";
+  public static final String VM_SERVICE_PORT_FLAG = "--vm-service-port=";
+  public static final String DART_FLAGS_FLAG = "--dart-flags=";
+
+  public static final List<String> ALL_FLAGS =
+      Collections.unmodifiableList(
+          Arrays.asList(
+              TRACE_STARTUP_FLAG,
+              START_PAUSED_FLAG,
+              DISABLE_SERVICE_AUTH_CODES_FLAG,
+              ENDLESS_TRACE_BUFFER_FLAG,
+              USE_TEST_FONTS_FLAG,
+              ENABLE_DART_PROFILING_FLAG,
+              PROFILE_STARTUP_FLAG,
+              ENABLE_SOFTWARE_RENDERING_FLAG,
+              SKIA_DETERMINISTIC_RENDERING_FLAG,
+              TRACE_SKIA_FLAG,
+              TRACE_SKIA_ALLOWLIST_FLAG,
+              TRACE_SYSTRACE_FLAG,
+              TRACE_TO_FILE_FLAG,
+              PROFILE_MICROTASKS_FLAG,
+              ENABLE_IMPELLER_FLAG,
+              ENABLE_VULKAN_VALIDATION_FLAG,
+              DUMP_SHADER_SKP_ON_SHADER_COMPILATION_FLAG,
+              CACHE_SKSL_FLAG,
+              PURGE_PERSISTENT_CACHE_FLAG,
+              VERBOSE_LOGGING_FLAG,
+              VM_SERVICE_PORT_FLAG,
+              DART_FLAGS_FLAG));
 
   @NonNull private Set<String> args;
 

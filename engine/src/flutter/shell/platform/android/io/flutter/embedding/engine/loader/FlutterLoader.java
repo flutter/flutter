@@ -79,8 +79,9 @@ public class FlutterLoader {
   static final String SNAPSHOT_ASSET_PATH_KEY = "snapshot-asset-path";
   static final String VM_SNAPSHOT_DATA_KEY = "vm-snapshot-data";
   static final String ISOLATE_SNAPSHOT_DATA_KEY = "isolate-snapshot-data";
-  static final String FLUTTER_ASSETS_DIR_KEY = "flutter-assets-dir";
-  static final String AUTOMATICALLY_REGISTER_PLUGINS_KEY = "automatically-register-plugins";
+  static final String FLUTTER_ASSETS_DIR_KEY = "flutter-assets-dir"; // TODO(camsim99): not used??
+  static final String AUTOMATICALLY_REGISTER_PLUGINS_KEY =
+      "automatically-register-plugins"; // TODO(camsim99): not used??
 
   // Resource names used for components of the precompiled snapshot.
   private static final String DEFAULT_LIBRARY = "libflutter.so";
@@ -321,6 +322,11 @@ public class FlutterLoader {
 
       if (args != null) {
         for (String arg : args) {
+          // Only allow known flags to be passed to the engine.
+          if (!FlutterEngineCommandLineFlags.ALL_FLAGS.contains(arg)) {
+            continue;
+          }
+
           // Perform security check for path containing application's compiled Dart code and
           // potentially user-provided compiled native code.
           if (arg.startsWith(aotSharedLibraryNameFlag)) {
@@ -339,9 +345,6 @@ public class FlutterLoader {
             }
           }
 
-          // TODO(camsim99): This is a dangerous pattern that blindly allows potentially malicious
-          // arguments to be used for engine initialization and should be fixed. See
-          // https://github.com/flutter/flutter/issues/172553.
           shellArgs.add(arg);
         }
       }
