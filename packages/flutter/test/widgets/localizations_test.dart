@@ -61,7 +61,7 @@ void main() {
     expect(find.text('loaded'), findsOneWidget);
   });
 
-  testWidgets('Locale is send to engine if this is a top level Localizations', (
+  testWidgets('Locale is sent to engine if this is a top level Localizations', (
     WidgetTester tester,
   ) async {
     final FakeLocalizationsDelegate delegate = FakeLocalizationsDelegate();
