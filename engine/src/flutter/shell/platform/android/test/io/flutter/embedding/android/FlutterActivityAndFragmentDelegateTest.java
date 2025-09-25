@@ -1621,7 +1621,6 @@ public class FlutterActivityAndFragmentDelegateTest {
         spy(new FlutterActivityAndFragmentDelegate(mockHost));
 
     delegate.onAttach(ctx);
-
     delegate.onResume();
 
     verify(mockFlutterEngine.getRenderer()).restoreSurfaceProducers();
