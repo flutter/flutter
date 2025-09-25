@@ -232,4 +232,13 @@ void main() {
     );
     expect(tester.getSize(find.byType(Divider)), Size.zero);
   });
+
+  testWidgets('VerticalDivider does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(child: SizedBox.shrink(child: VerticalDivider())),
+      ),
+    );
+    expect(tester.getSize(find.byType(VerticalDivider)), Size.zero);
+  });
 }
