@@ -28,7 +28,10 @@ class KeyedWindow {
 /// that have been created by the application as well as which controller is
 /// currently selected by the UI.
 class WindowManager extends ChangeNotifier {
-  final List<KeyedWindow> _windows = <KeyedWindow>[];
+  WindowManager({required List<KeyedWindow> initialWindows})
+    : _windows=initialWindows;
+
+  final List<KeyedWindow> _windows;
   List<KeyedWindow> get windows => _windows;
   int? _selectedViewId;
   BaseWindowController? get selected {
