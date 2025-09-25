@@ -433,6 +433,7 @@ extension type DomElement._(JSObject _) implements DomNode {
   external String? getAttribute(String attributeName);
   external DomRect getBoundingClientRect();
   external void prepend(DomNode node);
+  external void replaceWith(DomNode node);
   external DomElement? querySelector(String selectors);
   external DomElement? closest(String selectors);
   external bool matches(String selectors);

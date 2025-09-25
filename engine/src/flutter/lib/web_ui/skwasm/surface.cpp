@@ -39,6 +39,12 @@ Surface::Surface() {
 
 // Worker thread only
 void Surface::dispose() {
+  if (_grContext) {
+    _grContext->releaseResourcesAndAbandonContext();
+  }
+  if (_glContext) {
+    skwasm_destroyContext(_glContext);
+  }
   delete this;
 }
 
@@ -48,10 +54,7 @@ void Surface::setResourceCacheLimit(int bytes) {
 }
 
 // Main thread only
-uint32_t Surface::renderPictures(DisplayList** pictures,
-                                 int width,
-                                 int height,
-                                 int count) {
+uint32_t Surface::renderPictures(DisplayList** pictures, int count) {
   assert(emscripten_is_main_browser_thread());
   uint32_t callbackId = ++_currentCallbackId;
   std::unique_ptr<sk_sp<DisplayList>[]> picturePointers =
@@ -62,8 +65,8 @@ uint32_t Surface::renderPictures(DisplayList** pictures,
 
   // Releasing picturePointers here and will recreate the unique_ptr on the
   // other thread See surface_renderPicturesOnWorker
-  skwasm_dispatchRenderPictures(_thread, this, picturePointers.release(), width,
-                                height, count, callbackId);
+  skwasm_dispatchRenderPictures(_thread, this, picturePointers.release(), count,
+                                callbackId);
   return callbackId;
 }
 
@@ -84,14 +87,39 @@ std::unique_ptr<TextureSourceWrapper> Surface::createTextureSourceWrapper(
 }
 
 // Main thread only
+uint32_t Surface::triggerContextLoss() {
+  assert(emscripten_is_main_browser_thread());
+  uint32_t callbackId = ++_currentCallbackId;
+  skwasm_dispatchTriggerContextLoss(_thread, this, callbackId);
+  return callbackId;
+}
+
+// Main thread only
 void Surface::setCallbackHandler(CallbackHandler* callbackHandler) {
   assert(emscripten_is_main_browser_thread());
   _callbackHandler = callbackHandler;
 }
 
-// Worker thread only
-void Surface::_init() {
-  _glContext = skwasm_createOffscreenCanvas(256, 256);
+// Main thread only
+uint32_t Surface::setCanvas(SkwasmObject canvas) {
+  assert(emscripten_is_main_browser_thread());
+  uint32_t callbackId = ++_currentCallbackId;
+  skwasm_dispatchTransferCanvas(_thread, this, canvas, callbackId);
+  return callbackId;
+}
+
+// Worker thread only.
+void Surface::receiveCanvasOnWorker(SkwasmObject canvas, uint32_t callbackId) {
+  if (_grContext) {
+    _grContext->releaseResourcesAndAbandonContext();
+  }
+  if (_glContext) {
+    skwasm_destroyContext(_glContext);
+  }
+  _canvasWidth = 0;
+  _canvasHeight = 0;
+  _surface = nullptr;
+  _glContext = skwasm_getGlContextForCanvas(canvas, this);
   if (!_glContext) {
     printf("Failed to create context!\n");
     return;
@@ -119,7 +147,47 @@ void Surface::_init() {
   emscripten_glGetIntegerv(GL_SAMPLES, &_sampleCount);
   emscripten_glGetIntegerv(GL_STENCIL_BITS, &_stencil);
 
-  _isInitialized = true;
+  uint32_t contextLostCallbackId = ++_currentCallbackId;
+  _contextLostCallbackId = contextLostCallbackId;
+
+  skwasm_reportInitialized(this, contextLostCallbackId, callbackId);
+}
+
+// Worker thread only
+void Surface::triggerContextLossOnWorker(uint32_t callbackId) {
+  makeCurrent(_glContext);
+  skwasm_triggerContextLossOnCanvas();
+  skwasm_reportContextLossTriggered(this, callbackId);
+}
+
+// Main thread only
+void Surface::onContextLossTriggered(uint32_t callbackId) {
+  assert(emscripten_is_main_browser_thread());
+  _callbackHandler(callbackId, nullptr, __builtin_wasm_ref_null_extern());
+}
+
+// Worker thread only
+void Surface::onContextLost() {
+  if (!_contextLostCallbackId) {
+    printf("Received context lost event but never set callback handler!\n");
+    return;
+  }
+  skwasm_reportContextLost(this, _contextLostCallbackId);
+}
+
+// Main thread only
+uint32_t Surface::setSize(int width, int height) {
+  assert(emscripten_is_main_browser_thread());
+  uint32_t callbackId = ++_currentCallbackId;
+
+  skwasm_dispatchResizeSurface(_thread, this, width, height, callbackId);
+  return callbackId;
+}
+
+// Worker thread only
+void Surface::resizeOnWorker(int width, int height, uint32_t callbackId) {
+  _resizeSurface(width, height);
+  skwasm_reportResizeComplete(this, callbackId);
 }
 
 // Worker thread only
@@ -144,22 +212,15 @@ void Surface::_recreateSurface() {
 
 // Worker thread only
 void Surface::renderPicturesOnWorker(sk_sp<DisplayList>* pictures,
-                                     int width,
-                                     int height,
                                      int pictureCount,
                                      uint32_t callbackId,
                                      double rasterStart) {
-  if (!_isInitialized) {
-    _init();
-  }
-
+  makeCurrent(_glContext);
   // This is initialized on the first call to `skwasm_captureImageBitmap` and
   // then populated with more bitmaps on subsequent calls.
   SkwasmObject imageBitmapArray = __builtin_wasm_ref_null_extern();
   for (int i = 0; i < pictureCount; i++) {
     sk_sp<DisplayList> picture = pictures[i];
-    _resizeSurface(width, height);
-    makeCurrent(_glContext);
     auto canvas = _surface->getCanvas();
     canvas->drawColor(SK_ColorTRANSPARENT, SkBlendMode::kSrc);
     auto dispatcher = DlSkCanvasDispatcher(canvas);
@@ -177,13 +238,10 @@ void Surface::renderPicturesOnWorker(sk_sp<DisplayList>* pictures,
 void Surface::rasterizeImageOnWorker(SkImage* image,
                                      ImageByteFormat format,
                                      uint32_t callbackId) {
-  if (!_isInitialized) {
-    _init();
-  }
-
   // We handle PNG encoding with browser APIs so that we can omit libpng from
   // skia to save binary size.
   assert(format != ImageByteFormat::png);
+  makeCurrent(_glContext);
   sk_sp<SkData> data;
   SkAlphaType alphaType = format == ImageByteFormat::rawStraightRgba
                               ? SkAlphaType::kUnpremul_SkAlphaType
@@ -203,7 +261,6 @@ void Surface::rasterizeImageOnWorker(SkImage* image,
   // `glReadPixels`. Once the skia bug is fixed, we should switch back to using
   // `SkImage::readPixels` instead.
   // See https://g-issues.skia.org/issues/349201915
-  _resizeSurface(image->width(), image->height());
   auto canvas = _surface->getCanvas();
   canvas->drawColor(SK_ColorTRANSPARENT, SkBlendMode::kSrc);
 
@@ -223,7 +280,28 @@ void Surface::rasterizeImageOnWorker(SkImage* image,
   skwasm_postRasterizeResult(this, data.release(), callbackId);
 }
 
+// Main thread only
+void Surface::onInitialized(uint32_t callbackId) {
+  assert(emscripten_is_main_browser_thread());
+  _callbackHandler(callbackId, (void*)_contextLostCallbackId,
+                   __builtin_wasm_ref_null_extern());
+}
+
+// Main thread only
+void Surface::reportContextLost(uint32_t callbackId) {
+  assert(emscripten_is_main_browser_thread());
+  _callbackHandler(callbackId, nullptr, __builtin_wasm_ref_null_extern());
+}
+
+// Main thread only
+void Surface::onResizeComplete(uint32_t callbackId) {
+  assert(emscripten_is_main_browser_thread());
+  _callbackHandler(callbackId, nullptr, __builtin_wasm_ref_null_extern());
+}
+
+// Main thread only
 void Surface::onRasterizeComplete(uint32_t callbackId, SkData* data) {
+  assert(emscripten_is_main_browser_thread());
   _callbackHandler(callbackId, data, __builtin_wasm_ref_null_extern());
 }
 
@@ -252,8 +330,67 @@ SKWASM_EXPORT Surface* surface_create() {
   return new Surface();
 }
 
+SKWASM_EXPORT uint32_t surface_setCanvas(Surface* surface,
+                                         SkwasmObject canvas) {
+  // Dispatch to the worker so the canvas can be transferred to the worker.
+  return surface->setCanvas(canvas);
+}
+
+SKWASM_EXPORT void surface_receiveCanvasOnWorker(Surface* surface,
+                                                 SkwasmObject canvas,
+                                                 uint32_t callbackId) {
+  surface->receiveCanvasOnWorker(canvas, callbackId);
+}
+
+SKWASM_EXPORT void surface_onInitialized(Surface* surface,
+                                         uint32_t callbackId) {
+  surface->onInitialized(callbackId);
+}
+
+SKWASM_EXPORT uint32_t surface_setSize(Surface* surface,
+                                       int width,
+                                       int height) {
+  return surface->setSize(width, height);
+}
+
+SKWASM_EXPORT void surface_resizeOnWorker(Surface* surface,
+                                          int width,
+                                          int height,
+                                          uint32_t callbackId) {
+  surface->resizeOnWorker(width, height, callbackId);
+}
+
+SKWASM_EXPORT void surface_onResizeComplete(Surface* surface,
+                                            uint32_t callbackId) {
+  surface->onResizeComplete(callbackId);
+}
+
 SKWASM_EXPORT unsigned long surface_getThreadId(Surface* surface) {
   return surface->getThreadId();
+}
+
+SKWASM_EXPORT EMSCRIPTEN_WEBGL_CONTEXT_HANDLE
+surface_getGlContext(Surface* surface) {
+  return surface->getGlContext();
+}
+
+SKWASM_EXPORT uint32_t surface_triggerContextLoss(Surface* surface) {
+  return surface->triggerContextLoss();
+}
+
+SKWASM_EXPORT void surface_triggerContextLossOnWorker(Surface* surface,
+                                                      uint32_t callbackId) {
+  surface->triggerContextLossOnWorker(callbackId);
+}
+
+SKWASM_EXPORT void surface_onContextLossTriggered(Surface* surface,
+                                                  uint32_t callbackId) {
+  surface->onContextLossTriggered(callbackId);
+}
+
+SKWASM_EXPORT void surface_reportContextLost(Surface* surface,
+                                             uint32_t callbackId) {
+  surface->reportContextLost(callbackId);
 }
 
 SKWASM_EXPORT void surface_setCallbackHandler(
@@ -280,24 +417,20 @@ SKWASM_EXPORT void surface_setResourceCacheLimitBytes(Surface* surface,
 
 SKWASM_EXPORT uint32_t surface_renderPictures(Surface* surface,
                                               DisplayList** pictures,
-                                              int width,
-                                              int height,
                                               int count) {
-  return surface->renderPictures(pictures, width, height, count);
+  return surface->renderPictures(pictures, count);
 }
 
 SKWASM_EXPORT void surface_renderPicturesOnWorker(Surface* surface,
                                                   sk_sp<DisplayList>* pictures,
-                                                  int width,
-                                                  int height,
                                                   int pictureCount,
                                                   uint32_t callbackId,
                                                   double rasterStart) {
   // This will release the pictures when they leave scope.
   std::unique_ptr<sk_sp<DisplayList>[]> picturesPointer =
       std::unique_ptr<sk_sp<DisplayList>[]>(pictures);
-  surface->renderPicturesOnWorker(pictures, width, height, pictureCount,
-                                  callbackId, rasterStart);
+  surface->renderPicturesOnWorker(pictures, pictureCount, callbackId,
+                                  rasterStart);
 }
 
 SKWASM_EXPORT uint32_t surface_rasterizeImage(Surface* surface,
@@ -325,6 +458,10 @@ SKWASM_EXPORT void surface_onRasterizeComplete(Surface* surface,
                                                SkData* data,
                                                uint32_t callbackId) {
   surface->onRasterizeComplete(callbackId, data);
+}
+
+SKWASM_EXPORT void surface_onContextLost(Surface* surface) {
+  surface->onContextLost();
 }
 
 SKWASM_EXPORT bool skwasm_isMultiThreaded() {

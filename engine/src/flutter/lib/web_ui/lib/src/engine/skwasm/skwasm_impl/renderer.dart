@@ -13,8 +13,14 @@ import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
+import '../../compositing/canvas_provider.dart';
+
 class SkwasmRenderer extends Renderer {
-  late SkwasmSurface surface;
+  final OffscreenSurfaceProvider _surfaceProvider = OffscreenSurfaceProvider(
+    OffscreenCanvasProvider(),
+    (OffscreenCanvasProvider canvasProvider) => SkwasmSurface(canvasProvider),
+  );
+  late final SkwasmSurface surface = _surfaceProvider.createSurface() as SkwasmSurface;
 
   bool get isMultiThreaded => skwasmIsMultiThreaded();
 
@@ -320,8 +326,10 @@ class SkwasmRenderer extends Renderer {
 
   @override
   FutureOr<void> initialize() {
-    surface = SkwasmSurface();
-    rasterizer = SkwasmOffscreenCanvasRasterizer(surface);
+    rasterizer = OffscreenCanvasRasterizer(
+      (OffscreenCanvasProvider canvasProvider) => SkwasmSurface(canvasProvider),
+    );
+    pictureToImageSurface = rasterizer.createPictureToImageSurface();
     return super.initialize();
   }
 
@@ -524,6 +532,9 @@ class SkwasmRenderer extends Renderer {
 
   @override
   void debugResetRasterizer() {
-    rasterizer = SkwasmOffscreenCanvasRasterizer(surface);
+    rasterizer = OffscreenCanvasRasterizer(
+      (OffscreenCanvasProvider canvasProvider) => SkwasmSurface(canvasProvider),
+    );
+    pictureToImageSurface = rasterizer.createPictureToImageSurface();
   }
 }
