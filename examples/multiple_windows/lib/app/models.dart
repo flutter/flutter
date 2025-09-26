@@ -33,20 +33,6 @@ class WindowManager extends ChangeNotifier {
 
   final List<KeyedWindow> _windows;
   List<KeyedWindow> get windows => _windows;
-  int? _selectedViewId;
-  BaseWindowController? get selected {
-    if (_selectedViewId == null) {
-      return null;
-    }
-
-    for (final KeyedWindow window in _windows) {
-      if (window.controller.rootView.viewId == _selectedViewId) {
-        return window.controller;
-      }
-    }
-
-    return null;
-  }
 
   void add(KeyedWindow window) {
     _windows.add(window);
@@ -55,11 +41,6 @@ class WindowManager extends ChangeNotifier {
 
   void remove(UniqueKey key) {
     _windows.removeWhere((KeyedWindow window) => window.key == key);
-    notifyListeners();
-  }
-
-  void select(int? viewId) {
-    _selectedViewId = viewId;
     notifyListeners();
   }
 }

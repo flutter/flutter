@@ -78,8 +78,9 @@ class _MultiWindowAppState extends State<MultiWindowApp> {
             final List<Widget> childViews = <Widget>[mainWindowWidget];
             for (final KeyedWindow window in windowManager.windows) {
               // This check renders windows that are not nested below another window as
-              // a child window (e.g. a popup for a window) in addition to the main window,
-              // which is special as it is the one that is currently being rendered.
+              // a child window (e.g. a popup as a child of another window) in addition
+              // to the main window, which is special as it is the one that is currently
+              // being rendered.
               if (window.parent == null && !window.isMainWindow) {
                 childViews.add(
                   WindowContent(

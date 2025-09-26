@@ -26,9 +26,9 @@ class MainWindow extends StatelessWidget {
           Expanded(
             flex: 60,
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Expanded(
-                  // <-- This gives the scroll view bounded height
                   child: SingleChildScrollView(
                     scrollDirection: Axis.vertical,
                     child: _WindowsTable(),
@@ -37,7 +37,13 @@ class MainWindow extends StatelessWidget {
               ],
             ),
           ),
-          Expanded(flex: 40, child: Column(children: [_WindowCreatorCard()])),
+          Expanded(
+            flex: 40,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [Expanded(child: _WindowCreatorCard())],
+            ),
+          ),
         ],
       ),
     );
@@ -57,14 +63,6 @@ class _WindowsTable extends StatelessWidget {
             }
             return Colors.transparent;
           }),
-          selected: controller.controller == windowManager.selected,
-          onSelectChanged: (bool? selected) {
-            if (selected != null) {
-              windowManager.select(
-                selected ? controller.controller.rootView.viewId : null,
-              );
-            }
-          },
           cells: [
             DataCell(Text('${controller.controller.rootView.viewId}')),
             DataCell(Text(_getWindowTypeName(controller.controller))),
