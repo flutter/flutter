@@ -34,8 +34,8 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ### [3.35.5](https://github.com/flutter/flutter/releases/tag/3.35.5)
 
- - [flutter/172105](https://github.com/flutter/flutter/issues/172105) Fixes issue in iOS add-to-app where Flutter view may hang after multiple transitions.
- - [flutter/173106](https://github.com/flutter/flutter/issues/173106) Fixes an issue where multiple cursors were shown incorrectly.
+ - [flutter/172105](https://github.com/flutter/flutter/issues/172105) Flutter view no longer hangs after multiple transitions on iOS add-to-app.
+ - [flutter/173106](https://github.com/flutter/flutter/issues/173106) Multiple cursors display correctly.
 
 ### [3.35.4](https://github.com/flutter/flutter/releases/tag/3.35.4)
 - [flutter/173474](https://github.com/flutter/flutter/issues/173474) - On all platforms PlatformDispatchers.instance.engineId no longer returns null after hot restart.
