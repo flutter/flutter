@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:dtd/dtd.dart';
 import 'package:flutter/foundation.dart';
+import 'package:widget_preview_scaffold/src/dtd/utils.dart';
 
 /// Provides support for interacting with the Editor DTD service registered by IDE plugins.
 mixin DtdEditorService {
@@ -11,6 +14,27 @@ mixin DtdEditorService {
 
   /// The name of the Editor service.
   static const String kEditorService = 'Editor';
+
+  /// The name of the Editor's getActiveLocation method.
+  static const String kGetActiveLocation = 'getActiveLocation';
+
+  /// The name of the Editor's navigateToCode method.
+  static const String kNavigateToCode = 'navigateToCode';
+
+  /// The name of the DTD Service stream.
+  static const String kServiceStream = 'Service';
+
+  /// The kind of the event sent over the [kServiceStream] stream when a new
+  /// service method is registered.
+  static const kServiceRegistered = 'ServiceRegistered';
+
+  /// The kind of the event sent over the [kServiceStream] stream when a
+  /// service method is unregistered.
+  static const kServiceUnregistered = 'ServiceUnregistered';
+
+  /// Whether or not the Editor service is available.
+  ValueListenable<bool> get editorServiceAvailable => _editorServiceAvailable;
+  static final _editorServiceAvailable = ValueNotifier<bool>(false);
 
   /// The currently selected source file in the IDE.
   ValueListenable<TextDocument?> get selectedSourceFile => _selectedSourceFile;
@@ -38,13 +62,58 @@ mixin DtdEditorService {
           ).textDocument;
       }
     });
-    await dtd.streamListen(kEditorService);
+    await dtd.safeStreamListen(kEditorService);
+
+    dtd.onEvent(kServiceStream).listen((data) async {
+      switch (data) {
+        case DTDEvent(
+          kind: kServiceRegistered,
+          data: {
+            DtdParameters.service: kEditorService,
+            DtdParameters.method: kGetActiveLocation,
+          },
+        ):
+          // Manually retrieve the currently selected source file.
+          unawaited(_updateSelectedSourceFile());
+          _editorServiceAvailable.value = true;
+        case DTDEvent(
+          kind: kServiceUnregistered,
+          data: {DtdParameters.service: kEditorService},
+        ):
+          // TODO(bkonyi): this needs to be made more robust if we're going to use multiple service
+          // methods. It's unlikely that individual methods on the Editor service will be added or
+          // removed, but we should at least log an error if this happens.
+          _editorServiceAvailable.value = false;
+      }
+    });
+    await dtd.safeStreamListen(kServiceStream);
   }
 
   @mustCallSuper
   void dispose() {
     _selectedSourceFile.dispose();
+    _editorServiceAvailable.dispose();
     _editorTheme.dispose();
+  }
+
+  Future<void> _updateSelectedSourceFile() async {
+    final response = await dtd.safeCall(kEditorService, kGetActiveLocation);
+    if (response != null) {
+      _selectedSourceFile.value = ActiveLocation.fromJson(
+        response.result,
+      ).textDocument;
+    }
+  }
+
+  /// Tells the editor to navigate to a given code [location].
+  ///
+  /// Only locations with `file://` URIs are valid.
+  Future<void> navigateToCode(CodeLocation location) async {
+    await dtd.safeCall(
+      kEditorService,
+      kNavigateToCode,
+      params: location.toJson(),
+    );
   }
 }
 
@@ -120,13 +189,24 @@ class ThemeChangedEvent extends EditorEvent {
 }
 
 /// An event sent by an editor when the current cursor position/s change.
-class ActiveLocationChangedEvent extends EditorEvent {
-  ActiveLocationChangedEvent({
-    required this.selections,
-    required this.textDocument,
-  });
+class ActiveLocationChangedEvent extends ActiveLocation implements EditorEvent {
+  ActiveLocationChangedEvent({required ActiveLocation activeLocation})
+    : super(
+        selections: activeLocation.selections,
+        textDocument: activeLocation.textDocument,
+      );
 
   ActiveLocationChangedEvent.fromJson(Map<String, Object?> map)
+    : this(activeLocation: ActiveLocation.fromJson(map));
+
+  @override
+  EditorEventKind get kind => EditorEventKind.activeLocationChanged;
+}
+
+class ActiveLocation {
+  ActiveLocation({required this.selections, required this.textDocument});
+
+  ActiveLocation.fromJson(Map<String, Object?> map)
     : this(
         textDocument: map.containsKey(Field.textDocument)
             ? TextDocument.fromJson(
@@ -141,9 +221,6 @@ class ActiveLocationChangedEvent extends EditorEvent {
 
   final List<EditorSelection> selections;
   final TextDocument? textDocument;
-
-  @override
-  EditorEventKind get kind => EditorEventKind.activeLocationChanged;
 
   Map<String, Object?> toJson() => {
     Field.selections: selections,
@@ -266,6 +343,31 @@ class CursorPosition {
   int get hashCode => Object.hash(character, line);
 }
 
+/// Parameters for the `navigateToCode` request.
+class CodeLocation {
+  const CodeLocation({required this.uri, this.line, this.column});
+
+  /// The URI of the location to navigate to. Only `file://` URIs are supported
+  /// unless the service registration's `capabilities` indicate other schemes
+  /// are supported.
+  ///
+  /// Editors should return error code 144 if a caller passes a URI with an
+  /// unsupported scheme.
+  final String uri;
+
+  /// Optional 1-based line number to navigate to.
+  final int? line;
+
+  /// Optional 1-based column number to navigate to.
+  final int? column;
+
+  Map<String, Object?> toJson() => {
+    Field.uri: uri,
+    Field.line: ?line,
+    Field.column: ?column,
+  };
+}
+
 /// Constants for all fields used in JSON maps to avoid literal strings that
 /// may have typos sprinkled throughout the API classes.
 abstract class Field {
@@ -273,6 +375,7 @@ abstract class Field {
   static const anchor = 'anchor';
   static const backgroundColor = 'backgroundColor';
   static const character = 'character';
+  static const column = 'column';
   static const end = 'end';
   static const fontSize = 'fontSize';
   static const foregroundColor = 'foregroundColor';

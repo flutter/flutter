@@ -5,11 +5,13 @@
 import 'dart:async';
 
 import 'package:dtd/dtd.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/widget_preview/dtd_services.dart';
 
+import '../../../general.shard/migrations/swift_package_manager_gitignore_migration_test.dart';
 import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/test_flutter_command_runner.dart';
@@ -45,6 +47,7 @@ void main() {
             processManager: globals.processManager,
           ),
           onHotRestartPreviewerRequest: hotRestartRequestCompleter.complete,
+          project: FakeFlutterProject(fileSystem: MemoryFileSystem.test()),
         );
         await dtdServer.launchAndConnect();
 
