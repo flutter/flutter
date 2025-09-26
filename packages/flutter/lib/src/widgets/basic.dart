@@ -8437,7 +8437,12 @@ class _RenderColoredBox extends RenderProxyBoxWithHitTestBehavior {
     // https://github.com/flutter/flutter/pull/72526#issuecomment-749185938 for
     // a good description of why.
     if (size > Size.zero) {
-      context.canvas.drawRect(offset & size, Paint()..color = color);
+      context.canvas.drawRect(
+        offset & size,
+        Paint()
+          ..color = color
+          ..isAntiAlias = false,
+      );
     }
     if (child != null) {
       context.paintChild(child!, offset);
