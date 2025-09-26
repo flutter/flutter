@@ -1005,7 +1005,7 @@ void main() {
     final Widget textButton = actionTextButton.widget;
     if (textButton is TextButton) {
       final ButtonStyle buttonStyle = textButton.style!;
-      if (buttonStyle.foregroundColor is MaterialStateColor) {
+      if (buttonStyle.foregroundColor is WidgetStateColor) {
         // Same color when resolved
         expect(buttonStyle.foregroundColor!.resolve(<WidgetState>{}), usedColor);
       } else {
@@ -1016,7 +1016,7 @@ void main() {
     }
   });
 
-  testWidgets('Snackbar labels can be colored as MaterialStateColor (Material 3)', (
+  testWidgets('Snackbar labels can be colored as WidgetStateColor (Material 3)', (
     WidgetTester tester,
   ) async {
     const _TestMaterialStateColor usedColor = _TestMaterialStateColor();
@@ -1056,7 +1056,7 @@ void main() {
     final Widget textButton = actionTextButton.widget;
     if (textButton is TextButton) {
       final ButtonStyle buttonStyle = textButton.style!;
-      if (buttonStyle.foregroundColor is MaterialStateColor) {
+      if (buttonStyle.foregroundColor is WidgetStateColor) {
         // Exactly the same object
         expect(buttonStyle.foregroundColor, usedColor);
       } else {
@@ -3781,10 +3781,10 @@ void main() {
     expect(materialAfterDismissed.color, Colors.transparent);
   });
 
-  testWidgets('SnackBarAction backgroundColor works as a MaterialStateColor', (
+  testWidgets('SnackBarAction backgroundColor works as a WidgetStateColor', (
     WidgetTester tester,
   ) async {
-    final MaterialStateColor backgroundColor = MaterialStateColor.resolveWith((
+    final WidgetStateColor backgroundColor = WidgetStateColor.resolveWith((
       Set<WidgetState> states,
     ) {
       if (states.contains(WidgetState.disabled)) {
@@ -3901,9 +3901,9 @@ void main() {
   });
 
   testWidgets(
-    'SnackBarAction asserts when backgroundColor is a MaterialStateColor and disabledBackgroundColor is also provided',
+    'SnackBarAction asserts when backgroundColor is a WidgetStateColor and disabledBackgroundColor is also provided',
     (WidgetTester tester) async {
-      final Color backgroundColor = MaterialStateColor.resolveWith((Set<WidgetState> states) {
+      final Color backgroundColor = WidgetStateColor.resolveWith((Set<WidgetState> states) {
         if (states.contains(WidgetState.disabled)) {
           return Colors.blue;
         }
@@ -3948,7 +3948,7 @@ void main() {
           (AssertionError e) => e.toString(),
           'description',
           contains(
-            'disabledBackgroundColor must not be provided when background color is a MaterialStateColor',
+            'disabledBackgroundColor must not be provided when background color is a WidgetStateColor',
           ),
         ),
       );
@@ -4472,7 +4472,7 @@ Map<DismissDirection, List<Offset>> _getDragGesturesOfDismissDirections(double s
   return dragGestures;
 }
 
-class _TestMaterialStateColor extends MaterialStateColor {
+class _TestMaterialStateColor extends WidgetStateColor {
   const _TestMaterialStateColor() : super(_colorRed);
 
   static const int _colorRed = 0xFFF44336;
