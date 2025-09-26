@@ -15662,4 +15662,17 @@ void main() {
       expect(find.text(helperTextValue), findsOneWidget);
     },
   );
+
+  testWidgets('InputDecorator does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(child: InputDecorator(decoration: InputDecoration())),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(InputDecorator)), Size.zero);
+  });
 }
