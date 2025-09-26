@@ -894,7 +894,6 @@ pluginManagement {
         // Kotlin version at the edge of support window.
         GradleKgpTestData(true, kgpVersion: '2.2.20', gradleVersion: '8.14'),
         GradleKgpTestData(true, kgpVersion: '2.2.10', gradleVersion: '8.14'),
-        GradleKgpTestData(true, kgpVersion: '2.2.0', gradleVersion: '7.6.3'),
         GradleKgpTestData(true, kgpVersion: '2.2.20', gradleVersion: '7.6.3'),
         GradleKgpTestData(true, kgpVersion: '2.2.10', gradleVersion: '7.6.3'),
         GradleKgpTestData(true, kgpVersion: '2.2.0', gradleVersion: '7.6.3'),
