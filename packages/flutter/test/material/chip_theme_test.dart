@@ -805,7 +805,7 @@ void main() {
       return defaultColor;
     }
 
-    final TextStyle labelStyle = TextStyle(color: MaterialStateColor.resolveWith(getTextColor));
+    final TextStyle labelStyle = TextStyle(color: WidgetStateColor.resolveWith(getTextColor));
     Widget chipWidget({bool enabled = true, bool selected = false}) {
       return MaterialApp(
         theme: ThemeData(
