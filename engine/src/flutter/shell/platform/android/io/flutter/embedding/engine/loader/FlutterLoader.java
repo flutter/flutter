@@ -6,7 +6,6 @@ package io.flutter.embedding.engine.loader;
 
 import android.app.ActivityManager;
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.hardware.display.DisplayManager;
@@ -38,8 +37,6 @@ import java.util.concurrent.Future;
 public class FlutterLoader {
   private static final String TAG = "FlutterLoader";
 
-  private static final String OLD_GEN_HEAP_SIZE_META_DATA_KEY =
-      "io.flutter.embedding.android.OldGenHeapSize";
   private static final String ENABLE_IMPELLER_META_DATA_KEY =
       "io.flutter.embedding.android.EnableImpeller";
   private static final String ENABLE_VULKAN_VALIDATION_META_DATA_KEY =
@@ -74,9 +71,10 @@ public class FlutterLoader {
   private static final String LEAK_VM_META_DATA_KEY = "io.flutter.embedding.android.LeakVM";
 
   // Flags to only be set internally by default. Matches values in flutter::switches.
-  static final String AOT_VMSERVICE_SHARED_LIBRARY_NAME = "aot-vmservice-shared-library-name";
+  static final String SNAPSHOT_ASSET_PATH_KEY = "snapshot-asset-path";
   static final String VM_SNAPSHOT_DATA_KEY = "vm-snapshot-data";
   static final String ISOLATE_SNAPSHOT_DATA_KEY = "isolate-snapshot-data";
+  static final String AOT_VMSERVICE_SHARED_LIBRARY_NAME = "aot-vmservice-shared-library-name";
   static final String FLUTTER_ASSETS_DIR_KEY = "flutter-assets-dir"; // TODO(camsim99): not used??
   static final String AUTOMATICALLY_REGISTER_PLUGINS_KEY =
       "automatically-register-plugins"; // TODO(camsim99): not used??
@@ -332,13 +330,21 @@ public class FlutterLoader {
 
       // Add engine flags provided by metadata in the application manifest. These settings will take
       // precedent over any defaults set below, but can be overridden by command line args.
+
       Bundle applicationMetaData = applicationInfo.metaData;
+      boolean oldGenHeapSizeSet = false;
+
       for (String metadataKey : applicationMetaData.keySet()) {
         FlutterEngineManifestFlags.Flag flag =
             FlutterEngineManifestFlags.getFlagByMetaDataKey(metadataKey);
         if (flag != null) {
           // Only add flags that are allowed in the current build mode.
           if (flag.allowedInRelease || !BuildConfig.RELEASE) {
+
+            // Mark if old gen heap size is set to track whether or not to set default internally.
+            if (flag == FlutterEngineManifestFlags.OLD_GEN_HEAP_SIZE) {
+              oldGenHeapSizeSet = true;
+            }
 
             // Perform security check for path containing application's compiled Dart code and
             // potentially user-provided compiled native code.
@@ -360,7 +366,7 @@ public class FlutterLoader {
             }
 
             // Add flag automatically if it does not require a security check.
-            String arg = "--" + metadataKey; // TODO(camsim99): this is not correct.
+            String arg = "--" + metadataKey.toCommandLineFlag();
             if (flag.type == FlagType.VALUE) {
               arg += "=" + applicationMetaData.get(metadataKey);
             }
@@ -376,20 +382,21 @@ public class FlutterLoader {
         }
       }
 
-      // Add engine flags set by default internally. These settings can be overridden
+      // Add engine flags set by default internally. Some of these settings can be overridden
       // by command line args or application manifest metadata in that order of precedence.
+
       String kernelPath = null;
       if (BuildConfig.DEBUG || BuildConfig.JIT_RELEASE) {
         String snapshotAssetPath =
             result.dataDirPath + File.separator + flutterApplicationInfo.flutterAssetsDir;
         kernelPath = snapshotAssetPath + File.separator + DEFAULT_KERNEL_BLOB;
-        // TODO(camsim99): Convert to use SNAPSHOT_ASSET_PATH.
         shellArgs.add("--" + SNAPSHOT_ASSET_PATH_KEY + "=" + snapshotAssetPath);
         shellArgs.add("--" + VM_SNAPSHOT_DATA_KEY + "=" + flutterApplicationInfo.vmSnapshotData);
         shellArgs.add(
             "--" + ISOLATE_SNAPSHOT_DATA_KEY + "=" + flutterApplicationInfo.isolateSnapshotData);
       } else {
-        // Add default AOT shared library name arg.
+        // Add default AOT shared library name arg. Note that this can overriden by a value
+        // set in the manifest.
         shellArgs.add(aotSharedLibraryNameFlag + flutterApplicationInfo.aotSharedLibraryName);
 
         // Some devices cannot load the an AOT shared library based on the library name
@@ -417,23 +424,15 @@ public class FlutterLoader {
         shellArgs.add("--log-tag=" + settings.getLogTag());
       }
 
-      ApplicationInfo applicationInfo =
-          applicationContext
-              .getPackageManager()
-              .getApplicationInfo(
-                  applicationContext.getPackageName(), PackageManager.GET_META_DATA);
-      Bundle metaData = applicationInfo.metaData;
-      int oldGenHeapSizeMegaBytes =
-          metaData != null ? metaData.getInt(OLD_GEN_HEAP_SIZE_META_DATA_KEY) : 0;
-      if (oldGenHeapSizeMegaBytes == 0) {
-        // default to half of total memory.
+      if (!oldGenHeapSizeSet) {
+        // Default to half of total memory.
         ActivityManager activityManager =
             (ActivityManager) applicationContext.getSystemService(Context.ACTIVITY_SERVICE);
         ActivityManager.MemoryInfo memInfo = new ActivityManager.MemoryInfo();
         activityManager.getMemoryInfo(memInfo);
-        oldGenHeapSizeMegaBytes = (int) (memInfo.totalMem / 1e6 / 2);
+        int oldGenHeapSizeMegaBytes = (int) (memInfo.totalMem / 1e6 / 2);
+        shellArgs.add("--old-gen-heap-size=" + oldGenHeapSizeMegaBytes);
       }
-      shellArgs.add("--old-gen-heap-size=" + oldGenHeapSizeMegaBytes);
 
       DisplayMetrics displayMetrics = applicationContext.getResources().getDisplayMetrics();
       int screenWidth = displayMetrics.widthPixels;

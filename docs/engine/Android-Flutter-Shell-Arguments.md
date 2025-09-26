@@ -27,9 +27,6 @@
 | `--purge-persistent-cache` | Removes all persistent cache files for debugging. |
 | `--verbose-logging` | Enables logging at all severity levels. |
 | `--dart-flags=<value>` | Passes flags directly to the Dart VM. |
-| `--aot-shared-library-name=<path>` | Specifies the path to the AOT shared library containing compiled Dart code. |
-| `--aot-vmservice-shared-library-name=<path>` | Specifies the path to the AOT shared library for the Dart VM service isolate. |
-| `--snapshot-asset-path=<path>` | Sets the path to the directory containing snapshot assets. |
 | `--vm-snapshot-data=<path>` | Specifies the path to the VM snapshot data file. |
 | `--isolate-snapshot-data=<path>` | Specifies the path to the isolate snapshot data file. |
 | `--flutter-assets-dir=<path>` | Sets the directory containing Flutter assets. |
