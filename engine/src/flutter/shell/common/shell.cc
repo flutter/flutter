@@ -1455,10 +1455,9 @@ void Shell::OnEngineSetApplicationLocale(std::string locale) {
 
   task_runners_.GetPlatformTaskRunner()->RunNowOrPostTask(
       task_runners_.GetPlatformTaskRunner(),
-      [view = platform_view_->GetWeakPtr(),
-       locale_holder = static_cast<std::string>(std::move(locale))] {
+      [view = platform_view_->GetWeakPtr(), locale_holder = std::move(locale)] {
         if (view) {
-          view->SetApplicationLocale(std::move(locale_holder));
+          view->SetApplicationLocale(locale_holder);
         }
       });
 }
