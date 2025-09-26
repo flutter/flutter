@@ -105,9 +105,9 @@ class WidgetPreviewErrorWidget extends StatelessWidget {
     // Print out the stack trace nicely formatted.
     return frames.map<TextSpan>((frame) {
       if (frame is UnparsedFrame) return TextSpan(text: '$frame\n');
-      // The Editor service can't handle Dart core library paths, so don't
-      // allow for navigation to them. Also disable navigation if the Editor
-      // service isn't available.
+      // The Editor.navigateToCode service can't handle Dart core library paths,
+      // so don't allow for navigation to them. Also disable navigation if the
+      // Editor service isn't available.
       final isLinkable =
           (frame.uri.isScheme('file') || frame.uri.isScheme('package')) &&
           editorServiceAvailable;

@@ -80,12 +80,14 @@ mixin DtdEditorService {
           unawaited(_updateSelectedSourceFile());
           _editorServiceAvailable.value = true;
         case DTDEvent(
+          kind: kServiceRegistered,
+          data: {DtdParameters.service: kEditorService},
+        ):
+          _editorServiceAvailable.value = true;
+        case DTDEvent(
           kind: kServiceUnregistered,
           data: {DtdParameters.service: kEditorService},
         ):
-          // TODO(bkonyi): this needs to be made more robust if we're going to use multiple service
-          // methods. It's unlikely that individual methods on the Editor service will be added or
-          // removed, but we should at least log an error if this happens.
           _editorServiceAvailable.value = false;
       }
     });
