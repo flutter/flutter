@@ -31,7 +31,7 @@ class MockPlatformViewAndroidJNI : public PlatformViewAndroidJNI {
               (override));
   MOCK_METHOD(void,
               FlutterViewSetApplicationLocale,
-              (const std::string& locale),
+              (const std::string locale),
               (override));
   MOCK_METHOD(void,
               FlutterViewUpdateCustomAccessibilityActions,
