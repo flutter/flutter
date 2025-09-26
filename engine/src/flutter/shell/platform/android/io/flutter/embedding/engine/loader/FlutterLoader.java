@@ -362,8 +362,12 @@ public class FlutterLoader {
         if (flag != null) {
           // Only add flags that are allowed in the current build mode.
           if (flag.allowedInRelease || !BuildConfig.RELEASE) {
-            // TODO(camsim99): fix. this includes package name and is in camel case.
-            shellArgs.add("--" + metadataKey + "=" + applicationMetaData.get(metadataKey));
+            String arg = "--" + metadataKey;
+
+            if (flag.type == FlagType.VALUE) {
+            arg += "=" + applicationMetaData.get(metadataKey);
+            }
+            shellArgs.add(arg);
           }
         } else {
           Log.w(
@@ -377,8 +381,8 @@ public class FlutterLoader {
         }
       }
 
-
-
+      // Add engine flags set by default internally. These settings can be overridden
+      // by command line args or application manifest metadata in that order of precedence.
       String kernelPath = null;
       if (BuildConfig.DEBUG || BuildConfig.JIT_RELEASE) {
         String snapshotAssetPath =
