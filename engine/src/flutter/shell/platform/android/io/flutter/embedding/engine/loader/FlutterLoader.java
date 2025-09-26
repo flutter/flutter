@@ -344,11 +344,12 @@ public class FlutterLoader {
             // Mark if old gen heap size is set to track whether or not to set default internally.
             if (flag == FlutterEngineManifestFlags.OLD_GEN_HEAP_SIZE) {
               oldGenHeapSizeSet = true;
-            }
-
-            // Perform security check for path containing application's compiled Dart code and
-            // potentially user-provided compiled native code.
-            if (flag == FlutterEngineManifestFlags.AOT_SHARED_LIBRARY_NAME) {
+            } else if (flag == FlutterEngineManifestFlags.DISABLE_MERGED_PLATFORM_UI_THREAD) {
+              throw new IllegalArgumentException(
+              FlutterEngineManifestFlags.DISABLE_MERGED_PLATFORM_UI_THREAD.metaDataKey + " is no longer allowed.");
+            } else if (flag == FlutterEngineManifestFlags.AOT_SHARED_LIBRARY_NAME) {
+              // Perform security check for path containing application's compiled Dart code and
+              // potentially user-provided compiled native code.
               String safeAotSharedLibraryNameFlag =
                   getSafeAotSharedLibraryNameFlag(
                       applicationContext, applicationMetaData.get(metadataKey));
@@ -443,39 +444,6 @@ public class FlutterLoader {
       shellArgs.add("--resource-cache-max-bytes-threshold=" + resourceCacheMaxBytesThreshold);
 
       shellArgs.add("--prefetched-default-font-manager");
-
-      if (metaData != null) {
-        if (metaData.getBoolean(ENABLE_VULKAN_VALIDATION_META_DATA_KEY, false)) {
-          shellArgs.add("--enable-vulkan-validation");
-        }
-        if (metaData.getBoolean(IMPELLER_OPENGL_GPU_TRACING_DATA_KEY, false)) {
-          shellArgs.add("--enable-opengl-gpu-tracing");
-        }
-        if (metaData.getBoolean(IMPELLER_VULKAN_GPU_TRACING_DATA_KEY, false)) {
-          shellArgs.add("--enable-vulkan-gpu-tracing");
-        }
-        if (metaData.getBoolean(DISABLE_MERGED_PLATFORM_UI_THREAD_KEY, false)) {
-          throw new IllegalArgumentException(
-              DISABLE_MERGED_PLATFORM_UI_THREAD_KEY + " is no longer allowed.");
-        }
-        if (metaData.getBoolean(ENABLE_FLUTTER_GPU, false)) {
-          shellArgs.add("--enable-flutter-gpu");
-        }
-        if (metaData.getBoolean(ENABLE_SURFACE_CONTROL, false)) {
-          shellArgs.add("--enable-surface-control");
-        }
-
-        String backend = metaData.getString(IMPELLER_BACKEND_META_DATA_KEY);
-        if (backend != null) {
-          shellArgs.add("--impeller-backend=" + backend);
-        }
-        if (metaData.getBoolean(IMPELLER_LAZY_SHADER_MODE)) {
-          shellArgs.add("--impeller-lazy-shader-mode");
-        }
-        if (metaData.getBoolean(IMPELLER_ANTIALIAS_LINES)) {
-          shellArgs.add("--impeller-antialias-lines");
-        }
-      }
 
       final String leakVM = isLeakVM(metaData) ? "true" : "false";
       shellArgs.add("--leak-vm=" + leakVM);

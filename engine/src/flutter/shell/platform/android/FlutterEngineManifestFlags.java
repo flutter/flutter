@@ -68,6 +68,7 @@ public final class FlutterEngineManifestFlags {
   public static final Flag ENABLE_VULKAN_VALIDATION =
       new Flag("EnableVulkanValidation", false, FlagType.BOOLEAN);
   public static final Flag IMPELLER_BACKEND = new Flag("ImpellerBackend", true, FlagType.VALUE);
+  // TODO(camsim99): this one only in flutter loader before weirdly. Also make sure this converts correctly.
   public static final Flag ENABLE_OPENGL_GPU_TRACING =
       new Flag("EnableOpenGLGPUTracing", false, FlagType.BOOLEAN);
   public static final Flag ENABLE_VULKAN_GPU_TRACING =
@@ -78,6 +79,8 @@ public final class FlutterEngineManifestFlags {
       new Flag("EnableSurfaceControl", true, FlagType.BOOLEAN);
   public static final Flag ENABLE_FLUTTER_GPU =
       new Flag("EnableFlutterGPU", true, FlagType.BOOLEAN);
+  public static final Flag IMPELLER_LAZY_SHADER_MODE =
+      new Flag("ImpellerLazyShaderMode", true, FlagType.BOOLEAN);
   public static final Flag IMPELLER_LAZY_SHADER_INITIALIZATION =
       new Flag("ImpellerLazyShaderInitialization", true, FlagType.BOOLEAN);
   public static final Flag IMPELLER_ANTIALIAS_LINES =
