@@ -620,7 +620,7 @@ void main() {
 
   testWidgets('Tab bar theme overrides tab mouse cursor', (WidgetTester tester) async {
     const TabBarThemeData tabBarTheme = TabBarThemeData(
-      mouseCursor: MaterialStateMouseCursor.textable,
+      mouseCursor: WidgetStateMouseCursor.textable,
     );
 
     await tester.pumpWidget(buildTabBar(tabBarTheme: tabBarTheme));
