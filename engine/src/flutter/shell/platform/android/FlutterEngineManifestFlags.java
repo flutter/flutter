@@ -38,34 +38,47 @@ public final class FlutterEngineManifestFlags {
   }
 
   // Can also be set by command line. Command line takes precendence IMO
-// TODO(camsim99): note this in my manifest file.
-public static final Flag VM_SERVICE_PORT = new Flag("VmServicePort", false, FlagType.VALUE);
-public static final Flag USE_TEST_FONTS = new Flag("UseTestFonts", false, FlagType.BOOLEAN);
-public static final Flag ENABLE_SOFTWARE_RENDERING = new Flag("EnableSoftwareRendering", true, FlagType.BOOLEAN);
-public static final Flag SKIA_DETERMINISTIC_RENDERING =
-        new Flag("SkiaDeterministicRendering", true, FlagType.BOOLEAN);
-public static final Flag AOT_SHARED_LIBRARY_NAME = // set internally too
-        new Flag("AotSharedLibraryName", true, FlagType.VALUE);
-public static final Flag SNAPSHOT_ASSET_PATH = new Flag("SnapshotAssetPath", true, FlagType.VALUE);
-public static final Flag VM_SNAPSHOT_DATA = new Flag("VmSnapshotData", true, FlagType.VALUE);
-public static final Flag ISOLATE_SNAPSHOT_DATA = new Flag("IsolateSnapshotData", true, FlagType.VALUE);
-public static final Flag FLUTTER_ASSETS_DIR = new Flag("FlutterAssetsDir", true, FlagType.VALUE);
-public static final Flag AUTOMATICALLY_REGISTER_PLUGINS =
-        new Flag("AutomaticallyRegisterPlugins", true, FlagType.BOOLEAN);
-public static final Flag OLD_GEN_HEAP_SIZE = new Flag("OldGenHeapSize", true, FlagType.VALUE);
-public static final Flag ENABLE_IMPELLER = new Flag("EnableImpeller", true, FlagType.BOOLEAN); // TODO(camsim99): check if this should be value
-public static final Flag ENABLE_VULKAN_VALIDATION = new Flag("EnableVulkanValidation", false, FlagType.BOOLEAN);
-public static final Flag IMPELLER_BACKEND = new Flag("ImpellerBackend", true, FlagType.VALUE);
-public static final Flag ENABLE_OPENGL_GPU_TRACING = new Flag("EnableOpenGLGPUTracing", false, FlagType.BOOLEAN);
-public static final Flag ENABLE_VULKAN_GPU_TRACING = new Flag("EnableVulkanGPUTracing", false, FlagType.BOOLEAN);
-public static final Flag DISABLE_MERGED_PLATFORM_UI_THREAD =
-        new Flag("DisableMergedPlatformUIThread", true, FlagType.BOOLEAN);
-public static final Flag ENABLE_SURFACE_CONTROL = new Flag("EnableSurfaceControl", true, FlagType.BOOLEAN);
-public static final Flag ENABLE_FLUTTER_GPU = new Flag("EnableFlutterGPU", true, FlagType.BOOLEAN);
-public static final Flag IMPELLER_LAZY_SHADER_INITIALIZATION =
-        new Flag("ImpellerLazyShaderInitialization", true, FlagType.BOOLEAN);
-public static final Flag IMPELLER_ANTIALIAS_LINES = new Flag("ImpellerAntialiasLines", true, FlagType.BOOLEAN);
-public static final Flag LEAK_VM = new Flag("LeakVM", false, FlagType.BOOLEAN);
+  // TODO(camsim99): note this in my manifest file.
+  public static final Flag VM_SERVICE_PORT = new Flag("VmServicePort", false, FlagType.VALUE);
+  public static final Flag USE_TEST_FONTS = new Flag("UseTestFonts", false, FlagType.BOOLEAN);
+  public static final Flag ENABLE_SOFTWARE_RENDERING =
+      new Flag("EnableSoftwareRendering", true, FlagType.BOOLEAN);
+  public static final Flag SKIA_DETERMINISTIC_RENDERING =
+      new Flag("SkiaDeterministicRendering", true, FlagType.BOOLEAN);
+  public static final Flag AOT_SHARED_LIBRARY_NAME = // set internally too
+      new Flag("AotSharedLibraryName", true, FlagType.VALUE);
+  public static final Flag SNAPSHOT_ASSET_PATH =
+      new Flag("SnapshotAssetPath", true, FlagType.VALUE);
+  public static final Flag VM_SNAPSHOT_DATA = new Flag("VmSnapshotData", true, FlagType.VALUE);
+  public static final Flag ISOLATE_SNAPSHOT_DATA =
+      new Flag("IsolateSnapshotData", true, FlagType.VALUE);
+  public static final Flag FLUTTER_ASSETS_DIR = new Flag("FlutterAssetsDir", true, FlagType.VALUE);
+  public static final Flag AUTOMATICALLY_REGISTER_PLUGINS =
+      new Flag("AutomaticallyRegisterPlugins", true, FlagType.BOOLEAN);
+  public static final Flag OLD_GEN_HEAP_SIZE = new Flag("OldGenHeapSize", true, FlagType.VALUE);
+  public static final Flag ENABLE_IMPELLER =
+      new Flag(
+          "EnableImpeller",
+          true,
+          FlagType.BOOLEAN); // TODO(camsim99): check if this should be value
+  public static final Flag ENABLE_VULKAN_VALIDATION =
+      new Flag("EnableVulkanValidation", false, FlagType.BOOLEAN);
+  public static final Flag IMPELLER_BACKEND = new Flag("ImpellerBackend", true, FlagType.VALUE);
+  public static final Flag ENABLE_OPENGL_GPU_TRACING =
+      new Flag("EnableOpenGLGPUTracing", false, FlagType.BOOLEAN);
+  public static final Flag ENABLE_VULKAN_GPU_TRACING =
+      new Flag("EnableVulkanGPUTracing", false, FlagType.BOOLEAN);
+  public static final Flag DISABLE_MERGED_PLATFORM_UI_THREAD =
+      new Flag("DisableMergedPlatformUIThread", true, FlagType.BOOLEAN);
+  public static final Flag ENABLE_SURFACE_CONTROL =
+      new Flag("EnableSurfaceControl", true, FlagType.BOOLEAN);
+  public static final Flag ENABLE_FLUTTER_GPU =
+      new Flag("EnableFlutterGPU", true, FlagType.BOOLEAN);
+  public static final Flag IMPELLER_LAZY_SHADER_INITIALIZATION =
+      new Flag("ImpellerLazyShaderInitialization", true, FlagType.BOOLEAN);
+  public static final Flag IMPELLER_ANTIALIAS_LINES =
+      new Flag("ImpellerAntialiasLines", true, FlagType.BOOLEAN);
+  public static final Flag LEAK_VM = new Flag("LeakVM", false, FlagType.BOOLEAN);
 
   // public static final List<Flag> ALL_FLAGS = Collections.unmodifiableList(Arrays.asList(
   //     VM_SERVICE_PORT,
