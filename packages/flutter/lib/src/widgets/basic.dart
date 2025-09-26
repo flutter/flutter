@@ -8430,6 +8430,8 @@ class _RenderColoredBox extends RenderProxyBoxWithHitTestBehavior {
     markNeedsPaint();
   }
 
+  final Paint _paint = Paint()..isAntiAlias = false;
+
   @override
   void paint(PaintingContext context, Offset offset) {
     // It's tempting to want to optimize out this `drawRect()` call if the
@@ -8437,12 +8439,8 @@ class _RenderColoredBox extends RenderProxyBoxWithHitTestBehavior {
     // https://github.com/flutter/flutter/pull/72526#issuecomment-749185938 for
     // a good description of why.
     if (size > Size.zero) {
-      context.canvas.drawRect(
-        offset & size,
-        Paint()
-          ..color = color
-          ..isAntiAlias = false,
-      );
+      _paint.color = color;
+      context.canvas.drawRect(offset & size, _paint);
     }
     if (child != null) {
       context.paintChild(child!, offset);
