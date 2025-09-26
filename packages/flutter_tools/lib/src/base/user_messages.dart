@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../globals.dart';
-import 'platform.dart';
 import '../android/gradle_utils.dart' as gradle_utils;
+import 'platform.dart';
 
 /// Class containing some message strings that can be produced by Flutter tools.
 //
