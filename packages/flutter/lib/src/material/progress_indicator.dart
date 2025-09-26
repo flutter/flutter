@@ -538,45 +538,11 @@ class LinearProgressIndicator extends ProgressIndicator {
   State<LinearProgressIndicator> createState() => _LinearProgressIndicatorState();
 }
 
-class _LinearProgressIndicatorState extends State<LinearProgressIndicator>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _internalController;
-
-  @override
-  void initState() {
-    super.initState();
-    _internalController = AnimationController(
-      duration: LinearProgressIndicator.defaultAnimationDuration,
-      vsync: this,
-    );
-    _updateControllerAnimatingStatus();
-  }
-
-  @override
-  void didUpdateWidget(LinearProgressIndicator oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _updateControllerAnimatingStatus();
-  }
-
-  @override
-  void dispose() {
-    _internalController.dispose();
-    super.dispose();
-  }
-
-  AnimationController get _controller =>
+class _LinearProgressIndicatorState extends State<LinearProgressIndicator> {
+  AnimationController? get _externalController =>
       widget.controller ??
       context.getInheritedWidgetOfExactType<ProgressIndicatorTheme>()?.data.controller ??
-      context.findAncestorWidgetOfExactType<Theme>()?.data.progressIndicatorTheme.controller ??
-      _internalController;
-
-  void _updateControllerAnimatingStatus() {
-    if (widget.value == null && !_internalController.isAnimating) {
-      _internalController.repeat();
-    } else if (widget.value != null && _internalController.isAnimating) {
-      _internalController.stop();
-    }
-  }
+      context.findAncestorWidgetOfExactType<Theme>()?.data.progressIndicatorTheme.controller;
 
   Widget _buildIndicator(BuildContext context, double animationValue, TextDirection textDirection) {
     final ProgressIndicatorThemeData indicatorTheme = ProgressIndicatorTheme.of(context);
@@ -638,13 +604,28 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator>
     final TextDirection textDirection = Directionality.of(context);
 
     if (widget.value != null) {
-      return _buildIndicator(context, _controller.value, textDirection);
+      // Determinate progress - just show static value
+      return _buildIndicator(context, 0, textDirection);
     }
 
-    return AnimatedBuilder(
-      animation: _controller.view,
-      builder: (BuildContext context, Widget? child) {
-        return _buildIndicator(context, _controller.value, textDirection);
+    // Check if external controller is provided
+    final AnimationController? externalController = _externalController;
+    if (externalController != null) {
+      // External controller provided, use AnimatedBuilder
+      return AnimatedBuilder(
+        animation: externalController.view,
+        builder: (BuildContext context, Widget? child) {
+          return _buildIndicator(context, externalController.value, textDirection);
+        },
+      );
+    }
+
+    // No external controller - use RepeatingTweenAnimationBuilder
+    return RepeatingTweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: const Duration(milliseconds: _kIndeterminateLinearDuration),
+      builder: (BuildContext context, Animation<double> animation, Widget? child) {
+        return _buildIndicator(context, animation.value, textDirection);
       },
     );
   }
@@ -1040,8 +1021,7 @@ class CircularProgressIndicator extends ProgressIndicator {
   State<CircularProgressIndicator> createState() => _CircularProgressIndicatorState();
 }
 
-class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
-    with SingleTickerProviderStateMixin {
+class _CircularProgressIndicatorState extends State<CircularProgressIndicator> {
   static const int _pathCount = _kIndeterminateCircularDuration ~/ 1333;
   static const int _rotationCount = _kIndeterminateCircularDuration ~/ 2222;
 
@@ -1056,43 +1036,10 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
     curve: const SawTooth(_rotationCount),
   );
 
-  late final AnimationController _internalController;
-
-  @override
-  void initState() {
-    super.initState();
-    _internalController = AnimationController(
-      duration: CircularProgressIndicator.defaultAnimationDuration,
-      vsync: this,
-    );
-    _updateControllerAnimatingStatus();
-  }
-
-  @override
-  void didUpdateWidget(CircularProgressIndicator oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _updateControllerAnimatingStatus();
-  }
-
-  @override
-  void dispose() {
-    _internalController.dispose();
-    super.dispose();
-  }
-
-  AnimationController get _controller =>
+  AnimationController? get _externalController =>
       widget.controller ??
       context.getInheritedWidgetOfExactType<ProgressIndicatorTheme>()?.data.controller ??
-      context.findAncestorWidgetOfExactType<Theme>()?.data.progressIndicatorTheme.controller ??
-      _internalController;
-
-  void _updateControllerAnimatingStatus() {
-    if (widget.value == null && !_internalController.isAnimating) {
-      _internalController.repeat();
-    } else if (widget.value != null && _internalController.isAnimating) {
-      _internalController.stop();
-    }
-  }
+      context.findAncestorWidgetOfExactType<Theme>()?.data.progressIndicatorTheme.controller;
 
   Widget _buildCupertinoIndicator(BuildContext context) {
     final Color? tickColor = widget.backgroundColor;
@@ -1169,15 +1116,36 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
   }
 
   Widget _buildAnimation() {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (BuildContext context, Widget? child) {
+    // Check if external controller is provided
+    final AnimationController? externalController = _externalController;
+    if (externalController != null) {
+      // External controller provided, use AnimatedBuilder
+      return AnimatedBuilder(
+        animation: externalController,
+        builder: (BuildContext context, Widget? child) {
+          return _buildMaterialIndicator(
+            context,
+            _strokeHeadTween.evaluate(externalController),
+            _strokeTailTween.evaluate(externalController),
+            _offsetTween.evaluate(externalController),
+            _rotationTween.evaluate(externalController),
+          );
+        },
+      );
+    }
+
+    // No external controller - use RepeatingTweenAnimationBuilder
+    return RepeatingTweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: const Duration(milliseconds: _kIndeterminateCircularDuration),
+      paused: widget.value != null,
+      builder: (BuildContext context, Animation<double> animation, Widget? child) {
         return _buildMaterialIndicator(
           context,
-          _strokeHeadTween.evaluate(_controller),
-          _strokeTailTween.evaluate(_controller),
-          _offsetTween.evaluate(_controller),
-          _rotationTween.evaluate(_controller),
+          _strokeHeadTween.transform(animation.value),
+          _strokeTailTween.transform(animation.value),
+          _offsetTween.transform(animation.value),
+          _rotationTween.transform(animation.value),
         );
       },
     );
@@ -1370,24 +1338,27 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
     final double? value = widget.value;
     if (value != null) {
       _lastValue = value;
-      _controller.value =
-          _convertTween.transform(value) * (1333 / 2 / _kIndeterminateCircularDuration);
     }
     return _buildAnimation();
   }
 
   @override
   Widget _buildAnimation() {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (BuildContext context, Widget? child) {
+    return RepeatingTweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: const Duration(milliseconds: _kIndeterminateCircularDuration),
+      paused: widget.value != null,
+      builder: (BuildContext context, Animation<double> animation, Widget? child) {
+        final double animValue = widget.value != null
+            ? _convertTween.transform(widget.value!) * (1333 / 2 / _kIndeterminateCircularDuration)
+            : animation.value;
         return _buildMaterialIndicator(
           context,
           // Lengthen the arc a little
-          1.05 * _CircularProgressIndicatorState._strokeHeadTween.evaluate(_controller),
-          _CircularProgressIndicatorState._strokeTailTween.evaluate(_controller),
-          _CircularProgressIndicatorState._offsetTween.evaluate(_controller),
-          _CircularProgressIndicatorState._rotationTween.evaluate(_controller),
+          1.05 * _CircularProgressIndicatorState._strokeHeadTween.transform(animValue),
+          _CircularProgressIndicatorState._strokeTailTween.transform(animValue),
+          _CircularProgressIndicatorState._offsetTween.transform(animValue),
+          _CircularProgressIndicatorState._rotationTween.transform(animValue),
         );
       },
     );
