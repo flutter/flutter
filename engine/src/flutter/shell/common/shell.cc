@@ -1886,6 +1886,8 @@ bool Shell::OnServiceProtocolRunInView(
                                         engine_->GetLastEntrypointLibrary());
   configuration.SetEntrypointArgs(engine_->GetLastEntrypointArgs());
 
+  configuration.SetEngineId(engine_->GetLastEngineId());
+
   configuration.AddAssetResolver(std::make_unique<DirectoryAssetBundle>(
       fml::OpenDirectory(asset_directory_path.c_str(), false,
                          fml::FilePermission::kRead),
