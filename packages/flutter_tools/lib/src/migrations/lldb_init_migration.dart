@@ -249,6 +249,7 @@ selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
     required XmlDocument document,
     required SchemeInfo schemeInfo,
   }) {
+    // ignore: experimental_member_use
     final Iterable<XmlNode> nodes = document.xpath('/Scheme/$action');
     if (nodes.isEmpty) {
       logger.printTrace('Failed to find $action for the Scheme in ${schemeInfo.schemeFile.path}.');

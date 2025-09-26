@@ -33,8 +33,9 @@ Future<void> main() async {
   /// The [FileSystem] for the integration test environment.
   const LocalFileSystem fileSystem = LocalFileSystem();
 
+  /// The temp [Directory] purposedly has a space in it.
   final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
-    'flutter_android_dependency_version_tests',
+    'flutter android_dependency_version_tests',
   );
   await task(() {
     return buildFlutterApkWithSpecifiedDependencyVersions(

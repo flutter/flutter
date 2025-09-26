@@ -59,6 +59,8 @@ class WidgetPreviewerWidgetScaffolding extends StatelessWidget {
 class FakeWidgetPreviewScaffoldDtdServices extends Fake
     with DtdEditorService
     implements WidgetPreviewScaffoldDtdServices {
+  FakeWidgetPreviewScaffoldDtdServices({this.isWindows = false});
+
   @override
   Future<void> connect({Uri? dtdUri}) async {}
 
@@ -73,6 +75,9 @@ class FakeWidgetPreviewScaffoldDtdServices extends Fake
   Future<void> hotRestartPreviewer() async {
     hotRestartInvoked = true;
   }
+
+  @override
+  final bool isWindows;
 
   /// The currently selected source file in the IDE.
   @override

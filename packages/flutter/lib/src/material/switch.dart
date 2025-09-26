@@ -2143,7 +2143,7 @@ class _SwitchDefaultsM2 extends SwitchThemeData {
 
   @override
   WidgetStateProperty<MouseCursor> get mouseCursor => WidgetStateProperty.resolveWith(
-    (Set<WidgetState> states) => MaterialStateMouseCursor.clickable.resolve(states),
+    (Set<WidgetState> states) => WidgetStateMouseCursor.clickable.resolve(states),
   );
 
   @override
@@ -2295,7 +2295,7 @@ class _SwitchDefaultsM3 extends SwitchThemeData {
   @override
   WidgetStateProperty<MouseCursor> get mouseCursor {
     return WidgetStateProperty.resolveWith((Set<WidgetState> states)
-      => MaterialStateMouseCursor.clickable.resolve(states));
+      => WidgetStateMouseCursor.clickable.resolve(states));
   }
 
   @override

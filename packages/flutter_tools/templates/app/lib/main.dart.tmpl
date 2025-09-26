@@ -62,7 +62,7 @@ class MyApp extends StatelessWidget {
         //
         // This works for code too, not just values: Most code changes can be
         // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
       ),
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
@@ -136,7 +136,7 @@ class _MyHomePageState extends State<MyHomePage> {
           // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
           // action in the IDE, or press "p" in the console), to see the
           // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             const Text('You have pushed the button this many times:'),
             Text(
@@ -240,20 +240,20 @@ class _MyAppState extends State<MyApp> {
         ),
         body: SingleChildScrollView(
           child: Container(
-            padding: const EdgeInsets.all(10),
+            padding: const .all(10),
             child: Column(
               children: [
                 const Text(
                   'This calls a native function through FFI that is shipped as source in the package. '
                   'The native code is built as part of the Flutter Runner build.',
                   style: textStyle,
-                  textAlign: TextAlign.center,
+                  textAlign: .center,
                 ),
                 spacerSmall,
                 Text(
                   'sum(1, 2) = $sumResult',
                   style: textStyle,
-                  textAlign: TextAlign.center,
+                  textAlign: .center,
                 ),
                 spacerSmall,
                 FutureBuilder<int>(
@@ -264,7 +264,7 @@ class _MyAppState extends State<MyApp> {
                     return Text(
                       'await sumAsync(3, 4) = $displayValue',
                       style: textStyle,
-                      textAlign: TextAlign.center,
+                      textAlign: .center,
                     );
                   },
                 ),
