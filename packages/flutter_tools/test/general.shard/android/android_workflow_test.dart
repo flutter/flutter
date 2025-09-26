@@ -636,7 +636,7 @@ Review licenses that have not been accepted (y/N)?
     );
   });
 
-  testUsingContext('detects minimum recomended java version', () async {
+  testUsingContext('detects minimum recommended java version', () async {
     // Test with older version of JDK
     final Platform platform = FakePlatform()
       ..environment = <String, String>{
