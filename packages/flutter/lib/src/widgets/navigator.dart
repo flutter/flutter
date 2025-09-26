@@ -3706,12 +3706,20 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     // If this Navigator handles back gestures, then rebuild when canPop changes
     // so that the PopScope can be updated.
     if (_handlesBackGestures && value != _lastCanPop) {
-      ServicesBinding.instance.addPostFrameCallback((Duration timestamp) {
-        if (!mounted) {
-          return;
-        }
-        setState(() {});
-      });
+      switch (SchedulerBinding.instance.schedulerPhase) {
+        case SchedulerPhase.postFrameCallbacks:
+          setState(() {});
+        case SchedulerPhase.idle:
+        case SchedulerPhase.midFrameMicrotasks:
+        case SchedulerPhase.persistentCallbacks:
+        case SchedulerPhase.transientCallbacks:
+          ServicesBinding.instance.addPostFrameCallback((Duration timestamp) {
+            if (!mounted) {
+              return;
+            }
+            setState(() {});
+          });
+      }
     }
     _lastCanPopCached = value;
   }
