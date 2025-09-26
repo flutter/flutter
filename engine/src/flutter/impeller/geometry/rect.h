@@ -437,13 +437,8 @@ struct TRect {
   ///         necessary.
   [[nodiscard]] constexpr TRect TransformAndClipBounds(
       const Matrix& transform) const {
-    switch (transform.Classify2D()) {
-      case Matrix::Type::kScaleTranslate:
-        return TransformBoundsTranslateScale2D(transform);
-      case Matrix::Type::kAffine:
-        return TransformBounds(transform);
-      case Matrix::Type::kGeneral:
-        break;
+    if (!transform.HasPerspective2D()) {
+      return TransformBounds(transform);
     }
 
     if (IsEmpty()) {
@@ -475,14 +470,6 @@ struct TRect {
   /// @brief  Creates a new bounding box that contains this transformed
   ///         rectangle.
   [[nodiscard]] constexpr TRect TransformBounds(const Matrix& transform) const {
-    switch (transform.Classify2D()) {
-      case Matrix::Type::kScaleTranslate:
-        return TransformBoundsTranslateScale2D(transform);
-      case Matrix::Type::kAffine:
-      case Matrix::Type::kGeneral:
-        break;
-    }
-
     if (IsEmpty()) {
       return {};
     }
@@ -492,33 +479,6 @@ struct TRect {
       return bounds.value();
     }
     FML_UNREACHABLE();
-  }
-
-  /// @brief  Creates a new bounding box that contains this transformed
-  ///         rectangle.
-  ///
-  /// [transform] must be a translate-scale only matrix.
-  [[nodiscard]] constexpr TRect TransformBoundsTranslateScale2D(
-      const Matrix& transform) const {
-    if (IsEmpty()) {
-      return {};
-    }
-
-    Scalar tx = transform.m[12];
-    Scalar ty = transform.m[13];
-    Scalar sx = transform.m[0];
-    Scalar sy = transform.m[5];
-
-    Scalar l = GetLeft() * sx + tx;
-    Scalar r = GetRight() * sx + tx;
-    Scalar t = GetTop() * sy + ty;
-    Scalar b = GetBottom() * sy + ty;
-
-    return TRect<float>::MakeLTRB(std::min(l, r),  //
-                                  std::min(t, b),  //
-                                  std::max(l, r),  //
-                                  std::max(t, b)   //
-    );
   }
 
   /// @brief  Constructs a Matrix that will map all points in the coordinate
