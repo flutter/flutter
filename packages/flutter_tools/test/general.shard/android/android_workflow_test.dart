@@ -662,7 +662,7 @@ Review licenses that have not been accepted (y/N)?
     final String errorMessage = UserMessages().androidJavaMinimumVersion(javaVersionText);
 
     final ValidationResult validationResult = await AndroidValidator(
-      java: FakeJava(version: const Version.withText(16,0, 1, javaVersionText)),
+      java: FakeJava(version: const Version.withText(16, 0, 1, javaVersionText)),
       androidSdk: sdk,
       logger: logger,
       platform: platform,
