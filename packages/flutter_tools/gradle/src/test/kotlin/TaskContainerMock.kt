@@ -25,42 +25,76 @@ open class TaskContainerMock : TaskContainer {
     override fun create(options: Map<String?, *>): Task = notMocked()
 
     @Deprecated("Deprecated in Java")
-    override fun create(options: Map<String?, *>, configureClosure: Closure<*>): Task = notMocked()
+    override fun create(
+        options: Map<String?, *>,
+        configureClosure: Closure<*>
+    ): Task = notMocked()
 
     @Deprecated("Deprecated in Java")
-    override fun create(name: String, configureClosure: Closure<*>): Task = notMocked()
+    override fun create(
+        name: String,
+        configureClosure: Closure<*>
+    ): Task = notMocked()
 
     @Deprecated("Deprecated in Java")
     override fun create(name: String): Task = notMocked()
 
     @Deprecated("Deprecated in Java")
-    override fun <T : Task?> create(name: String, type: Class<T?>): T & Any = notMocked()
+    override fun <T : Task?> create(
+        name: String,
+        type: Class<T?>
+    ): T & Any = notMocked()
 
     @Deprecated("Deprecated in Java")
-    override fun <T : Task?> create(name: String, type: Class<T?>, vararg constructorArgs: Any?): T & Any = notMocked()
+    override fun <T : Task?> create(
+        name: String,
+        type: Class<T?>,
+        vararg constructorArgs: Any?
+    ): T & Any = notMocked()
 
     @Deprecated("Deprecated in Java")
-    override fun <T : Task?> create(name: String, type: Class<T?>, configuration: Action<in T>): T & Any = notMocked()
+    override fun <T : Task?> create(
+        name: String,
+        type: Class<T?>,
+        configuration: Action<in T>
+    ): T & Any = notMocked()
 
     @Deprecated("Deprecated in Java")
-    override fun create(name: String, configuration: Action<in Task>): Task = notMocked()
+    override fun create(
+        name: String,
+        configuration: Action<in Task>
+    ): Task = notMocked()
 
-    override fun register(name: String, configurationAction: Action<in Task>): TaskProvider<Task?> = notMocked()
+    override fun register(
+        name: String,
+        configurationAction: Action<in Task>
+    ): TaskProvider<Task?> = notMocked()
 
     override fun <T : Task?> register(
-        name: String, type: Class<T?>, configurationAction: Action<in T>
+        name: String,
+        type: Class<T?>,
+        configurationAction: Action<in T>
     ): TaskProvider<T?> = notMocked()
 
-    override fun <T : Task?> register(name: String, type: Class<T?>): TaskProvider<T?> = notMocked()
+    override fun <T : Task?> register(
+        name: String,
+        type: Class<T?>
+    ): TaskProvider<T?> = notMocked()
 
-    override fun <T : Task?> register(name: String, type: Class<T?>, vararg constructorArgs: Any?): TaskProvider<T?> =
-        notMocked()
+    override fun <T : Task?> register(
+        name: String,
+        type: Class<T?>,
+        vararg constructorArgs: Any?
+    ): TaskProvider<T?> = notMocked()
 
     override fun register(name: String): TaskProvider<Task?> = notMocked()
 
     override fun replace(name: String): Task = notMocked()
 
-    override fun <T : Task?> replace(name: String, type: Class<T?>): T & Any = notMocked()
+    override fun <T : Task?> replace(
+        name: String,
+        type: Class<T?>
+    ): T & Any = notMocked()
 
     override fun named(nameFilter: Spec<String?>): TaskCollection<Task?> = notMocked()
 
@@ -68,7 +102,10 @@ open class TaskContainerMock : TaskContainer {
 
     override fun matching(closure: Closure<*>): TaskCollection<Task?> = notMocked()
 
-    override fun getByName(name: String, configureClosure: Closure<*>): Task = notMocked()
+    override fun getByName(
+        name: String,
+        configureClosure: Closure<*>
+    ): Task = notMocked()
 
     override fun getByName(name: String): Task = notMocked()
 
@@ -82,12 +119,21 @@ open class TaskContainerMock : TaskContainer {
 
     override fun named(name: String): TaskProvider<Task> = notMocked()
 
-    override fun named(name: String, configurationAction: Action<in Task>): TaskProvider<Task?> = notMocked()
+    override fun named(
+        name: String,
+        configurationAction: Action<in Task>
+    ): TaskProvider<Task?> = notMocked()
 
-    override fun <S : Task?> named(name: String, type: Class<S?>): TaskProvider<S?> = notMocked()
+    override fun <S : Task?> named(
+        name: String,
+        type: Class<S?>
+    ): TaskProvider<S?> = notMocked()
 
-    override fun <S : Task?> named(name: String, type: Class<S?>, configurationAction: Action<in S>): TaskProvider<S?> =
-        notMocked()
+    override fun <S : Task?> named(
+        name: String,
+        type: Class<S?>,
+        configurationAction: Action<in S>
+    ): TaskProvider<S?> = notMocked()
 
     override fun add(e: Task): Boolean = notMocked()
 
@@ -101,13 +147,22 @@ open class TaskContainerMock : TaskContainer {
 
     override fun findByName(name: String): Task? = notMocked()
 
-    override fun getByName(name: String, configureAction: Action<in Task>): Task = notMocked()
+    override fun getByName(
+        name: String,
+        configureAction: Action<in Task>
+    ): Task = notMocked()
 
     override fun addRule(rule: Rule): Rule = notMocked()
 
-    override fun addRule(description: String, ruleAction: Closure<*>): Rule = notMocked()
+    override fun addRule(
+        description: String,
+        ruleAction: Closure<*>
+    ): Rule = notMocked()
 
-    override fun addRule(description: String, ruleAction: Action<String?>): Rule = notMocked()
+    override fun addRule(
+        description: String,
+        ruleAction: Action<String?>
+    ): Rule = notMocked()
 
     override fun getRules(): List<Rule?> = notMocked()
 
@@ -117,11 +172,15 @@ open class TaskContainerMock : TaskContainer {
 
     override fun addAllLater(provider: Provider<out Iterable<Task?>?>) = notMocked()
 
-    override fun <S : Task?> withType(type: Class<S?>, configureAction: Action<in S>): DomainObjectCollection<S?> =
-        notMocked()
+    override fun <S : Task?> withType(
+        type: Class<S?>,
+        configureAction: Action<in S>
+    ): DomainObjectCollection<S?> = notMocked()
 
-    override fun <S : Task?> withType(type: Class<S?>, configureClosure: Closure<*>): DomainObjectCollection<S?> =
-        notMocked()
+    override fun <S : Task?> withType(
+        type: Class<S?>,
+        configureClosure: Closure<*>
+    ): DomainObjectCollection<S?> = notMocked()
 
     override fun whenObjectAdded(action: Action<in Task>): Action<in Task> = notMocked()
 
@@ -149,7 +208,8 @@ open class TaskContainerMock : TaskContainer {
 
     override fun retainAll(elements: Collection<Task?>): Boolean = notMocked()
 
-    override val size: Int; get() = notMocked()
+    override val size: Int
+        get() = notMocked()
 
     override fun contains(element: Task?): Boolean = notMocked()
 
@@ -157,7 +217,10 @@ open class TaskContainerMock : TaskContainer {
 
     override fun isEmpty(): Boolean = notMocked()
 
-    override fun <U : Task?> maybeCreate(name: String, type: Class<U?>): U & Any = notMocked()
+    override fun <U : Task?> maybeCreate(
+        name: String,
+        type: Class<U?>
+    ): U & Any = notMocked()
 
     override fun <U : Task?> containerWithType(type: Class<U?>): NamedDomainObjectContainer<U?> = notMocked()
 

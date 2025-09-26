@@ -29,7 +29,9 @@ import java.nio.file.Path
 import kotlin.io.path.writeText
 import kotlin.test.Test
 
-class FakeTaskContainer(private val copyTaskActionCaptor: CapturingSlot<Action<Copy>>) : TaskContainerMock() {
+class FakeTaskContainer(
+    private val copyTaskActionCaptor: CapturingSlot<Action<Copy>>
+) : TaskContainerMock() {
     override fun register(
         name: String,
         configurationAction: Action<in Task>
