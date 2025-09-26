@@ -48,15 +48,15 @@
 
 #pragma mark - Opening URLs
 
-- (void)scene:(UIScene*)scene openURLContexts:(NSSet<UIOpenURLContext*>*)URLContexts;
+- (BOOL)scene:(UIScene*)scene openURLContexts:(NSSet<UIOpenURLContext*>*)URLContexts;
 
 #pragma mark - Continuing user activities
 
-- (void)scene:(UIScene*)scene continueUserActivity:(NSUserActivity*)userActivity;
+- (BOOL)scene:(UIScene*)scene continueUserActivity:(NSUserActivity*)userActivity;
 
 #pragma mark - Performing tasks
 
-- (void)windowScene:(UIWindowScene*)windowScene
+- (BOOL)windowScene:(UIWindowScene*)windowScene
     performActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
                completionHandler:(void (^)(BOOL succeeded))completionHandler;
 

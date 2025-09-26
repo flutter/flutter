@@ -59,15 +59,30 @@ API_AVAILABLE(ios(13.0))
 
 #pragma mark - Opening URLs
 
-- (void)scene:(UIScene*)scene openURLContexts:(NSSet<UIOpenURLContext*>*)URLContexts;
+/**
+ * Called if this has been registered for `UIWindowScene` callbacks.
+ *
+ * @return `YES` if this handles the request.
+ */
+- (BOOL)scene:(UIScene*)scene openURLContexts:(NSSet<UIOpenURLContext*>*)URLContexts;
 
 #pragma mark - Continuing user activities
 
-- (void)scene:(UIScene*)scene continueUserActivity:(NSUserActivity*)userActivity;
+/**
+ * Called if this has been registered for `UIWindowScene` callbacks.
+ *
+ * @return `YES` if this handles the request.
+ */
+- (BOOL)scene:(UIScene*)scene continueUserActivity:(NSUserActivity*)userActivity;
 
 #pragma mark - Performing tasks
 
-- (void)windowScene:(UIWindowScene*)windowScene
+/**
+ * Called if this has been registered for `UIWindowScene` callbacks.
+ *
+ * @return `YES` if this handles the request.
+ */
+- (BOOL)windowScene:(UIWindowScene*)windowScene
     performActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
                completionHandler:(void (^)(BOOL succeeded))completionHandler;
 
@@ -106,15 +121,33 @@ API_AVAILABLE(ios(13.0))
 
 #pragma mark - Opening URLs
 
-- (void)scene:(UIScene*)scene openURLContexts:(NSSet<UIOpenURLContext*>*)URLContexts;
+/**
+ * Calls all plugins registered for `UIWindowScene` callbacks in order of registration until
+ * a plugin handles the request.
+ *
+ * @return `YES` if any plugin handles the request.
+ */
+- (BOOL)scene:(UIScene*)scene openURLContexts:(NSSet<UIOpenURLContext*>*)URLContexts;
 
 #pragma mark - Continuing user activities
 
-- (void)scene:(UIScene*)scene continueUserActivity:(NSUserActivity*)userActivity;
+/**
+ * Calls all plugins registered for `UIWindowScene` callbacks in order of registration until
+ * a plugin handles the request.
+ *
+ * @return `YES` if any plugin handles the request.
+ */
+- (BOOL)scene:(UIScene*)scene continueUserActivity:(NSUserActivity*)userActivity;
 
 #pragma mark - Performing tasks
 
-- (void)windowScene:(UIWindowScene*)windowScene
+/**
+ * Calls all plugins registered for `UIWindowScene` callbacks in order of registration until
+ * a plugin handles the request.
+ *
+ * @return `YES` if any plugin handles the request.
+ */
+- (BOOL)windowScene:(UIWindowScene*)windowScene
     performActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
                completionHandler:(void (^)(BOOL succeeded))completionHandler;
 

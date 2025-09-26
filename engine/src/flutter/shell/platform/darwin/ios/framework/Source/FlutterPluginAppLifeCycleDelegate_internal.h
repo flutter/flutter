@@ -52,14 +52,14 @@
  * `scene:openURLContexts:` -> `application:openURL:options:completionHandler:` to plugins that have
  * not adopted the FlutterSceneLifeCycleDelegate protocol.
  */
-- (void)sceneFallbackOpenURLContexts:(NSSet<UIOpenURLContext*>*)URLContexts;
+- (BOOL)sceneFallbackOpenURLContexts:(NSSet<UIOpenURLContext*>*)URLContexts;
 
 /**
  * Forwards the application equivalent lifecycle event of
  * `scene:continueUserActivity:` -> `application:continueUserActivity:restorationHandler:` to
  * plugins that have not adopted the FlutterSceneLifeCycleDelegate protocol.
  */
-- (void)sceneFallbackContinueUserActivity:(NSUserActivity*)userActivity;
+- (BOOL)sceneFallbackContinueUserActivity:(NSUserActivity*)userActivity;
 
 /**
  * Forwards the application equivalent lifecycle event of
@@ -67,7 +67,7 @@
  * `application:performActionForShortcutItem:completionHandler:` to plugins that have not adopted
  * the FlutterSceneLifeCycleDelegate protocol.
  */
-- (void)sceneFallbackPerformActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
+- (BOOL)sceneFallbackPerformActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
                                 completionHandler:(void (^)(BOOL succeeded))completionHandler;
 
 @end

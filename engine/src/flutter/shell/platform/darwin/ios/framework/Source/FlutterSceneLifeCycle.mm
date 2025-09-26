@@ -166,37 +166,70 @@ FLUTTER_ASSERT_ARC
 
 #pragma mark - Opening URLs
 
-- (void)scene:(UIScene*)scene openURLContexts:(NSSet<UIOpenURLContext*>*)URLContexts {
+- (BOOL)scene:(UIScene*)scene openURLContexts:(NSSet<UIOpenURLContext*>*)URLContexts {
   [self updateEnginesInScene:scene];
+  BOOL consumedByPlugin = NO;
   for (FlutterEngine* engine in _engines.allObjects) {
-    [engine.sceneLifeCycleDelegate scene:scene openURLContexts:URLContexts];
+    BOOL result = [engine.sceneLifeCycleDelegate scene:scene openURLContexts:URLContexts];
+    if (result) {
+      consumedByPlugin = YES;
+    }
   }
-  [[self applicationLifeCycleDelegate] sceneFallbackOpenURLContexts:URLContexts];
+  if (!consumedByPlugin) {
+    BOOL result = [[self applicationLifeCycleDelegate] sceneFallbackOpenURLContexts:URLContexts];
+    if (result) {
+      consumedByPlugin = YES;
+    }
+  }
+  return consumedByPlugin;
 }
 
 #pragma mark - Continuing user activities
 
-- (void)scene:(UIScene*)scene continueUserActivity:(NSUserActivity*)userActivity {
+- (BOOL)scene:(UIScene*)scene continueUserActivity:(NSUserActivity*)userActivity {
   [self updateEnginesInScene:scene];
+  BOOL consumedByPlugin = NO;
   for (FlutterEngine* engine in _engines.allObjects) {
-    [engine.sceneLifeCycleDelegate scene:scene continueUserActivity:userActivity];
+    BOOL result = [engine.sceneLifeCycleDelegate scene:scene continueUserActivity:userActivity];
+    if (result) {
+      consumedByPlugin = YES;
+    }
   }
-  [[self applicationLifeCycleDelegate] sceneFallbackContinueUserActivity:userActivity];
+  if (!consumedByPlugin) {
+    BOOL result =
+        [[self applicationLifeCycleDelegate] sceneFallbackContinueUserActivity:userActivity];
+    if (result) {
+      consumedByPlugin = YES;
+    }
+  }
+  return consumedByPlugin;
 }
 
 #pragma mark - Performing tasks
 
-- (void)windowScene:(UIWindowScene*)windowScene
+- (BOOL)windowScene:(UIWindowScene*)windowScene
     performActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
                completionHandler:(void (^)(BOOL succeeded))completionHandler {
   [self updateEnginesInScene:windowScene];
+
+  BOOL consumedByPlugin = NO;
   for (FlutterEngine* engine in _engines.allObjects) {
-    [engine.sceneLifeCycleDelegate windowScene:windowScene
-                  performActionForShortcutItem:shortcutItem
-                             completionHandler:completionHandler];
+    BOOL result = [engine.sceneLifeCycleDelegate windowScene:windowScene
+                                performActionForShortcutItem:shortcutItem
+                                           completionHandler:completionHandler];
+    if (result) {
+      consumedByPlugin = YES;
+    }
   }
-  [[self applicationLifeCycleDelegate] sceneFallbackPerformActionForShortcutItem:shortcutItem
-                                                               completionHandler:completionHandler];
+  if (!consumedByPlugin) {
+    BOOL result = [[self applicationLifeCycleDelegate]
+        sceneFallbackPerformActionForShortcutItem:shortcutItem
+                                completionHandler:completionHandler];
+    if (result) {
+      consumedByPlugin = YES;
+    }
+  }
+  return consumedByPlugin;
 }
 @end
 
@@ -280,35 +313,47 @@ FLUTTER_ASSERT_ARC
 
 #pragma mark - Opening URLs
 
-- (void)scene:(UIScene*)scene openURLContexts:(NSSet<UIOpenURLContext*>*)URLContexts {
+- (BOOL)scene:(UIScene*)scene openURLContexts:(NSSet<UIOpenURLContext*>*)URLContexts {
   for (NSObject<FlutterSceneLifeCycleDelegate>* delegate in _delegates.allObjects) {
     if ([delegate respondsToSelector:_cmd]) {
-      [delegate scene:scene openURLContexts:URLContexts];
+      if ([delegate scene:scene openURLContexts:URLContexts]) {
+        // Only allow one plugin to process this event.
+        return YES;
+      }
     }
   }
+  return NO;
 }
 
 #pragma mark - Continuing user activities
 
-- (void)scene:(UIScene*)scene continueUserActivity:(NSUserActivity*)userActivity {
+- (BOOL)scene:(UIScene*)scene continueUserActivity:(NSUserActivity*)userActivity {
   for (NSObject<FlutterSceneLifeCycleDelegate>* delegate in _delegates.allObjects) {
     if ([delegate respondsToSelector:_cmd]) {
-      [delegate scene:scene continueUserActivity:userActivity];
+      if ([delegate scene:scene continueUserActivity:userActivity]) {
+        // Only allow one plugin to process this event.
+        return YES;
+      }
     }
   }
+  return NO;
 }
 
 #pragma mark - Performing tasks
 
-- (void)windowScene:(UIWindowScene*)windowScene
+- (BOOL)windowScene:(UIWindowScene*)windowScene
     performActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
                completionHandler:(void (^)(BOOL succeeded))completionHandler {
   for (NSObject<FlutterSceneLifeCycleDelegate>* delegate in _delegates.allObjects) {
     if ([delegate respondsToSelector:_cmd]) {
-      [delegate windowScene:windowScene
-          performActionForShortcutItem:shortcutItem
-                     completionHandler:completionHandler];
+      if ([delegate windowScene:windowScene
+              performActionForShortcutItem:shortcutItem
+                         completionHandler:completionHandler]) {
+        // Only allow one plugin to process this event.
+        return YES;
+      }
     }
   }
+  return NO;
 }
 @end

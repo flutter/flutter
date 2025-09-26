@@ -403,13 +403,14 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
   return [self application:application openURL:url options:options isFallbackForScene:NO];
 }
 
-- (void)sceneFallbackOpenURLContexts:(NSSet<UIOpenURLContext*>*)URLContexts {
+- (BOOL)sceneFallbackOpenURLContexts:(NSSet<UIOpenURLContext*>*)URLContexts {
   for (UIOpenURLContext* context in URLContexts) {
-    [self application:FlutterSharedApplication.application
-                   openURL:context.URL
-                   options:ConvertOptions(context.options)
-        isFallbackForScene:YES];
+    return [self application:FlutterSharedApplication.application
+                     openURL:context.URL
+                     options:ConvertOptions(context.options)
+          isFallbackForScene:YES];
   };
+  return NO;
 }
 
 - (BOOL)application:(UIApplication*)application
@@ -500,19 +501,19 @@ static NSDictionary<UIApplicationOpenURLOptionsKey, id>* ConvertOptions(
                 isFallbackForScene:NO];
 }
 
-- (void)sceneFallbackPerformActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
+- (BOOL)sceneFallbackPerformActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
                                 completionHandler:(void (^)(BOOL succeeded))completionHandler {
   UIApplication* application = FlutterSharedApplication.application;
   if (!application) {
-    return;
+    return NO;
   }
-  [self application:application
+  return [self application:application
       performActionForShortcutItem:shortcutItem
                  completionHandler:completionHandler
                 isFallbackForScene:YES];
 }
 
-- (void)application:(UIApplication*)application
+- (BOOL)application:(UIApplication*)application
     performActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
                completionHandler:(void (^)(BOOL succeeded))completionHandler
               isFallbackForScene:(BOOL)isFallback {
@@ -525,10 +526,11 @@ static NSDictionary<UIApplicationOpenURLOptionsKey, id>* ConvertOptions(
       if ([delegate application:application
               performActionForShortcutItem:shortcutItem
                          completionHandler:completionHandler]) {
-        return;
+        return YES;
       }
     }
   }
+  return NO;
 }
 
 - (BOOL)application:(UIApplication*)application
@@ -573,12 +575,12 @@ static NSDictionary<UIApplicationOpenURLOptionsKey, id>* ConvertOptions(
         isFallbackForScene:NO];
 }
 
-- (void)sceneFallbackContinueUserActivity:(NSUserActivity*)userActivity {
+- (BOOL)sceneFallbackContinueUserActivity:(NSUserActivity*)userActivity {
   UIApplication* application = FlutterSharedApplication.application;
   if (!application) {
-    return;
+    return NO;
   }
-  [self application:application
+  return [self application:application
       continueUserActivity:userActivity
         restorationHandler:nil
         isFallbackForScene:YES];

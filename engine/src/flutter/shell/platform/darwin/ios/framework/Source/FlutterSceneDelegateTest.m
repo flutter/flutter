@@ -179,14 +179,15 @@
   FlutterSceneDelegate* sceneDelegate = [[FlutterSceneDelegate alloc] init];
   id mockSceneDelegate = OCMPartialMock(sceneDelegate);
 
-  id mockLifecycleDelegate = OCMClassMock([FlutterPluginSceneLifeCycleDelegate class]);
+  FlutterPluginSceneLifeCycleDelegate* mockLifecycleDelegate =
+      OCMClassMock([FlutterPluginSceneLifeCycleDelegate class]);
   OCMStub([mockSceneDelegate sceneLifeCycleDelegate]).andReturn(mockLifecycleDelegate);
 
   id scene = OCMClassMock([UIWindowScene class]);
   id urlContext = OCMClassMock([UIOpenURLContext class]);
   NSSet<UIOpenURLContext*>* urlContexts = [NSSet setWithObjects:urlContext, nil];
 
-  [mockSceneDelegate scene:scene openURLContexts:urlContexts];
+  [((FlutterSceneDelegate*)mockSceneDelegate) scene:scene openURLContexts:urlContexts];
 
   OCMVerify(times(1), [mockLifecycleDelegate scene:scene openURLContexts:urlContexts]);
 }
@@ -197,13 +198,14 @@
   FlutterSceneDelegate* sceneDelegate = [[FlutterSceneDelegate alloc] init];
   id mockSceneDelegate = OCMPartialMock(sceneDelegate);
 
-  id mockLifecycleDelegate = OCMClassMock([FlutterPluginSceneLifeCycleDelegate class]);
+  FlutterPluginSceneLifeCycleDelegate* mockLifecycleDelegate =
+      OCMClassMock([FlutterPluginSceneLifeCycleDelegate class]);
   OCMStub([mockSceneDelegate sceneLifeCycleDelegate]).andReturn(mockLifecycleDelegate);
 
   id scene = OCMClassMock([UIWindowScene class]);
   id userActivity = OCMClassMock([NSUserActivity class]);
 
-  [mockSceneDelegate scene:scene continueUserActivity:userActivity];
+  [((FlutterSceneDelegate*)mockSceneDelegate) scene:scene continueUserActivity:userActivity];
 
   OCMVerify(times(1), [mockLifecycleDelegate scene:scene continueUserActivity:userActivity]);
 }
@@ -214,16 +216,17 @@
   FlutterSceneDelegate* sceneDelegate = [[FlutterSceneDelegate alloc] init];
   id mockSceneDelegate = OCMPartialMock(sceneDelegate);
 
-  id mockLifecycleDelegate = OCMClassMock([FlutterPluginSceneLifeCycleDelegate class]);
+  FlutterPluginSceneLifeCycleDelegate* mockLifecycleDelegate =
+      OCMClassMock([FlutterPluginSceneLifeCycleDelegate class]);
   OCMStub([mockSceneDelegate sceneLifeCycleDelegate]).andReturn(mockLifecycleDelegate);
 
   id scene = OCMClassMock([UIWindowScene class]);
   id shortcutItem = OCMClassMock([UIApplicationShortcutItem class]);
 
-  [mockSceneDelegate windowScene:scene
-      performActionForShortcutItem:shortcutItem
-                 completionHandler:^(BOOL succeeded){
-                 }];
+  [((FlutterSceneDelegate*)mockSceneDelegate) windowScene:scene
+                             performActionForShortcutItem:shortcutItem
+                                        completionHandler:^(BOOL succeeded){
+                                        }];
 
   OCMVerify(times(1), [mockLifecycleDelegate windowScene:scene
                             performActionForShortcutItem:shortcutItem
