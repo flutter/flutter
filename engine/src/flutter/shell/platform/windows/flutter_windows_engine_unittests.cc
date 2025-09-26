@@ -105,18 +105,9 @@ TEST_F(FlutterWindowsEngineTest, TaskRunnerDoesNotDeadlock) {
   // Spam flutter tasks.
   container.PostTaskLoop();
 
-  auto WndProc = [](HWND hWnd, UINT msg, WPARAM wParam,
-                    LPARAM lParam) -> LRESULT {
-    if (msg == WM_DESTROY) {
-      PostQuitMessage(0);
-      return 0;
-    }
-    return DefWindowProc(hWnd, msg, wParam, lParam);
-  };
-
   const LPCWSTR class_name = L"FlutterTestWindowClass";
   WNDCLASS wc = {0};
-  wc.lpfnWndProc = WndProc;
+  wc.lpfnWndProc = DefWindowProc;
   wc.lpszClassName = class_name;
   RegisterClass(&wc);
 
