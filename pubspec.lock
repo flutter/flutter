@@ -258,6 +258,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.2"
+  flutter_gpu:
+    dependency: transitive
+    description:
+      path: "engine/src/flutter/lib/gpu"
+      relative: true
+    source: path
+    version: "0.0.0"
   flutter_lints:
     dependency: "direct main"
     description:
