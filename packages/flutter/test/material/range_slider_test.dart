@@ -2397,9 +2397,7 @@ void main() {
     );
   });
 
-  testWidgets('RangeSlider WidgetStateMouseCursor resolves correctly', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('RangeSlider WidgetStateMouseCursor resolves correctly', (WidgetTester tester) async {
     RangeValues values = const RangeValues(50, 70);
     const MouseCursor disabledCursor = SystemMouseCursors.basic;
     const MouseCursor hoveredCursor = SystemMouseCursors.grab;
