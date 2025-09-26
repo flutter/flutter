@@ -37,6 +37,8 @@ class WindowBindingHandlerDelegate {
                              double y,
                              FlutterPointerDeviceKind device_kind,
                              int32_t device_id,
+                             uint32_t rotation,
+                             uint32_t pressure,
                              int modifiers_state) = 0;
 
   // Notifies delegate that backing window mouse pointer button has been
@@ -45,7 +47,9 @@ class WindowBindingHandlerDelegate {
                              double y,
                              FlutterPointerDeviceKind device_kind,
                              int32_t device_id,
-                             FlutterPointerMouseButtons button) = 0;
+                             FlutterPointerMouseButtons button,
+                             uint32_t rotation,
+                             uint32_t pressure) = 0;
 
   // Notifies delegate that backing window mouse pointer button has been
   // released. Typically called by currently configured WindowBindingHandler.

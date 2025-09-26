@@ -23,6 +23,16 @@ class MockWindowsProcTable : public WindowsProcTable {
               (UINT32 pointer_id, POINTER_INPUT_TYPE* pointer_type),
               (const, override));
 
+  MOCK_METHOD(BOOL,
+              GetPointerInfo,
+              (UINT32 pointer_id, POINTER_INFO* pointer_info),
+              (const, override));
+
+  MOCK_METHOD(BOOL,
+              GetPointerPenInfo,
+              (UINT32 pointer_id, POINTER_PEN_INFO* pointer_info),
+              (const, override));
+
   MOCK_METHOD(LRESULT,
               GetThreadPreferredUILanguages,
               (DWORD, PULONG, PZZWSTR, PULONG),
