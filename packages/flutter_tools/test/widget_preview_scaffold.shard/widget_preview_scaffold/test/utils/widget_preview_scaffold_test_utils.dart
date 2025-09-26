@@ -59,6 +59,8 @@ class WidgetPreviewerWidgetScaffolding extends StatelessWidget {
 class FakeWidgetPreviewScaffoldDtdServices extends Fake
     with DtdEditorService
     implements WidgetPreviewScaffoldDtdServices {
+  FakeWidgetPreviewScaffoldDtdServices({this.isWindows = false});
+
   @override
   Future<void> connect({Uri? dtdUri}) async {}
 
@@ -74,6 +76,9 @@ class FakeWidgetPreviewScaffoldDtdServices extends Fake
     hotRestartInvoked = true;
   }
 
+  @override
+  final bool isWindows;
+
   /// The currently selected source file in the IDE.
   @override
   final ValueNotifier<TextDocument?> selectedSourceFile =
@@ -84,7 +89,7 @@ class FakeWidgetPreviewScaffoldController
     extends WidgetPreviewScaffoldController {
   FakeWidgetPreviewScaffoldController({
     WidgetPreviewScaffoldDtdServices? dtdServicesOverride,
-    List<WidgetPreviewGroup>? previews,
+    List<WidgetPreview>? previews,
   }) : super(
          previews: () => previews ?? [],
          dtdServicesOverride:
