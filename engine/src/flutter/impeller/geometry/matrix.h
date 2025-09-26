@@ -35,31 +35,6 @@ namespace impeller {
 ///                 * This is NOT the same as OpenGL! Be careful.
 ///               * NDC origin is at (0.0f, 0.0f, 0.5f).
 struct Matrix {
-  /// The transform complexity type for the matrix, targeting the primary
-  /// optimizable operations that rectangle transforms can take advantage
-  /// of.
-  ///
-  /// The caller can query the type of the matrix for either 3D or 2D
-  /// operations with the 2D query only considering the entries that
-  /// are involved in transforming 2D coordinates.
-  ///
-  /// @see Classify
-  /// @see Classify2D
-  enum class Type {
-    /// The matrix contains only values that can scale and transform
-    /// coordinates. An Identity matrix also qualifies as kScaleTranslate.
-    kScaleTranslate,
-
-    /// The matrix contains only values that can perform affine operations
-    /// on the coordinates (no perspective).
-    kAffine,
-
-    /// The matrix contains perspective values that require the most general
-    /// type of transform computations. Any NaN values in the matrix will
-    /// also result in this classification.
-    kGeneral,
-  };
-
   union {
     Scalar m[16];
     Scalar e[4][4];
@@ -259,35 +234,6 @@ struct Matrix {
     );
     // clang-format on
   }
-
-  /// Classify the |Type| of matrix for a 3D operation on coordinates of the
-  /// form {x,y,z,1}.
-  constexpr Type Classify() const {
-    if (m[3] == 0.0f && m[7] == 0.0f && m[11] == 0.0f && m[15] == 1.0f) {
-      if (m[1] == 0.0f && m[2] == 0.0f &&  //
-          m[4] == 0.0f && m[6] == 0.0f &&  //
-          m[8] == 0.0f && m[9] == 0.0f) {
-        return Type::kScaleTranslate;
-      }
-      return Type::kAffine;
-    } else {
-      return Type::kGeneral;
-    }
-  };
-
-  /// Classify the |Type| of matrix for a 2D operation on coordinates of the
-  /// form {x,y,0,1}. Matrix entries that only affect incoming or outgoing
-  /// z values are ignored.
-  constexpr inline Type Classify2D() const {
-    if (m[3] == 0.0f && m[7] == 0.0f && m[15] == 1.0f) {
-      if (m[1] == 0.0f && m[4] == 0.0f) {
-        return Type::kScaleTranslate;
-      }
-      return Type::kAffine;
-    } else {
-      return Type::kGeneral;
-    }
-  };
 
   /// The Matrix without its `w` components (without translation).
   constexpr Matrix Basis() const {
