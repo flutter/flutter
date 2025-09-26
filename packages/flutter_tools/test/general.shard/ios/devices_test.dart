@@ -864,10 +864,12 @@ void main() {
       xcdevice.isInstalled = true;
       xcdevice.devices.add(<IOSDevice>[device1]);
 
-      final List<Device> devices = await iosDevices.pollingGetDevices();
+      final List<Device> devices = await iosDevices.pollingGetDevices(forWirelessDiscovery: true);
 
       expect(devices, hasLength(1));
       expect(devices.first, same(device1));
+      expect(xcdevice.getAvailableIOSDevicesCount, 0);
+      expect(xcdevice.getAvailableIOSDevicesForWirelessDiscoveryCount, 1);
     });
   });
 
@@ -1074,6 +1076,7 @@ class FakeIOSWorkflow extends Fake implements IOSWorkflow {}
 
 class FakeXcdevice extends Fake implements XCDevice {
   var getAvailableIOSDevicesCount = 0;
+  var getAvailableIOSDevicesForWirelessDiscoveryCount = 0;
   final devices = <List<IOSDevice>>[];
   final diagnostics = <String>[];
   var deviceEventController = StreamController<XCDeviceEventNotification>();
@@ -1098,7 +1101,14 @@ class FakeXcdevice extends Fake implements XCDevice {
 
   @override
   Future<List<IOSDevice>> getAvailableIOSDevices({Duration? timeout}) async {
-    return devices[getAvailableIOSDevicesCount++];
+    getAvailableIOSDevicesCount++;
+    return devices.removeAt(0);
+  }
+
+  @override
+  Future<List<IOSDevice>> getAvailableIOSDevicesForWirelessDiscovery({Duration? timeout}) async {
+    getAvailableIOSDevicesForWirelessDiscoveryCount++;
+    return devices.removeAt(0);
   }
 
   @override

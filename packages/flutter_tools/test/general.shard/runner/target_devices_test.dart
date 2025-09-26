@@ -1647,19 +1647,6 @@ If you would like your app to run on fuchsia or ios, consider running `flutter c
           deviceManager: deviceManager,
           logger: logger,
         );
-        targetDevices = TargetDevicesWithExtendedWirelessDeviceDiscovery(
-          deviceManager: deviceManager,
-          logger: logger,
-        );
-      });
-
-      testUsingContext('stops wireless discovery when single ephemeral device is found', () async {
-        deviceManager.iosDiscoverer.deviceList = <Device>[attachedIOSDevice1];
-
-        final List<Device>? devices = await targetDevices.findAllTargetDevices();
-
-        expect(devices, <Device>[attachedIOSDevice1]);
-        expect(deviceManager.stopExtendedWirelessDeviceDiscoverersCalled, 1);
       });
 
       group('with device not specified', () {
@@ -1842,30 +1829,6 @@ Checking for wireless devices...
         setUp(() {
           deviceManager.specifiedDeviceId = 'target-device';
         });
-
-        testUsingContext('stops wireless discovery when specified device is found', () async {
-          final exactMatchAttachedIOSDevice = FakeIOSDevice(deviceName: 'target-device');
-          deviceManager.iosDiscoverer.deviceList = <Device>[exactMatchAttachedIOSDevice];
-
-          final List<Device>? devices = await targetDevices.findAllTargetDevices();
-
-          expect(devices, <Device>[exactMatchAttachedIOSDevice]);
-          expect(deviceManager.stopExtendedWirelessDeviceDiscoverersCalled, 1);
-        });
-
-        testUsingContext('stops wireless discovery when specified device is unpaired', () async {
-          final exactMatchUnpairedIOSDevice = FakeIOSDevice(
-            deviceName: 'target-device',
-            isPaired: false,
-          );
-          deviceManager.iosDiscoverer.deviceList = <Device>[exactMatchUnpairedIOSDevice];
-
-          final List<Device>? devices = await targetDevices.findAllTargetDevices();
-
-          expect(devices, isNull);
-          expect(deviceManager.stopExtendedWirelessDeviceDiscoverersCalled, 1);
-        });
-
         testUsingContext('when multiple matches but first is unsupported by flutter', () async {
           deviceManager.iosDiscoverer.deviceList = <Device>[
             exactMatchAttachedUnsupportedIOSDevice,
@@ -2987,7 +2950,6 @@ class TestDeviceManager extends DeviceManager {
 
   @override
   var hasSpecifiedAllDevices = false;
-  var stopExtendedWirelessDeviceDiscoverersCalled = 0;
 
   final androidDiscoverer = TestPollingDeviceDiscovery('android');
   final otherDiscoverer = TestPollingDeviceDiscovery('other');
@@ -3001,11 +2963,6 @@ class TestDeviceManager extends DeviceManager {
   @override
   List<DeviceDiscovery> get deviceDiscoverers {
     return <DeviceDiscovery>[androidDiscoverer, otherDiscoverer, iosDiscoverer];
-  }
-
-  @override
-  void stopExtendedWirelessDeviceDiscoverers() {
-    stopExtendedWirelessDeviceDiscoverersCalled += 1;
   }
 
   void setDeviceToWaitFor(IOSDevice device, DeviceConnectionInterface connectionInterface) {

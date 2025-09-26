@@ -240,15 +240,20 @@ class IOSDevices extends PollingDeviceDiscovery {
   Future<void> stopPolling() async {
     await _observedDeviceEventsSubscription?.cancel();
     _observedDeviceEventsSubscription = null;
-    xcdevice.dispose();
+    xcdevice.cancelWirelessDiscovery();
   }
 
   @override
-  Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
+  Future<List<Device>> pollingGetDevices({
+    Duration? timeout,
+    bool forWirelessDiscovery = false,
+  }) async {
     if (!_platform.isMacOS) {
       throw UnsupportedError('Control of iOS devices or simulators only supported on macOS.');
     }
-
+    if (forWirelessDiscovery) {
+      return xcdevice.getAvailableIOSDevicesForWirelessDiscovery(timeout: timeout);
+    }
     return xcdevice.getAvailableIOSDevices(timeout: timeout);
   }
 
