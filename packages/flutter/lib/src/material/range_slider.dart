@@ -737,7 +737,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     final MouseCursor effectiveMouseCursor =
         widget.mouseCursor?.resolve(states) ??
         sliderTheme.mouseCursor?.resolve(states) ??
-        MaterialStateMouseCursor.clickable.resolve(states);
+        WidgetStateMouseCursor.clickable.resolve(states);
 
     // This size is used as the max bounds for the painting of the value
     // indicators. It must be kept in sync with the function with the same name
