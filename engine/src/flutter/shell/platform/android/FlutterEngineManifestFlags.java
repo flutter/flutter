@@ -29,11 +29,25 @@ public final class FlutterEngineManifestFlags {
 
     private String packageName = "io.flutter.embedding.android.";
 
-    public Flag(String metaDataName, String metaDataKey, boolean allowedInRelease, FlagType type) {
+    public Flag(String metaDataName, boolean allowedInRelease, FlagType type) {
       this.metaDataName = metaDataName;
       metaDataKey = packageName + metaDataName;
       this.allowedInRelease = allowedInRelease;
       this.type = type;
+    }
+
+   /**
+     * Converts this flag to its command-line argument form.
+     * For BOOLEAN flags: "--flag-name"
+     * For VALUE flags:   "--flag-name=value"
+     */
+    public String toCommandLineFlag(String value) {
+        String flag = "--" + metaDataName.replaceAll("([a-z])([A-Z])", "$1-$2").toLowerCase();
+        if (type == FlagType.VALUE) {
+            return flag + "=" + value;
+        } else {
+            return flag;
+        }
     }
   }
 

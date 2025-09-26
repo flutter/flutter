@@ -73,9 +73,8 @@ public class FlutterLoader {
    */
   private static final String LEAK_VM_META_DATA_KEY = "io.flutter.embedding.android.LeakVM";
 
-  // Must match values in flutter::switches
+  // Flags to only be set internally by default. Matches values in flutter::switches.
   static final String AOT_VMSERVICE_SHARED_LIBRARY_NAME = "aot-vmservice-shared-library-name";
-  static final String SNAPSHOT_ASSET_PATH_KEY = "snapshot-asset-path";
   static final String VM_SNAPSHOT_DATA_KEY = "vm-snapshot-data";
   static final String ISOLATE_SNAPSHOT_DATA_KEY = "isolate-snapshot-data";
   static final String FLUTTER_ASSETS_DIR_KEY = "flutter-assets-dir"; // TODO(camsim99): not used??
@@ -384,6 +383,7 @@ public class FlutterLoader {
         String snapshotAssetPath =
             result.dataDirPath + File.separator + flutterApplicationInfo.flutterAssetsDir;
         kernelPath = snapshotAssetPath + File.separator + DEFAULT_KERNEL_BLOB;
+        // TODO(camsim99): Convert to use SNAPSHOT_ASSET_PATH.
         shellArgs.add("--" + SNAPSHOT_ASSET_PATH_KEY + "=" + snapshotAssetPath);
         shellArgs.add("--" + VM_SNAPSHOT_DATA_KEY + "=" + flutterApplicationInfo.vmSnapshotData);
         shellArgs.add(
