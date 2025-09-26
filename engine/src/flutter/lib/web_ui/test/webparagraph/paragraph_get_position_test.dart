@@ -18,57 +18,69 @@ Future<void> testMain() async {
   test('Paragraph getPositionForOffset 1 Infinity line', () {
     final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
 
+    const String text =
+        'World domination is such an ugly phrase - I prefer to call it world optimisation. ';
     final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
-    builder.addText(
-      'World domination is such an ugly phrase - I prefer to call it world optimisation. ',
-    );
+    builder.addText(text);
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
 
     final ui.TextPosition positiontt = paragraph.getPositionForOffset(const ui.Offset(-1, -1));
     final ui.TextPosition position00 = paragraph.getPositionForOffset(ui.Offset.zero);
     final ui.TextPosition positionee = paragraph.getPositionForOffset(
-      ui.Offset(paragraph.width, paragraph.height),
+      ui.Offset(paragraph.longestLine, paragraph.height),
     );
     final ui.TextPosition positionmm = paragraph.getPositionForOffset(
-      ui.Offset(paragraph.width / 2, paragraph.height / 2),
+      ui.Offset(paragraph.longestLine / 2, paragraph.height / 2),
     );
     final ui.TextPosition positionbb = paragraph.getPositionForOffset(
-      ui.Offset(paragraph.width + 1, paragraph.height + 1),
+      ui.Offset(paragraph.longestLine + 1, paragraph.height + 1),
     );
     expect(positiontt, const ui.TextPosition(offset: 0 /*affinity: ui.TextAffinity.downstream)*/));
     expect(position00, const ui.TextPosition(offset: 0 /*affinity: ui.TextAffinity.downstream)*/));
     expect(positionmm, const ui.TextPosition(offset: 37 /*affinity: ui.TextAffinity.downstream)*/));
-    expect(positionee, const ui.TextPosition(offset: 80, affinity: ui.TextAffinity.upstream));
-    expect(positionbb, const ui.TextPosition(offset: 81, affinity: ui.TextAffinity.upstream));
+    expect(
+      positionee,
+      const ui.TextPosition(offset: text.length - 1 /*affinity: ui.TextAffinity.downstream)*/),
+    );
+    expect(
+      positionbb,
+      const ui.TextPosition(offset: text.length, affinity: ui.TextAffinity.upstream),
+    );
   });
 
   test('Paragraph getPositionForOffset multiple lines', () {
     final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
 
+    const String text =
+        'World domination is such an ugly phrase - I prefer to call it world optimisation. ';
     final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
-    builder.addText(
-      'World domination is such an ugly phrase - I prefer to call it world optimisation. ',
-    );
+    builder.addText(text);
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
 
     final ui.TextPosition positiontt = paragraph.getPositionForOffset(const ui.Offset(-1, -1));
     final ui.TextPosition position00 = paragraph.getPositionForOffset(ui.Offset.zero);
     final ui.TextPosition positionee = paragraph.getPositionForOffset(
-      ui.Offset(paragraph.width, paragraph.height),
+      ui.Offset(paragraph.longestLine, paragraph.height),
     );
     final ui.TextPosition positionmm = paragraph.getPositionForOffset(
-      ui.Offset(paragraph.width / 2, paragraph.height / 2),
+      ui.Offset(paragraph.longestLine / 2, paragraph.height / 2),
     );
     final ui.TextPosition positionbb = paragraph.getPositionForOffset(
-      ui.Offset(paragraph.width + 1, paragraph.height + 1),
+      ui.Offset(paragraph.longestLine + 1, paragraph.height + 1),
     );
 
     expect(positiontt, const ui.TextPosition(offset: 0 /*affinity: ui.TextAffinity.downstream)*/));
     expect(position00, const ui.TextPosition(offset: 0 /*affinity: ui.TextAffinity.downstream)*/));
     expect(positionmm, const ui.TextPosition(offset: 37 /*affinity: ui.TextAffinity.downstream)*/));
-    expect(positionee, const ui.TextPosition(offset: 80, affinity: ui.TextAffinity.upstream));
-    expect(positionbb, const ui.TextPosition(offset: 81, affinity: ui.TextAffinity.upstream));
+    expect(
+      positionee,
+      const ui.TextPosition(offset: text.length - 1 /*affinity: ui.TextAffinity.downstream)*/),
+    );
+    expect(
+      positionbb,
+      const ui.TextPosition(offset: text.length, affinity: ui.TextAffinity.upstream),
+    );
   });
 }

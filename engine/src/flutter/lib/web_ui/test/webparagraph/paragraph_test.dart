@@ -26,7 +26,11 @@ Future<void> testMain() async {
     final Paint redPaint = Paint()..color = const Color(0xFFFF0000);
     final Paint bluePaint = Paint()..color = const Color(0xFF0000FF);
     canvas.drawRect(const Rect.fromLTWH(0, 0, 200, 200), bluePaint);
-    final WebParagraphStyle arialStyle = WebParagraphStyle(fontFamily: 'Roboto', fontSize: 50);
+    final WebParagraphStyle arialStyle = WebParagraphStyle(
+      fontFamily: 'Roboto',
+      fontSize: 50,
+      color: const Color(0xFF000000),
+    );
     final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
     builder.addText('Lorem ipsum dolor sit');
     final WebParagraph paragraph = builder.build();
@@ -42,7 +46,11 @@ Future<void> testMain() async {
     final Canvas canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
 
-    final WebParagraphStyle arialStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
+    final WebParagraphStyle arialStyle = WebParagraphStyle(
+      fontFamily: 'Arial',
+      fontSize: 50,
+      color: const Color(0xFF000000),
+    );
     final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
     builder.addText(
       'World   domination   is such   an ugly   phrase - I   prefer to   call it   world   optimisation.   ',
@@ -63,6 +71,7 @@ Future<void> testMain() async {
       fontFamily: 'Roboto',
       fontSize: 50,
       textDirection: TextDirection.rtl,
+      color: const Color(0xFF000000),
     );
     final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
     builder.addText('عالم');
@@ -79,7 +88,11 @@ Future<void> testMain() async {
     final Canvas canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
 
-    final WebParagraphStyle arialStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
+    final WebParagraphStyle arialStyle = WebParagraphStyle(
+      fontFamily: 'Arial',
+      fontSize: 50,
+      color: const Color(0xFF000000),
+    );
     final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
     builder.addText('إنالسيطرةعلىالعالمعبارةقبيحةللغاية-أفضلأنأسميهاتحسينالعالم');
     final WebParagraph paragraph = builder.build();
@@ -98,6 +111,7 @@ Future<void> testMain() async {
       fontFamily: 'Arial',
       fontSize: 50,
       textDirection: TextDirection.ltr,
+      color: const Color(0xFF000000),
     );
     final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
 
@@ -109,7 +123,11 @@ Future<void> testMain() async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
 
-    final WebParagraphStyle arialStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
+    final WebParagraphStyle arialStyle = WebParagraphStyle(
+      fontFamily: 'Arial',
+      fontSize: 50,
+      color: const Color(0xFF000000),
+    );
     final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
     builder.addText('ABC لم def');
     final WebParagraph paragraph = builder.build();
@@ -128,6 +146,7 @@ Future<void> testMain() async {
       fontFamily: 'Arial',
       fontSize: 50,
       textDirection: TextDirection.rtl,
+      color: const Color(0xFF000000),
     );
     final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
     builder.addText('لABC لم def لل لم ghi');
@@ -149,6 +168,7 @@ Future<void> testMain() async {
       textAlign: TextAlign.left,
       fontFamily: 'Arial',
       fontSize: 50,
+      color: const Color(0xFF000000),
     );
     final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
     builder.addText(
@@ -171,6 +191,7 @@ Future<void> testMain() async {
       textAlign: TextAlign.right,
       fontFamily: 'Arial',
       fontSize: 50,
+      color: const Color(0xFF000000),
     );
     final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
     builder.addText(
@@ -657,7 +678,11 @@ Future<void> testMain() async {
       ..color = const Color(0xFF00FF00)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
-    final WebParagraphStyle robotoStyle = WebParagraphStyle(fontFamily: 'Roboto', fontSize: 40);
+    final WebParagraphStyle robotoStyle = WebParagraphStyle(
+      fontFamily: 'Roboto',
+      fontSize: 40,
+      color: const Color(0xFF000000),
+    );
     final WebTextStyle heightStyle = WebTextStyle(fontFamily: 'Roboto', fontSize: 40, height: 2.0);
     final WebParagraphBuilder builder = WebParagraphBuilder(robotoStyle);
     builder.pushStyle(heightStyle);
@@ -715,6 +740,7 @@ Future<void> testMain() async {
       fontFamily: 'Roboto',
       fontSize: 50,
       textDirection: TextDirection.ltr,
+      color: const Color(0xFF000000),
     );
     final WebTextStyle textStyle1 = WebTextStyle(fontFamily: 'Roboto', fontSize: 20);
     final WebTextStyle textStyle2 = WebTextStyle(fontFamily: 'Roboto', fontSize: 20);
@@ -821,7 +847,11 @@ Future<void> testMain() async {
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
     final Paint blackPaint = Paint()..color = const Color(0xFF000000);
 
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Roboto', fontSize: 20);
+    final WebParagraphStyle paragraphStyle = WebParagraphStyle(
+      fontFamily: 'Roboto',
+      fontSize: 20,
+      color: const Color(0xFF000000),
+    );
     final WebTextStyle defaultStyle = WebTextStyle(foreground: blackPaint);
     final WebTextStyle noLiga = WebTextStyle(
       fontFamily: 'Roboto',
@@ -858,7 +888,11 @@ Future<void> testMain() async {
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
     final Paint blackPaint = Paint()..color = const Color(0xFF000000);
 
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Roboto', fontSize: 20);
+    final WebParagraphStyle paragraphStyle = WebParagraphStyle(
+      fontFamily: 'Roboto',
+      fontSize: 20,
+      color: const Color(0xFF000000),
+    );
     final WebTextStyle defaultStyle = WebTextStyle(foreground: blackPaint);
     final WebTextStyle wght = WebTextStyle(
       fontFamily: 'Roboto',
@@ -905,7 +939,11 @@ Future<void> testMain() async {
     final Paint blackPaint = Paint()..color = const Color(0xFF000000);
     final Paint whitePaint = Paint()..color = const Color(0xFFFFFFFF);
 
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Roboto', fontSize: 20);
+    final WebParagraphStyle paragraphStyle = WebParagraphStyle(
+      fontFamily: 'Roboto',
+      fontSize: 50,
+      color: const Color(0xFF000000),
+    );
     final WebTextStyle blackStyle = WebTextStyle(
       fontFamily: 'Roboto',
       fontSize: 20,

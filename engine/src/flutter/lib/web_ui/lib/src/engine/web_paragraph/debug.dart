@@ -4,10 +4,20 @@
 
 class WebParagraphDebug {
   static bool logging = false;
+  static bool apiLogging = false;
 
   static void log(String arg) {
     assert(() {
       if (logging) {
+        print(arg);
+      }
+      return true;
+    }());
+  }
+
+  static void apiTrace(String arg) {
+    assert(() {
+      if (apiLogging) {
         print(arg);
       }
       return true;

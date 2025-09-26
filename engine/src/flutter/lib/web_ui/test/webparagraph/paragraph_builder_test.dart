@@ -216,8 +216,9 @@ Future<void> testMain() async {
       builder.pop();
       builder.addText(']]]');
       final WebParagraph paragraph = builder.build();
-      final WebTextStyle merged12 = textStyle1.mergeWith(textStyle2);
-      final WebTextStyle merged123 = textStyle1.mergeWith(textStyle2).mergeWith(textStyle3);
+      final WebTextStyle merged1 = paragraph.paragraphStyle.textStyle.mergeWith(textStyle1);
+      final WebTextStyle merged12 = merged1.mergeWith(textStyle2);
+      final WebTextStyle merged123 = merged12.mergeWith(textStyle3);
 
       expect(paragraph.text, '[1[2[3]]]');
       expect(paragraph.paragraphStyle, paragraphStyle);
@@ -228,7 +229,7 @@ Future<void> testMain() async {
       expect(spans[1].text, '[2');
       expect(spans[2].text, '[3');
       expect(spans[3].text, ']]]');
-      expect(spans[0].style, textStyle1);
+      expect(spans[0].style, merged1);
       expect(spans[1].style, merged12);
       expect(spans[2].style, merged123);
       expect(spans[3].style, merged12); // back to `12` since `3` was popped.
@@ -245,7 +246,7 @@ Future<void> testMain() async {
   );
 
   test('Build paragraph with inherited styles (foreground, background) [1[2[3]]]', () {
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle();
+    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 24.0);
     final WebTextStyle textStyle1 = WebTextStyle(
       foreground: Paint()..color = const Color(0xFF00FF00),
     );
@@ -264,7 +265,8 @@ Future<void> testMain() async {
     builder.pushStyle(textStyle3);
     builder.addText('[3]]]');
     final WebParagraph paragraph = builder.build();
-    final WebTextStyle merged12 = textStyle1.mergeWith(textStyle2);
+    final WebTextStyle merged1 = paragraph.paragraphStyle.textStyle.mergeWith(textStyle1);
+    final WebTextStyle merged12 = merged1.mergeWith(textStyle2);
     final WebTextStyle merged123 = merged12.mergeWith(textStyle3);
 
     expect(paragraph.text, '[1[2[3]]]');
@@ -275,7 +277,7 @@ Future<void> testMain() async {
     expect(spans[0].text, '[1');
     expect(spans[1].text, '[2');
     expect(spans[2].text, '[3]]]');
-    expect(spans[0].style, textStyle1);
+    expect(spans[0].style, merged1);
     expect(spans[1].style, merged12);
     expect(spans[2].style, merged123);
 

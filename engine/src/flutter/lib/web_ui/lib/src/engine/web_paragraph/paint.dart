@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:ui/ui.dart' as ui;
+
 import 'debug.dart';
 import 'layout.dart';
 import 'painter.dart';
@@ -80,7 +81,7 @@ class TextPaint {
         continue;
       }
       WebParagraphDebug.log(
-        'paintByClusters: ${line.fontBoundingBoxAscent} - ${block.rawFontBoundingBoxAscent}',
+        'paintByClusters: ${line.advance.left} + ${line.formattingShift} + ${block.shiftFromLineStart}',
       );
       // We are painting clusters in visual order so that if they step on each other, the paint
       // order is correct.

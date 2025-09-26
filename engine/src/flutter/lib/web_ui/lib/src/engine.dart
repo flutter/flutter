@@ -157,6 +157,7 @@ export 'engine/view_embedder/flutter_view_manager.dart';
 export 'engine/view_embedder/global_html_attributes.dart';
 export 'engine/view_embedder/hot_restart_cache_handler.dart';
 export 'engine/view_embedder/style_manager.dart';
+export 'engine/web_paragraph/bidi.dart';
 export 'engine/web_paragraph/code_unit_flags.dart';
 export 'engine/web_paragraph/debug.dart';
 export 'engine/web_paragraph/font_collection.dart';

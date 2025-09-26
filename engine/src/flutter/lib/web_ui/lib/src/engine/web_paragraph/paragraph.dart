@@ -41,20 +41,22 @@ class WebParagraphStyle implements ui.ParagraphStyle {
     ui.Locale? locale,
     this.maxLines,
     this.ellipsis,
+    ui.Color? color,
+    ui.StrutStyle? strutStyle,
     this.textHeightBehavior,
-    this.strutStyle,
-  }) : _textStyle = WebTextStyle(
+  }) : _strutStyle = strutStyle as WebStrutStyle?,
+       _textStyle = WebTextStyle(
          fontFamily: fontFamily,
          fontSize: fontSize,
          fontStyle: fontStyle,
          fontWeight: fontWeight,
          height: height,
          locale: locale,
+         color: color,
        ),
        textDirection = textDirection ?? ui.TextDirection.ltr,
        textAlign = textAlign ?? ui.TextAlign.start;
 
-  @visibleForTesting
   WebTextStyle get textStyle => _textStyle;
   final WebTextStyle _textStyle;
 
@@ -65,7 +67,9 @@ class WebParagraphStyle implements ui.ParagraphStyle {
   final String? ellipsis;
 
   final ui.TextHeightBehavior? textHeightBehavior;
-  final WebStrutStyle? strutStyle;
+
+  WebStrutStyle? get strutStyle => _strutStyle;
+  final WebStrutStyle? _strutStyle;
 
   @override
   bool operator ==(Object other) {
@@ -81,7 +85,7 @@ class WebParagraphStyle implements ui.ParagraphStyle {
         maxLines == other.maxLines &&
         ellipsis == other.ellipsis &&
         textHeightBehavior == other.textHeightBehavior &&
-        strutStyle == other.strutStyle &&
+        _strutStyle == other._strutStyle &&
         _textStyle == other._textStyle;
   }
 
@@ -93,7 +97,7 @@ class WebParagraphStyle implements ui.ParagraphStyle {
       maxLines,
       ellipsis,
       textHeightBehavior,
-      strutStyle,
+      _strutStyle,
       _textStyle,
     );
   }
@@ -109,7 +113,8 @@ class WebParagraphStyle implements ui.ParagraphStyle {
           'maxLines: $maxLines, '
           'ellipsis: $ellipsis, '
           'textHeightBehavior: $textHeightBehavior, '
-          'strutStyle: $strutStyle, '
+          'strutStyle: $_strutStyle, '
+          'textAlign: $textAlign'
           'textStyle: $_textStyle'
           ')';
       return true;
@@ -502,6 +507,16 @@ class ClusterRange {
     return ClusterRange(start: math.max(start, other.start), end: math.min(end, other.end));
   }
 
+  ClusterRange merge(ClusterRange other) {
+    if (other.size < 0) {
+      return this;
+    } else if (size < 0) {
+      return other;
+    }
+    assert(end == other.start || other.end == start);
+    return ClusterRange(start: math.min(start, other.start), end: math.max(end, other.end));
+  }
+
   bool isBefore(int index) {
     // `end` is exclusive.
     return end <= index;
@@ -640,6 +655,31 @@ class TextSpan extends ParagraphSpan {
     return _metrics.getSelection(cluster.startInSpan, cluster.endInSpan);
   }
 
+  ui.Rect getTextRangeSelectionInBlock(LineBlock block, ui.TextRange textRange) {
+    // Let's normalize the ranges
+    final intersect = block.textRange.intersect(textRange);
+    if (intersect.isEmpty) {
+      return ui.Rect.zero;
+    }
+    // This `selection` is relative to the span, but blocks should be positioned relative to the line.
+    final beforeSelection = _metrics.getSelection(
+      block.textRange.start - start,
+      intersect.start - start,
+    );
+    final intersectSelection = _metrics.getSelection(
+      intersect.start - start,
+      intersect.end - start,
+    );
+
+    // We need 2 selections to calculate the distance between the beginning of the line block and the intersection
+    return ui.Rect.fromLTWH(
+      block.shiftFromLineStart + intersectSelection.left - beforeSelection.left,
+      intersectSelection.top,
+      intersectSelection.width,
+      intersectSelection.height,
+    );
+  }
+
   ui.Rect getBlockSelection(LineBlock block) {
     // This `selection` is relative to the span, but blocks should be positioned relative to the line.
     final selection = _metrics.getSelection(
@@ -684,19 +724,101 @@ class TextSpan extends ParagraphSpan {
 }
 
 class WebStrutStyle implements ui.StrutStyle {
-  WebStrutStyle();
+  WebStrutStyle({
+    this.fontFamily,
+    this.fontFamilyFallback,
+    this.fontSize,
+    double? height,
+    // TODO(mdebbar): implement leadingDistribution.
+    this.leadingDistribution,
+    this.leading,
+    this.fontWeight,
+    this.fontStyle,
+    this.forceStrutHeight,
+  }) : height = height == ui.kTextHeightNone ? null : height;
+
+  final String? fontFamily;
+  final List<String>? fontFamilyFallback;
+  final double? fontSize;
+  final double? height;
+  final double? leading;
+  final ui.FontWeight? fontWeight;
+  final ui.FontStyle? fontStyle;
+  final bool? forceStrutHeight;
+  final ui.TextLeadingDistribution? leadingDistribution;
+  double strutAscent = 0;
+  double strutDescent = 0;
+  double strutLeading = 0;
 
   @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is WebStrutStyle;
+    return other is WebStrutStyle &&
+        other.fontFamily == fontFamily &&
+        other.fontSize == fontSize &&
+        other.height == height &&
+        other.leading == leading &&
+        other.leadingDistribution == leadingDistribution &&
+        other.fontWeight == fontWeight &&
+        other.fontStyle == fontStyle &&
+        other.forceStrutHeight == forceStrutHeight &&
+        listEquals<String>(other.fontFamilyFallback, fontFamilyFallback);
   }
 
   @override
   int get hashCode {
-    return Object.hash(null, null);
+    return Object.hash(
+      fontFamily,
+      fontFamilyFallback != null ? Object.hashAll(fontFamilyFallback!) : null,
+      fontSize,
+      height,
+      leading,
+      leadingDistribution,
+      fontWeight,
+      fontStyle,
+      forceStrutHeight,
+    );
+  }
+
+  void calculateMetrics() {
+    if (fontSize == null || fontSize! < 0) {
+      return;
+    }
+
+    final String cssFontStyle = fontStyle?.toCssString() ?? StyleManager.defaultFontStyle;
+    final String cssFontWeight = fontWeight?.toCssString() ?? StyleManager.defaultFontWeight;
+    final int cssFontSize = (fontSize ?? StyleManager.defaultFontSize).floor();
+    final String cssFontFamily = canonicalizeFontFamily(fontFamily)!;
+
+    layoutContext.font = '$cssFontStyle $cssFontWeight ${cssFontSize}px $cssFontFamily';
+    final DomTextMetrics strutTextMetrics = layoutContext.measureText('');
+
+    strutLeading = leading == null ? 0 : leading! * fontSize!;
+
+    if (height != null) {
+      // The half leading flag doesn't take effect unless there's height override.
+      if (leadingDistribution == ui.TextLeadingDistribution.even) {
+        final double occupiedHeight =
+            strutTextMetrics.fontBoundingBoxAscent + strutTextMetrics.fontBoundingBoxDescent;
+        // Distribute the flexible height evenly over and under.
+        final double flexibleHeight = (height! * fontSize! - occupiedHeight) / 2;
+        strutAscent = strutTextMetrics.fontBoundingBoxAscent + flexibleHeight;
+        strutDescent = strutTextMetrics.fontBoundingBoxDescent + flexibleHeight;
+      } else {
+        final double strutMetricsHeight =
+            strutTextMetrics.fontBoundingBoxAscent + strutTextMetrics.fontBoundingBoxDescent;
+        final double strutHeightMultiplier = strutMetricsHeight == 0
+            ? height!
+            : height! * fontSize! / strutMetricsHeight;
+        strutAscent = strutTextMetrics.fontBoundingBoxAscent * strutHeightMultiplier;
+        strutDescent = strutTextMetrics.fontBoundingBoxDescent * strutHeightMultiplier;
+      }
+    } else {
+      strutAscent = strutTextMetrics.fontBoundingBoxAscent;
+      strutDescent = strutTextMetrics.fontBoundingBoxDescent;
+    }
   }
 }
 
@@ -737,8 +859,7 @@ class WebParagraph implements ui.Paragraph {
   @override
   double width = 0;
 
-  // TODO(mdebbar): Rename this when you understand what it's for.
-  double requiredWidth = 0;
+  double maxLineWidthWithTrailingSpaces = 0; // without trailing spaces it would be longestLine
 
   List<TextLine> get lines => _layout.lines;
 
@@ -752,35 +873,58 @@ class WebParagraph implements ui.Paragraph {
     ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
     ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
   }) {
-    return _layout.getBoxesForRange(start, end, boxHeightStyle, boxWidthStyle);
+    final result = _layout.getBoxesForRange(start, end, boxHeightStyle, boxWidthStyle);
+    WebParagraphDebug.apiTrace(
+      'getBoxesForRange("$text", $start, $end, $boxHeightStyle, $boxWidthStyle): $result ($longestLine, $maxLineWidthWithTrailingSpaces)',
+    );
+    return result;
   }
 
   @override
   ui.TextPosition getPositionForOffset(ui.Offset offset) {
-    return _layout.getPositionForOffset(offset);
+    final ui.TextPosition result = text.isEmpty
+        ? const ui.TextPosition(offset: 0)
+        : _layout.getPositionForOffset(offset);
+    WebParagraphDebug.apiTrace('getPositionForOffset("$text", $offset): $result');
+    return result;
   }
 
   @override
   ui.GlyphInfo? getClosestGlyphInfoForOffset(ui.Offset offset) {
     final position = getPositionForOffset(offset);
-    WebParagraphDebug.log('getClosestGlyphInfoForOffset($offset): $position');
-    assert(position.offset != 0 || position.affinity != ui.TextAffinity.upstream);
-    assert(position.offset < text.length);
-    return getGlyphInfoAt(position.offset);
+    assert(position.offset < text.length || text.isEmpty);
+    final result = getGlyphInfoAt(position.offset);
+    if (result == null) {
+      WebParagraphDebug.apiTrace(
+        'getClosestGlyphInfoForOffset("$text", ${offset.dx}, ${offset.dy}): '
+        'TextPosition(${position.offset},${position.affinity.toString().replaceFirst('TextAffinity.', '')}) Glyph: null',
+      );
+      return null;
+    }
+
+    WebParagraphDebug.apiTrace(
+      'getClosestGlyphInfoForOffset("$text", ${offset.dx}, ${offset.dy}): '
+      'TextPosition(${position.offset},${position.affinity.toString().replaceFirst('TextAffinity.', '')} '
+      '${result.graphemeClusterLayoutBounds} '
+      'TextRange: [${result.graphemeClusterCodeUnitRange.start}:${result.graphemeClusterCodeUnitRange.end}) '
+      'TextDirection: ${result.writingDirection.toString().replaceFirst('TextDirection.', '')} ',
+    );
+
+    return result;
   }
 
   @override
   ui.GlyphInfo? getGlyphInfoAt(int codeUnitOffset) {
-    WebParagraphDebug.log('getGlyphInfoAt($codeUnitOffset)');
     if (codeUnitOffset < 0 || codeUnitOffset >= text.length) {
       return null;
     }
-    return _layout.getGlyphInfoAt(codeUnitOffset);
+    final result = _layout.getGlyphInfoAt(codeUnitOffset);
+    WebParagraphDebug.apiTrace('getGlyphInfoAt("$text", $codeUnitOffset): $result');
+    return result;
   }
 
   @override
   ui.TextRange getWordBoundary(ui.TextPosition position) {
-    WebParagraphDebug.log('getWordBoundary($position)');
     final int codepointPosition = switch (position.affinity) {
       ui.TextAffinity.upstream => position.offset - 1,
       ui.TextAffinity.downstream => position.offset,
@@ -791,12 +935,21 @@ class WebParagraph implements ui.Paragraph {
     if (codepointPosition >= text.length) {
       return ui.TextRange(start: text.length, end: text.length);
     }
-    return _layout.getWordBoundary(codepointPosition);
+    final result = _layout.getWordBoundary(codepointPosition);
+    WebParagraphDebug.apiTrace('getWordBoundary("$text", $position): $result');
+    return result;
   }
 
   @override
   void layout(ui.ParagraphConstraints constraints) {
     _layout.performLayout(constraints.width);
+    WebParagraphDebug.apiTrace(
+      'layout("$text", ${constraints.width.toStringAsFixed(4)}}): '
+      'width=${width.toStringAsFixed(4)} height=${height.toStringAsFixed(4)} '
+      'minIntrinsicWidth=${minIntrinsicWidth.toStringAsFixed(4)} maxIntrinsicWidth=${maxIntrinsicWidth.toStringAsFixed(4)} '
+      'longestLine=${longestLine.toStringAsFixed(4)} '
+      'maxLineWidthWithTrailingSpaces=${maxLineWidthWithTrailingSpaces.toStringAsFixed(4)} lines=${_layout.lines.length}',
+    );
   }
 
   void paint(ui.Canvas canvas, ui.Offset offset) {
@@ -807,36 +960,35 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   ui.TextRange getLineBoundary(ui.TextPosition position) {
-    WebParagraphDebug.log('getLineBoundary($position)');
     final int codepointPosition = switch (position.affinity) {
       ui.TextAffinity.upstream => position.offset - 1,
       ui.TextAffinity.downstream => position.offset,
     };
 
-    final int? lineNumber = getLineNumberAt(codepointPosition);
-    if (lineNumber == null) {
-      return ui.TextRange.empty;
-    }
-
-    return lines[lineNumber].allLineTextRange;
+    final result = _layout.getLineBoundary(codepointPosition);
+    WebParagraphDebug.apiTrace('getLineBoundary("$text", $position): $result');
+    return result;
   }
 
   @override
   List<ui.LineMetrics> computeLineMetrics() {
-    WebParagraphDebug.log('computeLineMetrics()');
     final List<ui.LineMetrics> metrics = <ui.LineMetrics>[];
     for (final line in _layout.lines) {
       metrics.add(line.getMetrics());
     }
+    WebParagraphDebug.apiTrace('computeLineMetrics("$text": $metrics');
     return metrics;
   }
 
   @override
   ui.LineMetrics? getLineMetricsAt(int lineNumber) {
-    WebParagraphDebug.log('getLineMetricsAt($lineNumber)');
     if (lineNumber < 0 || lineNumber >= _layout.lines.length) {
+      WebParagraphDebug.apiTrace('getLineMetricsAt("$text", $lineNumber): null (out of range)');
       return null;
     }
+    WebParagraphDebug.apiTrace(
+      'getLineMetricsAt($lineNumber): ${_layout.lines[lineNumber].getMetrics()}',
+    );
     return _layout.lines[lineNumber].getMetrics();
   }
 
@@ -850,24 +1002,29 @@ class WebParagraph implements ui.Paragraph {
     if (codeUnitOffset < 0 || codeUnitOffset >= text.length) {
       // When the offset is outside of the paragraph's range, we know it doesn't belong to any of
       // the lines.
+      WebParagraphDebug.apiTrace(
+        'getLineNumberAt("$text", $codeUnitOffset): null (out of text range)',
+      );
       return null;
     }
 
-    // TODO(mdebbar=>jlavrova): At this point, we know there must be a line, right?
-    WebParagraphDebug.log('getLineNumberAt($codeUnitOffset)');
     for (final line in _layout.lines) {
-      if (line.allLineTextRange.isAfter(codeUnitOffset)) {
-        // No more lines can contain the offset.
-        break;
-      }
       if (line.allLineTextRange.isBefore(codeUnitOffset)) {
-        // We haven't reached the offset yet, keep going.
         continue;
       }
+      if (line.allLineTextRange.isAfter(codeUnitOffset)) {
+        // We haven't reached the offset yet, keep going.
+        break;
+      }
 
+      WebParagraphDebug.apiTrace('getLineNumberAt("$text", $codeUnitOffset): ${line.lineNumber}');
       return line.lineNumber;
     }
 
+    assert(
+      false,
+      'getLineNumberAt("$text", $codeUnitOffset): null (out of range, should not happen)',
+    );
     return null;
   }
 
@@ -1023,7 +1180,7 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
     double? baselineOffset,
     ui.TextBaseline? baseline,
   }) {
-    WebParagraphDebug.log(
+    WebParagraphDebug.apiTrace(
       'WebParagraphBuilder.addPlaceholder('
       'width: $width, height: $height, alignment: $alignment, '
       'scale: $scale, baselineOffset: $baselineOffset, baseline: $baseline',
@@ -1119,7 +1276,7 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
     final String text = _fullTextBuffer.toString();
 
     final paragraph = WebParagraph(_paragraphStyle, _spans, text);
-    WebParagraphDebug.log('WebParagraphBuilder.build(): "$text" ${_spans.length}');
+    WebParagraphDebug.apiTrace('WebParagraphBuilder.build(): "$text" ${_spans.length}');
     for (var i = 0; i < _spans.length; ++i) {
       WebParagraphDebug.log('$i: ${_spans[i]}');
     }

@@ -12,6 +12,8 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
+const double EPSILON = 0.001;
+
 Future<void> testMain() async {
   setUpUnitTests();
 
@@ -220,6 +222,17 @@ Future<void> testMain() async {
     }
   });
 
+  test('Paragraph getGlyphInfoAt for a single character', () {
+    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+
+    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText('J');
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+    final glyphInfo = paragraph.getGlyphInfoAt(0);
+    expect(glyphInfo != null, true);
+  });
+
   test('Paragraph getClosestGlyphInfoForOffset', () {
     const double epsilon = 0.001;
     final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
@@ -248,5 +261,35 @@ Future<void> testMain() async {
         }
       }
     }
+  });
+
+  test('Paragraph empty text', () {
+    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+
+    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText('');
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+    expect(paragraph.width, double.infinity);
+    expect(paragraph.height, closeTo(22.0, EPSILON));
+    expect(paragraph.minIntrinsicWidth, closeTo(0.0, EPSILON));
+    expect(paragraph.maxIntrinsicWidth, closeTo(0.0, EPSILON));
+    expect(paragraph.longestLine, double.negativeInfinity);
+    expect(paragraph.numberOfLines, 0);
+  });
+
+  test('Paragraph whitespaces', () {
+    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+
+    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText(' ');
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+    expect(paragraph.width, double.infinity);
+    expect(paragraph.height, closeTo(22.0, EPSILON));
+    expect(paragraph.minIntrinsicWidth, closeTo(5.556640625, EPSILON));
+    expect(paragraph.maxIntrinsicWidth, closeTo(5.556640625, EPSILON));
+    expect(paragraph.longestLine, closeTo(5.556640625, EPSILON));
+    expect(paragraph.numberOfLines, 1);
   });
 }

@@ -20,6 +20,15 @@ class TextWrapper {
   double get minIntrinsicWidth => _minIntrinsicWidth;
   double _minIntrinsicWidth = 0.0;
 
+  double get longestLine => _longestLine;
+  double _longestLine = 0.0;
+
+  double get maxLineWidthWithTrailingSpaces => _maxLineWidthWithTrailingSpaces;
+  double _maxLineWidthWithTrailingSpaces = 0.0;
+
+  double get height => _height;
+  double _height = 0.0;
+
   bool _isWhitespace(WebCluster cluster) {
     return _layout.codeUnitFlags.hasFlag(cluster.start, CodeUnitFlag.whitespace);
   }
@@ -39,7 +48,7 @@ class TextWrapper {
     final _LineBuilder line = _LineBuilder(_layout, maxWidth);
 
     bool hardLineBreak = false;
-    for (int index = 0; index < _layout.allClusters.length; index += 1) {
+    for (int index = 0; index < _layout.allClusters.length - 1; index += 1) {
       final WebCluster cluster = _layout.allClusters[index];
       final double widthCluster = cluster.advance.width;
       hardLineBreak = _isHardLineBreak(cluster);
@@ -105,15 +114,26 @@ class TextWrapper {
     // TODO(jlavrova): This assert may need to change when we implement text overflow.
     assert(line.reachedEndOfText());
 
-    // Add the last line if there's anything left to add.
-    if (line.isNotEmpty) {
+    // Special case: we have only whitespaces in the whole paragraph
+    if (_layout.lines.isEmpty && line.hasOnlyWhitespaces) {
+      line._maxIntrinsicWidth = line._widthWhitespaces;
+      line._minIntrinsicWidth = line._widthWhitespaces;
+      line._longestLine = line._widthWhitespaces;
+      line._maxLineWidthWithTrailingSpaces = line._widthWhitespaces;
+      line.build(hardLineBreak);
+    }
+    // Add the last line if there's anything left to add
+    else if (line.isNotEmpty) {
       // Treat the end of text as a soft line break
-      line.markSoftLineBreak(_layout.allClusters.length);
+      line.markSoftLineBreak(_layout.allClusters.length - 1);
       line.build(hardLineBreak);
     }
 
-    _minIntrinsicWidth = line.minIntrinsicWidth;
-    _maxIntrinsicWidth = line.maxIntrinsicWidth;
+    _maxIntrinsicWidth = math.max(_maxIntrinsicWidth, line._maxIntrinsicWidth);
+    _minIntrinsicWidth = math.max(_minIntrinsicWidth, line._minIntrinsicWidth);
+    _longestLine = math.max(_longestLine, line._longestLine);
+    _maxLineWidthWithTrailingSpaces = math.max(_longestLine, line._maxLineWidthWithTrailingSpaces);
+    _height = line._top;
 
     // TODO(mdebbar=>jlavrova): Discuss with Mouad
     // Flutter wants to have another (empty) line if \n is the last codepoint in the text
@@ -175,6 +195,14 @@ class _LineBuilder {
   double get maxIntrinsicWidth => _maxIntrinsicWidth;
   double _maxIntrinsicWidth = 0.0;
 
+  double get longestLine => _longestLine;
+  double _longestLine = 0.0;
+
+  double get maxLineWidthWithTrailingSpaces => _maxLineWidthWithTrailingSpaces;
+  double _maxLineWidthWithTrailingSpaces = 0.0;
+
+  double get height => _top;
+
   bool get isEmpty {
     // When `start` and `pendingTextEnd` are equal, we know there was no text, whitespaces
     // or pending text added to the line.
@@ -225,6 +253,8 @@ class _LineBuilder {
 
   bool get hasLeadingWhitespaces => !hasConsumedText && hasWhitespaces;
 
+  bool get hasOnlyWhitespaces => !hasConsumedText && !hasPendingText && hasWhitespaces;
+
   bool get hasPendingText {
     final bool result = _pendingTextEnd > _whitespaceEnd;
 
@@ -260,7 +290,7 @@ class _LineBuilder {
   }
 
   bool reachedEndOfText() {
-    return _pendingTextEnd == _layout.allClusters.length;
+    return _pendingTextEnd == _layout.allClusters.length - 1;
   }
 
   void addWhitespace(int index, double width) {
@@ -309,6 +339,11 @@ class _LineBuilder {
   double build(bool hardLineBreak) {
     // Update max intrinsic width.
     _maxIntrinsicWidth = math.max(_maxIntrinsicWidth, _widthConsumedText);
+    _longestLine = math.max(_longestLine, _widthConsumedText);
+    _maxLineWidthWithTrailingSpaces = math.max(
+      _maxLineWidthWithTrailingSpaces,
+      _widthConsumedText + _widthWhitespaces,
+    );
 
     final double height = _layout.addLine(
       ClusterRange(start: start, end: _whitespaceStart),

@@ -30,14 +30,15 @@ class TextLayout {
   final lines = <TextLine>[];
 
   final allClusters = <WebCluster>[];
-  late final _mapping = _TextClusterMapping(paragraph.text.length, allClusters);
+  late final _mapping = _TextClusterMapping(paragraph.text.length + 1, allClusters);
 
   bool get isDefaultLtr => paragraph.paragraphStyle.textDirection == ui.TextDirection.ltr;
 
   bool get isDefaultRtl => !isDefaultLtr;
 
   void performLayout(double width) {
-    // TODO(jlavrova): find a less clumsy way to deal with edge cases like empty text
+    // TODO(jlavrova): I suggest with go with the general code flow for an empty text
+    /*
     if (paragraph.text.isEmpty) {
       // TODO(mdebbar): We need to populate at least `height` here.
       // I think we may need to ensure there's at least one span. The span's style should match the
@@ -47,7 +48,7 @@ class TextLayout {
       // metrics = measureText('');
       return;
     }
-
+    */
     // TODO(mdebbar=>jlavrova): Skip layout if `width` is the same as the last layout.
     // TODO(mdebbar=>jlavrova): Skip layout if `width` is greater than `maxIntrinsicWidth`.
 
@@ -57,12 +58,19 @@ class TextLayout {
 
       codeUnitFlags = AllCodeUnitFlags(paragraph.text);
       extractTextClusters();
+      calculateStrutMetrics();
       extractBidiRuns();
     }
 
     // Wrapping text into lines is required on every layout.
     wrapText(width);
     formatLines(width);
+  }
+
+  void calculateStrutMetrics() {
+    if (paragraph.paragraphStyle.strutStyle != null) {
+      paragraph.paragraphStyle.strutStyle?.calculateMetrics();
+    }
   }
 
   ui.TextDirection _detectTextDirection(ClusterRange clusterRange) {
@@ -87,6 +95,18 @@ class TextLayout {
         }
       }
     }
+
+    // One more dummy element in the end to avoid extra checks
+    final TextSpan emptySpan = TextSpan(
+      start: paragraph.text.length,
+      end: paragraph.text.length,
+      style: paragraph.spans.isEmpty
+          ? paragraph.paragraphStyle.textStyle
+          : paragraph.spans.last.style,
+      text: '',
+    );
+    allClusters.add(EmptyCluster(emptySpan));
+    _mapping.add(textIndex: paragraph.text.length, clusterIndex: allClusters.length - 1);
 
     if (WebParagraphDebug.logging) {
       _debugPrintSpans('Full text');
@@ -129,11 +149,25 @@ class TextLayout {
   void wrapText(double width) {
     lines.clear();
 
+    if (paragraph.text.isEmpty) {
+      // Empty text still has to have some metrics
+      paragraph.width = width;
+      paragraph.maxIntrinsicWidth = 0;
+      paragraph.minIntrinsicWidth = 0;
+      paragraph.longestLine = double.negativeInfinity;
+      paragraph.maxLineWidthWithTrailingSpaces = double.negativeInfinity;
+      paragraph.height = _mapping._clusters.last.advance.height;
+      return;
+    }
+
     final TextWrapper wrapper = TextWrapper(this);
     wrapper.breakLines(width);
+    paragraph.width = width;
     paragraph.maxIntrinsicWidth = wrapper.maxIntrinsicWidth;
     paragraph.minIntrinsicWidth = wrapper.minIntrinsicWidth;
-    paragraph.requiredWidth = width;
+    paragraph.longestLine = wrapper.longestLine;
+    paragraph.maxLineWidthWithTrailingSpaces = wrapper.maxLineWidthWithTrailingSpaces;
+    paragraph.height = wrapper.height;
   }
 
   double addLine(
@@ -143,21 +177,18 @@ class TextLayout {
     double top,
   ) {
     assert(contentRange.end == whitespaceRange.start);
-
     if (WebParagraphDebug.logging) {
       final allLineText = paragraph.getText1(contentRange.start, whitespaceRange.end);
       WebParagraphDebug.log('LINE "$allLineText" clusters:$contentRange+$whitespaceRange');
     }
 
     // Arrange line vertically, calculate metrics and bounds
-
     final ui.TextRange contentTextRange = _mapping.toTextRange(contentRange);
     final ui.TextRange whitespaceTextRange = _mapping.toTextRange(whitespaceRange);
     final ui.TextRange allTextRange = ui.TextRange(
       start: contentTextRange.start,
       end: whitespaceTextRange.end,
     );
-
     assert(contentTextRange.end == whitespaceTextRange.start);
 
     // TODO(mdebbar): Move this line creation to the end of the method when all info is available.
@@ -204,9 +235,11 @@ class TextLayout {
     // and shift all runs for this line so this first cluster starts from 0
     // Break the line into the blocks that belong to the same bidi run (monodirectional text) and to the same style block (the same text metrics)
     double blockShiftFromLineStart = 0.0;
+    double trailingSpacesWidth = 0.0;
     for (final BidiRun bidiRun in lineVisualRuns) {
       // TODO(jlavrova): we (almost always true) assume that trailing whitespaces do not affect the line height
       final ClusterRange textIntersection = bidiRun.clusterRange.intersect(contentRange);
+      final ClusterRange whitespacesIntersection = bidiRun.clusterRange.intersect(whitespaceRange);
 
       assert(() {
         final ClusterRange whitespaceIntersection = bidiRun.clusterRange.intersect(whitespaceRange);
@@ -214,20 +247,29 @@ class TextLayout {
         return textIntersection.isNotEmpty || whitespaceIntersection.isNotEmpty;
       }());
 
+      /*
       // We ignore whitespaces because for now we only use these textStyles for decoration
       // (and we do not decorate trailing whitespaces)
       if (textIntersection.isEmpty) {
         // TODO(jlavrova): what to do with trailing whitespaces? (After implementing queries)
         continue;
       }
+*/
+      // We cannot ignore whitespaces because they are expected to be counted in some query apis (getBoxesForRange)
+      assert(contentRange.isNotEmpty || whitespaceRange.isNotEmpty);
+      final fullIntersection = textIntersection.merge(whitespacesIntersection);
 
       // This is the part of the line that intersects with the `bidiRun` being processed now.
-      final ui.TextRange bidiLineTextRange = _mapping.toTextRange(textIntersection);
+      final ui.TextRange bidiLineTextRange = _mapping.toTextRange(fullIntersection);
+      final ui.TextRange bidiWhitespacesTextRange =
+          whitespacesIntersection.start < whitespacesIntersection.end
+          ? _mapping.toTextRange(whitespacesIntersection)
+          : ui.TextRange.empty;
 
       if (WebParagraphDebug.logging) {
         WebParagraphDebug.log(
           'Run: "${paragraph.getText(bidiLineTextRange)}" '
-          '${bidiRun.clusterRange} & $contentRange = $textIntersection textRange:$bidiLineTextRange',
+          '${bidiRun.clusterRange} & $contentRange = $fullIntersection textRange:$bidiLineTextRange',
         );
       }
 
@@ -280,6 +322,16 @@ class TextLayout {
             ),
           );
 
+          final blockLineWhitespaces = bidiLineSpanTextRange.intersect(bidiWhitespacesTextRange);
+          if (blockLineWhitespaces.start < blockLineWhitespaces.end) {
+            WebParagraphDebug.log(
+              'trailingSpacesWidth: $bidiLineSpanTextRange $bidiWhitespacesTextRange $blockLineWhitespaces}',
+            );
+            trailingSpacesWidth = span
+                .getTextRangeSelectionInBlock(line.visualBlocks.last, blockLineWhitespaces)
+                .width;
+          }
+
           // Line always counts multipled metrics (no need for the others)
           line.fontBoundingBoxAscent = math.max(
             line.fontBoundingBoxAscent,
@@ -296,7 +348,7 @@ class TextLayout {
           final String styledText = paragraph.getText(bidiLineSpanTextRange);
           WebParagraphDebug.log(
             'Styled text: "$styledText" clusterRange: $bidiLineSpanRange '
-            'width:$blockWidth shiftFromLineStart:$blockShiftFromLineStart ',
+            'width:$blockWidth shiftFromLineStart:$blockShiftFromLineStart trailingSpacesWidth:$trailingSpacesWidth',
           );
         }
         blockShiftFromLineStart += blockWidth;
@@ -327,7 +379,8 @@ class TextLayout {
     line.advance = ui.Rect.fromLTWH(
       0,
       top,
-      blockShiftFromLineStart,
+      // Line advance.width should not include trailing spaces (that are counted as a part of a block)
+      blockShiftFromLineStart - trailingSpacesWidth,
       // At the end this shift is equal to the entire line width
       line.height,
     );
@@ -351,33 +404,22 @@ class TextLayout {
       for (final TextLine line in lines) {
         maxLength = math.max(maxLength, line.advance.width);
       }
-      paragraph.requiredWidth = maxLength;
-    } else {
-      paragraph.requiredWidth = width;
+      return;
     }
 
     for (final TextLine line in lines) {
-      final double delta = paragraph.requiredWidth - line.advance.width;
-      if (delta <= 0) {
-        continue;
+      final double delta = paragraph.width - line.advance.width;
+      if (delta > 0) {
+        // We do nothing for left align
+        if (effectiveAlign == ui.TextAlign.justify) {
+          // TODO(jlavrova): implement justi     } else if (effectiveAlign == ui.TextAlign.right) {
+          line.formattingShift = delta;
+        } else if (effectiveAlign == ui.TextAlign.center) {
+          line.formattingShift = delta / 2;
+        }
       }
-      // We do nothing for left align
-      if (effectiveAlign == ui.TextAlign.justify) {
-        // TODO(jlavrova): implement justify
-      } else if (effectiveAlign == ui.TextAlign.right) {
-        line.formattingShift = delta;
-      } else if (effectiveAlign == ui.TextAlign.center) {
-        line.formattingShift = delta / 2;
-      }
-      // TODO(mdebbar=>jlavrova): Why does `longestLine` include `formattingShift`?
-      paragraph.longestLine = math.max(
-        paragraph.longestLine,
-        line.advance.width + line.formattingShift,
-      );
-      paragraph.width = paragraph.longestLine;
-      paragraph.height += line.advance.height;
-      WebParagraphDebug.log(
-        'formatLines($width): ${line.advance} $effectiveAlign $delta ${line.formattingShift} ${paragraph.longestLine}',
+      WebParagraphDebug.apiTrace(
+        'formatLines(${paragraph.text}, $width): ${line.advance} $effectiveAlign $delta ${line.formattingShift} ${paragraph.longestLine} ${paragraph.maxLineWidthWithTrailingSpaces}',
       );
     }
   }
@@ -393,18 +435,23 @@ class TextLayout {
     final textRange = ui.TextRange(start: start, end: end);
     final List<ui.TextBox> result = <ui.TextBox>[];
     // TODO(mdebbar): Instead of nested loops, make them two consecutive loops.
-    for (final line in lines) {
+    for (int lineIndex = 0; lineIndex < lines.length; ++lineIndex) {
+      final line = lines[lineIndex];
       WebParagraphDebug.log(
         'Line: ${line.textClusterRange} & $textRange '
-        '[${line.advance.left}:${line.advance.right} x ${line.advance.top}:${line.advance.bottom} '
-        '${line.fontBoundingBoxAscent}+${line.fontBoundingBoxDescent}',
+        '[${line.advance.left}:${line.advance.right} x ${line.advance.top}:${line.advance.bottom}] ',
       );
       // We take whitespaces in account
       if (!line.allLineTextRange.overlapsWith(start, end)) {
         continue;
       }
+
       for (final LineBlock block in line.visualBlocks) {
-        final intersect = block.textRange.intersect(textRange);
+        ui.TextRange intersect = block.textRange.intersect(textRange);
+        if (boxWidthStyle == ui.BoxWidthStyle.tight) {
+          // Ignore whitespaces at the end of the line
+          intersect = intersect.intersect(line.textRange);
+        }
         WebParagraphDebug.log(
           'block: ${block.textRange} & $textRange = $intersect '
           '${block.span.start}',
@@ -412,12 +459,15 @@ class TextLayout {
         if (intersect.size <= 0) {
           continue;
         }
-        var firstRect = block.advance;
+        ui.Rect firstRect = block.advance;
         if (block is! PlaceholderBlock) {
-          firstRect = firstRect.translate(
-            0.0,
-            block.rawFontBoundingBoxAscent,
-          ); // block.advance.top == 0 // TODO(mdebbar=>jlavrova): Explain this comment?
+          // We need to calculate the intersect rectangle
+          firstRect = (block.span as TextSpan)
+              .getTextRangeSelectionInBlock(block, intersect)
+              .translate(
+                block.shiftFromLineStart, // We do not use baseline for placeholder
+                block.rawFontBoundingBoxAscent,
+              );
         }
         // Now we need to recalculate the rects
         double left, right, top, bottom;
@@ -435,8 +485,14 @@ class TextLayout {
             bottom = firstRect.top + line.advance.bottom;
             assert((line.advance.height - (bottom - top).abs() < epsilon));
           case ui.BoxHeightStyle.strut:
-            // TODO(jlavrova): implement strut
-            throw UnimplementedError('BoxHeightStyle.strut not implemented');
+            if (paragraph.paragraphStyle.strutStyle == null) {
+              top = firstRect.top;
+              bottom = firstRect.bottom;
+              break;
+            }
+            final WebStrutStyle strutStyle = paragraph.paragraphStyle.strutStyle!;
+            top = line.fontBoundingBoxAscent - strutStyle.strutAscent;
+            bottom = top + strutStyle.strutDescent;
           case ui.BoxHeightStyle.includeLineSpacingMiddle:
             top =
                 line.advance.top +
@@ -455,10 +511,6 @@ class TextLayout {
         }
         left = firstRect.left - (line.advance.left + line.formattingShift);
         right = left + firstRect.width;
-        WebParagraphDebug.log(
-          'shift: -x=${line.advance.left + line.formattingShift}='
-          '${line.advance.left}+${line.formattingShift} +y=${line.advance.top + line.fontBoundingBoxAscent}',
-        );
         result.add(
           ui.TextBox.fromLTRBD(
             left,
@@ -470,26 +522,27 @@ class TextLayout {
         );
       }
 
-      if (boxWidthStyle == ui.BoxWidthStyle.max && paragraph.requiredWidth != double.infinity) {
+      if (boxWidthStyle == ui.BoxWidthStyle.max && lineIndex < lines.length - 1) {
+        // Add whitespaces box left/right for all the lines except the last one
         if ((result.first.left - 0).abs() > epsilon) {
           result.insert(
             0,
             ui.TextBox.fromLTRBD(
               0,
               result.first.top,
-              result.first.right,
+              result.first.left,
               result.first.bottom,
               paragraph.paragraphStyle.textDirection,
             ),
           );
         }
-        if ((result.last.right - paragraph.requiredWidth).abs() > epsilon) {
+        if ((result.last.right - paragraph.maxLineWidthWithTrailingSpaces).abs() > epsilon) {
           result.add(
             ui.TextBox.fromLTRBD(
               result.last.right,
-              result.last.top,
-              paragraph.requiredWidth,
-              result.last.bottom,
+              result.first.top,
+              paragraph.maxLineWidthWithTrailingSpaces,
+              result.first.bottom,
               paragraph.paragraphStyle.textDirection,
             ),
           );
@@ -535,7 +588,13 @@ class TextLayout {
   }
 
   ui.TextPosition getPositionForOffset(ui.Offset offset) {
-    WebParagraphDebug.log('getPositionForOffset($offset)');
+    WebParagraphDebug.apiTrace('getPositionForOffset("${paragraph.text}", $offset)');
+    if (paragraph.text.isEmpty) {
+      return ui.TextPosition(
+        offset: 0,
+        affinity: offset.dx <= 0 ? ui.TextAffinity.upstream : ui.TextAffinity.downstream,
+      );
+    }
 
     int lineNum = 0;
     for (final line in lines) {
@@ -581,7 +640,6 @@ class TextLayout {
         final int start = block.isLtr ? block.clusterRange.start : block.clusterRange.end - 1;
         final int end = block.isLtr ? block.clusterRange.end : block.clusterRange.start - 1;
         final int step = block.isLtr ? 1 : -1;
-        WebParagraphDebug.log('Found block: ${block.clusterRange}');
         for (int i = start; i != end; i += step) {
           final cluster = allClusters[i];
           final ui.Rect rect = cluster.advance
@@ -593,7 +651,6 @@ class TextLayout {
                 line.advance.top + line.fontBoundingBoxAscent,
               )
               .inflate(epsilon);
-          WebParagraphDebug.log('Check cluster: $rect $offset');
           if (rect.contains(offset)) {
             // TODO(jlavrova): proportionally calculate the text position? I wouldn't...
             if (offset.dx - rect.left <= rect.right - offset.dx) {
@@ -601,7 +658,7 @@ class TextLayout {
                 offset: cluster.start,
                 /* affinity: ui.TextAffinity.downstream, */
               );
-            } else {
+            } else if (cluster.end == paragraph.text.length) {
               return ui.TextPosition(offset: cluster.end - 1, affinity: ui.TextAffinity.upstream);
             }
           }
@@ -613,20 +670,25 @@ class TextLayout {
       // We didn't find the block containing our offset and
       // we didn't find the block that is on the right of the offset
       // So all the blocks are on the left
-      return ui.TextPosition(
-        offset: line.textClusterRange.end - 1,
-        /*affinity: ui.TextAffinity.downstream,*/
-      );
+      return paragraph.text.isEmpty
+          ? const ui.TextPosition(offset: 0)
+          : ui.TextPosition(
+              offset: line.textClusterRange.end - 1,
+              /*affinity: ui.TextAffinity.downstream,*/
+            );
     }
     // We didn't find the line containing our offset and
     // we didn't find the line that is down from the offset
     // So all the line are above the offset
-    return ui.TextPosition(offset: paragraph.text.length - 1, affinity: ui.TextAffinity.upstream);
+    return paragraph.text.isEmpty
+        ? const ui.TextPosition(offset: 0)
+        : ui.TextPosition(offset: paragraph.text.length, affinity: ui.TextAffinity.upstream);
   }
 
   ui.GlyphInfo? getGlyphInfoAt(int codeUnitOffset) {
-    assert(codeUnitOffset >= 0);
-    assert(codeUnitOffset < paragraph.text.length);
+    if (paragraph.text.isEmpty || codeUnitOffset < 0 || codeUnitOffset >= paragraph.text.length) {
+      return null;
+    }
 
     final clusterRange = _mapping.toClusterRange(codeUnitOffset, codeUnitOffset + 1);
     if (clusterRange.isEmpty) {
@@ -641,10 +703,10 @@ class TextLayout {
 
     // The cluster is on this line.
     for (final visualBlock in line.visualBlocks) {
-      if (visualBlock.clusterRange.isAfter(clusterRange.start)) {
-        // No more visual blocks can contain the cluster.
-        break;
-      } else if (visualBlock.clusterRange.isBefore(clusterRange.start)) {
+      if (visualBlock.clusterRange.isBefore(clusterRange.start)) {
+        // We cannot assume clusters go sequentially because of bidi reshuffling
+        continue;
+      } else if (visualBlock.clusterRange.isAfter(clusterRange.start)) {
         // We haven't reached the cluster yet, keep going.
         continue;
       }
@@ -690,12 +752,23 @@ class TextLayout {
     }
     return ui.TextRange(start: start, end: end);
   }
+
+  ui.TextRange getLineBoundary(int codepointPosition) {
+    for (final line in lines) {
+      if (line.allLineTextRange.start <= codepointPosition &&
+          line.allLineTextRange.end > codepointPosition) {
+        return ui.TextRange(start: line.allLineTextRange.start, end: line.allLineTextRange.end);
+      }
+    }
+    return ui.TextRange.empty;
+  }
 }
 
 extension EnhancedTextRange on ui.TextRange {
   int get size => end - start;
 
   bool get isEmpty => start == end;
+
   bool get isNotEmpty => !isEmpty;
 
   ui.TextRange intersect(ui.TextRange other) {
@@ -732,10 +805,10 @@ class _TextClusterMapping {
 
   void add({required int textIndex, required int clusterIndex}) {
     assert(textIndex >= 0);
-    assert(textIndex < _size);
+    assert(textIndex <= _size);
 
     assert(clusterIndex >= 0);
-    assert(clusterIndex < _clusters.length);
+    assert(clusterIndex <= _clusters.length);
 
     _textToCluster[textIndex] = clusterIndex;
     _debugAddCount++;
@@ -745,12 +818,15 @@ class _TextClusterMapping {
     assert(_debugAddCount == _size);
 
     assert(textIndex >= 0);
-    assert(textIndex < _size);
+    assert(textIndex <= _size);
 
     return _textToCluster[textIndex];
   }
 
   ClusterRange toClusterRange(int start, int end) {
+    if (start < 0 || end > _size || start > end) {
+      throw ArgumentError('TextRange [$start:$end) is out of paragraph text range: [0:$_size');
+    }
     assert(_debugAddCount == _size);
 
     assert(start >= 0);
@@ -781,21 +857,25 @@ class _TextClusterMapping {
     }
 
     final startCluster = _clusters[clusterRange.start];
-
     if (clusterRange.isEmpty) {
       return ui.TextRange.collapsed(startCluster.start);
     }
-
     final endCluster = _clusters[clusterRange.end - 1];
-    return ui.TextRange(start: startCluster.start, end: endCluster.end);
+
+    return ui.TextRange(
+      start: math.min(startCluster.start, endCluster.end),
+      end: math.max(startCluster.start, endCluster.end),
+    );
   }
 }
 
 abstract class WebCluster {
   int get start => span.start + startInSpan;
+
   int get end => span.start + endInSpan;
 
   int get startInSpan;
+
   int get endInSpan;
 
   // TODO(mdebbar): Cluster's `bounds` and `advance` are relative to the span, which isn't very useful
@@ -805,12 +885,19 @@ abstract class WebCluster {
   //                coordinate conversion to make them relative to the line, for example. We should
   //                encapsulate that logic here and make it convenient to use.
   ui.Rect get bounds;
+
   ui.Rect get advance;
 
   ParagraphSpan get span;
+
   WebTextStyle get style;
 
   void fillOnContext(DomCanvasRenderingContext2D context, {required double x, required double y});
+
+  @override
+  String toString() {
+    return 'WebCluster [$start:$end)';
+  }
 }
 
 class TextCluster extends WebCluster {
@@ -818,6 +905,7 @@ class TextCluster extends WebCluster {
 
   @override
   final TextSpan span;
+
   @override
   WebTextStyle get style => span.style;
 
@@ -843,10 +931,47 @@ class TextCluster extends WebCluster {
       <String, double>{'x': x, 'y': y},
     );
   }
+
+  @override
+  String toString() {
+    return 'TextCluster [$start:$end) ${end - start}';
+  }
+}
+
+class EmptyCluster extends WebCluster {
+  EmptyCluster(this.span) : height = span.fontBoundingBoxAscent + span.fontBoundingBoxDescent;
+
+  final double height;
+
+  @override
+  final TextSpan span;
+
+  @override
+  WebTextStyle get style => span.style;
+
+  @override
+  final int startInSpan = 0;
+  @override
+  final int endInSpan = 0;
+
+  @override
+  late final ui.Rect bounds = ui.Rect.fromLTWH(0, 0, 0, height);
+  @override
+  late final ui.Rect advance = ui.Rect.fromLTWH(0, 0, 0, height);
+
+  @override
+  void fillOnContext(DomCanvasRenderingContext2D context, {required double x, required double y}) {
+    assert(false, 'We should not call fillOnContext method on this object');
+  }
+
+  @override
+  String toString() {
+    return 'EmptyCluster [$start:$end)';
+  }
 }
 
 class PlaceholderCluster extends WebCluster {
-  PlaceholderCluster(this.span);
+  PlaceholderCluster(this.span) : endInSpan = span.size;
 
   @override
   final PlaceholderSpan span;
@@ -854,7 +979,7 @@ class PlaceholderCluster extends WebCluster {
   @override
   final int startInSpan = 0;
   @override
-  final int endInSpan = 0;
+  final int endInSpan;
 
   @override
   WebTextStyle get style => span.style;
@@ -898,10 +1023,13 @@ abstract class LineBlock {
   double get multipliedFontBoundingBoxDescent => rawFontBoundingBoxDescent * _heightMultiplier;
 
   final ParagraphSpan span;
+
   WebTextStyle get style => span.style;
 
   final int _bidiLevel;
+
   bool get isLtr => _bidiLevel.isEven;
+
   bool get isRtl => !isLtr;
 
   final ClusterRange clusterRange;
@@ -918,6 +1046,7 @@ abstract class LineBlock {
   // ^-------------^ shiftFromLineStart
   // ^--------^      spanShiftFromLineStart
   final double shiftFromLineStart;
+
   // TODO(mdebbar): Remove when possible!
   double get spanShiftFromLineStart;
 }
