@@ -445,13 +445,6 @@ public class FlutterLoader {
       shellArgs.add("--prefetched-default-font-manager");
 
       if (metaData != null) {
-        if (metaData.containsKey(ENABLE_IMPELLER_META_DATA_KEY)) {
-          if (metaData.getBoolean(ENABLE_IMPELLER_META_DATA_KEY)) {
-            shellArgs.add("--enable-impeller=true");
-          } else {
-            shellArgs.add("--enable-impeller=false");
-          }
-        }
         if (metaData.getBoolean(ENABLE_VULKAN_VALIDATION_META_DATA_KEY, false)) {
           shellArgs.add("--enable-vulkan-validation");
         }
