@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('Semantic announcement', (WidgetTester tester) async {
+  test('Semantic announcement', () async {
     final List<Map<dynamic, dynamic>> log = <Map<dynamic, dynamic>>[];
 
     Future<dynamic> handleMessage(dynamic mockMessage) async {
@@ -20,9 +20,8 @@ void main() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, handleMessage);
 
-    await SemanticsService.sendAnnouncement(tester.view, 'announcement 1', TextDirection.ltr);
-    await SemanticsService.sendAnnouncement(
-      tester.view,
+    await SemanticsService.announce('announcement 1', TextDirection.ltr);
+    await SemanticsService.announce(
       'announcement 2',
       TextDirection.rtl,
       assertiveness: Assertiveness.assertive,
@@ -32,16 +31,11 @@ void main() {
       equals(<Map<String, dynamic>>[
         <String, dynamic>{
           'type': 'announce',
-          'data': <String, dynamic>{
-            'viewId': tester.view.viewId,
-            'message': 'announcement 1',
-            'textDirection': 1,
-          },
+          'data': <String, dynamic>{'message': 'announcement 1', 'textDirection': 1},
         },
         <String, dynamic>{
           'type': 'announce',
           'data': <String, dynamic>{
-            'viewId': tester.view.viewId,
             'message': 'announcement 2',
             'textDirection': 0,
             'assertiveness': 1,
