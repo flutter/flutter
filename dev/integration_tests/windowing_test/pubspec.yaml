@@ -1,0 +1,22 @@
+name: windowing_test
+description: Flutter windowing integration tests.
+
+environment:
+  sdk: ^3.8.0-0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_driver:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  test: any
+
+  path: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+# PUBSPEC CHECKSUM: 77jv2r

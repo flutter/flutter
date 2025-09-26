@@ -1,0 +1,18 @@
+name: multiple_windows
+
+environment:
+  sdk: ^3.8.0-0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  vector_math: ^2.2.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
+# PUBSPEC CHECKSUM: lkvhan
