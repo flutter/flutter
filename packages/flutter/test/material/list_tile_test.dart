@@ -1635,10 +1635,10 @@ void main() {
         MaterialApp(
           home: Material(
             child: ListTileTheme(
-              data: const ListTileThemeData(mouseCursor: MaterialStateMouseCursor.clickable),
+              data: const ListTileThemeData(mouseCursor: WidgetStateMouseCursor.clickable),
               child: ListTile(
                 key: tileKey,
-                mouseCursor: MaterialStateMouseCursor.textable,
+                mouseCursor: WidgetStateMouseCursor.textable,
                 title: const Text('Title'),
                 onTap: () {},
               ),
