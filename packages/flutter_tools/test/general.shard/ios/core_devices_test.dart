@@ -2724,53 +2724,6 @@ invalid JSON
     });
 
     group('list devices', () {
-      testWithoutContext('kills process when stopListDevices is called', () async {
-        final processCompleter = Completer<void>();
-        late final FakeProcess process;
-
-        final File expectedOutputFile = fileSystem.systemTempDirectory
-            .childDirectory('core_devices.rand0')
-            .childFile('core_device_list.json');
-
-        fakeProcessManager.addCommand(
-          FakeCommand(
-            command: <String>[
-              'xcrun',
-              'devicectl',
-              'list',
-              'devices',
-              '--timeout',
-              '5',
-              '--json-output',
-              expectedOutputFile.path,
-            ],
-            onRun: (_) {
-              expectedOutputFile.createSync(recursive: true);
-            },
-            completer: processCompleter,
-            onProcess: (FakeProcess p) => process = p,
-          ),
-        );
-
-        final Future<List<IOSCoreDevice>> futureDevices = deviceControl.getCoreDevices();
-
-        await pumpEventQueue();
-
-        deviceControl.stopListDevices();
-
-        await pumpEventQueue();
-
-        expect(process.signals, contains(io.ProcessSignal.sigterm));
-
-        processCompleter.complete();
-        final List<IOSCoreDevice> devices = await futureDevices;
-        expect(devices, isEmpty);
-      });
-      testWithoutContext('stopListDevices is a no-op if no process is running', () async {
-        deviceControl.stopListDevices();
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-      });
-
       testWithoutContext('Handles FileSystemException deleting temp directory', () async {
         final Directory tempDir = fileSystem.systemTempDirectory.childDirectory(
           'core_devices.rand0',
@@ -3846,6 +3799,22 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
   @override
   Future<List<IOSCoreDeviceRunningProcess>> getRunningProcesses({required String deviceId}) async {
     return runningProcesses;
+  }
+
+  @override
+  Future<(Process?, File?)> startListCoreDevices({
+    Duration timeout = const Duration(seconds: 2),
+  }) async {
+    return (null, null);
+  }
+
+  @override
+  Future<List<Object?>> getCoreDevicesFromHandledProcess({
+    required File output,
+    required int exitCode,
+    required List<String> command,
+  }) async {
+    return <Object?>[];
   }
 }
 

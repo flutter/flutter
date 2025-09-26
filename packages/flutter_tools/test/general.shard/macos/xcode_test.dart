@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' as io;
 
+import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/io.dart' show ProcessException;
@@ -28,7 +30,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/fakes.dart';
+import '../../src/fakes.dart' hide FakeProcess;
 
 void main() {
   late BufferLogger logger;
@@ -1518,6 +1520,50 @@ void main() {
         }, overrides: <Type, Generator>{Platform: () => macPlatform});
 
         group('with CoreDevices', () {
+          testUsingContext('wireless discovery is cancelled', () async {
+            final processCompleter = Completer<void>();
+            late final FakeProcess process;
+            final File expectedOutputFile = fileSystem.systemTempDirectory
+                .childDirectory('core_devices.rand0')
+                .childFile('core_device_list.json');
+
+            fakeProcessManager.addCommands(<FakeCommand>[
+              const FakeCommand(
+                command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '2'],
+                stdout: '[]',
+              ),
+              FakeCommand(
+                command: <String>[
+                  'xcrun',
+                  'devicectl',
+                  'list',
+                  'devices',
+                  '--timeout',
+                  '5',
+                  '--json-output',
+                  expectedOutputFile.path,
+                ],
+                onRun: (_) {
+                  expectedOutputFile.createSync(recursive: true);
+                },
+                completer: processCompleter,
+                onProcess: (FakeProcess p) => process = p,
+              ),
+            ]);
+
+            final Future<List<IOSDevice>> futureDevices = xcdevice
+                .getAvailableIOSDevicesForWirelessDiscovery();
+
+            await pumpEventQueue();
+
+            xcdevice.cancelWirelessDiscovery();
+
+            final List<IOSDevice> devices = await futureDevices;
+            expect(devices, isEmpty);
+
+            expect(process.signals, contains(io.ProcessSignal.sigterm));
+            expect(fakeProcessManager, hasNoRemainingExpectations);
+          });
           testUsingContext(
             'returns devices with corresponding CoreDevices',
             () async {

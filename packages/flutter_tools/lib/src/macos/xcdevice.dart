@@ -9,6 +9,7 @@ import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -102,11 +103,17 @@ class XCDevice {
     _setupDeviceIdentifierByEventStream();
   }
 
+  Completer<void>? _cancelWirelessDiscoveryCompleter;
+
   void dispose() {
     _stopObservingTetheredIOSDevices();
     _usbDeviceWaitProcess?.kill();
     _wifiDeviceWaitProcess?.kill();
     _coreDeviceControl.stopListDevices();
+  }
+
+  void cancelWirelessDiscovery() {
+    _cancelWirelessDiscoveryCompleter?.complete();
   }
 
   final ProcessUtils _processUtils;
@@ -453,7 +460,9 @@ class XCDevice {
 
     final coreDeviceMap = <String, IOSCoreDevice>{};
     if (_xcode.isDevicectlInstalled) {
-      final List<IOSCoreDevice> coreDevices = await _coreDeviceControl.getCoreDevices();
+      final List<IOSCoreDevice> coreDevices = await _coreDeviceControl.getCoreDevices(
+        timeout: timeout ?? const Duration(seconds: 2),
+      );
       for (final device in coreDevices) {
         if (device.udid == null) {
           continue;
@@ -499,6 +508,70 @@ class XCDevice {
     //  },
     // ...
 
+    return _parseXcdeviceList(
+      allAvailableDevices: allAvailableDevices,
+      coreDeviceMap: coreDeviceMap,
+    );
+  }
+
+  Future<List<IOSDevice>> getAvailableIOSDevicesForWirelessDiscovery({Duration? timeout}) async {
+    _cancelWirelessDiscoveryCompleter = Completer<void>();
+    final Completer<void> cancelCompleter = _cancelWirelessDiscoveryCompleter!;
+
+    final List<Object>? allAvailableDevices = await _getAllDevices(
+      timeout: timeout ?? const Duration(seconds: 2),
+    );
+    if (allAvailableDevices == null || cancelCompleter.isCompleted) {
+      return const <IOSDevice>[];
+    }
+
+    final coreDeviceMap = <String, IOSCoreDevice>{};
+    if (_xcode.isDevicectlInstalled) {
+      final (Process? process, File? output) = await _coreDeviceControl.startListCoreDevices(
+        timeout: timeout ?? const Duration(seconds: 30),
+      );
+      if (process != null && output != null) {
+        unawaited(
+          cancelCompleter.future.whenComplete(() {
+            _logger.printTrace('Cancelling wireless device discovery.');
+            process.kill();
+          }),
+        );
+
+        final int exitCode = await process.exitCode;
+        if (!cancelCompleter.isCompleted) {
+          final List<Object?> coreDeviceObjects = await _coreDeviceControl
+              .getCoreDevicesFromHandledProcess(
+                output: output,
+                exitCode: exitCode,
+                command: process.toString().split(' '),
+              );
+          for (final deviceObject in coreDeviceObjects) {
+            if (deviceObject is Map<String, Object?>) {
+              final device = IOSCoreDevice.fromBetaJson(deviceObject, logger: _logger);
+              if (device.udid != null) {
+                coreDeviceMap[device.udid!] = device;
+              }
+            }
+          }
+        }
+        ErrorHandlingFileSystem.deleteIfExists(output.parent, recursive: true);
+      }
+    }
+    if (cancelCompleter.isCompleted) {
+      return const <IOSDevice>[];
+    }
+
+    return _parseXcdeviceList(
+      allAvailableDevices: allAvailableDevices,
+      coreDeviceMap: coreDeviceMap,
+    );
+  }
+
+  List<IOSDevice> _parseXcdeviceList({
+    required List<Object> allAvailableDevices,
+    required Map<String, IOSCoreDevice> coreDeviceMap,
+  }) {
     final deviceMap = <String, IOSDevice>{};
     for (final Object device in allAvailableDevices) {
       if (device is Map<String, Object?>) {

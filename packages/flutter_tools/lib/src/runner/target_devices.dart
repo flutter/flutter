@@ -461,101 +461,102 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
     Duration? deviceDiscoveryTimeout,
     bool includeDevicesUnsupportedByProject = false,
   }) async {
-    if (!globals.doctor!.canLaunchAnything) {
-      _logger.printError(globals.userMessages.flutterNoDevelopmentDevice);
-      return null;
-    }
+    try {
+      if (!globals.doctor!.canLaunchAnything) {
+        _logger.printError(globals.userMessages.flutterNoDevelopmentDevice);
+        return null;
+      }
 
-    // When a user defines the timeout or filters to only attached devices,
-    // use the super function that does not do longer wireless device
-    // discovery and does not wait for devices to connect.
-    if (deviceDiscoveryTimeout != null ||
-        deviceConnectionInterface == DeviceConnectionInterface.attached) {
-      return super.findAllTargetDevices(
-        deviceDiscoveryTimeout: deviceDiscoveryTimeout,
-        includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
-      );
-    }
+      // When a user defines the timeout or filters to only attached devices,
+      // use the super function that does not do longer wireless device
+      // discovery and does not wait for devices to connect.
+      if (deviceDiscoveryTimeout != null ||
+          deviceConnectionInterface == DeviceConnectionInterface.attached) {
+        return super.findAllTargetDevices(
+          deviceDiscoveryTimeout: deviceDiscoveryTimeout,
+          includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
+        );
+      }
 
-    // Start polling for wireless devices that need longer to load if it hasn't
-    // already been started.
-    startExtendedWirelessDeviceDiscovery();
+      // Start polling for wireless devices that need longer to load if it hasn't
+      // already been started.
+      startExtendedWirelessDeviceDiscovery();
 
-    if (_deviceManager.hasSpecifiedDeviceId) {
-      // Get devices matching the specified device regardless of whether they
-      // are currently connected or not.
-      // If there is a single matching connected device, return it immediately.
-      // If the only device found is an iOS device that is not connected yet,
-      // wait for it to connect.
-      // If there are multiple matches, continue on to wait for all attached
-      // and wireless devices to load so the user can select between all
-      // connected matches.
-      final List<Device> specifiedDevices = await _getDeviceById(
-        includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
-        includeDisconnected: true,
-      );
+      if (_deviceManager.hasSpecifiedDeviceId) {
+        // Get devices matching the specified device regardless of whether they
+        // are currently connected or not.
+        // If there is a single matching connected device, return it immediately.
+        // If the only device found is an iOS device that is not connected yet,
+        // wait for it to connect.
+        // If there are multiple matches, continue on to wait for all attached
+        // and wireless devices to load so the user can select between all
+        // connected matches.
+        final List<Device> specifiedDevices = await _getDeviceById(
+          includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
+          includeDisconnected: true,
+        );
 
-      if (specifiedDevices.length == 1) {
-        Device? matchedDevice = specifiedDevices.first;
-        if (matchedDevice is IOSDevice) {
-          // If the only matching device is not paired, print a warning
-          if (!matchedDevice.isPaired) {
-            _logger.printStatus(flutterSpecifiedDeviceUnpaired(matchedDevice.displayName));
-            stopExtendedWirelessDeviceDiscovery();
-            return null;
-          }
-          // If the only matching device does not have Developer Mode enabled,
-          // print a warning
-          if (!matchedDevice.devModeEnabled) {
-            _logger.printStatus(flutterSpecifiedDeviceDevModeDisabled(matchedDevice.displayName));
-            stopExtendedWirelessDeviceDiscovery();
-            return null;
-          }
+        if (specifiedDevices.length == 1) {
+          Device? matchedDevice = specifiedDevices.first;
+          if (matchedDevice is IOSDevice) {
+            // If the only matching device is not paired, print a warning
+            if (!matchedDevice.isPaired) {
+              _logger.printStatus(flutterSpecifiedDeviceUnpaired(matchedDevice.displayName));
+              return null;
+            }
+            // If the only matching device does not have Developer Mode enabled,
+            // print a warning
+            if (!matchedDevice.devModeEnabled) {
+              _logger.printStatus(flutterSpecifiedDeviceDevModeDisabled(matchedDevice.displayName));
+              return null;
+            }
 
-          if (!matchedDevice.isConnected) {
-            matchedDevice = await _waitForIOSDeviceToConnect(matchedDevice);
-          }
-        }
-
-        if (matchedDevice != null && matchedDevice.isConnected) {
-          stopExtendedWirelessDeviceDiscovery();
-          return <Device>[matchedDevice];
-        }
-      } else {
-        for (final IOSDevice device in specifiedDevices.whereType<IOSDevice>()) {
-          // Print warning for every matching unpaired device.
-          if (!device.isPaired) {
-            _logger.printStatus(flutterSpecifiedDeviceUnpaired(device.displayName));
+            if (!matchedDevice.isConnected) {
+              matchedDevice = await _waitForIOSDeviceToConnect(matchedDevice);
+            }
           }
 
-          // Print warning for every matching device that does not have Developer Mode enabled.
-          if (!device.devModeEnabled) {
-            _logger.printStatus(flutterSpecifiedDeviceDevModeDisabled(device.displayName));
+          if (matchedDevice != null && matchedDevice.isConnected) {
+            return <Device>[matchedDevice];
+          }
+        } else {
+          for (final IOSDevice device in specifiedDevices.whereType<IOSDevice>()) {
+            // Print warning for every matching unpaired device.
+            if (!device.isPaired) {
+              _logger.printStatus(flutterSpecifiedDeviceUnpaired(device.displayName));
+            }
+
+            // Print warning for every matching device that does not have Developer Mode enabled.
+            if (!device.devModeEnabled) {
+              _logger.printStatus(flutterSpecifiedDeviceDevModeDisabled(device.displayName));
+            }
           }
         }
       }
+
+      final List<Device> attachedDevices = await _getAttachedDevices(
+        supportFilter: _defaultSupportFilter(includeDevicesUnsupportedByProject),
+      );
+
+      // _getRefreshedWirelessDevices must be run after _getAttachedDevices is
+      // finished to prevent non-iOS discoverers from running simultaneously.
+      // `AndroidDevices` may error if run simultaneously.
+      final Future<List<Device>> futureWirelessDevices = _getRefreshedWirelessDevices(
+        includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
+      );
+
+      if (attachedDevices.isEmpty) {
+        return _handleNoAttachedDevices(attachedDevices, futureWirelessDevices);
+      } else if (_deviceManager.hasSpecifiedAllDevices) {
+        return _handleAllDevices(attachedDevices, futureWirelessDevices);
+      }
+      // Even if there's only a single attached device, continue to
+      // `_handleRemainingDevices` since there might be wireless devices
+      // that are not loaded yet.
+      return _handleRemainingDevices(attachedDevices, futureWirelessDevices);
+    } finally {
+      stopExtendedWirelessDeviceDiscovery();
     }
-
-    final List<Device> attachedDevices = await _getAttachedDevices(
-      supportFilter: _defaultSupportFilter(includeDevicesUnsupportedByProject),
-    );
-
-    // _getRefreshedWirelessDevices must be run after _getAttachedDevices is
-    // finished to prevent non-iOS discoverers from running simultaneously.
-    // `AndroidDevices` may error if run simultaneously.
-    final Future<List<Device>> futureWirelessDevices = _getRefreshedWirelessDevices(
-      includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
-    );
-
-    if (attachedDevices.isEmpty) {
-      return _handleNoAttachedDevices(attachedDevices, futureWirelessDevices);
-    } else if (_deviceManager.hasSpecifiedAllDevices) {
-      return _handleAllDevices(attachedDevices, futureWirelessDevices);
-    }
-    // Even if there's only a single attached device, continue to
-    // `_handleRemainingDevices` since there might be wireless devices
-    // that are not loaded yet.
-    return _handleRemainingDevices(attachedDevices, futureWirelessDevices);
   }
 
   /// When no supported attached devices are found, wait for wireless devices
