@@ -3700,6 +3700,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   final _History _history = _History();
   late bool _isRootNavigator;
 
+  /// The value of [canPop] before the most recent change in navigation history.
   bool get _lastCanPop => _lastCanPopCached;
   bool _lastCanPopCached = false; // Because history is empty to start.
   set _lastCanPop(bool value) {
@@ -5957,6 +5958,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
     if (_handlesBackGestures) {
       return PopScope(
+        // This widget uses _lastCanPop to rebuild whenever canPop changes.
         canPop: !canPop(),
         onPopInvokedWithResult: (bool didPop, Object? result) {
           if (didPop) {
