@@ -35,7 +35,7 @@ Future<int> sumAsync(int a, int b) async {
   final SendPort helperIsolateSendPort = await _helperIsolateSendPort;
   final int requestId = _nextSumRequestId++;
   final _SumRequest request = _SumRequest(requestId, a, b);
-  final Completer<int> completer = Completer<int>();
+  final completer = Completer<int>();
   _sumRequests[requestId] = completer;
   helperIsolateSendPort.send(request);
   return completer.future;
@@ -86,7 +86,7 @@ class _SumResponse {
 int _nextSumRequestId = 0;
 
 /// Mapping from [_SumRequest] `id`s to the completers corresponding to the correct future of the pending request.
-final Map<int, Completer<int>> _sumRequests = <int, Completer<int>>{};
+final Map<int, Completer<int>> _sumRequests = {};
 
 /// The SendPort belonging to the helper isolate.
 Future<SendPort> _helperIsolateSendPort = () async {
