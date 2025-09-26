@@ -64,6 +64,85 @@ TEST_F(FlutterWindowsEngineTest, RunHeadless) {
   ASSERT_EQ(engine->view(123), nullptr);
 }
 
+TEST_F(FlutterWindowsEngineTest, TaskRunnerDelayedTask) {
+  bool finished = false;
+  auto runner = std::make_unique<TaskRunner>(
+      [] {
+        return static_cast<uint64_t>(
+            fml::TimePoint::Now().ToEpochDelta().ToNanoseconds());
+      },
+      [&](const FlutterTask*) { finished = true; });
+  runner->PostFlutterTask(
+      FlutterTask{},
+      static_cast<uint64_t>((fml::TimePoint::Now().ToEpochDelta() +
+                             fml::TimeDelta::FromMilliseconds(50))
+                                .ToNanoseconds()));
+  auto start = fml::TimePoint::Now();
+  while (!finished) {
+    PumpMessage();
+  }
+  auto duration = fml::TimePoint::Now() - start;
+  EXPECT_GE(duration, fml::TimeDelta::FromMilliseconds(50));
+}
+
+// https://github.com/flutter/flutter/issues/173843)
+TEST_F(FlutterWindowsEngineTest, TaskRunnerDoesNotDeadlock) {
+  auto runner = std::make_unique<TaskRunner>(
+      [] {
+        return static_cast<uint64_t>(
+            fml::TimePoint::Now().ToEpochDelta().ToNanoseconds());
+      },
+      [&](const FlutterTask*) {});
+
+  struct RunnerHolder {
+    void PostTaskLoop() {
+      runner->PostTask([this] { PostTaskLoop(); });
+    }
+    std::unique_ptr<TaskRunner> runner;
+  };
+
+  RunnerHolder container{.runner = std::move(runner)};
+  // Spam flutter tasks.
+  container.PostTaskLoop();
+
+  auto WndProc = [](HWND hWnd, UINT msg, WPARAM wParam,
+                    LPARAM lParam) -> LRESULT {
+    if (msg == WM_DESTROY) {
+      PostQuitMessage(0);
+      return 0;
+    }
+    return DefWindowProc(hWnd, msg, wParam, lParam);
+  };
+
+  const LPCWSTR class_name = L"FlutterTestWindowClass";
+  WNDCLASS wc = {0};
+  wc.lpfnWndProc = WndProc;
+  wc.lpszClassName = class_name;
+  RegisterClass(&wc);
+
+  HWND window;
+  container.runner->PostTask([&] {
+    window = CreateWindowEx(0, class_name, L"Empty Window", WS_OVERLAPPEDWINDOW,
+                            CW_USEDEFAULT, CW_USEDEFAULT, 800, 600, nullptr,
+                            nullptr, nullptr, nullptr);
+    ShowWindow(window, SW_SHOW);
+  });
+
+  while (true) {
+    ::MSG msg;
+    if (::GetMessage(&msg, nullptr, 0, 0)) {
+      if (msg.message == WM_PAINT) {
+        break;
+      }
+      ::TranslateMessage(&msg);
+      ::DispatchMessage(&msg);
+    }
+  }
+
+  DestroyWindow(window);
+  UnregisterClassW(class_name, nullptr);
+}
+
 TEST_F(FlutterWindowsEngineTest, RunDoesExpectedInitialization) {
   FlutterWindowsEngineBuilder builder{GetContext()};
   builder.AddDartEntrypointArgument("arg1");
