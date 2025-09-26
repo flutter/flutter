@@ -45,7 +45,7 @@ TaskRunnerWindow::TaskRunnerWindow() {
   thread_id_ = GetCurrentThreadId();
 
   // Increase timer precision for this process (the call only affects
-  // current process since Windows 10, version 2004).n
+  // current process since Windows 10, version 2004).
   timeBeginPeriod(1);
 }
 
