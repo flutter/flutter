@@ -16,7 +16,6 @@ import 'color_scheme.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
-import 'material_state.dart';
 import 'radio_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -545,10 +544,7 @@ class _RadioState<T> extends State<Radio<T>> {
         WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
           return WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
               radioTheme.mouseCursor?.resolve(states) ??
-              WidgetStateProperty.resolveAs<MouseCursor>(
-                WidgetStateMouseCursor.clickable,
-                states,
-              );
+              WidgetStateProperty.resolveAs<MouseCursor>(WidgetStateMouseCursor.clickable, states);
         });
     return RawRadio<T>(
       value: widget.value,
