@@ -15,6 +15,7 @@ dependencies:
   dtd: 4.0.0
   flutter_lints: 6.0.0
   google_fonts: 6.3.1
+  path: 1.9.1
   stack_trace: 1.12.1
   url_launcher: 6.3.2
 
@@ -37,7 +38,6 @@ dependencies:
   matcher: 0.12.17
   material_color_utilities: 0.11.1
   meta: 1.17.0
-  path: 1.9.1
   plugin_platform_interface: 2.1.8
   source_span: 1.10.1
   stream_channel: 2.1.4

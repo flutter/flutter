@@ -26,7 +26,7 @@ public class PathUtilsTest {
   public void canGetFilesDir() {
     Context context = mock(Context.class);
     when(context.getFilesDir()).thenReturn(new File(APP_DATA_PATH + "/files"));
-    assertEquals(PathUtils.getFilesDir(context), APP_DATA_PATH + "/files");
+    assertEquals(APP_DATA_PATH + "/files", PathUtils.getFilesDir(context));
   }
 
   @Test
@@ -38,7 +38,7 @@ public class PathUtilsTest {
     } else {
       when(context.getApplicationInfo().dataDir).thenReturn(APP_DATA_PATH);
     }
-    assertEquals(PathUtils.getFilesDir(context), APP_DATA_PATH + "/files");
+    assertEquals(APP_DATA_PATH + "/files", PathUtils.getFilesDir(context));
   }
 
   @Test
@@ -46,7 +46,7 @@ public class PathUtilsTest {
     Context context = mock(Context.class);
     when(context.getDir("flutter", Context.MODE_PRIVATE))
         .thenReturn(new File(APP_DATA_PATH + "/app_flutter"));
-    assertEquals(PathUtils.getDataDirectory(context), APP_DATA_PATH + "/app_flutter");
+    assertEquals(APP_DATA_PATH + "/app_flutter", PathUtils.getDataDirectory(context));
   }
 
   @Test
@@ -58,7 +58,7 @@ public class PathUtilsTest {
     } else {
       when(context.getApplicationInfo().dataDir).thenReturn(APP_DATA_PATH);
     }
-    assertEquals(PathUtils.getDataDirectory(context), APP_DATA_PATH + "/app_flutter");
+    assertEquals(APP_DATA_PATH + "/app_flutter", PathUtils.getDataDirectory(context));
   }
 
   @Test
@@ -77,6 +77,6 @@ public class PathUtilsTest {
     when(context.getCodeCacheDir()).thenReturn(null);
     // Requires at least api 24.
     when(context.getDataDir()).thenReturn(new File(APP_DATA_PATH));
-    assertEquals(PathUtils.getCacheDirectory(context), APP_DATA_PATH + "/cache");
+    assertEquals(APP_DATA_PATH + "/cache", PathUtils.getCacheDirectory(context));
   }
 }

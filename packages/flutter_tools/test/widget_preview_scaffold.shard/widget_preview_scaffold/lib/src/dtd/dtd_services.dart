@@ -19,6 +19,7 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   // START KEEP SYNCED
 
   static const String kWidgetPreviewService = 'widget-preview';
+  static const kIsWindows = 'isWindows';
   static const String kHotRestartPreviewer = 'hotRestartPreviewer';
   static const String kResolveUri = 'resolveUri';
 
@@ -40,8 +41,8 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
         const <String, Object?>{},
       ),
     );
-
-    await initializeEditorService();
+    await _determineIfWindows();
+    await initializeEditorService(this);
   }
 
   /// Disposes the DTD connection.
@@ -55,6 +56,13 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
     String methodName, {
     Map<String, Object?>? params,
   }) => dtd.safeCall(kWidgetPreviewService, methodName, params: params);
+
+  /// Returns `true` if the operating system is Windows.
+  late final bool isWindows;
+
+  Future<void> _determineIfWindows() async {
+    isWindows = ((await _call(kIsWindows)) as BoolResponse).value!;
+  }
 
   /// Trigger a hot restart of the widget preview scaffold.
   Future<void> hotRestartPreviewer() => _call(kHotRestartPreviewer);

@@ -59,6 +59,8 @@ class WidgetPreviewerWidgetScaffolding extends StatelessWidget {
 class FakeWidgetPreviewScaffoldDtdServices extends Fake
     with DtdEditorService
     implements WidgetPreviewScaffoldDtdServices {
+  FakeWidgetPreviewScaffoldDtdServices({this.isWindows = false});
+
   final navigationEvents = <CodeLocation>[];
 
   @override
@@ -83,6 +85,9 @@ class FakeWidgetPreviewScaffoldDtdServices extends Fake
   Future<Uri?> resolveUri(Uri uri) async {
     return uri;
   }
+
+  @override
+  final bool isWindows;
 
   /// The currently selected source file in the IDE.
   @override
