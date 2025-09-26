@@ -9,6 +9,13 @@
  */
 export class FlutterServiceWorkerLoader {
   /**
+   * Injects a TrustedTypesPolicy (or undefined if the feature is not supported).
+   * @param {TrustedTypesPolicy | undefined} policy
+   */
+  setTrustedTypesPolicy(policy) {
+    this._ttPolicy = policy;
+  }
+  /**
    * Disables service worker registration from flutter.js. This is now a no-op,
    * and a warning will be logged if any `settings` are provided.
    * @param {import("./types").ServiceWorkerSettings} settings Service worker settings
