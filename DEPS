@@ -253,7 +253,7 @@ deps = {
    Var('chromium_git') + '/external/github.com/google/shaderc' + '@' + '37e25539ce199ecaf19fb7f7d27818716d36686d',
 
   'engine/src/flutter/third_party/vulkan-deps':
-   Var('chromium_git') + '/vulkan-deps' + '@' + '938de304bdcb33049ec39ce45f16223eb6a960b6',
+   Var('chromium_git') + '/vulkan-deps' + '@' + 'a9e2ca3b57aba86a22a2df1b84bf12f8cc98806e',
 
   'engine/src/flutter/third_party/flatbuffers':
    Var('chromium_git') + '/external/github.com/google/flatbuffers' + '@' + '067bfdbde9b10c1beb5d6b02d67ae9db8b96f736',
@@ -522,7 +522,7 @@ deps = {
   Var('swiftshader_git') + '/SwiftShader.git' + '@' + 'd040a5bab638bf7c226235c95787ba6288bb6416',
 
   'engine/src/flutter/third_party/angle':
-  Var('chromium_git') + '/angle/angle.git' + '@' + '6a09e41ce6ea8c93524faae1a925eb01562f53b1',
+  Var('chromium_git') + '/angle/angle.git' + '@' + 'e28922c5e71eb32594c2562076cd5b15383e24d4',
 
   'engine/src/flutter/third_party/vulkan_memory_allocator':
   Var('chromium_git') + '/external/github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator' + '@' + 'c788c52156f3ef7bc7ab769cb03c110a53ac8fcb',
