@@ -531,7 +531,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
         WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
           return WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
               checkboxTheme.mouseCursor?.resolve(states) ??
-              MaterialStateMouseCursor.clickable.resolve(states);
+              WidgetStateMouseCursor.clickable.resolve(states);
         });
 
     // Colors need to be resolved in selected and non selected states separately
