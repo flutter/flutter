@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/windows/task_runner_window.h"
 
+#include <timeapi.h>
 #include <algorithm>
 #include <chrono>
 
@@ -42,6 +43,10 @@ TaskRunnerWindow::TaskRunnerWindow() {
   }
 
   thread_id_ = GetCurrentThreadId();
+
+  // Increase timer precision for this process (the call only affects
+  // current process since Windows 10, version 2004).n
+  timeBeginPeriod(1);
 }
 
 TaskRunnerWindow::~TaskRunnerWindow() {
@@ -54,6 +59,8 @@ TaskRunnerWindow::~TaskRunnerWindow() {
     window_handle_ = nullptr;
   }
   UnregisterClass(window_class_name_.c_str(), nullptr);
+
+  timeEndPeriod(1);
 }
 
 void TaskRunnerWindow::OnTimer() {
