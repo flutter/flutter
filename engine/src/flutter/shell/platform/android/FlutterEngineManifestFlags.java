@@ -36,18 +36,17 @@ public final class FlutterEngineManifestFlags {
       this.type = type;
     }
 
-   /**
-     * Converts this flag to its command-line argument form.
-     * For BOOLEAN flags: "--flag-name"
-     * For VALUE flags:   "--flag-name=value"
+    /**
+     * Converts this flag to its command-line argument form. For BOOLEAN flags: "--flag-name" For
+     * VALUE flags: "--flag-name=value"
      */
     public String toCommandLineFlag(String value) {
-        String flag = "--" + metaDataName.replaceAll("([a-z])([A-Z])", "$1-$2").toLowerCase();
-        if (type == FlagType.VALUE) {
-            return flag + "=" + value;
-        } else {
-            return flag;
-        }
+      String flag = "--" + metaDataName.replaceAll("([a-z])([A-Z])", "$1-$2").toLowerCase();
+      if (type == FlagType.VALUE) {
+        return flag + "=" + value;
+      } else {
+        return flag;
+      }
     }
   }
 
@@ -61,20 +60,11 @@ public final class FlutterEngineManifestFlags {
       new Flag("SkiaDeterministicRendering", true, FlagType.BOOLEAN);
   public static final Flag AOT_SHARED_LIBRARY_NAME = // set internally too
       new Flag("AotSharedLibraryName", true, FlagType.VALUE);
-  public static final Flag SNAPSHOT_ASSET_PATH =
-      new Flag("SnapshotAssetPath", true, FlagType.VALUE);
-  public static final Flag VM_SNAPSHOT_DATA = new Flag("VmSnapshotData", true, FlagType.VALUE);
-  public static final Flag ISOLATE_SNAPSHOT_DATA =
-      new Flag("IsolateSnapshotData", true, FlagType.VALUE);
   public static final Flag FLUTTER_ASSETS_DIR = new Flag("FlutterAssetsDir", true, FlagType.VALUE);
   public static final Flag AUTOMATICALLY_REGISTER_PLUGINS =
       new Flag("AutomaticallyRegisterPlugins", true, FlagType.BOOLEAN);
   public static final Flag OLD_GEN_HEAP_SIZE = new Flag("OldGenHeapSize", true, FlagType.VALUE);
-  public static final Flag ENABLE_IMPELLER =
-      new Flag(
-          "EnableImpeller",
-          true,
-          FlagType.BOOLEAN); // TODO(camsim99): check if this should be value
+  public static final Flag ENABLE_IMPELLER = new Flag("EnableImpeller", true, FlagType.VALUE);
   public static final Flag ENABLE_VULKAN_VALIDATION =
       new Flag("EnableVulkanValidation", false, FlagType.BOOLEAN);
   public static final Flag IMPELLER_BACKEND = new Flag("ImpellerBackend", true, FlagType.VALUE);
@@ -100,8 +90,6 @@ public final class FlutterEngineManifestFlags {
   //     ENABLE_SOFTWARE_RENDERING,
   //     SKIA_DETERMINISTIC_RENDERING,
   //     AOT_SHARED_LIBRARY_NAME,
-  //     SNAPSHOT_ASSET_PATH,
-  //     VM_SNAPSHOT_DATA,
   //     ISOLATE_SNAPSHOT_DATA,
   //     FLUTTER_ASSETS_DIR,
   //     AUTOMATICALLY_REGISTER_PLUGINS,
@@ -125,6 +113,7 @@ public final class FlutterEngineManifestFlags {
    * @param key The manifest meta-data key.
    * @return The Flag, or null if not found.
    */
+  // TODO(camsim99): optimize this with a Map if this becomes a performance issue.
   public static Flag getFlagByMetaDataKey(String key) {
     for (Flag flag : ALL_FLAGS) {
       if (flag.metaDataKey.equals(key)) {
