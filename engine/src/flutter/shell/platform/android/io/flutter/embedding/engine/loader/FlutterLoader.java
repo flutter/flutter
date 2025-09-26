@@ -74,7 +74,6 @@ public class FlutterLoader {
   private static final String LEAK_VM_META_DATA_KEY = "io.flutter.embedding.android.LeakVM";
 
   // Must match values in flutter::switches
-  static final String AOT_SHARED_LIBRARY_NAME = "aot-shared-library-name";
   static final String AOT_VMSERVICE_SHARED_LIBRARY_NAME = "aot-vmservice-shared-library-name";
   static final String SNAPSHOT_ASSET_PATH_KEY = "snapshot-asset-path";
   static final String VM_SNAPSHOT_DATA_KEY = "vm-snapshot-data";
@@ -89,9 +88,6 @@ public class FlutterLoader {
   private static final String VMSERVICE_SNAPSHOT_LIBRARY = "libvmservice_snapshot.so";
 
   private static FlutterLoader instance;
-
-  @VisibleForTesting
-  static final String aotSharedLibraryNameFlag = "--" + AOT_SHARED_LIBRARY_NAME + "=";
 
   /**
    * Creates a {@code FlutterLoader} that uses a default constructed {@link FlutterJNI} and {@link
@@ -331,24 +327,6 @@ public class FlutterLoader {
             continue;
           }
 
-          // Perform security check for path containing application's compiled Dart code and
-          // potentially user-provided compiled native code.
-          if (arg.startsWith(aotSharedLibraryNameFlag)) {
-            String safeAotSharedLibraryNameFlag =
-                getSafeAotSharedLibraryNameFlag(applicationContext, arg);
-            if (safeAotSharedLibraryNameFlag != null) {
-              arg = safeAotSharedLibraryNameFlag;
-            } else {
-              // If the library path is not safe, we will skip adding this argument.
-              Log.w(
-                  TAG,
-                  "Skipping unsafe AOT shared library name flag: "
-                      + arg
-                      + ". Please ensure that the library is vetted and placed in your application's internal storage.");
-              continue;
-            }
-          }
-
           shellArgs.add(arg);
         }
       }
@@ -362,22 +340,40 @@ public class FlutterLoader {
         if (flag != null) {
           // Only add flags that are allowed in the current build mode.
           if (flag.allowedInRelease || !BuildConfig.RELEASE) {
-            String arg = "--" + metadataKey;
 
+            // Perform security check for path containing application's compiled Dart code and
+            // potentially user-provided compiled native code.
+            if (flag == FlutterEngineManifestFlags.AOT_SHARED_LIBRARY_NAME) {
+              String safeAotSharedLibraryNameFlag =
+                  getSafeAotSharedLibraryNameFlag(
+                      applicationContext, applicationMetaData.get(metadataKey));
+              if (safeAotSharedLibraryNameFlag != null) {
+                shellArgs.add("--aot-shared-library-name=" + safeAotSharedLibraryNameFlag);
+              } else {
+                // If the library path is not safe, we will skip adding this argument.
+                Log.w(
+                    TAG,
+                    "Skipping unsafe AOT shared library name flag: "
+                        + arg
+                        + ". Please ensure that the library is vetted and placed in your application's internal storage.");
+              }
+              continue;
+            }
+
+            // Add flag automatically if it does not require a security check.
+            String arg = "--" + metadataKey; // TODO(camsim99): this is not correct.
             if (flag.type == FlagType.VALUE) {
-            arg += "=" + applicationMetaData.get(metadataKey);
+              arg += "=" + applicationMetaData.get(metadataKey);
             }
             shellArgs.add(arg);
           }
         } else {
           Log.w(
-                  TAG,
-                  "Flag with metadata key "
-                      + metadataKey
-                      + " is not recognized. Please ensure that the flag is defined in the FlutterEngineManifestFlags.");
-              continue;
-            }
-          }
+              TAG,
+              "Flag with metadata key "
+                  + metadataKey
+                  + " is not recognized. Please ensure that the flag is defined in the FlutterEngineManifestFlags.");
+          continue;
         }
       }
 
@@ -522,16 +518,8 @@ public class FlutterLoader {
    * for more information.
    */
   private String getSafeAotSharedLibraryNameFlag(
-      @NonNull Context applicationContext, @NonNull String aotSharedLibraryNameArg)
+      @NonNull Context applicationContext, @NonNull String aotSharedLibraryPath)
       throws IOException {
-    // Isolate AOT shared library path.
-    if (!aotSharedLibraryNameArg.startsWith(aotSharedLibraryNameFlag)) {
-      throw new IllegalArgumentException(
-          "AOT shared library name flag was not specified correctly; please use --aot-shared-library-name=<path>.");
-    }
-    String aotSharedLibraryPath =
-        aotSharedLibraryNameArg.substring(aotSharedLibraryNameFlag.length());
-
     // Canocalize path for safety analysis.
     File aotSharedLibraryFile = getFileFromPath(aotSharedLibraryPath);
 
