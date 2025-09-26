@@ -25,6 +25,7 @@ NS_ASSUME_NONNULL_BEGIN
  *  * `UIWindowSceneDelegate`, additional methods that you use to manage app-specific tasks
  *    occurring in a scene: https://developer.apple.com/documentation/uikit/uiwindowscenedelegate
  */
+API_AVAILABLE(ios(13.0))
 @protocol FlutterSceneLifeCycleDelegate
 
 @optional
@@ -80,6 +81,7 @@ NS_ASSUME_NONNULL_BEGIN
  * and forwarding them to any plugins.
  */
 FLUTTER_DARWIN_EXPORT
+API_AVAILABLE(ios(13.0))
 @interface FlutterPluginSceneLifeCycleDelegate : NSObject
 
 #pragma mark - Connecting and disconnecting the scene
@@ -127,6 +129,7 @@ FLUTTER_DARWIN_EXPORT
  *
  * This is typically implemented by the app's `SceneDelegate`.
  */
+API_AVAILABLE(ios(13.0))
 @protocol FlutterSceneLifeCycleProvider
 @property(nonatomic, strong) FlutterPluginSceneLifeCycleDelegate* sceneLifeCycleDelegate;
 @end
