@@ -10,19 +10,21 @@
 //
 // 1. Have the `@internal` attribute.
 // 2. Throw an `UnsupportedError` if `isWindowingEnabled`
-//    is `false.
+//    is `false`.
 //
 // See: https://github.com/flutter/flutter/issues/30701.
 
 import 'dart:ui' show Display, FlutterView;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
 
 import '../foundation/_features.dart';
+import '_window_io.dart' if (dart.library.js_interop) '_window_web.dart' as window_impl;
+import 'basic.dart';
 import 'binding.dart';
 import 'framework.dart';
 import 'inherited_model.dart';
+import 'transitions.dart';
 import 'view.dart';
 
 const String _kWindowingDisabledErrorMessage = '''
@@ -60,7 +62,7 @@ See: https://github.com/flutter/flutter/issues/30701.
 ///
 ///  * [RegularWindowController], the controller for regular top-level windows.
 @internal
-sealed class BaseWindowController {
+sealed class BaseWindowController extends ChangeNotifier {
   /// The current size of the drawable area of the window.
   ///
   /// This might differ from the requested size.
@@ -136,12 +138,6 @@ mixin class RegularWindowControllerDelegate {
   void onWindowDestroyed() {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
-    }
-
-    final WindowingOwner owner = WidgetsBinding.instance.windowingOwner;
-    if (!owner.hasTopLevelWindows()) {
-      // TODO(mattkae): close the application if this is the last window
-      // via ServicesBinding.instance.exitApplication(AppExitType.cancelable);
     }
   }
 }
@@ -246,12 +242,18 @@ abstract class RegularWindowController extends BaseWindowController {
     );
   }
 
-  /// Creates an empty [RegularWindowController] for testing purposes.
+  /// Creates an empty [RegularWindowController].
+  ///
+  /// This method is only intended to be used by subclasses of the
+  /// [RegularWindowController].
+  ///
+  /// Users who want to instantiate a new [RegularWindowController] should
+  /// always use the factory method to create a controller that is valid
+  /// for their particular platform.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   @protected
-  @visibleForTesting
   RegularWindowController.empty();
 
   /// The current title of the window.
@@ -398,19 +400,23 @@ abstract class WindowingOwner {
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   bool hasTopLevelWindows();
+}
 
-  /// Creates default windowing owner for standard desktop embedders.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  static WindowingOwner createDefaultOwner() {
-    if (!isWindowingEnabled) {
-      return _WindowingOwnerUnsupported(errorMessage: _kWindowingDisabledErrorMessage);
-    }
-
-    // TODO(mattkae): Implement windowing owners for desktop platforms.
-    return _WindowingOwnerUnsupported(errorMessage: 'Windowing is unsupported on this platform.');
+/// Creates default windowing owner for standard desktop embedders.
+///
+/// {@macro flutter.widgets.windowing.experimental}
+@internal
+WindowingOwner createDefaultWindowingOwner() {
+  if (!isWindowingEnabled) {
+    return _WindowingOwnerUnsupported(errorMessage: _kWindowingDisabledErrorMessage);
   }
+
+  final WindowingOwner? owner = window_impl.createDefaultOwner();
+  if (owner != null) {
+    return owner;
+  }
+
+  return _WindowingOwnerUnsupported(errorMessage: 'Windowing is unsupported on this platform.');
 }
 
 /// Windowing delegate used on platforms that do not support windowing.
@@ -507,9 +513,12 @@ class RegularWindow extends StatelessWidget {
   @internal
   @override
   Widget build(BuildContext context) {
-    return WindowScope(
-      controller: controller,
-      child: View(view: controller.rootView, child: child),
+    return ListenableBuilder(
+      listenable: controller,
+      builder: (BuildContext context, Widget? widget) => WindowScope(
+        controller: controller,
+        child: View(view: controller.rootView, child: child),
+      ),
     );
   }
 }
