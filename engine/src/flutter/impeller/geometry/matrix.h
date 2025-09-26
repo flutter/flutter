@@ -273,12 +273,12 @@ struct Matrix {
     } else {
       return Type::kGeneral;
     }
-  };
+  }
 
   /// Classify the |Type| of matrix for a 2D operation on coordinates of the
   /// form {x,y,0,1}. Matrix entries that only affect incoming or outgoing
   /// z values are ignored.
-  constexpr inline Type Classify2D() const {
+  constexpr Type Classify2D() const {
     if (m[3] == 0.0f && m[7] == 0.0f && m[15] == 1.0f) {
       if (m[1] == 0.0f && m[4] == 0.0f) {
         return Type::kScaleTranslate;
@@ -287,7 +287,7 @@ struct Matrix {
     } else {
       return Type::kGeneral;
     }
-  };
+  }
 
   /// The Matrix without its `w` components (without translation).
   constexpr Matrix Basis() const {

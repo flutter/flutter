@@ -504,20 +504,20 @@ struct TRect {
       return {};
     }
 
-    Scalar tx = transform.m[12];
-    Scalar ty = transform.m[13];
-    Scalar sx = transform.m[0];
-    Scalar sy = transform.m[5];
+    Scalar translate_x = transform.m[12];
+    Scalar translate_y = transform.m[13];
+    Scalar scale_x = transform.m[0];
+    Scalar scale_y = transform.m[5];
 
-    Scalar l = GetLeft() * sx + tx;
-    Scalar r = GetRight() * sx + tx;
-    Scalar t = GetTop() * sy + ty;
-    Scalar b = GetBottom() * sy + ty;
+    Scalar x1 = translate_x + scale_x * GetLeft();
+    Scalar x2 = translate_x + scale_x * GetRight();
+    Scalar y1 = translate_y + scale_y * GetTop();
+    Scalar y2 = translate_y + scale_y * GetBottom();
 
-    return TRect<float>::MakeLTRB(std::min(l, r),  //
-                                  std::min(t, b),  //
-                                  std::max(l, r),  //
-                                  std::max(t, b)   //
+    return TRect::MakeLTRB(std::min(x1, x2),  //
+                           std::min(y1, y2),  //
+                           std::max(x1, x2),  //
+                           std::max(y1, y2)   //
     );
   }
 
