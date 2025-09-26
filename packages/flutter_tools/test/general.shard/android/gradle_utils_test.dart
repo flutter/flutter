@@ -1278,9 +1278,10 @@ allprojects {
       JavaAgpTestData(true, javaVersion: '25', agpVersion: '9.0'),
       // Strictly too new AGP versions.
       // *The tests that follow need to be updated* when max supported AGP versions are updated:
-      JavaAgpTestData(false, javaVersion: '26', agpVersion: '10.0'),
-      JavaAgpTestData(false, javaVersion: '21', agpVersion: '10.0'),
-      JavaAgpTestData(true, javaVersion: '25', agpVersion: maxKnownAndSupportedAgpVersion),
+      JavaAgpTestData(true, javaVersion: '26', agpVersion: '10.0'),
+      JavaAgpTestData(true, javaVersion: '21', agpVersion: '10.0'),
+      JavaAgpTestData(true, javaVersion: '17', agpVersion: '10.0'),
+      JavaAgpTestData(true, javaVersion: '17.0.3', agpVersion: '10.0'),
       // Java 17 & patch versions compatibility cases
       // *The tests that follow need to be updated* when maxKnownAndSupportedAgpVersion is
       // updated:
@@ -1300,7 +1301,6 @@ allprojects {
       JavaAgpTestData(true, javaVersion: '17', agpVersion: '8.1'),
       JavaAgpTestData(true, javaVersion: '17', agpVersion: '8.0'),
       JavaAgpTestData(true, javaVersion: '17', agpVersion: '7.4'),
-      JavaAgpTestData(false, javaVersion: '17.0.3', agpVersion: '10.0'),
       JavaAgpTestData(true, javaVersion: '25', agpVersion: maxKnownAndSupportedAgpVersion),
       JavaAgpTestData(true, javaVersion: '17.0.3', agpVersion: '8.8'),
       JavaAgpTestData(true, javaVersion: '17.0.3', agpVersion: '8.7'),

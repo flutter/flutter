@@ -944,7 +944,7 @@ JavaGradleCompat? getValidGradleVersionRangeForJavaVersion(Logger logger, {requi
 /// compatible with each other.
 ///
 /// Returns true when the specified Java and AGP versions are
-/// definitely compatible; otherwise, false is assumed by default. In addition,
+/// definitely compatible; True if AGP is newer than known, otherwise, false. In addition,
 /// this will return false when either a null Java or AGP version is provided.
 ///
 /// Source of truth are the AGP release notes:
@@ -973,7 +973,7 @@ bool validateJavaAndAgp(Logger logger, {required String? javaV, required String?
     inclusiveMin: false,
   )) {
     logger.printTrace('AGP Version: $agpV is too new to determine Java compatibility.');
-    return false;
+    return true;
   }
 
   // Begin known Java <-> AGP evaluation.
