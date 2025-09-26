@@ -61,7 +61,9 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   late final bool isWindows;
 
   Future<void> _determineIfWindows() async {
-    isWindows = ((await _call(kIsWindows)) as BoolResponse).value!;
+    isWindows = (BoolResponse.fromDTDResponse(
+      (await _call(kIsWindows))!,
+    )).value!;
   }
 
   /// Trigger a hot restart of the widget preview scaffold.
