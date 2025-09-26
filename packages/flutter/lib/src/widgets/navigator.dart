@@ -3700,8 +3700,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   final _History _history = _History();
   late bool _isRootNavigator;
 
-  bool _lastCanPopCached = false; // Because history is empty to start.
   bool get _lastCanPop => _lastCanPopCached;
+  bool _lastCanPopCached = false; // Because history is empty to start.
   set _lastCanPop(bool value) {
     // If this Navigator handles back gestures, then rebuild when canPop changes
     // so that the PopScope can be updated.
