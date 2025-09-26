@@ -28,7 +28,7 @@ extension WidgetPreviewScaffoldDtdUtils on DartToolingDaemon {
     try {
       return await call(serviceName, methodName, params: params);
     } on RpcException catch (e) {
-      if (e.code != RpcErrorCodes.kMethodNotFound ||
+      if (e.code != RpcErrorCodes.kMethodNotFound &&
           e.code != RpcErrorCodes.kServiceDisappeared) {
         rethrow;
       }
