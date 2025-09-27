@@ -508,7 +508,7 @@ class AndroidProject extends FlutterProjectPlatform {
   /// The Gradle root directory of the Android wrapping of Flutter and plugins.
   /// This is the same as [hostAppGradleRoot] except when the project is
   /// a Flutter module with an editable host app.
-  Directory get _flutterLibGradleRoot => isModule ? ephemeralDirectory : _editableHostAppDirectory;
+  Directory get _flutterLibGradleRoot => isPlugin ? parent.directory : isModule ? ephemeralDirectory : _editableHostAppDirectory;
 
   Directory get ephemeralDirectory => parent.directory.childDirectory('.android');
   Directory get _editableHostAppDirectory => parent.directory;
