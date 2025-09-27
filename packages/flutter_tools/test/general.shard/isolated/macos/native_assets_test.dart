@@ -359,17 +359,17 @@ void main() {
   // randomization causing issues with what processes are invoked.
   // Exercise the parsing of the process output in this separate test.
   testUsingContext(
-    'NativeAssetsBuildRunnerImpl.cCompilerConfig',
+    'NativeAssetsBuildRunnerImpl.cCompilerConfig normal installation',
     overrides: <Type, Generator>{
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(
-          command: <Pattern>['xcrun', 'clang', '--version'],
-          stdout: '''
-Apple clang version 14.0.0 (clang-1400.0.29.202)
-Target: arm64-apple-darwin22.6.0
-Thread model: posix
-InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin''',
-        ),
+        for (final binary in <String>['clang', 'ar', 'ld'])
+          FakeCommand(
+            command: <Pattern>['xcrun', '--find', binary],
+            stdout:
+                '''
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/$binary
+''', // NOTE: explicitly test needing to trim new line
+          ),
       ]),
     },
     () async {
@@ -384,6 +384,41 @@ InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault
           '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang',
         ),
       );
+      expect(
+        result.archiver,
+        Uri.file(
+          '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar',
+        ),
+      );
+      expect(
+        result.linker,
+        Uri.file(
+          '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld',
+        ),
+      );
+    },
+  );
+
+  testUsingContext(
+    'NativeAssetsBuildRunnerImpl.cCompilerConfig Nix installation',
+    overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        for (final binary in <String>['clang', 'ar', 'ld'])
+          FakeCommand(
+            command: <Pattern>['xcrun', '--find', binary],
+            stdout: '/nix/store/random-path-to-clang-wrapper/bin/$binary',
+          ),
+      ]),
+    },
+    () async {
+      if (!const LocalPlatform().isMacOS) {
+        return;
+      }
+
+      final CCompilerConfig result = await cCompilerConfigMacOS();
+      expect(result.compiler, Uri.file('/nix/store/random-path-to-clang-wrapper/bin/clang'));
+      expect(result.archiver, Uri.file('/nix/store/random-path-to-clang-wrapper/bin/ar'));
+      expect(result.linker, Uri.file('/nix/store/random-path-to-clang-wrapper/bin/ld'));
     },
   );
 }
