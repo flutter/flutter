@@ -108,8 +108,8 @@ table Shader {
 }
 
 table ShaderBundle {
-  format_version: uint32;  // This is intended to hold ShaderBundleFormatVersion.kVersion.
   shaders: [Shader];
+  format_version: uint32;  // This is intended to hold ShaderBundleFormatVersion.kVersion.
 }
 
 root_type ShaderBundle;

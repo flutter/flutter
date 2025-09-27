@@ -190,7 +190,7 @@ fml::RefPtr<ShaderLibrary> ShaderLibrary::MakeFromFlatbuffer(
       impeller::fb::shaderbundle::ShaderBundleFormatVersion::kVersion);
   if (version != expected) {
     VALIDATION_LOG << "Unsupported shader bundle format version: " << version
-                   << ". Expected: " << expected;
+                   << ", expected: " << expected;
     return nullptr;
   }
 
