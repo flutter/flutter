@@ -856,6 +856,38 @@ void main() {
     expect(renderGroup.geometry!.cacheExtent, 850.0);
   });
 
+  testWidgets('SliverMainAxisGroup has consistent cacheOrigin', (WidgetTester tester) async {
+    const Widget item = SizedBox.square(dimension: 50);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            SliverMainAxisGroup(
+              slivers: <Widget>[
+                const PinnedHeaderSliver(child: SizedBox(height: 500)),
+                SliverList.builder(
+                  itemCount: 100,
+                  itemBuilder: (BuildContext context, int index) => item,
+                ),
+                const SliverToBoxAdapter(child: item),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.scrollUntilVisible(find.byType(SliverToBoxAdapter), 500);
+    await tester.pumpAndSettle();
+
+    final RenderSliver sliverList =
+        find.byType(SliverList).evaluate().single.findRenderObject()! as RenderSliver;
+
+    expect(sliverList.constraints.cacheOrigin, -250.0);
+    expect(sliverList.constraints.remainingCacheExtent, 1100);
+  });
+
   testWidgets('SliverMainAxisGroup correctly handles ensureVisible', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
