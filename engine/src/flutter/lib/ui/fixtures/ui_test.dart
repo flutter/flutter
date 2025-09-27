@@ -199,6 +199,26 @@ void sendSemanticsUpdate() {
   transform[13] = 0;
   transform[14] = 0;
   transform[15] = 0;
+
+  hitTestTransform[0] = 1;
+  hitTestTransform[1] = 0;
+  hitTestTransform[2] = 0;
+  hitTestTransform[3] = 0;
+
+  hitTestTransform[4] = 0;
+  hitTestTransform[5] = 1;
+  hitTestTransform[6] = 0;
+  hitTestTransform[7] = 0;
+
+  hitTestTransform[8] = 0;
+  hitTestTransform[9] = 0;
+  hitTestTransform[10] = 1;
+  hitTestTransform[11] = 0;
+
+  hitTestTransform[12] = 0;
+  hitTestTransform[13] = 0;
+  hitTestTransform[14] = 0;
+  hitTestTransform[15] = 0;
   builder.updateNode(
     id: 0,
     flags: SemanticsFlags.none,
@@ -255,6 +275,10 @@ void sendSemanticsUpdateWithRole() {
   transform[0] = 1;
   transform[5] = 1;
   transform[10] = 1;
+
+  hitTestTransform[0] = 1;
+  hitTestTransform[5] = 1;
+  hitTestTransform[10] = 1;
   builder.updateNode(
     id: 0,
     flags: SemanticsFlags.none,
@@ -312,6 +336,10 @@ void sendSemanticsUpdateWithLocale() {
   transform[0] = 1;
   transform[5] = 1;
   transform[10] = 1;
+
+  hitTestTransform[0] = 1;
+  hitTestTransform[5] = 1;
+  hitTestTransform[10] = 1;
   builder.updateNode(
     id: 0,
     flags: SemanticsFlags.none,
