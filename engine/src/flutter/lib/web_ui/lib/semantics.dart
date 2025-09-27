@@ -339,6 +339,7 @@ class SemanticsFlags {
     this.isExpanded = Tristate.none,
     this.isRequired = Tristate.none,
     this.isFocused = Tristate.none,
+    this.isA11yFocusable = Tristate.none,
     this.isButton = false,
     this.isTextField = false,
     this.isInMutuallyExclusiveGroup = false,
@@ -364,6 +365,7 @@ class SemanticsFlags {
   final Tristate isExpanded;
   final Tristate isRequired;
   final Tristate isFocused;
+  final Tristate isA11yFocusable;
   final bool isButton;
   final bool isTextField;
   final bool isInMutuallyExclusiveGroup;
@@ -390,6 +392,7 @@ class SemanticsFlags {
       isExpanded: isExpanded.merge(other.isExpanded),
       isRequired: isRequired.merge(other.isRequired),
       isFocused: isFocused.merge(other.isFocused),
+      isA11yFocusable: isA11yFocusable.merge(other.isA11yFocusable),
       isButton: isButton || other.isButton,
       isTextField: isTextField || other.isTextField,
       isInMutuallyExclusiveGroup: isInMutuallyExclusiveGroup || other.isInMutuallyExclusiveGroup,
@@ -417,6 +420,7 @@ class SemanticsFlags {
     Tristate? isExpanded,
     Tristate? isRequired,
     Tristate? isFocused,
+    Tristate? isA11yFocusable,
     bool? isButton,
     bool? isTextField,
     bool? isInMutuallyExclusiveGroup,
@@ -440,6 +444,7 @@ class SemanticsFlags {
       isButton: isButton ?? this.isButton,
       isTextField: isTextField ?? this.isTextField,
       isFocused: isFocused ?? this.isFocused,
+      isA11yFocusable: isA11yFocusable ?? this.isA11yFocusable,
       isEnabled: isEnabled ?? this.isEnabled,
       isInMutuallyExclusiveGroup: isInMutuallyExclusiveGroup ?? this.isInMutuallyExclusiveGroup,
       isHeader: isHeader ?? this.isHeader,
@@ -473,6 +478,7 @@ class SemanticsFlags {
           isExpanded == other.isExpanded &&
           isRequired == other.isRequired &&
           isFocused == other.isFocused &&
+          isA11yFocusable == other.isA11yFocusable &&
           isButton == other.isButton &&
           isTextField == other.isTextField &&
           isInMutuallyExclusiveGroup == other.isInMutuallyExclusiveGroup &&
@@ -499,6 +505,7 @@ class SemanticsFlags {
     isExpanded,
     isRequired,
     isFocused,
+    isA11yFocusable,
     isButton,
     isTextField,
     isInMutuallyExclusiveGroup,
@@ -541,6 +548,8 @@ class SemanticsFlags {
       if (isMultiline) 'isMultiline',
       if (isReadOnly) 'isReadOnly',
       if (isFocused != Tristate.none) 'isFocusable',
+      if (isA11yFocusable == Tristate.isFalse) 'isNotA11yFocusable',
+      if (isA11yFocusable == Tristate.isTrue) 'isA11yFocusable',
       if (isLink) 'isLink',
       if (isSlider) 'isSlider',
       if (isKeyboardKey) 'isKeyboardKey',
@@ -562,6 +571,7 @@ class SemanticsFlags {
         isExpanded.hasConflict(other.isExpanded) ||
         isRequired.hasConflict(other.isRequired) ||
         isFocused.hasConflict(other.isFocused) ||
+        isA11yFocusable.hasConflict(other.isA11yFocusable) ||
         (isButton && other.isButton) ||
         (isTextField && other.isTextField) ||
         (isInMutuallyExclusiveGroup && other.isInMutuallyExclusiveGroup) ||

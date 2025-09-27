@@ -955,6 +955,9 @@ class RenderCustomPaint extends RenderProxyBox {
     if (properties.focused != null) {
       config.isFocused = properties.focused;
     }
+    if (properties.a11yFocusable != null) {
+      config.isA11yFocusable = properties.a11yFocusable;
+    }
     if (properties.enabled != null) {
       config.isEnabled = properties.enabled;
     }

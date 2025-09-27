@@ -1172,6 +1172,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
     this.isExpanded = Tristate.none,
     this.isRequired = Tristate.none,
     this.isFocused = Tristate.none,
+    this.isA11yFocusable = Tristate.none,
     this.isButton = false,
     this.isTextField = false,
     this.isInMutuallyExclusiveGroup = false,
@@ -1198,6 +1199,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
       isExpanded.value,
       isRequired.value,
       isFocused.value,
+      isA11yFocusable.value,
       isButton,
       isTextField,
       isInMutuallyExclusiveGroup,
@@ -1220,6 +1222,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
   @Native<
     Void Function(
       Handle,
+      Int,
       Int,
       Int,
       Int,
@@ -1254,6 +1257,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
     int isExpanded,
     int isRequired,
     int isFocused,
+    int isA11yFocusable,
     bool isButton,
     bool isTextField,
     bool isInMutuallyExclusiveGroup,
@@ -1295,6 +1299,16 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
 
   /// {@macro dart.ui.semantics.isFocused}
   final Tristate isFocused;
+
+  /// If not [Tristate.none], whether this node can be focused by accessibility services.
+  ///
+  /// If [Tristate.none], the a11y focusability is determined based on
+  /// the node's role and other properties, such as whether it is a button.
+  ///
+  /// This is for accessibility focus, which is the focus used by screen readers
+  /// like TalkBack and VoiceOver. It is different from input focus, which is
+  /// usually held by the element that currently responds to keyboard inputs.
+  final Tristate isA11yFocusable;
 
   /// {@macro dart.ui.semantics.isButton}
   final bool isButton;
@@ -1354,6 +1368,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
       isExpanded: isExpanded.merge(other.isExpanded),
       isRequired: isRequired.merge(other.isRequired),
       isFocused: isFocused.merge(other.isFocused),
+      isA11yFocusable: isA11yFocusable.merge(other.isA11yFocusable),
       isButton: isButton || other.isButton,
       isTextField: isTextField || other.isTextField,
       isInMutuallyExclusiveGroup: isInMutuallyExclusiveGroup || other.isInMutuallyExclusiveGroup,
@@ -1382,6 +1397,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
     Tristate? isExpanded,
     Tristate? isRequired,
     Tristate? isFocused,
+    Tristate? isA11yFocusable,
     bool? isButton,
     bool? isTextField,
     bool? isInMutuallyExclusiveGroup,
@@ -1405,6 +1421,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
       isButton: isButton ?? this.isButton,
       isTextField: isTextField ?? this.isTextField,
       isFocused: isFocused ?? this.isFocused,
+      isA11yFocusable: isA11yFocusable ?? this.isA11yFocusable,
       isEnabled: isEnabled ?? this.isEnabled,
       isInMutuallyExclusiveGroup: isInMutuallyExclusiveGroup ?? this.isInMutuallyExclusiveGroup,
       isHeader: isHeader ?? this.isHeader,
@@ -1438,6 +1455,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
           isExpanded == other.isExpanded &&
           isRequired == other.isRequired &&
           isFocused == other.isFocused &&
+          isA11yFocusable == other.isA11yFocusable &&
           isButton == other.isButton &&
           isTextField == other.isTextField &&
           isInMutuallyExclusiveGroup == other.isInMutuallyExclusiveGroup &&
@@ -1464,6 +1482,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
     isExpanded,
     isRequired,
     isFocused,
+    isA11yFocusable,
     isButton,
     isTextField,
     isInMutuallyExclusiveGroup,
@@ -1507,6 +1526,8 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
       if (isMultiline) 'isMultiline',
       if (isReadOnly) 'isReadOnly',
       if (isFocused != Tristate.none) 'isFocusable',
+      if (isA11yFocusable == Tristate.isFalse) 'isNotA11yFocusable',
+      if (isA11yFocusable == Tristate.isTrue) 'isA11yFocusable',
       if (isLink) 'isLink',
       if (isSlider) 'isSlider',
       if (isKeyboardKey) 'isKeyboardKey',
@@ -1530,6 +1551,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
         isExpanded.hasConflict(other.isExpanded) ||
         isRequired.hasConflict(other.isRequired) ||
         isFocused.hasConflict(other.isFocused) ||
+        isA11yFocusable.hasConflict(other.isA11yFocusable) ||
         (isButton && other.isButton) ||
         (isTextField && other.isTextField) ||
         (isInMutuallyExclusiveGroup && other.isInMutuallyExclusiveGroup) ||

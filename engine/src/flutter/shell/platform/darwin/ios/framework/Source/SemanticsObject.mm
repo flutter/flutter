@@ -466,6 +466,11 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 }
 
 - (bool)isFocusable {
+  // If isA11yFocusable has a value, use it. otherwise fall back to the default logic.
+  if (self.node.flags.isA11yFocusable != flutter::SemanticsTristate::kNone) {
+    return self.node.flags.isA11yFocusable == flutter::SemanticsTristate::kTrue;
+  }
+
   // If the node is scrollable AND hidden OR
   // The node has a label, value, or hint OR
   // The node has non-scrolling related actions.
