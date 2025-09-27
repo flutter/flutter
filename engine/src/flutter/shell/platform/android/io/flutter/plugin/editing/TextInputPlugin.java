@@ -364,7 +364,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     }
     outAttrs.imeOptions |= enterAction;
 
-    if (Build.VERSION.SDK_INT >= API_LEVELS.API_24 && configuration.hintLocales != null) {
+    if (configuration.hintLocales != null) {
       outAttrs.hintLocales = new LocaleList(configuration.hintLocales);
     }
 

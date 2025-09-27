@@ -244,15 +244,9 @@ class AccessibilityViewEmbedder {
     output.setRangeInfo(input.getRangeInfo());
     output.setError(input.getError());
     output.setMaxTextLength(input.getMaxTextLength());
-    if (Build.VERSION.SDK_INT >= API_LEVELS.API_23) {
-      output.setContextClickable(input.isContextClickable());
-      // TODO(amirh): copy traversal before and after.
-      // https://github.com/flutter/flutter/issues/29718
-    }
-    if (Build.VERSION.SDK_INT >= API_LEVELS.API_24) {
-      output.setDrawingOrder(input.getDrawingOrder());
-      output.setImportantForAccessibility(input.isImportantForAccessibility());
-    }
+    output.setContextClickable(input.isContextClickable());
+    output.setDrawingOrder(input.getDrawingOrder());
+    output.setImportantForAccessibility(input.isImportantForAccessibility());
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_26) {
       output.setAvailableExtraData(input.getAvailableExtraData());
       output.setHintText(input.getHintText());
