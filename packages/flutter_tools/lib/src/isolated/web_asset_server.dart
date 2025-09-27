@@ -676,9 +676,13 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
     // The file might have been a package file which is signaled by a
     // `/packages/<package>/<path>` request.
     if (segments.first == 'packages') {
-      final Uri? filePath = _packages.resolve(
-        Uri(scheme: 'package', pathSegments: segments.skip(1)),
-      );
+      Iterable<String> pathSegments = segments.skip(1);
+      final String packageName = segments[1];
+      if (segments[2] == 'lib' &&
+          _packages.packages.any((package) => package.name == packageName)) {
+        pathSegments = [segments[1], ...segments.skip(3)];
+      }
+      final Uri? filePath = _packages.resolve(Uri(scheme: 'package', pathSegments: pathSegments));
       if (filePath != null) {
         final File packageFile = fileSystem.file(filePath);
         if (packageFile.existsSync()) {

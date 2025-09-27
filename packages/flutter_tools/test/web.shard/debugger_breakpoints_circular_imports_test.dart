@@ -27,8 +27,6 @@ void main() {
 
     flutter = FlutterRunTestDriver(project.dir);
 
-    print(project.dir.uri);
-
     await flutter.run(
       withDebugger: true,
       startPaused: true,
@@ -44,7 +42,9 @@ void main() {
     expect((await flutter.getSourceLocation())!.line, equals(project.breakpointLine2));
 
     await flutter.resume();
+
     // TODO(nshahan): Add some expectation that the program ran to completion.
+
     await flutter.quit();
   });
 
