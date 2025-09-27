@@ -2889,6 +2889,24 @@ void main() {
     expect(FocusScope.of(tester.element(find.text('BottomSheet'))).hasFocus, false);
     expect(focusNode.hasFocus, true);
   });
+
+  testWidgets('BottomSheet does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(
+              child: BottomSheet(
+                onClosing: () {},
+                builder: (BuildContext context) => const Text('X'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(BottomSheet)), Size.zero);
+  });
 }
 
 class _TestPage extends StatelessWidget {
