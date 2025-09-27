@@ -526,7 +526,7 @@ class LocalizationsGenerator {
     String? headerFile,
     bool useDeferredLoading = false,
     String? inputsAndOutputsListPath,
-    String? projectPathString,
+    required String projectPathString,
     bool areResourceAttributesRequired = false,
     String? untranslatedMessagesFile,
     bool usesNullableGetter = true,
@@ -536,7 +536,7 @@ class LocalizationsGenerator {
     bool useRelaxedSyntax = false,
     bool useNamedParameters = false,
   }) {
-    final Directory? projectDirectory = projectDirFromPath(fileSystem, projectPathString);
+    final Directory projectDirectory = projectDirFromPath(fileSystem, projectPathString);
     final Directory inputDirectory = inputDirectoryFromPath(
       fileSystem,
       inputPathString,
@@ -561,6 +561,7 @@ class LocalizationsGenerator {
       useDeferredLoading: useDeferredLoading,
       untranslatedMessagesFile: _untranslatedMessagesFileFromPath(
         fileSystem,
+        projectDirectory,
         untranslatedMessagesFile,
       ),
       inputsAndOutputsListFile: _inputsAndOutputsListFileFromPath(
@@ -590,7 +591,7 @@ class LocalizationsGenerator {
     this.header = '',
     this.useDeferredLoading = false,
     required this.inputsAndOutputsListFile,
-    this.projectDirectory,
+    required this.projectDirectory,
     this.areResourceAttributesRequired = false,
     this.untranslatedMessagesFile,
     this.usesNullableGetter = true,
@@ -627,7 +628,7 @@ class LocalizationsGenerator {
   final Directory inputDirectory;
 
   /// The Flutter project's root directory.
-  final Directory? projectDirectory;
+  final Directory projectDirectory;
 
   /// The directory to generate the project's localizations files in.
   ///
@@ -762,11 +763,7 @@ class LocalizationsGenerator {
   }
 
   @visibleForTesting
-  static Directory? projectDirFromPath(FileSystem fileSystem, String? projectPathString) {
-    if (projectPathString == null) {
-      return null;
-    }
-
+  static Directory projectDirFromPath(FileSystem fileSystem, String projectPathString) {
     final Directory directory = fileSystem.directory(projectPathString);
     if (!directory.existsSync()) {
       throw L10nException(
@@ -783,12 +780,10 @@ class LocalizationsGenerator {
   static Directory inputDirectoryFromPath(
     FileSystem fileSystem,
     String inputPathString,
-    Directory? projectDirectory,
+    Directory projectDirectory,
   ) {
     final Directory inputDirectory = fileSystem.directory(
-      projectDirectory != null
-          ? _getAbsoluteProjectPath(inputPathString, projectDirectory)
-          : inputPathString,
+      _getAbsoluteProjectPath(inputPathString, projectDirectory),
     );
 
     if (!inputDirectory.existsSync()) {
@@ -812,13 +807,9 @@ class LocalizationsGenerator {
   static Directory _outputDirectoryFromPath(
     FileSystem fileSystem,
     String outputPathString,
-    Directory? projectDirectory,
+    Directory projectDirectory,
   ) {
-    return fileSystem.directory(
-      projectDirectory != null
-          ? _getAbsoluteProjectPath(outputPathString, projectDirectory)
-          : outputPathString,
-    );
+    return fileSystem.directory(_getAbsoluteProjectPath(outputPathString, projectDirectory));
   }
 
   /// Sets the reference [File] for [templateArbFile].
@@ -914,6 +905,7 @@ class LocalizationsGenerator {
 
   static File? _untranslatedMessagesFileFromPath(
     FileSystem fileSystem,
+    Directory projectDirectory,
     String? untranslatedMessagesFileString,
   ) {
     if (untranslatedMessagesFileString == null || untranslatedMessagesFileString.isEmpty) {
@@ -923,7 +915,7 @@ class LocalizationsGenerator {
       r'\',
       fileSystem.path.separator,
     );
-    return fileSystem.file(untranslatedMessagesFileString);
+    return projectDirectory.childFile(untranslatedMessagesFileString);
   }
 
   static File? _inputsAndOutputsListFileFromPath(
