@@ -1561,9 +1561,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
 - (void)addSceneDelegate:(NSObject<FlutterSceneLifeCycleDelegate>*)delegate {
   // If the plugin conforms to FlutterSceneLifeCycleDelegate, add it to the engine.
-  NSObject<FlutterSceneLifeCycleDelegate>* lifecycleDelegate =
-      (NSObject<FlutterSceneLifeCycleDelegate>*)delegate;
-  [_flutterEngine addSceneLifeCycleDelegate:lifecycleDelegate];
+  [_flutterEngine addSceneLifeCycleDelegate:delegate];
 }
 
 - (NSString*)lookupKeyForAsset:(NSString*)asset {

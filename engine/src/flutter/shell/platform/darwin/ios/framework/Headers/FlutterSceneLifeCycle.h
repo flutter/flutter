@@ -26,7 +26,7 @@ NS_ASSUME_NONNULL_BEGIN
  *    occurring in a scene: https://developer.apple.com/documentation/uikit/uiwindowscenedelegate
  */
 API_AVAILABLE(ios(13.0))
-@protocol FlutterSceneLifeCycleDelegate
+@protocol FlutterSceneLifeCycleDelegate <NSObject>
 
 @optional
 

@@ -12,12 +12,12 @@
 #import "FlutterChannels.h"
 #import "FlutterCodecs.h"
 #import "FlutterPlatformViews.h"
+#import "FlutterSceneLifeCycle.h"
 #import "FlutterTexture.h"
 
 NS_ASSUME_NONNULL_BEGIN
 @protocol FlutterPluginRegistrar;
 @protocol FlutterPluginRegistry;
-@protocol FlutterSceneLifeCycleDelegate;
 
 #pragma mark -
 /**
@@ -378,7 +378,8 @@ typedef enum {
  *
  * @param delegate The receiving object, such as the plugin's main class.
  */
-- (void)addSceneDelegate:(NSObject<FlutterSceneLifeCycleDelegate>*)delegate;
+- (void)addSceneDelegate:(NSObject<FlutterSceneLifeCycleDelegate>*)delegate
+    API_AVAILABLE(ios(13.0));
 
 /**
  * Returns the file name for the given asset.
