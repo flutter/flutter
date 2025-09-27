@@ -107,7 +107,6 @@ class FlutterPlugin : Plugin<Project> {
         }
 
         if (isInvokedFromAndroidStudio()) {
-            rootProject.file("local.properties")
             val settingsFile =
                 project.rootDir
                     .toPath()
@@ -141,7 +140,6 @@ class FlutterPlugin : Plugin<Project> {
 
             if ((hasSettings || hasSettingsKts) && !hasPubspec && !(hasParentSettings || hasParentSettingsKts) && hasParentPubspec) {
                 val file = if (hasSettings) settingsFile else settingsKtsFile
-                // TODO(rekire): Ensure that this url is live before merging
                 project.logger.warn(
                     "w: You should migrate your ${file.name}. See https://docs.flutter.dev/release/breaking-changes/gradle-settings-migration"
                 )
