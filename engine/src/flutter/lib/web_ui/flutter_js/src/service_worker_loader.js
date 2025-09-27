@@ -3,41 +3,6 @@
 // found in the LICENSE file.
 
 /**
- * Wraps `promise` in a timeout of the given `duration` in ms.
- *
- * Resolves/rejects with whatever the original `promises` does, or rejects
- * if `promise` takes longer to complete than `duration`. In that case,
- * `debugName` is used to compose a legible error message.
- *
- * If `duration` is < 0, the original `promise` is returned unchanged.
- * @param {Promise} promise
- * @param {number} duration
- * @param {string} debugName
- * @returns {Promise} a wrapped promise.
- */
-async function timeout(promise, duration, debugName) {
-  if (duration < 0) {
-    return promise;
-  }
-  let timeoutId;
-  const _clock = new Promise((_, reject) => {
-    timeoutId = setTimeout(() => {
-      reject(
-        new Error(
-          `${debugName} took more than ${duration}ms to resolve. Moving on.`,
-          {
-            cause: timeout,
-          }
-        )
-      );
-    }, duration);
-  });
-  return Promise.race([promise, _clock]).finally(() => {
-    clearTimeout(timeoutId);
-  });
-}
-
-/**
  * Handles loading/reloading Flutter's service worker, if configured.
  *
  * @see: https://developers.google.com/web/fundamentals/primers/service-workers
@@ -71,45 +36,5 @@ export class FlutterServiceWorkerLoader {
     }
 
     return Promise.resolve();
-  }
-
-  /**
-   * This method is no longer called by loadServiceWorker.
-   */
-  async _getNewServiceWorker(serviceWorkerRegistration, serviceWorkerVersion) {
-    if (!serviceWorkerRegistration.active && (serviceWorkerRegistration.installing || serviceWorkerRegistration.waiting)) {
-      // No active web worker and we have installed or are installing
-      // one for the first time. Simply wait for it to activate.
-      console.debug("Installing/Activating first service worker.");
-      return serviceWorkerRegistration.installing || serviceWorkerRegistration.waiting;
-    } else if (!serviceWorkerRegistration.active.scriptURL.endsWith(serviceWorkerVersion)) {
-      // When the app updates the serviceWorkerVersion changes, so we
-      // need to ask the service worker to update.
-      const newRegistration = await serviceWorkerRegistration.update();
-      console.debug("Updating service worker.");
-      return newRegistration.installing || newRegistration.waiting || newRegistration.active;
-    } else {
-      console.debug("Loading from existing service worker.");
-      return serviceWorkerRegistration.active;
-    }
-  }
-
-  async _waitForServiceWorkerActivation(serviceWorker) {
-    if (!serviceWorker || serviceWorker.state === "activated") {
-      if (!serviceWorker) {
-        throw new Error("Cannot activate a null service worker!");
-      } else {
-        console.debug("Service worker already active.");
-        return;
-      }
-    }
-    return new Promise((resolve, _) => {
-      serviceWorker.addEventListener("statechange", () => {
-        if (serviceWorker.state === "activated") {
-          console.debug("Activated new service worker.");
-          resolve();
-        }
-      });
-    });
   }
 }
