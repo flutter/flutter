@@ -855,6 +855,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
           // in the frontend_server.
           // https://github.com/flutter/flutter/issues/59902
           '--experimental-emit-debug-metadata',
+          '--debugger-module-names',
           for (final Object dartDefine in dartDefines) '-D$dartDefine',
           if (outputPath != null) ...<String>['--output-dill', outputPath],
           // If we have a platform dill, we don't need to pass the libraries spec,
