@@ -1829,7 +1829,6 @@ Checking for wireless devices...
         setUp(() {
           deviceManager.specifiedDeviceId = 'target-device';
         });
-
         testUsingContext('when multiple matches but first is unsupported by flutter', () async {
           deviceManager.iosDiscoverer.deviceList = <Device>[
             exactMatchAttachedUnsupportedIOSDevice,

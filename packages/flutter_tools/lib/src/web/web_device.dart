@@ -350,7 +350,10 @@ class WebDevices extends PollingDeviceDiscovery {
   bool get canListAnything => featureFlags.isWebEnabled;
 
   @override
-  Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
+  Future<List<Device>> pollingGetDevices({
+    Duration? timeout,
+    bool forWirelessDiscovery = false,
+  }) async {
     if (!_featureFlags.isWebEnabled) {
       return <Device>[];
     }

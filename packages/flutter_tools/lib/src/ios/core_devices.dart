@@ -304,6 +304,8 @@ class IOSCoreDeviceControl {
   final Xcode _xcode;
   final FileSystem _fileSystem;
 
+  Process? _devicectlListProcess;
+
   /// When the `--timeout` flag is used with `devicectl`, it must be at
   /// least 5 seconds. If lower than 5 seconds, `devicectl` will error and not
   /// run the command.
@@ -334,27 +336,54 @@ class IOSCoreDeviceControl {
     'Failed to execute code (error: EXC_BAD_ACCESS, debugger assist: not detected)',
   ];
 
+  void stopListDevices() {
+    if (_devicectlListProcess != null) {
+      _logger.printTrace('Killing devicectl list devices process');
+      _devicectlListProcess!.kill();
+    }
+    _devicectlListProcess = null;
+  }
+
   /// Executes `devicectl` command to get list of devices. The command will
   /// likely complete before [timeout] is reached. If [timeout] is reached,
   /// the command will be stopped as a failure.
   Future<List<Object?>> _listCoreDevices({
     Duration timeout = const Duration(seconds: _minimumTimeoutInSeconds),
   }) async {
-    if (!_xcode.isDevicectlInstalled) {
-      _logger.printError('devicectl is not installed.');
+    if (_devicectlListProcess != null) {
+      _logger.printError(
+        'A devicectl list devices process is already running. It must be stopped before starting a new one.',
+      );
       return <Object?>[];
     }
-
-    // Default to minimum timeout if needed to prevent error.
-    var validTimeout = timeout;
-    if (timeout.inSeconds < _minimumTimeoutInSeconds) {
-      _logger.printError(
-        'Timeout of ${timeout.inSeconds} seconds is below the minimum timeout value '
-        'for devicectl. Changing the timeout to the minimum value of $_minimumTimeoutInSeconds.',
+    final (Process? process, File? output) = await startListCoreDevices(timeout: timeout);
+    if (process == null || output == null) {
+      return <Object?>[];
+    }
+    _devicectlListProcess = process;
+    try {
+      final int exitcode = await _devicectlListProcess!.exitCode;
+      return await getCoreDevicesFromHandledProcess(
+        output: output,
+        exitCode: exitcode,
+        command: <String>[],
       );
-      validTimeout = const Duration(seconds: _minimumTimeoutInSeconds);
+    } finally {
+      _devicectlListProcess = null;
+    }
+  }
+
+  Future<(Process?, File?)> startListCoreDevices({
+    Duration timeout = const Duration(seconds: _minimumTimeoutInSeconds),
+  }) async {
+    if (!_xcode.isDevicectlInstalled) {
+      _logger.printError('devicectl is not installed.');
+      return (null, null);
     }
 
+    final validTimeout = timeout.inSeconds < _minimumTimeoutInSeconds
+        ? const Duration(seconds: _minimumTimeoutInSeconds)
+        : timeout;
     final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('core_devices.');
     final File output = tempDirectory.childFile('core_device_list.json');
     output.createSync();
@@ -371,55 +400,64 @@ class IOSCoreDeviceControl {
     ];
 
     try {
-      final RunResult result = await _processUtils.run(command, throwOnError: true);
-      var isToolPossiblyShutdown = false;
-      if (_fileSystem is ErrorHandlingFileSystem) {
-        final FileSystem delegate = _fileSystem.fileSystem;
-        if (delegate is LocalFileSystem) {
-          isToolPossiblyShutdown = delegate.disposed;
-        }
-      }
-
-      // It's possible that the tool is in the process of shutting down, which
-      // could result in the temp directory being deleted after the shutdown hooks run
-      // before we check if `output` exists. If this happens, we shouldn't crash
-      // but just carry on as if no devices were found as the tool will exit on
-      // its own.
-      //
-      // See https://github.com/flutter/flutter/issues/141892 for details.
-      if (!isToolPossiblyShutdown && !output.existsSync()) {
-        _logger.printError('After running the command ${command.join(' ')} the file');
-        _logger.printError('${output.path} was expected to exist, but it did not.');
-        _logger.printError('The process exited with code ${result.exitCode} and');
-        _logger.printError('Stdout:\n\n${result.stdout.trim()}\n');
-        _logger.printError('Stderr:\n\n${result.stderr.trim()}');
-        throw StateError('Expected the file ${output.path} to exist but it did not');
-      } else if (isToolPossiblyShutdown) {
-        return <Object?>[];
-      }
-      final String stringOutput = output.readAsStringSync();
-      _logger.printTrace(stringOutput);
-
-      try {
-        final Object? decodeResult = (json.decode(stringOutput) as Map<String, Object?>)['result'];
-        if (decodeResult is Map<String, Object?>) {
-          final Object? decodeDevices = decodeResult['devices'];
-          if (decodeDevices is List<Object?>) {
-            return decodeDevices;
-          }
-        }
-        _logger.printError('devicectl returned unexpected JSON response: $stringOutput');
-        return <Object?>[];
-      } on FormatException {
-        // We failed to parse the devicectl output, or it returned junk.
-        _logger.printError('devicectl returned non-JSON response: $stringOutput');
-        return <Object?>[];
-      }
+      return (await _processUtils.start(command), output);
     } on ProcessException catch (err) {
       _logger.printError('Error executing devicectl: $err');
-      return <Object?>[];
-    } finally {
       ErrorHandlingFileSystem.deleteIfExists(tempDirectory, recursive: true);
+      return (null, null);
+    }
+  }
+
+  Future<List<Object?>> getCoreDevicesFromHandledProcess({
+    required File output,
+    required int exitCode,
+    required List<String> command,
+  }) async {
+    if (exitCode != 0) {
+      _logger.printError('devicectl exited with a non-zero exit code: $exitCode');
+      return <Object?>[];
+    }
+
+    var isToolPossiblyShutdown = false;
+    if (_fileSystem is ErrorHandlingFileSystem) {
+      final FileSystem delegate = _fileSystem.fileSystem;
+      if (delegate is LocalFileSystem) {
+        isToolPossiblyShutdown = delegate.disposed;
+      }
+    }
+    // It's possible that the tool is in the process of shutting down, which
+    // could result in the temp directory being deleted after the shutdown hooks run
+    // before we check if `output` exists. If this happens, we shouldn't crash
+    // but just carry on as if no devices were found as the tool will exit on
+    // its own.
+    //
+    // See https://github.com/flutter/flutter/issues/141892 for details.
+    if (!isToolPossiblyShutdown && !output.existsSync()) {
+      _logger.printError('After running the command ${command.join(' ')} the file');
+      _logger.printError('${output.path} was expected to exist, but it did not.');
+      _logger.printError('The process exited with code $exitCode');
+      throw StateError('Expected the file ${output.path} to exist but it did not');
+    } else if (isToolPossiblyShutdown) {
+      return <Object?>[];
+    }
+
+    final String stringOutput = output.readAsStringSync();
+    _logger.printTrace(stringOutput);
+
+    try {
+      final Object? decodeResult = (json.decode(stringOutput) as Map<String, Object?>)['result'];
+      if (decodeResult is Map<String, Object?>) {
+        final Object? decodeDevices = decodeResult['devices'];
+        if (decodeDevices is List<Object?>) {
+          return decodeDevices;
+        }
+      }
+      _logger.printError('devicectl returned unexpected JSON response: $stringOutput');
+      return <Object?>[];
+    } on FormatException {
+      // We failed to parse the devicectl output, or it returned junk.
+      _logger.printError('devicectl returned non-JSON response: $stringOutput');
+      return <Object?>[];
     }
   }
 
