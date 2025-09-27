@@ -355,54 +355,35 @@ void main() {
     }
 
     await tester.pumpWidget(build(false, false, false));
-    expect(tester.renderObjectList(find.byType(AnimatedSize)), hasLength(3));
+
+    expect(tester.renderObjectList(find.byType(ClipRect)), hasLength(3));
+
+    expect(tester.getRect(find.byType(ClipRect).at(0)), const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(ClipRect).at(1)), const Rect.fromLTWH(0.0, 97.0, 800.0, 0.0));
     expect(
-      tester.getRect(find.byType(AnimatedSize).at(0)),
-      const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0),
-    );
-    expect(
-      tester.getRect(find.byType(AnimatedSize).at(1)),
-      const Rect.fromLTWH(0.0, 97.0, 800.0, 0.0),
-    );
-    expect(
-      tester.getRect(find.byType(AnimatedSize).at(2)),
+      tester.getRect(find.byType(ClipRect).at(2)),
       const Rect.fromLTWH(0.0, 146.0, 800.0, 0.0),
     );
 
     await tester.pump(const Duration(milliseconds: 200));
+    expect(tester.getRect(find.byType(ClipRect).at(0)), const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(ClipRect).at(1)), const Rect.fromLTWH(0.0, 97.0, 800.0, 0.0));
     expect(
-      tester.getRect(find.byType(AnimatedSize).at(0)),
-      const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0),
-    );
-    expect(
-      tester.getRect(find.byType(AnimatedSize).at(1)),
-      const Rect.fromLTWH(0.0, 97.0, 800.0, 0.0),
-    );
-    expect(
-      tester.getRect(find.byType(AnimatedSize).at(2)),
+      tester.getRect(find.byType(ClipRect).at(2)),
       const Rect.fromLTWH(0.0, 146.0, 800.0, 0.0),
     );
 
     await tester.pumpWidget(build(false, true, false));
+    expect(tester.getRect(find.byType(ClipRect).at(0)), const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(ClipRect).at(1)), const Rect.fromLTWH(0.0, 97.0, 800.0, 0.0));
     expect(
-      tester.getRect(find.byType(AnimatedSize).at(0)),
-      const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0),
-    );
-    expect(
-      tester.getRect(find.byType(AnimatedSize).at(1)),
-      const Rect.fromLTWH(0.0, 97.0, 800.0, 0.0),
-    );
-    expect(
-      tester.getRect(find.byType(AnimatedSize).at(2)),
+      tester.getRect(find.byType(ClipRect).at(2)),
       const Rect.fromLTWH(0.0, 146.0, 800.0, 0.0),
     );
 
     await tester.pump(kSizeAnimationDuration ~/ 2);
-    expect(
-      tester.getRect(find.byType(AnimatedSize).at(0)),
-      const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0),
-    );
-    final Rect rect1 = tester.getRect(find.byType(AnimatedSize).at(1));
+    expect(tester.getRect(find.byType(ClipRect).at(0)), const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0));
+    final Rect rect1 = tester.getRect(find.byType(ClipRect).at(1));
     expect(rect1.left, 0.0);
     expect(
       rect1.top,
@@ -410,50 +391,38 @@ void main() {
     ); // 16.0 material gap, plus 12.0 top and bottom margins added to the header
     expect(rect1.width, 800.0);
     expect(rect1.height, inExclusiveRange(0.0, 100.0));
-    final Rect rect2 = tester.getRect(find.byType(AnimatedSize).at(2));
+    final Rect rect2 = tester.getRect(find.byType(ClipRect).at(2));
     expect(
       rect2,
       Rect.fromLTWH(0.0, rect1.bottom + 16.0 + 48.0, 800.0, 0.0),
     ); // the 16.0 comes from the MaterialGap being introduced, the 48.0 is the header height.
 
     await tester.pumpWidget(build(false, false, false));
-    expect(
-      tester.getRect(find.byType(AnimatedSize).at(0)),
-      const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0),
-    );
-    expect(tester.getRect(find.byType(AnimatedSize).at(1)), rect1);
-    expect(tester.getRect(find.byType(AnimatedSize).at(2)), rect2);
+    expect(tester.getRect(find.byType(ClipRect).at(0)), const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(ClipRect).at(1)), rect1);
+    expect(tester.getRect(find.byType(ClipRect).at(2)), rect2);
 
     await tester.pumpWidget(build(false, false, true));
-    expect(
-      tester.getRect(find.byType(AnimatedSize).at(0)),
-      const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0),
-    );
-    expect(tester.getRect(find.byType(AnimatedSize).at(1)), rect1);
-    expect(tester.getRect(find.byType(AnimatedSize).at(2)), rect2);
+    expect(tester.getRect(find.byType(ClipRect).at(0)), const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(ClipRect).at(1)), rect1);
+    expect(tester.getRect(find.byType(ClipRect).at(2)), rect2);
 
     // a few no-op pumps to make sure there's nothing fishy going on
     await tester.pump();
     await tester.pump();
     await tester.pump();
-    expect(
-      tester.getRect(find.byType(AnimatedSize).at(0)),
-      const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0),
-    );
-    expect(tester.getRect(find.byType(AnimatedSize).at(1)), rect1);
-    expect(tester.getRect(find.byType(AnimatedSize).at(2)), rect2);
+    expect(tester.getRect(find.byType(ClipRect).at(0)), const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(ClipRect).at(1)), rect1);
+    expect(tester.getRect(find.byType(ClipRect).at(2)), rect2);
 
     await tester.pumpAndSettle();
+    expect(tester.getRect(find.byType(ClipRect).at(0)), const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0));
     expect(
-      tester.getRect(find.byType(AnimatedSize).at(0)),
-      const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0),
-    );
-    expect(
-      tester.getRect(find.byType(AnimatedSize).at(1)),
+      tester.getRect(find.byType(ClipRect).at(1)),
       const Rect.fromLTWH(0.0, 48.0 + 1.0 + 48.0, 800.0, 0.0),
     );
     expect(
-      tester.getRect(find.byType(AnimatedSize).at(2)),
+      tester.getRect(find.byType(ClipRect).at(2)),
       const Rect.fromLTWH(0.0, 48.0 + 1.0 + 48.0 + 16.0 + 16.0 + 48.0 + 16.0, 800.0, 100.0),
     );
   });
