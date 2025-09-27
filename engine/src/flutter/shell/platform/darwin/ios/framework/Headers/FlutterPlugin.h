@@ -17,6 +17,7 @@
 NS_ASSUME_NONNULL_BEGIN
 @protocol FlutterPluginRegistrar;
 @protocol FlutterPluginRegistry;
+@protocol FlutterSceneLifeCycleDelegate;
 
 #pragma mark -
 /**
@@ -377,7 +378,7 @@ typedef enum {
  *
  * @param delegate The receiving object, such as the plugin's main class.
  */
-- (void)addSceneDelegate:(NSObject<FlutterPlugin>*)delegate;
+- (void)addSceneDelegate:(NSObject<FlutterSceneLifeCycleDelegate>*)delegate;
 
 /**
  * Returns the file name for the given asset.

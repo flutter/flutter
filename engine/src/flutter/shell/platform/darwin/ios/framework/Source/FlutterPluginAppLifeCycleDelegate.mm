@@ -405,10 +405,12 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
 
 - (BOOL)sceneFallbackOpenURLContexts:(NSSet<UIOpenURLContext*>*)URLContexts {
   for (UIOpenURLContext* context in URLContexts) {
-    return [self application:FlutterSharedApplication.application
-                     openURL:context.URL
-                     options:ConvertOptions(context.options)
-          isFallbackForScene:YES];
+    if ([self application:FlutterSharedApplication.application
+                       openURL:context.URL
+                       options:ConvertOptions(context.options)
+            isFallbackForScene:YES]) {
+      return YES;
+    };
   };
   return NO;
 }

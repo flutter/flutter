@@ -62,7 +62,7 @@ API_AVAILABLE(ios(13.0))
 /**
  * Called if this has been registered for `UIWindowScene` callbacks.
  *
- * @return `YES` if this handles the request.
+ * @return `YES` if this handles any url.
  */
 - (BOOL)scene:(UIScene*)scene openURLContexts:(NSSet<UIOpenURLContext*>*)URLContexts;
 
