@@ -4758,6 +4758,73 @@ void main() {
     // Verify no exception is thrown at a brief moment when the PopupMenuButton is hidden.
     expect(tester.takeException(), isNull);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/43824.
+  testWidgets('PopupMenu updates when PopupMenuTheme in Theme changes', (
+    WidgetTester tester,
+  ) async {
+    Widget buildApp(PopupMenuThemeData popupMenuTheme) {
+      return MaterialApp(
+        theme: ThemeData(popupMenuTheme: popupMenuTheme),
+        home: Scaffold(
+          appBar: AppBar(
+            actions: <Widget>[
+              PopupMenuButton<String>(
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuItem<String>>[
+                    const PopupMenuItem<String>(value: '0', child: Text('Item 0')),
+                    const PopupMenuItem<String>(value: '1', child: Text('Item 1')),
+                  ];
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    void checkPopupMenu(PopupMenuThemeData popupMenuTheme) {
+      final Material material = tester.widget(find.byType(Material).last);
+      expect(material.elevation, popupMenuTheme.elevation);
+      expect(material.color, popupMenuTheme.color);
+      expect(material.shadowColor, popupMenuTheme.shadowColor);
+      expect(material.surfaceTintColor, popupMenuTheme.surfaceTintColor);
+      expect(material.shape, popupMenuTheme.shape);
+
+      final SingleChildScrollView scrollView = tester.widget(find.byType(SingleChildScrollView));
+      expect(scrollView.padding, popupMenuTheme.menuPadding);
+    }
+
+    final PopupMenuThemeData popupMenuTheme1 = PopupMenuThemeData(
+      elevation: 10,
+      color: Colors.red,
+      shadowColor: Colors.black,
+      surfaceTintColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      menuPadding: const EdgeInsets.all(10),
+    );
+    final PopupMenuThemeData popupMenuTheme2 = PopupMenuThemeData(
+      elevation: 20,
+      color: Colors.blue,
+      shadowColor: Colors.white,
+      surfaceTintColor: Colors.black,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      menuPadding: const EdgeInsets.all(20),
+    );
+
+    // Show the menu with the first theme.
+    await tester.pumpWidget(buildApp(popupMenuTheme1));
+    await tester.tap(find.byType(PopupMenuButton<String>));
+    await tester.pumpAndSettle();
+
+    checkPopupMenu(popupMenuTheme1);
+
+    // Rebuild with the second theme.
+    await tester.pumpWidget(buildApp(popupMenuTheme2));
+    await tester.pumpAndSettle();
+
+    checkPopupMenu(popupMenuTheme2);
+  });
 }
 
 Matcher overlaps(Rect other) => OverlapsMatcher(other);
