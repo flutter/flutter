@@ -347,10 +347,9 @@ DownsamplePassArgs CalculateDownsamplePassArgs(
     std::optional<Rect> blur_uv_bounds;
     std::optional<Rect> downsample_uv_bounds;
     if (source_bounds.has_value()) {
-      blur_uv_bounds = ratiod_rect(source_bounds->Shift(divisible_padding),
-                                   source_rect_padded);
-      downsample_uv_bounds =
-          ratiod_rect(source_bounds->Shift(divisible_padding), source_rect);
+      Rect shifted_rect = source_rect.TransformBounds(input_snapshot.transform);
+      blur_uv_bounds = ratiod_rect(source_bounds.value(), shifted_rect);
+      downsample_uv_bounds = ratiod_rect(source_bounds.value(), shifted_rect);
     }
     return {
         .subpass_size = subpass_size,
@@ -380,8 +379,8 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
   if (pass_args.effective_scalar.x >= 0.5f ||
       (!input_texture->NeedsMipmapGeneration() &&
        input_texture->GetTextureDescriptor().mip_count > 1)) {
-    // TODO(dkwingsmt): For now this branch ignores bounds_uv because I haven't
-    // met such cases.
+    // TODO(dkwingsmt): For now this branch ignores bounds_uv because I
+    // haven't met such cases.
     ContentContext::SubpassCallback subpass_callback =
         [&](const ContentContext& renderer, RenderPass& pass) {
           HostBuffer& data_host_buffer = renderer.GetTransientsDataBuffer();
@@ -448,8 +447,8 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
       pipeline_options.primitive_type = PrimitiveType::kTriangleStrip;
       // If the blur is unbounded, then the pipeline is selected based on
       // whether the platform supports decal tile mode: The GLES backend
-      // conditionally supports decal tile mode, while decal is always supported
-      // for Vulkan and Metal.
+      // conditionally supports decal tile mode, while decal is always
+      // supported for Vulkan and Metal.
       //
       // If the blur is bounded, software decal is always needed.
       if ((renderer.GetDeviceCapabilities().SupportsDecalSamplerAddressMode() ||
@@ -802,9 +801,6 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
   std::optional<Rect> shifted_bounds = bounds_;
   if (coverage_hint.has_value()) {
     expanded_coverage_hint = coverage_hint->Expand(blur_info.local_padding);
-    if (bounds_.has_value()) {
-      shifted_bounds = bounds_.value();
-    }
   }
 
   Entity snapshot_entity = entity.Clone();
@@ -816,7 +812,7 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
   std::optional<Rect> source_bounds;
   {
     std::optional<Matrix> source_transform;
-    if (expanded_coverage_hint.has_value() || shifted_bounds.has_value()) {
+    if (expanded_coverage_hint.has_value() || bounds_.has_value()) {
       source_transform =
           snapshot_entity.GetTransform() * entity.GetTransform().Invert();
     }
@@ -824,8 +820,8 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
       source_expanded_coverage_hint =
           expanded_coverage_hint->TransformBounds(source_transform.value());
     }
-    if (shifted_bounds.has_value()) {
-      source_bounds = shifted_bounds->TransformBounds(source_transform.value());
+    if (bounds_.has_value()) {
+      source_bounds = bounds_->TransformBounds(source_transform.value());
     }
   }
 
