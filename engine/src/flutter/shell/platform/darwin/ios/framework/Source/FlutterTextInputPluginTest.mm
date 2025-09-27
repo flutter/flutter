@@ -3890,8 +3890,18 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
         @{@"x" : @(0), @"y" : @(0), @"width" : @(100), @"height" : @(50)};
 
     NSArray<NSDictionary*>* encodedItems = @[
-      @{@"type" : @"custom", @"id" : @"custom-action-1", @"title" : @"Custom Action 1"},
-      @{@"type" : @"custom", @"id" : @"custom-action-2", @"title" : @"Custom Action 2"},
+      @{
+        @"type" : @"custom",
+        @"id" : @"custom-action-1",
+        @"title" : @"Custom Action 1",
+        @"" : @"attributes" : @(1)
+      },
+      @{
+        @"type" : @"custom",
+        @"id" : @"custom-action-2",
+        @"title" : @"Custom Action 2",
+        @"" : @"attributes" : @(2)
+      },
     ];
 
     BOOL shownEditMenu =
@@ -3907,8 +3917,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
     UIAction* secondAction = (UIAction*)menu.children[1];
     XCTAssertEqualObjects(firstAction.title, @"Custom Action 1",
                           @"First action title should match");
+    XCTAssertEqual(firstAction.attributes, @(1), @"First action attributes should match");
     XCTAssertEqualObjects(secondAction.title, @"Custom Action 2",
                           @"Second action title should match");
+    XCTAssertEqual(secondAction.attributes, @(2), @"Second action attributes should match");
   }
 }
 

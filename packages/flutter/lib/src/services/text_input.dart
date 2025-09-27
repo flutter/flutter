@@ -2888,13 +2888,23 @@ sealed class IOSSystemContextMenuItemData {
   /// platform.
   String? get title => null;
 
+  /// The attributes to assign to the menu item.
+  ///
+  /// Not exposed for built-in menu items.
+  IOSSystemContextMenuItemAttributes? get attributes => null;
+
   /// The type string used when serialized to json, recognized by the engine.
   String get _jsonType;
 
   /// Returns json for use in method channel calls, specifically
   /// `ContextMenu.showSystemContextMenu`.
   Map<String, dynamic> get _json {
-    return <String, dynamic>{'callbackId': hashCode, 'title': ?title, 'type': _jsonType};
+    return <String, dynamic>{
+      'callbackId': hashCode,
+      'title': ?title,
+      'type': _jsonType,
+      'attributes': ?attributes?._index,
+    };
   }
 
   @override
@@ -3105,6 +3115,96 @@ final class IOSSystemContextMenuItemDataLiveText extends IOSSystemContextMenuIte
   String get _jsonType => 'captureTextFromCamera';
 }
 
+/// Attributes that define additional configurations for a [IOSSystemContextMenuItem].
+///
+/// See also:
+///
+///  * <https://developer.apple.com/documentation/uikit/uimenuelement/attributes?language=objc>
+@immutable
+final class IOSSystemContextMenuItemAttributes with Diagnosticable {
+  const IOSSystemContextMenuItemAttributes._(this._index);
+
+  /// The numerical value for this attribute.
+  ///
+  /// Each attribute has one bit set in this bit field.
+  final int _index;
+
+  /// An attribute indicating that the menu item should be the displayed in a more
+  /// prominent style, with red text.
+  ///
+  /// This corresponds to the
+  /// [UIMenuElementAttributesDestructive value of UIMenuElementAttributes](https://developer.apple.com/documentation/uikit/uimenuelement/attributes/destructive?language=objc).
+  static const IOSSystemContextMenuItemAttributes destructive =
+      IOSSystemContextMenuItemAttributes._(1 << 1);
+
+  /// An attribute indicating that the menu item is disabled and cannot be selected.
+  ///
+  /// This corresponds to the
+  /// [UIMenuElementAttributesDisabled value of UIMenuElementAttributes](https://developer.apple.com/documentation/uikit/uimenuelement/attributes/disabled?language=objc).
+  static const IOSSystemContextMenuItemAttributes disabled = IOSSystemContextMenuItemAttributes._(
+    1 << 0,
+  );
+
+  /// An attribute indicating that the menu should not display the menu item.
+  ///
+  /// This corresponds to the
+  /// [UIMenuElementAttributesHidden value of UIMenuElementAttributes](https://developer.apple.com/documentation/uikit/uimenuelement/attributes/hidden?language=objc).
+  static const IOSSystemContextMenuItemAttributes hidden = IOSSystemContextMenuItemAttributes._(
+    1 << 2,
+  );
+
+  /// An attribute indicating that the menu remains presented after pressing on
+  /// the menu item.
+  ///
+  /// This corresponds to the
+  /// [UIMenuElementAttributesKeepsMenuPresented value of UIMenuElementAttributes](https://developer.apple.com/documentation/uikit/uimenuelement/attributes/keepsmenupresented?language=objc).
+  static const IOSSystemContextMenuItemAttributes keepsMenuPresented =
+      IOSSystemContextMenuItemAttributes._(1 << 3);
+
+  /// No attributes.
+  static const IOSSystemContextMenuItemAttributes none = IOSSystemContextMenuItemAttributes._(0);
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    if (_index == none._index) {
+      properties.add(StringProperty('attributes', 'no attributes', quoted: false));
+      return;
+    }
+
+    final List<String> flags = <String>[
+      if ((_index & destructive._index) != 0) 'destructive',
+      if ((_index & disabled._index) != 0) 'disabled',
+      if ((_index & hidden._index) != 0) 'hidden',
+      if ((_index & keepsMenuPresented._index) != 0) 'keepsMenuPresented',
+    ];
+
+    properties.add(
+      StringProperty(
+        'attributes',
+        flags.isEmpty ? 'no attributes' : flags.join(', '),
+        quoted: false,
+      ),
+    );
+  }
+
+  @override
+  int get hashCode => _index.hashCode;
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! IOSSystemContextMenuItemAttributes) {
+      return false;
+    }
+    return other._index == _index;
+  }
+
+  /// Combines two [IOSSystemContextMenuItemAttributes] values using logical "or".
+  IOSSystemContextMenuItemAttributes operator |(IOSSystemContextMenuItemAttributes other) {
+    return IOSSystemContextMenuItemAttributes._(_index | other._index);
+  }
+}
+
 /// An [IOSSystemContextMenuItemData] for custom action buttons defined by the developer.
 ///
 /// Must specify a [title] and [onPressed].
@@ -3120,10 +3220,19 @@ final class IOSSystemContextMenuItemDataLiveText extends IOSSystemContextMenuIte
 final class IOSSystemContextMenuItemDataCustom extends IOSSystemContextMenuItemData
     with Diagnosticable {
   /// Creates an instance of [IOSSystemContextMenuItemDataCustom].
-  const IOSSystemContextMenuItemDataCustom({required this.title, required this.onPressed});
+  const IOSSystemContextMenuItemDataCustom({
+    required this.title,
+    required this.attributes,
+    required this.onPressed,
+  });
 
   @override
   final String title;
+
+  /// The [IOSSystemContextMenuItemAttributes] indicating
+  /// additional configurations for this menu item.
+  @override
+  final IOSSystemContextMenuItemAttributes attributes;
 
   /// The callback to be executed when the item is selected.
   final VoidCallback onPressed;
@@ -3136,7 +3245,12 @@ final class IOSSystemContextMenuItemDataCustom extends IOSSystemContextMenuItemD
 
   @override
   Map<String, dynamic> get _json {
-    return <String, dynamic>{'id': callbackId, 'title': title, 'type': _jsonType};
+    return <String, dynamic>{
+      'id': callbackId,
+      'title': title,
+      'type': _jsonType,
+      'attributes': attributes._index,
+    };
   }
 
   @override
@@ -3144,11 +3258,14 @@ final class IOSSystemContextMenuItemDataCustom extends IOSSystemContextMenuItemD
     super.debugFillProperties(properties);
     properties.add(StringProperty('title', title));
     properties.add(StringProperty('callbackId', callbackId));
+    properties.add(
+      DiagnosticsProperty<IOSSystemContextMenuItemAttributes>('attributes', attributes),
+    );
     properties.add(DiagnosticsProperty<VoidCallback>('onPressed', onPressed));
   }
 
   @override
-  int get hashCode => Object.hash(title, onPressed);
+  int get hashCode => Object.hash(title, attributes, onPressed);
 
   @override
   bool operator ==(Object other) {
@@ -3157,6 +3274,7 @@ final class IOSSystemContextMenuItemDataCustom extends IOSSystemContextMenuItemD
     }
     return other is IOSSystemContextMenuItemDataCustom &&
         other.title == title &&
+        other.attributes == attributes &&
         other.onPressed == onPressed;
   }
 }
