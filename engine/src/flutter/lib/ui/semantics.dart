@@ -1764,6 +1764,21 @@ abstract class SemanticsUpdateBuilder {
   /// total number of child nodes that contribute semantics and `scrollIndex`
   /// is the index of the first visible child node that contributes semantics.
   ///
+  /// The `traversalOwner` specifies the ID of the semantics node that serves as
+  /// the logical parent of this node for accessibility traversal. This
+  /// parameter is only used by the web engine to establish parent-child
+  /// relationships between nodes that are not directly connected in paint order.
+  /// To ensure correct accessibility traversal, `traversalOwner` should be set
+  /// to the logical traversal parent node ID. This parameter is web-specific
+  /// because other platforms can complete grafting when generating the
+  /// semantics tree in traversal order. After grafting, the traversal order and
+  /// hit-test order will be different, which is acceptable for other platforms.
+  /// However, the web engine assumes these two orders are exactly the same, so
+  /// grafting cannot be performed ahead of time on web. Instead, the traversal
+  /// order is updated in the web engine by setting the `aria-owns` attribute
+  /// through this parameter. A value of -1 indicates no special traversal
+  /// parent. This parameter has no effect on other platforms.
+  ///
   /// The `rect` is the region occupied by this node in its own coordinate
   /// system.
   ///
@@ -1809,6 +1824,7 @@ abstract class SemanticsUpdateBuilder {
     required int platformViewId,
     required int scrollChildren,
     required int scrollIndex,
+    required int traversalOwner,
     required double scrollPosition,
     required double scrollExtentMax,
     required double scrollExtentMin,
@@ -1827,6 +1843,7 @@ abstract class SemanticsUpdateBuilder {
     required String tooltip,
     required TextDirection? textDirection,
     required Float64List transform,
+    required Float64List hitTestTransform,
     required Int32List childrenInTraversalOrder,
     required Int32List childrenInHitTestOrder,
     required Int32List additionalActions,
@@ -1887,6 +1904,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     required int platformViewId,
     required int scrollChildren,
     required int scrollIndex,
+    required int traversalOwner,
     required double scrollPosition,
     required double scrollExtentMax,
     required double scrollExtentMin,
@@ -1905,6 +1923,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     required String tooltip,
     required TextDirection? textDirection,
     required Float64List transform,
+    required Float64List hitTestTransform,
     required Int32List childrenInTraversalOrder,
     required Int32List childrenInHitTestOrder,
     required Int32List additionalActions,
@@ -1932,6 +1951,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       platformViewId,
       scrollChildren,
       scrollIndex,
+      traversalOwner,
       scrollPosition,
       scrollExtentMax,
       scrollExtentMin,
@@ -1953,6 +1973,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       tooltip,
       textDirection != null ? textDirection.index + 1 : 0,
       transform,
+      hitTestTransform,
       childrenInTraversalOrder,
       childrenInHitTestOrder,
       additionalActions,
@@ -1979,6 +2000,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       Int32,
       Int32,
       Int32,
+      Int32,
       Double,
       Double,
       Double,
@@ -1999,6 +2021,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       Handle,
       Handle,
       Int32,
+      Handle,
       Handle,
       Handle,
       Handle,
@@ -2023,6 +2046,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     int platformViewId,
     int scrollChildren,
     int scrollIndex,
+    int traversalOwner,
     double scrollPosition,
     double scrollExtentMax,
     double scrollExtentMin,
@@ -2044,6 +2068,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     String tooltip,
     int textDirection,
     Float64List transform,
+    Float64List hitTestTransform,
     Int32List childrenInTraversalOrder,
     Int32List childrenInHitTestOrder,
     Int32List additionalActions,

@@ -98,15 +98,17 @@ void AccessibilityBridge::UpdateSemantics(
     scrollOccured = scrollOccured || [object nodeWillCauseScroll:&node];
     needsAnnouncement = [object nodeShouldTriggerAnnouncement:&node];
     [object setSemanticsNode:&node];
-    NSUInteger newChildCount = node.childrenInTraversalOrder.size();
-    NSMutableArray* newChildren = [[NSMutableArray alloc] initWithCapacity:newChildCount];
-    for (NSUInteger i = 0; i < newChildCount; ++i) {
+    NSUInteger newChildCountInTraversalOrder = node.childrenInTraversalOrder.size();
+    NSMutableArray* newChildren =
+        [[NSMutableArray alloc] initWithCapacity:newChildCountInTraversalOrder];
+    for (NSUInteger i = 0; i < newChildCountInTraversalOrder; ++i) {
       SemanticsObject* child = GetOrCreateObject(node.childrenInTraversalOrder[i], nodes);
       [newChildren addObject:child];
     }
+    NSUInteger newChildCountInHitTestOrder = node.childrenInHitTestOrder.size();
     NSMutableArray* newChildrenInHitTestOrder =
-        [[NSMutableArray alloc] initWithCapacity:newChildCount];
-    for (NSUInteger i = 0; i < newChildCount; ++i) {
+        [[NSMutableArray alloc] initWithCapacity:newChildCountInHitTestOrder];
+    for (NSUInteger i = 0; i < newChildCountInHitTestOrder; ++i) {
       SemanticsObject* child = GetOrCreateObject(node.childrenInHitTestOrder[i], nodes);
       [newChildrenInHitTestOrder addObject:child];
     }

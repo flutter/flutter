@@ -2385,6 +2385,7 @@ public class AccessibilityBridgeTest {
     int platformViewId = -1;
     int scrollChildren = 0;
     int scrollIndex = 0;
+    int traversalOwner = -1;
     float scrollPosition = 0.0f;
     float scrollExtentMax = 0.0f;
     float scrollExtentMin = 0.0f;
@@ -2414,6 +2415,14 @@ public class AccessibilityBridgeTest {
           0.0f, 0.0f, 1.0f, 0.0f,
           0.0f, 0.0f, 0.0f, 1.0f
         };
+    float[] hitTestTransform =
+        new float[] {
+          1.0f, 0.0f, 0.0f, 0.0f,
+          0.0f, 1.0f, 0.0f, 0.0f,
+          0.0f, 0.0f, 1.0f, 0.0f,
+          0.0f, 0.0f, 0.0f, 1.0f
+        };
+
     final List<TestSemanticsNode> children = new ArrayList<TestSemanticsNode>();
 
     public void addChild(TestSemanticsNode child) {
@@ -2445,6 +2454,7 @@ public class AccessibilityBridgeTest {
       bytes.putInt(platformViewId);
       bytes.putInt(scrollChildren);
       bytes.putInt(scrollIndex);
+      bytes.putInt(traversalOwner);
       bytes.putFloat(scrollPosition);
       bytes.putFloat(scrollExtentMax);
       bytes.putFloat(scrollExtentMin);
@@ -2486,12 +2496,17 @@ public class AccessibilityBridgeTest {
       for (int i = 0; i < 16; i++) {
         bytes.putFloat(transform[i]);
       }
+      // hitTestTransform.
+      for (int i = 0; i < 16; i++) {
+        bytes.putFloat(hitTestTransform[i]);
+      }
       // children in traversal order.
       bytes.putInt(children.size());
       for (TestSemanticsNode node : children) {
         bytes.putInt(node.id);
       }
       // children in hit test order.
+      bytes.putInt(children.size());
       for (TestSemanticsNode node : children) {
         bytes.putInt(node.id);
       }
