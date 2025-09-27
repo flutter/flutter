@@ -247,9 +247,6 @@ Resources:
 web. Versions are not automatically updated whenever a new release is available.
 Instead, we update this file manually once in a while.
 
-`canvaskit_lock.yaml` locks the version of CanvasKit for tests and production
-use.
-
 ### Debugging the Web Engine
 
 Build the Flutter Web engine locally:
