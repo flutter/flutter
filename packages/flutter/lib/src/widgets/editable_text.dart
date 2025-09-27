@@ -242,7 +242,10 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// ** See code in examples/api/lib/widgets/editable_text/text_editing_controller.1.dart **
   /// {@end-tool}
   TextEditingController({String? text})
-    : super(text == null ? TextEditingValue.empty : TextEditingValue(text: text));
+    : _originalText = text ?? '',
+      super(
+        text == null ? TextEditingValue.empty : TextEditingValue(text: text),
+      );
 
   /// Creates a controller for an editable text field from an initial [TextEditingValue].
   ///
@@ -250,15 +253,33 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// [TextEditingValue.empty].
   TextEditingController.fromValue(TextEditingValue? value)
     : assert(
-        value == null || !value.composing.isValid || value.isComposingRangeValid,
+        value == null ||
+            !value.composing.isValid ||
+            value.isComposingRangeValid,
         'New TextEditingValue $value has an invalid non-empty composing range '
         '${value.composing}. It is recommended to use a valid composing range, '
         'even for readonly text fields.',
       ),
       super(value ?? TextEditingValue.empty);
 
+
+  /// The original text value when this controller was created.
+  ///
+  /// This field is used to track if the text has been modified from its original
+  /// value. It remains unchanged when:
+  /// - [clear] is called
+  /// - [value] is updated directly
+  /// - [text] is updated
+  ///
+  /// The field will be garbage collected when the controller is no longer
+  /// referenced, along with the rest of the controller's state.
+  String? _originalText;
+
   /// The current string the user is editing.
   String get text => value.text;
+
+  /// Returns true if the current [text] is different from the original text.
+  bool get isTextModified => _originalText != value.text;
 
   /// Updates the current [text] to the given `newText`, and removes existing
   /// selection and composing range held by the controller.
