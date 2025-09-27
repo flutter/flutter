@@ -898,8 +898,13 @@ void main() {
     final double item1YAfterInterrupt = tester.getCenter(find.text('item 1')).dy;
 
     // Position should not jump when animation is interrupted
-    expect(item1YAfterInterrupt, closeTo(item1YBeforeInterrupt, 5.0),
-      reason: 'Animation jumping detected! Position changed from $item1YBeforeInterrupt to $item1YAfterInterrupt');
+    expect(
+      item1YAfterInterrupt,
+      closeTo(item1YBeforeInterrupt, 5.0),
+      reason:
+          'Animation jumping detected! Position changed from '
+          '$item1YBeforeInterrupt to $item1YAfterInterrupt',
+    );
 
     for (int i = 0; i < 5; i++) {
       await drag.moveBy(const Offset(0, -10));
