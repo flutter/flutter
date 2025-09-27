@@ -120,43 +120,51 @@ final int _kUnblockedUserActions =
 
 /// A static class to conduct semantics role checks.
 sealed class _DebugSemanticsRoleChecks {
-  static FlutterError? _checkSemanticsData(SemanticsNode node) => switch (node.role) {
-    SemanticsRole.alertDialog => _noCheckRequired,
-    SemanticsRole.dialog => _noCheckRequired,
-    SemanticsRole.none => _noCheckRequired,
-    SemanticsRole.tab => _semanticsTab,
-    SemanticsRole.tabBar => _semanticsTabBar,
-    SemanticsRole.tabPanel => _noCheckRequired,
-    SemanticsRole.table => _semanticsTable,
-    SemanticsRole.cell => _semanticsCell,
-    SemanticsRole.row => _semanticsRow,
-    SemanticsRole.columnHeader => _semanticsColumnHeader,
-    SemanticsRole.radioGroup => _semanticsRadioGroup,
-    SemanticsRole.menu => _semanticsMenu,
-    SemanticsRole.menuBar => _semanticsMenuBar,
-    SemanticsRole.menuItem => _semanticsMenuItem,
-    SemanticsRole.menuItemCheckbox => _semanticsMenuItemCheckbox,
-    SemanticsRole.menuItemRadio => _semanticsMenuItemRadio,
-    SemanticsRole.alert => _noLiveRegion,
-    SemanticsRole.status => _noLiveRegion,
-    SemanticsRole.list => _noCheckRequired,
-    SemanticsRole.listItem => _semanticsListItem,
-    SemanticsRole.complementary => _semanticsComplementary,
-    SemanticsRole.contentInfo => _semanticsContentInfo,
-    SemanticsRole.main => _semanticsMain,
-    SemanticsRole.navigation => _semanticsNavigation,
-    SemanticsRole.region => _semanticsRegion,
-    SemanticsRole.form => _noCheckRequired,
-    // TODO(chunhtai): add checks when the roles are used in framework.
-    // https://github.com/flutter/flutter/issues/159741.
-    SemanticsRole.dragHandle => _unimplemented,
-    SemanticsRole.spinButton => _unimplemented,
-    SemanticsRole.comboBox => _unimplemented,
-    SemanticsRole.tooltip => _unimplemented,
-    SemanticsRole.loadingSpinner => _unimplemented,
-    SemanticsRole.progressBar => _unimplemented,
-    SemanticsRole.hotKey => _unimplemented,
-  }(node);
+  static FlutterError? _checkSemanticsData(SemanticsNode node) {
+    final FlutterError? error = switch (node.role) {
+      SemanticsRole.alertDialog => _noCheckRequired,
+      SemanticsRole.dialog => _noCheckRequired,
+      SemanticsRole.none => _noCheckRequired,
+      SemanticsRole.tab => _semanticsTab,
+      SemanticsRole.tabBar => _semanticsTabBar,
+      SemanticsRole.tabPanel => _noCheckRequired,
+      SemanticsRole.table => _semanticsTable,
+      SemanticsRole.cell => _semanticsCell,
+      SemanticsRole.row => _semanticsRow,
+      SemanticsRole.columnHeader => _semanticsColumnHeader,
+      SemanticsRole.radioGroup => _semanticsRadioGroup,
+      SemanticsRole.menu => _semanticsMenu,
+      SemanticsRole.menuBar => _semanticsMenuBar,
+      SemanticsRole.menuItem => _semanticsMenuItem,
+      SemanticsRole.menuItemCheckbox => _semanticsMenuItemCheckbox,
+      SemanticsRole.menuItemRadio => _semanticsMenuItemRadio,
+      SemanticsRole.alert => _noLiveRegion,
+      SemanticsRole.status => _noLiveRegion,
+      SemanticsRole.list => _noCheckRequired,
+      SemanticsRole.listItem => _semanticsListItem,
+      SemanticsRole.complementary => _semanticsComplementary,
+      SemanticsRole.contentInfo => _semanticsContentInfo,
+      SemanticsRole.main => _semanticsMain,
+      SemanticsRole.navigation => _semanticsNavigation,
+      SemanticsRole.region => _semanticsRegion,
+      SemanticsRole.form => _noCheckRequired,
+      // TODO(chunhtai): add checks when the roles are used in framework.
+      // https://github.com/flutter/flutter/issues/159741.
+      SemanticsRole.dragHandle => _unimplemented,
+      SemanticsRole.spinButton => _unimplemented,
+      SemanticsRole.comboBox => _unimplemented,
+      SemanticsRole.tooltip => _unimplemented,
+      SemanticsRole.loadingSpinner => _unimplemented,
+      SemanticsRole.progressBar => _unimplemented,
+      SemanticsRole.hotKey => _unimplemented,
+    }(node);
+
+    if (error != null) {
+      return error;
+    }
+
+    return _semanticsGeneral(node);
+  }
 
   static FlutterError? _unimplemented(SemanticsNode node) =>
       FlutterError('Missing checks for role ${node.getSemanticsData().role}');
@@ -456,6 +464,30 @@ sealed class _DebugSemanticsRoleChecks {
       return FlutterError(
         'A region role should include a label that describes the purpose of the content.',
       );
+    }
+
+    return null;
+  }
+
+  static FlutterError? _semanticsGeneral(SemanticsNode node) {
+    final SemanticsData data = node.getSemanticsData();
+    final bool? isExpanded = data.flagsCollection.isExpanded.toBoolOrNull();
+
+    if (isExpanded != null) {
+      final bool hasExpandAction = data.hasAction(SemanticsAction.expand);
+      final bool hasCollapseAction = data.hasAction(SemanticsAction.collapse);
+
+      if (hasExpandAction && hasCollapseAction) {
+        return FlutterError(
+          'An expandable node cannot have both expand and collapse actions set at the same time.',
+        );
+      }
+      if (isExpanded && hasExpandAction) {
+        return FlutterError('An expanded node cannot have an expand action.');
+      }
+      if (!isExpanded && hasCollapseAction) {
+        return FlutterError('A collapsed node cannot have a collapse action.');
+      }
     }
 
     return null;
@@ -1531,6 +1563,8 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onDidLoseAccessibilityFocus,
     this.onFocus,
     this.onDismiss,
+    this.onExpand,
+    this.onCollapse,
     this.customSemanticsActions,
   }) : assert(
          label == null || attributedLabel == null,
@@ -2330,6 +2364,24 @@ class SemanticsProperties extends DiagnosticableTree {
   /// menu, and VoiceOver users on iOS can trigger this action with a standard
   /// gesture or menu option.
   final VoidCallback? onDismiss;
+
+  /// The handler for [SemanticsAction.expand].
+  ///
+  /// This is a request to expand the currently focused node. For example, this
+  /// action might be recognized by a dropdown.
+  ///
+  /// This handler should only be set when the node is in a collapsed state
+  /// (i.e., [expanded] is false).
+  final VoidCallback? onExpand;
+
+  /// The handler for [SemanticsAction.collapse].
+  ///
+  /// This is a request to collapse the currently focused node. For example,
+  /// this action might be recognized by a dropdown.
+  ///
+  /// This handler should only be set when the node is in an expanded state
+  /// (i.e., [expanded] is true).
+  final VoidCallback? onCollapse;
 
   /// A map from each supported [CustomSemanticsAction] to a provided handler.
   ///
@@ -5038,6 +5090,28 @@ class SemanticsConfiguration {
   set onFocus(VoidCallback? value) {
     _addArgumentlessAction(SemanticsAction.focus, value!);
     _onFocus = value;
+  }
+
+  /// The handler for [SemanticsAction.expand].
+  ///
+  /// This is a request to expand the currently focused node.
+  VoidCallback? get onExpand => _onExpand;
+  VoidCallback? _onExpand;
+  set onExpand(VoidCallback? value) {
+    assert(value != null);
+    _addArgumentlessAction(SemanticsAction.expand, value!);
+    _onExpand = value;
+  }
+
+  /// The handler for [SemanticsAction.collapse].
+  ///
+  /// This is a request to collapse the currently focused node.
+  VoidCallback? get onCollapse => _onCollapse;
+  VoidCallback? _onCollapse;
+  set onCollapse(VoidCallback? value) {
+    assert(value != null);
+    _addArgumentlessAction(SemanticsAction.collapse, value!);
+    _onCollapse = value;
   }
 
   /// A delegate that decides how to handle [SemanticsConfiguration]s produced
