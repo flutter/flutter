@@ -1352,6 +1352,50 @@ void main() {
     await tester.pumpAndSettle();
     expect(findStretchEffect(tester).stretchStrength.abs(), 0.0);
   });
+
+  testWidgets('Fling overscroll triggers stretching animation correctly in reverse', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/169659
+    final GlobalKey box1Key = GlobalKey();
+    final GlobalKey box2Key = GlobalKey();
+    final GlobalKey box3Key = GlobalKey();
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(buildTest(box1Key, box2Key, box3Key, controller, reverse: true));
+
+    expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
+    expect(find.byType(GlowingOverscrollIndicator), findsNothing);
+    final RenderBox box1 = tester.renderObject(find.byKey(box1Key));
+    final RenderBox box2 = tester.renderObject(find.byKey(box2Key));
+    final RenderBox box3 = tester.renderObject(find.byKey(box3Key));
+
+    expect(controller.offset, 0.0);
+    expect(box1.localToGlobal(Offset.zero), const Offset(0.0, 350.0));
+    expect(box2.localToGlobal(Offset.zero), const Offset(0.0, 100.0));
+    expect(box3.localToGlobal(Offset.zero), const Offset(0.0, -150.0));
+
+    // Simulates a fast and short user fling.
+    await tester.fling(find.byType(CustomScrollView), const Offset(0.0, -50.0), 1000.0);
+
+    // Records the current stretch strength of the StretchEffect widget
+    // before pumping additional frames, so it can be compared later
+    // to verify that the stretch increases after the fling.
+    final double progressStrength = findStretchEffect(tester).stretchStrength;
+
+    await tester.pumpFrames(
+      tester.widget(find.byType(Directionality)),
+      const Duration(milliseconds: 50),
+    );
+
+    // Verifies that the stretchStrength has increased compared to the
+    // previously recorded value, ensuring the fling triggers stretching.
+    expect(findStretchEffect(tester).stretchStrength, lessThan(progressStrength));
+
+    await tester.pumpAndSettle();
+    expect(findStretchEffect(tester).stretchStrength.abs(), 0.0);
+  });
 }
 
 final class _HighFrictionClampingScrollPhysics extends ScrollPhysics {
