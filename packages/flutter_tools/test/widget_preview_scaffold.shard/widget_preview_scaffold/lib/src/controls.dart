@@ -50,7 +50,7 @@ class ZoomControls extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
+      children: [
         _WidgetPreviewIconButton(
           tooltip: 'Zoom in',
           onPressed: enabled ? _zoomIn : null,
