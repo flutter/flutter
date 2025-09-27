@@ -620,6 +620,63 @@ void main() {
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
 
+  testWidgets(
+    'can be rebuilt with custom items',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'one two three');
+      addTearDown(controller.dispose);
+      late StateSetter setState;
+      await tester.pumpWidget(
+        Builder(
+          builder: (BuildContext context) {
+            final MediaQueryData mediaQueryData = MediaQuery.of(context);
+            return MediaQuery(
+              data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: true),
+              child: MaterialApp(
+                home: Scaffold(
+                  body: Center(
+                    child: StatefulBuilder(
+                      builder: (BuildContext context, StateSetter localSetState) {
+                        setState = localSetState;
+                        return TextField(
+                          controller: controller,
+                          contextMenuBuilder:
+                              (BuildContext context, EditableTextState editableTextState) {
+                                return SystemContextMenu.editableText(
+                                  editableTextState: editableTextState,
+                                  items: <IOSSystemContextMenuItem>[
+                                    IOSSystemContextMenuItemCustom(
+                                      title: 'Custom Button',
+                                      onPressed: () {},
+                                    ),
+                                  ],
+                                );
+                              },
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+
+      await tester.tap(find.byType(TextField));
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.showToolbar(), true);
+      await tester.pump();
+
+      setState(() {});
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+    },
+    skip: kIsWeb, // [intended]
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
+
   test(
     'can get the IOSSystemContextMenuItemData representation of an IOSSystemContextMenuItemCopy',
     () {
