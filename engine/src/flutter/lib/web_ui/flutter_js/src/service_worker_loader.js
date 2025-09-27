@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import { resolveUrlWithSegments } from "./utils.js";
-
 /**
  * Wraps `promise` in a timeout of the given `duration` in ms.
  *
@@ -53,59 +51,30 @@ export class FlutterServiceWorkerLoader {
     this._ttPolicy = policy;
   }
   /**
-   * Returns a Promise that resolves when the latest Flutter service worker,
-   * configured by `settings` has been loaded and activated.
-   *
-   * Otherwise, the promise is rejected with an error message.
+   * default Flutter service worker. It will do nothing and resolve immediately.
    * @param {import("./types").ServiceWorkerSettings} settings Service worker settings
-   * @returns {Promise} that resolves when the latest serviceWorker is ready.
+   * @returns {Promise<void>} A promise that resolves immediately.
    */
   loadServiceWorker(settings) {
-    if (!settings) {
-      // In the future, settings = null -> uninstall service worker?
-      console.debug("Null serviceWorker configuration. Skipping.");
-      return Promise.resolve();
-    }
-    if (!("serviceWorker" in navigator)) {
-      let errorMessage = "Service Worker API unavailable.";
-      if (!window.isSecureContext) {
-        errorMessage += "\nThe current context is NOT secure."
-        errorMessage += "\nRead more: https://developer.mozilla.org/en-US/docs/Web/Security/Secure_Contexts";
-      }
-      return Promise.reject(
-        new Error(errorMessage)
+    // We will no longer register, update, or wait for any service worker.
+    // We simply log a warning for developers and return a resolved promise.
+
+    if (settings) {
+      // This warning will appear in the developer console if the app tries
+      // to call the loader with any service worker configuration.
+      console.warn(
+        `[Flutter] Service worker registration has been disabled in flutter.js.
+        The 'serviceWorkerSettings' option is no longer used.
+        To install a service worker, you must now do so manually in your index.html.
+        For more information, see: https://flutter.dev/go/web-cleanup-service-worker`
       );
     }
-    const {
-      serviceWorkerVersion,
-      serviceWorkerUrl = resolveUrlWithSegments(`flutter_service_worker.js?v=${serviceWorkerVersion}`),
-      timeoutMillis = 4000,
-    } = settings;
-    // Apply the TrustedTypes policy, if present.
-    let url = serviceWorkerUrl;
-    if (this._ttPolicy != null) {
-      url = this._ttPolicy.createScriptURL(url);
-    }
-    const serviceWorkerActivation = navigator.serviceWorker
-      .register(url)
-      .then((serviceWorkerRegistration) => this._getNewServiceWorker(serviceWorkerRegistration, serviceWorkerVersion))
-      .then(this._waitForServiceWorkerActivation);
-    // Timeout race promise
-    return timeout(
-      serviceWorkerActivation,
-      timeoutMillis,
-      "prepareServiceWorker"
-    );
+
+    return Promise.resolve();
   }
+
   /**
-   * Returns the latest service worker for the given `serviceWorkerRegistration`.
-   *
-   * This might return the current service worker, if there's no new service worker
-   * awaiting to be installed/updated.
-   *
-   * @param {ServiceWorkerRegistration} serviceWorkerRegistration
-   * @param {string} serviceWorkerVersion
-   * @returns {Promise<ServiceWorker>}
+   * This method is no longer called by loadServiceWorker.
    */
   async _getNewServiceWorker(serviceWorkerRegistration, serviceWorkerVersion) {
     if (!serviceWorkerRegistration.active && (serviceWorkerRegistration.installing || serviceWorkerRegistration.waiting)) {
@@ -124,13 +93,7 @@ export class FlutterServiceWorkerLoader {
       return serviceWorkerRegistration.active;
     }
   }
-  /**
-   * Returns a Promise that resolves when the `serviceWorker` changes its
-   * state to "activated".
-   *
-   * @param {ServiceWorker} serviceWorker
-   * @returns {Promise<void>}
-   */
+
   async _waitForServiceWorkerActivation(serviceWorker) {
     if (!serviceWorker || serviceWorker.state === "activated") {
       if (!serviceWorker) {
