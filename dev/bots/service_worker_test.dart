@@ -380,8 +380,8 @@ Future<void> runWebServiceWorkerTest({
       'assets/AssetManifest.bin.json': 1,
       'assets/fonts/MaterialIcons-Regular.otf': 1,
       'CLOSE': 1,
-      // In headless mode Chrome does not load 'manifest.json' and 'favicon.png'.
-      if (!headless) ...<String, int>{'manifest.json': 1, 'favicon.png': 1},
+      'manifest.json': 1,
+      'favicon.png': 1,
     });
     expect(reportedVersion, '1');
     reportedVersion = null;
@@ -409,7 +409,7 @@ Future<void> runWebServiceWorkerTest({
       'assets/AssetManifest.bin.json': 1,
       'assets/FontManifest.json': 1,
       'CLOSE': 1,
-      if (!headless) 'favicon.png': 1,
+      'favicon.png': 1,
     });
 
     expect(reportedVersion, '2');
@@ -434,8 +434,8 @@ Future<void> runWebServiceWorkerTest({
       'assets/AssetManifest.bin.json': 1,
       'assets/fonts/MaterialIcons-Regular.otf': 1,
       'CLOSE': 1,
-      // In headless mode Chrome does not load 'manifest.json' and 'favicon.png'.
-      if (!headless) ...<String, int>{'manifest.json': 1, 'favicon.png': 1},
+      'manifest.json': 1,
+      'favicon.png': 1,
     });
 
     expect(reportedVersion, '3');
@@ -453,7 +453,7 @@ Future<void> runWebServiceWorkerTest({
       if (shouldExpectFlutterJs) 'flutter.js': 1,
       'flutter_service_worker.js': 1,
       'CLOSE': 1,
-      if (!headless) 'manifest.json': 1,
+      'manifest.json': 1,
     });
     expect(reportedVersion, '3');
     reportedVersion = null;
@@ -477,7 +477,8 @@ Future<void> runWebServiceWorkerTest({
       'assets/AssetManifest.bin.json': 1,
       'assets/FontManifest.json': 1,
       'CLOSE': 1,
-      if (!headless) ...<String, int>{'manifest.json': 1, 'favicon.png': 1},
+      'manifest.json': 1,
+      'favicon.png': 1,
     });
 
     expect(reportedVersion, '4');
@@ -573,8 +574,8 @@ Future<void> runWebServiceWorkerTestWithCachingResources({
       'assets/FontManifest.json': 1,
       'assets/AssetManifest.bin.json': 1,
       'assets/fonts/MaterialIcons-Regular.otf': 1,
-      // In headless mode Chrome does not load 'manifest.json' and 'favicon.png'.
-      if (!headless) ...<String, int>{'manifest.json': 1, 'favicon.png': 1},
+      'manifest.json': 1,
+      'favicon.png': 1,
     });
 
     print('With cache: test first page reload');
@@ -628,8 +629,7 @@ Future<void> runWebServiceWorkerTestWithCachingResources({
       'assets/FontManifest.json': 1,
       'assets/AssetManifest.bin.json': 1,
       'assets/fonts/MaterialIcons-Regular.otf': 1,
-      // In headless mode Chrome does not load 'manifest.json' and 'favicon.png'.
-      if (!headless) ...<String, int>{'favicon.png': 1},
+      'favicon.png': 1,
     });
   } finally {
     await runCommand('mv', <String>[
@@ -706,8 +706,8 @@ Future<void> runWebServiceWorkerTestWithBlockedServiceWorkers({required bool hea
       'assets/FontManifest.json': 1,
       'assets/fonts/MaterialIcons-Regular.otf': 1,
       'CLOSE': 1,
-      // In headless mode Chrome does not load 'manifest.json' and 'favicon.png'.
-      if (!headless) ...<String, int>{'manifest.json': 1, 'favicon.png': 1},
+      'manifest.json': 1,
+      'favicon.png': 1,
     });
   } finally {
     await runCommand('mv', <String>[
@@ -789,8 +789,8 @@ Future<void> runWebServiceWorkerTestWithCustomServiceWorkerVersion({required boo
       'assets/FontManifest.json': 1,
       'assets/AssetManifest.bin.json': 1,
       'assets/fonts/MaterialIcons-Regular.otf': 1,
-      // In headless mode Chrome does not load 'manifest.json' and 'favicon.png'.
-      if (!headless) ...<String, int>{'manifest.json': 1, 'favicon.png': 1},
+      'manifest.json': 1,
+      'favicon.png': 1,
     });
 
     print('Test page reload, ensure service worker is not reloaded');
@@ -803,8 +803,8 @@ Future<void> runWebServiceWorkerTestWithCustomServiceWorkerVersion({required boo
       'assets/FontManifest.json': 1,
       'assets/fonts/MaterialIcons-Regular.otf': 1,
       'CLOSE': 1,
-      // In headless mode Chrome does not load 'manifest.json' and 'favicon.png'.
-      if (!headless) ...<String, int>{'manifest.json': 1, 'favicon.png': 1},
+      'manifest.json': 1,
+      'favicon.png': 1,
     });
 
     print('Test page reload after rebuild, ensure service worker is not reloaded');
@@ -822,8 +822,8 @@ Future<void> runWebServiceWorkerTestWithCustomServiceWorkerVersion({required boo
       'assets/FontManifest.json': 1,
       'assets/fonts/MaterialIcons-Regular.otf': 1,
       'CLOSE': 1,
-      // In headless mode Chrome does not load 'manifest.json' and 'favicon.png'.
-      if (!headless) ...<String, int>{'manifest.json': 1, 'favicon.png': 1},
+      'manifest.json': 1,
+      'favicon.png': 1,
     });
   } finally {
     await runCommand('mv', <String>[
