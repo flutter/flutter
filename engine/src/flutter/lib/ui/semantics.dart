@@ -46,6 +46,8 @@ class SemanticsAction {
   static const int _kSetTextIndex = 1 << 21;
   static const int _kFocusIndex = 1 << 22;
   static const int _kScrollToOffsetIndex = 1 << 23;
+  static const int _kExpandIndex = 1 << 24;
+  static const int _kCollapseIndex = 1 << 25;
   // READ THIS:
   // - The maximum supported bit index on the web (in JS mode) is 1 << 31.
   // - If you add an action here, you MUST update the numSemanticsActions value
@@ -298,6 +300,16 @@ class SemanticsAction {
   ///      VoiceOver (iOS), moving which does not move the input focus.
   static const SemanticsAction focus = SemanticsAction._(_kFocusIndex, 'focus');
 
+  /// A request that the node should be expanded.
+  ///
+  /// For example, this action might be recognized by a dropdown.
+  static const SemanticsAction expand = SemanticsAction._(_kExpandIndex, 'expand');
+
+  /// A request that the node should be collapsed.
+  ///
+  /// For example, this action might be recognized by a dropdown.
+  static const SemanticsAction collapse = SemanticsAction._(_kCollapseIndex, 'collapse');
+
   /// The possible semantics actions.
   ///
   /// The map's key is the [index] of the action and the value is the action
@@ -327,6 +339,8 @@ class SemanticsAction {
     _kMoveCursorBackwardByWordIndex: moveCursorBackwardByWord,
     _kSetTextIndex: setText,
     _kFocusIndex: focus,
+    _kExpandIndex: expand,
+    _kCollapseIndex: collapse,
   };
 
   // TODO(matanlurey): have original authors document; see https://github.com/flutter/flutter/issues/151917.
