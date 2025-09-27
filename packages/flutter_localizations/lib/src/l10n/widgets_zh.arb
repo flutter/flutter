@@ -13,5 +13,6 @@
   "pasteButtonLabel": "粘贴",
   "selectAllButtonLabel": "全选",
   "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found"
+  "noResultsFound": "No results found",
+  "radioButtonUnselectedLabel": "Not selected"
 }

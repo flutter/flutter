@@ -13,5 +13,6 @@
   "pasteButtonLabel": "ਪੇਸਟ ਕਰੋ",
   "selectAllButtonLabel": "ਸਭ ਚੁਣੋ",
   "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found"
+  "noResultsFound": "No results found",
+  "radioButtonUnselectedLabel": "Not selected"
 }
