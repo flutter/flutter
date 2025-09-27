@@ -56,7 +56,7 @@ const compileSdkVersion = '$compileSdkVersionInt';
 const minSdkVersionInt = 24;
 const minSdkVersion = '$minSdkVersionInt';
 const targetSdkVersion = '36';
-const ndkVersion = '27.0.12077973';
+const ndkVersion = '28.2.13676358';
 final minBuildToolsVersion = Version(28, 0, 3);
 // Align with packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt.
 final errorJavaMinVersionAndroid = Version(11, 0, 0);
