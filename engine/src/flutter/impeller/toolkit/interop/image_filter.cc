@@ -19,7 +19,8 @@ ImageFilter::~ImageFilter() = default;
 ScopedObject<ImageFilter> ImageFilter::MakeBlur(Scalar x_sigma,
                                                 Scalar y_sigma,
                                                 flutter::DlTileMode tile_mode) {
-  auto filter = flutter::DlBlurImageFilter::Make(x_sigma, y_sigma, tile_mode);
+  auto filter = flutter::DlBlurImageFilter::Make(x_sigma, y_sigma, std::nullopt,
+                                                 tile_mode);
   if (!filter) {
     return nullptr;
   }
