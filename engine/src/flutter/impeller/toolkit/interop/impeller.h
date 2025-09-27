@@ -2561,7 +2561,7 @@ void ImpellerParagraphStyleSetTextDecoration(
 IMPELLER_EXPORT
 void ImpellerParagraphStyleSetMaxLines(ImpellerParagraphStyle IMPELLER_NONNULL
                                            paragraph_style,
-                                       uint32_t max_lines);
+                                       float max_lines);
 
 //------------------------------------------------------------------------------
 /// @brief      Set the paragraph locale.

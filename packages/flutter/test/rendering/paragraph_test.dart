@@ -277,7 +277,7 @@ void main() {
       maxLines: 1,
     );
 
-    void relayoutWith({int? maxLines, required bool softWrap, required TextOverflow overflow}) {
+    void relayoutWith({double? maxLines, required bool softWrap, required TextOverflow overflow}) {
       paragraph
         ..maxLines = maxLines
         ..softWrap = softWrap
@@ -356,7 +356,7 @@ void main() {
       textDirection: TextDirection.ltr,
     );
     layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
-    void layoutAt(int? maxLines) {
+    void layoutAt(double? maxLines) {
       paragraph.maxLines = maxLines;
       pumpFrame();
     }
@@ -400,7 +400,7 @@ void main() {
 
   group('didExceedMaxLines', () {
     RenderParagraph createRenderParagraph({
-      int? maxLines,
+      double? maxLines,
       TextOverflow overflow = TextOverflow.clip,
     }) {
       return RenderParagraph(
