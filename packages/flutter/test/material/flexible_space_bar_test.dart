@@ -1462,7 +1462,18 @@ void main() {
   });
 
   testWidgets('FlexibleSpaceBar rebuilds when scrolling.', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(home: SubCategoryScreenView()));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: const SubCategoryScreenView(),
+        theme: ThemeData(
+          pageTransitionsTheme: const PageTransitionsTheme(
+            builders: <TargetPlatform, PageTransitionsBuilder>{
+              TargetPlatform.android: ZoomPageTransitionsBuilder(),
+            },
+          ),
+        ),
+      ),
+    );
 
     expect(RenderRebuildTracker.count, 1);
     expect(
@@ -1612,6 +1623,21 @@ void main() {
 
     final DefaultTextStyle textStyle = DefaultTextStyle.of(tester.element(find.text('Title')));
     expect(textStyle.style.color, theme.textTheme.titleLarge!.color);
+  });
+
+  testWidgets('FlexibleSpaceBar does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: Scaffold(
+              appBar: AppBar(flexibleSpace: const FlexibleSpaceBar(title: Text('X'))),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(FlexibleSpaceBar)), Size.zero);
   });
 }
 

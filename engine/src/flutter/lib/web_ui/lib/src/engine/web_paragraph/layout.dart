@@ -60,7 +60,7 @@ class TextLayout {
       final DomTextMetrics blockTextMetrics = layoutContext.measureText(text);
       for (final DomTextCluster cluster in blockTextMetrics.getTextClusters()) {
         final List<DomRectReadOnly> rects = blockTextMetrics.getSelectionRects(
-          cluster.begin,
+          cluster.start,
           cluster.end,
         );
         final ui.Rect bounds = ui.Rect.fromLTWH(
@@ -69,7 +69,7 @@ class TextLayout {
           rects.first.width,
           rects.first.height,
         );
-        for (int i = cluster.begin; i < cluster.end; i += 1) {
+        for (int i = cluster.start; i < cluster.end; i += 1) {
           textToClusterMap[i] = textClusters.length;
         }
         textClusters.add(ExtendedTextCluster(cluster, bounds, blockTextMetrics));
@@ -288,7 +288,7 @@ class TextLayout {
 
 class ExtendedTextCluster {
   ExtendedTextCluster(this.cluster, this.bounds, this.textMetrics)
-    : start = cluster!.begin,
+    : start = cluster!.start,
       end = cluster.end;
 
   // TODO(jlavrova): Remove this.

@@ -27,7 +27,7 @@ class AndroidEnvironmentGL
   EGLDisplay Display() const;
 
  private:
-  EGLDisplay display_;
+  EGLDisplay display_ = EGL_NO_DISPLAY;
   bool valid_ = false;
 
   FML_FRIEND_MAKE_REF_COUNTED(AndroidEnvironmentGL);

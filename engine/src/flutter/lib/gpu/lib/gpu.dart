@@ -17,7 +17,7 @@
 ///
 /// See also:
 ///
-///  * [Flutter GPU documentation](https://github.com/flutter/flutter/blob/main/engine/src/flutter/docs/impeller/Flutter-GPU.md).
+///  * [Flutter GPU documentation](https://github.com/flutter/flutter/blob/main/docs/engine/impeller/Flutter-GPU.md).
 library flutter_gpu;
 
 import 'dart:ffi';

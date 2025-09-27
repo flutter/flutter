@@ -14,14 +14,15 @@ GLContextResult::GLContextResult() = default;
 
 GLContextResult::~GLContextResult() = default;
 
-GLContextResult::GLContextResult(bool static_result) : result_(static_result){};
+GLContextResult::GLContextResult(bool static_result)
+    : result_(static_result) {};
 
 bool GLContextResult::GetResult() {
   return result_;
 };
 
 GLContextDefaultResult::GLContextDefaultResult(bool static_result)
-    : GLContextResult(static_result){};
+    : GLContextResult(static_result) {};
 
 GLContextDefaultResult::~GLContextDefaultResult() = default;
 

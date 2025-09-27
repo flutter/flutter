@@ -745,9 +745,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   flutter::SemanticsNode root_node;
   root_node.id = kRootNodeId;
   root_node.flags.isInMutuallyExclusiveGroup = true;
-  root_node.flags.isEnabled = true;
-  root_node.flags.hasCheckedState = true;
-  root_node.flags.hasEnabledState = true;
+  root_node.flags.isEnabled = flutter::SemanticsTristate::kTrue;
+  root_node.flags.isChecked = flutter::SemanticsCheckState::kFalse;
   nodes[root_node.id] = root_node;
   bridge->UpdateSemantics(/*nodes=*/nodes, /*actions=*/actions);
 
@@ -2391,6 +2390,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
 
     platform_view->SetOwnerViewController(mockFlutterViewController);
     platform_view->SetSemanticsEnabled(true);
+    platform_view->SetSemanticsTreeEnabled(true);
 
     OCMExpect([mockFlutterView setAccessibilityElements:[OCMArg isNil]]);
     platform_view->OnPreEngineRestart();

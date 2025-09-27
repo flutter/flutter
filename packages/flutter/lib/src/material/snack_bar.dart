@@ -15,7 +15,6 @@ import 'icon_button.dart';
 import 'icons.dart';
 import 'material.dart';
 import 'material_localizations.dart';
-import 'material_state.dart';
 import 'scaffold.dart';
 import 'snack_bar_theme.dart';
 import 'text_button.dart';
@@ -96,9 +95,9 @@ class SnackBarAction extends StatefulWidget {
     required this.label,
     required this.onPressed,
   }) : assert(
-         backgroundColor is! MaterialStateColor || disabledBackgroundColor == null,
+         backgroundColor is! WidgetStateColor || disabledBackgroundColor == null,
          'disabledBackgroundColor must not be provided when background color is '
-         'a MaterialStateColor',
+         'a WidgetStateColor',
        );
 
   /// The button label color. If not provided, defaults to
@@ -162,23 +161,23 @@ class _SnackBarActionState extends State<SnackBarAction> {
         : _SnackbarDefaultsM2(context);
     final SnackBarThemeData snackBarTheme = Theme.of(context).snackBarTheme;
 
-    MaterialStateColor resolveForegroundColor() {
+    WidgetStateColor resolveForegroundColor() {
       if (widget.textColor != null) {
-        if (widget.textColor is MaterialStateColor) {
-          return widget.textColor! as MaterialStateColor;
+        if (widget.textColor is WidgetStateColor) {
+          return widget.textColor! as WidgetStateColor;
         }
       } else if (snackBarTheme.actionTextColor != null) {
-        if (snackBarTheme.actionTextColor is MaterialStateColor) {
-          return snackBarTheme.actionTextColor! as MaterialStateColor;
+        if (snackBarTheme.actionTextColor is WidgetStateColor) {
+          return snackBarTheme.actionTextColor! as WidgetStateColor;
         }
       } else if (defaults.actionTextColor != null) {
-        if (defaults.actionTextColor is MaterialStateColor) {
-          return defaults.actionTextColor! as MaterialStateColor;
+        if (defaults.actionTextColor is WidgetStateColor) {
+          return defaults.actionTextColor! as WidgetStateColor;
         }
       }
 
-      return MaterialStateColor.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
+      return WidgetStateColor.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
           return widget.disabledTextColor ??
               snackBarTheme.disabledActionTextColor ??
               defaults.disabledActionTextColor!;
@@ -187,15 +186,15 @@ class _SnackBarActionState extends State<SnackBarAction> {
       });
     }
 
-    MaterialStateColor? resolveBackgroundColor() {
-      if (widget.backgroundColor is MaterialStateColor) {
-        return widget.backgroundColor! as MaterialStateColor;
+    WidgetStateColor? resolveBackgroundColor() {
+      if (widget.backgroundColor is WidgetStateColor) {
+        return widget.backgroundColor! as WidgetStateColor;
       }
-      if (snackBarTheme.actionBackgroundColor is MaterialStateColor) {
-        return snackBarTheme.actionBackgroundColor! as MaterialStateColor;
+      if (snackBarTheme.actionBackgroundColor is WidgetStateColor) {
+        return snackBarTheme.actionBackgroundColor! as WidgetStateColor;
       }
-      return MaterialStateColor.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
+      return WidgetStateColor.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
           return widget.disabledBackgroundColor ??
               snackBarTheme.disabledActionBackgroundColor ??
               Colors.transparent;
@@ -289,6 +288,7 @@ class SnackBar extends StatefulWidget {
     this.showCloseIcon,
     this.closeIconColor,
     this.duration = _snackBarDisplayDuration,
+    bool? persist,
     this.animation,
     this.onVisible,
     this.dismissDirection,
@@ -299,7 +299,8 @@ class SnackBar extends StatefulWidget {
          actionOverflowThreshold == null ||
              (actionOverflowThreshold >= 0 && actionOverflowThreshold <= 1),
          'Action overflow threshold must be between 0 and 1 inclusive',
-       );
+       ),
+       persist = persist ?? action != null;
 
   /// The primary content of the snack bar.
   ///
@@ -459,6 +460,17 @@ class SnackBar extends StatefulWidget {
   ///  * <https://material.io/design/components/snackbars.html>
   final Duration duration;
 
+  /// Whether the snack bar will stay or auto-dismiss after timeout.
+  ///
+  /// If true, the snack bar remains visible even after the timeout, until the
+  /// user taps the action button or the close icon.
+  ///
+  /// If false, the snack bar will be dismissed after the timeout.
+  ///
+  /// If not provided, but the snackbar action is not null, the snackbar will
+  /// persist as well.
+  final bool persist;
+
   /// The animation driving the entrance and exit of the snack bar.
   final Animation<double>? animation;
 
@@ -521,6 +533,7 @@ class SnackBar extends StatefulWidget {
       showCloseIcon: showCloseIcon,
       closeIconColor: closeIconColor,
       duration: duration,
+      persist: persist,
       animation: newAnimation,
       onVisible: onVisible,
       dismissDirection: dismissDirection,
@@ -939,17 +952,17 @@ class _SnackbarDefaultsM3 extends SnackBarThemeData {
   Color get backgroundColor => _colors.inverseSurface;
 
   @override
-  Color get actionTextColor =>  MaterialStateColor.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
+  Color get actionTextColor =>  WidgetStateColor.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
       return _colors.inversePrimary;
     }
-    if (states.contains(MaterialState.pressed)) {
+    if (states.contains(WidgetState.pressed)) {
       return _colors.inversePrimary;
     }
-    if (states.contains(MaterialState.hovered)) {
+    if (states.contains(WidgetState.hovered)) {
       return _colors.inversePrimary;
     }
-    if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.focused)) {
       return _colors.inversePrimary;
     }
     return _colors.inversePrimary;

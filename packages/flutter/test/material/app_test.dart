@@ -347,10 +347,6 @@ void main() {
       );
       expect(tester.takeException(), isFlutterError);
       expect(log, <String>['onGenerateRoute /', 'onUnknownRoute /']);
-
-      // Work-around for https://github.com/flutter/flutter/issues/65655.
-      await tester.pumpWidget(Container());
-      expect(tester.takeException(), isAssertionError);
     },
   );
 
@@ -1709,6 +1705,15 @@ void main() {
       expect(find.text('Works'), findsOne);
     },
   );
+
+  testWidgets('MaterialApp does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Center(
+        child: SizedBox.shrink(child: MaterialApp(home: Text('X'))),
+      ),
+    );
+    expect(tester.getSize(find.byType(MaterialApp)), Size.zero);
+  });
 }
 
 class MockScrollBehavior extends ScrollBehavior {

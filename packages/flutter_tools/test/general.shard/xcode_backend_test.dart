@@ -103,7 +103,6 @@ void main() {
             'CONFIGURATION': buildMode,
             'FLUTTER_ROOT': flutterRoot.path,
             'INFOPLIST_PATH': 'Info.plist',
-            'FLUTTER_CLI_BUILD_MODE': buildMode.toLowerCase(),
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -191,7 +190,6 @@ void main() {
             'TREE_SHAKE_ICONS': treeShake,
             'SRCROOT': srcRoot,
             'TARGET_DEVICE_OS_VERSION': iOSVersion,
-            'FLUTTER_CLI_BUILD_MODE': buildMode.toLowerCase(),
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -234,144 +232,13 @@ void main() {
         expect(context.stdout, contains('built and packaged successfully.'));
         expect(context.stderr, isEmpty);
       });
-
-      test(
-        'exits with useful error message when missing FLUTTER_CLI_BUILD_MODE during archive',
-        () {
-          final Directory buildDir = fileSystem.directory('/path/to/builds')
-            ..createSync(recursive: true);
-          final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
-            ..createSync(recursive: true);
-
-          const buildMode = 'Release';
-
-          final context = TestContext(
-            <String>['build', platformName],
-            <String, String>{
-              'ACTION': 'install',
-              'CONFIGURATION': buildMode,
-              'BUILT_PRODUCTS_DIR': buildDir.path,
-              'FLUTTER_ROOT': flutterRoot.path,
-              'INFOPLIST_PATH': 'Info.plist',
-            },
-            commands: <FakeCommand>[],
-            fileSystem: fileSystem,
-          );
-          expect(() => context.run(), throwsException);
-          expect(
-            context.stderr,
-            contains(
-              'error: Your Flutter build settings are outdated. '
-              'Please run "flutter build ${platform.name} --config-only --release" '
-              'in your Flutter project and try again.',
-            ),
-          );
-        },
-      );
-
-      test('exits with useful error message when build mode mismatches during archive', () {
-        final Directory buildDir = fileSystem.directory('/path/to/builds')
-          ..createSync(recursive: true);
-        final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
-          ..createSync(recursive: true);
-
-        const buildMode = 'Release';
-
-        final context = TestContext(
-          <String>['build', platformName],
-          <String, String>{
-            'ACTION': 'install',
-            'CONFIGURATION': buildMode,
-            'BUILT_PRODUCTS_DIR': buildDir.path,
-            'FLUTTER_ROOT': flutterRoot.path,
-            'INFOPLIST_PATH': 'Info.plist',
-            'FLUTTER_CLI_BUILD_MODE': 'debug',
-          },
-          commands: <FakeCommand>[],
-          fileSystem: fileSystem,
-        );
-        expect(() => context.run(), throwsException);
-        expect(
-          context.stderr,
-          contains(
-            'error: Your Flutter project is currently configured for debug mode. '
-            'Please run `flutter build ${platform.name} --config-only --release` '
-            'in your Flutter project to update your settings.',
-          ),
-        );
-      });
-
-      test('prints useful warning message when missing FLUTTER_CLI_BUILD_MODE', () {
-        final Directory buildDir = fileSystem.directory('/path/to/builds')
-          ..createSync(recursive: true);
-        final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
-          ..createSync(recursive: true);
-
-        const buildMode = 'Release';
-
-        final context = TestContext(
-          <String>['build', platformName],
-          <String, String>{
-            'ACTION': 'build',
-            'CONFIGURATION': buildMode,
-            'BUILT_PRODUCTS_DIR': buildDir.path,
-            'FLUTTER_ROOT': flutterRoot.path,
-            'INFOPLIST_PATH': 'Info.plist',
-          },
-          commands: <FakeCommand>[],
-          fileSystem: fileSystem,
-          fakeProcessManager: FakeProcessManager.any(),
-        );
-        context.run();
-        expect(
-          context.stderr,
-          contains(
-            'warning: Your Flutter build settings are outdated. '
-            'Please run "flutter build ${platform.name} --config-only --release" '
-            'in your Flutter project and try again.',
-          ),
-        );
-      });
-
-      test('prints useful warning message when build mode mismatches', () {
-        final Directory buildDir = fileSystem.directory('/path/to/builds')
-          ..createSync(recursive: true);
-        final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
-          ..createSync(recursive: true);
-
-        const buildMode = 'Release';
-
-        final context = TestContext(
-          <String>['build', platformName],
-          <String, String>{
-            'ACTION': 'debug',
-            'CONFIGURATION': buildMode,
-            'BUILT_PRODUCTS_DIR': buildDir.path,
-            'FLUTTER_ROOT': flutterRoot.path,
-            'INFOPLIST_PATH': 'Info.plist',
-            'FLUTTER_CLI_BUILD_MODE': 'debug',
-          },
-          commands: <FakeCommand>[],
-          fileSystem: fileSystem,
-          fakeProcessManager: FakeProcessManager.any(),
-        );
-        context.run();
-        expect(
-          context.stderr,
-          contains(
-            'warning: Your Flutter project is currently configured for debug mode. '
-            'Please run `flutter build ${platform.name} --config-only --release` '
-            'in your Flutter project to update your settings.',
-          ),
-        );
-      });
     });
   }
 
   group('test_vm_service_bonjour_service', () {
     test('handles when the Info.plist is missing', () {
-      final Directory buildDir = fileSystem.directory('/path/to/builds');
-      buildDir.createSync(recursive: true);
+      final Directory buildDir = fileSystem.directory('/path/to/builds')
+        ..createSync(recursive: true);
       final context = TestContext(
         <String>['test_vm_service_bonjour_service'],
         <String, String>{
@@ -389,6 +256,154 @@ void main() {
         ),
       );
     });
+
+    for (final verbose in <bool>[true, false]) {
+      test(
+        'Missing NSBonjourServices key in Info.plist should not fail Xcode compilation under ${verbose ? 'verbose' : 'non-verbose'} mode',
+        () {
+          final Directory buildDir = fileSystem.directory('/path/to/builds')
+            ..createSync(recursive: true);
+          final File infoPlist = buildDir.childFile('Info.plist')..createSync();
+          const plutilErrorMessage =
+              'Could not extract value, error: No value at that key path or invalid key path: NSBonjourServices';
+          final File pipe = fileSystem.file('/tmp/pipe')..createSync(recursive: true);
+          final context = TestContext(
+            <String>['test_vm_service_bonjour_service'],
+            <String, String>{
+              'CONFIGURATION': 'Debug',
+              'BUILT_PRODUCTS_DIR': buildDir.path,
+              'INFOPLIST_PATH': 'Info.plist',
+              if (verbose) 'VERBOSE_SCRIPT_LOGGING': 'YES',
+            },
+            commands: <FakeCommand>[
+              FakeCommand(
+                command: <String>[
+                  'plutil',
+                  '-extract',
+                  'NSBonjourServices',
+                  'xml1',
+                  '-o',
+                  '-',
+                  infoPlist.path,
+                ],
+                exitCode: 1,
+                stderr: plutilErrorMessage,
+              ),
+              FakeCommand(
+                command: <String>[
+                  'plutil',
+                  '-insert',
+                  'NSBonjourServices',
+                  '-json',
+                  '["_dartVmService._tcp"]',
+                  infoPlist.path,
+                ],
+              ),
+              FakeCommand(
+                command: <String>[
+                  'plutil',
+                  '-extract',
+                  'NSLocalNetworkUsageDescription',
+                  'xml1',
+                  '-o',
+                  '-',
+                  infoPlist.path,
+                ],
+              ),
+            ],
+            fileSystem: fileSystem,
+            scriptOutputStreamFile: pipe,
+          )..run();
+
+          expect(context.stderr, isNot(startsWith('error: ')));
+          expect(pipe.readAsStringSync(), isNot(contains(plutilErrorMessage)));
+          expect(context.stderr, isNot(contains(plutilErrorMessage)));
+          if (verbose) {
+            expect(context.stdout, contains(plutilErrorMessage));
+          } else {
+            expect(context.stdout, isNot(contains(plutilErrorMessage)));
+          }
+        },
+      );
+
+      test(
+        'Missing NSLocalNetworkUsageDescription in Info.plist should not fail Xcode compilation under ${verbose ? 'verbose' : 'non-verbose'} mode',
+        () {
+          final Directory buildDir = fileSystem.directory('/path/to/builds')
+            ..createSync(recursive: true);
+          final File infoPlist = buildDir.childFile('Info.plist')..createSync();
+          const plutilErrorMessage =
+              'Could not extract value, error: No value at that key path or invalid key path: NSLocalNetworkUsageDescription';
+          final File pipe = fileSystem.file('/tmp/pipe')..createSync(recursive: true);
+          final context = TestContext(
+            <String>['test_vm_service_bonjour_service'],
+            <String, String>{
+              'CONFIGURATION': 'Debug',
+              'BUILT_PRODUCTS_DIR': buildDir.path,
+              'INFOPLIST_PATH': 'Info.plist',
+              if (verbose) 'VERBOSE_SCRIPT_LOGGING': 'YES',
+            },
+            commands: <FakeCommand>[
+              FakeCommand(
+                command: <String>[
+                  'plutil',
+                  '-extract',
+                  'NSBonjourServices',
+                  'xml1',
+                  '-o',
+                  '-',
+                  infoPlist.path,
+                ],
+              ),
+              FakeCommand(
+                command: <String>[
+                  'plutil',
+                  '-insert',
+                  'NSBonjourServices.0',
+                  '-string',
+                  '_dartVmService._tcp',
+                  infoPlist.path,
+                ],
+              ),
+              FakeCommand(
+                command: <String>[
+                  'plutil',
+                  '-extract',
+                  'NSLocalNetworkUsageDescription',
+                  'xml1',
+                  '-o',
+                  '-',
+                  infoPlist.path,
+                ],
+                exitCode: 1,
+                stderr: plutilErrorMessage,
+              ),
+              FakeCommand(
+                command: <String>[
+                  'plutil',
+                  '-insert',
+                  'NSLocalNetworkUsageDescription',
+                  '-string',
+                  'Allow Flutter tools on your computer to connect and debug your application. This prompt will not appear on release builds.',
+                  infoPlist.path,
+                ],
+              ),
+            ],
+            fileSystem: fileSystem,
+            scriptOutputStreamFile: pipe,
+          )..run();
+
+          expect(context.stderr, isNot(startsWith('error: ')));
+          expect(pipe.readAsString(), isNot(contains(plutilErrorMessage)));
+          expect(context.stderr, isNot(contains(plutilErrorMessage)));
+          if (verbose) {
+            expect(context.stdout, contains(plutilErrorMessage));
+          } else {
+            expect(context.stdout, isNot(contains(plutilErrorMessage)));
+          }
+        },
+      );
+    }
   });
 
   for (final platform in platforms) {
@@ -409,7 +424,6 @@ void main() {
             'BUILT_PRODUCTS_DIR': buildDir.path,
             'FLUTTER_ROOT': flutterRoot.path,
             'INFOPLIST_PATH': 'Info.plist',
-            'FLUTTER_CLI_BUILD_MODE': buildMode.toLowerCase(),
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -461,7 +475,6 @@ void main() {
             'CONFIGURATION': buildMode,
             'FLUTTER_ROOT': flutterRoot.path,
             'INFOPLIST_PATH': 'Info.plist',
-            'FLUTTER_CLI_BUILD_MODE': buildMode.toLowerCase(),
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -541,7 +554,6 @@ void main() {
             'TREE_SHAKE_ICONS': treeShake,
             'SRCROOT': srcRoot,
             'TARGET_DEVICE_OS_VERSION': iOSVersion,
-            'FLUTTER_CLI_BUILD_MODE': buildMode.toLowerCase(),
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -599,7 +611,6 @@ void main() {
             'ARCHS': 'arm64 x86_64',
             'ONLY_ACTIVE_ARCH': 'YES',
             'NATIVE_ARCH': 'arm64e',
-            'FLUTTER_CLI_BUILD_MODE': buildMode.toLowerCase(),
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -654,7 +665,6 @@ void main() {
             'ARCHS': 'arm64',
             'ONLY_ACTIVE_ARCH': 'YES',
             'NATIVE_ARCH': 'x86_64',
-            'FLUTTER_CLI_BUILD_MODE': buildMode.toLowerCase(),
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -708,7 +718,6 @@ void main() {
             'INFOPLIST_PATH': 'Info.plist',
             'ARCHS': 'arm64 x86_64',
             'NATIVE_ARCH': 'arm64e',
-            'FLUTTER_CLI_BUILD_MODE': buildMode.toLowerCase(),
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -1054,13 +1063,7 @@ class TestContext extends Context {
   }
 
   @override
-  ProcessResult runSync(
-    String bin,
-    List<String> args, {
-    bool verbose = false,
-    bool allowFail = false,
-    String? workingDirectory,
-  }) {
+  ProcessResult runSyncProcess(String bin, List<String> args, {String? workingDirectory}) {
     return processManager.runSync(
       <dynamic>[bin, ...args],
       workingDirectory: workingDirectory,

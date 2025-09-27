@@ -16,9 +16,12 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/template.dart';
+import '../build_info.dart';
 import '../convert.dart';
 import '../macos/xcode.dart';
+import '../project.dart';
 import '../template.dart';
+import 'xcode_build_settings.dart';
 
 /// A class to handle interacting with Xcode via OSA (Open Scripting Architecture)
 /// Scripting to debug Flutter applications.
@@ -407,6 +410,7 @@ class XcodeDebug {
     final String schemeXml = schemeFile.readAsStringSync();
     try {
       final document = XmlDocument.parse(schemeXml);
+      // ignore: experimental_member_use
       final Iterable<XmlNode> nodes = document.xpath('/Scheme/LaunchAction');
       if (nodes.isEmpty) {
         _logger.printError('Failed to find LaunchAction for the Scheme in ${schemeFile.path}.');
@@ -432,6 +436,21 @@ and ensure "Debug executable" is checked in the "Info" tab.
     } on XmlException catch (exception) {
       _logger.printError('Failed to parse ${schemeFile.path}: $exception');
     }
+  }
+
+  /// Update CONFIGURATION_BUILD_DIR in the [project]'s Xcode build settings.
+  Future<void> updateConfigurationBuildDir({
+    required FlutterProject project,
+    required BuildInfo buildInfo,
+    String? mainPath,
+    required String configurationBuildDir,
+  }) async {
+    await updateGeneratedXcodeProperties(
+      project: project,
+      buildInfo: buildInfo,
+      targetOverride: mainPath,
+      configurationBuildDir: configurationBuildDir,
+    );
   }
 }
 

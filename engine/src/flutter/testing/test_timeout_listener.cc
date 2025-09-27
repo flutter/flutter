@@ -63,7 +63,7 @@ class PendingTests : public std::enable_shared_from_this<PendingTests> {
 };
 
 template <class T>
-auto WeakPtr(std::shared_ptr<T> pointer) {
+auto WeakPtr(const std::shared_ptr<T>& pointer) {
   return std::weak_ptr<T>{pointer};
 }
 

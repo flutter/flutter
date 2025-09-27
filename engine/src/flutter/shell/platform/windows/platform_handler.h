@@ -141,7 +141,7 @@ class PlatformHandler {
 // PlatformHandler.
 class ScopedClipboardInterface {
  public:
-  virtual ~ScopedClipboardInterface(){};
+  virtual ~ScopedClipboardInterface() {};
 
   // Attempts to open the clipboard for the given window, returning the error
   // code in the case of failure and 0 otherwise.

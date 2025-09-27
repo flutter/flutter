@@ -281,7 +281,7 @@ void _writeGeneratedFlutterConfig(
     'FLUTTER_ROOT': Cache.flutterRoot!,
     'FLUTTER_EPHEMERAL_DIR': windowsProject.ephemeralDirectory.path,
     'PROJECT_DIR': windowsProject.parent.directory.path,
-    if (target != null) 'FLUTTER_TARGET': target,
+    'FLUTTER_TARGET': ?target,
     ...buildInfo.toEnvironmentConfig(),
   };
   final LocalEngineInfo? localEngineInfo = globals.artifacts?.localEngineInfo;

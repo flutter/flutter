@@ -434,8 +434,8 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           radioTheme: RadioThemeData(
-            fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
+            fillColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
                 return themeSelectedFillColor;
               }
               return themeDefaultFillColor;
@@ -481,9 +481,9 @@ void main() {
     const Color activePressedOverlayColor = Color(0xFF000001);
     const Color inactivePressedOverlayColor = Color(0xFF000002);
 
-    Color? getOverlayColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
-        if (states.contains(MaterialState.selected)) {
+    Color? getOverlayColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
+        if (states.contains(WidgetState.selected)) {
           return activePressedOverlayColor;
         }
         return inactivePressedOverlayColor;
@@ -497,7 +497,7 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           radioTheme: RadioThemeData(
-            overlayColor: MaterialStateProperty.resolveWith(getOverlayColor),
+            overlayColor: WidgetStateProperty.resolveWith(getOverlayColor),
             splashRadius: splashRadius,
           ),
         ),

@@ -5,7 +5,8 @@
 # Custom GN integration for VulkanMemoryAllocator.
 
 declare_args() {
-  vma_vulkan_headers_dir = "//flutter/third_party/vulkan-deps/vulkan-headers/src"
+  vma_vulkan_headers_dir =
+      "//flutter/third_party/vulkan-deps/vulkan-headers/src"
 }
 
 config("vulkan_memory_allocator_config") {

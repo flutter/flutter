@@ -2607,9 +2607,16 @@ extension JSArrayExtension on JSArray<JSAny?> {
 
 @JS('TextCluster')
 extension type DomTextCluster._(JSObject _) implements JSObject {
-  // TODO(jlavrova): This has been renamed to `start` in the spec.
-  // See: https://github.com/fserb/canvas2D/blob/master/spec/enhanced-textmetrics.md
-  external int get begin;
+  @JS('begin')
+  external int? _begin;
+  @JS('start')
+  external int _start;
+  // The proposal had this `begin` then renamed it to `start`. Some versions of Chrome still have
+  // the old name.
+  //
+  // `_begin` can be removed once this feature is launched in a stable Chrome release.
+  int get start => _begin ?? _start;
+
   external int get end;
   external double get x;
   external double get y;

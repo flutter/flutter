@@ -336,4 +336,27 @@ void main() {
     // The custom callback is called, setting customCallbackWasCalled to true.
     expect(customCallbackWasCalled, true);
   });
+
+  testWidgets('CloseButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: Scaffold(body: CloseButton())),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CloseButton)), Size.zero);
+  });
+
+  testWidgets('BackButton renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: Scaffold(body: BackButton())),
+        ),
+      ),
+    );
+    final Finder backButtonIcon = find.byType(BackButtonIcon);
+    expect(tester.getSize(backButtonIcon).isEmpty, isTrue);
+  });
 }

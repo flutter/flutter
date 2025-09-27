@@ -107,8 +107,9 @@ class RefPtr final {
 
   // Destructor.
   ~RefPtr() {
+    // NOLINTNEXTLINE(clang-analyzer-core.StackAddressEscape)
     if (ptr_) {
-      // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDelete)
+      // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDelete,clang-analyzer-core.StackAddressEscape)
       ptr_->Release();
     }
   }

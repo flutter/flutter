@@ -1523,7 +1523,7 @@ void _paragraphTests() {
     final SkParagraphStyle paragraphStyle = canvasKit.ParagraphStyle(props);
     final SkParagraphBuilder builder = canvasKit.ParagraphBuilder.MakeFromFontCollection(
       paragraphStyle,
-      CanvasKitRenderer.instance.fontCollection.skFontCollection,
+      (CanvasKitRenderer.instance.fontCollection as SkiaFontCollection).skFontCollection,
     );
 
     builder.addText('Hello');
@@ -1558,9 +1558,7 @@ void _paragraphTests() {
     builder.pop();
     builder.pushStyle(canvasKit.TextStyle(SkTextStyleProperties()..halfLeading = true));
     builder.pop();
-    if (canvasKit.ParagraphBuilder.RequiresClientICU()) {
-      injectClientICU(builder);
-    }
+    builder.injectClientICUIfNeeded();
     final SkParagraph paragraph = builder.build();
     paragraph.layout(500);
 
@@ -1663,13 +1661,11 @@ void _paragraphTests() {
     final SkParagraphStyle paragraphStyle = canvasKit.ParagraphStyle(props);
     final SkParagraphBuilder builder = canvasKit.ParagraphBuilder.MakeFromFontCollection(
       paragraphStyle,
-      CanvasKitRenderer.instance.fontCollection.skFontCollection,
+      (CanvasKitRenderer.instance.fontCollection as SkiaFontCollection).skFontCollection,
     );
     builder.addText('hello');
 
-    if (canvasKit.ParagraphBuilder.RequiresClientICU()) {
-      injectClientICU(builder);
-    }
+    builder.injectClientICUIfNeeded();
 
     final SkParagraph paragraph = builder.build();
     paragraph.layout(500);

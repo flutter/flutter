@@ -32,8 +32,19 @@ class WebApplicationPackage extends ApplicationPackage {
   Directory get webSourcePath => flutterProject.directory.childDirectory('web');
 }
 
+abstract class WebDevice extends Device {
+  WebDevice(super.id, {required super.logger})
+    : super(category: Category.web, platformType: PlatformType.web, ephemeral: false);
+
+  @override
+  Uri? get devToolsUri => _devToolsUri;
+  Uri? _devToolsUri;
+
+  set devToolsUri(Uri? uri) => _devToolsUri = uri;
+}
+
 /// A web device that supports a chromium browser.
-abstract class ChromiumDevice extends Device {
+abstract class ChromiumDevice extends WebDevice {
   ChromiumDevice({
     required String name,
     required this.chromeLauncher,
@@ -41,7 +52,7 @@ abstract class ChromiumDevice extends Device {
     required super.logger,
   }) : _fileSystem = fileSystem,
        _logger = logger,
-       super(name, category: Category.web, platformType: PlatformType.web, ephemeral: false);
+       super(name);
 
   final ChromiumLauncher chromeLauncher;
 
@@ -116,8 +127,7 @@ abstract class ChromiumDevice extends Device {
     // for the web initialization and server logic.
     String url;
     if (debuggingOptions.webLaunchUrl != null) {
-      final pattern = RegExp(r'^((http)?:\/\/)[^\s]+');
-      if (pattern.hasMatch(debuggingOptions.webLaunchUrl!)) {
+      if (_isLaunchUrlValid(debuggingOptions.webLaunchUrl!)) {
         url = debuggingOptions.webLaunchUrl!;
       } else {
         throwToolExit('"${debuggingOptions.webLaunchUrl}" is not a valid HTTP URL.');
@@ -139,6 +149,11 @@ abstract class ChromiumDevice extends Device {
     }
     _logger.sendEvent('app.webLaunchUrl', <String, Object>{'url': url, 'launched': launchChrome});
     return LaunchResult.succeeded(vmServiceUri: Uri.parse(url));
+  }
+
+  bool _isLaunchUrlValid(String url) {
+    final pattern = RegExp(r'^(https?:\/\/)[^\s]+');
+    return pattern.hasMatch(url);
   }
 
   @override
@@ -183,9 +198,10 @@ class GoogleChromeDevice extends ChromiumDevice {
   final ProcessManager _processManager;
 
   static const kChromeDeviceId = 'chrome';
+  static const kChromeDeviceName = 'Chrome';
 
   @override
-  String get name => 'Chrome';
+  String get name => kChromeDeviceName;
 
   @override
   late final Future<String> sdkNameAndVersion = _computeSdkNameAndVersion();
@@ -239,9 +255,10 @@ class MicrosoftEdgeDevice extends ChromiumDevice {
   static const _kFirstChromiumEdgeMajorVersion = 79;
 
   static const kEdgeDeviceId = 'edge';
+  static const kEdgeDeviceName = 'Edge';
 
   @override
-  String get name => 'Edge';
+  String get name => kEdgeDeviceName;
 
   Future<bool> _meetsVersionConstraint() async {
     final String rawVersion = (await sdkNameAndVersion).replaceFirst('Microsoft Edge ', '');
@@ -286,7 +303,7 @@ class WebDevices extends PollingDeviceDiscovery {
     required FeatureFlags featureFlags,
   }) : _featureFlags = featureFlags,
        _webServerDevice = WebServerDevice(logger: logger),
-       super('Chrome') {
+       super(GoogleChromeDevice.kChromeDeviceName) {
     final operatingSystemUtils = OperatingSystemUtils(
       fileSystem: fileSystem,
       platform: platform,
@@ -358,10 +375,8 @@ String parseVersionForWindows(String input) {
 }
 
 /// A special device type to allow serving for arbitrary browsers.
-class WebServerDevice extends Device {
-  WebServerDevice({required super.logger})
-    : _logger = logger,
-      super('web-server', platformType: PlatformType.web, category: Category.web, ephemeral: false);
+class WebServerDevice extends WebDevice {
+  WebServerDevice({required super.logger}) : _logger = logger, super('web-server');
 
   static const kWebServerDeviceId = 'web-server';
   static var showWebServerDevice = false;
