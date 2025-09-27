@@ -283,6 +283,7 @@ android_java_sources = [
   "io/flutter/embedding/engine/plugins/util/GeneratedPluginRegister.java",
   "io/flutter/embedding/engine/renderer/FlutterRenderer.java",
   "io/flutter/embedding/engine/renderer/FlutterUiDisplayListener.java",
+  "io/flutter/embedding/engine/renderer/FlutterUiResizeListener.java",
   "io/flutter/embedding/engine/renderer/RenderSurface.java",
   "io/flutter/embedding/engine/renderer/SurfaceTextureSurfaceProducer.java",
   "io/flutter/embedding/engine/renderer/SurfaceTextureWrapper.java",
