@@ -263,6 +263,7 @@ PixelFormat ToPixelFormat(AHardwareBuffer_Format format) {
     case AHARDWAREBUFFER_FORMAT_R8G8B8_UNORM:
     case AHARDWAREBUFFER_FORMAT_D16_UNORM:
     case AHARDWAREBUFFER_FORMAT_R8G8B8X8_UNORM:
+    case AHARDWAREBUFFER_FORMAT_YCbCr_P210:
       // Not understood by the rest of Impeller. Use a placeholder but create
       // the native image and image views using the right external format.
       break;
