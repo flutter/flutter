@@ -656,7 +656,7 @@ class AppResourceBundle {
             // see if the parsed locale matches, throw an error if it does not. This
             // prevents developers from confusing issues when both @@locale and
             // "_{locale}" is specified in the filename.
-            if (localeString != parserLocaleString) {
+            if (localeString != parserLocaleString && localeString != fileName) {
               throw L10nException(
                 'The locale specified in @@locale and the arb filename do not match. \n'
                 'Please make sure that they match, since this prevents any confusion \n'
