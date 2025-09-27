@@ -805,6 +805,7 @@ class _AmPmButton extends StatelessWidget {
       checked: selected,
       inMutuallyExclusiveGroup: true,
       button: true,
+      liveRegion: true,
       child: Padding(
         padding: padding,
         child: Material(
