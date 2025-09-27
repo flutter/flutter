@@ -50,9 +50,11 @@ WidgetPreviewerWidgetScaffolding previewForBrightness({
   Brightness? platformBrightness,
   PreviewTheme? previewTheme,
 }) {
+  final controller = FakeWidgetPreviewScaffoldController();
   return WidgetPreviewerWidgetScaffolding(
     platformBrightness: platformBrightness ?? Brightness.light,
     child: WidgetPreviewWidget(
+      controller: controller,
       preview: WidgetPreview(
         scriptUri: '',
         builder: () => Text('Foo', key: key),
