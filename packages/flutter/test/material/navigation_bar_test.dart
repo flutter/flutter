@@ -953,6 +953,47 @@ void main() {
     );
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/169249.
+  testWidgets('Material3 - Navigation indicator moves to selected item', (
+    WidgetTester tester,
+  ) async {
+    final ThemeData theme = ThemeData();
+    int index = 0;
+
+    Widget buildNavigationBar({Color? indicatorColor, ShapeBorder? indicatorShape}) {
+      return MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          bottomNavigationBar: RepaintBoundary(
+            child: NavigationBar(
+              indicatorColor: indicatorColor,
+              indicatorShape: indicatorShape,
+              selectedIndex: index,
+              destinations: const <Widget>[
+                NavigationDestination(icon: Icon(Icons.ac_unit), label: 'AC'),
+                NavigationDestination(icon: Icon(Icons.access_alarm), label: 'Alarm'),
+              ],
+              onDestinationSelected: (int i) {},
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildNavigationBar());
+
+    // Move the selection to the second destination.
+    index = 1;
+    await tester.pumpWidget(buildNavigationBar());
+    await tester.pumpAndSettle();
+
+    // The navigation indicator should be on the second item.
+    await expectLater(
+      find.byType(NavigationBar),
+      matchesGoldenFile('m3.navigation_bar.indicator.ink.position.png'),
+    );
+  });
+
   testWidgets('Navigation indicator scale transform', (WidgetTester tester) async {
     int selectedIndex = 0;
 
@@ -1718,8 +1759,8 @@ Material _getMaterial(WidgetTester tester) {
 
 ShapeDecoration? _getIndicatorDecoration(WidgetTester tester) {
   return tester
-          .firstWidget<Container>(
-            find.descendant(of: find.byType(FadeTransition), matching: find.byType(Container)),
+          .firstWidget<Ink>(
+            find.descendant(of: find.byType(FadeTransition), matching: find.byType(Ink)),
           )
           .decoration
       as ShapeDecoration?;
