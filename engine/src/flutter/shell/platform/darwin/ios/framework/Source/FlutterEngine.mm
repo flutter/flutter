@@ -109,6 +109,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 @property(nonatomic, readonly, assign) BOOL restorationEnabled;
 
 @property(nonatomic, strong) FlutterPlatformViewsController* platformViewsController;
+@property(nonatomic, strong) FlutterEnginePluginSceneLifeCycleDelegate* sceneLifeCycleDelegate;
 
 // Maintains a dictionary of plugin names that have registered with the engine.  Used by
 // FlutterEngineRegistrar to implement a FlutterPluginRegistrar.
@@ -236,6 +237,8 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
              selector:@selector(onLocaleUpdated:)
                  name:NSCurrentLocaleDidChangeNotification
                object:nil];
+
+  self.sceneLifeCycleDelegate = [[FlutterEnginePluginSceneLifeCycleDelegate alloc] init];
 
   return self;
 }
@@ -1332,6 +1335,10 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   return _pluginPublications[pluginKey];
 }
 
+- (void)addSceneLifeCycleDelegate:(NSObject<FlutterSceneLifeCycleDelegate>*)delegate {
+  [self.sceneLifeCycleDelegate addDelegate:delegate];
+}
+
 #pragma mark - Notifications
 
 - (void)sceneWillEnterForeground:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
@@ -1537,14 +1544,24 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   }];
 }
 
-- (void)addApplicationDelegate:(NSObject<FlutterPlugin>*)delegate
-    NS_EXTENSION_UNAVAILABLE_IOS("Disallowed in plugins used in app extensions") {
-  id<UIApplicationDelegate> appDelegate = [[UIApplication sharedApplication] delegate];
+- (void)addApplicationDelegate:(NSObject<FlutterPlugin>*)delegate {
+  id<UIApplicationDelegate> appDelegate = FlutterSharedApplication.application.delegate;
   if ([appDelegate conformsToProtocol:@protocol(FlutterAppLifeCycleProvider)]) {
     id<FlutterAppLifeCycleProvider> lifeCycleProvider =
         (id<FlutterAppLifeCycleProvider>)appDelegate;
     [lifeCycleProvider addApplicationLifeCycleDelegate:delegate];
   }
+  if (![delegate conformsToProtocol:@protocol(FlutterSceneLifeCycleDelegate)]) {
+    // TODO(vashworth): If the plugin doesn't conform to the FlutterSceneLifeCycleDelegate,
+    // print a warning pointing to documentation: https://github.com/flutter/flutter/issues/175956
+    // [FlutterLogger logWarning:[NSString stringWithFormat:@"Plugin %@ has not migrated to
+    // scenes.", _pluginKey]];
+  }
+}
+
+- (void)addSceneDelegate:(NSObject<FlutterSceneLifeCycleDelegate>*)delegate {
+  // If the plugin conforms to FlutterSceneLifeCycleDelegate, add it to the engine.
+  [_flutterEngine addSceneLifeCycleDelegate:delegate];
 }
 
 - (NSString*)lookupKeyForAsset:(NSString*)asset {
