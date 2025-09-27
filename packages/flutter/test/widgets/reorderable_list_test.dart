@@ -871,6 +871,7 @@ void main() {
   );
 
   testWidgets('ReorderableList animation jumping on interruption', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/173243
     final List<int> items = List<int>.generate(3, (int index) => index);
 
     await tester.pumpWidget(TestList(items: items));
@@ -879,46 +880,33 @@ void main() {
     expect(tester.getTopLeft(find.text('item 0')), Offset.zero);
     expect(tester.getTopLeft(find.text('item 1')), const Offset(0, 100));
 
-    // Start drag
     final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('item 0')));
     await tester.pump(kPressTimeout);
 
-    // The swap threshold is at 50px (halfway between item centers at 50 and 150)
-    // Slowly drag down to just past the swap threshold (55px)
+    // Drag item 0 down past the swap threshold at 50px
     for (int i = 0; i < 6; i++) {
       await drag.moveBy(const Offset(0, 10));
       await tester.pump(const Duration(milliseconds: 50));
     }
 
-    // Start dragging back - we'll check right after crossing the threshold
-    // Drag back just past the threshold (to 45px) to trigger the swap back
+    final double item1YBeforeInterrupt = tester.getCenter(find.text('item 1')).dy;
+
+    // Drag back to trigger swap reversal
     await drag.moveBy(const Offset(0, -10));
     await tester.pump(const Duration(milliseconds: 50));
 
-    // Check for animation jumping immediately after crossing the threshold
-    final double item1Y = tester.getCenter(find.text('item 1')).dy;
+    final double item1YAfterInterrupt = tester.getCenter(find.text('item 1')).dy;
 
-    // At this moment, Item1 should have just started animating from ~Y=150
-    // If it jumps due to the bug, it will be at Y=108
-    // With correct behavior, it should still be close to its starting position
-    if (item1Y < 120 && item1Y > 90) {
-      fail('Animation jumping detected! Item1 jumped to Y=$item1Y when crossing threshold');
-    }
+    // Position should not jump when animation is interrupted
+    expect(item1YAfterInterrupt, closeTo(item1YBeforeInterrupt, 5.0),
+      reason: 'Animation jumping detected! Position changed from $item1YBeforeInterrupt to $item1YAfterInterrupt');
 
-    // Complete the drag back to original position
     for (int i = 0; i < 5; i++) {
       await drag.moveBy(const Offset(0, -10));
       await tester.pump(const Duration(milliseconds: 50));
     }
 
-    // Release and watch the animation
     await drag.up();
-
-    // Pump multiple times to see the animation
-    for (int i = 0; i < 20; i++) {
-      await tester.pump(const Duration(milliseconds: 50));
-    }
-
     await tester.pumpAndSettle();
   });
 
