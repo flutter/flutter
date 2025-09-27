@@ -99,7 +99,8 @@ void AccessibilityBridge::UpdateSemantics(
     needsAnnouncement = [object nodeShouldTriggerAnnouncement:&node];
     [object setSemanticsNode:&node];
     NSUInteger newChildCountInTraversalOrder = node.childrenInTraversalOrder.size();
-    NSMutableArray* newChildren = [[NSMutableArray alloc] initWithCapacity:newChildCountInTraversalOrder];
+    NSMutableArray* newChildren =
+        [[NSMutableArray alloc] initWithCapacity:newChildCountInTraversalOrder];
     for (NSUInteger i = 0; i < newChildCountInTraversalOrder; ++i) {
       SemanticsObject* child = GetOrCreateObject(node.childrenInTraversalOrder[i], nodes);
       [newChildren addObject:child];
