@@ -10,12 +10,6 @@ To get code completion in Android Studio, you must open a new Android Studio win
 directory as the root. Code completion will not work when navigating to files 
 in an Android Studio window opened at the root of the entire Flutter repo.
 
-### Contributing
-
-The Flutter Gradle Plugin is [currently being re-written](https://github.com/flutter/flutter/issues/121541) from Groovy to Kotlin 
-(Kotlin source specifically, i.e. not `.kts`). As such, outside of critical bug fixes, 
-new contributions will only be accepted in `src/main/kotlin` (and `src/test/kotlin`).
-
 ### Testing
 
 To run the tests from the CLI, you first need to download the Gradle wrapper.
