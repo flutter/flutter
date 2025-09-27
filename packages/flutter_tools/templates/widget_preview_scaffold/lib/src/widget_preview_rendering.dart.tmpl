@@ -55,10 +55,10 @@ class _WidgetPreviewErrorWidget extends StatelessWidget {
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
+          children: [
             Text.rich(
               TextSpan(
-                children: <TextSpan>[
+                children: [
                   TextSpan(
                     text: 'Failed to initialize widget tree: ',
                     style: boldStyle,
@@ -90,7 +90,7 @@ class _WidgetPreviewErrorWidget extends StatelessWidget {
     return frames.map<TextSpan>((frame) {
       if (frame is UnparsedFrame) return TextSpan(text: '$frame\n');
       return TextSpan(
-        children: <TextSpan>[
+        children: [
           TextSpan(
             text: frame.location,
             style: linkTextStyle,
@@ -122,7 +122,7 @@ class NoPreviewsDetectedWidget extends StatelessWidget {
     final style = fixBlurryText(TextStyle(color: Colors.black));
     return Center(
       child: Column(
-        children: <Widget>[
+        children: [
           Text(
             'No previews detected',
             style: style.copyWith(fontWeight: FontWeight.bold),
@@ -196,7 +196,7 @@ class WidgetPreviewGroupWidget extends StatelessWidget {
       spacing: WidgetPreviewGroupWidget._gridSpacing,
       runSpacing: WidgetPreviewGroupWidget._gridRunSpacing,
       alignment: WrapAlignment.start,
-      children: <Widget>[
+      children: [
         for (final WidgetPreview preview in previews)
           WidgetPreviewWidget(preview: preview),
       ],
@@ -963,7 +963,7 @@ class WidgetPreviews extends StatelessWidget {
         if (previewGroups.isEmpty) {
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[NoPreviewsDetectedWidget()],
+            children: [NoPreviewsDetectedWidget()],
           );
         }
         return LayoutBuilder(
