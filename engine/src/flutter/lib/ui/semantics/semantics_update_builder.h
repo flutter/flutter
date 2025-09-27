@@ -70,7 +70,9 @@ class SemanticsUpdateBuilder
       const std::vector<std::string>& controlsNodes,
       int validationResult,
       int inputType,
-      std::string locale);
+      std::string locale,
+      std::string minValue,
+      std::string maxValue);
 
   void updateCustomAction(int id,
                           std::string label,
