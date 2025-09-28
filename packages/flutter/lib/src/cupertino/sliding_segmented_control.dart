@@ -838,30 +838,34 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
         }
     }
 
-    return UnconstrainedBox(
-      constrainedAxis: Axis.horizontal,
-      child: Container(
-        // Clip the thumb shadow if it is outside of the segmented control. This
-        // behavior is eyeballed by the iOS 17.5 simulator.
-        clipBehavior: Clip.antiAlias,
-        padding: widget.padding.resolve(Directionality.of(context)),
-        decoration: ShapeDecoration(
-          shape: const RoundedSuperellipseBorder(borderRadius: BorderRadius.all(_kCornerRadius)),
-          color: CupertinoDynamicColor.resolve(widget.backgroundColor, context),
-        ),
-        child: AnimatedBuilder(
-          animation: thumbScaleAnimation,
-          builder: (BuildContext context, Widget? child) {
-            return _SegmentedControlRenderWidget<T>(
-              key: segmentedControlRenderWidgetKey,
-              highlightedIndex: widget.isMomentary ? null : highlightedIndex,
-              thumbColor: CupertinoDynamicColor.resolve(widget.thumbColor, context),
-              thumbScale: thumbScaleAnimation.value,
-              proportionalWidth: widget.proportionalWidth,
-              state: this,
-              children: children,
-            );
-          },
+    return Semantics(
+      container: true,
+      role: SemanticsRole.radioGroup,
+      child: UnconstrainedBox(
+        constrainedAxis: Axis.horizontal,
+        child: Container(
+          // Clip the thumb shadow if it is outside of the segmented control. This
+          // behavior is eyeballed by the iOS 17.5 simulator.
+          clipBehavior: Clip.antiAlias,
+          padding: widget.padding.resolve(Directionality.of(context)),
+          decoration: ShapeDecoration(
+            shape: const RoundedSuperellipseBorder(borderRadius: BorderRadius.all(_kCornerRadius)),
+            color: CupertinoDynamicColor.resolve(widget.backgroundColor, context),
+          ),
+          child: AnimatedBuilder(
+            animation: thumbScaleAnimation,
+            builder: (BuildContext context, Widget? child) {
+              return _SegmentedControlRenderWidget<T>(
+                key: segmentedControlRenderWidgetKey,
+                highlightedIndex: widget.isMomentary ? null : highlightedIndex,
+                thumbColor: CupertinoDynamicColor.resolve(widget.thumbColor, context),
+                thumbScale: thumbScaleAnimation.value,
+                proportionalWidth: widget.proportionalWidth,
+                state: this,
+                children: children,
+              );
+            },
+          ),
         ),
       ),
     );

@@ -436,9 +436,13 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
       children: gestureChildren,
     );
 
-    return Padding(
-      padding: widget.padding ?? _kHorizontalItemPadding,
-      child: UnconstrainedBox(constrainedAxis: Axis.horizontal, child: box),
+    return Semantics(
+      container: true,
+      role: SemanticsRole.radioGroup,
+      child: Padding(
+        padding: widget.padding ?? _kHorizontalItemPadding,
+        child: UnconstrainedBox(constrainedAxis: Axis.horizontal, child: box),
+      ),
     );
   }
 }
