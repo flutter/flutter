@@ -347,9 +347,12 @@ DownsamplePassArgs CalculateDownsamplePassArgs(
     std::optional<Rect> blur_uv_bounds;
     std::optional<Rect> downsample_uv_bounds;
     if (source_bounds.has_value()) {
-      Rect shifted_rect = source_rect.TransformBounds(input_snapshot.transform);
-      blur_uv_bounds = ratiod_rect(source_bounds.value(), shifted_rect);
-      downsample_uv_bounds = ratiod_rect(source_bounds.value(), shifted_rect);
+      blur_uv_bounds = ratiod_rect(
+          source_bounds.value(),
+          source_rect_padded.TransformBounds(input_snapshot.transform));
+      downsample_uv_bounds =
+          ratiod_rect(source_bounds.value(),
+                      source_rect.TransformBounds(input_snapshot.transform));
     }
     return {
         .subpass_size = subpass_size,
