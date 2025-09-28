@@ -437,13 +437,8 @@ struct TRect {
   ///         necessary.
   [[nodiscard]] constexpr TRect TransformAndClipBounds(
       const Matrix& transform) const {
-    switch (transform.Classify2D()) {
-      case Matrix::Type::kScaleTranslate:
-        return TransformBoundsTranslateScale2D(transform);
-      case Matrix::Type::kAffine:
-        return TransformBounds(transform);
-      case Matrix::Type::kGeneral:
-        break;
+    if (!transform.HasPerspective2D()) {
+      return TransformBounds(transform);
     }
 
     if (IsEmpty()) {
@@ -475,14 +470,6 @@ struct TRect {
   /// @brief  Creates a new bounding box that contains this transformed
   ///         rectangle.
   [[nodiscard]] constexpr TRect TransformBounds(const Matrix& transform) const {
-    switch (transform.Classify2D()) {
-      case Matrix::Type::kScaleTranslate:
-        return TransformBoundsTranslateScale2D(transform);
-      case Matrix::Type::kAffine:
-      case Matrix::Type::kGeneral:
-        break;
-    }
-
     if (IsEmpty()) {
       return {};
     }
@@ -492,33 +479,6 @@ struct TRect {
       return bounds.value();
     }
     FML_UNREACHABLE();
-  }
-
-  /// @brief  Creates a new bounding box that contains this transformed
-  ///         rectangle.
-  ///
-  /// [transform] must be a translate-scale only matrix.
-  [[nodiscard]] constexpr TRect TransformBoundsTranslateScale2D(
-      const Matrix& transform) const {
-    if (IsEmpty()) {
-      return {};
-    }
-
-    Scalar translate_x = transform.m[12];
-    Scalar translate_y = transform.m[13];
-    Scalar scale_x = transform.m[0];
-    Scalar scale_y = transform.m[5];
-
-    Scalar x1 = translate_x + scale_x * GetLeft();
-    Scalar x2 = translate_x + scale_x * GetRight();
-    Scalar y1 = translate_y + scale_y * GetTop();
-    Scalar y2 = translate_y + scale_y * GetBottom();
-
-    return TRect::MakeLTRB(std::min(x1, x2),  //
-                           std::min(y1, y2),  //
-                           std::max(x1, x2),  //
-                           std::max(y1, y2)   //
-    );
   }
 
   /// @brief  Constructs a Matrix that will map all points in the coordinate
