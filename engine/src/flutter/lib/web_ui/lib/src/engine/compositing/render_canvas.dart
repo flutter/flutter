@@ -81,6 +81,7 @@ class RenderCanvas extends DisplayCanvas {
     BitmapSize size,
   ) {
     _ensureSize(size);
+    renderContext2d.clearRect(0, 0, size.width, size.height);
     renderContext2d.drawImage(
       imageSource,
       0,
