@@ -844,24 +844,29 @@ void main() {
         TestSemantics.root(
           children: <TestSemantics>[
             TestSemantics.rootChild(
-              label: 'Child 1',
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isButton,
-                SemanticsFlag.isInMutuallyExclusiveGroup,
-                SemanticsFlag.hasSelectedState,
-                SemanticsFlag.isSelected,
+              role: SemanticsRole.radioGroup,
+              children: <TestSemantics>[
+                TestSemantics(
+                  label: 'Child 1',
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isButton,
+                    SemanticsFlag.isInMutuallyExclusiveGroup,
+                    SemanticsFlag.hasSelectedState,
+                    SemanticsFlag.isSelected,
+                  ],
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+                ),
+                TestSemantics(
+                  label: 'Child 2',
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isButton,
+                    SemanticsFlag.isInMutuallyExclusiveGroup,
+                    // Declares that it is selectable, but not currently selected.
+                    SemanticsFlag.hasSelectedState,
+                  ],
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+                ),
               ],
-              actions: <SemanticsAction>[SemanticsAction.tap],
-            ),
-            TestSemantics.rootChild(
-              label: 'Child 2',
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isButton,
-                SemanticsFlag.isInMutuallyExclusiveGroup,
-                // Declares that it is selectable, but not currently selected.
-                SemanticsFlag.hasSelectedState,
-              ],
-              actions: <SemanticsAction>[SemanticsAction.tap],
             ),
           ],
         ),
@@ -880,24 +885,29 @@ void main() {
         TestSemantics.root(
           children: <TestSemantics>[
             TestSemantics.rootChild(
-              label: 'Child 1',
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isButton,
-                SemanticsFlag.isInMutuallyExclusiveGroup,
-                // Declares that it is selectable, but not currently selected.
-                SemanticsFlag.hasSelectedState,
+              role: SemanticsRole.radioGroup,
+              children: <TestSemantics>[
+                TestSemantics(
+                  label: 'Child 1',
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isButton,
+                    SemanticsFlag.isInMutuallyExclusiveGroup,
+                    // Declares that it is selectable, but not currently selected.
+                    SemanticsFlag.hasSelectedState,
+                  ],
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+                ),
+                TestSemantics(
+                  label: 'Child 2',
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isButton,
+                    SemanticsFlag.isInMutuallyExclusiveGroup,
+                    SemanticsFlag.hasSelectedState,
+                    SemanticsFlag.isSelected,
+                  ],
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+                ),
               ],
-              actions: <SemanticsAction>[SemanticsAction.tap],
-            ),
-            TestSemantics.rootChild(
-              label: 'Child 2',
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isButton,
-                SemanticsFlag.isInMutuallyExclusiveGroup,
-                SemanticsFlag.hasSelectedState,
-                SemanticsFlag.isSelected,
-              ],
-              actions: <SemanticsAction>[SemanticsAction.tap],
             ),
           ],
         ),
