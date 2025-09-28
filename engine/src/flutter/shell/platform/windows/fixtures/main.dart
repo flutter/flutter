@@ -475,8 +475,8 @@ Future<void> sendSemanticsTreeInfo() async {
       controlsNodes: null,
       inputType: ui.SemanticsInputType.none,
       locale: null,
-      minValue: '0.0',
-      maxValue: '100.0',
+      minValue: '0',
+      maxValue: '0',
     );
     return builder.build();
   }
