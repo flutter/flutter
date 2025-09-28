@@ -887,7 +887,7 @@ void main() {
         theme: ThemeData(
           useMaterial3: false,
           chipTheme: ThemeData().chipTheme.copyWith(
-            side: MaterialStateBorderSide.resolveWith(getBorderSide),
+            side: WidgetStateBorderSide.resolveWith(getBorderSide),
           ),
         ),
         home: Scaffold(
@@ -934,7 +934,7 @@ void main() {
     Widget chipWidget({bool selected = false}) {
       return MaterialApp(
         theme: ThemeData(
-          chipTheme: ChipThemeData(side: MaterialStateBorderSide.resolveWith(getBorderSide)),
+          chipTheme: ChipThemeData(side: WidgetStateBorderSide.resolveWith(getBorderSide)),
         ),
         home: Scaffold(
           body: ChoiceChip(label: const Text('Chip'), selected: selected, onSelected: (_) {}),
@@ -1490,7 +1490,7 @@ void main() {
   });
 
   // This is a regression test for https://github.com/flutter/flutter/issues/135136.
-  testWidgets('MaterialStateBorderSide properly lerp in ChipThemeData.side', (
+  testWidgets('WidgetStateBorderSide properly lerp in ChipThemeData.side', (
     WidgetTester tester,
   ) async {
     late ColorScheme colorScheme;
@@ -1501,7 +1501,7 @@ void main() {
         theme: ThemeData(
           colorScheme: colorScheme,
           chipTheme: ChipThemeData(
-            side: MaterialStateBorderSide.resolveWith((Set<WidgetState> states) {
+            side: WidgetStateBorderSide.resolveWith((Set<WidgetState> states) {
               return BorderSide(color: colorScheme.primary, width: 4.0);
             }),
           ),
@@ -1535,7 +1535,7 @@ class _MaterialStateOutlinedBorder extends StadiumBorder implements MaterialStat
   OutlinedBorder? resolve(Set<WidgetState> states) => resolver(states);
 }
 
-class _MaterialStateBorderSide extends MaterialStateBorderSide {
+class _MaterialStateBorderSide extends WidgetStateBorderSide {
   const _MaterialStateBorderSide(this.resolver);
 
   final WidgetPropertyResolver<BorderSide?> resolver;

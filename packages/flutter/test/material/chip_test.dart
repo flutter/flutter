@@ -3911,7 +3911,7 @@ void main() {
               label: const Text('Chip'),
               selected: selected,
               onSelected: enabled ? (_) {} : null,
-              side: MaterialStateBorderSide.resolveWith(getBorderSide),
+              side: WidgetStateBorderSide.resolveWith(getBorderSide),
             ),
           ),
         ),
@@ -4019,7 +4019,7 @@ void main() {
               label: const Text('Chip'),
               selected: selected,
               onSelected: enabled ? (_) {} : null,
-              side: MaterialStateBorderSide.resolveWith(getBorderSide),
+              side: WidgetStateBorderSide.resolveWith(getBorderSide),
             ),
           ),
         ),
@@ -4102,7 +4102,7 @@ void main() {
                 label: const Text('Chip'),
                 selected: selected,
                 onSelected: enabled ? (_) {} : null,
-                side: MaterialStateBorderSide.resolveWith(getBorderSide),
+                side: WidgetStateBorderSide.resolveWith(getBorderSide),
               ),
             ),
           ),
@@ -4217,7 +4217,7 @@ void main() {
                 label: const Text('Chip'),
                 selected: selected,
                 onSelected: enabled ? (_) {} : null,
-                side: MaterialStateBorderSide.resolveWith(getBorderSide),
+                side: WidgetStateBorderSide.resolveWith(getBorderSide),
               ),
             ),
           ),
@@ -6454,7 +6454,7 @@ class _MaterialStateOutlinedBorder extends StadiumBorder implements MaterialStat
   OutlinedBorder? resolve(Set<WidgetState> states) => resolver(states);
 }
 
-class _MaterialStateBorderSide extends MaterialStateBorderSide {
+class _MaterialStateBorderSide extends WidgetStateBorderSide {
   const _MaterialStateBorderSide(this.resolver);
 
   final WidgetPropertyResolver<BorderSide?> resolver;
