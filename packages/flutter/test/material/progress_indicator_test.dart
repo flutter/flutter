@@ -381,8 +381,8 @@ void main() {
         matchesSemantics(
           value: '0',
           textDirection: TextDirection.ltr,
-          minValue: '0.0',
-          maxValue: '1.0',
+          minValue: '0',
+          maxValue: '100',
         ),
       );
       handle.dispose();
