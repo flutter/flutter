@@ -969,7 +969,10 @@ class _RenderDecoration extends RenderBox
       EdgeInsets.only(left: iconWidth),
     );
     final BoxConstraints contentConstraints = containerConstraints.deflate(
-      EdgeInsets.only(left: contentPadding.horizontal),
+      EdgeInsets.only(
+        left: contentPadding.start + decoration.inputGap,
+        right: contentPadding.end + decoration.inputGap,
+      ),
     );
 
     // The helper or error text can occupy the full width less the space

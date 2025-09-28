@@ -15662,4 +15662,51 @@ void main() {
       expect(find.text(helperTextValue), findsOneWidget);
     },
   );
+
+  testWidgets('InputDecorator helper text should have 16px padding on both sides for Material3', (
+    WidgetTester tester,
+  ) async {
+    const double inputWidth = 250.0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: const Material(
+          child: Center(
+            child: SizedBox(
+              width: inputWidth,
+              child: TextField(
+                decoration: InputDecoration(
+                  labelText: 'Label text',
+                  helperText: 'Helper text for testing padding',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder helperTextFinder = find.text('Helper text for testing padding');
+    expect(helperTextFinder, findsOneWidget);
+
+    final Finder textFieldFinder = find.byType(TextField);
+    final RenderBox textFieldRenderBox = tester.renderObject(textFieldFinder) as RenderBox;
+    final Size textFieldSize = textFieldRenderBox.size;
+
+    final Element helperTextElement = tester.element(helperTextFinder);
+    final RenderBox helperTextRenderBox = helperTextElement.renderObject! as RenderBox;
+
+    final Offset textFieldGlobalPos = textFieldRenderBox.localToGlobal(Offset.zero);
+    final Offset helperTextGlobalPos = helperTextRenderBox.localToGlobal(Offset.zero);
+
+    final double leftPadding = helperTextGlobalPos.dx - textFieldGlobalPos.dx;
+    final double helperTextRightEdge = helperTextGlobalPos.dx + helperTextRenderBox.size.width;
+    final double textFieldRightEdge = textFieldGlobalPos.dx + textFieldSize.width;
+    final double rightPadding = textFieldRightEdge - helperTextRightEdge;
+
+    expect(leftPadding, 16.0);
+    expect(rightPadding, 16.0);
+  });
 }
