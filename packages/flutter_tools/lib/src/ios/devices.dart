@@ -494,6 +494,26 @@ class IOSDevice extends Device {
       );
     }
 
+    if (isWirelesslyConnected &&
+        debuggingOptions.debuggingEnabled &&
+        sdkVersion != null &&
+        sdkVersion!.major >= 26) {
+      final warningMessage =
+          'Wireless debugging on iOS ${sdkVersion!.major} may be slower than expected. '
+          'For better performance, consider using a wired (USB) connection.';
+
+      _logger.printWarning(warningMessage);
+
+      _logger.sendEvent('app.warning', <String, Object?>{
+        'warning': warningMessage,
+        'category': 'ios-wireless-performance',
+        'deviceId': id,
+        'iosVersion': sdkVersion!.major,
+        'actionable': true,
+        'suggestion': 'Use a wired (USB) connection for better performance',
+      });
+    }
+
     if (!prebuiltApplication) {
       _logger.printTrace('Building ${package.name} for $id');
 
