@@ -44,6 +44,17 @@ typedef FilterCallback<T> =
 /// Used by [DropdownMenu.searchCallback].
 typedef SearchCallback<T> = int? Function(List<DropdownMenuEntry<T>> entries, String query);
 
+/// The type of builder function used by [DropdownMenu.decorationBuilder] to
+/// build the [InputDecoration] passed to the inner text field.
+///
+/// The `context` is the context that the decoration is being built in.
+///
+/// The `controller` is the [MenuController] that can be used to open and close
+/// the menu with and query the current state.
+///
+typedef DropdownMenuDecorationBuilder =
+    InputDecoration Function(BuildContext context, MenuController controller);
+
 const double _kMinimumWidth = 112.0;
 
 const double _kDefaultHorizontalPadding = 12.0;
@@ -180,6 +191,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.textAlign = TextAlign.start,
     // TODO(bleroux): Clean this up once `InputDecorationTheme` is fully normalized.
     Object? inputDecorationTheme,
+    this.decorationBuilder,
     this.menuStyle,
     this.controller,
     this.initialSelection,
@@ -205,6 +217,10 @@ class DropdownMenu<T> extends StatefulWidget {
                  inputDecorationTheme is InputDecorationThemeData),
        ),
        assert(trailingIconFocusNode == null || showTrailingIcon),
+       assert(
+         decorationBuilder == null ||
+             (label == null && hintText == null && helperText == null && errorText == null),
+       ),
        _inputDecorationTheme = inputDecorationTheme;
 
   /// Determine if the [DropdownMenu] is enabled.
@@ -366,6 +382,22 @@ class DropdownMenu<T> extends StatefulWidget {
   }
 
   final Object? _inputDecorationTheme;
+
+  /// The builder function used to create the [InputDecoration] passed to the text field.
+  ///
+  /// If provided and the resulting [InputDecoration.suffixIcon] is null,
+  /// the [InputDecoration.suffixIcon] is set to an [IconButton] which uses [trailingIcon]
+  /// and [selectedTrailingIcon] if defined, or [Icons.arrow_drop_down] and
+  /// [Icons.arrow_drop_up] otherwhise.
+  ///
+  /// If null, the default builder creates a decoration where:
+  /// - [InputDecoration.label] is set to [label].
+  /// - [InputDecoration.hintText] is set to [hintText].
+  /// - [InputDecoration.helperText] is set to [helperText].
+  /// - [InputDecoration.errorText] is set to [errorText].
+  /// - [InputDecoration.prefixIcon] is set to [leadingIcon].
+  /// - [InputDecoration.suffixIcon] is set to an [IconButton] which uses [trailingIcon] and [selectedTrailingIcon] if defined, or [Icons.arrow_drop_down] and [Icons.arrow_drop_up] otherwhise.
+  final DropdownMenuDecorationBuilder? decorationBuilder;
 
   /// The [MenuStyle] that defines the visual attributes of the menu.
   ///
@@ -1125,30 +1157,24 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       crossAxisUnconstrained: false,
       builder: (BuildContext context, MenuController controller, Widget? child) {
         assert(_initialMenu != null);
-        final bool isCollapsed = widget.inputDecorationTheme?.isCollapsed ?? false;
-        final Widget trailingButton = widget.showTrailingIcon
-            ? Padding(
-                padding: isCollapsed ? EdgeInsets.zero : const EdgeInsets.all(4.0),
-                child: IconButton(
-                  focusNode: _trailingIconButtonFocusNode,
-                  isSelected: controller.isOpen,
-                  constraints: widget.inputDecorationTheme?.suffixIconConstraints,
-                  padding: isCollapsed ? EdgeInsets.zero : null,
-                  icon: widget.trailingIcon ?? const Icon(Icons.arrow_drop_down),
-                  selectedIcon: widget.selectedTrailingIcon ?? const Icon(Icons.arrow_drop_up),
-                  onPressed: !widget.enabled
-                      ? null
-                      : () {
-                          handlePressed(controller);
-                        },
-                ),
-              )
-            : const SizedBox.shrink();
-
-        final Widget leadingButton = Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: widget.leadingIcon ?? const SizedBox.shrink(),
+        final DropdownMenuDecorationBuilder decorationBuilder =
+            widget.decorationBuilder ?? _buildLegacyDecoration;
+        InputDecoration decoration = decorationBuilder(context, controller);
+        // If no suffixIcon is provided, the legacy IconButton is used for convenience.
+        if (decoration.suffixIcon == null) {
+          decoration = decoration.copyWith(suffixIcon: _buildLegacySuffixIcon(context, controller));
+        }
+        final InputDecoration effectiveDecoration = decoration.applyDefaults(
+          effectiveInputDecorationTheme,
         );
+        final InputDecoration keyedDecoration = effectiveDecoration.prefixIcon == null
+            ? effectiveDecoration
+            : effectiveDecoration.copyWith(
+                prefixIcon: SizedBox(
+                  key: _leadingKey, // Used to query the width in refreshLeadingPadding.
+                  child: effectiveDecoration.prefixIcon,
+                ),
+              );
 
         final Widget textField = TextField(
           key: _anchorKey,
@@ -1181,16 +1207,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
             });
           },
           inputFormatters: widget.inputFormatters,
-          decoration: InputDecoration(
-            label: widget.label,
-            hintText: widget.hintText,
-            helperText: widget.helperText,
-            errorText: widget.errorText,
-            prefixIcon: widget.leadingIcon != null
-                ? SizedBox(key: _leadingKey, child: widget.leadingIcon)
-                : null,
-            suffixIcon: widget.showTrailingIcon ? trailingButton : null,
-          ).applyDefaults(effectiveInputDecorationTheme),
+          decoration: keyedDecoration,
           restorationId: widget.restorationId,
         );
 
@@ -1206,6 +1223,11 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
                 // and leadingButton.
                 //
                 // See _RenderDropdownMenuBody layout logic.
+                //
+                // TODO(bleroux): find a more accurate way to measure the text field minimum width.
+                // The text field width computation is not accurate as it is based only on label,
+                // prefixIcon and suffixIcon. Other InputDecoration parameters can have an
+                // impact on the total width.
                 children: <Widget>[
                   textField,
                   ..._initialMenu!.map(
@@ -1219,8 +1241,14 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
                         child: DefaultTextStyle(style: effectiveTextStyle!, child: widget.label!),
                       ),
                     ),
-                  trailingButton,
-                  leadingButton,
+                  effectiveDecoration.suffixIcon ?? const SizedBox.shrink(),
+                  Padding(
+                    // TODO(bleroux): find a more accurate way to get the correct width.
+                    // This padding is used to mimic default input decorator padding.
+                    // It won't be correct if non default values are used.
+                    padding: const EdgeInsets.all(8.0),
+                    child: effectiveDecoration.prefixIcon ?? const SizedBox.shrink(),
+                  ),
                 ],
               );
 
@@ -1292,6 +1320,39 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         ],
       ),
     );
+  }
+
+  InputDecoration _buildLegacyDecoration(BuildContext context, MenuController controller) {
+    return InputDecoration(
+      label: widget.label,
+      hintText: widget.hintText,
+      helperText: widget.helperText,
+      errorText: widget.errorText,
+      prefixIcon: widget.leadingIcon,
+      suffixIcon: _buildLegacySuffixIcon(context, controller),
+    );
+  }
+
+  Widget? _buildLegacySuffixIcon(BuildContext context, MenuController controller) {
+    final bool isCollapsed = widget.inputDecorationTheme?.isCollapsed ?? false;
+    return widget.showTrailingIcon
+        ? Padding(
+            padding: isCollapsed ? EdgeInsets.zero : const EdgeInsets.all(4.0),
+            child: IconButton(
+              focusNode: _trailingIconButtonFocusNode,
+              isSelected: controller.isOpen,
+              constraints: widget.inputDecorationTheme?.suffixIconConstraints,
+              padding: isCollapsed ? EdgeInsets.zero : null,
+              icon: widget.trailingIcon ?? const Icon(Icons.arrow_drop_down),
+              selectedIcon: widget.selectedTrailingIcon ?? const Icon(Icons.arrow_drop_up),
+              onPressed: !widget.enabled
+                  ? null
+                  : () {
+                      handlePressed(controller);
+                    },
+            ),
+          )
+        : null;
   }
 }
 
