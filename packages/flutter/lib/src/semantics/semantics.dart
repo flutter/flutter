@@ -5567,6 +5567,9 @@ class SemanticsConfiguration {
   String? get traversalParentIdentifier => _traversalParentIdentifier;
   String? _traversalParentIdentifier;
   set traversalParentIdentifier(String? value) {
+    if (value == traversalParentIdentifier) {
+      return;
+    }
     _traversalParentIdentifier = value;
     _hasBeenAnnotated = true;
   }
@@ -5575,6 +5578,9 @@ class SemanticsConfiguration {
   String? get traversalChildIdentifier => _traversalChildIdentifier;
   String? _traversalChildIdentifier;
   set traversalChildIdentifier(String? value) {
+    if (value == traversalChildIdentifier) {
+      return;
+    }
     _traversalChildIdentifier = value;
     _hasBeenAnnotated = true;
   }
@@ -6372,8 +6378,12 @@ class SemanticsConfiguration {
     _platformViewId ??= child._platformViewId;
     _maxValueLength ??= child._maxValueLength;
     _currentValueLength ??= child._currentValueLength;
-    _traversalParentIdentifier ??= child._traversalParentIdentifier;
-    _traversalChildIdentifier ??= child._traversalChildIdentifier;
+    if (_traversalChildIdentifier == null) {
+      _traversalParentIdentifier ??= child._traversalParentIdentifier;
+    }
+    if (_traversalParentIdentifier == null) {
+      _traversalChildIdentifier ??= child._traversalChildIdentifier;
+    }
 
     _headingLevel = _mergeHeadingLevels(
       sourceLevel: child._headingLevel,
