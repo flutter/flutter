@@ -327,7 +327,7 @@ class FloatingActionButton extends StatelessWidget {
   /// If this property is null,
   ///
   /// * On web, [WidgetStateMouseCursor.clickable] will be used.
-  /// * On other platforms, [WidgetStateMouseCursor.statelessClickable] will be used.
+  /// * On other platforms, [WidgetStateMouseCursor.basic] will be used.
   final MouseCursor? mouseCursor;
 
   /// The z-coordinate at which to place this button relative to its parent.
@@ -651,9 +651,7 @@ class _EffectiveMouseCursor extends MaterialStateMouseCursor {
 
   @override
   MouseCursor resolve(Set<WidgetState> states) {
-    const WidgetStateMouseCursor mouseCursor = kIsWeb
-        ? WidgetStateMouseCursor.clickable
-        : WidgetStateMouseCursor.statelessClickable;
+    final WidgetStateMouseCursor mouseCursor = WidgetStateMouseCursor.clickableAdaptive();
     return WidgetStateProperty.resolveAs<MouseCursor?>(widgetCursor, states) ??
         themeCursor?.resolve(states) ??
         mouseCursor.resolve(states);

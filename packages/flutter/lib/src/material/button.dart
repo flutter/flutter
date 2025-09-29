@@ -126,7 +126,7 @@ class RawMaterialButton extends StatefulWidget {
   /// If this property is null,
   ///
   ///   * On web, [WidgetStateMouseCursor.clickable] will be used.
-  ///   * On other platforms, [WidgetStateMouseCursor.statelessClickable] will be used.
+  ///   * On other platforms, [WidgetStateMouseCursor.basic] will be used.
   final MouseCursor? mouseCursor;
 
   /// Defines the default text style, with [Material.textStyle], for the
@@ -365,9 +365,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
       widget.constraints,
     );
 
-    const MouseCursor fallbackCursor = kIsWeb
-        ? WidgetStateMouseCursor.clickable
-        : WidgetStateMouseCursor.statelessClickable;
+    final MouseCursor fallbackCursor = WidgetStateMouseCursor.clickableAdaptive();
     final MouseCursor? effectiveMouseCursor = WidgetStateProperty.resolveAs<MouseCursor?>(
       widget.mouseCursor ?? fallbackCursor,
       materialStates,

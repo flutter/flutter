@@ -11,7 +11,6 @@
 library;
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'checkbox_theme.dart';
 import 'color_scheme.dart';
@@ -528,9 +527,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
     };
     size += effectiveVisualDensity.baseSizeAdjustment;
 
-    const WidgetStateMouseCursor fallbackMouseCursor = kIsWeb
-        ? WidgetStateMouseCursor.clickable
-        : WidgetStateMouseCursor.statelessClickable;
+    final WidgetStateMouseCursor fallbackMouseCursor = WidgetStateMouseCursor.clickableAdaptive();
     final WidgetStateProperty<MouseCursor> effectiveMouseCursor =
         WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
           return WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??

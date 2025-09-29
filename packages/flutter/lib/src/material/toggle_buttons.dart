@@ -274,7 +274,7 @@ class ToggleButtons extends StatelessWidget {
   /// If this property is null,
   ///
   /// * On web, [WidgetStateMouseCursor.clickable] will be used.
-  /// * On other platforms, [WidgetStateMouseCursor.statelessClickable] will be used.
+  /// * On other platforms, [WidgetStateMouseCursor.basic] will be used.
   final MouseCursor? mouseCursor;
 
   /// Configures the minimum size of the area within which the buttons may

@@ -126,7 +126,7 @@ class MaterialButton extends StatelessWidget {
   /// If this property is null,
   ///
   ///  * On web, [WidgetStateMouseCursor.clickable] is used.
-  ///  * On other platforms, [WidgetStateMouseCursor.statelessClickable] is used.
+  ///  * On other platforms, [WidgetStateMouseCursor.basic] is used.
   final MouseCursor? mouseCursor;
 
   /// Defines the button's base colors, and the defaults for the button's minimum

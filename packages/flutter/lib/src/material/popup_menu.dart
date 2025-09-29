@@ -349,7 +349,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   /// that is also null, then:
 
   ///  * On web, [WidgetStateMouseCursor.clickable] is used.
-  ///  * On other platforms, [WidgetStateMouseCursor.statelessClickable] is used.
+  ///  * On other platforms, [WidgetStateMouseCursor.basic] is used.
   final MouseCursor? mouseCursor;
 
   /// The widget below this widget in the tree.
@@ -1808,9 +1808,7 @@ class _EffectiveMouseCursor extends MaterialStateMouseCursor {
 
   @override
   MouseCursor resolve(Set<WidgetState> states) {
-    const WidgetStateMouseCursor fallbackCursor = kIsWeb
-        ? WidgetStateMouseCursor.clickable
-        : WidgetStateMouseCursor.statelessClickable;
+    final WidgetStateMouseCursor fallbackCursor = WidgetStateMouseCursor.clickableAdaptive();
     return WidgetStateProperty.resolveAs<MouseCursor?>(widgetCursor, states) ??
         themeCursor?.resolve(states) ??
         fallbackCursor.resolve(states);

@@ -446,7 +446,7 @@ class InkResponse extends StatelessWidget {
   /// If this property is null,
   ///
   ///   * On web, [WidgetStateMouseCursor.clickable] will be used.
-  ///   * On other platforms, [WidgetStateMouseCursor.statelessClickable] will be used.
+  ///   * On other platforms, [WidgetStateMouseCursor.basic] will be used.
   /// {@endtemplate}
   final MouseCursor? mouseCursor;
 
@@ -1381,9 +1381,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
         widget.splashColor ??
         Theme.of(context).splashColor;
 
-    const MouseCursor fallbackMouseCursor = kIsWeb
-        ? WidgetStateMouseCursor.clickable
-        : WidgetStateMouseCursor.statelessClickable;
+    final MouseCursor fallbackMouseCursor = WidgetStateMouseCursor.clickableAdaptive();
     final MouseCursor effectiveMouseCursor = WidgetStateProperty.resolveAs<MouseCursor>(
       widget.mouseCursor ?? fallbackMouseCursor,
       statesController.value,

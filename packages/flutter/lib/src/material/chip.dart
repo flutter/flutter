@@ -290,7 +290,7 @@ abstract interface class ChipAttributes {
   /// If this property is null,
   ///
   ///   * On web, [WidgetStateMouseCursor.clickable] will be used.
-  ///   * On other platforms, [WidgetStateMouseCursor.statelessClickable] will be used.
+  ///   * On other platforms, [WidgetStateMouseCursor.basic] will be used.
   MouseCursor? get mouseCursor;
 }
 
