@@ -171,12 +171,12 @@ class DependencyVersionCheckerTest {
             assertFailsWith<DependencyValidationException> { DependencyVersionChecker.checkDependencyVersions(mockProject) }
         assert(
             dependencyValidationException.message ==
-                    getErrorMessage(
-                        JAVA_NAME,
-                        exampleErrorJavaVersion.toString(),
-                        errorJavaVersion.toString(),
-                        POTENTIAL_JAVA_FIX
-                    )
+                getErrorMessage(
+                    JAVA_NAME,
+                    exampleErrorJavaVersion.toString(),
+                    errorJavaVersion.toString(),
+                    POTENTIAL_JAVA_FIX
+                )
         )
         verify(exactly = 1) { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true) }
     }
