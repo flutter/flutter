@@ -1,9 +1,6 @@
-//
-//  xcode_swiftuiApp.swift
-//  xcode_swiftui
-//
-//  Created by Victoria Ashworth on 9/28/25.
-//
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 import Flutter
 import FlutterPluginRegistrant
