@@ -366,6 +366,7 @@ public class FlutterLoader {
               continue;
             }
 
+            // TODO(camsim99): check booleans before adding.
             // Add flag automatically if it does not require a security check.
             String arg = "--" + metadataKey.toCommandLineFlag();
             if (flag.type == FlagType.VALUE) {
@@ -445,8 +446,14 @@ public class FlutterLoader {
 
       shellArgs.add("--prefetched-default-font-manager");
 
+
+
       final String leakVM = isLeakVM(metaData) ? "true" : "false";
       shellArgs.add("--leak-vm=" + leakVM);
+
+
+      // TODO(camsim9): here. handle isLeavkVM above.
+
 
       long initTimeMillis = SystemClock.uptimeMillis() - initStartTimestampMillis;
 
