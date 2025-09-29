@@ -101,9 +101,9 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
       return;
     }
     final LineInfo lineInfo = _currentUnit.lineInfo;
-    final location = lineInfo.getLocation(node.offset);
-    final line = location.lineNumber;
-    final column = location.columnNumber;
+    final CharacterLocation location = lineInfo.getLocation(node.offset);
+    final int line = location.lineNumber;
+    final int column = location.columnNumber;
     if (_currentFunction != null &&
         !hasRequiredParams(_currentFunction!.functionExpression.parameters)) {
       final TypeAnnotation? returnTypeAnnotation = _currentFunction!.returnType;
