@@ -636,6 +636,49 @@ Review licenses that have not been accepted (y/N)?
     );
   });
 
+  testUsingContext('detects minimum recommended java version', () async {
+    // Test with older version of JDK
+    final Platform platform = FakePlatform()
+      ..environment = <String, String>{
+        'HOME': '/home/me',
+        Java.javaHomeEnvironmentVariable: 'home/java',
+        'PATH': '',
+      };
+    final sdkVersion = FakeAndroidSdkVersion()
+      ..sdkLevel = gradle_utils.compileSdkVersionInt
+      ..buildToolsVersion = gradle_utils.minBuildToolsVersion;
+
+    // Mock a pass through scenario to reach _checkJavaVersion()
+    sdk
+      ..licensesAvailable = true
+      ..platformToolsAvailable = true
+      ..cmdlineToolsAvailable = true
+      ..directory = fileSystem.directory('/foo/bar')
+      ..sdkManagerPath = '/foo/bar/sdkmanager'
+      ..emulatorPath = 'path/to/emulator';
+    sdk.latestVersion = sdkVersion;
+
+    const javaVersionText = 'openjdk version "16.0.1"';
+    final String errorMessage = UserMessages().androidJavaMinimumVersion(javaVersionText);
+
+    final ValidationResult validationResult = await AndroidValidator(
+      java: FakeJava(version: const Version.withText(16, 0, 1, javaVersionText)),
+      androidSdk: sdk,
+      logger: logger,
+      platform: platform,
+      userMessages: UserMessages(),
+      processManager: processManager,
+    ).validate();
+    expect(validationResult.type, ValidationType.success);
+    expect(validationResult.messages.last.message, errorMessage);
+    expect(
+      validationResult.messages.any(
+        (ValidationMessage message) => message.message.contains('Unable to locate Android SDK'),
+      ),
+      false,
+    );
+  });
+
   testWithoutContext('Mentions `flutter config --android-sdk if user has no AndroidSdk`', () async {
     final ValidationResult validationResult = await AndroidValidator(
       java: FakeJava(),

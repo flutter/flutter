@@ -368,8 +368,6 @@ class _WidgetStateColorMapper extends WidgetStateMapper<Color> implements Widget
 ///
 /// See also:
 ///
-///  * [MaterialStateMouseCursor], the Material specific version of
-///    `WidgetStateMouseCursor`.
 ///  * [MouseCursor] for introduction on the mouse cursor system.
 ///  * [SystemMouseCursors], which defines cursors that are supported by
 ///    native platforms.

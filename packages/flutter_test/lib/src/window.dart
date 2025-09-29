@@ -175,6 +175,9 @@ class TestPlatformDispatcher implements PlatformDispatcher {
         : null;
   }
 
+  @override
+  int? get engineId => 1;
+
   final Map<int, TestFlutterView> _testViews = <int, TestFlutterView>{};
   final Map<int, TestDisplay> _testDisplays = <int, TestDisplay>{};
 
