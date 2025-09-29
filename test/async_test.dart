@@ -1,18 +1,17 @@
 import 'package:flutter_test/flutter_test.dart';
 
 Future<int> process() async {
-  await Future.delayed(Duration(seconds: 1));
+  await Future.delayed(const Duration(seconds: 1));
   return 0;
 }
-
-Map<String, List<double>> alunos = {
-  'Maria': [8.0, 9.0],
-  'Bruna': [7.0, 7.0],
-  'Carla': [10.0, 9.0],
+Map<String, List<double>> alunos = <String, List<double>>{
+  'Maria': <double>[8.0, 9.0],
+  'Bruna': <double>[7.0, 7.0],
+  'Carla': <double>[10.0, 9.0],
 };
 
 Future<List<double>?> search(String key) async {
-  return Future.delayed(Duration(milliseconds: 500), () {
+  return Future.delayed(const Duration(milliseconds: 500), () {
     if (alunos.containsKey(key)) {
       return alunos[key]!;
     }
@@ -22,23 +21,23 @@ Future<List<double>?> search(String key) async {
 
 Stream<int> count() async* {
   for (int i = 1; i <= 3; i++) {
-    await Future.delayed(Duration(milliseconds: 500));
+    await Future.delayed(const Duration(milliseconds: 500));
     yield i;
   }
 }
 
 /// Stream que calcula a média das notas de cada aluno da lista
 Stream<double> media(List<String> nomes) async* {
-  for (String nome in nomes) {
+  for (final String nome in nomes) {
     try {
-      List<double>? notas = await search(nome);
-      double soma = notas!.reduce((a, b) => a + b);
-      double m = soma / notas.length;
-      await Future.delayed(Duration(milliseconds: 300)); // simula atraso
+      final List<double>? notas = await search(nome);
+      final double soma = notas!.reduce((double a, double b) => a + b);
+      final double m = soma / notas.length;
+      await Future.delayed(const Duration(milliseconds: 300)); // simula atraso
       yield m;
     } catch (e) {
       // Se não encontrar o aluno, lança erro no Stream
-      throw e;
+      rethrow;
     }
   }
 }
@@ -52,43 +51,43 @@ void main() {
     test('Aguardando...', () => expect(result, isNotNull));
 
     test('Testando o resultado', () async {
-      int num = await result;
+      final int num = await result;
       expect(num, 0);
     });
 
     test('Testando busca sem erros em Future', () {
-      search('Maria').then((notas) => expect(notas, [8.0, 9.0]));
+      search('Maria').then((List<double>? notas) => expect(notas, <double>[8.0, 9.0]));
     });
 
     test('Testando busca com erros em Future', () {
-      search('Paula').then((notas) {}).catchError((error) {
+      search('Paula').then((List<double>? notas) {}).catchError((error) {
         expect(error, isA<ArgumentError>());
       });
     });
 
     test('Testando contagem em Stream', () async {
-      List<int> resultados = [];
-      await for (var valor in count()) {
+      final List<int> resultados = <int>[];
+      await for (int valor in count()) {
         resultados.add(valor);
       }
-      expect(resultados, [1, 2, 3]);
+      expect(resultados, <int>[1, 2, 3]);
     });
 
     test('Testando media em Stream', () async {
-      List<double> resultados = [];
+      final List<double> resultados = <double>[];
       try {
-        await for (var m in media(['Maria', 'Bruna'])) {
+        await for (double m in media(<String>['Maria', 'Bruna'])) {
           resultados.add(m);
         }
       } catch (_) {
         // erro é esperado para alunos inexistentes
       }
-      expect(resultados, [8.5, 7]);
+      expect(resultados, <num>[8.5, 7]);
     });
 
     test('Testando media com aluno inexistente', () async {
       expectLater(
-        media(['Paula']),
+        media(<String>['Paula']),
         emitsError(isA<ArgumentError>()),
       );
     });

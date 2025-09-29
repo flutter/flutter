@@ -38,9 +38,9 @@ class Aluno extends Pessoa with Ano {
 }
 
 class Professor extends Pessoa {
-  String especialidade;
 
   Professor(super.nome, this.especialidade);
+  String especialidade;
 }
 
 class Disciplina {
@@ -69,9 +69,9 @@ class Turma with Ano {
 }
 
 class Historico extends Turma {
-  final Map<Aluno, List<double>> notas = <Aluno, List<double>>{};
 
   Historico(super.disciplina, super.professor, super.ano);
+  final Map<Aluno, List<double>> notas = <Aluno, List<double>>{};
 
   @override
   void matricular(Aluno aluno) {
