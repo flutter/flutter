@@ -96,7 +96,7 @@ class _WindowsTable extends StatelessWidget {
         context: context,
         controller: regular,
       ),
-      final DialogWindowController dialog => throw UnimplementedError(),
+      DialogWindowController() => throw UnimplementedError(),
     };
   }
 

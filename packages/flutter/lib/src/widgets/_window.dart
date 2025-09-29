@@ -1218,7 +1218,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
               final RegularWindowController regular =>
                 regular.isMaximized !=
                     (oldWidget.controller as RegularWindowController).isMaximized,
-              final DialogWindowController dialog => false,
+              DialogWindowController() => false,
             },
             _WindowControllerAspect.minimized => switch (controller) {
               final RegularWindowController regular =>
@@ -1231,7 +1231,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
               final RegularWindowController regular =>
                 regular.isFullscreen !=
                     (oldWidget.controller as RegularWindowController).isFullscreen,
-              final DialogWindowController dialog => false,
+              DialogWindowController() => false,
             },
           },
     );
