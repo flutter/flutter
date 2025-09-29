@@ -19,7 +19,6 @@ import 'debug.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
-import 'material_state.dart';
 import 'theme.dart';
 import 'tooltip.dart';
 
@@ -1045,14 +1044,14 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
 
     final List<Widget> tiles = <Widget>[];
     for (int i = 0; i < widget.items.length; i++) {
-      final Set<MaterialState> states = <MaterialState>{
-        if (i == widget.currentIndex) MaterialState.selected,
+      final Set<WidgetState> states = <WidgetState>{
+        if (i == widget.currentIndex) WidgetState.selected,
       };
 
       final MouseCursor effectiveMouseCursor =
           WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
           bottomTheme.mouseCursor?.resolve(states) ??
-          MaterialStateMouseCursor.clickable.resolve(states);
+          WidgetStateMouseCursor.clickable.resolve(states);
 
       tiles.add(
         _BottomNavigationTile(

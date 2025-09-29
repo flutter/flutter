@@ -61,7 +61,7 @@ void main() {
       rangeValueIndicatorShape: PaddleRangeSliderValueIndicatorShape(),
       showValueIndicator: ShowValueIndicator.always,
       valueIndicatorTextStyle: TextStyle(color: Colors.black),
-      mouseCursor: MaterialStateMouseCursor.clickable,
+      mouseCursor: WidgetStateMouseCursor.clickable,
       allowedInteraction: SliderInteraction.tapOnly,
       padding: EdgeInsets.all(1.0),
       thumbSize: WidgetStatePropertyAll<Size>(Size(20, 20)),
@@ -920,8 +920,8 @@ void main() {
   testWidgets('Slider can use theme overlay with material states', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(platform: TargetPlatform.android, primarySwatch: Colors.blue);
     final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(
-      overlayColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.focused)) {
+      overlayColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.focused)) {
           return Colors.brown[500]!;
         }
 

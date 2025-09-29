@@ -12,13 +12,9 @@ import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart' show isSkwasm;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-// TODO(yjbanov): on the web text rendered with perspective produces flaky goldens: https://github.com/flutter/flutter/issues/110785
-final bool skipPerspectiveTextGoldens = isBrowser && isSkwasm;
 
 // A number of the hit tests below say "warnIfMissed: false". This is because
 // the way the CupertinoPicker works, the hits don't actually reach the labels,
@@ -1599,36 +1595,28 @@ void main() {
       }
 
       await tester.pumpWidget(buildApp(CupertinoDatePickerMode.time));
-      if (!skipPerspectiveTextGoldens) {
-        await expectLater(
-          find.byType(CupertinoDatePicker),
-          matchesGoldenFile('date_picker_test.time.initial.png'),
-        );
-      }
+      await expectLater(
+        find.byType(CupertinoDatePicker),
+        matchesGoldenFile('date_picker_test.time.initial.png'),
+      );
 
       await tester.pumpWidget(buildApp(CupertinoDatePickerMode.date));
-      if (!skipPerspectiveTextGoldens) {
-        await expectLater(
-          find.byType(CupertinoDatePicker),
-          matchesGoldenFile('date_picker_test.date.initial.png'),
-        );
-      }
+      await expectLater(
+        find.byType(CupertinoDatePicker),
+        matchesGoldenFile('date_picker_test.date.initial.png'),
+      );
 
       await tester.pumpWidget(buildApp(CupertinoDatePickerMode.monthYear));
-      if (!skipPerspectiveTextGoldens) {
-        await expectLater(
-          find.byType(CupertinoDatePicker),
-          matchesGoldenFile('date_picker_test.monthyear.initial.png'),
-        );
-      }
+      await expectLater(
+        find.byType(CupertinoDatePicker),
+        matchesGoldenFile('date_picker_test.monthyear.initial.png'),
+      );
 
       await tester.pumpWidget(buildApp(CupertinoDatePickerMode.dateAndTime));
-      if (!skipPerspectiveTextGoldens) {
-        await expectLater(
-          find.byType(CupertinoDatePicker),
-          matchesGoldenFile('date_picker_test.datetime.initial.png'),
-        );
-      }
+      await expectLater(
+        find.byType(CupertinoDatePicker),
+        matchesGoldenFile('date_picker_test.datetime.initial.png'),
+      );
 
       // Slightly drag the hour component to make the current hour off-center.
       await tester.drag(
@@ -1638,12 +1626,10 @@ void main() {
       ); // see top of file
       await tester.pump();
 
-      if (!skipPerspectiveTextGoldens) {
-        await expectLater(
-          find.byType(CupertinoDatePicker),
-          matchesGoldenFile('date_picker_test.datetime.drag.png'),
-        );
-      }
+      await expectLater(
+        find.byType(CupertinoDatePicker),
+        matchesGoldenFile('date_picker_test.datetime.drag.png'),
+      );
     });
 
     testWidgets('DatePicker displays the date in correct order', (WidgetTester tester) async {
@@ -1809,12 +1795,10 @@ void main() {
       ),
     );
 
-    if (!skipPerspectiveTextGoldens) {
-      await expectLater(
-        find.byType(CupertinoTimerPicker),
-        matchesGoldenFile('timer_picker_test.datetime.initial.png'),
-      );
-    }
+    await expectLater(
+      find.byType(CupertinoTimerPicker),
+      matchesGoldenFile('timer_picker_test.datetime.initial.png'),
+    );
 
     // Slightly drag the minute component to make the current minute off-center.
     await tester.drag(
@@ -1824,12 +1808,10 @@ void main() {
     ); // see top of file
     await tester.pump();
 
-    if (!skipPerspectiveTextGoldens) {
-      await expectLater(
-        find.byType(CupertinoTimerPicker),
-        matchesGoldenFile('timer_picker_test.datetime.drag.png'),
-      );
-    }
+    await expectLater(
+      find.byType(CupertinoTimerPicker),
+      matchesGoldenFile('timer_picker_test.datetime.drag.png'),
+    );
   });
 
   testWidgets('TimerPicker only changes hour label after scrolling stops', (
@@ -2610,6 +2592,127 @@ void main() {
     );
 
     expect(find.text(':'), findsNothing);
+  });
+
+  test('CupertinoDatePicker selectableDayPredicate parameter validation', () async {
+    expect(() => CupertinoDatePicker(onDateTimeChanged: (DateTime _) {}), returnsNormally);
+
+    expect(
+      () => CupertinoDatePicker(
+        initialDateTime: DateTime(2025),
+        onDateTimeChanged: (DateTime _) {},
+        selectableDayPredicate: (DateTime date) {
+          return date.year == 2025;
+        },
+      ),
+      returnsNormally,
+    );
+
+    expect(
+      () => CupertinoDatePicker(
+        onDateTimeChanged: (DateTime _) {},
+        selectableDayPredicate: (DateTime date) {
+          return date.year == 2025;
+        },
+      ),
+      returnsNormally,
+    );
+
+    expect(
+      () => CupertinoDatePicker(
+        initialDateTime: DateTime(2025, 7, 4),
+        onDateTimeChanged: (DateTime _) {},
+        selectableDayPredicate: (DateTime date) {
+          return date.month == 6;
+        },
+      ),
+      throwsA(
+        isA<AssertionError>().having(
+          (AssertionError e) => e.message ?? 'Unknown error',
+          'message',
+          contains('must satisfy provided selectableDayPredicate.'),
+        ),
+      ),
+    );
+  });
+
+  testWidgets('DatePicker with workdays predicate test case', (WidgetTester tester) async {
+    // Set initial date time to a work day.
+    final DateTime initialDateTime = DateTime(2025, 6, 13);
+    DateTime selectedDate = initialDateTime;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoDatePicker(
+            initialDateTime: initialDateTime,
+            selectableDayPredicate: (DateTime date) {
+              return date.weekday >= DateTime.monday && date.weekday <= DateTime.friday;
+            },
+            onDateTimeChanged: (DateTime dateTime) {
+              selectedDate = dateTime;
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Scrolling to Saturday should trigger automatic scroll to the next workday (Monday).
+    await tester.drag(find.text('Sat Jun 14'), const Offset(0.0, -100.0));
+    expect(selectedDate, DateTime(2025, 6, 16));
+  });
+
+  testWidgets('DatePicker with weekend predicate test case', (WidgetTester tester) async {
+    // Set initial date time to a weekend day.
+    final DateTime initialDateTime = DateTime(2025, 6, 14);
+    DateTime selectedDate = initialDateTime;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoDatePicker(
+            initialDateTime: initialDateTime,
+            selectableDayPredicate: (DateTime date) {
+              return date.weekday == DateTime.saturday || date.weekday == DateTime.sunday;
+            },
+            onDateTimeChanged: (DateTime dateTime) {
+              selectedDate = dateTime;
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Pressing on the friday day item should trigger automatic scroll back to
+    // saturday.
+    await tester.press(find.text('Fri Jun 13'));
+    await tester.pump();
+
+    expect(selectedDate, DateTime(2025, 6, 14));
+  });
+
+  testWidgets('DatePicker with custom predicate test case', (WidgetTester tester) async {
+    // Set initial date time to a work day.
+    final DateTime initialDateTime = DateTime(2025, 6, 16);
+    DateTime selectedDate = initialDateTime;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoDatePicker(
+            initialDateTime: initialDateTime,
+            selectableDayPredicate: (DateTime date) {
+              return date.day >= 16;
+            },
+            onDateTimeChanged: (DateTime dateTime) {
+              selectedDate = dateTime;
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.drag(find.text('Sun Jun 15'), const Offset(0.0, 64.0));
+    await tester.pump();
+
+    expect(selectedDate, initialDateTime);
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/161773

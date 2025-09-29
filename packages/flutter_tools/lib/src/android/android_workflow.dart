@@ -131,7 +131,7 @@ class AndroidValidator extends DoctorValidator {
   String? _task;
 
   /// Returns false if we cannot determine the Java version or if the version
-  /// is older that the minimum allowed version of 1.8.
+  /// is older that the minimum allowed version.
   Future<bool> _checkJavaVersion(List<ValidationMessage> messages) async {
     _task = 'Checking Java status';
     try {
@@ -160,11 +160,17 @@ class AndroidValidator extends DoctorValidator {
         return false;
       }
       // Should this be modified to be evaluated based on gradle version used?
-      if (javaVersion < gradle_utils.minJavaMinVersionAndroid) {
+      if (javaVersion < gradle_utils.errorJavaMinVersionAndroid) {
         messages.add(
           ValidationMessage.error(_userMessages.androidJavaMinimumVersion(javaVersion.toString())),
         );
         return false;
+      }
+      if (javaVersion < gradle_utils.warnJavaMinVersionAndroid) {
+        messages.add(
+          ValidationMessage.hint(_userMessages.androidJavaMinimumVersion(javaVersion.toString())),
+        );
+        return true;
       }
       messages.add(ValidationMessage(_userMessages.androidJavaVersion(javaVersion.toString())));
       return true;

@@ -148,4 +148,51 @@ void main() {
     );
     expect(tableA.borderRadius, const BorderRadius.all(Radius.circular(8.0)));
   });
+
+  test('TableBorder outer border uniformity', () {
+    const TableBorder uniformOuter = TableBorder(
+      top: BorderSide(width: 2.0),
+      right: BorderSide(width: 2.0),
+      bottom: BorderSide(width: 2.0),
+      left: BorderSide(width: 2.0),
+      horizontalInside: BorderSide(color: Color(0xFF0000FF)),
+      verticalInside: BorderSide(color: Color(0xFF0000FF)),
+    );
+
+    expect(uniformOuter.isUniform, isFalse);
+
+    final BorderSide topSide = uniformOuter.top;
+    expect(uniformOuter.right, equals(topSide));
+    expect(uniformOuter.bottom, equals(topSide));
+    expect(uniformOuter.left, equals(topSide));
+
+    const TableBorder nonUniformOuter = TableBorder(
+      top: BorderSide(width: 2.0),
+      right: BorderSide(color: Color(0xFF00FF00), width: 2.0),
+      bottom: BorderSide(width: 2.0),
+      left: BorderSide(width: 2.0),
+    );
+
+    expect(nonUniformOuter.right, isNot(equals(nonUniformOuter.top)));
+  });
+
+  test('TableBorder with non-uniform widths but uniform colors applies border radius', () {
+    const TableBorder borderWithRadius = TableBorder(
+      top: BorderSide(width: 3.0, color: Color(0xFF0000FF)),
+      right: BorderSide(color: Color(0xFF0000FF)),
+      bottom: BorderSide(width: 2.0, color: Color(0xFF0000FF)),
+      left: BorderSide(width: 1.5, color: Color(0xFF0000FF)),
+      borderRadius: BorderRadius.all(Radius.circular(8.0)),
+    );
+
+    expect(borderWithRadius.top.width, isNot(equals(borderWithRadius.bottom.width)));
+    expect(borderWithRadius.left.width, isNot(equals(borderWithRadius.right.width)));
+
+    final Color topColor = borderWithRadius.top.color;
+    expect(borderWithRadius.right.color, equals(topColor));
+    expect(borderWithRadius.bottom.color, equals(topColor));
+    expect(borderWithRadius.left.color, equals(topColor));
+
+    expect(borderWithRadius.borderRadius, const BorderRadius.all(Radius.circular(8.0)));
+  });
 }

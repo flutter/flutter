@@ -548,6 +548,8 @@ class TextField extends StatefulWidget {
   /// field showing how many characters have been entered. If set to a number
   /// greater than 0, it will also display the maximum number allowed. If set
   /// to [TextField.noMaxLength] then only the current character count is displayed.
+  /// To remove the counter, set [InputDecoration.counterText] to an empty string or
+  /// return null from [TextField.buildCounter] callback.
   ///
   /// After [maxLength] characters have been input, additional input
   /// is ignored, unless [maxLengthEnforcement] is set to
@@ -1312,10 +1314,10 @@ class _TextFieldState extends State<TextField>
     }
 
     if (widget.statesController == oldWidget.statesController) {
-      _statesController.update(MaterialState.disabled, !_isEnabled);
-      _statesController.update(MaterialState.hovered, _isHovering);
-      _statesController.update(MaterialState.focused, _effectiveFocusNode.hasFocus);
-      _statesController.update(MaterialState.error, _hasError);
+      _statesController.update(WidgetState.disabled, !_isEnabled);
+      _statesController.update(WidgetState.hovered, _isHovering);
+      _statesController.update(WidgetState.focused, _effectiveFocusNode.hasFocus);
+      _statesController.update(WidgetState.error, _hasError);
     } else {
       oldWidget.statesController?.removeListener(_handleStatesControllerChange);
       if (widget.statesController != null) {
@@ -1404,7 +1406,7 @@ class _TextFieldState extends State<TextField>
       // Rebuild the widget on focus change to show/hide the text selection
       // highlight.
     });
-    _statesController.update(MaterialState.focused, _effectiveFocusNode.hasFocus);
+    _statesController.update(WidgetState.focused, _effectiveFocusNode.hasFocus);
   }
 
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
@@ -1453,7 +1455,7 @@ class _TextFieldState extends State<TextField>
       setState(() {
         _isHovering = hovering;
       });
-      _statesController.update(MaterialState.hovered, _isHovering);
+      _statesController.update(WidgetState.hovered, _isHovering);
     }
   }
 
@@ -1472,10 +1474,10 @@ class _TextFieldState extends State<TextField>
     if (widget.statesController == null) {
       _internalStatesController = MaterialStatesController();
     }
-    _statesController.update(MaterialState.disabled, !_isEnabled);
-    _statesController.update(MaterialState.hovered, _isHovering);
-    _statesController.update(MaterialState.focused, _effectiveFocusNode.hasFocus);
-    _statesController.update(MaterialState.error, _hasError);
+    _statesController.update(WidgetState.disabled, !_isEnabled);
+    _statesController.update(WidgetState.hovered, _isHovering);
+    _statesController.update(WidgetState.focused, _effectiveFocusNode.hasFocus);
+    _statesController.update(WidgetState.error, _hasError);
     _statesController.addListener(_handleStatesControllerChange);
   }
 
@@ -1768,7 +1770,7 @@ class _TextFieldState extends State<TextField>
       );
     }
     final MouseCursor effectiveMouseCursor = WidgetStateProperty.resolveAs<MouseCursor>(
-      widget.mouseCursor ?? MaterialStateMouseCursor.textable,
+      widget.mouseCursor ?? WidgetStateMouseCursor.textable,
       _statesController.value,
     );
 
@@ -1851,9 +1853,9 @@ class _TextFieldState extends State<TextField>
 }
 
 TextStyle? _m2StateInputStyle(BuildContext context) =>
-    MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+    MaterialStateTextStyle.resolveWith((Set<WidgetState> states) {
       final ThemeData theme = Theme.of(context);
-      if (states.contains(MaterialState.disabled)) {
+      if (states.contains(WidgetState.disabled)) {
         return TextStyle(color: theme.disabledColor);
       }
       return TextStyle(color: theme.textTheme.titleMedium?.color);

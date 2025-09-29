@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <format>
 #include <thread>
+
 #include "flutter/flow/frame_timings.h"
 #include "flutter/flow/testing/layer_test.h"
 #include "flutter/flow/testing/mock_layer.h"
@@ -288,9 +290,8 @@ TEST(FrameTimingsRecorderTest, ClonedHasSameRasterEndWithCache) {
 TEST(FrameTimingsRecorderTest, FrameNumberTraceArgIsValid) {
   auto recorder = std::make_unique<FrameTimingsRecorder>();
 
-  char buff[50];
-  sprintf(buff, "%d", static_cast<int>(recorder->GetFrameNumber()));
-  std::string actual_arg = buff;
+  std::string actual_arg =
+      std::format("{}", static_cast<int>(recorder->GetFrameNumber()));
   std::string expected_arg = recorder->GetFrameNumberTraceArg();
 
   ASSERT_EQ(actual_arg, expected_arg);

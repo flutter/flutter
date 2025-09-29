@@ -604,6 +604,7 @@ void main() {
                 machine: true,
                 verbose: false,
                 prefixedErrors: false,
+                widgetPreviews: false,
                 windows: globals.platform.isWindows,
               );
             },

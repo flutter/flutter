@@ -11,7 +11,6 @@ import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
 import '../../../../src/common.dart';
-import 'preview_details_matcher.dart';
 
 typedef WidgetPreviewSourceFile = ({String path, String source});
 
@@ -224,16 +223,15 @@ dependencies:
 
 /// A mixin for preview projects that support adding and removing libraries with previews.
 mixin ProjectWithPreviews on WidgetPreviewProject {
-  List<PreviewDetailsMatcher> get expectedPreviewDetails;
+  List<Matcher> get expectedPreviewDetails;
 
   String get previewContainingFileContents;
 
   String get nonPreviewContainingFileContents;
 
-  Map<PreviewPath, List<PreviewDetailsMatcher>> get matcherMapping =>
-      <PreviewPath, List<PreviewDetailsMatcher>>{
-        for (final PreviewPath path in librariesWithPreviews) path: expectedPreviewDetails,
-      };
+  Map<PreviewPath, List<Matcher>> get matcherMapping => <PreviewPath, List<Matcher>>{
+    for (final PreviewPath path in librariesWithPreviews) path: expectedPreviewDetails,
+  };
 
   final librariesWithPreviews = <PreviewPath>{};
   final librariesWithoutPreviews = <PreviewPath>{};

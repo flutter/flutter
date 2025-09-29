@@ -239,4 +239,8 @@ size_t CapabilitiesGLES::GetMinimumUniformAlignment() const {
   return 256;
 }
 
+bool CapabilitiesGLES::NeedsPartitionedHostBuffer() const {
+  return false;
+}
+
 }  // namespace impeller

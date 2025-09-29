@@ -13,10 +13,10 @@ packages:
     dependency: "direct main"
     description:
       name: _fe_analyzer_shared
-      sha256: f0bb5d1648339c8308cc0b9838d8456b3cfe5c91f9dc1a735b4d003269e5da9a
+      sha256: dd3d2ad434b9510001d089e8de7556d50c834481b9abc2891a0184a8493a19dc
       url: "https://pub.dev"
     source: hosted
-    version: "88.0.0"
+    version: "89.0.0"
   adaptive_breakpoints:
     dependency: "direct main"
     description:
@@ -29,10 +29,10 @@ packages:
     dependency: "direct main"
     description:
       name: analyzer
-      sha256: "0b7b9c329d2879f8f05d6c05b32ee9ec025f39b077864bdb5ac9a7b63418a98f"
+      sha256: c22b6e7726d1f9e5db58c7251606076a71ca0dbcf76116675edfadbec0c9e875
       url: "https://pub.dev"
     source: hosted
-    version: "8.1.1"
+    version: "8.2.0"
   animations:
     dependency: "direct main"
     description:
@@ -126,10 +126,10 @@ packages:
     dependency: "direct main"
     description:
       name: code_assets
-      sha256: dd7ed641b7f642092092969f2dcd5845ab31c9f3efead0c06ca437bf9ce8a8b2
+      sha256: "3b182b03a2f263ad6ab47cdadf9b64daa1d2d72ac941a277f685fb77ba96cbd5"
       url: "https://pub.dev"
     source: hosted
-    version: "0.19.4"
+    version: "0.19.6"
   collection:
     dependency: "direct main"
     description:
@@ -310,10 +310,10 @@ packages:
     dependency: "direct main"
     description:
       name: google_fonts
-      sha256: df9763500dadba0155373e9cb44e202ce21bd9ed5de6bdbd05c5854e86839cb8
+      sha256: ebc94ed30fd13cefd397cb1658b593f21571f014b7d1197eeb41fb95f05d899a
       url: "https://pub.dev"
     source: hosted
-    version: "6.3.0"
+    version: "6.3.1"
   google_identity_services_web:
     dependency: "direct main"
     description:
@@ -350,10 +350,10 @@ packages:
     dependency: "direct main"
     description:
       name: hooks
-      sha256: "75363eae6c0c2db051c4f6b3b1fcdea8a09c4a596cc83bfff847661da6e80dfc"
+      sha256: "22abd27b650a571e53576abe732e4d9053aacaaa6dee23e9ff106c63e3e5b96c"
       url: "https://pub.dev"
     source: hosted
-    version: "0.19.5"
+    version: "0.20.1"
   html:
     dependency: "direct main"
     description:
@@ -430,10 +430,10 @@ packages:
     dependency: "direct main"
     description:
       name: leak_tracker
-      sha256: "8dcda04c3fc16c14f48a7bb586d4be1f0d1572731b6d81d51772ef47c02081e0"
+      sha256: "33e2e26bdd85a0112ec15400c8cbffea70d0f9c3407491f672a2fad47915e2de"
       url: "https://pub.dev"
     source: hosted
-    version: "11.0.1"
+    version: "11.0.2"
   leak_tracker_flutter_testing:
     dependency: "direct main"
     description:
@@ -510,10 +510,10 @@ packages:
     dependency: "direct main"
     description:
       name: native_toolchain_c
-      sha256: "74a0c80d877c519bc6bde2c4e27b6b01c1f93c9b480f65ceae8bedd3aba3c086"
+      sha256: "7e8358a4f6ec69a4f2d366bb971af298aca50d6c2e8a07be7c12d7f6d40460aa"
       url: "https://pub.dev"
     source: hosted
-    version: "0.16.8"
+    version: "0.17.1"
   nested:
     dependency: "direct main"
     description:
@@ -558,18 +558,18 @@ packages:
     dependency: "direct main"
     description:
       name: path_provider_android
-      sha256: d0d310befe2c8ab9e7f393288ccbb11b60c019c6b5afc21973eeee4dda2b35e9
+      sha256: "993381400e94d18469750e5b9dcb8206f15bc09f9da86b9e44a9b0092a0066db"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.17"
+    version: "2.2.18"
   path_provider_foundation:
     dependency: "direct main"
     description:
       name: path_provider_foundation
-      sha256: "4843174df4d288f5e29185bd6e72a6fbdf5a4a4602717eed565497429f179942"
+      sha256: "16eef174aacb07e09c351502740fa6254c165757638eba1e9116b0a781201bbd"
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.1"
+    version: "2.4.2"
   path_provider_linux:
     dependency: "direct main"
     description:
@@ -630,10 +630,10 @@ packages:
     dependency: "direct main"
     description:
       name: pool
-      sha256: "20fe868b6314b322ea036ba325e6fc0711a22948856475e2c2b6306e8ab39c2a"
+      sha256: "978783255c543aa3586a1b3c21f6e9d720eb315376a915872c61ef8b5c20177d"
       url: "https://pub.dev"
     source: hosted
-    version: "1.5.1"
+    version: "1.5.2"
   process:
     dependency: "direct main"
     description:
@@ -654,10 +654,10 @@ packages:
     dependency: "direct main"
     description:
       name: provider
-      sha256: "4abbd070a04e9ddc287673bf5a030c7ca8b685ff70218720abab8b092f53dd84"
+      sha256: "4e82183fa20e5ca25703ead7e05de9e4cceed1fbd1eadc1ac3cb6f565a09f272"
       url: "https://pub.dev"
     source: hosted
-    version: "6.1.5"
+    version: "6.1.5+1"
   pub_semver:
     dependency: "direct main"
     description:
@@ -867,18 +867,18 @@ packages:
     dependency: "direct main"
     description:
       name: url_launcher_android
-      sha256: "0aedad096a85b49df2e4725fa32118f9fa580f3b14af7a2d2221896a02cd5656"
+      sha256: "199bc33e746088546a39cc5f36bac5a278c5e53b40cb3196f99e7345fdcfae6b"
       url: "https://pub.dev"
     source: hosted
-    version: "6.3.17"
+    version: "6.3.22"
   url_launcher_ios:
     dependency: "direct main"
     description:
       name: url_launcher_ios
-      sha256: "7f2022359d4c099eea7df3fdf739f7d3d3b9faf3166fb1dd390775176e0b76cb"
+      sha256: d80b3f567a617cb923546034cc94bfe44eb15f989fe670b37f26abdb9d939cb7
       url: "https://pub.dev"
     source: hosted
-    version: "6.3.3"
+    version: "6.3.4"
   url_launcher_linux:
     dependency: "direct main"
     description:
@@ -891,10 +891,10 @@ packages:
     dependency: "direct main"
     description:
       name: url_launcher_macos
-      sha256: "17ba2000b847f334f16626a574c702b196723af2a289e7a93ffcb79acff855c2"
+      sha256: c043a77d6600ac9c38300567f33ef12b0ef4f4783a2c1f00231d2b1941fea13f
       url: "https://pub.dev"
     source: hosted
-    version: "3.2.2"
+    version: "3.2.3"
   url_launcher_platform_interface:
     dependency: "direct main"
     description:
@@ -939,18 +939,18 @@ packages:
     dependency: "direct main"
     description:
       name: video_player_android
-      sha256: "4a5135754a62dbc827a64a42ef1f8ed72c962e191c97e2d48744225c2b9ebb73"
+      sha256: "59e5a457ddcc1688f39e9aef0efb62aa845cf0cbbac47e44ac9730dc079a2385"
       url: "https://pub.dev"
     source: hosted
-    version: "2.8.7"
+    version: "2.8.13"
   video_player_avfoundation:
     dependency: "direct main"
     description:
       name: video_player_avfoundation
-      sha256: "9fedd55023249f3a02738c195c906b4e530956191febf0838e37d0dac912f953"
+      sha256: f9a780aac57802b2892f93787e5ea53b5f43cc57dc107bee9436458365be71cd
       url: "https://pub.dev"
     source: hosted
-    version: "2.8.0"
+    version: "2.8.4"
   video_player_platform_interface:
     dependency: "direct main"
     description:
@@ -987,10 +987,10 @@ packages:
     dependency: "direct main"
     description:
       name: watcher
-      sha256: "0b7fd4a0bbc4b92641dbf20adfd7e3fd1398fe17102d94b674234563e110088a"
+      sha256: "5bf046f41320ac97a469d506261797f35254fa61c641741ef32dacda98b7d39c"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.2"
+    version: "1.1.3"
   web:
     dependency: "direct main"
     description:
@@ -1059,10 +1059,10 @@ packages:
     dependency: "direct main"
     description:
       name: webview_flutter_wkwebview
-      sha256: fb46db8216131a3e55bcf44040ca808423539bc6732e7ed34fb6d8044e3d512f
+      sha256: fea63576b3b7e02b2df8b78ba92b48ed66caec2bb041e9a0b1cbd586d5d80bfd
       url: "https://pub.dev"
     source: hosted
-    version: "3.23.0"
+    version: "3.23.1"
   xdg_directories:
     dependency: "direct main"
     description:
@@ -1096,5 +1096,5 @@ packages:
     source: hosted
     version: "2.2.2"
 sdks:
-  dart: ">=3.9.0-21.0.dev <4.0.0"
-  flutter: ">=3.29.0"
+  dart: ">=3.9.0 <4.0.0"
+  flutter: ">=3.35.0"

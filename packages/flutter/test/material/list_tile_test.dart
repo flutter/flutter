@@ -1635,10 +1635,10 @@ void main() {
         MaterialApp(
           home: Material(
             child: ListTileTheme(
-              data: const ListTileThemeData(mouseCursor: MaterialStateMouseCursor.clickable),
+              data: const ListTileThemeData(mouseCursor: WidgetStateMouseCursor.clickable),
               child: ListTile(
                 key: tileKey,
-                mouseCursor: MaterialStateMouseCursor.textable,
+                mouseCursor: WidgetStateMouseCursor.textable,
                 title: const Text('Title'),
                 onTap: () {},
               ),
@@ -2176,7 +2176,7 @@ void main() {
     );
   });
 
-  testWidgets('ListTile.textColor respects MaterialStateColor', (WidgetTester tester) async {
+  testWidgets('ListTile.textColor respects WidgetStateColor', (WidgetTester tester) async {
     bool enabled = false;
     bool selected = false;
     const Color defaultColor = Colors.blue;
@@ -2192,11 +2192,11 @@ void main() {
                 return ListTile(
                   enabled: enabled,
                   selected: selected,
-                  textColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-                    if (states.contains(MaterialState.disabled)) {
+                  textColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
+                    if (states.contains(WidgetState.disabled)) {
                       return disabledColor;
                     }
-                    if (states.contains(MaterialState.selected)) {
+                    if (states.contains(WidgetState.selected)) {
                       return selectedColor;
                     }
                     return defaultColor;
@@ -2231,7 +2231,7 @@ void main() {
     expect(title.text.style!.color, selectedColor);
   });
 
-  testWidgets('ListTile.iconColor respects MaterialStateColor', (WidgetTester tester) async {
+  testWidgets('ListTile.iconColor respects WidgetStateColor', (WidgetTester tester) async {
     bool enabled = false;
     bool selected = false;
     const Color defaultColor = Colors.blue;
@@ -2248,11 +2248,11 @@ void main() {
                 return ListTile(
                   enabled: enabled,
                   selected: selected,
-                  iconColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-                    if (states.contains(MaterialState.disabled)) {
+                  iconColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
+                    if (states.contains(WidgetState.disabled)) {
                       return disabledColor;
                     }
-                    if (states.contains(MaterialState.selected)) {
+                    if (states.contains(WidgetState.selected)) {
                       return selectedColor;
                     }
                     return defaultColor;
@@ -4645,7 +4645,7 @@ void main() {
       ),
     );
 
-    expect(controller.value, <MaterialState>{});
+    expect(controller.value, <WidgetState>{});
     expect(count, 0);
 
     final Offset center = tester.getCenter(find.byType(Text));
@@ -4654,42 +4654,42 @@ void main() {
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
 
-    expect(controller.value, <MaterialState>{MaterialState.hovered});
+    expect(controller.value, <WidgetState>{WidgetState.hovered});
     expect(count, 1);
 
     await gesture.moveTo(Offset.zero);
     await tester.pumpAndSettle();
 
-    expect(controller.value, <MaterialState>{});
+    expect(controller.value, <WidgetState>{});
     expect(count, 2);
 
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
 
-    expect(controller.value, <MaterialState>{MaterialState.hovered});
+    expect(controller.value, <WidgetState>{WidgetState.hovered});
     expect(count, 3);
 
     await gesture.down(center);
     await tester.pumpAndSettle();
 
-    expect(controller.value, <MaterialState>{MaterialState.hovered, MaterialState.pressed});
+    expect(controller.value, <WidgetState>{WidgetState.hovered, WidgetState.pressed});
     expect(count, 4);
 
     await gesture.up();
     await tester.pumpAndSettle();
 
-    expect(controller.value, <MaterialState>{MaterialState.hovered});
+    expect(controller.value, <WidgetState>{WidgetState.hovered});
     expect(count, 5);
 
     await gesture.moveTo(Offset.zero);
     await tester.pumpAndSettle();
 
-    expect(controller.value, <MaterialState>{});
+    expect(controller.value, <WidgetState>{});
     expect(count, 6);
 
     await gesture.down(center);
     await tester.pumpAndSettle();
-    expect(controller.value, <MaterialState>{MaterialState.hovered, MaterialState.pressed});
+    expect(controller.value, <WidgetState>{WidgetState.hovered, WidgetState.pressed});
     expect(count, 8); // adds hovered and pressed - two changes
 
     // If the button is rebuilt disabled, then the pressed state is
@@ -4704,11 +4704,11 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(controller.value, <MaterialState>{MaterialState.hovered, MaterialState.disabled});
+    expect(controller.value, <WidgetState>{WidgetState.hovered, WidgetState.disabled});
     expect(count, 10); // removes pressed and adds disabled - two changes
     await gesture.moveTo(Offset.zero);
     await tester.pumpAndSettle();
-    expect(controller.value, <MaterialState>{MaterialState.disabled});
+    expect(controller.value, <WidgetState>{WidgetState.disabled});
     expect(count, 11);
     await gesture.removePointer();
   });

@@ -44,7 +44,7 @@ class _${blockName}DefaultsM3 extends InputDecorationThemeData {
   });
 
   @override
-  Color? get fillColor => MaterialStateColor.resolveWith((Set<WidgetState> states) {
+  Color? get fillColor => WidgetStateColor.resolveWith((Set<WidgetState> states) {
     if (states.contains(WidgetState.disabled)) {
       return ${componentColor("md.comp.filled-text-field.disabled.container")};
     }
@@ -101,7 +101,7 @@ class _${blockName}DefaultsM3 extends InputDecorationThemeData {
   Color? get iconColor => ${componentColor("md.comp.filled-text-field.leading-icon")};
 
   @override
-  Color? get prefixIconColor => MaterialStateColor.resolveWith((Set<WidgetState> states) {
+  Color? get prefixIconColor => WidgetStateColor.resolveWith((Set<WidgetState> states) {
     if (states.contains(WidgetState.disabled)) {
       return ${componentColor('md.comp.filled-text-field.disabled.leading-icon')};
     }${componentColor('md.comp.filled-text-field.error.leading-icon') == componentColor('md.comp.filled-text-field.leading-icon') ? '' : '''
@@ -124,7 +124,7 @@ class _${blockName}DefaultsM3 extends InputDecorationThemeData {
   });
 
   @override
-  Color? get suffixIconColor => MaterialStateColor.resolveWith((Set<WidgetState> states) {
+  Color? get suffixIconColor => WidgetStateColor.resolveWith((Set<WidgetState> states) {
     if (states.contains(WidgetState.disabled)) {
       return ${componentColor('md.comp.filled-text-field.disabled.trailing-icon')};
     }

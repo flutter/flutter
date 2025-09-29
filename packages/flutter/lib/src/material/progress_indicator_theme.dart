@@ -54,6 +54,7 @@ class ProgressIndicatorThemeData with Diagnosticable {
       'This feature was deprecated after v3.27.0-0.2.pre.',
     )
     this.year2023,
+    this.controller,
   });
 
   /// The color of the [ProgressIndicator]'s indicator.
@@ -138,6 +139,17 @@ class ProgressIndicatorThemeData with Diagnosticable {
   )
   final bool? year2023;
 
+  /// Defines a default [AnimationController] for descendant
+  /// [CircularProgressIndicator] and [LinearProgressIndicator] widgets.
+  ///
+  /// If a descendant progress indicator's `controller` property is null, this
+  /// controller will be used to drive its indeterminate animation. This allows
+  /// a single controller to synchronize the animations of multiple indicators.
+  ///
+  /// If this property is also null, the progress indicator will create and
+  /// manage its own internal [AnimationController].
+  final AnimationController? controller;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   ProgressIndicatorThemeData copyWith({
@@ -156,6 +168,7 @@ class ProgressIndicatorThemeData with Diagnosticable {
     double? trackGap,
     EdgeInsetsGeometry? circularTrackPadding,
     bool? year2023,
+    AnimationController? controller,
   }) {
     return ProgressIndicatorThemeData(
       color: color ?? this.color,
@@ -173,6 +186,7 @@ class ProgressIndicatorThemeData with Diagnosticable {
       trackGap: trackGap ?? this.trackGap,
       circularTrackPadding: circularTrackPadding ?? this.circularTrackPadding,
       year2023: year2023 ?? this.year2023,
+      controller: controller ?? this.controller,
     );
   }
 
@@ -207,6 +221,7 @@ class ProgressIndicatorThemeData with Diagnosticable {
         t,
       ),
       year2023: t < 0.5 ? a?.year2023 : b?.year2023,
+      controller: t < 0.5 ? a?.controller : b?.controller,
     );
   }
 
@@ -227,6 +242,7 @@ class ProgressIndicatorThemeData with Diagnosticable {
     trackGap,
     circularTrackPadding,
     year2023,
+    controller,
   );
 
   @override
@@ -252,7 +268,8 @@ class ProgressIndicatorThemeData with Diagnosticable {
         other.constraints == constraints &&
         other.trackGap == trackGap &&
         other.circularTrackPadding == circularTrackPadding &&
-        other.year2023 == year2023;
+        other.year2023 == year2023 &&
+        other.controller == controller;
   }
 
   @override
@@ -285,6 +302,9 @@ class ProgressIndicatorThemeData with Diagnosticable {
       ),
     );
     properties.add(DiagnosticsProperty<bool>('year2023', year2023, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<AnimationController>('controller', controller, defaultValue: null),
+    );
   }
 }
 

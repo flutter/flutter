@@ -1589,13 +1589,13 @@ void main() {
           final SemanticsNode elevenHours = semantics
               .nodesWith(
                 value: 'Select hours $initialValue',
-                ancestor: tester.renderObject(_hourControl).debugSemantics,
+                ancestor: tester.renderObject(_dialHourControl).debugSemantics,
               )
               .single;
           tester.binding.pipelineOwner.semanticsOwner!.performAction(elevenHours.id, action);
           await tester.pumpAndSettle();
           expect(
-            find.descendant(of: _hourControl, matching: find.text(finalValue)),
+            find.descendant(of: _dialHourControl, matching: find.text(finalValue)),
             findsOneWidget,
           );
         }
@@ -1643,13 +1643,13 @@ void main() {
           final SemanticsNode elevenHours = semantics
               .nodesWith(
                 value: 'Select minutes $initialValue',
-                ancestor: tester.renderObject(_minuteControl).debugSemantics,
+                ancestor: tester.renderObject(_dialMinuteControl).debugSemantics,
               )
               .single;
           tester.binding.pipelineOwner.semanticsOwner!.performAction(elevenHours.id, action);
           await tester.pumpAndSettle();
           expect(
-            find.descendant(of: _minuteControl, matching: find.text(finalValue)),
+            find.descendant(of: _dialMinuteControl, matching: find.text(finalValue)),
             findsOneWidget,
           );
         }
@@ -2424,41 +2424,24 @@ void main() {
     WidgetTester tester,
   ) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    await mediaQueryBoilerplate(tester, materialType: MaterialType.material3);
+    const TimeOfDay time = TimeOfDay(hour: 8, minute: 12);
+
+    await mediaQueryBoilerplate(tester, initialTime: time, materialType: MaterialType.material3);
 
     final MaterialLocalizations localizations = MaterialLocalizations.of(
       tester.element(find.byType(TimePickerDialog)),
     );
-    final Finder semanticsFinder = find.bySemanticsLabel(
-      localizations.timePickerHourModeAnnouncement,
-    );
 
-    final SemanticsNode semanticsNode = tester.getSemantics(semanticsFinder);
+    final String formattedHour = localizations.formatHour(time);
+    final String formattedMinute = localizations.formatMinute(time);
+
     expect(
-      semanticsNode.label,
-      localizations.timePickerHourModeAnnouncement,
-      reason: 'Label should announce hour mode initially',
+      find.semantics.byValue('${localizations.timePickerHourModeAnnouncement} $formattedHour'),
+      findsOne,
     );
     expect(
-      semanticsNode.hasFlag(SemanticsFlag.isLiveRegion),
-      isTrue,
-      reason: 'Node should be a live region to announce changes',
-    );
-
-    // --- Switch to minute mode ---
-    final Finder minuteControlInkWell = find.descendant(
-      of: _minuteControl,
-      matching: find.byType(InkWell),
-    );
-    expect(minuteControlInkWell, findsOneWidget, reason: 'Minute control should exist');
-    await tester.tap(minuteControlInkWell);
-    await tester.pumpAndSettle();
-
-    // Get the updated node properties
-    expect(
-      semanticsNode.label,
-      localizations.timePickerMinuteModeAnnouncement,
-      reason: 'Label should announce minute mode after switching',
+      find.semantics.byValue('${localizations.timePickerMinuteModeAnnouncement} $formattedMinute'),
+      findsOne,
     );
 
     semantics.dispose();
@@ -2677,11 +2660,11 @@ Future<void> mediaQueryBoilerplate(
   await tester.pumpAndSettle();
 }
 
-final Finder _hourControl = find.byWidgetPredicate(
-  (Widget w) => '${w.runtimeType}' == '_HourControl',
+final Finder _dialHourControl = find.byWidgetPredicate(
+  (Widget w) => '${w.runtimeType}' == '_DialHourControl',
 );
-final Finder _minuteControl = find.byWidgetPredicate(
-  (Widget widget) => '${widget.runtimeType}' == '_MinuteControl',
+final Finder _dialMinuteControl = find.byWidgetPredicate(
+  (Widget widget) => '${widget.runtimeType}' == '_DialMinuteControl',
 );
 final Finder _timePicker = find.byWidgetPredicate(
   (Widget widget) => '${widget.runtimeType}' == '_TimePicker',
