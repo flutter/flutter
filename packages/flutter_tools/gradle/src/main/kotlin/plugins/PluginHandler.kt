@@ -24,7 +24,7 @@ import java.io.File
  * project.
  */
 class PluginHandler(
-    val project: Project
+    val project: Project,
 ) {
     private var pluginList: List<Map<String?, Any?>>? = null
     private var pluginDependencies: List<Map<String?, Any?>>? = null
@@ -48,7 +48,7 @@ class PluginHandler(
             pluginList =
                 NativePluginLoaderReflectionBridge.getPlugins(
                     project.extraProperties,
-                    FlutterPluginUtils.getFlutterSourceDirectory(project)
+                    FlutterPluginUtils.getFlutterSourceDirectory(project),
                 )
         }
         return pluginList!!
@@ -63,7 +63,7 @@ class PluginHandler(
             val meta: Map<String, Any> =
                 NativePluginLoaderReflectionBridge.getDependenciesMetadata(
                     project.extraProperties,
-                    FlutterPluginUtils.getFlutterSourceDirectory(project)
+                    FlutterPluginUtils.getFlutterSourceDirectory(project),
                 )
             check(meta["dependencyGraph"] is List<*>)
             @Suppress("UNCHECKED_CAST")
@@ -78,7 +78,7 @@ class PluginHandler(
             configurePluginProject(
                 project,
                 plugin,
-                engineVersionValue
+                engineVersionValue,
             )
         }
         pluginList.forEach { plugin: Map<String?, Any?> ->
@@ -114,7 +114,7 @@ class PluginHandler(
         private fun configurePluginProject(
             project: Project,
             pluginObject: Map<String?, Any?>,
-            engineVersion: String
+            engineVersion: String,
         ) {
             val pluginName =
                 requireNotNull(pluginObject["name"] as? String) { "Plugin name must be a string for plugin object: $pluginObject" }
@@ -144,10 +144,10 @@ class PluginHandler(
                 //                 case of alphabet reset which happened with "Baklava".
                 if (pluginCompileSdkVersion > projectCompileSdkVersion) {
                     project.logger.quiet(
-                        "Warning: The plugin $pluginName requires Android SDK version $pluginCompileSdkVersion or higher."
+                        "Warning: The plugin $pluginName requires Android SDK version $pluginCompileSdkVersion or higher.",
                     )
                     project.logger.quiet(
-                        "For more information about build configuration, see ${WEBSITE_DEPLOYMENT_ANDROID_BUILD_CONFIG}."
+                        "For more information about build configuration, see ${WEBSITE_DEPLOYMENT_ANDROID_BUILD_CONFIG}.",
                     )
                 }
 
@@ -161,7 +161,7 @@ class PluginHandler(
             project: Project,
             pluginProject: Project,
             buildType: BuildType,
-            engineVersion: String
+            engineVersion: String,
         ) {
             val flutterBuildMode: String = buildModeFor(buildType)
             // TODO(gmackall): this should be safe to remove, as the minimum required AGP is well above
@@ -222,7 +222,7 @@ class PluginHandler(
          */
         private fun configurePluginDependencies(
             project: Project,
-            pluginObject: Map<String?, Any?>
+            pluginObject: Map<String?, Any?>,
         ) {
             val pluginName: String =
                 requireNotNull(pluginObject["name"] as? String) {
