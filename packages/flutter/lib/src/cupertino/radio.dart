@@ -66,11 +66,9 @@ const List<double> _kDisabledDarkGradientOpacities = <double>[0.08, 0.14];
 /// deselected. The values are of type `T`, the type parameter of the
 /// [CupertinoRadio] class. Enums are commonly used for this purpose.
 ///
-/// The radio button itself does not maintain any state. Instead, selecting the
-/// radio invokes the [onChanged] callback, passing [value] as a parameter. If
-/// [groupValue] and [value] match, this radio will be selected. Most widgets
-/// will respond to [onChanged] by calling [State.setState] to update the
-/// radio button's [groupValue].
+/// This widget typically has a [RadioGroup] ancestor, which takes in a
+/// [RadioGroup.groupValue], and the [CupertinoRadio] under it with matching
+/// value will be selected.
 ///
 /// {@tool dartpad}
 /// Here is an example of CupertinoRadio widgets wrapped in CupertinoListTiles.
