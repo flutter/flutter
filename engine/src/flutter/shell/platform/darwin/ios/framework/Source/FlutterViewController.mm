@@ -294,6 +294,8 @@ typedef struct MouseState {
                                                 opaque:_viewOpaque
                                        enableWideGamut:engine.project.isWideGamutEnabled];
   [_engine createShell:nil libraryURI:nil initialRoute:initialRoute];
+  [self executeAppDelegateCallbacks];  // This is the earliest this can be called because it depends
+                                       // on the shell being created.
   _engineNeedsLaunch = YES;
   _ongoingTouches = [[NSMutableSet alloc] init];
 
@@ -301,7 +303,15 @@ typedef struct MouseState {
   // Eliminate method calls in initializers and dealloc.
   [self loadDefaultSplashScreenView];
   [self performCommonViewControllerInitialization];
+}
 
+- (void)executeAppDelegateCallbacks {
+  // We call this from the FlutterViewController instead of the FlutterEngine directly because this
+  // is only needed when the FlutterEngine is implicit. If it's not implicit there's no need for
+  // them to have a callback to expose the engine since they created the FlutterEngine directly.
+  [_engine notifyAppDelegateOfEngineInitialization];
+
+  // TODO(vashworth): deprecate
   if ([FlutterSharedApplication.application.delegate
           respondsToSelector:@selector(pluginRegistrant)]) {
     NSObject<FlutterPluginRegistrant>* pluginRegistrant =

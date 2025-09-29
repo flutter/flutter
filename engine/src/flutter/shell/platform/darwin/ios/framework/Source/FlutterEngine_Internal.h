@@ -107,6 +107,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)addSceneLifeCycleDelegate:(NSObject<FlutterSceneLifeCycleDelegate>*)delegate;
 
+- (void)notifyAppDelegateOfEngineInitialization;
+
+- (NSObject<FlutterApplicationRegistrar>*)registrarForApplication:(NSString*)key;
+
 @end
 
 NS_ASSUME_NONNULL_END

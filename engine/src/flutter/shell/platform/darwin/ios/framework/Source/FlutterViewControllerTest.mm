@@ -2477,14 +2477,19 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [mockVC stopMocking];
 }
 
-- (void)testAppDelegatePluginRegistrant {
+- (void)testExecuteAppDelegateCallbacks {
   id mockRegistrant = OCMProtocolMock(@protocol(FlutterPluginRegistrant));
   id appDelegate = [[UIApplication sharedApplication] delegate];
+  [appDelegate setMockLaunchEngine:self.mockEngine];
+  UIStoryboard* storyboard = [UIStoryboard storyboardWithName:@"Flutter" bundle:nil];
   XCTAssertTrue([appDelegate respondsToSelector:@selector(setPluginRegistrant:)]);
   [appDelegate setPluginRegistrant:mockRegistrant];
-  FlutterViewController* viewController = [[FlutterViewController alloc] init];
+  FlutterViewController* viewController =
+      (FlutterViewController*)[storyboard instantiateInitialViewController];
   [appDelegate setPluginRegistrant:nil];
   OCMVerify([mockRegistrant registerWithRegistry:viewController]);
+  OCMVerify([self.mockEngine notifyAppDelegateOfEngineInitialization]);
+  [appDelegate setMockLaunchEngine:nil];
 }
 
 - (void)testGrabLaunchEngine {

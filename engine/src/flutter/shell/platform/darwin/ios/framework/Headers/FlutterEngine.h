@@ -447,6 +447,30 @@ FLUTTER_DARWIN_EXPORT
 
 @end
 
+/**
+ * Exposes parts of a `FlutterEngine` for registration purposes.
+ *
+ * This is used when the engine is created implicitly to allow registering
+ * plugins, application-level method channels, platform views, etc.
+ */
+@interface FlutterImplicitEngineBridge : NSObject
+
+@property(nonatomic, strong) NSObject<FlutterPluginRegistry>* pluginRegistry;
+@property(nonatomic, strong) NSObject<FlutterApplicationRegistrar>* applicationRegistrar;
+
+@end
+
+/**
+ * Protocol for receiving a callback when an implicit engine is initialized.
+ *
+ * This provides the engine bridge to the listener.
+ */
+@protocol FlutterImplicitEngineDelegate
+@required
+
+- (void)didInitializeImplicitFlutterEngine:(FlutterImplicitEngineBridge*)engineBridge;
+@end
+
 NS_ASSUME_NONNULL_END
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_HEADERS_FLUTTERENGINE_H_
