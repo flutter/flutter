@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_DISPLAY_MONITOR_H_
-#define FLUTTER_SHELL_PLATFORM_WINDOWS_DISPLAY_MONITOR_H_
+#ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_DISPLAY_MANAGER_H_
+#define FLUTTER_SHELL_PLATFORM_WINDOWS_DISPLAY_MANAGER_H_
 
 #include <windows.h>
 #include <memory>
@@ -15,10 +15,10 @@
 namespace flutter {
 
 class FlutterWindowsEngine;
-class DisplayMonitor {
+class DisplayManagerWin32 {
  public:
-  explicit DisplayMonitor(FlutterWindowsEngine* engine);
-  ~DisplayMonitor();
+  explicit DisplayManagerWin32(FlutterWindowsEngine* engine);
+  ~DisplayManagerWin32();
 
   // Updates the display information and notifies the engine
   void UpdateDisplays();
@@ -53,4 +53,4 @@ class DisplayMonitor {
   std::shared_ptr<WindowsProcTable> win32_;
 };
 }  // namespace flutter
-#endif  // FLUTTER_SHELL_PLATFORM_WINDOWS_DISPLAY_MONITOR_H_
+#endif  // FLUTTER_SHELL_PLATFORM_WINDOWS_DISPLAY_MANAGER_H_
