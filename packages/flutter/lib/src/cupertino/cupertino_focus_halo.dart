@@ -26,9 +26,9 @@ class CupertinoFocusHalo extends StatefulWidget {
   /// ```dart
   /// CupertinoFocusHalo.withRect(
   ///   child: Column(
-  ///     children: [
-  ///       CupertinoButton(child: Text('Child 1'), onPressed: () {}),
-  ///       CupertinoButton(child: Text('Child 2'), onPressed: () {}),
+  ///     children: <Widget>[
+  ///       CupertinoButton(child: const Text('Child 1'), onPressed: () {}),
+  ///       CupertinoButton(child: const Text('Child 2'), onPressed: () {}),
   ///     ],
   ///   ),
   /// )
@@ -45,9 +45,9 @@ class CupertinoFocusHalo extends StatefulWidget {
   /// CupertinoFocusHalo.withRRect(
   ///   borderRadius: BorderRadius.circular(10.0),
   ///   child: Column(
-  ///     children: [
-  ///       CupertinoButton(child: Text('Child 1'), onPressed: () {}),
-  ///       CupertinoButton(child: Text('Child 2'), onPressed: () {}),
+  ///     children: <Widget>[
+  ///       CupertinoButton(child: const Text('Child 1'), onPressed: () {}),
+  ///       CupertinoButton(child: const Text('Child 2'), onPressed: () {}),
   ///     ],
   ///   ),
   /// )
