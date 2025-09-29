@@ -148,6 +148,18 @@ class WindowingOwnerWin32 extends WindowingOwner {
     );
   }
 
+  @internal
+  @override
+  DialogWindowController createDialogWindowController({
+    required DialogWindowControllerDelegate delegate,
+    Size? preferredSize,
+    BoxConstraints? preferredConstraints,
+    FlutterView? parent,
+    String? title,
+  }) {
+    throw UnimplementedError('Dialog windows are not yet implemented on Windows.');
+  }
+
   /// Register a new [WindowsMessageHandler].
   ///
   /// The handler will be triggered for unhandled messages for all top level

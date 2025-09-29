@@ -98,6 +98,87 @@ sealed class BaseWindowController extends ChangeNotifier {
   }
 }
 
+/// A mixin that defines common behavior for window controllers.
+///
+/// See also:
+/// * [RegularWindowController], the controller that creates and manages regular windows.
+/// * [DialogWindowController], the controller that creates and manages dialog windows.
+///
+/// {@macro flutter.widgets.windowing.experimental}
+mixin WindowControllerCommon {
+  /// The current title of the window.
+  ///
+  /// This might differ from the requested title.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  String get title;
+
+  /// Whether the window is currently activated.
+  ///
+  /// If `true` this means that the window is currently focused and
+  /// can receive user input.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  bool get isActivated;
+
+  /// Whether or not window is currently minimized.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  bool get isMinimized;
+
+  /// Request change to the content size of the window.
+  ///
+  /// The [size] describes the new requested window size. If the size disagrees
+  /// with the current constraints placed upon the window, the platform might
+  /// clamp the size within the constraints.
+  ///
+  /// The platform is free to ignore this request.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  void setSize(Size size);
+
+  /// Request change to the constraints of the window.
+  ///
+  /// The [constraints] describes the new constraints that the window should
+  /// satisfy. If the constraints disagree with the current size of the window,
+  /// the platform might resize the window to satisfy the new constraints.
+  ///
+  /// The platform is free to ignore this request.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  void setConstraints(BoxConstraints constraints);
+
+  /// Request change for the window title.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  void setTitle(String title);
+
+  /// Requests that the window be displayed in its current size and position.
+  ///
+  /// The platform may also give the window input focus and bring it to the
+  /// top of the window stack. However, this behavior is platform-dependent.
+  ///
+  /// If the window is minimized, the window returns to the size and position
+  /// that it had before that state was applied. The window will also be
+  /// brought to the top of the window stack.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  void activate();
+
+  /// Requests window to be minimized.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  void setMinimized(bool minimized);
+}
+
 /// Delegate class for regular window controller.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
@@ -185,11 +266,12 @@ mixin class RegularWindowControllerDelegate {
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 @internal
-abstract class RegularWindowController extends BaseWindowController {
+abstract class RegularWindowController extends BaseWindowController with WindowControllerCommon {
   /// Creates a [RegularWindowController] with the provided properties.
   ///
   /// Upon construction, the window is created by the platform.
   ///
+  /// {@template flutter.widgets.windowing.constraints}
   /// The [preferredSize] is the preferred content size of the window.
   /// This might not be honored by the platform. This is the size that
   /// the platform will try to apply to the window when it is created. In contrast,
@@ -209,6 +291,7 @@ abstract class RegularWindowController extends BaseWindowController {
   ///
   /// If both [preferredSize] and [preferredConstraints] are null,
   /// then the platform will use its own default size for the window.
+  /// {@endtemplate}
   ///
   /// The [title] argument configures the window's initial title.
   /// If omitted, some platforms might fall back to the app's name.
@@ -256,83 +339,17 @@ abstract class RegularWindowController extends BaseWindowController {
   @protected
   RegularWindowController.empty();
 
-  /// The current title of the window.
-  ///
-  /// This might differ from the requested title.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  String get title;
-
-  /// Whether the window is currently activated.
-  ///
-  /// If `true` this means that the window is currently focused and
-  /// can receive user input.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  bool get isActivated;
-
   /// Whether or not the window is currently maximized.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   bool get isMaximized;
 
-  /// Whether or not window is currently minimized.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  bool get isMinimized;
-
   /// Whether or not the window is currently in fullscreen mode.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   bool get isFullscreen;
-
-  /// Request change to the content size of the window.
-  ///
-  /// The [size] describes the new requested window size. If the size disagrees
-  /// with the current constraints placed upon the window, the platform might
-  /// clamp the size within the constraints.
-  ///
-  /// The platform is free to ignore this request.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  void setSize(Size size);
-
-  /// Request change to the constraints of the window.
-  ///
-  /// The [constraints] describes the new constraints that the window should
-  /// satisfy. If the constraints disagree with the current size of the window,
-  /// the platform might resize the window to satisfy the new constraints.
-  ///
-  /// The platform is free to ignore this request.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  void setConstraints(BoxConstraints constraints);
-
-  /// Request change for the window title.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  void setTitle(String title);
-
-  /// Requests that the window be displayed in its current size and position.
-  ///
-  /// The platform may also give the window input focus and bring it to the
-  /// top of the window stack. However, this behavior is platform-dependent.
-  ///
-  /// If the window is minimized, the window returns to the size and position
-  /// that it had before that state was applied. The window will also be
-  /// brought to the top of the window stack.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  void activate();
 
   /// Requests the window to be maximized.
   ///
@@ -343,12 +360,6 @@ abstract class RegularWindowController extends BaseWindowController {
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   void setMaximized(bool maximized);
-
-  /// Requests window to be minimized.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  void setMinimized(bool minimized);
 
   /// Request change for the window to enter or exit fullscreen state.
   ///
@@ -372,6 +383,168 @@ abstract class RegularWindowController extends BaseWindowController {
   void setFullscreen(bool fullscreen, {Display? display});
 }
 
+/// Delegate class for dialog window controller.
+///
+/// {@macro flutter.widgets.windowing.experimental}
+///
+/// See also:
+///
+///  * [DialogWindowController], the controller that creates and manages dialog windows.
+///  * [DialogWindow], the widget for a dialog window.
+@internal
+mixin class DialogWindowControllerDelegate {
+  /// Invoked when the user attempts to close the window.
+  ///
+  /// The default implementation destroys the window. Subclasses
+  /// can override the behavior to delay or prevent the window from closing.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  ///
+  /// See also:
+  ///
+  /// * [onWindowDestroyed], which is invoked after the window is closed.
+  @internal
+  void onWindowCloseRequested(RegularWindowController controller) {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+
+    controller.destroy();
+  }
+
+  /// Invoked after the window is closed.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  ///
+  /// See also:
+  ///
+  /// * [onWindowCloseRequested], which is invoked when the user attempts to close the window.
+  @internal
+  void onWindowDestroyed() {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+  }
+}
+
+/// A controller for a dialog window.
+///
+/// Two types of dialogs are supported:
+///  * Modal dialogs: created with a non-null parent. These dialogs are modal
+///    to the parent, do not have a system menu, and are not selectable from the
+///    window switcher.
+///  * Modeless dialogs: created with a null parent. These dialogs can be
+///    minimized (but not maximized), and have a disabled close button.
+///
+/// This class does not interact with the widget tree. Instead, it is typically
+/// provided to the [DialogWindow] widget, which renders the content inside the
+/// dialog window.
+///
+/// The user of this class is responsible for managing the lifecycle of the window.
+/// When the window is no longer needed, the user should call [destroy] on this
+/// controller to release the resources associated with the window.
+///
+/// {@tool snippet}
+/// An example usage might look like:
+///
+/// ```dart
+/// // ignore_for_file: invalid_use_of_internal_member
+/// import 'package:flutter/widgets.dart';
+/// import 'package:flutter/material.dart';
+/// import 'package:flutter/src/widgets/_window.dart';
+///
+/// void main() {
+///   runWidget(
+///     RegularWindow(
+///       controller: RegularWindowController(
+///         preferredSize: const Size(800, 600),
+///         preferredConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
+///         title: 'Example Window',
+///       ),
+///       child: MaterialApp(home: Container(
+///          child: DialogWindow(
+///              controller: DialogWindowController(
+///                  size: WindowSizing.size(const Size(400, 300)),
+///                  parent: WidgetsBinding.instance.platformDispatcher.views.first,
+///                  title: 'Example Dialog
+///             ),
+///             child: const Text('Hello, World!')
+///          )
+///       )),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// Children of a [DialogWindow] widget can access the [DialogWindowController]
+/// via the [WindowControllerScope] inherited widget.
+///
+/// {@macro flutter.widgets.windowing.experimental}
+abstract class DialogWindowController extends BaseWindowController with WindowControllerCommon {
+  /// Creates a [DialogWindowController] with the provided properties.
+  ///
+  /// Upon construction, the window is created by the platform.
+  ///
+  /// {@macro flutter.widgets.windowing.constraints}
+  ///
+  /// The [parent] argument specifies the parent window of this dialog.
+  ///
+  /// If the [parent] is null, then the dialog is modeless. Such dialogs can
+  /// be minimized but not maximized. They also have a disabled close button.
+  ///
+  /// If the [parent] is non-null, then the dialog is modal to the parent.
+  /// Such dialogs do not have a system menu. They are also not selectable
+  /// from the window switcher.
+  ///
+  /// The [title] argument configures the window's initial title.
+  /// If omitted, some platforms might fall back to the app's name.
+  ///
+  /// The [delegate] argument can be used to listen to the window's
+  /// lifecycle. For example, it can be used to save state before
+  /// a window is closed.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  factory DialogWindowController({
+    Size? preferredSize,
+    BoxConstraints? preferredConstraints,
+    FlutterView? parent,
+    String? title,
+    DialogWindowControllerDelegate? delegate,
+  }) {
+    WidgetsFlutterBinding.ensureInitialized();
+    final WindowingOwner owner = WidgetsBinding.instance.windowingOwner;
+    return owner.createDialogWindowController(
+      delegate: delegate ?? DialogWindowControllerDelegate(),
+      preferredSize: preferredSize,
+      preferredConstraints: preferredConstraints,
+      title: title,
+      parent: parent,
+    );
+  }
+
+  @protected
+  /// Creates an empty [DialogWindowController].
+  ///
+  /// This method is only intended to be used by subclasses of the
+  /// [DialogWindowController].
+  ///
+  /// Users who want to instantiate a new [DialogWindowController] should
+  /// always use the factory method to create a controller that is valid
+  /// for their particular platform.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  @protected
+  DialogWindowController.empty();
+
+  /// The parent view of this dialog, if any.
+  ///
+  /// If null, this dialog is modeless.
+  /// If non-null, this dialog is modal to the parent.
+  FlutterView? get parent;
+}
+
 /// [WindowingOwner] is responsible for creating and managing window controllers.
 ///
 /// A custom implementation can be provided by setting [WidgetsBinding.windowingOwner].
@@ -391,6 +564,22 @@ abstract class WindowingOwner {
     required RegularWindowControllerDelegate delegate,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
+    String? title,
+  });
+
+  /// Creates a [DialogWindowController] with the provided properties.
+  ///
+  /// Most app developers should use [DialogWindowController]'s constructor
+  /// instead of calling this method directly. This method allows platforms
+  /// to inject platform-specific logic.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  DialogWindowController createDialogWindowController({
+    required DialogWindowControllerDelegate delegate,
+    Size? preferredSize,
+    BoxConstraints? preferredConstraints,
+    FlutterView? parent,
     String? title,
   });
 
@@ -430,6 +619,17 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
     required RegularWindowControllerDelegate delegate,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
+    String? title,
+  }) {
+    throw UnsupportedError(errorMessage);
+  }
+
+  @override
+  DialogWindowController createDialogWindowController({
+    required DialogWindowControllerDelegate delegate,
+    Size? preferredSize,
+    BoxConstraints? preferredConstraints,
+    FlutterView? parent,
     String? title,
   }) {
     throw UnsupportedError(errorMessage);
@@ -523,6 +723,97 @@ class RegularWindow extends StatelessWidget {
   }
 }
 
+/// The [DialogWindow] widget provides a way to render a dialog window in the
+/// widget tree.
+///
+/// The provided [controller] creates the native window that backs
+/// the widget. The [child] widget is rendered into this newly created window.
+///
+/// When a [DialogWindow] widget is removed from the tree, the window that was created
+/// by the [controller] remains valid until the caller destroys it by calling
+/// [DialogWindowController.destroy].
+///
+/// Widgets in the same tree as the [child] widget will have access to the
+/// [DialogWindowController] via the [WindowScope] widget.
+///
+/// {@tool snippet}
+/// An example usage might look like:
+///
+/// ```dart
+/// // ignore_for_file: invalid_use_of_internal_member
+/// import 'package:flutter/widgets.dart';
+/// import 'package:flutter/material.dart';
+/// import 'package:flutter/src/widgets/_window.dart';
+///
+/// void main() {
+///   runWidget(
+///     RegularWindow(
+///       controller: RegularWindowController(
+///         preferredSize: const Size(800, 600),
+///         preferredConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
+///         title: 'Example Window',
+///       ),
+///       child: MaterialApp(home: Container(
+///          child: DialogWindow(
+///              controller: DialogWindowController(
+///                  size: WindowSizing.size(const Size(400, 300)),
+///                  parent: WidgetsBinding.instance.platformDispatcher.views.first,
+///                  title: 'Example Dialog
+///             ),
+///             child: const Text('Hello, World!')
+///          )
+///       )),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@macro flutter.widgets.windowing.experimental}
+@internal
+class DialogWindow extends StatelessWidget {
+  /// Creates a dialog window widget.
+  ///
+  /// The [controller] creates the native backing window into which the
+  /// [child] widget is rendered.
+  ///
+  /// It is up to the caller to destroy the window by calling
+  /// [DialogWindowController.destroy] when the window is no longer needed.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  DialogWindow({super.key, required this.controller, required this.child}) {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+  }
+
+  /// Controller for this widget.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  final DialogWindowController controller;
+
+  /// The content rendered into this window.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  final Widget child;
+
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: controller,
+      builder: (BuildContext context, Widget? widget) => WindowScope(
+        controller: controller,
+        child: View(view: controller.rootView, child: child),
+      ),
+    );
+  }
+}
+
 enum _WindowControllerAspect { contentSize, title, activated, maximized, minimized, fullscreen }
 
 /// Provides descendants with access to the [BaseWindowController] associated with
@@ -537,6 +828,7 @@ enum _WindowControllerAspect { contentSize, title, activated, maximized, minimiz
 /// See also:
 ///
 ///  * [RegularWindow], the widget to create a regular window.
+///  * [DialogWindow], the widget to create a dialog window.
 @internal
 class WindowScope extends InheritedModel<_WindowControllerAspect> {
   /// Creates a new [WindowScope].
@@ -580,7 +872,9 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   /// See also:
   ///
   /// * [RegularWindowController], the controller for regular top-level windows.
+  /// * [DialogWindowController], the controller for dialog windows.
   /// * [RegularWindow], the widget for a regular window.
+  /// * [DialogWindow], the widget for a dialog window.
   /// * [maybeOf], which doesn't throw or assert if it doesn't find a
   ///   [WindowScope] ancestor. It returns null instead.
   @internal
@@ -595,7 +889,9 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   /// See also:
   ///
   /// * [RegularWindowController], the controller for regular top-level windows.
+  /// * [DialogWindowController], the controller for dialog windows.
   /// * [RegularWindow], the widget for a regular window.
+  /// * [DialogWindow], the widget for a dialog window.
   /// * [of], which will throw if it doesn't find a [WindowScope] ancestor,
   ///   instead of returning null.
   @internal
@@ -648,6 +944,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
     final BaseWindowController controller = _of(context, _WindowControllerAspect.title);
     return switch (controller) {
       RegularWindowController() => controller.title,
+      DialogWindowController() => controller.title,
     };
   }
 
@@ -668,6 +965,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
 
     return switch (controller) {
       RegularWindowController() => controller.title,
+      DialogWindowController() => controller.title,
     };
   }
 
@@ -689,6 +987,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
     final BaseWindowController controller = _of(context, _WindowControllerAspect.activated);
     return switch (controller) {
       RegularWindowController() => controller.isActivated,
+      DialogWindowController() => controller.isActivated,
     };
   }
 
@@ -710,6 +1009,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
 
     return switch (controller) {
       RegularWindowController() => controller.isActivated,
+      DialogWindowController() => controller.isActivated,
     };
   }
 
@@ -731,6 +1031,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
     final BaseWindowController controller = _of(context, _WindowControllerAspect.minimized);
     return switch (controller) {
       RegularWindowController() => controller.isMinimized,
+      DialogWindowController() => controller.isMinimized,
     };
   }
 
@@ -752,6 +1053,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
 
     return switch (controller) {
       RegularWindowController() => controller.isMinimized,
+      DialogWindowController() => controller.isMinimized,
     };
   }
 
@@ -773,6 +1075,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
     final BaseWindowController controller = _of(context, _WindowControllerAspect.maximized);
     return switch (controller) {
       RegularWindowController() => controller.isMaximized,
+      DialogWindowController() => false,
     };
   }
 
@@ -794,6 +1097,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
 
     return switch (controller) {
       RegularWindowController() => controller.isMaximized,
+      DialogWindowController() => false,
     };
   }
 
@@ -816,6 +1120,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
 
     return switch (controller) {
       RegularWindowController() => controller.isFullscreen,
+      DialogWindowController() => false,
     };
   }
 
@@ -837,6 +1142,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
 
     return switch (controller) {
       RegularWindowController() => controller.isFullscreen,
+      DialogWindowController() => false,
     };
   }
 
@@ -898,26 +1204,34 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
             _WindowControllerAspect.title => switch (controller) {
               final RegularWindowController regular =>
                 regular.title != (oldWidget.controller as RegularWindowController).title,
+              final DialogWindowController dialog =>
+                dialog.title != (oldWidget.controller as DialogWindowController).title,
             },
             _WindowControllerAspect.activated => switch (controller) {
               final RegularWindowController regular =>
                 regular.isActivated !=
                     (oldWidget.controller as RegularWindowController).isActivated,
+              final DialogWindowController dialog =>
+                dialog.isActivated != (oldWidget.controller as DialogWindowController).isActivated,
             },
             _WindowControllerAspect.maximized => switch (controller) {
               final RegularWindowController regular =>
                 regular.isMaximized !=
                     (oldWidget.controller as RegularWindowController).isMaximized,
+              final DialogWindowController _ => false,
             },
             _WindowControllerAspect.minimized => switch (controller) {
               final RegularWindowController regular =>
                 regular.isMinimized !=
                     (oldWidget.controller as RegularWindowController).isMinimized,
+              final DialogWindowController dialog =>
+                dialog.isMinimized != (oldWidget.controller as DialogWindowController).isMinimized,
             },
             _WindowControllerAspect.fullscreen => switch (controller) {
               final RegularWindowController regular =>
                 regular.isFullscreen !=
                     (oldWidget.controller as RegularWindowController).isFullscreen,
+              final DialogWindowController _ => false,
             },
           },
     );
