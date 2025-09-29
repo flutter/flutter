@@ -2225,6 +2225,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     HAS_ENABLED_STATE(1 << 6),
     IS_ENABLED(1 << 7),
     IS_IN_MUTUALLY_EXCLUSIVE_GROUP(1 << 8),
+    IS_HEADER(1 << 9),
     IS_OBSCURED(1 << 10),
     SCOPES_ROUTE(1 << 11),
     NAMES_ROUTE(1 << 12),
