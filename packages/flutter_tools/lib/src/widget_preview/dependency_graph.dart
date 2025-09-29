@@ -14,6 +14,7 @@ import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element2.dart';
 import 'package:analyzer/diagnostic/diagnostic.dart';
 import 'package:analyzer/error/error.dart';
+import 'package:analyzer/source/line_info.dart';
 
 import '../base/logger.dart';
 import 'preview_details.dart';
@@ -45,9 +46,12 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
   MethodDeclaration? _currentMethod;
 
   late Uri _currentScriptUri;
+  late CompilationUnit _currentUnit;
 
   void findPreviewsInResolvedUnitResult(ResolvedUnitResult unit) {
-    _scopedVisitChildren(unit.unit, (_) => _currentScriptUri = unit.file.toUri());
+    _currentScriptUri = unit.file.toUri();
+    _currentUnit = unit.unit;
+    _currentUnit.visitChildren(this);
   }
 
   /// Handles previews defined on top-level functions.
@@ -96,6 +100,10 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
     if (preview == null) {
       return;
     }
+    final LineInfo lineInfo = _currentUnit.lineInfo;
+    final location = lineInfo.getLocation(node.offset);
+    final line = location.lineNumber;
+    final column = location.columnNumber;
     if (_currentFunction != null &&
         !hasRequiredParams(_currentFunction!.functionExpression.parameters)) {
       final TypeAnnotation? returnTypeAnnotation = _currentFunction!.returnType;
@@ -105,6 +113,8 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
           previewEntries.add(
             PreviewDetails(
               scriptUri: _currentScriptUri,
+              line: line,
+              column: column,
               packageName: packageName,
               functionName: _currentFunction!.name.toString(),
               isBuilder: returnType.isWidgetBuilder,
@@ -120,6 +130,8 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
       previewEntries.add(
         PreviewDetails(
           scriptUri: _currentScriptUri,
+          line: line,
+          column: column,
           packageName: packageName,
           functionName: '$returnType${name == null ? '' : '.$name'}',
           isBuilder: false,
@@ -136,6 +148,8 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
           previewEntries.add(
             PreviewDetails(
               scriptUri: _currentScriptUri,
+              line: line,
+              column: column,
               packageName: packageName,
               functionName: '${parentClass.name}.${_currentMethod!.name}',
               isBuilder: returnType.isWidgetBuilder,
