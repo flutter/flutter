@@ -52,7 +52,8 @@ public final class ApplicationInfoLoader {
       return null;
     }
 
-    int networkSecurityConfigRes = metadata.getInt(FlutterEngineManifestFlags.NETWORK_POLICY.metaDataKey, 0);
+    int networkSecurityConfigRes =
+        metadata.getInt(FlutterEngineManifestFlags.NETWORK_POLICY.metaDataKey, 0);
     if (networkSecurityConfigRes <= 0) {
       return null;
     }
@@ -141,6 +142,9 @@ public final class ApplicationInfoLoader {
         getString(appInfo.metaData, FlutterEngineManifestFlags.FLUTTER_ASSETS_DIR.metaDataKey),
         getNetworkPolicy(appInfo, applicationContext),
         appInfo.nativeLibraryDir,
-        getBoolean(appInfo.metaData, FlutterEngineManifestFlags.AUTOMATICALLY_REGISTER_PLUGINS.metaDataKey, true));
+        getBoolean(
+            appInfo.metaData,
+            FlutterEngineManifestFlags.AUTOMATICALLY_REGISTER_PLUGINS.metaDataKey,
+            true));
   }
 }
