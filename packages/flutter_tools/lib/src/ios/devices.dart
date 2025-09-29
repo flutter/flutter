@@ -495,7 +495,7 @@ class IOSDevice extends Device {
     }
 
     // The minimum iOS version where wireless debugging is known to be slow.
-    const int minSlowWirelessDebugIOSVersion = 26;
+    const minSlowWirelessDebugIOSVersion = 26;
     if (isWirelesslyConnected &&
         debuggingOptions.debuggingEnabled &&
         sdkVersion != null &&
