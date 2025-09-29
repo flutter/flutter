@@ -969,7 +969,7 @@ void main() {
       brightness: Brightness.light,
       secondaryColor: Colors.blue,
       labelStyle: const TextStyle(),
-    ).copyWith(side: _MaterialStateBorderSide(getBorderSide));
+    ).copyWith(side: _TestWidgetStateBorderSide(getBorderSide));
 
     Widget chipWidget({bool selected = false}) {
       return MaterialApp(
@@ -1013,7 +1013,7 @@ void main() {
       return BorderSide(color: color);
     }
 
-    final ChipThemeData chipTheme = ChipThemeData(side: _MaterialStateBorderSide(getBorderSide));
+    final ChipThemeData chipTheme = ChipThemeData(side: _TestWidgetStateBorderSide(getBorderSide));
 
     Widget chipWidget({bool selected = false}) {
       return MaterialApp(
@@ -1535,8 +1535,8 @@ class _MaterialStateOutlinedBorder extends StadiumBorder implements MaterialStat
   OutlinedBorder? resolve(Set<WidgetState> states) => resolver(states);
 }
 
-class _MaterialStateBorderSide extends WidgetStateBorderSide {
-  const _MaterialStateBorderSide(this.resolver);
+class _TestWidgetStateBorderSide extends WidgetStateBorderSide {
+  const _TestWidgetStateBorderSide(this.resolver);
 
   final WidgetPropertyResolver<BorderSide?> resolver;
 
