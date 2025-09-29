@@ -367,7 +367,7 @@ TEST_P(AiksTest, CanRenderBackdropBlurHugeSigma) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
-TEST_P(AiksTest, CanRenderBoundedBlurCase1) {
+TEST_P(AiksTest, CanRenderBoundedBlurCloseToEdge) {
   auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
 
   DisplayListBuilder builder;
@@ -381,7 +381,7 @@ TEST_P(AiksTest, CanRenderBoundedBlurCase1) {
   builder.Save();
 
   DlPaint save_paint;
-  save_paint.setBlendMode(DlBlendMode::kSrc);
+  save_paint.setBlendMode(DlBlendMode::kSrcOver);
   auto backdrop_filter = DlBlurImageFilter::Make(
       20, 20, rect.Shift(-rect.GetOrigin()), DlTileMode::kDecal);
   builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter.get());
@@ -391,7 +391,7 @@ TEST_P(AiksTest, CanRenderBoundedBlurCase1) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
-TEST_P(AiksTest, CanRenderBoundedBlurCase2) {
+TEST_P(AiksTest, CanRenderBoundedBlurFarFromEdge) {
   auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
 
   DisplayListBuilder builder;
@@ -405,7 +405,7 @@ TEST_P(AiksTest, CanRenderBoundedBlurCase2) {
   builder.Save();
 
   DlPaint save_paint;
-  save_paint.setBlendMode(DlBlendMode::kSrc);
+  save_paint.setBlendMode(DlBlendMode::kSrcOver);
   auto backdrop_filter = DlBlurImageFilter::Make(
       20, 20, rect.Shift(-rect.GetOrigin()), DlTileMode::kDecal);
   builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter.get());
