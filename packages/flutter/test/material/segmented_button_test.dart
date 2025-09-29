@@ -850,10 +850,7 @@ void main() {
         ),
       ),
     );
-    final Set<MaterialState> states = <MaterialState>{
-      MaterialState.selected,
-      MaterialState.disabled,
-    };
+    final Set<WidgetState> states = <WidgetState>{WidgetState.selected, WidgetState.disabled};
     // Check the initial states.
     SegmentedButtonState<int> state = tester.state(find.byType(SegmentedButton<int>));
     expect(state.statesControllers.values.first.value, states);
@@ -1519,6 +1516,6 @@ void main() {
   });
 }
 
-Set<MaterialState> enabled = const <MaterialState>{};
-Set<MaterialState> disabled = const <MaterialState>{MaterialState.disabled};
-Set<MaterialState> selected = const <MaterialState>{MaterialState.selected};
+Set<WidgetState> enabled = const <WidgetState>{};
+Set<WidgetState> disabled = const <WidgetState>{WidgetState.disabled};
+Set<WidgetState> selected = const <WidgetState>{WidgetState.selected};

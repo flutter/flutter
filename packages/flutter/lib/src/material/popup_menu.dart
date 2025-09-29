@@ -26,7 +26,6 @@ import 'list_tile.dart';
 import 'list_tile_theme.dart';
 import 'material.dart';
 import 'material_localizations.dart';
-import 'material_state.dart';
 import 'popup_menu_theme.dart';
 import 'text_theme.dart';
 import 'theme.dart';
@@ -1800,7 +1799,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
 // This WidgetStateProperty is passed along to the menu item's InkWell which
 // resolves the property against WidgetState.disabled, WidgetState.hovered,
 // WidgetState.focused.
-class _EffectiveMouseCursor extends MaterialStateMouseCursor {
+class _EffectiveMouseCursor extends WidgetStateMouseCursor {
   const _EffectiveMouseCursor(this.widgetCursor, this.themeCursor);
 
   final MouseCursor? widgetCursor;
@@ -1815,7 +1814,7 @@ class _EffectiveMouseCursor extends MaterialStateMouseCursor {
   }
 
   @override
-  String get debugDescription => 'MaterialStateMouseCursor(PopupMenuItemState)';
+  String get debugDescription => 'WidgetStateMouseCursor(PopupMenuItemState)';
 }
 
 class _PopupMenuDefaultsM2 extends PopupMenuThemeData {

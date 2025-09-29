@@ -1356,8 +1356,8 @@ void main() {
           rows: <DataRow>[
             DataRow(
               selected: selected,
-              color: WidgetStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-                if (states.contains(MaterialState.selected)) {
+              color: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+                if (states.contains(WidgetState.selected)) {
                   return selectedColor;
                 }
                 return defaultColor;
@@ -1396,8 +1396,8 @@ void main() {
               onSelectChanged: (bool? value) {},
             ),
             DataRow(
-              color: WidgetStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-                if (states.contains(MaterialState.disabled)) {
+              color: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+                if (states.contains(WidgetState.disabled)) {
                   return disabledColor;
                 }
                 return defaultColor;
@@ -1432,8 +1432,8 @@ void main() {
         columns: const <DataColumn>[DataColumn(label: Text('Column1'))],
         rows: <DataRow>[
           DataRow(
-            color: WidgetStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-              if (states.contains(MaterialState.pressed)) {
+            color: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+              if (states.contains(WidgetState.pressed)) {
                 return pressedColor;
               }
               return Colors.transparent;
@@ -1468,8 +1468,8 @@ void main() {
         columns: const <DataColumn>[DataColumn(label: Text('Column1'))],
         rows: <DataRow>[
           DataRow(
-            color: WidgetStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-              if (states.contains(MaterialState.pressed)) {
+            color: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+              if (states.contains(WidgetState.pressed)) {
                 return pressedColor;
               }
               return Colors.transparent;
@@ -1784,8 +1784,8 @@ void main() {
           rows: <DataRow>[
             DataRow(
               selected: selected,
-              color: WidgetStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-                if (states.contains(MaterialState.selected)) {
+              color: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+                if (states.contains(WidgetState.selected)) {
                   return selectedColor;
                 }
                 return defaultColor;
@@ -1938,7 +1938,7 @@ void main() {
     });
   });
 
-  testWidgets('Heading cell cursor resolves MaterialStateMouseCursor correctly', (
+  testWidgets('Heading cell cursor resolves WidgetStateMouseCursor correctly', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
@@ -1949,8 +1949,8 @@ void main() {
             columns: <DataColumn>[
               // This column can be sorted.
               DataColumn(
-                mouseCursor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-                  if (states.contains(MaterialState.disabled)) {
+                mouseCursor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+                  if (states.contains(WidgetState.disabled)) {
                     return SystemMouseCursors.forbidden;
                   }
                   return SystemMouseCursors.copy;
@@ -1961,8 +1961,8 @@ void main() {
               ),
               // This column cannot be sorted.
               DataColumn(
-                mouseCursor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-                  if (states.contains(MaterialState.disabled)) {
+                mouseCursor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+                  if (states.contains(WidgetState.disabled)) {
                     return SystemMouseCursors.forbidden;
                   }
                   return SystemMouseCursors.copy;
@@ -2000,7 +2000,7 @@ void main() {
     );
   });
 
-  testWidgets('DataRow cursor resolves MaterialStateMouseCursor correctly', (
+  testWidgets('DataRow cursor resolves WidgetStateMouseCursor correctly', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
@@ -2015,8 +2015,8 @@ void main() {
             rows: <DataRow>[
               // This row can be selected.
               DataRow(
-                mouseCursor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-                  if (states.contains(MaterialState.selected)) {
+                mouseCursor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+                  if (states.contains(WidgetState.selected)) {
                     return SystemMouseCursors.copy;
                   }
                   return SystemMouseCursors.forbidden;
@@ -2028,8 +2028,8 @@ void main() {
               DataRow(
                 selected: true,
                 onSelectChanged: (bool? selected) {},
-                mouseCursor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-                  if (states.contains(MaterialState.selected)) {
+                mouseCursor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+                  if (states.contains(WidgetState.selected)) {
                     return SystemMouseCursors.copy;
                   }
                   return SystemMouseCursors.forbidden;
