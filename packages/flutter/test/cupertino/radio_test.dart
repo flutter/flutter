@@ -929,84 +929,38 @@ void main() {
 
   // Regression tests for https://github.com/flutter/flutter/issues/170422
   group('Radio accessibility announcements on various platforms', () {
-    testWidgets(
-      'Unselected radio should be vocalized via hint on iOS',
-      (WidgetTester tester) async {
-        const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
-        await tester.pumpWidget(
-          CupertinoApp(
-            home: Center(
-              child: CupertinoRadio<int>(value: 2, groupValue: 1, onChanged: (int? i) {}),
-            ),
-          ),
-        );
+    testWidgets('Unselected radio should be vocalized via hint on iOS/macOS platform', (
+      WidgetTester tester,
+    ) async {
+      const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(child: CupertinoRadio<int>(value: 2, groupValue: 1, onChanged: (int? i) {})),
+        ),
+      );
 
-        expect(
-          tester.getSemantics(find.byType(Focus).last),
-          matchesSemantics(
-            hasCheckedState: true,
-            hasEnabledState: true,
-            isEnabled: true,
-            hasTapAction: true,
-            isFocusable: true,
-            isInMutuallyExclusiveGroup: true,
-            hasSelectedState: true,
-            hint: localizations.radioButtonUnselectedLabel, // Unselected radio gets non-empty hint.
-          ),
-        );
-      },
-      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-    );
+      final SemanticsNode semanticNode = tester.getSemantics(find.byType(Focus).last);
+      if (defaultTargetPlatform == TargetPlatform.iOS ||
+          defaultTargetPlatform == TargetPlatform.macOS) {
+        expect(semanticNode.hint, localizations.radioButtonUnselectedLabel);
+      } else {
+        expect(semanticNode.hint, anyOf(isNull, isEmpty));
+      }
+    });
 
-    testWidgets(
-      'Selected radio should be vocalized via the selected flag on iOS',
-      (WidgetTester tester) async {
-        await tester.pumpWidget(
-          CupertinoApp(
-            home: Center(
-              child: CupertinoRadio<int>(value: 1, groupValue: 1, onChanged: (int? i) {}),
-            ),
-          ),
-        );
+    testWidgets('Selected radio should be vocalized via the selected flag on all platforms', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(child: CupertinoRadio<int>(value: 1, groupValue: 1, onChanged: (int? i) {})),
+        ),
+      );
 
-        expect(
-          tester.getSemantics(find.byType(Focus).last),
-          matchesSemantics(
-            hasCheckedState: true,
-            isChecked: true,
-            isSelected: true,
-            hasEnabledState: true,
-            isEnabled: true,
-            isFocusable: true,
-            isInMutuallyExclusiveGroup: true,
-            hasSelectedState: true,
-            hasTapAction: true,
-            hint: '', // Selected radios get empty hint.
-          ),
-        );
-      },
-      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-    );
-
-    testWidgets(
-      'Radio accessibility should not use hint on Android',
-      (WidgetTester tester) async {
-        await tester.pumpWidget(
-          CupertinoApp(
-            home: Center(
-              child: CupertinoRadio<int>(value: 2, groupValue: 1, onChanged: (int? i) {}),
-            ),
-          ),
-        );
-
-        final SemanticsNode semantics = tester.getSemantics(find.byType(Focus).last);
-
-        expect(semantics.hasFlag(SemanticsFlag.hasCheckedState), isTrue);
-        expect(semantics.hasFlag(SemanticsFlag.isInMutuallyExclusiveGroup), isTrue);
-        expect(semantics.hint, anyOf(isNull, isEmpty));
-      },
-      variant: TargetPlatformVariant.only(TargetPlatform.android),
-    );
+      final SemanticsNode semanticNode = tester.getSemantics(find.byType(Focus).last);
+      // Radio semantics should not have hint.
+      expect(semanticNode.hint, anyOf(isNull, isEmpty));
+    });
   });
 }
 

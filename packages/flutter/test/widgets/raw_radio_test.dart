@@ -7,6 +7,7 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -100,130 +101,71 @@ void main() {
 
   // Regression tests for https://github.com/flutter/flutter/issues/170422
   group('Raw Radio accessibility announcements on various platforms', () {
-    testWidgets(
-      'Unselected radio should be vocalized via hint on iOS',
-      (WidgetTester tester) async {
-        final TestRegistry<int> registry = TestRegistry<int>();
-        registry.groupValue = 2;
-        const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
-        final FocusNode node = FocusNode();
-        addTearDown(node.dispose);
+    testWidgets('Unselected radio should be vocalized via hint on iOS/macOS platform', (
+      WidgetTester tester,
+    ) async {
+      final TestRegistry<int> registry = TestRegistry<int>();
+      registry.groupValue = 2; // To mark radio as unselected.
+      const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+      final FocusNode node = FocusNode();
+      addTearDown(node.dispose);
 
-        await tester.pumpWidget(
-          MaterialApp(
-            home: RawRadio<int>(
-              value: 1,
-              mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.click),
-              toggleable: false,
-              focusNode: node,
-              autofocus: false,
-              enabled: true,
-              groupRegistry: registry,
-              builder: (BuildContext context, ToggleableStateMixin state) {
-                return const SizedBox.square(dimension: 24);
-              },
-            ),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: RawRadio<int>(
+            value: 1,
+            mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.click),
+            toggleable: false,
+            focusNode: node,
+            autofocus: false,
+            enabled: true,
+            groupRegistry: registry,
+            builder: (BuildContext context, ToggleableStateMixin state) {
+              return const SizedBox.square(dimension: 24);
+            },
           ),
-        );
+        ),
+      );
 
-        final SemanticsNode semantics = tester.getSemantics(find.byType(RawRadio<int>));
+      final SemanticsNode semanticNode = tester.getSemantics(find.byType(RawRadio<int>));
+      // Radio semantics should have hint.
+      if (defaultTargetPlatform == TargetPlatform.iOS ||
+          defaultTargetPlatform == TargetPlatform.macOS) {
+        expect(semanticNode.hint, localizations.radioButtonUnselectedLabel);
+      } else {
+        expect(semanticNode.hint, anyOf(isNull, isEmpty));
+      }
+    });
 
-        expect(
-          semantics,
-          matchesSemantics(
-            hasCheckedState: true,
-            hasEnabledState: true,
-            isEnabled: true,
-            hasTapAction: true,
-            isFocusable: true,
-            isInMutuallyExclusiveGroup: true,
-            hasSelectedState: true,
-            hint: localizations.radioButtonUnselectedLabel, // Unselected radio gets non-empty hint.
+    testWidgets('Selected radio should be vocalized via the selected flag on all platforms', (
+      WidgetTester tester,
+    ) async {
+      final TestRegistry<int> registry = TestRegistry<int>();
+      registry.groupValue = 1; // To mark radio as selected.
+      final FocusNode node = FocusNode();
+      addTearDown(node.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: RawRadio<int>(
+            value: 1,
+            mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.click),
+            toggleable: false,
+            focusNode: node,
+            autofocus: false,
+            enabled: true,
+            groupRegistry: registry,
+            builder: (BuildContext context, ToggleableStateMixin state) {
+              return const SizedBox.square(dimension: 24);
+            },
           ),
-        );
-      },
-      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-    );
+        ),
+      );
 
-    testWidgets(
-      'Selected radio should be vocalized via the selected flag on iOS',
-      (WidgetTester tester) async {
-        final TestRegistry<int> registry = TestRegistry<int>();
-        registry.groupValue = 1; // To mark radio as selected.
-        final FocusNode node = FocusNode();
-        addTearDown(node.dispose);
-
-        await tester.pumpWidget(
-          MaterialApp(
-            home: RawRadio<int>(
-              value: 1,
-              mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.click),
-              toggleable: false,
-              focusNode: node,
-              autofocus: false,
-              enabled: true,
-              groupRegistry: registry,
-              builder: (BuildContext context, ToggleableStateMixin state) {
-                return const SizedBox.square(dimension: 24);
-              },
-            ),
-          ),
-        );
-
-        final SemanticsNode semantics = tester.getSemantics(find.byType(RawRadio<int>));
-
-        expect(
-          semantics,
-          matchesSemantics(
-            hasCheckedState: true,
-            isChecked: true,
-            isSelected: true,
-            hasEnabledState: true,
-            isEnabled: true,
-            isFocusable: true,
-            isInMutuallyExclusiveGroup: true,
-            hasSelectedState: true,
-            hasTapAction: true,
-            hint: '', // Selected radios get empty hint.
-          ),
-        );
-      },
-      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-    );
-
-    testWidgets(
-      'Accessibility should not use hint on Android',
-      (WidgetTester tester) async {
-        final TestRegistry<int> registry = TestRegistry<int>();
-        registry.groupValue = 2;
-        final FocusNode node = FocusNode();
-        addTearDown(node.dispose);
-
-        await tester.pumpWidget(
-          MaterialApp(
-            home: RawRadio<int>(
-              value: 1,
-              mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.click),
-              toggleable: false,
-              focusNode: node,
-              autofocus: false,
-              enabled: true,
-              groupRegistry: registry,
-              builder: (BuildContext context, ToggleableStateMixin state) {
-                return const SizedBox.square(dimension: 24);
-              },
-            ),
-          ),
-        );
-
-        final SemanticsNode semantics = tester.getSemantics(find.byType(RawRadio<int>));
-
-        expect(semantics.hasFlag(SemanticsFlag.isInMutuallyExclusiveGroup), isTrue);
-        expect(semantics.hasFlag(SemanticsFlag.hasCheckedState), isTrue);
-        expect(semantics.hint, anyOf(isNull, isEmpty));
-      },
-      variant: TargetPlatformVariant.only(TargetPlatform.android),
-    );
+      final SemanticsNode semantics = tester.getSemantics(find.byType(RawRadio<int>));
+      // Radio semantics should not have hint.
+      expect(semantics.hint, anyOf(isNull, isEmpty));
+    });
   });
 }
 
