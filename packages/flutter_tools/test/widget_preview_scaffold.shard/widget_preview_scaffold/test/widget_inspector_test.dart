@@ -17,22 +17,23 @@ void main() {
       final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
       const int kNumPreviewedWidgets = 3;
       const String kTestText = 'Foo';
-      final WidgetPreviewerWidgetScaffolding widgetPreview =
-          WidgetPreviewerWidgetScaffolding(
-            child: Column(
-              children: <Widget>[
-                for (int i = 0; i < kNumPreviewedWidgets; ++i)
-                  WidgetPreviewWidget(
-                    preview: WidgetPreview(
-                      scriptUri: '',
-                      builder: () => Text('$kTestText$i'),
-                      previewData: Preview(),
-                      packageName: '',
-                    ),
-                  ),
-              ],
-            ),
-          );
+      final controller = FakeWidgetPreviewScaffoldController();
+      final widgetPreview = WidgetPreviewerWidgetScaffolding(
+        child: Column(
+          children: <Widget>[
+            for (int i = 0; i < kNumPreviewedWidgets; ++i)
+              WidgetPreviewWidget(
+                controller: controller,
+                preview: WidgetPreview(
+                  scriptUri: '',
+                  builder: () => Text('$kTestText$i'),
+                  previewData: Preview(),
+                  packageName: '',
+                ),
+              ),
+          ],
+        ),
+      );
 
       await tester.pumpWidget(widgetPreview);
 

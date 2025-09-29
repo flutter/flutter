@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:dtd/dtd.dart';
 import 'package:json_rpc_2/json_rpc_2.dart';
+import 'package:package_config/package_config_types.dart';
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
@@ -15,6 +16,8 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../convert.dart';
+import '../dart/package_map.dart';
+import '../project.dart';
 
 typedef DtdService = (String, DTDServiceCallback);
 
@@ -25,6 +28,7 @@ class WidgetPreviewDtdServices {
     required this.shutdownHooks,
     required this.dtdLauncher,
     required this.onHotRestartPreviewerRequest,
+    required this.project,
   }) {
     shutdownHooks.addShutdownHook(() async {
       await _dtd?.close();
@@ -40,9 +44,14 @@ class WidgetPreviewDtdServices {
   static const kWidgetPreviewService = 'widget-preview';
   static const kIsWindows = 'isWindows';
   static const kHotRestartPreviewer = 'hotRestartPreviewer';
+  static const kResolveUri = 'resolveUri';
 
   /// The list of DTD service methods registered by the tool.
-  late final services = <DtdService>[(kHotRestartPreviewer, _hotRestart), (kIsWindows, _isWindows)];
+  late final services = <DtdService>[
+    (kHotRestartPreviewer, _hotRestart),
+    (kIsWindows, _isWindows),
+    (kResolveUri, _resolveUri),
+  ];
 
   // END KEEP SYNCED
 
@@ -53,6 +62,11 @@ class WidgetPreviewDtdServices {
   /// Invoked when the [kHotRestartPreviewer] service method is invoked by the widget preview
   /// scaffold.
   final VoidCallback onHotRestartPreviewerRequest;
+
+  /// The widget_preview_scaffold project.
+  final FlutterProject project;
+
+  PackageConfig? _packageConfig;
 
   DartToolingDaemon? _dtd;
 
@@ -94,6 +108,12 @@ class WidgetPreviewDtdServices {
 
   Future<Map<String, Object?>> _isWindows(Parameters _) async {
     return BoolResponse(const LocalPlatform().isWindows).toJson();
+  }
+
+  Future<Map<String, Object?>> _resolveUri(Parameters params) async {
+    _packageConfig ??= await loadPackageConfigWithLogging(project.packageConfig, logger: logger);
+    final Uri? result = _packageConfig!.resolve(Uri.parse(params.asMap['uri'] as String));
+    return StringResponse(result.toString()).toJson();
   }
 }
 
