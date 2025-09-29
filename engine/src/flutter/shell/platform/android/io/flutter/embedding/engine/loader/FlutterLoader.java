@@ -37,26 +37,6 @@ import java.util.concurrent.Future;
 public class FlutterLoader {
   private static final String TAG = "FlutterLoader";
 
-  private static final String ENABLE_IMPELLER_META_DATA_KEY =
-      "io.flutter.embedding.android.EnableImpeller";
-  private static final String ENABLE_VULKAN_VALIDATION_META_DATA_KEY =
-      "io.flutter.embedding.android.EnableVulkanValidation";
-  private static final String IMPELLER_BACKEND_META_DATA_KEY =
-      "io.flutter.embedding.android.ImpellerBackend";
-  private static final String IMPELLER_OPENGL_GPU_TRACING_DATA_KEY =
-      "io.flutter.embedding.android.EnableOpenGLGPUTracing";
-  private static final String IMPELLER_VULKAN_GPU_TRACING_DATA_KEY =
-      "io.flutter.embedding.android.EnableVulkanGPUTracing";
-  private static final String DISABLE_MERGED_PLATFORM_UI_THREAD_KEY =
-      "io.flutter.embedding.android.DisableMergedPlatformUIThread";
-  private static final String ENABLE_SURFACE_CONTROL =
-      "io.flutter.embedding.android.EnableSurfaceControl";
-  private static final String ENABLE_FLUTTER_GPU = "io.flutter.embedding.android.EnableFlutterGPU";
-  private static final String IMPELLER_LAZY_SHADER_MODE =
-      "io.flutter.embedding.android.ImpellerLazyShaderInitialization";
-  private static final String IMPELLER_ANTIALIAS_LINES =
-      "io.flutter.embedding.android.ImpellerAntialiasLines";
-
   // Flags to only be set internally by default. Matches values in flutter::switches.
   static final String SNAPSHOT_ASSET_PATH_KEY = "snapshot-asset-path";
   static final String VM_SNAPSHOT_DATA_KEY = "vm-snapshot-data";
