@@ -24,10 +24,10 @@ public final class ApplicationInfoLoader {
   public static final String PUBLIC_ISOLATE_SNAPSHOT_DATA_KEY =
       FlutterLoader.class.getName() + '.' + FlutterLoader.ISOLATE_SNAPSHOT_DATA_KEY;
   public static final String PUBLIC_FLUTTER_ASSETS_DIR_KEY =
-      FlutterLoader.class.getName() + '.' + FlutterLoader.FLUTTER_ASSETS_DIR_KEY;
+      FlutterLoader.class.getName() + '.' + "flutter-assets-dir";
   public static final String NETWORK_POLICY_METADATA_KEY = "io.flutter.network-policy";
   public static final String PUBLIC_AUTOMATICALLY_REGISTER_PLUGINS_METADATA_KEY =
-      "io.flutter." + FlutterLoader.AUTOMATICALLY_REGISTER_PLUGINS_KEY;
+      "io.flutter." + "automatically-register-plugins";
 
   @NonNull
   private static ApplicationInfo getApplicationInfo(@NonNull Context applicationContext) {

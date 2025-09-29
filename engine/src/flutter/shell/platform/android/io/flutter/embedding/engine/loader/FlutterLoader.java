@@ -62,9 +62,6 @@ public class FlutterLoader {
   static final String VM_SNAPSHOT_DATA_KEY = "vm-snapshot-data";
   static final String ISOLATE_SNAPSHOT_DATA_KEY = "isolate-snapshot-data";
   static final String AOT_VMSERVICE_SHARED_LIBRARY_NAME = "aot-vmservice-shared-library-name";
-  static final String FLUTTER_ASSETS_DIR_KEY = "flutter-assets-dir"; // TODO(camsim99): not used??
-  static final String AUTOMATICALLY_REGISTER_PLUGINS_KEY =
-      "automatically-register-plugins"; // TODO(camsim99): not used??
 
   // Resource names used for components of the precompiled snapshot.
   private static final String DEFAULT_LIBRARY = "libflutter.so";
