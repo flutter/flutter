@@ -506,7 +506,7 @@ abstract class DialogWindowController extends BaseWindowController with WindowCo
   factory DialogWindowController({
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
-    FlutterView? parent,
+    BaseWindowController? parent,
     String? title,
     DialogWindowControllerDelegate? delegate,
   }) {
@@ -577,7 +577,7 @@ abstract class WindowingOwner {
     required DialogWindowControllerDelegate delegate,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
-    FlutterView? parent,
+    BaseWindowController? parent,
     String? title,
   });
 
@@ -627,7 +627,7 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
     required DialogWindowControllerDelegate delegate,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
-    FlutterView? parent,
+    BaseWindowController? parent,
     String? title,
   }) {
     throw UnsupportedError(errorMessage);
