@@ -197,6 +197,20 @@ Scalar FloorToDivisible(Scalar val, Scalar divisor) {
   }
 }
 
+// If `y_coord_scale` < 0.0, the Y coordinate is flipped. This is useful
+// for Impeller graphics backends that use a flipped framebuffer coordinate
+// space.
+//
+// See also: IPRemapCoords in convergions.glsl.
+Rect RemapRectCoords(Rect input, Scalar texture_sampler_y_coord_scale) {
+  if (texture_sampler_y_coord_scale < 0.0f) {
+    return Rect::MakeLTRB(input.GetLeft(), 1.0f - input.GetBottom(),
+                          input.GetRight(), 1.0f - input.GetTop());
+  } else {
+    return input;
+  }
+}
+
 struct DownsamplePassArgs {
   /// The output size of the down-sampling pass.
   ISize subpass_size;
@@ -463,8 +477,10 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
           } else {
             pass.SetPipeline(
                 renderer.GetDownsampleSoftwareDecalPipeline(pipeline_options));
-            Rect bounds_rect = pass_args.downsample_uv_bounds.value_or(
-                Rect::MakeLTRB(0, 0, 1, 1));
+            Rect bounds_rect =
+                RemapRectCoords(pass_args.downsample_uv_bounds.value_or(
+                                    Rect::MakeLTRB(0, 0, 1, 1)),
+                                input_texture->GetYCoordScale());
             Vector4 bounds_vector = {
                 bounds_rect.GetLeft(), bounds_rect.GetTop(),
                 bounds_rect.GetRight(), bounds_rect.GetBottom()};
@@ -543,7 +559,9 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
             input_texture->GetYCoordScale();
 
         GaussianBlurFragmentShader::FragInfo frag_info;
-        Rect bounds_uv = blur_info.blur_uv_bounds.value_or(Rect::MakeMaximum());
+        Rect bounds_uv = RemapRectCoords(
+            blur_info.blur_uv_bounds.value_or(Rect::MakeMaximum()),
+            input_texture->GetYCoordScale());
         frag_info.bounds_uv =
             Vector4(bounds_uv.GetLeft(), bounds_uv.GetTop(),
                     bounds_uv.GetRight(), bounds_uv.GetBottom());
@@ -576,10 +594,10 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
         GaussianBlurVertexShader::BindFrameInfo(
             pass, data_host_buffer.EmplaceUniform(frame_info));
         KernelSamples full_kernel_samples = GenerateBlurInfo(blur_info);
-        // For bounded blurs, kernel samples must not be interpolated (lerped),
-        // as this can introduce wave-like artifacts at the edges of the bounds.
-        // This is likely due to increased sensitivity to pixel accuracy caused
-        // by opacity normalization.
+        // For bounded blurs, kernel samples must not be lerped, as this can
+        // introduce wave-like artifacts at the edges of the bounds. This is
+        // likely due to increased sensitivity to pixel accuracy caused by
+        // opacity normalization.
         auto kernel_samples = blur_info.blur_uv_bounds.has_value()
                                   ? CloneKernelSamples(full_kernel_samples)
                                   : LerpHackKernelSamples(full_kernel_samples);
