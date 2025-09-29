@@ -65,7 +65,7 @@ object FlutterPluginUtils {
     @JvmName("compareVersionStrings")
     internal fun compareVersionStrings(
         firstString: String,
-        secondString: String
+        secondString: String,
     ): Int {
         val firstVersion = firstString.split(".")
         val secondVersion = secondString.split(".")
@@ -145,7 +145,7 @@ object FlutterPluginUtils {
     @JvmName("getSettingsGradleFileFromProjectDir")
     internal fun getSettingsGradleFileFromProjectDir(
         projectDirectory: File,
-        logger: Logger
+        logger: Logger,
     ): File {
         val settingsGradle = File(projectDirectory.parentFile, "settings.gradle")
         val settingsGradleKts = File(projectDirectory.parentFile, "settings.gradle.kts")
@@ -154,7 +154,7 @@ object FlutterPluginUtils {
                 """
                 Both settings.gradle and settings.gradle.kts exist, so
                 settings.gradle.kts is ignored. This is likely a mistake.
-                """.trimIndent()
+                """.trimIndent(),
             )
         }
 
@@ -170,7 +170,7 @@ object FlutterPluginUtils {
     @JvmName("getBuildGradleFileFromProjectDir")
     internal fun getBuildGradleFileFromProjectDir(
         projectDirectory: File,
-        logger: Logger
+        logger: Logger,
     ): File {
         val buildGradle = File(File(projectDirectory.parentFile, "app"), "build.gradle")
         val buildGradleKts = File(File(projectDirectory.parentFile, "app"), "build.gradle.kts")
@@ -179,7 +179,7 @@ object FlutterPluginUtils {
                 """
                 Both build.gradle and build.gradle.kts exist, so
                 build.gradle.kts is ignored. This is likely a mistake.
-                """.trimIndent()
+                """.trimIndent(),
             )
         }
 
@@ -191,7 +191,7 @@ object FlutterPluginUtils {
     internal fun shouldProjectSplitPerAbi(project: Project): Boolean =
         project
             .findProperty(
-                PROP_SPLIT_PER_ABI
+                PROP_SPLIT_PER_ABI,
             )?.toString()
             ?.toBoolean() ?: false
 
@@ -237,7 +237,7 @@ object FlutterPluginUtils {
     @JvmName("shouldConfigureFlutterTask")
     internal fun shouldConfigureFlutterTask(
         project: Project,
-        assembleTask: Task
+        assembleTask: Task,
     ): Boolean {
         val cliTasksNames = project.gradle.startParameter.taskNames
         if (cliTasksNames.size != 1 || !cliTasksNames.first().contains("assemble")) {
@@ -312,7 +312,7 @@ object FlutterPluginUtils {
     internal fun addApiDependencies(
         project: Project,
         variantName: String,
-        dependency: Any
+        dependency: Any,
     ) {
         addApiDependencies(project, variantName, dependency, null)
     }
@@ -323,7 +323,7 @@ object FlutterPluginUtils {
         project: Project,
         variantName: String,
         dependency: Any,
-        config: Closure<Any>?
+        config: Closure<Any>?,
     ) {
         var configuration: String
         try {
@@ -337,7 +337,7 @@ object FlutterPluginUtils {
         if (config == null) {
             project.dependencies.add(
                 configuration,
-                dependency
+                dependency,
             )
         } else {
             project.dependencies.add(configuration, dependency, config)
@@ -369,7 +369,7 @@ object FlutterPluginUtils {
     @JvmName("supportsBuildMode")
     internal fun supportsBuildMode(
         project: Project,
-        flutterBuildMode: String
+        flutterBuildMode: String,
     ): Boolean {
         if (!shouldProjectUseLocalEngine(project)) {
             return true
@@ -425,20 +425,20 @@ object FlutterPluginUtils {
         projectCompileSdkVersion: Int,
         logger: Logger,
         pluginsWithHigherSdkVersion: List<PluginVersionPair>,
-        projectDirectory: File
+        projectDirectory: File,
     ) {
         logger.error(
-            "Your project is configured to compile against Android SDK $projectCompileSdkVersion, but the following plugin(s) require to be compiled against a higher Android SDK version:"
+            "Your project is configured to compile against Android SDK $projectCompileSdkVersion, but the following plugin(s) require to be compiled against a higher Android SDK version:",
         )
         for (pluginToCompileSdkVersion in pluginsWithHigherSdkVersion) {
             logger.error(
-                "- ${pluginToCompileSdkVersion.name} compiles against Android SDK ${pluginToCompileSdkVersion.version}"
+                "- ${pluginToCompileSdkVersion.name} compiles against Android SDK ${pluginToCompileSdkVersion.version}",
             )
         }
         val buildGradleFile =
             getBuildGradleFileFromProjectDir(
                 projectDirectory,
-                logger
+                logger,
             )
         logger.error(
             """
@@ -449,7 +449,7 @@ object FlutterPluginUtils {
                     compileSdk = $maxPluginCompileSdkVersion
                     ...
                 }
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -458,10 +458,10 @@ object FlutterPluginUtils {
         projectNdkVersion: String,
         logger: Logger,
         pluginsWithDifferentNdkVersion: List<PluginVersionPair>,
-        projectDirectory: File
+        projectDirectory: File,
     ) {
         logger.error(
-            "Your project is configured with Android NDK $projectNdkVersion, but the following plugin(s) depend on a different Android NDK version:"
+            "Your project is configured with Android NDK $projectNdkVersion, but the following plugin(s) depend on a different Android NDK version:",
         )
         for (pluginToNdkVersion in pluginsWithDifferentNdkVersion) {
             logger.error("- ${pluginToNdkVersion.name} requires Android NDK ${pluginToNdkVersion.version}")
@@ -469,7 +469,7 @@ object FlutterPluginUtils {
         val buildGradleFile =
             getBuildGradleFileFromProjectDir(
                 projectDirectory,
-                logger
+                logger,
             )
         logger.error(
             """
@@ -480,7 +480,7 @@ object FlutterPluginUtils {
                     ndkVersion = "$maxPluginNdkVersion"
                     ...
                 }
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -489,7 +489,7 @@ object FlutterPluginUtils {
     @JvmName("detectLowCompileSdkVersionOrNdkVersion")
     internal fun detectLowCompileSdkVersionOrNdkVersion(
         project: Project,
-        pluginList: List<Map<String?, Any?>>
+        pluginList: List<Map<String?, Any?>>,
     ) {
         project.afterEvaluate {
             // getCompileSdkFromProject returns a string if the project uses a preview compileSdkVersion
@@ -515,7 +515,7 @@ object FlutterPluginUtils {
             pluginList.forEach { pluginObject ->
                 val pluginName: String =
                     requireNotNull(
-                        pluginObject["name"] as? String
+                        pluginObject["name"] as? String,
                     ) { "Missing valid \"name\" property for plugin object: $pluginObject" }
                 val pluginProject: Project =
                     project.rootProject.findProject(":$pluginName") ?: return@forEach
@@ -528,8 +528,8 @@ object FlutterPluginUtils {
                         pluginsWithHigherSdkVersion.add(
                             PluginVersionPair(
                                 pluginName,
-                                pluginCompileSdkVersion.toString()
-                            )
+                                pluginCompileSdkVersion.toString(),
+                            ),
                         )
                     }
 
@@ -542,14 +542,14 @@ object FlutterPluginUtils {
                     maxPluginNdkVersion =
                         VersionUtils.mostRecentSemanticVersion(
                             pluginNdkVersion,
-                            maxPluginNdkVersion
+                            maxPluginNdkVersion,
                         )
                     if (pluginNdkVersion != projectNdkVersion) {
                         pluginsWithDifferentNdkVersion.add(
                             PluginVersionPair(
                                 pluginName,
-                                pluginNdkVersion
-                            )
+                                pluginNdkVersion,
+                            ),
                         )
                     }
 
@@ -561,7 +561,7 @@ object FlutterPluginUtils {
                                 projectCompileSdkVersion = projectCompileSdkVersion,
                                 logger = project.logger,
                                 pluginsWithHigherSdkVersion = pluginsWithHigherSdkVersion,
-                                projectDirectory = project.projectDir
+                                projectDirectory = project.projectDir,
                             )
                         }
                         if (maxPluginNdkVersion != projectNdkVersion) {
@@ -570,7 +570,7 @@ object FlutterPluginUtils {
                                 projectNdkVersion = projectNdkVersion,
                                 logger = project.logger,
                                 pluginsWithDifferentNdkVersion = pluginsWithDifferentNdkVersion,
-                                projectDirectory = project.projectDir
+                                projectDirectory = project.projectDir,
                             )
                         }
                     }
@@ -587,7 +587,7 @@ object FlutterPluginUtils {
     @JvmName("forceNdkDownload")
     internal fun forceNdkDownload(
         gradleProject: Project,
-        flutterSdkRootPath: String
+        flutterSdkRootPath: String,
     ) {
         // If the project is already configuring a native build, we don't need to do anything.
         val gradleProjectAndroidExtension = getAndroidExtension(gradleProject)
@@ -599,7 +599,7 @@ object FlutterPluginUtils {
 
         // Otherwise, point to an empty CMakeLists.txt, and ignore associated warnings.
         gradleProjectAndroidExtension.externalNativeBuild.cmake.path(
-            "$flutterSdkRootPath/packages/flutter_tools/gradle/src/main/scripts/CMakeLists.txt"
+            "$flutterSdkRootPath/packages/flutter_tools/gradle/src/main/scripts/CMakeLists.txt",
         )
 
         // AGP defaults to outputting build artifacts in `android/app/.cxx`. This directory is a
@@ -616,7 +616,7 @@ object FlutterPluginUtils {
             gradleProject.layout.buildDirectory
                 .dir("../.cxx")
                 .get()
-                .asFile.path
+                .asFile.path,
         )
 
         // CMake will print warnings when you try to build an empty project.
@@ -626,7 +626,7 @@ object FlutterPluginUtils {
             buildType.externalNativeBuild.cmake.arguments(
                 "-Wno-dev",
                 "--no-warn-unused-cli",
-                "-DCMAKE_BUILD_TYPE=${buildType.name}"
+                "-DCMAKE_BUILD_TYPE=${buildType.name}",
             )
         }
     }
@@ -650,13 +650,13 @@ object FlutterPluginUtils {
         project: Project,
         buildType: BuildType,
         pluginHandler: PluginHandler,
-        engineVersion: String
+        engineVersion: String,
     ) {
         val flutterBuildMode: String = buildModeFor(buildType)
         if (!supportsBuildMode(project, flutterBuildMode)) {
             project.logger.quiet(
                 "Project does not support Flutter build mode: $flutterBuildMode, " +
-                    "skipping adding Flutter dependencies"
+                    "skipping adding Flutter dependencies",
             )
             return
         }
@@ -678,7 +678,7 @@ object FlutterPluginUtils {
             addApiDependencies(
                 project,
                 buildType.name,
-                "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion"
+                "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion",
             )
         }
         val platforms: List<String> = getTargetPlatforms(project)
@@ -688,7 +688,7 @@ object FlutterPluginUtils {
             addApiDependencies(
                 project,
                 buildType.name,
-                "io.flutter:${arch}_$flutterBuildMode:$engineVersion"
+                "io.flutter:${arch}_$flutterBuildMode:$engineVersion",
             )
         }
     }
@@ -792,7 +792,7 @@ object FlutterPluginUtils {
                     // instead of relying on passing in a path.
                     if (project.hasProperty("outputPath")) {
                         deepLinkJson.set(
-                            File(project.property("outputPath").toString())
+                            File(project.property("outputPath").toString()),
                         )
                     } else {
                         deepLinkJson.set(project.layout.buildDirectory.file("deeplink.json"))
@@ -805,7 +805,7 @@ object FlutterPluginUtils {
                 .use(manifestUpdater)
                 .wiredWithFiles(
                     DeepLinkJsonFromManifestTask::manifestFile,
-                    DeepLinkJsonFromManifestTask::updatedManifest
+                    DeepLinkJsonFromManifestTask::updatedManifest,
                 ).toTransform(SingleArtifact.MERGED_MANIFEST) // (3) Indicate the artifact and operation type.
         }
     }
@@ -813,5 +813,5 @@ object FlutterPluginUtils {
 
 private data class PluginVersionPair(
     val name: String,
-    val version: String
+    val version: String,
 )
