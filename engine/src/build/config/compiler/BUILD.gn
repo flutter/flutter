@@ -651,7 +651,7 @@ config("runtime_library") {
       "m",
     ]
 
-    lib_dirs += [ "${android_toolchain_root}/lib/clang/18/lib/linux/" ]
+    lib_dirs += [ "${android_toolchain_root}/lib/clang/19/lib/linux/" ]
     current_android_cpu = current_cpu
     if (current_cpu == "arm64") {
       current_android_cpu = "aarch64"
