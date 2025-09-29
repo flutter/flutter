@@ -86,6 +86,11 @@ public final class FlutterEngineManifestFlags {
       new Flag("ImpellerLazyShaderInitialization", true, FlagType.BOOLEAN);
   public static final Flag IMPELLER_ANTIALIAS_LINES =
       new Flag("ImpellerAntialiasLines", true, FlagType.BOOLEAN);
+  public static final Flag VM_SNAPSHOT_DATA =
+      new Flag("VmSnapshotData", true, FlagType.VALUE);
+  public static final Flag ISOLATE_SNAPSHOT_DATA =
+      new Flag("IsolateSnapshotData", true, FlagType.VALUE);
+  public static final Flag NETWORK_POLICY = new Flag("NetworkPolicy", true, FlagType.VALUE);
 
   /**
    * Set whether leave or clean up the VM after the last shell shuts down. It can be set from app's

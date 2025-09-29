@@ -1,5 +1,7 @@
 # Cross-platform Flags
 
+# TODO(camsim99): Most of these documentation things to the files of flags themselves
+
 # TODO(camsim99): note switches.whatever where you can get the whole vision
 ## Flags that can be set from the command line:
 | Flag     | Description |
