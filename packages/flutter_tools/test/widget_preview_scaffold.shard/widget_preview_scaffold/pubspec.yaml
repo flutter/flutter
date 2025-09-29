@@ -12,9 +12,10 @@ dependencies:
   flutter_test:
     sdk: flutter
   # These will be replaced with proper constraints after the template is hydrated.
-  dtd: 2.5.1
+  dtd: 4.0.0
   flutter_lints: 6.0.0
-  google_fonts: 6.3.1
+  google_fonts: 6.3.2
+  json_rpc_2: 3.0.3
   path: 1.9.1
   stack_trace: 1.12.1
   url_launcher: 6.3.2
@@ -30,7 +31,6 @@ dependencies:
   file: 7.0.1
   http: 1.5.0
   http_parser: 4.1.2
-  json_rpc_2: 3.0.3
   leak_tracker: 11.0.2
   leak_tracker_flutter_testing: 3.0.10
   leak_tracker_testing: 3.0.2
@@ -61,5 +61,4 @@ dependencies:
 
 flutter:
   uses-material-design: true
-
-# PUBSPEC CHECKSUM: c9leee
+# PUBSPEC CHECKSUM: fdcqn8
