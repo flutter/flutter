@@ -32,6 +32,11 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ## Flutter 3.35 Changes
 
+### [3.35.5](https://github.com/flutter/flutter/releases/tag/3.35.5)
+
+ - [flutter/172105](https://github.com/flutter/flutter/issues/172105) Flutter view no longer hangs after multiple transitions on iOS add-to-app.
+ - [flutter/173106](https://github.com/flutter/flutter/issues/173106) Multiple cursors display correctly.
+
 ### [3.35.4](https://github.com/flutter/flutter/releases/tag/3.35.4)
 - [flutter/173474](https://github.com/flutter/flutter/issues/173474) - On all platforms PlatformDispatchers.instance.engineId no longer returns null after hot restart.
 - [flutter/174513](https://github.com/flutter/flutter/issues/174513) - On iOS 26, fix a bug where platform view's gesture blocking fails and lets touches on Flutter views fall through to underlying platform views.
