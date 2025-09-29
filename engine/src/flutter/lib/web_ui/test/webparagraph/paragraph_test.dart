@@ -137,7 +137,7 @@ Future<void> testMain() async {
     await matchGoldenFile('web_paragraph_canvas_mix1_multilined_ltr.png', region: region);
   });
 
-  test('Draw WebParagraph LTR/RTL 1 Line in rtl', () async {
+  test('Draw WebParagraph LTR/RTL multi Line with RTL default left aligned', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
@@ -158,7 +158,7 @@ Future<void> testMain() async {
     await matchGoldenFile('web_paragraph_canvas_mix1_multilined_rtl.png', region: region);
   });
 
-  test('Draw WebParagraph LTR/RTL multi Line with LTR by default', () async {
+  test('Draw WebParagraph LTR/RTL multi Line with LTR left aligned', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
@@ -181,7 +181,7 @@ Future<void> testMain() async {
     await matchGoldenFile('web_paragraph_canvas_mix_multilined_ltr.png', region: region);
   });
 
-  test('Draw WebParagraph LTR/RTL multi Line with RTL by default', () async {
+  test('Draw WebParagraph LTR/RTL multi Line with RTL right aligned', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);

@@ -196,7 +196,6 @@ class CanvasKitPainter extends Painter {
     final WebTextStyle style = webTextCluster.style;
     // TODO(mdebbar=>jlavrova): Check `style.color` first.
     paintContext.fillStyle = style.foreground?.color.toCssString();
-
     // We fill the text cluster into a rectange [0,0,w,h]
     // but we need to shift the y coordinate by the font ascent
     // becase the text is drawn at the ascent, not at 0

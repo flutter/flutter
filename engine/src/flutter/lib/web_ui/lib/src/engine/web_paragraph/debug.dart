@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 class WebParagraphDebug {
-  static bool logging = false;
-  static bool apiLogging = false;
+  static bool logging = true;
+  static bool apiLogging = true;
 
   static void log(String arg) {
     assert(() {

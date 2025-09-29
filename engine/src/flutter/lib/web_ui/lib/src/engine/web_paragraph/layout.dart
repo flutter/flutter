@@ -1204,7 +1204,6 @@ class TextLine {
 extension DomTextMetricsExtension on DomTextMetrics {
   ui.Rect getSelection(int start, int end) {
     final List<DomRectReadOnly> rects = getSelectionRects(start, end);
-
     double minLeft = rects.first.left;
     double minTop = rects.first.top;
     double maxRight = rects.first.right;

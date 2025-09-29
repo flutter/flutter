@@ -151,7 +151,7 @@ class TextPaint {
     if (WebParagraphDebug.logging) {
       final String text = paragraph.getText1(webTextCluster.start, webTextCluster.end);
       WebParagraphDebug.log(
-        'calculateCluster "$text" ${block.textRange}-${block.span.start} ${block.clusterRange} source: $sourceRect => target: $targetRect',
+        'calculateCluster "$text" webTextCluster.bounds.width=${webTextCluster.bounds.width} clusterOffset.dx=${clusterOffset.dx}+webTextCluster.advance.left=${webTextCluster.advance.left}+lineOffset.dx=${lineOffset.dx}\nsource: $sourceRect => target: $targetRect',
       );
     }
 
@@ -180,7 +180,7 @@ class TextPaint {
     final ui.Rect targetRect = zeroRect
         // TODO(mdebbar=>jlavrova): Can we use `block.advance.left` instead of the cluster? That way
         //                          we don't have to worry about LTR vs RTL to get first cluster.
-        .translate(blockOffset.dx + startCluster.advance.left, blockOffset.dy)
+        .translate(blockOffset.dx + block.advance.left, blockOffset.dy)
         .translate(paragraphOffset.dx, paragraphOffset.dy);
 
     final String text = paragraph.getText(block.textRange);
