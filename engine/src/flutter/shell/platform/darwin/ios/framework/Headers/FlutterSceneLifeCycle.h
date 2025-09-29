@@ -35,13 +35,14 @@ API_AVAILABLE(ios(13.0))
 /**
  * Informs the delegate that a new scene is about to be connected and configured.
  *
- * This corresponds to `-[UISceneDelegate scene:willConnectToSession:options:]`.
+ * This corresponds to `-[UISceneDelegate scene:willConnectToSession:options:]`. `connectionOptions`
+ * may be nil if another plugin has already handled the connection.
  *
  * @return `YES` if this handled the connection.
  */
 - (BOOL)scene:(UIScene*)scene
     willConnectToSession:(UISceneSession*)session
-                 options:(UISceneConnectionOptions*)connectionOptions;
+                 options:(nullable UISceneConnectionOptions*)connectionOptions;
 
 - (void)sceneDidDisconnect:(UIScene*)scene;
 

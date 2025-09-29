@@ -99,7 +99,7 @@ public class MyPlugin: NSObject, FlutterPlugin, FlutterSceneLifeCycleDelegate {
   public func scene(
     _ scene: UIScene,
     willConnectTo session: UISceneSession,
-    options connectionOptions: UIScene.ConnectionOptions
+    options connectionOptions: UIScene.ConnectionOptions?
   ) -> Bool {
     events.append("sceneWillConnect")
     return true

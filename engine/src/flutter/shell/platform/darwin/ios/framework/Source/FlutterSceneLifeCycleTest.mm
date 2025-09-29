@@ -660,9 +660,7 @@ FLUTTER_ASSERT_ARC
   OCMVerify(times(1), [mockPlugin scene:mockScene
                           willConnectToSession:mockSession
                                        options:mockOptions]);
-  OCMVerify(times(0), [mockPlugin2 scene:mockScene
-                          willConnectToSession:mockSession
-                                       options:mockOptions]);
+  OCMVerify(times(1), [mockPlugin2 scene:mockScene willConnectToSession:mockSession options:nil]);
 }
 
 - (void)testEngineSceneDidDisconnect {

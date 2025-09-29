@@ -282,15 +282,20 @@ FLUTTER_ASSERT_ARC
 - (BOOL)scene:(UIScene*)scene
     willConnectToSession:(UISceneSession*)session
                  options:(UISceneConnectionOptions*)connectionOptions {
+  BOOL consumedByPlugin = NO;
   for (NSObject<FlutterSceneLifeCycleDelegate>* delegate in _delegates.allObjects) {
     if ([delegate respondsToSelector:_cmd]) {
-      if ([delegate scene:scene willConnectToSession:session options:connectionOptions]) {
+      // If this event has already been consumed by a plugin, send the event with nil options.
+      if (consumedByPlugin) {
+        [delegate scene:scene willConnectToSession:session options:nil];
+        continue;
+      } else if ([delegate scene:scene willConnectToSession:session options:connectionOptions]) {
         // Only allow one plugin to process this event.
-        return YES;
+        consumedByPlugin = YES;
       }
     }
   }
-  return NO;
+  return consumedByPlugin;
 }
 
 - (void)sceneDidDisconnect:(UIScene*)scene {
