@@ -24,22 +24,6 @@ using GaussianBlurFragmentShader = GaussianBlurPipeline::FragmentShader;
 
 namespace {
 
-GaussianBlurPipeline::FragmentShader::KernelSamples CloneKernelSamples(
-    KernelSamples parameters) {
-  GaussianBlurPipeline::FragmentShader::KernelSamples result = {};
-  result.sample_count = parameters.sample_count;
-  FML_DCHECK(result.sample_count <= kGaussianBlurMaxKernelSize);
-  static_assert(sizeof(result.sample_data) ==
-                sizeof(std::array<Vector4, kGaussianBlurMaxKernelSize>));
-
-  for (int i = 0; i < result.sample_count; i++) {
-    result.sample_data[i].x = parameters.samples[i].uv_offset.x;
-    result.sample_data[i].y = parameters.samples[i].uv_offset.y;
-    result.sample_data[i].z = parameters.samples[i].coefficient;
-  }
-  return result;
-}
-
 constexpr Scalar kMaxSigma = 500.0f;
 
 SamplerDescriptor MakeSamplerDescriptor(MinMagFilter filter,
@@ -213,14 +197,16 @@ Scalar FloorToDivisible(Scalar val, Scalar divisor) {
   }
 }
 
-Rect ExpandToDivisible(const Rect& rect, Scalar divisor) {
-  Rect result = Rect::MakeLTRB(FloorToDivisible(rect.GetLeft(), divisor),
-                               FloorToDivisible(rect.GetTop(), divisor),
-                               rect.GetRight(), rect.GetBottom());
-  result = Rect::MakeXYWH(result.GetX(), result.GetY(),
-                          CeilToDivisible(result.GetWidth(), divisor),
-                          CeilToDivisible(result.GetHeight(), divisor));
-  return result;
+Rect RectFromRatio(Rect target, Rect ref) {
+  auto ratio = [](Scalar target, Scalar start, Scalar end) {
+    return (target - start) / (end - start);
+  };
+
+  return Rect::MakeLTRB(
+      ratio(target.GetLeft(), ref.GetLeft(), ref.GetRight()),
+      ratio(target.GetTop(), ref.GetTop(), ref.GetBottom()),
+      ratio(target.GetRight(), ref.GetLeft(), ref.GetRight()),
+      ratio(target.GetBottom(), ref.GetTop(), ref.GetBottom()));
 }
 
 struct DownsamplePassArgs {
@@ -246,6 +232,22 @@ struct DownsamplePassArgs {
   /// the case with backdrop filters.
   Matrix transform;
 };
+
+GaussianBlurPipeline::FragmentShader::KernelSamples CloneKernelSamples(
+    KernelSamples parameters) {
+  GaussianBlurPipeline::FragmentShader::KernelSamples result = {};
+  result.sample_count = parameters.sample_count;
+  FML_DCHECK(result.sample_count <= kGaussianBlurMaxKernelSize);
+  static_assert(sizeof(result.sample_data) ==
+                sizeof(std::array<Vector4, kGaussianBlurMaxKernelSize>));
+
+  for (int i = 0; i < result.sample_count; i++) {
+    result.sample_data[i].x = parameters.samples[i].uv_offset.x;
+    result.sample_data[i].y = parameters.samples[i].uv_offset.y;
+    result.sample_data[i].z = parameters.samples[i].coefficient;
+  }
+  return result;
+}
 
 /// Calculates info required for the down-sampling pass.
 DownsamplePassArgs CalculateDownsamplePassArgs(
@@ -273,18 +275,6 @@ DownsamplePassArgs CalculateDownsamplePassArgs(
   //   !input_snapshot->GetCoverage()->Expand(-local_padding)
   //     .Contains(coverage_hint.value()))
 
-  auto ratiod_rect = [](Rect target, Rect ref) {
-    auto ratio = [](Scalar target, Scalar start, Scalar end) {
-      return (target - start) / (end - start);
-    };
-
-    return Rect::MakeLTRB(
-        ratio(target.GetLeft(), ref.GetLeft(), ref.GetRight()),
-        ratio(target.GetTop(), ref.GetTop(), ref.GetBottom()),
-        ratio(target.GetRight(), ref.GetLeft(), ref.GetRight()),
-        ratio(target.GetBottom(), ref.GetTop(), ref.GetBottom()));
-  };
-
   std::optional<Rect> snapshot_coverage = input_snapshot.GetCoverage();
   if (input_snapshot.transform.Equals(snapshot_entity.GetTransform()) &&
       source_expanded_coverage_hint.has_value() &&
@@ -299,8 +289,15 @@ DownsamplePassArgs CalculateDownsamplePassArgs(
     // The region we cut out will be aligned with the down-sample divisor to
     // avoid pixel alignment problems that create shimmering.
     int32_t divisor = std::round(1.0f / desired_scalar);
-    Rect aligned_coverage_hint =
-        ExpandToDivisible(source_expanded_coverage_hint.value(), divisor);
+    Rect aligned_coverage_hint = Rect::MakeLTRB(
+        FloorToDivisible(source_expanded_coverage_hint->GetLeft(), divisor),
+        FloorToDivisible(source_expanded_coverage_hint->GetTop(), divisor),
+        source_expanded_coverage_hint->GetRight(),
+        source_expanded_coverage_hint->GetBottom());
+    aligned_coverage_hint = Rect::MakeXYWH(
+        aligned_coverage_hint.GetX(), aligned_coverage_hint.GetY(),
+        CeilToDivisible(aligned_coverage_hint.GetWidth(), divisor),
+        CeilToDivisible(aligned_coverage_hint.GetHeight(), divisor));
     ISize source_size = ISize(aligned_coverage_hint.GetSize().width,
                               aligned_coverage_hint.GetSize().height);
     Vector2 downsampled_size = source_size * downsample_scalar;
@@ -316,12 +313,12 @@ DownsamplePassArgs CalculateDownsamplePassArgs(
     std::optional<Rect> downsample_uv_bounds;
     std::optional<Rect> blur_uv_bounds;
     if (source_bounds.has_value()) {
-      downsample_uv_bounds = ratiod_rect(
+      downsample_uv_bounds = RectFromRatio(
           source_bounds.value(),
           input_snapshot.GetCoverage().value_or(Rect::MakeWH(1, 1)));
       blur_uv_bounds =
-          ratiod_rect(source_bounds->Shift(source_bounds->GetLeftTop()),
-                      aligned_coverage_hint);
+          RectFromRatio(source_bounds->Shift(source_bounds->GetLeftTop()),
+                        aligned_coverage_hint);
     }
     return {
         .subpass_size = subpass_size,
@@ -363,12 +360,12 @@ DownsamplePassArgs CalculateDownsamplePassArgs(
     std::optional<Rect> blur_uv_bounds;
     std::optional<Rect> downsample_uv_bounds;
     if (source_bounds.has_value()) {
-      blur_uv_bounds = ratiod_rect(
+      blur_uv_bounds = RectFromRatio(
           source_bounds.value(),
           source_rect_padded.TransformBounds(input_snapshot.transform));
       downsample_uv_bounds =
-          ratiod_rect(source_bounds.value(),
-                      source_rect.TransformBounds(input_snapshot.transform));
+          RectFromRatio(source_bounds.value(),
+                        source_rect.TransformBounds(input_snapshot.transform));
     }
     return {
         .subpass_size = subpass_size,
@@ -719,6 +716,7 @@ Entity ApplyBlurStyle(FilterContents::BlurStyle blur_style,
     }
   }
 }
+
 }  // namespace
 
 GaussianBlurFilterContents::GaussianBlurFilterContents(
@@ -819,10 +817,6 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
   // Apply as much of the desired padding as possible from the source. This may
   // be ignored so must be accounted for in the downsample pass by adding a
   // transparent gutter.
-  //
-  // This effectively consistutes a coordinate space shift by `local_padding`,
-  // which must be applied to `bounds_`, since it resides in the same coordinate
-  // space as `coverage_hint`.
   std::optional<Rect> expanded_coverage_hint;
   if (coverage_hint.has_value()) {
     expanded_coverage_hint = coverage_hint->Expand(blur_info.local_padding);
