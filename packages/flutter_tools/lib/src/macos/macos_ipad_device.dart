@@ -159,7 +159,10 @@ class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
   static var allowDiscovery = false;
 
   @override
-  Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
+  Future<List<Device>> pollingGetDevices({
+    Duration? timeout,
+    bool forWirelessDiscovery = false,
+  }) async {
     if (!canListAnything) {
       return const <Device>[];
     }

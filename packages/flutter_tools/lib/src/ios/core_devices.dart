@@ -381,9 +381,14 @@ class IOSCoreDeviceControl {
       return (null, null);
     }
 
-    final validTimeout = timeout.inSeconds < _minimumTimeoutInSeconds
-        ? const Duration(seconds: _minimumTimeoutInSeconds)
-        : timeout;
+    var validTimeout = timeout;
+    if (timeout.inSeconds < _minimumTimeoutInSeconds) {
+      _logger.printError(
+        'Timeout of ${timeout.inSeconds} seconds is below the minimum timeout value '
+        'for devicectl. Changing the timeout to the minimum value of $_minimumTimeoutInSeconds.',
+      );
+      validTimeout = const Duration(seconds: _minimumTimeoutInSeconds);
+    }
     final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('core_devices.');
     final File output = tempDirectory.childFile('core_device_list.json');
     output.createSync();
@@ -413,11 +418,6 @@ class IOSCoreDeviceControl {
     required int exitCode,
     required List<String> command,
   }) async {
-    if (exitCode != 0) {
-      _logger.printError('devicectl exited with a non-zero exit code: $exitCode');
-      return <Object?>[];
-    }
-
     var isToolPossiblyShutdown = false;
     if (_fileSystem is ErrorHandlingFileSystem) {
       final FileSystem delegate = _fileSystem.fileSystem;
@@ -438,6 +438,11 @@ class IOSCoreDeviceControl {
       _logger.printError('The process exited with code $exitCode');
       throw StateError('Expected the file ${output.path} to exist but it did not');
     } else if (isToolPossiblyShutdown) {
+      return <Object?>[];
+    }
+
+    if (exitCode != 0) {
+      _logger.printError('devicectl exited with a non-zero exit code: $exitCode');
       return <Object?>[];
     }
 

@@ -76,7 +76,11 @@ class ProxiedDevices extends PollingDeviceDiscovery {
       _filterDevices(_devices ?? await discoverDevices(), filter);
 
   @override
-  Future<List<Device>> discoverDevices({Duration? timeout, DeviceDiscoveryFilter? filter}) async {
+  Future<List<Device>> discoverDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+    bool forWirelessDiscovery = false,
+  }) async {
     final List<Map<String, Object?>> discoveredDevices = _cast<List<dynamic>>(
       await connection.sendRequest('device.discoverDevices'),
     ).cast<Map<String, Object?>>();
@@ -96,7 +100,8 @@ class ProxiedDevices extends PollingDeviceDiscovery {
   }
 
   @override
-  Future<List<Device>> pollingGetDevices({Duration? timeout}) => discoverDevices(timeout: timeout);
+  Future<List<Device>> pollingGetDevices({Duration? timeout, bool forWirelessDiscovery = false}) =>
+      discoverDevices(timeout: timeout, forWirelessDiscovery: forWirelessDiscovery);
 
   @override
   List<String> get wellKnownIds => const <String>[];

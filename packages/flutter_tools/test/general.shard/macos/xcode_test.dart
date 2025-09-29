@@ -8,7 +8,7 @@ import 'dart:io' as io;
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/io.dart' show ProcessException;
+import 'package:flutter_tools/src/base/io.dart' show Process, ProcessException;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
@@ -27,6 +27,7 @@ import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import '../../integration.shard/test_utils.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
@@ -631,7 +632,10 @@ void main() {
           cache: Cache.test(processManager: FakeProcessManager.any()),
           iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
           fileSystem: fileSystem,
-          coreDeviceControl: FakeIOSCoreDeviceControl(),
+          coreDeviceControl: FakeIOSCoreDeviceControl(
+            processManager: fakeProcessManager,
+            fileSystem: fileSystem,
+          ),
           xcodeDebug: FakeXcodeDebug(),
           analytics: const NoOpAnalytics(),
           shutdownHooks: FakeShutdownHooks(),
@@ -664,7 +668,10 @@ void main() {
         cache: Cache.test(processManager: FakeProcessManager.any()),
         iproxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: MemoryFileSystem.test(),
-        coreDeviceControl: FakeIOSCoreDeviceControl(),
+        coreDeviceControl: FakeIOSCoreDeviceControl(
+          fileSystem: fileSystem,
+          processManager: processManager,
+        ),
         xcodeDebug: FakeXcodeDebug(),
         analytics: const NoOpAnalytics(),
         shutdownHooks: shutdownHooks,
@@ -694,7 +701,10 @@ void main() {
       setUp(() {
         xcode = Xcode.test(processManager: FakeProcessManager.any());
         fileSystem = MemoryFileSystem.test();
-        coreDeviceControl = FakeIOSCoreDeviceControl();
+        coreDeviceControl = FakeIOSCoreDeviceControl(
+          processManager: fakeProcessManager,
+          fileSystem: fileSystem,
+        );
         fakeAnalytics = getInitializedFakeAnalyticsInstance(
           fs: fileSystem,
           fakeFlutterVersion: FakeFlutterVersion(),
@@ -1547,7 +1557,14 @@ void main() {
                   expectedOutputFile.createSync(recursive: true);
                 },
                 completer: processCompleter,
-                onProcess: (FakeProcess p) => process = p,
+                onProcess: (FakeProcess p) {
+                  process = p;
+                  process.exitCode.whenComplete(() {
+                    if (!processCompleter.isCompleted) {
+                      processCompleter.complete();
+                    }
+                  });
+                },
               ),
             ]);
 
@@ -1955,6 +1972,12 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 class FakeXcodeDebug extends Fake implements XcodeDebug {}
 
 class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
+  FakeIOSCoreDeviceControl({required ProcessManager processManager, required FileSystem fileSystem})
+    : _processManager = processManager,
+      _fileSystem = fileSystem;
+
+  final ProcessManager _processManager;
+  final FileSystem _fileSystem;
   var devices = <FakeIOSCoreDevice>[];
 
   @override
@@ -1964,6 +1987,35 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
 
   @override
   void stopListDevices() {}
+
+  @override
+  Future<(Process?, File?)> startListCoreDevices({
+    Duration timeout = const Duration(seconds: 2),
+  }) async {
+    final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('core_devices.');
+    final File output = tempDirectory.childFile('core_device_list.json');
+    output.createSync();
+    final Process process = await _processManager.start(<String>[
+      'xcrun',
+      'devicectl',
+      'list',
+      'devices',
+      '--timeout',
+      '5',
+      '--json-output',
+      output.path,
+    ]);
+    return (process, output);
+  }
+
+  @override
+  Future<List<Object?>> getCoreDevicesFromHandledProcess({
+    required File output,
+    required int exitCode,
+    required List<String> command,
+  }) async {
+    return <Object?>[];
+  }
 }
 
 class FakeIOSCoreDevice extends Fake implements IOSCoreDevice {

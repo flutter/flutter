@@ -1090,6 +1090,9 @@ class FakeXcdevice extends Fake implements XCDevice {
   void dispose() {}
 
   @override
+  void cancelWirelessDiscovery() {}
+
+  @override
   Future<List<String>> getDiagnostics() async {
     return diagnostics;
   }
