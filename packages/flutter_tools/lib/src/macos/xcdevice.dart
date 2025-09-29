@@ -538,8 +538,10 @@ class XCDevice {
           }),
         );
 
-        final int exitCode = await process.exitCode;
+        await Future.any<void>(<Future<void>>[process.exitCode, cancelCompleter.future]);
+
         if (!cancelCompleter.isCompleted) {
+          final int exitCode = await process.exitCode;
           final List<Object?> coreDeviceObjects = await _coreDeviceControl
               .getCoreDevicesFromHandledProcess(
                 output: output,
