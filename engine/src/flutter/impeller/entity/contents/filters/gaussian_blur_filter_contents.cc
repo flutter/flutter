@@ -441,72 +441,73 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
       edge = 3.0;
       ratio = 1.0f / 16.0f;
     }
-    ContentContext::SubpassCallback subpass_callback = [&](const ContentContext&
-                                                               renderer,
-                                                           RenderPass& pass) {
-      HostBuffer& data_host_buffer = renderer.GetTransientsDataBuffer();
+    ContentContext::SubpassCallback subpass_callback =
+        [&](const ContentContext& renderer, RenderPass& pass) {
+          HostBuffer& data_host_buffer = renderer.GetTransientsDataBuffer();
 
-      pass.SetCommandLabel("Gaussian blur downsample");
-      auto pipeline_options = OptionsFromPass(pass);
-      pipeline_options.primitive_type = PrimitiveType::kTriangleStrip;
-      // If the blur is unbounded, then the pipeline is selected based on
-      // whether the platform supports decal tile mode: The GLES backend
-      // conditionally supports decal tile mode, while decal is always
-      // supported for Vulkan and Metal.
-      //
-      // If the blur is bounded, software decal is always needed.
-      if ((renderer.GetDeviceCapabilities().SupportsDecalSamplerAddressMode() ||
-           tile_mode != Entity::TileMode::kDecal) &&
-          !pass_args.downsample_uv_bounds.has_value()) {
-        pass.SetPipeline(renderer.GetDownsamplePipeline(pipeline_options));
-      } else {
-        pass.SetPipeline(
-            renderer.GetDownsampleSoftwareDecalPipeline(pipeline_options));
-        Rect bounds_rect =
-            pass_args.downsample_uv_bounds.value_or(Rect::MakeLTRB(0, 0, 1, 1));
-        Vector4 bounds_vector = {bounds_rect.GetLeft(), bounds_rect.GetTop(),
-                                 bounds_rect.GetRight(),
-                                 bounds_rect.GetBottom()};
-        TextureDownsampleSoftwareDecalFragmentShader::DecalInfo decal_info;
-        decal_info.bounds_uv = bounds_vector;
-        TextureDownsampleSoftwareDecalFragmentShader::BindDecalInfo(
-            pass, data_host_buffer.EmplaceUniform(decal_info));
-      }
+          pass.SetCommandLabel("Gaussian blur downsample");
+          auto pipeline_options = OptionsFromPass(pass);
+          pipeline_options.primitive_type = PrimitiveType::kTriangleStrip;
+          // If the blur is unbounded, then the pipeline is selected based on
+          // whether the platform supports decal tile mode: The GLES backend
+          // conditionally supports decal tile mode, while decal is always
+          // supported for Vulkan and Metal.
+          //
+          // If the blur is bounded, software decal is always needed.
+          bool need_software_decal = pass_args.blur_uv_bounds.has_value() ||
+                                     (!renderer.GetDeviceCapabilities()
+                                           .SupportsDecalSamplerAddressMode() &&
+                                      tile_mode == Entity::TileMode::kDecal);
+          if (!need_software_decal) {
+            pass.SetPipeline(renderer.GetDownsamplePipeline(pipeline_options));
+          } else {
+            pass.SetPipeline(
+                renderer.GetDownsampleSoftwareDecalPipeline(pipeline_options));
+            Rect bounds_rect = pass_args.downsample_uv_bounds.value_or(
+                Rect::MakeLTRB(0, 0, 1, 1));
+            Vector4 bounds_vector = {
+                bounds_rect.GetLeft(), bounds_rect.GetTop(),
+                bounds_rect.GetRight(), bounds_rect.GetBottom()};
+            TextureDownsampleSoftwareDecalFragmentShader::DecalInfo decal_info;
+            decal_info.bounds_uv = bounds_vector;
+            TextureDownsampleSoftwareDecalFragmentShader::BindDecalInfo(
+                pass, data_host_buffer.EmplaceUniform(decal_info));
+          }
 
-      TextureFillVertexShader::FrameInfo frame_info;
-      frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
-      frame_info.texture_sampler_y_coord_scale =
-          input_texture->GetYCoordScale();
+          TextureFillVertexShader::FrameInfo frame_info;
+          frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
+          frame_info.texture_sampler_y_coord_scale =
+              input_texture->GetYCoordScale();
 
-      TextureDownsampleFragmentShader::FragInfo frag_info;
-      frag_info.edge = edge;
-      frag_info.ratio = ratio;
-      frag_info.pixel_size = Vector2(1.0f / Size(input_texture->GetSize()));
+          TextureDownsampleFragmentShader::FragInfo frag_info;
+          frag_info.edge = edge;
+          frag_info.ratio = ratio;
+          frag_info.pixel_size = Vector2(1.0f / Size(input_texture->GetSize()));
 
-      const Quad& uvs = pass_args.uvs;
-      std::array<VS::PerVertexData, 4> vertices = {
-          VS::PerVertexData{Point(0, 0), uvs[0]},
-          VS::PerVertexData{Point(1, 0), uvs[1]},
-          VS::PerVertexData{Point(0, 1), uvs[2]},
-          VS::PerVertexData{Point(1, 1), uvs[3]},
-      };
-      pass.SetVertexBuffer(CreateVertexBuffer(vertices, data_host_buffer));
+          const Quad& uvs = pass_args.uvs;
+          std::array<VS::PerVertexData, 4> vertices = {
+              VS::PerVertexData{Point(0, 0), uvs[0]},
+              VS::PerVertexData{Point(1, 0), uvs[1]},
+              VS::PerVertexData{Point(0, 1), uvs[2]},
+              VS::PerVertexData{Point(1, 1), uvs[3]},
+          };
+          pass.SetVertexBuffer(CreateVertexBuffer(vertices, data_host_buffer));
 
-      SamplerDescriptor linear_sampler_descriptor = sampler_descriptor;
-      SetTileMode(&linear_sampler_descriptor, renderer, tile_mode);
-      linear_sampler_descriptor.mag_filter = MinMagFilter::kLinear;
-      linear_sampler_descriptor.min_filter = MinMagFilter::kLinear;
-      TextureFillVertexShader::BindFrameInfo(
-          pass, data_host_buffer.EmplaceUniform(frame_info));
-      TextureDownsampleFragmentShader::BindFragInfo(
-          pass, data_host_buffer.EmplaceUniform(frag_info));
-      TextureDownsampleFragmentShader::BindTextureSampler(
-          pass, input_texture,
-          renderer.GetContext()->GetSamplerLibrary()->GetSampler(
-              linear_sampler_descriptor));
+          SamplerDescriptor linear_sampler_descriptor = sampler_descriptor;
+          SetTileMode(&linear_sampler_descriptor, renderer, tile_mode);
+          linear_sampler_descriptor.mag_filter = MinMagFilter::kLinear;
+          linear_sampler_descriptor.min_filter = MinMagFilter::kLinear;
+          TextureFillVertexShader::BindFrameInfo(
+              pass, data_host_buffer.EmplaceUniform(frame_info));
+          TextureDownsampleFragmentShader::BindFragInfo(
+              pass, data_host_buffer.EmplaceUniform(frag_info));
+          TextureDownsampleFragmentShader::BindTextureSampler(
+              pass, input_texture,
+              renderer.GetContext()->GetSamplerLibrary()->GetSampler(
+                  linear_sampler_descriptor));
 
-      return pass.Draw().ok();
-    };
+          return pass.Draw().ok();
+        };
     return renderer.MakeSubpass("Gaussian Blur Filter", pass_args.subpass_size,
                                 command_buffer, subpass_callback,
                                 /*msaa_enabled=*/false,
