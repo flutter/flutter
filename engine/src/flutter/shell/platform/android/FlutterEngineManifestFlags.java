@@ -68,7 +68,8 @@ public final class FlutterEngineManifestFlags {
   public static final Flag ENABLE_VULKAN_VALIDATION =
       new Flag("EnableVulkanValidation", false, FlagType.BOOLEAN);
   public static final Flag IMPELLER_BACKEND = new Flag("ImpellerBackend", true, FlagType.VALUE);
-  // TODO(camsim99): this one only in flutter loader before weirdly. Also make sure this converts correctly.
+  // TODO(camsim99): this one only in flutter loader before weirdly. Also make sure this converts
+  // correctly.
   public static final Flag ENABLE_OPENGL_GPU_TRACING =
       new Flag("EnableOpenGLGPUTracing", false, FlagType.BOOLEAN);
   public static final Flag ENABLE_VULKAN_GPU_TRACING =
@@ -85,30 +86,19 @@ public final class FlutterEngineManifestFlags {
       new Flag("ImpellerLazyShaderInitialization", true, FlagType.BOOLEAN);
   public static final Flag IMPELLER_ANTIALIAS_LINES =
       new Flag("ImpellerAntialiasLines", true, FlagType.BOOLEAN);
-  public static final Flag LEAK_VM = new Flag("LeakVM", false, FlagType.BOOLEAN);
 
-  // public static final List<Flag> ALL_FLAGS = Collections.unmodifiableList(Arrays.asList(
-  //     VM_SERVICE_PORT,
-  //     USE_TEST_FONTS,
-  //     ENABLE_SOFTWARE_RENDERING,
-  //     SKIA_DETERMINISTIC_RENDERING,
-  //     AOT_SHARED_LIBRARY_NAME,
-  //     ISOLATE_SNAPSHOT_DATA,
-  //     FLUTTER_ASSETS_DIR,
-  //     AUTOMATICALLY_REGISTER_PLUGINS,
-  //     OLD_GEN_HEAP_SIZE,
-  //     ENABLE_IMPELLER,
-  //     ENABLE_VULKAN_VALIDATION,
-  //     IMPELLER_BACKEND,
-  //     ENABLE_OPENGL_GPU_TRACING,
-  //     ENABLE_VULKAN_GPU_TRACING,
-  //     DISABLE_MERGED_PLATFORM_UI_THREAD,
-  //     ENABLE_SURFACE_CONTROL,
-  //     ENABLE_FLUTTER_GPU,
-  //     IMPELLER_LAZY_SHADER_INITIALIZATION,
-  //     IMPELLER_ANTIALIAS_LINES,
-  //     LEAK_VM
-  // ));
+  /**
+   * Set whether leave or clean up the VM after the last shell shuts down. It can be set from app's
+   * meta-data in <application /> in AndroidManifest.xml. Set it to true in to leave the Dart VM,
+   * set it to false to destroy VM.
+   *
+   * <p>If your want to let your app destroy the last shell and re-create shells more quickly, set
+   * it to true, otherwise if you want to clean up the memory of the leak VM, set it to false.
+   *
+   * <p>TODO(eggfly): Should it be set to false by default?
+   * https://github.com/flutter/flutter/issues/96843
+   */
+  public static final Flag LEAK_VM = new Flag("LeakVM", false, FlagType.BOOLEAN);
 
   /**
    * Looks up a Flag by its metaDataKey.

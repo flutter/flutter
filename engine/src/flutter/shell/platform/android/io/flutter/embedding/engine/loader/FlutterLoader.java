@@ -57,19 +57,6 @@ public class FlutterLoader {
   private static final String IMPELLER_ANTIALIAS_LINES =
       "io.flutter.embedding.android.ImpellerAntialiasLines";
 
-  /**
-   * Set whether leave or clean up the VM after the last shell shuts down. It can be set from app's
-   * meta-data in <application /> in AndroidManifest.xml. Set it to true in to leave the Dart VM,
-   * set it to false to destroy VM.
-   *
-   * <p>If your want to let your app destroy the last shell and re-create shells more quickly, set
-   * it to true, otherwise if you want to clean up the memory of the leak VM, set it to false.
-   *
-   * <p>TODO(eggfly): Should it be set to false by default?
-   * https://github.com/flutter/flutter/issues/96843
-   */
-  private static final String LEAK_VM_META_DATA_KEY = "io.flutter.embedding.android.LeakVM";
-
   // Flags to only be set internally by default. Matches values in flutter::switches.
   static final String SNAPSHOT_ASSET_PATH_KEY = "snapshot-asset-path";
   static final String VM_SNAPSHOT_DATA_KEY = "vm-snapshot-data";
@@ -333,6 +320,7 @@ public class FlutterLoader {
 
       Bundle applicationMetaData = applicationInfo.metaData;
       boolean oldGenHeapSizeSet = false;
+      boolean isLeakVMSet = false;
 
       for (String metadataKey : applicationMetaData.keySet()) {
         FlutterEngineManifestFlags.Flag flag =
@@ -344,9 +332,12 @@ public class FlutterLoader {
             // Mark if old gen heap size is set to track whether or not to set default internally.
             if (flag == FlutterEngineManifestFlags.OLD_GEN_HEAP_SIZE) {
               oldGenHeapSizeSet = true;
+            } else if (flag == FlutterEngineManifestFlags.LEAK_VM) {
+              isLeakVMSet = true;
             } else if (flag == FlutterEngineManifestFlags.DISABLE_MERGED_PLATFORM_UI_THREAD) {
               throw new IllegalArgumentException(
-              FlutterEngineManifestFlags.DISABLE_MERGED_PLATFORM_UI_THREAD.metaDataKey + " is no longer allowed.");
+                  FlutterEngineManifestFlags.DISABLE_MERGED_PLATFORM_UI_THREAD.metaDataKey
+                      + " is no longer allowed.");
             } else if (flag == FlutterEngineManifestFlags.AOT_SHARED_LIBRARY_NAME) {
               // Perform security check for path containing application's compiled Dart code and
               // potentially user-provided compiled native code.
@@ -446,14 +437,9 @@ public class FlutterLoader {
 
       shellArgs.add("--prefetched-default-font-manager");
 
-
-
-      final String leakVM = isLeakVM(metaData) ? "true" : "false";
-      shellArgs.add("--leak-vm=" + leakVM);
-
-
-      // TODO(camsim9): here. handle isLeavkVM above.
-
+      if (!isLeakVMSet) {
+        shellArgs.add("--leak-vm=true");
+      }
 
       long initTimeMillis = SystemClock.uptimeMillis() - initStartTimestampMillis;
 
