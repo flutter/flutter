@@ -1686,7 +1686,6 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         debugLabel: 'Navigator Scope',
         autofocus: true,
         child: Navigator(
-          handlesBacksWhenNested: false,
           clipBehavior: Clip.none,
           restorationScopeId: 'nav',
           key: _navigator,
