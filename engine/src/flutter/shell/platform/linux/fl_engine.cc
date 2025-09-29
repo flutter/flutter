@@ -1476,7 +1476,8 @@ void fl_engine_update_accessibility_features(FlEngine* self, int32_t flags) {
   }
 
   if (self->embedder_api.UpdateAccessibilityFeatures(
-          self->engine, static_cast<FlutterAccessibilityFeature>(flags))) {
+          self->engine, static_cast<FlutterAccessibilityFeature>(flags)) !=
+      kSuccess) {
     g_warning("Failed to update accessibility features");
   }
 }
