@@ -359,14 +359,14 @@ DownsamplePassArgs CalculateDownsamplePassArgs(
         Vector2(subpass_size) / source_rect_padded.GetSize();
     Quad uvs = GaussianBlurFilterContents::CalculateUVs(
         input, snapshot_entity, source_rect_padded, input_snapshot_size);
-    std::optional<Rect> blur_uv_bounds;
     std::optional<Rect> downsample_uv_bounds;
+    std::optional<Rect> blur_uv_bounds;
     if (source_bounds.has_value()) {
-      blur_uv_bounds = MakeReferenceUVs(
-          source_rect_padded.TransformBounds(input_snapshot.transform),
-          source_bounds.value());
       downsample_uv_bounds = MakeReferenceUVs(
           source_rect.TransformBounds(input_snapshot.transform),
+          source_bounds.value());
+      blur_uv_bounds = MakeReferenceUVs(
+          source_rect_padded.TransformBounds(input_snapshot.transform),
           source_bounds.value());
     }
     return {
