@@ -129,7 +129,7 @@ classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 - jvmTarget should use JavaVersion.<SOMEVERSION>.toString() or there should be a comment explaining why.
 
 ```
-// Good
+// Correct configuration
 compileOptions {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
