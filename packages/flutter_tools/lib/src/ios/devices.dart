@@ -494,10 +494,12 @@ class IOSDevice extends Device {
       );
     }
 
+    // The minimum iOS version where wireless debugging is known to be slow.
+    const int minSlowWirelessDebugIOSVersion = 26;
     if (isWirelesslyConnected &&
         debuggingOptions.debuggingEnabled &&
         sdkVersion != null &&
-        sdkVersion!.major >= 26) {
+        sdkVersion!.major >= minSlowWirelessDebugIOSVersion) {
       final warningMessage =
           'Wireless debugging on iOS ${sdkVersion!.major} may be slower than expected. '
           'For better performance, consider using a wired (USB) connection.';
