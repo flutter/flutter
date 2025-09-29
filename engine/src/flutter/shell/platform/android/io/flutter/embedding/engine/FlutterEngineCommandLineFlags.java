@@ -44,32 +44,6 @@ public class FlutterEngineCommandLineFlags {
   public static final String VM_SERVICE_PORT_FLAG = "--vm-service-port=";
   public static final String DART_FLAGS_FLAG = "--dart-flags=";
 
-  public static final List<String> ALL_FLAGS =
-      Collections.unmodifiableList(
-          Arrays.asList(
-              TRACE_STARTUP_FLAG,
-              START_PAUSED_FLAG,
-              DISABLE_SERVICE_AUTH_CODES_FLAG,
-              ENDLESS_TRACE_BUFFER_FLAG,
-              USE_TEST_FONTS_FLAG,
-              ENABLE_DART_PROFILING_FLAG,
-              PROFILE_STARTUP_FLAG,
-              ENABLE_SOFTWARE_RENDERING_FLAG,
-              SKIA_DETERMINISTIC_RENDERING_FLAG,
-              TRACE_SKIA_FLAG,
-              TRACE_SKIA_ALLOWLIST_FLAG,
-              TRACE_SYSTRACE_FLAG,
-              TRACE_TO_FILE_FLAG,
-              PROFILE_MICROTASKS_FLAG,
-              ENABLE_IMPELLER_FLAG,
-              ENABLE_VULKAN_VALIDATION_FLAG,
-              DUMP_SHADER_SKP_ON_SHADER_COMPILATION_FLAG,
-              CACHE_SKSL_FLAG,
-              PURGE_PERSISTENT_CACHE_FLAG,
-              VERBOSE_LOGGING_FLAG,
-              VM_SERVICE_PORT_FLAG,
-              DART_FLAGS_FLAG));
-
   @NonNull private Set<String> args;
 
   /**
