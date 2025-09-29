@@ -1019,7 +1019,7 @@ config("optimize") {
   }
 
   lto_flags = []
-  if (enable_lto && (is_ios || is_mac || is_android || is_fuchsia || is_wasm)) {
+  if (enable_lto && (is_linux || is_ios || is_mac || is_android || is_fuchsia || is_wasm)) {
     lto_flags += [ "-flto" ]
   }
 
