@@ -1590,6 +1590,10 @@ typedef struct {
   FlutterPlatformViewIdentifier platform_view_id;
   /// A textual tooltip attached to the node.
   const char* tooltip;
+  /// The heading level for this node. A value of 0 means the node is not a
+  /// heading; higher values (1, 2, …) indicate the heading rank, with lower
+  /// numbers being higher-level headings.
+  int32_t heading_level;
 } FlutterSemanticsNode;
 
 /// A node in the Flutter semantics tree.
@@ -1697,6 +1701,10 @@ typedef struct {
   // The set of semantics flags associated with this node. Prefer to use this
   // over `flags__deprecated__`.
   FlutterSemanticsFlags* flags2;
+  /// The heading level for this node. A value of 0 means the node is not a
+  /// heading; higher values (1, 2, …) indicate the heading rank, with lower
+  /// numbers being higher-level headings.
+  int32_t heading_level;
 } FlutterSemanticsNode2;
 
 /// `FlutterSemanticsCustomAction` ID used as a sentinel to signal the end of a
