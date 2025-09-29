@@ -21,7 +21,7 @@
 #include "flutter/shell/platform/windows/accessibility_bridge_windows.h"
 #include "flutter/shell/platform/windows/compositor_opengl.h"
 #include "flutter/shell/platform/windows/compositor_software.h"
-#include "flutter/shell/platform/windows/display_monitor.h"
+#include "flutter/shell/platform/windows/display_manager.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
 #include "flutter/shell/platform/windows/keyboard_key_channel_handler.h"
 #include "flutter/shell/platform/windows/system_utils.h"
@@ -201,7 +201,7 @@ FlutterWindowsEngine::FlutterWindowsEngine(
       static_cast<egl::GpuPreference>(project_->gpu_preference()));
   window_proc_delegate_manager_ = std::make_unique<WindowProcDelegateManager>();
 
-  display_monitor_ = std::make_shared<DisplayMonitor>(this);
+  display_manager_ = std::make_shared<DisplayManagerWin32>(this);
 
   window_proc_delegate_manager_->RegisterTopLevelWindowProcDelegate(
       [](HWND hwnd, UINT msg, WPARAM wpar, LPARAM lpar, void* user_data,
@@ -210,8 +210,8 @@ FlutterWindowsEngine::FlutterWindowsEngine(
         FlutterWindowsEngine* that =
             static_cast<FlutterWindowsEngine*>(user_data);
 
-        BASE_DCHECK(that->display_monitor_);
-        if (that->display_monitor_->HandleWindowMessage(hwnd, msg, wpar, lpar,
+        BASE_DCHECK(that->display_manager_);
+        if (that->display_manager_->HandleWindowMessage(hwnd, msg, wpar, lpar,
                                                         result)) {
           return true;
         }
@@ -497,7 +497,7 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
     return false;
   }
 
-  display_monitor_->UpdateDisplays();
+  display_manager_->UpdateDisplays();
 
   SendSystemLocales();
 
@@ -1052,8 +1052,8 @@ void FlutterWindowsEngine::OnQuit(std::optional<HWND> hwnd,
 }
 
 void FlutterWindowsEngine::OnDwmCompositionChanged() {
-  if (display_monitor_) {
-    display_monitor_->UpdateDisplays();
+  if (display_manager_) {
+    display_manager_->UpdateDisplays();
   }
 
   std::shared_lock read_lock(views_mutex_);
@@ -1130,11 +1130,11 @@ bool FlutterWindowsEngine::HandleDisplayMonitorMessage(HWND hwnd,
                                                        WPARAM wparam,
                                                        LPARAM lparam,
                                                        LRESULT* result) {
-  if (!display_monitor_) {
+  if (!display_manager_) {
     return false;
   }
 
-  return display_monitor_->HandleWindowMessage(hwnd, message, wparam, lparam,
+  return display_manager_->HandleWindowMessage(hwnd, message, wparam, lparam,
                                                result);
 }
 
