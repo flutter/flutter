@@ -25,11 +25,15 @@ import 'package:path/path.dart' as path;
 ///
 /// e.g. `../../bin/cache/dart-sdk/bin/dart bin/test_runner.dart test -t module_uiscene_test_ios --local-engine ios_debug_sim_unopt_arm64 --local-engine-host host_debug --task-args destination=/path/to/copy/destination`
 Future<void> main(List<String> args) async {
-  final ArgParser argParser = ArgParser()..addOption('destination');
+  const String kDestination = 'destination';
+  const String kTestName = 'name';
+  final ArgParser argParser = ArgParser()
+    ..addOption(kDestination)
+    ..addOption(kTestName);
 
   await task(() async {
     final ArgResults argResults = argParser.parse(args);
-    final String? destination = argResults.option('destination');
+    final String? destination = argResults.option(kDestination);
     final Directory destinationDir;
     bool destinationOverride = false;
     if (destination != null) {
@@ -42,6 +46,8 @@ Future<void> main(List<String> args) async {
     } else {
       destinationDir = Directory.systemTemp.createTempSync('flutter_module_test.');
     }
+
+    final String? testName = argResults.option(kTestName);
 
     String? simulatorDeviceId;
     final Directory templatesDir = Directory(
@@ -67,14 +73,19 @@ Future<void> main(List<String> args) async {
 
       await testWithNewIOSSimulator('TestAdd2AppSim', (String deviceId) async {
         simulatorDeviceId = deviceId;
-        final Scenarios scenarios = Scenarios(
-          xcodeProjectDir: xcodeProjectDir,
-          templatesDir: templatesDir,
-          pluginDir: pluginDir,
-          appDir: appDir,
-        );
+        final Scenarios scenarios = Scenarios();
         for (final String scenarioName in scenarios.scenarios.keys) {
-          final List<FileReplacements> replacements = scenarios.scenarios[scenarioName]!;
+          if (testName != null && scenarioName != testName) {
+            continue;
+          }
+          final List<FileReplacements> replacements = FileReplacements.fromScenario(
+            scenarios.scenarios[scenarioName]!,
+            templatesDir: templatesDir,
+            xcodeProjectDir: xcodeProjectDir,
+            pluginDir: pluginDir,
+            appDir: appDir,
+          );
+
           for (final FileReplacements replacement in replacements) {
             replacement.replace();
           }
@@ -90,6 +101,13 @@ Future<void> main(List<String> args) async {
           );
           if (result != 0) {
             testFailed = true;
+          }
+
+          // Reset files to original between scenarios unless we're targetting a specific test.
+          if (testName == null) {
+            for (final FileReplacements replacement in replacements) {
+              replacement.reset();
+            }
           }
         }
       });
@@ -208,13 +226,48 @@ class FileReplacements {
 
   final String templatePath;
   final String destinationPath;
+  String? originalContent;
+
+  static List<FileReplacements> fromScenario(
+    Map<String, String> replacementMap, {
+    required Directory templatesDir,
+    required Directory xcodeProjectDir,
+    required Directory pluginDir,
+    required Directory appDir,
+  }) {
+    final List<FileReplacements> replacements = <FileReplacements>[];
+    for (final String source in replacementMap.keys) {
+      final String destination = replacementMap[source]!;
+      final String sourcePath = source.replaceFirst(r'$TEMPLATE_DIR', templatesDir.path);
+      final String destinationPath = destination
+          .replaceFirst(r'$XCODE_PROJ_DIR', xcodeProjectDir.path)
+          .replaceFirst(r'$PLUGIN_DIR', pluginDir.path)
+          .replaceFirst(r'$APP_DIR', appDir.path);
+      replacements.add(FileReplacements(sourcePath, destinationPath));
+    }
+    return replacements;
+  }
 
   void replace() {
     final File templateFile = File(templatePath);
-    if (!File(destinationPath).existsSync()) {
+    final File destinationFile = File(destinationPath);
+    if (!destinationFile.existsSync()) {
       File(destinationPath).createSync(recursive: true);
+    } else {
+      originalContent = destinationFile.readAsStringSync();
     }
     templateFile.copySync(destinationPath);
+  }
+
+  void reset() {
+    final File destinationFile = File(destinationPath);
+    if (originalContent != null) {
+      destinationFile.writeAsStringSync(originalContent!);
+    } else {
+      if (destinationFile.existsSync()) {
+        destinationFile.deleteSync(recursive: true);
+      }
+    }
   }
 }
 
@@ -279,181 +332,102 @@ Future<void> _uploadTestResults({
 enum XcodeProjectType { UIKitSwift, UIKitObjC, SwiftUI }
 
 class Scenarios {
-  Scenarios({
-    required this.templatesDir,
-    required this.xcodeProjectDir,
-    required this.pluginDir,
-    required this.appDir,
-  });
+  Scenarios();
 
-  final Directory templatesDir;
-  final Directory xcodeProjectDir;
-  final Directory pluginDir;
-  final Directory appDir;
-
-  /// A map of scenario names to a list of file replacements.
+  /// A map of scenario names to a map of file replacements.
   ///
   /// Each scenario is a different configuration for testing the Flutter module
   /// in a native iOS app. The file replacements are used to set up the
   /// specific configuration for each scenario.
-  late Map<String, List<FileReplacements>> scenarios = <String, List<FileReplacements>>{
+  late Map<String, Map<String, String>> scenarios = <String, Map<String, String>>{
     // When both the app and the plugin have migrated to scenes, we expect scene events.
-    'AppMigrated-FlutterSceneDelegate-PluginMigrated': <FileReplacements>[
+    'AppMigrated-FlutterSceneDelegate-PluginMigrated': <String, String>{
       ...sharedLifecycleFiles,
-      FileReplacements(
-        path.join(templatesDir.path, 'native', 'SceneDelegate-FlutterSceneDelegate.swift'),
-        path.join(xcodeProjectDir.path, 'xcode_uikit_swift', 'SceneDelegate.swift'),
-      ),
-      FileReplacements(
-        path.join(templatesDir.path, 'flutterplugin', 'ios', 'LifecyclePlugin-migrated.swift'),
-        path.join(pluginDir.path, 'ios', 'Classes', 'MyPlugin.swift'),
-      ),
-      FileReplacements(
-        path.join(templatesDir.path, 'native', 'UITests-SceneEvents.swift'),
-        path.join(
-          xcodeProjectDir.path,
-          'xcode_uikit_swiftUITests',
-          'xcode_uikit_swiftUITests.swift',
-        ),
-      ),
-    ],
+      r'$TEMPLATE_DIR/native/SceneDelegate-FlutterSceneDelegate.swift':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swift/SceneDelegate.swift',
+      r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-migrated.swift':
+          r'$PLUGIN_DIR/ios/Classes/MyPlugin.swift',
+      r'$TEMPLATE_DIR/native/UITests-SceneEvents.swift':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swiftUITests/xcode_uikit_swiftUITests.swift',
+    },
 
     // When the app has migrated but the plugin hasn't, we expect application events to be used as
     // a fallback.
-    'AppMigrated-FlutterSceneDelegate-PluginNotMigrated': <FileReplacements>[
+    'AppMigrated-FlutterSceneDelegate-PluginNotMigrated': <String, String>{
       ...sharedLifecycleFiles,
-      FileReplacements(
-        path.join(templatesDir.path, 'native', 'SceneDelegate-FlutterSceneDelegate.swift'),
-        path.join(xcodeProjectDir.path, 'xcode_uikit_swift', 'SceneDelegate.swift'),
-      ),
-      FileReplacements(
-        path.join(templatesDir.path, 'flutterplugin', 'ios', 'LifecyclePlugin-unmigrated.swift'),
-        path.join(pluginDir.path, 'ios', 'Classes', 'MyPlugin.swift'),
-      ),
-      FileReplacements(
-        path.join(templatesDir.path, 'native', 'UITests-ApplicationEvents-AppMigrated.swift'),
-        path.join(
-          xcodeProjectDir.path,
-          'xcode_uikit_swiftUITests',
-          'xcode_uikit_swiftUITests.swift',
-        ),
-      ),
-    ],
+      r'$TEMPLATE_DIR/native/SceneDelegate-FlutterSceneDelegate.swift':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swift/SceneDelegate.swift',
+      r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-unmigrated.swift':
+          r'$PLUGIN_DIR/ios/Classes/MyPlugin.swift',
+      r'$TEMPLATE_DIR/native/UITests-ApplicationEvents-AppMigrated.swift':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swiftUITests/xcode_uikit_swiftUITests.swift',
+    },
 
     // When both the app and the plugin have migrated to scenes, we expect scene events.
-    'AppMigrated-FlutterSceneLifeCycleProvider-PluginMigrated': <FileReplacements>[
+    'AppMigrated-FlutterSceneLifeCycleProvider-PluginMigrated': <String, String>{
       ...sharedLifecycleFiles,
-      FileReplacements(
-        path.join(templatesDir.path, 'native', 'SceneDelegate-FlutterSceneLifeCycleProvider.swift'),
-        path.join(xcodeProjectDir.path, 'xcode_uikit_swift', 'SceneDelegate.swift'),
-      ),
-      FileReplacements(
-        path.join(templatesDir.path, 'flutterplugin', 'ios', 'LifecyclePlugin-migrated.swift'),
-        path.join(pluginDir.path, 'ios', 'Classes', 'MyPlugin.swift'),
-      ),
-      FileReplacements(
-        path.join(templatesDir.path, 'native', 'UITests-SceneEvents.swift'),
-        path.join(
-          xcodeProjectDir.path,
-          'xcode_uikit_swiftUITests',
-          'xcode_uikit_swiftUITests.swift',
-        ),
-      ),
-    ],
+      r'$TEMPLATE_DIR/native/SceneDelegate-FlutterSceneLifeCycleProvider.swift':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swift/SceneDelegate.swift',
+      r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-migrated.swift':
+          r'$PLUGIN_DIR/ios/Classes/MyPlugin.swift',
+      r'$TEMPLATE_DIR/native/UITests-SceneEvents.swift':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swiftUITests/xcode_uikit_swiftUITests.swift',
+    },
 
     // When the app has migrated but the plugin hasn't, we expect application events to be used as
     // a fallback.
-    'AppMigrated-FlutterSceneLifeCycleProvider-PluginNotMigrated': <FileReplacements>[
+    'AppMigrated-FlutterSceneLifeCycleProvider-PluginNotMigrated': <String, String>{
       ...sharedLifecycleFiles,
-      FileReplacements(
-        path.join(templatesDir.path, 'native', 'SceneDelegate-FlutterSceneLifeCycleProvider.swift'),
-        path.join(xcodeProjectDir.path, 'xcode_uikit_swift', 'SceneDelegate.swift'),
-      ),
-      FileReplacements(
-        path.join(templatesDir.path, 'flutterplugin', 'ios', 'LifecyclePlugin-unmigrated.swift'),
-        path.join(pluginDir.path, 'ios', 'Classes', 'MyPlugin.swift'),
-      ),
-      FileReplacements(
-        path.join(templatesDir.path, 'native', 'UITests-ApplicationEvents-AppMigrated.swift'),
-        path.join(
-          xcodeProjectDir.path,
-          'xcode_uikit_swiftUITests',
-          'xcode_uikit_swiftUITests.swift',
-        ),
-      ),
-    ],
+      r'$TEMPLATE_DIR/native/SceneDelegate-FlutterSceneLifeCycleProvider.swift':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swift/SceneDelegate.swift',
+      r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-unmigrated.swift':
+          r'$PLUGIN_DIR/ios/Classes/MyPlugin.swift',
+      r'$TEMPLATE_DIR/native/UITests-ApplicationEvents-AppMigrated.swift':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swiftUITests/xcode_uikit_swiftUITests.swift',
+    },
 
     // When the app has not migrated, but the plugin supports both, we expect application events.
-    'AppNotMigrated-FlutterSceneDelegate-PluginMigrated': <FileReplacements>[
+    'AppNotMigrated-FlutterSceneDelegate-PluginMigrated': <String, String>{
       ...sharedLifecycleFiles,
-      FileReplacements(
-        path.join(templatesDir.path, 'native', 'Info-unmigrated.plist'),
-        path.join(xcodeProjectDir.path, 'xcode_uikit_swift', 'Info.plist'),
-      ),
-      FileReplacements(
-        path.join(templatesDir.path, 'flutterplugin', 'ios', 'LifecyclePlugin-migrated.swift'),
-        path.join(pluginDir.path, 'ios', 'Classes', 'MyPlugin.swift'),
-      ),
-      FileReplacements(
-        path.join(templatesDir.path, 'native', 'UITests-ApplicationEvents-AppNotMigrated.swift'),
-        path.join(
-          xcodeProjectDir.path,
-          'xcode_uikit_swiftUITests',
-          'xcode_uikit_swiftUITests.swift',
-        ),
-      ),
-    ],
+      r'$TEMPLATE_DIR/native/Info-unmigrated.plist':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swift/Info.plist',
+      r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-migrated.swift':
+          r'$PLUGIN_DIR/ios/Classes/MyPlugin.swift',
+      r'$TEMPLATE_DIR/native/UITests-ApplicationEvents-AppNotMigrated.swift':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swiftUITests/xcode_uikit_swiftUITests.swift',
+    },
 
     // When the app and plugin have not migrated, we expect application events.
-    'AppNotMigrated-FlutterSceneDelegate-PluginNotMigrated': <FileReplacements>[
+    'AppNotMigrated-FlutterSceneDelegate-PluginNotMigrated': <String, String>{
       ...sharedLifecycleFiles,
-      FileReplacements(
-        path.join(templatesDir.path, 'native', 'Info-unmigrated.plist'),
-        path.join(xcodeProjectDir.path, 'xcode_uikit_swift', 'Info.plist'),
-      ),
-      FileReplacements(
-        path.join(templatesDir.path, 'flutterplugin', 'ios', 'LifecyclePlugin-unmigrated.swift'),
-        path.join(pluginDir.path, 'ios', 'Classes', 'MyPlugin.swift'),
-      ),
-      FileReplacements(
-        path.join(templatesDir.path, 'native', 'UITests-ApplicationEvents-AppNotMigrated.swift'),
-        path.join(
-          xcodeProjectDir.path,
-          'xcode_uikit_swiftUITests',
-          'xcode_uikit_swiftUITests.swift',
-        ),
-      ),
-    ],
+      r'$TEMPLATE_DIR/native/Info-unmigrated.plist':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swift/Info.plist',
+      r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-unmigrated.swift':
+          r'$PLUGIN_DIR/ios/Classes/MyPlugin.swift',
+      r'$TEMPLATE_DIR/native/UITests-ApplicationEvents-AppNotMigrated.swift':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swiftUITests/xcode_uikit_swiftUITests.swift',
+    },
   };
 
-  late List<FileReplacements> sharedLifecycleFiles = <FileReplacements>[
-    FileReplacements(
-      path.join(templatesDir.path, 'flutterapp', 'lib', 'main-LifeCycleTest'),
-      path.join(appDir.path, 'lib', 'main.dart'),
-    ),
-    FileReplacements(
-      path.join(templatesDir.path, 'flutterapp', 'pubspec-LifeCycleTest.yaml'),
-      path.join(appDir.path, 'pubspec.yaml'),
-    ),
-    FileReplacements(
-      path.join(templatesDir.path, 'flutterplugin', 'lib', 'lifecycle_plugin'),
-      path.join(pluginDir.path, 'lib', 'my_plugin.dart'),
-    ),
-    FileReplacements(
-      path.join(templatesDir.path, 'flutterplugin', 'lib', 'lifecycle_plugin_method_channel'),
-      path.join(pluginDir.path, 'lib', 'my_plugin_method_channel.dart'),
-    ),
-    FileReplacements(
-      path.join(templatesDir.path, 'flutterplugin', 'lib', 'lifecycle_plugin_platform_interface'),
-      path.join(pluginDir.path, 'lib', 'my_plugin_platform_interface.dart'),
-    ),
-    FileReplacements(
-      path.join(templatesDir.path, 'native', 'AppDelegate-FlutterAppDelegate-FlutterEngine.swift'),
-      path.join(xcodeProjectDir.path, 'xcode_uikit_swift', 'AppDelegate.swift'),
-    ),
-    FileReplacements(
-      path.join(templatesDir.path, 'native', 'ViewController-FlutterEngineFromAppDelegate.swift'),
-      path.join(xcodeProjectDir.path, 'xcode_uikit_swift', 'ViewController.swift'),
-    ),
-  ];
+  late Map<String, String> sharedLifecycleFiles = <String, String>{
+    ...sharedAppLifecycleFiles,
+    ...sharedPluginLifecycleFiles,
+    r'$TEMPLATE_DIR/native/AppDelegate-FlutterAppDelegate-FlutterEngine.swift':
+        r'$XCODE_PROJ_DIR/xcode_uikit_swift/AppDelegate.swift',
+    r'$TEMPLATE_DIR/native/ViewController-FlutterEngineFromAppDelegate.swift':
+        r'$XCODE_PROJ_DIR/xcode_uikit_swift/ViewController.swift',
+  };
+
+  late Map<String, String> sharedAppLifecycleFiles = <String, String>{
+    r'$TEMPLATE_DIR/flutterapp/lib/main-LifeCycleTest': r'$APP_DIR/lib/main.dart',
+    r'$TEMPLATE_DIR/flutterapp/pubspec-LifeCycleTest.yaml': r'$APP_DIR/pubspec.yaml',
+  };
+
+  late Map<String, String> sharedPluginLifecycleFiles = <String, String>{
+    r'$TEMPLATE_DIR/flutterplugin/lib/lifecycle_plugin': r'$PLUGIN_DIR/lib/my_plugin.dart',
+    r'$TEMPLATE_DIR/flutterplugin/lib/lifecycle_plugin_method_channel':
+        r'$PLUGIN_DIR/lib/my_plugin_method_channel.dart',
+    r'$TEMPLATE_DIR/flutterplugin/lib/lifecycle_plugin_platform_interface':
+        r'$PLUGIN_DIR/lib/my_plugin_platform_interface.dart',
+  };
 }

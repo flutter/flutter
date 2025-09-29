@@ -14,9 +14,11 @@
  */
 @interface FlutterPluginSceneLifeCycleDelegate ()
 
-- (void)addFlutterEngine:(FlutterEngine*)engine scene:(UIScene*)scene;
+- (void)addFlutterEngine:(FlutterEngine*)engine;
 
 - (void)removeFlutterEngine:(FlutterEngine*)engine;
+
+- (void)engine:(FlutterEngine*)engine receivedConnectNotificationFor:(UIScene*)scene;
 
 @end
 
@@ -29,8 +31,9 @@
 
 #pragma mark - Connecting and disconnecting the scene
 
-- (void)flutterViewDidConnectTo:(UIScene*)scene
-                        options:(UISceneConnectionOptions*)connectionOptions;
+- (BOOL)scene:(UIScene*)scene
+    willConnectToSession:(UISceneSession*)session
+                 options:(UISceneConnectionOptions*)connectionOptions;
 
 - (void)sceneDidDisconnect:(UIScene*)scene;
 

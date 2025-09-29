@@ -10,9 +10,11 @@
 
 // Category to add test-only visibility.
 @interface FlutterPluginSceneLifeCycleDelegate (Test)
+@property(nonatomic, strong) UISceneConnectionOptions* connectionOptions;
 @property(nonatomic, strong) NSPointerArray* engines;
 
 - (void)updateEnginesInScene:(UIScene*)scene;
+
 @end
 
 @interface FlutterAppDelegate (Test)

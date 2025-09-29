@@ -96,11 +96,13 @@ public class MyPlugin: NSObject, FlutterPlugin, FlutterSceneLifeCycleDelegate {
 
   // MARK: - Scene Events
 
-  public func flutterViewDidConnect(
-    to scene: UIScene,
+  public func scene(
+    _ scene: UIScene,
+    willConnectTo session: UISceneSession,
     options connectionOptions: UIScene.ConnectionOptions
-  ) {
-    events.append("flutterViewDidConnect")
+  ) -> Bool {
+    events.append("sceneWillConnect")
+    return true
   }
 
   public func sceneDidDisconnect(_ scene: UIScene) {
@@ -126,19 +128,24 @@ public class MyPlugin: NSObject, FlutterPlugin, FlutterSceneLifeCycleDelegate {
   public func scene(
     _ scene: UIScene,
     openURLContexts URLContexts: Set<UIOpenURLContext>
-  ) {
+  ) -> Bool {
     events.append("sceneOpenURLContexts")
+    return true
   }
 
-  public func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
+  public func scene(_ scene: UIScene, continue userActivity: NSUserActivity)
+    -> Bool
+  {
     events.append("sceneContinueUserActivity")
+    return true
   }
 
   public func windowScene(
     _ windowScene: UIWindowScene,
     performActionFor shortcutItem: UIApplicationShortcutItem,
     completionHandler: @escaping (Bool) -> Void
-  ) {
+  ) -> Bool {
     events.append("scenePerformActionFor")
+    return true
   }
 }

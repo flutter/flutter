@@ -250,6 +250,10 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 
 - (void)setUpLifecycleNotifications:(NSNotificationCenter*)center {
   // If the application is not available, use the scene for lifecycle notifications if available.
+  [center addObserver:self
+             selector:@selector(sceneWillConnect:)
+                 name:UISceneWillConnectNotification
+               object:nil];
   if (!FlutterSharedApplication.isAvailable) {
     [center addObserver:self
                selector:@selector(sceneWillEnterForeground:)
@@ -269,6 +273,23 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
              selector:@selector(applicationDidEnterBackground:)
                  name:UIApplicationDidEnterBackgroundNotification
                object:nil];
+}
+
+- (void)sceneWillConnect:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
+  UIScene* scene = notification.object;
+  if (!FlutterSharedApplication.application.supportsMultipleScenes) {
+    // Since there is only one scene, we can assume that the FlutterEngine is within this scene and
+    // register it to the scene.
+    // The FlutterEngine needs to be registered with the scene when the scene connects in order for
+    // plugins to receive the `scene:willConnectToSession:options` event.
+    // If we want to support multi-window on iPad later, we may need to add a way for deveopers to
+    // register their FlutterEngine to the scene manually during this event.
+    if ([scene.delegate conformsToProtocol:@protocol(FlutterSceneLifeCycleProvider)]) {
+      NSObject<FlutterSceneLifeCycleProvider>* sceneProvider =
+          (NSObject<FlutterSceneLifeCycleProvider>*)scene.delegate;
+      [sceneProvider.sceneLifeCycleDelegate engine:self receivedConnectNotificationFor:scene];
+    }
+  }
 }
 
 - (void)recreatePlatformViewsController {
@@ -1524,7 +1545,6 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 - (NSObject<FlutterBinaryMessenger>*)messenger {
   return _flutterEngine.binaryMessenger;
 }
-
 - (NSObject<FlutterTextureRegistry>*)textures {
   return _flutterEngine.textureRegistry;
 }

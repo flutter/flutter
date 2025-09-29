@@ -15,6 +15,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Test.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifeCycle_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
@@ -503,6 +504,26 @@ FLUTTER_ASSERT_ARC
       }));
   XCTAssertFalse(gpuDisabled);
   [mockBundle stopMocking];
+}
+
+- (void)testLifeCycleNotificationSceneWillConnect {
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+  [engine run];
+  id mockScene = OCMClassMock([UIWindowScene class]);
+  id mockLifecycleProvider = OCMProtocolMock(@protocol(FlutterSceneLifeCycleProvider));
+  id mockLifecycleDelegate = OCMClassMock([FlutterPluginSceneLifeCycleDelegate class]);
+  OCMStub([mockScene delegate]).andReturn(mockLifecycleProvider);
+  OCMStub([mockLifecycleProvider sceneLifeCycleDelegate]).andReturn(mockLifecycleDelegate);
+
+  NSNotification* sceneNotification =
+      [NSNotification notificationWithName:UISceneWillConnectNotification
+                                    object:mockScene
+                                  userInfo:nil];
+
+  [NSNotificationCenter.defaultCenter postNotification:sceneNotification];
+  OCMVerify(times(1), [mockLifecycleDelegate engine:engine
+                          receivedConnectNotificationFor:mockScene]);
 }
 
 - (void)testSpawnsShareGpuContext {

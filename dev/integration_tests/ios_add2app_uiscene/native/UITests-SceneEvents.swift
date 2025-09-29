@@ -19,7 +19,7 @@ final class xcode_uikit_swiftUITests: XCTestCase {
     button.tap()
 
     let expectedStartEvents = [
-      "applicationDidFinishLaunchingWithOptions", "flutterViewDidConnect",
+      "applicationDidFinishLaunchingWithOptions", "sceneWillConnect",
       "sceneWillEnterForeground", "sceneDidBecomeActive",
     ]
     let startEventsPredicate = NSPredicate(
@@ -38,7 +38,7 @@ final class xcode_uikit_swiftUITests: XCTestCase {
     button.tap()
 
     let expectedEventsAfterBackgroundAndReactivate = [
-      "applicationDidFinishLaunchingWithOptions", "flutterViewDidConnect",
+      "applicationDidFinishLaunchingWithOptions", "sceneWillConnect",
       "sceneWillEnterForeground", "sceneDidBecomeActive",
       "sceneWillResignActive", "sceneDidEnterBackground",
       "sceneWillEnterForeground", "sceneDidBecomeActive",

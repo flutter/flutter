@@ -33,15 +33,15 @@ API_AVAILABLE(ios(13.0))
 #pragma mark - Connecting and disconnecting the scene
 
 /**
- * A Flutter-specific equivalent of `-[UISceneDelegate scene:willConnectToSession:options:]`.
+ * Informs the delegate that a new scene is about to be connected and configured.
  *
- * This method is called when a `FlutterViewController`'s view is able to access the scene.
+ * This corresponds to `-[UISceneDelegate scene:willConnectToSession:options:]`.
  *
- * @param scene The scene that is being connected.
- * @param connectionOptions The options that were passed to the scene.
+ * @return `YES` if this handled the connection.
  */
-- (void)flutterViewDidConnectTo:(UIScene*)scene
-                        options:(UISceneConnectionOptions*)connectionOptions;
+- (BOOL)scene:(UIScene*)scene
+    willConnectToSession:(UISceneSession*)session
+                 options:(UISceneConnectionOptions*)connectionOptions;
 
 - (void)sceneDidDisconnect:(UIScene*)scene;
 
@@ -60,27 +60,34 @@ API_AVAILABLE(ios(13.0))
 #pragma mark - Opening URLs
 
 /**
- * Called if this has been registered for `UIWindowScene` callbacks.
+ * Asks the delegate to open one or more URLs.
  *
- * @return `YES` if this handles any url.
+ * This corresponds to `-[UISceneDelegate scene:openURLContexts:]`.
+ *
+ * @return `YES` if this handled one or more of the URLs.
  */
 - (BOOL)scene:(UIScene*)scene openURLContexts:(NSSet<UIOpenURLContext*>*)URLContexts;
 
 #pragma mark - Continuing user activities
 
 /**
- * Called if this has been registered for `UIWindowScene` callbacks.
+ * Tells the delegate that the scene is continuing a user activity.
  *
- * @return `YES` if this handles the request.
+ * This corresponds to `-[UISceneDelegate scene:continueUserActivity:]`.
+ *
+ * @return `YES` if this handled the activity.
  */
 - (BOOL)scene:(UIScene*)scene continueUserActivity:(NSUserActivity*)userActivity;
 
 #pragma mark - Performing tasks
 
 /**
- * Called if this has been registered for `UIWindowScene` callbacks.
+ * Tells the delegate that the user has selected a home screen quick action.
  *
- * @return `YES` if this handles the request.
+ * This corresponds to `-[UIWindowSceneDelegate
+ * windowScene:performActionForShortcutItem:completionHandler:]`.
+ *
+ * @return `YES` if this handled the shortcut.
  */
 - (BOOL)windowScene:(UIWindowScene*)windowScene
     performActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
@@ -101,7 +108,13 @@ API_AVAILABLE(ios(13.0))
 
 #pragma mark - Connecting and disconnecting the scene
 
-- (void)scene:(UIScene*)scene
+/**
+ * Calls all plugins registered for `UIWindowScene` callbacks in order of registration until
+ * a plugin handles the request.
+ *
+ * @return `YES` if any plugin handles the request.
+ */
+- (BOOL)scene:(UIScene*)scene
     willConnectToSession:(UISceneSession*)session
                  options:(UISceneConnectionOptions*)connectionOptions;
 

@@ -33,7 +33,7 @@ FLUTTER_ASSERT_ARC
   return self;
 }
 
-- (void)addFlutterEngine:(FlutterEngine*)engine scene:(UIScene*)scene {
+- (void)addFlutterEngine:(FlutterEngine*)engine {
   // Check if the engine is already in the array to avoid duplicates.
   if ([self.engines.allObjects containsObject:engine]) {
     return;
@@ -47,8 +47,6 @@ FLUTTER_ASSERT_ARC
   // As a workaround, we mutate it first. See: http://www.openradar.me/15396578
   [self.engines addPointer:nil];
   [self.engines compact];
-
-  [engine.sceneLifeCycleDelegate flutterViewDidConnectTo:scene options:self.connectionOptions];
 }
 
 - (void)removeFlutterEngine:(FlutterEngine*)engine {
@@ -89,7 +87,7 @@ FLUTTER_ASSERT_ARC
       if ([actualScene.delegate conformsToProtocol:@protocol(FlutterSceneLifeCycleProvider)]) {
         id<FlutterSceneLifeCycleProvider> lifeCycleProvider =
             (id<FlutterSceneLifeCycleProvider>)actualScene.delegate;
-        [lifeCycleProvider.sceneLifeCycleDelegate addFlutterEngine:engine scene:actualScene];
+        [lifeCycleProvider.sceneLifeCycleDelegate addFlutterEngine:engine];
       }
       continue;
     }
@@ -114,10 +112,33 @@ FLUTTER_ASSERT_ARC
 
 #pragma mark - Connecting and disconnecting the scene
 
-- (void)scene:(UIScene*)scene
+- (void)engine:(FlutterEngine*)engine receivedConnectNotificationFor:(UIScene*)scene {
+  // Connection options may be nil if the notification was received before the
+  // `scene:willConnectToSession:options:` event. In which case, we can wait for the actual event.
+  [self addFlutterEngine:engine];
+  if (self.connectionOptions != nil) {
+    [self scene:scene willConnectToSession:scene.session options:self.connectionOptions];
+  }
+}
+
+- (BOOL)scene:(UIScene*)scene
     willConnectToSession:(UISceneSession*)session
                  options:(UISceneConnectionOptions*)connectionOptions {
   self.connectionOptions = connectionOptions;
+
+  [self updateEnginesInScene:scene];
+
+  BOOL consumedByPlugin = NO;
+  for (FlutterEngine* engine in _engines.allObjects) {
+    BOOL result = [engine.sceneLifeCycleDelegate scene:scene
+                                  willConnectToSession:session
+                                               options:connectionOptions];
+    if (result) {
+      consumedByPlugin = YES;
+    }
+  }
+  return consumedByPlugin;
+  // There is no application equivalent for this event and therefore no fallback.
 }
 
 - (void)sceneDidDisconnect:(UIScene*)scene {
@@ -258,13 +279,18 @@ FLUTTER_ASSERT_ARC
 
 #pragma mark - Connecting and disconnecting the scene
 
-- (void)flutterViewDidConnectTo:(UIScene*)scene
-                        options:(UISceneConnectionOptions*)connectionOptions {
+- (BOOL)scene:(UIScene*)scene
+    willConnectToSession:(UISceneSession*)session
+                 options:(UISceneConnectionOptions*)connectionOptions {
   for (NSObject<FlutterSceneLifeCycleDelegate>* delegate in _delegates.allObjects) {
     if ([delegate respondsToSelector:_cmd]) {
-      [delegate flutterViewDidConnectTo:scene options:connectionOptions];
+      if ([delegate scene:scene willConnectToSession:session options:connectionOptions]) {
+        // Only allow one plugin to process this event.
+        return YES;
+      }
     }
   }
+  return NO;
 }
 
 - (void)sceneDidDisconnect:(UIScene*)scene {

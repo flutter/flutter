@@ -45,7 +45,7 @@
   id connectionOptions = OCMClassMock([UISceneConnectionOptions class]);
 
   FlutterSceneDelegate* sceneDelegate = [[FlutterSceneDelegate alloc] init];
-  id mockSceneDelegate = OCMPartialMock(sceneDelegate);
+  FlutterSceneDelegate* mockSceneDelegate = OCMPartialMock(sceneDelegate);
   OCMStub([mockSceneDelegate moveRootViewControllerFrom:[OCMArg any] to:[OCMArg any]]);
 
   [mockSceneDelegate scene:scene willConnectToSession:session options:connectionOptions];
@@ -65,7 +65,7 @@
   id connectionOptions = OCMClassMock([UISceneConnectionOptions class]);
 
   FlutterSceneDelegate* sceneDelegate = [[FlutterSceneDelegate alloc] init];
-  id mockSceneDelegate = OCMPartialMock(sceneDelegate);
+  FlutterSceneDelegate* mockSceneDelegate = OCMPartialMock(sceneDelegate);
   OCMStub([mockSceneDelegate moveRootViewControllerFrom:[OCMArg any] to:[OCMArg any]]);
 
   [mockSceneDelegate scene:scene willConnectToSession:session options:connectionOptions];
@@ -86,11 +86,13 @@
   id session = OCMClassMock([UISceneSession class]);
   id connectionOptions = OCMClassMock([UISceneConnectionOptions class]);
 
-  [mockSceneDelegate scene:scene willConnectToSession:session options:connectionOptions];
+  [(FlutterSceneDelegate*)mockSceneDelegate scene:scene
+                             willConnectToSession:session
+                                          options:connectionOptions];
 
-  OCMVerify(times(1), [mockLifecycleDelegate scene:scene
-                              willConnectToSession:session
-                                           options:connectionOptions]);
+  OCMVerify(times(1), [(FlutterSceneDelegate*)mockLifecycleDelegate scene:scene
+                                                     willConnectToSession:session
+                                                                  options:connectionOptions]);
 }
 
 - (void)testSceneDidDisconnect {
