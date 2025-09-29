@@ -461,16 +461,14 @@ mixin class DialogWindowControllerDelegate {
 ///         preferredConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
 ///         title: 'Example Window',
 ///       ),
-///       child: MaterialApp(home: Container(
-///          child: DialogWindow(
-///              controller: DialogWindowController(
-///                  preferredSize: const Size(400, 300),
-///                  parent: WidgetsBinding.instance.platformDispatcher.views.first,
-///                  title: 'Example Dialog'
-///             ),
-///             child: const Text('Hello, World!')
-///          )
-///       )),
+///       child: MaterialApp(home: DialogWindow(
+///           controller: DialogWindowController(
+///               preferredSize: const Size(400, 300),
+///               parent: WidgetsBinding.instance.platformDispatcher.views.first,
+///               title: 'Example Dialog'
+///           ),
+///           child: const Text('Hello, World!')
+///       ),
 ///     ),
 ///   );
 /// }
@@ -753,16 +751,14 @@ class RegularWindow extends StatelessWidget {
 ///         preferredConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
 ///         title: 'Example Window',
 ///       ),
-///       child: MaterialApp(home: Container(
-///          child: DialogWindow(
-///              controller: DialogWindowController(
-///                  preferredSize: const Size(400, 300),
-///                  parent: WidgetsBinding.instance.platformDispatcher.views.first,
-///                  title: 'Example Dialog'
-///             ),
-///             child: const Text('Hello, World!')
-///          )
-///       )),
+///       child: MaterialApp(home: DialogWindow(
+///           controller: DialogWindowController(
+///               preferredSize: const Size(400, 300),
+///               parent: WidgetsBinding.instance.platformDispatcher.views.first,
+///               title: 'Example Dialog'
+///           ),
+///           child: const Text('Hello, World!')
+///       ),
 ///     ),
 ///   );
 /// }
