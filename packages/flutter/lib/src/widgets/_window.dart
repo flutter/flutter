@@ -404,7 +404,7 @@ mixin class DialogWindowControllerDelegate {
   ///
   /// * [onWindowDestroyed], which is invoked after the window is closed.
   @internal
-  void onWindowCloseRequested(RegularWindowController controller) {
+  void onWindowCloseRequested(DialogWindowController controller) {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
@@ -464,9 +464,9 @@ mixin class DialogWindowControllerDelegate {
 ///       child: MaterialApp(home: Container(
 ///          child: DialogWindow(
 ///              controller: DialogWindowController(
-///                  size: WindowSizing.size(const Size(400, 300)),
+///                  preferredSize: const Size(400, 300),
 ///                  parent: WidgetsBinding.instance.platformDispatcher.views.first,
-///                  title: 'Example Dialog
+///                  title: 'Example Dialog'
 ///             ),
 ///             child: const Text('Hello, World!')
 ///          )
@@ -756,9 +756,9 @@ class RegularWindow extends StatelessWidget {
 ///       child: MaterialApp(home: Container(
 ///          child: DialogWindow(
 ///              controller: DialogWindowController(
-///                  size: WindowSizing.size(const Size(400, 300)),
+///                  preferredSize: const Size(400, 300),
 ///                  parent: WidgetsBinding.instance.platformDispatcher.views.first,
-///                  title: 'Example Dialog
+///                  title: 'Example Dialog'
 ///             ),
 ///             child: const Text('Hello, World!')
 ///          )
