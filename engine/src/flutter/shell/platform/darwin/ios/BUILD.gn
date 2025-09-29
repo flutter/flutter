@@ -193,7 +193,7 @@ source_set("flutter_framework_source") {
 
   deps = [
     ":ios_gpu_configuration",
-    "//flutter/common:common",
+    "//flutter/common",
     "//flutter/common/graphics",
     "//flutter/fml",
     "//flutter/lib/ui",
@@ -204,7 +204,7 @@ source_set("flutter_framework_source") {
     "//flutter/shell/platform/darwin/common:framework_common",
     "//flutter/shell/platform/darwin/graphics",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
-    "//flutter/shell/profiling:profiling",
+    "//flutter/shell/profiling",
     "//flutter/third_party/icu",
     "//flutter/third_party/spring_animation",
   ]
@@ -289,8 +289,8 @@ if (enable_ios_unittests) {
       ":flutter_framework_source",
       ":ios_gpu_configuration",
       ":ios_test_flutter_swift",
-      "//flutter/common:common",
-      "//flutter/lib/ui:ui",
+      "//flutter/common",
+      "//flutter/lib/ui",
       "//flutter/shell/platform/darwin/common:framework_common",
       "//flutter/shell/platform/embedder:embedder_as_internal_library",
       "//flutter/shell/platform/embedder:embedder_test_utils",
