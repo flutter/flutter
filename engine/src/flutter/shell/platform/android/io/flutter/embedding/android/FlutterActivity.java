@@ -49,7 +49,6 @@ import androidx.lifecycle.LifecycleRegistry;
 import io.flutter.Log;
 import io.flutter.embedding.android.FlutterActivityLaunchConfigs.BackgroundMode;
 import io.flutter.embedding.engine.FlutterEngine;
-import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.plugins.activity.ActivityControlSurface;
 import io.flutter.embedding.engine.plugins.util.GeneratedPluginRegister;
 import io.flutter.plugin.platform.PlatformPlugin;
@@ -1034,17 +1033,6 @@ public class FlutterActivity extends Activity
   @NonNull
   public Lifecycle getLifecycle() {
     return lifecycle;
-  }
-
-  /**
-   * {@link FlutterActivityAndFragmentDelegate.Host} method that is used by {@link
-   * FlutterActivityAndFragmentDelegate} to obtain Flutter shell arguments when initializing
-   * Flutter.
-   */
-  @NonNull
-  @Override
-  public FlutterShellArgs getFlutterShellArgs() {
-    return FlutterShellArgs.fromIntent(getIntent());
   }
 
   /**

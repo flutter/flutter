@@ -75,7 +75,7 @@ public final class FlutterEngineManifestFlags {
 
   /**
    * Set whether leave or clean up the VM after the last shell shuts down. It can be set from app's
-   * meta-data in <application /> in AndroidManifest.xml. Set it to true in to leave the Dart VM,
+   * meta-data in the application block in AndroidManifest.xml. Set it to true in to leave the Dart VM,
    * set it to false to destroy VM.
    *
    * <p>If your want to let your app destroy the last shell and re-create shells more quickly, set

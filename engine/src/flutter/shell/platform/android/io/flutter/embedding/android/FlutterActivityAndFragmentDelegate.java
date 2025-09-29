@@ -31,7 +31,6 @@ import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterEngineCache;
 import io.flutter.embedding.engine.FlutterEngineGroup;
 import io.flutter.embedding.engine.FlutterEngineGroupCache;
-import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 import io.flutter.plugin.platform.PlatformPlugin;
@@ -333,7 +332,7 @@ import java.util.List;
 
     FlutterEngineGroup group =
         engineGroup == null
-            ? new FlutterEngineGroup(host.getContext(), host.getFlutterShellArgs().toArray())
+            ? new FlutterEngineGroup(host.getContext())
             : engineGroup;
     flutterEngine =
         group.createAndRunEngine(
@@ -1090,10 +1089,6 @@ import java.util.List;
      */
     @NonNull
     Lifecycle getLifecycle();
-
-    /** Returns the {@link FlutterShellArgs} that should be used when initializing Flutter. */
-    @NonNull
-    FlutterShellArgs getFlutterShellArgs();
 
     /**
      * Returns the ID of a statically cached {@link io.flutter.embedding.engine.FlutterEngine} to
