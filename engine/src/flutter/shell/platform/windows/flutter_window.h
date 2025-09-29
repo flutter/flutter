@@ -9,8 +9,8 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
+#include "flutter/shell/geometry/geometry.h"
 #include "flutter/shell/platform/common/alert_platform_node_delegate.h"
-#include "flutter/shell/platform/common/geometry.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/windows/direct_manipulation.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
