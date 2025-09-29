@@ -78,9 +78,9 @@ workspace:
 
 dependencies:
   _discoveryapis_commons: 1.0.7
-  _fe_analyzer_shared: 88.0.0
+  _fe_analyzer_shared: 89.0.0
   adaptive_breakpoints: 0.1.7
-  analyzer: 8.1.1
+  analyzer: 8.2.0
   animations: 2.0.11
   archive: 3.6.1
   args: 2.7.0
@@ -109,7 +109,7 @@ dependencies:
   frontend_server_client: 4.0.0
   gcloud: 0.8.19
   glob: 2.1.3
-  google_fonts: 6.3.1
+  google_fonts: 6.3.2
   google_identity_services_web: 0.3.3+1
   google_mobile_ads: 5.1.0
   googleapis: 12.0.0
@@ -212,4 +212,4 @@ dependencies:
   pedantic: 1.11.1
   quiver: 3.2.2
   yaml_edit: 2.2.2
-# PUBSPEC CHECKSUM: 39no2u
+# PUBSPEC CHECKSUM: 5pih92
