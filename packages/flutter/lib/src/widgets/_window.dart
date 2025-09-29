@@ -262,7 +262,7 @@ mixin class RegularWindowControllerDelegate {
 /// {@end-tool}
 ///
 /// Children of a [RegularWindow] widget can access the [RegularWindowController]
-/// via the [WindowControllerScope] inherited widget.
+/// via the [WindowScope] inherited widget.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 @internal
@@ -478,7 +478,7 @@ mixin class DialogWindowControllerDelegate {
 /// {@end-tool}
 ///
 /// Children of a [DialogWindow] widget can access the [DialogWindowController]
-/// via the [WindowControllerScope] inherited widget.
+/// via the [WindowScope] inherited widget.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 abstract class DialogWindowController extends BaseWindowController with WindowControllerCommon {
@@ -857,8 +857,8 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
 
   /// Returns the [BaseWindowController] for the window that hosts the given context.
   ///
-  /// {@template flutter.widgets.windowing.windowControllerScope.of}
-  /// If there is no [WindowControllerScope] in scope, this method
+  /// {@template flutter.widgets.windowing.WindowScope.of}
+  /// If there is no [WindowScope] in scope, this method
   /// will throw a [TypeError] exception in release builds, and throws
   /// a descriptive [FlutterError] in debug builds.
   ///
