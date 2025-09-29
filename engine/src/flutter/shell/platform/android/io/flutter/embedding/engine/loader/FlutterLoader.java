@@ -39,8 +39,6 @@ public class FlutterLoader {
 
   // Flags to only be set internally by default. Matches values in flutter::switches.
   static final String SNAPSHOT_ASSET_PATH_KEY = "snapshot-asset-path";
-  static final String VM_SNAPSHOT_DATA_KEY = "vm-snapshot-data";
-  static final String ISOLATE_SNAPSHOT_DATA_KEY = "isolate-snapshot-data";
   static final String AOT_VMSERVICE_SHARED_LIBRARY_NAME = "aot-vmservice-shared-library-name";
 
   // Resource names used for components of the precompiled snapshot.
@@ -322,7 +320,9 @@ public class FlutterLoader {
                   getSafeAotSharedLibraryNameFlag(
                       applicationContext, applicationMetaData.get(metadataKey));
               if (safeAotSharedLibraryNameFlag != null) {
-                shellArgs.add("--aot-shared-library-name=" + safeAotSharedLibraryNameFlag);
+                shellArgs.add(
+                    FlutterEngineManifestFlags.AOT_SHARED_LIBRARY_NAME.toCommandLineFlag(
+                        safeAotSharedLibraryNameFlag));
               } else {
                 // If the library path is not safe, we will skip adding this argument.
                 Log.w(
@@ -336,10 +336,7 @@ public class FlutterLoader {
 
             // TODO(camsim99): check booleans before adding.
             // Add flag automatically if it does not require a security check.
-            String arg = "--" + metadataKey.toCommandLineFlag();
-            if (flag.type == FlagType.VALUE) {
-              arg += "=" + applicationMetaData.get(metadataKey);
-            }
+            String arg = "--" + flag.toCommandLineFlag(applicationMetaData.get(metadataKey));
             shellArgs.add(arg);
           }
         } else {
@@ -361,9 +358,12 @@ public class FlutterLoader {
             result.dataDirPath + File.separator + flutterApplicationInfo.flutterAssetsDir;
         kernelPath = snapshotAssetPath + File.separator + DEFAULT_KERNEL_BLOB;
         shellArgs.add("--" + SNAPSHOT_ASSET_PATH_KEY + "=" + snapshotAssetPath);
-        shellArgs.add("--" + VM_SNAPSHOT_DATA_KEY + "=" + flutterApplicationInfo.vmSnapshotData);
         shellArgs.add(
-            "--" + ISOLATE_SNAPSHOT_DATA_KEY + "=" + flutterApplicationInfo.isolateSnapshotData);
+            FlutterEngineManifestFlags.VM_SNAPSHOT_DATA.toCommandLineFlag(
+                flutterApplicationInfo.vmSnapshotData));
+        shellArgs.add(
+            FlutterEngineManifestFlags.ISOLATE_SNAPSHOT_DATA.toCommandLineFlag(
+                flutterApplicationInfo.isolateSnapshotData));
       } else {
         // Add default AOT shared library name arg. Note that this can overriden by a value
         // set in the manifest.
@@ -401,7 +401,9 @@ public class FlutterLoader {
         ActivityManager.MemoryInfo memInfo = new ActivityManager.MemoryInfo();
         activityManager.getMemoryInfo(memInfo);
         int oldGenHeapSizeMegaBytes = (int) (memInfo.totalMem / 1e6 / 2);
-        shellArgs.add("--old-gen-heap-size=" + oldGenHeapSizeMegaBytes);
+        shellArgs.add(
+            FlutterEngineManifestFlags.OLD_GEN_HEAP_SIZE.toCommandLineFlag(
+                String.valueOf(oldGenHeapSizeMegaBytes)));
       }
 
       DisplayMetrics displayMetrics = applicationContext.getResources().getDisplayMetrics();
@@ -415,7 +417,7 @@ public class FlutterLoader {
       shellArgs.add("--prefetched-default-font-manager");
 
       if (!isLeakVMSet) {
-        shellArgs.add("--leak-vm=true");
+        shellArgs.add(FlutterEngineManifestFlags.LEAK_VM.toCommandLineFlag(true));
       }
 
       long initTimeMillis = SystemClock.uptimeMillis() - initStartTimestampMillis;
