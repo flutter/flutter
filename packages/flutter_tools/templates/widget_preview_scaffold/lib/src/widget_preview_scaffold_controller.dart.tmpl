@@ -228,7 +228,9 @@ class _WidgetPreviewScaffoldInspectorService with WidgetInspectorService {
           kColumn: location.column,
         });
       }
-      dtdServices.navigateToCode(location!);
+      if (location != null) {
+        dtdServices.navigateToCode(location);
+      }
     }
     super.postEvent(eventKind, eventData, stream: stream);
   }
