@@ -79,15 +79,14 @@ Future<void> main(List<String> args) async {
       );
 
       bool testFailed = false;
+      await testWithNewIOSSimulator('TestAdd2AppSim', (String deviceId) async {
+        for (final XcodeProjectType xcodeProjectType in projectTypesToTest) {
+          final (String xcodeProjectName, Directory xcodeProjectDir) = await _createNativeApp(
+            destinationDir: destinationDir,
+            templatesDir: templatesDir,
+            xcodeProjectType: xcodeProjectType,
+          );
 
-      for (final XcodeProjectType xcodeProjectType in projectTypesToTest) {
-        final (String xcodeProjectName, Directory xcodeProjectDir) = await _createNativeApp(
-          destinationDir: destinationDir,
-          templatesDir: templatesDir,
-          xcodeProjectType: xcodeProjectType,
-        );
-
-        await testWithNewIOSSimulator('TestAdd2AppSim', (String deviceId) async {
           simulatorDeviceId = deviceId;
           final Scenarios scenarios = Scenarios();
           final Map<String, Map<String, String>> scenariosMap = scenarios.scenarios(
@@ -130,8 +129,8 @@ Future<void> main(List<String> args) async {
               }
             }
           }
-        });
-      }
+        }
+      });
 
       if (testFailed) {
         return TaskResult.failure(

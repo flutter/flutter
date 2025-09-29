@@ -5,6 +5,7 @@
 #import <Foundation/Foundation.h>
 #import <OCMock/OCMock.h>
 #import <XCTest/XCTest.h>
+#include <objc/NSObject.h>
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPluginAppLifeCycleDelegate_internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifeCycle_Internal.h"
@@ -12,6 +13,25 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 
 FLUTTER_ASSERT_ARC
+
+@interface FlutterSwiftUIAppSceneDelegate : NSObject
+
+@property(nonatomic, strong) FlutterPluginSceneLifeCycleDelegate* sceneLifeCycleDelegate;
+
+@end
+
+@implementation FlutterSwiftUIAppSceneDelegate
+
+@synthesize sceneLifeCycleDelegate = _sceneLifeCycleDelegate;
+
+- (instancetype)init {
+  if (self = [super init]) {
+    _sceneLifeCycleDelegate = [[FlutterPluginSceneLifeCycleDelegate alloc] init];
+  }
+  return self;
+}
+
+@end
 
 @interface FlutterSceneLifecycleTest : XCTestCase
 @end
@@ -799,4 +819,15 @@ FLUTTER_ASSERT_ARC
                                      completionHandler:handler]);
 }
 
+- (void)testFlutterPluginSceneLifeCycleDelegateFromScene {
+  id mockScene = OCMClassMock([UIWindowScene class]);
+  id mockSceneDelegate = OCMClassMock([FlutterSwiftUIAppSceneDelegate class]);
+  id mockSceneLifeCycleDelegate = OCMClassMock([FlutterPluginSceneLifeCycleDelegate class]);
+
+  OCMStub([mockScene delegate]).andReturn(mockSceneDelegate);
+  OCMStub([mockSceneDelegate sceneLifeCycleDelegate]).andReturn(mockSceneLifeCycleDelegate);
+
+  XCTAssertEqual([FlutterPluginSceneLifeCycleDelegate fromScene:mockScene],
+                 mockSceneLifeCycleDelegate);
+}
 @end
