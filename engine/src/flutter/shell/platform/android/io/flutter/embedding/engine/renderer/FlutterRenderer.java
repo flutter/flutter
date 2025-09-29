@@ -102,6 +102,9 @@ public class FlutterRenderer implements TextureRegistry {
   /**
    * Restores {@code ImageReaderSurfaceProducer}s that were previously notified to be destroyed due
    * to a call to {@code onTrimMemory} as part of an {@code onResume} app lifecycle event.
+   *
+   * <p>All {@code FlutterActivity}s and {@code FlutterFragment}s are expected to call this {@code
+   * onResume} to ensure surface producers are restored when the app returns to the foreground.
    */
   public void restoreSurfaceProducers() {
     Log.v(TAG, "restoreSurfaceProducers called; notifying SurfaceProducers");
