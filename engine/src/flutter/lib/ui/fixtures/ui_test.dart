@@ -425,6 +425,7 @@ void sendSemanticsUpdateWithIsLink() {
     tooltip: "tooltip",
     textDirection: TextDirection.ltr,
     transform: transform,
+    hitTestTransform: transform,
     childrenInTraversalOrder: childrenInTraversalOrder,
     childrenInHitTestOrder: childrenInHitTestOrder,
     additionalActions: additionalActions,
