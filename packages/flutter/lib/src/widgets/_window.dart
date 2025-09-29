@@ -468,9 +468,9 @@ mixin class DialogWindowControllerDelegate {
 ///               title: 'Example Dialog'
 ///           ),
 ///           child: const Text('Hello, World!')
-///       ),
-///     ),
-///   );
+///       )),
+///     );
+///   )
 /// }
 /// ```
 /// {@end-tool}
@@ -758,9 +758,9 @@ class RegularWindow extends StatelessWidget {
 ///               title: 'Example Dialog'
 ///           ),
 ///           child: const Text('Hello, World!')
-///       ),
-///     ),
-///   );
+///       )),
+///     );
+///   )
 /// }
 /// ```
 /// {@end-tool}
