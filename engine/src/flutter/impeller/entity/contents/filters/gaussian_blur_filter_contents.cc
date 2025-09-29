@@ -801,7 +801,6 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
   // which must be applied to `bounds_`, since it resides in the same coordinate
   // space as `coverage_hint`.
   std::optional<Rect> expanded_coverage_hint;
-  std::optional<Rect> shifted_bounds = bounds_;
   if (coverage_hint.has_value()) {
     expanded_coverage_hint = coverage_hint->Expand(blur_info.local_padding);
   }
