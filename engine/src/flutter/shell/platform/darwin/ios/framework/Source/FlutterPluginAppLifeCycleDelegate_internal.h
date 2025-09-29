@@ -5,6 +5,8 @@
 #ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERPLUGINAPPLIFECYCLEDELEGATE_INTERNAL_H_
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERPLUGINAPPLIFECYCLEDELEGATE_INTERNAL_H_
 
+#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPluginAppLifeCycleDelegate.h"
+
 @interface FlutterPluginAppLifeCycleDelegate ()
 
 /**
@@ -16,6 +18,57 @@
  * Check whether there is at least one plugin responds to the selector.
  */
 - (BOOL)hasPluginThatRespondsToSelector:(SEL)selector;
+
+/**
+ * Forwards the application equivalent lifecycle event of
+ * `sceneWillEnterForeground:` -> `applicationWillEnterForeground:` to plugins that have not adopted
+ * the FlutterSceneLifeCycleDelegate protocol.
+ */
+- (void)sceneWillEnterForegroundFallback;
+
+/**
+ * Forwards the application equivalent lifecycle event of
+ * `sceneDidBecomeActive:` -> `applicationDidBecomeActive:` to plugins that have not adopted the
+ * FlutterSceneLifeCycleDelegate protocol.
+ */
+- (void)sceneDidBecomeActiveFallback;
+
+/**
+ * Forwards the application equivalent lifecycle event of
+ * `sceneWillResignActive:` -> `applicationWillResignActive:` to plugins that have not
+ * adopted the FlutterSceneLifeCycleDelegate protocol.
+ */
+- (void)sceneWillResignActiveFallback;
+
+/**
+ * Forwards the application equivalent lifecycle event of
+ * `sceneDidEnterBackground:` -> `applicationDidEnterBackground:` to plugins that have not adopted
+ * the FlutterSceneLifeCycleDelegate protocol.
+ */
+- (void)sceneDidEnterBackgroundFallback;
+
+/**
+ * Forwards the application equivalent lifecycle event of
+ * `scene:openURLContexts:` -> `application:openURL:options:completionHandler:` to plugins that have
+ * not adopted the FlutterSceneLifeCycleDelegate protocol.
+ */
+- (BOOL)sceneFallbackOpenURLContexts:(NSSet<UIOpenURLContext*>*)URLContexts;
+
+/**
+ * Forwards the application equivalent lifecycle event of
+ * `scene:continueUserActivity:` -> `application:continueUserActivity:restorationHandler:` to
+ * plugins that have not adopted the FlutterSceneLifeCycleDelegate protocol.
+ */
+- (BOOL)sceneFallbackContinueUserActivity:(NSUserActivity*)userActivity;
+
+/**
+ * Forwards the application equivalent lifecycle event of
+ * `windowScene:performActionForShortcutItem:completionHandler:` ->
+ * `application:performActionForShortcutItem:completionHandler:` to plugins that have not adopted
+ * the FlutterSceneLifeCycleDelegate protocol.
+ */
+- (BOOL)sceneFallbackPerformActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
+                                completionHandler:(void (^)(BOOL succeeded))completionHandler;
 
 @end
 ;

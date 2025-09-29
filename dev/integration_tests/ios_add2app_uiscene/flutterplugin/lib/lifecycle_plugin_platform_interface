@@ -1,0 +1,26 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+
+import 'my_plugin_method_channel.dart';
+
+abstract class MyPluginPlatform extends PlatformInterface {
+  MyPluginPlatform() : super(token: _token);
+
+  static final Object _token = Object();
+
+  static MyPluginPlatform _instance = MethodChannelMyPlugin();
+
+  static MyPluginPlatform get instance => _instance;
+
+  static set instance(MyPluginPlatform instance) {
+    PlatformInterface.verifyToken(instance, _token);
+    _instance = instance;
+  }
+
+  Future<String?> getLifecycleEvents() {
+    throw UnimplementedError('getLifecycleEvents() has not been implemented.');
+  }
+}
