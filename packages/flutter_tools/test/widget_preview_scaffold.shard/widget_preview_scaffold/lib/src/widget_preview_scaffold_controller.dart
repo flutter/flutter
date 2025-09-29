@@ -222,10 +222,10 @@ class _WidgetPreviewScaffoldInspectorService with WidgetInspectorService {
         // event data, just in case an IDE is attached and listening for
         // navigation events through the VM service.
         // TODO(bkonyi): determine if this is necessary
-        eventData.addAll({
+        eventData.addAll(<String, Object>{
           kFile: location.uri,
-          kLine: location.line,
-          kColumn: location.column,
+          kLine: location.line!,
+          kColumn: location.column!,
         });
       }
       if (location != null) {
