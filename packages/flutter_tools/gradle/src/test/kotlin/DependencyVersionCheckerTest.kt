@@ -16,6 +16,7 @@ import com.flutter.gradle.DependencyVersionChecker.OUT_OF_SUPPORT_RANGE_PROPERTY
 import com.flutter.gradle.DependencyVersionChecker.POTENTIAL_JAVA_FIX
 import com.flutter.gradle.DependencyVersionChecker.errorAGPVersion
 import com.flutter.gradle.DependencyVersionChecker.errorGradleVersion
+import com.flutter.gradle.DependencyVersionChecker.errorJavaVersion
 import com.flutter.gradle.DependencyVersionChecker.errorKGPVersion
 import com.flutter.gradle.DependencyVersionChecker.errorMinSdkVersion
 import com.flutter.gradle.DependencyVersionChecker.getErrorMessage
@@ -27,7 +28,6 @@ import com.flutter.gradle.DependencyVersionChecker.getPotentialSDKFix
 import com.flutter.gradle.DependencyVersionChecker.getWarnMessage
 import com.flutter.gradle.DependencyVersionChecker.warnAGPVersion
 import com.flutter.gradle.DependencyVersionChecker.warnGradleVersion
-import com.flutter.gradle.DependencyVersionChecker.warnJavaVersion
 import com.flutter.gradle.DependencyVersionChecker.warnKGPVersion
 import com.flutter.gradle.DependencyVersionChecker.warnMinSdkVersion
 import io.mockk.every
@@ -154,31 +154,31 @@ class DependencyVersionCheckerTest {
         verify(exactly = 0) { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true) }
     }
 
-    // No test for Java version in error range, as the lowest supported Java version is also the
+    // No test for Java version in warn range, as the lowest supported Java version is also the
     // lowest possible.
-
     @Test
-    fun `Java version in warn range results in warning logs`() {
-        val exampleWarnJavaVersion = JavaVersion.VERSION_16
-        val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(javaVersion = exampleWarnJavaVersion)
+    fun `Java version in error range results in error logs`() {
+        val exampleErrorJavaVersion = JavaVersion.VERSION_16
+        val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(javaVersion = exampleErrorJavaVersion)
 
         val mockExtraPropertiesExtension = mockProject.extra
         every { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, false) } returns Unit
+        every { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true) } returns Unit
         val mockLogger = mockProject.logger
         every { mockLogger.error(any()) } returns Unit
 
-        DependencyVersionChecker.checkDependencyVersions(mockProject)
-        verify {
-            mockLogger.error(
-                getWarnMessage(
-                    JAVA_NAME,
-                    exampleWarnJavaVersion.toString(),
-                    warnJavaVersion.toString(),
-                    POTENTIAL_JAVA_FIX
-                )
-            )
-        }
-        verify(exactly = 0) { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true) }
+        val dependencyValidationException =
+            assertFailsWith<DependencyValidationException> { DependencyVersionChecker.checkDependencyVersions(mockProject) }
+        assert(
+            dependencyValidationException.message ==
+                    getErrorMessage(
+                        JAVA_NAME,
+                        exampleErrorJavaVersion.toString(),
+                        errorJavaVersion.toString(),
+                        POTENTIAL_JAVA_FIX
+                    )
+        )
+        verify(exactly = 1) { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true) }
     }
 
     @Test
