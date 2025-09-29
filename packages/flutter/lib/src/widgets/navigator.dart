@@ -3187,6 +3187,10 @@ class _RouteEntry extends RouteTransitionRecord {
   _RoutePlaceholder? lastAnnouncedNextRoute = notAnnounced; // last argument to Route.didChangeNext
   int? lastFocusNode; // The last focused semantic node for the route entry.
 
+  // Whether this route is removed without using a Navigator.pages api.
+  // For example, Navigator.pop or Navigator.pushReplacement.
+  bool imperativeRemoval = false;
+
   /// Restoration ID to be used for the encapsulating route when restoration is
   /// enabled for it or null if restoration cannot be enabled for it.
   String? get restorationId {
@@ -3326,10 +3330,6 @@ class _RouteEntry extends RouteTransitionRecord {
       return false;
     }
     route.onPopInvokedWithResult(true, pendingResult);
-    if (pageBased) {
-      final Page<Object?> page = route.settings as Page<Object?>;
-      navigator.widget.onDidRemovePage?.call(page);
-    }
     pendingResult = null;
     return true;
   }
@@ -3346,8 +3346,14 @@ class _RouteEntry extends RouteTransitionRecord {
     required Route<dynamic>? previousPresent,
   }) {
     assert(navigator._debugLocked);
-    assert(route._navigator == navigator);
-    currentState = _RouteLifecycle.removing;
+    if (route._navigator == navigator) {
+      currentState = _RouteLifecycle.removing;
+    } else {
+      // This route is still waiting to be added while a top-most push or pop
+      // animation is still on-going. In this case, this route can be disposed
+      // directly since nothing has been initialized yet.
+      currentState = _RouteLifecycle.dispose;
+    }
     if (_reportRemovalToObserver) {
       navigator._observedRouteDeletions.add(_NavigatorRemoveObservation(route, previousPresent));
     }
@@ -3367,21 +3373,17 @@ class _RouteEntry extends RouteTransitionRecord {
 
   Object? pendingResult;
 
-  void pop<T>(T? result) {
+  void pop<T>(T? result, {required bool imperativeRemoval}) {
     assert(isPresent);
     pendingResult = result;
     currentState = _RouteLifecycle.pop;
+    this.imperativeRemoval = imperativeRemoval;
   }
 
   bool _reportRemovalToObserver = true;
 
   // Route completes with `result` and is removed.
-  void complete<T>(T result, {bool isReplaced = false}) {
-    assert(
-      !pageBased || isWaitingForExitingDecision,
-      'A page-based route cannot be completed using imperative api, provide a '
-      'new list without the corresponding Page to Navigator.pages instead. ',
-    );
+  void complete<T>(T result, {required bool isReplaced, required bool imperativeRemoval}) {
     if (currentState.index >= _RouteLifecycle.remove.index) {
       return;
     }
@@ -3389,6 +3391,7 @@ class _RouteEntry extends RouteTransitionRecord {
     _reportRemovalToObserver = !isReplaced;
     pendingResult = result;
     currentState = _RouteLifecycle.complete;
+    this.imperativeRemoval = imperativeRemoval;
   }
 
   void finalize() {
@@ -3553,7 +3556,7 @@ class _RouteEntry extends RouteTransitionRecord {
       final bool popResult = route.didPop(result);
       assert(!popResult);
     }
-    pop<dynamic>(result);
+    pop<dynamic>(result, imperativeRemoval: false);
     _isWaitingForExitingDecision = false;
   }
 
@@ -3565,7 +3568,7 @@ class _RouteEntry extends RouteTransitionRecord {
       'been made or it does not require an explicit decision on how to transition '
       'out.',
     );
-    complete<dynamic>(result);
+    complete<dynamic>(result, isReplaced: false, imperativeRemoval: false);
     _isWaitingForExitingDecision = false;
   }
 
@@ -4555,21 +4558,21 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
             navigator: this,
             previousPresent: _getRouteBefore(index, _RouteEntry.willBePresentPredicate)?.route,
           );
-          assert(entry.currentState == _RouteLifecycle.removing);
+          assert(entry.currentState.index >= _RouteLifecycle.removing.index);
           continue;
         case _RouteLifecycle.removing:
           if (!canRemoveOrAdd && next != null) {
             // We aren't allowed to remove this route yet.
             break;
           }
-          if (entry.pageBased) {
-            widget.onDidRemovePage?.call(entry.route.settings as Page<Object?>);
-          }
           entry.currentState = _RouteLifecycle.dispose;
           continue;
         case _RouteLifecycle.dispose:
           // Delay disposal until didChangeNext/didChangePrevious have been sent.
           toBeDisposed.add(_history.removeAt(index));
+          if (entry.pageBased && entry.imperativeRemoval) {
+            widget.onDidRemovePage?.call(entry.route.settings as Page<Object?>);
+          }
           entry = next;
         case _RouteLifecycle.disposing:
         case _RouteLifecycle.disposed:
@@ -5249,7 +5252,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       'Navigator has no active routes to replace.',
     );
     assert(entry.currentState == _RouteLifecycle.pushReplace);
-    _history.lastWhere(_RouteEntry.isPresentPredicate).complete(result, isReplaced: true);
+    _history
+        .lastWhere(_RouteEntry.isPresentPredicate)
+        .complete(result, isReplaced: true, imperativeRemoval: true);
     _history.add(entry);
     _flushHistoryUpdates();
     assert(() {
@@ -5348,7 +5353,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     _history.add(entry);
     while (index >= 0 && !predicate(_history[index].route)) {
       if (_history[index].isPresent) {
-        _history[index].complete(null);
+        _history[index].complete(null, isReplaced: false, imperativeRemoval: true);
       }
       index -= 1;
     }
@@ -5433,7 +5438,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     );
     final bool wasCurrent = oldRoute.isCurrent;
     _history.insert(index + 1, entry);
-    _history[index].complete(null, isReplaced: true);
+    _history[index].complete(null, isReplaced: true, imperativeRemoval: true);
     _flushHistoryUpdates();
     assert(() {
       _debugLocked = false;
@@ -5523,7 +5528,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }
     assert(index >= 0, 'There are no routes below the specified anchorRoute.');
     _history.insert(index + 1, entry);
-    _history[index].complete(null, isReplaced: true);
+    _history[index].complete(null, isReplaced: true, imperativeRemoval: true);
     _flushHistoryUpdates();
     assert(() {
       _debugLocked = false;
@@ -5646,7 +5651,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         entry.route.onPopInvokedWithResult(true, result);
       }
     } else {
-      entry.pop<T>(result);
+      entry.pop<T>(result, imperativeRemoval: true);
       assert(entry.currentState == _RouteLifecycle.pop);
     }
     if (entry.currentState == _RouteLifecycle.pop) {
@@ -5698,7 +5703,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     assert(route._navigator == this);
     final bool wasCurrent = route.isCurrent;
     final _RouteEntry entry = _history.firstWhere(_RouteEntry.isRoutePredicate(route));
-    entry.complete(result);
+    entry.complete(result, isReplaced: false, imperativeRemoval: true);
     _flushHistoryUpdates(rearrangeOverlay: false);
     assert(() {
       _debugLocked = false;
@@ -5735,7 +5740,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       index -= 1;
     }
     assert(index >= 0, 'There are no routes below the specified anchorRoute.');
-    _history[index].complete(result);
+    _history[index].complete(result, isReplaced: false, imperativeRemoval: true);
     _flushHistoryUpdates(rearrangeOverlay: false);
     assert(() {
       _debugLocked = false;
