@@ -12,6 +12,7 @@
 #import "FlutterChannels.h"
 #import "FlutterCodecs.h"
 #import "FlutterPlatformViews.h"
+#import "FlutterSceneLifeCycle.h"
 #import "FlutterTexture.h"
 
 NS_ASSUME_NONNULL_BEGIN
@@ -371,6 +372,14 @@ typedef enum {
  */
 - (void)addApplicationDelegate:(NSObject<FlutterPlugin>*)delegate
     NS_EXTENSION_UNAVAILABLE_IOS("Disallowed in plugins used in app extensions");
+
+/**
+ * Registers the plugin as a receiver of `UISceneDelegate` and `UIWindowSceneDelegate` calls.
+ *
+ * @param delegate The receiving object, such as the plugin's main class.
+ */
+- (void)addSceneDelegate:(NSObject<FlutterSceneLifeCycleDelegate>*)delegate
+    API_AVAILABLE(ios(13.0));
 
 /**
  * Returns the file name for the given asset.

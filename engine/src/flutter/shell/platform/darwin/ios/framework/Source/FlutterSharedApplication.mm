@@ -34,4 +34,15 @@ FLUTTER_ASSERT_ARC
   return UIApplication.sharedApplication;
 }
 
++ (BOOL)hasSceneDelegate {
+  if (FlutterSharedApplication.isAvailable) {
+    for (UIScene* scene in FlutterSharedApplication.sharedApplication.connectedScenes) {
+      if (scene.delegate != nil) {
+        return YES;
+      }
+    }
+  }
+  return NO;
+}
+
 @end
