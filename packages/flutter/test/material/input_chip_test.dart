@@ -690,15 +690,24 @@ void main() {
   });
 
   testWidgets('InputChip does not crash at zero area', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: SizedBox.shrink(child: InputChip(label: Text('X'))),
+    Future<void> testChip(Widget chip) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(child: SizedBox.shrink(child: chip)),
           ),
         ),
+      );
+      expect(tester.getSize(find.byType(InputChip)), Size.zero);
+    }
+
+    await testChip(const InputChip(label: Text('X')));
+    await testChip(
+      const InputChip(
+        label: Text('X'),
+        avatar: CircleAvatar(child: Text('A')),
       ),
     );
-    expect(tester.getSize(find.byType(InputChip)), Size.zero);
+    await testChip(InputChip(label: const Text('X'), onDeleted: () {}));
   });
 }
