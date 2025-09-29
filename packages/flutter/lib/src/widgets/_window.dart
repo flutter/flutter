@@ -536,11 +536,11 @@ abstract class DialogWindowController extends BaseWindowController with WindowCo
   @protected
   DialogWindowController.empty();
 
-  /// The parent view of this dialog, if any.
+  /// The parent controller of this dialog, if any.
   ///
   /// If null, this dialog is modeless.
   /// If non-null, this dialog is modal to the parent.
-  FlutterView? get parent;
+  BaseWindowController? get parent;
 }
 
 /// [WindowingOwner] is responsible for creating and managing window controllers.
