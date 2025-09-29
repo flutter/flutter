@@ -24,6 +24,22 @@ using GaussianBlurFragmentShader = GaussianBlurPipeline::FragmentShader;
 
 namespace {
 
+GaussianBlurPipeline::FragmentShader::KernelSamples CloneKernelSamples(
+    KernelSamples parameters) {
+  GaussianBlurPipeline::FragmentShader::KernelSamples result = {};
+  result.sample_count = parameters.sample_count;
+  FML_DCHECK(result.sample_count <= kGaussianBlurMaxKernelSize);
+  static_assert(sizeof(result.sample_data) ==
+                sizeof(std::array<Vector4, kGaussianBlurMaxKernelSize>));
+
+  for (int i = 0; i < result.sample_count; i++) {
+    result.sample_data[i].x = parameters.samples[i].uv_offset.x;
+    result.sample_data[i].y = parameters.samples[i].uv_offset.y;
+    result.sample_data[i].z = parameters.samples[i].coefficient;
+  }
+  return result;
+}
+
 constexpr Scalar kMaxSigma = 500.0f;
 
 SamplerDescriptor MakeSamplerDescriptor(MinMagFilter filter,
@@ -573,9 +589,16 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
                 linear_sampler_descriptor));
         GaussianBlurVertexShader::BindFrameInfo(
             pass, data_host_buffer.EmplaceUniform(frame_info));
+        KernelSamples full_kernel_samples = GenerateBlurInfo(blur_info);
+        // For bounded blurs, kernel samples must not be interpolated (lerped),
+        // as this can introduce wave-like artifacts at the edges of the bounds.
+        // This is likely due to increased sensitivity to pixel accuracy caused
+        // by opacity normalization.
+        auto kernel_samples = blur_info.blur_uv_bounds.has_value()
+                                  ? CloneKernelSamples(full_kernel_samples)
+                                  : LerpHackKernelSamples(full_kernel_samples);
         GaussianBlurFragmentShader::BindKernelSamples(
-            pass, data_host_buffer.EmplaceUniform(
-                      LerpHackKernelSamples(GenerateBlurInfo(blur_info))));
+            pass, data_host_buffer.EmplaceUniform(kernel_samples));
         GaussianBlurFragmentShader::BindFragInfo(
             pass, data_host_buffer.EmplaceUniform(frag_info));
         return pass.Draw().ok();
