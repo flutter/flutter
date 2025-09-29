@@ -427,7 +427,7 @@ abstract class WidgetStateMouseCursor extends MouseCursor
   }
 
   /// A mouse cursor for clickable widgets that resolves to [SystemMouseCursors.basic]
-  /// in every widget state.
+  /// in all widget states.
   static const WidgetStateMouseCursor basic = WidgetStateMouseCursor.resolveWith(
     _basic,
     debugDescription: 'WidgetStateMouseCursor(basic)',
