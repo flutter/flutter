@@ -197,18 +197,6 @@ Scalar FloorToDivisible(Scalar val, Scalar divisor) {
   }
 }
 
-Rect RectFromRatio(Rect target, Rect ref) {
-  auto ratio = [](Scalar target, Scalar start, Scalar end) {
-    return (target - start) / (end - start);
-  };
-
-  return Rect::MakeLTRB(
-      ratio(target.GetLeft(), ref.GetLeft(), ref.GetRight()),
-      ratio(target.GetTop(), ref.GetTop(), ref.GetBottom()),
-      ratio(target.GetRight(), ref.GetLeft(), ref.GetRight()),
-      ratio(target.GetBottom(), ref.GetTop(), ref.GetBottom()));
-}
-
 struct DownsamplePassArgs {
   /// The output size of the down-sampling pass.
   ISize subpass_size;
@@ -313,12 +301,12 @@ DownsamplePassArgs CalculateDownsamplePassArgs(
     std::optional<Rect> downsample_uv_bounds;
     std::optional<Rect> blur_uv_bounds;
     if (source_bounds.has_value()) {
-      downsample_uv_bounds = RectFromRatio(
-          source_bounds.value(),
-          input_snapshot.GetCoverage().value_or(Rect::MakeWH(1, 1)));
+      downsample_uv_bounds = MakeReferenceUVs(
+          input_snapshot.GetCoverage().value_or(Rect::MakeWH(1, 1)),
+          source_bounds.value());
       blur_uv_bounds =
-          RectFromRatio(source_bounds->Shift(source_bounds->GetLeftTop()),
-                        aligned_coverage_hint);
+          MakeReferenceUVs(aligned_coverage_hint,
+                           source_bounds->Shift(source_bounds->GetLeftTop()));
     }
     return {
         .subpass_size = subpass_size,
@@ -360,12 +348,12 @@ DownsamplePassArgs CalculateDownsamplePassArgs(
     std::optional<Rect> blur_uv_bounds;
     std::optional<Rect> downsample_uv_bounds;
     if (source_bounds.has_value()) {
-      blur_uv_bounds = RectFromRatio(
-          source_bounds.value(),
-          source_rect_padded.TransformBounds(input_snapshot.transform));
-      downsample_uv_bounds =
-          RectFromRatio(source_bounds.value(),
-                        source_rect.TransformBounds(input_snapshot.transform));
+      blur_uv_bounds = MakeReferenceUVs(
+          source_rect_padded.TransformBounds(input_snapshot.transform),
+          source_bounds.value());
+      downsample_uv_bounds = MakeReferenceUVs(
+          source_rect.TransformBounds(input_snapshot.transform),
+          source_bounds.value());
     }
     return {
         .subpass_size = subpass_size,
