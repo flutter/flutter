@@ -109,7 +109,7 @@ dependencies:
   frontend_server_client: 4.0.0
   gcloud: 0.8.19
   glob: 2.1.3
-  google_fonts: 6.3.1
+  google_fonts: 6.3.2
   google_identity_services_web: 0.3.3+1
   google_mobile_ads: 5.1.0
   googleapis: 12.0.0
@@ -212,4 +212,4 @@ dependencies:
   pedantic: 1.11.1
   quiver: 3.2.2
   yaml_edit: 2.2.2
-# PUBSPEC CHECKSUM: 4158rk
+# PUBSPEC CHECKSUM: 5pih92
