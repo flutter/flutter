@@ -84,10 +84,7 @@ class OutlinedButton extends ButtonStyleButton {
     super.clipBehavior,
     super.statesController,
     required super.child,
-    this.icon = const Icon(null),
   });
-
-  final Icon icon;
 
   /// Create a text button from a pair of widgets that serve as the button's
   /// [icon] and [label].
