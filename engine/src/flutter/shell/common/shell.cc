@@ -1449,6 +1449,20 @@ void Shell::OnEngineUpdateSemantics(int64_t view_id,
 }
 
 // |Engine::Delegate|
+void Shell::OnEngineSetApplicationLocale(std::string locale) {
+  FML_DCHECK(is_set_up_);
+  FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
+
+  task_runners_.GetPlatformTaskRunner()->RunNowOrPostTask(
+      task_runners_.GetPlatformTaskRunner(),
+      [view = platform_view_->GetWeakPtr(), locale_holder = std::move(locale)] {
+        if (view) {
+          view->SetApplicationLocale(locale_holder);
+        }
+      });
+}
+
+// |Engine::Delegate|
 void Shell::OnEngineSetSemanticsTreeEnabled(bool enabled) {
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
