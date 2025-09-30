@@ -529,6 +529,10 @@ void Engine::UpdateSemantics(int64_t view_id,
                                     std::move(actions));
 }
 
+void Engine::SetApplicationLocale(std::string locale) {
+  delegate_.OnEngineSetApplicationLocale(std::move(locale));
+}
+
 void Engine::SetSemanticsTreeEnabled(bool enabled) {
   delegate_.OnEngineSetSemanticsTreeEnabled(enabled);
 }

@@ -33,6 +33,10 @@ class JNIMock final : public PlatformViewAndroidJNI {
                std::vector<std::string> strings,
                std::vector<std::vector<uint8_t>> string_attribute_args),
               (override));
+  MOCK_METHOD(void,
+              FlutterViewSetApplicationLocale,
+              (std::string locale),
+              (override));
 
   MOCK_METHOD(void,
               FlutterViewUpdateCustomAccessibilityActions,

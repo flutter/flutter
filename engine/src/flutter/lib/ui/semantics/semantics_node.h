@@ -168,6 +168,7 @@ struct SemanticsNode {
   std::string linkUrl;
   SemanticsRole role;
   SemanticsValidationResult validationResult = SemanticsValidationResult::kNone;
+  // A locale string in BCP 47 format
   std::string locale;
 };
 
