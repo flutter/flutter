@@ -146,7 +146,6 @@ FLUTTER_ASSERT_ARC
   //  scene(_:continue:) when the universal link is tapped while your app is running or suspended in
   //  memory.
   for (NSUserActivity* userActivity in connectionOptions.userActivities) {
-    NSLog(@"%@", userActivity.webpageURL);
     if (userActivity.webpageURL != nil) {
       if ([self handleOpenURL:userActivity.webpageURL relayToSystemIfUnhandled:YES]) {
         return YES;
@@ -295,6 +294,9 @@ FLUTTER_ASSERT_ARC
 }
 
 - (BOOL)handleOpenURL:(NSURL*)url relayToSystemIfUnhandled:(BOOL)throwBack {
+  if (!url) {
+    return NO;
+  }
   // Don't process the link if deep linking is disabled.
   if (!FlutterSharedApplication.isFlutterDeepLinkingEnabled) {
     return NO;
