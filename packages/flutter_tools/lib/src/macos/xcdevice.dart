@@ -155,7 +155,7 @@ class XCDevice {
   Future<List<Object>?> _getAllDevices({bool useCache = false, required Duration timeout}) async {
     if (!isInstalled) {
       _logger.printTrace("Xcode not found. Run 'flutter doctor' for more information.");
-      return null;
+      return <Object>[];
     }
     if (useCache && _cachedListResults != null) {
       return _cachedListResults;
@@ -190,7 +190,7 @@ class XCDevice {
       _logger.printTrace('Argument exception running xcdevice list:\n$exception');
     }
 
-    return null;
+    return <Object>[];
   }
 
   /// Observe identifiers (UDIDs) of devices as they attach and detach.
