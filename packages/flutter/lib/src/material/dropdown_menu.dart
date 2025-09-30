@@ -388,7 +388,7 @@ class DropdownMenu<T> extends StatefulWidget {
   /// If provided and the resulting [InputDecoration.suffixIcon] is null,
   /// the [InputDecoration.suffixIcon] is set to an [IconButton] which uses [trailingIcon]
   /// and [selectedTrailingIcon] if defined, or [Icons.arrow_drop_down] and
-  /// [Icons.arrow_drop_up] otherwhise.
+  /// [Icons.arrow_drop_up] otherwise.
   ///
   /// If null, the default builder creates a decoration where:
   /// - [InputDecoration.label] is set to [label].
@@ -396,7 +396,7 @@ class DropdownMenu<T> extends StatefulWidget {
   /// - [InputDecoration.helperText] is set to [helperText].
   /// - [InputDecoration.errorText] is set to [errorText].
   /// - [InputDecoration.prefixIcon] is set to [leadingIcon].
-  /// - [InputDecoration.suffixIcon] is set to an [IconButton] which uses [trailingIcon] and [selectedTrailingIcon] if defined, or [Icons.arrow_drop_down] and [Icons.arrow_drop_up] otherwhise.
+  /// - [InputDecoration.suffixIcon] is set to an [IconButton] which uses [trailingIcon] and [selectedTrailingIcon] if defined, or [Icons.arrow_drop_down] and [Icons.arrow_drop_up] otherwise.
   final DropdownMenuDecorationBuilder? decorationBuilder;
 
   /// The [MenuStyle] that defines the visual attributes of the menu.
