@@ -205,6 +205,9 @@ public class SettingsChannel {
       }
 
       if (currentConfiguration == null) {
+        System.out.println(
+            "The configuration queue is empty when looking for config generation "
+                + String.valueOf(configGeneration));
         Log.e(
             TAG,
             "Cannot find config with generation: "
@@ -212,6 +215,11 @@ public class SettingsChannel {
                 + ", after exhausting the queue.");
         return null;
       } else if (currentConfiguration.generationNumber != configGeneration) {
+        System.out.println(
+            "The configuration queue head has generation "
+                + String.valueOf(currentConfiguration.generationNumber)
+                + " when looking for config generation "
+                + String.valueOf(configGeneration));
         Log.e(
             TAG,
             "Cannot find config with generation: "
