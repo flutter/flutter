@@ -95,10 +95,10 @@ public class FlutterJNITest {
           "en", "CA", ""
         };
     String[] result = flutterJNI.computePlatformResolvedLocale(supportedLocales);
-    assertEquals(result.length, 3);
-    assertEquals(result[0], "zh");
-    assertEquals(result[1], "");
-    assertEquals(result[2], "");
+    assertEquals(3, result.length);
+    assertEquals("zh", result[0]);
+    assertEquals("", result[1]);
+    assertEquals("", result[2]);
 
     supportedLocales =
         new String[] {
@@ -107,10 +107,10 @@ public class FlutterJNITest {
           "en", "CA", ""
         };
     result = flutterJNI.computePlatformResolvedLocale(supportedLocales);
-    assertEquals(result.length, 3);
-    assertEquals(result[0], "en");
-    assertEquals(result[1], "CA");
-    assertEquals(result[2], "");
+    assertEquals(3, result.length);
+    assertEquals("en", result[0]);
+    assertEquals("CA", result[1]);
+    assertEquals("", result[2]);
 
     supportedLocales =
         new String[] {
@@ -119,10 +119,10 @@ public class FlutterJNITest {
           "en", "US", ""
         };
     result = flutterJNI.computePlatformResolvedLocale(supportedLocales);
-    assertEquals(result.length, 3);
-    assertEquals(result[0], "en");
-    assertEquals(result[1], "US");
-    assertEquals(result[2], "");
+    assertEquals(3, result.length);
+    assertEquals("en", result[0]);
+    assertEquals("US", result[1]);
+    assertEquals("", result[2]);
 
     supportedLocales =
         new String[] {
@@ -131,15 +131,15 @@ public class FlutterJNITest {
           "en", "US", ""
         };
     result = flutterJNI.computePlatformResolvedLocale(supportedLocales);
-    assertEquals(result.length, 3);
-    assertEquals(result[0], "es");
-    assertEquals(result[1], "MX");
-    assertEquals(result[2], "");
+    assertEquals(3, result.length);
+    assertEquals("es", result[0]);
+    assertEquals("MX", result[1]);
+    assertEquals("", result[2]);
 
     // Empty supportedLocales.
     supportedLocales = new String[] {};
     result = flutterJNI.computePlatformResolvedLocale(supportedLocales);
-    assertEquals(result.length, 0);
+    assertEquals(0, result.length);
 
     // Empty preferredLocales.
     supportedLocales =
@@ -152,10 +152,10 @@ public class FlutterJNITest {
     when(config.getLocales()).thenReturn(localeList);
     result = flutterJNI.computePlatformResolvedLocale(supportedLocales);
     // The first locale is default.
-    assertEquals(result.length, 3);
-    assertEquals(result[0], "fr");
-    assertEquals(result[1], "FR");
-    assertEquals(result[2], "");
+    assertEquals(3, result.length);
+    assertEquals("fr", result[0]);
+    assertEquals("FR", result[1]);
+    assertEquals("", result[2]);
   }
 
   @Test
@@ -165,7 +165,7 @@ public class FlutterJNITest {
     int expectedFlag = 100;
 
     flutterJNI.setAccessibilityFeatures(expectedFlag);
-    assertEquals(flutterJNI.flags, expectedFlag);
+    assertEquals(expectedFlag, flutterJNI.flags);
 
     flutterJNI.setSemanticsEnabled(true);
     assertTrue(flutterJNI.semanticsEnabled);
@@ -178,7 +178,7 @@ public class FlutterJNITest {
     int flags = 100;
 
     flutterJNI.setAccessibilityFeatures(flags);
-    assertEquals(flutterJNI.flags, 0);
+    assertEquals(0, flutterJNI.flags);
 
     flutterJNI.setSemanticsEnabled(true);
     assertFalse(flutterJNI.semanticsEnabled);
