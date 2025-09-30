@@ -25,6 +25,10 @@ import '../foundation/_features.dart';
 import '_window.dart';
 import 'binding.dart';
 
+// Maximum width and height a window can be.
+// In C this would be INT_MAX, but since we can't determine that from Dart let's assume it's 32 bit signed. In any case this is far beyond any reasonable window size.
+const _kMaxWindowDimensions = 0x7fffffff;
+
 const String _kWindowingDisabledErrorMessage = '''
 Windowing APIs are not enabled.
 
@@ -248,8 +252,8 @@ class GtkWindow extends GtkWidget {
       geometryMask |= 2; // GDK_HINT_MIN_SIZE
     }
     if (maxWidth != null || maxHeight != null) {
-      g.max_width = maxWidth ?? 0x7fffffff;
-      g.max_height = maxHeight ?? 0x7fffffff;
+      g.max_width = maxWidth ?? _kMaxWindowDimensions;
+      g.max_height = maxHeight ?? _kMaxWindowDimensions;
       geometryMask |= 4; // GDK_HINT_MAX_SIZE
     }
     _gtkWindowSetGeometryHints(instance, ffi.nullptr, geometry, geometryMask);
