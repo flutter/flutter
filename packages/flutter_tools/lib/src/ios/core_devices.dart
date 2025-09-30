@@ -432,7 +432,6 @@ class IOSCoreDeviceControl {
       _logger.printError('devicectl returned unexpected JSON response: $stringOutput');
       return <Object?>[];
     } on FormatException {
-      // We failed to parse the devicectl output, or it returned junk.
       _logger.printError('devicectl returned non-JSON response: $stringOutput');
       return <Object?>[];
     } finally {
@@ -461,7 +460,6 @@ class IOSCoreDeviceControl {
     _devicectlListProcess = process;
 
     try {
-      // Race the process exit against the cancellation completer
       if (cancelCompleter != null) {
         await Future.any<void>(<Future<void>>[
           _devicectlListProcess!.exitCode,
@@ -471,7 +469,6 @@ class IOSCoreDeviceControl {
         await _devicectlListProcess!.exitCode;
       }
 
-      // If cancellation was triggered, return early.
       if (cancelCompleter?.isCompleted ?? false) {
         return const <IOSCoreDevice>[];
       }
