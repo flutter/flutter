@@ -263,17 +263,13 @@ FLUTTER_ASSERT_ARC
   // When embedded in a SwiftUI app, the scene delegate does not conform to
   // FlutterSceneLifeCycleProvider even if it does. However, after force casting it,
   // selectors respond and can be used.
-  Class sceneDelegateClass = [scene.delegate class];
-  NSString* sceneDelegateClassName = NSStringFromClass(sceneDelegateClass);
-  if ([sceneDelegateClassName containsString:@"SwiftUI"]) {
-    NSObject<FlutterSceneLifeCycleProvider>* sceneProvider =
-        (NSObject<FlutterSceneLifeCycleProvider>*)scene.delegate;
-    if ([sceneProvider respondsToSelector:@selector(sceneLifeCycleDelegate)]) {
-      id sceneLifeCycleDelegate = sceneProvider.sceneLifeCycleDelegate;
-      // Double check that the selector is the expected class.
-      if ([sceneLifeCycleDelegate isKindOfClass:[FlutterPluginSceneLifeCycleDelegate class]]) {
-        return (FlutterPluginSceneLifeCycleDelegate*)sceneLifeCycleDelegate;
-      }
+  NSObject<FlutterSceneLifeCycleProvider>* sceneProvider =
+      (NSObject<FlutterSceneLifeCycleProvider>*)scene.delegate;
+  if ([sceneProvider respondsToSelector:@selector(sceneLifeCycleDelegate)]) {
+    id sceneLifeCycleDelegate = sceneProvider.sceneLifeCycleDelegate;
+    // Double check that the selector is the expected class.
+    if ([sceneLifeCycleDelegate isKindOfClass:[FlutterPluginSceneLifeCycleDelegate class]]) {
+      return (FlutterPluginSceneLifeCycleDelegate*)sceneLifeCycleDelegate;
     }
   }
   return nil;
