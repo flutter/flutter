@@ -1942,7 +1942,7 @@ void main() {
     expect(getCheckboxRenderer(), paints..path(color: activeColor)); // checkbox fill
   });
 
-  testWidgets('Material2 - Checkbox MaterialStateBorderSide applies unconditionally', (
+  testWidgets('Material2 - Checkbox WidgetStateBorderSide applies unconditionally', (
     WidgetTester tester,
   ) async {
     const Color borderColor = Color(0xfff44336);
@@ -1958,7 +1958,7 @@ void main() {
               value: value,
               tristate: value == null,
               onChanged: enabled ? (bool? newValue) {} : null,
-              side: MaterialStateBorderSide.resolveWith((Set<WidgetState> states) => side),
+              side: WidgetStateBorderSide.resolveWith((Set<WidgetState> states) => side),
             ),
           ),
         ),
@@ -1993,7 +1993,7 @@ void main() {
     expectBorder();
   });
 
-  testWidgets('Material3 - Checkbox MaterialStateBorderSide applies unconditionally', (
+  testWidgets('Material3 - Checkbox WidgetStateBorderSide applies unconditionally', (
     WidgetTester tester,
   ) async {
     const Color borderColor = Color(0xfff44336);
@@ -2009,7 +2009,7 @@ void main() {
               value: value,
               tristate: value == null,
               onChanged: enabled ? (bool? newValue) {} : null,
-              side: MaterialStateBorderSide.resolveWith((Set<WidgetState> states) => side),
+              side: WidgetStateBorderSide.resolveWith((Set<WidgetState> states) => side),
             ),
           ),
         ),
@@ -2181,7 +2181,7 @@ void main() {
     await tester.pump();
   });
 
-  testWidgets('Material3 - Checkbox MaterialStateBorderSide applies in error states', (
+  testWidgets('Material3 - Checkbox WidgetStateBorderSide applies in error states', (
     WidgetTester tester,
   ) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Checkbox');
@@ -2199,7 +2199,7 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return Checkbox(
                   isError: true,
-                  side: MaterialStateBorderSide.resolveWith((Set<WidgetState> states) {
+                  side: WidgetStateBorderSide.resolveWith((Set<WidgetState> states) {
                     if (states.contains(WidgetState.error)) {
                       return const BorderSide(color: borderColor, width: 4);
                     }

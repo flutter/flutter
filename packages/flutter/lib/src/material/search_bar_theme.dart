@@ -12,7 +12,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import 'material_state.dart';
 import 'theme.dart';
 
 // Examples can assume:
@@ -150,7 +149,7 @@ class SearchBarThemeData with Diagnosticable {
         t,
         Color.lerp,
       ),
-      side: MaterialStateBorderSide.lerp(a?.side, b?.side, t),
+      side: WidgetStateBorderSide.lerp(a?.side, b?.side, t),
       shape: WidgetStateProperty.lerp<OutlinedBorder?>(a?.shape, b?.shape, t, OutlinedBorder.lerp),
       padding: WidgetStateProperty.lerp<EdgeInsetsGeometry?>(
         a?.padding,

@@ -24,8 +24,8 @@ class _${blockName}DefaultsM3 extends CheckboxThemeData {
   final ColorScheme _colors;
 
   @override
-  MaterialStateBorderSide? get side {
-    return MaterialStateBorderSide.resolveWith((Set<WidgetState> states) {
+  WidgetStateBorderSide? get side {
+    return WidgetStateBorderSide.resolveWith((Set<WidgetState> states) {
       if (states.contains(WidgetState.disabled)) {
         if (states.contains(WidgetState.selected)) {
           return const BorderSide(width: ${getToken('md.comp.checkbox.unselected.disabled.outline.width')}, color: Colors.transparent);

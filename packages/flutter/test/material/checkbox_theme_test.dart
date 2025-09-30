@@ -534,7 +534,7 @@ void main() {
     expect(lerped.side, const BorderSide(width: 3.5));
   });
 
-  testWidgets('MaterialStateBorderSide properly lerp in CheckboxThemeData.side', (
+  testWidgets('WidgetStateBorderSide properly lerp in CheckboxThemeData.side', (
     WidgetTester tester,
   ) async {
     late ColorScheme colorScheme;
@@ -545,7 +545,7 @@ void main() {
         theme: ThemeData(
           colorScheme: colorScheme,
           checkboxTheme: CheckboxThemeData(
-            side: MaterialStateBorderSide.resolveWith((Set<WidgetState> states) {
+            side: WidgetStateBorderSide.resolveWith((Set<WidgetState> states) {
               return BorderSide(color: colorScheme.primary, width: 4.0);
             }),
           ),
