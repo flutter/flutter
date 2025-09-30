@@ -47,7 +47,7 @@ void main() {
         // restart requests.
         final hotRestartRequestCompleter = Completer<void>();
         dtdServer = WidgetPreviewDtdServices(
-          fs: FakeFileSystem(),
+          fs: MemoryFileSystem.test(),
           logger: logger,
           shutdownHooks: ShutdownHooks(),
           dtdLauncher: DtdLauncher(
