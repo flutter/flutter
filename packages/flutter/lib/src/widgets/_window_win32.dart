@@ -154,7 +154,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
     required DialogWindowControllerDelegate delegate,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
-    FlutterView? parent,
+    BaseWindowController? parent,
     String? title,
   }) {
     throw UnimplementedError('Dialog windows are not yet implemented on Windows.');

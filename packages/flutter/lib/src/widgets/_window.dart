@@ -98,87 +98,6 @@ sealed class BaseWindowController extends ChangeNotifier {
   }
 }
 
-/// A mixin that defines common behavior for window controllers.
-///
-/// See also:
-/// * [RegularWindowController], the controller that creates and manages regular windows.
-/// * [DialogWindowController], the controller that creates and manages dialog windows.
-///
-/// {@macro flutter.widgets.windowing.experimental}
-mixin WindowControllerCommon {
-  /// The current title of the window.
-  ///
-  /// This might differ from the requested title.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  String get title;
-
-  /// Whether the window is currently activated.
-  ///
-  /// If `true` this means that the window is currently focused and
-  /// can receive user input.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  bool get isActivated;
-
-  /// Whether or not window is currently minimized.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  bool get isMinimized;
-
-  /// Request change to the content size of the window.
-  ///
-  /// The [size] describes the new requested window size. If the size disagrees
-  /// with the current constraints placed upon the window, the platform might
-  /// clamp the size within the constraints.
-  ///
-  /// The platform is free to ignore this request.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  void setSize(Size size);
-
-  /// Request change to the constraints of the window.
-  ///
-  /// The [constraints] describes the new constraints that the window should
-  /// satisfy. If the constraints disagree with the current size of the window,
-  /// the platform might resize the window to satisfy the new constraints.
-  ///
-  /// The platform is free to ignore this request.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  void setConstraints(BoxConstraints constraints);
-
-  /// Request change for the window title.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  void setTitle(String title);
-
-  /// Requests that the window be displayed in its current size and position.
-  ///
-  /// The platform may also give the window input focus and bring it to the
-  /// top of the window stack. However, this behavior is platform-dependent.
-  ///
-  /// If the window is minimized, the window returns to the size and position
-  /// that it had before that state was applied. The window will also be
-  /// brought to the top of the window stack.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  void activate();
-
-  /// Requests window to be minimized.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  void setMinimized(bool minimized);
-}
-
 /// Delegate class for regular window controller.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
@@ -240,6 +159,8 @@ mixin class RegularWindowControllerDelegate {
 /// {@tool snippet}
 /// An example usage might look like:
 ///
+/// TODO(mattkae): Remove invalid_use_of_internal_member ignore comment when this API is stable.
+///
 /// ```dart
 /// // ignore_for_file: invalid_use_of_internal_member
 /// import 'package:flutter/widgets.dart';
@@ -266,7 +187,7 @@ mixin class RegularWindowControllerDelegate {
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 @internal
-abstract class RegularWindowController extends BaseWindowController with WindowControllerCommon {
+abstract class RegularWindowController extends BaseWindowController {
   /// Creates a [RegularWindowController] with the provided properties.
   ///
   /// Upon construction, the window is created by the platform.
@@ -339,17 +260,83 @@ abstract class RegularWindowController extends BaseWindowController with WindowC
   @protected
   RegularWindowController.empty();
 
+  /// The current title of the window.
+  ///
+  /// This might differ from the requested title.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  String get title;
+
+  /// Whether the window is currently activated.
+  ///
+  /// If `true` this means that the window is currently focused and
+  /// can receive user input.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  bool get isActivated;
+
   /// Whether or not the window is currently maximized.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   bool get isMaximized;
 
+  /// Whether or not window is currently minimized.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  bool get isMinimized;
+
   /// Whether or not the window is currently in fullscreen mode.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   bool get isFullscreen;
+
+  /// Request change to the content size of the window.
+  ///
+  /// The [size] describes the new requested window size. If the size disagrees
+  /// with the current constraints placed upon the window, the platform might
+  /// clamp the size within the constraints.
+  ///
+  /// The platform is free to ignore this request.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  void setSize(Size size);
+
+  /// Request change to the constraints of the window.
+  ///
+  /// The [constraints] describes the new constraints that the window should
+  /// satisfy. If the constraints disagree with the current size of the window,
+  /// the platform might resize the window to satisfy the new constraints.
+  ///
+  /// The platform is free to ignore this request.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  void setConstraints(BoxConstraints constraints);
+
+  /// Request change for the window title.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  void setTitle(String title);
+
+  /// Requests that the window be displayed in its current size and position.
+  ///
+  /// The platform may also give the window input focus and bring it to the
+  /// top of the window stack. However, this behavior is platform-dependent.
+  ///
+  /// If the window is minimized, the window returns to the size and position
+  /// that it had before that state was applied. The window will also be
+  /// brought to the top of the window stack.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  void activate();
 
   /// Requests the window to be maximized.
   ///
@@ -360,6 +347,12 @@ abstract class RegularWindowController extends BaseWindowController with WindowC
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   void setMaximized(bool maximized);
+
+  /// Requests window to be minimized.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  void setMinimized(bool minimized);
 
   /// Request change for the window to enter or exit fullscreen state.
   ///
@@ -391,6 +384,7 @@ abstract class RegularWindowController extends BaseWindowController with WindowC
 ///
 ///  * [DialogWindowController], the controller that creates and manages dialog windows.
 ///  * [DialogWindow], the widget for a dialog window.
+///  * [RegularWindowControllerDelegate], the delegate for regular window controllers.
 @internal
 mixin class DialogWindowControllerDelegate {
   /// Invoked when the user attempts to close the window.
@@ -447,6 +441,8 @@ mixin class DialogWindowControllerDelegate {
 /// {@tool snippet}
 /// An example usage might look like:
 ///
+/// TODO(mattkae): Remove invalid_use_of_internal_member ignore comment when this API is stable.
+///
 /// ```dart
 /// // ignore_for_file: invalid_use_of_internal_member
 /// import 'package:flutter/widgets.dart';
@@ -461,14 +457,16 @@ mixin class DialogWindowControllerDelegate {
 ///         preferredConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
 ///         title: 'Example Window',
 ///       ),
-///       child: MaterialApp(home: DialogWindow(
+///       child: MaterialApp(
+///         home: DialogWindow(
 ///           controller: DialogWindowController(
-///               preferredSize: const Size(400, 300),
-///               parent: WidgetsBinding.instance.platformDispatcher.views.first,
-///               title: 'Example Dialog'
+///             preferredSize: const Size(400, 300),
+///             parent: WidgetsBinding.instance.platformDispatcher.views.first,
+///             title: 'Example Dialog'
 ///           ),
 ///           child: const Text('Hello, World!')
-///       )),
+///         )
+///       ),
 ///     )
 ///   );
 /// }
@@ -479,7 +477,7 @@ mixin class DialogWindowControllerDelegate {
 /// via the [WindowScope] inherited widget.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
-abstract class DialogWindowController extends BaseWindowController with WindowControllerCommon {
+abstract class DialogWindowController extends BaseWindowController {
   /// Creates a [DialogWindowController] with the provided properties.
   ///
   /// Upon construction, the window is created by the platform.
@@ -493,7 +491,7 @@ abstract class DialogWindowController extends BaseWindowController with WindowCo
   ///
   /// If the [parent] is non-null, then the dialog is modal to the parent.
   /// Such dialogs do not have a system menu. They are also not selectable
-  /// from the window switcher.
+  /// from the window switcher and they are closed when the parent is closed.
   ///
   /// The [title] argument configures the window's initial title.
   /// If omitted, some platforms might fall back to the app's name.
@@ -521,7 +519,6 @@ abstract class DialogWindowController extends BaseWindowController with WindowCo
     );
   }
 
-  @protected
   /// Creates an empty [DialogWindowController].
   ///
   /// This method is only intended to be used by subclasses of the
@@ -541,6 +538,78 @@ abstract class DialogWindowController extends BaseWindowController with WindowCo
   /// If null, this dialog is modeless.
   /// If non-null, this dialog is modal to the parent.
   BaseWindowController? get parent;
+
+  /// The current title of the window.
+  ///
+  /// This might differ from the requested title.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  String get title;
+
+  /// Whether the window is currently activated.
+  ///
+  /// If `true` this means that the window is currently focused and
+  /// can receive user input.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  bool get isActivated;
+
+  /// Whether or not window is currently minimized.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  bool get isMinimized;
+
+  /// Request change to the content size of the window.
+  ///
+  /// The [size] describes the new requested window size. If the size disagrees
+  /// with the current constraints placed upon the window, the platform might
+  /// clamp the size within the constraints.
+  ///
+  /// The platform is free to ignore this request.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  void setSize(Size size);
+
+  /// Request change to the constraints of the window.
+  ///
+  /// The [constraints] describes the new constraints that the window should
+  /// satisfy. If the constraints disagree with the current size of the window,
+  /// the platform might resize the window to satisfy the new constraints.
+  ///
+  /// The platform is free to ignore this request.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  void setConstraints(BoxConstraints constraints);
+
+  /// Request change for the window title.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  void setTitle(String title);
+
+  /// Requests that the window be displayed in its current size and position.
+  ///
+  /// The platform may also give the window input focus and bring it to the
+  /// top of the window stack. However, this behavior is platform-dependent.
+  ///
+  /// If the window is minimized, the window returns to the size and position
+  /// that it had before that state was applied. The window will also be
+  /// brought to the top of the window stack.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  void activate();
+
+  /// Requests window to be minimized.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  void setMinimized(bool minimized);
 }
 
 /// [WindowingOwner] is responsible for creating and managing window controllers.
@@ -655,6 +724,8 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
 /// {@tool snippet}
 /// An example usage might look like:
 ///
+/// TODO(mattkae): Remove invalid_use_of_internal_member ignore comment when this API is stable.
+///
 /// ```dart
 /// // ignore_for_file: invalid_use_of_internal_member
 /// import 'package:flutter/widgets.dart';
@@ -737,6 +808,8 @@ class RegularWindow extends StatelessWidget {
 /// {@tool snippet}
 /// An example usage might look like:
 ///
+/// TODO(mattkae): Remove invalid_use_of_internal_member ignore comment when this API is stable.
+///
 /// ```dart
 /// // ignore_for_file: invalid_use_of_internal_member
 /// import 'package:flutter/widgets.dart';
@@ -751,14 +824,16 @@ class RegularWindow extends StatelessWidget {
 ///         preferredConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
 ///         title: 'Example Window',
 ///       ),
-///       child: MaterialApp(home: DialogWindow(
+///       child: MaterialApp(
+///         home: DialogWindow(
 ///           controller: DialogWindowController(
-///               preferredSize: const Size(400, 300),
-///               parent: WidgetsBinding.instance.platformDispatcher.views.first,
-///               title: 'Example Dialog'
+///             preferredSize: const Size(400, 300),
+///             parent: WidgetsBinding.instance.platformDispatcher.views.first,
+///             title: 'Example Dialog'
 ///           ),
 ///           child: const Text('Hello, World!')
-///       )),
+///         )
+///       ),
 ///     )
 ///   );
 /// }
