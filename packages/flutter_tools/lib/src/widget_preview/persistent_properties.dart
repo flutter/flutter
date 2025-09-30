@@ -7,6 +7,9 @@ import 'package:meta/meta.dart';
 import '../base/file_system.dart';
 import '../convert.dart';
 
+/// A persistent store used to save settings across sessions.
+///
+/// The store is written to `~/.flutter-devtools/.widget-preview` in JSOn format.
 class PersistentPreferences {
   PersistentPreferences({required this.fs}) {
     if (!file.existsSync()) {
