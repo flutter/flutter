@@ -19,6 +19,7 @@
 namespace flutter {
 
 class WindowManager;
+class WindowsProcTable;
 class FlutterWindowsView;
 class FlutterWindowsViewController;
 
@@ -28,17 +29,25 @@ class HostWindow {
   virtual ~HostWindow();
 
   // Creates a native Win32 window with a child view confined to its client
-  // area. |controller| is a pointer to the controller that manages the
+  // area. |window_manager| is a pointer to the window manager that manages the
   // |HostWindow|. |engine| is a pointer to the engine that manages
-  // the controller. On success, a valid window handle can be retrieved
+  // the window manager. On success, a valid window handle can be retrieved
   // via |HostWindow::GetWindowHandle|. |nullptr| will be returned
   // on failure.
   static std::unique_ptr<HostWindow> CreateRegularWindow(
-      WindowManager* controller,
+      WindowManager* window_manager,
       FlutterWindowsEngine* engine,
       const WindowSizeRequest& preferred_size,
       const WindowConstraints& preferred_constraints,
       LPCWSTR title);
+
+  static std::unique_ptr<HostWindow> CreateDialogWindow(
+      WindowManager* window_manager,
+      FlutterWindowsEngine* engine,
+      const WindowSizeRequest& preferred_size,
+      const WindowConstraints& preferred_constraints,
+      LPCWSTR title,
+      HWND parent);
 
   // Returns the instance pointer for |hwnd| or nullptr if invalid.
   static HostWindow* GetThisFromHandle(HWND hwnd);
@@ -60,17 +69,23 @@ class HostWindow {
   // Set the fullscreen state. |display_id| indicates the display where
   // the window should be shown fullscreen; std::nullopt indicates
   // that no display was specified, so the current display may be used.
-  void SetFullscreen(bool fullscreen,
-                     std::optional<FlutterEngineDisplayId> display_id);
+  virtual void SetFullscreen(bool fullscreen,
+                             std::optional<FlutterEngineDisplayId> display_id);
 
   // Returns |true| if this window is fullscreen, otherwise |false|.
-  bool GetFullscreen() const;
+  virtual bool GetFullscreen() const;
 
   // Given a window identifier, returns the window content size of the
   // window.
   static ActualWindowSize GetWindowContentSize(HWND hwnd);
 
- private:
+  // Returns the owner window, or nullptr if none.
+  HostWindow* GetOwnerWindow() const;
+
+  // Processes modal state update for single layer of window hierarchy.
+  void UpdateModalStateLayer();
+
+ protected:
   friend WindowManager;
 
   // Information saved before going into fullscreen mode, used to restore the
@@ -85,26 +100,62 @@ class HostWindow {
     MONITORINFO monitor_info;
   };
 
-  HostWindow(WindowManager* controller,
+  HostWindow(WindowManager* window_manager,
              FlutterWindowsEngine* engine,
              WindowArchetype archetype,
-             std::unique_ptr<FlutterWindowsViewController> view_controller,
-             const BoxConstraints& constraints,
-             HWND hwnd);
+             DWORD window_style,
+             DWORD extended_window_style,
+             const BoxConstraints& box_constraints,
+             Rect const initial_window_rect,
+             LPCWSTR title,
+             HWND owner_window);
+
+  // Calculates the required window size, in physical coordinates, to
+  // accommodate the given |client_size|, in logical coordinates, constrained by
+  // optional |smallest| and |biggest|, for a window with the specified
+  // |window_style| and |extended_window_style|. If |owner_hwnd| is not null,
+  // the DPI of the display with the largest area of intersection with
+  // |owner_hwnd| is used for the calculation; otherwise, the primary display's
+  // DPI is used. The resulting size includes window borders, non-client areas,
+  // and drop shadows. On error, returns std::nullopt and logs an error message.
+  static std::optional<Size> GetWindowSizeForClientSize(
+      WindowsProcTable const& win32,
+      Size const& client_size,
+      std::optional<Size> smallest,
+      std::optional<Size> biggest,
+      DWORD window_style,
+      DWORD extended_window_style,
+      HWND owner_hwnd);
+
+  // Processes and routes salient window messages for mouse handling,
+  // size change and DPI. Delegates handling of these to member overloads that
+  // inheriting classes can handle.
+  virtual LRESULT HandleMessage(HWND hwnd,
+                                UINT message,
+                                WPARAM wparam,
+                                LPARAM lparam);
 
   // Sets the focus to the child view window of |window|.
-  static void FocusViewOf(HostWindow* window);
+  static void FocusRootViewOf(HostWindow* window);
+
+  // Enables or disables this window and all its descendants.
+  void EnableWindowAndDescendants(bool enable);
+
+  // Returns the first enabled descendant window. If the current window itself
+  // is enabled, returns the current window.
+  HostWindow* FindFirstEnabledDescendant() const;
+
+  // Returns windows owned by this window.
+  std::vector<HostWindow*> GetOwnedWindows() const;
+
+  // Disables the window and all its descendants.
+  void DisableRecursively();
 
   // OS callback called by message pump. Handles the WM_NCCREATE message which
   // is passed when the non-client area is being created and enables automatic
   // non-client DPI scaling so that the non-client area automatically
   // responds to changes in DPI. Delegates other messages to the controller.
   static LRESULT WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
-
-  // Processes and routes salient window messages for mouse handling,
-  // size change and DPI. Delegates handling of these to member overloads that
-  // inheriting classes can handle.
-  LRESULT HandleMessage(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
 
   // Controller for this window.
   WindowManager* const window_manager_ = nullptr;
@@ -125,6 +176,9 @@ class HostWindow {
 
   // The constraints on the window's client area.
   BoxConstraints box_constraints_;
+
+  // True while handling WM_DESTROY; used to detect in-progress destruction.
+  bool is_being_destroyed_ = false;
 
   // Whether or not the window is currently in a fullscreen state.
   bool is_fullscreen_ = false;
