@@ -290,6 +290,8 @@ DEF_SWITCH(EnableAndroidSurfaceControl,
 DEF_SWITCH(EnableFlutterGPU,
            "enable-flutter-gpu",
            "Whether Flutter GPU is enabled.")
+// TODO(camsim99): change this to have the same name:
+// impeller-lazy-shader-initialization
 DEF_SWITCH(ImpellerLazyShaderMode,
            "impeller-lazy-shader-mode",
            "Whether to defer initialization of all required PSOs for the "

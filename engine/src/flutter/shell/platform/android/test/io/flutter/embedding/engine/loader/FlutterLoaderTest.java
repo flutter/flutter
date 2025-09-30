@@ -336,7 +336,7 @@ public class FlutterLoaderTest {
     flutterLoader.ensureInitializationComplete(ctx, null);
     shadowOf(getMainLooper()).idle();
 
-    final String enableImpellerArg = "--enable-flutter-gpu";
+    final String enableFlutterGpuArg = "--enable-flutter-gpu=true";
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
         .init(
@@ -348,9 +348,10 @@ public class FlutterLoaderTest {
             anyLong(),
             anyInt());
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
-    assertTrue(arguments.contains(enableImpellerArg));
+    assertTrue(arguments.contains(enableFlutterGpuArg));
   }
 
+  // TODO(camsim99): change to manifest
   @Test
   public void itSetsEnableSurfaceControlFromMetaData() {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
@@ -365,7 +366,7 @@ public class FlutterLoaderTest {
     flutterLoader.ensureInitializationComplete(ctx, null);
     shadowOf(getMainLooper()).idle();
 
-    final String disabledControlArg = "--enable-surface-control";
+    final String disabledControlArg = "--enable-surface-control=true";
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
         .init(
@@ -394,7 +395,7 @@ public class FlutterLoaderTest {
     flutterLoader.ensureInitializationComplete(ctx, null);
     shadowOf(getMainLooper()).idle();
 
-    final String shaderModeArg = "--impeller-lazy-shader-mode";
+    final String shaderModeArg = "--impeller-lazy-shader-initialization=true";
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
         .init(
@@ -596,6 +597,7 @@ public class FlutterLoaderTest {
     }
   }
 
+  // TODO(camsim99): change to manifest
   @Test
   public void itSetsAotSharedLibraryNameAsExpectedIfSymlinkPointsToInternalStorage()
       throws IOException {

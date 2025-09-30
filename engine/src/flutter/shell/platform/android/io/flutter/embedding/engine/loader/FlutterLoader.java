@@ -343,8 +343,10 @@ public class FlutterLoader {
               }
 
               // Add flag automatically if it does not require a security check.
-              String arg =
-                  "--" + flag.toCommandLineFlag(applicationMetaData.getString(metadataKey));
+              System.out.println(applicationMetaData.get(metadataKey));
+              String arg = flag.toCommandLineFlag(applicationMetaData.get(metadataKey).toString());
+              System.out.println(arg);
+              System.out.println("---------------------");
               shellArgs.add(arg);
             }
           } else {
