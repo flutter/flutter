@@ -1038,7 +1038,7 @@ class SelectableRegionState extends State<SelectableRegion>
           // accesses contextMenuAnchors.
           _lastSecondaryTapDownPosition = details.globalPosition;
           _showHandles();
-          showToolbar(location: _lastSecondaryTapDownPosition);
+          _showToolbar(location: _lastSecondaryTapDownPosition);
           _updateSelectedContentIfNeeded();
           return;
         }
@@ -1071,7 +1071,7 @@ class SelectableRegionState extends State<SelectableRegion>
     // accesses contextMenuAnchors.
     _lastSecondaryTapDownPosition = details.globalPosition;
     _showHandles();
-    showToolbar(location: _lastSecondaryTapDownPosition);
+    _showToolbar(location: _lastSecondaryTapDownPosition);
     _updateSelectedContentIfNeeded();
   }
 
@@ -1336,14 +1336,25 @@ class SelectableRegionState extends State<SelectableRegion>
 
   /// Shows the text selection toolbar.
   ///
-  /// If the parameter `location` is set, the toolbar will be shown at the
-  /// location. Otherwise, the toolbar location will be calculated based on the
-  /// handles' locations. The `location` is in the coordinates system of the
-  /// [Overlay].
+  /// The toolbar location will be calculated based on the
+  /// location of the selection endpoints.
   ///
   /// Returns true if the toolbar is shown, false if the toolbar can't be shown.
   @override
-  bool showToolbar({Offset? location}) {
+  bool showToolbar() {
+    return _showToolbar();
+  }
+
+  /// Shows the text selection toolbar.
+  ///
+  /// When using [TextSelectionControls] to build the toolbar `location` will
+  /// be where the toolbar is shown. Otherwise, the toolbar location will be
+  /// calculated based on the selection endpoints locations. The `location` is
+  /// in the coordinates system of the [Overlay].
+  ///
+  /// Returns true if the toolbar is shown, false if the toolbar can't be shown.
+  // TODO(Renzo-Olivares): Update this method when TextSelectionControls is removed from the framework.
+  bool _showToolbar({Offset? location}) {
     if (!_hasSelectionOverlayGeometry && _selectionOverlay == null) {
       return false;
     }
