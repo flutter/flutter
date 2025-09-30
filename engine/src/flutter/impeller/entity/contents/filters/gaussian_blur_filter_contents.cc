@@ -398,7 +398,7 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
       (!input_texture->NeedsMipmapGeneration() &&
        input_texture->GetTextureDescriptor().mip_count > 1)) {
     // TODO(dkwingsmt): For now this branch ignores bounds_uv because I
-    // haven't met such cases.
+    // haven't found a way to enter this branch.
     ContentContext::SubpassCallback subpass_callback =
         [&](const ContentContext& renderer, RenderPass& pass) {
           HostBuffer& data_host_buffer = renderer.GetTransientsDataBuffer();
