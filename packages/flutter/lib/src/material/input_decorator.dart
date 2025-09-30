@@ -47,6 +47,10 @@ const double _kFinalLabelScale = 0.75;
 // An extra padding should be added for the input content to comply with the 16 pixels padding.
 const double _kInputExtraPadding = 4.0;
 
+// Padding between the character counter and helper/error text to prevent overlap.
+// Based on Material 3 specification for text fields.
+const double _kSubtextCounterPadding = 16.0;
+
 typedef _SubtextSize = ({double ascent, double bottomHeight, double subtextHeight});
 typedef _ChildBaselineGetter = double Function(RenderBox child, BoxConstraints constraints);
 
@@ -922,8 +926,10 @@ class _RenderDecoration extends RenderBox
       null => (Size.zero, 0.0),
     };
 
+    // Only add padding when counter is present (maxLength is used).
+    final double counterPadding = counter != null ? _kSubtextCounterPadding : 0.0;
     final BoxConstraints helperErrorConstraints = constraints.deflate(
-      EdgeInsets.only(left: counterSize.width),
+      EdgeInsets.only(left: counterSize.width + counterPadding),
     );
     final double helperErrorHeight = layoutChild(helperError, helperErrorConstraints).height;
 
@@ -1265,7 +1271,9 @@ class _RenderDecoration extends RenderBox
     final double counterHeight = _minHeight(counter, width);
     final double counterWidth = _minWidth(counter, counterHeight);
 
-    final double helperErrorAvailableWidth = math.max(width - counterWidth, 0.0);
+    // Only add padding when counter is present (maxLength is used).
+    final double counterPadding = counter != null ? _kSubtextCounterPadding : 0.0;
+    final double helperErrorAvailableWidth = math.max(width - counterWidth - counterPadding, 0.0);
     final double helperErrorHeight = _minHeight(helperError, helperErrorAvailableWidth);
     double subtextHeight = math.max(counterHeight, helperErrorHeight);
     if (subtextHeight > 0.0) {
