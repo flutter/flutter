@@ -325,7 +325,6 @@ public class FlutterFragment extends Fragment
       return this;
     }
 
-
     /**
      * Render Flutter either as a {@link RenderMode#surface} or a {@link RenderMode#texture}. You
      * should use {@code surface} unless you have a specific reason to use {@code texture}. {@code
