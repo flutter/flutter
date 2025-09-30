@@ -530,8 +530,6 @@ class XCDevice {
 
     final coreDeviceMap = <String, IOSCoreDevice>{};
     if (_xcode.isDevicectlInstalled) {
-      // The _coreDeviceControl now handles the process and cancellation internally.
-      // We just need to await the final list of devices.
       final List<IOSCoreDevice> coreDevices = await _coreDeviceControl.getCoreDevices(
         timeout: timeout ?? const Duration(seconds: 30),
         cancelCompleter: cancelCompleter,
