@@ -462,7 +462,7 @@ mixin class DialogWindowControllerDelegate {
 /// }
 ///
 /// class MyApp extends StatelessWidget {
-///   MyApp({super.key});
+///   const MyApp({super.key});
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -836,7 +836,7 @@ class RegularWindow extends StatelessWidget {
 /// }
 ///
 /// class MyApp extends StatelessWidget {
-///   MyApp({super.key});
+///   const MyApp({super.key});
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
