@@ -72,12 +72,15 @@ TextStyle fixBlurryText(TextStyle style) {
 }
 
 final TextStyle linkTextStyle = fixBlurryText(
-  TextStyle(
-    decoration: TextDecoration.underline,
+  underlineTextStyle.copyWith(
     // TODO(bkonyi): this color scheme is from DevTools and should be responsive
     // to changes in the previewer theme.
     color: const Color(0xFF1976D2),
   ),
+);
+
+final TextStyle underlineTextStyle = fixBlurryText(
+  TextStyle(decoration: TextDecoration.underline),
 );
 
 /// A basic vertical spacer.

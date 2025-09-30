@@ -3342,7 +3342,7 @@ class _Submenu extends StatelessWidget {
       });
     }
 
-    final MaterialStateMouseCursor mouseCursor = _MouseCursor(
+    final WidgetStateMouseCursor mouseCursor = _MouseCursor(
       (Set<WidgetState> states) =>
           effectiveValue((MenuStyle? style) => style?.mouseCursor?.resolve(states)),
     );
@@ -3444,7 +3444,7 @@ class _Submenu extends StatelessWidget {
 
 /// Wraps the [WidgetStateMouseCursor] so that it can default to
 /// [MouseCursor.uncontrolled] if none is set.
-class _MouseCursor extends MaterialStateMouseCursor {
+class _MouseCursor extends WidgetStateMouseCursor {
   const _MouseCursor(this.resolveCallback);
 
   final WidgetPropertyResolver<MouseCursor?> resolveCallback;

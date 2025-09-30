@@ -1015,9 +1015,25 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     }
     result.setSelected(semanticsNode.hasFlag(Flag.IS_SELECTED));
 
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_36) {
+      if (semanticsNode.hasFlag(Flag.HAS_EXPANDED_STATE)) {
+        final boolean isExpanded = semanticsNode.hasFlag(Flag.IS_EXPANDED);
+        result.setExpandedState(
+            isExpanded
+                ? AccessibilityNodeInfo.EXPANDED_STATE_FULL
+                : AccessibilityNodeInfo.EXPANDED_STATE_COLLAPSED);
+        if (semanticsNode.hasAction(Action.EXPAND)) {
+          result.addAction(AccessibilityNodeInfo.ACTION_EXPAND);
+        }
+        if (semanticsNode.hasAction(Action.COLLAPSE)) {
+          result.addAction(AccessibilityNodeInfo.ACTION_COLLAPSE);
+        }
+      }
+    }
+
     // Heading support
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_28) {
-      result.setHeading(semanticsNode.hasFlag(Flag.IS_HEADER));
+      result.setHeading(semanticsNode.headingLevel > 0);
     }
 
     // Accessibility Focus
@@ -1291,6 +1307,16 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       case AccessibilityNodeInfo.ACTION_SET_TEXT:
         {
           return performSetText(semanticsNode, virtualViewId, arguments);
+        }
+      case AccessibilityNodeInfo.ACTION_EXPAND:
+        {
+          accessibilityChannel.dispatchSemanticsAction(virtualViewId, Action.EXPAND);
+          return true;
+        }
+      case AccessibilityNodeInfo.ACTION_COLLAPSE:
+        {
+          accessibilityChannel.dispatchSemanticsAction(virtualViewId, Action.COLLAPSE);
+          return true;
         }
       default:
         // might be a custom accessibility accessibilityAction.
@@ -2168,7 +2194,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     MOVE_CURSOR_BACKWARD_BY_WORD(1 << 20),
     SET_TEXT(1 << 21),
     FOCUS(1 << 22),
-    SCROLL_TO_OFFSET(1 << 23);
+    SCROLL_TO_OFFSET(1 << 23),
+    EXPAND(1 << 24),
+    COLLAPSE(1 << 25);
 
     public final int value;
 
@@ -2363,6 +2391,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     // The locale of the content of this node.
     @Nullable private String locale;
 
+    // The heading level for this node (0 means not a heading).
+    private int headingLevel;
+
     // The id of the sibling node that is before this node in traversal
     // order.
     //
@@ -2488,6 +2519,10 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                 + flags
                 + "\n"
                 + indent
+                + "  +-- headingLevel="
+                + headingLevel
+                + "\n"
+                + indent
                 + "  +-- textDirection="
                 + textDirection
                 + "\n"
@@ -2563,6 +2598,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       linkUrl = getStringFromBuffer(buffer, strings);
       locale = getStringFromBuffer(buffer, strings);
 
+      headingLevel = buffer.getInt();
       textDirection = TextDirection.fromInt(buffer.getInt());
 
       left = buffer.getFloat();
