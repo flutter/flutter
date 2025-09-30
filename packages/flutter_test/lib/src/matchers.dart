@@ -2454,38 +2454,38 @@ class _MatchesSemanticsData extends Matcher {
     required String? onLongPressHint,
     required this.customActions,
     required this.children,
-  }) : flags = <SemanticsFlag, bool>{
-         SemanticsFlag.hasCheckedState: ?hasCheckedState,
-         SemanticsFlag.isChecked: ?isChecked,
-         SemanticsFlag.isCheckStateMixed: ?isCheckStateMixed,
-         SemanticsFlag.isSelected: ?isSelected,
-         SemanticsFlag.hasSelectedState: ?hasSelectedState,
-         SemanticsFlag.isButton: ?isButton,
-         SemanticsFlag.isSlider: ?isSlider,
-         SemanticsFlag.isKeyboardKey: ?isKeyboardKey,
-         SemanticsFlag.isLink: ?isLink,
-         SemanticsFlag.isTextField: ?isTextField,
-         SemanticsFlag.isReadOnly: ?isReadOnly,
-         SemanticsFlag.isFocused: ?isFocused,
-         SemanticsFlag.isFocusable: ?isFocusable,
-         SemanticsFlag.hasEnabledState: ?hasEnabledState,
-         SemanticsFlag.isEnabled: ?isEnabled,
-         SemanticsFlag.isInMutuallyExclusiveGroup: ?isInMutuallyExclusiveGroup,
-         SemanticsFlag.isHeader: ?isHeader,
-         SemanticsFlag.isObscured: ?isObscured,
-         SemanticsFlag.isMultiline: ?isMultiline,
-         SemanticsFlag.namesRoute: ?namesRoute,
-         SemanticsFlag.scopesRoute: ?scopesRoute,
-         SemanticsFlag.isHidden: ?isHidden,
-         SemanticsFlag.isImage: ?isImage,
-         SemanticsFlag.isLiveRegion: ?isLiveRegion,
-         SemanticsFlag.hasToggledState: ?hasToggledState,
-         SemanticsFlag.isToggled: ?isToggled,
-         SemanticsFlag.hasImplicitScrolling: ?hasImplicitScrolling,
-         SemanticsFlag.hasExpandedState: ?hasExpandedState,
-         SemanticsFlag.isExpanded: ?isExpanded,
-         SemanticsFlag.hasRequiredState: ?hasRequiredState,
-         SemanticsFlag.isRequired: ?isRequired,
+  }) : flags = <String, bool>{
+         'hasCheckedState': ?hasCheckedState,
+         'isChecked': ?isChecked,
+         'isCheckStateMixed': ?isCheckStateMixed,
+         'isSelected': ?isSelected,
+         'hasSelectedState': ?hasSelectedState,
+         'isButton': ?isButton,
+         'isSlider': ?isSlider,
+         'isKeyboardKey': ?isKeyboardKey,
+         'isLink': ?isLink,
+         'isTextField': ?isTextField,
+         'isReadOnly': ?isReadOnly,
+         'isFocused': ?isFocused,
+         'isFocusable': ?isFocusable,
+         'hasEnabledState': ?hasEnabledState,
+         'isEnabled': ?isEnabled,
+         'isInMutuallyExclusiveGroup': ?isInMutuallyExclusiveGroup,
+         'isHeader': ?isHeader,
+         'isObscured': ?isObscured,
+         'isMultiline': ?isMultiline,
+         'namesRoute': ?namesRoute,
+         'scopesRoute': ?scopesRoute,
+         'isHidden': ?isHidden,
+         'isImage': ?isImage,
+         'isLiveRegion': ?isLiveRegion,
+         'hasToggledState': ?hasToggledState,
+         'isToggled': ?isToggled,
+         'hasImplicitScrolling': ?hasImplicitScrolling,
+         'hasExpandedState': ?hasExpandedState,
+         'isExpanded': ?isExpanded,
+         'hasRequiredState': ?hasRequiredState,
+         'isRequired': ?isRequired,
        },
        actions = <SemanticsAction, bool>{
          SemanticsAction.tap: ?hasTapAction,
@@ -2546,7 +2546,7 @@ class _MatchesSemanticsData extends Matcher {
   ///  2. If the flag/action maps to `false`, then it must not be present in the SemanticData
   ///  3. If the flag/action is not in the map, then it will not be validated against
   final Map<SemanticsAction, bool> actions;
-  final Map<SemanticsFlag, bool> flags;
+  final Map<String, bool> flags;
 
   @override
   Description describe(Description description, [String? index]) {
@@ -2598,27 +2598,27 @@ class _MatchesSemanticsData extends Matcher {
           .toList();
 
       if (expectedActions.isNotEmpty) {
-        description.add(' with actions: ${_createEnumsSummary(expectedActions)} ');
+        description.add(' with actions: ${_createSemanticsActionSummary(expectedActions)} ');
       }
       if (notExpectedActions.isNotEmpty) {
-        description.add(' without actions: ${_createEnumsSummary(notExpectedActions)} ');
+        description.add(' without actions: ${_createSemanticsActionSummary(notExpectedActions)} ');
       }
     }
     if (flags.isNotEmpty) {
-      final List<SemanticsFlag> expectedFlags = flags.entries
-          .where((MapEntry<ui.SemanticsFlag, bool> e) => e.value)
-          .map((MapEntry<ui.SemanticsFlag, bool> e) => e.key)
+      final List<String> expectedFlags = flags.entries
+          .where((MapEntry<String, bool> e) => e.value)
+          .map((MapEntry<String, bool> e) => e.key)
           .toList();
-      final List<SemanticsFlag> notExpectedFlags = flags.entries
-          .where((MapEntry<ui.SemanticsFlag, bool> e) => !e.value)
-          .map((MapEntry<ui.SemanticsFlag, bool> e) => e.key)
+      final List<String> notExpectedFlags = flags.entries
+          .where((MapEntry<String, bool> e) => !e.value)
+          .map((MapEntry<String, bool> e) => e.key)
           .toList();
 
       if (expectedFlags.isNotEmpty) {
-        description.add(' with flags: ${_createEnumsSummary(expectedFlags)} ');
+        description.add(' with flags: ${expectedFlags.join(',')} ');
       }
       if (notExpectedFlags.isNotEmpty) {
-        description.add(' without flags: ${_createEnumsSummary(notExpectedFlags)} ');
+        description.add(' without flags: ${notExpectedFlags.join(', ')} ');
       }
     }
     if (textDirection != null) {
@@ -2803,7 +2803,7 @@ class _MatchesSemanticsData extends Matcher {
       if (unexpectedActions.isNotEmpty || missingActions.isNotEmpty) {
         return failWithDescription(
           matchState,
-          'missing actions: ${_createEnumsSummary(missingActions)} unexpected actions: ${_createEnumsSummary(unexpectedActions)}',
+          'missing actions: ${_createSemanticsActionSummary(missingActions)} unexpected actions: ${_createSemanticsActionSummary(unexpectedActions)}',
         );
       }
     }
@@ -2848,17 +2848,18 @@ class _MatchesSemanticsData extends Matcher {
       }
     }
     if (flags.isNotEmpty) {
-      final List<SemanticsFlag> unexpectedFlags = <SemanticsFlag>[];
-      final List<SemanticsFlag> missingFlags = <SemanticsFlag>[];
-      for (final MapEntry<ui.SemanticsFlag, bool> flagEntry in flags.entries) {
-        final ui.SemanticsFlag flag = flagEntry.key;
+      final Map<String, bool> foundFlags = _stringsMapFromSemanticsFlags(data.flagsCollection);
+      final List<String> unexpectedFlags = <String>[];
+      final List<String> missingFlags = <String>[];
+      for (final MapEntry<String, bool> flagEntry in flags.entries) {
+        final String flagName = flagEntry.key;
         final bool flagExpected = flagEntry.value;
-        final bool flagPresent = flag.index & data.flags == flag.index;
+        final bool flagPresent = foundFlags[flagName]!;
         if (flagPresent != flagExpected) {
           if (flagExpected) {
-            missingFlags.add(flag);
+            missingFlags.add(flagName);
           } else {
-            unexpectedFlags.add(flag);
+            unexpectedFlags.add(flagName);
           }
         }
       }
@@ -2866,7 +2867,7 @@ class _MatchesSemanticsData extends Matcher {
       if (unexpectedFlags.isNotEmpty || missingFlags.isNotEmpty) {
         return failWithDescription(
           matchState,
-          'missing flags: ${_createEnumsSummary(missingFlags)} unexpected flags: ${_createEnumsSummary(unexpectedFlags)}',
+          'missing flags: ${missingFlags.join(',')} unexpected flags: ${unexpectedFlags.join(',')}',
         );
       }
     }
@@ -2897,16 +2898,8 @@ class _MatchesSemanticsData extends Matcher {
     return mismatchDescription.add(matchState['failure'] as String);
   }
 
-  static String _createEnumsSummary<T extends Object>(List<T> enums) {
-    assert(
-      T == SemanticsAction || T == SemanticsFlag,
-      'This method is only intended for lists of SemanticsActions or SemanticsFlags.',
-    );
-    if (T == SemanticsAction) {
-      return '[${(enums as List<SemanticsAction>).map((SemanticsAction d) => d.name).join(', ')}]';
-    } else {
-      return '[${(enums as List<SemanticsFlag>).map((SemanticsFlag d) => d.name).join(', ')}]';
-    }
+  static String _createSemanticsActionSummary(List<SemanticsAction> enums) {
+    return '[${enums.map((ui.SemanticsAction d) => d.name).join(', ')}]';
   }
 }
 
@@ -2948,4 +2941,40 @@ class _DoesNotMatchAccessibilityGuideline extends AsyncMatcher {
     }
     return null;
   }
+}
+
+Map<String, bool> _stringsMapFromSemanticsFlags(SemanticsFlags flagsCollection) {
+  return <String, bool>{
+    'hasCheckedState': flagsCollection.isChecked != ui.CheckedState.none,
+    'isChecked': flagsCollection.isChecked == ui.CheckedState.isTrue,
+    'isCheckStateMixed': flagsCollection.isChecked == ui.CheckedState.mixed,
+    'isSelected': flagsCollection.isSelected == ui.Tristate.isTrue,
+    'hasSelectedState': flagsCollection.isSelected != ui.Tristate.none,
+    'isButton': flagsCollection.isButton,
+    'isSlider': flagsCollection.isSlider,
+    'isKeyboardKey': flagsCollection.isKeyboardKey,
+    'isLink': flagsCollection.isLink,
+    'isFocused': flagsCollection.isFocused == ui.Tristate.isTrue,
+    'isFocusable': flagsCollection.isFocused != ui.Tristate.none,
+    'isTextField': flagsCollection.isTextField,
+    'isReadOnly': flagsCollection.isReadOnly,
+    'hasEnabledState': flagsCollection.isEnabled != ui.Tristate.none,
+    'isEnabled': flagsCollection.isEnabled == ui.Tristate.isTrue,
+    'isInMutuallyExclusiveGroup': flagsCollection.isInMutuallyExclusiveGroup,
+    'isHeader': flagsCollection.isHeader,
+    'isObscured': flagsCollection.isObscured,
+    'isMultiline': flagsCollection.isMultiline,
+    'namesRoute': flagsCollection.namesRoute,
+    'scopesRoute': flagsCollection.scopesRoute,
+    'isHidden': flagsCollection.isHidden,
+    'isImage': flagsCollection.isImage,
+    'isLiveRegion': flagsCollection.isLiveRegion,
+    'hasToggledState': flagsCollection.isToggled != ui.Tristate.none,
+    'isToggled': flagsCollection.isToggled == ui.Tristate.isTrue,
+    'hasImplicitScrolling': flagsCollection.hasImplicitScrolling,
+    'hasExpandedState': flagsCollection.isExpanded != ui.Tristate.none,
+    'isExpanded': flagsCollection.isExpanded == ui.Tristate.isTrue,
+    'hasRequiredState': flagsCollection.isRequired != ui.Tristate.none,
+    'isRequired': flagsCollection.isRequired == ui.Tristate.isTrue,
+  };
 }
