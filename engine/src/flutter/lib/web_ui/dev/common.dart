@@ -75,7 +75,7 @@ class WindowsPlatformBinding extends PlatformBinding {
 
   @override
   String getFirefoxDownloadUrl(String version) =>
-      'https://download-installer.cdn.mozilla.net/pub/firefox/releases/$version/win64/en-US/'
+      'https://ftp.mozilla.org/pub/firefox/releases/$version/win64/en-US/'
       '${getFirefoxDownloadFilename(version)}';
 
   @override
@@ -109,11 +109,11 @@ class LinuxPlatformBinding extends PlatformBinding {
 
   @override
   String getFirefoxDownloadUrl(String version) =>
-      'https://download-installer.cdn.mozilla.net/pub/firefox/releases/$version/linux-x86_64/en-US/'
+      'https://ftp.mozilla.org/pub/firefox/releases/$version/linux-x86_64/en-US/'
       '${getFirefoxDownloadFilename(version)}';
 
   @override
-  String getFirefoxDownloadFilename(String version) => 'firefox-$version.tar.bz2';
+  String getFirefoxDownloadFilename(String version) => 'firefox-$version.tar.xz';
 
   @override
   String getFirefoxExecutablePath(io.Directory versionDir) =>
@@ -145,7 +145,7 @@ abstract class MacPlatformBinding extends PlatformBinding {
 
   @override
   String getFirefoxDownloadUrl(String version) =>
-      'https://download-installer.cdn.mozilla.net/pub/firefox/releases/$version/mac/en-US/'
+      'https://ftp.mozilla.org/pub/firefox/releases/$version/mac/en-US/'
       '${getFirefoxDownloadFilename(version)}';
 
   @override
