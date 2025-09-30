@@ -7,12 +7,12 @@ import 'package:flutter/src/foundation/_features.dart' show isWindowingEnabled;
 import 'package:flutter/src/widgets/_window.dart'
     show
         BaseWindowController,
-        RegularWindow,
-        RegularWindowController,
-        RegularWindowControllerDelegate,
         DialogWindow,
         DialogWindowController,
         DialogWindowControllerDelegate,
+        RegularWindow,
+        RegularWindowController,
+        RegularWindowControllerDelegate,
         WindowScope,
         WindowingOwner,
         createDefaultWindowingOwner;
