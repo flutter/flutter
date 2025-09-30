@@ -456,7 +456,7 @@ mixin class DialogWindowControllerDelegate {
 ///         preferredConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
 ///         title: 'Example Window',
 ///       ),
-///       child: MyApp()
+///       child: const MyApp()
 ///     )
 ///   );
 /// }
@@ -830,7 +830,7 @@ class RegularWindow extends StatelessWidget {
 ///         preferredConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
 ///         title: 'Example Window',
 ///       ),
-///       child: MyApp()
+///       child: const MyApp()
 ///     )
 ///   );
 /// }
