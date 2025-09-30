@@ -72,12 +72,15 @@ dependencies:
   flutter_test:
     sdk: flutter
   # These will be replaced with proper constraints after the template is hydrated.
-  dtd: 2.5.1
-  flutter_lints: 5.0.0
+  dtd: 4.0.0
+  flutter_lints: 6.0.0
+  google_fonts: 6.3.2
+  json_rpc_2: 3.0.3
+  path: 1.9.1
   stack_trace: 1.12.1
-  url_launcher: 6.3.1
+  url_launcher: 6.3.2
 
-# PUBSPEC CHECKSUM: giib17
+# PUBSPEC CHECKSUM: tr8ib0
 ''';
 
 // An example pubspec.yaml from flutter, not necessary for it to be up to date.

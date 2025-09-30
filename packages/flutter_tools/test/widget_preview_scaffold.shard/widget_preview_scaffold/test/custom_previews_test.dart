@@ -72,9 +72,14 @@ WidgetPreviewerWidgetScaffolding previewsForCustomMultiPreview() {
     preview: BrightnessPreview(name: 'MyPreview'),
     previewFunction: () => Text('Foo'),
   );
+  final controller = FakeWidgetPreviewScaffoldController();
   return WidgetPreviewerWidgetScaffolding(
     child: Column(
-      children: [...previews.map((e) => WidgetPreviewWidget(preview: e))],
+      children: [
+        ...previews.map(
+          (e) => WidgetPreviewWidget(preview: e, controller: controller),
+        ),
+      ],
     ),
   );
 }
