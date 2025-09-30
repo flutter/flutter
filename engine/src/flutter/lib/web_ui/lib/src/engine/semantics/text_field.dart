@@ -365,20 +365,15 @@ class SemanticTextField extends SemanticRole {
       switch (semanticsObject.inputType) {
         case ui.SemanticsInputType.search:
           input.type = 'search';
-          break;
         case ui.SemanticsInputType.url:
           input.type = 'url';
-          break;
         case ui.SemanticsInputType.phone:
           input.type = 'tel';
-          break;
         case ui.SemanticsInputType.email:
           input.setAttribute('inputmode', 'email');
           input.setAttribute('autocapitalize', 'none');
           input.autocomplete = 'email';
-          break;
         default:
-          break;
       }
     }
   }
