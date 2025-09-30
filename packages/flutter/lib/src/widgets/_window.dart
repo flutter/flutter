@@ -460,7 +460,7 @@ mixin class DialogWindowControllerDelegate {
 ///         home: DialogWindow(
 ///           controller: DialogWindowController(
 ///             preferredSize: const Size(400, 300),
-///             parent: WidgetsBinding.instance.platformDispatcher.views.first,
+///             parent: WindowScope.of(context),
 ///             title: 'Example Dialog'
 ///           ),
 ///           child: const Text('Hello, World!')
@@ -825,7 +825,7 @@ class RegularWindow extends StatelessWidget {
 ///         home: DialogWindow(
 ///           controller: DialogWindowController(
 ///             preferredSize: const Size(400, 300),
-///             parent: WidgetsBinding.instance.platformDispatcher.views.first,
+///             parent: WindowScope.of(context),
 ///             title: 'Example Dialog'
 ///           ),
 ///           child: const Text('Hello, World!')
