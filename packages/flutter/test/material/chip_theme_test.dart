@@ -1526,7 +1526,7 @@ void main() {
   });
 }
 
-class _MaterialStateOutlinedBorder extends StadiumBorder implements MaterialStateOutlinedBorder {
+class _MaterialStateOutlinedBorder extends StadiumBorder implements WidgetStateOutlinedBorder {
   const _MaterialStateOutlinedBorder(this.resolver);
 
   final WidgetPropertyResolver<OutlinedBorder?> resolver;
