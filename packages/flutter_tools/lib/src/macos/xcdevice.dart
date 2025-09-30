@@ -113,7 +113,10 @@ class XCDevice {
   }
 
   void cancelWirelessDiscovery() {
-    _cancelWirelessDiscoveryCompleter?.complete();
+    if (_cancelWirelessDiscoveryCompleter != null &&
+        !_cancelWirelessDiscoveryCompleter!.isCompleted) {
+      _cancelWirelessDiscoveryCompleter?.complete();
+    }
   }
 
   final ProcessUtils _processUtils;
