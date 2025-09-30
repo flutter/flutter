@@ -40,10 +40,10 @@
   "shareButtonLabel": "Абагуліць...",
   "cancelButtonLabel": "Скасаваць",
   "backButtonLabel": "Назад",
-  "expansionTileExpandedHint": "double tap to collapse",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "двойчы націснуць, каб згарнуць",
+  "expansionTileCollapsedHint": "двойчы націснуць, каб разгарнуць",
+  "expansionTileExpandedTapHint": "Згарнуць",
+  "expansionTileCollapsedTapHint": "Разгарніце, каб даведацца больш",
+  "expandedHint": "Згорнута",
+  "collapsedHint": "Разгорнута"
 }
