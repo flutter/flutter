@@ -81,6 +81,7 @@ public class PlatformViewsChannel {
         }
 
         private void create(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
+
           final Map<String, Object> createArgs = call.arguments();
           // TODO(egarciad): Remove the "hybrid" case.
           final boolean usesPlatformViewLayer =
@@ -89,18 +90,28 @@ public class PlatformViewsChannel {
               createArgs.containsKey("params")
                   ? ByteBuffer.wrap((byte[]) createArgs.get("params"))
                   : null;
+
           try {
+            // TODO(gmackall): Enable hcpp path in a follow up PR to
+            //                 https://github.com/flutter/flutter/pull/170553/.
+            //                 with a new more externally friendly flag name.
+            //            if (handler.isHcppEnabled()) {
+            //              final PlatformViewCreationRequest request =
+            //                  PlatformViewCreationRequest.createHCPPRequest(
+            //                      (int) createArgs.get("id"),
+            //                      (String) createArgs.get("viewType"),
+            //                      (int) createArgs.get("direction"),
+            //                      additionalParams);
+            //              handler.createPlatformViewHcpp(request);
+            //              result.success(null);
+            //              return;
+            //            }
             if (usesPlatformViewLayer) {
               final PlatformViewCreationRequest request =
-                  new PlatformViewCreationRequest(
+                  PlatformViewCreationRequest.createHybridCompositionRequest(
                       (int) createArgs.get("id"),
                       (String) createArgs.get("viewType"),
-                      0,
-                      0,
-                      0,
-                      0,
                       (int) createArgs.get("direction"),
-                      PlatformViewCreationRequest.RequestedDisplayMode.HYBRID_ONLY,
                       additionalParams);
               handler.createForPlatformViewLayer(request);
               result.success(null);
@@ -108,14 +119,8 @@ public class PlatformViewsChannel {
               final boolean hybridFallback =
                   createArgs.containsKey("hybridFallback")
                       && (boolean) createArgs.get("hybridFallback");
-              final PlatformViewCreationRequest.RequestedDisplayMode displayMode =
-                  hybridFallback
-                      ? PlatformViewCreationRequest.RequestedDisplayMode
-                          .TEXTURE_WITH_HYBRID_FALLBACK
-                      : PlatformViewCreationRequest.RequestedDisplayMode
-                          .TEXTURE_WITH_VIRTUAL_FALLBACK;
               final PlatformViewCreationRequest request =
-                  new PlatformViewCreationRequest(
+                  PlatformViewCreationRequest.createTLHCWithFallbackRequest(
                       (int) createArgs.get("id"),
                       (String) createArgs.get("viewType"),
                       createArgs.containsKey("top") ? (double) createArgs.get("top") : 0.0,
@@ -123,7 +128,7 @@ public class PlatformViewsChannel {
                       (double) createArgs.get("width"),
                       (double) createArgs.get("height"),
                       (int) createArgs.get("direction"),
-                      displayMode,
+                      hybridFallback,
                       additionalParams);
               long textureId = handler.createForTextureLayer(request);
               if (textureId == PlatformViewsHandler.NON_TEXTURE_FALLBACK) {
@@ -306,6 +311,11 @@ public class PlatformViewsChannel {
      */
     void createForPlatformViewLayer(@NonNull PlatformViewCreationRequest request);
 
+    /** Returns true if creation of HC++ platform views is currently supported. */
+    boolean isHcppEnabled();
+
+    void createPlatformViewHcpp(@NonNull PlatformViewCreationRequest request);
+
     /**
      * The Flutter application would like to display a new Android {@code View}, i.e., platform
      * view.
@@ -363,94 +373,6 @@ public class PlatformViewsChannel {
     void synchronizeToNativeViewHierarchy(boolean yes);
   }
 
-  /** Request sent from Flutter to create a new platform view. */
-  public static class PlatformViewCreationRequest {
-    /** Platform view display modes that can be requested at creation time. */
-    public enum RequestedDisplayMode {
-      /** Use Texture Layer if possible, falling back to Virtual Display if not. */
-      TEXTURE_WITH_VIRTUAL_FALLBACK,
-      /** Use Texture Layer if possible, falling back to Hybrid Composition if not. */
-      TEXTURE_WITH_HYBRID_FALLBACK,
-      /** Use Hybrid Composition in all cases. */
-      HYBRID_ONLY,
-    }
-
-    /** The ID of the platform view as seen by the Flutter side. */
-    public final int viewId;
-
-    /** The type of Android {@code View} to create for this platform view. */
-    @NonNull public final String viewType;
-
-    /** The density independent width to display the platform view. */
-    public final double logicalWidth;
-
-    /** The density independent height to display the platform view. */
-    public final double logicalHeight;
-
-    /** The density independent top position to display the platform view. */
-    public final double logicalTop;
-
-    /** The density independent left position to display the platform view. */
-    public final double logicalLeft;
-
-    /**
-     * The layout direction of the new platform view.
-     *
-     * <p>See {@link android.view.View#LAYOUT_DIRECTION_LTR} and {@link
-     * android.view.View#LAYOUT_DIRECTION_RTL}
-     */
-    public final int direction;
-
-    public final RequestedDisplayMode displayMode;
-
-    /** Custom parameters that are unique to the desired platform view. */
-    @Nullable public final ByteBuffer params;
-
-    /** Creates a request to construct a platform view. */
-    public PlatformViewCreationRequest(
-        int viewId,
-        @NonNull String viewType,
-        double logicalTop,
-        double logicalLeft,
-        double logicalWidth,
-        double logicalHeight,
-        int direction,
-        @Nullable ByteBuffer params) {
-      this(
-          viewId,
-          viewType,
-          logicalTop,
-          logicalLeft,
-          logicalWidth,
-          logicalHeight,
-          direction,
-          RequestedDisplayMode.TEXTURE_WITH_VIRTUAL_FALLBACK,
-          params);
-    }
-
-    /** Creates a request to construct a platform view with the given display mode. */
-    public PlatformViewCreationRequest(
-        int viewId,
-        @NonNull String viewType,
-        double logicalTop,
-        double logicalLeft,
-        double logicalWidth,
-        double logicalHeight,
-        int direction,
-        RequestedDisplayMode displayMode,
-        @Nullable ByteBuffer params) {
-      this.viewId = viewId;
-      this.viewType = viewType;
-      this.logicalTop = logicalTop;
-      this.logicalLeft = logicalLeft;
-      this.logicalWidth = logicalWidth;
-      this.logicalHeight = logicalHeight;
-      this.direction = direction;
-      this.displayMode = displayMode;
-      this.params = params;
-    }
-  }
-
   /** Request sent from Flutter to resize a platform view. */
   public static class PlatformViewResizeRequest {
     /** The ID of the platform view as seen by the Flutter side. */
@@ -486,82 +408,5 @@ public class PlatformViewsChannel {
   /** Allows to notify when a platform view buffer has been resized. */
   public interface PlatformViewBufferResized {
     void run(@Nullable PlatformViewBufferSize bufferSize);
-  }
-
-  /** The state of a touch event in Flutter within a platform view. */
-  public static class PlatformViewTouch {
-    /** The ID of the platform view as seen by the Flutter side. */
-    public final int viewId;
-
-    /** The amount of time that the touch has been pressed. */
-    @NonNull public final Number downTime;
-    /** TODO(mattcarroll): javadoc */
-    @NonNull public final Number eventTime;
-
-    public final int action;
-    /** The number of pointers (e.g, fingers) involved in the touch event. */
-    public final int pointerCount;
-    /**
-     * Properties for each pointer, encoded in a raw format. Expected to be formatted as a
-     * List[List[Integer]], where each inner list has two items: - An id, at index 0, corresponding
-     * to {@link android.view.MotionEvent.PointerProperties#id} - A tool type, at index 1,
-     * corresponding to {@link android.view.MotionEvent.PointerProperties#toolType}.
-     */
-    @NonNull public final Object rawPointerPropertiesList;
-    /** Coordinates for each pointer, encoded in a raw format. */
-    @NonNull public final Object rawPointerCoords;
-    /** TODO(mattcarroll): javadoc */
-    public final int metaState;
-    /** TODO(mattcarroll): javadoc */
-    public final int buttonState;
-    /** Coordinate precision along the x-axis. */
-    public final float xPrecision;
-    /** Coordinate precision along the y-axis. */
-    public final float yPrecision;
-    /** TODO(mattcarroll): javadoc */
-    public final int deviceId;
-    /** TODO(mattcarroll): javadoc */
-    public final int edgeFlags;
-    /** TODO(mattcarroll): javadoc */
-    public final int source;
-    /** TODO(mattcarroll): javadoc */
-    public final int flags;
-    /** TODO(iskakaushik): javadoc */
-    public final long motionEventId;
-
-    public PlatformViewTouch(
-        int viewId,
-        @NonNull Number downTime,
-        @NonNull Number eventTime,
-        int action,
-        int pointerCount,
-        @NonNull Object rawPointerPropertiesList,
-        @NonNull Object rawPointerCoords,
-        int metaState,
-        int buttonState,
-        float xPrecision,
-        float yPrecision,
-        int deviceId,
-        int edgeFlags,
-        int source,
-        int flags,
-        long motionEventId) {
-      this.viewId = viewId;
-      this.downTime = downTime;
-      this.eventTime = eventTime;
-      this.action = action;
-      this.pointerCount = pointerCount;
-      this.rawPointerPropertiesList = rawPointerPropertiesList;
-      this.rawPointerCoords = rawPointerCoords;
-      this.metaState = metaState;
-      this.buttonState = buttonState;
-      this.xPrecision = xPrecision;
-      this.yPrecision = yPrecision;
-      this.deviceId = deviceId;
-      this.edgeFlags = edgeFlags;
-      this.source = source;
-      this.flags = flags;
-      this.motionEventId = motionEventId;
-    }
   }
 }

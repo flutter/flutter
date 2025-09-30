@@ -43,10 +43,9 @@ class _RestorablePushReplacementExampleState extends State<RestorablePushReplace
     return Scaffold(
       appBar: AppBar(title: const Text('Sample Code')),
       body: Center(
-        child:
-            widget.wasPushed
-                ? const Text('This is a new route.')
-                : const Text('This is the initial route.'),
+        child: widget.wasPushed
+            ? const Text('This is a new route.')
+            : const Text('This is the initial route.'),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.of(context).restorablePushReplacement(_myRouteBuilder),

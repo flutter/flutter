@@ -38,47 +38,47 @@ class LocaleInitialization extends Scenario {
     // On the first frame, pretend that it drew a text field. Send the
     // corresponding semantics tree comprised of 1 node with the locale data
     // as the label.
-    final SemanticsUpdateBuilder semanticsUpdateBuilder =
-        SemanticsUpdateBuilder()..updateNode(
-          id: 0,
-          flags: SemanticsFlags(isTextField: true),
-          // SemanticsAction.tap.
-          actions: 1,
-          rect: const Rect.fromLTRB(0.0, 0.0, 414.0, 48.0),
-          identifier: '',
-          label: view.platformDispatcher.locales.toString(),
-          labelAttributes: <StringAttribute>[],
-          textDirection: TextDirection.ltr,
-          textSelectionBase: -1,
-          textSelectionExtent: -1,
-          platformViewId: -1,
-          maxValueLength: -1,
-          currentValueLength: 0,
-          scrollChildren: 0,
-          scrollIndex: 0,
-          scrollPosition: 0.0,
-          scrollExtentMax: 0.0,
-          scrollExtentMin: 0.0,
-          transform: Matrix4.identity().storage,
-          hint: '',
-          hintAttributes: <StringAttribute>[],
-          value: '',
-          valueAttributes: <StringAttribute>[],
-          increasedValue: '',
-          increasedValueAttributes: <StringAttribute>[],
-          decreasedValue: '',
-          decreasedValueAttributes: <StringAttribute>[],
-          tooltip: '',
-          childrenInTraversalOrder: Int32List(0),
-          childrenInHitTestOrder: Int32List(0),
-          additionalActions: Int32List(0),
-          controlsNodes: null,
-          inputType: SemanticsInputType.none,
-          locale: null,
-        );
+    final SemanticsUpdateBuilder semanticsUpdateBuilder = SemanticsUpdateBuilder()
+      ..updateNode(
+        id: 0,
+        flags: SemanticsFlags(isTextField: true),
+        // SemanticsAction.tap.
+        actions: 1,
+        rect: const Rect.fromLTRB(0.0, 0.0, 414.0, 48.0),
+        identifier: '',
+        label: view.platformDispatcher.locales.toString(),
+        labelAttributes: <StringAttribute>[],
+        textDirection: TextDirection.ltr,
+        textSelectionBase: -1,
+        textSelectionExtent: -1,
+        platformViewId: -1,
+        maxValueLength: -1,
+        currentValueLength: 0,
+        scrollChildren: 0,
+        scrollIndex: 0,
+        scrollPosition: 0.0,
+        scrollExtentMax: 0.0,
+        scrollExtentMin: 0.0,
+        transform: Matrix4.identity().storage,
+        hint: '',
+        hintAttributes: <StringAttribute>[],
+        value: '',
+        valueAttributes: <StringAttribute>[],
+        increasedValue: '',
+        increasedValueAttributes: <StringAttribute>[],
+        decreasedValue: '',
+        decreasedValueAttributes: <StringAttribute>[],
+        tooltip: '',
+        childrenInTraversalOrder: Int32List(0),
+        childrenInHitTestOrder: Int32List(0),
+        additionalActions: Int32List(0),
+        controlsNodes: null,
+        inputType: SemanticsInputType.none,
+        locale: null,
+      );
 
     final SemanticsUpdate semanticsUpdate = semanticsUpdateBuilder.build();
-
+    view.platformDispatcher.setSemanticsTreeEnabled(true);
     view.updateSemantics(semanticsUpdate);
   }
 
@@ -98,44 +98,44 @@ class LocaleInitialization extends Scenario {
       // Expand for other test cases.
     }
 
-    final SemanticsUpdateBuilder semanticsUpdateBuilder =
-        SemanticsUpdateBuilder()..updateNode(
-          id: 0,
-          flags: SemanticsFlags(isTextField: true),
-          // SemanticsAction.tap.
-          actions: 1,
-          rect: const Rect.fromLTRB(0.0, 0.0, 414.0, 48.0),
-          identifier: '',
-          label: label,
-          labelAttributes: <StringAttribute>[],
-          textDirection: TextDirection.ltr,
-          textSelectionBase: 0,
-          textSelectionExtent: 0,
-          platformViewId: -1,
-          maxValueLength: -1,
-          currentValueLength: 0,
-          scrollChildren: 0,
-          scrollIndex: 0,
-          scrollPosition: 0.0,
-          scrollExtentMax: 0.0,
-          scrollExtentMin: 0.0,
-          transform: Matrix4.identity().storage,
-          hint: '',
-          hintAttributes: <StringAttribute>[],
-          value: '',
-          valueAttributes: <StringAttribute>[],
-          increasedValue: '',
-          increasedValueAttributes: <StringAttribute>[],
-          decreasedValue: '',
-          decreasedValueAttributes: <StringAttribute>[],
-          tooltip: '',
-          childrenInTraversalOrder: Int32List(0),
-          childrenInHitTestOrder: Int32List(0),
-          additionalActions: Int32List(0),
-          controlsNodes: null,
-          inputType: SemanticsInputType.none,
-          locale: null,
-        );
+    final SemanticsUpdateBuilder semanticsUpdateBuilder = SemanticsUpdateBuilder()
+      ..updateNode(
+        id: 0,
+        flags: SemanticsFlags(isTextField: true),
+        // SemanticsAction.tap.
+        actions: 1,
+        rect: const Rect.fromLTRB(0.0, 0.0, 414.0, 48.0),
+        identifier: '',
+        label: label,
+        labelAttributes: <StringAttribute>[],
+        textDirection: TextDirection.ltr,
+        textSelectionBase: 0,
+        textSelectionExtent: 0,
+        platformViewId: -1,
+        maxValueLength: -1,
+        currentValueLength: 0,
+        scrollChildren: 0,
+        scrollIndex: 0,
+        scrollPosition: 0.0,
+        scrollExtentMax: 0.0,
+        scrollExtentMin: 0.0,
+        transform: Matrix4.identity().storage,
+        hint: '',
+        hintAttributes: <StringAttribute>[],
+        value: '',
+        valueAttributes: <StringAttribute>[],
+        increasedValue: '',
+        increasedValueAttributes: <StringAttribute>[],
+        decreasedValue: '',
+        decreasedValueAttributes: <StringAttribute>[],
+        tooltip: '',
+        childrenInTraversalOrder: Int32List(0),
+        childrenInHitTestOrder: Int32List(0),
+        additionalActions: Int32List(0),
+        controlsNodes: null,
+        inputType: SemanticsInputType.none,
+        locale: null,
+      );
 
     final SemanticsUpdate semanticsUpdate = semanticsUpdateBuilder.build();
 

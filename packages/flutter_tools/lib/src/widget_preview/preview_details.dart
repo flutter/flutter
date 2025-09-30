@@ -2,20 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/constant/value.dart';
+
+typedef PreviewProperty = ({String key, DartObject object, bool isCallback});
 
 /// Contains details related to a single preview instance.
 final class PreviewDetails {
-  PreviewDetails({required this.packageName, required this.functionName, required this.isBuilder});
+  PreviewDetails({
+    required this.scriptUri,
+    required this.packageName,
+    required this.functionName,
+    required this.isBuilder,
+    required this.isMultiPreview,
+    required this.previewAnnotation,
+  });
 
-  static const String kPackageName = 'packageName';
-  static const String kName = 'name';
-  static const String kSize = 'size';
-  static const String kTextScaleFactor = 'textScaleFactor';
-  static const String kWrapper = 'wrapper';
-  static const String kTheme = 'theme';
-  static const String kBrightness = 'brightness';
-  static const String kLocalizations = 'localizations';
+  /// The file:// URI pointing to the script in which the preview is defined.
+  final Uri scriptUri;
 
   /// The name of the package in which the preview was defined.
   ///
@@ -33,89 +36,13 @@ final class PreviewDetails {
   /// instead of a `Widget`.
   final bool isBuilder;
 
-  /// A description to be displayed alongside the preview.
+  /// The annotation marking a function as a preview.
   ///
-  /// If not provided, no name will be associated with the preview.
-  Expression? get name => _name;
-  Expression? _name;
+  /// This can be any object which extends `Preview` or `MultiPreview`.
+  final DartObject previewAnnotation;
 
-  /// Artificial constraints to be applied to the `child`.
-  ///
-  /// If not provided, the previewed widget will attempt to set its own
-  /// constraints and may result in an unbounded constraint error.
-  Expression? get size => _size;
-  Expression? _size;
-
-  /// Applies font scaling to text within the `child`.
-  ///
-  /// If not provided, the default text scaling factor provided by `MediaQuery`
-  /// will be used.
-  Expression? get textScaleFactor => _textScaleFactor;
-  Expression? _textScaleFactor;
-
-  /// The name of a tear-off used to wrap the `Widget` returned by the preview
-  /// function defined by [functionName].
-  ///
-  /// If not provided, the `Widget` returned by [functionName] will be used by
-  /// the previewer directly.
-  Identifier? get wrapper => _wrapper;
-  Identifier? _wrapper;
-
-  /// Set to `true` if `wrapper` is set.
-  bool get hasWrapper => _wrapper != null;
-
-  /// A callback to return Material and Cupertino theming data to be applied
-  /// to the previewed `Widget`.
-  Identifier? get theme => _theme;
-  Identifier? _theme;
-
-  /// Sets the initial theme brightness.
-  ///
-  /// If not provided, the current system default brightness will be used.
-  Expression? get brightness => _brightness;
-  Expression? _brightness;
-
-  Expression? get localizations => _localizations;
-  Expression? _localizations;
-
-  /// Initializes a property based on a argument to the preview declaration.
-  ///
-  /// Throws a [StateError] if the property has already been initialized.
-  void setField({required NamedExpression node}) {
-    final String key = node.name.label.name;
-    final Expression expression = node.expression;
-    switch (key) {
-      case kName:
-        _expectNotSet(kName, _name);
-        _name = expression;
-      case kSize:
-        _expectNotSet(kSize, _size);
-        _size = expression;
-      case kTextScaleFactor:
-        _expectNotSet(kTextScaleFactor, _textScaleFactor);
-        _textScaleFactor = expression;
-      case kWrapper:
-        _expectNotSet(kWrapper, _wrapper);
-        _wrapper = expression as Identifier;
-      case kTheme:
-        _expectNotSet(kTheme, _theme);
-        _theme = expression as Identifier;
-      case kBrightness:
-        _expectNotSet(kBrightness, _brightness);
-        _brightness = expression;
-      case kLocalizations:
-        _expectNotSet(kLocalizations, _localizations);
-        _localizations = expression;
-      default:
-        throw StateError('Unknown Preview field "$name": ${expression.toSource()}');
-    }
-  }
-
-  void _expectNotSet(String key, Object? field) {
-    if (field != null) {
-      throw StateError('$key has already been set.');
-    }
-  }
+  /// Set to true if [previewAnnotation] is a `MultiPreview`.
+  final bool isMultiPreview;
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
@@ -125,34 +52,35 @@ final class PreviewDetails {
     }
     return other.runtimeType == runtimeType &&
         other is PreviewDetails &&
+        other.scriptUri == scriptUri &&
         other.packageName == packageName &&
         other.functionName == functionName &&
         other.isBuilder == isBuilder &&
-        other.size == size &&
-        other.textScaleFactor == textScaleFactor &&
-        other.wrapper == wrapper &&
-        other.theme == theme &&
-        other.brightness == brightness &&
-        other.localizations == localizations;
+        other.previewAnnotation == previewAnnotation &&
+        other.isMultiPreview == isMultiPreview;
   }
 
   @override
   String toString() =>
-      'PreviewDetails(function: $functionName packageName: $packageName isBuilder: $isBuilder '
-      '$kName: $name $kSize: $size $kTextScaleFactor: $textScaleFactor $kWrapper: $wrapper '
-      '$kTheme: $theme $kBrightness: $_brightness $kLocalizations: $_localizations)';
+      '''
+PreviewDetails(
+  scriptUri: $scriptUri
+  function: $functionName
+  packageName: $packageName
+  isBuilder: $isBuilder
+  isMultiPreview: $isMultiPreview
+  previewAnnotation: $previewAnnotation
+)
+''';
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   int get hashCode => Object.hashAll(<Object?>[
+    scriptUri,
     packageName,
     functionName,
     isBuilder,
-    size,
-    textScaleFactor,
-    wrapper,
-    theme,
-    brightness,
-    localizations,
+    previewAnnotation,
+    isMultiPreview,
   ]);
 }

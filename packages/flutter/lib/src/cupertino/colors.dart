@@ -1010,15 +1010,13 @@ class CupertinoDynamicColor with Diagnosticable implements Color {
   /// brightness, normal contrast, [CupertinoUserInterfaceLevelData.base]
   /// elevation level).
   CupertinoDynamicColor resolveFrom(BuildContext context) {
-    final Brightness brightness =
-        _isPlatformBrightnessDependent
-            ? CupertinoTheme.maybeBrightnessOf(context) ?? Brightness.light
-            : Brightness.light;
+    final Brightness brightness = _isPlatformBrightnessDependent
+        ? CupertinoTheme.maybeBrightnessOf(context) ?? Brightness.light
+        : Brightness.light;
 
-    final CupertinoUserInterfaceLevelData level =
-        _isInterfaceElevationDependent
-            ? CupertinoUserInterfaceLevel.maybeOf(context) ?? CupertinoUserInterfaceLevelData.base
-            : CupertinoUserInterfaceLevelData.base;
+    final CupertinoUserInterfaceLevelData level = _isInterfaceElevationDependent
+        ? CupertinoUserInterfaceLevel.maybeOf(context) ?? CupertinoUserInterfaceLevelData.base
+        : CupertinoUserInterfaceLevelData.base;
 
     final bool highContrast =
         _isHighContrastDependent && (MediaQuery.maybeHighContrastOf(context) ?? false);
@@ -1159,27 +1157,51 @@ class CupertinoDynamicColor with Diagnosticable implements Color {
     }
   }
 
+  @Deprecated(
+    'Use component accessors like .r or .g, or toARGB32 for an explicit conversion. '
+    'This feature was deprecated after v3.33.0-1.0.pre.',
+  )
   @override
   int get value => _effectiveColor.value;
 
   @override
-  int toARGB32() => value;
+  int toARGB32() => _effectiveColor.toARGB32();
 
+  @Deprecated(
+    'Use (*.a * 255.0).round().clamp(0, 255). '
+    'This feature was deprecated after v3.33.0-1.0.pre.',
+  )
   @override
   int get alpha => _effectiveColor.alpha;
 
+  @Deprecated(
+    'Use (*.b * 255.0).round().clamp(0, 255). '
+    'This feature was deprecated after v3.33.0-1.0.pre.',
+  )
   @override
   int get blue => _effectiveColor.blue;
 
   @override
   double computeLuminance() => _effectiveColor.computeLuminance();
 
+  @Deprecated(
+    'Use (*.g * 255.0).round().clamp(0, 255). '
+    'This feature was deprecated after v3.33.0-1.0.pre.',
+  )
   @override
   int get green => _effectiveColor.green;
 
+  @Deprecated(
+    'Use .a. '
+    'This feature was deprecated after v3.33.0-1.0.pre.',
+  )
   @override
   double get opacity => _effectiveColor.opacity;
 
+  @Deprecated(
+    'Use (*.r * 255.0).round().clamp(0, 255). '
+    'This feature was deprecated after v3.33.0-1.0.pre.',
+  )
   @override
   int get red => _effectiveColor.red;
 
@@ -1192,6 +1214,10 @@ class CupertinoDynamicColor with Diagnosticable implements Color {
   @override
   Color withGreen(int g) => _effectiveColor.withGreen(g);
 
+  @Deprecated(
+    'Use .withValues() to avoid precision loss. '
+    'This feature was deprecated after v3.33.0-1.0.pre.',
+  )
   @override
   Color withOpacity(double opacity) => _effectiveColor.withOpacity(opacity);
 

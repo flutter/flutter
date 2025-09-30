@@ -71,24 +71,23 @@ class _BannerDemoState extends State<BannerDemo> {
           MaterialDemoDocumentationButton(BannerDemo.routeName),
           PopupMenuButton<BannerDemoAction>(
             onSelected: handleDemoAction,
-            itemBuilder:
-                (BuildContext context) => <PopupMenuEntry<BannerDemoAction>>[
-                  const PopupMenuItem<BannerDemoAction>(
-                    value: BannerDemoAction.reset,
-                    child: Text('Reset the banner'),
-                  ),
-                  const PopupMenuDivider(),
-                  CheckedPopupMenuItem<BannerDemoAction>(
-                    value: BannerDemoAction.showMultipleActions,
-                    checked: _showMultipleActions,
-                    child: const Text('Multiple actions'),
-                  ),
-                  CheckedPopupMenuItem<BannerDemoAction>(
-                    value: BannerDemoAction.showLeading,
-                    checked: _showLeading,
-                    child: const Text('Leading icon'),
-                  ),
-                ],
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<BannerDemoAction>>[
+              const PopupMenuItem<BannerDemoAction>(
+                value: BannerDemoAction.reset,
+                child: Text('Reset the banner'),
+              ),
+              const PopupMenuDivider(),
+              CheckedPopupMenuItem<BannerDemoAction>(
+                value: BannerDemoAction.showMultipleActions,
+                checked: _showMultipleActions,
+                child: const Text('Multiple actions'),
+              ),
+              CheckedPopupMenuItem<BannerDemoAction>(
+                value: BannerDemoAction.showLeading,
+                checked: _showLeading,
+                child: const Text('Leading icon'),
+              ),
+            ],
           ),
         ],
       ),

@@ -118,7 +118,9 @@ void main() {
   testWidgets('CircleAvatar with foreground color', (WidgetTester tester) async {
     final Color foregroundColor = Colors.red.shade100;
     await tester.pumpWidget(
-      wrap(child: CircleAvatar(foregroundColor: foregroundColor, child: const Text('Z'))),
+      wrap(
+        child: CircleAvatar(foregroundColor: foregroundColor, child: const Text('Z')),
+      ),
     );
 
     final ThemeData fallback = ThemeData.fallback();
@@ -136,7 +138,12 @@ void main() {
   testWidgets('Material3 - CircleAvatar default colors', (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     await tester.pumpWidget(
-      wrap(child: Theme(data: theme, child: const CircleAvatar(child: Text('Z')))),
+      wrap(
+        child: Theme(
+          data: theme,
+          child: const CircleAvatar(child: Text('Z')),
+        ),
+      ),
     );
 
     final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
@@ -151,7 +158,9 @@ void main() {
   testWidgets('CircleAvatar text does not expand with textScaler', (WidgetTester tester) async {
     final Color foregroundColor = Colors.red.shade100;
     await tester.pumpWidget(
-      wrap(child: CircleAvatar(foregroundColor: foregroundColor, child: const Text('Z'))),
+      wrap(
+        child: CircleAvatar(foregroundColor: foregroundColor, child: const Text('Z')),
+      ),
     );
 
     expect(tester.getSize(find.text('Z')), equals(const Size(16.0, 16.0)));
@@ -268,7 +277,12 @@ void main() {
     ) async {
       final ThemeData theme = ThemeData(useMaterial3: false, primaryColor: Colors.grey.shade100);
       await tester.pumpWidget(
-        wrap(child: Theme(data: theme, child: const CircleAvatar(child: Text('Z')))),
+        wrap(
+          child: Theme(
+            data: theme,
+            child: const CircleAvatar(child: Text('Z')),
+          ),
+        ),
       );
 
       final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
@@ -285,7 +299,12 @@ void main() {
     ) async {
       final ThemeData theme = ThemeData(useMaterial3: false, primaryColor: Colors.grey.shade800);
       await tester.pumpWidget(
-        wrap(child: Theme(data: theme, child: const CircleAvatar(child: Text('Z')))),
+        wrap(
+          child: Theme(
+            data: theme,
+            child: const CircleAvatar(child: Text('Z')),
+          ),
+        ),
       );
 
       final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
@@ -297,6 +316,14 @@ void main() {
       expect(paragraph.text.style!.color, equals(theme.primaryTextTheme.titleLarge!.color));
     });
   });
+
+  testWidgets('CircleAvatar renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SizedBox.shrink(child: CircleAvatar(child: Text('X'))),
+      ),
+    );
+  });
 }
 
 Widget wrap({required Widget child}) {
@@ -304,7 +331,10 @@ Widget wrap({required Widget child}) {
     textDirection: TextDirection.ltr,
     child: MediaQuery(
       data: const MediaQueryData(),
-      child: MaterialApp(theme: ThemeData(useMaterial3: false), home: Center(child: child)),
+      child: MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Center(child: child),
+      ),
     ),
   );
 }

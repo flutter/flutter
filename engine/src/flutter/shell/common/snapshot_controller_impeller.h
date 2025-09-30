@@ -18,16 +18,18 @@ class SnapshotControllerImpeller : public SnapshotController {
 
   void MakeRasterSnapshot(
       sk_sp<DisplayList> display_list,
-      SkISize picture_size,
+      DlISize picture_size,
       std::function<void(const sk_sp<DlImage>&)> callback) override;
 
   sk_sp<DlImage> MakeRasterSnapshotSync(sk_sp<DisplayList> display_list,
-                                        SkISize picture_size) override;
+                                        DlISize picture_size) override;
 
   sk_sp<SkImage> ConvertToRasterImage(sk_sp<SkImage> image) override;
 
   void CacheRuntimeStage(
       const std::shared_ptr<impeller::RuntimeStage>& runtime_stage) override;
+
+  virtual bool MakeRenderContextCurrent() override;
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(SnapshotControllerImpeller);

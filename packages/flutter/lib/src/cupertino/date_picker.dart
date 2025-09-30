@@ -308,6 +308,8 @@ class CupertinoDatePicker extends StatefulWidget {
     this.showTimeSeparator = false,
     this.itemExtent = _kItemExtent,
     this.selectionOverlayBuilder,
+    this.selectableDayPredicate,
+    this.changeReportingBehavior = ChangeReportingBehavior.onScrollUpdate,
   }) : initialDateTime = initialDateTime ?? DateTime.now(),
        assert(itemExtent > 0, 'item extent should be greater than 0'),
        assert(
@@ -362,6 +364,12 @@ class CupertinoDatePicker extends StatefulWidget {
              mode == CupertinoDatePickerMode.dateAndTime ||
              mode == CupertinoDatePickerMode.time,
          'showTimeSeparator is only supported in time or dateAndTime modes',
+       ),
+       assert(
+         selectableDayPredicate == null ||
+             initialDateTime == null ||
+             selectableDayPredicate(initialDateTime),
+         '$initialDateTime must satisfy provided selectableDayPredicate.',
        );
 
   /// The mode of the date picker as one of [CupertinoDatePickerMode]. Defaults
@@ -432,6 +440,8 @@ class CupertinoDatePicker extends StatefulWidget {
   /// Callback called when the selected date and/or time changes. If the new
   /// selected [DateTime] is not valid, or is not in the [minimumDate] through
   /// [maximumDate] range, this callback will not be called.
+  ///
+  /// The timing of this callback is controlled by [changeReportingBehavior].
   final ValueChanged<DateTime> onDateTimeChanged;
 
   /// Background color of date picker.
@@ -453,6 +463,9 @@ class CupertinoDatePicker extends StatefulWidget {
   ///
   /// Defaults to false.
   final bool showTimeSeparator;
+
+  /// Function to provide full control over which [DateTime] can be selected.
+  final SelectableDayPredicate? selectableDayPredicate;
 
   /// {@macro flutter.cupertino.picker.itemExtent}
   ///
@@ -500,6 +513,16 @@ class CupertinoDatePicker extends StatefulWidget {
   /// ```
   /// {@end-tool}
   final SelectionOverlayBuilder? selectionOverlayBuilder;
+
+  /// The behavior of reporting the selected date.
+  ///
+  /// This determines when the [onDateTimeChanged] callback is called.
+  ///
+  /// Native iOS 18 behavior is [ChangeReportingBehavior.onScrollEnd], which
+  /// calls the callback only when the scrolling stops.
+  ///
+  /// Defaults to [ChangeReportingBehavior.onScrollUpdate].
+  final ChangeReportingBehavior changeReportingBehavior;
 
   @override
   State<StatefulWidget> createState() {
@@ -560,10 +583,9 @@ class CupertinoDatePicker extends StatefulWidget {
         }
       case _PickerColumnType.month:
         for (int i = 1; i <= 12; i++) {
-          final String month =
-              standaloneMonth
-                  ? localizations.datePickerStandaloneMonth(i)
-                  : localizations.datePickerMonth(i);
+          final String month = standaloneMonth
+              ? localizations.datePickerStandaloneMonth(i)
+              : localizations.datePickerMonth(i);
           longTexts.add(month);
         }
       case _PickerColumnType.year:
@@ -803,17 +825,22 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
   // Only reports datetime change when the date time is valid.
   void _onSelectedItemChange(int index) {
-    final DateTime selected = selectedDateTime;
-
     final bool isDateInvalid =
-        (widget.minimumDate?.isAfter(selected) ?? false) ||
-        (widget.maximumDate?.isBefore(selected) ?? false);
+        (widget.minimumDate?.isAfter(selectedDateTime) ?? false) ||
+        (widget.maximumDate?.isBefore(selectedDateTime) ?? false);
 
     if (isDateInvalid) {
       return;
+    } else if (!_isSelectableDate(selectedDateTime)) {
+      return;
     }
 
-    widget.onDateTimeChanged(selected);
+    widget.onDateTimeChanged(selectedDateTime);
+  }
+
+  /// Returns whether the given date is selectable.
+  bool _isSelectableDate(DateTime date) {
+    return widget.selectableDayPredicate?.call(date) ?? true;
   }
 
   // Builds the date column. The date is displayed in medium date format (e.g. Fri Aug 31).
@@ -841,6 +868,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
         magnification: _kMagnification,
         backgroundColor: widget.backgroundColor,
         squeeze: _kSqueeze,
+        changeReportingBehavior: widget.changeReportingBehavior,
         onSelectedItemChanged: (int index) {
           _onSelectedItemChange(index);
         },
@@ -867,12 +895,14 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
             return null;
           }
 
-          final String dateText =
-              rangeStart == DateTime(now.year, now.month, now.day)
-                  ? localizations.todayLabel
-                  : localizations.datePickerMediumDate(rangeStart);
+          final String dateText = rangeStart == DateTime(now.year, now.month, now.day)
+              ? localizations.todayLabel
+              : localizations.datePickerMediumDate(rangeStart);
 
-          return itemPositioningBuilder(context, Text(dateText, style: _themeTextStyle(context)));
+          return itemPositioningBuilder(
+            context,
+            Text(dateText, style: _themeTextStyle(context, isValid: _isSelectableDate(rangeStart))),
+          );
         },
         selectionOverlay: selectionOverlay,
       ),
@@ -921,6 +951,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
         magnification: _kMagnification,
         backgroundColor: widget.backgroundColor,
         squeeze: _kSqueeze,
+        changeReportingBehavior: widget.changeReportingBehavior,
         onSelectedItemChanged: (int index) {
           final bool regionChanged = meridiemRegion != index ~/ 12;
           final bool debugIsFlipped = isHourRegionFlipped;
@@ -990,6 +1021,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
         magnification: _kMagnification,
         backgroundColor: widget.backgroundColor,
         squeeze: _kSqueeze,
+        changeReportingBehavior: widget.changeReportingBehavior,
         onSelectedItemChanged: _onSelectedItemChange,
         looping: true,
         selectionOverlay: selectionOverlay,
@@ -1045,6 +1077,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
         magnification: _kMagnification,
         backgroundColor: widget.backgroundColor,
         squeeze: _kSqueeze,
+        changeReportingBehavior: widget.changeReportingBehavior,
         onSelectedItemChanged: (int index) {
           selectedAmPm = index;
           assert(selectedAmPm == 0 || selectedAmPm == 1);
@@ -1089,6 +1122,21 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     );
   }
 
+  // Scrolls to the first selectable date if the current date is not selectable.
+  void _scrollToFirstSelectableDate() {
+    if (!_isSelectableDate(selectedDateTime)) {
+      const int daysThreshold = 1;
+      final DateTime targetDate = selectedDateTime.add(const Duration(days: daysThreshold));
+
+      _scrollToDate(
+        targetDate,
+        selectedDateTime,
+        false,
+        focusedIndex: dateController.selectedItem + daysThreshold,
+      );
+    }
+  }
+
   // One or more pickers have just stopped scrolling.
   void _pickerDidStopScrolling() {
     // Call setState to update the greyed out date/hour/minute/meridiem.
@@ -1105,6 +1153,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     final bool minCheck = widget.minimumDate?.isAfter(selectedDate) ?? false;
     final bool maxCheck = widget.maximumDate?.isBefore(selectedDate) ?? false;
 
+    _scrollToFirstSelectableDate();
     if (minCheck || maxCheck) {
       // We have minCheck === !maxCheck.
       final DateTime targetDate = minCheck ? widget.minimumDate! : widget.maximumDate!;
@@ -1112,12 +1161,12 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     }
   }
 
-  void _scrollToDate(DateTime newDate, DateTime fromDate, bool minCheck) {
+  void _scrollToDate(DateTime newDate, DateTime fromDate, bool minCheck, {int? focusedIndex}) {
     SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
       if (fromDate.year != newDate.year ||
           fromDate.month != newDate.month ||
           fromDate.day != newDate.day) {
-        _animateColumnControllerToItem(dateController, selectedDayFromInitial);
+        _animateColumnControllerToItem(dateController, focusedIndex ?? selectedDayFromInitial);
       }
 
       if (fromDate.hour != newDate.hour) {
@@ -1157,10 +1206,9 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     ];
 
     // Swap the hours and minutes if RTL to ensure they are in the correct position.
-    final List<_ColumnBuilder> pickerBuilders =
-        Directionality.of(context) == TextDirection.rtl
-            ? <_ColumnBuilder>[_buildMinutePicker, _buildHourPicker]
-            : <_ColumnBuilder>[_buildHourPicker, _buildMinutePicker];
+    final List<_ColumnBuilder> pickerBuilders = Directionality.of(context) == TextDirection.rtl
+        ? <_ColumnBuilder>[_buildMinutePicker, _buildHourPicker]
+        : <_ColumnBuilder>[_buildHourPicker, _buildMinutePicker];
 
     // Adds time separator column if the picker is showing time separator.
     if (widget.showTimeSeparator) {
@@ -1254,8 +1302,9 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       );
     }
 
-    final double maxPickerWidth =
-        totalColumnWidths > _kPickerWidth ? totalColumnWidths : _kPickerWidth;
+    final double maxPickerWidth = totalColumnWidths > _kPickerWidth
+        ? totalColumnWidths
+        : _kPickerWidth;
 
     return MediaQuery.withNoTextScaling(
       child: DefaultTextStyle.merge(
@@ -1401,6 +1450,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
         magnification: _kMagnification,
         backgroundColor: widget.backgroundColor,
         squeeze: _kSqueeze,
+        changeReportingBehavior: widget.changeReportingBehavior,
         onSelectedItemChanged: (int index) {
           selectedDay = index + 1;
           if (_isCurrentDateValid) {
@@ -1411,8 +1461,9 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
         selectionOverlay: selectionOverlay,
         children: List<Widget>.generate(31, (int index) {
           final int day = index + 1;
-          final int? dayOfWeek =
-              widget.showDayOfWeek ? DateTime(selectedYear, selectedMonth, day).weekday : null;
+          final int? dayOfWeek = widget.showDayOfWeek
+              ? DateTime(selectedYear, selectedMonth, day).weekday
+              : null;
           final bool isInvalidDay =
               (day > daysInCurrentMonth) ||
               (widget.minimumDate?.year == selectedYear &&
@@ -1457,6 +1508,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
         magnification: _kMagnification,
         backgroundColor: widget.backgroundColor,
         squeeze: _kSqueeze,
+        changeReportingBehavior: widget.changeReportingBehavior,
         onSelectedItemChanged: (int index) {
           selectedMonth = index + 1;
           if (_isCurrentDateValid) {
@@ -1470,10 +1522,9 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
           final bool isInvalidMonth =
               (widget.minimumDate?.year == selectedYear && widget.minimumDate!.month > month) ||
               (widget.maximumDate?.year == selectedYear && widget.maximumDate!.month < month);
-          final String monthName =
-              (widget.mode == CupertinoDatePickerMode.monthYear)
-                  ? localizations.datePickerStandaloneMonth(month)
-                  : localizations.datePickerMonth(month);
+          final String monthName = (widget.mode == CupertinoDatePickerMode.monthYear)
+              ? localizations.datePickerStandaloneMonth(month)
+              : localizations.datePickerMonth(month);
 
           return itemPositioningBuilder(
             context,
@@ -1508,6 +1559,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
         magnification: _kMagnification,
         backgroundColor: widget.backgroundColor,
         squeeze: _kSqueeze,
+        changeReportingBehavior: widget.changeReportingBehavior,
         onSelectedItemChanged: (int index) {
           selectedYear = index;
           if (_isCurrentDateValid) {
@@ -1690,8 +1742,9 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
       );
     }
 
-    final double maxPickerWidth =
-        totalColumnWidths > _kPickerWidth ? totalColumnWidths : _kPickerWidth;
+    final double maxPickerWidth = totalColumnWidths > _kPickerWidth
+        ? totalColumnWidths
+        : _kPickerWidth;
 
     return MediaQuery.withNoTextScaling(
       child: DefaultTextStyle.merge(
@@ -1821,6 +1874,7 @@ class _CupertinoDatePickerMonthYearState extends State<CupertinoDatePicker> {
         magnification: _kMagnification,
         backgroundColor: widget.backgroundColor,
         squeeze: _kSqueeze,
+        changeReportingBehavior: widget.changeReportingBehavior,
         onSelectedItemChanged: (int index) {
           selectedMonth = index + 1;
           if (_isCurrentDateValid) {
@@ -1834,10 +1888,9 @@ class _CupertinoDatePickerMonthYearState extends State<CupertinoDatePicker> {
           final bool isInvalidMonth =
               (widget.minimumDate?.year == selectedYear && widget.minimumDate!.month > month) ||
               (widget.maximumDate?.year == selectedYear && widget.maximumDate!.month < month);
-          final String monthName =
-              (widget.mode == CupertinoDatePickerMode.monthYear)
-                  ? localizations.datePickerStandaloneMonth(month)
-                  : localizations.datePickerMonth(month);
+          final String monthName = (widget.mode == CupertinoDatePickerMode.monthYear)
+              ? localizations.datePickerStandaloneMonth(month)
+              : localizations.datePickerMonth(month);
 
           return itemPositioningBuilder(
             context,
@@ -1871,6 +1924,7 @@ class _CupertinoDatePickerMonthYearState extends State<CupertinoDatePicker> {
         useMagnifier: _kUseMagnifier,
         magnification: _kMagnification,
         backgroundColor: widget.backgroundColor,
+        changeReportingBehavior: widget.changeReportingBehavior,
         onSelectedItemChanged: (int index) {
           selectedYear = index;
           if (_isCurrentDateValid) {
@@ -2037,8 +2091,9 @@ class _CupertinoDatePickerMonthYearState extends State<CupertinoDatePicker> {
       );
     }
 
-    final double maxPickerWidth =
-        totalColumnWidths > _kPickerWidth ? totalColumnWidths : _kPickerWidth;
+    final double maxPickerWidth = totalColumnWidths > _kPickerWidth
+        ? totalColumnWidths
+        : _kPickerWidth;
 
     return MediaQuery.withNoTextScaling(
       child: DefaultTextStyle.merge(
@@ -2145,6 +2200,7 @@ class CupertinoTimerPicker extends StatefulWidget {
     this.backgroundColor,
     this.itemExtent = _kItemExtent,
     required this.onTimerDurationChanged,
+    this.changeReportingBehavior = ChangeReportingBehavior.onScrollUpdate,
     this.selectionOverlayBuilder,
   }) : assert(initialTimerDuration >= Duration.zero),
        assert(initialTimerDuration < const Duration(days: 1)),
@@ -2169,6 +2225,8 @@ class CupertinoTimerPicker extends StatefulWidget {
   final int secondInterval;
 
   /// Callback called when the timer duration changes.
+  ///
+  /// The timing of this callback is controlled by [changeReportingBehavior].
   final ValueChanged<Duration> onTimerDurationChanged;
 
   /// Defines how the timer picker should be positioned within its parent.
@@ -2225,6 +2283,16 @@ class CupertinoTimerPicker extends StatefulWidget {
   /// ```
   /// {@end-tool}
   final SelectionOverlayBuilder? selectionOverlayBuilder;
+
+  /// The behavior of reporting the selected duration.
+  ///
+  /// This determines when the [onTimerDurationChanged] callback is called.
+  ///
+  /// Native iOS 18 behavior is [ChangeReportingBehavior.onScrollEnd], which
+  /// calls the callback only when the scrolling stops.
+  ///
+  /// Defaults to [ChangeReportingBehavior.onScrollUpdate].
+  final ChangeReportingBehavior changeReportingBehavior;
 
   @override
   State<StatefulWidget> createState() => _CupertinoTimerPickerState();
@@ -2450,6 +2518,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       itemExtent: widget.itemExtent,
       backgroundColor: widget.backgroundColor,
       squeeze: _kSqueeze,
+      changeReportingBehavior: widget.changeReportingBehavior,
       onSelectedItemChanged: (int index) {
         setState(() {
           selectedHour = index;
@@ -2461,10 +2530,9 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       selectionOverlay: selectionOverlay,
       children: List<Widget>.generate(24, (int index) {
         final String label = localizations.timerPickerHourLabel(index) ?? '';
-        final String semanticsLabel =
-            textDirectionFactor == 1
-                ? localizations.timerPickerHour(index) + label
-                : label + localizations.timerPickerHour(index);
+        final String semanticsLabel = textDirectionFactor == 1
+            ? localizations.timerPickerHour(index) + label
+            : label + localizations.timerPickerHour(index);
 
         return Semantics(
           label: semanticsLabel,
@@ -2515,6 +2583,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       backgroundColor: widget.backgroundColor,
       squeeze: _kSqueeze,
       looping: true,
+      changeReportingBehavior: widget.changeReportingBehavior,
       onSelectedItemChanged: (int index) {
         setState(() {
           selectedMinute = index * widget.minuteInterval;
@@ -2531,10 +2600,9 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       children: List<Widget>.generate(60 ~/ widget.minuteInterval, (int index) {
         final int minute = index * widget.minuteInterval;
         final String label = localizations.timerPickerMinuteLabel(minute) ?? '';
-        final String semanticsLabel =
-            textDirectionFactor == 1
-                ? localizations.timerPickerMinute(minute) + label
-                : label + localizations.timerPickerMinute(minute);
+        final String semanticsLabel = textDirectionFactor == 1
+            ? localizations.timerPickerMinute(minute) + label
+            : label + localizations.timerPickerMinute(minute);
 
         return Semantics(
           label: semanticsLabel,
@@ -2588,6 +2656,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       backgroundColor: widget.backgroundColor,
       squeeze: _kSqueeze,
       looping: true,
+      changeReportingBehavior: widget.changeReportingBehavior,
       onSelectedItemChanged: (int index) {
         setState(() {
           selectedSecond = index * widget.secondInterval;
@@ -2600,10 +2669,9 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       children: List<Widget>.generate(60 ~/ widget.secondInterval, (int index) {
         final int second = index * widget.secondInterval;
         final String label = localizations.timerPickerSecondLabel(second) ?? '';
-        final String semanticsLabel =
-            textDirectionFactor == 1
-                ? localizations.timerPickerSecond(second) + label
-                : label + localizations.timerPickerSecond(second);
+        final String semanticsLabel = textDirectionFactor == 1
+            ? localizations.timerPickerSecond(second) + label
+            : label + localizations.timerPickerSecond(second);
 
         return Semantics(
           label: semanticsLabel,

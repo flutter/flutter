@@ -30,6 +30,7 @@ part 'path_metrics.dart';
 part 'platform_dispatcher.dart';
 part 'platform_isolate.dart';
 part 'pointer.dart';
+part 'rsuperellipse_param.dart';
 part 'semantics.dart';
 part 'text.dart';
 part 'tile_mode.dart';

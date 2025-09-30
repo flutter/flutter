@@ -62,8 +62,8 @@ void main() {
   group('TickerProviderStateMixin assertion control test', () {
     testWidgets(
       'SingleTickerProviderStateMixin create multiple tickers',
-      experimentalLeakTesting:
-          LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+      experimentalLeakTesting: LeakTesting.settings
+          .withIgnoredAll(), // leaking by design because of exception
       (WidgetTester tester) async {
         const Widget widget = _SingleTickerCreateMultipleTicker();
         await tester.pumpWidget(widget);

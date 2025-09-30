@@ -188,6 +188,17 @@ TaskFunction dartDefinesTask() {
   ).call;
 }
 
+TaskFunction featureFlagsTask() {
+  return () async {
+    await flutter('config', options: const <String>['--enable-windowing']);
+
+    return DriverTest(
+      '${flutterDirectory.path}/dev/integration_tests/ui',
+      'lib/feature_flags.dart',
+    ).call();
+  };
+}
+
 TaskFunction createEndToEndIntegrationTest() {
   return IntegrationTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
@@ -208,6 +219,16 @@ TaskFunction createWindowsStartupDriverTest({String? deviceIdOverride}) {
     'lib/main.dart',
     deviceIdOverride: deviceIdOverride,
   ).call;
+}
+
+TaskFunction createWindowingDriverTest() {
+  return () async {
+    await flutter('config', options: const <String>['--enable-windowing']);
+    return DriverTest(
+      '${flutterDirectory.path}/dev/integration_tests/windowing_test',
+      'lib/main.dart',
+    ).call();
+  };
 }
 
 TaskFunction createWideGamutTest() {

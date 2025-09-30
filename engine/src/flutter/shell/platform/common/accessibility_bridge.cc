@@ -496,6 +496,7 @@ void AccessibilityBridge::SetIntListAttributesFromFlutterUpdate(
   FlutterSemanticsAction actions = node.actions;
   if (actions & FlutterSemanticsAction::kFlutterSemanticsActionCustomAction) {
     std::vector<int32_t> custom_action_ids;
+    custom_action_ids.reserve(node.custom_accessibility_actions.size());
     for (size_t i = 0; i < node.custom_accessibility_actions.size(); i++) {
       custom_action_ids.push_back(node.custom_accessibility_actions[i]);
     }
@@ -583,6 +584,7 @@ AccessibilityBridge::FromFlutterSemanticsNode(
 
   result.flags = flutter_node.flags2;
   result.actions = flutter_node.actions;
+  result.heading_level = flutter_node.heading_level;
   result.text_selection_base = flutter_node.text_selection_base;
   result.text_selection_extent = flutter_node.text_selection_extent;
   result.scroll_child_count = flutter_node.scroll_child_count;

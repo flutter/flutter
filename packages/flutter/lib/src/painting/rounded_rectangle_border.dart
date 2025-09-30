@@ -205,6 +205,20 @@ class _RoundedRectangleToCircleBorder extends _ShapeToCircleBorder<RoundedRectan
 /// Typically used with [ShapeDecoration] to draw a box that mimics the rounded
 /// rectangle style commonly seen in iOS design.
 ///
+/// {@tool dartpad}
+/// This interactive example demonstrates the use of
+/// [RoundedSuperellipseBorder].
+///
+/// Toggle the switch at the top to compare [RoundedSuperellipseBorder] with the
+/// traditional [RoundedRectangleBorder] and observe their subtle visual
+/// differences.
+///
+/// Use the sliders below to adjust the border's thickness and radius to explore
+/// its behavior in real-time.
+///
+/// ** See code in examples/api/lib/painting/rounded_superellipse_border/rounded_superellipse_border.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [RSuperellipse], which defines the shape.

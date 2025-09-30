@@ -234,7 +234,7 @@ void PlatformViewAndroid::NotifyDestroyed() {
   }
 }
 
-void PlatformViewAndroid::NotifyChanged(const SkISize& size) {
+void PlatformViewAndroid::NotifyChanged(const DlISize& size) {
   if (!android_surface_) {
     return;
   }

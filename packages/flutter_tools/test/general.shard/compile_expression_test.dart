@@ -41,6 +41,7 @@ void main() {
       logger: testLogger,
       platform: FakePlatform(),
       fileSystem: fileSystem,
+      shutdownHooks: FakeShutdownHooks(),
     );
 
     stdErrStreamController = StreamController<String>();
@@ -66,8 +67,8 @@ void main() {
   });
 
   testWithoutContext('compile expression can compile single expression', () async {
-    final Completer<List<int>> compileResponseCompleter = Completer<List<int>>();
-    final Completer<List<int>> compileExpressionResponseCompleter = Completer<List<int>>();
+    final compileResponseCompleter = Completer<List<int>>();
+    final compileExpressionResponseCompleter = Completer<List<int>>();
     fileSystem.file('/path/to/main.dart.dill')
       ..createSync(recursive: true)
       ..writeAsBytesSync(<int>[1, 2, 3, 4]);
@@ -114,9 +115,9 @@ void main() {
   });
 
   testWithoutContext('compile expressions without awaiting', () async {
-    final Completer<List<int>> compileResponseCompleter = Completer<List<int>>();
-    final Completer<List<int>> compileExpressionResponseCompleter1 = Completer<List<int>>();
-    final Completer<List<int>> compileExpressionResponseCompleter2 = Completer<List<int>>();
+    final compileResponseCompleter = Completer<List<int>>();
+    final compileExpressionResponseCompleter1 = Completer<List<int>>();
+    final compileExpressionResponseCompleter2 = Completer<List<int>>();
 
     processManager.process.stdout = Stream<List<int>>.fromFutures(<Future<List<int>>>[
       compileResponseCompleter.future,
@@ -154,7 +155,7 @@ void main() {
     );
 
     // The test manages timing via completers.
-    final Completer<bool> lastExpressionCompleted = Completer<bool>();
+    final lastExpressionCompleted = Completer<bool>();
     unawaited(
       generator
           .compileExpression('0+1', null, null, null, null, null, null, null, null, false)
@@ -198,20 +199,20 @@ void main() {
 
 class FakeProcess extends Fake implements Process {
   @override
-  Stream<List<int>> stdout = const Stream<List<int>>.empty();
+  var stdout = const Stream<List<int>>.empty();
 
   @override
-  Stream<List<int>> stderr = const Stream<List<int>>.empty();
+  var stderr = const Stream<List<int>>.empty();
 
   @override
-  IOSink stdin = IOSink(StreamController<List<int>>().sink);
+  var stdin = IOSink(StreamController<List<int>>().sink);
 
   @override
   Future<int> get exitCode => Completer<int>().future;
 }
 
 class FakeProcessManager extends Fake implements ProcessManager {
-  final FakeProcess process = FakeProcess();
+  final process = FakeProcess();
 
   @override
   bool canRun(dynamic executable, {String? workingDirectory}) {

@@ -531,21 +531,19 @@ class PlatformDispatcher {
     return PointerDataPacket(data: data);
   }
 
-  static ChannelCallback _keyDataListener(KeyDataCallback onKeyData, Zone zone) => (
-    ByteData? packet,
-    PlatformMessageResponseCallback callback,
-  ) {
-    _invoke1<KeyData>(
-      (KeyData keyData) {
-        final bool handled = onKeyData(keyData);
-        final Uint8List response = Uint8List(1);
-        response[0] = handled ? 1 : 0;
-        callback(response.buffer.asByteData());
-      },
-      zone,
-      _unpackKeyData(packet!),
-    );
-  };
+  static ChannelCallback _keyDataListener(KeyDataCallback onKeyData, Zone zone) =>
+      (ByteData? packet, PlatformMessageResponseCallback callback) {
+        _invoke1<KeyData>(
+          (KeyData keyData) {
+            final bool handled = onKeyData(keyData);
+            final Uint8List response = Uint8List(1);
+            response[0] = handled ? 1 : 0;
+            callback(response.buffer.asByteData());
+          },
+          zone,
+          _unpackKeyData(packet!),
+        );
+      };
 
   /// A callback that is invoked when key data is available.
   ///
@@ -577,12 +575,11 @@ class PlatformDispatcher {
 
     int offset = 0;
     final int charDataSize = packet.getUint64(kStride * offset++, _kFakeHostEndian);
-    final String? character =
-        charDataSize == 0
-            ? null
-            : utf8.decoder.convert(
-              packet.buffer.asUint8List(kStride * (offset + _kKeyDataFieldCount), charDataSize),
-            );
+    final String? character = charDataSize == 0
+        ? null
+        : utf8.decoder.convert(
+            packet.buffer.asUint8List(kStride * (offset + _kKeyDataFieldCount), charDataSize),
+          );
 
     final KeyData keyData = KeyData(
       timeStamp: Duration(microseconds: packet.getUint64(kStride * offset++, _kFakeHostEndian)),
@@ -718,6 +715,26 @@ class PlatformDispatcher {
 
   @Native<Void Function(Int64)>(symbol: 'PlatformConfigurationNativeApi::RegisterBackgroundIsolate')
   external static void __registerBackgroundIsolate(int rootIsolateId);
+
+  /// Informs the engine whether the framework is generating a semantics tree.
+  ///
+  /// Only framework knows when semantics tree should be generated. It uses this
+  /// method to notify the engine whether the framework will generate a semantics tree.
+  ///
+  /// In the case where platforms want to enable semantics, e.g. when
+  /// assistive technologies are enabled, it notifies framework through
+  /// [onSemanticsEnabledChanged].
+  ///
+  /// After this has been set to true, platforms are expected to prepare for accepting
+  /// semantics update sent via [FlutterView.updateSemantics]. When this is set to false, platforms
+  /// may dispose any resources associated with processing semantics as no further
+  /// semantics updates will be sent via [FlutterView.updateSemantics].
+  ///
+  /// One must call this method with true before sending update through [updateSemantics].
+  void setSemanticsTreeEnabled(bool enabled) => _setSemanticsTreeEnabled(enabled);
+
+  @Native<Void Function(Bool)>(symbol: 'PlatformConfigurationNativeApi::SetSemanticsTreeEnabled')
+  external static void _setSemanticsTreeEnabled(bool update);
 
   /// Deprecated. Migrate to [ChannelBuffers.setListener] instead.
   ///
@@ -1869,11 +1886,15 @@ class _ViewConfiguration {
     this.gestureSettings = const GestureSettings(),
     this.displayFeatures = const <DisplayFeature>[],
     this.displayId = 0,
+    this.viewConstraints = const ViewConstraints(maxWidth: 0, maxHeight: 0),
   });
 
   /// The identifier for a display for this view, in
   /// [PlatformDispatcher._displays].
   final int displayId;
+
+  /// The sizing constraints for this view in physical pixels.
+  final ViewConstraints viewConstraints;
 
   /// The pixel density of the output surface.
   final double devicePixelRatio;

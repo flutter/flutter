@@ -297,7 +297,10 @@ void main() {
         child: Semantics(
           container: true,
           child: Column(
-            children: <Widget>[Semantics(hint: 'hint one'), Semantics(hint: 'hint two')],
+            children: <Widget>[
+              Semantics(hint: 'hint one'),
+              Semantics(hint: 'hint two'),
+            ],
           ),
         ),
       ),
@@ -360,7 +363,12 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Semantics(
           container: true,
-          child: Column(children: <Widget>[Semantics(hint: 'hint'), Semantics(value: 'value')]),
+          child: Column(
+            children: <Widget>[
+              Semantics(hint: 'hint'),
+              Semantics(value: 'value'),
+            ],
+          ),
         ),
       ),
     );
@@ -443,27 +451,28 @@ void main() {
         onCopy: () => performedActions.add(SemanticsAction.copy),
         onCut: () => performedActions.add(SemanticsAction.cut),
         onPaste: () => performedActions.add(SemanticsAction.paste),
-        onMoveCursorForwardByCharacter:
-            (bool _) => performedActions.add(SemanticsAction.moveCursorForwardByCharacter),
-        onMoveCursorBackwardByCharacter:
-            (bool _) => performedActions.add(SemanticsAction.moveCursorBackwardByCharacter),
+        onMoveCursorForwardByCharacter: (bool _) =>
+            performedActions.add(SemanticsAction.moveCursorForwardByCharacter),
+        onMoveCursorBackwardByCharacter: (bool _) =>
+            performedActions.add(SemanticsAction.moveCursorBackwardByCharacter),
         onSetSelection: (TextSelection _) => performedActions.add(SemanticsAction.setSelection),
         onSetText: (String _) => performedActions.add(SemanticsAction.setText),
-        onDidGainAccessibilityFocus:
-            () => performedActions.add(SemanticsAction.didGainAccessibilityFocus),
-        onDidLoseAccessibilityFocus:
-            () => performedActions.add(SemanticsAction.didLoseAccessibilityFocus),
+        onDidGainAccessibilityFocus: () =>
+            performedActions.add(SemanticsAction.didGainAccessibilityFocus),
+        onDidLoseAccessibilityFocus: () =>
+            performedActions.add(SemanticsAction.didLoseAccessibilityFocus),
         onFocus: () => performedActions.add(SemanticsAction.focus),
+        onExpand: () => performedActions.add(SemanticsAction.expand),
+        onCollapse: () => performedActions.add(SemanticsAction.collapse),
       ),
     );
 
-    final Set<SemanticsAction> allActions =
-        SemanticsAction.values.toSet()
-          ..remove(SemanticsAction.moveCursorForwardByWord)
-          ..remove(SemanticsAction.moveCursorBackwardByWord)
-          ..remove(SemanticsAction.customAction) // customAction is not user-exposed.
-          ..remove(SemanticsAction.showOnScreen) // showOnScreen is not user-exposed
-          ..remove(SemanticsAction.scrollToOffset); // scrollToOffset is not user-exposed
+    final Set<SemanticsAction> allActions = SemanticsAction.values.toSet()
+      ..remove(SemanticsAction.moveCursorForwardByWord)
+      ..remove(SemanticsAction.moveCursorBackwardByWord)
+      ..remove(SemanticsAction.customAction) // customAction is not user-exposed.
+      ..remove(SemanticsAction.showOnScreen) // showOnScreen is not user-exposed
+      ..remove(SemanticsAction.scrollToOffset); // scrollToOffset is not user-exposed
 
     const int expectedId = 1;
     final TestSemantics expectedSemantics = TestSemantics.root(
@@ -515,6 +524,8 @@ void main() {
         case SemanticsAction.showOnScreen:
         case SemanticsAction.tap:
         case SemanticsAction.focus:
+        case SemanticsAction.expand:
+        case SemanticsAction.collapse:
           semanticsOwner.performAction(expectedId, action);
       }
       expect(performedActions.length, expectedLength);
@@ -1616,7 +1627,10 @@ void main() {
     expect(
       node,
       matchesSemantics(
-        children: <Matcher>[containsSemantics(label: 'label1'), containsSemantics(label: 'label2')],
+        children: <Matcher>[
+          containsSemantics(label: 'label1'),
+          containsSemantics(label: 'label2'),
+        ],
       ),
     );
   });

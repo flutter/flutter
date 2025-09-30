@@ -179,6 +179,14 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// [TextField] to ensure proper scroll coordination for [TextField] and its
 /// components like [TextSelectionOverlay].
 ///
+/// {@tool dartpad}
+/// This sample demonstrates how to use the [Shortcuts] and [Actions] widgets
+/// to create a custom `Shift+Enter` keyboard shortcut for inserting a new line
+/// in a [TextField].
+///
+/// ** See code in examples/api/lib/material/text_field/text_field.3.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [TextFormField], which integrates with the [Form] widget.
@@ -540,6 +548,8 @@ class TextField extends StatefulWidget {
   /// field showing how many characters have been entered. If set to a number
   /// greater than 0, it will also display the maximum number allowed. If set
   /// to [TextField.noMaxLength] then only the current character count is displayed.
+  /// To remove the counter, set [InputDecoration.counterText] to an empty string or
+  /// return null from [TextField.buildCounter] callback.
   ///
   /// After [maxLength] characters have been input, additional input
   /// is ignored, unless [maxLengthEnforcement] is set to
@@ -879,7 +889,7 @@ class TextField extends StatefulWidget {
     BuildContext context,
     EditableTextState editableTextState,
   ) {
-    if (defaultTargetPlatform == TargetPlatform.iOS && SystemContextMenu.isSupported(context)) {
+    if (SystemContextMenu.isSupportedByField(editableTextState)) {
       return SystemContextMenu.editableText(editableTextState: editableTextState);
     }
     return AdaptiveTextSelectionToolbar.editableText(editableTextState: editableTextState);
@@ -1113,10 +1123,9 @@ class TextField extends StatefulWidget {
       DiagnosticsProperty<List<String>>(
         'contentCommitMimeTypes',
         contentInsertionConfiguration?.allowedMimeTypes ?? const <String>[],
-        defaultValue:
-            contentInsertionConfiguration == null
-                ? const <String>[]
-                : kDefaultContentInsertionMimeTypes,
+        defaultValue: contentInsertionConfiguration == null
+            ? const <String>[]
+            : kDefaultContentInsertionMimeTypes,
       ),
     );
     properties.add(
@@ -1305,10 +1314,10 @@ class _TextFieldState extends State<TextField>
     }
 
     if (widget.statesController == oldWidget.statesController) {
-      _statesController.update(MaterialState.disabled, !_isEnabled);
-      _statesController.update(MaterialState.hovered, _isHovering);
-      _statesController.update(MaterialState.focused, _effectiveFocusNode.hasFocus);
-      _statesController.update(MaterialState.error, _hasError);
+      _statesController.update(WidgetState.disabled, !_isEnabled);
+      _statesController.update(WidgetState.hovered, _isHovering);
+      _statesController.update(WidgetState.focused, _effectiveFocusNode.hasFocus);
+      _statesController.update(WidgetState.error, _hasError);
     } else {
       oldWidget.statesController?.removeListener(_handleStatesControllerChange);
       if (widget.statesController != null) {
@@ -1333,10 +1342,9 @@ class _TextFieldState extends State<TextField>
 
   void _createLocalController([TextEditingValue? value]) {
     assert(_controller == null);
-    _controller =
-        value == null
-            ? RestorableTextEditingController()
-            : RestorableTextEditingController.fromValue(value);
+    _controller = value == null
+        ? RestorableTextEditingController()
+        : RestorableTextEditingController.fromValue(value);
     if (!restorePending) {
       _registerController();
     }
@@ -1398,7 +1406,7 @@ class _TextFieldState extends State<TextField>
       // Rebuild the widget on focus change to show/hide the text selection
       // highlight.
     });
-    _statesController.update(MaterialState.focused, _effectiveFocusNode.hasFocus);
+    _statesController.update(WidgetState.focused, _effectiveFocusNode.hasFocus);
   }
 
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
@@ -1447,7 +1455,7 @@ class _TextFieldState extends State<TextField>
       setState(() {
         _isHovering = hovering;
       });
-      _statesController.update(MaterialState.hovered, _isHovering);
+      _statesController.update(WidgetState.hovered, _isHovering);
     }
   }
 
@@ -1455,7 +1463,7 @@ class _TextFieldState extends State<TextField>
   MaterialStatesController? _internalStatesController;
 
   void _handleStatesControllerChange() {
-    // Force a rebuild to resolve MaterialStateProperty properties.
+    // Force a rebuild to resolve WidgetStateProperty properties.
     setState(() {});
   }
 
@@ -1466,10 +1474,10 @@ class _TextFieldState extends State<TextField>
     if (widget.statesController == null) {
       _internalStatesController = MaterialStatesController();
     }
-    _statesController.update(MaterialState.disabled, !_isEnabled);
-    _statesController.update(MaterialState.hovered, _isHovering);
-    _statesController.update(MaterialState.focused, _effectiveFocusNode.hasFocus);
-    _statesController.update(MaterialState.error, _hasError);
+    _statesController.update(WidgetState.disabled, !_isEnabled);
+    _statesController.update(WidgetState.hovered, _isHovering);
+    _statesController.update(WidgetState.focused, _effectiveFocusNode.hasFocus);
+    _statesController.update(WidgetState.error, _hasError);
     _statesController.addListener(_handleStatesControllerChange);
   }
 
@@ -1483,15 +1491,14 @@ class _TextFieldState extends State<TextField>
   @override
   TextInputConfiguration get textInputConfiguration {
     final List<String>? autofillHints = widget.autofillHints?.toList(growable: false);
-    final AutofillConfiguration autofillConfiguration =
-        autofillHints != null
-            ? AutofillConfiguration(
-              uniqueIdentifier: autofillId,
-              autofillHints: autofillHints,
-              currentEditingValue: _effectiveController.value,
-              hintText: (widget.decoration ?? const InputDecoration()).hintText,
-            )
-            : AutofillConfiguration.disabled;
+    final AutofillConfiguration autofillConfiguration = autofillHints != null
+        ? AutofillConfiguration(
+            uniqueIdentifier: autofillId,
+            autofillHints: autofillHints,
+            currentEditingValue: _effectiveController.value,
+            hintText: (widget.decoration ?? const InputDecoration()).hintText,
+          )
+        : AutofillConfiguration.disabled;
 
     return _editableText!.textInputConfiguration.copyWith(
       autofillConfiguration: autofillConfiguration,
@@ -1501,11 +1508,11 @@ class _TextFieldState extends State<TextField>
 
   TextStyle _getInputStyleForState(TextStyle style) {
     final ThemeData theme = Theme.of(context);
-    final TextStyle stateStyle = MaterialStateProperty.resolveAs(
+    final TextStyle stateStyle = WidgetStateProperty.resolveAs(
       theme.useMaterial3 ? _m3StateInputStyle(context)! : _m2StateInputStyle(context)!,
       _statesController.value,
     );
-    final TextStyle providedStyle = MaterialStateProperty.resolveAs(style, _statesController.value);
+    final TextStyle providedStyle = WidgetStateProperty.resolveAs(style, _statesController.value);
     return providedStyle.merge(stateStyle);
   }
 
@@ -1523,7 +1530,7 @@ class _TextFieldState extends State<TextField>
 
     final ThemeData theme = Theme.of(context);
     final DefaultSelectionStyle selectionStyle = DefaultSelectionStyle.of(context);
-    final TextStyle? providedStyle = MaterialStateProperty.resolveAs(
+    final TextStyle? providedStyle = WidgetStateProperty.resolveAs(
       widget.style,
       _statesController.value,
     );
@@ -1579,10 +1586,9 @@ class _TextFieldState extends State<TextField>
         textSelectionControls ??= cupertinoTextSelectionHandleControls;
         paintCursorAboveText = true;
         cursorOpacityAnimates ??= true;
-        cursorColor =
-            _hasError
-                ? _errorColor
-                : widget.cursorColor ?? selectionStyle.cursorColor ?? cupertinoTheme.primaryColor;
+        cursorColor = _hasError
+            ? _errorColor
+            : widget.cursorColor ?? selectionStyle.cursorColor ?? cupertinoTheme.primaryColor;
         selectionColor =
             selectionStyle.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
         cursorRadius ??= const Radius.circular(2.0);
@@ -1595,10 +1601,9 @@ class _TextFieldState extends State<TextField>
         textSelectionControls ??= cupertinoDesktopTextSelectionHandleControls;
         paintCursorAboveText = true;
         cursorOpacityAnimates ??= false;
-        cursorColor =
-            _hasError
-                ? _errorColor
-                : widget.cursorColor ?? selectionStyle.cursorColor ?? cupertinoTheme.primaryColor;
+        cursorColor = _hasError
+            ? _errorColor
+            : widget.cursorColor ?? selectionStyle.cursorColor ?? cupertinoTheme.primaryColor;
         selectionColor =
             selectionStyle.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
         cursorRadius ??= const Radius.circular(2.0);
@@ -1619,10 +1624,9 @@ class _TextFieldState extends State<TextField>
         textSelectionControls ??= materialTextSelectionHandleControls;
         paintCursorAboveText = false;
         cursorOpacityAnimates ??= false;
-        cursorColor =
-            _hasError
-                ? _errorColor
-                : widget.cursorColor ?? selectionStyle.cursorColor ?? theme.colorScheme.primary;
+        cursorColor = _hasError
+            ? _errorColor
+            : widget.cursorColor ?? selectionStyle.cursorColor ?? theme.colorScheme.primary;
         selectionColor =
             selectionStyle.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
 
@@ -1631,10 +1635,9 @@ class _TextFieldState extends State<TextField>
         textSelectionControls ??= desktopTextSelectionHandleControls;
         paintCursorAboveText = false;
         cursorOpacityAnimates ??= false;
-        cursorColor =
-            _hasError
-                ? _errorColor
-                : widget.cursorColor ?? selectionStyle.cursorColor ?? theme.colorScheme.primary;
+        cursorColor = _hasError
+            ? _errorColor
+            : widget.cursorColor ?? selectionStyle.cursorColor ?? theme.colorScheme.primary;
         selectionColor =
             selectionStyle.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
         handleDidGainAccessibilityFocus = () {
@@ -1652,10 +1655,9 @@ class _TextFieldState extends State<TextField>
         textSelectionControls ??= desktopTextSelectionHandleControls;
         paintCursorAboveText = false;
         cursorOpacityAnimates ??= false;
-        cursorColor =
-            _hasError
-                ? _errorColor
-                : widget.cursorColor ?? selectionStyle.cursorColor ?? theme.colorScheme.primary;
+        cursorColor = _hasError
+            ? _errorColor
+            : widget.cursorColor ?? selectionStyle.cursorColor ?? theme.colorScheme.primary;
         selectionColor =
             selectionStyle.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
         handleDidGainAccessibilityFocus = () {
@@ -1767,8 +1769,8 @@ class _TextFieldState extends State<TextField>
         child: child,
       );
     }
-    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
-      widget.mouseCursor ?? MaterialStateMouseCursor.textable,
+    final MouseCursor effectiveMouseCursor = WidgetStateProperty.resolveAs<MouseCursor>(
+      widget.mouseCursor ?? WidgetStateMouseCursor.textable,
       _statesController.value,
     );
 
@@ -1795,50 +1797,47 @@ class _TextFieldState extends State<TextField>
                 enabled: _isEnabled,
                 maxValueLength: semanticsMaxValueLength,
                 currentValueLength: _currentLength,
-                onTap:
-                    widget.readOnly
-                        ? null
-                        : () {
-                          if (!_effectiveController.selection.isValid) {
-                            _effectiveController.selection = TextSelection.collapsed(
-                              offset: _effectiveController.text.length,
-                            );
-                          }
-                          _requestKeyboard();
-                        },
+                onTap: widget.readOnly
+                    ? null
+                    : () {
+                        if (!_effectiveController.selection.isValid) {
+                          _effectiveController.selection = TextSelection.collapsed(
+                            offset: _effectiveController.text.length,
+                          );
+                        }
+                        _requestKeyboard();
+                      },
                 onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
                 onDidLoseAccessibilityFocus: handleDidLoseAccessibilityFocus,
-                onFocus:
-                    _isEnabled
-                        ? () {
-                          assert(
-                            _effectiveFocusNode.canRequestFocus,
-                            'Received SemanticsAction.focus from the engine. However, the FocusNode '
-                            'of this text field cannot gain focus. This likely indicates a bug. '
-                            'If this text field cannot be focused (e.g. because it is not '
-                            'enabled), then its corresponding semantics node must be configured '
-                            'such that the assistive technology cannot request focus on it.',
-                          );
+                onFocus: _isEnabled
+                    ? () {
+                        assert(
+                          _effectiveFocusNode.canRequestFocus,
+                          'Received SemanticsAction.focus from the engine. However, the FocusNode '
+                          'of this text field cannot gain focus. This likely indicates a bug. '
+                          'If this text field cannot be focused (e.g. because it is not '
+                          'enabled), then its corresponding semantics node must be configured '
+                          'such that the assistive technology cannot request focus on it.',
+                        );
 
-                          if (_effectiveFocusNode.canRequestFocus &&
-                              !_effectiveFocusNode.hasFocus) {
-                            _effectiveFocusNode.requestFocus();
-                          } else if (!widget.readOnly) {
-                            // If the platform requested focus, that means that previously the
-                            // platform believed that the text field did not have focus (even
-                            // though Flutter's widget system believed otherwise). This likely
-                            // means that the on-screen keyboard is hidden, or more generally,
-                            // there is no current editing session in this field. To correct
-                            // that, keyboard must be requested.
-                            //
-                            // A concrete scenario where this can happen is when the user
-                            // dismisses the keyboard on the web. The editing session is
-                            // closed by the engine, but the text field widget stays focused
-                            // in the framework.
-                            _requestKeyboard();
-                          }
+                        if (_effectiveFocusNode.canRequestFocus && !_effectiveFocusNode.hasFocus) {
+                          _effectiveFocusNode.requestFocus();
+                        } else if (!widget.readOnly) {
+                          // If the platform requested focus, that means that previously the
+                          // platform believed that the text field did not have focus (even
+                          // though Flutter's widget system believed otherwise). This likely
+                          // means that the on-screen keyboard is hidden, or more generally,
+                          // there is no current editing session in this field. To correct
+                          // that, keyboard must be requested.
+                          //
+                          // A concrete scenario where this can happen is when the user
+                          // dismisses the keyboard on the web. The editing session is
+                          // closed by the engine, but the text field widget stays focused
+                          // in the framework.
+                          _requestKeyboard();
                         }
-                        : null,
+                      }
+                    : null,
                 child: child,
               );
             },
@@ -1854,9 +1853,9 @@ class _TextFieldState extends State<TextField>
 }
 
 TextStyle? _m2StateInputStyle(BuildContext context) =>
-    MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+    MaterialStateTextStyle.resolveWith((Set<WidgetState> states) {
       final ThemeData theme = Theme.of(context);
-      if (states.contains(MaterialState.disabled)) {
+      if (states.contains(WidgetState.disabled)) {
         return TextStyle(color: theme.disabledColor);
       }
       return TextStyle(color: theme.textTheme.titleMedium?.color);
@@ -1873,8 +1872,8 @@ TextStyle _m2CounterErrorStyle(BuildContext context) =>
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
 // dart format off
-TextStyle? _m3StateInputStyle(BuildContext context) => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-  if (states.contains(MaterialState.disabled)) {
+TextStyle? _m3StateInputStyle(BuildContext context) => MaterialStateTextStyle.resolveWith((Set<WidgetState> states) {
+  if (states.contains(WidgetState.disabled)) {
     return TextStyle(color: Theme.of(context).textTheme.bodyLarge!.color?.withOpacity(0.38));
   }
   return TextStyle(color: Theme.of(context).textTheme.bodyLarge!.color);

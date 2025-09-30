@@ -33,11 +33,10 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const NavigationBarThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -59,11 +58,10 @@ void main() {
       labelPadding: EdgeInsets.all(8),
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(
       description,
@@ -114,8 +112,8 @@ void main() {
                 elevation: elevation,
                 indicatorColor: indicatorColor,
                 indicatorShape: indicatorShape,
-                iconTheme: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-                  if (states.contains(MaterialState.selected)) {
+                iconTheme: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+                  if (states.contains(WidgetState.selected)) {
                     return const IconThemeData(
                       size: selectedIconSize,
                       color: selectedIconColor,
@@ -128,8 +126,8 @@ void main() {
                     opacity: unselectedIconOpacity,
                   );
                 }),
-                labelTextStyle: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-                  if (states.contains(MaterialState.selected)) {
+                labelTextStyle: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+                  if (states.contains(WidgetState.selected)) {
                     return const TextStyle(fontSize: selectedLabelFontSize);
                   }
                   return const TextStyle(fontSize: unselectedLabelFontSize);
@@ -250,16 +248,16 @@ void main() {
       const Color hoverColor = Color(0xff0000ff);
       const Color focusColor = Color(0xff00ffff);
       const Color pressedColor = Color(0xffff00ff);
-      final MaterialStateProperty<Color?> overlayColor = MaterialStateProperty.resolveWith<Color>((
-        Set<MaterialState> states,
+      final WidgetStateProperty<Color?> overlayColor = WidgetStateProperty.resolveWith<Color>((
+        Set<WidgetState> states,
       ) {
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return hoverColor;
         }
-        if (states.contains(MaterialState.focused)) {
+        if (states.contains(WidgetState.focused)) {
           return focusColor;
         }
-        if (states.contains(MaterialState.pressed)) {
+        if (states.contains(WidgetState.pressed)) {
           return pressedColor;
         }
         return Colors.transparent;
@@ -296,9 +294,9 @@ void main() {
         inkFeatures,
         kIsWeb
             ? (paints
-              ..rrect()
-              ..rrect()
-              ..circle(color: hoverColor))
+                ..rrect()
+                ..rrect()
+                ..circle(color: hoverColor))
             : (paints..circle(color: hoverColor)),
       );
 
@@ -310,12 +308,12 @@ void main() {
         inkFeatures,
         kIsWeb
             ? (paints
-              ..circle()
-              ..circle()
-              ..circle(color: pressedColor))
+                ..circle()
+                ..circle()
+                ..circle(color: pressedColor))
             : (paints
-              ..circle()
-              ..circle(color: pressedColor)),
+                ..circle()
+                ..circle(color: pressedColor)),
       );
 
       await gesture.up();
@@ -330,11 +328,11 @@ void main() {
         inkFeatures,
         kIsWeb
             ? (paints
-              ..circle()
-              ..circle(color: focusColor))
+                ..circle()
+                ..circle(color: focusColor))
             : (paints
-              ..circle()
-              ..circle(color: focusColor)),
+                ..circle()
+                ..circle(color: focusColor)),
       );
     },
   );

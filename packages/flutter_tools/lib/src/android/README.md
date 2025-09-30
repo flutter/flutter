@@ -50,6 +50,10 @@ When updating the Kotlin Gradle Plugin (KGP) version used in project templates
 (`templateKotlinGradlePluginVersion`), make sure that the framework integration
 & benchmark tests are running with at least this KGP version.
 
+When updating the `warnKGPVersion` or `errorKGPVersion` ensure that versions used in
+`dev/tools/bin/generate_gradle_lockfiles.dart` are updated if needed then regenerate
+build.gradle(.kts) files.
+
 For information about the latest version, check https://kotlinlang.org/docs/releases.html#release-details.
 
 #### The Android Gradle Plugin (AGP)
@@ -90,7 +94,7 @@ When new versions of the Android Gradle Plugin become available, make sure to:
 steps to ensure that we are testing this version in CI.
 - Update the `_javaAgpCompatList` that contains the Java/AGP compatibility
 information known to the tool.
-- Update the test cases in [gradle_utils_test.dart](../../..test/general.shard/android/gradle_utils_test.dart) that test compatibility between Java and AGP versions
+- Update the test cases in [gradle_utils_test.dart](../../../test/general.shard/android/gradle_utils_test.dart) that test compatibility between Java and AGP versions
 (relevant tests should fail if you do not fix them preemptively, but should also
 be marked inline).
 - Update the test cases in [create_test.dart](../../../test/commands.shard/permeable/create_test.dart) that test for a warning for Java/AGP incompatibilities as needed

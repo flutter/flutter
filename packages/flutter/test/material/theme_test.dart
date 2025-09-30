@@ -67,7 +67,10 @@ void main() {
       await tester.pumpWidget(
         MediaQuery(
           data: const MediaQueryData(platformBrightness: Brightness.dark),
-          child: Theme(data: ThemeData(brightness: Brightness.light), child: const SizedBox()),
+          child: Theme(
+            data: ThemeData(brightness: Brightness.light),
+            child: const SizedBox(),
+          ),
         ),
       );
 
@@ -110,7 +113,10 @@ void main() {
       await tester.pumpWidget(
         MediaQuery(
           data: const MediaQueryData(platformBrightness: Brightness.dark),
-          child: Theme(data: ThemeData(brightness: Brightness.light), child: const SizedBox()),
+          child: Theme(
+            data: ThemeData(brightness: Brightness.light),
+            child: const SizedBox(),
+          ),
         ),
       );
 

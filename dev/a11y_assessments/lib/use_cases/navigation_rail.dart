@@ -7,6 +7,8 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class NavigationRailUseCase extends UseCase {
+  NavigationRailUseCase() : super(useCaseCategory: UseCaseCategory.core);
+
   @override
   String get name => 'NavigationRail';
 
@@ -47,25 +49,25 @@ class _NavRailExampleState extends State<NavRailExample> {
               });
             },
             labelType: labelType,
-            leading:
-                showLeading
-                    ? FloatingActionButton(
-                      elevation: 0,
-                      onPressed: () {
-                        // Add your onPressed code here!
-                      },
-                      child: const Icon(Icons.add),
-                    )
-                    : const SizedBox(),
-            trailing:
-                showTrailing
-                    ? IconButton(
-                      onPressed: () {
-                        // Add your onPressed code here!
-                      },
-                      icon: const Icon(Icons.more_horiz_rounded),
-                    )
-                    : const SizedBox(),
+            leading: showLeading
+                ? FloatingActionButton(
+                    tooltip: 'Add',
+                    elevation: 0,
+                    onPressed: () {
+                      // Add your onPressed code here!
+                    },
+                    child: const Icon(Icons.add),
+                  )
+                : const SizedBox(),
+            trailing: showTrailing
+                ? IconButton(
+                    tooltip: 'More',
+                    onPressed: () {
+                      // Add your onPressed code here!
+                    },
+                    icon: const Icon(Icons.more_horiz_rounded),
+                  )
+                : const SizedBox(),
             destinations: const <NavigationRailDestination>[
               NavigationRailDestination(
                 icon: Icon(Icons.favorite_border),

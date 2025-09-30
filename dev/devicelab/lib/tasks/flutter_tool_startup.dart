@@ -26,37 +26,39 @@ Future<TaskResult> flutterToolStartupBenchmarkTask() async {
 
   final Map<String, dynamic> data = <String, dynamic>{
     // `flutter test` in dir with no `test` folder.
-    ...(await _Benchmark(projectDirectory, 'test startup', 'test').run()).asMap(
-      'flutter_tool_startup_test',
-    ),
+    ...(await _Benchmark(
+      projectDirectory,
+      'test startup',
+      'test',
+    ).run()).asMap('flutter_tool_startup_test'),
 
     // `flutter test -d foo_device` in dir with no `test` folder.
     ...(await _Benchmark(
-          projectDirectory,
-          'test startup with specified device',
-          'test',
-          options: <String>['-d', 'foo_device'],
-        ).run())
-        .asMap('flutter_tool_startup_test_with_specified_device'),
+      projectDirectory,
+      'test startup with specified device',
+      'test',
+      options: <String>['-d', 'foo_device'],
+    ).run()).asMap('flutter_tool_startup_test_with_specified_device'),
 
     // `flutter test -v` where no android sdk will be found (at least currently).
     ...(await _Benchmark(
-          projectDirectory,
-          'test startup no android sdk',
-          'test',
-          options: <String>['-v'],
-          environment: <String, String>{
-            'ANDROID_HOME': 'dummy value',
-            'ANDROID_SDK_ROOT': 'dummy value',
-            'PATH': pathWithoutWhereHits(<String>['adb', 'aapt']),
-          },
-        ).run())
-        .asMap('flutter_tool_startup_test_no_android_sdk'),
+      projectDirectory,
+      'test startup no android sdk',
+      'test',
+      options: <String>['-v'],
+      environment: <String, String>{
+        'ANDROID_HOME': 'dummy value',
+        'ANDROID_SDK_ROOT': 'dummy value',
+        'PATH': pathWithoutWhereHits(<String>['adb', 'aapt']),
+      },
+    ).run()).asMap('flutter_tool_startup_test_no_android_sdk'),
 
     // `flutter -h`.
-    ...(await _Benchmark(projectDirectory, 'help startup', '-h').run()).asMap(
-      'flutter_tool_startup_help',
-    ),
+    ...(await _Benchmark(
+      projectDirectory,
+      'help startup',
+      '-h',
+    ).run()).asMap('flutter_tool_startup_help'),
   };
 
   // Cleanup.

@@ -16,7 +16,8 @@ class RangeSliderTemplate extends TokenTemplate {
   final String tokenGroup;
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends SliderThemeData {
   _${blockName}DefaultsM3(this.context)
     : super(trackHeight: ${getToken('$tokenGroup.active.track.height')});
@@ -90,18 +91,18 @@ class _${blockName}DefaultsM3 extends SliderThemeData {
   double? get minThumbSeparation => 0;
 
   @override
-  MaterialStateProperty<Size?>? get thumbSize {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+  WidgetStateProperty<Size?>? get thumbSize {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return const Size(${getToken("$tokenGroup.disabled.handle.width")}, ${getToken("$tokenGroup.handle.height")});
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return const Size(${getToken("$tokenGroup.hover.handle.width")}, ${getToken("$tokenGroup.handle.height")});
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return const Size(${getToken("$tokenGroup.focus.handle.width")}, ${getToken("$tokenGroup.handle.height")});
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return const Size(${getToken("$tokenGroup.pressed.handle.width")}, ${getToken("$tokenGroup.handle.height")});
       }
       return const Size(${getToken("$tokenGroup.handle.width")}, ${getToken("$tokenGroup.handle.height")});

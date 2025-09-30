@@ -158,8 +158,9 @@ void main() {
       for (int i = 0; i < count; i++) {
         for (int j = 0; j < count; j++) {
           final bool rectOdd = (i + j) & 1 == 0;
-          final Color fg =
-              (i < count / 2) ? ((j < count / 2) ? green : blue) : ((j < count / 2) ? yellow : red);
+          final Color fg = (i < count / 2)
+              ? ((j < count / 2) ? green : blue)
+              : ((j < count / 2) ? yellow : red);
           canvas.drawRect(
             Rect.fromLTWH(i * rectSize, j * rectSize, rectSize, rectSize),
             Paint()..color = rectOdd ? fg : white,

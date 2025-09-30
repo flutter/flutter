@@ -44,8 +44,9 @@ class FlutterTesterTestDevice extends TestDevice {
     required this.fontConfigManager,
     required this.nativeAssetsBuilder,
   }) : assert(!debuggingOptions.startPaused || enableVmService),
-       _gotProcessVmServiceUri =
-           enableVmService ? Completer<Uri?>() : (Completer<Uri?>()..complete());
+       _gotProcessVmServiceUri = enableVmService
+           ? Completer<Uri?>()
+           : (Completer<Uri?>()..complete());
 
   /// Used for logging to identify the test that is currently being executed.
   final int id;
@@ -65,9 +66,9 @@ class FlutterTesterTestDevice extends TestDevice {
   final FontConfigManager fontConfigManager;
   final TestCompilerNativeAssetsBuilder? nativeAssetsBuilder;
 
-  late final DartDevelopmentService _ddsLauncher = DartDevelopmentService(logger: logger);
+  late final _ddsLauncher = DartDevelopmentService(logger: logger);
   final Completer<Uri?> _gotProcessVmServiceUri;
-  final Completer<int> _exitCode = Completer<int>();
+  final _exitCode = Completer<int>();
 
   Process? _process;
   HttpServer? _server;
@@ -87,7 +88,7 @@ class FlutterTesterTestDevice extends TestDevice {
     // Let the server choose an unused port.
     _server = await bind(host, /*port*/ 0);
     logger.printTrace('test $id: test harness socket server is running at port:${_server!.port}');
-    final List<String> command = <String>[
+    final command = <String>[
       flutterTesterBinPath,
       if (enableVmService) ...<String>[
         // Some systems drive the _FlutterPlatform class in an unusual way, where
@@ -127,18 +128,17 @@ class FlutterTesterTestDevice extends TestDevice {
     //
     // If FLUTTER_TEST has not been set, assume from this context that this
     // call was invoked by the command 'flutter test'.
-    final String flutterTest =
-        platform.environment.containsKey('FLUTTER_TEST')
-            ? platform.environment['FLUTTER_TEST']!
-            : 'true';
-    final Map<String, String> environment = <String, String>{
+    final String flutterTest = platform.environment.containsKey('FLUTTER_TEST')
+        ? platform.environment['FLUTTER_TEST']!
+        : 'true';
+    final environment = <String, String>{
       'FLUTTER_TEST': flutterTest,
       'FONTCONFIG_FILE': fontConfigManager.fontConfigFile.path,
       'SERVER_PORT': _server!.port.toString(),
       'APP_NAME': flutterProject?.manifest.appName ?? '',
       if (debuggingOptions.enableImpeller == ImpellerStatus.enabled)
         'FLUTTER_TEST_IMPELLER': 'true',
-      if (testAssetDirectory != null) 'UNIT_TEST_ASSETS': testAssetDirectory!,
+      'UNIT_TEST_ASSETS': ?testAssetDirectory,
       if (platform.isWindows && nativeAssetsBuilder != null && flutterProject != null)
         'PATH':
             '${nativeAssetsBuilder!.windowsBuildDirectory(flutterProject!)};${platform.environment['PATH']}',
@@ -173,6 +173,7 @@ class FlutterTesterTestDevice extends TestDevice {
         );
 
         Uri? forwardingUri;
+        Uri? devToolsUri;
 
         if (debuggingOptions.enableDds) {
           logger.printTrace('test $id: Starting Dart Development Service');
@@ -181,6 +182,7 @@ class FlutterTesterTestDevice extends TestDevice {
             debuggingOptions: debuggingOptions,
           );
           forwardingUri = _ddsLauncher.uri;
+          devToolsUri = _ddsLauncher.devToolsUri;
           logger.printTrace(
             'test $id: Dart Development Service started at $forwardingUri, forwarding to VM service at $detectedUri.',
           );
@@ -197,7 +199,11 @@ class FlutterTesterTestDevice extends TestDevice {
         logger.printTrace('test $id: Successfully connected to service protocol: $forwardingUri');
         if (debuggingOptions.startPaused && !machine!) {
           logger.printStatus('The Dart VM service is listening on $forwardingUri');
-          await _startDevTools(forwardingUri, _ddsLauncher);
+          if (devToolsUri != null) {
+            logger.printStatus(
+              'The Flutter DevTools debugger and profiler is available at: $devToolsUri',
+            );
+          }
           logger.printStatus('');
           logger.printStatus(
             'The test process has been started. Set any relevant breakpoints and then resume the test in the debugger.',
@@ -256,26 +262,6 @@ class FlutterTesterTestDevice extends TestDevice {
     return connectToVmService(httpUri, compileExpression: compileExpression, logger: logger);
   }
 
-  // TODO(bkonyi): remove when ready to serve DevTools from DDS.
-  Future<void> _startDevTools(Uri forwardingUri, DartDevelopmentService? dds) async {
-    _devToolsLauncher = DevtoolsLauncher.instance;
-    logger.printTrace('test $id: Serving DevTools...');
-    final DevToolsServerAddress? devToolsServerAddress = await _devToolsLauncher?.serve();
-
-    if (devToolsServerAddress == null) {
-      logger.printTrace('test $id: Failed to start DevTools');
-      return;
-    }
-    await _devToolsLauncher?.ready;
-    logger.printTrace('test $id: DevTools is being served at ${devToolsServerAddress.uri}');
-
-    final Uri devToolsUri = devToolsServerAddress.uri!.replace(
-      // Use query instead of queryParameters to avoid unnecessary encoding.
-      query: 'uri=$forwardingUri',
-    );
-    logger.printStatus('The Flutter DevTools debugger and profiler is available at: $devToolsUri');
-  }
-
   /// Binds an [HttpServer] serving from `host` on `port`.
   ///
   /// Only intended to be overridden in tests.
@@ -299,10 +285,9 @@ class FlutterTesterTestDevice extends TestDevice {
 
   @override
   String toString() {
-    final String status =
-        _process != null
-            ? 'pid: ${_process!.pid}, ${_exitCode.isCompleted ? 'exited' : 'running'}'
-            : 'not started';
+    final status = _process != null
+        ? 'pid: ${_process!.pid}, ${_exitCode.isCompleted ? 'exited' : 'running'}'
+        : 'not started';
     return 'Flutter Tester ($status) for test $id';
   }
 
@@ -310,7 +295,7 @@ class FlutterTesterTestDevice extends TestDevice {
     required Process process,
     required Future<void> Function(Uri uri) reportVmServiceUri,
   }) {
-    for (final Stream<List<int>> stream in <Stream<List<int>>>[process.stderr, process.stdout]) {
+    for (final stream in <Stream<List<int>>>[process.stderr, process.stdout]) {
       stream
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
@@ -354,7 +339,7 @@ String _getExitCodeMessage(int exitCode) {
 }
 
 StreamChannel<String> _webSocketToStreamChannel(WebSocket webSocket) {
-  final StreamChannelController<String> controller = StreamChannelController<String>();
+  final controller = StreamChannelController<String>();
 
   controller.local.stream.map<dynamic>((String message) => message as dynamic).pipe(webSocket);
   webSocket

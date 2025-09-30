@@ -13,10 +13,10 @@
 #include "flutter/fml/paths.h"
 #include "flutter/shell/version/version.h"
 
-// Include once for the default enum definition.
+// This will include switch_defs.h once to get the default enum definition.
 #include "flutter/shell/common/switches.h"
 
-#undef FLUTTER_SHELL_COMMON_SWITCHES_H_
+#undef FLUTTER_SHELL_COMMON_SWITCH_DEFS_H_
 
 struct SwitchDesc {
   flutter::Switch sw;
@@ -68,8 +68,8 @@ static const std::string kAllowedDartFlags[] = {
 
 #endif  // FLUTTER_RELEASE
 
-// Include again for struct definition.
-#include "flutter/shell/common/switches.h"
+// Include switch_defs.h again for the struct definition.
+#include "flutter/shell/common/switch_defs.h"
 
 // Define symbols for the ICU data that is linked into the Flutter library on
 // Android.  This is a workaround for crashes seen when doing dynamic lookups
@@ -93,6 +93,9 @@ void PrintUsage(const std::string& executable_name) {
 
   std::cerr << "Flutter Engine Version: " << GetFlutterEngineVersion()
             << std::endl;
+
+  std::cerr << "Flutter Content Hash: " << GetFlutterContentHash() << std::endl;
+
   std::cerr << "Skia Version: " << GetSkiaVersion() << std::endl;
 
   std::cerr << "Dart Version: " << GetDartVersion() << std::endl << std::endl;
@@ -224,7 +227,8 @@ std::unique_ptr<fml::Mapping> GetSymbolMapping(
   return std::make_unique<fml::NonOwnedMapping>(mapping, size);
 }
 
-Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
+Settings SettingsFromCommandLine(const fml::CommandLine& command_line,
+                                 bool require_merged_platform_ui_thread) {
   Settings settings = {};
 
   // Set executable name.
@@ -290,6 +294,9 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
 
   settings.enable_dart_profiling =
       command_line.HasOption(FlagForSwitch(Switch::EnableDartProfiling));
+
+  settings.profile_startup =
+      command_line.HasOption(FlagForSwitch(Switch::ProfileStartup));
 
   settings.enable_software_rendering =
       command_line.HasOption(FlagForSwitch(Switch::EnableSoftwareRendering));
@@ -379,7 +386,7 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
 
   if (!aot_shared_library_name.empty()) {
     for (std::string_view name : aot_shared_library_name) {
-      settings.application_library_path.emplace_back(name);
+      settings.application_library_paths.emplace_back(name);
     }
   } else if (!snapshot_asset_path.empty()) {
     settings.vm_snapshot_data_path =
@@ -510,8 +517,15 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   settings.enable_surface_control = command_line.HasOption(
       FlagForSwitch(Switch::EnableAndroidSurfaceControl));
 
+  constexpr std::string_view kMergedThreadEnabled = "enabled";
+  constexpr std::string_view kMergedThreadDisabled = "disabled";
+  constexpr std::string_view kMergedThreadMergeAfterLaunch = "mergeAfterLaunch";
   if (command_line.HasOption(
           FlagForSwitch(Switch::DisableMergedPlatformUIThread))) {
+    FML_CHECK(!require_merged_platform_ui_thread)
+        << "This platform does not support the "
+        << FlagForSwitch(Switch::DisableMergedPlatformUIThread) << " flag";
+
     settings.merged_platform_ui_thread =
         Settings::MergedPlatformUIThread::kDisabled;
   } else if (command_line.HasOption(
@@ -519,13 +533,18 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
     std::string merged_platform_ui;
     command_line.GetOptionValue(FlagForSwitch(Switch::MergedPlatformUIThread),
                                 &merged_platform_ui);
-    if (merged_platform_ui == "enabled") {
+    if (merged_platform_ui == kMergedThreadEnabled) {
       settings.merged_platform_ui_thread =
           Settings::MergedPlatformUIThread::kEnabled;
-    } else if (merged_platform_ui == "disabled") {
+    } else if (merged_platform_ui == kMergedThreadDisabled) {
+      FML_CHECK(!require_merged_platform_ui_thread)
+          << "This platform does not support the "
+          << FlagForSwitch(Switch::MergedPlatformUIThread) << "="
+          << kMergedThreadDisabled << " flag";
+
       settings.merged_platform_ui_thread =
           Settings::MergedPlatformUIThread::kDisabled;
-    } else if (merged_platform_ui == "mergeAfterLaunch") {
+    } else if (merged_platform_ui == kMergedThreadMergeAfterLaunch) {
       settings.merged_platform_ui_thread =
           Settings::MergedPlatformUIThread::kMergeAfterLaunch;
     }

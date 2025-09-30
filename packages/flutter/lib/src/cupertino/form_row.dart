@@ -126,7 +126,9 @@ class CupertinoFormRow extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               if (prefix != null) DefaultTextStyle(style: textStyle, child: prefix!),
-              Flexible(child: Align(alignment: AlignmentDirectional.centerEnd, child: child)),
+              Flexible(
+                child: Align(alignment: AlignmentDirectional.centerEnd, child: child),
+              ),
             ],
           ),
           if (helper != null)

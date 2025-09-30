@@ -209,14 +209,15 @@ void main() {
 
   testWidgets('Slider relayout upon system fonts changes', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(home: Material(child: Slider(value: 0.0, onChanged: (double value) {}))),
+      MaterialApp(
+        home: Material(child: Slider(value: 0.0, onChanged: (double value) {})),
+      ),
     );
-    final RenderObject renderObject =
-        tester.allRenderObjects
-            .where(
-              (RenderObject renderObject) => renderObject.runtimeType.toString() == '_RenderSlider',
-            )
-            .first;
+    final RenderObject renderObject = tester.allRenderObjects
+        .where(
+          (RenderObject renderObject) => renderObject.runtimeType.toString() == '_RenderSlider',
+        )
+        .first;
     await verifyMarkedNeedsLayoutDuringTransientCallbacksPhase(tester, renderObject);
   });
 

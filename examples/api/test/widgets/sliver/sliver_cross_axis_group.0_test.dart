@@ -18,8 +18,9 @@ void main() {
 
     final double crossAxisExtent = renderSliverGroup.constraints.crossAxisExtent;
 
-    final List<RenderSliverList> renderSliverLists =
-        tester.renderObjectList<RenderSliverList>(find.byType(SliverList)).toList();
+    final List<RenderSliverList> renderSliverLists = tester
+        .renderObjectList<RenderSliverList>(find.byType(SliverList))
+        .toList();
     final RenderSliverList firstList = renderSliverLists[0];
     final RenderSliverList secondList = renderSliverLists[1];
     final RenderSliverList thirdList = renderSliverLists[2];

@@ -191,6 +191,17 @@ These APIs can take a variety of forms, including specific methods to check indi
 
 *We currently have many cases of APIs that do not follow this guidance because they predate it. This is technical debt, rather than something that should be pointed to as a justification for adding new APIs that do not.*
 
+### OS version support
+
+Whenever feasible, plugins should support the same OS versions that [Flutter supports](https://docs.flutter.dev/reference/supported-platforms). When a plugin's platform implementation is updated to require a version of Flutter that drops a previously-supported OS version, the plugin should be updated to drop that version as well (for example, updating minimim versions in native build files and removing runtime version checks for versions that are no longer supported).
+
+If a new plugin is being created, or a plugin is being extended to a new platform, it's fine to require a newer OS version if there is a good reason to do so. For instance, if it would require adding significant already-deprecated codepaths that would cause a maintenance burden, it may not be worth supporting older OS verions.
+
+For existing plugins, dropping support for OS versions that are still supported by Flutter (or supported by older versions of Flutter that are still within the allowance of the package's pubspec.yaml Flutter constraint) is **very disruptive**: because `pub` does not have information about OS version support, dropping previously-supported OS versions is build breaking for clients. There are three possible approaches to dropping an OS version from an existing plugin:
+1. Wait for Flutter to drop that version, then set the minimum SDK version accordingly before/while dropping the OS version in the plugin. This means that a client still targetting the dropped version can never resolve to the version of the package that dropped support, so it is a no-op for clients. This is the **strongly preferred** approach.
+2. Drop the version as a breaking change. Keep in mind that this must be a breaking change not only for the implementation package, but also for the app-facing package when updating to use the new major version of the implementation package, so should be discussed with the ecosystem team in advance. This approach ensures that clients have appropriate breaking change notification, and have to opt in to the new version.
+3. While it is **strongly discouraged**, in rare cases we have dropped OS version support without a major version change. This should be done only if a major version change would be disruptive to the ecosystem and the OS version drop cannot be delayed until after Flutter has dropped it. For example, if continuing to support an older OS version would require continuing to use an older version of an SDK that has a significant security vulnerability, this approach could be warranted. This should only be done if the costs of one of the two previous approaches is so high that causing unexpected build breakage for plugin clients is a better outcome.
+
 ## Languages
 
 On some platforms, there are multiple native languages that can be used to write plugins; repository policy limits the languages that are used in some cases. These are currently the allowed languages for each platform:

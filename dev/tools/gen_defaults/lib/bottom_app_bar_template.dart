@@ -13,7 +13,8 @@ class BottomAppBarTemplate extends TokenTemplate {
   });
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends BottomAppBarThemeData {
   _${blockName}DefaultsM3(this.context)
     : super(

@@ -48,7 +48,7 @@ void main() {
       'ensureConfiguration throws an error if an '
       'explicitVmServicePort is specified and more than one test file',
       () async {
-        final FlutterPlatform flutterPlatform = FlutterPlatform(
+        final flutterPlatform = FlutterPlatform(
           flutterTesterBinPath: '/',
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, hostVmServicePort: 1234),
           enableVmService: false,
@@ -74,7 +74,7 @@ void main() {
       'ensureConfiguration throws an error if a precompiled '
       'entrypoint is specified and more that one test file',
       () {
-        final FlutterPlatform flutterPlatform = FlutterPlatform(
+        final flutterPlatform = FlutterPlatform(
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
           flutterTesterBinPath: '/',
           precompiledDillPath: 'example.dill',
@@ -100,8 +100,8 @@ void main() {
     testUsingContext(
       'an exception from the app not starting bubbles up to the test runner',
       () async {
-        final _UnstartableDevice testDevice = _UnstartableDevice();
-        final FlutterPlatform flutterPlatform = FlutterPlatform(
+        final testDevice = _UnstartableDevice();
+        final flutterPlatform = FlutterPlatform(
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
           flutterTesterBinPath: '/',
           enableVmService: false,
@@ -141,10 +141,10 @@ void main() {
     testUsingContext(
       'a shutdown signal terminates the test device',
       () async {
-        final _WorkingDevice testDevice = _WorkingDevice();
+        final testDevice = _WorkingDevice();
 
-        final ShutdownHooks shutdownHooks = ShutdownHooks();
-        final FlutterPlatform flutterPlatform = FlutterPlatform(
+        final shutdownHooks = ShutdownHooks();
+        final flutterPlatform = FlutterPlatform(
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
           flutterTesterBinPath: '/',
           enableVmService: false,
@@ -164,7 +164,7 @@ void main() {
           returnsNormally,
         );
 
-        final BufferLogger logger = globals.logger as BufferLogger;
+        final logger = globals.logger as BufferLogger;
         await shutdownHooks.runShutdownHooks(logger);
         expect(logger.traceText, contains('test 0: ensuring test device is terminated.'));
       },
@@ -205,7 +205,7 @@ void main() {
       );
 
       FlutterPlatform? capturedPlatform;
-      final Map<String, String> expectedPrecompiledDillFiles = <String, String>{'Key': 'Value'};
+      final expectedPrecompiledDillFiles = <String, String>{'Key': 'Value'};
       final FlutterPlatform flutterPlatform = installHook(
         flutterTesterBinPath: 'abc',
         debuggingOptions: DebuggingOptions.enabled(
@@ -344,7 +344,7 @@ void main() {
         addFlutterTesterDeviceExpectation();
 
         const Device? notAnIntegrationTest = null;
-        final FlutterPlatform flutterPlatform = FlutterPlatform(
+        final flutterPlatform = FlutterPlatform(
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
           flutterTesterBinPath: 'flutter_tester',
           enableVmService: false,
@@ -377,7 +377,8 @@ void main() {
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
         Logger: () => logger,
-        VMServiceConnector: () => (_) => throw UnimplementedError(),
+        VMServiceConnector: () =>
+            (_) => throw UnimplementedError(),
       },
     );
 
@@ -407,7 +408,7 @@ void main() {
         );
         addFlutterTesterDeviceExpectation();
 
-        final FlutterPlatform flutterPlatform = FlutterPlatform(
+        final flutterPlatform = FlutterPlatform(
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
           flutterTesterBinPath: 'flutter_tester',
           enableVmService: false,
@@ -461,19 +462,18 @@ void main() {
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
         Logger: () => logger,
-        VMServiceConnector:
-            () =>
-                (
-                  Uri httpUri, {
-                  ReloadSources? reloadSources,
-                  Restart? restart,
-                  CompileExpression? compileExpression,
-                  FlutterProject? flutterProject,
-                  PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-                  io.CompressionOptions? compression,
-                  Device? device,
-                  Logger? logger,
-                }) async => flutterVmService,
+        VMServiceConnector: () =>
+            (
+              Uri httpUri, {
+              ReloadSources? reloadSources,
+              Restart? restart,
+              CompileExpression? compileExpression,
+              FlutterProject? flutterProject,
+              PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+              io.CompressionOptions? compression,
+              Device? device,
+              Logger? logger,
+            }) async => flutterVmService,
         ApplicationPackageFactory: _FakeApplicationPackageFactory.new,
         Artifacts: () => artifacts,
       },
@@ -488,6 +488,7 @@ class _FakeFlutterVmService extends Fake implements FlutterVmService {
   }
 
   @override
+  // ignore: omit_obvious_property_types
   final _FakeVmService service = _FakeVmService();
 
   (String, String?, Map<String, Object?>?)? callMethodWrapperInvocation;
@@ -512,7 +513,7 @@ class _FakeVmService extends Fake implements VmService {
     return Success();
   }
 
-  final StreamController<Event> onExtensionEventController = StreamController<Event>();
+  final onExtensionEventController = StreamController<Event>();
 
   @override
   Stream<Event> get onExtensionEvent => const Stream<Event>.empty();

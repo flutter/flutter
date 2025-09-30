@@ -214,11 +214,12 @@ class ArchiveUnpublisher {
   /// Remove the archive from Google Storage.
   Future<void> unpublishArchive() async {
     final Map<String, dynamic> jsonData = await _loadMetadata();
-    final List<Map<String, String>> releases =
-        (jsonData['releases'] as List<dynamic>).map<Map<String, String>>((dynamic entry) {
+    final List<Map<String, String>> releases = (jsonData['releases'] as List<dynamic>)
+        .map<Map<String, String>>((dynamic entry) {
           final Map<String, dynamic> mapEntry = entry as Map<String, dynamic>;
           return mapEntry.cast<String, String>();
-        }).toList();
+        })
+        .toList();
     final Map<Channel, Map<String, String>> paths = await _getArchivePaths(releases);
     releases.removeWhere(
       (Map<String, String> value) =>
@@ -377,12 +378,12 @@ void _printBanner(String message) {
 
 /// Prepares a flutter git repo to be removed from the published cloud storage.
 Future<void> main(List<String> rawArguments) async {
-  final List<String> allowedChannelValues =
-      Channel.values.map<String>((Channel channel) => getChannelName(channel)).toList();
-  final List<String> allowedPlatformNames =
-      PublishedPlatform.values
-          .map<String>((PublishedPlatform platform) => getPublishedPlatform(platform))
-          .toList();
+  final List<String> allowedChannelValues = Channel.values
+      .map<String>((Channel channel) => getChannelName(channel))
+      .toList();
+  final List<String> allowedPlatformNames = PublishedPlatform.values
+      .map<String>((PublishedPlatform platform) => getPublishedPlatform(platform))
+      .toList();
   final ArgParser argParser = ArgParser();
   argParser.addOption(
     'temp_dir',
@@ -479,14 +480,14 @@ Future<void> main(List<String> rawArguments) async {
 
   final List<String> channelArg = parsedArguments['channel'] as List<String>;
   final List<String> channelOptions = channelArg.isNotEmpty ? channelArg : allowedChannelValues;
-  final Set<Channel> channels =
-      channelOptions.map<Channel>((String value) => fromChannelName(value)).toSet();
+  final Set<Channel> channels = channelOptions
+      .map<Channel>((String value) => fromChannelName(value))
+      .toSet();
   final List<String> platformArg = parsedArguments['platform'] as List<String>;
   final List<String> platformOptions = platformArg.isNotEmpty ? platformArg : allowedPlatformNames;
-  final List<PublishedPlatform> platforms =
-      platformOptions
-          .map<PublishedPlatform>((String value) => fromPublishedPlatform(value))
-          .toList();
+  final List<PublishedPlatform> platforms = platformOptions
+      .map<PublishedPlatform>((String value) => fromPublishedPlatform(value))
+      .toList();
   int exitCode = 0;
   late String message;
   late String stack;

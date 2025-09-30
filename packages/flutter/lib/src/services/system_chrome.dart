@@ -232,7 +232,7 @@ enum SystemUiMode {
 /// the system overlays, and by [SystemChrome.setSystemUIOverlayStyle] for
 /// imperatively setting the style of the system overlays.
 @immutable
-class SystemUiOverlayStyle {
+class SystemUiOverlayStyle with Diagnosticable {
   /// Creates a new [SystemUiOverlayStyle].
   const SystemUiOverlayStyle({
     this.systemNavigationBarColor,
@@ -343,9 +343,6 @@ class SystemUiOverlayStyle {
     };
   }
 
-  @override
-  String toString() => '${objectRuntimeType(this, 'SystemUiOverlayStyle')}(${_toMap()})';
-
   /// Creates a copy of this theme with the given fields replaced with new values.
   SystemUiOverlayStyle copyWith({
     Color? systemNavigationBarColor,
@@ -400,6 +397,40 @@ class SystemUiOverlayStyle {
         other.systemStatusBarContrastEnforced == systemStatusBarContrastEnforced &&
         other.systemNavigationBarIconBrightness == systemNavigationBarIconBrightness;
   }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(
+      DiagnosticsProperty<Color>('systemNavigationBarColor', systemNavigationBarColor),
+    );
+    properties.add(
+      DiagnosticsProperty<Color>(
+        'systemNavigationBarDividerColor',
+        systemNavigationBarDividerColor,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<Brightness>(
+        'systemNavigationBarIconBrightness',
+        systemNavigationBarIconBrightness,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<bool>(
+        'systemNavigationBarContrastEnforced',
+        systemNavigationBarContrastEnforced,
+      ),
+    );
+    properties.add(DiagnosticsProperty<Color>('statusBarColor', statusBarColor));
+    properties.add(DiagnosticsProperty<Brightness>('statusBarBrightness', statusBarBrightness));
+    properties.add(
+      DiagnosticsProperty<Brightness>('statusBarIconBrightness', statusBarIconBrightness),
+    );
+    properties.add(
+      DiagnosticsProperty<bool>('systemStatusBarContrastEnforced', systemStatusBarContrastEnforced),
+    );
+  }
 }
 
 List<String> _stringify(List<dynamic> list) => <String>[
@@ -419,6 +450,11 @@ abstract final class SystemChrome {
   /// ## Limitations
   ///
   /// ### Android
+  ///
+  /// If your Flutter app is targeting Android 16 (API 36) or later and you are using
+  /// a device with a display width >= 600 dp, then you cannot set the device
+  /// orientation via [SystemChrome.setPreferredOrientations]. For more details see
+  /// Android 16 docs [here](https://developer.android.com/about/versions/16/behavior-changes-16#ignore-orientation).
   ///
   /// Android limits the [orientations](https://developer.android.com/reference/android/R.attr#screenOrientation)
   /// to the following combinations:

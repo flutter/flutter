@@ -81,7 +81,7 @@ void main() {
           defaultWorkingDirectory: tempRoot,
           processManager: permissiveProcessManager,
         ),
-        now: () => DateTime(2025, 6, 27, 12, 30),
+        now: () => DateTime.utc(2025, 6, 27, 12, 30),
       );
 
       // Set up the Flutter tool for the test.
@@ -122,7 +122,7 @@ void main() {
         containsAllInOrder([
           endsWith('src/out/engine_stamp.json:'),
           contains(
-            '{"build_date":"2025-06-27T12:30:00.000","build_time_ms":1751052600000,"git_revision":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","git_revision_date":"2025-06-27T17:11:53-07:00","content_hash":"1111111111111111111111111111111111111111"}',
+            '{"build_date":"2025-06-27T12:30:00.000Z","build_time_ms":1751027400000,"git_revision":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","git_revision_date":"2025-06-27T17:11:53-07:00","content_hash":"1111111111111111111111111111111111111111"}',
           ),
         ]),
       );
@@ -149,7 +149,7 @@ void main() {
       expect(io.File(p.join(tempRoot.path, 'src/out/engine_stamp.json')).existsSync(), isTrue);
       expect(
         io.File(p.join(tempRoot.path, 'src/out/engine_stamp.json')).readAsStringSync().trim(),
-        '{"build_date":"2025-06-27T12:30:00.000","build_time_ms":1751052600000,"git_revision":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","git_revision_date":"2025-06-27T17:11:53-07:00","content_hash":"1111111111111111111111111111111111111111"}',
+        '{"build_date":"2025-06-27T12:30:00.000Z","build_time_ms":1751027400000,"git_revision":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","git_revision_date":"2025-06-27T17:11:53-07:00","content_hash":"1111111111111111111111111111111111111111"}',
       );
     });
   });

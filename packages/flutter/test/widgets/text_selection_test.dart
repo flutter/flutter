@@ -616,8 +616,9 @@ void main() {
       );
 
       // Get the location of the 10th character
-      final Offset charLocation =
-          renderEditable.getLocalRectForCaret(const TextPosition(offset: 10)).center;
+      final Offset charLocation = renderEditable
+          .getLocalRectForCaret(const TextPosition(offset: 10))
+          .center;
       final Offset globalCharLocation = charLocation + tester.getTopLeft(find.byType(FakeEditable));
 
       // Right clicking on a word should select it
@@ -666,8 +667,9 @@ void main() {
       );
 
       // Get the location of the 10th character
-      final Offset charLocation =
-          renderEditable.getLocalRectForCaret(const TextPosition(offset: 10)).center;
+      final Offset charLocation = renderEditable
+          .getLocalRectForCaret(const TextPosition(offset: 10))
+          .center;
       final Offset globalCharLocation = charLocation + tester.getTopLeft(find.byType(FakeEditable));
 
       // Right clicking on an unfocused field should place the cursor, not select
@@ -1248,7 +1250,9 @@ void main() {
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
-        MaterialApp(home: Scaffold(body: TextField(autofocus: true, controller: controller))),
+        MaterialApp(
+          home: Scaffold(body: TextField(autofocus: true, controller: controller)),
+        ),
       );
 
       await tester.pumpAndSettle();
@@ -1565,15 +1569,16 @@ void main() {
         tester,
         magnifierConfiguration: TextMagnifierConfiguration(
           shouldDisplayHandlesInMagnifier: false,
-          magnifierBuilder: (
-            BuildContext context,
-            MagnifierController controller,
-            ValueNotifier<MagnifierInfo>? notifier,
-          ) {
-            builtGlobalGesturePosition = notifier?.value.globalGesturePosition;
-            builtFieldBounds = notifier?.value.fieldBounds;
-            return SizedBox.shrink(key: magnifierKey);
-          },
+          magnifierBuilder:
+              (
+                BuildContext context,
+                MagnifierController controller,
+                ValueNotifier<MagnifierInfo>? notifier,
+              ) {
+                builtGlobalGesturePosition = notifier?.value.globalGesturePosition;
+                builtFieldBounds = notifier?.value.fieldBounds;
+                return SizedBox.shrink(key: magnifierKey);
+              },
         ),
       );
 

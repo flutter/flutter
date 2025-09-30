@@ -58,7 +58,7 @@ void main() {
   testUsingContext(
     'Missing dir error caught for FontConfigManger.dispose',
     () async {
-      final FontConfigManager fontConfigManager = FontConfigManager();
+      final fontConfigManager = FontConfigManager();
 
       final Directory fontsDirectory = fileSystem.file(fontConfigManager.fontConfigFile).parent;
       fontsDirectory.deleteSync(recursive: true);
@@ -291,19 +291,20 @@ void main() {
       ]);
       device = createDevice(enableVmService: true);
       originalDdsLauncher = ddsLauncherCallback;
-      ddsLauncherCallback = ({
-        required Uri remoteVmServiceUri,
-        Uri? serviceUri,
-        bool enableAuthCodes = true,
-        bool serveDevTools = false,
-        Uri? devToolsServerAddress,
-        bool enableServicePortFallback = false,
-        List<String> cachedUserTags = const <String>[],
-        String? dartExecutable,
-        String? google3WorkspaceRoot,
-      }) async {
-        return FakeDartDevelopmentServiceLauncher(uri: Uri.parse('http://localhost:1234'));
-      };
+      ddsLauncherCallback =
+          ({
+            required Uri remoteVmServiceUri,
+            Uri? serviceUri,
+            bool enableAuthCodes = true,
+            bool serveDevTools = false,
+            Uri? devToolsServerAddress,
+            bool enableServicePortFallback = false,
+            List<String> cachedUserTags = const <String>[],
+            String? dartExecutable,
+            String? google3WorkspaceRoot,
+          }) async {
+            return FakeDartDevelopmentServiceLauncher(uri: Uri.parse('http://localhost:1234'));
+          };
     });
 
     tearDown(() {

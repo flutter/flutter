@@ -41,7 +41,7 @@ static sk_sp<SkImage> ResizeRasterImage(const sk_sp<SkImage>& image,
   }
 
   if (image->dimensions() == resized_dimensions) {
-    return image->makeRasterImage();
+    return image->makeRasterImage(nullptr);
   }
 
   const auto scaled_image_info =
@@ -92,7 +92,7 @@ static sk_sp<SkImage> ImageFromDecompressedData(
 
   if (!target_width && !target_height) {
     // No resizing requested. Just rasterize the image.
-    return image->makeRasterImage();
+    return image->makeRasterImage(nullptr);
   }
 
   return ResizeRasterImage(image, SkISize::Make(target_width, target_height),
@@ -110,7 +110,7 @@ sk_sp<SkImage> ImageDecoderSkia::ImageFromCompressedData(
   if (!descriptor->should_resize(target_width, target_height)) {
     // No resizing requested. Just decode & rasterize the image.
     sk_sp<SkImage> image = descriptor->image();
-    return image ? image->makeRasterImage() : nullptr;
+    return image ? image->makeRasterImage(nullptr) : nullptr;
   }
 
   const SkISize source_dimensions = descriptor->image_info().dimensions();

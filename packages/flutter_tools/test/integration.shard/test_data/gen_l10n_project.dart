@@ -30,7 +30,7 @@ class GenL10nProject extends Project {
   }
 
   @override
-  final String pubspec = '''
+  final pubspec = '''
 name: test_l10n_project
 environment:
   sdk: ^3.7.0-0
@@ -53,7 +53,7 @@ flutter:
 
   final bool useNamedParameters;
 
-  final String appEn = r'''
+  final appEn = r'''
 {
   "@@locale": "en",
 
@@ -428,14 +428,14 @@ flutter:
 }
 ''';
 
-  final String appEnCa = r'''
+  final appEnCa = r'''
 {
   "@@locale": "en_CA",
   "helloWorld": "CA Hello World"
 }
 ''';
 
-  final String appEnGb = r'''
+  final appEnGb = r'''
 {
   "@@locale": "en_GB",
   "helloWorld": "GB Hello World"
@@ -445,7 +445,7 @@ flutter:
   // All these messages are the template language's message with 'ES - '
   // appended. This makes validating test behavior easier. The interpolated
   // messages are different where applicable.
-  final String appEs = r'''
+  final appEs = r'''
 {
   "@@locale": "es",
   "helloWorld": "ES - Hello world",
@@ -477,7 +477,7 @@ flutter:
 }
 ''';
 
-  final String appEs419 = r'''
+  final appEs419 = r'''
 {
   "@@locale": "es_419",
   "helloWorld": "ES 419 - Hello World",
@@ -485,7 +485,7 @@ flutter:
 }
 ''';
 
-  final String appZh = r'''
+  final appZh = r'''
 {
   "@@locale": "zh",
   "helloWorld": "你好世界",
@@ -494,21 +494,21 @@ flutter:
 }
 ''';
 
-  final String appZhHans = r'''
+  final appZhHans = r'''
 {
   "@@locale": "zh_Hans",
   "helloWorld": "简体你好世界"
 }
   ''';
 
-  final String appZhHant = r'''
+  final appZhHant = r'''
 {
   "@@locale": "zh_Hant",
   "helloWorld": "繁體你好世界"
 }
   ''';
 
-  final String appZhHantTw = r'''
+  final appZhHantTw = r'''
 {
   "@@locale": "zh_Hant_TW",
   "helloWorld": "台灣繁體你好世界"
@@ -1085,7 +1085,7 @@ void main() {
 }''';
 
   String l10nYaml({required bool useDeferredLoading, required bool useNamedParameters}) {
-    String l10nYamlString = '';
+    var l10nYamlString = '';
 
     if (useDeferredLoading) {
       l10nYamlString += 'use-deferred-loading: true\n';

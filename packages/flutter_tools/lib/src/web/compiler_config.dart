@@ -16,10 +16,10 @@ sealed class WebCompilerConfig {
   });
 
   /// Build environment flag for [optimizationLevel].
-  static const String kOptimizationLevel = 'OptimizationLevel';
+  static const kOptimizationLevel = 'OptimizationLevel';
 
   /// Build environment flag for [sourceMaps].
-  static const String kSourceMapsEnabled = 'SourceMaps';
+  static const kSourceMapsEnabled = 'SourceMaps';
 
   /// Calculates the optimization level for the compiler for the given
   /// build mode.
@@ -43,7 +43,7 @@ sealed class WebCompilerConfig {
   String get buildKey;
 
   Map<String, Object> get buildEventAnalyticsValues => <String, Object>{
-    if (optimizationLevel != null) 'optimizationLevel': optimizationLevel!,
+    'optimizationLevel': ?optimizationLevel,
   };
 
   Map<String, dynamic> get _buildKeyMap => <String, dynamic>{
@@ -128,7 +128,7 @@ class JsCompilerConfig extends WebCompilerConfig {
 
   @override
   String get buildKey {
-    final Map<String, dynamic> settings = <String, dynamic>{
+    final settings = <String, dynamic>{
       ...super._buildKeyMap,
       'csp': csp,
       'dumpInfo': dumpInfo,
@@ -146,18 +146,21 @@ class WasmCompilerConfig extends WebCompilerConfig {
   const WasmCompilerConfig({
     super.optimizationLevel,
     this.stripWasm = true,
-    this.minify = true,
+    this.minify,
+    this.dryRun = false,
     super.sourceMaps = true,
     super.renderer = WebRendererMode.defaultForWasm,
   });
 
   /// Build environment for [stripWasm].
-  static const String kStripWasm = 'StripWasm';
+  static const kStripWasm = 'StripWasm';
 
   /// Whether to strip the wasm file of static symbols.
   final bool stripWasm;
 
   final bool? minify;
+
+  final bool dryRun;
 
   @override
   CompileTarget get compileTarget => CompileTarget.wasm;
@@ -184,17 +187,25 @@ class WasmCompilerConfig extends WebCompilerConfig {
       if (!sourceMaps) '--no-source-maps',
       if (minify ?? buildMode == BuildMode.release) '--minify' else '--no-minify',
       if (buildMode == BuildMode.debug) '--extra-compiler-option=--enable-asserts',
+      if (dryRun) '--extra-compiler-option=--dry-run',
     ];
   }
 
   @override
   String get buildKey {
-    final Map<String, dynamic> settings = <String, dynamic>{
+    final settings = <String, dynamic>{
       ...super._buildKeyMap,
       kStripWasm: stripWasm,
       'minify': minify,
+      'dryRun': dryRun,
       WebCompilerConfig.kSourceMapsEnabled: sourceMaps,
     };
     return jsonEncode(settings);
   }
+
+  @override
+  Map<String, Object> get buildEventAnalyticsValues => <String, Object>{
+    ...super.buildEventAnalyticsValues,
+    'dryRun': dryRun,
+  };
 }

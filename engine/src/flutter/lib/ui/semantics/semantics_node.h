@@ -45,6 +45,8 @@ enum class SemanticsAction : int32_t {
   kSetText = 1 << 21,
   kFocus = 1 << 22,
   kScrollToOffset = 1 << 23,
+  kExpand = 1 << 24,
+  kCollapse = 1 << 25,
 };
 
 constexpr int kVerticalScrollSemanticsActions =
@@ -166,6 +168,7 @@ struct SemanticsNode {
   std::string linkUrl;
   SemanticsRole role;
   SemanticsValidationResult validationResult = SemanticsValidationResult::kNone;
+  std::string locale;
 };
 
 // Contains semantic nodes that need to be updated.

@@ -146,7 +146,10 @@ void main() {
               children: <Widget>[
                 client1,
                 TextField(key: keyClient3, autofillHints: const <String>['3']),
-                const AutofillGroup(key: innerKey, child: Column(children: <Widget>[client2])),
+                const AutofillGroup(
+                  key: innerKey,
+                  child: Column(children: <Widget>[client2]),
+                ),
               ],
             ),
           ),
@@ -168,9 +171,15 @@ void main() {
     const TextField placeholder = TextField(autofillHints: <String>[AutofillHints.name]);
 
     List<Widget> children = const <Widget>[
-      AutofillGroup(key: group1, child: AutofillGroup(child: placeholder)),
+      AutofillGroup(
+        key: group1,
+        child: AutofillGroup(child: placeholder),
+      ),
       AutofillGroup(key: group2, onDisposeAction: AutofillContextAction.cancel, child: placeholder),
-      AutofillGroup(key: group3, child: AutofillGroup(child: placeholder)),
+      AutofillGroup(
+        key: group3,
+        child: AutofillGroup(child: placeholder),
+      ),
     ];
 
     await tester.pumpWidget(
@@ -198,7 +207,10 @@ void main() {
           onDisposeAction: AutofillContextAction.cancel,
           child: placeholder,
         ),
-        AutofillGroup(key: group3, child: AutofillGroup(child: placeholder)),
+        AutofillGroup(
+          key: group3,
+          child: AutofillGroup(child: placeholder),
+        ),
       ];
     });
 
@@ -211,7 +223,10 @@ void main() {
     // Remove the topmost group group2. Should cancel.
     setState(() {
       children = const <Widget>[
-        AutofillGroup(key: group3, child: AutofillGroup(child: placeholder)),
+        AutofillGroup(
+          key: group3,
+          child: AutofillGroup(child: placeholder),
+        ),
       ];
     });
 

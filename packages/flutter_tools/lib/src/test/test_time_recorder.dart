@@ -55,7 +55,7 @@ class TestTimeRecord {
   final StopwatchFactory stopwatchFactory;
   Duration _combinedRuntime = Duration.zero;
   final Stopwatch _wallClockRuntime;
-  int _currentlyRunningCount = 0;
+  var _currentlyRunningCount = 0;
 
   Stopwatch start() {
     final Stopwatch stopwatch = stopwatchFactory.createStopwatch()..start();

@@ -1538,25 +1538,25 @@ class SemanticsObject {
   bool hasAction(ui.SemanticsAction action) => (_actions! & action.index) != 0;
 
   /// Whether this object represents a widget that can receive input focus.
-  bool get isFocusable => flags.isFocusable;
+  bool get isFocusable => flags.isFocused != ui.Tristate.none;
 
   /// Whether this object currently has input focus.
   ///
   /// This value only makes sense if [isFocusable] is true.
-  bool get hasFocus => flags.isFocused;
+  bool get hasFocus => flags.isFocused == ui.Tristate.isTrue;
 
   /// Whether this object can be in one of "enabled" or "disabled" state.
   ///
   /// If this is true, [isEnabled] communicates the state.
-  bool get hasEnabledState => flags.hasEnabledState;
+  bool get hasEnabledState => flags.isEnabled != ui.Tristate.none;
 
   /// Whether this object is enabled.
   ///
   /// This field is only meaningful if [hasEnabledState] is true.
-  bool get isEnabled => flags.isEnabled;
+  bool get isEnabled => flags.isEnabled == ui.Tristate.isTrue;
 
   /// Whether this object can be in one of "expanded" or "collapsed" state.
-  bool get hasExpandedState => flags.hasExpandedState;
+  bool get hasExpandedState => flags.isExpanded != ui.Tristate.none;
 
   /// Whether this object represents a vertically scrollable area.
   bool get isVerticalScrollContainer =>
@@ -1600,14 +1600,13 @@ class SemanticsObject {
   ///
   /// See [EnabledState] for more details.
   EnabledState enabledState() {
-    if (flags.hasEnabledState) {
-      if (flags.isEnabled) {
+    switch (flags.isEnabled) {
+      case ui.Tristate.none:
+        return EnabledState.noOpinion;
+      case ui.Tristate.isTrue:
         return EnabledState.enabled;
-      } else {
+      case ui.Tristate.isFalse:
         return EnabledState.disabled;
-      }
-    } else {
-      return EnabledState.noOpinion;
     }
   }
 
@@ -2056,14 +2055,14 @@ class SemanticsObject {
       return EngineSemanticsRole.image;
     } else if (isCheckable) {
       return EngineSemanticsRole.checkable;
+    } else if (isLink) {
+      return EngineSemanticsRole.link;
     } else if (isButton) {
       return EngineSemanticsRole.button;
     } else if (isScrollContainer) {
       return EngineSemanticsRole.scrollable;
     } else if (scopesRoute) {
       return EngineSemanticsRole.route;
-    } else if (isLink) {
-      return EngineSemanticsRole.link;
     } else if (isHeader) {
       return EngineSemanticsRole.header;
     } else if (isButtonLike) {
@@ -2190,15 +2189,16 @@ class SemanticsObject {
   /// Because such widgets require the use of specific ARIA roles and HTML
   /// elements, they are managed by the [SemanticCheckable] role, and they do
   /// not use the [Selectable] behavior.
-  bool get isCheckable => flags.hasCheckedState || flags.hasToggledState;
+  bool get isCheckable =>
+      flags.isChecked != ui.CheckedState.none || flags.isToggled != ui.Tristate.none;
 
   /// If true, this node represents something that can be in a "checked" or
   /// state, such as checkboxes, radios, and switches.
-  bool get isChecked => flags.isChecked;
+  bool get isChecked => flags.isChecked == ui.CheckedState.isTrue;
 
   /// If true, this node represents something that can be in a "mixed" or
   /// state, such as checkboxes.
-  bool get isMixed => flags.isCheckStateMixed;
+  bool get isMixed => flags.isChecked == ui.CheckedState.mixed;
 
   /// If true, this node represents something that can be annotated as
   /// "selected", such as a tab, or an item in a list.
@@ -2213,11 +2213,11 @@ class SemanticsObject {
   /// See also:
   ///
   ///   * [isSelected], which indicates whether the node is currently selected.
-  bool get isSelectable => flags.hasSelectedState;
+  bool get isSelectable => flags.isSelected != ui.Tristate.none;
 
   /// If [isSelectable] is true, indicates whether the node is currently
   /// selected.
-  bool get isSelected => flags.isSelected;
+  bool get isSelected => flags.isSelected == ui.Tristate.isTrue;
 
   /// If true, this node represents something that currently requires user input
   /// before a form can be submitted.
@@ -2230,10 +2230,10 @@ class SemanticsObject {
   /// See also:
   ///
   ///   * [isRequired], which indicates whether the is currently required.
-  bool get isRequirable => flags.hasRequiredState;
+  bool get isRequirable => flags.isRequired != ui.Tristate.none;
 
   /// If [isRequirable] is true, indicates whether the node is required.
-  bool get isRequired => flags.isRequired;
+  bool get isRequired => flags.isRequired == ui.Tristate.isTrue;
 
   /// If true, this node represents something that can be annotated as
   /// "expanded", such as a expansion tile or drop down menu
@@ -2243,10 +2243,10 @@ class SemanticsObject {
   /// See also:
   ///
   ///   * [isExpanded], which indicates whether the node is currently selected.
-  bool get isExpandable => flags.hasExpandedState;
+  bool get isExpandable => flags.isExpanded != ui.Tristate.none;
 
   /// Indicates whether the node is currently expanded.
-  bool get isExpanded => flags.isExpanded;
+  bool get isExpanded => flags.isExpanded == ui.Tristate.isTrue;
 
   /// Role-specific adjustment of the vertical position of the children.
   ///
@@ -2433,8 +2433,8 @@ class SemanticsObject {
     assert(() {
       final String children =
           _childrenInTraversalOrder != null && _childrenInTraversalOrder!.isNotEmpty
-              ? '[${_childrenInTraversalOrder!.join(', ')}]'
-              : '<empty>';
+          ? '[${_childrenInTraversalOrder!.join(', ')}]'
+          : '<empty>';
       result = '$runtimeType(#$id, children: $children)';
       return true;
     }());
