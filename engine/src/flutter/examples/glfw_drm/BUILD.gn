@@ -13,7 +13,7 @@ if (build_embedder_examples) {
     ldflags = [ "-rdynamic" ]
 
     deps = [
-      "//flutter/shell/platform/embedder:embedder",
+      "//flutter/shell/platform/embedder",
       "//flutter/third_party/glfw",
     ]
 
