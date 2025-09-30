@@ -6,8 +6,8 @@
         "master"
     ],
     "files.trimTrailingWhitespace": true,
-    "dart.lineLength": 80,
-    "editor.rulers": [80],
+    "dart.lineLength": 100,
+    "editor.rulers": [100],
     "editor.formatOnSave": true,
     "dart.previewFlutterUiGuides": true,
     "dart.previewFlutterUiGuidesCustomTracking": true,
