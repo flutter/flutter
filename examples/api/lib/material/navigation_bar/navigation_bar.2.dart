@@ -78,7 +78,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
   @override
   Widget build(BuildContext context) {
     return NavigatorPopHandler(
-      onPopWithResult: (Object? result) {
+      onPopWithResult: (void result) {
         final NavigatorState navigator = navigatorKeys[selectedIndex].currentState!;
         navigator.pop();
       },
