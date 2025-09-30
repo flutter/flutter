@@ -942,6 +942,11 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   void layout(ui.ParagraphConstraints constraints) {
+    // We need to set in up because we otherwise in RTL text without textDirection
+    // Canvas2D will return all clusters placed right to left starting from 0.
+    // If we go with that we will have to take it in account EVERYWHERE (lots of places)
+    layoutContext.direction = paragraphStyle.textDirection == ui.TextDirection.ltr ? 'ltr' : 'rtl';
+
     _layout.performLayout(constraints.width);
     WebParagraphDebug.apiTrace(
       'layout("$text", ${constraints.width.toStringAsFixed(4)}}): '

@@ -80,13 +80,14 @@ class TextPaint {
           layout.allClusters[block.clusterRange.start] is PlaceholderCluster) {
         continue;
       }
+
       WebParagraphDebug.log(
-        'paintByClusters: ${line.advance.left} + ${line.formattingShift} + ${block.shiftFromLineStart}',
+        '+paintByClusters: ${block.textRange} ${block.clusterRange} ${(block as TextBlock).clusterRangeWithoutWhitespaces} ${(block as TextBlock).whitespacesWidth} ${block.isLtr} ${line.advance.left} + ${line.formattingShift} + ${block.shiftFromLineStart}',
       );
       // We are painting clusters in visual order so that if they step on each other, the paint
       // order is correct.
-      final int start = block.isLtr ? block.clusterRange.start : block.clusterRange.end - 1;
-      final int end = block.isLtr ? block.clusterRange.end : block.clusterRange.start - 1;
+      final int start = block.isLtr ? block.clusterRangeWithoutWhitespaces.start : block.clusterRangeWithoutWhitespaces.end - 1;
+      final int end = block.isLtr ? block.clusterRangeWithoutWhitespaces.end : block.clusterRangeWithoutWhitespaces.start - 1;
       final int step = block.isLtr ? 1 : -1;
       for (int i = start; i != end; i += step) {
         final clusterText = layout.allClusters[i];

@@ -87,12 +87,15 @@ class TextLayout {
 
     for (final span in paragraph.spans) {
       assert(span.isNotEmpty);
-
       for (final cluster in span.extractClusters()) {
         allClusters.add(cluster);
-        for (int i = cluster.start; i < cluster.end; i++) {
-          _mapping.add(textIndex: i, clusterIndex: allClusters.length - 1);
-        }
+      }
+    }
+    allClusters.sort((a, b) => a.start.compareTo(b.start));
+    for (int i = 0; i < allClusters.length; ++i) {
+      final cluster = allClusters[i];
+      for (int j = cluster.start; j < cluster.end; ++j) {
+        _mapping.add(textIndex: j, clusterIndex: i);
       }
     }
 
@@ -109,7 +112,7 @@ class TextLayout {
     _mapping.add(textIndex: paragraph.text.length, clusterIndex: allClusters.length - 1);
 
     if (WebParagraphDebug.logging) {
-      _debugPrintSpans('Full text');
+      _debugPrintMappings('Mappings');
     }
   }
 
@@ -139,10 +142,26 @@ class TextLayout {
     for (int i = 0; i < paragraph.spans.length; i++) {
       final span = paragraph.spans[i];
       if (span is TextSpan) {
-        WebParagraphDebug.log('spans[$i]: "${span.text}"');
+        final ClusterRange clusterRange = _mapping.toClusterRange(span.start, span.end);
+        WebParagraphDebug.log('span[$i]: [${span.start}:${span.end}) $clusterRange');
+        for (int c = clusterRange.start; c < clusterRange.end; c++) {
+          final cluster = _mapping._clusters[c];
+          WebParagraphDebug.log('cluster[$c]: [${cluster.start}:[${cluster.end})');
+        }
       } else if (span is PlaceholderSpan) {
         WebParagraphDebug.log('spans[$i]: PLACEHOLDER ${span.width}x${span.height}');
       }
+    }
+  }
+
+  void _debugPrintMappings(String header) {
+    WebParagraphDebug.log(
+      'Mappings ($header): ${_mapping._clusters.length} ${_mapping._textToCluster.length}',
+    );
+    for (int i = 0; i < _mapping._textToCluster.length; i++) {
+      final clusterIndex = _mapping._textToCluster[i];
+      final cluster = _mapping._clusters[clusterIndex];
+      WebParagraphDebug.log('mappings[$i] => $clusterIndex [${cluster.start}:${cluster.end})');
     }
   }
 
@@ -323,13 +342,19 @@ class TextLayout {
           );
 
           final blockLineWhitespaces = bidiLineSpanTextRange.intersect(bidiWhitespacesTextRange);
+          final blockLineNoWhitespaces = bidiLineSpanTextRange.intersect(
+            _mapping.toTextRange(textIntersection),
+          );
           if (blockLineWhitespaces.start < blockLineWhitespaces.end) {
-            WebParagraphDebug.log(
-              'trailingSpacesWidth: $bidiLineSpanTextRange $bidiWhitespacesTextRange $blockLineWhitespaces}',
-            );
             trailingSpacesWidth = span
                 .getTextRangeSelectionInBlock(line.visualBlocks.last, blockLineWhitespaces)
                 .width;
+            (line.visualBlocks.last as TextBlock).clusterRangeWithoutWhitespaces = _mapping
+                .toClusterRange(blockLineNoWhitespaces.start, blockLineNoWhitespaces.end);
+            (line.visualBlocks.last as TextBlock).whitespacesWidth = trailingSpacesWidth;
+            WebParagraphDebug.log(
+              'TRAILING: $bidiLineSpanTextRange $blockLineNoWhitespaces $trailingSpacesWidth',
+            );
           }
 
           // Line always counts multipled metrics (no need for the others)
@@ -384,6 +409,7 @@ class TextLayout {
       // At the end this shift is equal to the entire line width
       line.height,
     );
+    line.trailingSpacesWidth = trailingSpacesWidth;
     lines.add(line);
 
     WebParagraphDebug.log(
@@ -400,6 +426,8 @@ class TextLayout {
     final ui.TextAlign effectiveAlign = paragraph.paragraphStyle.effectiveAlign();
     if (width == double.infinity && effectiveAlign != ui.TextAlign.left) {
       // If we have to format the text we find the max line length and use it as a width
+      // Notice, that we can have multiple lines even with width=infinity
+      // (hard line breaks would do that)
       double maxLength = 0.0;
       for (final TextLine line in lines) {
         maxLength = math.max(maxLength, line.advance.width);
@@ -412,8 +440,11 @@ class TextLayout {
       if (delta > 0) {
         // We do nothing for left align
         if (effectiveAlign == ui.TextAlign.justify) {
-          // TODO(jlavrova): implement justi     } else if (effectiveAlign == ui.TextAlign.right) {
-          line.formattingShift = delta;
+          // TODO(jlavrova): implement justification
+        } else if (effectiveAlign == ui.TextAlign.right) {
+          // When we paint we exclude whitespaces but the advances still remain
+          // so we need to take them into account
+          line.formattingShift = delta - line.trailingSpacesWidth;
         } else if (effectiveAlign == ui.TextAlign.center) {
           line.formattingShift = delta / 2;
         }
@@ -1059,7 +1090,9 @@ class TextBlock extends LineBlock {
     super.textRange,
     super.shiftFromLineStart,
     double shiftFromSpanStart,
-  ) : spanShiftFromLineStart = shiftFromLineStart - shiftFromSpanStart;
+  ) : spanShiftFromLineStart = shiftFromLineStart - shiftFromSpanStart,
+      clusterRangeWithoutWhitespaces = clusterRange,
+      whitespacesWidth = 0.0;
 
   @override
   TextSpan get span => super.span as TextSpan;
@@ -1073,6 +1106,9 @@ class TextBlock extends LineBlock {
   @override
   // TODO(mdebbar=>jlavrova): Why are we defaulting to 1.0? In Chrome, the default line-height is `1.2` most of the time.
   double get _heightMultiplier => style.height == null ? 1.0 : style.height!;
+
+  ClusterRange clusterRangeWithoutWhitespaces;
+  double whitespacesWidth;
 }
 
 class PlaceholderBlock extends LineBlock {
@@ -1196,6 +1232,7 @@ class TextLine {
   double fontBoundingBoxAscent = 0.0;
   double fontBoundingBoxDescent = 0.0;
   double formattingShift = 0.0; // For centered or right aligned text
+  double trailingSpacesWidth = 0.0;
 
   // TODO(mdebbar): Do we need blocks ordered visually?
   List<LineBlock> visualBlocks = <LineBlock>[];
