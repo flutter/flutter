@@ -137,8 +137,34 @@ FLUTTER_ASSERT_ARC
       consumedByPlugin = YES;
     }
   }
-  return consumedByPlugin;
-  // There is no application equivalent for this event and therefore no fallback.
+  if (consumedByPlugin) {
+    return consumedByPlugin;
+  }
+
+  //  If your app has opted into Scenes, and your app is not running, the system delivers the
+  //  universal link to the scene(_:willConnectTo:options:) delegate method after launch, and to
+  //  scene(_:continue:) when the universal link is tapped while your app is running or suspended in
+  //  memory.
+  for (NSUserActivity* userActivity in connectionOptions.userActivities) {
+    NSLog(@"%@", userActivity.webpageURL);
+    if (userActivity.webpageURL != nil) {
+      if ([self handleOpenURL:userActivity.webpageURL relayToSystemIfUnhandled:YES]) {
+        return YES;
+      }
+    }
+  }
+
+  //  If your app has opted into Scenes, and your app isn’t running, the system delivers the URL to
+  //  the scene:willConnectToSession:options: delegate method after launch, and to
+  //  scene:openURLContexts: when your app opens a URL while running or suspended in memory.
+  for (UIOpenURLContext* urlContext in connectionOptions.URLContexts) {
+    if (urlContext.URL != nil) {
+      if ([self handleOpenURL:urlContext.URL relayToSystemIfUnhandled:YES]) {
+        return YES;
+      }
+    }
+  }
+  return NO;
 }
 
 - (void)sceneDidDisconnect:(UIScene*)scene {
@@ -202,7 +228,18 @@ FLUTTER_ASSERT_ARC
       consumedByPlugin = YES;
     }
   }
-  return consumedByPlugin;
+  // If a plugin has processed the url, we should not use it.
+  if (consumedByPlugin) {
+    return YES;
+  }
+
+  for (UIOpenURLContext* urlContext in URLContexts) {
+    if ([self handleOpenURL:urlContext.URL relayToSystemIfUnhandled:NO]) {
+      return YES;
+    }
+  }
+
+  return NO;
 }
 
 #pragma mark - Continuing user activities
@@ -223,7 +260,11 @@ FLUTTER_ASSERT_ARC
       consumedByPlugin = YES;
     }
   }
-  return consumedByPlugin;
+  // If a plugin has used the activity, we should not use it.
+  if (consumedByPlugin) {
+    return YES;
+  }
+  return [self handleOpenURL:userActivity.webpageURL relayToSystemIfUnhandled:YES];
 }
 
 #pragma mark - Performing tasks
@@ -251,6 +292,26 @@ FLUTTER_ASSERT_ARC
     }
   }
   return consumedByPlugin;
+}
+
+- (BOOL)handleOpenURL:(NSURL*)url relayToSystemIfUnhandled:(BOOL)throwBack {
+  // Don't process the link if deep linking is disabled.
+  if (!FlutterSharedApplication.isFlutterDeepLinkingEnabled) {
+    return NO;
+  }
+  for (FlutterEngine* engine in _engines.allObjects) {
+    // if deep linking is enabled, send it to the framework
+    [engine sendDeepLinkToFramework:url
+                  completionHandler:^(BOOL success) {
+                    if (!success && throwBack) {
+                      // throw it back to iOS
+                      [FlutterSharedApplication.application openURL:url
+                                                            options:@{}
+                                                  completionHandler:nil];
+                    }
+                  }];
+  }
+  return YES;
 }
 @end
 
