@@ -446,7 +446,7 @@ public class FlutterLoaderTest {
 
     for (Path testPath : pathsToTest) {
       String path = testPath.toString();
-      String aotSharedLibraryNameArg = FlutterLoader.aotSharedLibraryNameFlag + path;
+      String aotSharedLibraryNameArg = "--aot-shared-library-name=" + path;
       String[] args = {aotSharedLibraryNameArg};
       flutterLoader.ensureInitializationComplete(ctx, args);
 
@@ -467,8 +467,7 @@ public class FlutterLoaderTest {
       // mode, actualArgs would contain the default arguments for AOT shared library name on top
       // of aotSharedLibraryNameArg.
       String canonicalTestPath = testPath.toFile().getCanonicalPath();
-      String canonicalAotSharedLibraryNameArg =
-          FlutterLoader.aotSharedLibraryNameFlag + canonicalTestPath;
+      String canonicalAotSharedLibraryNameArg = "--aot-shared-library-name=" + canonicalTestPath;
       assertTrue(
           "Args sent to FlutterJni.init incorrectly did not include path " + path,
           actualArgs.contains(canonicalAotSharedLibraryNameArg));
@@ -523,7 +522,7 @@ public class FlutterLoaderTest {
 
     for (Path testPath : pathsToTest) {
       String path = testPath.toString();
-      String aotSharedLibraryNameArg = FlutterLoader.aotSharedLibraryNameFlag + path;
+      String aotSharedLibraryNameArg = "--aot-shared-library-name=" + path;
       String[] args = {aotSharedLibraryNameArg};
       flutterLoader.ensureInitializationComplete(ctx, args);
 
@@ -544,8 +543,7 @@ public class FlutterLoaderTest {
       // mode, actualArgs would contain the default arguments for AOT shared library name on top
       // of aotSharedLibraryNameArg.
       String canonicalTestPath = testPath.toFile().getCanonicalPath();
-      String canonicalAotSharedLibraryNameArg =
-          FlutterLoader.aotSharedLibraryNameFlag + canonicalTestPath;
+      String canonicalAotSharedLibraryNameArg = "--aot-shared-library-name=" + canonicalTestPath;
       assertFalse(
           "Args sent to FlutterJni.init incorrectly included canonical path " + canonicalTestPath,
           actualArgs.contains(canonicalAotSharedLibraryNameArg));
@@ -572,7 +570,7 @@ public class FlutterLoaderTest {
 
     String invalidFilePath = "my\0file.so";
 
-    String[] args = {FlutterLoader.aotSharedLibraryNameFlag + invalidFilePath};
+    String[] args = {"--aot-shared-library-name=" + invalidFilePath};
     flutterLoader.ensureInitializationComplete(ctx, args);
 
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
@@ -592,7 +590,7 @@ public class FlutterLoaderTest {
     // mode, actualArgs would contain the default arguments for AOT shared library name on top
     // of aotSharedLibraryNameArg.
     for (String arg : actualArgs) {
-      if (arg.startsWith(FlutterLoader.aotSharedLibraryNameFlag)) {
+      if (arg.startsWith("--aot-shared-library-name=")) {
         fail();
       }
     }
@@ -620,7 +618,7 @@ public class FlutterLoaderTest {
     when(flutterLoader.getFileFromPath(spySymlinkFile.getPath())).thenReturn(spySymlinkFile);
     doReturn(realSoFile.getCanonicalPath()).when(spySymlinkFile).getCanonicalPath();
 
-    String symlinkArg = FlutterLoader.aotSharedLibraryNameFlag + spySymlinkFile.getPath();
+    String symlinkArg = "--aot-shared-library-name=" + spySymlinkFile.getPath();
     String[] args = {symlinkArg};
     flutterLoader.ensureInitializationComplete(ctx, args);
 
@@ -639,7 +637,7 @@ public class FlutterLoaderTest {
 
     String canonicalSymlinkCanonicalizedPath = realSoFile.getCanonicalPath();
     String canonicalAotSharedLibraryNameArg =
-        FlutterLoader.aotSharedLibraryNameFlag + canonicalSymlinkCanonicalizedPath;
+        "--aot-shared-library-name=" + canonicalSymlinkCanonicalizedPath;
     assertFalse(
         "Args sent to FlutterJni.init incorrectly included absolute symlink path: "
             + spySymlinkFile.getAbsolutePath(),
@@ -674,7 +672,7 @@ public class FlutterLoaderTest {
     List<File> unsafeFiles = Arrays.asList(nonSoFile, fileJustOutsideInternalStorage);
     Files.deleteIfExists(spySymlinkFile.toPath());
 
-    String symlinkArg = FlutterLoader.aotSharedLibraryNameFlag + spySymlinkFile.getAbsolutePath();
+    String symlinkArg = "--aot-shared-library-name=" + spySymlinkFile.getAbsolutePath();
     String[] args = {symlinkArg};
 
     for (File unsafeFile : unsafeFiles) {
@@ -699,7 +697,7 @@ public class FlutterLoaderTest {
 
       String canonicalSymlinkCanonicalizedPath = unsafeFile.getCanonicalPath();
       String canonicalAotSharedLibraryNameArg =
-          FlutterLoader.aotSharedLibraryNameFlag + canonicalSymlinkCanonicalizedPath;
+          "--aot-shared-library-name=" + canonicalSymlinkCanonicalizedPath;
       assertFalse(
           "Args sent to FlutterJni.init incorrectly included canonicalized path of symlink: "
               + canonicalSymlinkCanonicalizedPath,
