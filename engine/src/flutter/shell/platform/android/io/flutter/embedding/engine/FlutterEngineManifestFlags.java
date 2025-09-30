@@ -75,8 +75,8 @@ public final class FlutterEngineManifestFlags {
 
   /**
    * Set whether leave or clean up the VM after the last shell shuts down. It can be set from app's
-   * meta-data in the application block in AndroidManifest.xml. Set it to true in to leave the Dart VM,
-   * set it to false to destroy VM.
+   * meta-data in the application block in AndroidManifest.xml. Set it to true in to leave the Dart
+   * VM, set it to false to destroy VM.
    *
    * <p>If your want to let your app destroy the last shell and re-create shells more quickly, set
    * it to true, otherwise if you want to clean up the memory of the leak VM, set it to false.
@@ -85,6 +85,33 @@ public final class FlutterEngineManifestFlags {
    * https://github.com/flutter/flutter/issues/96843
    */
   public static final Flag LEAK_VM = new Flag("LeakVM", false);
+
+  public static final List<Flag> ALL_FLAGS =
+      Collections.unmodifiableList(
+          Arrays.asList(
+              VM_SERVICE_PORT,
+              USE_TEST_FONTS,
+              ENABLE_SOFTWARE_RENDERING,
+              SKIA_DETERMINISTIC_RENDERING,
+              AOT_SHARED_LIBRARY_NAME,
+              FLUTTER_ASSETS_DIR,
+              AUTOMATICALLY_REGISTER_PLUGINS,
+              OLD_GEN_HEAP_SIZE,
+              ENABLE_IMPELLER,
+              ENABLE_VULKAN_VALIDATION,
+              IMPELLER_BACKEND,
+              ENABLE_OPENGL_GPU_TRACING,
+              ENABLE_VULKAN_GPU_TRACING,
+              DISABLE_MERGED_PLATFORM_UI_THREAD,
+              ENABLE_SURFACE_CONTROL,
+              ENABLE_FLUTTER_GPU,
+              IMPELLER_LAZY_SHADER_MODE,
+              IMPELLER_LAZY_SHADER_INITIALIZATION,
+              IMPELLER_ANTIALIAS_LINES,
+              VM_SNAPSHOT_DATA,
+              ISOLATE_SNAPSHOT_DATA,
+              NETWORK_POLICY,
+              LEAK_VM));
 
   /**
    * Looks up a Flag by its metaDataKey.

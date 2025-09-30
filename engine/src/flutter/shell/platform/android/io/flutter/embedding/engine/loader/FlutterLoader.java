@@ -6,6 +6,7 @@ package io.flutter.embedding.engine.loader;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.hardware.display.DisplayManager;
@@ -21,6 +22,8 @@ import androidx.annotation.VisibleForTesting;
 import io.flutter.BuildConfig;
 import io.flutter.FlutterInjector;
 import io.flutter.Log;
+import io.flutter.embedding.engine.FlutterEngineCommandLineFlags;
+import io.flutter.embedding.engine.FlutterEngineManifestFlags;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.util.HandlerCompat;
 import io.flutter.util.PathUtils;
@@ -292,7 +295,11 @@ public class FlutterLoader {
 
       // Add engine flags provided by metadata in the application manifest. These settings will take
       // precedent over any defaults set below, but can be overridden by command line args.
-
+      ApplicationInfo applicationInfo =
+          applicationContext
+              .getPackageManager()
+              .getApplicationInfo(
+                  applicationContext.getPackageName(), PackageManager.GET_META_DATA);
       Bundle applicationMetaData = applicationInfo.metaData;
       boolean oldGenHeapSizeSet = false;
       boolean isLeakVMSet = false;
@@ -316,27 +323,26 @@ public class FlutterLoader {
             } else if (flag == FlutterEngineManifestFlags.AOT_SHARED_LIBRARY_NAME) {
               // Perform security check for path containing application's compiled Dart code and
               // potentially user-provided compiled native code.
-              String safeAotSharedLibraryNameFlag =
-                  getSafeAotSharedLibraryNameFlag(
-                      applicationContext, applicationMetaData.get(metadataKey));
-              if (safeAotSharedLibraryNameFlag != null) {
+              String aotSharedLibraryNameArg = applicationMetaData.getString(metadataKey);
+              String safeAotSharedLibraryName =
+                  getSafeAotSharedLibraryName(applicationContext, aotSharedLibraryNameArg);
+              if (safeAotSharedLibraryName != null) {
                 shellArgs.add(
                     FlutterEngineManifestFlags.AOT_SHARED_LIBRARY_NAME.toCommandLineFlag(
-                        safeAotSharedLibraryNameFlag));
+                        safeAotSharedLibraryName));
               } else {
                 // If the library path is not safe, we will skip adding this argument.
                 Log.w(
                     TAG,
                     "Skipping unsafe AOT shared library name flag: "
-                        + arg
+                        + aotSharedLibraryNameArg
                         + ". Please ensure that the library is vetted and placed in your application's internal storage.");
               }
               continue;
             }
 
-            // TODO(camsim99): check booleans before adding.
             // Add flag automatically if it does not require a security check.
-            String arg = "--" + flag.toCommandLineFlag(applicationMetaData.get(metadataKey));
+            String arg = "--" + flag.toCommandLineFlag(applicationMetaData.getString(metadataKey));
             shellArgs.add(arg);
           }
         } else {
@@ -367,16 +373,18 @@ public class FlutterLoader {
       } else {
         // Add default AOT shared library name arg. Note that this can overriden by a value
         // set in the manifest.
-        shellArgs.add(aotSharedLibraryNameFlag + flutterApplicationInfo.aotSharedLibraryName);
+        shellArgs.add(
+            FlutterEngineManifestFlags.AOT_SHARED_LIBRARY_NAME.toCommandLineFlag(
+                flutterApplicationInfo.aotSharedLibraryName));
 
         // Some devices cannot load the an AOT shared library based on the library name
         // with no directory path. So, we provide a fully qualified path to the default library
         // as a workaround for devices where that fails.
         shellArgs.add(
-            aotSharedLibraryNameFlag
-                + flutterApplicationInfo.nativeLibraryDir
-                + File.separator
-                + flutterApplicationInfo.aotSharedLibraryName);
+            FlutterEngineManifestFlags.AOT_SHARED_LIBRARY_NAME.toCommandLineFlag(
+                flutterApplicationInfo.nativeLibraryDir
+                    + File.separator
+                    + flutterApplicationInfo.aotSharedLibraryName));
 
         // In profile mode, provide a separate library containing a snapshot for
         // launching the Dart VM service isolate.
@@ -417,7 +425,7 @@ public class FlutterLoader {
       shellArgs.add("--prefetched-default-font-manager");
 
       if (!isLeakVMSet) {
-        shellArgs.add(FlutterEngineManifestFlags.LEAK_VM.toCommandLineFlag(true));
+        shellArgs.add(FlutterEngineManifestFlags.LEAK_VM.toCommandLineFlag("true"));
       }
 
       long initTimeMillis = SystemClock.uptimeMillis() - initStartTimestampMillis;
@@ -439,9 +447,9 @@ public class FlutterLoader {
   }
 
   /**
-   * Returns the AOT shared library name flag with the canonical path to the library that the engine
-   * will use to load application's Dart code if it lives within a path we consider safe, which is a
-   * path within the application's internal storage. Otherwise, returns null.
+   * Returns the canonical path to the AOT shared library that the engine will use to load
+   * application's Dart code if it lives within a path we consider safe, which is a path within the
+   * application's internal storage. Otherwise, returns null.
    *
    * <p>If the library lives within the application's internal storage, this means that the
    * application developer either explicitly placed the library there or set the Android Gradle
@@ -449,7 +457,7 @@ public class FlutterLoader {
    * https://developer.android.com/build/releases/past-releases/agp-4-2-0-release-notes#compress-native-libs-dsl
    * for more information.
    */
-  private String getSafeAotSharedLibraryNameFlag(
+  private String getSafeAotSharedLibraryName(
       @NonNull Context applicationContext, @NonNull String aotSharedLibraryPath)
       throws IOException {
     // Canocalize path for safety analysis.
@@ -476,7 +484,7 @@ public class FlutterLoader {
     boolean isSoFile = aotSharedLibraryPathCanonicalPath.endsWith(".so");
 
     if (livesWithinInternalStorage && isSoFile) {
-      return aotSharedLibraryNameFlag + aotSharedLibraryPathCanonicalPath;
+      return aotSharedLibraryPathCanonicalPath;
     }
     // If the library does not live within the application's internal storage, we will not use it.
     Log.e(
@@ -490,14 +498,6 @@ public class FlutterLoader {
   @VisibleForTesting
   File getFileFromPath(String path) {
     return new File(path);
-  }
-
-  private static boolean isLeakVM(@Nullable Bundle metaData) {
-    final boolean leakVMDefaultValue = true;
-    if (metaData == null) {
-      return leakVMDefaultValue;
-    }
-    return metaData.getBoolean(LEAK_VM_META_DATA_KEY, leakVMDefaultValue);
   }
 
   /**

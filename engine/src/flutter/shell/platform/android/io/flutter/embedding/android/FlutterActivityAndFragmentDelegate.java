@@ -331,9 +331,7 @@ import java.util.List;
             + " this FlutterFragment.");
 
     FlutterEngineGroup group =
-        engineGroup == null
-            ? new FlutterEngineGroup(host.getContext())
-            : engineGroup;
+        engineGroup == null ? new FlutterEngineGroup(host.getContext()) : engineGroup;
     flutterEngine =
         group.createAndRunEngine(
             addEntrypointOptions(

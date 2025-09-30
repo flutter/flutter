@@ -10,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.content.res.XmlResourceParser;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
+import io.flutter.embedding.engine.FlutterEngineManifestFlags;
 import java.io.IOException;
 import org.json.JSONArray;
 import org.xmlpull.v1.XmlPullParserException;
