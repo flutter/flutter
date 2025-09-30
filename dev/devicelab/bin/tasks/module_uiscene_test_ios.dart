@@ -1,0 +1,433 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'dart:async';
+import 'dart:io';
+
+import 'package:args/args.dart';
+import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/host_agent.dart';
+import 'package:flutter_devicelab/framework/ios.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
+import 'package:flutter_devicelab/framework/utils.dart';
+import 'package:path/path.dart' as path;
+
+/// This test creates a Flutter module, Flutter plugin, and native iOS app.
+/// It adds the plugin as a dependency and embeds the Flutter module into the native iOS app.
+/// Additional scenarios can be added in [Scenarios.scenarios].
+///
+/// To run this test locally, follow instructions in dev/devicelab/README.md.
+/// The `--local-engine` and `--local-engine-host` flags can be used to run with a local engine.
+///
+/// `--task-args destination=[/path/to/copy/destination]` can be used to override the destination
+/// of the generated apps/plugins.
+///
+/// e.g. `../../bin/cache/dart-sdk/bin/dart bin/test_runner.dart test -t module_uiscene_test_ios --local-engine ios_debug_sim_unopt_arm64 --local-engine-host host_debug --task-args destination=/path/to/copy/destination`
+Future<void> main(List<String> args) async {
+  const String kDestination = 'destination';
+  const String kTestName = 'name';
+  final ArgParser argParser = ArgParser()
+    ..addOption(kDestination)
+    ..addOption(kTestName);
+
+  await task(() async {
+    final ArgResults argResults = argParser.parse(args);
+    final String? destination = argResults.option(kDestination);
+    final Directory destinationDir;
+    bool destinationOverride = false;
+    if (destination != null) {
+      destinationOverride = true;
+      destinationDir = Directory(destination);
+      if (destinationDir.existsSync()) {
+        destinationDir.deleteSync(recursive: true);
+      }
+      destinationDir.createSync(recursive: true);
+    } else {
+      destinationDir = Directory.systemTemp.createTempSync('flutter_module_test.');
+    }
+
+    final String? testName = argResults.option(kTestName);
+
+    String? simulatorDeviceId;
+    final Directory templatesDir = Directory(
+      path.join(flutterDirectory.path, 'dev', 'integration_tests', 'ios_add2app_uiscene'),
+    );
+
+    try {
+      final Directory appDir = await _createFlutterModuleApp(
+        destinationDir: destinationDir,
+        templatesDir: templatesDir,
+      );
+      final Directory pluginDir = await _createFlutterPlugin(
+        destinationDir: destinationDir,
+        templatesDir: templatesDir,
+      );
+      final Directory xcodeProjectDir = await _createNativeApp(
+        destinationDir: destinationDir,
+        templatesDir: templatesDir,
+        xcodeProjectType: XcodeProjectType.UIKitSwift,
+      );
+
+      bool testFailed = false;
+
+      await testWithNewIOSSimulator('TestAdd2AppSim', (String deviceId) async {
+        simulatorDeviceId = deviceId;
+        final Scenarios scenarios = Scenarios();
+        for (final String scenarioName in scenarios.scenarios.keys) {
+          if (testName != null && scenarioName != testName) {
+            continue;
+          }
+          final List<FileReplacements> replacements = FileReplacements.fromScenario(
+            scenarios.scenarios[scenarioName]!,
+            templatesDir: templatesDir,
+            xcodeProjectDir: xcodeProjectDir,
+            pluginDir: pluginDir,
+            appDir: appDir,
+          );
+
+          for (final FileReplacements replacement in replacements) {
+            replacement.replace();
+          }
+
+          section('Test Scenario $scenarioName');
+
+          await _installPlugins(appDir: appDir, xcodeProjectDir: xcodeProjectDir);
+          final int result = await _testNativeApp(
+            deviceId: simulatorDeviceId!,
+            scenarioName: scenarioName,
+            templatesDir: templatesDir,
+            xcodeProjectDir: xcodeProjectDir,
+          );
+          if (result != 0) {
+            testFailed = true;
+          }
+
+          // Reset files to original between scenarios unless we're targetting a specific test.
+          if (testName == null) {
+            for (final FileReplacements replacement in replacements) {
+              replacement.reset();
+            }
+          }
+        }
+      });
+
+      if (testFailed) {
+        return TaskResult.failure(
+          'One or more native tests failed. Search the logs for "** TEST FAILED **"',
+        );
+      }
+      return TaskResult.success(null);
+    } catch (e, stackTrace) {
+      print(e);
+      print('Task exception stack trace:\n$stackTrace');
+      return TaskResult.failure(e.toString());
+    } finally {
+      unawaited(removeIOSSimulator(simulatorDeviceId));
+      if (!destinationOverride) {
+        rmTree(destinationDir);
+      }
+    }
+  });
+}
+
+Future<Directory> _createFlutterModuleApp({
+  required Directory templatesDir,
+  required Directory destinationDir,
+}) async {
+  section('Create Flutter Module');
+
+  const String moduleName = 'my_module';
+  await flutter(
+    'create',
+    options: <String>['--org', 'dev.flutter.devicelab', '--template=module', moduleName],
+    workingDirectory: destinationDir.path,
+  );
+  return Directory(path.join(destinationDir.path, moduleName));
+}
+
+Future<Directory> _createFlutterPlugin({
+  required Directory templatesDir,
+  required Directory destinationDir,
+}) async {
+  section('Create Flutter Plugin');
+
+  const String pluginName = 'my_plugin';
+  await flutter(
+    'create',
+    options: <String>[
+      '--org',
+      'dev.flutter.devicelab',
+      '--template=plugin',
+      '--platform=ios',
+      pluginName,
+    ],
+    workingDirectory: destinationDir.path,
+  );
+  return Directory(path.join(destinationDir.path, pluginName));
+}
+
+Future<Directory> _createNativeApp({
+  required Directory templatesDir,
+  required Directory destinationDir,
+  required XcodeProjectType xcodeProjectType,
+}) async {
+  section('Create Xcode Project');
+
+  final String xcodeProjectName;
+
+  switch (xcodeProjectType) {
+    case XcodeProjectType.UIKitSwift:
+      xcodeProjectName = 'xcode_uikit_swift';
+    case XcodeProjectType.UIKitObjC:
+      // TODO(vashworth): add Objective C integration test
+      throw UnimplementedError();
+    case XcodeProjectType.SwiftUI:
+      // TODO(vashworth): add SwiftUI integration test
+      throw UnimplementedError();
+  }
+  // Copy Xcode project
+  final Directory xcodeProjectDir = Directory(path.join(destinationDir.path, xcodeProjectName));
+  xcodeProjectDir.createSync(recursive: true);
+  final Directory xcodeProjectTemplate = Directory(path.join(templatesDir.path, xcodeProjectName));
+  recursiveCopy(xcodeProjectTemplate, xcodeProjectDir);
+
+  return xcodeProjectDir;
+}
+
+Future<void> _installPlugins({
+  required Directory appDir,
+  required Directory xcodeProjectDir,
+}) async {
+  // Poke the pubspec to reset the fingerprinter to ensure the module is re-generated.
+  // See [_regenerateModuleFromTemplateIfNeeded] in packages/flutter_tools/lib/src/xcode_project.dart.
+  final File pubspec = File(path.join(appDir.path, 'pubspec.yaml'));
+  pubspec.writeAsStringSync(pubspec.readAsStringSync());
+
+  await flutter(
+    'build',
+    options: <String>['ios', '--config-only', '-v'],
+    workingDirectory: appDir.path,
+  );
+  await flutter('pub', options: <String>['get'], workingDirectory: appDir.path);
+
+  await eval(
+    'pod',
+    <String>['install'],
+    environment: <String, String>{'LANG': 'en_US.UTF-8'},
+    workingDirectory: xcodeProjectDir.path,
+    printStdout: false,
+    printStderr: false,
+  );
+}
+
+class FileReplacements {
+  FileReplacements(this.templatePath, this.destinationPath);
+
+  final String templatePath;
+  final String destinationPath;
+  String? originalContent;
+
+  static List<FileReplacements> fromScenario(
+    Map<String, String> replacementMap, {
+    required Directory templatesDir,
+    required Directory xcodeProjectDir,
+    required Directory pluginDir,
+    required Directory appDir,
+  }) {
+    final List<FileReplacements> replacements = <FileReplacements>[];
+    for (final String source in replacementMap.keys) {
+      final String destination = replacementMap[source]!;
+      final String sourcePath = source.replaceFirst(r'$TEMPLATE_DIR', templatesDir.path);
+      final String destinationPath = destination
+          .replaceFirst(r'$XCODE_PROJ_DIR', xcodeProjectDir.path)
+          .replaceFirst(r'$PLUGIN_DIR', pluginDir.path)
+          .replaceFirst(r'$APP_DIR', appDir.path);
+      replacements.add(FileReplacements(sourcePath, destinationPath));
+    }
+    return replacements;
+  }
+
+  void replace() {
+    final File templateFile = File(templatePath);
+    final File destinationFile = File(destinationPath);
+    if (!destinationFile.existsSync()) {
+      File(destinationPath).createSync(recursive: true);
+    } else {
+      originalContent = destinationFile.readAsStringSync();
+    }
+    templateFile.copySync(destinationPath);
+  }
+
+  void reset() {
+    final File destinationFile = File(destinationPath);
+    if (originalContent != null) {
+      destinationFile.writeAsStringSync(originalContent!);
+    } else {
+      if (destinationFile.existsSync()) {
+        destinationFile.deleteSync(recursive: true);
+      }
+    }
+  }
+}
+
+Future<int> _testNativeApp({
+  required Directory templatesDir,
+  required String scenarioName,
+  required Directory xcodeProjectDir,
+  required String deviceId,
+}) async {
+  final String resultBundleTemp = Directory.systemTemp
+      .createTempSync('flutter_module_test_ios_xcresult.')
+      .path;
+  final String resultBundlePath = path.join(resultBundleTemp, 'result');
+  final int testResultExit = await exec(
+    'xcodebuild',
+    <String>[
+      '-workspace',
+      'xcode_uikit_swift.xcworkspace',
+      '-scheme',
+      'xcode_uikit_swift',
+      '-configuration',
+      'Debug',
+      '-destination',
+      'id=$deviceId',
+      '-resultBundlePath',
+      resultBundlePath,
+      'test',
+      '-parallel-testing-enabled',
+      'NO',
+      'COMPILER_INDEX_STORE_ENABLE=NO',
+    ],
+    workingDirectory: xcodeProjectDir.path,
+    canFail: true,
+  );
+
+  if (testResultExit != 0) {
+    await _uploadTestResults(scenarioName: scenarioName, resultBundlePath: resultBundleTemp);
+  }
+  return testResultExit;
+}
+
+Future<void> _uploadTestResults({
+  required String scenarioName,
+  required String resultBundlePath,
+}) async {
+  final Directory? dumpDirectory = hostAgent.dumpDirectory;
+  if (dumpDirectory != null) {
+    // Zip the test results to the artifacts directory for upload.
+    final String zipName =
+        'module_uiscene_test_ios-$scenarioName-${DateTime.now().toLocal().toIso8601String()}.zip';
+    await inDirectory(resultBundlePath, () {
+      final String zipPath = path.join(dumpDirectory.path, zipName);
+      return exec(
+        'zip',
+        <String>['-r', '-9', '-q', zipPath, 'result.xcresult'],
+        canFail: true, // Best effort to get the logs.
+      );
+    });
+  }
+}
+
+enum XcodeProjectType { UIKitSwift, UIKitObjC, SwiftUI }
+
+class Scenarios {
+  Scenarios();
+
+  /// A map of scenario names to a map of file replacements.
+  ///
+  /// Each scenario is a different configuration for testing the Flutter module
+  /// in a native iOS app. The file replacements are used to set up the
+  /// specific configuration for each scenario.
+  late Map<String, Map<String, String>> scenarios = <String, Map<String, String>>{
+    // When both the app and the plugin have migrated to scenes, we expect scene events.
+    'AppMigrated-FlutterSceneDelegate-PluginMigrated': <String, String>{
+      ...sharedLifecycleFiles,
+      r'$TEMPLATE_DIR/native/SceneDelegate-FlutterSceneDelegate.swift':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swift/SceneDelegate.swift',
+      r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-migrated.swift':
+          r'$PLUGIN_DIR/ios/Classes/MyPlugin.swift',
+      r'$TEMPLATE_DIR/native/UITests-SceneEvents.swift':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swiftUITests/xcode_uikit_swiftUITests.swift',
+    },
+
+    // When the app has migrated but the plugin hasn't, we expect application events to be used as
+    // a fallback.
+    'AppMigrated-FlutterSceneDelegate-PluginNotMigrated': <String, String>{
+      ...sharedLifecycleFiles,
+      r'$TEMPLATE_DIR/native/SceneDelegate-FlutterSceneDelegate.swift':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swift/SceneDelegate.swift',
+      r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-unmigrated.swift':
+          r'$PLUGIN_DIR/ios/Classes/MyPlugin.swift',
+      r'$TEMPLATE_DIR/native/UITests-ApplicationEvents-AppMigrated.swift':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swiftUITests/xcode_uikit_swiftUITests.swift',
+    },
+
+    // When both the app and the plugin have migrated to scenes, we expect scene events.
+    'AppMigrated-FlutterSceneLifeCycleProvider-PluginMigrated': <String, String>{
+      ...sharedLifecycleFiles,
+      r'$TEMPLATE_DIR/native/SceneDelegate-FlutterSceneLifeCycleProvider.swift':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swift/SceneDelegate.swift',
+      r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-migrated.swift':
+          r'$PLUGIN_DIR/ios/Classes/MyPlugin.swift',
+      r'$TEMPLATE_DIR/native/UITests-SceneEvents.swift':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swiftUITests/xcode_uikit_swiftUITests.swift',
+    },
+
+    // When the app has migrated but the plugin hasn't, we expect application events to be used as
+    // a fallback.
+    'AppMigrated-FlutterSceneLifeCycleProvider-PluginNotMigrated': <String, String>{
+      ...sharedLifecycleFiles,
+      r'$TEMPLATE_DIR/native/SceneDelegate-FlutterSceneLifeCycleProvider.swift':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swift/SceneDelegate.swift',
+      r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-unmigrated.swift':
+          r'$PLUGIN_DIR/ios/Classes/MyPlugin.swift',
+      r'$TEMPLATE_DIR/native/UITests-ApplicationEvents-AppMigrated.swift':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swiftUITests/xcode_uikit_swiftUITests.swift',
+    },
+
+    // When the app has not migrated, but the plugin supports both, we expect application events.
+    'AppNotMigrated-FlutterSceneDelegate-PluginMigrated': <String, String>{
+      ...sharedLifecycleFiles,
+      r'$TEMPLATE_DIR/native/Info-unmigrated.plist':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swift/Info.plist',
+      r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-migrated.swift':
+          r'$PLUGIN_DIR/ios/Classes/MyPlugin.swift',
+      r'$TEMPLATE_DIR/native/UITests-ApplicationEvents-AppNotMigrated.swift':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swiftUITests/xcode_uikit_swiftUITests.swift',
+    },
+
+    // When the app and plugin have not migrated, we expect application events.
+    'AppNotMigrated-FlutterSceneDelegate-PluginNotMigrated': <String, String>{
+      ...sharedLifecycleFiles,
+      r'$TEMPLATE_DIR/native/Info-unmigrated.plist':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swift/Info.plist',
+      r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-unmigrated.swift':
+          r'$PLUGIN_DIR/ios/Classes/MyPlugin.swift',
+      r'$TEMPLATE_DIR/native/UITests-ApplicationEvents-AppNotMigrated.swift':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swiftUITests/xcode_uikit_swiftUITests.swift',
+    },
+  };
+
+  late Map<String, String> sharedLifecycleFiles = <String, String>{
+    ...sharedAppLifecycleFiles,
+    ...sharedPluginLifecycleFiles,
+    r'$TEMPLATE_DIR/native/AppDelegate-FlutterAppDelegate-FlutterEngine.swift':
+        r'$XCODE_PROJ_DIR/xcode_uikit_swift/AppDelegate.swift',
+    r'$TEMPLATE_DIR/native/ViewController-FlutterEngineFromAppDelegate.swift':
+        r'$XCODE_PROJ_DIR/xcode_uikit_swift/ViewController.swift',
+  };
+
+  late Map<String, String> sharedAppLifecycleFiles = <String, String>{
+    r'$TEMPLATE_DIR/flutterapp/lib/main-LifeCycleTest': r'$APP_DIR/lib/main.dart',
+    r'$TEMPLATE_DIR/flutterapp/pubspec-LifeCycleTest.yaml': r'$APP_DIR/pubspec.yaml',
+  };
+
+  late Map<String, String> sharedPluginLifecycleFiles = <String, String>{
+    r'$TEMPLATE_DIR/flutterplugin/lib/lifecycle_plugin': r'$PLUGIN_DIR/lib/my_plugin.dart',
+    r'$TEMPLATE_DIR/flutterplugin/lib/lifecycle_plugin_method_channel':
+        r'$PLUGIN_DIR/lib/my_plugin_method_channel.dart',
+    r'$TEMPLATE_DIR/flutterplugin/lib/lifecycle_plugin_platform_interface':
+        r'$PLUGIN_DIR/lib/my_plugin_platform_interface.dart',
+  };
+}

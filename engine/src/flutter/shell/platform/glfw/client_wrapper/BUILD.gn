@@ -32,7 +32,7 @@ source_set("client_wrapper_glfw") {
 
   deps = [
     "//flutter/shell/platform/common:common_cpp_library_headers",
-    "//flutter/shell/platform/common/client_wrapper:client_wrapper",
+    "//flutter/shell/platform/common/client_wrapper",
     "//flutter/shell/platform/glfw:flutter_glfw_headers",
   ]
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "display_monitor.h"
+#include "display_manager.h"
 
 #include <windows.h>
 
@@ -15,18 +15,18 @@ namespace {
 
 // Data structure to pass to the display enumeration callback.
 struct MonitorEnumState {
-  const DisplayMonitor* display_monitor;
+  const DisplayManagerWin32* display_manager;
   std::vector<FlutterEngineDisplay>* displays;
 };
 
 }  // namespace
 
-DisplayMonitor::DisplayMonitor(FlutterWindowsEngine* engine)
+DisplayManagerWin32::DisplayManagerWin32(FlutterWindowsEngine* engine)
     : engine_(engine), win32_(engine->windows_proc_table()) {}
 
-DisplayMonitor::~DisplayMonitor() {}
+DisplayManagerWin32::~DisplayManagerWin32() = default;
 
-std::optional<FlutterEngineDisplay> DisplayMonitor::FromMonitor(
+std::optional<FlutterEngineDisplay> DisplayManagerWin32::FromMonitor(
     HMONITOR monitor) const {
   MONITORINFOEXW monitor_info = {};
   monitor_info.cbSize = sizeof(monitor_info);
@@ -55,12 +55,12 @@ std::optional<FlutterEngineDisplay> DisplayMonitor::FromMonitor(
   return display;
 }
 
-BOOL CALLBACK DisplayMonitor::EnumMonitorCallback(HMONITOR monitor,
-                                                  HDC hdc,
-                                                  LPRECT rect,
-                                                  LPARAM data) {
+BOOL CALLBACK DisplayManagerWin32::EnumMonitorCallback(HMONITOR monitor,
+                                                       HDC hdc,
+                                                       LPRECT rect,
+                                                       LPARAM data) {
   MonitorEnumState* state = reinterpret_cast<MonitorEnumState*>(data);
-  const DisplayMonitor* self = state->display_monitor;
+  const DisplayManagerWin32* self = state->display_manager;
   std::vector<FlutterEngineDisplay>* displays = state->displays;
   const std::optional<FlutterEngineDisplay> display =
       self->FromMonitor(monitor);
@@ -74,16 +74,16 @@ BOOL CALLBACK DisplayMonitor::EnumMonitorCallback(HMONITOR monitor,
   return TRUE;
 }
 
-void DisplayMonitor::UpdateDisplays() {
+void DisplayManagerWin32::UpdateDisplays() {
   auto displays = GetDisplays();
   engine_->UpdateDisplay(displays);
 }
 
-bool DisplayMonitor::HandleWindowMessage(HWND hwnd,
-                                         UINT message,
-                                         WPARAM wparam,
-                                         LPARAM lparam,
-                                         LRESULT* result) {
+bool DisplayManagerWin32::HandleWindowMessage(HWND hwnd,
+                                              UINT message,
+                                              WPARAM wparam,
+                                              LPARAM lparam,
+                                              LRESULT* result) {
   switch (message) {
     case WM_DISPLAYCHANGE:
     case WM_DPICHANGED:
@@ -93,7 +93,7 @@ bool DisplayMonitor::HandleWindowMessage(HWND hwnd,
   return false;
 }
 
-std::optional<FlutterEngineDisplay> DisplayMonitor::FindById(
+std::optional<FlutterEngineDisplay> DisplayManagerWin32::FindById(
     FlutterEngineDisplayId id) {
   for (auto const& display : GetDisplays()) {
     if (display.display_id == id) {
@@ -104,7 +104,7 @@ std::optional<FlutterEngineDisplay> DisplayMonitor::FindById(
   return std::nullopt;
 }
 
-std::vector<FlutterEngineDisplay> DisplayMonitor::GetDisplays() const {
+std::vector<FlutterEngineDisplay> DisplayManagerWin32::GetDisplays() const {
   std::vector<FlutterEngineDisplay> displays;
   MonitorEnumState state = {this, &displays};
   win32_->EnumDisplayMonitors(nullptr, nullptr, EnumMonitorCallback,

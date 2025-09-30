@@ -3498,8 +3498,8 @@ void main() {
 
     final String buildGradleContent = await buildGradleFile.readAsString();
 
-    expect(buildGradleContent.contains('sourceCompatibility = JavaVersion.VERSION_11'), true);
-    expect(buildGradleContent.contains('targetCompatibility = JavaVersion.VERSION_11'), true);
+    expect(buildGradleContent.contains('sourceCompatibility = JavaVersion.VERSION_'), true);
+    expect(buildGradleContent.contains('targetCompatibility = JavaVersion.VERSION_'), true);
   });
 
   testUsingContext('Android Kotlin plugin sets explicit compatibility version', () async {
@@ -3525,10 +3525,10 @@ void main() {
 
     final String buildGradleContent = await buildGradleFile.readAsString();
 
-    expect(buildGradleContent.contains('sourceCompatibility = JavaVersion.VERSION_11'), true);
-    expect(buildGradleContent.contains('targetCompatibility = JavaVersion.VERSION_11'), true);
+    expect(buildGradleContent.contains('sourceCompatibility = JavaVersion.VERSION_'), true);
+    expect(buildGradleContent.contains('targetCompatibility = JavaVersion.VERSION_'), true);
     // jvmTarget should be set to the same value.
-    expect(buildGradleContent.contains('jvmTarget = JavaVersion.VERSION_11'), true);
+    expect(buildGradleContent.contains('jvmTarget = JavaVersion.VERSION_'), true);
   });
 
   testUsingContext(

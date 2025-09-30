@@ -36,7 +36,7 @@ source_set("client_wrapper_windows") {
 
   deps = [
     "//flutter/shell/platform/common:common_cpp_library_headers",
-    "//flutter/shell/platform/common/client_wrapper:client_wrapper",
+    "//flutter/shell/platform/common/client_wrapper",
     "//flutter/shell/platform/windows:flutter_windows_headers",
   ]
 
@@ -117,7 +117,7 @@ zip_bundle("client_wrapper_archive") {
   deps = [
     ":client_wrapper_windows",
     ":publish_wrapper_windows",
-    "//flutter/shell/platform/common/client_wrapper:client_wrapper",
+    "//flutter/shell/platform/common/client_wrapper",
   ]
   tmp_files = []
   foreach(source_file, client_wrapper_file_archive_list) {

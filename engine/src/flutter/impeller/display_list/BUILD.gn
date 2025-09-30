@@ -157,7 +157,7 @@ impeller_component("aiks_playground") {
     ":display_list",
     "../playground:playground_test",
     "//flutter/display_list",
-    "//flutter/impeller/display_list:display_list",
+    "//flutter/impeller/display_list",
   ]
   public_deps = [
     "//flutter/impeller/typographer/backends/skia:typographer_skia_backend",
