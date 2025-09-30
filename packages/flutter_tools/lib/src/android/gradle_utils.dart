@@ -59,7 +59,7 @@ const targetSdkVersion = '36';
 const ndkVersion = '27.0.12077973';
 final minBuildToolsVersion = Version(28, 0, 3);
 // Align with packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt.
-final errorJavaMinVersionAndroid = Version(11, 0, 0);
+final errorJavaMinVersionAndroid = Version(17, 0, 0);
 final warnJavaMinVersionAndroid = Version(17, 0, 0);
 
 // Update these when new major versions of Java are supported by new Gradle
