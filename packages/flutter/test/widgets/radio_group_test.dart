@@ -327,6 +327,121 @@ void main() {
 
     expect(tester.takeException(), isNull);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/175511.
+  testWidgets('Radio group does not intercept key events when no radio is focused', (
+    WidgetTester tester,
+  ) async {
+    final List<String> log = <String>[];
+    late final Map<ShortcutActivator, Intent> shortcuts = <ShortcutActivator, Intent>{
+      const SingleActivator(LogicalKeyboardKey.arrowLeft): VoidCallbackIntent(() => log.add('←')),
+      const SingleActivator(LogicalKeyboardKey.arrowRight): VoidCallbackIntent(() => log.add('→')),
+      const SingleActivator(LogicalKeyboardKey.arrowDown): VoidCallbackIntent(() => log.add('↓')),
+      const SingleActivator(LogicalKeyboardKey.arrowUp): VoidCallbackIntent(() => log.add('↑')),
+      const SingleActivator(LogicalKeyboardKey.space): VoidCallbackIntent(() => log.add('_')),
+    };
+
+    final FocusNode firstRadioFocusNode = FocusNode();
+    addTearDown(firstRadioFocusNode.dispose);
+    final FocusNode textFieldFocusNode = FocusNode();
+    addTearDown(textFieldFocusNode.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Shortcuts(
+            shortcuts: shortcuts,
+            child: TestRadioGroup<int>(
+              child: Column(
+                children: <Widget>[
+                  Radio<int>(focusNode: firstRadioFocusNode, value: 0),
+                  const RadioListTile<int>(value: 1),
+                  const Radio<int>(value: 2),
+                  TextField(focusNode: textFieldFocusNode),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestRadioGroupState<int> state = tester.state<TestRadioGroupState<int>>(
+      find.byType(TestRadioGroup<int>),
+    );
+
+    // Focus on the first radio and toggle it.
+    firstRadioFocusNode.requestFocus();
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pumpAndSettle();
+    expect(state.groupValue, 0);
+    expect(firstRadioFocusNode.hasFocus, isTrue);
+
+    // Toggle the second radio with shortcut.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(state.groupValue, 1);
+    // Log is empty because radio group handles shortcuts.
+    expect(log, isEmpty);
+
+    // Toggle the first radio with shortcut.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pumpAndSettle();
+    expect(state.groupValue, 0);
+    expect(log, isEmpty);
+
+    // Move focus to the text field.
+    // Now radio group will ignore shortcuts as there are no focused radios.
+    textFieldFocusNode.requestFocus();
+    await tester.pumpAndSettle();
+
+    // Verify that shortcuts are not intercepted by the radio group.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pumpAndSettle();
+    expect(state.groupValue, 0);
+    expect(log, <String>['←']);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(state.groupValue, 0);
+    expect(log, <String>['←', '→']);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    expect(state.groupValue, 0);
+    expect(log, <String>['←', '→', '↓']);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pumpAndSettle();
+    expect(state.groupValue, 0);
+    expect(log, <String>['←', '→', '↓', '↑']);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pumpAndSettle();
+    expect(state.groupValue, 0);
+    expect(log, <String>['←', '→', '↓', '↑', '_']);
+
+    log.clear();
+    expect(log, isEmpty);
+
+    // Focus on the first radio.
+    firstRadioFocusNode.requestFocus();
+    await tester.pump();
+    expect(state.groupValue, 0);
+    expect(firstRadioFocusNode.hasFocus, isTrue);
+
+    // Verify that radio group handles shortcuts again.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    expect(state.groupValue, 1);
+    expect(log, isEmpty);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pumpAndSettle();
+    expect(state.groupValue, 0);
+    expect(log, isEmpty);
+  });
 }
 
 class TestRadioGroup<T> extends StatefulWidget {
