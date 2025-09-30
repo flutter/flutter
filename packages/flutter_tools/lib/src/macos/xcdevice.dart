@@ -457,7 +457,7 @@ class XCDevice {
       timeout: timeout ?? const Duration(seconds: 2),
     );
 
-    if (allAvailableDevices == null) {
+    if (allAvailableDevices == null || allAvailableDevices.isEmpty) {
       return const <IOSDevice>[];
     }
 
@@ -524,7 +524,7 @@ class XCDevice {
     final List<Object>? allAvailableDevices = await _getAllDevices(
       timeout: timeout ?? const Duration(seconds: 2),
     );
-    if (allAvailableDevices == null || cancelCompleter.isCompleted) {
+    if (allAvailableDevices == null || allAvailableDevices.isEmpty || cancelCompleter.isCompleted) {
       return const <IOSDevice>[];
     }
 
@@ -876,7 +876,7 @@ class XCDevice {
       timeout: const Duration(seconds: 2),
     );
 
-    if (allAvailableDevices == null) {
+    if (allAvailableDevices == null || allAvailableDevices.isEmpty) {
       return const <String>[];
     }
 
