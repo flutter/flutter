@@ -4247,7 +4247,7 @@ void main() {
     });
 
     group('Semantics', () {
-      testWidgets('MenuItemButton is not a semantic button', (WidgetTester tester) async {
+      testWidgets('MenuItemButton is a semantic button', (WidgetTester tester) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         await tester.pumpWidget(
           Directionality(
@@ -4262,7 +4262,7 @@ void main() {
           ),
         );
 
-        // The flags should not have SemanticsFlag.isButton.
+        // The flags should have SemanticsFlag.isButton.
         expect(
           semantics,
           hasSemantics(
@@ -4274,6 +4274,7 @@ void main() {
                   rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
                   transform: Matrix4.translationValues(356.0, 276.0, 0.0),
                   flags: <SemanticsFlag>[
+                    SemanticsFlag.isButton,
                     SemanticsFlag.hasEnabledState,
                     SemanticsFlag.isEnabled,
                     SemanticsFlag.isFocusable,
@@ -4309,7 +4310,7 @@ void main() {
         semantics.dispose();
       }, variant: TargetPlatformVariant.desktop());
 
-      testWidgets('SubMenuButton is not a semantic button', (WidgetTester tester) async {
+      testWidgets('SubMenuButton is a semantic button', (WidgetTester tester) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         await tester.pumpWidget(
           Directionality(
@@ -4325,7 +4326,7 @@ void main() {
           ),
         );
 
-        // The flags should not have SemanticsFlag.isButton.
+        // The flags should have SemanticsFlag.isButton.
         expect(
           semantics,
           hasSemantics(
@@ -4334,8 +4335,93 @@ void main() {
                 TestSemantics(
                   rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
                   flags: <SemanticsFlag>[
+                    SemanticsFlag.isButton,
                     SemanticsFlag.hasEnabledState,
                     SemanticsFlag.hasExpandedState,
+                  ],
+                  label: 'ABC',
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
+            ignoreTransform: true,
+            ignoreId: true,
+          ),
+        );
+
+        semantics.dispose();
+      });
+
+      testWidgets('MenuItemButton disabled semantics', (WidgetTester tester) async {
+        final SemanticsTester semantics = SemanticsTester(tester);
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: MenuItemButton(
+                style: MenuItemButton.styleFrom(fixedSize: const Size(88.0, 48.0)),
+                onPressed: null, // Disabled
+                child: const Text('ABC'),
+              ),
+            ),
+          ),
+        );
+
+        // Disabled menu items should still be semantic buttons but not enabled.
+        expect(
+          semantics,
+          hasSemantics(
+            TestSemantics.root(
+              children: <TestSemantics>[
+                TestSemantics.rootChild(
+                  label: 'ABC',
+                  rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+                  transform: Matrix4.translationValues(356.0, 276.0, 0.0),
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isButton,
+                    SemanticsFlag.hasEnabledState,
+                    // Note: No SemanticsFlag.isEnabled for disabled items
+                  ],
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
+            ignoreId: true,
+          ),
+        );
+
+        semantics.dispose();
+      });
+
+      testWidgets('SubmenuButton disabled semantics', (WidgetTester tester) async {
+        final SemanticsTester semantics = SemanticsTester(tester);
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: SubmenuButton(
+                onHover: (bool value) {},
+                style: SubmenuButton.styleFrom(fixedSize: const Size(88.0, 48.0)),
+                menuChildren: const <Widget>[], // Empty = disabled
+                child: const Text('ABC'),
+              ),
+            ),
+          ),
+        );
+
+        // Disabled submenu buttons should still be semantic buttons but not enabled.
+        expect(
+          semantics,
+          hasSemantics(
+            TestSemantics.root(
+              children: <TestSemantics>[
+                TestSemantics(
+                  rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isButton,
+                    SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.hasExpandedState,
+                    // Note: No SemanticsFlag.isEnabled for disabled items
                   ],
                   label: 'ABC',
                   textDirection: TextDirection.ltr,
@@ -4394,6 +4480,7 @@ void main() {
                             TestSemantics(
                               id: 4,
                               flags: <SemanticsFlag>[
+                                SemanticsFlag.isButton,
                                 SemanticsFlag.isFocused,
                                 SemanticsFlag.hasEnabledState,
                                 SemanticsFlag.isEnabled,
@@ -4422,6 +4509,7 @@ void main() {
                                       label: 'Item 0',
                                       rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 48.0),
                                       flags: <SemanticsFlag>[
+                                        SemanticsFlag.isButton,
                                         SemanticsFlag.hasEnabledState,
                                         SemanticsFlag.isEnabled,
                                         SemanticsFlag.isFocusable,
@@ -4444,6 +4532,7 @@ void main() {
               ],
             ),
             ignoreTransform: true,
+            ignoreId: true,
           ),
         );
 
@@ -4471,6 +4560,7 @@ void main() {
                             TestSemantics(
                               id: 4,
                               flags: <SemanticsFlag>[
+                                SemanticsFlag.isButton,
                                 SemanticsFlag.hasExpandedState,
                                 SemanticsFlag.isFocused,
                                 SemanticsFlag.hasEnabledState,
@@ -4493,6 +4583,7 @@ void main() {
               ],
             ),
             ignoreTransform: true,
+            ignoreId: true,
           ),
         );
 

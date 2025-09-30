@@ -940,6 +940,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
         leadingIcon: widget.leadingIcon,
         shortcut: widget.shortcut,
         semanticsLabel: widget.semanticsLabel,
+        isEnabled: widget.enabled,
         trailingIcon: widget.trailingIcon,
         hasSubmenu: false,
         overflowAxis: _anchor?._orientation ?? widget.overflowAxis,
@@ -1852,6 +1853,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
                   trailingIcon: widget.trailingIcon,
                   hasSubmenu: true,
                   showDecoration: (_parent?._orientation ?? Axis.horizontal) == Axis.vertical,
+                  isEnabled: _enabled,
                   submenuIcon: submenuIcon,
                   child: child,
                 ),
@@ -2783,6 +2785,7 @@ class _MenuItemLabel extends StatelessWidget {
     this.trailingIcon,
     this.shortcut,
     this.semanticsLabel,
+    this.isEnabled,
     this.overflowAxis = Axis.vertical,
     this.submenuIcon,
     this.child,
@@ -2811,6 +2814,11 @@ class _MenuItemLabel extends StatelessWidget {
   /// An optional Semantics label, which replaces the generated string when
   /// read by a screen reader.
   final String? semanticsLabel;
+
+  /// Whether this menu item is enabled for semantics purposes.
+  ///
+  /// If null, the enabled state is not explicitly set by this widget.
+  final bool? isEnabled;
 
   /// The direction in which the menu item expands.
   final Axis overflowAxis;
@@ -2893,10 +2901,13 @@ class _MenuItemLabel extends StatelessWidget {
           ),
       ],
     );
-    if (semanticsLabel != null) {
+    if (semanticsLabel != null || isEnabled != null) {
       menuItemLabel = Semantics(
         label: semanticsLabel,
-        excludeSemantics: true,
+        enabled: isEnabled,
+        button: true,
+        // Only exclude semantics when we explicitly supply a custom label.
+        excludeSemantics: semanticsLabel != null,
         child: menuItemLabel,
       );
     }
