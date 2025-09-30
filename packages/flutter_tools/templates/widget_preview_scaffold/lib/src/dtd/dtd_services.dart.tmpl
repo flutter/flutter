@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:dtd/dtd.dart';
+import 'package:json_rpc_2/json_rpc_2.dart';
 import 'package:widget_preview_scaffold/src/dtd/utils.dart';
 import 'editor_service.dart';
 
@@ -24,6 +25,10 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   static const kResolveUri = 'resolveUri';
   static const kSetPreference = 'setPreference';
   static const kGetPreference = 'getPreference';
+
+  /// Error code for RpcException thrown when attempting to load a key from
+  /// persistent preferences that doesn't have an entry.
+  static const kNoValueForKey = 200;
 
   // END KEEP SYNCED
 
@@ -88,10 +93,17 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   ///
   /// Returns null if [key] is not in the map.
   Future<String?> getPreference(String key) async {
-    final response = StringResponse.fromDTDResponse(
-      (await _call(kGetPreference, params: {'key': key}))!,
-    );
-    return response.value;
+    try {
+      final response = StringResponse.fromDTDResponse(
+        (await _call(kGetPreference, params: {'key': key}))!,
+      );
+      return response.value;
+    } on RpcException catch (e) {
+      if (e.code == kNoValueForKey) {
+        return null;
+      }
+      rethrow;
+    }
   }
 
   /// Retrieves the state of flag [key] from the persistent preferences map.
@@ -106,7 +118,7 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   }
 
   /// Sets [key] to [value] in the persistent preferences map.
-  Future<void> setPreference(String key, String value) async {
+  Future<void> setPreference(String key, Object value) async {
     await _call(kSetPreference, params: {'key': key, 'value': value});
   }
 

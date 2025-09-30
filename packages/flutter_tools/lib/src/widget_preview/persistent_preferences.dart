@@ -1,6 +1,7 @@
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 import 'package:devtools_shared/devtools_server.dart' as devtools;
 import 'package:meta/meta.dart';
 
@@ -9,7 +10,7 @@ import '../convert.dart';
 
 /// A persistent store used to save settings across sessions.
 ///
-/// The store is written to `~/.flutter-devtools/.widget-preview` in JSOn format.
+/// The store is written to `~/.flutter-devtools/.widget-preview` in JSON format.
 class PersistentPreferences {
   PersistentPreferences({required this.fs}) {
     if (!file.existsSync()) {
@@ -27,7 +28,7 @@ class PersistentPreferences {
     fs.path.join(devtools.LocalFileSystem.devToolsDir(), _kPreferencesFileName),
   );
 
-  late Map<String, Object?> _map;
+  late Map<String, Object> _map;
 
   Object? operator [](String key) => _map[key];
 
@@ -44,13 +45,7 @@ class PersistentPreferences {
     } else {
       _map[key] = value;
     }
-
-    try {
-      const jsonEncoder = JsonEncoder.withIndent('  ');
-      file.writeAsStringSync('${jsonEncoder.convert(_map)}\n');
-    } on Exception {
-      // Do nothing.
-    }
+    _writeChanges();
   }
 
   /// Re-read settings from the backing store.
@@ -64,11 +59,24 @@ class PersistentPreferences {
       }
       _map = (json.decode(contents) as Map).cast<String, Object>();
     } on Exception {
-      _map = <String, Object?>{};
+      _map = <String, Object>{};
     }
   }
 
   void remove(String propertyName) {
+    if (!_map.containsKey(propertyName)) {
+      return;
+    }
     _map.remove(propertyName);
+    _writeChanges();
+  }
+
+  void _writeChanges() {
+    try {
+      const jsonEncoder = JsonEncoder.withIndent('  ');
+      file.writeAsStringSync('${jsonEncoder.convert(_map)}\n');
+    } on Exception {
+      // Do nothing.
+    }
   }
 }

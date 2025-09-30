@@ -185,7 +185,7 @@ void main() {
     );
   });
 
-  testWidgets('Filter previews is responsive to Editor service availablility', (
+  testWidgets('Filter previews is responsive to Editor service availability', (
     tester,
   ) async {
     final dtdServices = FakeWidgetPreviewScaffoldDtdServices();
@@ -241,16 +241,15 @@ void main() {
     expect(controller.filteredPreviewSetListenable.value, isEmpty);
   });
 
-  testWidgets('Filter previews is responsive to Editor service availablility', (
+  testWidgets('Filter by selected file preference is persisted', (
     tester,
   ) async {
     final dtdServices = FakeWidgetPreviewScaffoldDtdServices();
 
-    bool? getFilterBySelectedFileValue() => bool.tryParse(
-      dtdServices.preferences[WidgetPreviewScaffoldController
-              .kFilterBySelectedFilePreference] ??
-          '',
-    );
+    bool? getFilterBySelectedFileValue() =>
+        dtdServices.preferences[WidgetPreviewScaffoldController
+                .kFilterBySelectedFilePreference]
+            as bool?;
 
     // Validate setting isn't set in preferences yet.
     expect(getFilterBySelectedFileValue(), null);

@@ -20,7 +20,7 @@ import '../base/process.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
 import '../project.dart';
-import 'persistent_properties.dart';
+import 'persistent_preferences.dart';
 
 typedef DtdService = (String, DTDServiceCallback);
 
@@ -51,6 +51,10 @@ class WidgetPreviewDtdServices {
   static const kResolveUri = 'resolveUri';
   static const kSetPreference = 'setPreference';
   static const kGetPreference = 'getPreference';
+
+  /// Error code for RpcException thrown when attempting to load a key from
+  /// persistent preferences that doesn't have an entry.
+  static const kNoValueForKey = 200;
 
   /// The list of DTD service methods registered by the tool.
   late final services = <DtdService>[
@@ -137,7 +141,17 @@ class WidgetPreviewDtdServices {
 
   Future<Map<String, Object?>> _getPreference(Parameters params) async {
     final String key = params['key'].asString;
-    return StringResponse(preferences[key].toString()).toJson();
+    final Object? value = preferences[key];
+    if (value == null) {
+      throw RpcException(kNoValueForKey, 'No entry for $key in preferences.');
+    }
+    if (value is String) {
+      return StringResponse(value).toJson();
+    }
+    if (value is bool) {
+      return BoolResponse(value).toJson();
+    }
+    throw UnimplementedError('Unexpected preference value: ${value.runtimeType}');
   }
 }
 

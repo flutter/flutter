@@ -13,10 +13,9 @@ import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/widget_preview/dtd_services.dart';
-import 'package:flutter_tools/src/widget_preview/persistent_properties.dart';
+import 'package:flutter_tools/src/widget_preview/persistent_preferences.dart';
 import 'package:test/fake.dart';
 
-import '../../../general.shard/base/error_handling_io_test.dart';
 import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/test_flutter_command_runner.dart';
@@ -41,42 +40,6 @@ void main() {
   });
 
   group('$WidgetPreviewDtdServices', () {
-    testUsingContext(
-      'handles ${WidgetPreviewDtdServices.kHotRestartPreviewer} invocations',
-      () async {
-        // Start DTD and register the widget preview DTD services with a custom handler for hot
-        // restart requests.
-        final hotRestartRequestCompleter = Completer<void>();
-        dtdServer = WidgetPreviewDtdServices(
-          fs: FakeFileSystem(),
-          logger: logger,
-          shutdownHooks: ShutdownHooks(),
-          dtdLauncher: DtdLauncher(
-            logger: logger,
-            artifacts: globals.artifacts!,
-            processManager: globals.processManager,
-          ),
-          onHotRestartPreviewerRequest: hotRestartRequestCompleter.complete,
-          project: FakeFlutterProject(),
-        );
-        await dtdServer.launchAndConnect();
-
-        // Connect to the DTD instance and invoke the hot restart endpoint.
-        final DartToolingDaemon dtd = await DartToolingDaemon.connect(dtdServer.dtdUri!);
-        final DTDResponse response = await dtd.call(
-          WidgetPreviewDtdServices.kWidgetPreviewService,
-          WidgetPreviewDtdServices.kHotRestartPreviewer,
-        );
-
-        // This will throw if the response is not an instance of Success.
-        expect(() => Success.fromDTDResponse(response), returnsNormally);
-
-        // Ensure the custom handler is actually invoked.
-        await hotRestartRequestCompleter.future;
-      },
-      overrides: <Type, Generator>{ProcessManager: () => loggingProcessManager},
-    );
-
     testUsingContext(
       'handles ${WidgetPreviewDtdServices.kHotRestartPreviewer} invocations',
       () async {

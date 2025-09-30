@@ -81,7 +81,7 @@ class WidgetPreviewScaffoldController {
     final updated = !_filterBySelectedFile.value;
     await dtdServices.setPreference(
       kFilterBySelectedFilePreference,
-      updated.toString(),
+      updated,
     );
     _filterBySelectedFile.value = updated;
   }
