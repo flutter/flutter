@@ -9,7 +9,6 @@ import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
-import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -555,7 +554,7 @@ class XCDevice {
     required Map<String, IOSCoreDevice> coreDeviceMap,
   }) {
     final deviceMap = <String, IOSDevice>{};
-    for (final Object device in allAvailableDevices) {
+    for (final device in allAvailableDevices) {
       if (device is Map<String, Object?>) {
         // Only include iPhone, iPad, iPod, or other iOS devices.
         if (!_isIPhoneOSDevice(device)) {
