@@ -456,12 +456,14 @@ mixin class DialogWindowControllerDelegate {
 ///         preferredConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
 ///         title: 'Example Window',
 ///       ),
-///       child: const MyApp()
+///       child: MyApp()
 ///     )
 ///   );
 /// }
 ///
 /// class MyApp extends StatelessWidget {
+///   MyApp({super.key});
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return MaterialApp(
@@ -828,12 +830,14 @@ class RegularWindow extends StatelessWidget {
 ///         preferredConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
 ///         title: 'Example Window',
 ///       ),
-///       child: const MyApp()
+///       child: MyApp()
 ///     )
 ///   );
 /// }
 ///
 /// class MyApp extends StatelessWidget {
+///   MyApp({super.key});
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return MaterialApp(
