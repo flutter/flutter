@@ -18,10 +18,10 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   //
   // START KEEP SYNCED
 
-  static const String kWidgetPreviewService = 'widget-preview';
+  static const kWidgetPreviewService = 'widget-preview';
   static const kIsWindows = 'isWindows';
-  static const String kHotRestartPreviewer = 'hotRestartPreviewer';
-  static const String kResolveUri = 'resolveUri';
+  static const kHotRestartPreviewer = 'hotRestartPreviewer';
+  static const kResolveUri = 'resolveUri';
   static const kSetPreference = 'setPreference';
   static const kGetPreference = 'getPreference';
 
