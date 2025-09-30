@@ -65,18 +65,18 @@ String _nativeToString(ffi.Pointer<ffi.Uint8> value) {
   return utf8.decode(value.asTypedList(length));
 }
 
-typedef GCallback = ffi.Void Function();
+typedef _GCallback = ffi.Void Function();
 
-class GObject {
+class _GObject {
   final ffi.Pointer instance;
 
-  const GObject(this.instance);
+  const _GObject(this.instance);
 
   @ffi.Native<
     ffi.UnsignedLong Function(
       ffi.Pointer,
       ffi.Pointer<ffi.Uint8>,
-      ffi.Pointer<ffi.NativeFunction<GCallback>>,
+      ffi.Pointer<ffi.NativeFunction<_GCallback>>,
       ffi.Pointer,
       ffi.Int,
     )
@@ -84,7 +84,7 @@ class GObject {
   external static int _gSignalConnectData(
     ffi.Pointer instance,
     ffi.Pointer<ffi.Uint8> detailedSignal,
-    ffi.Pointer<ffi.NativeFunction<GCallback>> handler,
+    ffi.Pointer<ffi.NativeFunction<_GCallback>> handler,
     ffi.Pointer destroyData,
     int connectFlags,
   );
@@ -93,7 +93,7 @@ class GObject {
     final r = _gSignalConnectData(
       instance,
       detailedSignalBuffer,
-      ffi.NativeCallable<GCallback>.listener(handler).nativeFunction,
+      ffi.NativeCallable<_GCallback>.listener(handler).nativeFunction,
       ffi.nullptr,
       0,
     );
@@ -110,8 +110,8 @@ class GObject {
   }
 }
 
-class GtkWidget extends GObject {
-  const GtkWidget(ffi.Pointer instance) : super(instance);
+class _GtkWidget extends _GObject {
+  const _GtkWidget(ffi.Pointer instance) : super(instance);
 
   @ffi.Native<ffi.Void Function(ffi.Pointer)>(symbol: 'gtk_widget_show')
   external static void _gtkWidgetShow(ffi.Pointer widget);
@@ -127,8 +127,8 @@ class GtkWidget extends GObject {
 
   @ffi.Native<ffi.Pointer Function(ffi.Pointer)>(symbol: 'gtk_widget_get_window')
   external static ffi.Pointer _gtkWidgetGetWindow(ffi.Pointer widget);
-  GdkWindow getWindow() {
-    return GdkWindow(_gtkWidgetGetWindow(instance));
+  _GdkWindow getWindow() {
+    return _GdkWindow(_gtkWidgetGetWindow(instance));
   }
 
   @ffi.Native<ffi.Void Function(ffi.Pointer)>(symbol: 'gtk_widget_destroy')
@@ -138,8 +138,8 @@ class GtkWidget extends GObject {
   }
 }
 
-class GdkWindow extends GObject {
-  const GdkWindow(ffi.Pointer instance) : super(instance);
+class _GdkWindow extends _GObject {
+  const _GdkWindow(ffi.Pointer instance) : super(instance);
 
   @ffi.Native<ffi.Int Function(ffi.Pointer)>(symbol: 'gdk_window_get_state')
   external static int _gdkWindowGetState(ffi.Pointer window);
@@ -148,7 +148,7 @@ class GdkWindow extends GObject {
   }
 }
 
-final class GdkGeometry extends ffi.Struct {
+final class _GdkGeometry extends ffi.Struct {
   @ffi.Int()
   external int min_width;
 
@@ -182,24 +182,24 @@ final class GdkGeometry extends ffi.Struct {
   @ffi.Int()
   external int win_gravity;
 
-  factory GdkGeometry() {
+  factory _GdkGeometry() {
     return ffi.Struct.create();
   }
 }
 
-const int GDK_WINDOW_STATE_ICONIFIED = 1 << 1;
-const int GDK_WINDOW_STATE_MAXIMIZED = 1 << 2;
-const int GDK_WINDOW_STATE_FULLSCREEN = 1 << 4;
+const int _GDK_WINDOW_STATE_ICONIFIED = 1 << 1;
+const int _GDK_WINDOW_STATE_MAXIMIZED = 1 << 2;
+const int _GDK_WINDOW_STATE_FULLSCREEN = 1 << 4;
 
-class GtkWindow extends GtkWidget {
+class _GtkWindow extends _GtkWidget {
   @ffi.Native<ffi.Pointer Function(ffi.Int)>(symbol: 'gtk_window_new')
   external static ffi.Pointer _gtkWindowNew(int type);
 
-  GtkWindow() : super(_gtkWindowNew(0));
+  _GtkWindow() : super(_gtkWindowNew(0));
 
   @ffi.Native<ffi.Void Function(ffi.Pointer, ffi.Pointer)>(symbol: 'gtk_container_add')
   external static void _gtkContainerAdd(ffi.Pointer container, ffi.Pointer child);
-  void add(GtkWidget child) {
+  void add(_GtkWidget child) {
     _gtkContainerAdd(instance, child.instance);
   }
 
@@ -233,17 +233,17 @@ class GtkWindow extends GtkWidget {
     _gtkWindowSetDefaultSize(instance, width, height);
   }
 
-  @ffi.Native<ffi.Void Function(ffi.Pointer, ffi.Pointer, ffi.Pointer<GdkGeometry>, ffi.Int)>(
+  @ffi.Native<ffi.Void Function(ffi.Pointer, ffi.Pointer, ffi.Pointer<_GdkGeometry>, ffi.Int)>(
     symbol: 'gtk_window_set_geometry_hints',
   )
   external static void _gtkWindowSetGeometryHints(
     ffi.Pointer window,
     ffi.Pointer geometryWidget,
-    ffi.Pointer<GdkGeometry> geometry,
+    ffi.Pointer<_GdkGeometry> geometry,
     int geometryMask,
   );
   void setGeometryHints({int? minWidth, int? minHeight, int? maxWidth, int? maxHeight}) {
-    final geometry = _gMalloc0(ffi.sizeOf<GdkGeometry>()).cast<GdkGeometry>();
+    final geometry = _gMalloc0(ffi.sizeOf<_GdkGeometry>()).cast<_GdkGeometry>();
     final g = geometry.ref;
     int geometryMask = 0;
     if (minWidth != null || minHeight != null) {
@@ -321,11 +321,11 @@ class GtkWindow extends GtkWidget {
   }
 }
 
-class FlView extends GtkWidget {
+class _FlView extends _GtkWidget {
   @ffi.Native<ffi.Pointer Function(ffi.Pointer)>(symbol: 'fl_view_new_for_engine')
   external static ffi.Pointer _flViewNewForEngine(ffi.Pointer engine);
 
-  FlView()
+  _FlView()
     : super(_flViewNewForEngine(ffi.Pointer.fromAddress(PlatformDispatcher.instance.engineId!)));
 
   @ffi.Native<ffi.Int64 Function(ffi.Pointer)>(symbol: 'fl_view_get_id')
@@ -419,7 +419,7 @@ class WindowingOwnerLinux extends WindowingOwner {
 ///  * [RegularWindowController], the base class for regular windows.
 class RegularWindowControllerLinux extends RegularWindowController {
   final RegularWindowControllerDelegate _delegate;
-  final GtkWindow _window;
+  final _GtkWindow _window;
   int _deleteEventId = 0;
   int _destroyEventId = 0;
 
@@ -440,7 +440,7 @@ class RegularWindowControllerLinux extends RegularWindowController {
     BoxConstraints? preferredConstraints,
     String? title,
   }) : _delegate = delegate,
-       _window = GtkWindow(),
+       _window = _GtkWindow(),
        super.empty() {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
@@ -462,7 +462,7 @@ class RegularWindowControllerLinux extends RegularWindowController {
     if (title != null) {
       setTitle(title);
     }
-    final view = FlView();
+    final view = _FlView();
     final viewId = view.getId();
     rootView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
       (FlutterView view) => view.viewId == viewId,
@@ -491,15 +491,15 @@ class RegularWindowControllerLinux extends RegularWindowController {
 
   @override
   @internal
-  bool get isMaximized => (_window.getWindow().getState() & GDK_WINDOW_STATE_MAXIMIZED) != 0;
+  bool get isMaximized => (_window.getWindow().getState() & _GDK_WINDOW_STATE_MAXIMIZED) != 0;
 
   @override
   @internal
-  bool get isMinimized => (_window.getWindow().getState() & GDK_WINDOW_STATE_ICONIFIED) != 0;
+  bool get isMinimized => (_window.getWindow().getState() & _GDK_WINDOW_STATE_ICONIFIED) != 0;
 
   @override
   @internal
-  bool get isFullscreen => (_window.getWindow().getState() & GDK_WINDOW_STATE_FULLSCREEN) != 0;
+  bool get isFullscreen => (_window.getWindow().getState() & _GDK_WINDOW_STATE_FULLSCREEN) != 0;
 
   @override
   @internal
