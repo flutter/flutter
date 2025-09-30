@@ -22,10 +22,10 @@ final class PreviewDetails {
   /// The file:// URI pointing to the script in which the preview is defined.
   final Uri scriptUri;
 
-  /// The line at which the Preview annotation was applied.
+  /// The 1-based line at which the Preview annotation was applied.
   final int line;
 
-  /// The column at which the Preview annotation was applied.
+  /// The 1-based column at which the Preview annotation was applied.
   final int column;
 
   /// The name of the package in which the preview was defined.

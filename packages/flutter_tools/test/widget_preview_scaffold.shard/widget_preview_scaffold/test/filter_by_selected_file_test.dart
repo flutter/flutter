@@ -187,21 +187,13 @@ void main() {
   ) async {
     final dtdServices = FakeWidgetPreviewScaffoldDtdServices();
     final previews = <WidgetPreview>[
-      WidgetPreview(
+      WidgetPreview.test(
         builder: () => Text('widget1'),
-        scriptUri: '',
-        line: -1,
-        column: -1,
         previewData: Preview(group: 'group'),
-        packageName: '',
       ),
-      WidgetPreview(
+      WidgetPreview.test(
         builder: () => Text('widget2'),
-        scriptUri: '',
-        line: -1,
-        column: -1,
         previewData: Preview(group: 'group'),
-        packageName: '',
       ),
     ];
     final controller = FakeWidgetPreviewScaffoldController(
