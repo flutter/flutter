@@ -347,34 +347,9 @@ class IOSCoreDeviceControl {
   /// Executes `devicectl` command to get list of devices. The command will
   /// likely complete before [timeout] is reached. If [timeout] is reached,
   /// the command will be stopped as a failure.
-  Future<List<Object?>> _listCoreDevices({
-    Duration timeout = const Duration(seconds: _minimumTimeoutInSeconds),
-  }) async {
-    if (_devicectlListProcess != null) {
-      _logger.printError(
-        'A devicectl list devices process is already running. It must be stopped before starting a new one.',
-      );
-      return <Object?>[];
-    }
-    final (Process? process, File? output) = await startListCoreDevices(timeout: timeout);
-    if (process == null || output == null) {
-      return <Object?>[];
-    }
-    _devicectlListProcess = process;
-    try {
-      final int exitcode = await _devicectlListProcess!.exitCode;
-      return await getCoreDevicesFromHandledProcess(
-        output: output,
-        exitCode: exitcode,
-        command: <String>[],
-      );
-    } finally {
-      _devicectlListProcess = null;
-    }
-  }
-
   Future<(Process?, File?)> startListCoreDevices({
     Duration timeout = const Duration(seconds: _minimumTimeoutInSeconds),
+    Completer<void>? cancelCompleter,
   }) async {
     if (!_xcode.isDevicectlInstalled) {
       _logger.printError('devicectl is not installed.');
@@ -393,7 +368,7 @@ class IOSCoreDeviceControl {
     final File output = tempDirectory.childFile('core_device_list.json');
     output.createSync();
 
-    final command = <String>[
+    final Process process = await _processUtils.start(<String>[
       ..._xcode.xcrunCommand(),
       'devicectl',
       'list',
@@ -402,43 +377,40 @@ class IOSCoreDeviceControl {
       validTimeout.inSeconds.toString(),
       '--json-output',
       output.path,
-    ];
+    ]);
 
-    try {
-      return (await _processUtils.start(command), output);
-    } on ProcessException catch (err) {
-      _logger.printError('Error executing devicectl: $err');
-      ErrorHandlingFileSystem.deleteIfExists(tempDirectory, recursive: true);
-      return (null, null);
+    if (cancelCompleter != null) {
+      unawaited(
+        cancelCompleter.future.whenComplete(() {
+          _logger.printTrace('Cancelling devicectl process.');
+          process.kill();
+        }),
+      );
     }
+    return (process, output);
   }
 
   Future<List<Object?>> getCoreDevicesFromHandledProcess({
     required File output,
     required int exitCode,
-    required List<String> command,
   }) async {
-    var isToolPossiblyShutdown = false;
-    if (_fileSystem is ErrorHandlingFileSystem) {
-      final FileSystem delegate = _fileSystem.fileSystem;
-      if (delegate is LocalFileSystem) {
-        isToolPossiblyShutdown = delegate.disposed;
+    if (!output.existsSync()) {
+      // It's possible that the tool is in the process of shutting down, which
+      // could result in the temp directory being deleted after the shutdown hooks run
+      // before we check if `output` exists. If this happens, we shouldn't crash
+      // but just carry on as if no devices were found as the tool will exit on
+      // its own.
+      //
+      // See https://github.com/flutter/flutter/issues/141892 for details.
+      if (_fileSystem is ErrorHandlingFileSystem) {
+        final FileSystem delegate = _fileSystem.fileSystem;
+        if (delegate is LocalFileSystem && delegate.disposed) {
+          return <Object?>[];
+        }
       }
-    }
-    // It's possible that the tool is in the process of shutting down, which
-    // could result in the temp directory being deleted after the shutdown hooks run
-    // before we check if `output` exists. If this happens, we shouldn't crash
-    // but just carry on as if no devices were found as the tool will exit on
-    // its own.
-    //
-    // See https://github.com/flutter/flutter/issues/141892 for details.
-    if (!isToolPossiblyShutdown && !output.existsSync()) {
-      _logger.printError('After running the command ${command.join(' ')} the file');
       _logger.printError('${output.path} was expected to exist, but it did not.');
       _logger.printError('The process exited with code $exitCode');
-      throw StateError('Expected the file ${output.path} to exist but it did not');
-    } else if (isToolPossiblyShutdown) {
-      return <Object?>[];
+      throw FileSystemException('The devicectl output file was unexpectedly deleted.', output.path);
     }
 
     if (exitCode != 0) {
@@ -463,18 +435,65 @@ class IOSCoreDeviceControl {
       // We failed to parse the devicectl output, or it returned junk.
       _logger.printError('devicectl returned non-JSON response: $stringOutput');
       return <Object?>[];
+    } finally {
+      _devicectlListProcess = null;
+      ErrorHandlingFileSystem.deleteIfExists(output.parent, recursive: true);
     }
   }
 
   Future<List<IOSCoreDevice>> getCoreDevices({
     Duration timeout = const Duration(seconds: _minimumTimeoutInSeconds),
+    Completer<void>? cancelCompleter,
   }) async {
-    final List<Object?> devicesSection = await _listCoreDevices(timeout: timeout);
-    return <IOSCoreDevice>[
-      for (final Object? deviceObject in devicesSection)
-        if (deviceObject is Map<String, Object?>)
-          IOSCoreDevice.fromBetaJson(deviceObject, logger: _logger),
-    ];
+    if (_devicectlListProcess != null) {
+      _logger.printError(
+        'A devicectl list devices process is already running. It must be stopped before starting a new one.',
+      );
+      return <IOSCoreDevice>[];
+    }
+    final (Process? process, File? output) = await startListCoreDevices(
+      timeout: timeout,
+      cancelCompleter: cancelCompleter,
+    );
+    if (process == null || output == null) {
+      return const <IOSCoreDevice>[];
+    }
+    _devicectlListProcess = process;
+
+    try {
+      // Race the process exit against the cancellation completer
+      if (cancelCompleter != null) {
+        await Future.any<void>(<Future<void>>[
+          _devicectlListProcess!.exitCode,
+          cancelCompleter.future,
+        ]);
+      } else {
+        await _devicectlListProcess!.exitCode;
+      }
+
+      // If cancellation was triggered, return early.
+      if (cancelCompleter?.isCompleted ?? false) {
+        return const <IOSCoreDevice>[];
+      }
+
+      final int exitCode = await _devicectlListProcess!.exitCode;
+      final List<Object?> coreDeviceObjects = await getCoreDevicesFromHandledProcess(
+        output: output,
+        exitCode: exitCode,
+      );
+
+      return <IOSCoreDevice>[
+        for (final Object? deviceObject in coreDeviceObjects)
+          if (deviceObject is Map<String, Object?>)
+            IOSCoreDevice.fromBetaJson(deviceObject, logger: _logger),
+      ];
+    } on FileSystemException catch (e) {
+      _logger.printError('Failed to read devicectl output file: $e');
+      return const <IOSCoreDevice>[];
+    } finally {
+      _devicectlListProcess = null;
+      ErrorHandlingFileSystem.deleteIfExists(output.parent, recursive: true);
+    }
   }
 
   /// Executes `devicectl` command to get list of apps installed on the device.

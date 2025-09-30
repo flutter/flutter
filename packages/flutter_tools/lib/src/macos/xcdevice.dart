@@ -155,7 +155,7 @@ class XCDevice {
   Future<List<Object>?> _getAllDevices({bool useCache = false, required Duration timeout}) async {
     if (!isInstalled) {
       _logger.printTrace("Xcode not found. Run 'flutter doctor' for more information.");
-      return <Object>[];
+      return null;
     }
     if (useCache && _cachedListResults != null) {
       return _cachedListResults;
@@ -190,7 +190,7 @@ class XCDevice {
       _logger.printTrace('Argument exception running xcdevice list:\n$exception');
     }
 
-    return <Object>[];
+    return null;
   }
 
   /// Observe identifiers (UDIDs) of devices as they attach and detach.
@@ -457,7 +457,7 @@ class XCDevice {
       timeout: timeout ?? const Duration(seconds: 2),
     );
 
-    if (allAvailableDevices == null || allAvailableDevices.isEmpty) {
+    if (allAvailableDevices == null) {
       return const <IOSDevice>[];
     }
 
@@ -524,43 +524,22 @@ class XCDevice {
     final List<Object>? allAvailableDevices = await _getAllDevices(
       timeout: timeout ?? const Duration(seconds: 2),
     );
-    if (allAvailableDevices == null || allAvailableDevices.isEmpty || cancelCompleter.isCompleted) {
+    if (allAvailableDevices == null || cancelCompleter.isCompleted) {
       return const <IOSDevice>[];
     }
 
     final coreDeviceMap = <String, IOSCoreDevice>{};
     if (_xcode.isDevicectlInstalled) {
-      final (Process? process, File? output) = await _coreDeviceControl.startListCoreDevices(
+      // The _coreDeviceControl now handles the process and cancellation internally.
+      // We just need to await the final list of devices.
+      final List<IOSCoreDevice> coreDevices = await _coreDeviceControl.getCoreDevices(
         timeout: timeout ?? const Duration(seconds: 30),
+        cancelCompleter: cancelCompleter,
       );
-      if (process != null && output != null) {
-        unawaited(
-          cancelCompleter.future.whenComplete(() {
-            _logger.printTrace('Cancelling wireless device discovery.');
-            process.kill();
-          }),
-        );
-
-        await Future.any<void>(<Future<void>>[process.exitCode, cancelCompleter.future]);
-
-        if (!cancelCompleter.isCompleted) {
-          final int exitCode = await process.exitCode;
-          final List<Object?> coreDeviceObjects = await _coreDeviceControl
-              .getCoreDevicesFromHandledProcess(
-                output: output,
-                exitCode: exitCode,
-                command: process.toString().split(' '),
-              );
-          for (final deviceObject in coreDeviceObjects) {
-            if (deviceObject is Map<String, Object?>) {
-              final device = IOSCoreDevice.fromBetaJson(deviceObject, logger: _logger);
-              if (device.udid != null) {
-                coreDeviceMap[device.udid!] = device;
-              }
-            }
-          }
+      for (final device in coreDevices) {
+        if (device.udid != null) {
+          coreDeviceMap[device.udid!] = device;
         }
-        ErrorHandlingFileSystem.deleteIfExists(output.parent, recursive: true);
       }
     }
     if (cancelCompleter.isCompleted) {
@@ -876,7 +855,7 @@ class XCDevice {
       timeout: const Duration(seconds: 2),
     );
 
-    if (allAvailableDevices == null || allAvailableDevices.isEmpty) {
+    if (allAvailableDevices == null) {
       return const <String>[];
     }
 
