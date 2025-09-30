@@ -1531,40 +1531,31 @@ void main() {
 
         group('with CoreDevices', () {
           testUsingContext('wireless discovery is cancelled', () async {
-            final processCompleter = Completer<void>();
-            late final FakeProcess process;
-            final File expectedOutputFile = fileSystem.systemTempDirectory
-                .childDirectory('core_devices.rand0')
-                .childFile('core_device_list.json');
+            final getCoreDevicesCompleter = Completer<void>();
+            final coreDeviceControl = FakeIOSCoreDeviceControl(
+              processManager: fakeProcessManager,
+              fileSystem: fileSystem,
+              getCoreDevicesCompleter: getCoreDevicesCompleter,
+            );
+            xcdevice = XCDevice(
+              processManager: fakeProcessManager,
+              logger: logger,
+              xcode: xcode,
+              platform: FakePlatform(operatingSystem: 'macos'),
+              artifacts: Artifacts.test(),
+              cache: Cache.test(processManager: FakeProcessManager.any()),
+              iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
+              fileSystem: fileSystem,
+              coreDeviceControl: coreDeviceControl,
+              xcodeDebug: FakeXcodeDebug(),
+              analytics: fakeAnalytics,
+              shutdownHooks: FakeShutdownHooks(),
+            );
 
             fakeProcessManager.addCommands(<FakeCommand>[
               const FakeCommand(
                 command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '2'],
                 stdout: '[]',
-              ),
-              FakeCommand(
-                command: <String>[
-                  'xcrun',
-                  'devicectl',
-                  'list',
-                  'devices',
-                  '--timeout',
-                  '5',
-                  '--json-output',
-                  expectedOutputFile.path,
-                ],
-                onRun: (_) {
-                  expectedOutputFile.createSync(recursive: true);
-                },
-                completer: processCompleter,
-                onProcess: (FakeProcess p) {
-                  process = p;
-                  process.exitCode.whenComplete(() {
-                    if (!processCompleter.isCompleted) {
-                      processCompleter.complete();
-                    }
-                  });
-                },
               ),
             ]);
 
@@ -1574,11 +1565,11 @@ void main() {
             await pumpEventQueue();
 
             xcdevice.cancelWirelessDiscovery();
+            getCoreDevicesCompleter.complete();
 
             final List<IOSDevice> devices = await futureDevices;
             expect(devices, isEmpty);
 
-            expect(process.signals, contains(io.ProcessSignal.sigterm));
             expect(fakeProcessManager, hasNoRemainingExpectations);
           });
           testUsingContext(
@@ -1972,16 +1963,26 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 class FakeXcodeDebug extends Fake implements XcodeDebug {}
 
 class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
-  FakeIOSCoreDeviceControl({required ProcessManager processManager, required FileSystem fileSystem})
-    : _processManager = processManager,
-      _fileSystem = fileSystem;
+  FakeIOSCoreDeviceControl({
+    required ProcessManager processManager,
+    required FileSystem fileSystem,
+    this.getCoreDevicesCompleter,
+  }) : _processManager = processManager,
+       _fileSystem = fileSystem;
 
   final ProcessManager _processManager;
   final FileSystem _fileSystem;
+  final Completer<void>? getCoreDevicesCompleter;
   var devices = <FakeIOSCoreDevice>[];
 
   @override
-  Future<List<IOSCoreDevice>> getCoreDevices({Duration timeout = Duration.zero}) async {
+  Future<List<IOSCoreDevice>> getCoreDevices({
+    Duration timeout = Duration.zero,
+    Completer<void>? cancelCompleter,
+  }) async {
+    if (getCoreDevicesCompleter != null) {
+      await getCoreDevicesCompleter!.future;
+    }
     return devices;
   }
 
@@ -1991,6 +1992,7 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
   @override
   Future<(Process?, File?)> startListCoreDevices({
     Duration timeout = const Duration(seconds: 2),
+    Completer<void>? cancelCompleter,
   }) async {
     final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('core_devices.');
     final File output = tempDirectory.childFile('core_device_list.json');
@@ -2012,7 +2014,6 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
   Future<List<Object?>> getCoreDevicesFromHandledProcess({
     required File output,
     required int exitCode,
-    required List<String> command,
   }) async {
     return <Object?>[];
   }

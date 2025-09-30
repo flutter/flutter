@@ -2754,33 +2754,7 @@ invalid JSON
           ),
         );
 
-        final (Process? process, File? output) = await deviceControl.startListCoreDevices();
-        expect(process, isNotNull);
-        expect(output, isNotNull);
-        final int exitCode = await process!.exitCode;
-
-        await expectLater(
-          () => deviceControl.getCoreDevicesFromHandledProcess(
-            output: output!,
-            exitCode: exitCode,
-            command: args,
-          ),
-          throwsA(
-            isA<StateError>().having(
-              (StateError e) => e.message,
-              'message',
-              contains('Expected the file ${tempFile.path} to exist but it did not'),
-            ),
-          ),
-        );
-        expect(
-          logger.errorText,
-          contains(
-            'After running the command xcrun devicectl list devices '
-            '--timeout 5 --json-output ${tempFile.path} the file\n'
-            '${tempFile.path} was expected to exist, but it did not',
-          ),
-        );
+        await expectLater(deviceControl.getCoreDevices(), completion(isEmpty));
         expect(fakeProcessManager, hasNoRemainingExpectations);
       });
 
@@ -2812,33 +2786,8 @@ invalid JSON
           ),
         );
 
-        final (Process? process, File? output) = await deviceControl.startListCoreDevices();
-        expect(process, isNotNull);
-        expect(output, isNotNull);
-        final int exitCode = await process!.exitCode;
-
-        await expectLater(
-          () => deviceControl.getCoreDevicesFromHandledProcess(
-            output: output!,
-            exitCode: exitCode,
-            command: args,
-          ),
-          throwsA(
-            isA<StateError>().having(
-              (StateError e) => e.message,
-              'message',
-              contains('Expected the file ${tempFile.path} to exist but it did not'),
-            ),
-          ),
-        );
-        expect(
-          logger.errorText,
-          contains(
-            'After running the command xcrun devicectl list devices '
-            '--timeout 5 --json-output ${tempFile.path} the file\n'
-            '${tempFile.path} was expected to exist, but it did not',
-          ),
-        );
+        final List<IOSCoreDevice> devices = await deviceControl.getCoreDevices();
+        expect(devices, isEmpty);
         expect(fakeProcessManager, hasNoRemainingExpectations);
       });
 
@@ -2997,38 +2946,22 @@ invalid JSON
               tempFile.path,
             ],
             onRun: (_) {
-              // expect(tempFile, exists);
+              expect(tempFile, exists);
               tempFile.writeAsStringSync(deviceControlOutput);
             },
           ),
         );
 
-        final (Process? process, File? output) = await deviceControl.startListCoreDevices();
-        expect(process, isNotNull);
-        expect(output, isNotNull);
-        final int exitCode = await process!.exitCode;
-
-        final List<Object?> devices = await deviceControl.getCoreDevicesFromHandledProcess(
-          output: output!,
-          exitCode: exitCode,
-          command: <String>[],
-        );
-        final List<IOSCoreDevice> coreDevices = devices
-            .map(
-              (Object? o) => IOSCoreDevice.fromBetaJson(o! as Map<String, Object?>, logger: logger),
-            )
-            .toList();
-        expect(coreDevices.length, 1);
-
-        expect(coreDevices[0].capabilities, isNotNull);
-        expect(coreDevices[0].connectionProperties, isNotNull);
-        expect(coreDevices[0].deviceProperties, isNotNull);
-        expect(coreDevices[0].hardwareProperties, isNotNull);
-        expect(coreDevices[0].coreDeviceIdentifier, '123456BB5-AEDE-7A22-B890-1234567890DD');
-        expect(coreDevices[0].visibilityClass, 'default');
-
+        final List<IOSCoreDevice> devices = await deviceControl.getCoreDevices();
+        expect(devices.length, 1);
+        expect(devices[0].capabilities, isNotNull);
+        expect(devices[0].connectionProperties, isNotNull);
+        expect(devices[0].deviceProperties, isNotNull);
+        expect(devices[0].hardwareProperties, isNotNull);
+        expect(devices[0].coreDeviceIdentifier, '123456BB5-AEDE-7A22-B890-1234567890DD');
+        expect(devices[0].visibilityClass, 'default');
         expect(fakeProcessManager, hasNoRemainingExpectations);
-        ErrorHandlingFileSystem.deleteIfExists(tempFile.parent, recursive: true);
+        expect(tempFile, isNot(exists));
       });
 
       testWithoutContext('All sections parsed, device missing sections', () async {
@@ -3082,32 +3015,16 @@ invalid JSON
           ),
         );
 
-        final (Process? process, File? output) = await deviceControl.startListCoreDevices();
-        expect(process, isNotNull);
-        expect(output, isNotNull);
-        final int exitCode = await process!.exitCode;
-
-        final List<Object?> devices = await deviceControl.getCoreDevicesFromHandledProcess(
-          output: output!,
-          exitCode: exitCode,
-          command: <String>[],
-        );
-        final List<IOSCoreDevice> coreDevices = devices
-            .map(
-              (Object? o) => IOSCoreDevice.fromBetaJson(o! as Map<String, Object?>, logger: logger),
-            )
-            .toList();
-        expect(coreDevices.length, 1);
-
-        expect(coreDevices[0].capabilities, isEmpty);
-        expect(coreDevices[0].connectionProperties, isNull);
-        expect(coreDevices[0].deviceProperties, isNull);
-        expect(coreDevices[0].hardwareProperties, isNull);
-        expect(coreDevices[0].coreDeviceIdentifier, '123456BB5-AEDE-7A22-B890-1234567890DD');
-        expect(coreDevices[0].visibilityClass, 'default');
-
+        final List<IOSCoreDevice> devices = await deviceControl.getCoreDevices();
+        expect(devices.length, 1);
+        expect(devices[0].capabilities, isEmpty);
+        expect(devices[0].connectionProperties, isNull);
+        expect(devices[0].deviceProperties, isNull);
+        expect(devices[0].hardwareProperties, isNull);
+        expect(devices[0].coreDeviceIdentifier, '123456BB5-AEDE-7A22-B890-1234567890DD');
+        expect(devices[0].visibilityClass, 'default');
         expect(fakeProcessManager, hasNoRemainingExpectations);
-        ErrorHandlingFileSystem.deleteIfExists(tempFile.parent, recursive: true);
+        expect(tempFile, isNot(exists));
       });
 
       testWithoutContext('capabilities parsed', () async {
@@ -3154,37 +3071,23 @@ invalid JSON
           ),
         );
 
-        final (Process? process, File? output) = await deviceControl.startListCoreDevices();
-        expect(process, isNotNull);
-        expect(output, isNotNull);
-        final int exitCode = await process!.exitCode;
+        final List<IOSCoreDevice> devices = await deviceControl.getCoreDevices();
 
-        final List<Object?> devices = await deviceControl.getCoreDevicesFromHandledProcess(
-          output: output!,
-          exitCode: exitCode,
-          command: <String>[],
-        );
-        final List<IOSCoreDevice> coreDevices = devices
-            .map(
-              (Object? o) => IOSCoreDevice.fromBetaJson(o! as Map<String, Object?>, logger: logger),
-            )
-            .toList();
         expect(devices.length, 1);
 
-        expect(coreDevices[0].capabilities.length, 2);
+        expect(devices[0].capabilities.length, 2);
         expect(
-          coreDevices[0].capabilities[0].featureIdentifier,
+          devices[0].capabilities[0].featureIdentifier,
           'com.apple.coredevice.feature.spawnexecutable',
         );
-        expect(coreDevices[0].capabilities[0].name, 'Spawn Executable');
+        expect(devices[0].capabilities[0].name, 'Spawn Executable');
         expect(
-          coreDevices[0].capabilities[1].featureIdentifier,
+          devices[0].capabilities[1].featureIdentifier,
           'com.apple.coredevice.feature.launchapplication',
         );
-        expect(coreDevices[0].capabilities[1].name, 'Launch Application');
+        expect(devices[0].capabilities[1].name, 'Launch Application');
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
-        ErrorHandlingFileSystem.deleteIfExists(tempFile.parent, recursive: true);
       });
 
       testWithoutContext('connectionProperties parsed', () async {
@@ -3240,43 +3143,22 @@ invalid JSON
           ),
         );
 
-        final (Process? process, File? output) = await deviceControl.startListCoreDevices();
-        expect(process, isNotNull);
-        expect(output, isNotNull);
-        final int exitCode = await process!.exitCode;
-
-        final List<Object?> devices = await deviceControl.getCoreDevicesFromHandledProcess(
-          output: output!,
-          exitCode: exitCode,
-          command: <String>[],
-        );
-        final List<IOSCoreDevice> coreDevices = devices
-            .map(
-              (Object? o) => IOSCoreDevice.fromBetaJson(o! as Map<String, Object?>, logger: logger),
-            )
-            .toList();
+        final List<IOSCoreDevice> devices = await deviceControl.getCoreDevices();
         expect(devices.length, 1);
-
-        expect(coreDevices[0].connectionProperties?.authenticationType, 'manualPairing');
-        expect(coreDevices[0].connectionProperties?.isMobileDeviceOnly, false);
-        expect(coreDevices[0].connectionProperties?.lastConnectionDate, '2023-06-15T15:29:00.082Z');
-        expect(coreDevices[0].connectionProperties?.localHostnames, <String>[
+        expect(devices[0].connectionProperties?.authenticationType, 'manualPairing');
+        expect(devices[0].connectionProperties?.isMobileDeviceOnly, false);
+        expect(devices[0].connectionProperties?.lastConnectionDate, '2023-06-15T15:29:00.082Z');
+        expect(devices[0].connectionProperties?.localHostnames, <String>[
           'Victorias-iPad.coredevice.local',
           '00001234-0001234A3C03401E.coredevice.local',
           '123456BB5-AEDE-7A22-B890-1234567890DD.coredevice.local',
         ]);
-        expect(coreDevices[0].connectionProperties?.pairingState, 'paired');
-        expect(coreDevices[0].connectionProperties?.potentialHostnames, <String>[
-          '00001234-0001234A3C03401E.coredevice.local',
-          '123456BB5-AEDE-7A22-B890-1234567890DD.coredevice.local',
-        ]);
-        expect(coreDevices[0].connectionProperties?.transportType, 'wired');
-        expect(coreDevices[0].connectionProperties?.tunnelIPAddress, 'fdf1:23c4:cd56::1');
-        expect(coreDevices[0].connectionProperties?.tunnelState, 'connected');
-        expect(coreDevices[0].connectionProperties?.tunnelTransportProtocol, 'tcp');
-
+        expect(devices[0].connectionProperties?.transportType, 'wired');
+        expect(devices[0].connectionProperties?.tunnelIPAddress, 'fdf1:23c4:cd56::1');
+        expect(devices[0].connectionProperties?.tunnelState, 'connected');
+        expect(devices[0].connectionProperties?.tunnelTransportProtocol, 'tcp');
         expect(fakeProcessManager, hasNoRemainingExpectations);
-        ErrorHandlingFileSystem.deleteIfExists(tempFile.parent, recursive: true);
+        expect(tempFile, isNot(exists));
       });
 
       testWithoutContext('deviceProperties parsed', () async {
@@ -3326,40 +3208,23 @@ invalid JSON
           ),
         );
 
-        final (Process? process, File? output) = await deviceControl.startListCoreDevices();
-        expect(process, isNotNull);
-        expect(output, isNotNull);
-        final int exitCode = await process!.exitCode;
-
-        final List<Object?> devices = await deviceControl.getCoreDevicesFromHandledProcess(
-          output: output!,
-          exitCode: exitCode,
-          command: <String>[],
-        );
-        final List<IOSCoreDevice> coreDevices = devices
-            .map(
-              (Object? o) => IOSCoreDevice.fromBetaJson(o! as Map<String, Object?>, logger: logger),
-            )
-            .toList();
-        expect(coreDevices.length, 1);
-
-        expect(coreDevices[0].deviceProperties?.bootedFromSnapshot, true);
-        expect(coreDevices[0].deviceProperties?.bootedSnapshotName, 'com.apple.os.update-123456');
-        expect(coreDevices[0].deviceProperties?.bootState, 'booted');
-        expect(coreDevices[0].deviceProperties?.ddiServicesAvailable, true);
-        expect(coreDevices[0].deviceProperties?.developerModeStatus, 'enabled');
-        expect(coreDevices[0].deviceProperties?.hasInternalOSBuild, false);
-        expect(coreDevices[0].deviceProperties?.name, 'iPadName');
-        expect(coreDevices[0].deviceProperties?.osBuildUpdate, '21A5248v');
-        expect(coreDevices[0].deviceProperties?.osVersionNumber, '17.0');
-        expect(coreDevices[0].deviceProperties?.rootFileSystemIsWritable, false);
+        final List<IOSCoreDevice> devices = await deviceControl.getCoreDevices();
+        expect(devices.length, 1);
+        expect(devices[0].deviceProperties?.bootedFromSnapshot, true);
+        expect(devices[0].deviceProperties?.bootedSnapshotName, 'com.apple.os.update-123456');
+        expect(devices[0].deviceProperties?.bootState, 'booted');
+        expect(devices[0].deviceProperties?.ddiServicesAvailable, true);
+        expect(devices[0].deviceProperties?.developerModeStatus, 'enabled');
+        expect(devices[0].deviceProperties?.hasInternalOSBuild, false);
+        expect(devices[0].deviceProperties?.name, 'iPadName');
+        expect(devices[0].deviceProperties?.osBuildUpdate, '21A5248v');
+        expect(devices[0].deviceProperties?.osVersionNumber, '17.0');
+        expect(devices[0].deviceProperties?.rootFileSystemIsWritable, false);
         expect(
-          coreDevices[0].deviceProperties?.screenViewingURL,
+          devices[0].deviceProperties?.screenViewingURL,
           'coredevice-devices:/viewDeviceByUUID?uuid=123456BB5-AEDE-7A22-B890-1234567890DD',
         );
-
         expect(fakeProcessManager, hasNoRemainingExpectations);
-        ErrorHandlingFileSystem.deleteIfExists(tempFile.parent, recursive: true);
       });
 
       testWithoutContext('hardwareProperties parsed', () async {
@@ -3429,52 +3294,35 @@ invalid JSON
           ),
         );
 
-        final (Process? process, File? output) = await deviceControl.startListCoreDevices();
-        expect(process, isNotNull);
-        expect(output, isNotNull);
-        final int exitCode = await process!.exitCode;
-
-        final List<Object?> devices = await deviceControl.getCoreDevicesFromHandledProcess(
-          output: output!,
-          exitCode: exitCode,
-          command: <String>[],
-        );
-        final List<IOSCoreDevice> coreDevices = devices
-            .map(
-              (Object? o) => IOSCoreDevice.fromBetaJson(o! as Map<String, Object?>, logger: logger),
-            )
-            .toList();
-        expect(coreDevices.length, 1);
-
-        expect(coreDevices[0].hardwareProperties?.cpuType, isNotNull);
-        expect(coreDevices[0].hardwareProperties?.cpuType?.name, 'arm64e');
-        expect(coreDevices[0].hardwareProperties?.cpuType?.subType, 2);
-        expect(coreDevices[0].hardwareProperties?.cpuType?.cpuType, 16777228);
-        expect(coreDevices[0].hardwareProperties?.deviceType, 'iPad');
-        expect(coreDevices[0].hardwareProperties?.ecid, 12345678903408542);
-        expect(coreDevices[0].hardwareProperties?.hardwareModel, 'J617AP');
-        expect(coreDevices[0].hardwareProperties?.internalStorageCapacity, 128000000000);
+        final List<IOSCoreDevice> devices = await deviceControl.getCoreDevices();
+        expect(devices.length, 1);
+        expect(devices[0].hardwareProperties?.cpuType, isNotNull);
+        expect(devices[0].hardwareProperties?.cpuType?.name, 'arm64e');
+        expect(devices[0].hardwareProperties?.cpuType?.subType, 2);
+        expect(devices[0].hardwareProperties?.cpuType?.cpuType, 16777228);
+        expect(devices[0].hardwareProperties?.deviceType, 'iPad');
+        expect(devices[0].hardwareProperties?.ecid, 12345678903408542);
+        expect(devices[0].hardwareProperties?.hardwareModel, 'J617AP');
+        expect(devices[0].hardwareProperties?.internalStorageCapacity, 128000000000);
         expect(
-          coreDevices[0].hardwareProperties?.marketingName,
+          devices[0].hardwareProperties?.marketingName,
           'iPad Pro (11-inch) (4th generation)"',
         );
-        expect(coreDevices[0].hardwareProperties?.platform, 'iOS');
-        expect(coreDevices[0].hardwareProperties?.productType, 'iPad14,3');
-        expect(coreDevices[0].hardwareProperties?.serialNumber, 'HC123DHCQV');
-        expect(coreDevices[0].hardwareProperties?.supportedCPUTypes, isNotNull);
-        expect(coreDevices[0].hardwareProperties?.supportedCPUTypes?[0].name, 'arm64e');
-        expect(coreDevices[0].hardwareProperties?.supportedCPUTypes?[0].subType, 2);
-        expect(coreDevices[0].hardwareProperties?.supportedCPUTypes?[0].cpuType, 16777228);
-        expect(coreDevices[0].hardwareProperties?.supportedCPUTypes?[1].name, 'arm64');
-        expect(coreDevices[0].hardwareProperties?.supportedCPUTypes?[1].subType, 0);
-        expect(coreDevices[0].hardwareProperties?.supportedCPUTypes?[1].cpuType, 16777228);
-        expect(coreDevices[0].hardwareProperties?.supportedDeviceFamilies, <int>[1, 2]);
-        expect(coreDevices[0].hardwareProperties?.thinningProductType, 'iPad14,3-A');
-
-        expect(coreDevices[0].hardwareProperties?.udid, '00001234-0001234A3C03401E');
-
+        expect(devices[0].hardwareProperties?.platform, 'iOS');
+        expect(devices[0].hardwareProperties?.productType, 'iPad14,3');
+        expect(devices[0].hardwareProperties?.serialNumber, 'HC123DHCQV');
+        expect(devices[0].hardwareProperties?.supportedCPUTypes, isNotNull);
+        expect(devices[0].hardwareProperties?.supportedCPUTypes?[0].name, 'arm64e');
+        expect(devices[0].hardwareProperties?.supportedCPUTypes?[0].subType, 2);
+        expect(devices[0].hardwareProperties?.supportedCPUTypes?[0].cpuType, 16777228);
+        expect(devices[0].hardwareProperties?.supportedCPUTypes?[1].name, 'arm64');
+        expect(devices[0].hardwareProperties?.supportedCPUTypes?[1].subType, 0);
+        expect(devices[0].hardwareProperties?.supportedCPUTypes?[1].cpuType, 16777228);
+        expect(devices[0].hardwareProperties?.supportedDeviceFamilies, <int>[1, 2]);
+        expect(devices[0].hardwareProperties?.thinningProductType, 'iPad14,3-A');
+        expect(devices[0].hardwareProperties?.udid, '00001234-0001234A3C03401E');
         expect(fakeProcessManager, hasNoRemainingExpectations);
-        ErrorHandlingFileSystem.deleteIfExists(tempFile.parent, recursive: true);
+        expect(tempFile, isNot(exists));
       });
 
       group('Handles errors', () {
@@ -3507,6 +3355,7 @@ invalid JSON
           expect(devices.isEmpty, isTrue);
           expect(fakeProcessManager, hasNoRemainingExpectations);
           expect(logger.errorText, contains('devicectl returned non-JSON response: Invalid JSON'));
+          expect(tempFile, isNot(exists));
         });
 
         testWithoutContext('unexpected json', () async {
@@ -3559,6 +3408,7 @@ invalid JSON
           expect(devices.isEmpty, isTrue);
           expect(fakeProcessManager, hasNoRemainingExpectations);
           expect(logger.errorText, contains('devicectl returned unexpected JSON response:'));
+          expect(tempFile, isNot(exists));
         });
 
         testWithoutContext('When timeout is below minimum, default to minimum', () async {
@@ -3611,12 +3461,10 @@ invalid JSON
               },
             ),
           );
-
-          final (Process? process, File? output) = await deviceControl.startListCoreDevices(
+          final List<IOSCoreDevice> devices = await deviceControl.getCoreDevices(
             timeout: const Duration(seconds: 2),
           );
-          expect(process, isNotNull);
-          expect(output, isNotNull);
+          expect(devices, isNotEmpty);
           expect(fakeProcessManager, hasNoRemainingExpectations);
           expect(
             logger.errorText,
@@ -3876,6 +3724,14 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
   bool get terminateProcessCalled => processTerminated != null;
 
   @override
+  Future<List<IOSCoreDevice>> getCoreDevices({
+    Duration timeout = const Duration(seconds: 5),
+    Completer<void>? cancelCompleter,
+  }) async {
+    return <IOSCoreDevice>[];
+  }
+
+  @override
   Future<(bool, IOSCoreDeviceInstallResult?)> installApp({
     required String deviceId,
     required String bundlePath,
@@ -3924,6 +3780,7 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
   @override
   Future<(Process?, File?)> startListCoreDevices({
     Duration timeout = const Duration(seconds: 2),
+    Completer<void>? cancelCompleter,
   }) async {
     return (null, null);
   }
@@ -3932,7 +3789,6 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
   Future<List<Object?>> getCoreDevicesFromHandledProcess({
     required File output,
     required int exitCode,
-    required List<String> command,
   }) async {
     return <Object?>[];
   }
