@@ -163,14 +163,14 @@ source_set("flutter_windows_source") {
 
   deps = [
     ":flutter_windows_headers",
-    "//flutter/fml:fml",
+    "//flutter/fml",
     "//flutter/impeller/renderer/backend/gles",
-    "//flutter/shell/geometry:geometry",
+    "//flutter/shell/geometry",
     "//flutter/shell/platform/common:common_cpp",
     "//flutter/shell/platform/common:common_cpp_input",
     "//flutter/shell/platform/common:common_cpp_isolate_scope",
     "//flutter/shell/platform/common:common_cpp_switches",
-    "//flutter/shell/platform/common/client_wrapper:client_wrapper",
+    "//flutter/shell/platform/common/client_wrapper",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/shell/platform/windows/client_wrapper:client_wrapper_windows",
 
@@ -276,7 +276,7 @@ executable("flutter_windows_unittests") {
     ":flutter_windows_source",
     "//flutter/impeller/renderer/backend/gles",
     "//flutter/shell/platform/common:common_cpp",
-    "//flutter/shell/platform/common/client_wrapper:client_wrapper",
+    "//flutter/shell/platform/common/client_wrapper",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/shell/platform/embedder:embedder_test_utils",
     "//flutter/testing",
