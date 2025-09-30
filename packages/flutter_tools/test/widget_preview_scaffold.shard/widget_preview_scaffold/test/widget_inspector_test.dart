@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/widget_previews.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:widget_preview_scaffold/src/widget_preview.dart';
@@ -16,17 +17,23 @@ void main() {
       final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
       const int kNumPreviewedWidgets = 3;
       const String kTestText = 'Foo';
-      final WidgetPreviewerWidgetScaffolding widgetPreview =
-          WidgetPreviewerWidgetScaffolding(
-            child: Column(
-              children: <Widget>[
-                for (int i = 0; i < kNumPreviewedWidgets; ++i)
-                  WidgetPreviewWidget(
-                    preview: WidgetPreview(builder: () => Text('$kTestText$i')),
-                  ),
-              ],
-            ),
-          );
+      final controller = FakeWidgetPreviewScaffoldController();
+      final widgetPreview = WidgetPreviewerWidgetScaffolding(
+        child: Column(
+          children: <Widget>[
+            for (int i = 0; i < kNumPreviewedWidgets; ++i)
+              WidgetPreviewWidget(
+                controller: controller,
+                preview: WidgetPreview(
+                  scriptUri: '',
+                  builder: () => Text('$kTestText$i'),
+                  previewData: Preview(),
+                  packageName: '',
+                ),
+              ),
+          ],
+        ),
+      );
 
       await tester.pumpWidget(widgetPreview);
 

@@ -333,7 +333,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     if (widget.statesController == null) {
       internalStatesController = MaterialStatesController();
     }
-    statesController.update(MaterialState.disabled, !widget.enabled);
+    statesController.update(WidgetState.disabled, !widget.enabled);
     statesController.addListener(handleStatesControllerChange);
   }
 
@@ -355,10 +355,10 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
       initStatesController();
     }
     if (widget.enabled != oldWidget.enabled) {
-      statesController.update(MaterialState.disabled, !widget.enabled);
+      statesController.update(WidgetState.disabled, !widget.enabled);
       if (!widget.enabled) {
         // The button may have been disabled while a press gesture is currently underway.
-        statesController.update(MaterialState.pressed, false);
+        statesController.update(WidgetState.pressed, false);
       }
     }
   }
@@ -429,13 +429,13 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
       (ButtonStyle? style) => style?.shape,
     );
 
-    final MaterialStateMouseCursor mouseCursor = _MouseCursor(
-      (Set<MaterialState> states) =>
+    final WidgetStateMouseCursor mouseCursor = _MouseCursor(
+      (Set<WidgetState> states) =>
           effectiveValue((ButtonStyle? style) => style?.mouseCursor?.resolve(states)),
     );
 
     final WidgetStateProperty<Color?> overlayColor = WidgetStateProperty.resolveWith<Color?>(
-      (Set<MaterialState> states) =>
+      (Set<WidgetState> states) =>
           effectiveValue((ButtonStyle? style) => style?.overlayColor?.resolve(states)),
     );
 
@@ -615,13 +615,13 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
   }
 }
 
-class _MouseCursor extends MaterialStateMouseCursor {
+class _MouseCursor extends WidgetStateMouseCursor {
   const _MouseCursor(this.resolveCallback);
 
-  final MaterialPropertyResolver<MouseCursor?> resolveCallback;
+  final WidgetPropertyResolver<MouseCursor?> resolveCallback;
 
   @override
-  MouseCursor resolve(Set<MaterialState> states) => resolveCallback(states)!;
+  MouseCursor resolve(Set<WidgetState> states) => resolveCallback(states)!;
 
   @override
   String get debugDescription => 'ButtonStyleButton_MouseCursor';

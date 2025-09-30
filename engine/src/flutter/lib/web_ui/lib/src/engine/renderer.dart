@@ -59,6 +59,9 @@ abstract class Renderer {
   // Listens for view disposal events from the view manager.
   late StreamSubscription<int> _onViewDisposedListener;
 
+  /// Set the maximum number of bytes that can be held in the GPU resource cache.
+  set resourceCacheMaxBytes(int bytes) => rasterizer.setResourceCacheMaxBytes(bytes);
+
   @mustCallSuper
   FutureOr<void> initialize() {
     // Views may have been registered before this renderer was initialized.
@@ -301,16 +304,19 @@ abstract class Renderer {
 
   Future<void> _kickRenderLoop(ViewRasterizer rasterizer) async {
     final RenderQueue renderQueue = rasterizer.queue;
-    while (renderQueue.current != null) {
-      final RenderRequest current = renderQueue.current!;
-      try {
-        await _renderScene(current.scene, rasterizer, current.recorder);
-        current.completer.complete();
-      } catch (error, stackTrace) {
-        current.completer.completeError(error, stackTrace);
-      }
-      renderQueue.current = renderQueue.next;
-      renderQueue.next = null;
+    final RenderRequest current = renderQueue.current!;
+    try {
+      await _renderScene(current.scene, rasterizer, current.recorder);
+      current.completer.complete();
+    } catch (error, stackTrace) {
+      current.completer.completeError(error, stackTrace);
+    }
+    renderQueue.current = renderQueue.next;
+    renderQueue.next = null;
+    if (renderQueue.current == null) {
+      return;
+    } else {
+      return _kickRenderLoop(rasterizer);
     }
   }
 

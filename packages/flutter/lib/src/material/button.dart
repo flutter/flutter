@@ -20,7 +20,6 @@ import 'button_theme.dart';
 import 'constants.dart';
 import 'ink_well.dart';
 import 'material.dart';
-import 'material_state.dart';
 import 'material_state_mixin.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -314,19 +313,19 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
   @override
   void initState() {
     super.initState();
-    setMaterialState(MaterialState.disabled, !widget.enabled);
+    setMaterialState(WidgetState.disabled, !widget.enabled);
   }
 
   @override
   void didUpdateWidget(RawMaterialButton oldWidget) {
     super.didUpdateWidget(oldWidget);
-    setMaterialState(MaterialState.disabled, !widget.enabled);
+    setMaterialState(WidgetState.disabled, !widget.enabled);
     // If the button is disabled while a press gesture is currently ongoing,
     // InkWell makes a call to handleHighlightChanged. This causes an exception
     // because it calls setState in the middle of a build. To preempt this, we
     // manually update pressed to false when this situation occurs.
     if (isDisabled && isPressed) {
-      removeMaterialState(MaterialState.pressed);
+      removeMaterialState(WidgetState.pressed);
     }
   }
 
@@ -363,7 +362,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
       widget.constraints,
     );
     final MouseCursor? effectiveMouseCursor = WidgetStateProperty.resolveAs<MouseCursor?>(
-      widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
+      widget.mouseCursor ?? WidgetStateMouseCursor.clickable,
       materialStates,
     );
     final EdgeInsetsGeometry padding = widget.padding
@@ -392,17 +391,17 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
         child: InkWell(
           focusNode: widget.focusNode,
           canRequestFocus: widget.enabled,
-          onFocusChange: updateMaterialState(MaterialState.focused),
+          onFocusChange: updateMaterialState(WidgetState.focused),
           autofocus: widget.autofocus,
           onHighlightChanged: updateMaterialState(
-            MaterialState.pressed,
+            WidgetState.pressed,
             onChanged: widget.onHighlightChanged,
           ),
           splashColor: widget.splashColor,
           highlightColor: widget.highlightColor,
           focusColor: widget.focusColor,
           hoverColor: widget.hoverColor,
-          onHover: updateMaterialState(MaterialState.hovered),
+          onHover: updateMaterialState(WidgetState.hovered),
           onTap: widget.onPressed,
           onLongPress: widget.onLongPress,
           enableFeedback: widget.enableFeedback,

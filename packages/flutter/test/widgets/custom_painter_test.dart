@@ -461,6 +461,8 @@ void _defineTests() {
               onDidLoseAccessibilityFocus: () =>
                   performedActions.add(SemanticsAction.didLoseAccessibilityFocus),
               onFocus: () => performedActions.add(SemanticsAction.focus),
+              onExpand: () => performedActions.add(SemanticsAction.expand),
+              onCollapse: () => performedActions.add(SemanticsAction.collapse),
             ),
           ),
         ),
@@ -523,6 +525,8 @@ void _defineTests() {
         case SemanticsAction.showOnScreen:
         case SemanticsAction.tap:
         case SemanticsAction.focus:
+        case SemanticsAction.expand:
+        case SemanticsAction.collapse:
           semanticsOwner.performAction(expectedId, action);
       }
       expect(performedActions.length, expectedLength);
