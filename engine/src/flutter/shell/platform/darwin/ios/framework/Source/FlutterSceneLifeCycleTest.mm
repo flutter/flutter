@@ -4,9 +4,12 @@
 
 #import <Foundation/Foundation.h>
 #import <OCMock/OCMock.h>
+#import <UIKit/UIKit.h>
 #import <XCTest/XCTest.h>
 
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPluginAppLifeCycleDelegate_internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterRestorationPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifeCycle_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifeCycle_Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
@@ -500,6 +503,126 @@ FLUTTER_ASSERT_ARC
   XCTAssertFalse([delegate scene:mockScene continueUserActivity:userActivity]);
   OCMVerify(times(1), [mockLifecycleDelegate scene:mockScene continueUserActivity:userActivity]);
   OCMVerify(times(1), [mockAppLifecycleDelegate sceneFallbackContinueUserActivity:userActivity]);
+}
+
+- (void)testStateRestorationActivityForScene {
+  FlutterPluginSceneLifeCycleDelegate* delegate =
+      [[FlutterPluginSceneLifeCycleDelegate alloc] init];
+
+  id mocks = [self mocksForEvents];
+  id mockEngine = mocks[@"mockEngine"];
+  id mockViewController = OCMClassMock([FlutterViewController class]);
+  id mockRestorationPlugin = OCMClassMock([FlutterRestorationPlugin class]);
+  OCMStub([mockEngine viewController]).andReturn(mockViewController);
+  OCMStub([mockEngine restorationPlugin]).andReturn(mockRestorationPlugin);
+
+  NSString* restorationId = @"restorationId";
+  NSString* mockDataString = @"mockData";
+  NSString* configName = @"ConfigurationName";
+  NSData* mockData = [mockDataString dataUsingEncoding:NSUTF8StringEncoding];
+  OCMStub([mockViewController restorationIdentifier]).andReturn(restorationId);
+  OCMStub([mockRestorationPlugin restorationData]).andReturn(mockData);
+
+  id mockScene = mocks[@"mockScene"];
+  id mockSession = OCMClassMock([UISceneSession class]);
+  id mockConfiguration = OCMClassMock([UISceneConfiguration class]);
+  OCMStub([mockScene session]).andReturn(mockSession);
+  OCMStub([mockSession configuration]).andReturn(mockConfiguration);
+  OCMStub([mockConfiguration name]).andReturn(configName);
+
+  [delegate addFlutterEngine:mockEngine];
+  XCTAssertEqual(delegate.engines.count, 1.0);
+  NSUserActivity* state = [delegate stateRestorationActivityForScene:mockScene];
+  XCTAssertEqual(state.userInfo[restorationId], mockData);
+  XCTAssertEqual(state.activityType, configName);
+}
+
+- (void)testSceneRestoreInteractionStateWithUserActivity {
+  FlutterPluginSceneLifeCycleDelegate* delegate =
+      [[FlutterPluginSceneLifeCycleDelegate alloc] init];
+  id mockBundle = OCMPartialMock([NSBundle mainBundle]);
+  id mockURL = OCMClassMock([NSURL class]);
+  id mockFileDate = OCMClassMock([NSDate class]);
+  int64_t mockBundleDateNum = 1;
+
+  OCMStub([mockBundle executableURL]).andReturn(mockURL);
+  OCMStub([mockURL getResourceValue:[OCMArg setTo:mockFileDate]
+                             forKey:NSURLContentModificationDateKey
+                              error:[OCMArg setTo:nil]]);
+  OCMStub([mockFileDate timeIntervalSince1970]).andReturn(mockBundleDateNum);
+
+  id mocks = [self mocksForEvents];
+  id mockEngine = mocks[@"mockEngine"];
+  id mockViewController = OCMClassMock([FlutterViewController class]);
+  id mockRestorationPlugin = OCMClassMock([FlutterRestorationPlugin class]);
+  OCMStub([mockEngine viewController]).andReturn(mockViewController);
+  OCMStub([mockEngine restorationPlugin]).andReturn(mockRestorationPlugin);
+
+  NSString* restorationId = @"restorationId";
+  NSString* mockDataString = @"teststring";
+  NSNumber* mockBundleStateDateNum = @1.0;
+  NSData* mockData = [mockDataString dataUsingEncoding:NSUTF8StringEncoding];
+  OCMStub([mockViewController restorationIdentifier]).andReturn(restorationId);
+  OCMStub([mockRestorationPlugin restorationData]).andReturn(mockData);
+
+  id mockScene = mocks[@"mockScene"];
+
+  id userActivity = OCMClassMock([NSUserActivity class]);
+  NSDictionary* mockUserInfo = @{
+    @"mod-date" : mockBundleStateDateNum,
+    restorationId : mockData,
+  };
+  OCMStub([userActivity userInfo]).andReturn(mockUserInfo);
+
+  [delegate addFlutterEngine:mockEngine];
+  XCTAssertEqual(delegate.engines.count, 1.0);
+  [delegate scene:mockScene restoreInteractionStateWithUserActivity:userActivity];
+  OCMVerify(times(1), [mockRestorationPlugin setRestorationData:mockData]);
+  [mockBundle stopMocking];
+}
+
+- (void)testSceneDoesNotRestoreInteractionStateWithUserActivity {
+  FlutterPluginSceneLifeCycleDelegate* delegate =
+      [[FlutterPluginSceneLifeCycleDelegate alloc] init];
+  id mockBundle = OCMPartialMock([NSBundle mainBundle]);
+  id mockURL = OCMClassMock([NSURL class]);
+  id mockFileDate = OCMClassMock([NSDate class]);
+  int64_t mockBundleDateNum = 1;
+
+  OCMStub([mockBundle executableURL]).andReturn(mockURL);
+  OCMStub([mockURL getResourceValue:[OCMArg setTo:mockFileDate]
+                             forKey:NSURLContentModificationDateKey
+                              error:[OCMArg setTo:nil]]);
+  OCMStub([mockFileDate timeIntervalSince1970]).andReturn(mockBundleDateNum);
+
+  id mocks = [self mocksForEvents];
+  id mockEngine = mocks[@"mockEngine"];
+  id mockViewController = OCMClassMock([FlutterViewController class]);
+  id mockRestorationPlugin = OCMClassMock([FlutterRestorationPlugin class]);
+  OCMStub([mockEngine viewController]).andReturn(mockViewController);
+  OCMStub([mockEngine restorationPlugin]).andReturn(mockRestorationPlugin);
+
+  NSString* restorationId = @"restorationId";
+  NSString* mockDataString = @"teststring";
+  NSNumber* mockBundleStateDateNum = @2.0;
+  NSData* mockData = [mockDataString dataUsingEncoding:NSUTF8StringEncoding];
+  OCMStub([mockViewController restorationIdentifier]).andReturn(restorationId);
+  OCMStub([mockRestorationPlugin restorationData]).andReturn(mockData);
+
+  id mockScene = mocks[@"mockScene"];
+
+  id userActivity = OCMClassMock([NSUserActivity class]);
+  NSDictionary* mockUserInfo = @{
+    @"mod-date" : mockBundleStateDateNum,
+    restorationId : mockData,
+  };
+  OCMStub([userActivity userInfo]).andReturn(mockUserInfo);
+
+  [delegate addFlutterEngine:mockEngine];
+  XCTAssertEqual(delegate.engines.count, 1.0);
+  [delegate scene:mockScene restoreInteractionStateWithUserActivity:userActivity];
+  OCMVerify(times(0), [mockRestorationPlugin setRestorationData:mockData]);
+  [mockBundle stopMocking];
 }
 
 - (void)testWindowScenePerformActionForShortcutItemConsumedByScenePlugin {

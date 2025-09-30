@@ -12,6 +12,8 @@
 
 FLUTTER_ASSERT_ARC
 
+static NSString* const kRestorationStateAppModificationKey = @"mod-date";
+
 @interface FlutterPluginSceneLifeCycleDelegate ()
 
 /**
@@ -224,6 +226,72 @@ FLUTTER_ASSERT_ARC
     }
   }
   return consumedByPlugin;
+}
+
+#pragma mark - Saving the state of the scene
+
+- (NSUserActivity*)stateRestorationActivityForScene:(UIScene*)scene {
+  // Saves activity to the state
+  NSUserActivity* activity = scene.userActivity;
+  if (!activity) {
+    activity = [[NSUserActivity alloc] initWithActivityType:scene.session.configuration.name];
+  }
+
+  [self updateEnginesInScene:scene];
+  for (FlutterEngine* engine in [_engines allObjects]) {
+    UIViewController* vc = (UIViewController*)engine.viewController;
+    NSString* restorationId = vc.restorationIdentifier;
+    if (restorationId && restorationId.length > 0) {
+      NSData* restorationData = [engine.restorationPlugin restorationData];
+      if (restorationData) {
+        int64_t stateDate = [self lastAppModificationTime];
+        [activity addUserInfoEntriesFromDictionary:@{restorationId : restorationData}];
+        [activity addUserInfoEntriesFromDictionary:@{
+          kRestorationStateAppModificationKey : [NSNumber numberWithLongLong:stateDate]
+        }];
+      }
+    }
+  }
+
+  return activity;
+}
+
+- (void)scene:(UIScene*)scene
+    restoreInteractionStateWithUserActivity:(NSUserActivity*)stateRestorationActivity {
+  // Restores activity to the state
+  NSDictionary<NSString*, id>* userInfo = stateRestorationActivity.userInfo;
+  [self updateEnginesInScene:scene];
+  for (FlutterEngine* engine in [_engines allObjects]) {
+    UIViewController* vc = (UIViewController*)engine.viewController;
+    NSString* restorationId = vc.restorationIdentifier;
+    if (restorationId && restorationId.length > 0) {
+      NSNumber* stateDateNumber = userInfo[kRestorationStateAppModificationKey];
+      int64_t stateDate = 0;
+      if (stateDateNumber && [stateDateNumber isKindOfClass:[NSNumber class]]) {
+        stateDate = [stateDateNumber longLongValue];
+      }
+      NSLog(@"%lld", self.lastAppModificationTime);
+      NSLog(@"%lld", stateDate);
+      if (self.lastAppModificationTime != stateDate) {
+        // Don't restore state if the app has been re-installed since the state was last saved
+        return;
+      }
+      NSData* restorationData = userInfo[restorationId];
+      if ([restorationData isKindOfClass:[NSData class]]) {
+        [engine.restorationPlugin setRestorationData:restorationData];
+      }
+    }
+  }
+}
+
+- (int64_t)lastAppModificationTime {
+  NSDate* fileDate;
+  NSError* error = nil;
+  [[[NSBundle mainBundle] executableURL] getResourceValue:&fileDate
+                                                   forKey:NSURLContentModificationDateKey
+                                                    error:&error];
+  NSAssert(error == nil, @"Cannot obtain modification date of main bundle: %@", error);
+  return [fileDate timeIntervalSince1970];
 }
 
 #pragma mark - Performing tasks
