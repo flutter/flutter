@@ -109,7 +109,7 @@ void main() {
     await ensureFlutterToolsSnapshot();
     loggingProcessManager = LoggingProcessManager();
     shutdownHooks = ShutdownHooks();
-    logger = BufferLogger.test();
+    logger = WidgetPreviewMachineAwareLogger(BufferLogger.test(), machine: false, verbose: false);
     fs = LocalFileSystem.test(signals: Signals.test());
     botDetector = const FakeBotDetector(false);
     tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_create_test.');
@@ -190,7 +190,7 @@ void main() {
   void expectSinglePreviewLaunchTimingEvent() => expectNPreviewLaunchTimingEvents(1);
 
   void expectDeviceSelected(Device device) {
-    final bufferLogger = logger as BufferLogger;
+    final BufferLogger bufferLogger = asLogger<BufferLogger>(logger);
     expect(
       bufferLogger.statusText,
       contains('Launching the Widget Preview Scaffold on ${device.displayName}...'),
@@ -323,21 +323,20 @@ import 'package:flutter/widget_previews.dart';
 Widget preview() => Text('Foo');''';
 
     const expectedGeneratedFileContents = '''
+// ignore_for_file: implementation_imports
+
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'widget_preview.dart' as _i1;
-import 'package:flutter_project/foo.dart' as _i2;
+import 'utils.dart' as _i2;
+import 'package:flutter_project/foo.dart' as _i3;
+import 'package:flutter/src/widget_previews/widget_previews.dart' as _i4;
 
-List<_i1.WidgetPreviewGroup> previews() => [
-      _i1.WidgetPreviewGroup(
-        name: 'Default',
-        previews: [
-          _i1.WidgetPreview(
-            scriptUri: 'STRIPPED',
-            packageName: 'flutter_project',
-            name: 'preview',
-            builder: () => _i2.preview(),
-          )
-        ],
+List<_i1.WidgetPreview> previews() => [
+      _i2.buildWidgetPreview(
+        packageName: 'flutter_project',
+        scriptUri: 'STRIPPED',
+        previewFunction: () => _i3.preview(),
+        transformedPreview: const _i4.Preview(name: 'preview').transform(),
       )
     ];
 ''';

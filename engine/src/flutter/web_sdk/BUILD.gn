@@ -22,7 +22,6 @@ web_engine_libraries = [
   ":web_ui_library",
   ":web_ui_ui_web",
   ":web_ui_library_sources",
-  ":web_unicode_library",
   ":web_test_fonts_library",
   ":web_locale_keymap_library",
 ]
@@ -70,13 +69,6 @@ sdk_rewriter("skwasm_impl_library") {
   api_file = "//flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl.dart"
   input_dir = "//flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/"
   output_dir = "$root_out_dir/flutter_web_sdk/lib/_skwasm_impl/"
-}
-
-sdk_rewriter("web_unicode_library") {
-  library_name = "web_unicode"
-  api_file = "//flutter/third_party/web_unicode/lib/web_unicode.dart"
-  input_dir = "//flutter/third_party/web_unicode/lib/web_unicode/"
-  output_dir = "$root_out_dir/flutter_web_sdk/lib/_web_unicode/"
 }
 
 sdk_rewriter("web_test_fonts_library") {
@@ -256,8 +248,6 @@ template("_compile_platform") {
       "--source",
       skwasm_library,
       "--source",
-      "dart:_web_unicode",
-      "--source",
       "dart:_web_locale_keymap",
     ]
     if (flutter_prebuilt_dart_sdk) {
@@ -299,7 +289,6 @@ group("flutter_platform_dills") {
     ":flutter_dart2js_kernel_sdk_full",
     ":flutter_dart2wasm_kernel_sdk_full",
     ":flutter_dartdevc_kernel_sdk_outline",
-    ":flutter_dartdevc_kernel_sdk_outline",
   ]
 }
 
@@ -333,7 +322,6 @@ template("_compile_ddc_module") {
       "dart:ui_web",
       "dart:_engine",
       "dart:_skwasm_stub",
-      "dart:_web_unicode",
       "dart:_web_locale_keymap",
       "--no-summarize",
       "--packages",

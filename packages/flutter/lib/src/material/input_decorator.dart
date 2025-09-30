@@ -47,6 +47,10 @@ const double _kFinalLabelScale = 0.75;
 // An extra padding should be added for the input content to comply with the 16 pixels padding.
 const double _kInputExtraPadding = 4.0;
 
+// Padding between the character counter and helper/error text to prevent overlap.
+// Based on Material 3 specification for text fields.
+const double _kSubtextCounterPadding = 16.0;
+
 typedef _SubtextSize = ({double ascent, double bottomHeight, double subtextHeight});
 typedef _ChildBaselineGetter = double Function(RenderBox child, BoxConstraints constraints);
 
@@ -401,8 +405,11 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
 
   Widget _buildError() {
     assert(widget.error != null || widget.errorText != null);
-    final Widget? capturedError = widget.error;
     final String? capturedErrorText = widget.errorText;
+    Widget? capturedError = widget.error;
+    if (capturedError != null && widget.errorStyle != null) {
+      capturedError = DefaultTextStyle(style: widget.errorStyle!, child: capturedError);
+    }
     return Builder(
       builder: (BuildContext context) {
         return Semantics(
@@ -919,8 +926,10 @@ class _RenderDecoration extends RenderBox
       null => (Size.zero, 0.0),
     };
 
+    // Only add padding when counter is present (maxLength is used).
+    final double counterPadding = counter != null ? _kSubtextCounterPadding : 0.0;
     final BoxConstraints helperErrorConstraints = constraints.deflate(
-      EdgeInsets.only(left: counterSize.width),
+      EdgeInsets.only(left: counterSize.width + counterPadding),
     );
     final double helperErrorHeight = layoutChild(helperError, helperErrorConstraints).height;
 
@@ -1262,7 +1271,9 @@ class _RenderDecoration extends RenderBox
     final double counterHeight = _minHeight(counter, width);
     final double counterWidth = _minWidth(counter, counterHeight);
 
-    final double helperErrorAvailableWidth = math.max(width - counterWidth, 0.0);
+    // Only add padding when counter is present (maxLength is used).
+    final double counterPadding = counter != null ? _kSubtextCounterPadding : 0.0;
+    final double helperErrorAvailableWidth = math.max(width - counterWidth - counterPadding, 0.0);
     final double helperErrorHeight = _minHeight(helperError, helperErrorAvailableWidth);
     double subtextHeight = math.max(counterHeight, helperErrorHeight);
     if (subtextHeight > 0.0) {
@@ -5818,7 +5829,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationThemeData {
   });
 
   @override
-  Color? get fillColor => MaterialStateColor.resolveWith((Set<WidgetState> states) {
+  Color? get fillColor => WidgetStateColor.resolveWith((Set<WidgetState> states) {
     return switch ((Theme.brightnessOf(context), states.contains(WidgetState.disabled))) {
       (Brightness.dark, true) => const Color(0x0DFFFFFF), //  5% white
       (Brightness.dark, false) => const Color(0x1AFFFFFF), // 10% white
@@ -5828,7 +5839,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationThemeData {
   });
 
   @override
-  Color? get iconColor => MaterialStateColor.resolveWith((Set<WidgetState> states) {
+  Color? get iconColor => WidgetStateColor.resolveWith((Set<WidgetState> states) {
     if (states.contains(WidgetState.disabled) && !states.contains(WidgetState.focused)) {
       return Theme.of(context).disabledColor;
     }
@@ -5842,7 +5853,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationThemeData {
   });
 
   @override
-  Color? get prefixIconColor => MaterialStateColor.resolveWith((Set<WidgetState> states) {
+  Color? get prefixIconColor => WidgetStateColor.resolveWith((Set<WidgetState> states) {
     if (states.contains(WidgetState.disabled) && !states.contains(WidgetState.focused)) {
       return Theme.of(context).disabledColor;
     }
@@ -5856,7 +5867,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationThemeData {
   });
 
   @override
-  Color? get suffixIconColor => MaterialStateColor.resolveWith((Set<WidgetState> states) {
+  Color? get suffixIconColor => WidgetStateColor.resolveWith((Set<WidgetState> states) {
     if (states.contains(WidgetState.disabled) && !states.contains(WidgetState.focused)) {
       return Theme.of(context).disabledColor;
     }
@@ -5909,7 +5920,7 @@ class _InputDecoratorDefaultsM3 extends InputDecorationThemeData {
   });
 
   @override
-  Color? get fillColor => MaterialStateColor.resolveWith((Set<WidgetState> states) {
+  Color? get fillColor => WidgetStateColor.resolveWith((Set<WidgetState> states) {
     if (states.contains(WidgetState.disabled)) {
       return _colors.onSurface.withOpacity(0.04);
     }
@@ -5966,7 +5977,7 @@ class _InputDecoratorDefaultsM3 extends InputDecorationThemeData {
   Color? get iconColor => _colors.onSurfaceVariant;
 
   @override
-  Color? get prefixIconColor => MaterialStateColor.resolveWith((Set<WidgetState> states) {
+  Color? get prefixIconColor => WidgetStateColor.resolveWith((Set<WidgetState> states) {
     if (states.contains(WidgetState.disabled)) {
       return _colors.onSurface.withOpacity(0.38);
     }
@@ -5974,7 +5985,7 @@ class _InputDecoratorDefaultsM3 extends InputDecorationThemeData {
   });
 
   @override
-  Color? get suffixIconColor => MaterialStateColor.resolveWith((Set<WidgetState> states) {
+  Color? get suffixIconColor => WidgetStateColor.resolveWith((Set<WidgetState> states) {
     if (states.contains(WidgetState.disabled)) {
       return _colors.onSurface.withOpacity(0.38);
     }
