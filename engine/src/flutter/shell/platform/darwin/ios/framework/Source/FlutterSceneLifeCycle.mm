@@ -231,7 +231,7 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 #pragma mark - Saving the state of the scene
 
 - (NSUserActivity*)stateRestorationActivityForScene:(UIScene*)scene {
-  // Saves activity to the state
+  // Saves state per FlutterViewController.
   NSUserActivity* activity = scene.userActivity;
   if (!activity) {
     activity = [[NSUserActivity alloc] initWithActivityType:scene.session.configuration.name];
@@ -258,7 +258,7 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 
 - (void)scene:(UIScene*)scene
     restoreInteractionStateWithUserActivity:(NSUserActivity*)stateRestorationActivity {
-  // Restores activity to the state
+  // Restores state per FlutterViewController.
   NSDictionary<NSString*, id>* userInfo = stateRestorationActivity.userInfo;
   [self updateEnginesInScene:scene];
   for (FlutterEngine* engine in [_engines allObjects]) {
@@ -270,8 +270,6 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
       if (stateDateNumber && [stateDateNumber isKindOfClass:[NSNumber class]]) {
         stateDate = [stateDateNumber longLongValue];
       }
-      NSLog(@"%lld", self.lastAppModificationTime);
-      NSLog(@"%lld", stateDate);
       if (self.lastAppModificationTime != stateDate) {
         // Don't restore state if the app has been re-installed since the state was last saved
         return;
