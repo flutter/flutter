@@ -159,9 +159,9 @@ mixin class RegularWindowControllerDelegate {
 /// {@tool snippet}
 /// An example usage might look like:
 ///
-/// TODO(mattkae): Remove invalid_use_of_internal_member ignore comment when this API is stable.
 ///
 /// ```dart
+/// // TODO(mattkae): remove invalid_use_of_internal_member ignore comment when this API is stable.
 /// // ignore_for_file: invalid_use_of_internal_member
 /// import 'package:flutter/widgets.dart';
 /// import 'package:flutter/material.dart';
@@ -441,9 +441,8 @@ mixin class DialogWindowControllerDelegate {
 /// {@tool snippet}
 /// An example usage might look like:
 ///
-/// TODO(mattkae): Remove invalid_use_of_internal_member ignore comment when this API is stable.
-///
 /// ```dart
+/// // TODO(mattkae): remove invalid_use_of_internal_member ignore comment when this API is stable.
 /// // ignore_for_file: invalid_use_of_internal_member
 /// import 'package:flutter/widgets.dart';
 /// import 'package:flutter/material.dart';
@@ -724,9 +723,8 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
 /// {@tool snippet}
 /// An example usage might look like:
 ///
-/// TODO(mattkae): Remove invalid_use_of_internal_member ignore comment when this API is stable.
-///
 /// ```dart
+/// // TODO(mattkae): remove invalid_use_of_internal_member ignore comment when this API is stable.
 /// // ignore_for_file: invalid_use_of_internal_member
 /// import 'package:flutter/widgets.dart';
 /// import 'package:flutter/material.dart';
@@ -808,9 +806,8 @@ class RegularWindow extends StatelessWidget {
 /// {@tool snippet}
 /// An example usage might look like:
 ///
-/// TODO(mattkae): Remove invalid_use_of_internal_member ignore comment when this API is stable.
-///
 /// ```dart
+/// // TODO(mattkae): remove invalid_use_of_internal_member ignore comment when this API is stable.
 /// // ignore_for_file: invalid_use_of_internal_member
 /// import 'package:flutter/widgets.dart';
 /// import 'package:flutter/material.dart';
