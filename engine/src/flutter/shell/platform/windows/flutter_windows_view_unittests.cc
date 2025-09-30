@@ -1131,7 +1131,7 @@ TEST(FlutterWindowsViewTest, WindowRepaintTests) {
 
   FlutterWindowsView view{kImplicitViewId, engine.get(),
                           std::make_unique<flutter::FlutterWindow>(
-                              100, 100, engine->display_monitor())};
+                              100, 100, engine->display_manager())};
 
   bool schedule_frame_called = false;
   modifier.embedder_api().ScheduleFrame =

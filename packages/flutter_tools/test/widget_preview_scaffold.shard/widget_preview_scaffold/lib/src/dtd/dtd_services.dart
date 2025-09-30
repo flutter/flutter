@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:dtd/dtd.dart';
+import 'package:widget_preview_scaffold/src/dtd/utils.dart';
 import 'editor_service.dart';
 
 /// Provides services, streams, and RPC invocations to interact with Flutter developer tooling.
@@ -18,7 +19,9 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   // START KEEP SYNCED
 
   static const String kWidgetPreviewService = 'widget-preview';
+  static const kIsWindows = 'isWindows';
   static const String kHotRestartPreviewer = 'hotRestartPreviewer';
+  static const String kResolveUri = 'resolveUri';
 
   // END KEEP SYNCED
 
@@ -38,8 +41,8 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
         const <String, Object?>{},
       ),
     );
-
-    await initializeEditorService();
+    await _determineIfWindows();
+    await initializeEditorService(this);
   }
 
   /// Disposes the DTD connection.
@@ -49,13 +52,34 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
     await dtd.close();
   }
 
-  Future<DTDResponse> _call(
+  Future<DTDResponse?> _call(
     String methodName, {
     Map<String, Object?>? params,
-  }) => dtd.call(kWidgetPreviewService, methodName, params: params);
+  }) => dtd.safeCall(kWidgetPreviewService, methodName, params: params);
+
+  /// Returns `true` if the operating system is Windows.
+  late final bool isWindows;
+
+  Future<void> _determineIfWindows() async {
+    isWindows = (BoolResponse.fromDTDResponse(
+      (await _call(kIsWindows))!,
+    )).value!;
+  }
 
   /// Trigger a hot restart of the widget preview scaffold.
   Future<void> hotRestartPreviewer() => _call(kHotRestartPreviewer);
+
+  /// Resolves a package:// URI to a file:// URI using the package_config.
+  ///
+  /// Returns null if [uri] can not be resolved.
+  Future<Uri?> resolveUri(Uri uri) async {
+    final response = await _call(kResolveUri, params: {'uri': uri.toString()});
+    if (response == null) {
+      return null;
+    }
+    final result = StringResponse.fromDTDResponse(response).value;
+    return result == null ? null : Uri.parse(result);
+  }
 
   @override
   late final DartToolingDaemon dtd;

@@ -1128,15 +1128,15 @@ void main() {
     const Color focusColor = Color(0xff00ffff);
     const Color pressedColor = Color(0xffff00ff);
     final WidgetStateProperty<Color?> overlayColor = WidgetStateProperty.resolveWith<Color>((
-      Set<MaterialState> states,
+      Set<WidgetState> states,
     ) {
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return hoverColor;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return focusColor;
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return pressedColor;
       }
       return Colors.transparent;

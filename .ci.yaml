@@ -695,6 +695,7 @@ targets:
       - DEPS
 
   - name: Linux firebase_release_smoke_test
+    bringup: true # https://github.com/flutter/flutter/issues/176042
     recipe: firebaselab/firebaselab
     timeout: 60
     properties:
@@ -708,6 +709,7 @@ targets:
       task_name: release_smoke_test
       physical_devices: >-
         [
+          "--device", "model=tokay,version=36",
           "--device", "model=shiba,version=34",
           "--device", "model=redfin,version=30",
           "--device", "model=griffin,version=24"
@@ -1093,7 +1095,6 @@ targets:
       - DEPS
 
   - name: Linux plugin_test_android_variants
-    bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 45
     properties:
@@ -1119,7 +1120,6 @@ targets:
       - DEPS
 
   - name: Linux plugin_test_android_standard
-    bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 45
     properties:
@@ -4306,6 +4306,26 @@ targets:
       - engine/**
       - DEPS
 
+  - name: Mac module_uiscene_test_ios
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      task_name: module_uiscene_test_ios
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
   - name: Mac_benchmark platform_view_macos__start_up
     presubmit: false
     recipe: devicelab/devicelab_drone
@@ -4385,7 +4405,6 @@ targets:
       - DEPS
 
   - name: Mac plugin_test_android_variants
-    bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 45
     properties:
@@ -4406,7 +4425,6 @@ targets:
       - DEPS
 
   - name: Mac plugin_test_android_standard
-    bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 45
     properties:
@@ -5270,7 +5288,6 @@ targets:
   - name: Mac_ios microbenchmarks_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -6190,7 +6207,6 @@ targets:
       - DEPS
 
   - name: Windows plugin_test_android_variants
-    bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 45
     properties:
@@ -6212,7 +6228,6 @@ targets:
       - DEPS
 
   - name: Windows plugin_test_android_standard
-    bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 45
     properties:
@@ -6990,6 +7005,20 @@ targets:
       tags: >
         ["devicelab", "hostonly", "windows", "arm64"]
       task_name: windows_startup_test
+
+  - name: Windows windowing_test
+    recipe: devicelab/devicelab_drone
+    presubmit: true
+    bringup: true
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      task_name: windowing_test_windows
 
   - name: Windows flutter_tool_startup__windows
     recipe: devicelab/devicelab_drone
