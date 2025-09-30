@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/widget_preview/dtd_services.dart';
 import 'package:flutter_tools/src/widget_preview/persistent_preferences.dart';
+import 'package:json_rpc_2/json_rpc_2.dart';
 import 'package:test/fake.dart';
 
 import '../../../src/common.dart';
@@ -99,13 +100,20 @@ void main() {
       final DartToolingDaemon dtd = await DartToolingDaemon.connect(dtdServer.dtdUri!);
 
       Future<String?> getPreference(String key) async {
-        return StringResponse.fromDTDResponse(
-          await dtd.call(
-            WidgetPreviewDtdServices.kWidgetPreviewService,
-            WidgetPreviewDtdServices.kGetPreference,
-            params: {'key': key},
-          ),
-        ).value;
+        try {
+          return StringResponse.fromDTDResponse(
+            await dtd.call(
+              WidgetPreviewDtdServices.kWidgetPreviewService,
+              WidgetPreviewDtdServices.kGetPreference,
+              params: {'key': key},
+            ),
+          ).value;
+        } on RpcException catch (e) {
+          if (e.code == WidgetPreviewDtdServices.kNoValueForKey) {
+            return null;
+          }
+          rethrow;
+        }
       }
 
       Future<void> setPreference(String key, String? value) async {
@@ -119,7 +127,7 @@ void main() {
       const kTestKey = 'myKey';
 
       // The preferences file should be empty.
-      expect(await getPreference(kTestKey), 'null');
+      expect(await getPreference(kTestKey), null);
       expect(preferencesFile.readAsStringSync(), isEmpty);
 
       // Set a preference and ensure it's read back.
