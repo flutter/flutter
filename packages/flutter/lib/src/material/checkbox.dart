@@ -17,7 +17,6 @@ import 'color_scheme.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
-import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
@@ -462,7 +461,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
   }
 
   BorderSide? _resolveSide(BorderSide? side, Set<WidgetState> states) {
-    if (side is MaterialStateBorderSide) {
+    if (side is WidgetStateBorderSide) {
       return WidgetStateProperty.resolveAs<BorderSide?>(side, states);
     }
     if (!states.contains(WidgetState.selected)) {
@@ -844,8 +843,8 @@ class _CheckboxDefaultsM2 extends CheckboxThemeData {
   final ColorScheme _colors;
 
   @override
-  MaterialStateBorderSide? get side {
-    return MaterialStateBorderSide.resolveWith((Set<WidgetState> states) {
+  WidgetStateBorderSide? get side {
+    return WidgetStateBorderSide.resolveWith((Set<WidgetState> states) {
       if (states.contains(WidgetState.disabled)) {
         if (states.contains(WidgetState.selected)) {
           return const BorderSide(width: 2.0, color: Colors.transparent);
@@ -927,8 +926,8 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
   final ColorScheme _colors;
 
   @override
-  MaterialStateBorderSide? get side {
-    return MaterialStateBorderSide.resolveWith((Set<WidgetState> states) {
+  WidgetStateBorderSide? get side {
+    return WidgetStateBorderSide.resolveWith((Set<WidgetState> states) {
       if (states.contains(WidgetState.disabled)) {
         if (states.contains(WidgetState.selected)) {
           return const BorderSide(width: 2.0, color: Colors.transparent);

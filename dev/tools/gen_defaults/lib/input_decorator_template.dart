@@ -52,7 +52,7 @@ class _${blockName}DefaultsM3 extends InputDecorationThemeData {
   });
 
   @override
-  BorderSide? get activeIndicatorBorder => MaterialStateBorderSide.resolveWith((Set<WidgetState> states) {
+  BorderSide? get activeIndicatorBorder => WidgetStateBorderSide.resolveWith((Set<WidgetState> states) {
     if (states.contains(WidgetState.disabled)) {
       return ${border('md.comp.filled-text-field.disabled.active-indicator')};
     }
@@ -75,7 +75,7 @@ class _${blockName}DefaultsM3 extends InputDecorationThemeData {
     });
 
   @override
-  BorderSide? get outlineBorder => MaterialStateBorderSide.resolveWith((Set<WidgetState> states) {
+  BorderSide? get outlineBorder => WidgetStateBorderSide.resolveWith((Set<WidgetState> states) {
     if (states.contains(WidgetState.disabled)) {
       return ${border('md.comp.outlined-text-field.disabled.outline')};
     }
