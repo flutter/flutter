@@ -22,6 +22,8 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   static const kIsWindows = 'isWindows';
   static const String kHotRestartPreviewer = 'hotRestartPreviewer';
   static const String kResolveUri = 'resolveUri';
+  static const kSetPreference = 'setPreference';
+  static const kGetPreference = 'getPreference';
 
   // END KEEP SYNCED
 
@@ -79,6 +81,33 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
     }
     final result = StringResponse.fromDTDResponse(response).value;
     return result == null ? null : Uri.parse(result);
+  }
+
+  /// Retrieves an arbitrary value associated with [key] from the persistent
+  /// preferences map.
+  ///
+  /// Returns null if [key] is not in the map.
+  Future<String?> getPreference(String key) async {
+    final response = StringResponse.fromDTDResponse(
+      (await _call(kGetPreference, params: {'key': key}))!,
+    );
+    return response.value;
+  }
+
+  /// Retrieves the state of flag [key] from the persistent preferences map.
+  ///
+  /// If [key] is not set, [defaultValue] is returned.
+  Future<bool> getFlag(String key, {bool defaultValue = false}) async {
+    final result = await getPreference(key);
+    if (result == null) {
+      return defaultValue;
+    }
+    return bool.tryParse(result) ?? defaultValue;
+  }
+
+  /// Sets [key] to [value] in the persistent preferences map.
+  Future<void> setPreference(String key, String value) async {
+    await _call(kSetPreference, params: {'key': key, 'value': value});
   }
 
   @override
