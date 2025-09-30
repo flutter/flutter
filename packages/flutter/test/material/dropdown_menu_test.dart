@@ -4908,7 +4908,7 @@ void main() {
               body: DropdownMenu<TestMenu>(
                 menuController: menuController,
                 dropdownMenuEntries: menuChildren,
-                errorText: 'hintText',
+                errorText: 'errorText',
                 decorationBuilder: buildDecoration,
               ),
             ),
