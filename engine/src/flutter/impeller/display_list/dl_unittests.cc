@@ -721,6 +721,57 @@ TEST_P(DisplayListTest, CanDrawBackdropFilter) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
+TEST_P(DisplayListTest, CanDrawBoundedBlur) {
+  auto texture = CreateTextureForFixture("kalimba.jpg");
+
+  auto callback = [&]() {
+    static float sigma = 20;
+    static float ctm_scale = 1;
+    static bool use_bounds = true;
+
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::SliderFloat("Sigma", &sigma, 0, 100);
+    ImGui::SliderFloat("Scale", &ctm_scale, 0, 10);
+    ImGui::NewLine();
+    ImGui::Checkbox("Bounded blur", &use_bounds);
+    ImGui::End();
+
+    flutter::DisplayListBuilder builder;
+
+    Vector2 scale = ctm_scale * GetContentScale();
+    builder.Scale(scale.x, scale.y);
+
+    // Draw from top right to bottom left.
+    static PlaygroundPoint blur_point_a(Point(680, 240), 10, Color::White());
+    static PlaygroundPoint blur_point_b(Point(350, 480), 10, Color::White());
+    auto [p1, p2] = DrawPlaygroundLine(blur_point_a, blur_point_b);
+    DlRect bounds = DlRect::MakeLTRB(p2.x, p1.y, p1.x, p2.y);
+
+    builder.DrawImage(DlImageImpeller::Make(texture), DlPoint(200, 200),
+                      flutter::DlImageSampling::kNearestNeighbor, nullptr);
+    builder.ClipRect(bounds.Scale(1 / ctm_scale));
+    builder.Save();
+
+    flutter::DlPaint save_paint;
+    save_paint.setBlendMode(flutter::DlBlendMode::kSrcOver);
+
+    std::optional<DlRect> blur_bounds;
+    if (use_bounds) {
+      blur_bounds = bounds.Scale(GetContentScale());
+      blur_bounds = blur_bounds->Shift(-blur_bounds->GetOrigin());
+    }
+    auto filter = flutter::DlBlurImageFilter(sigma, sigma, blur_bounds,
+                                             flutter::DlTileMode::kDecal);
+    builder.SaveLayer(std::nullopt, &save_paint, &filter);
+    builder.Restore();
+    builder.Restore();
+
+    return builder.Build();
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
 TEST_P(DisplayListTest, CanDrawNinePatchImage) {
   // Image is drawn with corners to scale and center pieces stretched to fit.
   auto texture = CreateTextureForFixture("embarcadero.jpg");
