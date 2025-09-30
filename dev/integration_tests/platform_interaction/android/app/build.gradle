@@ -28,6 +28,10 @@ android {
         ndkPath = systemNdkPath
     }
 
+    // Temporarily hardcoding the ndkVersion due to lack of access to
+    // higher AGP version thereby a higher default ndk.
+    ndkVersion = "28.2.13676358"
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
