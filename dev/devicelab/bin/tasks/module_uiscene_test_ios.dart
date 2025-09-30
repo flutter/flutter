@@ -213,11 +213,14 @@ Future<void> _installPlugins({
 
   await eval(
     'pod',
-    <String>['install'],
-    environment: <String, String>{'LANG': 'en_US.UTF-8'},
+    <String>['install', '--verbose'],
+    environment: <String, String>{
+      // See https://github.com/flutter/flutter/issues/10873.
+      // CocoaPods analytics adds a lot of latency.
+      'COCOAPODS_DISABLE_STATS': 'true',
+      'LANG': 'en_US.UTF-8',
+    },
     workingDirectory: xcodeProjectDir.path,
-    printStdout: false,
-    printStderr: false,
   );
 }
 
