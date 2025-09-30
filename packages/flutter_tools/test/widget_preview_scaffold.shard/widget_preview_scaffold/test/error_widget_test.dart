@@ -42,11 +42,9 @@ void main() {
     final controller = WidgetPreviewScaffoldController(
       dtdServicesOverride: fakeDtdServices,
       previews: () => [
-        WidgetPreview(
+        WidgetPreview.test(
           builder: () => throw Exception('Error!'),
-          scriptUri: '',
           previewData: Preview(),
-          packageName: '',
         ),
       ],
     );

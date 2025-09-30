@@ -32,7 +32,9 @@ class PreviewCodeGenerator {
   static const _kBuildMultiWidgetPreview = 'buildMultiWidgetPreview';
   static const _kBuildWidgetPreview = 'buildWidgetPreview';
   static const _kBuildWidgetPreviewError = 'buildWidgetPreviewError';
+  static const _kColumn = 'column';
   static const _kDependencyHasErrors = 'dependencyHasErrors';
+  static const _kLine = 'line';
   static const _kListType = 'List';
   static const _kPackageName = 'packageName';
   static const _kPackageUri = 'packageUri';
@@ -164,6 +166,8 @@ class PreviewCodeGenerator {
     final args = <String, cb.Expression>{
       _kPackageName: cb.literalString(preview.packageName!),
       _kScriptUri: cb.literalString(preview.scriptUri.toString()),
+      _kLine: cb.literalNum(preview.line),
+      _kColumn: cb.literalNum(preview.column),
     };
     // TODO(bkonyi): improve the error related code.
     if (libraryDetails.hasErrors || libraryDetails.dependencyHasErrors) {

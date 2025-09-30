@@ -448,6 +448,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
             widgetPreviewScaffoldProject.packageConfig.readAsBytesSync(),
             widgetPreviewScaffoldProject.packageConfig.uri,
           ),
+          trackWidgetCreation: true,
           // Don't try and download canvaskit from the CDN.
           useLocalCanvasKit: true,
           webEnableHotReload: true,
