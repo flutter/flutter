@@ -96,12 +96,14 @@ class _WindowsTable extends StatelessWidget {
         context: context,
         controller: regular,
       ),
+      DialogWindowController() => throw UnimplementedError(),
     };
   }
 
   static String _getWindowTypeName(BaseWindowController controller) {
     return switch (controller) {
       RegularWindowController() => 'Regular',
+      DialogWindowController() => 'Dialog',
     };
   }
 
