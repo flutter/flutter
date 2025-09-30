@@ -392,6 +392,18 @@ class WindowingOwnerLinux extends WindowingOwner {
 
   @internal
   @override
+  DialogWindowController createDialogWindowController({
+    required DialogWindowControllerDelegate delegate,
+    Size? preferredSize,
+    BoxConstraints? preferredConstraints,
+    BaseWindowController? parent,
+    String? title,
+  }) {
+    throw UnimplementedError('Dialog windows are not yet implemented on Linux.');
+  }
+
+  @internal
+  @override
   bool hasTopLevelWindows() {
     return false;
   }
