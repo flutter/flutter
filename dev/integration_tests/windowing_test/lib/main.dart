@@ -38,17 +38,33 @@ void main() {
         throw ArgumentError('Message must contain a "type" field.');
       }
 
+      /// Helper method that will await a notification from the controller
+      /// and clean it up after it has been received.
+      Future<void> awaitNotification(VoidCallback act) async {
+        final Completer<void> notificationReceived = Completer();
+        void notificationHandler() {
+          notificationReceived.complete();
+        }
+
+        controller.addListener(notificationHandler);
+        act();
+        await notificationReceived.future;
+        controller.removeListener(notificationHandler);
+      }
+
       if (jsonMap['type'] == 'get_size') {
         return jsonEncode({
           'width': controller.contentSize.width,
           'height': controller.contentSize.height,
         });
       } else if (jsonMap['type'] == 'set_size') {
-        final Size size = Size(
-          jsonMap['width'].toDouble(),
-          jsonMap['height'].toDouble(),
-        );
-        controller.setSize(size);
+        await awaitNotification(() {
+          final Size size = Size(
+            jsonMap['width'].toDouble(),
+            jsonMap['height'].toDouble(),
+          );
+          controller.setSize(size);
+        });
       } else if (jsonMap['type'] == 'set_constraints') {
         final BoxConstraints constraints = BoxConstraints(
           minWidth: jsonMap['min_width'].toDouble(),
@@ -58,35 +74,50 @@ void main() {
         );
         controller.setConstraints(constraints);
       } else if (jsonMap['type'] == 'set_fullscreen') {
-        controller.setFullscreen(true);
+        await awaitNotification(() {
+          controller.setFullscreen(true);
+        });
       } else if (jsonMap['type'] == 'unset_fullscreen') {
-        controller.setFullscreen(false);
+        await awaitNotification(() {
+          controller.setFullscreen(false);
+        });
       } else if (jsonMap['type'] == 'get_fullscreen') {
         return jsonEncode({'isFullscreen': controller.isFullscreen});
       } else if (jsonMap['type'] == 'set_maximized') {
-        controller.setMaximized(true);
+        await awaitNotification(() {
+          controller.setMaximized(true);
+        });
       } else if (jsonMap['type'] == 'unset_maximized') {
-        controller.setMaximized(false);
+        await awaitNotification(() {
+          controller.setMaximized(false);
+        });
       } else if (jsonMap['type'] == 'get_maximized') {
         return jsonEncode({'isMaximized': controller.isMaximized});
       } else if (jsonMap['type'] == 'set_minimized') {
-        controller.setMinimized(true);
+        await awaitNotification(() {
+          controller.setMinimized(true);
+        });
       } else if (jsonMap['type'] == 'unset_minimized') {
-        controller.setMinimized(false);
+        await awaitNotification(() {
+          controller.setMinimized(false);
+        });
       } else if (jsonMap['type'] == 'get_minimized') {
         return jsonEncode({'isMinimized': controller.isMinimized});
       } else if (jsonMap['type'] == 'set_title') {
-        controller.setTitle(jsonMap['title']);
+        await awaitNotification(() {
+          controller.setTitle(jsonMap['title']);
+        });
       } else if (jsonMap['type'] == 'get_title') {
         return jsonEncode({'title': controller.title});
       } else if (jsonMap['type'] == 'set_activated') {
-        controller.activate();
+        await awaitNotification(() {
+          controller.activate();
+        });
       } else if (jsonMap['type'] == 'get_activated') {
         return jsonEncode({'isActivated': controller.isActivated});
       } else {
         throw ArgumentError('Unknown message type: ${jsonMap['type']}');
       }
-
       return '';
     },
   );
