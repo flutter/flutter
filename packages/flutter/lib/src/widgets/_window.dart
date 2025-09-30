@@ -456,18 +456,25 @@ mixin class DialogWindowControllerDelegate {
 ///         preferredConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
 ///         title: 'Example Window',
 ///       ),
-///       child: MaterialApp(
-///         home: DialogWindow(
-///           controller: DialogWindowController(
-///             preferredSize: const Size(400, 300),
-///             parent: WindowScope.of(context),
-///             title: 'Example Dialog'
-///           ),
-///           child: const Text('Hello, World!')
-///         )
-///       ),
+///       child: const MyApp()
 ///     )
 ///   );
+/// }
+///
+/// class MyApp extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
+///       home: DialogWindow(
+///         controller: DialogWindowController(
+///           preferredSize: const Size(400, 300),
+///           parent: WindowScope.of(context),
+///           title: 'Example Dialog'
+///         ),
+///         child: const Text('Hello, World!')
+///       )
+///     );
+///   }
 /// }
 /// ```
 /// {@end-tool}
@@ -821,18 +828,25 @@ class RegularWindow extends StatelessWidget {
 ///         preferredConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
 ///         title: 'Example Window',
 ///       ),
-///       child: MaterialApp(
-///         home: DialogWindow(
-///           controller: DialogWindowController(
-///             preferredSize: const Size(400, 300),
-///             parent: WindowScope.of(context),
-///             title: 'Example Dialog'
-///           ),
-///           child: const Text('Hello, World!')
-///         )
-///       ),
+///       child: const MyApp()
 ///     )
 ///   );
+/// }
+///
+/// class MyApp extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
+///       home: DialogWindow(
+///         controller: DialogWindowController(
+///           preferredSize: const Size(400, 300),
+///           parent: WindowScope.of(context),
+///           title: 'Example Dialog'
+///         ),
+///         child: const Text('Hello, World!')
+///       )
+///     );
+///   }
 /// }
 /// ```
 /// {@end-tool}
