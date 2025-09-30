@@ -14,6 +14,7 @@ import static org.mockito.Mockito.verify;
 import android.annotation.TargetApi;
 import android.util.DisplayMetrics;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import io.flutter.Log;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.plugin.common.BasicMessageChannel;
 import java.nio.ByteBuffer;
@@ -43,6 +44,7 @@ public class SettingsChannelTest {
 
   @Test
   public void configurationQueueWorks() {
+    Log.setLogLevel(Log.VERBOSE);
     final SettingsChannel.ConfigurationQueue queue = new SettingsChannel.ConfigurationQueue();
     final int baseId = Integer.MIN_VALUE;
 
