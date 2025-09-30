@@ -90,7 +90,7 @@ dependencies:
   checked_yaml: 2.0.4
   cli_config: 0.2.0
   clock: 1.1.2
-  code_assets: 0.19.6
+  code_assets: 0.19.7
   collection: 1.19.1
   convert: 3.1.2
   coverage: 1.15.0
@@ -212,4 +212,4 @@ dependencies:
   pedantic: 1.11.1
   quiver: 3.2.2
   yaml_edit: 2.2.2
-# PUBSPEC CHECKSUM: 5pih92
+# PUBSPEC CHECKSUM: 9hqic
