@@ -4360,7 +4360,6 @@ void main() {
             child: Center(
               child: MenuItemButton(
                 style: MenuItemButton.styleFrom(fixedSize: const Size(88.0, 48.0)),
-                onPressed: null, // Disabled
                 child: const Text('ABC'),
               ),
             ),
