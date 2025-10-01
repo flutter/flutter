@@ -1984,38 +1984,6 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
     }
     return devices;
   }
-
-  @override
-  void stopListDevices() {}
-
-  @override
-  Future<(Process?, File?)> startListCoreDevices({
-    Duration timeout = const Duration(seconds: 2),
-    Completer<void>? cancelCompleter,
-  }) async {
-    final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('core_devices.');
-    final File output = tempDirectory.childFile('core_device_list.json');
-    output.createSync();
-    final Process process = await _processManager.start(<String>[
-      'xcrun',
-      'devicectl',
-      'list',
-      'devices',
-      '--timeout',
-      '5',
-      '--json-output',
-      output.path,
-    ]);
-    return (process, output);
-  }
-
-  @override
-  Future<List<Object?>> getCoreDevicesFromHandledProcess({
-    required File output,
-    required int exitCode,
-  }) async {
-    return <Object?>[];
-  }
 }
 
 class FakeIOSCoreDevice extends Fake implements IOSCoreDevice {
