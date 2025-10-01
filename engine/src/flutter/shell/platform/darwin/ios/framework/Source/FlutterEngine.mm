@@ -284,10 +284,10 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
     // plugins to receive the `scene:willConnectToSession:options` event.
     // If we want to support multi-window on iPad later, we may need to add a way for deveopers to
     // register their FlutterEngine to the scene manually during this event.
-    if ([scene.delegate conformsToProtocol:@protocol(FlutterSceneLifeCycleProvider)]) {
-      NSObject<FlutterSceneLifeCycleProvider>* sceneProvider =
-          (NSObject<FlutterSceneLifeCycleProvider>*)scene.delegate;
-      [sceneProvider.sceneLifeCycleDelegate engine:self receivedConnectNotificationFor:scene];
+    FlutterPluginSceneLifeCycleDelegate* sceneLifeCycleDelegate =
+        [FlutterPluginSceneLifeCycleDelegate fromScene:scene];
+    if (sceneLifeCycleDelegate != nil) {
+      return [sceneLifeCycleDelegate engine:self receivedConnectNotificationFor:scene];
     }
   }
 }
