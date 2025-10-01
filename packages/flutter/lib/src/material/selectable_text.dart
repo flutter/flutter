@@ -8,7 +8,7 @@
 /// @docImport 'text_field.dart';
 library;
 
-import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, TypographySettings;
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -798,10 +798,10 @@ class _SelectableTextState extends State<SelectableText>
       autofillHints: null,
       contextMenuBuilder: widget.contextMenuBuilder,
     );
-    final ui.TypographySettings? typographySettings = MediaQuery.maybeTypographySettingsOf(context);
-    if (typographySettings?.paragraphSpacing != null) {
+    final double? paragraphSpacing = MediaQuery.maybeParagraphSpacingOf(context);
+    if (paragraphSpacing != null) {
       editable = Padding(
-        padding: EdgeInsets.only(bottom: typographySettings!.paragraphSpacing!),
+        padding: EdgeInsets.only(bottom: paragraphSpacing),
         child: editable,
       );
     }

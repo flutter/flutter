@@ -1121,10 +1121,10 @@ class PlatformDispatcher {
   /// This option is used by [showTimePicker].
   bool get alwaysUse24HourFormat => _configuration.alwaysUse24HourFormat;
 
-  /// The system-reported typography settings if any.
-  ///
-  /// If any of the settings change, [onMetricsChanged] will be called.
-  TypographySettings get typographySettings => _configuration.typographySettings;
+  double get lineHeightScaleFactor => _configuration.lineHeightScaleFactor;
+  double get letterSpacing => _configuration.letterSpacing;
+  double get wordSpacing => _configuration.wordSpacing;
+  double get paragraphSpacing => _configuration.paragraphSpacing;
 
   /// The system-reported text scale.
   ///
@@ -1816,7 +1816,10 @@ class _PlatformConfiguration {
     this.defaultRouteName,
     this.systemFontFamily,
     this.configurationId,
-    this.typographySettings = const TypographySettings(),
+    this.lineHeightScaleFactor = 1.0,
+    this.letterSpacing = 1.0,
+    this.wordSpacing = 1.0,
+    this.paragraphSpacing = 1.0,
   });
 
   _PlatformConfiguration copyWith({
@@ -1829,7 +1832,10 @@ class _PlatformConfiguration {
     String? defaultRouteName,
     String? systemFontFamily,
     int? configurationId,
-    TypographySettings? typographySettings,
+    double? lineHeightScaleFactor,
+    double? letterSpacing,
+    double? wordSpacing,
+    double? paragraphSpacing,
   }) {
     return _PlatformConfiguration(
       accessibilityFeatures: accessibilityFeatures ?? this.accessibilityFeatures,
@@ -1841,7 +1847,10 @@ class _PlatformConfiguration {
       defaultRouteName: defaultRouteName ?? this.defaultRouteName,
       systemFontFamily: systemFontFamily ?? this.systemFontFamily,
       configurationId: configurationId ?? this.configurationId,
-      typographySettings: typographySettings ?? this.typographySettings,
+      lineHeightScaleFactor: lineHeightScaleFactor ?? this.lineHeightScaleFactor,
+      letterSpacing: letterSpacing ?? this.letterSpacing,
+      wordSpacing: wordSpacing ?? this.wordSpacing,
+      paragraphSpacing: paragraphSpacing ?? this.paragraphSpacing,
     );
   }
 
@@ -1890,8 +1899,13 @@ class _PlatformConfiguration {
   /// function should not be called in either case.
   final int? configurationId;
 
-  /// Additional typography settings that may be enabled by the platform.
-  final TypographySettings typographySettings;
+  final double lineHeightScaleFactor;
+
+  final double letterSpacing;
+
+  final double wordSpacing;
+
+  final double paragraphSpacing;
 }
 
 /// An immutable view configuration.
