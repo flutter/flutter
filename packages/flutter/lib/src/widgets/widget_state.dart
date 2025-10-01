@@ -433,21 +433,10 @@ abstract class WidgetStateMouseCursor extends MouseCursor
     return SystemMouseCursors.click;
   }
 
-  /// A mouse cursor for clickable widgets that resolves to [SystemMouseCursors.basic]
-  /// in all widget states.
-  static const WidgetStateMouseCursor basic = WidgetStateMouseCursor.resolveWith(
-    _basic,
-    debugDescription: 'WidgetStateMouseCursor(basic)',
-  );
-
-  static MouseCursor _basic(Set<WidgetState> states) {
-    return SystemMouseCursors.basic;
-  }
-
   /// A platform-adaptive mouse cursor for clickable widgets.
   ///
   /// On web platforms, this cursor resolves to [clickable] on all other
-  /// platforms, it resolves to [basic].
+  /// platforms, it resolves to [SystemMouseCursors.basic].
   static const WidgetStateMouseCursor adaptiveClickable = WidgetStateMouseCursor.resolveAs(
     kIsWeb ? WidgetStateMouseCursor.clickable : SystemMouseCursors.basic,
     debugDescription: 'WidgetStateMouseCursor(adaptiveClickable)',
