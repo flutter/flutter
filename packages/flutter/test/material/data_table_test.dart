@@ -1937,7 +1937,7 @@ void main() {
     });
   });
 
-  testWidgets('Heading cell cursor resolves MaterialStateMouseCursor correctly', (
+  testWidgets('Heading cell cursor resolves WidgetStateMouseCursor correctly', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
@@ -1999,7 +1999,7 @@ void main() {
     );
   });
 
-  testWidgets('DataRow cursor resolves MaterialStateMouseCursor correctly', (
+  testWidgets('DataRow cursor resolves WidgetStateMouseCursor correctly', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
