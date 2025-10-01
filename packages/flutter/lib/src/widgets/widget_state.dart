@@ -393,8 +393,10 @@ abstract class WidgetStateMouseCursor extends MouseCursor
   /// [cursor].
   ///
   /// A [debugDescription] may optionally be provided.
-  const factory WidgetStateMouseCursor.resolveAs(MouseCursor cursor, {String debugDescription}) =
-      _WidgetStateMouseCursor;
+  const factory WidgetStateMouseCursor.resolveAs(
+    MouseCursor Function() cursor, {
+    String debugDescription,
+  }) = _WidgetStateMouseCursor;
 
   /// Creates a [WidgetStateMouseCursor] from a [WidgetStateMap].
   ///
@@ -437,10 +439,19 @@ abstract class WidgetStateMouseCursor extends MouseCursor
   ///
   /// On web platforms, this cursor resolves to [clickable] on all other
   /// platforms, it resolves to [SystemMouseCursors.basic].
-  static const WidgetStateMouseCursor adaptiveClickable = WidgetStateMouseCursor.resolveAs(
-    kIsWeb ? WidgetStateMouseCursor.clickable : SystemMouseCursors.basic,
+  static const WidgetStateMouseCursor adaptiveClickable = WidgetStateMouseCursor.resolveWith(
+    _adaptiveClickable,
     debugDescription: 'WidgetStateMouseCursor(adaptiveClickable)',
   );
+
+  /// [states] are ignored.
+  static MouseCursor _adaptiveClickable(Set<WidgetState> states) {
+    if (!states.contains(WidgetState.disabled) && kIsWeb) {
+      return WidgetStateMouseCursor.clickable;
+    }
+    print('is not web');
+    return SystemMouseCursors.basic;
+  }
 
   /// A mouse cursor for widgets related to text, which resolves differently
   /// when the widget is disabled.
@@ -479,10 +490,10 @@ class _WidgetStateMouseCursorResolver extends WidgetStateMouseCursor {
 class _WidgetStateMouseCursor extends WidgetStateMouseCursor {
   const _WidgetStateMouseCursor(this.cursor, {this.debugDescription = 'WidgetStateMouseCursor()'});
 
-  final MouseCursor cursor;
+  final MouseCursor Function() cursor;
 
   @override
-  MouseCursor resolve(Set<WidgetState> states) => cursor;
+  MouseCursor resolve(Set<WidgetState> states) => cursor();
 
   @override
   final String debugDescription;
