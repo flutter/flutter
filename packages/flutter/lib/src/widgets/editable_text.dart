@@ -3239,19 +3239,21 @@ class EditableTextState extends State<EditableText>
     super.didChangeDependencies();
 
     // Apply platform settings to text style.
-    final ui.TypographySettings? typographySettings = MediaQuery.maybeTypographySettingsOf(context);
+    final double? lineHeightScaleFactor = MediaQuery.maybeLineHeightScaleFactorOf(context);
+    final double? letterSpacing = MediaQuery.maybeLetterSpacingOf(context);
+    final double? wordSpacing = MediaQuery.maybeWordSpacingOf(context);
     final bool boldText = MediaQuery.boldTextOf(context);
     if (!boldText &&
-        typographySettings?.lineHeight == null &&
-        typographySettings?.letterSpacing == null &&
-        typographySettings?.wordSpacing == null) {
+        lineHeightScaleFactor == null &&
+        letterSpacing == null &&
+        wordSpacing == null) {
       _style = widget.style;
     } else {
       _style = widget.style.merge(
         TextStyle(
-          height: typographySettings?.lineHeight,
-          letterSpacing: typographySettings?.letterSpacing,
-          wordSpacing: typographySettings?.wordSpacing,
+          height: lineHeightScaleFactor,
+          letterSpacing: letterSpacing,
+          wordSpacing: wordSpacing,
           fontWeight: boldText ? FontWeight.bold : null,
         ),
       );
@@ -3396,21 +3398,21 @@ class EditableTextState extends State<EditableText>
 
     if (widget.style != oldWidget.style) {
       // Apply platform settings to text style.
-      final ui.TypographySettings? typographySettings = MediaQuery.maybeTypographySettingsOf(
-        context,
-      );
+      final double? lineHeightScaleFactor = MediaQuery.maybeLineHeightScaleFactorOf(context);
+      final double? letterSpacing = MediaQuery.maybeLetterSpacingOf(context);
+      final double? wordSpacing = MediaQuery.maybeWordSpacingOf(context);
       final bool boldText = MediaQuery.boldTextOf(context);
       if (!boldText &&
-          typographySettings?.lineHeight == null &&
-          typographySettings?.letterSpacing == null &&
-          typographySettings?.wordSpacing == null) {
+          lineHeightScaleFactor == null &&
+          letterSpacing == null &&
+          wordSpacing == null) {
         _style = widget.style;
       } else {
         _style = widget.style.merge(
           TextStyle(
-            height: typographySettings?.lineHeight,
-            letterSpacing: typographySettings?.letterSpacing,
-            wordSpacing: typographySettings?.wordSpacing,
+            height: lineHeightScaleFactor,
+            letterSpacing: letterSpacing,
+            wordSpacing: wordSpacing,
             fontWeight: boldText ? FontWeight.bold : null,
           ),
         );

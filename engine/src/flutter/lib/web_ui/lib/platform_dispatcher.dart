@@ -89,7 +89,10 @@ abstract class PlatformDispatcher {
 
   void setApplicationLocale(Locale locale) {}
 
-  TypographySettings get typographySettings;
+  double get lineHeightScaleFactor;
+  double get letterSpacing;
+  double get wordSpacing;
+  double get paragraphSpacing;
 
   AccessibilityFeatures get accessibilityFeatures;
 
