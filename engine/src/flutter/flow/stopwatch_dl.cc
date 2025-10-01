@@ -52,9 +52,9 @@ void DlStopwatchVisualizer::Visualize(DlCanvas* canvas,
   {
     DlScalar bar_left = x;
     for (size_t i = 0u; i < stopwatch_.GetLapsCount(); i++) {
-      double time_ms = stopwatch_.GetLap(i).ToMillisecondsF();
-      const DlScalar sample_unit_height =
-          height * UnitHeight(time_ms, max_unit_interval);
+      const double time_ms = stopwatch_.GetLap(i).ToMillisecondsF();
+      const DlScalar sample_unit_height = static_cast<DlScalar>(
+          height * UnitHeight(time_ms, max_unit_interval));
 
       const DlScalar bar_top = bottom - sample_unit_height;
       const DlScalar bar_right = x + (i + 1) * sample_unit_width;
