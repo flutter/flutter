@@ -2602,11 +2602,7 @@ void main() {
       bool? getPlatformSemanticProperty(Semantics semantics) {
         return switch (defaultTargetPlatform) {
           TargetPlatform.iOS => semantics.properties.selected,
-          TargetPlatform.android ||
-          TargetPlatform.fuchsia ||
-          TargetPlatform.linux ||
-          TargetPlatform.macOS ||
-          TargetPlatform.windows => semantics.properties.checked,
+          _ => semantics.properties.checked,
         };
       }
 
