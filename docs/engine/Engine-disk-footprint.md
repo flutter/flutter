@@ -14,7 +14,7 @@ Cloud Storage and linked from the
 To find a treemap for a given commit follow these steps:
 
 1) go to the list of all flutter commits:
-   <https://github.com/flutter/flutter/commits/master/>
+   <https://github.com/flutter/flutter/commits/main/>
 1) find the commit you want to evaluate, then click on the green checkbox to see
    the checks
 1) find the check titled `Linux linux_android_aot_engine`, click on `details`
