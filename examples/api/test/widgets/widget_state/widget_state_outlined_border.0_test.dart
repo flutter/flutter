@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/material_state/material_state_outlined_border.0.dart'
+import 'package:flutter_api_samples/widgets/widget_state/widget_state_outlined_border.0.dart'
     as example;
 import 'package:flutter_test/flutter_test.dart';
 
@@ -21,7 +21,7 @@ void main() {
   }
 
   testWidgets('FilterChip displays the correct border when selected', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.MaterialStateOutlinedBorderExampleApp());
+    await tester.pumpWidget(const example.WidgetStateOutlinedBorderExampleApp());
 
     expect(
       findBorderShape(const RoundedRectangleBorder(side: BorderSide(color: Colors.transparent))),
@@ -32,7 +32,7 @@ void main() {
   testWidgets('FilterChip displays the correct border when not selected', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const example.MaterialStateOutlinedBorderExampleApp());
+    await tester.pumpWidget(const example.WidgetStateOutlinedBorderExampleApp());
 
     await tester.tap(find.byType(FilterChip));
     await tester.pumpAndSettle();
