@@ -4290,7 +4290,7 @@ void main() {
             child: ChoiceChip(
               selected: selected,
               label: const Text('Chip'),
-              shape: _MaterialStateOutlinedBorder(getShape),
+              shape: _TestWidgetStateOutlinedBorder(getShape),
               onSelected: enabled ? (_) {} : null,
             ),
           ),
@@ -4360,7 +4360,7 @@ void main() {
             child: ChoiceChip(
               selected: selected,
               label: const Text('Chip'),
-              shape: _MaterialStateOutlinedBorder(getShape),
+              shape: _TestWidgetStateOutlinedBorder(getShape),
               onSelected: enabled ? (_) {} : null,
             ),
           ),
@@ -4433,7 +4433,7 @@ void main() {
           body: ChoiceChip(
             selected: selected,
             label: const Text('Chip'),
-            shape: _MaterialStateOutlinedBorder(getShape),
+            shape: _TestWidgetStateOutlinedBorder(getShape),
             side: _MaterialStateBorderSide(getBorderSide),
             onSelected: enabled ? (_) {} : null,
           ),
@@ -4493,7 +4493,7 @@ void main() {
           body: ChoiceChip(
             selected: selected,
             label: const Text('Chip'),
-            shape: _MaterialStateOutlinedBorder(getShape),
+            shape: _TestWidgetStateOutlinedBorder(getShape),
             side: _MaterialStateBorderSide(getBorderSide),
             onSelected: enabled ? (_) {} : null,
           ),
@@ -6445,8 +6445,8 @@ void main() {
   });
 }
 
-class _MaterialStateOutlinedBorder extends StadiumBorder implements WidgetStateOutlinedBorder {
-  const _MaterialStateOutlinedBorder(this.resolver);
+class _TestWidgetStateOutlinedBorder extends StadiumBorder implements WidgetStateOutlinedBorder {
+  const _TestWidgetStateOutlinedBorder(this.resolver);
 
   final WidgetPropertyResolver<OutlinedBorder?> resolver;
 
