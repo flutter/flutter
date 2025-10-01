@@ -36,8 +36,7 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
   final TextEditingController _regularHeightController =
       TextEditingController();
   final TextEditingController _dialogWidthController = TextEditingController();
-  final TextEditingController _dialogHeightController =
-      TextEditingController();
+  final TextEditingController _dialogHeightController = TextEditingController();
 
   @override
   void initState() {
