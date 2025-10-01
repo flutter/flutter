@@ -5005,6 +5005,12 @@ mixin SemanticsAnnotationsMixin on RenderObject {
     if (_properties.onFocus != null) {
       config.onFocus = _performFocus;
     }
+    if (_properties.onExpand != null) {
+      config.onExpand = _performExpand;
+    }
+    if (_properties.onCollapse != null) {
+      config.onCollapse = _performCollapse;
+    }
     if (_properties.customSemanticsActions != null) {
       config.customSemanticsActions = _properties.customSemanticsActions!;
     }
@@ -5092,6 +5098,14 @@ mixin SemanticsAnnotationsMixin on RenderObject {
 
   void _performFocus() {
     _properties.onFocus?.call();
+  }
+
+  void _performExpand() {
+    _properties.onExpand?.call();
+  }
+
+  void _performCollapse() {
+    _properties.onCollapse?.call();
   }
 }
 

@@ -328,7 +328,7 @@
         },
         {
           "dependency": "firefox",
-          "version": "version:132.0"
+          "version": "version:143.0"
         }
       ],
       "tasks": [

@@ -9,6 +9,8 @@ import 'package:widget_preview_scaffold/src/widget_preview.dart';
 Iterable<WidgetPreview> buildMultiWidgetPreview({
   required String packageName,
   required String scriptUri,
+  required int line,
+  required int column,
   required MultiPreview preview,
   required Object? Function() previewFunction,
 }) {
@@ -16,6 +18,8 @@ Iterable<WidgetPreview> buildMultiWidgetPreview({
     (p) => buildWidgetPreview(
       packageName: packageName,
       scriptUri: scriptUri,
+      line: line,
+      column: column,
       transformedPreview: p,
       previewFunction: previewFunction,
     ),
@@ -25,6 +29,8 @@ Iterable<WidgetPreview> buildMultiWidgetPreview({
 WidgetPreview buildWidgetPreview({
   required String packageName,
   required String scriptUri,
+  required int line,
+  required int column,
   required Preview transformedPreview,
   required Object? Function() previewFunction,
 }) {
@@ -39,6 +45,8 @@ WidgetPreview buildWidgetPreview({
   return WidgetPreview(
     builder: previewBuilder,
     scriptUri: scriptUri,
+    line: line,
+    column: column,
     previewData: transformedPreview,
     packageName: packageName,
   );
@@ -47,6 +55,8 @@ WidgetPreview buildWidgetPreview({
 WidgetPreview buildWidgetPreviewError({
   required String packageName,
   required String scriptUri,
+  required int line,
+  required int column,
   required String packageUri,
   required String functionName,
   required bool dependencyHasErrors,
@@ -58,6 +68,8 @@ WidgetPreview buildWidgetPreviewError({
   return WidgetPreview(
     builder: () => Text('$functionName: $errorMessage'),
     scriptUri: scriptUri,
+    line: line,
+    column: column,
     previewData: const Preview(group: 'Invalid Previews'),
     packageName: packageName,
   );
@@ -72,12 +84,15 @@ TextStyle fixBlurryText(TextStyle style) {
 }
 
 final TextStyle linkTextStyle = fixBlurryText(
-  TextStyle(
-    decoration: TextDecoration.underline,
+  underlineTextStyle.copyWith(
     // TODO(bkonyi): this color scheme is from DevTools and should be responsive
     // to changes in the previewer theme.
     color: const Color(0xFF1976D2),
   ),
+);
+
+final TextStyle underlineTextStyle = fixBlurryText(
+  TextStyle(decoration: TextDecoration.underline),
 );
 
 /// A basic vertical spacer.
