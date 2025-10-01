@@ -631,10 +631,7 @@ void main() {
           cache: Cache.test(processManager: FakeProcessManager.any()),
           iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
           fileSystem: fileSystem,
-          coreDeviceControl: FakeIOSCoreDeviceControl(
-            processManager: fakeProcessManager,
-            fileSystem: fileSystem,
-          ),
+          coreDeviceControl: FakeIOSCoreDeviceControl(),
           xcodeDebug: FakeXcodeDebug(),
           analytics: const NoOpAnalytics(),
           shutdownHooks: FakeShutdownHooks(),
@@ -667,10 +664,7 @@ void main() {
         cache: Cache.test(processManager: FakeProcessManager.any()),
         iproxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: MemoryFileSystem.test(),
-        coreDeviceControl: FakeIOSCoreDeviceControl(
-          fileSystem: fileSystem,
-          processManager: processManager,
-        ),
+        coreDeviceControl: FakeIOSCoreDeviceControl(),
         xcodeDebug: FakeXcodeDebug(),
         analytics: const NoOpAnalytics(),
         shutdownHooks: shutdownHooks,
@@ -700,10 +694,7 @@ void main() {
       setUp(() {
         xcode = Xcode.test(processManager: FakeProcessManager.any());
         fileSystem = MemoryFileSystem.test();
-        coreDeviceControl = FakeIOSCoreDeviceControl(
-          processManager: fakeProcessManager,
-          fileSystem: fileSystem,
-        );
+        coreDeviceControl = FakeIOSCoreDeviceControl();
         fakeAnalytics = getInitializedFakeAnalyticsInstance(
           fs: fileSystem,
           fakeFlutterVersion: FakeFlutterVersion(),
@@ -1532,8 +1523,6 @@ void main() {
           testUsingContext('wireless discovery is cancelled', () async {
             final getCoreDevicesCompleter = Completer<void>();
             final coreDeviceControl = FakeIOSCoreDeviceControl(
-              processManager: fakeProcessManager,
-              fileSystem: fileSystem,
               getCoreDevicesCompleter: getCoreDevicesCompleter,
             );
             xcdevice = XCDevice(
