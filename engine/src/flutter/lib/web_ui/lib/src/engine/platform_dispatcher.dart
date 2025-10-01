@@ -758,7 +758,16 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   }
 
   @override
-  ui.TypographySettings get typographySettings => configuration.typographySettings;
+  double get lineHeightScaleFactor => configuration.lineHeightScaleFactor;
+
+  @override
+  double get letterSpacing => configuration.letterSpacing;
+
+  @override
+  double get wordSpacing => configuration.wordSpacing;
+
+  @override
+  double get paragraphSpacing => configuration.paragraphSpacing;
 
   /// Additional accessibility features that may be enabled by the platform.
   @override
@@ -1030,47 +1039,44 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   DomResizeObserver? _typographySettingsObserver;
   DomElement? _typographyMeasurementElement;
 
-  /// Updates [typographySettings] and invokes [onPlatformConfigurationChanged] and
-  /// [onMetricsChanged] callbacks if [typographySettings] changed.
-  void _updateTypographySettings(ui.TypographySettings value) {
-    if (configuration.typographySettings != value) {
-      configuration = configuration.copyWith(typographySettings: value);
+  /// Updates [lineHeightScaleFactor] and invokes [onPlatformConfigurationChanged] and
+  /// [onMetricsChanged] callbacks if [lineHeightScaleFactor] changed.
+  void _updateLineHeightScaleFactor(double value) {
+    if (configuration.lineHeightScaleFactor != value) {
+      configuration = configuration.copyWith(lineHeightScaleFactor: value);
       invokeOnPlatformConfigurationChanged();
       invokeOnMetricsChanged();
     }
   }
 
-  ui.TypographySettings _computeTypographySettings() {
-    final double? lineHeight = parseNumericStyleProperty(
-      _typographyMeasurementElement!,
-      'line-height',
-    )?.toDouble();
-    final double? fontSize = parseFontSize(_typographyMeasurementElement!)?.toDouble();
-    final double? lineHeightFactor = fontSize != null && lineHeight != null
-        ? lineHeight / fontSize
-        : null;
-    final double? wordSpacing = parseNumericStyleProperty(
-      _typographyMeasurementElement!,
-      'word-spacing',
-    )?.toDouble();
-    final double? letterSpacing = parseNumericStyleProperty(
-      _typographyMeasurementElement!,
-      'letter-spacing',
-    )?.toDouble();
-    // There is no direct CSS property for paragraph spacing,
-    // so on the web this feature is usually implemented
-    // by extension authors by leveraging `margin-bottom` on
-    // the `p` element.
-    final double? paragraphSpacing = parseNumericStyleProperty(
-      _typographyMeasurementElement!,
-      'margin-bottom',
-    )?.toDouble();
-    return ui.TypographySettings(
-      lineHeight: lineHeightFactor,
-      letterSpacing: letterSpacing,
-      wordSpacing: wordSpacing,
-      paragraphSpacing: paragraphSpacing,
-    );
+  /// Updates [letterSpacing] and invokes [onPlatformConfigurationChanged] and
+  /// [onMetricsChanged] callbacks if [letterSpacing] changed.
+  void _updateLetterSpacing(double value) {
+    if (configuration.letterSpacing != value) {
+      configuration = configuration.copyWith(letterSpacing: value);
+      invokeOnPlatformConfigurationChanged();
+      invokeOnMetricsChanged();
+    }
+  }
+
+  /// Updates [wordSpacing] and invokes [onPlatformConfigurationChanged] and
+  /// [onMetricsChanged] callbacks if [wordSpacing] changed.
+  void _updateWordSpacing(double value) {
+    if (configuration.wordSpacing != value) {
+      configuration = configuration.copyWith(wordSpacing: value);
+      invokeOnPlatformConfigurationChanged();
+      invokeOnMetricsChanged();
+    }
+  }
+
+  /// Updates [paragraphSpacing] and invokes [onPlatformConfigurationChanged] and
+  /// [onMetricsChanged] callbacks if [paragraphSpacing] changed.
+  void _updateParagraphSpacing(double value) {
+    if (configuration.paragraphSpacing != value) {
+      configuration = configuration.copyWith(paragraphSpacing: value);
+      invokeOnPlatformConfigurationChanged();
+      invokeOnMetricsChanged();
+    }
   }
 
   /// Set the callback function for updating [typographySettings] based on
@@ -1107,16 +1113,57 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       List<DomResizeObserverEntry> entries,
       DomResizeObserver observer,
     ) {
-      final ui.TypographySettings computedTypographySettings = _computeTypographySettings();
-      if (computedTypographySettings.lineHeight == defaultLineHeightFactor &&
-          computedTypographySettings.wordSpacing == spacingDefault &&
-          computedTypographySettings.letterSpacing == spacingDefault &&
-          computedTypographySettings.paragraphSpacing == spacingDefault) {
-        // Disable text spacing properties if computed values match the default ones.
-        _updateTypographySettings(const ui.TypographySettings());
-        return;
+      final double? lineHeight = parseNumericStyleProperty(
+        _typographyMeasurementElement!,
+        'line-height',
+      )?.toDouble();
+      final double? fontSize = parseFontSize(_typographyMeasurementElement!)?.toDouble();
+      final double? computedLineHeightScaleFactor = fontSize != null && lineHeight != null
+          ? lineHeight / fontSize
+          : null;
+      final double? computedWordSpacing = parseNumericStyleProperty(
+        _typographyMeasurementElement!,
+        'word-spacing',
+      )?.toDouble();
+      final double? computedLetterSpacing = parseNumericStyleProperty(
+        _typographyMeasurementElement!,
+        'letter-spacing',
+      )?.toDouble();
+      // There is no direct CSS property for paragraph spacing,
+      // so on the web this feature is usually implemented
+      // by extension authors by leveraging `margin-bottom` on
+      // the `p` element.
+      final double? computedParagraphSpacing = parseNumericStyleProperty(
+        _typographyMeasurementElement!,
+        'margin-bottom',
+      )?.toDouble();
+
+      // if (computedLineHeightScaleFactor == defaultLineHeightFactor) {
+      //   _updateLineHeightScaleFactor();
+      // }
+      // if (computedLetterSpacing == spacingDefault) {
+      //   _updateLetterSpacing();
+      // }
+      // if (computedWordSpacing == spacingDefault) {
+      //   _updateWordSpacing();
+      // }
+      // if (computedParagraphSpacing == spacingDefault) {
+      //   _updateParagraphSpacing();
+      // }
+
+      if (computedLineHeightScaleFactor != null &&
+          computedLineHeightScaleFactor != defaultLineHeightFactor) {
+        _updateLineHeightScaleFactor(computedLineHeightScaleFactor);
       }
-      _updateTypographySettings(computedTypographySettings);
+      if (computedLetterSpacing != null && computedLetterSpacing != spacingDefault) {
+        _updateLetterSpacing(computedLetterSpacing);
+      }
+      if (computedWordSpacing != null && computedWordSpacing != spacingDefault) {
+        _updateWordSpacing(computedWordSpacing);
+      }
+      if (computedParagraphSpacing != null && computedParagraphSpacing != spacingDefault) {
+        _updateParagraphSpacing(computedParagraphSpacing);
+      }
     });
 
     _typographySettingsObserver!.observe(_typographyMeasurementElement!);
@@ -1787,7 +1834,10 @@ class PlatformConfiguration {
     this.locales = const <ui.Locale>[],
     this.defaultRouteName = '/',
     this.systemFontFamily,
-    this.typographySettings = const ui.TypographySettings(),
+    this.lineHeightScaleFactor = 1.0,
+    this.letterSpacing = 1.0,
+    this.wordSpacing = 1.0,
+    this.paragraphSpacing = 1.0,
   });
 
   PlatformConfiguration copyWith({
@@ -1799,7 +1849,10 @@ class PlatformConfiguration {
     List<ui.Locale>? locales,
     String? defaultRouteName,
     String? systemFontFamily,
-    ui.TypographySettings? typographySettings,
+    double? lineHeightScaleFactor,
+    double? letterSpacing,
+    double? wordSpacing,
+    double? paragraphSpacing,
   }) {
     return PlatformConfiguration(
       accessibilityFeatures: accessibilityFeatures ?? this.accessibilityFeatures,
@@ -1810,7 +1863,10 @@ class PlatformConfiguration {
       locales: locales ?? this.locales,
       defaultRouteName: defaultRouteName ?? this.defaultRouteName,
       systemFontFamily: systemFontFamily ?? this.systemFontFamily,
-      typographySettings: typographySettings ?? this.typographySettings,
+      lineHeightScaleFactor: lineHeightScaleFactor ?? this.lineHeightScaleFactor,
+      letterSpacing: letterSpacing ?? this.letterSpacing,
+      wordSpacing: wordSpacing ?? this.wordSpacing,
+      paragraphSpacing: paragraphSpacing ?? this.paragraphSpacing,
     );
   }
 
@@ -1822,7 +1878,10 @@ class PlatformConfiguration {
   final List<ui.Locale> locales;
   final String defaultRouteName;
   final String? systemFontFamily;
-  final ui.TypographySettings typographySettings;
+  final double lineHeightScaleFactor;
+  final double letterSpacing;
+  final double wordSpacing;
+  final double paragraphSpacing;
 }
 
 /// Helper class to hold navigation target information for AT focus restoration
