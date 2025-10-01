@@ -92,7 +92,7 @@ dependencies:
         final yaml =
             loadYaml(rootProject.widgetPreviewScaffoldProject.pubspecFile.readAsStringSync())
                 as YamlMap;
-        const expectedDependencies = <String, Map<String, String>>{
+        const expectedDependencies = <String, Object?>{
           'abcd': {'path': '../../packages/$kPackageProjectName'},
           'example': {'path': '../../packages/$kExampleProjectName'},
         };
@@ -103,10 +103,13 @@ dependencies:
         // dependency (e.g., a dependency of the form "some_workspace_package: " with no version
         // constraint or path).
         if (yaml case {
-          'dependencies': expectedDependencies,
-          'dependency_overrides': expectedDependencies,
+          'dependencies': final YamlMap dependencies,
+          'dependency_overrides': final YamlMap dependencyOverrides,
         }) {
-          // Do nothing.
+          for (final MapEntry(key: package, value: constraint) in expectedDependencies.entries) {
+            expect(dependencies[package], constraint);
+            expect(dependencyOverrides[package], constraint);
+          }
         } else {
           fail('''
 Did not find the following dependencies for "dependencies" or "dependency_overrides":
