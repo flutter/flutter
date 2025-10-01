@@ -4,34 +4,29 @@
 
 import 'package:analyzer/dart/constant/value.dart';
 
+typedef PreviewProperty = ({String key, DartObject object, bool isCallback});
+
 /// Contains details related to a single preview instance.
 final class PreviewDetails {
   PreviewDetails({
     required this.scriptUri,
+    required this.line,
+    required this.column,
     required this.packageName,
     required this.functionName,
     required this.isBuilder,
-    required DartObject previewAnnotation,
-  }) : name = previewAnnotation.getField(kName)!,
-       size = previewAnnotation.getField(kSize)!,
-       textScaleFactor = previewAnnotation.getField(kTextScaleFactor)!,
-       wrapper = previewAnnotation.getField(kWrapper)!,
-       theme = previewAnnotation.getField(kTheme)!,
-       brightness = previewAnnotation.getField(kBrightness)!,
-       localizations = previewAnnotation.getField(kLocalizations)!;
-
-  static const kScriptUri = 'scriptUri';
-  static const kPackageName = 'packageName';
-  static const kName = 'name';
-  static const kSize = 'size';
-  static const kTextScaleFactor = 'textScaleFactor';
-  static const kWrapper = 'wrapper';
-  static const kTheme = 'theme';
-  static const kBrightness = 'brightness';
-  static const kLocalizations = 'localizations';
+    required this.isMultiPreview,
+    required this.previewAnnotation,
+  });
 
   /// The file:// URI pointing to the script in which the preview is defined.
   final Uri scriptUri;
+
+  /// The 1-based line at which the Preview annotation was applied.
+  final int line;
+
+  /// The 1-based column at which the Preview annotation was applied.
+  final int column;
 
   /// The name of the package in which the preview was defined.
   ///
@@ -49,43 +44,13 @@ final class PreviewDetails {
   /// instead of a `Widget`.
   final bool isBuilder;
 
-  /// A description to be displayed alongside the preview.
+  /// The annotation marking a function as a preview.
   ///
-  /// If not provided, no name will be associated with the preview.
-  final DartObject name;
+  /// This can be any object which extends `Preview` or `MultiPreview`.
+  final DartObject previewAnnotation;
 
-  /// Artificial constraints to be applied to the `child`.
-  ///
-  /// If not provided, the previewed widget will attempt to set its own
-  /// constraints and may result in an unbounded constraint error.
-  final DartObject size;
-
-  /// Applies font scaling to text within the `child`.
-  ///
-  /// If not provided, the default text scaling factor provided by `MediaQuery`
-  /// will be used.
-  final DartObject textScaleFactor;
-
-  /// The name of a tear-off used to wrap the `Widget` returned by the preview
-  /// function defined by [functionName].
-  ///
-  /// If not provided, the `Widget` returned by [functionName] will be used by
-  /// the previewer directly.
-  final DartObject wrapper;
-
-  /// Set to `true` if `wrapper` is set.
-  bool get hasWrapper => !wrapper.isNull;
-
-  /// A callback to return Material and Cupertino theming data to be applied
-  /// to the previewed `Widget`.
-  final DartObject theme;
-
-  /// Sets the initial theme brightness.
-  ///
-  /// If not provided, the current system default brightness will be used.
-  final DartObject brightness;
-
-  final DartObject localizations;
+  /// Set to true if [previewAnnotation] is a `MultiPreview`.
+  final bool isMultiPreview;
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
@@ -95,34 +60,35 @@ final class PreviewDetails {
     }
     return other.runtimeType == runtimeType &&
         other is PreviewDetails &&
+        other.scriptUri == scriptUri &&
         other.packageName == packageName &&
         other.functionName == functionName &&
         other.isBuilder == isBuilder &&
-        other.size == size &&
-        other.textScaleFactor == textScaleFactor &&
-        other.wrapper == wrapper &&
-        other.theme == theme &&
-        other.brightness == brightness &&
-        other.localizations == localizations;
+        other.previewAnnotation == previewAnnotation &&
+        other.isMultiPreview == isMultiPreview;
   }
 
   @override
   String toString() =>
-      'PreviewDetails(function: $functionName packageName: $packageName isBuilder: $isBuilder '
-      '$kName: $name $kSize: $size $kTextScaleFactor: $textScaleFactor $kWrapper: $wrapper '
-      '$kTheme: $theme $kBrightness: $brightness $kLocalizations: $localizations)';
+      '''
+PreviewDetails(
+  scriptUri: $scriptUri
+  function: $functionName
+  packageName: $packageName
+  isBuilder: $isBuilder
+  isMultiPreview: $isMultiPreview
+  previewAnnotation: $previewAnnotation
+)
+''';
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   int get hashCode => Object.hashAll(<Object?>[
+    scriptUri,
     packageName,
     functionName,
     isBuilder,
-    size,
-    textScaleFactor,
-    wrapper,
-    theme,
-    brightness,
-    localizations,
+    previewAnnotation,
+    isMultiPreview,
   ]);
 }

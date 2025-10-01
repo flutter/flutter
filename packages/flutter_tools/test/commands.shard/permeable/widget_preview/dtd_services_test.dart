@@ -8,12 +8,18 @@ import 'package:dtd/dtd.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/widget_preview/dtd_services.dart';
+import 'package:test/fake.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/test_flutter_command_runner.dart';
 import '../utils/project_testing_utils.dart';
+
+class FakeFlutterProject extends Fake implements FlutterProject {
+  FakeFlutterProject();
+}
 
 void main() {
   late WidgetPreviewDtdServices dtdServer;
@@ -45,6 +51,7 @@ void main() {
             processManager: globals.processManager,
           ),
           onHotRestartPreviewerRequest: hotRestartRequestCompleter.complete,
+          project: FakeFlutterProject(),
         );
         await dtdServer.launchAndConnect();
 

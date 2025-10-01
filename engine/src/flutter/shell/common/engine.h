@@ -162,6 +162,13 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
         CustomAccessibilityActionUpdates actions) = 0;
 
     //--------------------------------------------------------------------------
+    /// @brief      Framework sets the application locale.
+    ///
+    /// @param[in]  locale  The application locale in BCP 47 format.
+    ///
+    virtual void OnEngineSetApplicationLocale(std::string locale) = 0;
+
+    //--------------------------------------------------------------------------
     /// @brief      When the Framework starts or stops generating semantics
     /// tree,
     ///             this new information needs to be conveyed to the underlying
@@ -910,6 +917,11 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   const std::string& GetLastEntrypoint() const;
 
   //----------------------------------------------------------------------------
+  /// @brief      Get the last Engine Id that was used in the RunConfiguration
+  ///             when |Engine::Run| was called.
+  std::optional<int64_t> GetLastEngineId() const;
+
+  //----------------------------------------------------------------------------
   /// @brief      Get the last Entrypoint Library that was used in the
   ///             RunConfiguration when |Engine::Run| was called.
   ///
@@ -1025,6 +1037,9 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
                        CustomAccessibilityActionUpdates actions) override;
 
   // |RuntimeDelegate|
+  void SetApplicationLocale(std::string locale) override;
+
+  // |RuntimeDelegate|
   void SetSemanticsTreeEnabled(bool enabled) override;
 
   // |RuntimeDelegate|
@@ -1088,6 +1103,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   std::string last_entry_point_;
   std::string last_entry_point_library_;
   std::vector<std::string> last_entry_point_args_;
+  std::optional<int64_t> last_engine_id_;
   std::string initial_route_;
   std::shared_ptr<AssetManager> asset_manager_;
   std::shared_ptr<FontCollection> font_collection_;

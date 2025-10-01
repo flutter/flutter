@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/sliver_utils.dart';
+import 'semantics_tester.dart';
 
 const double VIEWPORT_HEIGHT = 600;
 const double VIEWPORT_WIDTH = 300;
@@ -454,7 +455,7 @@ void main() {
         ],
       ),
     );
-    controller.jumpTo(300);
+    controller.jumpTo(RenderAbstractViewport.defaultCacheExtent + 200);
     await tester.pumpAndSettle();
 
     final List<RenderSliver> visitedChildren = <RenderSliver>[];
@@ -466,9 +467,10 @@ void main() {
     }
 
     renderGroup.visitChildrenForSemantics(visitor);
-    expect(visitedChildren.length, equals(2));
+    expect(visitedChildren.length, equals(3));
     expect(visitedChildren[0].geometry!.scrollExtent, equals(300));
     expect(visitedChildren[1].geometry!.scrollExtent, equals(500));
+    expect(visitedChildren[2].geometry!.scrollExtent, equals(400));
   });
 
   testWidgets('SliverPinnedPersistentHeader is painted within bounds of SliverMainAxisGroup', (
@@ -1330,6 +1332,160 @@ void main() {
       expectedIndex: 0,
       expectedLocalPosition: const Offset(15, 5),
     );
+  });
+  testWidgets(
+    'With SliverList can handle inaccurate scroll offset due to changes in children list',
+    (WidgetTester tester) async {
+      bool skip = true;
+      Widget buildItem(BuildContext context, int index) {
+        return !skip || index.isEven
+            ? Card(
+                child: ListTile(title: Text('item$index', style: const TextStyle(fontSize: 80))),
+              )
+            : Container();
+      }
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Scaffold(
+            body: CustomScrollView(
+              slivers: <Widget>[
+                SliverMainAxisGroup(
+                  slivers: <Widget>[
+                    SliverList(delegate: SliverChildBuilderDelegate(buildItem, childCount: 30)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      // Only even items 0~12 are on the screen.
+      for (int index = 0; index <= 12; index++) {
+        expect(find.text('item$index'), index.isEven ? findsOneWidget : findsNothing);
+      }
+      expect(find.text('item12'), findsOneWidget);
+      expect(find.text('item14'), findsNothing);
+
+      await tester.drag(find.byType(CustomScrollView), const Offset(0.0, -750.0));
+      await tester.pump();
+      // Only even items 16~28 are on the screen.
+      expect(find.text('item15'), findsNothing);
+      expect(find.text('item16'), findsOneWidget);
+      expect(find.text('item28'), findsOneWidget);
+
+      skip = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CustomScrollView(
+              slivers: <Widget>[
+                SliverMainAxisGroup(
+                  slivers: <Widget>[
+                    SliverList(delegate: SliverChildBuilderDelegate(buildItem, childCount: 30)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // Only items 12~19 are on the screen.
+      expect(find.text('item11'), findsNothing);
+      expect(find.text('item12'), findsOneWidget);
+      expect(find.text('item19'), findsOneWidget);
+      expect(find.text('item20'), findsNothing);
+
+      await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 250.0));
+      await tester.pump();
+
+      // Only items 10~16 are on the screen.
+      expect(find.text('item9'), findsNothing);
+      expect(find.text('item10'), findsOneWidget);
+      expect(find.text('item16'), findsOneWidget);
+      expect(find.text('item17'), findsNothing);
+
+      // The inaccurate scroll offset should reach zero at this point
+      await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 250.0));
+      await tester.pump();
+
+      // Only items 7~13 are on the screen.
+      expect(find.text('item6'), findsNothing);
+      expect(find.text('item7'), findsOneWidget);
+      expect(find.text('item13'), findsOneWidget);
+      expect(find.text('item14'), findsNothing);
+
+      // It will be corrected as we scroll, so we have to drag multiple times.
+      await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 250.0));
+      await tester.pump();
+      await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 250.0));
+      await tester.pump();
+      await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 250.0));
+      await tester.pump();
+
+      // Only items 0~6 are on the screen.
+      expect(find.text('item0'), findsOneWidget);
+      expect(find.text('item6'), findsOneWidget);
+      expect(find.text('item7'), findsNothing);
+    },
+  );
+
+  testWidgets('SliverMainAxisGroup ensure semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    await tester.pumpWidget(
+      _buildSliverMainAxisGroup(
+        slivers: <Widget>[
+          const SliverEnsureSemantics(sliver: SliverToBoxAdapter(child: Text('a'))),
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (BuildContext context, int index) {
+                return Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text('Lorem Ipsum $index'),
+                  ),
+                );
+              },
+              childCount: 50,
+              semanticIndexOffset: 1,
+            ),
+          ),
+          const SliverEnsureSemantics(sliver: SliverToBoxAdapter(child: Text('b'))),
+        ],
+      ),
+    );
+
+    // Even though 'b' is outside of the Viewport and cacheExtent, since it is
+    // wrapped with a `SliverEnsureSemantics` it will still be included in the
+    // semantics tree.
+    expect(semantics.nodesWith(label: 'b'), hasLength(1));
+    expect(find.text('b'), findsNothing);
+    expect(find.byType(SliverEnsureSemantics, skipOffstage: false), findsNWidgets(2));
+    semantics.dispose();
+  });
+
+  testWidgets('SliverMainAxisGroup includes items in cacheExtent in semantics', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    await tester.pumpWidget(
+      _buildSliverMainAxisGroup(
+        viewportHeight: 300,
+        // Default cacheExtent is 250.0
+        slivers: <Widget>[
+          const SliverToBoxAdapter(child: SizedBox(height: 300, child: Text('a'))),
+          const SliverToBoxAdapter(child: SizedBox(height: 100, child: Text('b'))),
+        ],
+      ),
+    );
+
+    // 'b' is not visible, but it should be in the cache extent.
+    expect(find.text('b'), findsNothing);
+    // So it should be in the semantics tree.
+    expect(semantics.nodesWith(label: 'b'), hasLength(1));
+    semantics.dispose();
   });
 }
 
