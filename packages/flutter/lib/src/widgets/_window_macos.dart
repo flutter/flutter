@@ -25,6 +25,7 @@ class WindowingOwnerMacOS extends WindowingOwner {
       owner: this,
       delegate: delegate,
       preferredSize: preferredSize,
+      title: title,
     );
     _activeControllers.add(res);
     return res;
