@@ -784,7 +784,7 @@ static char markerKey;
   // Input string may be NSString or NSAttributedString.
   BOOL isAttributedString = [string isKindOfClass:[NSAttributedString class]];
   const NSString* rawString = isAttributedString ? [string string] : string;
-  std::string utf8String = [rawString UTF8String];
+  std::string utf8String = rawString ? [rawString UTF8String] : "";
   _activeModel->AddText(utf8String);
   if (_activeModel->composing()) {
     replacedRange = composingBeforeChange;
