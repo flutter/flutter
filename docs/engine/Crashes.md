@@ -159,7 +159,7 @@ If the crash is in AOT Dart code (in `--release` or `--profile` builds) on iOS, 
 
 ## Android Local Engine Builds
 
-When running with a local engine build, the symbolization workflow can be cumbersome and unecessary. Instead, it is possible to build the engine itself with symbols and disable Gradle's automatic symbol stripping. This is also required to see symbol names in Android Studio CPU profiles.
+When running with a local engine build, the symbolization workflow can be cumbersome and unnecessary. Instead, it is possible to build the engine itself with symbols and disable Gradle's automatic symbol stripping. This is also required to see symbol names in Android Studio CPU profiles.
 
 1. In the android engine configuration, provide a --no-stripped argument to gn. For example: `gn --android --android-cpu=arm64 --unopt --no-stripped`
 

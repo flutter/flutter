@@ -50,6 +50,8 @@ void main() {
       currentPreviews.add(
         WidgetPreview(
           scriptUri: '',
+          line: -1,
+          column: -1,
           builder: () => const Text('Foo'),
           previewData: Preview(),
           packageName: '',

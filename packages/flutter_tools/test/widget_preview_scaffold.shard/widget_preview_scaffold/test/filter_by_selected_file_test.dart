@@ -29,17 +29,15 @@ Future<void> testImpl({
     isWindows: isWindows,
   );
   final previews = <WidgetPreview>[
-    WidgetPreview(
+    WidgetPreview.test(
       builder: () => Text('widget1'),
       scriptUri: script1Uri.toString(),
       previewData: Preview(group: 'group'),
-      packageName: '',
     ),
-    WidgetPreview(
+    WidgetPreview.test(
       builder: () => Text('widget2'),
       scriptUri: script2Uri.toString(),
       previewData: Preview(group: 'group'),
-      packageName: '',
     ),
   ];
   final controller = FakeWidgetPreviewScaffoldController(
@@ -51,16 +49,11 @@ Future<void> testImpl({
     controller: controller,
   );
 
-  // No file is selected, so all previews should be visible until
-  // https://github.com/dart-lang/sdk/issues/61538 is resolved.
+  // No file is selected, so no previews should be visible.
   await tester.pumpWidget(widgetPreview);
   expect(controller.filterBySelectedFileListenable.value, true);
   expect(dtdServices.selectedSourceFile.value, isNull);
-  expect(controller.filteredPreviewSetListenable.value, hasLength(1));
-  expect(
-    controller.filteredPreviewSetListenable.value.single.previews,
-    hasLength(2),
-  );
+  expect(controller.filteredPreviewSetListenable.value, isEmpty);
 
   // Select textEditorScript1Uri
   dtdServices.selectedSourceFile.value = TextDocument(
@@ -170,6 +163,7 @@ void main() {
       isWindows: false,
     );
   });
+
   testWidgets('Filter previews based on currently selected file (Windows)', (
     tester,
   ) async {
@@ -186,5 +180,57 @@ void main() {
       textEditorScript2Uri: kTextEditorScript2,
       isWindows: true,
     );
+  });
+
+  testWidgets('Filter previews is responsive to Editor service availablility', (
+    tester,
+  ) async {
+    final dtdServices = FakeWidgetPreviewScaffoldDtdServices();
+    final previews = <WidgetPreview>[
+      WidgetPreview.test(
+        builder: () => Text('widget1'),
+        previewData: Preview(group: 'group'),
+      ),
+      WidgetPreview.test(
+        builder: () => Text('widget2'),
+        previewData: Preview(group: 'group'),
+      ),
+    ];
+    final controller = FakeWidgetPreviewScaffoldController(
+      dtdServicesOverride: dtdServices,
+      previews: previews,
+    );
+    await controller.initialize();
+    final WidgetPreviewScaffold widgetPreview = WidgetPreviewScaffold(
+      controller: controller,
+    );
+    // Disable the Editor service to mimic a preview session not managed by an IDE.
+    dtdServices.editorServiceAvailable.value = false;
+
+    // The Editor service isn't available, so the filter by selected file toggle should not be
+    // shown and all previews should be rendered.
+    await tester.pumpWidget(widgetPreview);
+    final Finder filterBySelectedFileToggle = find.byTooltip(
+      FilterBySelectedFileToggle.kTooltip,
+    );
+    expect(filterBySelectedFileToggle, findsNothing);
+    expect(controller.filteredPreviewSetListenable.value, hasLength(1));
+    expect(
+      controller.filteredPreviewSetListenable.value.first.previews,
+      previews,
+    );
+
+    // Mimic an IDE registering the Editor service after the previewer starts.
+    dtdServices.editorServiceAvailable.value = true;
+
+    // The Editor service is available, so the filter by selected file toggle should be shown.
+    await tester.pumpWidget(widgetPreview);
+    expect(filterBySelectedFileToggle, findsOne);
+
+    // No file is selected, so no previews should be visible.
+    await tester.pumpWidget(widgetPreview);
+    expect(controller.filterBySelectedFileListenable.value, true);
+    expect(dtdServices.selectedSourceFile.value, isNull);
+    expect(controller.filteredPreviewSetListenable.value, isEmpty);
   });
 }
