@@ -47,6 +47,7 @@ public class SettingsChannelTest {
     Log.setLogLevel(Log.VERBOSE);
     final SettingsChannel.ConfigurationQueue queue = new SettingsChannel.ConfigurationQueue();
     final int baseId = Integer.MIN_VALUE;
+    System.out.println("Base ID from test: " + baseId);
 
     queue.enqueueConfiguration(
         new SettingsChannel.ConfigurationQueue.SentConfiguration(mock(DisplayMetrics.class)));

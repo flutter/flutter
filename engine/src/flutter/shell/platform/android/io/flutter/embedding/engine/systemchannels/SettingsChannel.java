@@ -194,6 +194,7 @@ public class SettingsChannel {
      */
     public SentConfiguration getConfiguration(int configGeneration) {
       if (currentConfiguration == null) {
+        System.out.println("The current configuration is null, polling the queue.");
         currentConfiguration = sentQueue.poll();
       }
 
@@ -201,6 +202,12 @@ public class SettingsChannel {
       // configGeneration. Here we assume the generationNumber never overflows.
       while (currentConfiguration != null
           && currentConfiguration.generationNumber < configGeneration) {
+        System.out.println(
+            "The current configuration has generation "
+                + String.valueOf(currentConfiguration.generationNumber)
+                + " when looking for config generation "
+                + String.valueOf(configGeneration)
+                + ", polling the queue.");
         currentConfiguration = sentQueue.poll();
       }
 
@@ -244,8 +251,15 @@ public class SettingsChannel {
     @Nullable
     public BasicMessageChannel.Reply enqueueConfiguration(SentConfiguration config) {
       sentQueue.add(config);
+      System.out.println("Enqueued config with generation number: " + config.generationNumber);
       final SentConfiguration configurationToRemove = previousEnqueuedConfiguration;
+      System.out.println(
+          "Previous enqueued config with generation number: "
+              + (previousEnqueuedConfiguration == null
+                  ? "null"
+                  : String.valueOf(previousEnqueuedConfiguration.generationNumber)));
       previousEnqueuedConfiguration = config;
+      System.out.println("The queue size is now: " + String.valueOf(sentQueue.size()));
       return configurationToRemove == null
           ? null
           : new BasicMessageChannel.Reply() {
@@ -255,6 +269,9 @@ public class SettingsChannel {
               // Removes the SentConfiguration sent right before `config`. Since
               // platform messages are also FIFO older messages will be removed
               // before newer ones.
+              System.out.println(
+                  "Removing config with generation number: "
+                      + String.valueOf(configurationToRemove.generationNumber));
               sentQueue.remove(configurationToRemove);
               if (!sentQueue.isEmpty()) {
                 Log.e(
@@ -274,6 +291,7 @@ public class SettingsChannel {
 
       public SentConfiguration(@NonNull DisplayMetrics displayMetrics) {
         this.generationNumber = nextConfigGeneration++;
+        System.out.println("Generation number created by SentConfiguration: " + generationNumber);
         this.displayMetrics = displayMetrics;
       }
     }
