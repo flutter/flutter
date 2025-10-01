@@ -3777,22 +3777,6 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
   Future<List<IOSCoreDeviceRunningProcess>> getRunningProcesses({required String deviceId}) async {
     return runningProcesses;
   }
-
-  @override
-  Future<(Process?, File?)> startListCoreDevices({
-    Duration timeout = const Duration(seconds: 2),
-    Completer<void>? cancelCompleter,
-  }) async {
-    return (null, null);
-  }
-
-  @override
-  Future<List<Object?>> getCoreDevicesFromHandledProcess({
-    required File output,
-    required int exitCode,
-  }) async {
-    return <Object?>[];
-  }
 }
 
 class FakeXcodeDebug extends Fake implements XcodeDebug {

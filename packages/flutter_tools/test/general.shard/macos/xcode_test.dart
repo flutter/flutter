@@ -1962,15 +1962,8 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 class FakeXcodeDebug extends Fake implements XcodeDebug {}
 
 class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
-  FakeIOSCoreDeviceControl({
-    required ProcessManager processManager,
-    required FileSystem fileSystem,
-    this.getCoreDevicesCompleter,
-  }) : _processManager = processManager,
-       _fileSystem = fileSystem;
+  FakeIOSCoreDeviceControl({this.getCoreDevicesCompleter});
 
-  final ProcessManager _processManager;
-  final FileSystem _fileSystem;
   final Completer<void>? getCoreDevicesCompleter;
   var devices = <FakeIOSCoreDevice>[];
 
