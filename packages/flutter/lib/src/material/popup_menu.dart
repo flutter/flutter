@@ -1807,7 +1807,7 @@ class _EffectiveMouseCursor extends WidgetStateMouseCursor {
 
   @override
   MouseCursor resolve(Set<WidgetState> states) {
-    final WidgetStateMouseCursor fallbackCursor = WidgetStateMouseCursor.clickableAdaptive();
+    const WidgetStateMouseCursor fallbackCursor = WidgetStateMouseCursor.adaptiveClickable;
     return WidgetStateProperty.resolveAs<MouseCursor?>(widgetCursor, states) ??
         themeCursor?.resolve(states) ??
         fallbackCursor.resolve(states);

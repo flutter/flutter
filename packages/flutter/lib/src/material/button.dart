@@ -365,7 +365,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
       widget.constraints,
     );
 
-    final MouseCursor fallbackCursor = WidgetStateMouseCursor.clickableAdaptive();
+    const MouseCursor fallbackCursor = WidgetStateMouseCursor.adaptiveClickable;
     final MouseCursor? effectiveMouseCursor = WidgetStateProperty.resolveAs<MouseCursor?>(
       widget.mouseCursor ?? fallbackCursor,
       materialStates,

@@ -1646,7 +1646,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       );
     }
 
-    final MouseCursor fallbackCursor = WidgetStateMouseCursor.clickableAdaptive();
+    const MouseCursor fallbackCursor = WidgetStateMouseCursor.adaptiveClickable;
     final MouseCursor effectiveMouseCursor = WidgetStateProperty.resolveAs<MouseCursor>(
       widget.mouseCursor ?? fallbackCursor,
       <WidgetState>{if (!_enabled) WidgetState.disabled},

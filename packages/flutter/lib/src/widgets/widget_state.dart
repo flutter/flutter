@@ -387,7 +387,14 @@ abstract class WidgetStateMouseCursor extends MouseCursor
   const factory WidgetStateMouseCursor.resolveWith(
     WidgetPropertyResolver<MouseCursor> callback, {
     String debugDescription,
-  }) = _WidgetStateMouseCursor;
+  }) = _WidgetStateMouseCursorResolver;
+
+  /// Creates a [WidgetStateMouseCursor] that always resolves to the given
+  /// [cursor].
+  ///
+  /// A [debugDescription] may optionally be provided.
+  const factory WidgetStateMouseCursor.resolveAs(MouseCursor cursor, {String debugDescription}) =
+      _WidgetStateMouseCursor;
 
   /// Creates a [WidgetStateMouseCursor] from a [WidgetStateMap].
   ///
@@ -441,12 +448,10 @@ abstract class WidgetStateMouseCursor extends MouseCursor
   ///
   /// On web platforms, this cursor resolves to [clickable] on all other
   /// platforms, it resolves to [basic].
-  static WidgetStateMouseCursor clickableAdaptive() {
-    if (kIsWeb) {
-      return clickable;
-    }
-    return basic;
-  }
+  static const WidgetStateMouseCursor adaptiveClickable = WidgetStateMouseCursor.resolveAs(
+    kIsWeb ? WidgetStateMouseCursor.clickable : SystemMouseCursors.basic,
+    debugDescription: 'WidgetStateMouseCursor(adaptiveClickable)',
+  );
 
   /// A mouse cursor for widgets related to text, which resolves differently
   /// when the widget is disabled.
@@ -467,8 +472,8 @@ abstract class WidgetStateMouseCursor extends MouseCursor
   }
 }
 
-class _WidgetStateMouseCursor extends WidgetStateMouseCursor {
-  const _WidgetStateMouseCursor(
+class _WidgetStateMouseCursorResolver extends WidgetStateMouseCursor {
+  const _WidgetStateMouseCursorResolver(
     this._resolve, {
     this.debugDescription = 'WidgetStateMouseCursor()',
   });
@@ -477,6 +482,18 @@ class _WidgetStateMouseCursor extends WidgetStateMouseCursor {
 
   @override
   MouseCursor resolve(Set<WidgetState> states) => _resolve(states);
+
+  @override
+  final String debugDescription;
+}
+
+class _WidgetStateMouseCursor extends WidgetStateMouseCursor {
+  const _WidgetStateMouseCursor(this.cursor, {this.debugDescription = 'WidgetStateMouseCursor()'});
+
+  final MouseCursor cursor;
+
+  @override
+  MouseCursor resolve(Set<WidgetState> states) => cursor;
 
   @override
   final String debugDescription;

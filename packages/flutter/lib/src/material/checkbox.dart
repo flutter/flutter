@@ -527,7 +527,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
     };
     size += effectiveVisualDensity.baseSizeAdjustment;
 
-    final WidgetStateMouseCursor fallbackMouseCursor = WidgetStateMouseCursor.clickableAdaptive();
+    const WidgetStateMouseCursor fallbackMouseCursor = WidgetStateMouseCursor.adaptiveClickable;
     final WidgetStateProperty<MouseCursor> effectiveMouseCursor =
         WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
           return WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
