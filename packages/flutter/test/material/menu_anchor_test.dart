@@ -2680,6 +2680,42 @@ void main() {
       expect(closed, unorderedEquals(<TestMenu>[TestMenu.mainMenu1, TestMenu.subMenu11]));
       expect(opened, isEmpty);
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/176374.
+    testWidgets('internal controller is created when the controller is null',
+        (WidgetTester tester) async {
+      MenuController? testController;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MenuAnchor(
+            controller: controller,
+            menuChildren: const <Widget>[],
+            builder: (BuildContext context, MenuController controller, Widget? child) {
+              testController = controller;
+              return const Text('Anchor');
+            },
+          ),
+        ),
+      );
+
+      expect(testController, equals(controller));
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MenuAnchor(
+            menuChildren: const <Widget>[],
+            builder: (BuildContext context, MenuController controller, Widget? child) {
+              testController = controller;
+              return const Text('Anchor');
+            },
+          ),
+        ),
+      );
+
+      expect(testController, isNotNull);
+      expect(testController, isNot(controller));
+    });
   });
 
   group('MenuItemButton', () {
