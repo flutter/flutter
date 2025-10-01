@@ -589,45 +589,49 @@ object FlutterPluginUtils {
         gradleProject: Project,
         flutterSdkRootPath: String
     ) {
-        // If the project is already configuring a native build, we don't need to do anything.
-        val gradleProjectAndroidExtension = getAndroidExtension(gradleProject)
-        val forcingNotRequired: Boolean =
-            gradleProjectAndroidExtension.externalNativeBuild.cmake.path != null
-        if (forcingNotRequired) {
-            return
-        }
+        gradleProject.afterEvaluate {
+            // If the project is already configuring a native build using Cmake or ndk-build, we don't
+            // need to do anything.
+            val gradleProjectAndroidExtension = getAndroidExtension(gradleProject)
+            println(gradleProjectAndroidExtension.externalNativeBuild.ndkBuild.path)
+            val forcingNotRequired: Boolean =
+                gradleProjectAndroidExtension.externalNativeBuild.cmake.path != null || gradleProjectAndroidExtension.externalNativeBuild.ndkBuild.path != null
+            if (forcingNotRequired) {
+                return@afterEvaluate
+            }
 
-        // Otherwise, point to an empty CMakeLists.txt, and ignore associated warnings.
-        gradleProjectAndroidExtension.externalNativeBuild.cmake.path(
-            "$flutterSdkRootPath/packages/flutter_tools/gradle/src/main/scripts/CMakeLists.txt"
-        )
-
-        // AGP defaults to outputting build artifacts in `android/app/.cxx`. This directory is a
-        // build artifact, so we move it from that directory to within Flutter's build directory
-        // to avoid polluting source directories with build artifacts.
-        //
-        // AGP explicitly recommends not setting the buildStagingDirectory to be within a build
-        // directory in
-        // https://developer.android.com/reference/tools/gradle-api/8.3/null/com/android/build/api/dsl/Cmake#buildStagingDirectory(kotlin.Any),
-        // but as we are not actually building anything (and are instead only tricking AGP into
-        // downloading the NDK), it is acceptable for the buildStagingDirectory to be removed
-        // and rebuilt when running clean builds.
-        gradleProjectAndroidExtension.externalNativeBuild.cmake.buildStagingDirectory(
-            gradleProject.layout.buildDirectory
-                .dir("../.cxx")
-                .get()
-                .asFile.path
-        )
-
-        // CMake will print warnings when you try to build an empty project.
-        // These arguments silence the warnings - our project is intentionally
-        // empty.
-        gradleProjectAndroidExtension.buildTypes.forEach { buildType ->
-            buildType.externalNativeBuild.cmake.arguments(
-                "-Wno-dev",
-                "--no-warn-unused-cli",
-                "-DCMAKE_BUILD_TYPE=${buildType.name}"
+            // Otherwise, point to an empty CMakeLists.txt, and ignore associated warnings.
+            gradleProjectAndroidExtension.externalNativeBuild.cmake.path(
+                "$flutterSdkRootPath/packages/flutter_tools/gradle/src/main/scripts/CMakeLists.txt"
             )
+
+            // AGP defaults to outputting build artifacts in `android/app/.cxx`. This directory is a
+            // build artifact, so we move it from that directory to within Flutter's build directory
+            // to avoid polluting source directories with build artifacts.
+            //
+            // AGP explicitly recommends not setting the buildStagingDirectory to be within a build
+            // directory in
+            // https://developer.android.com/reference/tools/gradle-api/8.3/null/com/android/build/api/dsl/Cmake#buildStagingDirectory(kotlin.Any),
+            // but as we are not actually building anything (and are instead only tricking AGP into
+            // downloading the NDK), it is acceptable for the buildStagingDirectory to be removed
+            // and rebuilt when running clean builds.
+            gradleProjectAndroidExtension.externalNativeBuild.cmake.buildStagingDirectory(
+                gradleProject.layout.buildDirectory
+                    .dir("../.cxx")
+                    .get()
+                    .asFile.path
+            )
+
+            // CMake will print warnings when you try to build an empty project.
+            // These arguments silence the warnings - our project is intentionally
+            // empty.
+            gradleProjectAndroidExtension.buildTypes.forEach { buildType ->
+                buildType.externalNativeBuild.cmake.arguments(
+                    "-Wno-dev",
+                    "--no-warn-unused-cli",
+                    "-DCMAKE_BUILD_TYPE=${buildType.name}"
+                )
+            }
         }
     }
 
