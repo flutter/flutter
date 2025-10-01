@@ -137,7 +137,12 @@ class OutlinedButton extends ButtonStyleButton {
       autofocus: autofocus ?? false,
       clipBehavior: clipBehavior ?? Clip.none,
       statesController: statesController,
-      child: _OutlinedButtonWithIconChild(icon: icon, label: label, buttonStyle: style, iconAlignment: iconAlignment),
+      child: _OutlinedButtonWithIconChild(
+        icon: icon,
+        label: label,
+        buttonStyle: style,
+        iconAlignment: iconAlignment,
+      ),
     );
   }
 
@@ -394,6 +399,7 @@ class OutlinedButton extends ButtonStyleButton {
             splashFactory: InkRipple.splashFactory,
           );
 
+    // Only apply paddings when OutlinedButton has an Icon
     if (child is _OutlinedButtonWithIconChild && theme.useMaterial3) {
       final double defaultFontSize =
           buttonStyle.textStyle?.resolve(const <WidgetState>{})?.fontSize ?? 14.0;
@@ -431,8 +437,6 @@ EdgeInsetsGeometry _scaledPadding(BuildContext context) {
     effectiveTextScale,
   );
 }
-
-
 
 class _OutlinedButtonWithIconChild extends StatelessWidget {
   const _OutlinedButtonWithIconChild({
