@@ -79,10 +79,7 @@ class WidgetPreviewScaffoldController {
   /// Enable or disable filtering by selected source file.
   Future<void> toggleFilterBySelectedFile() async {
     final updated = !_filterBySelectedFile.value;
-    await dtdServices.setPreference(
-      kFilterBySelectedFilePreference,
-      updated,
-    );
+    await dtdServices.setPreference(kFilterBySelectedFilePreference, updated);
     _filterBySelectedFile.value = updated;
   }
 
