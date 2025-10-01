@@ -1260,7 +1260,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('When an OutlinedButton gains an icon, preserves the same Semantic Node ID', (
+  testWidgets('When an OutlinedButton gains an icon, preserves the same SemanticsNode id', (
     WidgetTester tester,
   ) async {
     bool toggled = false;
