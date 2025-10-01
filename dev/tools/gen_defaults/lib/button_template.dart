@@ -176,8 +176,8 @@ ${tokenAvailable("$tokenGroup.outline.color") ? '''
     const MaterialStatePropertyAll<OutlinedBorder>(${shape("$tokenGroup.container", '')});
 
   @override
-  WidgetStateProperty<MouseCursor?>? get mouseCursor => 
-    MaterialStatePropertyAll<MouseCursor?>(WidgetStateMouseCursor.adaptiveClickable);
+  WidgetStateProperty<MouseCursor?>? get mouseCursor =>
+    const MaterialStatePropertyAll<MouseCursor?>(WidgetStateMouseCursor.adaptiveClickable);
 
   @override
   VisualDensity? get visualDensity => Theme.of(context).visualDensity;

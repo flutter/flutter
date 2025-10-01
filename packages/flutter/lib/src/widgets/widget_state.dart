@@ -449,7 +449,6 @@ abstract class WidgetStateMouseCursor extends MouseCursor
     if (!states.contains(WidgetState.disabled) && kIsWeb) {
       return WidgetStateMouseCursor.clickable;
     }
-    print('is not web');
     return SystemMouseCursors.basic;
   }
 

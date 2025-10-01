@@ -1103,8 +1103,6 @@ void main() {
         ),
       ),
     );
-    print('kisWeb: $kIsWeb');
-    print(kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic);
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
