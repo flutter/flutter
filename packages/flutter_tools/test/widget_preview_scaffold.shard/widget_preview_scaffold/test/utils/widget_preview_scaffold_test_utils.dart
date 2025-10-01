@@ -62,6 +62,7 @@ class FakeWidgetPreviewScaffoldDtdServices extends Fake
   FakeWidgetPreviewScaffoldDtdServices({this.isWindows = false});
 
   final navigationEvents = <CodeLocation>[];
+  final preferences = <String, Object>{};
 
   @override
   Future<void> connect({Uri? dtdUri}) async {}
@@ -104,6 +105,20 @@ class FakeWidgetPreviewScaffoldDtdServices extends Fake
   @override
   Future<void> navigateToCode(CodeLocation location) async {
     navigationEvents.add(location);
+  }
+
+  /// Retrieves the state of flag [key] from the persistent preferences map.
+  ///
+  /// If [key] is not set, [defaultValue] is returned.
+  @override
+  Future<bool> getFlag(String flag, {bool defaultValue = true}) async {
+    return preferences[flag] as bool? ?? defaultValue;
+  }
+
+  /// Sets [key] to [value] in the persistent preferences map.
+  @override
+  Future<void> setPreference(String key, Object value) async {
+    preferences[key] = value;
   }
 }
 

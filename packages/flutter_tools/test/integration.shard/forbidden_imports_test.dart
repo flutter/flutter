@@ -276,8 +276,8 @@ void main() {
               ) ||
               line.startsWith(RegExp(r'import.*package:build_runner/build_runner.dart')) ||
               line.startsWith(RegExp(r'import.*package:build_config/build_config.dart')) ||
-              line.startsWith(RegExp(r'import.*dwds:*.dart')) ||
-              line.startsWith(RegExp(r'import.*devtools_server:*.dart')) ||
+              line.startsWith(RegExp(r'import.*package:dwds/.*.dart')) ||
+              line.startsWith(RegExp(r'import.*package:devtools_server/.*.dart')) ||
               line.startsWith(RegExp(r'import.*build_runner/.*.dart'))) {
             final String relativePath = fileSystem.path.relative(file.path, from: flutterTools);
             fail('$relativePath imports a build_runner/dwds/devtools package');
