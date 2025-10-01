@@ -335,27 +335,19 @@ class WebTextStyle implements ui.TextStyle {
     );
   }
 
+  ui.Color getForegroundColor() {
+    //print('foreground: ${foreground == null ? 'null' : foreground!.color.toCssString()}');
+    //print('color: ${color == null ? 'null' : color!.toCssString()}');
+    return foreground != null
+        ? foreground!.color
+        : (color != null ? color! : const ui.Color(0xFFFFFFFF));
+  }
+
   String _debugPaintToString(ui.Paint? paint) {
     if (paint == null) {
       return '';
     }
     return paint.color.toCssString();
-    /*
-      'colorFilter:${paint.colorFilter}\n'
-      'strokeWidth:${paint.strokeWidth}\n'
-      'strokeMiterLimit:${paint.strokeMiterLimit}\n'
-      'strokeCap:${paint.strokeCap}\n'
-      'strokeJoin:${paint.strokeJoin}\n'
-      'style:${paint.style}\n'
-      '${paint.shader != null ? 'shader,' : 'null shader'}\n'
-      '${paint.maskFilter != null ? 'maskFilter,' : 'null maskFilter'}\n'
-      '${paint.colorFilter != null ? 'colorFilter,' : 'null colorFilter'}\n'
-      '${paint.imageFilter != null ? 'imageFilter,' : 'null imageFilter'}\n'
-      'blendMode:${paint.blendMode}\n'
-      'isAntiAlias:${paint.isAntiAlias}\n'
-      '${paint.invertColors ? 'invertColors,' : 'null invertColors'}\n'
-      '${paint.filterQuality != ui.FilterQuality.none ? 'filterQuality:${paint.filterQuality},' : 'none filterQuality'}'
-      */
   }
 
   @override
@@ -481,7 +473,7 @@ class WebTextStyle implements ui.TextStyle {
       case StyleElements.shadows:
         return shadows != null && shadows!.isNotEmpty;
       case StyleElements.decorations:
-        return decoration != null;
+        return decoration != null && decoration! != ui.TextDecoration.none;
       case StyleElements.text:
         return true;
     }
@@ -1397,7 +1389,7 @@ class ChildStyleNode extends StyleNode {
   // property isn't defined, go to the parent node.
 
   @override
-  ui.Color? get _color => style.color ?? (_foreground == null ? parent._color : null);
+  ui.Color? get _color => style.color ?? parent._color;
 
   @override
   ui.TextDecoration? get _decoration => style.decoration ?? parent._decoration;
@@ -1531,7 +1523,8 @@ class RootStyleNode extends StyleNode {
   ui.Locale? get _locale => style.locale;
 
   @override
-  ui.Paint? get _background => null;
+  ui.Paint? get _background => style.background ?? ui.Paint()
+    ..color = const ui.Color(0x00000000);
 
   @override
   ui.Paint? get _foreground => null;

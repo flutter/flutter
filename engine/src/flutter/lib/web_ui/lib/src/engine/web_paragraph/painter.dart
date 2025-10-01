@@ -54,7 +54,7 @@ class CanvasKitPainter extends Painter {
 
   @override
   void fillDecorations(TextBlock block, ui.Rect sourceRect) {
-    paintContext.fillStyle = block.style.foreground?.color.toCssString();
+    paintContext.fillStyle = block.style.getForegroundColor().toCssString();
 
     final double thickness = calculateThickness(block.style);
 
@@ -148,8 +148,7 @@ class CanvasKitPainter extends Painter {
     // TODO(jlavrova): see if we can implement shadowing ourself avoiding redrawing text clusters many times.
     // Answer: we cannot, and also there is a question of calculating the size of the shadow which we have to
     // take from Chrome as well (performing another measure text operation with shadow attribute set).
-    // TODO(mdebbar=>jlavrova): Check `style.color` first.
-    paintContext.fillStyle = style.foreground?.color.toCssString();
+    paintContext.fillStyle = style.getForegroundColor().toCssString();
     paintContext.shadowColor = shadow.color.toCssString();
     paintContext.shadowBlur = shadow.blurRadius;
     paintContext.shadowOffsetX = shadow.offset.dx;
@@ -194,8 +193,7 @@ class CanvasKitPainter extends Painter {
   @override
   void fillTextCluster(WebCluster webTextCluster, bool isDefaultLtr) {
     final WebTextStyle style = webTextCluster.style;
-    // TODO(mdebbar=>jlavrova): Check `style.color` first.
-    paintContext.fillStyle = style.foreground?.color.toCssString();
+    paintContext.fillStyle = style.getForegroundColor().toCssString();
     // We fill the text cluster into a rectange [0,0,w,h]
     // but we need to shift the y coordinate by the font ascent
     // becase the text is drawn at the ascent, not at 0

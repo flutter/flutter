@@ -86,8 +86,12 @@ class TextPaint {
       );
       // We are painting clusters in visual order so that if they step on each other, the paint
       // order is correct.
-      final int start = block.isLtr ? block.clusterRangeWithoutWhitespaces.start : block.clusterRangeWithoutWhitespaces.end - 1;
-      final int end = block.isLtr ? block.clusterRangeWithoutWhitespaces.end : block.clusterRangeWithoutWhitespaces.start - 1;
+      final int start = block.isLtr
+          ? block.clusterRangeWithoutWhitespaces.start
+          : block.clusterRangeWithoutWhitespaces.end - 1;
+      final int end = block.isLtr
+          ? block.clusterRangeWithoutWhitespaces.end
+          : block.clusterRangeWithoutWhitespaces.start - 1;
       final int step = block.isLtr ? 1 : -1;
       for (int i = start; i != end; i += step) {
         final clusterText = layout.allClusters[i];

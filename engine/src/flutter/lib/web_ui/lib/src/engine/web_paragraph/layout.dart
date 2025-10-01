@@ -479,10 +479,10 @@ class TextLayout {
 
       for (final LineBlock block in line.visualBlocks) {
         ui.TextRange intersect = block.textRange.intersect(textRange);
-        if (boxWidthStyle == ui.BoxWidthStyle.tight) {
-          // Ignore whitespaces at the end of the line
-          intersect = intersect.intersect(line.textRange);
-        }
+        //if (boxWidthStyle == ui.BoxWidthStyle.tight) {
+        //  // Ignore whitespaces at the end of the line
+        //  intersect = intersect.intersect(line.textRange);
+        //}
         WebParagraphDebug.log(
           'block: ${block.textRange} & $textRange = $intersect '
           '${block.span.start}',
@@ -635,7 +635,6 @@ class TextLayout {
         // Actually, it's only possible for the first line (no lines before) because lines cover all vertical space.
         assert(lineNum == 1);
         return ui.TextPosition(
-          // TODO(mdebbar=>jlavrova): Using cluster range here is probably wrong.
           offset: line.textClusterRange.start,
           /*affinity: ui.TextAffinity.downstream,*/
         );
@@ -643,22 +642,15 @@ class TextLayout {
         // We are not there yet; we need a line closest to the offset.
         continue;
       }
+      WebParagraphDebug.log('found line: ${line.textClusterRange} ${line.advance} vs $offset');
 
       // We found the line that contains the offset; let's go through all the visual blocks to find the position
-      int blockNum = 0;
       for (final block in line.visualBlocks) {
-        blockNum++;
         final blockRect = block.advance
             .translate(line.advance.left + line.formattingShift, line.advance.top)
             .inflate(epsilon);
         if (blockRect.right < offset.dx) {
-          // TODO(mdebbar=>jlavrova): The below comment is incorrect?
-
-          // We didn't find any block and we already on the right side of our offset
-          // It's only possible for the first block in the line
-          assert(blockNum == 1);
           return ui.TextPosition(
-            // TODO(mdebbar=>jlavrova): Using cluster range here is probably wrong.
             offset: line.textClusterRange.end - 1,
             /*affinity: ui.TextAffinity.downstream,*/
           );
@@ -666,6 +658,8 @@ class TextLayout {
           // We are not there yet; we need a block containing the offset (or the closest to it)
           continue;
         }
+
+        WebParagraphDebug.log('found block: $block $blockRect vs $offset');
         // Found the block; let's go through all the clusters IN VISUAL ORDER to find the position
         // TODO(mdebbar=>jlavrova): Do we have to iterate in visual order?
         final int start = block.isLtr ? block.clusterRange.start : block.clusterRange.end - 1;
@@ -682,15 +676,14 @@ class TextLayout {
                 line.advance.top + line.fontBoundingBoxAscent,
               )
               .inflate(epsilon);
+          WebParagraphDebug.log('test cluster: $rect vs $offset');
           if (rect.contains(offset)) {
-            // TODO(jlavrova): proportionally calculate the text position? I wouldn't...
             if (offset.dx - rect.left <= rect.right - offset.dx) {
-              return ui.TextPosition(
-                offset: cluster.start,
-                /* affinity: ui.TextAffinity.downstream, */
-              );
+              return ui.TextPosition(offset: cluster.start);
             } else if (cluster.end == paragraph.text.length) {
-              return ui.TextPosition(offset: cluster.end - 1, affinity: ui.TextAffinity.upstream);
+              return ui.TextPosition(offset: cluster.end - 1);
+            } else {
+              return ui.TextPosition(offset: cluster.end, affinity: ui.TextAffinity.upstream);
             }
           }
         }
