@@ -2896,8 +2896,7 @@ class _MenuItemLabel extends StatelessWidget {
     if (semanticsLabel != null) {
       menuItemLabel = Semantics(
         label: semanticsLabel,
-        // Only exclude semantics when we explicitly supply a custom label.
-        excludeSemantics: semanticsLabel != null,
+        excludeSemantics: true,
         child: menuItemLabel,
       );
     }
