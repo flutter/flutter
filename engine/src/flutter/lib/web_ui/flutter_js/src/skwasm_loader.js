@@ -28,7 +28,6 @@ export const loadSkwasm = async (deps, config, browserEnvironment, baseUrl) => {
       // queues/flushes pending messages that were received during the
       // asynchronous load.
       if (filename.endsWith('.ww.js')) {
-        const url = resolveUrlWithSegments(baseUrl, filename);
         return URL.createObjectURL(new Blob(
           [`
 "use strict";
@@ -62,6 +61,7 @@ addEventListener("message", eventListener);
           ],
           { 'type': 'application/javascript' }));
       }
+      const url = resolveUrlWithSegments(baseUrl, filename);
       return url;
     },
     // Because of the above workaround, the worker is just a blob and
