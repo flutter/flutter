@@ -715,11 +715,6 @@ class _WidgetOutlinedBorderMapper extends WidgetStateMapper<OutlinedBorder?>
 ///   2. Use [WidgetStateTextStyle.resolveWith] and pass in a callback that
 ///      will be used to resolve the text style in the given states.
 ///   3. Use [WidgetStateTextStyle.fromMap] to assign a style using a [WidgetStateMap].
-///
-/// See also:
-///
-///  * [MaterialStateTextStyle], the Material specific version of
-///    `WidgetStateTextStyle`.
 abstract class WidgetStateTextStyle extends TextStyle implements WidgetStateProperty<TextStyle> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
