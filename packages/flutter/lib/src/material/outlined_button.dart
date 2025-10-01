@@ -83,8 +83,11 @@ class OutlinedButton extends ButtonStyleButton {
     super.autofocus = false,
     super.clipBehavior,
     super.statesController,
+    Widget? icon,
     required super.child,
-  });
+  }) : _icon = icon;
+
+  final Widget? _icon;
 
   /// Create a text button from a pair of widgets that serve as the button's
   /// [icon] and [label].
@@ -111,21 +114,6 @@ class OutlinedButton extends ButtonStyleButton {
     required Widget label,
     IconAlignment? iconAlignment,
   }) {
-    if (icon == null) {
-      return OutlinedButton(
-        key: key,
-        onPressed: onPressed,
-        onLongPress: onLongPress,
-        onHover: onHover,
-        onFocusChange: onFocusChange,
-        style: style,
-        focusNode: focusNode,
-        autofocus: autofocus ?? false,
-        clipBehavior: clipBehavior ?? Clip.none,
-        statesController: statesController,
-        child: label,
-      );
-    }
     return OutlinedButton(
       key: key,
       onPressed: onPressed,
@@ -137,12 +125,8 @@ class OutlinedButton extends ButtonStyleButton {
       autofocus: autofocus ?? false,
       clipBehavior: clipBehavior ?? Clip.none,
       statesController: statesController,
-      child: _OutlinedButtonWithIconChild(
-        icon: icon,
-        label: label,
-        buttonStyle: style,
-        iconAlignment: iconAlignment,
-      ),
+      icon: icon,
+      child: icon != null ? _OutlinedButtonWithIconChild(iconAlignment: iconAlignment, label: label, buttonStyle: style, icon: icon,) : label,
     );
   }
 
@@ -225,8 +209,8 @@ class OutlinedButton extends ButtonStyleButton {
     ButtonLayerBuilder? foregroundBuilder,
   }) {
     final WidgetStateProperty<Color?>? backgroundColorProp = switch ((
-      backgroundColor,
-      disabledBackgroundColor,
+    backgroundColor,
+    disabledBackgroundColor,
     )) {
       (_?, null) => WidgetStatePropertyAll<Color?>(backgroundColor),
       (_, _) => ButtonStyleButton.defaultColor(backgroundColor, disabledBackgroundColor),
@@ -377,30 +361,30 @@ class OutlinedButton extends ButtonStyleButton {
     final ButtonStyle buttonStyle = theme.useMaterial3
         ? _OutlinedButtonDefaultsM3(context)
         : styleFrom(
-            foregroundColor: colorScheme.primary,
-            disabledForegroundColor: colorScheme.onSurface.withOpacity(0.38),
-            backgroundColor: Colors.transparent,
-            disabledBackgroundColor: Colors.transparent,
-            shadowColor: theme.shadowColor,
-            elevation: 0,
-            textStyle: theme.textTheme.labelLarge,
-            padding: _scaledPadding(context),
-            minimumSize: const Size(64, 36),
-            maximumSize: Size.infinite,
-            side: BorderSide(color: colorScheme.onSurface.withOpacity(0.12)),
-            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
-            enabledMouseCursor: SystemMouseCursors.click,
-            disabledMouseCursor: SystemMouseCursors.basic,
-            visualDensity: theme.visualDensity,
-            tapTargetSize: theme.materialTapTargetSize,
-            animationDuration: kThemeChangeDuration,
-            enableFeedback: true,
-            alignment: Alignment.center,
-            splashFactory: InkRipple.splashFactory,
-          );
+      foregroundColor: colorScheme.primary,
+      disabledForegroundColor: colorScheme.onSurface.withOpacity(0.38),
+      backgroundColor: Colors.transparent,
+      disabledBackgroundColor: Colors.transparent,
+      shadowColor: theme.shadowColor,
+      elevation: 0,
+      textStyle: theme.textTheme.labelLarge,
+      padding: _scaledPadding(context),
+      minimumSize: const Size(64, 36),
+      maximumSize: Size.infinite,
+      side: BorderSide(color: colorScheme.onSurface.withOpacity(0.12)),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
+      enabledMouseCursor: SystemMouseCursors.click,
+      disabledMouseCursor: SystemMouseCursors.basic,
+      visualDensity: theme.visualDensity,
+      tapTargetSize: theme.materialTapTargetSize,
+      animationDuration: kThemeChangeDuration,
+      enableFeedback: true,
+      alignment: Alignment.center,
+      splashFactory: InkRipple.splashFactory,
+    );
 
     // Only apply paddings when OutlinedButton has an Icon
-    if (child is _OutlinedButtonWithIconChild && theme.useMaterial3) {
+    if (_icon != null && theme.useMaterial3) {
       final double defaultFontSize =
           buttonStyle.textStyle?.resolve(const <WidgetState>{})?.fontSize ?? 14.0;
       final double effectiveTextScale =
@@ -461,9 +445,9 @@ class _OutlinedButtonWithIconChild extends StatelessWidget {
     final OutlinedButtonThemeData outlinedButtonTheme = OutlinedButtonTheme.of(context);
     final IconAlignment effectiveIconAlignment =
         iconAlignment ??
-        outlinedButtonTheme.style?.iconAlignment ??
-        buttonStyle?.iconAlignment ??
-        IconAlignment.start;
+            outlinedButtonTheme.style?.iconAlignment ??
+            buttonStyle?.iconAlignment ??
+            IconAlignment.start;
     final Widget? icon = this.icon;
 
     if (icon == null) {
@@ -490,72 +474,72 @@ class _OutlinedButtonWithIconChild extends StatelessWidget {
 // dart format off
 class _OutlinedButtonDefaultsM3 extends ButtonStyle {
   _OutlinedButtonDefaultsM3(this.context)
-   : super(
-       animationDuration: kThemeChangeDuration,
-       enableFeedback: true,
-       alignment: Alignment.center,
-     );
+      : super(
+    animationDuration: kThemeChangeDuration,
+    enableFeedback: true,
+    alignment: Alignment.center,
+  );
 
   final BuildContext context;
   late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
   WidgetStateProperty<TextStyle?> get textStyle =>
-    MaterialStatePropertyAll<TextStyle?>(Theme.of(context).textTheme.labelLarge);
+      MaterialStatePropertyAll<TextStyle?>(Theme.of(context).textTheme.labelLarge);
 
   @override
   WidgetStateProperty<Color?>? get backgroundColor =>
-    const MaterialStatePropertyAll<Color>(Colors.transparent);
+      const MaterialStatePropertyAll<Color>(Colors.transparent);
 
   @override
   WidgetStateProperty<Color?>? get foregroundColor =>
-    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-      if (states.contains(WidgetState.disabled)) {
-        return _colors.onSurface.withOpacity(0.38);
-      }
-      return _colors.primary;
-    });
+      WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
+          return _colors.onSurface.withOpacity(0.38);
+        }
+        return _colors.primary;
+      });
 
   @override
   WidgetStateProperty<Color?>? get overlayColor =>
-    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-      if (states.contains(WidgetState.pressed)) {
-        return _colors.primary.withOpacity(0.1);
-      }
-      if (states.contains(WidgetState.hovered)) {
-        return _colors.primary.withOpacity(0.08);
-      }
-      if (states.contains(WidgetState.focused)) {
-        return _colors.primary.withOpacity(0.1);
-      }
-      return null;
-    });
+      WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.pressed)) {
+          return _colors.primary.withOpacity(0.1);
+        }
+        if (states.contains(WidgetState.hovered)) {
+          return _colors.primary.withOpacity(0.08);
+        }
+        if (states.contains(WidgetState.focused)) {
+          return _colors.primary.withOpacity(0.1);
+        }
+        return null;
+      });
 
   @override
   WidgetStateProperty<Color>? get shadowColor =>
-    const MaterialStatePropertyAll<Color>(Colors.transparent);
+      const MaterialStatePropertyAll<Color>(Colors.transparent);
 
   @override
   WidgetStateProperty<Color>? get surfaceTintColor =>
-    const MaterialStatePropertyAll<Color>(Colors.transparent);
+      const MaterialStatePropertyAll<Color>(Colors.transparent);
 
   @override
   WidgetStateProperty<double>? get elevation =>
-    const MaterialStatePropertyAll<double>(0.0);
+      const MaterialStatePropertyAll<double>(0.0);
 
   @override
   WidgetStateProperty<EdgeInsetsGeometry>? get padding =>
-    MaterialStatePropertyAll<EdgeInsetsGeometry>(_scaledPadding(context));
+      MaterialStatePropertyAll<EdgeInsetsGeometry>(_scaledPadding(context));
 
   @override
   WidgetStateProperty<Size>? get minimumSize =>
-    const MaterialStatePropertyAll<Size>(Size(64.0, 40.0));
+      const MaterialStatePropertyAll<Size>(Size(64.0, 40.0));
 
   // No default fixedSize
 
   @override
   WidgetStateProperty<double>? get iconSize =>
-    const MaterialStatePropertyAll<double>(18.0);
+      const MaterialStatePropertyAll<double>(18.0);
 
   @override
   WidgetStateProperty<Color>? get iconColor {
@@ -578,32 +562,32 @@ class _OutlinedButtonDefaultsM3 extends ButtonStyle {
 
   @override
   WidgetStateProperty<Size>? get maximumSize =>
-    const MaterialStatePropertyAll<Size>(Size.infinite);
+      const MaterialStatePropertyAll<Size>(Size.infinite);
 
   @override
   WidgetStateProperty<BorderSide>? get side =>
-    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-    if (states.contains(WidgetState.disabled)) {
-      return BorderSide(color: _colors.onSurface.withOpacity(0.12));
-    }
-    if (states.contains(WidgetState.focused)) {
-      return BorderSide(color: _colors.primary);
-    }
-    return BorderSide(color: _colors.outline);
-  });
+      WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
+          return BorderSide(color: _colors.onSurface.withOpacity(0.12));
+        }
+        if (states.contains(WidgetState.focused)) {
+          return BorderSide(color: _colors.primary);
+        }
+        return BorderSide(color: _colors.outline);
+      });
 
   @override
   WidgetStateProperty<OutlinedBorder>? get shape =>
-    const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
+      const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
   WidgetStateProperty<MouseCursor?>? get mouseCursor =>
-    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-      if (states.contains(WidgetState.disabled)) {
-        return SystemMouseCursors.basic;
-      }
-      return SystemMouseCursors.click;
-    });
+      WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
+          return SystemMouseCursors.basic;
+        }
+        return SystemMouseCursors.click;
+      });
 
   @override
   VisualDensity? get visualDensity => Theme.of(context).visualDensity;
