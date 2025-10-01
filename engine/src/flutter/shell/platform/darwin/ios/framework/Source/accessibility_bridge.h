@@ -62,6 +62,7 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
                                fml::MallocMapping args) override;
   void AccessibilityObjectDidBecomeFocused(int32_t id) override;
   void AccessibilityObjectDidLoseFocus(int32_t id) override;
+  NSString* GetDefaultLocale() override { return view_controller_.applicationLocale; }
 
   UIView<UITextInput>* textInputView() override;
 

@@ -112,7 +112,7 @@ void main() {
       minLeadingWidth: 400,
       minTileHeight: 30,
       enableFeedback: true,
-      mouseCursor: MaterialStateMouseCursor.clickable,
+      mouseCursor: WidgetStateMouseCursor.clickable,
       visualDensity: VisualDensity.comfortable,
       titleAlignment: ListTileTitleAlignment.top,
       isThreeLine: true,
@@ -171,7 +171,7 @@ void main() {
             minVerticalPadding: 300,
             minLeadingWidth: 400,
             enableFeedback: true,
-            mouseCursor: MaterialStateMouseCursor.clickable,
+            mouseCursor: WidgetStateMouseCursor.clickable,
             child: Center(
               child: Builder(
                 builder: (BuildContext context) {
@@ -198,7 +198,7 @@ void main() {
     expect(theme.minVerticalPadding, 300);
     expect(theme.minLeadingWidth, 400);
     expect(theme.enableFeedback, true);
-    expect(theme.mouseCursor, MaterialStateMouseCursor.clickable);
+    expect(theme.mouseCursor, WidgetStateMouseCursor.clickable);
   });
 
   testWidgets('ListTileTheme', (WidgetTester tester) async {
@@ -1036,7 +1036,7 @@ void main() {
             minTileHeight: 30,
             enableFeedback: true,
             titleAlignment: ListTileTitleAlignment.bottom,
-            mouseCursor: MaterialStateMouseCursor.textable,
+            mouseCursor: WidgetStateMouseCursor.textable,
             visualDensity: VisualDensity.comfortable,
             isThreeLine: true,
           ),
@@ -1064,7 +1064,7 @@ void main() {
                   minTileHeight: 80,
                   enableFeedback: false,
                   titleAlignment: ListTileTitleAlignment.top,
-                  mouseCursor: MaterialStateMouseCursor.clickable,
+                  mouseCursor: WidgetStateMouseCursor.clickable,
                   visualDensity: VisualDensity.compact,
                   isThreeLine: false,
                   child: const ListTile(),
@@ -1096,7 +1096,7 @@ void main() {
     expect(theme.minTileHeight, 80);
     expect(theme.enableFeedback, false);
     expect(theme.titleAlignment, ListTileTitleAlignment.top);
-    expect(theme.mouseCursor, MaterialStateMouseCursor.clickable);
+    expect(theme.mouseCursor, WidgetStateMouseCursor.clickable);
     expect(theme.visualDensity, VisualDensity.compact);
     expect(theme.isThreeLine, false);
   });
