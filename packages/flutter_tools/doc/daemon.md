@@ -158,6 +158,17 @@ This is sent once the application launch process is complete and the app is eith
 
 This is sent when output is logged for a running application. The `params` field will be a map with the fields `appId` and `log`. The `log` field is a string with the output text. If the output indicates an error, an `error` boolean field will be present, and set to `true`.
 
+#### app.warning
+
+This is sent when a warning is issued for a running application that an editor may wish to handle specifically. The `params` field will be a map with the following fields:
+
+- `warning`: A string containing the warning message to be displayed to the user.
+- `category`: A string used to categorize the warning (for example, `ios-wireless-performance`).
+- `deviceId`: The ID of the device this warning is relevant to.
+- `iosVersion`: The iOS versionn of the device
+- `actionable`: A boolean indicating if the warning includes a suggested action for the user.'
+- `url`: An optional string containing a URL with more information about the warning.
+
 #### app.progress
 
 This is sent when an operation starts and again when it stops. When an operation starts, the event contains the fields `id`, an opaque identifier, and `message` containing text describing the operation. When that same operation ends, the event contains the same `id` field value as when the operation started, along with a `finished` bool field with the value true, but no `message` field.

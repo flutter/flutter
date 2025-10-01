@@ -512,7 +512,6 @@ class IOSDevice extends Device {
         'deviceId': id,
         'iosVersion': sdkVersion!.major,
         'actionable': true,
-        'suggestion': 'Use a wired (USB) connection for better performance',
       });
     }
 
