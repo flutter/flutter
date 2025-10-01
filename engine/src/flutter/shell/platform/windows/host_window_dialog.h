@@ -10,6 +10,9 @@
 namespace flutter {
 class HostWindowDialog : public HostWindow {
  public:
+  // Creates a dialog window.
+  //
+  // If |owner_window| is not null, the dialog will be modal to the owner.
   HostWindowDialog(WindowManager* window_manager,
                    FlutterWindowsEngine* engine,
                    const WindowSizeRequest& preferred_size,

@@ -37,7 +37,7 @@ class DialogWindowContent extends StatelessWidget {
                       'View ID: ${window.rootView.viewId}\n'
                       'Parent View ID: ${window.parent?.rootView.viewId ?? "None"}\n'
                       'Size: ${(windowSize.width).toStringAsFixed(1)}\u00D7${(windowSize.height).toStringAsFixed(1)}\n'
-                      'Device Pixel Ratio: ${dpr}',
+                      'Device Pixel Ratio: $dpr',
                       textAlign: TextAlign.center,
                     );
                   },

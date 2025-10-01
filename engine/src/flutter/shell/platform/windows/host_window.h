@@ -28,10 +28,14 @@ class HostWindow {
  public:
   virtual ~HostWindow();
 
-  // Creates a native Win32 window with a child view confined to its client
+  // Creates a regular Win32 window with a child view confined to its client
   // area. |window_manager| is a pointer to the window manager that manages the
   // |HostWindow|. |engine| is a pointer to the engine that manages
-  // the window manager. On success, a valid window handle can be retrieved
+  // the window manager. |preferred_size| is the preferred size of the window.
+  // |preferred_constraints| are the constraints set on the window's size.
+  // |title| is the title of the window.
+  //
+  // On success, a valid window handle can be retrieved
   // via |HostWindow::GetWindowHandle|. |nullptr| will be returned
   // on failure.
   static std::unique_ptr<HostWindow> CreateRegularWindow(
@@ -41,6 +45,17 @@ class HostWindow {
       const WindowConstraints& preferred_constraints,
       LPCWSTR title);
 
+  // Creates a dialog Win32 window with a child view confined to its client
+  // area. |window_manager| is a pointer to the window manager that manages the
+  // |HostWindow|. |engine| is a pointer to the engine that manages
+  // the window manager. |preferred_size| is the preferred size of the window.
+  // |preferred_constraints| are the constraints set on the window's size.
+  // |title| is the title of the window. |parent| is the parent of this dialog,
+  // which can be `null`.
+  //
+  // On success, a valid window handle can be retrieved
+  // via |HostWindow::GetWindowHandle|. |nullptr| will be returned
+  // on failure.
   static std::unique_ptr<HostWindow> CreateDialogWindow(
       WindowManager* window_manager,
       FlutterWindowsEngine* engine,

@@ -10,6 +10,7 @@
 namespace flutter {
 class HostWindowRegular : public HostWindow {
  public:
+  // Creates a regular window.
   HostWindowRegular(WindowManager* window_manager,
                     FlutterWindowsEngine* engine,
                     const WindowSizeRequest& preferred_size,

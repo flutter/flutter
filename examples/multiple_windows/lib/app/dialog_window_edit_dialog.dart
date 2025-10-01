@@ -43,7 +43,7 @@ class _DialogWindowEditDialogState extends State<_DialogWindowEditDialog> {
   late final TextEditingController heightController;
   late final TextEditingController titleController;
 
-  bool? nextIsMinized;
+  bool? nextIsMinimized;
 
   void _init() {
     widget.controller.addListener(_onNotification);
@@ -56,7 +56,7 @@ class _DialogWindowEditDialogState extends State<_DialogWindowEditDialog> {
       text: initialSize.height.toString(),
     );
     titleController = TextEditingController(text: initialTitle);
-    nextIsMinized = null;
+    nextIsMinimized = null;
   }
 
   @override
@@ -86,7 +86,7 @@ class _DialogWindowEditDialogState extends State<_DialogWindowEditDialog> {
     if (widget.controller.isMinimized != initialMinimized) {
       setState(() {
         initialMinimized = widget.controller.isMinimized;
-        nextIsMinized = null;
+        nextIsMinimized = null;
       });
     }
   }
@@ -109,8 +109,8 @@ class _DialogWindowEditDialogState extends State<_DialogWindowEditDialog> {
     if (title != null && title != initialTitle) {
       widget.controller.setTitle(title);
     }
-    if (nextIsMinized != null && nextIsMinized != initialMinimized) {
-      widget.controller.setMinimized(nextIsMinized!);
+    if (nextIsMinimized != null && nextIsMinimized != initialMinimized) {
+      widget.controller.setMinimized(nextIsMinimized!);
     }
 
     widget.onClose();
@@ -139,10 +139,10 @@ class _DialogWindowEditDialogState extends State<_DialogWindowEditDialog> {
           ),
           CheckboxListTile(
             title: const Text('Minimized'),
-            value: nextIsMinized ?? initialMinimized,
+            value: nextIsMinimized ?? initialMinimized,
             onChanged: (bool? value) {
               if (value != null) {
-                setState(() => nextIsMinized = value);
+                setState(() => nextIsMinimized = value);
               }
             },
           ),

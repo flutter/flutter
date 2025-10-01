@@ -484,7 +484,7 @@ class DialogWindowControllerWin32 extends DialogWindowController {
   ///
   /// See also:
   ///
-  ///  * [DialogWindowController], the base class for regular windows.
+  ///  * [DialogWindowController], the base class for dialog windows.
   @internal
   DialogWindowControllerWin32({
     required WindowingOwnerWin32 owner,

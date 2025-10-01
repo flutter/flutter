@@ -170,6 +170,12 @@ class _MyHomePageState extends State<MyHomePage> {
             Widget? child,
           ) {
             return ViewAnchor(
+              view: dialogController != null
+                  ? DialogWindow(
+                      controller: dialogController,
+                      child: MyDialogPage(controller: dialogController),
+                    )
+                  : null,
               child: Scaffold(
                 appBar: AppBar(
                   backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -182,12 +188,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
               ),
-              view: dialogController != null
-                  ? DialogWindow(
-                      controller: dialogController!,
-                      child: MyDialogPage(controller: dialogController!),
-                    )
-                  : null,
             );
           },
     );
@@ -195,7 +195,7 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class MyDialogPage extends StatelessWidget {
-  MyDialogPage({super.key, required this.controller});
+  const MyDialogPage({super.key, required this.controller});
 
   final DialogWindowController controller;
 
