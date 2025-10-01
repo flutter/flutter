@@ -15729,5 +15729,18 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(InputDecorator)), Size.zero);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(
+              child: InputDecorator(decoration: InputDecoration(border: OutlineInputBorder())),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(InputDecorator)), Size.zero);
   });
 }
