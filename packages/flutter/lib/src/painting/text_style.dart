@@ -504,11 +504,13 @@ class TextStyle with Diagnosticable {
     List<String>? fontFamilyFallback,
     String? package,
     this.overflow,
-  }) : fontFamily = package == null ? fontFamily : 'packages/$package/$fontFamily',
+  }) : assert(
+         height == null || (height != double.infinity && height != -double.infinity),
+         'TextStyle.height must be a finite number or null.',
+       ),
+       fontFamily = package == null ? fontFamily : 'packages/$package/$fontFamily',
        _fontFamilyFallback = fontFamilyFallback,
        _package = package,
-       assert(!height.isNaN, 'TextStyle.height cannot be NaN'),
-       assert(!fontSize.isNaN, 'TextStyle.fontSize cannot be NaN'),
        assert(color == null || foreground == null, _kColorForegroundWarning),
        assert(backgroundColor == null || background == null, _kColorBackgroundWarning);
 
