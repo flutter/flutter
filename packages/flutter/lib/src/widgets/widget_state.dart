@@ -638,7 +638,7 @@ class _WidgetBorderSideMapper extends WidgetStateMapper<BorderSide?>
 /// implementation of [WidgetStateOutlinedBorder], that resolves to
 /// [RoundedRectangleBorder] when its widget is selected.
 ///
-/// ** See code in examples/api/lib/material/material_state/material_state_outlined_border.0.dart **
+/// ** See code in examples/api/lib/widgets/widget_state/widget_state_outlined_border.0.dart **
 /// {@end-tool}
 ///
 /// This class should only be used for parameters which are documented to take
@@ -647,8 +647,6 @@ class _WidgetBorderSideMapper extends WidgetStateMapper<BorderSide?>
 /// See also:
 ///
 ///  * [ShapeBorder] the base class for shape outlines.
-///  * [MaterialStateOutlinedBorder], the Material specific version of
-///    `WidgetStateOutlinedBorder`.
 abstract class WidgetStateOutlinedBorder extends OutlinedBorder
     implements WidgetStateProperty<OutlinedBorder?> {
   /// Abstract const constructor. This constructor enables subclasses to provide
