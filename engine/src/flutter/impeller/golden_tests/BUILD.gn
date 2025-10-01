@@ -15,7 +15,7 @@ impeller_component("golden_playground_test") {
     ":screenshot",
     "//flutter/display_list",
     "//flutter/fml",
-    "//flutter/impeller/display_list:display_list",
+    "//flutter/impeller/display_list",
     "//flutter/impeller/playground",
     "//flutter/impeller/typographer/backends/skia:typographer_skia_backend",
     "//flutter/testing:testing_lib",
@@ -70,7 +70,7 @@ if (is_mac) {
       "//flutter/fml",
       "//flutter/impeller/display_list",
       "//flutter/impeller/playground",
-      "//flutter/impeller/renderer/backend/metal:metal",
+      "//flutter/impeller/renderer/backend/metal",
       "//flutter/impeller/renderer/backend/vulkan",
     ]
   }

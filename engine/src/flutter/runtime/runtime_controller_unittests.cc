@@ -19,6 +19,7 @@ class MockRuntimeDelegate : public RuntimeDelegate {
   std::vector<SemanticsNodeUpdates> updates;
   std::vector<CustomAccessibilityActionUpdates> actions;
   std::string DefaultRouteName() override { return ""; }
+  std::string locale;
 
   void ScheduleFrame(bool regenerate_layer_trees = true) override {}
 
@@ -33,6 +34,10 @@ class MockRuntimeDelegate : public RuntimeDelegate {
                        CustomAccessibilityActionUpdates actions) override {
     this->updates.push_back(update);
     this->actions.push_back(actions);
+  }
+
+  void SetApplicationLocale(std::string locale) override {
+    this->locale = std::move(locale);
   }
 
   void SetSemanticsTreeEnabled(bool enabled) override {}
@@ -96,6 +101,12 @@ class RuntimeControllerTester {
     ASSERT_FALSE(delegate_.actions.empty());
   }
 
+  void CanUpdateSetApplicationLocale() {
+    ASSERT_TRUE(delegate_.locale.empty());
+    runtime_controller_.SetApplicationLocale("es-MX");
+    ASSERT_TRUE(delegate_.locale == "es-MX");
+  }
+
  private:
   MockRuntimeDelegate delegate_;
   UIDartState::Context& context_;
@@ -144,6 +155,18 @@ TEST_F(RuntimeControllerTest, CanUpdateSemanticsWhenSetSemanticsTreeEnabled) {
 
   message_latch.Wait();
   DestroyShell(std::move(shell), task_runners);
+}
+
+TEST_F(RuntimeControllerTest, CanSetApplicationLocale) {
+  TaskRunners task_runners("test",                  // label
+                           GetCurrentTaskRunner(),  // platform
+                           CreateNewThread(),       // raster
+                           CreateNewThread(),       // ui
+                           CreateNewThread()        // io
+  );
+  UIDartState::Context context(task_runners);
+  auto tester = std::make_shared<RuntimeControllerTester>(context);
+  tester->CanUpdateSetApplicationLocale();
 }
 
 }  // namespace flutter::testing

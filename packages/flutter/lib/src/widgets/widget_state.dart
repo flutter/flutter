@@ -368,8 +368,6 @@ class _WidgetStateColorMapper extends WidgetStateMapper<Color> implements Widget
 ///
 /// See also:
 ///
-///  * [MaterialStateMouseCursor], the Material specific version of
-///    `WidgetStateMouseCursor`.
 ///  * [MouseCursor] for introduction on the mouse cursor system.
 ///  * [SystemMouseCursors], which defines cursors that are supported by
 ///    native platforms.
@@ -488,11 +486,6 @@ class _WidgetMouseCursorMapper extends WidgetStateMapper<MouseCursor>
 ///
 /// ** See code in examples/api/lib/widgets/widget_state/widget_state_border_side.0.dart **
 /// {@end-tool}
-///
-/// See also:
-///
-///  * [MaterialStateBorderSide], the Material specific version of
-///    `WidgetStateBorderSide`.
 abstract class WidgetStateBorderSide extends BorderSide
     implements WidgetStateProperty<BorderSide?> {
   /// Abstract const constructor. This constructor enables subclasses to provide

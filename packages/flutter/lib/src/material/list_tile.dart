@@ -960,7 +960,7 @@ class ListTile extends StatelessWidget {
     final MouseCursor effectiveMouseCursor =
         WidgetStateProperty.resolveAs<MouseCursor?>(mouseCursor, mouseStates) ??
         tileTheme.mouseCursor?.resolve(mouseStates) ??
-        MaterialStateMouseCursor.clickable.resolve(mouseStates);
+        WidgetStateMouseCursor.clickable.resolve(mouseStates);
 
     final ListTileTitleAlignment effectiveTitleAlignment =
         titleAlignment ??

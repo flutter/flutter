@@ -17,22 +17,21 @@ void main() {
       final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
       const int kNumPreviewedWidgets = 3;
       const String kTestText = 'Foo';
-      final WidgetPreviewerWidgetScaffolding widgetPreview =
-          WidgetPreviewerWidgetScaffolding(
-            child: Column(
-              children: <Widget>[
-                for (int i = 0; i < kNumPreviewedWidgets; ++i)
-                  WidgetPreviewWidget(
-                    preview: WidgetPreview(
-                      scriptUri: '',
-                      builder: () => Text('$kTestText$i'),
-                      previewData: Preview(),
-                      packageName: '',
-                    ),
-                  ),
-              ],
-            ),
-          );
+      final controller = FakeWidgetPreviewScaffoldController();
+      final widgetPreview = WidgetPreviewerWidgetScaffolding(
+        child: Column(
+          children: <Widget>[
+            for (int i = 0; i < kNumPreviewedWidgets; ++i)
+              WidgetPreviewWidget(
+                controller: controller,
+                preview: WidgetPreview.test(
+                  builder: () => Text('$kTestText$i'),
+                  previewData: Preview(),
+                ),
+              ),
+          ],
+        ),
+      );
 
       await tester.pumpWidget(widgetPreview);
 
@@ -85,5 +84,58 @@ void main() {
     binding.debugShowWidgetInspectorOverride = true;
     await tester.pump();
     expect(widgetInspectorFinder, findsNothing);
+  });
+
+  testWidgets('WidgetInspector navigates to Preview application location', (
+    tester,
+  ) async {
+    final controller = FakeWidgetPreviewScaffoldController();
+    await controller.initialize();
+    final dtd = controller.dtdServices as FakeWidgetPreviewScaffoldDtdServices;
+
+    final service = WidgetInspectorService.instance;
+    service.isSelectMode = true;
+
+    const kLine = 123;
+    const kColumn = 456;
+    const kScriptUri = 'file:///script/containing/preview.dart';
+
+    final widgetPreview = WidgetPreviewerWidgetScaffolding(
+      child: Column(
+        children: <Widget>[
+          WidgetPreviewWidget(
+            controller: controller,
+            preview: WidgetPreview.test(
+              builder: () => Text(''),
+              previewData: Preview(),
+              line: kLine,
+              column: kColumn,
+              scriptUri: kScriptUri,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    await tester.pumpWidget(widgetPreview);
+    final element = find.byType(PreviewWidget).evaluate().first;
+
+    // Select the WidgetPreviewWidget, which acts as the root entry of the
+    // preview within the inspector.
+    expect(service.selection.current, isNull);
+    // ignore: invalid_use_of_protected_member
+    service.setSelection(element);
+
+    // Ensure that a navigation event has been sent to the IDE via DTD as a
+    // result of the inspector selection.
+    expect(dtd.navigationEvents, hasLength(1));
+
+    // The navigation event should be to the location of the preview provided
+    // to the WidgetPreviewWidget, not the actual creation location of the
+    // WidgetPreviewWidget.annotation location
+    final codeLocation = dtd.navigationEvents.single;
+    expect(codeLocation.uri, kScriptUri);
+    expect(codeLocation.line, kLine);
+    expect(codeLocation.column, kColumn);
   });
 }

@@ -5,7 +5,7 @@ contains the build-time dependencies of the Android embedding of the Engine,
 and the dependencies of the in-tree testing framework. The Android embedder is
 shipped to Flutter end-users, but these build-time dependencies are not.
 Therefore, the license script can skip over the destination of the CIPD package
-in an Engine checkout at `src/third_party/android_embedding_dependencies`.
+in an Engine checkout at `src/flutter/third_party/android_embedding_dependencies`.
 Even so, the CIPD package should contain a LICENSE file, and the instructions
 below explain how to fetch the license information for the dependencies.
 
@@ -26,7 +26,7 @@ below explain how to fetch the license information for the dependencies.
 1. Examine the file `./build/reports/license/license-dependency.xml`. If it
    contains licenses other than "The Apache License, Version 2.0" or something
    very similar, STOP. Ask Hixie for adivce on how to proceed.
-1. Copy or move the `lib/` directory to `src/third_party/android_embedding_dependencies/`,
+1. Copy or move the `lib/` directory to `src/flutter/third_party/android_embedding_dependencies/`,
    overwriting its contents, and ensure the Android build still works.
 1. Run `cipd create --pkg-def cipd.yaml -tag last_updated:"$version_tag"` where
    `$version_tag` is the output of `date +%Y-%m-%dT%T%z`.

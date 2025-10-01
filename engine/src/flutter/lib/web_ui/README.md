@@ -194,20 +194,17 @@ If you have questions, contact the Flutter Web team on Flutter Discord on the
 
 We test with Firefox on LUCI in the Linux Web Engine builder. The process for
 rolling Firefox is even easier than Chromium. Simply update `package_lock.yaml`
-with the latest version of Firefox, and run `package_roller.dart`.
+with the latest version of Firefox, and run:
+```
+dart dev/package_roller.dart
+```
 
 #### .ci.yaml
 
-After rolling Chrome and/or Firefox, also update the CI dependencies in
-`.ci.yaml` to make use of the new versions. The lines look like
+After rolling Chrome and/or Firefox, also update the CI dependencies by running:
 
-```yaml
-      dependencies: >-
-        [
-          {"dependency": "chrome_and_driver", "version": "version:107.0"},
-          {"dependency": "firefox", "version": "version:83.0"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
-        ]
+```
+felt generate-builder-json
 ```
 
 ##### **package_roller.dart**
@@ -246,9 +243,6 @@ Resources:
 `package_lock.yaml` contains the version of browsers we use to test Flutter for
 web. Versions are not automatically updated whenever a new release is available.
 Instead, we update this file manually once in a while.
-
-`canvaskit_lock.yaml` locks the version of CanvasKit for tests and production
-use.
 
 ### Debugging the Web Engine
 
