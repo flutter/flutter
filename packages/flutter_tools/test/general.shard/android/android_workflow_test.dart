@@ -593,6 +593,7 @@ Review licenses that have not been accepted (y/N)?
     );
   });
 
+  // Warning test not available when minimum and error are aligned.
   testUsingContext('detects minimum required java version', () async {
     // Test with older version of JDK
     final Platform platform = FakePlatform()

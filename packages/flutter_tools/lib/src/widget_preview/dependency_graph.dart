@@ -11,9 +11,9 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/dart/constant/value.dart';
-import 'package:analyzer/dart/element/element2.dart';
+import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/diagnostic/diagnostic.dart';
-import 'package:analyzer/error/error.dart';
+import 'package:analyzer/source/line_info.dart';
 
 import '../base/logger.dart';
 import 'preview_details.dart';
@@ -33,7 +33,7 @@ typedef PreviewDependencyGraph = Map<PreviewPath, LibraryPreviewNode>;
 /// Visitor which detects previews and extracts [PreviewDetails] for later code
 /// generation.
 class _PreviewVisitor extends RecursiveAstVisitor<void> {
-  _PreviewVisitor({required LibraryElement2 lib})
+  _PreviewVisitor({required LibraryElement lib})
     : packageName = lib.uri.scheme == 'package' ? lib.uri.pathSegments.first : null;
 
   late final String? packageName;
@@ -45,9 +45,12 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
   MethodDeclaration? _currentMethod;
 
   late Uri _currentScriptUri;
+  late CompilationUnit _currentUnit;
 
   void findPreviewsInResolvedUnitResult(ResolvedUnitResult unit) {
-    _scopedVisitChildren(unit.unit, (_) => _currentScriptUri = unit.file.toUri());
+    _currentScriptUri = unit.file.toUri();
+    _currentUnit = unit.unit;
+    _currentUnit.visitChildren(this);
   }
 
   /// Handles previews defined on top-level functions.
@@ -96,6 +99,10 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
     if (preview == null) {
       return;
     }
+    final LineInfo lineInfo = _currentUnit.lineInfo;
+    final CharacterLocation location = lineInfo.getLocation(node.offset);
+    final int line = location.lineNumber;
+    final int column = location.columnNumber;
     if (_currentFunction != null &&
         !hasRequiredParams(_currentFunction!.functionExpression.parameters)) {
       final TypeAnnotation? returnTypeAnnotation = _currentFunction!.returnType;
@@ -105,6 +112,8 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
           previewEntries.add(
             PreviewDetails(
               scriptUri: _currentScriptUri,
+              line: line,
+              column: column,
               packageName: packageName,
               functionName: _currentFunction!.name.toString(),
               isBuilder: returnType.isWidgetBuilder,
@@ -120,6 +129,8 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
       previewEntries.add(
         PreviewDetails(
           scriptUri: _currentScriptUri,
+          line: line,
+          column: column,
           packageName: packageName,
           functionName: '$returnType${name == null ? '' : '.$name'}',
           isBuilder: false,
@@ -136,6 +147,8 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
           previewEntries.add(
             PreviewDetails(
               scriptUri: _currentScriptUri,
+              line: line,
+              column: column,
               packageName: packageName,
               functionName: '${parentClass.name}.${_currentMethod!.name}',
               isBuilder: returnType.isWidgetBuilder,
@@ -194,7 +207,7 @@ final class LibraryPreviewNode {
   bool get hasErrors => errors.isNotEmpty;
 
   /// The set of errors found in this library.
-  final errors = <AnalysisError>[];
+  final errors = <Diagnostic>[];
 
   /// Determines the set of errors found in this library.
   ///
@@ -203,8 +216,8 @@ final class LibraryPreviewNode {
     errors.clear();
     for (final String file in files) {
       errors.addAll(
-        ((await context.currentSession.getErrors(file)) as ErrorsResult).errors
-            .where((AnalysisError error) => error.severity == Severity.error)
+        ((await context.currentSession.getErrors(file)) as ErrorsResult).diagnostics
+            .where((error) => error.severity == Severity.error)
             .toList(),
       );
     }

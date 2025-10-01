@@ -60,11 +60,7 @@ public class KeyEventChannelTest {
     KeyEventChannel.FlutterKeyEvent flutterKeyEvent =
         new KeyEventChannel.FlutterKeyEvent(keyEvent, null);
     keyEventChannel.sendFlutterKeyEvent(
-        flutterKeyEvent,
-        false,
-        (isHandled) -> {
-          handled[0] = isHandled;
-        });
+        flutterKeyEvent, false, (isHandled) -> handled[0] = isHandled);
 
     ArgumentCaptor<ByteBuffer> byteBufferArgumentCaptor = ArgumentCaptor.forClass(ByteBuffer.class);
     ArgumentCaptor<BinaryMessenger.BinaryReply> replyArgumentCaptor =
@@ -88,11 +84,7 @@ public class KeyEventChannelTest {
     KeyEventChannel.FlutterKeyEvent flutterKeyEvent =
         new KeyEventChannel.FlutterKeyEvent(keyEvent, null);
     keyEventChannel.sendFlutterKeyEvent(
-        flutterKeyEvent,
-        false,
-        (isHandled) -> {
-          handled[0] = isHandled;
-        });
+        flutterKeyEvent, false, (isHandled) -> handled[0] = isHandled);
 
     ArgumentCaptor<ByteBuffer> byteBufferArgumentCaptor = ArgumentCaptor.forClass(ByteBuffer.class);
     ArgumentCaptor<BinaryMessenger.BinaryReply> replyArgumentCaptor =

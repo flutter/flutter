@@ -410,6 +410,7 @@ class XcodeDebug {
     final String schemeXml = schemeFile.readAsStringSync();
     try {
       final document = XmlDocument.parse(schemeXml);
+      // ignore: experimental_member_use
       final Iterable<XmlNode> nodes = document.xpath('/Scheme/LaunchAction');
       if (nodes.isEmpty) {
         _logger.printError('Failed to find LaunchAction for the Scheme in ${schemeFile.path}.');

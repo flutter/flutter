@@ -254,6 +254,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     shutdownHooks: shutdownHooks,
     onHotRestartPreviewerRequest: onHotRestartRequest,
     dtdLauncher: DtdLauncher(logger: logger, artifacts: artifacts, processManager: processManager),
+    project: rootProject.widgetPreviewScaffoldProject,
   );
 
   /// The currently running instance of the widget preview scaffold.
@@ -447,6 +448,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
             widgetPreviewScaffoldProject.packageConfig.readAsBytesSync(),
             widgetPreviewScaffoldProject.packageConfig.uri,
           ),
+          trackWidgetCreation: true,
           // Don't try and download canvaskit from the CDN.
           useLocalCanvasKit: true,
           webEnableHotReload: true,

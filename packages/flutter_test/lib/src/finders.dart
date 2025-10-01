@@ -1351,7 +1351,7 @@ class _FirstWidgetFinder extends ChainedFinder with _FirstFinderMixin<Element> {
 mixin _LastFinderMixin<CandidateType> on ChainedFinderMixin<CandidateType> {
   @override
   String describeMatch(Plurality plurality) {
-    return '${parent.describeMatch(plurality)} (ignoring all but first)';
+    return '${parent.describeMatch(plurality)} (ignoring all but last)';
   }
 
   @override
