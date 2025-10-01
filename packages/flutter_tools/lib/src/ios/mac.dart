@@ -28,6 +28,7 @@ import '../macos/xcode.dart';
 import '../migrations/lldb_init_migration.dart';
 import '../migrations/swift_package_manager_gitignore_migration.dart';
 import '../migrations/swift_package_manager_integration_migration.dart';
+import '../migrations/uiscene_migration.dart';
 import '../migrations/xcode_project_object_version_migration.dart';
 import '../migrations/xcode_script_build_phase_migration.dart';
 import '../migrations/xcode_thin_binary_build_phase_input_paths_migration.dart';
@@ -176,6 +177,12 @@ Future<XcodeBuildResult> buildXcodeProject({
       deviceID: deviceID,
       fileSystem: globals.fs,
       environmentType: environmentType,
+    ),
+    UISceneMigration(
+      app.project,
+      globals.logger,
+      fileSystem: globals.fs,
+      plistParser: globals.plistParser,
     ),
   ];
 

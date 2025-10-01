@@ -369,6 +369,11 @@ class FakePlistParser implements PlistParser {
     setProperty(key, value);
     return true;
   }
+
+  @override
+  bool insertKeyWithJson(String plistFilePath, {required String key, required String json}) {
+    return false;
+  }
 }
 
 class FakeBotDetector implements BotDetector {
