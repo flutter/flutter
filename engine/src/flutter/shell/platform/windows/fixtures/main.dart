@@ -60,9 +60,9 @@ Future<void> sendAccessibilityAnnouncement() async {
 
   // Standard message codec magic number identifiers.
   // See: https://github.com/flutter/flutter/blob/ee94fe262b63b0761e8e1f889ae52322fef068d2/packages/flutter/lib/src/services/message_codecs.dart#L262
-  const int valueMap = 13, valueString = 7;
+  const int valueMap = 13, valueString = 7, valueInt64 = 4;
 
-  // Corresponds to: {"type": "announce", "data": {"message": "hello"}}
+  // Corresponds to: {"type": "announce", "data": {"viewId": 0, "message": "hello"}}
   // See: https://github.com/flutter/flutter/blob/b781da9b5822de1461a769c3b245075359f5464d/packages/flutter/lib/src/semantics/semantics_event.dart#L86
   final Uint8List data = Uint8List.fromList([
     // Map with 2 entries
@@ -73,8 +73,12 @@ Future<void> sendAccessibilityAnnouncement() async {
     valueString, 'announce'.length, ...'announce'.codeUnits,
     // Map key: "data"
     valueString, 'data'.length, ...'data'.codeUnits,
-    // Map value: map with 1 entry
-    valueMap, 1,
+    // Map value: map with 2 entries
+    valueMap, 2,
+    // Map key: "viewId"
+    valueString, 'viewId'.length, ...'viewId'.codeUnits,
+    // Map value: 0
+    valueInt64, 0, 0, 0, 0, 0, 0, 0, 0,
     // Map key: "message"
     valueString, 'message'.length, ...'message'.codeUnits,
     // Map value: "hello"
