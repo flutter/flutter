@@ -14,6 +14,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
@@ -980,8 +981,9 @@ void main() {
                     SemanticsFlag.isInMutuallyExclusiveGroup,
                     SemanticsFlag.hasSelectedState,
                     SemanticsFlag.isSelected,
+                    SemanticsFlag.isFocusable,
                   ],
-                  actions: <SemanticsAction>[SemanticsAction.tap],
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                 ),
                 TestSemantics(
                   label: 'Child 2',
@@ -990,8 +992,9 @@ void main() {
                     SemanticsFlag.isInMutuallyExclusiveGroup,
                     // Declares that it is selectable, but not currently selected.
                     SemanticsFlag.hasSelectedState,
+                    SemanticsFlag.isFocusable,
                   ],
-                  actions: <SemanticsAction>[SemanticsAction.tap],
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                 ),
               ],
             ),
@@ -1021,8 +1024,9 @@ void main() {
                     SemanticsFlag.isInMutuallyExclusiveGroup,
                     // Declares that it is selectable, but not currently selected.
                     SemanticsFlag.hasSelectedState,
+                    SemanticsFlag.isFocusable,
                   ],
-                  actions: <SemanticsAction>[SemanticsAction.tap],
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                 ),
                 TestSemantics(
                   label: 'Child 2',
@@ -1031,8 +1035,10 @@ void main() {
                     SemanticsFlag.isInMutuallyExclusiveGroup,
                     SemanticsFlag.hasSelectedState,
                     SemanticsFlag.isSelected,
+                    SemanticsFlag.isFocusable,
+                    SemanticsFlag.isFocused,
                   ],
-                  actions: <SemanticsAction>[SemanticsAction.tap],
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                 ),
               ],
             ),
@@ -2196,5 +2202,88 @@ void main() {
     await tester.pumpAndSettle();
     scale = tester.widget<ScaleTransition>(scaleTransition).scale.value;
     expect(scale, moreOrLessEquals(1.0));
+  });
+
+  testWidgets('Sliding segmented control can use arrow keys', (WidgetTester tester) async {
+    final Map<int, Widget> children = <int, Widget>{};
+    children[0] = const Text('Child 1');
+    children[1] = const Text('Child 2');
+    children[2] = const Text('Child 3');
+
+    groupValue = 0;
+
+    await tester.pumpWidget(
+      boilerplate(
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            children: children,
+            onValueChanged: defaultCallback,
+            groupValue: groupValue,
+          );
+        },
+      ),
+    );
+
+    expect(groupValue, 0);
+
+    await tester.tap(find.text('Child 1'));
+    await tester.pumpAndSettle();
+    expect(groupValue, 0);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(groupValue, 1);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    expect(groupValue, 2);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(groupValue, 0);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pumpAndSettle();
+    expect(groupValue, 2);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pumpAndSettle();
+    expect(groupValue, 1);
+  });
+
+  testWidgets('Sliding segmented control skips disabled segments with keyboard', (
+    WidgetTester tester,
+  ) async {
+    final Map<int, Widget> children = <int, Widget>{};
+    children[0] = const Text('Child 1');
+    children[1] = const Text('Child 2');
+    children[2] = const Text('Child 3');
+
+    groupValue = 0;
+
+    await tester.pumpWidget(
+      boilerplate(
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            children: children,
+            onValueChanged: defaultCallback,
+            groupValue: groupValue,
+            disabledChildren: const <int>{1},
+          );
+        },
+      ),
+    );
+
+    expect(groupValue, 0);
+
+    await tester.tap(find.text('Child 1'));
+    await tester.pumpAndSettle();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(groupValue, 2);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pumpAndSettle();
+    expect(groupValue, 0);
   });
 }
