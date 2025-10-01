@@ -15807,7 +15807,7 @@ void main() {
     expect(tester.getTopRight(errorFinder).dx, inputWidth - defaultPadding);
 
     // Error in RTL.
-    await buildDecorator(direction: TextDirection.ltr, errorText: longText);
+    await buildDecorator(direction: TextDirection.rtl, errorText: longText);
 
     expect(tester.getTopLeft(errorFinder).dx, defaultPadding);
     expect(tester.getTopRight(errorFinder).dx, inputWidth - defaultPadding);
