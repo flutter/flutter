@@ -188,6 +188,7 @@ const nativeAssets = Feature(
   environmentOverride: 'FLUTTER_NATIVE_ASSETS',
   master: FeatureChannelSetting(available: true, enabledByDefault: true),
   beta: FeatureChannelSetting(available: true, enabledByDefault: true),
+  stable: FeatureChannelSetting(available: true, enabledByDefault: true),
 );
 
 /// Enable Dart data assets building and bundling.
