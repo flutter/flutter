@@ -108,7 +108,6 @@ class XCDevice {
     _stopObservingTetheredIOSDevices();
     _usbDeviceWaitProcess?.kill();
     _wifiDeviceWaitProcess?.kill();
-    _coreDeviceControl.stopListDevices();
   }
 
   void cancelWirelessDiscovery() {
@@ -460,15 +459,46 @@ class XCDevice {
       return const <IOSDevice>[];
     }
 
-    final coreDeviceMap = <String, IOSCoreDevice>{};
+    var coreDevices = <IOSCoreDevice>[];
     if (_xcode.isDevicectlInstalled) {
-      final List<IOSCoreDevice> coreDevices = await _coreDeviceControl.getCoreDevices(
-        timeout: timeout ?? const Duration(seconds: 2),
+      coreDevices = await _coreDeviceControl.getCoreDevices();
+    }
+
+    return _parseXcdeviceList(allAvailableDevices: allAvailableDevices, coreDevices: coreDevices);
+  }
+
+  Future<List<IOSDevice>> getAvailableIOSDevicesForWirelessDiscovery({Duration? timeout}) async {
+    _cancelWirelessDiscoveryCompleter = Completer<void>();
+    final Completer<void> cancelCompleter = _cancelWirelessDiscoveryCompleter!;
+
+    final List<Object>? allAvailableDevices = await _getAllDevices(
+      timeout: timeout ?? const Duration(seconds: 2),
+    );
+    if (allAvailableDevices == null || cancelCompleter.isCompleted) {
+      return const <IOSDevice>[];
+    }
+
+    var coreDevices = <IOSCoreDevice>[];
+    if (_xcode.isDevicectlInstalled) {
+      coreDevices = await _coreDeviceControl.getCoreDevices(
+        timeout: timeout ?? const Duration(seconds: 30),
+        cancelCompleter: cancelCompleter,
       );
-      for (final device in coreDevices) {
-        if (device.udid == null) {
-          continue;
-        }
+    }
+    if (cancelCompleter.isCompleted) {
+      return const <IOSDevice>[];
+    }
+
+    return _parseXcdeviceList(allAvailableDevices: allAvailableDevices, coreDevices: coreDevices);
+  }
+
+  List<IOSDevice> _parseXcdeviceList({
+    required List<Object> allAvailableDevices,
+    required List<IOSCoreDevice> coreDevices,
+  }) {
+    final coreDeviceMap = <String, IOSCoreDevice>{};
+    for (final device in coreDevices) {
+      if (device.udid != null) {
         coreDeviceMap[device.udid!] = device;
       }
     }
@@ -510,49 +540,6 @@ class XCDevice {
     //  },
     // ...
 
-    return _parseXcdeviceList(
-      allAvailableDevices: allAvailableDevices,
-      coreDeviceMap: coreDeviceMap,
-    );
-  }
-
-  Future<List<IOSDevice>> getAvailableIOSDevicesForWirelessDiscovery({Duration? timeout}) async {
-    _cancelWirelessDiscoveryCompleter = Completer<void>();
-    final Completer<void> cancelCompleter = _cancelWirelessDiscoveryCompleter!;
-
-    final List<Object>? allAvailableDevices = await _getAllDevices(
-      timeout: timeout ?? const Duration(seconds: 2),
-    );
-    if (allAvailableDevices == null || cancelCompleter.isCompleted) {
-      return const <IOSDevice>[];
-    }
-
-    final coreDeviceMap = <String, IOSCoreDevice>{};
-    if (_xcode.isDevicectlInstalled) {
-      final List<IOSCoreDevice> coreDevices = await _coreDeviceControl.getCoreDevices(
-        timeout: timeout ?? const Duration(seconds: 30),
-        cancelCompleter: cancelCompleter,
-      );
-      for (final device in coreDevices) {
-        if (device.udid != null) {
-          coreDeviceMap[device.udid!] = device;
-        }
-      }
-    }
-    if (cancelCompleter.isCompleted) {
-      return const <IOSDevice>[];
-    }
-
-    return _parseXcdeviceList(
-      allAvailableDevices: allAvailableDevices,
-      coreDeviceMap: coreDeviceMap,
-    );
-  }
-
-  List<IOSDevice> _parseXcdeviceList({
-    required List<Object> allAvailableDevices,
-    required Map<String, IOSCoreDevice> coreDeviceMap,
-  }) {
     final deviceMap = <String, IOSDevice>{};
     for (final device in allAvailableDevices) {
       if (device is Map<String, Object?>) {

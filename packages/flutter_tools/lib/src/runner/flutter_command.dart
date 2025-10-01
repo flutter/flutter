@@ -1946,24 +1946,20 @@ abstract class FlutterCommand extends Command<void> {
   /// If [includeDevicesUnsupportedByProject] is true, the tool does not filter
   /// the list by the current project support list.
   Future<Device?> findTargetDevice({bool includeDevicesUnsupportedByProject = false}) async {
-    try {
-      final List<Device>? deviceList = await findAllTargetDevices(
-        includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
-      );
-      if (deviceList == null) {
-        return null;
-      }
-      if (deviceList.length > 1) {
-        globals.printStatus(globals.userMessages.flutterSpecifyDevice);
-        final List<Device> allDevices = await globals.deviceManager!.getAllDevices();
-        globals.printStatus('');
-        await Device.printDevices(allDevices, globals.logger);
-        return null;
-      }
-      return deviceList.single;
-    } finally {
-      _targetDevices.stopExtendedWirelessDeviceDiscovery();
+    final List<Device>? deviceList = await findAllTargetDevices(
+      includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
+    );
+    if (deviceList == null) {
+      return null;
     }
+    if (deviceList.length > 1) {
+      globals.printStatus(globals.userMessages.flutterSpecifyDevice);
+      final List<Device> allDevices = await globals.deviceManager!.getAllDevices();
+      globals.printStatus('');
+      await Device.printDevices(allDevices, globals.logger);
+      return null;
+    }
+    return deviceList.single;
   }
 
   @protected

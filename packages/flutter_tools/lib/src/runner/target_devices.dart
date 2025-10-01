@@ -616,7 +616,6 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
   ) async {
     final Device? ephemeralDevice = _deviceManager.getSingleEphemeralDevice(attachedDevices);
     if (ephemeralDevice != null) {
-      stopExtendedWirelessDeviceDiscovery();
       return <Device>[ephemeralDevice];
     }
 
@@ -624,7 +623,6 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
       _logger.printStatus(_checkingForWirelessDevicesMessage);
       final List<Device> wirelessDevices = await futureWirelessDevices;
       if (attachedDevices.length + wirelessDevices.length == 1) {
-        stopExtendedWirelessDeviceDiscovery();
         return attachedDevices + wirelessDevices;
       }
       _logger.printStatus('');
@@ -635,7 +633,6 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
       }
       // If terminal does not have stdin, print out device list.
       final List<Device>? devices = await _printMultipleDevices(attachedDevices, wirelessDevices);
-      stopExtendedWirelessDeviceDiscovery();
       return devices;
     }
 
@@ -718,7 +715,6 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
     // be prompted again.
     _deviceManager.specifiedDeviceId = chosenDevice.id;
 
-    stopExtendedWirelessDeviceDiscovery();
     return <Device>[chosenDevice];
   }
 
