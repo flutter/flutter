@@ -250,6 +250,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   );
 
   late var _dtdService = WidgetPreviewDtdServices(
+    fs: fs,
     logger: logger,
     shutdownHooks: shutdownHooks,
     onHotRestartPreviewerRequest: onHotRestartRequest,

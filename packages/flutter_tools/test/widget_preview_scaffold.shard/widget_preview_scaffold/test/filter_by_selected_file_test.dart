@@ -10,6 +10,7 @@ import 'package:widget_preview_scaffold/src/controls.dart';
 import 'package:widget_preview_scaffold/src/dtd/editor_service.dart';
 import 'package:widget_preview_scaffold/src/widget_preview.dart';
 import 'package:widget_preview_scaffold/src/widget_preview_rendering.dart';
+import 'package:widget_preview_scaffold/src/widget_preview_scaffold_controller.dart';
 
 import 'utils/widget_preview_scaffold_test_utils.dart';
 
@@ -182,7 +183,7 @@ void main() {
     );
   });
 
-  testWidgets('Filter previews is responsive to Editor service availablility', (
+  testWidgets('Filter previews is responsive to Editor service availability', (
     tester,
   ) async {
     final dtdServices = FakeWidgetPreviewScaffoldDtdServices();
@@ -232,5 +233,37 @@ void main() {
     expect(controller.filterBySelectedFileListenable.value, true);
     expect(dtdServices.selectedSourceFile.value, isNull);
     expect(controller.filteredPreviewSetListenable.value, isEmpty);
+  });
+
+  testWidgets('Filter by selected file preference is persisted', (
+    tester,
+  ) async {
+    final dtdServices = FakeWidgetPreviewScaffoldDtdServices();
+
+    bool? getFilterBySelectedFileValue() =>
+        dtdServices.preferences[WidgetPreviewScaffoldController
+                .kFilterBySelectedFilePreference]
+            as bool?;
+
+    // Validate setting isn't set in preferences yet.
+    expect(getFilterBySelectedFileValue(), null);
+
+    final controller = FakeWidgetPreviewScaffoldController(
+      dtdServicesOverride: dtdServices,
+    );
+    await controller.initialize();
+    expect(controller.filterBySelectedFileListenable.value, true);
+    // Still null as we've just used the default value and haven't actually
+    // written to the preferences.
+    expect(getFilterBySelectedFileValue(), null);
+
+    // Toggle the setting, which will cause it to be written to the preferences.
+    await controller.toggleFilterBySelectedFile();
+    expect(controller.filterBySelectedFileListenable.value, false);
+    expect(getFilterBySelectedFileValue(), false);
+
+    await controller.toggleFilterBySelectedFile();
+    expect(controller.filterBySelectedFileListenable.value, true);
+    expect(getFilterBySelectedFileValue(), true);
   });
 }
