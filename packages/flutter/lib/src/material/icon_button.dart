@@ -1152,14 +1152,12 @@ class _IconButtonDefaultsM3 extends ButtonStyle {
 
   @override
   WidgetStateProperty<MouseCursor?>? get mouseCursor {
-    return WidgetStateProperty.resolveWith(
-      (Set<WidgetState> states) {
-        if (states.contains(WidgetState.disabled)) {
-          return SystemMouseCursors.basic;
-        }
-        return kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic;
-      },
-    );
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
+        return SystemMouseCursors.basic;
+      }
+      return WidgetStateMouseCursor.adaptiveClickable;
+    });
   }
 
   @override
@@ -1303,14 +1301,12 @@ class _FilledIconButtonDefaultsM3 extends ButtonStyle {
 
   @override
   WidgetStateProperty<MouseCursor?>? get mouseCursor {
-    return WidgetStateProperty.resolveWith(
-      (Set<WidgetState> states) {
-        if (states.contains(WidgetState.disabled)) {
-          return SystemMouseCursors.basic;
-        }
-        return kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic;
-      },
-    );
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
+        return SystemMouseCursors.basic;
+      }
+      return WidgetStateMouseCursor.adaptiveClickable;
+    });
   }
 
   @override
@@ -1454,14 +1450,12 @@ class _FilledTonalIconButtonDefaultsM3 extends ButtonStyle {
 
   @override
   WidgetStateProperty<MouseCursor?>? get mouseCursor {
-    return WidgetStateProperty.resolveWith(
-      (Set<WidgetState> states) {
-        if (states.contains(WidgetState.disabled)) {
-          return SystemMouseCursors.basic;
-        }
-        return kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic;
-      },
-    );
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
+        return SystemMouseCursors.basic;
+      }
+      return WidgetStateMouseCursor.adaptiveClickable;
+    });
   }
 
   @override
@@ -1600,14 +1594,12 @@ class _OutlinedIconButtonDefaultsM3 extends ButtonStyle {
 
   @override
   WidgetStateProperty<MouseCursor?>? get mouseCursor {
-    return WidgetStateProperty.resolveWith(
-      (Set<WidgetState> states) {
-        if (states.contains(WidgetState.disabled)) {
-          return SystemMouseCursors.basic;
-        }
-        return kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic;
-      },
-    );
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
+        return SystemMouseCursors.basic;
+      }
+      return WidgetStateMouseCursor.adaptiveClickable;
+    });
   }
 
   @override
