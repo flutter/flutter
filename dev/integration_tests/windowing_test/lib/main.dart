@@ -38,17 +38,26 @@ void main() {
         throw ArgumentError('Message must contain a "type" field.');
       }
 
-      /// Helper method that will await a notification from the controller
-      /// and clean it up after it has been received.
-      Future<void> awaitNotification(VoidCallback act) async {
-        final Completer<void> notificationReceived = Completer();
+      /// This helper method registers a listener on the controller, 
+      /// calls [act] to perform some action on the controller, waits for
+      /// the [predicate] to be satisified, and finally cleans up the listener.
+      Future<void> awaitNotification(
+        VoidCallback act,
+        bool Function() predicate,
+      ) async {
+        final StreamController<bool> streamController = StreamController();
         void notificationHandler() {
-          notificationReceived.complete();
+          streamController.add(true);
         }
 
         controller.addListener(notificationHandler);
+
         act();
-        await notificationReceived.future;
+        await for (final _ in streamController.stream) {
+          if (predicate()) {
+            break;
+          }
+        }
         controller.removeListener(notificationHandler);
       }
 
@@ -58,13 +67,13 @@ void main() {
           'height': controller.contentSize.height,
         });
       } else if (jsonMap['type'] == 'set_size') {
+        final Size size = Size(
+          jsonMap['width'].toDouble(),
+          jsonMap['height'].toDouble(),
+        );
         await awaitNotification(() {
-          final Size size = Size(
-            jsonMap['width'].toDouble(),
-            jsonMap['height'].toDouble(),
-          );
           controller.setSize(size);
-        });
+        }, () => controller.contentSize == size);
       } else if (jsonMap['type'] == 'set_constraints') {
         final BoxConstraints constraints = BoxConstraints(
           minWidth: jsonMap['min_width'].toDouble(),
@@ -76,43 +85,44 @@ void main() {
       } else if (jsonMap['type'] == 'set_fullscreen') {
         await awaitNotification(() {
           controller.setFullscreen(true);
-        });
+        }, () => controller.isFullscreen);
       } else if (jsonMap['type'] == 'unset_fullscreen') {
         await awaitNotification(() {
           controller.setFullscreen(false);
-        });
+        }, () => !controller.isFullscreen);
       } else if (jsonMap['type'] == 'get_fullscreen') {
         return jsonEncode({'isFullscreen': controller.isFullscreen});
       } else if (jsonMap['type'] == 'set_maximized') {
         await awaitNotification(() {
           controller.setMaximized(true);
-        });
+        }, () => controller.isMaximized);
       } else if (jsonMap['type'] == 'unset_maximized') {
         await awaitNotification(() {
           controller.setMaximized(false);
-        });
+        }, () => !controller.isMaximized);
       } else if (jsonMap['type'] == 'get_maximized') {
         return jsonEncode({'isMaximized': controller.isMaximized});
       } else if (jsonMap['type'] == 'set_minimized') {
         await awaitNotification(() {
           controller.setMinimized(true);
-        });
+        }, () => controller.isMinimized);
       } else if (jsonMap['type'] == 'unset_minimized') {
         await awaitNotification(() {
           controller.setMinimized(false);
-        });
+        }, () => !controller.isMinimized);
       } else if (jsonMap['type'] == 'get_minimized') {
         return jsonEncode({'isMinimized': controller.isMinimized});
       } else if (jsonMap['type'] == 'set_title') {
+        final String title = jsonMap['title'];
         await awaitNotification(() {
-          controller.setTitle(jsonMap['title']);
-        });
+          controller.setTitle(title);
+        }, () => controller.title == title);
       } else if (jsonMap['type'] == 'get_title') {
         return jsonEncode({'title': controller.title});
       } else if (jsonMap['type'] == 'set_activated') {
         await awaitNotification(() {
           controller.activate();
-        });
+        }, () => controller.isActivated);
       } else if (jsonMap['type'] == 'get_activated') {
         return jsonEncode({'isActivated': controller.isActivated});
       } else {
