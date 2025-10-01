@@ -627,6 +627,7 @@ class MenuItemButton extends StatefulWidget {
     this.autofocus = false,
     this.shortcut,
     this.semanticsLabel,
+    this.isSemanticButton,
     this.style,
     this.statesController,
     this.clipBehavior = Clip.none,
@@ -688,6 +689,23 @@ class MenuItemButton extends StatefulWidget {
   ///
   /// Null by default.
   final String? semanticsLabel;
+
+  /// Whether this menu item should be semantically marked as a button.
+  ///
+  /// By default, menu items do not announce "button" to match native platform
+  /// behavior. For example, on Windows, native menus only announce the item
+  /// label (e.g., "Save") without the "button" designation, keeping menu
+  /// navigation concise and less verbose for screen reader users.
+  ///
+  /// If true, the menu item will have the [SemanticsFlag.isButton] flag set,
+  /// which causes screen readers to announce "button" along with the item label.
+  /// This may be useful for specific accessibility requirements or custom UX
+  /// needs where explicit button semantics improve clarity.
+  ///
+  /// If false, button semantics are explicitly suppressed.
+  ///
+  /// Defaults to null (no button semantics, matching native platform menu behavior).
+  final bool? isSemanticButton;
 
   /// Customizes this button's appearance.
   ///
@@ -940,6 +958,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
         leadingIcon: widget.leadingIcon,
         shortcut: widget.shortcut,
         semanticsLabel: widget.semanticsLabel,
+        isSemanticButton: widget.isSemanticButton,
         isEnabled: widget.enabled,
         trailingIcon: widget.trailingIcon,
         hasSubmenu: false,
@@ -1451,6 +1470,7 @@ class SubmenuButton extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     this.focusNode,
     this.statesController,
+    this.isSemanticButton,
     this.leadingIcon,
     this.trailingIcon,
     this.submenuIcon,
@@ -1515,6 +1535,22 @@ class SubmenuButton extends StatefulWidget {
 
   /// {@macro flutter.material.inkwell.statesController}
   final MaterialStatesController? statesController;
+
+  /// Whether this submenu button should be semantically marked as a button.
+  ///
+  /// By default, submenu buttons do not announce "button" to match native
+  /// platform behavior. For example, on Windows, native menus only announce
+  /// the item label without the "button" designation, keeping menu navigation
+  /// concise and less verbose for screen reader users.
+  ///
+  /// If true, the submenu button will have the [SemanticsFlag.isButton] flag
+  /// set, which causes screen readers to announce "button" along with the item
+  /// label.
+  ///
+  /// If false or null, no button semantics will be added.
+  ///
+  /// Defaults to null (no button semantics, matching native platform menu behavior).
+  final bool? isSemanticButton;
 
   /// An optional icon to display before the [child].
   final Widget? leadingIcon;
@@ -1853,6 +1889,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
                   trailingIcon: widget.trailingIcon,
                   hasSubmenu: true,
                   showDecoration: (_parent?._orientation ?? Axis.horizontal) == Axis.vertical,
+                  isSemanticButton: widget.isSemanticButton,
                   isEnabled: _enabled,
                   submenuIcon: submenuIcon,
                   child: child,
@@ -2785,6 +2822,7 @@ class _MenuItemLabel extends StatelessWidget {
     this.trailingIcon,
     this.shortcut,
     this.semanticsLabel,
+    this.isSemanticButton,
     this.isEnabled,
     this.overflowAxis = Axis.vertical,
     this.submenuIcon,
@@ -2814,6 +2852,12 @@ class _MenuItemLabel extends StatelessWidget {
   /// An optional Semantics label, which replaces the generated string when
   /// read by a screen reader.
   final String? semanticsLabel;
+
+  /// Whether this menu item should be semantically marked as a button.
+  ///
+  /// When true, the [SemanticsFlag.isButton] flag will be set. When false or
+  /// null, no button semantics will be added.
+  final bool? isSemanticButton;
 
   /// Whether this menu item is enabled for semantics purposes.
   ///
@@ -2901,11 +2945,11 @@ class _MenuItemLabel extends StatelessWidget {
           ),
       ],
     );
-    if (semanticsLabel != null || isEnabled != null) {
+    if (semanticsLabel != null || isEnabled != null || isSemanticButton != null) {
       menuItemLabel = Semantics(
         label: semanticsLabel,
         enabled: isEnabled,
-        button: true,
+        button: isSemanticButton,
         // Only exclude semantics when we explicitly supply a custom label.
         excludeSemantics: semanticsLabel != null,
         child: menuItemLabel,

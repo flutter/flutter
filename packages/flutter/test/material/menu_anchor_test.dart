@@ -4247,7 +4247,7 @@ void main() {
     });
 
     group('Semantics', () {
-      testWidgets('MenuItemButton is a semantic button', (WidgetTester tester) async {
+      testWidgets('MenuItemButton default semantics', (WidgetTester tester) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         await tester.pumpWidget(
           Directionality(
@@ -4262,7 +4262,50 @@ void main() {
           ),
         );
 
-        // The flags should have SemanticsFlag.isButton.
+        // By default, menu items should NOT have isButton flag to match native platform behavior.
+        expect(
+          semantics,
+          hasSemantics(
+            TestSemantics.root(
+              children: <TestSemantics>[
+                TestSemantics.rootChild(
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                  label: 'ABC',
+                  rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+                  transform: Matrix4.translationValues(356.0, 276.0, 0.0),
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.isEnabled,
+                    SemanticsFlag.isFocusable,
+                  ],
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
+            ignoreId: true,
+          ),
+        );
+
+        semantics.dispose();
+      });
+
+      testWidgets('MenuItemButton with explicit button semantics', (WidgetTester tester) async {
+        final SemanticsTester semantics = SemanticsTester(tester);
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: MenuItemButton(
+                style: MenuItemButton.styleFrom(fixedSize: const Size(88.0, 36.0)),
+                onPressed: () {},
+                isSemanticButton: true,
+                child: const Text('ABC'),
+              ),
+            ),
+          ),
+        );
+
+        // With isSemanticButton: true, the flags should have SemanticsFlag.isButton.
         expect(
           semantics,
           hasSemantics(
@@ -4310,7 +4353,7 @@ void main() {
         semantics.dispose();
       }, variant: TargetPlatformVariant.desktop());
 
-      testWidgets('SubMenuButton is a semantic button', (WidgetTester tester) async {
+      testWidgets('SubMenuButton default semantics', (WidgetTester tester) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         await tester.pumpWidget(
           Directionality(
@@ -4326,7 +4369,49 @@ void main() {
           ),
         );
 
-        // The flags should have SemanticsFlag.isButton.
+        // By default, submenu buttons should NOT have isButton flag to match native platform behavior.
+        expect(
+          semantics,
+          hasSemantics(
+            TestSemantics.root(
+              children: <TestSemantics>[
+                TestSemantics(
+                  rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.hasExpandedState,
+                  ],
+                  label: 'ABC',
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
+            ignoreTransform: true,
+            ignoreId: true,
+          ),
+        );
+
+        semantics.dispose();
+      });
+
+      testWidgets('SubmenuButton with explicit button semantics', (WidgetTester tester) async {
+        final SemanticsTester semantics = SemanticsTester(tester);
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: SubmenuButton(
+                onHover: (bool value) {},
+                style: SubmenuButton.styleFrom(fixedSize: const Size(88.0, 36.0)),
+                isSemanticButton: true,
+                menuChildren: const <Widget>[],
+                child: const Text('ABC'),
+              ),
+            ),
+          ),
+        );
+
+        // With isSemanticButton: true, the flags should have SemanticsFlag.isButton.
         expect(
           semantics,
           hasSemantics(
@@ -4360,6 +4445,7 @@ void main() {
             child: Center(
               child: MenuItemButton(
                 style: MenuItemButton.styleFrom(fixedSize: const Size(88.0, 48.0)),
+                isSemanticButton: true,
                 child: const Text('ABC'),
               ),
             ),
@@ -4401,6 +4487,7 @@ void main() {
               child: SubmenuButton(
                 onHover: (bool value) {},
                 style: SubmenuButton.styleFrom(fixedSize: const Size(88.0, 48.0)),
+                isSemanticButton: true,
                 menuChildren: const <Widget>[], // Empty = disabled
                 child: const Text('ABC'),
               ),
@@ -4442,9 +4529,11 @@ void main() {
             home: Center(
               child: SubmenuButton(
                 style: SubmenuButton.styleFrom(fixedSize: const Size(88.0, 36.0)),
+                isSemanticButton: true,
                 menuChildren: <Widget>[
                   MenuItemButton(
                     style: MenuItemButton.styleFrom(fixedSize: const Size(120.0, 36.0)),
+                    isSemanticButton: true,
                     child: const Text('Item 0'),
                     onPressed: () {},
                   ),
