@@ -3724,7 +3724,7 @@ void main() {
               label: const Text('Chip'),
               selected: selected,
               onSelected: enabled ? (_) {} : null,
-              side: _MaterialStateBorderSide(getBorderSide),
+              side: _TestWidgetStateBorderSide(getBorderSide),
             ),
           ),
         ),
@@ -3832,7 +3832,7 @@ void main() {
               label: const Text('Chip'),
               selected: selected,
               onSelected: enabled ? (_) {} : null,
-              side: _MaterialStateBorderSide(getBorderSide),
+              side: _TestWidgetStateBorderSide(getBorderSide),
             ),
           ),
         ),
@@ -3911,7 +3911,7 @@ void main() {
               label: const Text('Chip'),
               selected: selected,
               onSelected: enabled ? (_) {} : null,
-              side: MaterialStateBorderSide.resolveWith(getBorderSide),
+              side: WidgetStateBorderSide.resolveWith(getBorderSide),
             ),
           ),
         ),
@@ -4019,7 +4019,7 @@ void main() {
               label: const Text('Chip'),
               selected: selected,
               onSelected: enabled ? (_) {} : null,
-              side: MaterialStateBorderSide.resolveWith(getBorderSide),
+              side: WidgetStateBorderSide.resolveWith(getBorderSide),
             ),
           ),
         ),
@@ -4102,7 +4102,7 @@ void main() {
                 label: const Text('Chip'),
                 selected: selected,
                 onSelected: enabled ? (_) {} : null,
-                side: MaterialStateBorderSide.resolveWith(getBorderSide),
+                side: WidgetStateBorderSide.resolveWith(getBorderSide),
               ),
             ),
           ),
@@ -4217,7 +4217,7 @@ void main() {
                 label: const Text('Chip'),
                 selected: selected,
                 onSelected: enabled ? (_) {} : null,
-                side: MaterialStateBorderSide.resolveWith(getBorderSide),
+                side: WidgetStateBorderSide.resolveWith(getBorderSide),
               ),
             ),
           ),
@@ -4434,7 +4434,7 @@ void main() {
             selected: selected,
             label: const Text('Chip'),
             shape: _TestWidgetStateOutlinedBorder(getShape),
-            side: _MaterialStateBorderSide(getBorderSide),
+            side: _TestWidgetStateBorderSide(getBorderSide),
             onSelected: enabled ? (_) {} : null,
           ),
         ),
@@ -4494,7 +4494,7 @@ void main() {
             selected: selected,
             label: const Text('Chip'),
             shape: _TestWidgetStateOutlinedBorder(getShape),
-            side: _MaterialStateBorderSide(getBorderSide),
+            side: _TestWidgetStateBorderSide(getBorderSide),
             onSelected: enabled ? (_) {} : null,
           ),
         ),
@@ -6454,8 +6454,8 @@ class _TestWidgetStateOutlinedBorder extends StadiumBorder implements WidgetStat
   OutlinedBorder? resolve(Set<WidgetState> states) => resolver(states);
 }
 
-class _MaterialStateBorderSide extends MaterialStateBorderSide {
-  const _MaterialStateBorderSide(this.resolver);
+class _TestWidgetStateBorderSide extends WidgetStateBorderSide {
+  const _TestWidgetStateBorderSide(this.resolver);
 
   final WidgetPropertyResolver<BorderSide?> resolver;
 
