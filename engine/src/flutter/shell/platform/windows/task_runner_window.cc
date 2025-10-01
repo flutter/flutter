@@ -25,6 +25,7 @@ TaskRunnerWindow::TaskRunnerWindow() {
   if (!timer_) {
     FML_LOG(ERROR) << "Failed to create threadpool timer, error: "
                    << GetLastError();
+    FML_CHECK(timer_);
   }
 
   if (window_handle_) {
@@ -51,6 +52,8 @@ TaskRunnerWindow::TaskRunnerWindow() {
 
 TaskRunnerWindow::~TaskRunnerWindow() {
   SetThreadpoolTimer(timer_, nullptr, 0, 0);
+  // Ensures that no callbacks will run after CloseThreadpoolTimer.
+  // https://learn.microsoft.com/en-us/windows/win32/api/threadpoolapiset/nf-threadpoolapiset-closethreadpooltimer#remarks
   WaitForThreadpoolTimerCallbacks(timer_, TRUE);
   CloseThreadpoolTimer(timer_);
 
