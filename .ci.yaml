@@ -2274,7 +2274,7 @@ targets:
 
   - name: Linux web_tool_tests
     recipe: flutter/flutter_drone
-    timeout: 90 # https://github.com/flutter/flutter/issues/169634
+    timeout: 60
     properties:
       dependencies: >-
         [
@@ -2287,7 +2287,7 @@ targets:
       subshard: "1_1"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "5400" # https://github.com/flutter/flutter/issues/162714
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4298,6 +4298,26 @@ targets:
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: module_test_ios
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  - name: Mac module_uiscene_test_ios
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      task_name: module_uiscene_test_ios
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -6666,6 +6686,7 @@ targets:
       subshard: "2_2"
       tags: >
         ["framework", "hostonly", "shard"]
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
     - dev/**
     - packages/flutter_tools/**
