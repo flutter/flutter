@@ -106,6 +106,7 @@ void main() {
         ..entries['my-asset.txt'] = AssetBundleEntry(
           DevFSFileContent(asset),
           kind: AssetKind.regular,
+          platforms: const <String>{},
           transformers: const <AssetTransformerEntry>[
             AssetTransformerEntry(package: 'increment', args: <String>[]),
           ],
