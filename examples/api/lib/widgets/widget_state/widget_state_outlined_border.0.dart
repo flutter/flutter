@@ -4,20 +4,20 @@
 
 import 'package:flutter/material.dart';
 
-/// Flutter code sample for [MaterialStateOutlinedBorder].
+/// Flutter code sample for [WidgetStateOutlinedBorder].
 
-void main() => runApp(const MaterialStateOutlinedBorderExampleApp());
+void main() => runApp(const WidgetStateOutlinedBorderExampleApp());
 
-class MaterialStateOutlinedBorderExampleApp extends StatelessWidget {
-  const MaterialStateOutlinedBorderExampleApp({super.key});
+class WidgetStateOutlinedBorderExampleApp extends StatelessWidget {
+  const WidgetStateOutlinedBorderExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: MaterialStateOutlinedBorderExample());
+    return const MaterialApp(home: WidgetStateOutlinedBorderExample());
   }
 }
 
-class SelectedBorder extends RoundedRectangleBorder implements MaterialStateOutlinedBorder {
+class SelectedBorder extends RoundedRectangleBorder implements WidgetStateOutlinedBorder {
   const SelectedBorder();
 
   @override
@@ -29,15 +29,14 @@ class SelectedBorder extends RoundedRectangleBorder implements MaterialStateOutl
   }
 }
 
-class MaterialStateOutlinedBorderExample extends StatefulWidget {
-  const MaterialStateOutlinedBorderExample({super.key});
+class WidgetStateOutlinedBorderExample extends StatefulWidget {
+  const WidgetStateOutlinedBorderExample({super.key});
 
   @override
-  State<MaterialStateOutlinedBorderExample> createState() =>
-      _MaterialStateOutlinedBorderExampleState();
+  State<WidgetStateOutlinedBorderExample> createState() => _WidgetStateOutlinedBorderExampleState();
 }
 
-class _MaterialStateOutlinedBorderExampleState extends State<MaterialStateOutlinedBorderExample> {
+class _WidgetStateOutlinedBorderExampleState extends State<WidgetStateOutlinedBorderExample> {
   bool isSelected = true;
 
   @override
