@@ -59,6 +59,10 @@ class WidgetPreviewerWidgetScaffolding extends StatelessWidget {
 class FakeWidgetPreviewScaffoldDtdServices extends Fake
     with DtdEditorService
     implements WidgetPreviewScaffoldDtdServices {
+  FakeWidgetPreviewScaffoldDtdServices({this.isWindows = false});
+
+  final navigationEvents = <CodeLocation>[];
+
   @override
   Future<void> connect({Uri? dtdUri}) async {}
 
@@ -74,10 +78,33 @@ class FakeWidgetPreviewScaffoldDtdServices extends Fake
     hotRestartInvoked = true;
   }
 
+  /// Resolves a package:// URI to a file:// URI using the package_config.
+  ///
+  /// Returns null if [uri] can not be resolved.
+  @override
+  Future<Uri?> resolveUri(Uri uri) async {
+    return uri;
+  }
+
+  @override
+  final bool isWindows;
+
   /// The currently selected source file in the IDE.
   @override
   final ValueNotifier<TextDocument?> selectedSourceFile =
       ValueNotifier<TextDocument?>(null);
+
+  /// Whether or not the Editor service is available.
+  @override
+  final ValueNotifier<bool> editorServiceAvailable = ValueNotifier<bool>(true);
+
+  /// Tells the editor to navigate to a given code [location].
+  ///
+  /// Only locations with `file://` URIs are valid.
+  @override
+  Future<void> navigateToCode(CodeLocation location) async {
+    navigationEvents.add(location);
+  }
 }
 
 class FakeWidgetPreviewScaffoldController

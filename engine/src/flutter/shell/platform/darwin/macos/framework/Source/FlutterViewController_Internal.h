@@ -20,6 +20,8 @@
 
 @property(nonatomic, readonly) std::weak_ptr<flutter::AccessibilityBridgeMac> accessibilityBridge;
 
+@property(nonatomic, nullable) NSString* applicationLocale;
+
 /**
  * Returns YES if provided event is being currently redispatched by keyboard manager.
  */
