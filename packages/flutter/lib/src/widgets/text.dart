@@ -13,7 +13,7 @@
 library;
 
 import 'dart:math';
-import 'dart:ui' as ui show TextHeightBehavior, TypographySettings;
+import 'dart:ui' as ui show TextHeightBehavior;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -710,17 +710,16 @@ class Text extends StatelessWidget {
     if (style == null || style!.inherit) {
       effectiveTextStyle = defaultTextStyle.style.merge(style);
     }
-    final ui.TypographySettings? typographySettings = MediaQuery.maybeTypographySettingsOf(context);
     final bool boldText = MediaQuery.boldTextOf(context);
-    if (boldText ||
-        typographySettings?.lineHeight != null ||
-        typographySettings?.letterSpacing != null ||
-        typographySettings?.wordSpacing != null) {
+    final double? lineHeightScaleFactor = MediaQuery.maybeLineHeightScaleFactorOf(context);
+    final double? letterSpacing = MediaQuery.maybeLetterSpacingOf(context);
+    final double? wordSpacing = MediaQuery.maybeWordSpacingOf(context);
+    if (boldText || lineHeightScaleFactor != null || letterSpacing != null || wordSpacing != null) {
       effectiveTextStyle = effectiveTextStyle!.merge(
         TextStyle(
-          height: typographySettings?.lineHeight,
-          letterSpacing: typographySettings?.letterSpacing,
-          wordSpacing: typographySettings?.wordSpacing,
+          height: lineHeightScaleFactor,
+          letterSpacing: letterSpacing,
+          wordSpacing: wordSpacing,
           fontWeight: boldText ? FontWeight.bold : null,
         ),
       );
@@ -800,9 +799,10 @@ class Text extends StatelessWidget {
         child: ExcludeSemantics(excluding: semanticsLabel != null, child: result),
       );
     }
-    if (typographySettings?.paragraphSpacing != null) {
+    final double? paragraphSpacing = MediaQuery.maybeParagraphSpacingOf(context);
+    if (paragraphSpacing != null) {
       result = Padding(
-        padding: EdgeInsets.only(bottom: typographySettings!.paragraphSpacing!),
+        padding: EdgeInsets.only(bottom: paragraphSpacing),
         child: result,
       );
     }
