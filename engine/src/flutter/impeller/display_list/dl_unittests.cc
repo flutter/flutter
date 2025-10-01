@@ -742,12 +742,12 @@ TEST_P(DisplayListTest, CanDrawBoundedBlur) {
     builder.Scale(scale.x, scale.y);
 
     // Draw from top right to bottom left.
-    static PlaygroundPoint blur_point_a(Point(680, 240), 10, Color::White());
-    static PlaygroundPoint blur_point_b(Point(350, 480), 10, Color::White());
+    static PlaygroundPoint blur_point_a(Point(410, 110), 10, Color::White());
+    static PlaygroundPoint blur_point_b(Point(150, 320), 10, Color::White());
     auto [p1, p2] = DrawPlaygroundLine(blur_point_a, blur_point_b);
     DlRect bounds = DlRect::MakeLTRB(p2.x, p1.y, p1.x, p2.y);
 
-    builder.DrawImage(DlImageImpeller::Make(texture), DlPoint(200, 200),
+    builder.DrawImage(DlImageImpeller::Make(texture), DlPoint(0, 0),
                       flutter::DlImageSampling::kNearestNeighbor, nullptr);
     builder.ClipRect(bounds.Scale(1 / ctm_scale));
     builder.Save();
