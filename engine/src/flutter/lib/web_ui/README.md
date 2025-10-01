@@ -195,20 +195,17 @@ If you have questions, contact the Flutter Web team on Flutter Discord on the
 
 We test with Firefox on LUCI in the Linux Web Engine builder. The process for
 rolling Firefox is even easier than Chromium. Simply update `package_lock.yaml`
-with the latest version of Firefox, and run `package_roller.dart`.
+with the latest version of Firefox, and run:
+```
+dart dev/package_roller.dart
+```
 
 #### .ci.yaml
 
-After rolling Chrome and/or Firefox, also update the CI dependencies in
-`.ci.yaml` to make use of the new versions. The lines look like
+After rolling Chrome and/or Firefox, also update the CI dependencies by running:
 
-```yaml
-      dependencies: >-
-        [
-          {"dependency": "chrome_and_driver", "version": "version:107.0"},
-          {"dependency": "firefox", "version": "version:83.0"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
-        ]
+```
+felt generate-builder-json
 ```
 
 ##### **package_roller.dart**
