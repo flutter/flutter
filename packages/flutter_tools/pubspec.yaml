@@ -58,9 +58,9 @@ dependencies:
   pubspec_parse: 1.5.0
 
   graphs: 2.3.2
-  hooks_runner: 0.22.1
+  hooks_runner: 0.23.0
   hooks: 0.20.1
-  code_assets: 0.19.6
+  code_assets: 0.19.7
   data_assets: 0.19.3
 
   # We depend on very specific internal implementation details of the
@@ -127,4 +127,4 @@ dev_dependencies:
 dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
-# PUBSPEC CHECKSUM: sro36f
+# PUBSPEC CHECKSUM: 37t3vr
