@@ -134,7 +134,7 @@ class WidgetPreviewDtdServices {
 
   Future<Map<String, Object?>> _setPreference(Parameters params) async {
     final String key = params['key'].asString;
-    final String value = params['value'].asString;
+    final Object? value = params['value'].value;
     preferences[key] = value;
     return const Success().toJson();
   }
