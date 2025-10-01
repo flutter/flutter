@@ -4,11 +4,13 @@
 
 import 'dart:async';
 
+import 'package:flutter/widget_previews.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:widget_preview_scaffold/src/controls.dart';
 import 'package:widget_preview_scaffold/src/widget_preview.dart';
-import 'package:widget_preview_scaffold/src/widget_preview_rendering.dart';
+import 'package:widget_preview_scaffold/src/widget_preview_rendering.dart'
+    hide PreviewWidget;
 
 import 'utils/widget_preview_scaffold_test_utils.dart';
 
@@ -17,15 +19,16 @@ void main() {
     'Soft restart removes and re-inserts previewed widget into the widget tree',
     (tester) async {
       const String kTestText = 'Foo';
-      final WidgetPreviewerWidgetScaffolding widgetPreview =
-          WidgetPreviewerWidgetScaffolding(
-            child: WidgetPreviewWidget(
-              preview: WidgetPreview(
-                scriptUri: '',
-                builder: () => const Text(kTestText),
-              ),
-            ),
-          );
+      final controller = FakeWidgetPreviewScaffoldController();
+      final widgetPreview = WidgetPreviewerWidgetScaffolding(
+        child: WidgetPreviewWidget(
+          controller: controller,
+          preview: WidgetPreview.test(
+            builder: () => const Text(kTestText),
+            previewData: Preview(),
+          ),
+        ),
+      );
 
       await tester.pumpWidget(widgetPreview);
       final Finder softRestartButton = find.byType(SoftRestartButton);

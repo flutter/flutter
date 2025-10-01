@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/widget_previews.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:widget_preview_scaffold/src/widget_preview.dart';
-import 'package:widget_preview_scaffold/src/widget_preview_rendering.dart';
+import 'package:widget_preview_scaffold/src/widget_preview_rendering.dart'
+    hide PreviewWidget;
 import 'package:widget_preview_scaffold/src/widget_preview_scaffold_controller.dart';
 
 import 'utils/widget_preview_scaffold_test_utils.dart';
@@ -14,12 +16,17 @@ void main() {
   testWidgets(
     'Help message is displayed with link to documentation when no previews are detected',
     (tester) async {
-      final currentPreviews = <WidgetPreviewGroup>[];
+      final currentPreviews = <WidgetPreview>[];
 
       final controller = WidgetPreviewScaffoldController(
         dtdServicesOverride: FakeWidgetPreviewScaffoldDtdServices(),
         previews: () => currentPreviews,
       );
+
+      if (controller.filterBySelectedFileListenable.value) {
+        // Don't filter by selected file.
+        controller.toggleFilterBySelectedFile();
+      }
       // Start with no previews populated and verify the help message is displayed with a link to
       // documentation.
       await tester.pumpWidget(WidgetPreviewScaffold(controller: controller));
@@ -41,11 +48,13 @@ void main() {
       expect(widgetPreviewWidgetFinder, findsNothing);
 
       currentPreviews.add(
-        WidgetPreviewGroup(
-          name: 'group',
-          previews: <WidgetPreview>[
-            WidgetPreview(scriptUri: '', builder: () => const Text('Foo')),
-          ],
+        WidgetPreview(
+          scriptUri: '',
+          line: -1,
+          column: -1,
+          builder: () => const Text('Foo'),
+          previewData: Preview(),
+          packageName: '',
         ),
       );
 

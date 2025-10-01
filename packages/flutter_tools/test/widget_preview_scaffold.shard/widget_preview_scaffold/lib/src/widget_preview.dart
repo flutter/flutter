@@ -31,19 +31,32 @@ class WidgetPreview {
   const WidgetPreview({
     required this.builder,
     required this.scriptUri,
-    this.packageName,
-    this.name,
-    this.size,
-    this.textScaleFactor,
-    this.brightness,
-    this.theme,
-    this.localizations,
+    required this.line,
+    required this.column,
+    required this.previewData,
+    required this.packageName,
+  });
+
+  @visibleForTesting
+  const WidgetPreview.test({
+    required this.builder,
+    required this.previewData,
+    this.scriptUri = '',
+    this.line = -1,
+    this.column = -1,
+    this.packageName = '',
   });
 
   /// The absolute file:// URI pointing to the script containing this preview.
   ///
   /// This matches the URI format sent by IDEs for active location change events.
   final String scriptUri;
+
+  /// The line at which the Preview annotation was applied.
+  final int line;
+
+  /// The column at which the Preview annotation was applied.
+  final int column;
 
   /// The name of the package in which a preview was defined.
   ///
@@ -54,10 +67,22 @@ class WidgetPreview {
   /// A description to be displayed alongside the preview.
   ///
   /// If not provided, no name will be associated with the preview.
-  final String? name;
+  String? get name => previewData.name;
 
   /// A callback to build the [Widget] to be rendered in the preview.
   final Widget Function() builder;
+
+  Widget Function() get previewBuilder {
+    if (previewData.wrapper == null) {
+      return builder;
+    }
+    return switch (previewData) {
+      Preview(:final Widget Function(Widget) wrapper) => () => wrapper(
+        builder(),
+      ),
+      _ => builder,
+    };
+  }
 
   /// Artificial constraints to be applied to the previewed widget.
   ///
@@ -66,34 +91,38 @@ class WidgetPreview {
   ///
   /// If a dimension has a value of `double.infinity`, the previewed widget
   /// will attempt to set its own constraints in the relevant dimension.
-  final Size? size;
+  Size? get size => previewData.size;
 
   /// Applies font scaling to text within the [Widget] returned by [builder].
   ///
   /// If not provided, the default text scaling factor provided by [MediaQuery]
   /// will be used.
-  final double? textScaleFactor;
+  double? get textScaleFactor => previewData.textScaleFactor;
 
   /// Material and Cupertino theming data to be applied to the previewed [Widget].
   ///
   /// If not provided, the default theme will be used.
-  final PreviewThemeData? theme;
+  PreviewThemeData? get theme => previewData.theme?.call();
 
   /// Sets the initial theme brightness.
   ///
   /// If not provided, the current system default brightness will be used.
-  final Brightness? brightness;
+  Brightness? get brightness => previewData.brightness;
 
   /// A callback to return a localization configuration to be applied to the
   /// previewed [Widget].
   ///
   /// Note: this must be a reference to a static, public function defined as
   /// either a top-level function or static member in a class.
-  final PreviewLocalizationsData? localizations;
+  PreviewLocalizationsData? get localizations =>
+      previewData.localizations?.call();
+
+  final Preview previewData;
 
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     properties
       ..add(DiagnosticsProperty<String>('name', name, ifNull: 'not set'))
+      ..add(DiagnosticsProperty<String>('group', previewData.group))
       ..add(DiagnosticsProperty<Size>('size', size))
       ..add(DiagnosticsProperty<double>('textScaleFactor', textScaleFactor))
       ..add(DiagnosticsProperty<PreviewThemeData>('theme', theme))
