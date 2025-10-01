@@ -16,9 +16,10 @@ namespace txt {
 
 namespace {
 
-constexpr std::string kWeightAxisTag("wght");
+constexpr std::string_view kWeightAxisTag = "wght";
 
-SkFourByteTag GetFourByteTag(const std::string& tag) {
+template <typename T>
+SkFourByteTag GetFourByteTag(const T& tag) {
   return SkSetFourByteTag(tag[0], tag[1], tag[2], tag[3]);
 }
 
