@@ -33,22 +33,22 @@
 
 @interface NSWindow (FlutterWindowSizing)
 
-- (void)flutterSetContentSize:(FlutterWindowSizing)contentSize;
+- (void)flutterSetContentSize:(FlutterWindowSize)contentSize;
+- (void)flutterSetConstraints:(FlutterWindowConstraints)constraints;
 
 @end
 
 @implementation NSWindow (FlutterWindowSizing)
-- (void)flutterSetContentSize:(FlutterWindowSizing)contentSize {
-  if (contentSize.has_size) {
-    [self setContentSize:NSMakeSize(contentSize.width, contentSize.height)];
-  }
-  if (contentSize.has_constraints) {
-    [self setContentMinSize:NSMakeSize(contentSize.min_width, contentSize.min_height)];
-    if (contentSize.max_width > 0 && contentSize.max_height > 0) {
-      [self setContentMaxSize:NSMakeSize(contentSize.max_width, contentSize.max_height)];
-    } else {
-      [self setContentMaxSize:NSMakeSize(CGFLOAT_MAX, CGFLOAT_MAX)];
-    }
+- (void)flutterSetContentSize:(FlutterWindowSize)contentSize {
+  [self setContentSize:NSMakeSize(contentSize.width, contentSize.height)];
+}
+
+- (void)flutterSetConstraints:(FlutterWindowConstraints)constraints {
+  [self setContentMinSize:NSMakeSize(constraints.min_width, constraints.min_height)];
+  if (constraints.max_width > 0 && constraints.max_height > 0) {
+    [self setContentMaxSize:NSMakeSize(constraints.max_width, constraints.max_height)];
+  } else {
+    [self setContentMaxSize:NSMakeSize(CGFLOAT_MAX, CGFLOAT_MAX)];
   }
 }
 
@@ -135,7 +135,12 @@
   window.contentViewController = c;
   window.styleMask = NSWindowStyleMaskResizable | NSWindowStyleMaskTitled |
                      NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable;
-  [window flutterSetContentSize:request->contentSize];
+  if (request->has_size) {
+    [window flutterSetContentSize:request->size];
+  }
+  if (request->has_constraints) {
+    [window flutterSetConstraints:request->constraints];
+  }
   [window setIsVisible:YES];
   [window makeKeyAndOrderFront:nil];
 
@@ -206,9 +211,16 @@ FlutterWindowSize InternalFlutter_Window_GetContentSize(void* window) {
   };
 }
 
-void InternalFlutter_Window_SetContentSize(void* window, const FlutterWindowSizing* size) {
+void InternalFlutter_Window_SetContentSize(void* window, const FlutterWindowSize* size) {
   NSWindow* w = (__bridge NSWindow*)window;
   [w flutterSetContentSize:*size];
+}
+
+FLUTTER_DARWIN_EXPORT
+void InternalFlutter_Window_SetConstraints(void* window,
+                                           const FlutterWindowConstraints* constraints) {
+  NSWindow* w = (__bridge NSWindow*)window;
+  [w flutterSetConstraints:*constraints];
 }
 
 void InternalFlutter_Window_SetTitle(void* window, const char* title) {
@@ -264,6 +276,16 @@ void InternalFlutter_Window_Activate(void* window) {
   NSWindow* w = (__bridge NSWindow*)window;
   [NSApplication.sharedApplication activateIgnoringOtherApps:YES];
   [w makeKeyAndOrderFront:nil];
+}
+
+char* InternalFlutter_Window_GetTitle(void* window) {
+  NSWindow* w = (__bridge NSWindow*)window;
+  return strdup(w.title.UTF8String);
+}
+
+bool InternalFlutter_Window_IsActivated(void* window) {
+  NSWindow* w = (__bridge NSWindow*)window;
+  return w.isKeyWindow;
 }
 
 // NOLINTEND(google-objc-function-naming)
