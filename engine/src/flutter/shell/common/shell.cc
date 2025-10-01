@@ -149,6 +149,56 @@ void PerformInitializationTasks(Settings& settings) {
 #endif  //  !SLIMPELLER
 }
 
+bool ValidateViewportMetrics(const ViewportMetrics& metrics) {
+  // Pixel ratio cannot be zero.
+  if (metrics.device_pixel_ratio <= 0) {
+    return false;
+  }
+
+  // If negative values are passed in.
+  if (metrics.physical_width < 0 || metrics.physical_height < 0 ||
+      metrics.physical_min_width_constraint < 0 ||
+      metrics.physical_max_width_constraint < 0 ||
+      metrics.physical_min_height_constraint < 0 ||
+      metrics.physical_max_height_constraint < 0) {
+    return false;
+  }
+
+  // If width is zero and the constraints are tight.
+  if (metrics.physical_width == 0 &&
+      metrics.physical_min_width_constraint ==
+          metrics.physical_max_width_constraint) {
+    return false;
+  }
+
+  // If not tight constraints, check the width fits in the constraints.
+  if (metrics.physical_min_width_constraint !=
+      metrics.physical_max_width_constraint) {
+    if (metrics.physical_min_width_constraint > metrics.physical_width ||
+        metrics.physical_width > metrics.physical_max_width_constraint) {
+      return false;
+    }
+  }
+
+  // If height is zero and the constraints are tight.
+  if (metrics.physical_height == 0 &&
+      metrics.physical_min_height_constraint ==
+          metrics.physical_max_height_constraint) {
+    return false;
+  }
+
+  // If not tight constraints, check the height fits in the constraints.
+  if (metrics.physical_min_height_constraint !=
+      metrics.physical_max_height_constraint) {
+    if (metrics.physical_min_height_constraint > metrics.physical_height ||
+        metrics.physical_height > metrics.physical_max_height_constraint) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 }  // namespace
 
 std::pair<DartVMRef, fml::RefPtr<const DartSnapshot>>
@@ -1078,8 +1128,7 @@ void Shell::OnPlatformViewSetViewportMetrics(int64_t view_id,
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
-  if (metrics.device_pixel_ratio <= 0 || metrics.physical_width <= 0 ||
-      metrics.physical_height <= 0) {
+  if (!ValidateViewportMetrics(metrics)) {
     // Ignore invalid view-port metrics.
     return;
   }
@@ -1107,8 +1156,12 @@ void Shell::OnPlatformViewSetViewportMetrics(int64_t view_id,
 
   {
     std::scoped_lock<std::mutex> lock(resize_mutex_);
-    expected_frame_sizes_[view_id] =
-        DlISize(metrics.physical_width, metrics.physical_height);
+
+    expected_frame_constraints_[view_id] =
+        BoxConstraints(Size(metrics.physical_min_width_constraint,
+                            metrics.physical_min_height_constraint),
+                       Size(metrics.physical_max_width_constraint,
+                            metrics.physical_max_height_constraint));
     device_pixel_ratio_ = metrics.device_pixel_ratio;
   }
 }
@@ -1391,6 +1444,20 @@ void Shell::OnEngineUpdateSemantics(int64_t view_id,
        actions = std::move(actions), view_id = view_id] {
         if (view) {
           view->UpdateSemantics(view_id, update, actions);
+        }
+      });
+}
+
+// |Engine::Delegate|
+void Shell::OnEngineSetApplicationLocale(std::string locale) {
+  FML_DCHECK(is_set_up_);
+  FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
+
+  task_runners_.GetPlatformTaskRunner()->RunNowOrPostTask(
+      task_runners_.GetPlatformTaskRunner(),
+      [view = platform_view_->GetWeakPtr(), locale_holder = std::move(locale)] {
+        if (view) {
+          view->SetApplicationLocale(locale_holder);
         }
       });
 }
@@ -1756,9 +1823,9 @@ fml::TimePoint Shell::GetLatestFrameTargetTime() const {
 bool Shell::ShouldDiscardLayerTree(int64_t view_id,
                                    const flutter::LayerTree& tree) {
   std::scoped_lock<std::mutex> lock(resize_mutex_);
-  auto expected_frame_size = ExpectedFrameSize(view_id);
-  return !expected_frame_size.IsEmpty() &&
-         tree.frame_size() != expected_frame_size;
+  auto expected_frame_constraints = ExpectedFrameConstraints(view_id);
+  return !expected_frame_constraints.IsSatisfiedBy(
+      Size(tree.frame_size().width, tree.frame_size().height));
 }
 
 // |ServiceProtocol::Handler|
@@ -1904,6 +1971,8 @@ bool Shell::OnServiceProtocolRunInView(
   configuration.SetEntrypointAndLibrary(engine_->GetLastEntrypoint(),
                                         engine_->GetLastEntrypointLibrary());
   configuration.SetEntrypointArgs(engine_->GetLastEntrypointArgs());
+
+  configuration.SetEngineId(engine_->GetLastEngineId());
 
   configuration.AddAssetResolver(std::make_unique<DirectoryAssetBundle>(
       fml::OpenDirectory(asset_directory_path.c_str(), false,
@@ -2167,8 +2236,10 @@ void Shell::OnPlatformViewRemoveView(int64_t view_id,
   FML_DCHECK(view_id != kFlutterImplicitViewId)
       << "Unexpected request to remove the implicit view #"
       << kFlutterImplicitViewId << ". This view should never be removed.";
-
-  expected_frame_sizes_.erase(view_id);
+  {
+    std::scoped_lock<std::mutex> lock(resize_mutex_);
+    expected_frame_constraints_.erase(view_id);
+  }
   task_runners_.GetUITaskRunner()->RunNowOrPostTask(
       task_runners_.GetUITaskRunner(),
       [&task_runners = task_runners_,           //
@@ -2361,11 +2432,13 @@ Shell::GetConcurrentWorkerTaskRunner() const {
   return vm_->GetConcurrentWorkerTaskRunner();
 }
 
-DlISize Shell::ExpectedFrameSize(int64_t view_id) {
-  auto found = expected_frame_sizes_.find(view_id);
-  if (found == expected_frame_sizes_.end()) {
-    return DlISize();
+BoxConstraints Shell::ExpectedFrameConstraints(int64_t view_id) {
+  auto found = expected_frame_constraints_.find(view_id);
+
+  if (found == expected_frame_constraints_.end()) {
+    return {};
   }
+
   return found->second;
 }
 

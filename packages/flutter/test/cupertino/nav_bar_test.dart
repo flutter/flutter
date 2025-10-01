@@ -451,6 +451,52 @@ void main() {
     expect(count, 0x010101);
   });
 
+  testWidgets('Nav bar static components respect MediaQueryData', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/174642
+    const double value = 10.0;
+
+    void expectCustomMediaQueryData(BuildContext context) {
+      expect(MediaQuery.platformBrightnessOf(context), Brightness.dark);
+      expect(MediaQuery.devicePixelRatioOf(context), value);
+      expect(MediaQuery.viewInsetsOf(context), const EdgeInsets.all(value));
+    }
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: MediaQuery(
+          data: const MediaQueryData(
+            devicePixelRatio: value,
+            viewInsets: EdgeInsets.all(value),
+            platformBrightness: Brightness.dark,
+          ),
+          child: CupertinoNavigationBar(
+            leading: Builder(
+              builder: (BuildContext context) {
+                expectCustomMediaQueryData(context);
+                return CupertinoButton(onPressed: () {}, child: const Text('leading'));
+              },
+            ),
+            middle: Builder(
+              builder: (BuildContext context) {
+                expectCustomMediaQueryData(context);
+                return CupertinoButton(onPressed: () {}, child: const Text('middle'));
+              },
+            ),
+            trailing: Builder(
+              builder: (BuildContext context) {
+                expectCustomMediaQueryData(context);
+                return CupertinoButton(onPressed: () {}, child: const Text('trailing'));
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(find.text('leading'), findsOneWidget);
+    expect(find.text('middle'), findsOneWidget);
+    expect(find.text('trailing'), findsOneWidget);
+  });
+
   testWidgets('No slivers with no large titles', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
@@ -2743,6 +2789,122 @@ void main() {
       findsOneWidget,
     );
     expect(navBar.preferredSize.height, persistentHeight + bottomHeight);
+  });
+
+  testWidgets('CupertinoNavigationBar has correct height', (WidgetTester tester) async {
+    const double persistentHeight = 44.0;
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoPageScaffold(
+          navigationBar: CupertinoNavigationBar(middle: Text('Middle')),
+          child: Placeholder(),
+        ),
+      ),
+    );
+
+    final Finder navBarFinder = find.byType(CupertinoNavigationBar);
+    expect(navBarFinder, findsOneWidget);
+
+    final RenderBox navBarBox = tester.renderObject(navBarFinder);
+    final CupertinoNavigationBar navBar = tester.widget<CupertinoNavigationBar>(navBarFinder);
+
+    // preferredSize should only include persistent height when no large title.
+    expect(navBar.preferredSize.height, persistentHeight);
+    // The box size height should match the preferred size height.
+    expect(navBarBox.size.height, persistentHeight);
+  });
+
+  testWidgets('CupertinoNavigationBar with bottom widget has correct height', (
+    WidgetTester tester,
+  ) async {
+    const double persistentHeight = 44.0;
+    const double bottomHeight = 20.0;
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoPageScaffold(
+          navigationBar: CupertinoNavigationBar(
+            middle: Text('Middle'),
+            bottom: PreferredSize(
+              preferredSize: Size.fromHeight(bottomHeight),
+              child: Placeholder(),
+            ),
+          ),
+          child: Placeholder(),
+        ),
+      ),
+    );
+
+    final Finder navBarFinder = find.byType(CupertinoNavigationBar);
+    expect(navBarFinder, findsOneWidget);
+
+    final RenderBox navBarBox = tester.renderObject(navBarFinder);
+    final CupertinoNavigationBar navBar = tester.widget<CupertinoNavigationBar>(navBarFinder);
+
+    // preferredSize should include persistent height and bottom height
+    expect(navBar.preferredSize.height, persistentHeight + bottomHeight);
+    // The box size height should match the preferred size height.
+    expect(navBarBox.size.height, persistentHeight + bottomHeight);
+  });
+
+  testWidgets('CupertinoNavigationBar.large has correct height', (WidgetTester tester) async {
+    const double persistentHeight = 44.0;
+    const double largeTitleExtension = 52.0;
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoPageScaffold(
+          navigationBar: CupertinoNavigationBar.large(largeTitle: Text('Large Title')),
+          child: Placeholder(),
+        ),
+      ),
+    );
+
+    final Finder navBarFinder = find.byType(CupertinoNavigationBar);
+    expect(navBarFinder, findsOneWidget);
+
+    final RenderBox navBarBox = tester.renderObject(navBarFinder);
+    final CupertinoNavigationBar navBar = tester.widget<CupertinoNavigationBar>(navBarFinder);
+
+    // preferredSize should include both persistent height and large title extension
+    expect(navBar.preferredSize.height, persistentHeight + largeTitleExtension);
+    // The box size height should match the preferred size height.
+    expect(navBarBox.size.height, persistentHeight + largeTitleExtension);
+  });
+
+  testWidgets('CupertinoNavigationBar.large with bottom widget has correct height', (
+    WidgetTester tester,
+  ) async {
+    const double persistentHeight = 44.0;
+    const double largeTitleExtension = 52.0;
+    const double bottomHeight = 20.0;
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoPageScaffold(
+          navigationBar: CupertinoNavigationBar.large(
+            largeTitle: Text('Large Title'),
+            bottom: PreferredSize(
+              preferredSize: Size.fromHeight(bottomHeight),
+              child: Placeholder(),
+            ),
+          ),
+          child: Placeholder(),
+        ),
+      ),
+    );
+
+    final Finder navBarFinder = find.byType(CupertinoNavigationBar);
+    expect(navBarFinder, findsOneWidget);
+
+    final RenderBox navBarBox = tester.renderObject(navBarFinder);
+    final CupertinoNavigationBar navBar = tester.widget<CupertinoNavigationBar>(navBarFinder);
+
+    // preferredSize should include persistent height, large title extension, and bottom height
+    expect(navBar.preferredSize.height, persistentHeight + largeTitleExtension + bottomHeight);
+    // The box size height should match the preferred size height.
+    expect(navBarBox.size.height, persistentHeight + largeTitleExtension + bottomHeight);
   });
 
   testWidgets('CupertinoSliverNavigationBar.search field collapses nav bar on tap', (
