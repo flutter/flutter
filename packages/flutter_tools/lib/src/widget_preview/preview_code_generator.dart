@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:analyzer/dart/constant/value.dart';
-import 'package:analyzer/dart/element/element2.dart' as analyzer;
-import 'package:analyzer/dart/element/element2.dart';
+import 'package:analyzer/dart/element/element.dart' as analyzer;
+import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:built_collection/built_collection.dart';
 import 'package:code_builder/code_builder.dart' as cb;
@@ -210,7 +210,7 @@ extension on DartObject {
       DartType(isDartCoreInt: true) => cb.literalNum(toIntValue()!),
       DartType(isDartCoreString: true) => cb.literalString(toStringValue()!),
       DartType(isDartCoreNull: true) => cb.literalNull,
-      InterfaceType(element3: EnumElement()) => _createEnumInstance(this),
+      InterfaceType(element: EnumElement()) => _createEnumInstance(this),
       InterfaceType() => _createInstance(type, this),
       FunctionType() => _createTearoff(toFunctionValue()!),
       _ => throw UnsupportedError('Unexpected DartObject type: $runtimeType'),
@@ -242,10 +242,10 @@ extension on DartObject {
     final ConstructorInvocation constructorInvocation = object.constructorInvocation!;
     final ConstructorElement constructor = constructorInvocation.constructor;
     final cb.Expression type = cb.refer(
-      dartType.element3.name3!,
-      _elementToLibraryIdentifier(dartType.element3),
+      dartType.element.name!,
+      _elementToLibraryIdentifier(dartType.element),
     );
-    final String? name = constructor.name3 == 'new' ? null : constructor.name3;
+    final String? name = constructor.name == 'new' ? null : constructor.name;
 
     final List<cb.Expression> positionalArguments = constructorInvocation.positionalArguments
         .map((e) => e.toExpression())
