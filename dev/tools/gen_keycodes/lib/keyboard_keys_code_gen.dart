@@ -112,8 +112,9 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
 
   String? _otherComments(String name) {
     if (synonyms.containsKey(name)) {
-      final Set<String> unionNames =
-          synonyms[name]!.keys.map((LogicalKeyEntry entry) => entry.constantName).toSet();
+      final Set<String> unionNames = synonyms[name]!.keys
+          .map((LogicalKeyEntry entry) => entry.constantName)
+          .toSet();
       return _wrapString(
         'This key represents the union of the keys '
         '$unionNames when comparing keys. This key will never be generated '
@@ -138,8 +139,9 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
     final StringBuffer result = StringBuffer();
     for (final SynonymKeyInfo synonymInfo in synonyms.values) {
       final LogicalKeyEntry synonym = logicalData.entryByName(synonymInfo.name);
-      final List<String> entries =
-          synonymInfo.keys.map<String>((LogicalKeyEntry entry) => entry.constantName).toList();
+      final List<String> entries = synonymInfo.keys
+          .map<String>((LogicalKeyEntry entry) => entry.constantName)
+          .toList();
       result.writeln('    ${synonym.constantName}: <LogicalKeyboardKey>{${entries.join(', ')}},');
     }
     return result.toString();
@@ -213,8 +215,9 @@ ${_wrapString(constant.description)}  ///
 
   late final Map<String, SynonymKeyInfo> synonyms = Map<String, SynonymKeyInfo>.fromEntries(
     LogicalKeyData.synonyms.entries.map((MapEntry<String, List<String>> synonymDefinition) {
-      final List<LogicalKeyEntry> entries =
-          synonymDefinition.value.map((String name) => logicalData.entryByName(name)).toList();
+      final List<LogicalKeyEntry> entries = synonymDefinition.value
+          .map((String name) => logicalData.entryByName(name))
+          .toList();
       return MapEntry<String, SynonymKeyInfo>(
         synonymDefinition.key,
         SynonymKeyInfo(entries, synonymDefinition.key),

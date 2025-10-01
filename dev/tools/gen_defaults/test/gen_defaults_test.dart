@@ -511,7 +511,8 @@ class TestTemplate extends TokenTemplate {
   TestTemplate(super.blockName, super.fileName, super.tokens);
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 static final String tokenFoo = '${getToken('foo')}';
 static final String tokenBar = '${getToken('bar')}';
 ''';
@@ -521,7 +522,8 @@ class TestColorTemplate extends TokenTemplate {
   TestColorTemplate(super.blockName, super.fileName, super.tokens);
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 static final Color color_1 = '${color('color_foo_req')}';
 static final Color color_2 = '${color('color_foo_opt', 'Colors.red')}';
 ''';
@@ -531,7 +533,8 @@ class TestBorderTemplate extends TokenTemplate {
   TestBorderTemplate(super.blockName, super.fileName, super.tokens);
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 static final BorderSide border = '${border('border_foo')}';
 ''';
 }

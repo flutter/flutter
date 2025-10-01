@@ -568,10 +568,9 @@ void main() {
   group('vmo', () {
     test('fromFile', () {
       const String fuchsia = 'Fuchsia';
-      File f =
-          File('tmp/testdata')
-            ..createSync()
-            ..writeAsStringSync(fuchsia);
+      File f = File('tmp/testdata')
+        ..createSync()
+        ..writeAsStringSync(fuchsia);
       String readFuchsia = f.readAsStringSync();
       expect(readFuchsia, equals(fuchsia));
 

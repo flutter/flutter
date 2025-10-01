@@ -85,6 +85,10 @@ abstract class PlatformDispatcher {
 
   void scheduleWarmUpFrame({required VoidCallback beginFrame, required VoidCallback drawFrame});
 
+  void setSemanticsTreeEnabled(bool enabled) {}
+
+  void setApplicationLocale(Locale locale) {}
+
   AccessibilityFeatures get accessibilityFeatures;
 
   VoidCallback? get onAccessibilityFeaturesChanged;

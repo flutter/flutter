@@ -692,8 +692,9 @@ class Timeseries {
     // with no noise the difference between average and outlier average is zero,
     // which the best possible outcome. Noise produces a positive difference
     // between the two.
-    final double outlierAverage =
-        outliers.isNotEmpty ? _computeAverage(name, outliers) : cleanAverage;
+    final double outlierAverage = outliers.isNotEmpty
+        ? _computeAverage(name, outliers)
+        : cleanAverage;
 
     final List<AnnotatedSample> annotatedValues = <AnnotatedSample>[
       for (final double warmUpValue in warmUpValues)
@@ -809,10 +810,9 @@ class TimeseriesStats {
   /// This is a measure of performance consistency. The higher this number the
   /// worse is jank when it happens. Smaller is better, with 1.0 being the
   /// perfect score. If [average] is zero, this value defaults to 1.0.
-  double get outlierRatio =>
-      average > 0.0
-          ? outlierAverage / average
-          : 1.0; // this can only happen in perfect benchmark that reports only zeros
+  double get outlierRatio => average > 0.0
+      ? outlierAverage / average
+      : 1.0; // this can only happen in perfect benchmark that reports only zeros
 
   @override
   String toString() {

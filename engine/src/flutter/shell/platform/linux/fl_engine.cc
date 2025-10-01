@@ -13,11 +13,10 @@
 #include "flutter/shell/platform/common/engine_switches.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/linux/fl_binary_messenger_private.h"
-#include "flutter/shell/platform/linux/fl_compositor_opengl.h"
-#include "flutter/shell/platform/linux/fl_compositor_software.h"
 #include "flutter/shell/platform/linux/fl_dart_project_private.h"
 #include "flutter/shell/platform/linux/fl_display_monitor.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
+#include "flutter/shell/platform/linux/fl_framebuffer.h"
 #include "flutter/shell/platform/linux/fl_keyboard_handler.h"
 #include "flutter/shell/platform/linux/fl_opengl_manager.h"
 #include "flutter/shell/platform/linux/fl_pixel_buffer_texture_private.h"
@@ -49,8 +48,8 @@ struct _FlEngine {
   // Watches for monitors changes to update engine.
   FlDisplayMonitor* display_monitor;
 
-  // Renders the Flutter app.
-  FlCompositor* compositor;
+  // Type of rendering performed.
+  FlutterRendererType renderer_type;
 
   // Manages OpenGL contexts.
   FlOpenGLManager* opengl_manager;
@@ -248,14 +247,100 @@ static void setup_locales(FlEngine* self) {
   }
 }
 
+static bool create_opengl_backing_store(
+    FlEngine* self,
+    const FlutterBackingStoreConfig* config,
+    FlutterBackingStore* backing_store_out) {
+  if (!fl_opengl_manager_make_current(self->opengl_manager)) {
+    return false;
+  }
+
+  GLint sized_format = GL_RGBA8;
+  GLint general_format = GL_RGBA;
+  if (epoxy_has_gl_extension("GL_EXT_texture_format_BGRA8888")) {
+    sized_format = GL_BGRA8_EXT;
+    general_format = GL_BGRA_EXT;
+  }
+
+  FlFramebuffer* framebuffer = fl_framebuffer_new(
+      general_format, config->size.width, config->size.height, FALSE);
+  if (!framebuffer) {
+    g_warning("Failed to create backing store");
+    return false;
+  }
+
+  backing_store_out->type = kFlutterBackingStoreTypeOpenGL;
+  backing_store_out->open_gl.type = kFlutterOpenGLTargetTypeFramebuffer;
+  backing_store_out->open_gl.framebuffer.user_data = framebuffer;
+  backing_store_out->open_gl.framebuffer.name =
+      fl_framebuffer_get_id(framebuffer);
+  backing_store_out->open_gl.framebuffer.target = sized_format;
+  backing_store_out->open_gl.framebuffer.destruction_callback = [](void* p) {
+    // Backing store destroyed in fl_compositor_opengl_collect_backing_store(),
+    // set on FlutterCompositor.collect_backing_store_callback during engine
+    // start.
+  };
+
+  return true;
+}
+
+static bool collect_opengl_backing_store(
+    FlEngine* self,
+    const FlutterBackingStore* backing_store) {
+  if (!fl_opengl_manager_make_current(self->opengl_manager)) {
+    return false;
+  }
+
+  // OpenGL context is required when destroying #FlFramebuffer.
+  g_object_unref(backing_store->open_gl.framebuffer.user_data);
+  return true;
+}
+
+static bool create_software_backing_store(
+    FlEngine* self,
+    const FlutterBackingStoreConfig* config,
+    FlutterBackingStore* backing_store_out) {
+  size_t allocation_length = config->size.width * config->size.height * 4;
+  uint8_t* allocation = static_cast<uint8_t*>(malloc(allocation_length));
+  if (allocation == nullptr) {
+    return false;
+  }
+
+  backing_store_out->type = kFlutterBackingStoreTypeSoftware;
+  backing_store_out->software.allocation = allocation;
+  backing_store_out->software.height = config->size.height;
+  backing_store_out->software.row_bytes = config->size.width * 4;
+  backing_store_out->software.user_data = nullptr;
+  backing_store_out->software.destruction_callback = [](void* p) {
+    // Backing store destroyed in
+    // fl_compositor_software_collect_backing_store(), set on
+    // FlutterCompositor.collect_backing_store_callback during engine start.
+  };
+
+  return true;
+}
+
+static bool collect_software_backing_store(
+    FlEngine* self,
+    const FlutterBackingStore* backing_store) {
+  free(const_cast<void*>(backing_store->software.allocation));
+  return true;
+}
+
 // Called when engine needs a backing store for a specific #FlutterLayer.
 static bool compositor_create_backing_store_callback(
     const FlutterBackingStoreConfig* config,
     FlutterBackingStore* backing_store_out,
     void* user_data) {
   FlEngine* self = static_cast<FlEngine*>(user_data);
-  return fl_compositor_create_backing_store(self->compositor, config,
-                                            backing_store_out);
+  switch (self->renderer_type) {
+    case kOpenGL:
+      return create_opengl_backing_store(self, config, backing_store_out);
+    case kSoftware:
+      return create_software_backing_store(self, config, backing_store_out);
+    default:
+      return false;
+  }
 }
 
 // Called when the backing store is to be released.
@@ -263,15 +348,33 @@ static bool compositor_collect_backing_store_callback(
     const FlutterBackingStore* backing_store,
     void* user_data) {
   FlEngine* self = static_cast<FlEngine*>(user_data);
-  return fl_compositor_collect_backing_store(self->compositor, backing_store);
+  switch (self->renderer_type) {
+    case kOpenGL:
+      return collect_opengl_backing_store(self, backing_store);
+    case kSoftware:
+      return collect_software_backing_store(self, backing_store);
+    default:
+      return false;
+  }
 }
 
 // Called when embedder should composite contents of each layer onto the screen.
 static bool compositor_present_view_callback(
     const FlutterPresentViewInfo* info) {
   FlEngine* self = static_cast<FlEngine*>(info->user_data);
-  return fl_compositor_present_layers(self->compositor, info->view_id,
-                                      info->layers, info->layers_count);
+
+  GWeakRef* ref = static_cast<GWeakRef*>(g_hash_table_lookup(
+      self->renderables_by_view_id, GINT_TO_POINTER(info->view_id)));
+  if (ref == nullptr) {
+    return true;
+  }
+  g_autoptr(FlRenderable) renderable = FL_RENDERABLE(g_weak_ref_get(ref));
+  if (renderable == nullptr) {
+    return true;
+  }
+
+  fl_renderable_present_layers(renderable, info->layers, info->layers_count);
+  return true;
 }
 
 // Flutter engine rendering callbacks.
@@ -282,14 +385,12 @@ static void* fl_engine_gl_proc_resolver(void* user_data, const char* name) {
 
 static bool fl_engine_gl_make_current(void* user_data) {
   FlEngine* self = static_cast<FlEngine*>(user_data);
-  fl_opengl_manager_make_current(self->opengl_manager);
-  return true;
+  return fl_opengl_manager_make_current(self->opengl_manager);
 }
 
 static bool fl_engine_gl_clear_current(void* user_data) {
   FlEngine* self = static_cast<FlEngine*>(user_data);
-  fl_opengl_manager_clear_current(self->opengl_manager);
-  return true;
+  return fl_opengl_manager_clear_current(self->opengl_manager);
 }
 
 static uint32_t fl_engine_gl_get_fbo(void* user_data) {
@@ -299,8 +400,7 @@ static uint32_t fl_engine_gl_get_fbo(void* user_data) {
 
 static bool fl_engine_gl_make_resource_current(void* user_data) {
   FlEngine* self = static_cast<FlEngine*>(user_data);
-  fl_opengl_manager_make_resource_current(self->opengl_manager);
-  return true;
+  return fl_opengl_manager_make_resource_current(self->opengl_manager);
 }
 
 // Called by the engine to retrieve an external texture.
@@ -464,12 +564,16 @@ static void fl_engine_dispose(GObject* object) {
   FlEngine* self = FL_ENGINE(object);
 
   if (self->engine != nullptr) {
-    self->embedder_api.Shutdown(self->engine);
+    if (self->embedder_api.Shutdown(self->engine) != kSuccess) {
+      g_warning("Failed to shutdown Flutter engine");
+    }
     self->engine = nullptr;
   }
 
   if (self->aot_data != nullptr) {
-    self->embedder_api.CollectAOTData(self->aot_data);
+    if (self->embedder_api.CollectAOTData(self->aot_data) != kSuccess) {
+      g_warning("Failed to send collect AOT data");
+    }
     self->aot_data = nullptr;
   }
 
@@ -478,7 +582,6 @@ static void fl_engine_dispose(GObject* object) {
 
   g_clear_object(&self->project);
   g_clear_object(&self->display_monitor);
-  g_clear_object(&self->compositor);
   g_clear_object(&self->opengl_manager);
   g_clear_object(&self->texture_registrar);
   g_clear_object(&self->binary_messenger);
@@ -557,7 +660,7 @@ static FlEngine* fl_engine_new_full(FlDartProject* project,
   self->project = FL_DART_PROJECT(g_object_ref(project));
   const gchar* renderer = g_getenv("FLUTTER_LINUX_RENDERER");
   if (g_strcmp0(renderer, "software") == 0) {
-    self->compositor = FL_COMPOSITOR(fl_compositor_software_new(self));
+    self->renderer_type = kSoftware;
     g_warning(
         "Using the software renderer. Not all features are supported. This is "
         "not recommended.\n"
@@ -568,8 +671,9 @@ static FlEngine* fl_engine_new_full(FlDartProject* project,
     if (renderer != nullptr && strcmp(renderer, "opengl") != 0) {
       g_warning("Unknown renderer type '%s', defaulting to opengl", renderer);
     }
-    self->compositor = FL_COMPOSITOR(fl_compositor_opengl_new(self));
+    self->renderer_type = kOpenGL;
   }
+
   if (binary_messenger != nullptr) {
     self->binary_messenger =
         FL_BINARY_MESSENGER(g_object_ref(binary_messenger));
@@ -604,9 +708,9 @@ G_MODULE_EXPORT FlEngine* fl_engine_new_headless(FlDartProject* project) {
   return fl_engine_new(project);
 }
 
-FlCompositor* fl_engine_get_compositor(FlEngine* self) {
-  g_return_val_if_fail(FL_IS_ENGINE(self), nullptr);
-  return self->compositor;
+FlutterRendererType fl_engine_get_renderer_type(FlEngine* self) {
+  g_return_val_if_fail(FL_IS_ENGINE(self), static_cast<FlutterRendererType>(0));
+  return self->renderer_type;
 }
 
 FlOpenGLManager* fl_engine_get_opengl_manager(FlEngine* self) {
@@ -623,7 +727,7 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   g_return_val_if_fail(FL_IS_ENGINE(self), FALSE);
 
   FlutterRendererConfig config = {};
-  config.type = fl_compositor_get_renderer_type(self->compositor);
+  config.type = self->renderer_type;
   switch (config.type) {
     case kSoftware:
       config.software.struct_size = sizeof(FlutterSoftwareRendererConfig);
@@ -984,8 +1088,10 @@ void fl_engine_send_platform_message(FlEngine* self,
   }
 
   if (response_handle != nullptr) {
-    self->embedder_api.PlatformMessageReleaseResponseHandle(self->engine,
-                                                            response_handle);
+    if (self->embedder_api.PlatformMessageReleaseResponseHandle(
+            self->engine, response_handle) != kSuccess) {
+      g_warning("Failed to release response handle");
+    }
   }
 }
 
@@ -1017,7 +1123,10 @@ void fl_engine_send_window_metrics_event(FlEngine* self,
   event.pixel_ratio = pixel_ratio;
   event.display_id = display_id;
   event.view_id = view_id;
-  self->embedder_api.SendWindowMetricsEvent(self->engine, &event);
+  if (self->embedder_api.SendWindowMetricsEvent(self->engine, &event) !=
+      kSuccess) {
+    g_warning("Failed to send window metrics");
+  }
 }
 
 void fl_engine_send_mouse_pointer_event(FlEngine* self,
@@ -1051,7 +1160,10 @@ void fl_engine_send_mouse_pointer_event(FlEngine* self,
   fl_event.buttons = buttons;
   fl_event.device = kMousePointerDeviceId;
   fl_event.view_id = view_id;
-  self->embedder_api.SendPointerEvent(self->engine, &fl_event, 1);
+  if (self->embedder_api.SendPointerEvent(self->engine, &fl_event, 1) !=
+      kSuccess) {
+    g_warning("Failed to send pointer event");
+  }
 }
 
 void fl_engine_send_touch_up_event(FlEngine* self,
@@ -1077,7 +1189,10 @@ void fl_engine_send_touch_up_event(FlEngine* self,
   event.phase = FlutterPointerPhase::kUp;
   event.struct_size = sizeof(event);
 
-  self->embedder_api.SendPointerEvent(self->engine, &event, 1);
+  if (self->embedder_api.SendPointerEvent(self->engine, &event, 1) !=
+      kSuccess) {
+    g_warning("Failed to send pointer event");
+  }
 }
 
 void fl_engine_send_touch_down_event(FlEngine* self,
@@ -1103,7 +1218,10 @@ void fl_engine_send_touch_down_event(FlEngine* self,
   event.phase = FlutterPointerPhase::kDown;
   event.struct_size = sizeof(event);
 
-  self->embedder_api.SendPointerEvent(self->engine, &event, 1);
+  if (self->embedder_api.SendPointerEvent(self->engine, &event, 1) !=
+      kSuccess) {
+    g_warning("Failed to send pointer event");
+  }
 }
 
 void fl_engine_send_touch_move_event(FlEngine* self,
@@ -1129,7 +1247,10 @@ void fl_engine_send_touch_move_event(FlEngine* self,
   event.phase = FlutterPointerPhase::kMove;
   event.struct_size = sizeof(event);
 
-  self->embedder_api.SendPointerEvent(self->engine, &event, 1);
+  if (self->embedder_api.SendPointerEvent(self->engine, &event, 1) !=
+      kSuccess) {
+    g_warning("Failed to send pointer event");
+  }
 }
 
 void fl_engine_send_touch_add_event(FlEngine* self,
@@ -1155,7 +1276,10 @@ void fl_engine_send_touch_add_event(FlEngine* self,
   event.phase = FlutterPointerPhase::kAdd;
   event.struct_size = sizeof(event);
 
-  self->embedder_api.SendPointerEvent(self->engine, &event, 1);
+  if (self->embedder_api.SendPointerEvent(self->engine, &event, 1) !=
+      kSuccess) {
+    g_warning("Failed to send pointer event");
+  }
 }
 
 void fl_engine_send_touch_remove_event(FlEngine* self,
@@ -1181,7 +1305,10 @@ void fl_engine_send_touch_remove_event(FlEngine* self,
   event.phase = FlutterPointerPhase::kRemove;
   event.struct_size = sizeof(event);
 
-  self->embedder_api.SendPointerEvent(self->engine, &event, 1);
+  if (self->embedder_api.SendPointerEvent(self->engine, &event, 1) !=
+      kSuccess) {
+    g_warning("Failed to send pointer event");
+  }
 }
 
 void fl_engine_send_pointer_pan_zoom_event(FlEngine* self,
@@ -1213,7 +1340,10 @@ void fl_engine_send_pointer_pan_zoom_event(FlEngine* self,
   fl_event.device = kPointerPanZoomDeviceId;
   fl_event.device_kind = kFlutterPointerDeviceKindTrackpad;
   fl_event.view_id = view_id;
-  self->embedder_api.SendPointerEvent(self->engine, &fl_event, 1);
+  if (self->embedder_api.SendPointerEvent(self->engine, &fl_event, 1) !=
+      kSuccess) {
+    g_warning("Failed to send pointer event");
+  }
 }
 
 static void send_key_event_cb(bool handled, void* user_data) {
@@ -1288,7 +1418,9 @@ void fl_engine_dispatch_semantics_action(FlEngine* self,
   info.action = action;
   info.data = action_data;
   info.data_length = action_data_length;
-  self->embedder_api.SendSemanticsAction(self->engine, &info);
+  if (self->embedder_api.SendSemanticsAction(self->engine, &info) != kSuccess) {
+    g_warning("Failed to send semantics action");
+  }
 }
 
 gboolean fl_engine_mark_texture_frame_available(FlEngine* self,
@@ -1325,7 +1457,9 @@ FlTaskRunner* fl_engine_get_task_runner(FlEngine* self) {
 
 void fl_engine_execute_task(FlEngine* self, FlutterTask* task) {
   g_return_if_fail(FL_IS_ENGINE(self));
-  self->embedder_api.RunTask(self->engine, task);
+  if (self->embedder_api.RunTask(self->engine, task) != kSuccess) {
+    g_warning("Failed to run task");
+  }
 }
 
 G_MODULE_EXPORT FlTextureRegistrar* fl_engine_get_texture_registrar(
@@ -1341,8 +1475,11 @@ void fl_engine_update_accessibility_features(FlEngine* self, int32_t flags) {
     return;
   }
 
-  self->embedder_api.UpdateAccessibilityFeatures(
-      self->engine, static_cast<FlutterAccessibilityFeature>(flags));
+  if (self->embedder_api.UpdateAccessibilityFeatures(
+          self->engine, static_cast<FlutterAccessibilityFeature>(flags)) !=
+      kSuccess) {
+    g_warning("Failed to update accessibility features");
+  }
 }
 
 void fl_engine_request_app_exit(FlEngine* self) {

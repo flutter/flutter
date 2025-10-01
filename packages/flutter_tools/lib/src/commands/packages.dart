@@ -85,13 +85,13 @@ class PackagesCommand extends FlutterCommand {
   }
 
   @override
-  final String name = 'pub';
+  final name = 'pub';
 
   @override
   List<String> get aliases => const <String>['packages'];
 
   @override
-  final String description = 'Commands for managing Flutter packages.';
+  final description = 'Commands for managing Flutter packages.';
 
   @override
   String get category => FlutterCommandCategory.project;
@@ -140,7 +140,7 @@ class PackagesForwardCommand extends FlutterCommand {
   PubContext context = PubContext.pubForward;
 
   @override
-  ArgParser argParser = ArgParser.allowAnything();
+  var argParser = ArgParser.allowAnything();
 
   final String _commandName;
   final String _description;
@@ -161,8 +161,8 @@ class PackagesForwardCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final List<String> subArgs =
-        argResults!.rest.toList()..removeWhere((String arg) => arg == '--');
+    final List<String> subArgs = argResults!.rest.toList()
+      ..removeWhere((String arg) => arg == '--');
     await pub.interactively(
       <String>[_commandName, ...subArgs],
       context: context,
@@ -174,7 +174,7 @@ class PackagesForwardCommand extends FlutterCommand {
 
 class PackagesPassthroughCommand extends FlutterCommand {
   @override
-  ArgParser argParser = ArgParser.allowAnything();
+  var argParser = ArgParser.allowAnything();
 
   @override
   String get name => 'pub';
@@ -204,7 +204,7 @@ class PackagesGetCommand extends FlutterCommand {
   PackagesGetCommand(this._commandName, this._description, this._context);
 
   @override
-  ArgParser argParser = ArgParser.allowAnything();
+  var argParser = ArgParser.allowAnything();
 
   final String _commandName;
   final String _description;
@@ -236,7 +236,7 @@ class PackagesGetCommand extends FlutterCommand {
   ///
   /// commands accept.
   ArgParser get _permissiveArgParser {
-    final ArgParser argParser = ArgParser();
+    final argParser = ArgParser();
     argParser.addOption('directory', abbr: 'C');
     argParser.addFlag('offline');
     argParser.addFlag('dry-run', abbr: 'n');
@@ -259,11 +259,11 @@ class PackagesGetCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final List<String> rest = argResults!.rest;
-    bool isHelp = false;
-    bool example = true;
-    bool exampleWasParsed = false;
+    var isHelp = false;
+    var example = true;
+    var exampleWasParsed = false;
     String? directoryOption;
-    bool dryRun = false;
+    var dryRun = false;
     try {
       final ArgResults results = _permissiveArgParser.parse(rest);
       isHelp = results['help'] as bool;
@@ -293,7 +293,7 @@ class PackagesGetCommand extends FlutterCommand {
     final String? relativeTarget = target == null ? null : globals.fs.path.relative(target);
 
     final List<String> subArgs = rest.toList()..removeWhere((String arg) => arg == '--');
-    final Stopwatch timer = Stopwatch()..start();
+    final timer = Stopwatch()..start();
     try {
       await pub.interactively(
         <String>[
@@ -351,7 +351,7 @@ class PackagesGetCommand extends FlutterCommand {
 
         final FlutterProject project = FlutterProject.fromDirectory(globals.fs.directory(rootUri));
 
-        final Environment environment = Environment(
+        final environment = Environment(
           artifacts: globals.artifacts!,
           logger: globals.logger,
           cacheDir: globals.cache.getRoot(),
@@ -388,7 +388,7 @@ class PackagesGetCommand extends FlutterCommand {
         // anyway, we assume this is fine.
         //
         // It won't be if they do `flutter build --no-pub`, though.
-        const bool ignoreReleaseModeSinceItsNotABuildAndHopeItWorks = false;
+        const ignoreReleaseModeSinceItsNotABuildAndHopeItWorks = false;
 
         // We need to regenerate the platform specific tooling for both the project
         // itself and example(if present).
@@ -407,18 +407,20 @@ class PackagesGetCommand extends FlutterCommand {
     return FlutterCommandResult.success();
   }
 
-  late final Future<List<Plugin>> _pluginsFound =
-      (() async {
-        final FlutterProject? rootProject = _rootProject;
-        if (rootProject == null) {
-          return <Plugin>[];
-        }
+  late final Future<List<Plugin>> _pluginsFound = (() async {
+    final FlutterProject? rootProject = _rootProject;
+    if (rootProject == null) {
+      return <Plugin>[];
+    }
 
-        return findPlugins(rootProject, throwOnError: false);
-      })();
+    return findPlugins(rootProject, throwOnError: false);
+  })();
 
-  late final String? _androidEmbeddingVersion =
-      _rootProject?.android.getEmbeddingVersion().toString().split('.').last;
+  late final String? _androidEmbeddingVersion = _rootProject?.android
+      .getEmbeddingVersion()
+      .toString()
+      .split('.')
+      .last;
 
   /// The pub packages usage values are incorrect since these are calculated/sent
   /// before pub get completes. This needs to be performed after dependency resolution.

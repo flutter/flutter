@@ -22,7 +22,9 @@ void main() {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      MaterialApp(home: ListView(controller: controller, children: children(30))),
+      MaterialApp(
+        home: ListView(controller: controller, children: children(30)),
+      ),
     );
     final double thirty = controller.position.maxScrollExtent;
     controller.jumpTo(thirty);
@@ -30,7 +32,9 @@ void main() {
     controller.jumpTo(thirty + 100.0); // past the end
     await tester.pump();
     await tester.pumpWidget(
-      MaterialApp(home: ListView(controller: controller, children: children(31))),
+      MaterialApp(
+        home: ListView(controller: controller, children: children(31)),
+      ),
     );
     expect(
       controller.position.pixels,
@@ -46,7 +50,9 @@ void main() {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      MaterialApp(home: ListView(controller: controller, children: children(30))),
+      MaterialApp(
+        home: ListView(controller: controller, children: children(30)),
+      ),
     );
     final double thirty = controller.position.maxScrollExtent;
     controller.jumpTo(thirty);
@@ -54,7 +60,9 @@ void main() {
     controller.jumpTo(thirty + 200.0); // past the end
     await tester.pump();
     await tester.pumpWidget(
-      MaterialApp(home: ListView(controller: controller, children: children(31))),
+      MaterialApp(
+        home: ListView(controller: controller, children: children(31)),
+      ),
     );
     expect(controller.position.pixels, thirty + 200.0); // has the same position, still overscrolled
     expect(await tester.pumpAndSettle(), 8); // now it goes ballistic...
@@ -343,11 +351,10 @@ void main() {
   test('$ScrollDragController dispatches memory events', () async {
     await expectLater(
       await memoryEvents(
-        () =>
-            ScrollDragController(
-              delegate: _ScrollActivityDelegate(),
-              details: DragStartDetails(),
-            ).dispose(),
+        () => ScrollDragController(
+          delegate: _ScrollActivityDelegate(),
+          details: DragStartDetails(),
+        ).dispose(),
         ScrollDragController,
       ),
       areCreateAndDispose,

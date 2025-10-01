@@ -648,15 +648,14 @@ void main() {
   test('RenderShrinkWrappingViewport shrinkwrap test - 1 child', () {
     RenderBox child;
     final RenderBox root = RenderPositionedBox(
-      child:
-          child = RenderShrinkWrappingViewport(
-            axisDirection: AxisDirection.left,
-            crossAxisDirection: AxisDirection.down,
-            offset: ViewportOffset.fixed(200.0),
-            children: <RenderSliver>[
-              RenderSliverToBoxAdapter(child: RenderSizedBox(const Size(400.0, 100.0))),
-            ],
-          ),
+      child: child = RenderShrinkWrappingViewport(
+        axisDirection: AxisDirection.left,
+        crossAxisDirection: AxisDirection.down,
+        offset: ViewportOffset.fixed(200.0),
+        children: <RenderSliver>[
+          RenderSliverToBoxAdapter(child: RenderSizedBox(const Size(400.0, 100.0))),
+        ],
+      ),
     );
     layout(root);
 
@@ -669,16 +668,15 @@ void main() {
   test('RenderShrinkWrappingViewport shrinkwrap test - 2 children', () {
     RenderBox child;
     final RenderBox root = RenderPositionedBox(
-      child:
-          child = RenderShrinkWrappingViewport(
-            axisDirection: AxisDirection.right,
-            crossAxisDirection: AxisDirection.down,
-            offset: ViewportOffset.fixed(200.0),
-            children: <RenderSliver>[
-              RenderSliverToBoxAdapter(child: RenderSizedBox(const Size(300.0, 100.0))),
-              RenderSliverToBoxAdapter(child: RenderSizedBox(const Size(150.0, 100.0))),
-            ],
-          ),
+      child: child = RenderShrinkWrappingViewport(
+        axisDirection: AxisDirection.right,
+        crossAxisDirection: AxisDirection.down,
+        offset: ViewportOffset.fixed(200.0),
+        children: <RenderSliver>[
+          RenderSliverToBoxAdapter(child: RenderSizedBox(const Size(300.0, 100.0))),
+          RenderSliverToBoxAdapter(child: RenderSizedBox(const Size(150.0, 100.0))),
+        ],
+      ),
     );
     layout(root);
 
@@ -851,15 +849,16 @@ void main() {
         crossAxisOffset: 0.0,
         mainAxisPosition: 0.0,
         crossAxisPosition: 0.0,
-        hitTest: (
-          SliverHitTestResult result, {
-          required double mainAxisPosition,
-          required double crossAxisPosition,
-        }) {
-          mainAxisPositions.add(mainAxisPosition);
-          crossAxisPositions.add(crossAxisPosition);
-          return true;
-        },
+        hitTest:
+            (
+              SliverHitTestResult result, {
+              required double mainAxisPosition,
+              required double crossAxisPosition,
+            }) {
+              mainAxisPositions.add(mainAxisPosition);
+              crossAxisPositions.add(crossAxisPosition);
+              return true;
+            },
       );
       expect(isHit, isTrue);
       expect(mainAxisPositions.single, 0.0);
@@ -873,15 +872,16 @@ void main() {
         crossAxisOffset: 6.0,
         mainAxisPosition: 10.0,
         crossAxisPosition: 20.0,
-        hitTest: (
-          SliverHitTestResult result, {
-          required double mainAxisPosition,
-          required double crossAxisPosition,
-        }) {
-          mainAxisPositions.add(mainAxisPosition);
-          crossAxisPositions.add(crossAxisPosition);
-          return false;
-        },
+        hitTest:
+            (
+              SliverHitTestResult result, {
+              required double mainAxisPosition,
+              required double crossAxisPosition,
+            }) {
+              mainAxisPositions.add(mainAxisPosition);
+              crossAxisPositions.add(crossAxisPosition);
+              return false;
+            },
       );
       expect(isHit, isFalse);
       expect(mainAxisPositions.single, 10.0 - 5.0);
@@ -895,15 +895,16 @@ void main() {
         crossAxisOffset: -6.0,
         mainAxisPosition: 10.0,
         crossAxisPosition: 20.0,
-        hitTest: (
-          SliverHitTestResult result, {
-          required double mainAxisPosition,
-          required double crossAxisPosition,
-        }) {
-          mainAxisPositions.add(mainAxisPosition);
-          crossAxisPositions.add(crossAxisPosition);
-          return false;
-        },
+        hitTest:
+            (
+              SliverHitTestResult result, {
+              required double mainAxisPosition,
+              required double crossAxisPosition,
+            }) {
+              mainAxisPositions.add(mainAxisPosition);
+              crossAxisPositions.add(crossAxisPosition);
+              return false;
+            },
       );
       expect(isHit, isFalse);
       expect(mainAxisPositions.single, 10.0 + 5.0);
@@ -925,16 +926,17 @@ void main() {
         crossAxisOffset: 6.0,
         mainAxisPosition: 10.0,
         crossAxisPosition: 20.0,
-        hitTest: (
-          SliverHitTestResult result, {
-          required double mainAxisPosition,
-          required double crossAxisPosition,
-        }) {
-          recordedMainAxisPosition = mainAxisPosition;
-          recordedCrossAxisPosition = crossAxisPosition;
-          result.add(entry);
-          return true;
-        },
+        hitTest:
+            (
+              SliverHitTestResult result, {
+              required double mainAxisPosition,
+              required double crossAxisPosition,
+            }) {
+              recordedMainAxisPosition = mainAxisPosition;
+              recordedCrossAxisPosition = crossAxisPosition;
+              result.add(entry);
+              return true;
+            },
       );
       expect(isHit, isTrue);
       expect(recordedMainAxisPosition, 10.0 - 5.0);

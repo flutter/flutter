@@ -22,11 +22,10 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const DrawerThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -44,11 +43,10 @@ void main() {
       clipBehavior: Clip.hardEdge,
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'backgroundColor: ${const Color(0x00000099)}',
@@ -68,7 +66,10 @@ void main() {
       final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
       final ThemeData theme = ThemeData(useMaterial3: false);
       await tester.pumpWidget(
-        MaterialApp(theme: theme, home: Scaffold(key: scaffoldKey, drawer: const Drawer())),
+        MaterialApp(
+          theme: theme,
+          home: Scaffold(key: scaffoldKey, drawer: const Drawer()),
+        ),
       );
       scaffoldKey.currentState!.openDrawer();
       await tester.pumpAndSettle();
@@ -90,7 +91,10 @@ void main() {
       final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
       final ThemeData theme = ThemeData();
       await tester.pumpWidget(
-        MaterialApp(theme: theme, home: Scaffold(key: scaffoldKey, drawer: const Drawer())),
+        MaterialApp(
+          theme: theme,
+          home: Scaffold(key: scaffoldKey, drawer: const Drawer()),
+        ),
       );
       scaffoldKey.currentState!.openDrawer();
       await tester.pumpAndSettle();
@@ -117,7 +121,10 @@ void main() {
       final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
       final ThemeData theme = ThemeData(useMaterial3: false);
       await tester.pumpWidget(
-        MaterialApp(theme: theme, home: Scaffold(key: scaffoldKey, endDrawer: const Drawer())),
+        MaterialApp(
+          theme: theme,
+          home: Scaffold(key: scaffoldKey, endDrawer: const Drawer()),
+        ),
       );
       scaffoldKey.currentState!.openEndDrawer();
       await tester.pumpAndSettle();
@@ -139,7 +146,10 @@ void main() {
       final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
       final ThemeData theme = ThemeData();
       await tester.pumpWidget(
-        MaterialApp(theme: theme, home: Scaffold(key: scaffoldKey, endDrawer: const Drawer())),
+        MaterialApp(
+          theme: theme,
+          home: Scaffold(key: scaffoldKey, endDrawer: const Drawer()),
+        ),
       );
       scaffoldKey.currentState!.openEndDrawer();
       await tester.pumpAndSettle();

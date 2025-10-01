@@ -27,7 +27,9 @@ void main() {
       MaterialApp(
         theme: ThemeData.from(colorScheme: colorScheme),
         home: Scaffold(
-          body: Center(child: ElevatedButton(onPressed: () {}, child: const Text('button'))),
+          body: Center(
+            child: ElevatedButton(onPressed: () {}, child: const Text('button')),
+          ),
         ),
       ),
     );
@@ -63,7 +65,9 @@ void main() {
       MaterialApp(
         theme: ThemeData.from(colorScheme: colorScheme, useMaterial3: false),
         home: Scaffold(
-          body: Center(child: ElevatedButton(onPressed: () {}, child: const Text('button'))),
+          body: Center(
+            child: ElevatedButton(onPressed: () {}, child: const Text('button')),
+          ),
         ),
       ),
     );
@@ -154,13 +158,12 @@ void main() {
           body: Center(
             // If the ElevatedButtonTheme widget is present, it's used
             // instead of the Theme's ThemeData.ElevatedButtonTheme.
-            child:
-                themeStyle == null
-                    ? child
-                    : ElevatedButtonTheme(
-                      data: ElevatedButtonThemeData(style: themeStyle),
-                      child: child,
-                    ),
+            child: themeStyle == null
+                ? child
+                : ElevatedButtonTheme(
+                    data: ElevatedButtonThemeData(style: themeStyle),
+                    child: child,
+                  ),
           ),
         ),
       );
@@ -176,11 +179,11 @@ void main() {
       matching: find.byType(InkWell),
     );
 
-    const Set<MaterialState> enabled = <MaterialState>{};
-    const Set<MaterialState> disabled = <MaterialState>{MaterialState.disabled};
-    const Set<MaterialState> hovered = <MaterialState>{MaterialState.hovered};
-    const Set<MaterialState> focused = <MaterialState>{MaterialState.focused};
-    const Set<MaterialState> pressed = <MaterialState>{MaterialState.pressed};
+    const Set<WidgetState> enabled = <WidgetState>{};
+    const Set<WidgetState> disabled = <WidgetState>{WidgetState.disabled};
+    const Set<WidgetState> hovered = <WidgetState>{WidgetState.hovered};
+    const Set<WidgetState> focused = <WidgetState>{WidgetState.focused};
+    const Set<WidgetState> pressed = <WidgetState>{WidgetState.pressed};
 
     void checkButton(WidgetTester tester) {
       final Material material = tester.widget<Material>(findMaterial);
@@ -191,11 +194,11 @@ void main() {
       expect(material.shadowColor, shadowColor);
       expect(material.elevation, elevation);
       expect(
-        MaterialStateProperty.resolveAs<MouseCursor>(inkWell.mouseCursor!, enabled),
+        WidgetStateProperty.resolveAs<MouseCursor>(inkWell.mouseCursor!, enabled),
         enabledMouseCursor,
       );
       expect(
-        MaterialStateProperty.resolveAs<MouseCursor>(inkWell.mouseCursor!, disabled),
+        WidgetStateProperty.resolveAs<MouseCursor>(inkWell.mouseCursor!, disabled),
         disabledMouseCursor,
       );
       expect(inkWell.overlayColor!.resolve(hovered), foregroundColor.withOpacity(0.08));

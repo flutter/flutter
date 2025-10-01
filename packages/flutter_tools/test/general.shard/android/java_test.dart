@@ -56,15 +56,14 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
 ''',
           ),
         );
-        final Java java =
-            Java.find(
-              config: config,
-              androidStudio: androidStudio,
-              logger: logger,
-              fileSystem: fs,
-              platform: platform,
-              processManager: processManager,
-            )!;
+        final Java java = Java.find(
+          config: config,
+          androidStudio: androidStudio,
+          logger: logger,
+          fileSystem: fs,
+          platform: platform,
+          processManager: processManager,
+        )!;
 
         expect(java.javaHome, androidStudioBundledJdkHome);
         expect(java.binaryPath, expectedJavaBinaryPath);
@@ -81,21 +80,20 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
         'finds JAVA_HOME if it is set and the JDK bundled with Android Studio could not be found',
         () {
           final AndroidStudio androidStudio = _FakeAndroidStudioWithoutJdk();
-          const String javaHome = '/java/home';
+          const javaHome = '/java/home';
           final String expectedJavaBinaryPath = fs.path.join(javaHome, 'bin', 'java');
           const JavaSource expectedJavaHomeSource = JavaSource.javaHome;
 
-          final Java java =
-              Java.find(
-                config: config,
-                androidStudio: androidStudio,
-                logger: logger,
-                fileSystem: fs,
-                platform: FakePlatform(
-                  environment: <String, String>{Java.javaHomeEnvironmentVariable: javaHome},
-                ),
-                processManager: processManager,
-              )!;
+          final Java java = Java.find(
+            config: config,
+            androidStudio: androidStudio,
+            logger: logger,
+            fileSystem: fs,
+            platform: FakePlatform(
+              environment: <String, String>{Java.javaHomeEnvironmentVariable: javaHome},
+            ),
+            processManager: processManager,
+          )!;
 
           expect(java.javaHome, javaHome);
           expect(java.binaryPath, expectedJavaBinaryPath);
@@ -112,15 +110,14 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
           const FakeCommand(command: <String>['which', 'java'], stdout: '/fake/which/java/path'),
         );
 
-        final Java java =
-            Java.find(
-              config: config,
-              androidStudio: androidStudio,
-              logger: logger,
-              fileSystem: fs,
-              platform: platform,
-              processManager: processManager,
-            )!;
+        final Java java = Java.find(
+          config: config,
+          androidStudio: androidStudio,
+          logger: logger,
+          fileSystem: fs,
+          platform: platform,
+          processManager: processManager,
+        )!;
 
         expect(java.javaHome, isNull);
         expect(java.binaryPath, os.which('java')!.path);
@@ -144,7 +141,7 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
       });
 
       testWithoutContext('finds and prefers JDK found at config item "jdk-dir" if it is set', () {
-        const String configuredJdkPath = '/jdk';
+        const configuredJdkPath = '/jdk';
         config.setValue('jdk-dir', configuredJdkPath);
         JavaSource expectedJavaHomeSource = JavaSource.flutterConfig;
 
@@ -152,8 +149,8 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
           const FakeCommand(command: <String>['which', 'java'], stdout: '/fake/which/java/path'),
         );
 
-        final _FakeAndroidStudioWithJdk androidStudio = _FakeAndroidStudioWithJdk();
-        final FakePlatform platformWithJavaHome = FakePlatform(
+        final androidStudio = _FakeAndroidStudioWithJdk();
+        final platformWithJavaHome = FakePlatform(
           environment: <String, String>{'JAVA_HOME': '/old/jdk'},
         );
         Java? java = Java.find(

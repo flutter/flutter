@@ -84,11 +84,10 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ListTileThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -113,17 +112,16 @@ void main() {
       minLeadingWidth: 400,
       minTileHeight: 30,
       enableFeedback: true,
-      mouseCursor: MaterialStateMouseCursor.clickable,
+      mouseCursor: WidgetStateMouseCursor.clickable,
       visualDensity: VisualDensity.comfortable,
       titleAlignment: ListTileTitleAlignment.top,
       isThreeLine: true,
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(
       description,
@@ -173,7 +171,7 @@ void main() {
             minVerticalPadding: 300,
             minLeadingWidth: 400,
             enableFeedback: true,
-            mouseCursor: MaterialStateMouseCursor.clickable,
+            mouseCursor: WidgetStateMouseCursor.clickable,
             child: Center(
               child: Builder(
                 builder: (BuildContext context) {
@@ -200,7 +198,7 @@ void main() {
     expect(theme.minVerticalPadding, 300);
     expect(theme.minLeadingWidth, 400);
     expect(theme.enableFeedback, true);
-    expect(theme.mouseCursor, MaterialStateMouseCursor.clickable);
+    expect(theme.mouseCursor, WidgetStateMouseCursor.clickable);
   });
 
   testWidgets('ListTileTheme', (WidgetTester tester) async {
@@ -232,8 +230,8 @@ void main() {
                 iconColor: iconColor,
                 textColor: textColor,
                 minVerticalPadding: 25.0,
-                mouseCursor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-                  if (states.contains(MaterialState.disabled)) {
+                mouseCursor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+                  if (states.contains(WidgetState.disabled)) {
                     return SystemMouseCursors.forbidden;
                   }
 
@@ -270,12 +268,9 @@ void main() {
 
     Color iconColor(Key key) => tester.state<TestIconState>(find.byKey(key)).iconTheme.color!;
     Color textColor(Key key) => tester.state<TestTextState>(find.byKey(key)).textStyle.color!;
-    ShapeBorder inkWellBorder() =>
-        tester
-            .widget<InkWell>(
-              find.descendant(of: find.byType(ListTile), matching: find.byType(InkWell)),
-            )
-            .customBorder!;
+    ShapeBorder inkWellBorder() => tester
+        .widget<InkWell>(find.descendant(of: find.byType(ListTile), matching: find.byType(InkWell)))
+        .customBorder!;
 
     // A selected ListTile's leading, trailing, and text get the primary color by default
     await tester.pumpWidget(buildFrame(selected: true));
@@ -785,17 +780,14 @@ void main() {
     // Start drawer animation.
     await tester.pump();
 
-    final ShapeBorder? inkWellBorder =
-        tester
-            .widget<InkWell>(
-              find.descendant(of: find.byType(ListTile), matching: find.byType(InkWell)),
-            )
-            .customBorder;
+    final ShapeBorder? inkWellBorder = tester
+        .widget<InkWell>(find.descendant(of: find.byType(ListTile), matching: find.byType(InkWell)))
+        .customBorder;
     // Test shape.
     expect(inkWellBorder, shapeBorder);
   });
 
-  testWidgets('ListTile respects MaterialStateColor LisTileTheme.textColor', (
+  testWidgets('ListTile respects WidgetStateColor LisTileTheme.textColor', (
     WidgetTester tester,
   ) async {
     bool enabled = false;
@@ -806,11 +798,11 @@ void main() {
 
     final ThemeData theme = ThemeData(
       listTileTheme: ListTileThemeData(
-        textColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.disabled)) {
+        textColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.disabled)) {
             return disabledColor;
           }
-          if (states.contains(MaterialState.selected)) {
+          if (states.contains(WidgetState.selected)) {
             return selectedColor;
           }
           return defaultColor;
@@ -857,7 +849,7 @@ void main() {
     expect(title.text.style!.color, selectedColor);
   });
 
-  testWidgets('ListTile respects MaterialStateColor LisTileTheme.iconColor', (
+  testWidgets('ListTile respects WidgetStateColor LisTileTheme.iconColor', (
     WidgetTester tester,
   ) async {
     bool enabled = false;
@@ -869,11 +861,11 @@ void main() {
 
     final ThemeData theme = ThemeData(
       listTileTheme: ListTileThemeData(
-        iconColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.disabled)) {
+        iconColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.disabled)) {
             return disabledColor;
           }
-          if (states.contains(MaterialState.selected)) {
+          if (states.contains(WidgetState.selected)) {
             return selectedColor;
           }
           return defaultColor;
@@ -1044,7 +1036,7 @@ void main() {
             minTileHeight: 30,
             enableFeedback: true,
             titleAlignment: ListTileTitleAlignment.bottom,
-            mouseCursor: MaterialStateMouseCursor.textable,
+            mouseCursor: WidgetStateMouseCursor.textable,
             visualDensity: VisualDensity.comfortable,
             isThreeLine: true,
           ),
@@ -1072,7 +1064,7 @@ void main() {
                   minTileHeight: 80,
                   enableFeedback: false,
                   titleAlignment: ListTileTitleAlignment.top,
-                  mouseCursor: MaterialStateMouseCursor.clickable,
+                  mouseCursor: WidgetStateMouseCursor.clickable,
                   visualDensity: VisualDensity.compact,
                   isThreeLine: false,
                   child: const ListTile(),
@@ -1104,7 +1096,7 @@ void main() {
     expect(theme.minTileHeight, 80);
     expect(theme.enableFeedback, false);
     expect(theme.titleAlignment, ListTileTitleAlignment.top);
-    expect(theme.mouseCursor, MaterialStateMouseCursor.clickable);
+    expect(theme.mouseCursor, WidgetStateMouseCursor.clickable);
     expect(theme.visualDensity, VisualDensity.compact);
     expect(theme.isThreeLine, false);
   });
@@ -1118,10 +1110,9 @@ void main() {
     Widget buildFrame({bool? isThreeLine}) {
       return MaterialApp(
         key: UniqueKey(),
-        theme:
-            isThreeLine != null
-                ? ThemeData(listTileTheme: ListTileThemeData(isThreeLine: isThreeLine))
-                : null,
+        theme: isThreeLine != null
+            ? ThemeData(listTileTheme: ListTileThemeData(isThreeLine: isThreeLine))
+            : null,
         home: Material(
           child: ListView(
             children: const <Widget>[

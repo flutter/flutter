@@ -44,7 +44,7 @@ class WaterfallNotchedRectangle extends NotchedShape {
     // Segment C - a Bezier curve from segment B back to the host's top edge.
     //
     // A detailed explanation and the derivation of the formulas below is
-    // available at: https://goo.gl/Ufzrqn
+    // available at: https://docs.google.com/document/d/e/2PACX-1vRVPWGtR85bawGynRSWzYTKgQtqrxCnxXCKC5xM9ab3IvtRHueku4rRIuJ4TbedzyMz2oy2pkzM71-_/pub
 
     // s1, s2 are the two knobs controlling the behavior of the bezier curve.
     const double s1 = 21.0;

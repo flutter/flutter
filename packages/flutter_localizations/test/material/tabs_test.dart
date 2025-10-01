@@ -25,7 +25,10 @@ void main() {
                 TabBar(
                   controller: controller,
                   indicatorWeight: 30.0,
-                  tabs: const <Widget>[Tab(text: 'TAB1'), Tab(text: 'TAB2')],
+                  tabs: const <Widget>[
+                    Tab(text: 'TAB1'),
+                    Tab(text: 'TAB2'),
+                  ],
                 ),
                 Flexible(
                   child: TabBarView(

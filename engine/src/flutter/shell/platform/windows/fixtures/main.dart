@@ -333,10 +333,9 @@ void drawHelloWorld() {
     canvas.drawParagraph(paragraph, ui.Offset.zero);
 
     final ui.Picture picture = recorder.endRecording();
-    final ui.SceneBuilder sceneBuilder =
-        ui.SceneBuilder()
-          ..addPicture(ui.Offset.zero, picture)
-          ..pop();
+    final ui.SceneBuilder sceneBuilder = ui.SceneBuilder()
+      ..addPicture(ui.Offset.zero, picture)
+      ..pop();
 
     ui.PlatformDispatcher.instance.implicitView?.render(sceneBuilder.build());
   };
@@ -406,6 +405,11 @@ void testEngineId() {
 }
 
 @pragma('vm:entry-point')
+void testWindowController() {
+  signal();
+}
+
+@pragma('vm:entry-point')
 Future<void> sendSemanticsTreeInfo() async {
   // Wait until semantics are enabled.
   if (!ui.PlatformDispatcher.instance.semanticsEnabled) {
@@ -466,10 +470,12 @@ Future<void> sendSemanticsTreeInfo() async {
       role: ui.SemanticsRole.tab,
       controlsNodes: null,
       inputType: ui.SemanticsInputType.none,
+      locale: null,
     );
     return builder.build();
   }
 
+  ui.PlatformDispatcher.instance.setSemanticsTreeEnabled(true);
   view1.updateSemantics(createSemanticsUpdate(view1.viewId + 1));
   view2.updateSemantics(createSemanticsUpdate(view2.viewId + 1));
   signal();

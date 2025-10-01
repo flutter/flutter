@@ -22,16 +22,15 @@ class ColorPicker extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children:
-          colors.map((Color color) {
-            return _ColorPickerSwatch(
-              color: color,
-              selected: color == selectedColor,
-              onTap: () {
-                onColorSelection?.call(color);
-              },
-            );
-          }).toList(),
+      children: colors.map((Color color) {
+        return _ColorPickerSwatch(
+          color: color,
+          selected: color == selectedColor,
+          onTap: () {
+            onColorSelection?.call(color);
+          },
+        );
+      }).toList(),
     );
   }
 }

@@ -49,7 +49,10 @@ Widget buildWidget({required String blockedText, bool blocking = true}) {
       fit: StackFit.expand,
       children: <Widget>[
         Semantics(container: true, child: ListView(children: <Widget>[Text(blockedText)])),
-        BlockSemantics(blocking: blocking, child: Semantics(label: 'hello', container: true)),
+        BlockSemantics(
+          blocking: blocking,
+          child: Semantics(label: 'hello', container: true),
+        ),
       ],
     ),
   );

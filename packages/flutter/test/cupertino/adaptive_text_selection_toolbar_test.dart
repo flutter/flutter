@@ -242,13 +242,12 @@ void main() {
           child: Builder(
             builder: (BuildContext context) {
               return Column(
-                children:
-                    CupertinoAdaptiveTextSelectionToolbar.getAdaptiveButtons(
-                      context,
-                      <ContextMenuButtonItem>[
-                        ContextMenuButtonItem(label: buttonText, onPressed: () {}),
-                      ],
-                    ).toList(),
+                children: CupertinoAdaptiveTextSelectionToolbar.getAdaptiveButtons(
+                  context,
+                  <ContextMenuButtonItem>[
+                    ContextMenuButtonItem(label: buttonText, onPressed: () {}),
+                  ],
+                ).toList(),
               );
             },
           ),
@@ -271,4 +270,25 @@ void main() {
         expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsOneWidget);
     }
   }, variant: TargetPlatformVariant.all());
+
+  testWidgets(
+    'Builds empty toolbar when children and buttonItems are null',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: Center(
+            child: CupertinoAdaptiveTextSelectionToolbar(
+              anchors: TextSelectionToolbarAnchors(primaryAnchor: Offset.zero),
+              children: null,
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.getSize(find.byType(CupertinoAdaptiveTextSelectionToolbar)), Size.zero);
+      expect(tester.takeException(), isNull);
+    },
+    skip: isBrowser, // [intended] see https://github.com/flutter/flutter/issues/108382
+    variant: TargetPlatformVariant.all(),
+  );
 }

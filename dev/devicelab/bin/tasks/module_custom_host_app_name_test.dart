@@ -130,12 +130,6 @@ Future<void> main() async {
         await flutter('clean');
       });
 
-      section('Make Android host app editable');
-
-      await inDirectory(projectDir, () async {
-        await flutter('make-host-app-editable', options: <String>['android']);
-      });
-
       section('Build editable host app');
 
       await inDirectory(projectDir, () async {

@@ -145,10 +145,9 @@ class Chrome extends Browser {
     BrowserInstallation installation,
     bool useDwarf,
   ) async {
-    final String userDirectoryPath =
-        environment.webUiDartToolDir
-            .createTempSync('test_chrome_user_data_')
-            .resolveSymbolicLinksSync();
+    final String userDirectoryPath = environment.webUiDartToolDir
+        .createTempSync('test_chrome_user_data_')
+        .resolveSymbolicLinksSync();
     if (!useDwarf) {
       return userDirectoryPath;
     }

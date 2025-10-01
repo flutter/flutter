@@ -246,8 +246,9 @@ class SemanticTextField extends SemanticRole {
   }
 
   void _initializeEditableElement() {
-    editableElement =
-        semanticsObject.flags.isMultiline ? _createMultiLineField() : _createSingleLineField();
+    editableElement = semanticsObject.flags.isMultiline
+        ? _createMultiLineField()
+        : _createSingleLineField();
     _updateEnabledState();
 
     // On iOS, even though the semantic text field is transparent, the cursor
@@ -352,13 +353,28 @@ class SemanticTextField extends SemanticRole {
     if (semanticsObject.flags.isObscured) {
       input.type = 'password';
     } else {
-      input.type = switch (semanticsObject.inputType) {
-        ui.SemanticsInputType.search => 'search',
-        ui.SemanticsInputType.email => 'email',
-        ui.SemanticsInputType.url => 'url',
-        ui.SemanticsInputType.phone => 'tel',
-        _ => 'text',
-      };
+      // For email inputs, prefer type="text" with inputmode="email" so that
+      // browsers keep selection APIs enabled while still providing email
+      // keyboards and hints. This avoids InvalidStateError and enables
+      // proper selection/cursor operations.
+      input.removeAttribute('inputmode');
+      input.removeAttribute('autocapitalize');
+      input.autocomplete = 'off';
+      input.type = 'text';
+
+      switch (semanticsObject.inputType) {
+        case ui.SemanticsInputType.search:
+          input.type = 'search';
+        case ui.SemanticsInputType.url:
+          input.type = 'url';
+        case ui.SemanticsInputType.phone:
+          input.type = 'tel';
+        case ui.SemanticsInputType.email:
+          input.setAttribute('inputmode', 'email');
+          input.setAttribute('autocapitalize', 'none');
+          input.autocomplete = 'email';
+        default:
+      }
     }
   }
 

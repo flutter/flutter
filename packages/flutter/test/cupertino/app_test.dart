@@ -108,22 +108,24 @@ void main() {
           expect(initialRoute, '/abc');
           return <Route<void>>[
             PageRouteBuilder<void>(
-              pageBuilder: (
-                BuildContext context,
-                Animation<double> animation,
-                Animation<double> secondaryAnimation,
-              ) {
-                return const Text('non-regular page one');
-              },
+              pageBuilder:
+                  (
+                    BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                  ) {
+                    return const Text('non-regular page one');
+                  },
             ),
             PageRouteBuilder<void>(
-              pageBuilder: (
-                BuildContext context,
-                Animation<double> animation,
-                Animation<double> secondaryAnimation,
-              ) {
-                return const Text('non-regular page two');
-              },
+              pageBuilder:
+                  (
+                    BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                  ) {
+                    return const Text('non-regular page two');
+                  },
             ),
           ];
         },
@@ -328,16 +330,15 @@ void main() {
     final RouterConfig<RouteInformation> routerConfig = RouterConfig<RouteInformation>(
       routeInformationProvider: provider,
       routeInformationParser: SimpleRouteInformationParser(),
-      routerDelegate:
-          delegate = SimpleNavigatorRouterDelegate(
-            builder: (BuildContext context, RouteInformation information) {
-              return Text(information.uri.toString());
-            },
-            onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
-              delegate.routeInformation = RouteInformation(uri: Uri.parse('popped'));
-              return route.didPop(result);
-            },
-          ),
+      routerDelegate: delegate = SimpleNavigatorRouterDelegate(
+        builder: (BuildContext context, RouteInformation information) {
+          return Text(information.uri.toString());
+        },
+        onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
+          delegate.routeInformation = RouteInformation(uri: Uri.parse('popped'));
+          return route.didPop(result);
+        },
+      ),
       backButtonDispatcher: RootBackButtonDispatcher(),
     );
     await tester.pumpWidget(CupertinoApp.router(routerConfig: routerConfig));

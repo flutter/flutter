@@ -18,7 +18,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '_network_image_io.dart'
-    if (dart.library.js_util) '_network_image_web.dart'
+    if (dart.library.js_interop) '_network_image_web.dart'
     as network_image;
 import 'binding.dart';
 import 'image_cache.dart';
@@ -348,7 +348,7 @@ typedef ImageDecoderCallback =
 ///
 /// ## Creating an [ImageProvider]
 ///
-/// {@tool dartpad}
+/// {@tool sample}
 /// In this example, a variant of [NetworkImage] is created that passes all the
 /// [ImageConfiguration] information (locale, platform, size, etc) to the server
 /// using query arguments in the image URL.
@@ -386,12 +386,11 @@ abstract class ImageProvider<T extends Object> {
         await null; // wait an event turn in case a listener has been added to the image stream.
         InformationCollector? collector;
         assert(() {
-          collector =
-              () => <DiagnosticsNode>[
-                DiagnosticsProperty<ImageProvider>('Image provider', this),
-                DiagnosticsProperty<ImageConfiguration>('Image configuration', configuration),
-                DiagnosticsProperty<T>('Image key', key, defaultValue: null),
-              ];
+          collector = () => <DiagnosticsNode>[
+            DiagnosticsProperty<ImageProvider>('Image provider', this),
+            DiagnosticsProperty<ImageConfiguration>('Image configuration', configuration),
+            DiagnosticsProperty<T>('Image key', key, defaultValue: null),
+          ];
           return true;
         }());
         if (stream.completer == null) {
@@ -444,12 +443,11 @@ abstract class ImageProvider<T extends Object> {
         } else {
           InformationCollector? collector;
           assert(() {
-            collector =
-                () => <DiagnosticsNode>[
-                  DiagnosticsProperty<ImageProvider>('Image provider', this),
-                  DiagnosticsProperty<ImageConfiguration>('Image configuration', configuration),
-                  DiagnosticsProperty<T>('Image key', key, defaultValue: null),
-                ];
+            collector = () => <DiagnosticsNode>[
+              DiagnosticsProperty<ImageProvider>('Image provider', this),
+              DiagnosticsProperty<ImageConfiguration>('Image configuration', configuration),
+              DiagnosticsProperty<T>('Image key', key, defaultValue: null),
+            ];
             return true;
           }());
           FlutterError.reportError(
@@ -735,11 +733,10 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
   ImageStreamCompleter loadImage(AssetBundleImageKey key, ImageDecoderCallback decode) {
     InformationCollector? collector;
     assert(() {
-      collector =
-          () => <DiagnosticsNode>[
-            DiagnosticsProperty<ImageProvider>('Image provider', this),
-            DiagnosticsProperty<AssetBundleImageKey>('Image key', key),
-          ];
+      collector = () => <DiagnosticsNode>[
+        DiagnosticsProperty<ImageProvider>('Image provider', this),
+        DiagnosticsProperty<AssetBundleImageKey>('Image key', key),
+      ];
       return true;
     }());
     return MultiFrameImageStreamCompleter(
@@ -756,11 +753,10 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
   ImageStreamCompleter loadBuffer(AssetBundleImageKey key, DecoderBufferCallback decode) {
     InformationCollector? collector;
     assert(() {
-      collector =
-          () => <DiagnosticsNode>[
-            DiagnosticsProperty<ImageProvider>('Image provider', this),
-            DiagnosticsProperty<AssetBundleImageKey>('Image key', key),
-          ];
+      collector = () => <DiagnosticsNode>[
+        DiagnosticsProperty<ImageProvider>('Image provider', this),
+        DiagnosticsProperty<AssetBundleImageKey>('Image key', key),
+      ];
       return true;
     }());
     return MultiFrameImageStreamCompleter(
@@ -1254,6 +1250,7 @@ enum ResizeImagePolicy {
 ///
 ///  * [ui.FlutterView.devicePixelRatio], used to convert between physical and
 ///    logical pixels.
+@immutable
 class ResizeImage extends ImageProvider<ResizeImageKey> {
   /// Creates an ImageProvider that decodes the image to the specified size.
   ///
@@ -1466,6 +1463,25 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
     completer = Completer<ResizeImageKey>();
     return completer.future;
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is ResizeImage &&
+        imageProvider == other.imageProvider &&
+        width == other.width &&
+        height == other.height &&
+        policy == other.policy &&
+        allowUpscaling == other.allowUpscaling;
+  }
+
+  @override
+  int get hashCode => Object.hash(imageProvider, width, height, policy, allowUpscaling);
 }
 
 /// The strategy for [Image.network] and [NetworkImage] to decide whether to

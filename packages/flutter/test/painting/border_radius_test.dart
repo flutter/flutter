@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -328,6 +329,56 @@ void main() {
     expect(BorderRadiusDirectional.circular(15.0) ~/ 10.0, BorderRadiusDirectional.circular(1.0));
 
     expect(BorderRadiusDirectional.circular(15.0) % 10.0, BorderRadiusDirectional.circular(5.0));
+  });
+
+  test('BorderRadiusDirectional.resolve with null throws detailed error', () {
+    const BorderRadiusDirectional borderRadius = BorderRadiusDirectional.all(Radius.circular(1.0));
+    expect(
+      () => borderRadius.resolve(null),
+      throwsA(
+        isFlutterError.having(
+          (FlutterError e) => e.message,
+          'message',
+          allOf(contains('No TextDirection found.'), contains('without a Directionality ancestor')),
+        ),
+      ),
+    );
+  });
+
+  // to test _MixedBorderRadius using `add()` and `subtract()` methods
+  test('resolve method throws detailed error when TextDirection is null', () {
+    const BorderRadius a = BorderRadius.only(
+      topLeft: Radius.elliptical(10.0, 20.0),
+      topRight: Radius.elliptical(30.0, 40.0),
+      bottomLeft: Radius.elliptical(50.0, 60.0),
+    );
+    const BorderRadiusDirectional b = BorderRadiusDirectional.only(
+      topEnd: Radius.elliptical(100.0, 110.0),
+      bottomStart: Radius.elliptical(120.0, 130.0),
+      bottomEnd: Radius.elliptical(140.0, 150.0),
+    );
+
+    expect(
+      () => a.add(b).resolve(null),
+      throwsA(
+        isFlutterError.having(
+          (FlutterError e) => e.message,
+          'message',
+          allOf(contains('No TextDirection found.'), contains('without a Directionality ancestor')),
+        ),
+      ),
+    );
+
+    expect(
+      () => b.subtract(a).resolve(null),
+      throwsA(
+        isFlutterError.having(
+          (FlutterError e) => e.message,
+          'message',
+          allOf(contains('No TextDirection found.'), contains('without a Directionality ancestor')),
+        ),
+      ),
+    );
   });
 
   test('BorderRadiusDirectional.lerp() invariants', () {

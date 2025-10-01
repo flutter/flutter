@@ -155,7 +155,7 @@ RenderPassMTL::RenderPassMTL(std::shared_ptr<const Context> context,
   pass_bindings_.SetEncoder(encoder_);
   pass_bindings_.SetViewport(
       Viewport{.rect = Rect::MakeSize(GetRenderTargetSize())});
-  pass_bindings_.SetScissor(IRect::MakeSize(GetRenderTargetSize()));
+  pass_bindings_.SetScissor(IRect32::MakeSize(GetRenderTargetSize()));
   is_valid_ = true;
 }
 
@@ -278,7 +278,7 @@ void RenderPassMTL::SetViewport(Viewport viewport) {
 }
 
 // |RenderPass|
-void RenderPassMTL::SetScissor(IRect scissor) {
+void RenderPassMTL::SetScissor(IRect32 scissor) {
   pass_bindings_.SetScissor(scissor);
 }
 

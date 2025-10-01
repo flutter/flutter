@@ -274,12 +274,11 @@ abstract class Repository {
 
   Future<String> commit(String message, {bool addFirst = false, String? author}) async {
     if (addFirst) {
-      final bool hasChanges =
-          (await git.getOutput(
-            <String>['status', '--porcelain'],
-            'check for uncommitted changes',
-            workingDirectory: (await checkoutDirectory).path,
-          )).trim().isNotEmpty;
+      final bool hasChanges = (await git.getOutput(
+        <String>['status', '--porcelain'],
+        'check for uncommitted changes',
+        workingDirectory: (await checkoutDirectory).path,
+      )).trim().isNotEmpty;
       if (!hasChanges) {
         throw Exception('Tried to commit with message $message but no changes were present');
       }
@@ -300,12 +299,7 @@ abstract class Repository {
       }
       authorArg = '--author="$author"';
     }
-    final List<String> commitCmd = <String>[
-      'commit',
-      '--message',
-      message,
-      if (authorArg != null) authorArg,
-    ];
+    final List<String> commitCmd = <String>['commit', '--message', message, ?authorArg];
     stdio.printTrace('Executing git $commitCmd...');
     final io.ProcessResult commitResult = await git.run(
       commitCmd,

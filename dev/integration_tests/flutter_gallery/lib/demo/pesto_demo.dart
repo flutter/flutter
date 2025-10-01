@@ -119,7 +119,9 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
               top: statusBarHeight + 0.5 * extraPadding,
               bottom: extraPadding,
             ),
-            child: Center(child: PestoLogo(height: logoHeight, t: t.clamp(0.0, 1.0))),
+            child: Center(
+              child: PestoLogo(height: logoHeight, t: t.clamp(0.0, 1.0)),
+            ),
           );
         },
       ),
@@ -136,13 +138,14 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
     );
     return SliverPadding(
       padding: padding,
-      sliver: SliverGrid(
+      sliver: SliverGrid.builder(
         gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
           maxCrossAxisExtent: _kRecipePageMaxWidth,
           crossAxisSpacing: 8.0,
           mainAxisSpacing: 8.0,
         ),
-        delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+        itemCount: widget.recipes!.length,
+        itemBuilder: (BuildContext context, int index) {
           final Recipe? recipe = widget.recipes![index];
           return RecipeCard(
             recipe: recipe,
@@ -150,7 +153,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
               showRecipePage(context, recipe);
             },
           );
-        }, childCount: widget.recipes!.length),
+        },
       ),
     );
   }
@@ -368,13 +371,12 @@ class _RecipePageState extends State<RecipePage> {
                 actions: <Widget>[
                   PopupMenuButton<String>(
                     onSelected: (String item) {},
-                    itemBuilder:
-                        (BuildContext context) => <PopupMenuItem<String>>[
-                          _buildMenuItem(Icons.share, 'Tweet recipe'),
-                          _buildMenuItem(Icons.email, 'Email recipe'),
-                          _buildMenuItem(Icons.message, 'Message recipe'),
-                          _buildMenuItem(Icons.people, 'Share on Facebook'),
-                        ],
+                    itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
+                      _buildMenuItem(Icons.share, 'Tweet recipe'),
+                      _buildMenuItem(Icons.email, 'Email recipe'),
+                      _buildMenuItem(Icons.message, 'Message recipe'),
+                      _buildMenuItem(Icons.people, 'Share on Facebook'),
+                    ],
                   ),
                 ],
                 flexibleSpace: const FlexibleSpaceBar(

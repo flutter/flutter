@@ -43,11 +43,10 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const CheckboxThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -64,11 +63,10 @@ void main() {
       visualDensity: VisualDensity.standard,
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(
       description,
@@ -103,23 +101,23 @@ void main() {
         theme: ThemeData(
           checkboxTheme: CheckboxThemeData(
             mouseCursor: const MaterialStatePropertyAll<MouseCursor?>(mouseCursor),
-            fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
+            fillColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
                 return selectedFillColor;
               }
               return defaultFillColor;
             }),
-            checkColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.focused)) {
+            checkColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.focused)) {
                 return focusedCheckColor;
               }
               return defaultCheckColor;
             }),
-            overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.focused)) {
+            overlayColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.focused)) {
                 return focusOverlayColor;
               }
-              if (states.contains(MaterialState.hovered)) {
+              if (states.contains(WidgetState.hovered)) {
                 return hoverOverlayColor;
               }
               return null;
@@ -209,18 +207,18 @@ void main() {
         theme: ThemeData(
           checkboxTheme: CheckboxThemeData(
             mouseCursor: const MaterialStatePropertyAll<MouseCursor?>(themeMouseCursor),
-            fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
+            fillColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
                 return themeSelectedFillColor;
               }
               return themeDefaultFillColor;
             }),
             checkColor: const MaterialStatePropertyAll<Color?>(themeCheckColor),
-            overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.focused)) {
+            overlayColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.focused)) {
                 return themeFocusOverlayColor;
               }
-              if (states.contains(MaterialState.hovered)) {
+              if (states.contains(WidgetState.hovered)) {
                 return themeHoverOverlayColor;
               }
               return null;
@@ -236,8 +234,8 @@ void main() {
             value: selected,
             autofocus: autofocus,
             mouseCursor: mouseCursor,
-            fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
+            fillColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
                 return selectedFillColor;
               }
               return defaultFillColor;
@@ -299,8 +297,8 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           checkboxTheme: CheckboxThemeData(
-            fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
+            fillColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
                 return themeSelectedFillColor;
               }
               return themeDefaultFillColor;
@@ -334,9 +332,9 @@ void main() {
     const Color activePressedOverlayColor = Color(0xFF000001);
     const Color inactivePressedOverlayColor = Color(0xFF000002);
 
-    Color? getOverlayColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
-        if (states.contains(MaterialState.selected)) {
+    Color? getOverlayColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
+        if (states.contains(WidgetState.selected)) {
           return activePressedOverlayColor;
         }
         return inactivePressedOverlayColor;
@@ -350,11 +348,13 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           checkboxTheme: CheckboxThemeData(
-            overlayColor: MaterialStateProperty.resolveWith(getOverlayColor),
+            overlayColor: WidgetStateProperty.resolveWith(getOverlayColor),
             splashRadius: splashRadius,
           ),
         ),
-        home: Scaffold(body: Checkbox(value: active, onChanged: (_) {})),
+        home: Scaffold(
+          body: Checkbox(value: active, onChanged: (_) {}),
+        ),
       );
     }
 
@@ -437,9 +437,9 @@ void main() {
 
   test('CheckboxThemeData lerp from populated to null parameters', () {
     final CheckboxThemeData theme = CheckboxThemeData(
-      fillColor: MaterialStateProperty.all(const Color(0xfffffff0)),
-      checkColor: MaterialStateProperty.all(const Color(0xfffffff1)),
-      overlayColor: MaterialStateProperty.all(const Color(0xfffffff2)),
+      fillColor: WidgetStateProperty.all(const Color(0xfffffff0)),
+      checkColor: WidgetStateProperty.all(const Color(0xfffffff1)),
+      overlayColor: WidgetStateProperty.all(const Color(0xfffffff2)),
       splashRadius: 3.0,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       visualDensity: const VisualDensity(vertical: 1.0, horizontal: 1.0),
@@ -448,9 +448,9 @@ void main() {
     );
     final CheckboxThemeData lerped = CheckboxThemeData.lerp(theme, null, 0.5);
 
-    expect(lerped.fillColor!.resolve(<MaterialState>{}), isSameColorAs(const Color(0x80fffff0)));
-    expect(lerped.checkColor!.resolve(<MaterialState>{}), isSameColorAs(const Color(0x80fffff1)));
-    expect(lerped.overlayColor!.resolve(<MaterialState>{}), isSameColorAs(const Color(0x80fffff2)));
+    expect(lerped.fillColor!.resolve(<WidgetState>{}), isSameColorAs(const Color(0x80fffff0)));
+    expect(lerped.checkColor!.resolve(<WidgetState>{}), isSameColorAs(const Color(0x80fffff1)));
+    expect(lerped.overlayColor!.resolve(<WidgetState>{}), isSameColorAs(const Color(0x80fffff2)));
     expect(lerped.splashRadius, 1.5);
     expect(lerped.materialTapTargetSize, null);
     expect(lerped.visualDensity, null);
@@ -458,15 +458,51 @@ void main() {
       lerped.shape,
       const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0))),
     );
-    // Returns null if either lerp value is null.
-    expect(lerped.side, null);
+    expect(lerped.side!.width, 2.0);
+    expect(lerped.side!.color, isSameColorAs(const Color(0x80000000)));
+  });
+
+  test('CheckboxThemeData lerp from null to populated parameters', () {
+    final CheckboxThemeData theme = CheckboxThemeData(
+      fillColor: WidgetStateProperty.all(const Color(0xfffffff0)),
+      checkColor: WidgetStateProperty.all(const Color(0xfffffff1)),
+      overlayColor: WidgetStateProperty.all(const Color(0xfffffff2)),
+      splashRadius: 4.0,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      visualDensity: const VisualDensity(vertical: 1.0, horizontal: 1.0),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))),
+      side: const BorderSide(width: 4.0),
+    );
+    final CheckboxThemeData lerped = CheckboxThemeData.lerp(null, theme, 0.25);
+
+    expect(
+      lerped.fillColor!.resolve(const <WidgetState>{}),
+      isSameColorAs(const Color(0x40fffff0)),
+    );
+    expect(
+      lerped.checkColor!.resolve(const <WidgetState>{}),
+      isSameColorAs(const Color(0x40fffff1)),
+    );
+    expect(
+      lerped.overlayColor!.resolve(const <WidgetState>{}),
+      isSameColorAs(const Color(0x40fffff2)),
+    );
+    expect(lerped.splashRadius, 1);
+    expect(lerped.materialTapTargetSize, null);
+    expect(lerped.visualDensity, null);
+    expect(
+      lerped.shape,
+      const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(1.0))),
+    );
+    expect(lerped.side!.width, 1.0);
+    expect(lerped.side!.color, isSameColorAs(const Color(0x40000000)));
   });
 
   test('CheckboxThemeData lerp from populated parameters', () {
     final CheckboxThemeData themeA = CheckboxThemeData(
-      fillColor: MaterialStateProperty.all(const Color(0xfffffff0)),
-      checkColor: MaterialStateProperty.all(const Color(0xfffffff1)),
-      overlayColor: MaterialStateProperty.all(const Color(0xfffffff2)),
+      fillColor: WidgetStateProperty.all(const Color(0xfffffff0)),
+      checkColor: WidgetStateProperty.all(const Color(0xfffffff1)),
+      overlayColor: WidgetStateProperty.all(const Color(0xfffffff2)),
       splashRadius: 3.0,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       visualDensity: const VisualDensity(vertical: 1.0, horizontal: 1.0),
@@ -474,9 +510,9 @@ void main() {
       side: const BorderSide(width: 4.0),
     );
     final CheckboxThemeData themeB = CheckboxThemeData(
-      fillColor: MaterialStateProperty.all(const Color(0xfffffff3)),
-      checkColor: MaterialStateProperty.all(const Color(0xfffffff4)),
-      overlayColor: MaterialStateProperty.all(const Color(0xfffffff5)),
+      fillColor: WidgetStateProperty.all(const Color(0xfffffff3)),
+      checkColor: WidgetStateProperty.all(const Color(0xfffffff4)),
+      overlayColor: WidgetStateProperty.all(const Color(0xfffffff5)),
       splashRadius: 9.0,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       visualDensity: const VisualDensity(vertical: 2.0, horizontal: 2.0),
@@ -485,9 +521,9 @@ void main() {
     );
     final CheckboxThemeData lerped = CheckboxThemeData.lerp(themeA, themeB, 0.5);
 
-    expect(lerped.fillColor!.resolve(<MaterialState>{}), isSameColorAs(const Color(0xfffffff1)));
-    expect(lerped.checkColor!.resolve(<MaterialState>{}), isSameColorAs(const Color(0xfffffff2)));
-    expect(lerped.overlayColor!.resolve(<MaterialState>{}), isSameColorAs(const Color(0xfffffff3)));
+    expect(lerped.fillColor!.resolve(<WidgetState>{}), isSameColorAs(const Color(0xfffffff1)));
+    expect(lerped.checkColor!.resolve(<WidgetState>{}), isSameColorAs(const Color(0xfffffff2)));
+    expect(lerped.overlayColor!.resolve(<WidgetState>{}), isSameColorAs(const Color(0xfffffff3)));
     expect(lerped.splashRadius, 6);
     expect(lerped.materialTapTargetSize, MaterialTapTargetSize.shrinkWrap);
     expect(lerped.visualDensity, const VisualDensity(vertical: 2.0, horizontal: 2.0));
@@ -498,7 +534,7 @@ void main() {
     expect(lerped.side, const BorderSide(width: 3.5));
   });
 
-  testWidgets('MaterialStateBorderSide properly lerp in CheckboxThemeData.side', (
+  testWidgets('WidgetStateBorderSide properly lerp in CheckboxThemeData.side', (
     WidgetTester tester,
   ) async {
     late ColorScheme colorScheme;
@@ -509,7 +545,7 @@ void main() {
         theme: ThemeData(
           colorScheme: colorScheme,
           checkboxTheme: CheckboxThemeData(
-            side: MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
+            side: WidgetStateBorderSide.resolveWith((Set<WidgetState> states) {
               return BorderSide(color: colorScheme.primary, width: 4.0);
             }),
           ),

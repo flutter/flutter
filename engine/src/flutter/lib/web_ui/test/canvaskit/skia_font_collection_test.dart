@@ -6,7 +6,6 @@ import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
@@ -56,8 +55,9 @@ void testMain() {
 
     test('logs a warning if one of the registered fonts is invalid', () async {
       mockHttpFetchResponseFactory = (String url) async {
-        final ByteBuffer bogusData =
-            Uint8List.fromList('this is not valid font data'.codeUnits).buffer;
+        final ByteBuffer bogusData = Uint8List.fromList(
+          'this is not valid font data'.codeUnits,
+        ).buffer;
         return MockHttpFetchResponse(
           status: 200,
           url: url,
@@ -139,7 +139,8 @@ void testMain() {
             "fonts":[{"asset":"/assets/fonts/Roboto-Regular.ttf"}]
           }
         ]
-      '''.trim(),
+      '''
+              .trim(),
         ),
       );
 

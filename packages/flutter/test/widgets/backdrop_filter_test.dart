@@ -105,8 +105,9 @@ void main() {
 
     await tester.pumpWidget(build());
 
-    final List<BackdropFilterLayer> layers =
-        tester.layers.whereType<BackdropFilterLayer>().toList();
+    final List<BackdropFilterLayer> layers = tester.layers
+        .whereType<BackdropFilterLayer>()
+        .toList();
 
     expect(layers.length, 2);
     expect(layers[0].backdropKey, layers[1].backdropKey);

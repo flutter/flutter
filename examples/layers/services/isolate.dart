@@ -229,7 +229,9 @@ class IsolateExampleState extends State<StatefulWidget> with SingleTickerProvide
             child: CircularProgressIndicator(value: _progress),
           ),
           Text(_status),
-          Center(child: ElevatedButton(onPressed: _handleButtonPressed, child: Text(_label))),
+          Center(
+            child: ElevatedButton(onPressed: _handleButtonPressed, child: Text(_label)),
+          ),
           Text(_result),
         ],
       ),

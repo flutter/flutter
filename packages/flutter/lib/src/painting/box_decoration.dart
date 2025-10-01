@@ -551,10 +551,10 @@ class _BoxDecorationPainter extends BoxPainter {
         clipPath = Path()..addOval(square);
       case BoxShape.rectangle:
         if (_decoration.borderRadius != null) {
-          clipPath =
-              Path()..addRRect(
-                _decoration.borderRadius!.resolve(configuration.textDirection).toRRect(rect),
-              );
+          clipPath = Path()
+            ..addRRect(
+              _decoration.borderRadius!.resolve(configuration.textDirection).toRRect(rect),
+            );
         }
     }
     _imagePainter!.paint(canvas, rect, clipPath, configuration);

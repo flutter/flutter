@@ -836,11 +836,10 @@ abstract class ImageStreamCompleter with Diagnosticable {
     _checkDisposed();
     if (hasListeners) {
       // Make a copy to allow for concurrent modification.
-      final List<ImageChunkListener> localListeners =
-          _listeners
-              .map<ImageChunkListener?>((ImageStreamListener listener) => listener.onChunk)
-              .whereType<ImageChunkListener>()
-              .toList();
+      final List<ImageChunkListener> localListeners = _listeners
+          .map<ImageChunkListener?>((ImageStreamListener listener) => listener.onChunk)
+          .whereType<ImageChunkListener>()
+          .toList();
       for (final ImageChunkListener listener in localListeners) {
         listener(event);
       }

@@ -9,7 +9,6 @@
 
 #include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/vulkan/procs/vulkan_handle.h"
-#include "third_party/skia/include/core/SkSize.h"
 
 namespace flutter::testing {
 

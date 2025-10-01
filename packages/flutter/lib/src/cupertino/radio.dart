@@ -66,23 +66,21 @@ const List<double> _kDisabledDarkGradientOpacities = <double>[0.08, 0.14];
 /// deselected. The values are of type `T`, the type parameter of the
 /// [CupertinoRadio] class. Enums are commonly used for this purpose.
 ///
-/// The radio button itself does not maintain any state. Instead, selecting the
-/// radio invokes the [onChanged] callback, passing [value] as a parameter. If
-/// [groupValue] and [value] match, this radio will be selected. Most widgets
-/// will respond to [onChanged] by calling [State.setState] to update the
-/// radio button's [groupValue].
+/// This widget typically has a [RadioGroup] ancestor, which takes in a
+/// [RadioGroup.groupValue], and the [CupertinoRadio] under it with matching
+/// [value] will be selected.
 ///
 /// {@tool dartpad}
 /// Here is an example of CupertinoRadio widgets wrapped in CupertinoListTiles.
 ///
-/// The currently selected character is passed into `groupValue`, which is
+/// The currently selected character is passed into `RadioGroup.groupValue`, which is
 /// maintained by the example's `State`. In this case, the first [CupertinoRadio]
 /// will start off selected because `_character` is initialized to
 /// `SingingCharacter.lafayette`.
 ///
 /// If the second radio button is pressed, the example's state is updated
 /// with `setState`, updating `_character` to `SingingCharacter.jefferson`.
-/// This causes the buttons to rebuild with the updated `groupValue`, and
+/// This causes the buttons to rebuild with the updated `RadioGroup.groupValue`, and
 /// therefore the selection of the second button.
 ///
 /// ** See code in examples/api/lib/cupertino/radio/cupertino_radio.0.dart **
@@ -393,8 +391,8 @@ class _RadioPaintState extends State<_RadioPaint> {
   Widget build(BuildContext context) {
     // Colors need to be resolved in selected and non selected states separately.
     final Set<WidgetState> activeStates = widget.toggleableState.states..add(WidgetState.selected);
-    final Set<WidgetState> inactiveStates =
-        widget.toggleableState.states..remove(WidgetState.selected);
+    final Set<WidgetState> inactiveStates = widget.toggleableState.states
+      ..remove(WidgetState.selected);
 
     // Since the states getter always makes a new set, make a copy to use
     // throughout the lifecycle of this build method.
@@ -417,21 +415,20 @@ class _RadioPaintState extends State<_RadioPaint> {
 
     return CustomPaint(
       size: _size,
-      painter:
-          _painter
-            ..position = widget.toggleableState.position
-            ..reaction = widget.toggleableState.reaction
-            ..focusColor = effectiveFocusOverlayColor
-            ..downPosition = widget.toggleableState.downPosition
-            ..isFocused = widget.focused
-            ..activeColor = effectiveActiveColor
-            ..inactiveColor = effectiveInactiveColor
-            ..fillColor = effectiveFillColor
-            ..value = widget.toggleableState.value
-            ..checkmarkStyle = widget.useCheckmarkStyle
-            ..isActive = widget.isActive
-            ..borderColor = effectiveBorderColor
-            ..brightness = CupertinoTheme.of(context).brightness,
+      painter: _painter
+        ..position = widget.toggleableState.position
+        ..reaction = widget.toggleableState.reaction
+        ..focusColor = effectiveFocusOverlayColor
+        ..downPosition = widget.toggleableState.downPosition
+        ..isFocused = widget.focused
+        ..activeColor = effectiveActiveColor
+        ..inactiveColor = effectiveInactiveColor
+        ..fillColor = effectiveFillColor
+        ..value = widget.toggleableState.value
+        ..checkmarkStyle = widget.useCheckmarkStyle
+        ..isActive = widget.isActive
+        ..borderColor = effectiveBorderColor
+        ..brightness = CupertinoTheme.of(context).brightness,
     );
   }
 }
@@ -488,12 +485,10 @@ class _RadioPainter extends ToggleablePainter {
   }
 
   void _drawPressedOverlay(Canvas canvas, Offset center, double radius) {
-    final Paint pressedPaint =
-        Paint()
-          ..color =
-              brightness == Brightness.light
-                  ? CupertinoColors.black.withOpacity(_kPressedOverlayOpacity)
-                  : CupertinoColors.white.withOpacity(_kPressedOverlayOpacity);
+    final Paint pressedPaint = Paint()
+      ..color = brightness == Brightness.light
+          ? CupertinoColors.black.withOpacity(_kPressedOverlayOpacity)
+          : CupertinoColors.white.withOpacity(_kPressedOverlayOpacity);
     canvas.drawCircle(center, radius, pressedPaint);
   }
 
@@ -515,11 +510,10 @@ class _RadioPainter extends ToggleablePainter {
   }
 
   void _drawOuterBorder(Canvas canvas, Offset center) {
-    final Paint borderPaint =
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..color = borderColor
-          ..strokeWidth = _kBorderOutlineStrokeWidth;
+    final Paint borderPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..color = borderColor
+      ..strokeWidth = _kBorderOutlineStrokeWidth;
     canvas.drawCircle(center, _kOuterRadius, borderPaint);
   }
 
@@ -530,12 +524,11 @@ class _RadioPainter extends ToggleablePainter {
     if (checkmarkStyle) {
       if (value ?? false) {
         final Path path = Path();
-        final Paint checkPaint =
-            Paint()
-              ..color = activeColor
-              ..style = PaintingStyle.stroke
-              ..strokeWidth = _kCheckmarkStrokeWidth
-              ..strokeCap = StrokeCap.round;
+        final Paint checkPaint = Paint()
+          ..color = activeColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = _kCheckmarkStrokeWidth
+          ..strokeCap = StrokeCap.round;
         final double width = _size.width;
         final Offset origin = Offset(center.dx - (width / 2), center.dy - (width / 2));
         final Offset start = Offset(width * 0.25, width * 0.52);
@@ -603,11 +596,10 @@ class _RadioPainter extends ToggleablePainter {
       }
     }
     if (isFocused) {
-      final Paint focusPaint =
-          Paint()
-            ..style = PaintingStyle.stroke
-            ..color = focusColor
-            ..strokeWidth = _kFocusOutlineStrokeWidth;
+      final Paint focusPaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..color = focusColor
+        ..strokeWidth = _kFocusOutlineStrokeWidth;
       canvas.drawCircle(center, _kOuterRadius + _kFocusOutlineStrokeWidth / 2, focusPaint);
     }
   }
