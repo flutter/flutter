@@ -781,7 +781,10 @@ static char markerKey;
   flutter::TextRange replacedRange(-1, -1);
 
   std::string textBeforeChange = _activeModel->GetText().c_str();
-  std::string utf8String = [string UTF8String];
+  // Input string may be NSString or NSAttributedString.
+  BOOL isAttributedString = [string isKindOfClass:[NSAttributedString class]];
+  const NSString* rawString = isAttributedString ? [string string] : string;
+  std::string utf8String = [rawString UTF8String];
   _activeModel->AddText(utf8String);
   if (_activeModel->composing()) {
     replacedRange = composingBeforeChange;
