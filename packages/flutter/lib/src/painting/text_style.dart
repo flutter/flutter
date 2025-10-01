@@ -507,6 +507,8 @@ class TextStyle with Diagnosticable {
   }) : fontFamily = package == null ? fontFamily : 'packages/$package/$fontFamily',
        _fontFamilyFallback = fontFamilyFallback,
        _package = package,
+       assert(height == null || !height.isNaN, 'TextStyle.height cannot be NaN');
+       assert(fontSize == null || !fontSize.isNaN, 'TextStyle.fontSize cannot be NaN');
        assert(color == null || foreground == null, _kColorForegroundWarning),
        assert(backgroundColor == null || background == null, _kColorBackgroundWarning);
 
