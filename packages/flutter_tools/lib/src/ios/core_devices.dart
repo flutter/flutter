@@ -354,6 +354,10 @@ class IOSCoreDeviceControl {
       validTimeout = const Duration(seconds: _minimumTimeoutInSeconds);
     }
 
+    final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('core_devices.');
+    final File output = tempDirectory.childFile('core_device_list.json');
+    output.createSync();
+
     final command = <String>[
       ..._xcode.xcrunCommand(),
       'devicectl',
@@ -361,6 +365,8 @@ class IOSCoreDeviceControl {
       'devices',
       '--timeout',
       validTimeout.inSeconds.toString(),
+      '--json-output',
+      output.path,
     ];
 
     Process? process;
@@ -381,6 +387,7 @@ class IOSCoreDeviceControl {
 
       final int exitCode = await process.exitCode;
       final String stdout = await utf8.decodeStream(process.stdout);
+      final String stringOutput = output.readAsStringSync();
 
       if (exitCode != 0) {
         final String stderr = await utf8.decodeStream(process.stderr);
@@ -392,23 +399,29 @@ class IOSCoreDeviceControl {
 
       _logger.printTrace(stdout);
 
-      final Object? decodeResult = (json.decode(stdout) as Map<String, Object?>)['result'];
+      final Object? decodeResult = (json.decode(stringOutput) as Map<String, Object?>)['result'];
       if (decodeResult is Map<String, Object?>) {
         final Object? decodeDevices = decodeResult['devices'];
         if (decodeDevices is List<Object?>) {
           return decodeDevices;
         }
       }
-      _logger.printError('devicectl returned unexpected JSON response: $stdout');
+      _logger.printError('devicectl returned unexpected JSON response: $stringOutput');
       return const <Object?>[];
     } on ProcessException catch (e) {
       _logger.printError('Error executing devicectl: $e');
+      return const <Object?>[];
+    } on FileSystemException catch (e) {
+      _logger.printTrace('Error reading devicectl output: $e');
       return const <Object?>[];
     } on FormatException {
       _logger.printError('devicectl returned non-JSON response.');
       return const <Object?>[];
     } finally {
       process?.kill();
+      if (tempDirectory.existsSync()) {
+        tempDirectory.deleteSync(recursive: true);
+      }
     }
   }
 
