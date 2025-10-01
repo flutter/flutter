@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('RenderPerformanceOverlay intrinsic height respects optionsMask', () {
     const double kGraph = 80.0; // matches implementation default graph height
-    final RenderPerformanceOverlay r = RenderPerformanceOverlay(optionsMask: 0);
+    final RenderPerformanceOverlay r = RenderPerformanceOverlay();
     expect(r.computeMinIntrinsicHeight(100.0), 0.0);
 
     // One engine stat enabled
