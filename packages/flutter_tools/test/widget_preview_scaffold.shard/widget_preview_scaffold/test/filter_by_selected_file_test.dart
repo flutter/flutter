@@ -30,17 +30,15 @@ Future<void> testImpl({
     isWindows: isWindows,
   );
   final previews = <WidgetPreview>[
-    WidgetPreview(
+    WidgetPreview.test(
       builder: () => Text('widget1'),
       scriptUri: script1Uri.toString(),
       previewData: Preview(group: 'group'),
-      packageName: '',
     ),
-    WidgetPreview(
+    WidgetPreview.test(
       builder: () => Text('widget2'),
       scriptUri: script2Uri.toString(),
       previewData: Preview(group: 'group'),
-      packageName: '',
     ),
   ];
   final controller = FakeWidgetPreviewScaffoldController(
@@ -190,17 +188,13 @@ void main() {
   ) async {
     final dtdServices = FakeWidgetPreviewScaffoldDtdServices();
     final previews = <WidgetPreview>[
-      WidgetPreview(
+      WidgetPreview.test(
         builder: () => Text('widget1'),
-        scriptUri: '',
         previewData: Preview(group: 'group'),
-        packageName: '',
       ),
-      WidgetPreview(
+      WidgetPreview.test(
         builder: () => Text('widget2'),
-        scriptUri: '',
         previewData: Preview(group: 'group'),
-        packageName: '',
       ),
     ];
     final controller = FakeWidgetPreviewScaffoldController(
