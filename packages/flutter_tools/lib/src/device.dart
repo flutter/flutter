@@ -225,10 +225,11 @@ abstract class DeviceManager {
 
   /// Stop any running extended wireless device discoverers.
   void stopExtendedWirelessDeviceDiscoverers() {
-    for (final DeviceDiscovery discoverer in _platformDiscoverers) {
-      if (discoverer.requiresExtendedWirelessDeviceDiscovery) {
-        discoverer.stopPolling();
-      }
+    final DeviceDiscovery? iosDiscoverer = _platformDiscoverers
+        .where((DeviceDiscovery d) => d.requiresExtendedWirelessDeviceDiscovery)
+        .firstOrNull;
+    if (iosDiscoverer is PollingDeviceDiscovery) {
+      iosDiscoverer.cancelWirelessDiscovery();
     }
   }
 
@@ -514,6 +515,9 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
     _timer?.cancel();
     _timer = null;
   }
+
+  /// Cancels any in-progress, long-running wireless discovery processes.
+  Future<void> cancelWirelessDiscovery() async {}
 
   /// Get devices from cache filtered by [filter].
   ///

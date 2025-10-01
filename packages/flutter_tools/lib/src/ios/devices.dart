@@ -244,6 +244,11 @@ class IOSDevices extends PollingDeviceDiscovery {
   }
 
   @override
+  Future<void> cancelWirelessDiscovery() async {
+    xcdevice.cancelWirelessDiscovery();
+  }
+
+  @override
   Future<List<Device>> pollingGetDevices({
     Duration? timeout,
     bool forWirelessDiscovery = false,

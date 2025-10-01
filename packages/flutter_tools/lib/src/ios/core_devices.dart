@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
-import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -304,8 +303,6 @@ class IOSCoreDeviceControl {
   final Xcode _xcode;
   final FileSystem _fileSystem;
 
-  Process? _devicectlListProcess;
-
   /// When the `--timeout` flag is used with `devicectl`, it must be at
   /// least 5 seconds. If lower than 5 seconds, `devicectl` will error and not
   /// run the command.
@@ -336,107 +333,82 @@ class IOSCoreDeviceControl {
     'Failed to execute code (error: EXC_BAD_ACCESS, debugger assist: not detected)',
   ];
 
-  void stopListDevices() {
-    if (_devicectlListProcess != null) {
-      _logger.printTrace('Killing devicectl list devices process');
-      _devicectlListProcess!.kill();
-    }
-    _devicectlListProcess = null;
-  }
-
   /// Executes `devicectl` command to get list of devices. The command will
   /// likely complete before [timeout] is reached. If [timeout] is reached,
   /// the command will be stopped as a failure.
-  Future<(Process?, File?)> startListCoreDevices({
+  Future<List<Object?>> _listCoreDevices({
     Duration timeout = const Duration(seconds: _minimumTimeoutInSeconds),
     Completer<void>? cancelCompleter,
   }) async {
     if (!_xcode.isDevicectlInstalled) {
       _logger.printError('devicectl is not installed.');
-      return (null, null);
+      return const <Object?>[];
     }
 
     var validTimeout = timeout;
     if (timeout.inSeconds < _minimumTimeoutInSeconds) {
-      _logger.printError(
+      _logger.printWarning(
         'Timeout of ${timeout.inSeconds} seconds is below the minimum timeout value '
         'for devicectl. Changing the timeout to the minimum value of $_minimumTimeoutInSeconds.',
       );
       validTimeout = const Duration(seconds: _minimumTimeoutInSeconds);
     }
-    final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('core_devices.');
-    final File output = tempDirectory.childFile('core_device_list.json');
-    output.createSync();
 
-    final Process process = await _processUtils.start(<String>[
+    final command = <String>[
       ..._xcode.xcrunCommand(),
       'devicectl',
       'list',
       'devices',
       '--timeout',
       validTimeout.inSeconds.toString(),
-      '--json-output',
-      output.path,
-    ]);
+    ];
 
-    if (cancelCompleter != null) {
-      unawaited(
-        cancelCompleter.future.whenComplete(() {
-          _logger.printTrace('Cancelling devicectl process.');
-          process.kill();
-        }),
-      );
-    }
-    return (process, output);
-  }
-
-  Future<List<Object?>> getCoreDevicesFromHandledProcess({
-    required File output,
-    required int exitCode,
-  }) async {
-    if (!output.existsSync()) {
-      // It's possible that the tool is in the process of shutting down, which
-      // could result in the temp directory being deleted after the shutdown hooks run
-      // before we check if `output` exists. If this happens, we shouldn't crash
-      // but just carry on as if no devices were found as the tool will exit on
-      // its own.
-      //
-      // See https://github.com/flutter/flutter/issues/141892 for details.
-      if (_fileSystem is ErrorHandlingFileSystem) {
-        final FileSystem delegate = _fileSystem.fileSystem;
-        if (delegate is LocalFileSystem && delegate.disposed) {
-          return <Object?>[];
-        }
-      }
-      _logger.printError('${output.path} was expected to exist, but it did not.');
-      _logger.printError('The process exited with code $exitCode');
-      throw FileSystemException('The devicectl output file was unexpectedly deleted.', output.path);
-    }
-
-    if (exitCode != 0) {
-      _logger.printError('devicectl exited with a non-zero exit code: $exitCode');
-      return <Object?>[];
-    }
-
-    final String stringOutput = output.readAsStringSync();
-    _logger.printTrace(stringOutput);
-
+    Process? process;
     try {
-      final Object? decodeResult = (json.decode(stringOutput) as Map<String, Object?>)['result'];
+      process = await _processUtils.start(command);
+
+      final Future<void> cancelFuture = cancelCompleter?.future ?? Completer<void>().future;
+      final Future<dynamic> firstCompleted = Future.any<dynamic>(<Future<dynamic>>[
+        process.exitCode,
+        cancelFuture,
+      ]);
+      await firstCompleted;
+
+      if (cancelCompleter?.isCompleted ?? false) {
+        process.kill();
+        return const <Object?>[];
+      }
+
+      final int exitCode = await process.exitCode;
+      final String stdout = await utf8.decodeStream(process.stdout);
+
+      if (exitCode != 0) {
+        final String stderr = await utf8.decodeStream(process.stderr);
+        _logger.printError('devicectl exited with a non-zero exit code: $exitCode');
+        _logger.printTrace('devicectl stdout:\n$stdout');
+        _logger.printTrace('devicectl stderr:\n$stderr');
+        return const <Object?>[];
+      }
+
+      _logger.printTrace(stdout);
+
+      final Object? decodeResult = (json.decode(stdout) as Map<String, Object?>)['result'];
       if (decodeResult is Map<String, Object?>) {
         final Object? decodeDevices = decodeResult['devices'];
         if (decodeDevices is List<Object?>) {
           return decodeDevices;
         }
       }
-      _logger.printError('devicectl returned unexpected JSON response: $stringOutput');
-      return <Object?>[];
+      _logger.printError('devicectl returned unexpected JSON response: $stdout');
+      return const <Object?>[];
+    } on ProcessException catch (e) {
+      _logger.printError('Error executing devicectl: $e');
+      return const <Object?>[];
     } on FormatException {
-      _logger.printError('devicectl returned non-JSON response: $stringOutput');
-      return <Object?>[];
+      _logger.printError('devicectl returned non-JSON response.');
+      return const <Object?>[];
     } finally {
-      _devicectlListProcess = null;
-      ErrorHandlingFileSystem.deleteIfExists(output.parent, recursive: true);
+      process?.kill();
     }
   }
 
@@ -444,53 +416,16 @@ class IOSCoreDeviceControl {
     Duration timeout = const Duration(seconds: _minimumTimeoutInSeconds),
     Completer<void>? cancelCompleter,
   }) async {
-    if (_devicectlListProcess != null) {
-      _logger.printError(
-        'A devicectl list devices process is already running. It must be stopped before starting a new one.',
-      );
-      return <IOSCoreDevice>[];
-    }
-    final (Process? process, File? output) = await startListCoreDevices(
+    final List<Object?> coreDeviceObjects = await _listCoreDevices(
       timeout: timeout,
       cancelCompleter: cancelCompleter,
     );
-    if (process == null || output == null) {
-      return const <IOSCoreDevice>[];
-    }
-    _devicectlListProcess = process;
 
-    try {
-      if (cancelCompleter != null) {
-        await Future.any<void>(<Future<void>>[
-          _devicectlListProcess!.exitCode,
-          cancelCompleter.future,
-        ]);
-      } else {
-        await _devicectlListProcess!.exitCode;
-      }
-
-      if (cancelCompleter?.isCompleted ?? false) {
-        return const <IOSCoreDevice>[];
-      }
-
-      final int exitCode = await _devicectlListProcess!.exitCode;
-      final List<Object?> coreDeviceObjects = await getCoreDevicesFromHandledProcess(
-        output: output,
-        exitCode: exitCode,
-      );
-
-      return <IOSCoreDevice>[
-        for (final Object? deviceObject in coreDeviceObjects)
-          if (deviceObject is Map<String, Object?>)
-            IOSCoreDevice.fromBetaJson(deviceObject, logger: _logger),
-      ];
-    } on FileSystemException catch (e) {
-      _logger.printError('Failed to read devicectl output file: $e');
-      return const <IOSCoreDevice>[];
-    } finally {
-      _devicectlListProcess = null;
-      ErrorHandlingFileSystem.deleteIfExists(output.parent, recursive: true);
-    }
+    return <IOSCoreDevice>[
+      for (final Object? deviceObject in coreDeviceObjects)
+        if (deviceObject is Map<String, Object?>)
+          IOSCoreDevice.fromBetaJson(deviceObject, logger: _logger),
+    ];
   }
 
   /// Executes `devicectl` command to get list of apps installed on the device.
