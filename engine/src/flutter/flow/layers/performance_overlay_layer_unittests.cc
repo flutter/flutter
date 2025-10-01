@@ -175,6 +175,8 @@ TEST_F(PerformanceOverlayLayerTest, PaintingEmptyLayerDoesNotDie) {
   layer->Preroll(preroll_context());
   EXPECT_EQ(layer->paint_bounds(), DlRect());
   EXPECT_FALSE(layer->needs_painting(paint_context()));
+
+  layer->Paint(paint_context());
 }
 
 TEST_F(PerformanceOverlayLayerTest, InvalidOptions) {
