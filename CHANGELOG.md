@@ -34,6 +34,10 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ### [3.35.5](https://github.com/flutter/flutter/releases/tag/3.35.5)
 
+[flutter/175669](https://github.com/flutter/flutter/issues/175669) Flutter analyze --suggestions supports versions up to Java 25, Gradle 9 and AGP 9, Kotlin 2.2.20.
+
+### [3.35.5](https://github.com/flutter/flutter/releases/tag/3.35.5)
+
  - [flutter/172105](https://github.com/flutter/flutter/issues/172105) Flutter view no longer hangs after multiple transitions on iOS add-to-app.
  - [flutter/173106](https://github.com/flutter/flutter/issues/173106) Multiple cursors display correctly.
 
