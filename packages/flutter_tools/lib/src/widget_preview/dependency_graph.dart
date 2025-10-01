@@ -11,9 +11,8 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/dart/constant/value.dart';
-import 'package:analyzer/dart/element/element2.dart';
+import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/diagnostic/diagnostic.dart';
-import 'package:analyzer/error/error.dart';
 import 'package:analyzer/source/line_info.dart';
 
 import '../base/logger.dart';
@@ -34,7 +33,7 @@ typedef PreviewDependencyGraph = Map<PreviewPath, LibraryPreviewNode>;
 /// Visitor which detects previews and extracts [PreviewDetails] for later code
 /// generation.
 class _PreviewVisitor extends RecursiveAstVisitor<void> {
-  _PreviewVisitor({required LibraryElement2 lib})
+  _PreviewVisitor({required LibraryElement lib})
     : packageName = lib.uri.scheme == 'package' ? lib.uri.pathSegments.first : null;
 
   late final String? packageName;
@@ -208,7 +207,7 @@ final class LibraryPreviewNode {
   bool get hasErrors => errors.isNotEmpty;
 
   /// The set of errors found in this library.
-  final errors = <AnalysisError>[];
+  final errors = <Diagnostic>[];
 
   /// Determines the set of errors found in this library.
   ///
@@ -217,8 +216,8 @@ final class LibraryPreviewNode {
     errors.clear();
     for (final String file in files) {
       errors.addAll(
-        ((await context.currentSession.getErrors(file)) as ErrorsResult).errors
-            .where((AnalysisError error) => error.severity == Severity.error)
+        ((await context.currentSession.getErrors(file)) as ErrorsResult).diagnostics
+            .where((error) => error.severity == Severity.error)
             .toList(),
       );
     }
