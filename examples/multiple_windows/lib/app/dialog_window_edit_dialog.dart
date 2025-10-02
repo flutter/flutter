@@ -94,6 +94,9 @@ class _DialogWindowEditDialogState extends State<_DialogWindowEditDialog> {
   @override
   void dispose() {
     widget.controller.removeListener(_onNotification);
+    widthController.dispose();
+    heightController.dispose();
+    titleController.dispose();
     super.dispose();
   }
 
@@ -149,8 +152,8 @@ class _DialogWindowEditDialogState extends State<_DialogWindowEditDialog> {
         ],
       ),
       actions: [
-        TextButton(onPressed: () => widget.onClose(), child: Text('Cancel')),
-        TextButton(onPressed: () => _onSave(), child: Text('Save')),
+        TextButton(onPressed: widget.onClose, child: Text('Cancel')),
+        TextButton(onPressed: _onSave, child: Text('Save')),
       ],
     );
   }

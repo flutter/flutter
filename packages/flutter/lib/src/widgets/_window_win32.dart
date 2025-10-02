@@ -253,7 +253,7 @@ class _RegularWindowMesageHandler implements _WindowsMessageHandler {
 class RegularWindowControllerWin32 extends RegularWindowController {
   /// Creates a new regular window controller for Win32.
   ///
-  /// When this constructor completes the native window has been created and
+  /// When this constructor completes, the native window has been created and
   /// has a view associated with it.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
@@ -477,7 +477,7 @@ class _DialogWindowMesageHandler implements _WindowsMessageHandler {
 class DialogWindowControllerWin32 extends DialogWindowController {
   /// Creates a new dialog window controller for Win32.
   ///
-  /// When this constructor completes the native window has been created and
+  /// When this constructor completes, the native window has been created and
   /// has a view associated with it.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
@@ -533,8 +533,7 @@ class DialogWindowControllerWin32 extends DialogWindowController {
   Size get contentSize {
     _ensureNotDestroyed();
     final _ActualContentSize size = _Win32PlatformInterface.getWindowContentSize(getWindowHandle());
-    final Size result = Size(size.width, size.height);
-    return result;
+    return Size(size.width, size.height);
   }
 
   @override
@@ -591,11 +590,11 @@ class DialogWindowControllerWin32 extends DialogWindowController {
   @override
   @internal
   void setMinimized(bool minimized) {
+    _ensureNotDestroyed();
     if (parent != null) {
       return;
     }
 
-    _ensureNotDestroyed();
     if (minimized) {
       _Win32PlatformInterface.showWindow(getWindowHandle(), _SW_MINIMIZE);
     } else {

@@ -17,8 +17,6 @@ class DialogWindowContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dpr = MediaQuery.of(context).devicePixelRatio;
-    final windowSize = WindowScope.contentSizeOf(context);
     final WindowManager windowManager = WindowManagerAccessor.of(context);
 
     final child = FocusScope(
@@ -33,6 +31,8 @@ class DialogWindowContent extends StatelessWidget {
                 ListenableBuilder(
                   listenable: window,
                   builder: (BuildContext context, Widget? _) {
+                    final dpr = MediaQuery.of(context).devicePixelRatio;
+                    final windowSize = WindowScope.contentSizeOf(context);
                     return Text(
                       'View ID: ${window.rootView.viewId}\n'
                       'Parent View ID: ${window.parent?.rootView.viewId ?? "None"}\n'

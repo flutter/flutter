@@ -114,6 +114,9 @@ class _RegularWindowEditDialogState extends State<_RegularWindowEditDialog> {
   @override
   void dispose() {
     widget.controller.removeListener(_onNotification);
+    widthController.dispose();
+    heightController.dispose();
+    titleController.dispose();
     super.dispose();
   }
 

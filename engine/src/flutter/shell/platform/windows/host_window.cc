@@ -727,7 +727,7 @@ std::optional<Size> HostWindow::GetWindowSizeForClientSize(
   double width = static_cast<double>(rect.right - rect.left);
   double height = static_cast<double>(rect.bottom - rect.top);
 
-  // Apply size constraints
+  // Apply size constraints.
   double const non_client_width = width - (client_size.width() * scale_factor);
   double const non_client_height =
       height - (client_size.height() * scale_factor);
