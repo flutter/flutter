@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:dtd/dtd.dart';
+import 'package:json_rpc_2/json_rpc_2.dart';
 import 'package:widget_preview_scaffold/src/dtd/utils.dart';
 import 'editor_service.dart';
 
@@ -18,10 +19,16 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   //
   // START KEEP SYNCED
 
-  static const String kWidgetPreviewService = 'widget-preview';
+  static const kWidgetPreviewService = 'widget-preview';
   static const kIsWindows = 'isWindows';
-  static const String kHotRestartPreviewer = 'hotRestartPreviewer';
-  static const String kResolveUri = 'resolveUri';
+  static const kHotRestartPreviewer = 'hotRestartPreviewer';
+  static const kResolveUri = 'resolveUri';
+  static const kSetPreference = 'setPreference';
+  static const kGetPreference = 'getPreference';
+
+  /// Error code for RpcException thrown when attempting to load a key from
+  /// persistent preferences that doesn't have an entry.
+  static const kNoValueForKey = 200;
 
   // END KEEP SYNCED
 
@@ -79,6 +86,40 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
     }
     final result = StringResponse.fromDTDResponse(response).value;
     return result == null ? null : Uri.parse(result);
+  }
+
+  /// Retrieves an arbitrary value associated with [key] from the persistent
+  /// preferences map.
+  ///
+  /// Returns null if [key] is not in the map.
+  Future<String?> getPreference(String key) async {
+    try {
+      final response = StringResponse.fromDTDResponse(
+        (await _call(kGetPreference, params: {'key': key}))!,
+      );
+      return response.value;
+    } on RpcException catch (e) {
+      if (e.code == kNoValueForKey) {
+        return null;
+      }
+      rethrow;
+    }
+  }
+
+  /// Retrieves the state of flag [key] from the persistent preferences map.
+  ///
+  /// If [key] is not set, [defaultValue] is returned.
+  Future<bool> getFlag(String key, {bool defaultValue = false}) async {
+    final result = await getPreference(key);
+    if (result == null) {
+      return defaultValue;
+    }
+    return bool.tryParse(result) ?? defaultValue;
+  }
+
+  /// Sets [key] to [value] in the persistent preferences map.
+  Future<void> setPreference(String key, Object value) async {
+    await _call(kSetPreference, params: {'key': key, 'value': value});
   }
 
   @override
