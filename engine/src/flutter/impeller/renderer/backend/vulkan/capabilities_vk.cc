@@ -732,7 +732,7 @@ size_t CapabilitiesVK::GetMinimumUniformAlignment() const {
   return minimum_uniform_alignment_;
 }
 
-size_t CapabilitiesVK::GetMinimumStorageAlignment() const {
+size_t CapabilitiesVK::GetMinimumStorageBufferAlignment() const {
   return minimum_storage_alignment_;
 }
 

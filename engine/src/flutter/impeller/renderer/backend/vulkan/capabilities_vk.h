@@ -282,7 +282,7 @@ class CapabilitiesVK final : public Capabilities,
   size_t GetMinimumUniformAlignment() const override;
 
   // |Capabilities|
-  size_t GetMinimumStorageAlignment() const override;
+  size_t GetMinimumStorageBufferAlignment() const override;
 
   // |Capabilities|
   bool NeedsPartitionedHostBuffer() const override;

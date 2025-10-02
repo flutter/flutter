@@ -272,14 +272,12 @@ void CommandPoolRecyclerVK::Reclaim(
     return;
   }
   auto device = strong_context->GetDevice();
-  vk::Result result;
+  vk::CommandPoolResetFlags flags;
   if (should_trim) {
     buffers.clear();
-    result = device.resetCommandPool(
-        pool.get(), vk::CommandPoolResetFlagBits::eReleaseResources);
-  } else {
-    result = device.resetCommandPool(pool.get(), {});
+    flags = vk::CommandPoolResetFlagBits::eReleaseResources;
   }
+  const auto result = device.resetCommandPool(pool.get(), flags);
   if (result != vk::Result::eSuccess) {
     VALIDATION_LOG << "Could not reset command pool: " << vk::to_string(result);
   }

@@ -116,7 +116,8 @@ bool SweepGradientContents::RenderSSBO(const ContentContext& renderer,
         frag_info.colors_length = colors.size();
         auto color_buffer = data_host_buffer.Emplace(
             colors.data(), colors.size() * sizeof(StopData),
-            renderer.GetDeviceCapabilities().GetMinimumStorageAlignment());
+            renderer.GetDeviceCapabilities()
+                .GetMinimumStorageBufferAlignment());
 
         pass.SetCommandLabel("SweepGradientSSBOFill");
 
