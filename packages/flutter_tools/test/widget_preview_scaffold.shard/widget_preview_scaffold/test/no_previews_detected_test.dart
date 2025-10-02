@@ -25,7 +25,7 @@ void main() {
 
       if (controller.filterBySelectedFileListenable.value) {
         // Don't filter by selected file.
-        controller.toggleFilterBySelectedFile();
+        await controller.toggleFilterBySelectedFile();
       }
       // Start with no previews populated and verify the help message is displayed with a link to
       // documentation.

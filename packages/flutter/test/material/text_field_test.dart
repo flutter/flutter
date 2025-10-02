@@ -7375,7 +7375,7 @@ void main() {
             child: TextField(
               controller: controller,
               enabled: enabled,
-              style: MaterialStateTextStyle.resolveWith((Set<WidgetState> states) {
+              style: WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
                 if (states.contains(WidgetState.disabled)) {
                   return const TextStyle(color: Colors.red);
                 }

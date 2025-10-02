@@ -8404,13 +8404,13 @@ void main() {
   testWidgets('InputDecorationThemeData.inputDecoration with WidgetState', (
     WidgetTester tester,
   ) async {
-    final MaterialStateTextStyle themeStyle = MaterialStateTextStyle.resolveWith((
+    final WidgetStateTextStyle themeStyle = WidgetStateTextStyle.resolveWith((
       Set<WidgetState> states,
     ) {
       return const TextStyle(color: Colors.green);
     });
 
-    final MaterialStateTextStyle decorationStyle = MaterialStateTextStyle.resolveWith((
+    final WidgetStateTextStyle decorationStyle = WidgetStateTextStyle.resolveWith((
       Set<WidgetState> states,
     ) {
       return const TextStyle(color: Colors.blue);

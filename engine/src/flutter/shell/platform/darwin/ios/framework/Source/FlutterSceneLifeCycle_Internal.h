@@ -20,6 +20,8 @@
 
 - (void)engine:(FlutterEngine*)engine receivedConnectNotificationFor:(UIScene*)scene;
 
++ (FlutterPluginSceneLifeCycleDelegate*)fromScene:(UIScene*)scene;
+
 @end
 
 /**
