@@ -888,6 +888,22 @@ void main() {
     expect(imageStreamCompleter.listeners.length, 1);
   });
 
+  testWidgets('MediaQuery.disableAnimations controls stream registration', (
+    WidgetTester tester,
+  ) async {
+    final _TestImageStreamCompleter imageStreamCompleter = _TestImageStreamCompleter();
+    final Image image = Image(
+      excludeFromSemantics: true,
+      image: _TestImageProvider(streamCompleter: imageStreamCompleter),
+    );
+    await tester.pumpWidget(image);
+    expect(imageStreamCompleter.listeners.length, 2);
+    await tester.pumpWidget(
+      MediaQuery(data: const MediaQueryData(disableAnimations: true), child: image),
+    );
+    expect(imageStreamCompleter.listeners.length, 1);
+  });
+
   testWidgets(
     'Verify Image shows correct RenderImage when changing to an already completed provider',
     (WidgetTester tester) async {
@@ -1158,6 +1174,7 @@ void main() {
     expect(tester.state(find.byType(Image)), same(state));
   });
 
+  // TODO(justinmc): Maybe do a similar test for disableAnimations?
   testWidgets(
     'Image state handles enabling and disabling of tickers',
     experimentalLeakTesting: LeakTesting.settings
@@ -1962,6 +1979,40 @@ void main() {
     expect(find.byType(Image), findsOneWidget);
 
     await tester.pumpWidget(TickerMode(enabled: true, child: Image(image: provider)));
+    expect(find.byType(Image), findsOneWidget);
+  });
+
+  testWidgets('Keeps stream alive when anmiations are disabled', (WidgetTester tester) async {
+    imageCache.maximumSize = 0;
+    final ui.Image image = (await tester.runAsync(() => createTestImage(cache: false)))!;
+    final _TestImageProvider provider = _TestImageProvider();
+    provider.complete(image);
+
+    bool disableAnimations = false;
+    late StateSetter setState;
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter localSetState) {
+          setState = localSetState;
+          return MediaQuery(
+            data: MediaQueryData(disableAnimations: disableAnimations),
+            child: Image(image: provider),
+          );
+        },
+      ),
+    );
+    expect(find.byType(Image), findsOneWidget);
+
+    setState(() {
+      disableAnimations = true;
+    });
+    await tester.pump();
+    expect(find.byType(Image), findsOneWidget);
+
+    setState(() {
+      disableAnimations = false;
+    });
+    await tester.pump();
     expect(find.byType(Image), findsOneWidget);
   });
 
