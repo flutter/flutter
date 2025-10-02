@@ -8,6 +8,7 @@ import static io.flutter.Build.API_LEVELS;
 
 import android.annotation.SuppressLint;
 import android.graphics.Insets;
+import android.os.Build;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowInsetsAnimation;
@@ -121,6 +122,71 @@ class ImeSyncDeferringInsetsCallback {
       super(WindowInsetsAnimation.Callback.DISPATCH_MODE_CONTINUE_ON_SUBTREE);
     }
 
+    // In class AnimationCallback
+
+    // In class AnimationCallback
+
+    private boolean shouldExcludeNavigationInserts(View view) {
+      // On modern APIs, we check if the window is laid out edge-to-edge.
+      // On older APIs, we fall back to the system UI flags.
+      if (Build.VERSION.SDK_INT >= API_LEVELS.API_30) {
+        // If isDrawingBehindNavBar is true, it means the app is edge-to-edge,
+        // so we should NOT exclude the navigation insets. The original method name
+        // is inverted, so we return the opposite of our check.
+        return !isDrawingBehindNavBar(view);
+      }
+
+      // Fallback for older APIs before WindowInsetsAnimation.Callback existed.
+      // This logic is retained for consistency with potential older code paths,
+      // even though this class is @RequiresApi(30).
+      return !isDrawingBehindNavBarLegacy(view);
+    }
+
+    /**
+     * Checks if the application is drawing behind the navigation bar on API 30+.
+     *
+     * <p>An app is considered edge-to-edge if the system is NOT applying a bottom inset for the
+     * navigation bar by default. This is controlled by `WindowCompat.setDecorFitsSystemWindows`.
+     * When `decorFitsSystemWindows` is false (edge-to-edge), the system does not add padding, and
+     * the navigation bar insets are passed to the app to handle.
+     */
+    @RequiresApi(API_LEVELS.API_30)
+    private boolean isDrawingBehindNavBar(View view) {
+      // The modern equivalent of the legacy UI flags is checking decorFitsSystemWindows.
+      // Since there's no direct getter, we can reliably infer this state by checking
+      // if the system is applying insets for the navigation bars.
+      WindowInsetsCompat insets = ViewCompat.getRootWindowInsets(view);
+      if (insets == null) {
+        // Cannot determine, assume not edge-to-edge as a safe default.
+        return false;
+      }
+      // If the system applies insets for navigation bars, it means decorFitsSystemWindows is true
+      // (the default, non-edge-to-edge behavior). We can check this by seeing if the insets
+      // consumed by the system at the navigation bar type are non-zero.
+      androidx.core.graphics.Insets navInsets =
+          insets.getInsets(WindowInsetsCompat.Type.navigationBars());
+      return navInsets.bottom > 0 || navInsets.top > 0 || navInsets.left > 0 || navInsets.right > 0;
+    }
+
+    /**
+     * Checks if the relevant system UI flags are set to indicate that the application is drawing
+     * behind the navigation bar (i.e., is in edge-to-edge mode for navigation).
+     */
+    @SuppressWarnings("deprecation")
+    private boolean isDrawingBehindNavBarLegacy(View view) {
+      int systemUiFlags = view.getWindowSystemUiVisibility();
+      // The app is considered to be drawing behind the navigation bar if either:
+      // 1. It has SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION set.
+      // 2. It has both LAYOUT_STABLE and LAYOUT_FULLSCREEN (a common combination for fullscreen
+      // apps).
+      boolean layoutHideNavigation =
+          (systemUiFlags & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0;
+      boolean layoutStable = (systemUiFlags & View.SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0;
+      boolean layoutFullscreen = (systemUiFlags & View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN) != 0;
+
+      return layoutHideNavigation || (layoutStable && layoutFullscreen);
+    }
+
     @Override
     public void onPrepare(WindowInsetsAnimation animation) {
       needsSave = true;
@@ -150,12 +216,9 @@ class ImeSyncDeferringInsetsCallback {
       // the navigation bar, this causes the IME insets to be too large during the animation.
       // To fix this, we subtract the navigationBars bottom inset if the system UI flags for laying
       // out behind the navigation bar aren't present.
+      // In class AnimationCallback, inside onProgress method:
       int excludedInsets = 0;
-      int systemUiFlags = view.getWindowSystemUiVisibility();
-      if (!((systemUiFlags & View.SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0
-              && (systemUiFlags & View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN) != 0)
-          && (systemUiFlags & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) == 0
-          && (systemUiFlags & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0) {
+      if (shouldExcludeNavigationInserts(view)) {
         excludedInsets = insets.getInsets(WindowInsets.Type.navigationBars()).bottom;
       }
 
