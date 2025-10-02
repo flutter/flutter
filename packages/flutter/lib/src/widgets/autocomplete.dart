@@ -111,53 +111,15 @@ enum OptionsViewOpenDirection {
 
   /// Open in the direction with the most available space within the overlay.
   ///
-  /// The available space for the options view is calculated based on the
-  /// size of the [Overlay] that contains the autocomplete widget,
-  /// not the visible screen space. This means the options view will be
-  /// constrained by any surrounding widgets that limit the overlay's bounds.
+  /// The available space for the options view is calculated based on the size
+  /// of the [Overlay] that contains the autocomplete widget, not the visible
+  /// screen space. This means the options view will be constrained by any
+  /// surrounding widgets that limit the overlay's bounds.
   ///
-  /// This is equivalent to using [RawAutocomplete.optionsViewOpenDirectionBuilder] with:
-  /// ```dart
-  /// (double spaceAbove, double spaceBelow) =>
-  ///     spaceAbove > spaceBelow
-  ///         ? OptionsViewOpenDirection.up
-  ///         : OptionsViewOpenDirection.down
-  /// ```
-  ///
-  /// Consider using [RawAutocomplete.optionsViewOpenDirectionBuilder] if you need more control
-  /// over the direction logic, such as minimum space requirements or different
-  /// thresholds for each direction.
+  /// If both directions have the same available space, the options view opens
+  /// downward.
   automatic,
 }
-
-/// A builder that determines the direction in which to open the options view
-/// based on the available space.
-///
-/// The [spaceAbove] and [spaceBelow] parameters represent the available space
-/// in logical pixels from the text field to the top and bottom edges of the
-/// overlay, respectively.
-///
-/// Return [OptionsViewOpenDirection.up] to open the options view above the
-/// text field, or [OptionsViewOpenDirection.down] to open it below.
-///
-/// Example:
-///
-/// ```dart
-/// optionsViewOpenDirectionBuilder: (double spaceAbove, double spaceBelow) {
-///   // Prefer opening up if there's at least 200 logical pixels of space
-///   if (spaceAbove >= 200) {
-///     return OptionsViewOpenDirection.up;
-///   }
-///   // Otherwise, open down if there's at least 100 logical pixels
-///   if (spaceBelow >= 100) {
-///     return OptionsViewOpenDirection.down;
-///   }
-///   // If there's not enough space in either direction, prefer opening up
-///   return OptionsViewOpenDirection.up;
-/// }
-/// ```
-typedef OptionsViewOpenDirectionBuilder =
-    OptionsViewOpenDirection Function(double spaceAbove, double spaceBelow);
 
 // TODO(justinmc): Mention AutocompleteCupertino when it is implemented.
 /// {@template flutter.widgets.RawAutocomplete.RawAutocomplete}
@@ -211,7 +173,6 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
     required this.optionsViewBuilder,
     required this.optionsBuilder,
     this.optionsViewOpenDirection = OptionsViewOpenDirection.down,
-    this.optionsViewOpenDirectionBuilder,
     this.displayStringForOption = defaultStringForOption,
     this.fieldViewBuilder,
     this.focusNode,
@@ -288,31 +249,9 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// {@template flutter.widgets.RawAutocomplete.optionsViewOpenDirection}
   /// Determines the direction in which to open the options view.
   ///
-  /// If [optionsViewOpenDirectionBuilder] is non-null, it will be used instead
-  /// of this value to determine the open direction.
-  ///
   /// Defaults to [OptionsViewOpenDirection.down].
   /// {@endtemplate}
   final OptionsViewOpenDirection optionsViewOpenDirection;
-
-  /// {@template flutter.widgets.RawAutocomplete.optionsViewOpenDirectionBuilder}
-  /// A builder that determines the direction in which to open the options view
-  /// based on the available space.
-  ///
-  /// If non-null, this overrides the [optionsViewOpenDirection] property.
-  ///
-  /// The parameters of the builder are:
-  /// * `spaceAbove`: The available space in logical pixels from the text field
-  ///   to the top edge of the overlay.
-  /// * `spaceBelow`: The available space in logical pixels from the text field
-  ///   to the bottom edge of the overlay.
-  ///
-  /// See also:
-  ///
-  ///  * [OptionsViewOpenDirection], for predefined open directions.
-  ///  * [OptionsViewOpenDirectionBuilder], for the signature of this builder.
-  /// {@endtemplate}
-  final OptionsViewOpenDirectionBuilder? optionsViewOpenDirectionBuilder;
 
   /// {@template flutter.widgets.RawAutocomplete.displayStringForOption}
   /// Returns the string to display in the field when the option is selected.
@@ -617,20 +556,11 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
 
     final double spaceAbove = -overlayRectInField.top;
     final double spaceBelow = overlayRectInField.bottom - fieldSize.height;
-    final bool opensUp;
-    if (widget.optionsViewOpenDirectionBuilder != null) {
-      // Use the builder if provided, which gives full control to the developer
-      opensUp =
-          widget.optionsViewOpenDirectionBuilder!(spaceAbove, spaceBelow) ==
-          OptionsViewOpenDirection.up;
-    } else {
-      // Fall back to the simple enum-based behavior
-      opensUp = switch (widget.optionsViewOpenDirection) {
-        OptionsViewOpenDirection.up => true,
-        OptionsViewOpenDirection.down => false,
-        OptionsViewOpenDirection.automatic => spaceAbove > spaceBelow,
-      };
-    }
+    final bool opensUp = switch (widget.optionsViewOpenDirection) {
+      OptionsViewOpenDirection.up => true,
+      OptionsViewOpenDirection.down => false,
+      OptionsViewOpenDirection.automatic => spaceAbove > spaceBelow,
+    };
 
     final double optionsViewMaxHeight = opensUp
         ? -overlayRectInField.top
