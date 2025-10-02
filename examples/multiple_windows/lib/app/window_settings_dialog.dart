@@ -35,6 +35,8 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
   final TextEditingController _regularWidthController = TextEditingController();
   final TextEditingController _regularHeightController =
       TextEditingController();
+  final TextEditingController _dialogWidthController = TextEditingController();
+  final TextEditingController _dialogHeightController = TextEditingController();
 
   @override
   void initState() {
@@ -42,6 +44,8 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
     _regularWidthController.text = widget.settings.regularSize.width.toString();
     _regularHeightController.text = widget.settings.regularSize.height
         .toString();
+    _dialogWidthController.text = widget.settings.dialogSize.width.toString();
+    _dialogHeightController.text = widget.settings.dialogSize.height.toString();
   }
 
   @override
@@ -73,6 +77,28 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
             ],
           ),
         ),
+        ListTile(
+          title: const Text('Dialog'),
+          subtitle: Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: _dialogWidthController,
+                  decoration: const InputDecoration(labelText: 'Initial width'),
+                ),
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: TextFormField(
+                  controller: _dialogHeightController,
+                  decoration: const InputDecoration(
+                    labelText: 'Initial height',
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: TextButton(
@@ -82,6 +108,12 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
                     widget.settings.regularSize.width,
                 double.tryParse(_regularHeightController.text) ??
                     widget.settings.regularSize.height,
+              );
+              widget.settings.dialogSize = Size(
+                double.tryParse(_dialogWidthController.text) ??
+                    widget.settings.dialogSize.width,
+                double.tryParse(_dialogHeightController.text) ??
+                    widget.settings.dialogSize.height,
               );
               widget.onClose();
             },

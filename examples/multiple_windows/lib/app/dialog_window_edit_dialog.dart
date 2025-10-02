@@ -8,53 +8,47 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/_window.dart';
 
-void showRegularWindowEditDialog({
+void showDialogWindowEditDialog({
   required BuildContext context,
-  required RegularWindowController controller,
+  required DialogWindowController controller,
 }) {
   showDialog(
     context: context,
-    builder: (context) => _RegularWindowEditDialog(
+    builder: (context) => _DialogWindowEditDialog(
       controller: controller,
       onClose: () => Navigator.pop(context),
     ),
   );
 }
 
-class _RegularWindowEditDialog extends StatefulWidget {
-  const _RegularWindowEditDialog({
+class _DialogWindowEditDialog extends StatefulWidget {
+  const _DialogWindowEditDialog({
     required this.controller,
     required this.onClose,
   });
 
-  final RegularWindowController controller;
+  final DialogWindowController controller;
   final VoidCallback onClose;
 
   @override
-  State<StatefulWidget> createState() => _RegularWindowEditDialogState();
+  State<StatefulWidget> createState() => _DialogWindowEditDialogState();
 }
 
-class _RegularWindowEditDialogState extends State<_RegularWindowEditDialog> {
+class _DialogWindowEditDialogState extends State<_DialogWindowEditDialog> {
   late Size initialSize;
   late String initialTitle;
-  late bool initialFullscreen;
-  late bool initialMaximized;
   late bool initialMinimized;
 
   late final TextEditingController widthController;
   late final TextEditingController heightController;
   late final TextEditingController titleController;
 
-  bool? nextIsFullscreen;
-  bool? nextIsMaximized;
   bool? nextIsMinimized;
 
   void _init() {
     widget.controller.addListener(_onNotification);
     initialSize = widget.controller.contentSize;
     initialTitle = widget.controller.title;
-    initialFullscreen = widget.controller.isFullscreen;
-    initialMaximized = widget.controller.isMaximized;
     initialMinimized = widget.controller.isMinimized;
 
     widthController = TextEditingController(text: initialSize.width.toString());
@@ -62,8 +56,6 @@ class _RegularWindowEditDialogState extends State<_RegularWindowEditDialog> {
       text: initialSize.height.toString(),
     );
     titleController = TextEditingController(text: initialTitle);
-    nextIsFullscreen = null;
-    nextIsMaximized = null;
     nextIsMinimized = null;
   }
 
@@ -74,7 +66,7 @@ class _RegularWindowEditDialogState extends State<_RegularWindowEditDialog> {
   }
 
   @override
-  void didUpdateWidget(covariant _RegularWindowEditDialog oldWidget) {
+  void didUpdateWidget(covariant _DialogWindowEditDialog oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller) {
       oldWidget.controller.removeListener(_onNotification);
@@ -90,18 +82,6 @@ class _RegularWindowEditDialogState extends State<_RegularWindowEditDialog> {
       initialSize = widget.controller.contentSize;
       widthController.text = widget.controller.contentSize.width.toString();
       heightController.text = widget.controller.contentSize.height.toString();
-    }
-    if (widget.controller.isFullscreen != initialFullscreen) {
-      setState(() {
-        initialFullscreen = widget.controller.isFullscreen;
-        nextIsFullscreen = null;
-      });
-    }
-    if (widget.controller.isMaximized != initialMaximized) {
-      setState(() {
-        initialMaximized = widget.controller.isMaximized;
-        nextIsMaximized = null;
-      });
     }
     if (widget.controller.isMinimized != initialMinimized) {
       setState(() {
@@ -132,12 +112,6 @@ class _RegularWindowEditDialogState extends State<_RegularWindowEditDialog> {
     if (title != null && title != initialTitle) {
       widget.controller.setTitle(title);
     }
-    if (nextIsFullscreen != null && nextIsFullscreen != initialFullscreen) {
-      widget.controller.setFullscreen(nextIsFullscreen!);
-    }
-    if (nextIsMaximized != null && nextIsMaximized != initialMaximized) {
-      widget.controller.setMaximized(nextIsMaximized!);
-    }
     if (nextIsMinimized != null && nextIsMinimized != initialMinimized) {
       widget.controller.setMinimized(nextIsMinimized!);
     }
@@ -167,24 +141,6 @@ class _RegularWindowEditDialogState extends State<_RegularWindowEditDialog> {
             decoration: InputDecoration(labelText: 'Title'),
           ),
           CheckboxListTile(
-            title: const Text('Fullscreen'),
-            value: nextIsFullscreen ?? initialFullscreen,
-            onChanged: (bool? value) {
-              if (value != null) {
-                setState(() => nextIsFullscreen = value);
-              }
-            },
-          ),
-          CheckboxListTile(
-            title: const Text('Maximized'),
-            value: nextIsMaximized ?? initialMaximized,
-            onChanged: (bool? value) {
-              if (value != null) {
-                setState(() => nextIsMaximized = value);
-              }
-            },
-          ),
-          CheckboxListTile(
             title: const Text('Minimized'),
             value: nextIsMinimized ?? initialMinimized,
             onChanged: (bool? value) {
@@ -196,8 +152,8 @@ class _RegularWindowEditDialogState extends State<_RegularWindowEditDialog> {
         ],
       ),
       actions: [
-        TextButton(onPressed: () => widget.onClose(), child: Text('Cancel')),
-        TextButton(onPressed: () => _onSave(), child: Text('Save')),
+        TextButton(onPressed: widget.onClose, child: Text('Cancel')),
+        TextButton(onPressed: _onSave, child: Text('Save')),
       ],
     );
   }
