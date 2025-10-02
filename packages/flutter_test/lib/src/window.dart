@@ -124,7 +124,12 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
 class FakeViewPadding implements ViewPadding {
   /// Instantiates a new [FakeViewPadding] object for faking insets and padding
   /// during tests.
-  const FakeViewPadding({this.left = 0.0, this.top = 0.0, this.right = 0.0, this.bottom = 0.0});
+  const FakeViewPadding({
+    this.left = 0.0,
+    this.top = 0.0,
+    this.right = 0.0,
+    this.bottom = 0.0,
+  });
 
   FakeViewPadding._wrap(ViewPadding base)
     : left = base.left,
@@ -195,7 +200,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
-  ViewFocusChangeCallback? get onViewFocusChange => _platformDispatcher.onViewFocusChange;
+  ViewFocusChangeCallback? get onViewFocusChange =>
+      _platformDispatcher.onViewFocusChange;
   ViewFocusChangeCallback? _onViewFocusChange;
   @override
   set onViewFocusChange(ViewFocusChangeCallback? callback) {
@@ -251,8 +257,14 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     required ViewFocusState state,
     required ViewFocusDirection direction,
   }) {
-    _testFocusEvents.add(ViewFocusEvent(viewId: viewId, state: state, direction: direction));
-    _platformDispatcher.requestViewFocusChange(viewId: viewId, state: state, direction: direction);
+    _testFocusEvents.add(
+      ViewFocusEvent(viewId: viewId, state: state, direction: direction),
+    );
+    _platformDispatcher.requestViewFocusChange(
+      viewId: viewId,
+      state: state,
+      direction: direction,
+    );
   }
 
   @override
@@ -312,7 +324,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
-  double get textScaleFactor => _textScaleFactorTestValue ?? _platformDispatcher.textScaleFactor;
+  double get textScaleFactor =>
+      _textScaleFactorTestValue ?? _platformDispatcher.textScaleFactor;
   double? _textScaleFactorTestValue;
 
   /// Hides the real text scale factor and reports the given
@@ -331,14 +344,16 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
-  double scaleFontSize(double unscaledFontSize) => textScaleFactor * unscaledFontSize;
+  double scaleFontSize(double unscaledFontSize) =>
+      textScaleFactor * unscaledFontSize;
 
   @override
   Brightness get platformBrightness =>
       _platformBrightnessTestValue ?? _platformDispatcher.platformBrightness;
   Brightness? _platformBrightnessTestValue;
   @override
-  VoidCallback? get onPlatformBrightnessChanged => _platformDispatcher.onPlatformBrightnessChanged;
+  VoidCallback? get onPlatformBrightnessChanged =>
+      _platformDispatcher.onPlatformBrightnessChanged;
   @override
   set onPlatformBrightnessChanged(VoidCallback? callback) {
     _platformDispatcher.onPlatformBrightnessChanged = callback;
@@ -361,7 +376,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
 
   @override
   bool get alwaysUse24HourFormat =>
-      _alwaysUse24HourFormatTestValue ?? _platformDispatcher.alwaysUse24HourFormat;
+      _alwaysUse24HourFormatTestValue ??
+      _platformDispatcher.alwaysUse24HourFormat;
   bool? _alwaysUse24HourFormatTestValue;
 
   /// Hides the real clock format and reports the given
@@ -378,7 +394,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
-  VoidCallback? get onTextScaleFactorChanged => _platformDispatcher.onTextScaleFactorChanged;
+  VoidCallback? get onTextScaleFactorChanged =>
+      _platformDispatcher.onTextScaleFactorChanged;
   @override
   set onTextScaleFactorChanged(VoidCallback? callback) {
     _platformDispatcher.onTextScaleFactorChanged = callback;
@@ -390,8 +407,11 @@ class TestPlatformDispatcher implements PlatformDispatcher {
       _platformDispatcher.nativeSpellCheckServiceDefined;
   bool? _nativeSpellCheckServiceDefinedTestValue;
   // ignore: avoid_setters_without_getters
-  set nativeSpellCheckServiceDefinedTestValue(bool nativeSpellCheckServiceDefinedTestValue) {
-    _nativeSpellCheckServiceDefinedTestValue = nativeSpellCheckServiceDefinedTestValue;
+  set nativeSpellCheckServiceDefinedTestValue(
+    bool nativeSpellCheckServiceDefinedTestValue,
+  ) {
+    _nativeSpellCheckServiceDefinedTestValue =
+        nativeSpellCheckServiceDefinedTestValue;
   }
 
   /// Deletes existing value that determines whether or not a native spell check
@@ -402,7 +422,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
 
   @override
   bool get supportsShowingSystemContextMenu =>
-      _supportsShowingSystemContextMenu ?? _platformDispatcher.supportsShowingSystemContextMenu;
+      _supportsShowingSystemContextMenu ??
+      _platformDispatcher.supportsShowingSystemContextMenu;
   bool? _supportsShowingSystemContextMenu;
   set supportsShowingSystemContextMenu(bool value) {
     _supportsShowingSystemContextMenu = value;
@@ -431,22 +452,83 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
-  TypographySettings get typographySettings =>
-      _typographySettingsTestValue ?? _platformDispatcher.typographySettings;
-  TypographySettings? _typographySettingsTestValue;
+  double get lineHeightScaleFactor =>
+      _lineHeightScaleFactorTestValue ??
+      _platformDispatcher.lineHeightScaleFactor;
+  double? _lineHeightScaleFactorTestValue;
 
-  /// Hides the real typography settings and reports the given
-  /// [typographySettings] instead.
+  /// Hides the real line height scale factor and reports the given
+  /// [lineHeightScaleFactorTestValue] instead.
   // ignore: avoid_setters_without_getters
-  set typographySettingsTestValue(TypographySettings typographySettingsTestValue) {
-    _typographySettingsTestValue = typographySettingsTestValue;
+  set lineHeightScaleFactorTestValue(double lineHeightScaleFactorTestValue) {
+    _lineHeightScaleFactorTestValue = lineHeightScaleFactorTestValue;
     onMetricsChanged?.call();
   }
 
-  /// Deletes any existing test typography settings and returns to using the
-  /// real accessibility features.
-  void clearTypographySettingsTestValue() {
-    _typographySettingsTestValue = null;
+  /// Deletes any existing test line height scale factor and returns to using
+  /// the real line height scale factor.
+  void clearLineHeightScaleFactorTestValue() {
+    _lineHeightScaleFactorTestValue = null;
+    onMetricsChanged?.call();
+  }
+
+  @override
+  double get letterSpacing =>
+      _letterSpacingTestValue ?? _platformDispatcher.letterSpacing;
+  double? _letterSpacingTestValue;
+
+  /// Hides the real letter spacing and reports the given
+  /// [letterSpacingTestValue] instead.
+  /// ignore: avoid_setters_without_getters
+  set letterSpacingTestValue(double letterSpacingTestValue) {
+    _letterSpacingTestValue = letterSpacingTestValue;
+    onMetricsChanged?.call();
+  }
+
+  /// Deletes any existing test letter spacing and returns to using the real
+  /// letter spacing.
+  void clearLetterSpacingTestValue() {
+    _letterSpacingTestValue = null;
+    onMetricsChanged?.call();
+  }
+
+  @override
+  double get wordSpacing =>
+      _wordSpacingTestValue ?? _platformDispatcher.wordSpacing;
+  double? _wordSpacingTestValue;
+
+  /// Hides the real word spacing and reports the given
+  /// [wordSpacingTestValue] instead.
+  /// ignore: avoid_setters_without_getters
+  set wordSpacingTestValue(double wordSpacingTestValue) {
+    _wordSpacingTestValue = wordSpacingTestValue;
+    onMetricsChanged?.call();
+  }
+
+  /// Deletes any existing test word spacing and returns to using the real
+  /// word spacing.
+  void clearWordSpacingTestValue() {
+    _wordSpacingTestValue = null;
+    onMetricsChanged?.call();
+  }
+
+  @override
+  double get paragraphSpacing =>
+      _paragraphSpacingTestValue ?? _platformDispatcher.paragraphSpacing;
+  double? _paragraphSpacingTestValue;
+
+  /// Hides the real paragraph spacing and reports the given
+  /// [paragraphSpacingTestValue] instead.
+  /// ignore: avoid_setters_without_getters
+  set paragraphSpacingTestValue(double paragraphSpacingTestValue) {
+    _paragraphSpacingTestValue = paragraphSpacingTestValue;
+    onMetricsChanged?.call();
+  }
+
+  /// Deletes any existing test paragraph spacing and returns to using the real
+  /// paragraph spacing.
+  void clearParagraphSpacingTestValue() {
+    _paragraphSpacingTestValue = null;
     onMetricsChanged?.call();
   }
 
@@ -472,14 +554,16 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
-  PointerDataPacketCallback? get onPointerDataPacket => _platformDispatcher.onPointerDataPacket;
+  PointerDataPacketCallback? get onPointerDataPacket =>
+      _platformDispatcher.onPointerDataPacket;
   @override
   set onPointerDataPacket(PointerDataPacketCallback? callback) {
     _platformDispatcher.onPointerDataPacket = callback;
   }
 
   @override
-  String get defaultRouteName => _defaultRouteNameTestValue ?? _platformDispatcher.defaultRouteName;
+  String get defaultRouteName =>
+      _defaultRouteNameTestValue ?? _platformDispatcher.defaultRouteName;
   String? _defaultRouteNameTestValue;
 
   /// Hides the real default route name and reports the given
@@ -501,7 +585,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
-  bool get semanticsEnabled => _semanticsEnabledTestValue ?? _platformDispatcher.semanticsEnabled;
+  bool get semanticsEnabled =>
+      _semanticsEnabledTestValue ?? _platformDispatcher.semanticsEnabled;
   bool? _semanticsEnabledTestValue;
 
   /// The application locale set during the test.
@@ -528,7 +613,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
-  VoidCallback? get onSemanticsEnabledChanged => _platformDispatcher.onSemanticsEnabledChanged;
+  VoidCallback? get onSemanticsEnabledChanged =>
+      _platformDispatcher.onSemanticsEnabledChanged;
   @override
   set onSemanticsEnabledChanged(VoidCallback? callback) {
     _platformDispatcher.onSemanticsEnabledChanged = callback;
@@ -544,7 +630,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
 
   @override
   AccessibilityFeatures get accessibilityFeatures =>
-      _accessibilityFeaturesTestValue ?? _platformDispatcher.accessibilityFeatures;
+      _accessibilityFeaturesTestValue ??
+      _platformDispatcher.accessibilityFeatures;
   AccessibilityFeatures? _accessibilityFeaturesTestValue;
 
   /// Hides the real accessibility features and reports the given
@@ -553,7 +640,9 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   /// Consider using [FakeAccessibilityFeatures] to provide specific
   /// values for the various accessibility features under test.
   // ignore: avoid_setters_without_getters
-  set accessibilityFeaturesTestValue(AccessibilityFeatures accessibilityFeaturesTestValue) {
+  set accessibilityFeaturesTestValue(
+    AccessibilityFeatures accessibilityFeaturesTestValue,
+  ) {
     _accessibilityFeaturesTestValue = accessibilityFeaturesTestValue;
     onAccessibilityFeaturesChanged?.call();
   }
@@ -579,7 +668,11 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
-  void sendPlatformMessage(String name, ByteData? data, PlatformMessageResponseCallback? callback) {
+  void sendPlatformMessage(
+    String name,
+    ByteData? data,
+    PlatformMessageResponseCallback? callback,
+  ) {
     _platformDispatcher.sendPlatformMessage(name, data, callback);
   }
 
@@ -606,7 +699,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
-  VoidCallback? get onFrameDataChanged => _platformDispatcher.onFrameDataChanged;
+  VoidCallback? get onFrameDataChanged =>
+      _platformDispatcher.onFrameDataChanged;
   @override
   set onFrameDataChanged(VoidCallback? value) {
     _platformDispatcher.onFrameDataChanged = value;
@@ -625,8 +719,11 @@ class TestPlatformDispatcher implements PlatformDispatcher {
       _platformDispatcher.onPlatformConfigurationChanged;
 
   @override
-  set onPlatformConfigurationChanged(VoidCallback? onPlatformConfigurationChanged) {
-    _platformDispatcher.onPlatformConfigurationChanged = onPlatformConfigurationChanged;
+  set onPlatformConfigurationChanged(
+    VoidCallback? onPlatformConfigurationChanged,
+  ) {
+    _platformDispatcher.onPlatformConfigurationChanged =
+        onPlatformConfigurationChanged;
   }
 
   @override
@@ -634,7 +731,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
       _platformDispatcher.computePlatformResolvedLocale(supportedLocales);
 
   @override
-  ByteData? getPersistentIsolateData() => _platformDispatcher.getPersistentIsolateData();
+  ByteData? getPersistentIsolateData() =>
+      _platformDispatcher.getPersistentIsolateData();
 
   @override
   Iterable<TestFlutterView> get views => _testViews.values;
@@ -696,7 +794,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
-  VoidCallback? get onSystemFontFamilyChanged => _platformDispatcher.onSystemFontFamilyChanged;
+  VoidCallback? get onSystemFontFamilyChanged =>
+      _platformDispatcher.onSystemFontFamilyChanged;
   @override
   set onSystemFontFamilyChanged(VoidCallback? value) {
     _platformDispatcher.onSystemFontFamilyChanged = value;
@@ -822,7 +921,8 @@ class TestFlutterView implements FlutterView {
   ///   * [resetDevicePixelRatio] to reset this value specifically
   ///   * [reset] to reset all test values for this view
   @override
-  double get devicePixelRatio => _display._devicePixelRatio ?? _view.devicePixelRatio;
+  double get devicePixelRatio =>
+      _display._devicePixelRatio ?? _view.devicePixelRatio;
   set devicePixelRatio(double value) {
     _display.devicePixelRatio = value;
   }
@@ -847,7 +947,8 @@ class TestFlutterView implements FlutterView {
   ///   * [resetDisplayFeatures] to reset this value specifically
   ///   * [reset] to reset all test values for this view
   @override
-  List<DisplayFeature> get displayFeatures => _displayFeatures ?? _view.displayFeatures;
+  List<DisplayFeature> get displayFeatures =>
+      _displayFeatures ?? _view.displayFeatures;
   List<DisplayFeature>? _displayFeatures;
   set displayFeatures(List<DisplayFeature> value) {
     _displayFeatures = value;
@@ -873,7 +974,8 @@ class TestFlutterView implements FlutterView {
   ///   * [resetPadding] to reset this value specifically.
   ///   * [reset] to reset all test values for this view.
   @override
-  FakeViewPadding get padding => _padding ?? FakeViewPadding._wrap(_view.padding);
+  FakeViewPadding get padding =>
+      _padding ?? FakeViewPadding._wrap(_view.padding);
   FakeViewPadding? _padding;
   set padding(FakeViewPadding value) {
     _padding = value;
@@ -928,7 +1030,8 @@ class TestFlutterView implements FlutterView {
   ///   * [physicalConstraints] to reset this value specifically
   ///   * [reset] to reset all test values for this view
   @override
-  ViewConstraints get physicalConstraints => _physicalConstraints ?? _view.physicalConstraints;
+  ViewConstraints get physicalConstraints =>
+      _physicalConstraints ?? _view.physicalConstraints;
   ViewConstraints? _physicalConstraints;
   set physicalConstraints(ViewConstraints value) {
     _physicalConstraints = value;
@@ -981,7 +1084,8 @@ class TestFlutterView implements FlutterView {
   ///   * [resetViewInsets] to reset this value specifically
   ///   * [reset] to reset all test values for this view
   @override
-  FakeViewPadding get viewInsets => _viewInsets ?? FakeViewPadding._wrap(_view.viewInsets);
+  FakeViewPadding get viewInsets =>
+      _viewInsets ?? FakeViewPadding._wrap(_view.viewInsets);
   FakeViewPadding? _viewInsets;
   set viewInsets(FakeViewPadding value) {
     _viewInsets = value;
@@ -1007,7 +1111,8 @@ class TestFlutterView implements FlutterView {
   ///   * [resetViewPadding] to reset this value specifically
   ///   * [reset] to reset all test values for this view
   @override
-  FakeViewPadding get viewPadding => _viewPadding ?? FakeViewPadding._wrap(_view.viewPadding);
+  FakeViewPadding get viewPadding =>
+      _viewPadding ?? FakeViewPadding._wrap(_view.viewPadding);
   FakeViewPadding? _viewPadding;
   set viewPadding(FakeViewPadding value) {
     _viewPadding = value;
@@ -1032,7 +1137,8 @@ class TestFlutterView implements FlutterView {
   ///   * [resetGestureSettings] to reset this value specifically
   ///   * [reset] to reset all test values for this view
   @override
-  GestureSettings get gestureSettings => _gestureSettings ?? _view.gestureSettings;
+  GestureSettings get gestureSettings =>
+      _gestureSettings ?? _view.gestureSettings;
   GestureSettings? _gestureSettings;
   set gestureSettings(GestureSettings value) {
     _gestureSettings = value;
@@ -1305,7 +1411,9 @@ class TestWindow implements SingletonFlutterWindow {
     'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   TestWindow({required SingletonFlutterWindow window})
-    : platformDispatcher = TestPlatformDispatcher(platformDispatcher: window.platformDispatcher);
+    : platformDispatcher = TestPlatformDispatcher(
+        platformDispatcher: window.platformDispatcher,
+      );
 
   /// Constructs a [TestWindow] that defers all behavior to the given
   /// [TestPlatformDispatcher] and its [TestPlatformDispatcher.implicitView].
@@ -1425,7 +1533,9 @@ class TestWindow implements SingletonFlutterWindow {
   )
   // ignore: avoid_setters_without_getters
   set viewInsetsTestValue(ViewPadding value) {
-    _view.viewInsets = value is FakeViewPadding ? value : FakeViewPadding._wrap(value);
+    _view.viewInsets = value is FakeViewPadding
+        ? value
+        : FakeViewPadding._wrap(value);
   }
 
   /// Deletes any existing test view insets and returns to using the real view
@@ -1458,7 +1568,9 @@ class TestWindow implements SingletonFlutterWindow {
   )
   // ignore: avoid_setters_without_getters
   set viewPaddingTestValue(ViewPadding value) {
-    _view.viewPadding = value is FakeViewPadding ? value : FakeViewPadding._wrap(value);
+    _view.viewPadding = value is FakeViewPadding
+        ? value
+        : FakeViewPadding._wrap(value);
   }
 
   /// Deletes any existing test view padding and returns to using the real
@@ -1490,7 +1602,9 @@ class TestWindow implements SingletonFlutterWindow {
   )
   // ignore: avoid_setters_without_getters
   set paddingTestValue(ViewPadding value) {
-    _view.padding = value is FakeViewPadding ? value : FakeViewPadding._wrap(value);
+    _view.padding = value is FakeViewPadding
+        ? value
+        : FakeViewPadding._wrap(value);
   }
 
   /// Deletes any existing test padding and returns to using the real padding.
@@ -1580,7 +1694,9 @@ class TestWindow implements SingletonFlutterWindow {
   )
   // ignore: avoid_setters_without_getters
   set systemGestureInsetsTestValue(ViewPadding value) {
-    _view.systemGestureInsets = value is FakeViewPadding ? value : FakeViewPadding._wrap(value);
+    _view.systemGestureInsets = value is FakeViewPadding
+        ? value
+        : FakeViewPadding._wrap(value);
   }
 
   /// Deletes any existing test system gesture insets and returns to using the real system gesture insets.
@@ -1672,7 +1788,8 @@ class TestWindow implements SingletonFlutterWindow {
     'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
-  VoidCallback? get onPlatformBrightnessChanged => platformDispatcher.onPlatformBrightnessChanged;
+  VoidCallback? get onPlatformBrightnessChanged =>
+      platformDispatcher.onPlatformBrightnessChanged;
   @Deprecated(
     'Use WidgetTester.platformDispatcher.onPlatformBrightnessChanged instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
@@ -1697,7 +1814,8 @@ class TestWindow implements SingletonFlutterWindow {
     'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
-  VoidCallback? get onTextScaleFactorChanged => platformDispatcher.onTextScaleFactorChanged;
+  VoidCallback? get onTextScaleFactorChanged =>
+      platformDispatcher.onTextScaleFactorChanged;
   @Deprecated(
     'Use WidgetTester.platformDispatcher.onTextScaleFactorChanged instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
@@ -1714,14 +1832,17 @@ class TestWindow implements SingletonFlutterWindow {
     'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
-  bool get nativeSpellCheckServiceDefined => platformDispatcher.nativeSpellCheckServiceDefined;
+  bool get nativeSpellCheckServiceDefined =>
+      platformDispatcher.nativeSpellCheckServiceDefined;
   @Deprecated(
     'Use WidgetTester.platformDispatcher.nativeSpellCheckServiceDefinedTestValue instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
     'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   // ignore: avoid_setters_without_getters
-  set nativeSpellCheckServiceDefinedTestValue(bool nativeSpellCheckServiceDefinedTestValue) {
+  set nativeSpellCheckServiceDefinedTestValue(
+    bool nativeSpellCheckServiceDefinedTestValue,
+  ) {
     platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
         nativeSpellCheckServiceDefinedTestValue;
   }
@@ -1791,7 +1912,8 @@ class TestWindow implements SingletonFlutterWindow {
     'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
-  PointerDataPacketCallback? get onPointerDataPacket => platformDispatcher.onPointerDataPacket;
+  PointerDataPacketCallback? get onPointerDataPacket =>
+      platformDispatcher.onPointerDataPacket;
   @Deprecated(
     'Use WidgetTester.platformDispatcher.onPointerDataPacket instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
@@ -1844,7 +1966,8 @@ class TestWindow implements SingletonFlutterWindow {
     'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
-  VoidCallback? get onSemanticsEnabledChanged => platformDispatcher.onSemanticsEnabledChanged;
+  VoidCallback? get onSemanticsEnabledChanged =>
+      platformDispatcher.onSemanticsEnabledChanged;
   @Deprecated(
     'Use WidgetTester.platformDispatcher.onSemanticsEnabledChanged instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
@@ -1861,7 +1984,8 @@ class TestWindow implements SingletonFlutterWindow {
     'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
-  AccessibilityFeatures get accessibilityFeatures => platformDispatcher.accessibilityFeatures;
+  AccessibilityFeatures get accessibilityFeatures =>
+      platformDispatcher.accessibilityFeatures;
 
   @Deprecated(
     'Use WidgetTester.platformDispatcher.onAccessibilityFeaturesChanged instead. '
@@ -1907,7 +2031,11 @@ class TestWindow implements SingletonFlutterWindow {
     'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
-  void sendPlatformMessage(String name, ByteData? data, PlatformMessageResponseCallback? callback) {
+  void sendPlatformMessage(
+    String name,
+    ByteData? data,
+    PlatformMessageResponseCallback? callback,
+  ) {
     platformDispatcher.sendPlatformMessage(name, data, callback);
   }
 
@@ -1974,7 +2102,8 @@ class TestWindow implements SingletonFlutterWindow {
     'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
-  VoidCallback? get onSystemFontFamilyChanged => platformDispatcher.onSystemFontFamilyChanged;
+  VoidCallback? get onSystemFontFamilyChanged =>
+      platformDispatcher.onSystemFontFamilyChanged;
   @Deprecated(
     'Use WidgetTester.platformDispatcher.onSystemFontFamilyChanged instead. '
     'Deprecated to prepare for the upcoming multi-window support. '

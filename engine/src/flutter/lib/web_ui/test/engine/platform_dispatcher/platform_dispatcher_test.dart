@@ -315,19 +315,21 @@ void testMain() {
         isCalled = true;
       };
 
-      const ui.TypographySettings expectedTypographySettings = ui.TypographySettings(
-        lineHeight: 2.0,
-        letterSpacing: 1.0,
-        wordSpacing: 4.0,
-        paragraphSpacing: 10.0,
-      );
+      const double expectedLineHeightScaleFactor = 2.0;
+      const double expectedLetterSpacing = 1.0;
+      const double expectedWordSpacing = 4.0;
+      const double expectedParagraphSpacing = 10.0;
+
       style.text =
           'html *{ line-height: 2 !important; word-spacing: 4px !important; letter-spacing: 1px !important; margin-bottom: 10px !important; }';
       root.append(style);
       await waitForResizeObserver();
       expect(root.contains(style), isTrue);
       expect(isCalled, isTrue);
-      expect(ui.PlatformDispatcher.instance.typographySettings, expectedTypographySettings);
+      expect(ui.PlatformDispatcher.instance.lineHeightScaleFactor, expectedLineHeightScaleFactor);
+      expect(ui.PlatformDispatcher.instance.letterSpacing, expectedLetterSpacing);
+      expect(ui.PlatformDispatcher.instance.wordSpacing, expectedWordSpacing);
+      expect(ui.PlatformDispatcher.instance.paragraphSpacing, expectedParagraphSpacing);
 
       isCalled = false;
 
@@ -335,7 +337,10 @@ void testMain() {
       await waitForResizeObserver();
       expect(root.contains(style), isFalse);
       expect(isCalled, isTrue);
-      expect(ui.PlatformDispatcher.instance.typographySettings, const ui.TypographySettings());
+      expect(ui.PlatformDispatcher.instance.lineHeightScaleFactor, 1.0);
+      expect(ui.PlatformDispatcher.instance.letterSpacing, 0.0);
+      expect(ui.PlatformDispatcher.instance.wordSpacing, 0.0);
+      expect(ui.PlatformDispatcher.instance.paragraphSpacing, 0.0);
 
       isCalled = false;
 
@@ -343,7 +348,10 @@ void testMain() {
       await waitForResizeObserver();
       expect(root.contains(style), isTrue);
       expect(isCalled, isTrue);
-      expect(ui.PlatformDispatcher.instance.typographySettings, expectedTypographySettings);
+      expect(ui.PlatformDispatcher.instance.lineHeightScaleFactor, expectedLineHeightScaleFactor);
+      expect(ui.PlatformDispatcher.instance.letterSpacing, expectedLetterSpacing);
+      expect(ui.PlatformDispatcher.instance.wordSpacing, expectedWordSpacing);
+      expect(ui.PlatformDispatcher.instance.paragraphSpacing, expectedParagraphSpacing);
     });
 
     test('disposes all its views', () {
