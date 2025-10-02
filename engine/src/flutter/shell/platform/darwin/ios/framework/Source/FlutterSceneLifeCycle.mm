@@ -328,6 +328,28 @@ FLUTTER_ASSERT_ARC
                 }];
   return YES;
 }
+
++ (FlutterPluginSceneLifeCycleDelegate*)fromScene:(UIScene*)scene {
+  if ([scene.delegate conformsToProtocol:@protocol(FlutterSceneLifeCycleProvider)]) {
+    NSObject<FlutterSceneLifeCycleProvider>* sceneProvider =
+        (NSObject<FlutterSceneLifeCycleProvider>*)scene.delegate;
+    return sceneProvider.sceneLifeCycleDelegate;
+  }
+
+  // When embedded in a SwiftUI app, the scene delegate does not conform to
+  // FlutterSceneLifeCycleProvider even if it does. However, after force casting it,
+  // selectors respond and can be used.
+  NSObject<FlutterSceneLifeCycleProvider>* sceneProvider =
+      (NSObject<FlutterSceneLifeCycleProvider>*)scene.delegate;
+  if ([sceneProvider respondsToSelector:@selector(sceneLifeCycleDelegate)]) {
+    id sceneLifeCycleDelegate = sceneProvider.sceneLifeCycleDelegate;
+    // Double check that the selector is the expected class.
+    if ([sceneLifeCycleDelegate isKindOfClass:[FlutterPluginSceneLifeCycleDelegate class]]) {
+      return (FlutterPluginSceneLifeCycleDelegate*)sceneLifeCycleDelegate;
+    }
+  }
+  return nil;
+}
 @end
 
 @implementation FlutterEnginePluginSceneLifeCycleDelegate {
@@ -362,11 +384,10 @@ FLUTTER_ASSERT_ARC
   for (NSObject<FlutterSceneLifeCycleDelegate>* delegate in _delegates.allObjects) {
     if ([delegate respondsToSelector:_cmd]) {
       // If this event has already been consumed by a plugin, send the event with nil options.
-      if (handledByPlugin) {
-        [delegate scene:scene willConnectToSession:session options:nil];
-        continue;
-      } else if ([delegate scene:scene willConnectToSession:session options:connectionOptions]) {
-        // Only allow one plugin to process this event.
+      // Only allow one plugin to process the connection options.
+      if ([delegate scene:scene
+              willConnectToSession:session
+                           options:(handledByPlugin ? nil : connectionOptions)]) {
         handledByPlugin = YES;
       }
     }
