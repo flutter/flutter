@@ -6,6 +6,24 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 
+/// Context information provided when resolving an [ImageFilterConfig].
+///
+///  See also:
+///  * [ImageFilterConfig.resolve], which takes an [ImageFilterContext] to create
+///   a [ui.ImageFilter].
+@immutable
+class ImageFilterContext {
+  /// Creates an [ImageFilterContext].
+  const ImageFilterContext({required this.bounds});
+
+  /// The bounds to apply the filter, in the local coordinate of the current
+  /// canvas state.
+  ///
+  /// This is typically the bounds of the widget or render object applying the
+  /// filter.
+  final ui.Rect bounds;
+}
+
 /// A configuration for a [ui.ImageFilter].
 ///
 /// This class provides a framework-level abstraction for image filters that can
@@ -15,9 +33,9 @@ import 'package:flutter/foundation.dart';
 /// time, allowing them to incorporate layout-dependent information such as the
 /// widget's bounds.
 ///
-/// Most filters can be used via [ImageFilterConfig.filter]. The most notable
-/// filter that requires this class is [ImageFilterConfig.blur] with the
-/// `bounded` option set to true.
+/// Most filters can be used via [ImageFilterConfig.fromImageFilter] and
+/// constructors of [ui.ImageFilter]. The most notable filter that requires this
+/// class is [ImageFilterConfig.blur] with the `bounded` option set to true.
 ///
 /// See also:
 ///
@@ -44,7 +62,8 @@ abstract class ImageFilterConfig {
   /// If `bounded` is true, the filter performs a "bounded blur". This means the
   /// blur kernel will only sample pixels from within the provided attached
   /// render object, treating all pixels outside of it as transparent. This
-  /// mode is typically used to implement high-fidelity iOS-style blurs.
+  /// mode is typically used to implement high-fidelity iOS-style blurs. It
+  /// defaults to false.
   factory ImageFilterConfig.blur({
     double sigmaX = 0.0,
     double sigmaY = 0.0,
@@ -77,7 +96,7 @@ abstract class ImageFilterConfig {
   ///
   /// The `bounds` can be used to create layout-dependent filters, such as
   /// a blur that only samples pixels within the bounds.
-  ui.ImageFilter resolve(ui.Rect bounds);
+  ui.ImageFilter resolve(ImageFilterContext context);
 }
 
 class _BlurImageFilterConfig extends ImageFilterConfig {
@@ -94,12 +113,12 @@ class _BlurImageFilterConfig extends ImageFilterConfig {
   final bool bounded;
 
   @override
-  ui.ImageFilter resolve(ui.Rect bounds) {
+  ui.ImageFilter resolve(ImageFilterContext context) {
     return ui.ImageFilter.blur(
       sigmaX: sigmaX,
       sigmaY: sigmaY,
       tileMode: tileMode,
-      bounds: bounded ? bounds : null,
+      bounds: bounded ? context.bounds : null,
     );
   }
 
@@ -129,8 +148,8 @@ class _ComposeImageFilterConfig extends ImageFilterConfig {
   final ImageFilterConfig inner;
 
   @override
-  ui.ImageFilter resolve(ui.Rect bounds) {
-    return ui.ImageFilter.compose(outer: outer.resolve(bounds), inner: inner.resolve(bounds));
+  ui.ImageFilter resolve(ImageFilterContext context) {
+    return ui.ImageFilter.compose(outer: outer.resolve(context), inner: inner.resolve(context));
   }
 
   @override
@@ -154,7 +173,7 @@ class _DirectImageFilterConfig extends ImageFilterConfig {
   final ui.ImageFilter filter;
 
   @override
-  ui.ImageFilter resolve(ui.Rect bounds) {
+  ui.ImageFilter resolve(ImageFilterContext context) {
     return filter;
   }
 
