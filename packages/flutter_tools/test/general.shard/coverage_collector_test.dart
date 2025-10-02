@@ -28,7 +28,7 @@ void main() {
           jsonResponse:
               (VM.parse(<String, Object>{})!
                     ..isolates = <IsolateRef>[
-                      IsolateRef.parse(<String, Object>{'id': '1'})!,
+                      IsolateRef.parse(<String, Object>{'id': '1'}),
                     ])
                   .toJson(),
         ),
@@ -66,7 +66,7 @@ void main() {
           jsonResponse:
               (VM.parse(<String, Object>{})!
                     ..isolates = <IsolateRef>[
-                      IsolateRef.parse(<String, Object>{'id': '1'})!,
+                      IsolateRef.parse(<String, Object>{'id': '1'}),
                     ])
                   .toJson(),
         ),
@@ -170,7 +170,7 @@ void main() {
           jsonResponse:
               (VM.parse(<String, Object>{})!
                     ..isolates = <IsolateRef>[
-                      IsolateRef.parse(<String, Object>{'id': '1'})!,
+                      IsolateRef.parse(<String, Object>{'id': '1'}),
                     ])
                   .toJson(),
         ),
@@ -234,7 +234,7 @@ void main() {
           jsonResponse:
               (VM.parse(<String, Object>{})!
                     ..isolates = <IsolateRef>[
-                      IsolateRef.parse(<String, Object>{'id': '1'})!,
+                      IsolateRef.parse(<String, Object>{'id': '1'}),
                     ])
                   .toJson(),
         ),
@@ -297,7 +297,7 @@ void main() {
           jsonResponse:
               (VM.parse(<String, Object>{})!
                     ..isolates = <IsolateRef>[
-                      IsolateRef.parse(<String, Object>{'id': '1'})!,
+                      IsolateRef.parse(<String, Object>{'id': '1'}),
                     ])
                   .toJson(),
         ),
@@ -590,7 +590,7 @@ void main() {
           jsonResponse:
               (VM.parse(<String, Object>{})!
                     ..isolates = <IsolateRef>[
-                      IsolateRef.parse(<String, Object>{'id': '1'})!,
+                      IsolateRef.parse(<String, Object>{'id': '1'}),
                     ])
                   .toJson(),
         ),
@@ -663,7 +663,7 @@ void main() {
             jsonResponse:
                 (VM.parse(<String, Object>{})!
                       ..isolates = <IsolateRef>[
-                        IsolateRef.parse(<String, Object>{'id': '1'})!,
+                        IsolateRef.parse(<String, Object>{'id': '1'}),
                       ])
                     .toJson(),
           ),
@@ -758,7 +758,7 @@ FakeVmServiceHost createFakeVmServiceHostWithFooAndBar({
         jsonResponse:
             (VM.parse(<String, Object>{})!
                   ..isolates = <IsolateRef>[
-                    IsolateRef.parse(<String, Object>{'id': '1'})!,
+                    IsolateRef.parse(<String, Object>{'id': '1'}),
                   ])
                 .toJson(),
       ),

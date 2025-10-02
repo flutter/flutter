@@ -70,7 +70,7 @@ class TestAssetImage extends AssetImage {
   ImageStreamCompleter loadImage(AssetBundleImageKey key, ImageDecoderCallback decode) {
     late ImageInfo imageInfo;
     key.bundle.load(key.name).then<void>((ByteData data) {
-      final ui.Image image = images[scaleOf(data)]!;
+      final ui.Image image = images[scaleOf(data)];
       imageInfo = ImageInfo(image: image, scale: key.scale);
     });
     return FakeImageStreamCompleter(SynchronousFuture<ImageInfo>(imageInfo));

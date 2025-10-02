@@ -728,7 +728,7 @@ void main() {
     testWithoutContext('returns error if repository url is null', () {
       final VersionCheckError error = runUpstreamValidator(
         // repositoryUrl is null by default
-      )!;
+      );
       expect(error, isNotNull);
       expect(
         error.message,
@@ -748,7 +748,7 @@ void main() {
     testWithoutContext('returns error at non-standard remote url with FLUTTER_GIT_URL unset', () {
       final VersionCheckError error = runUpstreamValidator(
         versionUpstreamUrl: flutterNonStandardUrlDotGit,
-      )!;
+      );
       expect(error, isNotNull);
       expect(
         error.message,
@@ -777,7 +777,7 @@ void main() {
       final VersionCheckError error = runUpstreamValidator(
         versionUpstreamUrl: flutterStandardUrlDotGit,
         flutterGitUrl: flutterNonStandardUrlDotGit,
-      )!;
+      );
       expect(error, isNotNull);
       expect(
         error.message,

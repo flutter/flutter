@@ -849,7 +849,7 @@ class _RadioPainter extends ToggleablePainter {
 
     // Background
     final Paint backgroundPaint = Paint()
-      ..color = Color.lerp(inactiveBackgroundColor, activeBackgroundColor, position.value)!
+      ..color = Color.lerp(inactiveBackgroundColor, activeBackgroundColor, position.value)
       ..style = PaintingStyle.fill;
     canvas.drawCircle(center, _kOuterRadius, backgroundPaint);
 
@@ -861,7 +861,7 @@ class _RadioPainter extends ToggleablePainter {
     if (!position.isDismissed) {
       final Paint innerCirclePaint = Paint()
         ..style = PaintingStyle.fill
-        ..color = Color.lerp(inactiveColor, activeColor, position.value)!;
+        ..color = Color.lerp(inactiveColor, activeColor, position.value);
       canvas.drawCircle(center, innerRadius * position.value, innerCirclePaint);
     }
   }

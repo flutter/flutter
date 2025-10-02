@@ -2234,7 +2234,7 @@ class TextSelectionGestureDetectorBuilder {
     }
 
     final TextPosition textPosition = renderEditable.getPositionForPoint(
-      renderEditable.lastSecondaryTapDownPosition!,
+      renderEditable.lastSecondaryTapDownPosition,
     );
 
     return renderEditable.selection!.start <= textPosition.offset &&

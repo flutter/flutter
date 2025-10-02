@@ -268,7 +268,7 @@ class AppLifecycleListener with WidgetsBindingObserver, Diagnosticable {
         onDetach?.call();
     }
     // At this point, it can't be null anymore.
-    onStateChange?.call(_lifecycleState!);
+    onStateChange?.call(_lifecycleState);
   }
 
   @override

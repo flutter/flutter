@@ -1080,7 +1080,7 @@ void main() {
             find.ancestor(of: find.byIcon(icon), matching: find.byType(IconTheme)),
           )
           .data
-          .color!;
+          .color;
     }
 
     // Test unselected state.

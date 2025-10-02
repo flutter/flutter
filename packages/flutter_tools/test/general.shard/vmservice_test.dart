@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
+import '../../lib/src/vmservice.dart' show WebSocketConnector;
 import '../src/common.dart';
 import '../src/context.dart' hide testLogger;
 import '../src/fake_vm_services.dart';
@@ -449,7 +450,7 @@ void main() {
           isolate.toJson()
             ..['id'] = '2'
             ..['extensionRPCs'] = <String>[otherExtensionName],
-        )!;
+        );
 
         final fakeFlutterView2 = FlutterView(id: '2', uiIsolate: isolate2);
 

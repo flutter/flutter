@@ -1504,13 +1504,13 @@ void main() {
           tabs: <Widget>[
             Builder(
               builder: (BuildContext context) {
-                firstColor = IconTheme.of(context).color!;
+                firstColor = IconTheme.of(context).color;
                 return const Text('First');
               },
             ),
             Builder(
               builder: (BuildContext context) {
-                secondColor = IconTheme.of(context).color!;
+                secondColor = IconTheme.of(context).color;
                 return const Text('Second');
               },
             ),
@@ -5540,13 +5540,13 @@ void main() {
           tabs: <Widget>[
             Builder(
               builder: (BuildContext context) {
-                firstColor = DefaultTextStyle.of(context).style.color!;
+                firstColor = DefaultTextStyle.of(context).style.color;
                 return const Text('First');
               },
             ),
             Builder(
               builder: (BuildContext context) {
-                secondColor = DefaultTextStyle.of(context).style.color!;
+                secondColor = DefaultTextStyle.of(context).style.color;
                 return const Text('Second');
               },
             ),
@@ -7021,7 +7021,7 @@ void main() {
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 360),
                 child: ColoredBox(
-                  color: Colors.grey[200]!,
+                  color: Colors.grey[200],
                   child: const TabBar.secondary(
                     tabAlignment: TabAlignment.start,
                     isScrollable: true,

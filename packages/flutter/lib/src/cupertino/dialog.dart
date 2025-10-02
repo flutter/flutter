@@ -718,12 +718,11 @@ class CupertinoPopupSurface extends StatelessWidget {
 
     if (filter != null) {
       return ClipRSuperellipse(
-        borderRadius: _clipper,
         child: BackdropFilter(filter: filter, child: contents),
       );
     }
 
-    return ClipRSuperellipse(borderRadius: _clipper, child: contents);
+    return ClipRSuperellipse(child: contents);
   }
 }
 

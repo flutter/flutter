@@ -18,7 +18,7 @@ void main() {
   }
 
   Color textColor(WidgetTester tester, String text) {
-    return tester.renderObject<RenderParagraph>(find.text(text)).text.style!.color!;
+    return tester.renderObject<RenderParagraph>(find.text(text)).text.style!.color;
   }
 
   testWidgets('TextButton, TextButton.icon defaults', (WidgetTester tester) async {
@@ -386,9 +386,9 @@ void main() {
           MaterialState.focused,
         };
         if (states.any(interactiveStates.contains)) {
-          return Colors.blue[900]!;
+          return Colors.blue[900];
         }
-        return Colors.blue[800]!;
+        return Colors.blue[800];
       }
 
       await tester.pumpWidget(

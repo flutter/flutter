@@ -471,10 +471,6 @@ class _PredictiveBackSharedElementPageTransitionState
   // route regardless of its page transition.
   // https://github.com/flutter/flutter/issues/153577
 
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   void didUpdateWidget(_PredictiveBackSharedElementPageTransition oldWidget) {

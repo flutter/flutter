@@ -623,9 +623,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         return;
       }
       // Custom-shaped thumb
-      final Path outerPath = shape!.getOuterPath(_thumbRect!);
+      final Path outerPath = shape!.getOuterPath(_thumbRect);
       canvas.drawPath(outerPath, _paintThumb);
-      shape!.paint(canvas, _thumbRect!);
+      shape!.paint(canvas, _thumbRect);
     }
   }
 
@@ -737,7 +737,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       return false;
     }
 
-    final Rect interactiveRect = _trackRect!;
+    final Rect interactiveRect = _trackRect;
     final Rect paddedRect = interactiveRect.expandToInclude(
       Rect.fromCircle(center: _thumbRect!.center, radius: _kMinInteractiveSize / 2),
     );

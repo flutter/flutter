@@ -298,7 +298,7 @@ class Icon extends StatelessWidget {
     }
     if (blendMode != null) {
       foreground = Paint()
-        ..blendMode = blendMode!
+        ..blendMode = blendMode
         ..color = iconColor;
       // Cannot provide both a color and a foreground.
       iconColor = null;

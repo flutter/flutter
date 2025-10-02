@@ -555,12 +555,12 @@ void main() {
     testWidgets('White on different colors, passing', (WidgetTester tester) async {
       await tester.pumpWidget(
         rowWidget(<Widget>[
-          iconWidget(color: Colors.white, background: Colors.red[800]!, icon: Icons.more_horiz),
-          iconWidget(color: Colors.white, background: Colors.green[800]!, icon: Icons.description),
-          iconWidget(color: Colors.white, background: Colors.blue[800]!, icon: Icons.image),
+          iconWidget(color: Colors.white, background: Colors.red[800], icon: Icons.more_horiz),
+          iconWidget(color: Colors.white, background: Colors.green[800], icon: Icons.description),
+          iconWidget(color: Colors.white, background: Colors.blue[800], icon: Icons.image),
           iconWidget(
             color: Colors.white,
-            background: Colors.purple[800]!,
+            background: Colors.purple[800],
             icon: Icons.beach_access,
           ),
         ]),
@@ -572,12 +572,12 @@ void main() {
     testWidgets('White on different colors, failing', (WidgetTester tester) async {
       await tester.pumpWidget(
         rowWidget(<Widget>[
-          iconWidget(color: Colors.white, background: Colors.red[200]!, icon: Icons.more_horiz),
-          iconWidget(color: Colors.white, background: Colors.green[400]!, icon: Icons.description),
-          iconWidget(color: Colors.white, background: Colors.blue[600]!, icon: Icons.image),
+          iconWidget(color: Colors.white, background: Colors.red[200], icon: Icons.more_horiz),
+          iconWidget(color: Colors.white, background: Colors.green[400], icon: Icons.description),
+          iconWidget(color: Colors.white, background: Colors.blue[600], icon: Icons.image),
           iconWidget(
             color: Colors.white,
-            background: Colors.purple[800]!,
+            background: Colors.purple[800],
             icon: Icons.beach_access,
           ),
         ]),

@@ -266,7 +266,7 @@ class ListPage extends StatelessWidget {
               child: OutlinedButton(
                 style: buttonStyle.copyWith(
                   backgroundColor: WidgetStatePropertyAll<Color>(
-                    Color.lerp(destination.color[100], Colors.white, index / itemCount)!,
+                    Color.lerp(destination.color[100], Colors.white, index / itemCount),
                   ),
                 ),
                 onPressed: () {

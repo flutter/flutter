@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' show ProcessException;
 
 import 'package:args/command_runner.dart';
 import 'package:collection/collection.dart';
@@ -19,6 +20,13 @@ import 'package:test/test.dart' as test_package show test;
 import 'package:test/test.dart' hide test;
 import 'package:unified_analytics/unified_analytics.dart';
 
+import '../../lib/src/base/common.dart' show ToolExit;
+import '../../lib/src/base/context.dart' show AppContext;
+import '../../lib/src/base/io.dart' show ProcessException;
+import '../general.shard/ios/devices_test.dart' show FakeAnalytics;
+import '../general.shard/ios/ios_device_install_test.dart' show FakeAnalytics;
+import '../general.shard/ios/ios_device_project_test.dart' show FakeAnalytics;
+import '../general.shard/ios/ios_device_start_prebuilt_test.dart' show FakeAnalytics;
 import 'fakes.dart';
 
 export 'package:path/path.dart' show Context; // flutter_ignore: package_path_import

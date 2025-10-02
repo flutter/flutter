@@ -21,6 +21,7 @@ import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import '../../lib/src/base/logger.dart' show BufferLogger;
 import 'context.dart';
 import 'fake_http_client.dart';
 import 'fakes.dart';

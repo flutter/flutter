@@ -49,7 +49,7 @@ class PestoStyle extends TextStyle {
   const PestoStyle({
     double super.fontSize = 12.0,
     super.fontWeight,
-    Color super.color = Colors.black87,
+    super.color = Colors.black87,
     super.letterSpacing,
     super.height,
   }) : super(inherit: false, fontFamily: 'Raleway', textBaseline: TextBaseline.alphabetic);
@@ -228,7 +228,7 @@ class _PestoLogoState extends State<PestoLogo> {
             clipBehavior: Clip.none,
             children: <Widget>[
               Positioned.fromRect(
-                rect: _imageRectTween.lerp(widget.t!)!,
+                rect: _imageRectTween.lerp(widget.t!),
                 child: Image.asset(
                   _kSmallLogoImage,
                   package: _kGalleryAssetsPackage,
@@ -236,7 +236,7 @@ class _PestoLogoState extends State<PestoLogo> {
                 ),
               ),
               Positioned.fromRect(
-                rect: _textRectTween.lerp(widget.t!)!,
+                rect: _textRectTween.lerp(widget.t!),
                 child: Opacity(
                   opacity: _textOpacity.transform(widget.t!),
                   child: Text('PESTO', style: titleStyle, textAlign: TextAlign.center),

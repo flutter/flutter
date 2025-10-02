@@ -450,12 +450,12 @@ void main() {
     scrollRenderObject.visitChildren(findsRenderViewPort);
     expect(viewport, isNotNull);
     final RenderObject childRenderObject = tester.renderObject(find.byKey(childBox));
-    Rect semanticsClip = viewport!.describeSemanticsClip(childRenderObject)!;
+    Rect semanticsClip = viewport!.describeSemanticsClip(childRenderObject);
     expect(semanticsClip.size.height, length);
 
     controller.jumpTo(2000);
     await tester.pump();
-    semanticsClip = viewport!.describeSemanticsClip(childRenderObject)!;
+    semanticsClip = viewport!.describeSemanticsClip(childRenderObject);
     expect(semanticsClip.size.height, length);
   });
 
@@ -494,12 +494,12 @@ void main() {
     scrollRenderObject.visitChildren(findsRenderViewPort);
     expect(viewport, isNotNull);
     final RenderObject childRenderObject = tester.renderObject(find.byKey(childBox));
-    Rect semanticsClip = viewport!.describeSemanticsClip(childRenderObject)!;
+    Rect semanticsClip = viewport!.describeSemanticsClip(childRenderObject);
     expect(semanticsClip.size.width, length);
 
     controller.jumpTo(2000);
     await tester.pump();
-    semanticsClip = viewport!.describeSemanticsClip(childRenderObject)!;
+    semanticsClip = viewport!.describeSemanticsClip(childRenderObject);
     expect(semanticsClip.size.width, length);
   });
 

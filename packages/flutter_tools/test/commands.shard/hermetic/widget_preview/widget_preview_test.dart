@@ -131,7 +131,7 @@ flutter:
     pubspecFile.path,
     fileSystem: fileSystem,
     logger: logger,
-  )!;
+  );
 
   @override
   late FlutterProject widgetPreviewScaffoldProject = FakeFlutterProject(

@@ -274,7 +274,7 @@ class AnalyzeCommand extends FlutterCommand {
       } else {
         throwToolExit('No argument is provided to analyze. Use -h to see available commands.');
       }
-      final Set<String> items = findDirectories(argResults!, _fileSystem);
+      final Set<String> items = findDirectories(argResults, _fileSystem);
       final String directoryPath;
       if (items.isEmpty) {
         // user did not specify any path
@@ -319,7 +319,7 @@ class AnalyzeCommand extends FlutterCommand {
       } else {
         throwToolExit('No argument is provided to analyze. Use -h to see available commands.');
       }
-      final Set<String> items = findDirectories(argResults!, _fileSystem);
+      final Set<String> items = findDirectories(argResults, _fileSystem);
       final String directoryPath;
       if (items.isEmpty) {
         // user did not specify any path
@@ -343,7 +343,7 @@ class AnalyzeCommand extends FlutterCommand {
         throwToolExit('flag --watch is not compatible with --suggestions');
       }
       if (workingDirectory == null) {
-        final Set<String> items = findDirectories(argResults!, _fileSystem);
+        final Set<String> items = findDirectories(argResults, _fileSystem);
         if (items.isEmpty) {
           // user did not specify any path
           directoryPath = _fileSystem.currentDirectory.path;
@@ -367,7 +367,7 @@ class AnalyzeCommand extends FlutterCommand {
       ).run();
     } else if (boolArg('watch')) {
       await AnalyzeContinuously(
-        argResults!,
+        argResults,
         runner!.getRepoPackages(),
         fileSystem: _fileSystem,
         logger: _logger,
@@ -379,7 +379,7 @@ class AnalyzeCommand extends FlutterCommand {
       ).analyze();
     } else {
       await AnalyzeOnce(
-        argResults!,
+        argResults,
         runner!.getRepoPackages(),
         workingDirectory: workingDirectory,
         fileSystem: _fileSystem,

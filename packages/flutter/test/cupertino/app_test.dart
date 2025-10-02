@@ -635,8 +635,8 @@ void main() {
           child: Builder(
             builder: (BuildContext context) {
               return EditableText(
-                backgroundCursorColor: DefaultSelectionStyle.of(context).selectionColor!,
-                cursorColor: DefaultSelectionStyle.of(context).cursorColor!,
+                backgroundCursorColor: DefaultSelectionStyle.of(context).selectionColor,
+                cursorColor: DefaultSelectionStyle.of(context).cursorColor,
                 controller: controller,
                 focusNode: focusNode,
                 style: const TextStyle(),
@@ -648,7 +648,7 @@ void main() {
     );
 
     final RenderEditable editableText = findRenderEditable(tester);
-    final Color cursorColor = editableText.cursorColor!;
+    final Color cursorColor = editableText.cursorColor;
 
     // Cursor color should be equal to the dark variant of the primary color.
     // Alpha value needs to be 0, because cursor is not visible by default.

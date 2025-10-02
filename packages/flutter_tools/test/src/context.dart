@@ -81,7 +81,7 @@ void testUsingContext(
   Directory? configDir;
   tearDown(() {
     if (configDir != null) {
-      tryToDelete(configDir!);
+      tryToDelete(configDir);
       configDir = null;
     }
   });

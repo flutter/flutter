@@ -71,7 +71,7 @@ void main() {
     }
 
     Color containerColor() {
-      return tester.widget<Container>(find.byKey(primaryContainerKey)).color!;
+      return tester.widget<Container>(find.byKey(primaryContainerKey)).color;
     }
 
     await tester.pumpWidget(buildFrame());
@@ -265,7 +265,7 @@ void main() {
           .widget<Material>(
             find.descendant(of: find.byType(MaterialBanner), matching: find.byType(Material)).first,
           )
-          .color!;
+          .color;
     }
 
     TextStyle getTextStyle(String text) {
@@ -658,7 +658,7 @@ void main() {
           .widget<RichText>(find.descendant(of: find.text(text), matching: find.byType(RichText)))
           .text
           .style!
-          .color!;
+          .color;
     }
 
     await tester.pumpWidget(buildFrame());

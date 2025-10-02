@@ -94,7 +94,7 @@ class _TimePickerOptionsState extends State<TimePickerOptions> {
   void _textDirectionChanged(TextDirection? value) {
     if (value != textDirection) {
       setState(() {
-        textDirection = value!;
+        textDirection = value;
       });
     }
   }

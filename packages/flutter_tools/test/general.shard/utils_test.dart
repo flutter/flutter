@@ -28,24 +28,24 @@ baz=qux
       expect(Version(0, null, null).toString(), equals('0'));
       expect(const Version.withText(1, 2, 3, 'versionText').toString(), 'versionText');
 
-      final Version v1 = Version.parse('1')!;
+      final Version v1 = Version.parse('1');
       expect(v1.major, equals(1));
       expect(v1.minor, equals(0));
       expect(v1.patch, equals(0));
 
       expect(v1, greaterThan(Version(0, 0, 0)));
 
-      final Version v2 = Version.parse('1.2')!;
+      final Version v2 = Version.parse('1.2');
       expect(v2.major, equals(1));
       expect(v2.minor, equals(2));
       expect(v2.patch, equals(0));
 
-      final Version v3 = Version.parse('1.2.3')!;
+      final Version v3 = Version.parse('1.2.3');
       expect(v3.major, equals(1));
       expect(v3.minor, equals(2));
       expect(v3.patch, equals(3));
 
-      final Version v4 = Version.parse('1.12')!;
+      final Version v4 = Version.parse('1.12');
       expect(v4, greaterThan(v2));
 
       expect(v3, greaterThan(v2));

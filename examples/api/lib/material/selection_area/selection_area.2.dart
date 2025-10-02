@@ -164,7 +164,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   .currentState!
                   .selectableRegion
                   .contextMenuAnchors
-                  .secondaryAnchor!,
+                  .secondaryAnchor,
             ),
           ),
         );

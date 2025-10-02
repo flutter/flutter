@@ -5082,10 +5082,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           final ui.FrameInfo frame = await codec.getNextFrame();
           codec.dispose();
           return frame.image;
-        }))!;
+        }));
         addTearDown(screenshotImage.dispose);
 
-        await expectLater(screenshotImage, matchesReferenceImage(clipRectScreenshot!));
+        await expectLater(screenshotImage, matchesReferenceImage(clipRectScreenshot));
 
         // Test with a very visible debug paint
         final ui.Image? screenshot10 = await service.screenshot(

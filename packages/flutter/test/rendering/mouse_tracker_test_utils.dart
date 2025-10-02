@@ -38,7 +38,7 @@ class TestMouseTrackerFlutterBinding extends BindingBase
     postFrameCallbacks = <void Function(Duration)>[];
   }
 
-  late final RenderView _renderView = RenderView(view: platformDispatcher.implicitView!);
+  late final RenderView _renderView = RenderView(view: platformDispatcher.implicitView);
 
   late final PipelineOwner _pipelineOwner = PipelineOwner(
     onSemanticsUpdate: (ui.SemanticsUpdate _) {

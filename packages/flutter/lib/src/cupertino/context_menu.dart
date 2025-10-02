@@ -473,7 +473,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
       barrierLabel: CupertinoLocalizations.of(context).menuDismissLabel,
       filter: ui.ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
       contextMenuLocation: _contextMenuLocation,
-      previousChildRect: _decoyChildEndRect!,
+      previousChildRect: _decoyChildEndRect,
       scaleFactor: _scaleFactor,
       builder: (BuildContext context, Animation<double> animation) {
         if (widget.child == null) {
@@ -720,14 +720,14 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
 
   Widget _buildAnimation(BuildContext context, Widget? child) {
     return Positioned.fromRect(
-      rect: _rect.value!,
+      rect: _rect.value,
       child: Container(decoration: _boxDecoration.value, child: widget.child),
     );
   }
 
   Widget _buildBuilder(BuildContext context, Widget? child) {
     return Positioned.fromRect(
-      rect: _rect.value!,
+      rect: _rect.value,
       child: widget.builder!(context, widget.controller),
     );
   }

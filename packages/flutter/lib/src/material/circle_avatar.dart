@@ -209,12 +209,12 @@ class CircleAvatar extends StatelessWidget {
     Color? effectiveBackgroundColor =
         backgroundColor ?? (theme.useMaterial3 ? theme.colorScheme.primaryContainer : null);
     if (effectiveBackgroundColor == null) {
-      effectiveBackgroundColor = switch (ThemeData.estimateBrightnessForColor(textStyle.color!)) {
+      effectiveBackgroundColor = switch (ThemeData.estimateBrightnessForColor(textStyle.color)) {
         Brightness.dark => theme.primaryColorLight,
         Brightness.light => theme.primaryColorDark,
       };
     } else if (effectiveForegroundColor == null) {
-      textStyle = switch (ThemeData.estimateBrightnessForColor(backgroundColor!)) {
+      textStyle = switch (ThemeData.estimateBrightnessForColor(backgroundColor)) {
         Brightness.dark => textStyle.copyWith(color: theme.primaryColorLight),
         Brightness.light => textStyle.copyWith(color: theme.primaryColorDark),
       };

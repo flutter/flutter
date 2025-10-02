@@ -749,14 +749,14 @@ class SelectableRegionState extends State<SelectableRegion>
       case 2:
         switch (defaultTargetPlatform) {
           case TargetPlatform.iOS:
-            if (kIsWeb && details.kind != null && !_isPrecisePointerDevice(details.kind!)) {
+            if (kIsWeb && details.kind != null && !_isPrecisePointerDevice(details.kind)) {
               // Double tap on iOS web triggers when a drag begins after the double tap.
               _doubleTapOffset = details.globalPosition;
               break;
             }
             _selectWordAt(offset: details.globalPosition);
             _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
-            if (details.kind != null && !_isPrecisePointerDevice(details.kind!)) {
+            if (details.kind != null && !_isPrecisePointerDevice(details.kind)) {
               _showHandles();
             }
           case TargetPlatform.android:
@@ -772,7 +772,7 @@ class SelectableRegionState extends State<SelectableRegion>
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
           case TargetPlatform.iOS:
-            if (details.kind != null && _isPrecisePointerDevice(details.kind!)) {
+            if (details.kind != null && _isPrecisePointerDevice(details.kind)) {
               // Triple tap on static text is only supported on mobile
               // platforms using a precise pointer device.
               _selectParagraphAt(offset: details.globalPosition);
@@ -791,7 +791,7 @@ class SelectableRegionState extends State<SelectableRegion>
   void _handleMouseDragStart(TapDragStartDetails details) {
     switch (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
       case 1:
-        if (details.kind != null && !_isPrecisePointerDevice(details.kind!)) {
+        if (details.kind != null && !_isPrecisePointerDevice(details.kind)) {
           // Drag to select is only enabled with a precise pointer device.
           return;
         }
@@ -804,7 +804,7 @@ class SelectableRegionState extends State<SelectableRegion>
   void _handleMouseDragUpdate(TapDragUpdateDetails details) {
     switch (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
       case 1:
-        if (details.kind != null && !_isPrecisePointerDevice(details.kind!)) {
+        if (details.kind != null && !_isPrecisePointerDevice(details.kind)) {
           // Drag to select is only enabled with a precise pointer device.
           return;
         }
@@ -816,7 +816,7 @@ class SelectableRegionState extends State<SelectableRegion>
           case TargetPlatform.fuchsia:
             // Double tap + drag is only supported on Android when using a precise
             // pointer device or when not on the web.
-            if (!kIsWeb || details.kind != null && _isPrecisePointerDevice(details.kind!)) {
+            if (!kIsWeb || details.kind != null && _isPrecisePointerDevice(details.kind)) {
               _selectEndTo(
                 offset: details.globalPosition,
                 continuous: true,
@@ -827,11 +827,11 @@ class SelectableRegionState extends State<SelectableRegion>
           case TargetPlatform.iOS:
             if (kIsWeb &&
                 details.kind != null &&
-                !_isPrecisePointerDevice(details.kind!) &&
+                !_isPrecisePointerDevice(details.kind) &&
                 _doubleTapOffset != null) {
               // On iOS web a double tap does not select the word at the position,
               // until the drag has begun.
-              _selectWordAt(offset: _doubleTapOffset!);
+              _selectWordAt(offset: _doubleTapOffset);
               _doubleTapOffset = null;
             }
             _selectEndTo(
@@ -840,7 +840,7 @@ class SelectableRegionState extends State<SelectableRegion>
               textGranularity: TextGranularity.word,
             );
             _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
-            if (details.kind != null && !_isPrecisePointerDevice(details.kind!)) {
+            if (details.kind != null && !_isPrecisePointerDevice(details.kind)) {
               _showHandles();
             }
           case TargetPlatform.macOS:
@@ -860,7 +860,7 @@ class SelectableRegionState extends State<SelectableRegion>
           case TargetPlatform.iOS:
             // Triple tap + drag is only supported on mobile devices when using
             // a precise pointer device.
-            if (details.kind != null && _isPrecisePointerDevice(details.kind!)) {
+            if (details.kind != null && _isPrecisePointerDevice(details.kind)) {
               _selectEndTo(
                 offset: details.globalPosition,
                 continuous: true,
@@ -884,7 +884,7 @@ class SelectableRegionState extends State<SelectableRegion>
 
   void _handleMouseDragEnd(TapDragEndDetails details) {
     assert(_lastPointerDeviceKind != null);
-    final bool isPointerPrecise = _isPrecisePointerDevice(_lastPointerDeviceKind!);
+    final bool isPointerPrecise = _isPrecisePointerDevice(_lastPointerDeviceKind);
     // On mobile platforms like android, fuchsia, and iOS, a drag gesture will
     // only show the selection overlay when the drag has finished and the pointer
     // device kind is not precise, for example at the end of a double tap + drag
@@ -1047,15 +1047,15 @@ class SelectableRegionState extends State<SelectableRegion>
           _updateSelectedContentIfNeeded();
           return;
         }
-        _collapseSelectionAt(offset: _lastSecondaryTapDownPosition!);
+        _collapseSelectionAt(offset: _lastSecondaryTapDownPosition);
       case TargetPlatform.iOS:
-        _selectWordAt(offset: _lastSecondaryTapDownPosition!);
+        _selectWordAt(offset: _lastSecondaryTapDownPosition);
       case TargetPlatform.macOS:
         if (previousSecondaryTapDownPosition == _lastSecondaryTapDownPosition && toolbarIsVisible) {
           hideToolbar();
           return;
         }
-        _selectWordAt(offset: _lastSecondaryTapDownPosition!);
+        _selectWordAt(offset: _lastSecondaryTapDownPosition);
       case TargetPlatform.linux:
         if (toolbarIsVisible) {
           hideToolbar();
@@ -1067,7 +1067,7 @@ class SelectableRegionState extends State<SelectableRegion>
           globalPosition: details.globalPosition,
         );
         if (!lastSecondaryTapDownPositionWasOnActiveSelection) {
-          _collapseSelectionAt(offset: _lastSecondaryTapDownPosition!);
+          _collapseSelectionAt(offset: _lastSecondaryTapDownPosition);
         }
     }
     _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
@@ -1101,7 +1101,7 @@ class SelectableRegionState extends State<SelectableRegion>
     }
     if (_selectable?.dispatchSelectionEvent(
           SelectionEdgeUpdateEvent.forEnd(
-            globalPosition: _selectionEndPosition!,
+            globalPosition: _selectionEndPosition,
             granularity: textGranularity,
           ),
         ) ==
@@ -1167,7 +1167,7 @@ class SelectableRegionState extends State<SelectableRegion>
     }
     if (_selectable?.dispatchSelectionEvent(
           SelectionEdgeUpdateEvent.forStart(
-            globalPosition: _selectionStartPosition!,
+            globalPosition: _selectionStartPosition,
             granularity: textGranularity,
           ),
         ) ==
@@ -1592,7 +1592,7 @@ class SelectableRegionState extends State<SelectableRegion>
   TextSelectionToolbarAnchors get contextMenuAnchors {
     if (_lastSecondaryTapDownPosition != null) {
       final TextSelectionToolbarAnchors anchors = TextSelectionToolbarAnchors(
-        primaryAnchor: _lastSecondaryTapDownPosition!,
+        primaryAnchor: _lastSecondaryTapDownPosition,
       );
       // Clear the state of _lastSecondaryTapDownPosition after use since a user may
       // access contextMenuAnchors and receive invalid anchors for their context menu.
@@ -2291,7 +2291,7 @@ class StaticSelectionContainerDelegate extends MultiSelectableSelectionContainer
   void ensureChildUpdated(Selectable selectable) {
     if (_lastEndEdgeUpdateGlobalPosition != null && _hasReceivedEndEvent.add(selectable)) {
       final SelectionEdgeUpdateEvent synthesizedEvent = SelectionEdgeUpdateEvent.forEnd(
-        globalPosition: _lastEndEdgeUpdateGlobalPosition!,
+        globalPosition: _lastEndEdgeUpdateGlobalPosition,
       );
       if (currentSelectionEndIndex == -1) {
         handleSelectionEdgeUpdate(synthesizedEvent);
@@ -2300,7 +2300,7 @@ class StaticSelectionContainerDelegate extends MultiSelectableSelectionContainer
     }
     if (_lastStartEdgeUpdateGlobalPosition != null && _hasReceivedStartEvent.add(selectable)) {
       final SelectionEdgeUpdateEvent synthesizedEvent = SelectionEdgeUpdateEvent.forStart(
-        globalPosition: _lastStartEdgeUpdateGlobalPosition!,
+        globalPosition: _lastStartEdgeUpdateGlobalPosition,
       );
       if (currentSelectionStartIndex == -1) {
         handleSelectionEdgeUpdate(synthesizedEvent);
@@ -2313,12 +2313,12 @@ class StaticSelectionContainerDelegate extends MultiSelectableSelectionContainer
   void didChangeSelectables() {
     if (_lastEndEdgeUpdateGlobalPosition != null) {
       handleSelectionEdgeUpdate(
-        SelectionEdgeUpdateEvent.forEnd(globalPosition: _lastEndEdgeUpdateGlobalPosition!),
+        SelectionEdgeUpdateEvent.forEnd(globalPosition: _lastEndEdgeUpdateGlobalPosition),
       );
     }
     if (_lastStartEdgeUpdateGlobalPosition != null) {
       handleSelectionEdgeUpdate(
-        SelectionEdgeUpdateEvent.forStart(globalPosition: _lastStartEdgeUpdateGlobalPosition!),
+        SelectionEdgeUpdateEvent.forStart(globalPosition: _lastStartEdgeUpdateGlobalPosition),
       );
     }
     final Set<Selectable> selectableSet = selectables.toSet();

@@ -7,6 +7,8 @@ import 'dart:async';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 
+import '../../lib/src/build_system/build_system.dart' show BuildSystem;
+
 class TestBuildSystem implements BuildSystem {
   /// Create a [BuildSystem] instance that returns the provided results in order.
   TestBuildSystem.list(this._results, [this._onRun]) : _exception = null, _singleResult = null;

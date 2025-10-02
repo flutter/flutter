@@ -70,7 +70,7 @@ void main() {
         gradient: RadialGradient(
           center: Alignment.topLeft,
           radius: 1.8,
-          colors: <Color>[Colors.yellow[500]!, Colors.blue[500]!],
+          colors: <Color>[Colors.yellow[500], Colors.blue[500]],
         ),
         boxShadow: kElevationToShadow[3],
       ),
@@ -474,7 +474,7 @@ void main() {
               textDirection: TextDirection.ltr,
               constraintsTransform: (BoxConstraints constraints) =>
                   constraints.copyWith(maxWidth: double.infinity),
-              clipBehavior: clip!,
+              clipBehavior: clip,
               child: RenderConstrainedBox(
                 additionalConstraints: const BoxConstraints.tightFor(
                   width: double.maxFinite,
@@ -784,7 +784,7 @@ void main() {
             alignment: Alignment.center,
             textDirection: TextDirection.ltr,
             child: box200x200,
-            clipBehavior: clip!,
+            clipBehavior: clip,
           );
         case null:
           box = RenderConstraintsTransformBox(

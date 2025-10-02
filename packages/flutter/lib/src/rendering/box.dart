@@ -928,9 +928,9 @@ class BoxHitTestResult extends HitTestResult {
       pushTransform(rawTransform);
     } else {
       assert(paintTransform != null);
-      paintTransform = Matrix4.tryInvert(PointerEvent.removePerspectiveTransform(paintTransform!));
+      paintTransform = Matrix4.tryInvert(PointerEvent.removePerspectiveTransform(paintTransform));
       assert(paintTransform != null, 'paintTransform must be invertible.');
-      pushTransform(paintTransform!);
+      pushTransform(paintTransform);
     }
     final bool isHit = hitTest(this);
     popTransform();
@@ -2633,7 +2633,7 @@ abstract class RenderBox extends RenderObject {
         ]);
       }
       // verify that the size is within the constraints
-      if (!constraints.isSatisfiedBy(_size!)) {
+      if (!constraints.isSatisfiedBy(_size)) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('$runtimeType does not meet its constraints.'),
           DiagnosticsProperty<BoxConstraints>(

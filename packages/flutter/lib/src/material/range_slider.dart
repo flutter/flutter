@@ -1550,7 +1550,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       MaterialState.pressed,
     })?.width;
     final double delta;
-    if (_active && thumbWidth != null && pressedThumbWidth != null && trackGap != null) {
+    if (_active && pressedThumbWidth != null && trackGap != null) {
       delta = thumbWidth - pressedThumbWidth;
       thumbWidth = pressedThumbWidth;
       if (trackGap > 0.0) {
@@ -1692,7 +1692,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       isDiscrete: isDiscrete,
       isOnTop: false,
       textDirection: textDirection,
-      sliderTheme: thumbWidth != null && thumbHeight != null
+      sliderTheme: thumbHeight != null
           ? _sliderTheme.copyWith(
               thumbSize: MaterialStatePropertyAll<Size?>(Size(thumbWidth, thumbHeight)),
             )
@@ -1781,7 +1781,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       isOnTop:
           thumbDelta < sliderTheme.rangeThumbShape!.getPreferredSize(isEnabled, isDiscrete).width,
       textDirection: textDirection,
-      sliderTheme: thumbWidth != null && thumbHeight != null
+      sliderTheme: thumbHeight != null
           ? _sliderTheme.copyWith(
               thumbSize: MaterialStatePropertyAll<Size?>(Size(thumbWidth, thumbHeight)),
             )

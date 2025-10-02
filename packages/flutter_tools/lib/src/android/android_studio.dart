@@ -5,6 +5,8 @@
 /// @docImport 'java.dart';
 library;
 
+import 'dart:io' show Directory;
+
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';

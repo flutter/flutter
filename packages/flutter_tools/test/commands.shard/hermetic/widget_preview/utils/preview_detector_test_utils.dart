@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/widget_preview/analytics.dart';
 import 'package:flutter_tools/src/widget_preview/dependency_graph.dart';
 import 'package:flutter_tools/src/widget_preview/preview_detector.dart';
 
+import '../../../../../lib/src/widget_preview/preview_detector.dart' show PreviewDetector;
 import '../../../../src/common.dart';
 import '../../../../src/fakes.dart';
 import 'preview_project.dart';

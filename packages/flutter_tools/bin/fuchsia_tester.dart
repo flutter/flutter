@@ -100,7 +100,7 @@ Future<void> run(List<String> args) async {
 
     // Put the tester shell where runTests expects it.
     // TODO(garymm): Switch to a Fuchsia-specific Artifacts impl.
-    final Artifacts artifacts = globals.artifacts!;
+    final Artifacts artifacts = globals.artifacts;
     final Link testerDestLink = globals.fs.link(artifacts.getArtifactPath(Artifact.flutterTester));
     testerDestLink.parent.createSync(recursive: true);
     testerDestLink.createSync(globals.fs.path.absolute(flutterTesterBinPath));

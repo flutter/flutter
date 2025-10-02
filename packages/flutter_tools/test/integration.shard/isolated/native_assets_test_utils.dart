@@ -62,7 +62,7 @@ Future<void> addTestProjectAsDependency(
   Directory packageDirectory,
   String testProject,
 ) async {
-  final Directory flutterDirectory = fileSystem.currentDirectory.parent.parent;
+  const Directory flutterDirectory = fileSystem.currentDirectory.parent.parent;
   final Directory linkHookDirectory = flutterDirectory
       .childDirectory('dev')
       .childDirectory('integration_tests')

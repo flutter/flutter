@@ -242,7 +242,7 @@ class InkRipple extends InteractiveInkFeature {
       _position,
       rect != null ? rect.center : referenceBox.size.center(Offset.zero),
       Curves.ease.transform(_radiusController.value),
-    )!;
+    );
     paintInkCircle(
       canvas: canvas,
       transform: transform,

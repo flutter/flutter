@@ -427,7 +427,7 @@ class RenderImage extends RenderBox {
     paintImage(
       canvas: context.canvas,
       rect: offset & size,
-      image: _image!,
+      image: _image,
       debugImageLabel: debugImageLabel,
       scale: _scale,
       opacity: _opacity?.value ?? 1.0,

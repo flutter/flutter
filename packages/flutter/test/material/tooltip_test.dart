@@ -934,15 +934,15 @@ void main() {
 
     // Default value should be TextAlign.start
     await pumpTooltipWithTextAlign();
-    TextAlign textAlign = tester.widget<Text>(find.text(tooltipText)).textAlign!;
+    TextAlign textAlign = tester.widget<Text>(find.text(tooltipText)).textAlign;
     expect(textAlign, TextAlign.start);
 
     await pumpTooltipWithTextAlign(textAlign: TextAlign.center);
-    textAlign = tester.widget<Text>(find.text(tooltipText)).textAlign!;
+    textAlign = tester.widget<Text>(find.text(tooltipText)).textAlign;
     expect(textAlign, TextAlign.center);
 
     await pumpTooltipWithTextAlign(textAlign: TextAlign.end);
-    textAlign = tester.widget<Text>(find.text(tooltipText)).textAlign!;
+    textAlign = tester.widget<Text>(find.text(tooltipText)).textAlign;
     expect(textAlign, TextAlign.end);
   });
 

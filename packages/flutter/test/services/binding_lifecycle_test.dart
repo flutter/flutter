@@ -8,10 +8,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _TestBinding extends BindingBase with SchedulerBinding, ServicesBinding {
-  @override
-  Future<void> initializationComplete() async {
-    return super.initializationComplete();
-  }
 
   @override
   TestDefaultBinaryMessenger get defaultBinaryMessenger =>

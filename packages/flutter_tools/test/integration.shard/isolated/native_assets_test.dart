@@ -26,7 +26,7 @@ import '../test_utils.dart' show fileSystem, flutterBin, platform;
 import '../transition_test_utils.dart';
 import 'native_assets_test_utils.dart';
 
-final String hostOs = platform.operatingSystem;
+const String hostOs = platform.operatingSystem;
 
 final devices = <String>['flutter-tester', hostOs];
 

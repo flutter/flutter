@@ -865,7 +865,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   void _pushCircle(int index) {
     if (widget.items[index].backgroundColor != null) {
       _circles.add(
-        _Circle(state: this, index: index, color: widget.items[index].backgroundColor!, vsync: this)
+        _Circle(state: this, index: index, color: widget.items[index].backgroundColor, vsync: this)
           ..controller.addStatusListener((AnimationStatus status) {
             if (status.isCompleted) {
               setState(() {

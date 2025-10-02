@@ -195,7 +195,7 @@ class ResidentWebRunner extends ResidentRunner {
     final vmservice.VmService? service = _connectionResult?.vmService;
     final Uri websocketUri = Uri.parse(_connectionResult!.debugConnection!.uri);
     final Uri httpUri = _httpUriFromWebsocketUri(websocketUri);
-    return _instance ??= FlutterVmService(service!, wsAddress: websocketUri, httpAddress: httpUri);
+    return _instance ??= FlutterVmService(service, wsAddress: websocketUri, httpAddress: httpUri);
   }
 
   FlutterVmService? _instance;
@@ -701,21 +701,13 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       // Generates the generated_plugin_registrar
       await injectBuildTimePluginFilesForWebPlatform(
         flutterProject,
-        destination: _generatedEntrypointDirectory!,
+        destination: _generatedEntrypointDirectory,
       );
       // The below works because `injectBuildTimePluginFiles` is configured to write
       // the web_plugin_registrant.dart file alongside the generated main.dart
       const generatedImport = 'web_plugin_registrant.dart';
 
       Uri? importedEntrypoint = packageConfig!.toPackageUri(mainUri);
-      // Special handling for entrypoints that are not under lib, such as test scripts.
-      if (importedEntrypoint == null) {
-        final String parent = _fileSystem.file(mainUri).parent.path;
-        flutterDevices.first.generator!
-          ..addFileSystemRoot(parent)
-          ..addFileSystemRoot(_fileSystem.directory('test').absolute.path);
-        importedEntrypoint = Uri(scheme: 'org-dartlang-app', path: '/${mainUri.pathSegments.last}');
-      }
       final LanguageVersion languageVersion = determineLanguageVersion(
         _fileSystem.file(mainUri),
         packageConfig[flutterProject.manifest.appName],
@@ -773,7 +765,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       dillOutputPath: dillOutputPath,
       pathToReload: getReloadPath(resetCompiler: resetCompiler, swap: false),
       invalidatedFiles: invalidationResult.uris!,
-      packageConfig: invalidationResult.packageConfig!,
+      packageConfig: invalidationResult.packageConfig,
       trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation,
       shaderCompiler: device!.developmentShaderCompiler,
     );

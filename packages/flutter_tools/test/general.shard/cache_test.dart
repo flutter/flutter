@@ -395,7 +395,7 @@ void main() {
       final Directory dir = fileSystem.systemTempDirectory
           .listSync(recursive: true)
           .whereType<Directory>()
-          .singleWhereOrNull((Directory directory) => directory.basename == 'bin_dir')!;
+          .singleWhereOrNull((Directory directory) => directory.basename == 'bin_dir');
 
       expect(dir, isNotNull);
       expect(dir.path, artifactDir.childDirectory('bin_dir').path);
@@ -443,7 +443,7 @@ void main() {
     final Directory dir = fileSystem.systemTempDirectory
         .listSync(recursive: true)
         .whereType<Directory>()
-        .singleWhereOrNull((Directory directory) => directory.basename == 'pkg')!;
+        .singleWhereOrNull((Directory directory) => directory.basename == 'pkg');
     expect(dir.path, artifactDir.childDirectory('pkg').path);
     expect(dir.childDirectory('package_dir').existsSync(), isTrue);
   });

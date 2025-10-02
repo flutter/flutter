@@ -748,7 +748,7 @@ class _AndroidViewState extends State<AndroidView> {
     if (didChangeLayoutDirection) {
       // The native view will update asynchronously, in the meantime we don't want
       // to block the framework. (so this is intentionally not awaiting).
-      _controller.setLayoutDirection(_layoutDirection!);
+      _controller.setLayoutDirection(_layoutDirection);
     }
   }
 
@@ -767,7 +767,7 @@ class _AndroidViewState extends State<AndroidView> {
     }
 
     if (didChangeLayoutDirection) {
-      _controller.setLayoutDirection(_layoutDirection!);
+      _controller.setLayoutDirection(_layoutDirection);
     }
   }
 
@@ -789,7 +789,7 @@ class _AndroidViewState extends State<AndroidView> {
     _controller = PlatformViewsService.initAndroidView(
       id: _id!,
       viewType: widget.viewType,
-      layoutDirection: _layoutDirection!,
+      layoutDirection: _layoutDirection,
       creationParams: widget.creationParams,
       creationParamsCodec: widget.creationParamsCodec,
       onFocus: () {
@@ -888,7 +888,7 @@ abstract class _DarwinViewState<
     if (didChangeLayoutDirection) {
       // The native view will update asynchronously, in the meantime we don't want
       // to block the framework. (so this is intentionally not awaiting).
-      _controller?.setLayoutDirection(_layoutDirection!);
+      _controller?.setLayoutDirection(_layoutDirection);
     }
   }
 
@@ -910,7 +910,7 @@ abstract class _DarwinViewState<
     }
 
     if (didChangeLayoutDirection) {
-      _controller?.setLayoutDirection(_layoutDirection!);
+      _controller?.setLayoutDirection(_layoutDirection);
     }
   }
 
@@ -965,7 +965,7 @@ class _UiKitViewState
     return PlatformViewsService.initUiKitView(
       id: id,
       viewType: widget.viewType,
-      layoutDirection: _layoutDirection!,
+      layoutDirection: _layoutDirection,
       creationParams: widget.creationParams,
       creationParamsCodec: widget.creationParamsCodec,
       onFocus: () {
@@ -992,7 +992,7 @@ class _AppKitViewState
     return PlatformViewsService.initAppKitView(
       id: id,
       viewType: widget.viewType,
-      layoutDirection: _layoutDirection!,
+      layoutDirection: _layoutDirection,
       creationParams: widget.creationParams,
       creationParamsCodec: widget.creationParamsCodec,
       onFocus: () {

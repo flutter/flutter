@@ -1775,7 +1775,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       MaterialState.pressed,
     })?.width;
     final double delta;
-    if (_active && thumbWidth != null && pressedThumbWidth != null && trackGap != null) {
+    if (_active && pressedThumbWidth != null && trackGap != null) {
       delta = thumbWidth - pressedThumbWidth;
       if (thumbWidth > 0.0) {
         thumbWidth = pressedThumbWidth;
@@ -1880,7 +1880,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       isDiscrete: isDiscrete,
       labelPainter: _labelPainter,
       parentBox: this,
-      sliderTheme: thumbWidth != null && thumbHeight != null
+      sliderTheme: thumbHeight != null
           ? _sliderTheme.copyWith(
               thumbSize: MaterialStatePropertyAll<Size?>(Size(thumbWidth, thumbHeight)),
             )

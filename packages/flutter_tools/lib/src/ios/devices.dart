@@ -1071,7 +1071,7 @@ class IOSDevice extends Device {
       debugProject = XcodeDebugProject(
         scheme: scheme,
         xcodeProject: project.xcodeProject,
-        xcodeWorkspace: project.xcodeWorkspace!,
+        xcodeWorkspace: project.xcodeWorkspace,
         hostAppProjectName: project.hostAppProjectName,
         expectedConfigurationBuildDir: bundle.parent.absolute.path,
         verboseLogging: _logger.isVerbose,

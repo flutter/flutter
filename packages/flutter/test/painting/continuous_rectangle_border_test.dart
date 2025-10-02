@@ -31,7 +31,7 @@ void main() {
 
     expect(
       const ContinuousRectangleBorder().copyWith(side: side, borderRadius: radius),
-      const ContinuousRectangleBorder(side: side, borderRadius: radius),
+      const ContinuousRectangleBorder(side: side),
     );
 
     expect(

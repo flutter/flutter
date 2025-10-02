@@ -227,7 +227,7 @@ class _PathMoveTo extends _PathCommand {
 
   @override
   void apply(Path path, double progress) {
-    final Offset offset = _interpolate<Offset?>(points, progress, Offset.lerp)!;
+    final Offset offset = _interpolate<Offset?>(points, progress, Offset.lerp);
     path.moveTo(offset.dx, offset.dy);
   }
 }
@@ -241,9 +241,9 @@ class _PathCubicTo extends _PathCommand {
 
   @override
   void apply(Path path, double progress) {
-    final Offset controlPoint1 = _interpolate<Offset?>(controlPoints1, progress, Offset.lerp)!;
-    final Offset controlPoint2 = _interpolate<Offset?>(controlPoints2, progress, Offset.lerp)!;
-    final Offset targetPoint = _interpolate<Offset?>(targetPoints, progress, Offset.lerp)!;
+    final Offset controlPoint1 = _interpolate<Offset?>(controlPoints1, progress, Offset.lerp);
+    final Offset controlPoint2 = _interpolate<Offset?>(controlPoints2, progress, Offset.lerp);
+    final Offset targetPoint = _interpolate<Offset?>(targetPoints, progress, Offset.lerp);
     path.cubicTo(
       controlPoint1.dx,
       controlPoint1.dy,
@@ -263,7 +263,7 @@ class _PathLineTo extends _PathCommand {
 
   @override
   void apply(Path path, double progress) {
-    final Offset point = _interpolate<Offset?>(points, progress, Offset.lerp)!;
+    final Offset point = _interpolate<Offset?>(points, progress, Offset.lerp);
     path.lineTo(point.dx, point.dy);
   }
 }

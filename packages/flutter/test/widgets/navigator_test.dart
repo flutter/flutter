@@ -128,8 +128,6 @@ class SlideInOutPageRoute<T> extends PageRouteBuilder<T> {
             },
       );
 
-  @override
-  AnimationController? get controller => super.controller;
 }
 
 void main() {

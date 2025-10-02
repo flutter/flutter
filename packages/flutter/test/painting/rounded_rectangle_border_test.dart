@@ -28,7 +28,7 @@ void main() {
 
     expect(
       const RoundedRectangleBorder().copyWith(side: side, borderRadius: radius),
-      const RoundedRectangleBorder(side: side, borderRadius: radius),
+      const RoundedRectangleBorder(side: side),
     );
 
     expect(

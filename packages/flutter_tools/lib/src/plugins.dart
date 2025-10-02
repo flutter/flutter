@@ -81,7 +81,7 @@ class Plugin {
       return Plugin._fromMultiPlatformYaml(
         name,
         path,
-        pluginYaml!,
+        pluginYaml,
         flutterConstraint,
         dependencies,
         fileSystem,

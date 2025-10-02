@@ -165,7 +165,7 @@ class LoadingUnit {
     final List<FileSystemEntity> files = outputDir.listSync(recursive: true);
     for (final fileEntity in files) {
       if (fileEntity is File) {
-        final File file = fileEntity;
+        final file = fileEntity;
         // Determine if the abi is one we build.
         var matchingAbi = abis == null;
         if (abis != null) {

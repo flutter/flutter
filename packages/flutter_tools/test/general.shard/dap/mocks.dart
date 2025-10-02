@@ -11,6 +11,10 @@ import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/debug_adapters/flutter_adapter.dart';
 import 'package:flutter_tools/src/debug_adapters/flutter_test_adapter.dart';
 
+import '../../../lib/src/debug_adapters/flutter_adapter.dart' show FlutterDebugAdapter;
+
+import '../../../lib/src/debug_adapters/flutter_test_adapter.dart' show FlutterTestDebugAdapter;
+
 /// A [FlutterDebugAdapter] that captures what process/args will be launched.
 class FakeFlutterDebugAdapter extends FlutterDebugAdapter {
   factory FakeFlutterDebugAdapter({

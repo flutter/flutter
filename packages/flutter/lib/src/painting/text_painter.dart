@@ -366,7 +366,7 @@ class _TextLayout {
     final String rawString = _painter.plainText;
     final int lastLineIndex = _paragraph.numberOfLines - 1;
     assert(lastLineIndex >= 0);
-    final ui.LineMetrics lineMetrics = _paragraph.getLineMetricsAt(lastLineIndex)!;
+    final ui.LineMetrics lineMetrics = _paragraph.getLineMetricsAt(lastLineIndex);
     // Trailing white spaces don't contribute to the line width and thus require special handling
     // when they're present.
     // Luckily they have the same bidi embedding level as the paragraph as per
@@ -1411,7 +1411,7 @@ class TextPainter {
     final _LineCaretMetrics? caretMetrics = _computeCaretMetrics(position);
 
     if (caretMetrics == null) {
-      final double paintOffsetAlignment = _computePaintOffsetFraction(textAlign, textDirection!);
+      final double paintOffsetAlignment = _computePaintOffsetFraction(textAlign, textDirection);
       // The full width is not (width - caretPrototype.width), because
       // RenderEditable reserves cursor width on the right. Ideally this
       // should be handled by RenderEditable instead.

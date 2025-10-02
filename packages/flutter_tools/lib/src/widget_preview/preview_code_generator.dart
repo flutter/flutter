@@ -178,7 +178,7 @@ class PreviewCodeGenerator {
 
       if (preview.hasWrapper) {
         previewWidget = _buildIdentifierReference(
-          preview.wrapper!,
+          preview.wrapper,
         ).call(<cb.Expression>[previewWidget]);
       }
     }
@@ -244,7 +244,7 @@ class PreviewCodeGenerator {
     }
     cb.Expression generatedExpression = expression.accept(
       AnalyzerAstToCodeBuilderVisitor(allocator: allocator),
-    )!;
+    );
 
     if (isCallback) {
       generatedExpression = generatedExpression.call(<cb.Expression>[]);
@@ -380,9 +380,9 @@ class AnalyzerAstToCodeBuilderVisitor extends analyzer.RecursiveAstVisitor<cb.Ex
 
   @override
   cb.Expression visitBinaryExpression(analyzer.BinaryExpression node) {
-    final String lhs = _expressionToString(node.leftOperand.accept(this)!);
+    final String lhs = _expressionToString(node.leftOperand.accept(this));
     final String operator = node.operator.lexeme;
-    final String rhs = _expressionToString(node.rightOperand.accept(this)!);
+    final String rhs = _expressionToString(node.rightOperand.accept(this));
     // There's unfortunately not a nice way to build a binary expression based on an operator
     // string using package:code_builder without creating an exhaustive switch statement. It's less
     // risky (and less cumbersome) to just build the expression manually.
@@ -391,16 +391,16 @@ class AnalyzerAstToCodeBuilderVisitor extends analyzer.RecursiveAstVisitor<cb.Ex
 
   @override
   cb.Expression visitInstanceCreationExpression(analyzer.InstanceCreationExpression node) {
-    final cb.Expression type = node.constructorName.type.accept(this)!;
+    final cb.Expression type = node.constructorName.type.accept(this);
     final String? name = node.constructorName.name?.name;
     final List<cb.Expression> positionalArguments = node.argumentList.arguments
         .where((analyzer.Expression e) => e is! analyzer.NamedExpression)
-        .map<cb.Expression>((analyzer.Expression e) => e.accept(this)!)
+        .map<cb.Expression>((analyzer.Expression e) => e.accept(this))
         .toList();
     final namedArguments = <String, cb.Expression>{
       for (final analyzer.NamedExpression e
           in node.argumentList.arguments.whereType<analyzer.NamedExpression>())
-        e.name.label.name: e.expression.accept(this)!,
+        e.name.label.name: e.expression.accept(this),
     };
     final typeArguments = <cb.Reference>[
       // TODO(bkonyi): consider handling type arguments
@@ -419,7 +419,7 @@ class AnalyzerAstToCodeBuilderVisitor extends analyzer.RecursiveAstVisitor<cb.Ex
   @override
   cb.Expression visitPropertyAccess(analyzer.PropertyAccess node) {
     // Needed to handle case where an enum is accessed via a prefixed import.
-    final String target = _expressionToString(node.realTarget.accept(this)!);
+    final String target = _expressionToString(node.realTarget.accept(this));
     return cb.CodeExpression(cb.Code('$target.${node.propertyName.name}'));
   }
 

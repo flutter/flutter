@@ -211,7 +211,7 @@ class PreviewDetector {
           );
         }
         if (lib is ResolvedLibraryResult) {
-          final ResolvedLibraryResult resolvedLib = lib;
+          final resolvedLib = lib;
           final PreviewPath previewPath = lib.element2.toPreviewPath();
           // This library has already been processed.
           if (updatedPreviews.containsKey(previewPath)) {

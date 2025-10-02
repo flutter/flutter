@@ -275,7 +275,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
   bool _isAbove(double childHeight) => anchorAbove.dy >= childHeight - _kToolbarArrowSize.height;
 
   BoxConstraints _constraintsForChild(BoxConstraints constraints) {
-    return BoxConstraints(
+    return const BoxConstraints(
       minWidth: _kToolbarArrowSize.width + _kToolbarBorderRadius.x * 2,
     ).enforce(constraints.loosen());
   }
@@ -398,7 +398,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
           arrowBaseY,
         ); // left side of the arrow triangle
     } else {
-      final double arrowBaseY = _kToolbarArrowSize.height;
+      const double arrowBaseY = _kToolbarArrowSize.height;
       const double arrowTipY = 0.0;
       path
         ..moveTo(
@@ -429,7 +429,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
 
     // If configured, paint the shadow beneath the shape.
     if (_shadowColor != null) {
-      final BoxShadow boxShadow = BoxShadow(color: _shadowColor!, blurRadius: 15.0);
+      final BoxShadow boxShadow = BoxShadow(color: _shadowColor, blurRadius: 15.0);
       final RRect shadowRRect = RRect.fromLTRBR(
         rrect.left,
         rrect.top,

@@ -636,7 +636,7 @@ class RenderTable extends RenderBox {
 
     Rect rectWithOffset(SemanticsNode node) {
       final Offset offset =
-          (node.transform != null ? MatrixUtils.getAsTranslation(node.transform!) : null) ??
+          (node.transform != null ? MatrixUtils.getAsTranslation(node.transform) : null) ??
           Offset.zero;
       return node.rect.shift(offset);
     }
@@ -1361,7 +1361,7 @@ class RenderTable extends RenderBox {
               );
               child.layout(BoxConstraints.tightFor(width: widths[x]), parentUsesSize: true);
               final double? childBaseline = child.getDistanceToBaseline(
-                textBaseline!,
+                textBaseline,
                 onlyReal: true,
               );
               if (childBaseline != null) {

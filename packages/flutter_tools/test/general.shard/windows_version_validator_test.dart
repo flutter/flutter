@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/windows/windows_version_validator.dart';
 import 'package:test/fake.dart';
 
+import '../../lib/src/base/os.dart' show OperatingSystemUtils;
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_process_manager.dart';

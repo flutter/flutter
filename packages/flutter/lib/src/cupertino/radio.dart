@@ -531,7 +531,7 @@ class _RadioPainter extends ToggleablePainter {
           ..style = PaintingStyle.stroke
           ..strokeWidth = _kCheckmarkStrokeWidth
           ..strokeCap = StrokeCap.round;
-        final double width = _size.width;
+        const double width = _size.width;
         final Offset origin = Offset(center.dx - (width / 2), center.dy - (width / 2));
         final Offset start = Offset(width * 0.25, width * 0.52);
         final Offset mid = Offset(width * 0.46, width * 0.75);

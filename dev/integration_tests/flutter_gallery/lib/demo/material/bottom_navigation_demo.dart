@@ -91,7 +91,7 @@ class CustomInactiveIcon extends StatelessWidget {
       margin: const EdgeInsets.all(4.0),
       width: iconTheme.size! - 8.0,
       height: iconTheme.size! - 8.0,
-      decoration: BoxDecoration(border: Border.all(color: iconTheme.color!, width: 2.0)),
+      decoration: BoxDecoration(border: Border.all(color: iconTheme.color, width: 2.0)),
     );
   }
 }

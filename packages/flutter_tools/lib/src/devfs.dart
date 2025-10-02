@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' show File;
 
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';

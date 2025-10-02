@@ -93,7 +93,7 @@ Future<bool> get isRunningOnBot => botDetector.isRunningOnBot;
 
 // Analytics instance for package:unified_analytics for analytics
 // reporting for all Flutter and Dart related tooling
-Analytics get analytics => context.get<Analytics>()!;
+Analytics get analytics => context.get<Analytics>();
 
 /// Currently active implementation of the file system.
 ///

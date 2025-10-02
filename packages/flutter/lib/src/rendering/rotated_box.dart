@@ -124,7 +124,7 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
       _transformLayer.layer = context.pushTransform(
         needsCompositing,
         offset,
-        _paintTransform!,
+        _paintTransform,
         _paintChild,
         oldLayer: _transformLayer.layer,
       );

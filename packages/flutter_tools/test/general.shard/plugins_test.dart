@@ -30,6 +30,7 @@ import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
 import 'package:yaml/yaml.dart';
 
+import '../../lib/src/macos/cocoapods.dart' show CocoaPods;
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fakes.dart' hide FakeOperatingSystemUtils;
@@ -1191,7 +1192,7 @@ version: 1.0.0
 dependencies:
   url_launcher: ^1.0.0
   user_selected_url_launcher_implementation: ^1.0.0
-    ''', logger: BufferLogger.test())!;
+    ''', logger: BufferLogger.test());
 
             flutterProject.manifest = manifest;
             flutterProject.isModule = true;
@@ -1475,7 +1476,7 @@ version: 1.0.0
 dependencies:
   url_launcher: ^1.0.0
   user_selected_url_launcher_implementation: ^1.0.0
-    ''', logger: BufferLogger.test())!;
+    ''', logger: BufferLogger.test());
 
           flutterProject.manifest = manifest;
 
@@ -1546,7 +1547,7 @@ version: 1.0.0
 dependencies:
   url_launcher: ^1.0.0
   user_selected_url_launcher_implementation: ^1.0.0
-    ''', logger: BufferLogger.test())!;
+    ''', logger: BufferLogger.test());
 
           flutterProject.manifest = manifest;
 

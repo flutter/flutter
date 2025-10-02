@@ -216,7 +216,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     } finally {
       ErrorHandlingFileSystem.deleteIfExists(backupProjectSettings);
       if (schemeInfo?.backupSchemeFile != null) {
-        ErrorHandlingFileSystem.deleteIfExists(schemeInfo!.backupSchemeFile!);
+        ErrorHandlingFileSystem.deleteIfExists(schemeInfo!.backupSchemeFile);
       }
       migrationStatus?.stop();
     }

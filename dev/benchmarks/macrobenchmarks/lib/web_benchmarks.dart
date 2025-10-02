@@ -202,7 +202,7 @@ void _fallbackToManual(String error) {
   ''');
 
   for (final String benchmarkName in benchmarks.keys) {
-    final web.Element button = web.document.querySelector('#$benchmarkName')!;
+    final web.Element button = web.document.querySelector('#$benchmarkName');
     button.addEventListener(
       'click',
       (JSObject _) {

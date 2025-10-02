@@ -194,7 +194,7 @@ void main() {
           wrap = RenderWrap(
             textDirection: TextDirection.ltr,
             children: <RenderBox>[box200x200],
-            clipBehavior: clip!,
+            clipBehavior: clip,
           );
         case null:
           wrap = RenderWrap(textDirection: TextDirection.ltr, children: <RenderBox>[box200x200]);

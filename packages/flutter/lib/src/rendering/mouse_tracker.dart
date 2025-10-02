@@ -233,7 +233,7 @@ class MouseTracker extends ChangeNotifier {
     for (final HitTestEntry entry in result.path) {
       final Object target = entry.target;
       if (target is MouseTrackerAnnotation) {
-        annotations[target] = entry.transform!;
+        annotations[target] = entry.transform;
       }
     }
     return annotations;

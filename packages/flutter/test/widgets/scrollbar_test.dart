@@ -474,7 +474,7 @@ void main() {
   testWidgets('thumb resizes gradually on overscroll', (WidgetTester tester) async {
     const EdgeInsets padding = EdgeInsets.fromLTRB(1, 2, 3, 4);
     const Size size = Size(60, 300);
-    final double scrollExtent = size.height * 10;
+    const double scrollExtent = size.height * 10;
     final ScrollMetrics metrics = defaultMetrics.copyWith(
       minScrollExtent: 0,
       maxScrollExtent: scrollExtent,
@@ -2333,7 +2333,7 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
 
       // Drag the thumb to scroll down.
       const double scrollDownAmount = 20.0;
-      final Offset thumbCenter = thumbRectBefore.center;
+      const Offset thumbCenter = thumbRectBefore.center;
       final TestGesture dragGesture = await tester.startGesture(thumbCenter);
       await tester.pumpAndSettle();
       await dragGesture.moveBy(const Offset(0.0, scrollDownAmount));

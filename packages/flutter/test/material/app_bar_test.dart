@@ -1513,7 +1513,7 @@ void main() {
           find.descendant(of: find.byType(AppBar), matching: find.byType(Material)),
         );
         final Brightness appBarBrightness = ThemeData.estimateBrightnessForColor(
-          appBarMaterial.color!,
+          appBarMaterial.color,
         );
         final Brightness onAppBarBrightness = appBarBrightness == Brightness.light
             ? Brightness.dark
@@ -1536,7 +1536,7 @@ void main() {
           find.descendant(of: find.byType(AppBar), matching: find.byType(Material)),
         );
         final Brightness appBarBrightness = ThemeData.estimateBrightnessForColor(
-          appBarMaterial.color!,
+          appBarMaterial.color,
         );
         final Brightness onAppBarBrightness = appBarBrightness == Brightness.light
             ? Brightness.dark
@@ -1888,7 +1888,7 @@ void main() {
     );
 
     Color textColor() {
-      return tester.renderObject<RenderParagraph>(find.text('title')).text.style!.color!;
+      return tester.renderObject<RenderParagraph>(find.text('title')).text.style!.color;
     }
 
     Color? leadingIconColor() => _iconStyle(tester, Icons.add_circle)?.color;
@@ -3543,7 +3543,7 @@ void main() {
             find.descendant(of: find.byType(AppBar), matching: find.byType(Material)),
           );
           final Brightness appBarBrightness = ThemeData.estimateBrightnessForColor(
-            appBarMaterial.color!,
+            appBarMaterial.color,
           );
           final Brightness onAppBarBrightness = appBarBrightness == Brightness.light
               ? Brightness.dark
@@ -3565,7 +3565,7 @@ void main() {
             find.descendant(of: find.byType(AppBar), matching: find.byType(Material)),
           );
           final Brightness appBarBrightness = ThemeData.estimateBrightnessForColor(
-            appBarMaterial.color!,
+            appBarMaterial.color,
           );
           final Brightness onAppBarBrightness = appBarBrightness == Brightness.light
               ? Brightness.dark

@@ -2086,14 +2086,14 @@ class TransformLayer extends OffsetLayer {
 
   Offset? _transformOffset(Offset localPosition) {
     if (_inverseDirty) {
-      _invertedTransform = Matrix4.tryInvert(PointerEvent.removePerspectiveTransform(transform!));
+      _invertedTransform = Matrix4.tryInvert(PointerEvent.removePerspectiveTransform(transform));
       _inverseDirty = false;
     }
     if (_invertedTransform == null) {
       return null;
     }
 
-    return MatrixUtils.transformPoint(_invertedTransform!, localPosition);
+    return MatrixUtils.transformPoint(_invertedTransform, localPosition);
   }
 
   @override

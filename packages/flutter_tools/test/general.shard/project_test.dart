@@ -441,7 +441,7 @@ void main() {
         final FlutterManifest manifest = FlutterManifest.createFromString('''
     name: test
     version: 1.0.0+3
-    ''', logger: BufferLogger.test())!;
+    ''', logger: BufferLogger.test());
         final project = FlutterProject(fileSystem.systemTempDirectory, manifest, manifest);
         final versionInfo = jsonDecode(project.getVersionInfo()) as Map<String, dynamic>;
         expect(versionInfo['app_name'], 'test');
@@ -1549,7 +1549,7 @@ plugins {
         final FlutterManifest updated = FlutterManifest.createFromString(
           validPubspecWithDependencies,
           logger: logger,
-        )!;
+        );
         // Verifies the pubspec.yaml from [project] is overwritten with the pubspec
         // defined by [updated], both in the [FlutterProject] and on disk.
         expect(project.manifest, isNot(equals(updated)));

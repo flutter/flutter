@@ -1764,7 +1764,7 @@ void main() {
       return Material(
         child: DataTable(
           clipBehavior: clipBehavior,
-          border: TableBorder.all(borderRadius: borderRadius),
+          border: TableBorder.all(),
           columns: const <DataColumn>[DataColumn(label: Text('Column1'))],
           rows: <DataRow>[
             DataRow(

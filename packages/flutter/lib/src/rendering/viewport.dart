@@ -1007,7 +1007,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       rectLocal = rect;
     } else {
       assert(rect != null);
-      return RevealedOffset(offset: offset.pixels, rect: rect!);
+      return RevealedOffset(offset: offset.pixels, rect: rect);
     }
 
     assert(child.parent == this);

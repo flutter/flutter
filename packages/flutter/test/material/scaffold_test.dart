@@ -1690,7 +1690,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 50));
 
       ScaffoldGeometry geometry = listenerState.cache.value;
-      final Rect transitioningFabRect = geometry.floatingActionButtonArea!;
+      final Rect transitioningFabRect = geometry.floatingActionButtonArea;
 
       final double transitioningRotation = tester
           .widget<RotationTransition>(find.byType(RotationTransition))

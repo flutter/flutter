@@ -525,7 +525,7 @@ void main() {
 
     chipTheme = ChipThemeData.fromDefaults(
       brightness: Brightness.dark,
-      secondaryColor: Colors.tealAccent[200]!,
+      secondaryColor: Colors.tealAccent[200],
       labelStyle: const TextStyle(),
     );
     expect(chipTheme.backgroundColor, Colors.white.withAlpha(0x1f));
@@ -828,7 +828,7 @@ void main() {
     }
 
     Color textColor() {
-      return tester.renderObject<RenderParagraph>(find.text('Chip')).text.style!.color!;
+      return tester.renderObject<RenderParagraph>(find.text('Chip')).text.style!.color;
     }
 
     // Default, not disabled.

@@ -44,7 +44,7 @@ class SliverFillRemainingExample extends StatelessWidget {
           // ScrollPhysics do not allow for overscroll, setting fillOverscroll
           // to true will have no effect.
           fillOverscroll: true,
-          child: Container(
+          child: ColoredBox(
             color: Colors.teal[100],
             child: Align(
               alignment: Alignment.bottomCenter,

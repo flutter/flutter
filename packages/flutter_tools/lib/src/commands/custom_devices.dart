@@ -254,7 +254,7 @@ class CustomDevicesResetCommand extends CustomDevicesCommandBase {
   CustomDevicesResetCommand({
     required super.customDevicesConfig,
     required super.featureFlags,
-    required FileSystem super.fileSystem,
+    required super.fileSystem,
     required super.logger,
   });
 
@@ -296,7 +296,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     required Platform platform,
     required super.featureFlags,
     required ProcessManager processManager,
-    required FileSystem super.fileSystem,
+    required super.fileSystem,
     required super.logger,
   }) : _operatingSystemUtils = operatingSystemUtils,
        _terminal = terminal,
@@ -766,7 +766,7 @@ class CustomDevicesDeleteCommand extends CustomDevicesCommandBase {
   CustomDevicesDeleteCommand({
     required super.customDevicesConfig,
     required super.featureFlags,
-    required FileSystem super.fileSystem,
+    required super.fileSystem,
     required super.logger,
   });
 

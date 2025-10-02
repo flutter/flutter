@@ -417,14 +417,14 @@ class TrackingScrollController extends ScrollController {
       _lastUpdated = position;
       _lastUpdatedOffset = position.pixels;
     };
-    position.addListener(_positionToListener[position]!);
+    position.addListener(_positionToListener[position]);
   }
 
   @override
   void detach(ScrollPosition position) {
     super.detach(position);
     assert(_positionToListener.containsKey(position));
-    position.removeListener(_positionToListener[position]!);
+    position.removeListener(_positionToListener[position]);
     _positionToListener.remove(position);
     if (_lastUpdated == position) {
       _lastUpdated = null;
@@ -438,7 +438,7 @@ class TrackingScrollController extends ScrollController {
   void dispose() {
     for (final ScrollPosition position in positions) {
       assert(_positionToListener.containsKey(position));
-      position.removeListener(_positionToListener[position]!);
+      position.removeListener(_positionToListener[position]);
     }
     super.dispose();
   }

@@ -355,7 +355,7 @@ class FakeCrashReportSender extends MockClient {
 
         // A very ad-hoc multipart request parser. Good enough for this test.
         String? boundary = request.headers['Content-Type'];
-        boundary = boundary?.substring(boundary.indexOf('boundary=') + 9);
+        boundary = boundary.substring(boundary.indexOf('boundary=') + 9);
         crashInfo.fields = Map<String, String>.fromIterable(
           utf8.decode(request.bodyBytes).split('--$boundary').map<List<String>?>((String part) {
             final Match? nameMatch = RegExp(r'name="(.*)"').firstMatch(part);

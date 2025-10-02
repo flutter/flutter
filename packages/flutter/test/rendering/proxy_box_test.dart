@@ -571,7 +571,7 @@ void main() {
         case Clip.hardEdge:
         case Clip.antiAlias:
         case Clip.antiAliasWithSaveLayer:
-          box = RenderFittedBox(child: box200x200, fit: BoxFit.none, clipBehavior: clip!);
+          box = RenderFittedBox(child: box200x200, fit: BoxFit.none, clipBehavior: clip);
         case null:
           box = RenderFittedBox(child: box200x200, fit: BoxFit.none);
       }

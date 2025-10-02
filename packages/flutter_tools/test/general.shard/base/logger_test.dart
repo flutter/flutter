@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:test/fake.dart';
 
+import '../../../lib/src/base/logger.dart' show Logger;
 import '../../src/common.dart';
 import '../../src/fakes.dart';
 

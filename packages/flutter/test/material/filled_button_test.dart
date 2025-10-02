@@ -18,7 +18,7 @@ void main() {
   }
 
   Color textColor(WidgetTester tester, String text) {
-    return tester.renderObject<RenderParagraph>(find.text(text)).text.style!.color!;
+    return tester.renderObject<RenderParagraph>(find.text(text)).text.style!.color;
   }
 
   testWidgets('FilledButton, FilledButton.icon defaults', (WidgetTester tester) async {

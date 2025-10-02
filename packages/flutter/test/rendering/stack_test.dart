@@ -122,7 +122,7 @@ void main() {
           stack = RenderStack(
             textDirection: TextDirection.ltr,
             children: <RenderBox>[child],
-            clipBehavior: clip!,
+            clipBehavior: clip,
           );
         case null:
           stack = RenderStack(textDirection: TextDirection.ltr, children: <RenderBox>[child]);

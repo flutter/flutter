@@ -252,7 +252,7 @@ class CardCollectionState extends State<CardCollection> {
 
   void _changeTextAlign(TextAlign? newTextAlign) {
     setState(() {
-      _textAlign = newTextAlign!;
+      _textAlign = newTextAlign;
     });
   }
 

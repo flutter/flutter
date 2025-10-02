@@ -112,7 +112,7 @@ void main() {
     }
 
     final Color effectiveColor = ElevationOverlay.applySurfaceTint(
-      themeData.color!,
+      themeData.color,
       themeData.surfaceTintColor,
       themeData.elevation!,
     );

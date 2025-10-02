@@ -283,7 +283,7 @@ class ShapeDecoration extends Decoration {
   @override
   BoxPainter createBoxPainter([VoidCallback? onChanged]) {
     assert(onChanged != null || image == null);
-    return _ShapeDecorationPainter(this, onChanged!);
+    return _ShapeDecorationPainter(this, onChanged);
   }
 }
 
@@ -318,7 +318,7 @@ class _ShapeDecorationPainter extends BoxPainter {
     if (_interiorPaint == null && (_decoration.color != null || _decoration.gradient != null)) {
       _interiorPaint = Paint();
       if (_decoration.color != null) {
-        _interiorPaint!.color = _decoration.color!;
+        _interiorPaint!.color = _decoration.color;
       }
     }
     if (_decoration.gradient != null) {
@@ -434,7 +434,7 @@ class _ShapeDecorationPainter extends BoxPainter {
         _decoration.shape.paintInterior(
           canvas,
           adjustedRect,
-          _interiorPaint!,
+          _interiorPaint,
           textDirection: textDirection,
         );
       } else {
@@ -459,7 +459,7 @@ class _ShapeDecorationPainter extends BoxPainter {
       return;
     }
     _imagePainter ??= _decoration.image!.createPainter(onChanged);
-    _imagePainter!.paint(canvas, _lastRect!, _innerPath, configuration);
+    _imagePainter!.paint(canvas, _lastRect, _innerPath, configuration);
   }
 
   @override

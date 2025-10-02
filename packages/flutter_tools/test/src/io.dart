@@ -9,6 +9,8 @@ import 'dart:io' as io show Directory, File, IOOverrides, Link;
 
 import 'package:flutter_tools/src/base/file_system.dart';
 
+import '../../lib/src/base/file_system.dart' show LocalFileSystem;
+
 /// An [io.IOOverrides] that can delegate to [FileSystem] implementation if provided.
 ///
 /// Does not override any of the socket facilities.

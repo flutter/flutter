@@ -227,7 +227,7 @@ void main() {
       Border(
         top: BorderSide(
           width: 5.0,
-          color: Color.lerp(const Color(0xFFFFFF00), const Color(0xFFFF00FF), 0.25)!,
+          color: Color.lerp(const Color(0xFFFFFF00), const Color(0xFFFF00FF), 0.25),
         ),
       ),
     );
@@ -265,7 +265,7 @@ void main() {
       Border(
         top: BorderSide(
           width: 5.0,
-          color: Color.lerp(const Color(0xFFFFFF00), const Color(0xFFFF00FF), 0.75)!,
+          color: Color.lerp(const Color(0xFFFFFF00), const Color(0xFFFF00FF), 0.75),
         ),
       ),
     );

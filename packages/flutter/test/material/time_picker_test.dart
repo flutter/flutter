@@ -80,7 +80,7 @@ void main() {
     const Size timePickerInputSize = Size(312, 252);
     const Size dayPeriodPortraitSize = Size(52, 80);
     const EdgeInsets padding = EdgeInsets.fromLTRB(8, 18, 8, 8);
-    final double height = timePickerInputSize.height + padding.vertical;
+    const double height = timePickerInputSize.height + padding.vertical;
     double width;
 
     await mediaQueryBoilerplate(tester, entryMode: entryMode, materialType: MaterialType.material2);
@@ -175,7 +175,7 @@ void main() {
     const Size timePickerMinInputSize = Size(312, 252);
     const Size dayPeriodPortraitSize = Size(52, 80);
     const EdgeInsets padding = EdgeInsets.all(24.0);
-    final double height = timePickerMinInputSize.height * textScaleFactor + padding.vertical;
+    const double height = timePickerMinInputSize.height * textScaleFactor + padding.vertical;
     double width;
 
     await mediaQueryBoilerplate(tester, entryMode: entryMode, materialType: MaterialType.material3);
@@ -364,28 +364,28 @@ void main() {
 
         Offset center = (await startPicker(tester, (TimeOfDay? time) {
           result = time;
-        }, materialType: materialType))!;
+        }, materialType: materialType));
         await tester.tapAt(Offset(center.dx, center.dy - 50)); // 12:00 AM
         await finishPicker(tester);
         expect(result, equals(const TimeOfDay(hour: 0, minute: 0)));
 
         center = (await startPicker(tester, (TimeOfDay? time) {
           result = time;
-        }, materialType: materialType))!;
+        }, materialType: materialType));
         await tester.tapAt(Offset(center.dx + 50, center.dy));
         await finishPicker(tester);
         expect(result, equals(const TimeOfDay(hour: 3, minute: 0)));
 
         center = (await startPicker(tester, (TimeOfDay? time) {
           result = time;
-        }, materialType: materialType))!;
+        }, materialType: materialType));
         await tester.tapAt(Offset(center.dx, center.dy + 50));
         await finishPicker(tester);
         expect(result, equals(const TimeOfDay(hour: 6, minute: 0)));
 
         center = (await startPicker(tester, (TimeOfDay? time) {
           result = time;
-        }, materialType: materialType))!;
+        }, materialType: materialType));
         await tester.tapAt(Offset(center.dx, center.dy + 50));
         await tester.tapAt(Offset(center.dx - 50, center.dy));
         await finishPicker(tester);
@@ -397,7 +397,7 @@ void main() {
 
         final Offset center = (await startPicker(tester, (TimeOfDay? time) {
           result = time!;
-        }, materialType: materialType))!;
+        }, materialType: materialType));
         final Offset hour0 = Offset(center.dx, center.dy - 50); // 12:00 AM
         final Offset hour3 = Offset(center.dx + 50, center.dy);
         final Offset hour6 = Offset(center.dx, center.dy + 50);
@@ -453,7 +453,7 @@ void main() {
 
         final Offset center = (await startPicker(tester, (TimeOfDay? time) {
           result = time!;
-        }, materialType: materialType))!;
+        }, materialType: materialType));
         final Offset hour6 = Offset(center.dx, center.dy + 50); // 6:00
         final Offset min45 = Offset(center.dx - 50, center.dy); // 45 mins (or 9:00 hours)
 
@@ -469,7 +469,7 @@ void main() {
 
         final Offset center = (await startPicker(tester, (TimeOfDay? time) {
           result = time!;
-        }, materialType: materialType))!;
+        }, materialType: materialType));
         final Offset hour3 = Offset(center.dx + 50, center.dy);
         final Offset hour6 = Offset(center.dx, center.dy + 50);
         final Offset hour9 = Offset(center.dx - 50, center.dy);
@@ -492,7 +492,7 @@ void main() {
 
         final Offset center = (await startPicker(tester, (TimeOfDay? time) {
           result = time!;
-        }, materialType: materialType))!;
+        }, materialType: materialType));
         final Offset hour6 = Offset(center.dx, center.dy + 50); // 6:00
         final Offset min46 = Offset(center.dx - 50, center.dy - 5); // 46 mins
 
@@ -510,7 +510,7 @@ void main() {
 
         final Offset center = (await startPicker(tester, (TimeOfDay? time) {
           result = time!;
-        }, materialType: materialType))!;
+        }, materialType: materialType));
         final Offset hour6 = Offset(center.dx, center.dy + 50); // 6:00
         final Offset min48 = Offset(center.dx - 50, center.dy - 15); // 48 mins
 
@@ -540,7 +540,7 @@ void main() {
           tester,
           (TimeOfDay? time) {},
           materialType: materialType,
-        ))!;
+        ));
         await tester.tapAt(Offset(center.dx, center.dy - 50));
         await finishPicker(tester);
         expect(feedback.hapticCount, 1);
@@ -551,7 +551,7 @@ void main() {
           tester,
           (TimeOfDay? time) {},
           materialType: materialType,
-        ))!;
+        ));
         await tester.tapAt(Offset(center.dx, center.dy - 50));
         await tester.pump(kFastFeedbackInterval);
         await tester.tapAt(Offset(center.dx, center.dy + 50));
@@ -564,7 +564,7 @@ void main() {
           tester,
           (TimeOfDay? time) {},
           materialType: materialType,
-        ))!;
+        ));
         await tester.tapAt(Offset(center.dx, center.dy - 50));
         await tester.pump(kSlowFeedbackInterval);
         await tester.tapAt(Offset(center.dx, center.dy + 50));
@@ -579,7 +579,7 @@ void main() {
           tester,
           (TimeOfDay? time) {},
           materialType: materialType,
-        ))!;
+        ));
         final Offset hour0 = Offset(center.dx, center.dy - 50);
         final Offset hour3 = Offset(center.dx + 50, center.dy);
 
@@ -595,7 +595,7 @@ void main() {
           tester,
           (TimeOfDay? time) {},
           materialType: materialType,
-        ))!;
+        ));
         final Offset hour0 = Offset(center.dx, center.dy - 50);
         final Offset hour3 = Offset(center.dx + 50, center.dy);
 
@@ -615,7 +615,7 @@ void main() {
           tester,
           (TimeOfDay? time) {},
           materialType: materialType,
-        ))!;
+        ));
         final Offset hour0 = Offset(center.dx, center.dy - 50);
         final Offset hour3 = Offset(center.dx + 50, center.dy);
 
@@ -2173,7 +2173,7 @@ void main() {
           },
           restorationId: 'restorable_time_picker',
           materialType: materialType,
-        ))!;
+        ));
         final Offset hour6 = Offset(center.dx, center.dy + 50); // 6:00
         final Offset min45 = Offset(center.dx - 50, center.dy); // 45 mins (or 9:00 hours)
 
@@ -2242,7 +2242,7 @@ void main() {
           },
           restorationId: 'restorable_time_picker',
           materialType: materialType,
-        ))!;
+        ));
 
         final TestRestorationData restorationData = await tester.getRestorationData();
         // Switch to input mode from dial mode.

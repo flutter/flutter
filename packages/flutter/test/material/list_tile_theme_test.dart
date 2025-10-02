@@ -266,8 +266,8 @@ void main() {
       borderRadius: BorderRadius.all(Radius.circular(4.0)),
     );
 
-    Color iconColor(Key key) => tester.state<TestIconState>(find.byKey(key)).iconTheme.color!;
-    Color textColor(Key key) => tester.state<TestTextState>(find.byKey(key)).textStyle.color!;
+    Color iconColor(Key key) => tester.state<TestIconState>(find.byKey(key)).iconTheme.color;
+    Color textColor(Key key) => tester.state<TestTextState>(find.byKey(key)).textStyle.color;
     ShapeBorder inkWellBorder() => tester
         .widget<InkWell>(find.descendant(of: find.byType(ListTile), matching: find.byType(InkWell)))
         .customBorder!;
@@ -376,7 +376,7 @@ void main() {
       );
     }
 
-    Color textColor(Key key) => tester.state<TestTextState>(find.byKey(key)).textStyle.color!;
+    Color textColor(Key key) => tester.state<TestTextState>(find.byKey(key)).textStyle.color;
 
     await tester.pumpWidget(buildFrame());
     // Enabled color should use ListTileTheme.textColor.
@@ -891,7 +891,7 @@ void main() {
       );
     }
 
-    Color iconColor(Key key) => tester.state<TestIconState>(find.byKey(key)).iconTheme.color!;
+    Color iconColor(Key key) => tester.state<TestIconState>(find.byKey(key)).iconTheme.color;
 
     // Test disabled state.
     await tester.pumpWidget(buildFrame());

@@ -40,7 +40,7 @@ void main() {
   testWidgets('Verify Image does not use disposed handles', (WidgetTester tester) async {
     final ui.Image image100x100 = (await tester.runAsync(
       () async => createTestImage(width: 100, height: 100),
-    ))!;
+    ));
 
     final _TestImageProvider imageProvider1 = _TestImageProvider();
     final _TestImageProvider imageProvider2 = _TestImageProvider();
@@ -430,7 +430,7 @@ void main() {
   testWidgets('Verify Image stops listening to ImageStream', (WidgetTester tester) async {
     final ui.Image image100x100 = (await tester.runAsync(
       () async => createTestImage(width: 100, height: 100),
-    ))!;
+    ));
     // Web does not override the toString, whereas VM does
     final String imageString = image100x100.toString();
 
@@ -897,7 +897,7 @@ void main() {
       final _TestImageProvider imageProvider2 = _TestImageProvider();
       final ui.Image image100x100 = (await tester.runAsync(
         () async => createTestImage(width: 100, height: 100),
-      ))!;
+      ));
 
       await tester.pumpWidget(
         Container(
@@ -917,7 +917,7 @@ void main() {
       renderImage = key.currentContext!.findRenderObject()! as RenderImage;
       expect(renderImage.image, isNotNull);
 
-      final ui.Image oldImage = renderImage.image!;
+      final ui.Image oldImage = renderImage.image;
 
       await tester.pumpWidget(
         Container(
@@ -1019,10 +1019,10 @@ void main() {
     (WidgetTester tester) async {
       final ui.Codec codec = (await tester.runAsync(() {
         return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
-      }))!;
+      }));
 
       Future<ui.Image> nextFrame() async {
-        final ui.FrameInfo frameInfo = (await tester.runAsync(codec.getNextFrame))!;
+        final ui.FrameInfo frameInfo = (await tester.runAsync(codec.getNextFrame));
         return frameInfo.image;
       }
 
@@ -1165,10 +1165,10 @@ void main() {
     (WidgetTester tester) async {
       final ui.Codec codec = (await tester.runAsync(() {
         return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
-      }))!;
+      }));
 
       Future<ui.Image> nextFrame() async {
-        final ui.FrameInfo frameInfo = (await tester.runAsync(codec.getNextFrame))!;
+        final ui.FrameInfo frameInfo = (await tester.runAsync(codec.getNextFrame));
         return frameInfo.image;
       }
 
@@ -1888,7 +1888,7 @@ void main() {
 
       final ui.Image image = (await tester.runAsync(
         () => createTestImage(width: 100, height: 100),
-      ))!;
+      ));
       final _TestImageStreamCompleter streamCompleter = _TestImageStreamCompleter(
         ImageInfo(image: image, debugLabel: 'test.png'),
       );
@@ -1915,7 +1915,7 @@ void main() {
   );
 
   testWidgets('Disposes image handle when disposed', (WidgetTester tester) async {
-    final ui.Image image = (await tester.runAsync(() => createTestImage(cache: false)))!;
+    final ui.Image image = (await tester.runAsync(() => createTestImage(cache: false)));
 
     expect(image.debugGetOpenHandleStackTraces()!.length, 1);
 
@@ -1951,7 +1951,7 @@ void main() {
 
   testWidgets('Keeps stream alive when ticker mode is disabled', (WidgetTester tester) async {
     imageCache.maximumSize = 0;
-    final ui.Image image = (await tester.runAsync(() => createTestImage(cache: false)))!;
+    final ui.Image image = (await tester.runAsync(() => createTestImage(cache: false)));
     final _TestImageProvider provider = _TestImageProvider();
     provider.complete(image);
 
@@ -1971,7 +1971,7 @@ void main() {
         .withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
     (WidgetTester tester) async {
       final UniqueKey errorKey = UniqueKey();
-      final ui.Image image = (await tester.runAsync(() => createTestImage()))!;
+      final ui.Image image = (await tester.runAsync(() => createTestImage()));
       final _TestImageStreamCompleter streamCompleter = _TestImageStreamCompleter();
       final _TestImageProvider imageProvider = _TestImageProvider(streamCompleter: streamCompleter);
 
@@ -2076,10 +2076,10 @@ void main() {
     (WidgetTester tester) async {
       final ui.Codec codec = (await tester.runAsync(() {
         return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
-      }))!;
+      }));
 
       Future<ui.Image> nextFrame() async {
-        final ui.FrameInfo frameInfo = (await tester.runAsync(codec.getNextFrame))!;
+        final ui.FrameInfo frameInfo = (await tester.runAsync(codec.getNextFrame));
         return frameInfo.image;
       }
 

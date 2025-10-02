@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' show Platform, ProcessResult;
+
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -9,6 +11,8 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../lib/src/base/io.dart' show ProcessResult;
+import '../../lib/src/base/platform.dart' show Platform;
 import '../src/common.dart';
 import 'test_driver.dart';
 

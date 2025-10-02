@@ -967,14 +967,14 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
       return b!._colors == null
           ? b
           : _CupertinoEdgeShadowDecoration._(
-              b._colors!.map<Color>((Color color) => Color.lerp(null, color, t)!).toList(),
+              b._colors!.map<Color>((Color color) => Color.lerp(null, color, t)).toList(),
             );
     }
     if (b == null) {
       return a._colors == null
           ? a
           : _CupertinoEdgeShadowDecoration._(
-              a._colors.map<Color>((Color color) => Color.lerp(null, color, 1.0 - t)!).toList(),
+              a._colors.map<Color>((Color color) => Color.lerp(null, color, 1.0 - t)).toList(),
             );
     }
     assert(b._colors != null || a._colors != null);
@@ -1084,7 +1084,7 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
           colors[bandColorIndex],
           colors[bandColorIndex + 1],
           (dx % bandWidth) / bandWidth,
-        )!;
+        );
       final double x = start + shadowDirection * dx;
       canvas.drawRect(Rect.fromLTWH(x - 1.0, offset.dy, 1.0, shadowHeight), paint);
     }

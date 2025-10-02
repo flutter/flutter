@@ -2733,7 +2733,7 @@ class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
       final String acceleratorCharacter = _displayLabel[_acceleratorIndex].toLowerCase();
       _shortcutRegistryEntry = _shortcutRegistry?.addAll(<ShortcutActivator, Intent>{
         CharacterActivator(acceleratorCharacter, alt: true): VoidCallbackIntent(
-          _binding!.onInvoke!,
+          _binding!.onInvoke,
         ),
       });
     }

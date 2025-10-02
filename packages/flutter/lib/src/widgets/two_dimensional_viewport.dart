@@ -970,7 +970,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     };
 
     // The scroll offset in the viewport to `rect`.
-    final Offset paintOffset = parentDataOf(box).paintOffset!;
+    final Offset paintOffset = parentDataOf(box).paintOffset;
     leadingScrollOffset += switch (axisDirection) {
       AxisDirection.up => viewportDimension.height - paintOffset.dy - box.size.height,
       AxisDirection.left => viewportDimension.width - paintOffset.dx - box.size.width,
@@ -1459,13 +1459,13 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
 
     // Set paintExtent (and visibility)
     childParentData._paintExtent = computeChildPaintExtent(
-      childParentData.layoutOffset!,
+      childParentData.layoutOffset,
       child.size,
     );
     // Set paintOffset
     childParentData.paintOffset = computeAbsolutePaintOffsetFor(
       child,
-      layoutOffset: childParentData.layoutOffset!,
+      layoutOffset: childParentData.layoutOffset,
     );
     // If the child is partially visible, or not visible at all, there is
     // visual overflow.
@@ -1737,7 +1737,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    final Offset paintOffset = parentDataOf(child).paintOffset!;
+    final Offset paintOffset = parentDataOf(child).paintOffset;
     transform.translate(paintOffset.dx, paintOffset.dy);
   }
 

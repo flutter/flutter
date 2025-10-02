@@ -83,7 +83,7 @@ void main() {
             color: Colors.yellow[200],
             child: PhysicalModel(
               elevation: 9.0,
-              color: Colors.blue[900]!,
+              color: Colors.blue[900],
               child: const SizedBox(height: 100.0, width: 100.0),
             ),
           ),
@@ -112,7 +112,7 @@ void main() {
             padding: const EdgeInsets.all(150.0),
             color: Colors.yellow[200],
             child: PhysicalShape(
-              color: Colors.green[900]!,
+              color: Colors.green[900],
               clipper: const ShapeBorderClipper(
                 shape: BeveledRectangleBorder(
                   borderRadius: BorderRadius.all(Radius.circular(20.0)),

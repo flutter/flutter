@@ -486,7 +486,7 @@ class _ScreenshotPaintingContext extends PaintingContext {
     _screenshotCanvas = Canvas(_screenshotRecorder!);
     _data.containerLayer.append(_screenshotCurrentLayer!);
     if (_data.includeInRegularContext) {
-      _multicastCanvas = _MulticastCanvas(main: super.canvas, screenshot: _screenshotCanvas!);
+      _multicastCanvas = _MulticastCanvas(main: super.canvas, screenshot: _screenshotCanvas);
     } else {
       _multicastCanvas = null;
     }
@@ -3028,7 +3028,7 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
       return;
     }
     if (_lastPointerLocation != null) {
-      _inspectAt(_lastPointerLocation!);
+      _inspectAt(_lastPointerLocation);
       WidgetInspectorService.instance._sendInspectEvent(selection.current);
     }
   }

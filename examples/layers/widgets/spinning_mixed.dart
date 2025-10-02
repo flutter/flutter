@@ -103,7 +103,7 @@ void main() {
 
   // TODO(goderbauer): Create a window if embedder doesn't provide an implicit view to draw into.
   assert(binding.platformDispatcher.implicitView != null);
-  final RenderView view = RenderView(view: binding.platformDispatcher.implicitView!, child: root);
+  final RenderView view = RenderView(view: binding.platformDispatcher.implicitView, child: root);
   final PipelineOwner pipelineOwner = PipelineOwner()..rootNode = view;
   binding.rootPipelineOwner.adoptChild(pipelineOwner);
   binding.addRenderView(view);

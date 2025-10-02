@@ -712,7 +712,7 @@ class _LocalizationsState extends State<Localizations> {
       textDirection: _textDirection,
       child: _LocalizationsScope(
         key: _localizedResourcesScopeKey,
-        locale: _locale!,
+        locale: _locale,
         localizationsState: this,
         typeToResources: _typeToResources,
         child: Directionality(textDirection: _textDirection, child: widget.child!),
@@ -789,7 +789,7 @@ class LocalizationsResolver extends ChangeNotifier with WidgetsBindingObserver {
   /// the provided set of [supportedLocales].
   Locale get locale {
     final Locale appLocale = _locale != null
-        ? _resolveLocales(<Locale>[_locale!], supportedLocales)
+        ? _resolveLocales(<Locale>[_locale], supportedLocales)
         : _resolvedLocale!;
     assert(_debugCheckLocalizations(appLocale));
     return appLocale;

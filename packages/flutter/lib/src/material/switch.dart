@@ -1644,7 +1644,7 @@ class _SwitchPainter extends ToggleablePainter {
     thumbSize = Size(thumbSize!.width - inset, thumbSize.height - inset);
 
     final double colorValue = _colorAnimation!.value;
-    final Color trackColor = Color.lerp(inactiveTrackColor, activeTrackColor, colorValue)!;
+    final Color trackColor = Color.lerp(inactiveTrackColor, activeTrackColor, colorValue);
     final Color? trackOutlineColor =
         inactiveTrackOutlineColor == null || activeTrackOutlineColor == null
         ? null
@@ -1656,13 +1656,13 @@ class _SwitchPainter extends ToggleablePainter {
     );
     Color lerpedThumbColor;
     if (!reaction.isDismissed) {
-      lerpedThumbColor = Color.lerp(inactivePressedColor, activePressedColor, colorValue)!;
+      lerpedThumbColor = Color.lerp(inactivePressedColor, activePressedColor, colorValue);
     } else if (positionController.status == AnimationStatus.forward) {
-      lerpedThumbColor = Color.lerp(inactivePressedColor, activeColor, colorValue)!;
+      lerpedThumbColor = Color.lerp(inactivePressedColor, activeColor, colorValue);
     } else if (positionController.status == AnimationStatus.reverse) {
-      lerpedThumbColor = Color.lerp(inactiveColor, activePressedColor, colorValue)!;
+      lerpedThumbColor = Color.lerp(inactiveColor, activePressedColor, colorValue);
     } else {
-      lerpedThumbColor = Color.lerp(inactiveColor, activeColor, colorValue)!;
+      lerpedThumbColor = Color.lerp(inactiveColor, activeColor, colorValue);
     }
 
     // Blend the thumb color against a `surfaceColor` background in case the
@@ -1820,7 +1820,7 @@ class _SwitchPainter extends ToggleablePainter {
       thumbPainter.paint(canvas, thumbPaintOffset, configuration.copyWith(size: thumbSize));
 
       if (thumbIcon != null && thumbIcon.icon != null) {
-        final Color iconColor = Color.lerp(inactiveIconColor, activeIconColor, currentValue)!;
+        final Color iconColor = Color.lerp(inactiveIconColor, activeIconColor, currentValue);
         final double iconSize = thumbIcon.size ?? _SwitchConfigM3.iconSize;
         final IconData iconData = thumbIcon.icon!;
         final double? iconWeight = thumbIcon.weight ?? iconTheme?.weight;

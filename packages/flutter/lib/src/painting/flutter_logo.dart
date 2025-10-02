@@ -137,7 +137,7 @@ class FlutterLogoDecoration extends Decoration {
       return b;
     }
     return FlutterLogoDecoration._(
-      Color.lerp(a.textColor, b.textColor, t)!,
+      Color.lerp(a.textColor, b.textColor, t),
       t < 0.5 ? a.style : b.style,
       EdgeInsets.lerp(a.margin, b.margin, t)!,
       a._position + (b._position - a._position) * t,
@@ -333,7 +333,7 @@ class _FlutterLogoPainter extends BoxPainter {
   @override
   void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
     offset += _config.margin.topLeft;
-    final Size canvasSize = _config.margin.deflateSize(configuration.size!);
+    final Size canvasSize = _config.margin.deflateSize(configuration.size);
     if (canvasSize.isEmpty) {
       return;
     }
@@ -370,7 +370,7 @@ class _FlutterLogoPainter extends BoxPainter {
       // only the mark
       logoTargetSquare = centerSquare;
     }
-    final Rect logoSquare = Rect.lerp(centerSquare, logoTargetSquare, _config._position.abs())!;
+    final Rect logoSquare = Rect.lerp(centerSquare, logoTargetSquare, _config._position.abs());
 
     if (_config._opacity < 1.0) {
       canvas.saveLayer(

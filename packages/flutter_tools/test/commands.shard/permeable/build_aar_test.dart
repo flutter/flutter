@@ -21,6 +21,7 @@ import 'package:test/fake.dart';
 import 'package:unified_analytics/testing.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import '../../../lib/src/android/android_builder.dart' show AndroidBuilder;
 import '../../src/android_common.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';

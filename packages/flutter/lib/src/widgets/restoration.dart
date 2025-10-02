@@ -1012,7 +1012,7 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
   }
 
   void _unregister(RestorableProperty<Object?> property) {
-    final VoidCallback listener = _properties.remove(property)!;
+    final VoidCallback listener = _properties.remove(property);
     assert(() {
       _debugPropertiesWaitingForReregistration?.remove(property);
       return true;

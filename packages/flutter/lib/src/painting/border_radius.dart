@@ -572,10 +572,10 @@ class BorderRadius extends BorderRadiusGeometry {
       return a * (1.0 - t);
     }
     return BorderRadius.only(
-      topLeft: Radius.lerp(a.topLeft, b.topLeft, t)!,
-      topRight: Radius.lerp(a.topRight, b.topRight, t)!,
-      bottomLeft: Radius.lerp(a.bottomLeft, b.bottomLeft, t)!,
-      bottomRight: Radius.lerp(a.bottomRight, b.bottomRight, t)!,
+      topLeft: Radius.lerp(a.topLeft, b.topLeft, t),
+      topRight: Radius.lerp(a.topRight, b.topRight, t),
+      bottomLeft: Radius.lerp(a.bottomLeft, b.bottomLeft, t),
+      bottomRight: Radius.lerp(a.bottomRight, b.bottomRight, t),
     );
   }
 
@@ -777,10 +777,10 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
       return a * (1.0 - t);
     }
     return BorderRadiusDirectional.only(
-      topStart: Radius.lerp(a.topStart, b.topStart, t)!,
-      topEnd: Radius.lerp(a.topEnd, b.topEnd, t)!,
-      bottomStart: Radius.lerp(a.bottomStart, b.bottomStart, t)!,
-      bottomEnd: Radius.lerp(a.bottomEnd, b.bottomEnd, t)!,
+      topStart: Radius.lerp(a.topStart, b.topStart, t),
+      topEnd: Radius.lerp(a.topEnd, b.topEnd, t),
+      bottomStart: Radius.lerp(a.bottomStart, b.bottomStart, t),
+      bottomEnd: Radius.lerp(a.bottomEnd, b.bottomEnd, t),
     );
   }
 

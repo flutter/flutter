@@ -177,7 +177,7 @@ Future<void> _expectColors(
   final TestWidgetsFlutterBinding binding = tester.binding;
   final ui.Image image = (await binding.runAsync<ui.Image>(
     () => captureImage(finder.evaluate().single),
-  ))!;
+  ));
   addTearDown(image.dispose);
   final ByteData bytes = (await binding.runAsync<ByteData?>(
     () => image.toByteData(format: ui.ImageByteFormat.rawStraightRgba),

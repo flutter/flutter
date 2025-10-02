@@ -76,7 +76,7 @@ class WidgetPreviewDtdServices {
   }
 
   Future<void> _registerServices() async {
-    final DartToolingDaemon dtd = _dtd!;
+    final DartToolingDaemon dtd = _dtd;
     await Future.wait(<Future<void>>[
       for (final (String method, DTDServiceCallback callback) in services)
         dtd

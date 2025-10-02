@@ -95,7 +95,7 @@ abstract base class WidgetPreviewSubCommandBase extends FlutterCommand {
   FlutterProjectFactory get projectFactory;
 
   FlutterProject getRootProject() {
-    final ArgResults results = argResults!;
+    final ArgResults results = argResults;
     final Directory projectDir;
     if (results.rest case <String>[final String directory]) {
       projectDir = fs.directory(directory);

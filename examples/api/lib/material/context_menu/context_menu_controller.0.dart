@@ -140,7 +140,7 @@ class _ContextMenuRegionState extends State<_ContextMenuRegion> {
 
   void _onLongPress() {
     assert(_longPressOffset != null);
-    _show(_longPressOffset!);
+    _show(_longPressOffset);
     _longPressOffset = null;
   }
 

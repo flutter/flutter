@@ -175,7 +175,7 @@ void main() {
       });
 
       testWidgets('should have some vertical drag', (WidgetTester tester) async {
-        final double dragPositionBelowTextField = reasonableTextField.center.dy + 30;
+        const double dragPositionBelowTextField = reasonableTextField.center.dy + 30;
 
         await tester.pumpWidget(
           const MaterialApp(color: Color.fromARGB(7, 0, 129, 90), home: Placeholder()),

@@ -10,6 +10,8 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
+import '../../../lib/src/build_system/build_system.dart' show Source;
+import '../../../lib/src/build_system/source.dart' show Source;
 import '../../src/common.dart';
 import '../test_data/basic_project.dart';
 import '../test_data/compile_error_project.dart';
@@ -22,7 +24,7 @@ import 'test_support.dart';
 void main() {
   late Directory tempDir;
   late DapTestSession dap;
-  final relativeMainPath = 'lib${fileSystem.path.separator}main.dart';
+  const relativeMainPath = 'lib${fileSystem.path.separator}main.dart';
 
   setUpAll(() {
     Cache.flutterRoot = getFlutterRoot();

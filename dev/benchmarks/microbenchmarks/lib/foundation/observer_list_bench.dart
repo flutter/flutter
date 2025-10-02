@@ -15,8 +15,6 @@ const List<int> callbackCounts = <int>[1, 10, 100, 500];
 class TestAnimationController extends AnimationController {
   TestAnimationController() : super(vsync: const TestVSync());
 
-  @override
-  void notifyListeners() => super.notifyListeners();
 }
 
 Future<void> execute() async {

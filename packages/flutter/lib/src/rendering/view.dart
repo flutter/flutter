@@ -496,7 +496,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   @override
   Rect get semanticBounds {
     assert(_rootTransform != null);
-    return MatrixUtils.transformRect(_rootTransform!, Offset.zero & size);
+    return MatrixUtils.transformRect(_rootTransform, Offset.zero & size);
   }
 
   @override

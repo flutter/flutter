@@ -74,7 +74,7 @@ class _TreeSliverExampleState extends State<TreeSliverExample> {
     AnimationStyle toggleAnimationStyle,
   ) {
     final bool isParentNode = node.children.isNotEmpty;
-    final BorderSide border = BorderSide(width: 2, color: Colors.purple[300]!);
+    final BorderSide border = BorderSide(width: 2, color: Colors.purple[300]);
     return TreeSliver.wrapChildToToggleNode(
       node: node,
       child: Row(

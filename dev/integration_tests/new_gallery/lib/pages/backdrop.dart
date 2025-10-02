@@ -266,7 +266,7 @@ class _SettingsIcon extends AnimatedWidget {
                 toggleSettings();
                 SemanticsService.announce(
                   _settingsSemanticLabel(isSettingsOpenNotifier.value, context),
-                  GalleryOptions.of(context).resolvedTextDirection()!,
+                  GalleryOptions.of(context).resolvedTextDirection(),
                 );
               },
               child: Padding(

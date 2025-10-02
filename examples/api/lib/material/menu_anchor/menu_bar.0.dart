@@ -50,7 +50,7 @@ class MenuEntry {
         result.addAll(MenuEntry.shortcuts(selection.menuChildren!));
       } else {
         if (selection.shortcut != null && selection.onPressed != null) {
-          result[selection.shortcut!] = VoidCallbackIntent(selection.onPressed!);
+          result[selection.shortcut!] = VoidCallbackIntent(selection.onPressed);
         }
       }
     }

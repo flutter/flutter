@@ -922,7 +922,7 @@ void main() {
     final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(
       overlayColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
         if (states.contains(MaterialState.focused)) {
-          return Colors.brown[500]!;
+          return Colors.brown[500];
         }
 
         return Colors.transparent;

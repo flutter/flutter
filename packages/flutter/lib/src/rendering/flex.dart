@@ -1289,7 +1289,7 @@ class RenderFlex extends RenderBox
       final double? childBaselineOffset;
       final bool baselineAlign =
           baselineOffset != null &&
-          (childBaselineOffset = child.getDistanceToBaseline(textBaseline!, onlyReal: true)) !=
+          (childBaselineOffset = child.getDistanceToBaseline(textBaseline, onlyReal: true)) !=
               null;
       final double childCrossPosition = baselineAlign
           ? baselineOffset - childBaselineOffset!

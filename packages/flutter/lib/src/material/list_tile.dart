@@ -1568,7 +1568,7 @@ class _RenderListTile extends RenderBox
       final double titleBaseline =
           getBaseline(title, textConstraints, titleBaselineType) ?? titleHeight;
       final double subtitleBaseline =
-          getBaseline(subtitle, textConstraints, subtitleBaselineType!) ?? subtitleHeight;
+          getBaseline(subtitle, textConstraints, subtitleBaselineType) ?? subtitleHeight;
 
       final double targetTitleY =
           (isThreeLine ? (isDense ? 22.0 : 28.0) : (isDense ? 28.0 : 32.0)) - titleBaseline;

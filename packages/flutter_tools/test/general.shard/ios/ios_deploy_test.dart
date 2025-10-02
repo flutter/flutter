@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
 import 'package:test/fake.dart';
 
+import '../../../lib/src/ios/ios_deploy.dart' show IOSDeployDebugger;
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';

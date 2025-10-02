@@ -218,7 +218,7 @@ final class LibraryPreviewNode {
           // the pub-cache) and isn't necessary to track as part of the dependency graph.
           continue;
         }
-        final LibraryElement2 importedLibrary = importedLib.importedLibrary2!;
+        final LibraryElement2 importedLibrary = importedLib.importedLibrary2;
         final LibraryPreviewNode result = graph.putIfAbsent(
           importedLibrary.toPreviewPath(),
           () => LibraryPreviewNode(library: importedLibrary, logger: logger),

@@ -359,7 +359,7 @@ class _DismissibleState extends State<Dismissible>
   double get _dismissThreshold => widget.dismissThresholds[_dismissDirection] ?? _kDismissThreshold;
 
   double get _overallDragAxisExtent {
-    final Size size = context.size!;
+    final Size size = context.size;
     return _directionIsXAxis ? size.width : size.height;
   }
 

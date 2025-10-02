@@ -10,6 +10,8 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 
+import '../../lib/src/android/android_builder.dart' show AndroidBuilder;
+import '../../lib/src/project.dart' show FlutterProject;
 import '../integration.shard/test_utils.dart';
 import 'common.dart';
 

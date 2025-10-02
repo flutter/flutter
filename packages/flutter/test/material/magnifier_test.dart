@@ -260,7 +260,7 @@ void main() {
           context,
           tester,
           magnifierPositioner = ValueNotifier<MagnifierInfo>(
-            MagnifierInfo(
+            const MagnifierInfo(
               currentLineBoundaries: reasonableTextField,
               fieldBounds: reasonableTextField,
               caretRect: reasonableTextField,
@@ -321,7 +321,7 @@ void main() {
           context,
           tester,
           magnifierPositioner = ValueNotifier<MagnifierInfo>(
-            MagnifierInfo(
+            const MagnifierInfo(
               currentLineBoundaries: reasonableTextField,
               fieldBounds: reasonableTextField,
               caretRect: reasonableTextField,
@@ -383,7 +383,7 @@ void main() {
           context,
           tester,
           magnifierInfo = ValueNotifier<MagnifierInfo>(
-            MagnifierInfo(
+            const MagnifierInfo(
               currentLineBoundaries: reasonableTextField,
               fieldBounds: reasonableTextField,
               caretRect: reasonableTextField,
@@ -401,7 +401,7 @@ void main() {
         final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
         final ValueNotifier<MagnifierInfo> magnifierPositioner = ValueNotifier<MagnifierInfo>(
-          MagnifierInfo(
+          const MagnifierInfo(
             currentLineBoundaries: reasonableTextField,
             fieldBounds: reasonableTextField,
             caretRect: reasonableTextField,
@@ -413,11 +413,11 @@ void main() {
         await showMagnifier(context, tester, magnifierPositioner);
 
         // New position has a horizontal shift.
-        magnifierPositioner.value = MagnifierInfo(
+        magnifierPositioner.value = const MagnifierInfo(
           currentLineBoundaries: reasonableTextField,
           fieldBounds: reasonableTextField,
           caretRect: reasonableTextField,
-          globalGesturePosition: reasonableTextField.center + const Offset(200, 0),
+          globalGesturePosition: reasonableTextField.center + Offset(200, 0),
         );
         await tester.pumpAndSettle();
 
@@ -432,7 +432,7 @@ void main() {
         final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
         final ValueNotifier<MagnifierInfo> magnifierPositioner = ValueNotifier<MagnifierInfo>(
-          MagnifierInfo(
+          const MagnifierInfo(
             currentLineBoundaries: reasonableTextField,
             fieldBounds: reasonableTextField,
             caretRect: reasonableTextField,
@@ -466,7 +466,7 @@ void main() {
         final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
         final ValueNotifier<MagnifierInfo> magnifierPositioner = ValueNotifier<MagnifierInfo>(
-          MagnifierInfo(
+          const MagnifierInfo(
             currentLineBoundaries: reasonableTextField,
             fieldBounds: reasonableTextField,
             caretRect: reasonableTextField,

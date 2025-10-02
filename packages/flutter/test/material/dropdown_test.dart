@@ -1676,7 +1676,7 @@ void main() {
     }
 
     Color textColor(String text) {
-      return tester.renderObject<RenderParagraph>(find.text(text)).text.style!.color!;
+      return tester.renderObject<RenderParagraph>(find.text(text)).text.style!.color;
     }
 
     // The selected value should be displayed when the button is enabled.

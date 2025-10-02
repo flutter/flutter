@@ -149,7 +149,7 @@ void main() {
     final Color darkColor = (await testIconTheme(
       tester,
       themeData.copyWith(brightness: Brightness.dark),
-    )).color!;
+    )).color;
 
     expect(darkColor, isSameColorAs(primaryColor.darkColor));
   });

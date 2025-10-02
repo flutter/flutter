@@ -1625,7 +1625,7 @@ class _RenderDecoration extends RenderBox
       layer = context.pushTransform(
         needsCompositing,
         offset,
-        _labelTransform!,
+        _labelTransform,
         _paintLabel,
         oldLayer: layer as TransformLayer?,
       );
@@ -2102,9 +2102,9 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       return Colors.transparent;
     }
     if (decoration.fillColor != null) {
-      return MaterialStateProperty.resolveAs(decoration.fillColor!, materialState);
+      return MaterialStateProperty.resolveAs(decoration.fillColor, materialState);
     }
-    return MaterialStateProperty.resolveAs(defaults.fillColor!, materialState);
+    return MaterialStateProperty.resolveAs(defaults.fillColor, materialState);
   }
 
   Color _getHoverColor(ThemeData themeData) {
@@ -2116,7 +2116,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
   Color _getIconColor(ThemeData themeData, InputDecorationThemeData defaults) {
     return MaterialStateProperty.resolveAs(decoration.iconColor, materialState) ??
-        MaterialStateProperty.resolveAs(defaults.iconColor!, materialState);
+        MaterialStateProperty.resolveAs(defaults.iconColor, materialState);
   }
 
   Color _getPrefixIconColor(
@@ -2125,7 +2125,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   ) {
     return MaterialStateProperty.resolveAs(decoration.prefixIconColor, materialState) ??
         iconButtonTheme.style?.foregroundColor?.resolve(materialState) ??
-        MaterialStateProperty.resolveAs(defaults.prefixIconColor!, materialState);
+        MaterialStateProperty.resolveAs(defaults.prefixIconColor, materialState);
   }
 
   Color _getSuffixIconColor(
@@ -2134,7 +2134,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   ) {
     return MaterialStateProperty.resolveAs(decoration.suffixIconColor, materialState) ??
         iconButtonTheme.style?.foregroundColor?.resolve(materialState) ??
-        MaterialStateProperty.resolveAs(defaults.suffixIconColor!, materialState);
+        MaterialStateProperty.resolveAs(defaults.suffixIconColor, materialState);
   }
 
   // True if the label will be shown and the hint will not.
@@ -2298,7 +2298,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final IconButtonThemeData iconButtonTheme = IconButtonTheme.of(context);
 
     final TextStyle labelStyle = _getInlineLabelStyle(themeData, defaults);
-    final TextBaseline textBaseline = labelStyle.textBaseline!;
+    final TextBaseline textBaseline = labelStyle.textBaseline;
 
     final TextStyle hintStyle = _getInlineHintStyle(themeData, defaults);
     final String? hintText = decoration.hintText;

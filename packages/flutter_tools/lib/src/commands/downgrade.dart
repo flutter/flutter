@@ -87,13 +87,13 @@ class DowngradeCommand extends FlutterCommand {
     _flutterVersion ??= globals.flutterVersion;
     _persistentToolState ??= globals.persistentToolState;
     _processManager ??= globals.processManager;
-    _processUtils ??= ProcessUtils(processManager: _processManager!, logger: _logger);
+    _processUtils ??= ProcessUtils(processManager: _processManager, logger: _logger);
     _stdio ??= globals.stdio;
     _fileSystem ??= globals.fs;
     String workingDirectory = Cache.flutterRoot!;
     if (argResults!.wasParsed('working-directory')) {
       workingDirectory = stringArg('working-directory')!;
-      _flutterVersion = FlutterVersion(fs: _fileSystem!, flutterRoot: workingDirectory);
+      _flutterVersion = FlutterVersion(fs: _fileSystem, flutterRoot: workingDirectory);
     }
 
     final String currentChannel = _flutterVersion!.channel;

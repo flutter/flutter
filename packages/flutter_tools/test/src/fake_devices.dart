@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 
+import '../../lib/src/device.dart' show DeviceLogReader;
 import 'fakes.dart';
 
 /// A list of fake devices to test JSON serialization

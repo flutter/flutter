@@ -25,7 +25,7 @@ void main() {
 
     // Pans along the x axis.
     const Offset panStart = Offset(400.0, 300.0);
-    final Offset panXEnd = panStart - const Offset(0, 20);
+    const Offset panXEnd = panStart - const Offset(0, 20);
     final TestGesture gesturePanX = await tester.startGesture(panStart);
     await tester.pump();
     await gesturePanX.moveTo(panXEnd);
@@ -39,7 +39,7 @@ void main() {
     );
 
     // Pans along the Y axis.
-    final Offset panYEnd = panStart - const Offset(20, 0);
+    const Offset panYEnd = panStart - const Offset(20, 0);
     final TestGesture gesturePanY = await tester.startGesture(panStart);
     await tester.pump();
     await gesturePanY.moveTo(panYEnd);
@@ -54,8 +54,8 @@ void main() {
 
     // Tries to zooms even if it is disabled.
     const Offset scaleStart1 = Offset(400.0, 300.0);
-    final Offset scaleStart2 = scaleStart1 + const Offset(10.0, 0.0);
-    final Offset scaleEnd1 = scaleStart1 - const Offset(10.0, 0.0);
+    const Offset scaleStart2 = scaleStart1 + const Offset(10.0, 0.0);
+    const Offset scaleEnd1 = scaleStart1 - const Offset(10.0, 0.0);
     final Offset scaleEnd2 = scaleStart2 + const Offset(10.0, 0.0);
     final TestGesture gesture1 = await tester.createGesture();
     final TestGesture gesture2 = await tester.createGesture();

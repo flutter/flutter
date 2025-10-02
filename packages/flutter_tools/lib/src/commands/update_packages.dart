@@ -373,11 +373,11 @@ class UpdatePackagesCommand extends FlutterCommand {
     for (final MapEntry<String, String> pin in kManuallyPinnedDependencies.entries) {
       Dependency dependency;
       if (pubspec.dependencies.containsKey(pin.key)) {
-        dependency = pubspec.dependencies[pin.key]!;
+        dependency = pubspec.dependencies[pin.key];
       } else if (pubspec.devDependencies.containsKey(pin.key)) {
-        dependency = pubspec.devDependencies[pin.key]!;
+        dependency = pubspec.devDependencies[pin.key];
       } else if (pubspec.dependencyOverrides.containsKey(pin.key)) {
-        dependency = pubspec.dependencyOverrides[pin.key]!;
+        dependency = pubspec.dependencyOverrides[pin.key];
       } else {
         continue;
       }

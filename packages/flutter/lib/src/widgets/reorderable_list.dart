@@ -1403,7 +1403,7 @@ class _DragInfo extends Drag {
     child = item.widget.child;
     capturedThemes = item.widget.capturedThemes;
     dragOffset = itemRenderBox.globalToLocal(initialPosition);
-    itemSize = item.context.size!;
+    itemSize = item.context.size;
     _rawDragPosition = initialPosition;
     if (listState.widget.dragBoundaryProvider != null) {
       boundary = listState.widget.dragBoundaryProvider!.call(listState.context);
@@ -1554,7 +1554,7 @@ class _DragItemProxy extends StatelessWidget {
               dropPosition - overlayOrigin,
               effectivePosition,
               Curves.easeOut.transform(animation.value),
-            )!;
+            );
           }
           return Positioned(
             left: effectivePosition.dx,

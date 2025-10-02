@@ -851,7 +851,7 @@ class ScaffoldGeometry {
       floatingActionButtonArea!.center & Size.zero,
       floatingActionButtonArea,
       scaleFactor,
-    )!;
+    );
     return copyWith(floatingActionButtonArea: scaledButton);
   }
 
@@ -3404,7 +3404,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
             showDragHandle: widget.showDragHandle,
             onDragStart: _handleDragStart,
             onDragEnd: _handleDragEnd,
-            onClosing: widget.onClosing!,
+            onClosing: widget.onClosing,
             builder: widget.builder,
             backgroundColor: widget.backgroundColor,
             elevation: widget.elevation,

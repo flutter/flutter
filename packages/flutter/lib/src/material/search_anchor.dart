@@ -756,7 +756,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
             reverseCurve: Curves.easeInOutCubicEmphasized.flipped,
           );
 
-          final Rect viewRect = _rectTween.evaluate(curvedAnimation!)!;
+          final Rect viewRect = _rectTween.evaluate(curvedAnimation!);
           final double topPadding = showFullScreenView
               ? lerpDouble(0.0, MediaQuery.paddingOf(context).top, curvedAnimation!.value)!
               : 0.0;

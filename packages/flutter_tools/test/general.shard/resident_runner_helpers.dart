@@ -417,7 +417,7 @@ class FakeDevice extends Fake implements Device {
       NoOpDeviceLogReader(name);
 
   @override
-  DevicePortForwarder portForwarder = const NoOpDevicePortForwarder();
+  var portForwarder = const NoOpDevicePortForwarder();
 }
 
 class FakeDevFS extends Fake implements DevFS {

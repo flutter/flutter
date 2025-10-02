@@ -80,7 +80,7 @@ void main() {
           flex = RenderFlex(
             direction: Axis.vertical,
             children: <RenderBox>[box200x200],
-            clipBehavior: clip!,
+            clipBehavior: clip,
           );
         case null:
           flex = RenderFlex(direction: Axis.vertical, children: <RenderBox>[box200x200]);

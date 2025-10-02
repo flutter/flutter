@@ -327,7 +327,7 @@ abstract final class FlutterTestDriver {
       // But also check if the isolate was already at the state we need (only after we've
       // set up the subscription) to avoid races. If it already in the desired state, we
       // don't need to wait for the event.
-      final VmService vmService = _vmService!;
+      final VmService vmService = _vmService;
       final Isolate isolate = await vmService.getIsolate(isolateId);
       if (isolate.pauseEvent?.kind?.startsWith(kind) ?? false) {
         _debugPrint('Isolate was already at "$kind" (${isolate.pauseEvent!.kind}).');

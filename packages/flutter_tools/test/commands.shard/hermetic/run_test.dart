@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' show StdinException;
 
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
@@ -31,6 +32,7 @@ import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart' as analytics;
 import 'package:vm_service/vm_service.dart';
 
+import '../../../lib/src/base/io.dart' show StdinException;
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';

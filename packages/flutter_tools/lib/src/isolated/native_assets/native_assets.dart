@@ -512,7 +512,7 @@ Future<void> _copyNativeCodeAssetsForOS(
   assetTargetLocations = <FlutterCodeAsset, KernelAsset>{
     for (final FlutterCodeAsset codeAsset in assetTargetLocations.keys)
       if (codeAsset.codeAsset.linkMode is DynamicLoadingBundled)
-        codeAsset: assetTargetLocations[codeAsset]!,
+        codeAsset: assetTargetLocations[codeAsset],
   };
 
   if (assetTargetLocations.isEmpty) {

@@ -306,7 +306,7 @@ void main() {
             ),
             SliverFillRemaining(
               hasScrollBody: false,
-              child: Container(
+              child: ColoredBox(
                 key: key,
                 color: Colors.blue[300],
                 child: Align(
@@ -596,7 +596,7 @@ void main() {
               SliverFillRemaining(
                 hasScrollBody: false,
                 fillOverscroll: true,
-                child: Container(
+                child: ColoredBox(
                   key: key,
                   color: Colors.blue[300],
                   child: Align(
@@ -984,7 +984,7 @@ void main() {
               SliverFillRemaining(
                 hasScrollBody: false,
                 fillOverscroll: true,
-                child: Container(
+                child: ColoredBox(
                   key: key,
                   color: Colors.blue[300],
                   child: Align(

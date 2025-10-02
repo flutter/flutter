@@ -86,7 +86,7 @@ class DeferredLoadingPlaceholder extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: Colors.grey[700],
-          border: Border.all(width: 20, color: Colors.grey[700]!),
+          border: Border.all(width: 20, color: Colors.grey[700]),
           borderRadius: const BorderRadius.all(Radius.circular(10)),
         ),
         width: 250,

@@ -881,7 +881,7 @@ class _SelectionKeepAliveState extends State<_SelectionKeepAlive>
       return;
     }
     assert(_selectableAttachments!.containsKey(selectable));
-    final VoidCallback attachment = _selectableAttachments!.remove(selectable)!;
+    final VoidCallback attachment = _selectableAttachments!.remove(selectable);
     selectable.removeListener(attachment);
     _registrar!.remove(selectable);
     _updateSelectablesWithSelections(selectable, add: false);
@@ -892,7 +892,7 @@ class _SelectionKeepAliveState extends State<_SelectionKeepAlive>
     if (_selectableAttachments != null) {
       for (final Selectable selectable in _selectableAttachments!.keys) {
         _registrar!.remove(selectable);
-        selectable.removeListener(_selectableAttachments![selectable]!);
+        selectable.removeListener(_selectableAttachments![selectable]);
       }
       _selectableAttachments = null;
     }

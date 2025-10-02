@@ -533,7 +533,7 @@ void main() {
 
       // Image should be scaled down (divided by scale)
       // and be positioned in the bottom right of the outputRect
-      final Size expectedTileSize = imageSize / scale;
+      const Size expectedTileSize = imageSize / scale;
       final Rect expectedTileRect = Rect.fromPoints(
         outputRect.bottomRight.translate(-expectedTileSize.width, -expectedTileSize.height),
         outputRect.bottomRight,
@@ -577,7 +577,7 @@ void main() {
 
       // Image should be scaled down (divided by scale)
       // and be positioned in the bottom right of the outputRect
-      final Size expectedTileSize = imageSize / scale;
+      const Size expectedTileSize = imageSize / scale;
       final Rect expectedTileRect = Rect.fromPoints(
         outputRect.bottomRight.translate(-expectedTileSize.width, -expectedTileSize.height),
         outputRect.bottomRight,

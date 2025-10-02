@@ -1623,7 +1623,7 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy
       if (bandGroup.members.length == 1) {
         continue; // No need to sort one node.
       }
-      _ReadingOrderSortData.sortWithDirectionality(bandGroup.members, bandGroup.directionality!);
+      _ReadingOrderSortData.sortWithDirectionality(bandGroup.members, bandGroup.directionality);
     }
     return result;
   }
@@ -1677,7 +1677,7 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy
     // common directionality to be able to group into sane groups for the
     // given directionality, since rectangles can overlap and give different
     // results for different directionalities.
-    _ReadingOrderSortData.sortWithDirectionality(inBandOfTop, nearestCommonDirectionality!);
+    _ReadingOrderSortData.sortWithDirectionality(inBandOfTop, nearestCommonDirectionality);
 
     // Collect the top band into internally sorted groups with shared directionality.
     final List<_ReadingOrderDirectionalGroupData> bandGroups = _collectDirectionalityGroups(

@@ -37,7 +37,7 @@ class SliverFillRemainingExample extends StatelessWidget {
         ),
         SliverFillRemaining(
           hasScrollBody: false,
-          child: Container(
+          child: ColoredBox(
             color: Colors.orange[300],
             child: const Padding(padding: EdgeInsets.all(50.0), child: FlutterLogo(size: 100)),
           ),

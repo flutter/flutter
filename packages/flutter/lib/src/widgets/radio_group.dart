@@ -294,21 +294,6 @@ class _SkipUnselectedRadioPolicy<T> extends ReadingOrderTraversalPolicy {
     RadioClient<T>? selected = radios.firstWhereOrNull(_radioSelected);
 
     if (selected == null) {
-      // None of the radio are selected. Select the first radio in read order.
-      final Map<FocusNode, RadioClient<T>> radioFocusNodes = <FocusNode, RadioClient<T>>{};
-      for (final RadioClient<T> radio in radios) {
-        radioFocusNodes[radio.focusNode] = radio;
-      }
-
-      for (final FocusNode node in nodesInReadOrder) {
-        selected = radioFocusNodes[node];
-        if (selected != null) {
-          break;
-        }
-      }
-    }
-
-    if (selected == null) {
       // None of the radio is selected or focusable, defaults to reading order
       return nodesInReadOrder;
     }

@@ -10,6 +10,8 @@ import 'package:flutter_tools/src/widget_preview/dependency_graph.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
+import '../../../../../lib/src/widget_preview/dependency_graph.dart' show PreviewPath;
+import '../../../../../lib/src/widget_preview/preview_detector.dart' show PreviewDetector;
 import '../../../../src/common.dart';
 
 typedef WidgetPreviewSourceFile = ({String path, String source});

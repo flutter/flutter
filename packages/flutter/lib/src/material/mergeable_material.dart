@@ -497,14 +497,14 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
         Radius.zero,
         cardRadius,
         _animationTuples[_children[index - 1].key]!.startAnimation.value,
-      )!;
+      );
     }
     if (index < _children.length - 2 && _children[index + 1] is MaterialGap) {
       endRadius = Radius.lerp(
         Radius.zero,
         cardRadius,
         _animationTuples[_children[index + 1].key]!.endAnimation.value,
-      )!;
+      );
     }
 
     if (widget.mainAxis == Axis.vertical) {

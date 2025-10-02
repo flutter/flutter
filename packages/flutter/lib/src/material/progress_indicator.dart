@@ -220,7 +220,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
     void drawStopIndicator() {
       // Limit the stop indicator radius to the height of the indicator.
       final double radius = math.min(stopIndicatorRadius!, size.height / 2);
-      final Paint indicatorPaint = Paint()..color = stopIndicatorColor!;
+      final Paint indicatorPaint = Paint()..color = stopIndicatorColor;
       final Offset position = switch (textDirection) {
         TextDirection.rtl => Offset(size.height / 2, size.height / 2),
         TextDirection.ltr => Offset(size.width - size.height / 2, size.height / 2),
@@ -596,7 +596,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 
     if (trackColor != null) {
       final Paint backgroundPaint = Paint()
-        ..color = trackColor!
+        ..color = trackColor
         ..strokeWidth = strokeWidth
         ..strokeCap = strokeCap ?? StrokeCap.round
         ..style = PaintingStyle.stroke;

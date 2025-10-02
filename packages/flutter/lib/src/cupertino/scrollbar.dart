@@ -80,7 +80,7 @@ class CupertinoScrollbar extends RawScrollbar {
     bool? thumbVisibility,
     double super.thickness = defaultThickness,
     this.thicknessWhileDragging = defaultThicknessWhileDragging,
-    Radius super.radius = defaultRadius,
+    super.radius = defaultRadius,
     this.radiusWhileDragging = defaultRadiusWhileDragging,
     ScrollNotificationPredicate? notificationPredicate,
     super.scrollbarOrientation,

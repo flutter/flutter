@@ -574,7 +574,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     }
     final FlutterView view = renderView.flutterView;
     if (_surfaceSize != null && view == platformDispatcher.implicitView) {
-      final BoxConstraints constraints = BoxConstraints.tight(_surfaceSize!);
+      final BoxConstraints constraints = BoxConstraints.tight(_surfaceSize);
       return ViewConfiguration(
         logicalConstraints: constraints,
         physicalConstraints: constraints * view.devicePixelRatio,

@@ -63,7 +63,7 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
           fileSystem: fs,
           platform: platform,
           processManager: processManager,
-        )!;
+        );
 
         expect(java.javaHome, androidStudioBundledJdkHome);
         expect(java.binaryPath, expectedJavaBinaryPath);
@@ -93,7 +93,7 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
               environment: <String, String>{Java.javaHomeEnvironmentVariable: javaHome},
             ),
             processManager: processManager,
-          )!;
+          );
 
           expect(java.javaHome, javaHome);
           expect(java.binaryPath, expectedJavaBinaryPath);
@@ -117,7 +117,7 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
           fileSystem: fs,
           platform: platform,
           processManager: processManager,
-        )!;
+        );
 
         expect(java.javaHome, isNull);
         expect(java.binaryPath, os.which('java')!.path);
@@ -231,7 +231,7 @@ java version "1.8.0_202"
 Java(TM) SE Runtime Environment (build 1.8.0_202-b10)
 Java HotSpot(TM) 64-Bit Server VM (build 25.202-b10, mixed mode)
 ''');
-        final Version version = java.version!;
+        final Version version = java.version;
         expect(version.toString(), 'Java(TM) SE Runtime Environment (build 1.8.0_202-b10)');
         expect(version, equals(Version(1, 8, 0)));
       });
@@ -241,7 +241,7 @@ java version "11.0.14"
 Java(TM) SE Runtime Environment (build 11.0.14+10-b13)
 Java HotSpot(TM) 64-Bit Server VM (build 11.0.14+10-b13, mixed mode)
 ''');
-        final Version version = java.version!;
+        final Version version = java.version;
         expect(version.toString(), 'Java(TM) SE Runtime Environment (build 11.0.14+10-b13)');
         expect(version, equals(Version(11, 0, 14)));
       });
@@ -252,7 +252,7 @@ openjdk version "11.0.18" 2023-01-17 LTS
 OpenJDK Runtime Environment Zulu11.62+17-CA (build 11.0.18+10-LTS)
 OpenJDK 64-Bit Server VM Zulu11.62+17-CA (build 11.0.18+10-LTS, mixed mode)
 ''');
-        final Version version = java.version!;
+        final Version version = java.version;
         expect(
           version.toString(),
           'OpenJDK Runtime Environment Zulu11.62+17-CA (build 11.0.18+10-LTS)',
@@ -266,7 +266,7 @@ openjdk 17.0.6 2023-01-17
 OpenJDK Runtime Environment (build 17.0.6+0-17.0.6b802.4-9586694)
 OpenJDK 64-Bit Server VM (build 17.0.6+0-17.0.6b802.4-9586694, mixed mode)
 ''');
-        final Version version = java.version!;
+        final Version version = java.version;
         expect(
           version.toString(),
           'OpenJDK Runtime Environment (build 17.0.6+0-17.0.6b802.4-9586694)',
@@ -280,7 +280,7 @@ openjdk 19.0.2 2023-01-17
 OpenJDK Runtime Environment Homebrew (build 19.0.2)
 OpenJDK 64-Bit Server VM Homebrew (build 19.0.2, mixed mode, sharing)
 ''');
-        final Version version = java.version!;
+        final Version version = java.version;
         expect(version.toString(), 'OpenJDK Runtime Environment Homebrew (build 19.0.2)');
         expect(version, equals(Version(19, 0, 2)));
       });
@@ -292,14 +292,14 @@ openjdk 11.0.2 2019-01-15
 OpenJDK Runtime Environment 18.9 (build 11.0.2+9)
 OpenJDK 64-Bit Server VM 18.9 (build 11.0.2+9, mixed mode)
 ''');
-        final Version version = java.version!;
+        final Version version = java.version;
         expect(version.toString(), 'OpenJDK Runtime Environment 18.9 (build 11.0.2+9)');
         expect(version, equals(Version(11, 0, 2)));
       });
 
       testWithoutContext('parses jdk two number versions', () {
         addJavaVersionCommand('openjdk 19.0 2023-01-17');
-        final Version version = java.version!;
+        final Version version = java.version;
         expect(version.toString(), 'openjdk 19.0 2023-01-17');
         expect(version, equals(Version(19, 0, null)));
       });

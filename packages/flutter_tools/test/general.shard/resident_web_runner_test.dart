@@ -39,6 +39,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
+import '../../lib/src/web/chrome.dart' show ChromiumLauncher;
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_process_manager.dart';
