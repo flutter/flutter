@@ -126,7 +126,14 @@ class OutlinedButton extends ButtonStyleButton {
       clipBehavior: clipBehavior ?? Clip.none,
       statesController: statesController,
       icon: icon,
-      child: icon != null ? _OutlinedButtonWithIconChild(iconAlignment: iconAlignment, label: label, buttonStyle: style, icon: icon,) : label,
+      child: icon != null
+          ? _OutlinedButtonWithIconChild(
+              iconAlignment: iconAlignment,
+              label: label,
+              buttonStyle: style,
+              icon: icon,
+            )
+          : label,
     );
   }
 
@@ -209,8 +216,8 @@ class OutlinedButton extends ButtonStyleButton {
     ButtonLayerBuilder? foregroundBuilder,
   }) {
     final WidgetStateProperty<Color?>? backgroundColorProp = switch ((
-    backgroundColor,
-    disabledBackgroundColor,
+      backgroundColor,
+      disabledBackgroundColor,
     )) {
       (_?, null) => WidgetStatePropertyAll<Color?>(backgroundColor),
       (_, _) => ButtonStyleButton.defaultColor(backgroundColor, disabledBackgroundColor),
@@ -361,27 +368,27 @@ class OutlinedButton extends ButtonStyleButton {
     final ButtonStyle buttonStyle = theme.useMaterial3
         ? _OutlinedButtonDefaultsM3(context)
         : styleFrom(
-      foregroundColor: colorScheme.primary,
-      disabledForegroundColor: colorScheme.onSurface.withOpacity(0.38),
-      backgroundColor: Colors.transparent,
-      disabledBackgroundColor: Colors.transparent,
-      shadowColor: theme.shadowColor,
-      elevation: 0,
-      textStyle: theme.textTheme.labelLarge,
-      padding: _scaledPadding(context),
-      minimumSize: const Size(64, 36),
-      maximumSize: Size.infinite,
-      side: BorderSide(color: colorScheme.onSurface.withOpacity(0.12)),
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
-      enabledMouseCursor: SystemMouseCursors.click,
-      disabledMouseCursor: SystemMouseCursors.basic,
-      visualDensity: theme.visualDensity,
-      tapTargetSize: theme.materialTapTargetSize,
-      animationDuration: kThemeChangeDuration,
-      enableFeedback: true,
-      alignment: Alignment.center,
-      splashFactory: InkRipple.splashFactory,
-    );
+            foregroundColor: colorScheme.primary,
+            disabledForegroundColor: colorScheme.onSurface.withOpacity(0.38),
+            backgroundColor: Colors.transparent,
+            disabledBackgroundColor: Colors.transparent,
+            shadowColor: theme.shadowColor,
+            elevation: 0,
+            textStyle: theme.textTheme.labelLarge,
+            padding: _scaledPadding(context),
+            minimumSize: const Size(64, 36),
+            maximumSize: Size.infinite,
+            side: BorderSide(color: colorScheme.onSurface.withOpacity(0.12)),
+            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
+            enabledMouseCursor: SystemMouseCursors.click,
+            disabledMouseCursor: SystemMouseCursors.basic,
+            visualDensity: theme.visualDensity,
+            tapTargetSize: theme.materialTapTargetSize,
+            animationDuration: kThemeChangeDuration,
+            enableFeedback: true,
+            alignment: Alignment.center,
+            splashFactory: InkRipple.splashFactory,
+          );
 
     // Only apply paddings when OutlinedButton has an Icon
     if (_icon != null && theme.useMaterial3) {
@@ -445,9 +452,9 @@ class _OutlinedButtonWithIconChild extends StatelessWidget {
     final OutlinedButtonThemeData outlinedButtonTheme = OutlinedButtonTheme.of(context);
     final IconAlignment effectiveIconAlignment =
         iconAlignment ??
-            outlinedButtonTheme.style?.iconAlignment ??
-            buttonStyle?.iconAlignment ??
-            IconAlignment.start;
+        outlinedButtonTheme.style?.iconAlignment ??
+        buttonStyle?.iconAlignment ??
+        IconAlignment.start;
     final Widget? icon = this.icon;
 
     if (icon == null) {
