@@ -83,7 +83,7 @@ public class PlatformViewsControllerTest {
 
     @Override
     public void dispose() {
-      // We have been removed from the view hierarhy before the call to dispose.
+      // We have been removed from the view hierarchy before the call to dispose.
       assertNull(view.getParent());
       disposeCalls++;
     }
@@ -108,7 +108,7 @@ public class PlatformViewsControllerTest {
   @Config(
       shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class},
       minSdk = 35)
-  public void itRemovesPlatformViewBeforeDiposeIsCalled() {
+  public void itRemovesPlatformViewBeforeDisposeIsCalled() {
     PlatformViewsController platformViewsController = new PlatformViewsController();
     FlutterJNI jni = new FlutterJNI();
     platformViewsController.setFlutterJNI(jni);
@@ -154,7 +154,7 @@ public class PlatformViewsControllerTest {
       shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class},
       minSdk = 29,
       maxSdk = 34)
-  public void itPassesSurfaceLifecyleResetInBackgroundLeqApi34() {
+  public void itPassesSurfaceLifecycleResetInBackgroundLeqApi34() {
     PlatformViewsController platformViewsController = new PlatformViewsController();
     FlutterJNI jni = new FlutterJNI();
     platformViewsController.setFlutterJNI(jni);
@@ -831,9 +831,7 @@ public class PlatformViewsControllerTest {
 
     assertThrows(
         IllegalStateException.class,
-        () -> {
-          platformViewsController.initializePlatformViewIfNeeded(platformViewId);
-        });
+        () -> platformViewsController.initializePlatformViewIfNeeded(platformViewId));
   }
 
   @Test
@@ -863,9 +861,7 @@ public class PlatformViewsControllerTest {
 
     assertThrows(
         IllegalStateException.class,
-        () -> {
-          platformViewsController.initializePlatformViewIfNeeded(platformViewId);
-        });
+        () -> platformViewsController.initializePlatformViewIfNeeded(platformViewId));
   }
 
   @Test

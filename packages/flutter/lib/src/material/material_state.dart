@@ -222,7 +222,7 @@ typedef MaterialStateBorderSide = WidgetStateBorderSide;
 /// implementation of [MaterialStateOutlinedBorder], that resolves to
 /// [RoundedRectangleBorder] when its widget is selected.
 ///
-/// ** See code in examples/api/lib/material/material_state/material_state_outlined_border.0.dart **
+/// ** See code in examples/api/lib/widgets/widget_state/widget_state_outlined_border.0.dart **
 /// {@end-tool}
 ///
 /// This class should only be used for parameters which are documented to take
