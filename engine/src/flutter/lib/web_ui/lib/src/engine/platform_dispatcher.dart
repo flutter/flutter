@@ -1835,9 +1835,9 @@ class PlatformConfiguration {
     this.defaultRouteName = '/',
     this.systemFontFamily,
     this.lineHeightScaleFactor = 1.0,
-    this.letterSpacing = 1.0,
-    this.wordSpacing = 1.0,
-    this.paragraphSpacing = 1.0,
+    this.letterSpacing = 0.0,
+    this.wordSpacing = 0.0,
+    this.paragraphSpacing = 0.0,
   });
 
   PlatformConfiguration copyWith({
