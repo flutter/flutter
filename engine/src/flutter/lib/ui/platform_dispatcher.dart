@@ -1121,9 +1121,31 @@ class PlatformDispatcher {
   /// This option is used by [showTimePicker].
   bool get alwaysUse24HourFormat => _configuration.alwaysUse24HourFormat;
 
+  /// The system-reported height of the text, as a multiple of the font size.
+  ///
+  /// If this value changes, [onMetricsChanged] will be called.
   double get lineHeightScaleFactor => _configuration.lineHeightScaleFactor;
+
+  /// The system-reported amount of additional space (in logical pixels)
+  /// to add between each letter.
+  ///
+  /// A negative value can be used to bring the letters closer.
+  ///
+  /// If this value changes, [onMetricsChanged] will be called.
   double get letterSpacing => _configuration.letterSpacing;
+
+  /// The system-reported amount of additional space (in logical pixels)
+  /// to add between each sequence of white-space (i.e. between each word).
+  ///
+  /// A negative value can be used to bring the words closer.
+  ///
+  /// If this value changes, [onMetricsChanged] will be called.
   double get wordSpacing => _configuration.wordSpacing;
+
+  /// The system-reported amount of additional space (in logical pixels)
+  /// to add between each paragraph in text.
+  ///
+  /// If this value changes, [onMetricsChanged] will be called.
   double get paragraphSpacing => _configuration.paragraphSpacing;
 
   /// The system-reported text scale.
@@ -1817,9 +1839,9 @@ class _PlatformConfiguration {
     this.systemFontFamily,
     this.configurationId,
     this.lineHeightScaleFactor = 1.0,
-    this.letterSpacing = 1.0,
-    this.wordSpacing = 1.0,
-    this.paragraphSpacing = 1.0,
+    this.letterSpacing = 0.0,
+    this.wordSpacing = 0.0,
+    this.paragraphSpacing = 0.0,
   });
 
   _PlatformConfiguration copyWith({
@@ -1899,12 +1921,23 @@ class _PlatformConfiguration {
   /// function should not be called in either case.
   final int? configurationId;
 
+  /// The height of the text, as a multiple of the font size.
   final double lineHeightScaleFactor;
 
+  /// The amount of space (in logical pixels) to add between each letter
+  /// in a piece of text.
+  ///
+  /// A negative value can be used to bring the letters closer.
   final double letterSpacing;
 
+  /// The amount of space (in logical pixels) to add at each sequence of
+  /// white-space (i.e. between each word) in a piece of text.
+  ///
+  /// A negative value can be used to bring the words closer.
   final double wordSpacing;
 
+  /// The amount of space (in logical pixels) to add between each paragraph
+  /// in a piece of text.
   final double paragraphSpacing;
 }
 
