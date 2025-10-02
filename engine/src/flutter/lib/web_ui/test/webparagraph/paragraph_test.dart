@@ -32,6 +32,7 @@ Future<void> testMain() async {
       color: const Color(0xFF000000),
     );
     final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
+    builder.pushStyle(WebTextStyle(color: const Color(0xFF000000)));
     builder.addText('Lorem ipsum dolor sit');
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: double.infinity));
@@ -52,6 +53,7 @@ Future<void> testMain() async {
       color: const Color(0xFF000000),
     );
     final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
+    builder.pushStyle(WebTextStyle(color: const Color(0xFF000000)));
     builder.addText(
       'World   domination   is such   an ugly   phrase - I   prefer to   call it   world   optimisation.   ',
     );
@@ -74,6 +76,7 @@ Future<void> testMain() async {
       color: const Color(0xFF000000),
     );
     final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
+    builder.pushStyle(WebTextStyle(color: const Color(0xFF000000)));
     builder.addText('عالم');
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: double.infinity));
@@ -94,6 +97,7 @@ Future<void> testMain() async {
       color: const Color(0xFF000000),
     );
     final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
+    builder.pushStyle(WebTextStyle(color: const Color(0xFF000000)));
     builder.addText('إنالسيطرةعلىالعالمعبارةقبيحةللغاية-أفضلأنأسميهاتحسينالعالم');
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: 300));
@@ -114,7 +118,7 @@ Future<void> testMain() async {
       color: const Color(0xFF000000),
     );
     final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
-
+    builder.pushStyle(WebTextStyle(color: const Color(0xFF000000)));
     builder.addText('لABC لم def لل لم ghi');
     await matchGoldenFile('web_paragraph_canvas_mix_1_ltr.png', region: region);
   });
@@ -129,6 +133,7 @@ Future<void> testMain() async {
       color: const Color(0xFF000000),
     );
     final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
+    builder.pushStyle(WebTextStyle(color: const Color(0xFF000000)));
     builder.addText('ABC لم def');
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: 300));
@@ -146,9 +151,9 @@ Future<void> testMain() async {
       fontFamily: 'Arial',
       fontSize: 50,
       textDirection: TextDirection.rtl,
-      color: const Color(0xFF000000),
     );
     final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
+    builder.pushStyle(WebTextStyle(color: const Color(0xFF000000)));
     builder.addText('لABC لم def لل لم ghi');
     //لABC لم def لل لم ghi
     final WebParagraph paragraph = builder.build();
@@ -171,6 +176,7 @@ Future<void> testMain() async {
       color: const Color(0xFF000000),
     );
     final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
+    builder.pushStyle(WebTextStyle(color: const Color(0xFF000000)));
     builder.addText(
       'إنالسيطرةعلىاxyz لعالمعباvwx رةقبيحةstu للغاpqr ية-أmno فضلأjkl نأسميهاghi تحسيناdef لعاabc لم',
     );
@@ -194,6 +200,7 @@ Future<void> testMain() async {
       color: const Color(0xFF000000),
     );
     final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
+    builder.pushStyle(WebTextStyle(color: const Color(0xFF000000)));
     builder.addText(
       'إنالسيطرةعلىاxyz لعالمعباvwx رةقبيحةstu للغاpqr ية-أmno فضلأjkl نأسميهاghi تحسيناdef لعاabc لم',
     );
@@ -683,7 +690,12 @@ Future<void> testMain() async {
       fontSize: 40,
       color: const Color(0xFF000000),
     );
-    final WebTextStyle heightStyle = WebTextStyle(fontFamily: 'Roboto', fontSize: 40, height: 2.0);
+    final WebTextStyle heightStyle = WebTextStyle(
+      fontFamily: 'Roboto',
+      fontSize: 40,
+      height: 2.0,
+      color: const Color(0xFF000000),
+    );
     final WebParagraphBuilder builder = WebParagraphBuilder(robotoStyle);
     builder.pushStyle(heightStyle);
     builder.addText(
@@ -742,7 +754,11 @@ Future<void> testMain() async {
       textDirection: TextDirection.ltr,
       color: const Color(0xFF000000),
     );
-    final WebTextStyle textStyle1 = WebTextStyle(fontFamily: 'Roboto', fontSize: 20);
+    final WebTextStyle textStyle1 = WebTextStyle(
+      fontFamily: 'Roboto',
+      fontSize: 20,
+      color: const Color(0xFF000000),
+    );
     final WebTextStyle textStyle2 = WebTextStyle(fontFamily: 'Roboto', fontSize: 20);
     final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
     builder.pushStyle(textStyle1);
