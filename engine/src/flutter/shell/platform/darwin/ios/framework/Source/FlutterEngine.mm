@@ -89,6 +89,7 @@ NSString* const FlutterDefaultInitialRoute = nil;
 
 NSString* const kFlutterKeyDataChannel = @"flutter/keydata";
 static constexpr int kNumProfilerSamplesPerSec = 5;
+NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.application_registrar";
 
 @interface FlutterEngineBaseRegistrar : NSObject <FlutterBaseRegistrar>
 
@@ -172,8 +173,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 - (instancetype)initWithEngine:(FlutterEngine*)engine {
   self = [super init];
   _pluginRegistry = engine;
-  _applicationRegistrar =
-      [engine registrarForApplication:@"io.flutter.flutter.application_registrar"];
+  _applicationRegistrar = [engine registrarForApplication:kFlutterApplicationRegistrarKey];
   return self;
 }
 @end
