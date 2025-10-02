@@ -6,8 +6,6 @@
 
 namespace flutter {
 
-static const size_t kMaxSamples = 120;
-
 Stopwatch::Stopwatch(const RefreshRateUpdater& updater)
     : refresh_rate_updater_(updater), start_(fml::TimePoint::Now()) {
   const fml::TimeDelta delta = fml::TimeDelta::Zero();
@@ -26,11 +24,10 @@ FixedRefreshRateUpdater::FixedRefreshRateUpdater(
 
 void Stopwatch::Start() {
   start_ = fml::TimePoint::Now();
-  current_sample_ = (current_sample_ + 1) % kMaxSamples;
 }
 
 void Stopwatch::Stop() {
-  laps_[current_sample_] = fml::TimePoint::Now() - start_;
+  SetLapTime(fml::TimePoint::Now() - start_);
 }
 
 void Stopwatch::SetLapTime(const fml::TimeDelta& delta) {
@@ -39,7 +36,7 @@ void Stopwatch::SetLapTime(const fml::TimeDelta& delta) {
 }
 
 const fml::TimeDelta& Stopwatch::LastLap() const {
-  return laps_[(current_sample_ - 1) % kMaxSamples];
+  return laps_[current_sample_];
 }
 
 const fml::TimeDelta& Stopwatch::GetLap(size_t index) const {
