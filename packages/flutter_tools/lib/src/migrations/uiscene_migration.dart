@@ -229,8 +229,18 @@ import UIKit
     if (_plistParser.insertKeyWithJson(
       _project.defaultHostInfoPlist.path,
       key: 'UIApplicationSceneManifest',
-      json:
-          '{"UIApplicationSupportsMultipleScenes": false, "UISceneConfigurations": { "UIWindowSceneSessionRoleApplication": [{"UISceneClassName": "UIWindowScene", "UISceneDelegateClassName": "FlutterSceneDelegate", "UISceneConfigurationName": "flutter", "UISceneStoryboardFile": "Main"}]}}',
+      json: '''
+{
+  "UIApplicationSupportsMultipleScenes": false,
+  "UISceneConfigurations": {
+    "UIWindowSceneSessionRoleApplication": [{
+      "UISceneClassName": "UIWindowScene",
+      "UISceneDelegateClassName": "FlutterSceneDelegate",
+      "UISceneConfigurationName": "flutter",
+      "UISceneStoryboardFile": "Main"
+    }]
+  }
+}''',
     )) {
       return true;
     }
