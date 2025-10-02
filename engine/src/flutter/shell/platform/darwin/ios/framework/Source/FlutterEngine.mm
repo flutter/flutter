@@ -1528,6 +1528,35 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   return self.dartProject;
 }
 
+- (void)sendDeepLinkToFramework:(NSURL*)url completionHandler:(void (^)(BOOL success))completion {
+  __weak FlutterEngine* weakSelf = self;
+  [self waitForFirstFrame:3.0
+                 callback:^(BOOL didTimeout) {
+                   if (didTimeout) {
+                     [FlutterLogger
+                         logError:@"Timeout waiting for first frame when launching a URL."];
+                     completion(NO);
+                   } else {
+                     // invove the method and get the result
+                     [weakSelf.navigationChannel
+                         invokeMethod:@"pushRouteInformation"
+                            arguments:@{
+                              @"location" : url.absoluteString ?: [NSNull null],
+                            }
+                               result:^(id _Nullable result) {
+                                 BOOL success =
+                                     [result isKindOfClass:[NSNumber class]] && [result boolValue];
+                                 if (!success) {
+                                   // Logging the error if the result is not successful
+                                   [FlutterLogger
+                                       logError:@"Failed to handle route information in Flutter."];
+                                 }
+                                 completion(success);
+                               }];
+                   }
+                 }];
+}
+
 @end
 
 @implementation FlutterEngineRegistrar {
