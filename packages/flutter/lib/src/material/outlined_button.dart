@@ -83,9 +83,8 @@ class OutlinedButton extends ButtonStyleButton {
     super.autofocus = false,
     super.clipBehavior,
     super.statesController,
-    Widget? icon,
     required super.child,
-  }) : _icon = icon;
+  }) : _addPadding = false;
 
   /// Create a text button from a pair of widgets that serve as the button's
   /// [icon] and [label].
@@ -97,45 +96,33 @@ class OutlinedButton extends ButtonStyleButton {
   ///
   /// {@macro flutter.material.ButtonStyleButton.iconAlignment}
   ///
-  factory OutlinedButton.icon({
-    Key? key,
-    required VoidCallback? onPressed,
-    VoidCallback? onLongPress,
-    ValueChanged<bool>? onHover,
-    ValueChanged<bool>? onFocusChange,
-    ButtonStyle? style,
-    FocusNode? focusNode,
-    bool? autofocus,
-    Clip? clipBehavior,
-    MaterialStatesController? statesController,
+  OutlinedButton.icon({
+    super.key,
+    required super.onPressed,
+    super.onLongPress,
+    super.onHover,
+    super.onFocusChange,
+    super.style,
+    super.focusNode,
+    super.autofocus = false,
+    super.clipBehavior,
+    super.statesController,
     Widget? icon,
     required Widget label,
     IconAlignment? iconAlignment,
-  }) {
-    return OutlinedButton(
-      key: key,
-      onPressed: onPressed,
-      onLongPress: onLongPress,
-      onHover: onHover,
-      onFocusChange: onFocusChange,
-      style: style,
-      focusNode: focusNode,
-      autofocus: autofocus ?? false,
-      clipBehavior: clipBehavior ?? Clip.none,
-      statesController: statesController,
-      icon: icon,
-      child: icon != null
-          ? _OutlinedButtonWithIconChild(
-              iconAlignment: iconAlignment,
-              label: label,
-              buttonStyle: style,
-              icon: icon,
-            )
-          : label,
-    );
-  }
+  }) : _addPadding = icon != null,
+       super(
+         child: icon != null
+           ? _OutlinedButtonWithIconChild(
+               iconAlignment: iconAlignment,
+               label: label,
+               buttonStyle: style,
+               icon: icon,
+             )
+           : label,
+       );
 
-  final Widget? _icon;
+  final bool _addPadding;
 
   /// A static convenience method that constructs an outlined button
   /// [ButtonStyle] given simple values.
@@ -391,7 +378,7 @@ class OutlinedButton extends ButtonStyleButton {
           );
 
     // Only apply paddings when OutlinedButton has an Icon
-    if (_icon != null && theme.useMaterial3) {
+    if (_addPadding && theme.useMaterial3) {
       final double defaultFontSize =
           buttonStyle.textStyle?.resolve(const <WidgetState>{})?.fontSize ?? 14.0;
       final double effectiveTextScale =
