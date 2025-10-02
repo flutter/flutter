@@ -16651,35 +16651,38 @@ void main() {
     expect(state.buildTextSpan().style!.fontWeight, FontWeight.bold);
   });
 
-  testWidgets('EditableText respects MediaQueryData.lineHeightScaleFactor, MediaQueryData.letterSpacing, and MediaQueryData.wordSpacing', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: const MediaQueryData(
-            lineHeightScaleFactor: 2.0,
-            letterSpacing: 2.0,
-            wordSpacing: 2.0,
-          ),
-          child: EditableText(
-            controller: controller,
-            focusNode: focusNode,
-            style: const TextStyle(fontWeight: FontWeight.normal),
-            cursorColor: Colors.red,
-            backgroundCursorColor: Colors.green,
+  testWidgets(
+    'EditableText respects MediaQueryData.lineHeightScaleFactor, MediaQueryData.letterSpacing, and MediaQueryData.wordSpacing',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(
+              lineHeightScaleFactor: 2.0,
+              letterSpacing: 2.0,
+              wordSpacing: 2.0,
+            ),
+            child: EditableText(
+              controller: controller,
+              focusNode: focusNode,
+              style: const TextStyle(fontWeight: FontWeight.normal),
+              cursorColor: Colors.red,
+              backgroundCursorColor: Colors.green,
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    controller.text = 'foo';
-    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      controller.text = 'foo';
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
 
-    final TextStyle? resultTextStyle = state.buildTextSpan().style;
-    expect(resultTextStyle?.height, 2.0);
-    expect(resultTextStyle?.letterSpacing, 2.0);
-    expect(resultTextStyle?.wordSpacing, 2.0);
-  });
+      final TextStyle? resultTextStyle = state.buildTextSpan().style;
+      expect(resultTextStyle?.height, 2.0);
+      expect(resultTextStyle?.letterSpacing, 2.0);
+      expect(resultTextStyle?.wordSpacing, 2.0);
+    },
+  );
 
   testWidgets(
     'code points are treated as single characters in obscure mode',
