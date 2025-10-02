@@ -44,11 +44,20 @@
 }
 
 - (void)flutterSetConstraints:(FlutterWindowConstraints)constraints {
+  NSSize size = [self frameRectForContentRect:self.frame].size;
+  NSSize originalSize = size;
   [self setContentMinSize:NSMakeSize(constraints.min_width, constraints.min_height)];
+  size.width = std::max(size.width, constraints.min_width);
+  size.height = std::max(size.height, constraints.min_height);
   if (constraints.max_width > 0 && constraints.max_height > 0) {
     [self setContentMaxSize:NSMakeSize(constraints.max_width, constraints.max_height)];
+    size.width = std::min(size.width, constraints.max_width);
+    size.height = std::min(size.height, constraints.max_height);
   } else {
     [self setContentMaxSize:NSMakeSize(CGFLOAT_MAX, CGFLOAT_MAX)];
+  }
+  if (!NSEqualSizes(originalSize, size)) {
+    [self setContentSize:size];
   }
 }
 
@@ -205,9 +214,10 @@ void* InternalFlutter_Window_GetHandle(int64_t engine_id, FlutterViewIdentifier 
 
 FlutterWindowSize InternalFlutter_Window_GetContentSize(void* window) {
   NSWindow* w = (__bridge NSWindow*)window;
+  NSRect contentRect = [w contentRectForFrameRect:w.frame];
   return {
-      .width = w.frame.size.width,
-      .height = w.frame.size.height,
+      .width = contentRect.size.width,
+      .height = contentRect.size.height,
   };
 }
 
