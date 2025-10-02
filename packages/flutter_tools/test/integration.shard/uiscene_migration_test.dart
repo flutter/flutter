@@ -56,7 +56,7 @@ void main() {
       expect(infoPlist.readAsStringSync(), newInfoPlistTemplate);
 
       // Turn off config
-      await _enableUISceneMigration(flutterBin, workingDirectoryPath);
+      await _disableUISceneMigration(flutterBin, workingDirectoryPath);
 
       // Replace with old template
       appDelegate.writeAsStringSync(_oldSwiftAppDelegate);
