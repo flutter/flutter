@@ -361,7 +361,7 @@ class ManifestAssetBundle implements AssetBundle {
           emptyAssetManifest.buffer.asUint8List(0, emptyAssetManifest.lengthInBytes),
         ),
         kind: AssetKind.regular,
-        platforms:const <String>{},
+        platforms: const <String>{},
         transformers: const <AssetTransformerEntry>[],
       );
       // Create .bin.json on web builds.
@@ -369,7 +369,7 @@ class ManifestAssetBundle implements AssetBundle {
         entries[_kAssetManifestBinJsonFilename] = AssetBundleEntry(
           DevFSStringContent('""'),
           kind: AssetKind.regular,
-          platforms:const <String>{},
+          platforms: const <String>{},
           transformers: const <AssetTransformerEntry>[],
         );
       }
