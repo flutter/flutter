@@ -1921,23 +1921,23 @@ class _PlatformConfiguration {
   /// function should not be called in either case.
   final int? configurationId;
 
-  /// The height of the text, as a multiple of the font size.
+  /// The system-reported height of the text, as a multiple of the font size.
   final double lineHeightScaleFactor;
 
-  /// The amount of space (in logical pixels) to add between each letter
-  /// in a piece of text.
+  /// The system-reported amount of additional space (in logical pixels)
+  /// to add between each letter.
   ///
   /// A negative value can be used to bring the letters closer.
   final double letterSpacing;
 
-  /// The amount of space (in logical pixels) to add at each sequence of
-  /// white-space (i.e. between each word) in a piece of text.
+  /// The system-reported amount of additional space (in logical pixels)
+  /// to add between each sequence of white-space (i.e. between each word).
   ///
   /// A negative value can be used to bring the words closer.
   final double wordSpacing;
 
-  /// The amount of space (in logical pixels) to add between each paragraph
-  /// in a piece of text.
+  /// The system-reported amount of additional space (in logical pixels)
+  /// to add between each paragraph in text.
   final double paragraphSpacing;
 }
 
