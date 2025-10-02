@@ -89,11 +89,6 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 
 /// A direction in which to open the options-view overlay.
 ///
-/// The available space for the options view is calculated based on the
-/// constraints of the [Overlay] that contains the autocomplete widget,
-/// not the visible screen space. This means the options view will be
-/// constrained by any surrounding widgets that limit the overlay's bounds.
-///
 /// See also:
 ///
 ///  * [RawAutocomplete.optionsViewOpenDirection], which is of this type.
@@ -115,6 +110,11 @@ enum OptionsViewOpenDirection {
   down,
 
   /// Open in the direction with the most available space within the overlay.
+  ///
+  /// The available space for the options view is calculated based on the
+  /// size of the [Overlay] that contains the autocomplete widget,
+  /// not the visible screen space. This means the options view will be
+  /// constrained by any surrounding widgets that limit the overlay's bounds.
   ///
   /// This is equivalent to using [RawAutocomplete.optionsViewOpenDirectionBuilder] with:
   /// ```dart
