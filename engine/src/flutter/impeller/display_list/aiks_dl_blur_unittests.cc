@@ -368,6 +368,9 @@ TEST_P(AiksTest, CanRenderBackdropBlurHugeSigma) {
 }
 
 TEST_P(AiksTest, CanRenderBoundedBlurCloseToEdge) {
+  // This test case corresponds to the 1st branch of downsampling, where
+  // the coverage hint is non-null but was ignored during snapshotting.
+
   auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
 
   DisplayListBuilder builder;
@@ -376,14 +379,34 @@ TEST_P(AiksTest, CanRenderBoundedBlurCloseToEdge) {
   builder.DrawImage(image, DlPoint(0.0, 0.0), DlImageSampling::kNearestNeighbor,
                     &paint);
 
-  DlRect rect = DlRect::MakeLTRB(50, 135, 233, 350);
-  builder.ClipRect(rect);
-  builder.Save();
-
   DlPaint save_paint;
   save_paint.setBlendMode(DlBlendMode::kSrcOver);
+
+  // Subcase 1: When the blur bounds has a non-zero offset.
+  // We still need a clip to trigger the 1st branch of downsampling, therefore
+  // the clip is chosen as an expanded rect of the blur bounds.
+  DlRect rect1 = DlRect::MakeLTRB(50, 80, 233, 180);
+  Point offset = Point(10, 10);
+  builder.Save();
+  builder.ClipRect(rect1.Expand(offset));
+  auto backdrop_filter1 = DlBlurImageFilter::Make(
+      20, 20, rect1.Shift(offset - rect1.GetLeftTop()), DlTileMode::kDecal);
+  builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter1.get());
+  builder.Restore();
+  builder.Restore();
+
+  // Stroke the rect so that we can see where the bounds are.
+  DlPaint stroke_paint(DlColor::kBlack());
+  stroke_paint.setStrokeWidth(1);
+  stroke_paint.setDrawStyle(DlDrawStyle::kStroke);
+  builder.DrawRect(rect1, stroke_paint);
+
+  // Subcase 2: When the blur bounds has a zero offset.
+  DlRect rect2 = DlRect::MakeLTRB(50, 200, 233, 300);
+  builder.ClipRect(rect2);
+  builder.Save();
   auto backdrop_filter = DlBlurImageFilter::Make(
-      20, 20, rect.Shift(-rect.GetOrigin()), DlTileMode::kDecal);
+      20, 20, rect2.Shift(-rect2.GetOrigin()), DlTileMode::kDecal);
   builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter.get());
   builder.Restore();
   builder.Restore();
@@ -392,6 +415,8 @@ TEST_P(AiksTest, CanRenderBoundedBlurCloseToEdge) {
 }
 
 TEST_P(AiksTest, CanRenderBoundedBlurFarFromEdge) {
+  // This test case corresponds to the 2nd branch of downsampling, where
+  // the coverage hint is null or was considered during snapshotting.
   auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
 
   DisplayListBuilder builder;

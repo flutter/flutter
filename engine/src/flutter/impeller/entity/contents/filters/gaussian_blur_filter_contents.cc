@@ -217,12 +217,15 @@ struct DownsamplePassArgs {
   /// The UVs that will be used for drawing to the down-sampling pass.
   /// This effectively is chopping out a region of the input.
   Quad uvs;
-  /// The bounds used for a bounded blur, in the unit of the same UV space as
-  /// `uvs`.
+  /// The bounds used for the downsampling pass of a bounded blur, in the same
+  /// UV space as the texture input of the downsampling pass.
   ///
-  /// During downsampling and blurring, out-of-bound pixels are treated as
-  /// transparent.
+  /// During downsampling, out-of-bound pixels are treated as transparent.
   std::optional<Rect> downsample_uv_bounds;
+  /// The bounds used for the blurring pass of a bounded blur, in the same UV
+  /// space as the output of the downsampling pass.
+  ///
+  /// During downsampling, out-of-bound pixels are treated as transparent.
   std::optional<Rect> blur_uv_bounds;
   /// The effective scalar of the down-sample pass.
   /// This isn't usually exactly as we'd calculate because it has to be rounded
@@ -319,8 +322,7 @@ DownsamplePassArgs CalculateDownsamplePassArgs(
           input_snapshot.GetCoverage().value_or(Rect::MakeWH(1, 1)),
           source_bounds.value());
       blur_uv_bounds =
-          MakeReferenceUVs(aligned_coverage_hint,
-                           source_bounds->Shift(source_bounds->GetLeftTop()));
+          MakeReferenceUVs(aligned_coverage_hint, source_bounds.value());
     }
     return {
         .subpass_size = subpass_size,
@@ -394,11 +396,15 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
 
   // If the texture already had mip levels generated, then we can use the
   // original downsample shader.
-  if (pass_args.effective_scalar.x >= 0.5f ||
-      (!input_texture->NeedsMipmapGeneration() &&
-       input_texture->GetTextureDescriptor().mip_count > 1)) {
-    // TODO(dkwingsmt): For now this branch ignores bounds_uv because I
-    // haven't found a way to enter this branch.
+  //
+  // This doesn't support bounded blurs, since bounded blurs need to treat
+  // out-of-bounds pixels as transparent.
+  bool may_reuse_mipmap =
+      !pass_args.downsample_uv_bounds.has_value() &&
+      (pass_args.effective_scalar.x >= 0.5f ||
+       (!input_texture->NeedsMipmapGeneration() &&
+        input_texture->GetTextureDescriptor().mip_count > 1));
+  if (may_reuse_mipmap) {
     ContentContext::SubpassCallback subpass_callback =
         [&](const ContentContext& renderer, RenderPass& pass) {
           HostBuffer& data_host_buffer = renderer.GetTransientsDataBuffer();
