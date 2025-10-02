@@ -30,10 +30,10 @@
   "clearButtonLabel": "સાફ કરો",
   "cancelButtonLabel": "રદ કરો",
   "backButtonLabel": "પાછળ",
-  "expansionTileExpandedHint": "double tap to collapse",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "નાની કરવા માટે બે વાર ટૅપ કરો",
+  "expansionTileCollapsedHint": "મોટી કરવા માટે બે વાર ટૅપ કરો",
+  "expansionTileExpandedTapHint": "નાની કરો",
+  "expansionTileCollapsedTapHint": "વધુ વિગતો માટે મોટી કરો",
+  "expandedHint": "નાની કરી",
+  "collapsedHint": "મોટી કરી"
 }

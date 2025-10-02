@@ -30,10 +30,10 @@
   "clearButtonLabel": "मिटाएं",
   "cancelButtonLabel": "रद्द करें",
   "backButtonLabel": "वापस जाएं",
-  "expansionTileExpandedHint": "double tap to collapse",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "छोटा करने के लिए दो बार टैप करें",
+  "expansionTileCollapsedHint": "बड़ा करने के लिए दो बार टैप करें",
+  "expansionTileExpandedTapHint": "छोटा करें",
+  "expansionTileCollapsedTapHint": "ज़्यादा जानकारी के लिए बड़ा करें",
+  "expandedHint": "छोटा किया गया",
+  "collapsedHint": "बड़ा किया गया"
 }

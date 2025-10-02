@@ -30,10 +30,10 @@
   "clearButtonLabel": "Өшіру",
   "cancelButtonLabel": "Бас тарту",
   "backButtonLabel": "Артқа",
-  "expansionTileExpandedHint": "double tap to collapse",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "жию үшін екі рет түртіңіз",
+  "expansionTileCollapsedHint": "жаю үшін екі рет түртіңіз",
+  "expansionTileExpandedTapHint": "Жию",
+  "expansionTileCollapsedTapHint": "Толық мәлімет алу үшін жайыңыз.",
+  "expandedHint": "Жиылды",
+  "collapsedHint": "Жайылды"
 }

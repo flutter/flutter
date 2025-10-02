@@ -30,10 +30,10 @@
   "clearButtonLabel": "ဖယ်ရှားရန်",
   "cancelButtonLabel": "မလုပ်တော့",
   "backButtonLabel": "နောက်သို့",
-  "expansionTileExpandedHint": "double tap to collapse",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "ခေါက်ရန် နှစ်ချက်တို့ပါ",
+  "expansionTileCollapsedHint": "ဖြန့်ရန် နှစ်ချက်တို့ပါ",
+  "expansionTileExpandedTapHint": "ခေါက်ရန်",
+  "expansionTileCollapsedTapHint": "အသေးစိတ်အတွက် ဖြန့်ရန်",
+  "expandedHint": "ခေါက်ထားသည်",
+  "collapsedHint": "ဖြန့်ထားသည်"
 }
