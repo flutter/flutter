@@ -1627,7 +1627,7 @@ class EditableText extends StatefulWidget {
   /// [TextSelectionGestureDetectorBuilder] to wrap the [EditableText], and set
   /// [rendererIgnoresPointer] to true.
   ///
-  /// When [rendererIgnoresPointer] is true true, the [RenderEditable] created
+  /// When [rendererIgnoresPointer] is true, the [RenderEditable] created
   /// by this widget will not handle pointer events.
   ///
   /// This property is false by default.

@@ -162,6 +162,23 @@ void main() {
     final allowedPath = <String>[
       fileSystem.path.join(flutterTools, 'lib', 'src', 'isolated', 'web_compilation_delegate.dart'),
       fileSystem.path.join(flutterTools, 'test', 'general.shard', 'platform_plugins_test.dart'),
+      fileSystem.path.join(
+        flutterTools,
+        'test',
+        'widget_preview_scaffold.shard',
+        'widget_preview_scaffold',
+        'test',
+        'filter_by_selected_file_test.dart',
+      ),
+      fileSystem.path.join(
+        flutterTools,
+        'test',
+        'widget_preview_scaffold.shard',
+        'widget_preview_scaffold',
+        'lib',
+        'src',
+        'widget_preview_scaffold_controller.dart',
+      ),
     ];
     for (final dirName in <String>['lib', 'bin', 'test']) {
       final Iterable<File> files = fileSystem
@@ -259,8 +276,8 @@ void main() {
               ) ||
               line.startsWith(RegExp(r'import.*package:build_runner/build_runner.dart')) ||
               line.startsWith(RegExp(r'import.*package:build_config/build_config.dart')) ||
-              line.startsWith(RegExp(r'import.*dwds:*.dart')) ||
-              line.startsWith(RegExp(r'import.*devtools_server:*.dart')) ||
+              line.startsWith(RegExp(r'import.*package:dwds/.*.dart')) ||
+              line.startsWith(RegExp(r'import.*package:devtools_server/.*.dart')) ||
               line.startsWith(RegExp(r'import.*build_runner/.*.dart'))) {
             final String relativePath = fileSystem.path.relative(file.path, from: flutterTools);
             fail('$relativePath imports a build_runner/dwds/devtools package');

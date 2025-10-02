@@ -6,24 +6,33 @@ import 'dart:async';
 
 import 'package:dtd/dtd.dart';
 import 'package:json_rpc_2/json_rpc_2.dart';
+import 'package:meta/meta.dart';
+import 'package:package_config/package_config_types.dart';
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../convert.dart';
+import '../dart/package_map.dart';
+import '../project.dart';
+import 'persistent_preferences.dart';
 
 typedef DtdService = (String, DTDServiceCallback);
 
 /// Provides services, streams, and RPC invocations to interact with the Widget Preview Scaffold.
 class WidgetPreviewDtdServices {
   WidgetPreviewDtdServices({
+    required this.fs,
     required this.logger,
     required this.shutdownHooks,
     required this.dtdLauncher,
     required this.onHotRestartPreviewerRequest,
+    required this.project,
   }) {
     shutdownHooks.addShutdownHook(() async {
       await _dtd?.close();
@@ -37,13 +46,31 @@ class WidgetPreviewDtdServices {
   // START KEEP SYNCED
 
   static const kWidgetPreviewService = 'widget-preview';
+  static const kIsWindows = 'isWindows';
   static const kHotRestartPreviewer = 'hotRestartPreviewer';
+  static const kResolveUri = 'resolveUri';
+  static const kSetPreference = 'setPreference';
+  static const kGetPreference = 'getPreference';
+
+  /// Error code for RpcException thrown when attempting to load a key from
+  /// persistent preferences that doesn't have an entry.
+  static const kNoValueForKey = 200;
 
   /// The list of DTD service methods registered by the tool.
-  late final services = <DtdService>[(kHotRestartPreviewer, _hotRestart)];
+  late final services = <DtdService>[
+    (kHotRestartPreviewer, _hotRestart),
+    (kIsWindows, _isWindows),
+    (kResolveUri, _resolveUri),
+    (kSetPreference, _setPreference),
+    (kGetPreference, _getPreference),
+  ];
 
   // END KEEP SYNCED
 
+  @visibleForTesting
+  late final preferences = PersistentPreferences(fs: fs);
+
+  final FileSystem fs;
   final Logger logger;
   final ShutdownHooks shutdownHooks;
   final DtdLauncher dtdLauncher;
@@ -51,6 +78,11 @@ class WidgetPreviewDtdServices {
   /// Invoked when the [kHotRestartPreviewer] service method is invoked by the widget preview
   /// scaffold.
   final VoidCallback onHotRestartPreviewerRequest;
+
+  /// The widget_preview_scaffold project.
+  final FlutterProject project;
+
+  PackageConfig? _packageConfig;
 
   DartToolingDaemon? _dtd;
 
@@ -88,6 +120,38 @@ class WidgetPreviewDtdServices {
   Future<Map<String, Object?>> _hotRestart(Parameters params) async {
     onHotRestartPreviewerRequest();
     return const Success().toJson();
+  }
+
+  Future<Map<String, Object?>> _isWindows(Parameters _) async {
+    return BoolResponse(const LocalPlatform().isWindows).toJson();
+  }
+
+  Future<Map<String, Object?>> _resolveUri(Parameters params) async {
+    _packageConfig ??= await loadPackageConfigWithLogging(project.packageConfig, logger: logger);
+    final Uri? result = _packageConfig!.resolve(Uri.parse(params.asMap['uri'] as String));
+    return StringResponse(result.toString()).toJson();
+  }
+
+  Future<Map<String, Object?>> _setPreference(Parameters params) async {
+    final String key = params['key'].asString;
+    final Object? value = params['value'].value;
+    preferences[key] = value;
+    return const Success().toJson();
+  }
+
+  Future<Map<String, Object?>> _getPreference(Parameters params) async {
+    final String key = params['key'].asString;
+    final Object? value = preferences[key];
+    if (value == null) {
+      throw RpcException(kNoValueForKey, 'No entry for $key in preferences.');
+    }
+    if (value is String) {
+      return StringResponse(value).toJson();
+    }
+    if (value is bool) {
+      return BoolResponse(value).toJson();
+    }
+    throw UnimplementedError('Unexpected preference value: ${value.runtimeType}');
   }
 }
 

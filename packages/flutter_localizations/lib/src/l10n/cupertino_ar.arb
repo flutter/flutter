@@ -50,10 +50,10 @@
   "shareButtonLabel": "مشاركة…",
   "cancelButtonLabel": "الإلغاء",
   "backButtonLabel": "رجوع",
-  "expansionTileExpandedHint": "double tap to collapse",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "يُرجى النقر مرّتين للتصغير.",
+  "expansionTileCollapsedHint": "انقر مرّتين للتوسيع",
+  "expansionTileExpandedTapHint": "تصغير",
+  "expansionTileCollapsedTapHint": "وسِّع المربّع لعرض مزيد من التفاصيل.",
+  "expandedHint": "مصغَّر",
+  "collapsedHint": "موسَّع"
 }
