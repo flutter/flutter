@@ -5261,9 +5261,9 @@ class InputDecorationThemeData with Diagnosticable {
 
   /// The shape of the border to draw around the decoration's container.
   ///
-  /// If [border] is a [MaterialStateUnderlineInputBorder]
-  /// or [WidgetStateInputBorder], then the effective border can depend on
-  /// the [WidgetState.focused] state, i.e. if the [TextField] is focused or not.
+  /// If [border] is a [WidgetStateInputBorder], then the effective border can
+  /// depend on the [WidgetState.focused] state, i.e. if the [TextField] is
+  /// focused or not.
   ///
   /// The decoration's container is the area which is filled if [filled] is
   /// true and bordered per the [border]. It's the area adjacent to
