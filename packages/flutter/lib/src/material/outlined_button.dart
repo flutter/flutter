@@ -87,8 +87,6 @@ class OutlinedButton extends ButtonStyleButton {
     required super.child,
   }) : _icon = icon;
 
-  final Widget? _icon;
-
   /// Create a text button from a pair of widgets that serve as the button's
   /// [icon] and [label].
   ///
@@ -136,6 +134,8 @@ class OutlinedButton extends ButtonStyleButton {
           : label,
     );
   }
+
+  final Widget? _icon;
 
   /// A static convenience method that constructs an outlined button
   /// [ButtonStyle] given simple values.
