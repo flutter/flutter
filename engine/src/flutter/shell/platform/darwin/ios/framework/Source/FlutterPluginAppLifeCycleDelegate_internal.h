@@ -20,6 +20,22 @@
 - (BOOL)hasPluginThatRespondsToSelector:(SEL)selector;
 
 /**
+ * Forwards the `application:didFinishLaunchingWithOptions:` lifecycle event to plugins if they have
+ * not received it yet. This compensates for the UIScene migration, which causes storyboards (and
+ * thus the plugin registration via `FlutterImplicitEngineDelegate`) to be instantiated after the
+ * application launch events.
+ */
+- (void)applicationDidFinishLaunchingSceneFallback:(UIApplication*)application;
+
+/**
+ * Forwards the `application:willFinishLaunchingWithOptions:` lifecycle event to plugins if they
+ * have not received it yet. This compensates for the UIScene migration, which causes storyboards
+ * (and thus the plugin registration via `FlutterImplicitEngineDelegate`) to be instantiated after
+ * the application launch events.
+ */
+- (void)applicationWillFinishLaunchingSceneFallback:(UIApplication*)application;
+
+/**
  * Forwards the application equivalent lifecycle event of
  * `sceneWillEnterForeground:` -> `applicationWillEnterForeground:` to plugins that have not adopted
  * the FlutterSceneLifeCycleDelegate protocol.

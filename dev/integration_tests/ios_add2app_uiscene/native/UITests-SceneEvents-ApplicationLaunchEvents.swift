@@ -19,7 +19,8 @@ final class xcode_uikit_swiftUITests: XCTestCase {
     button.tap()
 
     let expectedStartEvents = [
-      "sceneWillConnect",
+      "applicationWillFinishLaunchingWithOptions",
+      "applicationDidFinishLaunchingWithOptions", "sceneWillConnect",
       "sceneWillEnterForeground", "sceneDidBecomeActive",
     ]
     let startEventsPredicate = NSPredicate(
@@ -38,7 +39,8 @@ final class xcode_uikit_swiftUITests: XCTestCase {
     button.tap()
 
     let expectedEventsAfterBackgroundAndReactivate = [
-    "sceneWillConnect",
+      "applicationWillFinishLaunchingWithOptions",
+      "applicationDidFinishLaunchingWithOptions", "sceneWillConnect",
       "sceneWillEnterForeground", "sceneDidBecomeActive",
       "sceneWillResignActive", "sceneDidEnterBackground",
       "sceneWillEnterForeground", "sceneDidBecomeActive",

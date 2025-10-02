@@ -29,7 +29,7 @@ FLUTTER_DARWIN_EXPORT
  * @return `NO` if any plugin vetos application launch.
  */
 - (BOOL)application:(UIApplication*)application
-    didFinishLaunchingWithOptions:(NSDictionary*)launchOptions;
+    didFinishLaunchingWithOptions:(nullable NSDictionary*)launchOptions;
 
 /**
  * Calls all plugins registered for `UIApplicationDelegate` callbacks.
@@ -37,7 +37,7 @@ FLUTTER_DARWIN_EXPORT
  * @return `NO` if any plugin vetos application launch.
  */
 - (BOOL)application:(UIApplication*)application
-    willFinishLaunchingWithOptions:(NSDictionary*)launchOptions;
+    willFinishLaunchingWithOptions:(nullable NSDictionary*)launchOptions;
 
 /**
  * Called if this plugin has been registered for `UIApplicationDelegate` callbacks.

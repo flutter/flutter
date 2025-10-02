@@ -928,13 +928,15 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   return _shell != nullptr;
 }
 
-- (void)notifyAppDelegateOfEngineInitialization {
+- (BOOL)notifyAppDelegateOfEngineInitialization {
   id appDelegate = FlutterSharedApplication.application.delegate;
   if ([appDelegate conformsToProtocol:@protocol(FlutterImplicitEngineDelegate)]) {
     id<FlutterImplicitEngineDelegate> provider = (id<FlutterImplicitEngineDelegate>)appDelegate;
     [provider didInitializeImplicitFlutterEngine:[[FlutterImplicitEngineBridge alloc]
                                                      initWithEngine:self]];
+    return YES;
   }
+  return NO;
 }
 
 - (void)updateDisplays {
