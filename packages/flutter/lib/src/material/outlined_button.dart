@@ -113,13 +113,13 @@ class OutlinedButton extends ButtonStyleButton {
   }) : _addPadding = icon != null,
        super(
          child: icon != null
-           ? _OutlinedButtonWithIconChild(
-               iconAlignment: iconAlignment,
-               label: label,
-               buttonStyle: style,
-               icon: icon,
-             )
-           : label,
+             ? _OutlinedButtonWithIconChild(
+                 iconAlignment: iconAlignment,
+                 label: label,
+                 buttonStyle: style,
+                 icon: icon,
+               )
+             : label,
        );
 
   final bool _addPadding;
