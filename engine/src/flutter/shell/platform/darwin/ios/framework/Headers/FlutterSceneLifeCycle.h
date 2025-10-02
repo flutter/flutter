@@ -112,10 +112,8 @@ API_AVAILABLE(ios(13.0))
 /**
  * Calls all plugins registered for `UIWindowScene` callbacks in order of registration until
  * a plugin handles the request.
- *
- * @return `YES` if any plugin handles the request.
  */
-- (BOOL)scene:(UIScene*)scene
+- (void)scene:(UIScene*)scene
     willConnectToSession:(UISceneSession*)session
                  options:(UISceneConnectionOptions*)connectionOptions;
 
@@ -138,30 +136,24 @@ API_AVAILABLE(ios(13.0))
 /**
  * Calls all plugins registered for `UIWindowScene` callbacks in order of registration until
  * a plugin handles the request.
- *
- * @return `YES` if any plugin handles the request.
  */
-- (BOOL)scene:(UIScene*)scene openURLContexts:(NSSet<UIOpenURLContext*>*)URLContexts;
+- (void)scene:(UIScene*)scene openURLContexts:(NSSet<UIOpenURLContext*>*)URLContexts;
 
 #pragma mark - Continuing user activities
 
 /**
  * Calls all plugins registered for `UIWindowScene` callbacks in order of registration until
  * a plugin handles the request.
- *
- * @return `YES` if any plugin handles the request.
  */
-- (BOOL)scene:(UIScene*)scene continueUserActivity:(NSUserActivity*)userActivity;
+- (void)scene:(UIScene*)scene continueUserActivity:(NSUserActivity*)userActivity;
 
 #pragma mark - Performing tasks
 
 /**
  * Calls all plugins registered for `UIWindowScene` callbacks in order of registration until
  * a plugin handles the request.
- *
- * @return `YES` if any plugin handles the request.
  */
-- (BOOL)windowScene:(UIWindowScene*)windowScene
+- (void)windowScene:(UIWindowScene*)windowScene
     performActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
                completionHandler:(void (^)(BOOL succeeded))completionHandler;
 
