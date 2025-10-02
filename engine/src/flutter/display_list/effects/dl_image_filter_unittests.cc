@@ -207,8 +207,10 @@ TEST(DisplayListImageFilter, BlurEquals) {
 
   TestEquals(filter1, filter2);
 
-  DlBlurImageFilter filter3(5.0, 6.0, DlRect::MakeLTRB(1, 2, 3, 4), DlTileMode::kMirror);
-  DlBlurImageFilter filter4(5.0, 6.0, DlRect::MakeLTRB(1, 2, 3, 4), DlTileMode::kMirror);
+  DlBlurImageFilter filter3(5.0, 6.0, DlRect::MakeLTRB(1, 2, 3, 4),
+                            DlTileMode::kMirror);
+  DlBlurImageFilter filter4(5.0, 6.0, DlRect::MakeLTRB(1, 2, 3, 4),
+                            DlTileMode::kMirror);
 
   TestEquals(filter3, filter4);
 }
@@ -227,8 +229,10 @@ TEST(DisplayListImageFilter, BlurNotEquals) {
   DlBlurImageFilter filter2(7.0, 6.0, std::nullopt, DlTileMode::kMirror);
   DlBlurImageFilter filter3(5.0, 8.0, std::nullopt, DlTileMode::kMirror);
   DlBlurImageFilter filter4(5.0, 6.0, std::nullopt, DlTileMode::kRepeat);
-  DlBlurImageFilter filter5(5.0, 6.0, DlRect::MakeLTRB(1, 2, 3, 4), DlTileMode::kRepeat);
-  DlBlurImageFilter filter6(5.0, 6.0, DlRect::MakeLTRB(4, 2, 3, 4), DlTileMode::kRepeat);
+  DlBlurImageFilter filter5(5.0, 6.0, DlRect::MakeLTRB(1, 2, 3, 4),
+                            DlTileMode::kRepeat);
+  DlBlurImageFilter filter6(5.0, 6.0, DlRect::MakeLTRB(4, 2, 3, 4),
+                            DlTileMode::kRepeat);
 
   TestNotEquals(filter1, filter2, "Sigma X differs");
   TestNotEquals(filter1, filter3, "Sigma Y differs");
