@@ -93,6 +93,8 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 @interface FlutterEngineBaseRegistrar : NSObject <FlutterBaseRegistrar>
 
 @property(nonatomic, weak) FlutterEngine* flutterEngine;
+@property(nonatomic, strong) NSString* key;
+
 - (instancetype)initWithKey:(NSString*)key flutterEngine:(FlutterEngine*)flutterEngine;
 
 @end
@@ -928,7 +930,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   return _shell != nullptr;
 }
 
-- (BOOL)notifyAppDelegateOfEngineInitialization {
+- (BOOL)performAppDelegateEngineInitializationCallback {
   id appDelegate = FlutterSharedApplication.application.delegate;
   if ([appDelegate conformsToProtocol:@protocol(FlutterImplicitEngineDelegate)]) {
     id<FlutterImplicitEngineDelegate> provider = (id<FlutterImplicitEngineDelegate>)appDelegate;
@@ -1575,9 +1577,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
 @end
 
-@implementation FlutterEngineBaseRegistrar {
-  NSString* _key;
-}
+@implementation FlutterEngineBaseRegistrar
 
 - (instancetype)initWithKey:(NSString*)key flutterEngine:(FlutterEngine*)flutterEngine {
   self = [super init];
@@ -1612,16 +1612,12 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
 @end
 
-@implementation FlutterEnginePluginRegistrar {
-  NSString* _pluginKey;
-}
+@implementation FlutterEnginePluginRegistrar
 
 - (instancetype)initWithPlugin:(NSString*)pluginKey flutterEngine:(FlutterEngine*)flutterEngine {
   self = [super init];
   NSAssert(self, @"Super init cannot be nil");
-  _pluginKey = [pluginKey copy];
-  self.flutterEngine = flutterEngine;
-  return self;
+  return [super initWithKey:pluginKey flutterEngine:flutterEngine];
 }
 
 - (nullable UIViewController*)viewController {
@@ -1629,7 +1625,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 }
 
 - (void)publish:(NSObject*)value {
-  self.flutterEngine.pluginPublications[_pluginKey] = value;
+  self.flutterEngine.pluginPublications[self.key] = value;
 }
 
 - (void)addMethodCallDelegate:(NSObject<FlutterPlugin>*)delegate
@@ -1650,7 +1646,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
     // TODO(vashworth): If the plugin doesn't conform to the FlutterSceneLifeCycleDelegate,
     // print a warning pointing to documentation: https://github.com/flutter/flutter/issues/175956
     // [FlutterLogger logWarning:[NSString stringWithFormat:@"Plugin %@ has not migrated to
-    // scenes.", _pluginKey]];
+    // scenes.", self.key]];
   }
 }
 

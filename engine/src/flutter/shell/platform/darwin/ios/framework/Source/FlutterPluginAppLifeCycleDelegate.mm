@@ -31,8 +31,8 @@ static const SEL kSelectorsHandledByPlugins[] = {
 - (void)handleWillTerminate:(NSNotification*)notification
     NS_EXTENSION_UNAVAILABLE_IOS("Disallowed in app extensions");
 
-@property(nonatomic, assign) BOOL didReceiveApplicationWillLaunch;
-@property(nonatomic, assign) BOOL didReceiveApplicationDidLaunch;
+@property(nonatomic, assign) BOOL didForwardApplicationWillLaunch;
+@property(nonatomic, assign) BOOL didForwardApplicationDidLaunch;
 @end
 
 @implementation FlutterPluginAppLifeCycleDelegate {
@@ -118,25 +118,25 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
   }
 }
 
-- (void)applicationDidFinishLaunchingSceneFallback:(UIApplication*)application {
+- (void)sceneFallbackDidFinishLaunchingApplication:(UIApplication*)application {
   // If the application:didFinishingLaunchingWithOptions: event has already been sent to plugins, do
   // not send again.
-  if (self.didReceiveApplicationDidLaunch) {
+  if (self.didForwardApplicationDidLaunch) {
     return;
   }
   // Send nil launchOptions since UIKit sends nil when UIScene is enabled.
   [self application:application didFinishLaunchingWithOptions:nil];
 }
 
-- (void)applicationWillFinishLaunchingSceneFallback:(UIApplication*)application {
+- (void)sceneFallbackWillFinishLaunchingApplication:(UIApplication*)application {
   // If the application:willFinishLaunchingWithOptions: event has already been sent to plugins, do
   // not send again.
-  if (self.didReceiveApplicationWillLaunch) {
+  if (self.didForwardApplicationWillLaunch) {
     return;
   }
   // If the application:didFinishingLaunchingWithOptions: event has already been sent to plugins, do
   // not send willFinishLaunchingWithOptions since it should happen before, not after.
-  if (self.didReceiveApplicationDidLaunch) {
+  if (self.didForwardApplicationDidLaunch) {
     return;
   }
   // Send nil launchOptions since UIKit sends nil when UIScene is enabled.
@@ -146,7 +146,7 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
 - (BOOL)application:(UIApplication*)application
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
   if (_delegates.count > 0) {
-    self.didReceiveApplicationDidLaunch = YES;
+    self.didForwardApplicationDidLaunch = YES;
   }
   for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in [_delegates allObjects]) {
     if (!delegate) {
@@ -164,7 +164,7 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
 - (BOOL)application:(UIApplication*)application
     willFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
   if (_delegates.count > 0) {
-    self.didReceiveApplicationWillLaunch = YES;
+    self.didForwardApplicationWillLaunch = YES;
   }
   flutter::DartCallbackCache::LoadCacheFromDisk();
   for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in [_delegates allObjects]) {

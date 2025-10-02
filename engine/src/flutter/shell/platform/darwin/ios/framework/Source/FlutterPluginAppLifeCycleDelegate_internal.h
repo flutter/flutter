@@ -25,7 +25,7 @@
  * thus the plugin registration via `FlutterImplicitEngineDelegate`) to be instantiated after the
  * application launch events.
  */
-- (void)applicationDidFinishLaunchingSceneFallback:(UIApplication*)application;
+- (void)sceneFallbackDidFinishLaunchingApplication:(UIApplication*)application;
 
 /**
  * Forwards the `application:willFinishLaunchingWithOptions:` lifecycle event to plugins if they
@@ -33,7 +33,7 @@
  * (and thus the plugin registration via `FlutterImplicitEngineDelegate`) to be instantiated after
  * the application launch events.
  */
-- (void)applicationWillFinishLaunchingSceneFallback:(UIApplication*)application;
+- (void)sceneFallbackWillFinishLaunchingApplication:(UIApplication*)application;
 
 /**
  * Forwards the application equivalent lifecycle event of

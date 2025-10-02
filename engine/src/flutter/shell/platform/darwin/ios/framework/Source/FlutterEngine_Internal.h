@@ -107,8 +107,16 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)addSceneLifeCycleDelegate:(NSObject<FlutterSceneLifeCycleDelegate>*)delegate;
 
-- (BOOL)notifyAppDelegateOfEngineInitialization;
+/*
+ * Performs AppDelegate callback provided through the `FlutterImplicitEngineDelegate` protocol to
+ * inform apps that the implicit `FlutterEngine` has initialized.
+ */
+- (BOOL)performAppDelegateEngineInitializationCallback;
 
+/*
+ * Creates a `FlutterEngineApplicationRegistrar` that can be used to access application-level
+ * services, such as the engine's `FlutterBinaryMessenger` or `FlutterTextureRegistry`.
+ */
 - (NSObject<FlutterApplicationRegistrar>*)registrarForApplication:(NSString*)key;
 
 @end

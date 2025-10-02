@@ -2488,7 +2488,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
       (FlutterViewController*)[storyboard instantiateInitialViewController];
   [appDelegate setPluginRegistrant:nil];
   OCMVerify([mockRegistrant registerWithRegistry:viewController]);
-  OCMVerify([self.mockEngine notifyAppDelegateOfEngineInitialization]);
+  OCMVerify([self.mockEngine performAppDelegateEngineInitializationCallback]);
   [appDelegate setMockLaunchEngine:nil];
 }
 

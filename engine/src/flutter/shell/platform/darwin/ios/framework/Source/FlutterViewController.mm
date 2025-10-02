@@ -79,7 +79,7 @@ typedef struct MouseState {
 @property(nonatomic, assign) UIStatusBarStyle statusBarStyle;
 @property(nonatomic, assign) BOOL initialized;
 @property(nonatomic, assign) BOOL engineNeedsLaunch;
-@property(nonatomic, assign) BOOL wokenFromNib;
+@property(nonatomic, assign) BOOL awokenFromNib;
 
 @property(nonatomic, readwrite, getter=isDisplayingFlutterUI) BOOL displayingFlutterUI;
 @property(nonatomic, assign) BOOL isHomeIndicatorHidden;
@@ -248,7 +248,7 @@ typedef struct MouseState {
 
 - (void)awakeFromNib {
   [super awakeFromNib];
-  self.wokenFromNib = YES;
+  self.awokenFromNib = YES;
   if (!self.engine) {
     [self sharedSetupWithProject:nil initialRoute:nil];
   }
@@ -312,9 +312,9 @@ typedef struct MouseState {
   // We call this from the FlutterViewController instead of the FlutterEngine directly because this
   // is only needed when the FlutterEngine is implicit. If it's not implicit there's no need for
   // them to have a callback to expose the engine since they created the FlutterEngine directly.
-  BOOL notified = [_engine notifyAppDelegateOfEngineInitialization];
+  BOOL notified = [_engine performAppDelegateEngineInitializationCallback];
 
-  // TODO(vashworth): deprecate
+  // TODO(vashworth): Deprecate, see https://github.com/flutter/flutter/issues/176424
   if ([FlutterSharedApplication.application.delegate
           respondsToSelector:@selector(pluginRegistrant)]) {
     NSObject<FlutterPluginRegistrant>* pluginRegistrant =
@@ -328,13 +328,13 @@ typedef struct MouseState {
   // to be registered during the implicit engine callbacks. As a workaround, send the app launch
   // events after the application callbacks.
   id appDelegate = FlutterSharedApplication.application.delegate;
-  if (self.wokenFromNib && notified && FlutterSharedApplication.hasSceneDelegate &&
+  if (self.awokenFromNib && notified && FlutterSharedApplication.hasSceneDelegate &&
       [appDelegate isKindOfClass:[FlutterAppDelegate class]]) {
     id applicationLifeCycleDelegate = ((FlutterAppDelegate*)appDelegate).lifeCycleDelegate;
     [applicationLifeCycleDelegate
-        applicationWillFinishLaunchingSceneFallback:FlutterSharedApplication.application];
+        sceneFallbackWillFinishLaunchingApplication:FlutterSharedApplication.application];
     [applicationLifeCycleDelegate
-        applicationDidFinishLaunchingSceneFallback:FlutterSharedApplication.application];
+        sceneFallbackDidFinishLaunchingApplication:FlutterSharedApplication.application];
   }
 }
 
