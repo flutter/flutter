@@ -11,10 +11,10 @@ class AppDelegate: FlutterAppDelegate {
     return true
   }
 
-  var engine : FlutterEngine?;
+  var engine: FlutterEngine
 
   override func applicationDidFinishLaunching(_ notification: Notification) {
-    engine = FlutterEngine(name: "project", project: nil);
-    engine?.run(withEntrypoint:nil);
+    engine = FlutterEngine(name: "project", project: nil)
+    engine?.run(withEntrypoint:nil)
   }
 }
