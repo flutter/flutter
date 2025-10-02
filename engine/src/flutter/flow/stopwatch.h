@@ -16,6 +16,9 @@ namespace flutter {
 
 class Stopwatch {
  public:
+  // The number of samples that will be accumulated for performance monitoring
+  static const size_t kMaxSamples = 120;
+
   /// The refresh rate interface for `Stopwatch`.
   class RefreshRateUpdater {
    public:
@@ -56,7 +59,7 @@ class Stopwatch {
   const RefreshRateUpdater& refresh_rate_updater_;
   fml::TimePoint start_;
   std::vector<fml::TimeDelta> laps_;
-  size_t current_sample_ = 0;
+  size_t current_sample_ = kMaxSamples - 1u;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Stopwatch);
 };
