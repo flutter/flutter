@@ -20,6 +20,7 @@ import 'package:flutter/foundation.dart';
 
 import '../foundation/_features.dart';
 import '_window_io.dart' if (dart.library.js_interop) '_window_web.dart' as window_impl;
+import '_window_positioner.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'framework.dart';
@@ -421,6 +422,50 @@ mixin class DialogWindowControllerDelegate {
   }
 }
 
+/// Delegate class for overlay window controller.
+///
+/// {@macro flutter.widgets.windowing.experimental}
+///
+/// See also:
+///
+///  * [OverlayWindowController], the controller that creates and manages overlay windows.
+///  * [OverlayWindow], the widget for an overlay window.
+@internal
+mixin class OverlayWindowControllerDelegate {
+  /// Invoked when the user attempts to close the window.
+  ///
+  /// The default implementation destroys the window. Subclasses
+  /// can override the behavior to delay or prevent the window from closing.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  ///
+  /// See also:
+  ///
+  /// * [onWindowDestroyed], which is invoked after the window is closed.
+  @internal
+  void onWindowCloseRequested(OverlayWindowController controller) {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+
+    controller.destroy();
+  }
+
+  /// Invoked after the window is closed.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  ///
+  /// See also:
+  ///
+  /// * [onWindowCloseRequested], which is invoked when the user attempts to close the window.
+  @internal
+  void onWindowDestroyed() {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+  }
+}
+
 /// A controller for a dialog window.
 ///
 /// Two types of dialogs are supported:
@@ -620,6 +665,183 @@ abstract class DialogWindowController extends BaseWindowController {
   void setMinimized(bool minimized);
 }
 
+/// A controller for an overlay window.
+///
+/// An overlay window is a frameless, floating window that automatically adjusts
+/// size based on content dimensions and appears above other windows. Unlike
+/// existing archetypes, overlay windows can have parent-child relationships and
+/// persist independently while maintaining always-on-top behavior as optional
+/// behavior.
+///
+/// This class does not interact with the widget tree. Instead, it is typically
+/// provided to the [OverlayWindow] widget, which renders the content inside the
+/// overlay window.
+///
+/// The user of this class is responsible for managing the lifecycle of the window.
+/// When the window is no longer needed, the user should call [destroy] on this
+/// controller to release the resources associated with the window.
+///
+/// {@tool snippet}
+/// An example usage might look like:
+///
+/// ```dart
+/// // TODO(mattkae): remove invalid_use_of_internal_member ignore comment when this API is stable.
+/// // ignore_for_file: invalid_use_of_internal_member
+/// import 'package:flutter/widgets.dart';
+/// import 'package:flutter/material.dart';
+/// import 'package:flutter/src/widgets/_window.dart';
+/// import 'package:flutter/src/widgets/_window_positioner.dart';
+///
+/// void main() {
+///   runWidget(
+///     OverlayWindow(
+///       controller: OverlayWindowController(
+///         anchorRect: const Rect.fromLTWH(100, 100, 200, 100),
+///         positioner: const WindowPositioner(
+///           parentAnchor: WindowPositionerAnchor.bottomRight,
+///           childAnchor: WindowPositionerAnchor.topLeft,
+///         ),
+///         contentSizeConstraints: const BoxConstraints(
+///           minWidth: 200,
+///           minHeight: 100,
+///         ),
+///         alwaysOnTop: true,
+///       ),
+///       child: Container(
+///         padding: const EdgeInsets.all(16),
+///         child: const Text('Overlay Content'),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// Children of an [OverlayWindow] widget can access the [OverlayWindowController]
+/// via the [WindowScope] inherited widget.
+///
+/// {@macro flutter.widgets.windowing.experimental}
+abstract class OverlayWindowController extends BaseWindowController {
+  /// Creates an [OverlayWindowController] with the provided properties.
+  ///
+  /// Upon construction, the window is created by the platform.
+  ///
+  /// The [anchorRect] argument specifies the rectangle used as reference
+  /// for positioning the overlay window.
+  ///
+  /// The [positioner] argument handles intelligent positioning of the
+  /// overlay window relative to the anchor rectangle.
+  ///
+  /// The [contentSizeConstraints] argument specifies constraints for
+  /// the window content size.
+  ///
+  /// The [parent] argument specifies the parent window of this overlay.
+  /// If null, the overlay window is independent.
+  ///
+  /// The [alwaysOnTop] argument determines whether the overlay window
+  /// should stay on top of other windows. Defaults to false.
+  ///
+  /// The [title] argument configures the window's initial title.
+  /// If omitted, some platforms might fall back to the app's name.
+  ///
+  /// The [delegate] argument can be used to listen to the window's
+  /// lifecycle. For example, it can be used to save state before
+  /// a window is closed.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  factory OverlayWindowController({
+    required Rect anchorRect,
+    required WindowPositioner positioner,
+    BoxConstraints? contentSizeConstraints,
+    BaseWindowController? parent,
+    String? title,
+    bool alwaysOnTop = false,
+    OverlayWindowControllerDelegate? delegate,
+  }) {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+
+    final WindowingOwner owner = WidgetsBinding.instance.windowingOwner;
+    return owner.createOverlayWindowController(
+      delegate: delegate ?? OverlayWindowControllerDelegate(),
+      anchorRect: anchorRect,
+      positioner: positioner,
+      contentSizeConstraints: contentSizeConstraints ?? const BoxConstraints(),
+      parent: parent,
+      title: title,
+      alwaysOnTop: alwaysOnTop,
+    );
+  }
+
+  /// Creates an empty [OverlayWindowController].
+  ///
+  /// This method is only intended to be used by subclasses of the
+  /// [OverlayWindowController].
+  ///
+  /// Users who want to instantiate a new [OverlayWindowController] should
+  /// always use the factory method to create a controller that is valid
+  /// for their particular platform.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  @protected
+  OverlayWindowController.empty();
+
+  /// The parent controller of this overlay, if any.
+  BaseWindowController? get parent;
+
+  /// The current title of the overlay window.
+  ///
+  /// This might differ from the requested title.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  String get title;
+
+  /// Request change for the window title.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  void setTitle(String title);
+
+  /// Whether the overlay window is activated (has focus).
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  bool get isActivated;
+
+  /// Activates the overlay window (brings to front and gives focus).
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  void activate();
+
+  /// Whether the overlay window is minimized.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  bool get isMinimized;
+
+  /// Requests window to be minimized.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  void setMinimized(bool minimized);
+
+  /// Whether the overlay window is always on top of other windows.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  bool get alwaysOnTop;
+
+  /// Sets whether the overlay window should be always on top of other windows.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  void setAlwaysOnTop(bool alwaysOnTop);
+}
+
 /// [WindowingOwner] is responsible for creating and managing window controllers.
 ///
 /// A custom implementation can be provided by setting [WidgetsBinding.windowingOwner].
@@ -656,6 +878,24 @@ abstract class WindowingOwner {
     BoxConstraints? preferredConstraints,
     BaseWindowController? parent,
     String? title,
+  });
+
+  /// Creates an [OverlayWindowController] with the provided properties.
+  ///
+  /// Most app developers should use [OverlayWindowController]'s constructor
+  /// instead of calling this method directly. This method allows platforms
+  /// to inject platform-specific logic.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  OverlayWindowController createOverlayWindowController({
+    required OverlayWindowControllerDelegate delegate,
+    required Rect anchorRect,
+    required WindowPositioner positioner,
+    required BoxConstraints contentSizeConstraints,
+    BaseWindowController? parent,
+    String? title,
+    bool alwaysOnTop = false,
   });
 
   /// Returns whether the application has any top level windows created by this
@@ -706,6 +946,19 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
     BoxConstraints? preferredConstraints,
     BaseWindowController? parent,
     String? title,
+  }) {
+    throw UnsupportedError(errorMessage);
+  }
+
+  @override
+  OverlayWindowController createOverlayWindowController({
+    required OverlayWindowControllerDelegate delegate,
+    required Rect anchorRect,
+    required WindowPositioner positioner,
+    required BoxConstraints contentSizeConstraints,
+    BaseWindowController? parent,
+    String? title,
+    bool alwaysOnTop = false,
   }) {
     throw UnsupportedError(errorMessage);
   }
@@ -900,6 +1153,100 @@ class DialogWindow extends StatelessWidget {
   }
 }
 
+/// The [OverlayWindow] widget provides a way to render an overlay window in the
+/// widget tree.
+///
+/// The provided [controller] creates the native window that backs
+/// the widget. The [child] widget is rendered into this newly created window.
+///
+/// When an [OverlayWindow] widget is removed from the tree, the window that was created
+/// by the [controller] remains valid until the caller destroys it by calling
+/// [OverlayWindowController.destroy].
+///
+/// Widgets in the same tree as the [child] widget will have access to the
+/// [OverlayWindowController] via the [WindowScope] widget.
+///
+/// {@tool snippet}
+/// An example usage might look like:
+///
+/// ```dart
+/// // TODO(mattkae): remove invalid_use_of_internal_member ignore comment when this API is stable.
+/// // ignore_for_file: invalid_use_of_internal_member
+/// import 'package:flutter/widgets.dart';
+/// import 'package:flutter/material.dart';
+/// import 'package:flutter/src/widgets/_window.dart';
+/// import 'package:flutter/src/widgets/_window_positioner.dart';
+///
+/// void main() {
+///   runWidget(
+///     OverlayWindow(
+///       controller: OverlayWindowController(
+///         anchorRect: const Rect.fromLTWH(100, 100, 200, 100),
+///         positioner: const WindowPositioner(
+///           parentAnchor: WindowPositionerAnchor.bottomRight,
+///           childAnchor: WindowPositionerAnchor.topLeft,
+///         ),
+///         contentSizeConstraints: const BoxConstraints(
+///           minWidth: 200,
+///           minHeight: 100,
+///         ),
+///         alwaysOnTop: true,
+///       ),
+///       child: Container(
+///         padding: const EdgeInsets.all(16),
+///         child: const Text('Overlay Content'),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@macro flutter.widgets.windowing.experimental}
+@internal
+class OverlayWindow extends StatelessWidget {
+  /// Creates an overlay window widget.
+  ///
+  /// The [controller] creates the native backing window into which the
+  /// [child] widget is rendered.
+  ///
+  /// It is up to the caller to destroy the window by calling
+  /// [OverlayWindowController.destroy] when the window is no longer needed.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  OverlayWindow({super.key, required this.controller, required this.child}) {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+  }
+
+  /// Controller for this widget.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  final OverlayWindowController controller;
+
+  /// The content rendered into this window.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  final Widget child;
+
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: controller,
+      builder: (BuildContext context, Widget? widget) => WindowScope(
+        controller: controller,
+        child: View(view: controller.rootView, child: child),
+      ),
+    );
+  }
+}
+
 enum _WindowControllerAspect { contentSize, title, activated, maximized, minimized, fullscreen }
 
 /// Provides descendants with access to the [BaseWindowController] associated with
@@ -1031,6 +1378,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
     return switch (controller) {
       RegularWindowController() => controller.title,
       DialogWindowController() => controller.title,
+      OverlayWindowController() => controller.title,
     };
   }
 
@@ -1052,6 +1400,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
     return switch (controller) {
       RegularWindowController() => controller.title,
       DialogWindowController() => controller.title,
+      OverlayWindowController() => controller.title,
     };
   }
 
@@ -1074,6 +1423,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
     return switch (controller) {
       RegularWindowController() => controller.isActivated,
       DialogWindowController() => controller.isActivated,
+      OverlayWindowController() => controller.isActivated,
     };
   }
 
@@ -1096,6 +1446,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
     return switch (controller) {
       RegularWindowController() => controller.isActivated,
       DialogWindowController() => controller.isActivated,
+      OverlayWindowController() => controller.isActivated,
     };
   }
 
@@ -1118,6 +1469,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
     return switch (controller) {
       RegularWindowController() => controller.isMinimized,
       DialogWindowController() => controller.isMinimized,
+      OverlayWindowController() => controller.isMinimized,
     };
   }
 
@@ -1140,6 +1492,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
     return switch (controller) {
       RegularWindowController() => controller.isMinimized,
       DialogWindowController() => controller.isMinimized,
+      OverlayWindowController() => controller.isMinimized,
     };
   }
 
@@ -1162,6 +1515,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
     return switch (controller) {
       RegularWindowController() => controller.isMaximized,
       DialogWindowController() => false,
+      OverlayWindowController() => false,
     };
   }
 
@@ -1184,6 +1538,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
     return switch (controller) {
       RegularWindowController() => controller.isMaximized,
       DialogWindowController() => false,
+      OverlayWindowController() => false,
     };
   }
 
@@ -1207,6 +1562,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
     return switch (controller) {
       RegularWindowController() => controller.isFullscreen,
       DialogWindowController() => false,
+      OverlayWindowController() => false,
     };
   }
 
@@ -1229,6 +1585,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
     return switch (controller) {
       RegularWindowController() => controller.isFullscreen,
       DialogWindowController() => false,
+      OverlayWindowController() => false,
     };
   }
 
@@ -1292,6 +1649,8 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
                 regular.title != (oldWidget.controller as RegularWindowController).title,
               final DialogWindowController dialog =>
                 dialog.title != (oldWidget.controller as DialogWindowController).title,
+              final OverlayWindowController overlay =>
+                overlay.title != (oldWidget.controller as OverlayWindowController).title,
             },
             _WindowControllerAspect.activated => switch (controller) {
               final RegularWindowController regular =>
@@ -1299,12 +1658,16 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
                     (oldWidget.controller as RegularWindowController).isActivated,
               final DialogWindowController dialog =>
                 dialog.isActivated != (oldWidget.controller as DialogWindowController).isActivated,
+              final OverlayWindowController overlay =>
+                overlay.isActivated !=
+                    (oldWidget.controller as OverlayWindowController).isActivated,
             },
             _WindowControllerAspect.maximized => switch (controller) {
               final RegularWindowController regular =>
                 regular.isMaximized !=
                     (oldWidget.controller as RegularWindowController).isMaximized,
               DialogWindowController() => false,
+              OverlayWindowController() => false,
             },
             _WindowControllerAspect.minimized => switch (controller) {
               final RegularWindowController regular =>
@@ -1312,12 +1675,16 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
                     (oldWidget.controller as RegularWindowController).isMinimized,
               final DialogWindowController dialog =>
                 dialog.isMinimized != (oldWidget.controller as DialogWindowController).isMinimized,
+              final OverlayWindowController overlay =>
+                overlay.isMinimized !=
+                    (oldWidget.controller as OverlayWindowController).isMinimized,
             },
             _WindowControllerAspect.fullscreen => switch (controller) {
               final RegularWindowController regular =>
                 regular.isFullscreen !=
                     (oldWidget.controller as RegularWindowController).isFullscreen,
               DialogWindowController() => false,
+              OverlayWindowController() => false,
             },
           },
     );
