@@ -5041,7 +5041,7 @@ void main() {
 
     const Color selectedColor = Color(0xff00ff00);
     const Color unselectedColor = Color(0xffff0000);
-    final MaterialStateColor labelColor = MaterialStateColor.resolveWith((Set<WidgetState> states) {
+    final WidgetStateColor labelColor = WidgetStateColor.resolveWith((Set<WidgetState> states) {
       if (states.contains(WidgetState.selected)) {
         return selectedColor;
       }
@@ -5083,7 +5083,7 @@ void main() {
 
     const Color selectedStateColor = Color(0xff00ff00);
     const Color unselectedStateColor = Color(0xffff0000);
-    final MaterialStateColor labelColor = MaterialStateColor.resolveWith((Set<WidgetState> states) {
+    final WidgetStateColor labelColor = WidgetStateColor.resolveWith((Set<WidgetState> states) {
       if (states.contains(WidgetState.selected)) {
         return selectedStateColor;
       }
@@ -5521,12 +5521,12 @@ void main() {
 
     Widget buildTabBar({bool stateColor = false}) {
       final Color labelColor = stateColor
-          ? MaterialStateColor.resolveWith((Set<WidgetState> states) {
+          ? WidgetStateColor.resolveWith((Set<WidgetState> states) {
               if (states.contains(WidgetState.selected)) {
                 return Colors.white;
               } else {
                 // this is a third color to also test if unselectedLabelColor
-                // is ignored when labelColor is MaterialStateColor
+                // is ignored when labelColor is WidgetStateColor
                 return Colors.transparent;
               }
             })

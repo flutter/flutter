@@ -29,7 +29,7 @@ source_set("image_generator") {
 
   deps = [
     "//flutter/fml",
-    "//flutter/lib/ui:ui",
+    "//flutter/lib/ui",
     "//flutter/skia",
   ]
 
