@@ -3846,6 +3846,7 @@ void main() {
     expect(
       tester.getSemantics(find.byType(TextField)),
       matchesSemantics(
+        isButton: true,
         hasFocusAction: true,
         isTextField: true,
         isFocusable: true,
@@ -4435,26 +4436,12 @@ void main() {
                             SemanticsFlag.hasEnabledState,
                             SemanticsFlag.isEnabled,
                             SemanticsFlag.isReadOnly,
+                            SemanticsFlag.isButton,
                           ],
+                          hint: 'Collapsed',
                           actions: <SemanticsAction>[SemanticsAction.focus],
                           textDirection: TextDirection.ltr,
                           currentValueLength: 0,
-                          children: <TestSemantics>[
-                            TestSemantics(
-                              id: 6,
-                              flags: <SemanticsFlag>[
-                                SemanticsFlag.hasSelectedState,
-                                SemanticsFlag.isButton,
-                                SemanticsFlag.hasEnabledState,
-                                SemanticsFlag.isEnabled,
-                                SemanticsFlag.isFocusable,
-                              ],
-                              actions: <SemanticsAction>[
-                                SemanticsAction.tap,
-                                SemanticsAction.focus,
-                              ],
-                            ),
-                          ],
                         ),
                       ],
                     ),

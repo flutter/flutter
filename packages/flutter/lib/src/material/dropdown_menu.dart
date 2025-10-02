@@ -1129,18 +1129,26 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         final Widget trailingButton = widget.showTrailingIcon
             ? Padding(
                 padding: isCollapsed ? EdgeInsets.zero : const EdgeInsets.all(4.0),
-                child: IconButton(
-                  focusNode: _trailingIconButtonFocusNode,
-                  isSelected: controller.isOpen,
-                  constraints: widget.inputDecorationTheme?.suffixIconConstraints,
-                  padding: isCollapsed ? EdgeInsets.zero : null,
-                  icon: widget.trailingIcon ?? const Icon(Icons.arrow_drop_down),
-                  selectedIcon: widget.selectedTrailingIcon ?? const Icon(Icons.arrow_drop_up),
-                  onPressed: !widget.enabled
-                      ? null
-                      : () {
-                          handlePressed(controller);
-                        },
+                child: ExcludeSemantics(
+                  // When the text field is treated as a button (i.e., it can
+                  // not be focused), the trailing button should become part of
+                  // the text field button by excluding semantics. Otherwise,
+                  // it will inappropriately announce whether this icon button
+                  // is selected or not.
+                  excluding: !canRequestFocus(),
+                  child: IconButton(
+                    focusNode: _trailingIconButtonFocusNode,
+                    isSelected: controller.isOpen,
+                    constraints: widget.inputDecorationTheme?.suffixIconConstraints,
+                    padding: isCollapsed ? EdgeInsets.zero : null,
+                    icon: widget.trailingIcon ?? const Icon(Icons.arrow_drop_down),
+                    selectedIcon: widget.selectedTrailingIcon ?? const Icon(Icons.arrow_drop_up),
+                    onPressed: !widget.enabled
+                        ? null
+                        : () {
+                            handlePressed(controller);
+                          },
+                  ),
                 ),
               )
             : const SizedBox.shrink();
@@ -1150,48 +1158,52 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           child: widget.leadingIcon ?? const SizedBox.shrink(),
         );
 
-        final Widget textField = TextField(
-          key: _anchorKey,
-          enabled: widget.enabled,
-          mouseCursor: effectiveMouseCursor,
-          focusNode: widget.focusNode,
-          canRequestFocus: canRequestFocus(),
-          enableInteractiveSelection: canRequestFocus(),
-          readOnly: !canRequestFocus(),
-          keyboardType: widget.keyboardType,
-          textAlign: widget.textAlign,
-          textAlignVertical: TextAlignVertical.center,
-          maxLines: widget.maxLines,
-          textInputAction: widget.textInputAction,
-          cursorHeight: widget.cursorHeight,
-          style: effectiveTextStyle,
-          controller: _effectiveTextEditingController,
-          onEditingComplete: _handleEditingComplete,
-          onTap: !widget.enabled
-              ? null
-              : () {
-                  handlePressed(controller, focusForKeyboard: !canRequestFocus());
-                },
-          onChanged: (String text) {
-            controller.open();
-            setState(() {
-              filteredEntries = widget.dropdownMenuEntries;
-              _enableFilter = widget.enableFilter;
-              _enableSearch = widget.enableSearch;
-            });
-          },
-          inputFormatters: widget.inputFormatters,
-          decoration: InputDecoration(
-            label: widget.label,
-            hintText: widget.hintText,
-            helperText: widget.helperText,
-            errorText: widget.errorText,
-            prefixIcon: widget.leadingIcon != null
-                ? SizedBox(key: _leadingKey, child: widget.leadingIcon)
-                : null,
-            suffixIcon: widget.showTrailingIcon ? trailingButton : null,
-          ).applyDefaults(effectiveInputDecorationTheme),
-          restorationId: widget.restorationId,
+        final Widget textField = Semantics(
+          button: !canRequestFocus(),
+          hint: _controller.isOpen ? 'Expanded' : 'Collapsed',
+          child: TextField(
+            key: _anchorKey,
+            enabled: widget.enabled,
+            mouseCursor: effectiveMouseCursor,
+            focusNode: widget.focusNode,
+            canRequestFocus: canRequestFocus(),
+            enableInteractiveSelection: canRequestFocus(),
+            readOnly: !canRequestFocus(),
+            keyboardType: widget.keyboardType,
+            textAlign: widget.textAlign,
+            textAlignVertical: TextAlignVertical.center,
+            maxLines: widget.maxLines,
+            textInputAction: widget.textInputAction,
+            cursorHeight: widget.cursorHeight,
+            style: effectiveTextStyle,
+            controller: _effectiveTextEditingController,
+            onEditingComplete: _handleEditingComplete,
+            onTap: !widget.enabled
+                ? null
+                : () {
+                    handlePressed(controller, focusForKeyboard: !canRequestFocus());
+                  },
+            onChanged: (String text) {
+              controller.open();
+              setState(() {
+                filteredEntries = widget.dropdownMenuEntries;
+                _enableFilter = widget.enableFilter;
+                _enableSearch = widget.enableSearch;
+              });
+            },
+            inputFormatters: widget.inputFormatters,
+            decoration: InputDecoration(
+              label: widget.label,
+              hintText: widget.hintText,
+              helperText: widget.helperText,
+              errorText: widget.errorText,
+              prefixIcon: widget.leadingIcon != null
+                  ? SizedBox(key: _leadingKey, child: widget.leadingIcon)
+                  : null,
+              suffixIcon: widget.showTrailingIcon ? trailingButton : null,
+            ).applyDefaults(effectiveInputDecorationTheme),
+            restorationId: widget.restorationId,
+          ),
         );
 
         // If [expandedInsets] is not null, the width of the text field should depend
