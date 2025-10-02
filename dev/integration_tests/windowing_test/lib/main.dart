@@ -59,20 +59,26 @@ void main() {
         controller.setConstraints(constraints);
       } else if (jsonMap['type'] == 'set_fullscreen') {
         controller.setFullscreen(true);
+        await Future.delayed(Duration(seconds: 1));
       } else if (jsonMap['type'] == 'unset_fullscreen') {
         controller.setFullscreen(false);
+        await Future.delayed(Duration(seconds: 1));
       } else if (jsonMap['type'] == 'get_fullscreen') {
         return jsonEncode({'isFullscreen': controller.isFullscreen});
       } else if (jsonMap['type'] == 'set_maximized') {
         controller.setMaximized(true);
+        await Future.delayed(Duration(seconds: 1));
       } else if (jsonMap['type'] == 'unset_maximized') {
         controller.setMaximized(false);
+        await Future.delayed(Duration(seconds: 1));
       } else if (jsonMap['type'] == 'get_maximized') {
         return jsonEncode({'isMaximized': controller.isMaximized});
       } else if (jsonMap['type'] == 'set_minimized') {
         controller.setMinimized(true);
+        await Future.delayed(Duration(seconds: 1));
       } else if (jsonMap['type'] == 'unset_minimized') {
         controller.setMinimized(false);
+        await Future.delayed(Duration(seconds: 1));
       } else if (jsonMap['type'] == 'get_minimized') {
         return jsonEncode({'isMinimized': controller.isMinimized});
       } else if (jsonMap['type'] == 'set_title') {
