@@ -47,6 +47,8 @@ export 'package:flutter/painting.dart'
 // Examples can assume:
 // late Widget image;
 // late ImageProvider _image;
+// late bool isPaused;
+// late AssetImage myAnimatedGif;
 
 /// Creates an [ImageConfiguration] based on the given [BuildContext] (and
 /// optionally size).
@@ -279,6 +281,18 @@ typedef ImageErrorWidgetBuilder =
 ///
 /// ```dart
 /// Image.network('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg')
+/// ```
+/// {@end-tool}
+///
+/// {@tool snippet}
+/// Multiframe images, such as animated GIFs, can be paused using TickerMode
+/// just like any other animation.
+///
+/// ```dart
+/// TickerMode(
+///   enabled: !isPaused,
+///   child: Image(image: myAnimatedGif),
+/// ),
 /// ```
 /// {@end-tool}
 ///
