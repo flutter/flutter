@@ -424,6 +424,7 @@ void testFontVariation() {
     final ParagraphBuilder pb = ParagraphBuilder(
       ParagraphStyle(fontFamily: 'RobotoSerif', fontSize: 40.0, fontWeight: FontWeight.w100),
     );
+    pb.pushStyle(TextStyle(color: const Color(0xFF000000)));
     pb.addText('Thin - 100\n');
     pb.pushStyle(TextStyle(fontWeight: FontWeight.w300));
     pb.addText('Light - 300\n');
