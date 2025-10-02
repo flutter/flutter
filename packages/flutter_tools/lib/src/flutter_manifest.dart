@@ -913,20 +913,23 @@ class AssetsEntry {
     final List<String> errors = result.$2;
 
     if (platforms != null) {
-      final List<String> invalid = platforms
-          .where((p) => !_kValidPluginPlatforms.contains(p))
-          .toList();
+      final List<String> validPlatforms = [];
+      final List<String> invalidPlatforms = [];
+      for (final String p in platforms) {
+        if (_kValidPluginPlatforms.contains(p)) {
+          validPlatforms.add(p);
+        } else {
+          invalidPlatforms.add(p);
+        }
+      }
 
-      if (invalid.isNotEmpty) {
+      if (invalidPlatforms.isNotEmpty) {
         errors.add(
-          'Invalid platform(s): "${invalid.join(", ")}". '
+          'Invalid platform(s): "${invalidPlatforms.join(", ")}". '
           'Supported platforms are: "${_kValidPluginPlatforms.join(", ")}".',
         );
       }
-
-      // keep only the valid ones
-      final List<String> valid = platforms.where(_kValidPluginPlatforms.contains).toList();
-      return (valid, errors);
+      return (validPlatforms, errors);
     }
 
     return result;
