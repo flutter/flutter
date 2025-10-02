@@ -1105,6 +1105,12 @@ class RenderCustomPaint extends RenderProxyBox {
     if (properties.onDismiss != null) {
       config.onDismiss = properties.onDismiss;
     }
+    if (properties.onExpand != null) {
+      config.onExpand = properties.onExpand;
+    }
+    if (properties.onCollapse != null) {
+      config.onCollapse = properties.onCollapse;
+    }
 
     newChild.updateWith(
       config: config,

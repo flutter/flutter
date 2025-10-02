@@ -45,7 +45,7 @@ class WidgetPreviewWorkspace {
       inWorkspace: true,
       packageName: name,
     );
-    project._writePubspec(project.pubspecContents);
+    project.writePubspec(project.initialPubspecContents);
     _packages[name] = project;
     await _updatePubspec();
     return project;
@@ -108,7 +108,7 @@ class WidgetPreviewProject {
   final String packageName;
 
   /// The initial contents of the pubspec.yaml for the project.
-  String get pubspecContents =>
+  String get initialPubspecContents =>
       '''
 name: $packageName
 
@@ -123,6 +123,9 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 ''';
+
+  /// The current contents of the pubspec.yaml for the project.
+  String get pubspecContents => _pubspecYaml.readAsStringSync();
 
   /// The root of the fake project.
   ///
@@ -155,7 +158,7 @@ dependencies:
 
   /// Writes `pubspec.yaml` and `.dart_tool/package_config.json` at [projectRoot].
   Future<void> initializePubspec() async {
-    _writePubspec(pubspecContents);
+    writePubspec(initialPubspecContents);
     final String flutterRoot = getFlutterRoot();
     await savePackageConfig(
       PackageConfig(
@@ -189,7 +192,7 @@ dependencies:
   }
 
   /// Updates the content of the project's pubspec.yaml.
-  void _writePubspec(String contents) {
+  void writePubspec(String contents) {
     projectRoot.childFile(_kPubspec)
       ..createSync(recursive: true)
       ..writeAsStringSync(contents);

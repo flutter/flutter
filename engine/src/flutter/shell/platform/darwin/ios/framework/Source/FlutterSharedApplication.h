@@ -24,6 +24,13 @@
  */
 @property(class, nonatomic, readonly) UIApplication* application;
 
+/**
+ * Returns YES if any connected UIScene in the UIApplication has a delegate.
+ */
+@property(class, nonatomic, readonly) BOOL hasSceneDelegate;
+
++ (BOOL)isFlutterDeepLinkingEnabled;
+
 @end
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERSHAREDAPPLICATION_H_

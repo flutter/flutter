@@ -34,4 +34,24 @@ FLUTTER_ASSERT_ARC
   return UIApplication.sharedApplication;
 }
 
++ (BOOL)hasSceneDelegate {
+  if (FlutterSharedApplication.isAvailable) {
+    for (UIScene* scene in FlutterSharedApplication.sharedApplication.connectedScenes) {
+      if (scene.delegate != nil) {
+        return YES;
+      }
+    }
+  }
+  return NO;
+}
+
++ (BOOL)isFlutterDeepLinkingEnabled {
+  // Developers may disable deep linking through their Info.plist if they are using a plugin that
+  // handles deeplinking instead.
+  NSNumber* isDeepLinkingEnabled =
+      [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FlutterDeepLinkingEnabled"];
+  // if not set, return YES
+  return isDeepLinkingEnabled ? [isDeepLinkingEnabled boolValue] : YES;
+}
+
 @end

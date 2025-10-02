@@ -30,10 +30,10 @@
   "menuDismissLabel": "تىزىملىكنى بىكار قىلىش",
   "cancelButtonLabel": "بىكار قىلىش",
   "backButtonLabel": "Back",
-  "expansionTileExpandedHint": "double tap to collapse",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "يىغىش ئۈچۈن قوش چېكىڭ",
+  "expansionTileCollapsedHint": "يېيىش ئۈچۈن قوش چېكىڭ",
+  "expansionTileExpandedTapHint": "يىغىش",
+  "expansionTileCollapsedTapHint": "تېخىمۇ كۆپ تەپسىلاتلار ئۈچۈن يېيىڭ",
+  "expandedHint": "يىغىلدى",
+  "collapsedHint": "يېيىلدى"
 }

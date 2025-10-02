@@ -61,6 +61,9 @@ class FakeWidgetPreviewScaffoldDtdServices extends Fake
     implements WidgetPreviewScaffoldDtdServices {
   FakeWidgetPreviewScaffoldDtdServices({this.isWindows = false});
 
+  final navigationEvents = <CodeLocation>[];
+  final preferences = <String, Object>{};
+
   @override
   Future<void> connect({Uri? dtdUri}) async {}
 
@@ -76,6 +79,14 @@ class FakeWidgetPreviewScaffoldDtdServices extends Fake
     hotRestartInvoked = true;
   }
 
+  /// Resolves a package:// URI to a file:// URI using the package_config.
+  ///
+  /// Returns null if [uri] can not be resolved.
+  @override
+  Future<Uri?> resolveUri(Uri uri) async {
+    return uri;
+  }
+
   @override
   final bool isWindows;
 
@@ -83,6 +94,32 @@ class FakeWidgetPreviewScaffoldDtdServices extends Fake
   @override
   final ValueNotifier<TextDocument?> selectedSourceFile =
       ValueNotifier<TextDocument?>(null);
+
+  /// Whether or not the Editor service is available.
+  @override
+  final ValueNotifier<bool> editorServiceAvailable = ValueNotifier<bool>(true);
+
+  /// Tells the editor to navigate to a given code [location].
+  ///
+  /// Only locations with `file://` URIs are valid.
+  @override
+  Future<void> navigateToCode(CodeLocation location) async {
+    navigationEvents.add(location);
+  }
+
+  /// Retrieves the state of flag [key] from the persistent preferences map.
+  ///
+  /// If [key] is not set, [defaultValue] is returned.
+  @override
+  Future<bool> getFlag(String flag, {bool defaultValue = true}) async {
+    return preferences[flag] as bool? ?? defaultValue;
+  }
+
+  /// Sets [key] to [value] in the persistent preferences map.
+  @override
+  Future<void> setPreference(String key, Object value) async {
+    preferences[key] = value;
+  }
 }
 
 class FakeWidgetPreviewScaffoldController
