@@ -16651,18 +16651,15 @@ void main() {
     expect(state.buildTextSpan().style!.fontWeight, FontWeight.bold);
   });
 
-  testWidgets('EditableText respects MediaQuery.typographySettings', (WidgetTester tester) async {
+  testWidgets('EditableText respects MediaQueryData.lineHeightScaleFactor, MediaQueryData.letterSpacing, and MediaQueryData.wordSpacing', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
           data: const MediaQueryData(
-            typographySettings: TypographySettings(
-              lineHeight: 2.0,
-              letterSpacing: 2.0,
-              wordSpacing: 2.0,
-              paragraphSpacing: 2.0,
-            ),
+            lineHeightScaleFactor: 2.0,
+            letterSpacing: 2.0,
+            wordSpacing: 2.0,
           ),
           child: EditableText(
             controller: controller,
