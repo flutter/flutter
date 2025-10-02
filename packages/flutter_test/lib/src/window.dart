@@ -432,8 +432,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
 
   @override
   double get lineHeightScaleFactor =>
-      _lineHeightScaleFactorTestValue ??
-      _platformDispatcher.lineHeightScaleFactor;
+      _lineHeightScaleFactorTestValue ?? _platformDispatcher.lineHeightScaleFactor;
   double? _lineHeightScaleFactorTestValue;
 
   /// Hides the real line height scale factor and reports the given
@@ -452,8 +451,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
-  double get letterSpacing =>
-      _letterSpacingTestValue ?? _platformDispatcher.letterSpacing;
+  double get letterSpacing => _letterSpacingTestValue ?? _platformDispatcher.letterSpacing;
   double? _letterSpacingTestValue;
 
   /// Hides the real letter spacing and reports the given
@@ -472,8 +470,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
-  double get wordSpacing =>
-      _wordSpacingTestValue ?? _platformDispatcher.wordSpacing;
+  double get wordSpacing => _wordSpacingTestValue ?? _platformDispatcher.wordSpacing;
   double? _wordSpacingTestValue;
 
   /// Hides the real word spacing and reports the given
@@ -492,8 +489,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
-  double get paragraphSpacing =>
-      _paragraphSpacingTestValue ?? _platformDispatcher.paragraphSpacing;
+  double get paragraphSpacing => _paragraphSpacingTestValue ?? _platformDispatcher.paragraphSpacing;
   double? _paragraphSpacingTestValue;
 
   /// Hides the real paragraph spacing and reports the given
