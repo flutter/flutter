@@ -1137,7 +1137,11 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     _updateInvertColors();
     _resolveImage();
 
-    if (TickerMode.of(context)) {
+    // TODO(justinmc): Should show first frame.
+    final bool paused =
+        !TickerMode.of(context) || (MediaQuery.maybeDisableAnimationsOf(context) ?? false);
+
+    if (!paused) {
       _listenToStream();
     } else {
       _stopListeningToStream(keepStreamAlive: true);
