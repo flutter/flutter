@@ -4,16 +4,66 @@
 
 import 'dart:convert' show utf8;
 import 'dart:ffi' hide Size;
+import 'dart:io';
 import 'dart:ui' show Display, FlutterView;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/foundation/_features.dart';
 
 import '_window.dart';
 import 'binding.dart';
 
+// Do not import this file in production applications or packages published
+// to pub.dev. Flutter will make breaking changes to this file, even in patch
+// versions.
+//
+// All APIs in this file must be private or must:
+//
+// 1. Have the `@internal` attribute.
+// 2. Throw an `UnsupportedError` if `isWindowingEnabled`
+//    is `false`.
+//
+// See: https://github.com/flutter/flutter/issues/30701.
+
+const String _kWindowingDisabledErrorMessage = '''
+Windowing APIs are not enabled.
+
+Windowing APIs are currently experimental. Do not use windowing APIs in
+production applications or plugins published to pub.dev.
+
+To try experimental windowing APIs:
+1. Switch to Flutter's main release channel.
+2. Turn on the windowing feature flag.
+
+See: https://github.com/flutter/flutter/issues/30701.
+''';
+
 /// The macOS implementation of the windowing API.
 class WindowingOwnerMacOS extends WindowingOwner {
+  /// Creates a new [WindowingOwnerMacOS] instance.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  ///
+  /// See also:
+  ///
+  ///  * [WindowingOwner], the abstract class that manages native windows.
+  @internal
+  WindowingOwnerMacOS() {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+
+    if (!Platform.isWindows) {
+      throw UnsupportedError('Only available on the Win32 platform');
+    }
+
+    assert(
+      PlatformDispatcher.instance.engineId != null,
+      'WindowingOwnerMacOS must be created after the engine has been initialized.',
+    );
+  }
+
   @override
   RegularWindowController createRegularWindowController({
     required RegularWindowControllerDelegate delegate,
@@ -73,9 +123,13 @@ class RegularWindowControllerMacOS extends RegularWindowController {
   }) : _owner = owner,
        _delegate = delegate,
        super.empty() {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+
     _onClose = NativeCallable<Void Function()>.isolateLocal(_handleOnClose);
     _onResize = NativeCallable<Void Function()>.isolateLocal(_handleOnResize);
-    final viewId = _MacOSPlatformInterface.createWindow(
+    final int viewId = _MacOSPlatformInterface.createWindow(
       preferredSize: preferredSize,
       preferredConstraints: preferredConstraints,
       onClose: _onClose.nativeFunction,
