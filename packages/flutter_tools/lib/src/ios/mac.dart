@@ -19,6 +19,7 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../darwin/darwin.dart';
 import '../device.dart';
+import '../features.dart';
 import '../flutter_manifest.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
@@ -181,6 +182,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     UISceneMigration(
       app.project,
       globals.logger,
+      isMigrationEnabled: featureFlags.isUISceneMigrationEnabled,
       fileSystem: globals.fs,
       plistParser: globals.plistParser,
     ),

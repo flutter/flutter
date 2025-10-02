@@ -531,6 +531,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isOmitLegacyVersionFileEnabled = false,
     this.isWindowingEnabled = false,
     this.isLLDBDebuggingEnabled = false,
+    this.isUISceneMigrationEnabled = false,
   });
 
   @override
@@ -579,6 +580,9 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isLLDBDebuggingEnabled;
 
   @override
+  final bool isUISceneMigrationEnabled;
+
+  @override
   bool isEnabled(Feature feature) {
     return switch (feature) {
       flutterWebFeature => isWebEnabled,
@@ -595,6 +599,7 @@ class TestFeatureFlags implements FeatureFlags {
       omitLegacyVersionFile => isOmitLegacyVersionFileEnabled,
       windowingFeature => isWindowingEnabled,
       lldbDebugging => isLLDBDebuggingEnabled,
+      uiSceneMigration => isUISceneMigrationEnabled,
       _ => false,
     };
   }

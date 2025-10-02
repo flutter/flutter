@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/project_migrator.dart';
 import '../ios/plist_parser.dart';
 import '../template.dart';
@@ -15,12 +16,15 @@ class UISceneMigration extends ProjectMigrator {
   UISceneMigration(
     IosProject project,
     super.logger, {
+    required bool isMigrationEnabled,
     required FileSystem fileSystem,
     required PlistParser plistParser,
-  }) : _fileSystem = fileSystem,
+  }) : _isMigrationEnabled = isMigrationEnabled,
+       _fileSystem = fileSystem,
        _project = project,
        _plistParser = plistParser;
 
+  final bool _isMigrationEnabled;
   final FileSystem _fileSystem;
   final PlistParser _plistParser;
   final IosProject _project;
@@ -127,6 +131,10 @@ import UIKit
 
   @override
   Future<void> migrate() async {
+    if (!_isMigrationEnabled) {
+      return;
+    }
+
     // If we can't find their Info.plist, they will need to migrate manually and update the config
     // to no longer see this warning.
     if (!_project.defaultHostInfoPlist.existsSync()) {
@@ -142,11 +150,17 @@ import UIKit
     }
 
     // If UIMainStoryboardFile is missing or not "Main", don't auto-migrate.
-    final String? storyboardName = _plistParser.getValueFromFile<String>(
-      _project.defaultHostInfoPlist.path,
-      'UIMainStoryboardFile',
-    );
-    if (storyboardName == null || storyboardName != 'Main') {
+    try {
+      final String? storyboardName = _plistParser.getValueFromFile<String>(
+        _project.defaultHostInfoPlist.path,
+        'UIMainStoryboardFile',
+      );
+      if (storyboardName == null || storyboardName != 'Main') {
+        logger.printTrace('UIScene migration: unable to find matching storyboard');
+        _printErrorMessage();
+        return;
+      }
+    } on ProcessException {
       logger.printTrace('UIScene migration: unable to find matching storyboard');
       _printErrorMessage();
       return;
