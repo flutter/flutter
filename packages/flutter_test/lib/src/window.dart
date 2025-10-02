@@ -175,6 +175,9 @@ class TestPlatformDispatcher implements PlatformDispatcher {
         : null;
   }
 
+  @override
+  int? get engineId => 1;
+
   final Map<int, TestFlutterView> _testViews = <int, TestFlutterView>{};
   final Map<int, TestDisplay> _testDisplays = <int, TestDisplay>{};
 
@@ -480,6 +483,14 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   @override
   bool get semanticsEnabled => _semanticsEnabledTestValue ?? _platformDispatcher.semanticsEnabled;
   bool? _semanticsEnabledTestValue;
+
+  /// The application locale set during the test.
+  Locale? applicationLocale;
+
+  @override
+  void setApplicationLocale(Locale locale) {
+    applicationLocale = locale;
+  }
 
   /// Hides the real semantics enabled and reports the given
   /// [semanticsEnabledTestValue] instead.
