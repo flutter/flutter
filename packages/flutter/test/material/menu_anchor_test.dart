@@ -4247,7 +4247,9 @@ void main() {
     });
 
     group('Semantics', () {
-      testWidgets('MenuItemButton has platform-adaptive button semantics', (WidgetTester tester) async {
+      testWidgets('MenuItemButton has platform-adaptive button semantics', (
+        WidgetTester tester,
+      ) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         await tester.pumpWidget(
           Directionality(
@@ -4311,7 +4313,9 @@ void main() {
         semantics.dispose();
       }, variant: TargetPlatformVariant.desktop());
 
-      testWidgets('SubmenuButton has platform-adaptive button semantics', (WidgetTester tester) async {
+      testWidgets('SubmenuButton has platform-adaptive button semantics', (
+        WidgetTester tester,
+      ) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         await tester.pumpWidget(
           Directionality(
@@ -4347,6 +4351,7 @@ void main() {
               ],
             ),
             ignoreTransform: true,
+            ignoreId: true,
           ),
         );
 
@@ -4499,7 +4504,6 @@ void main() {
               ],
             ),
             ignoreTransform: true,
-            ignoreId: true,
           ),
         );
 
