@@ -38,7 +38,7 @@ void main() {
         throw ArgumentError('Message must contain a "type" field.');
       }
 
-      /// This helper method registers a listener on the controller, 
+      /// This helper method registers a listener on the controller,
       /// calls [act] to perform some action on the controller, waits for
       /// the [predicate] to be satisified, and finally cleans up the listener.
       Future<void> awaitNotification(
