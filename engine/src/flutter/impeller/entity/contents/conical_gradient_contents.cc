@@ -131,7 +131,7 @@ bool ConicalGradientContents::RenderSSBO(const ContentContext& renderer,
         frag_info.colors_length = colors.size();
         auto color_buffer = data_host_buffer.Emplace(
             colors.data(), colors.size() * sizeof(StopData),
-            data_host_buffer.GetMinimumUniformAlignment());
+            renderer.GetDeviceCapabilities().GetMinimumStorageAlignment());
 
         FS::BindFragInfo(pass, data_host_buffer.EmplaceUniform(frag_info));
         FS::BindColorData(pass, color_buffer);

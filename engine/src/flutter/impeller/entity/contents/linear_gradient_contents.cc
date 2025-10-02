@@ -311,7 +311,7 @@ bool LinearGradientContents::RenderSSBO(const ContentContext& renderer,
         frag_info.colors_length = colors.size();
         auto color_buffer = data_host_buffer.Emplace(
             colors.data(), colors.size() * sizeof(StopData),
-            data_host_buffer.GetMinimumUniformAlignment());
+            renderer.GetDeviceCapabilities().GetMinimumStorageAlignment());
 
         pass.SetCommandLabel("LinearGradientSSBOFill");
 
