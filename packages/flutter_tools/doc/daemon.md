@@ -162,11 +162,12 @@ This is sent when output is logged for a running application. The `params` field
 
 This is sent when a warning is issued for a running application that an editor may wish to handle specifically. The `params` field will be a map with the following fields:
 
+- `warningId`: A unique string identifying the warning type, suitable for client-side suppression.
 - `warning`: A string containing the warning message to be displayed to the user.
 - `category`: A string used to categorize the warning (for example, `ios-wireless-performance`).
 - `deviceId`: The ID of the device this warning is relevant to.
-- `iosVersion`: The iOS versionn of the device
-- `actionable`: A boolean indicating if the warning includes a suggested action for the user.'
+- `deviceOsVersion`: An optional string representing the OS version of the device.
+- `actionable`: A boolean indicating if the warning includes a suggested action for the user.
 - `url`: An optional string containing a URL with more information about the warning.
 
 #### app.progress
