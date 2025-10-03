@@ -453,7 +453,7 @@ FLUTTER_DARWIN_EXPORT
  * This is used when the engine is created implicitly to allow registering
  * plugins, application-level method channels, platform views, etc.
  */
-@interface FlutterImplicitEngineBridge : NSObject
+@protocol FlutterImplicitEngineBridge <NSObject>
 
 /**
  * The `FlutterPluginRegistry` for the created `FlutterEngine`.
@@ -487,7 +487,7 @@ FLUTTER_DARWIN_EXPORT
  * The `FlutterImplicitEngineBridge` can then be used to register plugins,
  * application-level method channels, platform views, etc.
  */
-- (void)didInitializeImplicitFlutterEngine:(FlutterImplicitEngineBridge*)engineBridge;
+- (void)didInitializeImplicitFlutterEngine:(NSObject<FlutterImplicitEngineBridge>*)engineBridge;
 @end
 
 NS_ASSUME_NONNULL_END

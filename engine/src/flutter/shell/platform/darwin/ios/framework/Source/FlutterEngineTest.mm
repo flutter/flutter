@@ -592,7 +592,7 @@ FLUTTER_ASSERT_ARC
   id mockAppDelegate = OCMProtocolMock(@protocol(FlutterImplicitEngineDelegate));
   OCMStub([mockApplication delegate]).andReturn(mockAppDelegate);
 
-  [engine performAppDelegateEngineInitializationCallback];
+  [engine performImplicitEngineCallback];
   OCMVerify(times(1), [mockAppDelegate didInitializeImplicitFlutterEngine:[OCMArg any]]);
 }
 

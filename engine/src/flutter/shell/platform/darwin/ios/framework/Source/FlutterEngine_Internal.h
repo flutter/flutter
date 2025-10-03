@@ -111,7 +111,7 @@ NS_ASSUME_NONNULL_BEGIN
  * Performs AppDelegate callback provided through the `FlutterImplicitEngineDelegate` protocol to
  * inform apps that the implicit `FlutterEngine` has initialized.
  */
-- (BOOL)performAppDelegateEngineInitializationCallback;
+- (BOOL)performImplicitEngineCallback;
 
 /*
  * Creates a `FlutterEngineApplicationRegistrar` that can be used to access application-level
@@ -120,6 +120,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSObject<FlutterApplicationRegistrar>*)registrarForApplication:(NSString*)key;
 
 - (void)sendDeepLinkToFramework:(NSURL*)url completionHandler:(void (^)(BOOL success))completion;
+
+@end
+
+@interface FlutterImplicitEngineBridgeImpl : NSObject <FlutterImplicitEngineBridge>
 
 @end
 

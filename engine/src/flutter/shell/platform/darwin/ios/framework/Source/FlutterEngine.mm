@@ -166,12 +166,26 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 
 @end
 
-@implementation FlutterImplicitEngineBridge
+@implementation FlutterImplicitEngineBridgeImpl {
+  FlutterEngine* _engine;
+  NSObject<FlutterApplicationRegistrar>* _appRegistrar;
+}
+
 - (instancetype)initWithEngine:(FlutterEngine*)engine {
   self = [super init];
-  _pluginRegistry = engine;
-  _applicationRegistrar = [engine registrarForApplication:kFlutterApplicationRegistrarKey];
+  if (self) {
+    _engine = engine;
+    _appRegistrar = [engine registrarForApplication:kFlutterApplicationRegistrarKey];
+  }
   return self;
+}
+
+- (NSObject<FlutterPluginRegistry>*)pluginRegistry {
+  return _engine;
+}
+
+- (NSObject<FlutterApplicationRegistrar>*)applicationRegistrar {
+  return _appRegistrar;
 }
 @end
 
@@ -927,11 +941,11 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   return _shell != nullptr;
 }
 
-- (BOOL)performAppDelegateEngineInitializationCallback {
+- (BOOL)performImplicitEngineCallback {
   id appDelegate = FlutterSharedApplication.application.delegate;
   if ([appDelegate conformsToProtocol:@protocol(FlutterImplicitEngineDelegate)]) {
     id<FlutterImplicitEngineDelegate> provider = (id<FlutterImplicitEngineDelegate>)appDelegate;
-    [provider didInitializeImplicitFlutterEngine:[[FlutterImplicitEngineBridge alloc]
+    [provider didInitializeImplicitFlutterEngine:[[FlutterImplicitEngineBridgeImpl alloc]
                                                      initWithEngine:self]];
     return YES;
   }

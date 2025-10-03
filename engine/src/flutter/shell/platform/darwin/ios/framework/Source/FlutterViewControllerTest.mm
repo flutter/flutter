@@ -174,7 +174,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 - (void)sceneDidEnterBackground:(NSNotification*)notification API_AVAILABLE(ios(13.0));
 - (void)sceneWillEnterForeground:(NSNotification*)notification API_AVAILABLE(ios(13.0));
 - (void)triggerTouchRateCorrectionIfNeeded:(NSSet*)touches;
-- (void)performImplicitEngineCallbacks;
 @end
 
 @interface FlutterViewControllerTest : XCTestCase
@@ -2492,7 +2491,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
       (FlutterViewController*)[storyboard instantiateInitialViewController];
   [appDelegate setPluginRegistrant:nil];
   OCMVerify([mockRegistrant registerWithRegistry:viewController]);
-  OCMVerify([self.mockEngine performAppDelegateEngineInitializationCallback]);
+  OCMVerify([self.mockEngine performImplicitEngineCallback]);
   [appDelegate setMockLaunchEngine:nil];
 }
 
@@ -2502,24 +2501,25 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                                                                                 nibName:nil
                                                                                  bundle:nil];
   FlutterViewController* viewControllerMock = OCMPartialMock(viewController);
-  OCMStub([mockEngine performAppDelegateEngineInitializationCallback]).andReturn(YES);
+  OCMStub([mockEngine performImplicitEngineCallback]).andReturn(YES);
   OCMStub([viewControllerMock awokenFromNib]).andReturn(YES);
 
   id mockApplication = OCMClassMock([UIApplication class]);
   OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+  FlutterAppDelegate* mockApplicationDelegate = OCMClassMock([FlutterAppDelegate class]);
+  OCMStub([mockApplication delegate]).andReturn(mockApplicationDelegate);
+  OCMStub([mockApplicationDelegate takeLaunchEngine]).andReturn(mockEngine);
 
   id mockScene = OCMClassMock([UIScene class]);
   id mockSceneDelegate = OCMProtocolMock(@protocol(UISceneDelegate));
   OCMStub([mockScene delegate]).andReturn(mockSceneDelegate);
   OCMStub([mockApplication connectedScenes]).andReturn([NSSet setWithObject:mockScene]);
 
-  FlutterAppDelegate* mockApplicationDelegate = OCMClassMock([FlutterAppDelegate class]);
-  OCMStub([mockApplication delegate]).andReturn(mockApplicationDelegate);
   FlutterPluginAppLifeCycleDelegate* mockLifecycleDelegate =
       OCMClassMock([FlutterPluginAppLifeCycleDelegate class]);
   OCMStub([mockApplicationDelegate lifeCycleDelegate]).andReturn(mockLifecycleDelegate);
 
-  [viewControllerMock performImplicitEngineCallbacks];
+  [viewControllerMock sharedSetupWithProject:nil initialRoute:nil];
   OCMVerify([mockLifecycleDelegate sceneFallbackWillFinishLaunchingApplication:mockApplication]);
   OCMVerify([mockLifecycleDelegate sceneFallbackDidFinishLaunchingApplication:mockApplication]);
 }
@@ -2530,24 +2530,25 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                                                                                 nibName:nil
                                                                                  bundle:nil];
   FlutterViewController* viewControllerMock = OCMPartialMock(viewController);
-  OCMStub([mockEngine performAppDelegateEngineInitializationCallback]).andReturn(YES);
+  OCMStub([mockEngine performImplicitEngineCallback]).andReturn(YES);
   OCMStub([viewControllerMock awokenFromNib]).andReturn(NO);
 
   id mockApplication = OCMClassMock([UIApplication class]);
   OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+  FlutterAppDelegate* mockApplicationDelegate = OCMClassMock([FlutterAppDelegate class]);
+  OCMStub([mockApplication delegate]).andReturn(mockApplicationDelegate);
+  OCMStub([mockApplicationDelegate takeLaunchEngine]).andReturn(mockEngine);
 
   id mockScene = OCMClassMock([UIScene class]);
   id mockSceneDelegate = OCMProtocolMock(@protocol(UISceneDelegate));
   OCMStub([mockScene delegate]).andReturn(mockSceneDelegate);
   OCMStub([mockApplication connectedScenes]).andReturn([NSSet setWithObject:mockScene]);
 
-  FlutterAppDelegate* mockApplicationDelegate = OCMClassMock([FlutterAppDelegate class]);
-  OCMStub([mockApplication delegate]).andReturn(mockApplicationDelegate);
   FlutterPluginAppLifeCycleDelegate* mockLifecycleDelegate =
       OCMClassMock([FlutterPluginAppLifeCycleDelegate class]);
   OCMStub([mockApplicationDelegate lifeCycleDelegate]).andReturn(mockLifecycleDelegate);
 
-  [viewControllerMock performImplicitEngineCallbacks];
+  [viewControllerMock sharedSetupWithProject:nil initialRoute:nil];
   OCMReject([mockLifecycleDelegate sceneFallbackWillFinishLaunchingApplication:mockApplication]);
   OCMReject([mockLifecycleDelegate sceneFallbackDidFinishLaunchingApplication:mockApplication]);
 }
@@ -2558,19 +2559,20 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                                                                                 nibName:nil
                                                                                  bundle:nil];
   FlutterViewController* viewControllerMock = OCMPartialMock(viewController);
-  OCMStub([mockEngine performAppDelegateEngineInitializationCallback]).andReturn(YES);
+  OCMStub([mockEngine performImplicitEngineCallback]).andReturn(YES);
   OCMStub([viewControllerMock awokenFromNib]).andReturn(YES);
 
   id mockApplication = OCMClassMock([UIApplication class]);
   OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
-
   FlutterAppDelegate* mockApplicationDelegate = OCMClassMock([FlutterAppDelegate class]);
   OCMStub([mockApplication delegate]).andReturn(mockApplicationDelegate);
+  OCMStub([mockApplicationDelegate takeLaunchEngine]).andReturn(mockEngine);
+
   FlutterPluginAppLifeCycleDelegate* mockLifecycleDelegate =
       OCMClassMock([FlutterPluginAppLifeCycleDelegate class]);
   OCMStub([mockApplicationDelegate lifeCycleDelegate]).andReturn(mockLifecycleDelegate);
 
-  [viewControllerMock performImplicitEngineCallbacks];
+  [viewControllerMock sharedSetupWithProject:nil initialRoute:nil];
   OCMReject([mockLifecycleDelegate sceneFallbackWillFinishLaunchingApplication:mockApplication]);
   OCMReject([mockLifecycleDelegate sceneFallbackDidFinishLaunchingApplication:mockApplication]);
 }
