@@ -9,6 +9,8 @@
 
 FLUTTER_ASSERT_ARC
 
+NSString* const kRestorationStateAppModificationKey = @"mod-date";
+
 @implementation FlutterSharedApplication
 
 + (BOOL)isAppExtension {
@@ -43,6 +45,16 @@ FLUTTER_ASSERT_ARC
     }
   }
   return NO;
+}
+
++ (int64_t)lastAppModificationTime {
+  NSDate* fileDate;
+  NSError* error = nil;
+  [[[NSBundle mainBundle] executableURL] getResourceValue:&fileDate
+                                                   forKey:NSURLContentModificationDateKey
+                                                    error:&error];
+  NSAssert(error == nil, @"Cannot obtain modification date of main bundle: %@", error);
+  return [fileDate timeIntervalSince1970];
 }
 
 + (BOOL)isFlutterDeepLinkingEnabled {
