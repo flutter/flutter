@@ -7,6 +7,7 @@ import 'package:data_assets/data_assets.dart';
 import 'package:hooks/hooks.dart';
 import 'package:hooks_runner/hooks_runner.dart';
 import '../../asset.dart' show FlutterHookResult, HookAsset;
+import '../../font_asset.dart';
 import 'native_assets.dart' show FlutterCodeAsset;
 
 /// The assets produced by a Dart hook run and the dependencies of those assets.
@@ -19,6 +20,7 @@ final class DartHooksResult {
     required this.buildEnd,
     required this.codeAssets,
     required this.dataAssets,
+    required this.fontAssets,
     required this.dependencies,
   });
 
@@ -27,6 +29,7 @@ final class DartHooksResult {
       buildEnd = DateTime.now(),
       codeAssets = const <FlutterCodeAsset>[],
       dataAssets = const <DataAsset>[],
+      fontAssets = const <FontAsset>[],
       dependencies = const <Uri>[];
 
   factory DartHooksResult.fromJson(Map<String, Object?> json) {
@@ -36,6 +39,7 @@ final class DartHooksResult {
       _dependenciesKey: final List<Object?>? dependenciesList,
       _codeAssetsKey: final List<Object?> codeAssetsList,
       _dataAssetsKey: final List<Object?>? dataAssetsList,
+      _fontAssetsKey: final List<Object?>? fontAssetsList,
     }) {
       final DateTime buildStart = DateTime.parse(buildStartString);
       final DateTime buildEnd = DateTime.parse(buildEndString);
@@ -62,11 +66,16 @@ final class DartHooksResult {
         for (final Object? dataAssetJson in dataAssetsList ?? const <Object?>[])
           DataAsset.fromEncoded(EncodedAsset.fromJson(dataAssetJson! as Map<String, Object?>)),
       ];
+      final fontAssets = <FontAsset>[
+        for (final Object? fontAssetJson in fontAssetsList ?? const <Object?>[])
+          FontAsset.fromEncoded(EncodedAsset.fromJson(fontAssetJson! as Map<String, Object?>)),
+      ];
       return DartHooksResult(
         buildStart: buildStart,
         buildEnd: buildEnd,
         codeAssets: codeAssets,
         dataAssets: dataAssets,
+        fontAssets: fontAssets,
         dependencies: dependencies,
       );
     } else {
@@ -82,6 +91,7 @@ final class DartHooksResult {
   final DateTime buildEnd;
   final List<FlutterCodeAsset> codeAssets;
   final List<DataAsset> dataAssets;
+  final List<FontAsset> fontAssets;
   final List<Uri> dependencies;
 
   Map<String, Object?> toJson() => <String, Object?>{
@@ -96,6 +106,7 @@ final class DartHooksResult {
         },
     ],
     _dataAssetsKey: <Object?>[for (final DataAsset asset in dataAssets) asset.encode().toJson()],
+    _fontAssetsKey: <Object?>[for (final FontAsset asset in fontAssets) asset.encode().toJson()],
   };
 
   static const _buildStartKey = 'build_start';
@@ -103,6 +114,7 @@ final class DartHooksResult {
   static const _dependenciesKey = 'dependencies';
   static const _codeAssetsKey = 'code_assets';
   static const _dataAssetsKey = 'data_assets';
+  static const _fontAssetsKey = 'font_assets';
   static const _assetKey = 'asset';
   static const _targetKey = 'target';
 
@@ -113,16 +125,23 @@ final class DartHooksResult {
   ];
 
   FlutterHookResult get asFlutterResult {
-    final List<HookAsset> hookAssets = dataAssets
+    final List<HookAsset> dataHookAssets = dataAssets
         .map(
           (DataAsset asset) =>
+              HookAsset(file: asset.file, name: asset.name, package: asset.package),
+        )
+        .toList();
+    final List<HookAsset> fontHookAssets = fontAssets
+        .map(
+          (FontAsset asset) =>
               HookAsset(file: asset.file, name: asset.name, package: asset.package),
         )
         .toList();
     return FlutterHookResult(
       buildStart: buildStart,
       buildEnd: buildEnd,
-      dataAssets: hookAssets,
+      dataAssets: dataHookAssets,
+      fontAssets: fontHookAssets,
       dependencies: dependencies,
     );
   }
