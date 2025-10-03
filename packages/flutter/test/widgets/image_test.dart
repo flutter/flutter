@@ -2228,7 +2228,7 @@ void main() {
     expect(find.byType(Image), findsOneWidget);
   });
 
-  testWidgets('Keeps stream alive when anmiations are disabled', (WidgetTester tester) async {
+  testWidgets('Keeps stream alive when animations are disabled', (WidgetTester tester) async {
     imageCache.maximumSize = 0;
     final ui.Image image = (await tester.runAsync(() => createTestImage(cache: false)))!;
     final _TestImageProvider provider = _TestImageProvider();
