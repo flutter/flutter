@@ -1120,7 +1120,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   ImageStreamCompleterHandle? _completerHandle;
 
   /// True when animations are disabled and the image should not update, such as
-  /// when [TickerMode] is disabled or [MediaQuerData.disableAnimations] is
+  /// when [TickerMode] is disabled or [MediaQueryData.disableAnimations] is
   /// true.
   bool _isPaused = false;
 
