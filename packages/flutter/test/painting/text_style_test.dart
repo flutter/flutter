@@ -734,16 +734,12 @@ void main() {
       expect(TextStyle.lerp(fromStyle, toStyle, 1), toStyle);
     },
   );
-   test('Throws when height is infinite', () {
-  expect(
-    () => TextStyle(height: double.infinity),
-    throwsAssertionError,
-  );
-  expect(
-    () => TextStyle(height: -double.infinity),
-    throwsAssertionError,
-  );
-}); 
+    
+  test('Throws when height is infinite', () {
+    expect(() => TextStyle(height: double.infinity), throwsAssertionError);
+    expect(() => TextStyle(height: -double.infinity), throwsAssertionError);
+    expect(() => TextStyle(height: double.nan), throwsAssertionError);
+  }); 
 
   test('lerpFontVariations', () {
     // nil cases
