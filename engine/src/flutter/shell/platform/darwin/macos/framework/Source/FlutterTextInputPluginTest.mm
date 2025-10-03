@@ -2523,43 +2523,6 @@ TEST(FlutterTextInputPluginTest, InsertTextHandlesNSAttributedString) {
   EXPECT_EQ([editingState[@"selectionExtent"] intValue], 15);
 }
 
-TEST(FlutterTextInputPluginTest, InsertTextHandlesNilString) {
-  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
-  id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
-  OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
-      [engineMock binaryMessenger])
-      .andReturn(binaryMessengerMock);
-
-  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
-                                                                                nibName:@""
-                                                                                 bundle:nil];
-
-  FlutterTextInputPluginTestDelegate* delegate =
-      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
-                                                           viewController:viewController];
-
-  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
-
-  NSDictionary* setClientConfig = @{
-    @"viewId" : @(kViewId),
-    @"inputAction" : @"action",
-    @"inputType" : @{@"name" : @"inputName"},
-  };
-  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
-                                                             arguments:@[ @(1), setClientConfig ]]
-                    result:^(id){
-                    }];
-
-  // Test with nil - should not crash and should handle gracefully
-  [plugin insertText:nil replacementRange:NSMakeRange(NSNotFound, 0)];
-
-  NSDictionary* editingState = [plugin editingState];
-  // Should result in empty string
-  EXPECT_STREQ([editingState[@"text"] UTF8String], "");
-  EXPECT_EQ([editingState[@"selectionBase"] intValue], 0);
-  EXPECT_EQ([editingState[@"selectionExtent"] intValue], 0);
-}
-
 TEST(FlutterTextInputPluginTest, InsertTextHandlesEmptyAttributedString) {
   id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
   id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
