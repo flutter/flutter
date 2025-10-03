@@ -768,7 +768,6 @@ def to_gn_args(args):
 
   if args.target_os == 'fuchsia':
     gn_args['gn_configs_path'] = '//flutter/build/config/fuchsia/gn_configs.gni'
-    gn_args['fuchsia_gn_sdk'] = '//flutter/tools/fuchsia/gn-sdk'
 
   # Flags for Dart features:
   if args.use_mallinfo2:
