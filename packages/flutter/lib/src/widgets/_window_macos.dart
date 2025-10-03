@@ -39,7 +39,16 @@ To try experimental windowing APIs:
 See: https://github.com/flutter/flutter/issues/30701.
 ''';
 
-/// The macOS implementation of the windowing API.
+/// [WindowingOwner] implementation for macOS.
+///
+/// If [Platform.isMacOS] is false, then the constructor will throw an
+/// [UnsupportedError].
+///
+/// {@macro flutter.widgets.windowing.experimental}
+///
+/// See also:
+///
+///  * [WindowingOwner], the abstract class that manages native windows.
 class WindowingOwnerMacOS extends WindowingOwner {
   /// Creates a new [WindowingOwnerMacOS] instance.
   ///
