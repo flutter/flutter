@@ -3542,7 +3542,7 @@ void main() {
       expect(
         logger.statusText,
         contains(
-          'The darwin is currently not supported on your local environment.\n'
+          'The darwin platform is currently not supported on your local environment.\n'
           'You must have a macOS host with Xcode installed to develop for iOS or macOS.\n',
         ),
       );
