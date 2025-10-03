@@ -19,7 +19,6 @@ FLUTTER_ASSERT_ARC
 static NSString* const kUIBackgroundMode = @"UIBackgroundModes";
 static NSString* const kRemoteNotificationCapabitiliy = @"remote-notification";
 static NSString* const kBackgroundFetchCapatibility = @"fetch";
-static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 
 @interface FlutterAppDelegate () {
   __weak NSObject<FlutterPluginRegistrant>* _weakRegistrant;
@@ -333,34 +332,26 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 #pragma mark - State Restoration
 
 - (BOOL)application:(UIApplication*)application shouldSaveApplicationState:(NSCoder*)coder {
-  [coder encodeInt64:self.lastAppModificationTime forKey:kRestorationStateAppModificationKey];
+  [coder encodeInt64:FlutterSharedApplication.lastAppModificationTime
+              forKey:kRestorationStateAppModificationKey];
   return YES;
 }
 
 - (BOOL)application:(UIApplication*)application shouldRestoreApplicationState:(NSCoder*)coder {
   int64_t stateDate = [coder decodeInt64ForKey:kRestorationStateAppModificationKey];
-  return self.lastAppModificationTime == stateDate;
+  return FlutterSharedApplication.lastAppModificationTime == stateDate;
 }
 
 - (BOOL)application:(UIApplication*)application shouldSaveSecureApplicationState:(NSCoder*)coder {
-  [coder encodeInt64:self.lastAppModificationTime forKey:kRestorationStateAppModificationKey];
+  [coder encodeInt64:FlutterSharedApplication.lastAppModificationTime
+              forKey:kRestorationStateAppModificationKey];
   return YES;
 }
 
 - (BOOL)application:(UIApplication*)application
     shouldRestoreSecureApplicationState:(NSCoder*)coder {
   int64_t stateDate = [coder decodeInt64ForKey:kRestorationStateAppModificationKey];
-  return self.lastAppModificationTime == stateDate;
-}
-
-- (int64_t)lastAppModificationTime {
-  NSDate* fileDate;
-  NSError* error = nil;
-  [[[NSBundle mainBundle] executableURL] getResourceValue:&fileDate
-                                                   forKey:NSURLContentModificationDateKey
-                                                    error:&error];
-  NSAssert(error == nil, @"Cannot obtain modification date of main bundle: %@", error);
-  return [fileDate timeIntervalSince1970];
+  return FlutterSharedApplication.lastAppModificationTime == stateDate;
 }
 
 @end

@@ -257,6 +257,62 @@ FLUTTER_ASSERT_ARC
   }
 }
 
+#pragma mark - Saving the state of the scene
+
+- (NSUserActivity*)stateRestorationActivityForScene:(UIScene*)scene {
+  // Saves state per FlutterViewController.
+  NSUserActivity* activity = scene.userActivity;
+  if (!activity) {
+    activity = [[NSUserActivity alloc] initWithActivityType:scene.session.configuration.name];
+  }
+
+  [self updateEnginesInScene:scene];
+  int64_t appBundleModifiedTime = FlutterSharedApplication.lastAppModificationTime;
+  for (FlutterEngine* engine in [_engines allObjects]) {
+    FlutterViewController* vc = (FlutterViewController*)engine.viewController;
+    NSString* restorationId = vc.restorationIdentifier;
+    if (restorationId) {
+      NSData* restorationData = [engine.restorationPlugin restorationData];
+      if (restorationData) {
+        [activity addUserInfoEntriesFromDictionary:@{restorationId : restorationData}];
+        [activity addUserInfoEntriesFromDictionary:@{
+          kRestorationStateAppModificationKey : [NSNumber numberWithLongLong:appBundleModifiedTime]
+        }];
+      }
+    }
+  }
+
+  return activity;
+}
+
+- (void)scene:(UIScene*)scene
+    restoreInteractionStateWithUserActivity:(NSUserActivity*)stateRestorationActivity {
+  // Restores state per FlutterViewController.
+  NSDictionary<NSString*, id>* userInfo = stateRestorationActivity.userInfo;
+  [self updateEnginesInScene:scene];
+  int64_t appBundleModifiedTime = FlutterSharedApplication.lastAppModificationTime;
+  NSNumber* stateDateNumber = userInfo[kRestorationStateAppModificationKey];
+  int64_t stateDate = 0;
+  if (stateDateNumber && [stateDateNumber isKindOfClass:[NSNumber class]]) {
+    stateDate = [stateDateNumber longLongValue];
+  }
+  if (appBundleModifiedTime != stateDate) {
+    // Don't restore state if the app has been re-installed since the state was last saved
+    return;
+  }
+
+  for (FlutterEngine* engine in [_engines allObjects]) {
+    UIViewController* vc = (UIViewController*)engine.viewController;
+    NSString* restorationId = vc.restorationIdentifier;
+    if (restorationId) {
+      NSData* restorationData = userInfo[restorationId];
+      if ([restorationData isKindOfClass:[NSData class]]) {
+        [engine.restorationPlugin setRestorationData:restorationData];
+      }
+    }
+  }
+}
+
 #pragma mark - Performing tasks
 
 - (void)windowScene:(UIWindowScene*)windowScene
