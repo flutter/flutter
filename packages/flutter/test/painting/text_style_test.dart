@@ -736,9 +736,9 @@ void main() {
   );
     
   test('Throws when height is infinite', () {
-    expect(() => TextStyle(height: double.infinity), throwsAssertionError);
-    expect(() => TextStyle(height: -double.infinity), throwsAssertionError);
-    expect(() => TextStyle(height: double.nan), throwsAssertionError);
+    expect(() => const TextStyle(height: double.infinity), throwsAssertionError);
+    expect(() => const TextStyle(height: -double.infinity), throwsAssertionError);
+    expect(() => const TextStyle(height: double.nan), throwsAssertionError);
   }); 
 
   test('lerpFontVariations', () {
