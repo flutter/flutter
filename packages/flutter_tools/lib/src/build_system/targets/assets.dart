@@ -281,7 +281,10 @@ class CopyAssets extends Target {
   List<String> get depfiles => const <String>['flutter_assets.d'];
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(
+    Environment environment, {
+    TargetPlatform targetPlatform = TargetPlatform.android,
+  }) async {
     final String? buildModeEnvironment = environment.defines[kBuildMode];
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, name);
@@ -294,7 +297,7 @@ class CopyAssets extends Target {
       environment,
       output,
       dartHookResult: dartHookResult,
-      targetPlatform: TargetPlatform.android,
+      targetPlatform: targetPlatform,
       buildMode: buildMode,
       flavor: environment.defines[kFlavor],
       additionalContent: <String, DevFSContent>{
