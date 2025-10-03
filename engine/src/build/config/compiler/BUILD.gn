@@ -98,6 +98,8 @@ config("compiler") {
       "/guard:cf",  # Enable control flow guard security checks.
     ]
   } else {
+    cflags_c += [ "-std=c11" ]
+
     # Common GCC compiler flags setup.
     # --------------------------------
     cflags += [ "-fno-strict-aliasing" ]  # See http://crbug.com/32204
