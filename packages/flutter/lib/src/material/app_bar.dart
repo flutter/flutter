@@ -1074,6 +1074,7 @@ class _AppBarState extends State<AppBar> {
             TargetPlatform.iOS || TargetPlatform.macOS => null,
           },
           header: true,
+          explicitChildNodes: !kIsWeb,
           child: title,
         );
       }
@@ -1196,12 +1197,12 @@ class _AppBarState extends State<AppBar> {
         children: <Widget>[
           Semantics(
             sortKey: widget.useDefaultSemanticsOrder ? const OrdinalSortKey(1.0) : null,
-            explicitChildNodes: true,
+            explicitChildNodes: !kIsWeb,
             child: widget.flexibleSpace,
           ),
           Semantics(
             sortKey: widget.useDefaultSemanticsOrder ? const OrdinalSortKey(0.0) : null,
-            explicitChildNodes: true,
+            explicitChildNodes: !kIsWeb,
             // Creates a material widget to prevent the flexibleSpace from
             // obscuring the ink splashes produced by appBar children.
             child: Material(type: MaterialType.transparency, child: appBar),
@@ -1240,7 +1241,10 @@ class _AppBarState extends State<AppBar> {
               (theme.useMaterial3 ? theme.colorScheme.surfaceTint : null),
           shape: widget.shape ?? appBarTheme.shape ?? defaults.shape,
           animateColor: widget.animateColor,
-          child: Semantics(explicitChildNodes: true, child: appBar),
+          child: Semantics(
+            explicitChildNodes: !kIsWeb,
+            child: appBar,
+          ),
         ),
       ),
     );

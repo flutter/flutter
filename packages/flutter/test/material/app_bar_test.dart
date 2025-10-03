@@ -1388,8 +1388,13 @@ void main() {
                                     SemanticsFlag.isHeader,
                                     SemanticsFlag.namesRoute,
                                   ],
-                                  label: 'Title',
-                                  textDirection: TextDirection.ltr,
+                                  children: <TestSemantics>[
+                                    TestSemantics(
+                                      id: 10,
+                                      label: 'Title',
+                                      textDirection: TextDirection.ltr,
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
@@ -1474,8 +1479,13 @@ void main() {
                                 SemanticsFlag.isHeader,
                                 SemanticsFlag.namesRoute,
                               ],
-                              label: 'Title',
-                              textDirection: TextDirection.ltr,
+                              children: <TestSemantics>[
+                                TestSemantics(
+                                  id: 8,
+                                  label: 'Title',
+                                  textDirection: TextDirection.ltr,
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -3624,5 +3634,33 @@ void main() {
         }
       },
     );
+  });
+
+  testWidgets('AppBar uses explicitChildNodes: !kIsWeb for web accessibility', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/176332
+    // AppBar wraps content with Semantics(explicitChildNodes: !kIsWeb) to prevent
+    // screen readers on web from announcing "X more items" when navigating.
+
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(leading: const BackButton(), title: const Text('Book Details')),
+        ),
+      ),
+    );
+
+    // The fix creates a parent-child structure where the title's text is in a
+    // child node and the parent has the isHeader flag (explicitChildNodes: true).
+    final SemanticsNode titleNode = tester.getSemantics(find.text('Book Details'));
+    final SemanticsNode? parent = titleNode.parent;
+
+    expect(parent, isNotNull);
+    expect(parent!.hasFlag(SemanticsFlag.isHeader), isTrue);
+
+    semantics.dispose();
   });
 }
