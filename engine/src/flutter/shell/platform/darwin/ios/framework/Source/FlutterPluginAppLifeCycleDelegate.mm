@@ -125,7 +125,7 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
     return;
   }
   // Send nil launchOptions since UIKit sends nil when UIScene is enabled.
-  [self application:application didFinishLaunchingWithOptions:nil];
+  [self application:application didFinishLaunchingWithOptions:@{}];
 }
 
 - (void)sceneFallbackWillFinishLaunchingApplication:(UIApplication*)application {
@@ -140,7 +140,7 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
     return;
   }
   // Send nil launchOptions since UIKit sends nil when UIScene is enabled.
-  [self application:application willFinishLaunchingWithOptions:nil];
+  [self application:application willFinishLaunchingWithOptions:@{}];
 }
 
 - (BOOL)application:(UIApplication*)application
