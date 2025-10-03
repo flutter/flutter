@@ -21,6 +21,11 @@ WORKING_DIR="$REPO_PATH/engine/src/flutter"
 LICENSES_PATH="$REPO_PATH/engine/src/flutter/sky/packages/sky_engine/LICENSE"
 DATA_PATH="$REPO_PATH/engine/src/flutter/tools/licenses_cpp/data"
 
+cd "$REPO_PATH/engine/src"
+./tools/dart/create_updated_flutter_deps.py
+cd "$REPO_PATH"
+gclient sync -D
+
 # This calls `gn gen`.
 "$GN" --runtime-mode profile --no-goma --no-rbe --enable-minimal-linux
 ninja -C "$PROFILE_PATH" licenses_cpp
