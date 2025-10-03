@@ -511,7 +511,7 @@ class _MenuAnchorState extends State<MenuAnchor> with SingleTickerProviderStateM
   }
 
   void _resolveMenuItems() {
-    _menuChildren = [];
+    _menuChildren = <Widget>[];
 
     if (!widget.animated) {
       _menuChildren.addAll(widget.menuChildren);
