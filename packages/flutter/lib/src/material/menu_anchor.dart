@@ -2027,7 +2027,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
         key: _anchorKey,
         onAnimationStatusChanged: (AnimationStatus status) {
           _animationStatus = status;
-        }
+        },
         controller: _menuController,
         childFocusNode: _buttonFocusNode,
         alignmentOffset: menuPaddingOffset,
