@@ -56,7 +56,7 @@ FLUTTER_ASSERT_ARC
   }
 }
 
--(BOOL)manuallyRegisteredEngine:(FlutterEngine*)engine {
+- (BOOL)manuallyRegisteredEngine:(FlutterEngine*)engine {
   return [self.manuallyRegisteredEngines.allObjects containsObject:engine];
 }
 
@@ -159,7 +159,8 @@ FLUTTER_ASSERT_ARC
 }
 
 - (NSArray*)allEngines {
-  return [_flutterRegisteredEngines.allObjects arrayByAddingObjectsFromArray:_manuallyRegisteredEngines.allObjects];
+  return [_flutterRegisteredEngines.allObjects
+      arrayByAddingObjectsFromArray:_manuallyRegisteredEngines.allObjects];
 }
 
 - (void)scene:(UIScene*)scene
@@ -389,8 +390,8 @@ FLUTTER_ASSERT_ARC
   return nil;
 }
 
-- (void) compactNSPointerArray:(NSPointerArray*)array {
-// NSPointerArray is clever and assumes that unless a mutation operation has occurred on it that
+- (void)compactNSPointerArray:(NSPointerArray*)array {
+  // NSPointerArray is clever and assumes that unless a mutation operation has occurred on it that
   // has set one of its values to nil, nothing could have changed and it can skip compaction.
   // That's reasonable behaviour on a regular NSPointerArray but not for a weakObjectPointerArray.
   // As a workaround, we mutate it first. See: http://www.openradar.me/15396578
