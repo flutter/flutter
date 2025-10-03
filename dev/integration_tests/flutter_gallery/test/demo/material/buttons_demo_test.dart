@@ -35,9 +35,9 @@ void main() {
     {
       await tester.tap(find.text('OUTLINED'));
       await tester.pumpAndSettle();
-      expect(find.byType(OutlinedButton).evaluate().length, 2);
+      expect(find.byType(OutlinedButton).evaluate().length, 4);
       final Offset topLeft1 = tester.getTopLeft(find.byType(OutlinedButton).first);
-      final Offset topLeft2 = tester.getTopLeft(find.byType(OutlinedButton).last);
+      final Offset topLeft2 = tester.getTopLeft(find.byType(OutlinedButton).at(1));
       expect(topLeft1.dx, 203);
       expect(topLeft2.dx, 453);
       expect(topLeft1.dy, topLeft2.dy);
