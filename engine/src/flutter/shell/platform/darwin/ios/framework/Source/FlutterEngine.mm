@@ -94,7 +94,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 @interface FlutterEngineBaseRegistrar : NSObject <FlutterBaseRegistrar>
 
 @property(nonatomic, weak) FlutterEngine* flutterEngine;
-@property(nonatomic, strong) NSString* key;
+@property(nonatomic, readonly) NSString* key;
 
 - (instancetype)initWithKey:(NSString*)key flutterEngine:(FlutterEngine*)flutterEngine;
 
@@ -105,9 +105,6 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 @end
 
 @interface FlutterEnginePluginRegistrar : FlutterEngineBaseRegistrar <FlutterPluginRegistrar>
-
-- (instancetype)initWithPlugin:(NSString*)pluginKey flutterEngine:(FlutterEngine*)flutterEngine;
-
 @end
 
 @interface FlutterEngine () <FlutterIndirectScribbleDelegate,
@@ -1380,8 +1377,8 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 - (NSObject<FlutterPluginRegistrar>*)registrarForPlugin:(NSString*)pluginKey {
   NSAssert(self.pluginPublications[pluginKey] == nil, @"Duplicate plugin key: %@", pluginKey);
   self.pluginPublications[pluginKey] = [NSNull null];
-  FlutterEnginePluginRegistrar* result =
-      [[FlutterEnginePluginRegistrar alloc] initWithPlugin:pluginKey flutterEngine:self];
+  FlutterEnginePluginRegistrar* result = [[FlutterEnginePluginRegistrar alloc] initWithKey:pluginKey
+                                                                             flutterEngine:self];
   self.registrars[pluginKey] = result;
   return result;
 }
@@ -1642,12 +1639,6 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 @end
 
 @implementation FlutterEnginePluginRegistrar
-
-- (instancetype)initWithPlugin:(NSString*)pluginKey flutterEngine:(FlutterEngine*)flutterEngine {
-  self = [super init];
-  NSAssert(self, @"Super init cannot be nil");
-  return [super initWithKey:pluginKey flutterEngine:flutterEngine];
-}
 
 - (nullable UIViewController*)viewController {
   return self.flutterEngine.viewController;

@@ -460,7 +460,7 @@ FLUTTER_DARWIN_EXPORT
  *
  * This can be used to vend `FlutterPluginRegistrar`s for plugins.
  */
-@property(nonatomic, strong) NSObject<FlutterPluginRegistry>* pluginRegistry;
+@property(nonatomic, readonly) NSObject<FlutterPluginRegistry>* pluginRegistry;
 
 /**
  * The `FlutterApplicationRegistrar` for the created `FlutterEngine`.
@@ -468,7 +468,7 @@ FLUTTER_DARWIN_EXPORT
  * This registrar provides access to application-level services, such as the engine's
  * `FlutterBinaryMessenger` or `FlutterTextureRegistry`.
  */
-@property(nonatomic, strong) NSObject<FlutterApplicationRegistrar>* applicationRegistrar;
+@property(nonatomic, readonly) NSObject<FlutterApplicationRegistrar>* applicationRegistrar;
 
 @end
 
