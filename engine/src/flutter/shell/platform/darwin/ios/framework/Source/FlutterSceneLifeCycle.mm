@@ -260,7 +260,6 @@ FLUTTER_ASSERT_ARC
 #pragma mark - Saving the state of the scene
 
 - (NSUserActivity*)stateRestorationActivityForScene:(UIScene*)scene {
-  NSLog(@"stateRestorationActivityForScene");
   // Saves state per FlutterViewController.
   NSUserActivity* activity = scene.userActivity;
   if (!activity) {
@@ -270,7 +269,7 @@ FLUTTER_ASSERT_ARC
   [self updateEnginesInScene:scene];
   int64_t appBundleModifiedTime = FlutterSharedApplication.lastAppModificationTime;
   for (FlutterEngine* engine in [_engines allObjects]) {
-    UIViewController* vc = (UIViewController*)engine.viewController;
+    FlutterViewController* vc = (FlutterViewController*)engine.viewController;
     NSString* restorationId = vc.restorationIdentifier;
     if (restorationId) {
       NSData* restorationData = [engine.restorationPlugin restorationData];
