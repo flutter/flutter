@@ -424,6 +424,12 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
   /// This parent folder of `Runner.xcodeproj`.
   @override
   Directory get hostAppRoot {
+    if (parent.manifest.isModule || (parent.manifest.ios?.sharedDarwinSource ?? false)) {
+      final Directory darwinDir = parent.directory.childDirectory('darwin');
+      if (darwinDir.existsSync()) {
+        return darwinDir;
+      }
+    }
     if (!isModule || _editableDirectory.existsSync()) {
       return _editableDirectory;
     }
@@ -936,7 +942,15 @@ class MacOSProject extends XcodeBasedProject {
   bool existsSync() => hostAppRoot.existsSync();
 
   @override
-  Directory get hostAppRoot => parent.directory.childDirectory('macos');
+  Directory get hostAppRoot {
+    if (parent.manifest.macos?.sharedDarwinSource ?? false) {
+      final Directory darwinDir = parent.directory.childDirectory('darwin');
+      if (darwinDir.existsSync()) {
+        return darwinDir;
+      }
+    }
+    return parent.directory.childDirectory('macos');
+  }
 
   /// The xcfilelist used to track the inputs for the Flutter script phase in
   /// the Xcode build.
