@@ -23,11 +23,9 @@ void main() {
       final widgetPreview = WidgetPreviewerWidgetScaffolding(
         child: WidgetPreviewWidget(
           controller: controller,
-          preview: WidgetPreview(
-            scriptUri: '',
+          preview: WidgetPreview.test(
             builder: () => const Text(kTestText),
             previewData: Preview(),
-            packageName: '',
           ),
         ),
       );

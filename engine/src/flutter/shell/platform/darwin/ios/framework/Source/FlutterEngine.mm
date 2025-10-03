@@ -309,10 +309,10 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
     // plugins to receive the `scene:willConnectToSession:options` event.
     // If we want to support multi-window on iPad later, we may need to add a way for deveopers to
     // register their FlutterEngine to the scene manually during this event.
-    if ([scene.delegate conformsToProtocol:@protocol(FlutterSceneLifeCycleProvider)]) {
-      NSObject<FlutterSceneLifeCycleProvider>* sceneProvider =
-          (NSObject<FlutterSceneLifeCycleProvider>*)scene.delegate;
-      [sceneProvider.sceneLifeCycleDelegate engine:self receivedConnectNotificationFor:scene];
+    FlutterPluginSceneLifeCycleDelegate* sceneLifeCycleDelegate =
+        [FlutterPluginSceneLifeCycleDelegate fromScene:scene];
+    if (sceneLifeCycleDelegate != nil) {
+      return [sceneLifeCycleDelegate engine:self receivedConnectNotificationFor:scene];
     }
   }
 }
@@ -1573,6 +1573,35 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
 - (FlutterDartProject*)project {
   return self.dartProject;
+}
+
+- (void)sendDeepLinkToFramework:(NSURL*)url completionHandler:(void (^)(BOOL success))completion {
+  __weak FlutterEngine* weakSelf = self;
+  [self waitForFirstFrame:3.0
+                 callback:^(BOOL didTimeout) {
+                   if (didTimeout) {
+                     [FlutterLogger
+                         logError:@"Timeout waiting for first frame when launching a URL."];
+                     completion(NO);
+                   } else {
+                     // invove the method and get the result
+                     [weakSelf.navigationChannel
+                         invokeMethod:@"pushRouteInformation"
+                            arguments:@{
+                              @"location" : url.absoluteString ?: [NSNull null],
+                            }
+                               result:^(id _Nullable result) {
+                                 BOOL success =
+                                     [result isKindOfClass:[NSNumber class]] && [result boolValue];
+                                 if (!success) {
+                                   // Logging the error if the result is not successful
+                                   [FlutterLogger
+                                       logError:@"Failed to handle route information in Flutter."];
+                                 }
+                                 completion(success);
+                               }];
+                   }
+                 }];
 }
 
 @end

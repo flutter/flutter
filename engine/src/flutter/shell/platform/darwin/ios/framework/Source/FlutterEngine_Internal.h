@@ -119,6 +119,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (NSObject<FlutterApplicationRegistrar>*)registrarForApplication:(NSString*)key;
 
+- (void)sendDeepLinkToFramework:(NSURL*)url completionHandler:(void (^)(BOOL success))completion;
+
 @end
 
 NS_ASSUME_NONNULL_END

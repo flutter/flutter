@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #include <cstring>
-#include "flutter/shell/platform/windows/display_monitor.h"
+#include "flutter/shell/platform/windows/display_manager.h"
 
 #include <string>
 #include "flutter/shell/platform/windows/testing/flutter_windows_engine_builder.h"
@@ -28,10 +28,10 @@ using ::testing::Return;
 using ::testing::SetArgPointee;
 using ::testing::StrEq;
 
-class DisplayMonitorTest : public WindowsTest {};
+class DisplayManagerWin32Test : public WindowsTest {};
 
-// Test that the display monitor correctly handles multiple monitors
-TEST_F(DisplayMonitorTest, MultipleMonitors) {
+// Test that the display manager correctly handles multiple monitors
+TEST_F(DisplayManagerWin32Test, MultipleMonitors) {
   auto mock_windows_proc_table =
       std::make_shared<NiceMock<MockWindowsProcTable>>();
 
@@ -79,14 +79,14 @@ TEST_F(DisplayMonitorTest, MultipleMonitors) {
   EXPECT_CALL(*mock_windows_proc_table, EnumDisplaySettings(_, _, _))
       .WillRepeatedly(Return(TRUE));
 
-  // Create the display monitor with the mock engine
-  auto display_monitor = std::make_unique<DisplayMonitor>(engine.get());
+  // Create the display manager with the mock engine
+  auto display_manager = std::make_unique<DisplayManagerWin32>(engine.get());
 
-  display_monitor->UpdateDisplays();
+  display_manager->UpdateDisplays();
 }
 
-// Test that the display monitor correctly handles a display change message
-TEST_F(DisplayMonitorTest, HandleDisplayChangeMessage) {
+// Test that the display manager correctly handles a display change message
+TEST_F(DisplayManagerWin32Test, HandleDisplayChangeMessage) {
   // Create a mock Windows proc table
   auto mock_windows_proc_table =
       std::make_shared<NiceMock<MockWindowsProcTable>>();
@@ -99,23 +99,23 @@ TEST_F(DisplayMonitorTest, HandleDisplayChangeMessage) {
   EXPECT_CALL(*mock_windows_proc_table, EnumDisplayMonitors(_, _, _, _))
       .WillRepeatedly(Return(TRUE));
 
-  // Create the display monitor with the mock engine
-  auto display_monitor = std::make_unique<DisplayMonitor>(engine.get());
+  // Create the display manager with the mock engine
+  auto display_manager = std::make_unique<DisplayManagerWin32>(engine.get());
 
   // Test handling a display change message
   HWND dummy_hwnd = reinterpret_cast<HWND>(1);
   LRESULT result = 0;
 
   // Verify that WM_DISPLAYCHANGE is handled
-  EXPECT_FALSE(display_monitor->HandleWindowMessage(
+  EXPECT_FALSE(display_manager->HandleWindowMessage(
       dummy_hwnd, WM_DISPLAYCHANGE, 0, 0, &result));
 
   // Verify that WM_DPICHANGED is handled
-  EXPECT_FALSE(display_monitor->HandleWindowMessage(dummy_hwnd, WM_DPICHANGED,
+  EXPECT_FALSE(display_manager->HandleWindowMessage(dummy_hwnd, WM_DPICHANGED,
                                                     0, 0, &result));
 
   // Verify that other messages are not handled
-  EXPECT_FALSE(display_monitor->HandleWindowMessage(dummy_hwnd, WM_PAINT, 0, 0,
+  EXPECT_FALSE(display_manager->HandleWindowMessage(dummy_hwnd, WM_PAINT, 0, 0,
                                                     &result));
 }
 
