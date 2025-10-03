@@ -146,10 +146,10 @@ class ImeSyncDeferringInsetsCallback {
         return insets;
       }
 
-      // The IME insets include the height of the navigation bar. If the app isn't laid out behind
-      // the navigation bar, this causes the IME insets to be too large during the animation.
-      // To fix this, we subtract the navigationBars bottom inset if the system UI flags for laying
-      // out behind the navigation bar aren't present.
+      // If not Edge-to-Edge, the IME insets include the height of the navigation bar. If the app
+      // isn't laid out behind the navigation bar, this causes the IME insets to be too large during
+      // the animation.  To fix this, we subtract the navigationBars bottom inset if the system UI
+      // flags for laying out behind the navigation bar aren't present.
       int excludedInsets = 0;
       int systemUiFlags = view.getWindowSystemUiVisibility();
       if (!((systemUiFlags & View.SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0
