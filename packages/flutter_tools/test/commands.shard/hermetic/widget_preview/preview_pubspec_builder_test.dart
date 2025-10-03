@@ -18,7 +18,7 @@ import '../../../src/context.dart';
 import '../../../src/package_config.dart';
 
 void main() {
-  group('WidgetPreviewStartCommand', () {
+  group('$PreviewPubspecBuilder', () {
     late MemoryFileSystem fileSystem;
     late ProcessManager processManager;
     late PreviewPubspecBuilder pubspecBuilder;
