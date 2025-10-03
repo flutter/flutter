@@ -1010,7 +1010,8 @@ List<String> _getPlatformWarningList(List<String> requestedPlatforms) {
     if (requestedPlatforms.contains('windows') && !featureFlags.isWindowsEnabled) 'windows',
     if (requestedPlatforms.contains('linux') && !featureFlags.isLinuxEnabled) 'linux',
     if (requestedPlatforms.contains('darwin') &&
-        !(featureFlags.isMacOSEnabled || !featureFlags.isIOSEnabled))
+        !featureFlags.isMacOSEnabled &&
+        !featureFlags.isIOSEnabled)
       'darwin',
   ];
 
@@ -1050,7 +1051,7 @@ For more details, see: https://flutter.dev/to/add-web-support
   }
   if (darwin.isNotEmpty) {
     globals.printStatus('''
-The darwin is currently not supported on your local environment.
+The darwin platform is currently not supported on your local environment.
 You must have a macOS host with Xcode installed to develop for iOS or macOS.
 ''');
   }
