@@ -4043,6 +4043,24 @@ class ColorFilter implements ImageFilter {
       _matrix = null,
       _type = _kTypeSrgbToLinearGamma;
 
+  /// Creates a color filter that applies the given saturation to the RGB
+  /// channels.
+  factory ColorFilter.saturation(double saturation) {
+    const double r = 0.2126;
+    const double g = 0.7152;
+    const double b = 0.0722;
+    final double invSat = 1 - saturation;
+
+    return ColorFilter.matrix(<double>[
+      // dart format off
+      invSat * r + saturation, invSat * g,              invSat * b,              0, 0,
+      invSat * r,              invSat * g + saturation, invSat * b,              0, 0,
+      invSat * r,              invSat * g,              invSat * b + saturation, 0, 0,
+      0,                       0,                       0,                       1, 0,
+      // dart format on
+    ]);
+  }
+
   final Color? _color;
   final BlendMode? _blendMode;
   final List<double>? _matrix;
