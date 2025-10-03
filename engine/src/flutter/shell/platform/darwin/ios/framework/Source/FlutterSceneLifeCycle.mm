@@ -35,7 +35,7 @@ FLUTTER_ASSERT_ARC
 
 - (void)addFlutterEngine:(FlutterEngine*)engine {
   // Check if the engine is already in the array to avoid duplicates.
-  if ([self.engines.allObjects containsObject:engine]) {
+  if ([self containsEngine:engine]) {
     return;
   }
 
@@ -54,6 +54,10 @@ FLUTTER_ASSERT_ARC
   if (index != NSNotFound) {
     [self.engines removePointerAtIndex:index];
   }
+}
+
+- (BOOL)containsEngine:(FlutterEngine*)engine {
+  return [self.engines.allObjects containsObject:engine];
 }
 
 - (void)updateEnginesInScene:(UIScene*)scene {
@@ -113,6 +117,11 @@ FLUTTER_ASSERT_ARC
 #pragma mark - Connecting and disconnecting the scene
 
 - (void)engine:(FlutterEngine*)engine receivedConnectNotificationFor:(UIScene*)scene {
+  // Don't send willConnectToSession event if engine is already tracked as it will be handled by
+  // the actual event.
+  if ([self containsEngine:engine]) {
+    return;
+  }
   // Connection options may be nil if the notification was received before the
   // `scene:willConnectToSession:options:` event. In which case, we can wait for the actual event.
   [self addFlutterEngine:engine];
@@ -128,6 +137,13 @@ FLUTTER_ASSERT_ARC
     willConnectToSession:(UISceneSession*)session
                  options:(UISceneConnectionOptions*)connectionOptions {
   self.connectionOptions = connectionOptions;
+  if ([scene.delegate conformsToProtocol:@protocol(UIWindowSceneDelegate)]) {
+    NSObject<UIWindowSceneDelegate>* sceneDelegate = (NSObject<UIWindowSceneDelegate>*)scene.delegate;
+    if ([sceneDelegate.window.rootViewController isKindOfClass:[FlutterViewController class]]) {
+      FlutterViewController* rootViewController = (FlutterViewController*)sceneDelegate.window.rootViewController;
+      [self addFlutterEngine:rootViewController.engine];
+    }
+  }
 
   [self updateEnginesInScene:scene];
 

@@ -79,58 +79,62 @@ Future<void> main(List<String> args) async {
       );
 
       bool testFailed = false;
-      await testWithNewIOSSimulator('TestAdd2AppSim', (String deviceId) async {
-        for (final XcodeProjectType xcodeProjectType in projectTypesToTest) {
-          final (String xcodeProjectName, Directory xcodeProjectDir) = await _createNativeApp(
-            destinationDir: destinationDir,
-            templatesDir: templatesDir,
-            xcodeProjectType: xcodeProjectType,
-          );
-
-          simulatorDeviceId = deviceId;
-          final Scenarios scenarios = Scenarios();
-          final Map<String, Map<String, String>> scenariosMap = scenarios.scenarios(
-            xcodeProjectType,
-          );
-          for (final String scenarioName in scenariosMap.keys) {
-            if (testName != null && scenarioName != testName) {
-              continue;
-            }
-            final List<FileReplacements> replacements = FileReplacements.fromScenario(
-              scenariosMap[scenarioName]!,
+      await testWithNewIOSSimulator(
+        'TestAdd2AppSim',
+        deviceTypeId: 'com.apple.CoreSimulator.SimDeviceType.iPad-Pro-11-inch-3rd-generation',
+        (String deviceId) async {
+          for (final XcodeProjectType xcodeProjectType in projectTypesToTest) {
+            final (String xcodeProjectName, Directory xcodeProjectDir) = await _createNativeApp(
+              destinationDir: destinationDir,
               templatesDir: templatesDir,
-              xcodeProjectDir: xcodeProjectDir,
-              pluginDir: pluginDir,
-              appDir: appDir,
+              xcodeProjectType: xcodeProjectType,
             );
 
-            for (final FileReplacements replacement in replacements) {
-              replacement.replace();
-            }
-
-            section('Test Scenario $scenarioName');
-
-            await _installPlugins(appDir: appDir, xcodeProjectDir: xcodeProjectDir);
-            final int result = await _testNativeApp(
-              deviceId: simulatorDeviceId!,
-              scenarioName: scenarioName,
-              templatesDir: templatesDir,
-              xcodeProjectDir: xcodeProjectDir,
-              xcodeProjectName: xcodeProjectName,
+            simulatorDeviceId = deviceId;
+            final Scenarios scenarios = Scenarios();
+            final Map<String, Map<String, String>> scenariosMap = scenarios.scenarios(
+              xcodeProjectType,
             );
-            if (result != 0) {
-              testFailed = true;
-            }
+            for (final String scenarioName in scenariosMap.keys) {
+              if (testName != null && scenarioName != testName) {
+                continue;
+              }
+              final List<FileReplacements> replacements = FileReplacements.fromScenario(
+                scenariosMap[scenarioName]!,
+                templatesDir: templatesDir,
+                xcodeProjectDir: xcodeProjectDir,
+                pluginDir: pluginDir,
+                appDir: appDir,
+              );
 
-            // Reset files to original between scenarios unless we're targetting a specific test.
-            if (testName == null) {
               for (final FileReplacements replacement in replacements) {
-                replacement.reset();
+                replacement.replace();
+              }
+
+              section('Test Scenario $scenarioName');
+
+              await _installPlugins(appDir: appDir, xcodeProjectDir: xcodeProjectDir);
+              final int result = await _testNativeApp(
+                deviceId: simulatorDeviceId!,
+                scenarioName: scenarioName,
+                templatesDir: templatesDir,
+                xcodeProjectDir: xcodeProjectDir,
+                xcodeProjectName: xcodeProjectName,
+              );
+              if (result != 0) {
+                testFailed = true;
+              }
+
+              // Reset files to original between scenarios unless we're targetting a specific test.
+              if (testName == null) {
+                for (final FileReplacements replacement in replacements) {
+                  replacement.reset();
+                }
               }
             }
           }
-        }
-      });
+        },
+      );
 
       if (testFailed) {
         return TaskResult.failure(
@@ -434,6 +438,24 @@ class Scenarios {
       r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-unmigrated.swift':
           r'$PLUGIN_DIR/ios/Classes/MyPlugin.swift',
       r'$TEMPLATE_DIR/native/UITests-ApplicationEvents-AppNotMigrated.swift':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swiftUITests/xcode_uikit_swiftUITests.swift',
+    },
+
+    // When multi scene is enabled with a root FlutterViewController, we expect scene events.
+    'AppMigrated-FlutterSceneDelegate-PluginMigrated-MultiSceneEnabled': <String, String>{
+      ...sharedAppLifecycleFiles,
+      ...sharedPluginLifecycleFiles,
+      r'$TEMPLATE_DIR/native/Info-MultiSceneEnabled.plist':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swift/Info.plist',
+      r'$TEMPLATE_DIR/native/AppDelegate-FlutterAppDelegate.swift':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swift/AppDelegate.swift',
+      r'$TEMPLATE_DIR/native/Main-FlutterViewController.storyboard':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swift/Base.lproj/Main.storyboard',
+      r'$TEMPLATE_DIR/native/SceneDelegate-FlutterSceneDelegate.swift':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swift/SceneDelegate.swift',
+      r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-migrated.swift':
+          r'$PLUGIN_DIR/ios/Classes/MyPlugin.swift',
+      r'$TEMPLATE_DIR/native/UITests-SceneEvents.swift':
           r'$XCODE_PROJ_DIR/xcode_uikit_swiftUITests/xcode_uikit_swiftUITests.swift',
     },
   };

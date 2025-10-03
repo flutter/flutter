@@ -14,6 +14,10 @@
 @property(nonatomic, strong) NSPointerArray* engines;
 
 - (void)updateEnginesInScene:(UIScene*)scene;
+- (void)scene:(UIScene*)scene
+    willConnectToSession:(UISceneSession*)session
+           flutterEngine:(FlutterEngine*)engine
+                 options:(UISceneConnectionOptions*)connectionOptions;
 
 @end
 

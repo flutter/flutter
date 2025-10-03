@@ -388,6 +388,57 @@ FLUTTER_ASSERT_ARC
   OCMVerify(times(0), [mockEngine sendDeepLinkToFramework:url completionHandler:[OCMArg any]]);
 }
 
+- (void)testSceneWillConnectToSessionAddsEngineFromRootViewController {
+  FlutterPluginSceneLifeCycleDelegate* delegate =
+      [[FlutterPluginSceneLifeCycleDelegate alloc] init];
+  FlutterPluginSceneLifeCycleDelegate* mockDelegate = OCMPartialMock(delegate);
+
+  id mockScene = OCMClassMock([UIWindowScene class]);
+  id mockWindow = OCMClassMock([UIWindow class]);
+  id mockViewController = OCMClassMock([FlutterViewController class]);
+  id mockEngine = OCMClassMock([FlutterEngine class]);
+  id mockSceneDelegate = OCMProtocolMock(@protocol(UIWindowSceneDelegate));
+
+  OCMStub([mockScene delegate]).andReturn(mockSceneDelegate);
+  OCMStub([mockSceneDelegate window]).andReturn(mockWindow);
+  OCMStub([mockWindow rootViewController]).andReturn(mockViewController);
+  OCMStub([mockViewController engine]).andReturn(mockEngine);
+
+  id session = OCMClassMock([UISceneSession class]);
+  id options = OCMClassMock([UISceneConnectionOptions class]);
+
+  [mockDelegate scene:mockScene willConnectToSession:session options:options];
+
+  OCMVerify(times(1), [mockDelegate addFlutterEngine:mockEngine]);
+  OCMVerify(times(1), [mockDelegate scene:mockScene willConnectToSession:session flutterEngine:mockEngine options:options]);
+}
+
+- (void)testSceneWillConnectToSessionAddsEngineFromRootViewControllerAndNotNotification {
+  FlutterPluginSceneLifeCycleDelegate* delegate =
+      [[FlutterPluginSceneLifeCycleDelegate alloc] init];
+  FlutterPluginSceneLifeCycleDelegate* mockDelegate = OCMPartialMock(delegate);
+
+  id mockScene = OCMClassMock([UIWindowScene class]);
+  id mockWindow = OCMClassMock([UIWindow class]);
+  id mockViewController = OCMClassMock([FlutterViewController class]);
+  id mockEngine = OCMClassMock([FlutterEngine class]);
+  id mockSceneDelegate = OCMProtocolMock(@protocol(UIWindowSceneDelegate));
+
+  OCMStub([mockScene delegate]).andReturn(mockSceneDelegate);
+  OCMStub([mockSceneDelegate window]).andReturn(mockWindow);
+  OCMStub([mockWindow rootViewController]).andReturn(mockViewController);
+  OCMStub([mockViewController engine]).andReturn(mockEngine);
+
+  id session = OCMClassMock([UISceneSession class]);
+  id options = OCMClassMock([UISceneConnectionOptions class]);
+
+  [mockDelegate scene:mockScene willConnectToSession:session options:options];
+  [mockDelegate engine:mockEngine receivedConnectNotificationFor:mockScene];
+
+  OCMVerify(times(1), [mockDelegate addFlutterEngine:mockEngine]);
+  OCMVerify(times(1), [mockDelegate scene:mockScene willConnectToSession:session flutterEngine:mockEngine options:options]);
+}
+
 - (void)testSceneDidDisconnect {
   FlutterPluginSceneLifeCycleDelegate* delegate =
       [[FlutterPluginSceneLifeCycleDelegate alloc] init];
