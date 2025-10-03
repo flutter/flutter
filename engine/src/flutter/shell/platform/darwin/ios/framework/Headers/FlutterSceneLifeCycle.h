@@ -10,6 +10,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class FlutterEngine;
+
 /**
  * A protocol for delegates that handle `UISceneDelegate` and `UIWindowSceneDelegate` life-cycle
  * events.
@@ -106,6 +108,18 @@ API_AVAILABLE(ios(13.0))
 FLUTTER_DARWIN_EXPORT
 API_AVAILABLE(ios(13.0))
 @interface FlutterPluginSceneLifeCycleDelegate : NSObject
+
+/**
+ * Use this method to register a `FlutterEngine`'s plugins to the scene's life cycle events.
+ *
+ * Some Flutter plugins use scene life cycle events to do actions on app launch. For them to receive
+ * the necessary events, the `FlutterEngine` must be registered to the scene during
+ * `scene:willConnectTo:options:`. This is only required if Multiple Scenes is enabled and the
+ * `rootViewController` of the scene is not a `FlutterViewController`.
+ */
+- (void)registerFlutterEngine:(FlutterEngine*)engine;
+
+- (void)deregisterFlutterEngine:(FlutterEngine*)engine;
 
 #pragma mark - Connecting and disconnecting the scene
 

@@ -91,6 +91,14 @@ FLUTTER_ASSERT_ARC
 
 #pragma mark - Helpers
 
+- (void)registerFlutterEngine:(FlutterEngine*)engine {
+  [self.sceneLifeCycleDelegate registerFlutterEngine:engine];
+}
+
+- (void)deregisterFlutterEngine:(FlutterEngine*)engine {
+  [self.sceneLifeCycleDelegate deregisterFlutterEngine:engine];
+}
+
 - (void)moveRootViewControllerFrom:(NSObject<UIApplicationDelegate>*)appDelegate
                                 to:(UIWindowScene*)windowScene {
   self.window = [[UIWindow alloc] initWithWindowScene:windowScene];
