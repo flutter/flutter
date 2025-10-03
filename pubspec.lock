@@ -6,7 +6,7 @@ packages:
     description:
       name: _discoveryapis_commons
       sha256: "113c4100b90a5b70a983541782431b82168b3cae166ab130649c36eb3559d498"
-      url: "https://pub.dev"
+      url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.0.7"
   _fe_analyzer_shared:

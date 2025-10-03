@@ -149,12 +149,12 @@ void main() {
     expect(insets1, const EdgeInsetsDirectional.only(start: 16, top: 16, end: 16, bottom: 16));
 
     const EdgeInsetsDirectional insets2 = EdgeInsetsDirectional.some(rest: 20, top: 0, start: 8);
-    expect(insets2, const EdgeInsetsDirectional.only(start: 8, top: 0, end: 20, bottom: 20));
+    expect(insets2, const EdgeInsetsDirectional.only(start: 8, end: 20, bottom: 20));
 
     const EdgeInsetsDirectional insetsExceptStart = EdgeInsetsDirectional.exceptStart(16);
     expect(
       insetsExceptStart,
-      const EdgeInsetsDirectional.only(start: 0, top: 16, end: 16, bottom: 16),
+      const EdgeInsetsDirectional.only(top: 16, end: 16, bottom: 16),
     );
 
     const EdgeInsetsDirectional insetsExceptStart2 = EdgeInsetsDirectional.exceptStart(16, 4);
@@ -165,16 +165,16 @@ void main() {
 
     const EdgeInsetsDirectional insetsExceptStart3 = EdgeInsetsDirectional.exceptStart(16);
     final EdgeInsets resolvedExceptStart3 = insetsExceptStart3.resolve(TextDirection.ltr);
-    expect(resolvedExceptStart3, const EdgeInsets.only(left: 0, top: 16, right: 16, bottom: 16));
+    expect(resolvedExceptStart3, const EdgeInsets.only(top: 16, right: 16, bottom: 16));
 
     const EdgeInsetsDirectional insetsExceptStart4 = EdgeInsetsDirectional.exceptStart(16);
     final EdgeInsets resolvedExceptStart4 = insetsExceptStart4.resolve(TextDirection.rtl);
-    expect(resolvedExceptStart4, const EdgeInsets.only(left: 16, top: 16, right: 0, bottom: 16));
+    expect(resolvedExceptStart4, const EdgeInsets.only(left: 16, top: 16, bottom: 16));
 
     const EdgeInsetsDirectional insetsExceptEnd = EdgeInsetsDirectional.exceptEnd(16);
     expect(
       insetsExceptEnd,
-      const EdgeInsetsDirectional.only(start: 16, top: 16, end: 0, bottom: 16),
+      const EdgeInsetsDirectional.only(start: 16, top: 16, bottom: 16),
     );
 
     const EdgeInsetsDirectional insetsExceptEnd2 = EdgeInsetsDirectional.exceptEnd(16, 6);
@@ -185,11 +185,11 @@ void main() {
 
     const EdgeInsetsDirectional insetsExceptEnd3 = EdgeInsetsDirectional.exceptEnd(16);
     final EdgeInsets resolvedExceptEnd3 = insetsExceptEnd3.resolve(TextDirection.ltr);
-    expect(resolvedExceptEnd3, const EdgeInsets.only(left: 16, top: 16, right: 0, bottom: 16));
+    expect(resolvedExceptEnd3, const EdgeInsets.only(left: 16, top: 16, bottom: 16));
 
     const EdgeInsetsDirectional insetsExceptEnd4 = EdgeInsetsDirectional.exceptEnd(16);
     final EdgeInsets resolvedExceptEnd4 = insetsExceptEnd4.resolve(TextDirection.rtl);
-    expect(resolvedExceptEnd4, const EdgeInsets.only(left: 0, top: 16, right: 16, bottom: 16));
+    expect(resolvedExceptEnd4, const EdgeInsets.only(top: 16, right: 16, bottom: 16));
 
     // only
     const EdgeInsetsDirectional directional = EdgeInsetsDirectional.only(
