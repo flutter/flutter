@@ -920,7 +920,9 @@ const Duration _kDuration = Duration(milliseconds: 300);
 // Incoming and outgoing animated items.
 class _ActiveItem implements Comparable<_ActiveItem> {
   _ActiveItem.incoming(this.controller, this.itemIndex) : removedItemBuilder = null;
+
   _ActiveItem.outgoing(this.controller, this.itemIndex, this.removedItemBuilder);
+
   _ActiveItem.index(this.itemIndex) : controller = null, removedItemBuilder = null;
 
   final AnimationController? controller;
@@ -1437,9 +1439,13 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
   /// `builder` must construct its widget as needed.
   ///
   /// This method's semantics are the same as Dart's [List.clear] method: it
-  /// removes all the items in the list.
+  /// removes all the items in the list including the ones that are in inserting
+  /// process and excluding the ones that are already in removal process.
   void removeAllItems(AnimatedRemovedItemBuilder builder, {Duration duration = _kDuration}) {
-    for (int i = _itemsCount - 1; i >= 0; i--) {
+    assert(_itemsCount >= 0);
+    assert(_itemsCount - _outgoingItems.length >= 0);
+    final int notOutGoingTotalCount = _itemsCount - _outgoingItems.length;
+    for (int i = notOutGoingTotalCount - 1; i >= 0; i--) {
       removeItem(i, builder, duration: duration);
     }
   }
