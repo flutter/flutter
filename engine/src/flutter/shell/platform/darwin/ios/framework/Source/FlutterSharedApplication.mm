@@ -57,4 +57,13 @@ NSString* const kRestorationStateAppModificationKey = @"mod-date";
   return [fileDate timeIntervalSince1970];
 }
 
++ (BOOL)isFlutterDeepLinkingEnabled {
+  // Developers may disable deep linking through their Info.plist if they are using a plugin that
+  // handles deeplinking instead.
+  NSNumber* isDeepLinkingEnabled =
+      [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FlutterDeepLinkingEnabled"];
+  // if not set, return YES
+  return isDeepLinkingEnabled ? [isDeepLinkingEnabled boolValue] : YES;
+}
+
 @end

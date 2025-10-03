@@ -141,13 +141,6 @@ static NSString* const kBackgroundFetchCapatibility = @"fetch";
   }
 }
 
-- (BOOL)isFlutterDeepLinkingEnabled {
-  NSNumber* isDeepLinkingEnabled =
-      [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FlutterDeepLinkingEnabled"];
-  // if not set, return YES
-  return isDeepLinkingEnabled ? [isDeepLinkingEnabled boolValue] : YES;
-}
-
 // This method is called when opening an URL with custom schemes.
 - (BOOL)application:(UIApplication*)application
             openURL:(NSURL*)url
@@ -168,21 +161,21 @@ static NSString* const kBackgroundFetchCapatibility = @"fetch";
   if (flutterApplication == nil) {
     return NO;
   }
-  if (![self isFlutterDeepLinkingEnabled]) {
+  if (!FlutterSharedApplication.isFlutterDeepLinkingEnabled) {
     return NO;
   }
 
   FlutterViewController* flutterViewController = [self rootFlutterViewController];
   if (flutterViewController) {
-    [flutterViewController sendDeepLinkToFramework:url
-                                 completionHandler:^(BOOL success) {
-                                   if (!success && throwBack) {
-                                     // throw it back to iOS
-                                     [flutterApplication openURL:url
-                                                         options:@{}
-                                               completionHandler:nil];
-                                   }
-                                 }];
+    [flutterViewController.engine sendDeepLinkToFramework:url
+                                        completionHandler:^(BOOL success) {
+                                          if (!success && throwBack) {
+                                            // throw it back to iOS
+                                            [flutterApplication openURL:url
+                                                                options:@{}
+                                                      completionHandler:nil];
+                                          }
+                                        }];
   } else {
     [FlutterLogger logError:@"Attempting to open an URL without a Flutter RootViewController."];
     return NO;

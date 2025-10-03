@@ -117,28 +117,36 @@ FLUTTER_ASSERT_ARC
   // `scene:willConnectToSession:options:` event. In which case, we can wait for the actual event.
   [self addFlutterEngine:engine];
   if (self.connectionOptions != nil) {
-    [self scene:scene willConnectToSession:scene.session options:self.connectionOptions];
+    [self scene:scene
+        willConnectToSession:scene.session
+               flutterEngine:engine
+                     options:self.connectionOptions];
   }
 }
 
-- (BOOL)scene:(UIScene*)scene
+- (void)scene:(UIScene*)scene
     willConnectToSession:(UISceneSession*)session
                  options:(UISceneConnectionOptions*)connectionOptions {
   self.connectionOptions = connectionOptions;
 
   [self updateEnginesInScene:scene];
 
-  BOOL consumedByPlugin = NO;
   for (FlutterEngine* engine in _engines.allObjects) {
-    BOOL result = [engine.sceneLifeCycleDelegate scene:scene
-                                  willConnectToSession:session
-                                               options:connectionOptions];
-    if (result) {
-      consumedByPlugin = YES;
-    }
+    [self scene:scene willConnectToSession:session flutterEngine:engine options:connectionOptions];
   }
-  return consumedByPlugin;
-  // There is no application equivalent for this event and therefore no fallback.
+}
+
+- (void)scene:(UIScene*)scene
+    willConnectToSession:(UISceneSession*)session
+           flutterEngine:(FlutterEngine*)engine
+                 options:(UISceneConnectionOptions*)connectionOptions {
+  BOOL handledByPlugin = [engine.sceneLifeCycleDelegate scene:scene
+                                         willConnectToSession:session
+                                                      options:connectionOptions];
+  if (!handledByPlugin) {
+    // Only process deeplinks if a plugin has not already done something to handle this event.
+    [self handleDeeplinkingForEngine:engine options:connectionOptions];
+  }
 }
 
 - (void)sceneDidDisconnect:(UIScene*)scene {
@@ -187,43 +195,66 @@ FLUTTER_ASSERT_ARC
 
 #pragma mark - Opening URLs
 
-- (BOOL)scene:(UIScene*)scene openURLContexts:(NSSet<UIOpenURLContext*>*)URLContexts {
+- (void)scene:(UIScene*)scene openURLContexts:(NSSet<UIOpenURLContext*>*)URLContexts {
   [self updateEnginesInScene:scene];
-  BOOL consumedByPlugin = NO;
+
+  // Track engines that had this event handled by a plugin.
+  NSMutableSet<FlutterEngine*>* enginesHandledByPlugin = [NSMutableSet set];
   for (FlutterEngine* engine in _engines.allObjects) {
-    BOOL result = [engine.sceneLifeCycleDelegate scene:scene openURLContexts:URLContexts];
-    if (result) {
-      consumedByPlugin = YES;
+    if ([engine.sceneLifeCycleDelegate scene:scene openURLContexts:URLContexts]) {
+      [enginesHandledByPlugin addObject:engine];
     }
   }
-  if (!consumedByPlugin) {
-    BOOL result = [[self applicationLifeCycleDelegate] sceneFallbackOpenURLContexts:URLContexts];
-    if (result) {
-      consumedByPlugin = YES;
+
+  // If no plugins handled this, give the application fallback a chance to handle it.
+  if (enginesHandledByPlugin.count == 0) {
+    if ([[self applicationLifeCycleDelegate] sceneFallbackOpenURLContexts:URLContexts]) {
+      // If the application fallback handles it, don't do any deeplinking.
+      return;
     }
   }
-  return consumedByPlugin;
+
+  // For any engine that was not handled by a plugin, do deeplinking.
+  for (FlutterEngine* engine in _engines.allObjects) {
+    if ([enginesHandledByPlugin containsObject:engine]) {
+      continue;
+    }
+    for (UIOpenURLContext* urlContext in URLContexts) {
+      if ([self handleDeeplink:urlContext.URL flutterEngine:engine relayToSystemIfUnhandled:NO]) {
+        break;
+      }
+    }
+  }
 }
 
 #pragma mark - Continuing user activities
 
-- (BOOL)scene:(UIScene*)scene continueUserActivity:(NSUserActivity*)userActivity {
+- (void)scene:(UIScene*)scene continueUserActivity:(NSUserActivity*)userActivity {
   [self updateEnginesInScene:scene];
-  BOOL consumedByPlugin = NO;
+
+  // Track engines that had this event handled by a plugin.
+  NSMutableSet<FlutterEngine*>* enginesHandledByPlugin = [NSMutableSet set];
   for (FlutterEngine* engine in _engines.allObjects) {
-    BOOL result = [engine.sceneLifeCycleDelegate scene:scene continueUserActivity:userActivity];
-    if (result) {
-      consumedByPlugin = YES;
+    if ([engine.sceneLifeCycleDelegate scene:scene continueUserActivity:userActivity]) {
+      [enginesHandledByPlugin addObject:engine];
     }
   }
-  if (!consumedByPlugin) {
-    BOOL result =
-        [[self applicationLifeCycleDelegate] sceneFallbackContinueUserActivity:userActivity];
-    if (result) {
-      consumedByPlugin = YES;
+
+  // If no plugins handled this, give the application fallback a chance to handle it.
+  if (enginesHandledByPlugin.count == 0) {
+    if ([[self applicationLifeCycleDelegate] sceneFallbackContinueUserActivity:userActivity]) {
+      // If the application fallback handles it, don't do any deeplinking.
+      return;
     }
   }
-  return consumedByPlugin;
+
+  // For any engine that was not handled by a plugin, do deeplinking.
+  for (FlutterEngine* engine in _engines.allObjects) {
+    if ([enginesHandledByPlugin containsObject:engine]) {
+      continue;
+    }
+    [self handleDeeplink:userActivity.webpageURL flutterEngine:engine relayToSystemIfUnhandled:YES];
+  }
 }
 
 #pragma mark - Saving the state of the scene
@@ -285,29 +316,74 @@ FLUTTER_ASSERT_ARC
 
 #pragma mark - Performing tasks
 
-- (BOOL)windowScene:(UIWindowScene*)windowScene
+- (void)windowScene:(UIWindowScene*)windowScene
     performActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
                completionHandler:(void (^)(BOOL succeeded))completionHandler {
   [self updateEnginesInScene:windowScene];
 
-  BOOL consumedByPlugin = NO;
+  BOOL handledByPlugin = NO;
   for (FlutterEngine* engine in _engines.allObjects) {
     BOOL result = [engine.sceneLifeCycleDelegate windowScene:windowScene
                                 performActionForShortcutItem:shortcutItem
                                            completionHandler:completionHandler];
     if (result) {
-      consumedByPlugin = YES;
+      handledByPlugin = YES;
     }
   }
-  if (!consumedByPlugin) {
-    BOOL result = [[self applicationLifeCycleDelegate]
+  if (!handledByPlugin) {
+    [[self applicationLifeCycleDelegate]
         sceneFallbackPerformActionForShortcutItem:shortcutItem
                                 completionHandler:completionHandler];
-    if (result) {
-      consumedByPlugin = YES;
+  }
+}
+
+#pragma mark - Helpers
+
+- (void)handleDeeplinkingForEngine:(FlutterEngine*)engine
+                           options:(UISceneConnectionOptions*)connectionOptions {
+  //  If your app has opted into Scenes, and your app is not running, the system delivers the
+  //  universal link to the scene(_:willConnectTo:options:) delegate method after launch, and to
+  //  scene(_:continue:) when the universal link is tapped while your app is running or suspended in
+  //  memory.
+  for (NSUserActivity* userActivity in connectionOptions.userActivities) {
+    if ([self handleDeeplink:userActivity.webpageURL
+                       flutterEngine:engine
+            relayToSystemIfUnhandled:YES]) {
+      return;
     }
   }
-  return consumedByPlugin;
+
+  //  If your app has opted into Scenes, and your app isn’t running, the system delivers the URL to
+  //  the scene:willConnectToSession:options: delegate method after launch, and to
+  //  scene:openURLContexts: when your app opens a URL while running or suspended in memory.
+  for (UIOpenURLContext* urlContext in connectionOptions.URLContexts) {
+    if ([self handleDeeplink:urlContext.URL flutterEngine:engine relayToSystemIfUnhandled:YES]) {
+      return;
+    }
+  }
+}
+
+- (BOOL)handleDeeplink:(NSURL*)url
+               flutterEngine:(FlutterEngine*)engine
+    relayToSystemIfUnhandled:(BOOL)throwBack {
+  if (!url) {
+    return NO;
+  }
+  // Don't process the link if deep linking is disabled.
+  if (!FlutterSharedApplication.isFlutterDeepLinkingEnabled) {
+    return NO;
+  }
+  // if deep linking is enabled, send it to the framework
+  [engine sendDeepLinkToFramework:url
+                completionHandler:^(BOOL success) {
+                  if (!success && throwBack) {
+                    // throw it back to iOS
+                    [FlutterSharedApplication.application openURL:url
+                                                          options:@{}
+                                                completionHandler:nil];
+                  }
+                }];
+  return YES;
 }
 
 + (FlutterPluginSceneLifeCycleDelegate*)fromScene:(UIScene*)scene {
@@ -361,19 +437,19 @@ FLUTTER_ASSERT_ARC
 - (BOOL)scene:(UIScene*)scene
     willConnectToSession:(UISceneSession*)session
                  options:(UISceneConnectionOptions*)connectionOptions {
-  BOOL consumedByPlugin = NO;
+  BOOL handledByPlugin = NO;
   for (NSObject<FlutterSceneLifeCycleDelegate>* delegate in _delegates.allObjects) {
     if ([delegate respondsToSelector:_cmd]) {
       // If this event has already been consumed by a plugin, send the event with nil options.
       // Only allow one plugin to process the connection options.
       if ([delegate scene:scene
               willConnectToSession:session
-                           options:(consumedByPlugin ? nil : connectionOptions)]) {
-        consumedByPlugin = YES;
+                           options:(handledByPlugin ? nil : connectionOptions)]) {
+        handledByPlugin = YES;
       }
     }
   }
-  return consumedByPlugin;
+  return handledByPlugin;
 }
 
 - (void)sceneDidDisconnect:(UIScene*)scene {

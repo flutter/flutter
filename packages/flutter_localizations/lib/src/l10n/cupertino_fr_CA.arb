@@ -1,4 +1,10 @@
 {
+  "expansionTileExpandedHint": "toucher deux fois pour réduire",
+  "collapsedHint": "Développé",
+  "expandedHint": "Réduit",
+  "expansionTileCollapsedTapHint": "Développer le panneau pour plus de détails",
+  "expansionTileExpandedTapHint": "Réduire",
+  "expansionTileCollapsedHint": "toucher deux fois pour développer",
   "cancelButtonLabel": "Annuler",
   "backButtonLabel": "Retour",
   "clearButtonLabel": "Effacer",

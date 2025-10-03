@@ -33,6 +33,8 @@ extern NSString* const kRestorationStateAppModificationKey;
 
 @property(class, nonatomic, readonly) int64_t lastAppModificationTime;
 
++ (BOOL)isFlutterDeepLinkingEnabled;
+
 @end
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERSHAREDAPPLICATION_H_
