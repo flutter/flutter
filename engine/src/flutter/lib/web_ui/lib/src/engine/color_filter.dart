@@ -111,17 +111,17 @@ class EngineColorFilter implements LayerImageFilter, ui.ColorFilter {
   /// Creates a color filter that applies the given saturation to the RGB
   /// channels.
   factory EngineColorFilter.saturation(double saturation) {
-    const double r = 0.2126;
-    const double g = 0.7152;
-    const double b = 0.0722;
+    const double rLuminance = 0.2126;
+    const double gLuminance = 0.7152;
+    const double bLuminance = 0.0722;
     final double invSat = 1 - saturation;
 
     return EngineColorFilter.matrix(<double>[
       // dart format off
-      invSat * r + saturation, invSat * g,              invSat * b,              0, 0,
-      invSat * r,              invSat * g + saturation, invSat * b,              0, 0,
-      invSat * r,              invSat * g,              invSat * b + saturation, 0, 0,
-      0,                       0,                       0,                       1, 0,
+      invSat * rLuminance + saturation, invSat * gLuminance,              invSat * bLuminance,              0, 0,
+      invSat * rLuminance,              invSat * gLuminance + saturation, invSat * bLuminance,              0, 0,
+      invSat * rLuminance,              invSat * gLuminance,              invSat * bLuminance + saturation, 0, 0,
+      0,                                0,                                0,                                1, 0,
       // dart format on
     ]);
   }
