@@ -45,10 +45,10 @@
   "menuDismissLabel": "Ruaig an roghchlár",
   "cancelButtonLabel": "Cealaigh",
   "backButtonLabel": "Siar",
-  "expansionTileExpandedHint": "double tap to collapse",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "tapáil faoi dhó chun laghdú",
+  "expansionTileCollapsedHint": "tapáil faoi dhó chun leathnú",
+  "expansionTileExpandedTapHint": "Laghdaigh",
+  "expansionTileCollapsedTapHint": "Leathnaigh chun tuilleadh sonraí a fháil",
+  "expandedHint": "Laghdaithe",
+  "collapsedHint": "Leathnaithe"
 }
