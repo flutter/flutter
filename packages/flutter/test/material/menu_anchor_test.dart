@@ -5096,6 +5096,23 @@ void main() {
 
     expect(tester.getRect(findMenuPanels()).width, 800.0 - reservedPadding.horizontal);
   });
+
+  testWidgets('CheckboxMenuButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: CheckboxMenuButton(
+              value: true,
+              onChanged: (bool? value) {},
+              child: const Text('X'),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CheckboxMenuButton)), Size.zero);
+  });
 }
 
 List<Widget> createTestMenus({
