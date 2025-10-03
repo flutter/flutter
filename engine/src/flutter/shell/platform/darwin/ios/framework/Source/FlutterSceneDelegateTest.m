@@ -212,6 +212,43 @@
   OCMVerify(times(1), [mockLifecycleDelegate scene:scene continueUserActivity:userActivity]);
 }
 
+- (void)testStateRestorationActivityForScene {
+  [self setupMockApplication];
+
+  FlutterSceneDelegate* sceneDelegate = [[FlutterSceneDelegate alloc] init];
+  id mockSceneDelegate = OCMPartialMock(sceneDelegate);
+
+  FlutterPluginSceneLifeCycleDelegate* mockLifecycleDelegate =
+      OCMClassMock([FlutterPluginSceneLifeCycleDelegate class]);
+  OCMStub([mockSceneDelegate sceneLifeCycleDelegate]).andReturn(mockLifecycleDelegate);
+
+  id scene = OCMClassMock([UIWindowScene class]);
+
+  [((FlutterSceneDelegate*)mockSceneDelegate) stateRestorationActivityForScene:scene];
+
+  OCMVerify(times(1), [mockLifecycleDelegate stateRestorationActivityForScene:scene]);
+}
+
+- (void)testSceneRestoreInteractionStateWithUserActivity {
+  [self setupMockApplication];
+
+  FlutterSceneDelegate* sceneDelegate = [[FlutterSceneDelegate alloc] init];
+  id mockSceneDelegate = OCMPartialMock(sceneDelegate);
+
+  FlutterPluginSceneLifeCycleDelegate* mockLifecycleDelegate =
+      OCMClassMock([FlutterPluginSceneLifeCycleDelegate class]);
+  OCMStub([mockSceneDelegate sceneLifeCycleDelegate]).andReturn(mockLifecycleDelegate);
+
+  id scene = OCMClassMock([UIWindowScene class]);
+  id userActivity = OCMClassMock([NSUserActivity class]);
+
+  [((FlutterSceneDelegate*)mockSceneDelegate) scene:scene
+            restoreInteractionStateWithUserActivity:userActivity];
+
+  OCMVerify(times(1), [mockLifecycleDelegate scene:scene
+                          restoreInteractionStateWithUserActivity:userActivity]);
+}
+
 - (void)testWindowScenePerformActionForShortcutItem {
   [self setupMockApplication];
 
