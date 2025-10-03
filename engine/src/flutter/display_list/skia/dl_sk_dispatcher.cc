@@ -7,6 +7,7 @@
 #include "flutter/display_list/skia/dl_sk_dispatcher.h"
 
 #include "flutter/display_list/dl_blend_mode.h"
+#include "flutter/display_list/dl_canvas.h"
 #include "flutter/display_list/effects/image_filters/dl_blur_image_filter.h"
 #include "flutter/display_list/geometry/dl_geometry_conversions.h"
 #include "flutter/display_list/skia/dl_sk_conversions.h"
@@ -167,7 +168,7 @@ void DlSkCanvasDispatcher::drawPaint() {
 void DlSkCanvasDispatcher::drawColor(DlColor color, DlBlendMode mode) {
   // SkCanvas::drawColor(SkColor) does the following conversion anyway
   // We do it here manually to increase precision on applying opacity
-  SkColor4f color4f = SkColor4f::FromColor(ToSk(color));
+  SkColor4f color4f = ToSkColor4f(color);
   color4f.fA *= opacity();
   canvas_->drawColor(color4f, ToSk(mode));
 }
@@ -314,17 +315,12 @@ void DlSkCanvasDispatcher::drawDisplayList(
   // Restore canvas state to what it was before dispatching.
   canvas_->restoreToCount(restore_count);
 }
-void DlSkCanvasDispatcher::drawTextBlob(const sk_sp<SkTextBlob> blob,
-                                        DlScalar x,
-                                        DlScalar y) {
+void DlSkCanvasDispatcher::drawText(const std::shared_ptr<DlText>& text,
+                                    DlScalar x,
+                                    DlScalar y) {
+  auto blob = text->GetTextBlob();
+  FML_CHECK(blob) << "Impeller DlText cannot be drawn to a Skia canvas.";
   canvas_->drawTextBlob(blob, x, y, paint());
-}
-
-void DlSkCanvasDispatcher::drawTextFrame(
-    const std::shared_ptr<impeller::TextFrame>& text_frame,
-    DlScalar x,
-    DlScalar y) {
-  FML_CHECK(false);
 }
 
 void DlSkCanvasDispatcher::DrawShadow(SkCanvas* canvas,
@@ -341,8 +337,9 @@ void DlSkCanvasDispatcher::DrawShadow(SkCanvas* canvas,
                        : SkShadowFlags::kNone_ShadowFlag;
   flags |= SkShadowFlags::kDirectionalLight_ShadowFlag;
   SkColor in_ambient =
-      SkColorSetA(ToSk(color), kAmbientAlpha * color.getAlpha());
-  SkColor in_spot = SkColorSetA(ToSk(color), kSpotAlpha * color.getAlpha());
+      SkColorSetA(ToSkColor(color), kAmbientAlpha * color.getAlpha());
+  SkColor in_spot =
+      SkColorSetA(ToSkColor(color), kSpotAlpha * color.getAlpha());
   SkColor ambient_color, spot_color;
   SkShadowUtils::ComputeTonalColors(in_ambient, in_spot, &ambient_color,
                                     &spot_color);

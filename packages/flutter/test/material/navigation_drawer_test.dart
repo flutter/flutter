@@ -123,16 +123,14 @@ void main() {
     await tester.tap(find.text('AC'));
     await tester.pump();
 
-    // When no background color is set, only the non-visible indicator Ink is expected.
-    expect(findDestinationInk('AC'), findsOne);
+    expect(findDestinationInk('AC'), findsNothing);
 
     // Destination with a custom background color.
     await tester.tap(find.byIcon(Icons.access_alarm));
     await tester.pump();
 
     // A Material is added with the custom color.
-    expect(findDestinationInk('Alarm'), findsNWidgets(2));
-    // The drawer destination Ink is the first one, the second is the indicator's one.
+    expect(findDestinationInk('Alarm'), findsOne);
     final BoxDecoration destinationDecoration =
         tester.firstWidget<Ink>(findDestinationInk('Alarm')).decoration! as BoxDecoration;
     expect(destinationDecoration.color, color);
@@ -488,6 +486,46 @@ void main() {
 
     await tester.pumpAndSettle();
   });
+
+  testWidgets('NavigationDrawer can display header and footer', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    widgetSetup(tester, 3000, viewHeight: 3000);
+    final Widget widget = _buildWidget(
+      scaffoldKey,
+      NavigationDrawer(
+        header: const DrawerHeader(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              spacing: 8,
+              children: <Widget>[FlutterLogo(), Text('Header')],
+            ),
+          ),
+        ),
+        footer: ListTile(
+          leading: const FlutterLogo(),
+          title: const Text('Footer'),
+          trailing: const Icon(Icons.settings),
+          onTap: () {},
+        ),
+        children: <Widget>[
+          for (int i = 0; i < 10; i++)
+            NavigationDrawerDestination(icon: const Icon(Icons.home), label: Text('Item $i')),
+        ],
+      ),
+    );
+
+    await tester.pumpWidget(widget);
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.byType(DrawerHeader), findsOneWidget);
+    expect(find.text('Header'), findsOneWidget);
+    expect(find.byType(FlutterLogo), findsNWidgets(2));
+    expect(find.byType(ListTile), findsOneWidget);
+    expect(find.text('Footer'), findsOneWidget);
+    expect(find.byIcon(Icons.settings), findsOneWidget);
+  });
 }
 
 Widget _buildWidget(GlobalKey<ScaffoldState> scaffoldKey, Widget child, {bool? useMaterial3}) {
@@ -511,8 +549,8 @@ InkWell? _getInkWell(WidgetTester tester) {
 
 ShapeDecoration? _getIndicatorDecoration(WidgetTester tester) {
   return tester
-          .firstWidget<Ink>(
-            find.descendant(of: find.byType(FadeTransition), matching: find.byType(Ink)),
+          .firstWidget<Container>(
+            find.descendant(of: find.byType(NavigationIndicator), matching: find.byType(Container)),
           )
           .decoration
       as ShapeDecoration?;

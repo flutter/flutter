@@ -26,6 +26,8 @@
   <string>Copyright 2013 The Flutter Authors. All rights reserved.</string>
   <key>FlutterEngine</key>
   <string>{revision}</string>
+  <key>BuildMode</key>
+  <string>{build_mode}</string>
   <key>ClangVersion</key>
   <string>{clang_version}</string>
 </dict>

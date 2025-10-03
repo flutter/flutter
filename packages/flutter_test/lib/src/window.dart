@@ -32,6 +32,7 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
     this.reduceMotion = false,
     this.highContrast = false,
     this.onOffSwitchLabels = false,
+    this.supportsAnnounce = false,
   });
 
   /// An instance of [AccessibilityFeatures] where all the features are enabled.
@@ -43,6 +44,7 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
     reduceMotion: true,
     highContrast: true,
     onOffSwitchLabels: true,
+    supportsAnnounce: true,
   );
 
   @override
@@ -67,6 +69,9 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
   final bool onOffSwitchLabels;
 
   @override
+  final bool supportsAnnounce;
+
+  @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
@@ -78,7 +83,8 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
         other.boldText == boldText &&
         other.reduceMotion == reduceMotion &&
         other.highContrast == highContrast &&
-        other.onOffSwitchLabels == onOffSwitchLabels;
+        other.onOffSwitchLabels == onOffSwitchLabels &&
+        other.supportsAnnounce == supportsAnnounce;
   }
 
   @override
@@ -91,6 +97,7 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
       reduceMotion,
       highContrast,
       onOffSwitchLabels,
+      supportsAnnounce,
     );
   }
 
@@ -167,6 +174,9 @@ class TestPlatformDispatcher implements PlatformDispatcher {
         ? _testViews[_platformDispatcher.implicitView!.viewId]!
         : null;
   }
+
+  @override
+  int? get engineId => 1;
 
   final Map<int, TestFlutterView> _testViews = <int, TestFlutterView>{};
   final Map<int, TestDisplay> _testDisplays = <int, TestDisplay>{};
@@ -473,6 +483,14 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   @override
   bool get semanticsEnabled => _semanticsEnabledTestValue ?? _platformDispatcher.semanticsEnabled;
   bool? _semanticsEnabledTestValue;
+
+  /// The application locale set during the test.
+  Locale? applicationLocale;
+
+  @override
+  void setApplicationLocale(Locale locale) {
+    applicationLocale = locale;
+  }
 
   /// Hides the real semantics enabled and reports the given
   /// [semanticsEnabledTestValue] instead.

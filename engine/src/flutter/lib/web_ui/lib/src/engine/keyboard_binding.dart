@@ -234,17 +234,14 @@ class KeyboardConverter {
   final locale_keymap.LocaleKeymap _mapping;
 
   static locale_keymap.LocaleKeymap _mappingFromPlatform(ui_web.OperatingSystem platform) {
-    switch (platform) {
-      case ui_web.OperatingSystem.iOs:
-      case ui_web.OperatingSystem.macOs:
-        return locale_keymap.LocaleKeymap.darwin();
-      case ui_web.OperatingSystem.windows:
-        return locale_keymap.LocaleKeymap.win();
-      case ui_web.OperatingSystem.android:
-      case ui_web.OperatingSystem.linux:
-      case ui_web.OperatingSystem.unknown:
-        return locale_keymap.LocaleKeymap.linux();
-    }
+    return switch (platform) {
+      ui_web.OperatingSystem.iOs ||
+      ui_web.OperatingSystem.macOs => locale_keymap.LocaleKeymap.darwin(),
+      ui_web.OperatingSystem.windows => locale_keymap.LocaleKeymap.win(),
+      ui_web.OperatingSystem.android ||
+      ui_web.OperatingSystem.linux ||
+      ui_web.OperatingSystem.unknown => locale_keymap.LocaleKeymap.linux(),
+    };
   }
 
   // The `performDispatchKeyData` wrapped with tracking logic.

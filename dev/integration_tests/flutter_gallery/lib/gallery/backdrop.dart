@@ -86,11 +86,15 @@ class _CrossFadeTransition extends AnimatedWidget {
   Widget build(BuildContext context) {
     final Animation<double> progress = listenable as Animation<double>;
 
-    final double opacity1 =
-        CurvedAnimation(parent: ReverseAnimation(progress), curve: const Interval(0.5, 1.0)).value;
+    final double opacity1 = CurvedAnimation(
+      parent: ReverseAnimation(progress),
+      curve: const Interval(0.5, 1.0),
+    ).value;
 
-    final double opacity2 =
-        CurvedAnimation(parent: progress, curve: const Interval(0.5, 1.0)).value;
+    final double opacity2 = CurvedAnimation(
+      parent: progress,
+      curve: const Interval(0.5, 1.0),
+    ).value;
 
     return Stack(
       alignment: alignment,

@@ -38,10 +38,9 @@ Directory createResolvedTempDirectorySync(String prefix) {
 }
 
 void writeFile(String path, String content, {bool writeFutureModifiedDate = false}) {
-  final File file =
-      fileSystem.file(path)
-        ..createSync(recursive: true)
-        ..writeAsStringSync(content, flush: true);
+  final File file = fileSystem.file(path)
+    ..createSync(recursive: true)
+    ..writeAsStringSync(content, flush: true);
   // Some integration tests on Windows to not see this file as being modified
   // recently enough for the hot reload to pick this change up unless the
   // modified time is written in the future.
@@ -57,20 +56,16 @@ void writeBytesFile(String path, List<int> content) {
 }
 
 Future<void> getPackages(String folder) async {
-  final List<String> command = <String>[
-    fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter'),
-    'pub',
-    'get',
-  ];
+  final command = <String>[fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter'), 'pub', 'get'];
   final ProcessResult result = await processManager.run(command, workingDirectory: folder);
   if (result.exitCode != 0) {
     throw Exception('flutter pub get failed: ${result.stderr}\n${result.stdout}');
   }
 }
 
-const String kLocalEngineEnvironment = 'FLUTTER_LOCAL_ENGINE';
-const String kLocalEngineHostEnvironment = 'FLUTTER_LOCAL_ENGINE_HOST';
-const String kLocalEngineLocation = 'FLUTTER_LOCAL_ENGINE_SRC_PATH';
+const kLocalEngineEnvironment = 'FLUTTER_LOCAL_ENGINE';
+const kLocalEngineHostEnvironment = 'FLUTTER_LOCAL_ENGINE_HOST';
+const kLocalEngineLocation = 'FLUTTER_LOCAL_ENGINE_SRC_PATH';
 
 List<String> getLocalEngineArguments() {
   return <String>[
@@ -90,7 +85,7 @@ Future<void> pollForServiceExtensionValue<T>({
   required Matcher matches,
   String valueKey = 'value',
 }) async {
-  for (int i = 0; i < 10; i++) {
+  for (var i = 0; i < 10; i++) {
     final Response response = await testDriver.callServiceExtension(extension);
     if (response.json?[valueKey] as T == continuePollingValue) {
       await Future<void>.delayed(const Duration(seconds: 1));
@@ -106,7 +101,7 @@ Future<void> pollForServiceExtensionValue<T>({
 }
 
 abstract final class AppleTestUtils {
-  static const List<String> requiredSymbols = <String>[
+  static const requiredSymbols = <String>[
     '_kDartIsolateSnapshotData',
     '_kDartIsolateSnapshotInstructions',
     '_kDartVmSnapshotData',
@@ -160,12 +155,12 @@ class ProcessResultMatcher extends Matcher {
 
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
-    final ProcessResult result = item as ProcessResult;
-    bool foundStdout = true;
-    bool foundStderr = true;
+    final result = item as ProcessResult;
+    var foundStdout = true;
+    var foundStderr = true;
 
-    final String stdout = result.stdout as String;
-    final String stderr = result.stderr as String;
+    final stdout = result.stdout as String;
+    final stderr = result.stderr as String;
     if (stdoutPattern != null) {
       foundStdout = stdout.contains(stdoutPattern!);
       matchState['stdout'] = stdout;
@@ -191,7 +186,7 @@ class ProcessResultMatcher extends Matcher {
     Map<dynamic, dynamic> matchState,
     bool verbose,
   ) {
-    final ProcessResult result = item! as ProcessResult;
+    final result = item! as ProcessResult;
 
     if (result.exitCode != exitCode) {
       mismatchDescription.add('Actual exitCode was ${result.exitCode}\n');

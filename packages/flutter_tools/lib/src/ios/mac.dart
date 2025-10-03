@@ -17,8 +17,8 @@ import '../base/project_migrator.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../darwin/darwin.dart';
 import '../device.dart';
-import '../features.dart';
 import '../flutter_manifest.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
@@ -48,15 +48,16 @@ import 'xcode_build_settings.dart';
 import 'xcodeproj.dart';
 import 'xcresult.dart';
 
-const String kConcurrentRunFailureMessage1 = 'database is locked';
-const String kConcurrentRunFailureMessage2 = 'there are two concurrent builds running';
+const kConcurrentRunFailureMessage1 = 'database is locked';
+const kConcurrentRunFailureMessage2 = 'there are two concurrent builds running';
 
 /// User message when missing platform required to use Xcode.
 ///
 /// Starting with Xcode 15, the simulator is no longer downloaded with Xcode
 /// and must be downloaded and installed separately.
 @visibleForTesting
-String missingPlatformInstructions(String simulatorVersion) => '''
+String missingPlatformInstructions(String simulatorVersion) =>
+    '''
 ════════════════════════════════════════════════════════════════════════════════
 $simulatorVersion is not installed. To download and install the platform, open
 Xcode, select Xcode > Settings > Components, and click the GET button for the
@@ -145,7 +146,7 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   final FlutterProject project = FlutterProject.current();
 
-  final List<ProjectMigrator> migrators = <ProjectMigrator>[
+  final migrators = <ProjectMigrator>[
     RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.analytics),
     XcodeBuildSystemMigration(app.project, globals.logger),
     ProjectBaseConfigurationMigration(app.project, globals.logger),
@@ -159,13 +160,12 @@ Future<XcodeBuildResult> buildXcodeProject({
     UIApplicationMainDeprecationMigration(app.project, globals.logger),
     SwiftPackageManagerIntegrationMigration(
       app.project,
-      SupportedPlatform.ios,
+      FlutterDarwinPlatform.ios,
       buildInfo,
       xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
       logger: globals.logger,
       fileSystem: globals.fs,
       plistParser: globals.plistParser,
-      features: featureFlags,
     ),
     SwiftPackageManagerGitignoreMigration(project, globals.logger),
     MetalAPIValidationMigrator.ios(app.project, globals.logger),
@@ -179,7 +179,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     ),
   ];
 
-  final ProjectMigration migration = ProjectMigration(migrators);
+  final migration = ProjectMigration(migrators);
   await migration.run();
 
   if (!_checkXcodeVersion()) {
@@ -291,13 +291,12 @@ Future<XcodeBuildResult> buildXcodeProject({
     project: project,
     targetOverride: targetOverride,
     buildInfo: buildInfo,
-    featureFlags: featureFlags,
   );
   if (app.project.usesSwiftPackageManager) {
     final String? iosDeploymentTarget = buildSettings['IPHONEOS_DEPLOYMENT_TARGET'];
     if (iosDeploymentTarget != null) {
       SwiftPackageManager.updateMinimumDeployment(
-        platform: SupportedPlatform.ios,
+        platform: FlutterDarwinPlatform.ios,
         project: project.ios,
         deploymentTarget: iosDeploymentTarget,
       );
@@ -308,7 +307,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     return XcodeBuildResult(success: true);
   }
 
-  final List<String> buildCommands = <String>[
+  final buildCommands = <String>[
     ...globals.xcode!.xcrunCommand(),
     'xcodebuild',
     '-configuration',
@@ -367,9 +366,9 @@ Future<XcodeBuildResult> buildXcodeProject({
     }
   } else {
     if (environmentType == EnvironmentType.physical) {
-      buildCommands.addAll(<String>['-sdk', 'iphoneos']);
+      buildCommands.addAll(<String>['-sdk', XcodeSdk.IPhoneOS.platformName]);
     } else {
-      buildCommands.addAll(<String>['-sdk', 'iphonesimulator']);
+      buildCommands.addAll(<String>['-sdk', XcodeSdk.IPhoneSimulator.platformName]);
     }
   }
 
@@ -377,9 +376,9 @@ Future<XcodeBuildResult> buildXcodeProject({
   if (deviceID != null) {
     buildCommands.add('id=$deviceID');
   } else if (environmentType == EnvironmentType.physical) {
-    buildCommands.add('generic/platform=iOS');
+    buildCommands.add(XcodeSdk.IPhoneOS.genericPlatform);
   } else {
-    buildCommands.add('generic/platform=iOS Simulator');
+    buildCommands.add(XcodeSdk.IPhoneSimulator.genericPlatform);
   }
 
   if (activeArch != null) {
@@ -388,7 +387,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     if (!hasWatchCompanion) {
       // ONLY_ACTIVE_ARCH specifies whether the product includes only code for
       // the native architecture.
-      final bool onlyActiveArch = activeArch == getCurrentDarwinArch();
+      final onlyActiveArch = activeArch == getCurrentDarwinArch();
 
       buildCommands.add('ONLY_ACTIVE_ARCH=${onlyActiveArch ? 'YES' : 'NO'}');
       buildCommands.add('ARCHS=${activeArch.name}');
@@ -419,7 +418,9 @@ Future<XcodeBuildResult> buildXcodeProject({
 
       Future<void> listenToScriptOutputLine() async {
         final List<String> lines = await scriptOutputPipeFile!.readAsLines();
-        for (final String line in lines) {
+        var inWarningBlock = false;
+        var inNoteBlock = false;
+        for (final line in lines) {
           if (line == 'done' || line == 'all done') {
             buildSubStatus?.stop();
             buildSubStatus = null;
@@ -427,6 +428,25 @@ Future<XcodeBuildResult> buildXcodeProject({
               return;
             }
           } else {
+            if (!globals.logger.isVerbose) {
+              if (line.contains('error:')) {
+                globals.printError(line);
+              } else if (line.contains('warning:')) {
+                globals.printWarning(line);
+                inWarningBlock = true;
+              } else if (inNoteBlock) {
+                globals.printWarning(line);
+                inNoteBlock = false;
+              } else if (inWarningBlock) {
+                if (line.startsWith(RegExp(r'\s+?note[:]'))) {
+                  // Xcode doesn't echo this, so we don't.
+                  inNoteBlock = true;
+                }
+                inWarningBlock = false;
+              }
+              continue;
+            }
+
             initialBuildStatus?.cancel();
             initialBuildStatus = null;
             buildSubStatus = globals.logger.startProgress(
@@ -472,7 +492,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       ]);
     }
 
-    final Stopwatch sw = Stopwatch()..start();
+    final sw = Stopwatch()..start();
     initialBuildStatus = globals.logger.startProgress('Running Xcode build...');
 
     buildResult = await _runBuildWithRetries(buildCommands, app, resultBundleDirectory);
@@ -505,13 +525,11 @@ Future<XcodeBuildResult> buildXcodeProject({
         );
       } else {
         // Discard unwanted errors. See: https://github.com/flutter/flutter/issues/95354
-        final XCResultIssueDiscarder warningDiscarder = XCResultIssueDiscarder(
-          typeMatcher: XCResultIssueType.warning,
-        );
-        final XCResultIssueDiscarder dartBuildErrorDiscarder = XCResultIssueDiscarder(
+        final warningDiscarder = XCResultIssueDiscarder(typeMatcher: XCResultIssueType.warning);
+        final dartBuildErrorDiscarder = XCResultIssueDiscarder(
           messageMatcher: RegExp(r'Command PhaseScriptExecution failed with a nonzero exit code'),
         );
-        final XCResultGenerator xcResultGenerator = XCResultGenerator(
+        final xcResultGenerator = XCResultGenerator(
           resultPath: resultBundle.absolute.path,
           xcode: globals.xcode!,
           processUtils: globals.processUtils,
@@ -552,7 +570,10 @@ Future<XcodeBuildResult> buildXcodeProject({
       }
       if (hasWatchCompanion && environmentType == EnvironmentType.simulator) {
         globals.printTrace('Replacing iphoneos with iphonesimulator in TARGET_BUILD_DIR.');
-        targetBuildDir = targetBuildDir.replaceFirst('iphoneos', 'iphonesimulator');
+        targetBuildDir = targetBuildDir.replaceFirst(
+          XcodeSdk.IPhoneOS.platformName,
+          XcodeSdk.IPhoneSimulator.platformName,
+        );
       }
       final String? appBundle = buildSettings['WRAPPER_NAME'];
       final String expectedOutputDirectory = globals.fs.path.join(targetBuildDir, appBundle);
@@ -624,8 +645,8 @@ Future<RunResult?> _runBuildWithRetries(
   BuildableIOSApp app,
   Directory resultBundleDirectory,
 ) async {
-  int buildRetryDelaySeconds = 1;
-  int remainingTries = 8;
+  var buildRetryDelaySeconds = 1;
+  var remainingTries = 8;
 
   RunResult? buildResult;
   while (remainingTries > 0) {
@@ -676,17 +697,17 @@ Future<void> diagnoseXcodeBuildFailure(
   required Analytics analytics,
   required Logger logger,
   required FileSystem fileSystem,
-  required SupportedPlatform platform,
+  required FlutterDarwinPlatform platform,
   required FlutterProject project,
 }) async {
   final XcodeBuildExecution? xcodeBuildExecution = result.xcodeBuildExecution;
   if (xcodeBuildExecution != null &&
       xcodeBuildExecution.environmentType == EnvironmentType.physical &&
       (result.stdout?.toUpperCase().contains('BITCODE') ?? false)) {
-    const String label = 'xcode-bitcode-failure';
-    const String buildType = 'ios';
-    final String command = xcodeBuildExecution.buildCommands.toString();
-    final String settings = xcodeBuildExecution.buildSettings.toString();
+    const label = 'xcode-bitcode-failure';
+    const buildType = 'ios';
+    final command = xcodeBuildExecution.buildCommands.toString();
+    final settings = xcodeBuildExecution.buildSettings.toString();
 
     analytics.send(
       Event.flutterBuildInfo(
@@ -714,7 +735,7 @@ Future<void> diagnoseXcodeBuildFailure(
   }
 }
 
-/// xcodebuild <buildaction> parameter (see man xcodebuild for details).
+/// `xcodebuild <buildaction>` parameter (see `man xcodebuild` for details).
 ///
 /// `clean`, `test`, `analyze`, and `install` are not supported.
 enum XcodeBuildAction { build, archive }
@@ -768,8 +789,7 @@ class XcodeBuildExecution {
   final Map<String, String> buildSettings;
 }
 
-final String _xcodeRequirement =
-    'Xcode $xcodeRequiredVersion or greater is required to develop for iOS.';
+final _xcodeRequirement = 'Xcode $xcodeRequiredVersion or greater is required to develop for iOS.';
 
 bool _checkXcodeVersion() {
   if (!globals.platform.isMacOS) {
@@ -793,11 +813,11 @@ bool upgradePbxProjWithFlutterAssets(IosProject project, Logger logger) {
   assert(xcodeProjectFile.existsSync());
   final List<String> lines = xcodeProjectFile.readAsLinesSync();
 
-  final RegExp oldAssets = RegExp(r'\/\* (flutter_assets|app\.flx)');
-  final StringBuffer buffer = StringBuffer();
-  final Set<String> printedStatuses = <String>{};
+  final oldAssets = RegExp(r'\/\* (flutter_assets|app\.flx)');
+  final buffer = StringBuffer();
+  final printedStatuses = <String>{};
 
-  for (final String line in lines) {
+  for (final line in lines) {
     final Match? match = oldAssets.firstMatch(line);
     if (match != null) {
       if (printedStatuses.add(match.group(1)!)) {
@@ -819,14 +839,14 @@ _XCResultIssueHandlingResult _handleXCResultIssue({
   required Logger logger,
 }) {
   // Issue summary from xcresult.
-  final StringBuffer issueSummaryBuffer = StringBuffer();
+  final issueSummaryBuffer = StringBuffer();
   issueSummaryBuffer.write(issue.subType ?? 'Unknown');
   issueSummaryBuffer.write(' (Xcode): ');
   issueSummaryBuffer.writeln(issue.message ?? '');
   if (issue.location != null) {
     issueSummaryBuffer.writeln(issue.location);
   }
-  final String issueSummary = issueSummaryBuffer.toString();
+  final issueSummary = issueSummaryBuffer.toString();
 
   switch (issue.type) {
     case XCResultIssueType.error:
@@ -902,16 +922,16 @@ Future<bool> _handleIssues(
   XcodeBuildResult result,
   XcodeBuildExecution? xcodeBuildExecution, {
   required FlutterProject project,
-  required SupportedPlatform platform,
+  required FlutterDarwinPlatform platform,
   required Logger logger,
   required FileSystem fileSystem,
 }) async {
-  bool requiresProvisioningProfile = false;
-  bool hasProvisioningProfileIssue = false;
-  bool issueDetected = false;
+  var requiresProvisioningProfile = false;
+  var hasProvisioningProfileIssue = false;
+  var issueDetected = false;
   String? missingPlatform;
-  final List<String> duplicateModules = <String>[];
-  final List<String> missingModules = <String>[];
+  final duplicateModules = <String>[];
+  final missingModules = <String>[];
 
   final XCResult? xcResult = result.xcResult;
   if (xcResult != null && xcResult.parseSuccess) {
@@ -940,8 +960,7 @@ Future<bool> _handleIssues(
     globals.printTrace('XCResult parsing error: ${xcResult.parsingErrorMessage}');
   }
 
-  final XcodeBasedProject xcodeProject =
-      platform == SupportedPlatform.ios ? project.ios : project.macos;
+  final XcodeBasedProject xcodeProject = platform.xcodeProject(project);
 
   if (requiresProvisioningProfile) {
     logger.printError(noProvisioningProfileInstruction, emphasis: true);
@@ -978,15 +997,16 @@ Future<bool> _handleIssues(
         'to learn more about understanding Podlock dependency tree. \n\n'
         'You can also disable Swift Package Manager for the project by adding the '
         'following in the project\'s pubspec.yaml under the "flutter" section:\n'
-        '  "disable-swift-package-manager: true"\n',
+        '  config:'
+        '    enable-swift-package-manager: false\n',
       );
     }
   } else if (missingModules.isNotEmpty) {
     final bool usesCocoapods = xcodeProject.podfile.existsSync();
     final bool usesSwiftPackageManager = xcodeProject.usesSwiftPackageManager;
     if (usesCocoapods && !usesSwiftPackageManager) {
-      final List<String> swiftPackageOnlyPlugins = <String>[];
-      for (final String module in missingModules) {
+      final swiftPackageOnlyPlugins = <String>[];
+      for (final module in missingModules) {
         if (await _isPluginSwiftPackageOnly(
           platform: platform,
           project: project,
@@ -1010,20 +1030,19 @@ Future<bool> _handleIssues(
 
 /// Returns true if a Package.swift is found for the plugin and a podspec is not.
 Future<bool> _isPluginSwiftPackageOnly({
-  required SupportedPlatform platform,
+  required FlutterDarwinPlatform platform,
   required FlutterProject project,
   required String pluginName,
   required FileSystem fileSystem,
 }) async {
   final List<Plugin> plugins = await findPlugins(project);
-  final Plugin? matched =
-      plugins
-          .where(
-            (Plugin plugin) =>
-                plugin.name.toLowerCase() == pluginName.toLowerCase() &&
-                plugin.platforms[platform.name] != null,
-          )
-          .firstOrNull;
+  final Plugin? matched = plugins
+      .where(
+        (Plugin plugin) =>
+            plugin.name.toLowerCase() == pluginName.toLowerCase() &&
+            plugin.platforms[platform.name] != null,
+      )
+      .firstOrNull;
   if (matched == null) {
     return false;
   }
@@ -1091,7 +1110,7 @@ void _parseIssueInStdout(
 }
 
 String? _parseMissingPlatform(String message) {
-  final RegExp pattern = RegExp(
+  final pattern = RegExp(
     r'error:(.*?) is not installed\. To use with Xcode, first download and install the platform',
   );
   return pattern.firstMatch(message)?.group(1);
@@ -1099,7 +1118,7 @@ String? _parseMissingPlatform(String message) {
 
 String? _parseModuleRedefinition(String message) {
   // Example: "Redefinition of module 'plugin_1_name'"
-  final RegExp pattern = RegExp(r"Redefinition of module '(.*?)'");
+  final pattern = RegExp(r"Redefinition of module '(.*?)'");
   final RegExpMatch? match = pattern.firstMatch(message);
   if (match != null && match.groupCount > 0) {
     final String? version = match.group(1);
@@ -1111,7 +1130,7 @@ String? _parseModuleRedefinition(String message) {
 String? _parseDuplicateSymbols(String message) {
   // Example: "duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_SdtF' in:
   //             /Users/username/path/to/app/build/ios/Debug-iphonesimulator/plugin_1_name/plugin_1_name.framework/plugin_1_name[arm64][5](PluginNamePlugin.o)
-  final RegExp pattern = RegExp(r'duplicate symbol [\s|\S]*?\/(.*)\.o');
+  final pattern = RegExp(r'duplicate symbol [\s|\S]*?\/(.*)\.o');
   final RegExpMatch? match = pattern.firstMatch(message);
   if (match != null && match.groupCount > 0) {
     final String? version = match.group(1);
@@ -1125,7 +1144,7 @@ String? _parseDuplicateSymbols(String message) {
 
 String? _parseMissingModule(String message) {
   // Example: "Module 'plugin_1_name' not found"
-  final RegExp pattern = RegExp(r"Module '(.*?)' not found");
+  final pattern = RegExp(r"Module '(.*?)' not found");
   final RegExpMatch? match = pattern.firstMatch(message);
   if (match != null && match.groupCount > 0) {
     final String? version = match.group(1);
@@ -1161,5 +1180,5 @@ class _XCResultIssueHandlingResult {
   final String? missingModule;
 }
 
-const String _kResultBundlePath = 'temporary_xcresult_bundle';
-const String _kResultBundleVersion = '3';
+const _kResultBundlePath = 'temporary_xcresult_bundle';
+const _kResultBundleVersion = '3';

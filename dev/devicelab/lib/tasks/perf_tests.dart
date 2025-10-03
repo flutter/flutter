@@ -8,6 +8,7 @@ import 'dart:ffi' show Abi;
 import 'dart:io';
 import 'dart:math' as math;
 
+import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:xml/xml.dart';
@@ -1001,6 +1002,8 @@ class StartupTest {
             );
             final String buildRoot = path.join(testDirectory, 'build');
             applicationBinaryPath = _findDarwinAppInBuildDirectory(buildRoot);
+          case DeviceOperatingSystem.webServer:
+            break;
           case DeviceOperatingSystem.windows:
             await flutter(
               'build',
@@ -1152,6 +1155,7 @@ class DevtoolsStartupTest {
         case DeviceOperatingSystem.fuchsia:
         case DeviceOperatingSystem.linux:
         case DeviceOperatingSystem.macos:
+        case DeviceOperatingSystem.webServer:
         case DeviceOperatingSystem.windows:
           break;
       }
@@ -1492,6 +1496,7 @@ class PerfTest {
         case DeviceOperatingSystem.fuchsia:
         case DeviceOperatingSystem.linux:
         case DeviceOperatingSystem.macos:
+        case DeviceOperatingSystem.webServer:
         case DeviceOperatingSystem.windows:
           recordGPU = false;
       }
@@ -1753,6 +1758,96 @@ class CompileTest {
     });
   }
 
+  Future<List<double>> getMetricsFromXCResults(String xcResultsBundleName) async {
+    return inDirectory<List<double>>(testDirectory, () async {
+      List<dynamic> resultsJson = <dynamic>[];
+
+      // First, grab the id from the info.plist.
+      final ProcessResult plistIDResult = await Process.run(
+        workingDirectory: testDirectory,
+        'plutil',
+        <String>['-extract', 'rootId.hash', 'raw', '-o', '-', '$xcResultsBundleName/Info.plist'],
+      );
+
+      final String plistID = plistIDResult.stdout.toString().trim();
+
+      // Next, get the ActionsInvocationRecord and Extract the testsRef ID
+      String testRefID = '';
+      await Process.run(workingDirectory: testDirectory, 'xcrun', <String>[
+        'xcresulttool',
+        'get',
+        '--path',
+        xcResultsBundleName,
+        '--id',
+        plistID,
+        '--format',
+        'json',
+        '--legacy',
+      ]).then((ProcessResult result) {
+        final dynamic actionsInvocationRecordJSON = json.decode(result.stdout.toString());
+        print(result.stdout);
+
+        testRefID =
+            // ignore: avoid_dynamic_calls
+            actionsInvocationRecordJSON['actions']['_values'][0]['actionResult']['testsRef']['id']['_value']
+                .toString();
+      });
+
+      // Next, grab the ActionTestSummary using our testRefID.
+      String actionTestSummaryID = '';
+      await Process.run(workingDirectory: testDirectory, 'xcrun', <String>[
+        'xcresulttool',
+        'get',
+        '--path',
+        xcResultsBundleName,
+        '--id',
+        testRefID,
+        '--format',
+        'json',
+        '--legacy',
+      ]).then((ProcessResult result) {
+        final dynamic actionTestSummaryJSON = json.decode(result.stdout.toString());
+
+        actionTestSummaryID =
+            // ignore: avoid_dynamic_calls
+            actionTestSummaryJSON['summaries']['_values'][0]['testableSummaries']['_values'][0]['tests']['_values'][0]['subtests']['_values'][0]['subtests']['_values'][0]['subtests']['_values'][0]['summaryRef']['id']['_value']
+                .toString();
+      });
+
+      dynamic resultMetricsJSON = '';
+
+      // Finally, grab the metrics.
+      await Process.run(workingDirectory: testDirectory, 'xcrun', <String>[
+        'xcresulttool',
+        'get',
+        '--path',
+        xcResultsBundleName,
+        '--id',
+        actionTestSummaryID,
+        '--format',
+        'json',
+        '--legacy',
+      ]).then((ProcessResult result) {
+        resultMetricsJSON = json.decode(result.stdout.toString());
+
+        resultsJson =
+            // ignore: avoid_dynamic_calls
+            resultMetricsJSON['performanceMetrics']['_values'][0]['measurements']['_values']
+                as List<dynamic>;
+      });
+      final List<double> extractedLaunchTimes = <double>[];
+      resultsJson
+          .map(
+            (dynamic item) => extractedLaunchTimes.add(
+              double.parse((item as Map<String, dynamic>)['_value'] as String),
+            ),
+          )
+          .toList();
+
+      return extractedLaunchTimes;
+    });
+  }
+
   Future<TaskResult> runSwiftUIApp() async {
     return inDirectory<TaskResult>(testDirectory, () async {
       final Map<String, String> environment = Platform.environment;
@@ -1763,6 +1858,7 @@ class CompileTest {
 
       await Process.run('xcodebuild', <String>['clean', '-allTargets']);
 
+      /* Compile Time */
       int releaseSizeInBytes = 0;
       final Stopwatch watch = Stopwatch();
 
@@ -1791,6 +1887,7 @@ class CompileTest {
         }
       });
 
+      /* App Size */
       final String appPath =
           '$testDirectory/hello_world_swiftui.xcarchive/Products/Applications/hello_world_swiftui.app';
 
@@ -1798,10 +1895,40 @@ class CompileTest {
       await exec('tar', <String>['-zcf', 'app.tar.gz', appPath]);
       releaseSizeInBytes = await file('$testDirectory/app.tar.gz').length();
 
+      /* Time to First Frame */
+      const String resultBundleName = 'benchmarkResults.xcresult';
+      await Process.run(workingDirectory: testDirectory, 'rm', <String>[
+        '-rf',
+        '$testDirectory/$resultBundleName',
+      ]).then((ProcessResult results) {
+        print(results.stdout);
+      });
+
+      // Run the benchmarking tests, and create the xcResults file.
+      await Process.run(workingDirectory: testDirectory, 'xcodebuild', <String>[
+        'test',
+        '-project',
+        'hello_world_swiftui.xcodeproj',
+        '-scheme',
+        'hello_world_swiftui',
+        '-destination',
+        'platform=iOS',
+        '-only-testing:BenchmarkTests/BenchmarkTests/testTimeToFirstFrame',
+        '-resultBundlePath',
+        '$testDirectory/$resultBundleName',
+        '-verbose',
+        'DEVELOPMENT_TEAM=$developmentTeam',
+        'CODE_SIGN_STYLE=$codeSignStyle',
+        'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
+      ]);
+
+      final List<double> extractedLaunchTimes = await getMetricsFromXCResults(resultBundleName);
+
       final Map<String, dynamic> metrics = <String, dynamic>{};
       metrics.addAll(<String, dynamic>{
         'release_swiftui_compile_millis': watch.elapsedMilliseconds,
         'release_swiftui_size_bytes': releaseSizeInBytes,
+        'time_to_first_frame': extractedLaunchTimes.average,
       });
       return TaskResult.success(metrics);
     });
@@ -1888,6 +2015,8 @@ class CompileTest {
         throw Exception('Unsupported option for Fuchsia devices');
       case DeviceOperatingSystem.linux:
         throw Exception('Unsupported option for Linux devices');
+      case DeviceOperatingSystem.webServer:
+        throw Exception('Unsupported option for Web Server devices');
       case DeviceOperatingSystem.windows:
         unawaited(stderr.flush());
         options.insert(0, 'windows');
@@ -1955,6 +2084,8 @@ class CompileTest {
       case DeviceOperatingSystem.macos:
         unawaited(stderr.flush());
         options.insert(0, 'macos');
+      case DeviceOperatingSystem.webServer:
+        throw Exception('Unsupported option for Web Server devices');
       case DeviceOperatingSystem.windows:
         unawaited(stderr.flush());
         options.insert(0, 'windows');
@@ -1987,6 +2118,7 @@ class CompileTest {
       case DeviceOperatingSystem.fake:
       case DeviceOperatingSystem.fuchsia:
       case DeviceOperatingSystem.linux:
+      case DeviceOperatingSystem.webServer:
       case DeviceOperatingSystem.windows:
         throw Exception('Called ${CompileTest.getSizesFromDarwinApp} with $operatingSystem.');
     }
@@ -2294,7 +2426,6 @@ class ReportedDurationTest {
         options: <String>[
           '--verbose',
           '--no-publish-port',
-          '--no-fast-start',
           '--${_reportedDurationTestToString(flavor)}',
           '--no-resident',
           '-d',

@@ -163,7 +163,7 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
       }
       // skip node if it is touching the edge scrollable, since it might
       // be partially scrolled offscreen.
-      if (current.hasFlag(SemanticsFlag.hasImplicitScrolling) &&
+      if (current.flagsCollection.hasImplicitScrolling &&
           _isAtBoundary(paintBounds, current.rect)) {
         return result;
       }
@@ -207,11 +207,11 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
     // Skip node if it has no actions, or is marked as hidden.
     if ((!data.hasAction(ui.SemanticsAction.longPress) &&
             !data.hasAction(ui.SemanticsAction.tap)) ||
-        data.hasFlag(ui.SemanticsFlag.isHidden)) {
+        data.flagsCollection.isHidden) {
       return true;
     }
     // Skip links https://www.w3.org/WAI/WCAG21/Understanding/target-size.html
-    if (data.hasFlag(ui.SemanticsFlag.isLink)) {
+    if (data.flagsCollection.isLink) {
       return true;
     }
     return false;
@@ -253,8 +253,8 @@ class LabeledTapTargetGuideline extends AccessibilityGuideline {
     });
     if (node.isMergedIntoParent ||
         node.isInvisible ||
-        node.hasFlag(ui.SemanticsFlag.isHidden) ||
-        node.hasFlag(ui.SemanticsFlag.isTextField)) {
+        node.flagsCollection.isHidden ||
+        node.flagsCollection.isTextField) {
       return result;
     }
     final SemanticsData data = node.getSemanticsData();
@@ -281,6 +281,7 @@ class LabeledTapTargetGuideline extends AccessibilityGuideline {
 /// See also:
 ///  * [AccessibilityGuideline], which provides a general overview of
 ///    accessibility guidelines and how to use them.
+///  * [MinimumTextContrastGuidelineAAA], which follows the WCAG AAA level.
 @visibleForTesting
 class MinimumTextContrastGuideline extends AccessibilityGuideline {
   /// Create a new [MinimumTextContrastGuideline].
@@ -345,12 +346,11 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     Evaluation result = const Evaluation.pass();
 
     // Skip disabled nodes, as they not required to pass contrast check.
-    final bool isDisabled =
-        node.hasFlag(ui.SemanticsFlag.hasEnabledState) && !node.hasFlag(ui.SemanticsFlag.isEnabled);
+    final bool isDisabled = node.flagsCollection.isEnabled == ui.Tristate.isFalse;
 
     if (node.isInvisible ||
         node.isMergedIntoParent ||
-        node.hasFlag(ui.SemanticsFlag.isHidden) ||
+        node.flagsCollection.isHidden ||
         isDisabled) {
       return result;
     }
@@ -428,8 +428,9 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(element);
     if (widget is Text) {
       final TextStyle? style = widget.style;
-      final TextStyle effectiveTextStyle =
-          style == null || style.inherit ? defaultTextStyle.style.merge(widget.style) : style;
+      final TextStyle effectiveTextStyle = style == null || style.inherit
+          ? defaultTextStyle.style.merge(widget.style)
+          : style;
       isBold = effectiveTextStyle.fontWeight == FontWeight.bold;
       fontSize = effectiveTextStyle.fontSize;
     } else if (widget is EditableText) {
@@ -479,8 +480,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
   ///
   /// Skip routes which might have labels, and nodes without any text.
   bool shouldSkipNode(SemanticsData data) =>
-      data.hasFlag(ui.SemanticsFlag.scopesRoute) ||
-      (data.label.trim().isEmpty && data.value.trim().isEmpty);
+      data.flagsCollection.scopesRoute || (data.label.trim().isEmpty && data.value.trim().isEmpty);
 
   /// Returns if a rectangle of node is off the screen.
   ///
@@ -507,6 +507,48 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
 
   @override
   String get description => 'Text contrast should follow WCAG guidelines';
+}
+
+/// A guideline which verifies that all nodes that contribute semantics via text
+/// meet **WCAG AAA** contrast levels.
+///
+/// The AAA level is defined by the Web Content Accessibility Guidelines:
+/// https://www.w3.org/WAI/WCAG22/Understanding/contrast-enhanced
+///
+/// This guideline enforces a stricter contrast ratio:
+///  * Normal text must have a contrast ratio of at least 7.0
+///  * Large or bold text must have a contrast ratio of at least 4.5
+///
+/// See also:
+///  * [MinimumTextContrastGuideline], which follows the WCAG AA level.
+///  * [AccessibilityGuideline], which provides an overview of guidelines.
+@visibleForTesting
+class MinimumTextContrastGuidelineAAA extends MinimumTextContrastGuideline {
+  /// Create a new [MinimumTextContrastGuidelineAAA].
+  const MinimumTextContrastGuidelineAAA();
+
+  /// The minimum contrast ratio for large text (bold ≥14px or ≥18px).
+  ///
+  /// Defined by WCAG AAA standard http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
+  static const double kAAAMinimumRatioLargeText = 4.5;
+
+  /// The minimum contrast ratio for normal text.
+  ///
+  /// Defined by WCAG AAA standard http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
+  static const double kAAAMinimumRatioNormalText = 7.0;
+
+  @override
+  double targetContrastRatio(double? fontSize, {required bool bold}) {
+    final double fontSizeOrDefault = fontSize ?? MinimumTextContrastGuideline._kDefaultFontSize;
+    if ((bold && fontSizeOrDefault >= MinimumTextContrastGuideline.kBoldTextMinimumSize) ||
+        fontSizeOrDefault >= MinimumTextContrastGuideline.kLargeTextMinimumSize) {
+      return kAAAMinimumRatioLargeText;
+    }
+    return kAAAMinimumRatioNormalText;
+  }
+
+  @override
+  String get description => 'Text contrast should follow WCAG AAA guidelines';
 }
 
 /// A guideline which verifies that all elements specified by [finder]
@@ -573,13 +615,12 @@ class CustomMinimumContrastGuideline extends AccessibilityGuideline {
 
       // Obtain a previously rendered image or render one for a new view.
       await tester.binding.runAsync(() async {
-        image =
-            images[view] ??= await layer.toImage(
-              renderView.paintBounds,
-              // Needs to be the same pixel ratio otherwise our dimensions
-              // won't match the last transform layer.
-              pixelRatio: 1 / view.devicePixelRatio,
-            );
+        image = images[view] ??= await layer.toImage(
+          renderView.paintBounds,
+          // Needs to be the same pixel ratio otherwise our dimensions
+          // won't match the last transform layer.
+          pixelRatio: 1 / view.devicePixelRatio,
+        );
         byteData = byteDatas[view] ??= (await image.toByteData())!;
       });
 

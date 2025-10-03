@@ -22,8 +22,11 @@ void main() {
 
     expect(color.toColor(), const Color(0xb399816b));
 
-    final HSVColor result =
-        HSVColor.lerp(color, const HSVColor.fromAHSV(0.3, 128.0, 0.7, 0.2), 0.25)!;
+    final HSVColor result = HSVColor.lerp(
+      color,
+      const HSVColor.fromAHSV(0.3, 128.0, 0.7, 0.2),
+      0.25,
+    )!;
     expect(result.alpha, moreOrLessEquals(0.6));
     expect(result.hue, moreOrLessEquals(53.0));
     expect(result.saturation, greaterThan(0.3999));
@@ -225,8 +228,11 @@ void main() {
 
     expect(color.toColor(), const Color(0xb3b8977a));
 
-    final HSLColor result =
-        HSLColor.lerp(color, const HSLColor.fromAHSL(0.3, 128.0, 0.7, 0.2), 0.25)!;
+    final HSLColor result = HSLColor.lerp(
+      color,
+      const HSLColor.fromAHSL(0.3, 128.0, 0.7, 0.2),
+      0.25,
+    )!;
     expect(result.alpha, moreOrLessEquals(0.6));
     expect(result.hue, moreOrLessEquals(53.0));
     expect(result.saturation, greaterThan(0.3999));

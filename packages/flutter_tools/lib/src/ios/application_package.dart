@@ -10,6 +10,7 @@ import '../globals.dart' as globals;
 import '../template.dart';
 import '../xcode_project.dart';
 import 'plist_parser.dart';
+import 'xcodeproj.dart';
 
 /// Tests whether a [Directory] is an iOS bundle directory.
 bool _isBundleDirectory(Directory dir) => dir.path.endsWith('.app');
@@ -130,10 +131,10 @@ class BuildableIOSApp extends IOSApp {
   String? get name => _appProductName;
 
   @override
-  String get simulatorBundlePath => _buildAppPath('iphonesimulator');
+  String get simulatorBundlePath => _buildAppPath(XcodeSdk.IPhoneSimulator.platformName);
 
   @override
-  String get deviceBundlePath => _buildAppPath('iphoneos');
+  String get deviceBundlePath => _buildAppPath(XcodeSdk.IPhoneOS.platformName);
 
   @override
   Directory get appDeltaDirectory =>

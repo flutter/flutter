@@ -116,12 +116,16 @@ class FlutterWindowTest : public WindowsTest {};
 }  // namespace
 
 TEST_F(FlutterWindowTest, CreateDestroy) {
-  FlutterWindow window(800, 600);
+  std::unique_ptr<FlutterWindowsEngine> engine =
+      FlutterWindowsEngineBuilder{GetContext()}.Build();
+  FlutterWindow window(800, 600, engine->display_manager());
   ASSERT_TRUE(TRUE);
 }
 
 TEST_F(FlutterWindowTest, OnBitmapSurfaceUpdated) {
-  FlutterWindow win32window(100, 100);
+  std::unique_ptr<FlutterWindowsEngine> engine =
+      FlutterWindowsEngineBuilder{GetContext()}.Build();
+  FlutterWindow win32window(100, 100, engine->display_manager());
   int old_handle_count = GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS);
 
   constexpr size_t row_bytes = 100 * 4;
@@ -162,7 +166,9 @@ TEST_F(FlutterWindowTest, OnCursorRectUpdatedHighDPI) {
 }
 
 TEST_F(FlutterWindowTest, OnPointerStarSendsDeviceType) {
-  FlutterWindow win32window(100, 100);
+  std::unique_ptr<FlutterWindowsEngine> engine =
+      FlutterWindowsEngineBuilder{GetContext()}.Build();
+  FlutterWindow win32window(100, 100, engine->display_manager());
   MockWindowBindingHandlerDelegate delegate;
   EXPECT_CALL(delegate, OnWindowStateEvent).Times(AnyNumber());
   win32window.SetView(&delegate);

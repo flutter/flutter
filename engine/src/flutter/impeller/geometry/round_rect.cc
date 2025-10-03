@@ -87,4 +87,82 @@ static constexpr Point kLowerRightDirection(1.0f, 1.0f);
   return true;
 }
 
+void RoundRect::Dispatch(PathReceiver& receiver) const {
+  Scalar left = bounds_.GetLeft();
+  Scalar top = bounds_.GetTop();
+  Scalar right = bounds_.GetRight();
+  Scalar bottom = bounds_.GetBottom();
+
+  receiver.MoveTo(Point(left + radii_.top_left.width, top), true);
+  receiver.LineTo(Point(right - radii_.top_right.width, top));
+
+  receiver.ConicTo(Point(right, top),
+                   Point(right, top + radii_.top_right.height),  //
+                   kSqrt2Over2);
+
+  receiver.LineTo(Point(right, bottom - radii_.bottom_right.height));
+
+  receiver.ConicTo(Point(right, bottom),
+                   Point(right - radii_.bottom_right.width, bottom),  //
+                   kSqrt2Over2);
+
+  receiver.LineTo(Point(left + radii_.bottom_left.width, bottom));
+
+  receiver.ConicTo(Point(left, bottom),
+                   Point(left, bottom - radii_.bottom_left.height),  //
+                   kSqrt2Over2);
+
+  receiver.LineTo(Point(left, top + radii_.top_left.height));
+
+  receiver.ConicTo(Point(left, top),
+                   Point(left + radii_.top_left.width, top),  //
+                   kSqrt2Over2);
+
+  receiver.Close();
+}
+
+RoundRectPathSource::RoundRectPathSource(const RoundRect& round_rect)
+    : round_rect_(round_rect) {}
+
+RoundRectPathSource::~RoundRectPathSource() = default;
+
+FillType RoundRectPathSource::GetFillType() const {
+  return FillType::kNonZero;
+}
+
+Rect RoundRectPathSource::GetBounds() const {
+  return round_rect_.GetBounds();
+}
+
+bool RoundRectPathSource::IsConvex() const {
+  return true;
+}
+
+void RoundRectPathSource::Dispatch(PathReceiver& receiver) const {
+  round_rect_.Dispatch(receiver);
+}
+
+DiffRoundRectPathSource::DiffRoundRectPathSource(const RoundRect& outer,
+                                                 const RoundRect& inner)
+    : outer_(outer), inner_(inner) {}
+
+DiffRoundRectPathSource::~DiffRoundRectPathSource() = default;
+
+FillType DiffRoundRectPathSource::GetFillType() const {
+  return FillType::kOdd;
+}
+
+Rect DiffRoundRectPathSource::GetBounds() const {
+  return outer_.GetBounds();
+}
+
+bool DiffRoundRectPathSource::IsConvex() const {
+  return false;
+}
+
+void DiffRoundRectPathSource::Dispatch(PathReceiver& receiver) const {
+  outer_.Dispatch(receiver);
+  inner_.Dispatch(receiver);
+}
+
 }  // namespace impeller

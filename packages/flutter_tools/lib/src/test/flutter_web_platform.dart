@@ -38,7 +38,7 @@ import 'test_golden_comparator.dart';
 import 'test_time_recorder.dart';
 
 shelf.Handler createDirectoryHandler(Directory directory, {required bool crossOriginIsolated}) {
-  final mime.MimeTypeResolver resolver = mime.MimeTypeResolver();
+  final resolver = mime.MimeTypeResolver();
   final FileSystem fileSystem = directory.fileSystem;
   return (shelf.Request request) async {
     String uriPath = request.requestedUri.path;
@@ -57,7 +57,7 @@ shelf.Handler createDirectoryHandler(Directory directory, {required bool crossOr
     return shelf.Response.ok(
       file.openRead(),
       headers: <String, String>{
-        if (contentType != null) 'Content-Type': contentType,
+        'Content-Type': ?contentType,
         if (needsCrossOriginIsolated) ...kMultiThreadedHeaders,
       },
     );
@@ -116,8 +116,8 @@ class FlutterWebPlatform extends PlatformPlugin {
         .add(_packageFilesHandler);
     _server.mount(cascade.handler);
     _testGoldenComparator = TestGoldenComparator(
-      compilerFactory:
-          () => TestCompiler(buildInfo, flutterProject, testTimeRecorder: testTimeRecorder),
+      compilerFactory: () =>
+          TestCompiler(buildInfo, flutterProject, testTimeRecorder: testTimeRecorder),
       flutterTesterBinPath: flutterTesterBinPath,
       fileSystem: _fileSystem,
       logger: _logger,
@@ -140,8 +140,8 @@ class FlutterWebPlatform extends PlatformPlugin {
   final Logger _logger;
   final Artifacts? _artifacts;
   final bool updateGoldens;
-  final OneOffHandler _webSocketHandler = OneOffHandler();
-  final AsyncMemoizer<void> _closeMemo = AsyncMemoizer<void>();
+  final _webSocketHandler = OneOffHandler();
+  final _closeMemo = AsyncMemoizer<void>();
   final String _root;
   final WebRendererMode webRenderer;
   final bool useWasm;
@@ -149,7 +149,7 @@ class FlutterWebPlatform extends PlatformPlugin {
   /// Allows only one test suite (typically one test file) to be loaded and run
   /// at any given point in time. Loading more than one file at a time is known
   /// to lead to flaky tests.
-  final Pool _suiteLock = Pool(1);
+  final _suiteLock = Pool(1);
 
   BrowserManager? _browserManager;
   late TestGoldenComparator _testGoldenComparator;
@@ -283,12 +283,12 @@ class FlutterWebPlatform extends PlatformPlugin {
     // TODO(srujzs): Remove this assertion when the library bundle format is
     // supported without canary mode.
     if (buildInfo.ddcModuleFormat == DdcModuleFormat.ddc) {
-      assert(buildInfo.canaryFeatures ?? true);
+      assert(buildInfo.canaryFeatures);
     }
     final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap =
         buildInfo.ddcModuleFormat == DdcModuleFormat.ddc
-            ? kDdcLibraryBundleDartSdkJsArtifactMap
-            : kAmdDartSdkJsArtifactMap;
+        ? kDdcLibraryBundleDartSdkJsArtifactMap
+        : kAmdDartSdkJsArtifactMap;
     return _fileSystem.file(_artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
   }
 
@@ -296,12 +296,12 @@ class FlutterWebPlatform extends PlatformPlugin {
     // TODO(srujzs): Remove this assertion when the library bundle format is
     // supported without canary mode.
     if (buildInfo.ddcModuleFormat == DdcModuleFormat.ddc) {
-      assert(buildInfo.canaryFeatures ?? true);
+      assert(buildInfo.canaryFeatures);
     }
     final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap =
         buildInfo.ddcModuleFormat == DdcModuleFormat.ddc
-            ? kDdcLibraryBundleDartSdkJsMapArtifactMap
-            : kAmdDartSdkJsMapArtifactMap;
+        ? kDdcLibraryBundleDartSdkJsMapArtifactMap
+        : kAmdDartSdkJsMapArtifactMap;
     return _fileSystem.file(_artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
   }
 
@@ -421,7 +421,7 @@ class FlutterWebPlatform extends PlatformPlugin {
           _fileSystem.directory(dirname),
           crossOriginIsolated: webRenderer == WebRendererMode.skwasm,
         );
-        final shelf.Request modifiedRequest = shelf.Request(
+        final modifiedRequest = shelf.Request(
           request.method,
           request.requestedUri.replace(path: basename),
           protocolVersion: request.protocolVersion,
@@ -439,8 +439,7 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   Future<shelf.Response> _goldenFileHandler(shelf.Request request) async {
     if (request.url.path.contains('flutter_goldens')) {
-      final Map<String, Object?> body =
-          json.decode(await request.readAsString()) as Map<String, Object?>;
+      final body = json.decode(await request.readAsString()) as Map<String, Object?>;
       final Uri goldenKey = Uri.parse(body['key']! as String);
       final Uri testUri = Uri.parse(body['testUri']! as String);
       Uint8List bytes;
@@ -483,7 +482,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       case '.wasm':
         contentType = 'application/wasm';
       default:
-        final String error = 'Failed to determine Content-Type for "${request.url.path}".';
+        final error = 'Failed to determine Content-Type for "${request.url.path}".';
         _logger.printError(error);
         return shelf.Response.internalServerError(body: error);
     }
@@ -518,7 +517,7 @@ class FlutterWebPlatform extends PlatformPlugin {
   shelf.Response _wrapperHandler(shelf.Request request) {
     final String path = _fileSystem.path.fromUri(request.url);
     if (path.endsWith('.html')) {
-      final String test = '${_fileSystem.path.withoutExtension(path)}.dart';
+      final test = '${_fileSystem.path.withoutExtension(path)}.dart';
       return shelf.Response.ok(
         '''
         <!DOCTYPE html>
@@ -581,7 +580,7 @@ class FlutterWebPlatform extends PlatformPlugin {
 
     final Runtime browser = platform.runtime;
     try {
-      _browserManager = await _launchBrowser(browser);
+      _browserManager ??= await _launchBrowser(browser);
     } on Error catch (_) {
       await _suiteLock.close();
       rethrow;
@@ -601,8 +600,6 @@ class FlutterWebPlatform extends PlatformPlugin {
       suiteConfig,
       message,
       onDone: () async {
-        await _browserManager!.close();
-        _browserManager = null;
         lockResource.release();
         if (_logger.isVerbose) {
           _logger.printTrace('Test suite $relativePath finished.');
@@ -617,7 +614,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     return suite;
   }
 
-  /// Returns the [BrowserManager] for [runtime], which should be a browser.
+  /// Returns the [BrowserManager] for [browser], which should be a browser.
   ///
   /// If no browser manager is running yet, starts one.
   Future<BrowserManager> _launchBrowser(Runtime browser) {
@@ -625,7 +622,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       throw StateError('Another browser is currently running.');
     }
 
-    final Completer<WebSocketChannel> completer = Completer<WebSocketChannel>.sync();
+    final completer = Completer<WebSocketChannel>.sync();
     final String path = _webSocketHandler.create(
       webSocketHandler((WebSocketChannel webSocket, _) {
         completer.complete(webSocket);
@@ -662,7 +659,7 @@ class FlutterWebPlatform extends PlatformPlugin {
   @override
   Future<void> close() => _closeMemo.runOnce(() async {
     await Future.wait<void>(<Future<dynamic>>[
-      if (_browserManager != null) _browserManager!.close(),
+      ?_browserManager?.close(),
       _server.close(),
       _testGoldenComparator.close(),
     ]);
@@ -671,10 +668,10 @@ class FlutterWebPlatform extends PlatformPlugin {
 
 class OneOffHandler {
   /// A map from URL paths to handlers.
-  final Map<String, shelf.Handler> _handlers = <String, shelf.Handler>{};
+  final _handlers = <String, shelf.Handler>{};
 
   /// The counter of handlers that have been activated.
-  int _counter = 0;
+  var _counter = 0;
 
   /// The actual [shelf.Handler] that dispatches requests.
   shelf.Handler get handler => _onRequest;
@@ -686,7 +683,7 @@ class OneOffHandler {
   ///
   /// [handler] will be unmounted as soon as it receives a request.
   String create(shelf.Handler handler) {
-    final String path = _counter.toString();
+    final path = _counter.toString();
     _handlers[path] = handler;
     _counter++;
     return path;
@@ -708,7 +705,7 @@ class OneOffHandler {
 }
 
 class BrowserManager {
-  /// Creates a new BrowserManager that communicates with [browser] over
+  /// Creates a new BrowserManager that communicates with [_browser] over
   /// [webSocket].
   BrowserManager._(this._browser, this._runtime, WebSocketChannel webSocket) {
     // The duration should be short enough that the debugging console is open as
@@ -757,10 +754,10 @@ class BrowserManager {
   ///
   /// This is used to ensure that the suites can be referred to consistently
   /// across the client and server.
-  int _suiteID = 0;
+  var _suiteID = 0;
 
   /// Whether the channel to the browser has closed.
-  bool _closed = false;
+  var _closed = false;
 
   /// The completer for [_BrowserEnvironment.displayPause].
   ///
@@ -769,7 +766,7 @@ class BrowserManager {
   CancelableCompleter<dynamic>? _pauseCompleter;
 
   /// The controller for [_BrowserEnvironment.onRestart].
-  final StreamController<dynamic> _onRestartController = StreamController<dynamic>.broadcast();
+  final _onRestartController = StreamController<dynamic>.broadcast();
 
   /// The environment to attach to each suite.
   late Future<_BrowserEnvironment> _environment;
@@ -778,7 +775,7 @@ class BrowserManager {
   ///
   /// These are used to mark suites as debugging or not based on the browser's
   /// pings.
-  final Set<RunnerSuiteController> _controllers = <RunnerSuiteController>{};
+  final _controllers = <RunnerSuiteController>{};
 
   // A timer that's reset whenever we receive a message from the browser.
   //
@@ -786,7 +783,7 @@ class BrowserManager {
   // this lets us detect whether they're debugging reasonably accurately.
   late RestartableTimer _timer;
 
-  final AsyncMemoizer<dynamic> _closeMemoizer = AsyncMemoizer<dynamic>();
+  final _closeMemoizer = AsyncMemoizer<dynamic>();
 
   /// Starts the browser identified by [runtime] and has it connect to [url].
   ///
@@ -795,14 +792,12 @@ class BrowserManager {
   /// [future]. If [debug] is true, starts the browser in debug mode, with its
   /// debugger interfaces on and detected.
   ///
-  /// The browser will start in headless mode if [headless] is true.
+  /// The browser will start in headless mode if [headless] is `true`.
   ///
   /// Add arbitrary browser flags via [webBrowserFlags].
   ///
-  /// The [settings] indicate how to invoke this browser's executable.
-  ///
-  /// Returns the browser manager, or throws an [ApplicationException] if a
-  /// connection fails to be established.
+  /// Returns the browser manager, or throws an exception if
+  /// a connection fails to be established.
   static Future<BrowserManager> start(
     ChromiumLauncher chromiumLauncher,
     Runtime runtime,
@@ -817,7 +812,7 @@ class BrowserManager {
       headless: headless,
       webBrowserFlags: webBrowserFlags,
     );
-    final Completer<BrowserManager> completer = Completer<BrowserManager>();
+    final completer = Completer<BrowserManager>();
 
     unawaited(
       chrome.onExit
@@ -869,9 +864,6 @@ class BrowserManager {
   /// [url] should be an HTML page with a reference to the JS-compiled test
   /// suite. [path] is the path of the original test suite file, which is used
   /// for reporting. [suiteConfig] is the configuration for the test suite.
-  ///
-  /// If [mapper] is passed, it's used to map stack traces for errors coming
-  /// from this test suite.
   Future<RunnerSuite> load(
     String path,
     Uri url,
@@ -1002,8 +994,9 @@ class _BrowserEnvironment implements Environment {
   final BrowserManager _manager;
 
   @override
-  final bool supportsDebugging = true;
+  final supportsDebugging = true;
 
+  // TODO(bkonyi): update package:test_core to no longer reference Observatory.
   @override
   final Uri? observatoryUrl;
 

@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(bkonyi): remove and cleanup prints once https://github.com/flutter/flutter/issues/172636
+// is resolved.
+// ignore_for_file: avoid_print
+
 import 'dart:async';
 
 import 'package:dds/dap.dart';
@@ -20,7 +24,7 @@ class DapTestClient {
     // emitted by the debug adapter so tests have easy access to it.
     vmServiceUri = event('dart.debuggerUris')
         .then<Uri?>((Event event) {
-          final Map<String, Object?> body = event.body! as Map<String, Object?>;
+          final body = event.body! as Map<String, Object?>;
           return Uri.parse(body['vmServiceUri']! as String);
         })
         .then((Uri? uri) => uri, onError: (Object? e) => null);
@@ -47,9 +51,9 @@ class DapTestClient {
   late final StreamSubscription<String> _subscription;
   final Logger? _logger;
   final bool captureVmServiceTraffic;
-  final Map<int, _OutgoingRequest> _pendingRequests = <int, _OutgoingRequest>{};
-  final StreamController<Event> _eventController = StreamController<Event>.broadcast();
-  int _seq = 1;
+  final _pendingRequests = <int, _OutgoingRequest>{};
+  final _eventController = StreamController<Event>.broadcast();
+  var _seq = 1;
   late final Future<Uri?> vmServiceUri;
 
   /// Returns a stream of [OutputEventBody] events.
@@ -87,7 +91,7 @@ class DapTestClient {
 
   /// Returns a stream of progress events.
   Stream<Event> progressEvents() {
-    const Set<String> progressEvents = <String>{'progressStart', 'progressUpdate', 'progressEnd'};
+    const progressEvents = <String>{'progressStart', 'progressUpdate', 'progressEnd'};
     return _eventController.stream.where((Event e) => progressEvents.contains(e.event));
   }
 
@@ -129,6 +133,7 @@ class DapTestClient {
     bool? supportsRunInTerminalRequest,
     bool? supportsProgressReporting,
   }) async {
+    print('DapTestClient.initialize: wait for responses');
     final List<ProtocolMessage> responses = await Future.wait(<Future<ProtocolMessage>>[
       event('initialized'),
       sendRequest(
@@ -140,6 +145,7 @@ class DapTestClient {
       ),
       sendRequest(SetExceptionBreakpointsArguments(filters: <String>[exceptionPauseMode])),
     ]);
+    print('DapTestClient.initialize: got responses, sending config done');
     await sendRequest(ConfigurationDoneArguments());
     return responses[1] as Response; // Return the initialize response.
   }
@@ -225,8 +231,8 @@ class DapTestClient {
     String? overrideCommand,
   }) {
     final String command = overrideCommand ?? commandTypes[arguments.runtimeType]!;
-    final Request request = Request(seq: _seq++, command: command, arguments: arguments);
-    final Completer<Response> completer = Completer<Response>();
+    final request = Request(seq: _seq++, command: command, arguments: arguments);
+    final completer = Completer<Response>();
     _pendingRequests[request.seq] = _OutgoingRequest(completer, command, allowFailure);
     _channel.sendRequest(request);
     return completer.future;
@@ -237,11 +243,9 @@ class DapTestClient {
   Future<Map<String, Object?>> serviceExtensionAdded(String extension) =>
       serviceExtensionAddedEvents.firstWhere(
         (Map<String, Object?> body) => body['extensionRPC'] == extension,
-        orElse:
-            () =>
-                throw Exception(
-                  'Did not receive $extension extension added event before stream closed',
-                ),
+        orElse: () => throw Exception(
+          'Did not receive $extension extension added event before stream closed',
+        ),
       );
 
   /// Returns a Future that completes with the next serviceExtensionStateChanged
@@ -249,11 +253,9 @@ class DapTestClient {
   Future<Map<String, Object?>> serviceExtensionStateChanged(String extension) =>
       serviceExtensionStateChangedEvents.firstWhere(
         (Map<String, Object?> body) => body['extension'] == extension,
-        orElse:
-            () =>
-                throw Exception(
-                  'Did not receive $extension extension state changed event before stream closed',
-                ),
+        orElse: () => throw Exception(
+          'Did not receive $extension extension state changed event before stream closed',
+        ),
       );
 
   /// Initializes the debug adapter and launches [program]/[cwd] or calls the
@@ -265,8 +267,12 @@ class DapTestClient {
     Future<Object?> Function()? launch,
   }) {
     return Future.wait(<Future<Object?>>[
-      initialize(exceptionPauseMode: exceptionPauseMode),
-      launch?.call() ?? this.launch(program: program, cwd: cwd),
+      initialize(
+        exceptionPauseMode: exceptionPauseMode,
+      ).then((_) => print('DapTestClient.initialize: completed')),
+      (launch?.call() ?? this.launch(program: program, cwd: cwd)).then(
+        (_) => print('DapTestClient.launch: completed'),
+      ),
     ], eagerError: true);
   }
 
@@ -304,17 +310,13 @@ class DapTestClient {
   }
 
   /// Creates a [DapTestClient] that connects the server listening on
-  /// [host]:[port].
+  /// `[host]:[port]`.
   static Future<DapTestClient> connect(
     DapTestServer server, {
     bool captureVmServiceTraffic = false,
     Logger? logger,
   }) async {
-    final ByteStreamServerChannel channel = ByteStreamServerChannel(
-      server.stream,
-      server.sink,
-      logger,
-    );
+    final channel = ByteStreamServerChannel(server.stream, server.sink, logger);
     return DapTestClient._(channel, logger, captureVmServiceTraffic: captureVmServiceTraffic);
   }
 }
@@ -348,7 +350,7 @@ extension DapTestClientExtension on DapTestClient {
   ///
   /// Only one of [start] or [launch] may be provided. Use [start] to customise
   /// the whole start of the session (including initialize) or [launch] to only
-  /// customise the [launchRequest].
+  /// customise the `launchRequest`.
   Future<List<OutputEventBody>> collectAllOutput({
     String? program,
     String? cwd,
@@ -376,13 +378,13 @@ extension DapTestClientExtension on DapTestClient {
     //  https://github.com/flutter/flutter/issues/120015
     return skipInitialPubGetOutput
         ? output
-            .skipWhile(
-              (OutputEventBody output) =>
-                  output.output.startsWith('Running "flutter pub get"') ||
-                  output.output.startsWith('Resolving dependencies') ||
-                  output.output.startsWith('Got dependencies'),
-            )
-            .toList()
+              .skipWhile(
+                (OutputEventBody output) =>
+                    output.output.startsWith('Running "flutter pub get"') ||
+                    output.output.startsWith('Resolving dependencies') ||
+                    output.output.startsWith('Got dependencies'),
+              )
+              .toList()
         : output;
   }
 
@@ -393,7 +395,7 @@ extension DapTestClientExtension on DapTestClient {
   ///
   /// Only one of [start] or [launch] may be provided. Use [start] to customise
   /// the whole start of the session (including initialise) or [launch] to only
-  /// customise the [launchRequest].
+  /// customise the `launchRequest`.
   Future<TestEvents> collectTestOutput({
     String? program,
     String? cwd,
@@ -403,14 +405,23 @@ extension DapTestClientExtension on DapTestClient {
     assert(start == null || launch == null, 'Only one of "start" or "launch" may be provided');
 
     final Future<List<OutputEventBody>> outputEventsFuture = outputEvents.toList();
-    final Future<List<Map<String, Object?>>> testNotificationEventsFuture =
-        testNotificationEvents.toList();
+    final Future<List<Map<String, Object?>>> testNotificationEventsFuture = testNotificationEvents
+        .toList();
 
+    print('DapTestClient.start: started');
     if (start != null) {
       await start();
     } else {
       await this.start(program: program, cwd: cwd, launch: launch);
     }
+    print('DapTestClient.start: completed');
+
+    unawaited(outputEventsFuture.then((_) => print('DapTestClient.outputEventsFuture: completed')));
+    unawaited(
+      testNotificationEventsFuture.then(
+        (_) => print('DapTestClient.testNotificationEventsFuture: completed'),
+      ),
+    );
 
     return TestEvents(
       output: await outputEventsFuture,
@@ -418,7 +429,7 @@ extension DapTestClientExtension on DapTestClient {
     );
   }
 
-  /// Sets a breakpoint at [line] in [file].
+  /// Sets a breakpoint at [line] in the file at [filePath].
   Future<void> setBreakpoint(String filePath, int line) async {
     await sendRequest(
       SetBreakpointsArguments(
@@ -468,10 +479,13 @@ extension DapTestClientExtension on DapTestClient {
     StackTraceArguments(threadId: threadId, startFrame: startFrame, levels: numFrames),
   );
 
-  /// Clears breakpoints in [file].
+  /// Clears breakpoints in the file at [filePath].
   Future<void> clearBreakpoints(String filePath) async {
     await sendRequest(
-      SetBreakpointsArguments(source: Source(path: filePath), breakpoints: <SourceBreakpoint>[]),
+      SetBreakpointsArguments(
+        source: Source(path: filePath),
+        breakpoints: <SourceBreakpoint>[],
+      ),
     );
   }
 }

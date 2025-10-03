@@ -53,7 +53,7 @@ import 'run_command.dart';
 import 'suite_runners/run_add_to_app_life_cycle_tests.dart';
 import 'suite_runners/run_analyze_tests.dart';
 import 'suite_runners/run_android_engine_tests.dart';
-import 'suite_runners/run_android_java11_integration_tool_tests.dart';
+import 'suite_runners/run_android_java17_integration_tool_tests.dart';
 import 'suite_runners/run_android_preview_integration_tool_tests.dart';
 import 'suite_runners/run_customer_testing_tests.dart';
 import 'suite_runners/run_docs_tests.dart';
@@ -129,7 +129,7 @@ Future<void> main(List<String> args) async {
       'web_tool_tests': _runWebToolTests,
       'tool_integration_tests': _runIntegrationToolTests,
       'android_preview_tool_integration_tests': androidPreviewIntegrationToolTestsRunner,
-      'android_java11_tool_integration_tests': androidJava11IntegrationToolTestsRunner,
+      'android_java17_tool_integration_tests': androidJava17IntegrationToolTestsRunner,
       'tool_host_cross_arch_tests': _runToolHostCrossArchTests,
       // All the unit/widget tests run using `flutter test --platform=chrome`
       'web_canvaskit_tests': webTestsSuite.runWebCanvasKitUnitTests,
@@ -137,10 +137,10 @@ Future<void> main(List<String> args) async {
       'web_skwasm_tests': webTestsSuite.runWebSkwasmUnitTests,
       // All web integration tests
       'web_long_running_tests': webTestsSuite.webLongRunningTestsRunner,
-      'android_engine_vulkan_tests':
-          () => runAndroidEngineTests(impellerBackend: ImpellerBackend.vulkan),
-      'android_engine_opengles_tests':
-          () => runAndroidEngineTests(impellerBackend: ImpellerBackend.opengles),
+      'android_engine_vulkan_tests': () =>
+          runAndroidEngineTests(impellerBackend: ImpellerBackend.vulkan),
+      'android_engine_opengles_tests': () =>
+          runAndroidEngineTests(impellerBackend: ImpellerBackend.opengles),
       'flutter_plugins': flutterPackagesRunner,
       'skp_generator': skpGeneratorTestsRunner,
       'customer_testing': customerTestingRunner,
@@ -149,6 +149,7 @@ Future<void> main(List<String> args) async {
       'snippets': _runSnippetsTests,
       'docs': docsRunner,
       'verify_binaries_codesigned': verifyCodesignedTestRunner,
+      'verify_binaries_pre_codesigned': verifyPreCodesignedTestRunner,
       kTestHarnessShardName:
           testHarnessTestsRunner, // Used for testing this script; also run as part of SHARD=framework_tests, SUBSHARD=misc.
     });
@@ -192,10 +193,9 @@ Future<void> _runCommandsToolTests() async {
 }
 
 Future<void> _runWebToolTests() async {
-  final List<File> allFiles =
-      Directory(
-        path.join(_toolsPath, 'test', 'web.shard'),
-      ).listSync(recursive: true).whereType<File>().toList();
+  final List<File> allFiles = Directory(
+    path.join(_toolsPath, 'test', 'web.shard'),
+  ).listSync(recursive: true).whereType<File>().toList();
   final List<String> allTests = <String>[];
   for (final File file in allFiles) {
     if (file.path.endsWith('_test.dart')) {
@@ -220,13 +220,12 @@ Future<void> _runToolHostCrossArchTests() {
 }
 
 Future<void> _runIntegrationToolTests() async {
-  final List<String> allTests =
-      Directory(path.join(_toolsPath, 'test', 'integration.shard'))
-          .listSync(recursive: true)
-          .whereType<File>()
-          .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
-          .where((String testPath) => path.basename(testPath).endsWith('_test.dart'))
-          .toList();
+  final List<String> allTests = Directory(path.join(_toolsPath, 'test', 'integration.shard'))
+      .listSync(recursive: true)
+      .whereType<File>()
+      .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
+      .where((String testPath) => path.basename(testPath).endsWith('_test.dart'))
+      .toList();
 
   await runDartTest(
     _toolsPath,
@@ -252,13 +251,12 @@ Future<void> _runToolTests() async {
 
 Future<void> _runSnippetsTests() async {
   final String snippetsPath = path.join(flutterRoot, 'dev', 'snippets');
-  final List<String> allTests =
-      Directory(path.join(snippetsPath, 'test'))
-          .listSync(recursive: true)
-          .whereType<File>()
-          .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
-          .where((String testPath) => path.basename(testPath).endsWith('_test.dart'))
-          .toList();
+  final List<String> allTests = Directory(path.join(snippetsPath, 'test'))
+      .listSync(recursive: true)
+      .whereType<File>()
+      .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
+      .where((String testPath) => path.basename(testPath).endsWith('_test.dart'))
+      .toList();
 
   await runDartTest(
     snippetsPath,
@@ -295,7 +293,7 @@ Future<void> runForbiddenFromReleaseTests() async {
     '--snapshot',
     path.join(tempDirectory.path, 'snapshot.arm64-v8a.json'),
     '--package-config',
-    path.join(flutterRoot, 'examples', 'hello_world', '.dart_tool', 'package_config.json'),
+    path.join(flutterRoot, '.dart_tool', 'package_config.json'),
     '--forbidden-type',
     'package:flutter/src/widgets/framework.dart::Widget',
   ];
@@ -307,7 +305,7 @@ Future<void> runForbiddenFromReleaseTests() async {
     '--snapshot',
     path.join(tempDirectory.path, 'snapshot.arm64-v8a.json'),
     '--package-config',
-    path.join(flutterRoot, 'examples', 'hello_world', '.dart_tool', 'package_config.json'),
+    path.join(flutterRoot, '.dart_tool', 'package_config.json'),
     '--forbidden-type',
     'package:flutter/src/widgets/widget_inspector.dart::WidgetInspectorService',
     '--forbidden-type',
@@ -629,8 +627,8 @@ bool _allTargetsCached(File performanceFile) {
   }
   final Map<String, Object?> data =
       json.decode(performanceFile.readAsStringSync()) as Map<String, Object?>;
-  final List<Map<String, Object?>> targets =
-      (data['targets']! as List<Object?>).cast<Map<String, Object?>>();
+  final List<Map<String, Object?>> targets = (data['targets']! as List<Object?>)
+      .cast<Map<String, Object?>>();
   return targets.every((Map<String, Object?> element) => element['skipped'] == true);
 }
 

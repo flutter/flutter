@@ -14,7 +14,7 @@ final class RawPaint extends Opaque {}
 typedef PaintHandle = Pointer<RawPaint>;
 
 typedef _PaintCreateInitSignature =
-    PaintHandle Function(Bool, Int, Int, Int, Float, Int, Int, Float);
+    PaintHandle Function(Bool, Int, Int, Int, Float, Int, Int, Float, Bool);
 
 @Native<_PaintCreateInitSignature>(symbol: 'paint_create', isLeaf: true)
 external PaintHandle paintCreate(
@@ -26,6 +26,7 @@ external PaintHandle paintCreate(
   int strokeCap,
   int strokeJoin,
   double strokeMiterLimit,
+  bool invertColors,
 );
 
 @Native<Void Function(PaintHandle)>(symbol: 'paint_dispose', isLeaf: true)

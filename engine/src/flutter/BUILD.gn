@@ -74,11 +74,17 @@ group("flutter") {
   testonly = true
 
   # Compile the engine.
-  public_deps = [
-    ":unittests",
-    "//flutter/shell/platform/embedder:flutter_engine",
-    "//flutter/sky",
-  ]
+  public_deps = []
+
+  if (!is_qnx) {
+    public_deps = [
+      "//flutter/shell/platform/embedder:flutter_engine",
+      "//flutter/sky",
+    ]
+    if (enable_unittests) {
+      public_deps += [ ":unittests" ]
+    }
+  }
 
   # Ensure the example for a sample embedder compiles.
   if (build_embedder_examples) {
@@ -93,7 +99,7 @@ group("flutter") {
   }
 
   # If enabled, compile the SDK / snapshot.
-  if (!is_fuchsia) {
+  if (!is_fuchsia && !is_qnx) {
     public_deps += [ "//flutter/lib/snapshot:generate_snapshot_bins" ]
 
     if (build_engine_artifacts) {
@@ -113,6 +119,13 @@ group("flutter") {
         # path_ops
         "//flutter/tools/path_ops",
       ]
+
+      if (host_os == "linux" || host_os == "mac") {
+        public_deps += [
+          "//flutter/tools/licenses_cpp",
+          "//flutter/tools/licenses_cpp:licenses_cpp_testrunner",
+        ]
+      }
 
       if (host_os == "linux") {
         public_deps += [
@@ -154,13 +167,19 @@ group("flutter") {
   }
 
   # Build the standalone Impeller library.
-  if (is_mac || is_linux || is_win || is_android) {
+  if (is_mac || is_linux || is_win || is_android || is_qnx) {
     public_deps += [ "//flutter/impeller/toolkit/interop:sdk" ]
   }
 
   if ((flutter_runtime_mode == "debug" || flutter_runtime_mode == "profile") &&
       is_ios) {
     public_deps += [ "//flutter/testing/ios_scenario_app" ]
+  }
+
+  # Build the standalone Embedder API SDK for platforms that don't vend all
+  # their engine artifacts (via `build_engine_artifacts`).
+  if (is_android && flutter_runtime_mode == "debug") {
+    public_deps += [ "//flutter/shell/platform/embedder:embedder-archive" ]
   }
 }
 
@@ -194,6 +213,7 @@ group("unittests") {
       "//flutter/runtime:no_dart_plugin_registrant_unittests",
       "//flutter/runtime:runtime_unittests",
       "//flutter/shell/common:shell_unittests",
+      "//flutter/shell/geometry:geometry_unittests",
       "//flutter/shell/platform/embedder:embedder_a11y_unittests",
       "//flutter/shell/platform/embedder:embedder_proctable_unittests",
       "//flutter/shell/platform/embedder:embedder_unittests",
@@ -227,6 +247,7 @@ group("unittests") {
         "//flutter/impeller/golden_tests:impeller_golden_tests",
         "//flutter/shell/gpu:gpu_surface_metal_unittests",
         "//flutter/shell/platform/darwin/common:availability_version_check_unittests",
+        "//flutter/shell/platform/darwin/common:framework_common_swift_unittests",
         "//flutter/shell/platform/darwin/common:framework_common_unittests",
         "//flutter/third_party/spring_animation:spring_animation_unittests",
       ]
@@ -268,7 +289,10 @@ group("unittests") {
       }
 
       if (is_mac) {
-        public_deps += [ "//flutter/shell/platform/darwin/macos:flutter_desktop_darwin_unittests" ]
+        public_deps += [
+          "//flutter/shell/platform/darwin/macos:flutter_desktop_darwin_swift_unittests",
+          "//flutter/shell/platform/darwin/macos:flutter_desktop_darwin_unittests",
+        ]
       }
 
       if (is_win) {

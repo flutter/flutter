@@ -471,7 +471,7 @@ TEST(GaussianBlurFilterContentsTest, Coefficients) {
                                .blur_radius = 5,
                                .step_size = 1};
   KernelSamples samples = GenerateBlurInfo(parameters);
-  EXPECT_EQ(samples.sample_count, 9);
+  EXPECT_EQ(samples.sample_count, 11);
 
   // Coefficients should add up to 1.
   Scalar tally = 0;
@@ -483,7 +483,7 @@ TEST(GaussianBlurFilterContentsTest, Coefficients) {
   // Verify the shape of the curve.
   for (int i = 0; i < 4; ++i) {
     EXPECT_FLOAT_EQ(samples.samples[i].coefficient,
-                    samples.samples[8 - i].coefficient);
+                    samples.samples[10 - i].coefficient);
     EXPECT_TRUE(samples.samples[i + 1].coefficient >
                 samples.samples[i].coefficient);
   }

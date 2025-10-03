@@ -39,5 +39,11 @@
   "searchWebButtonLabel": "Vyhledávat na webu",
   "shareButtonLabel": "Sdílet…",
   "cancelButtonLabel": "Zrušit",
-  "backButtonLabel": "Zpět"
+  "backButtonLabel": "Zpět",
+  "expansionTileExpandedHint": "dvojitým klepnutím sbalíte",
+  "expansionTileCollapsedHint": "dvojitým klepnutím rozbalíte",
+  "expansionTileExpandedTapHint": "Sbalit",
+  "expansionTileCollapsedTapHint": "Rozbalte pro další podrobnosti",
+  "expandedHint": "Sbaleno",
+  "collapsedHint": "Rozbaleno"
 }

@@ -4,10 +4,11 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPluginAppLifeCycleDelegate.h"
 
-#include "flutter/fml/logging.h"
 #include "flutter/fml/paths.h"
 #include "flutter/lib/ui/plugins/callback_cache.h"
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterCallbackCache_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifeCycle_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 
 FLUTTER_ASSERT_ARC
@@ -89,6 +90,24 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
   return NO;
 }
 
+- (BOOL)appSupportsSceneLifecycle {
+  // When UIScene lifecycle is being used, some application lifecycle events are not call by UIKit.
+  // However, the notifications are still sent. When a Flutter app has been migrated to UIScene,
+  // Flutter should not use the notifications to forward application events to plugins since they
+  // are not expected to be called.
+  // See https://flutter.dev/go/ios-ui-scene-lifecycle-migration?tab=t.0#heading=h.eq8gyd4ds50u
+  return FlutterSharedApplication.hasSceneDelegate;
+}
+
+- (BOOL)pluginSupportsSceneLifecycle:(NSObject<FlutterApplicationLifeCycleDelegate>*)delegate {
+  // The fallback is unnecessary if the plugin conforms to FlutterSceneLifeCycleDelegate.
+  // This means that the plugin has migrated to scene lifecycle events and shouldn't require
+  // application events. However, the plugin may still have the application event implemented to
+  // maintain compatibility with un-migrated apps, which is why the fallback should be checked
+  // before checking that the delegate responds to the selector.
+  return [delegate conformsToProtocol:@protocol(FlutterSceneLifeCycleDelegate)];
+}
+
 - (void)addDelegate:(NSObject<FlutterApplicationLifeCycleDelegate>*)delegate {
   [_delegates addPointer:(__bridge void*)delegate];
   if (IsPowerOfTwo([_delegates count])) {
@@ -129,6 +148,9 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
 
 - (void)handleDidEnterBackground:(NSNotification*)notification
     NS_EXTENSION_UNAVAILABLE_IOS("Disallowed in app extensions") {
+  if ([self appSupportsSceneLifecycle]) {
+    return;
+  }
   UIApplication* application = [UIApplication sharedApplication];
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
   // The following keeps the Flutter session alive when the device screen locks
@@ -143,15 +165,28 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
                     [application endBackgroundTask:_debugBackgroundTask];
                     _debugBackgroundTask = UIBackgroundTaskInvalid;
                   }
-                  FML_LOG(WARNING)
-                      << "\nThe OS has terminated the Flutter debug connection for being "
-                         "inactive in the background for too long.\n\n"
-                         "There are no errors with your Flutter application.\n\n"
-                         "To reconnect, launch your application again via 'flutter run'";
+                  [FlutterLogger
+                      logWarning:@"\nThe OS has terminated the Flutter debug connection for being "
+                                  "inactive in the background for too long.\n\n"
+                                  "There are no errors with your Flutter application.\n\n"
+                                  "To reconnect, launch your application again via 'flutter run'"];
                 }];
 #endif  // FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
+  [self applicationDidEnterBackground:application isFallbackForScene:NO];
+}
+
+- (void)sceneDidEnterBackgroundFallback {
+  UIApplication* application = FlutterSharedApplication.application;
+  if (!application) {
+    return;
+  }
+  [self applicationDidEnterBackground:application isFallbackForScene:YES];
+}
+
+- (void)applicationDidEnterBackground:(UIApplication*)application
+                   isFallbackForScene:(BOOL)isFallback {
   for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
-    if (!delegate) {
+    if (!delegate || (isFallback && [self pluginSupportsSceneLifecycle:delegate])) {
       continue;
     }
     if ([delegate respondsToSelector:@selector(applicationDidEnterBackground:)]) {
@@ -162,6 +197,9 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
 
 - (void)handleWillEnterForeground:(NSNotification*)notification
     NS_EXTENSION_UNAVAILABLE_IOS("Disallowed in app extensions") {
+  if ([self appSupportsSceneLifecycle]) {
+    return;
+  }
   UIApplication* application = [UIApplication sharedApplication];
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
   if (_debugBackgroundTask != UIBackgroundTaskInvalid) {
@@ -169,8 +207,21 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
     _debugBackgroundTask = UIBackgroundTaskInvalid;
   }
 #endif  // FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
+  [self applicationWillEnterForeground:application isFallbackForScene:NO];
+}
+
+- (void)sceneWillEnterForegroundFallback {
+  UIApplication* application = FlutterSharedApplication.application;
+  if (!application) {
+    return;
+  }
+  [self applicationWillEnterForeground:application isFallbackForScene:YES];
+}
+
+- (void)applicationWillEnterForeground:(UIApplication*)application
+                    isFallbackForScene:(BOOL)isFallback {
   for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
-    if (!delegate) {
+    if (!delegate || (isFallback && [self pluginSupportsSceneLifecycle:delegate])) {
       continue;
     }
     if ([delegate respondsToSelector:@selector(applicationWillEnterForeground:)]) {
@@ -181,9 +232,25 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
 
 - (void)handleWillResignActive:(NSNotification*)notification
     NS_EXTENSION_UNAVAILABLE_IOS("Disallowed in app extensions") {
+  if ([self appSupportsSceneLifecycle]) {
+    return;
+  }
   UIApplication* application = [UIApplication sharedApplication];
+  [self applicationWillResignActive:application isFallbackForScene:NO];
+}
+
+- (void)sceneWillResignActiveFallback {
+  UIApplication* application = FlutterSharedApplication.application;
+  if (!application) {
+    return;
+  }
+  [self applicationWillResignActive:application isFallbackForScene:YES];
+}
+
+- (void)applicationWillResignActive:(UIApplication*)application
+                 isFallbackForScene:(BOOL)isFallback {
   for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
-    if (!delegate) {
+    if (!delegate || (isFallback && [self pluginSupportsSceneLifecycle:delegate])) {
       continue;
     }
     if ([delegate respondsToSelector:@selector(applicationWillResignActive:)]) {
@@ -194,9 +261,24 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
 
 - (void)handleDidBecomeActive:(NSNotification*)notification
     NS_EXTENSION_UNAVAILABLE_IOS("Disallowed in app extensions") {
+  if ([self appSupportsSceneLifecycle]) {
+    return;
+  }
   UIApplication* application = [UIApplication sharedApplication];
+  [self applicationDidBecomeActive:application isFallbackForScene:NO];
+}
+
+- (void)sceneDidBecomeActiveFallback {
+  UIApplication* application = FlutterSharedApplication.application;
+  if (!application) {
+    return;
+  }
+  [self applicationDidBecomeActive:application isFallbackForScene:YES];
+}
+
+- (void)applicationDidBecomeActive:(UIApplication*)application isFallbackForScene:(BOOL)isFallback {
   for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
-    if (!delegate) {
+    if (!delegate || (isFallback && [self pluginSupportsSceneLifecycle:delegate])) {
       continue;
     }
     if ([delegate respondsToSelector:@selector(applicationDidBecomeActive:)]) {
@@ -318,17 +400,64 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
 - (BOOL)application:(UIApplication*)application
             openURL:(NSURL*)url
             options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*)options {
+  return [self application:application openURL:url options:options isFallbackForScene:NO];
+}
+
+- (BOOL)sceneFallbackOpenURLContexts:(NSSet<UIOpenURLContext*>*)URLContexts {
+  for (UIOpenURLContext* context in URLContexts) {
+    if ([self application:FlutterSharedApplication.application
+                       openURL:context.URL
+                       options:ConvertOptions(context.options)
+            isFallbackForScene:YES]) {
+      return YES;
+    };
+  };
+  return NO;
+}
+
+- (BOOL)application:(UIApplication*)application
+               openURL:(NSURL*)url
+               options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*)options
+    isFallbackForScene:(BOOL)isFallback {
   for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
-    if (!delegate) {
+    if (!delegate || (isFallback && [self pluginSupportsSceneLifecycle:delegate])) {
       continue;
     }
-    if ([delegate respondsToSelector:_cmd]) {
+    if ([delegate respondsToSelector:@selector(application:openURL:options:)]) {
       if ([delegate application:application openURL:url options:options]) {
         return YES;
       }
     }
   }
   return NO;
+}
+
+/* Converts UISceneOpenURLOptions from the scene event (`sceneFallbackOpenURLContexts`) to a
+ * NSDictionary of options used to the application lifecycle event.
+ *
+ * For more information on UISceneOpenURLOptions, see
+ * https://developer.apple.com/documentation/uikit/uiopenurlcontext/options.
+ *
+ * For information about the possible keys in the NSDictionary and how to handle them, see
+ * https://developer.apple.com/documentation/uikit/uiapplication/openurloptionskey
+ */
+static NSDictionary<UIApplicationOpenURLOptionsKey, id>* ConvertOptions(
+    UISceneOpenURLOptions* options) {
+  NSMutableDictionary<UIApplicationOpenURLOptionsKey, id>* convertedOptions =
+      [NSMutableDictionary dictionary];
+  if (options.sourceApplication) {
+    convertedOptions[UIApplicationOpenURLOptionsSourceApplicationKey] = options.sourceApplication;
+  }
+  if (options.annotation) {
+    convertedOptions[UIApplicationOpenURLOptionsAnnotationKey] = options.annotation;
+  }
+  convertedOptions[UIApplicationOpenURLOptionsOpenInPlaceKey] = @(options.openInPlace);
+  if (@available(iOS 14.5, *)) {
+    if (options.eventAttribution) {
+      convertedOptions[UIApplicationOpenURLOptionsEventAttributionKey] = options.eventAttribution;
+    }
+  }
+  return convertedOptions;
 }
 
 - (BOOL)application:(UIApplication*)application handleOpenURL:(NSURL*)url {
@@ -368,18 +497,42 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
 - (void)application:(UIApplication*)application
     performActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
                completionHandler:(void (^)(BOOL succeeded))completionHandler {
+  [self application:application
+      performActionForShortcutItem:shortcutItem
+                 completionHandler:completionHandler
+                isFallbackForScene:NO];
+}
+
+- (BOOL)sceneFallbackPerformActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
+                                completionHandler:(void (^)(BOOL succeeded))completionHandler {
+  UIApplication* application = FlutterSharedApplication.application;
+  if (!application) {
+    return NO;
+  }
+  return [self application:application
+      performActionForShortcutItem:shortcutItem
+                 completionHandler:completionHandler
+                isFallbackForScene:YES];
+}
+
+- (BOOL)application:(UIApplication*)application
+    performActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
+               completionHandler:(void (^)(BOOL succeeded))completionHandler
+              isFallbackForScene:(BOOL)isFallback {
   for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
-    if (!delegate) {
+    if (!delegate || (isFallback && [self pluginSupportsSceneLifecycle:delegate])) {
       continue;
     }
-    if ([delegate respondsToSelector:_cmd]) {
+    if ([delegate respondsToSelector:@selector(application:
+                                         performActionForShortcutItem:completionHandler:)]) {
       if ([delegate application:application
               performActionForShortcutItem:shortcutItem
                          completionHandler:completionHandler]) {
-        return;
+        return YES;
       }
     }
   }
+  return NO;
 }
 
 - (BOOL)application:(UIApplication*)application
@@ -418,11 +571,33 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
 - (BOOL)application:(UIApplication*)application
     continueUserActivity:(NSUserActivity*)userActivity
       restorationHandler:(void (^)(NSArray*))restorationHandler {
+  return [self application:application
+      continueUserActivity:userActivity
+        restorationHandler:restorationHandler
+        isFallbackForScene:NO];
+}
+
+- (BOOL)sceneFallbackContinueUserActivity:(NSUserActivity*)userActivity {
+  UIApplication* application = FlutterSharedApplication.application;
+  if (!application) {
+    return NO;
+  }
+  return [self application:application
+      continueUserActivity:userActivity
+        restorationHandler:nil
+        isFallbackForScene:YES];
+}
+
+- (BOOL)application:(UIApplication*)application
+    continueUserActivity:(NSUserActivity*)userActivity
+      restorationHandler:(void (^)(NSArray*))restorationHandler
+      isFallbackForScene:(BOOL)isFallback {
   for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
-    if (!delegate) {
+    if (!delegate || (isFallback && [self pluginSupportsSceneLifecycle:delegate])) {
       continue;
     }
-    if ([delegate respondsToSelector:_cmd]) {
+    if ([delegate respondsToSelector:@selector(application:
+                                         continueUserActivity:restorationHandler:)]) {
       if ([delegate application:application
               continueUserActivity:userActivity
                 restorationHandler:restorationHandler]) {

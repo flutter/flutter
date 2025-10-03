@@ -7,7 +7,6 @@ package io.flutter.plugin.editing;
 import static io.flutter.Build.API_LEVELS;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.graphics.Insets;
 import android.view.View;
 import android.view.WindowInsets;
@@ -16,6 +15,8 @@ import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import java.util.List;
 
 // Loosely based off of
@@ -44,7 +45,6 @@ import java.util.List;
 // dispatched again, this time avoiding any flicker since the animation is now
 // complete.
 @VisibleForTesting
-@TargetApi(API_LEVELS.API_30)
 @RequiresApi(API_LEVELS.API_30)
 @SuppressLint({"NewApi", "Override"})
 @Keep
@@ -54,6 +54,7 @@ class ImeSyncDeferringInsetsCallback {
   private WindowInsets lastWindowInsets;
   private AnimationCallback animationCallback;
   private InsetsListener insetsListener;
+  private ImeVisibilityListener imeVisibilityListener;
 
   // True when an animation that matches deferredInsetTypes is active.
   //
@@ -91,6 +92,11 @@ class ImeSyncDeferringInsetsCallback {
     view.setOnApplyWindowInsetsListener(null);
   }
 
+  // Set a listener to be notified when the IME visibility changes.
+  void setImeVisibilityListener(ImeVisibilityListener imeVisibilityListener) {
+    this.imeVisibilityListener = imeVisibilityListener;
+  }
+
   @VisibleForTesting
   View.OnApplyWindowInsetsListener getInsetsListener() {
     return insetsListener;
@@ -99,6 +105,11 @@ class ImeSyncDeferringInsetsCallback {
   @VisibleForTesting
   WindowInsetsAnimation.Callback getAnimationCallback() {
     return animationCallback;
+  }
+
+  @VisibleForTesting
+  ImeVisibilityListener getImeVisibilityListener() {
+    return imeVisibilityListener;
   }
 
   // WindowInsetsAnimation.Callback was introduced in API level 30.  The callback
@@ -175,6 +186,11 @@ class ImeSyncDeferringInsetsCallback {
           view.dispatchApplyWindowInsets(lastWindowInsets);
         }
       }
+      WindowInsetsCompat insets = ViewCompat.getRootWindowInsets(view);
+      if (insets != null && imeVisibilityListener != null) {
+        boolean imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime());
+        imeVisibilityListener.onImeVisibilityChanged(imeVisible);
+      }
     }
   }
 
@@ -201,5 +217,10 @@ class ImeSyncDeferringInsetsCallback {
       // inset handling.
       return view.onApplyWindowInsets(windowInsets);
     }
+  }
+
+  // Listener for IME visibility changes.
+  public interface ImeVisibilityListener {
+    void onImeVisibilityChanged(boolean visible);
   }
 }

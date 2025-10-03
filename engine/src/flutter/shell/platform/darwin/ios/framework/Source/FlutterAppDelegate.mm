@@ -4,11 +4,12 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterAppDelegate.h"
 
-#import "flutter/fml/logging.h"
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPluginAppLifeCycleDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterLaunchEngine.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPluginAppLifeCycleDelegate_internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
@@ -18,11 +19,14 @@ FLUTTER_ASSERT_ARC
 static NSString* const kUIBackgroundMode = @"UIBackgroundModes";
 static NSString* const kRemoteNotificationCapabitiliy = @"remote-notification";
 static NSString* const kBackgroundFetchCapatibility = @"fetch";
-static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 
-@interface FlutterAppDelegate ()
+@interface FlutterAppDelegate () {
+  __weak NSObject<FlutterPluginRegistrant>* _weakRegistrant;
+  NSObject<FlutterPluginRegistrant>* _strongRegistrant;
+}
 @property(nonatomic, copy) FlutterViewController* (^rootFlutterViewControllerGetter)(void);
 @property(nonatomic, strong) FlutterPluginAppLifeCycleDelegate* lifeCycleDelegate;
+@property(nonatomic, strong) FlutterLaunchEngine* launchEngine;
 @end
 
 @implementation FlutterAppDelegate
@@ -30,8 +34,13 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 - (instancetype)init {
   if (self = [super init]) {
     _lifeCycleDelegate = [[FlutterPluginAppLifeCycleDelegate alloc] init];
+    _launchEngine = [[FlutterLaunchEngine alloc] init];
   }
   return self;
+}
+
+- (nullable FlutterEngine*)takeLaunchEngine {
+  return [self.launchEngine takeEngine];
 }
 
 - (BOOL)application:(UIApplication*)application
@@ -132,13 +141,6 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
   }
 }
 
-- (BOOL)isFlutterDeepLinkingEnabled {
-  NSNumber* isDeepLinkingEnabled =
-      [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FlutterDeepLinkingEnabled"];
-  // if not set, return YES
-  return isDeepLinkingEnabled ? [isDeepLinkingEnabled boolValue] : YES;
-}
-
 // This method is called when opening an URL with custom schemes.
 - (BOOL)application:(UIApplication*)application
             openURL:(NSURL*)url
@@ -159,23 +161,23 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
   if (flutterApplication == nil) {
     return NO;
   }
-  if (![self isFlutterDeepLinkingEnabled]) {
+  if (!FlutterSharedApplication.isFlutterDeepLinkingEnabled) {
     return NO;
   }
 
   FlutterViewController* flutterViewController = [self rootFlutterViewController];
   if (flutterViewController) {
-    [flutterViewController sendDeepLinkToFramework:url
-                                 completionHandler:^(BOOL success) {
-                                   if (!success && throwBack) {
-                                     // throw it back to iOS
-                                     [flutterApplication openURL:url
-                                                         options:@{}
-                                               completionHandler:nil];
-                                   }
-                                 }];
+    [flutterViewController.engine sendDeepLinkToFramework:url
+                                        completionHandler:^(BOOL success) {
+                                          if (!success && throwBack) {
+                                            // throw it back to iOS
+                                            [flutterApplication openURL:url
+                                                                options:@{}
+                                                      completionHandler:nil];
+                                          }
+                                        }];
   } else {
-    FML_LOG(ERROR) << "Attempting to open an URL without a Flutter RootViewController.";
+    [FlutterLogger logError:@"Attempting to open an URL without a Flutter RootViewController."];
     return NO;
   }
   return YES;
@@ -214,9 +216,8 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 // This method is called when opening an URL with a http/https scheme.
 - (BOOL)application:(UIApplication*)application
     continueUserActivity:(NSUserActivity*)userActivity
-      restorationHandler:
-          (void (^)(NSArray<id<UIUserActivityRestoring>>* __nullable restorableObjects))
-              restorationHandler {
+      restorationHandler:(void (^)(NSArray<id<UIUserActivityRestoring>>* __nullable
+                                       restorableObjects))restorationHandler {
   if ([self.lifeCycleDelegate application:application
                      continueUserActivity:userActivity
                        restorationHandler:restorationHandler]) {
@@ -228,12 +229,32 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 
 #pragma mark - FlutterPluginRegistry methods. All delegating to the rootViewController
 
+- (NSObject<FlutterPluginRegistrant>*)pluginRegistrant {
+  if (_weakRegistrant) {
+    return _weakRegistrant;
+  }
+  if (_strongRegistrant) {
+    return _strongRegistrant;
+  }
+  return nil;
+}
+
+- (void)setPluginRegistrant:(NSObject<FlutterPluginRegistrant>*)pluginRegistrant {
+  if (pluginRegistrant == (id)self) {
+    _weakRegistrant = pluginRegistrant;
+    _strongRegistrant = nil;
+  } else {
+    _weakRegistrant = nil;
+    _strongRegistrant = pluginRegistrant;
+  }
+}
+
 - (NSObject<FlutterPluginRegistrar>*)registrarForPlugin:(NSString*)pluginKey {
   FlutterViewController* flutterRootViewController = [self rootFlutterViewController];
   if (flutterRootViewController) {
     return [[flutterRootViewController pluginRegistry] registrarForPlugin:pluginKey];
   }
-  return nil;
+  return [self.launchEngine.engine registrarForPlugin:pluginKey];
 }
 
 - (BOOL)hasPlugin:(NSString*)pluginKey {
@@ -241,7 +262,7 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
   if (flutterRootViewController) {
     return [[flutterRootViewController pluginRegistry] hasPlugin:pluginKey];
   }
-  return false;
+  return [self.launchEngine.engine hasPlugin:pluginKey];
 }
 
 - (NSObject*)valuePublishedByPlugin:(NSString*)pluginKey {
@@ -249,7 +270,7 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
   if (flutterRootViewController) {
     return [[flutterRootViewController pluginRegistry] valuePublishedByPlugin:pluginKey];
   }
-  return nil;
+  return [self.launchEngine.engine valuePublishedByPlugin:pluginKey];
 }
 
 #pragma mark - Selectors handling
@@ -311,34 +332,26 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 #pragma mark - State Restoration
 
 - (BOOL)application:(UIApplication*)application shouldSaveApplicationState:(NSCoder*)coder {
-  [coder encodeInt64:self.lastAppModificationTime forKey:kRestorationStateAppModificationKey];
+  [coder encodeInt64:FlutterSharedApplication.lastAppModificationTime
+              forKey:kRestorationStateAppModificationKey];
   return YES;
 }
 
 - (BOOL)application:(UIApplication*)application shouldRestoreApplicationState:(NSCoder*)coder {
   int64_t stateDate = [coder decodeInt64ForKey:kRestorationStateAppModificationKey];
-  return self.lastAppModificationTime == stateDate;
+  return FlutterSharedApplication.lastAppModificationTime == stateDate;
 }
 
 - (BOOL)application:(UIApplication*)application shouldSaveSecureApplicationState:(NSCoder*)coder {
-  [coder encodeInt64:self.lastAppModificationTime forKey:kRestorationStateAppModificationKey];
+  [coder encodeInt64:FlutterSharedApplication.lastAppModificationTime
+              forKey:kRestorationStateAppModificationKey];
   return YES;
 }
 
 - (BOOL)application:(UIApplication*)application
     shouldRestoreSecureApplicationState:(NSCoder*)coder {
   int64_t stateDate = [coder decodeInt64ForKey:kRestorationStateAppModificationKey];
-  return self.lastAppModificationTime == stateDate;
-}
-
-- (int64_t)lastAppModificationTime {
-  NSDate* fileDate;
-  NSError* error = nil;
-  [[[NSBundle mainBundle] executableURL] getResourceValue:&fileDate
-                                                   forKey:NSURLContentModificationDateKey
-                                                    error:&error];
-  NSAssert(error == nil, @"Cannot obtain modification date of main bundle: %@", error);
-  return [fileDate timeIntervalSince1970];
+  return FlutterSharedApplication.lastAppModificationTime == stateDate;
 }
 
 @end

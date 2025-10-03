@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -82,8 +80,9 @@ class _RawMenuAnchorExampleState extends State<RawMenuAnchorExample> {
                     });
                     controller.close();
                   },
-                  trailingIcon:
-                      _selectedAnimal == animal ? const Icon(Icons.check, size: 20) : null,
+                  trailingIcon: _selectedAnimal == animal
+                      ? const Icon(Icons.check, size: 20)
+                      : null,
                   child: Text(animal.label),
                 ),
             ],
@@ -128,7 +127,6 @@ class CustomMenu extends StatelessWidget {
           child: Semantics(
             scopesRoute: true,
             explicitChildNodes: true,
-            role: SemanticsRole.menu,
             child: TapRegion(
               groupId: info.tapRegionGroupId,
               onTapOutside: (PointerDownEvent event) {
@@ -145,7 +143,10 @@ class CustomMenu extends StatelessWidget {
                       borderRadius: BorderRadius.circular(6),
                       boxShadow: kElevationToShadow[4],
                     ),
-                    child: Shortcuts(shortcuts: _shortcuts, child: Column(children: children)),
+                    child: Shortcuts(
+                      shortcuts: _shortcuts,
+                      child: Column(children: children),
+                    ),
                   ),
                 ),
               ),

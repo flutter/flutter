@@ -4,7 +4,6 @@
 
 package io.flutter.embedding.engine.systemchannels;
 
-import android.annotation.TargetApi;
 import android.window.BackEvent;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -60,7 +59,6 @@ public class BackGestureChannel {
    *
    * @param backEvent The BackEvent object containing information about the touch.
    */
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   public void startBackGesture(@NonNull BackEvent backEvent) {
     Log.v(TAG, "Sending message to start back gesture");
@@ -74,7 +72,6 @@ public class BackGestureChannel {
    *
    * @param backEvent An BackEvent object describing the progress event.
    */
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   public void updateBackGestureProgress(@NonNull BackEvent backEvent) {
     Log.v(TAG, "Sending message to update back gesture progress");
@@ -87,7 +84,6 @@ public class BackGestureChannel {
    * <p>This method should be called to signify the completion of a back gesture event and commit
    * the navigation action initiated by the gesture.
    */
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   public void commitBackGesture() {
     Log.v(TAG, "Sending message to commit back gesture");
@@ -99,7 +95,6 @@ public class BackGestureChannel {
    *
    * <p>This method should be called when a back gesture is cancelled or the back button is pressed.
    */
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   public void cancelBackGesture() {
     Log.v(TAG, "Sending message to cancel back gesture");
@@ -115,7 +110,6 @@ public class BackGestureChannel {
     channel.setMethodCallHandler(handler);
   }
 
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   private Map<String, Object> backEventToJsonMap(@NonNull BackEvent backEvent) {
     Map<String, Object> message = new HashMap<>(3);

@@ -73,6 +73,7 @@ static void TestPerformanceOverlayLayerGold(int refresh_rate) {
       .ui_time                       = mock_stopwatch,
       .texture_registry              = nullptr,
       .raster_cache                  = nullptr,
+      .impeller_enabled              = false,
       // clang-format on
   };
 
@@ -141,27 +142,33 @@ class ImageSizeTextBlobInspector : public virtual DlOpReceiver,
                  const DlPoint& point,
                  DlImageSampling sampling,
                  bool render_with_attributes) override {
-    sizes_.push_back(image->GetBounds().GetSize());
+    // We no longer render performance overlays with temp images.
+    FML_UNREACHABLE();
   }
 
-  void drawTextBlob(const sk_sp<SkTextBlob> blob,
-                    DlScalar x,
-                    DlScalar y) override {
-    text_blobs_.push_back(blob);
+  void drawVertices(const std::shared_ptr<DlVertices>& vertices,
+                    DlBlendMode mode) override {
+    sizes_.push_back(vertices->GetBounds().GetSize());
+  }
+
+  void drawText(const std::shared_ptr<DlText>& text,
+                DlScalar x,
+                DlScalar y) override {
+    texts_.push_back(text);
     text_positions_.push_back(DlPoint(x, y));
   }
 
-  const std::vector<DlISize>& sizes() { return sizes_; }
-  const std::vector<sk_sp<SkTextBlob>> text_blobs() { return text_blobs_; }
+  const std::vector<DlSize>& sizes() { return sizes_; }
+  const std::vector<std::shared_ptr<DlText>> texts() { return texts_; }
   const std::vector<DlPoint> text_positions() { return text_positions_; }
 
  private:
-  std::vector<DlISize> sizes_;
-  std::vector<sk_sp<SkTextBlob>> text_blobs_;
+  std::vector<DlSize> sizes_;
+  std::vector<std::shared_ptr<DlText>> texts_;
   std::vector<DlPoint> text_positions_;
 };
 
-TEST_F(PerformanceOverlayLayerTest, PaintingEmptyLayerDies) {
+TEST_F(PerformanceOverlayLayerTest, PaintingEmptyLayerDoesNotDie) {
   const uint64_t overlay_opts = kVisualizeRasterizerStatistics;
   auto layer = std::make_shared<PerformanceOverlayLayer>(overlay_opts);
 
@@ -169,8 +176,7 @@ TEST_F(PerformanceOverlayLayerTest, PaintingEmptyLayerDies) {
   EXPECT_EQ(layer->paint_bounds(), DlRect());
   EXPECT_FALSE(layer->needs_painting(paint_context()));
 
-  // Crashes reading a nullptr.
-  EXPECT_DEATH_IF_SUPPORTED(layer->Paint(paint_context()), "");
+  layer->Paint(paint_context());
 }
 
 TEST_F(PerformanceOverlayLayerTest, InvalidOptions) {
@@ -220,9 +226,10 @@ TEST_F(PerformanceOverlayLayerTest, SimpleRasterizerStatistics) {
   display_list()->Dispatch(inspector);
 
   ASSERT_EQ(inspector.sizes().size(), 0u);
-  ASSERT_EQ(inspector.text_blobs().size(), 1u);
+  ASSERT_EQ(inspector.texts().size(), 1u);
   ASSERT_EQ(inspector.text_positions().size(), 1u);
-  auto text_data = inspector.text_blobs().front()->serialize(SkSerialProcs{});
+  auto text_data =
+      inspector.texts().front()->GetTextBlob()->serialize(SkSerialProcs{});
   EXPECT_TRUE(text_data->equals(overlay_text_data.get()));
   EXPECT_EQ(inspector.text_positions().front(), text_position);
 }
@@ -236,12 +243,12 @@ TEST_F(PerformanceOverlayLayerTest, MarkAsDirtyWhenResized) {
   layer->set_paint_bounds(DlRect::MakeLTRB(0.0f, 0.0f, 48.0f, 48.0f));
   layer->Preroll(preroll_context());
   layer->Paint(display_list_paint_context());
-  DlISize first_draw_size;
+  DlSize first_draw_size;
   {
     ImageSizeTextBlobInspector inspector;
     display_list()->Dispatch(inspector);
     ASSERT_EQ(inspector.sizes().size(), 1u);
-    ASSERT_EQ(inspector.text_blobs().size(), 0u);
+    ASSERT_EQ(inspector.texts().size(), 0u);
     ASSERT_EQ(inspector.text_positions().size(), 0u);
     first_draw_size = inspector.sizes().front();
   }
@@ -256,7 +263,7 @@ TEST_F(PerformanceOverlayLayerTest, MarkAsDirtyWhenResized) {
     ImageSizeTextBlobInspector inspector;
     display_list()->Dispatch(inspector);
     ASSERT_EQ(inspector.sizes().size(), 1u);
-    ASSERT_EQ(inspector.text_blobs().size(), 0u);
+    ASSERT_EQ(inspector.texts().size(), 0u);
     ASSERT_EQ(inspector.text_positions().size(), 0u);
     EXPECT_NE(first_draw_size, inspector.sizes().front());
   }

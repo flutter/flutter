@@ -35,7 +35,8 @@ class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   Future<void> _summarizeStats() async {
     final double? framesProduced = await channel.invokeMethod('getProducedFrameRate');
     final double? framesConsumed = await channel.invokeMethod('getConsumedFrameRate');
-    _summary = '''
+    _summary =
+        '''
 Produced: ${framesProduced?.toStringAsFixed(1)}fps
 Consumed: ${framesConsumed?.toStringAsFixed(1)}fps
 Widget builds: $_widgetBuilds''';
@@ -104,7 +105,8 @@ Widget builds: $_widgetBuilds''';
         setState(() {
           _flutterFrameRate = tickCount * 1000 / elapsed.inMilliseconds;
           debugPrint('Calibrated: frame rate ${_flutterFrameRate.toStringAsFixed(1)}fps.');
-          _summary = '''
+          _summary =
+              '''
 Flutter frame rate is ${_flutterFrameRate.toStringAsFixed(1)}fps.
 Press play to produce texture frames.''';
           _icon = Icons.play_arrow;
@@ -143,14 +145,13 @@ Press play to produce texture frames.''';
             ],
           ),
         ),
-        floatingActionButton:
-            _icon == null
-                ? null
-                : FloatingActionButton(
-                  key: const ValueKey<String>('fab'),
-                  onPressed: _nextState,
-                  child: Icon(_icon),
-                ),
+        floatingActionButton: _icon == null
+            ? null
+            : FloatingActionButton(
+                key: const ValueKey<String>('fab'),
+                onPressed: _nextState,
+                child: Icon(_icon),
+              ),
       ),
     );
   }

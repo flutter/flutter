@@ -58,7 +58,7 @@ void main() {
       await _buildWebProject(projectDir);
 
       // Find the web_plugin_registrant, now that it lives outside "lib":
-      final Directory buildDir =
+      final buildDir =
           projectDir
                   .childDirectory('.dart_tool/flutter_build')
                   .listSync()
@@ -82,15 +82,14 @@ void main() {
       expect(contents, contains('registrar.registerMessageHandler();'));
     },
     overrides: <Type, Generator>{
-      Pub:
-          () => Pub.test(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            processManager: globals.processManager,
-            botDetector: globals.botDetector,
-            platform: globals.platform,
-            stdio: globals.stdio,
-          ),
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: globals.stdio,
+      ),
     },
   );
 
@@ -115,7 +114,7 @@ void main() {
       await _buildWebProject(projectDir);
 
       // Find the web_plugin_registrant, now that it lives outside "lib":
-      final Directory buildDir =
+      final buildDir =
           projectDir
                   .childDirectory('.dart_tool/flutter_build')
                   .listSync()
@@ -139,15 +138,14 @@ void main() {
       expect(contents, contains('registrar.registerMessageHandler();'));
     },
     overrides: <Type, Generator>{
-      Pub:
-          () => Pub.test(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            processManager: globals.processManager,
-            botDetector: globals.botDetector,
-            platform: globals.platform,
-            stdio: globals.stdio,
-          ),
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: globals.stdio,
+      ),
     },
   );
 
@@ -159,7 +157,7 @@ void main() {
       await _buildWebProject(projectDir);
 
       // Find the web_plugin_registrant, now that it lives outside "lib":
-      final Directory buildDir =
+      final buildDir =
           projectDir
                   .childDirectory('.dart_tool/flutter_build')
                   .listSync()
@@ -176,15 +174,14 @@ void main() {
       expect(contents, contains('void registerPlugins() {}'));
     },
     overrides: <Type, Generator>{
-      Pub:
-          () => Pub.test(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            processManager: globals.processManager,
-            botDetector: globals.botDetector,
-            platform: globals.platform,
-            stdio: globals.stdio,
-          ),
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: globals.stdio,
+      ),
     },
   );
 
@@ -213,15 +210,14 @@ void main() {
       expect(buildDir, isNot(exists));
     },
     overrides: <Type, Generator>{
-      Pub:
-          () => Pub.test(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            processManager: globals.processManager,
-            botDetector: globals.botDetector,
-            platform: globals.platform,
-            stdio: globals.stdio,
-          ),
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: globals.stdio,
+      ),
     },
   );
 
@@ -252,7 +248,7 @@ void main() {
       await _buildWebProject(projectDir);
 
       // Find the web_plugin_registrant, now that it lives outside "lib":
-      final Directory buildDir =
+      final buildDir =
           projectDir
                   .childDirectory('.dart_tool/flutter_build')
                   .listSync()
@@ -263,22 +259,21 @@ void main() {
       await _analyzeEntity(buildDir.childFile('web_plugin_registrant.dart'));
     },
     overrides: <Type, Generator>{
-      Pub:
-          () => Pub.test(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            processManager: globals.processManager,
-            botDetector: globals.botDetector,
-            platform: globals.platform,
-            stdio: globals.stdio,
-          ),
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: globals.stdio,
+      ),
     },
   );
 }
 
 Future<void> _createProject(Directory dir, List<String> createArgs) async {
   Cache.flutterRoot = '../..';
-  final CreateCommand command = CreateCommand();
+  final command = CreateCommand();
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>['create', ...createArgs, dir.path]);
 }
@@ -306,11 +301,14 @@ PubspecEditor _addDependencyEditor(String packageToAdd, {String? version, String
     'Cannot only load a package from path or from Pub, not both.',
   );
   void editor(List<String> lines) {
-    for (int i = 0; i < lines.length; i++) {
+    for (var i = 0; i < lines.length; i++) {
       final String line = lines[i];
       if (line.startsWith('dependencies:')) {
-        lines.insert(i + 1, '  $packageToAdd: ${version ?? '\n'
-                '   path: $path'}');
+        lines.insert(
+          i + 1,
+          '  $packageToAdd: ${version ?? '\n'
+                  '   path: $path'}',
+        );
         break;
       }
     }
@@ -321,12 +319,12 @@ PubspecEditor _addDependencyEditor(String packageToAdd, {String? version, String
 
 PubspecEditor _setDartSDKVersionEditor(String version) {
   void editor(List<String> lines) {
-    for (int i = 0; i < lines.length; i++) {
+    for (var i = 0; i < lines.length; i++) {
       final String line = lines[i];
       if (line.startsWith('environment:')) {
         for (i++; i < lines.length; i++) {
           final String innerLine = lines[i];
-          final String sdkLine = "  sdk: '$version'";
+          final sdkLine = "  sdk: '$version'";
           if (innerLine.isNotEmpty && !innerLine.startsWith('  ')) {
             lines.insert(i, sdkLine);
             break;
@@ -346,7 +344,7 @@ PubspecEditor _setDartSDKVersionEditor(String version) {
 
 PubspecEditor _composeEditors(Iterable<PubspecEditor> editors) {
   void composedEditor(List<String> lines) {
-    for (final PubspecEditor editor in editors) {
+    for (final editor in editors) {
       editor(lines);
     }
   }
@@ -369,7 +367,7 @@ Future<void> _analyzeEntity(FileSystemEntity target) async {
     globals.fs.path.join('..', '..', 'bin', 'cache', 'flutter_tools.snapshot'),
   );
 
-  final List<String> args = <String>[flutterToolsSnapshotPath, 'analyze', target.path];
+  final args = <String>[flutterToolsSnapshotPath, 'analyze', target.path];
 
   final ProcessResult exec = await Process.run(
     globals.artifacts!.getArtifactPath(
@@ -399,7 +397,7 @@ Future<void> _runFlutterSnapshot(List<String> flutterCommandArgs, Directory work
     globals.fs.path.join('..', '..', 'bin', 'cache', 'flutter_tools.snapshot'),
   );
 
-  final List<String> args = <String>[
+  final args = <String>[
     globals.artifacts!.getArtifactPath(
       Artifact.engineDartBinary,
       platform: TargetPlatform.web_javascript,

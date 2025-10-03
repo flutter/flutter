@@ -18,7 +18,6 @@ import 'package:flutter/widgets.dart';
 
 import 'list_tile.dart';
 import 'list_tile_theme.dart';
-import 'material_state.dart';
 import 'switch.dart';
 import 'switch_theme.dart';
 import 'theme.dart';
@@ -203,7 +202,7 @@ class SwitchListTile extends StatelessWidget {
     this.tileColor,
     this.title,
     this.subtitle,
-    this.isThreeLine = false,
+    this.isThreeLine,
     this.dense,
     this.contentPadding,
     this.secondary,
@@ -219,7 +218,7 @@ class SwitchListTile extends StatelessWidget {
        applyCupertinoTheme = false,
        assert(activeThumbImage != null || onActiveThumbImageError == null),
        assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
-       assert(!isThreeLine || subtitle != null);
+       assert(isThreeLine != true || subtitle != null);
 
   /// Creates a Material [ListTile] with an adaptive [Switch], following
   /// Material design's
@@ -266,7 +265,7 @@ class SwitchListTile extends StatelessWidget {
     this.tileColor,
     this.title,
     this.subtitle,
-    this.isThreeLine = false,
+    this.isThreeLine,
     this.dense,
     this.contentPadding,
     this.secondary,
@@ -279,7 +278,7 @@ class SwitchListTile extends StatelessWidget {
     this.hoverColor,
     this.internalAddSemanticForOnTap = false,
   }) : _switchListTileType = _SwitchListTileType.adaptive,
-       assert(!isThreeLine || subtitle != null),
+       assert(isThreeLine != true || subtitle != null),
        assert(activeThumbImage != null || onActiveThumbImageError == null),
        assert(inactiveThumbImage != null || onInactiveThumbImageError == null);
 
@@ -373,7 +372,7 @@ class SwitchListTile extends StatelessWidget {
   /// and [inactiveThumbColor] in the default state. If that is also null, then
   /// the value of [SwitchThemeData.thumbColor] is used. If that is also null,
   /// The default value is used.
-  final MaterialStateProperty<Color?>? thumbColor;
+  final WidgetStateProperty<Color?>? thumbColor;
 
   /// The color of this switch's track.
   ///
@@ -386,7 +385,7 @@ class SwitchListTile extends StatelessWidget {
   /// state and [inactiveTrackColor] in the default state. If that is also null,
   /// then the value of [SwitchThemeData.trackColor] is used. If that is also
   /// null, then the default value is used.
-  final MaterialStateProperty<Color?>? trackColor;
+  final WidgetStateProperty<Color?>? trackColor;
 
   /// {@macro flutter.material.switch.trackOutlineColor}
   ///
@@ -396,7 +395,7 @@ class SwitchListTile extends StatelessWidget {
   /// In Material 3, the outline color defaults to transparent in the selected
   /// state and [ColorScheme.outline] in the unselected state. In Material 2,
   /// the [Switch] track has no outline.
-  final MaterialStateProperty<Color?>? trackOutlineColor;
+  final WidgetStateProperty<Color?>? trackOutlineColor;
 
   /// The icon to use on the thumb of this switch
   ///
@@ -407,7 +406,7 @@ class SwitchListTile extends StatelessWidget {
   ///
   /// If null, then the value of [SwitchThemeData.thumbIcon] is used. If this is
   /// also null, then the [Switch] does not have any icons on the thumb.
-  final MaterialStateProperty<Icon?>? thumbIcon;
+  final WidgetStateProperty<Icon?>? thumbIcon;
 
   /// {@macro flutter.material.switch.materialTapTargetSize}
   ///
@@ -442,7 +441,7 @@ class SwitchListTile extends StatelessWidget {
   /// and [hoverColor] is used in the pressed and hovered state. If that is also
   /// null, the value of [SwitchThemeData.overlayColor] is used. If that is
   /// also null, then the default value is used in the pressed and hovered state.
-  final MaterialStateProperty<Color?>? overlayColor;
+  final WidgetStateProperty<Color?>? overlayColor;
 
   /// {@macro flutter.material.switch.splashRadius}
   ///
@@ -479,9 +478,10 @@ class SwitchListTile extends StatelessWidget {
 
   /// Whether this list tile is intended to display three lines of text.
   ///
-  /// If false, the list tile is treated as having one line if the subtitle is
-  /// null and treated as having two lines if the subtitle is non-null.
-  final bool isThreeLine;
+  /// If null, the value from [ListTileThemeData.isThreeLine] is used.
+  /// If that is also null, the value from [ThemeData.listTileTheme] is used.
+  /// If still null, the default value is `false`.
+  final bool? isThreeLine;
 
   /// Whether this list tile is part of a vertically dense list.
   ///
@@ -617,7 +617,7 @@ class SwitchListTile extends StatelessWidget {
 
     final ThemeData theme = Theme.of(context);
     final SwitchThemeData switchTheme = SwitchTheme.of(context);
-    final Set<MaterialState> states = <MaterialState>{if (selected) MaterialState.selected};
+    final Set<WidgetState> states = <WidgetState>{if (selected) WidgetState.selected};
     final Color effectiveActiveColor =
         activeThumbColor ??
         activeColor ??
@@ -634,12 +634,11 @@ class SwitchListTile extends StatelessWidget {
         dense: dense,
         contentPadding: contentPadding,
         enabled: onChanged != null,
-        onTap:
-            onChanged != null
-                ? () {
-                  onChanged!(!value);
-                }
-                : null,
+        onTap: onChanged != null
+            ? () {
+                onChanged!(!value);
+              }
+            : null,
         selected: selected,
         selectedTileColor: selectedTileColor,
         autofocus: autofocus,

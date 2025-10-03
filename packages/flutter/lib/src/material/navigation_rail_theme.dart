@@ -21,9 +21,8 @@ import 'theme.dart';
 /// widgets.
 ///
 /// Descendant widgets obtain the current [NavigationRailThemeData] object
-/// using `NavigationRailTheme.of(context)`. Instances of
-/// [NavigationRailThemeData] can be customized with
-/// [NavigationRailThemeData.copyWith].
+/// using [NavigationRailTheme.of]. Instances of [NavigationRailThemeData]
+/// can be customized with [NavigationRailThemeData.copyWith].
 ///
 /// Typically a [NavigationRailThemeData] is specified as part of the
 /// overall [Theme] with [ThemeData.navigationRailTheme].
@@ -166,14 +165,12 @@ class NavigationRailThemeData with Diagnosticable {
         b?.selectedLabelTextStyle,
         t,
       ),
-      unselectedIconTheme:
-          a?.unselectedIconTheme == null && b?.unselectedIconTheme == null
-              ? null
-              : IconThemeData.lerp(a?.unselectedIconTheme, b?.unselectedIconTheme, t),
-      selectedIconTheme:
-          a?.selectedIconTheme == null && b?.selectedIconTheme == null
-              ? null
-              : IconThemeData.lerp(a?.selectedIconTheme, b?.selectedIconTheme, t),
+      unselectedIconTheme: a?.unselectedIconTheme == null && b?.unselectedIconTheme == null
+          ? null
+          : IconThemeData.lerp(a?.unselectedIconTheme, b?.unselectedIconTheme, t),
+      selectedIconTheme: a?.selectedIconTheme == null && b?.selectedIconTheme == null
+          ? null
+          : IconThemeData.lerp(a?.selectedIconTheme, b?.selectedIconTheme, t),
       groupAlignment: lerpDouble(a?.groupAlignment, b?.groupAlignment, t),
       labelType: t < 0.5 ? a?.labelType : b?.labelType,
       useIndicator: t < 0.5 ? a?.useIndicator : b?.useIndicator,
@@ -311,7 +308,7 @@ class NavigationRailTheme extends InheritedTheme {
   /// [NavigationRail] widgets.
   final NavigationRailThemeData data;
 
-  /// The closest instance of this class that encloses the given context.
+  /// Retrieves the [NavigationRailThemeData] from the closest ancestor [NavigationRailTheme].
   ///
   /// If there is no enclosing [NavigationRailTheme] widget, then
   /// [ThemeData.navigationRailTheme] is used.
@@ -322,8 +319,8 @@ class NavigationRailTheme extends InheritedTheme {
   /// NavigationRailThemeData theme = NavigationRailTheme.of(context);
   /// ```
   static NavigationRailThemeData of(BuildContext context) {
-    final NavigationRailTheme? navigationRailTheme =
-        context.dependOnInheritedWidgetOfExactType<NavigationRailTheme>();
+    final NavigationRailTheme? navigationRailTheme = context
+        .dependOnInheritedWidgetOfExactType<NavigationRailTheme>();
     return navigationRailTheme?.data ?? Theme.of(context).navigationRailTheme;
   }
 

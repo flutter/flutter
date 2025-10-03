@@ -44,14 +44,14 @@ final bool _isRandomizationOff =
 final String bold = hasColor ? '\x1B[1m' : ''; // shard titles
 final String red = hasColor ? '\x1B[31m' : ''; // errors
 final String green = hasColor ? '\x1B[32m' : ''; // section titles, commands
-final String yellow =
-    hasColor
-        ? '\x1B[33m'
-        : ''; // indications that a test was skipped (usually renders orange or brown)
+final String yellow = hasColor
+    ? '\x1B[33m'
+    : ''; // indications that a test was skipped (usually renders orange or brown)
 final String cyan = hasColor ? '\x1B[36m' : ''; // paths
 final String reverse = hasColor ? '\x1B[7m' : ''; // clocks
-final String gray =
-    hasColor ? '\x1B[30m' : ''; // subtle decorative items (usually renders as dark gray)
+final String gray = hasColor
+    ? '\x1B[30m'
+    : ''; // subtle decorative items (usually renders as dark gray)
 final String white = hasColor ? '\x1B[37m' : ''; // last log line (usually renders as light gray)
 final String reset = hasColor ? '\x1B[0m' : '';
 
@@ -62,6 +62,7 @@ final String flutter = path.join(flutterRoot, 'bin', 'flutter$bat');
 final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart$exe');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
 final String engineVersionFile = path.join(flutterRoot, 'bin', 'cache', 'engine.stamp');
+final String engineInfoFile = path.join(flutterRoot, 'bin', 'cache', 'engine_stamp.json');
 final String luciBotId = Platform.environment['SWARMING_BOT_ID'] ?? '';
 final bool runningInDartHHHBot =
     luciBotId.startsWith('luci-dart-') || luciBotId.startsWith('dart-tests-');
@@ -107,9 +108,17 @@ const int kCSIIntermediateRangeEnd = 0x2F;
 const int kCSIFinalRangeStart = 0x40;
 const int kCSIFinalRangeEnd = 0x7E;
 
+int get terminalColumns {
+  try {
+    return stdout.terminalColumns;
+  } catch (e) {
+    return 40;
+  }
+}
+
 String get redLine {
   if (hasColor) {
-    return '$red${'━' * stdout.terminalColumns}$reset';
+    return '$red${'━' * terminalColumns}$reset';
   }
   return '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━';
 }
@@ -168,7 +177,7 @@ void foundError(List<String> messages) {
   assert(messages.isNotEmpty);
   // Make the error message easy to notice in the logs by
   // wrapping it in a red box.
-  final int width = math.max(15, (hasColor ? stdout.terminalColumns : 80) - 1);
+  final int width = math.max(15, (hasColor ? terminalColumns : 80) - 1);
   final String title = 'ERROR #${_errorMessages.length + 1}';
   print('$red╔═╡$bold$title$reset$red╞═${"═" * (width - 4 - title.length)}');
   for (final String message in messages.expand((String line) => line.split('\n'))) {
@@ -258,7 +267,7 @@ void _printQuietly(Object? message) {
     final int start = line.lastIndexOf(_lineBreak) + 1;
     int index = start;
     int length = 0;
-    while (index < line.length && length < stdout.terminalColumns) {
+    while (index < line.length && length < terminalColumns) {
       if (line.codeUnitAt(index) == kESC) {
         // 0x1B
         index += 1;
@@ -449,7 +458,7 @@ Future<void> runDartTest(
     if (coverage != null) '--coverage=$coverage',
     if (perTestTimeout != null) '--timeout=${perTestTimeout.inMilliseconds}ms',
     if (runSkipped) '--run-skipped',
-    if (tags != null) ...tags.map((String t) => '--tags=$t'),
+    ...?tags?.map((String t) => '--tags=$t'),
     if (testPaths != null)
       for (final String testPath in testPaths) testPath,
   ];
@@ -562,8 +571,9 @@ Future<void> runFlutterTest(
 
   args.addAll(tests);
 
-  final OutputMode outputMode =
-      outputChecker == null && printOutput ? OutputMode.print : OutputMode.capture;
+  final OutputMode outputMode = outputChecker == null && printOutput
+      ? OutputMode.print
+      : OutputMode.capture;
 
   final CommandResult result = await runCommand(
     flutter,
@@ -685,8 +695,9 @@ List<T> selectIndexOfTotalSubshard<T>(List<T> tests, {String subshardKey = kSubs
   // Lastly, compute the indices of the items in buckets[index].
   // We derive this from the toal number items in previous buckets and the number
   // of items in this bucket.
-  final int numberOfItemsInPreviousBuckets =
-      subShardIndex == 0 ? 0 : buckets.sublist(0, subShardIndex - 1).sum;
+  final int numberOfItemsInPreviousBuckets = subShardIndex == 0
+      ? 0
+      : buckets.sublist(0, subShardIndex - 1).sum;
   final int start = numberOfItemsInPreviousBuckets;
   final int end = start + buckets[subShardIndex - 1];
 
@@ -724,22 +735,75 @@ Future<void> _runFromList(
   }
 }
 
-/// Checks the given file's contents to determine if they match the allowed
-/// pattern for version strings.
-///
-/// Returns null if the contents are good. Returns a string if they are bad.
-/// The string is an error message.
-Future<String?> verifyVersion(File file) async {
-  final RegExp pattern = RegExp(r'^(\d+)\.(\d+)\.(\d+)((-\d+\.\d+)?\.pre(\.\d+)?)?$');
-  if (!file.existsSync()) {
-    return 'The version logic failed to create the Flutter version file.';
+/// Provides access to read and parse the `bin/cache/flutter.version.json`.
+sealed class Version {
+  static final RegExp _pattern = RegExp(r'^(\d+)\.(\d+)\.(\d+)((-\d+\.\d+)?\.pre([-\.]\d+)?)?$');
+
+  /// Attempts to read and resolve the version stored in the [checkoutPath].
+  ///
+  /// If omitted, defaults the current flutter root using the real file system.
+  static Future<Version> resolveIn([fs.Directory? checkoutPath]) async {
+    checkoutPath ??= const LocalFileSystem().directory(flutterRoot);
+    return resolveFile(
+      checkoutPath.childDirectory('bin').childDirectory('cache').childFile('flutter.version.json'),
+    );
   }
-  final String version = await file.readAsString();
-  if (version == '0.0.0-unknown') {
-    return 'The version logic failed to determine the Flutter version.';
+
+  /// Attempts to read and resolve the version stored in [file].
+  static Future<Version> resolveFile(fs.File file) async {
+    if (!file.existsSync()) {
+      return VersionError._(
+        'The version logic failed to create the Flutter version file: ${file.path}',
+        contents: null,
+      );
+    }
+    final Object? json = jsonDecode(await file.readAsString());
+    if (json is! Map<String, Object?>) {
+      return VersionError._('The version file was in an unexpected format.', contents: '$json');
+    }
+    final String? version = json['flutterVersion'] as String?;
+    if (version == null) {
+      return VersionError._(
+        'The version file was missing the key "flutterVersion".',
+        contents: '$json',
+      );
+    }
+    if (version == '0.0.0-unknown') {
+      return VersionError._(
+        'The version logic failed to determine the Flutter version.',
+        contents: version,
+      );
+    }
+    if (!version.contains(_pattern)) {
+      return VersionError._(
+        'The version logic generated an invalid version string: "$version".',
+        contents: version,
+      );
+    }
+    return VersionOk._(version);
   }
-  if (!version.contains(pattern)) {
-    return 'The version logic generated an invalid version string: "$version".';
+}
+
+/// A failed result of [Version.resolveFile].
+final class VersionError implements Version {
+  const VersionError._(this.error, {required this.contents});
+
+  /// Describes the error state.
+  final String error;
+
+  /// The contents of the version file, if any.
+  final String? contents;
+
+  @override
+  String toString() {
+    return error;
   }
-  return null;
+}
+
+/// A successful result of [Version.resolveFile].
+final class VersionOk implements Version {
+  const VersionOk._(this.version);
+
+  /// The contents of the version file, successfully parsed.
+  final String version;
 }

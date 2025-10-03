@@ -5,6 +5,8 @@
 #include "flutter/display_list/benchmarking/dl_benchmarks.h"
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_op_flags.h"
+#include "flutter/display_list/dl_text_skia.h"
+#include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/display_list/skia/dl_sk_canvas.h"
 #include "flutter/display_list/testing/dl_test_snippets.h"
 
@@ -15,6 +17,30 @@
 
 namespace flutter {
 namespace testing {
+
+class DlPathVerbCounter : public DlPathReceiver {
+ public:
+  void MoveTo(const DlPoint& p2, bool will_be_closed) override {
+    verb_count_++;
+  }
+  void LineTo(const DlPoint& p2) override { verb_count_++; }
+  void QuadTo(const DlPoint& cp, const DlPoint& p2) override { verb_count_++; }
+  bool ConicTo(const DlPoint& cp, const DlPoint& p2, DlScalar weight) override {
+    verb_count_++;
+    return false;
+  }
+  void CubicTo(const DlPoint& cp1,
+               const DlPoint& cp2,
+               const DlPoint& p2) override {
+    verb_count_++;
+  }
+  void Close() override { verb_count_++; }
+
+  uint32_t GetVerbCount() const { return verb_count_; }
+
+ private:
+  uint32_t verb_count_ = 0u;
+};
 
 DlPaint GetPaintForRun(unsigned attributes) {
   DlPaint paint;
@@ -662,9 +688,11 @@ void BM_DrawPath(benchmark::State& state,
   state.SetComplexityN(state.range(0));
 
   MultiplyPath(path_builder, type, center, 20, state.range(0), radius);
-  DlPath path = DlPath(path_builder);
+  DlPath path = path_builder.TakePath();
 
-  state.counters["VerbCount"] = path.GetPath().GetComponentCount();
+  DlPathVerbCounter counter;
+  path.Dispatch(counter);
+  state.counters["VerbCount"] = counter.GetVerbCount();
   state.counters["DrawCallCount"] = 1;
 
   builder.DrawPath(path, paint);
@@ -1197,7 +1225,7 @@ void BM_DrawTextBlob(benchmark::State& state,
   DisplayListBuilder builder;
   DlPaint paint = GetPaintForRun(attributes);
 
-  AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawTextBlobFlags);
+  AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawTextFlags);
 
   size_t draw_calls = state.range(0);
   size_t canvas_size = kFixedCanvasSize;
@@ -1213,7 +1241,7 @@ void BM_DrawTextBlob(benchmark::State& state,
   for (size_t i = 0; i < draw_calls; i++) {
     character[0] = 'A' + (i % 26);
     auto blob = SkTextBlob::MakeFromString(character, CreateTestFontOfSize(20));
-    builder.DrawTextBlob(blob, 50.0f, 50.0f, paint);
+    builder.DrawText(DlTextSkia::Make(blob), 50.0f, 50.0f, paint);
   }
 
   auto display_list = builder.Build();
@@ -1277,7 +1305,7 @@ void BM_DrawShadow(benchmark::State& state,
   float elevation = state.range(0);
   state.counters["DrawCallCount"] = 1;
 
-  DlPath path = DlPath(path_builder);
+  DlPath path = path_builder.TakePath();
 
   // We can hardcode dpr to 1.0f as we're varying elevation, and dpr is only
   // ever used in conjunction with elevation.

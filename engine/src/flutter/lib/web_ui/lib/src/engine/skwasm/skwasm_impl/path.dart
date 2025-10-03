@@ -14,7 +14,7 @@ enum PathDirection { clockwise, counterClockwise }
 
 enum PathArcSize { small, large }
 
-class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements ScenePath {
+class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements LayerPath, DisposablePath {
   factory SkwasmPath() {
     return SkwasmPath.fromHandle(pathCreate());
   }
@@ -93,8 +93,9 @@ class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements ScenePath {
     bool clockwise = true,
   }) {
     final PathArcSize arcSize = largeArc ? PathArcSize.large : PathArcSize.small;
-    final PathDirection pathDirection =
-        clockwise ? PathDirection.clockwise : PathDirection.counterClockwise;
+    final PathDirection pathDirection = clockwise
+        ? PathDirection.clockwise
+        : PathDirection.counterClockwise;
     pathArcToRotated(
       handle,
       radius.x,
@@ -116,8 +117,9 @@ class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements ScenePath {
     bool clockwise = true,
   }) {
     final PathArcSize arcSize = largeArc ? PathArcSize.large : PathArcSize.small;
-    final PathDirection pathDirection =
-        clockwise ? PathDirection.clockwise : PathDirection.counterClockwise;
+    final PathDirection pathDirection = clockwise
+        ? PathDirection.clockwise
+        : PathDirection.counterClockwise;
     pathRelativeArcToRotated(
       handle,
       radius.x,
@@ -172,9 +174,8 @@ class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements ScenePath {
 
   @override
   void addRSuperellipse(ui.RSuperellipse rsuperellipse) {
-    // TODO(dkwingsmt): Properly implement RSuperellipse on Web instead of falling
-    // back to RRect.  https://github.com/flutter/flutter/issues/163718
-    addRRect(rsuperellipse.toApproximateRRect());
+    final (ui.Path path, ui.Offset offset) = rsuperellipse.toPathOffset();
+    addPath((path as LazyPath).builtPath, offset);
   }
 
   @override
@@ -234,7 +235,7 @@ class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements ScenePath {
       SkwasmPath.fromHandle(pathCombine(operation.index, path1.handle, path2.handle));
 
   @override
-  ui.PathMetrics computeMetrics({bool forceClosed = false}) {
+  SkwasmPathMetrics computeMetrics({bool forceClosed = false}) {
     return SkwasmPathMetrics(path: this, forceClosed: forceClosed);
   }
 
@@ -247,5 +248,15 @@ class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements ScenePath {
     final String svgString = utf8.decode(characters);
     skStringFree(skString);
     return svgString;
+  }
+}
+
+class SkwasmPathConstructors implements DisposablePathConstructors {
+  @override
+  SkwasmPath createNew() => SkwasmPath();
+
+  @override
+  SkwasmPath combinePaths(ui.PathOperation operation, DisposablePath path1, DisposablePath path2) {
+    return SkwasmPath.combine(operation, path1 as SkwasmPath, path2 as SkwasmPath);
   }
 }

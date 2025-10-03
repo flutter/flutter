@@ -6,13 +6,13 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/isolated/devfs_web.dart';
+import 'package:flutter_tools/src/isolated/release_asset_server.dart';
 import 'package:flutter_tools/src/web/web_constants.dart';
 import 'package:shelf/shelf.dart';
 
 import '../../src/common.dart';
 
-const List<int> kTransparentImage = <int>[
+const kTransparentImage = <int>[
   0x89,
   0x50,
   0x4E,
@@ -101,7 +101,7 @@ void main() {
   testWithoutContext(
     'release asset server serves correct mime type and content length for png',
     () async {
-      final ReleaseAssetServer assetServer = ReleaseAssetServer(
+      final assetServer = ReleaseAssetServer(
         Uri.base,
         fileSystem: fileSystem,
         platform: platform,
@@ -128,7 +128,7 @@ void main() {
   testWithoutContext(
     'release asset server serves correct mime type and content length for JavaScript',
     () async {
-      final ReleaseAssetServer assetServer = ReleaseAssetServer(
+      final assetServer = ReleaseAssetServer(
         Uri.base,
         fileSystem: fileSystem,
         platform: platform,
@@ -155,7 +155,7 @@ void main() {
   testWithoutContext(
     'release asset server serves correct mime type and content length for html',
     () async {
-      final ReleaseAssetServer assetServer = ReleaseAssetServer(
+      final assetServer = ReleaseAssetServer(
         Uri.base,
         fileSystem: fileSystem,
         platform: platform,
@@ -180,7 +180,7 @@ void main() {
   );
 
   testWithoutContext('release asset server serves content from flutter root', () async {
-    final ReleaseAssetServer assetServer = ReleaseAssetServer(
+    final assetServer = ReleaseAssetServer(
       Uri.base,
       fileSystem: fileSystem,
       platform: platform,
@@ -199,7 +199,7 @@ void main() {
   });
 
   testWithoutContext('release asset server serves content from project directory', () async {
-    final ReleaseAssetServer assetServer = ReleaseAssetServer(
+    final assetServer = ReleaseAssetServer(
       Uri.base,
       fileSystem: fileSystem,
       platform: platform,
@@ -220,7 +220,7 @@ void main() {
   testWithoutContext(
     'release asset server serves html content with COOP/COEP headers when specified',
     () async {
-      final ReleaseAssetServer assetServer = ReleaseAssetServer(
+      final assetServer = ReleaseAssetServer(
         Uri.base,
         fileSystem: fileSystem,
         platform: platform,
@@ -246,7 +246,7 @@ void main() {
   testWithoutContext(
     'release asset server serves html content without COOP/COEP headers when specified',
     () async {
-      final ReleaseAssetServer assetServer = ReleaseAssetServer(
+      final assetServer = ReleaseAssetServer(
         Uri.base,
         fileSystem: fileSystem,
         platform: platform,

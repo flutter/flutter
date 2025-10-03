@@ -6,7 +6,6 @@ package io.flutter.embedding.engine.renderer;
 
 import static io.flutter.Build.API_LEVELS;
 
-import android.annotation.TargetApi;
 import android.content.ComponentCallbacks2;
 import android.graphics.Bitmap;
 import android.graphics.ImageFormat;
@@ -23,6 +22,7 @@ import android.view.Surface;
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
@@ -408,13 +408,11 @@ public class FlutterRenderer implements TextureRegistry {
   // When we acquire the next image, close any ImageReaders that don't have any
   // more pending images.
   @Keep
-  @TargetApi(API_LEVELS.API_29)
   final class ImageReaderSurfaceProducer
       implements TextureRegistry.SurfaceProducer,
           TextureRegistry.ImageConsumer,
           TextureRegistry.OnTrimMemoryListener {
     private static final String TAG = "ImageReaderSurfaceProducer";
-    private static final int MAX_IMAGES = 6;
     // The ImageReaderSurfaceProducer must not close images until the renderer,
     // either Skia OpenGL, Impeller OpenGL, or Impeller Vulkan is done reading
     // from them. The Vulkan renderer allows up to two frames in flight before
@@ -423,6 +421,7 @@ public class FlutterRenderer implements TextureRegistry {
     // the frame that references them has finished rendering can result in
     // tearing or other incorrect rendering.
     private static final int MAX_DEQUEUED_IMAGES = 2;
+    private static final int MAX_IMAGES = 5 + MAX_DEQUEUED_IMAGES;
 
     // Flip when debugging to see verbose logs.
     private static final boolean VERBOSE_LOGS = false;
@@ -556,10 +555,10 @@ public class FlutterRenderer implements TextureRegistry {
       return (double) deltaNanos / 1000000.0;
     }
 
-    PerImageReader getOrCreatePerImageReader(ImageReader reader) {
+    private PerImageReader getOrCreatePerImageReader(ImageReader reader) {
       PerImageReader r = perImageReaders.get(reader);
       if (r == null) {
-        r = new PerImageReader(reader);
+        r = createPerImageReader(reader);
         perImageReaders.put(reader, r);
         imageReaderQueue.add(r);
         if (VERBOSE_LOGS) {
@@ -567,6 +566,11 @@ public class FlutterRenderer implements TextureRegistry {
         }
       }
       return r;
+    }
+
+    @VisibleForTesting
+    public PerImageReader createPerImageReader(ImageReader reader) {
+      return new PerImageReader(reader);
     }
 
     void pruneImageReaderQueue() {
@@ -741,7 +745,7 @@ public class FlutterRenderer implements TextureRegistry {
       }
     }
 
-    @TargetApi(API_LEVELS.API_33)
+    @RequiresApi(API_LEVELS.API_33)
     private void waitOnFence(Image image) {
       try {
         SyncFence fence = image.getFence();
@@ -831,6 +835,12 @@ public class FlutterRenderer implements TextureRegistry {
     }
 
     @Override
+    public Surface getForcedNewSurface() {
+      createNewReader = true;
+      return getSurface();
+    }
+
+    @Override
     public void scheduleFrame() {
       if (VERBOSE_LOGS) {
         long now = System.nanoTime();
@@ -844,7 +854,7 @@ public class FlutterRenderer implements TextureRegistry {
     }
 
     @Override
-    @TargetApi(API_LEVELS.API_29)
+    @RequiresApi(API_LEVELS.API_29)
     public Image acquireLatestImage() {
       PerImage r = dequeueImage();
       if (r == null) {
@@ -856,17 +866,23 @@ public class FlutterRenderer implements TextureRegistry {
 
     private PerImageReader getActiveReader() {
       synchronized (lock) {
-        if (createNewReader) {
-          createNewReader = false;
-          // Create a new ImageReader and add it to the queue.
-          ImageReader reader = createImageReader();
-          if (VERBOSE_LOGS) {
-            Log.i(
-                TAG, reader.hashCode() + " created w=" + requestedWidth + " h=" + requestedHeight);
+        if (!createNewReader) {
+          // Verify we don't need a new ImageReader anyway because its Surface has been invalidated.
+          PerImageReader lastPerImageReader = imageReaderQueue.peekLast();
+          Surface lastImageReaderSurface = lastPerImageReader.reader.getSurface();
+          boolean lastImageReaderHasValidSurface = lastImageReaderSurface.isValid();
+          if (lastImageReaderHasValidSurface) {
+            return lastPerImageReader;
           }
-          return getOrCreatePerImageReader(reader);
         }
-        return imageReaderQueue.peekLast();
+
+        createNewReader = false;
+        // Create a new ImageReader and add it to the queue.
+        ImageReader reader = createImageReader();
+        if (VERBOSE_LOGS) {
+          Log.i(TAG, reader.hashCode() + " created w=" + requestedWidth + " h=" + requestedHeight);
+        }
+        return getOrCreatePerImageReader(reader);
       }
     }
 
@@ -883,7 +899,7 @@ public class FlutterRenderer implements TextureRegistry {
       }
     }
 
-    @TargetApi(API_LEVELS.API_33)
+    @RequiresApi(API_LEVELS.API_33)
     private ImageReader createImageReader33() {
       final ImageReader.Builder builder = new ImageReader.Builder(requestedWidth, requestedHeight);
       // Allow for double buffering.
@@ -900,7 +916,7 @@ public class FlutterRenderer implements TextureRegistry {
       return builder.build();
     }
 
-    @TargetApi(API_LEVELS.API_29)
+    @RequiresApi(API_LEVELS.API_29)
     private ImageReader createImageReader29() {
       return ImageReader.newInstance(
           requestedWidth,
@@ -910,7 +926,8 @@ public class FlutterRenderer implements TextureRegistry {
           HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE);
     }
 
-    private ImageReader createImageReader() {
+    @VisibleForTesting
+    public ImageReader createImageReader() {
       if (Build.VERSION.SDK_INT >= API_LEVELS.API_33) {
         return createImageReader33();
       } else if (Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
@@ -1008,7 +1025,7 @@ public class FlutterRenderer implements TextureRegistry {
       }
     }
 
-    @TargetApi(API_LEVELS.API_33)
+    @RequiresApi(API_LEVELS.API_33)
     private void waitOnFence(Image image) {
       try {
         SyncFence fence = image.getFence();
@@ -1018,7 +1035,7 @@ public class FlutterRenderer implements TextureRegistry {
       }
     }
 
-    @TargetApi(API_LEVELS.API_29)
+    @RequiresApi(API_LEVELS.API_29)
     private void maybeWaitOnFence(Image image) {
       if (image == null) {
         return;
@@ -1037,7 +1054,7 @@ public class FlutterRenderer implements TextureRegistry {
     }
 
     @Override
-    @TargetApi(API_LEVELS.API_29)
+    @RequiresApi(API_LEVELS.API_29)
     public Image acquireLatestImage() {
       Image r;
       synchronized (this) {

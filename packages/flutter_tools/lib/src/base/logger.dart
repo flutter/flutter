@@ -13,7 +13,7 @@ import 'io.dart';
 import 'terminal.dart' show OutputPreferences, Terminal, TerminalColor;
 import 'utils.dart';
 
-const int kDefaultStatusPadding = 59;
+const kDefaultStatusPadding = 59;
 
 /// A factory for generating [Stopwatch] instances for [Status] instances.
 class StopwatchFactory {
@@ -34,7 +34,7 @@ abstract class Logger {
   bool get isVerbose => false;
 
   /// If true, silences the logger output.
-  bool quiet = false;
+  var quiet = false;
 
   /// If true, this logger supports ANSI sequences and animations are enabled.
   bool get supportsColor;
@@ -44,16 +44,16 @@ abstract class Logger {
 
   /// If true, then [printError] has been called at least once for this logger
   /// since the last time it was set to false.
-  bool hadErrorOutput = false;
+  var hadErrorOutput = false;
 
   /// If true, then [printWarning] has been called at least once with its
   /// "fatal" argument true for this logger
   /// since the last time it was reset to false.
-  bool hadWarningOutput = false;
+  var hadWarningOutput = false;
 
   /// Causes [checkForFatalLogs] to call [throwToolExit] when it is called if
   /// [hadWarningOutput] is true.
-  bool fatalWarnings = false;
+  var fatalWarnings = false;
 
   /// Returns the terminal attached to this logger.
   Terminal get terminal;
@@ -77,12 +77,12 @@ abstract class Logger {
   /// doesn't support them.
   ///
   /// The `indent` argument specifies the number of spaces to indent the overall
-  /// message. If wrapping is enabled in [outputPreferences], then the wrapped
+  /// message. If wrapping is enabled in [OutputPreferences], then the wrapped
   /// lines will be indented as well.
   ///
   /// If `hangingIndent` is specified, then any wrapped lines will be indented
   /// by this much more than the first line, if wrapping is enabled in
-  /// [outputPreferences].
+  /// [OutputPreferences].
   ///
   /// If `wrap` is specified, then it overrides the
   /// `outputPreferences.wrapText` setting.
@@ -109,12 +109,12 @@ abstract class Logger {
   /// doesn't support them.
   ///
   /// The `indent` argument specifies the number of spaces to indent the overall
-  /// message. If wrapping is enabled in [outputPreferences], then the wrapped
+  /// message. If wrapping is enabled in [OutputPreferences], then the wrapped
   /// lines will be indented as well.
   ///
   /// If `hangingIndent` is specified, then any wrapped lines will be indented
   /// by this much more than the first line, if wrapping is enabled in
-  /// [outputPreferences].
+  /// [OutputPreferences].
   ///
   /// If `wrap` is specified, then it overrides the
   /// `outputPreferences.wrapText` setting.
@@ -147,12 +147,12 @@ abstract class Logger {
   /// status. Defaults to true.
   ///
   /// The `indent` argument specifies the number of spaces to indent the overall
-  /// message. If wrapping is enabled in [outputPreferences], then the wrapped
+  /// message. If wrapping is enabled in [OutputPreferences], then the wrapped
   /// lines will be indented as well.
   ///
   /// If `hangingIndent` is specified, then any wrapped lines will be indented
   /// by this much more than the first line, if wrapping is enabled in
-  /// [outputPreferences].
+  /// [OutputPreferences].
   ///
   /// If `wrap` is specified, then it overrides the
   /// `outputPreferences.wrapText` setting.
@@ -219,9 +219,6 @@ abstract class Logger {
   });
 
   /// Send an event to be emitted.
-  ///
-  /// Only surfaces a value in machine modes, Loggers may ignore this message in
-  /// non-machine modes.
   void sendEvent(String name, [Map<String, dynamic>? args]) {}
 
   /// Clears all output.
@@ -410,7 +407,7 @@ class DelegatingLogger implements Logger {
 /// Throws a [StateError] if no matching delegate is found.
 @override
 T asLogger<T extends Logger>(Logger logger) {
-  final Logger original = logger;
+  final original = logger;
   while (true) {
     if (logger is T) {
       return logger;
@@ -656,8 +653,8 @@ void _generateBox({
   required Terminal terminal,
   String? title,
 }) {
-  const int kPaddingLeftRight = 1;
-  const int kEdges = 2;
+  const kPaddingLeftRight = 1;
+  const kEdges = 2;
 
   final int maxTextWidthPerLine = wrapColumn - kEdges - kPaddingLeftRight * 2;
   final List<String> lines = wrapText(
@@ -685,7 +682,7 @@ void _generateBox({
   write('\n');
 
   // Write `│ [message] │`.
-  for (int lineIdx = 0; lineIdx < lines.length; lineIdx++) {
+  for (var lineIdx = 0; lineIdx < lines.length; lineIdx++) {
     write('│');
     write(' ' * kPaddingLeftRight);
     write(lines[lineIdx]);
@@ -702,7 +699,7 @@ void _generateBox({
   write('\n');
 }
 
-final RegExp _ansiEscapePattern = RegExp('\x1B\\[[\x30-\x3F]*[\x20-\x2F]*[\x40-\x7E]');
+final _ansiEscapePattern = RegExp('\x1B\\[[\x30-\x3F]*[\x20-\x2F]*[\x40-\x7E]');
 
 int _getColumnSize(String line) {
   // Remove ANSI escape characters from the string.
@@ -727,18 +724,17 @@ class WindowsStdoutLogger extends StdoutLogger {
 
   @override
   void writeToStdOut(String message) {
-    final String windowsMessage =
-        terminal.supportsEmoji
-            ? message
-            : message
-                .replaceAll('🔥', '')
-                .replaceAll('🖼️', '')
-                .replaceAll('✗', 'X')
-                .replaceAll('✓', '√')
-                .replaceAll('🔨', '')
-                .replaceAll('💪', '')
-                .replaceAll('⚠️', '!')
-                .replaceAll('✏️', '');
+    final String windowsMessage = terminal.supportsEmoji
+        ? message
+        : message
+              .replaceAll('🔥', '')
+              .replaceAll('🖼️', '')
+              .replaceAll('✗', 'X')
+              .replaceAll('✓', '√')
+              .replaceAll('🔨', '')
+              .replaceAll('💪', '')
+              .replaceAll('⚠️', '!')
+              .replaceAll('✏️', '');
     _stdio.stdoutWrite(windowsMessage);
   }
 }
@@ -779,11 +775,11 @@ class BufferLogger extends Logger {
   @override
   bool get supportsColor => terminal.supportsColor && terminal.isCliAnimationEnabled;
 
-  final StringBuffer _error = StringBuffer();
-  final StringBuffer _warning = StringBuffer();
-  final StringBuffer _status = StringBuffer();
-  final StringBuffer _trace = StringBuffer();
-  final StringBuffer _events = StringBuffer();
+  final _error = StringBuffer();
+  final _warning = StringBuffer();
+  final _status = StringBuffer();
+  final _trace = StringBuffer();
+  final _events = StringBuffer();
 
   String get errorText => _error.toString();
   String get warningText => _warning.toString();
@@ -805,7 +801,7 @@ class BufferLogger extends Logger {
     bool? wrap,
   }) {
     hadErrorOutput = true;
-    final StringBuffer errorMessage = StringBuffer();
+    final errorMessage = StringBuffer();
     errorMessage.write(message);
     if (stackTrace != null) {
       errorMessage.writeln();
@@ -1019,7 +1015,7 @@ class VerboseLogger extends DelegatingLogger {
 
   @override
   void printBox(String message, {String? title}) {
-    String composedMessage = '';
+    var composedMessage = '';
     _generateBox(
       title: title,
       message: message,
@@ -1069,7 +1065,7 @@ class VerboseLogger extends DelegatingLogger {
     _stopwatch.reset();
 
     String prefix;
-    const int prefixWidth = 8;
+    const prefixWidth = 8;
     if (millis == 0) {
       prefix = ''.padLeft(prefixWidth);
     } else {
@@ -1214,11 +1210,14 @@ class SilentStatus extends Status {
   }
 }
 
-const int _kTimePadding = 8; // should fit "99,999ms"
+const _kTimePadding = 8; // should fit "99,999ms"
 
-/// Constructor writes [message] to [stdout]. On [cancel] or [stop], will call
-/// [onFinish]. On [stop], will additionally print out summary information.
+/// A version of [Status] that just outputs a summary.
 class SummaryStatus extends Status {
+  /// Writes [message] to [stdio].
+  ///
+  /// On [cancel] or [stop], will call [onFinish].
+  /// On [stop], will additionally print out summary information.
   SummaryStatus({
     String message = '',
     required super.stopwatch,
@@ -1233,7 +1232,7 @@ class SummaryStatus extends Status {
   final int _padding;
   final Stdio _stdio;
 
-  bool _messageShowingOnCurrentLine = false;
+  var _messageShowingOnCurrentLine = false;
 
   @override
   void start() {
@@ -1298,14 +1297,14 @@ class AnonymousSpinnerStatus extends Status {
 
   final Stdio _stdio;
   final Terminal _terminal;
-  String _slowWarning = '';
+  var _slowWarning = '';
   final SlowWarningCallback? _slowWarningCallback;
   final TerminalColor? _warningColor;
 
-  static const String _backspaceChar = '\b';
-  static const String _clearChar = ' ';
+  static const _backspaceChar = '\b';
+  static const _clearChar = ' ';
 
-  static const List<String> _emojiAnimations = <String>[
+  static const _emojiAnimations = <String>[
     '⣾⣽⣻⢿⡿⣟⣯⣷', // counter-clockwise
     '⣾⣷⣯⣟⡿⢿⣻⣽', // clockwise
     '⣾⣷⣯⣟⡿⢿⣻⣽⣷⣾⣽⣻⢿⡿⣟⣯⣷', // bouncing clockwise and counter-clockwise
@@ -1327,7 +1326,7 @@ class AnonymousSpinnerStatus extends Status {
     '⢸⡯⠭⠅⢸⣇⣀⡀⢸⣇⣸⡇⠈⢹⡏⠁⠈⢹⡏⠁⢸⣯⣭⡅⢸⡯⢕⡂⠀⠀', // text crawl
   ];
 
-  static const List<String> _asciiAnimations = <String>[r'-\|/'];
+  static const _asciiAnimations = <String>[r'-\|/'];
 
   static List<String> _selectAnimation(Terminal terminal) {
     final List<String> animations = terminal.supportsEmoji ? _emojiAnimations : _asciiAnimations;
@@ -1340,12 +1339,12 @@ class AnonymousSpinnerStatus extends Status {
 
   Timer? _timer;
 
-  int _ticks = 0;
+  var _ticks = 0;
   @visibleForTesting
   int get ticks => _ticks;
 
-  int _lastAnimationFrameLength = 0;
-  bool _timedOut = false;
+  var _lastAnimationFrameLength = 0;
+  var _timedOut = false;
 
   String get _currentAnimationFrame => _animation[ticks % _animation.length];
   int get _currentLineLength => _lastAnimationFrameLength + _slowWarning.length;
@@ -1435,15 +1434,14 @@ class AnonymousSpinnerStatus extends Status {
 }
 
 /// An animated version of [Status].
-///
-/// The constructor writes [message] to [stdout] with padding, then starts an
-/// indeterminate progress indicator animation.
-///
-/// On [cancel] or [stop], will call [onFinish]. On [stop], will
-/// additionally print out summary information.
-///
-/// Call [pause] before outputting any text while this is running.
 class SpinnerStatus extends AnonymousSpinnerStatus {
+  /// Writes [message] to [stdio] with padding, then starts an
+  /// indeterminate progress indicator animation.
+  ///
+  /// On [cancel] or [stop], will call [onFinish].
+  /// On [stop], will additionally print out summary information.
+  ///
+  /// Call [pause] before outputting any text while this is running.
   SpinnerStatus({
     required String message,
     int padding = kDefaultStatusPadding,
@@ -1459,7 +1457,7 @@ class SpinnerStatus extends AnonymousSpinnerStatus {
 
   static final String _margin = AnonymousSpinnerStatus._clearChar * (5 + _kTimePadding - 1);
 
-  int _totalMessageLength = 0;
+  var _totalMessageLength = 0;
 
   @override
   int get _currentLineLength => _totalMessageLength + super._currentLineLength;
@@ -1471,7 +1469,7 @@ class SpinnerStatus extends AnonymousSpinnerStatus {
   }
 
   void _printStatus() {
-    final String line = '${_message.padRight(_padding)}$_margin';
+    final line = '${_message.padRight(_padding)}$_margin';
     _totalMessageLength = line.length;
     _writeToStdOut(line);
   }

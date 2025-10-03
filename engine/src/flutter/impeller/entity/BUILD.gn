@@ -37,8 +37,9 @@ impeller_shaders("entity_shaders") {
     "shaders/gradients/sweep_gradient_uniform_fill.frag",
     "shaders/line.frag",
     "shaders/line.vert",
-    "shaders/rrect_blur.vert",
     "shaders/rrect_blur.frag",
+    "shaders/rrect_like_blur.vert",
+    "shaders/rsuperellipse_blur.frag",
     "shaders/runtime_effect.vert",
     "shaders/solid_fill.frag",
     "shaders/solid_fill.vert",
@@ -175,6 +176,10 @@ impeller_component("entity") {
     "contents/solid_color_contents.h",
     "contents/solid_rrect_blur_contents.cc",
     "contents/solid_rrect_blur_contents.h",
+    "contents/solid_rrect_like_blur_contents.cc",
+    "contents/solid_rrect_like_blur_contents.h",
+    "contents/solid_rsuperellipse_blur_contents.cc",
+    "contents/solid_rsuperellipse_blur_contents.h",
     "contents/sweep_gradient_contents.cc",
     "contents/sweep_gradient_contents.h",
     "contents/text_contents.cc",
@@ -195,6 +200,8 @@ impeller_component("entity") {
     "entity_pass_clip_stack.h",
     "entity_pass_target.cc",
     "entity_pass_target.h",
+    "geometry/arc_geometry.cc",
+    "geometry/arc_geometry.h",
     "geometry/circle_geometry.cc",
     "geometry/circle_geometry.h",
     "geometry/cover_geometry.cc",
@@ -236,6 +243,7 @@ impeller_component("entity") {
     "../renderer",
     "../typographer",
     "//flutter/display_list",
+    "//flutter/third_party/abseil-cpp/absl/container:flat_hash_map",
   ]
 
   deps = [ "//flutter/fml" ]

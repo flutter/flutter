@@ -90,10 +90,9 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
         continue;
       }
 
-      final String routeName =
-          eventName == 'Start Transition'
-              ? (eventIter.current['args'] as Map<String, dynamic>)['to'] as String
-              : '';
+      final String routeName = eventName == 'Start Transition'
+          ? (eventIter.current['args'] as Map<String, dynamic>)['to'] as String
+          : '';
 
       if (eventName == lastEventName && routeName == lastRouteName) {
         error.write('.');

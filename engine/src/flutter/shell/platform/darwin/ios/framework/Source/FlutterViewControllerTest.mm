@@ -13,6 +13,7 @@
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterHourFormat.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEmbedderKeyResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFakeKeyEvents.h"
@@ -22,6 +23,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 #import "flutter/shell/platform/embedder/embedder.h"
+#import "flutter/testing/ios/IosUnitTests/App/AppDelegate.h"
 #import "flutter/third_party/spring_animation/spring_animation.h"
 
 FLUTTER_ASSERT_ARC
@@ -116,6 +118,10 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
 @interface FlutterEmbedderKeyResponder (Tests)
 @property(nonatomic, copy, readonly) FlutterSendKeyEvent sendEvent;
+@end
+
+@interface NSObject (Tests)
+@property(nonatomic, strong) FlutterEngine* mockLaunchEngine;
 @end
 
 @interface FlutterViewController (Tests)
@@ -2469,6 +2475,40 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
   [mockBundle stopMocking];
   [mockVC stopMocking];
+}
+
+- (void)testAppDelegatePluginRegistrant {
+  id mockRegistrant = OCMProtocolMock(@protocol(FlutterPluginRegistrant));
+  id appDelegate = [[UIApplication sharedApplication] delegate];
+  XCTAssertTrue([appDelegate respondsToSelector:@selector(setPluginRegistrant:)]);
+  [appDelegate setPluginRegistrant:mockRegistrant];
+  FlutterViewController* viewController = [[FlutterViewController alloc] init];
+  [appDelegate setPluginRegistrant:nil];
+  OCMVerify([mockRegistrant registerWithRegistry:viewController]);
+}
+
+- (void)testGrabLaunchEngine {
+  id appDelegate = [[UIApplication sharedApplication] delegate];
+  XCTAssertTrue([appDelegate respondsToSelector:@selector(setMockLaunchEngine:)]);
+  [appDelegate setMockLaunchEngine:self.mockEngine];
+  UIStoryboard* storyboard = [UIStoryboard storyboardWithName:@"Flutter" bundle:nil];
+  XCTAssertTrue(storyboard);
+  FlutterViewController* viewController =
+      (FlutterViewController*)[storyboard instantiateInitialViewController];
+  XCTAssertTrue(viewController);
+  XCTAssertTrue([viewController isKindOfClass:[FlutterViewController class]]);
+  XCTAssertEqual(viewController.engine, self.mockEngine);
+  [appDelegate setMockLaunchEngine:nil];
+}
+
+- (void)testDoesntGrabLaunchEngine {
+  id appDelegate = [[UIApplication sharedApplication] delegate];
+  XCTAssertTrue([appDelegate respondsToSelector:@selector(setMockLaunchEngine:)]);
+  [appDelegate setMockLaunchEngine:self.mockEngine];
+  FlutterViewController* flutterViewController = [[FlutterViewController alloc] init];
+  XCTAssertNotNil(flutterViewController.engine);
+  XCTAssertNotEqual(flutterViewController.engine, self.mockEngine);
+  [appDelegate setMockLaunchEngine:nil];
 }
 
 @end

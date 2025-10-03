@@ -14,7 +14,10 @@ import '../widgets/feedback_tester.dart';
 Widget wrap({required Widget child}) {
   return MediaQuery(
     data: const MediaQueryData(),
-    child: Directionality(textDirection: TextDirection.ltr, child: Material(child: child)),
+    child: Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(child: child),
+    ),
   );
 }
 
@@ -119,8 +122,8 @@ void main() {
         child: Theme(
           data: ThemeData(
             checkboxTheme: CheckboxThemeData(
-              fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-                return states.contains(MaterialState.selected) ? themeColor : null;
+              fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+                return states.contains(WidgetState.selected) ? themeColor : null;
               }),
             ),
           ),
@@ -353,8 +356,8 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           checkboxTheme: CheckboxThemeData(
-            fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-              return states.contains(MaterialState.selected) ? fillColor : null;
+            fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+              return states.contains(WidgetState.selected) ? fillColor : null;
             }),
           ),
         ),
@@ -637,14 +640,14 @@ void main() {
     const Color activeEnabledFillColor = Color(0xFF000001);
     const Color activeDisabledFillColor = Color(0xFF000002);
 
-    Color getFillColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    Color getFillColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return activeDisabledFillColor;
       }
       return activeEnabledFillColor;
     }
 
-    final MaterialStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
+    final WidgetStateProperty<Color> fillColor = WidgetStateColor.resolveWith(getFillColor);
 
     Widget buildFrame({required bool enabled}) {
       return wrap(
@@ -673,14 +676,14 @@ void main() {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const Color hoveredFillColor = Color(0xFF000001);
 
-    Color getFillColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.hovered)) {
+    Color getFillColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.hovered)) {
         return hoveredFillColor;
       }
       return Colors.transparent;
     }
 
-    final MaterialStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
+    final WidgetStateProperty<Color> fillColor = WidgetStateColor.resolveWith(getFillColor);
 
     Widget buildFrame() {
       return wrap(
@@ -717,14 +720,13 @@ void main() {
           builder: (BuildContext context, StateSetter setState) {
             return CheckboxListTile(
               value: value,
-              onChanged:
-                  enabled
-                      ? (bool? newValue) {
-                        setState(() {
-                          value = newValue;
-                        });
-                      }
-                      : null,
+              onChanged: enabled
+                  ? (bool? newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    }
+                  : null,
               hoverColor: Colors.orange[500],
             );
           },
@@ -777,14 +779,14 @@ void main() {
       const Color hoverOverlayColor = Color(0xFF000003);
       const Color hoverColor = Color(0xFF000005);
 
-      Color? getOverlayColor(Set<MaterialState> states) {
-        if (states.contains(MaterialState.pressed)) {
-          if (states.contains(MaterialState.selected)) {
+      Color? getOverlayColor(Set<WidgetState> states) {
+        if (states.contains(WidgetState.pressed)) {
+          if (states.contains(WidgetState.selected)) {
             return activePressedOverlayColor;
           }
           return inactivePressedOverlayColor;
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return hoverOverlayColor;
         }
         return null;
@@ -800,7 +802,7 @@ void main() {
               value: active,
               onChanged: (_) {},
               fillColor: const MaterialStatePropertyAll<Color>(fillColor),
-              overlayColor: useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
+              overlayColor: useOverlay ? WidgetStateProperty.resolveWith(getOverlayColor) : null,
               hoverColor: hoverColor,
               splashRadius: splashRadius,
             ),
@@ -900,14 +902,14 @@ void main() {
       const Color hoverOverlayColor = Color(0xFF000003);
       const Color hoverColor = Color(0xFF000005);
 
-      Color? getOverlayColor(Set<MaterialState> states) {
-        if (states.contains(MaterialState.pressed)) {
-          if (states.contains(MaterialState.selected)) {
+      Color? getOverlayColor(Set<WidgetState> states) {
+        if (states.contains(WidgetState.pressed)) {
+          if (states.contains(WidgetState.selected)) {
             return activePressedOverlayColor;
           }
           return inactivePressedOverlayColor;
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return hoverOverlayColor;
         }
         return null;
@@ -922,7 +924,7 @@ void main() {
               value: active,
               onChanged: (_) {},
               fillColor: const MaterialStatePropertyAll<Color>(fillColor),
-              overlayColor: useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
+              overlayColor: useOverlay ? WidgetStateProperty.resolveWith(getOverlayColor) : null,
               hoverColor: hoverColor,
               splashRadius: splashRadius,
             ),
@@ -940,10 +942,10 @@ void main() {
         Material.of(tester.element(find.byType(Checkbox))),
         kIsWeb
             ? (paints
-              ..circle()
-              ..circle(color: fillColor.withAlpha(kRadialReactionAlpha), radius: splashRadius))
+                ..circle()
+                ..circle(color: fillColor.withAlpha(kRadialReactionAlpha), radius: splashRadius))
             : (paints
-              ..circle(color: fillColor.withAlpha(kRadialReactionAlpha), radius: splashRadius)),
+                ..circle(color: fillColor.withAlpha(kRadialReactionAlpha), radius: splashRadius)),
         reason: 'Default inactive pressed Checkbox should have overlay color from fillColor',
       );
 
@@ -957,10 +959,10 @@ void main() {
         Material.of(tester.element(find.byType(Checkbox))),
         kIsWeb
             ? (paints
-              ..circle()
-              ..circle(color: fillColor.withAlpha(kRadialReactionAlpha), radius: splashRadius))
+                ..circle()
+                ..circle(color: fillColor.withAlpha(kRadialReactionAlpha), radius: splashRadius))
             : (paints
-              ..circle(color: fillColor.withAlpha(kRadialReactionAlpha), radius: splashRadius)),
+                ..circle(color: fillColor.withAlpha(kRadialReactionAlpha), radius: splashRadius)),
         reason: 'Default active pressed Checkbox should have overlay color from fillColor',
       );
 
@@ -974,8 +976,8 @@ void main() {
         Material.of(tester.element(find.byType(Checkbox))),
         kIsWeb
             ? (paints
-              ..circle()
-              ..circle(color: inactivePressedOverlayColor, radius: splashRadius))
+                ..circle()
+                ..circle(color: inactivePressedOverlayColor, radius: splashRadius))
             : (paints..circle(color: inactivePressedOverlayColor, radius: splashRadius)),
         reason: 'Inactive pressed Checkbox should have overlay color: $inactivePressedOverlayColor',
       );
@@ -990,8 +992,8 @@ void main() {
         Material.of(tester.element(find.byType(Checkbox))),
         kIsWeb
             ? (paints
-              ..circle()
-              ..circle(color: activePressedOverlayColor, radius: splashRadius))
+                ..circle()
+                ..circle(color: activePressedOverlayColor, radius: splashRadius))
             : (paints..circle(color: activePressedOverlayColor, radius: splashRadius)),
         reason: 'Active pressed Checkbox should have overlay color: $activePressedOverlayColor',
       );
@@ -1346,14 +1348,14 @@ void main() {
     Widget buildFrame({bool? themeDataIsThreeLine, bool? themeIsThreeLine, bool? isThreeLine}) {
       return MaterialApp(
         key: UniqueKey(),
-        theme:
-            themeDataIsThreeLine != null
-                ? ThemeData(listTileTheme: ListTileThemeData(isThreeLine: themeDataIsThreeLine))
-                : null,
+        theme: themeDataIsThreeLine != null
+            ? ThemeData(listTileTheme: ListTileThemeData(isThreeLine: themeDataIsThreeLine))
+            : null,
         home: Material(
           child: ListTileTheme(
-            data:
-                themeIsThreeLine != null ? ListTileThemeData(isThreeLine: themeIsThreeLine) : null,
+            data: themeIsThreeLine != null
+                ? ListTileThemeData(isThreeLine: themeIsThreeLine)
+                : null,
             child: ListView(
               children: <Widget>[
                 CheckboxListTile(
@@ -1462,15 +1464,15 @@ void main() {
         key: UniqueKey(),
         theme: ThemeData(
           platform: TargetPlatform.iOS,
-          listTileTheme:
-              themeDataIsThreeLine != null
-                  ? ListTileThemeData(isThreeLine: themeDataIsThreeLine)
-                  : null,
+          listTileTheme: themeDataIsThreeLine != null
+              ? ListTileThemeData(isThreeLine: themeDataIsThreeLine)
+              : null,
         ),
         home: Material(
           child: ListTileTheme(
-            data:
-                themeIsThreeLine != null ? ListTileThemeData(isThreeLine: themeIsThreeLine) : null,
+            data: themeIsThreeLine != null
+                ? ListTileThemeData(isThreeLine: themeIsThreeLine)
+                : null,
             child: ListView(
               children: <Widget>[
                 CheckboxListTile.adaptive(
@@ -1569,14 +1571,286 @@ void main() {
     );
     expectThreeLine();
   });
+
+  testWidgets('titleAlignment position with title widget', (WidgetTester tester) async {
+    const Key secondaryKey = Key('secondary');
+    const double titleHeight = 50.0;
+    const double secondaryHeight = 24.0;
+    // The default vertical padding for material 3 is 8.0.
+    const double minVerticalPadding = 8.0;
+
+    Widget buildFrame({ListTileTitleAlignment? titleAlignment}) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: CheckboxListTile(
+              titleAlignment: titleAlignment,
+              controlAffinity: ListTileControlAffinity.leading,
+              value: true,
+              onChanged: (bool? newValue) {},
+              title: const SizedBox(width: 20.0, height: titleHeight),
+              secondary: const SizedBox(key: secondaryKey, width: 24.0, height: secondaryHeight),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // If [ThemeData.useMaterial3] is true, the default title alignment is
+    // [ListTileTitleAlignment.threeLine], which positions the leading and
+    // trailing widgets center vertically in the tile if the [ListTile.isThreeLine]
+    // property is false.
+    await tester.pumpWidget(buildFrame());
+    final double checkboxHeight = tester.getSize(find.byType(Checkbox)).height;
+    final double tileHeight = tester.getSize(find.byType(ListTile)).height;
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is ListTile && widget.titleAlignment == null;
+      }),
+      findsOne,
+    );
+    Offset tileOffset = tester.getTopLeft(find.byType(ListTile));
+    Offset checkboxOffset = tester.getTopLeft(find.byType(Checkbox));
+    Offset secondaryOffset = tester.getTopRight(find.byKey(secondaryKey));
+
+    // Leading and trailing widgets are centered vertically in the tile.
+    final double centerPositionCheckbox = (tileHeight / 2) - (checkboxHeight / 2);
+    final double centerPositionSecondary = (tileHeight / 2) - (secondaryHeight / 2);
+    expect(checkboxOffset.dy - tileOffset.dy, centerPositionCheckbox);
+    expect(secondaryOffset.dy - tileOffset.dy, centerPositionSecondary);
+
+    // Test [ListTileTitleAlignment.threeLine] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.threeLine));
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is ListTile && widget.titleAlignment == ListTileTitleAlignment.threeLine;
+      }),
+      findsOne,
+    );
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    checkboxOffset = tester.getTopLeft(find.byType(Checkbox));
+    secondaryOffset = tester.getTopRight(find.byKey(secondaryKey));
+
+    // Leading and trailing widgets are centered vertically in the tile,
+    // If the [ListTile.isThreeLine] property is false.
+    expect(checkboxOffset.dy - tileOffset.dy, centerPositionCheckbox);
+    expect(secondaryOffset.dy - tileOffset.dy, centerPositionSecondary);
+
+    // Test [ListTileTitleAlignment.titleHeight] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.titleHeight));
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is ListTile && widget.titleAlignment == ListTileTitleAlignment.titleHeight;
+      }),
+      findsOne,
+    );
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    checkboxOffset = tester.getTopLeft(find.byType(Checkbox));
+    secondaryOffset = tester.getTopRight(find.byKey(secondaryKey));
+
+    expect(checkboxOffset.dy - tileOffset.dy, (tileHeight - checkboxHeight) / 2);
+    expect(secondaryOffset.dy - tileOffset.dy, centerPositionSecondary);
+
+    // Test [ListTileTitleAlignment.top] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.top));
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is ListTile && widget.titleAlignment == ListTileTitleAlignment.top;
+      }),
+      findsOne,
+    );
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    checkboxOffset = tester.getTopLeft(find.byType(Checkbox));
+    secondaryOffset = tester.getTopRight(find.byKey(secondaryKey));
+
+    // Leading and trailing widgets are placed minVerticalPadding below
+    // the top of the title widget. The default for material 3 is 8.0.
+    const double topPosition = minVerticalPadding;
+    expect(checkboxOffset.dy - tileOffset.dy, topPosition);
+    expect(secondaryOffset.dy - tileOffset.dy, topPosition);
+
+    // Test [ListTileTitleAlignment.center] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.center));
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is ListTile && widget.titleAlignment == ListTileTitleAlignment.center;
+      }),
+      findsOne,
+    );
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    checkboxOffset = tester.getTopLeft(find.byType(Checkbox));
+    secondaryOffset = tester.getTopRight(find.byKey(secondaryKey));
+
+    // Leading and trailing widgets are centered vertically in the tile.
+    expect(checkboxOffset.dy - tileOffset.dy, centerPositionCheckbox);
+    expect(secondaryOffset.dy - tileOffset.dy, centerPositionSecondary);
+
+    // Test [ListTileTitleAlignment.bottom] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.bottom));
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is ListTile && widget.titleAlignment == ListTileTitleAlignment.bottom;
+      }),
+      findsOne,
+    );
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    checkboxOffset = tester.getTopLeft(find.byType(Checkbox));
+    secondaryOffset = tester.getTopRight(find.byKey(secondaryKey));
+
+    // Leading and trailing widgets are placed minVerticalPadding above
+    // the bottom of the subtitle widget.
+    final double bottomPositionCheckbox = tileHeight - minVerticalPadding - checkboxHeight;
+    final double bottomPositionSecondary = tileHeight - minVerticalPadding - secondaryHeight;
+    expect(checkboxOffset.dy - tileOffset.dy, bottomPositionCheckbox);
+    expect(secondaryOffset.dy - tileOffset.dy, bottomPositionSecondary);
+  });
+
+  testWidgets('titleAlignment position with title and subtitle widgets', (
+    WidgetTester tester,
+  ) async {
+    const Key secondaryKey = Key('secondary');
+    const double titleHeight = 50.0;
+    const double subtitleHeight = 50.0;
+    const double secondaryHeight = 24.0;
+    const double verticalPadding = 8.0;
+
+    Widget buildFrame({ListTileTitleAlignment? titleAlignment}) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: CheckboxListTile(
+              titleAlignment: titleAlignment,
+              controlAffinity: ListTileControlAffinity.leading,
+              title: const SizedBox(width: 20.0, height: titleHeight),
+              subtitle: const SizedBox(width: 20.0, height: subtitleHeight),
+              secondary: const SizedBox(key: secondaryKey, width: 24.0, height: secondaryHeight),
+              value: true,
+              onChanged: (bool? newValue) {},
+            ),
+          ),
+        ),
+      );
+    }
+
+    // If [ThemeData.useMaterial3] is true, the default title alignment is
+    // [ListTileTitleAlignment.threeLine], which positions the leading and
+    // trailing widgets center vertically in the tile if the [ListTile.isThreeLine]
+    // property is false.
+    await tester.pumpWidget(buildFrame());
+    final double tileHeight = tester.getSize(find.byType(ListTile)).height;
+    final double checkboxHeight = tester.getSize(find.byType(Checkbox)).height;
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is ListTile && widget.titleAlignment == null;
+      }),
+      findsOne,
+    );
+    Offset tileOffset = tester.getTopLeft(find.byType(ListTile));
+    Offset checkboxOffset = tester.getTopLeft(find.byType(Checkbox));
+    Offset secondaryOffset = tester.getTopRight(find.byKey(secondaryKey));
+
+    // Leading and trailing widgets are centered vertically in the tile.
+    final double centerPositionOffsetCheckbox = (tileHeight / 2) - (checkboxHeight / 2);
+    final double centerPositionOffsetSecondary = (tileHeight / 2) - (secondaryHeight / 2);
+    expect(checkboxOffset.dy - tileOffset.dy, centerPositionOffsetCheckbox);
+    expect(secondaryOffset.dy - tileOffset.dy, centerPositionOffsetSecondary);
+
+    // Test [ListTileTitleAlignment.threeLine] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.threeLine));
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is ListTile && widget.titleAlignment == ListTileTitleAlignment.threeLine;
+      }),
+      findsOne,
+    );
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    checkboxOffset = tester.getTopLeft(find.byType(Checkbox));
+    secondaryOffset = tester.getTopRight(find.byKey(secondaryKey));
+
+    // Leading and trailing widgets are centered vertically in the tile,
+    // If the [ListTile.isThreeLine] property is false.
+    expect(checkboxOffset.dy - tileOffset.dy, centerPositionOffsetCheckbox);
+    expect(secondaryOffset.dy - tileOffset.dy, centerPositionOffsetSecondary);
+
+    // Test [ListTileTitleAlignment.titleHeight] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.titleHeight));
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is ListTile && widget.titleAlignment == ListTileTitleAlignment.titleHeight;
+      }),
+      findsOne,
+    );
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    checkboxOffset = tester.getTopLeft(find.byType(Checkbox));
+    secondaryOffset = tester.getTopRight(find.byKey(secondaryKey));
+
+    // Leading and trailing widgets are positioned 16.0 pixels below the
+    // top of the title widget.
+    const double titlePosition = 16.0;
+    expect(checkboxOffset.dy - tileOffset.dy, titlePosition);
+    expect(secondaryOffset.dy - tileOffset.dy, titlePosition);
+
+    // Test [ListTileTitleAlignment.top] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.top));
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is ListTile && widget.titleAlignment == ListTileTitleAlignment.top;
+      }),
+      findsOne,
+    );
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    checkboxOffset = tester.getTopLeft(find.byType(Checkbox));
+    secondaryOffset = tester.getTopRight(find.byKey(secondaryKey));
+
+    // Leading and trailing widgets are placed minVerticalPadding below
+    // the top of the title widget.
+    const double topPosition = verticalPadding;
+    expect(checkboxOffset.dy - tileOffset.dy, topPosition);
+    expect(secondaryOffset.dy - tileOffset.dy, topPosition);
+
+    // Test [ListTileTitleAlignment.center] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.center));
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is ListTile && widget.titleAlignment == ListTileTitleAlignment.center;
+      }),
+      findsOne,
+    );
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    checkboxOffset = tester.getTopLeft(find.byType(Checkbox));
+    secondaryOffset = tester.getTopRight(find.byKey(secondaryKey));
+
+    // Leading and trailing widgets are centered vertically in the tile.
+    expect(checkboxOffset.dy - tileOffset.dy, centerPositionOffsetCheckbox);
+    expect(secondaryOffset.dy - tileOffset.dy, centerPositionOffsetSecondary);
+
+    // Test [ListTileTitleAlignment.bottom] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.bottom));
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is ListTile && widget.titleAlignment == ListTileTitleAlignment.bottom;
+      }),
+      findsOne,
+    );
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    checkboxOffset = tester.getTopLeft(find.byType(Checkbox));
+    secondaryOffset = tester.getTopRight(find.byKey(secondaryKey));
+
+    // Leading and trailing widgets are placed minVerticalPadding above
+    // the bottom of the subtitle widget.
+    final double bottomPositionCheckbox = tileHeight - verticalPadding - checkboxHeight;
+    final double bottomPositionSecondary = tileHeight - verticalPadding - secondaryHeight;
+    expect(checkboxOffset.dy - tileOffset.dy, bottomPositionCheckbox);
+    expect(secondaryOffset.dy - tileOffset.dy, bottomPositionSecondary);
+  });
 }
 
-class _SelectedGrabMouseCursor extends MaterialStateMouseCursor {
+class _SelectedGrabMouseCursor extends WidgetStateMouseCursor {
   const _SelectedGrabMouseCursor();
 
   @override
-  MouseCursor resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.selected)) {
+  MouseCursor resolve(Set<WidgetState> states) {
+    if (states.contains(WidgetState.selected)) {
       return SystemMouseCursors.grab;
     }
     return SystemMouseCursors.basic;

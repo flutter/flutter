@@ -587,6 +587,10 @@ static const NSInteger kSecondsToWaitForPlatformView = 30;
 }
 
 - (void)testPlatformView {
+  // This is increased to account for the usage of gaussian blur which doesn't
+  // converge into golden images.
+  // https://github.com/flutter/flutter/issues/168497
+  self.rmseThreadhold = 0.7;
   [self checkPlatformViewGolden];
 }
 
@@ -605,11 +609,10 @@ static const NSInteger kSecondsToWaitForPlatformView = 30;
 }
 
 - (void)testPlatformView {
-  // (TODO)cyanglaz: remove the threshold adjustment after all the ci migrates to macOS13.
-  // https://github.com/flutter/flutter/issues/133207
-  if ([NSProcessInfo processInfo].operatingSystemVersion.majorVersion >= 13) {
-    self.rmseThreadhold = 0.7;
-  }
+  // This is increased to account for the usage of gaussian blur which doesn't
+  // converge into golden images.
+  // https://github.com/flutter/flutter/issues/168497
+  self.rmseThreadhold = 1.5;
   [self checkPlatformViewGolden];
 }
 
@@ -628,6 +631,10 @@ static const NSInteger kSecondsToWaitForPlatformView = 30;
 }
 
 - (void)testPlatformView {
+  // This is increased to account for the usage of gaussian blur which doesn't
+  // converge into golden images.
+  // https://github.com/flutter/flutter/issues/168497
+  self.rmseThreadhold = 1.0;
   [self checkPlatformViewGolden];
 }
 

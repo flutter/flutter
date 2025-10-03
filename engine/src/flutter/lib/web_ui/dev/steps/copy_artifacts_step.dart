@@ -51,12 +51,13 @@ class CopyArtifactsStep implements PipelineStep {
     final String realmComponent = switch (realm) {
       LuciRealm.Prod || LuciRealm.Staging => '',
       LuciRealm.Try => 'flutter_archives_v2/',
-      LuciRealm.Unknown =>
-        throw ToolExit('Could not generate artifact bucket url for unknown realm.'),
+      LuciRealm.Unknown => throw ToolExit(
+        'Could not generate artifact bucket url for unknown realm.',
+      ),
     };
     final Uri url = Uri.https(
       'storage.googleapis.com',
-      '${realmComponent}flutter_infra_release/flutter/$gitRevision/flutter-web-sdk.zip',
+      '${realmComponent}flutter_infra_release/flutter/${realm == LuciRealm.Try ? gitRevision : contentHash}/flutter-web-sdk.zip',
     );
     final http.Response response = await http.Client().get(url);
     if (response.statusCode != 200) {
@@ -77,6 +78,7 @@ class CopyArtifactsStep implements PipelineStep {
     final String canvaskitSourceDirectory;
     final String canvaskitChromiumSourceDirectory;
     final String skwasmSourceDirectory;
+    final String skwasmHeavySourceDirectory;
     switch (source) {
       case LocalArtifactSource(:final mode):
         final buildDirectory = getBuildDirectoryForRuntimeMode(mode).path;
@@ -88,6 +90,7 @@ class CopyArtifactsStep implements PipelineStep {
         canvaskitSourceDirectory = pathlib.join(buildDirectory, 'canvaskit');
         canvaskitChromiumSourceDirectory = pathlib.join(buildDirectory, 'canvaskit_chromium');
         skwasmSourceDirectory = pathlib.join(buildDirectory, 'skwasm');
+        skwasmHeavySourceDirectory = pathlib.join(buildDirectory, 'skwasm_heavy');
 
       case GcsArtifactSource(:final realm):
         final artifactsDirectory = (await _downloadArtifacts(realm)).path;
@@ -104,6 +107,7 @@ class CopyArtifactsStep implements PipelineStep {
           'chromium',
         );
         skwasmSourceDirectory = pathlib.join(artifactsDirectory, 'canvaskit');
+        skwasmHeavySourceDirectory = pathlib.join(artifactsDirectory, 'canvaskit');
     }
 
     await environment.webTestsArtifactsDir.create(recursive: true);
@@ -131,6 +135,7 @@ class CopyArtifactsStep implements PipelineStep {
     if (artifactDeps.skwasm) {
       copied.add('Skwasm');
       await copyWasmLibrary('skwasm', skwasmSourceDirectory, 'canvaskit');
+      await copyWasmLibrary('skwasm_heavy', skwasmHeavySourceDirectory, 'canvaskit');
     }
     print('Copied artifacts: ${copied.join(', ')}');
   }

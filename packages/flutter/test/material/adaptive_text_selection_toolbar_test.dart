@@ -270,6 +270,27 @@ void main() {
     variant: TargetPlatformVariant.all(),
   );
 
+  testWidgets(
+    'Builds empty toolbar when children and buttonItems are null',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Center(
+            child: AdaptiveTextSelectionToolbar(
+              anchors: TextSelectionToolbarAnchors(primaryAnchor: Offset.zero),
+              children: null,
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.getSize(find.byType(AdaptiveTextSelectionToolbar)), Size.zero);
+      expect(tester.takeException(), isNull);
+    },
+    skip: isBrowser, // [intended] on web the browser handles the context menu.
+    variant: TargetPlatformVariant.all(),
+  );
+
   group('buttonItems', () {
     testWidgets(
       'getEditableTextButtonItems builds the correct button items per-platform',
@@ -294,10 +315,9 @@ void main() {
                   cursorColor: Colors.red,
                   selectionControls: materialTextSelectionHandleControls,
                   contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
-                    buttonTypes =
-                        editableTextState.contextMenuButtonItems
-                            .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
-                            .toSet();
+                    buttonTypes = editableTextState.contextMenuButtonItems
+                        .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
+                        .toSet();
                     return const SizedBox.shrink();
                   },
                 ),
@@ -385,11 +405,10 @@ void main() {
                       ContextMenuButtonItem(label: buttonText, onPressed: () {}),
                     ];
                     return ListView(
-                      children:
-                          AdaptiveTextSelectionToolbar.getAdaptiveButtons(
-                            context,
-                            buttonItems,
-                          ).toList(),
+                      children: AdaptiveTextSelectionToolbar.getAdaptiveButtons(
+                        context,
+                        buttonItems,
+                      ).toList(),
                     );
                   },
                 ),

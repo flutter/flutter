@@ -20,38 +20,36 @@ class MaterialDemoThemeData {
       color: _colorScheme.primary,
       iconTheme: IconThemeData(color: _colorScheme.onPrimary),
     ),
-    bottomAppBarTheme: BottomAppBarTheme(color: _colorScheme.primary),
+    bottomAppBarTheme: BottomAppBarThemeData(color: _colorScheme.primary),
     checkboxTheme: CheckboxThemeData(
-      fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
+      fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
           return null;
         }
-        return states.contains(MaterialState.selected) ? _colorScheme.primary : null;
+        return states.contains(WidgetState.selected) ? _colorScheme.primary : null;
       }),
     ),
     radioTheme: RadioThemeData(
-      fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
+      fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
           return null;
         }
-        return states.contains(MaterialState.selected) ? _colorScheme.primary : null;
+        return states.contains(WidgetState.selected) ? _colorScheme.primary : null;
       }),
     ),
     snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating),
     switchTheme: SwitchThemeData(
-      thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
+      thumbColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
           return null;
         }
-        return states.contains(MaterialState.selected) ? _colorScheme.primary : null;
+        return states.contains(WidgetState.selected) ? _colorScheme.primary : null;
       }),
-      trackColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
+      trackColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
           return null;
         }
-        return states.contains(MaterialState.selected)
-            ? _colorScheme.primary.withAlpha(0x80)
-            : null;
+        return states.contains(WidgetState.selected) ? _colorScheme.primary.withAlpha(0x80) : null;
       }),
     ),
   );

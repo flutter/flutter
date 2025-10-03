@@ -24,11 +24,10 @@ class _LinkTextSpan extends TextSpan {
   _LinkTextSpan({super.style, required String url, String? text})
     : super(
         text: text ?? url,
-        recognizer:
-            TapGestureRecognizer()
-              ..onTap = () {
-                launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-              },
+        recognizer: TapGestureRecognizer()
+          ..onTap = () {
+            launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+          },
       );
 }
 
@@ -67,7 +66,7 @@ void showGalleryAboutDialog(BuildContext context) {
               ),
               _LinkTextSpan(
                 style: linkStyle,
-                url: 'https://goo.gl/iv1p4G',
+                url: 'https://github.com/flutter/gallery',
                 text: 'flutter github repo',
               ),
               TextSpan(style: aboutTextStyle, text: '.'),

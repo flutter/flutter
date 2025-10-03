@@ -35,9 +35,14 @@ class CommandQueue {
   ///        Only the Metal and Vulkan backends can give a status beyond
   ///        successful encoding. This callback may be called more than once and
   ///        potentially on a different thread.
+  ///
+  ///        If [block_on_schedule] is true, this function will not return until
+  ///        the command buffer has been scheduled. This only impacts the Metal
+  ///        backend.
   virtual fml::Status Submit(
       const std::vector<std::shared_ptr<CommandBuffer>>& buffers,
-      const CompletionCallback& completion_callback = {});
+      const CompletionCallback& completion_callback = {},
+      bool block_on_schedule = false);
 
  private:
   CommandQueue(const CommandQueue&) = delete;

@@ -65,6 +65,10 @@ abstract class TextScaler {
     assert(minScaleFactor.isFinite);
     assert(minScaleFactor >= 0);
 
+    if (minScaleFactor == 0 && maxScaleFactor == double.infinity) {
+      return this;
+    }
+
     return minScaleFactor == maxScaleFactor
         ? TextScaler.linear(minScaleFactor)
         : _ClampedTextScaler(this, minScaleFactor, maxScaleFactor);
@@ -123,9 +127,7 @@ final class _ClampedTextScaler implements TextScaler {
   double scale(double fontSize) {
     assert(fontSize >= 0);
     assert(fontSize.isFinite);
-    return minScale == maxScale
-        ? minScale * fontSize
-        : clampDouble(scaler.scale(fontSize), minScale * fontSize, maxScale * fontSize);
+    return clampDouble(scaler.scale(fontSize), minScale * fontSize, maxScale * fontSize);
   }
 
   @override
@@ -143,10 +145,12 @@ final class _ClampedTextScaler implements TextScaler {
     return other is _ClampedTextScaler &&
         minScale == other.minScale &&
         maxScale == other.maxScale &&
-        (minScale == maxScale || scaler == other.scaler);
+        scaler == other.scaler;
   }
 
   @override
-  int get hashCode =>
-      minScale == maxScale ? minScale.hashCode : Object.hash(scaler, minScale, maxScale);
+  int get hashCode => Object.hash(scaler, minScale, maxScale);
+
+  @override
+  String toString() => '$scaler clamped [$minScale, $maxScale]';
 }

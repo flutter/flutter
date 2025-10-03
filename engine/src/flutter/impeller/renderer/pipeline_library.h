@@ -6,6 +6,7 @@
 #define FLUTTER_IMPELLER_RENDERER_PIPELINE_LIBRARY_H_
 
 #include <optional>
+#include <unordered_map>
 
 #include "compute_pipeline_descriptor.h"
 #include "impeller/renderer/pipeline.h"
@@ -40,9 +41,29 @@ class PipelineLibrary : public std::enable_shared_from_this<PipelineLibrary> {
 
   virtual bool IsValid() const = 0;
 
+  //------------------------------------------------------------------------------
+  /// @brief      Creates a pipeline.
+  ///
+  /// @param[in]  descriptor  The descriptor of the texture to create.
+  /// @param[in]  async       Whether to allow pipeline creation to be deferred.
+  ///                         If `false`, pipeline creation will block on the
+  ///                         current thread.
+  ///
+  /// @param[in]  threadsafe  Whether mutations to this texture should be
+  ///                         protected with a threadsafe barrier.
+  ///
+  ///                         This parameter only affects the OpenGLES rendering
+  ///                         backend.
+  ///
+  ///                         If any interaction with this texture (including
+  ///                         creation) will be done on a thread other than
+  ///                         where the OpenGLES context resides, then
+  ///                         `threadsafe`, must be set to `true`.
+  ///
   virtual PipelineFuture<PipelineDescriptor> GetPipeline(
       PipelineDescriptor descriptor,
-      bool async = true) = 0;
+      bool async = true,
+      bool threadsafe = false) = 0;
 
   virtual PipelineFuture<ComputePipelineDescriptor> GetPipeline(
       ComputePipelineDescriptor descriptor,

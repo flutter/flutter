@@ -5,6 +5,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 
 #include "flutter/fml/platform/darwin/cf_utils.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifeCycle_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.h"
 
@@ -132,7 +133,7 @@ static void PrintWideGamutWarningOnce() {
   auto screenshot = [_delegate takeScreenshot:flutter::Rasterizer::ScreenshotType::UncompressedImage
                               asBase64Encoded:NO];
 
-  if (!screenshot.data || screenshot.data->isEmpty() || screenshot.frame_size.isEmpty()) {
+  if (!screenshot.data || screenshot.data->isEmpty() || screenshot.frame_size.IsEmpty()) {
     return;
   }
 
@@ -175,26 +176,26 @@ static void PrintWideGamutWarningOnce() {
   }
 
   fml::CFRef<CGImageRef> image(CGImageCreate(
-      screenshot.frame_size.width(),                             // size_t width
-      screenshot.frame_size.height(),                            // size_t height
-      bits_per_component,                                        // size_t bitsPerComponent
-      bits_per_pixel,                                            // size_t bitsPerPixel,
-      bytes_per_row_multiplier * screenshot.frame_size.width(),  // size_t bytesPerRow
-      colorspace,                                                // CGColorSpaceRef space
-      bitmap_info,                                               // CGBitmapInfo bitmapInfo
-      image_data_provider,                                       // CGDataProviderRef provider
-      nullptr,                                                   // const CGFloat* decode
-      false,                                                     // bool shouldInterpolate
-      kCGRenderingIntentDefault                                  // CGColorRenderingIntent intent
+      screenshot.frame_size.width,                             // size_t width
+      screenshot.frame_size.height,                            // size_t height
+      bits_per_component,                                      // size_t bitsPerComponent
+      bits_per_pixel,                                          // size_t bitsPerPixel,
+      bytes_per_row_multiplier * screenshot.frame_size.width,  // size_t bytesPerRow
+      colorspace,                                              // CGColorSpaceRef space
+      bitmap_info,                                             // CGBitmapInfo bitmapInfo
+      image_data_provider,                                     // CGDataProviderRef provider
+      nullptr,                                                 // const CGFloat* decode
+      false,                                                   // bool shouldInterpolate
+      kCGRenderingIntentDefault                                // CGColorRenderingIntent intent
       ));
 
   const CGRect frame_rect =
-      CGRectMake(0.0, 0.0, screenshot.frame_size.width(), screenshot.frame_size.height());
+      CGRectMake(0.0, 0.0, screenshot.frame_size.width, screenshot.frame_size.height);
   CGContextSaveGState(context);
   // If the CGContext is not a bitmap based context, this returns zero.
   CGFloat height = CGBitmapContextGetHeight(context);
   if (height == 0) {
-    height = CGFloat(screenshot.frame_size.height());
+    height = CGFloat(screenshot.frame_size.height);
   }
   CGContextTranslateCTM(context, 0.0, height);
   CGContextScaleCTM(context, 1.0, -1.0);
@@ -239,6 +240,32 @@ static void PrintWideGamutWarningOnce() {
   // the focus engine should only interact with the designated focus items
   // (SemanticsObjects).
   return nil;
+}
+
+- (void)willMoveToWindow:(UIWindow*)newWindow {
+  // When a FlutterView moves windows, it may also be moving scenes. Add/remove the FlutterEngine
+  // from the FlutterSceneLifeCycleProvider.sceneLifeCycleDelegate if it changes scenes.
+  UIWindowScene* newScene = newWindow.windowScene;
+  UIWindowScene* previousScene = self.window.windowScene;
+  if (newScene == previousScene) {
+    return;
+  }
+  FlutterPluginSceneLifeCycleDelegate* newSceneLifeCycleDelegate =
+      [FlutterPluginSceneLifeCycleDelegate fromScene:newScene];
+  if (newSceneLifeCycleDelegate != nil) {
+    return [newSceneLifeCycleDelegate addFlutterEngine:(FlutterEngine*)self.delegate];
+  }
+
+  // The window, and therefore windowScene, property may be nil if the receiver does not currently
+  // reside in any window. This occurs when the receiver has just been removed from its superview
+  // or when the receiver has just been added to a superview that is not attached to a window.
+  // Remove the engine from the previous scene if set since it is no longer in that window and
+  // scene.
+  FlutterPluginSceneLifeCycleDelegate* previousSceneLifeCycleDelegate =
+      [FlutterPluginSceneLifeCycleDelegate fromScene:previousScene];
+  if (previousSceneLifeCycleDelegate != nil) {
+    return [previousSceneLifeCycleDelegate removeFlutterEngine:(FlutterEngine*)self.delegate];
+  }
 }
 
 @end

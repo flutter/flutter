@@ -75,7 +75,7 @@ class WindowsPlatformBinding extends PlatformBinding {
 
   @override
   String getFirefoxDownloadUrl(String version) =>
-      'https://download-installer.cdn.mozilla.net/pub/firefox/releases/$version/win64/en-US/'
+      'https://ftp.mozilla.org/pub/firefox/releases/$version/win64/en-US/'
       '${getFirefoxDownloadFilename(version)}';
 
   @override
@@ -109,11 +109,11 @@ class LinuxPlatformBinding extends PlatformBinding {
 
   @override
   String getFirefoxDownloadUrl(String version) =>
-      'https://download-installer.cdn.mozilla.net/pub/firefox/releases/$version/linux-x86_64/en-US/'
+      'https://ftp.mozilla.org/pub/firefox/releases/$version/linux-x86_64/en-US/'
       '${getFirefoxDownloadFilename(version)}';
 
   @override
-  String getFirefoxDownloadFilename(String version) => 'firefox-$version.tar.bz2';
+  String getFirefoxDownloadFilename(String version) => 'firefox-$version.tar.xz';
 
   @override
   String getFirefoxExecutablePath(io.Directory versionDir) =>
@@ -145,7 +145,7 @@ abstract class MacPlatformBinding extends PlatformBinding {
 
   @override
   String getFirefoxDownloadUrl(String version) =>
-      'https://download-installer.cdn.mozilla.net/pub/firefox/releases/$version/mac/en-US/'
+      'https://ftp.mozilla.org/pub/firefox/releases/$version/mac/en-US/'
       '${getFirefoxDownloadFilename(version)}';
 
   @override
@@ -253,6 +253,31 @@ final String gitRevision = () {
   if (result.exitCode != 0) {
     throw ToolExit(
       'Failed to get git revision. Exit code: ${result.exitCode} Error: ${result.stderr}',
+    );
+  }
+  return (result.stdout as String).trim();
+}();
+
+final String contentHash = () {
+  final String executable;
+  final List<String> args;
+  if (io.Platform.isWindows) {
+    executable = 'powershell';
+    args = <String>[path.join('bin', 'internal', 'content_aware_hash.ps1')];
+  } else {
+    executable = path.join('bin', 'internal', 'content_aware_hash.sh');
+    args = <String>[];
+  }
+  final result = io.Process.runSync(
+    executable,
+    args,
+    workingDirectory: environment.flutterRootDir.path,
+    stderrEncoding: utf8,
+    stdoutEncoding: utf8,
+  );
+  if (result.exitCode != 0) {
+    throw ToolExit(
+      'Failed to get content hash. Exit code: ${result.exitCode} Error: ${result.stderr}',
     );
   }
   return (result.stdout as String).trim();

@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:file/memory.dart';
+library;
+
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -32,6 +35,7 @@ import 'cache.dart';
 import 'custom_devices/custom_devices_config.dart';
 import 'device.dart';
 import 'doctor.dart';
+import 'git.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_parser.dart';
 import 'ios/simulators.dart';
@@ -79,7 +83,7 @@ LocalEngineLocator? get localEngineLocator => context.get<LocalEngineLocator>();
 PersistentToolState? get persistentToolState => PersistentToolState.instance;
 
 BotDetector get botDetector => context.get<BotDetector>() ?? _defaultBotDetector;
-final BotDetector _defaultBotDetector = BotDetector(
+final _defaultBotDetector = BotDetector(
   httpClientFactory: context.get<HttpClientFactory>() ?? () => HttpClient(),
   platform: platform,
   persistentToolState:
@@ -104,6 +108,8 @@ FileSystem get fs => ErrorHandlingFileSystem(
 FileSystemUtils get fsUtils =>
     context.get<FileSystemUtils>() ?? FileSystemUtils(fileSystem: fs, platform: platform);
 
+Git get git => context.get<Git>()!;
+
 const ProcessManager _kLocalProcessManager = LocalProcessManager();
 
 /// The active process manager.
@@ -115,7 +121,7 @@ Platform get platform => context.get<Platform>() ?? _kLocalPlatform;
 
 UserMessages get userMessages => context.get<UserMessages>()!;
 
-final OutputPreferences _default = OutputPreferences(
+final _default = OutputPreferences(
   wrapText: stdio.hasTerminal,
   showColor: platform.stdoutSupportsAnsi,
   stdio: stdio,
@@ -124,7 +130,7 @@ OutputPreferences get outputPreferences => context.get<OutputPreferences>() ?? _
 
 /// The current system clock instance.
 SystemClock get systemClock => context.get<SystemClock>() ?? _systemClock;
-SystemClock _systemClock = const SystemClock();
+var _systemClock = const SystemClock();
 
 ProcessInfo get processInfo => context.get<ProcessInfo>()!;
 
@@ -229,7 +235,7 @@ AnsiTerminal get terminal {
   return context.get<AnsiTerminal>() ?? _defaultAnsiTerminal;
 }
 
-final AnsiTerminal _defaultAnsiTerminal = AnsiTerminal(
+final _defaultAnsiTerminal = AnsiTerminal(
   stdio: stdio,
   platform: platform,
   now: DateTime.now(),
@@ -255,8 +261,8 @@ TemplateRenderer get templateRenderer => context.get<TemplateRenderer>()!;
 /// Global [ShutdownHooks] that should be run before the tool process exits.
 ///
 /// This is depended on by [localFileSystem] which is called before any
-/// [Context] is set up, and thus this cannot be a Context getter.
-final ShutdownHooks shutdownHooks = ShutdownHooks();
+/// [AppContext] is set up, and thus this cannot be a Context getter.
+final shutdownHooks = ShutdownHooks();
 
 // Unless we're in a test of this class's signal handling features, we must
 // have only one instance created with the singleton LocalSignals instance
@@ -281,13 +287,13 @@ PreRunValidator get preRunValidator =>
     context.get<PreRunValidator>() ?? const NoOpPreRunValidator();
 
 // Used to build RegExp instances which can detect the VM service message.
-final RegExp kVMServiceMessageRegExp = RegExp(
+final kVMServiceMessageRegExp = RegExp(
   r'The Dart VM service is listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)',
 );
 
 /// Contains information about the JRE/JDK to use for Java-dependent operations.
 ///
-/// A value of [null] indicates that no installation of java could be found on
+/// A value of `null` indicates that no installation of java could be found on
 /// the host machine.
 Java? get java => context.get<Java>();
 

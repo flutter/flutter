@@ -146,8 +146,10 @@ void main() {
     expect(resultingIconTheme.color, isSameColorAs(primaryColor));
 
     // Works in dark mode if primaryColor is a CupertinoDynamicColor.
-    final Color darkColor =
-        (await testIconTheme(tester, themeData.copyWith(brightness: Brightness.dark))).color!;
+    final Color darkColor = (await testIconTheme(
+      tester,
+      themeData.copyWith(brightness: Brightness.dark),
+    )).color!;
 
     expect(darkColor, isSameColorAs(primaryColor.darkColor));
   });
@@ -173,8 +175,9 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const CupertinoThemeData().debugFillProperties(builder);
 
-    final Set<String> description =
-        builder.properties.map((DiagnosticsNode node) => node.name.toString()).toSet();
+    final Set<String> description = builder.properties
+        .map((DiagnosticsNode node) => node.name.toString())
+        .toSet();
 
     expect(
       setEquals(description, <String>{

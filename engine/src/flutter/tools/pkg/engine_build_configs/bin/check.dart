@@ -20,15 +20,14 @@ import 'package:yaml/yaml.dart' as y;
 // Or, for more options:
 // $ dart bin/check.dart --help
 
-final _argParser =
-    ArgParser()
-      ..addFlag('verbose', abbr: 'v', help: 'Enable noisier diagnostic output', negatable: false)
-      ..addFlag('help', abbr: 'h', help: 'Output usage information.', negatable: false)
-      ..addOption(
-        'engine-src-path',
-        valueHelp: '/path/to/engine/src',
-        defaultsTo: Engine.tryFindWithin()?.srcDir.path,
-      );
+final _argParser = ArgParser()
+  ..addFlag('verbose', abbr: 'v', help: 'Enable noisier diagnostic output', negatable: false)
+  ..addFlag('help', abbr: 'h', help: 'Output usage information.', negatable: false)
+  ..addOption(
+    'engine-src-path',
+    valueHelp: '/path/to/engine/src',
+    defaultsTo: Engine.tryFindWithin()?.srcDir.path,
+  );
 
 void main(List<String> args) {
   run(
@@ -137,6 +136,12 @@ void run(
   statusPrint('All build names must have a conforming prefix', success: buildNameErrors.isEmpty);
   indentedPrint(buildNameErrors);
 
+  // Check for duplicate archive paths in order to prevent builders from
+  // overwriting each other's artifacts in cloud storage.
+  final List<String> duplicateArchives = checkForDuplicateArchives(configs);
+  statusPrint('Archive paths must be unique', success: duplicateArchives.isEmpty);
+  indentedPrint(duplicateArchives);
+
   // If we have a successfully parsed .ci.yaml, perform additional checks.
   if (ciConfig == null) {
     return;
@@ -228,22 +233,45 @@ List<String> checkForDuplicateConfigs(Map<String, BuilderConfig> configs) {
   return errors;
 }
 
+// This check ensures that json files do not duplicate archive paths.
+List<String> checkForDuplicateArchives(Map<String, BuilderConfig> configs) {
+  final RegExp zipPathPattern = RegExp(r'zip_archives/(.*\.zip)$');
+  final List<String> errors = <String>[];
+  final Set<String> archivePaths = <String>{};
+  _forEachBuild(configs, (String name, BuilderConfig config, Build build) {
+    for (final BuildArchive archive in build.archives) {
+      for (final String path in archive.includePaths) {
+        final RegExpMatch? match = zipPathPattern.firstMatch(path);
+        if (match == null) {
+          continue;
+        }
+        final String zipPath = match.group(1)!;
+        if (!archivePaths.add(zipPath)) {
+          errors.add('$zipPath is duplicated in $name\n');
+        }
+      }
+    }
+  });
+  return errors;
+}
+
 // This check ensures that builds are named in a way that is understood by
 // `et`.
 List<String> checkForInvalidBuildNames(Map<String, BuilderConfig> configs) {
   final List<String> errors = <String>[];
 
   // In local_engine.json, allowed OS names are linux, macos, and windows.
-  final List<String> osNames =
-      <String>[
-        Platform.linux,
-        Platform.macOS,
-        Platform.windows,
-      ].expand((String s) => <String>['$s/', '$s\\']).toList();
+  final List<String> osNames = <String>[
+    Platform.linux,
+    Platform.macOS,
+    Platform.windows,
+  ].expand((String s) => <String>['$s/', '$s\\']).toList();
 
   // In all other build json files, allowed prefix names are ci and web_tests.
-  final List<String> ciNames =
-      <String>['ci', 'web_tests'].expand((String s) => <String>['$s/', '$s\\']).toList();
+  final List<String> ciNames = <String>[
+    'ci',
+    'web_tests',
+  ].expand((String s) => <String>['$s/', '$s\\']).toList();
 
   _forEachBuild(configs, (String name, BuilderConfig config, Build build) {
     final List<String> goodPrefixes = name.contains('local_engine') ? osNames : ciNames;

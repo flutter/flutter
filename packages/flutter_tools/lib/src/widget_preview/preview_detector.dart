@@ -3,544 +3,345 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:collection';
 
 import 'package:analyzer/dart/analysis/analysis_context.dart';
 import 'package:analyzer/dart/analysis/analysis_context_collection.dart';
 import 'package:analyzer/dart/analysis/results.dart';
-import 'package:analyzer/dart/ast/ast.dart';
-import 'package:analyzer/dart/ast/token.dart';
-import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/file_system/physical_file_system.dart';
+import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:watcher/watcher.dart';
 
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/utils.dart';
-import 'preview_code_generator.dart';
+import 'analytics.dart';
+import 'dependency_graph.dart';
+import 'utils.dart';
 
-/// A path / URI pair used to map previews to a file.
-///
-/// We don't just use a path or a URI as the file watcher doesn't report URIs
-/// (e.g., package:*) but the analyzer APIs do, and the code generator emits
-/// package URIs for preview imports.
-typedef PreviewPath = ({String path, Uri uri});
+typedef WatcherBuilder = Watcher Function(String path);
 
-/// Represents a set of previews for a given file.
-typedef PreviewMapping = Map<PreviewPath, List<PreviewDetails>>;
-
-extension on Token {
-  /// Convenience getter to identify tokens for private fields and functions.
-  bool get isPrivate => toString().startsWith('_');
-
-  /// Convenience getter to identify WidgetBuilder types.
-  bool get isWidgetBuilder => toString() == 'WidgetBuilder';
-}
-
-extension on Annotation {
-  /// Convenience getter to identify `@Preview` annotations
-  bool get isPreview => name.name == 'Preview';
-}
-
-/// Convenience getters for examining [String] paths.
-extension on String {
-  bool get isDartFile => endsWith('.dart');
-  bool get isPubspec => endsWith('pubspec.yaml');
-  bool get doesContainDartTool => contains('.dart_tool');
-  bool get isGeneratedPreviewFile => endsWith(PreviewCodeGenerator.generatedPreviewFilePath);
-}
-
-extension on ParsedUnitResult {
-  /// Convenience method to package [path] and [uri] into a [PreviewPath]
-  PreviewPath toPreviewPath() => (path: path, uri: uri);
-}
-
-/// Contains details related to a single preview instance.
-final class PreviewDetails {
-  PreviewDetails({required this.functionName, required this.isBuilder});
-
-  @visibleForTesting
-  PreviewDetails.test({
-    required this.functionName,
-    required this.isBuilder,
-    String? name,
-    String? width,
-    String? height,
-    String? textScaleFactor,
-    String? wrapper,
-    String? wrapperLibraryUri = '',
-    String? theme,
-    String? themeLibraryUri = '',
-    String? brightness,
-    String? brightnessLibraryUri = '',
-  }) : _name = name,
-       _width = width,
-       _height = height,
-       _textScaleFactor = textScaleFactor,
-       _wrapper = wrapper,
-       _wrapperLibraryUri = wrapperLibraryUri,
-       _theme = theme,
-       _themeLibraryUri = themeLibraryUri,
-       _brightness = brightness,
-       _brightnessLibraryUri = brightnessLibraryUri;
-
-  @visibleForTesting
-  PreviewDetails copyWith({
-    String? functionName,
-    bool? isBuilder,
-    String? name,
-    String? width,
-    String? height,
-    String? textScaleFactor,
-    String? wrapper,
-    String? wrapperLibraryUri,
-    String? theme,
-    String? themeLibraryUri,
-    String? brightness,
-    String? brightnessLibraryUri,
-  }) {
-    return PreviewDetails.test(
-      functionName: functionName ?? this.functionName,
-      isBuilder: isBuilder ?? this.isBuilder,
-      name: name ?? this.name,
-      width: width ?? this.width,
-      height: height ?? this.height,
-      textScaleFactor: textScaleFactor ?? this.textScaleFactor,
-      wrapper: wrapper ?? this.wrapper,
-      wrapperLibraryUri: wrapperLibraryUri ?? this.wrapperLibraryUri,
-      theme: theme ?? this.theme,
-      themeLibraryUri: themeLibraryUri ?? this.themeLibraryUri,
-      brightness: brightness ?? this.brightness,
-      brightnessLibraryUri: brightnessLibraryUri ?? this.brightnessLibraryUri,
-    );
-  }
-
-  static const String kName = 'name';
-  static const String kWidth = 'width';
-  static const String kHeight = 'height';
-  static const String kTextScaleFactor = 'textScaleFactor';
-  static const String kWrapper = 'wrapper';
-  static const String kWrapperLibraryUri = 'wrapperLibraryUrl';
-  static const String kTheme = 'theme';
-  static const String kThemeLibraryUri = 'themeLibraryUrl';
-  static const String kBrightness = 'brightness';
-  static const String kBrightnessLibraryUri = 'brightnessLibraryUrl';
-
-  /// The name of the function returning the preview.
-  final String functionName;
-
-  /// Set to `true` if the preview function is returning a [WidgetBuilder]
-  /// instead of a [Widget].
-  final bool isBuilder;
-
-  /// A description to be displayed alongside the preview.
-  ///
-  /// If not provided, no name will be associated with the preview.
-  String? get name => _name;
-  String? _name;
-
-  /// Artificial width constraint to be applied to the [child].
-  ///
-  /// If not provided, the previewed widget will attempt to set its own width
-  /// constraints and may result in an unbounded constraint error.
-  String? get width => _width;
-  String? _width;
-
-  /// Artificial height constraint to be applied to the [child].
-  ///
-  /// If not provided, the previewed widget will attempt to set its own height
-  /// constraints and may result in an unbounded constraint error.
-  String? get height => _height;
-  String? _height;
-
-  /// Applies font scaling to text within the [child].
-  ///
-  /// If not provided, the default text scaling factor provided by [MediaQuery]
-  /// will be used.
-  String? get textScaleFactor => _textScaleFactor;
-  String? _textScaleFactor;
-
-  /// The name of a tear-off used to wrap the [Widget] returned by the preview
-  /// function defined by [functionName].
-  ///
-  /// If not provided, the [Widget] returned by [functionName] will be used by
-  /// the previewer directly.
-  String? get wrapper => _wrapper;
-  String? _wrapper;
-
-  /// The URI for the library containing the declaration of [wrapper].
-  String? get wrapperLibraryUri => _wrapperLibraryUri;
-  String? _wrapperLibraryUri;
-
-  bool get hasWrapper => _wrapper != null;
-
-  String? get theme => _theme;
-  String? _theme;
-
-  String? get themeLibraryUri => _themeLibraryUri;
-  String? _themeLibraryUri;
-
-  String? get brightness => _brightness;
-  String? _brightness;
-
-  String? get brightnessLibraryUri => _brightnessLibraryUri;
-  String? _brightnessLibraryUri;
-
-  void _setField({required NamedExpression node}) {
-    final String key = node.name.label.name;
-    final Expression expression = node.expression;
-    final String source = expression.toSource();
-    final String? libraryUri =
-        expression is SimpleIdentifier ? expression.element!.library2!.identifier : null;
-    switch (key) {
-      case kName:
-        _name = source;
-      case kWidth:
-        _width = source;
-      case kHeight:
-        _height = source;
-      case kTextScaleFactor:
-        _textScaleFactor = source;
-      case kWrapper:
-        _wrapper = source;
-        _wrapperLibraryUri = libraryUri;
-      case kTheme:
-        _theme = source;
-        _themeLibraryUri = libraryUri;
-      case kBrightness:
-        _brightness = source;
-        _brightnessLibraryUri = libraryUri;
-      default:
-        throw StateError('Unknown Preview field "$name": $source');
-    }
-  }
-
-  @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  bool operator ==(Object other) {
-    if (identical(other, this)) {
-      return true;
-    }
-    return other.runtimeType == runtimeType &&
-        other is PreviewDetails &&
-        other.functionName == functionName &&
-        other.isBuilder == isBuilder &&
-        other.height == height &&
-        other.width == width &&
-        other.textScaleFactor == textScaleFactor &&
-        other.wrapper == wrapper &&
-        other.wrapperLibraryUri == wrapperLibraryUri &&
-        other.theme == theme &&
-        other.themeLibraryUri == themeLibraryUri &&
-        other.brightness == brightness &&
-        other.brightnessLibraryUri == brightnessLibraryUri;
-  }
-
-  @override
-  String toString() =>
-      'PreviewDetails(function: $functionName isBuilder: $isBuilder $kName: $name '
-      '$kWidth: $width $kHeight: $height $kTextScaleFactor: $textScaleFactor $kWrapper: $wrapper '
-      '$kWrapperLibraryUri: $wrapperLibraryUri $kTheme: $theme $kThemeLibraryUri: $themeLibraryUri '
-      '$kBrightness: $_brightness $kBrightnessLibraryUri: $_brightnessLibraryUri)';
-
-  @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(<Object?>[
-    functionName,
-    isBuilder,
-    height,
-    width,
-    textScaleFactor,
-    wrapper,
-    wrapperLibraryUri,
-    theme,
-    themeLibraryUri,
-    brightness,
-    brightnessLibraryUri,
-  ]);
+Watcher _defaultWatcherBuilder(String path) {
+  return Watcher(path);
 }
 
 class PreviewDetector {
   PreviewDetector({
+    required this.platform,
+    required this.previewAnalytics,
     required this.projectRoot,
     required this.fs,
     required this.logger,
     required this.onChangeDetected,
     required this.onPubspecChangeDetected,
+    @visibleForTesting this.watcherBuilder = _defaultWatcherBuilder,
   });
 
+  final Platform platform;
+  final WidgetPreviewAnalytics previewAnalytics;
   final Directory projectRoot;
   final FileSystem fs;
   final Logger logger;
-  final void Function(PreviewMapping) onChangeDetected;
-  final void Function() onPubspecChangeDetected;
+  final void Function(PreviewDependencyGraph) onChangeDetected;
+  final void Function(String path) onPubspecChangeDetected;
+  final WatcherBuilder watcherBuilder;
 
+  @visibleForTesting
+  static const kDirectoryWatcherClosedUnexpectedlyPrefix = 'Directory watcher closed unexpectedly';
+  @visibleForTesting
+  static const kWindowsFileWatcherRestartedMessage =
+      'WindowsDirectoryWatcher has closed and been restarted.';
   StreamSubscription<WatchEvent>? _fileWatcher;
-  final PreviewDetectorMutex _mutex = PreviewDetectorMutex();
-  late final PreviewMapping _pathToPreviews;
+  final _mutex = PreviewDetectorMutex();
 
-  late final AnalysisContextCollection collection = AnalysisContextCollection(
+  var _disposed = false;
+
+  @visibleForTesting
+  PreviewDependencyGraph get dependencyGraph => _dependencyGraph;
+  final PreviewDependencyGraph _dependencyGraph = PreviewDependencyGraph();
+
+  late final collection = AnalysisContextCollection(
     includedPaths: <String>[projectRoot.absolute.path],
     resourceProvider: PhysicalResourceProvider.INSTANCE,
   );
 
   /// Starts listening for changes to Dart sources under [projectRoot] and returns
-  /// the initial [PreviewMapping] for the project.
-  Future<PreviewMapping> initialize() async {
+  /// the initial [PreviewDependencyGraph] for the project.
+  Future<PreviewDependencyGraph> initialize() async {
     // Find the initial set of previews.
-    _pathToPreviews = await findPreviewFunctions(projectRoot);
+    await _findPreviewFunctions(projectRoot);
 
-    final Watcher watcher = Watcher(projectRoot.path);
-    _fileWatcher = watcher.events.listen((WatchEvent event) async {
-      final String eventPath = event.path;
-      // If the pubspec has changed, new dependencies or assets could have been added, requiring
-      // the preview scaffold's pubspec to be updated.
-      if (eventPath.isPubspec && !eventPath.doesContainDartTool) {
-        onPubspecChangeDetected();
-        return;
-      }
-      // Only trigger a reload when changes to Dart sources are detected. We
-      // ignore the generated preview file to avoid getting stuck in a loop.
-      if (!eventPath.isDartFile || eventPath.isGeneratedPreviewFile) {
-        return;
-      }
-      logger.printStatus('Detected change in $eventPath.');
-      final PreviewMapping filePreviewsMapping = await findPreviewFunctions(
-        fs.file(Uri.file(event.path)),
-      );
-      final bool hasExistingPreviews =
-          _pathToPreviews.keys.where((PreviewPath e) => e.path == event.path).isNotEmpty;
-      if (filePreviewsMapping.isEmpty && !hasExistingPreviews) {
-        // No previews found or removed, nothing to do.
-        return;
-      }
-      if (filePreviewsMapping.length > 1) {
-        logger.printWarning('Previews from more than one file were detected!');
-        logger.printWarning('Previews: $filePreviewsMapping');
-      }
-      if (filePreviewsMapping.isNotEmpty) {
-        // The set of previews has changed, but there are still previews in the file.
-        final MapEntry<PreviewPath, List<PreviewDetails>>(
-          key: PreviewPath location,
-          value: List<PreviewDetails> filePreviews,
-        ) = filePreviewsMapping.entries.first;
-        logger.printStatus('Updated previews for ${location.uri}: $filePreviews');
-        if (filePreviews.isNotEmpty) {
-          final List<PreviewDetails>? currentPreviewsForFile = _pathToPreviews[location];
-          if (filePreviews != currentPreviewsForFile) {
-            _pathToPreviews[location] = filePreviews;
-          }
+    // Determine which files have transitive dependencies with compile time errors.
+    _propagateErrors();
+
+    final Watcher watcher = watcherBuilder(projectRoot.path);
+    _fileWatcher = watcher.events.listen(
+      _onFileSystemEvent,
+      onError: (Object e, StackTrace st) {
+        if (platform.isWindows &&
+            e is FileSystemException &&
+            e.message.startsWith(kDirectoryWatcherClosedUnexpectedlyPrefix)) {
+          // The Windows directory watcher sometimes decides to shutdown on its own. It's
+          // automatically restarted by package:watcher, but we need to handle this exception.
+          // See https://github.com/dart-lang/tools/issues/1713 for details.
+          logger.printTrace(kWindowsFileWatcherRestartedMessage);
+          return;
         }
-      } else {
-        // The file previously had previews that were removed.
-        logger.printStatus('Previews removed from $eventPath');
-        _pathToPreviews.removeWhere((PreviewPath e, _) => e.path == eventPath);
-      }
-      onChangeDetected(_pathToPreviews);
-    });
+        Error.throwWithStackTrace(e, st);
+      },
+    );
+
     // Wait for file watcher to finish initializing, otherwise we might miss changes and cause
     // tests to flake.
     await watcher.ready;
-    return _pathToPreviews;
+    return _dependencyGraph;
   }
 
   Future<void> dispose() async {
+    if (_disposed) {
+      return;
+    }
+    _disposed = true;
     // Guard disposal behind a mutex to make sure the analyzer has finished
     // processing the latest file updates to avoid throwing an exception.
     await _mutex.runGuarded(() async {
       await _fileWatcher?.cancel();
+      _fileWatcher = null;
       await collection.dispose();
     });
   }
 
-  /// Search for functions annotated with `@Preview` in the current project.
-  Future<PreviewMapping> findPreviewFunctions(FileSystemEntity entity) async {
-    final PreviewMapping previews = PreviewMapping();
+  Future<void> _onFileSystemEvent(WatchEvent event) async {
     // Only process one FileSystemEntity at a time so we don't invalidate an AnalysisSession that's
     // in use when we call context.changeFile(...).
     await _mutex.runGuarded(() async {
-      // TODO(bkonyi): this can probably be replaced by a call to collection.contextFor(...),
-      // but we need to figure out the right path format for Windows.
-      for (final AnalysisContext context in collection.contexts) {
-        logger.printStatus('Finding previews in ${entity.path}...');
+      final String eventPath = event.path;
+      // If the pubspec has changed, new dependencies or assets could have been added, requiring
+      // the preview scaffold's pubspec to be updated.
+      if (eventPath.isPubspec && !eventPath.doesContainDartTool) {
+        onPubspecChangeDetected(eventPath);
+        return;
+      }
+      // Only trigger a reload when changes to Dart sources are detected. We
+      // ignore the generated preview file to avoid getting stuck in a loop.
+      if (!eventPath.isDartFile || eventPath.doesContainDartTool) {
+        return;
+      }
 
-        // If we're processing a single file, it means the file watcher detected a
-        // change in a Dart source. We need to notify the analyzer that this file
-        // has changed so it can reanalyze the file.
-        if (entity is File) {
-          context.changeFile(entity.path);
-          await context.applyPendingFileChanges();
+      // Start tracking how long it takes to reload a preview after the file change is detected.
+      previewAnalytics.startPreviewReloadStopwatch();
+
+      // TODO(bkonyi): investigate batching change detection to handle cases where directories are
+      // deleted or moved. Currently, analysis, preview detection, and error propagation will be
+      // performed for each file contained in a modified directory (i.e., moved or deleted). This
+      // will likely cause performance issues when performing large directory operations,
+      // particularly for large projects.
+      //
+      // Unfortunately, package:watcher doesn't report changes to directories, only individual
+      // files. However, it does have a batching mechanism under the hood in the BatchEvents
+      // extension which may be worth using here.
+
+      // We need to notify the analyzer that this file has changed so it can reanalyze the file.
+      final AnalysisContext context = collection.contextFor(eventPath);
+      final File file = fs.file(eventPath);
+      context.changeFile(file.path);
+      final List<String> potentiallyAffectedFiles = await context.applyPendingFileChanges();
+
+      logger.printStatus('Detected change in $eventPath.');
+      if (event.type == ChangeType.REMOVE) {
+        potentiallyAffectedFiles.remove(eventPath);
+      } else if (event.type == ChangeType.ADD) {
+        potentiallyAffectedFiles.add(eventPath);
+      }
+
+      for (final filePath in potentiallyAffectedFiles) {
+        await _fileAddedOrUpdated(context: context, filePath: filePath);
+      }
+
+      // TODO(bkonyi): If _fileAddedOrUpdated is called after _fileRemoved, it'll add the removed file back...
+      if (event.type == ChangeType.REMOVE) {
+        await _fileRemoved(context: context, filePath: eventPath);
+      }
+      // Determine which files have transitive dependencies with compile time errors.
+      _propagateErrors();
+      onChangeDetected(_dependencyGraph);
+
+      // Report how long it took to analyze the changed file, find preview instances, update the
+      // dependency graph, generate code, and reload the widget preview scaffold with the changes.
+      previewAnalytics.reportPreviewReloadTiming();
+    });
+  }
+
+  Future<void> _fileAddedOrUpdated({
+    required AnalysisContext context,
+    required String filePath,
+  }) async {
+    final PreviewDependencyGraph filePreviewsMapping = await _findPreviewFunctions(
+      fs.file(filePath),
+    );
+    if (filePreviewsMapping.length > 1) {
+      logger.printWarning('Previews from more than one file were detected!');
+      logger.printWarning('Previews: $filePreviewsMapping');
+    }
+
+    if (filePreviewsMapping.isNotEmpty) {
+      // The set of previews has changed, but there are still previews in the library.
+      final MapEntry<PreviewPath, LibraryPreviewNode>(
+        key: PreviewPath location,
+        value: LibraryPreviewNode libraryDetails,
+      ) = filePreviewsMapping.entries.single;
+      logger.printStatus('Updated previews for ${location.uri}: ${libraryDetails.previews}');
+      _dependencyGraph[location] = libraryDetails;
+    } else {
+      // Why is this working with an empty file system on Linux?
+      final PreviewPath? removedLibraryPath = _dependencyGraph.values
+          .firstWhereOrNull((LibraryPreviewNode element) => element.files.contains(filePath))
+          ?.path;
+      if (removedLibraryPath == null) {
+        // The node was already removed from the graph as a result of updating nodes after the
+        // removal of another node. This can happen when a directory is deleted.
+        return;
+      }
+      // The library previously had previews that were removed.
+      logger.printStatus('Previews removed from $filePath');
+      _dependencyGraph.remove(removedLibraryPath);
+    }
+  }
+
+  /// Search for functions annotated with `@Preview` in the current project.
+  Future<PreviewDependencyGraph> _findPreviewFunctions(FileSystemEntity entity) async {
+    final PreviewDependencyGraph updatedPreviews = PreviewDependencyGraph();
+
+    logger.printStatus('Finding previews in ${entity.path}...');
+    for (final AnalysisContext context in collection.contexts) {
+      for (final String filePath in context.contextRoot.analyzedFiles()) {
+        logger.printTrace('Checking file: $filePath');
+        if (!filePath.isDartFile || !filePath.startsWith(entity.path)) {
+          logger.printTrace('Skipping $filePath');
+          continue;
         }
-
-        for (final String filePath in context.contextRoot.analyzedFiles()) {
-          logger.printTrace('Checking file: $filePath');
-          if (!filePath.isDartFile || !filePath.startsWith(entity.path)) {
-            logger.printTrace('Skipping $filePath');
+        SomeResolvedLibraryResult lib = await context.currentSession.getResolvedLibrary(filePath);
+        // If filePath points to a file that's part of a library, retrieve its compilation unit first
+        // in order to get the actual path to the library.
+        if (lib is NotLibraryButPartResult) {
+          final unit =
+              (await context.currentSession.getResolvedUnit(filePath)) as ResolvedUnitResult;
+          lib = await context.currentSession.getResolvedLibrary(
+            unit.libraryElement.firstFragment.source.fullName,
+          );
+        }
+        if (lib is ResolvedLibraryResult) {
+          final ResolvedLibraryResult resolvedLib = lib;
+          final PreviewPath previewPath = lib.element.toPreviewPath();
+          // This library has already been processed.
+          if (updatedPreviews.containsKey(previewPath)) {
             continue;
           }
-          final SomeResolvedLibraryResult lib = await context.currentSession.getResolvedLibrary(
-            filePath,
+
+          final LibraryPreviewNode previewsForLibrary = _dependencyGraph.putIfAbsent(
+            previewPath,
+            () => LibraryPreviewNode(library: resolvedLib.element, logger: logger),
           );
-          // TODO(bkonyi): ensure this can handle part files.
-          if (lib is ResolvedLibraryResult) {
-            for (final ResolvedUnitResult libUnit in lib.units) {
-              final List<PreviewDetails> previewEntries =
-                  previews[libUnit.toPreviewPath()] ?? <PreviewDetails>[];
-              final PreviewVisitor visitor = PreviewVisitor();
-              libUnit.unit.visitChildren(visitor);
-              previewEntries.addAll(visitor.previewEntries);
-              if (previewEntries.isNotEmpty) {
-                previews[libUnit.toPreviewPath()] = previewEntries;
-              }
-            }
-          } else {
-            logger.printWarning('Unknown library type at $filePath: $lib');
-          }
+
+          previewsForLibrary.updateDependencyGraph(graph: _dependencyGraph, units: lib.units);
+          updatedPreviews[previewPath] = previewsForLibrary;
+
+          // Check for errors in the library.
+          await previewsForLibrary.populateErrors(context: context);
+
+          // Iterate over each library's AST to find previews.
+          previewsForLibrary.findPreviews(lib: lib);
         }
       }
-      final int previewCount = previews.values.fold<int>(
-        0,
-        (int count, List<PreviewDetails> value) => count + value.length,
-      );
-      logger.printStatus('Found $previewCount ${pluralize('preview', previewCount)}.');
-    });
-    return previews;
-  }
-}
-
-/// Visitor which detects previews and extracts [PreviewDetails] for later code
-/// generation.
-// TODO(bkonyi): this visitor needs better error detection to identify invalid
-// previews and report them to the previewer without causing the entire
-// environment to shutdown or fail to render valid previews.
-class PreviewVisitor extends RecursiveAstVisitor<void> {
-  final List<PreviewDetails> previewEntries = <PreviewDetails>[];
-
-  FunctionDeclaration? _currentFunction;
-  ConstructorDeclaration? _currentConstructor;
-  MethodDeclaration? _currentMethod;
-  PreviewDetails? _currentPreview;
-
-  /// Handles previews defined on top-level functions.
-  @override
-  void visitFunctionDeclaration(FunctionDeclaration node) {
-    assert(_currentFunction == null);
-    if (node.name.isPrivate) {
-      return;
     }
-
-    final TypeAnnotation? returnType = node.returnType;
-    if (returnType == null || returnType.question != null) {
-      return;
-    }
-    _scopedVisitChildren(node, (FunctionDeclaration? node) => _currentFunction = node);
+    final int previewCount = updatedPreviews.values.fold<int>(
+      0,
+      (int count, LibraryPreviewNode value) => count + value.previews.length,
+    );
+    logger.printStatus('Found $previewCount ${pluralize('preview', previewCount)}.');
+    return updatedPreviews;
   }
 
-  /// Handles previews defined on constructors.
-  @override
-  void visitConstructorDeclaration(ConstructorDeclaration node) {
-    _scopedVisitChildren(node, (ConstructorDeclaration? node) => _currentConstructor = node);
-  }
-
-  /// Handles previews defined on static methods within classes.
-  @override
-  void visitMethodDeclaration(MethodDeclaration node) {
-    if (!node.isStatic) {
-      return;
-    }
-    _scopedVisitChildren(node, (MethodDeclaration? node) => _currentMethod = node);
-  }
-
-  @override
-  void visitAnnotation(Annotation node) {
-    if (!node.isPreview) {
-      return;
-    }
-    assert(_currentFunction != null || _currentConstructor != null || _currentMethod != null);
-    if (_currentFunction != null) {
-      final NamedType returnType = _currentFunction!.returnType! as NamedType;
-      _currentPreview = PreviewDetails(
-        functionName: _currentFunction!.name.toString(),
-        isBuilder: returnType.name2.isWidgetBuilder,
-      );
-    } else if (_currentConstructor != null) {
-      final SimpleIdentifier returnType = _currentConstructor!.returnType as SimpleIdentifier;
-      final Token? name = _currentConstructor!.name;
-      _currentPreview = PreviewDetails(
-        functionName: '$returnType${name == null ? '' : '.$name'}',
-        isBuilder: false,
-      );
-    } else if (_currentMethod != null) {
-      final NamedType returnType = _currentMethod!.returnType! as NamedType;
-      final ClassDeclaration parentClass = _currentMethod!.parent! as ClassDeclaration;
-      _currentPreview = PreviewDetails(
-        functionName: '${parentClass.name}.${_currentMethod!.name}',
-        isBuilder: returnType.name2.isWidgetBuilder,
-      );
-    }
-    node.visitChildren(this);
-    previewEntries.add(_currentPreview!);
-    _currentPreview = null;
-  }
-
-  @override
-  void visitNamedExpression(NamedExpression node) {
-    // Extracts named properties from the @Preview annotation.
-    _currentPreview?._setField(node: node);
-  }
-
-  void _scopedVisitChildren<T extends AstNode>(T node, void Function(T?) setter) {
-    setter(node);
-    node.visitChildren(this);
-    setter(null);
-  }
-}
-
-/// Used to protect global state accessed in blocks containing calls to
-/// asynchronous methods.
-///
-/// Originally from DDS:
-/// https://github.com/dart-lang/sdk/blob/3fe58da3cfe2c03fb9ee691a7a4709082fad3e73/pkg/dds/lib/src/utils/mutex.dart
-class PreviewDetectorMutex {
-  /// Executes a block of code containing asynchronous calls atomically.
+  /// Handles the deletion of a file from the target project.
   ///
-  /// If no other asynchronous context is currently executing within
-  /// [criticalSection], it will immediately be called. Otherwise, the
-  /// caller will be suspended and entered into a queue to be resumed once the
-  /// lock is released.
-  Future<T> runGuarded<T>(FutureOr<T> Function() criticalSection) async {
-    try {
-      await _acquireLock();
-      return await criticalSection();
-    } finally {
-      _releaseLock();
-    }
-  }
+  /// This involves removing the relevant [LibraryPreviewNode] from the dependency graph as well
+  /// as checking for newly introduced errors in files which had a transitive dependency on the
+  /// removed file.
+  Future<void> _fileRemoved({required AnalysisContext context, required String filePath}) async {
+    final File file = fs.file(filePath);
+    final LibraryPreviewNode? node = _dependencyGraph.values.firstWhereOrNull(
+      (LibraryPreviewNode e) => e.files.contains(file.path),
+    );
 
-  Future<void> _acquireLock() async {
-    if (!_locked) {
-      _locked = true;
+    if (node == null) {
+      // The node was already removed from the graph as a result of updating nodes after the
+      // removal of another node. This can happen when a directory is deleted.
       return;
     }
 
-    final Completer<void> request = Completer<void>();
-    _outstandingRequests.add(request);
-    await request.future;
-  }
-
-  void _releaseLock() {
-    if (_outstandingRequests.isNotEmpty) {
-      final Completer<void> request = _outstandingRequests.removeFirst();
-      request.complete();
-      return;
+    final visitedNodes = <LibraryPreviewNode>{};
+    Future<void> populateErrorsDownstream({required LibraryPreviewNode node}) async {
+      visitedNodes.add(node);
+      await node.populateErrors(context: context);
+      for (final LibraryPreviewNode downstream in node.dependedOnBy) {
+        if (!visitedNodes.contains(downstream)) {
+          await populateErrorsDownstream(node: downstream);
+        }
+      }
     }
-    // Only release the lock if no other requests are pending to prevent races
-    // between the next request from the queue to be handled and incoming
-    // requests.
-    _locked = false;
+
+    node.files.remove(filePath);
+
+    // If the library node contains no files, the library has been completely deleted.
+    if (node.files.isEmpty) {
+      _dependencyGraph.remove(node.path)!;
+
+      // Removing a library can cause errors to be introduced down the dependency chain, so all
+      // downstream dependencies need to be checked for errors.
+      for (final LibraryPreviewNode downstream in node.dependedOnBy) {
+        downstream.dependsOn.remove(node);
+        await populateErrorsDownstream(node: node);
+      }
+      for (final LibraryPreviewNode upstream in node.dependsOn) {
+        upstream.dependedOnBy.remove(node);
+      }
+    }
   }
 
-  bool _locked = false;
-  final Queue<Completer<void>> _outstandingRequests = Queue<Completer<void>>();
+  /// Determines which libraries in the project have transitive dependencies containing compile
+  /// time errors, setting [LibraryPreviewNode.dependencyHasErrors] to true for libraries which
+  /// would cause errors if imported into the previewer.
+  // TODO(bkonyi): allow for processing a subset of files.
+  void _propagateErrors() {
+    final PreviewDependencyGraph previews = _dependencyGraph;
+
+    // Reset the error state for all dependencies.
+    for (final LibraryPreviewNode libraryDetails in previews.values) {
+      if (libraryDetails.errors.isEmpty) {
+        libraryDetails.dependencyHasErrors = false;
+      }
+    }
+
+    void propagateErrorsHelper(LibraryPreviewNode errorContainingNode) {
+      for (final LibraryPreviewNode importer in errorContainingNode.dependedOnBy) {
+        if (importer.dependencyHasErrors) {
+          // This dependency path has already been processed.
+          continue;
+        }
+        logger.printWarning('Propagating errors to: ${importer.path.path}');
+        importer.dependencyHasErrors = true;
+        propagateErrorsHelper(importer);
+      }
+    }
+
+    // Find the libraries that have errors and mark each of their downstream dependencies as having
+    // a dependency containing errors.
+    for (final LibraryPreviewNode nodeDetails in previews.values) {
+      if (nodeDetails.errors.isNotEmpty) {
+        logger.printWarning('${nodeDetails.path.path} has errors.');
+        propagateErrorsHelper(nodeDetails);
+      }
+    }
+  }
 }

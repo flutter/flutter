@@ -16,7 +16,7 @@ namespace flutter {
 class DlSkPaintDispatchHelper : public virtual DlOpReceiver {
  public:
   explicit DlSkPaintDispatchHelper(SkScalar opacity = SK_Scalar1)
-      : current_color_(SK_ColorBLACK), opacity_(opacity) {
+      : current_color_(DlColor::kBlack()), opacity_(opacity) {
     if (opacity < SK_Scalar1) {
       paint_.setAlphaf(opacity);
     }
@@ -87,11 +87,11 @@ class DlSkPaintDispatchHelper : public virtual DlOpReceiver {
   void set_opacity(SkScalar opacity) {
     if (opacity_ != opacity) {
       opacity_ = opacity;
-      setColor(DlColor(current_color_));
+      setColor(current_color_);
     }
   }
 
-  SkColor current_color_;
+  DlColor current_color_;
   SkScalar opacity_;
 };
 

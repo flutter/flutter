@@ -29,5 +29,11 @@
   "shareButtonLabel": "Del…",
   "clearButtonLabel": "Slett",
   "cancelButtonLabel": "Avbryt",
-  "backButtonLabel": "Tilbake"
+  "backButtonLabel": "Tilbake",
+  "expansionTileExpandedHint": "dobbelttrykk for å skjule",
+  "expansionTileCollapsedHint": "dobbelttrykk for å vise",
+  "expansionTileExpandedTapHint": "Skjul",
+  "expansionTileCollapsedTapHint": "Vis for å se mer informasjon",
+  "expandedHint": "Skjules",
+  "collapsedHint": "Vises"
 }

@@ -12,27 +12,21 @@ void main() {
 
     expect(find.byType(CupertinoRadio<example.SingingCharacter>), findsNWidgets(2));
 
-    CupertinoRadio<example.SingingCharacter> radio = tester.widget(
-      find.byType(CupertinoRadio<example.SingingCharacter>).first,
+    RadioGroup<example.SingingCharacter> group = tester.widget(
+      find.byType(RadioGroup<example.SingingCharacter>),
     );
-    expect(radio.groupValue, example.SingingCharacter.mulligan);
-
-    radio = tester.widget(find.byType(CupertinoRadio<example.SingingCharacter>).last);
-    expect(radio.groupValue, example.SingingCharacter.mulligan);
+    expect(group.groupValue, example.SingingCharacter.mulligan);
 
     await tester.tap(find.byType(CupertinoRadio<example.SingingCharacter>).last);
     await tester.pumpAndSettle();
 
-    radio = tester.widget(find.byType(CupertinoRadio<example.SingingCharacter>).last);
-    expect(radio.groupValue, example.SingingCharacter.hamilton);
-
-    radio = tester.widget(find.byType(CupertinoRadio<example.SingingCharacter>).first);
-    expect(radio.groupValue, example.SingingCharacter.hamilton);
+    group = tester.widget(find.byType(RadioGroup<example.SingingCharacter>));
+    expect(group.groupValue, example.SingingCharacter.hamilton);
 
     await tester.tap(find.byType(CupertinoRadio<example.SingingCharacter>).last);
     await tester.pumpAndSettle();
 
-    radio = tester.widget(find.byType(CupertinoRadio<example.SingingCharacter>).last);
-    expect(radio.groupValue, null);
+    group = tester.widget(find.byType(RadioGroup<example.SingingCharacter>));
+    expect(group.groupValue, null);
   });
 }

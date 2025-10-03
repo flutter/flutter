@@ -1,0 +1,119 @@
+################################################################################
+# This file describes all the files we don't need to do a copyright header
+# check on.
+################################################################################
+.*/CMakeLists\.txt$
+.*/test/.*
+.*/testing/.*
+.*/tests/.*
+.*third_party/googletest/.*
+^build/.*
+^buildtools/.*
+^impeller/fixtures/.*
+^prebuilts/.*
+^shell/platform/fuchsia/dart-pkg/zircon_ffi/lib/zircon_ffi.dart
+^sky/packages/sky_engine/LICENSE
+^testing/.*
+^third_party/android_tools/.*
+^third_party/angle/third_party/.*
+^third_party/angle/tools/.*
+^third_party/angle/util/.*
+^third_party/benchmark/.*
+^third_party/dart/pkg/.*
+^third_party/dart/third_party/binary_size/.*
+^third_party/dart/third_party/binaryen/.*
+^third_party/dart/third_party/d3/.*
+^third_party/dart/third_party/devtools/web/.*\.frag$
+^third_party/dart/third_party/devtools/web/.*\.js$
+^third_party/dart/third_party/pkg/.*
+^third_party/dart/third_party/requirejs/.*
+^third_party/depot_tools/.*
+^third_party/expat/expat/lib/internal\.h$
+^third_party/freetype2/docs/[^F].*$
+^third_party/google_fonts_for_unit_tests/.*
+^third_party/gradle/.*
+^third_party/harfbuzz/.*\.py
+^third_party/harfbuzz/perf/.*
+^third_party/harfbuzz/src/harfbuzz.cc
+^third_party/harfbuzz/util/.*
+^third_party/icu/scripts/.*
+^third_party/imgui/.*
+^third_party/inja/third_party/amalgamate/.*
+^third_party/inja/third_party/include/doctest/.*
+^third_party/java/.*
+^third_party/libpng/contrib/.*
+^third_party/libwebp/.*\.py
+^third_party/libwebp/examples/.*
+^third_party/libwebp/extras/webp_quality.c
+^third_party/libwebp/swig/.*
+^third_party/llvm-project/.*
+^third_party/ocmock/.*
+^third_party/pkg/archive/.*
+^third_party/pkg/flutter_packages/.*
+^third_party/pkg/gcloud/.*
+^third_party/pkg/googleapis/.*
+^third_party/pkg/process/.*
+^third_party/pkg/vector_math/.*
+^third_party/protobuf/.*
+^third_party/pyyaml/.*
+^third_party/skia/third_party/freetype2/.*
+^third_party/skia/third_party/icu/.*
+^third_party/skia/third_party/libgrapheme/.*
+^third_party/skia/third_party/libpng/.*
+^third_party/skia/third_party/vello/.*
+^third_party/swiftshader/third_party/.*
+^third_party/swiftshader/third_party/llvm-10.0/.*
+^third_party/swiftshader/third_party/llvm-16.0/.*
+(?i)^third_party/vulkan-deps/glslang/src/LICENSE\.txt$
+^third_party/vulkan-deps/spirv-headers/.*
+^third_party/vulkan-deps/vulkan-headers/src/LICENSE\.md$
+^third_party/vulkan-deps/vulkan-loader/.*
+^third_party/vulkan-deps/vulkan-utility-libraries/src/LICENSE.md$
+^third_party/vulkan-deps/vulkan-utility-libraries/src/scripts/.*
+^tools/android_sdk/packages\.txt$
+^tools/fuchsia/.*
+^tools/licenses_cpp/data/.*
+################################################################################
+# Instances that don't have a clear resolution yet.
+################################################################################
+# I'm not sure why this LICENSE seems to generate a different package name on
+# ci than locally. It isn't necessary because each vulkan-dep has its own
+# license
+^third_party/vulkan-deps/LICENSE$
+# This isn't in the sky license, nor excluded.
+^third_party/expat/expat/lib/siphash.h
+# This directory isn't excluded explicitly but probably should be.
+^third_party/harfbuzz/.ci/.*
+# These files don't have headers and aren't explicitly excluded.
+^third_party/harfbuzz/src/test-use-table.cc
+^third_party/harfbuzz/src/wasm/graphite/shape.cc
+^third_party/harfbuzz/src/wasm/sample/c/shape-fallback.cc
+^third_party/harfbuzz/src/wasm/sample/c/shape-ot.cc
+# These files don't have headers and aren't explicitly excluded (but they're scripts).
+^third_party/libwebp/autogen.sh
+^third_party/libwebp/iosbuild.sh
+^third_party/libwebp/xcframeworkbuild.sh
+# This file doesn't have a header and isn't excluded.
+^third_party/harfbuzz/src/OT/Var/VARC/VARC.cc
+# This file has no header, but it only includes other files.
+^third_party/harfbuzz/src/harfbuzz-subset.cc
+# These files have no header, but they are generated files.
+^third_party/harfbuzz/src/hb-ot-shaper-indic-table.cc
+^third_party/harfbuzz/src/hb-ot-shaper-vowel-constraints.cc
+# These files don't seem to be explicitly excluded but aren't present in the
+# sky license.
+third_party/freetype2/autogen.sh
+third_party/freetype2/builds/.*
+third_party/freetype2/docs/markdown/javascripts/extra.js
+third_party/freetype2/include/freetype-flutter-config/.*
+third_party/freetype2/include/freetype/config/ftmodule.h
+third_party/freetype2/include/freetype/ftchapters.h
+third_party/freetype2/LICENSE.TXT
+third_party/freetype2/src/gxvalid/gxvfgen.c
+third_party/freetype2/src/psaux/.*
+third_party/freetype2/src/tools/.*
+third_party/freetype2/src/truetype/ttpload.c
+# This file is a conglomeration of licenses found in files.
+third_party/vulkan-deps/glslang/src/LICENSE.TXT
+# This file has a copyright but isn't included in legacy tool
+^third_party/freetype2/meson_options\.txt$

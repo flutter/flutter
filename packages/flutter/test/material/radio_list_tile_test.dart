@@ -15,7 +15,10 @@ import '../widgets/semantics_tester.dart';
 Widget wrap({Widget? child}) {
   return MediaQuery(
     data: const MediaQueryData(),
-    child: Directionality(textDirection: TextDirection.ltr, child: Material(child: child)),
+    child: Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(child: child),
+    ),
   );
 }
 
@@ -27,17 +30,15 @@ void main() {
     int? selectedValue;
     // Constructor parameters are required for [RadioListTile], but they are
     // irrelevant when searching with [find.byType].
-    final Type radioListTileType =
-        const RadioListTile<int>(value: 0, groupValue: 0, onChanged: null).runtimeType;
+    final Type radioListTileType = const RadioListTile<int>(value: 0, groupValue: 0).runtimeType;
 
     List<RadioListTile<int>> generatedRadioListTiles;
-    List<RadioListTile<int>> findTiles() =>
-        find
-            .byType(radioListTileType)
-            .evaluate()
-            .map<Widget>((Element element) => element.widget)
-            .cast<RadioListTile<int>>()
-            .toList();
+    List<RadioListTile<int>> findTiles() => find
+        .byType(radioListTileType)
+        .evaluate()
+        .map<Widget>((Element element) => element.widget)
+        .cast<RadioListTile<int>>()
+        .toList();
 
     Widget buildFrame() {
       return wrap(
@@ -46,17 +47,16 @@ void main() {
             return Scaffold(
               body: ListView.builder(
                 itemCount: values.length,
-                itemBuilder:
-                    (BuildContext context, int index) => RadioListTile<int>(
-                      onChanged: (int? value) {
-                        setState(() {
-                          selectedValue = value;
-                        });
-                      },
-                      value: values[index],
-                      groupValue: selectedValue,
-                      title: Text(values[index].toString()),
-                    ),
+                itemBuilder: (BuildContext context, int index) => RadioListTile<int>(
+                  onChanged: (int? value) {
+                    setState(() {
+                      selectedValue = value;
+                    });
+                  },
+                  value: values[index],
+                  groupValue: selectedValue,
+                  title: Text(values[index].toString()),
+                ),
               ),
             );
           },
@@ -126,7 +126,6 @@ void main() {
           key: key,
           value: 1,
           groupValue: 2,
-          onChanged: null,
           title: Text('Title', key: titleKey),
         ),
       ),
@@ -158,7 +157,7 @@ void main() {
     int? selectedValue;
     // Constructor parameters are required for [Radio], but they are irrelevant
     // when searching with [find.byType].
-    final Type radioType = const Radio<int>(value: 0, groupValue: 0, onChanged: null).runtimeType;
+    final Type radioType = const Radio<int>(value: 0, groupValue: 0).runtimeType;
     final List<dynamic> log = <dynamic>[];
 
     Widget buildFrame() {
@@ -168,18 +167,17 @@ void main() {
             return Scaffold(
               body: ListView.builder(
                 itemCount: values.length,
-                itemBuilder:
-                    (BuildContext context, int index) => RadioListTile<int>(
-                      onChanged: (int? value) {
-                        log.add(value);
-                        setState(() {
-                          selectedValue = value;
-                        });
-                      },
-                      value: values[index],
-                      groupValue: selectedValue,
-                      title: Text(values[index].toString()),
-                    ),
+                itemBuilder: (BuildContext context, int index) => RadioListTile<int>(
+                  onChanged: (int? value) {
+                    log.add(value);
+                    setState(() {
+                      selectedValue = value;
+                    });
+                  },
+                  value: values[index],
+                  groupValue: selectedValue,
+                  title: Text(values[index].toString()),
+                ),
               ),
             );
           },
@@ -223,7 +221,7 @@ void main() {
     int? selectedValue;
     // Constructor parameters are required for [Radio], but they are irrelevant
     // when searching with [find.byType].
-    final Type radioType = const Radio<int>(value: 0, groupValue: 0, onChanged: null).runtimeType;
+    final Type radioType = const Radio<int>(value: 0, groupValue: 0).runtimeType;
     final List<dynamic> log = <dynamic>[];
 
     Widget buildFrame() {
@@ -233,18 +231,17 @@ void main() {
             return Scaffold(
               body: ListView.builder(
                 itemCount: values.length,
-                itemBuilder:
-                    (BuildContext context, int index) => RadioListTile<int>(
-                      onChanged: (int? value) {
-                        log.add(value);
-                        setState(() {
-                          selectedValue = value;
-                        });
-                      },
-                      value: values[index],
-                      groupValue: selectedValue,
-                      title: Text(values[index].toString()),
-                    ),
+                itemBuilder: (BuildContext context, int index) => RadioListTile<int>(
+                  onChanged: (int? value) {
+                    log.add(value);
+                    setState(() {
+                      selectedValue = value;
+                    });
+                  },
+                  value: values[index],
+                  groupValue: selectedValue,
+                  title: Text(values[index].toString()),
+                ),
               ),
             );
           },
@@ -273,7 +270,7 @@ void main() {
     int? selectedValue;
     // Constructor parameters are required for [Radio], but they are irrelevant
     // when searching with [find.byType].
-    final Type radioType = const Radio<int>(value: 0, groupValue: 0, onChanged: null).runtimeType;
+    final Type radioType = const Radio<int>(value: 0, groupValue: 0).runtimeType;
     final List<dynamic> log = <dynamic>[];
 
     Widget buildFrame() {
@@ -363,13 +360,7 @@ void main() {
     await tester.pumpWidget(
       Material(
         child: Center(
-          child: Radio<int>(
-            key: key,
-            value: 1,
-            groupValue: null,
-            onChanged: log.add,
-            toggleable: true,
-          ),
+          child: Radio<int>(key: key, value: 1, onChanged: log.add, toggleable: true),
         ),
       ),
     );
@@ -466,7 +457,6 @@ void main() {
         child: const RadioListTile<int>(
           value: 1,
           groupValue: 2,
-          onChanged: null,
           title: Text('Title'),
           internalAddSemanticForOnTap: true,
         ),
@@ -504,7 +494,6 @@ void main() {
         child: const RadioListTile<int>(
           value: 2,
           groupValue: 2,
-          onChanged: null,
           title: Text('Title'),
           internalAddSemanticForOnTap: true,
         ),
@@ -607,7 +596,6 @@ void main() {
         child: RadioListTile<int>(
           value: 1,
           groupValue: 2,
-          onChanged: null,
           title: Text('Title', key: childKey),
           autofocus: true,
         ),
@@ -619,8 +607,7 @@ void main() {
   });
 
   testWidgets('RadioListTile contentPadding test', (WidgetTester tester) async {
-    final Type radioType =
-        const Radio<bool>(groupValue: true, value: true, onChanged: null).runtimeType;
+    final Type radioType = const Radio<bool>(groupValue: true, value: true).runtimeType;
 
     await tester.pumpWidget(
       wrap(
@@ -666,7 +653,6 @@ void main() {
           child: RadioListTile<bool>(
             value: true,
             groupValue: true,
-            onChanged: null,
             title: Text('Title'),
             shape: shapeBorder,
           ),
@@ -686,7 +672,6 @@ void main() {
           child: RadioListTile<bool>(
             value: false,
             groupValue: true,
-            onChanged: null,
             title: const Text('Title'),
             tileColor: tileColor,
           ),
@@ -706,7 +691,6 @@ void main() {
           child: RadioListTile<bool>(
             value: false,
             groupValue: true,
-            onChanged: null,
             title: const Text('Title'),
             selected: true,
             selectedTileColor: selectedTileColor,
@@ -727,8 +711,8 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           radioTheme: RadioThemeData(
-            fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-              return states.contains(MaterialState.selected) ? fillColor : null;
+            fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+              return states.contains(WidgetState.selected) ? fillColor : null;
             }),
           ),
         ),
@@ -887,7 +871,7 @@ void main() {
       wrap(
         child: const MouseRegion(
           cursor: SystemMouseCursors.forbidden,
-          child: RadioListTile<int>(value: 1, onChanged: null, groupValue: 2),
+          child: RadioListTile<int>(value: 1, groupValue: 2),
         ),
       ),
     );
@@ -906,20 +890,20 @@ void main() {
     const Color inactiveEnabledFillColor = Color(0xFF000003);
     const Color inactiveDisabledFillColor = Color(0xFF000004);
 
-    Color getFillColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        if (states.contains(MaterialState.selected)) {
+    Color getFillColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
+        if (states.contains(WidgetState.selected)) {
           return activeDisabledFillColor;
         }
         return inactiveDisabledFillColor;
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return activeEnabledFillColor;
       }
       return inactiveEnabledFillColor;
     }
 
-    final MaterialStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
+    final WidgetStateProperty<Color> fillColor = WidgetStateColor.resolveWith(getFillColor);
 
     int? groupValue = 0;
     Widget buildApp({required bool enabled}) {
@@ -929,14 +913,13 @@ void main() {
             return RadioListTile<int>(
               value: 0,
               fillColor: fillColor,
-              onChanged:
-                  enabled
-                      ? (int? newValue) {
-                        setState(() {
-                          groupValue = newValue;
-                        });
-                      }
-                      : null,
+              onChanged: enabled
+                  ? (int? newValue) {
+                      setState(() {
+                        groupValue = newValue;
+                      });
+                    }
+                  : null,
               groupValue: groupValue,
             );
           },
@@ -952,6 +935,7 @@ void main() {
       Material.of(tester.element(find.byType(Radio<int>))),
       paints
         ..rect()
+        ..circle(color: Colors.transparent)
         ..circle(color: activeEnabledFillColor)
         ..circle(color: activeEnabledFillColor),
     );
@@ -964,6 +948,7 @@ void main() {
       Material.of(tester.element(find.byType(Radio<int>))),
       paints
         ..rect()
+        ..circle(color: Colors.transparent)
         ..circle(color: inactiveEnabledFillColor, style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
 
@@ -975,6 +960,7 @@ void main() {
       Material.of(tester.element(find.byType(Radio<int>))),
       paints
         ..rect()
+        ..circle(color: Colors.transparent)
         ..circle(color: activeDisabledFillColor)
         ..circle(color: activeDisabledFillColor),
     );
@@ -987,6 +973,7 @@ void main() {
       Material.of(tester.element(find.byType(Radio<int>))),
       paints
         ..rect()
+        ..circle(color: Colors.transparent)
         ..circle(color: inactiveDisabledFillColor, style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
   });
@@ -995,14 +982,14 @@ void main() {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const Color hoveredFillColor = Color(0xFF000001);
 
-    Color getFillColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.hovered)) {
+    Color getFillColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.hovered)) {
         return hoveredFillColor;
       }
       return Colors.transparent;
     }
 
-    final MaterialStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
+    final WidgetStateProperty<Color> fillColor = WidgetStateColor.resolveWith(getFillColor);
 
     int? groupValue = 0;
     Widget buildApp() {
@@ -1038,6 +1025,7 @@ void main() {
       paints
         ..rect()
         ..circle()
+        ..circle(color: Colors.transparent)
         ..circle(color: hoveredFillColor),
     );
   });
@@ -1055,14 +1043,13 @@ void main() {
             builder: (BuildContext context, StateSetter setState) {
               return RadioListTile<int>(
                 value: 0,
-                onChanged:
-                    enabled
-                        ? (int? newValue) {
-                          setState(() {
-                            groupValue = newValue;
-                          });
-                        }
-                        : null,
+                onChanged: enabled
+                    ? (int? newValue) {
+                        setState(() {
+                          groupValue = newValue;
+                        });
+                      }
+                    : null,
                 hoverColor: hoverColor,
                 groupValue: groupValue,
               );
@@ -1080,6 +1067,7 @@ void main() {
       Material.of(tester.element(find.byType(Radio<int>))),
       paints
         ..rect()
+        ..circle(color: Colors.transparent)
         ..circle(color: theme.colorScheme.primary)
         ..circle(color: theme.colorScheme.primary),
     );
@@ -1097,7 +1085,8 @@ void main() {
       Material.of(tester.element(find.byType(Radio<int>))),
       paints
         ..rect()
-        ..circle(color: hoverColor),
+        ..circle(color: hoverColor)
+        ..circle(color: Colors.transparent),
     );
 
     // Check when the radio is selected, but disabled.
@@ -1109,6 +1098,7 @@ void main() {
       Material.of(tester.element(find.byType(Radio<int>))),
       paints
         ..rect()
+        ..circle(color: Colors.transparent)
         ..circle(color: theme.colorScheme.onSurface.withOpacity(0.38))
         ..circle(color: theme.colorScheme.onSurface.withOpacity(0.38)),
     );
@@ -1125,14 +1115,14 @@ void main() {
     const Color hoverOverlayColor = Color(0xFF000003);
     const Color hoverColor = Color(0xFF000005);
 
-    Color? getOverlayColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
-        if (states.contains(MaterialState.selected)) {
+    Color? getOverlayColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
+        if (states.contains(WidgetState.selected)) {
           return activePressedOverlayColor;
         }
         return inactivePressedOverlayColor;
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return hoverOverlayColor;
       }
       return null;
@@ -1146,7 +1136,7 @@ void main() {
             groupValue: true,
             onChanged: (_) {},
             fillColor: const MaterialStatePropertyAll<Color>(fillColor),
-            overlayColor: useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
+            overlayColor: useOverlay ? WidgetStateProperty.resolveWith(getOverlayColor) : null,
             hoverColor: hoverColor,
           ),
         ),
@@ -1418,14 +1408,14 @@ void main() {
         const Color hoverOverlayColor = Color(0xFF000003);
         const Color hoverColor = Color(0xFF000005);
 
-        Color? getOverlayColor(Set<MaterialState> states) {
-          if (states.contains(MaterialState.pressed)) {
-            if (states.contains(MaterialState.selected)) {
+        Color? getOverlayColor(Set<WidgetState> states) {
+          if (states.contains(WidgetState.pressed)) {
+            if (states.contains(WidgetState.selected)) {
               return activePressedOverlayColor;
             }
             return inactivePressedOverlayColor;
           }
-          if (states.contains(MaterialState.hovered)) {
+          if (states.contains(WidgetState.hovered)) {
             return hoverOverlayColor;
           }
           return null;
@@ -1440,8 +1430,7 @@ void main() {
                 groupValue: true,
                 onChanged: (_) {},
                 fillColor: const MaterialStatePropertyAll<Color>(fillColor),
-                overlayColor:
-                    useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
+                overlayColor: useOverlay ? WidgetStateProperty.resolveWith(getOverlayColor) : null,
                 hoverColor: hoverColor,
               ),
             ),
@@ -1514,14 +1503,13 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return RadioListTile<int>(
                   value: 0,
-                  onChanged:
-                      enabled
-                          ? (int? newValue) {
-                            setState(() {
-                              groupValue = newValue;
-                            });
-                          }
-                          : null,
+                  onChanged: enabled
+                      ? (int? newValue) {
+                          setState(() {
+                            groupValue = newValue;
+                          });
+                        }
+                      : null,
                   hoverColor: hoverColor,
                   groupValue: groupValue,
                 );
@@ -1539,6 +1527,7 @@ void main() {
         Material.of(tester.element(find.byType(Radio<int>))),
         paints
           ..rect()
+          ..circle(color: Colors.transparent)
           ..circle(color: const Color(0xff2196f3))
           ..circle(color: const Color(0xff2196f3)),
       );
@@ -1556,7 +1545,8 @@ void main() {
         Material.of(tester.element(find.byType(Radio<int>))),
         paints
           ..rect()
-          ..circle(color: hoverColor),
+          ..circle(color: hoverColor)
+          ..circle(color: Colors.transparent),
       );
 
       // Check when the radio is selected, but disabled.
@@ -1568,6 +1558,7 @@ void main() {
         Material.of(tester.element(find.byType(Radio<int>))),
         paints
           ..rect()
+          ..circle(color: Colors.transparent)
           ..circle(color: const Color(0x61000000))
           ..circle(color: const Color(0x61000000)),
       );
@@ -1610,9 +1601,7 @@ void main() {
   testWidgets('RadioListTile renders with default scale', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
-        home: Material(
-          child: RadioListTile<bool>(value: false, groupValue: false, onChanged: null),
-        ),
+        home: Material(child: RadioListTile<bool>(value: false, groupValue: false)),
       ),
     );
 
@@ -1629,12 +1618,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
-          child: RadioListTile<bool>(
-            value: false,
-            groupValue: false,
-            onChanged: null,
-            radioScaleFactor: scale,
-          ),
+          child: RadioListTile<bool>(value: false, groupValue: false, radioScaleFactor: scale),
         ),
       ),
     );
@@ -1644,5 +1628,682 @@ void main() {
     );
 
     expect(widget.transform.getMaxScaleOnAxis(), scale);
+  });
+
+  testWidgets('RadioListTile isThreeLine', (WidgetTester tester) async {
+    const double height = 300;
+    const double size = 40.0;
+
+    Widget buildFrame({bool? themeDataIsThreeLine, bool? themeIsThreeLine, bool? isThreeLine}) {
+      return MaterialApp(
+        key: UniqueKey(),
+        theme: themeDataIsThreeLine != null
+            ? ThemeData(listTileTheme: ListTileThemeData(isThreeLine: themeDataIsThreeLine))
+            : null,
+        home: Material(
+          child: ListTileTheme(
+            data: themeIsThreeLine != null
+                ? ListTileThemeData(isThreeLine: themeIsThreeLine)
+                : null,
+            child: ListView(
+              children: <Widget>[
+                RadioListTile<int>(
+                  isThreeLine: isThreeLine,
+                  title: const Text('A'),
+                  subtitle: const Text('A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nL\nM'),
+                  value: 0,
+                  groupValue: 1,
+                ),
+                RadioListTile<int>(
+                  isThreeLine: isThreeLine,
+                  title: const Text('A'),
+                  subtitle: const Text('A'),
+                  value: 0,
+                  groupValue: 2,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    void expectTwoLine() {
+      expect(
+        tester.getRect(find.byType(RadioListTile<int>).at(0)),
+        const Rect.fromLTWH(0.0, 0.0, 800.0, height),
+      );
+      expect(
+        tester.getRect(find.byType(Radio<int>).at(0)),
+        const Rect.fromLTWH(16.0, 130.0, size, size),
+      );
+      expect(
+        tester.getRect(find.byType(RadioListTile<int>).at(1)),
+        const Rect.fromLTWH(0.0, height, 800.0, 72.0),
+      );
+      expect(
+        tester.getRect(find.byType(Radio<int>).at(1)),
+        const Rect.fromLTWH(16.0, height + 16, size, size),
+      );
+    }
+
+    void expectThreeLine() {
+      expect(
+        tester.getRect(find.byType(RadioListTile<int>).at(0)),
+        const Rect.fromLTWH(0.0, 0.0, 800.0, height),
+      );
+      expect(
+        tester.getRect(find.byType(Radio<int>).at(0)),
+        const Rect.fromLTWH(16.0, 8.0, size, size),
+      );
+      expect(
+        tester.getRect(find.byType(RadioListTile<int>).at(1)),
+        const Rect.fromLTWH(0.0, height, 800.0, 88.0),
+      );
+      expect(
+        tester.getRect(find.byType(Radio<int>).at(1)),
+        const Rect.fromLTWH(16.0, height + 8.0, size, size),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    expectTwoLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: true));
+    expectThreeLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: false, themeIsThreeLine: true));
+    expectThreeLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: true, themeIsThreeLine: false));
+    expectTwoLine();
+
+    await tester.pumpWidget(buildFrame(isThreeLine: true));
+    expectThreeLine();
+
+    await tester.pumpWidget(buildFrame(themeIsThreeLine: true, isThreeLine: false));
+    expectTwoLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: true, isThreeLine: false));
+    expectTwoLine();
+
+    await tester.pumpWidget(
+      buildFrame(themeDataIsThreeLine: true, themeIsThreeLine: true, isThreeLine: false),
+    );
+    expectTwoLine();
+
+    await tester.pumpWidget(buildFrame(themeIsThreeLine: false, isThreeLine: true));
+    expectThreeLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: false, isThreeLine: true));
+    expectThreeLine();
+
+    await tester.pumpWidget(
+      buildFrame(themeDataIsThreeLine: false, themeIsThreeLine: false, isThreeLine: true),
+    );
+    expectThreeLine();
+  });
+
+  testWidgets('RadioListTile.adaptive isThreeLine', (WidgetTester tester) async {
+    const double height = 300;
+    const double size = 18.0;
+
+    Widget buildFrame({bool? themeDataIsThreeLine, bool? themeIsThreeLine, bool? isThreeLine}) {
+      return MaterialApp(
+        key: UniqueKey(),
+        theme: ThemeData(
+          platform: TargetPlatform.iOS,
+          listTileTheme: themeDataIsThreeLine != null
+              ? ListTileThemeData(isThreeLine: themeDataIsThreeLine)
+              : null,
+        ),
+        home: Material(
+          child: ListTileTheme(
+            data: themeIsThreeLine != null
+                ? ListTileThemeData(isThreeLine: themeIsThreeLine)
+                : null,
+            child: ListView(
+              children: <Widget>[
+                RadioListTile<int>.adaptive(
+                  isThreeLine: isThreeLine,
+                  title: const Text('A'),
+                  subtitle: const Text('A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nL\nM'),
+                  value: 0,
+                  groupValue: 1,
+                ),
+                RadioListTile<int>.adaptive(
+                  isThreeLine: isThreeLine,
+                  title: const Text('A'),
+                  subtitle: const Text('A'),
+                  value: 0,
+                  groupValue: 2,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    void expectTwoLine() {
+      expect(
+        tester.getRect(find.byType(RadioListTile<int>).at(0)),
+        const Rect.fromLTWH(0.0, 0.0, 800.0, height),
+      );
+      expect(
+        tester.getRect(find.byType(Radio<int>).at(0)),
+        const Rect.fromLTWH(16.0, 141.0, size, size),
+      );
+      expect(
+        tester.getRect(find.byType(RadioListTile<int>).at(1)),
+        const Rect.fromLTWH(0.0, height, 800.0, 72.0),
+      );
+      expect(
+        tester.getRect(find.byType(Radio<int>).at(1)),
+        const Rect.fromLTWH(16.0, height + 27.0, size, size),
+      );
+    }
+
+    void expectThreeLine() {
+      expect(
+        tester.getRect(find.byType(RadioListTile<int>).at(0)),
+        const Rect.fromLTWH(0.0, 0.0, 800.0, height),
+      );
+      expect(
+        tester.getRect(find.byType(Radio<int>).at(0)),
+        const Rect.fromLTWH(16.0, 8.0, size, size),
+      );
+      expect(
+        tester.getRect(find.byType(RadioListTile<int>).at(1)),
+        const Rect.fromLTWH(0.0, height, 800.0, 88.0),
+      );
+      expect(
+        tester.getRect(find.byType(Radio<int>).at(1)),
+        const Rect.fromLTWH(16.0, height + 8.0, size, size),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    expectTwoLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: true));
+    expectThreeLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: false, themeIsThreeLine: true));
+    expectThreeLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: true, themeIsThreeLine: false));
+    expectTwoLine();
+
+    await tester.pumpWidget(buildFrame(isThreeLine: true));
+    expectThreeLine();
+
+    await tester.pumpWidget(buildFrame(themeIsThreeLine: true, isThreeLine: false));
+    expectTwoLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: true, isThreeLine: false));
+    expectTwoLine();
+
+    await tester.pumpWidget(
+      buildFrame(themeDataIsThreeLine: true, themeIsThreeLine: true, isThreeLine: false),
+    );
+    expectTwoLine();
+
+    await tester.pumpWidget(buildFrame(themeIsThreeLine: false, isThreeLine: true));
+    expectThreeLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: false, isThreeLine: true));
+    expectThreeLine();
+
+    await tester.pumpWidget(
+      buildFrame(themeDataIsThreeLine: false, themeIsThreeLine: false, isThreeLine: true),
+    );
+    expectThreeLine();
+  });
+
+  testWidgets('titleAlignment position with title widget', (WidgetTester tester) async {
+    const Key secondaryKey = Key('secondary');
+    const double titleHeight = 50.0;
+    const double secondaryHeight = 24.0;
+    // The default vertical padding for material 3 is 8.0.
+    const double minVerticalPadding = 8.0;
+
+    Widget buildFrame({ListTileTitleAlignment? titleAlignment}) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: RadioListTile<bool>(
+              titleAlignment: titleAlignment,
+              controlAffinity: ListTileControlAffinity.leading,
+              value: true,
+              groupValue: true,
+              onChanged: (bool? newValue) {},
+              title: const SizedBox(width: 20.0, height: titleHeight),
+              secondary: const SizedBox(key: secondaryKey, width: 24.0, height: secondaryHeight),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // If [ThemeData.useMaterial3] is true, the default title alignment is
+    // [ListTileTitleAlignment.threeLine], which positions the leading and
+    // trailing widgets center vertically in the tile if the [ListTile.isThreeLine]
+    // property is false.
+    await tester.pumpWidget(buildFrame());
+    final double radioHeight = tester.getSize(find.byType(Radio<bool>)).height;
+    final double tileHeight = tester.getSize(find.byType(ListTile)).height;
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is ListTile && widget.titleAlignment == null;
+      }),
+      findsOne,
+    );
+    Offset tileOffset = tester.getTopLeft(find.byType(ListTile));
+    Offset radioOffset = tester.getTopLeft(find.byType(Radio<bool>));
+    Offset secondaryOffset = tester.getTopRight(find.byKey(secondaryKey));
+
+    // Leading and trailing widgets are centered vertically in the tile.
+    final double centerPositionRadio = (tileHeight / 2) - (radioHeight / 2);
+    final double centerPositionSecondary = (tileHeight / 2) - (secondaryHeight / 2);
+    expect(radioOffset.dy - tileOffset.dy, centerPositionRadio);
+    expect(secondaryOffset.dy - tileOffset.dy, centerPositionSecondary);
+
+    // Test [ListTileTitleAlignment.threeLine] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.threeLine));
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is ListTile && widget.titleAlignment == ListTileTitleAlignment.threeLine;
+      }),
+      findsOne,
+    );
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    radioOffset = tester.getTopLeft(find.byType(Radio<bool>));
+    secondaryOffset = tester.getTopRight(find.byKey(secondaryKey));
+
+    // Leading and trailing widgets are centered vertically in the tile,
+    // If the [ListTile.isThreeLine] property is false.
+    expect(radioOffset.dy - tileOffset.dy, centerPositionRadio);
+    expect(secondaryOffset.dy - tileOffset.dy, centerPositionSecondary);
+
+    // Test [ListTileTitleAlignment.titleHeight] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.titleHeight));
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is ListTile && widget.titleAlignment == ListTileTitleAlignment.titleHeight;
+      }),
+      findsOne,
+    );
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    radioOffset = tester.getTopLeft(find.byType(Radio<bool>));
+    secondaryOffset = tester.getTopRight(find.byKey(secondaryKey));
+
+    expect(radioOffset.dy - tileOffset.dy, (tileHeight - radioHeight) / 2);
+    expect(secondaryOffset.dy - tileOffset.dy, centerPositionSecondary);
+
+    // Test [ListTileTitleAlignment.top] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.top));
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is ListTile && widget.titleAlignment == ListTileTitleAlignment.top;
+      }),
+      findsOne,
+    );
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    radioOffset = tester.getTopLeft(find.byType(Radio<bool>));
+    secondaryOffset = tester.getTopRight(find.byKey(secondaryKey));
+
+    // Leading and trailing widgets are placed minVerticalPadding below
+    // the top of the title widget. The default for material 3 is 8.0.
+    const double topPosition = minVerticalPadding;
+    expect(radioOffset.dy - tileOffset.dy, topPosition);
+    expect(secondaryOffset.dy - tileOffset.dy, topPosition);
+
+    // Test [ListTileTitleAlignment.center] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.center));
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is ListTile && widget.titleAlignment == ListTileTitleAlignment.center;
+      }),
+      findsOne,
+    );
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    radioOffset = tester.getTopLeft(find.byType(Radio<bool>));
+    secondaryOffset = tester.getTopRight(find.byKey(secondaryKey));
+
+    // Leading and trailing widgets are centered vertically in the tile.
+    expect(radioOffset.dy - tileOffset.dy, centerPositionRadio);
+    expect(secondaryOffset.dy - tileOffset.dy, centerPositionSecondary);
+
+    // Test [ListTileTitleAlignment.bottom] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.bottom));
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is ListTile && widget.titleAlignment == ListTileTitleAlignment.bottom;
+      }),
+      findsOne,
+    );
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    radioOffset = tester.getTopLeft(find.byType(Radio<bool>));
+    secondaryOffset = tester.getTopRight(find.byKey(secondaryKey));
+
+    // Leading and trailing widgets are placed minVerticalPadding above
+    // the bottom of the subtitle widget.
+    final double bottomPositionRadio = tileHeight - minVerticalPadding - radioHeight;
+    final double bottomPositionSecondary = tileHeight - minVerticalPadding - secondaryHeight;
+    expect(radioOffset.dy - tileOffset.dy, bottomPositionRadio);
+    expect(secondaryOffset.dy - tileOffset.dy, bottomPositionSecondary);
+  });
+
+  testWidgets('titleAlignment position with title and subtitle widgets', (
+    WidgetTester tester,
+  ) async {
+    const Key secondaryKey = Key('secondary');
+    const double titleHeight = 50.0;
+    const double subtitleHeight = 50.0;
+    const double secondaryHeight = 24.0;
+    const double verticalPadding = 8.0;
+
+    Widget buildFrame({ListTileTitleAlignment? titleAlignment}) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: RadioListTile<bool>(
+              titleAlignment: titleAlignment,
+              controlAffinity: ListTileControlAffinity.leading,
+              title: const SizedBox(width: 20.0, height: titleHeight),
+              subtitle: const SizedBox(width: 20.0, height: subtitleHeight),
+              secondary: const SizedBox(key: secondaryKey, width: 24.0, height: secondaryHeight),
+              value: true,
+              groupValue: true,
+              onChanged: (bool? newValue) {},
+            ),
+          ),
+        ),
+      );
+    }
+
+    // If [ThemeData.useMaterial3] is true, the default title alignment is
+    // [ListTileTitleAlignment.threeLine], which positions the leading and
+    // trailing widgets center vertically in the tile if the [ListTile.isThreeLine]
+    // property is false.
+    await tester.pumpWidget(buildFrame());
+    final double tileHeight = tester.getSize(find.byType(ListTile)).height;
+    final double radioHeight = tester.getSize(find.byType(Radio<bool>)).height;
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is ListTile && widget.titleAlignment == null;
+      }),
+      findsOne,
+    );
+    Offset tileOffset = tester.getTopLeft(find.byType(ListTile));
+    Offset radioOffset = tester.getTopLeft(find.byType(Radio<bool>));
+    Offset secondaryOffset = tester.getTopRight(find.byKey(secondaryKey));
+
+    // Leading and trailing widgets are centered vertically in the tile.
+    final double centerPositionOffsetRadio = (tileHeight / 2) - (radioHeight / 2);
+    final double centerPositionOffsetSecondary = (tileHeight / 2) - (secondaryHeight / 2);
+    expect(radioOffset.dy - tileOffset.dy, centerPositionOffsetRadio);
+    expect(secondaryOffset.dy - tileOffset.dy, centerPositionOffsetSecondary);
+
+    // Test [ListTileTitleAlignment.threeLine] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.threeLine));
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is ListTile && widget.titleAlignment == ListTileTitleAlignment.threeLine;
+      }),
+      findsOne,
+    );
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    radioOffset = tester.getTopLeft(find.byType(Radio<bool>));
+    secondaryOffset = tester.getTopRight(find.byKey(secondaryKey));
+
+    // Leading and trailing widgets are centered vertically in the tile,
+    // If the [ListTile.isThreeLine] property is false.
+    expect(radioOffset.dy - tileOffset.dy, centerPositionOffsetRadio);
+    expect(secondaryOffset.dy - tileOffset.dy, centerPositionOffsetSecondary);
+
+    // Test [ListTileTitleAlignment.titleHeight] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.titleHeight));
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is ListTile && widget.titleAlignment == ListTileTitleAlignment.titleHeight;
+      }),
+      findsOne,
+    );
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    radioOffset = tester.getTopLeft(find.byType(Radio<bool>));
+    secondaryOffset = tester.getTopRight(find.byKey(secondaryKey));
+
+    // Leading and trailing widgets are positioned 16.0 pixels below the
+    // top of the title widget.
+    const double titlePosition = 16.0;
+    expect(radioOffset.dy - tileOffset.dy, titlePosition);
+    expect(secondaryOffset.dy - tileOffset.dy, titlePosition);
+
+    // Test [ListTileTitleAlignment.top] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.top));
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is ListTile && widget.titleAlignment == ListTileTitleAlignment.top;
+      }),
+      findsOne,
+    );
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    radioOffset = tester.getTopLeft(find.byType(Radio<bool>));
+    secondaryOffset = tester.getTopRight(find.byKey(secondaryKey));
+
+    // Leading and trailing widgets are placed minVerticalPadding below
+    // the top of the title widget.
+    const double topPosition = verticalPadding;
+    expect(radioOffset.dy - tileOffset.dy, topPosition);
+    expect(secondaryOffset.dy - tileOffset.dy, topPosition);
+
+    // Test [ListTileTitleAlignment.center] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.center));
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is ListTile && widget.titleAlignment == ListTileTitleAlignment.center;
+      }),
+      findsOne,
+    );
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    radioOffset = tester.getTopLeft(find.byType(Radio<bool>));
+    secondaryOffset = tester.getTopRight(find.byKey(secondaryKey));
+
+    // Leading and trailing widgets are centered vertically in the tile.
+    expect(radioOffset.dy - tileOffset.dy, centerPositionOffsetRadio);
+    expect(secondaryOffset.dy - tileOffset.dy, centerPositionOffsetSecondary);
+
+    // Test [ListTileTitleAlignment.bottom] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.bottom));
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is ListTile && widget.titleAlignment == ListTileTitleAlignment.bottom;
+      }),
+      findsOne,
+    );
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    radioOffset = tester.getTopLeft(find.byType(Radio<bool>));
+    secondaryOffset = tester.getTopRight(find.byKey(secondaryKey));
+
+    // Leading and trailing widgets are placed minVerticalPadding above
+    // the bottom of the subtitle widget.
+    final double bottomPositionRadio = tileHeight - verticalPadding - radioHeight;
+    final double bottomPositionSecondary = tileHeight - verticalPadding - secondaryHeight;
+    expect(radioOffset.dy - tileOffset.dy, bottomPositionRadio);
+    expect(secondaryOffset.dy - tileOffset.dy, bottomPositionSecondary);
+  });
+
+  testWidgets('RadioListTile respects radioBackgroundColor in enabled/disabled states', (
+    WidgetTester tester,
+  ) async {
+    const Color activeEnabledBackgroundColor = Color(0xFF000001);
+    const Color activeDisabledBackgroundColor = Color(0xFF000002);
+    const Color inactiveEnabledBackgroundColor = Color(0xFF000003);
+    const Color inactiveDisabledBackgroundColor = Color(0xFF000004);
+
+    Color getBackgroundColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
+        if (states.contains(WidgetState.selected)) {
+          return activeDisabledBackgroundColor;
+        }
+        return inactiveDisabledBackgroundColor;
+      }
+      if (states.contains(WidgetState.selected)) {
+        return activeEnabledBackgroundColor;
+      }
+      return inactiveEnabledBackgroundColor;
+    }
+
+    final WidgetStateProperty<Color> backgroundColor = WidgetStateColor.resolveWith(
+      getBackgroundColor,
+    );
+
+    int? groupValue = 0;
+    Widget buildApp({required bool enabled}) {
+      return wrap(
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return RadioGroup<int>(
+              groupValue: groupValue,
+              onChanged: (int? newValue) {
+                setState(() {
+                  groupValue = newValue;
+                });
+              },
+              child: RadioListTile<int>(
+                value: 0,
+                radioBackgroundColor: backgroundColor,
+                enabled: enabled,
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp(enabled: true));
+
+    // Selected and enabled.
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Radio<int>))),
+      paints
+        ..rect()
+        ..circle(color: activeEnabledBackgroundColor),
+    );
+
+    // Check when the radio isn't selected.
+    groupValue = 1;
+    await tester.pumpWidget(buildApp(enabled: true));
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Radio<int>))),
+      paints
+        ..rect()
+        ..circle(color: inactiveEnabledBackgroundColor),
+    );
+
+    // Check when the radio is selected, but disabled.
+    groupValue = 0;
+    await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Radio<int>))),
+      paints
+        ..rect()
+        ..circle(color: activeDisabledBackgroundColor),
+    );
+
+    // Check when the radio is unselected and disabled.
+    groupValue = 1;
+    await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Radio<int>))),
+      paints
+        ..rect()
+        ..circle(color: inactiveDisabledBackgroundColor),
+    );
+  });
+
+  testWidgets('RadioListTile respects radioBackgroundColor in hovered state', (
+    WidgetTester tester,
+  ) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    const Color hoveredBackgroundColor = Color(0xFF000001);
+
+    final ThemeData theme = ThemeData();
+
+    Color getBackgroundColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.hovered)) {
+        return hoveredBackgroundColor;
+      }
+      return Colors.transparent;
+    }
+
+    final WidgetStateProperty<Color> backgroundColor = WidgetStateColor.resolveWith(
+      getBackgroundColor,
+    );
+
+    const int groupValue = 0;
+    Widget buildApp() {
+      return MaterialApp(
+        theme: theme,
+        home: Material(
+          child: RadioGroup<int>(
+            groupValue: groupValue,
+            onChanged: (int? newValue) {},
+            child: RadioListTile<int>(value: 0, radioBackgroundColor: backgroundColor),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    // Start hovering
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byType(Radio<int>)));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Radio<int>))),
+      paints
+        ..rect()
+        ..circle()
+        ..circle(color: hoveredBackgroundColor),
+    );
+  });
+
+  testWidgets('radioSide is passed to the Radio', (WidgetTester tester) async {
+    const BorderSide side = BorderSide(color: Colors.red, width: 3.0);
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(child: RadioListTile<bool>(value: true, radioSide: side)),
+        ),
+      ),
+    );
+
+    final Radio<bool> radio = tester.widget(find.byType(Radio<bool>));
+    expect(radio.side, side);
+  });
+
+  testWidgets('radioInnerRadius is passed to the Radio', (WidgetTester tester) async {
+    final WidgetStateProperty<double?> innerRadius = WidgetStateProperty.all(6);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(child: RadioListTile<bool>(value: true, radioInnerRadius: innerRadius)),
+        ),
+      ),
+    );
+
+    final Radio<bool> radio = tester.widget(find.byType(Radio<bool>));
+    expect(radio.innerRadius, innerRadius);
   });
 }

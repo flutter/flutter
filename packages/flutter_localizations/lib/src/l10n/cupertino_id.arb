@@ -29,5 +29,11 @@
   "shareButtonLabel": "Bagikan...",
   "clearButtonLabel": "Hapus",
   "cancelButtonLabel": "Batal",
-  "backButtonLabel": "Kembali"
+  "backButtonLabel": "Kembali",
+  "expansionTileExpandedHint": "ketuk dua kali untuk menciutkan",
+  "expansionTileCollapsedHint": "ketuk dua kali untuk meluaskan",
+  "expansionTileExpandedTapHint": "Ciutkan",
+  "expansionTileCollapsedTapHint": "Luaskan untuk mengetahui detail selengkapnya",
+  "expandedHint": "Diciutkan",
+  "collapsedHint": "Diluaskan"
 }

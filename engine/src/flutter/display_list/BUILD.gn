@@ -20,6 +20,8 @@ source_set("dl_path") {
     "geometry/dl_geometry_types.h",
     "geometry/dl_path.cc",
     "geometry/dl_path.h",
+    "geometry/dl_path_builder.cc",
+    "geometry/dl_path_builder.h",
   ]
 
   public_deps = [
@@ -34,6 +36,8 @@ source_set("display_list") {
     "benchmarking/dl_complexity.h",
     "benchmarking/dl_complexity_gl.cc",
     "benchmarking/dl_complexity_gl.h",
+    "benchmarking/dl_complexity_helper.cc",
+    "benchmarking/dl_complexity_helper.h",
     "benchmarking/dl_complexity_metal.cc",
     "benchmarking/dl_complexity_metal.h",
     "display_list.cc",
@@ -58,6 +62,10 @@ source_set("display_list") {
     "dl_sampling_options.h",
     "dl_storage.cc",
     "dl_storage.h",
+    "dl_text.cc",
+    "dl_text.h",
+    "dl_text_skia.cc",
+    "dl_text_skia.h",
     "dl_tile_mode.h",
     "dl_types.cc",
     "dl_types.h",
@@ -96,6 +104,8 @@ source_set("display_list") {
     "effects/dl_mask_filter.h",
     "effects/dl_runtime_effect.cc",
     "effects/dl_runtime_effect.h",
+    "effects/dl_runtime_effect_skia.cc",
+    "effects/dl_runtime_effect_skia.h",
     "effects/image_filters/dl_blur_image_filter.cc",
     "effects/image_filters/dl_blur_image_filter.h",
     "effects/image_filters/dl_color_filter_image_filter.cc",
@@ -142,8 +152,6 @@ source_set("display_list") {
   public_deps = [
     ":dl_path",
     "//flutter/fml",
-    "//flutter/impeller/runtime_stage",
-    "//flutter/impeller/typographer",
     "//flutter/skia",
   ]
 
@@ -163,6 +171,7 @@ if (enable_unittests) {
     sources = [
       "benchmarking/dl_complexity_unittests.cc",
       "display_list_unittests.cc",
+      "dl_canvas_unittests.cc",
       "dl_color_unittests.cc",
       "dl_paint_unittests.cc",
       "dl_storage_unittests.cc",
@@ -172,9 +181,11 @@ if (enable_unittests) {
       "effects/dl_image_filter_unittests.cc",
       "effects/dl_mask_filter_unittests.cc",
       "geometry/dl_geometry_types_unittests.cc",
+      "geometry/dl_path_builder_unittests.cc",
       "geometry/dl_path_unittests.cc",
       "geometry/dl_region_unittests.cc",
       "geometry/dl_rtree_unittests.cc",
+      "skia/dl_sk_canvas_unittests.cc",
       "skia/dl_sk_conversions_unittests.cc",
       "skia/dl_sk_paint_dispatcher_unittests.cc",
       "utils/dl_accumulation_rect_unittests.cc",
@@ -275,36 +286,43 @@ if (enable_unittests) {
   }
 }
 
-source_set("display_list_benchmarks_source") {
-  testonly = true
+if (enable_unittests) {
+  source_set("display_list_benchmarks_source") {
+    testonly = true
 
-  sources = [
-    "benchmarking/dl_benchmarks.cc",
-    "benchmarking/dl_benchmarks.h",
-  ]
+    sources = [
+      "benchmarking/dl_benchmarks.cc",
+      "benchmarking/dl_benchmarks.h",
+    ]
 
-  deps = [
-    ":display_list",
-    ":display_list_fixtures",
-    "$dart_src/runtime:libdart_jit",  # for tracing
-    "//flutter/benchmarking",
-    "//flutter/common/graphics",
-    "//flutter/display_list/testing:display_list_surface_provider",
-    "//flutter/display_list/testing:display_list_testing",
-    "//flutter/fml",
-    "//flutter/skia",
-    "//flutter/testing:skia",
-    "//flutter/testing:testing_lib",
-  ]
+    deps = [
+      ":display_list",
+      ":display_list_fixtures",
+      "//flutter/benchmarking",
+      "//flutter/common/graphics",
+      "//flutter/display_list/testing:display_list_surface_provider",
+      "//flutter/display_list/testing:display_list_testing",
+      "//flutter/fml",
+      "//flutter/skia",
+      "//flutter/testing:skia",
+      "//flutter/testing:testing_lib",
+    ]
+
+    if (!is_wasm) {
+      deps += [
+        "$dart_src/runtime:libdart_jit",  # for tracing
+      ]
+    }
+  }
+
+  executable("display_list_benchmarks") {
+    testonly = true
+
+    deps = [ ":display_list_benchmarks_source" ]
+  }
 }
 
-executable("display_list_benchmarks") {
-  testonly = true
-
-  deps = [ ":display_list_benchmarks_source" ]
-}
-
-if (is_ios) {
+if (is_ios && enable_unittests) {
   shared_library("ios_display_list_benchmarks") {
     testonly = true
     visibility = [ ":*" ]

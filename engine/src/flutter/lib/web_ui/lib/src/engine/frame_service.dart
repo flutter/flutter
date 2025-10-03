@@ -10,6 +10,7 @@ import 'package:ui/ui.dart' as ui;
 
 import 'dom.dart';
 import 'frame_timing_recorder.dart';
+import 'initialization.dart';
 import 'platform_dispatcher.dart';
 
 /// Provides frame scheduling functionality and frame lifecycle information to
@@ -18,12 +19,18 @@ import 'platform_dispatcher.dart';
 /// If new frame-related functionality needs to be added to the web engine,
 /// prefer to add it here instead of implementing it ad hoc.
 class FrameService {
+  FrameService() {
+    registerHotRestartListener(_dispose);
+  }
+
   /// The singleton instance of the [FrameService] used to schedule frames.
   ///
   /// This may be overridden in tests, for example, to pump fake frames, using
   /// [debugOverrideFrameService].
   static FrameService get instance => _instance ??= FrameService();
   static FrameService? _instance;
+
+  bool _isDisposed = false;
 
   /// Overrides the value returned by [instance].
   ///
@@ -36,18 +43,16 @@ class FrameService {
     _instance = mock;
   }
 
-  /// A monotonically increasing frame number being rendered.
-  ///
-  /// This is intended for tests only.
-  int get debugFrameNumber => _debugFrameNumber;
-  int _debugFrameNumber = 0;
+  /// The [ui.FrameData] object for the current frame.
+  ui.FrameData get frameData => _frameData;
+  ui.FrameData _frameData = const ui.FrameData();
 
-  /// Resets [debugFrameNumber] back to zero.
+  /// Resets [frameData] back to the initial value.
   ///
   /// This is intended for tests only.
   @visibleForTesting
-  void debugResetFrameNumber() {
-    _debugFrameNumber = 0;
+  void debugResetFrameData() {
+    _frameData = const ui.FrameData();
   }
 
   /// Whether a frame has already been scheduled.
@@ -100,9 +105,21 @@ class FrameService {
       //   functionality that may throw exceptions, or produce wasm traps.
       _isFrameScheduled = false;
 
+      if (_isDisposed) {
+        // Skip this animation frame because the instance has been disposed, meaning there was a
+        // hot restart performed. During a hot restart, Dart automatically cancels timers and
+        // microtasks, but animation frames are requested directly from the browser which isn't
+        // aware of hot restarts, and that leads to problems.
+        //
+        // See:
+        // - https://github.com/flutter/flutter/issues/175260
+        // - https://github.com/flutter/flutter/issues/140684#issuecomment-3251179364
+        return;
+      }
+
       try {
         _isRenderingFrame = true;
-        _debugFrameNumber += 1;
+        _frameData = ui.FrameData(frameNumber: _frameData.frameNumber + 1);
         _renderFrame(highResTime.toDartDouble);
       } finally {
         _isRenderingFrame = false;
@@ -132,7 +149,7 @@ class FrameService {
 
     Timer.run(() {
       _isRenderingFrame = true;
-      _debugFrameNumber += 1;
+      _frameData = ui.FrameData(frameNumber: _frameData.frameNumber + 1);
       // TODO(yjbanov): it's funky that if beginFrame crashes, the drawFrame
       //                fires anyway. We should clean this up, or better explain
       //                what the expectations are for various situations. The
@@ -158,14 +175,14 @@ class FrameService {
   }
 
   void _renderFrame(double highResTime) {
+    FrameTimingRecorder.recordCurrentFrameNumber(_frameData.frameNumber);
     FrameTimingRecorder.recordCurrentFrameVsync();
 
     // In Flutter terminology "building a frame" consists of "beginning
     // frame" and "drawing frame".
     //
-    // We do not call `recordBuildFinish` from here because
-    // part of the rasterization process, particularly in the HTML
-    // renderer, takes place in the `SceneBuilder.build()`.
+    // We do not call `recordBuildFinish` from here because part of the
+    // rasterization process takes place in `SceneBuilder.build()`.
     FrameTimingRecorder.recordCurrentFrameBuildStart();
 
     // We have to convert high-resolution time to `int` so we can construct
@@ -181,6 +198,10 @@ class FrameService {
       );
     }
 
+    if (EnginePlatformDispatcher.instance.onFrameDataChanged != null) {
+      EnginePlatformDispatcher.instance.invokeOnFrameDataChanged();
+    }
+
     if (EnginePlatformDispatcher.instance.onDrawFrame != null) {
       // On mobile Flutter flushes microtasks between onBeginFrame and
       // onDrawFrame. The web doesn't because there's no way to hook into the
@@ -193,5 +214,12 @@ class FrameService {
       //                `EnginePlatformDispatcher.scheduleWarmUpFrame`).
       EnginePlatformDispatcher.instance.invokeOnDrawFrame();
     }
+  }
+
+  void _dispose() {
+    if (identical(this, _instance)) {
+      _instance = null;
+    }
+    _isDisposed = true;
   }
 }

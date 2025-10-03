@@ -27,7 +27,7 @@ ThemeData _buildShrineTheme() {
     scaffoldBackgroundColor: shrineBackgroundWhite,
     cardColor: shrineBackgroundWhite,
     primaryIconTheme: _customIconTheme(base.iconTheme),
-    inputDecorationTheme: const InputDecorationTheme(
+    inputDecorationTheme: const InputDecorationThemeData(
       border: CutCornersBorder(borderSide: BorderSide(color: shrineBrown900, width: 0.5)),
       contentPadding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
     ),

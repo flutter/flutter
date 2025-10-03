@@ -1,0 +1,3 @@
+ibm header
+(?s)^(?:\s*COPYRIGHT:)?\s*Copyright \([cC]\) [^\n]*,? International Business Machines.*All Rights Reserved.
+(?s)Copyright \([cC]\) .*,? International Business Machines Corporation(?: and others)?. All Rights Reserved\.(?:\s*Copyright[^\n]+[\n])*

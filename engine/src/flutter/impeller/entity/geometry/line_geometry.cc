@@ -8,9 +8,9 @@
 
 namespace impeller {
 
-LineGeometry::LineGeometry(Point p0, Point p1, Scalar width, Cap cap)
-    : p0_(p0), p1_(p1), width_(width), cap_(cap) {
-  FML_DCHECK(width >= 0);
+LineGeometry::LineGeometry(Point p0, Point p1, const StrokeParameters& stroke)
+    : p0_(p0), p1_(p1), width_(stroke.width), cap_(stroke.cap) {
+  FML_DCHECK(width_ >= 0);
 }
 
 LineGeometry::~LineGeometry() = default;
@@ -128,10 +128,10 @@ GeometryResult LineGeometry::GetPositionBuffer(const ContentContext& renderer,
     return kEmptyResult;
   }
 
-  auto& host_buffer = renderer.GetTransientsBuffer();
+  auto& data_host_buffer = renderer.GetTransientsDataBuffer();
 
   size_t count = 4;
-  BufferView vertex_buffer = host_buffer.Emplace(
+  BufferView vertex_buffer = data_host_buffer.Emplace(
       count * sizeof(VT), alignof(VT), [&corners](uint8_t* buffer) {
         auto vertices = reinterpret_cast<VT*>(buffer);
         for (auto& corner : corners) {

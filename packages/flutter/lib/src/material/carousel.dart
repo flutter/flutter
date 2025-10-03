@@ -134,6 +134,7 @@ class CarouselView extends StatefulWidget {
     this.backgroundColor,
     this.elevation,
     this.shape,
+    this.itemClipBehavior,
     this.overlayColor,
     this.itemSnapping = false,
     this.shrinkExtent = 0.0,
@@ -194,6 +195,7 @@ class CarouselView extends StatefulWidget {
     this.backgroundColor,
     this.elevation,
     this.shape,
+    this.itemClipBehavior,
     this.overlayColor,
     this.itemSnapping = false,
     this.shrinkExtent = 0.0,
@@ -229,6 +231,14 @@ class CarouselView extends StatefulWidget {
   /// Defaults to a [RoundedRectangleBorder] with a circular corner radius
   /// of 28.0.
   final ShapeBorder? shape;
+
+  /// The clip behavior for each carousel item.
+  ///
+  /// The item content will be clipped (or not) according to this option.
+  /// Refer to the [Clip] enum for more details on the different clip options.
+  ///
+  /// Defaults to [Clip.antiAlias].
+  final Clip? itemClipBehavior;
 
   /// The highlight color to indicate the carousel items are in pressed, hovered
   /// or focused states.
@@ -415,6 +425,8 @@ class _CarouselViewState extends State<CarouselView> {
         widget.shape ??
         carouselTheme.shape ??
         const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(28.0)));
+    final Clip effectiveItemClipBehavior =
+        widget.itemClipBehavior ?? carouselTheme.itemClipBehavior ?? Clip.antiAlias;
     final WidgetStateProperty<Color?> effectiveOverlayColor =
         widget.overlayColor ??
         carouselTheme.overlayColor ??
@@ -453,7 +465,7 @@ class _CarouselViewState extends State<CarouselView> {
     return Padding(
       padding: effectivePadding,
       child: Material(
-        clipBehavior: Clip.antiAlias,
+        clipBehavior: effectiveItemClipBehavior,
         color: effectiveBackgroundColor,
         elevation: effectiveElevation,
         shape: effectiveShape,
@@ -491,10 +503,9 @@ class _CarouselViewState extends State<CarouselView> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final AxisDirection axisDirection = _getDirection(context);
-    final ScrollPhysics physics =
-        widget.itemSnapping
-            ? const CarouselScrollPhysics()
-            : ScrollConfiguration.of(context).getScrollPhysics(context);
+    final ScrollPhysics physics = widget.itemSnapping
+        ? const CarouselScrollPhysics()
+        : ScrollConfiguration.of(context).getScrollPhysics(context);
 
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
@@ -502,8 +513,9 @@ class _CarouselViewState extends State<CarouselView> {
           Axis.horizontal => constraints.maxWidth,
           Axis.vertical => constraints.maxHeight,
         };
-        _itemExtent =
-            widget.itemExtent == null ? null : clampDouble(widget.itemExtent!, 0, mainAxisExtent);
+        _itemExtent = widget.itemExtent == null
+            ? null
+            : clampDouble(widget.itemExtent!, 0, mainAxisExtent);
 
         return Scrollable(
           axisDirection: axisDirection,
@@ -1064,15 +1076,15 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
     const double deprecatedExtraItemExtent = -1;
 
     final int firstIndex = getMinChildIndexForScrollOffset(scrollOffset, deprecatedExtraItemExtent);
-    final int? targetLastIndex =
-        targetEndScrollOffset.isFinite
-            ? getMaxChildIndexForScrollOffset(targetEndScrollOffset, deprecatedExtraItemExtent)
-            : null;
+    final int? targetLastIndex = targetEndScrollOffset.isFinite
+        ? getMaxChildIndexForScrollOffset(targetEndScrollOffset, deprecatedExtraItemExtent)
+        : null;
 
     if (firstChild != null) {
       final int leadingGarbage = calculateLeadingGarbage(firstIndex: firstIndex);
-      final int trailingGarbage =
-          targetLastIndex != null ? calculateTrailingGarbage(lastIndex: targetLastIndex) : 0;
+      final int trailingGarbage = targetLastIndex != null
+          ? calculateTrailingGarbage(lastIndex: targetLastIndex)
+          : 0;
       collectGarbage(leadingGarbage, trailingGarbage);
     } else {
       collectGarbage(0, 0);
@@ -1207,13 +1219,9 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
 
     final double targetEndScrollOffsetForPaint =
         constraints.scrollOffset + constraints.remainingPaintExtent;
-    final int? targetLastIndexForPaint =
-        targetEndScrollOffsetForPaint.isFinite
-            ? getMaxChildIndexForScrollOffset(
-              targetEndScrollOffsetForPaint,
-              deprecatedExtraItemExtent,
-            )
-            : null;
+    final int? targetLastIndexForPaint = targetEndScrollOffsetForPaint.isFinite
+        ? getMaxChildIndexForScrollOffset(targetEndScrollOffsetForPaint, deprecatedExtraItemExtent)
+        : null;
 
     geometry = SliverGeometry(
       scrollExtent: estimatedMaxScrollOffset,
@@ -1446,8 +1454,9 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
     final double maxItem;
     if (hasPixels && flexWeights != null) {
       final double leadingItem = getItemFromPixels(pixels, viewportDimension);
-      maxItem =
-          consumeMaxWeight ? leadingItem : leadingItem + flexWeights!.indexOf(flexWeights!.max);
+      maxItem = consumeMaxWeight
+          ? leadingItem
+          : leadingItem + flexWeights!.indexOf(flexWeights!.max);
     } else {
       maxItem = _itemToShowOnStartup;
     }

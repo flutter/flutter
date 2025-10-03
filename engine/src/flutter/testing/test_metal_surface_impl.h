@@ -16,18 +16,18 @@ namespace flutter::testing {
 class TestMetalSurfaceImpl : public TestMetalSurface {
  public:
   TestMetalSurfaceImpl(const TestMetalContext& test_metal_context,
-                       const SkISize& surface_size);
+                       const DlISize& surface_size);
 
   TestMetalSurfaceImpl(const TestMetalContext& test_metal_context,
                        int64_t texture_id,
-                       const SkISize& surface_size);
+                       const DlISize& surface_size);
 
   // |TestMetalSurface|
   ~TestMetalSurfaceImpl() override;
 
  private:
   void Init(const TestMetalContext::TextureInfo& texture_info,
-            const SkISize& surface_size);
+            const DlISize& surface_size);
 
   const TestMetalContext& test_metal_context_;
   bool is_valid_ = false;

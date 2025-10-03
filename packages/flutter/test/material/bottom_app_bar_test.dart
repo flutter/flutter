@@ -191,7 +191,9 @@ void main() {
     final BottomAppBar bottomAppBar = tester.widget(find.byType(BottomAppBar));
     expect(bottomAppBar.padding, customPadding);
     final Rect babRect = tester.getRect(find.byType(BottomAppBar));
-    final Rect childRect = tester.getRect(find.byType(ColoredBox));
+    final Rect childRect = tester.getRect(
+      find.descendant(of: find.byType(BottomAppBar), matching: find.byType(ColoredBox)),
+    );
     expect(childRect, const Rect.fromLTRB(250, 530, 550, 590));
     expect(babRect, const Rect.fromLTRB(240, 520, 560, 600));
   });
@@ -205,7 +207,7 @@ void main() {
             return Theme(
               data: Theme.of(
                 context,
-              ).copyWith(bottomAppBarTheme: const BottomAppBarTheme(color: Color(0xffffff00))),
+              ).copyWith(bottomAppBarTheme: const BottomAppBarThemeData(color: Color(0xffffff00))),
               child: const Scaffold(
                 floatingActionButton: FloatingActionButton(onPressed: null),
                 bottomNavigationBar: BottomAppBar(),
@@ -230,7 +232,7 @@ void main() {
             return Theme(
               data: Theme.of(
                 context,
-              ).copyWith(bottomAppBarTheme: const BottomAppBarTheme(color: Color(0xffffff00))),
+              ).copyWith(bottomAppBarTheme: const BottomAppBarThemeData(color: Color(0xffffff00))),
               child: const Scaffold(
                 floatingActionButton: FloatingActionButton(onPressed: null),
                 bottomNavigationBar: BottomAppBar(color: Color(0xff0000ff)),
@@ -251,7 +253,7 @@ void main() {
   testWidgets('Material3 - Color overrides theme color', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(bottomAppBarTheme: const BottomAppBarTheme(color: Color(0xffffff00))),
+        theme: ThemeData(bottomAppBarTheme: const BottomAppBarThemeData(color: Color(0xffffff00))),
         home: Builder(
           builder: (BuildContext context) {
             return const Scaffold(
@@ -399,17 +401,16 @@ void main() {
     final double fabRight = fabLeft + fabSize.width;
     final double fabBottom = fabSize.height / 2.0;
 
-    final Path expectedPath =
-        Path()
-          ..moveTo(0.0, 0.0)
-          ..lineTo(fabLeft, 0.0)
-          ..lineTo(fabLeft, fabBottom)
-          ..lineTo(fabRight, fabBottom)
-          ..lineTo(fabRight, 0.0)
-          ..lineTo(babSize.width, 0.0)
-          ..lineTo(babSize.width, babSize.height)
-          ..lineTo(0.0, babSize.height)
-          ..close();
+    final Path expectedPath = Path()
+      ..moveTo(0.0, 0.0)
+      ..lineTo(fabLeft, 0.0)
+      ..lineTo(fabLeft, fabBottom)
+      ..lineTo(fabRight, fabBottom)
+      ..lineTo(fabRight, 0.0)
+      ..lineTo(babSize.width, 0.0)
+      ..lineTo(babSize.width, babSize.height)
+      ..lineTo(0.0, babSize.height)
+      ..close();
 
     final Path actualPath = shapeListenerState.cache.value;
 
@@ -446,17 +447,16 @@ void main() {
     final double fabRight = fabLeft + fabSize.width + 6.0;
     final double fabBottom = 6.0 + fabSize.height / 2.0;
 
-    final Path expectedPath =
-        Path()
-          ..moveTo(0.0, 0.0)
-          ..lineTo(fabLeft, 0.0)
-          ..lineTo(fabLeft, fabBottom)
-          ..lineTo(fabRight, fabBottom)
-          ..lineTo(fabRight, 0.0)
-          ..lineTo(babSize.width, 0.0)
-          ..lineTo(babSize.width, babSize.height)
-          ..lineTo(0.0, babSize.height)
-          ..close();
+    final Path expectedPath = Path()
+      ..moveTo(0.0, 0.0)
+      ..lineTo(fabLeft, 0.0)
+      ..lineTo(fabLeft, fabBottom)
+      ..lineTo(fabRight, fabBottom)
+      ..lineTo(fabRight, 0.0)
+      ..lineTo(babSize.width, 0.0)
+      ..lineTo(babSize.width, babSize.height)
+      ..lineTo(0.0, babSize.height)
+      ..close();
 
     final Path actualPath = shapeListenerState.cache.value;
 
@@ -472,7 +472,9 @@ void main() {
         theme: ThemeData(useMaterial3: false),
         home: const MediaQuery(
           data: MediaQueryData(padding: EdgeInsets.all(50.0)),
-          child: Scaffold(bottomNavigationBar: BottomAppBar(child: Center(child: Text('safe')))),
+          child: Scaffold(
+            bottomNavigationBar: BottomAppBar(child: Center(child: Text('safe'))),
+          ),
         ),
       ),
     );
@@ -487,7 +489,9 @@ void main() {
         theme: ThemeData(),
         home: const MediaQuery(
           data: MediaQueryData(padding: EdgeInsets.all(safeAreaPadding)),
-          child: Scaffold(bottomNavigationBar: BottomAppBar(child: Center(child: Text('safe')))),
+          child: Scaffold(
+            bottomNavigationBar: BottomAppBar(child: Center(child: Text('safe'))),
+          ),
         ),
       ),
     );
@@ -648,17 +652,16 @@ void main() {
     final double fabRight = fabLeft + fabSize.width + 6.0;
     final double fabBottom = 6.0 + fabSize.height / 2.0;
 
-    final Path expectedPath =
-        Path()
-          ..moveTo(0.0, 0.0)
-          ..lineTo(fabLeft, 0.0)
-          ..lineTo(fabLeft, fabBottom)
-          ..lineTo(fabRight, fabBottom)
-          ..lineTo(fabRight, 0.0)
-          ..lineTo(babSize.width, 0.0)
-          ..lineTo(babSize.width, babSize.height)
-          ..lineTo(0.0, babSize.height)
-          ..close();
+    final Path expectedPath = Path()
+      ..moveTo(0.0, 0.0)
+      ..lineTo(fabLeft, 0.0)
+      ..lineTo(fabLeft, fabBottom)
+      ..lineTo(fabRight, fabBottom)
+      ..lineTo(fabRight, 0.0)
+      ..lineTo(babSize.width, 0.0)
+      ..lineTo(babSize.width, babSize.height)
+      ..lineTo(0.0, babSize.height)
+      ..close();
 
     final Path actualPath = shapeListenerState.cache.value;
 
@@ -731,6 +734,18 @@ void main() {
     final double barCenter = bottomAppBar.topLeft.dy + (bottomAppBar.height - bottomPadding) / 2;
     expect(iconButton.center.dy, barCenter);
     expect(fab.center.dy, barCenter);
+  });
+
+  testWidgets('BottomAppBar renders at zero size', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: SizedBox.shrink(child: BottomAppBar(child: Text('X'))),
+        ),
+      ),
+    );
+    final Finder bottomAppBarChild = find.text('X');
+    expect(tester.getSize(bottomAppBarChild).isEmpty, isTrue);
   });
 }
 

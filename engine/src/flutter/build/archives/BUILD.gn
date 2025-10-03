@@ -15,8 +15,8 @@ generated_file("artifacts_entitlement_config") {
     deps += [
       "//flutter/impeller/compiler:impellerc",
       "//flutter/impeller/tessellator:tessellator_shared",
-      "//flutter/shell/testing:testing",
-      "//flutter/tools/path_ops:path_ops",
+      "//flutter/shell/testing",
+      "//flutter/tools/path_ops",
     ]
   }
 }
@@ -50,8 +50,8 @@ if (build_engine_artifacts) {
       "//flutter/impeller/compiler:impellerc",
       "//flutter/impeller/tessellator:tessellator_shared",
       "//flutter/lib/snapshot:generate_snapshot_bin",
-      "//flutter/shell/testing:testing",
-      "//flutter/tools/path_ops:path_ops",
+      "//flutter/shell/testing",
+      "//flutter/tools/path_ops",
     ]
     if (is_mac) {
       # TODO(godofredoc): Remove after paths are standardized flutter/flutter#105351.
@@ -190,6 +190,7 @@ generated_file("dart_sdk_entitlement_config") {
   contents = [
     "dart-sdk/bin/dart",
     "dart-sdk/bin/dartaotruntime",
+    "dart-sdk/bin/dartvm",
     "dart-sdk/bin/utils/gen_snapshot",
     "dart-sdk/bin/utils/wasm-opt",
   ]

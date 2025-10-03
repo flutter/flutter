@@ -50,7 +50,7 @@ class BuildApkCommand extends BuildSubCommand {
       )
       ..addMultiOption(
         'target-platform',
-        allowed: <String>['android-arm', 'android-arm64', 'android-x86', 'android-x64'],
+        allowed: <String>['android-arm', 'android-arm64', 'android-x64'],
         help: 'The target platform for which the app is compiled.',
       );
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
@@ -69,27 +69,17 @@ class BuildApkCommand extends BuildSubCommand {
     return BuildMode.release;
   }
 
-  static const List<String> _kDefaultJitArchs = <String>[
-    'android-arm',
-    'android-arm64',
-    'android-x86',
-    'android-x64',
-  ];
-  static const List<String> _kDefaultAotArchs = <String>[
-    'android-arm',
-    'android-arm64',
-    'android-x64',
-  ];
-  List<String> get _targetArchs =>
-      stringsArg('target-platform').isEmpty
-          ? switch (_buildMode) {
-            BuildMode.release || BuildMode.profile => _kDefaultAotArchs,
-            BuildMode.debug || BuildMode.jitRelease => _kDefaultJitArchs,
-          }
-          : stringsArg('target-platform');
+  static const _kDefaultJitArchs = <String>['android-arm', 'android-arm64', 'android-x64'];
+  static const _kDefaultAotArchs = <String>['android-arm', 'android-arm64', 'android-x64'];
+  List<String> get _targetArchs => stringsArg('target-platform').isEmpty
+      ? switch (_buildMode) {
+          BuildMode.release || BuildMode.profile => _kDefaultAotArchs,
+          BuildMode.debug || BuildMode.jitRelease => _kDefaultJitArchs,
+        }
+      : stringsArg('target-platform');
 
   @override
-  final String name = 'apk';
+  final name = 'apk';
 
   @override
   DeprecationBehavior get deprecationBehavior =>
@@ -103,7 +93,7 @@ class BuildApkCommand extends BuildSubCommand {
   };
 
   @override
-  final String description =
+  final description =
       'Build an Android APK file from your app.\n\n'
       "This command can build debug and release versions of your application. 'debug' builds support "
       "debugging and a quick development cycle. 'release' builds don't support debugging and are "
@@ -130,7 +120,7 @@ class BuildApkCommand extends BuildSubCommand {
     }
     final BuildInfo buildInfo = await getBuildInfo();
 
-    final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(
+    final androidBuildInfo = AndroidBuildInfo(
       buildInfo,
       splitPerAbi: boolArg('split-per-abi'),
       targetArchs: _targetArchs.map<AndroidArch>(getAndroidArchForName),
@@ -149,8 +139,7 @@ class BuildApkCommand extends BuildSubCommand {
     // is enabled or disabled. Note that 'computeImpellerEnabled' will default
     // to false if not enabled explicitly in the manifest.
     final bool impellerEnabled = project.android.computeImpellerEnabled();
-    final String buildLabel =
-        impellerEnabled ? 'manifest-impeller-enabled' : 'manifest-impeller-disabled';
+    final buildLabel = impellerEnabled ? 'manifest-impeller-enabled' : 'manifest-impeller-disabled';
     globals.analytics.send(Event.flutterBuildInfo(label: buildLabel, buildType: 'android'));
 
     return FlutterCommandResult.success();

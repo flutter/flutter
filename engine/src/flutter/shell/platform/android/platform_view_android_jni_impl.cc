@@ -69,6 +69,8 @@ static jfieldID g_jni_shell_holder_field = nullptr;
     "(ILjava/nio/ByteBuffer;)V")                                              \
   V(g_update_semantics_method, updateSemantics,                               \
     "(Ljava/nio/ByteBuffer;[Ljava/lang/String;[Ljava/nio/ByteBuffer;)V")      \
+  V(g_set_application_locale_method, setApplicationLocale,                    \
+    "(Ljava/lang/String;)V")                                                  \
   V(g_on_display_platform_view_method, onDisplayPlatformView,                 \
     "(IIIIIIILio/flutter/embedding/engine/mutatorsstack/"                     \
     "FlutterMutatorsStack;)V")                                                \
@@ -284,7 +286,7 @@ static void SurfaceChanged(JNIEnv* env,
                            jint width,
                            jint height) {
   ANDROID_SHELL_HOLDER->GetPlatformView()->NotifyChanged(
-      SkISize::Make(width, height));
+      DlISize(width, height));
 }
 
 static void SurfaceDestroyed(JNIEnv* env, jobject jcaller, jlong shell_holder) {
@@ -367,27 +369,38 @@ static void SetViewportMetrics(JNIEnv* env,
   env->GetIntArrayRegion(javaDisplayFeaturesState, 0, stateSize,
                          &displayFeaturesState[0]);
 
+  // TODO(boetger): update for https://github.com/flutter/flutter/issues/149033
   const flutter::ViewportMetrics metrics{
-      static_cast<double>(devicePixelRatio),
-      static_cast<double>(physicalWidth),
-      static_cast<double>(physicalHeight),
-      static_cast<double>(physicalPaddingTop),
-      static_cast<double>(physicalPaddingRight),
-      static_cast<double>(physicalPaddingBottom),
-      static_cast<double>(physicalPaddingLeft),
-      static_cast<double>(physicalViewInsetTop),
-      static_cast<double>(physicalViewInsetRight),
-      static_cast<double>(physicalViewInsetBottom),
-      static_cast<double>(physicalViewInsetLeft),
-      static_cast<double>(systemGestureInsetTop),
-      static_cast<double>(systemGestureInsetRight),
-      static_cast<double>(systemGestureInsetBottom),
-      static_cast<double>(systemGestureInsetLeft),
-      static_cast<double>(physicalTouchSlop),
-      displayFeaturesBounds,
-      displayFeaturesType,
-      displayFeaturesState,
-      0,  // Display ID
+      static_cast<double>(devicePixelRatio),  // p_device_pixel_ratio
+      static_cast<double>(physicalWidth),     // p_physical_width
+      static_cast<double>(physicalHeight),    // p_physical_height
+      static_cast<double>(physicalWidth),     // p_physical_min_width_constraint
+      static_cast<double>(physicalWidth),     // p_physical_max_width_constraint
+      static_cast<double>(physicalHeight),  // p_physical_min_height_constraint
+      static_cast<double>(physicalHeight),  // p_physical_max_height_constraint
+      static_cast<double>(physicalPaddingTop),     // p_physical_padding_top
+      static_cast<double>(physicalPaddingRight),   // p_physical_padding_right
+      static_cast<double>(physicalPaddingBottom),  // p_physical_padding_bottom
+      static_cast<double>(physicalPaddingLeft),    // p_physical_padding_left
+      static_cast<double>(physicalViewInsetTop),   // p_physical_view_inset_top
+      static_cast<double>(
+          physicalViewInsetRight),  // p_physical_view_inset_right
+      static_cast<double>(
+          physicalViewInsetBottom),  // p_physical_view_inset_bottom
+      static_cast<double>(physicalViewInsetLeft),  // p_physical_view_inset_left
+      static_cast<double>(
+          systemGestureInsetTop),  // p_physical_system_gesture_inset_top
+      static_cast<double>(
+          systemGestureInsetRight),  // p_physical_system_gesture_inset_right
+      static_cast<double>(
+          systemGestureInsetBottom),  // p_physical_system_gesture_inset_bottom
+      static_cast<double>(
+          systemGestureInsetLeft),  // p_physical_system_gesture_inset_left
+      static_cast<double>(physicalTouchSlop),  // p_physical_touch_slop
+      displayFeaturesBounds,  // p_physical_display_features_bounds
+      displayFeaturesType,    // p_physical_display_features_type
+      displayFeaturesState,   // p_physical_display_features_state
+      0,                      // p_display_id
   };
 
   ANDROID_SHELL_HOLDER->GetPlatformView()->SetViewportMetrics(
@@ -426,8 +439,7 @@ static jobject GetBitmap(JNIEnv* env, jobject jcaller, jlong shell_holder) {
 
   auto bitmap = env->CallStaticObjectMethod(
       g_bitmap_class->obj(), g_bitmap_create_bitmap_method,
-      screenshot.frame_size.width(), screenshot.frame_size.height(),
-      bitmap_config);
+      screenshot.frame_size.width, screenshot.frame_size.height, bitmap_config);
 
   fml::jni::ScopedJavaLocalRef<jobject> buffer(
       env,
@@ -1348,6 +1360,24 @@ void PlatformViewAndroidJNIImpl::FlutterViewHandlePlatformMessage(
   FML_CHECK(fml::jni::CheckException(env));
 }
 
+void PlatformViewAndroidJNIImpl::FlutterViewSetApplicationLocale(
+    std::string locale) {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+
+  auto java_object = java_object_.get(env);
+  if (java_object.is_null()) {
+    return;
+  }
+
+  fml::jni::ScopedJavaLocalRef<jstring> jlocale =
+      fml::jni::StringToJavaString(env, locale);
+
+  env->CallVoidMethod(java_object.obj(), g_set_application_locale_method,
+                      jlocale.obj());
+
+  FML_CHECK(fml::jni::CheckException(env));
+}
+
 void PlatformViewAndroidJNIImpl::FlutterViewHandlePlatformMessageResponse(
     int responseId,
     std::unique_ptr<fml::Mapping> data) {
@@ -2130,7 +2160,7 @@ class AndroidPathReceiver final : public DlPathReceiver {
     env_->CallVoidMethod(android_path_, path_close_method);
   }
 
-  jobject TakePath() { return android_path_; }
+  jobject TakePath() const { return android_path_; }
 
  private:
   JNIEnv* env_;

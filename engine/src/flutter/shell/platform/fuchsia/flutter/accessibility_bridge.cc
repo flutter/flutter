@@ -26,31 +26,31 @@ static constexpr char kTreeDumpInspectRootName[] = "semantic_tree_root";
 // Converts flutter semantic node flags to a string representation.
 std::string NodeFlagsToString(const flutter::SemanticsNode& node) {
   std::string output;
-  if (node.flags.hasCheckedState) {
+  if (node.flags.isChecked != flutter::SemanticsCheckState::kNone) {
     output += "kHasCheckedState|";
   }
-  if (node.flags.hasEnabledState) {
+  if (node.flags.isEnabled != flutter::SemanticsTristate::kNone) {
     output += "kHasEnabledState|";
   }
   if (node.flags.hasImplicitScrolling) {
     output += "kHasImplicitScrolling|";
   }
-  if (node.flags.hasToggledState) {
+  if (node.flags.isToggled != flutter::SemanticsTristate::kNone) {
     output += "kHasToggledState|";
   }
   if (node.flags.isButton) {
     output += "kIsButton|";
   }
-  if (node.flags.isChecked) {
+  if (node.flags.isChecked == flutter::SemanticsCheckState::kTrue) {
     output += "kIsChecked|";
   }
-  if (node.flags.isEnabled) {
+  if (node.flags.isEnabled == flutter::SemanticsTristate::kTrue) {
     output += "kIsEnabled|";
   }
-  if (node.flags.isFocusable) {
+  if (node.flags.isFocused != flutter::SemanticsTristate::kNone) {
     output += "kIsFocusable|";
   }
-  if (node.flags.isFocused) {
+  if (node.flags.isFocused == flutter::SemanticsTristate::kTrue) {
     output += "kIsFocused|";
   }
   if (node.flags.isHeader) {
@@ -80,7 +80,7 @@ std::string NodeFlagsToString(const flutter::SemanticsNode& node) {
   if (node.flags.isReadOnly) {
     output += "kIsReadOnly|";
   }
-  if (node.flags.isSelected) {
+  if (node.flags.isSelected == flutter::SemanticsTristate::kTrue) {
     output += "kIsSelected|";
   }
   if (node.flags.isSlider) {
@@ -89,7 +89,7 @@ std::string NodeFlagsToString(const flutter::SemanticsNode& node) {
   if (node.flags.isTextField) {
     output += "kIsTextField|";
   }
-  if (node.flags.isToggled) {
+  if (node.flags.isToggled == flutter::SemanticsTristate::kTrue) {
     output += "kIsToggled|";
   }
   if (node.flags.namesRoute) {
@@ -178,6 +178,12 @@ std::string NodeActionsToString(const flutter::SemanticsNode& node) {
   }
   if (node.HasAction(flutter::SemanticsAction::kFocus)) {
     output += "kFocus|";
+  }
+  if (node.HasAction(flutter::SemanticsAction::kExpand)) {
+    output += "kExpand|";
+  }
+  if (node.HasAction(flutter::SemanticsAction::kCollapse)) {
+    output += "kCollapse|";
   }
 
   return output;
@@ -279,10 +285,8 @@ fuchsia::ui::gfx::BoundingBox AccessibilityBridge::GetNodeLocation(
   fuchsia::ui::gfx::BoundingBox box;
   box.min.x = node.rect.fLeft;
   box.min.y = node.rect.fTop;
-  box.min.z = static_cast<float>(node.elevation);
   box.max.x = node.rect.fRight;
   box.max.y = node.rect.fBottom;
-  box.max.z = static_cast<float>(node.thickness);
   return box;
 }
 
@@ -336,26 +340,27 @@ fuchsia::accessibility::semantics::States AccessibilityBridge::GetNodeStates(
   (*additional_size) += sizeof(fuchsia::accessibility::semantics::States);
 
   // Set checked state.
-  if (!node.flags.hasCheckedState) {
+  if (node.flags.isChecked == flutter::SemanticsCheckState::kNone) {
     states.set_checked_state(
         fuchsia::accessibility::semantics::CheckedState::NONE);
   } else {
     states.set_checked_state(
-        node.flags.isChecked
+        node.flags.isChecked == flutter::SemanticsCheckState::kTrue
             ? fuchsia::accessibility::semantics::CheckedState::CHECKED
             : fuchsia::accessibility::semantics::CheckedState::UNCHECKED);
   }
 
   // Set enabled state.
-  if (node.flags.hasEnabledState) {
+  if (node.flags.isEnabled != flutter::SemanticsTristate::kNone) {
     states.set_enabled_state(
-        node.flags.isEnabled
+        node.flags.isEnabled == flutter::SemanticsTristate::kTrue
             ? fuchsia::accessibility::semantics::EnabledState::ENABLED
             : fuchsia::accessibility::semantics::EnabledState::DISABLED);
   }
 
   // Set selected state.
-  states.set_selected(node.flags.isSelected);
+  states.set_selected(node.flags.isSelected ==
+                      flutter::SemanticsTristate::kTrue);
 
   // Flutter's definition of a hidden node is different from Fuchsia, so it must
   // not be set here.
@@ -371,9 +376,9 @@ fuchsia::accessibility::semantics::States AccessibilityBridge::GetNodeStates(
   }
 
   // Set toggled state.
-  if (node.flags.hasToggledState) {
+  if (node.flags.isToggled != flutter::SemanticsTristate::kNone) {
     states.set_toggled_state(
-        node.flags.isToggled
+        node.flags.isToggled == flutter::SemanticsTristate::kTrue
             ? fuchsia::accessibility::semantics::ToggledState::ON
             : fuchsia::accessibility::semantics::ToggledState::OFF);
   }
@@ -448,7 +453,7 @@ fuchsia::accessibility::semantics::Role AccessibilityBridge::GetNodeRole(
   // If a flutter node has a checked state, then we assume it is either a
   // checkbox or a radio button. We distinguish between checkboxes and
   // radio buttons based on membership in a mutually exclusive group.
-  if (node.flags.hasCheckedState) {
+  if (node.flags.isChecked != flutter::SemanticsCheckState::kNone) {
     if (node.flags.isInMutuallyExclusiveGroup) {
       return fuchsia::accessibility::semantics::Role::RADIO_BUTTON;
     } else {
@@ -456,7 +461,7 @@ fuchsia::accessibility::semantics::Role AccessibilityBridge::GetNodeRole(
     }
   }
 
-  if (node.flags.hasToggledState) {
+  if (node.flags.isToggled != flutter::SemanticsTristate::kNone) {
     return fuchsia::accessibility::semantics::Role::TOGGLE_SWITCH;
   }
   return fuchsia::accessibility::semantics::Role::UNKNOWN;
@@ -804,7 +809,7 @@ bool AccessibilityBridge::IsFocusable(
     return false;
   }
 
-  if (node.flags.isFocusable) {
+  if (node.flags.isFocused != flutter::SemanticsTristate::kNone) {
     return true;
   }
 

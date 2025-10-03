@@ -6,7 +6,6 @@ package io.flutter.embedding.engine.systemchannels;
 
 import static io.flutter.Build.API_LEVELS;
 
-import android.annotation.TargetApi;
 import android.os.Build;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -129,7 +128,6 @@ public class ScribeChannel {
      * Responds to the {@code result} with success and a boolean indicating whether or not stylus
      * handwriting is available.
      */
-    @TargetApi(API_LEVELS.API_34)
     @RequiresApi(API_LEVELS.API_34)
     boolean isStylusHandwritingAvailable();
 
@@ -137,7 +135,6 @@ public class ScribeChannel {
      * Requests to start Scribe stylus handwriting, which will respond to the {@code result} with
      * either success if handwriting input has started or error otherwise.
      */
-    @TargetApi(API_LEVELS.API_33)
     @RequiresApi(API_LEVELS.API_33)
     void startStylusHandwriting();
   }

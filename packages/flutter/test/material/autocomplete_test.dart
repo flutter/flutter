@@ -2,15 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../widgets/semantics_tester.dart';
 
 class User {
   const User({required this.email, required this.name});
@@ -216,14 +210,15 @@ void main() {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            fieldViewBuilder: (
-              BuildContext context,
-              TextEditingController textEditingController,
-              FocusNode focusNode,
-              VoidCallback onFieldSubmitted,
-            ) {
-              return Container(key: fieldKey);
-            },
+            fieldViewBuilder:
+                (
+                  BuildContext context,
+                  TextEditingController textEditingController,
+                  FocusNode focusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  return Container(key: fieldKey);
+                },
           ),
         ),
       ),
@@ -245,13 +240,14 @@ void main() {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            optionsViewBuilder: (
-              BuildContext context,
-              AutocompleteOnSelected<String> onSelected,
-              Iterable<String> options,
-            ) {
-              return Container(key: optionsKey);
-            },
+            optionsViewBuilder:
+                (
+                  BuildContext context,
+                  AutocompleteOnSelected<String> onSelected,
+                  Iterable<String> options,
+                ) {
+                  return Container(key: optionsKey);
+                },
           ),
         ),
       ),
@@ -551,10 +547,9 @@ void main() {
           ),
         ),
       );
-      final OptionsViewOpenDirection actual =
-          tester
-              .widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
-              .optionsViewOpenDirection;
+      final OptionsViewOpenDirection actual = tester
+          .widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
+          .optionsViewOpenDirection;
       expect(actual, equals(OptionsViewOpenDirection.down));
     });
 
@@ -570,10 +565,9 @@ void main() {
           ),
         ),
       );
-      final OptionsViewOpenDirection actual =
-          tester
-              .widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
-              .optionsViewOpenDirection;
+      final OptionsViewOpenDirection actual = tester
+          .widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
+          .optionsViewOpenDirection;
       expect(actual, equals(OptionsViewOpenDirection.down));
     });
 
@@ -590,10 +584,9 @@ void main() {
           ),
         ),
       );
-      final OptionsViewOpenDirection actual =
-          tester
-              .widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
-              .optionsViewOpenDirection;
+      final OptionsViewOpenDirection actual = tester
+          .widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
+          .optionsViewOpenDirection;
       expect(actual, equals(OptionsViewOpenDirection.up));
 
       await tester.tap(find.byType(RawAutocomplete<String>));
@@ -655,187 +648,137 @@ void main() {
     checkOptionHighlight(tester, kOptions.first, highlightColor);
   });
 
-  testWidgets('Autocomplete suggestions are hit-tested before ListTiles', (
+  testWidgets(
+    'passes textEditingController, focusNode to textEditingController, focusNode RawAutocomplete',
+    (WidgetTester tester) async {
+      final TextEditingController textEditingController = TextEditingController();
+      final FocusNode focusNode = FocusNode();
+      addTearDown(textEditingController.dispose);
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: Autocomplete<String>(
+                focusNode: focusNode,
+                textEditingController: textEditingController,
+                optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final RawAutocomplete<String> rawAutocomplete = tester.widget(
+        find.byType(RawAutocomplete<String>),
+      );
+      expect(rawAutocomplete.textEditingController, textEditingController);
+      expect(rawAutocomplete.focusNode, focusNode);
+    },
+  );
+
+  testWidgets('when field scrolled offscreen, reshown selected value when scrolled back', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final ScrollController scrollController = ScrollController();
+    final TextEditingController textEditingController = TextEditingController();
+    final FocusNode focusNode = FocusNode();
+    addTearDown(textEditingController.dispose);
+    addTearDown(focusNode.dispose);
+    addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: Column(
+          body: ListView(
+            controller: scrollController,
             children: <Widget>[
               Autocomplete<String>(
+                focusNode: focusNode,
+                textEditingController: textEditingController,
                 optionsBuilder: (TextEditingValue textEditingValue) {
-                  const List<String> options = <String>['Apple', 'Banana', 'Cherry'];
-                  return options.where(
-                    (String option) => option.toLowerCase().contains(textEditingValue.text),
-                  );
+                  return kOptions.where((String option) {
+                    return option.contains(textEditingValue.text.toLowerCase());
+                  });
                 },
               ),
-              for (int i = 0; i < 3; i++) ListTile(title: Text('Item $i'), onTap: () {}),
+              const SizedBox(height: 1000.0),
             ],
           ),
         ),
       ),
     );
 
+    /// Select an option.
     await tester.tap(find.byType(TextField));
     await tester.pump();
+    const String textSelection = 'chameleon';
+    await tester.tap(find.text(textSelection));
 
-    // Check the semantics tree based on hit-testing order.
-    expect(
-      semantics,
-      hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics(
-              id: 1,
-              textDirection: TextDirection.ltr,
-              children: <TestSemantics>[
-                TestSemantics(
-                  id: 2,
-                  children: <TestSemantics>[
-                    TestSemantics(
-                      id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          id: 7,
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.hasSelectedState,
-                            SemanticsFlag.isButton,
-                            SemanticsFlag.hasEnabledState,
-                            SemanticsFlag.isEnabled,
-                            SemanticsFlag.isFocusable,
-                          ],
-                          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-                          label: 'Item 2',
-                          textDirection: TextDirection.ltr,
-                        ),
-                        TestSemantics(
-                          id: 6,
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.hasSelectedState,
-                            SemanticsFlag.isButton,
-                            SemanticsFlag.hasEnabledState,
-                            SemanticsFlag.isEnabled,
-                            SemanticsFlag.isFocusable,
-                          ],
-                          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-                          label: 'Item 1',
-                          textDirection: TextDirection.ltr,
-                        ),
-                        TestSemantics(
-                          id: 5,
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.hasSelectedState,
-                            SemanticsFlag.isButton,
-                            SemanticsFlag.hasEnabledState,
-                            SemanticsFlag.isEnabled,
-                            SemanticsFlag.isFocusable,
-                          ],
-                          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-                          label: 'Item 0',
-                          textDirection: TextDirection.ltr,
-                        ),
-                        TestSemantics(
-                          id: 8,
-                          children: <TestSemantics>[
-                            TestSemantics(
-                              id: 9,
-                              children: <TestSemantics>[
-                                TestSemantics(
-                                  id: 13,
-                                  flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
-                                  children: <TestSemantics>[
-                                    TestSemantics(
-                                      id: 12,
-                                      tags: <SemanticsTag>[
-                                        const SemanticsTag('RenderViewport.twoPane'),
-                                      ],
-                                      flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                                      actions: <SemanticsAction>[
-                                        SemanticsAction.tap,
-                                        SemanticsAction.focus,
-                                      ],
-                                      label: 'Cherry',
-                                      textDirection: TextDirection.ltr,
-                                    ),
-                                    TestSemantics(
-                                      id: 11,
-                                      tags: <SemanticsTag>[
-                                        const SemanticsTag('RenderViewport.twoPane'),
-                                      ],
-                                      flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                                      actions: <SemanticsAction>[
-                                        SemanticsAction.tap,
-                                        SemanticsAction.focus,
-                                      ],
-                                      label: 'Banana',
-                                      textDirection: TextDirection.ltr,
-                                    ),
-                                    TestSemantics(
-                                      id: 10,
-                                      tags: <SemanticsTag>[
-                                        const SemanticsTag('RenderViewport.twoPane'),
-                                      ],
-                                      flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                                      actions: <SemanticsAction>[
-                                        SemanticsAction.tap,
-                                        SemanticsAction.focus,
-                                      ],
-                                      label: 'Apple',
-                                      textDirection: TextDirection.ltr,
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        TestSemantics(
-                          id: 4,
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.isTextField,
-                            SemanticsFlag.isFocused,
-                            SemanticsFlag.hasEnabledState,
-                            SemanticsFlag.isEnabled,
-                          ],
-                          actions: <SemanticsAction>[
-                            SemanticsAction.tap,
-                            SemanticsAction.setSelection,
-                            SemanticsAction.setText,
-                            SemanticsAction.focus,
-                            if (kIsWeb) SemanticsAction.paste,
-                          ],
-                          currentValueLength: 0,
-                          inputType: SemanticsInputType.text,
-                          textDirection: TextDirection.ltr,
-                          textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
-                          validationResult: SemanticsValidationResult.valid,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
+    // Unfocus and scroll to deconstruct the widge
+    final TextField field = find.byType(TextField).evaluate().first.widget as TextField;
+    field.focusNode?.unfocus();
+    scrollController.jumpTo(2000.0);
+    await tester.pumpAndSettle();
+
+    /// Scroll to go back to the widget.
+    scrollController.jumpTo(0.0);
+    await tester.pumpAndSettle();
+
+    /// Checks that the option selected is still present.
+    final TextField field2 = find.byType(TextField).evaluate().first.widget as TextField;
+    expect(field2.controller!.text, textSelection);
+  });
+
+  testWidgets('Autocomplete renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: Scaffold(
+              body: Autocomplete<String>(
+                initialValue: const TextEditingValue(text: 'X'),
+                optionsBuilder: (TextEditingValue textEditingValue) => <String>['Y'],
+              ),
             ),
-          ],
+          ),
         ),
-        ignoreRect: true,
-        ignoreTransform: true,
-        childOrder: DebugSemanticsDumpOrder.inverseHitTest,
       ),
     );
+    final Finder xText = find.text('X');
+    expect(tester.getSize(xText), Size.zero);
+  });
 
-    final Finder cherryFinder = find.text('Cherry');
-    expect(cherryFinder, findsOneWidget);
-
-    await tester.tap(cherryFinder);
+  testWidgets('autocomplete options have button semantics', (WidgetTester tester) async {
+    const Color highlightColor = Color(0xFF112233);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(focusColor: highlightColor),
+        home: Scaffold(
+          body: Autocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              return kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.byType(TextField));
     await tester.pump();
-
-    expect(find.widgetWithText(TextField, 'Cherry'), findsOneWidget);
-    semantics.dispose();
+    await tester.enterText(find.byType(TextField), 'aa');
+    await tester.pump();
+    expect(
+      tester.getSemantics(find.text('aardvark')),
+      matchesSemantics(
+        isButton: true,
+        isFocusable: true,
+        hasTapAction: true,
+        hasFocusAction: true,
+        label: 'aardvark',
+      ),
+    );
   });
 }

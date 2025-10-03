@@ -261,10 +261,9 @@ class RevealedOffset {
     final bool inverted = leadingEdgeOffset.offset < trailingEdgeOffset.offset;
     final RevealedOffset smaller;
     final RevealedOffset larger;
-    (smaller, larger) =
-        inverted
-            ? (leadingEdgeOffset, trailingEdgeOffset)
-            : (trailingEdgeOffset, leadingEdgeOffset);
+    (smaller, larger) = inverted
+        ? (leadingEdgeOffset, trailingEdgeOffset)
+        : (trailingEdgeOffset, leadingEdgeOffset);
     if (currentOffset > larger.offset) {
       return larger;
     } else if (currentOffset < smaller.offset) {
@@ -858,11 +857,10 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   void debugPaintSize(PaintingContext context, Offset offset) {
     assert(() {
       super.debugPaintSize(context, offset);
-      final Paint paint =
-          Paint()
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = 1.0
-            ..color = const Color(0xFF00FF00);
+      final Paint paint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.0
+        ..color = const Color(0xFF00FF00);
       final Canvas canvas = context.canvas;
       RenderSliver? child = firstChild;
       while (child != null) {
@@ -1687,8 +1685,9 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
       child: center,
       scrollOffset: math.max(0.0, -centerOffset),
       overlap: leadingNegativeChild == null ? math.min(0.0, -centerOffset) : 0.0,
-      layoutOffset:
-          centerOffset >= mainAxisExtent ? centerOffset : reverseDirectionRemainingPaintExtent,
+      layoutOffset: centerOffset >= mainAxisExtent
+          ? centerOffset
+          : reverseDirectionRemainingPaintExtent,
       remainingPaintExtent: forwardDirectionRemainingPaintExtent,
       mainAxisExtent: mainAxisExtent,
       crossAxisExtent: crossAxisExtent,
@@ -2087,7 +2086,7 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
     // Hit test logic relies on this always providing an invertible matrix.
     final Offset offset = paintOffsetOf(child as RenderSliver);
-    transform.translate(offset.dx, offset.dy);
+    transform.translateByDouble(offset.dx, offset.dy, 0, 1);
   }
 
   @override

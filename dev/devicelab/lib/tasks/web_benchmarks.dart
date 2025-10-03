@@ -26,8 +26,13 @@ const int chromeDebugPort = 10000;
 /// The port at which the benchmark's app is being served.
 const int benchmarksAppPort = 10001;
 
-typedef WebBenchmarkOptions =
-    ({bool useWasm, bool forceSingleThreadedSkwasm, bool useDdc, bool withHotReload});
+typedef WebBenchmarkOptions = ({
+  bool useWasm,
+  bool forceSingleThreadedSkwasm,
+  bool useDdc,
+  bool withHotReload,
+  String buildMode,
+});
 
 Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
   // Reduce logging level. Otherwise, package:webkit_inspection_protocol is way too spammy.
@@ -67,9 +72,14 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
           '--web-browser-flag=--disable-translate',
           '--web-browser-flag=--disable-background-timer-throttling',
           '--web-browser-flag=--disable-backgrounding-occluded-windows',
+          '--web-browser-flag=--disable-renderer-backgrounding',
+          '--web-browser-flag=--headless=new',
           '--web-browser-flag=--no-sandbox',
           '--dart-define=FLUTTER_WEB_ENABLE_PROFILING=true',
-          if (benchmarkOptions.withHotReload) '--web-experimental-hot-reload',
+          if (benchmarkOptions.withHotReload)
+            '--web-experimental-hot-reload'
+          else
+            '--no-web-experimental-hot-reload',
           '--no-web-resources-cdn',
           'lib/web_benchmarks_ddc.dart',
         ],
@@ -98,7 +108,7 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
           '--no-tree-shake-icons', // local engine builds are frequently out of sync with the Dart Kernel version
           if (benchmarkOptions.useWasm) ...<String>['--wasm', '--no-strip-wasm'],
           '--dart-define=FLUTTER_WEB_ENABLE_PROFILING=true',
-          '--profile',
+          '--${benchmarkOptions.buildMode}',
           '--no-web-resources-cdn',
           '-t',
           'lib/web_benchmarks.dart',
@@ -155,8 +165,9 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
 
           // Trace data is null when the benchmark is not frame-based, such as RawRecorder.
           if (latestPerformanceTrace != null) {
-            final BlinkTraceSummary traceSummary =
-                BlinkTraceSummary.fromJson(latestPerformanceTrace!)!;
+            final BlinkTraceSummary traceSummary = BlinkTraceSummary.fromJson(
+              latestPerformanceTrace!,
+            )!;
             profile['totalUiFrame.average'] = traceSummary.averageTotalUIFrameTime.inMicroseconds;
             profile['scoreKeys'] ??= <dynamic>[]; // using dynamic for consistency with JSON
             (profile['scoreKeys'] as List<dynamic>).add('totalUiFrame.average');
@@ -221,8 +232,9 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
       shelf_io.serveRequests(server, cascade.handler);
 
       final String dartToolDirectory = path.join('$macrobenchmarksDirectory/.dart_tool');
-      final String userDataDir =
-          io.Directory(dartToolDirectory).createTempSync('flutter_chrome_user_data.').path;
+      final String userDataDir = io.Directory(
+        dartToolDirectory,
+      ).createTempSync('flutter_chrome_user_data.').path;
 
       // TODO(yjbanov): temporarily disables headful Chrome until we get
       //                devicelab hardware that is able to run it. Our current

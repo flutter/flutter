@@ -147,7 +147,7 @@ public class FlutterJNI {
     if (FlutterJNI.loadLibraryCalled) {
       Log.w(TAG, "FlutterJNI.loadLibrary called more than once");
     }
-    ReLinker.loadLibrary(context, "flutter");
+    ReLinker.log(msg -> Log.d(TAG, msg)).loadLibrary(context, "flutter");
     FlutterJNI.loadLibraryCalled = true;
   }
 
@@ -254,20 +254,6 @@ public class FlutterJNI {
    */
   @Nullable
   public static String getVMServiceUri() {
-    return vmServiceUri;
-  }
-
-  /**
-   * VM Service URI for the VM instance.
-   *
-   * <p>Its value is set by the native engine once {@link #init(Context, String[], String, String,
-   * String, long, int)} is run.
-   *
-   * @deprecated replaced by {@link #getVMServiceUri()}.
-   */
-  @Deprecated
-  @Nullable
-  public static String getObservatoryUri() {
     return vmServiceUri;
   }
 
@@ -814,6 +800,16 @@ public class FlutterJNI {
     ensureRunningOnMainThread();
     if (accessibilityDelegate != null) {
       accessibilityDelegate.updateSemantics(buffer, strings, stringAttributeArgs);
+    }
+  }
+
+  /** Invoked by native to set application locale in Android. */
+  @SuppressWarnings("unused")
+  @UiThread
+  private void setApplicationLocale(@NonNull String locale) {
+    ensureRunningOnMainThread();
+    if (accessibilityDelegate != null) {
+      accessibilityDelegate.setLocale(locale);
     }
   }
 
@@ -1645,6 +1641,13 @@ public class FlutterJNI {
         @NonNull ByteBuffer buffer,
         @NonNull String[] strings,
         @NonNull ByteBuffer[] stringAttributeArgs);
+
+    /**
+     * Sets the locale for the assistive technologies.
+     *
+     * <p>Must be called on the main thread
+     */
+    void setLocale(@NonNull String locale);
   }
 
   public interface AsyncWaitForVsyncDelegate {

@@ -107,6 +107,7 @@ extension type MouseEvent._(JSObject _) implements JSObject {
   external num get offsetX;
   external num get offsetY;
   external int get button;
+  external void preventDefault();
 }
 
 extension type Navigator._(JSObject _) implements JSObject {

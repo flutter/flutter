@@ -73,7 +73,6 @@ Future<void> testMain() async {
   });
 
   const ui.Rect drawRegion = ui.Rect.fromLTWH(0, 0, 300, 300);
-  const ui.Rect imageRegion = ui.Rect.fromLTWH(0, 0, 150, 150);
 
   // Emits a set of rendering tests for an image
   // `imageGenerator` should produce an image that is 150x150 pixels.
@@ -126,7 +125,12 @@ Future<void> testMain() async {
 
         final ui.PictureRecorder recorder = ui.PictureRecorder();
         final ui.Canvas canvas = ui.Canvas(recorder, drawRegion);
-        const ui.Rect srcRect = ui.Rect.fromLTRB(50, 50, 100, 100);
+        final ui.Rect srcRect = ui.Rect.fromLTRB(
+          image.width / 3,
+          image.height / 3,
+          2 * image.width / 3,
+          2 * image.height / 3,
+        );
         canvas.drawImageRect(
           image,
           srcRect,
@@ -159,15 +163,16 @@ Future<void> testMain() async {
 
       test('drawImageNine', () async {
         final ui.Image image = await generateImage();
+        final ui.Rect srcRect = ui.Rect.fromLTRB(
+          image.width / 3,
+          image.height / 3,
+          2 * image.width / 3,
+          2 * image.height / 3,
+        );
 
         final ui.PictureRecorder recorder = ui.PictureRecorder();
         final ui.Canvas canvas = ui.Canvas(recorder, drawRegion);
-        canvas.drawImageNine(
-          image,
-          const ui.Rect.fromLTRB(50, 50, 100, 100),
-          drawRegion,
-          ui.Paint(),
-        );
+        canvas.drawImageNine(image, srcRect, drawRegion, ui.Paint());
 
         await drawPictureUsingCurrentRenderer(recorder.endRecording());
 
@@ -253,10 +258,22 @@ Future<void> testMain() async {
           ui.Offset(0, 100),
           ui.Offset(0, 50),
         ];
+        final double imageWidth = image.width.toDouble();
+        final double imageHeight = image.height.toDouble();
+        final List<ui.Offset> texCoords = <ui.Offset>[
+          ui.Offset(imageWidth / 3, 0),
+          ui.Offset(2 * imageWidth / 3, 0),
+          ui.Offset(imageWidth, imageHeight / 3),
+          ui.Offset(imageWidth, 2 * imageHeight / 3),
+          ui.Offset(2 * imageWidth / 3, imageHeight),
+          ui.Offset(imageWidth / 3, imageHeight),
+          ui.Offset(0, 2 * imageHeight / 3),
+          ui.Offset(0, imageHeight / 3),
+        ];
         final ui.Vertices vertices = ui.Vertices(
           ui.VertexMode.triangles,
           vertexValues,
-          textureCoordinates: vertexValues,
+          textureCoordinates: texCoords,
           indices: <int>[
             0, 1, 2, //
             0, 2, 3, //
@@ -299,7 +316,7 @@ Future<void> testMain() async {
 
   emitImageTests('picture_toImage', () {
     final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final ui.Canvas canvas = ui.Canvas(recorder, imageRegion);
+    final ui.Canvas canvas = ui.Canvas(recorder, const ui.Rect.fromLTWH(0, 0, 150, 150));
     for (int y = 0; y < 15; y++) {
       for (int x = 0; x < 15; x++) {
         final ui.Offset center = ui.Offset(x * 10 + 5, y * 10 + 5);
@@ -488,4 +505,57 @@ Future<void> testMain() async {
     codec.dispose();
     return info.image;
   });
+
+  emitImageTests('animated_gif_list', () async {
+    final ByteBuffer data = await httpFetchByteBuffer('/test_images/alphabetAnim.gif');
+    final ui.Codec codec = await renderer.instantiateImageCodec(data.asUint8List());
+    expect(codec.frameCount, 13);
+
+    // The second frame of this gif is more interesting to test than the first,
+    // so skip the first frame.
+    await codec.getNextFrame();
+    final ui.FrameInfo info = await codec.getNextFrame();
+    codec.dispose();
+    return info.image;
+  });
+
+  emitImageTests('animated_webp_list', () async {
+    final ByteBuffer data = await httpFetchByteBuffer('/test_images/stoplight.webp');
+    final ui.Codec codec = await renderer.instantiateImageCodec(data.asUint8List());
+    expect(codec.frameCount, 3);
+
+    final ui.FrameInfo info = await codec.getNextFrame();
+    codec.dispose();
+    return info.image;
+  });
+
+  if (!isCanvasKit) {
+    // CanvasKit doesn't do the correct thing for animated images for the
+    // `instantiateImageCodecFromUrl` code path.
+    // See https://github.com/flutter/flutter/issues/166803
+    emitImageTests('animated_gif_uri', () async {
+      final ui.Codec codec = await renderer.instantiateImageCodecFromUrl(
+        Uri(path: '/test_images/alphabetAnim.gif'),
+      );
+      expect(codec.frameCount, 13);
+
+      // The second frame of this gif is more interesting to test than the first,
+      // so skip the first frame.
+      await codec.getNextFrame();
+      final ui.FrameInfo info = await codec.getNextFrame();
+      codec.dispose();
+      return info.image;
+    });
+
+    emitImageTests('animated_webp_uri', () async {
+      final ui.Codec codec = await renderer.instantiateImageCodecFromUrl(
+        Uri(path: '/test_images/stoplight.webp'),
+      );
+      expect(codec.frameCount, 3);
+
+      final ui.FrameInfo info = await codec.getNextFrame();
+      codec.dispose();
+      return info.image;
+    });
+  }
 }

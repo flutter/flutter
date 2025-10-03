@@ -13,11 +13,12 @@ import 'package:flutter_tools/src/web/compile.dart';
 import 'package:test/expect.dart';
 
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 
 void main() {
   testUsingContext('web test compiler issues valid compile command', () async {
-    final BufferLogger logger = BufferLogger.test();
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final logger = BufferLogger.test();
+    final fileSystem = MemoryFileSystem.test();
     fileSystem.file('project/test/fake_test.dart').createSync(recursive: true);
     fileSystem.file('build/out').createSync(recursive: true);
     fileSystem.file('build/build/out.sources').createSync(recursive: true);
@@ -26,14 +27,14 @@ void main() {
       ..writeAsStringSync('{}');
     fileSystem.file('build/build/out.map').createSync();
     fileSystem.file('build/build/out.metadata').createSync();
-    final FakePlatform platform = FakePlatform(environment: <String, String>{});
-    final Config config = Config(
+    final platform = FakePlatform(environment: <String, String>{});
+    final config = Config(
       Config.kFlutterSettings,
       fileSystem: fileSystem,
       logger: logger,
       platform: platform,
     );
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <Pattern>[
           'Artifact.engineDartAotRuntime.TargetPlatform.web_javascript',
@@ -67,16 +68,17 @@ void main() {
         stdout: 'result abc\nline0\nline1\nabc\nabc build/out 0',
       ),
     ]);
-    final WebTestCompiler compiler = WebTestCompiler(
+    final compiler = WebTestCompiler(
       logger: logger,
       fileSystem: fileSystem,
       platform: FakePlatform(environment: <String, String>{}),
       artifacts: Artifacts.test(),
       processManager: processManager,
       config: config,
+      shutdownHooks: FakeShutdownHooks(),
     );
 
-    const BuildInfo buildInfo = BuildInfo(
+    const buildInfo = BuildInfo(
       BuildMode.debug,
       '',
       treeShakeIcons: false,
@@ -90,6 +92,76 @@ void main() {
       buildInfo: buildInfo,
       webRenderer: WebRendererMode.canvaskit,
       useWasm: false,
+    );
+
+    expect(processManager.hasRemainingExpectations, isFalse);
+  });
+
+  testUsingContext('web test compiler issues valid compile command (wasm)', () async {
+    final logger = BufferLogger.test();
+    final fileSystem = MemoryFileSystem.test();
+    fileSystem.file('project/test/fake_test.dart').createSync(recursive: true);
+    fileSystem.file('build/out').createSync(recursive: true);
+    fileSystem.file('build/build/out.sources').createSync(recursive: true);
+    fileSystem.file('build/build/out.json')
+      ..createSync()
+      ..writeAsStringSync('{}');
+    fileSystem.file('build/build/out.map').createSync();
+    fileSystem.file('build/build/out.metadata').createSync();
+    final platform = FakePlatform(environment: <String, String>{});
+    final config = Config(
+      Config.kFlutterSettings,
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: platform,
+    );
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <Pattern>[
+          'Artifact.engineDartBinary.TargetPlatform.web_javascript',
+          'compile',
+          'wasm',
+          '--packages=.dart_tool/package_config.json',
+          '--extra-compiler-option=--platform=HostArtifact.webPlatformKernelFolder/dart2wasm_platform.dill',
+          '--extra-compiler-option=--multi-root-scheme=org-dartlang-app',
+          '--extra-compiler-option=--multi-root=project/test',
+          '--extra-compiler-option=--multi-root=build',
+          '--extra-compiler-option=--enable-asserts',
+          '--extra-compiler-option=--no-inlining',
+          '-DFLUTTER_WEB_USE_SKIA=true',
+          '-DFLUTTER_WEB_USE_SKWASM=false',
+          '-O0',
+          '-o',
+          'build/main.dart.wasm',
+          'build/main.dart',
+        ],
+        stdout: 'result abc\nline0\nline1\nabc\nabc build/out 0',
+      ),
+    ]);
+    final compiler = WebTestCompiler(
+      logger: logger,
+      fileSystem: fileSystem,
+      platform: FakePlatform(environment: <String, String>{}),
+      artifacts: Artifacts.test(),
+      processManager: processManager,
+      config: config,
+      shutdownHooks: FakeShutdownHooks(),
+    );
+
+    const buildInfo = BuildInfo(
+      BuildMode.debug,
+      '',
+      treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
+    );
+
+    await compiler.initialize(
+      projectDirectory: fileSystem.directory('project'),
+      testOutputDir: 'build',
+      testFiles: <String>['project/test/fake_test.dart'],
+      buildInfo: buildInfo,
+      webRenderer: WebRendererMode.canvaskit,
+      useWasm: true,
     );
 
     expect(processManager.hasRemainingExpectations, isFalse);

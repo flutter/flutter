@@ -29,13 +29,13 @@ AndroidNativeWindow::Handle AndroidNativeWindow::handle() const {
   return window_;
 }
 
-SkISize AndroidNativeWindow::GetSize() const {
+DlISize AndroidNativeWindow::GetSize() const {
 #if FML_OS_ANDROID
-  return window_ == nullptr ? SkISize::Make(0, 0)
-                            : SkISize::Make(ANativeWindow_getWidth(window_),
-                                            ANativeWindow_getHeight(window_));
+  return window_ == nullptr ? DlISize()
+                            : DlISize(ANativeWindow_getWidth(window_),
+                                      ANativeWindow_getHeight(window_));
 #else   // FML_OS_ANDROID
-  return SkISize::Make(0, 0);
+  return DlISize();
 #endif  // FML_OS_ANDROID
 }
 

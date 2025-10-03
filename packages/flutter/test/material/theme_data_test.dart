@@ -1054,10 +1054,9 @@ void main() {
     'VisualDensity in ThemeData defaults to the right thing when a platform is supplied to it',
     (WidgetTester tester) async {
       final ThemeData themeData = ThemeData(
-        platform:
-            debugDefaultTargetPlatformOverride! == TargetPlatform.android
-                ? TargetPlatform.linux
-                : TargetPlatform.android,
+        platform: debugDefaultTargetPlatformOverride! == TargetPlatform.android
+            ? TargetPlatform.linux
+            : TargetPlatform.android,
       );
       switch (debugDefaultTargetPlatformOverride!) {
         case TargetPlatform.iOS:
@@ -1329,10 +1328,10 @@ void main() {
       typography: Typography.material2018(),
       // COMPONENT THEMES
       actionIconTheme: const ActionIconThemeData(),
-      appBarTheme: const AppBarTheme(backgroundColor: Colors.black),
+      appBarTheme: const AppBarThemeData(backgroundColor: Colors.black),
       badgeTheme: const BadgeThemeData(backgroundColor: Colors.black),
       bannerTheme: const MaterialBannerThemeData(backgroundColor: Colors.black),
-      bottomAppBarTheme: const BottomAppBarTheme(color: Colors.black),
+      bottomAppBarTheme: const BottomAppBarThemeData(color: Colors.black),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         type: BottomNavigationBarType.fixed,
       ),
@@ -1458,10 +1457,10 @@ void main() {
       typography: Typography.material2018(platform: TargetPlatform.iOS),
       // COMPONENT THEMES
       actionIconTheme: const ActionIconThemeData(),
-      appBarTheme: const AppBarTheme(backgroundColor: Colors.white),
+      appBarTheme: const AppBarThemeData(backgroundColor: Colors.white),
       badgeTheme: const BadgeThemeData(backgroundColor: Colors.black),
       bannerTheme: const MaterialBannerThemeData(backgroundColor: Colors.white),
-      bottomAppBarTheme: const BottomAppBarTheme(color: Colors.white),
+      bottomAppBarTheme: const BottomAppBarThemeData(color: Colors.white),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         type: BottomNavigationBarType.shifting,
       ),
@@ -1854,11 +1853,10 @@ void main() {
 
     final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
     ThemeData().debugFillProperties(properties);
-    final List<String> propertyNameList =
-        properties.properties
-            .map((final DiagnosticsNode node) => node.name)
-            .whereType<String>()
-            .toList();
+    final List<String> propertyNameList = properties.properties
+        .map((final DiagnosticsNode node) => node.name)
+        .whereType<String>()
+        .toList();
     final Set<String> propertyNames = propertyNameList.toSet();
 
     // Ensure there are no duplicates.
@@ -1889,10 +1887,7 @@ void main() {
       );
 
       expect(adaptiveString, 'Adaptive theme.');
-      expect(
-        adaptiveSwitchTheme.thumbColor?.resolve(<MaterialState>{}),
-        isSameColorAs(Colors.brown),
-      );
+      expect(adaptiveSwitchTheme.thumbColor?.resolve(<WidgetState>{}), isSameColorAs(Colors.brown));
     });
 
     testWidgets('should return null on extension not found', (WidgetTester tester) async {
@@ -2005,6 +2000,32 @@ void main() {
           ),
         );
       }
+    },
+  );
+
+  testWidgets(
+    'ThemeData.inputDecorationTheme accepts only a InputDecorationTheme or a InputDecorationThemeData',
+    (WidgetTester tester) async {
+      ThemeData(inputDecorationTheme: const InputDecorationTheme());
+      expect(tester.takeException(), isNull);
+
+      ThemeData(inputDecorationTheme: const InputDecorationThemeData());
+      expect(tester.takeException(), isNull);
+
+      expect(
+        () {
+          ThemeData(inputDecorationTheme: Object());
+        },
+        throwsA(
+          isA<ArgumentError>().having(
+            (ArgumentError error) => error.message,
+            'message',
+            equals(
+              'inputDecorationTheme must be either a InputDecorationThemeData or a InputDecorationTheme',
+            ),
+          ),
+        ),
+      );
     },
   );
 }

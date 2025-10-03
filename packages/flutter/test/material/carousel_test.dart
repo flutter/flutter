@@ -26,8 +26,9 @@ void main() {
       ),
     );
 
-    final Finder carouselViewMaterial =
-        find.descendant(of: find.byType(CarouselView), matching: find.byType(Material)).first;
+    final Finder carouselViewMaterial = find
+        .descendant(of: find.byType(CarouselView), matching: find.byType(Material))
+        .first;
 
     final Material material = tester.widget<Material>(carouselViewMaterial);
     expect(material.clipBehavior, Clip.antiAlias);
@@ -67,7 +68,10 @@ void main() {
             itemExtent: 200,
             children: List<Widget>.generate(10, (int index) {
               if (index == 0) {
-                return Center(key: key, child: Center(child: Text('Item $index')));
+                return Center(
+                  key: key,
+                  child: Center(child: Text('Item $index')),
+                );
               }
               return Center(child: Text('Item $index'));
             }),
@@ -76,8 +80,9 @@ void main() {
       ),
     );
 
-    final Finder carouselViewMaterial =
-        find.descendant(of: find.byType(CarouselView), matching: find.byType(Material)).first;
+    final Finder carouselViewMaterial = find
+        .descendant(of: find.byType(CarouselView), matching: find.byType(Material))
+        .first;
 
     expect(
       tester.getSize(carouselViewMaterial).width,
@@ -122,7 +127,7 @@ void main() {
     expect(inkWellElement.widget, isA<InkWell>());
     final InkWell inkWell = inkWellElement.widget as InkWell;
 
-    const MaterialState state = MaterialState.focused;
+    const WidgetState state = WidgetState.focused;
 
     // Check overlay color in focused state.
     expect(inkWell.overlayColor?.resolve(<WidgetState>{state}), Colors.purple);
@@ -1885,6 +1890,154 @@ void main() {
       }
     });
   });
+
+  group('CarouselView item clipBehavior', () {
+    testWidgets('CarouselView Item clipBehavior defaults to Clip.antiAlias', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CarouselView(
+              itemExtent: 350,
+              children: List<Widget>.generate(3, (int index) {
+                return Text('Item $index');
+              }),
+            ),
+          ),
+        ),
+      );
+
+      final Material material = tester.firstWidget<Material>(
+        find.ancestor(of: find.text('Item 0'), matching: find.byType(Material)),
+      );
+
+      expect(material.clipBehavior, Clip.antiAlias);
+    });
+
+    testWidgets('CarouselView.weighted Item clipBehavior defaults to Clip.antiAlias', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CarouselView.weighted(
+              flexWeights: const <int>[1, 1, 1],
+              children: List<Widget>.generate(3, (int index) {
+                return Text('Item $index');
+              }),
+            ),
+          ),
+        ),
+      );
+
+      final Material material = tester.firstWidget<Material>(
+        find.ancestor(of: find.text('Item 0'), matching: find.byType(Material)),
+      );
+
+      expect(material.clipBehavior, Clip.antiAlias);
+    });
+
+    testWidgets('CarouselView Item clipBehavior respects theme', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData(
+        carouselViewTheme: const CarouselViewThemeData(itemClipBehavior: Clip.hardEdge),
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          home: Scaffold(
+            body: CarouselView(
+              itemExtent: 350,
+              children: List<Widget>.generate(3, (int index) {
+                return Text('Item $index');
+              }),
+            ),
+          ),
+        ),
+      );
+
+      final Material material = tester.firstWidget<Material>(
+        find.ancestor(of: find.text('Item 0'), matching: find.byType(Material)),
+      );
+
+      expect(material.clipBehavior, Clip.hardEdge);
+    });
+
+    testWidgets('CarouselView.weighted item clipBehavior respects theme', (
+      WidgetTester tester,
+    ) async {
+      final ThemeData theme = ThemeData(
+        carouselViewTheme: const CarouselViewThemeData(itemClipBehavior: Clip.hardEdge),
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          home: Scaffold(
+            body: CarouselView.weighted(
+              flexWeights: const <int>[1, 1, 1],
+              children: List<Widget>.generate(3, (int index) {
+                return Text('Item $index');
+              }),
+            ),
+          ),
+        ),
+      );
+
+      final Material material = tester.firstWidget<Material>(
+        find.ancestor(of: find.text('Item 0'), matching: find.byType(Material)),
+      );
+
+      expect(material.clipBehavior, Clip.hardEdge);
+    });
+  });
+
+  testWidgets('CarouselView item clipBehavior respects custom itemClipBehavior', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CarouselView(
+            itemExtent: 350,
+            itemClipBehavior: Clip.hardEdge,
+            children: List<Widget>.generate(3, (int index) {
+              return Text('Item $index');
+            }),
+          ),
+        ),
+      ),
+    );
+
+    final Material material = tester.firstWidget<Material>(
+      find.ancestor(of: find.text('Item 0'), matching: find.byType(Material)),
+    );
+
+    expect(material.clipBehavior, Clip.hardEdge);
+  });
+
+  testWidgets('CarouselView.weighted item clipBehavior respects custom itemClipBehavior', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CarouselView.weighted(
+            flexWeights: const <int>[1, 1, 1],
+            itemClipBehavior: Clip.hardEdge,
+            children: List<Widget>.generate(3, (int index) {
+              return Text('Item $index');
+            }),
+          ),
+        ),
+      ),
+    );
+
+    final Material material = tester.firstWidget<Material>(
+      find.ancestor(of: find.text('Item 0'), matching: find.byType(Material)),
+    );
+
+    expect(material.clipBehavior, Clip.hardEdge);
+  });
 }
 
 Finder getItem(int index) {
@@ -1917,29 +2070,28 @@ Future<void> runCarouselTest({
   await tester.pumpWidget(
     MaterialApp(
       home: Scaffold(
-        body:
-            (flexWeights.isEmpty)
-                ? CarouselView(
-                  scrollDirection: scrollDirection,
-                  reverse: reverse,
-                  controller: controller,
-                  itemSnapping: true,
-                  itemExtent: 300,
-                  children: List<Widget>.generate(numberOfChildren, (int index) {
-                    return Center(child: Text('Item $index'));
-                  }),
-                )
-                : CarouselView.weighted(
-                  flexWeights: flexWeights,
-                  scrollDirection: scrollDirection,
-                  reverse: reverse,
-                  controller: controller,
-                  itemSnapping: true,
-                  consumeMaxWeight: consumeMaxWeight,
-                  children: List<Widget>.generate(numberOfChildren, (int index) {
-                    return Center(child: Text('Item $index'));
-                  }),
-                ),
+        body: flexWeights.isEmpty
+            ? CarouselView(
+                scrollDirection: scrollDirection,
+                reverse: reverse,
+                controller: controller,
+                itemSnapping: true,
+                itemExtent: 300,
+                children: List<Widget>.generate(numberOfChildren, (int index) {
+                  return Center(child: Text('Item $index'));
+                }),
+              )
+            : CarouselView.weighted(
+                flexWeights: flexWeights,
+                scrollDirection: scrollDirection,
+                reverse: reverse,
+                controller: controller,
+                itemSnapping: true,
+                consumeMaxWeight: consumeMaxWeight,
+                children: List<Widget>.generate(numberOfChildren, (int index) {
+                  return Center(child: Text('Item $index'));
+                }),
+              ),
       ),
     ),
   );
@@ -1953,10 +2105,9 @@ Future<void> runCarouselTest({
   // For reverse scrolling, the middle item is calculated taking into account the end of the list,
   // reversing the calculation so that the item that appears in the middle when scrolling is the correct one.
   // For normal scrolling, we simply get the middle item.
-  final int middleIndex =
-      reverse
-          ? (numberOfChildren - 1 - (numberOfChildren / 2).round())
-          : (numberOfChildren / 2).round();
+  final int middleIndex = reverse
+      ? (numberOfChildren - 1 - (numberOfChildren / 2).round())
+      : (numberOfChildren / 2).round();
 
   controller.animateToItem(
     middleIndex,

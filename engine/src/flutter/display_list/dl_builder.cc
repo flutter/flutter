@@ -11,7 +11,9 @@
 #include "flutter/display_list/effects/dl_color_filters.h"
 #include "flutter/display_list/effects/dl_color_source.h"
 #include "flutter/display_list/effects/dl_image_filters.h"
+#include "flutter/display_list/effects/dl_mask_filter.h"
 #include "flutter/display_list/geometry/dl_geometry_conversions.h"
+#include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/display_list/utils/dl_accumulation_rect.h"
 #include "fml/logging.h"
 
@@ -369,17 +371,17 @@ void DisplayListBuilder::SetAttributesFromPaint(
     setStrokeJoin(paint.getStrokeJoin());
   }
   if (flags.applies_shader()) {
-    setColorSource(paint.getColorSource().get());
+    setColorSource(paint.getColorSourcePtr());
   }
   if (flags.applies_color_filter()) {
     setInvertColors(paint.isInvertColors());
-    setColorFilter(paint.getColorFilter().get());
+    setColorFilter(paint.getColorFilterPtr());
   }
   if (flags.applies_image_filter()) {
-    setImageFilter(paint.getImageFilter().get());
+    setImageFilter(paint.getImageFilterPtr());
   }
   if (flags.applies_mask_filter()) {
-    setMaskFilter(paint.getMaskFilter().get());
+    setMaskFilter(paint.getMaskFilterPtr());
   }
 }
 
@@ -706,6 +708,7 @@ void DisplayListBuilder::TransferLayerBounds(const DlRect& content_bounds) {
     // revisit all of the RTree rects accumulated during the current layer
     // (indicated by rtree_rects_start_index) and expand them by the filter.
 
+    // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
     if (AdjustRTreeRects(rtree_data_.value(), *filter, matrix, clip,
                          current_layer().rtree_rects_start_index)) {
       parent_is_flooded = true;
@@ -1267,11 +1270,9 @@ void DisplayListBuilder::drawRoundSuperellipse(const DlRoundSuperellipse& rse) {
         Push<DrawRoundSuperellipseOp>(0, rse);
       } else {
         DlPathBuilder builder;
-        builder.SetConvexity(impeller::Convexity::kConvex);
-        builder.SetBounds(rse.GetBounds());
         builder.AddRoundSuperellipse(DlRoundSuperellipse::MakeRectRadii(
             rse.GetBounds(), rse.GetRadii()));
-        Push<DrawPathOp>(0, DlPath(builder.TakePath()));
+        Push<DrawPathOp>(0, builder.TakePath());
       }
       CheckLayerOpacityCompatibility();
       UpdateLayerResult(result);
@@ -1697,52 +1698,16 @@ void DisplayListBuilder::DrawDisplayList(const sk_sp<DisplayList> display_list,
     current_layer().contains_backdrop_filter = true;
   }
 }
-void DisplayListBuilder::drawTextBlob(const sk_sp<SkTextBlob> blob,
-                                      DlScalar x,
-                                      DlScalar y) {
-  DisplayListAttributeFlags flags = kDrawTextBlobFlags;
-  OpResult result = PaintResult(current_, flags);
-  if (result == OpResult::kNoEffect) {
-    return;
-  }
-  DlRect bounds = ToDlRect(blob->bounds().makeOffset(x, y));
-  bool unclipped = AccumulateOpBounds(bounds, flags);
-  // TODO(https://github.com/flutter/flutter/issues/82202): Remove once the
-  // unit tests can use Fuchsia's font manager instead of the empty default.
-  // Until then we might encounter empty bounds for otherwise valid text and
-  // thus we ignore the results from AccumulateOpBounds.
-#if defined(OS_FUCHSIA)
-  unclipped = true;
-#endif  // OS_FUCHSIA
-  if (unclipped) {
-    Push<DrawTextBlobOp>(0, blob, x, y);
-    // There is no way to query if the glyphs of a text blob overlap and
-    // there are no current guarantees from either Skia or Impeller that
-    // they will protect overlapping glyphs from the effects of overdraw
-    // so we must make the conservative assessment that this DL layer is
-    // not compatible with group opacity inheritance.
-    UpdateLayerOpacityCompatibility(false);
-    UpdateLayerResult(result);
-  }
-}
-void DisplayListBuilder::DrawTextBlob(const sk_sp<SkTextBlob>& blob,
-                                      DlScalar x,
-                                      DlScalar y,
-                                      const DlPaint& paint) {
-  SetAttributesFromPaint(paint, DisplayListOpFlags::kDrawTextBlobFlags);
-  drawTextBlob(blob, x, y);
-}
 
-void DisplayListBuilder::drawTextFrame(
-    const std::shared_ptr<impeller::TextFrame>& text_frame,
-    DlScalar x,
-    DlScalar y) {
-  DisplayListAttributeFlags flags = kDrawTextBlobFlags;
+void DisplayListBuilder::drawText(const std::shared_ptr<DlText>& text,
+                                  DlScalar x,
+                                  DlScalar y) {
+  DisplayListAttributeFlags flags = kDrawTextFlags;
   OpResult result = PaintResult(current_, flags);
   if (result == OpResult::kNoEffect) {
     return;
   }
-  DlRect bounds = text_frame->GetBounds().Shift(x, y);
+  DlRect bounds = text->GetBounds().Shift(x, y);
   bool unclipped = AccumulateOpBounds(bounds, flags);
   // TODO(https://github.com/flutter/flutter/issues/82202): Remove once the
   // unit tests can use Fuchsia's font manager instead of the empty default.
@@ -1752,7 +1717,7 @@ void DisplayListBuilder::drawTextFrame(
   unclipped = true;
 #endif  // OS_FUCHSIA
   if (unclipped) {
-    Push<DrawTextFrameOp>(0, text_frame, x, y);
+    Push<DrawTextOp>(0, text, x, y);
     // There is no way to query if the glyphs of a text blob overlap and
     // there are no current guarantees from either Skia or Impeller that
     // they will protect overlapping glyphs from the effects of overdraw
@@ -1763,13 +1728,12 @@ void DisplayListBuilder::drawTextFrame(
   }
 }
 
-void DisplayListBuilder::DrawTextFrame(
-    const std::shared_ptr<impeller::TextFrame>& text_frame,
-    DlScalar x,
-    DlScalar y,
-    const DlPaint& paint) {
-  SetAttributesFromPaint(paint, DisplayListOpFlags::kDrawTextBlobFlags);
-  drawTextFrame(text_frame, x, y);
+void DisplayListBuilder::DrawText(const std::shared_ptr<DlText>& text,
+                                  DlScalar x,
+                                  DlScalar y,
+                                  const DlPaint& paint) {
+  SetAttributesFromPaint(paint, DisplayListOpFlags::kDrawTextFlags);
+  drawText(text, x, y);
 }
 
 void DisplayListBuilder::DrawShadow(const DlPath& path,
@@ -1801,7 +1765,6 @@ bool DisplayListBuilder::AdjustBoundsForPaint(DlRect& bounds,
   if (flags.is_geometric()) {
     bool is_stroked = flags.is_stroked(current_.getDrawStyle());
 
-    // Path effect occurs before stroking...
     DisplayListSpecialGeometryFlags special_flags =
         flags.GeometryFlags(is_stroked);
 
@@ -1823,7 +1786,7 @@ bool DisplayListBuilder::AdjustBoundsForPaint(DlRect& bounds,
   }
 
   if (flags.applies_mask_filter()) {
-    auto filter = current_.getMaskFilter();
+    const DlMaskFilter* filter = current_.getMaskFilterPtr();
     if (filter) {
       switch (filter->type()) {
         case DlMaskFilterType::kBlur: {
@@ -1841,7 +1804,7 @@ bool DisplayListBuilder::AdjustBoundsForPaint(DlRect& bounds,
   // a layer.
 
   if (flags.applies_image_filter()) {
-    auto filter = current_.getImageFilterPtr();
+    const DlImageFilter* filter = current_.getImageFilterPtr();
     if (filter) {
       DlRect dl_bounds;
       if (!filter->map_local_bounds(bounds, dl_bounds)) {

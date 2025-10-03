@@ -162,6 +162,27 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
         CustomAccessibilityActionUpdates actions) = 0;
 
     //--------------------------------------------------------------------------
+    /// @brief      Framework sets the application locale.
+    ///
+    /// @param[in]  locale  The application locale in BCP 47 format.
+    ///
+    virtual void OnEngineSetApplicationLocale(std::string locale) = 0;
+
+    //--------------------------------------------------------------------------
+    /// @brief      When the Framework starts or stops generating semantics
+    /// tree,
+    ///             this new information needs to be conveyed to the underlying
+    ///             platform so that they can prepare to accept semantics
+    ///             update. The engine delegates this task to the shell via this
+    ///             call.
+    ///
+    /// @see        `OnEngineUpdateSemantics`
+    ///
+    /// @param[in]  enabled  whether Framework starts generating semantics tree.
+    ///
+    virtual void OnEngineSetSemanticsTreeEnabled(bool enabled) = 0;
+
+    //--------------------------------------------------------------------------
     /// @brief      When the Flutter application has a message to send to the
     ///             underlying platform, the message needs to be forwarded to
     ///             the platform on the appropriate thread (via the platform
@@ -599,13 +620,6 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   void NotifyIdle(fml::TimeDelta deadline);
 
   //----------------------------------------------------------------------------
-  /// @brief      Notifies the engine that the attached flutter view has been
-  ///             destroyed.
-  ///             This enables the engine to notify the Dart VM so it can do
-  ///             some cleanp activities.
-  void NotifyDestroyed();
-
-  //----------------------------------------------------------------------------
   /// @brief      Dart code cannot fully measure the time it takes for a
   ///             specific frame to be rendered. This is because Dart code only
   ///             runs on the UI task runner. That is only a small part of the
@@ -903,6 +917,11 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   const std::string& GetLastEntrypoint() const;
 
   //----------------------------------------------------------------------------
+  /// @brief      Get the last Engine Id that was used in the RunConfiguration
+  ///             when |Engine::Run| was called.
+  std::optional<int64_t> GetLastEngineId() const;
+
+  //----------------------------------------------------------------------------
   /// @brief      Get the last Entrypoint Library that was used in the
   ///             RunConfiguration when |Engine::Run| was called.
   ///
@@ -1018,6 +1037,12 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
                        CustomAccessibilityActionUpdates actions) override;
 
   // |RuntimeDelegate|
+  void SetApplicationLocale(std::string locale) override;
+
+  // |RuntimeDelegate|
+  void SetSemanticsTreeEnabled(bool enabled) override;
+
+  // |RuntimeDelegate|
   void HandlePlatformMessage(std::unique_ptr<PlatformMessage> message) override;
 
   // |RuntimeDelegate|
@@ -1078,6 +1103,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   std::string last_entry_point_;
   std::string last_entry_point_library_;
   std::vector<std::string> last_entry_point_args_;
+  std::optional<int64_t> last_engine_id_;
   std::string initial_route_;
   std::shared_ptr<AssetManager> asset_manager_;
   std::shared_ptr<FontCollection> font_collection_;

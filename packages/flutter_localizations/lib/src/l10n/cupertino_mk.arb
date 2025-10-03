@@ -29,5 +29,11 @@
   "shareButtonLabel": "Споделете...",
   "clearButtonLabel": "Избриши",
   "cancelButtonLabel": "Откажи",
-  "backButtonLabel": "Назад"
+  "backButtonLabel": "Назад",
+  "expansionTileExpandedHint": "допрете двапати за собирање",
+  "expansionTileCollapsedHint": "допри двапати за проширување",
+  "expansionTileExpandedTapHint": "собирање",
+  "expansionTileCollapsedTapHint": "проширување за повеќе детали",
+  "expandedHint": "Собрано",
+  "collapsedHint": "Проширено"
 }

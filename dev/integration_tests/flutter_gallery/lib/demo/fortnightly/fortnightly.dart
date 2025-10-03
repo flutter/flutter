@@ -70,15 +70,18 @@ class ShortAppBar extends StatelessWidget {
 class FruitPage extends StatelessWidget {
   const FruitPage({super.key});
 
-  static final String paragraph1 = '''
+  static final String paragraph1 =
+      '''
 Have you ever held a quince? It's strange;
 covered in a fuzz somewhere between peach skin and a spider web. And it's
 hard as soft lumber. You'd be forgiven for thinking it's veneered Larch-wood.
 But inhale the aroma and you'll instantly know you have something wonderful.
 Its scent can fill a room for days. And all this before you've even cooked it.
-'''.replaceAll('\n', ' ');
+'''
+          .replaceAll('\n', ' ');
 
-  static final String paragraph2 = '''
+  static final String paragraph2 =
+      '''
 Pomegranates on the other hand have become
 almost ubiquitous. You can find its juice in any bodega, Walmart, and even some
 gas stations. But at what cost? The pomegranate juice craze of the aughts made
@@ -86,7 +89,8 @@ gas stations. But at what cost? The pomegranate juice craze of the aughts made
 of water to make that much pomegranate juice. Water the Resnicks get from their
 majority stake in the Kern Water Bank. How did one family come to hold control
 over water meant for the whole central valley of California? The story will shock you.
-'''.replaceAll('\n', ' ');
+'''
+          .replaceAll('\n', ' ');
 
   @override
   Widget build(BuildContext context) {

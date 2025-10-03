@@ -493,8 +493,9 @@ abstract class ScrollView extends StatelessWidget {
         primary ??
         controller == null && PrimaryScrollController.shouldInherit(context, scrollDirection);
 
-    final ScrollController? scrollController =
-        effectivePrimary ? PrimaryScrollController.maybeOf(context) : controller;
+    final ScrollController? scrollController = effectivePrimary
+        ? PrimaryScrollController.maybeOf(context)
+        : controller;
 
     final Scrollable scrollable = Scrollable(
       dragStartBehavior: dragStartBehavior,
@@ -511,11 +512,10 @@ abstract class ScrollView extends StatelessWidget {
       clipBehavior: clipBehavior,
     );
 
-    final Widget scrollableResult =
-        effectivePrimary && scrollController != null
-            // Further descendant ScrollViews will not inherit the same PrimaryScrollController
-            ? PrimaryScrollController.none(child: scrollable)
-            : scrollable;
+    final Widget scrollableResult = effectivePrimary && scrollController != null
+        // Further descendant ScrollViews will not inherit the same PrimaryScrollController
+        ? PrimaryScrollController.none(child: scrollable)
+        : scrollable;
 
     final ScrollViewKeyboardDismissBehavior effectiveKeyboardDismissBehavior =
         keyboardDismissBehavior ??
@@ -879,17 +879,15 @@ abstract class BoxScrollView extends ScrollView {
           right: 0.0,
         );
         // Consume the main axis padding with SliverPadding.
-        effectivePadding =
-            scrollDirection == Axis.vertical
-                ? mediaQueryVerticalPadding
-                : mediaQueryHorizontalPadding;
+        effectivePadding = scrollDirection == Axis.vertical
+            ? mediaQueryVerticalPadding
+            : mediaQueryHorizontalPadding;
         // Leave behind the cross axis padding.
         sliver = MediaQuery(
           data: mediaQuery.copyWith(
-            padding:
-                scrollDirection == Axis.vertical
-                    ? mediaQueryHorizontalPadding
-                    : mediaQueryVerticalPadding,
+            padding: scrollDirection == Axis.vertical
+                ? mediaQueryHorizontalPadding
+                : mediaQueryVerticalPadding,
           ),
           child: sliver,
         );

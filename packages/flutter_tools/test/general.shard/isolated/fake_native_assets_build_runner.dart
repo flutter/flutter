@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:code_assets/code_assets.dart';
+import 'package:data_assets/data_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
+import 'package:flutter_tools/src/isolated/native_assets/targets.dart';
 import 'package:hooks/hooks.dart';
 import 'package:hooks_runner/hooks_runner.dart';
 
@@ -18,8 +20,6 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
     this.onLink,
     this.buildResult = const FakeFlutterNativeAssetsBuilderResult(),
     this.linkResult = const FakeFlutterNativeAssetsBuilderResult(),
-    this.cCompilerConfigResult,
-    this.ndkCCompilerConfigResult,
   });
 
   // TODO(dcharkes): Cleanup this fake https://github.com/flutter/flutter/issues/162061
@@ -28,12 +28,10 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
   final BuildResult? buildResult;
   final LinkResult? linkResult;
   final List<String> packagesWithNativeAssetsResult;
-  final CCompilerConfig? cCompilerConfigResult;
-  final CCompilerConfig? ndkCCompilerConfigResult;
 
-  int buildInvocations = 0;
-  int linkInvocations = 0;
-  int packagesWithNativeAssetsInvocations = 0;
+  var buildInvocations = 0;
+  var linkInvocations = 0;
+  var packagesWithNativeAssetsInvocations = 0;
 
   @override
   Future<BuildResult?> build({
@@ -42,20 +40,19 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
   }) async {
     BuildResult? result = buildResult;
     for (final String package in packagesWithNativeAssetsResult) {
-      final BuildInputBuilder input =
-          BuildInputBuilder()
-            ..setupShared(
-              packageRoot: Uri.parse('$package/'),
-              packageName: package,
-              outputDirectoryShared: Uri.parse('build-out-dir-shared'),
-              outputFile: Uri.file('output.json'),
-            )
-            ..setupBuildInput()
-            ..config.setupBuild(linkingEnabled: linkingEnabled);
-      for (final ProtocolExtension extension in extensions) {
+      final input = BuildInputBuilder()
+        ..setupShared(
+          packageRoot: Uri.parse('$package/'),
+          packageName: package,
+          outputDirectoryShared: Uri.parse('build-out-dir-shared'),
+          outputFile: Uri.file('output.json'),
+        )
+        ..setupBuildInput()
+        ..config.setupBuild(linkingEnabled: linkingEnabled);
+      for (final extension in extensions) {
         extension.setupBuildInput(input);
       }
-      final BuildInput buildConfig = BuildInput(input.json);
+      final buildConfig = BuildInput(input.json);
       if (onBuild != null) {
         result = onBuild!(buildConfig);
       }
@@ -71,19 +68,22 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
   }) async {
     LinkResult? result = linkResult;
     for (final String package in packagesWithNativeAssetsResult) {
-      final LinkInputBuilder input =
-          LinkInputBuilder()
-            ..setupShared(
-              packageRoot: Uri.parse('$package/'),
-              packageName: package,
-              outputDirectoryShared: Uri.parse('build-out-dir-shared'),
-              outputFile: Uri.file('output.json'),
-            )
-            ..setupLink(assets: buildResult.encodedAssets, recordedUsesFile: null);
-      for (final ProtocolExtension extension in extensions) {
+      final input = LinkInputBuilder()
+        ..setupShared(
+          packageRoot: Uri.parse('$package/'),
+          packageName: package,
+          outputDirectoryShared: Uri.parse('build-out-dir-shared'),
+          outputFile: Uri.file('output.json'),
+        )
+        ..setupLink(
+          assets: buildResult.encodedAssets,
+          recordedUsesFile: null,
+          assetsFromLinking: [],
+        );
+      for (final extension in extensions) {
         extension.setupLinkInput(input);
       }
-      final LinkInput buildConfig = LinkInput(input.json);
+      final buildConfig = LinkInput(input.json);
       if (onLink != null) {
         result = onLink!(buildConfig);
       }
@@ -98,11 +98,19 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
     return packagesWithNativeAssetsResult;
   }
 
-  @override
-  Future<CCompilerConfig?> get cCompilerConfig async => cCompilerConfigResult;
+  CCompilerConfig? get cCompilerConfigResult => null;
+  CCompilerConfig? get ndkCCompilerConfigResult => null;
 
   @override
-  Future<CCompilerConfig?> get ndkCCompilerConfig async => cCompilerConfigResult;
+  Future<void> setCCompilerConfig(CodeAssetTarget target) async {
+    if (target is AndroidAssetTarget) {
+      target.cCompilerConfigSync = ndkCCompilerConfigResult;
+    } else if (target is FlutterTesterAssetTarget) {
+      target.subtarget.cCompilerConfigSync = cCompilerConfigResult;
+    } else {
+      target.cCompilerConfigSync = cCompilerConfigResult;
+    }
+  }
 }
 
 final class FakeFlutterNativeAssetsBuilderResult implements BuildResult, LinkResult {
@@ -114,17 +122,24 @@ final class FakeFlutterNativeAssetsBuilderResult implements BuildResult, LinkRes
 
   factory FakeFlutterNativeAssetsBuilderResult.fromAssets({
     List<CodeAsset> codeAssets = const <CodeAsset>[],
+    List<DataAsset> dataAssets = const <DataAsset>[],
     Map<String, List<CodeAsset>> codeAssetsForLinking = const <String, List<CodeAsset>>{},
+    Map<String, List<DataAsset>> dataAssetsForLinking = const <String, List<DataAsset>>{},
     List<Uri> dependencies = const <Uri>[],
   }) {
     return FakeFlutterNativeAssetsBuilderResult(
       encodedAssets: <EncodedAsset>[
         for (final CodeAsset codeAsset in codeAssets) codeAsset.encode(),
+        for (final DataAsset dataAsset in dataAssets) dataAsset.encode(),
       ],
       encodedAssetsForLinking: <String, List<EncodedAsset>>{
         for (final String linkerName in codeAssetsForLinking.keys)
           linkerName: <EncodedAsset>[
             for (final CodeAsset codeAsset in codeAssetsForLinking[linkerName]!) codeAsset.encode(),
+          ],
+        for (final String linkerName in dataAssetsForLinking.keys)
+          linkerName: <EncodedAsset>[
+            for (final DataAsset dataAsset in dataAssetsForLinking[linkerName]!) dataAsset.encode(),
           ],
       },
       dependencies: dependencies,

@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		0D1CE5D8233430F400E5D880 /* FlutterChannelsTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D1CE5D7233430F400E5D880 /* FlutterChannelsTest.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		0D48E9ED2DCE7B16005474A1 /* Flutter.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0D48E9EC2DCE7B16005474A1 /* Flutter.storyboard */; };
+		0D48E9EE2DCE7B16005474A1 /* Flutter.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0D48E9EC2DCE7B16005474A1 /* Flutter.storyboard */; };
 		0D6AB6B622BB05E100EEE540 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D6AB6B522BB05E100EEE540 /* AppDelegate.m */; };
 		0D6AB6B922BB05E100EEE540 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D6AB6B822BB05E100EEE540 /* ViewController.m */; };
 		0D6AB6BC22BB05E100EEE540 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0D6AB6BA22BB05E100EEE540 /* Main.storyboard */; };
@@ -55,6 +57,7 @@
 		0AC2331924BA71D300A85907 /* FlutterPluginAppLifeCycleDelegateTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterPluginAppLifeCycleDelegateTest.mm; sourceTree = "<group>"; };
 		0AC2332124BA71D300A85907 /* FlutterViewControllerTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterViewControllerTest.mm; sourceTree = "<group>"; };
 		0D1CE5D7233430F400E5D880 /* FlutterChannelsTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FlutterChannelsTest.m; sourceTree = "<group>"; };
+		0D48E9EC2DCE7B16005474A1 /* Flutter.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Flutter.storyboard; sourceTree = "<group>"; };
 		0D6AB6B122BB05E100EEE540 /* IosUnitTests.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = IosUnitTests.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0D6AB6B422BB05E100EEE540 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		0D6AB6B522BB05E100EEE540 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -71,6 +74,9 @@
 		3DD7D38C27D2B81000DA365C /* FlutterUndoManagerPluginTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterUndoManagerPluginTest.mm; sourceTree = "<group>"; };
 		689EC1E2281B30D3008FEB58 /* FlutterSpellCheckPluginTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterSpellCheckPluginTest.mm; sourceTree = "<group>"; };
 		68B6091227F62F990036AC78 /* VsyncWaiterIosTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = VsyncWaiterIosTest.mm; sourceTree = "<group>"; };
+		7802C4F12E67A0CC002C7D6D /* FlutterSceneDelegateTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FlutterSceneDelegateTest.m; sourceTree = "<group>"; };
+		78136AF72E68D14D00900DCE /* FlutterSceneLifeCycleTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterSceneLifeCycleTest.mm; sourceTree = "<group>"; };
+		78A9D2512E6F56DA00BEE2FC /* FlutterViewTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterViewTest.mm; sourceTree = "<group>"; };
 		78E4ED342D88A77C00FD954E /* FlutterSharedApplicationTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterSharedApplicationTest.mm; sourceTree = "<group>"; };
 		D2D361A52B234EAC0018964E /* FlutterMetalLayerTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterMetalLayerTest.mm; sourceTree = "<group>"; };
 		F7521D7226BB671E005F15C5 /* libios_test_flutter.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libios_test_flutter.dylib; path = "../../../../out/$(FLUTTER_ENGINE)/libios_test_flutter.dylib"; sourceTree = "<group>"; };
@@ -101,6 +107,8 @@
 		0AC232E924BA71D300A85907 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				78136AF72E68D14D00900DCE /* FlutterSceneLifeCycleTest.mm */,
+				7802C4F12E67A0CC002C7D6D /* FlutterSceneDelegateTest.m */,
 				78E4ED342D88A77C00FD954E /* FlutterSharedApplicationTest.mm */,
 				F76A3A892BE48F2F00A654F1 /* FlutterPlatformViewsTest.mm */,
 				689EC1E2281B30D3008FEB58 /* FlutterSpellCheckPluginTest.mm */,
@@ -109,6 +117,7 @@
 				F7A3FDE026B9E0A300EADD61 /* FlutterAppDelegateTest.mm */,
 				0AC232F424BA71D300A85907 /* SemanticsObjectTest.mm */,
 				0AC232F724BA71D300A85907 /* FlutterEngineTest.mm */,
+				78A9D2512E6F56DA00BEE2FC /* FlutterViewTest.mm */,
 				0AC2330324BA71D300A85907 /* accessibility_bridge_test.mm */,
 				0AC2330B24BA71D300A85907 /* FlutterTextInputPluginTest.mm */,
 				0AC2331024BA71D300A85907 /* connection_collection_test.mm */,
@@ -162,6 +171,7 @@
 				0D6AB6BF22BB05E200EEE540 /* LaunchScreen.storyboard */,
 				0D6AB6C222BB05E200EEE540 /* Info.plist */,
 				0D6AB6C322BB05E200EEE540 /* main.m */,
+				0D48E9EC2DCE7B16005474A1 /* Flutter.storyboard */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -270,6 +280,7 @@
 				0D6AB6C122BB05E200EEE540 /* LaunchScreen.storyboard in Resources */,
 				0D6AB6BE22BB05E200EEE540 /* Assets.xcassets in Resources */,
 				0D6AB6BC22BB05E100EEE540 /* Main.storyboard in Resources */,
+				0D48E9ED2DCE7B16005474A1 /* Flutter.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -277,6 +288,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0D48E9EE2DCE7B16005474A1 /* Flutter.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

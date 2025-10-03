@@ -77,10 +77,10 @@ TEST(FlAccessibleNodeTest, SetFlags) {
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 123, 0);
-  fl_accessible_node_set_flags(
-      node, static_cast<FlutterSemanticsFlag>(kFlutterSemanticsFlagIsEnabled |
-                                              kFlutterSemanticsFlagIsFocusable |
-                                              kFlutterSemanticsFlagIsFocused));
+  FlutterSemanticsFlags flags = {};
+  flags.is_enabled = kFlutterTristateTrue;
+  flags.is_focused = kFlutterTristateTrue;
+  fl_accessible_node_set_flags(node, &flags);
 
   AtkStateSet* state = atk_object_ref_state_set(ATK_OBJECT(node));
   EXPECT_TRUE(atk_state_set_contains_state(state, ATK_STATE_ENABLED));
@@ -98,30 +98,36 @@ TEST(FlAccessibleNodeTest, GetRole) {
 
   g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 123, 0);
 
-  fl_accessible_node_set_flags(
-      node, static_cast<FlutterSemanticsFlag>(kFlutterSemanticsFlagIsButton));
+  FlutterSemanticsFlags flags1 = {};
+  flags1.is_button = true;
+  fl_accessible_node_set_flags(node, &flags1);
   EXPECT_EQ(atk_object_get_role(ATK_OBJECT(node)), ATK_ROLE_PUSH_BUTTON);
 
-  fl_accessible_node_set_flags(node, static_cast<FlutterSemanticsFlag>(
-                                         kFlutterSemanticsFlagHasCheckedState));
+  FlutterSemanticsFlags flags2 = {};
+  flags2.is_checked = kFlutterCheckStateFalse;
+  fl_accessible_node_set_flags(node, &flags2);
   EXPECT_EQ(atk_object_get_role(ATK_OBJECT(node)), ATK_ROLE_CHECK_BOX);
 
-  fl_accessible_node_set_flags(
-      node, static_cast<FlutterSemanticsFlag>(
-                kFlutterSemanticsFlagHasCheckedState |
-                kFlutterSemanticsFlagIsInMutuallyExclusiveGroup));
+  FlutterSemanticsFlags flags3 = {};
+  flags3.is_checked = kFlutterCheckStateFalse;
+  flags3.is_in_mutually_exclusive_group = true;
+  fl_accessible_node_set_flags(node, &flags3);
   EXPECT_EQ(atk_object_get_role(ATK_OBJECT(node)), ATK_ROLE_RADIO_BUTTON);
 
-  fl_accessible_node_set_flags(node, static_cast<FlutterSemanticsFlag>(
-                                         kFlutterSemanticsFlagHasToggledState));
+  FlutterSemanticsFlags flags4 = {};
+  flags4.is_toggled = kFlutterTristateFalse;
+  fl_accessible_node_set_flags(node, &flags4);
   EXPECT_EQ(atk_object_get_role(ATK_OBJECT(node)), ATK_ROLE_TOGGLE_BUTTON);
 
-  fl_accessible_node_set_flags(node, kFlutterSemanticsFlagIsTextField);
+  FlutterSemanticsFlags flags5 = {};
+  flags5.is_text_field = true;
+  fl_accessible_node_set_flags(node, &flags5);
   EXPECT_EQ(atk_object_get_role(ATK_OBJECT(node)), ATK_ROLE_TEXT);
 
-  fl_accessible_node_set_flags(
-      node, static_cast<FlutterSemanticsFlag>(kFlutterSemanticsFlagIsTextField |
-                                              kFlutterSemanticsFlagIsObscured));
+  FlutterSemanticsFlags flags6 = {};
+  flags6.is_text_field = true;
+  flags6.is_obscured = true;
+  fl_accessible_node_set_flags(node, &flags6);
   EXPECT_EQ(atk_object_get_role(ATK_OBJECT(node)), ATK_ROLE_PASSWORD_TEXT);
 }
 

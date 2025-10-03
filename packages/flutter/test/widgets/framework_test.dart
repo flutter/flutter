@@ -75,7 +75,10 @@ void main() {
         Stack(
           textDirection: TextDirection.ltr,
           children: <Widget>[
-            Container(key: const ValueKey<int>(1), child: SizedBox(key: key)),
+            Container(
+              key: const ValueKey<int>(1),
+              child: SizedBox(key: key),
+            ),
             LayoutBuilder(
               key: const ValueKey<int>(2),
               builder: (BuildContext context, BoxConstraints constraints) {
@@ -125,7 +128,10 @@ void main() {
         Stack(
           textDirection: TextDirection.ltr,
           children: <Widget>[
-            Container(key: const ValueKey<int>(1), child: SizedBox(key: key)),
+            Container(
+              key: const ValueKey<int>(1),
+              child: SizedBox(key: key),
+            ),
             LayoutBuilder(
               key: const ValueKey<int>(2),
               builder: (BuildContext context, BoxConstraints constraints) {
@@ -151,7 +157,9 @@ void main() {
           builder: (BuildContext context, BoxConstraints constraints) {
             return Column(
               children: <Widget>[
-                _Stateful(child: Text('Text1', textDirection: TextDirection.ltr, key: key1)),
+                _Stateful(
+                  child: Text('Text1', textDirection: TextDirection.ltr, key: key1),
+                ),
                 _Stateful(
                   child: Text('Text2', textDirection: TextDirection.ltr, key: key2),
                   onElementRebuild: (StatefulElement element) {
@@ -225,7 +233,9 @@ void main() {
           builder: (BuildContext context, BoxConstraints constraints) {
             return Column(
               children: <Widget>[
-                const _Stateful(child: Text('Text1', textDirection: TextDirection.ltr, key: key1)),
+                const _Stateful(
+                  child: Text('Text1', textDirection: TextDirection.ltr, key: key1),
+                ),
                 _Stateful(
                   child: const Text('Text2', textDirection: TextDirection.ltr, key: key2),
                   onElementRebuild: (StatefulElement element) {
@@ -235,7 +245,9 @@ void main() {
                     rebuiltKeyOfSecondChildBeforeLayout = statefulWidget.child.key;
                   },
                 ),
-                const _Stateful(child: Text('Text3', textDirection: TextDirection.ltr, key: key3)),
+                const _Stateful(
+                  child: Text('Text3', textDirection: TextDirection.ltr, key: key3),
+                ),
               ],
             );
           },
@@ -253,7 +265,9 @@ void main() {
           builder: (BuildContext context, BoxConstraints constraints) {
             return Column(
               children: <Widget>[
-                const _Stateful(child: Text('Text1', textDirection: TextDirection.ltr, key: key1)),
+                const _Stateful(
+                  child: Text('Text1', textDirection: TextDirection.ltr, key: key1),
+                ),
                 _Stateful(
                   child: const Text('Text3', textDirection: TextDirection.ltr, key: key3),
                   onElementRebuild: (StatefulElement element) {
@@ -361,8 +375,14 @@ void main() {
       Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          Container(key: const ValueKey<int>(1), child: SizedBox(key: key)),
-          Container(key: const ValueKey<int>(2), child: Placeholder(key: key)),
+          Container(
+            key: const ValueKey<int>(1),
+            child: SizedBox(key: key),
+          ),
+          Container(
+            key: const ValueKey<int>(2),
+            child: Placeholder(key: key),
+          ),
         ],
       ),
     );
@@ -382,8 +402,8 @@ void main() {
 
   testWidgets(
     'GlobalKey duplication 2 - splitting and changing type',
-    experimentalLeakTesting:
-        LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
       final Key key = GlobalKey(debugLabel: 'problematic');
 
@@ -402,8 +422,14 @@ void main() {
         Stack(
           textDirection: TextDirection.ltr,
           children: <Widget>[
-            Container(key: const ValueKey<int>(1), child: SizedBox(key: key)),
-            Container(key: const ValueKey<int>(2), child: Placeholder(key: key)),
+            Container(
+              key: const ValueKey<int>(1),
+              child: SizedBox(key: key),
+            ),
+            Container(
+              key: const ValueKey<int>(2),
+              child: Placeholder(key: key),
+            ),
           ],
         ),
       );
@@ -425,17 +451,23 @@ void main() {
 
   testWidgets(
     'GlobalKey duplication 3 - splitting and changing type',
-    experimentalLeakTesting:
-        LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
       final Key key = GlobalKey(debugLabel: 'problematic');
       await tester.pumpWidget(
-        Stack(textDirection: TextDirection.ltr, children: <Widget>[Container(key: key)]),
+        Stack(
+          textDirection: TextDirection.ltr,
+          children: <Widget>[Container(key: key)],
+        ),
       );
       await tester.pumpWidget(
         Stack(
           textDirection: TextDirection.ltr,
-          children: <Widget>[SizedBox(key: key), Placeholder(key: key)],
+          children: <Widget>[
+            SizedBox(key: key),
+            Placeholder(key: key),
+          ],
         ),
       );
       final dynamic exception = tester.takeException();
@@ -453,17 +485,23 @@ void main() {
 
   testWidgets(
     'GlobalKey duplication 4 - splitting and half changing type',
-    experimentalLeakTesting:
-        LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
       final Key key = GlobalKey(debugLabel: 'problematic');
       await tester.pumpWidget(
-        Stack(textDirection: TextDirection.ltr, children: <Widget>[Container(key: key)]),
+        Stack(
+          textDirection: TextDirection.ltr,
+          children: <Widget>[Container(key: key)],
+        ),
       );
       await tester.pumpWidget(
         Stack(
           textDirection: TextDirection.ltr,
-          children: <Widget>[Container(key: key), Placeholder(key: key)],
+          children: <Widget>[
+            Container(key: key),
+            Placeholder(key: key),
+          ],
         ),
       );
       final dynamic exception = tester.takeException();
@@ -481,17 +519,23 @@ void main() {
 
   testWidgets(
     'GlobalKey duplication 5 - splitting and half changing type',
-    experimentalLeakTesting:
-        LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
       final Key key = GlobalKey(debugLabel: 'problematic');
       await tester.pumpWidget(
-        Stack(textDirection: TextDirection.ltr, children: <Widget>[Container(key: key)]),
+        Stack(
+          textDirection: TextDirection.ltr,
+          children: <Widget>[Container(key: key)],
+        ),
       );
       await tester.pumpWidget(
         Stack(
           textDirection: TextDirection.ltr,
-          children: <Widget>[Placeholder(key: key), Container(key: key)],
+          children: <Widget>[
+            Placeholder(key: key),
+            Container(key: key),
+          ],
         ),
       );
       expect(tester.takeException(), isFlutterError);
@@ -500,17 +544,23 @@ void main() {
 
   testWidgets(
     'GlobalKey duplication 6 - splitting and not changing type',
-    experimentalLeakTesting:
-        LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
       final Key key = GlobalKey(debugLabel: 'problematic');
       await tester.pumpWidget(
-        Stack(textDirection: TextDirection.ltr, children: <Widget>[Container(key: key)]),
+        Stack(
+          textDirection: TextDirection.ltr,
+          children: <Widget>[Container(key: key)],
+        ),
       );
       await tester.pumpWidget(
         Stack(
           textDirection: TextDirection.ltr,
-          children: <Widget>[Container(key: key), Container(key: key)],
+          children: <Widget>[
+            Container(key: key),
+            Container(key: key),
+          ],
         ),
       );
       expect(tester.takeException(), isFlutterError);
@@ -523,7 +573,10 @@ void main() {
       Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          Container(key: const ValueKey<int>(1), child: Container(key: key)),
+          Container(
+            key: const ValueKey<int>(1),
+            child: Container(key: key),
+          ),
           Container(key: const ValueKey<int>(2)),
         ],
       ),
@@ -532,8 +585,14 @@ void main() {
       Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          Container(key: const ValueKey<int>(1), child: Container(key: key)),
-          Container(key: const ValueKey<int>(2), child: Container(key: key)),
+          Container(
+            key: const ValueKey<int>(1),
+            child: Container(key: key),
+          ),
+          Container(
+            key: const ValueKey<int>(2),
+            child: Container(key: key),
+          ),
         ],
       ),
     );
@@ -547,7 +606,10 @@ void main() {
         textDirection: TextDirection.ltr,
         children: <Widget>[
           Container(key: const ValueKey<int>(1)),
-          Container(key: const ValueKey<int>(2), child: Container(key: key)),
+          Container(
+            key: const ValueKey<int>(2),
+            child: Container(key: key),
+          ),
         ],
       ),
     );
@@ -555,8 +617,14 @@ void main() {
       Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          Container(key: const ValueKey<int>(1), child: Container(key: key)),
-          Container(key: const ValueKey<int>(2), child: Container(key: key)),
+          Container(
+            key: const ValueKey<int>(1),
+            child: Container(key: key),
+          ),
+          Container(
+            key: const ValueKey<int>(2),
+            child: Container(key: key),
+          ),
         ],
       ),
     );
@@ -569,7 +637,10 @@ void main() {
       Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          Container(key: const ValueKey<int>(0), child: Container(key: key)),
+          Container(
+            key: const ValueKey<int>(0),
+            child: Container(key: key),
+          ),
           Container(key: const ValueKey<int>(1)),
           Container(key: const ValueKey<int>(2)),
         ],
@@ -580,8 +651,14 @@ void main() {
         textDirection: TextDirection.ltr,
         children: <Widget>[
           Container(key: const ValueKey<int>(0)),
-          Container(key: const ValueKey<int>(1), child: Container(key: key)),
-          Container(key: const ValueKey<int>(2), child: Container(key: key)),
+          Container(
+            key: const ValueKey<int>(1),
+            child: Container(key: key),
+          ),
+          Container(
+            key: const ValueKey<int>(2),
+            child: Container(key: key),
+          ),
         ],
       ),
     );
@@ -598,7 +675,10 @@ void main() {
         children: <Widget>[
           Container(key: const ValueKey<int>(1)),
           Container(key: const ValueKey<int>(2)),
-          Container(key: const ValueKey<int>(3), child: Container(key: key)),
+          Container(
+            key: const ValueKey<int>(3),
+            child: Container(key: key),
+          ),
         ],
       ),
     );
@@ -606,8 +686,14 @@ void main() {
       Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          Container(key: const ValueKey<int>(1), child: Container(key: key)),
-          Container(key: const ValueKey<int>(2), child: Container(key: key)),
+          Container(
+            key: const ValueKey<int>(1),
+            child: Container(key: key),
+          ),
+          Container(
+            key: const ValueKey<int>(2),
+            child: Container(key: key),
+          ),
           Container(key: const ValueKey<int>(3)),
         ],
       ),
@@ -620,7 +706,10 @@ void main() {
     await tester.pumpWidget(
       Stack(
         textDirection: TextDirection.ltr,
-        children: <Widget>[Container(key: key), Container(key: key)],
+        children: <Widget>[
+          Container(key: key),
+          Container(key: key),
+        ],
       ),
     );
     expect(tester.takeException(), isFlutterError);
@@ -655,7 +744,13 @@ void main() {
               Container(key: key2),
             ],
           ),
-          Row(children: <Widget>[Container(key: key1), Container(key: key1), Container(key: key3)]),
+          Row(
+            children: <Widget>[
+              Container(key: key1),
+              Container(key: key1),
+              Container(key: key3),
+            ],
+          ),
           Container(key: key3),
         ],
       ),
@@ -674,8 +769,8 @@ void main() {
 
   testWidgets(
     'GlobalKey duplication 13 - all kinds of badness at once',
-    experimentalLeakTesting:
-        LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
       final Key key1 = GlobalKey(debugLabel: 'problematic');
       final Key key2 = GlobalKey(debugLabel: 'problematic'); // intentionally the same label
@@ -683,7 +778,11 @@ void main() {
       await tester.pumpWidget(
         Stack(
           textDirection: TextDirection.ltr,
-          children: <Widget>[Container(key: key1), Container(key: key2), Container(key: key3)],
+          children: <Widget>[
+            Container(key: key1),
+            Container(key: key2),
+            Container(key: key3),
+          ],
         ),
       );
       await tester.pumpWidget(
@@ -710,7 +809,11 @@ void main() {
               ],
             ),
             Row(
-              children: <Widget>[Container(key: key1), Container(key: key1), Container(key: key3)],
+              children: <Widget>[
+                Container(key: key1),
+                Container(key: key1),
+                Container(key: key3),
+              ],
             ),
             Container(key: key3),
           ],
@@ -739,7 +842,10 @@ void main() {
         textDirection: TextDirection.ltr,
         children: <Widget>[
           Container(key: const ValueKey<int>(0)),
-          Container(key: const ValueKey<int>(1), child: Container(key: key)),
+          Container(
+            key: const ValueKey<int>(1),
+            child: Container(key: key),
+          ),
         ],
       ),
     );
@@ -765,7 +871,10 @@ void main() {
         children: <Widget>[
           Container(key: key),
           Container(key: const ValueKey<int>(0)),
-          Container(key: const ValueKey<int>(1), child: Container(key: key)),
+          Container(
+            key: const ValueKey<int>(1),
+            child: Container(key: key),
+          ),
         ],
       ),
     );
@@ -791,7 +900,10 @@ void main() {
         textDirection: TextDirection.ltr,
         children: <Widget>[
           Container(key: const ValueKey<int>(0)),
-          Container(key: const ValueKey<int>(1), child: Container(key: key)),
+          Container(
+            key: const ValueKey<int>(1),
+            child: Container(key: key),
+          ),
         ],
       ),
     );
@@ -822,7 +934,10 @@ void main() {
         textDirection: TextDirection.ltr,
         children: <Widget>[
           Container(key: const ValueKey<int>(0)),
-          Container(key: const ValueKey<int>(1), child: Container(key: key)),
+          Container(
+            key: const ValueKey<int>(1),
+            child: Container(key: key),
+          ),
           Container(key: key),
         ],
       ),
@@ -879,7 +994,10 @@ void main() {
       children: <Widget>[
         const SwapKeyWidget(childKey: ValueKey<int>(0)),
         Container(key: const ValueKey<int>(1)),
-        ColoredBox(color: Colors.green, child: SizedBox(key: key)),
+        ColoredBox(
+          color: Colors.green,
+          child: SizedBox(key: key),
+        ),
       ],
     );
     await tester.pumpWidget(stack);
@@ -913,7 +1031,9 @@ void main() {
           builder: (BuildContext context, BoxConstraints constraints) {
             return Column(
               children: <Widget>[
-                const _Stateful(child: Text('Text1', textDirection: TextDirection.ltr, key: key1)),
+                const _Stateful(
+                  child: Text('Text1', textDirection: TextDirection.ltr, key: key1),
+                ),
                 _Stateful(
                   child: const Text('Text2', textDirection: TextDirection.ltr, key: key2),
                   onElementRebuild: (StatefulElement element) {
@@ -1001,9 +1121,7 @@ void main() {
             child: CustomScrollView(
               controller: scrollController,
               slivers: <Widget>[
-                SliverList(
-                  delegate: SliverChildListDelegate(<Widget>[Text('child', key: GlobalKey())]),
-                ),
+                SliverList.list(children: <Widget>[Text('child', key: GlobalKey())]),
               ],
             ),
           ),
@@ -1314,7 +1432,10 @@ void main() {
 
     // reparent it - should call deactivate and didChangeDependencies
     await tester.pumpWidget(
-      Inherited(3, child: SizedBox(child: DependentStatefulWidget(key: key))),
+      Inherited(
+        3,
+        child: SizedBox(child: DependentStatefulWidget(key: key)),
+      ),
     );
     expect(key.currentState, isNotNull);
     expect(state.didChangeDependenciesCount, 3);
@@ -1498,8 +1619,8 @@ void main() {
 
   testWidgets(
     'A widget whose element has an invalid visitChildren implementation triggers a useful error message',
-    experimentalLeakTesting:
-        LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(_WidgetWithNoVisitChildren(_StatefulLeaf(key: key)));
@@ -1611,7 +1732,12 @@ void main() {
     expect(tester.binding.buildOwner!.globalKeyCount, initialCount + 1);
     await tester.pumpWidget(Container(key: key1, child: Container()));
     expect(tester.binding.buildOwner!.globalKeyCount, initialCount + 1);
-    await tester.pumpWidget(Container(key: key1, child: Container(key: key2)));
+    await tester.pumpWidget(
+      Container(
+        key: key1,
+        child: Container(key: key2),
+      ),
+    );
     expect(tester.binding.buildOwner!.globalKeyCount, initialCount + 2);
     await tester.pumpWidget(Container());
     expect(tester.binding.buildOwner!.globalKeyCount, initialCount + 0);
@@ -1641,13 +1767,18 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/96959.
     final LayerLink link = LayerLink();
     await tester.pumpWidget(
-      _TestLeaderLayerWidget(link: link, child: const _TestLeaderLayerWidget(child: Placeholder())),
+      _TestLeaderLayerWidget(
+        link: link,
+        child: const _TestLeaderLayerWidget(child: Placeholder()),
+      ),
     );
     expect(tester.takeException(), isNull);
 
     // Swaps the layer link.
     await tester.pumpWidget(
-      _TestLeaderLayerWidget(child: _TestLeaderLayerWidget(link: link, child: const Placeholder())),
+      _TestLeaderLayerWidget(
+        child: _TestLeaderLayerWidget(link: link, child: const Placeholder()),
+      ),
     );
     expect(tester.takeException(), isNull);
   });
@@ -1722,14 +1853,20 @@ void main() {
       Inherited(
         0,
         elementCreator: elementCreator,
-        child: Column(children: <Widget>[Builder(key: const Key('dependent'), builder: builder)]),
+        child: Column(
+          children: <Widget>[Builder(key: const Key('dependent'), builder: builder)],
+        ),
       ),
     );
 
     expect(removedDependentWidgetKeys, isEmpty);
 
     await tester.pumpWidget(
-      Inherited(0, elementCreator: elementCreator, child: Column(children: <Widget>[Container()])),
+      Inherited(
+        0,
+        elementCreator: elementCreator,
+        child: Column(children: <Widget>[Container()]),
+      ),
     );
 
     expect(removedDependentWidgetKeys, hasLength(1));
@@ -1813,7 +1950,13 @@ The findRenderObject() method was called for the following element:
     // Regression test for https://github.com/flutter/flutter/issues/120762.
     final GlobalKey globalKey = GlobalKey();
     await tester.pumpWidget(
-      Column(children: <Widget>[const SizedBox(), SizedBox(key: globalKey), const SizedBox()]),
+      Column(
+        children: <Widget>[
+          const SizedBox(),
+          SizedBox(key: globalKey),
+          const SizedBox(),
+        ],
+      ),
     );
     expect(tester.takeException(), isNull);
 
@@ -1932,6 +2075,71 @@ The findRenderObject() method was called for the following element:
       ),
     );
   });
+
+  testWidgets(
+    'widget is not active if throw in deactivated',
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
+    (WidgetTester tester) async {
+      final FlutterExceptionHandler? onError = FlutterError.onError;
+      FlutterError.onError = (_) {};
+      const Widget child = Placeholder();
+      await tester.pumpWidget(
+        StatefulWidgetSpy(onDeactivate: (_) => throw StateError('kaboom'), child: child),
+      );
+      final Element element = tester.element(find.byWidget(child));
+      assert(element.debugIsActive);
+
+      await tester.pumpWidget(const SizedBox());
+      FlutterError.onError = onError;
+      expect(element.debugIsActive, false);
+      expect(element.debugIsDefunct, false);
+    },
+  );
+
+  testWidgets(
+    'widget is not active if throw in activated',
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
+    (WidgetTester tester) async {
+      final FlutterExceptionHandler? onError = FlutterError.onError;
+      FlutterError.onError = (_) {};
+      const Widget child = Placeholder();
+      final Widget widget = StatefulWidgetSpy(
+        key: GlobalKey(),
+        onActivate: (_) => throw StateError('kaboom'),
+        child: child,
+      );
+      await tester.pumpWidget(widget);
+      final Element element = tester.element(find.byWidget(child));
+
+      await tester.pumpWidget(MetaData(child: widget));
+      FlutterError.onError = onError;
+      expect(element.debugIsActive, false);
+      expect(element.debugIsDefunct, false);
+    },
+  );
+
+  testWidgets(
+    'widget is unmounted if throw in dispose',
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
+    (WidgetTester tester) async {
+      final FlutterExceptionHandler? onError = FlutterError.onError;
+      FlutterError.onError = (_) {};
+      const Widget child = Placeholder();
+      final Widget widget = StatefulWidgetSpy(
+        onDispose: (_) => throw StateError('kaboom'),
+        child: child,
+      );
+      await tester.pumpWidget(widget);
+      final Element element = tester.element(find.byWidget(child));
+      await tester.pumpWidget(child);
+
+      FlutterError.onError = onError;
+      expect(element.debugIsDefunct, true);
+    },
+  );
 }
 
 class _TestInheritedElement extends InheritedElement {
@@ -2180,6 +2388,7 @@ class StatefulWidgetSpy extends StatefulWidget {
     this.onDeactivate,
     this.onActivate,
     this.onDidUpdateWidget,
+    this.child = const SizedBox(),
   });
 
   final void Function(BuildContext)? onBuild;
@@ -2189,6 +2398,7 @@ class StatefulWidgetSpy extends StatefulWidget {
   final void Function(BuildContext)? onDeactivate;
   final void Function(BuildContext)? onActivate;
   final void Function(BuildContext)? onDidUpdateWidget;
+  final Widget child;
 
   @override
   State<StatefulWidgetSpy> createState() => _StatefulWidgetSpyState();
@@ -2234,7 +2444,7 @@ class _StatefulWidgetSpyState extends State<StatefulWidgetSpy> {
   @override
   Widget build(BuildContext context) {
     widget.onBuild?.call(context);
-    return Container();
+    return widget.child;
   }
 }
 
@@ -2411,8 +2621,10 @@ class _DummyMultiChildElement extends Element {
 
     Element? previousChild;
     final List<Element> children = List<Element>.generate(childWidgets.length, (int i) {
-      final Element child =
-          previousChild = inflateWidget(childWidgets[i], IndexedSlot<Element?>(i, previousChild));
+      final Element child = previousChild = inflateWidget(
+        childWidgets[i],
+        IndexedSlot<Element?>(i, previousChild),
+      );
       return child;
     });
     _children = children;

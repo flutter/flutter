@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <UIKit/UIKit.h>
 #include "common/settings.h"
 #define FML_USED_ON_EMBEDDER
 
@@ -20,6 +21,7 @@
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/common/variable_refresh_rate_display.h"
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/common/command_line.h"
 #import "flutter/shell/platform/darwin/common/framework/Source/FlutterBinaryMessengerRelay.h"
 #import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
@@ -107,6 +109,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 @property(nonatomic, readonly, assign) BOOL restorationEnabled;
 
 @property(nonatomic, strong) FlutterPlatformViewsController* platformViewsController;
+@property(nonatomic, strong) FlutterEnginePluginSceneLifeCycleDelegate* sceneLifeCycleDelegate;
 
 // Maintains a dictionary of plugin names that have registered with the engine.  Used by
 // FlutterEngineRegistrar to implement a FlutterPluginRegistrar.
@@ -235,6 +238,8 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
                  name:NSCurrentLocaleDidChangeNotification
                object:nil];
 
+  self.sceneLifeCycleDelegate = [[FlutterEnginePluginSceneLifeCycleDelegate alloc] init];
+
   return self;
 }
 
@@ -245,6 +250,10 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 
 - (void)setUpLifecycleNotifications:(NSNotificationCenter*)center {
   // If the application is not available, use the scene for lifecycle notifications if available.
+  [center addObserver:self
+             selector:@selector(sceneWillConnect:)
+                 name:UISceneWillConnectNotification
+               object:nil];
   if (!FlutterSharedApplication.isAvailable) {
     [center addObserver:self
                selector:@selector(sceneWillEnterForeground:)
@@ -264,6 +273,23 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
              selector:@selector(applicationDidEnterBackground:)
                  name:UIApplicationDidEnterBackgroundNotification
                object:nil];
+}
+
+- (void)sceneWillConnect:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
+  UIScene* scene = notification.object;
+  if (!FlutterSharedApplication.application.supportsMultipleScenes) {
+    // Since there is only one scene, we can assume that the FlutterEngine is within this scene and
+    // register it to the scene.
+    // The FlutterEngine needs to be registered with the scene when the scene connects in order for
+    // plugins to receive the `scene:willConnectToSession:options` event.
+    // If we want to support multi-window on iPad later, we may need to add a way for deveopers to
+    // register their FlutterEngine to the scene manually during this event.
+    FlutterPluginSceneLifeCycleDelegate* sceneLifeCycleDelegate =
+        [FlutterPluginSceneLifeCycleDelegate fromScene:scene];
+    if (sceneLifeCycleDelegate != nil) {
+      return [sceneLifeCycleDelegate engine:self receivedConnectNotificationFor:scene];
+    }
+  }
 }
 
 - (void)recreatePlatformViewsController {
@@ -504,10 +530,6 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   _platformViewsController = nil;
 }
 
-- (NSURL*)observatoryUrl {
-  return self.publisher.url;
-}
-
 - (NSURL*)vmServiceUrl {
   return self.publisher.url;
 }
@@ -663,8 +685,8 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
     NSData* data = [NSData dataWithBytes:screenshot.data->writable_data()
                                   length:screenshot.data->size()];
     NSString* format = [NSString stringWithUTF8String:screenshot.format.c_str()];
-    NSNumber* width = @(screenshot.frame_size.fWidth);
-    NSNumber* height = @(screenshot.frame_size.fHeight);
+    NSNumber* width = @(screenshot.frame_size.width);
+    NSNumber* height = @(screenshot.frame_size.height);
     return result(@[ width, height, format ?: [NSNull null], data ]);
   }];
 }
@@ -796,7 +818,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
          libraryURI:(NSString*)libraryURI
        initialRoute:(NSString*)initialRoute {
   if (_shell != nullptr) {
-    FML_LOG(WARNING) << "This FlutterEngine was already invoked.";
+    [FlutterLogger logWarning:@"This FlutterEngine was already invoked."];
     return NO;
   }
 
@@ -851,7 +873,11 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   );
 
   // Disable GPU if the app or scene is running in the background.
-  self.isGpuDisabled = self.viewController.stateIsBackground;
+  self.isGpuDisabled = self.viewController
+                           ? self.viewController.stateIsBackground
+                           : FlutterSharedApplication.application &&
+                                 FlutterSharedApplication.application.applicationState ==
+                                     UIApplicationStateBackground;
 
   // Create the shell. This is a blocking operation.
   std::unique_ptr<flutter::Shell> shell = flutter::Shell::Create(
@@ -863,8 +889,9 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
       /*is_gpu_disabled=*/_isGpuDisabled);
 
   if (shell == nullptr) {
-    FML_LOG(ERROR) << "Could not start a shell FlutterEngine with entrypoint: "
-                   << entrypoint.UTF8String;
+    NSString* errorMessage = [NSString
+        stringWithFormat:@"Could not start a shell FlutterEngine with entrypoint: %@", entrypoint];
+    [FlutterLogger logError:errorMessage];
   } else {
     [self setUpShell:std::move(shell)
         withVMServicePublication:settings.enable_vm_service_publication];
@@ -1056,6 +1083,13 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
           lookUpSelectedText:(NSString*)selectedText {
   [self.platformPlugin showLookUpViewController:selectedText];
+}
+
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+    performContextMenuCustomActionWithActionID:(NSString*)actionID
+                               textInputClient:(int)client {
+  [self.platformChannel invokeMethod:@"ContextMenu.onPerformCustomAction"
+                           arguments:@[ @(client), actionID ]];
 }
 
 #pragma mark - FlutterViewEngineDelegate
@@ -1322,6 +1356,10 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   return _pluginPublications[pluginKey];
 }
 
+- (void)addSceneLifeCycleDelegate:(NSObject<FlutterSceneLifeCycleDelegate>*)delegate {
+  [self.sceneLifeCycleDelegate addDelegate:delegate];
+}
+
 #pragma mark - Notifications
 
 - (void)sceneWillEnterForeground:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
@@ -1490,6 +1528,35 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   return self.dartProject;
 }
 
+- (void)sendDeepLinkToFramework:(NSURL*)url completionHandler:(void (^)(BOOL success))completion {
+  __weak FlutterEngine* weakSelf = self;
+  [self waitForFirstFrame:3.0
+                 callback:^(BOOL didTimeout) {
+                   if (didTimeout) {
+                     [FlutterLogger
+                         logError:@"Timeout waiting for first frame when launching a URL."];
+                     completion(NO);
+                   } else {
+                     // invove the method and get the result
+                     [weakSelf.navigationChannel
+                         invokeMethod:@"pushRouteInformation"
+                            arguments:@{
+                              @"location" : url.absoluteString ?: [NSNull null],
+                            }
+                               result:^(id _Nullable result) {
+                                 BOOL success =
+                                     [result isKindOfClass:[NSNumber class]] && [result boolValue];
+                                 if (!success) {
+                                   // Logging the error if the result is not successful
+                                   [FlutterLogger
+                                       logError:@"Failed to handle route information in Flutter."];
+                                 }
+                                 completion(success);
+                               }];
+                   }
+                 }];
+}
+
 @end
 
 @implementation FlutterEngineRegistrar {
@@ -1507,9 +1574,12 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 - (NSObject<FlutterBinaryMessenger>*)messenger {
   return _flutterEngine.binaryMessenger;
 }
-
 - (NSObject<FlutterTextureRegistry>*)textures {
   return _flutterEngine.textureRegistry;
+}
+
+- (nullable UIViewController*)viewController {
+  return _flutterEngine.viewController;
 }
 
 - (void)publish:(NSObject*)value {
@@ -1523,14 +1593,24 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   }];
 }
 
-- (void)addApplicationDelegate:(NSObject<FlutterPlugin>*)delegate
-    NS_EXTENSION_UNAVAILABLE_IOS("Disallowed in plugins used in app extensions") {
-  id<UIApplicationDelegate> appDelegate = [[UIApplication sharedApplication] delegate];
+- (void)addApplicationDelegate:(NSObject<FlutterPlugin>*)delegate {
+  id<UIApplicationDelegate> appDelegate = FlutterSharedApplication.application.delegate;
   if ([appDelegate conformsToProtocol:@protocol(FlutterAppLifeCycleProvider)]) {
     id<FlutterAppLifeCycleProvider> lifeCycleProvider =
         (id<FlutterAppLifeCycleProvider>)appDelegate;
     [lifeCycleProvider addApplicationLifeCycleDelegate:delegate];
   }
+  if (![delegate conformsToProtocol:@protocol(FlutterSceneLifeCycleDelegate)]) {
+    // TODO(vashworth): If the plugin doesn't conform to the FlutterSceneLifeCycleDelegate,
+    // print a warning pointing to documentation: https://github.com/flutter/flutter/issues/175956
+    // [FlutterLogger logWarning:[NSString stringWithFormat:@"Plugin %@ has not migrated to
+    // scenes.", _pluginKey]];
+  }
+}
+
+- (void)addSceneDelegate:(NSObject<FlutterSceneLifeCycleDelegate>*)delegate {
+  // If the plugin conforms to FlutterSceneLifeCycleDelegate, add it to the engine.
+  [_flutterEngine addSceneLifeCycleDelegate:delegate];
 }
 
 - (NSString*)lookupKeyForAsset:(NSString*)asset {

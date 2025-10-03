@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ffi';
-
 import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
@@ -26,9 +24,17 @@ class SkwasmPaint implements ui.Paint {
       strokeCap.index,
       strokeJoin.index,
       strokeMiterLimit,
+      invertColors,
     );
 
-    _maybeSetEffectiveColorFilter(rawPaint);
+    final localColorFilter = _colorFilter;
+    if (localColorFilter != null) {
+      SkwasmColorFilter.fromEngineColorFilter(localColorFilter).withRawColorFilter((
+        nativeFilterHandle,
+      ) {
+        paintSetColorFilter(rawPaint, nativeFilterHandle);
+      });
+    }
 
     final shaderHandle = _shader?.handle;
     if (shaderHandle != null) {
@@ -52,38 +58,6 @@ class SkwasmPaint implements ui.Paint {
 
     return rawPaint;
   }
-
-  /// If `invertColors` is true or `colorFilter` is not null, sets the
-  /// appropriate Skia color filter. Otherwise, does nothing.
-  void _maybeSetEffectiveColorFilter(Pointer<RawPaint> handle) {
-    final nativeFilter =
-        _colorFilter != null ? SkwasmColorFilter.fromEngineColorFilter(_colorFilter!) : null;
-    if (invertColors) {
-      if (nativeFilter != null) {
-        final composedFilter = SkwasmColorFilter.composed(_invertColorFilter, nativeFilter);
-        composedFilter.withRawColorFilter((composedFilterHandle) {
-          paintSetColorFilter(handle, composedFilterHandle);
-        });
-      } else {
-        _invertColorFilter.withRawColorFilter((invertFilterHandle) {
-          paintSetColorFilter(handle, invertFilterHandle);
-        });
-      }
-    } else if (nativeFilter != null) {
-      nativeFilter.withRawColorFilter((nativeFilterHandle) {
-        paintSetColorFilter(handle, nativeFilterHandle);
-      });
-    }
-  }
-
-  static final SkwasmColorFilter _invertColorFilter = SkwasmColorFilter.fromEngineColorFilter(
-    const EngineColorFilter.matrix(<double>[
-      -1.0, 0, 0, 1.0, 0, // row
-      0, -1.0, 0, 1.0, 0, // row
-      0, 0, -1.0, 1.0, 0, // row
-      1.0, 1.0, 1.0, 1.0, 0,
-    ]),
-  );
 
   @override
   ui.BlendMode blendMode = _kBlendModeDefault;

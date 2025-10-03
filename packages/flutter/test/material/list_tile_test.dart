@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
 
@@ -187,7 +188,9 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: MediaQuery(
-          data: MediaQueryData(padding: EdgeInsets.only(left: leftPadding, right: rightPadding)),
+          data: MediaQueryData(
+            padding: EdgeInsets.only(left: leftPadding, right: rightPadding),
+          ),
           child: Directionality(
             textDirection: TextDirection.rtl,
             child: Material(
@@ -221,11 +224,10 @@ void main() {
           child: Builder(
             builder: (BuildContext context) {
               return ListView(
-                children:
-                    ListTile.divideTiles(
-                      context: context,
-                      tiles: titles.map<Widget>((String title) => ListTile(title: Text(title))),
-                    ).toList(),
+                children: ListTile.divideTiles(
+                  context: context,
+                  tiles: titles.map<Widget>((String title) => ListTile(title: Text(title))),
+                ).toList(),
               );
             },
           ),
@@ -260,8 +262,10 @@ void main() {
       yield const Text('');
     }
 
-    final List<Widget> output =
-        ListTile.divideTiles(tiles: generator(), color: Colors.grey).toList();
+    final List<Widget> output = ListTile.divideTiles(
+      tiles: generator(),
+      color: Colors.grey,
+    ).toList();
     expect(output, hasLength(2));
     expect(callCount, 1);
   });
@@ -845,7 +849,11 @@ void main() {
         home: Material(
           child: ListView(
             children: <Widget>[
-              ListTile(title: Text('A', key: childKey), dense: true, onTap: () {}),
+              ListTile(
+                title: Text('A', key: childKey),
+                dense: true,
+                onTap: () {},
+              ),
             ],
           ),
         ),
@@ -864,7 +872,12 @@ void main() {
         home: Material(
           child: ListView(
             children: <Widget>[
-              ListTile(title: Text('A', key: childKey), dense: true, enabled: false, onTap: () {}),
+              ListTile(
+                title: Text('A', key: childKey),
+                dense: true,
+                enabled: false,
+                onTap: () {},
+              ),
             ],
           ),
         ),
@@ -883,7 +896,12 @@ void main() {
         home: Material(
           child: ListView(
             children: <Widget>[
-              ListTile(title: Text('A', key: childKey), dense: true, autofocus: true, onTap: () {}),
+              ListTile(
+                title: Text('A', key: childKey),
+                dense: true,
+                autofocus: true,
+                onTap: () {},
+              ),
             ],
           ),
         ),
@@ -1097,14 +1115,13 @@ void main() {
                   color: Colors.white,
                   child: ListTile(
                     key: tileKey,
-                    onTap:
-                        enabled
-                            ? () {
-                              setState(() {
-                                tapped = true;
-                              });
-                            }
-                            : null,
+                    onTap: enabled
+                        ? () {
+                            setState(() {
+                              tapped = true;
+                            });
+                          }
+                        : null,
                     hoverColor: Colors.orange[500],
                     autofocus: true,
                   ),
@@ -1170,7 +1187,11 @@ void main() {
 
     Widget buildListTile(ShapeBorder shape) {
       return MaterialApp(
-        home: Material(child: Center(child: ListTile(shape: shape, tileColor: tileColor))),
+        home: Material(
+          child: Center(
+            child: ListTile(shape: shape, tileColor: tileColor),
+          ),
+        ),
       );
     }
 
@@ -1230,7 +1251,10 @@ void main() {
       MaterialApp(
         home: Material(
           child: Center(
-            child: MouseRegion(cursor: SystemMouseCursors.forbidden, child: ListTile(onTap: () {})),
+            child: MouseRegion(
+              cursor: SystemMouseCursors.forbidden,
+              child: ListTile(onTap: () {}),
+            ),
           ),
         ),
       ),
@@ -1474,7 +1498,11 @@ void main() {
 
     await tester.pumpWidget(
       const MaterialApp(
-        home: Scaffold(body: SizedBox.shrink(child: ListTile(key: key, tileColor: Colors.green))),
+        home: Scaffold(
+          body: SizedBox.shrink(
+            child: ListTile(key: key, tileColor: Colors.green),
+          ),
+        ),
       ),
     );
 
@@ -1538,7 +1566,11 @@ void main() {
 
     testWidgets('ListTile with enabled feedback by default', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: ListTile(title: const Text('Title'), onTap: () {}))),
+        MaterialApp(
+          home: Material(
+            child: ListTile(title: const Text('Title'), onTap: () {}),
+          ),
+        ),
       );
 
       await tester.tap(find.byType(ListTile));
@@ -1603,10 +1635,10 @@ void main() {
         MaterialApp(
           home: Material(
             child: ListTileTheme(
-              data: const ListTileThemeData(mouseCursor: MaterialStateMouseCursor.clickable),
+              data: const ListTileThemeData(mouseCursor: WidgetStateMouseCursor.clickable),
               child: ListTile(
                 key: tileKey,
-                mouseCursor: MaterialStateMouseCursor.textable,
+                mouseCursor: WidgetStateMouseCursor.textable,
                 title: const Text('Title'),
                 onTap: () {},
               ),
@@ -2067,11 +2099,10 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ListTile().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -2109,11 +2140,10 @@ void main() {
       titleAlignment: ListTileTitleAlignment.bottom,
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(
       description,
@@ -2146,7 +2176,7 @@ void main() {
     );
   });
 
-  testWidgets('ListTile.textColor respects MaterialStateColor', (WidgetTester tester) async {
+  testWidgets('ListTile.textColor respects WidgetStateColor', (WidgetTester tester) async {
     bool enabled = false;
     bool selected = false;
     const Color defaultColor = Colors.blue;
@@ -2162,11 +2192,11 @@ void main() {
                 return ListTile(
                   enabled: enabled,
                   selected: selected,
-                  textColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-                    if (states.contains(MaterialState.disabled)) {
+                  textColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
+                    if (states.contains(WidgetState.disabled)) {
                       return disabledColor;
                     }
-                    if (states.contains(MaterialState.selected)) {
+                    if (states.contains(WidgetState.selected)) {
                       return selectedColor;
                     }
                     return defaultColor;
@@ -2201,7 +2231,7 @@ void main() {
     expect(title.text.style!.color, selectedColor);
   });
 
-  testWidgets('ListTile.iconColor respects MaterialStateColor', (WidgetTester tester) async {
+  testWidgets('ListTile.iconColor respects WidgetStateColor', (WidgetTester tester) async {
     bool enabled = false;
     bool selected = false;
     const Color defaultColor = Colors.blue;
@@ -2218,11 +2248,11 @@ void main() {
                 return ListTile(
                   enabled: enabled,
                   selected: selected,
-                  iconColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-                    if (states.contains(MaterialState.disabled)) {
+                  iconColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
+                    if (states.contains(WidgetState.disabled)) {
                       return disabledColor;
                     }
-                    if (states.contains(MaterialState.selected)) {
+                    if (states.contains(WidgetState.selected)) {
                       return selectedColor;
                     }
                     return defaultColor;
@@ -2286,19 +2316,116 @@ void main() {
         );
       }
 
-      TextStyle? getIconStyle(WidgetTester tester, IconData icon) =>
-          tester
-              .widget<RichText>(
-                find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
-              )
-              .text
-              .style;
+      TextStyle? getIconStyle(WidgetTester tester, IconData icon) => tester
+          .widget<RichText>(find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)))
+          .text
+          .style;
 
       await tester.pumpWidget(buildFrame());
       expect(getIconStyle(tester, leadingIcon.icon!)?.color, listTileIconColor);
       expect(getIconStyle(tester, trailingIcon.icon!)?.color, listTileIconColor);
     },
   );
+
+  testWidgets(
+    'IconButtonTheme.style.foregroundColor is preserved in ListTile in non-overriding scenario',
+    (WidgetTester tester) async {
+      const Color iconButtonThemeColor = Colors.blue;
+      const Icon leadingIcon = Icon(Icons.favorite);
+      const Icon trailingIcon = Icon(Icons.close);
+
+      Widget buildFrame() {
+        return MaterialApp(
+          theme: ThemeData(
+            iconButtonTheme: IconButtonThemeData(
+              style: IconButton.styleFrom(foregroundColor: iconButtonThemeColor),
+            ),
+          ),
+          home: Material(
+            child: Center(
+              child: Builder(
+                builder: (BuildContext context) {
+                  return ListTile(
+                    leading: IconButton(icon: leadingIcon, onPressed: () {}),
+                    trailing: IconButton(icon: trailingIcon, onPressed: () {}),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      }
+
+      TextStyle? getIconStyle(WidgetTester tester, IconData icon) => tester
+          .widget<RichText>(find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)))
+          .text
+          .style;
+
+      await tester.pumpWidget(buildFrame());
+      expect(getIconStyle(tester, leadingIcon.icon!)?.color, iconButtonThemeColor);
+      expect(getIconStyle(tester, trailingIcon.icon!)?.color, iconButtonThemeColor);
+    },
+  );
+
+  testWidgets('ListTile respects and combines parent IconButtonThemeData style', (
+    WidgetTester tester,
+  ) async {
+    const Color customIconColor = Colors.green;
+    const Icon leadingIcon = Icon(Icons.favorite);
+    const Icon trailingIcon = Icon(Icons.close);
+    const WidgetStateProperty<OutlinedBorder> customShape = WidgetStatePropertyAll<OutlinedBorder>(
+      RoundedRectangleBorder(side: BorderSide()),
+    );
+    // Specially treated in ButtonStyle.merge, thus check these, too.
+    const WidgetStateProperty<Color> overlayColor = WidgetStatePropertyAll<Color>(Colors.purple);
+    const WidgetStateProperty<MouseCursor> mouseCursor = WidgetStatePropertyAll<MouseCursor>(
+      SystemMouseCursors.resizeUpRightDownLeft,
+    );
+
+    Widget buildFrame() {
+      return MaterialApp(
+        theme: ThemeData(
+          iconButtonTheme: const IconButtonThemeData(
+            style: ButtonStyle(
+              overlayColor: overlayColor,
+              mouseCursor: mouseCursor,
+              shape: customShape,
+            ),
+          ),
+        ),
+        home: Scaffold(
+          body: Center(
+            child: ListTile(
+              iconColor: customIconColor,
+              leading: IconButton(icon: leadingIcon, onPressed: () {}),
+              trailing: IconButton(icon: trailingIcon, onPressed: () {}),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+
+    // Verify that the merged theme retains the parent shape and other critical fields.
+    for (final BuildContext iconButtonContext in find.byType(IconButton).evaluate()) {
+      final IconButtonThemeData mergedTheme = IconButtonTheme.of(iconButtonContext);
+      expect(mergedTheme.style?.shape, customShape);
+      expect(mergedTheme.style?.overlayColor, overlayColor);
+      expect(mergedTheme.style?.mouseCursor, mouseCursor);
+    }
+
+    // Verify that ListTile's iconColor overrides the inherited color.
+    Color? getIconColor(IconData iconData) {
+      final RichText richText = tester.widget<RichText>(
+        find.descendant(of: find.byIcon(iconData), matching: find.byType(RichText)),
+      );
+      return richText.text.style?.color;
+    }
+
+    expect(getIconColor(leadingIcon.icon!), customIconColor);
+    expect(getIconColor(trailingIcon.icon!), customIconColor);
+  });
 
   testWidgets('ListTile.dense does not throw assertion', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/pull/116908
@@ -2590,7 +2717,10 @@ void main() {
       return MaterialApp(
         home: Material(
           child: Center(
-            child: SizedBox(width: 100, child: ListTile(leading: leading, trailing: trailing)),
+            child: SizedBox(
+              width: 100,
+              child: ListTile(leading: leading, trailing: trailing),
+            ),
           ),
         ),
       );
@@ -2831,7 +2961,9 @@ void main() {
         MaterialApp(
           theme: ThemeData(useMaterial3: false),
           home: const MediaQuery(
-            data: MediaQueryData(padding: EdgeInsets.only(left: leftPadding, right: rightPadding)),
+            data: MediaQueryData(
+              padding: EdgeInsets.only(left: leftPadding, right: rightPadding),
+            ),
             child: Directionality(
               textDirection: TextDirection.rtl,
               child: Material(
@@ -4019,10 +4151,9 @@ void main() {
       final Key trailingKey = UniqueKey();
 
       Widget buildFrame({required Brightness brightness, required bool selected}) {
-        final ThemeData theme =
-            brightness == Brightness.light
-                ? ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: false)
-                : ThemeData.from(colorScheme: const ColorScheme.dark(), useMaterial3: false);
+        final ThemeData theme = brightness == Brightness.light
+            ? ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: false)
+            : ThemeData.from(colorScheme: const ColorScheme.dark(), useMaterial3: false);
         return MaterialApp(
           theme: theme,
           home: Material(
@@ -4371,14 +4502,14 @@ void main() {
     Widget buildFrame({bool? themeDataIsThreeLine, bool? themeIsThreeLine, bool? isThreeLine}) {
       return MaterialApp(
         key: UniqueKey(),
-        theme:
-            themeDataIsThreeLine != null
-                ? ThemeData(listTileTheme: ListTileThemeData(isThreeLine: themeDataIsThreeLine))
-                : null,
+        theme: themeDataIsThreeLine != null
+            ? ThemeData(listTileTheme: ListTileThemeData(isThreeLine: themeDataIsThreeLine))
+            : null,
         home: Material(
           child: ListTileTheme(
-            data:
-                themeIsThreeLine != null ? ListTileThemeData(isThreeLine: themeIsThreeLine) : null,
+            data: themeIsThreeLine != null
+                ? ListTileThemeData(isThreeLine: themeIsThreeLine)
+                : null,
             child: ListView(
               children: <Widget>[
                 ListTile(
@@ -4492,6 +4623,94 @@ void main() {
       buildFrame(themeDataIsThreeLine: false, themeIsThreeLine: false, isThreeLine: true),
     );
     expectThreeLine();
+  });
+
+  testWidgets('ListTile statesController', (WidgetTester tester) async {
+    int count = 0;
+    void valueChanged() {
+      count += 1;
+    }
+
+    final MaterialStatesController controller = MaterialStatesController();
+    addTearDown(controller.dispose);
+    controller.addListener(valueChanged);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: ListTile(statesController: controller, onTap: () {}, title: const Text('title')),
+          ),
+        ),
+      ),
+    );
+
+    expect(controller.value, <WidgetState>{});
+    expect(count, 0);
+
+    final Offset center = tester.getCenter(find.byType(Text));
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <WidgetState>{WidgetState.hovered});
+    expect(count, 1);
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <WidgetState>{});
+    expect(count, 2);
+
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <WidgetState>{WidgetState.hovered});
+    expect(count, 3);
+
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <WidgetState>{WidgetState.hovered, WidgetState.pressed});
+    expect(count, 4);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <WidgetState>{WidgetState.hovered});
+    expect(count, 5);
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <WidgetState>{});
+    expect(count, 6);
+
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+    expect(controller.value, <WidgetState>{WidgetState.hovered, WidgetState.pressed});
+    expect(count, 8); // adds hovered and pressed - two changes
+
+    // If the button is rebuilt disabled, then the pressed state is
+    // removed.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: ListTile(statesController: controller, title: const Text('title')),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(controller.value, <WidgetState>{WidgetState.hovered, WidgetState.disabled});
+    expect(count, 10); // removes pressed and adds disabled - two changes
+    await gesture.moveTo(Offset.zero);
+    await tester.pumpAndSettle();
+    expect(controller.value, <WidgetState>{WidgetState.disabled});
+    expect(count, 11);
+    await gesture.removePointer();
   });
 }
 

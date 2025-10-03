@@ -11,5 +11,7 @@
   "searchWebButtonLabel": "ဝဘ်တွင်ရှာရန်",
   "shareButtonLabel": "မျှဝေရန်",
   "pasteButtonLabel": "ကူးထည့်ရန်",
-  "selectAllButtonLabel": "အားလုံး ရွေးရန်"
+  "selectAllButtonLabel": "အားလုံး ရွေးရန်",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found"
 }
