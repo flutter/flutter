@@ -24,6 +24,7 @@ class ThreadHost;
 @property(readonly, nonatomic) FlutterEngineProcTable& embedderAPI;
 @property(readonly, nonatomic) BOOL enableEmbedderAPI;
 @property(nonatomic, readonly) NSMutableDictionary* pluginPublications;
+@property(nonatomic, strong) FlutterRestorationPlugin* restorationPlugin;
 
 - (flutter::Shell&)shell;
 - (flutter::PlatformViewIOS*)platformView;

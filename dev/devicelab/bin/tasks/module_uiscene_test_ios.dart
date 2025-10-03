@@ -513,6 +513,14 @@ class Scenarios {
       r'$TEMPLATE_DIR/native/UITests-SceneEventsNoConnect-NoApplicationEvents.swift':
           r'$XCODE_PROJ_DIR/xcode_uikit_swiftUITests/xcode_uikit_swiftUITests.swift',
     },
+
+    // State restoration work both when migrated and when not.
+    'AppMigrated-StateRestoration': <String, String>{...sharedStateRestorationFiles},
+    'AppNotMigrated-StateRestoration': <String, String>{
+      ...sharedStateRestorationFiles,
+      r'$TEMPLATE_DIR/native/Info-unmigrated.plist':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swift/Info.plist',
+    },
   };
 
   late Map<String, Map<String, String>> swiftUIScenarios = <String, Map<String, String>>{
@@ -566,5 +574,17 @@ class Scenarios {
         r'$PLUGIN_DIR/lib/my_plugin_method_channel.dart',
     r'$TEMPLATE_DIR/flutterplugin/lib/lifecycle_plugin_platform_interface':
         r'$PLUGIN_DIR/lib/my_plugin_platform_interface.dart',
+  };
+
+  late Map<String, String> sharedStateRestorationFiles = <String, String>{
+    r'$TEMPLATE_DIR/flutterapp/lib/main-StateRestorationTest': r'$APP_DIR/lib/main.dart',
+    r'$TEMPLATE_DIR/native/AppDelegate-FlutterAppDelegate-FlutterEngine.swift':
+        r'$XCODE_PROJ_DIR/xcode_uikit_swift/AppDelegate.swift',
+    r'$TEMPLATE_DIR/native/SceneDelegate-FlutterSceneDelegate.swift':
+        r'$XCODE_PROJ_DIR/xcode_uikit_swift/SceneDelegate.swift',
+    r'$TEMPLATE_DIR/native/Main-FlutterViewController-RestorationId.storyboard':
+        r'$XCODE_PROJ_DIR/xcode_uikit_swift/Base.lproj/Main.storyboard',
+    r'$TEMPLATE_DIR/native/UITests-StateRestoration.swift':
+        r'$XCODE_PROJ_DIR/xcode_uikit_swiftUITests/xcode_uikit_swiftUITests.swift',
   };
 }
