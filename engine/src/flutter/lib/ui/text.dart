@@ -2232,6 +2232,7 @@ ByteData _encodeStrut(
   data.setInt32(0, bitmask, _kFakeHostEndian);
 
   assert(byteCount <= 24);
+  assert(bitmask >> 32 == 0, 'strut bitmask overflow: $bitmask');
   return ByteData.view(data.buffer, 0, byteCount);
 }
 
@@ -3560,9 +3561,9 @@ base class _NativeParagraphBuilder extends NativeFieldWrapperClass1 implements P
       final TextLeadingDistribution leadingDistribution =
           strutStyle._leadingDistribution ?? style._leadingDistribution;
       encodedStrutStyle = strutStyle._encoded;
-      int bitmask = encodedStrutStyle.getInt8(0);
+      int bitmask = encodedStrutStyle.getInt32(0, _kFakeHostEndian);
       bitmask |= (leadingDistribution.index) << 3;
-      encodedStrutStyle.setInt8(0, bitmask);
+      encodedStrutStyle.setInt32(0, bitmask, _kFakeHostEndian);
     } else {
       encodedStrutStyle = null;
     }
