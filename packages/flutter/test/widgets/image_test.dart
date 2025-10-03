@@ -1421,12 +1421,16 @@ void main() {
     expect(lastFrame, 0);
     expect(buildCount, 2);
 
-    // Another frame arriving also doesn't do anything, because
-    // disableAnimations is true.
+    // Subsequent frames arriving don't do anything, because disableAnimations
+    // is true.
     streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
     await tester.pump();
-    expect(lastFrame, 1);
-    expect(buildCount, 3);
+    expect(lastFrame, 0);
+    expect(buildCount, 2);
+    streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+    await tester.pump();
+    expect(lastFrame, 0);
+    expect(buildCount, 2);
   });
 
   testWidgets('the first frame is still loaded when TickerMode is disabled on first load', (
@@ -1454,7 +1458,7 @@ void main() {
 
     await tester.pumpWidget(
       TickerMode(
-      enabled: false,
+        enabled: false,
         child: Image(image: imageProvider, frameBuilder: buildFrame),
       ),
     );
@@ -1479,12 +1483,16 @@ void main() {
     expect(lastFrame, 0);
     expect(buildCount, 2);
 
-    // Another frame arriving also doesn't do anything, because
-    // disableAnimations is true.
+    // Subsequent frames arriving don't do anything, because disableAnimations
+    // is true.
     streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
     await tester.pump();
-    expect(lastFrame, 1);
-    expect(buildCount, 3);
+    expect(lastFrame, 0);
+    expect(buildCount, 2);
+    streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+    await tester.pump();
+    expect(lastFrame, 0);
+    expect(buildCount, 2);
   });
 
   testWidgets('Image invokes loadingBuilder on chunk event notification', (

@@ -1243,6 +1243,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   void _handleImageFrame(ImageInfo imageInfo, bool synchronousCall) {
     if (_hasReceivedFirstFrame && _isPaused) {
       _stopListeningToStream(keepStreamAlive: true);
+      return;
     }
     _hasReceivedFirstFrame = true;
     setState(() {
