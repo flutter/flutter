@@ -29,3 +29,8 @@ ninja -C "$PROFILE_PATH" licenses_cpp
   --licenses_path="$LICENSES_PATH" \
   --data_dir="$DATA_PATH" \
   --v=1
+
+cd "$REPO_PATH/engine/src"
+./tools/dart/create_updated_flutter_deps.py
+cd "$REPO_PATH"
+gclient sync
