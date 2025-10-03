@@ -1151,8 +1151,7 @@ class _IconButtonDefaultsM3 extends ButtonStyle {
     const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
-  WidgetStateProperty<MouseCursor?>? get mouseCursor =>
-    const MaterialStatePropertyAll<MouseCursor?>(WidgetStateMouseCursor.adaptiveClickable);
+  WidgetStateProperty<MouseCursor?>? get mouseCursor => WidgetStateMouseCursor.adaptiveClickable;
 
   @override
   VisualDensity? get visualDensity => VisualDensity.standard;
@@ -1294,8 +1293,7 @@ class _FilledIconButtonDefaultsM3 extends ButtonStyle {
     const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
-  WidgetStateProperty<MouseCursor?>? get mouseCursor =>
-    const MaterialStatePropertyAll<MouseCursor?>(WidgetStateMouseCursor.adaptiveClickable);
+  WidgetStateProperty<MouseCursor?>? get mouseCursor => WidgetStateMouseCursor.adaptiveClickable;
 
   @override
   VisualDensity? get visualDensity => VisualDensity.standard;
@@ -1437,8 +1435,7 @@ class _FilledTonalIconButtonDefaultsM3 extends ButtonStyle {
     const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
-  WidgetStateProperty<MouseCursor?>? get mouseCursor =>
-    const MaterialStatePropertyAll<MouseCursor?>(WidgetStateMouseCursor.adaptiveClickable);
+  WidgetStateProperty<MouseCursor?>? get mouseCursor => WidgetStateMouseCursor.adaptiveClickable;
 
   @override
   VisualDensity? get visualDensity => VisualDensity.standard;
@@ -1575,8 +1572,7 @@ class _OutlinedIconButtonDefaultsM3 extends ButtonStyle {
     const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
-  WidgetStateProperty<MouseCursor?>? get mouseCursor =>
-    const MaterialStatePropertyAll<MouseCursor?>(WidgetStateMouseCursor.adaptiveClickable);
+  WidgetStateProperty<MouseCursor?>? get mouseCursor => WidgetStateMouseCursor.adaptiveClickable;
 
   @override
   VisualDensity? get visualDensity => VisualDensity.standard;

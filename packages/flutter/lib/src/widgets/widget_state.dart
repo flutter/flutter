@@ -436,10 +436,10 @@ abstract class WidgetStateMouseCursor extends MouseCursor
   );
 
   static MouseCursor _adaptiveClickable(Set<WidgetState> states) {
-    if (!states.contains(WidgetState.disabled) && kIsWeb) {
-      return SystemMouseCursors.click;
+    if (states.contains(WidgetState.disabled)) {
+      return SystemMouseCursors.basic;
     }
-    return SystemMouseCursors.basic;
+    return kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic;
   }
 
   /// A mouse cursor for widgets related to text, which resolves differently

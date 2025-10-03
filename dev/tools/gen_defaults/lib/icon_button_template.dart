@@ -301,8 +301,7 @@ class _${blockName}DefaultsM3 extends ButtonStyle {
   WidgetStateProperty<OutlinedBorder>? get shape =>${_shape()};
 
   @override
-  WidgetStateProperty<MouseCursor?>? get mouseCursor =>
-    const MaterialStatePropertyAll<MouseCursor?>(WidgetStateMouseCursor.adaptiveClickable);
+  WidgetStateProperty<MouseCursor?>? get mouseCursor => WidgetStateMouseCursor.adaptiveClickable;
 
   @override
   VisualDensity? get visualDensity => VisualDensity.standard;

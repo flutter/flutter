@@ -618,8 +618,7 @@ class _OutlinedButtonDefaultsM3 extends ButtonStyle {
     const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
-  WidgetStateProperty<MouseCursor?>? get mouseCursor =>
-    const MaterialStatePropertyAll<MouseCursor?>(WidgetStateMouseCursor.adaptiveClickable);
+  WidgetStateProperty<MouseCursor?>? get mouseCursor => WidgetStateMouseCursor.adaptiveClickable;
 
   @override
   VisualDensity? get visualDensity => Theme.of(context).visualDensity;
