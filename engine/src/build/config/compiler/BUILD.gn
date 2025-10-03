@@ -213,8 +213,6 @@ config("compiler") {
     # an Objective C struct won't be called, which is very bad.
     cflags_objcc += [ "-fobjc-call-cxx-cdtors" ]
 
-    cflags_c += [ "-std=c99" ]
-
     ldflags += common_mac_flags
   } else if (is_posix) {
     # CPU architecture. We may or may not be doing a cross compile now, so for
