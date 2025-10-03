@@ -1114,6 +1114,15 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   StackTrace? _lastStack;
   ImageStreamCompleterHandle? _completerHandle;
 
+  /// True when animations are disabled and the image should not update, such as
+  /// when [TickerMode] is disabled or [MediaQuerData.disableAnimations] is
+  /// true.
+  bool _isPaused = false;
+
+  /// False when the class first is instantiated and true forever after the
+  /// first frame of the image is received.
+  bool _hasReceivedFirstFrame = false;
+
   @override
   void initState() {
     super.initState();
@@ -1137,11 +1146,9 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     _updateInvertColors();
     _resolveImage();
 
-    // TODO(justinmc): Should show first frame.
-    final bool paused =
-        !TickerMode.of(context) || (MediaQuery.maybeDisableAnimationsOf(context) ?? false);
+    _isPaused = !TickerMode.of(context) || (MediaQuery.maybeDisableAnimationsOf(context) ?? false);
 
-    if (!paused) {
+    if (!_isPaused || !_hasReceivedFirstFrame) {
       _listenToStream();
     } else {
       _stopListeningToStream(keepStreamAlive: true);
@@ -1229,6 +1236,10 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   }
 
   void _handleImageFrame(ImageInfo imageInfo, bool synchronousCall) {
+    if (_hasReceivedFirstFrame && _isPaused) {
+      _stopListeningToStream(keepStreamAlive: true);
+    }
+    _hasReceivedFirstFrame = true;
     setState(() {
       _replaceImage(info: imageInfo);
       _loadingProgress = null;

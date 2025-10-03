@@ -882,9 +882,26 @@ void main() {
       excludeFromSemantics: true,
       image: _TestImageProvider(streamCompleter: imageStreamCompleter),
     );
+
+    final ui.Codec codec = (await tester.runAsync(() {
+      return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
+    }))!;
+    Future<ui.Image> nextFrame() async {
+      final ui.FrameInfo frameInfo = (await tester.runAsync(codec.getNextFrame))!;
+      return frameInfo.image;
+    }
+
+    expect(imageStreamCompleter.listeners.length, 0);
     await tester.pumpWidget(TickerMode(enabled: true, child: image));
     expect(imageStreamCompleter.listeners.length, 2);
     await tester.pumpWidget(TickerMode(enabled: false, child: image));
+    // Despite being paused, the first frame hasn't come in yet, so it's still
+    // listening.
+    expect(imageStreamCompleter.listeners.length, 2);
+
+    // Send the first frame and the listener will be removed.
+    imageStreamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+    await tester.pump();
     expect(imageStreamCompleter.listeners.length, 1);
   });
 
@@ -896,11 +913,27 @@ void main() {
       excludeFromSemantics: true,
       image: _TestImageProvider(streamCompleter: imageStreamCompleter),
     );
+    final ui.Codec codec = (await tester.runAsync(() {
+      return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
+    }))!;
+    Future<ui.Image> nextFrame() async {
+      final ui.FrameInfo frameInfo = (await tester.runAsync(codec.getNextFrame))!;
+      return frameInfo.image;
+    }
+
+    expect(imageStreamCompleter.listeners.length, 0);
     await tester.pumpWidget(image);
     expect(imageStreamCompleter.listeners.length, 2);
     await tester.pumpWidget(
       MediaQuery(data: const MediaQueryData(disableAnimations: true), child: image),
     );
+    // Despite being paused, the first frame hasn't come in yet, so it's still
+    // listening.
+    expect(imageStreamCompleter.listeners.length, 2);
+
+    // Send the first frame and the listener will be removed.
+    imageStreamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+    await tester.pump();
     expect(imageStreamCompleter.listeners.length, 1);
   });
 
