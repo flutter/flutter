@@ -93,9 +93,9 @@ void main() {
     expect(exceptBottom.bottom, 0);
 
     // Except-Right with value
-    const EdgeInsets exceptButtomWithValue = EdgeInsets.exceptBottom(20, 6);
-    const EdgeInsets expectedExceptButtomWithValue = EdgeInsets.only(top: 20, bottom: 6, left: 20, right: 20);
-    expect(exceptButtomWithValue, equals(expectedExceptButtomWithValue));
+    const EdgeInsets exceptBottomWithValue = EdgeInsets.exceptBottom(20, 6);
+    const EdgeInsets expectedExceptBottomWithValue = EdgeInsets.only(top: 20, bottom: 6, left: 20, right: 20);
+    expect(exceptBottomWithValue, equals(expectedExceptBottomWithValue));
   });
 
   test('EdgeInsetsDirectional constructors', () {
@@ -127,13 +127,13 @@ void main() {
     expect(all.resolve(TextDirection.rtl), equals(const EdgeInsets.fromLTRB(10, 10, 10, 10)));
 
     const EdgeInsetsDirectional insets1  = EdgeInsetsDirectional.some(rest: 16);
-      expect(insets1, const EdgeInsetsDirectional.only(
+    expect(insets1, const EdgeInsetsDirectional.only(
         start: 16,
         top: 16,
         end: 16,
         bottom: 16,
-      ));
-    });
+    ));
+
 
       const EdgeInsetsDirectional insets2 = EdgeInsetsDirectional.some(
         rest: 20,

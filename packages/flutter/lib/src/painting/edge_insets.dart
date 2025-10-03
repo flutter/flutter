@@ -45,7 +45,7 @@ abstract class EdgeInsetsGeometry {
   ///
   /// Example:
   /// ```dart
-  /// EdgeInsetsGeometry.some(value: 16, left: 8, top: 0);
+  /// EdgeInsetsGeometry.some(rest: 16, left: 8, top: 0);
   /// ```
   /// Results in: left = 8, top = 0, right = 16, bottom = 16
   const factory EdgeInsetsGeometry.some({
@@ -467,7 +467,7 @@ class EdgeInsets extends EdgeInsetsGeometry {
   ///
   /// Example:
   /// ```dart
-  /// const EdgeInsets.except(value: 8.0, top: true); // -> left: 8, right: 8, bottom: 8, top: 0
+  /// const EdgeInsets.except(rest: 8.0, top: true); // -> left: 8, right: 8, bottom: 8, top: 0
   /// ```
   /// {@end-tool}
   const EdgeInsets.some({
@@ -865,10 +865,7 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
   ///
   /// For example:
   /// ```dart
-  /// EdgeInsetsDirectional.some(16);
-  /// // -> start=16, top=16, end=16, bottom=16
-  ///
-  /// EdgeInsetsDirectional.some(20, top: 0, start: 8);
+  /// EdgeInsetsDirectional.some(rest : 20, top: 0, start: 8);
   /// // -> start=8, top=0, end=20, bottom=20
   /// ```
   const EdgeInsetsDirectional.some({
