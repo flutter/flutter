@@ -3828,7 +3828,7 @@ void main() {
     await tester.pumpWidget(buildDropdownMenu(requestFocusOnTap: true));
 
     expect(
-      tester.getSemantics(find.byType(TextField)),
+      tester.getSemantics(find.text('Test')),
       matchesSemantics(
         hasFocusAction: true,
         hasTapAction: true,
@@ -3844,7 +3844,7 @@ void main() {
     await tester.pumpWidget(buildDropdownMenu(requestFocusOnTap: false));
 
     expect(
-      tester.getSemantics(find.byType(TextField)),
+      tester.getSemantics(find.text('Test')),
       matchesSemantics(
         hasFocusAction: true,
         isTextField: true,
