@@ -2682,8 +2682,9 @@ void main() {
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/176374.
-    testWidgets('internal controller is created when the controller is null',
-        (WidgetTester tester) async {
+    testWidgets('internal controller is created when the controller is null', (
+      WidgetTester tester,
+    ) async {
       MenuController? testController;
 
       await tester.pumpWidget(
