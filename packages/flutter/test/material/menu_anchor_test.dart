@@ -5096,6 +5096,34 @@ void main() {
 
     expect(tester.getRect(findMenuPanels()).width, 800.0 - reservedPadding.horizontal);
   });
+
+  testWidgets('Layout updates when reserved padding changes', (WidgetTester tester) async {
+    const EdgeInsetsGeometry reservedPadding = EdgeInsets.symmetric(horizontal: 13.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MenuAnchor(
+          controller: controller,
+          menuChildren: const <Widget>[SizedBox(width: 800, height: 24)],
+        ),
+      ),
+    );
+
+    controller.open(position: Offset.zero);
+    await tester.pump();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MenuAnchor(
+          controller: controller,
+          reservedPadding: reservedPadding,
+          menuChildren: const <Widget>[SizedBox(width: 800, height: 24)],
+        ),
+      ),
+    );
+
+    expect(tester.getRect(findMenuPanels()).width, 800.0 - reservedPadding.horizontal);
+  });
 }
 
 List<Widget> createTestMenus({
