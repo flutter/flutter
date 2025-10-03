@@ -3518,11 +3518,8 @@ void main() {
     },
     overrides: {
       // Ensure Swift Package Manager is enabled to test the SPM path
-      FeatureFlags: () => TestFeatureFlags(
-        isSwiftPackageManagerEnabled: true,
-        isMacOSEnabled: true,
-        isIOSEnabled: true,
-      ),
+      FeatureFlags: () =>
+          TestFeatureFlags(isSwiftPackageManagerEnabled: true, isMacOSEnabled: true),
     },
   );
 
@@ -3547,10 +3544,7 @@ void main() {
         ),
       );
     },
-    overrides: {
-      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false, isIOSEnabled: false),
-      Logger: () => logger,
-    },
+    overrides: {FeatureFlags: () => TestFeatureFlags(isIOSEnabled: false), Logger: () => logger},
   );
 
   testUsingContext('Android FFI plugin contains 16kb page support', () async {
