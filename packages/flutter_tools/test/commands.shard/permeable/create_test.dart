@@ -3553,37 +3553,6 @@ void main() {
     },
   );
 
-  // // ADD THE PLATFORM WARNING TEST HERE
-  // testUsingContext('returns darwin when both macOS and iOS are disabled', () {
-  //   final CreateCommand command = CreateCommand();
-  //   final List<String> requested = <String>['darwin'];
-  //   final List<String> warnings = command.getPlatformWarningList(
-  //     requestedPlatforms: requested,
-  //     featureFlags: FakeFeatureFlags(isMacOSEnabled: false, isIOSEnabled: false),
-  //   );
-  //   expect(warnings, contains('darwin'));
-  // });
-
-  // testUsingContext('does not return darwin when only macOS is enabled', () {
-  //   final CreateCommand command = CreateCommand();
-  //   final List<String> requested = <String>['darwin'];
-  //   final List<String> warnings = command.getPlatformWarningList(
-  //     requestedPlatforms: requested,
-  //     featureFlags: FakeFeatureFlags(isMacOSEnabled: true, isIOSEnabled: false),
-  //   );
-  //   expect(warnings, isNot(contains('darwin')));
-  // });
-
-  // testUsingContext('does not return darwin when only iOS is enabled', () {
-  //   final CreateCommand command = CreateCommand();
-  //   final List<String> requested = <String>['darwin'];
-  //   final List<String> warnings = command.getPlatformWarningList(
-  //     requestedPlatforms: requested,
-  //     featureFlags: FakeFeatureFlags(isMacOSEnabled: false, isIOSEnabled: true),
-  //   );
-  //   expect(warnings, isNot(contains('darwin')));
-  // });
-
   testUsingContext('Android FFI plugin contains 16kb page support', () async {
     final command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
