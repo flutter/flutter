@@ -3450,7 +3450,7 @@ class _RenderMenuLayout extends RenderShiftedBox {
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    return computeMaxIntrinsicWidth(height);
+    return getMaxIntrinsicWidth(height);
   }
 
   @override
@@ -3464,7 +3464,7 @@ class _RenderMenuLayout extends RenderShiftedBox {
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    return computeMaxIntrinsicHeight(width);
+    return getMaxIntrinsicHeight(width);
   }
 
   @override
