@@ -92,7 +92,7 @@ void main() {
     expect(exceptBottom.right, 12);
     expect(exceptBottom.bottom, 0);
 
-    // Except-Right with value
+    // Except-Bottom with value
     const EdgeInsets exceptBottomWithValue = EdgeInsets.exceptBottom(20, 6);
     const EdgeInsets expectedExceptBottomWithValue = EdgeInsets.only(top: 20, bottom: 6, left: 20, right: 20);
     expect(exceptBottomWithValue, equals(expectedExceptBottomWithValue));

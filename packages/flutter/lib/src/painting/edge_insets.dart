@@ -40,7 +40,7 @@ abstract class EdgeInsetsGeometry {
   const factory EdgeInsetsGeometry.only({double left, double right, double top, double bottom}) =
       EdgeInsets.only;
 
-  /// Creates [EdgeInsets] with all sides equal to [value],
+  /// Creates [EdgeInsets] with all sides equal to [rest],
   /// but allows overriding individual sides.
   ///
   /// Example:
@@ -467,7 +467,7 @@ class EdgeInsets extends EdgeInsetsGeometry {
   ///
   /// Example:
   /// ```dart
-  /// const EdgeInsets.except(rest: 8.0, top: true); // -> left: 8, right: 8, bottom: 8, top: 0
+  /// const EdgeInsets.some(rest: 8.0, top: true); // -> left: 8, right: 8, bottom: 8, top: 0
   /// ```
   /// {@end-tool}
   const EdgeInsets.some({
