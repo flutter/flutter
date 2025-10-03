@@ -284,9 +284,14 @@ typedef ImageErrorWidgetBuilder =
 /// ```
 /// {@end-tool}
 ///
+/// Multiframe images, such as animated GIFs, are paused when [TickerMode] is
+/// disabled just like any other animation. They also paused when animations are
+/// disabled via [MediaQueryData.disableAnimations], such as for accessibility
+/// purposes. If the animation is paused when the image first loads, the first
+/// frame will be displayed and then animation will stop.
+///
 /// {@tool snippet}
-/// Multiframe images, such as animated GIFs, can be paused using TickerMode
-/// just like any other animation.
+//// An example of pausing a multiframe image using [TickerMode].
 ///
 /// ```dart
 /// TickerMode(
