@@ -488,17 +488,10 @@ class AndroidProject extends FlutterProjectPlatform {
   /// Regex is used in both Groovy and Kotlin Gradle files.
   static final _groupPattern = RegExp('^\\s*group\\s*=?\\s*[\'"](.*)[\'"]\\s*\$');
 
-  /// True if this project has a `build.gradle[.kts]` file in the project root directory.
-  bool get hasGradleSettingsInProjectRoot =>
-      getGroovyOrKotlin(parent.directory, 'build.gradle').existsSync();
-
   /// The Gradle root directory of the Android host app. This is the directory
   /// containing the `app/` subdirectory and the `settings.gradle` file that
   /// includes it in the overall Gradle project.
   Directory get hostAppGradleRoot {
-    if (hasGradleSettingsInProjectRoot) {
-      return parent.directory;
-    }
     if (!isModule || _editableHostAppDirectory.existsSync()) {
       return _editableHostAppDirectory;
     }
@@ -632,19 +625,13 @@ class AndroidProject extends FlutterProjectPlatform {
   /// The file must exist and it must be written in either Groovy (build.gradle)
   /// or Kotlin (build.gradle.kts).
   File get appGradleFile {
-    final Directory baseDirectory = hasGradleSettingsInProjectRoot
-        ? hostAppGradleRoot.childDirectory('android')
-        : hostAppGradleRoot;
-    final Directory appDir = baseDirectory.childDirectory('app');
+    final Directory appDir = hostAppGradleRoot.childDirectory('app');
     return getGroovyOrKotlin(appDir, 'build.gradle');
   }
 
   File get appManifestFile {
     if (isUsingGradle) {
-      final Directory baseDirectory = hasGradleSettingsInProjectRoot
-          ? hostAppGradleRoot.childDirectory('android')
-          : hostAppGradleRoot;
-      return baseDirectory
+      return hostAppGradleRoot
           .childDirectory('app')
           .childDirectory('src')
           .childDirectory('main')
@@ -808,8 +795,7 @@ See the link below for more information:
   }
 
   bool get isUsingGradle {
-    return hostAppGradleFile.existsSync() ||
-        getGroovyOrKotlin(parent.directory, 'build.gradle').existsSync();
+    return hostAppGradleFile.existsSync();
   }
 
   String? get applicationId {
@@ -920,10 +906,7 @@ See the link below for more information:
       return;
     }
     // The v1 android embedding has been deleted.
-    throwToolExit(
-      'Build failed due to use of deleted Android v1 embedding (${result.reason}).',
-      exitCode: 1,
-    );
+    throwToolExit('Build failed due to use of deleted Android v1 embedding.', exitCode: 1);
   }
 
   AndroidEmbeddingVersion getEmbeddingVersion() {
