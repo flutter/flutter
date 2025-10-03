@@ -1010,7 +1010,7 @@ List<String> _getPlatformWarningList(List<String> requestedPlatforms) {
     if (requestedPlatforms.contains('windows') && !featureFlags.isWindowsEnabled) 'windows',
     if (requestedPlatforms.contains('linux') && !featureFlags.isLinuxEnabled) 'linux',
     if (requestedPlatforms.contains('darwin') &&
-        !(featureFlags.isMacOSEnabled && !featureFlags.isIOSEnabled))
+        !(featureFlags.isMacOSEnabled || !featureFlags.isIOSEnabled))
       'darwin',
   ];
 
