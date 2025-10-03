@@ -63,8 +63,8 @@ class WindowingOwnerMacOS extends WindowingOwner {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
 
-    if (!Platform.isWindows) {
-      throw UnsupportedError('Only available on the Win32 platform');
+    if (!Platform.isMacOS) {
+      throw UnsupportedError('Only available on the macOS platform');
     }
 
     assert(
