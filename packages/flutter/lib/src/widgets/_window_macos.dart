@@ -119,7 +119,13 @@ class WindowingOwnerMacOS extends WindowingOwner {
   }
 }
 
-/// The macOS implementation of the regular window controller.
+/// Implementation of [RegularWindowController] for the macOS platform.
+///
+/// {@macro flutter.widgets.windowing.experimental}
+///
+/// See also:
+///
+///  * [RegularWindowController], the base class for regular windows.
 class RegularWindowControllerMacOS extends RegularWindowController {
   /// Creates a new regular window controller for macOS. When this constructor
   /// completes the FlutterView is created and framework is aware of it.
