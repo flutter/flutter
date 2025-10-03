@@ -410,7 +410,10 @@ FLUTTER_ASSERT_ARC
   [mockDelegate scene:mockScene willConnectToSession:session options:options];
 
   OCMVerify(times(1), [mockDelegate addFlutterEngine:mockEngine]);
-  OCMVerify(times(1), [mockDelegate scene:mockScene willConnectToSession:session flutterEngine:mockEngine options:options]);
+  OCMVerify(times(1), [mockDelegate scene:mockScene
+                          willConnectToSession:session
+                                 flutterEngine:mockEngine
+                                       options:options]);
 }
 
 - (void)testSceneWillConnectToSessionAddsEngineFromRootViewControllerAndNotNotification {
@@ -436,7 +439,10 @@ FLUTTER_ASSERT_ARC
   [mockDelegate engine:mockEngine receivedConnectNotificationFor:mockScene];
 
   OCMVerify(times(1), [mockDelegate addFlutterEngine:mockEngine]);
-  OCMVerify(times(1), [mockDelegate scene:mockScene willConnectToSession:session flutterEngine:mockEngine options:options]);
+  OCMVerify(times(1), [mockDelegate scene:mockScene
+                          willConnectToSession:session
+                                 flutterEngine:mockEngine
+                                       options:options]);
 }
 
 - (void)testSceneDidDisconnect {

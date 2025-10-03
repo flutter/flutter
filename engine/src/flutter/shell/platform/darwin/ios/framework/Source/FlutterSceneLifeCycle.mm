@@ -138,9 +138,11 @@ FLUTTER_ASSERT_ARC
                  options:(UISceneConnectionOptions*)connectionOptions {
   self.connectionOptions = connectionOptions;
   if ([scene.delegate conformsToProtocol:@protocol(UIWindowSceneDelegate)]) {
-    NSObject<UIWindowSceneDelegate>* sceneDelegate = (NSObject<UIWindowSceneDelegate>*)scene.delegate;
+    NSObject<UIWindowSceneDelegate>* sceneDelegate =
+        (NSObject<UIWindowSceneDelegate>*)scene.delegate;
     if ([sceneDelegate.window.rootViewController isKindOfClass:[FlutterViewController class]]) {
-      FlutterViewController* rootViewController = (FlutterViewController*)sceneDelegate.window.rootViewController;
+      FlutterViewController* rootViewController =
+          (FlutterViewController*)sceneDelegate.window.rootViewController;
       [self addFlutterEngine:rootViewController.engine];
     }
   }
