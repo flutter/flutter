@@ -589,19 +589,13 @@ class _ExpansionTileState extends State<ExpansionTile> {
     final String onTapHint = _tileController.isExpanded
         ? localizations.expansionTileExpandedTapHint
         : localizations.expansionTileCollapsedTapHint;
-    String? semanticsHint;
-    switch (theme.platform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        semanticsHint = _tileController.isExpanded
+    final String semanticsHint = switch (theme.platform) {
+      TargetPlatform.iOS || TargetPlatform.macOS =>
+        _tileController.isExpanded
             ? '${localizations.collapsedHint}\n ${localizations.expansionTileExpandedHint}'
-            : '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}';
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        break;
-    }
+            : '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}',
+      _ => _tileController.isExpanded ? localizations.collapsedHint : localizations.expandedHint,
+    };
 
     return Semantics(
       hint: semanticsHint,
