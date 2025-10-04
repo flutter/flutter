@@ -12,9 +12,11 @@ library;
 
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -1781,7 +1783,14 @@ class SubmenuButton extends StatefulWidget {
 
   /// The duration to wait before opening the menu when the button is hovered.
   ///
-  /// Defaults to Duration.zero.
+  /// Because [MenuBar] children can only be opened by hover if a sibling
+  /// [SubmenuButton] is already open, providing a [hoverOpenDelay] to direct
+  /// children of a [MenuBar] will throw an assertion error. This is to avoid
+  /// the case where the [hoverOpenDelay] for a [SubmenuButton] is longer than
+  /// the duration of a sibling's closing animation, which leads to that menu
+  /// never opening.
+  ///
+  /// Defaults to [Duration.zero].
   final Duration hoverOpenDelay;
 
   /// Whether the menu should open and close with an animation.
@@ -1993,6 +2002,21 @@ class _SubmenuButtonState extends State<SubmenuButton> {
     if (widget.controller != oldWidget.controller) {
       _internalMenuController = (oldWidget.controller == null) ? null : MenuController();
     }
+
+    assert(() {
+      if (_parent?._orientation == Axis.horizontal && widget.hoverOpenDelay > Duration.zero) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary(
+            'A non-zero hoverOpenDelay was used in a top-level SubmenuButton situated in a MenuBar.',
+          ),
+          ErrorDescription(
+            'MenuBar children can only be opened by hover if a sibling SubmenuButton is already open. When the hoverOpenDelay for a SubmenuButton is longer than the closing animation of a sibling SubmenuButton, that sibling will close before this SubmenuButton begins opening, leading to this SubmenuButton never opening.',
+          ),
+          context.describeElement('The affected SubmenuButton is'),
+        ]);
+      }
+      return true;
+    }());
   }
 
   @override
@@ -2610,7 +2634,6 @@ class _MenuBarAnchorState extends _MenuAnchorState {
       child: Shortcuts(
         shortcuts: _kMenuTraversalShortcuts,
         child: _MenuPanel(
-          fadeAnimation: kAlwaysCompleteAnimation,
           menuStyle: widget.style,
           clipBehavior: widget.clipBehavior,
           orientation: _orientation,
@@ -3631,7 +3654,6 @@ class _MenuPanel extends StatefulWidget {
     this.clipBehavior = Clip.none,
     required this.orientation,
     this.crossAxisUnconstrained = true,
-    required this.fadeAnimation,
     required this.children,
   });
 
@@ -3652,9 +3674,6 @@ class _MenuPanel extends StatefulWidget {
 
   /// The layout orientation of this panel.
   final Axis orientation;
-
-  /// The animation that controls the opacity of the menu surface.
-  final Animation<double> fadeAnimation;
 
   /// The list of widgets to use as children of this menu panel.
   ///
@@ -3753,38 +3772,35 @@ class _MenuPanelState extends State<_MenuPanel> {
     }
 
     Widget menuPanel = _intrinsicCrossSize(
-      child: FadeTransition(
-        opacity: widget.fadeAnimation,
-        child: Material(
-          elevation: elevation,
-          shape: shape,
-          color: backgroundColor,
-          shadowColor: shadowColor,
-          surfaceTintColor: surfaceTintColor,
-          type: backgroundColor == null ? MaterialType.transparency : MaterialType.canvas,
-          clipBehavior: widget.clipBehavior,
-          child: Padding(
-            padding: resolvedPadding,
-            child: ScrollConfiguration(
-              behavior: ScrollConfiguration.of(context).copyWith(
-                scrollbars: false,
-                overscroll: false,
-                physics: const ClampingScrollPhysics(),
-              ),
-              child: PrimaryScrollController(
-                controller: scrollController,
-                child: Scrollbar(
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    controller: scrollController,
-                    scrollDirection: widget.orientation,
-                    child: Flex(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      textDirection: Directionality.of(context),
-                      direction: widget.orientation,
-                      mainAxisSize: MainAxisSize.min,
-                      children: children,
-                    ),
+      child: Material(
+        elevation: elevation,
+        shape: shape,
+        color: backgroundColor,
+        shadowColor: shadowColor,
+        surfaceTintColor: surfaceTintColor,
+        type: backgroundColor == null ? MaterialType.transparency : MaterialType.canvas,
+        clipBehavior: widget.clipBehavior,
+        child: Padding(
+          padding: resolvedPadding,
+          child: ScrollConfiguration(
+            behavior: ScrollConfiguration.of(context).copyWith(
+              scrollbars: false,
+              overscroll: false,
+              physics: const ClampingScrollPhysics(),
+            ),
+            child: PrimaryScrollController(
+              controller: scrollController,
+              child: Scrollbar(
+                thumbVisibility: true,
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  scrollDirection: widget.orientation,
+                  child: Flex(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    textDirection: Directionality.of(context),
+                    direction: widget.orientation,
+                    mainAxisSize: MainAxisSize.min,
+                    children: children,
                   ),
                 ),
               ),
@@ -3912,13 +3928,15 @@ class _Submenu extends StatelessWidget {
             },
             child: Shortcuts(
               shortcuts: _kMenuTraversalShortcuts,
-              child: _MenuPanel(
-                fadeAnimation: fadeAnimation,
-                menuStyle: menuStyle,
-                clipBehavior: clipBehavior,
-                orientation: anchor._orientation,
-                crossAxisUnconstrained: crossAxisUnconstrained,
-                children: menuChildren,
+              child: FadeTransition(
+                opacity: fadeAnimation,
+                child: _MenuPanel(
+                  menuStyle: menuStyle,
+                  clipBehavior: clipBehavior,
+                  orientation: anchor._orientation,
+                  crossAxisUnconstrained: crossAxisUnconstrained,
+                  children: menuChildren,
+                ),
               ),
             ),
           ),
