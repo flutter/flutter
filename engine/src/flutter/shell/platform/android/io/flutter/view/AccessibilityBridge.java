@@ -44,6 +44,7 @@ import io.flutter.view.AccessibilityStringBuilder.StringAttributeType;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -226,6 +227,16 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   // a bitmask whose values comes from {@link AccessibilityFeature}.
   private int accessibilityFeatureFlags = 0;
 
+  // The default locale for assistive technologies in BCP 47 format.
+  //
+  // For example "en-US", "de-DE", "fr-FR".
+  @Nullable private String defaultLocale;
+
+  @VisibleForTesting
+  public void setLocale(@NonNull String locale) {
+    defaultLocale = locale;
+  }
+
   // The {@code SemanticsNode} within Flutter that currently has the focus of Android's input
   // system.
   //
@@ -370,6 +381,11 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
             args.order(ByteOrder.LITTLE_ENDIAN);
           }
           AccessibilityBridge.this.updateSemantics(buffer, strings, stringAttributeArgs);
+        }
+
+        @Override
+        public void setLocale(String locale) {
+          AccessibilityBridge.this.setLocale(locale);
         }
       };
 
@@ -1014,9 +1030,25 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     }
     result.setSelected(semanticsNode.hasFlag(Flag.IS_SELECTED));
 
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_36) {
+      if (semanticsNode.hasFlag(Flag.HAS_EXPANDED_STATE)) {
+        final boolean isExpanded = semanticsNode.hasFlag(Flag.IS_EXPANDED);
+        result.setExpandedState(
+            isExpanded
+                ? AccessibilityNodeInfo.EXPANDED_STATE_FULL
+                : AccessibilityNodeInfo.EXPANDED_STATE_COLLAPSED);
+        if (semanticsNode.hasAction(Action.EXPAND)) {
+          result.addAction(AccessibilityNodeInfo.ACTION_EXPAND);
+        }
+        if (semanticsNode.hasAction(Action.COLLAPSE)) {
+          result.addAction(AccessibilityNodeInfo.ACTION_COLLAPSE);
+        }
+      }
+    }
+
     // Heading support
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_28) {
-      result.setHeading(semanticsNode.hasFlag(Flag.IS_HEADER));
+      result.setHeading(semanticsNode.headingLevel > 0);
     }
 
     // Accessibility Focus
@@ -1290,6 +1322,16 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       case AccessibilityNodeInfo.ACTION_SET_TEXT:
         {
           return performSetText(semanticsNode, virtualViewId, arguments);
+        }
+      case AccessibilityNodeInfo.ACTION_EXPAND:
+        {
+          accessibilityChannel.dispatchSemanticsAction(virtualViewId, Action.EXPAND);
+          return true;
+        }
+      case AccessibilityNodeInfo.ACTION_COLLAPSE:
+        {
+          accessibilityChannel.dispatchSemanticsAction(virtualViewId, Action.COLLAPSE);
+          return true;
         }
       default:
         // might be a custom accessibility accessibilityAction.
@@ -1728,7 +1770,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     }
 
     // If all the routes are in the previous route, get the last route.
-    if (lastAdded == null && newRoutes.size() > 0) {
+    if (lastAdded == null && !newRoutes.isEmpty()) {
       lastAdded = newRoutes.get(newRoutes.size() - 1);
     }
 
@@ -2167,7 +2209,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     MOVE_CURSOR_BACKWARD_BY_WORD(1 << 20),
     SET_TEXT(1 << 21),
     FOCUS(1 << 22),
-    SCROLL_TO_OFFSET(1 << 23);
+    SCROLL_TO_OFFSET(1 << 23),
+    EXPAND(1 << 24),
+    COLLAPSE(1 << 25);
 
     public final int value;
 
@@ -2362,6 +2406,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     // The locale of the content of this node.
     @Nullable private String locale;
 
+    // The heading level for this node (0 means not a heading).
+    private int headingLevel;
+
     // The id of the sibling node that is before this node in traversal
     // order.
     //
@@ -2467,7 +2514,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       if (label == null && previousLabel == null) {
         return false;
       }
-      return label == null || previousLabel == null || !label.equals(previousLabel);
+      return label == null || !label.equals(previousLabel);
     }
 
     private void log(@NonNull String indent, boolean recursive) {
@@ -2485,6 +2532,10 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                 + actions
                 + " flags="
                 + flags
+                + "\n"
+                + indent
+                + "  +-- headingLevel="
+                + headingLevel
                 + "\n"
                 + indent
                 + "  +-- textDirection="
@@ -2562,6 +2613,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       linkUrl = getStringFromBuffer(buffer, strings);
       locale = getStringFromBuffer(buffer, strings);
 
+      headingLevel = buffer.getInt();
       textDirection = TextDirection.fromInt(buffer.getInt());
 
       left = buffer.getFloat();
@@ -2651,7 +2703,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
               attribute.start = start;
               attribute.end = end;
               attribute.type = type;
-              attribute.locale = Charset.forName("UTF-8").decode(args).toString();
+              attribute.locale = StandardCharsets.UTF_8.decode(args).toString();
               result.add(attribute);
               break;
             }
@@ -2758,6 +2810,21 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       return null;
     }
 
+    /**
+     * Returns the effective locale for this semantics node after taking app default locale into
+     * account.
+     *
+     * <p>Can be null if there is no preference.
+     *
+     * @return the effective locale.
+     */
+    private @Nullable String getEffectiveLocale() {
+      if (locale != null && !locale.isEmpty()) {
+        return locale;
+      }
+      return accessibilityBridge.defaultLocale;
+    }
+
     private void updateRecursively(
         float[] ancestorTransform, Set<SemanticsNode> visitedObjects, boolean forceUpdate) {
       visitedObjects.add(this);
@@ -2853,7 +2920,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       return new AccessibilityStringBuilder()
           .addString(value)
           .addAttributes(valueAttributes)
-          .addLocale(locale)
+          .addLocale(getEffectiveLocale())
           .build();
     }
 
@@ -2862,7 +2929,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
           .addString(label)
           .addAttributes(labelAttributes)
           .addUrl(linkUrl)
-          .addLocale(locale)
+          .addLocale(getEffectiveLocale())
           .build();
     }
 
@@ -2870,7 +2937,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       return new AccessibilityStringBuilder()
           .addString(hint)
           .addAttributes(hintAttributes)
-          .addLocale(locale)
+          .addLocale(getEffectiveLocale())
           .build();
     }
 

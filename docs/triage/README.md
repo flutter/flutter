@@ -86,6 +86,7 @@ In general the flow chart for team assignment is as follows, stopping as soon as
 - If it's about developer tools, add `team-devexp`.
 - If it's about a first-party package:
   - If it's about `go_router` or `go_router_builder`, add `team-framework`.
+  - If it's about `google_fonts`, add `team-framework`.
   - If it's about `two_dimensional_scrollables`, add `team-framework`.
   - If it's about `flutter_svg` or `vector_graphics`, add `team-engine`.
   - Otherwise, add `team-ecosystem`.

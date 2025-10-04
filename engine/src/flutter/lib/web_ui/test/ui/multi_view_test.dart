@@ -54,9 +54,7 @@ void testMain() {
         createDomElement('unregistered-view'),
       );
       expect(() => renderer.renderScene(scene, unregisteredView), throwsAssertionError);
-      // Unskip when Skwasm and CanvasKit are unified:
-      // https://github.com/flutter/flutter/issues/172311
-    }, skip: isSkwasm);
+    });
 
     test('will dispose the Rasterizer for a disposed view', () async {
       final EngineFlutterView view = EngineFlutterView(

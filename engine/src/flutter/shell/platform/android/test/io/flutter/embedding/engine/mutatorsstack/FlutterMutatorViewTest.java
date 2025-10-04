@@ -46,7 +46,7 @@ public class FlutterMutatorViewTest {
 
       final Matrix screenMatrix = new Matrix();
       screenMatrix.postTranslate(1, 2);
-      assertTrue(matrixCaptor.getValue().equals(screenMatrix));
+      assertEquals(matrixCaptor.getValue(), screenMatrix);
     }
 
     reset(touchProcessor);
@@ -59,7 +59,7 @@ public class FlutterMutatorViewTest {
 
       final Matrix screenMatrix = new Matrix();
       screenMatrix.postTranslate(1, 2);
-      assertTrue(matrixCaptor.getValue().equals(screenMatrix));
+      assertEquals(matrixCaptor.getValue(), screenMatrix);
     }
 
     reset(touchProcessor);
@@ -72,7 +72,7 @@ public class FlutterMutatorViewTest {
 
       final Matrix screenMatrix = new Matrix();
       screenMatrix.postTranslate(3, 4);
-      assertTrue(matrixCaptor.getValue().equals(screenMatrix));
+      assertEquals(matrixCaptor.getValue(), screenMatrix);
     }
 
     reset(touchProcessor);
@@ -85,7 +85,7 @@ public class FlutterMutatorViewTest {
 
       final Matrix screenMatrix = new Matrix();
       screenMatrix.postTranslate(7, 8);
-      assertTrue(matrixCaptor.getValue().equals(screenMatrix));
+      assertEquals(matrixCaptor.getValue(), screenMatrix);
     }
   }
 

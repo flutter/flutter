@@ -1478,6 +1478,11 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   CGFloat scale = screen.scale;
   _viewportMetrics.physical_width = self.view.bounds.size.width * scale;
   _viewportMetrics.physical_height = self.view.bounds.size.height * scale;
+  // TODO(louisehsu): update for https://github.com/flutter/flutter/issues/169147
+  _viewportMetrics.physical_min_width_constraint = _viewportMetrics.physical_width;
+  _viewportMetrics.physical_max_width_constraint = _viewportMetrics.physical_width;
+  _viewportMetrics.physical_min_height_constraint = _viewportMetrics.physical_height;
+  _viewportMetrics.physical_max_height_constraint = _viewportMetrics.physical_height;
 }
 
 // Set _viewportMetrics physical paddings.
@@ -1898,36 +1903,6 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     return;
   }
   [self.keyboardManager handlePress:press nextAction:next];
-}
-
-- (void)sendDeepLinkToFramework:(NSURL*)url completionHandler:(void (^)(BOOL success))completion {
-  __weak FlutterViewController* weakSelf = self;
-  [self.engine
-      waitForFirstFrame:3.0
-               callback:^(BOOL didTimeout) {
-                 if (didTimeout) {
-                   [FlutterLogger
-                       logError:@"Timeout waiting for first frame when launching a URL."];
-                   completion(NO);
-                 } else {
-                   // invove the method and get the result
-                   [weakSelf.engine.navigationChannel
-                       invokeMethod:@"pushRouteInformation"
-                          arguments:@{
-                            @"location" : url.absoluteString ?: [NSNull null],
-                          }
-                             result:^(id _Nullable result) {
-                               BOOL success =
-                                   [result isKindOfClass:[NSNumber class]] && [result boolValue];
-                               if (!success) {
-                                 // Logging the error if the result is not successful
-                                 [FlutterLogger
-                                     logError:@"Failed to handle route information in Flutter."];
-                               }
-                               completion(success);
-                             }];
-                 }
-               }];
 }
 
 // The documentation for presses* handlers (implemented below) is entirely

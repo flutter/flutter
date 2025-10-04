@@ -21,7 +21,6 @@ import 'debug.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
-import 'material_state.dart';
 import 'tab_bar_theme.dart';
 import 'tab_controller.dart';
 import 'tab_indicator.dart';
@@ -258,7 +257,7 @@ class _TabStyle extends AnimatedWidget {
   final TabBarThemeData defaults;
   final Widget child;
 
-  MaterialStateColor _resolveWithLabelColor(BuildContext context, {IconThemeData? iconTheme}) {
+  WidgetStateColor _resolveWithLabelColor(BuildContext context, {IconThemeData? iconTheme}) {
     final ThemeData themeData = Theme.of(context);
     final TabBarThemeData tabBarTheme = TabBarTheme.of(context);
     final Animation<double> animation = listenable as Animation<double>;
@@ -275,12 +274,12 @@ class _TabStyle extends AnimatedWidget {
 
     final Color unselectedColor;
 
-    if (selectedColor is MaterialStateColor) {
+    if (selectedColor is WidgetStateColor) {
       unselectedColor = selectedColor.resolve(const <WidgetState>{});
       selectedColor = selectedColor.resolve(const <WidgetState>{WidgetState.selected});
     } else {
       // unselectedLabelColor and tabBarTheme.unselectedLabelColor are ignored
-      // when labelColor is a MaterialStateColor.
+      // when labelColor is a WidgetStateColor.
       unselectedColor =
           unselectedLabelColor ??
           tabBarTheme.unselectedLabelColor ??
@@ -292,7 +291,7 @@ class _TabStyle extends AnimatedWidget {
               : selectedColor.withAlpha(0xB2)); // 70% alpha
     }
 
-    return MaterialStateColor.resolveWith((Set<WidgetState> states) {
+    return WidgetStateColor.resolveWith((Set<WidgetState> states) {
       if (states.contains(WidgetState.selected)) {
         return Color.lerp(selectedColor, unselectedColor, animation.value)!;
       }
@@ -1932,13 +1931,12 @@ class _TabBarState extends State<TabBar> {
       final MouseCursor effectiveMouseCursor =
           WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, selectedState) ??
           tabBarTheme.mouseCursor?.resolve(selectedState) ??
-          MaterialStateMouseCursor.clickable.resolve(selectedState);
+          WidgetStateMouseCursor.clickable.resolve(selectedState);
 
       final WidgetStateProperty<Color?> defaultOverlay = WidgetStateProperty.resolveWith<Color?>((
         Set<WidgetState> states,
       ) {
-        // TODO(ValentinVignal): Don't selectedState.
-        final Set<WidgetState> effectiveStates = selectedState..addAll(states);
+        final Set<WidgetState> effectiveStates = selectedState.toSet()..addAll(states);
         return _defaults.overlayColor?.resolve(effectiveStates);
       });
       wrappedTabs[index] = InkWell(

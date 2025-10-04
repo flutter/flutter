@@ -178,7 +178,7 @@ public class ProcessTextPlugin
   public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
     this.activityBinding = binding;
     this.activityBinding.addActivityResultListener(this);
-  };
+  }
 
   public void onDetachedFromActivityForConfigChanges() {
     this.activityBinding.removeActivityResultListener(this);

@@ -23,6 +23,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterRestorationPlugin.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifeCycle_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
@@ -49,6 +50,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (FlutterPlatformPlugin*)platformPlugin;
 - (FlutterTextInputPlugin*)textInputPlugin;
 - (FlutterRestorationPlugin*)restorationPlugin;
+- (FlutterEnginePluginSceneLifeCycleDelegate*)sceneLifeCycleDelegate;
 - (void)launchEngine:(nullable NSString*)entrypoint
           libraryURI:(nullable NSString*)libraryOrNil
       entrypointArgs:(nullable NSArray<NSString*>*)entrypointArgs;
@@ -102,6 +104,10 @@ NS_ASSUME_NONNULL_BEGIN
  * This function must be called on the main thread.
  */
 + (nullable FlutterEngine*)engineForIdentifier:(int64_t)identifier;
+
+- (void)addSceneLifeCycleDelegate:(NSObject<FlutterSceneLifeCycleDelegate>*)delegate;
+
+- (void)sendDeepLinkToFramework:(NSURL*)url completionHandler:(void (^)(BOOL success))completion;
 
 @end
 

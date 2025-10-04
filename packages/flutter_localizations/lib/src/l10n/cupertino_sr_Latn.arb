@@ -1,4 +1,10 @@
 {
+  "expansionTileExpandedHint": "dvaput dodirnite da biste skupili",
+  "collapsedHint": "Prošireno je",
+  "expandedHint": "Skupljeno je",
+  "expansionTileCollapsedTapHint": "Proširite za još detalja",
+  "expansionTileExpandedTapHint": "Skupite",
+  "expansionTileCollapsedHint": "dvaput dodirnite da biste proširili",
   "cancelButtonLabel": "Otkaži",
   "backButtonLabel": "Nazad",
   "clearButtonLabel": "Obriši",

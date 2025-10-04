@@ -19,7 +19,6 @@ FLUTTER_ASSERT_ARC
 static NSString* const kUIBackgroundMode = @"UIBackgroundModes";
 static NSString* const kRemoteNotificationCapabitiliy = @"remote-notification";
 static NSString* const kBackgroundFetchCapatibility = @"fetch";
-static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 
 @interface FlutterAppDelegate () {
   __weak NSObject<FlutterPluginRegistrant>* _weakRegistrant;
@@ -142,13 +141,6 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
   }
 }
 
-- (BOOL)isFlutterDeepLinkingEnabled {
-  NSNumber* isDeepLinkingEnabled =
-      [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FlutterDeepLinkingEnabled"];
-  // if not set, return YES
-  return isDeepLinkingEnabled ? [isDeepLinkingEnabled boolValue] : YES;
-}
-
 // This method is called when opening an URL with custom schemes.
 - (BOOL)application:(UIApplication*)application
             openURL:(NSURL*)url
@@ -169,21 +161,21 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
   if (flutterApplication == nil) {
     return NO;
   }
-  if (![self isFlutterDeepLinkingEnabled]) {
+  if (!FlutterSharedApplication.isFlutterDeepLinkingEnabled) {
     return NO;
   }
 
   FlutterViewController* flutterViewController = [self rootFlutterViewController];
   if (flutterViewController) {
-    [flutterViewController sendDeepLinkToFramework:url
-                                 completionHandler:^(BOOL success) {
-                                   if (!success && throwBack) {
-                                     // throw it back to iOS
-                                     [flutterApplication openURL:url
-                                                         options:@{}
-                                               completionHandler:nil];
-                                   }
-                                 }];
+    [flutterViewController.engine sendDeepLinkToFramework:url
+                                        completionHandler:^(BOOL success) {
+                                          if (!success && throwBack) {
+                                            // throw it back to iOS
+                                            [flutterApplication openURL:url
+                                                                options:@{}
+                                                      completionHandler:nil];
+                                          }
+                                        }];
   } else {
     [FlutterLogger logError:@"Attempting to open an URL without a Flutter RootViewController."];
     return NO;
@@ -340,34 +332,26 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 #pragma mark - State Restoration
 
 - (BOOL)application:(UIApplication*)application shouldSaveApplicationState:(NSCoder*)coder {
-  [coder encodeInt64:self.lastAppModificationTime forKey:kRestorationStateAppModificationKey];
+  [coder encodeInt64:FlutterSharedApplication.lastAppModificationTime
+              forKey:kRestorationStateAppModificationKey];
   return YES;
 }
 
 - (BOOL)application:(UIApplication*)application shouldRestoreApplicationState:(NSCoder*)coder {
   int64_t stateDate = [coder decodeInt64ForKey:kRestorationStateAppModificationKey];
-  return self.lastAppModificationTime == stateDate;
+  return FlutterSharedApplication.lastAppModificationTime == stateDate;
 }
 
 - (BOOL)application:(UIApplication*)application shouldSaveSecureApplicationState:(NSCoder*)coder {
-  [coder encodeInt64:self.lastAppModificationTime forKey:kRestorationStateAppModificationKey];
+  [coder encodeInt64:FlutterSharedApplication.lastAppModificationTime
+              forKey:kRestorationStateAppModificationKey];
   return YES;
 }
 
 - (BOOL)application:(UIApplication*)application
     shouldRestoreSecureApplicationState:(NSCoder*)coder {
   int64_t stateDate = [coder decodeInt64ForKey:kRestorationStateAppModificationKey];
-  return self.lastAppModificationTime == stateDate;
-}
-
-- (int64_t)lastAppModificationTime {
-  NSDate* fileDate;
-  NSError* error = nil;
-  [[[NSBundle mainBundle] executableURL] getResourceValue:&fileDate
-                                                   forKey:NSURLContentModificationDateKey
-                                                    error:&error];
-  NSAssert(error == nil, @"Cannot obtain modification date of main bundle: %@", error);
-  return [fileDate timeIntervalSince1970];
+  return FlutterSharedApplication.lastAppModificationTime == stateDate;
 }
 
 @end

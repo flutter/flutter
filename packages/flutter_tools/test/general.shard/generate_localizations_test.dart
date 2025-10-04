@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -120,6 +121,7 @@ void main() {
         suppressWarnings: suppressWarnings,
         useRelaxedSyntax: relaxSyntax,
         useNamedParameters: useNamedParameters,
+        projectPathString: (fileSystem ?? fs).currentDirectory.path,
       )
       ..loadResources()
       ..writeOutputFiles(isFromYaml: isFromYaml);
@@ -404,6 +406,40 @@ void main() {
     expect(unimplementedOutputString, contains('subtitle'));
   });
 
+  testWithoutContext('correctly creates an untranslated messages file when project directory is '
+      'not the current directory', () {
+    // Regression test for https://github.com/flutter/flutter/issues/174205
+    final String untranslatedMessagesFilePath = fs.path.join(
+      'lib',
+      'l10n',
+      'unimplemented_message_translations.json',
+    );
+
+    final Directory projectRoot = fs.directory('/my/project/root/')..createSync(recursive: true);
+    final Directory current = fs.currentDirectory;
+    try {
+      fs.currentDirectory = projectRoot;
+      _standardFlutterDirectoryL10nSetup(fs);
+    } finally {
+      fs.currentDirectory = current;
+    }
+    final generator =
+        LocalizationsGenerator(
+            fileSystem: fs,
+            inputPathString: defaultL10nPath,
+            outputPathString: defaultL10nPath,
+            templateArbFileName: defaultTemplateArbFileName,
+            outputFileString: defaultOutputFileString,
+            classNameString: defaultClassNameString,
+            logger: logger,
+            projectPathString: projectRoot.path,
+            untranslatedMessagesFile: untranslatedMessagesFilePath,
+          )
+          ..loadResources()
+          ..writeOutputFiles();
+    expect(generator.untranslatedMessagesFile, exists);
+  });
+
   testWithoutContext('untranslated messages suggestion is printed when translation is missing: '
       'command line message', () {
     setupLocalizations(<String, String>{
@@ -475,6 +511,7 @@ void main() {
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
           logger: logger,
+          projectPathString: fs.currentDirectory.path,
         )
         ..loadResources()
         ..writeOutputFiles();
@@ -505,6 +542,7 @@ void main() {
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
           logger: logger,
+          projectPathString: fs.currentDirectory.path,
         )
         ..loadResources()
         ..writeOutputFiles();
@@ -530,6 +568,7 @@ void main() {
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
           logger: logger,
+          projectPathString: fs.currentDirectory.path,
         )
         ..loadResources()
         ..writeOutputFiles();
@@ -776,9 +815,9 @@ flutter:
       expect(generator.header, 'HEADER');
       expect(generator.useDeferredLoading, isTrue);
       expect(generator.inputsAndOutputsListFile?.path, '/gen_l10n_inputs_and_outputs.json');
-      expect(generator.projectDirectory?.path, '/');
+      expect(generator.projectDirectory.path, '/');
       expect(generator.areResourceAttributesRequired, isTrue);
-      expect(generator.untranslatedMessagesFile?.path, 'untranslated');
+      expect(generator.untranslatedMessagesFile?.path, '/untranslated');
       expect(generator.usesNullableGetter, isFalse);
 
       // Just validate one file.
@@ -954,6 +993,7 @@ class AppLocalizationsEn extends AppLocalizations {
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
           logger: logger,
+          projectPathString: fs.currentDirectory.path,
         )..loadResources();
 
         expect(generator.supportedLocales.contains(LocaleInfo.fromString('en')), true);
@@ -980,6 +1020,7 @@ class AppLocalizationsEn extends AppLocalizations {
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
           logger: logger,
+          projectPathString: fs.currentDirectory.path,
         )..loadResources();
 
         expect(generator.supportedLocales.first, LocaleInfo.fromString('en'));
@@ -1008,6 +1049,7 @@ class AppLocalizationsEn extends AppLocalizations {
           classNameString: defaultClassNameString,
           preferredSupportedLocales: preferredSupportedLocale,
           logger: logger,
+          projectPathString: fs.currentDirectory.path,
         )..loadResources();
 
         expect(generator.supportedLocales.first, LocaleInfo.fromString('zh'));
@@ -1038,6 +1080,7 @@ class AppLocalizationsEn extends AppLocalizations {
               classNameString: defaultClassNameString,
               preferredSupportedLocales: preferredSupportedLocale,
               logger: logger,
+              projectPathString: fs.currentDirectory.path,
             ).loadResources();
           },
           throwsA(
@@ -1068,11 +1111,12 @@ class AppLocalizationsEn extends AppLocalizations {
         outputFileString: defaultOutputFileString,
         classNameString: defaultClassNameString,
         logger: logger,
+        projectPathString: fs.currentDirectory.path,
       )..loadResources();
 
-      expect(generator.arbPathStrings.first, fs.path.join('lib', 'l10n', 'app_en.arb'));
-      expect(generator.arbPathStrings.elementAt(1), fs.path.join('lib', 'l10n', 'app_es.arb'));
-      expect(generator.arbPathStrings.elementAt(2), fs.path.join('lib', 'l10n', 'app_zh.arb'));
+      expect(generator.arbPathStrings.first, fs.path.join('/', 'lib', 'l10n', 'app_en.arb'));
+      expect(generator.arbPathStrings.elementAt(1), fs.path.join('/', 'lib', 'l10n', 'app_es.arb'));
+      expect(generator.arbPathStrings.elementAt(2), fs.path.join('/', 'lib', 'l10n', 'app_zh.arb'));
     });
 
     testWithoutContext('correctly parses @@locale property in arb file', () {
@@ -1108,6 +1152,7 @@ class AppLocalizationsEn extends AppLocalizations {
         outputFileString: defaultOutputFileString,
         classNameString: defaultClassNameString,
         logger: logger,
+        projectPathString: fs.currentDirectory.path,
       )..loadResources();
 
       expect(generator.supportedLocales.contains(LocaleInfo.fromString('en')), true);
@@ -1151,6 +1196,7 @@ class AppLocalizationsEn extends AppLocalizations {
               outputFileString: defaultOutputFileString,
               classNameString: defaultClassNameString,
               logger: logger,
+              projectPathString: fs.currentDirectory.path,
             ).loadResources();
           },
           throwsA(
@@ -1178,6 +1224,7 @@ class AppLocalizationsEn extends AppLocalizations {
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
             logger: logger,
+            projectPathString: fs.currentDirectory.path,
           ).loadResources();
         },
         throwsA(
@@ -1213,6 +1260,7 @@ class AppLocalizationsEn extends AppLocalizations {
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
           logger: logger,
+          projectPathString: fs.currentDirectory.path,
         ).loadResources(),
         throwsA(
           isA<L10nException>().having(
@@ -1249,6 +1297,7 @@ class AppLocalizationsEn extends AppLocalizations {
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
             logger: logger,
+            projectPathString: fs.currentDirectory.path,
           ).loadResources();
         },
         throwsA(
@@ -1277,6 +1326,7 @@ class AppLocalizationsEn extends AppLocalizations {
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
             logger: logger,
+            projectPathString: fs.currentDirectory.path,
           ).loadResources();
         },
         throwsA(
@@ -1309,13 +1359,14 @@ class AppLocalizationsEn extends AppLocalizations {
         outputFileString: outputFileString,
         classNameString: classNameString,
         logger: logger,
+        projectPathString: fs.currentDirectory.path,
       );
       expect(
         () => generator.loadResources(),
         throwsToolExit(
           message:
               'Localized message for key "helloWorld" in '
-              '"lib/l10n/app_es.arb" is not a string.',
+              '"/lib/l10n/app_es.arb" is not a string.',
         ),
       );
     });
@@ -3046,6 +3097,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
               outputFileString: defaultOutputFileString,
               classNameString: defaultClassNameString,
               logger: logger,
+              projectPathString: fs.currentDirectory.path,
             )
             ..loadResources()
             ..writeOutputFiles();

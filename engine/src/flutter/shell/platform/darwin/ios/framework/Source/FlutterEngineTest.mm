@@ -15,10 +15,14 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Test.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifeCycle_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 FLUTTER_ASSERT_ARC
+
+@protocol TestFlutterPluginWithSceneEvents <NSObject, FlutterPlugin, FlutterSceneLifeCycleDelegate>
+@end
 
 @interface FlutterEngineSpy : FlutterEngine
 @property(nonatomic) BOOL ensureSemanticsEnabledCalled;
@@ -502,6 +506,26 @@ FLUTTER_ASSERT_ARC
   [mockBundle stopMocking];
 }
 
+- (void)testLifeCycleNotificationSceneWillConnect {
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+  [engine run];
+  id mockScene = OCMClassMock([UIWindowScene class]);
+  id mockLifecycleProvider = OCMProtocolMock(@protocol(FlutterSceneLifeCycleProvider));
+  id mockLifecycleDelegate = OCMClassMock([FlutterPluginSceneLifeCycleDelegate class]);
+  OCMStub([mockScene delegate]).andReturn(mockLifecycleProvider);
+  OCMStub([mockLifecycleProvider sceneLifeCycleDelegate]).andReturn(mockLifecycleDelegate);
+
+  NSNotification* sceneNotification =
+      [NSNotification notificationWithName:UISceneWillConnectNotification
+                                    object:mockScene
+                                  userInfo:nil];
+
+  [NSNotificationCenter.defaultCenter postNotification:sceneNotification];
+  OCMVerify(times(1), [mockLifecycleDelegate engine:engine
+                          receivedConnectNotificationFor:mockScene]);
+}
+
 - (void)testSpawnsShareGpuContext {
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar"];
   [engine run];
@@ -547,6 +571,74 @@ FLUTTER_ASSERT_ARC
   XCTAssertNotEqual(engine.shell.GetTaskRunners().GetUITaskRunner(),
                     engine.shell.GetTaskRunners().GetPlatformTaskRunner());
 #endif  // defined(TARGET_IPHONE_SIMULATOR) && TARGET_IPHONE_SIMULATOR
+}
+
+- (void)testAddSceneDelegateToRegistrar {
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"engine" project:project];
+  id mockEngine = OCMPartialMock(engine);
+  NSObject<FlutterPluginRegistrar>* registrar = [mockEngine registrarForPlugin:@"plugin"];
+  id mockPlugin = OCMProtocolMock(@protocol(TestFlutterPluginWithSceneEvents));
+  [registrar addSceneDelegate:mockPlugin];
+
+  OCMVerify(times(1), [mockEngine addSceneLifeCycleDelegate:[OCMArg any]]);
+}
+
+- (void)testSendDeepLinkToFrameworkTimesOut {
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"engine" project:project];
+  id mockEngine = OCMPartialMock(engine);
+  id mockEngineFirstFrameCallback = [OCMArg invokeBlockWithArgs:@YES, nil];
+  OCMStub([mockEngine waitForFirstFrame:3.0 callback:mockEngineFirstFrameCallback]);
+
+  NSURL* url = [NSURL URLWithString:@"example.com"];
+
+  [mockEngine sendDeepLinkToFramework:url
+                    completionHandler:^(BOOL success) {
+                      XCTAssertFalse(success);
+                    }];
+}
+
+- (void)testSendDeepLinkToFrameworkUsingNavigationChannel {
+  NSString* urlString = @"example.com";
+  NSURL* url = [NSURL URLWithString:urlString];
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"engine" project:project];
+  id mockEngine = OCMPartialMock(engine);
+  id mockEngineFirstFrameCallback = [OCMArg invokeBlockWithArgs:@NO, nil];
+  OCMStub([mockEngine waitForFirstFrame:3.0 callback:mockEngineFirstFrameCallback]);
+  id mockNavigationChannel = OCMClassMock([FlutterMethodChannel class]);
+  OCMStub([mockEngine navigationChannel]).andReturn(mockNavigationChannel);
+  id mockNavigationChannelCallback = [OCMArg invokeBlockWithArgs:@1, nil];
+  OCMStub([mockNavigationChannel invokeMethod:@"pushRouteInformation"
+                                    arguments:@{@"location" : urlString}
+                                       result:mockNavigationChannelCallback]);
+
+  [mockEngine sendDeepLinkToFramework:url
+                    completionHandler:^(BOOL success) {
+                      XCTAssertTrue(success);
+                    }];
+}
+
+- (void)testSendDeepLinkToFrameworkUsingNavigationChannelFails {
+  NSString* urlString = @"example.com";
+  NSURL* url = [NSURL URLWithString:urlString];
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"engine" project:project];
+  id mockEngine = OCMPartialMock(engine);
+  id mockEngineFirstFrameCallback = [OCMArg invokeBlockWithArgs:@NO, nil];
+  OCMStub([mockEngine waitForFirstFrame:3.0 callback:mockEngineFirstFrameCallback]);
+  id mockNavigationChannel = OCMClassMock([FlutterMethodChannel class]);
+  OCMStub([mockEngine navigationChannel]).andReturn(mockNavigationChannel);
+  id mockNavigationChannelCallback = [OCMArg invokeBlockWithArgs:@0, nil];
+  OCMStub([mockNavigationChannel invokeMethod:@"pushRouteInformation"
+                                    arguments:@{@"location" : urlString}
+                                       result:mockNavigationChannelCallback]);
+
+  [mockEngine sendDeepLinkToFramework:url
+                    completionHandler:^(BOOL success) {
+                      XCTAssertFalse(success);
+                    }];
 }
 
 @end

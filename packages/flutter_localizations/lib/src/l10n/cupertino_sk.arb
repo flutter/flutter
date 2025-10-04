@@ -40,10 +40,10 @@
   "clearButtonLabel": "Vymazať",
   "cancelButtonLabel": "Zrušiť",
   "backButtonLabel": "Späť",
-  "expansionTileExpandedHint": "double tap to collapse",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "zbalíte dvojitým klepnutím",
+  "expansionTileCollapsedHint": "rozbalíte dvojitým klepnutím",
+  "expansionTileExpandedTapHint": "Zbaliť",
+  "expansionTileCollapsedTapHint": "Rozbaliť a zobraziť ďalšie podrobnosti",
+  "expandedHint": "Zbalené",
+  "collapsedHint": "Rozbalené"
 }

@@ -272,10 +272,10 @@ ComponentV2::ComponentV2(
       fidl::ClientEnd<fuchsia_io::Directory>(flutter_public_dir.TakeChannel()));
 
   // Request an event from the directory to ensure it is servicing requests.
-  directory_ptr_->Open3(".",
-                        fuchsia::io::Flags::PROTOCOL_NODE |
-                            fuchsia::io::Flags::FLAG_SEND_REPRESENTATION,
-                        {}, cloned_directory_ptr_.NewRequest().TakeChannel());
+  directory_ptr_->Open(".",
+                       fuchsia::io::Flags::PROTOCOL_NODE |
+                           fuchsia::io::Flags::FLAG_SEND_REPRESENTATION,
+                       {}, cloned_directory_ptr_.NewRequest().TakeChannel());
 
   // Collect our standard set of directories along with directories that are
   // included in the cml file to expose.

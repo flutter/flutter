@@ -186,7 +186,7 @@ source_set("ui") {
     "//flutter/skia",
     "//flutter/third_party/rapidjson",
     "//flutter/third_party/tonic",
-    "//third_party/zlib:zlib",
+    "//third_party/zlib",
   ]
 
   if (impeller_supports_rendering) {
