@@ -1613,21 +1613,36 @@ mixin WidgetInspectorService {
     switch (object) {
       case Element() when object != selection.currentElement:
         selection.currentElement = object;
-        _sendInspectEvent(selection.currentElement);
+        _notifyToolsOfSelection(selection.currentElement);
         return true;
       case RenderObject() when object != selection.current:
         selection.current = object;
-        _sendInspectEvent(selection.current);
+        _notifyToolsOfSelection(selection.current);
         return true;
     }
     return false;
   }
 
-  /// Notify attached tools to navigate to an object's source location.
-  void _sendInspectEvent(Object? object) {
+  /// Notify connected tools (e.g. Flutter DevTools, IDE plugins) that a new
+  /// widget has been selected.
+  ///
+  /// This method triggers two actions:
+  /// 1. It calls [developer.inspect] on the provided [object], making it
+  ///    available for inspection in tools like DevTools.
+  /// 2. It posts a 'navigate' [ToolEvent] with the source code location of the
+  ///    selected widget, allowing IDEs to navigate to the corresponding file
+  ///    and line.
+  ///
+  /// If [restrictToProjectFiles] is true and the selected widget is not from
+  /// the local project (i.e., it's from the Flutter framework or a package),
+  /// the 'navigate' event will point to the nearest ancestor widget that is
+  /// part of the local project.
+  void _notifyToolsOfSelection(Object? object, {bool restrictToProjectFiles = false}) {
     inspect(object);
 
-    final _Location? location = _getSelectedWidgetLocation();
+    final _Location? location = _getSelectedWidgetLocation(
+      restrictToSummaryTree: restrictToProjectFiles,
+    );
     if (location != null) {
       postEvent('navigate', <String, Object>{
         'fileUri': location.file, // URI file path of the location.
@@ -2463,8 +2478,18 @@ mixin WidgetInspectorService {
     return _safeJsonEncode(_getSelectedSummaryWidget(null, groupName));
   }
 
-  _Location? _getSelectedWidgetLocation() {
-    return _getCreationLocation(_getSelectedWidgetDiagnosticsNode(null)?.value);
+  /// Returns the creation location of the currently selected widget.
+  ///
+  /// If [restrictToSummaryTree] is true and the currently selected widget is
+  /// not in the summary tree (i.e. not created by the current project), this
+  /// method will instead return the location of its nearest ancestor widget
+  /// that is in the summary tree.
+  _Location? _getSelectedWidgetLocation({bool restrictToSummaryTree = false}) {
+    final DiagnosticsNode? selectedNode = restrictToSummaryTree
+        ? _getSelectedSummaryDiagnosticsNode(null)
+        : _getSelectedWidgetDiagnosticsNode(null);
+
+    return _getCreationLocation(selectedNode?.value);
   }
 
   DiagnosticsNode? _getSelectedSummaryDiagnosticsNode(String? previousSelectionId) {
@@ -3019,7 +3044,10 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
       selection.clear();
     } else {
       // Otherwise notify DevTools of the current selection.
-      WidgetInspectorService.instance._sendInspectEvent(selection.current);
+      WidgetInspectorService.instance._notifyToolsOfSelection(
+        selection.current,
+        restrictToProjectFiles: true,
+      );
     }
   }
 
@@ -3029,7 +3057,10 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
     }
     if (_lastPointerLocation != null) {
       _inspectAt(_lastPointerLocation!);
-      WidgetInspectorService.instance._sendInspectEvent(selection.current);
+      WidgetInspectorService.instance._notifyToolsOfSelection(
+        selection.current,
+        restrictToProjectFiles: true,
+      );
     }
   }
 
