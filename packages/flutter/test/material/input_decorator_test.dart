@@ -15717,4 +15717,30 @@ void main() {
     // see https://github.com/flutter/flutter/issues/175993.
     expect(actualGap, greaterThanOrEqualTo(8.0));
   });
+
+  testWidgets('InputDecorator does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(child: InputDecorator(decoration: InputDecoration())),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(InputDecorator)), Size.zero);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(
+              child: InputDecorator(decoration: InputDecoration(border: OutlineInputBorder())),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(InputDecorator)), Size.zero);
+  });
 }
