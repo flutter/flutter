@@ -68,4 +68,4 @@ if [[ "$CURRENT_BRANCH" != "main" && \
   fi
 fi
 
-git -C "$FLUTTER_ROOT" ls-tree --format "%(objectname) %(path)" "$BASEREF" -- "${TRACKEDFILES[@]}" | git hash-object --stdin
+git -C "$FLUTTER_ROOT" ls-tree "$BASEREF" -- "${TRACKEDFILES[@]}" | git hash-object --stdin
