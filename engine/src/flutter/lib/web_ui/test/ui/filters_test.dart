@@ -159,6 +159,13 @@ Future<void> testMain() async {
     expect(sepia.toString(), startsWith('ColorFilter.matrix([0.393, 0.769, 0.189, '));
   });
 
+  test('saturation color filter', () async {
+    final ui.ColorFilter colorFilter = ui.ColorFilter.saturation(0);
+    await drawTestImageWithPaint(ui.Paint()..colorFilter = colorFilter);
+    await matchGoldenFile('ui_filter_saturation_colorfilter.png', region: region);
+    expect(colorFilter.toString(), startsWith('ColorFilter.matrix([0.2126, 0.7152, 0.0722'));
+  });
+
   test('matrix color filter with 0..255 translation values', () async {
     const ui.ColorFilter sepia = ui.ColorFilter.matrix(<double>[
       0.393, 0.769, 0.189, 0, 50.0, // row
@@ -587,6 +594,7 @@ List<ui.ColorFilter> createColorFilters() {
     EngineColorFilter.linearToSrgbGamma(),
     // ignore: prefer_const_constructors
     EngineColorFilter.srgbToLinearGamma(),
+    EngineColorFilter.saturation(0.5),
   ];
 }
 
