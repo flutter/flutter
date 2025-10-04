@@ -47,6 +47,8 @@ export 'package:flutter/painting.dart'
 // Examples can assume:
 // late Widget image;
 // late ImageProvider _image;
+// late bool isPaused;
+// late AssetImage myAnimatedGif;
 
 /// Creates an [ImageConfiguration] based on the given [BuildContext] (and
 /// optionally size).
@@ -279,6 +281,23 @@ typedef ImageErrorWidgetBuilder =
 ///
 /// ```dart
 /// Image.network('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg')
+/// ```
+/// {@end-tool}
+///
+/// Multiframe images, such as animated GIFs, are paused when [TickerMode] is
+/// disabled just like any other animation. They also paused when animations are
+/// disabled via [MediaQueryData.disableAnimations], such as for accessibility
+/// purposes. If the animation is paused when the image first loads, the first
+/// frame will be displayed and then animation will stop.
+///
+/// {@tool snippet}
+//// An example of pausing a multiframe image using [TickerMode].
+///
+/// ```dart
+/// TickerMode(
+///   enabled: !isPaused,
+///   child: Image(image: myAnimatedGif),
+/// ),
 /// ```
 /// {@end-tool}
 ///
@@ -1100,6 +1119,15 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   StackTrace? _lastStack;
   ImageStreamCompleterHandle? _completerHandle;
 
+  /// True when animations are disabled and the image should not update, such as
+  /// when [TickerMode] is disabled or [MediaQueryData.disableAnimations] is
+  /// true.
+  bool _isPaused = false;
+
+  /// False when the class first is instantiated and true forever after the
+  /// first frame of the image is received.
+  bool _hasReceivedFirstFrame = false;
+
   @override
   void initState() {
     super.initState();
@@ -1123,7 +1151,9 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     _updateInvertColors();
     _resolveImage();
 
-    if (TickerMode.of(context)) {
+    _isPaused = !TickerMode.of(context) || (MediaQuery.maybeDisableAnimationsOf(context) ?? false);
+
+    if (!_isPaused || !_hasReceivedFirstFrame) {
       _listenToStream();
     } else {
       _stopListeningToStream(keepStreamAlive: true);
@@ -1211,6 +1241,11 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   }
 
   void _handleImageFrame(ImageInfo imageInfo, bool synchronousCall) {
+    if (_hasReceivedFirstFrame && _isPaused) {
+      _stopListeningToStream(keepStreamAlive: true);
+      return;
+    }
+    _hasReceivedFirstFrame = true;
     setState(() {
       _replaceImage(info: imageInfo);
       _loadingProgress = null;

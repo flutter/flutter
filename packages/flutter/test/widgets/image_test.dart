@@ -882,9 +882,58 @@ void main() {
       excludeFromSemantics: true,
       image: _TestImageProvider(streamCompleter: imageStreamCompleter),
     );
+
+    final ui.Codec codec = (await tester.runAsync(() {
+      return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
+    }))!;
+    Future<ui.Image> nextFrame() async {
+      final ui.FrameInfo frameInfo = (await tester.runAsync(codec.getNextFrame))!;
+      return frameInfo.image;
+    }
+
+    expect(imageStreamCompleter.listeners.length, 0);
     await tester.pumpWidget(TickerMode(enabled: true, child: image));
     expect(imageStreamCompleter.listeners.length, 2);
     await tester.pumpWidget(TickerMode(enabled: false, child: image));
+    // Despite being paused, the first frame hasn't come in yet, so it's still
+    // listening.
+    expect(imageStreamCompleter.listeners.length, 2);
+
+    // Send the first frame and the listener will be removed.
+    imageStreamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+    await tester.pump();
+    expect(imageStreamCompleter.listeners.length, 1);
+  });
+
+  testWidgets('MediaQuery.disableAnimations controls stream registration', (
+    WidgetTester tester,
+  ) async {
+    final _TestImageStreamCompleter imageStreamCompleter = _TestImageStreamCompleter();
+    final Image image = Image(
+      excludeFromSemantics: true,
+      image: _TestImageProvider(streamCompleter: imageStreamCompleter),
+    );
+    final ui.Codec codec = (await tester.runAsync(() {
+      return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
+    }))!;
+    Future<ui.Image> nextFrame() async {
+      final ui.FrameInfo frameInfo = (await tester.runAsync(codec.getNextFrame))!;
+      return frameInfo.image;
+    }
+
+    expect(imageStreamCompleter.listeners.length, 0);
+    await tester.pumpWidget(image);
+    expect(imageStreamCompleter.listeners.length, 2);
+    await tester.pumpWidget(
+      MediaQuery(data: const MediaQueryData(disableAnimations: true), child: image),
+    );
+    // Despite being paused, the first frame hasn't come in yet, so it's still
+    // listening.
+    expect(imageStreamCompleter.listeners.length, 2);
+
+    // Send the first frame and the listener will be removed.
+    imageStreamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+    await tester.pump();
     expect(imageStreamCompleter.listeners.length, 1);
   });
 
@@ -1231,6 +1280,220 @@ void main() {
       expect(buildCount, 4);
     },
   );
+
+  testWidgets('disableAnimations prevents the image from updating', (WidgetTester tester) async {
+    final ui.Codec codec = (await tester.runAsync(() {
+      return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
+    }))!;
+
+    Future<ui.Image> nextFrame() async {
+      final ui.FrameInfo frameInfo = (await tester.runAsync(codec.getNextFrame))!;
+      return frameInfo.image;
+    }
+
+    final _TestImageStreamCompleter streamCompleter = _TestImageStreamCompleter();
+    final _TestImageProvider imageProvider = _TestImageProvider(streamCompleter: streamCompleter);
+    int? lastFrame;
+    int buildCount = 0;
+
+    Widget buildFrame(BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
+      lastFrame = frame;
+      buildCount++;
+      return child;
+    }
+
+    bool disableAnimations = false;
+    late StateSetter setState;
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter localSetState) {
+          setState = localSetState;
+          return MediaQuery(
+            data: MediaQueryData(disableAnimations: disableAnimations),
+            child: Image(image: imageProvider, frameBuilder: buildFrame),
+          );
+        },
+      ),
+    );
+
+    expect(lastFrame, isNull);
+    expect(buildCount, 1);
+
+    // Pumping another frame doesn't do anything.
+    await tester.pump();
+    expect(lastFrame, isNull);
+    expect(buildCount, 1);
+
+    // When some data comes through for the image, it updates to show the image.
+    streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+    await tester.pump();
+    expect(lastFrame, 0);
+    expect(buildCount, 2);
+
+    // Pumping another frame doesn't do anything.
+    await tester.pump();
+    expect(lastFrame, 0);
+    expect(buildCount, 2);
+
+    // When another image frame comes, it updates again.
+    streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+    await tester.pump();
+    expect(lastFrame, 1);
+    expect(buildCount, 3);
+
+    // Disable animations. A rebuild happens of the same frame.
+    setState(() {
+      disableAnimations = true;
+    });
+    await tester.pump();
+    expect(lastFrame, 1);
+    expect(buildCount, 4);
+
+    // A new frame arriving does nothing because animations are disabled.
+    streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+    await tester.pump();
+    expect(lastFrame, 1);
+    expect(buildCount, 4);
+
+    // Re-enable animations. The image updates to show the frame that was
+    // received while disabled.
+    setState(() {
+      disableAnimations = false;
+    });
+    await tester.pump();
+    expect(lastFrame, 2);
+    expect(buildCount, 5);
+
+    // Subsequent frames showing up update the image.
+    streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+    await tester.pump();
+    expect(lastFrame, 3);
+    expect(buildCount, 6);
+  });
+
+  testWidgets('the first frame is still loaded when disableAnimations is true on first load', (
+    WidgetTester tester,
+  ) async {
+    final ui.Codec codec = (await tester.runAsync(() {
+      return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
+    }))!;
+
+    Future<ui.Image> nextFrame() async {
+      final ui.FrameInfo frameInfo = (await tester.runAsync(codec.getNextFrame))!;
+      return frameInfo.image;
+    }
+
+    final _TestImageStreamCompleter streamCompleter = _TestImageStreamCompleter();
+    final _TestImageProvider imageProvider = _TestImageProvider(streamCompleter: streamCompleter);
+    int? lastFrame;
+    int buildCount = 0;
+
+    Widget buildFrame(BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
+      lastFrame = frame;
+      buildCount++;
+      return child;
+    }
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(disableAnimations: true),
+        child: Image(image: imageProvider, frameBuilder: buildFrame),
+      ),
+    );
+
+    expect(lastFrame, isNull);
+    expect(buildCount, 1);
+
+    // Pumping another frame doesn't do anything.
+    await tester.pump();
+    expect(lastFrame, isNull);
+    expect(buildCount, 1);
+
+    // When some data comes through for the image, it updates to show the image,
+    // even though disableAnimations is true.
+    streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+    await tester.pump();
+    expect(lastFrame, 0);
+    expect(buildCount, 2);
+
+    // Pumping another frame doesn't do anything.
+    await tester.pump();
+    expect(lastFrame, 0);
+    expect(buildCount, 2);
+
+    // Subsequent frames arriving don't do anything, because disableAnimations
+    // is true.
+    streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+    await tester.pump();
+    expect(lastFrame, 0);
+    expect(buildCount, 2);
+    streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+    await tester.pump();
+    expect(lastFrame, 0);
+    expect(buildCount, 2);
+  });
+
+  testWidgets('the first frame is still loaded when TickerMode is disabled on first load', (
+    WidgetTester tester,
+  ) async {
+    final ui.Codec codec = (await tester.runAsync(() {
+      return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
+    }))!;
+
+    Future<ui.Image> nextFrame() async {
+      final ui.FrameInfo frameInfo = (await tester.runAsync(codec.getNextFrame))!;
+      return frameInfo.image;
+    }
+
+    final _TestImageStreamCompleter streamCompleter = _TestImageStreamCompleter();
+    final _TestImageProvider imageProvider = _TestImageProvider(streamCompleter: streamCompleter);
+    int? lastFrame;
+    int buildCount = 0;
+
+    Widget buildFrame(BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
+      lastFrame = frame;
+      buildCount++;
+      return child;
+    }
+
+    await tester.pumpWidget(
+      TickerMode(
+        enabled: false,
+        child: Image(image: imageProvider, frameBuilder: buildFrame),
+      ),
+    );
+
+    expect(lastFrame, isNull);
+    expect(buildCount, 1);
+
+    // Pumping another frame doesn't do anything.
+    await tester.pump();
+    expect(lastFrame, isNull);
+    expect(buildCount, 1);
+
+    // When some data comes through for the image, it updates to show the image,
+    // even though disableAnimations is true.
+    streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+    await tester.pump();
+    expect(lastFrame, 0);
+    expect(buildCount, 2);
+
+    // Pumping another frame doesn't do anything.
+    await tester.pump();
+    expect(lastFrame, 0);
+    expect(buildCount, 2);
+
+    // Subsequent frames arriving don't do anything, because disableAnimations
+    // is true.
+    streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+    await tester.pump();
+    expect(lastFrame, 0);
+    expect(buildCount, 2);
+    streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+    await tester.pump();
+    expect(lastFrame, 0);
+    expect(buildCount, 2);
+  });
 
   testWidgets('Image invokes loadingBuilder on chunk event notification', (
     WidgetTester tester,
@@ -1962,6 +2225,40 @@ void main() {
     expect(find.byType(Image), findsOneWidget);
 
     await tester.pumpWidget(TickerMode(enabled: true, child: Image(image: provider)));
+    expect(find.byType(Image), findsOneWidget);
+  });
+
+  testWidgets('Keeps stream alive when animations are disabled', (WidgetTester tester) async {
+    imageCache.maximumSize = 0;
+    final ui.Image image = (await tester.runAsync(() => createTestImage(cache: false)))!;
+    final _TestImageProvider provider = _TestImageProvider();
+    provider.complete(image);
+
+    bool disableAnimations = false;
+    late StateSetter setState;
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter localSetState) {
+          setState = localSetState;
+          return MediaQuery(
+            data: MediaQueryData(disableAnimations: disableAnimations),
+            child: Image(image: provider),
+          );
+        },
+      ),
+    );
+    expect(find.byType(Image), findsOneWidget);
+
+    setState(() {
+      disableAnimations = true;
+    });
+    await tester.pump();
+    expect(find.byType(Image), findsOneWidget);
+
+    setState(() {
+      disableAnimations = false;
+    });
+    await tester.pump();
     expect(find.byType(Image), findsOneWidget);
   });
 
