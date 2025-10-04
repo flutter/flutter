@@ -100,6 +100,7 @@ bool InternalFlutterGpu_Texture_Initialize(Dart_Handle wrapper,
                                            int height,
                                            int sample_count,
                                            int coordinate_system,
+                                           int texture_type,
                                            bool enable_render_target_usage,
                                            bool enable_shader_read_usage,
                                            bool enable_shader_write_usage) {
@@ -119,16 +120,20 @@ bool InternalFlutterGpu_Texture_Initialize(Dart_Handle wrapper,
   }
   switch (sample_count) {
     case 1:
-      desc.type = impeller::TextureType::kTexture2D;
       desc.sample_count = impeller::SampleCount::kCount1;
       break;
     case 4:
-      desc.type = impeller::TextureType::kTexture2DMultisample;
       desc.sample_count = impeller::SampleCount::kCount4;
       break;
     default:
       return false;
   }
+  desc.type = static_cast<impeller::TextureType>(texture_type);
+  if (!impeller::IsMultisampleCapable(desc.type) &&
+      desc.sample_count == impeller::SampleCount::kCount4) {
+    return false;
+  }
+
   auto texture =
       gpu_context->GetContext().GetResourceAllocator()->CreateTexture(desc,
                                                                       true);
