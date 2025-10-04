@@ -40,6 +40,22 @@ abstract class EdgeInsetsGeometry {
   const factory EdgeInsetsGeometry.only({double left, double right, double top, double bottom}) =
       EdgeInsets.only;
 
+  /// Creates [EdgeInsets] with all sides equal to [rest],
+  /// but allows overriding individual sides.
+  ///
+  /// Example:
+  /// ```dart
+  /// EdgeInsetsGeometry.some(rest: 16, left: 8, top: 0);
+  /// ```
+  /// Results in: left = 8, top = 0, right = 16, bottom = 16
+  const factory EdgeInsetsGeometry.some({
+    double rest,
+    double? left,
+    double? top,
+    double? right,
+    double? bottom,
+  }) = EdgeInsets.some;
+
   /// Creates [EdgeInsetsDirectional] with only the given values non-zero.
   const factory EdgeInsetsGeometry.directional({
     double start,
@@ -69,6 +85,20 @@ abstract class EdgeInsetsGeometry {
   /// bottom.
   const factory EdgeInsetsGeometry.fromSTEB(double start, double top, double end, double bottom) =
       EdgeInsetsDirectional.fromSTEB;
+
+  /// Creates insets where all sides are [value] except [top].
+  const factory EdgeInsetsGeometry.exceptTop(double value, [double top]) = EdgeInsets.exceptTop;
+
+  /// Creates insets where all sides are [value] except [bottom].
+  const factory EdgeInsetsGeometry.exceptBottom(double value, [double bottom]) =
+      EdgeInsets.exceptBottom;
+
+  /// Creates insets where all sides are [value] except [left].
+  const factory EdgeInsetsGeometry.exceptLeft(double value, [double left]) = EdgeInsets.exceptLeft;
+
+  /// Creates insets where all sides are [value] except [right].
+  const factory EdgeInsetsGeometry.exceptRight(double value, [double right]) =
+      EdgeInsets.exceptRight;
 
   /// An [EdgeInsets] with zero offsets in each direction.
   static const EdgeInsetsGeometry zero = EdgeInsets.zero;
@@ -431,6 +461,74 @@ class EdgeInsets extends EdgeInsetsGeometry {
       right = horizontal,
       bottom = vertical;
 
+  /// Creates insets where all sides are [value], except the excluded ones.
+  ///
+  ///{@tool snippet}
+  ///
+  /// Example:
+  /// ```dart
+  /// const EdgeInsets.some(rest: 8.0, top: true); // -> left: 8, right: 8, bottom: 8, top: 0
+  /// ```
+  /// {@end-tool}
+  const EdgeInsets.some({
+    double rest = 0.0,
+    double? left,
+    double? top,
+    double? right,
+    double? bottom,
+  }) : left = left ?? rest,
+       top = top ?? rest,
+       right = right ?? rest,
+       bottom = bottom ?? rest;
+
+  /// Creates insets where all sides are set to [value] except the [top], which is
+  /// `0.0` by default.
+  ///
+  /// {@tool snippet}
+  /// ```dart
+  /// // Creates insets: left=16, right=16, bottom=16, top=0
+  /// const EdgeInsets.exceptTop(16.0);
+  /// ```
+  /// {@end-tool}
+  const EdgeInsets.exceptTop(double value, [double top = 0.0])
+    : this.only(left: value, top: top, right: value, bottom: value);
+
+  /// Creates insets where all sides are set to [value] except the [bottom], which is
+  /// `0.0` by default.
+  ///
+  /// {@tool snippet}
+  /// ```dart
+  /// // Creates insets: left=12, right=12, top=12, bottom=0
+  /// const EdgeInsets.exceptBottom(12.0);
+  /// ```
+  /// {@end-tool}
+  const EdgeInsets.exceptBottom(double value, [double bottom = 0.0])
+    : this.only(left: value, top: value, right: value, bottom: bottom);
+
+  /// Creates insets where all sides are set to [value] except the [left], which is
+  /// `0.0` by default.
+  ///
+  /// {@tool snippet}
+  /// ```dart
+  /// // Creates insets: top=20, right=20, bottom=20, left=0
+  /// const EdgeInsets.exceptLeft(20.0);
+  /// ```
+  /// {@end-tool}
+  const EdgeInsets.exceptLeft(double value, [double left = 0.0])
+    : this.only(left: left, top: value, right: value, bottom: value);
+
+  /// Creates insets where all sides are set to [value] except the [right], which is
+  /// `0.0` by default.
+  ///
+  /// {@tool snippet}
+  /// ```dart
+  /// // Creates insets: top=8, left=8, bottom=8, right=0
+  /// const EdgeInsets.exceptRight(8.0);
+  /// ```
+  /// {@end-tool}
+  const EdgeInsets.exceptRight(double value, [double right = 0.0])
+    : this.only(left: value, top: value, right: right, bottom: value);
+
   /// Creates insets that match the given view padding.
   ///
   /// If you need the current system padding or view insets in the context of a
@@ -759,6 +857,57 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
     this.end = 0.0,
     this.bottom = 0.0,
   });
+
+  /// Creates [EdgeInsetsDirectional] where all sides default to [rest],
+  /// but allows overriding individual sides.
+  ///
+  /// This is similar to [EdgeInsets.all], but with optional overrides.
+  ///
+  /// For example:
+  /// ```dart
+  /// EdgeInsetsDirectional.some(rest : 20, top: 0, start: 8);
+  /// // -> start=8, top=0, end=20, bottom=20
+  /// ```
+  const EdgeInsetsDirectional.some({
+    double rest = 0.0,
+    double? start,
+    double? top,
+    double? end,
+    double? bottom,
+  }) : this.only(
+          start: start ?? rest,
+          top: top ?? rest,
+          end: end ?? rest,
+          bottom: bottom ?? rest,
+        );
+
+  /// Creates [EdgeInsetsDirectional] where all sides are [value],
+  /// except [start] which defaults to `0.0`.
+  ///
+  /// This is useful when you want equal padding on all sides except
+  /// the `start` side in an LTR/RTL-aware layout.
+  ///
+  /// For example:
+  /// ```dart
+  /// EdgeInsetsDirectional.exceptStart(16);
+  /// // -> start=0, top=16, end=16, bottom=16
+  /// ```
+  const EdgeInsetsDirectional.exceptStart(double value, [double start = 0.0])
+      : this.only(start: start, top: value, end: value, bottom: value);
+
+  /// Creates [EdgeInsetsDirectional] where all sides are [value],
+  /// except [end] which defaults to `0.0`.
+  ///
+  /// This is useful when you want equal padding on all sides except
+  /// the `end` side in an LTR/RTL-aware layout.
+  ///
+  /// For example:
+  /// ```dart
+  /// EdgeInsetsDirectional.exceptEnd(16);
+  /// // -> start=16, top=16, end=0, bottom=16
+  /// ```
+  const EdgeInsetsDirectional.exceptEnd(double value, [double end = 0.0])
+      : this.only(start: value, top: value, end: end, bottom: value);
 
   /// Creates insets with symmetric vertical and horizontal offsets.
   ///
