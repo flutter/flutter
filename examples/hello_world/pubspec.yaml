@@ -8,7 +8,7 @@ resolution: workspace
 dependencies:
   flutter:
     sdk: flutter
-
+  go_router: any
 
 dev_dependencies:
   flutter_driver:
