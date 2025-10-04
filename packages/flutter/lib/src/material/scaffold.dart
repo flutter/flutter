@@ -3155,6 +3155,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     switch (themeData.platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
+        if (!widget.primary) {
+          break;
+        }
         _addIfNonNull(
           children,
           GestureDetector(
