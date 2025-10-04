@@ -197,48 +197,7 @@ class WebTestsSuite {
       () => _runGalleryE2eWebTest('debug'),
       () => _runGalleryE2eWebTest('profile'),
       () => _runGalleryE2eWebTest('release'),
-      () =>
-          runWebServiceWorkerTest(headless: true, testType: ServiceWorkerTestType.withoutFlutterJs),
-      () => runWebServiceWorkerTest(headless: true, testType: ServiceWorkerTestType.withFlutterJs),
-      () => runWebServiceWorkerTest(
-        headless: true,
-        testType: ServiceWorkerTestType.withFlutterJsShort,
-      ),
-      () => runWebServiceWorkerTest(
-        headless: true,
-        testType: ServiceWorkerTestType.withFlutterJsEntrypointLoadedEvent,
-      ),
-      () => runWebServiceWorkerTest(
-        headless: true,
-        testType: ServiceWorkerTestType.withFlutterJsTrustedTypesOn,
-      ),
-      () => runWebServiceWorkerTest(
-        headless: true,
-        testType: ServiceWorkerTestType.withFlutterJsNonceOn,
-      ),
-      () => runWebServiceWorkerTestWithCachingResources(
-        headless: true,
-        testType: ServiceWorkerTestType.withoutFlutterJs,
-      ),
-      () => runWebServiceWorkerTestWithCachingResources(
-        headless: true,
-        testType: ServiceWorkerTestType.withFlutterJs,
-      ),
-      () => runWebServiceWorkerTestWithCachingResources(
-        headless: true,
-        testType: ServiceWorkerTestType.withFlutterJsShort,
-      ),
-      () => runWebServiceWorkerTestWithCachingResources(
-        headless: true,
-        testType: ServiceWorkerTestType.withFlutterJsEntrypointLoadedEvent,
-      ),
-      () => runWebServiceWorkerTestWithCachingResources(
-        headless: true,
-        testType: ServiceWorkerTestType.withFlutterJsTrustedTypesOn,
-      ),
-      () => runWebServiceWorkerTestWithGeneratedEntrypoint(headless: true),
-      () => runWebServiceWorkerTestWithBlockedServiceWorkers(headless: true),
-      () => runWebServiceWorkerTestWithCustomServiceWorkerVersion(headless: true),
+      () => runCleanupVerificationTest(headless: true),
       () => _runWebStackTraceTest('profile', 'lib/stack_trace.dart'),
       () => _runWebStackTraceTest('release', 'lib/stack_trace.dart'),
       () => _runWebStackTraceTest('profile', 'lib/framework_stack_trace.dart'),
