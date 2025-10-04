@@ -815,10 +815,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       // This can get called twice, in the case of a Future without listeners failing, and then
       // our main future completing.
       assert(Zone.current == _parentZone);
-      _restorationManager?.dispose();
-      _restorationManager = null;
       if (_pendingExceptionDetails != null) {
-        debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
+        debugPrint =
+            debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
         reportTestException(_pendingExceptionDetails!, testDescription);
         _pendingExceptionDetails = null;
       }
@@ -1068,6 +1067,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         Container(key: UniqueKey(), child: _postTestMessage),
       ); // Unmount any remaining widgets.
       await pump();
+      _restorationManager?.dispose();
+      _restorationManager = null;
       if (registerTestTextInput) {
         _testTextInput.unregister();
       }
