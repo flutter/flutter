@@ -991,7 +991,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
     );
 
-    group('On-device inspector buttons test', () {
+    group('On-device inspector buttons', () {
       Widget exitWidgetSelectionButtonBuilder(
         BuildContext context, {
         required VoidCallback onPressed,
