@@ -939,7 +939,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     });
 
     testWidgets(
-      'WidgetInspector Exit Selection Mode button',
+      'On-device selection test',
       (WidgetTester tester) async {
         // Enable widget selection mode.
         WidgetInspectorService.instance.isSelectMode = true;
@@ -947,23 +947,12 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final GlobalKey inspectorKey = GlobalKey();
         setupDefaultPubRootDirectory(service);
 
-        Widget exitWidgetSelectionButtonBuilder(
-          BuildContext context, {
-          required VoidCallback onPressed,
-          required String semanticsLabel,
-          required GlobalKey key,
-        }) {
-          return Material(
-            child: ElevatedButton(onPressed: onPressed, key: key, child: null),
-          );
-        }
-
         await tester.pumpWidget(
           Directionality(
             textDirection: TextDirection.ltr,
             child: WidgetInspector(
               key: inspectorKey,
-              exitWidgetSelectionButtonBuilder: exitWidgetSelectionButtonBuilder,
+              exitWidgetSelectionButtonBuilder: null,
               tapBehaviorButtonBuilder: null,
               moveExitWidgetSelectionButtonBuilder: null,
               child: const Text('Child 1'),
@@ -991,286 +980,303 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final String file = event['fileUri']! as String;
         final int line = event['line']! as int;
         final int column = event['column']! as int;
-        expect(file, endsWith('text.dart'));
+        expect(file, endsWith('widget_inspector_test.dart'));
         // We don't hardcode the actual lines the widgets are created on as that
         // would make this test fragile.
         expect(line, isNotNull);
         // Column numbers are more stable than line numbers.
-        expect(column, equals(16));
+        expect(column, equals(28));
       },
       // [intended] Test requires --track-widget-creation flag.
       skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
     );
 
-    testWidgets(
-      '[LTR] WidgetInspector Move Exit Selection Mode button to the right then left',
-      (WidgetTester tester) async {
-        WidgetInspectorService.instance.isSelectMode = true;
-        final GlobalKey inspectorKey = GlobalKey();
-        setupDefaultPubRootDirectory(service);
-
-        Widget exitWidgetSelectionButtonBuilder(
-          BuildContext context, {
-          required VoidCallback onPressed,
-          required String semanticsLabel,
-          required GlobalKey key,
-        }) {
-          return Material(
-            child: ElevatedButton(
-              onPressed: onPressed,
-              key: key,
-              child: const Text('EXIT SELECT MODE'),
-            ),
-          );
-        }
-
-        Widget moveWidgetSelectionButtonBuilder(
-          BuildContext context, {
-          required VoidCallback onPressed,
-          required String semanticsLabel,
-          bool usesDefaultAlignment = true,
-        }) {
-          return Material(
-            child: ElevatedButton(
-              onPressed: onPressed,
-              child: Text(usesDefaultAlignment ? 'MOVE RIGHT' : 'MOVE LEFT'),
-            ),
-          );
-        }
-
-        Finder buttonFinder(String buttonText) {
-          return find.ancestor(of: find.text(buttonText), matching: find.byType(ElevatedButton));
-        }
-
-        await tester.pumpWidget(
-          Directionality(
-            textDirection: TextDirection.ltr,
-            child: WidgetInspector(
-              key: inspectorKey,
-              exitWidgetSelectionButtonBuilder: exitWidgetSelectionButtonBuilder,
-              moveExitWidgetSelectionButtonBuilder: moveWidgetSelectionButtonBuilder,
-              tapBehaviorButtonBuilder: null,
-              child: const Text('APP'),
-            ),
+    group('On-device inspector buttons test', () {
+      Widget exitWidgetSelectionButtonBuilder(
+        BuildContext context, {
+        required VoidCallback onPressed,
+        required String semanticsLabel,
+        required GlobalKey key,
+      }) {
+        return Material(
+          child: ElevatedButton(
+            onPressed: onPressed,
+            key: key,
+            child: const Text('EXIT SELECT MODE'),
           ),
         );
+      }
 
-        final Finder exitButton = buttonFinder('EXIT SELECT MODE');
-        expect(exitButton, findsOneWidget);
-        final Finder moveRightButton = buttonFinder('MOVE RIGHT');
-        expect(moveRightButton, findsOneWidget);
-        final double initialExitButtonX = tester.getCenter(exitButton).dx;
-
-        await tester.tap(moveRightButton);
-        await tester.pump();
-
-        final Finder moveLeftButton = buttonFinder('MOVE LEFT');
-        expect(moveLeftButton, findsOneWidget);
-        final double movedExitButtonX = tester.getCenter(exitButton).dx;
-
-        expect(initialExitButtonX, lessThan(movedExitButtonX), reason: 'LTR: should move right');
-
-        await tester.tap(moveLeftButton);
-        await tester.pump();
-
-        final double finalExitButtonX = tester.getCenter(exitButton).dx;
-        expect(finalExitButtonX, equals(initialExitButtonX));
-      },
-      // [intended] Test requires --track-widget-creation flag.
-      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
-    );
-
-    testWidgets(
-      '[RTL] WidgetInspector Move Exit Selection Mode button to the left then right',
-      (WidgetTester tester) async {
-        WidgetInspectorService.instance.isSelectMode = true;
-        final GlobalKey inspectorKey = GlobalKey();
-        setupDefaultPubRootDirectory(service);
-
-        Widget exitWidgetSelectionButtonBuilder(
-          BuildContext context, {
-          required VoidCallback onPressed,
-          required String semanticsLabel,
-          required GlobalKey key,
-        }) {
-          return Material(
-            child: ElevatedButton(
-              onPressed: onPressed,
-              key: key,
-              child: const Text('EXIT SELECT MODE'),
-            ),
-          );
-        }
-
-        Widget moveWidgetSelectionButtonBuilder(
-          BuildContext context, {
-          required VoidCallback onPressed,
-          required String semanticsLabel,
-          bool usesDefaultAlignment = true,
-        }) {
-          return Material(
-            child: ElevatedButton(
-              onPressed: onPressed,
-              child: Text(usesDefaultAlignment ? 'MOVE RIGHT' : 'MOVE LEFT'),
-            ),
-          );
-        }
-
-        Finder buttonFinder(String buttonText) {
-          return find.ancestor(of: find.text(buttonText), matching: find.byType(ElevatedButton));
-        }
-
-        await tester.pumpWidget(
-          Directionality(
-            textDirection: TextDirection.rtl,
-            child: WidgetInspector(
-              key: inspectorKey,
-              exitWidgetSelectionButtonBuilder: exitWidgetSelectionButtonBuilder,
-              moveExitWidgetSelectionButtonBuilder: moveWidgetSelectionButtonBuilder,
-              tapBehaviorButtonBuilder: null,
-              child: const Text('APP'),
-            ),
+      Widget moveWidgetSelectionButtonBuilder(
+        BuildContext context, {
+        required VoidCallback onPressed,
+        required String semanticsLabel,
+        bool usesDefaultAlignment = true,
+      }) {
+        return Material(
+          child: ElevatedButton(
+            onPressed: onPressed,
+            child: Text(usesDefaultAlignment ? 'MOVE RIGHT' : 'MOVE LEFT'),
           ),
         );
+      }
 
-        final Finder exitButton = buttonFinder('EXIT SELECT MODE');
-        expect(exitButton, findsOneWidget);
-        final Finder moveRightButton = buttonFinder('MOVE RIGHT');
-        expect(moveRightButton, findsOneWidget);
-        final double initialExitButtonX = tester.getCenter(exitButton).dx;
-
-        await tester.tap(moveRightButton);
-        await tester.pump();
-
-        final Finder moveLeftButton = buttonFinder('MOVE LEFT');
-        expect(moveLeftButton, findsOneWidget);
-        final double movedExitButtonX = tester.getCenter(exitButton).dx;
-
-        expect(initialExitButtonX, greaterThan(movedExitButtonX), reason: 'RTL: should move left');
-
-        await tester.tap(moveLeftButton);
-        await tester.pump();
-
-        final double finalExitButtonX = tester.getCenter(exitButton).dx;
-        expect(finalExitButtonX, equals(initialExitButtonX));
-      },
-      // [intended] Test requires --track-widget-creation flag.
-      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
-    );
-
-    testWidgets(
-      'WidgetInspector Tap behavior button',
-      (WidgetTester tester) async {
-        Widget exitWidgetSelectionButtonBuilder(
-          BuildContext context, {
-          required VoidCallback onPressed,
-          required String semanticsLabel,
-          required GlobalKey key,
-        }) {
-          return Material(
-            child: ElevatedButton(onPressed: onPressed, key: key, child: null),
-          );
-        }
-
-        Widget tapBehaviorButtonBuilder(
-          BuildContext context, {
-          required VoidCallback onPressed,
-          required String semanticsLabel,
-          required bool selectionOnTapEnabled,
-        }) {
-          return Material(
-            child: ElevatedButton(
-              onPressed: onPressed,
-              child: Text(selectionOnTapEnabled ? 'SELECTION ON TAP' : 'APP INTERACTION ON TAP'),
-            ),
-          );
-        }
-
-        Finder buttonFinder(String buttonText) {
-          return find.ancestor(of: find.text(buttonText), matching: find.byType(ElevatedButton));
-        }
-
-        int navigateEventsCount() =>
-            service.dispatchedEvents('navigate', stream: 'ToolEvent').length;
-
-        // Enable widget selection mode.
-        WidgetInspectorService.instance.isSelectMode = true;
-
-        // Pump the test widget.
-        final GlobalKey inspectorKey = GlobalKey();
-        setupDefaultPubRootDirectory(service);
-        await tester.pumpWidget(
-          Directionality(
-            textDirection: TextDirection.ltr,
-            child: WidgetInspector(
-              key: inspectorKey,
-              exitWidgetSelectionButtonBuilder: exitWidgetSelectionButtonBuilder,
-              tapBehaviorButtonBuilder: tapBehaviorButtonBuilder,
-              moveExitWidgetSelectionButtonBuilder: null,
-              child: const Row(children: <Widget>[Text('Child 1'), Text('Child 2')]),
-            ),
+      Widget tapBehaviorButtonBuilder(
+        BuildContext context, {
+        required VoidCallback onPressed,
+        required String semanticsLabel,
+        required bool selectionOnTapEnabled,
+      }) {
+        return Material(
+          child: ElevatedButton(
+            onPressed: onPressed,
+            child: Text(selectionOnTapEnabled ? 'SELECTION ON TAP' : 'APP INTERACTION ON TAP'),
           ),
         );
+      }
 
-        // Verify there are no navigate events yet.
-        expect(navigateEventsCount(), equals(0));
+      Finder buttonFinder(String buttonText) {
+        return find.ancestor(of: find.text(buttonText), matching: find.byType(ElevatedButton));
+      }
 
-        // Tap on the first child widget.
-        final Finder child1 = find.text('Child 1');
-        await tester.tap(child1, warnIfMissed: false);
-        await tester.pump();
+      int navigateEventsCount() => service.dispatchedEvents('navigate', stream: 'ToolEvent').length;
 
-        // Verify the selection matches the first child widget.
-        final Element child1Element = child1.evaluate().first;
-        expect(service.selection.current, equals(child1Element.renderObject));
+      testWidgets(
+        'Exit select mode button',
+        (WidgetTester tester) async {
+          // Enable widget selection mode.
+          WidgetInspectorService.instance.isSelectMode = true;
 
-        // Verify that a navigate event was sent.
-        expect(navigateEventsCount(), equals(1));
+          final GlobalKey inspectorKey = GlobalKey();
+          setupDefaultPubRootDirectory(service);
 
-        // Tap on the SELECTION ON TAP button.
-        final Finder tapBehaviorButtonBefore = buttonFinder('SELECTION ON TAP');
-        expect(tapBehaviorButtonBefore, findsOneWidget);
-        await tester.tap(tapBehaviorButtonBefore);
-        await tester.pump();
+          await tester.pumpWidget(
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: WidgetInspector(
+                key: inspectorKey,
+                exitWidgetSelectionButtonBuilder: exitWidgetSelectionButtonBuilder,
+                tapBehaviorButtonBuilder: null,
+                moveExitWidgetSelectionButtonBuilder: null,
+                child: const Column(children: <Widget>[Text('Child 1'), Text('Child 2')]),
+              ),
+            ),
+          );
 
-        // Verify the tap behavior button's UI has been updated.
-        expect(tapBehaviorButtonBefore, findsNothing);
-        final Finder tapBehaviorButtonAfter = buttonFinder('APP INTERACTION ON TAP');
-        expect(tapBehaviorButtonAfter, findsOneWidget);
+          // tap on child 1
+          final Finder child1 = find.text('Child 1');
+          await tester.tap(child1, warnIfMissed: false);
+          await tester.pump();
 
-        // Tap on the second child widget.
-        final Finder child2 = find.text('Child 2');
-        await tester.tap(child2, warnIfMissed: false);
-        await tester.pump();
+          // ensure that developer.inspect was called on child 1
+          expect(
+            service.inspectedObjects(),
+            equals(<RenderObject?>[child1.evaluate().first.renderObject]),
+          );
 
-        // Verify there is no selection.
-        expect(service.selection.current, isNull);
+          // ensure that there was a single navigate event
+          expect(navigateEventsCount(), equals(1));
 
-        // Verify no navigate events were sent.
-        expect(navigateEventsCount(), equals(1));
+          // tap the exit selection mode button
+          final Finder exitButton = buttonFinder('EXIT SELECT MODE');
+          expect(exitButton, findsOneWidget);
+          await tester.tap(exitButton);
+          await tester.pump();
 
-        // Tap on the SELECTION ON TAP button again.
-        await tester.tap(tapBehaviorButtonAfter);
-        await tester.pump();
+          // tap on child 2
+          final Finder child2 = find.text('Child 2');
+          await tester.tap(child2, warnIfMissed: false);
+          await tester.pump();
 
-        // Verify the tap behavior button's UI has been reset.
-        expect(tapBehaviorButtonAfter, findsNothing);
-        expect(tapBehaviorButtonBefore, findsOneWidget);
+          // ensure that developer.inspect was still only called on child 1
+          expect(
+            service.inspectedObjects(),
+            equals(<RenderObject?>[child1.evaluate().first.renderObject]),
+          );
 
-        // Tap on the second child widget again.
-        await tester.tap(child2, warnIfMissed: false);
-        await tester.pump();
+          // ensure that there is still only a single navigate event
+          expect(navigateEventsCount(), equals(1));
+        },
+        // [intended] Test requires --track-widget-creation flag.
+        skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
+      );
 
-        // Verify the selection now matches the second child widget.
-        final Element child2Element = child2.evaluate().first;
-        expect(service.selection.current, equals(child2Element.renderObject));
+      testWidgets(
+        '[LTR] Move button group to the right then left',
+        (WidgetTester tester) async {
+          WidgetInspectorService.instance.isSelectMode = true;
+          final GlobalKey inspectorKey = GlobalKey();
+          setupDefaultPubRootDirectory(service);
 
-        // Verify another navigate event was sent.
-        expect(navigateEventsCount(), equals(2));
-      },
-      // [intended] Test requires --track-widget-creation flag.
-      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
-    );
+          await tester.pumpWidget(
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: WidgetInspector(
+                key: inspectorKey,
+                exitWidgetSelectionButtonBuilder: exitWidgetSelectionButtonBuilder,
+                moveExitWidgetSelectionButtonBuilder: moveWidgetSelectionButtonBuilder,
+                tapBehaviorButtonBuilder: null,
+                child: const Text('APP'),
+              ),
+            ),
+          );
+
+          final Finder exitButton = buttonFinder('EXIT SELECT MODE');
+          expect(exitButton, findsOneWidget);
+          final Finder moveRightButton = buttonFinder('MOVE RIGHT');
+          expect(moveRightButton, findsOneWidget);
+          final double initialExitButtonX = tester.getCenter(exitButton).dx;
+
+          await tester.tap(moveRightButton);
+          await tester.pump();
+
+          final Finder moveLeftButton = buttonFinder('MOVE LEFT');
+          expect(moveLeftButton, findsOneWidget);
+          final double movedExitButtonX = tester.getCenter(exitButton).dx;
+
+          expect(initialExitButtonX, lessThan(movedExitButtonX), reason: 'LTR: should move right');
+
+          await tester.tap(moveLeftButton);
+          await tester.pump();
+
+          final double finalExitButtonX = tester.getCenter(exitButton).dx;
+          expect(finalExitButtonX, equals(initialExitButtonX));
+        },
+        // [intended] Test requires --track-widget-creation flag.
+        skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
+      );
+
+      testWidgets(
+        '[RTL] Move button group to the left then right',
+        (WidgetTester tester) async {
+          WidgetInspectorService.instance.isSelectMode = true;
+          final GlobalKey inspectorKey = GlobalKey();
+          setupDefaultPubRootDirectory(service);
+
+          await tester.pumpWidget(
+            Directionality(
+              textDirection: TextDirection.rtl,
+              child: WidgetInspector(
+                key: inspectorKey,
+                exitWidgetSelectionButtonBuilder: exitWidgetSelectionButtonBuilder,
+                moveExitWidgetSelectionButtonBuilder: moveWidgetSelectionButtonBuilder,
+                tapBehaviorButtonBuilder: null,
+                child: const Text('APP'),
+              ),
+            ),
+          );
+
+          final Finder exitButton = buttonFinder('EXIT SELECT MODE');
+          expect(exitButton, findsOneWidget);
+          final Finder moveRightButton = buttonFinder('MOVE RIGHT');
+          expect(moveRightButton, findsOneWidget);
+          final double initialExitButtonX = tester.getCenter(exitButton).dx;
+
+          await tester.tap(moveRightButton);
+          await tester.pump();
+
+          final Finder moveLeftButton = buttonFinder('MOVE LEFT');
+          expect(moveLeftButton, findsOneWidget);
+          final double movedExitButtonX = tester.getCenter(exitButton).dx;
+
+          expect(
+            initialExitButtonX,
+            greaterThan(movedExitButtonX),
+            reason: 'RTL: should move left',
+          );
+
+          await tester.tap(moveLeftButton);
+          await tester.pump();
+
+          final double finalExitButtonX = tester.getCenter(exitButton).dx;
+          expect(finalExitButtonX, equals(initialExitButtonX));
+        },
+        // [intended] Test requires --track-widget-creation flag.
+        skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
+      );
+
+      testWidgets(
+        'Tap behavior button',
+        (WidgetTester tester) async {
+          // Enable widget selection mode.
+          WidgetInspectorService.instance.isSelectMode = true;
+
+          // Pump the test widget.
+          final GlobalKey inspectorKey = GlobalKey();
+          setupDefaultPubRootDirectory(service);
+          await tester.pumpWidget(
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: WidgetInspector(
+                key: inspectorKey,
+                exitWidgetSelectionButtonBuilder: exitWidgetSelectionButtonBuilder,
+                tapBehaviorButtonBuilder: tapBehaviorButtonBuilder,
+                moveExitWidgetSelectionButtonBuilder: null,
+                child: const Row(children: <Widget>[Text('Child 1'), Text('Child 2')]),
+              ),
+            ),
+          );
+
+          // Verify there are no navigate events yet.
+          expect(navigateEventsCount(), equals(0));
+
+          // Tap on the first child widget.
+          final Finder child1 = find.text('Child 1');
+          await tester.tap(child1, warnIfMissed: false);
+          await tester.pump();
+
+          // Verify the selection matches the first child widget.
+          final Element child1Element = child1.evaluate().first;
+          expect(service.selection.current, equals(child1Element.renderObject));
+
+          // Verify that a navigate event was sent.
+          expect(navigateEventsCount(), equals(1));
+
+          // Tap on the SELECTION ON TAP button.
+          final Finder tapBehaviorButtonBefore = buttonFinder('SELECTION ON TAP');
+          expect(tapBehaviorButtonBefore, findsOneWidget);
+          await tester.tap(tapBehaviorButtonBefore);
+          await tester.pump();
+
+          // Verify the tap behavior button's UI has been updated.
+          expect(tapBehaviorButtonBefore, findsNothing);
+          final Finder tapBehaviorButtonAfter = buttonFinder('APP INTERACTION ON TAP');
+          expect(tapBehaviorButtonAfter, findsOneWidget);
+
+          // Tap on the second child widget.
+          final Finder child2 = find.text('Child 2');
+          await tester.tap(child2, warnIfMissed: false);
+          await tester.pump();
+
+          // Verify there is no selection.
+          expect(service.selection.current, isNull);
+
+          // Verify no navigate events were sent.
+          expect(navigateEventsCount(), equals(1));
+
+          // Tap on the SELECTION ON TAP button again.
+          await tester.tap(tapBehaviorButtonAfter);
+          await tester.pump();
+
+          // Verify the tap behavior button's UI has been reset.
+          expect(tapBehaviorButtonAfter, findsNothing);
+          expect(tapBehaviorButtonBefore, findsOneWidget);
+
+          // Tap on the second child widget again.
+          await tester.tap(child2, warnIfMissed: false);
+          await tester.pump();
+
+          // Verify the selection now matches the second child widget.
+          final Element child2Element = child2.evaluate().first;
+          expect(service.selection.current, equals(child2Element.renderObject));
+
+          // Verify another navigate event was sent.
+          expect(navigateEventsCount(), equals(2));
+        },
+        // [intended] Test requires --track-widget-creation flag.
+        skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
+      );
+    });
 
     testWidgets('test transformDebugCreator will re-order if after stack trace', (
       WidgetTester tester,
