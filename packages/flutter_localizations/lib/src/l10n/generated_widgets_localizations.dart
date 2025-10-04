@@ -29,10 +29,16 @@ class WidgetsLocalizationAf extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationAf() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopieer';
 
   @override
   String get cutButtonLabel => 'Knip';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Kyk op';
@@ -82,10 +88,16 @@ class WidgetsLocalizationAm extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationAm() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'ቅዳ';
 
   @override
   String get cutButtonLabel => 'ቁረጥ';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'ይመልከቱ';
@@ -135,10 +147,16 @@ class WidgetsLocalizationAr extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationAr() : super(TextDirection.rtl);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'نسخ';
 
   @override
   String get cutButtonLabel => 'قص';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'بحث عام';
@@ -188,10 +206,16 @@ class WidgetsLocalizationAs extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationAs() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'প্ৰতিলিপি কৰক';
 
   @override
   String get cutButtonLabel => 'কাট কৰক';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'ওপৰলৈ চাওক';
@@ -241,10 +265,16 @@ class WidgetsLocalizationAz extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationAz() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopyalayın';
 
   @override
   String get cutButtonLabel => 'Kəsin';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Axtarın';
@@ -294,10 +324,16 @@ class WidgetsLocalizationBe extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationBe() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Капіраваць';
 
   @override
   String get cutButtonLabel => 'Выразаць';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Знайсці';
@@ -347,10 +383,16 @@ class WidgetsLocalizationBg extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationBg() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Копиране';
 
   @override
   String get cutButtonLabel => 'Изрязване';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Look Up';
@@ -400,10 +442,16 @@ class WidgetsLocalizationBn extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationBn() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'কপি করুন';
 
   @override
   String get cutButtonLabel => 'কাট করুন';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'লুক-আপ';
@@ -453,10 +501,16 @@ class WidgetsLocalizationBs extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationBs() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopiraj';
 
   @override
   String get cutButtonLabel => 'Izreži';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Pogled nagore';
@@ -506,10 +560,16 @@ class WidgetsLocalizationCa extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationCa() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Copia';
 
   @override
   String get cutButtonLabel => 'Retalla';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Mira amunt';
@@ -559,10 +619,16 @@ class WidgetsLocalizationCs extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationCs() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopírovat';
 
   @override
   String get cutButtonLabel => 'Vyjmout';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Vyhledat';
@@ -612,10 +678,16 @@ class WidgetsLocalizationCy extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationCy() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Copïo';
 
   @override
   String get cutButtonLabel => 'Torri';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Chwilio';
@@ -665,10 +737,16 @@ class WidgetsLocalizationDa extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationDa() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopiér';
 
   @override
   String get cutButtonLabel => 'Klip';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Slå op';
@@ -718,10 +796,16 @@ class WidgetsLocalizationDe extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationDe() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopieren';
 
   @override
   String get cutButtonLabel => 'Ausschneiden';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Nachschlagen';
@@ -779,10 +863,16 @@ class WidgetsLocalizationEl extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationEl() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Αντιγραφή';
 
   @override
   String get cutButtonLabel => 'Αποκοπή';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Look Up';
@@ -832,10 +922,16 @@ class WidgetsLocalizationEn extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationEn() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Copy';
 
   @override
   String get cutButtonLabel => 'Cut';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Look Up';
@@ -1018,10 +1114,16 @@ class WidgetsLocalizationEs extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationEs() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Copiar';
 
   @override
   String get cutButtonLabel => 'Cortar';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Buscador visual';
@@ -1351,10 +1453,16 @@ class WidgetsLocalizationEt extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationEt() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopeeri';
 
   @override
   String get cutButtonLabel => 'Lõika';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Look Up';
@@ -1404,10 +1512,16 @@ class WidgetsLocalizationEu extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationEu() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopiatu';
 
   @override
   String get cutButtonLabel => 'Ebaki';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Bilatu';
@@ -1457,10 +1571,16 @@ class WidgetsLocalizationFa extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationFa() : super(TextDirection.rtl);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'کپی';
 
   @override
   String get cutButtonLabel => 'برش';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'جستجو';
@@ -1510,10 +1630,16 @@ class WidgetsLocalizationFi extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationFi() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopioi';
 
   @override
   String get cutButtonLabel => 'Leikkaa';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Hae';
@@ -1563,10 +1689,16 @@ class WidgetsLocalizationFil extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationFil() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopyahin';
 
   @override
   String get cutButtonLabel => 'I-cut';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Tumingin sa Itaas';
@@ -1616,10 +1748,16 @@ class WidgetsLocalizationFr extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationFr() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Copier';
 
   @override
   String get cutButtonLabel => 'Couper';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Recherche visuelle';
@@ -1686,10 +1824,16 @@ class WidgetsLocalizationGl extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationGl() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Copiar';
 
   @override
   String get cutButtonLabel => 'Cortar';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Mirar cara arriba';
@@ -1739,10 +1883,16 @@ class WidgetsLocalizationGsw extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationGsw() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopieren';
 
   @override
   String get cutButtonLabel => 'Ausschneiden';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Nachschlagen';
@@ -1792,10 +1942,16 @@ class WidgetsLocalizationGu extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationGu() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'કૉપિ કરો';
 
   @override
   String get cutButtonLabel => 'કાપો';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'શોધો';
@@ -1845,10 +2001,16 @@ class WidgetsLocalizationHe extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationHe() : super(TextDirection.rtl);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'העתקה';
 
   @override
   String get cutButtonLabel => 'גזירה';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'חיפוש';
@@ -1898,10 +2060,16 @@ class WidgetsLocalizationHi extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationHi() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'कॉपी करें';
 
   @override
   String get cutButtonLabel => 'काटें';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'लुक अप बटन';
@@ -1951,10 +2119,16 @@ class WidgetsLocalizationHr extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationHr() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopiraj';
 
   @override
   String get cutButtonLabel => 'Izreži';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Pogled prema gore';
@@ -2004,10 +2178,16 @@ class WidgetsLocalizationHu extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationHu() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Másolás';
 
   @override
   String get cutButtonLabel => 'Kivágás';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Felfelé nézés';
@@ -2057,10 +2237,16 @@ class WidgetsLocalizationHy extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationHy() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Պատճենել';
 
   @override
   String get cutButtonLabel => 'Կտրել';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Փնտրել';
@@ -2110,10 +2296,16 @@ class WidgetsLocalizationId extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationId() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Salin';
 
   @override
   String get cutButtonLabel => 'Potong';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Cari';
@@ -2163,10 +2355,16 @@ class WidgetsLocalizationIs extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationIs() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Afrita';
 
   @override
   String get cutButtonLabel => 'Klippa';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Look Up';
@@ -2216,10 +2414,16 @@ class WidgetsLocalizationIt extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationIt() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Copia';
 
   @override
   String get cutButtonLabel => 'Taglia';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Cerca';
@@ -2269,10 +2473,16 @@ class WidgetsLocalizationJa extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationJa() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'コピー';
 
   @override
   String get cutButtonLabel => '切り取り';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => '調べる';
@@ -2322,10 +2532,16 @@ class WidgetsLocalizationKa extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationKa() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'კოპირება';
 
   @override
   String get cutButtonLabel => 'ამოჭრა';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'აიხედეთ ზემოთ';
@@ -2375,10 +2591,16 @@ class WidgetsLocalizationKk extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationKk() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Көшіру';
 
   @override
   String get cutButtonLabel => 'Қию';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Іздеу';
@@ -2428,10 +2650,16 @@ class WidgetsLocalizationKm extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationKm() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'ចម្លង';
 
   @override
   String get cutButtonLabel => 'កាត់';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'រកមើល';
@@ -2481,10 +2709,16 @@ class WidgetsLocalizationKn extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationKn() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => '\u{ca8}\u{c95}\u{cb2}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
   String get cutButtonLabel => '\u{c95}\u{ca4}\u{ccd}\u{ca4}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => '\u{cae}\u{cc7}\u{cb2}\u{cc6}\u{20}\u{ca8}\u{ccb}\u{ca1}\u{cbf}';
@@ -2534,10 +2768,16 @@ class WidgetsLocalizationKo extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationKo() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => '복사';
 
   @override
   String get cutButtonLabel => '잘라내기';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => '찾기';
@@ -2587,10 +2827,16 @@ class WidgetsLocalizationKy extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationKy() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Көчүрүү';
 
   @override
   String get cutButtonLabel => 'Кесүү';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Издөө';
@@ -2640,10 +2886,16 @@ class WidgetsLocalizationLo extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationLo() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'ສຳເນົາ';
 
   @override
   String get cutButtonLabel => 'ຕັດ';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'ຊອກຫາຂໍ້ມູນ';
@@ -2693,10 +2945,16 @@ class WidgetsLocalizationLt extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationLt() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopijuoti';
 
   @override
   String get cutButtonLabel => 'Iškirpti';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Ieškoti';
@@ -2746,10 +3004,16 @@ class WidgetsLocalizationLv extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationLv() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopēt';
 
   @override
   String get cutButtonLabel => 'Izgriezt';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Meklēt';
@@ -2799,10 +3063,16 @@ class WidgetsLocalizationMk extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationMk() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Копирај';
 
   @override
   String get cutButtonLabel => 'Исечи';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Погледнете нагоре';
@@ -2852,10 +3122,16 @@ class WidgetsLocalizationMl extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationMl() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'പകർത്തുക';
 
   @override
   String get cutButtonLabel => 'മുറിക്കുക';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'മുകളിലേക്ക് നോക്കുക';
@@ -2905,10 +3181,16 @@ class WidgetsLocalizationMn extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationMn() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Хуулах';
 
   @override
   String get cutButtonLabel => 'Таслах';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Дээшээ харах';
@@ -2958,10 +3240,16 @@ class WidgetsLocalizationMr extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationMr() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'कॉपी करा';
 
   @override
   String get cutButtonLabel => 'कट करा';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'शोध घ्या';
@@ -3011,10 +3299,16 @@ class WidgetsLocalizationMs extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationMs() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Salin';
 
   @override
   String get cutButtonLabel => 'Potong';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Lihat ke Atas';
@@ -3064,10 +3358,16 @@ class WidgetsLocalizationMy extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationMy() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'မိတ္တူကူးရန်';
 
   @override
   String get cutButtonLabel => 'ဖြတ်ယူရန်';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'အပေါ်ကြည့်ရန်';
@@ -3117,10 +3417,16 @@ class WidgetsLocalizationNb extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationNb() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopiér';
 
   @override
   String get cutButtonLabel => 'Klipp ut';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Slå opp';
@@ -3170,10 +3476,16 @@ class WidgetsLocalizationNe extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationNe() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'कपी गर्नुहोस्';
 
   @override
   String get cutButtonLabel => 'काट्नुहोस्';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'माथितिर हेर्नुहोस्';
@@ -3223,10 +3535,16 @@ class WidgetsLocalizationNl extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationNl() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopiëren';
 
   @override
   String get cutButtonLabel => 'Knippen';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Opzoeken';
@@ -3276,10 +3594,16 @@ class WidgetsLocalizationNo extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationNo() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopiér';
 
   @override
   String get cutButtonLabel => 'Klipp ut';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Slå opp';
@@ -3329,10 +3653,16 @@ class WidgetsLocalizationOr extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationOr() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'କପି କରନ୍ତୁ';
 
   @override
   String get cutButtonLabel => 'କଟ୍ କରନ୍ତୁ';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'ଉପରକୁ ଦେଖନ୍ତୁ';
@@ -3382,10 +3712,16 @@ class WidgetsLocalizationPa extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationPa() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'ਕਾਪੀ ਕਰੋ';
 
   @override
   String get cutButtonLabel => 'ਕੱਟ ਕਰੋ';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'ਖੋਜੋ';
@@ -3435,10 +3771,16 @@ class WidgetsLocalizationPl extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationPl() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopiuj';
 
   @override
   String get cutButtonLabel => 'Wytnij';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Sprawdź';
@@ -3488,10 +3830,16 @@ class WidgetsLocalizationPs extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationPs() : super(TextDirection.rtl);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'کاپی';
 
   @override
   String get cutButtonLabel => 'کم کړئ';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Look Up';
@@ -3541,10 +3889,16 @@ class WidgetsLocalizationPt extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationPt() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Copiar';
 
   @override
   String get cutButtonLabel => 'Cortar';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Pesquisar';
@@ -3611,10 +3965,16 @@ class WidgetsLocalizationRo extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationRo() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Copiați';
 
   @override
   String get cutButtonLabel => 'Decupați';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Privire în sus';
@@ -3664,10 +4024,16 @@ class WidgetsLocalizationRu extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationRu() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Копировать';
 
   @override
   String get cutButtonLabel => 'Вырезать';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Найти';
@@ -3717,10 +4083,16 @@ class WidgetsLocalizationSi extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationSi() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'පිටපත් කරන්න';
 
   @override
   String get cutButtonLabel => 'කපන්න';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'උඩ බලන්න';
@@ -3770,10 +4142,16 @@ class WidgetsLocalizationSk extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationSk() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopírovať';
 
   @override
   String get cutButtonLabel => 'Vystrihnúť';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Pohľad nahor';
@@ -3823,10 +4201,16 @@ class WidgetsLocalizationSl extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationSl() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopiraj';
 
   @override
   String get cutButtonLabel => 'Izreži';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Pogled gor';
@@ -3876,10 +4260,16 @@ class WidgetsLocalizationSq extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationSq() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopjo';
 
   @override
   String get cutButtonLabel => 'Prit';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Kërko';
@@ -3929,10 +4319,16 @@ class WidgetsLocalizationSr extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationSr() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Копирај';
 
   @override
   String get cutButtonLabel => 'Исеци';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Поглед нагоре';
@@ -4037,10 +4433,16 @@ class WidgetsLocalizationSv extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationSv() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopiera';
 
   @override
   String get cutButtonLabel => 'Klipp ut';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Titta upp';
@@ -4090,10 +4492,16 @@ class WidgetsLocalizationSw extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationSw() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Nakili';
 
   @override
   String get cutButtonLabel => 'Kata';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Tafuta';
@@ -4143,10 +4551,16 @@ class WidgetsLocalizationTa extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationTa() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'நகலெடு';
 
   @override
   String get cutButtonLabel => 'வெட்டு';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'தேடு';
@@ -4196,10 +4610,16 @@ class WidgetsLocalizationTe extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationTe() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'కాపీ చేయి';
 
   @override
   String get cutButtonLabel => 'కత్తిరించండి';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'వెతకండి';
@@ -4249,10 +4669,16 @@ class WidgetsLocalizationTh extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationTh() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'คัดลอก';
 
   @override
   String get cutButtonLabel => 'ตัด';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'ค้นหา';
@@ -4302,10 +4728,16 @@ class WidgetsLocalizationTl extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationTl() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopyahin';
 
   @override
   String get cutButtonLabel => 'I-cut';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Tumingin sa Itaas';
@@ -4355,10 +4787,16 @@ class WidgetsLocalizationTr extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationTr() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopyala';
 
   @override
   String get cutButtonLabel => 'Kes';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Ara';
@@ -4408,10 +4846,16 @@ class WidgetsLocalizationUk extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationUk() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Копіювати';
 
   @override
   String get cutButtonLabel => 'Вирізати';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Шукати';
@@ -4461,10 +4905,16 @@ class WidgetsLocalizationUr extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationUr() : super(TextDirection.rtl);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'کاپی کریں';
 
   @override
   String get cutButtonLabel => 'کٹ کریں';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'تفصیل دیکھیں';
@@ -4514,10 +4964,16 @@ class WidgetsLocalizationUz extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationUz() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Nusxa olish';
 
   @override
   String get cutButtonLabel => 'Kesib olish';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Tepaga qarang';
@@ -4567,10 +5023,16 @@ class WidgetsLocalizationVi extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationVi() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Sao chép';
 
   @override
   String get cutButtonLabel => 'Cắt';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Tra cứu';
@@ -4620,10 +5082,16 @@ class WidgetsLocalizationZh extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationZh() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => '复制';
 
   @override
   String get cutButtonLabel => '剪切';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => '查询';
@@ -4750,10 +5218,16 @@ class WidgetsLocalizationZu extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationZu() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopisha';
 
   @override
   String get cutButtonLabel => 'Sika';
+
+  @override
+  String get expandedHint => 'Collapsed';
 
   @override
   String get lookUpButtonLabel => 'Bheka Phezulu';
