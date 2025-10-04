@@ -822,6 +822,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         _pendingExceptionDetails = null;
       }
       if (!completer.isCompleted) {
+        reset();
         completer.complete();
       }
     };
