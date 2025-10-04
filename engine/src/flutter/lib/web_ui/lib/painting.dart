@@ -989,6 +989,10 @@ abstract class FragmentProgram {
     return engine.renderer.createFragmentProgram(assetKey);
   }
 
+  static Future<FragmentProgram> fromBytes(String nameForShaderRegistry, Uint8List bytes) {
+    return engine.renderer.createFragmentProgramFromBytes(nameForShaderRegistry, bytes);
+  }
+
   FragmentShader fragmentShader();
 }
 
