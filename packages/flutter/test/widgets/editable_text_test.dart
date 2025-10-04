@@ -10207,6 +10207,79 @@ void main() {
   });
 
   group('TextEditingController', () {
+    testWidgets('_originalText is set to initial text', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'initial');
+      addTearDown(controller.dispose);
+      
+      // Verify _originalText is set to the initial text
+      expect(controller.isTextModified, false);
+      expect(controller.text, 'initial');
+    });
+
+    testWidgets('isTextModified reflects text modifications', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'initial');
+      addTearDown(controller.dispose);
+      
+      // Initial state
+      expect(controller.isTextModified, false);
+      
+      // Modify text
+      controller.text = 'modified';
+      expect(controller.isTextModified, true);
+      
+      // Change back to original
+      controller.text = 'initial';
+      expect(controller.isTextModified, false);
+    });
+
+    testWidgets('value setter updates isTextModified', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'initial');
+      addTearDown(controller.dispose);
+      
+      // Initial state
+      expect(controller.isTextModified, false);
+      
+      // Modify using value setter
+      controller.value = const TextEditingValue(text: 'modified');
+      expect(controller.isTextModified, true);
+      
+      // Change back to original
+      controller.value = const TextEditingValue(text: 'initial');
+      expect(controller.isTextModified, false);
+    });
+
+    testWidgets('clear() does not modify _originalText', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'initial');
+      addTearDown(controller.dispose);
+      
+      // Initial state
+      expect(controller.text, 'initial');
+      expect(controller.isTextModified, false);
+      
+      // Clear the controller
+      controller.clear();
+      
+      // Verify text is empty but _originalText is still 'initial'
+      expect(controller.text, '');
+      expect(controller.isTextModified, true);
+    });
+
+    testWidgets('isTextModified is true after clear() if original text was not empty', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'initial');
+      addTearDown(controller.dispose);
+      
+      // Modify text
+      controller.text = 'modified';
+      expect(controller.isTextModified, true);
+      
+      // Clear the controller
+      controller.clear();
+      
+      // isTextModified should be true because the current text ('') is different
+      // from the original text ('initial').
+      expect(controller.text, '');
+      expect(controller.isTextModified, true);
+    });
     testWidgets('TextEditingController.text set to empty string clears field', (
       WidgetTester tester,
     ) async {
@@ -18020,6 +18093,9 @@ class _TextEditingControllerImpl extends ChangeNotifier implements TextEditingCo
   TextEditingValue get value => _innerController.value;
   @override
   set value(TextEditingValue newValue) => _innerController.value = newValue;
+  
+  @override
+  bool get isTextModified => _innerController.isTextModified;
 }
 
 class _TestScrollController extends ScrollController {
