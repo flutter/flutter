@@ -194,25 +194,15 @@ class IsolateExampleWidget extends StatefulWidget {
 }
 
 // Main application state.
-class IsolateExampleState extends State<StatefulWidget> with SingleTickerProviderStateMixin {
+class IsolateExampleState extends State<StatefulWidget> {
   String _status = 'Idle';
   String _label = 'Start';
   String _result = ' ';
   double _progress = 0.0;
-  late final AnimationController _animation = AnimationController(
-    duration: const Duration(milliseconds: 3600),
-    vsync: this,
-  )..repeat();
   late final CalculationManager _calculationManager = CalculationManager(
     onProgressListener: _handleProgressUpdate,
     onResultListener: _handleResult,
   );
-
-  @override
-  void dispose() {
-    _animation.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -220,8 +210,12 @@ class IsolateExampleState extends State<StatefulWidget> with SingleTickerProvide
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: <Widget>[
-          RotationTransition(
-            turns: _animation,
+          RepeatingTweenAnimationBuilder<double>(
+            tween: Tween<double>(begin: 0, end: 1),
+            duration: const Duration(milliseconds: 3600),
+            builder: (BuildContext context, Animation<double> animation, Widget? child) {
+              return RotationTransition(turns: animation, child: child);
+            },
             child: Container(width: 120.0, height: 120.0, color: const Color(0xFF882222)),
           ),
           Opacity(

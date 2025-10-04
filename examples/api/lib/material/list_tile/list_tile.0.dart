@@ -20,39 +20,8 @@ class ListTileApp extends StatelessWidget {
   }
 }
 
-class ListTileExample extends StatefulWidget {
+class ListTileExample extends StatelessWidget {
   const ListTileExample({super.key});
-
-  @override
-  State<ListTileExample> createState() => _ListTileExampleState();
-}
-
-class _ListTileExampleState extends State<ListTileExample> with TickerProviderStateMixin {
-  late final AnimationController _fadeController;
-  late final AnimationController _sizeController;
-  late final Animation<double> _fadeAnimation;
-  late final Animation<double> _sizeAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _fadeController = AnimationController(duration: const Duration(seconds: 1), vsync: this)
-      ..repeat(reverse: true);
-
-    _sizeController = AnimationController(duration: const Duration(milliseconds: 850), vsync: this)
-      ..repeat(reverse: true);
-
-    _fadeAnimation = CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut);
-
-    _sizeAnimation = CurvedAnimation(parent: _sizeController, curve: Curves.easeOut);
-  }
-
-  @override
-  void dispose() {
-    _fadeController.dispose();
-    _sizeController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -100,34 +69,50 @@ class _ListTileExampleState extends State<ListTileExample> with TickerProviderSt
               ),
             ),
           ),
-          FadeTransition(
-            opacity: _fadeAnimation,
-            // Wrap the ListTile in a Material widget so the ListTile has someplace
-            // to draw the animated colors during the fade transition.
-            child: const Material(
-              child: ListTile(
-                title: Text('ListTile with FadeTransition'),
-                selectedTileColor: Colors.green,
-                selectedColor: Colors.white,
-                selected: true,
-              ),
-            ),
+          RepeatingTweenAnimationBuilder<double>(
+            tween: Tween<double>(begin: 0.0, end: 1.0),
+            duration: const Duration(seconds: 1),
+            reverse: true,
+            curve: Curves.easeInOut,
+            builder: (BuildContext context, Animation<double> animation, Widget? child) {
+              return FadeTransition(
+                opacity: animation,
+                // Wrap the ListTile in a Material widget so the ListTile has someplace
+                // to draw the animated colors during the fade transition.
+                child: const Material(
+                  child: ListTile(
+                    title: Text('ListTile with FadeTransition'),
+                    selectedTileColor: Colors.green,
+                    selectedColor: Colors.white,
+                    selected: true,
+                  ),
+                ),
+              );
+            },
           ),
           SizedBox(
             height: 100,
             child: Center(
-              child: SizeTransition(
-                sizeFactor: _sizeAnimation,
-                axisAlignment: -1.0,
-                // Wrap the ListTile in a Material widget so the ListTile has someplace
-                // to draw the animated colors during the size transition.
-                child: const Material(
-                  child: ListTile(
-                    title: Text('ListTile with SizeTransition'),
-                    tileColor: Colors.red,
-                    minVerticalPadding: 25.0,
-                  ),
-                ),
+              child: RepeatingTweenAnimationBuilder<double>(
+                tween: Tween<double>(begin: 0.0, end: 1.0),
+                duration: const Duration(milliseconds: 850),
+                reverse: true,
+                curve: Curves.easeOut,
+                builder: (BuildContext context, Animation<double> animation, Widget? child) {
+                  return SizeTransition(
+                    sizeFactor: animation,
+                    axisAlignment: -1.0,
+                    // Wrap the ListTile in a Material widget so the ListTile has someplace
+                    // to draw the animated colors during the size transition.
+                    child: const Material(
+                      child: ListTile(
+                        title: Text('ListTile with SizeTransition'),
+                        tileColor: Colors.red,
+                        minVerticalPadding: 25.0,
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ),

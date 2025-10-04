@@ -17,28 +17,8 @@ class RelativePositionedTransitionExampleApp extends StatelessWidget {
   }
 }
 
-class RelativePositionedTransitionExample extends StatefulWidget {
+class RelativePositionedTransitionExample extends StatelessWidget {
   const RelativePositionedTransitionExample({super.key});
-
-  @override
-  State<RelativePositionedTransitionExample> createState() =>
-      _RelativePositionedTransitionExampleState();
-}
-
-/// [AnimationController]s can be created with `vsync: this` because of
-/// [TickerProviderStateMixin].
-class _RelativePositionedTransitionExampleState extends State<RelativePositionedTransitionExample>
-    with TickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    duration: const Duration(seconds: 2),
-    vsync: this,
-  )..repeat(reverse: true);
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,17 +30,26 @@ class _RelativePositionedTransitionExampleState extends State<RelativePositioned
         final Size biggest = constraints.biggest;
         return Stack(
           children: <Widget>[
-            RelativePositionedTransition(
-              size: biggest,
-              rect: RectTween(
-                begin: const Rect.fromLTWH(0, 0, bigLogo, bigLogo),
-                end: Rect.fromLTWH(
-                  biggest.width - smallLogo,
-                  biggest.height - smallLogo,
-                  smallLogo,
-                  smallLogo,
-                ),
-              ).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticInOut)),
+            RepeatingTweenAnimationBuilder<double>(
+              tween: Tween<double>(begin: 0.0, end: 1.0),
+              duration: const Duration(seconds: 2),
+              reverse: true,
+              curve: Curves.elasticInOut,
+              builder: (BuildContext context, Animation<double> animation, Widget? child) {
+                return RelativePositionedTransition(
+                  size: biggest,
+                  rect: RectTween(
+                    begin: const Rect.fromLTWH(0, 0, bigLogo, bigLogo),
+                    end: Rect.fromLTWH(
+                      biggest.width - smallLogo,
+                      biggest.height - smallLogo,
+                      smallLogo,
+                      smallLogo,
+                    ),
+                  ).animate(animation),
+                  child: child!,
+                );
+              },
               child: const Padding(padding: EdgeInsets.all(8), child: FlutterLogo()),
             ),
           ],

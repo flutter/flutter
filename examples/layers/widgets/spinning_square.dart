@@ -4,32 +4,20 @@
 
 import 'package:flutter/widgets.dart';
 
-class SpinningSquare extends StatefulWidget {
+class SpinningSquare extends StatelessWidget {
   const SpinningSquare({super.key});
 
   @override
-  State<SpinningSquare> createState() => _SpinningSquareState();
-}
-
-class _SpinningSquareState extends State<SpinningSquare> with SingleTickerProviderStateMixin {
-  // We use 3600 milliseconds instead of 1800 milliseconds because 0.0 -> 1.0
-  // represents an entire turn of the square whereas in the other examples
-  // we used 0.0 -> math.pi, which is only half a turn.
-  late final AnimationController _animation = AnimationController(
-    duration: const Duration(milliseconds: 3600),
-    vsync: this,
-  )..repeat();
-
-  @override
-  void dispose() {
-    _animation.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return RotationTransition(
-      turns: _animation,
+    return RepeatingTweenAnimationBuilder<double>(
+      // We use 3600 milliseconds instead of 1800 milliseconds because 0.0 -> 1.0
+      // represents an entire turn of the square whereas in the other examples
+      // we used 0.0 -> math.pi, which is only half a turn.
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 3600),
+      builder: (BuildContext context, Animation<double> animation, Widget? child) {
+        return RotationTransition(turns: animation, child: child);
+      },
       child: Container(width: 200.0, height: 200.0, color: const Color(0xFF00FF00)),
     );
   }

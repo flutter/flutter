@@ -17,57 +17,46 @@ class DecoratedBoxTransitionExampleApp extends StatelessWidget {
   }
 }
 
-class DecoratedBoxTransitionExample extends StatefulWidget {
+class DecoratedBoxTransitionExample extends StatelessWidget {
   const DecoratedBoxTransitionExample({super.key});
 
   @override
-  State<DecoratedBoxTransitionExample> createState() => _DecoratedBoxTransitionExampleState();
-}
-
-/// [AnimationController]s can be created with `vsync: this` because of
-/// [TickerProviderStateMixin].
-class _DecoratedBoxTransitionExampleState extends State<DecoratedBoxTransitionExample>
-    with TickerProviderStateMixin {
-  final DecorationTween decorationTween = DecorationTween(
-    begin: BoxDecoration(
-      color: const Color(0xFFFFFFFF),
-      border: Border.all(style: BorderStyle.none),
-      borderRadius: BorderRadius.circular(60.0),
-      boxShadow: const <BoxShadow>[
-        BoxShadow(
-          color: Color(0x66666666),
-          blurRadius: 10.0,
-          spreadRadius: 3.0,
-          offset: Offset(0, 6.0),
-        ),
-      ],
-    ),
-    end: BoxDecoration(
-      color: const Color(0xFFFFFFFF),
-      border: Border.all(style: BorderStyle.none),
-      borderRadius: BorderRadius.zero,
-      // No shadow.
-    ),
-  );
-
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: const Duration(seconds: 3),
-  )..repeat(reverse: true);
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final DecorationTween decorationTween = DecorationTween(
+      begin: BoxDecoration(
+        color: const Color(0xFFFFFFFF),
+        border: Border.all(style: BorderStyle.none),
+        borderRadius: BorderRadius.circular(60.0),
+        boxShadow: const <BoxShadow>[
+          BoxShadow(
+            color: Color(0x66666666),
+            blurRadius: 10.0,
+            spreadRadius: 3.0,
+            offset: Offset(0, 6.0),
+          ),
+        ],
+      ),
+      end: BoxDecoration(
+        color: const Color(0xFFFFFFFF),
+        border: Border.all(style: BorderStyle.none),
+        borderRadius: BorderRadius.zero,
+        // No shadow.
+      ),
+    );
+
     return ColoredBox(
       color: Colors.white,
       child: Center(
-        child: DecoratedBoxTransition(
-          decoration: decorationTween.animate(_controller),
+        child: RepeatingTweenAnimationBuilder<double>(
+          tween: Tween<double>(begin: 0.0, end: 1.0),
+          duration: const Duration(seconds: 3),
+          reverse: true,
+          builder: (BuildContext context, Animation<double> animation, Widget? child) {
+            return DecoratedBoxTransition(
+              decoration: decorationTween.animate(AlwaysStoppedAnimation<double>(animation.value)),
+              child: child!,
+            );
+          },
           child: Container(
             width: 200,
             height: 200,

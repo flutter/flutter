@@ -26,38 +26,26 @@ class MatrixTransitionExample extends StatefulWidget {
   State<MatrixTransitionExample> createState() => _MatrixTransitionExampleState();
 }
 
-/// [AnimationController]s can be created with `vsync: this` because of
-/// [TickerProviderStateMixin].
-class _MatrixTransitionExampleState extends State<MatrixTransitionExample>
-    with TickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(duration: const Duration(seconds: 2), vsync: this)..repeat();
-    _animation = CurvedAnimation(parent: _controller, curve: Curves.linear);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
+class _MatrixTransitionExampleState extends State<MatrixTransitionExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: MatrixTransition(
-          animation: _animation,
-          child: const Padding(padding: EdgeInsets.all(8.0), child: FlutterLogo(size: 150.0)),
-          onTransform: (double value) {
-            return Matrix4.identity()
-              ..setEntry(3, 2, 0.004)
-              ..rotateY(pi * 2.0 * value);
+        child: RepeatingTweenAnimationBuilder<double>(
+          tween: Tween<double>(begin: 0, end: 1),
+          duration: const Duration(seconds: 2),
+          builder: (BuildContext context, Animation<double> animation, Widget? child) {
+            return MatrixTransition(
+              animation: animation,
+              onTransform: (double animationValue) {
+                return Matrix4.identity()
+                  ..setEntry(3, 2, 0.004)
+                  ..rotateY(pi * 2.0 * animationValue);
+              },
+              child: child,
+            );
           },
+          child: const Padding(padding: EdgeInsets.all(8.0), child: FlutterLogo(size: 150.0)),
         ),
       ),
     );

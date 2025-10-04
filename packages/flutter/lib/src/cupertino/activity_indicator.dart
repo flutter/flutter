@@ -84,51 +84,28 @@ class CupertinoActivityIndicator extends StatefulWidget {
   State<CupertinoActivityIndicator> createState() => _CupertinoActivityIndicatorState();
 }
 
-class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(duration: const Duration(seconds: 1), vsync: this);
-
-    if (widget.animating) {
-      _controller.repeat();
-    }
-  }
-
-  @override
-  void didUpdateWidget(CupertinoActivityIndicator oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.animating != oldWidget.animating) {
-      if (widget.animating) {
-        _controller.repeat();
-      } else {
-        _controller.stop();
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
+class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator> {
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: widget.radius * 2,
-      width: widget.radius * 2,
-      child: CustomPaint(
-        painter: _CupertinoActivityIndicatorPainter(
-          position: _controller,
-          activeColor: widget.color ?? CupertinoDynamicColor.resolve(_kActiveTickColor, context),
-          radius: widget.radius,
-          progress: widget.progress,
-        ),
-      ),
+    return RepeatingTweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: const Duration(seconds: 1),
+      paused: !widget.animating,
+      builder: (BuildContext context, Animation<double> animation, Widget? child) {
+        return SizedBox(
+          height: widget.radius * 2,
+          width: widget.radius * 2,
+          child: CustomPaint(
+            painter: _CupertinoActivityIndicatorPainter(
+              position: animation,
+              activeColor:
+                  widget.color ?? CupertinoDynamicColor.resolve(_kActiveTickColor, context),
+              radius: widget.radius,
+              progress: widget.progress,
+            ),
+          ),
+        );
+      },
     );
   }
 }
