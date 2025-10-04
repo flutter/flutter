@@ -2713,6 +2713,104 @@ public class TextInputPluginTest {
   @SuppressWarnings("deprecation")
   // getWindowSystemUiVisibility
   // flutter#133074 tracks migration work.
+  public void ime_windowInsetsSync_edgeToEdge_includesNavigationBars() {
+    try (ActivityScenario<Activity> scenario = ActivityScenario.launch(Activity.class)) {
+      scenario.onActivity(
+          activity -> {
+            FlutterView testView = spy(new FlutterView(activity));
+            when(testView.getWindowSystemUiVisibility())
+                .thenReturn(
+                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+
+            TextInputChannel textInputChannel = new TextInputChannel(mock(DartExecutor.class));
+            ScribeChannel scribeChannel = new ScribeChannel(mock(DartExecutor.class));
+            TextInputPlugin textInputPlugin =
+                new TextInputPlugin(
+                    testView,
+                    textInputChannel,
+                    scribeChannel,
+                    mock(PlatformViewsController.class),
+                    mock(PlatformViewsController2.class));
+            ImeSyncDeferringInsetsCallback imeSyncCallback = textInputPlugin.getImeSyncCallback();
+            FlutterEngine flutterEngine =
+                spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
+            FlutterRenderer flutterRenderer = spy(new FlutterRenderer(mockFlutterJni));
+            when(flutterEngine.getRenderer()).thenReturn(flutterRenderer);
+            testView.attachToFlutterEngine(flutterEngine);
+
+            WindowInsetsAnimation animation = mock(WindowInsetsAnimation.class);
+            when(animation.getTypeMask()).thenReturn(WindowInsets.Type.ime());
+
+            List<WindowInsetsAnimation> animationList = new ArrayList();
+            animationList.add(animation);
+
+            ArgumentCaptor<FlutterRenderer.ViewportMetrics> viewportMetricsCaptor =
+                ArgumentCaptor.forClass(FlutterRenderer.ViewportMetrics.class);
+
+            WindowInsets.Builder builder = new WindowInsets.Builder();
+
+            // Set the initial insets and verify that they were set and the bottom view inset is
+            // correct
+            imeSyncCallback.getInsetsListener().onApplyWindowInsets(testView, builder.build());
+
+            verify(flutterRenderer, atLeast(1)).setViewportMetrics(viewportMetricsCaptor.capture());
+            assertEquals(0, viewportMetricsCaptor.getValue().viewInsetBottom);
+
+            // Call onPrepare and set the lastWindowInsets - these should be stored for the end of
+            // the
+            // animation instead of being applied immediately
+            imeSyncCallback.getAnimationCallback().onPrepare(animation);
+            builder.setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, 100));
+            builder.setInsets(WindowInsets.Type.navigationBars(), Insets.of(0, 0, 0, 0));
+            imeSyncCallback.getInsetsListener().onApplyWindowInsets(testView, builder.build());
+
+            verify(flutterRenderer, atLeast(1)).setViewportMetrics(viewportMetricsCaptor.capture());
+            assertEquals(0, viewportMetricsCaptor.getValue().viewInsetBottom);
+
+            // Call onStart and apply new insets - these should be ignored completely
+            imeSyncCallback.getAnimationCallback().onStart(animation, null);
+            builder.setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, 50));
+            builder.setInsets(WindowInsets.Type.navigationBars(), Insets.of(0, 0, 0, 40));
+            imeSyncCallback.getInsetsListener().onApplyWindowInsets(testView, builder.build());
+
+            verify(flutterRenderer, atLeast(1)).setViewportMetrics(viewportMetricsCaptor.capture());
+            assertEquals(0, viewportMetricsCaptor.getValue().viewInsetBottom);
+
+            // Progress the animation and ensure that the navigation bar insets have not been
+            // subtracted from the IME insets
+            builder.setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, 25));
+            builder.setInsets(WindowInsets.Type.navigationBars(), Insets.of(0, 0, 0, 40));
+            imeSyncCallback.getAnimationCallback().onProgress(builder.build(), animationList);
+
+            verify(flutterRenderer, atLeast(1)).setViewportMetrics(viewportMetricsCaptor.capture());
+            assertEquals(25, viewportMetricsCaptor.getValue().viewInsetBottom);
+
+            builder.setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, 50));
+            builder.setInsets(WindowInsets.Type.navigationBars(), Insets.of(0, 0, 0, 40));
+            imeSyncCallback.getAnimationCallback().onProgress(builder.build(), animationList);
+
+            verify(flutterRenderer, atLeast(1)).setViewportMetrics(viewportMetricsCaptor.capture());
+            assertEquals(50, viewportMetricsCaptor.getValue().viewInsetBottom);
+
+            // End the animation and ensure that the bottom insets match the lastWindowInsets that
+            // we set
+            // during onPrepare
+            imeSyncCallback.getAnimationCallback().onEnd(animation);
+
+            verify(flutterRenderer, atLeast(1)).setViewportMetrics(viewportMetricsCaptor.capture());
+            assertEquals(100, viewportMetricsCaptor.getValue().viewInsetBottom);
+          });
+    }
+  }
+
+  @Test
+  @TargetApi(API_LEVELS.API_30)
+  @Config(sdk = API_LEVELS.API_30)
+  @SuppressWarnings("deprecation")
+  // getWindowSystemUiVisibility
+  // flutter#133074 tracks migration work.
   public void ime_windowInsetsSync_laidOutBehindNavigation_includesNavigationBars() {
     try (ActivityScenario<Activity> scenario = ActivityScenario.launch(Activity.class)) {
       scenario.onActivity(
