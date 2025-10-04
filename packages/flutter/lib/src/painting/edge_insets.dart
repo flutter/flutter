@@ -42,12 +42,6 @@ abstract class EdgeInsetsGeometry {
 
   /// Creates [EdgeInsets] with all sides equal to [rest],
   /// but allows overriding individual sides.
-  ///
-  /// Example:
-  /// ```dart
-  /// EdgeInsetsGeometry.some(rest: 16, left: 8, top: 0);
-  /// ```
-  /// Results in: left = 8, top = 0, right = 16, bottom = 16
   const factory EdgeInsetsGeometry.some({
     double rest,
     double? left,
@@ -466,9 +460,10 @@ class EdgeInsets extends EdgeInsetsGeometry {
   ///
   ///{@tool snippet}
   ///
-  /// Example:
+  /// Create insets: (left= 8, right= 8, bottom= 8, top= 0) :
+  ///
   /// ```dart
-  /// const EdgeInsets.some(rest: 8.0, top: true); // -> left: 8, right: 8, bottom: 8, top: 0
+  /// const EdgeInsets.some(rest: 8.0, top: true);
   /// ```
   /// {@end-tool}
   const EdgeInsets.some({
@@ -486,8 +481,10 @@ class EdgeInsets extends EdgeInsetsGeometry {
   /// `0.0` by default.
   ///
   /// {@tool snippet}
+  ///
+  /// Creates insets: (left=16, right=16, bottom=16, top=0) :
+  ///
   /// ```dart
-  /// // Creates insets: left=16, right=16, bottom=16, top=0
   /// const EdgeInsets.exceptTop(16.0);
   /// ```
   /// {@end-tool}
@@ -498,8 +495,10 @@ class EdgeInsets extends EdgeInsetsGeometry {
   /// `0.0` by default.
   ///
   /// {@tool snippet}
+  ///
+  /// Creates insets: (left=12, right=12, top=12, bottom=0) :
+  ///
   /// ```dart
-  /// // Creates insets: left=12, right=12, top=12, bottom=0
   /// const EdgeInsets.exceptBottom(12.0);
   /// ```
   /// {@end-tool}
@@ -510,8 +509,10 @@ class EdgeInsets extends EdgeInsetsGeometry {
   /// `0.0` by default.
   ///
   /// {@tool snippet}
+  ///
+  /// Creates insets: (top=20, right=20, bottom=20, left=0) :
+  ///
   /// ```dart
-  /// // Creates insets: top=20, right=20, bottom=20, left=0
   /// const EdgeInsets.exceptLeft(20.0);
   /// ```
   /// {@end-tool}
@@ -522,8 +523,10 @@ class EdgeInsets extends EdgeInsetsGeometry {
   /// `0.0` by default.
   ///
   /// {@tool snippet}
+  ///
+  /// Creates insets: (top=8, left=8, bottom=8, right=0) :
+  ///
   /// ```dart
-  /// // Creates insets: top=8, left=8, bottom=8, right=0
   /// const EdgeInsets.exceptRight(8.0);
   /// ```
   /// {@end-tool}
@@ -861,13 +864,16 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
 
   /// Creates [EdgeInsetsDirectional] where all sides default to [rest],
   /// but allows overriding individual sides.
+  ///  This is similar to [EdgeInsets.all], but with optional overrides.
   ///
-  /// This is similar to [EdgeInsets.all], but with optional overrides.
+  ///{@tool snippet}
   ///
-  /// For example:
+  /// Create insets : (start=8, top=0, end=20, bottom=20) :
+  ///
   /// ```dart
-  /// EdgeInsetsDirectional.some(rest: 20, top: 0, start: 8);  /// // -> start=8, top=0, end=20, bottom=20
+  /// EdgeInsetsDirectional.some(rest: 20, top: 0, start: 8);
   /// ```
+  /// {@end-tool}
   const EdgeInsetsDirectional.some({
     double rest = 0.0,
     double? start,
@@ -882,10 +888,14 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
   /// This is useful when you want equal padding on all sides except
   /// the `start` side in an LTR/RTL-aware layout.
   ///
-  /// For example:
+  ///{@tool snippest}
+  ///
+  /// Create insets: (start=0, top=16, end=16, bottom=16):
+  ///
   /// ```dart
-  /// EdgeInsetsDirectional.exceptStart(16); // start=0, top=16, end=16, bottom=16
+  /// EdgeInsetsDirectional.exceptStart(16);
   /// ```
+  /// {@end-tool}
   const EdgeInsetsDirectional.exceptStart(double value, [double start = 0.0])
     : this.only(start: start, top: value, end: value, bottom: value);
 
@@ -895,11 +905,14 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
   /// This is useful when you want equal padding on all sides except
   /// the `end` side in an LTR/RTL-aware layout.
   ///
-  /// For example:
+  /// {@tool snippest}
+  ///
+  /// create insets: (start=16, top=16, end=0, bottom=16) :
+  ///
   /// ```dart
   /// EdgeInsetsDirectional.exceptEnd(16);
-  /// // -> start=16, top=16, end=0, bottom=16
   /// ```
+  /// {@end-tool}
   const EdgeInsetsDirectional.exceptEnd(double value, [double end = 0.0])
     : this.only(start: value, top: value, end: end, bottom: value);
 
