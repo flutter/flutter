@@ -3333,8 +3333,8 @@ class _RenderMenuLayout extends RenderShiftedBox {
        _heightFactor = heightFactor,
        super(child);
 
-  Rect _anchorRect;
   Rect get anchorRect => _anchorRect;
+  Rect _anchorRect;
   set anchorRect(Rect value) {
     if (_anchorRect == value) {
       return;
@@ -3343,8 +3343,8 @@ class _RenderMenuLayout extends RenderShiftedBox {
     markNeedsLayout();
   }
 
-  TextDirection _textDirection;
   TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
   set textDirection(TextDirection value) {
     if (_textDirection == value) {
       return;
@@ -3353,8 +3353,8 @@ class _RenderMenuLayout extends RenderShiftedBox {
     markNeedsLayout();
   }
 
-  AlignmentGeometry _alignment;
   AlignmentGeometry get alignment => _alignment;
+  AlignmentGeometry _alignment;
   set alignment(AlignmentGeometry value) {
     if (_alignment == value) {
       return;
@@ -3363,8 +3363,8 @@ class _RenderMenuLayout extends RenderShiftedBox {
     markNeedsLayout();
   }
 
-  Offset _alignmentOffset;
   Offset get alignmentOffset => _alignmentOffset;
+  Offset _alignmentOffset;
   set alignmentOffset(Offset value) {
     if (_alignmentOffset == value) {
       return;
@@ -3373,8 +3373,8 @@ class _RenderMenuLayout extends RenderShiftedBox {
     markNeedsLayout();
   }
 
-  Offset? _menuPosition;
   Offset? get menuPosition => _menuPosition;
+  Offset? _menuPosition;
   set menuPosition(Offset? value) {
     if (_menuPosition == value) {
       return;
@@ -3383,8 +3383,8 @@ class _RenderMenuLayout extends RenderShiftedBox {
     markNeedsLayout();
   }
 
-  EdgeInsetsGeometry _menuPadding;
   EdgeInsetsGeometry get menuPadding => _menuPadding;
+  EdgeInsetsGeometry _menuPadding;
   set menuPadding(EdgeInsetsGeometry value) {
     if (_menuPadding == value) {
       return;
@@ -3393,8 +3393,8 @@ class _RenderMenuLayout extends RenderShiftedBox {
     markNeedsLayout();
   }
 
-  Set<Rect> _avoidBounds;
   Set<Rect> get avoidBounds => _avoidBounds;
+  Set<Rect> _avoidBounds;
   set avoidBounds(Set<Rect> value) {
     if (setEquals(_avoidBounds, value)) {
       return;
@@ -3403,8 +3403,8 @@ class _RenderMenuLayout extends RenderShiftedBox {
     markNeedsLayout();
   }
 
-  Axis _orientation;
   Axis get orientation => _orientation;
+  Axis _orientation;
   set orientation(Axis value) {
     if (_orientation == value) {
       return;
@@ -3413,8 +3413,8 @@ class _RenderMenuLayout extends RenderShiftedBox {
     markNeedsLayout();
   }
 
-  Axis _parentOrientation;
   Axis get parentOrientation => _parentOrientation;
+  Axis _parentOrientation;
   set parentOrientation(Axis value) {
     if (_parentOrientation == value) {
       return;
@@ -3423,8 +3423,8 @@ class _RenderMenuLayout extends RenderShiftedBox {
     markNeedsLayout();
   }
 
-  EdgeInsetsGeometry _reservedPadding;
   EdgeInsetsGeometry get reservedPadding => _reservedPadding;
+  EdgeInsetsGeometry _reservedPadding;
   set reservedPadding(EdgeInsetsGeometry value) {
     if (_reservedPadding == value) {
       return;
@@ -3433,8 +3433,8 @@ class _RenderMenuLayout extends RenderShiftedBox {
     markNeedsLayout();
   }
 
-  double _heightFactor;
   double get heightFactor => _heightFactor;
+  double _heightFactor;
   set heightFactor(double value) {
     if (_heightFactor == value) {
       return;
@@ -3469,34 +3469,6 @@ class _RenderMenuLayout extends RenderShiftedBox {
               ? childConstraints.smallest
               : child.getDryLayout(childConstraints),
         ).dy;
-  }
-
-  @override
-  double computeMinIntrinsicWidth(double height) {
-    return getMaxIntrinsicWidth(height);
-  }
-
-  @override
-  double computeMaxIntrinsicWidth(double height) {
-    final double width = BoxConstraints.tightForFinite(height: height).maxWidth;
-    if (width.isFinite) {
-      return width;
-    }
-    return 0.0;
-  }
-
-  @override
-  double computeMinIntrinsicHeight(double width) {
-    return getMaxIntrinsicHeight(width);
-  }
-
-  @override
-  double computeMaxIntrinsicHeight(double width) {
-    final double height = BoxConstraints.tightForFinite(width: width).maxHeight;
-    if (height.isFinite) {
-      return height;
-    }
-    return 0.0;
   }
 
   @override
