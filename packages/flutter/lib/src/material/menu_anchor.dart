@@ -3610,20 +3610,6 @@ class _RenderMenuLayout extends RenderShiftedBox {
     return Offset(x, y);
   }
 
-  @override
-  bool shouldRelayout(_MenuLayout oldDelegate) {
-    return anchorRect != oldDelegate.anchorRect ||
-        textDirection != oldDelegate.textDirection ||
-        alignment != oldDelegate.alignment ||
-        alignmentOffset != oldDelegate.alignmentOffset ||
-        menuPosition != oldDelegate.menuPosition ||
-        menuPadding != oldDelegate.menuPadding ||
-        orientation != oldDelegate.orientation ||
-        parentOrientation != oldDelegate.parentOrientation ||
-        reservedPadding != oldDelegate.reservedPadding ||
-        !setEquals(avoidBounds, oldDelegate.avoidBounds);
-  }
-
   Rect _closestScreen(Iterable<Rect> screens, Offset point) {
     Rect closest = screens.first;
     for (final Rect screen in screens) {
