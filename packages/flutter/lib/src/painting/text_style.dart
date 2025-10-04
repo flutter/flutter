@@ -504,7 +504,11 @@ class TextStyle with Diagnosticable {
     List<String>? fontFamilyFallback,
     String? package,
     this.overflow,
-  }) : fontFamily = package == null ? fontFamily : 'packages/$package/$fontFamily',
+  }) : assert(
+         height == null || (height != double.infinity && height != -double.infinity),
+         'TextStyle.height must be a finite number or null.',
+       ),
+       fontFamily = package == null ? fontFamily : 'packages/$package/$fontFamily',
        _fontFamilyFallback = fontFamilyFallback,
        _package = package,
        assert(color == null || foreground == null, _kColorForegroundWarning),
