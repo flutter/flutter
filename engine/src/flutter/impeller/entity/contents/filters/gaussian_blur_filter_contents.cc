@@ -474,10 +474,11 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
           // supported for Vulkan and Metal.
           //
           // If the blur is bounded, software decal is always needed.
-          bool need_software_decal = pass_args.blur_uv_bounds.has_value() ||
-                                     (!renderer.GetDeviceCapabilities()
-                                           .SupportsDecalSamplerAddressMode() &&
-                                      tile_mode == Entity::TileMode::kDecal);
+          bool need_software_decal =
+              pass_args.downsample_uv_bounds.has_value() ||
+              (!renderer.GetDeviceCapabilities()
+                    .SupportsDecalSamplerAddressMode() &&
+               tile_mode == Entity::TileMode::kDecal);
           if (!need_software_decal) {
             pass.SetPipeline(renderer.GetDownsamplePipeline(pipeline_options));
           } else {
