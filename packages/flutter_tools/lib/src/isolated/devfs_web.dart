@@ -84,7 +84,8 @@ class WebDevFS implements DevFS {
     required this.logger,
     required this.platform,
     this.testMode = false,
-  }) {
+    Map<String, String>? webDefines,
+  }) : _webDefines = webDefines ?? <String, String>{} {
     // TODO(srujzs): Remove this assertion when the library bundle format is
     // supported without canary mode.
     if (ddcModuleSystem) {
@@ -115,6 +116,7 @@ class WebDevFS implements DevFS {
   final FileSystem fileSystem;
   final Logger logger;
   final Platform platform;
+  final Map<String, String> _webDefines;
 
   late WebAssetServer webAssetServer;
 
@@ -221,6 +223,7 @@ class WebDevFS implements DevFS {
       logger: logger,
       platform: platform,
       shouldEnableMiddleware: shouldEnableMiddleware,
+      webDefines: _webDefines,
     );
     return baseUri;
   }

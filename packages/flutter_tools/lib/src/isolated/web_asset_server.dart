@@ -78,7 +78,9 @@ class WebAssetServer implements AssetReader {
     required this.webRenderer,
     required this.useLocalCanvasKit,
     required this.fileSystem,
-  }) : basePath = WebTemplate.baseHref(htmlTemplate(fileSystem, 'index.html', _kDefaultIndex)) {
+    Map<String, String>? webDefines,
+  }) : basePath = WebTemplate.baseHref(htmlTemplate(fileSystem, 'index.html', _kDefaultIndex)),
+       _webDefines = webDefines ?? <String, String>{} {
     // TODO(srujzs): Remove this assertion when the library bundle format is
     // supported without canary mode.
     if (_ddcModuleSystem) {
@@ -194,6 +196,7 @@ class WebAssetServer implements AssetReader {
     required Logger logger,
     required Platform platform,
     bool shouldEnableMiddleware = true,
+    Map<String, String>? webDefines,
   }) async {
     final String hostname = webDevServerConfig.host;
     final int port = webDevServerConfig.port;
@@ -256,6 +259,7 @@ class WebAssetServer implements AssetReader {
       webRenderer: webRenderer,
       useLocalCanvasKit: useLocalCanvasKit,
       fileSystem: fileSystem,
+      webDefines: webDefines,
     );
     final int selectedPort = server.selectedPort;
     var url = '$hostname:$selectedPort';
@@ -390,6 +394,7 @@ class WebAssetServer implements AssetReader {
 
   final bool _ddcModuleSystem;
   final bool _canaryFeatures;
+  final Map<String, String> _webDefines;
   final HttpServer _httpServer;
   final _webMemoryFS = WebMemoryFS();
   final PackageConfig _packages;
@@ -619,6 +624,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
       serviceWorkerVersion: null,
       buildConfig: _buildConfigString,
       flutterJsFile: _flutterJsFile,
+      webDefines: _webDefines,
     );
   }
 
@@ -641,6 +647,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
         buildConfig: _buildConfigString,
         flutterJsFile: _flutterJsFile,
         flutterBootstrapJs: _flutterBootstrapJsContent,
+        webDefines: _webDefines,
       ),
       headers: <String, String>{HttpHeaders.contentTypeHeader: 'text/html'},
     );

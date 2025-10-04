@@ -358,6 +358,7 @@ class FakeWebRunnerFactory implements WebRunnerFactory {
     Usage? usage,
     Analytics? analytics,
     bool machine = false,
+    Map<String, String>? webDefines
   }) {
     expect(stayResident, isTrue);
     return FakeResidentRunner(
