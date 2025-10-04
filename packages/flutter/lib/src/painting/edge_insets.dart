@@ -86,17 +86,17 @@ abstract class EdgeInsetsGeometry {
   const factory EdgeInsetsGeometry.fromSTEB(double start, double top, double end, double bottom) =
       EdgeInsetsDirectional.fromSTEB;
 
-  /// Creates insets where all sides are [value] except [top].
+  /// Creates insets where all sides are [value] except [top], which defaults to 0.0.
   const factory EdgeInsetsGeometry.exceptTop(double value, [double top]) = EdgeInsets.exceptTop;
 
-  /// Creates insets where all sides are [value] except [bottom].
+  /// Creates insets where all sides are [value] except [bottom], which defaults to 0.0.
   const factory EdgeInsetsGeometry.exceptBottom(double value, [double bottom]) =
       EdgeInsets.exceptBottom;
 
-  /// Creates insets where all sides are [value] except [left].
+  /// Creates insets where all sides are [value] except [left], which defaults to 0.0.
   const factory EdgeInsetsGeometry.exceptLeft(double value, [double left]) = EdgeInsets.exceptLeft;
 
-  /// Creates insets where all sides are [value] except [right].
+  /// Creates insets where all sides are [value] except [right], which defaults to 0.0.
   const factory EdgeInsetsGeometry.exceptRight(double value, [double right]) =
       EdgeInsets.exceptRight;
 
@@ -461,7 +461,8 @@ class EdgeInsets extends EdgeInsetsGeometry {
       right = horizontal,
       bottom = vertical;
 
-  /// Creates insets where all sides are [value], except the excluded ones.
+  /// Creates insets where all sides are [rest],
+  /// but allows overriding individual sides.
   ///
   ///{@tool snippet}
   ///
@@ -865,8 +866,7 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
   ///
   /// For example:
   /// ```dart
-  /// EdgeInsetsDirectional.some(rest : 20, top: 0, start: 8);
-  /// // -> start=8, top=0, end=20, bottom=20
+  /// EdgeInsetsDirectional.some(rest: 20, top: 0, start: 8);  /// // -> start=8, top=0, end=20, bottom=20
   /// ```
   const EdgeInsetsDirectional.some({
     double rest = 0.0,
@@ -874,12 +874,7 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
     double? top,
     double? end,
     double? bottom,
-  }) : this.only(
-          start: start ?? rest,
-          top: top ?? rest,
-          end: end ?? rest,
-          bottom: bottom ?? rest,
-        );
+  }) : this.only(start: start ?? rest, top: top ?? rest, end: end ?? rest, bottom: bottom ?? rest);
 
   /// Creates [EdgeInsetsDirectional] where all sides are [value],
   /// except [start] which defaults to `0.0`.
@@ -889,11 +884,10 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
   ///
   /// For example:
   /// ```dart
-  /// EdgeInsetsDirectional.exceptStart(16);
-  /// // -> start=0, top=16, end=16, bottom=16
+  /// EdgeInsetsDirectional.exceptStart(16); // start=0, top=16, end=16, bottom=16
   /// ```
   const EdgeInsetsDirectional.exceptStart(double value, [double start = 0.0])
-      : this.only(start: start, top: value, end: value, bottom: value);
+    : this.only(start: start, top: value, end: value, bottom: value);
 
   /// Creates [EdgeInsetsDirectional] where all sides are [value],
   /// except [end] which defaults to `0.0`.
@@ -907,7 +901,7 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
   /// // -> start=16, top=16, end=0, bottom=16
   /// ```
   const EdgeInsetsDirectional.exceptEnd(double value, [double end = 0.0])
-      : this.only(start: value, top: value, end: end, bottom: value);
+    : this.only(start: value, top: value, end: end, bottom: value);
 
   /// Creates insets with symmetric vertical and horizontal offsets.
   ///

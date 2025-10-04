@@ -152,10 +152,7 @@ void main() {
     expect(insets2, const EdgeInsetsDirectional.only(start: 8, end: 20, bottom: 20));
 
     const EdgeInsetsDirectional insetsExceptStart = EdgeInsetsDirectional.exceptStart(16);
-    expect(
-      insetsExceptStart,
-      const EdgeInsetsDirectional.only(top: 16, end: 16, bottom: 16),
-    );
+    expect(insetsExceptStart, const EdgeInsetsDirectional.only(top: 16, end: 16, bottom: 16));
 
     const EdgeInsetsDirectional insetsExceptStart2 = EdgeInsetsDirectional.exceptStart(16, 4);
     expect(
@@ -172,10 +169,7 @@ void main() {
     expect(resolvedExceptStart4, const EdgeInsets.only(left: 16, top: 16, bottom: 16));
 
     const EdgeInsetsDirectional insetsExceptEnd = EdgeInsetsDirectional.exceptEnd(16);
-    expect(
-      insetsExceptEnd,
-      const EdgeInsetsDirectional.only(start: 16, top: 16, bottom: 16),
-    );
+    expect(insetsExceptEnd, const EdgeInsetsDirectional.only(start: 16, top: 16, bottom: 16));
 
     const EdgeInsetsDirectional insetsExceptEnd2 = EdgeInsetsDirectional.exceptEnd(16, 6);
     expect(
