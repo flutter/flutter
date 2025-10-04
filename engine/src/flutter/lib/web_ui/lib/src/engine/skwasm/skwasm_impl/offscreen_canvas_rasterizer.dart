@@ -77,7 +77,7 @@ class SkwasmOffscreenCanvasViewRasterizer extends ViewRasterizer {
     for (int i = 0; i < displayCanvases.length; i++) {
       final RenderCanvas renderCanvas = displayCanvases[i] as RenderCanvas;
       final DomImageBitmap bitmap = renderResult.imageBitmaps[i];
-      renderCanvas.render(bitmap);
+      renderCanvas.render(bitmap, currentFrameSize);
     }
   }
 }
