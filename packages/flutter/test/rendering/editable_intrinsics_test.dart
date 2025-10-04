@@ -34,7 +34,7 @@ void main() {
         ' │ size: MISSING\n'
         ' │ cursorColor: null\n'
         ' │ showCursor: ValueNotifier<bool>#00000(false)\n'
-        ' │ maxLines: 1\n'
+        ' │ maxLines: 1.0\n'
         ' │ minLines: null\n'
         ' │ selectionColor: null\n'
         ' │ locale: ja_JP\n'

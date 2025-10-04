@@ -126,7 +126,7 @@ class SkwasmRenderer extends Renderer {
   ui.ParagraphStyle createParagraphStyle({
     ui.TextAlign? textAlign,
     ui.TextDirection? textDirection,
-    int? maxLines,
+    double? maxLines,
     String? fontFamily,
     double? fontSize,
     double? height,
