@@ -630,6 +630,12 @@ class FakeFlutterManifest extends Fake implements FlutterManifest {
 
   @override
   String get appName => '';
+
+  @override
+  PluginPlatformConfig? get ios => null;
+
+  @override
+  PluginPlatformConfig? get macos => null;
 }
 
 class FakeCache extends Fake implements Cache {

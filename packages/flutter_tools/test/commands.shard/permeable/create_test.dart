@@ -3422,6 +3422,131 @@ void main() {
     expect(buildGradleContent.contains('namespace = "com.bar.foo.flutter_project"'), true);
   });
 
+  testUsingContext(
+    'creates a plugin with shared darwin implementation using CocoaPods',
+    () async {
+      final command = CreateCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+
+      await runner.run(<String>[
+        'create',
+        '--no-pub',
+        '--template=plugin',
+        '--platforms=darwin',
+        '--project-name=darwin_plugin',
+        projectDir.path,
+      ]);
+
+      expect(
+        projectDir.childDirectory('darwin').existsSync(),
+        isTrue,
+        reason: 'darwin directory should exist',
+      );
+      expect(
+        projectDir.childDirectory('example').childDirectory('ios').existsSync(),
+        isTrue,
+        reason: 'example/ios directory should exist',
+      );
+      expect(
+        projectDir.childDirectory('example').childDirectory('macos').existsSync(),
+        isTrue,
+        reason: 'example/macos directory should exist',
+      );
+
+      final File pubspec = projectDir.childFile('pubspec.yaml');
+      final String pubspecContent = await pubspec.readAsString();
+      expect(
+        pubspecContent,
+        contains('''
+      ios:
+        pluginClass: DarwinPlugin
+        sharedDarwinSource: true'''),
+      );
+      expect(
+        pubspecContent,
+        contains('''
+      macos:
+        pluginClass: DarwinPlugin
+        sharedDarwinSource: true'''),
+      );
+
+      final File podspec = projectDir.childDirectory('darwin').childFile('darwin_plugin.podspec');
+      final String podspecContent = await podspec.readAsString();
+      expect(podspecContent, contains("s.ios.deployment_target = '13.0'"));
+      expect(podspecContent, contains("s.osx.deployment_target = '10.15'"));
+
+      final File swiftFile = projectDir
+          .childDirectory('darwin')
+          .childDirectory('Classes')
+          .childFile('DarwinPlugin.swift');
+      final String swiftContent = await swiftFile.readAsString();
+      expect(swiftContent, contains('#if os(iOS)'));
+      expect(swiftContent, contains('#elseif os(macOS)'));
+    },
+    overrides: {FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true)},
+  );
+
+  testUsingContext(
+    'creates a plugin with shared darwin implementation using Swift Package Manager',
+    () async {
+      final command = CreateCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+
+      await runner.run(<String>[
+        'create',
+        '--no-pub',
+        '--template=plugin',
+        '--platforms=darwin',
+        '--project-name=darwin_plugin',
+        projectDir.path,
+      ]);
+
+      expect(
+        projectDir.childDirectory('darwin').existsSync(),
+        isTrue,
+        reason: 'darwin directory should exist',
+      );
+
+      // Verify Package.swift content
+      final File packageSwift = projectDir
+          .childDirectory('darwin')
+          .childDirectory('darwin_plugin')
+          .childFile('Package.swift');
+      final String packageSwiftContent = await packageSwift.readAsString();
+      expect(packageSwiftContent, contains('.macOS("10.15")'));
+      expect(packageSwiftContent, contains('.iOS("13.0")'));
+    },
+    overrides: {
+      // Ensure Swift Package Manager is enabled to test the SPM path
+      FeatureFlags: () =>
+          TestFeatureFlags(isSwiftPackageManagerEnabled: true, isMacOSEnabled: true),
+    },
+  );
+
+  testUsingContext(
+    'should show warning when darwin is requested and macOS and iOS are disabled',
+    () async {
+      final command = CreateCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+
+      await runner.run(<String>[
+        'create',
+        '--no-pub',
+        '--template=plugin',
+        '--platforms=darwin',
+        projectDir.path,
+      ]);
+      expect(
+        logger.statusText,
+        contains(
+          'The darwin platform is currently not supported on your local environment.\n'
+          'You must have a macOS host with Xcode installed to develop for iOS or macOS.\n',
+        ),
+      );
+    },
+    overrides: {FeatureFlags: () => TestFeatureFlags(isIOSEnabled: false), Logger: () => logger},
+  );
+
   testUsingContext('Android FFI plugin contains 16kb page support', () async {
     final command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
