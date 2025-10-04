@@ -244,6 +244,7 @@ class SemanticsNodeUpdate {
     required this.platformViewId,
     required this.scrollChildren,
     required this.scrollIndex,
+    required this.traversalOwner,
     required this.scrollPosition,
     required this.scrollExtentMax,
     required this.scrollExtentMin,
@@ -262,6 +263,7 @@ class SemanticsNodeUpdate {
     this.tooltip,
     this.textDirection,
     required this.transform,
+    required this.hitTestTransform,
     required this.childrenInTraversalOrder,
     required this.childrenInHitTestOrder,
     required this.additionalActions,
@@ -303,6 +305,9 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final int scrollIndex;
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final int? traversalOwner;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final double scrollPosition;
@@ -357,6 +362,9 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final Float32List transform;
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final Float32List hitTestTransform;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final Int32List childrenInTraversalOrder;
@@ -794,6 +802,10 @@ abstract class SemanticRole {
     if (semanticsObject.isLocaleDirty) {
       semanticsObject.owner.addOneTimePostUpdateCallback(_updateLocale);
     }
+
+    if (semanticsObject.isTraversalOwnerDirty) {
+      _updateTraversalOwner();
+    }
   }
 
   void _updateIdentifier() {
@@ -832,6 +844,29 @@ abstract class SemanticRole {
       return;
     }
     setAttribute('lang', locale);
+  }
+
+  void _updateTraversalOwner() {
+    // Set up aria-owns relationship for traversal order.
+    if (semanticsObject.traversalOwner != -1) {
+      final SemanticsObject? parent =
+          semanticsObject.owner._semanticsTree[semanticsObject.traversalOwner!];
+      if (parent != null && parent.semanticRole != null) {
+        parent.element.setAttribute(
+          'aria-owns',
+          '$kFlutterSemanticNodePrefix${semanticsObject.id}',
+        );
+      }
+    }
+    // Clean up aria-owns relationship.
+    if (semanticsObject._previousTraversalOwner != null &&
+        semanticsObject._previousTraversalOwner != -1) {
+      final SemanticsObject? parent =
+          semanticsObject.owner._semanticsTree[semanticsObject._previousTraversalOwner!];
+      if (parent != null) {
+        parent.element.removeAttribute('aria-owns');
+      }
+    }
   }
 
   /// Applies the current [SemanticsObject.validationResult] to the DOM managed
@@ -1506,6 +1541,20 @@ class SemanticsObject {
     _dirtyFields |= _localeIndex;
   }
 
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  int? get traversalOwner => _traversalOwner;
+  int? _traversalOwner;
+  int? _previousTraversalOwner;
+
+  static const int _traversalOwnerIndex = 1 << 29;
+
+  /// Whether the [traversalOwner] field has been updated but has not been
+  /// applied to the DOM yet.
+  bool get isTraversalOwnerDirty => _isDirty(_traversalOwnerIndex);
+  void _markTraversalOwnerDirty() {
+    _dirtyFields |= _traversalOwnerIndex;
+  }
+
   /// Bitfield showing which fields have been updated but have not yet been
   /// applied to the DOM.
   ///
@@ -1691,6 +1740,12 @@ class SemanticsObject {
     if (_scrollIndex != update.scrollIndex) {
       _scrollIndex = update.scrollIndex;
       _markScrollIndexDirty();
+    }
+
+    if (_traversalOwner != update.traversalOwner) {
+      _previousTraversalOwner = _traversalOwner;
+      _traversalOwner = update.traversalOwner;
+      _markTraversalOwnerDirty();
     }
 
     if (_scrollExtentMax != update.scrollExtentMax) {
