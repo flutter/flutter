@@ -1404,40 +1404,33 @@ class _RenderDropdownMenuBody extends RenderBox
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    final BoxConstraints constraints = this.constraints;
-    double maxWidth = 0.0;
-    double? maxHeight;
+    double maxChildWidth = 0.0;
+    double? childHeight;
     RenderBox? child = firstChild;
-    final double intrinsicWidth = width ?? getMaxIntrinsicWidth(constraints.maxHeight);
-    final double widthConstraint = math.min(intrinsicWidth, constraints.maxWidth);
+    final double maxIntrinsicRenderWidth = width ?? getMaxIntrinsicWidth(constraints.maxHeight);
+    final double widthConstraint = math.min(maxIntrinsicRenderWidth, constraints.maxWidth);
     final BoxConstraints innerConstraints = BoxConstraints(
       maxWidth: widthConstraint,
       maxHeight: getMaxIntrinsicHeight(widthConstraint),
     );
 
     while (child != null) {
-      if (child == firstChild) {
-        final Size childSize = child.getDryLayout(innerConstraints);
-        maxHeight ??= childSize.height;
-        final _DropdownMenuBodyParentData childParentData =
-            child.parentData! as _DropdownMenuBodyParentData;
-        assert(child.parentData == childParentData);
-        child = childParentData.nextSibling;
-        continue;
-      }
       final Size childSize = child.getDryLayout(innerConstraints);
+      childHeight ??= childSize.height;
+
+      // The first child is the TextField, which doesn't contribute to the menu's width calculation.
+      if (child != firstChild) {
+        maxChildWidth = math.max(maxChildWidth, childSize.width);
+      }
+
       final _DropdownMenuBodyParentData childParentData =
           child.parentData! as _DropdownMenuBodyParentData;
-      childParentData.offset = Offset.zero;
-      maxWidth = math.max(maxWidth, childSize.width);
-      maxHeight ??= childSize.height;
-      assert(child.parentData == childParentData);
       child = childParentData.nextSibling;
     }
 
-    assert(maxHeight != null);
-    maxWidth = math.max(_kMinimumWidth, maxWidth);
-    return constraints.constrain(Size(width ?? maxWidth, maxHeight!));
+    assert(firstChild != null, 'DropdownMenu must have at least one child.');
+    final double finalWidth = math.max(_kMinimumWidth, width ?? maxChildWidth);
+    return constraints.constrain(Size(finalWidth, childHeight!));
   }
 
   @override

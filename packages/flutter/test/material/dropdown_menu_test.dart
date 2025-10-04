@@ -952,6 +952,32 @@ void main() {
     expect(dropdownWidth, menuWidth);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/176501
+  testWidgets('_RenderDropdownMenuBody.computeDryLayout does not access this.constraints', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: _TestDryLayout(
+              child: DropdownMenu<int>(
+                dropdownMenuEntries: <DropdownMenuEntry<int>>[
+                  DropdownMenuEntry<int>(value: 1, label: 'One'),
+                  DropdownMenuEntry<int>(value: 2, label: 'Two'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // The test passes if no exception is thrown during the layout phase.
+    expect(tester.takeException(), isNull);
+    expect(find.byType(DropdownMenu<int>), findsOneWidget);
+  });
+
   testWidgets(
     'Material2 - The menuHeight property can be used to show a shorter scrollable menu list instead of the complete list',
     (WidgetTester tester) async {
@@ -4782,4 +4808,30 @@ enum ShortMenu {
 
   const ShortMenu(this.label);
   final String label;
+}
+
+// A helper widget that creates a render object designed to call `getDryLayout`
+// on its child during its own `performLayout` phase. This is used to test
+// that a child's `computeDryLayout` implementation is valid.
+class _TestDryLayout extends SingleChildRenderObjectWidget {
+  const _TestDryLayout({super.child});
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderTestDryLayout();
+  }
+}
+
+class _RenderTestDryLayout extends RenderProxyBox {
+  @override
+  void performLayout() {
+    if (child == null) {
+      size = constraints.smallest;
+      return;
+    }
+
+    child!.getDryLayout(constraints);
+    child!.layout(constraints, parentUsesSize: true);
+    size = child!.size;
+  }
 }
