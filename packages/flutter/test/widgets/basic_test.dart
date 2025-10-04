@@ -1220,6 +1220,18 @@ void main() {
 
       expect(properties.properties.first.value, colorToPaint);
     });
+
+    testWidgets('ColoredBox - paint uses isAntiAlias = false', (WidgetTester tester) async {
+      await tester.pumpWidget(const ColoredBox(color: colorToPaint));
+
+      final RenderObject renderColoredBox = tester.renderObject(find.byType(ColoredBox));
+      expect(renderColoredBox, isA<RenderProxyBoxWithHitTestBehavior>());
+
+      renderColoredBox.paint(mockContext, Offset.zero);
+
+      expect(mockCanvas.paints, isNotEmpty);
+      expect(mockCanvas.paints.first.isAntiAlias, false);
+    });
   });
 
   testWidgets('Inconsequential golden test', (WidgetTester tester) async {
