@@ -25,7 +25,6 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   static const kResolveUri = 'resolveUri';
   static const kSetPreference = 'setPreference';
   static const kGetPreference = 'getPreference';
-  static const kGetDevToolsUri = 'getDevToolsUri';
 
   /// Error code for RpcException thrown when attempting to load a key from
   /// persistent preferences that doesn't have an entry.
@@ -114,10 +113,7 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   /// If [key] is not set, [defaultValue] is returned.
   Future<bool> getFlag(String key, {bool defaultValue = false}) async {
     final result = await getPreference(key) as bool?;
-    if (result == null) {
-      return defaultValue;
-    }
-    return result;
+    return result ?? defaultValue;
   }
 
   /// Sets [key] to [value] in the persistent preferences map.
