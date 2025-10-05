@@ -253,7 +253,8 @@ static void PrintWideGamutWarningOnce() {
   FlutterPluginSceneLifeCycleDelegate* newSceneLifeCycleDelegate =
       [FlutterPluginSceneLifeCycleDelegate fromScene:newScene];
   if (newSceneLifeCycleDelegate != nil) {
-    return [newSceneLifeCycleDelegate addFlutterEngine:(FlutterEngine*)self.delegate];
+    [newSceneLifeCycleDelegate addFlutterEngine:(FlutterEngine*)self.delegate];
+    return;
   }
 
   // The window, and therefore windowScene, property may be nil if the receiver does not currently
@@ -264,7 +265,8 @@ static void PrintWideGamutWarningOnce() {
   FlutterPluginSceneLifeCycleDelegate* previousSceneLifeCycleDelegate =
       [FlutterPluginSceneLifeCycleDelegate fromScene:previousScene];
   if (previousSceneLifeCycleDelegate != nil) {
-    return [previousSceneLifeCycleDelegate removeFlutterEngine:(FlutterEngine*)self.delegate];
+    [previousSceneLifeCycleDelegate removeFlutterEngine:(FlutterEngine*)self.delegate];
+    return;
   }
 }
 

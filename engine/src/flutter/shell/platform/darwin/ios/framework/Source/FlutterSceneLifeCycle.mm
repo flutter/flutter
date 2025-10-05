@@ -33,10 +33,10 @@ FLUTTER_ASSERT_ARC
   return self;
 }
 
-- (void)addFlutterEngine:(FlutterEngine*)engine {
+- (BOOL)addFlutterEngine:(FlutterEngine*)engine {
   // Check if the engine is already in the array to avoid duplicates.
-  if ([self containsEngine:engine]) {
-    return;
+  if ([self.engines.allObjects containsObject:engine]) {
+    return NO;
   }
 
   [self.engines addPointer:(__bridge void*)engine];
@@ -47,6 +47,8 @@ FLUTTER_ASSERT_ARC
   // As a workaround, we mutate it first. See: http://www.openradar.me/15396578
   [self.engines addPointer:nil];
   [self.engines compact];
+
+  return YES;
 }
 
 - (void)removeFlutterEngine:(FlutterEngine*)engine {
@@ -54,10 +56,6 @@ FLUTTER_ASSERT_ARC
   if (index != NSNotFound) {
     [self.engines removePointerAtIndex:index];
   }
-}
-
-- (BOOL)containsEngine:(FlutterEngine*)engine {
-  return [self.engines.allObjects containsObject:engine];
 }
 
 - (void)updateEnginesInScene:(UIScene*)scene {
@@ -117,14 +115,14 @@ FLUTTER_ASSERT_ARC
 #pragma mark - Connecting and disconnecting the scene
 
 - (void)engine:(FlutterEngine*)engine receivedConnectNotificationFor:(UIScene*)scene {
-  // Don't send willConnectToSession event if engine is already tracked as it will be handled by
-  // the actual event.
-  if ([self containsEngine:engine]) {
-    return;
-  }
   // Connection options may be nil if the notification was received before the
   // `scene:willConnectToSession:options:` event. In which case, we can wait for the actual event.
-  [self addFlutterEngine:engine];
+  BOOL added = [self addFlutterEngine:engine];
+  if (!added) {
+    // Don't send willConnectToSession event if engine is already tracked as it will be handled by
+    // the actual event.
+    return;
+  }
   if (self.connectionOptions != nil) {
     [self scene:scene
         willConnectToSession:scene.session

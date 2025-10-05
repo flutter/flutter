@@ -14,7 +14,13 @@
  */
 @interface FlutterPluginSceneLifeCycleDelegate ()
 
-- (void)addFlutterEngine:(FlutterEngine*)engine;
+/**
+ * Associates the `FlutterEngine` with the `FlutterPluginSceneLifeCycleDelegate` so that it will
+ * forward scene events to the plugins within the engine.
+ *
+ * Returns NO if the engine is already associated with the delegate.
+ */
+- (BOOL)addFlutterEngine:(FlutterEngine*)engine;
 
 - (void)removeFlutterEngine:(FlutterEngine*)engine;
 
