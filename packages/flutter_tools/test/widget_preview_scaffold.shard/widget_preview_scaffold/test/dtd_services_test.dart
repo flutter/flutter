@@ -127,6 +127,13 @@ void main() {
           kFlagKey: true,
           kTestKey: kSecondValue,
         });
+
+        // Remove an entry.
+        await dtd.setPreference(kTestKey, null);
+        expect(await dtd.getPreference(kTestKey), null);
+        expect(json.decode(preferencesFile.readAsStringSync()), {
+          kFlagKey: true,
+        });
       },
     );
   });

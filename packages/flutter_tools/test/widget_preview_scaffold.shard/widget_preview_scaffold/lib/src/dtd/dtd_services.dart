@@ -96,10 +96,10 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   Future<Object?> getPreference(String key) async {
     try {
       final response = await _call(kGetPreference, params: {'key': key});
-      return switch (response!.type) {
-        'StringResponse' => StringResponse.fromDTDResponse(response).value,
-        'BoolResponse' => BoolResponse.fromDTDResponse(response).value,
-        _ => throw StateError('Unexpected response type: ${response.type}'),
+      return switch (response?.type) {
+        'StringResponse' => StringResponse.fromDTDResponse(response!).value,
+        'BoolResponse' => BoolResponse.fromDTDResponse(response!).value,
+        _ => throw StateError('Unexpected response type: ${response?.type}'),
       };
     } on RpcException catch (e) {
       if (e.code == kNoValueForKey) {
@@ -121,7 +121,7 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   }
 
   /// Sets [key] to [value] in the persistent preferences map.
-  Future<void> setPreference(String key, Object value) async {
+  Future<void> setPreference(String key, Object? value) async {
     await _call(kSetPreference, params: {'key': key, 'value': value});
   }
 
