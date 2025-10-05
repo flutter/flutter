@@ -18,6 +18,7 @@ class WidgetPreviewScaffoldInspectorService with WidgetInspectorService {
     WidgetInspectorService.instance = this;
   }
 
+  /// The DTD services instance used to communicate with the tool.
   final WidgetPreviewScaffoldDtdServices dtdServices;
 
   // Keys used to specify the creation location of a widget when serializing a
