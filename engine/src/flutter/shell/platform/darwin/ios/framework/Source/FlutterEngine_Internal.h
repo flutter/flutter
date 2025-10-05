@@ -107,6 +107,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)addSceneLifeCycleDelegate:(NSObject<FlutterSceneLifeCycleDelegate>*)delegate;
 
+- (void)sendDeepLinkToFramework:(NSURL*)url completionHandler:(void (^)(BOOL success))completion;
+
 @end
 
 NS_ASSUME_NONNULL_END

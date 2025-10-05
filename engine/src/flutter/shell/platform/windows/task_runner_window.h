@@ -59,9 +59,17 @@ class TaskRunnerWindow {
                                   WPARAM const wparam,
                                   LPARAM const lparam) noexcept;
 
+  void OnTimer();
+
+  static void TimerProc(PTP_CALLBACK_INSTANCE Instance,
+                        PVOID Context,
+                        PTP_TIMER Timer);
+
   HWND window_handle_;
   std::wstring window_class_name_;
   std::vector<Delegate*> delegates_;
+  PTP_TIMER timer_ = nullptr;
+  DWORD thread_id_ = 0;
 
   FML_DISALLOW_COPY_AND_ASSIGN(TaskRunnerWindow);
 };

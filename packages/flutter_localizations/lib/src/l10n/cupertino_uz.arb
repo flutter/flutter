@@ -30,10 +30,10 @@
   "clearButtonLabel": "Tozalash",
   "cancelButtonLabel": "Bekor qilish",
   "backButtonLabel": "Orqaga",
-  "expansionTileExpandedHint": "double tap to collapse",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "yigʻish uchun ikki marta bosing",
+  "expansionTileCollapsedHint": "yoyish uchun ikki marta bosing",
+  "expansionTileExpandedTapHint": "Yigʻish",
+  "expansionTileCollapsedTapHint": "Batafsil koʻrish uchun yoying",
+  "expandedHint": "Yigʻilgan",
+  "collapsedHint": "Yoyilgan"
 }

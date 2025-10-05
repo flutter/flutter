@@ -104,24 +104,24 @@ class PreviewMatcher extends Matcher {
     );
     checkPropertyMatch(
       name: kWrapper,
-      actual: item.getFirstField(kWrapper)?.toFunctionValue2()?.displayName,
+      actual: item.getFirstField(kWrapper)?.toFunctionValue()?.displayName,
       expected: wrapper,
     );
     checkPropertyMatch(
       name: kTheme,
-      actual: item.getFirstField(kTheme)?.toFunctionValue2()?.displayName,
+      actual: item.getFirstField(kTheme)?.toFunctionValue()?.displayName,
       expected: theme,
     );
 
     final DartObject? actualBrightness = item.getFirstField(kBrightness);
     checkPropertyMatch(
       name: kBrightness,
-      actual: (actualBrightness?.isNull ?? true) ? null : actualBrightness!.variable2!.toString(),
+      actual: (actualBrightness?.isNull ?? true) ? null : actualBrightness!.variable!.toString(),
       expected: brightness,
     );
     checkPropertyMatch(
       name: kLocalizations,
-      actual: item.getFirstField(kLocalizations)?.toFunctionValue2()?.displayName,
+      actual: item.getFirstField(kLocalizations)?.toFunctionValue()?.displayName,
       expected: localizations,
     );
     return matches;
