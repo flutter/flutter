@@ -30,10 +30,10 @@
   "clearButtonLabel": "삭제",
   "cancelButtonLabel": "취소",
   "backButtonLabel": "뒤로",
-  "expansionTileExpandedHint": "double tap to collapse",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "두 번 탭하여 접기",
+  "expansionTileCollapsedHint": "두 번 탭하여 펼치기",
+  "expansionTileExpandedTapHint": "접기",
+  "expansionTileCollapsedTapHint": "자세히 알아보려면 펼치기",
+  "expandedHint": "접힘",
+  "collapsedHint": "펼침"
 }
