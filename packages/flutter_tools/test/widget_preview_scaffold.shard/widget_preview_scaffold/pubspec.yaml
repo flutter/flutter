@@ -45,8 +45,8 @@ dependencies:
   term_glyph: 1.2.2
   test_api: 0.7.7
   typed_data: 1.4.0
-  unified_analytics: 8.0.1
-  url_launcher_android: 6.3.22
+  unified_analytics: 8.0.5
+  url_launcher_android: 6.3.23
   url_launcher_ios: 6.3.4
   url_launcher_linux: 3.2.1
   url_launcher_macos: 3.2.3
@@ -59,6 +59,11 @@ dependencies:
   web_socket: 1.0.1
   web_socket_channel: 3.0.3
 
+dev_dependencies:
+  flutter_tools:
+    path: ../../../
+  test: 1.26.3
+
 flutter:
   uses-material-design: true
-# PUBSPEC CHECKSUM: fdcqn8
+# PUBSPEC CHECKSUM: 130obr
