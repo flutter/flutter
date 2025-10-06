@@ -7,10 +7,9 @@
 
 #import <UIKit/UIKit.h>
 #import "FlutterMacros.h"
+#import "FlutterSceneLifeCycle.h"
 
 NS_ASSUME_NONNULL_BEGIN
-
-@class FlutterEngine;
 
 /**
  * The UISceneDelegate used by Flutter by default.
@@ -18,20 +17,10 @@ NS_ASSUME_NONNULL_BEGIN
  * This class is typically specified as the UISceneDelegate in the Info.plist.
  */
 FLUTTER_DARWIN_EXPORT
-@interface FlutterSceneDelegate : NSObject <UIWindowSceneDelegate>
+@interface FlutterSceneDelegate
+    : NSObject <UIWindowSceneDelegate, FlutterSceneLifeCycleEngineRegistration>
 @property(nonatomic, strong, nullable) UIWindow* window;
 
-/**
- * Use this method to register a `FlutterEngine`'s plugins to the scene's life cycle events.
- *
- * Some Flutter plugins use scene life cycle events to do actions on app launch. For them to receive
- * the necessary events, the `FlutterEngine` must be registered to the scene during
- * `scene:willConnectTo:options:`. This is only required if Multiple Scenes is enabled and the
- * `rootViewController` of the scene is not a `FlutterViewController`.
- */
-- (void)registerFlutterEngine:(FlutterEngine*)engine;
-
-- (void)deregisterFlutterEngine:(FlutterEngine*)engine;
 @end
 
 NS_ASSUME_NONNULL_END

@@ -235,6 +235,36 @@
                                        completionHandler:[OCMArg any]]);
 }
 
+- (void)testRegisterSceneLifeCycleWithFlutterEngine {
+  [self setupMockApplication];
+
+  id mockEngine = OCMClassMock([FlutterEngine class]);
+  FlutterSceneDelegate* sceneDelegate = [[FlutterSceneDelegate alloc] init];
+  id mockSceneDelegate = OCMPartialMock(sceneDelegate);
+
+  id mockLifecycleDelegate = OCMClassMock([FlutterPluginSceneLifeCycleDelegate class]);
+  OCMStub([mockSceneDelegate sceneLifeCycleDelegate]).andReturn(mockLifecycleDelegate);
+
+  [mockSceneDelegate registerSceneLifeCycleWithFlutterEngine:mockEngine];
+
+  OCMVerify(times(1), [mockLifecycleDelegate registerSceneLifeCycleWithFlutterEngine:mockEngine]);
+}
+
+- (void)testUnregisterSceneLifeCycleWithFlutterEngine {
+  [self setupMockApplication];
+
+  id mockEngine = OCMClassMock([FlutterEngine class]);
+  FlutterSceneDelegate* sceneDelegate = [[FlutterSceneDelegate alloc] init];
+  id mockSceneDelegate = OCMPartialMock(sceneDelegate);
+
+  id mockLifecycleDelegate = OCMClassMock([FlutterPluginSceneLifeCycleDelegate class]);
+  OCMStub([mockSceneDelegate sceneLifeCycleDelegate]).andReturn(mockLifecycleDelegate);
+
+  [mockSceneDelegate unregisterSceneLifeCycleWithFlutterEngine:mockEngine];
+
+  OCMVerify(times(1), [mockLifecycleDelegate unregisterSceneLifeCycleWithFlutterEngine:mockEngine]);
+}
+
 - (NSDictionary*)setupMockApplication {
   id mockApplication = OCMClassMock([UIApplication class]);
   OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
