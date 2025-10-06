@@ -66,8 +66,7 @@ void PlatformViewIOS::SetOwnerViewController(__weak FlutterViewController* owner
     accessibility_bridge_.reset();
   }
   owner_controller_ = owner_controller;
-  owner_controller_.applicationLocale =
-      application_locale_.empty() ? nil : @(application_locale_.data());
+  ApplyLocaleToOwnerController();
 
   // Add an observer that will clear out the owner_controller_ ivar and
   // the accessibility_bridge_ in case the view controller is deleted.
@@ -164,10 +163,7 @@ void PlatformViewIOS::UpdateSemantics(int64_t view_id,
 // |PlatformView|
 void PlatformViewIOS::SetApplicationLocale(std::string locale) {
   application_locale_ = std::move(locale);
-  if (owner_controller_) {
-    owner_controller_.applicationLocale =
-        application_locale_.empty() ? nil : @(application_locale_.data());
-  }
+  ApplyLocaleToOwnerController();
 }
 
 // |PlatformView|
@@ -189,6 +185,7 @@ std::unique_ptr<VsyncWaiter> PlatformViewIOS::CreateVSyncWaiter() {
   return std::make_unique<VsyncWaiterIOS>(task_runners_);
 }
 
+// |PlatformView|
 void PlatformViewIOS::OnPreEngineRestart() const {
   if (accessibility_bridge_) {
     accessibility_bridge_.get()->clearState();
@@ -201,6 +198,7 @@ void PlatformViewIOS::OnPreEngineRestart() const {
   [owner_controller_.textInputPlugin reset];
 }
 
+// |PlatformView|
 std::unique_ptr<std::vector<std::string>> PlatformViewIOS::ComputePlatformResolvedLocales(
     const std::vector<std::string>& supported_locale_data) {
   size_t localeDataLength = 3;
@@ -233,6 +231,13 @@ std::unique_ptr<std::vector<std::string>> PlatformViewIOS::ComputePlatformResolv
     out->emplace_back(scriptCode == nullptr ? "" : scriptCode.UTF8String);
   }
   return out;
+}
+
+void PlatformViewIOS::ApplyLocaleToOwnerController() {
+  if (owner_controller_) {
+    owner_controller_.applicationLocale =
+        application_locale_.empty() ? nil : @(application_locale_.data());
+  }
 }
 
 PlatformViewIOS::ScopedObserver::ScopedObserver() {}

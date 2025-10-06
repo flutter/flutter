@@ -132,7 +132,8 @@ class MockDelegate : public PlatformView::Delegate {
     std::string locale = "en-US";
     platform_view->SetApplicationLocale(locale);
     platform_view->SetOwnerViewController(flutterViewController);
-    OCMVerify([flutterViewController setApplicationLocale:@"en-US"]) latch.Signal();
+    OCMVerify([flutterViewController setApplicationLocale:@"en-US"]);
+    latch.Signal();
   });
   latch.Wait();
 

@@ -141,6 +141,7 @@ class PlatformViewIOS final : public PlatformView {
   AccessibilityBridge* GetAccessibilityBridge() { return accessibility_bridge_.get(); }
 
  private:
+  void ApplyLocaleToOwnerController();
   /// Smart pointer for use with objective-c observers.
   /// This guarantees we remove the observer.
   class ScopedObserver {
