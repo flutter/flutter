@@ -30,10 +30,10 @@
   "clearButtonLabel": "Kosongkan",
   "cancelButtonLabel": "Batal",
   "backButtonLabel": "Kembali",
-  "expansionTileExpandedHint": "double tap to collapse",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "ketik dua kali untuk kuncupkan",
+  "expansionTileCollapsedHint": "ketik dua kali untuk kembangkan",
+  "expansionTileExpandedTapHint": "Kuncupkan",
+  "expansionTileCollapsedTapHint": "Kembangkan untuk mendapatkan butiran lanjut",
+  "expandedHint": "Dikuncupkan",
+  "collapsedHint": "Dikembangkan"
 }
