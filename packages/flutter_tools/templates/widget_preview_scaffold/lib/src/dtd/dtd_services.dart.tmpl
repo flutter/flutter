@@ -92,12 +92,14 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   /// preferences map.
   ///
   /// Returns null if [key] is not in the map.
-  Future<String?> getPreference(String key) async {
+  Future<Object?> getPreference(String key) async {
     try {
-      final response = StringResponse.fromDTDResponse(
-        (await _call(kGetPreference, params: {'key': key}))!,
-      );
-      return response.value;
+      final response = await _call(kGetPreference, params: {'key': key});
+      return switch (response?.type) {
+        'StringResponse' => StringResponse.fromDTDResponse(response!).value,
+        'BoolResponse' => BoolResponse.fromDTDResponse(response!).value,
+        _ => throw StateError('Unexpected response type: ${response?.type}'),
+      };
     } on RpcException catch (e) {
       if (e.code == kNoValueForKey) {
         return null;
@@ -110,15 +112,12 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   ///
   /// If [key] is not set, [defaultValue] is returned.
   Future<bool> getFlag(String key, {bool defaultValue = false}) async {
-    final result = await getPreference(key);
-    if (result == null) {
-      return defaultValue;
-    }
-    return bool.tryParse(result) ?? defaultValue;
+    final result = await getPreference(key) as bool?;
+    return result ?? defaultValue;
   }
 
   /// Sets [key] to [value] in the persistent preferences map.
-  Future<void> setPreference(String key, Object value) async {
+  Future<void> setPreference(String key, Object? value) async {
     await _call(kSetPreference, params: {'key': key, 'value': value});
   }
 
