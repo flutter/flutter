@@ -113,7 +113,7 @@ FLUTTER_ASSERT_ARC
       didFinishLaunchingWithOptions:expectedApplicationOptions]);
 }
 
-- (void)testSceneWillConnectFallbackSkipped {
+- (void)testSceneWillConnectFallbackSkippedSupportsScenes {
   FlutterPluginAppLifeCycleDelegate* delegate = [[FlutterPluginAppLifeCycleDelegate alloc] init];
   id plugin = [[FakeTestFlutterPluginWithSceneEvents alloc] init];
   id mockPlugin = OCMPartialMock(plugin);
@@ -132,6 +132,19 @@ FLUTTER_ASSERT_ARC
   [delegate sceneWillConnectFallback:mockOptions];
   OCMReject([mockPlugin application:[OCMArg any] didFinishLaunchingWithOptions:[OCMArg any]]);
 }
+
+- (void)testSceneWillConnectFallbackSkippedNoOptions {
+  FlutterPluginAppLifeCycleDelegate* delegate = [[FlutterPluginAppLifeCycleDelegate alloc] init];
+  id plugin = [[FakePlugin alloc] init];
+  id mockPlugin = OCMPartialMock(plugin);
+  [delegate addDelegate:mockPlugin];
+
+  id mockOptions = OCMClassMock([UISceneConnectionOptions class]);
+
+  [delegate sceneWillConnectFallback:mockOptions];
+  OCMReject([mockPlugin application:[OCMArg any] didFinishLaunchingWithOptions:[OCMArg any]]);
+}
+
 - (void)testDidEnterBackground {
   XCTNSNotificationExpectation* expectation = [[XCTNSNotificationExpectation alloc]
       initWithName:UIApplicationDidEnterBackgroundNotification];

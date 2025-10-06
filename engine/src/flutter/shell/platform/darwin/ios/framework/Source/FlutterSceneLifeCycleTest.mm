@@ -213,7 +213,7 @@ FLUTTER_ASSERT_ARC
                                            options:options]);
   OCMVerify(times(1), [mockLifecycleDelegate2 scene:mockScene
                                willConnectToSession:session
-                                            options:options]);
+                                            options:nil]);
   XCTAssertEqual(delegate.engines.count, 2.0);
 }
 
@@ -260,16 +260,13 @@ FLUTTER_ASSERT_ARC
   OCMVerify(times(1), [mockDelegate addFlutterEngine:mockEngine]);
   OCMVerify(times(1), [mockDelegate addFlutterEngine:mockEngine2]);
   XCTAssertEqual(delegate.engines.count, 2.0);
-  OCMVerify(times(1), [mockDelegate scene:mockScene
-                          willConnectToSession:session
-                                       options:options]);  // This is called twice because once is
-                                                           // within the test itself.
+  OCMVerify(times(1), [mockDelegate scene:mockScene willConnectToSession:session options:options]);
   OCMVerify(times(1), [mockLifecycleDelegate scene:mockScene
                               willConnectToSession:session
                                            options:options]);
   OCMVerify(times(1), [mockLifecycleDelegate2 scene:mockScene
                                willConnectToSession:session
-                                            options:options]);
+                                            options:nil]);
 }
 
 - (void)testSceneWillConnectToSessionOptionsHandledByScenePlugin {

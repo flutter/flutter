@@ -127,8 +127,14 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
   if (!application) {
     return NO;
   }
+  NSDictionary<UIApplicationLaunchOptionsKey, id>* convertedLaunchOptions =
+      ConvertConnectionOptions(connectionOptions);
+  if (convertedLaunchOptions.count == 0) {
+    // Only use fallback if there are meaningful launch options.
+    return NO;
+  }
   if (![self application:application
-          didFinishLaunchingWithOptions:ConvertConnectionOptions(connectionOptions)
+          didFinishLaunchingWithOptions:convertedLaunchOptions
                      isFallbackForScene:YES]) {
     return YES;
   }
@@ -163,7 +169,7 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
  */
 static NSDictionary<UIApplicationLaunchOptionsKey, id>* ConvertConnectionOptions(
     UISceneConnectionOptions* connectionOptions) {
-  NSMutableDictionary<UIApplicationOpenURLOptionsKey, id>* convertedOptions =
+  NSMutableDictionary<UIApplicationLaunchOptionsKey, id>* convertedOptions =
       [NSMutableDictionary dictionary];
 
   if (connectionOptions.shortcutItem) {
