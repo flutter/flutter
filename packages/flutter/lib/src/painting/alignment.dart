@@ -135,7 +135,7 @@ abstract class AlignmentGeometry {
   ///
   /// See also:
   ///
-  /// * [AlignmentDirectional.bottomStart], which is the same thing.
+  /// * [AlignmentDirectional.bottomEnd], which is the same thing.
   static const AlignmentGeometry bottomEnd = AlignmentDirectional.bottomEnd;
 
   double get _x;
