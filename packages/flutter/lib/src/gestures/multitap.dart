@@ -235,6 +235,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
           globalPosition: event.position,
           localPosition: event.localPosition,
           kind: getKindForPointer(event.pointer),
+          buttons: event.buttons,
         );
         invokeCallback<void>('onDoubleTapDown', () => onDoubleTapDown!(details));
       }
@@ -528,6 +529,7 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
             globalPosition: event.position,
             localPosition: event.localPosition,
             kind: event.kind,
+            buttons: event.buttons,
           ),
         );
       });
@@ -563,9 +565,10 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
         onTapUp!(
           pointer,
           TapUpDetails(
-            kind: getKindForPointer(pointer),
-            localPosition: position.local,
             globalPosition: position.global,
+            localPosition: position.local,
+            kind: getKindForPointer(pointer),
+            buttons: getButtonsForPointer(pointer),
           ),
         );
       });
@@ -585,6 +588,7 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
             globalPosition: lastPosition.global,
             localPosition: lastPosition.local,
             kind: getKindForPointer(pointer),
+            buttons: getButtonsForPointer(pointer),
           ),
         );
       });

@@ -183,6 +183,71 @@ void main() {
     tap.dispose();
   });
 
+  testGesture('Details contain the correct buttons - primary', (GestureTester tester) {
+    final TapGestureRecognizer tap = TapGestureRecognizer();
+
+    TapDownDetails? lastDownDetails;
+    TapUpDetails? lastUpDetails;
+
+    tap.onTapDown = (TapDownDetails details) {
+      lastDownDetails = details;
+    };
+    tap.onTapUp = (TapUpDetails details) {
+      lastUpDetails = details;
+    };
+
+    const PointerDownEvent primaryMouseDown = PointerDownEvent(
+      pointer: 1,
+      kind: PointerDeviceKind.mouse,
+    );
+    const PointerUpEvent primaryMouseUp = PointerUpEvent(pointer: 1, kind: PointerDeviceKind.mouse);
+
+    tap.addPointer(primaryMouseDown);
+    tester.closeArena(1);
+    tester.route(primaryMouseDown);
+    expect(lastDownDetails?.buttons, kPrimaryMouseButton);
+
+    tester.route(primaryMouseUp);
+    expect(lastUpDetails?.buttons, kPrimaryMouseButton);
+
+    tap.dispose();
+  });
+
+  testGesture('Details contain the correct buttons - secondary', (GestureTester tester) {
+    final TapGestureRecognizer tap = TapGestureRecognizer();
+
+    TapDownDetails? lastDownDetails;
+    TapUpDetails? lastUpDetails;
+
+    tap.onSecondaryTapDown = (TapDownDetails details) {
+      lastDownDetails = details;
+    };
+    tap.onSecondaryTapUp = (TapUpDetails details) {
+      lastUpDetails = details;
+    };
+
+    const PointerDownEvent secondaryMouseDown = PointerDownEvent(
+      pointer: 1,
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryMouseButton,
+    );
+    const PointerUpEvent secondaryMouseUp = PointerUpEvent(
+      pointer: 1,
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryMouseButton,
+    );
+
+    tap.addPointer(secondaryMouseDown);
+    tester.closeArena(1);
+    tester.route(secondaryMouseDown);
+    expect(lastDownDetails?.buttons, kSecondaryMouseButton);
+
+    tester.route(secondaryMouseUp);
+    expect(lastUpDetails?.buttons, kSecondaryMouseButton);
+
+    tap.dispose();
+  });
+
   testGesture('No duplicate tap events', (GestureTester tester) {
     final tap = TapGestureRecognizer();
 
