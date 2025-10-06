@@ -66,6 +66,8 @@ void PlatformViewIOS::SetOwnerViewController(__weak FlutterViewController* owner
     accessibility_bridge_.reset();
   }
   owner_controller_ = owner_controller;
+  owner_controller_.applicationLocale =
+      application_locale_.empty() ? nil : @(application_locale_.data());
 
   // Add an observer that will clear out the owner_controller_ ivar and
   // the accessibility_bridge_ in case the view controller is deleted.
@@ -161,8 +163,11 @@ void PlatformViewIOS::UpdateSemantics(int64_t view_id,
 
 // |PlatformView|
 void PlatformViewIOS::SetApplicationLocale(std::string locale) {
-  FML_DCHECK(owner_controller_);
-  owner_controller_.applicationLocale = locale.empty() ? nil : @(locale.data());
+  application_locale_ = std::move(locale);
+  if (owner_controller_) {
+    owner_controller_.applicationLocale =
+        application_locale_.empty() ? nil : @(application_locale_.data());
+  }
 }
 
 // |PlatformView|
