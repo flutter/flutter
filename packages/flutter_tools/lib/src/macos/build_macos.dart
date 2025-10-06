@@ -197,7 +197,22 @@ Future<void> buildMacOS({
     HostPlatform.darwin_x64 => 'x86_64',
     _ => throw UnimplementedError('Unsupported platform'),
   };
-  final String destination = buildInfo.isDebug
+
+  // Parse DarwinArchs from dartDefines to determine if we should limit architectures
+  String? darwinArchs;
+  for (final String define in buildInfo.dartDefines) {
+    if (define.startsWith('DarwinArchs=')) {
+      darwinArchs = define.substring('DarwinArchs='.length);
+      break;
+    }
+  }
+
+  // Use specific architecture destination if:
+  // 1. Debug build (existing behavior)
+  // 2. DarwinArchs is explicitly defined (new behavior)
+  // Otherwise use generic platform for universal binary
+  final bool shouldUseSpecificArch = buildInfo.isDebug || darwinArchs != null;
+  final String destination = shouldUseSpecificArch
       ? 'platform=${XcodeSdk.MacOSX.displayName},arch=$arch'
       : XcodeSdk.MacOSX.genericPlatform;
 

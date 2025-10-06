@@ -99,10 +99,11 @@ void main() {
     void Function(List<String> command)? onRun,
     List<String>? additionalCommandArguments,
     String hostPlatformArch = 'x86_64',
+    String? darwinArchs,
   }) {
     final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
     final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
-    final destination = configuration == 'Debug'
+    final destination = configuration == 'Debug' || darwinArchs != null
         ? 'platform=macOS,arch=$hostPlatformArch'
         : 'generic/platform=macOS';
     return FakeCommand(
@@ -1004,6 +1005,115 @@ STDERR STUFF
       FileSystem: () => fileSystem,
       ProcessManager: () =>
           FakeProcessManager.list(<FakeCommand>[setUpFakeXcodeBuildHandler('Release')]),
+      Pub: ThrowingPub.new,
+      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+      XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+    },
+  );
+
+  testUsingContext(
+    'Release build with DarwinArchs=arm64 uses specific architecture destination',
+    () async {
+      createMinimalMockProjectFiles();
+
+      final command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+      );
+
+      await createTestCommandRunner(command).run(const <String>[
+        'build',
+        'macos',
+        '--release',
+        '--no-pub',
+        '--dart-define=DarwinArchs=arm64',
+      ]);
+    },
+    overrides: <Type, Generator>{
+      Platform: () => macosPlatform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(
+          'Release',
+          hostPlatformArch: 'arm64',
+          darwinArchs: 'arm64',
+        ),
+      ]),
+      Pub: ThrowingPub.new,
+      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+      XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
+    },
+  );
+
+  testUsingContext(
+    'Release build with DarwinArchs=x86_64 uses specific architecture destination',
+    () async {
+      createMinimalMockProjectFiles();
+
+      final command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+      );
+
+      await createTestCommandRunner(command).run(const <String>[
+        'build',
+        'macos',
+        '--release',
+        '--no-pub',
+        '--dart-define=DarwinArchs=x86_64',
+      ]);
+    },
+    overrides: <Type, Generator>{
+      Platform: () => macosPlatform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(
+          'Release',
+          hostPlatformArch: 'x86_64',
+          darwinArchs: 'x86_64',
+        ),
+      ]),
+      Pub: ThrowingPub.new,
+      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+      XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+    },
+  );
+
+  testUsingContext(
+    'Release build without DarwinArchs uses generic destination (backward compatibility)',
+    () async {
+      createMinimalMockProjectFiles();
+
+      final command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+      );
+
+      await createTestCommandRunner(command).run(const <String>[
+        'build',
+        'macos',
+        '--release',
+        '--no-pub',
+      ]);
+    },
+    overrides: <Type, Generator>{
+      Platform: () => macosPlatform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        setUpFakeXcodeBuildHandler('Release'), // No darwinArchs parameter
+      ]),
       Pub: ThrowingPub.new,
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
       XcodeProjectInterpreter: () => xcodeProjectInterpreter,
