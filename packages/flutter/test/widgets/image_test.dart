@@ -906,7 +906,7 @@ void main() {
       // Send the first frame and the listener will be removed.
       imageStreamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
       await tester.pump();
-      expect(imageStreamCompleter.listeners.length, 1);
+      expect(imageStreamCompleter.listeners.length, 0);
     },
   );
 
@@ -941,7 +941,7 @@ void main() {
       // Send the first frame and the listener will be removed.
       imageStreamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
       await tester.pump();
-      expect(imageStreamCompleter.listeners.length, 1);
+      expect(imageStreamCompleter.listeners.length, 0);
     },
   );
 
@@ -1388,6 +1388,460 @@ void main() {
       expect(buildCount, 6);
     },
   );
+
+  for (final _DisableMethod disableMethod in _DisableMethod.values) {
+    testWidgets(
+      'image source swapping with $disableMethod',
+      experimentalLeakTesting: LeakTesting.settings
+          .withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
+      (WidgetTester tester) async {
+        final ui.Codec codec = (await tester.runAsync(() {
+          return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
+        }))!;
+
+        Future<ui.Image> nextFrame() async {
+          final ui.FrameInfo frameInfo = (await tester.runAsync(codec.getNextFrame))!;
+          return frameInfo.image;
+        }
+
+        final _TestImageStreamCompleter streamCompleter1 = _TestImageStreamCompleter();
+        final _TestImageProvider imageProvider1 = _TestImageProvider(
+          streamCompleter: streamCompleter1,
+        );
+        final _TestImageStreamCompleter streamCompleter2 = _TestImageStreamCompleter();
+        final _TestImageProvider imageProvider2 = _TestImageProvider(
+          streamCompleter: streamCompleter2,
+        );
+        int? lastFrame1;
+        int? lastFrame2;
+        int buildCount = 0;
+
+        _TestImageProvider imageProvider = imageProvider1;
+        Widget buildFrame1(
+          BuildContext context,
+          Widget child,
+          int? frame,
+          bool wasSynchronouslyLoaded,
+        ) {
+          lastFrame1 = frame;
+          buildCount++;
+          return child;
+        }
+
+        Widget buildFrame2(
+          BuildContext context,
+          Widget child,
+          int? frame,
+          bool wasSynchronouslyLoaded,
+        ) {
+          lastFrame2 = frame;
+          buildCount++;
+          return child;
+        }
+
+        bool disableAnimations = false;
+        late StateSetter setState;
+        await tester.pumpWidget(
+          StatefulBuilder(
+            builder: (BuildContext context, StateSetter localSetState) {
+              setState = localSetState;
+              return switch (disableMethod) {
+                _DisableMethod.tickerMode => TickerMode(
+                  enabled: !disableAnimations,
+                  child: Image(
+                    image: imageProvider,
+                    frameBuilder: imageProvider == imageProvider1 ? buildFrame1 : buildFrame2,
+                  ),
+                ),
+                _DisableMethod.mediaQuery => MediaQuery(
+                  data: MediaQueryData(disableAnimations: disableAnimations),
+                  child: Image(
+                    image: imageProvider,
+                    frameBuilder: imageProvider == imageProvider1 ? buildFrame1 : buildFrame2,
+                  ),
+                ),
+              };
+            },
+          ),
+        );
+
+        expect(lastFrame1, isNull);
+        expect(lastFrame2, isNull);
+        expect(buildCount, 1);
+
+        // Pumping another frame doesn't do anything.
+        await tester.pump();
+        expect(lastFrame1, isNull);
+        expect(lastFrame2, isNull);
+        expect(buildCount, 1);
+
+        // When some data comes through for image 1, it updates to show the image.
+        streamCompleter1.setData(imageInfo: ImageInfo(image: await nextFrame()));
+        await tester.pump();
+        expect(lastFrame1, 0);
+        expect(lastFrame2, isNull);
+        expect(buildCount, 2);
+
+        // Pumping another frame doesn't do anything.
+        await tester.pump();
+        expect(lastFrame1, 0);
+        expect(lastFrame2, isNull);
+        expect(buildCount, 2);
+
+        // Swap the image source and pump a frame. The second image hasn't
+        // displayed because its first frame hasn't arrived yet.
+        setState(() {
+          imageProvider = imageProvider2;
+        });
+        await tester.pump();
+        expect(lastFrame1, 0);
+        expect(lastFrame2, isNull);
+        expect(buildCount, 3);
+
+        // If another frame comes for image 1, nothing happens, because we have
+        // swapped the image source to image 2.
+        streamCompleter1.setData(imageInfo: ImageInfo(image: await nextFrame()));
+        await tester.pump();
+        expect(lastFrame1, 0);
+        expect(lastFrame2, isNull);
+        expect(buildCount, 3);
+
+        // When image 2's first frame comes, it updates.
+        streamCompleter2.setData(imageInfo: ImageInfo(image: await nextFrame()));
+        await tester.pump();
+        expect(lastFrame1, 0);
+        expect(lastFrame2, 0);
+        expect(buildCount, 4);
+
+        // Disable animations. A rebuild happens of the same frame.
+        setState(() {
+          disableAnimations = true;
+        });
+        await tester.pump();
+        expect(lastFrame1, 0);
+        expect(lastFrame2, 0);
+        expect(buildCount, 5);
+
+        // A new frame arriving for either image does nothing because animations
+        // are disabled.
+        streamCompleter1.setData(imageInfo: ImageInfo(image: await nextFrame()));
+        await tester.pump();
+        expect(lastFrame1, 0);
+        expect(lastFrame2, 0);
+        expect(buildCount, 5);
+        streamCompleter2.setData(imageInfo: ImageInfo(image: await nextFrame()));
+        await tester.pump();
+        expect(lastFrame1, 0);
+        expect(lastFrame2, 0);
+        expect(buildCount, 5);
+
+        // Swapping the image source back rebuilds to show the old image.
+        setState(() {
+          imageProvider = imageProvider1;
+        });
+        await tester.pump();
+        expect(lastFrame1, 0);
+        expect(lastFrame2, 0);
+        expect(buildCount, 6);
+
+        // Re-enable animations. Subsequent frames showing up update the image.
+        setState(() {
+          disableAnimations = false;
+        });
+        await tester.pump();
+        expect(lastFrame1, 0);
+        expect(lastFrame2, 0);
+        expect(buildCount, 7);
+        streamCompleter1.setData(imageInfo: ImageInfo(image: await nextFrame()));
+        await tester.pump();
+        expect(lastFrame1, 1);
+        expect(lastFrame2, 0);
+        expect(buildCount, 8);
+        streamCompleter1.setData(imageInfo: ImageInfo(image: await nextFrame()));
+        await tester.pump();
+        expect(lastFrame1, 2);
+        expect(lastFrame2, 0);
+        expect(buildCount, 9);
+      },
+    );
+
+    testWidgets(
+      'image source swapping while paused with $disableMethod',
+      experimentalLeakTesting: LeakTesting.settings
+          .withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
+      (WidgetTester tester) async {
+        final ui.Codec codec = (await tester.runAsync(() {
+          return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
+        }))!;
+
+        Future<ui.Image> nextFrame() async {
+          final ui.FrameInfo frameInfo = (await tester.runAsync(codec.getNextFrame))!;
+          return frameInfo.image;
+        }
+
+        final _TestImageStreamCompleter streamCompleter1 = _TestImageStreamCompleter();
+        final _TestImageProvider imageProvider1 = _TestImageProvider(
+          streamCompleter: streamCompleter1,
+        );
+        final _TestImageStreamCompleter streamCompleter2 = _TestImageStreamCompleter();
+        final _TestImageProvider imageProvider2 = _TestImageProvider(
+          streamCompleter: streamCompleter2,
+        );
+        int? lastFrame1;
+        int? lastFrame2;
+        int buildCount = 0;
+
+        _TestImageProvider imageProvider = imageProvider1;
+        Widget buildFrame1(
+          BuildContext context,
+          Widget child,
+          int? frame,
+          bool wasSynchronouslyLoaded,
+        ) {
+          lastFrame1 = frame;
+          buildCount++;
+          return child;
+        }
+
+        Widget buildFrame2(
+          BuildContext context,
+          Widget child,
+          int? frame,
+          bool wasSynchronouslyLoaded,
+        ) {
+          lastFrame2 = frame;
+          buildCount++;
+          return child;
+        }
+
+        late StateSetter setState;
+        await tester.pumpWidget(
+          StatefulBuilder(
+            builder: (BuildContext context, StateSetter localSetState) {
+              setState = localSetState;
+              return switch (disableMethod) {
+                _DisableMethod.tickerMode => TickerMode(
+                  enabled: false,
+                  child: Image(
+                    image: imageProvider,
+                    frameBuilder: imageProvider == imageProvider1 ? buildFrame1 : buildFrame2,
+                  ),
+                ),
+                _DisableMethod.mediaQuery => MediaQuery(
+                  data: const MediaQueryData(disableAnimations: true),
+                  child: Image(
+                    image: imageProvider,
+                    frameBuilder: imageProvider == imageProvider1 ? buildFrame1 : buildFrame2,
+                  ),
+                ),
+              };
+            },
+          ),
+        );
+
+        expect(lastFrame1, isNull);
+        expect(lastFrame2, isNull);
+        expect(buildCount, 1);
+
+        // Pumping another frame doesn't do anything.
+        await tester.pump();
+        expect(lastFrame1, isNull);
+        expect(lastFrame2, isNull);
+        expect(buildCount, 1);
+
+        // When some data comes through for image 1, it updates to show the
+        // first frame.
+        streamCompleter1.setData(imageInfo: ImageInfo(image: await nextFrame()));
+        await tester.pump();
+        expect(lastFrame1, 0);
+        expect(lastFrame2, isNull);
+        expect(buildCount, 2);
+
+        // When some data comes through for image 2, it doesn't update because
+        // it's not showing that image.
+        streamCompleter2.setData(imageInfo: ImageInfo(image: await nextFrame()));
+        await tester.pump();
+        expect(lastFrame1, 0);
+        expect(lastFrame2, isNull);
+        expect(buildCount, 2);
+
+        // Pumping another frame doesn't do anything.
+        await tester.pump();
+        expect(lastFrame1, 0);
+        expect(lastFrame2, isNull);
+        expect(buildCount, 2);
+
+        // Subsequent frames do nothing because it's paused.
+        streamCompleter1.setData(imageInfo: ImageInfo(image: await nextFrame()));
+        await tester.pump();
+        expect(lastFrame1, 0);
+        expect(lastFrame2, isNull);
+        expect(buildCount, 2);
+        streamCompleter2.setData(imageInfo: ImageInfo(image: await nextFrame()));
+        await tester.pump();
+        expect(lastFrame1, 0);
+        expect(lastFrame2, isNull);
+        expect(buildCount, 2);
+
+        // Swap the image source and pump a frame. The second image updates with
+        // the frame that already came in.
+        setState(() {
+          imageProvider = imageProvider2;
+        });
+        await tester.pump();
+        expect(lastFrame1, 0);
+        expect(lastFrame2, 0);
+        expect(buildCount, 3);
+
+        // Subsequently swapping the image source loads the new image but does
+        // not advance the frame.
+        setState(() {
+          imageProvider = imageProvider1;
+        });
+        await tester.pump();
+        expect(lastFrame1, 0);
+        expect(lastFrame2, 0);
+        expect(buildCount, 4);
+        setState(() {
+          imageProvider = imageProvider2;
+        });
+        await tester.pump();
+        expect(lastFrame1, 0);
+        expect(lastFrame2, 0);
+        expect(buildCount, 5);
+
+        // Even when new frames come in, they are not displayed.
+        streamCompleter1.setData(imageInfo: ImageInfo(image: await nextFrame()));
+        await tester.pump();
+        expect(lastFrame1, 0);
+        expect(lastFrame2, 0);
+        expect(buildCount, 5);
+        streamCompleter2.setData(imageInfo: ImageInfo(image: await nextFrame()));
+        await tester.pump();
+        expect(lastFrame1, 0);
+        expect(lastFrame2, 0);
+        expect(buildCount, 5);
+
+        // Even when the source is swapped again, the new frames that previously
+        // came in are not displayed.
+        setState(() {
+          imageProvider = imageProvider1;
+        });
+        await tester.pump();
+        expect(lastFrame1, 0);
+        expect(lastFrame2, 0);
+        expect(buildCount, 6);
+        setState(() {
+          imageProvider = imageProvider2;
+        });
+        await tester.pump();
+        expect(lastFrame1, 0);
+        expect(lastFrame2, 0);
+        expect(buildCount, 7);
+      },
+    );
+
+    testWidgets('image source swapping and image disposal with $disableMethod', (
+      WidgetTester tester,
+    ) async {
+      final ui.Image image1 = (await tester.runAsync(() => createTestImage(cache: false)))!;
+      final _TestImageProvider imageProvider1 = _TestImageProvider(
+        streamCompleter: OneFrameImageStreamCompleter(
+          Future<ImageInfo>.value(ImageInfo(image: image1, debugLabel: '_TestImage1')),
+        ),
+      );
+      final ui.Image image2 = (await tester.runAsync(() => createTestImage(cache: false)))!;
+      final _TestImageProvider imageProvider2 = _TestImageProvider(
+        streamCompleter: OneFrameImageStreamCompleter(
+          Future<ImageInfo>.value(ImageInfo(image: image2, debugLabel: '_TestImage2')),
+        ),
+      );
+
+      expect(image1.debugGetOpenHandleStackTraces()!.length, 1);
+      expect(image2.debugGetOpenHandleStackTraces()!.length, 1);
+
+      _TestImageProvider imageProvider = imageProvider1;
+      bool disableAnimations = false;
+      late StateSetter setState;
+      await tester.pumpWidget(
+        StatefulBuilder(
+          builder: (BuildContext context, StateSetter localSetState) {
+            setState = localSetState;
+            return switch (disableMethod) {
+              _DisableMethod.tickerMode => TickerMode(
+                enabled: !disableAnimations,
+                child: Image(image: imageProvider),
+              ),
+              _DisableMethod.mediaQuery => MediaQuery(
+                data: MediaQueryData(disableAnimations: disableAnimations),
+                child: Image(image: imageProvider),
+              ),
+            };
+          },
+        ),
+      );
+
+      // Image widget + 1, render object + 1 for the active image.
+      expect(image1.debugGetOpenHandleStackTraces()!.length, 3);
+      expect(image2.debugGetOpenHandleStackTraces()!.length, 1);
+
+      // Pumping another frame doesn't change anything.
+      await tester.pump();
+      expect(image1.debugGetOpenHandleStackTraces()!.length, 3);
+      expect(image2.debugGetOpenHandleStackTraces()!.length, 1);
+
+      // Swap the image source and pump a frame.
+      // Image widget + 1, render object + 1 for the active image.
+      // Image widget - 1 for the inactive image.
+      setState(() {
+        imageProvider = imageProvider2;
+      });
+      await tester.pump();
+      expect(image1.debugGetOpenHandleStackTraces()!.length, 2);
+      expect(image2.debugGetOpenHandleStackTraces()!.length, 3);
+
+      // Disable animations.
+      setState(() {
+        disableAnimations = true;
+      });
+      await tester.pump();
+      expect(image1.debugGetOpenHandleStackTraces()!.length, 2);
+      expect(image2.debugGetOpenHandleStackTraces()!.length, 3);
+
+      // Swapping the image source back.
+      // Image widget + 1 for the active image.
+      // Image widget - 1 for the inactive image.
+      setState(() {
+        imageProvider = imageProvider1;
+      });
+      await tester.pump();
+      expect(image1.debugGetOpenHandleStackTraces()!.length, 3);
+      expect(image2.debugGetOpenHandleStackTraces()!.length, 2);
+
+      // Re-enable animations.
+      setState(() {
+        disableAnimations = false;
+      });
+      await tester.pump();
+      expect(image1.debugGetOpenHandleStackTraces()!.length, 3);
+      expect(image2.debugGetOpenHandleStackTraces()!.length, 2);
+
+      // Disposing disposes both the active and inactive images.
+      await tester.pumpWidget(const SizedBox());
+
+      // Image widget and render object go away.
+      expect(image1.debugGetOpenHandleStackTraces()!.length, 1);
+      expect(image2.debugGetOpenHandleStackTraces()!.length, 1);
+
+      await imageProvider1.evict();
+      await imageProvider2.evict();
+
+      tester.binding.scheduleFrame();
+      await tester.pump();
+      expect(image1.debugGetOpenHandleStackTraces()!.length, 0);
+      expect(image2.debugGetOpenHandleStackTraces()!.length, 0);
+    });
+  }
 
   testWidgets(
     'the first frame is still loaded when disableAnimations is true on first load',
@@ -2222,18 +2676,18 @@ void main() {
       ),
     );
 
-    // creating the provider should not have changed anything, and the provider
+    // Creating the provider should not have changed anything, and the provider
     // now owns the handle.
     expect(image.debugGetOpenHandleStackTraces()!.length, 1);
 
     await tester.pumpWidget(Image(image: provider));
 
-    // Image widget + 1, render object + 1
+    // Image widget + 1, render object + 1.
     expect(image.debugGetOpenHandleStackTraces()!.length, 3);
 
     await tester.pumpWidget(const SizedBox());
 
-    // Image widget and render object go away
+    // Image widget and render object go away.
     expect(image.debugGetOpenHandleStackTraces()!.length, 1);
 
     await provider.evict();
@@ -2776,4 +3230,13 @@ class _FailingImageProvider extends ImageProvider<int> {
     }
     return OneFrameImageStreamCompleter(Future<ImageInfo>.value(ImageInfo(image: image, scale: 0)));
   }
+}
+
+/// The different ways of disabling animations.
+enum _DisableMethod {
+  /// Use [TickerMode.enabled].
+  tickerMode,
+
+  /// Use [MedaiQueryData.disableAnimations].
+  mediaQuery,
 }
