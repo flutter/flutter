@@ -319,8 +319,8 @@ FLUTTER_ASSERT_ARC
   id session = OCMClassMock([UISceneSession class]);
   id options = OCMClassMock([UISceneConnectionOptions class]);
 
-  [delegate addFlutterManagedEngine:mockEngine];
-  XCTAssertEqual(delegate.flutterManagedEngines.count, 1.0);
+  [delegate addFlutterEngine:mockEngine];
+  XCTAssertEqual(delegate.engines.count, 1.0);
 
   [delegate scene:mockScene willConnectToSession:session options:options];
   OCMVerify(times(1), [mockLifecycleDelegate scene:mockScene
@@ -359,9 +359,9 @@ FLUTTER_ASSERT_ARC
   id session = OCMClassMock([UISceneSession class]);
   id options = OCMClassMock([UISceneConnectionOptions class]);
 
-  [delegate addFlutterManagedEngine:mockEngine];
-  [delegate addFlutterManagedEngine:mockEngine2];
-  XCTAssertEqual(delegate.flutterManagedEngines.count, 2.0);
+  [delegate addFlutterEngine:mockEngine];
+  [delegate addFlutterEngine:mockEngine2];
+  XCTAssertEqual(delegate.engines.count, 2.0);
 
   [delegate scene:mockScene willConnectToSession:session options:options];
   OCMVerify(times(1), [mockLifecycleDelegate scene:mockScene
