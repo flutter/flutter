@@ -59,6 +59,8 @@ FLUTTER_ASSERT_ARC
 
   [self compactNSPointerArray:self.developerManagedEngines];
 
+  engine.manuallyRegisteredToScene = YES;
+
   return YES;
 }
 
@@ -84,7 +86,7 @@ FLUTTER_ASSERT_ARC
   }
 
   // If a manually registered engine, do not add, as it is being handled manually.
-  if ([self manuallyRegisteredEngine:engine]) {
+  if (engine.manuallyRegisteredToScene) {
     return NO;
   }
 
@@ -332,9 +334,9 @@ FLUTTER_ASSERT_ARC
     activity = [[NSUserActivity alloc] initWithActivityType:scene.session.configuration.name];
   }
 
-  [self updateEnginesInScene:scene];
+  [self updateFlutterManagedEnginesInScene:scene];
   int64_t appBundleModifiedTime = FlutterSharedApplication.lastAppModificationTime;
-  for (FlutterEngine* engine in [_engines allObjects]) {
+  for (FlutterEngine* engine in [self allEngines]) {
     FlutterViewController* vc = (FlutterViewController*)engine.viewController;
     NSString* restorationId = vc.restorationIdentifier;
     if (restorationId) {
@@ -355,7 +357,7 @@ FLUTTER_ASSERT_ARC
     restoreInteractionStateWithUserActivity:(NSUserActivity*)stateRestorationActivity {
   // Restores state per FlutterViewController.
   NSDictionary<NSString*, id>* userInfo = stateRestorationActivity.userInfo;
-  [self updateEnginesInScene:scene];
+  [self updateFlutterManagedEnginesInScene:scene];
   int64_t appBundleModifiedTime = FlutterSharedApplication.lastAppModificationTime;
   NSNumber* stateDateNumber = userInfo[kRestorationStateAppModificationKey];
   int64_t stateDate = 0;
@@ -367,7 +369,7 @@ FLUTTER_ASSERT_ARC
     return;
   }
 
-  for (FlutterEngine* engine in [_engines allObjects]) {
+  for (FlutterEngine* engine in [self allEngines]) {
     UIViewController* vc = (UIViewController*)engine.viewController;
     NSString* restorationId = vc.restorationIdentifier;
     if (restorationId) {

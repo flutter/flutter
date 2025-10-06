@@ -202,12 +202,22 @@ FLUTTER_ASSERT_ARC
   FlutterPluginSceneLifeCycleDelegate* delegate =
       [[FlutterPluginSceneLifeCycleDelegate alloc] init];
 
-  id mockEngine = OCMClassMock([FlutterEngine class]);
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  id mockEngine = OCMPartialMock(engine);
   id mockLifecycleDelegate = OCMClassMock([FlutterEnginePluginSceneLifeCycleDelegate class]);
   OCMStub([mockEngine sceneLifeCycleDelegate]).andReturn(mockLifecycleDelegate);
 
   [delegate registerSceneLifeCycleWithFlutterEngine:mockEngine];
   [delegate addFlutterManagedEngine:mockEngine];
+  XCTAssertEqual(delegate.flutterManagedEngines.count, 0.0);
+  XCTAssertEqual(delegate.developerManagedEngines.count, 1.0);
+
+  [delegate unregisterSceneLifeCycleWithFlutterEngine:mockEngine];
+  [delegate addFlutterManagedEngine:mockEngine];
+  XCTAssertEqual(delegate.flutterManagedEngines.count, 0.0);
+  XCTAssertEqual(delegate.developerManagedEngines.count, 0.0);
+
+  [delegate registerSceneLifeCycleWithFlutterEngine:mockEngine];
   XCTAssertEqual(delegate.flutterManagedEngines.count, 0.0);
   XCTAssertEqual(delegate.developerManagedEngines.count, 1.0);
 }
@@ -954,8 +964,8 @@ FLUTTER_ASSERT_ARC
   OCMStub([mockSession configuration]).andReturn(mockConfiguration);
   OCMStub([mockConfiguration name]).andReturn(configName);
 
-  [delegate addFlutterEngine:mockEngine];
-  XCTAssertEqual(delegate.engines.count, 1.0);
+  [delegate addFlutterManagedEngine:mockEngine];
+  XCTAssertEqual(delegate.flutterManagedEngines.count, 1.0);
   NSUserActivity* state = [delegate stateRestorationActivityForScene:mockScene];
   XCTAssertEqual(state.userInfo[restorationId], mockData);
   XCTAssertEqual(state.activityType, configName);
@@ -998,8 +1008,8 @@ FLUTTER_ASSERT_ARC
   };
   OCMStub([userActivity userInfo]).andReturn(mockUserInfo);
 
-  [delegate addFlutterEngine:mockEngine];
-  XCTAssertEqual(delegate.engines.count, 1.0);
+  [delegate addFlutterManagedEngine:mockEngine];
+  XCTAssertEqual(delegate.flutterManagedEngines.count, 1.0);
   [delegate scene:mockScene restoreInteractionStateWithUserActivity:userActivity];
   OCMVerify(times(1), [mockRestorationPlugin setRestorationData:mockData]);
   [mockBundle stopMocking];
@@ -1042,8 +1052,8 @@ FLUTTER_ASSERT_ARC
   };
   OCMStub([userActivity userInfo]).andReturn(mockUserInfo);
 
-  [delegate addFlutterEngine:mockEngine];
-  XCTAssertEqual(delegate.engines.count, 1.0);
+  [delegate addFlutterManagedEngine:mockEngine];
+  XCTAssertEqual(delegate.flutterManagedEngines.count, 1.0);
   [delegate scene:mockScene restoreInteractionStateWithUserActivity:userActivity];
   OCMVerify(times(0), [mockRestorationPlugin setRestorationData:mockData]);
   [mockBundle stopMocking];

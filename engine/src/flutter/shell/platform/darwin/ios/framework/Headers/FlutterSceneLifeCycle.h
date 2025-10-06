@@ -105,20 +105,22 @@ API_AVAILABLE(ios(13.0))
 /**
  * Registers a `FlutterEngine` to receive scene life cycle events.
  *
- * This method is required **only** when both of the following conditions are true:
+ * This method is **only** necessary when the following conditions are true:
  * 1. Multiple Scenes (UIApplicationSupportsMultipleScenes) is enabled.
- * 2. The `rootViewController` of the scene is **not** a `FlutterViewController`.
+ * 2. The `UIWindowSceneDelegate` `window.rootViewController` is not a `FlutterViewController`
+ *    initialized with the target `FlutterEngine`.
  *
- * In this specific configuration, Flutter cannot automatically associate the engine with a scene
- * during the scene connection phase. Manually registering the engine ensures it receives the
- * critical `scene:willConnectToSession:options:` event, which is necessary for some Flutter plugins
- * that rely on scene connection options (the scene-equivalent of application launch options).
+ * When multiple scenes is enabled (UIApplicationSupportsMultipleScenes), Flutter cannot
+ * automatically associate a `FlutterEngine` with a scene during the scene connection phase. In
+ * order for plugins to receive launch connection information, the `FlutterEngine` must be manually
+ * registered with either the `FlutterSceneDelegate` or `FlutterPluginSceneLifeCycleDelegate` during
+ * `scene:willConnectToSession:options:`.
  *
- * For all other configurations, Flutter automatically handles the registration.
+ * In all other cases, or once the `FlutterViewController.view` associated with the `FlutterEngine`
+ * is added to the view hierarchy, Flutter will automatically handle registration for scene events.
  *
- * Manually registered engines must also be manually deregistered if they
- * switch scenes or when they are no longer needed. Use
- * `unregisterSceneLifeCycleWithFlutterEngine:`.
+ * Manually registered engines must also be manually deregistered and re-registered if they
+ * switch scenes. Use `unregisterSceneLifeCycleWithFlutterEngine:`.
  *
  * @param engine The `FlutterEngine` to register for scene life cycle events.
  * @return `NO` if already manually registered.
@@ -128,14 +130,9 @@ API_AVAILABLE(ios(13.0))
 /**
  * Use this method to unregister a `FlutterEngine` from the scene's life cycle events.
  *
- * If a `FlutterEngine`'s view changes scenes,
- *
- * Only manually registered engines can be unregistered. See
- * `registerSceneLifeCycleWithFlutterEngine`.
- *
  * @param engine The `FlutterEngine` to unregister for scene life cycle events.
  * @return `NO` if the engine was not found among the manually registered engines and could not be
- * deregistered.
+ * unregistered.
  */
 - (BOOL)unregisterSceneLifeCycleWithFlutterEngine:(FlutterEngine*)engine;
 @end
