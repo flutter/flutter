@@ -14,6 +14,16 @@ void main() {
     expect(SchedulerBinding.instance.platformDispatcher.onBeginFrame, isNotNull);
   });
 
+  test('Ticker.forceFrames requests forced frames', () async {
+    final Ticker t = Ticker((_) {});
+    t.forceFrames = true;
+    final TickerFuture f = t.start();
+    // A forced frame should be scheduled even if frames are otherwise disabled.
+    expect(SchedulerBinding.instance.hasScheduledFrame, isTrue);
+    t.stop();
+    await f;
+  });
+
   test('debugAssertNoTimeDilation does not throw if time dilate already reset', () async {
     timeDilation = 2.0;
     timeDilation = 1.0;
