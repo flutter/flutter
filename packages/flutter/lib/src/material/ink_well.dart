@@ -919,7 +919,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     if (widget.statesController == null) {
       internalStatesController = MaterialStatesController();
     }
-    statesController.update(MaterialState.disabled, !enabled);
+    statesController.update(WidgetState.disabled, !enabled);
     statesController.addListener(handleStatesControllerChange);
   }
 
@@ -959,9 +959,9 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       _updateHighlightsAndSplashes();
     }
     if (enabled != isWidgetEnabled(oldWidget)) {
-      statesController.update(MaterialState.disabled, !enabled);
+      statesController.update(WidgetState.disabled, !enabled);
       if (!enabled) {
-        statesController.update(MaterialState.pressed, false);
+        statesController.update(WidgetState.pressed, false);
         // Remove the existing hover highlight immediately when enabled is false.
         // Do not rely on updateHighlight or InkHighlight.deactivate to not break
         // the expected lifecycle which is updating _hovering when the mouse exit.
@@ -1010,10 +1010,10 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
     switch (type) {
       case _HighlightType.pressed:
-        statesController.update(MaterialState.pressed, value);
+        statesController.update(WidgetState.pressed, value);
       case _HighlightType.hover:
         if (callOnHover) {
-          statesController.update(MaterialState.hovered, value);
+          statesController.update(WidgetState.hovered, value);
         }
       case _HighlightType.focus:
         // see handleFocusUpdate()
@@ -1154,10 +1154,10 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   void handleFocusUpdate(bool hasFocus) {
     _hasFocus = hasFocus;
     // Set here rather than updateHighlight because this widget's
-    // (MaterialState) states include MaterialState.focused if
+    // (WidgetState) states include WidgetState.focused if
     // the InkWell _has_ the focus, rather than if it's showing
     // the focus per FocusManager.instance.highlightMode.
-    statesController.update(MaterialState.focused, hasFocus);
+    statesController.update(WidgetState.focused, hasFocus);
     updateFocusHighlights();
     widget.onFocusChange?.call(hasFocus);
   }
@@ -1201,7 +1201,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     } else {
       globalPosition = details!.globalPosition;
     }
-    statesController.update(MaterialState.pressed, true); // ... before creating the splash
+    statesController.update(WidgetState.pressed, true); // ... before creating the splash
     final InteractiveInkFeature splash = _createSplash(globalPosition);
     _splashes ??= HashSet<InteractiveInkFeature>();
     _splashes!.add(splash);
@@ -1339,28 +1339,19 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
     final ThemeData theme = Theme.of(context);
-    const Set<MaterialState> highlightableStates = <MaterialState>{
-      MaterialState.focused,
-      MaterialState.hovered,
-      MaterialState.pressed,
+    const Set<WidgetState> highlightableStates = <WidgetState>{
+      WidgetState.focused,
+      WidgetState.hovered,
+      WidgetState.pressed,
     };
-    final Set<MaterialState> nonHighlightableStates = statesController.value.difference(
+    final Set<WidgetState> nonHighlightableStates = statesController.value.difference(
       highlightableStates,
     );
     // Each highlightable state will be resolved separately to get the corresponding color.
     // For this resolution to be correct, the non-highlightable states should be preserved.
-    final Set<MaterialState> pressed = <MaterialState>{
-      ...nonHighlightableStates,
-      MaterialState.pressed,
-    };
-    final Set<MaterialState> focused = <MaterialState>{
-      ...nonHighlightableStates,
-      MaterialState.focused,
-    };
-    final Set<MaterialState> hovered = <MaterialState>{
-      ...nonHighlightableStates,
-      MaterialState.hovered,
-    };
+    final Set<WidgetState> pressed = <WidgetState>{...nonHighlightableStates, WidgetState.pressed};
+    final Set<WidgetState> focused = <WidgetState>{...nonHighlightableStates, WidgetState.focused};
+    final Set<WidgetState> hovered = <WidgetState>{...nonHighlightableStates, WidgetState.hovered};
 
     Color getHighlightColorForType(_HighlightType type) {
       return switch (type) {

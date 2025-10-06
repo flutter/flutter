@@ -1045,8 +1045,8 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
 
     final List<Widget> tiles = <Widget>[];
     for (int i = 0; i < widget.items.length; i++) {
-      final Set<MaterialState> states = <MaterialState>{
-        if (i == widget.currentIndex) MaterialState.selected,
+      final Set<WidgetState> states = <WidgetState>{
+        if (i == widget.currentIndex) WidgetState.selected,
       };
 
       final MouseCursor effectiveMouseCursor =

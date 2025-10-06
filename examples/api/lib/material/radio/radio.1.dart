@@ -76,7 +76,7 @@ class _RadioExampleState extends State<RadioExample> {
             leading: Radio<RadioType>(
               value: RadioType.side,
               side: WidgetStateBorderSide.resolveWith((Set<WidgetState> states) {
-                if (states.contains(MaterialState.selected)) {
+                if (states.contains(WidgetState.selected)) {
                   return const BorderSide(
                     color: Colors.red,
                     width: 4,

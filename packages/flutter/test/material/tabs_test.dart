@@ -4753,7 +4753,7 @@ void main() {
             length: 1,
             child: TabBar(
               tabs: const <Tab>[Tab(text: 'A')],
-              overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+              overlayColor: WidgetStateProperty.resolveWith<Color>((Set<MaterialState> states) {
                 if (states.contains(MaterialState.hovered)) {
                   return const Color(0xff00ff00);
                 }
@@ -4793,7 +4793,7 @@ void main() {
               length: 1,
               child: TabBar(
                 tabs: const <Tab>[Tab(text: 'A')],
-                overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+                overlayColor: WidgetStateProperty.resolveWith<Color>((Set<MaterialState> states) {
                   if (states.contains(MaterialState.hovered)) {
                     return const Color(0xff00ff00);
                   }
@@ -6272,7 +6272,7 @@ void main() {
 
   testWidgets('TabBar InkWell splashFactory and overlayColor', (WidgetTester tester) async {
     const InteractiveInkFeatureFactory splashFactory = NoSplash.splashFactory;
-    final MaterialStateProperty<Color?> overlayColor = MaterialStateProperty.resolveWith<Color?>(
+    final WidgetStateProperty<Color?> overlayColor = WidgetStateProperty.resolveWith<Color?>(
       (Set<MaterialState> states) => Colors.transparent,
     );
 
@@ -6328,7 +6328,7 @@ void main() {
         child: DefaultTabController(
           length: 1,
           child: TabBar(
-            overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+            overlayColor: WidgetStateProperty.resolveWith<Color>((Set<MaterialState> states) {
               if (states.contains(MaterialState.hovered)) {
                 return hoverColor;
               }

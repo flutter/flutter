@@ -29,5 +29,11 @@
   "shareButtonLabel": "Shiriki...",
   "clearButtonLabel": "Futa",
   "cancelButtonLabel": "Ghairi",
-  "backButtonLabel": "Nyuma"
+  "backButtonLabel": "Nyuma",
+  "expansionTileExpandedHint": "double tap to collapse",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

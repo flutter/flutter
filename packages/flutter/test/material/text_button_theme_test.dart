@@ -204,11 +204,11 @@ void main() {
       expect(material.shadowColor, shadowColor);
       expect(material.elevation, elevation);
       expect(
-        MaterialStateProperty.resolveAs<MouseCursor?>(inkWell.mouseCursor, enabled),
+        WidgetStateProperty.resolveAs<MouseCursor?>(inkWell.mouseCursor, enabled),
         enabledMouseCursor,
       );
       expect(
-        MaterialStateProperty.resolveAs<MouseCursor?>(inkWell.mouseCursor, disabled),
+        WidgetStateProperty.resolveAs<MouseCursor?>(inkWell.mouseCursor, disabled),
         disabledMouseCursor,
       );
       expect(inkWell.overlayColor!.resolve(hovered), foregroundColor.withOpacity(0.08));

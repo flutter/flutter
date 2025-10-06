@@ -631,7 +631,7 @@ class SliderThemeData with Diagnosticable {
   /// The Slider defaults to [GappedSliderTrackShape] when the track shape is
   /// not specified, and the [trackGap] can be used to adjust the gap size.
   ///
-  /// If [Slider.year2023] is false or [ThemeData.useMaterial3] is false, then
+  /// If [Slider.year2023] is true or [ThemeData.useMaterial3] is false, then
   /// the Slider track shape defaults to [RoundedRectSliderTrackShape] and the
   /// [trackGap] is ignored. In this case, set the track shape to
   /// [GappedSliderTrackShape] to use the [trackGap].

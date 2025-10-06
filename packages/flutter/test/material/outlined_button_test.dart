@@ -425,7 +425,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: OutlinedButton(
           style: ButtonStyle(
-            overlayColor: MaterialStateProperty.resolveWith<Color?>(getOverlayColor),
+            overlayColor: WidgetStateProperty.resolveWith<Color?>(getOverlayColor),
           ),
           onPressed: () {},
           child: const Text('button'),
@@ -458,7 +458,7 @@ void main() {
         theme: theme,
         home: OutlinedButton(
           style: ButtonStyle(
-            overlayColor: MaterialStateProperty.resolveWith<Color?>(getOverlayColor),
+            overlayColor: WidgetStateProperty.resolveWith<Color?>(getOverlayColor),
           ),
           focusNode: focusNode,
           onPressed: () {},
@@ -504,7 +504,7 @@ void main() {
         home: OutlinedButton(
           autofocus: true,
           style: ButtonStyle(
-            overlayColor: MaterialStateProperty.resolveWith<Color?>(getOverlayColor),
+            overlayColor: WidgetStateProperty.resolveWith<Color?>(getOverlayColor),
           ),
           focusNode: focusNode,
           onPressed: () {},
@@ -609,7 +609,7 @@ void main() {
               child: OutlinedButtonTheme(
                 data: OutlinedButtonThemeData(
                   style: ButtonStyle(
-                    foregroundColor: MaterialStateProperty.resolveWith<Color>(getTextColor),
+                    foregroundColor: WidgetStateProperty.resolveWith<Color>(getTextColor),
                   ),
                 ),
                 child: Builder(
@@ -685,7 +685,7 @@ void main() {
           body: Center(
             child: OutlinedButton(
               style: ButtonStyle(
-                foregroundColor: MaterialStateProperty.resolveWith<Color>(getTextColor),
+                foregroundColor: WidgetStateProperty.resolveWith<Color>(getTextColor),
               ),
               onPressed: () {},
               focusNode: focusNode,
@@ -753,7 +753,7 @@ void main() {
           body: Center(
             child: OutlinedButton.icon(
               key: buttonKey,
-              style: ButtonStyle(iconColor: MaterialStateProperty.resolveWith<Color>(getIconColor)),
+              style: ButtonStyle(iconColor: WidgetStateProperty.resolveWith<Color>(getIconColor)),
               icon: const Icon(Icons.add),
               label: const Text('OutlinedButton'),
               onPressed: () {},
@@ -820,7 +820,7 @@ void main() {
           body: Center(
             child: OutlinedButton(
               style: ButtonStyle(
-                side: MaterialStateProperty.resolveWith<BorderSide>(getBorderSide),
+                side: WidgetStateProperty.resolveWith<BorderSide>(getBorderSide),
                 // Test assumes a rounded rect for the shape
                 shape: ButtonStyleButton.allOrNull(
                   const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
@@ -1137,9 +1137,7 @@ void main() {
                     backgroundColor: fillColor,
                     minimumSize: const Size(64, 36),
                   ).copyWith(
-                    side: MaterialStateProperty.resolveWith<BorderSide>((
-                      Set<MaterialState> states,
-                    ) {
+                    side: WidgetStateProperty.resolveWith<BorderSide>((Set<MaterialState> states) {
                       if (states.contains(MaterialState.disabled)) {
                         return disabledBorderSide;
                       }

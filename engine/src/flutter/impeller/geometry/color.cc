@@ -6,11 +6,11 @@
 
 #include <algorithm>
 #include <cmath>
+#include <format>
 #include <functional>
 #include <sstream>
 #include <type_traits>
 
-#include "impeller/base/strings.h"
 #include "impeller/geometry/constants.h"
 #include "impeller/geometry/scalar.h"
 #include "impeller/geometry/vector.h"
@@ -331,12 +331,8 @@ Color Color::SRGBToLinear() const {
 }
 
 std::string ColorToString(const Color& color) {
-  return SPrintF("R=%.1f,G=%.1f,B=%.1f,A=%.1f",  //
-                 color.red,                      //
-                 color.green,                    //
-                 color.blue,                     //
-                 color.alpha                     //
-  );
+  return std::format("R={:.1f},G={:.1f},B={:.1f},A={:.1f}", color.red,
+                     color.green, color.blue, color.alpha);
 }
 
 }  // namespace impeller

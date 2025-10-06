@@ -87,7 +87,7 @@ class SkwasmSurface {
     surfaceSetCallbackHandler(handle, SkwasmCallbackHandler.instance.callbackPointer);
   }
 
-  Future<RenderResult> renderPictures(List<SkwasmPicture> pictures) =>
+  Future<RenderResult> renderPictures(List<SkwasmPicture> pictures, int width, int height) =>
       withStackScope((StackScope scope) async {
         final Pointer<PictureHandle> pictureHandles = scope
             .allocPointerArray(pictures.length)
@@ -95,7 +95,13 @@ class SkwasmSurface {
         for (int i = 0; i < pictures.length; i++) {
           pictureHandles[i] = pictures[i].handle;
         }
-        final int callbackId = surfaceRenderPictures(handle, pictureHandles, pictures.length);
+        final int callbackId = surfaceRenderPictures(
+          handle,
+          pictureHandles,
+          width,
+          height,
+          pictures.length,
+        );
         final RasterResult rasterResult =
             (await SkwasmCallbackHandler.instance.registerCallback(callbackId)) as RasterResult;
         final RenderResult result = (

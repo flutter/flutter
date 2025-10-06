@@ -298,6 +298,20 @@ typedef enum {
 - (NSObject<FlutterTextureRegistry>*)textures;
 
 /**
+ * The `UIViewController` whose view is displaying Flutter content.
+ *
+ * The plugin typically should not store a strong reference to this view
+ * controller.
+ *
+ * This property is provided for backwards compatibility for apps that assume
+ * a single view, and will eventually be replaced by the multi-view API variant.
+ *
+ * This property may be |nil|, for instance in a headless environment, or when
+ * the underlying Flutter engine is deallocated.
+ */
+@property(nullable, readonly) UIViewController* viewController;
+
+/**
  * Registers a `FlutterPlatformViewFactory` for creation of platform views.
  *
  * Plugins expose `UIView` for embedding in Flutter apps by registering a view factory.

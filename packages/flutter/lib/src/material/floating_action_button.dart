@@ -638,8 +638,8 @@ class FloatingActionButton extends StatelessWidget {
 }
 
 // This WidgetStateProperty is passed along to RawMaterialButton which
-// resolves the property against MaterialState.pressed, MaterialState.hovered,
-// MaterialState.focused, MaterialState.disabled.
+// resolves the property against WidgetState.pressed, WidgetState.hovered,
+// WidgetState.focused, WidgetState.disabled.
 class _EffectiveMouseCursor extends MaterialStateMouseCursor {
   const _EffectiveMouseCursor(this.widgetCursor, this.themeCursor);
 
@@ -647,7 +647,7 @@ class _EffectiveMouseCursor extends MaterialStateMouseCursor {
   final WidgetStateProperty<MouseCursor?>? themeCursor;
 
   @override
-  MouseCursor resolve(Set<MaterialState> states) {
+  MouseCursor resolve(Set<WidgetState> states) {
     return WidgetStateProperty.resolveAs<MouseCursor?>(widgetCursor, states) ??
         themeCursor?.resolve(states) ??
         MaterialStateMouseCursor.clickable.resolve(states);

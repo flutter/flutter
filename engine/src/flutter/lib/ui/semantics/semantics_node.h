@@ -166,6 +166,7 @@ struct SemanticsNode {
   std::string linkUrl;
   SemanticsRole role;
   SemanticsValidationResult validationResult = SemanticsValidationResult::kNone;
+  std::string locale;
 };
 
 // Contains semantic nodes that need to be updated.

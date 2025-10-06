@@ -1423,7 +1423,7 @@ void main() {
   });
 
   testWidgets('PaginatedDataTable custom heading row color', (WidgetTester tester) async {
-    const MaterialStateProperty<Color> headingRowColor = MaterialStatePropertyAll<Color>(
+    const WidgetStateProperty<Color> headingRowColor = MaterialStatePropertyAll<Color>(
       Color(0xffFF0000),
     );
 

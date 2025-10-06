@@ -927,6 +927,31 @@ void main() {
     expect(buttonSize.width, parentWidth - 35.0 - 20.0);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/172680.
+  testWidgets('Menu panel width can expand to full-screen width', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<int>(
+            expandedInsets: EdgeInsets.zero,
+            dropdownMenuEntries: <DropdownMenuEntry<int>>[
+              DropdownMenuEntry<int>(value: 0, label: 'Flutter'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final double dropdownWidth = tester.getSize(find.byType(DropdownMenu<int>)).width;
+    expect(dropdownWidth, 800);
+
+    await tester.tap(find.byType(DropdownMenu<int>));
+    await tester.pump();
+
+    final double menuWidth = tester.getSize(findMenuItemButton('Flutter')).width;
+    expect(dropdownWidth, menuWidth);
+  });
+
   testWidgets(
     'Material2 - The menuHeight property can be used to show a shorter scrollable menu list instead of the complete list',
     (WidgetTester tester) async {

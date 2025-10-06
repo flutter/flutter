@@ -68,6 +68,7 @@ typedef PreviewLocalizations = PreviewLocalizationsData Function();
 final class Preview {
   /// Annotation used to mark functions that return widget previews.
   const Preview({
+    this.group = 'Default',
     this.name,
     this.size,
     this.textScaleFactor,
@@ -76,6 +77,12 @@ final class Preview {
     this.brightness,
     this.localizations,
   });
+
+  /// The group the preview belongs to.
+  ///
+  /// Previews with the same group name will be displayed together in the
+  /// previewer. If not provided, 'Default' is used.
+  final String group;
 
   /// A description to be displayed alongside the preview.
   ///
