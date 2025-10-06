@@ -685,9 +685,10 @@ class AndroidDevice extends Device {
     final String powerInfo = await shellEval('dumpsys', <String>['power']);
     // A motoG4 phone returns `mWakefulness=Awake`.
     // A Samsung phone returns `getWakefullnessLocked()=Awake`.
-    final RegExp wakefulnessRegexp = RegExp(r'.*(mWakefulness=|getWakefulnessLocked\(\)=).*');
-    final String wakefulness = grep(wakefulnessRegexp, from: powerInfo).single.split('=')[1].trim();
-    return wakefulness;
+    final RegExp wakefulnessRegexp = RegExp(
+      r'(?:mWakefulness|getWakefulnessLocked\(\))=\s*([a-zA-Z]+)',
+    );
+    return wakefulnessRegexp.allMatches(powerInfo).single.group(1)!;
   }
 
   Future<bool> isArm64() async {
@@ -1018,7 +1019,6 @@ class IosDeviceDiscovery implements DeviceDiscovery {
     //       "hotReload": true,
     //       "hotRestart": true,
     //       "screenshot": true,
-    //       "fastStart": false,
     //       "flutterExit": true,
     //       "hardwareRendering": false,
     //       "startPaused": false

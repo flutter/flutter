@@ -515,6 +515,23 @@ class PlatformView {
                                CustomAccessibilityActionUpdates actions);
 
   //----------------------------------------------------------------------------
+  /// @brief      Used by the framework to set application locale in the
+  ///             embedding
+  ///
+  /// @param[in]  locale The application locale in BCP 47 format.
+  ///
+  virtual void SetApplicationLocale(std::string locale);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Used by the framework to tell the embedder to prepare or clear
+  ///             resoruce for accepting semantics tree.
+  ///
+  /// @param[in]  enabled  whether framework starts or stops sending semantics
+  ///                      updates
+  ///
+  virtual void SetSemanticsTreeEnabled(bool enabled);
+
+  //----------------------------------------------------------------------------
   /// @brief      Used by the framework to tell the embedder that it has
   ///             registered a listener on a given channel.
   ///

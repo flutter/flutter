@@ -29,5 +29,11 @@
   "shareButtonLabel": "ਸਾਂਝਾ ਕਰੋ...",
   "clearButtonLabel": "ਕਲੀਅਰ ਕਰੋ",
   "cancelButtonLabel": "ਰੱਦ ਕਰੋ",
-  "backButtonLabel": "ਪਿੱਛੇ"
+  "backButtonLabel": "ਪਿੱਛੇ",
+  "expansionTileExpandedHint": "ਸਮੇਟਣ ਲਈ ਡਬਲ ਟੈਪ ਕਰੋ",
+  "expansionTileCollapsedHint": "ਵਿਸਤਾਰ ਕਰਨ ਲਈ ਡਬਲ ਟੈਪ ਕਰੋ",
+  "expansionTileExpandedTapHint": "ਸਮੇਟੋ",
+  "expansionTileCollapsedTapHint": "ਹੋਰ ਵੇਰਵਿਆਂ ਲਈ ਵਿਸਤਾਰ ਕਰੋ",
+  "expandedHint": "ਸਮੇਟਿਆ ਗਿਆ",
+  "collapsedHint": "ਵਿਸਤਾਰ ਕੀਤਾ ਗਿਆ"
 }

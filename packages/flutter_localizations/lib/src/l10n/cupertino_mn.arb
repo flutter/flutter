@@ -29,5 +29,11 @@
   "shareButtonLabel": "Хуваалцах...",
   "clearButtonLabel": "Арилгах",
   "cancelButtonLabel": "Цуцлах",
-  "backButtonLabel": "Буцах"
+  "backButtonLabel": "Буцах",
+  "expansionTileExpandedHint": "хураахын тулд хоёр товшино уу",
+  "expansionTileCollapsedHint": "дэлгэхийн тулд хоёр товшино уу",
+  "expansionTileExpandedTapHint": "Хураах",
+  "expansionTileCollapsedTapHint": "Илүү дэлгэрэнгүй авах бол дэлгэнэ үү",
+  "expandedHint": "Хураасан",
+  "collapsedHint": "Дэлгэсэн"
 }

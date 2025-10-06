@@ -6,11 +6,12 @@
 
 #include <dwmapi.h>
 
-#include "flutter/shell/platform/windows/display_monitor.h"
+#include "flutter/shell/platform/windows/display_manager.h"
 #include "flutter/shell/platform/windows/dpi_utils.h"
 #include "flutter/shell/platform/windows/flutter_window.h"
 #include "flutter/shell/platform/windows/flutter_windows_view_controller.h"
 #include "flutter/shell/platform/windows/rect_helper.h"
+#include "flutter/shell/platform/windows/wchar_util.h"
 #include "flutter/shell/platform/windows/window_manager.h"
 
 namespace {
@@ -283,7 +284,7 @@ std::unique_ptr<HostWindow> HostWindow::CreateRegularWindow(
   // Set up the view.
   auto view_window = std::make_unique<FlutterWindow>(
       initial_window_rect.width(), initial_window_rect.height(),
-      engine->display_monitor(), engine->windows_proc_table());
+      engine->display_manager(), engine->windows_proc_table());
 
   std::unique_ptr<FlutterWindowsView> view =
       engine->CreateView(std::move(view_window));
@@ -317,8 +318,9 @@ std::unique_ptr<HostWindow> HostWindow::CreateRegularWindow(
     window_class.lpszClassName = kWindowClassName;
 
     if (!RegisterClassEx(&window_class)) {
-      FML_LOG(ERROR) << "Cannot register window class " << kWindowClassName
-                     << ": " << GetLastErrorAsString();
+      FML_LOG(ERROR) << "Cannot register window class "
+                     << WCharBufferToString(kWindowClassName) << ": "
+                     << GetLastErrorAsString();
       return nullptr;
     }
   }
@@ -628,7 +630,7 @@ void HostWindow::SetFullscreen(
         MonitorFromWindow(window_handle_, MONITOR_DEFAULTTONEAREST);
     if (display_id) {
       if (auto const display =
-              engine_->display_monitor()->FindById(display_id.value())) {
+              engine_->display_manager()->FindById(display_id.value())) {
         monitor = reinterpret_cast<HMONITOR>(display->display_id);
       }
     }

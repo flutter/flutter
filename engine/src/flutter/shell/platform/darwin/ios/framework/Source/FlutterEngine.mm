@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <UIKit/UIKit.h>
 #include "common/settings.h"
 #define FML_USED_ON_EMBEDDER
 
@@ -88,10 +89,22 @@ NSString* const FlutterDefaultInitialRoute = nil;
 
 NSString* const kFlutterKeyDataChannel = @"flutter/keydata";
 static constexpr int kNumProfilerSamplesPerSec = 5;
+NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.application_registrar";
 
-@interface FlutterEngineRegistrar : NSObject <FlutterPluginRegistrar>
+@interface FlutterEngineBaseRegistrar : NSObject <FlutterBaseRegistrar>
+
 @property(nonatomic, weak) FlutterEngine* flutterEngine;
-- (instancetype)initWithPlugin:(NSString*)pluginKey flutterEngine:(FlutterEngine*)flutterEngine;
+@property(nonatomic, readonly) NSString* key;
+
+- (instancetype)initWithKey:(NSString*)key flutterEngine:(FlutterEngine*)flutterEngine;
+
+@end
+
+@interface FlutterEngineApplicationRegistrar
+    : FlutterEngineBaseRegistrar <FlutterApplicationRegistrar>
+@end
+
+@interface FlutterEnginePluginRegistrar : FlutterEngineBaseRegistrar <FlutterPluginRegistrar>
 @end
 
 @interface FlutterEngine () <FlutterIndirectScribbleDelegate,
@@ -108,11 +121,13 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 @property(nonatomic, readonly, assign) BOOL restorationEnabled;
 
 @property(nonatomic, strong) FlutterPlatformViewsController* platformViewsController;
+@property(nonatomic, strong) FlutterEnginePluginSceneLifeCycleDelegate* sceneLifeCycleDelegate;
 
 // Maintains a dictionary of plugin names that have registered with the engine.  Used by
-// FlutterEngineRegistrar to implement a FlutterPluginRegistrar.
+// FlutterEnginePluginRegistrar to implement a FlutterPluginRegistrar.
 @property(nonatomic, readonly) NSMutableDictionary* pluginPublications;
-@property(nonatomic, readonly) NSMutableDictionary<NSString*, FlutterEngineRegistrar*>* registrars;
+@property(nonatomic, readonly)
+    NSMutableDictionary<NSString*, FlutterEngineBaseRegistrar*>* registrars;
 
 @property(nonatomic, readwrite, copy) NSString* isolateId;
 @property(nonatomic, copy) NSString* initialRoute;
@@ -149,6 +164,29 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 // Function pointers for interacting with the embedder.h API.
 @property(nonatomic) FlutterEngineProcTable& embedderAPI;
 
+@end
+
+@implementation FlutterImplicitEngineBridgeImpl {
+  FlutterEngine* _engine;
+  NSObject<FlutterApplicationRegistrar>* _appRegistrar;
+}
+
+- (instancetype)initWithEngine:(FlutterEngine*)engine {
+  self = [super init];
+  if (self) {
+    _engine = engine;
+    _appRegistrar = [engine registrarForApplication:kFlutterApplicationRegistrarKey];
+  }
+  return self;
+}
+
+- (NSObject<FlutterPluginRegistry>*)pluginRegistry {
+  return _engine;
+}
+
+- (NSObject<FlutterApplicationRegistrar>*)applicationRegistrar {
+  return _appRegistrar;
+}
 @end
 
 @implementation FlutterEngine {
@@ -236,6 +274,8 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
                  name:NSCurrentLocaleDidChangeNotification
                object:nil];
 
+  self.sceneLifeCycleDelegate = [[FlutterEnginePluginSceneLifeCycleDelegate alloc] init];
+
   return self;
 }
 
@@ -246,6 +286,10 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 
 - (void)setUpLifecycleNotifications:(NSNotificationCenter*)center {
   // If the application is not available, use the scene for lifecycle notifications if available.
+  [center addObserver:self
+             selector:@selector(sceneWillConnect:)
+                 name:UISceneWillConnectNotification
+               object:nil];
   if (!FlutterSharedApplication.isAvailable) {
     [center addObserver:self
                selector:@selector(sceneWillEnterForeground:)
@@ -267,6 +311,23 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
                object:nil];
 }
 
+- (void)sceneWillConnect:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
+  UIScene* scene = notification.object;
+  if (!FlutterSharedApplication.application.supportsMultipleScenes) {
+    // Since there is only one scene, we can assume that the FlutterEngine is within this scene and
+    // register it to the scene.
+    // The FlutterEngine needs to be registered with the scene when the scene connects in order for
+    // plugins to receive the `scene:willConnectToSession:options` event.
+    // If we want to support multi-window on iPad later, we may need to add a way for deveopers to
+    // register their FlutterEngine to the scene manually during this event.
+    FlutterPluginSceneLifeCycleDelegate* sceneLifeCycleDelegate =
+        [FlutterPluginSceneLifeCycleDelegate fromScene:scene];
+    if (sceneLifeCycleDelegate != nil) {
+      return [sceneLifeCycleDelegate engine:self receivedConnectNotificationFor:scene];
+    }
+  }
+}
+
 - (void)recreatePlatformViewsController {
   _renderingApi = flutter::GetRenderingAPIForProcess(/*force_software=*/false);
   _platformViewsController = [[FlutterPlatformViewsController alloc] init];
@@ -281,18 +342,20 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   /// plugins may be talking to things like the binaryMessenger.
   [_pluginPublications enumerateKeysAndObjectsUsingBlock:^(id key, id object, BOOL* stop) {
     if ([object respondsToSelector:@selector(detachFromEngineForRegistrar:)]) {
-      NSObject<FlutterPluginRegistrar>* registrar = self.registrars[key];
-      [object detachFromEngineForRegistrar:registrar];
+      FlutterEngineBaseRegistrar* registrar = self.registrars[key];
+      if ([registrar conformsToProtocol:@protocol(FlutterPluginRegistrar)]) {
+        [object detachFromEngineForRegistrar:((id<FlutterPluginRegistrar>)registrar)];
+      }
     }
   }];
 
   // nil out weak references.
   // TODO(cbracken): https://github.com/flutter/flutter/issues/156222
-  // Ensure that FlutterEngineRegistrar is using weak pointers, then eliminate this code.
-  [_registrars
-      enumerateKeysAndObjectsUsingBlock:^(id key, FlutterEngineRegistrar* registrar, BOOL* stop) {
-        registrar.flutterEngine = nil;
-      }];
+  // Ensure that FlutterEnginePluginRegistrar is using weak pointers, then eliminate this code.
+  [_registrars enumerateKeysAndObjectsUsingBlock:^(id key, FlutterEngineBaseRegistrar* registrar,
+                                                   BOOL* stop) {
+    registrar.flutterEngine = nil;
+  }];
 
   _binaryMessenger.parent = nil;
   _textureRegistry.parent = nil;
@@ -878,6 +941,17 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   return _shell != nullptr;
 }
 
+- (BOOL)performImplicitEngineCallback {
+  id appDelegate = FlutterSharedApplication.application.delegate;
+  if ([appDelegate conformsToProtocol:@protocol(FlutterImplicitEngineDelegate)]) {
+    id<FlutterImplicitEngineDelegate> provider = (id<FlutterImplicitEngineDelegate>)appDelegate;
+    [provider didInitializeImplicitFlutterEngine:[[FlutterImplicitEngineBridgeImpl alloc]
+                                                     initWithEngine:self]];
+    return YES;
+  }
+  return NO;
+}
+
 - (void)updateDisplays {
   if (!_shell) {
     // Tests may do this.
@@ -1317,9 +1391,18 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 - (NSObject<FlutterPluginRegistrar>*)registrarForPlugin:(NSString*)pluginKey {
   NSAssert(self.pluginPublications[pluginKey] == nil, @"Duplicate plugin key: %@", pluginKey);
   self.pluginPublications[pluginKey] = [NSNull null];
-  FlutterEngineRegistrar* result = [[FlutterEngineRegistrar alloc] initWithPlugin:pluginKey
-                                                                    flutterEngine:self];
+  FlutterEnginePluginRegistrar* result = [[FlutterEnginePluginRegistrar alloc] initWithKey:pluginKey
+                                                                             flutterEngine:self];
   self.registrars[pluginKey] = result;
+  return result;
+}
+
+- (NSObject<FlutterApplicationRegistrar>*)registrarForApplication:(NSString*)key {
+  NSAssert(self.pluginPublications[key] == nil, @"Duplicate key: %@", key);
+  self.pluginPublications[key] = [NSNull null];
+  FlutterEngineApplicationRegistrar* result =
+      [[FlutterEngineApplicationRegistrar alloc] initWithKey:key flutterEngine:self];
+  self.registrars[key] = result;
   return result;
 }
 
@@ -1329,6 +1412,10 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
 - (NSObject*)valuePublishedByPlugin:(NSString*)pluginKey {
   return _pluginPublications[pluginKey];
+}
+
+- (void)addSceneLifeCycleDelegate:(NSObject<FlutterSceneLifeCycleDelegate>*)delegate {
+  [self.sceneLifeCycleDelegate addDelegate:delegate];
 }
 
 #pragma mark - Notifications
@@ -1499,16 +1586,43 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   return self.dartProject;
 }
 
-@end
-
-@implementation FlutterEngineRegistrar {
-  NSString* _pluginKey;
+- (void)sendDeepLinkToFramework:(NSURL*)url completionHandler:(void (^)(BOOL success))completion {
+  __weak FlutterEngine* weakSelf = self;
+  [self waitForFirstFrame:3.0
+                 callback:^(BOOL didTimeout) {
+                   if (didTimeout) {
+                     [FlutterLogger
+                         logError:@"Timeout waiting for first frame when launching a URL."];
+                     completion(NO);
+                   } else {
+                     // invove the method and get the result
+                     [weakSelf.navigationChannel
+                         invokeMethod:@"pushRouteInformation"
+                            arguments:@{
+                              @"location" : url.absoluteString ?: [NSNull null],
+                            }
+                               result:^(id _Nullable result) {
+                                 BOOL success =
+                                     [result isKindOfClass:[NSNumber class]] && [result boolValue];
+                                 if (!success) {
+                                   // Logging the error if the result is not successful
+                                   [FlutterLogger
+                                       logError:@"Failed to handle route information in Flutter."];
+                                 }
+                                 completion(success);
+                               }];
+                   }
+                 }];
 }
 
-- (instancetype)initWithPlugin:(NSString*)pluginKey flutterEngine:(FlutterEngine*)flutterEngine {
+@end
+
+@implementation FlutterEngineBaseRegistrar
+
+- (instancetype)initWithKey:(NSString*)key flutterEngine:(FlutterEngine*)flutterEngine {
   self = [super init];
   NSAssert(self, @"Super init cannot be nil");
-  _pluginKey = [pluginKey copy];
+  _key = [key copy];
   _flutterEngine = flutterEngine;
   return self;
 }
@@ -1516,38 +1630,8 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 - (NSObject<FlutterBinaryMessenger>*)messenger {
   return _flutterEngine.binaryMessenger;
 }
-
 - (NSObject<FlutterTextureRegistry>*)textures {
   return _flutterEngine.textureRegistry;
-}
-
-- (void)publish:(NSObject*)value {
-  _flutterEngine.pluginPublications[_pluginKey] = value;
-}
-
-- (void)addMethodCallDelegate:(NSObject<FlutterPlugin>*)delegate
-                      channel:(FlutterMethodChannel*)channel {
-  [channel setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
-    [delegate handleMethodCall:call result:result];
-  }];
-}
-
-- (void)addApplicationDelegate:(NSObject<FlutterPlugin>*)delegate
-    NS_EXTENSION_UNAVAILABLE_IOS("Disallowed in plugins used in app extensions") {
-  id<UIApplicationDelegate> appDelegate = [[UIApplication sharedApplication] delegate];
-  if ([appDelegate conformsToProtocol:@protocol(FlutterAppLifeCycleProvider)]) {
-    id<FlutterAppLifeCycleProvider> lifeCycleProvider =
-        (id<FlutterAppLifeCycleProvider>)appDelegate;
-    [lifeCycleProvider addApplicationLifeCycleDelegate:delegate];
-  }
-}
-
-- (NSString*)lookupKeyForAsset:(NSString*)asset {
-  return [_flutterEngine lookupKeyForAsset:asset];
-}
-
-- (NSString*)lookupKeyForAsset:(NSString*)asset fromPackage:(NSString*)package {
-  return [_flutterEngine lookupKeyForAsset:asset fromPackage:package];
 }
 
 - (void)registerViewFactory:(NSObject<FlutterPlatformViewFactory>*)factory
@@ -1566,4 +1650,54 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
                              gestureRecognizersBlockingPolicy:gestureRecognizersBlockingPolicy];
 }
 
+@end
+
+@implementation FlutterEnginePluginRegistrar
+
+- (nullable UIViewController*)viewController {
+  return self.flutterEngine.viewController;
+}
+
+- (void)publish:(NSObject*)value {
+  self.flutterEngine.pluginPublications[self.key] = value;
+}
+
+- (void)addMethodCallDelegate:(NSObject<FlutterPlugin>*)delegate
+                      channel:(FlutterMethodChannel*)channel {
+  [channel setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
+    [delegate handleMethodCall:call result:result];
+  }];
+}
+
+- (void)addApplicationDelegate:(NSObject<FlutterPlugin>*)delegate {
+  id<UIApplicationDelegate> appDelegate = FlutterSharedApplication.application.delegate;
+  if ([appDelegate conformsToProtocol:@protocol(FlutterAppLifeCycleProvider)]) {
+    id<FlutterAppLifeCycleProvider> lifeCycleProvider =
+        (id<FlutterAppLifeCycleProvider>)appDelegate;
+    [lifeCycleProvider addApplicationLifeCycleDelegate:delegate];
+  }
+  if (![delegate conformsToProtocol:@protocol(FlutterSceneLifeCycleDelegate)]) {
+    // TODO(vashworth): If the plugin doesn't conform to the FlutterSceneLifeCycleDelegate,
+    // print a warning pointing to documentation: https://github.com/flutter/flutter/issues/175956
+    // [FlutterLogger logWarning:[NSString stringWithFormat:@"Plugin %@ has not migrated to
+    // scenes.", self.key]];
+  }
+}
+
+- (void)addSceneDelegate:(NSObject<FlutterSceneLifeCycleDelegate>*)delegate {
+  // If the plugin conforms to FlutterSceneLifeCycleDelegate, add it to the engine.
+  [self.flutterEngine addSceneLifeCycleDelegate:delegate];
+}
+
+- (NSString*)lookupKeyForAsset:(NSString*)asset {
+  return [self.flutterEngine lookupKeyForAsset:asset];
+}
+
+- (NSString*)lookupKeyForAsset:(NSString*)asset fromPackage:(NSString*)package {
+  return [self.flutterEngine lookupKeyForAsset:asset fromPackage:package];
+}
+
+@end
+
+@implementation FlutterEngineApplicationRegistrar
 @end

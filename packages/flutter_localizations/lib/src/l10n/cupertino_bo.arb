@@ -29,5 +29,11 @@
   "modalBarrierDismissLabel": "འདོར་བ།",
   "menuDismissLabel": "ཐོ་གཞུང་འདོར་བ།",
   "cancelButtonLabel": "ཕྱིར་འཐེན།",
-  "backButtonLabel": "Back"
+  "backButtonLabel": "Back",
+  "expansionTileExpandedHint": "ཕྱོགས་བསྡུའི་ཆེད་ཐེངས་གཉིས་གནོན།",
+  "expansionTileCollapsedHint": "ཁྱབ་སྤེལ་ཆེད་ཐེངས་གཉིས་གནོན།",
+  "expansionTileExpandedTapHint": "ཕྱོགས་བསྡུ།",
+  "expansionTileCollapsedTapHint": "ཞིབ་རྒྱས་ཆེད་ཁྱབ་སྤེལ།",
+  "expandedHint": "ཕྱོགས་བསྡུས།",
+  "collapsedHint": "ཁྱབ་སྤེལ་ཟིན།"
 }

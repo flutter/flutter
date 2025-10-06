@@ -44,7 +44,7 @@ if [[ "$CURRENT_BRANCH" != "main" && \
       "$CURRENT_BRANCH" != "beta" && \
       "$CURRENT_BRANCH" != "gh-readonly-queue/master/pr-"* && \
       "$CURRENT_BRANCH" != "flutter-"*"-candidate."* && \
-      "$CURRENT_BRANCH" != "HEAD" && \
+      ! ( "$CURRENT_BRANCH" == "HEAD" && -n "$LUCI_CI" ) && \
       ! -f "$FLUTTER_ROOT/.git/shallow" ]]; then
 
   # This is a development branch. Find the merge-base.
@@ -68,4 +68,4 @@ if [[ "$CURRENT_BRANCH" != "main" && \
   fi
 fi
 
-git -C "$FLUTTER_ROOT" ls-tree --format "%(objectname) %(path)" "$BASEREF" -- "${TRACKEDFILES[@]}" | git hash-object --stdin
+git -C "$FLUTTER_ROOT" ls-tree "$BASEREF" -- "${TRACKEDFILES[@]}" | git hash-object --stdin

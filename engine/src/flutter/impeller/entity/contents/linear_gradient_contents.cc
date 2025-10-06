@@ -155,8 +155,9 @@ bool LinearGradientContents::FastLinearGradient(const ContentContext& renderer,
     }
     return GeometryResult{
         .type = PrimitiveType::kTriangle,
-        .vertex_buffer =
-            vtx_builder.CreateVertexBuffer(renderer.GetTransientsBuffer()),
+        .vertex_buffer = vtx_builder.CreateVertexBuffer(
+            renderer.GetTransientsDataBuffer(),
+            renderer.GetTransientsIndexesBuffer()),
         .transform = entity.GetShaderTransform(pass),
     };
   };
@@ -172,14 +173,14 @@ bool LinearGradientContents::FastLinearGradient(const ContentContext& renderer,
   return ColorSourceContents::DrawGeometry<VS>(
       renderer, entity, pass, pipeline_callback, frame_info,
       [this, &renderer, &entity](RenderPass& pass) {
-        auto& host_buffer = renderer.GetTransientsBuffer();
+        auto& data_host_buffer = renderer.GetTransientsDataBuffer();
 
         FS::FragInfo frag_info;
         frag_info.alpha =
             GetOpacityFactor() *
             GetGeometry()->ComputeAlphaCoverage(entity.GetTransform());
 
-        FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
+        FS::BindFragInfo(pass, data_host_buffer.EmplaceUniform(frag_info));
 
         return true;
       },
@@ -262,7 +263,7 @@ bool LinearGradientContents::RenderTexture(const ContentContext& renderer,
             renderer.GetContext()->GetSamplerLibrary()->GetSampler(
                 sampler_desc));
         FS::BindFragInfo(
-            pass, renderer.GetTransientsBuffer().EmplaceUniform(frag_info));
+            pass, renderer.GetTransientsDataBuffer().EmplaceUniform(frag_info));
         return true;
       });
 }
@@ -304,18 +305,18 @@ bool LinearGradientContents::RenderSSBO(const ContentContext& renderer,
         frag_info.inverse_dot_start_to_end =
             CalculateInverseDotStartToEnd(start_point_, end_point_);
 
-        auto& host_buffer = renderer.GetTransientsBuffer();
+        auto& data_host_buffer = renderer.GetTransientsDataBuffer();
         auto colors = CreateGradientColors(colors_, stops_);
 
         frag_info.colors_length = colors.size();
-        auto color_buffer =
-            host_buffer.Emplace(colors.data(), colors.size() * sizeof(StopData),
-                                host_buffer.GetMinimumUniformAlignment());
+        auto color_buffer = data_host_buffer.Emplace(
+            colors.data(), colors.size() * sizeof(StopData),
+            renderer.GetDeviceCapabilities()
+                .GetMinimumStorageBufferAlignment());
 
         pass.SetCommandLabel("LinearGradientSSBOFill");
 
-        FS::BindFragInfo(
-            pass, renderer.GetTransientsBuffer().EmplaceUniform(frag_info));
+        FS::BindFragInfo(pass, data_host_buffer.EmplaceUniform(frag_info));
         FS::BindColorData(pass, color_buffer);
 
         return true;
@@ -354,7 +355,7 @@ bool LinearGradientContents::RenderUniform(const ContentContext& renderer,
         pass.SetCommandLabel("LinearGradientUniformFill");
 
         FS::BindFragInfo(
-            pass, renderer.GetTransientsBuffer().EmplaceUniform(frag_info));
+            pass, renderer.GetTransientsDataBuffer().EmplaceUniform(frag_info));
 
         return true;
       });

@@ -44,7 +44,7 @@ if (($currentBranch -ne "main") -and
     ($currentBranch -ne "master") -and
     ($currentBranch -ne "stable") -and
     ($currentBranch -ne "beta") -and
-    ($currentBranch -ne "HEAD") -and
+    (-not (($currentBranch -eq "HEAD") -and (-not [string]::IsNullOrEmpty($env:LUCI_CI)))) -and
     (-not $currentBranch.StartsWith("gh-readonly-queue/master/pr-")) -and
     (-not ($currentBranch -like "flutter-*-candidate.*")) -and
     (-not $isShallow)) {
@@ -79,6 +79,6 @@ if (($currentBranch -ne "main") -and
 # 3. Out-File -NoNewline -Encoding ascii outputs 8bit ascii
 # 4. git hash-object with stdin from a pipeline consumes UTF-16, so consume
 #.   the contents of hash.txt
-(git -C "$flutterRoot" ls-tree --format "%(objectname) %(path)" "$baseRef" -- $trackedFiles | Out-String) -replace "`r`n", "`n"  | Out-File -NoNewline -Encoding ascii hash.txt
+(git -C "$flutterRoot" ls-tree "$baseRef" -- $trackedFiles | Out-String) -replace "`r`n", "`n"  | Out-File -NoNewline -Encoding ascii hash.txt
 git hash-object hash.txt
 Remove-Item hash.txt

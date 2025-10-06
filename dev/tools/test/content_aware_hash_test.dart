@@ -198,22 +198,22 @@ void main() {
 
   test('generates a hash or upstream/master', () async {
     initGitRepoWithBlankInitialCommit();
-    expect(runContentAwareHash(), processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'));
+    expect(runContentAwareHash(), processStdout('fa69812cddffc076be3aa477a93942cb8d233ccc'));
   });
 
   test('generates a hash for origin/master', () {
     initGitRepoWithBlankInitialCommit(remote: 'origin');
-    expect(runContentAwareHash(), processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'));
+    expect(runContentAwareHash(), processStdout('fa69812cddffc076be3aa477a93942cb8d233ccc'));
   });
 
   test('generates a hash for origin/main', () {
     initGitRepoWithBlankInitialCommit(remote: 'origin', branch: 'main');
-    expect(runContentAwareHash(), processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'));
+    expect(runContentAwareHash(), processStdout('fa69812cddffc076be3aa477a93942cb8d233ccc'));
   });
 
   test('generates a hash for upstream/main', () {
     initGitRepoWithBlankInitialCommit(branch: 'main');
-    expect(runContentAwareHash(), processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'));
+    expect(runContentAwareHash(), processStdout('fa69812cddffc076be3aa477a93942cb8d233ccc'));
   });
 
   test('generates a hash for CI/CD from HEAD', () {
@@ -230,14 +230,33 @@ void main() {
       equals('HEAD'),
     );
 
-    expect(runContentAwareHash(), processStdout('f049fdcd4300c8c0d5041b5e35b3d11c2d289bdf'));
+    // Simulate being in a LUCI environment.
+    environment['LUCI_CI'] = 'true';
+    expect(runContentAwareHash(), processStdout('63a6c6dc494d9a2fc3e78e8505e878d129429246'));
+  });
+
+  test('generates a hash based on merge-base in local detached HEAD', () {
+    // This test validates the workflow with a detached HEAD, which is common
+    // when working with jj.
+    initGitRepoWithBlankInitialCommit(branch: 'main');
+    writeFileAndCommit(testRoot.deps, 'deps changed');
+
+    final String headSha = gitShaFor('HEAD');
+    run('git', <String>['checkout', '-f', headSha]);
+    run('git', <String>['--no-pager', 'log', '--decorate=short', '--pretty=oneline']);
+    expect(
+      (run('git', <String>['rev-parse', '--abbrev-ref', 'HEAD']).stdout as String).trim(),
+      equals('HEAD'),
+    );
+
+    expect(runContentAwareHash(), processStdout('fa69812cddffc076be3aa477a93942cb8d233ccc'));
   });
 
   group('stable branches calculate hash locally', () {
     test('with no changes', () {
       initGitRepoWithBlankInitialCommit(branch: 'main');
       gitSwitchBranch('stable');
-      expect(runContentAwareHash(), processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'));
+      expect(runContentAwareHash(), processStdout('fa69812cddffc076be3aa477a93942cb8d233ccc'));
     });
 
     test('with engine changes', () {
@@ -245,7 +264,7 @@ void main() {
       gitSwitchBranch('stable');
       writeFileAndCommit(testRoot.deps, 'deps changed');
 
-      expect(runContentAwareHash(), processStdout('f049fdcd4300c8c0d5041b5e35b3d11c2d289bdf'));
+      expect(runContentAwareHash(), processStdout('63a6c6dc494d9a2fc3e78e8505e878d129429246'));
     });
   });
 
@@ -253,7 +272,7 @@ void main() {
     test('with no changes', () {
       initGitRepoWithBlankInitialCommit(branch: 'main');
       gitSwitchBranch('beta');
-      expect(runContentAwareHash(), processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'));
+      expect(runContentAwareHash(), processStdout('fa69812cddffc076be3aa477a93942cb8d233ccc'));
     });
 
     test('with engine changes', () {
@@ -261,7 +280,7 @@ void main() {
       gitSwitchBranch('beta');
       writeFileAndCommit(testRoot.deps, 'deps changed');
 
-      expect(runContentAwareHash(), processStdout('f049fdcd4300c8c0d5041b5e35b3d11c2d289bdf'));
+      expect(runContentAwareHash(), processStdout('63a6c6dc494d9a2fc3e78e8505e878d129429246'));
     });
   });
 
@@ -269,7 +288,7 @@ void main() {
     test('with no changes', () {
       initGitRepoWithBlankInitialCommit(branch: 'main');
       gitSwitchBranch('flutter-4.35-candidate.2');
-      expect(runContentAwareHash(), processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'));
+      expect(runContentAwareHash(), processStdout('fa69812cddffc076be3aa477a93942cb8d233ccc'));
     });
 
     test('with engine changes', () {
@@ -277,7 +296,7 @@ void main() {
       gitSwitchBranch('flutter-4.35-candidate.2');
       writeFileAndCommit(testRoot.deps, 'deps changed');
 
-      expect(runContentAwareHash(), processStdout('f049fdcd4300c8c0d5041b5e35b3d11c2d289bdf'));
+      expect(runContentAwareHash(), processStdout('63a6c6dc494d9a2fc3e78e8505e878d129429246'));
     });
   });
 
@@ -288,7 +307,7 @@ void main() {
     );
     writeFileAndCommit(testRoot.deps, 'deps changed');
 
-    expect(runContentAwareHash(), processStdout('f049fdcd4300c8c0d5041b5e35b3d11c2d289bdf'));
+    expect(runContentAwareHash(), processStdout('63a6c6dc494d9a2fc3e78e8505e878d129429246'));
   });
 
   test('generates a hash for shallow clones', () {
@@ -298,7 +317,7 @@ void main() {
         .childFile(localFs.path.joinAll('.git/shallow'.split('/')))
         .writeAsStringSync(headSha);
     writeFileAndCommit(testRoot.deps, 'deps changed');
-    expect(runContentAwareHash(), processStdout('f049fdcd4300c8c0d5041b5e35b3d11c2d289bdf'));
+    expect(runContentAwareHash(), processStdout('63a6c6dc494d9a2fc3e78e8505e878d129429246'));
   });
 
   group('ignores local engine for', () {
@@ -308,14 +327,14 @@ void main() {
       testRoot.deps.writeAsStringSync('deps changed');
       expect(
         runContentAwareHash(),
-        processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'),
+        processStdout('fa69812cddffc076be3aa477a93942cb8d233ccc'),
         reason: 'content hash from master for non-committed file',
       );
 
       writeFileAndCommit(testRoot.deps, 'deps changed');
       expect(
         runContentAwareHash(),
-        processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'),
+        processStdout('fa69812cddffc076be3aa477a93942cb8d233ccc'),
         reason: 'content hash from master for committed file',
       );
     });
@@ -326,14 +345,14 @@ void main() {
       testRoot.deps.writeAsStringSync('deps changed');
       expect(
         runContentAwareHash(),
-        processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'),
+        processStdout('fa69812cddffc076be3aa477a93942cb8d233ccc'),
         reason: 'content hash from master for non-committed file',
       );
 
       writeFileAndCommit(testRoot.deps, 'deps changed');
       expect(
         runContentAwareHash(),
-        processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'),
+        processStdout('fa69812cddffc076be3aa477a93942cb8d233ccc'),
         reason: 'content hash from master for committed file',
       );
     });
@@ -346,12 +365,12 @@ void main() {
 
     test('DEPS is changed', () async {
       writeFileAndCommit(testRoot.deps, 'deps changed');
-      expect(runContentAwareHash(), processStdout('f049fdcd4300c8c0d5041b5e35b3d11c2d289bdf'));
+      expect(runContentAwareHash(), processStdout('63a6c6dc494d9a2fc3e78e8505e878d129429246'));
     });
 
     test('an engine file changes', () async {
       writeFileAndCommit(testRoot.engineReadMe, 'engine file changed');
-      expect(runContentAwareHash(), processStdout('49e58f425cb039e745614d7ea10c369387c43681'));
+      expect(runContentAwareHash(), processStdout('bc993ee46320d3831092bc2c3dd86881d5c15d5f'));
     });
 
     test('a new engine file is added', () async {
@@ -375,14 +394,14 @@ void main() {
         testRoot.contentAwareHashPs1.parent.childFile('release-candidate-branch.version'),
         'sup',
       );
-      expect(runContentAwareHash(), processStdout('3b81cd2164f26a8db3271d46c7022c159193417d'));
+      expect(runContentAwareHash(), processStdout('ec994692b9e9610655484436cecd691cecee4c78'));
     });
   });
 
   test('does not hash non-engine files', () async {
     initGitRepoWithBlankInitialCommit();
     testRoot.flutterReadMe.writeAsStringSync('codefu was here');
-    expect(runContentAwareHash(), processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'));
+    expect(runContentAwareHash(), processStdout('fa69812cddffc076be3aa477a93942cb8d233ccc'));
   });
 
   test('missing merge-base defaults to HEAD', () {
@@ -394,7 +413,7 @@ void main() {
     writeFileAndCommit(testRoot.deps, 'deps changed');
     expect(
       runContentAwareHash(),
-      processStdout('f049fdcd4300c8c0d5041b5e35b3d11c2d289bdf'),
+      processStdout('63a6c6dc494d9a2fc3e78e8505e878d129429246'),
       reason: 'content hash from HEAD when no merge-base',
     );
   });

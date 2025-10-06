@@ -29,5 +29,11 @@
   "shareButtonLabel": "Dela …",
   "clearButtonLabel": "Rensa",
   "cancelButtonLabel": "Avbryt",
-  "backButtonLabel": "Tillbaka"
+  "backButtonLabel": "Tillbaka",
+  "expansionTileExpandedHint": "dubbeltryck för att komprimera",
+  "expansionTileCollapsedHint": "dubbeltryck för att utöka",
+  "expansionTileExpandedTapHint": "Komprimera",
+  "expansionTileCollapsedTapHint": "Utöka för mer information",
+  "expandedHint": "Komprimerades",
+  "collapsedHint": "Utökades"
 }

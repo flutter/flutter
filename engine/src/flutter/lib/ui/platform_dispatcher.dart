@@ -716,6 +716,26 @@ class PlatformDispatcher {
   @Native<Void Function(Int64)>(symbol: 'PlatformConfigurationNativeApi::RegisterBackgroundIsolate')
   external static void __registerBackgroundIsolate(int rootIsolateId);
 
+  /// Informs the engine whether the framework is generating a semantics tree.
+  ///
+  /// Only framework knows when semantics tree should be generated. It uses this
+  /// method to notify the engine whether the framework will generate a semantics tree.
+  ///
+  /// In the case where platforms want to enable semantics, e.g. when
+  /// assistive technologies are enabled, it notifies framework through
+  /// [onSemanticsEnabledChanged].
+  ///
+  /// After this has been set to true, platforms are expected to prepare for accepting
+  /// semantics update sent via [FlutterView.updateSemantics]. When this is set to false, platforms
+  /// may dispose any resources associated with processing semantics as no further
+  /// semantics updates will be sent via [FlutterView.updateSemantics].
+  ///
+  /// One must call this method with true before sending update through [updateSemantics].
+  void setSemanticsTreeEnabled(bool enabled) => _setSemanticsTreeEnabled(enabled);
+
+  @Native<Void Function(Bool)>(symbol: 'PlatformConfigurationNativeApi::SetSemanticsTreeEnabled')
+  external static void _setSemanticsTreeEnabled(bool update);
+
   /// Deprecated. Migrate to [ChannelBuffers.setListener] instead.
   ///
   /// Called whenever this platform dispatcher receives a message from a
@@ -955,6 +975,15 @@ class PlatformDispatcher {
   /// undefined (using the language tag "und") non-null locale if the [locales]
   /// list has not been set or is empty.
   Locale get locale => locales.isEmpty ? const Locale.fromSubtags() : locales.first;
+
+  /// Sets the locale for the application in engine.
+  ///
+  /// This is typically called by framework to set the locale based on which
+  /// locale the Flutter app actually uses.
+  void setApplicationLocale(Locale locale) => _setApplicationLocale(locale.toLanguageTag());
+
+  @Native<Void Function(Handle)>(symbol: 'PlatformConfigurationNativeApi::SetApplicationLocale')
+  external static void _setApplicationLocale(String locale);
 
   /// The full system-reported supported locales of the device.
   ///
@@ -1866,11 +1895,15 @@ class _ViewConfiguration {
     this.gestureSettings = const GestureSettings(),
     this.displayFeatures = const <DisplayFeature>[],
     this.displayId = 0,
+    this.viewConstraints = const ViewConstraints(maxWidth: 0, maxHeight: 0),
   });
 
   /// The identifier for a display for this view, in
   /// [PlatformDispatcher._displays].
   final int displayId;
+
+  /// The sizing constraints for this view in physical pixels.
+  final ViewConstraints viewConstraints;
 
   /// The pixel density of the output surface.
   final double devicePixelRatio;

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:widget_preview_scaffold/src/dtd/dtd_services.dart';
+import 'widget_preview_scaffold_controller.dart';
 
 class _WidgetPreviewIconButton extends StatelessWidget {
   const _WidgetPreviewIconButton({
@@ -50,7 +50,7 @@ class ZoomControls extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
+      children: [
         _WidgetPreviewIconButton(
           tooltip: 'Zoom in',
           onPressed: enabled ? _zoomIn : null,
@@ -97,6 +97,98 @@ class ZoomControls extends StatelessWidget {
   }
 }
 
+class _ControlDecorator extends StatelessWidget {
+  const _ControlDecorator({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(8.0),
+      decoration: BoxDecoration(
+        color: Colors.grey[300],
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: child,
+    );
+  }
+}
+
+/// Allows for controlling the grid vs layout view in the preview environment.
+class LayoutTypeSelector extends StatelessWidget {
+  const LayoutTypeSelector({super.key, required this.controller});
+
+  final WidgetPreviewScaffoldController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return _ControlDecorator(
+      child: ValueListenableBuilder<LayoutType>(
+        valueListenable: controller.layoutTypeListenable,
+        builder: (context, selectedLayout, _) {
+          return Row(
+            children: [
+              IconButton(
+                onPressed: () => controller.layoutType = LayoutType.gridView,
+                icon: Icon(Icons.grid_on),
+                color: selectedLayout == LayoutType.gridView
+                    ? Colors.blue
+                    : Colors.black,
+              ),
+              IconButton(
+                onPressed: () => controller.layoutType = LayoutType.listView,
+                icon: Icon(Icons.view_list),
+                color: selectedLayout == LayoutType.listView
+                    ? Colors.blue
+                    : Colors.black,
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// A toggle button that enables / disables filtering previews by the currently
+/// selected source file.
+///
+/// This control is hidden if the DTD Editor service isn't available.
+class FilterBySelectedFileToggle extends StatelessWidget {
+  const FilterBySelectedFileToggle({super.key, required this.controller});
+
+  @visibleForTesting
+  static const kTooltip = 'Filter previews by selected file';
+
+  final WidgetPreviewScaffoldController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: controller.editorServiceAvailable,
+      builder: (context, editorServiceAvailable, child) {
+        if (!editorServiceAvailable) {
+          return Container();
+        }
+        return _ControlDecorator(
+          child: ValueListenableBuilder(
+            valueListenable: controller.filterBySelectedFileListenable,
+            builder: (context, value, child) {
+              return IconButton(
+                onPressed: controller.toggleFilterBySelectedFile,
+                icon: Icon(Icons.file_open),
+                color: value ? Colors.blue : Colors.black,
+                tooltip: kTooltip,
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
 /// A button that triggers a "soft" restart of a previewed widget.
 ///
 /// A soft restart removes the previewed widget from the widget tree for a frame before
@@ -129,16 +221,18 @@ class SoftRestartButton extends StatelessWidget {
 /// A button that triggers a restart of the widget previewer through a hot restart request made
 /// through DTD.
 class WidgetPreviewerRestartButton extends StatelessWidget {
-  const WidgetPreviewerRestartButton({super.key, required this.dtdServices});
+  const WidgetPreviewerRestartButton({super.key, required this.controller});
 
-  final WidgetPreviewScaffoldDtdServices dtdServices;
+  final WidgetPreviewScaffoldController controller;
 
   @override
   Widget build(BuildContext context) {
-    return IconButton.outlined(
-      tooltip: 'Restart the Widget Previewer',
-      onPressed: () => dtdServices.hotRestartPreviewer(),
-      icon: Icon(Icons.restart_alt),
+    return _ControlDecorator(
+      child: IconButton(
+        tooltip: 'Restart the Widget Previewer',
+        onPressed: controller.dtdServices.hotRestartPreviewer,
+        icon: Icon(Icons.restart_alt),
+      ),
     );
   }
 }
