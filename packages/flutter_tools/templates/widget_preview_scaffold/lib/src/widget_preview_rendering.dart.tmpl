@@ -16,6 +16,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:stack_trace/stack_trace.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:widget_preview_scaffold/src/dtd/editor_service.dart';
+import 'package:widget_preview_scaffold/src/widget_preview_inspector_service.dart';
 
 import 'controls.dart';
 import 'generated_preview.dart';
@@ -928,14 +929,20 @@ class PreviewAssetBundle extends PlatformAssetBundle {
 /// the preview scaffold project which prevents us from being able to use hot
 /// restart to iterate on this file.
 Future<void> mainImpl() async {
+  final controller = WidgetPreviewScaffoldController(previews: previews);
+  await controller.initialize();
+  // WARNING: do not move this line. This constructor sets
+  // [WidgetInspectorService.instance] to the custom service for the widget
+  // previewer. If [WidgetsFlutterBinding.ensureInitialized()] is invoked before
+  // the custom service is set, inspector service extensions will be registered
+  // against the wrong service.
+  WidgetPreviewScaffoldInspectorService(dtdServices: controller.dtdServices);
   final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
   // Disable the injection of [WidgetInspector] into the widget tree built by
   // [WidgetsApp]. [WidgetInspector] instances will be created for each
   // individual preview so the widget inspector won't allow for users to select
   // widgets that make up the widget preview scaffolding.
   binding.debugExcludeRootWidgetInspector = true;
-  final controller = WidgetPreviewScaffoldController(previews: previews);
-  await controller.initialize();
   runWidget(
     DisableWidgetInspectorScope(
       child: binding.wrapWithDefaultView(
