@@ -50,7 +50,7 @@ class ZoomControls extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
+      children: [
         _WidgetPreviewIconButton(
           tooltip: 'Zoom in',
           onPressed: enabled ? _zoomIn : null,
@@ -153,25 +153,38 @@ class LayoutTypeSelector extends StatelessWidget {
 
 /// A toggle button that enables / disables filtering previews by the currently
 /// selected source file.
+///
+/// This control is hidden if the DTD Editor service isn't available.
 class FilterBySelectedFileToggle extends StatelessWidget {
   const FilterBySelectedFileToggle({super.key, required this.controller});
+
+  @visibleForTesting
+  static const kTooltip = 'Filter previews by selected file';
 
   final WidgetPreviewScaffoldController controller;
 
   @override
   Widget build(BuildContext context) {
-    return _ControlDecorator(
-      child: ValueListenableBuilder(
-        valueListenable: controller.filterBySelectedFileListenable,
-        builder: (context, value, child) {
-          return IconButton(
-            onPressed: controller.toggleFilterBySelectedFile,
-            icon: Icon(Icons.file_open),
-            color: value ? Colors.blue : Colors.black,
-            tooltip: 'Filter previews by selected file',
-          );
-        },
-      ),
+    return ValueListenableBuilder(
+      valueListenable: controller.editorServiceAvailable,
+      builder: (context, editorServiceAvailable, child) {
+        if (!editorServiceAvailable) {
+          return Container();
+        }
+        return _ControlDecorator(
+          child: ValueListenableBuilder(
+            valueListenable: controller.filterBySelectedFileListenable,
+            builder: (context, value, child) {
+              return IconButton(
+                onPressed: controller.toggleFilterBySelectedFile,
+                icon: Icon(Icons.file_open),
+                color: value ? Colors.blue : Colors.black,
+                tooltip: kTooltip,
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }

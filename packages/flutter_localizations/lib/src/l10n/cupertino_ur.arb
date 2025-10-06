@@ -30,10 +30,10 @@
   "clearButtonLabel": "صاف کریں",
   "cancelButtonLabel": "منسوخ کریں",
   "backButtonLabel": "Back",
-  "expansionTileExpandedHint": "double tap to collapse",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "سکیڑنے کے لیے دوبار تھپتھپائیں",
+  "expansionTileCollapsedHint": "پھیلانے کے لیے دوبار تھپتھپائیں",
+  "expansionTileExpandedTapHint": "سکیڑیں",
+  "expansionTileCollapsedTapHint": "مزید تفصیلات کے لیے پھیلائیں",
+  "expandedHint": "سکڑا ہوا",
+  "collapsedHint": "پھیلا ہوا"
 }

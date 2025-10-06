@@ -1280,7 +1280,11 @@ class DeviceDomain extends Domain {
       devToolsServerAddress: devToolsServerAddress,
     );
     unawaited(device.dds.done.whenComplete(() => sendEvent('device.dds.done.$deviceId')));
-    return <String, Object?>{'ddsUri': device.dds.uri?.toString()};
+    return <String, Object?>{
+      'ddsUri': device.dds.uri?.toString(),
+      'devToolsUri': device.dds.devToolsUri?.toString(),
+      'dtdUri': device.dds.dtdUri?.toString(),
+    };
   }
 
   /// Starts DDS for the device.
