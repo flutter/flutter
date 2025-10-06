@@ -835,6 +835,68 @@ void main() {
 
     semantics.dispose();
   });
+  testWidgets('accessibilityFocusable flag value is passed from parent to subtree,', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      Semantics(
+        container: true,
+        accessibilityFocusable: true,
+        child: Column(
+          children: <Widget>[
+            Semantics(
+              container: true,
+              accessibilityFocusable: false,
+              customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
+                const CustomSemanticsAction(label: 'action1'): () {},
+              },
+              child: const SizedBox(width: 10, height: 10),
+            ),
+            Semantics(
+              container: true,
+              customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
+                const CustomSemanticsAction(label: 'action2'): () {},
+              },
+              child: const SizedBox(width: 10, height: 10),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              id: 1,
+              flags: SemanticsFlags(isAccessibilityFocusable: Tristate.isTrue),
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 2,
+                  flags: SemanticsFlags(isAccessibilityFocusable: Tristate.isFalse),
+                  actions: <SemanticsAction>[SemanticsAction.customAction],
+                ),
+                TestSemantics(
+                  id: 3,
+                  flags: SemanticsFlags(isAccessibilityFocusable: Tristate.isTrue),
+                  actions: <SemanticsAction>[SemanticsAction.customAction],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreTransform: true,
+        ignoreRect: true,
+        ignoreId: true,
+      ),
+    );
+
+    semantics.dispose();
+  });
 
   testWidgets('Increased/decreased values are annotated', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);

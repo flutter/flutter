@@ -5121,6 +5121,7 @@ final class _SemanticsParentData {
     required this.explicitChildNodes,
     required this.tagsForChildren,
     required this.localeForChildren,
+    required this.accessibilityFocusable,
   });
 
   /// Whether [SemanticsNode]s created from this render object semantics subtree
@@ -5135,6 +5136,9 @@ final class _SemanticsParentData {
   /// This is imposed by render objects of parent [IgnorePointer]s or
   /// [AbsorbPointer]s.
   final bool blocksUserActions;
+
+  /// Whether this subtree is accessibility focusable.
+  final bool? accessibilityFocusable;
 
   /// Any immediate render object semantics that
   /// [_RenderObjectSemantics.contributesToSemanticsTree] should forms a node
@@ -5556,6 +5560,8 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
 
     final bool blocksUserAction =
         (parentData?.blocksUserActions ?? false) || configProvider.effective.isBlockingUserActions;
+    final bool? accessibilityFocusable =
+        configProvider.effective.isAccessibilityFocusable ?? parentData?.accessibilityFocusable;
 
     // localeForSubtree from the config overrides parentData's inherited locale.
     final Locale? localeForChildren =
@@ -5568,6 +5574,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
           (parentData?.mergeIntoParent ?? false) ||
           configProvider.effective.isMergingSemanticsOfDescendants,
       blocksUserActions: blocksUserAction,
+      accessibilityFocusable: accessibilityFocusable,
       localeForChildren: localeForChildren,
       explicitChildNodes: explicitChildNodesForChildren,
       tagsForChildren: tagsForChildren,
@@ -5609,6 +5616,11 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         assert(tags.isNotEmpty);
         configProvider.updateConfig((SemanticsConfiguration config) {
           tags.forEach(config.addTagForChildren);
+        });
+      }
+      if (accessibilityFocusable != configProvider.effective.isAccessibilityFocusable) {
+        configProvider.updateConfig((SemanticsConfiguration config) {
+          config.isAccessibilityFocusable = accessibilityFocusable;
         });
       }
 
@@ -5688,6 +5700,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       effectiveChildParentData = _SemanticsParentData(
         mergeIntoParent: childParentData.mergeIntoParent,
         blocksUserActions: childParentData.blocksUserActions,
+        accessibilityFocusable: childParentData.accessibilityFocusable,
         explicitChildNodes: false,
         tagsForChildren: childParentData.tagsForChildren,
         localeForChildren: childParentData.localeForChildren,
