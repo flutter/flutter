@@ -437,6 +437,83 @@ class Scenarios {
           r'$XCODE_PROJ_DIR/xcode_uikit_swiftUITests/xcode_uikit_swiftUITests.swift',
     },
 
+    // When using an implicit FlutterEngine created by the storyboard, we expect plugins to
+    // receive application launch events and scene events.
+    'FlutterImplicitEngineDelegate-AppMigrated-StoryboardFlutterViewController': <String, String>{
+      ...sharedAppLifecycleFiles,
+      ...sharedPluginLifecycleFiles,
+      r'$TEMPLATE_DIR/native/SceneDelegate-FlutterSceneDelegate.swift':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swift/SceneDelegate.swift',
+      r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-migrated.swift':
+          r'$PLUGIN_DIR/ios/Classes/MyPlugin.swift',
+      r'$TEMPLATE_DIR/native/Main-FlutterViewController.storyboard':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swift/Base.lproj/Main.storyboard',
+      r'$TEMPLATE_DIR/native/AppDelegate-FlutterImplicitEngineDelegate.swift':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swift/AppDelegate.swift',
+      r'$TEMPLATE_DIR/native/UITests-SceneEvents-ApplicationLaunchEvents.swift':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swiftUITests/xcode_uikit_swiftUITests.swift',
+    },
+
+    // When registering plugins with the AppDelegate's self (and therefore the FlutterLaunchEngine)
+    // alongside the FlutterImplicitEngineDelegate, we expect application events starting where
+    // registration occurs, such as `application:didFinishingLaunchingWithOptions`.
+    'FlutterImplicitEngineDelegateWithLaunchEngine-AppMigrated-StoryboardFlutterViewController':
+        <String, String>{
+          ...sharedAppLifecycleFiles,
+          ...sharedPluginLifecycleFiles,
+          r'$TEMPLATE_DIR/native/SceneDelegate-FlutterSceneDelegate.swift':
+              r'$XCODE_PROJ_DIR/xcode_uikit_swift/SceneDelegate.swift',
+          r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-migrated.swift':
+              r'$PLUGIN_DIR/ios/Classes/MyPlugin.swift',
+          r'$TEMPLATE_DIR/native/Main-FlutterViewController.storyboard':
+              r'$XCODE_PROJ_DIR/xcode_uikit_swift/Base.lproj/Main.storyboard',
+          r'$TEMPLATE_DIR/native/AppDelegate-FlutterImplicitEngineDelegateWithLaunchEngine.swift':
+              r'$XCODE_PROJ_DIR/xcode_uikit_swift/AppDelegate.swift',
+          r'$TEMPLATE_DIR/native/UITests-SceneEvents.swift':
+              r'$XCODE_PROJ_DIR/xcode_uikit_swiftUITests/xcode_uikit_swiftUITests.swift',
+        },
+
+    // When the app has not migrated to scenes, storyboard is instantiated earlier in the lifecycle.
+    // So when using an implicit FlutterEngine created by the storyboard, we expect plugins to
+    // receive all application events.
+    'FlutterImplicitEngineDelegate-AppNotMigrated-StoryboardFlutterViewController':
+        <String, String>{
+          ...sharedAppLifecycleFiles,
+          ...sharedPluginLifecycleFiles,
+          r'$TEMPLATE_DIR/native/Info-unmigrated.plist':
+              r'$XCODE_PROJ_DIR/xcode_uikit_swift/Info.plist',
+          r'$TEMPLATE_DIR/native/SceneDelegate-FlutterSceneDelegate.swift':
+              r'$XCODE_PROJ_DIR/xcode_uikit_swift/SceneDelegate.swift',
+          r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-migrated.swift':
+              r'$PLUGIN_DIR/ios/Classes/MyPlugin.swift',
+          r'$TEMPLATE_DIR/native/AppDelegate-FlutterImplicitEngineDelegate.swift':
+              r'$XCODE_PROJ_DIR/xcode_uikit_swift/AppDelegate.swift',
+          r'$TEMPLATE_DIR/native/Main-FlutterViewController.storyboard':
+              r'$XCODE_PROJ_DIR/xcode_uikit_swift/Base.lproj/Main.storyboard',
+          r'$TEMPLATE_DIR/native/UITests-ApplicationEvents-FlutterImplicitEngineDelegate.swift':
+              r'$XCODE_PROJ_DIR/xcode_uikit_swiftUITests/xcode_uikit_swiftUITests.swift',
+        },
+
+    // When using an implicit FlutterEngine, created by the FlutterViewController in another
+    // ViewController, we expect plugins to be registered after the FlutterViewController is
+    // created, which results in the `application:didFinishLaunchingWithOptions:` and
+    // `scene:willConnectToSession:options:` events being missed. This is not a expected use case
+    // but it could be utilized.
+    'FlutterImplicitEngineDelegate-AppMigrated-ImplicitFlutterEngine': <String, String>{
+      ...sharedAppLifecycleFiles,
+      ...sharedPluginLifecycleFiles,
+      r'$TEMPLATE_DIR/native/SceneDelegate-FlutterSceneDelegate.swift':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swift/SceneDelegate.swift',
+      r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-migrated.swift':
+          r'$PLUGIN_DIR/ios/Classes/MyPlugin.swift',
+      r'$TEMPLATE_DIR/native/AppDelegate-FlutterImplicitEngineDelegate.swift':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swift/AppDelegate.swift',
+      r'$TEMPLATE_DIR/native/ViewController-ImplicitFlutterEngine.swift':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swift/ViewController.swift',
+      r'$TEMPLATE_DIR/native/UITests-SceneEventsNoConnect-NoApplicationEvents.swift':
+          r'$XCODE_PROJ_DIR/xcode_uikit_swiftUITests/xcode_uikit_swiftUITests.swift',
+    },
+
     // State restoration work both when migrated and when not.
     'AppMigrated-StateRestoration': <String, String>{...sharedStateRestorationFiles},
     'AppNotMigrated-StateRestoration': <String, String>{
