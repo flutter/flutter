@@ -21,6 +21,13 @@
 
 /**
  * Forwards the application equivalent lifecycle event of
+ * `scene:willConnectToSession:options:` -> `application:didFinishLaunchingWithOptions:` to plugins
+ * that have not adopted the FlutterSceneLifeCycleDelegate protocol.
+ */
+- (BOOL)sceneWillConnectFallback:(UISceneConnectionOptions*)connectionOptions;
+
+/**
+ * Forwards the application equivalent lifecycle event of
  * `sceneWillEnterForeground:` -> `applicationWillEnterForeground:` to plugins that have not adopted
  * the FlutterSceneLifeCycleDelegate protocol.
  */

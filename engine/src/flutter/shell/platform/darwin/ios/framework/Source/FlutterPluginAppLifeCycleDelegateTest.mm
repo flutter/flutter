@@ -23,6 +23,11 @@ FLUTTER_ASSERT_ARC
 
 @implementation FakeTestFlutterPluginWithSceneEvents
 - (BOOL)application:(UIApplication*)application
+    didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
+  return NO;
+}
+
+- (BOOL)application:(UIApplication*)application
             openURL:(NSURL*)url
             options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*)options {
   return YES;
@@ -46,6 +51,11 @@ FLUTTER_ASSERT_ARC
 @end
 
 @implementation FakePlugin
+- (BOOL)application:(UIApplication*)application
+    didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
+  return NO;
+}
+
 - (BOOL)application:(UIApplication*)application
             openURL:(NSURL*)url
             options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*)options {
@@ -76,6 +86,52 @@ FLUTTER_ASSERT_ARC
   XCTAssertNotNil(delegate);
 }
 
+- (void)testSceneWillConnectFallback {
+  FlutterPluginAppLifeCycleDelegate* delegate = [[FlutterPluginAppLifeCycleDelegate alloc] init];
+  id plugin = [[FakePlugin alloc] init];
+  id mockPlugin = OCMPartialMock(plugin);
+  [delegate addDelegate:mockPlugin];
+
+  id mockOptions = OCMClassMock([UISceneConnectionOptions class]);
+  id mockShortcutItem = OCMClassMock([UIApplicationShortcutItem class]);
+  OCMStub([mockOptions shortcutItem]).andReturn(mockShortcutItem);
+  OCMStub([mockOptions sourceApplication]).andReturn(@"bundle_id");
+  id urlContext = OCMClassMock([UIOpenURLContext class]);
+  NSURL* url = [NSURL URLWithString:@"http://example.com"];
+  OCMStub([urlContext URL]).andReturn(url);
+  NSSet<UIOpenURLContext*>* urlContexts = [NSSet setWithObjects:urlContext, nil];
+  OCMStub([mockOptions URLContexts]).andReturn(urlContexts);
+
+  NSDictionary<UIApplicationOpenURLOptionsKey, id>* expectedApplicationOptions = @{
+    UIApplicationLaunchOptionsShortcutItemKey : mockShortcutItem,
+    UIApplicationLaunchOptionsSourceApplicationKey : @"bundle_id",
+    UIApplicationLaunchOptionsURLKey : url,
+  };
+
+  [delegate sceneWillConnectFallback:mockOptions];
+  OCMVerify([mockPlugin application:[UIApplication sharedApplication]
+      didFinishLaunchingWithOptions:expectedApplicationOptions]);
+}
+
+- (void)testSceneWillConnectFallbackSkipped {
+  FlutterPluginAppLifeCycleDelegate* delegate = [[FlutterPluginAppLifeCycleDelegate alloc] init];
+  id plugin = [[FakeTestFlutterPluginWithSceneEvents alloc] init];
+  id mockPlugin = OCMPartialMock(plugin);
+  [delegate addDelegate:mockPlugin];
+
+  id mockOptions = OCMClassMock([UISceneConnectionOptions class]);
+  id mockShortcutItem = OCMClassMock([UIApplicationShortcutItem class]);
+  OCMStub([mockOptions shortcutItem]).andReturn(mockShortcutItem);
+  OCMStub([mockOptions sourceApplication]).andReturn(@"bundle_id");
+  id urlContext = OCMClassMock([UIOpenURLContext class]);
+  NSURL* url = [NSURL URLWithString:@"http://example.com"];
+  OCMStub([urlContext URL]).andReturn(url);
+  NSSet<UIOpenURLContext*>* urlContexts = [NSSet setWithObjects:urlContext, nil];
+  OCMStub([mockOptions URLContexts]).andReturn(urlContexts);
+
+  [delegate sceneWillConnectFallback:mockOptions];
+  OCMReject([mockPlugin application:[OCMArg any] didFinishLaunchingWithOptions:[OCMArg any]]);
+}
 - (void)testDidEnterBackground {
   XCTNSNotificationExpectation* expectation = [[XCTNSNotificationExpectation alloc]
       initWithName:UIApplicationDidEnterBackgroundNotification];

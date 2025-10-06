@@ -285,6 +285,8 @@ FLUTTER_ASSERT_ARC
                   willConnectToSession:[OCMArg any]
                                options:[OCMArg any]])
       .andReturn(YES);
+  id mockAppLifecycleDelegate = mocks[@"mockAppLifecycleDelegate"];
+  OCMStub([mockAppLifecycleDelegate sceneWillConnectFallback:[OCMArg any]]).andReturn(YES);
 
   id session = OCMClassMock([UISceneSession class]);
   id options = OCMClassMock([UISceneConnectionOptions class]);
@@ -296,6 +298,84 @@ FLUTTER_ASSERT_ARC
   OCMVerify(times(1), [mockLifecycleDelegate scene:mockScene
                               willConnectToSession:session
                                            options:options]);
+  OCMVerify(times(0), [mockAppLifecycleDelegate sceneWillConnectFallback:options]);
+  OCMVerify(times(0), [mockEngine sendDeepLinkToFramework:[OCMArg any]
+                                        completionHandler:[OCMArg any]]);
+}
+
+- (void)testSceneWillConnectToSessionOptionsHandledByApplicationPlugin {
+  FlutterPluginSceneLifeCycleDelegate* delegate =
+      [[FlutterPluginSceneLifeCycleDelegate alloc] init];
+
+  id mocks = [self mocksForEvents];
+  id mockEngine = mocks[@"mockEngine"];
+  id mockScene = mocks[@"mockScene"];
+  FlutterEnginePluginSceneLifeCycleDelegate* mockLifecycleDelegate =
+      (FlutterEnginePluginSceneLifeCycleDelegate*)mocks[@"mockLifecycleDelegate"];
+  OCMStub([mockLifecycleDelegate scene:[OCMArg any]
+                  willConnectToSession:[OCMArg any]
+                               options:[OCMArg any]])
+      .andReturn(NO);
+  id mockAppLifecycleDelegate = mocks[@"mockAppLifecycleDelegate"];
+  OCMStub([mockAppLifecycleDelegate sceneWillConnectFallback:[OCMArg any]]).andReturn(YES);
+
+  id session = OCMClassMock([UISceneSession class]);
+  id options = OCMClassMock([UISceneConnectionOptions class]);
+
+  [delegate addFlutterManagedEngine:mockEngine];
+  XCTAssertEqual(delegate.flutterManagedEngines.count, 1.0);
+
+  [delegate scene:mockScene willConnectToSession:session options:options];
+  OCMVerify(times(1), [mockLifecycleDelegate scene:mockScene
+                              willConnectToSession:session
+                                           options:options]);
+  OCMVerify(times(1), [mockAppLifecycleDelegate sceneWillConnectFallback:options]);
+  OCMVerify(times(0), [mockEngine sendDeepLinkToFramework:[OCMArg any]
+                                        completionHandler:[OCMArg any]]);
+}
+
+- (void)testSceneWillConnectToSessionOptionsHandledByApplicationPluginMultipleEngines {
+  FlutterPluginSceneLifeCycleDelegate* delegate =
+      [[FlutterPluginSceneLifeCycleDelegate alloc] init];
+
+  id mocks = [self mocksForEvents];
+  id mockEngine = mocks[@"mockEngine"];
+  id mockScene = mocks[@"mockScene"];
+  FlutterEnginePluginSceneLifeCycleDelegate* mockLifecycleDelegate =
+      (FlutterEnginePluginSceneLifeCycleDelegate*)mocks[@"mockLifecycleDelegate"];
+  OCMStub([mockLifecycleDelegate scene:[OCMArg any]
+                  willConnectToSession:[OCMArg any]
+                               options:[OCMArg any]])
+      .andReturn(NO);
+
+  id mocks2 = [self mocksForEvents];
+  id mockEngine2 = mocks2[@"mockEngine"];
+  FlutterEnginePluginSceneLifeCycleDelegate* mockLifecycleDelegate2 =
+      (FlutterEnginePluginSceneLifeCycleDelegate*)mocks2[@"mockLifecycleDelegate"];
+  OCMStub([mockLifecycleDelegate2 scene:[OCMArg any]
+                   willConnectToSession:[OCMArg any]
+                                options:[OCMArg any]])
+      .andReturn(NO);
+
+  id mockAppLifecycleDelegate = mocks2[@"mockAppLifecycleDelegate"];
+  OCMStub([mockAppLifecycleDelegate sceneWillConnectFallback:[OCMArg any]]).andReturn(YES);
+  id session = OCMClassMock([UISceneSession class]);
+  id options = OCMClassMock([UISceneConnectionOptions class]);
+
+  [delegate addFlutterManagedEngine:mockEngine];
+  [delegate addFlutterManagedEngine:mockEngine2];
+  XCTAssertEqual(delegate.flutterManagedEngines.count, 2.0);
+
+  [delegate scene:mockScene willConnectToSession:session options:options];
+  OCMVerify(times(1), [mockLifecycleDelegate scene:mockScene
+                              willConnectToSession:session
+                                           options:options]);
+  OCMVerify(times(1), [mockLifecycleDelegate2 scene:mockScene
+                               willConnectToSession:session
+                                            options:nil]);
+  OCMVerify(times(1), [mockAppLifecycleDelegate sceneWillConnectFallback:options]);
+  OCMVerify(times(0), [mockEngine sendDeepLinkToFramework:[OCMArg any]
+                                        completionHandler:[OCMArg any]]);
 }
 
 - (void)testSceneWillConnectToSessionOptionsHandledByUniversalLinks {
@@ -1238,4 +1318,196 @@ FLUTTER_ASSERT_ARC
   XCTAssertEqual([FlutterPluginSceneLifeCycleDelegate fromScene:mockScene],
                  mockSceneLifeCycleDelegate);
 }
+
+// - (void)testSceneWillConnectHandledByPlugin {
+//   // Arrange
+//   FlutterPluginSceneLifeCycleDelegate* sceneDelegate =
+//       [[FlutterPluginSceneLifeCycleDelegate alloc] init];
+//   id mockEngine = OCMClassMock([FlutterEngine class]);
+//   OCMStub([mockEngine sceneLifeCycleDelegate]).andReturn(sceneDelegate);
+//   [sceneDelegate addFlutterEngine:mockEngine];
+
+//   id mockScene = OCMClassMock([UIScene class]);
+//   id mockSession = OCMClassMock([UISceneSession class]);
+//   id mockConnectionOptions = OCMClassMock([UISceneConnectionOptions class]);
+
+//   OCMStub([sceneDelegate scene:mockScene willConnectToSession:mockSession
+//   options:mockConnectionOptions])
+//       .andReturn(YES);
+
+//   // Act
+//   [sceneDelegate scene:mockScene
+//       willConnectToSession:mockSession
+//              flutterEngine:mockEngine
+//                    options:mockConnectionOptions];
+
+//   // Assert
+//   XCTAssertTrue(sceneDelegate.sceneWillConnectEventHandledByPlugin);
+//   XCTAssertFalse(sceneDelegate.sceneWillConnectFallbackCalled);
+// }
+
+// - (void)testSceneWillConnectHandledByFallback {
+//   // Arrange
+//   FlutterPluginSceneLifeCycleDelegate* sceneDelegate =
+//       [[FlutterPluginSceneLifeCycleDelegate alloc] init];
+//   id mockEngine = OCMClassMock([FlutterEngine class]);
+//   OCMStub([mockEngine sceneLifeCycleDelegate]).andReturn(sceneDelegate);
+//   [sceneDelegate addFlutterEngine:mockEngine];
+
+//   id mockScene = OCMClassMock([UIScene class]);
+//   id mockSession = OCMClassMock([UISceneSession class]);
+//   id mockConnectionOptions = OCMClassMock([UISceneConnectionOptions class]);
+
+//   id mockAppLifeCycleDelegate = OCMClassMock([FlutterPluginAppLifeCycleDelegate class]);
+//   OCMStub([sceneDelegate applicationLifeCycleDelegate]).andReturn(mockAppLifeCycleDelegate);
+//   OCMStub([mockAppLifeCycleDelegate
+//   sceneWillConnectFallback:mockConnectionOptions]).andReturn(YES);
+
+//   // Act
+//   [sceneDelegate scene:mockScene
+//       willConnectToSession:mockSession
+//              flutterEngine:mockEngine
+//                    options:mockConnectionOptions];
+
+//   // Assert
+//   XCTAssertTrue(sceneDelegate.sceneWillConnectFallbackCalled);
+//   XCTAssertTrue(sceneDelegate.sceneWillConnectEventHandledByPlugin);
+// }
+
+// - (void)testSceneWillConnectNotHandled {
+//   // Arrange
+//   FlutterPluginSceneLifeCycleDelegate* sceneDelegate =
+//       [[FlutterPluginSceneLifeCycleDelegate alloc] init];
+//   id mockEngine = OCMClassMock([FlutterEngine class]);
+//   OCMStub([mockEngine sceneLifeCycleDelegate]).andReturn(sceneDelegate);
+//   [sceneDelegate addFlutterEngine:mockEngine];
+
+//   id mockScene = OCMClassMock([UIScene class]);
+//   id mockSession = OCMClassMock([UISceneSession class]);
+//   id mockConnectionOptions = OCMClassMock([UISceneConnectionOptions class]);
+
+//   id mockAppLifeCycleDelegate = OCMClassMock([FlutterPluginAppLifeCycleDelegate class]);
+//   OCMStub([sceneDelegate applicationLifeCycleDelegate]).andReturn(mockAppLifeCycleDelegate);
+//   OCMStub([mockAppLifeCycleDelegate
+//   sceneWillConnectFallback:mockConnectionOptions]).andReturn(NO);
+
+//   id partialMockSceneDelegate = OCMPartialMock(sceneDelegate);
+//   OCMStub([partialMockSceneDelegate handleDeeplinkingForEngine:mockEngine
+//   options:mockConnectionOptions]);
+
+//   // Act
+//   [sceneDelegate scene:mockScene
+//       willConnectToSession:mockSession
+//              flutterEngine:mockEngine
+//                    options:mockConnectionOptions];
+
+//   // Assert
+//   XCTAssertTrue(sceneDelegate.sceneWillConnectFallbackCalled);
+//   XCTAssertFalse(sceneDelegate.sceneWillConnectEventHandledByPlugin);
+//   OCMVerify([partialMockSceneDelegate handleDeeplinkingForEngine:mockEngine
+//   options:mockConnectionOptions]);
+// }
+
+// - (void)testSceneOpenURLContextsHandledByPlugin {
+//   // Arrange
+//   FlutterPluginSceneLifeCycleDelegate* sceneDelegate =
+//       [[FlutterPluginSceneLifeCycleDelegate alloc] init];
+//   id mockEngine = OCMClassMock([FlutterEngine class]);
+//   OCMStub([mockEngine sceneLifeCycleDelegate]).andReturn(sceneDelegate);
+//   [sceneDelegate addFlutterEngine:mockEngine];
+
+//   id mockScene = OCMClassMock([UIScene class]);
+//   id mockURLContext = OCMClassMock([UIOpenURLContext class]);
+//   NSSet<UIOpenURLContext*>* urlContexts = [NSSet setWithObject:mockURLContext];
+
+//   OCMStub([sceneDelegate scene:mockScene openURLContexts:urlContexts]).andReturn(YES);
+//   id mockAppLifeCycleDelegate = OCMClassMock([FlutterPluginAppLifeCycleDelegate class]);
+//   OCMStub([sceneDelegate applicationLifeCycleDelegate]).andReturn(mockAppLifeCycleDelegate);
+
+//   // Act
+//   [sceneDelegate scene:mockScene openURLContexts:urlContexts];
+
+//   // Assert
+//   OCMVerify(never(), [mockAppLifeCycleDelegate sceneFallbackOpenURLContexts:urlContexts]);
+// }
+
+// - (void)testSceneOpenURLContextsHandledByFallback {
+//   // Arrange
+//   FlutterPluginSceneLifeCycleDelegate* sceneDelegate =
+//       [[FlutterPluginSceneLifeCycleDelegate alloc] init];
+//   id mockEngine = OCMClassMock([FlutterEngine class]);
+//   OCMStub([mockEngine sceneLifeCycleDelegate]).andReturn(sceneDelegate);
+//   [sceneDelegate addFlutterEngine:mockEngine];
+
+//   id mockScene = OCMClassMock([UIScene class]);
+//   id mockURLContext = OCMClassMock([UIOpenURLContext class]);
+//   NSSet<UIOpenURLContext*>* urlContexts = [NSSet setWithObject:mockURLContext];
+
+//   OCMStub([sceneDelegate scene:mockScene openURLContexts:urlContexts]).andReturn(NO);
+//   id mockAppLifeCycleDelegate = OCMClassMock([FlutterPluginAppLifeCycleDelegate class]);
+//   OCMStub([sceneDelegate applicationLifeCycleDelegate]).andReturn(mockAppLifeCycleDelegate);
+//   OCMStub([mockAppLifeCycleDelegate sceneFallbackOpenURLContexts:urlContexts]).andReturn(YES);
+
+//   id partialMockSceneDelegate = OCMPartialMock(sceneDelegate);
+//   OCMStub([partialMockSceneDelegate handleDeeplink:[OCMArg any] flutterEngine:mockEngine
+//   relayToSystemIfUnhandled:NO]);
+
+//   // Act
+//   [sceneDelegate scene:mockScene openURLContexts:urlContexts];
+
+//   // Assert
+//   OCMVerify(never(), [partialMockSceneDelegate handleDeeplink:[OCMArg any]
+//   flutterEngine:mockEngine relayToSystemIfUnhandled:NO]);
+// }
+
+// - (void)testSceneContinueUserActivityHandledByPlugin {
+//   // Arrange
+//   FlutterPluginSceneLifeCycleDelegate* sceneDelegate =
+//       [[FlutterPluginSceneLifeCycleDelegate alloc] init];
+//   id mockEngine = OCMClassMock([FlutterEngine class]);
+//   OCMStub([mockEngine sceneLifeCycleDelegate]).andReturn(sceneDelegate);
+//   [sceneDelegate addFlutterEngine:mockEngine];
+
+//   id mockScene = OCMClassMock([UIScene class]);
+//   id mockUserActivity = OCMClassMock([NSUserActivity class]);
+
+//   OCMStub([sceneDelegate scene:mockScene continueUserActivity:mockUserActivity]).andReturn(YES);
+//   id mockAppLifeCycleDelegate = OCMClassMock([FlutterPluginAppLifeCycleDelegate class]);
+//   OCMStub([sceneDelegate applicationLifeCycleDelegate]).andReturn(mockAppLifeCycleDelegate);
+
+//   // Act
+//   [sceneDelegate scene:mockScene continueUserActivity:mockUserActivity];
+
+//   // Assert
+//   OCMVerify(never(), [mockAppLifeCycleDelegate
+//   sceneFallbackContinueUserActivity:mockUserActivity]);
+// }
+
+// - (void)testWindowScenePerformActionForShortcutItemHandledByPlugin {
+//   // Arrange
+//   FlutterPluginSceneLifeCycleDelegate* sceneDelegate =
+//       [[FlutterPluginSceneLifeCycleDelegate alloc] init];
+//   id mockEngine = OCMClassMock([FlutterEngine class]);
+//   OCMStub([mockEngine sceneLifeCycleDelegate]).andReturn(sceneDelegate);
+//   [sceneDelegate addFlutterEngine:mockEngine];
+
+//   id mockWindowScene = OCMClassMock([UIWindowScene class]);
+//   id mockShortcutItem = OCMClassMock([UIApplicationShortcutItem class]);
+//   id completionHandler = ^(BOOL succeeded) {};
+
+//   OCMStub([sceneDelegate windowScene:mockWindowScene
+//   performActionForShortcutItem:mockShortcutItem
+//   completionHandler:completionHandler]).andReturn(YES); id mockAppLifeCycleDelegate =
+//   OCMClassMock([FlutterPluginAppLifeCycleDelegate class]); OCMStub([sceneDelegate
+//   applicationLifeCycleDelegate]).andReturn(mockAppLifeCycleDelegate);
+
+//   // Act
+//   [sceneDelegate windowScene:mockWindowScene performActionForShortcutItem:mockShortcutItem
+//   completionHandler:completionHandler];
+
+//   // Assert
+//   OCMVerify(never(), [mockAppLifeCycleDelegate
+//   sceneFallbackPerformActionForShortcutItem:mockShortcutItem
+//   completionHandler:completionHandler]);
+// }
 @end

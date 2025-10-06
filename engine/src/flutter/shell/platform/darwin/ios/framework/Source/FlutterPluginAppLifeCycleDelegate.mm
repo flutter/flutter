@@ -117,17 +117,67 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
 
 - (BOOL)application:(UIApplication*)application
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
-  for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in [_delegates allObjects]) {
-    if (!delegate) {
+  return [self application:application
+      didFinishLaunchingWithOptions:launchOptions
+                 isFallbackForScene:NO];
+}
+
+- (BOOL)sceneWillConnectFallback:(UISceneConnectionOptions*)connectionOptions {
+  UIApplication* application = FlutterSharedApplication.application;
+  if (!application) {
+    return NO;
+  }
+  if (![self application:application
+          didFinishLaunchingWithOptions:ConvertConnectionOptions(connectionOptions)
+                     isFallbackForScene:YES]) {
+    return YES;
+  }
+  return NO;
+}
+
+- (BOOL)application:(UIApplication*)application
+    didFinishLaunchingWithOptions:(NSDictionary*)launchOptions
+               isFallbackForScene:(BOOL)isFallback {
+  for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
+    if (!delegate || (isFallback && [self pluginSupportsSceneLifecycle:delegate])) {
       continue;
     }
-    if ([delegate respondsToSelector:_cmd]) {
+    if ([delegate respondsToSelector:@selector(application:didFinishLaunchingWithOptions:)]) {
       if (![delegate application:application didFinishLaunchingWithOptions:launchOptions]) {
         return NO;
       }
     }
   }
   return YES;
+}
+
+/* Makes a best attempt to convert UISceneConnectionOptions from the scene event
+ * (`scene:willConnectToSession:options:`) to a NSDictionary of options used to the application
+ * lifecycle event.
+ *
+ * For more information on UISceneConnectionOptions, see
+ * https://developer.apple.com/documentation/uikit/uiscene/connectionoptions.
+ *
+ * For information about the possible keys in the NSDictionary and how to handle them, see
+ * https://developer.apple.com/documentation/uikit/uiapplication/launchoptionskey
+ */
+static NSDictionary<UIApplicationLaunchOptionsKey, id>* ConvertConnectionOptions(
+    UISceneConnectionOptions* connectionOptions) {
+  NSMutableDictionary<UIApplicationOpenURLOptionsKey, id>* convertedOptions =
+      [NSMutableDictionary dictionary];
+
+  if (connectionOptions.shortcutItem) {
+    convertedOptions[UIApplicationLaunchOptionsShortcutItemKey] = connectionOptions.shortcutItem;
+  }
+  if (connectionOptions.sourceApplication) {
+    convertedOptions[UIApplicationLaunchOptionsSourceApplicationKey] =
+        connectionOptions.sourceApplication;
+  }
+  if (connectionOptions.URLContexts.anyObject.URL) {
+    convertedOptions[UIApplicationLaunchOptionsURLKey] =
+        connectionOptions.URLContexts.anyObject.URL;
+  }
+  return convertedOptions;
 }
 
 - (BOOL)application:(UIApplication*)application

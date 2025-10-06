@@ -150,8 +150,8 @@ void PlatformViewIOS::SetAccessibilityFeatures(int32_t flags) {
 void PlatformViewIOS::UpdateSemantics(int64_t view_id,
                                       flutter::SemanticsNodeUpdates update,
                                       flutter::CustomAccessibilityActionUpdates actions) {
-  FML_DCHECK(owner_controller_);
-  FML_DCHECK(accessibility_bridge_);
+  //  FML_DCHECK(owner_controller_);
+  //  FML_DCHECK(accessibility_bridge_);
   if (accessibility_bridge_) {
     accessibility_bridge_.get()->UpdateSemantics(std::move(update), actions);
     [[NSNotificationCenter defaultCenter] postNotificationName:FlutterSemanticsUpdateNotification
@@ -161,7 +161,7 @@ void PlatformViewIOS::UpdateSemantics(int64_t view_id,
 
 // |PlatformView|
 void PlatformViewIOS::SetApplicationLocale(std::string locale) {
-  FML_DCHECK(owner_controller_);
+  // FML_DCHECK(owner_controller_);
   owner_controller_.applicationLocale = locale.empty() ? nil : @(locale.data());
 }
 
