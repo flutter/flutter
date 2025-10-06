@@ -846,6 +846,7 @@ void main() {
         accessibilityFocusable: true,
         child: Column(
           children: <Widget>[
+            // If the child has a value for accessibilityFocusable, It's valid.
             Semantics(
               container: true,
               accessibilityFocusable: false,
@@ -854,6 +855,7 @@ void main() {
               },
               child: const SizedBox(width: 10, height: 10),
             ),
+            // If the child doesn't have a value for accessibilityFocusable, it will use the parent data.
             Semantics(
               container: true,
               customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
