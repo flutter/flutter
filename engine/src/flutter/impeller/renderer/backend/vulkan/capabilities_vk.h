@@ -282,6 +282,9 @@ class CapabilitiesVK final : public Capabilities,
   size_t GetMinimumUniformAlignment() const override;
 
   // |Capabilities|
+  size_t GetMinimumStorageBufferAlignment() const override;
+
+  // |Capabilities|
   bool NeedsPartitionedHostBuffer() const override;
 
   //----------------------------------------------------------------------------
@@ -326,6 +329,7 @@ class CapabilitiesVK final : public Capabilities,
   vk::PhysicalDevice physical_device_;
   vk::PhysicalDeviceProperties device_properties_;
   size_t minimum_uniform_alignment_ = 256;
+  size_t minimum_storage_alignment_ = 256;
   bool supports_compute_subgroups_ = false;
   bool supports_device_transient_textures_ = false;
   bool supports_texture_fixed_rate_compression_ = false;

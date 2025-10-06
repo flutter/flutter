@@ -74,6 +74,7 @@ class KHRSwapchainImplVK final
   std::shared_ptr<SwapchainTransientsVK> transients_;
   std::vector<std::shared_ptr<KHRSwapchainImageVK>> images_;
   std::vector<std::unique_ptr<KHRFrameSynchronizerVK>> synchronizers_;
+  std::vector<vk::UniqueSemaphore> present_semaphores_;
   size_t current_frame_ = 0u;
   ISize size_;
   bool enable_msaa_ = true;

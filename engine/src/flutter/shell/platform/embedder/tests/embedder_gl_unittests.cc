@@ -9,8 +9,6 @@
 #include <string>
 #include <vector>
 
-#include "vulkan/vulkan.h"
-
 #include "GLES3/gl3.h"
 #include "flutter/flow/raster_cache.h"
 #include "flutter/fml/file.h"
