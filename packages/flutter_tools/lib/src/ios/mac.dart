@@ -182,8 +182,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     UISceneMigration(
       app.project,
       globals.logger,
-      isMigrationEnabled: featureFlags.isUISceneMigrationEnabled,
-      fileSystem: globals.fs,
+      isMigrationFeatureEnabled: featureFlags.isUISceneMigrationEnabled,
       plistParser: globals.plistParser,
     ),
   ];

@@ -5,7 +5,6 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/migrations/uiscene_migration.dart';
 
@@ -24,8 +23,8 @@ void main() {
       final migration = UISceneMigration(
         setupFakeIosProject(fileSystem),
         logger,
-        fileSystem: fileSystem,
         plistParser: plistParser,
+        isMigrationFeatureEnabled: true,
       );
 
       await migration.migrate();
@@ -35,7 +34,8 @@ void main() {
         contains(
           'To ensure your app continues to launch on upcoming iOS versions, UIScene lifecycle '
           'support will soon be required. Please see https://flutter.dev/to/uiscene-migration '
-          'for the migration guide.\nSee https://flutter.dev/to/uiscene-migration for instructions to hide this warning.',
+          'for the migration guide.\nSee https://flutter.dev/to/uiscene-migration/#hide-migration-warning'
+          ' for instructions to hide this warning.',
         ),
       );
     });
@@ -48,8 +48,25 @@ void main() {
       final migration = UISceneMigration(
         setupFakeIosProject(fileSystem, infoPlistContent: validMigratedInfoPlist),
         logger,
-        fileSystem: fileSystem,
+        isMigrationFeatureEnabled: true,
         plistParser: plistParser,
+      );
+
+      await migration.migrate();
+      expect(logger.traceText, isEmpty);
+      expect(logger.errorText, isEmpty);
+    });
+
+    testWithoutContext('skips if feature disabled', () async {
+      final logger = BufferLogger.test();
+      final fileSystem = MemoryFileSystem.test();
+      final plistParser = FakePlistParser();
+
+      final migration = UISceneMigration(
+        setupFakeIosProject(fileSystem),
+        logger,
+        plistParser: plistParser,
+        isMigrationFeatureEnabled: false,
       );
 
       await migration.migrate();
@@ -65,7 +82,7 @@ void main() {
       final migration = UISceneMigration(
         setupFakeIosProject(fileSystem, infoPlistContent: ''),
         logger,
-        fileSystem: fileSystem,
+        isMigrationFeatureEnabled: true,
         plistParser: plistParser,
       );
 
@@ -89,7 +106,7 @@ void main() {
       final migration = UISceneMigration(
         setupFakeIosProject(fileSystem, infoPlistContent: ''),
         logger,
-        fileSystem: fileSystem,
+        isMigrationFeatureEnabled: true,
         plistParser: plistParser,
       );
 
@@ -118,7 +135,7 @@ void main() {
             swiftAppDelegateConent: 'not matching content',
           ),
           logger,
-          fileSystem: fileSystem,
+          isMigrationFeatureEnabled: true,
           plistParser: plistParser,
         );
 
@@ -138,25 +155,9 @@ void main() {
       });
 
       testWithoutContext('replaces if AppDelegate.swift is exact match', () async {
-        Cache.flutterRoot = '../..';
         final logger = BufferLogger.test();
         final fileSystem = MemoryFileSystem.test();
         final plistParser = FakePlistParser();
-        final File templateFile =
-            fileSystem.file(
-                fileSystem.path.join(
-                  Cache.flutterRoot!,
-                  'packages',
-                  'flutter_tools',
-                  'templates',
-                  'app',
-                  'ios.tmpl',
-                  'Runner',
-                  'AppDelegate.swift',
-                ),
-              )
-              ..createSync(recursive: true)
-              ..writeAsStringSync('New template');
 
         final migration = UISceneMigration(
           setupFakeIosProject(
@@ -165,7 +166,7 @@ void main() {
             swiftAppDelegateConent: UISceneMigration.originalSwiftAppDelegate,
           ),
           logger,
-          fileSystem: fileSystem,
+          isMigrationFeatureEnabled: true,
           plistParser: plistParser,
         );
 
@@ -174,7 +175,7 @@ void main() {
         expect(logger.errorText, isEmpty);
         expect(plistParser.insertKeyCalled, isTrue);
         final File appDelegateSwift = fileSystem.systemTempDirectory.childFile('AppDelegate.swift');
-        expect(appDelegateSwift.readAsStringSync(), equals(templateFile.readAsStringSync()));
+        expect(appDelegateSwift.readAsStringSync(), equals(UISceneMigration.newSwiftAppDelegate));
       });
     });
 
@@ -192,7 +193,7 @@ void main() {
             objcAppDelegateContent: UISceneMigration.originalObjCAppDelegateImplementation,
           ),
           logger,
-          fileSystem: fileSystem,
+          isMigrationFeatureEnabled: true,
           plistParser: plistParser,
         );
 
@@ -224,7 +225,7 @@ void main() {
             objcAppDelegateContent: 'not a match',
           ),
           logger,
-          fileSystem: fileSystem,
+          isMigrationFeatureEnabled: true,
           plistParser: plistParser,
         );
 
@@ -256,7 +257,7 @@ void main() {
             objcAppDelegateContent: UISceneMigration.originalObjCAppDelegateImplementation,
           ),
           logger,
-          fileSystem: fileSystem,
+          isMigrationFeatureEnabled: true,
           plistParser: plistParser,
         );
 
@@ -292,7 +293,7 @@ void main() {
           objcAppDelegateContent: UISceneMigration.originalObjCAppDelegateImplementation,
         ),
         logger,
-        fileSystem: fileSystem,
+        isMigrationFeatureEnabled: true,
         plistParser: plistParser,
       );
 

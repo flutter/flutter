@@ -4,31 +4,28 @@
 
 import 'package:meta/meta.dart';
 
-import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/project_migrator.dart';
 import '../ios/plist_parser.dart';
-import '../template.dart';
 import '../xcode_project.dart';
 
-// Xcode Info.plist and AppDelegate to support UIScene.
+/// Migrates Xcode's Info.plist and AppDelegate to support UIScene if matches original templates.
+/// Otherwise, provides link to documentation to migrate manually.
+///
+/// Only migrates if
 class UISceneMigration extends ProjectMigrator {
   UISceneMigration(
     IosProject project,
     super.logger, {
-    required bool isMigrationEnabled,
-    required FileSystem fileSystem,
+    required bool isMigrationFeatureEnabled,
     required PlistParser plistParser,
-  }) : _isMigrationEnabled = isMigrationEnabled,
-       _fileSystem = fileSystem,
+  }) : _isMigrationFeatureEnabled = isMigrationFeatureEnabled,
        _project = project,
        _plistParser = plistParser;
 
-  final bool _isMigrationEnabled;
-  final FileSystem _fileSystem;
+  final bool _isMigrationFeatureEnabled;
   final PlistParser _plistParser;
   final IosProject _project;
-  static const _templatePathProvider = TemplatePathProvider();
 
   @visibleForTesting
   static const originalSwiftAppDelegate = '''
@@ -93,6 +90,7 @@ import UIKit
 
 @end
 ''';
+
   @visibleForTesting
   static const newObjCAppDelegateHeader = '''
 #import <Flutter/Flutter.h>
@@ -116,22 +114,36 @@ import UIKit
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 
-- (void)didInitializeImplicitFlutterEngine:(FlutterImplicitEngineBridge*)engineBridge {
+- (void)didInitializeImplicitFlutterEngine:(NSObject<FlutterImplicitEngineBridge>*)engineBridge {
   [GeneratedPluginRegistrant registerWithRegistry:engineBridge.pluginRegistry];
 }
 
 @end
 ''';
 
-  final _flutterLicense = '''
-// Copyright 2013 The Flutter Authors
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+  @visibleForTesting
+  static const newSwiftAppDelegate = '''
+import Flutter
+import UIKit
+
+@main
+@objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
+  override func application(
+    _ application: UIApplication,
+    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+  ) -> Bool {
+    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+
+  func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
+    GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+  }
+}
 ''';
 
   @override
   Future<void> migrate() async {
-    if (!_isMigrationEnabled) {
+    if (!_isMigrationFeatureEnabled) {
       return;
     }
 
@@ -178,26 +190,17 @@ import UIKit
       return;
     }
 
-    logger.printStatus('Finished migration to UIScene lifecycle...');
+    logger.printStatus(
+      'Finished migration to UIScene lifecycle. See https://flutter.dev/to/uiscene-migration for details.',
+    );
   }
 
   bool _migrateAppDelegate() {
     if (_project.appDelegateSwift.existsSync()) {
-      final String projectAppDelegate = _project.appDelegateSwift
-          .readAsStringSync()
-          .replaceAll(_flutterLicense, '')
-          .trim();
+      final String projectAppDelegate = _project.appDelegateSwift.readAsStringSync().trim();
       if (projectAppDelegate == originalSwiftAppDelegate.trim() ||
           projectAppDelegate == secondaryOriginalSwiftAppDelegate.trim()) {
-        final Directory templateDir = _templatePathProvider.directoryInPackage('app', _fileSystem);
-        final File template = templateDir
-            .childDirectory('ios.tmpl')
-            .childDirectory('Runner')
-            .childFile('AppDelegate.swift');
-        if (!template.existsSync()) {
-          return false;
-        }
-        _project.appDelegateSwift.writeAsStringSync(template.readAsStringSync());
+        _project.appDelegateSwift.writeAsStringSync(newSwiftAppDelegate);
         return true;
       }
       logger.printTrace('UIScene migration: AppDelegate does not match original template.');
@@ -206,11 +209,9 @@ import UIKit
         _project.appDelegateObjcHeader.existsSync()) {
       final String projectAppDelegateImplementation = _project.appDelegateObjcImplementation
           .readAsStringSync()
-          .replaceAll(_flutterLicense, '')
           .trim();
       final String projectAppDelegateHeader = _project.appDelegateObjcHeader
           .readAsStringSync()
-          .replaceAll(_flutterLicense, '')
           .trim();
       if (projectAppDelegateImplementation == originalObjCAppDelegateImplementation.trim() &&
           projectAppDelegateHeader == originalObjCAppDelegateHeader.trim()) {
@@ -249,14 +250,18 @@ import UIKit
   }
 
   void _printErrorMessage({bool withConfigInstructions = false}) {
-    var message =
-        'To ensure your app continues to launch on upcoming iOS versions, UIScene lifecycle '
-        'support will soon be required. Please see https://flutter.dev/to/uiscene-migration '
-        'for the migration guide.';
+    final buffer = StringBuffer();
+    buffer.writeln(
+      'To ensure your app continues to launch on upcoming iOS versions, UIScene lifecycle '
+      'support will soon be required. Please see https://flutter.dev/to/uiscene-migration '
+      'for the migration guide.',
+    );
     if (withConfigInstructions) {
-      message =
-          '$message\nSee https://flutter.dev/to/uiscene-migration for instructions to hide this warning.';
+      buffer.writeln(
+        'See https://flutter.dev/to/uiscene-migration/#hide-migration-warning for instructions to '
+        'hide this warning.',
+      );
     }
-    logger.printError(message);
+    logger.printError(buffer.toString());
   }
 }
