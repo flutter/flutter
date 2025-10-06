@@ -2708,21 +2708,18 @@ public class TextInputPluginTest {
   }
 
   @Test
-  @TargetApi(API_LEVELS.API_30)
-  @Config(sdk = API_LEVELS.API_30)
+  @TargetApi(API_LEVELS.API_35)
+  @Config(sdk = API_LEVELS.API_35)
   @SuppressWarnings("deprecation")
-  // getWindowSystemUiVisibility
+  // getWindowSystemUiVisibility, SYSTEM_UI_FLAG_LAYOUT_STABLE.
   // flutter#133074 tracks migration work.
-  public void ime_windowInsetsSync_edgeToEdge_includesNavigationBars() {
+  public void ime_windowInsetsSync_notLaidOutBehindNavigation_post15_includesNavigationBars() {
     try (ActivityScenario<Activity> scenario = ActivityScenario.launch(Activity.class)) {
       scenario.onActivity(
           activity -> {
             FlutterView testView = spy(new FlutterView(activity));
             when(testView.getWindowSystemUiVisibility())
-                .thenReturn(
-                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+                .thenReturn(View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
 
             TextInputChannel textInputChannel = new TextInputChannel(mock(DartExecutor.class));
             ScribeChannel scribeChannel = new ScribeChannel(mock(DartExecutor.class));
