@@ -200,11 +200,14 @@ Future<void> buildMacOS({
 
   // Parse DarwinArchs from dartDefines to determine if we should limit architectures
   String? darwinArchs;
-  for (final String define in buildInfo.dartDefines) {
-    if (define.startsWith('DarwinArchs=')) {
-      darwinArchs = define.substring('DarwinArchs='.length);
-      break;
-    }
+  try {
+    const prefix = '$kDarwinArchs=';
+    final String define = buildInfo.dartDefines.firstWhere(
+      (String d) => d.startsWith(prefix),
+    );
+    darwinArchs = define.substring(prefix.length);
+  } on StateError {
+    // No DarwinArchs define found.
   }
 
   // Use specific architecture destination if:
