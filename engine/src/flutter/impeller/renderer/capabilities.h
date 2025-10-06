@@ -126,6 +126,9 @@ class Capabilities {
   /// @brief The minimum alignment of uniform value offsets in bytes.
   virtual size_t GetMinimumUniformAlignment() const = 0;
 
+  /// @brief The minimum alignment of storage buffer value offsets in bytes.
+  virtual size_t GetMinimumStorageBufferAlignment() const;
+
   /// @brief Whether the host buffer should use separate device buffers
   /// for indexes from other data.
   virtual bool NeedsPartitionedHostBuffer() const = 0;

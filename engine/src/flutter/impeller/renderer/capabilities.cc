@@ -11,6 +11,10 @@ Capabilities::Capabilities() = default;
 
 Capabilities::~Capabilities() = default;
 
+size_t Capabilities::GetMinimumStorageBufferAlignment() const {
+  return GetMinimumUniformAlignment();
+}
+
 class StandardCapabilities final : public Capabilities {
  public:
   // |Capabilities|
