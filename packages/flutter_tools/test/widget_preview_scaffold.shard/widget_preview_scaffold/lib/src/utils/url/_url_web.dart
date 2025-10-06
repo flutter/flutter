@@ -25,13 +25,10 @@ void updateQueryParameter(String key, String? value, {bool reload = false}) {
   } else {
     newQueryParams[key] = value;
   }
-  final newUri = Uri.parse(window.location.toString())
-      .replace(queryParameters: newQueryParams);
-  window.history.replaceState(
-    window.history.state,
-    '',
-    newUri.toString(),
-  );
+  final newUri = Uri.parse(
+    window.location.toString(),
+  ).replace(queryParameters: newQueryParams);
+  window.history.replaceState(window.history.state, '', newUri.toString());
 
   if (reload) {
     window.location.reload();

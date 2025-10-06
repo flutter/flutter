@@ -54,7 +54,7 @@ ThemeData _baseTheme({
 }) {
   // TODO(kenz): do we need to pass in the foreground color from the [IdeTheme]
   // as well as the background color?
-  const _kCardRadius = Radius.circular(12);
+  const kCardRadius = Radius.circular(12);
   return theme.copyWith(
     tabBarTheme: theme.tabBarTheme.copyWith(
       tabAlignment: TabAlignment.start,
@@ -106,17 +106,17 @@ ThemeData _baseTheme({
     expansionTileTheme: ExpansionTileThemeData(
       backgroundColor: backgroundColor.brighten(),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(_kCardRadius),
+        borderRadius: BorderRadius.all(kCardRadius),
       ),
       collapsedShape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(_kCardRadius),
+        borderRadius: BorderRadius.all(kCardRadius),
       ),
     ),
     listTileTheme: ListTileThemeData(
       dense: true,
       tileColor: backgroundColor.brighten(),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(_kCardRadius),
+        borderRadius: BorderRadius.all(kCardRadius),
       ),
     ),
     dropdownMenuTheme: DropdownMenuThemeData(textStyle: theme.regularTextStyle),

@@ -13,14 +13,12 @@ void main() {
   group('$IdeThemeQueryParams', () {
     test('successfully creates params', () {
       final params = IdeThemeQueryParams({
-        'embedMode': 'one',
         'backgroundColor': '#112233',
         'foregroundColor': '#112244',
         'theme': 'dark',
       });
 
       expect(params.params, isNotEmpty);
-      expect(params.embedMode, EmbedMode.embedOne);
       expect(params.backgroundColor, const Color(0xFF112233));
       expect(params.foregroundColor, const Color(0xFF112244));
       expect(params.darkMode, true);
@@ -28,14 +26,12 @@ void main() {
 
     test('handles bad input', () {
       final params = IdeThemeQueryParams({
-        'embedMode': 'blah',
         'backgroundColor': 'badcolor',
         'foregroundColor': 'badcolor',
         'theme': 'dark',
       });
 
       expect(params.params, isNotEmpty);
-      expect(params.embedMode, EmbedMode.none);
       expect(params.backgroundColor, isNull);
       expect(params.foregroundColor, isNull);
       expect(params.darkMode, true);
@@ -53,7 +49,6 @@ void main() {
     test('creates empty params', () {
       final params = IdeThemeQueryParams({});
       expect(params.params, isEmpty);
-      expect(params.embedMode, EmbedMode.none);
       expect(params.backgroundColor, isNull);
       expect(params.foregroundColor, isNull);
       expect(params.darkMode, true);

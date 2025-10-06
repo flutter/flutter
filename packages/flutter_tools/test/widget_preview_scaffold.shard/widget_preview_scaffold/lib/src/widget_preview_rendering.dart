@@ -976,7 +976,7 @@ class WidgetPreviewScaffold extends StatelessWidget {
         ideTheme: ideTheme,
         theme: ThemeData.dark(),
       ),
-      themeMode: ThemeMode.dark,
+      themeMode: ideTheme.isDarkMode ? ThemeMode.dark : ThemeMode.light,
       home: Material(
         child: Column(
           children: [
