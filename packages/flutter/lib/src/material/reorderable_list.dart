@@ -73,9 +73,9 @@ class ReorderableListView extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///   * [ReorderableListView.builder], which allows you to build a reorderable
+  ///   * [ReorderableListView.builder], to build a reorderable
   ///     list where the items are built as needed when scrolling the list.
-  ///   * [ReorderableListView.separated], which allows you to build a reorderable
+  ///   * [ReorderableListView.separated], to build a reorderable
   ///     list with separators between items.
   ReorderableListView({
     super.key,
@@ -397,7 +397,7 @@ class ReorderableListView extends StatefulWidget {
   /// This callback is used to build the separator widgets that appear between items.
   /// It is called with indices from 0 to [itemCount] - 2.
   ///
-  /// Null if this is not a `ReorderableListView.separated`.
+  /// This is null when using [ReorderableListView.separated] constructor.
   final IndexedWidgetBuilder? separatorBuilder;
 
   @override

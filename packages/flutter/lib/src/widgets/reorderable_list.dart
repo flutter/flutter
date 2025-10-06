@@ -947,9 +947,10 @@ class SliverReorderableListState extends State<SliverReorderableList>
     assert(_dragInfo != null);
     double gapExtent = _dragInfo!.itemExtent;
 
-    // For separated lists, the gap should include both the item and its separator
+    // For [ReorderableList.separated], the gap extent must include both the dragged item
+    // and its associated separator to maintain proper visual spacing during drag operations.
     if (widget.semanticIndexCallback != null) {
-      // Find separator height and add it to the gap
+      // Detect separator size and add it to the gap calculations
       for (final _ReorderableItemState separatorItem in _items.values) {
         if (separatorItem.mounted &&
             widget.semanticIndexCallback!(separatorItem.widget, separatorItem.index) == null) {
@@ -975,7 +976,7 @@ class SliverReorderableListState extends State<SliverReorderableList>
         continue;
       }
 
-      // Skip separators in separated lists - they should not be considered for drop positioning
+      // For [ReorderableList.separated], skip separators when calculating drop positions
       if (widget.semanticIndexCallback != null &&
           widget.semanticIndexCallback!(item.widget, item.index) == null) {
         continue;
@@ -1041,7 +1042,7 @@ class SliverReorderableListState extends State<SliverReorderableList>
           continue;
         }
 
-        // Skip separators in separated lists - they should not have gap animations
+        // For [ReorderableList.separated], skip separators when updating the gap
         if (widget.semanticIndexCallback != null &&
             widget.semanticIndexCallback!(item.widget, item.index) == null) {
           continue;
