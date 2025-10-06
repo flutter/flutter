@@ -273,6 +273,71 @@ typedef enum {
 
 #pragma mark -
 /**
+ * The base interface for `FlutterPluginRegistrar` and `FlutterApplicationRegistrar`.
+ *
+ * Provides registration context for the application or plugins.
+ */
+@protocol FlutterBaseRegistrar <NSObject>
+/**
+ * Returns a `FlutterBinaryMessenger` for creating Dart/iOS communication
+ * channels to be used by the application or a plugin.
+ *
+ * @return The messenger.
+ */
+- (NSObject<FlutterBinaryMessenger>*)messenger;
+
+/**
+ * Returns a `FlutterTextureRegistry` for registering textures
+ * provided by the application or a plugin.
+ *
+ * @return The texture registry.
+ */
+- (NSObject<FlutterTextureRegistry>*)textures;
+
+/**
+ * Registers a `FlutterPlatformViewFactory` for creation of platform views.
+ *
+ * Applications or plugins can expose `UIView` for embedding in Flutter apps by registering a view
+ * factory.
+ *
+ * @param factory The view factory that will be registered.
+ * @param factoryId A unique identifier for the factory, the Dart code of the Flutter app can use
+ *   this identifier to request creation of a `UIView` by the registered factory.
+ */
+- (void)registerViewFactory:(NSObject<FlutterPlatformViewFactory>*)factory
+                     withId:(NSString*)factoryId;
+
+/**
+ * Registers a `FlutterPlatformViewFactory` for creation of platform views.
+ *
+ * Applications or plugins can expose a `UIView` for embedding in Flutter apps by registering a view
+ * factory.
+ *
+ * @param factory The view factory that will be registered.
+ * @param factoryId A unique identifier for the factory, the Dart code of the Flutter app can use
+ *   this identifier to request creation of a `UIView` by the registered factory.
+ * @param gestureRecognizersBlockingPolicy How UIGestureRecognizers on the platform views are
+ * blocked.
+ *
+ */
+- (void)registerViewFactory:(NSObject<FlutterPlatformViewFactory>*)factory
+                              withId:(NSString*)factoryId
+    gestureRecognizersBlockingPolicy:
+        (FlutterPlatformViewGestureRecognizersBlockingPolicy)gestureRecognizersBlockingPolicy;
+@end
+
+/**
+ * A registrar for Flutter applications.
+ *
+ * This registrar provides access to application-level services, such as the binary messenger and
+ * texture registry.
+ *
+ * See also `FlutterBaseRegistrar`.
+ */
+@protocol FlutterApplicationRegistrar <FlutterBaseRegistrar>
+@end
+
+/**
  * Registration context for a single `FlutterPlugin`, providing a one stop shop
  * for the plugin to access contextual information and register callbacks for
  * various application events.
@@ -281,22 +346,7 @@ typedef enum {
  * the identity of registered plugins and provides basic support for cross-plugin
  * coordination.
  */
-@protocol FlutterPluginRegistrar <NSObject>
-/**
- * Returns a `FlutterBinaryMessenger` for creating Dart/iOS communication
- * channels to be used by the plugin.
- *
- * @return The messenger.
- */
-- (NSObject<FlutterBinaryMessenger>*)messenger;
-
-/**
- * Returns a `FlutterTextureRegistry` for registering textures
- * provided by the plugin.
- *
- * @return The texture registry.
- */
-- (NSObject<FlutterTextureRegistry>*)textures;
+@protocol FlutterPluginRegistrar <FlutterBaseRegistrar>
 
 /**
  * The `UIViewController` whose view is displaying Flutter content.
@@ -311,35 +361,6 @@ typedef enum {
  * the underlying Flutter engine is deallocated.
  */
 @property(nullable, readonly) UIViewController* viewController;
-
-/**
- * Registers a `FlutterPlatformViewFactory` for creation of platform views.
- *
- * Plugins expose `UIView` for embedding in Flutter apps by registering a view factory.
- *
- * @param factory The view factory that will be registered.
- * @param factoryId A unique identifier for the factory, the Dart code of the Flutter app can use
- *   this identifier to request creation of a `UIView` by the registered factory.
- */
-- (void)registerViewFactory:(NSObject<FlutterPlatformViewFactory>*)factory
-                     withId:(NSString*)factoryId;
-
-/**
- * Registers a `FlutterPlatformViewFactory` for creation of platform views.
- *
- * Plugins can expose a `UIView` for embedding in Flutter apps by registering a view factory.
- *
- * @param factory The view factory that will be registered.
- * @param factoryId A unique identifier for the factory, the Dart code of the Flutter app can use
- *   this identifier to request creation of a `UIView` by the registered factory.
- * @param gestureRecognizersBlockingPolicy How UIGestureRecognizers on the platform views are
- * blocked.
- *
- */
-- (void)registerViewFactory:(NSObject<FlutterPlatformViewFactory>*)factory
-                              withId:(NSString*)factoryId
-    gestureRecognizersBlockingPolicy:
-        (FlutterPlatformViewGestureRecognizersBlockingPolicy)gestureRecognizersBlockingPolicy;
 
 /**
  * Publishes a value for external use of the plugin.
