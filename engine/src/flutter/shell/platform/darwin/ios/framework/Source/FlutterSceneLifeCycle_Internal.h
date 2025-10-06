@@ -32,6 +32,11 @@
 
 - (void)engine:(FlutterEngine*)engine receivedConnectNotificationFor:(UIScene*)scene;
 
+- (NSUserActivity*)stateRestorationActivityForScene:(UIScene*)scene;
+
+- (void)scene:(UIScene*)scene
+    restoreInteractionStateWithUserActivity:(NSUserActivity*)stateRestorationActivity;
+
 + (FlutterPluginSceneLifeCycleDelegate*)fromScene:(UIScene*)scene;
 
 @end

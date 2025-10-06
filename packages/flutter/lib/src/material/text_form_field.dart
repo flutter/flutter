@@ -12,7 +12,6 @@ import 'adaptive_text_selection_toolbar.dart';
 import 'input_decorator.dart';
 import 'material_state.dart';
 import 'text_field.dart';
-import 'theme.dart';
 
 export 'package:flutter/services.dart' show SmartDashesType, SmartQuotesType;
 
@@ -42,7 +41,7 @@ export 'package:flutter/services.dart' show SmartDashesType, SmartQuotesType;
 /// when it is no longer needed. This will ensure any resources used by the object
 /// are discarded.
 ///
-/// By default, `decoration` will apply the [ThemeData.inputDecorationTheme] for
+/// By default, `decoration` will apply the ambient [InputDecorationThemeData] for
 /// the current context to the [InputDecoration], see
 /// [InputDecoration.applyDefaults].
 ///
@@ -213,7 +212,7 @@ class TextFormField extends FormField<String> {
          builder: (FormFieldState<String> field) {
            final _TextFormFieldState state = field as _TextFormFieldState;
            InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
-               .applyDefaults(Theme.of(field.context).inputDecorationTheme);
+               .applyDefaults(InputDecorationTheme.of(field.context));
 
            final String? errorText = field.errorText;
            if (errorText != null) {
