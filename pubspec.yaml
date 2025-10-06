@@ -175,7 +175,7 @@ dependencies:
   test_core: 0.6.12
   typed_data: 1.4.0
   url_launcher: 6.3.2
-  url_launcher_android: 6.3.22
+  url_launcher_android: 6.3.23
   url_launcher_ios: 6.3.4
   url_launcher_linux: 3.2.1
   url_launcher_macos: 3.2.3
@@ -212,4 +212,4 @@ dependencies:
   pedantic: 1.11.1
   quiver: 3.2.2
   yaml_edit: 2.2.2
-# PUBSPEC CHECKSUM: pb0r15
+# PUBSPEC CHECKSUM: 5h4lnl
