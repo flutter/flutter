@@ -1716,7 +1716,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// element it is reading, and is separate from input focus.
   final bool? focused;
 
-  /// If non-null, whether this node can be focused by accessibility services.
+  /// If non-null, whether the subtree can be focused by accessibility services.
   ///
   /// If null, the a11y focusability is determined based on
   /// the node's role and other properties, such as whether it is a button.
