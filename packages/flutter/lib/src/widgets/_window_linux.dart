@@ -72,41 +72,10 @@ class _GObject {
 
   const _GObject(this.instance);
 
-  @ffi.Native<
-    ffi.UnsignedLong Function(
-      ffi.Pointer,
-      ffi.Pointer<ffi.Uint8>,
-      ffi.Pointer<ffi.NativeFunction<_GCallback>>,
-      ffi.Pointer,
-      ffi.Int,
-    )
-  >(symbol: 'g_signal_connect_data')
-  external static int _gSignalConnectData(
-    ffi.Pointer instance,
-    ffi.Pointer<ffi.Uint8> detailedSignal,
-    ffi.Pointer<ffi.NativeFunction<_GCallback>> handler,
-    ffi.Pointer destroyData,
-    int connectFlags,
-  );
-  int signalConnect(String detailedSignal, Function() handler) {
-    final detailedSignalBuffer = _stringToNative(detailedSignal);
-    final r = _gSignalConnectData(
-      instance,
-      detailedSignalBuffer,
-      ffi.NativeCallable<_GCallback>.listener(handler).nativeFunction,
-      ffi.nullptr,
-      0,
-    );
-    _gFree(detailedSignalBuffer);
-    return r;
-  }
-
-  @ffi.Native<ffi.Void Function(ffi.Pointer, ffi.UnsignedLong)>(
-    symbol: 'g_signal_handler_disconnect',
-  )
-  external static void _gSignalHandlerDisconnect(ffi.Pointer instance, int handlerId);
-  void signalHandlerDisconnect(int handlerId) {
-    _gSignalHandlerDisconnect(instance, handlerId);
+  @ffi.Native<ffi.Void Function(ffi.Pointer)>(symbol: 'g_object_unref')
+  external static void _unref(ffi.Pointer widget);
+  void unref() {
+    _unref(instance);
   }
 }
 
@@ -335,6 +304,26 @@ class _FlView extends _GtkWidget {
   }
 }
 
+class _FlWindowMonitor extends _GObject {
+  @ffi.Native<ffi.Pointer Function(ffi.Pointer, ffi.Pointer, ffi.Pointer)>(
+    symbol: 'fl_window_monitor_new',
+  )
+  external static ffi.Pointer _flWindowMonitorNew(
+    ffi.Pointer window,
+    ffi.Pointer onClose,
+    ffi.Pointer onDestroy,
+  );
+
+  _FlWindowMonitor(_GtkWindow window, Function() onClose, Function() onDestroy)
+    : super(
+        _flWindowMonitorNew(
+          window.instance,
+          ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onClose).nativeFunction,
+          ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onDestroy).nativeFunction,
+        ),
+      );
+}
+
 /// [WindowingOwner] implementation for Linux.
 ///
 /// If [Platform.isLinux] is false, then the constructor will throw an
@@ -420,8 +409,7 @@ class WindowingOwnerLinux extends WindowingOwner {
 class RegularWindowControllerLinux extends RegularWindowController {
   final RegularWindowControllerDelegate _delegate;
   final _GtkWindow _window;
-  int _deleteEventId = 0;
-  int _destroyEventId = 0;
+  late final _FlWindowMonitor _windowMonitor;
 
   /// Creates a new regular window controller for Linux.
   ///
@@ -446,13 +434,15 @@ class RegularWindowControllerLinux extends RegularWindowController {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
 
-    _deleteEventId = _window.signalConnect("delete-event", () {
-      // FIXME(robert-ancell): Can't return true to stop this running default destroy handler. Might need a helper functions to make a callback that always returns true. Can use `gtk_true` in GTK3, but this doesn't exist in GTK4.
-      _delegate.onWindowCloseRequested(this);
-    });
-    _destroyEventId = _window.signalConnect("destroy", () {
-      _delegate.onWindowDestroyed();
-    });
+    _windowMonitor = _FlWindowMonitor(
+      _window,
+      () {
+        _delegate.onWindowCloseRequested(this);
+      },
+      () {
+        _delegate.onWindowDestroyed();
+      },
+    );
     if (preferredSize != null) {
       _window.setDefaultSize(preferredSize.width.toInt(), preferredSize.height.toInt());
     }

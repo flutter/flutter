@@ -99,6 +99,7 @@ source_set("flutter_linux_sources") {
              "fl_pointer_manager.h",
              "fl_task_runner.h",
              "fl_view_private.h",
+             "fl_window_monitor.h",
              "fl_window_state_monitor.h",
              "key_mapping.h",
            ]
@@ -168,6 +169,7 @@ source_set("flutter_linux_sources") {
     "fl_view.cc",
     "fl_view_accessible.cc",
     "fl_window_state_monitor.cc",
+    "fl_window_monitor.cc",
     "fl_windowing_channel.cc",
     "fl_windowing_handler.cc",
     "key_mapping.g.cc",
@@ -186,6 +188,7 @@ source_set("flutter_linux_sources") {
     "//flutter/shell/platform/common:common_cpp_switches",
     "//flutter/shell/platform/embedder:embedder_headers",
     "//flutter/third_party/rapidjson",
+    "$dart_src/runtime:dart_api",
   ]
 }
 
