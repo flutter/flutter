@@ -73,6 +73,7 @@ abstract class FeatureFlags {
   /// Whether physical iOS devices are debugging with LLDB.
   bool get isLLDBDebuggingEnabled;
 
+  /// Whether UIScene migration is enabled.
   bool get isUISceneMigrationEnabled;
 
   /// Whether a particular feature is enabled for the current channel.

@@ -621,6 +621,7 @@ class TestFeatureFlags implements FeatureFlags {
     omitLegacyVersionFile,
     windowingFeature,
     lldbDebugging,
+    uiSceneMigration,
   ];
 
   @override
