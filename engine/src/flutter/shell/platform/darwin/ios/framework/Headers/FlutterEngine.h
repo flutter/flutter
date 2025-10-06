@@ -447,6 +447,49 @@ FLUTTER_DARWIN_EXPORT
 
 @end
 
+/**
+ * Exposes parts of a `FlutterEngine` for registration purposes.
+ *
+ * This is used when the engine is created implicitly to allow registering
+ * plugins, application-level method channels, platform views, etc.
+ */
+@protocol FlutterImplicitEngineBridge <NSObject>
+
+/**
+ * The `FlutterPluginRegistry` for the created `FlutterEngine`.
+ *
+ * This can be used to vend `FlutterPluginRegistrar`s for plugins.
+ */
+@property(nonatomic, readonly) NSObject<FlutterPluginRegistry>* pluginRegistry;
+
+/**
+ * The `FlutterApplicationRegistrar` for the created `FlutterEngine`.
+ *
+ * This registrar provides access to application-level services, such as the engine's
+ * `FlutterBinaryMessenger` or `FlutterTextureRegistry`.
+ */
+@property(nonatomic, readonly) NSObject<FlutterApplicationRegistrar>* applicationRegistrar;
+
+@end
+
+/**
+ * Protocol for receiving a callback when an implicit engine is initialized, such as when created by
+ * a FlutterViewController from a storyboard.
+ *
+ * This provides the engine bridge to the listener.
+ */
+@protocol FlutterImplicitEngineDelegate
+@required
+
+/**
+ * Called once the implicit `FlutterEngine` is initialized.
+ *
+ * The `FlutterImplicitEngineBridge` can then be used to register plugins,
+ * application-level method channels, platform views, etc.
+ */
+- (void)didInitializeImplicitFlutterEngine:(NSObject<FlutterImplicitEngineBridge>*)engineBridge;
+@end
+
 NS_ASSUME_NONNULL_END
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_HEADERS_FLUTTERENGINE_H_

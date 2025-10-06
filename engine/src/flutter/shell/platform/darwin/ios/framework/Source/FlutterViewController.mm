@@ -26,6 +26,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterLaunchEngine.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPluginAppLifeCycleDelegate_internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
@@ -78,6 +79,7 @@ typedef struct MouseState {
 @property(nonatomic, assign) UIStatusBarStyle statusBarStyle;
 @property(nonatomic, assign) BOOL initialized;
 @property(nonatomic, assign) BOOL engineNeedsLaunch;
+@property(nonatomic, assign) BOOL awokenFromNib;
 
 @property(nonatomic, readwrite, getter=isDisplayingFlutterUI) BOOL displayingFlutterUI;
 @property(nonatomic, assign) BOOL isHomeIndicatorHidden;
@@ -246,6 +248,7 @@ typedef struct MouseState {
 
 - (void)awakeFromNib {
   [super awakeFromNib];
+  self.awokenFromNib = YES;
   if (!self.engine) {
     [self sharedSetupWithProject:nil initialRoute:nil];
   }
@@ -294,6 +297,34 @@ typedef struct MouseState {
                                                 opaque:_viewOpaque
                                        enableWideGamut:engine.project.isWideGamutEnabled];
   [_engine createShell:nil libraryURI:nil initialRoute:initialRoute];
+
+  // We call this from the FlutterViewController instead of the FlutterEngine directly because this
+  // is only needed when the FlutterEngine is implicit. If it's not implicit there's no need for
+  // them to have a callback to expose the engine since they created the FlutterEngine directly.
+  // This is the earliest this can be called because it depends on the shell being created.
+  BOOL performedCallback = [_engine performImplicitEngineCallback];
+
+  // TODO(vashworth): Deprecate, see https://github.com/flutter/flutter/issues/176424
+  if ([FlutterSharedApplication.application.delegate
+          respondsToSelector:@selector(pluginRegistrant)]) {
+    NSObject<FlutterPluginRegistrant>* pluginRegistrant =
+        [FlutterSharedApplication.application.delegate performSelector:@selector(pluginRegistrant)];
+    [pluginRegistrant registerWithRegistry:self];
+    performedCallback = YES;
+  }
+  // When migrated to scenes, the FlutterViewController from the storyboard is initialized after the
+  // application launch events. Therefore, plugins may not be registered yet since they're expected
+  // to be registered during the implicit engine callbacks. As a workaround, send the app launch
+  // events after the application callbacks.
+  if (self.awokenFromNib && performedCallback && FlutterSharedApplication.hasSceneDelegate &&
+      [appDelegate isKindOfClass:[FlutterAppDelegate class]]) {
+    id applicationLifeCycleDelegate = ((FlutterAppDelegate*)appDelegate).lifeCycleDelegate;
+    [applicationLifeCycleDelegate
+        sceneFallbackWillFinishLaunchingApplication:FlutterSharedApplication.application];
+    [applicationLifeCycleDelegate
+        sceneFallbackDidFinishLaunchingApplication:FlutterSharedApplication.application];
+  }
+
   _engineNeedsLaunch = YES;
   _ongoingTouches = [[NSMutableSet alloc] init];
 
@@ -301,13 +332,6 @@ typedef struct MouseState {
   // Eliminate method calls in initializers and dealloc.
   [self loadDefaultSplashScreenView];
   [self performCommonViewControllerInitialization];
-
-  if ([FlutterSharedApplication.application.delegate
-          respondsToSelector:@selector(pluginRegistrant)]) {
-    NSObject<FlutterPluginRegistrant>* pluginRegistrant =
-        [FlutterSharedApplication.application.delegate performSelector:@selector(pluginRegistrant)];
-    [pluginRegistrant registerWithRegistry:self];
-  }
 }
 
 - (BOOL)isViewOpaque {
