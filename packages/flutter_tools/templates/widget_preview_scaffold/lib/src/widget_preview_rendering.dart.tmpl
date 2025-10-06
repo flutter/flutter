@@ -178,11 +178,15 @@ class NoPreviewsDetectedWidget extends StatelessWidget {
   }
 }
 
+/// A wrapper that serves as the root entry for a single preview in the widget inspector.
 class PreviewWidget extends StatelessWidget {
   const PreviewWidget({super.key, required this.preview, required this.child});
 
   final WidgetPreview preview;
   final Widget child;
+
+  @override
+  StatelessElement createElement() => PreviewWidgetElement(this);
 
   @override
   Widget build(BuildContext context) {
@@ -191,7 +195,9 @@ class PreviewWidget extends StatelessWidget {
 
   @override
   String toStringShort() {
-    final StringBuffer buffer = StringBuffer('@Preview');
+    final StringBuffer buffer = StringBuffer(
+      '@${preview.previewData.runtimeType}',
+    );
     if (preview.name != null) {
       buffer.write('(name: "${preview.name}")');
     }
@@ -203,6 +209,12 @@ class PreviewWidget extends StatelessWidget {
     super.debugFillProperties(properties);
     preview.debugFillProperties(properties);
   }
+}
+
+/// A custom [StatelessElement] with the sole purpose of simplifying identifying
+/// selections of @Preview annotations in the widget inspector.
+class PreviewWidgetElement extends StatelessElement {
+  PreviewWidgetElement(super.widget);
 }
 
 class WidgetPreviewGroupWidget extends StatelessWidget {
