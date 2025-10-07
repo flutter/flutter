@@ -3829,16 +3829,7 @@ void main() {
 
     expect(
       tester.getSemantics(find.byType(TextField)),
-      matchesSemantics(
-        hasFocusAction: true,
-        hasTapAction: true,
-        isTextField: true,
-        isFocusable: true,
-        hasEnabledState: true,
-        isEnabled: true,
-        label: 'Test',
-        textDirection: TextDirection.ltr,
-      ),
+      matchesSemantics(hasExpandedState: true, isTextField: true),
     );
 
     await tester.pumpWidget(buildDropdownMenu(requestFocusOnTap: false));
@@ -3847,6 +3838,7 @@ void main() {
       tester.getSemantics(find.byType(TextField)),
       matchesSemantics(
         isButton: true,
+        hasExpandedState: true,
         hasFocusAction: true,
         isTextField: true,
         isFocusable: true,
@@ -4437,9 +4429,9 @@ void main() {
                             SemanticsFlag.isEnabled,
                             SemanticsFlag.isReadOnly,
                             SemanticsFlag.isButton,
+                            SemanticsFlag.hasExpandedState,
                           ],
-                          hint: 'Collapsed',
-                          actions: <SemanticsAction>[SemanticsAction.focus],
+                          actions: <SemanticsAction>[SemanticsAction.focus, SemanticsAction.expand],
                           textDirection: TextDirection.ltr,
                           currentValueLength: 0,
                         ),

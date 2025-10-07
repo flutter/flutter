@@ -1160,7 +1160,28 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
         final Widget textField = Semantics(
           button: !canRequestFocus(),
-          hint: _controller.isOpen ? 'Expanded' : 'Collapsed',
+          // Some platforms may still treat this as text field if both `textField`
+          // and `button` are true. So manually set `textField` to false when
+          // `button` is true.
+          textField: canRequestFocus(),
+          // This is set specificly for iOS because iOS does not have any native
+          // APIs to show whether the menu is expanded or collapsed.
+          hint: Theme.of(context).platform == TargetPlatform.iOS
+              ? _controller.isOpen
+                    ? 'Expanded'
+                    : 'Collapsed'
+              : null,
+          expanded: _controller.isOpen,
+          onExpand: _controller.isOpen
+              ? null
+              : () {
+                  _controller.open();
+                },
+          onCollapse: !_controller.isOpen
+              ? null
+              : () {
+                  _controller.close();
+                },
           child: TextField(
             key: _anchorKey,
             enabled: widget.enabled,
