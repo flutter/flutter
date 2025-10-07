@@ -446,7 +446,7 @@ class InkResponse extends StatelessWidget {
   /// If this property is null,
   ///
   ///   * On web, [WidgetStateMouseCursor.clickable] will be used.
-  ///   * On other platforms, [WidgetStateMouseCursor.basic] will be used.
+  ///   * On other platforms, [SystemMouseCursors.basic] will be used.
   /// {@endtemplate}
   final MouseCursor? mouseCursor;
 

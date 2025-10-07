@@ -326,7 +326,7 @@ class FloatingActionButton extends StatelessWidget {
   /// If this property is null,
   ///
   /// * On web, [WidgetStateMouseCursor.clickable] will be used.
-  /// * On other platforms, [WidgetStateMouseCursor.basic] will be used.
+  /// * On other platforms, [SystemMouseCursors.basic] will be used.
   final MouseCursor? mouseCursor;
 
   /// The z-coordinate at which to place this button relative to its parent.

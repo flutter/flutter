@@ -126,7 +126,7 @@ class RawMaterialButton extends StatefulWidget {
   /// If this property is null,
   ///
   ///   * On web, [WidgetStateMouseCursor.clickable] will be used.
-  ///   * On other platforms, [WidgetStateMouseCursor.basic] will be used.
+  ///   * On other platforms, [SystemMouseCursors.basic] will be used.
   final MouseCursor? mouseCursor;
 
   /// Defines the default text style, with [Material.textStyle], for the

@@ -348,7 +348,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   /// that is also null, then:
 
   ///  * On web, [WidgetStateMouseCursor.clickable] is used.
-  ///  * On other platforms, [WidgetStateMouseCursor.basic] is used.
+  ///  * On other platforms, [SystemMouseCursors.basic] is used.
   final MouseCursor? mouseCursor;
 
   /// The widget below this widget in the tree.
