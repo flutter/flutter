@@ -151,14 +151,19 @@ typedef MenuAnchorChildBuilder =
     Widget Function(BuildContext context, MenuController controller, Widget? child);
 
 class _MenuAnchorScope extends InheritedWidget {
-  const _MenuAnchorScope({required this.state, required super.child});
+  const _MenuAnchorScope({
+    required this.state,
+    required this.animationStatus,
+    required super.child,
+  });
 
   final _MenuAnchorState state;
+  final AnimationStatus animationStatus;
 
   @override
   bool updateShouldNotify(_MenuAnchorScope oldWidget) {
     assert(oldWidget.state == state, 'The state of a MenuAnchor should not change.');
-    return false;
+    return oldWidget.animationStatus != animationStatus;
   }
 }
 
@@ -441,20 +446,16 @@ class _MenuAnchorState extends State<MenuAnchor> with SingleTickerProviderStateM
     curve: _kMenuPanelHeightForwardCurve,
     reverseCurve: _kMenuPanelHeightReverseCurve,
   );
-
   late final CurvedAnimation opacityAnimation = CurvedAnimation(
     parent: _animationController,
     curve: _kMenuPanelOpacityForwardCurve,
     reverseCurve: _kMenuPanelOpacityReverseCurve,
   );
-
   List<Widget> _menuChildren = <Widget>[];
   _MenuAnchorState? get _parent => _maybeOf(context);
   bool get isSubmenu => MenuController.maybeOf(context) != null;
-  bool get excludeInteraction => switch (_animationController.status) {
-    AnimationStatus.forward || AnimationStatus.completed => false,
-    AnimationStatus.reverse || AnimationStatus.dismissed => true,
-  };
+  bool get isClosing => !_animationController.status.isForwardOrCompleted;
+  List<CurvedAnimation> _cachedAnimations = <CurvedAnimation>[]; // Add this
 
   @override
   void initState() {
@@ -478,14 +479,14 @@ class _MenuAnchorState extends State<MenuAnchor> with SingleTickerProviderStateM
       }
     }
 
-    bool needsMenuItemResolution = widget.menuChildren != oldWidget.menuChildren;
-    if (oldWidget.animated != widget.animated) {
-      _resolveAnimationController();
-      needsMenuItemResolution = true;
+    if (oldWidget.animated != widget.animated || widget.menuChildren != oldWidget.menuChildren) {
+      // If animated changed, we need to re-resolve the menu items since the
+      // animations are part of how the menu items are built.
+      _resolveMenuItems();
     }
 
-    if (needsMenuItemResolution) {
-      _resolveMenuItems();
+    if (oldWidget.animated != widget.animated) {
+      _resolveAnimationController();
     }
   }
 
@@ -493,6 +494,9 @@ class _MenuAnchorState extends State<MenuAnchor> with SingleTickerProviderStateM
   void dispose() {
     assert(_debugMenuInfo('Disposing of $this'));
     _menuChildren.clear();
+    for (final CurvedAnimation animation in _cachedAnimations) {
+      animation.dispose();
+    }
     _internalMenuController = null;
     _menuScopeNode.dispose();
     heightAnimation.dispose();
@@ -515,13 +519,18 @@ class _MenuAnchorState extends State<MenuAnchor> with SingleTickerProviderStateM
   void _resolveMenuItems() {
     _menuChildren = <Widget>[];
 
-    if (!widget.animated) {
-      _menuChildren.addAll(widget.menuChildren);
-      return;
+    for (final CurvedAnimation animation in _cachedAnimations) {
+      animation.dispose();
     }
+    _cachedAnimations = <CurvedAnimation>[];
 
     final int itemCount = widget.menuChildren.length;
     if (itemCount == 0) {
+      return;
+    }
+
+    if (!widget.animated) {
+      _menuChildren.addAll(widget.menuChildren);
       return;
     }
 
@@ -529,9 +538,10 @@ class _MenuAnchorState extends State<MenuAnchor> with SingleTickerProviderStateM
     const double reverseFinalItemOffset =
         1 - _kMenuItemRelativeFadeOutDuration - _kMenuItemRelativeFadeOutDelay;
 
-    double? itemFadeInGap = 0;
-    double? itemFadeOutGap = 0;
-
+    double forwardProgress = 0;
+    double reverseProgress = 0;
+    double itemFadeInGap = 0;
+    double itemFadeOutGap = 0;
     if (itemCount > 1) {
       // Spread every item evenly across the remaining time after accounting for
       // the fade in/out durations.
@@ -539,8 +549,6 @@ class _MenuAnchorState extends State<MenuAnchor> with SingleTickerProviderStateM
       itemFadeOutGap = reverseFinalItemOffset / (itemCount - 1);
     }
 
-    double forwardProgress = 0;
-    double reverseProgress = 0;
     for (final Widget child in widget.menuChildren) {
       final Interval forwardCurve = Interval(
         forwardProgress,
@@ -558,8 +566,10 @@ class _MenuAnchorState extends State<MenuAnchor> with SingleTickerProviderStateM
         reverseCurve: reverseCurve,
       );
 
-      _menuChildren.add(FadeTransition(opacity: animation, child: child));
-
+      _cachedAnimations.add(animation);
+      _menuChildren.add(
+        FadeTransition(opacity: animation, alwaysIncludeSemantics: true, child: child),
+      );
       forwardProgress += itemFadeInGap;
       reverseProgress += itemFadeOutGap;
     }
@@ -568,7 +578,7 @@ class _MenuAnchorState extends State<MenuAnchor> with SingleTickerProviderStateM
   void _handleAnimationStatusChanged(AnimationStatus status) {
     widget.onAnimationStatusChanged?.call(status);
     setState(() {
-      // Rebuild to update excludeInteraction.
+      // Rebuild to update isClosing and notify dependents of AnimationStatus changes.
     });
   }
 
@@ -602,6 +612,7 @@ class _MenuAnchorState extends State<MenuAnchor> with SingleTickerProviderStateM
   Widget build(BuildContext context) {
     final Widget child = _MenuAnchorScope(
       state: this,
+      animationStatus: _animationController.status,
       child: RawMenuAnchor(
         onOpenRequested: _handleMenuOpenRequest,
         onCloseRequested: _handleMenuCloseRequest,
@@ -625,24 +636,34 @@ class _MenuAnchorState extends State<MenuAnchor> with SingleTickerProviderStateM
   }
 
   Widget _buildOverlay(BuildContext context, RawMenuOverlayInfo position) {
-    return IgnorePointer(
-      ignoring: excludeInteraction,
-      child: ExcludeFocus(
-        excluding: excludeInteraction,
-        child: _Submenu(
-          fadeAnimation: opacityAnimation,
-          heightAnimation: heightAnimation,
-          layerLink: widget.layerLink,
-          consumeOutsideTaps: widget.consumeOutsideTap,
-          menuScopeNode: _menuScopeNode,
-          menuStyle: widget.style,
-          clipBehavior: widget.clipBehavior,
-          menuChildren: _menuChildren,
-          crossAxisUnconstrained: widget.crossAxisUnconstrained,
-          menuPosition: position,
-          anchor: this,
-          alignmentOffset: widget.alignmentOffset ?? Offset.zero,
-          reservedPadding: widget.reservedPadding ?? const EdgeInsets.all(_kMenuViewPadding),
+    // BlockSemantics behaves like focus trap for screen readers.
+    // ExcludeSemantics and IgnorePointer are used to effectively disable all
+    // interactions with the menu while it is closing.
+    //
+    // An animated menu should behave the same as a menu without animations.
+    // Focus should be able to move to a menu as soon as it starts to open, and
+    // a menu should not be interactive as soon as it starts to close.
+    return BlockSemantics(
+      blocking: !isClosing,
+      child: ExcludeSemantics(
+        excluding: isClosing,
+        child: IgnorePointer(
+          ignoring: isClosing,
+          child: _Submenu(
+            fadeAnimation: opacityAnimation,
+            heightAnimation: heightAnimation,
+            layerLink: widget.layerLink,
+            consumeOutsideTaps: widget.consumeOutsideTap,
+            menuScopeNode: _menuScopeNode,
+            menuStyle: widget.style,
+            clipBehavior: widget.clipBehavior,
+            menuChildren: _menuChildren,
+            crossAxisUnconstrained: widget.crossAxisUnconstrained,
+            menuPosition: position,
+            anchor: this,
+            alignmentOffset: widget.alignmentOffset ?? Offset.zero,
+            reservedPadding: widget.reservedPadding ?? const EdgeInsets.all(_kMenuViewPadding),
+          ),
         ),
       ),
     );
@@ -688,6 +709,10 @@ class _MenuAnchorState extends State<MenuAnchor> with SingleTickerProviderStateM
 
   static _MenuAnchorState? _maybeOf(BuildContext context) {
     return context.getInheritedWidgetOfExactType<_MenuAnchorScope>()?.state;
+  }
+
+  static AnimationStatus? _maybeAnimationStatusOf(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<_MenuAnchorScope>()?.animationStatus;
   }
 
   @override
@@ -1951,8 +1976,8 @@ class _SubmenuButtonState extends State<SubmenuButton> {
   FocusNode get _buttonFocusNode => widget.focusNode ?? _internalFocusNode!;
   bool get _enabled => widget.menuChildren.isNotEmpty;
   bool _isHovered = false;
-  Timer? _hoverOpenTimer;
   AnimationStatus _animationStatus = AnimationStatus.dismissed;
+  Timer? _hoverOpenTimer;
 
   @override
   void initState() {
@@ -1971,6 +1996,12 @@ class _SubmenuButtonState extends State<SubmenuButton> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    assert(_debugValidateHoverOpenDelay());
+  }
+
+  @override
   void dispose() {
     _clearHoverOpenTimer();
     _buttonFocusNode.removeListener(_handleFocusChange);
@@ -1982,6 +2013,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
   @override
   void didUpdateWidget(SubmenuButton oldWidget) {
     super.didUpdateWidget(oldWidget);
+    assert(_debugValidateHoverOpenDelay());
     if (widget.focusNode != oldWidget.focusNode) {
       if (oldWidget.focusNode == null) {
         _internalFocusNode?.removeListener(_handleFocusChange);
@@ -2002,21 +2034,6 @@ class _SubmenuButtonState extends State<SubmenuButton> {
     if (widget.controller != oldWidget.controller) {
       _internalMenuController = (oldWidget.controller == null) ? null : MenuController();
     }
-
-    assert(() {
-      if (_parent?._orientation == Axis.horizontal && widget.hoverOpenDelay > Duration.zero) {
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary(
-            'A non-zero hoverOpenDelay was used in a top-level SubmenuButton situated in a MenuBar.',
-          ),
-          ErrorDescription(
-            'MenuBar children can only be opened by hover if a sibling SubmenuButton is already open. When the hoverOpenDelay for a SubmenuButton is longer than the closing animation of a sibling SubmenuButton, that sibling will close before this SubmenuButton begins opening, leading to this SubmenuButton never opening.',
-          ),
-          context.describeElement('The affected SubmenuButton is'),
-        ]);
-      }
-      return true;
-    }());
   }
 
   @override
@@ -2024,6 +2041,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
     Offset menuPaddingOffset = widget.alignmentOffset ?? Offset.zero;
     final EdgeInsets menuPadding = _computeMenuPadding(context);
     final Axis orientation = _parent?._orientation ?? Axis.vertical;
+
     // Move the submenu over by the size of the menu padding, so that
     // the first menu item aligns with the submenu button that opens it.
     menuPaddingOffset += switch ((orientation, Directionality.of(context))) {
@@ -2049,15 +2067,13 @@ class _SubmenuButtonState extends State<SubmenuButton> {
       actions: actions,
       child: MenuAnchor(
         key: _anchorKey,
-        onAnimationStatusChanged: (AnimationStatus status) {
-          _animationStatus = status;
-        },
+        onAnimationStatusChanged: _handleAnimationStatusChanged,
         controller: _menuController,
         childFocusNode: _buttonFocusNode,
         alignmentOffset: menuPaddingOffset,
         clipBehavior: widget.clipBehavior,
-        onClose: _onClose,
-        onOpen: _onOpen,
+        onClose: _handleClose,
+        onOpen: _handleOpen,
         style: widget.menuStyle,
         useRootOverlay: widget.useRootOverlay,
         animated: widget.animated,
@@ -2086,6 +2102,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
             if (_isHovered) {
               widget.onHover?.call(false);
               _isHovered = false;
+              _clearHoverOpenTimer();
             }
           }
 
@@ -2098,15 +2115,19 @@ class _SubmenuButtonState extends State<SubmenuButton> {
               _isHovered = true;
               widget.onHover?.call(true);
               final _MenuAnchorState root = _MenuAnchorState._maybeOf(context)!._root;
-              // Don't open the root menu bar menus on hover unless something else
+              // Don't open the root menu bar menus on hover unless a sibling menu
               // is already open. This means that the user has to first click to
               // open a menu on the menu bar before hovering allows them to traverse
               // it.
-              if (root._orientation == Axis.horizontal && !root._menuController.isOpen) {
+              if (_parent?._orientation == Axis.horizontal && !root._menuController.isOpen) {
                 return;
               }
 
-              _buttonFocusNode.requestFocus();
+              if (_buttonFocusNode.hasPrimaryFocus) {
+                _handleTogglingInteraction();
+              } else {
+                _buttonFocusNode.requestFocus();
+              }
             }
           }
 
@@ -2153,7 +2174,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
     );
   }
 
-  void _onClose() {
+  void _handleClose() {
     // After closing the children of this submenu, this submenu button will
     // regain focus. Because submenu buttons open on focus, this submenu will
     // immediately reopen. To prevent this from happening, we prevent focus on
@@ -2169,7 +2190,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
     widget.onClose?.call();
   }
 
-  void _onOpen() {
+  void _handleOpen() {
     if (!_waitingToFocusMenu) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
@@ -2195,7 +2216,17 @@ class _SubmenuButtonState extends State<SubmenuButton> {
         .resolve(Directionality.of(context));
   }
 
+  // ignore: use_setters_to_change_properties
+  void _handleAnimationStatusChanged(AnimationStatus status) {
+    _animationStatus = status;
+  }
+
   void _handleFocusChange() {
+    _handleTogglingInteraction();
+  }
+
+  // Handles interactions that could open or close the menu.
+  void _handleTogglingInteraction() {
     _clearHoverOpenTimer();
     if (!_buttonFocusNode.hasPrimaryFocus) {
       if (!_anchorState!._menuScopeNode.hasFocus && _menuController.isOpen) {
@@ -2238,6 +2269,21 @@ class _SubmenuButtonState extends State<SubmenuButton> {
   void _clearHoverOpenTimer() {
     _hoverOpenTimer?.cancel();
     _hoverOpenTimer = null;
+  }
+
+  bool _debugValidateHoverOpenDelay() {
+    if (_parent?._orientation == Axis.horizontal && widget.hoverOpenDelay > Duration.zero) {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary(
+          'A non-zero hoverOpenDelay was used in a top-level SubmenuButton situated in a MenuBar.',
+        ),
+        ErrorDescription(
+          'MenuBar children can only be opened by hover if a sibling SubmenuButton is already open. When the hoverOpenDelay for a SubmenuButton is longer than the closing animation of a sibling SubmenuButton, that sibling will close before this SubmenuButton begins opening, leading to this SubmenuButton never opening.',
+        ),
+        context.describeElement('The affected SubmenuButton is'),
+      ]);
+    }
+    return true;
   }
 }
 
@@ -2643,6 +2689,7 @@ class _MenuBarAnchorState extends _MenuAnchorState {
     );
     return _MenuAnchorScope(
       state: this,
+      animationStatus: _animationController.status,
       child: RawMenuAnchorGroup(
         controller: _menuController,
         child: Builder(
@@ -3333,8 +3380,8 @@ class _RenderMenuLayout extends RenderShiftedBox {
        _heightFactor = heightFactor,
        super(child);
 
-  Rect get anchorRect => _anchorRect;
   Rect _anchorRect;
+  Rect get anchorRect => _anchorRect;
   set anchorRect(Rect value) {
     if (_anchorRect == value) {
       return;
@@ -3343,8 +3390,8 @@ class _RenderMenuLayout extends RenderShiftedBox {
     markNeedsLayout();
   }
 
-  TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
+  TextDirection get textDirection => _textDirection;
   set textDirection(TextDirection value) {
     if (_textDirection == value) {
       return;
@@ -3353,8 +3400,8 @@ class _RenderMenuLayout extends RenderShiftedBox {
     markNeedsLayout();
   }
 
-  AlignmentGeometry get alignment => _alignment;
   AlignmentGeometry _alignment;
+  AlignmentGeometry get alignment => _alignment;
   set alignment(AlignmentGeometry value) {
     if (_alignment == value) {
       return;
@@ -3363,8 +3410,8 @@ class _RenderMenuLayout extends RenderShiftedBox {
     markNeedsLayout();
   }
 
-  Offset get alignmentOffset => _alignmentOffset;
   Offset _alignmentOffset;
+  Offset get alignmentOffset => _alignmentOffset;
   set alignmentOffset(Offset value) {
     if (_alignmentOffset == value) {
       return;
@@ -3373,8 +3420,8 @@ class _RenderMenuLayout extends RenderShiftedBox {
     markNeedsLayout();
   }
 
-  Offset? get menuPosition => _menuPosition;
   Offset? _menuPosition;
+  Offset? get menuPosition => _menuPosition;
   set menuPosition(Offset? value) {
     if (_menuPosition == value) {
       return;
@@ -3383,8 +3430,8 @@ class _RenderMenuLayout extends RenderShiftedBox {
     markNeedsLayout();
   }
 
-  EdgeInsetsGeometry get menuPadding => _menuPadding;
   EdgeInsetsGeometry _menuPadding;
+  EdgeInsetsGeometry get menuPadding => _menuPadding;
   set menuPadding(EdgeInsetsGeometry value) {
     if (_menuPadding == value) {
       return;
@@ -3393,8 +3440,8 @@ class _RenderMenuLayout extends RenderShiftedBox {
     markNeedsLayout();
   }
 
-  Set<Rect> get avoidBounds => _avoidBounds;
   Set<Rect> _avoidBounds;
+  Set<Rect> get avoidBounds => _avoidBounds;
   set avoidBounds(Set<Rect> value) {
     if (setEquals(_avoidBounds, value)) {
       return;
@@ -3403,8 +3450,8 @@ class _RenderMenuLayout extends RenderShiftedBox {
     markNeedsLayout();
   }
 
-  Axis get orientation => _orientation;
   Axis _orientation;
+  Axis get orientation => _orientation;
   set orientation(Axis value) {
     if (_orientation == value) {
       return;
@@ -3413,8 +3460,8 @@ class _RenderMenuLayout extends RenderShiftedBox {
     markNeedsLayout();
   }
 
-  Axis get parentOrientation => _parentOrientation;
   Axis _parentOrientation;
+  Axis get parentOrientation => _parentOrientation;
   set parentOrientation(Axis value) {
     if (_parentOrientation == value) {
       return;
@@ -3423,8 +3470,8 @@ class _RenderMenuLayout extends RenderShiftedBox {
     markNeedsLayout();
   }
 
-  EdgeInsetsGeometry get reservedPadding => _reservedPadding;
   EdgeInsetsGeometry _reservedPadding;
+  EdgeInsetsGeometry get reservedPadding => _reservedPadding;
   set reservedPadding(EdgeInsetsGeometry value) {
     if (_reservedPadding == value) {
       return;
@@ -3433,8 +3480,8 @@ class _RenderMenuLayout extends RenderShiftedBox {
     markNeedsLayout();
   }
 
-  double get heightFactor => _heightFactor;
   double _heightFactor;
+  double get heightFactor => _heightFactor;
   set heightFactor(double value) {
     if (_heightFactor == value) {
       return;
@@ -3455,7 +3502,6 @@ class _RenderMenuLayout extends RenderShiftedBox {
     if (child == null) {
       return null;
     }
-
     final BoxConstraints childConstraints = getConstraintsForChild(constraints);
     final double? result = child.getDryBaseline(childConstraints, baseline);
     if (result == null) {
@@ -3743,6 +3789,14 @@ class _MenuPanelState extends State<_MenuPanel> {
       }).toList();
     }
 
+    final bool displayScrollbar = switch (_MenuAnchorState._maybeAnimationStatusOf(context)) {
+      AnimationStatus.completed => true,
+      AnimationStatus.forward ||
+      AnimationStatus.reverse ||
+      AnimationStatus.dismissed ||
+      null => false,
+    };
+
     Widget menuPanel = _intrinsicCrossSize(
       child: Material(
         elevation: elevation,
@@ -3763,7 +3817,8 @@ class _MenuPanelState extends State<_MenuPanel> {
             child: PrimaryScrollController(
               controller: scrollController,
               child: Scrollbar(
-                thumbVisibility: true,
+                thumbVisibility: displayScrollbar,
+                trackVisibility: displayScrollbar,
                 child: SingleChildScrollView(
                   controller: scrollController,
                   scrollDirection: widget.orientation,
@@ -3902,12 +3957,17 @@ class _Submenu extends StatelessWidget {
               shortcuts: _kMenuTraversalShortcuts,
               child: FadeTransition(
                 opacity: fadeAnimation,
-                child: _MenuPanel(
-                  menuStyle: menuStyle,
-                  clipBehavior: clipBehavior,
-                  orientation: anchor._orientation,
-                  crossAxisUnconstrained: crossAxisUnconstrained,
-                  children: menuChildren,
+                alwaysIncludeSemantics: true,
+                child: Semantics.fromProperties(
+                  explicitChildNodes: true,
+                  properties: const SemanticsProperties(scopesRoute: true, namesRoute: true),
+                  child: _MenuPanel(
+                    menuStyle: menuStyle,
+                    clipBehavior: clipBehavior,
+                    orientation: anchor._orientation,
+                    crossAxisUnconstrained: crossAxisUnconstrained,
+                    children: menuChildren,
+                  ),
                 ),
               ),
             ),
