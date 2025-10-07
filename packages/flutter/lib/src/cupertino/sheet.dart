@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -162,6 +163,7 @@ Future<T?> showCupertinoSheet<T>({
   )
   WidgetBuilder? pageBuilder,
   WidgetBuilder? builder,
+  ScrollableWidgetBuilder? scrollableBuilder,
   bool useNestedNavigation = false,
   bool enableDrag = true,
   RouteSettings? settings,
@@ -171,42 +173,45 @@ Future<T?> showCupertinoSheet<T>({
   assert(topGap == null || (topGap >= 0.0 && topGap <= 0.9), 'topGap must be between 0.0 and 0.9');
   assert(pageBuilder != null || builder != null);
 
-  final WidgetBuilder? effectivePageBuilder = builder ?? pageBuilder;
-  final WidgetBuilder widgetBuilder;
+  final WidgetBuilder? effectiveBuilder = builder ?? pageBuilder;
+  final WidgetBuilder? widgetBuilder;
   final nestedNavigatorKey = GlobalKey<NavigatorState>();
   if (!useNestedNavigation) {
-    widgetBuilder = effectivePageBuilder!;
+    widgetBuilder = effectiveBuilder;
   } else {
-    widgetBuilder = (BuildContext context) {
-      return NavigatorPopHandler(
-        onPopWithResult: (T? result) {
-          nestedNavigatorKey.currentState!.maybePop();
-        },
-        child: Navigator(
-          key: nestedNavigatorKey,
-          initialRoute: '/',
-          onGenerateInitialRoutes: (NavigatorState navigator, String initialRouteName) {
-            return <Route<void>>[
-              CupertinoPageRoute<void>(
-                builder: (BuildContext context) {
-                  return PopScope(
-                    canPop: false,
-                    onPopInvokedWithResult: (bool didPop, Object? result) {
-                      if (didPop) {
-                        return;
-                      }
-                      Navigator.of(context, rootNavigator: true).pop(result);
-                    },
-                    child: effectivePageBuilder!(context),
-                  );
+    widgetBuilder = effectiveBuilder != null
+        ? (BuildContext context) {
+            return NavigatorPopHandler(
+              onPopWithResult: (T? result) {
+                nestedNavigatorKey.currentState!.maybePop();
+              },
+              child: Navigator(
+                key: nestedNavigatorKey,
+                initialRoute: '/',
+                onGenerateInitialRoutes: (NavigatorState navigator, String initialRouteName) {
+                  return <Route<void>>[
+                    CupertinoPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return PopScope(
+                          canPop: false,
+                          onPopInvokedWithResult: (bool didPop, Object? result) {
+                            if (didPop) {
+                              return;
+                            }
+                            Navigator.of(context, rootNavigator: true).pop(result);
+                          },
+                          child: effectiveBuilder(context),
+                        );
+                      },
+                    ),
+                  ];
                 },
               ),
-            ];
-          },
-        ),
-      );
-    };
+            );
+          }
+        : null;
   }
+  // Todo: handle scrollableBuilder with nested navigation as well.
 
   return Navigator.of(context, rootNavigator: true).push<T>(
     CupertinoSheetRoute<T>(
@@ -214,6 +219,7 @@ Future<T?> showCupertinoSheet<T>({
       enableDrag: enableDrag,
       settings: settings,
       showDragHandle: showDragHandle,
+      scrollableBuilder: scrollableBuilder,
       topGap: topGap,
     ),
   );
@@ -583,6 +589,7 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
   CupertinoSheetRoute({
     super.settings,
     required this.builder,
+    this.scrollableBuilder,
     this.enableDrag = true,
     double? topGap,
     this.showDragHandle = false,
@@ -590,10 +597,27 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
          topGap == null || (topGap >= 0.0 && topGap <= 0.9),
          'topGap must be between 0.0 and 0.9',
        ),
-       _topGap = topGap;
+       _topGap = topGap,
+       _scrollController = CupertinoSheetScrollController();
+  // Need to add assert for either builder or scrollableBuilder.
+
+  final CupertinoSheetScrollController _scrollController;
+
+  @override
+  CupertinoSheetScrollController? get scrollController => _scrollController;
 
   /// Builds the primary contents of the sheet route.
-  final WidgetBuilder builder;
+  final WidgetBuilder? builder;
+
+  /// Builds the primary contents of the sheet route with a provided [ScrollController].
+  ///
+  /// Use this instead of [builder] when the contents of the sheet need to both
+  /// scroll in the Y-axis, while still being able to drag the sheet downwards to
+  /// pop the route.
+  final ScrollableWidgetBuilder? scrollableBuilder;
+
+  WidgetBuilder get _effectiveBuilder =>
+      builder ?? (BuildContext context) => scrollableBuilder!(context, scrollController!);
 
   @override
   final bool enableDrag;
@@ -614,7 +638,7 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
 
   Widget _sheetWithDragHandle(BuildContext context) {
     if (!showDragHandle) {
-      return builder(context);
+      return _effectiveBuilder(context);
     }
 
     // Values derived from Apple's Figma files and a simulator running iOS 18.2.
@@ -630,7 +654,7 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
           data: MediaQuery.of(
             context,
           ).copyWith(padding: const EdgeInsets.only(top: dragHandlePadding)),
-          child: builder(context),
+          child: _effectiveBuilder(context),
         ),
         const Align(
           alignment: Alignment.topCenter,
@@ -649,6 +673,14 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
         ),
       ],
     );
+  }
+
+  @override
+  void dispose() {
+    if (scrollController != null) {
+      scrollController!.dispose();
+    }
+    super.dispose();
   }
 
   @override
@@ -721,6 +753,9 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
   @protected
   Widget buildContent(BuildContext context);
 
+  /// Scroll controller for dragging and scrolling.
+  CupertinoSheetScrollController? get scrollController;
+
   @override
   Duration get transitionDuration => const Duration(milliseconds: 500);
 
@@ -775,6 +810,7 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
     Widget child,
     bool enableDrag,
     double topGap,
+    CupertinoSheetScrollController? scrollController,
   ) {
     final bool linearTransition = route.popGestureInProgress;
     return CupertinoSheetTransition(
@@ -785,6 +821,7 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
       child: _CupertinoDragGestureDetector<T>(
         enabledCallback: () => enableDrag,
         onStartPopGesture: () => _startPopGesture<T>(route, topGap),
+        scrollController: scrollController,
         child: child,
       ),
     );
@@ -818,6 +855,7 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
       child,
       enableDrag,
       topGap,
+      scrollController,
     );
   }
 }
@@ -827,12 +865,15 @@ class _CupertinoDragGestureDetector<T> extends StatefulWidget {
     super.key,
     required this.enabledCallback,
     required this.onStartPopGesture,
+    required this.scrollController,
     required this.child,
   });
 
   final Widget child;
 
   final ValueGetter<bool> enabledCallback;
+
+  final CupertinoSheetScrollController? scrollController;
 
   final ValueGetter<_CupertinoDragGestureController<T>> onStartPopGesture;
 
@@ -846,22 +887,17 @@ class _CupertinoDragGestureDetectorState<T> extends State<_CupertinoDragGestureD
   late VerticalDragGestureRecognizer _recognizer;
   _StretchDragControllerProvider? _stretchDragController;
 
+  late _SheetVelocityTracker _velocityTracker;
+
   @override
   void initState() {
     super.initState();
-    assert(_stretchDragController == null);
-    _stretchDragController = _StretchDragControllerProvider.maybeOf(context);
     _recognizer = VerticalDragGestureRecognizer(debugOwner: this)
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
       ..onEnd = _handleDragEnd
       ..onCancel = _handleDragCancel;
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _stretchDragController = _StretchDragControllerProvider.maybeOf(context);
+    _velocityTracker = _SheetVelocityTracker();
   }
 
   @override
@@ -889,23 +925,76 @@ class _CupertinoDragGestureDetectorState<T> extends State<_CupertinoDragGestureD
   void _handleDragUpdate(DragUpdateDetails details) {
     assert(mounted);
     assert(_dragGestureController != null);
-    if (_stretchDragController == null) {
+    if (_dragGestureController!.popDragController.value == 1.0 && details.primaryDelta! < 0.0) {
+      print('Scroll Up');
+      _velocityTracker.isScrolling = true;
+      _handleScroll(details);
+    } else if (details.primaryDelta! > 0.0 && widget.scrollController!.offset > 0) {
+      print('Scroll down');
+      _velocityTracker.isScrolling = true;
+      _handleScroll(details);
+    } else {
+      print('drag');
+      _velocityTracker.isDragging = true;
+      _dragGestureController!.dragUpdate(
+        // Divide by size of the sheet.
+        details.primaryDelta! / (context.size!.height - (context.size!.height * _kTopGapRatio)),
+        _stretchDragController!.controller,
+      );
+    }
+    _velocityTracker.velocity =
+        details.primaryDelta! / (context.size!.height - (context.size!.height * _kTopGapRatio));
+  }
+
+  void _handleScroll(DragUpdateDetails details) {
+    if (widget.scrollController == null && widget.scrollController?.hasClients != true) {
       return;
     }
-    _dragGestureController!.dragUpdate(details.primaryDelta!, _stretchDragController!.controller);
+    final double newPosition = widget.scrollController!.offset + (details.primaryDelta! * -1);
+    widget.scrollController!.jumpTo(newPosition);
   }
 
   void _handleDragEnd(DragEndDetails details) {
     assert(mounted);
     assert(_dragGestureController != null);
-    if (_stretchDragController == null) {
-      _dragGestureController = null;
-      return;
+    if (_dragGestureController!.popDragController.value == 1.0 && widget.scrollController != null) {
+      final Simulation? simulation = widget.scrollController!.position.physics
+          .createBallisticSimulation(
+            widget.scrollController!.position,
+            (details.velocity.pixelsPerSecond.dy) * -1,
+          );
+      if (simulation != null) {
+        print('Fling');
+        widget.scrollController!.position.beginActivity(
+          BallisticScrollActivity(
+            widget.scrollController!.position as ScrollPositionWithSingleContext,
+            simulation,
+            widget.scrollController!.position.context.vsync,
+            widget.scrollController!.position.shouldIgnorePointer,
+          ),
+        );
+      } else {
+        print('Drag end but no fling');
+        print(simulation);
+        if (simulation == null) {
+          print('No simulation');
+          print(widget.scrollController!.position);
+          print(details);
+          print(details.velocity);
+          print(details.primaryVelocity);
+          print(details.velocity.pixelsPerSecond.dy);
+          print('Tracker velocity');
+          print(_velocityTracker.velocity);
+        }
+        print(widget.scrollController?.position);
+      }
+    } else {
+      _dragGestureController!.dragEnd(
+        details.velocity.pixelsPerSecond.dy / context.size!.height,
+        _stretchDragController!.controller,
+      );
     }
-    _dragGestureController!.dragEnd(
-      details.velocity.pixelsPerSecond.dy / context.size!.height,
-      _stretchDragController!.controller,
-    );
+    // _downGestureController!.dragEnd(details.velocity.pixelsPerSecond.dy / context.size!.height);
     _dragGestureController = null;
   }
 
@@ -1022,6 +1111,7 @@ class _CupertinoDragGestureController<T> {
     } else {
       if (isCurrent) {
         // This route is destined to pop at this point. Reuse navigator's pop.
+        print('popped');
         navigator.pop();
       }
 
@@ -1048,5 +1138,171 @@ class _CupertinoDragGestureController<T> {
     } else {
       navigator.didStopUserGesture();
     }
+  }
+}
+
+class CupertinoSheetScrollController extends ScrollController {
+  @override
+  _DraggableScrollableSheetScrollPosition createScrollPosition(
+    ScrollPhysics physics,
+    ScrollContext context,
+    ScrollPosition? oldPosition,
+  ) {
+    return _DraggableScrollableSheetScrollPosition(
+      physics: physics,
+      context: context,
+      oldPosition: oldPosition,
+    );
+  }
+
+  @override
+  _DraggableScrollableSheetScrollPosition get position =>
+      super.position as _DraggableScrollableSheetScrollPosition;
+}
+
+/// A scroll position that manages scroll activities for
+/// [_DraggableScrollableSheetScrollController].
+///
+/// This class is a concrete subclass of [ScrollPosition] logic that handles a
+/// single [ScrollContext], such as a [Scrollable]. An instance of this class
+/// manages [ScrollActivity] instances, which changes the
+/// [_DraggableSheetExtent.currentSize] or visible content offset in the
+/// [Scrollable]'s [Viewport]
+///
+/// See also:
+///
+///  * [_DraggableScrollableSheetScrollController], which uses this as its [ScrollPosition].
+class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleContext {
+  _DraggableScrollableSheetScrollPosition({
+    required super.physics,
+    required super.context,
+    super.oldPosition,
+  });
+
+  VoidCallback? _dragCancelCallback;
+  final Set<AnimationController> _ballisticControllers = <AnimationController>{};
+  bool get listShouldScroll => pixels > 0.0;
+
+  @override
+  void absorb(ScrollPosition other) {
+    super.absorb(other);
+    assert(_dragCancelCallback == null);
+
+    if (other is! _DraggableScrollableSheetScrollPosition) {
+      return;
+    }
+
+    if (other._dragCancelCallback != null) {
+      _dragCancelCallback = other._dragCancelCallback;
+      other._dragCancelCallback = null;
+    }
+  }
+
+  @override
+  void beginActivity(ScrollActivity? newActivity) {
+    // Cancel the running ballistic simulations
+    for (final AnimationController ballisticController in _ballisticControllers) {
+      ballisticController.stop();
+    }
+    super.beginActivity(newActivity);
+  }
+
+  @override
+  void dispose() {
+    for (final AnimationController ballisticController in _ballisticControllers) {
+      ballisticController.dispose();
+    }
+    _ballisticControllers.clear();
+    super.dispose();
+  }
+
+  @override
+  void goBallistic(double velocity) {
+    if ((velocity == 0.0) ||
+        (velocity < 0.0 && listShouldScroll) ||
+        (velocity > 0.0 && pixels != maxScrollExtent)) {
+      super.goBallistic(velocity);
+      return;
+    }
+    // Scrollable expects that we will dispose of its current _dragCancelCallback
+    _dragCancelCallback?.call();
+    _dragCancelCallback = null;
+
+    late final Simulation simulation;
+    // The iOS bouncing simulation just isn't right here - once we delegate
+    // the ballistic back to the ScrollView, it will use the right simulation.
+    simulation = ClampingScrollSimulation(
+      // Run the simulation in terms of pixels, not extent.
+      position: pixels,
+      velocity: velocity,
+      tolerance: physics.toleranceFor(this),
+    );
+
+    final AnimationController ballisticController = AnimationController.unbounded(
+      debugLabel: objectRuntimeType(this, '_DraggableScrollableSheetPosition'),
+      vsync: context.vsync,
+    );
+    _ballisticControllers.add(ballisticController);
+
+    void tick() {
+      if ((velocity > 0 && pixels == maxScrollExtent) ||
+          (velocity < 0 && pixels == minScrollExtent)) {
+        // Make sure we pass along enough velocity to keep scrolling - otherwise
+        // we just "bounce" off the top making it look like the list doesn't
+        // have more to scroll.
+        velocity =
+            ballisticController.velocity +
+            (physics.toleranceFor(this).velocity * ballisticController.velocity.sign);
+        super.goBallistic(velocity);
+        ballisticController.stop();
+      } else if (ballisticController.isCompleted) {
+        super.goBallistic(0);
+      }
+    }
+
+    ballisticController
+      ..addListener(tick)
+      ..animateWith(simulation).whenCompleteOrCancel(() {
+        if (_ballisticControllers.contains(ballisticController)) {
+          _ballisticControllers.remove(ballisticController);
+          ballisticController.dispose();
+        }
+      });
+  }
+
+  @override
+  Drag drag(DragStartDetails details, VoidCallback dragCancelCallback) {
+    // Save this so we can call it later if we have to [goBallistic] on our own.
+    _dragCancelCallback = dragCancelCallback;
+    return super.drag(details, dragCancelCallback);
+  }
+}
+
+class _SheetVelocityTracker {
+  bool _isScrolling = false;
+  bool _isDragging = false;
+
+  double velocity = 0;
+
+  bool get isScrolling => _isScrolling;
+  set isScrolling(bool newValue) {
+    _isScrolling = newValue;
+    if (_isScrolling == true) {
+      _isDragging = false;
+    }
+  }
+
+  bool get isDragging => _isDragging;
+  set isDragging(bool newValue) {
+    _isDragging = newValue;
+    if (_isDragging == true) {
+      _isScrolling = false;
+    }
+  }
+
+  void finishActivity() {
+    _isScrolling = false;
+    _isDragging = false;
+    velocity = 0;
   }
 }
