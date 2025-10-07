@@ -5257,6 +5257,9 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
   @pragma('vm:entry-point')
   late int _samplerCount;
 
+  @pragma('vm:entry-point')
+  late List<dynamic> _uniformInfo;
+
   @Native<Void Function(Handle)>(symbol: 'FragmentProgram::Create')
   external void _constructor();
 
@@ -5265,6 +5268,19 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
 
   /// Returns a fresh instance of [FragmentShader].
   FragmentShader fragmentShader() => FragmentShader._(this, debugName: _debugName);
+}
+
+base class UniformFloatSlot {
+  UniformFloatSlot._(this._shader, this.name, this.offset, this._index);
+
+  void set(double val) {
+    _shader.setFloat(_index, val);
+  }
+
+  final FragmentShader _shader;
+  final int _index;
+  final String name;
+  final int offset;
 }
 
 /// A [Shader] generated from a [FragmentProgram].
@@ -5281,11 +5297,11 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
 /// are required to exist simultaneously, they must be obtained from two
 /// different calls to [FragmentProgram.fragmentShader].
 base class FragmentShader extends Shader {
-  FragmentShader._(FragmentProgram program, {String? debugName})
-    : _debugName = debugName,
-      super._() {
-    _floats = _constructor(program, program._uniformFloatCount, program._samplerCount);
+  FragmentShader._(this._program, {String? debugName}) : _debugName = debugName, super._() {
+    _floats = _constructor(_program, _program._uniformFloatCount, _program._samplerCount);
   }
+
+  final FragmentProgram _program;
 
   final String? _debugName;
 
@@ -5338,6 +5354,31 @@ base class FragmentShader extends Shader {
   void setFloat(int index, double value) {
     assert(!debugDisposed, 'Tried to accesss uniforms on a disposed Shader: $this');
     _floats[index] = value;
+  }
+
+  UniformFloatSlot getUniformFloat(String name, [int? index]) {
+    index ??= 0;
+    int offset = 0;
+    bool found = false;
+    const int sizeOfFloat = 4;
+    for (final dynamic entryDynamic in _program._uniformInfo) {
+      final Map<String, Object> entry = entryDynamic as Map<String, Object>;
+      final int sizeInFloats = (entry['size'] as int? ?? 0) ~/ sizeOfFloat;
+      if (entry['name'] == name) {
+        if (index + 1 > sizeInFloats) {
+          throw ArgumentError('Index `$index` out of bounds for `$name`.');
+        }
+        found = true;
+        break;
+      }
+      offset += sizeInFloats;
+    }
+
+    if (!found) {
+      throw ArgumentError('No uniform named "$name".');
+    }
+
+    return UniformFloatSlot._(this, name, index, offset + index);
   }
 
   /// Sets the sampler uniform at [index] to [image].
