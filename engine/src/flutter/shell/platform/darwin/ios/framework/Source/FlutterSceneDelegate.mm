@@ -79,6 +79,18 @@ FLUTTER_ASSERT_ARC
   [self.sceneLifeCycleDelegate scene:scene continueUserActivity:userActivity];
 }
 
+#pragma mark - Saving the state of the scene
+
+- (NSUserActivity*)stateRestorationActivityForScene:(UIScene*)scene {
+  return [self.sceneLifeCycleDelegate stateRestorationActivityForScene:scene];
+}
+
+- (void)scene:(UIScene*)scene
+    restoreInteractionStateWithUserActivity:(NSUserActivity*)stateRestorationActivity {
+  [self.sceneLifeCycleDelegate scene:scene
+      restoreInteractionStateWithUserActivity:stateRestorationActivity];
+}
+
 #pragma mark - Performing tasks
 
 - (void)windowScene:(UIWindowScene*)windowScene
