@@ -8,7 +8,6 @@
 #include <memory>
 #include <optional>
 
-#include "GLES3/gl3.h"
 #include "gmock/gmock.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
 
@@ -160,11 +159,7 @@ class MockGLESImpl : public IMockGLESImpl {
                GLsizei numAttachments,
                const GLenum* attachments),
               (override));
-  MOCK_METHOD(void,
-              GetIntegerv,
-              (GLenum name,
-               GLint *value),
-              (override));
+  MOCK_METHOD(void, GetIntegerv, (GLenum name, GLint* value), (override));
 };
 
 /// @brief      Provides a mocked version of the |ProcTableGLES| class.
