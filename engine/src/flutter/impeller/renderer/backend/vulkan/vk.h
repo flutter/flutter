@@ -74,6 +74,13 @@
 
 #include "vulkan/vulkan.hpp"  // IWYU pragma: keep.
 
+// The Vulkan headers may bring in X11 headers which define some macros that
+// conflict with other code.  Undefine these macros after including Vulkan.
+#undef Bool
+#undef None
+#undef Status
+#undef Success
+
 static_assert(VK_HEADER_VERSION >= 215, "Vulkan headers must not be too old.");
 
 #endif  // FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_VK_H_

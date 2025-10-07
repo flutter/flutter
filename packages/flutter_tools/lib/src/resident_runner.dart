@@ -1468,11 +1468,11 @@ abstract class ResidentRunner extends ResidentHandlers {
         /// of the default URI encoding.
         String urlToDisplayString(Uri uri) {
           final base = StringBuffer(uri.withoutQueryParameters().toString());
-          base.write(
-            uri.queryParameters.keys
-                .map((String key) => '$key=${uri.queryParameters[key]}')
-                .join('&'),
-          );
+          if (uri.hasQuery) {
+            base.write(
+              '?${uri.queryParameters.keys.map((String key) => '$key=${uri.queryParameters[key]}').join('&')}',
+            );
+          }
           return base.toString();
         }
 

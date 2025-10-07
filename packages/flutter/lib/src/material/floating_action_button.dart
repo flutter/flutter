@@ -16,7 +16,6 @@ import 'package:flutter/widgets.dart';
 import 'button.dart';
 import 'color_scheme.dart';
 import 'floating_action_button_theme.dart';
-import 'material_state.dart';
 import 'scaffold.dart';
 import 'text_theme.dart';
 import 'theme.dart';
@@ -640,7 +639,7 @@ class FloatingActionButton extends StatelessWidget {
 // This WidgetStateProperty is passed along to RawMaterialButton which
 // resolves the property against WidgetState.pressed, WidgetState.hovered,
 // WidgetState.focused, WidgetState.disabled.
-class _EffectiveMouseCursor extends MaterialStateMouseCursor {
+class _EffectiveMouseCursor extends WidgetStateMouseCursor {
   const _EffectiveMouseCursor(this.widgetCursor, this.themeCursor);
 
   final MouseCursor? widgetCursor;
@@ -650,11 +649,11 @@ class _EffectiveMouseCursor extends MaterialStateMouseCursor {
   MouseCursor resolve(Set<WidgetState> states) {
     return WidgetStateProperty.resolveAs<MouseCursor?>(widgetCursor, states) ??
         themeCursor?.resolve(states) ??
-        MaterialStateMouseCursor.clickable.resolve(states);
+        WidgetStateMouseCursor.clickable.resolve(states);
   }
 
   @override
-  String get debugDescription => 'MaterialStateMouseCursor(FloatActionButton)';
+  String get debugDescription => 'WidgetStateMouseCursor(FloatActionButton)';
 }
 
 // This widget's size matches its child's size unless its constraints

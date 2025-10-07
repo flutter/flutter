@@ -48,6 +48,7 @@ typedef void (^FlutterKeyboardAnimationCallback)(fml::TimePoint);
 @property(nonatomic, readonly) BOOL isPresentingViewController;
 @property(nonatomic, readonly) BOOL isVoiceOverRunning;
 @property(nonatomic, strong) FlutterKeyboardManager* keyboardManager;
+@property(nonatomic, readwrite) NSString* applicationLocale;
 
 /**
  * @brief Whether the status bar is preferred hidden.
@@ -67,7 +68,6 @@ typedef void (^FlutterKeyboardAnimationCallback)(fml::TimePoint);
 // handled.
 - (void)handlePressEvent:(FlutterUIPressProxy*)press
               nextAction:(void (^)())nextAction API_AVAILABLE(ios(13.4));
-- (void)sendDeepLinkToFramework:(NSURL*)url completionHandler:(void (^)(BOOL success))completion;
 - (void)addInternalPlugins;
 - (void)deregisterNotifications;
 - (int32_t)accessibilityFlags;
