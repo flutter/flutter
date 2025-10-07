@@ -7,6 +7,7 @@ import 'dart:async';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'build_info.dart';
+import 'device.dart';
 import 'globals.dart' as globals;
 import 'resident_runner.dart';
 import 'tracing.dart';
@@ -64,6 +65,8 @@ class ColdRunner extends ResidentRunner {
       return 1;
     }
 
+    final FlutterDevice flutterDevice = flutterDevices.first;
+
     // Connect to the VM Service.
     if (debuggingEnabled) {
       try {
@@ -75,12 +78,16 @@ class ColdRunner extends ResidentRunner {
       }
     }
 
-    if (flutterDevices.first.vmServiceUris != null) {
+    if (flutterDevice.vmServiceUris != null) {
+      final FlutterVmService vmService = flutterDevice.vmService!;
+      final Device device = flutterDevice.device!;
       // For now, only support one debugger connection.
       connectionInfoCompleter?.complete(
         DebugConnectionInfo(
-          httpUri: flutterDevices.first.vmService!.httpAddress,
-          wsUri: flutterDevices.first.vmService!.wsAddress,
+          httpUri: vmService.httpAddress,
+          wsUri: vmService.wsAddress,
+          devToolsUri: device.dds.devToolsUri,
+          dtdUri: device.dds.dtdUri,
         ),
       );
     }
