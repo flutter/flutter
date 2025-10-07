@@ -5,7 +5,7 @@
 import SwiftUI
 
 @main
-struct xcode_swiftuiApp: App {
+struct NativeSwiftUIExperimentApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()

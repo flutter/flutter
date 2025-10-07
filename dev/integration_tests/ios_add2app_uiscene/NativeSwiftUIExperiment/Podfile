@@ -4,14 +4,14 @@
 flutter_application_path = '../my_module'
 load File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')
 
-target 'xcode_uikit_swift' do
+target 'NativeSwiftUIExperiment' do
   # Comment the next line if you don't want to use dynamic frameworks
   use_frameworks!
 
-  # Pods for xcode_uikit_swift
+  # Pods for NativeSwiftUIExperiment
   install_all_flutter_pods(flutter_application_path)
 
-  target 'xcode_uikit_swiftUITests' do
+  target 'NativeSwiftUIExperimentUITests' do
     # Pods for testing
   end
 

@@ -4,7 +4,7 @@
 
 import XCTest
 
-final class xcode_uikit_swiftUITests: XCTestCase {
+final class NativeUIKitSwiftExperimentUITests: XCTestCase {
 
   override func setUpWithError() throws {
     continueAfterFailure = false
