@@ -5,6 +5,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterSceneDelegate.h"
 
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
+#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterSceneLifeCycle.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifeCycle_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
@@ -102,6 +103,14 @@ FLUTTER_ASSERT_ARC
 }
 
 #pragma mark - Helpers
+
+- (BOOL)registerSceneLifeCycleWithFlutterEngine:(FlutterEngine*)engine {
+  return [self.sceneLifeCycleDelegate registerSceneLifeCycleWithFlutterEngine:engine];
+}
+
+- (BOOL)unregisterSceneLifeCycleWithFlutterEngine:(FlutterEngine*)engine {
+  return [self.sceneLifeCycleDelegate unregisterSceneLifeCycleWithFlutterEngine:engine];
+}
 
 - (void)moveRootViewControllerFrom:(NSObject<UIApplicationDelegate>*)appDelegate
                                 to:(UIWindowScene*)windowScene {
