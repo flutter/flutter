@@ -897,10 +897,10 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         || semanticsNode.hasAction(Action.SCROLL_UP)
         || semanticsNode.hasAction(Action.SCROLL_RIGHT)
         || semanticsNode.hasAction(Action.SCROLL_DOWN)) {
-      result.setScrollable(true);
       // This tells Android's a11y to send scroll events when reaching the end of
       // the visible viewport of a scrollable, unless the node itself does not
       // allow implicit scrolling - then we leave the className as view.View.
+      result.setScrollable(true);
     }
     // We should prefer setCollectionInfo to the class names, as this way we get "In List"
     // and "Out of list" announcements.  But we don't always know the counts, so we
