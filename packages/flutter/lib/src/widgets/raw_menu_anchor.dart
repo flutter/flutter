@@ -823,19 +823,14 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
       ),
     );
 
-    if (useRootOverlay) {
-      return OverlayPortal.targetsRootOverlay(
-        controller: _overlayController,
-        overlayChildBuilder: _buildOverlay,
-        child: child,
-      );
-    } else {
-      return OverlayPortal(
-        controller: _overlayController,
-        overlayChildBuilder: _buildOverlay,
-        child: child,
-      );
-    }
+    return OverlayPortal(
+      controller: _overlayController,
+      overlayChildBuilder: _buildOverlay,
+      overlayLocation: useRootOverlay
+          ? OverlayChildLocation.rootOverlay
+          : OverlayChildLocation.nearestOverlay,
+      child: child,
+    );
   }
 
   @override
@@ -987,7 +982,7 @@ class _RawMenuAnchorGroupState extends State<RawMenuAnchorGroup>
 ///   [MenuController].
 /// * [SubmenuButton], a widget that has a button that manages a submenu.
 /// * [RawMenuAnchor], a widget that defines a region that has submenu.
-final class MenuController {
+class MenuController {
   // The anchor that this controller controls.
   //
   // This is set automatically when this `MenuController` is attached to an

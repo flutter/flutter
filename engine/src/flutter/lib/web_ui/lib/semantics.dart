@@ -34,6 +34,8 @@ class SemanticsAction {
   static const int _kSetTextIndex = 1 << 21;
   static const int _kFocusIndex = 1 << 22;
   static const int _kScrollToOffsetIndex = 1 << 23;
+  static const int _kExpandIndex = 1 << 24;
+  static const int _kCollapseIndex = 1 << 25;
 
   static const SemanticsAction tap = SemanticsAction._(_kTapIndex, 'tap');
   static const SemanticsAction longPress = SemanticsAction._(_kLongPressIndex, 'longPress');
@@ -89,6 +91,8 @@ class SemanticsAction {
     'moveCursorBackwardByWord',
   );
   static const SemanticsAction focus = SemanticsAction._(_kFocusIndex, 'focus');
+  static const SemanticsAction expand = SemanticsAction._(_kExpandIndex, 'expand');
+  static const SemanticsAction collapse = SemanticsAction._(_kCollapseIndex, 'collapse');
 
   static const Map<int, SemanticsAction> _kActionById = <int, SemanticsAction>{
     _kTapIndex: tap,
@@ -115,6 +119,8 @@ class SemanticsAction {
     _kMoveCursorBackwardByWordIndex: moveCursorBackwardByWord,
     _kSetTextIndex: setText,
     _kFocusIndex: focus,
+    _kExpandIndex: expand,
+    _kCollapseIndex: collapse,
   };
 
   static List<SemanticsAction> get values => _kActionById.values.toList(growable: false);
@@ -333,6 +339,7 @@ class SemanticsFlags {
     this.isExpanded = Tristate.none,
     this.isRequired = Tristate.none,
     this.isFocused = Tristate.none,
+    this.isAccessibilityFocusable = Tristate.none,
     this.isButton = false,
     this.isTextField = false,
     this.isInMutuallyExclusiveGroup = false,
@@ -358,6 +365,7 @@ class SemanticsFlags {
   final Tristate isExpanded;
   final Tristate isRequired;
   final Tristate isFocused;
+  final Tristate isAccessibilityFocusable;
   final bool isButton;
   final bool isTextField;
   final bool isInMutuallyExclusiveGroup;
@@ -384,6 +392,7 @@ class SemanticsFlags {
       isExpanded: isExpanded.merge(other.isExpanded),
       isRequired: isRequired.merge(other.isRequired),
       isFocused: isFocused.merge(other.isFocused),
+      isAccessibilityFocusable: isAccessibilityFocusable.merge(other.isAccessibilityFocusable),
       isButton: isButton || other.isButton,
       isTextField: isTextField || other.isTextField,
       isInMutuallyExclusiveGroup: isInMutuallyExclusiveGroup || other.isInMutuallyExclusiveGroup,
@@ -411,6 +420,7 @@ class SemanticsFlags {
     Tristate? isExpanded,
     Tristate? isRequired,
     Tristate? isFocused,
+    Tristate? isAccessibilityFocusable,
     bool? isButton,
     bool? isTextField,
     bool? isInMutuallyExclusiveGroup,
@@ -434,6 +444,7 @@ class SemanticsFlags {
       isButton: isButton ?? this.isButton,
       isTextField: isTextField ?? this.isTextField,
       isFocused: isFocused ?? this.isFocused,
+      isAccessibilityFocusable: isAccessibilityFocusable ?? this.isAccessibilityFocusable,
       isEnabled: isEnabled ?? this.isEnabled,
       isInMutuallyExclusiveGroup: isInMutuallyExclusiveGroup ?? this.isInMutuallyExclusiveGroup,
       isHeader: isHeader ?? this.isHeader,
@@ -467,6 +478,7 @@ class SemanticsFlags {
           isExpanded == other.isExpanded &&
           isRequired == other.isRequired &&
           isFocused == other.isFocused &&
+          isAccessibilityFocusable == other.isAccessibilityFocusable &&
           isButton == other.isButton &&
           isTextField == other.isTextField &&
           isInMutuallyExclusiveGroup == other.isInMutuallyExclusiveGroup &&
@@ -493,6 +505,7 @@ class SemanticsFlags {
     isExpanded,
     isRequired,
     isFocused,
+    isAccessibilityFocusable,
     isButton,
     isTextField,
     isInMutuallyExclusiveGroup,
@@ -535,6 +548,8 @@ class SemanticsFlags {
       if (isMultiline) 'isMultiline',
       if (isReadOnly) 'isReadOnly',
       if (isFocused != Tristate.none) 'isFocusable',
+      if (isAccessibilityFocusable == Tristate.isFalse) 'isNotAccessibilityFocusable',
+      if (isAccessibilityFocusable == Tristate.isTrue) 'isAccessibilityFocusable',
       if (isLink) 'isLink',
       if (isSlider) 'isSlider',
       if (isKeyboardKey) 'isKeyboardKey',
@@ -556,6 +571,7 @@ class SemanticsFlags {
         isExpanded.hasConflict(other.isExpanded) ||
         isRequired.hasConflict(other.isRequired) ||
         isFocused.hasConflict(other.isFocused) ||
+        isAccessibilityFocusable.hasConflict(other.isAccessibilityFocusable) ||
         (isButton && other.isButton) ||
         (isTextField && other.isTextField) ||
         (isInMutuallyExclusiveGroup && other.isInMutuallyExclusiveGroup) ||

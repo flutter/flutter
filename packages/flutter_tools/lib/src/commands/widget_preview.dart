@@ -13,6 +13,7 @@ import 'package:process/process.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
@@ -28,7 +29,6 @@ import '../isolated/resident_web_runner.dart';
 import '../project.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart';
-import '../runner/flutter_command_runner.dart';
 import '../web/web_device.dart';
 import '../widget_preview/analytics.dart';
 import '../widget_preview/dependency_graph.dart';
@@ -77,7 +77,8 @@ class WidgetPreviewCommand extends FlutterCommand {
   String get description => 'Manage the widget preview environment.';
 
   @override
-  String get name => 'widget-preview';
+  String get name => kWidgetPreview;
+  static const kWidgetPreview = 'widget-preview';
 
   @override
   String get category => FlutterCommandCategory.tools;
@@ -130,7 +131,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     required this.processManager,
     required this.artifacts,
     @visibleForTesting WidgetPreviewDtdServices? dtdServicesOverride,
-  }) : logger = WidgetPreviewMachineAwareLogger(logger) {
+  }) : _logger = logger {
     if (dtdServicesOverride != null) {
       _dtdService = dtdServicesOverride;
     }
@@ -200,7 +201,8 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   final FileSystem fs;
 
   @override
-  final WidgetPreviewMachineAwareLogger logger;
+  WidgetPreviewMachineAwareLogger get logger => _logger as WidgetPreviewMachineAwareLogger;
+  final Logger _logger;
 
   @override
   final FlutterProjectFactory projectFactory;
@@ -252,6 +254,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     shutdownHooks: shutdownHooks,
     onHotRestartPreviewerRequest: onHotRestartRequest,
     dtdLauncher: DtdLauncher(logger: logger, artifacts: artifacts, processManager: processManager),
+    project: rootProject.widgetPreviewScaffoldProject,
   );
 
   /// The currently running instance of the widget preview scaffold.
@@ -259,16 +262,16 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    assert(_logger is WidgetPreviewMachineAwareLogger);
+
     // Start the timer tracking how long it takes to launch the preview environment.
     previewAnalytics.initializeLaunchStopwatch();
+    logger.sendInitializingEvent();
 
     final String? customPreviewScaffoldOutput = stringArg(kWidgetPreviewScaffoldOutputDir);
     final Directory widgetPreviewScaffold = customPreviewScaffoldOutput != null
         ? fs.directory(customPreviewScaffoldOutput)
         : rootProject.widgetPreviewScaffold;
-
-    final bool machine = boolArg(FlutterGlobalOptions.kMachineFlag);
-    logger.machine = machine;
 
     // Check to see if a preview scaffold has already been generated. If not,
     // generate one.
@@ -479,7 +482,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         );
         unawaited(_widgetPreviewApp!.run(appStartedCompleter: appStarted));
         await appStarted.future;
-        logger.sendEvent('started', {'url': flutterDevice.devFS!.baseUri.toString()});
+        logger.sendStartedEvent(applicationUrl: flutterDevice.devFS!.baseUri!);
       }
     } on Exception catch (error) {
       throwToolExit(error.toString());
@@ -531,9 +534,10 @@ final class WidgetPreviewCleanCommand extends WidgetPreviewSubCommandBase {
 /// A custom logger for the widget-preview commands that disables non-event output to stdio when
 /// machine mode is enabled.
 final class WidgetPreviewMachineAwareLogger extends DelegatingLogger {
-  WidgetPreviewMachineAwareLogger(super.delegate);
+  WidgetPreviewMachineAwareLogger(super.delegate, {required this.machine, required this.verbose});
 
-  var machine = false;
+  final bool machine;
+  final bool verbose;
 
   @override
   void printError(
@@ -546,6 +550,11 @@ final class WidgetPreviewMachineAwareLogger extends DelegatingLogger {
     bool? wrap,
   }) {
     if (machine) {
+      sendEvent('logMessage', <String, Object?>{
+        'level': 'error',
+        'message': message,
+        'stackTrace': ?stackTrace?.toString(),
+      });
       return;
     }
     super.printError(
@@ -570,6 +579,7 @@ final class WidgetPreviewMachineAwareLogger extends DelegatingLogger {
     bool fatal = true,
   }) {
     if (machine) {
+      sendEvent('logMessage', <String, Object?>{'level': 'warning', 'message': message});
       return;
     }
     super.printWarning(
@@ -594,6 +604,7 @@ final class WidgetPreviewMachineAwareLogger extends DelegatingLogger {
     bool? wrap,
   }) {
     if (machine) {
+      sendEvent('logMessage', <String, Object?>{'level': 'status', 'message': message});
       return;
     }
     super.printStatus(
@@ -617,10 +628,25 @@ final class WidgetPreviewMachineAwareLogger extends DelegatingLogger {
 
   @override
   void printTrace(String message) {
+    if (!verbose) {
+      return;
+    }
     if (machine) {
+      sendEvent('logMessage', <String, Object?>{'level': 'trace', 'message': message});
       return;
     }
     super.printTrace(message);
+  }
+
+  /// Notifies tooling that the widget previewer is initializing.
+  void sendInitializingEvent() {
+    sendEvent('initializing', {'pid': pid});
+  }
+
+  /// Notifies tooling that the widget previewer has started and is being
+  /// served at [applicationUrl].
+  void sendStartedEvent({required Uri applicationUrl}) {
+    sendEvent('started', {'url': applicationUrl.toString()});
   }
 
   @override
@@ -642,6 +668,7 @@ final class WidgetPreviewMachineAwareLogger extends DelegatingLogger {
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     if (machine) {
+      printStatus(message);
       return SilentStatus(stopwatch: Stopwatch());
     }
     return super.startProgress(

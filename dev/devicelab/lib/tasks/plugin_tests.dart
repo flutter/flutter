@@ -420,15 +420,6 @@ public class $pluginClass: NSObject, FlutterPlugin {
     Map<String, String>? environment,
   }) async {
     final bool isDarwin = target == 'ios' || target == 'macos';
-    if (template != 'plugin' && isDarwin) {
-      // ios-language option is only supported for plugins. Remove the -i flag and the next parameter, "swift" or
-      // "objc". This isn't proper arg parsing (for example doesn't handle -i=objc, but good enough for these tests
-      // since they blow up if -i is passed incorrectly.
-      final int indexOfIOSLanguage = options.indexOf('-i');
-      if (indexOfIOSLanguage != -1) {
-        options.removeRange(indexOfIOSLanguage, indexOfIOSLanguage + 2);
-      }
-    }
     await inDirectory(directory, () async {
       await flutter(
         'create',

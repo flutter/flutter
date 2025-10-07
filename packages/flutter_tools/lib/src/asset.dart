@@ -25,6 +25,84 @@ import 'license_collector.dart';
 import 'package_graph.dart';
 import 'project.dart';
 
+class FlutterHookResult {
+  const FlutterHookResult({
+    required this.buildStart,
+    required this.buildEnd,
+    required this.dataAssets,
+    required this.dependencies,
+  });
+
+  FlutterHookResult.empty()
+    : this(
+        buildStart: DateTime.fromMillisecondsSinceEpoch(0),
+        buildEnd: DateTime.fromMillisecondsSinceEpoch(0),
+        dataAssets: <HookAsset>[],
+        dependencies: <Uri>[],
+      );
+
+  final List<HookAsset> dataAssets;
+
+  /// The timestamp at which we start a build - so the timestamp of the inputs.
+  final DateTime buildStart;
+
+  /// The timestamp at which we finish a build - so the timestamp of the
+  /// outputs.
+  final DateTime buildEnd;
+
+  /// The dependencies of the build are used to check if the build needs to be
+  /// rerun.
+  final List<Uri> dependencies;
+
+  /// Whether caller may need to re-run the Dart build.
+  bool hasAnyModifiedFiles(FileSystem fileSystem) =>
+      _wasAnyFileModifiedSince(fileSystem, buildStart, dependencies);
+
+  /// Whether the files produced by the build are up-to-date.
+  ///
+  /// NOTICE: The build itself may be up-to-date but the output may not be (as
+  /// the output may be existing on disc and not be produced by the build
+  /// itself - in which case we may not need to re-build if the file changes,
+  /// but we may need to make a new asset bundle with the modified file).
+  bool isOutputDirty(FileSystem fileSystem) => _wasAnyFileModifiedSince(
+    fileSystem,
+    buildEnd,
+    dataAssets.map((HookAsset e) => e.file).toList(),
+  );
+
+  static bool _wasAnyFileModifiedSince(FileSystem fileSystem, DateTime since, List<Uri> uris) {
+    for (final uri in uris) {
+      final DateTime modified = fileSystem.statSync(uri.toFilePath()).modified;
+      if (modified.isAfter(since)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @override
+  String toString() {
+    return dataAssets.toString();
+  }
+}
+
+/// A convenience class to wrap native assets
+///
+/// When translating from a `DartHooksResult` to a [FlutterHookResult], where we
+/// need to have different classes to not import `isolated/` stuff.
+class HookAsset {
+  HookAsset({required this.file, required this.name, required this.package});
+
+  final Uri file;
+  final String name;
+  final String package;
+
+  @override
+  String toString() {
+    return 'HookAsset(file: $file, name: $name, package: $package)';
+  }
+}
+
 const defaultManifestPath = 'pubspec.yaml';
 
 const kFontManifestJson = 'FontManifest.json';
@@ -50,7 +128,7 @@ const kMaterialFonts = <Map<String, Object>>[
   },
 ];
 
-const kMaterialShaders = <String>['shaders/ink_sparkle.frag'];
+const kMaterialShaders = <String>['shaders/ink_sparkle.frag', 'shaders/stretch_effect.frag'];
 
 /// Injected factory class for spawning [AssetBundle] instances.
 abstract class AssetBundleFactory {
@@ -113,6 +191,7 @@ abstract class AssetBundle {
 
   /// Returns 0 for success; non-zero for failure.
   Future<int> build({
+    FlutterHookResult? flutterHookResult,
     String manifestPath = defaultManifestPath,
     required String packageConfigPath,
     bool deferredComponentsEnabled = false,
@@ -163,7 +242,8 @@ class ManifestAssetBundle implements AssetBundle {
        _platform = platform,
        _flutterRoot = flutterRoot,
        _splitDeferredAssets = splitDeferredAssets,
-       _licenseCollector = LicenseCollector(fileSystem: fileSystem);
+       _licenseCollector = LicenseCollector(fileSystem: fileSystem),
+       _lastHookResult = FlutterHookResult.empty();
 
   final Logger _logger;
   final FileSystem _fileSystem;
@@ -188,6 +268,8 @@ class ManifestAssetBundle implements AssetBundle {
 
   DateTime? _lastBuildTimestamp;
 
+  FlutterHookResult _lastHookResult;
+
   // We assume the main asset is designed for a device pixel ratio of 1.0.
   static const _kAssetManifestBinFilename = 'AssetManifest.bin';
   static const _kAssetManifestBinJsonFilename = 'AssetManifest.bin.json';
@@ -206,13 +288,19 @@ class ManifestAssetBundle implements AssetBundle {
 
   @override
   bool needsBuild({String manifestPath = defaultManifestPath}) {
-    final DateTime? lastBuildTimestamp = _lastBuildTimestamp;
-    if (lastBuildTimestamp == null) {
+    if (!wasBuiltOnce() ||
+        // We need to re-run the Dart build.
+        _lastHookResult.hasAnyModifiedFiles(_fileSystem) ||
+        // We don't have to re-run the Dart build, but some files the Dart build
+        // wants us to bundle have changed contents.
+        _lastHookResult.isOutputDirty(_fileSystem)) {
       return true;
     }
+    final DateTime lastBuildTimestamp = _lastBuildTimestamp!;
 
     final FileStat manifestStat = _fileSystem.file(manifestPath).statSync();
-    if (manifestStat.type == FileSystemEntityType.notFound) {
+    if (manifestStat.type == FileSystemEntityType.notFound ||
+        manifestStat.modified.isAfter(lastBuildTimestamp)) {
       return true;
     }
 
@@ -221,18 +309,19 @@ class ManifestAssetBundle implements AssetBundle {
         return true; // directory was deleted.
       }
       for (final File file in directory.listSync().whereType<File>()) {
-        final DateTime dateTime = file.statSync().modified;
-        if (dateTime.isAfter(lastBuildTimestamp)) {
+        final DateTime lastModified = file.statSync().modified;
+        if (lastModified.isAfter(lastBuildTimestamp)) {
           return true;
         }
       }
     }
 
-    return manifestStat.modified.isAfter(lastBuildTimestamp);
+    return false;
   }
 
   @override
   Future<int> build({
+    FlutterHookResult? flutterHookResult,
     String manifestPath = defaultManifestPath,
     FlutterProject? flutterProject,
     required String packageConfigPath,
@@ -256,6 +345,7 @@ class ManifestAssetBundle implements AssetBundle {
     // hang on hot reload, as the incremental dill files will never be copied to the
     // device.
     _lastBuildTimestamp = DateTime.now();
+    _lastHookResult = flutterHookResult ?? FlutterHookResult.empty();
     if (flutterManifest.isEmpty) {
       final ByteData emptyAssetManifest = const StandardMessageCodec().encodeMessage(
         <dynamic, dynamic>{},
@@ -418,9 +508,29 @@ class ManifestAssetBundle implements AssetBundle {
         );
       }
     }
+    for (final HookAsset dataAsset in flutterHookResult?.dataAssets ?? <HookAsset>[]) {
+      final Package package = packageConfig[dataAsset.package]!;
+      final Uri fileUri = dataAsset.file;
+
+      final String filePath = fileUri.toFilePath();
+
+      final asset = _Asset(
+        baseDir: _fileSystem.path.dirname(filePath),
+        relativeUri: Uri(path: _fileSystem.path.basename(filePath)),
+        entryUri: Uri.parse(_fileSystem.path.join('packages', dataAsset.package, dataAsset.name)),
+        package: package,
+      );
+      if (assetVariants.containsKey(asset)) {
+        _logger.printError(
+          'Conflicting assets: The asset "$asset" was declared in the pubspec and the hook.',
+        );
+        return 1;
+      }
+      assetVariants[asset] = <_Asset>[asset];
+    }
 
     // Save the contents of each image, image variant, and font
-    // asset in entries.
+    // asset in [entries].
     for (final _Asset asset in assetVariants.keys) {
       final File assetFile = asset.lookupAssetFile(_fileSystem);
       final List<_Asset> variants = assetVariants[asset]!;

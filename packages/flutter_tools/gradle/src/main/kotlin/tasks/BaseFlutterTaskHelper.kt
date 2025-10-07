@@ -13,7 +13,6 @@ import org.gradle.api.tasks.OutputFiles
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.process.ExecOperations
 import org.gradle.process.ExecSpec
-import java.nio.file.Paths
 
 /**
  * Stateless object to contain the logic used in [BaseFlutterTask]. Any required state should be stored
@@ -111,21 +110,7 @@ object BaseFlutterTaskHelper {
             baseFlutterTask.performanceMeasurementFile?.let {
                 args("--performance-measurement-file=$it")
             }
-            if (!baseFlutterTask.fastStart!! || baseFlutterTask.buildMode != "debug") {
-                args("-dTargetFile=${baseFlutterTask.targetPath}")
-            } else {
-                args(
-                    "-dTargetFile=${
-                        Paths.get(
-                            baseFlutterTask.flutterRoot!!.absolutePath,
-                            "examples",
-                            "splash",
-                            "lib",
-                            "main.dart"
-                        )
-                    }"
-                )
-            }
+            args("-dTargetFile=${baseFlutterTask.targetPath}")
             args("-dTargetPlatform=android")
             args("-dBuildMode=${baseFlutterTask.buildMode}")
             baseFlutterTask.trackWidgetCreation?.let {

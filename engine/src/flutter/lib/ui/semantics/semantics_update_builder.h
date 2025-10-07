@@ -68,7 +68,9 @@ class SemanticsUpdateBuilder
       std::string linkUrl,
       int role,
       const std::vector<std::string>& controlsNodes,
-      int validationResult);
+      int validationResult,
+      int inputType,
+      std::string locale);
 
   void updateCustomAction(int id,
                           std::string label,

@@ -214,7 +214,13 @@ class CkCanvas implements LayerCanvas {
   @override
   void drawParagraph(ui.Paragraph paragraph, ui.Offset offset) {
     assert(offsetIsValid(offset));
-    skCanvas.drawParagraph((paragraph as CkParagraph).skiaObject, offset.dx, offset.dy);
+    if (paragraph is CkParagraph) {
+      skCanvas.drawParagraph(paragraph.skiaObject, offset.dx, offset.dy);
+    } else if (paragraph is WebParagraph) {
+      paragraph.paint(this, offset);
+    } else {
+      throw UnimplementedError('Unknown paragraph type.');
+    }
   }
 
   @override

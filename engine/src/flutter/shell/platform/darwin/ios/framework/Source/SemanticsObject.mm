@@ -454,6 +454,17 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   return [self isFocusable];
 }
 
+- (NSString*)accessibilityLanguage {
+  if (![self isAccessibilityBridgeAlive]) {
+    return nil;
+  }
+
+  if (self.node.locale.empty()) {
+    return nil;
+  }
+  return @(self.node.locale.data());
+}
+
 - (bool)isFocusable {
   // If the node is scrollable AND hidden OR
   // The node has a label, value, or hint OR
@@ -778,6 +789,11 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 }
 
 - (BOOL)accessibilityRespondsToUserInteraction {
+  // If isAccessibilityFocusable has a value, use it. otherwise fall back to the default logic.
+  if (self.node.flags.isAccessibilityFocusable != flutter::SemanticsTristate::kNone) {
+    return self.node.flags.isAccessibilityFocusable == flutter::SemanticsTristate::kTrue;
+  }
+
   // Return true only if the node contains actions other than system actions.
   if ((self.node.actions & ~flutter::kSystemActions) != 0) {
     return true;

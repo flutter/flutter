@@ -58,7 +58,11 @@ class Surface {
 
   // Main thread only
   void dispose();
-  uint32_t renderPictures(flutter::DisplayList** picture, int count);
+  void setResourceCacheLimit(int bytes);
+  uint32_t renderPictures(flutter::DisplayList** picture,
+                          int width,
+                          int height,
+                          int count);
   uint32_t rasterizeImage(SkImage* image, ImageByteFormat format);
   void setCallbackHandler(CallbackHandler* callbackHandler);
   void onRenderComplete(uint32_t callbackId, SkwasmObject imageBitmap);
@@ -70,6 +74,8 @@ class Surface {
 
   // Worker thread
   void renderPicturesOnWorker(sk_sp<flutter::DisplayList>* picture,
+                              int width,
+                              int height,
                               int pictureCount,
                               uint32_t callbackId,
                               double rasterStart);
@@ -79,7 +85,7 @@ class Surface {
 
  private:
   void _init();
-  void _resizeCanvasToFit(int width, int height);
+  void _resizeSurface(int width, int height);
   void _recreateSurface();
 
   CallbackHandler* _callbackHandler = nullptr;

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -462,6 +463,8 @@ void main() {
         onDidLoseAccessibilityFocus: () =>
             performedActions.add(SemanticsAction.didLoseAccessibilityFocus),
         onFocus: () => performedActions.add(SemanticsAction.focus),
+        onExpand: () => performedActions.add(SemanticsAction.expand),
+        onCollapse: () => performedActions.add(SemanticsAction.collapse),
       ),
     );
 
@@ -522,6 +525,8 @@ void main() {
         case SemanticsAction.showOnScreen:
         case SemanticsAction.tap:
         case SemanticsAction.focus:
+        case SemanticsAction.expand:
+        case SemanticsAction.collapse:
           semanticsOwner.performAction(expectedId, action);
       }
       expect(performedActions.length, expectedLength);
@@ -553,6 +558,7 @@ void main() {
         readOnly: true,
         focused: true,
         focusable: true,
+        accessibilityFocusable: true,
         inMutuallyExclusiveGroup: true,
         header: true,
         obscured: true,
@@ -565,12 +571,30 @@ void main() {
         isRequired: true,
       ),
     );
-    final List<SemanticsFlag> flags = SemanticsFlag.values.toList();
-    flags
-      ..remove(SemanticsFlag.hasToggledState)
-      ..remove(SemanticsFlag.isToggled)
-      ..remove(SemanticsFlag.hasImplicitScrolling)
-      ..remove(SemanticsFlag.isCheckStateMixed);
+    SemanticsFlags flags = SemanticsFlags(
+      isChecked: CheckedState.isTrue,
+      isSelected: Tristate.isTrue,
+      isEnabled: Tristate.isTrue,
+      isExpanded: Tristate.isTrue,
+      isRequired: Tristate.isTrue,
+      isFocused: Tristate.isTrue,
+      isAccessibilityFocusable: Tristate.isTrue,
+      isButton: true,
+      isTextField: true,
+      isInMutuallyExclusiveGroup: true,
+      isObscured: true,
+      scopesRoute: true,
+      namesRoute: true,
+      isHidden: true,
+      isImage: true,
+      isHeader: true,
+      isLiveRegion: true,
+      isMultiline: true,
+      isReadOnly: true,
+      isLink: true,
+      isSlider: true,
+      isKeyboardKey: true,
+    );
 
     TestSemantics expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
@@ -619,6 +643,7 @@ void main() {
         readOnly: true,
         focused: true,
         focusable: true,
+        accessibilityFocusable: true,
         inMutuallyExclusiveGroup: true,
         header: true,
         obscured: true,
@@ -631,9 +656,7 @@ void main() {
         isRequired: true,
       ),
     );
-    flags
-      ..remove(SemanticsFlag.isChecked)
-      ..add(SemanticsFlag.isCheckStateMixed);
+    flags = flags.copyWith(isChecked: CheckedState.mixed);
     semantics.dispose();
     expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
@@ -807,6 +830,70 @@ void main() {
           const CustomSemanticsAction(label: 'action1'),
           const CustomSemanticsAction(label: 'action2'),
         ],
+      ),
+    );
+
+    semantics.dispose();
+  });
+  testWidgets('accessibilityFocusable flag value is passed from parent to subtree,', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      Semantics(
+        container: true,
+        accessibilityFocusable: true,
+        child: Column(
+          children: <Widget>[
+            // If the child has a value for accessibilityFocusable, It's valid.
+            Semantics(
+              container: true,
+              accessibilityFocusable: false,
+              customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
+                const CustomSemanticsAction(label: 'action1'): () {},
+              },
+              child: const SizedBox(width: 10, height: 10),
+            ),
+            // If the child doesn't have a value for accessibilityFocusable, it will use the parent data.
+            Semantics(
+              container: true,
+              customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
+                const CustomSemanticsAction(label: 'action2'): () {},
+              },
+              child: const SizedBox(width: 10, height: 10),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              id: 1,
+              flags: SemanticsFlags(isAccessibilityFocusable: Tristate.isTrue),
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 2,
+                  flags: SemanticsFlags(isAccessibilityFocusable: Tristate.isFalse),
+                  actions: <SemanticsAction>[SemanticsAction.customAction],
+                ),
+                TestSemantics(
+                  id: 3,
+                  flags: SemanticsFlags(isAccessibilityFocusable: Tristate.isTrue),
+                  actions: <SemanticsAction>[SemanticsAction.customAction],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreTransform: true,
+        ignoreRect: true,
+        ignoreId: true,
       ),
     );
 

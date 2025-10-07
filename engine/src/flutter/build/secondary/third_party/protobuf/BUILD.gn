@@ -69,7 +69,7 @@ config("protobuf_warnings") {
       "-Wno-sign-compare",
       "-Wno-unused-function",
       "-Wno-unused-private-field",
-      "-Wno-deprecated-declarations", # Mac deprecated sprintf
+      "-Wno-deprecated-declarations",  # Mac deprecated sprintf
     ]
   }
 }
@@ -530,7 +530,9 @@ if (current_toolchain == host_toolchain) {
   }
 
   executable("protoc") {
-    sources = [ "//flutter/third_party/protobuf/src/google/protobuf/compiler/main.cc" ]
+    sources = [
+      "//flutter/third_party/protobuf/src/google/protobuf/compiler/main.cc",
+    ]
     deps = [ ":protoc_lib" ]
   }
 }

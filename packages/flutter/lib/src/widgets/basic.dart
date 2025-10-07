@@ -1778,7 +1778,53 @@ class Transform extends SingleChildRenderObjectWidget {
   /// [Directionality.of] returns [TextDirection.rtl].
   final AlignmentGeometry? alignment;
 
-  /// Whether to apply the transformation when performing hit tests.
+  /// Whether to transform registered hits into the child's resulting coordinate system.
+  ///
+  /// When `true`, hit coordinates within the parent's bounds are transformed to match
+  /// where the child appears visually after any transformation such as translation,
+  /// rotation, scaling, or skewing.
+  ///
+  /// When `false`, hit coordinates are not transformed, potentially causing taps to
+  /// register in a different location relative to the child's visual position.
+  ///
+  /// **Important:** Even when [transformHitTests] is true, children cannot
+  /// receive events outside the parent's bounds. Hit testing always starts
+  /// with the parent's own bounds check in [RenderBox.hitTest]. If the pointer
+  /// is outside the parent's bounds, [RenderBox.hitTestChildren] is not
+  /// invoked and the children are not considered for hit testing.
+  ///
+  /// For interactive elements that need to be tappable outside their parent's
+  /// original bounds, consider:
+  /// - Expanding the parent widget's bounds to encompass the transformed child.
+  /// - Using an [OverlayEntry] or [OverlayPortal] to place the widget in an
+  ///   [Overlay].
+  /// - Restructuring the widget hierarchy.
+  ///
+  /// {@tool snippet}
+  /// This example shows a `Container` that is scaled up. Even though it appears
+  /// larger, taps are only registered within the original 100x100 area of the
+  /// parent `SizedBox`.
+  ///
+  /// ```dart
+  /// Center(
+  ///   child: SizedBox(
+  ///     width: 100.0,
+  ///     height: 100.0,
+  ///     child: Transform.scale(
+  ///       scale: 2.0,
+  ///       child: GestureDetector(
+  ///         onTap: () => debugPrint('Tapped!'),
+  ///         child: const ColoredBox(
+  ///           color: Colors.purple,
+  ///         ),
+  ///       ),
+  ///     ),
+  ///   ),
+  /// )
+  /// ```
+  /// {@end-tool}
+  ///
+  /// Defaults to true.
   final bool transformHitTests;
 
   /// The filter quality with which to apply the transform as a bitmap operation.
@@ -3945,6 +3991,7 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
     required bool? readOnly,
     required bool? focusable,
     required bool? focused,
+    required bool? accessibilityFocusable,
     required bool? inMutuallyExclusiveGroup,
     required bool? obscured,
     required bool? multiline,
@@ -3993,6 +4040,8 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
     required VoidCallback? onDidGainAccessibilityFocus,
     required VoidCallback? onDidLoseAccessibilityFocus,
     required VoidCallback? onFocus,
+    required VoidCallback? onExpand,
+    required VoidCallback? onCollapse,
     required Map<CustomSemanticsAction, VoidCallback>? customSemanticsActions,
     required SemanticsRole? role,
     required Set<String>? controlsNodes,
@@ -4025,6 +4074,7 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
            readOnly: readOnly,
            focusable: focusable,
            focused: focused,
+           accessibilityFocusable: accessibilityFocusable,
            inMutuallyExclusiveGroup: inMutuallyExclusiveGroup,
            obscured: obscured,
            multiline: multiline,
@@ -4070,6 +4120,8 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
            onDismiss: onDismiss,
            onSetSelection: onSetSelection,
            onSetText: onSetText,
+           onExpand: onExpand,
+           onCollapse: onCollapse,
            customSemanticsActions: customSemanticsActions,
            hintOverrides: onTapHint != null || onLongPressHint != null
                ? SemanticsHintOverrides(onTapHint: onTapHint, onLongPressHint: onLongPressHint)
@@ -4269,6 +4321,7 @@ class SliverSemantics extends _SemanticsBase {
     super.readOnly,
     super.focusable,
     super.focused,
+    super.accessibilityFocusable,
     super.inMutuallyExclusiveGroup,
     super.obscured,
     super.multiline,
@@ -4317,6 +4370,8 @@ class SliverSemantics extends _SemanticsBase {
     super.onDidGainAccessibilityFocus,
     super.onDidLoseAccessibilityFocus,
     super.onFocus,
+    super.onExpand,
+    super.onCollapse,
     super.customSemanticsActions,
     super.role,
     super.controlsNodes,
@@ -7842,6 +7897,7 @@ class Semantics extends _SemanticsBase {
     super.readOnly,
     super.focusable,
     super.focused,
+    super.accessibilityFocusable,
     super.inMutuallyExclusiveGroup,
     super.obscured,
     super.multiline,
@@ -7890,6 +7946,8 @@ class Semantics extends _SemanticsBase {
     super.onDidGainAccessibilityFocus,
     super.onDidLoseAccessibilityFocus,
     super.onFocus,
+    super.onExpand,
+    super.onCollapse,
     super.customSemanticsActions,
     super.role,
     super.controlsNodes,

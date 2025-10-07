@@ -48,15 +48,18 @@ WidgetPreviewerWidgetScaffolding previewForBrightness({
   required Key key,
   Brightness? brightness,
   Brightness? platformBrightness,
-  PreviewThemeData? previewThemeData,
+  PreviewTheme? previewTheme,
 }) {
+  final controller = FakeWidgetPreviewScaffoldController();
   return WidgetPreviewerWidgetScaffolding(
     platformBrightness: platformBrightness ?? Brightness.light,
     child: WidgetPreviewWidget(
+      controller: controller,
       preview: WidgetPreview(
+        scriptUri: '',
         builder: () => Text('Foo', key: key),
-        theme: previewThemeData,
-        brightness: brightness,
+        previewData: Preview(theme: previewTheme, brightness: brightness),
+        packageName: '',
       ),
     ),
   );
@@ -85,7 +88,7 @@ void main() {
     WidgetPreviewerWidgetScaffolding widgetPreview = previewForBrightness(
       key: key,
       brightness: Brightness.light,
-      previewThemeData: previewThemeData,
+      previewTheme: () => previewThemeData,
     );
     await tester.pumpWidget(widgetPreview);
 
@@ -99,7 +102,7 @@ void main() {
     widgetPreview = previewForBrightness(
       key: key,
       brightness: Brightness.dark,
-      previewThemeData: previewThemeData,
+      previewTheme: () => previewThemeData,
     );
     await tester.pumpWidget(widgetPreview);
 
@@ -147,7 +150,7 @@ void main() {
     WidgetPreviewerWidgetScaffolding widgetPreview = previewForBrightness(
       key: key,
       brightness: Brightness.light,
-      previewThemeData: previewThemeData,
+      previewTheme: () => previewThemeData,
     );
     await tester.pumpWidget(widgetPreview);
 
@@ -188,7 +191,7 @@ void main() {
       // Start with no explicit brightness set. This should use the system brightness (light).
       WidgetPreviewerWidgetScaffolding widgetPreview = previewForBrightness(
         key: key,
-        previewThemeData: previewThemeData,
+        previewTheme: () => previewThemeData,
       );
       await tester.pumpWidget(widgetPreview);
 
@@ -233,7 +236,7 @@ void main() {
       // Set an initial brightness for the preview to 'light'.
       widgetPreview = previewForBrightness(
         key: key,
-        previewThemeData: previewThemeData,
+        previewTheme: () => previewThemeData,
         brightness: Brightness.light,
       );
       await tester.pumpWidget(widgetPreview);
@@ -253,7 +256,7 @@ void main() {
       // cause the preview to use the dark theme.
       widgetPreview = previewForBrightness(
         key: key,
-        previewThemeData: previewThemeData,
+        previewTheme: () => previewThemeData,
         brightness: Brightness.dark,
       );
       await tester.pumpWidget(widgetPreview);

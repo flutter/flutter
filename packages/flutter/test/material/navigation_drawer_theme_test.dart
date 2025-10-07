@@ -117,20 +117,20 @@ void main() {
       // Test icon.
       expect(
         _iconStyle(tester, Icons.ac_unit)?.color,
-        navigationDrawerTheme.iconTheme?.resolve(<MaterialState>{})?.color,
+        navigationDrawerTheme.iconTheme?.resolve(<WidgetState>{})?.color,
       );
       expect(
         _iconStyle(tester, Icons.access_alarm)?.color,
-        navigationDrawerTheme.iconTheme?.resolve(<MaterialState>{})?.color,
+        navigationDrawerTheme.iconTheme?.resolve(<WidgetState>{})?.color,
       );
       // Test label.
       expect(
         _labelStyle(tester, 'AC'),
-        navigationDrawerTheme.labelTextStyle?.resolve(<MaterialState>{}),
+        navigationDrawerTheme.labelTextStyle?.resolve(<WidgetState>{}),
       );
       expect(
         _labelStyle(tester, 'Alarm'),
-        navigationDrawerTheme.labelTextStyle?.resolve(<MaterialState>{}),
+        navigationDrawerTheme.labelTextStyle?.resolve(<WidgetState>{}),
       );
     },
   );

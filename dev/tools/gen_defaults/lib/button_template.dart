@@ -19,8 +19,8 @@ class ButtonTemplate extends TokenTemplate {
     if (tokenAvailable('$tokenGroup.container.color')) {
       return '''
 
-    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return ${componentColor('$tokenGroup.disabled.container')};
       }
       return ${componentColor('$tokenGroup.container')};
@@ -35,17 +35,17 @@ class ButtonTemplate extends TokenTemplate {
     if (tokenAvailable('$tokenGroup.container.elevation')) {
       return '''
 
-    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return ${elevation("$tokenGroup.disabled.container")};
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return ${elevation("$tokenGroup.pressed.container")};
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return ${elevation("$tokenGroup.hover.container")};
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return ${elevation("$tokenGroup.focus.container")};
       }
       return ${elevation("$tokenGroup.container")};
@@ -87,8 +87,8 @@ class _${blockName}DefaultsM3 extends ButtonStyle {
 
   @override
   WidgetStateProperty<Color?>? get foregroundColor =>
-    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return ${componentColor('$tokenGroup.disabled.label-text')};
       }
       return ${componentColor('$tokenGroup.label-text')};
@@ -96,14 +96,14 @@ class _${blockName}DefaultsM3 extends ButtonStyle {
 
   @override
   WidgetStateProperty<Color?>? get overlayColor =>
-    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
         return ${componentColor('$tokenGroup.pressed.state-layer')};
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return ${componentColor('$tokenGroup.hover.state-layer')};
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return ${componentColor('$tokenGroup.focus.state-layer')};
       }
       return null;
@@ -136,17 +136,17 @@ class _${blockName}DefaultsM3 extends ButtonStyle {
 
   @override
   WidgetStateProperty<Color>? get iconColor {
-    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return ${color('$tokenGroup.with-icon.disabled.icon.color')}.withOpacity(${opacity("$tokenGroup.with-icon.disabled.icon.opacity")});
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return ${color('$tokenGroup.with-icon.pressed.icon.color')};
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return ${color('$tokenGroup.with-icon.hover.icon.color')};
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return ${color('$tokenGroup.with-icon.focus.icon.color')};
       }
       return ${color('$tokenGroup.with-icon.icon.color')};
@@ -160,11 +160,11 @@ class _${blockName}DefaultsM3 extends ButtonStyle {
 ${tokenAvailable("$tokenGroup.outline.color") ? '''
   @override
   WidgetStateProperty<BorderSide>? get side =>
-    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
       return ${border("$tokenGroup.disabled.outline")};
     }
-    if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.focused)) {
       return ${border('$tokenGroup.focus.outline')};
     }
     return ${border("$tokenGroup.outline")};
@@ -177,8 +177,8 @@ ${tokenAvailable("$tokenGroup.outline.color") ? '''
 
   @override
   WidgetStateProperty<MouseCursor?>? get mouseCursor =>
-    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return SystemMouseCursors.basic;
       }
       return SystemMouseCursors.click;

@@ -223,4 +223,13 @@ void main() {
     expect(() => Divider.createBorderSide(null), isNot(throwsAssertionError));
     expect(() => Divider.createBorderSide(null), isNot(throwsNoSuchMethodError));
   });
+
+  testWidgets('VerticalDivider does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(child: SizedBox.shrink(child: VerticalDivider())),
+      ),
+    );
+    expect(tester.getSize(find.byType(VerticalDivider)), Size.zero);
+  });
 }
