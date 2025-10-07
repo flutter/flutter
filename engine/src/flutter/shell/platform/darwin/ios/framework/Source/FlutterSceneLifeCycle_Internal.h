@@ -14,9 +14,21 @@
  */
 @interface FlutterPluginSceneLifeCycleDelegate ()
 
-- (void)addFlutterEngine:(FlutterEngine*)engine;
+/**
+ * Associates the `FlutterEngine` with the `FlutterPluginSceneLifeCycleDelegate` so that it will
+ * forward scene events to the plugins within the engine.
+ *
+ * Returns NO if the engine is already associated with the delegate.
+ */
+- (BOOL)addFlutterManagedEngine:(FlutterEngine*)engine;
 
-- (void)removeFlutterEngine:(FlutterEngine*)engine;
+/**
+ * Removes the `FlutterEngine` from the `FlutterPluginSceneLifeCycleDelegate` so that it will no
+ * longer forward scene events to the plugins within the engine.
+ *
+ * Returns NO if the engine is not associated with the delegate.
+ */
+- (BOOL)removeFlutterManagedEngine:(FlutterEngine*)engine;
 
 - (void)engine:(FlutterEngine*)engine receivedConnectNotificationFor:(UIScene*)scene;
 
