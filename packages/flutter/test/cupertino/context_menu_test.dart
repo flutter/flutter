@@ -1453,4 +1453,91 @@ void main() {
       );
     });
   });
+
+  testWidgets('CupertinoContextMenu respects available screen width - Portrait', (
+    WidgetTester tester,
+  ) async {
+    const Size portraitScreenSize = Size(300.0, 350.0);
+    await binding.setSurfaceSize(portraitScreenSize);
+    addTearDown(() => binding.setSurfaceSize(null));
+
+    final Widget child = getChild();
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(size: portraitScreenSize),
+        child: CupertinoApp(
+          home: Center(
+            child: CupertinoContextMenu(
+              actions: <Widget>[
+                CupertinoContextMenuAction(child: const Text('Test'), onPressed: () {}),
+              ],
+              child: child,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byWidget(child), findsOneWidget);
+    final Rect childRect = tester.getRect(find.byWidget(child));
+
+    // Start a press on the child.
+    final TestGesture gesture = await tester.startGesture(childRect.center);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), null);
+
+    // Verify the child width is constrained correctly.
+    expect(findStatic(), findsOneWidget);
+    final Size fittedBoxSize = tester.getSize(findFittedBox());
+    // availableWidth = 300.0 (screen width) - 2 * 20.0 (padding) = 260.0
+    expect(fittedBoxSize.width, 260.0);
+  });
+
+  testWidgets('CupertinoContextMenu respects available screen width - Landscape', (
+    WidgetTester tester,
+  ) async {
+    const Size landscapeScreenSize = Size(350.0, 300.0);
+    await binding.setSurfaceSize(landscapeScreenSize);
+    addTearDown(() => binding.setSurfaceSize(null));
+
+    final Widget child = getChild(width: 500);
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(size: landscapeScreenSize),
+        child: CupertinoApp(
+          home: Center(
+            child: CupertinoContextMenu(
+              actions: <Widget>[
+                CupertinoContextMenuAction(child: const Text('Test'), onPressed: () {}),
+              ],
+              child: child,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byWidget(child), findsOneWidget);
+    final Rect childRect = tester.getRect(find.byWidget(child));
+
+    // Start a press on the child.
+    final TestGesture gesture = await tester.startGesture(childRect.center);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), null);
+
+    // Verify the child width is constrained correctly.
+    expect(findStatic(), findsOneWidget);
+    final Size fittedBoxSize = tester.getSize(findFittedBox());
+    // availableWidth = 350.0 (screen width) - 2 * 20.0 (padding) = 310.0
+    // availableWidthForChild = 310.0 - 250.0 (menu width) = 60.0
+    expect(fittedBoxSize.width, 60.0);
+  });
 }

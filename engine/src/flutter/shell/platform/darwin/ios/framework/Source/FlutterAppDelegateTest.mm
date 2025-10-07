@@ -10,6 +10,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Test.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Test.h"
 
 FLUTTER_ASSERT_ARC
@@ -19,6 +20,7 @@ FLUTTER_ASSERT_ARC
 @property(strong) FlutterViewController* viewController;
 @property(strong) id mockMainBundle;
 @property(strong) id mockNavigationChannel;
+@property(strong) FlutterEngine* engine;
 
 // Retain callback until the tests are done.
 // https://github.com/flutter/flutter/issues/74267
@@ -46,6 +48,7 @@ FLUTTER_ASSERT_ARC
   FlutterEngine* engine = OCMClassMock([FlutterEngine class]);
   OCMStub([engine navigationChannel]).andReturn(navigationChannel);
   OCMStub([viewController engine]).andReturn(engine);
+  self.engine = engine;
 
   id mockEngineFirstFrameCallback = [OCMArg invokeBlockWithArgs:@NO, nil];
   self.mockEngineFirstFrameCallback = mockEngineFirstFrameCallback;
@@ -194,7 +197,7 @@ FLUTTER_ASSERT_ARC
       .andReturn(@YES);
   NSUserActivity* userActivity = [[NSUserActivity alloc] initWithActivityType:@"com.example.test"];
   userActivity.webpageURL = [NSURL URLWithString:@"http://myApp/custom/route?query=nonexist"];
-  OCMStub([self.viewController sendDeepLinkToFramework:[OCMArg any] completionHandler:[OCMArg any]])
+  OCMStub([self.engine sendDeepLinkToFramework:[OCMArg any] completionHandler:[OCMArg any]])
       .andDo(^(NSInvocation* invocation) {
         void (^handler)(BOOL success);
         [invocation getArgument:&handler atIndex:3];

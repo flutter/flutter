@@ -30,6 +30,8 @@ class SnapshotControllerSkia : public SnapshotController {
   void CacheRuntimeStage(
       const std::shared_ptr<impeller::RuntimeStage>& runtime_stage) override;
 
+  bool MakeRenderContextCurrent() override;
+
  private:
   sk_sp<DlImage> DoMakeRasterSnapshot(
       DlISize size,
