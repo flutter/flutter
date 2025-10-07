@@ -385,4 +385,15 @@ void main() {
       SystemMouseCursors.cell,
     );
   });
+
+  testWidgets('DrawerButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: Scaffold(body: DrawerButton())),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(DrawerButton)), Size.zero);
+  });
 }

@@ -653,7 +653,7 @@ class _WidgetBorderSideMapper extends WidgetStateMapper<BorderSide?>
 /// implementation of [WidgetStateOutlinedBorder], that resolves to
 /// [RoundedRectangleBorder] when its widget is selected.
 ///
-/// ** See code in examples/api/lib/material/material_state/material_state_outlined_border.0.dart **
+/// ** See code in examples/api/lib/widgets/widget_state/widget_state_outlined_border.0.dart **
 /// {@end-tool}
 ///
 /// This class should only be used for parameters which are documented to take
@@ -662,8 +662,6 @@ class _WidgetBorderSideMapper extends WidgetStateMapper<BorderSide?>
 /// See also:
 ///
 ///  * [ShapeBorder] the base class for shape outlines.
-///  * [MaterialStateOutlinedBorder], the Material specific version of
-///    `WidgetStateOutlinedBorder`.
 abstract class WidgetStateOutlinedBorder extends OutlinedBorder
     implements WidgetStateProperty<OutlinedBorder?> {
   /// Abstract const constructor. This constructor enables subclasses to provide
@@ -732,11 +730,6 @@ class _WidgetOutlinedBorderMapper extends WidgetStateMapper<OutlinedBorder?>
 ///   2. Use [WidgetStateTextStyle.resolveWith] and pass in a callback that
 ///      will be used to resolve the text style in the given states.
 ///   3. Use [WidgetStateTextStyle.fromMap] to assign a style using a [WidgetStateMap].
-///
-/// See also:
-///
-///  * [MaterialStateTextStyle], the Material specific version of
-///    `WidgetStateTextStyle`.
 abstract class WidgetStateTextStyle extends TextStyle implements WidgetStateProperty<TextStyle> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
