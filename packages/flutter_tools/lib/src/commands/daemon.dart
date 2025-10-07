@@ -796,15 +796,18 @@ class AppDomain extends Domain {
       // As it just writes to stdout.
       unawaited(
         connectionInfoCompleter.future.then<void>((DebugConnectionInfo info) {
-          final params = <String, Object?>{
+          _sendAppEvent(app, 'debugPort', {
             // The web vmservice proxy does not have an http address.
             'port': info.httpUri?.port ?? info.wsUri!.port,
             'wsUri': info.wsUri.toString(),
-          };
-          if (info.baseUri != null) {
-            params['baseUri'] = info.baseUri;
+            'baseUri': ?info.baseUri,
+          });
+          if (info.devToolsUri != null) {
+            _sendAppEvent(app, 'devTools', {'uri': info.devToolsUri!.toString()});
           }
-          _sendAppEvent(app, 'debugPort', params);
+          if (info.dtdUri != null) {
+            _sendAppEvent(app, 'dtd', {'uri': info.dtdUri!.toString()});
+          }
         }),
       );
     }

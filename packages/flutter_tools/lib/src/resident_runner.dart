@@ -1867,11 +1867,14 @@ class TerminalHandler {
 }
 
 class DebugConnectionInfo {
-  DebugConnectionInfo({this.httpUri, this.wsUri, this.baseUri});
+  DebugConnectionInfo({this.httpUri, this.wsUri, this.baseUri, this.dtdUri, this.devToolsUri});
 
   final Uri? httpUri;
   final Uri? wsUri;
   final String? baseUri;
+
+  final Uri? dtdUri;
+  final Uri? devToolsUri;
 }
 
 /// Returns the next platform value for the switcher.
