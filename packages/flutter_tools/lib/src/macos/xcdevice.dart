@@ -480,10 +480,7 @@ class XCDevice {
 
     var coreDevices = <IOSCoreDevice>[];
     if (_xcode.isDevicectlInstalled) {
-      coreDevices = await _coreDeviceControl.getCoreDevices(
-        timeout: timeout ?? const Duration(seconds: 30),
-        cancelCompleter: cancelCompleter,
-      );
+      coreDevices = await _coreDeviceControl.getCoreDevices(cancelCompleter: cancelCompleter);
     }
     if (cancelCompleter.isCompleted) {
       return const <IOSDevice>[];
