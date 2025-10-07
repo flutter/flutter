@@ -888,8 +888,8 @@ class ResidentWebRunner extends ResidentRunner {
           connectionInfoCompleter?.complete(
             DebugConnectionInfo(
               wsUri: websocketUri,
-              devToolsUri: device.dds.devToolsUri,
-              dtdUri: device.dds.dtdUri,
+              devToolsUri: Uri.tryParse(debugConnection.devToolsUri ?? ''),
+              // TODO(bkonyi): surface DTD URI once it's visible from DWDS
             ),
           );
         }),

@@ -609,6 +609,10 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
       withDevtools: !noDevtools,
       startPaused: startPaused,
       waitForDebugPort: device != WebServerDevice.kWebServerDeviceId && !wasm,
+      waitForDtdAndDevTools:
+          device != WebServerDevice.kWebServerDeviceId &&
+          device != GoogleChromeDevice.kChromeDeviceId &&
+          !noDevtools,
       pauseOnExceptions: pauseOnExceptions,
       script: script,
       verbose: verbose,
@@ -651,6 +655,7 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
     bool startPaused = false,
     bool pauseOnExceptions = false,
     bool waitForDebugPort = false,
+    bool waitForDtdAndDevTools = true,
     bool verbose = false,
     int? attachPort,
   }) async {
@@ -712,7 +717,7 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
         if (waitForDebugPort || withDebugger || attachPort != null) {
           debugPort = await _waitFor(event: 'app.debugPort', timeout: appStartTimeout);
         }
-        if (withDebugger && withDevtools) {
+        if (withDebugger && waitForDtdAndDevTools) {
           await Future.wait([devTools, dtd]);
         }
         if (withDebugger || attachPort != null) {
