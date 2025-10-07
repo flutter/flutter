@@ -56,15 +56,18 @@ enum FontStyle {
 ///
 /// Some modern fonts allow the weight to be adjusted in arbitrary increments.
 /// When using these fonts, applications can specify [FontWeight] instances
-/// constructed using values other than the predefined values.
+/// constructed using values other than the predefined values. For these fonts,
+/// [FontWeight] will set the value of the `wght` axis (producing the same
+/// results as explicitly setting that attribute using [FontVariation.weight]).
 class FontWeight {
-  /// Create a [FontWeight] object, which can be added to a [TextStyle] to
+  /// Creates a [FontWeight] object, which can be added to a [TextStyle] to
   /// select the thickness of a font's glyphs.
   const FontWeight(this.value)
     : assert(value >= 1, 'Font weight must be between 1 and 1000'),
       assert(value <= 1000, 'Font weight must be between 1 and 1000');
 
   /// The encoded integer value of this font weight.
+  @Deprecated('Use value, which is more precise.')
   int get index => (value ~/ 100 - 1).clamp(0, 8);
 
   /// The thickness value of this font weight.
