@@ -5096,6 +5096,15 @@ void main() {
 
     expect(tester.getRect(findMenuPanels()).width, 800.0 - reservedPadding.horizontal);
   });
+
+  testWidgets('MenuAcceleratorLabel does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(child: SizedBox.shrink(child: MenuAcceleratorLabel('X'))),
+      ),
+    );
+    expect(tester.getSize(find.byType(MenuAcceleratorLabel)), Size.zero);
+  });
 }
 
 List<Widget> createTestMenus({
