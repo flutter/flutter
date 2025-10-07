@@ -103,7 +103,8 @@ void main() {
   }) {
     final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
     final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
-    final destination = configuration == 'Debug' || darwinArchs != null
+    final bool shouldUseSpecificArch = configuration == 'Debug' || darwinArchs != null;
+    final destination = shouldUseSpecificArch
         ? 'platform=macOS,arch=$hostPlatformArch'
         : 'generic/platform=macOS';
     return FakeCommand(
@@ -125,6 +126,11 @@ void main() {
         'SYMROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
         if (verbose) 'VERBOSE_SCRIPT_LOGGING=YES' else '-quiet',
         'COMPILER_INDEX_STORE_ENABLE=NO',
+        if (darwinArchs != null) ...[
+          'ARCHS=$hostPlatformArch',
+          'ONLY_ACTIVE_ARCH=YES',
+          'EXCLUDED_ARCHS=${hostPlatformArch == 'arm64' ? 'x86_64' : 'arm64'}',
+        ],
         ...?additionalCommandArguments,
       ],
       stdout: '''

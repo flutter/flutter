@@ -239,6 +239,11 @@ Future<void> buildMacOS({
         'SYMROOT=${globals.fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
         if (verboseLogging) 'VERBOSE_SCRIPT_LOGGING=YES' else '-quiet',
         'COMPILER_INDEX_STORE_ENABLE=NO',
+        if (darwinArchs != null) ...[
+          'ARCHS=$arch',
+          'ONLY_ACTIVE_ARCH=YES',
+          'EXCLUDED_ARCHS=${arch == 'arm64' ? 'x86_64' : 'arm64'}',
+        ],
         if (disabledSandboxEntitlementFile != null)
           'CODE_SIGN_ENTITLEMENTS=${disabledSandboxEntitlementFile.path}',
         ...environmentVariablesAsXcodeBuildSettings(globals.platform),
