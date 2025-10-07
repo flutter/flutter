@@ -179,7 +179,6 @@
 					};
 					7831F33E2E8E1F8A00BBDDC3 = {
 						CreatedOnToolsVersion = 16.3;
-						LastSwiftMigration = 2600;
 						TestTargetID = 7831F3272E8E1F8800BBDDC3;
 					};
 				};
@@ -192,8 +191,6 @@
 				Base,
 			);
 			mainGroup = 7831F31F2E8E1F8800BBDDC3;
-			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
 			productRefGroup = 7831F3292E8E1F8800BBDDC3 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
