@@ -8456,7 +8456,7 @@ void main() {
     );
 
     // InputDecoration (baseDecoration) defines InputDecoration properties
-    final MaterialStateOutlineInputBorder border = MaterialStateOutlineInputBorder.resolveWith((
+    final WidgetStateInputBorder border = WidgetStateInputBorder.resolveWith((
       Set<WidgetState> states,
     ) {
       return const OutlineInputBorder();
@@ -8522,7 +8522,7 @@ void main() {
     expect(decoration.counterStyle, decorationStyle);
     expect(decoration.filled, false);
     expect(decoration.fillColor, Colors.blue);
-    expect(decoration.border, isA<MaterialStateOutlineInputBorder>());
+    expect(decoration.border, isA<WidgetStateInputBorder>());
     expect(decoration.alignLabelWithHint, false);
     expect(
       decoration.constraints,
