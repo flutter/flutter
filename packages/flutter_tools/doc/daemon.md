@@ -198,13 +198,13 @@ This is sent once a web application is being served and available for the user t
 #### app.devTools
 
 This is sent after the [`app.debugPort`](#appdebugPort) event if DevTools is being served for this application instance. The
-`params` field will be a map with the string `url` field containing the DevTools URI with query parameters already set to connect
+`params` field will be a map with the string `uri` field containing the DevTools URI with query parameters already set to connect
 to the running application.
 
 #### app.dtd
 
 This is sent after the [`app.debugPort`](#appdebugPort) event if the Dart Tooling Daemon (DTD) is being served for this application
-instance. The `params` field will be a map with the string `url` field containing the DTD URI.
+instance. The `params` field will be a map with the string `uri` field containing the DTD URI.
 
 ### Daemon-to-Editor Requests
 
