@@ -130,7 +130,7 @@ bool InternalFlutterGpu_Texture_Initialize(Dart_Handle wrapper,
   }
   desc.type = static_cast<impeller::TextureType>(texture_type);
   if (!impeller::IsMultisampleCapable(desc.type) &&
-      desc.sample_count == impeller::SampleCount::kCount4) {
+      desc.sample_count != impeller::SampleCount::kCount1) {
     return false;
   }
 
