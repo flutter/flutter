@@ -141,6 +141,7 @@ public class FlutterJNI {
    * <p>This method should only be called once across all FlutterJNI instances.
    */
   public void loadLibrary(Context context) {
+    Log.w(TAG, "FlutterJNI.loadLibrary called");
     if (FlutterJNI.loadLibraryCalled) {
       Log.w(TAG, "FlutterJNI.loadLibrary called more than once");
     }
