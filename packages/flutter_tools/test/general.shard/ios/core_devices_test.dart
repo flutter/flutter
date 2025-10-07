@@ -816,7 +816,7 @@ void main() {
       testWithoutContext('fails to get device list', () async {
         final List<IOSCoreDevice> devices = await deviceControl.getCoreDevices();
         expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(logger.errorText, contains('devicectl is not installed.'));
+        expect(logger.traceText, contains('devicectl is not installed.'));
         expect(devices.isEmpty, isTrue);
       });
 
@@ -2754,8 +2754,7 @@ invalid JSON
         );
 
         await expectLater(deviceControl.getCoreDevices(), completion(isEmpty));
-        //  await deviceControl.getCoreDevices();
-        expect(logger.errorText, contains('Error executing devicectl: ProcessException'));
+        expect(logger.traceText, contains('Error executing devicectl: ProcessException'));
         expect(fakeProcessManager, hasNoRemainingExpectations);
       });
 
@@ -2787,8 +2786,24 @@ invalid JSON
           ),
         );
 
-        final List<IOSCoreDevice> devices = await deviceControl.getCoreDevices();
-        expect(devices, isEmpty);
+        await expectLater(
+          () => deviceControl.getCoreDevices(),
+          throwsA(
+            isA<StateError>().having(
+              (StateError e) => e.message,
+              'message',
+              contains('Expected the file ${tempFile.path} to exist but it did not'),
+            ),
+          ),
+        );
+        expect(
+          logger.traceText,
+          contains(
+            'After running the command xcrun devicectl list devices '
+            '--timeout 5 --json-output ${tempFile.path} the file\n'
+            '${tempFile.path} was expected to exist, but it did not',
+          ),
+        );
         expect(fakeProcessManager, hasNoRemainingExpectations);
       });
 
@@ -3010,7 +3025,7 @@ invalid JSON
               tempFile.path,
             ],
             onRun: (_) {
-              tempFile.createSync(recursive: true);
+              expect(tempFile, exists);
               tempFile.writeAsStringSync(deviceControlOutput);
             },
           ),
@@ -3089,6 +3104,7 @@ invalid JSON
         expect(devices[0].capabilities[1].name, 'Launch Application');
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(tempFile, isNot(exists));
       });
 
       testWithoutContext('connectionProperties parsed', () async {
@@ -3151,6 +3167,11 @@ invalid JSON
         expect(devices[0].connectionProperties?.lastConnectionDate, '2023-06-15T15:29:00.082Z');
         expect(devices[0].connectionProperties?.localHostnames, <String>[
           'Victorias-iPad.coredevice.local',
+          '00001234-0001234A3C03401E.coredevice.local',
+          '123456BB5-AEDE-7A22-B890-1234567890DD.coredevice.local',
+        ]);
+        expect(devices[0].connectionProperties?.pairingState, 'paired');
+        expect(devices[0].connectionProperties?.potentialHostnames, <String>[
           '00001234-0001234A3C03401E.coredevice.local',
           '123456BB5-AEDE-7A22-B890-1234567890DD.coredevice.local',
         ]);
@@ -3226,6 +3247,7 @@ invalid JSON
           'coredevice-devices:/viewDeviceByUUID?uuid=123456BB5-AEDE-7A22-B890-1234567890DD',
         );
         expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(tempFile, isNot(exists));
       });
 
       testWithoutContext('hardwareProperties parsed', () async {
@@ -3355,7 +3377,7 @@ invalid JSON
           final List<IOSCoreDevice> devices = await deviceControl.getCoreDevices();
           expect(devices.isEmpty, isTrue);
           expect(fakeProcessManager, hasNoRemainingExpectations);
-          expect(logger.errorText, contains('devicectl returned non-JSON response.'));
+          expect(logger.traceText, contains('devicectl returned non-JSON response.'));
           expect(tempFile, isNot(exists));
         });
 
@@ -3408,7 +3430,44 @@ invalid JSON
           final List<IOSCoreDevice> devices = await deviceControl.getCoreDevices();
           expect(devices.isEmpty, isTrue);
           expect(fakeProcessManager, hasNoRemainingExpectations);
-          expect(logger.errorText, contains('devicectl returned unexpected JSON response:'));
+          expect(logger.traceText, contains('devicectl returned unexpected JSON response:'));
+          expect(tempFile, isNot(exists));
+        });
+
+        testWithoutContext('Cancels operation when cancelCompleter completes', () async {
+          final cancelCompleter = Completer<void>();
+          final Directory tempDir = fileSystem.systemTempDirectory.childDirectory(
+            'core_devices.rand0',
+          );
+          final File tempFile = tempDir.childFile('core_device_list.json');
+
+          fakeProcessManager.addCommand(
+            FakeCommand(
+              command: <String>[
+                'xcrun',
+                'devicectl',
+                'list',
+                'devices',
+                '--timeout',
+                '5',
+                '--json-output',
+                tempFile.path,
+              ],
+              onRun: (_) {
+                expect(tempFile, exists);
+              },
+            ),
+          );
+
+          final Future<List<IOSCoreDevice>> devicesFuture = deviceControl.getCoreDevices(
+            cancelCompleter: cancelCompleter,
+          );
+
+          cancelCompleter.complete();
+
+          final List<IOSCoreDevice> devices = await devicesFuture;
+          expect(devices, isEmpty);
+          expect(fakeProcessManager, hasNoRemainingExpectations);
           expect(tempFile, isNot(exists));
         });
 
@@ -3465,7 +3524,7 @@ invalid JSON
           final List<IOSCoreDevice> devices = await deviceControl.getCoreDevices(
             timeout: const Duration(seconds: 2),
           );
-          expect(devices, isNotEmpty);
+          expect(devices.isNotEmpty, isTrue);
           expect(fakeProcessManager, hasNoRemainingExpectations);
           expect(
             logger.warningText,

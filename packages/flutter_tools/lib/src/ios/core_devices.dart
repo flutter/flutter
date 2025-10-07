@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -341,7 +342,7 @@ class IOSCoreDeviceControl {
     Completer<void>? cancelCompleter,
   }) async {
     if (!_xcode.isDevicectlInstalled) {
-      _logger.printError('devicectl is not installed.');
+      _logger.printTrace('devicectl is not installed.');
       return const <Object?>[];
     }
 
@@ -387,17 +388,38 @@ class IOSCoreDeviceControl {
 
       final int exitCode = await process.exitCode;
       final String stdout = await utf8.decodeStream(process.stdout);
-      final String stringOutput = output.readAsStringSync();
+      final String stderr = await utf8.decodeStream(process.stderr);
+
+      var isToolPossiblyShutdown = false;
+      if (_fileSystem is ErrorHandlingFileSystem) {
+        final FileSystem delegate = _fileSystem.fileSystem;
+        if (delegate is LocalFileSystem) {
+          isToolPossiblyShutdown = delegate.disposed;
+        }
+      }
+
+      if (isToolPossiblyShutdown) {
+        return const <Object?>[];
+      }
 
       if (exitCode != 0) {
-        final String stderr = await utf8.decodeStream(process.stderr);
-        _logger.printError('devicectl exited with a non-zero exit code: $exitCode');
+        _logger.printTrace('devicectl exited with a non-zero exit code: $exitCode');
         _logger.printTrace('devicectl stdout:\n$stdout');
         _logger.printTrace('devicectl stderr:\n$stderr');
         return const <Object?>[];
       }
 
-      _logger.printTrace(stdout);
+      if (!output.existsSync()) {
+        _logger.printTrace('After running the command ${command.join(' ')} the file');
+        _logger.printTrace('${output.path} was expected to exist, but it did not.');
+        _logger.printTrace('The process exited with code $exitCode and');
+        _logger.printTrace('Stdout:\n\n${stdout.trim()}\n');
+        _logger.printTrace('Stderr:\n\n${stderr.trim()}');
+        throw StateError('Expected the file ${output.path} to exist but it did not');
+      }
+
+      final String stringOutput = output.readAsStringSync();
+      _logger.printTrace(stringOutput);
 
       final Object? decodeResult = (json.decode(stringOutput) as Map<String, Object?>)['result'];
       if (decodeResult is Map<String, Object?>) {
@@ -406,22 +428,20 @@ class IOSCoreDeviceControl {
           return decodeDevices;
         }
       }
-      _logger.printError('devicectl returned unexpected JSON response: $stringOutput');
+      _logger.printTrace('devicectl returned unexpected JSON response: $stringOutput');
       return const <Object?>[];
     } on ProcessException catch (e) {
-      _logger.printError('Error executing devicectl: $e');
+      _logger.printTrace('Error executing devicectl: $e');
       return const <Object?>[];
     } on FileSystemException catch (e) {
       _logger.printTrace('Error reading devicectl output: $e');
       return const <Object?>[];
     } on FormatException {
-      _logger.printError('devicectl returned non-JSON response.');
+      _logger.printTrace('devicectl returned non-JSON response.');
       return const <Object?>[];
     } finally {
       process?.kill();
-      if (tempDirectory.existsSync()) {
-        tempDirectory.deleteSync(recursive: true);
-      }
+      ErrorHandlingFileSystem.deleteIfExists(tempDirectory, recursive: true);
     }
   }
 

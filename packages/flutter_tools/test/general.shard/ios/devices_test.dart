@@ -864,6 +864,24 @@ void main() {
       xcdevice.isInstalled = true;
       xcdevice.devices.add(<IOSDevice>[device1]);
 
+      final List<Device> devices = await iosDevices.pollingGetDevices();
+
+      expect(devices, hasLength(1));
+      expect(devices.first, same(device1));
+      expect(xcdevice.getAvailableIOSDevicesCount, 1);
+      expect(xcdevice.getAvailableIOSDevicesForWirelessDiscoveryCount, 0);
+    });
+
+    testWithoutContext('pollingGetDevices returns wireless devices', () async {
+      final iosDevices = IOSDevices(
+        platform: macPlatform,
+        xcdevice: xcdevice,
+        iosWorkflow: iosWorkflow,
+        logger: logger,
+      );
+      xcdevice.isInstalled = true;
+      xcdevice.devices.add(<IOSDevice>[device1]);
+
       final List<Device> devices = await iosDevices.pollingGetDevices(forWirelessDiscovery: true);
 
       expect(devices, hasLength(1));
