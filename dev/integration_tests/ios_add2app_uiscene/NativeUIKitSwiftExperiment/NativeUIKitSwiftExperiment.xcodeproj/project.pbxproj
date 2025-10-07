@@ -9,6 +9,13 @@
 /* Begin PBXBuildFile section */
 		4BB66C84F8951359042349F4 /* Pods_NativeUIKitSwiftExperiment.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A4D480656A4DC96AD5C5EFDD /* Pods_NativeUIKitSwiftExperiment.framework */; };
 		610ADDF570221F721827E1AA /* Pods_NativeUIKitSwiftExperiment_NativeUIKitSwiftExperimentUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8C914C66E8DD265B4CFF52CB /* Pods_NativeUIKitSwiftExperiment_NativeUIKitSwiftExperimentUITests.framework */; };
+		78D658982E95925200CAC372 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 78D6588F2E95925200CAC372 /* Assets.xcassets */; };
+		78D6589A2E95925200CAC372 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 78D658922E95925200CAC372 /* LaunchScreen.storyboard */; };
+		78D6589B2E95925200CAC372 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 78D658942E95925200CAC372 /* Main.storyboard */; };
+		78D6589C2E95925200CAC372 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78D6588E2E95925200CAC372 /* AppDelegate.swift */; };
+		78D6589D2E95925200CAC372 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78D658952E95925200CAC372 /* SceneDelegate.swift */; };
+		78D6589E2E95925200CAC372 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78D658962E95925200CAC372 /* ViewController.swift */; };
+		78D658A02E95997A00CAC372 /* NativeUIKitSwiftExperimentUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78D6589F2E95997A00CAC372 /* NativeUIKitSwiftExperimentUITests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -27,6 +34,14 @@
 		4AED7B23B41F0BEEF3636A24 /* Pods_NativeUIKitSwiftExperimentTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NativeUIKitSwiftExperimentTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7831F2B92E8E1DA500BBDDC3 /* NativeUIKitSwiftExperiment.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NativeUIKitSwiftExperiment.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7831F2D92E8E1DA600BBDDC3 /* NativeUIKitSwiftExperimentUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NativeUIKitSwiftExperimentUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		78D6588E2E95925200CAC372 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		78D6588F2E95925200CAC372 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		78D658902E95925200CAC372 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		78D658912E95925200CAC372 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		78D658932E95925200CAC372 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		78D658952E95925200CAC372 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		78D658962E95925200CAC372 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		78D6589F2E95997A00CAC372 /* NativeUIKitSwiftExperimentUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeUIKitSwiftExperimentUITests.swift; sourceTree = "<group>"; };
 		8C914C66E8DD265B4CFF52CB /* Pods_NativeUIKitSwiftExperiment_NativeUIKitSwiftExperimentUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NativeUIKitSwiftExperiment_NativeUIKitSwiftExperimentUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9612A8B853DE7FDD653EE7ED /* Pods-NativeUIKitSwiftExperiment.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NativeUIKitSwiftExperiment.release.xcconfig"; path = "Target Support Files/Pods-NativeUIKitSwiftExperiment/Pods-NativeUIKitSwiftExperiment.release.xcconfig"; sourceTree = "<group>"; };
 		A29DBD83AAC1A3A5C96040BA /* Pods-NativeUIKitSwiftExperiment-NativeUIKitSwiftExperimentUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NativeUIKitSwiftExperiment-NativeUIKitSwiftExperimentUITests.debug.xcconfig"; path = "Target Support Files/Pods-NativeUIKitSwiftExperiment-NativeUIKitSwiftExperimentUITests/Pods-NativeUIKitSwiftExperiment-NativeUIKitSwiftExperimentUITests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -34,32 +49,6 @@
 		B9CCF65EACEBC0BDD2FD6E8D /* Pods-NativeUIKitSwiftExperiment-NativeUIKitSwiftExperimentUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NativeUIKitSwiftExperiment-NativeUIKitSwiftExperimentUITests.release.xcconfig"; path = "Target Support Files/Pods-NativeUIKitSwiftExperiment-NativeUIKitSwiftExperimentUITests/Pods-NativeUIKitSwiftExperiment-NativeUIKitSwiftExperimentUITests.release.xcconfig"; sourceTree = "<group>"; };
 		F03D00B986BD9C868CE71A46 /* Pods-NativeUIKitSwiftExperiment.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NativeUIKitSwiftExperiment.debug.xcconfig"; path = "Target Support Files/Pods-NativeUIKitSwiftExperiment/Pods-NativeUIKitSwiftExperiment.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
-
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		7831F2E12E8E1DA600BBDDC3 /* Exceptions for "NativeUIKitSwiftExperiment" folder in "NativeUIKitSwiftExperiment" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = 7831F2B82E8E1DA500BBDDC3 /* NativeUIKitSwiftExperiment */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
-/* Begin PBXFileSystemSynchronizedRootGroup section */
-		7831F2BB2E8E1DA500BBDDC3 /* NativeUIKitSwiftExperiment */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				7831F2E12E8E1DA600BBDDC3 /* Exceptions for "NativeUIKitSwiftExperiment" folder in "NativeUIKitSwiftExperiment" target */,
-			);
-			path = NativeUIKitSwiftExperiment;
-			sourceTree = "<group>";
-		};
-		7831F2DC2E8E1DA600BBDDC3 /* NativeUIKitSwiftExperimentUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = NativeUIKitSwiftExperimentUITests;
-			sourceTree = "<group>";
-		};
-/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		7831F2B62E8E1DA500BBDDC3 /* Frameworks */ = {
@@ -97,8 +86,8 @@
 		7831F2B02E8E1DA500BBDDC3 = {
 			isa = PBXGroup;
 			children = (
-				7831F2BB2E8E1DA500BBDDC3 /* NativeUIKitSwiftExperiment */,
-				7831F2DC2E8E1DA600BBDDC3 /* NativeUIKitSwiftExperimentUITests */,
+				78D658972E95925200CAC372 /* NativeUIKitSwiftExperiment */,
+				78D6588D2E95925000CAC372 /* NativeUIKitSwiftExperimentUITests */,
 				7831F2BA2E8E1DA500BBDDC3 /* Products */,
 				4A789515CC3F244B1D703789 /* Pods */,
 				AEEDE682CAE498D5F586A528 /* Frameworks */,
@@ -112,6 +101,28 @@
 				7831F2D92E8E1DA600BBDDC3 /* NativeUIKitSwiftExperimentUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		78D6588D2E95925000CAC372 /* NativeUIKitSwiftExperimentUITests */ = {
+			isa = PBXGroup;
+			children = (
+				78D6589F2E95997A00CAC372 /* NativeUIKitSwiftExperimentUITests.swift */,
+			);
+			path = NativeUIKitSwiftExperimentUITests;
+			sourceTree = "<group>";
+		};
+		78D658972E95925200CAC372 /* NativeUIKitSwiftExperiment */ = {
+			isa = PBXGroup;
+			children = (
+				78D6588E2E95925200CAC372 /* AppDelegate.swift */,
+				78D6588F2E95925200CAC372 /* Assets.xcassets */,
+				78D658902E95925200CAC372 /* Info.plist */,
+				78D658922E95925200CAC372 /* LaunchScreen.storyboard */,
+				78D658942E95925200CAC372 /* Main.storyboard */,
+				78D658952E95925200CAC372 /* SceneDelegate.swift */,
+				78D658962E95925200CAC372 /* ViewController.swift */,
+			);
+			path = NativeUIKitSwiftExperiment;
 			sourceTree = "<group>";
 		};
 		AEEDE682CAE498D5F586A528 /* Frameworks */ = {
@@ -140,9 +151,6 @@
 			);
 			dependencies = (
 			);
-			fileSystemSynchronizedGroups = (
-				7831F2BB2E8E1DA500BBDDC3 /* NativeUIKitSwiftExperiment */,
-			);
 			name = NativeUIKitSwiftExperiment;
 			productName = NativeUIKitSwiftExperiment;
 			productReference = 7831F2B92E8E1DA500BBDDC3 /* NativeUIKitSwiftExperiment.app */;
@@ -161,9 +169,6 @@
 			);
 			dependencies = (
 				7831F2DB2E8E1DA600BBDDC3 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				7831F2DC2E8E1DA600BBDDC3 /* NativeUIKitSwiftExperimentUITests */,
 			);
 			name = NativeUIKitSwiftExperimentUITests;
 			productName = NativeUIKitSwiftExperimentUITests;
@@ -185,6 +190,7 @@
 					};
 					7831F2D82E8E1DA600BBDDC3 = {
 						CreatedOnToolsVersion = 16.3;
+						LastSwiftMigration = 2600;
 						TestTargetID = 7831F2B82E8E1DA500BBDDC3;
 					};
 				};
@@ -214,6 +220,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				78D658982E95925200CAC372 /* Assets.xcassets in Resources */,
+				78D6589A2E95925200CAC372 /* LaunchScreen.storyboard in Resources */,
+				78D6589B2E95925200CAC372 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -278,6 +287,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				78D6589C2E95925200CAC372 /* AppDelegate.swift in Sources */,
+				78D6589D2E95925200CAC372 /* SceneDelegate.swift in Sources */,
+				78D6589E2E95925200CAC372 /* ViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -285,6 +297,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				78D658A02E95997A00CAC372 /* NativeUIKitSwiftExperimentUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -297,6 +310,25 @@
 			targetProxy = 7831F2DA2E8E1DA600BBDDC3 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		78D658922E95925200CAC372 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				78D658912E95925200CAC372 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+		78D658942E95925200CAC372 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				78D658932E95925200CAC372 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		7831F2E32E8E1DA600BBDDC3 /* Debug */ = {
@@ -480,6 +512,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = A29DBD83AAC1A3A5C96040BA /* Pods-NativeUIKitSwiftExperiment-NativeUIKitSwiftExperimentUITests.debug.xcconfig */;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -488,6 +521,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = dev.flutter.devicelab.NativeUIKitSwiftExperimentUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = NativeUIKitSwiftExperiment;
@@ -498,6 +532,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = B9CCF65EACEBC0BDD2FD6E8D /* Pods-NativeUIKitSwiftExperiment-NativeUIKitSwiftExperimentUITests.release.xcconfig */;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;

@@ -8,6 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		1E54F750DBB9DDB3CD0BFF34 /* Pods_NativeSwiftUIExperiment_NativeSwiftUIExperimentUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 67398A34BD2DEF2BBE88904A /* Pods_NativeSwiftUIExperiment_NativeSwiftUIExperimentUITests.framework */; };
+		78D658792E95923600CAC372 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 78D658752E95923600CAC372 /* Assets.xcassets */; };
+		78D6587A2E95923600CAC372 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78D658762E95923600CAC372 /* ContentView.swift */; };
+		78D6587B2E95923600CAC372 /* NativeSwiftUIExperimentApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78D658772E95923600CAC372 /* NativeSwiftUIExperimentApp.swift */; };
+		78D658A22E95999E00CAC372 /* NativeSwiftUIExperimentUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78D658A12E95999E00CAC372 /* NativeSwiftUIExperimentUITests.swift */; };
 		8CC4D8ED4325AD66F4105A16 /* Pods_NativeSwiftUIExperiment.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79FA578B09AFD4EEB7A29CB7 /* Pods_NativeSwiftUIExperiment.framework */; };
 /* End PBXBuildFile section */
 
@@ -28,25 +32,16 @@
 		67398A34BD2DEF2BBE88904A /* Pods_NativeSwiftUIExperiment_NativeSwiftUIExperimentUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NativeSwiftUIExperiment_NativeSwiftUIExperimentUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7831F3282E8E1F8800BBDDC3 /* NativeSwiftUIExperiment.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NativeSwiftUIExperiment.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7831F33F2E8E1F8A00BBDDC3 /* NativeSwiftUIExperimentUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NativeSwiftUIExperimentUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		78D658752E95923600CAC372 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		78D658762E95923600CAC372 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		78D658772E95923600CAC372 /* NativeSwiftUIExperimentApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeSwiftUIExperimentApp.swift; sourceTree = "<group>"; };
+		78D658A12E95999E00CAC372 /* NativeSwiftUIExperimentUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeSwiftUIExperimentUITests.swift; sourceTree = "<group>"; };
 		79FA578B09AFD4EEB7A29CB7 /* Pods_NativeSwiftUIExperiment.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NativeSwiftUIExperiment.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7BCA9D8BB2B4333006E2F322 /* Pods-NativeSwiftUIExperiment-NativeSwiftUIExperimentUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NativeSwiftUIExperiment-NativeSwiftUIExperimentUITests.debug.xcconfig"; path = "Target Support Files/Pods-NativeSwiftUIExperiment-NativeSwiftUIExperimentUITests/Pods-NativeSwiftUIExperiment-NativeSwiftUIExperimentUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		82A2DD74D26CD1CD4CF1CBC4 /* Pods-NativeSwiftUIExperimentTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NativeSwiftUIExperimentTests.debug.xcconfig"; path = "Target Support Files/Pods-NativeSwiftUIExperimentTests/Pods-NativeSwiftUIExperimentTests.debug.xcconfig"; sourceTree = "<group>"; };
 		EC6932CFFBDC3F339936C54B /* Pods-NativeSwiftUIExperiment.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NativeSwiftUIExperiment.debug.xcconfig"; path = "Target Support Files/Pods-NativeSwiftUIExperiment/Pods-NativeSwiftUIExperiment.debug.xcconfig"; sourceTree = "<group>"; };
 		FE9DE93C7456A24671A3DE9F /* Pods_NativeSwiftUIExperimentTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NativeSwiftUIExperimentTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
-
-/* Begin PBXFileSystemSynchronizedRootGroup section */
-		7831F32A2E8E1F8800BBDDC3 /* NativeSwiftUIExperiment */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = NativeSwiftUIExperiment;
-			sourceTree = "<group>";
-		};
-		7831F3422E8E1F8A00BBDDC3 /* NativeSwiftUIExperimentUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = NativeSwiftUIExperimentUITests;
-			sourceTree = "<group>";
-		};
-/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		7831F3252E8E1F8800BBDDC3 /* Frameworks */ = {
@@ -71,8 +66,8 @@
 		7831F31F2E8E1F8800BBDDC3 = {
 			isa = PBXGroup;
 			children = (
-				7831F32A2E8E1F8800BBDDC3 /* NativeSwiftUIExperiment */,
-				7831F3422E8E1F8A00BBDDC3 /* NativeSwiftUIExperimentUITests */,
+				78D658782E95923600CAC372 /* NativeSwiftUIExperiment */,
+				78D6587C2E95923A00CAC372 /* NativeSwiftUIExperimentUITests */,
 				7831F3292E8E1F8800BBDDC3 /* Products */,
 				D6395A4C1FB53F511B21901C /* Pods */,
 				AD0504386FD58B1C55D3EB41 /* Frameworks */,
@@ -86,6 +81,24 @@
 				7831F33F2E8E1F8A00BBDDC3 /* NativeSwiftUIExperimentUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		78D658782E95923600CAC372 /* NativeSwiftUIExperiment */ = {
+			isa = PBXGroup;
+			children = (
+				78D658752E95923600CAC372 /* Assets.xcassets */,
+				78D658762E95923600CAC372 /* ContentView.swift */,
+				78D658772E95923600CAC372 /* NativeSwiftUIExperimentApp.swift */,
+			);
+			path = NativeSwiftUIExperiment;
+			sourceTree = "<group>";
+		};
+		78D6587C2E95923A00CAC372 /* NativeSwiftUIExperimentUITests */ = {
+			isa = PBXGroup;
+			children = (
+				78D658A12E95999E00CAC372 /* NativeSwiftUIExperimentUITests.swift */,
+			);
+			path = NativeSwiftUIExperimentUITests;
 			sourceTree = "<group>";
 		};
 		AD0504386FD58B1C55D3EB41 /* Frameworks */ = {
@@ -127,9 +140,6 @@
 			);
 			dependencies = (
 			);
-			fileSystemSynchronizedGroups = (
-				7831F32A2E8E1F8800BBDDC3 /* NativeSwiftUIExperiment */,
-			);
 			name = NativeSwiftUIExperiment;
 			productName = NativeSwiftUIExperiment;
 			productReference = 7831F3282E8E1F8800BBDDC3 /* NativeSwiftUIExperiment.app */;
@@ -148,9 +158,6 @@
 			);
 			dependencies = (
 				7831F3412E8E1F8A00BBDDC3 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				7831F3422E8E1F8A00BBDDC3 /* NativeSwiftUIExperimentUITests */,
 			);
 			name = NativeSwiftUIExperimentUITests;
 			productName = NativeSwiftUIExperimentUITests;
@@ -172,6 +179,7 @@
 					};
 					7831F33E2E8E1F8A00BBDDC3 = {
 						CreatedOnToolsVersion = 16.3;
+						LastSwiftMigration = 2600;
 						TestTargetID = 7831F3272E8E1F8800BBDDC3;
 					};
 				};
@@ -201,6 +209,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				78D658792E95923600CAC372 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -265,6 +274,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				78D6587A2E95923600CAC372 /* ContentView.swift in Sources */,
+				78D6587B2E95923600CAC372 /* NativeSwiftUIExperimentApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -272,6 +283,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				78D658A22E95999E00CAC372 /* NativeSwiftUIExperimentUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -465,6 +477,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7BCA9D8BB2B4333006E2F322 /* Pods-NativeSwiftUIExperiment-NativeSwiftUIExperimentUITests.debug.xcconfig */;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -472,6 +485,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = dev.flutter.devicelab.NativeSwiftUIExperimentUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = NativeSwiftUIExperiment;
@@ -482,6 +496,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 03FE462B080E3A5DA0F8E380 /* Pods-NativeSwiftUIExperiment-NativeSwiftUIExperimentUITests.release.xcconfig */;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;

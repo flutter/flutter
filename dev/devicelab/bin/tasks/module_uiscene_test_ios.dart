@@ -78,7 +78,8 @@ Future<void> main(List<String> args) async {
         templatesDir: templatesDir,
       );
 
-      bool testFailed = false;
+      int testCount = 0;
+      int testFailedCount = 0;
       await testWithNewIOSSimulator(
         'TestAdd2AppSim',
         deviceTypeId: 'com.apple.CoreSimulator.SimDeviceType.iPad-Pro-11-inch-3rd-generation',
@@ -121,8 +122,9 @@ Future<void> main(List<String> args) async {
                 xcodeProjectDir: xcodeProjectDir,
                 xcodeProjectName: xcodeProjectName,
               );
+              testCount++;
               if (result != 0) {
-                testFailed = true;
+                testFailedCount++;
               }
 
               // Reset files to original between scenarios unless we're targetting a specific test.
@@ -136,9 +138,9 @@ Future<void> main(List<String> args) async {
         },
       );
 
-      if (testFailed) {
+      if (testFailedCount > 0) {
         return TaskResult.failure(
-          'One or more native tests failed. Search the logs for "** TEST FAILED **"',
+          '$testFailedCount out of $testCount native tests failed. Search the logs for "** TEST FAILED **"',
         );
       }
       return TaskResult.success(null);
