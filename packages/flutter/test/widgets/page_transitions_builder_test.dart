@@ -177,9 +177,6 @@ void main() {
   });
 
   testWidgets('FadeUpwardsPageTransitionsBuilder test', (WidgetTester tester) async {
-    const FadeUpwardsPageTransitionsBuilder transitionsBuilder =
-        FadeUpwardsPageTransitionsBuilder();
-
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -187,7 +184,7 @@ void main() {
           onGenerateRoute: (RouteSettings settings) {
             return _CustomPageRoute<void>(
               settings: settings,
-              transitionsBuilder: transitionsBuilder,
+              transitionsBuilder: const FadeUpwardsPageTransitionsBuilder(),
               builder: (BuildContext context) {
                 if (settings.name == '/') {
                   return ColoredBox(
@@ -218,42 +215,42 @@ void main() {
       ),
     );
 
-    expect(find.text('Page 1'), findsOneWidget);
-    expect(find.text('Page 2'), findsNothing);
-
-    final Offset initialPage1Position = tester.getTopLeft(find.text('Page 1'));
+    final Offset widget1TopLeft = tester.getTopLeft(find.text('Page 1'));
 
     await tester.tap(find.text('Page 1'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 1));
 
-    expect(find.text('Page 1'), findsOneWidget);
-    expect(find.text('Page 2'), findsOneWidget);
-
-    final Finder page2Finder = find.text('Page 2');
-    final FadeTransition fadeTransition = tester
-        .element(page2Finder)
-        .findAncestorWidgetOfExactType<FadeTransition>()!;
-
-    // Early in the animation, opacity should be low.
-    expect(fadeTransition.opacity.value, greaterThan(0.0));
-    expect(fadeTransition.opacity.value, lessThan(0.1));
-
-    // Verify only vertical slide animation for incoming page.
-    final Offset page2Position = tester.getTopLeft(find.text('Page 2'));
-    expect(initialPage1Position.dx, equals(page2Position.dx));
-    expect(page2Position.dy, greaterThan(initialPage1Position.dy));
-
-    await tester.pumpAndSettle();
-
-    expect(find.text('Page 1'), findsNothing);
-    expect(find.text('Page 2'), findsOneWidget);
-
-    // After animation completes, verify full opacity.
-    final FadeTransition fadeTransitionComplete = tester
+    FadeTransition widget2Opacity = tester
         .element(find.text('Page 2'))
         .findAncestorWidgetOfExactType<FadeTransition>()!;
-    expect(fadeTransitionComplete.opacity.value, equals(1.0));
+    Offset widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
+
+    expect(widget1TopLeft.dx == widget2TopLeft.dx, true);
+    expect(widget1TopLeft.dy < widget2TopLeft.dy, true);
+    expect(widget2Opacity.opacity.value < 0.01, true);
+
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), isOnstage);
+
+    tester.state<NavigatorState>(find.byType(Navigator)).pop();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1));
+
+    widget2Opacity = tester
+        .element(find.text('Page 2'))
+        .findAncestorWidgetOfExactType<FadeTransition>()!;
+    widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
+
+    expect(widget1TopLeft.dy < widget2TopLeft.dy, true);
+    expect(widget2Opacity.opacity.value < 1.0, true);
+
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Page 1'), isOnstage);
+    expect(find.text('Page 2'), findsNothing);
   });
 
   testWidgets(
