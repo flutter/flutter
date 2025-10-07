@@ -1463,10 +1463,17 @@ class _ContextMenuAlignedChildrenDelegate extends MultiChildLayoutDelegate {
 
     final double availableHeightForChild =
         screenBounds.height - _ContextMenuRouteStaticState._kPadding;
+    final double availableWidth = screenBounds.width - _ContextMenuRouteStaticState._kPadding * 2;
+    final double availableWidthForChild = switch (orientation) {
+      Orientation.portrait => availableWidth,
+      Orientation.landscape => availableWidth - _ContextMenuSheetState._kMenuWidth,
+    };
+    assert(availableWidthForChild >= 0.0);
+    assert(availableHeightForChild >= 0.0);
 
     final Size childSize = layoutChild(
       _ContextMenuChild.child,
-      constraints.copyWith(maxHeight: availableHeightForChild),
+      constraints.copyWith(maxHeight: availableHeightForChild, maxWidth: availableWidthForChild),
     );
 
     // In portrait orientation, the child is atop the menu, while in landscape

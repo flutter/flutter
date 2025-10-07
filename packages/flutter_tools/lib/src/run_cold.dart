@@ -24,7 +24,6 @@ class ColdRunner extends ResidentRunner {
     this.applicationBinary,
     super.stayResident,
     super.machine,
-    super.devtoolsHandler,
     super.dartBuilder,
   }) : super(hotMode: false);
 
@@ -74,18 +73,6 @@ class ColdRunner extends ResidentRunner {
         appFailedToStart();
         return 2;
       }
-    }
-
-    // TODO(bkonyi): remove when ready to serve DevTools from DDS.
-    if (debuggingEnabled && debuggingOptions.enableDevTools) {
-      // The method below is guaranteed never to return a failing future.
-      unawaited(
-        residentDevtoolsHandler!.serveAndAnnounceDevTools(
-          devToolsServerAddress: debuggingOptions.devToolsServerAddress,
-          flutterDevices: flutterDevices,
-          isStartPaused: debuggingOptions.startPaused,
-        ),
-      );
     }
 
     if (flutterDevices.first.vmServiceUris != null) {
@@ -178,7 +165,6 @@ class ColdRunner extends ResidentRunner {
     for (final FlutterDevice? flutterDevice in flutterDevices) {
       await flutterDevice!.device!.dispose();
     }
-    await residentDevtoolsHandler!.shutdown();
     await stopEchoingDeviceLog();
   }
 

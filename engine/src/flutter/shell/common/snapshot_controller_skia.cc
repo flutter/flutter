@@ -172,6 +172,11 @@ sk_sp<SkImage> SnapshotControllerSkia::ConvertToRasterImage(
 void SnapshotControllerSkia::CacheRuntimeStage(
     const std::shared_ptr<impeller::RuntimeStage>& runtime_stage) {}
 
+bool SnapshotControllerSkia::MakeRenderContextCurrent() {
+  FML_UNREACHABLE();
+  return false;
+}
+
 }  // namespace flutter
 
 #endif  //  !SLIMPELLER
