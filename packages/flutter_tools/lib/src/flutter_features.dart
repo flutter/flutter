@@ -63,6 +63,9 @@ mixin FlutterFeatureFlagsIsEnabled implements FeatureFlags {
 
   @override
   bool get isLLDBDebuggingEnabled => isEnabled(lldbDebugging);
+
+  @override
+  bool get isUISceneMigrationEnabled => isEnabled(uiSceneMigration);
 }
 
 interface class FlutterFeatureFlags extends FeatureFlags with FlutterFeatureFlagsIsEnabled {
