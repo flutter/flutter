@@ -781,25 +781,28 @@ class IOSDevice extends Device {
     // The minimum iOS version where wireless debugging is known to be slow.
     const minSlowWirelessDebugIOSVersion = 26;
     final Version? sdkVersion = this.sdkVersion;
-    if (isWirelesslyConnected &&
-        debuggingOptions.debuggingEnabled &&
-        sdkVersion != null &&
-        sdkVersion.major >= minSlowWirelessDebugIOSVersion) {
-      final warningMessage =
-          'Wireless debugging on iOS ${sdkVersion.major} may be slower than expected. '
-          'For better performance, consider using a wired (USB) connection.';
 
-      _logger.printWarning(warningMessage);
-
-      _logger.sendEvent('app.warning', <String, Object?>{
-        'warningId': 'ios-wireless-slow',
-        'warning': warningMessage,
-        'category': 'ios-wireless-performance',
-        'deviceId': id,
-        'deviceOsVersion': sdkVersion.major,
-        'actionable': true,
-      });
+    if (!isWirelesslyConnected ||
+        !debuggingOptions.debuggingEnabled ||
+        sdkVersion == null ||
+        sdkVersion.major < minSlowWirelessDebugIOSVersion) {
+      return;
     }
+
+    final warningMessage =
+        'Wireless debugging on iOS ${sdkVersion.major} may be slower than expected. '
+        'For better performance, consider using a wired (USB) connection.';
+
+    _logger.printWarning(warningMessage);
+
+    _logger.sendEvent('app.warning', <String, Object?>{
+      'warningId': 'ios-wireless-slow',
+      'warning': warningMessage,
+      'category': 'ios-wireless-performance',
+      'deviceId': id,
+      'deviceOsVersion': sdkVersion.major,
+      'actionable': true,
+    });
   }
 
   void _printInstallError(Directory bundle) {

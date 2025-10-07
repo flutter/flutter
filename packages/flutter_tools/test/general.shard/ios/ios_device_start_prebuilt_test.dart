@@ -1301,20 +1301,24 @@ void main() {
 
           device.warnIfSlowWirelessDebugging(DebuggingOptions.enabled(BuildInfo.debug));
 
-          expect(
-            logger.warningText,
-            contains(
+          const warningMessage =
               'Wireless debugging on iOS 26 may be slower than expected. '
-              'For better performance, consider using a wired (USB) connection.',
-            ),
-          );
+              'For better performance, consider using a wired (USB) connection.';
+          expect(logger.warningText, contains(warningMessage));
+
+          final event = json.decode(logger.eventText) as Map<String, dynamic>;
+          expect(event['name'], 'app.warning');
+          final args = event['args'] as Map<String, dynamic>;
           expect(
-            logger.eventText,
-            contains(
-              '{"name":"app.warning","args":{"warningId":"ios-wireless-slow",'
-              '"warning":"Wireless debugging on iOS 26 may be slower than expected. For better performance, consider using a wired (USB) connection.",'
-              '"category":"ios-wireless-performance","deviceId":"123","deviceOsVersion":26,"actionable":true}}',
-            ),
+            args,
+            equals(<String, Object?>{
+              'warningId': 'ios-wireless-slow',
+              'warning': warningMessage,
+              'category': 'ios-wireless-performance',
+              'deviceId': '123',
+              'deviceOsVersion': 26,
+              'actionable': true,
+            }),
           );
         });
         testWithoutContext(
