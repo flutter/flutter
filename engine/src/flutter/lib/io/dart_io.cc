@@ -21,6 +21,8 @@ void DartIO::InitForIsolate(bool may_insecurely_connect_to_all_domains,
   Dart_Handle result = Dart_SetNativeResolver(io_lib, dart::bin::LookupIONative,
                                               dart::bin::LookupIONativeSymbol);
   FML_CHECK(!CheckAndHandleError(result));
+  result = Dart_SetFfiNativeResolver(io_lib, dart::bin::LookupIOFfiNative);
+  FML_CHECK(!CheckAndHandleError(result));
 
   Dart_Handle ui_lib = Dart_LookupLibrary(ToDart("dart:ui"));
   Dart_Handle dart_validate_args[1];
