@@ -19,6 +19,7 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../darwin/darwin.dart';
 import '../device.dart';
+import '../features.dart';
 import '../flutter_manifest.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
@@ -28,6 +29,7 @@ import '../macos/xcode.dart';
 import '../migrations/lldb_init_migration.dart';
 import '../migrations/swift_package_manager_gitignore_migration.dart';
 import '../migrations/swift_package_manager_integration_migration.dart';
+import '../migrations/uiscene_migration.dart';
 import '../migrations/xcode_project_object_version_migration.dart';
 import '../migrations/xcode_script_build_phase_migration.dart';
 import '../migrations/xcode_thin_binary_build_phase_input_paths_migration.dart';
@@ -176,6 +178,12 @@ Future<XcodeBuildResult> buildXcodeProject({
       deviceID: deviceID,
       fileSystem: globals.fs,
       environmentType: environmentType,
+    ),
+    UISceneMigration(
+      app.project,
+      globals.logger,
+      isMigrationFeatureEnabled: featureFlags.isUISceneMigrationEnabled,
+      plistParser: globals.plistParser,
     ),
   ];
 

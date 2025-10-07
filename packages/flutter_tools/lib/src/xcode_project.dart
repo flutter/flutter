@@ -461,8 +461,12 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       _editableDirectory.childDirectory('Runner').childFile('AppDelegate.swift');
 
   /// The 'AppDelegate.m' file of the host app. This file might not exist if the app project uses Swift.
-  File get appDelegateObjc =>
+  File get appDelegateObjcImplementation =>
       _editableDirectory.childDirectory('Runner').childFile('AppDelegate.m');
+
+  /// The 'AppDelegate.h' file of the host app. This file might not exist if the app project uses Swift.
+  File get appDelegateObjcHeader =>
+      _editableDirectory.childDirectory('Runner').childFile('AppDelegate.h');
 
   File get infoPlist => _editableDirectory.childDirectory('Runner').childFile('Info.plist');
 
