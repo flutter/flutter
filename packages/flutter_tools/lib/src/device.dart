@@ -225,11 +225,11 @@ abstract class DeviceManager {
 
   /// Stop any running extended wireless device discoverers.
   void stopExtendedWirelessDeviceDiscoverers() {
-    final DeviceDiscovery? iosDiscoverer = _platformDiscoverers
+    final DeviceDiscovery? extendedWirelessDiscoverer = _platformDiscoverers
         .where((DeviceDiscovery d) => d.requiresExtendedWirelessDeviceDiscovery)
         .firstOrNull;
-    if (iosDiscoverer is PollingDeviceDiscovery) {
-      iosDiscoverer.cancelWirelessDiscovery();
+    if (extendedWirelessDiscoverer is PollingDeviceDiscovery) {
+      extendedWirelessDiscoverer.cancelWirelessDiscovery();
     }
   }
 
@@ -468,9 +468,6 @@ abstract class DeviceDiscovery {
   ///
   /// For example, 'windows' or 'linux'.
   List<String> get wellKnownIds;
-
-  /// Stop the discoverer from polling for devices.
-  void stopPolling() {}
 }
 
 /// A [DeviceDiscovery] implementation that uses polling to discover device adds
@@ -510,7 +507,6 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
     });
   }
 
-  @override
   void stopPolling() {
     _timer?.cancel();
     _timer = null;

@@ -37,7 +37,6 @@ class FakeCommand {
     this.exception,
     this.outputFollowsExit = false,
     this.processStartMode,
-    this.onProcess,
   });
 
   /// The exact commands that must be matched for this [FakeCommand] to be
@@ -114,9 +113,6 @@ class FakeCommand {
   final bool outputFollowsExit;
 
   final io.ProcessStartMode? processStartMode;
-
-  /// A callback that is run when the process is started.
-  final void Function(FakeProcess process)? onProcess;
 
   void _matches(
     List<String> command,
@@ -334,7 +330,7 @@ abstract class FakeProcessManager implements ProcessManager {
       fakeCommand.onRun!(command);
     }
 
-    final process = FakeProcess(
+    return FakeProcess(
       duration: fakeCommand.duration,
       exitCode: fakeCommand.exitCode,
       pid: _pid,
@@ -344,10 +340,6 @@ abstract class FakeProcessManager implements ProcessManager {
       completer: fakeCommand.completer,
       outputFollowsExit: fakeCommand.outputFollowsExit,
     );
-    if (fakeCommand.onProcess != null) {
-      fakeCommand.onProcess!(process);
-    }
-    return process;
   }
 
   @override
