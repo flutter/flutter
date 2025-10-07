@@ -612,7 +612,8 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
       waitForDtdAndDevTools:
           device != WebServerDevice.kWebServerDeviceId &&
           device != GoogleChromeDevice.kChromeDeviceId &&
-          !noDevtools,
+          !noDevtools &&
+          spawnDdsInstance,
       pauseOnExceptions: pauseOnExceptions,
       script: script,
       verbose: verbose,
