@@ -313,7 +313,7 @@ FLUTTER_ASSERT_ARC
                                            options:options]);
   OCMVerify(times(1), [mockLifecycleDelegate2 scene:mockScene
                                willConnectToSession:session
-                                            options:options]);
+                                            options:nil]);
   XCTAssertEqual(delegate.flutterManagedEngines.count, 2.0);
 }
 
@@ -360,16 +360,13 @@ FLUTTER_ASSERT_ARC
   OCMVerify(times(1), [mockDelegate addFlutterManagedEngine:mockEngine]);
   OCMVerify(times(1), [mockDelegate addFlutterManagedEngine:mockEngine2]);
   XCTAssertEqual(delegate.flutterManagedEngines.count, 2.0);
-  OCMVerify(times(1), [mockDelegate scene:mockScene
-                          willConnectToSession:session
-                                       options:options]);  // This is called twice because once is
-                                                           // within the test itself.
+  OCMVerify(times(1), [mockDelegate scene:mockScene willConnectToSession:session options:options]);
   OCMVerify(times(1), [mockLifecycleDelegate scene:mockScene
                               willConnectToSession:session
                                            options:options]);
   OCMVerify(times(1), [mockLifecycleDelegate2 scene:mockScene
                                willConnectToSession:session
-                                            options:options]);
+                                            options:nil]);
 }
 
 - (void)testSceneWillConnectToSessionOptionsHandledByScenePlugin {
@@ -385,6 +382,8 @@ FLUTTER_ASSERT_ARC
                   willConnectToSession:[OCMArg any]
                                options:[OCMArg any]])
       .andReturn(YES);
+  id mockAppLifecycleDelegate = mocks[@"mockAppLifecycleDelegate"];
+  OCMStub([mockAppLifecycleDelegate sceneWillConnectFallback:[OCMArg any]]).andReturn(YES);
 
   id session = OCMClassMock([UISceneSession class]);
   id options = OCMClassMock([UISceneConnectionOptions class]);
@@ -396,6 +395,84 @@ FLUTTER_ASSERT_ARC
   OCMVerify(times(1), [mockLifecycleDelegate scene:mockScene
                               willConnectToSession:session
                                            options:options]);
+  OCMVerify(times(0), [mockAppLifecycleDelegate sceneWillConnectFallback:options]);
+  OCMVerify(times(0), [mockEngine sendDeepLinkToFramework:[OCMArg any]
+                                        completionHandler:[OCMArg any]]);
+}
+
+- (void)testSceneWillConnectToSessionOptionsHandledByApplicationPlugin {
+  FlutterPluginSceneLifeCycleDelegate* delegate =
+      [[FlutterPluginSceneLifeCycleDelegate alloc] init];
+
+  id mocks = [self mocksForEvents];
+  id mockEngine = mocks[@"mockEngine"];
+  id mockScene = mocks[@"mockScene"];
+  FlutterEnginePluginSceneLifeCycleDelegate* mockLifecycleDelegate =
+      (FlutterEnginePluginSceneLifeCycleDelegate*)mocks[@"mockLifecycleDelegate"];
+  OCMStub([mockLifecycleDelegate scene:[OCMArg any]
+                  willConnectToSession:[OCMArg any]
+                               options:[OCMArg any]])
+      .andReturn(NO);
+  id mockAppLifecycleDelegate = mocks[@"mockAppLifecycleDelegate"];
+  OCMStub([mockAppLifecycleDelegate sceneWillConnectFallback:[OCMArg any]]).andReturn(YES);
+
+  id session = OCMClassMock([UISceneSession class]);
+  id options = OCMClassMock([UISceneConnectionOptions class]);
+
+  [delegate addFlutterManagedEngine:mockEngine];
+  XCTAssertEqual(delegate.flutterManagedEngines.count, 1.0);
+
+  [delegate scene:mockScene willConnectToSession:session options:options];
+  OCMVerify(times(1), [mockLifecycleDelegate scene:mockScene
+                              willConnectToSession:session
+                                           options:options]);
+  OCMVerify(times(1), [mockAppLifecycleDelegate sceneWillConnectFallback:options]);
+  OCMVerify(times(0), [mockEngine sendDeepLinkToFramework:[OCMArg any]
+                                        completionHandler:[OCMArg any]]);
+}
+
+- (void)testSceneWillConnectToSessionOptionsHandledByApplicationPluginMultipleEngines {
+  FlutterPluginSceneLifeCycleDelegate* delegate =
+      [[FlutterPluginSceneLifeCycleDelegate alloc] init];
+
+  id mocks = [self mocksForEvents];
+  id mockEngine = mocks[@"mockEngine"];
+  id mockScene = mocks[@"mockScene"];
+  FlutterEnginePluginSceneLifeCycleDelegate* mockLifecycleDelegate =
+      (FlutterEnginePluginSceneLifeCycleDelegate*)mocks[@"mockLifecycleDelegate"];
+  OCMStub([mockLifecycleDelegate scene:[OCMArg any]
+                  willConnectToSession:[OCMArg any]
+                               options:[OCMArg any]])
+      .andReturn(NO);
+
+  id mocks2 = [self mocksForEvents];
+  id mockEngine2 = mocks2[@"mockEngine"];
+  FlutterEnginePluginSceneLifeCycleDelegate* mockLifecycleDelegate2 =
+      (FlutterEnginePluginSceneLifeCycleDelegate*)mocks2[@"mockLifecycleDelegate"];
+  OCMStub([mockLifecycleDelegate2 scene:[OCMArg any]
+                   willConnectToSession:[OCMArg any]
+                                options:[OCMArg any]])
+      .andReturn(NO);
+
+  id mockAppLifecycleDelegate = mocks2[@"mockAppLifecycleDelegate"];
+  OCMStub([mockAppLifecycleDelegate sceneWillConnectFallback:[OCMArg any]]).andReturn(YES);
+  id session = OCMClassMock([UISceneSession class]);
+  id options = OCMClassMock([UISceneConnectionOptions class]);
+
+  [delegate addFlutterManagedEngine:mockEngine];
+  [delegate addFlutterManagedEngine:mockEngine2];
+  XCTAssertEqual(delegate.flutterManagedEngines.count, 2.0);
+
+  [delegate scene:mockScene willConnectToSession:session options:options];
+  OCMVerify(times(1), [mockLifecycleDelegate scene:mockScene
+                              willConnectToSession:session
+                                           options:options]);
+  OCMVerify(times(1), [mockLifecycleDelegate2 scene:mockScene
+                               willConnectToSession:session
+                                            options:nil]);
+  OCMVerify(times(1), [mockAppLifecycleDelegate sceneWillConnectFallback:options]);
+  OCMVerify(times(0), [mockEngine sendDeepLinkToFramework:[OCMArg any]
+                                        completionHandler:[OCMArg any]]);
 }
 
 - (void)testSceneWillConnectToSessionOptionsHandledByUniversalLinks {
