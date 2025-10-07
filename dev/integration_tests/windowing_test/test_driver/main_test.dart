@@ -118,6 +118,9 @@ void main() {
     }, timeout: Timeout.none, onPlatform: {'linux': Skip('FIXME: isMinimized is async')});
 
     test('Can set and get activated', () async {
+      await driver.requestData(
+        jsonEncode({'type': 'set_minimized'}),
+      ); // Minimize first so that the window is not active
       await driver.requestData(jsonEncode({'type': 'set_activated'}));
       final response = await driver.requestData(
         jsonEncode({'type': 'get_activated'}),
