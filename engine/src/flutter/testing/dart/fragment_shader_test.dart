@@ -101,6 +101,19 @@ void main() async {
     }
   });
 
+  test('FragmentProgram getUniformFloat offset underflow', () async {
+    final FragmentProgram program = await FragmentProgram.fromAsset(
+      'uniforms.frag.iplr',
+    );
+    final FragmentShader shader = program.fragmentShader();
+    try {
+      shader.getUniformFloat('iVec2Uniform', -1);
+      fail('Unreachable');
+    } catch (e) {
+      expect(e.toString(), contains('Index `-1` out of bounds for `iVec2Uniform`.'));
+    }
+  });
+
   test('FragmentShader setSampler throws with out-of-bounds index', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset('blue_green_sampler.frag.iplr');
     final Image blueGreenImage = await _createBlueGreenImage();

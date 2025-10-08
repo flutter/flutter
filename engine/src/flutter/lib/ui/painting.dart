@@ -5362,6 +5362,11 @@ base class FragmentShader extends Shader {
 
   UniformFloatSlot getUniformFloat(String name, [int? index]) {
     index ??= 0;
+
+    if (index < 0) {
+      throw ArgumentError('Index `$index` out of bounds for `$name`.');
+    }
+
     int offset = 0;
     bool found = false;
     const int sizeOfFloat = 4;
