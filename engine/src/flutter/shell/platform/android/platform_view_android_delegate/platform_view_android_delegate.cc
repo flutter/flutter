@@ -239,6 +239,7 @@ void PlatformViewAndroidDelegate::UpdateSemantics(
       putStringIntoBuffer(node.linkUrl, buffer_int32, &position, strings);
       putStringIntoBuffer(node.locale, buffer_int32, &position, strings);
 
+      buffer_int32[position++] = node.headingLevel;
       buffer_int32[position++] = node.textDirection;
       buffer_float32[position++] = node.rect.left();
       buffer_float32[position++] = node.rect.top();
