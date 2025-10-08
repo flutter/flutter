@@ -115,7 +115,7 @@ class TextButton extends ButtonStyleButton {
     super.style,
     super.focusNode,
     super.autofocus = false,
-    super.clipBehavior,
+    super.clipBehavior = Clip.none,
     super.statesController,
     Widget? icon,
     required Widget label,
