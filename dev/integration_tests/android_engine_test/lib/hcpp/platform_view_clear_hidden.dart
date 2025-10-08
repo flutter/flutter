@@ -110,7 +110,7 @@ class _MyAppState extends State<MyApp> {
                       visible: _showRightView,
                       maintainState: true,
                       maintainSize: true,
-                      maintainAnimation: true, // This line fixes the issue
+                      maintainAnimation: true,
                       child: const PlatformViewWidget(),
                     ),
                   ),
