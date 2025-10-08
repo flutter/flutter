@@ -5277,6 +5277,10 @@ base class UniformFloatSlot {
     _shader.setFloat(_index, val);
   }
 
+  int get index {
+    return _index;
+  }
+
   final FragmentShader _shader;
   final int _index;
   final String name;

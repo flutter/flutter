@@ -56,6 +56,51 @@ void main() async {
     expect(identical(programA, programB), true);
   });
 
+  test('FragmentProgram uniform info', () async {
+    final FragmentProgram program = await FragmentProgram.fromAsset(
+      'uniforms.frag.iplr',
+    );
+    final FragmentShader shader = program.fragmentShader();
+    final List<UniformFloatSlot> slots = [
+      shader.getUniformFloat('iFloatUniform'),
+      shader.getUniformFloat('iVec2Uniform', 0),
+      shader.getUniformFloat('iVec2Uniform', 1),
+      shader.getUniformFloat('iMat2Uniform', 0),
+      shader.getUniformFloat('iMat2Uniform', 1),
+      shader.getUniformFloat('iMat2Uniform', 2),
+      shader.getUniformFloat('iMat2Uniform', 3),
+    ];
+    for (int i = 0; i < slots.length; ++i) {
+      expect(slots[i].index, equals(i));
+    }
+  });
+
+  test('FragmentProgram getUniformFloat unknown', () async {
+    final FragmentProgram program = await FragmentProgram.fromAsset(
+      'uniforms.frag.iplr',
+    );
+    final FragmentShader shader = program.fragmentShader();
+    try {
+      shader.getUniformFloat('unknown');
+      fail('Unreachable');
+    } catch (e) {
+      expect(e.toString(), contains('No uniform named "unknown".'));
+    }
+  });
+
+  test('FragmentProgram getUniformFloat offset overflow', () async {
+    final FragmentProgram program = await FragmentProgram.fromAsset(
+      'uniforms.frag.iplr',
+    );
+    final FragmentShader shader = program.fragmentShader();
+    try {
+      shader.getUniformFloat('iVec2Uniform', 2);
+      fail('Unreachable');
+    } catch (e) {
+      expect(e.toString(), contains('Index `2` out of bounds for `iVec2Uniform`.'));
+    }
+  });
+
   test('FragmentShader setSampler throws with out-of-bounds index', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset('blue_green_sampler.frag.iplr');
     final Image blueGreenImage = await _createBlueGreenImage();
