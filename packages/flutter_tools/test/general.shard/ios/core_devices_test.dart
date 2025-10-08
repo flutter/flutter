@@ -3441,7 +3441,7 @@ invalid JSON
           );
           final File tempFile = tempDir.childFile('core_device_list.json');
           final processCompleter = Completer<void>();
-          final FakeProcess fakeProcess = FakeProcess();
+          final fakeProcess = FakeProcess();
 
           fakeProcessManager.addCommand(
             FakeCommand(
