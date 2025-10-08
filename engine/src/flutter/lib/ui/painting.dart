@@ -5308,6 +5308,22 @@ base class UniformFloatSlot {
   final int offset;
 }
 
+base class UniformImageSamplerSlot {
+  UniformImageSamplerSlot._(this._shader, this.name, this._index);
+
+  final FragmentShader _shader;
+  final int _index;
+
+  void set(Image val) {
+    _shader.setImageSampler(_index, val);
+  }
+
+  get index => _index;
+
+  /// The name of the bound uniform.
+  final String name;
+}
+
 /// A [Shader] generated from a [FragmentProgram].
 ///
 /// Instances of this class can be obtained from the
@@ -5430,6 +5446,29 @@ base class FragmentShader extends Shader {
     }
 
     return UniformFloatSlot._(this, name, index, offset + index);
+  }
+
+  UniformImageSamplerSlot getImageSampler(String name) {
+    int index = 0;
+    bool found = false;
+    for (final dynamic entryDynamic in _program._uniformInfo) {
+      final Map<String, Object> entry = entryDynamic as Map<String, Object>;
+      if (entry['name'] == name) {
+        if (entry['type'] != 'SampledImage') {
+          throw ArgumentError('Uniform "$name" is not an image sampler.');
+        }
+        found = true;
+        break;
+      } else if (entry['type'] == 'SampledImage') {
+        index += 1;
+      }
+    }
+
+    if (!found) {
+      throw ArgumentError('No uniform named "$name".');
+    }
+
+    return UniformImageSamplerSlot._(this, name, index);
   }
 
   /// Sets the sampler uniform at [index] to [image].

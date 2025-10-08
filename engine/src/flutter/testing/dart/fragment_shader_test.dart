@@ -106,6 +106,37 @@ void main() async {
     }
   });
 
+  test('FragmentProgram getImageSampler', () async {
+    final FragmentProgram program = await FragmentProgram.fromAsset('uniform_ordering.frag.iplr');
+    final FragmentShader shader = program.fragmentShader();
+    final Image blueGreenImage = await _createBlueGreenImage();
+    final UniformImageSamplerSlot slot = shader.getImageSampler('u_texture');
+    slot.set(blueGreenImage);
+    expect(slot.index, equals(0));
+  });
+
+  test('FragmentProgram getImageSampler unknown', () async {
+    final FragmentProgram program = await FragmentProgram.fromAsset('uniform_ordering.frag.iplr');
+    final FragmentShader shader = program.fragmentShader();
+    try {
+      shader.getImageSampler('unknown');
+      fail('Unreachable');
+    } catch (e) {
+      expect(e.toString(), contains('No uniform named "unknown".'));
+    }
+  });
+
+  test('FragmentProgram getImageSampler wrong type', () async {
+    final FragmentProgram program = await FragmentProgram.fromAsset('uniform_ordering.frag.iplr');
+    final FragmentShader shader = program.fragmentShader();
+    try {
+      shader.getImageSampler('b');
+      fail('Unreachable');
+    } catch (e) {
+      expect(e.toString(), contains('Uniform "b" is not an image sampler.'));
+    }
+  });
+
   test('FragmentShader setSampler throws with out-of-bounds index', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset('blue_green_sampler.frag.iplr');
     final Image blueGreenImage = await _createBlueGreenImage();
