@@ -21,6 +21,7 @@ G_DECLARE_FINAL_TYPE(FlWindowMonitor,
  * @on_configure: the function to call when the window changes size, position or
  * stacking.
  * @on_state_changed: the function to call when the window state changes.
+ * @is_active_notify: the function to call when the is-active property changes.
  * @on_close: the function to call when the user requests the window to be
  * closed.
  * @on_destroy: the function to call when the window is destroyed.
@@ -33,6 +34,7 @@ G_DECLARE_FINAL_TYPE(FlWindowMonitor,
 FlWindowMonitor* fl_window_monitor_new(GtkWindow* window,
                                        void (*on_configure)(void),
                                        void (*on_state_changed)(void),
+                                       void (*is_active_notify)(void),
                                        void (*on_close)(void),
                                        void (*on_destroy)(void));
 

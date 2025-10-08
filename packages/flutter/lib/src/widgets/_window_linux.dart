@@ -88,12 +88,6 @@ class _GtkWidget extends _GObject {
     _gtkWidgetShow(instance);
   }
 
-  @ffi.Native<ffi.Bool Function(ffi.Pointer)>(symbol: 'gtk_widget_get_visible')
-  external static bool _gtkWidgetGetVisible(ffi.Pointer widget);
-  bool getVisible() {
-    return _gtkWidgetGetVisible(instance);
-  }
-
   @ffi.Native<ffi.Pointer Function(ffi.Pointer)>(symbol: 'gtk_widget_get_window')
   external static ffi.Pointer _gtkWidgetGetWindow(ffi.Pointer widget);
   _GdkWindow getWindow() {
@@ -288,6 +282,12 @@ class _GtkWindow extends _GtkWidget {
     _gFree(height);
     return result;
   }
+
+  @ffi.Native<ffi.Bool Function(ffi.Pointer)>(symbol: 'gtk_window_is_active')
+  external static bool _gtkWindowIsActive(ffi.Pointer widget);
+  bool isActive() {
+    return _gtkWindowIsActive(instance);
+  }
 }
 
 class _FlView extends _GtkWidget {
@@ -307,16 +307,25 @@ class _FlView extends _GtkWidget {
 class _FlWindowMonitor extends _GObject {
   final ffi.NativeCallable<ffi.Void Function()> _onConfigureFunction;
   final ffi.NativeCallable<ffi.Void Function()> _onStateChangedFunction;
+  final ffi.NativeCallable<ffi.Void Function()> _onIsActiveNotifyFunction;
   final ffi.NativeCallable<ffi.Void Function()> _onCloseFunction;
   final ffi.NativeCallable<ffi.Void Function()> _onDestroyFunction;
 
   @ffi.Native<
-    ffi.Pointer Function(ffi.Pointer, ffi.Pointer, ffi.Pointer, ffi.Pointer, ffi.Pointer)
+    ffi.Pointer Function(
+      ffi.Pointer,
+      ffi.Pointer,
+      ffi.Pointer,
+      ffi.Pointer,
+      ffi.Pointer,
+      ffi.Pointer,
+    )
   >(symbol: 'fl_window_monitor_new')
   external static ffi.Pointer _flWindowMonitorNew(
     ffi.Pointer window,
     ffi.Pointer onConfigure,
     ffi.Pointer onStateChanged,
+    ffi.Pointer onIsActiveNotify,
     ffi.Pointer onClose,
     ffi.Pointer onDestroy,
   );
@@ -325,6 +334,7 @@ class _FlWindowMonitor extends _GObject {
     _GtkWindow window,
     Function() onConfigure,
     Function() onStateChanged,
+    Function() onIsActiveNotify,
     Function() onClose,
     Function() onDestroy,
   ) {
@@ -332,6 +342,7 @@ class _FlWindowMonitor extends _GObject {
       window.instance,
       ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onConfigure),
       ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onStateChanged),
+      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onIsActiveNotify),
       ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onClose),
       ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onDestroy),
     );
@@ -341,6 +352,7 @@ class _FlWindowMonitor extends _GObject {
     ffi.Pointer window,
     this._onConfigureFunction,
     this._onStateChangedFunction,
+    this._onIsActiveNotifyFunction,
     this._onCloseFunction,
     this._onDestroyFunction,
   ) : super(
@@ -348,6 +360,7 @@ class _FlWindowMonitor extends _GObject {
           window,
           _onConfigureFunction.nativeFunction,
           _onStateChangedFunction.nativeFunction,
+          _onIsActiveNotifyFunction.nativeFunction,
           _onCloseFunction.nativeFunction,
           _onDestroyFunction.nativeFunction,
         ),
@@ -356,6 +369,7 @@ class _FlWindowMonitor extends _GObject {
   void close() {
     _onConfigureFunction.close();
     _onStateChangedFunction.close();
+    _onIsActiveNotifyFunction.close();
     _onCloseFunction.close();
     _onDestroyFunction.close();
   }
@@ -481,6 +495,10 @@ class RegularWindowControllerLinux extends RegularWindowController {
       () {
         notifyListeners();
       },
+      // onIsActiveNotify
+      () {
+        notifyListeners();
+      },
       // onClose
       () {
         _delegate.onWindowCloseRequested(this);
@@ -524,7 +542,7 @@ class RegularWindowControllerLinux extends RegularWindowController {
 
   @override
   @internal
-  bool get isActivated => _window.getVisible();
+  bool get isActivated => _window.isActive();
 
   @override
   @internal
