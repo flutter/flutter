@@ -156,7 +156,8 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
   task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
       [&, composition_order = composition_order_, view_params = view_params_,
        jni_facade = jni_facade_, device_pixel_ratio = device_pixel_ratio_,
-       slices = std::move(slices_), views_visible_last_frame = views_visible_last_frame_,
+       slices = std::move(slices_),
+       views_visible_last_frame = views_visible_last_frame_,
        overlay_layer_has_content_this_frame_]() mutable -> void {
         jni_facade->swapTransaction();
 
@@ -182,7 +183,8 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
           // remove this view from the set of views visible last frame
           views_visible_last_frame.erase(view_id);
         }
-        // for views visible last frame, and not removed from the set, hide them with a new jni call
+        // for views visible last frame, and not removed from the set, hide them
+        // with a new jni call
         for (int64_t view_id : views_visible_last_frame) {
           jni_facade->onDisplayPlatformView2(
               view_id, 0, 0, 0, 0, 0, 0,
@@ -192,7 +194,8 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
 
         jni_facade_->onEndFrame2();
       }));
-  // clear views visible last frame and copy the values from composition order to views visible last frame
+  // clear views visible last frame and copy the values from composition order
+  // to views visible last frame
   views_visible_last_frame_.clear();
   for (int64_t view_id : composition_order_) {
     views_visible_last_frame_.insert(view_id);
