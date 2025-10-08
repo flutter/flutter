@@ -1560,6 +1560,75 @@ void main() {
     }),
   );
 
+  // Regression test for https://github.com/flutter/flutter/issues/176566
+  testWidgets(
+    'AppBar title Semantics.namesRoute flag should be non-null on Android/Fuchsia/Linux/Windows platforms regardless of theme platform',
+    (WidgetTester tester) async {
+      // When someone sets theme.platform to TargetPlatform.iOS on an Android device,
+      // TalkBack should still work correctly by having a namesRoute flag in the title's semantics.
+      final SemanticsTester semantics = SemanticsTester(tester);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: TargetPlatform.iOS),
+          home: AppBar(title: const Text('Title')),
+        ),
+      );
+
+      final List<SemanticsFlag> expectedFlags = <SemanticsFlag>[
+        SemanticsFlag.isHeader,
+        SemanticsFlag.namesRoute,
+      ];
+
+      expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 1,
+                textDirection: TextDirection.ltr,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    id: 2,
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 3,
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            id: 4,
+                            children: <TestSemantics>[
+                              TestSemantics(
+                                id: 5,
+                                flags: expectedFlags,
+                                label: 'Title',
+                                textDirection: TextDirection.ltr,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          ignoreRect: true,
+          ignoreTransform: true,
+        ),
+      );
+
+      semantics.dispose();
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.android,
+      TargetPlatform.fuchsia,
+      TargetPlatform.linux,
+      TargetPlatform.windows,
+    }),
+  );
+
   testWidgets('Material3 - AppBar draws a light system bar for a dark background', (
     WidgetTester tester,
   ) async {
