@@ -16,15 +16,8 @@ using tonic::ToDart;
 namespace flutter {
 
 void DartIO::InitForIsolate(bool may_insecurely_connect_to_all_domains,
-                            const std::string& domain_network_policy) {
-  // TODO(https://dartbug.com/61694): move this code into dart_io_api.h
-  Dart_Handle io_lib = Dart_LookupLibrary(ToDart("dart:io"));
-  Dart_Handle result = Dart_SetNativeResolver(io_lib, dart::bin::LookupIONative,
-                                              dart::bin::LookupIONativeSymbol);
-  FML_CHECK(!CheckAndHandleError(result));
-  result = Dart_SetFfiNativeResolver(io_lib, dart::bin::LookupIOFfiNative);
-  FML_CHECK(!CheckAndHandleError(result));
-
+                            const std::string& domain_network_policy,
+                            const std::string& script_uri) {
   Dart_Handle ui_lib = Dart_LookupLibrary(ToDart("dart:ui"));
   Dart_Handle dart_validate_args[1];
   dart_validate_args[0] = ToDart(may_insecurely_connect_to_all_domains);
@@ -32,11 +25,16 @@ void DartIO::InitForIsolate(bool may_insecurely_connect_to_all_domains,
       Dart_Invoke(ui_lib, ToDart("_getHttpConnectionHookClosure"),
                   /*number_of_arguments=*/1, dart_validate_args);
   FML_CHECK(!CheckAndHandleError(http_connection_hook_closure));
-  Dart_Handle http_lib = Dart_LookupLibrary(ToDart("dart:_http"));
-  FML_CHECK(!CheckAndHandleError(http_lib));
-  Dart_Handle set_http_connection_hook_result = Dart_SetField(
-      http_lib, ToDart("_httpConnectionHook"), http_connection_hook_closure);
-  FML_CHECK(!CheckAndHandleError(set_http_connection_hook_result));
+
+  Dart_Handle /* _LocaleClosure? */ locale_closure =
+      Dart_Invoke(ui_lib, ToDart("_getLocaleClosure"), 0, nullptr);
+  FML_CHECK(!CheckAndHandleError(locale_closure));
+
+  dart::bin::SetupDartIoLibrary({
+      .http_connection_hook = http_connection_hook_closure,
+      .locale_name_callback = locale_closure,
+      .script_uri = !script_uri.empty() ? script_uri.c_str() : nullptr,
+  });
 }
 
 }  // namespace flutter
