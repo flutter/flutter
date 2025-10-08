@@ -186,10 +186,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
         // for views visible last frame, and not removed from the set, hide them
         // with a new jni call
         for (int64_t view_id : views_visible_last_frame) {
-          jni_facade->onDisplayPlatformView2(
-              view_id, 0, 0, 0, 0, 0, 0,
-              MutatorsStack()  // empty mutators stack
-          );
+          jni_facade->hidePlatformView2(view_id);
         }
 
         jni_facade_->onEndFrame2();
