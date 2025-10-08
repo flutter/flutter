@@ -23,6 +23,11 @@ FLUTTER_ASSERT_ARC
 
 @implementation FakeTestFlutterPluginWithSceneEvents
 - (BOOL)application:(UIApplication*)application
+    didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
+  return NO;
+}
+
+- (BOOL)application:(UIApplication*)application
             openURL:(NSURL*)url
             options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*)options {
   return YES;
@@ -64,6 +69,16 @@ FLUTTER_ASSERT_ARC
     API_AVAILABLE(ios(9.0)) {
   return YES;
 }
+
+- (BOOL)application:(UIApplication*)application
+    didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
+  return YES;
+}
+
+- (BOOL)application:(UIApplication*)application
+    willFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
+  return YES;
+}
 @end
 
 @interface FlutterPluginAppLifeCycleDelegateTest : XCTestCase
@@ -74,6 +89,65 @@ FLUTTER_ASSERT_ARC
 - (void)testCreate {
   FlutterPluginAppLifeCycleDelegate* delegate = [[FlutterPluginAppLifeCycleDelegate alloc] init];
   XCTAssertNotNil(delegate);
+}
+
+- (void)testSceneWillConnectFallback {
+  FlutterPluginAppLifeCycleDelegate* delegate = [[FlutterPluginAppLifeCycleDelegate alloc] init];
+  id plugin = [[FakePlugin alloc] init];
+  id mockPlugin = OCMPartialMock(plugin);
+  [delegate addDelegate:mockPlugin];
+
+  id mockOptions = OCMClassMock([UISceneConnectionOptions class]);
+  id mockShortcutItem = OCMClassMock([UIApplicationShortcutItem class]);
+  OCMStub([mockOptions shortcutItem]).andReturn(mockShortcutItem);
+  OCMStub([mockOptions sourceApplication]).andReturn(@"bundle_id");
+  id urlContext = OCMClassMock([UIOpenURLContext class]);
+  NSURL* url = [NSURL URLWithString:@"http://example.com"];
+  OCMStub([urlContext URL]).andReturn(url);
+  NSSet<UIOpenURLContext*>* urlContexts = [NSSet setWithObjects:urlContext, nil];
+  OCMStub([mockOptions URLContexts]).andReturn(urlContexts);
+
+  NSDictionary<UIApplicationOpenURLOptionsKey, id>* expectedApplicationOptions = @{
+    UIApplicationLaunchOptionsShortcutItemKey : mockShortcutItem,
+    UIApplicationLaunchOptionsSourceApplicationKey : @"bundle_id",
+    UIApplicationLaunchOptionsURLKey : url,
+  };
+
+  [delegate sceneWillConnectFallback:mockOptions];
+  OCMVerify([mockPlugin application:[UIApplication sharedApplication]
+      didFinishLaunchingWithOptions:expectedApplicationOptions]);
+}
+
+- (void)testSceneWillConnectFallbackSkippedSupportsScenes {
+  FlutterPluginAppLifeCycleDelegate* delegate = [[FlutterPluginAppLifeCycleDelegate alloc] init];
+  id plugin = [[FakeTestFlutterPluginWithSceneEvents alloc] init];
+  id mockPlugin = OCMPartialMock(plugin);
+  [delegate addDelegate:mockPlugin];
+
+  id mockOptions = OCMClassMock([UISceneConnectionOptions class]);
+  id mockShortcutItem = OCMClassMock([UIApplicationShortcutItem class]);
+  OCMStub([mockOptions shortcutItem]).andReturn(mockShortcutItem);
+  OCMStub([mockOptions sourceApplication]).andReturn(@"bundle_id");
+  id urlContext = OCMClassMock([UIOpenURLContext class]);
+  NSURL* url = [NSURL URLWithString:@"http://example.com"];
+  OCMStub([urlContext URL]).andReturn(url);
+  NSSet<UIOpenURLContext*>* urlContexts = [NSSet setWithObjects:urlContext, nil];
+  OCMStub([mockOptions URLContexts]).andReturn(urlContexts);
+
+  [delegate sceneWillConnectFallback:mockOptions];
+  OCMReject([mockPlugin application:[OCMArg any] didFinishLaunchingWithOptions:[OCMArg any]]);
+}
+
+- (void)testSceneWillConnectFallbackSkippedNoOptions {
+  FlutterPluginAppLifeCycleDelegate* delegate = [[FlutterPluginAppLifeCycleDelegate alloc] init];
+  id plugin = [[FakePlugin alloc] init];
+  id mockPlugin = OCMPartialMock(plugin);
+  [delegate addDelegate:mockPlugin];
+
+  id mockOptions = OCMClassMock([UISceneConnectionOptions class]);
+
+  [delegate sceneWillConnectFallback:mockOptions];
+  OCMReject([mockPlugin application:[OCMArg any] didFinishLaunchingWithOptions:[OCMArg any]]);
 }
 
 - (void)testDidEnterBackground {
@@ -423,6 +497,74 @@ FLUTTER_ASSERT_ARC
   }
   XCTAssertNil(weakPlugin);
   XCTAssertNil(weakDelegate);
+}
+
+- (void)testApplicationWillFinishLaunchingSceneFallbackForwards {
+  FlutterPluginAppLifeCycleDelegate* delegate = [[FlutterPluginAppLifeCycleDelegate alloc] init];
+  id plugin = [[FakePlugin alloc] init];
+  id mockPlugin = OCMPartialMock(plugin);
+  [delegate addDelegate:mockPlugin];
+  id mockApplication = OCMClassMock([UIApplication class]);
+  NSDictionary* options = @{};
+
+  [delegate sceneFallbackWillFinishLaunchingApplication:mockApplication];
+  OCMVerify(times(1), [mockPlugin application:mockApplication
+                          willFinishLaunchingWithOptions:options]);
+}
+
+- (void)testApplicationWillFinishLaunchingSceneFallbackNoForwardAfterWillLaunch {
+  FlutterPluginAppLifeCycleDelegate* delegate = [[FlutterPluginAppLifeCycleDelegate alloc] init];
+  id plugin = [[FakePlugin alloc] init];
+  id mockPlugin = OCMPartialMock(plugin);
+  [delegate addDelegate:mockPlugin];
+  id mockApplication = OCMClassMock([UIApplication class]);
+  NSDictionary* options = @{@"key" : @"value"};
+
+  [delegate application:mockApplication willFinishLaunchingWithOptions:options];
+  [delegate sceneFallbackWillFinishLaunchingApplication:mockApplication];
+  OCMVerify(times(1), [mockPlugin application:mockApplication
+                          willFinishLaunchingWithOptions:options]);
+}
+
+- (void)testApplicationWillFinishLaunchingSceneFallbackNoForwardAfterDidLaunch {
+  FlutterPluginAppLifeCycleDelegate* delegate = [[FlutterPluginAppLifeCycleDelegate alloc] init];
+  id plugin = [[FakePlugin alloc] init];
+  id mockPlugin = OCMPartialMock(plugin);
+  [delegate addDelegate:mockPlugin];
+  id mockApplication = OCMClassMock([UIApplication class]);
+  NSDictionary* options = @{@"key" : @"value"};
+
+  [delegate application:mockApplication didFinishLaunchingWithOptions:options];
+  [delegate sceneFallbackWillFinishLaunchingApplication:mockApplication];
+  OCMVerify(times(0), [mockPlugin application:mockApplication
+                          willFinishLaunchingWithOptions:options]);
+}
+
+- (void)testApplicationDidFinishLaunchingSceneFallbackForwards {
+  FlutterPluginAppLifeCycleDelegate* delegate = [[FlutterPluginAppLifeCycleDelegate alloc] init];
+  id plugin = [[FakePlugin alloc] init];
+  id mockPlugin = OCMPartialMock(plugin);
+  [delegate addDelegate:mockPlugin];
+  id mockApplication = OCMClassMock([UIApplication class]);
+  NSDictionary* options = @{};
+
+  [delegate sceneFallbackDidFinishLaunchingApplication:mockApplication];
+  OCMVerify(times(1), [mockPlugin application:mockApplication
+                          didFinishLaunchingWithOptions:options]);
+}
+
+- (void)testApplicationDidFinishLaunchingSceneFallbackNoForward {
+  FlutterPluginAppLifeCycleDelegate* delegate = [[FlutterPluginAppLifeCycleDelegate alloc] init];
+  id plugin = [[FakePlugin alloc] init];
+  id mockPlugin = OCMPartialMock(plugin);
+  [delegate addDelegate:mockPlugin];
+  id mockApplication = OCMClassMock([UIApplication class]);
+  NSDictionary* options = @{@"key" : @"value"};
+
+  [delegate application:mockApplication didFinishLaunchingWithOptions:options];
+  [delegate sceneFallbackDidFinishLaunchingApplication:mockApplication];
+  OCMVerify(times(1), [mockPlugin application:mockApplication
+                          didFinishLaunchingWithOptions:options]);
 }
 
 @end
