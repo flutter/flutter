@@ -104,7 +104,7 @@ The easiest way to do this is create a [multi-root workspace](https://code.visua
 }
 ```
 
-Then, edit the `"settings"` key:
+Then, install the [`clangd` extension](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.vscode-clangd) and edit the `"settings"` key:
 
 ```json
 "settings": {

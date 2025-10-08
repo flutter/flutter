@@ -37,11 +37,9 @@ WidgetPreviewerWidgetScaffolding previewForLocalizations({
   return WidgetPreviewerWidgetScaffolding(
     child: WidgetPreviewWidget(
       controller: controller,
-      preview: WidgetPreview(
-        scriptUri: '',
+      preview: WidgetPreview.test(
         builder: () => Text('Foo', key: key),
         previewData: Preview(localizations: previewLocalizationsData),
-        packageName: '',
       ),
     ),
   );
