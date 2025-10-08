@@ -20,7 +20,7 @@ void main() {
     )) {
       stdout.writeln(
         'The widget_preview_scaffold contents do not match the widget_preview_scaffold '
-        'templates. Run "dart test/widget_preview_scaffold.shard/update_widget_preview_scaffold" '
+        'templates. Run "dart test/widget_preview_scaffold.shard/update_widget_preview_scaffold.dart" '
         'to update widget_preview_scaffold with the latest template contents.',
       );
       fail(
