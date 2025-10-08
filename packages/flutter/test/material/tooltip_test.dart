@@ -3623,14 +3623,14 @@ void main() {
                   ({
                     required Offset target,
                     required Size targetSize,
-                    required Size childSize,
+                    required Size tooltipSize,
                     required double verticalOffset,
                     required bool preferBelow,
                   }) {
                     // Align on top right of box with bottom left of tooltip.
                     return Offset(
                       target.dx + (targetSize.width / 2),
-                      target.dy - (targetSize.height / 2) - childSize.height,
+                      target.dy - (targetSize.height / 2) - tooltipSize.height,
                     );
                   },
               child: const SizedBox(width: 50, height: 50),

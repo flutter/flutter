@@ -30,7 +30,7 @@ typedef TooltipTriggeredCallback = void Function();
 /// The arguments are:
 /// * `target`: The center point of the target widget in the global coordinate system.
 /// * `targetSize`: The size of the target widget that triggers the tooltip.
-/// * `childSize`: The size of the tooltip itself.
+/// * `tooltipSize`: The size of the tooltip itself.
 /// * `verticalOffset`: The configured vertical offset.
 /// * `preferBelow`: Whether the tooltip prefers to be positioned below the target.
 ///
@@ -39,7 +39,7 @@ typedef TooltipPositionDelegate =
     Offset Function({
       required Offset target,
       required Size targetSize,
-      required Size childSize,
+      required Size tooltipSize,
       required double verticalOffset,
       required bool preferBelow,
     });
@@ -861,7 +861,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       layoutInfo.childPaintTransform,
       layoutInfo.childSize.center(Offset.zero),
     );
-    final Size targetSize = layoutInfo.childSize;
+    final Size tooltipSize = layoutInfo.childSize;
 
     final (TextStyle defaultTextStyle, BoxDecoration defaultDecoration) = switch (Theme.of(
       context,
@@ -914,7 +914,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       textAlign: widget.textAlign ?? tooltipTheme.textAlign ?? _defaultTextAlign,
       animation: _overlayAnimation,
       target: target,
-      targetSize: targetSize,
+      targetSize: tooltipSize,
       verticalOffset:
           widget.verticalOffset ?? tooltipTheme.verticalOffset ?? _defaultVerticalOffset,
       preferBelow: widget.preferBelow ?? tooltipTheme.preferBelow ?? _defaultPreferBelow,
@@ -1029,7 +1029,7 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
       return positionDelegate!(
         target: target,
         targetSize: targetSize,
-        childSize: childSize,
+        tooltipSize: childSize,
         verticalOffset: verticalOffset,
         preferBelow: preferBelow,
       );
