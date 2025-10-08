@@ -19,7 +19,8 @@ struct _FlWindowMonitor {
   // Callbacks.
   void (*on_configure)(void);
   void (*on_state_changed)(void);
-  void (*is_active_notify)(void);
+  void (*on_is_active_notify)(void);
+  void (*on_title_notify)(void);
   void (*on_close)(void);
   void (*on_destroy)(void);
 
@@ -27,6 +28,7 @@ struct _FlWindowMonitor {
   gulong configure_event_cb_id;
   gulong window_state_event_cb_id;
   gulong is_active_notify_cb_id;
+  gulong title_notify_cb_id;
   gulong delete_event_cb_id;
   gulong destroy_cb_id;
 };
@@ -51,7 +53,12 @@ static gboolean window_state_event_cb(FlWindowMonitor* self,
 
 static void is_active_notify_cb(FlWindowMonitor* self) {
   flutter::IsolateScope scope(self->isolate);
-  self->is_active_notify();
+  self->on_is_active_notify();
+}
+
+static void title_notify_cb(FlWindowMonitor* self) {
+  flutter::IsolateScope scope(self->isolate);
+  self->on_title_notify();
 }
 
 static gboolean delete_event_cb(FlWindowMonitor* self, GdkEvent* event) {
@@ -74,6 +81,7 @@ static void fl_window_monitor_dispose(GObject* object) {
   g_signal_handler_disconnect(self->window, self->configure_event_cb_id);
   g_signal_handler_disconnect(self->window, self->window_state_event_cb_id);
   g_signal_handler_disconnect(self->window, self->is_active_notify_cb_id);
+  g_signal_handler_disconnect(self->window, self->title_notify_cb_id);
   g_signal_handler_disconnect(self->window, self->delete_event_cb_id);
   g_signal_handler_disconnect(self->window, self->destroy_cb_id);
 
@@ -90,7 +98,8 @@ G_MODULE_EXPORT FlWindowMonitor* fl_window_monitor_new(
     GtkWindow* window,
     void (*on_configure)(void),
     void (*on_state_changed)(void),
-    void (*is_active_notify)(void),
+    void (*on_is_active_notify)(void),
+    void (*on_title_notify)(void),
     void (*on_close)(void),
     void (*on_destroy)(void)) {
   FlWindowMonitor* self =
@@ -100,7 +109,8 @@ G_MODULE_EXPORT FlWindowMonitor* fl_window_monitor_new(
   self->isolate = flutter::Isolate::Current();
   self->on_configure = on_configure;
   self->on_state_changed = on_state_changed;
-  self->is_active_notify = is_active_notify;
+  self->on_is_active_notify = on_is_active_notify;
+  self->on_title_notify = on_title_notify;
   self->on_close = on_close;
   self->on_destroy = on_destroy;
   self->configure_event_cb_id = g_signal_connect_swapped(
@@ -109,6 +119,8 @@ G_MODULE_EXPORT FlWindowMonitor* fl_window_monitor_new(
       window, "window-state-event", G_CALLBACK(window_state_event_cb), self);
   self->is_active_notify_cb_id = g_signal_connect_swapped(
       window, "notify::is-active", G_CALLBACK(is_active_notify_cb), self);
+  self->title_notify_cb_id = g_signal_connect_swapped(
+      window, "notify::title", G_CALLBACK(title_notify_cb), self);
   self->delete_event_cb_id = g_signal_connect_swapped(
       window, "delete-event", G_CALLBACK(delete_event_cb), self);
   self->destroy_cb_id =

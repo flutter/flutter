@@ -308,11 +308,13 @@ class _FlWindowMonitor extends _GObject {
   final ffi.NativeCallable<ffi.Void Function()> _onConfigureFunction;
   final ffi.NativeCallable<ffi.Void Function()> _onStateChangedFunction;
   final ffi.NativeCallable<ffi.Void Function()> _onIsActiveNotifyFunction;
+  final ffi.NativeCallable<ffi.Void Function()> _onTitleNotifyFunction;
   final ffi.NativeCallable<ffi.Void Function()> _onCloseFunction;
   final ffi.NativeCallable<ffi.Void Function()> _onDestroyFunction;
 
   @ffi.Native<
     ffi.Pointer Function(
+      ffi.Pointer,
       ffi.Pointer,
       ffi.Pointer,
       ffi.Pointer,
@@ -326,6 +328,7 @@ class _FlWindowMonitor extends _GObject {
     ffi.Pointer onConfigure,
     ffi.Pointer onStateChanged,
     ffi.Pointer onIsActiveNotify,
+    ffi.Pointer onTitleNotify,
     ffi.Pointer onClose,
     ffi.Pointer onDestroy,
   );
@@ -335,6 +338,7 @@ class _FlWindowMonitor extends _GObject {
     Function() onConfigure,
     Function() onStateChanged,
     Function() onIsActiveNotify,
+    Function() onTitleNotify,
     Function() onClose,
     Function() onDestroy,
   ) {
@@ -343,6 +347,7 @@ class _FlWindowMonitor extends _GObject {
       ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onConfigure),
       ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onStateChanged),
       ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onIsActiveNotify),
+      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onTitleNotify),
       ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onClose),
       ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onDestroy),
     );
@@ -353,6 +358,7 @@ class _FlWindowMonitor extends _GObject {
     this._onConfigureFunction,
     this._onStateChangedFunction,
     this._onIsActiveNotifyFunction,
+    this._onTitleNotifyFunction,
     this._onCloseFunction,
     this._onDestroyFunction,
   ) : super(
@@ -361,6 +367,7 @@ class _FlWindowMonitor extends _GObject {
           _onConfigureFunction.nativeFunction,
           _onStateChangedFunction.nativeFunction,
           _onIsActiveNotifyFunction.nativeFunction,
+          _onTitleNotifyFunction.nativeFunction,
           _onCloseFunction.nativeFunction,
           _onDestroyFunction.nativeFunction,
         ),
@@ -370,6 +377,7 @@ class _FlWindowMonitor extends _GObject {
     _onConfigureFunction.close();
     _onStateChangedFunction.close();
     _onIsActiveNotifyFunction.close();
+    _onTitleNotifyFunction.close();
     _onCloseFunction.close();
     _onDestroyFunction.close();
   }
@@ -488,25 +496,19 @@ class RegularWindowControllerLinux extends RegularWindowController {
     _windowMonitor = _FlWindowMonitor(
       _window,
       // onConfigure
-      () {
-        notifyListeners();
-      },
+      notifyListeners,
       // onStateChanged
-      () {
-        notifyListeners();
-      },
+      notifyListeners,
       // onIsActiveNotify
-      () {
-        notifyListeners();
-      },
+      notifyListeners,
+      // onTitleNotify
+      notifyListeners,
       // onClose
       () {
         _delegate.onWindowCloseRequested(this);
       },
       // onDestroy
-      () {
-        _delegate.onWindowDestroyed();
-      },
+      _delegate.onWindowDestroyed,
     );
     if (preferredSize != null) {
       _window.setDefaultSize(preferredSize.width.toInt(), preferredSize.height.toInt());
@@ -578,7 +580,6 @@ class RegularWindowControllerLinux extends RegularWindowController {
   @internal
   void setTitle(String title) {
     _window.setTitle(title);
-    notifyListeners();
   }
 
   @override
