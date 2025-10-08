@@ -298,7 +298,7 @@ void main() async {
     'GpuContext.createTexture fails if invalid sampleCount and texture type is passed.',
     () async {
       try {
-        final gpu.Texture texture = gpu.gpuContext.createTexture(
+        gpu.gpuContext.createTexture(
           gpu.StorageMode.hostVisible,
           100,
           100,
