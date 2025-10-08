@@ -305,15 +305,17 @@ class _FlView extends _GtkWidget {
 }
 
 class _FlWindowMonitor extends _GObject {
+  final ffi.NativeCallable<ffi.Void Function()> _onConfigureFunction;
   final ffi.NativeCallable<ffi.Void Function()> _onStateChangedFunction;
   final ffi.NativeCallable<ffi.Void Function()> _onCloseFunction;
   final ffi.NativeCallable<ffi.Void Function()> _onDestroyFunction;
 
-  @ffi.Native<ffi.Pointer Function(ffi.Pointer, ffi.Pointer, ffi.Pointer, ffi.Pointer)>(
-    symbol: 'fl_window_monitor_new',
-  )
+  @ffi.Native<
+    ffi.Pointer Function(ffi.Pointer, ffi.Pointer, ffi.Pointer, ffi.Pointer, ffi.Pointer)
+  >(symbol: 'fl_window_monitor_new')
   external static ffi.Pointer _flWindowMonitorNew(
     ffi.Pointer window,
+    ffi.Pointer onConfigure,
     ffi.Pointer onStateChanged,
     ffi.Pointer onClose,
     ffi.Pointer onDestroy,
@@ -321,12 +323,14 @@ class _FlWindowMonitor extends _GObject {
 
   factory _FlWindowMonitor(
     _GtkWindow window,
+    Function() onConfigure,
     Function() onStateChanged,
     Function() onClose,
     Function() onDestroy,
   ) {
     return _FlWindowMonitor._internal(
       window.instance,
+      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onConfigure),
       ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onStateChanged),
       ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onClose),
       ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onDestroy),
@@ -335,12 +339,14 @@ class _FlWindowMonitor extends _GObject {
 
   _FlWindowMonitor._internal(
     ffi.Pointer window,
+    this._onConfigureFunction,
     this._onStateChangedFunction,
     this._onCloseFunction,
     this._onDestroyFunction,
   ) : super(
         _flWindowMonitorNew(
           window,
+          _onConfigureFunction.nativeFunction,
           _onStateChangedFunction.nativeFunction,
           _onCloseFunction.nativeFunction,
           _onDestroyFunction.nativeFunction,
@@ -348,6 +354,7 @@ class _FlWindowMonitor extends _GObject {
       );
 
   void close() {
+    _onConfigureFunction.close();
     _onStateChangedFunction.close();
     _onCloseFunction.close();
     _onDestroyFunction.close();
@@ -466,6 +473,10 @@ class RegularWindowControllerLinux extends RegularWindowController {
 
     _windowMonitor = _FlWindowMonitor(
       _window,
+      // onConfigure
+      () {
+        notifyListeners();
+      },
       // onStateChanged
       () {
         notifyListeners();

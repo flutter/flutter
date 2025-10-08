@@ -17,17 +17,27 @@ struct _FlWindowMonitor {
   flutter::Isolate isolate;
 
   // Callbacks.
+  void (*on_configure)(void);
   void (*on_state_changed)(void);
   void (*on_close)(void);
   void (*on_destroy)(void);
 
   // Signal subscriptions.
+  gulong configure_event_cb_id;
   gulong window_state_event_cb_id;
   gulong delete_event_cb_id;
   gulong destroy_cb_id;
 };
 
 G_DEFINE_TYPE(FlWindowMonitor, fl_window_monitor, G_TYPE_OBJECT)
+
+static gboolean configure_event_cb(FlWindowMonitor* self,
+                                   GdkEventConfigure* event) {
+  flutter::IsolateScope scope(self->isolate);
+  self->on_configure();
+
+  return FALSE;
+}
 
 static gboolean window_state_event_cb(FlWindowMonitor* self,
                                       GdkEventWindowState* event) {
@@ -69,6 +79,7 @@ static void fl_window_monitor_init(FlWindowMonitor* self) {}
 
 G_MODULE_EXPORT FlWindowMonitor* fl_window_monitor_new(
     GtkWindow* window,
+    void (*on_configure)(void),
     void (*on_state_changed)(void),
     void (*on_close)(void),
     void (*on_destroy)(void)) {
@@ -77,9 +88,12 @@ G_MODULE_EXPORT FlWindowMonitor* fl_window_monitor_new(
 
   self->window = GTK_WINDOW(g_object_ref(window));
   self->isolate = flutter::Isolate::Current();
+  self->on_configure = on_configure;
   self->on_state_changed = on_state_changed;
   self->on_close = on_close;
   self->on_destroy = on_destroy;
+  self->configure_event_cb_id = g_signal_connect_swapped(
+      window, "configure-event", G_CALLBACK(configure_event_cb), self);
   self->window_state_event_cb_id = g_signal_connect_swapped(
       window, "window-state-event", G_CALLBACK(window_state_event_cb), self);
   self->delete_event_cb_id = g_signal_connect_swapped(
