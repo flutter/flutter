@@ -72,7 +72,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  // This boolean now controls the visibility of the right-hand platform view.
   bool _showRightView = true;
 
   void _toggleRightView() {
