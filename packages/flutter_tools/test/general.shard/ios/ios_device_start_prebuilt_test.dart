@@ -1289,6 +1289,86 @@ void main() {
         },
       );
 
+      group('IOSDevice warnIfSlowWirelessDebugging', () {
+        testWithoutContext('prints warning for slow wireless debugging on iOS 26+', () async {
+          final logger = BufferLogger.test();
+          final IOSDevice device = setUpIOSDevice(
+            sdkVersion: '26.0.0',
+            logger: logger,
+            interfaceType: DeviceConnectionInterface.wireless,
+          );
+          expect(device.isWirelesslyConnected, isTrue);
+
+          device.warnIfSlowWirelessDebugging(DebuggingOptions.enabled(BuildInfo.debug));
+
+          const warningMessage =
+              'Wireless debugging on iOS 26 may be slower than expected. '
+              'For better performance, consider using a wired (USB) connection.';
+          expect(logger.warningText, contains(warningMessage));
+
+          final event = json.decode(logger.eventText) as Map<String, dynamic>;
+          expect(event['name'], 'app.warning');
+          final args = event['args'] as Map<String, dynamic>;
+          expect(
+            args,
+            equals(<String, Object?>{
+              'warningId': 'ios-wireless-slow',
+              'warning': warningMessage,
+              'category': 'ios-wireless-performance',
+              'deviceId': '123',
+              'deviceOsVersion': 26,
+              'actionable': true,
+            }),
+          );
+        });
+        testWithoutContext(
+          'does not print slow wireless debugging warning on iOS less than 26',
+          () async {
+            final logger = BufferLogger.test();
+            final IOSDevice device = setUpIOSDevice(
+              sdkVersion: '25.0',
+              logger: logger,
+              interfaceType: DeviceConnectionInterface.wireless,
+            );
+
+            device.warnIfSlowWirelessDebugging(DebuggingOptions.enabled(BuildInfo.debug));
+
+            expect(logger.warningText, isEmpty);
+            expect(logger.eventText, isEmpty);
+          },
+        );
+
+        testWithoutContext(
+          'does not print slow wireless debugging warning for wired device',
+          () async {
+            final logger = BufferLogger.test();
+            final IOSDevice device = setUpIOSDevice(sdkVersion: '26.0', logger: logger);
+
+            device.warnIfSlowWirelessDebugging(DebuggingOptions.enabled(BuildInfo.debug));
+
+            expect(logger.warningText, isEmpty);
+            expect(logger.eventText, isEmpty);
+          },
+        );
+
+        testWithoutContext(
+          'does not print slow wireless debugging warning for release mode',
+          () async {
+            final logger = BufferLogger.test();
+            final IOSDevice device = setUpIOSDevice(
+              sdkVersion: '26.0',
+              logger: logger,
+              interfaceType: DeviceConnectionInterface.wireless,
+            );
+
+            device.warnIfSlowWirelessDebugging(DebuggingOptions.disabled(BuildInfo.release));
+
+            expect(logger.warningText, isEmpty);
+            expect(logger.eventText, isEmpty);
+          },
+        );
+      });
+
       group('IOSDevice.startApp attaches in debug mode via device logging', () {
         late FakeMDnsVmServiceDiscovery mdnsDiscovery;
         setUp(() {
