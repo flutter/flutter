@@ -672,7 +672,7 @@ bool DartIsolate::LoadLibraries() {
   tonic::DartState::Scope scope(this);
 
   DartIO::InitForIsolate(may_insecurely_connect_to_all_domains_,
-                         domain_network_policy_);
+                         domain_network_policy_, GetAdvisoryScriptURI());
 
   const auto& settings = GetIsolateGroupData().GetSettings();
 
