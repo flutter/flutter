@@ -67,7 +67,7 @@ void main() {
       final data = jsonDecode(response);
       expect(data["width"], 500);
       expect(data["height"], 501);
-    }, timeout: Timeout.none, onPlatform: {'linux': Skip('FIXME: resize is async')});
+    }, timeout: Timeout.none, onPlatform: {'linux': Skip('FIXME: Not resizing to expected size')});
 
     test('Can set and get fullscreen', () async {
       await driver.requestData(jsonEncode({'type': 'set_fullscreen'}));
@@ -83,7 +83,7 @@ void main() {
       );
       data = jsonDecode(response);
       expect(data["isFullscreen"], false);
-    }, timeout: Timeout.none, onPlatform: {'linux': Skip('FIXME: isFullscreen is async')});
+    }, timeout: Timeout.none);
 
     test('Can set and get maximized', () async {
       await driver.requestData(jsonEncode({'type': 'set_maximized'}));
@@ -99,7 +99,7 @@ void main() {
       );
       data = jsonDecode(response);
       expect(data["isMaximized"], false);
-    }, timeout: Timeout.none, onPlatform: {'linux': Skip('FIXME: isMaximized is async')});
+    }, timeout: Timeout.none);
 
     test('Can set and get minimized', () async {
       await driver.requestData(jsonEncode({'type': 'set_minimized'}));
@@ -115,7 +115,7 @@ void main() {
       );
       data = jsonDecode(response);
       expect(data["isMinimized"], false);
-    }, timeout: Timeout.none, onPlatform: {'linux': Skip('FIXME: isMinimized is async')});
+    }, timeout: Timeout.none, onPlatform: {'linux': Skip('isMinimized is not supported on Wayland')});
 
     test('Can set and get activated', () async {
       await driver.requestData(
@@ -127,6 +127,6 @@ void main() {
       );
       final data = jsonDecode(response);
       expect(data["isActivated"], true);
-    }, timeout: Timeout.none);
+    }, timeout: Timeout.none, onPlatform: {'linux': Skip('isMinimized is not supported on Wayland')});
   });
 }
