@@ -1169,8 +1169,8 @@ def parse_args(args):
 
   parser.add_argument(
       '--prebuilt-dart-sdk',
-      default=True,
-      action='store_true',
+      default=False,
+      action='store_false',
       help='Whether to use a prebuilt Dart SDK instead of building one. This defaults to ' +
       'true and is enabled on CI.'
   )
