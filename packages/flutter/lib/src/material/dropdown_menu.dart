@@ -17,6 +17,7 @@ import 'icon_button.dart';
 import 'icons.dart';
 import 'input_border.dart';
 import 'input_decorator.dart';
+import 'material_localizations.dart';
 import 'material_state.dart';
 import 'menu_anchor.dart';
 import 'menu_button_theme.dart';
@@ -1158,6 +1159,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           child: widget.leadingIcon ?? const SizedBox.shrink(),
         );
 
+        final MaterialLocalizations localizations = MaterialLocalizations.of(context);
         final Widget textField = Semantics(
           button: !canRequestFocus(),
           // Some platforms may still treat this as text field if both `textField`
@@ -1168,8 +1170,8 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           // APIs to show whether the menu is expanded or collapsed.
           hint: Theme.of(context).platform == TargetPlatform.iOS
               ? _controller.isOpen
-                    ? 'Expanded'
-                    : 'Collapsed'
+                    ? localizations.collapsedHint
+                    : localizations.expandedHint
               : null,
           expanded: _controller.isOpen,
           onExpand: _controller.isOpen
