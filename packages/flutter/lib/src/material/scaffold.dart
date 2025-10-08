@@ -1955,7 +1955,7 @@ class Scaffold extends StatefulWidget {
   /// If true then the height of the [appBar] will be extended by the height
   /// of the screen's status bar, i.e. the top padding for [MediaQuery].
   ///
-  /// If ture, on iOS and macOS, tapping the status bar scrolls the app's
+  /// If true, on iOS and macOS, tapping the status bar scrolls the app's
   /// [PrimaryScrollController] to the top.
   ///
   /// The default value of this property, like the default value of
@@ -2747,7 +2747,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
 
   // iOS FEATURES - status bar tap, back gesture
 
-  // On iOS and macOS, tapping the status bar scrolls the app's primary scrollable
+  // On iOS and macOS, if `primary` is true, tapping the status bar scrolls the app's primary scrollable
   // to the top. We implement this by looking up the primary scroll controller and
   // scrolling it to the top when tapped.
   void _handleStatusBarTap() {
