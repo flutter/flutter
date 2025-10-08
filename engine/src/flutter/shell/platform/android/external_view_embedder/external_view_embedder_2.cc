@@ -72,9 +72,17 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
 
   if (!FrameHasPlatformLayers()) {
     frame->Submit();
-    // If the previous frame had platform views, hide the overlay surface.
-    HideOverlayLayerIfNeeded();
-    jni_facade_->applyTransaction();
+    task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
+        [&, jni_facade = jni_facade_,
+         views_visible_last_frame = views_visible_last_frame_]() {
+          HideOverlayLayerIfNeeded();
+          for (int64_t view_id : views_visible_last_frame) {
+            jni_facade->hidePlatformView2(view_id);
+          }
+
+          jni_facade->applyTransaction();
+        }));
+    views_visible_last_frame_.clear();
     return;
   }
 
@@ -151,6 +159,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
   } else {
     overlay_layer_has_content_this_frame_ = false;
   }
+
   frame->Submit();
   task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
       [&, composition_order = composition_order_, view_params = view_params_,
@@ -184,6 +193,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
         }
         // Hide views that were visible last frame, but not in this frame.
         for (int64_t view_id : views_visible_last_frame) {
+          FML_LOG(ERROR) << "Hiding platform view: " << view_id;
           jni_facade->hidePlatformView2(view_id);
         }
 
