@@ -960,7 +960,7 @@ class ListTile extends StatelessWidget {
     final MouseCursor effectiveMouseCursor =
         WidgetStateProperty.resolveAs<MouseCursor?>(mouseCursor, mouseStates) ??
         tileTheme.mouseCursor?.resolve(mouseStates) ??
-        MaterialStateMouseCursor.clickable.resolve(mouseStates);
+        WidgetStateMouseCursor.clickable.resolve(mouseStates);
 
     final ListTileTitleAlignment effectiveTitleAlignment =
         titleAlignment ??
@@ -1151,7 +1151,7 @@ class _IndividualOverrides extends WidgetStateProperty<Color?> {
 
   @override
   Color? resolve(Set<WidgetState> states) {
-    if (explicitColor is MaterialStateColor) {
+    if (explicitColor is WidgetStateColor) {
       return WidgetStateProperty.resolveAs<Color?>(explicitColor, states);
     }
     if (states.contains(WidgetState.disabled)) {

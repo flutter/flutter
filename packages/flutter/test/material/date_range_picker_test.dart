@@ -1967,6 +1967,19 @@ void main() {
       expect(getDayCount(secondMonthItem), 21);
     });
   });
+
+  testWidgets('DateRangePickerDialog does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: DateRangePickerDialog(firstDate: firstDate, lastDate: lastDate),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(DateRangePickerDialog)), Size.zero);
+  });
 }
 
 class _RestorableDateRangePickerDialogTestWidget extends StatefulWidget {

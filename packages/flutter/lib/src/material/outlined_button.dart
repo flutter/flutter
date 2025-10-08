@@ -84,7 +84,7 @@ class OutlinedButton extends ButtonStyleButton {
     super.clipBehavior,
     super.statesController,
     required super.child,
-  });
+  }) : _addPadding = false;
 
   /// Create a text button from a pair of widgets that serve as the button's
   /// [icon] and [label].
@@ -96,52 +96,33 @@ class OutlinedButton extends ButtonStyleButton {
   ///
   /// {@macro flutter.material.ButtonStyleButton.iconAlignment}
   ///
-  factory OutlinedButton.icon({
-    Key? key,
-    required VoidCallback? onPressed,
-    VoidCallback? onLongPress,
-    ValueChanged<bool>? onHover,
-    ValueChanged<bool>? onFocusChange,
-    ButtonStyle? style,
-    FocusNode? focusNode,
-    bool? autofocus,
-    Clip? clipBehavior,
-    MaterialStatesController? statesController,
+  OutlinedButton.icon({
+    super.key,
+    required super.onPressed,
+    super.onLongPress,
+    super.onHover,
+    super.onFocusChange,
+    super.style,
+    super.focusNode,
+    super.autofocus = false,
+    super.clipBehavior,
+    super.statesController,
     Widget? icon,
     required Widget label,
     IconAlignment? iconAlignment,
-  }) {
-    if (icon == null) {
-      return OutlinedButton(
-        key: key,
-        onPressed: onPressed,
-        onLongPress: onLongPress,
-        onHover: onHover,
-        onFocusChange: onFocusChange,
-        style: style,
-        focusNode: focusNode,
-        autofocus: autofocus ?? false,
-        clipBehavior: clipBehavior ?? Clip.none,
-        statesController: statesController,
-        child: label,
-      );
-    }
-    return _OutlinedButtonWithIcon(
-      key: key,
-      onPressed: onPressed,
-      onLongPress: onLongPress,
-      onHover: onHover,
-      onFocusChange: onFocusChange,
-      style: style,
-      focusNode: focusNode,
-      autofocus: autofocus ?? false,
-      clipBehavior: clipBehavior ?? Clip.none,
-      statesController: statesController,
-      icon: icon,
-      label: label,
-      iconAlignment: iconAlignment,
-    );
-  }
+  }) : _addPadding = icon != null,
+       super(
+         child: icon != null
+             ? _OutlinedButtonWithIconChild(
+                 iconAlignment: iconAlignment,
+                 label: label,
+                 buttonStyle: style,
+                 icon: icon,
+               )
+             : label,
+       );
+
+  final bool _addPadding;
 
   /// A static convenience method that constructs an outlined button
   /// [ButtonStyle] given simple values.
@@ -371,8 +352,7 @@ class OutlinedButton extends ButtonStyleButton {
   ButtonStyle defaultStyleOf(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
-
-    return Theme.of(context).useMaterial3
+    final ButtonStyle buttonStyle = theme.useMaterial3
         ? _OutlinedButtonDefaultsM3(context)
         : styleFrom(
             foregroundColor: colorScheme.primary,
@@ -396,6 +376,25 @@ class OutlinedButton extends ButtonStyleButton {
             alignment: Alignment.center,
             splashFactory: InkRipple.splashFactory,
           );
+
+    // Only apply paddings when OutlinedButton has an Icon
+    if (_addPadding && theme.useMaterial3) {
+      final double defaultFontSize =
+          buttonStyle.textStyle?.resolve(const <WidgetState>{})?.fontSize ?? 14.0;
+      final double effectiveTextScale =
+          MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0;
+      final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
+        const EdgeInsetsDirectional.fromSTEB(16, 0, 24, 0),
+        const EdgeInsetsDirectional.fromSTEB(8, 0, 12, 0),
+        const EdgeInsetsDirectional.fromSTEB(4, 0, 6, 0),
+        effectiveTextScale,
+      );
+      return buttonStyle.copyWith(
+        padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(scaledPadding),
+      );
+    }
+
+    return buttonStyle;
   }
 
   @override
@@ -417,64 +416,16 @@ EdgeInsetsGeometry _scaledPadding(BuildContext context) {
   );
 }
 
-class _OutlinedButtonWithIcon extends OutlinedButton {
-  _OutlinedButtonWithIcon({
-    super.key,
-    required super.onPressed,
-    super.onLongPress,
-    super.onHover,
-    super.onFocusChange,
-    super.style,
-    super.focusNode,
-    bool? autofocus,
-    super.clipBehavior,
-    super.statesController,
-    required Widget icon,
-    required Widget label,
-    IconAlignment? iconAlignment,
-  }) : super(
-         autofocus: autofocus ?? false,
-         child: _OutlinedButtonWithIconChild(
-           icon: icon,
-           label: label,
-           buttonStyle: style,
-           iconAlignment: iconAlignment,
-         ),
-       );
-
-  @override
-  ButtonStyle defaultStyleOf(BuildContext context) {
-    final bool useMaterial3 = Theme.of(context).useMaterial3;
-    if (!useMaterial3) {
-      return super.defaultStyleOf(context);
-    }
-    final ButtonStyle buttonStyle = super.defaultStyleOf(context);
-    final double defaultFontSize =
-        buttonStyle.textStyle?.resolve(const <WidgetState>{})?.fontSize ?? 14.0;
-    final double effectiveTextScale =
-        MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0;
-    final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
-      const EdgeInsetsDirectional.fromSTEB(16, 0, 24, 0),
-      const EdgeInsetsDirectional.fromSTEB(8, 0, 12, 0),
-      const EdgeInsetsDirectional.fromSTEB(4, 0, 6, 0),
-      effectiveTextScale,
-    );
-    return buttonStyle.copyWith(
-      padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(scaledPadding),
-    );
-  }
-}
-
 class _OutlinedButtonWithIconChild extends StatelessWidget {
   const _OutlinedButtonWithIconChild({
     required this.label,
-    required this.icon,
+    this.icon,
     required this.buttonStyle,
     required this.iconAlignment,
   });
 
   final Widget label;
-  final Widget icon;
+  final Widget? icon;
   final ButtonStyle? buttonStyle;
   final IconAlignment? iconAlignment;
 
@@ -491,6 +442,12 @@ class _OutlinedButtonWithIconChild extends StatelessWidget {
         outlinedButtonTheme.style?.iconAlignment ??
         buttonStyle?.iconAlignment ??
         IconAlignment.start;
+    final Widget? icon = this.icon;
+
+    if (icon == null) {
+      return label;
+    }
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       spacing: lerpDouble(8, 4, scale)!,
