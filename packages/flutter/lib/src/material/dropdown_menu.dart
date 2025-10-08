@@ -51,7 +51,6 @@ typedef SearchCallback<T> = int? Function(List<DropdownMenuEntry<T>> entries, St
 ///
 /// The `controller` is the [MenuController] that can be used to open and close
 /// the menu with and query the current state.
-///
 typedef DropdownMenuDecorationBuilder =
     InputDecoration Function(BuildContext context, MenuController controller);
 
@@ -385,10 +384,11 @@ class DropdownMenu<T> extends StatefulWidget {
 
   /// The builder function used to create the [InputDecoration] passed to the text field.
   ///
-  /// If provided and the resulting [InputDecoration.suffixIcon] is null,
-  /// the [InputDecoration.suffixIcon] is set to an [IconButton] which uses [trailingIcon]
-  /// and [selectedTrailingIcon] if defined, or [Icons.arrow_drop_down] and
-  /// [Icons.arrow_drop_up] otherwise.
+  /// If a value is provided for this property and the resulting [InputDecoration.suffixIcon]
+  /// is null, a default [IconButton] is assigned as the suffix icon. This button's icon will
+  /// use [trailingIcon] and [selectedTrailingIcon] if those are explicitly defined; otherwise,
+  /// it defaults to [Icons.arrow_drop_down] for the collapsed state and [Icons.arrow_drop_up]
+  /// for the expanded state.
   ///
   /// If null, the default builder creates a decoration where:
   /// - [InputDecoration.label] is set to [label].
@@ -1158,11 +1158,11 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       builder: (BuildContext context, MenuController controller, Widget? child) {
         assert(_initialMenu != null);
         final DropdownMenuDecorationBuilder decorationBuilder =
-            widget.decorationBuilder ?? _buildLegacyDecoration;
+            widget.decorationBuilder ?? _buildDefaultDecoration;
         InputDecoration decoration = decorationBuilder(context, controller);
-        // If no suffixIcon is provided, the legacy IconButton is used for convenience.
+        // If no suffixIcon is provided, the default IconButton is used for convenience.
         if (decoration.suffixIcon == null) {
-          decoration = decoration.copyWith(suffixIcon: _buildLegacySuffixIcon(context, controller));
+          decoration = decoration.copyWith(suffixIcon: _buildDefaultSuffixIcon(context, controller));
         }
         final InputDecoration effectiveDecoration = decoration.applyDefaults(
           effectiveInputDecorationTheme,
@@ -1322,18 +1322,18 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     );
   }
 
-  InputDecoration _buildLegacyDecoration(BuildContext context, MenuController controller) {
+  InputDecoration _buildDefaultDecoration(BuildContext context, MenuController controller) {
     return InputDecoration(
       label: widget.label,
       hintText: widget.hintText,
       helperText: widget.helperText,
       errorText: widget.errorText,
       prefixIcon: widget.leadingIcon,
-      suffixIcon: _buildLegacySuffixIcon(context, controller),
+      suffixIcon: _buildDefaultSuffixIcon(context, controller),
     );
   }
 
-  Widget? _buildLegacySuffixIcon(BuildContext context, MenuController controller) {
+  Widget? _buildDefaultSuffixIcon(BuildContext context, MenuController controller) {
     final bool isCollapsed = widget.inputDecorationTheme?.isCollapsed ?? false;
     return widget.showTrailingIcon
         ? Padding(
