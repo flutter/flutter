@@ -5270,20 +5270,39 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
   FragmentShader fragmentShader() => FragmentShader._(this, debugName: _debugName);
 }
 
+/// A binding to a uniform of type float. Calling [set] on this object updates
+/// a float uniform's value.
+///
+/// Example:
+///
+/// ```dart
+/// shader.getUniformFloat('uColor', 0).set(1.0);
+/// shader.getUniformFloat('uColor', 1).set(0.0);
+/// shader.getUniformFloat('uColor', 2).set(0.0);
+/// ```
+///
+/// See also:
+///   [FragmentShader.getUniformFloat] - How [UniformFloatSlot] instances are acquired.
+///
 base class UniformFloatSlot {
   UniformFloatSlot._(this._shader, this.name, this.offset, this._index);
 
+  /// Set the float value of the bound uniform.
   void set(double val) {
     _shader.setFloat(_index, val);
   }
 
+  /// VisibleForTesting: This is the index one would use with
+  /// [FragmentShader.setFloat] for this uniform.
   int get index {
     return _index;
   }
 
   final FragmentShader _shader;
   final int _index;
+  /// The name of the bound uniform.
   final String name;
+  /// The offset into the bound uniform. For example, 1 for `.y` or 2 for `.b`.
   final int offset;
 }
 
@@ -5360,6 +5379,27 @@ base class FragmentShader extends Shader {
     _floats[index] = value;
   }
 
+  /// Access the float binding for uniform named [name] with optional offset
+  /// [index]. Example [index] values: 1 for 'foo.y', 2 for 'foo.b'.
+  ///
+  /// Example:
+  ///
+  /// ```glsl
+  /// uniform float uScale;
+  /// uniform sampler2D uTexture;
+  /// uniform vec2 uMagnitude;
+  /// uniform vec4 uColor;
+  /// ```
+  ///
+  /// ```dart
+  /// shader.getUniformFloat('uScale');
+  /// shader.getUniformFloat('uMagnitude', 0);
+  /// shader.getUniformFloat('uMagnitude', 1);
+  /// shader.getUniformFloat('uColor', 0);
+  /// shader.getUniformFloat('uColor', 1);
+  /// shader.getUniformFloat('uColor', 2);
+  /// shader.getUniformFloat('uColor', 3);
+  /// ```
   UniformFloatSlot getUniformFloat(String name, [int? index]) {
     index ??= 0;
 
