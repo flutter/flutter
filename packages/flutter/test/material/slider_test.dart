@@ -3333,7 +3333,7 @@ void main() {
     );
   });
 
-  testWidgets('Slider MaterialStateMouseCursor resolves correctly', (WidgetTester tester) async {
+  testWidgets('Slider WidgetStateMouseCursor resolves correctly', (WidgetTester tester) async {
     const MouseCursor systemDefaultCursor = SystemMouseCursors.basic;
     const MouseCursor regularCursor = SystemMouseCursors.click;
     const MouseCursor disabledCursor = SystemMouseCursors.forbidden;

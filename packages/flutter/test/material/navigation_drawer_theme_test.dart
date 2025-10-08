@@ -283,8 +283,8 @@ Material _getMaterial(WidgetTester tester) {
 
 ShapeDecoration? _getIndicatorDecoration(WidgetTester tester) {
   return tester
-          .firstWidget<Container>(
-            find.descendant(of: find.byType(NavigationIndicator), matching: find.byType(Container)),
+          .firstWidget<Ink>(
+            find.descendant(of: find.byType(NavigationIndicator), matching: find.byType(Ink)),
           )
           .decoration
       as ShapeDecoration?;
