@@ -235,7 +235,9 @@ class _RadioGroupShortcutManager<T> extends ShortcutManager {
       (RadioClient<T> radio) => radio.focusNode.hasFocus,
     );
     if (!hasFocusedRadio) {
-      // Ignore the event if no radio is focused.
+      // Ignore the event if no radio is focused. This prevents this handler
+      // from unintentionally consuming an event meant for a non-radio widget
+      // that currently has focus.
       return KeyEventResult.ignored;
     }
     return super.handleKeypress(context, event);
