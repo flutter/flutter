@@ -28,42 +28,6 @@ void main() {
   runApp(const MyApp());
 }
 
-/// A reusable widget that encapsulates the creation of the platform view.
-class PlatformViewWidget extends StatelessWidget {
-  const PlatformViewWidget({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: SizedBox(
-        width: 200,
-        height: 200,
-        child: PlatformViewLink(
-          viewType: 'changing_color_button_platform_view',
-          surfaceFactory:
-              (BuildContext context, PlatformViewController controller) {
-            return AndroidViewSurface(
-              controller: controller as AndroidViewController,
-              hitTestBehavior: PlatformViewHitTestBehavior.transparent,
-              gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
-            );
-          },
-          onCreatePlatformView: (PlatformViewCreationParams params) {
-            return PlatformViewsService.initHybridAndroidView(
-              id: params.id,
-              viewType: 'changing_color_button_platform_view',
-              layoutDirection: TextDirection.ltr,
-              creationParamsCodec: const StandardMessageCodec(),
-            )
-              ..addOnPlatformViewCreatedListener(params.onPlatformViewCreated)
-              ..create();
-          },
-        ),
-      ),
-    );
-  }
-}
-
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
@@ -72,12 +36,11 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  // This boolean now controls the visibility of the right-hand platform view.
-  bool _showRightView = true;
+  bool _showTexture = true;
 
-  void _toggleRightView() {
+  void _toggleTexture() {
     setState(() {
-      _showRightView = !_showRightView;
+      _showTexture = !_showTexture;
     });
   }
 
@@ -85,36 +48,68 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('Platform View Toggle Demo')),
+        appBar: AppBar(title: const Text('HCPP Platform View Bug Demo')),
         body: Column(
           children: <Widget>[
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: ElevatedButton(
-                key: const ValueKey<String>('ToggleRightView'),
-                onPressed: _toggleRightView,
-                child:
-                Text(_showRightView ? 'Hide Right View' : 'Show Right View'),
+                key: const ValueKey<String>('ToggleTexture'),
+                onPressed: _toggleTexture,
+                child: Text(_showTexture ? 'Hide Texture' : 'Show Texture'),
               ),
             ),
             Expanded(
-              child: Row(
-                children: <Widget>[
-                  // The left platform view is always visible.
-                  const Expanded(child: PlatformViewWidget()),
-
-                  // The right platform view's visibility is toggled,
-                  // but it always occupies space in the layout.
-                  Expanded(
-                    child: Visibility(
-                      visible: _showRightView,
-                      maintainState: true,
-                      maintainSize: true,
-                      maintainAnimation: true, // This line fixes the issue
-                      child: const PlatformViewWidget(),
+              child: Center(
+                child: Stack(
+                  children: <Widget>[
+                    Center(
+                      child: SizedBox(
+                        width: 300,
+                        height: 300,
+                        child: PlatformViewLink(
+                          viewType: 'changing_color_button_platform_view',
+                          surfaceFactory:
+                              (BuildContext context, PlatformViewController controller) {
+                                return AndroidViewSurface(
+                                  controller: controller as AndroidViewController,
+                                  hitTestBehavior: PlatformViewHitTestBehavior.transparent,
+                                  gestureRecognizers:
+                                      const <Factory<OneSequenceGestureRecognizer>>{},
+                                );
+                              },
+                          onCreatePlatformView: (PlatformViewCreationParams params) {
+                            return PlatformViewsService.initHybridAndroidView(
+                                id: params.id,
+                                viewType: 'changing_color_button_platform_view',
+                                layoutDirection: TextDirection.ltr,
+                                creationParamsCodec: const StandardMessageCodec(),
+                              )
+                              ..addOnPlatformViewCreatedListener(params.onPlatformViewCreated)
+                              ..create();
+                          },
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+
+                    if (_showTexture)
+                      const Center(
+                        child: SizedBox(
+                          width: 275,
+                          height: 275,
+                          child: Opacity(
+                            opacity: 0.5,
+                            child: Texture(
+                              // Intentionally use an unknown texture ID: this
+                              // results a black rectangle which is good enough
+                              // for our purposes.
+                              textureId: 1,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
           ],
