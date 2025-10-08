@@ -42,7 +42,7 @@ struct FlutterWindowCreationRequest {
   bool has_constraints;
   struct FlutterWindowConstraints constraints;
   void (*on_close)();
-  void (*on_size_change)();
+  void (*notify_listeners)();
 };
 
 extern "C" {

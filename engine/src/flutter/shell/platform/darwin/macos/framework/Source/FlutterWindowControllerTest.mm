@@ -60,7 +60,7 @@ TEST_F(FlutterWindowControllerTest, CreateRegularWindow) {
       .has_size = true,
       .size = {.width = 800, .height = 600},
       .on_close = [] {},
-      .on_size_change = [] {},
+      .notify_listeners = [] {},
   };
 
   FlutterEngine* engine = GetFlutterEngine();
@@ -84,7 +84,7 @@ TEST_F(FlutterWindowControllerRetainTest, WindowControllerDoesNotRetainEngine) {
       .has_size = true,
       .size = {.width = 800, .height = 600},
       .on_close = [] {},
-      .on_size_change = [] {},
+      .notify_listeners = [] {},
   };
 
   __weak FlutterEngine* weakEngine = nil;
@@ -126,7 +126,7 @@ TEST_F(FlutterWindowControllerTest, DestroyRegularWindow) {
       .has_size = true,
       .size = {.width = 800, .height = 600},
       .on_close = [] {},
-      .on_size_change = [] {},
+      .notify_listeners = [] {},
   };
 
   FlutterEngine* engine = GetFlutterEngine();
@@ -146,7 +146,7 @@ TEST_F(FlutterWindowControllerTest, InternalFlutter_Window_GetHandle) {
       .has_size = true,
       .size = {.width = 800, .height = 600},
       .on_close = [] {},
-      .on_size_change = [] {},
+      .notify_listeners = [] {},
   };
 
   FlutterEngine* engine = GetFlutterEngine();
@@ -165,7 +165,7 @@ TEST_F(FlutterWindowControllerTest, WindowStates) {
       .has_size = true,
       .size = {.width = 800, .height = 600},
       .on_close = [] {},
-      .on_size_change = [] {},
+      .notify_listeners = [] {},
   };
 
   FlutterEngine* engine = GetFlutterEngine();
