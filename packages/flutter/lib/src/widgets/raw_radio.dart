@@ -132,6 +132,9 @@ class _RawRadioState<T> extends State<RawRadio<T>>
   FocusNode get focusNode => widget.focusNode;
 
   @override
+  bool get enabled => isInteractive;
+
+  @override
   T get radioValue => widget.value;
 
   @override
