@@ -975,7 +975,10 @@ class _RenderDecoration extends RenderBox
       EdgeInsets.only(left: iconWidth),
     );
     final BoxConstraints contentConstraints = containerConstraints.deflate(
-      EdgeInsets.only(left: contentPadding.horizontal),
+      EdgeInsetsDirectional.only(
+        start: contentPadding.start + decoration.inputGap,
+        end: contentPadding.end + decoration.inputGap,
+      ),
     );
 
     // The helper or error text can occupy the full width less the space
@@ -1264,7 +1267,7 @@ class _RenderDecoration extends RenderBox
     final double suffixIconHeight = _minHeight(suffixIcon, width);
     final double suffixIconWidth = _minWidth(suffixIcon, suffixIconHeight);
 
-    width = math.max(width - contentPadding.horizontal, 0.0);
+    width = math.max(width - contentPadding.horizontal - decoration.inputGap * 2, 0.0);
 
     // TODO(LongCatIsLooong): use _computeSubtextSizes for subtext intrinsic sizes.
     // See https://github.com/flutter/flutter/issues/13715.
