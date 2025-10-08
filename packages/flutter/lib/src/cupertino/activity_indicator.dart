@@ -91,13 +91,13 @@ class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
       tween: Tween<double>(begin: 0, end: 1),
       duration: const Duration(seconds: 1),
       paused: !widget.animating,
-      builder: (BuildContext context, Animation<double> animation, Widget? child) {
+      builder: (BuildContext context, double value, Widget? child) {
         return SizedBox(
           height: widget.radius * 2,
           width: widget.radius * 2,
           child: CustomPaint(
             painter: _CupertinoActivityIndicatorPainter(
-              position: animation,
+              position: value,
               activeColor:
                   widget.color ?? CupertinoDynamicColor.resolve(_kActiveTickColor, context),
               radius: widget.radius,
@@ -133,9 +133,9 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
          radius / _kDefaultIndicatorRadius,
          radius / _kDefaultIndicatorRadius,
        ),
-       super(repaint: position);
+       super();
 
-  final Animation<double> position;
+  final double position;
   final Color activeColor;
   final double radius;
   final double progress;
@@ -152,7 +152,7 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
     canvas.save();
     canvas.translate(size.width / 2.0, size.height / 2.0);
 
-    final int activeTick = (tickCount * position.value).floor();
+    final int activeTick = (tickCount * position).floor();
 
     for (int i = 0; i < tickCount * progress; ++i) {
       final int t = (i - activeTick) % tickCount;

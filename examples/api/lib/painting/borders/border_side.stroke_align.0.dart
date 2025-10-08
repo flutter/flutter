@@ -32,7 +32,8 @@ class StrokeAlignExample extends StatelessWidget {
           tween: Tween<double>(begin: 0.0, end: 1.0),
           duration: const Duration(seconds: 1),
           reverse: true,
-          builder: (BuildContext context, Animation<double> animation, Widget? child) {
+          builder: (BuildContext context, double value, Widget? child) {
+            final double strokeAlign = (value * 2) - 1;
             return Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
@@ -41,7 +42,7 @@ class StrokeAlignExample extends StatelessWidget {
                     side: BorderSide(
                       color: borderColor,
                       width: borderWidth,
-                      strokeAlign: (animation.value * 2) - 1,
+                      strokeAlign: strokeAlign,
                     ),
                   ),
                 ),
@@ -53,7 +54,7 @@ class StrokeAlignExample extends StatelessWidget {
                         side: BorderSide(
                           color: borderColor,
                           width: borderWidth,
-                          strokeAlign: (animation.value * 2) - 1,
+                          strokeAlign: strokeAlign,
                         ),
                       ),
                     ),
@@ -62,7 +63,7 @@ class StrokeAlignExample extends StatelessWidget {
                         side: BorderSide(
                           color: borderColor,
                           width: borderWidth,
-                          strokeAlign: (animation.value * 2) - 1,
+                          strokeAlign: strokeAlign,
                         ),
                       ),
                     ),
@@ -76,7 +77,7 @@ class StrokeAlignExample extends StatelessWidget {
                         side: BorderSide(
                           color: borderColor,
                           width: borderWidth,
-                          strokeAlign: (animation.value * 2) - 1,
+                          strokeAlign: strokeAlign,
                         ),
                       ),
                     ),
@@ -86,7 +87,7 @@ class StrokeAlignExample extends StatelessWidget {
                         side: BorderSide(
                           color: borderColor,
                           width: borderWidth,
-                          strokeAlign: (animation.value * 2) - 1,
+                          strokeAlign: strokeAlign,
                         ),
                       ),
                     ),
@@ -100,7 +101,7 @@ class StrokeAlignExample extends StatelessWidget {
                         side: BorderSide(
                           color: borderColor,
                           width: borderWidth,
-                          strokeAlign: (animation.value * 2) - 1,
+                          strokeAlign: strokeAlign,
                         ),
                       ),
                     ),
@@ -110,7 +111,7 @@ class StrokeAlignExample extends StatelessWidget {
                         side: BorderSide(
                           color: borderColor,
                           width: borderWidth,
-                          strokeAlign: (animation.value * 2) - 1,
+                          strokeAlign: (value * 2) - 1,
                         ),
                       ),
                     ),
@@ -124,7 +125,7 @@ class StrokeAlignExample extends StatelessWidget {
                         side: BorderSide(
                           color: borderColor,
                           width: borderWidth,
-                          strokeAlign: (animation.value * 2) - 1,
+                          strokeAlign: strokeAlign,
                         ),
                       ),
                     ),
@@ -136,7 +137,7 @@ class StrokeAlignExample extends StatelessWidget {
                         side: BorderSide(
                           color: borderColor,
                           width: borderWidth,
-                          strokeAlign: (animation.value * 2) - 1,
+                          strokeAlign: (value * 2) - 1,
                         ),
                       ),
                     ),
@@ -147,7 +148,7 @@ class StrokeAlignExample extends StatelessWidget {
                         side: BorderSide(
                           color: borderColor,
                           width: borderWidth,
-                          strokeAlign: (animation.value * 2) - 1,
+                          strokeAlign: strokeAlign,
                         ),
                       ),
                     ),

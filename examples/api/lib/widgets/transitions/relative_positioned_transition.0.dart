@@ -17,8 +17,32 @@ class RelativePositionedTransitionExampleApp extends StatelessWidget {
   }
 }
 
-class RelativePositionedTransitionExample extends StatelessWidget {
+class RelativePositionedTransitionExample extends StatefulWidget {
   const RelativePositionedTransitionExample({super.key});
+
+  @override
+  State<RelativePositionedTransitionExample> createState() =>
+      _RelativePositionedTransitionExampleState();
+}
+
+class _RelativePositionedTransitionExampleState extends State<RelativePositionedTransitionExample>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _curve;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(duration: const Duration(seconds: 2), vsync: this)
+      ..repeat(reverse: true);
+    _curve = CurvedAnimation(parent: _controller, curve: Curves.elasticInOut);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,28 +52,21 @@ class RelativePositionedTransitionExample extends StatelessWidget {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         final Size biggest = constraints.biggest;
+        final Animation<Rect?> rectAnimation = RectTween(
+          begin: const Rect.fromLTWH(0, 0, bigLogo, bigLogo),
+          end: Rect.fromLTWH(
+            biggest.width - smallLogo,
+            biggest.height - smallLogo,
+            smallLogo,
+            smallLogo,
+          ),
+        ).animate(_curve);
+
         return Stack(
           children: <Widget>[
-            RepeatingTweenAnimationBuilder<double>(
-              tween: Tween<double>(begin: 0.0, end: 1.0),
-              duration: const Duration(seconds: 2),
-              reverse: true,
-              curve: Curves.elasticInOut,
-              builder: (BuildContext context, Animation<double> animation, Widget? child) {
-                return RelativePositionedTransition(
-                  size: biggest,
-                  rect: RectTween(
-                    begin: const Rect.fromLTWH(0, 0, bigLogo, bigLogo),
-                    end: Rect.fromLTWH(
-                      biggest.width - smallLogo,
-                      biggest.height - smallLogo,
-                      smallLogo,
-                      smallLogo,
-                    ),
-                  ).animate(animation),
-                  child: child!,
-                );
-              },
+            RelativePositionedTransition(
+              size: biggest,
+              rect: rectAnimation,
               child: const Padding(padding: EdgeInsets.all(8), child: FlutterLogo()),
             ),
           ],

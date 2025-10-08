@@ -39,40 +39,54 @@ class AnimatedIconApp extends StatelessWidget {
   }
 }
 
-class AnimatedIconExample extends StatelessWidget {
+class AnimatedIconExample extends StatefulWidget {
   const AnimatedIconExample({super.key});
+
+  @override
+  State<AnimatedIconExample> createState() => _AnimatedIconExampleState();
+}
+
+class _AnimatedIconExampleState extends State<AnimatedIconExample>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(duration: const Duration(seconds: 2), vsync: this)
+      ..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: RepeatingTweenAnimationBuilder<double>(
-        tween: Tween<double>(begin: 0.0, end: 1.0),
-        duration: const Duration(seconds: 2),
-        reverse: true,
-        builder: (BuildContext context, Animation<double> animation, Widget? child) {
-          return GridView(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
-            children: iconsList.entries.map((MapEntry<String, AnimatedIconData> entry) {
-              return Card(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      AnimatedIcon(
-                        icon: entry.value,
-                        progress: animation,
-                        size: 72.0,
-                        semanticLabel: entry.key,
-                      ),
-                      const SizedBox(height: 8.0),
-                      Text(entry.key),
-                    ],
+      body: GridView(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
+        children: iconsList.entries.map((MapEntry<String, AnimatedIconData> entry) {
+          return Card(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  AnimatedIcon(
+                    icon: entry.value,
+                    progress: _controller,
+                    size: 72.0,
+                    semanticLabel: entry.key,
                   ),
-                ),
-              );
-            }).toList(),
+                  const SizedBox(height: 8.0),
+                  Text(entry.key),
+                ],
+              ),
+            ),
           );
-        },
+        }).toList(),
       ),
     );
   }

@@ -17,29 +17,42 @@ class DefaultTextStyleTransitionExampleApp extends StatelessWidget {
   }
 }
 
-class DefaultTextStyleTransitionExample extends StatelessWidget {
+class DefaultTextStyleTransitionExample extends StatefulWidget {
   const DefaultTextStyleTransitionExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final TextStyleTween styleTween = TextStyleTween(
-      begin: const TextStyle(fontSize: 50, color: Colors.blue, fontWeight: FontWeight.w900),
-      end: const TextStyle(fontSize: 50, color: Colors.red, fontWeight: FontWeight.w100),
-    );
+  State<DefaultTextStyleTransitionExample> createState() =>
+      _DefaultTextStyleTransitionExampleState();
+}
 
+class _DefaultTextStyleTransitionExampleState extends State<DefaultTextStyleTransitionExample>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<TextStyle> _style;
+
+  static final TextStyleTween _styleTween = TextStyleTween(
+    begin: const TextStyle(fontSize: 50, color: Colors.blue, fontWeight: FontWeight.w900),
+    end: const TextStyle(fontSize: 50, color: Colors.red, fontWeight: FontWeight.w100),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(duration: const Duration(seconds: 2), vsync: this)
+      ..repeat(reverse: true);
+    _style = _styleTween.animate(CurvedAnimation(parent: _controller, curve: Curves.elasticInOut));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Center(
-      child: RepeatingTweenAnimationBuilder<double>(
-        tween: Tween<double>(begin: 0.0, end: 1.0),
-        duration: const Duration(seconds: 2),
-        curve: Curves.elasticInOut,
-        reverse: true,
-        builder: (BuildContext context, Animation<double> animation, Widget? child) {
-          return DefaultTextStyleTransition(
-            style: styleTween.animate(animation),
-            child: const Text('Flutter'),
-          );
-        },
-      ),
+      child: DefaultTextStyleTransition(style: _style, child: const Text('Flutter')),
     );
   }
 }

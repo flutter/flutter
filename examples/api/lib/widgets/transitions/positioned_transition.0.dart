@@ -17,8 +17,31 @@ class PositionedTransitionExampleApp extends StatelessWidget {
   }
 }
 
-class PositionedTransitionExample extends StatelessWidget {
+class PositionedTransitionExample extends StatefulWidget {
   const PositionedTransitionExample({super.key});
+
+  @override
+  State<PositionedTransitionExample> createState() => _PositionedTransitionExampleState();
+}
+
+class _PositionedTransitionExampleState extends State<PositionedTransitionExample>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _curve;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(duration: const Duration(seconds: 2), vsync: this)
+      ..repeat(reverse: true);
+    _curve = CurvedAnimation(parent: _controller, curve: Curves.elasticInOut);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,35 +51,31 @@ class PositionedTransitionExample extends StatelessWidget {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         final Size biggest = constraints.biggest;
-        return RepeatingTweenAnimationBuilder<double>(
-          tween: Tween<double>(begin: 0.0, end: 1.0),
-          duration: const Duration(seconds: 2),
-          reverse: true,
-          builder: (BuildContext context, Animation<double> animation, Widget? child) {
-            return Stack(
-              children: <Widget>[
-                PositionedTransition(
-                  rect: RelativeRectTween(
-                    begin: RelativeRect.fromSize(
-                      const Rect.fromLTWH(0, 0, smallLogo, smallLogo),
-                      biggest,
+        final Animation<RelativeRect> rectAnimation =
+            RelativeRectTween(
+                  begin: RelativeRect.fromSize(
+                    const Rect.fromLTWH(0, 0, smallLogo, smallLogo),
+                    biggest,
+                  ),
+                  end: RelativeRect.fromSize(
+                    Rect.fromLTWH(
+                      biggest.width - bigLogo,
+                      biggest.height - bigLogo,
+                      bigLogo,
+                      bigLogo,
                     ),
-                    end: RelativeRect.fromSize(
-                      Rect.fromLTWH(
-                        biggest.width - bigLogo,
-                        biggest.height - bigLogo,
-                        bigLogo,
-                        bigLogo,
-                      ),
-                      biggest,
-                    ),
-                  ).animate(CurvedAnimation(parent: animation, curve: Curves.elasticInOut)),
-                  child: child!,
-                ),
-              ],
-            );
-          },
-          child: const Padding(padding: EdgeInsets.all(8), child: FlutterLogo()),
+                    biggest,
+                  ),
+                ).animate(_curve)
+                as Animation<RelativeRect>;
+
+        return Stack(
+          children: <Widget>[
+            PositionedTransition(
+              rect: rectAnimation,
+              child: const Padding(padding: EdgeInsets.all(8), child: FlutterLogo()),
+            ),
+          ],
         );
       },
     );

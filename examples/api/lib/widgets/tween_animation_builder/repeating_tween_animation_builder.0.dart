@@ -54,13 +54,13 @@ class _RepeatingTweenAnimationBuilderExampleState
         paused: _isPaused,
         reverse: _isReversing,
         curve: Curves.easeInOut,
-        builder: (BuildContext context, Animation<double> animation, Widget? child) {
+        builder: (BuildContext context, double value, Widget? child) {
           return Stack(
             children: <Widget>[
               Center(
-                child: Transform.rotate(angle: animation.value * 0.5 * math.pi, child: child),
+                child: Transform.rotate(angle: value * 0.5 * math.pi, child: child),
               ),
-              _buildControls(colors, animation),
+              _buildControls(colors, value),
             ],
           );
         },
@@ -94,16 +94,13 @@ class _RepeatingTweenAnimationBuilderExampleState
             paused: _isPaused,
             reverse: true,
             curve: Curves.easeInOutSine,
-            builder: (BuildContext context, Animation<double> animation, Widget? child) {
+            builder: (BuildContext context, double value, Widget? child) {
               return Transform.scale(
-                scale: animation.value,
+                scale: value,
                 child: Container(
                   decoration: BoxDecoration(
                     boxShadow: <BoxShadow>[
-                      BoxShadow(
-                        color: colors.primary.withOpacity(animation.value * 0.7),
-                        blurRadius: 25,
-                      ),
+                      BoxShadow(color: colors.primary.withOpacity(value * 0.7), blurRadius: 25),
                     ],
                   ),
                   child: child,
@@ -134,7 +131,7 @@ class _RepeatingTweenAnimationBuilderExampleState
   }
 
   /// Builds the controls area at the bottom of the screen.
-  Widget _buildControls(ColorScheme colors, Animation<double> animation) {
+  Widget _buildControls(ColorScheme colors, double animationValue) {
     return Positioned(
       bottom: 40,
       left: 0,
@@ -142,7 +139,7 @@ class _RepeatingTweenAnimationBuilderExampleState
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          _buildPlayPauseButton(colors, animation),
+          _buildPlayPauseButton(colors, animationValue),
           const SizedBox(height: 24),
           _buildReverseToggle(colors),
         ],
@@ -151,7 +148,7 @@ class _RepeatingTweenAnimationBuilderExampleState
   }
 
   /// Builds the custom Play/Pause button with a progress indicator border.
-  Widget _buildPlayPauseButton(ColorScheme colors, Animation<double> animation) {
+  Widget _buildPlayPauseButton(ColorScheme colors, double animationValue) {
     const double buttonSize = 88.0;
     return SizedBox(
       width: buttonSize,
@@ -167,7 +164,7 @@ class _RepeatingTweenAnimationBuilderExampleState
             SizedBox.expand(
               // This makes the indicator fill the SizedBox
               child: CircularProgressIndicator(
-                value: animation.value,
+                value: animationValue,
                 strokeWidth: 6,
                 backgroundColor: colors.surfaceVariant.withOpacity(0.3),
                 color: colors.primary,

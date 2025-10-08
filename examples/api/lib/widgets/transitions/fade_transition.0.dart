@@ -22,30 +22,52 @@ class FadeTransitionExampleApp extends StatelessWidget {
   }
 }
 
-class FadeTransitionExample extends StatelessWidget {
+class FadeTransitionExample extends StatefulWidget {
   const FadeTransitionExample({required this.duration, required this.curve, super.key});
 
   final Duration duration;
-
   final Curve curve;
+
+  @override
+  State<FadeTransitionExample> createState() => _FadeTransitionExampleState();
+}
+
+class _FadeTransitionExampleState extends State<FadeTransitionExample>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _opacity;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(duration: widget.duration, vsync: this)
+      ..repeat(reverse: true);
+    _opacity = CurvedAnimation(parent: _controller, curve: widget.curve);
+  }
+
+  @override
+  void didUpdateWidget(FadeTransitionExample oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.duration != widget.duration) {
+      _controller.duration = widget.duration;
+    }
+    if (oldWidget.curve != widget.curve) {
+      _opacity = CurvedAnimation(parent: _controller, curve: widget.curve);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
       color: Colors.white,
-      child: RepeatingTweenAnimationBuilder<double>(
-        tween: Tween<double>(begin: 0.0, end: 1.0),
-        duration: duration,
-        reverse: true,
-        builder: (BuildContext context, Animation<double> animation, Widget? child) {
-          return FadeTransition(
-            opacity: CurvedAnimation(
-              parent: AlwaysStoppedAnimation<double>(animation.value),
-              curve: curve,
-            ),
-            child: child,
-          );
-        },
+      child: FadeTransition(
+        opacity: _opacity,
         child: const Padding(padding: EdgeInsets.all(8), child: FlutterLogo()),
       ),
     );

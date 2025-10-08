@@ -42,9 +42,9 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample> {
               duration: const Duration(seconds: 2),
               reverse: true,
               paused: determinate, // Pause when determinate to match original behavior
-              builder: (BuildContext context, Animation<double> animation, Widget? child) {
+              builder: (BuildContext context, double value, Widget? child) {
                 return LinearProgressIndicator(
-                  value: determinate ? animation.value : null,
+                  value: determinate ? value : null,
                   semanticsLabel: 'Linear progress indicator',
                 );
               },

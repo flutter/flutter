@@ -17,24 +17,38 @@ class SizeTransitionExampleApp extends StatelessWidget {
   }
 }
 
-class SizeTransitionExample extends StatelessWidget {
+class SizeTransitionExample extends StatefulWidget {
   const SizeTransitionExample({super.key});
+
+  @override
+  State<SizeTransitionExample> createState() => _SizeTransitionExampleState();
+}
+
+class _SizeTransitionExampleState extends State<SizeTransitionExample>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _sizeFactor;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(duration: const Duration(seconds: 3), vsync: this)..repeat();
+    _sizeFactor = CurvedAnimation(parent: _controller, curve: Curves.fastOutSlowIn);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: RepeatingTweenAnimationBuilder<double>(
-        tween: Tween<double>(begin: 0, end: 1),
-        duration: const Duration(seconds: 3),
-        curve: Curves.fastOutSlowIn,
-        builder: (BuildContext context, Animation<double> animation, Widget? child) {
-          return SizeTransition(
-            sizeFactor: animation,
-            axis: Axis.horizontal,
-            axisAlignment: -1,
-            child: child,
-          );
-        },
+      body: SizeTransition(
+        sizeFactor: _sizeFactor,
+        axis: Axis.horizontal,
+        axisAlignment: -1,
         child: const Center(child: FlutterLogo(size: 200.0)),
       ),
     );

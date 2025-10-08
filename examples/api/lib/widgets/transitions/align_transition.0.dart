@@ -17,25 +17,41 @@ class AlignTransitionExampleApp extends StatelessWidget {
   }
 }
 
-class AlignTransitionExample extends StatelessWidget {
+class AlignTransitionExample extends StatefulWidget {
   const AlignTransitionExample({super.key});
+
+  @override
+  State<AlignTransitionExample> createState() => _AlignTransitionExampleState();
+}
+
+class _AlignTransitionExampleState extends State<AlignTransitionExample>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<AlignmentGeometry> _alignment;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(duration: const Duration(seconds: 2), vsync: this)
+      ..repeat(reverse: true);
+    _alignment = Tween<AlignmentGeometry>(
+      begin: Alignment.bottomLeft,
+      end: Alignment.center,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.decelerate));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
       color: Colors.white,
-      child: RepeatingTweenAnimationBuilder<double>(
-        tween: Tween<double>(begin: 0.0, end: 1.0),
-        duration: const Duration(seconds: 2),
-        reverse: true,
-        curve: Curves.decelerate,
-        builder: (BuildContext context, Animation<double> animation, Widget? child) {
-          final Animation<AlignmentGeometry> alignmentAnimation = Tween<AlignmentGeometry>(
-            begin: Alignment.bottomLeft,
-            end: Alignment.center,
-          ).animate(animation);
-          return AlignTransition(alignment: alignmentAnimation, child: child!);
-        },
+      child: AlignTransition(
+        alignment: _alignment,
         child: const Padding(padding: EdgeInsets.all(8.0), child: FlutterLogo(size: 150.0)),
       ),
     );

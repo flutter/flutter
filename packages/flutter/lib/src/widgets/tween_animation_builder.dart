@@ -277,9 +277,8 @@ class RepeatingTweenAnimationBuilder<T extends Object> extends StatefulWidget {
 
   /// Called every time the animation value changes.
   ///
-  /// The builder receives the animation object and the optional child.
-  /// The current value can be accessed via animation.value.
-  final Widget Function(BuildContext context, Animation<T> animation, Widget? child) builder;
+  /// The builder receives the current animation value and the optional child.
+  final ValueWidgetBuilder<T> builder;
 
   /// The child widget to pass to the builder.
   ///
@@ -371,13 +370,13 @@ class _RepeatingTweenAnimationBuilderState<T extends Object>
   Widget build(BuildContext context) {
     // If no animation needed (begin equals end), just build with static value
     if (widget.tween.begin == widget.tween.end) {
-      return widget.builder(context, _animation, widget.child);
+      return widget.builder(context, _animation.value, widget.child);
     }
 
     return AnimatedBuilder(
       animation: _animation,
       builder: (BuildContext context, Widget? child) {
-        return widget.builder(context, _animation, child);
+        return widget.builder(context, _animation.value, child);
       },
       child: widget.child,
     );

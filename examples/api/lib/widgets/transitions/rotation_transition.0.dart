@@ -17,21 +17,38 @@ class RotationTransitionExampleApp extends StatelessWidget {
   }
 }
 
-class RotationTransitionExample extends StatelessWidget {
+class RotationTransitionExample extends StatefulWidget {
   const RotationTransitionExample({super.key});
+
+  @override
+  State<RotationTransitionExample> createState() => _RotationTransitionExampleState();
+}
+
+class _RotationTransitionExampleState extends State<RotationTransitionExample>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _turns;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(duration: const Duration(seconds: 2), vsync: this)
+      ..repeat(reverse: true);
+    _turns = CurvedAnimation(parent: _controller, curve: Curves.elasticOut);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: RepeatingTweenAnimationBuilder<double>(
-          tween: Tween<double>(begin: 0.0, end: 1.0),
-          duration: const Duration(seconds: 2),
-          curve: Curves.elasticOut,
-          reverse: true,
-          builder: (BuildContext context, Animation<double> animation, Widget? child) {
-            return RotationTransition(turns: animation, child: child);
-          },
+        child: RotationTransition(
+          turns: _turns,
           child: const Padding(padding: EdgeInsets.all(8.0), child: FlutterLogo(size: 150.0)),
         ),
       ),

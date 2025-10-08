@@ -403,8 +403,8 @@ void main() {
         RepeatingTweenAnimationBuilder<double>(
           duration: duration,
           tween: Tween<double>(begin: 0.0, end: 1.0),
-          builder: (BuildContext context, Animation<double> animation, Widget? child) {
-            values.add(animation.value);
+          builder: (BuildContext context, double value, Widget? child) {
+            values.add(value);
             return const Placeholder();
           },
         ),
@@ -432,8 +432,8 @@ void main() {
           duration: const Duration(milliseconds: 100),
           tween: Tween<double>(begin: 0, end: 1),
           reverse: true,
-          builder: (BuildContext context, Animation<double> animation, Widget? child) {
-            values.add(animation.value);
+          builder: (BuildContext context, double value, Widget? child) {
+            values.add(value);
             return const Placeholder();
           },
         ),
@@ -466,8 +466,8 @@ void main() {
           duration: const Duration(seconds: 1),
           tween: IntTween(begin: 0, end: 100),
           paused: paused,
-          builder: (BuildContext context, Animation<int> animation, Widget? child) {
-            values.add(animation.value);
+          builder: (BuildContext context, int value, Widget? child) {
+            values.add(value);
             return const Placeholder();
           },
         );
@@ -494,8 +494,8 @@ void main() {
         RepeatingTweenAnimationBuilder<int>(
           duration: const Duration(seconds: 1),
           tween: IntTween(begin: 100, end: 100),
-          builder: (BuildContext context, Animation<int> animation, Widget? child) {
-            values.add(animation.value);
+          builder: (BuildContext context, int value, Widget? child) {
+            values.add(value);
             return const Placeholder();
           },
         ),
@@ -516,7 +516,7 @@ void main() {
           child: RepeatingTweenAnimationBuilder<double>(
             duration: const Duration(seconds: 1),
             tween: Tween<double>(begin: 0.0, end: 1.0),
-            builder: (BuildContext context, Animation<double> animation, Widget? child) {
+            builder: (BuildContext context, double value, Widget? child) {
               receivedChild = child;
               return child ?? const Placeholder();
             },
@@ -537,7 +537,7 @@ void main() {
         () => RepeatingTweenAnimationBuilder<double>(
           duration: const Duration(seconds: 1),
           tween: Tween<double>(end: 1.0), // begin is null
-          builder: (BuildContext context, Animation<double> animation, Widget? child) {
+          builder: (BuildContext context, double value, Widget? child) {
             return const Placeholder();
           },
         ),
@@ -549,7 +549,7 @@ void main() {
         () => RepeatingTweenAnimationBuilder<double>(
           duration: const Duration(seconds: 1),
           tween: Tween<double>(begin: 0.0), // end is null
-          builder: (BuildContext context, Animation<double> animation, Widget? child) {
+          builder: (BuildContext context, double value, Widget? child) {
             return const Placeholder();
           },
         ),
@@ -561,7 +561,7 @@ void main() {
         () => RepeatingTweenAnimationBuilder<double>(
           duration: const Duration(seconds: 1),
           tween: Tween<double>(), // both begin and end are null
-          builder: (BuildContext context, Animation<double> animation, Widget? child) {
+          builder: (BuildContext context, double value, Widget? child) {
             return const Placeholder();
           },
         ),
@@ -573,7 +573,7 @@ void main() {
         RepeatingTweenAnimationBuilder<double>(
           duration: const Duration(seconds: 1),
           tween: Tween<double>(begin: 0.0, end: 1.0),
-          builder: (BuildContext context, Animation<double> animation, Widget? child) {
+          builder: (BuildContext context, double value, Widget? child) {
             return const Placeholder();
           },
         ),
