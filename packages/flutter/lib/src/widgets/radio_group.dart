@@ -174,9 +174,7 @@ class _RadioGroupState<T> extends State<RadioGroup<T>> implements RadioGroupRegi
           .where((RadioClient<T> radio) => radio.enabled)
           .map<FocusNode>((RadioClient<T> radio) => radio.focusNode),
     ).toList();
-    if (sorted.isEmpty) {
-      return;
-    }
+    assert(sorted.isNotEmpty);
     final Iterable<FocusNode> nodesInEffectiveOrder = forward ? sorted : sorted.reversed;
 
     final Iterator<FocusNode> iterator = nodesInEffectiveOrder.iterator;
