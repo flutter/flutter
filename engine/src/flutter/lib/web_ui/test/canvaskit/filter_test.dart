@@ -79,6 +79,7 @@ void testMain() {
       )!,
       createCkColorFilter(const EngineColorFilter.linearToSrgbGamma())!,
       createCkColorFilter(const EngineColorFilter.srgbToLinearGamma())!,
+      createCkColorFilter(EngineColorFilter.saturation(0.5))!,
     ];
   }
 
