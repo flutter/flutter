@@ -4,7 +4,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
-import 'package:widget_preview_scaffold/src/widget_preview.dart';
+
+import 'widget_preview.dart';
 
 Iterable<WidgetPreview> buildMultiWidgetPreview({
   required String packageName,
@@ -74,26 +75,6 @@ WidgetPreview buildWidgetPreviewError({
     packageName: packageName,
   );
 }
-
-/// Returns a [TextStyle] with [FontFeature.proportionalFigures] applied to
-/// fix blurry text.
-TextStyle fixBlurryText(TextStyle style) {
-  return style.copyWith(
-    fontFeatures: [const FontFeature.proportionalFigures()],
-  );
-}
-
-final TextStyle linkTextStyle = fixBlurryText(
-  underlineTextStyle.copyWith(
-    // TODO(bkonyi): this color scheme is from DevTools and should be responsive
-    // to changes in the previewer theme.
-    color: const Color(0xFF1976D2),
-  ),
-);
-
-final TextStyle underlineTextStyle = fixBlurryText(
-  TextStyle(decoration: TextDecoration.underline),
-);
 
 /// A basic vertical spacer.
 class VerticalSpacer extends StatelessWidget {

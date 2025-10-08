@@ -40,10 +40,10 @@
   "clearButtonLabel": "ניקוי",
   "cancelButtonLabel": "ביטול",
   "backButtonLabel": "למסך הקודם",
-  "expansionTileExpandedHint": "double tap to collapse",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "כדי לכווץ, יש ללחוץ לחיצה כפולה",
+  "expansionTileCollapsedHint": "כדי להרחיב, יש ללחוץ לחיצה כפולה",
+  "expansionTileExpandedTapHint": "כיווץ",
+  "expansionTileCollapsedTapHint": "ניתן להרחיב להצגת פרטים נוספים",
+  "expandedHint": "מכווץ",
+  "collapsedHint": "מורחב"
 }
