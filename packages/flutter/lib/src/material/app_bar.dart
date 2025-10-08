@@ -633,6 +633,19 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// {@template flutter.material.appbar.excludeHeaderSemantics}
   /// Whether the title should be wrapped with header [Semantics].
   ///
+  /// When false (the default), the title is wrapped with [Semantics] that
+  /// includes the [SemanticsProperties.namesRoute] flag on Android, Fuchsia,
+  /// Linux, and Windows, but not on iOS and macOS.
+  ///
+  /// [AppBar] uses the device's platform (via [defaultTargetPlatform])
+  /// rather than [ThemeData.platform] to determine platform-specific accessibility
+  /// behavior. This ensures that assistive technologies like VoiceOver on iOS and
+  /// macOS receive correct semantics namesRoute, even when the app's theme is configured
+  /// to use a different platform's visual appearance. For example, if an app uses
+  /// `ThemeData(platform: TargetPlatform.android)` on an iOS device to achieve an
+  /// Android look and feel, VoiceOver is able to detect iOS-appropriate semantics
+  /// namesRoute value to work properly.
+  ///
   /// Defaults to false.
   /// {@endtemplate}
   final bool excludeHeaderSemantics;
@@ -1066,7 +1079,7 @@ class _AppBarState extends State<AppBar> {
       title = _AppBarTitleBox(child: title);
       if (!widget.excludeHeaderSemantics) {
         title = Semantics(
-          namesRoute: switch (theme.platform) {
+          namesRoute: switch (defaultTargetPlatform) {
             TargetPlatform.android ||
             TargetPlatform.fuchsia ||
             TargetPlatform.linux ||
