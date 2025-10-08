@@ -96,12 +96,14 @@ RenderTarget RenderTargetCache::CreateOffscreen(
   if (!created_target.IsValid()) {
     return created_target;
   }
-  render_target_data_.push_back(RenderTargetData{
-      .used_this_frame = true,                            //
-      .keep_alive_frame_count = keep_alive_frame_count_,  //
-      .config = config,                                   //
-      .render_target = created_target                     //
-  });
+  if (CacheEnabled()) {
+    render_target_data_.push_back(RenderTargetData{
+        .used_this_frame = true,                            //
+        .keep_alive_frame_count = keep_alive_frame_count_,  //
+        .config = config,                                   //
+        .render_target = created_target                     //
+    });
+  }
   return created_target;
 }
 
@@ -152,12 +154,14 @@ RenderTarget RenderTargetCache::CreateOffscreenMSAA(
   if (!created_target.IsValid()) {
     return created_target;
   }
-  render_target_data_.push_back(RenderTargetData{
-      .used_this_frame = true,                            //
-      .keep_alive_frame_count = keep_alive_frame_count_,  //
-      .config = config,                                   //
-      .render_target = created_target                     //
-  });
+  if (CacheEnabled()) {
+    render_target_data_.push_back(RenderTargetData{
+        .used_this_frame = true,                            //
+        .keep_alive_frame_count = keep_alive_frame_count_,  //
+        .config = config,                                   //
+        .render_target = created_target                     //
+    });
+  }
   return created_target;
 }
 

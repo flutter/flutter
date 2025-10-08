@@ -279,7 +279,7 @@ class _TabStyle extends AnimatedWidget {
       selectedColor = selectedColor.resolve(const <WidgetState>{WidgetState.selected});
     } else {
       // unselectedLabelColor and tabBarTheme.unselectedLabelColor are ignored
-      // when labelColor is a MaterialStateColor.
+      // when labelColor is a WidgetStateColor.
       unselectedColor =
           unselectedLabelColor ??
           tabBarTheme.unselectedLabelColor ??
@@ -2034,7 +2034,7 @@ class _TabBarState extends State<TabBar> {
       final WidgetStateProperty<Color?> defaultOverlay = WidgetStateProperty.resolveWith<Color?>((
         Set<WidgetState> states,
       ) {
-        final Set<WidgetState> effectiveStates = selectedState..addAll(states);
+        final Set<WidgetState> effectiveStates = selectedState.toSet()..addAll(states);
         return _defaults.overlayColor?.resolve(effectiveStates);
       });
       wrappedTabs[index] = InkWell(

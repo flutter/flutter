@@ -105,7 +105,7 @@ class PageRouteBuilder<T> extends PageRoute<T> {
   });
 
   /// {@template flutter.widgets.pageRouteBuilder.pageBuilder}
-  /// Used build the route's primary contents.
+  /// Used to build the route's primary contents.
   ///
   /// See [ModalRoute.buildPage] for complete definition of the parameters.
   /// {@endtemplate}
