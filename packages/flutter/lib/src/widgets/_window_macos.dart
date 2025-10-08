@@ -148,7 +148,7 @@ class RegularWindowControllerMacOS extends RegularWindowController {
       preferredSize: preferredSize,
       preferredConstraints: preferredConstraints,
       onClose: _onClose.nativeFunction,
-      onSizeChange: _onResize.nativeFunction,
+      onNotifyListeners: _onResize.nativeFunction,
     );
     final FlutterView flutterView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
       (FlutterView view) => view.viewId == viewId,
@@ -208,6 +208,7 @@ class RegularWindowControllerMacOS extends RegularWindowController {
   void setTitle(String title) {
     _ensureNotDestroyed();
     _MacOSPlatformInterface.setWindowTitle(getWindowHandle(), title);
+    notifyListeners();
   }
 
   final WindowingOwnerMacOS _owner;
@@ -290,7 +291,7 @@ final class _WindowCreationRequest extends Struct {
   external _Constraints constraints;
 
   external Pointer<NativeFunction<Void Function()>> onClose;
-  external Pointer<NativeFunction<Void Function()>> onSizeChange;
+  external Pointer<NativeFunction<Void Function()>> onNotifyListeners;
 }
 
 final class _Size extends Struct {
@@ -363,11 +364,11 @@ class _MacOSPlatformInterface {
     required Size? preferredSize,
     BoxConstraints? preferredConstraints,
     required Pointer<NativeFunction<Void Function()>> onClose,
-    required Pointer<NativeFunction<Void Function()>> onSizeChange,
+    required Pointer<NativeFunction<Void Function()>> onNotifyListeners,
   }) {
     final Pointer<_WindowCreationRequest> request = _allocator<_WindowCreationRequest>()
       ..ref.onClose = onClose
-      ..ref.onSizeChange = onSizeChange;
+      ..ref.onNotifyListeners = onNotifyListeners;
 
     if (preferredSize != null) {
       request.ref

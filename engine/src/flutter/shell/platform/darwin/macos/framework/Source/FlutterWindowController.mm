@@ -96,21 +96,31 @@
 
 - (void)windowDidResize:(NSNotification*)notification {
   flutter::IsolateScope isolate_scope(*_isolate);
-  _creationRequest.on_size_change();
+  _creationRequest.notify_listeners();
 }
 
 // Miniaturize does not trigger resize event, but for now there
 // is no other way to get notification about the state change.
 - (void)windowDidMiniaturize:(NSNotification*)notification {
   flutter::IsolateScope isolate_scope(*_isolate);
-  _creationRequest.on_size_change();
+  _creationRequest.notify_listeners();
 }
 
 // Deminiaturize does not trigger resize event, but for now there
 // is no other way to get notification about the state change.
 - (void)windowDidDeminiaturize:(NSNotification*)notification {
   flutter::IsolateScope isolate_scope(*_isolate);
-  _creationRequest.on_size_change();
+  _creationRequest.notify_listeners();
+}
+
+- (void)windowWillEnterFullScreen:(NSNotification*)notification {
+  flutter::IsolateScope isolate_scope(*_isolate);
+  _creationRequest.notify_listeners();
+}
+
+- (void)windowWillExitFullScreen:(NSNotification*)notification {
+  flutter::IsolateScope isolate_scope(*_isolate);
+  _creationRequest.notify_listeners();
 }
 
 @end
