@@ -87,6 +87,8 @@ abstract class PlatformDispatcher {
 
   void setSemanticsTreeEnabled(bool enabled) {}
 
+  void setApplicationLocale(Locale locale) {}
+
   AccessibilityFeatures get accessibilityFeatures;
 
   VoidCallback? get onAccessibilityFeaturesChanged;
