@@ -27,7 +27,7 @@ import 'menu_style.dart';
 ///
 ///  * [DropdownMenu], which is the underlying text field without the [Form]
 ///    integration.
-class DropdownMenuFormField<T> extends FormField<T> {
+class DropdownMenuFormField<T extends Object> extends FormField<T> {
   /// Creates a [DropdownMenu] widget that is a [FormField].
   ///
   /// For a description of the `onSaved`, `validator`, or `autovalidateMode`
@@ -117,7 +117,12 @@ class DropdownMenuFormField<T> extends FormField<T> {
 
   /// The callback is called when a selection is made.
   ///
-  /// Defaults to null. If null, only the text field is updated.
+  /// The callback receives the selected entry's value of type `T` when the user
+  /// chooses an item. It may also be invoked with `null` to indicate that the
+  /// selection was cleared / that no item was chosen.
+  ///
+  /// Defaults to null. If this callback itself is null, the widget still updates
+  /// the text field with the selected label but does not notify the caller.
   final ValueChanged<T?>? onSelected;
 
   /// Controls the text being edited.
@@ -136,7 +141,7 @@ class DropdownMenuFormField<T> extends FormField<T> {
   FormFieldState<T> createState() => _DropdownMenuFormFieldState<T>();
 }
 
-class _DropdownMenuFormFieldState<T> extends FormFieldState<T> {
+class _DropdownMenuFormFieldState<T extends Object> extends FormFieldState<T> {
   DropdownMenuFormField<T> get _dropdownMenuFormField => widget as DropdownMenuFormField<T>;
 
   // The controller used to restore the selected item.
