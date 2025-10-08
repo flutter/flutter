@@ -108,6 +108,24 @@ class EngineColorFilter implements LayerImageFilter, ui.ColorFilter {
       matrix = null,
       type = ColorFilterType.srgbToLinearGamma;
 
+  /// Creates a color filter that applies the given saturation to the RGB
+  /// channels.
+  factory EngineColorFilter.saturation(double saturation) {
+    const double rLuminance = 0.2126;
+    const double gLuminance = 0.7152;
+    const double bLuminance = 0.0722;
+    final double invSat = 1 - saturation;
+
+    return EngineColorFilter.matrix(<double>[
+      // dart format off
+      invSat * rLuminance + saturation, invSat * gLuminance,              invSat * bLuminance,              0, 0,
+      invSat * rLuminance,              invSat * gLuminance + saturation, invSat * bLuminance,              0, 0,
+      invSat * rLuminance,              invSat * gLuminance,              invSat * bLuminance + saturation, 0, 0,
+      0,                                0,                                0,                                1, 0,
+      // dart format on
+    ]);
+  }
+
   final ui.Color? color;
   final ui.BlendMode? blendMode;
   final List<double>? matrix;

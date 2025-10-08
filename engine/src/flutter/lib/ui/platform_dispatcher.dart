@@ -976,6 +976,15 @@ class PlatformDispatcher {
   /// list has not been set or is empty.
   Locale get locale => locales.isEmpty ? const Locale.fromSubtags() : locales.first;
 
+  /// Sets the locale for the application in engine.
+  ///
+  /// This is typically called by framework to set the locale based on which
+  /// locale the Flutter app actually uses.
+  void setApplicationLocale(Locale locale) => _setApplicationLocale(locale.toLanguageTag());
+
+  @Native<Void Function(Handle)>(symbol: 'PlatformConfigurationNativeApi::SetApplicationLocale')
+  external static void _setApplicationLocale(String locale);
+
   /// The full system-reported supported locales of the device.
   ///
   /// This establishes the language and formatting conventions that application

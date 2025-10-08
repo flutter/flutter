@@ -33,6 +33,7 @@ allprojects {
 apply plugin: "com.android.application"
 
 android {
+  namespace "io.flutter.licensecheck"
   compileSdk 36
 }
 

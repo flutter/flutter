@@ -8404,13 +8404,13 @@ void main() {
   testWidgets('InputDecorationThemeData.inputDecoration with WidgetState', (
     WidgetTester tester,
   ) async {
-    final MaterialStateTextStyle themeStyle = MaterialStateTextStyle.resolveWith((
+    final WidgetStateTextStyle themeStyle = WidgetStateTextStyle.resolveWith((
       Set<WidgetState> states,
     ) {
       return const TextStyle(color: Colors.green);
     });
 
-    final MaterialStateTextStyle decorationStyle = MaterialStateTextStyle.resolveWith((
+    final WidgetStateTextStyle decorationStyle = WidgetStateTextStyle.resolveWith((
       Set<WidgetState> states,
     ) {
       return const TextStyle(color: Colors.blue);
@@ -8456,7 +8456,7 @@ void main() {
     );
 
     // InputDecoration (baseDecoration) defines InputDecoration properties
-    final MaterialStateOutlineInputBorder border = MaterialStateOutlineInputBorder.resolveWith((
+    final WidgetStateInputBorder border = WidgetStateInputBorder.resolveWith((
       Set<WidgetState> states,
     ) {
       return const OutlineInputBorder();
@@ -8522,7 +8522,7 @@ void main() {
     expect(decoration.counterStyle, decorationStyle);
     expect(decoration.filled, false);
     expect(decoration.fillColor, Colors.blue);
-    expect(decoration.border, isA<MaterialStateOutlineInputBorder>());
+    expect(decoration.border, isA<WidgetStateInputBorder>());
     expect(decoration.alignLabelWithHint, false);
     expect(
       decoration.constraints,
@@ -9189,6 +9189,42 @@ void main() {
     );
 
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Min intrinsic height calculation should not impact the container height', (
+    WidgetTester tester,
+  ) async {
+    const String helperText = '0123456789';
+
+    Widget buildDecoration({required double width}) {
+      return MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: width,
+            child: const IntrinsicHeight(
+              child: InputDecorator(
+                decoration: InputDecoration(
+                  filled: true,
+                  labelText: labelText,
+                  helperText: helperText,
+                  helperMaxLines: 2,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Build once with enough width for the helper to fit in one line.
+    await tester.pumpWidget(buildDecoration(width: 300));
+    final double defaultContainerHeight = getContainerRect(tester).height;
+
+    // Build once with a smaller width that will force the helper text to wrap.
+    await tester.pumpWidget(buildDecoration(width: 150));
+
+    // The container height should be the same as before.
+    expect(getContainerRect(tester).height, defaultContainerHeight);
   });
 
   group('Intrinsic width', () {
@@ -15662,4 +15698,118 @@ void main() {
       expect(find.text(helperTextValue), findsOneWidget);
     },
   );
+
+  testWidgets('helper text and character counter do not overlap', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/175591.
+
+    // This test verifies that when both helperText and maxLength are specified,
+    // the helper text and character counter do not overlap.
+    const String longHelperText =
+        'This is a very long helper text that should not overlap with the character counter when both are present in the input field';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox(
+              width: 300, // Constrain width to force potential overlap
+              child: TextFormField(
+                maxLength: 200,
+                decoration: const InputDecoration(
+                  helperText: longHelperText,
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Find the helper text and counter widgets.
+    final Finder helperTextFinder = find.text(longHelperText);
+    final Finder counterFinder = find.text('0/200');
+
+    expect(helperTextFinder, findsOneWidget);
+    expect(counterFinder, findsOneWidget);
+
+    // Get the positions of both widgets.
+    final Offset helperTextPosition = tester.getTopLeft(helperTextFinder);
+    final Offset counterPosition = tester.getTopLeft(counterFinder);
+    final Size helperTextSize = tester.getSize(helperTextFinder);
+
+    // Calculate the right edge of helper text and left edge of counter.
+    final double helperTextRight = helperTextPosition.dx + helperTextSize.width;
+    final double counterLeft = counterPosition.dx;
+
+    // Verify that helper text and counter do not overlap.
+    // The gap should be positive (no overlap) and at least 8.0 pixels.
+    final double actualGap = counterLeft - helperTextRight;
+    expect(actualGap, greaterThan(0.0)); // No overlap.
+    expect(actualGap, 16.0); // As per Material 3 specification.
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/175993.
+  testWidgets('helper/error text default padding is correct', (WidgetTester tester) async {
+    const double defaultPadding = 16.0; // From M3 spec.
+    const String longText =
+        'This is a very long text that should wrap and fill the available width';
+    const double inputWidth = 300;
+
+    Future<void> buildDecorator({
+      required TextDirection direction,
+      String? helperText,
+      String? errorText,
+    }) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Directionality(
+              textDirection: direction,
+              child: SizedBox(
+                width: inputWidth,
+                child: InputDecorator(
+                  decoration: InputDecoration(
+                    filled: true,
+                    helperText: helperText,
+                    errorText: errorText,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    final Finder helperFinder = find.text(longText);
+    final Finder errorFinder = find.text(longText);
+
+    // Helper in LTR.
+    await buildDecorator(direction: TextDirection.ltr, helperText: longText);
+
+    expect(tester.getTopLeft(helperFinder).dx, defaultPadding);
+    expect(tester.getTopRight(helperFinder).dx, inputWidth - defaultPadding);
+
+    // Helper in RTL.
+    await buildDecorator(direction: TextDirection.rtl, helperText: longText);
+
+    expect(tester.getTopLeft(helperFinder).dx, defaultPadding);
+    expect(tester.getTopRight(helperFinder).dx, inputWidth - defaultPadding);
+
+    // Error in LTR.
+    await buildDecorator(direction: TextDirection.ltr, errorText: longText);
+
+    expect(tester.getTopLeft(errorFinder).dx, defaultPadding);
+    expect(tester.getTopRight(errorFinder).dx, inputWidth - defaultPadding);
+
+    // Error in RTL.
+    await buildDecorator(direction: TextDirection.rtl, errorText: longText);
+
+    expect(tester.getTopLeft(errorFinder).dx, defaultPadding);
+    expect(tester.getTopRight(errorFinder).dx, inputWidth - defaultPadding);
+  });
 }

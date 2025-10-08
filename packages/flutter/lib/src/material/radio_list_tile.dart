@@ -50,7 +50,7 @@ enum _RadioType { material, adaptive }
 /// This widget does not coordinate the [selected] state and the
 /// [checked] state; to have the list tile appear selected when the
 /// radio button is the selected radio button, set [selected] to true
-/// when [value] matches [groupValue].
+/// when [value] matches [RadioGroup.groupValue].
 ///
 /// The radio button is shown on the left by default in left-to-right languages
 /// (i.e. the leading edge). This can be changed using [controlAffinity]. The

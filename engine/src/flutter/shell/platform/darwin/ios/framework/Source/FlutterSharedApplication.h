@@ -7,6 +7,8 @@
 
 #import <UIKit/UIKit.h>
 
+extern NSString* const kRestorationStateAppModificationKey;
+
 @interface FlutterSharedApplication : NSObject
 
 /**
@@ -23,6 +25,15 @@
  * Returns the `UIApplication.sharedApplication` is available. Otherwise returns nil.
  */
 @property(class, nonatomic, readonly) UIApplication* application;
+
+/**
+ * Returns YES if any connected UIScene in the UIApplication has a delegate.
+ */
+@property(class, nonatomic, readonly) BOOL hasSceneDelegate;
+
+@property(class, nonatomic, readonly) int64_t lastAppModificationTime;
+
++ (BOOL)isFlutterDeepLinkingEnabled;
 
 @end
 
