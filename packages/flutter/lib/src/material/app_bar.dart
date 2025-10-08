@@ -640,11 +640,12 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// [AppBar] uses the device's platform (via [defaultTargetPlatform])
   /// rather than [ThemeData.platform] to determine platform-specific accessibility
   /// behavior. This ensures that assistive technologies like VoiceOver on iOS and
-  /// macOS receive correct semantics namesRoute, even when the app's theme is configured
-  /// to use a different platform's visual appearance. For example, if an app uses
+  /// macOS receive the correct `namesRoute` semantic information,
+  /// even when the app's theme is configured to use a different
+  /// platform's visual appearance. For example, if an app uses
   /// `ThemeData(platform: TargetPlatform.android)` on an iOS device to achieve an
-  /// Android look and feel, VoiceOver is able to detect iOS-appropriate semantics
-  /// namesRoute value to work properly.
+  /// Android look and feel, VoiceOver can still use the iOS-appropriate `namesRoute`
+  /// value to work properly.
   ///
   /// Defaults to false.
   /// {@endtemplate}
