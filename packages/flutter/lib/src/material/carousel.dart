@@ -227,6 +227,13 @@ class CarouselView extends StatefulWidget {
   ///
   /// ** See code in examples/api/lib/material/carousel/carousel.1.dart **
   /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [CarouselView.new], which creates a carousel with explicit children.
+  ///  * [CarouselView.weighted], which creates a carousel with weighted items.
+  ///  * [CarouselView.weightedBuilder], which creates a carousel with weighted
+  ///    items using lazy loading.
   const CarouselView.builder({
     super.key,
     this.padding,
@@ -276,6 +283,13 @@ class CarouselView extends StatefulWidget {
   /// )
   /// ```
   /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [CarouselView.new], which creates a carousel with explicit children.
+  ///  * [CarouselView.weighted], which creates a carousel with weighted items.
+  ///  * [CarouselView.builder], which creates a carousel with fixed-sized items
+  ///    using lazy loading.
   const CarouselView.weightedBuilder({
     super.key,
     this.padding,
