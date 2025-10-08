@@ -5300,8 +5300,10 @@ base class UniformFloatSlot {
 
   final FragmentShader _shader;
   final int _index;
+
   /// The name of the bound uniform.
   final String name;
+
   /// The offset into the bound uniform. For example, 1 for `.y` or 2 for `.b`.
   final int offset;
 }

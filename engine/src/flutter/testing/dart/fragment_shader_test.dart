@@ -57,9 +57,7 @@ void main() async {
   });
 
   test('FragmentProgram uniform info', () async {
-    final FragmentProgram program = await FragmentProgram.fromAsset(
-      'uniforms.frag.iplr',
-    );
+    final FragmentProgram program = await FragmentProgram.fromAsset('uniforms.frag.iplr');
     final FragmentShader shader = program.fragmentShader();
     final List<UniformFloatSlot> slots = [
       shader.getUniformFloat('iFloatUniform'),
@@ -76,9 +74,7 @@ void main() async {
   });
 
   test('FragmentProgram getUniformFloat unknown', () async {
-    final FragmentProgram program = await FragmentProgram.fromAsset(
-      'uniforms.frag.iplr',
-    );
+    final FragmentProgram program = await FragmentProgram.fromAsset('uniforms.frag.iplr');
     final FragmentShader shader = program.fragmentShader();
     try {
       shader.getUniformFloat('unknown');
@@ -89,9 +85,7 @@ void main() async {
   });
 
   test('FragmentProgram getUniformFloat offset overflow', () async {
-    final FragmentProgram program = await FragmentProgram.fromAsset(
-      'uniforms.frag.iplr',
-    );
+    final FragmentProgram program = await FragmentProgram.fromAsset('uniforms.frag.iplr');
     final FragmentShader shader = program.fragmentShader();
     try {
       shader.getUniformFloat('iVec2Uniform', 2);
@@ -102,9 +96,7 @@ void main() async {
   });
 
   test('FragmentProgram getUniformFloat offset underflow', () async {
-    final FragmentProgram program = await FragmentProgram.fromAsset(
-      'uniforms.frag.iplr',
-    );
+    final FragmentProgram program = await FragmentProgram.fromAsset('uniforms.frag.iplr');
     final FragmentShader shader = program.fragmentShader();
     try {
       shader.getUniformFloat('iVec2Uniform', -1);
