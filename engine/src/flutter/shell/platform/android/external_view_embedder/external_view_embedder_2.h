@@ -5,6 +5,8 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_2_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_2_H_
 
+#include <cstdint>
+#include <set>
 #include <unordered_map>
 
 #include "flutter/common/task_runners.h"
@@ -134,6 +136,9 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
   // The params for a platform view, which contains the size, position and
   // mutation stack.
   std::unordered_map<int64_t, EmbeddedViewParams> view_params_;
+
+  // The set of platform views that were visible in the last frame.
+  std::set<int64_t> views_visible_last_frame_;
 
   // Destroys the surfaces created from the surface factory.
   // This method schedules a task on the platform thread, and waits for
