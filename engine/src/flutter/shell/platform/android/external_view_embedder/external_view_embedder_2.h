@@ -5,7 +5,6 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_2_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_2_H_
 
-#include <set>
 #include <unordered_map>
 
 #include "flutter/common/task_runners.h"
@@ -14,6 +13,7 @@
 #include "flutter/shell/platform/android/external_view_embedder/surface_pool.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/surface/android_surface.h"
+#include "flutter/third_party/abseil-cpp/absl/container/flat_hash_set.h"
 
 namespace flutter {
 
@@ -137,7 +137,7 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
   std::unordered_map<int64_t, EmbeddedViewParams> view_params_;
 
   // The set of platform views that were visible in the last frame.
-  std::set<int64_t> views_visible_last_frame_;
+  absl::flat_hash_set<int64_t> views_visible_last_frame_;
 
   // Destroys the surfaces created from the surface factory.
   // This method schedules a task on the platform thread, and waits for

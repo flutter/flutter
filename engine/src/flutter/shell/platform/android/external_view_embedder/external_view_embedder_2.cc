@@ -201,9 +201,8 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
       }));
 
   views_visible_last_frame_.clear();
-  for (int64_t view_id : composition_order_) {
-    views_visible_last_frame_.insert(view_id);
-  }
+  views_visible_last_frame_.insert(composition_order_.begin(),
+                                   composition_order_.end());
 }
 
 // |ExternalViewEmbedder|
