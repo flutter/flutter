@@ -3440,6 +3440,8 @@ invalid JSON
             'core_devices.rand0',
           );
           final File tempFile = tempDir.childFile('core_device_list.json');
+          final processCompleter = Completer<void>();
+          final FakeProcess fakeProcess = FakeProcess();
 
           fakeProcessManager.addCommand(
             FakeCommand(
@@ -3453,9 +3455,11 @@ invalid JSON
                 '--json-output',
                 tempFile.path,
               ],
-              onRun: (_) {
+              onRun: (_) async {
                 expect(tempFile, exists);
+                await processCompleter.future;
               },
+              process: fakeProcess,
             ),
           );
 
@@ -3469,6 +3473,9 @@ invalid JSON
           expect(devices, isEmpty);
           expect(fakeProcessManager, hasNoRemainingExpectations);
           expect(tempFile, isNot(exists));
+          expect(fakeProcess.signals, contains(io.ProcessSignal.sigterm));
+
+          processCompleter.complete();
         });
 
         testWithoutContext('When timeout is below minimum, default to minimum', () async {

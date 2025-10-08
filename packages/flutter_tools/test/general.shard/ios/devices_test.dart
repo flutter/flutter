@@ -1122,14 +1122,12 @@ class FakeXcdevice extends Fake implements XCDevice {
 
   @override
   Future<List<IOSDevice>> getAvailableIOSDevices({Duration? timeout}) async {
-    getAvailableIOSDevicesCount++;
-    return devices.removeAt(0);
+    return devices[getAvailableIOSDevicesCount++];
   }
 
   @override
   Future<List<IOSDevice>> getAvailableIOSDevicesForWirelessDiscovery({Duration? timeout}) async {
-    getAvailableIOSDevicesForWirelessDiscoveryCount++;
-    return devices.removeAt(0);
+    return devices[getAvailableIOSDevicesForWirelessDiscoveryCount++];
   }
 
   @override

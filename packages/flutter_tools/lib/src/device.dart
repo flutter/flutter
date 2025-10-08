@@ -225,11 +225,11 @@ abstract class DeviceManager {
 
   /// Stop any running extended wireless device discoverers.
   void stopExtendedWirelessDeviceDiscoverers() {
-    final DeviceDiscovery? extendedWirelessDiscoverer = _platformDiscoverers
-        .where((DeviceDiscovery d) => d.requiresExtendedWirelessDeviceDiscovery)
-        .firstOrNull;
-    if (extendedWirelessDiscoverer is PollingDeviceDiscovery) {
-      extendedWirelessDiscoverer.cancelWirelessDiscovery();
+    for (final PollingDeviceDiscovery deviceDiscoverer
+        in _platformDiscoverers.whereType<PollingDeviceDiscovery>()) {
+      if (deviceDiscoverer.requiresExtendedWirelessDeviceDiscovery) {
+        deviceDiscoverer.cancelWirelessDiscovery();
+      }
     }
   }
 

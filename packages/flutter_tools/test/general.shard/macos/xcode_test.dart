@@ -1523,6 +1523,13 @@ void main() {
             final coreDeviceControl = FakeIOSCoreDeviceControl(
               getCoreDevicesCompleter: getCoreDevicesCompleter,
             );
+            coreDeviceControl.devices.add(
+              FakeIOSCoreDevice(
+                udid: '00008110-00062D2E2632801E',
+                connectionInterface: DeviceConnectionInterface.wireless,
+                developerModeStatus: 'enabled',
+              ),
+            );
             xcdevice = XCDevice(
               processManager: fakeProcessManager,
               logger: logger,
@@ -1537,11 +1544,27 @@ void main() {
               analytics: fakeAnalytics,
               shutdownHooks: FakeShutdownHooks(),
             );
+            const devicesOutput = '''
+[
+  {
+    "simulator" : false,
+    "operatingSystemVersion" : "17.0 (17C54)",
+    "interface" : "network",
+    "available" : true,
+    "platform" : "com.apple.platform.iphoneos",
+    "modelCode" : "iPhone15,1",
+    "identifier" : "234234234234234234345445687594e089dede3c44",
+    "architecture" : "arm64",
+    "modelName" : "iPhone 14",
+    "name" : "A networked iPhone"
+  }
+]
+''';
 
             fakeProcessManager.addCommands(<FakeCommand>[
               const FakeCommand(
                 command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '2'],
-                stdout: '[]',
+                stdout: devicesOutput,
               ),
             ]);
 
