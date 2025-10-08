@@ -18,6 +18,7 @@ G_DECLARE_FINAL_TYPE(FlWindowMonitor,
 /**
  * fl_window_monitor_new:
  * @window: the window being monitored.
+ * @on_state_changed: the function to call when the window state changes.
  * @on_close: the function to call when the user requests the window to be
  * closed.
  * @on_destroy: the function to call when the window is destroyed.
@@ -28,6 +29,7 @@ G_DECLARE_FINAL_TYPE(FlWindowMonitor,
  * Returns: a new #FlWindowMonitor.
  */
 FlWindowMonitor* fl_window_monitor_new(GtkWindow* window,
+                                       void (*on_state_changed)(void),
                                        void (*on_close)(void),
                                        void (*on_destroy)(void));
 

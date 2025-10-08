@@ -4,68 +4,59 @@
 
 #include <gtk/gtk.h>
 
-#include "dart_api.h"
+#include "flutter/shell/platform/common/isolate_scope.h"
 #include "flutter/shell/platform/linux/fl_window_monitor.h"
 
 struct _FlWindowMonitor {
   GObject parent_instance;
 
+  // Window being monitored.
   GtkWindow* window;
-  Dart_Isolate isolate;
-  Dart_Isolate previous_isolate;
+
+  // Isolate to call callbacks with.
+  flutter::Isolate isolate;
+
+  // Callbacks.
+  void (*on_state_changed)(void);
   void (*on_close)(void);
   void (*on_destroy)(void);
-  gulong window_delete_event_cb_id;
-  gulong window_destroy_cb_id;
+
+  // Signal subscriptions.
+  gulong window_state_event_cb_id;
+  gulong delete_event_cb_id;
+  gulong destroy_cb_id;
 };
 
 G_DEFINE_TYPE(FlWindowMonitor, fl_window_monitor, G_TYPE_OBJECT)
 
-static void enter_isolate(FlWindowMonitor* self) {
-  Dart_Isolate current_isolate = Dart_CurrentIsolate();
-  if (self->isolate == current_isolate) {
-    return;
-  }
+static gboolean window_state_event_cb(FlWindowMonitor* self,
+                                      GdkEventWindowState* event) {
+  flutter::IsolateScope scope(self->isolate);
+  self->on_state_changed();
 
-  if (current_isolate) {
-    Dart_ExitIsolate();
-  }
-  Dart_EnterIsolate(self->isolate);
-  self->previous_isolate = current_isolate;
+  return FALSE;
 }
 
-static void leave_isolate(FlWindowMonitor* self) {
-  Dart_ExitIsolate();
-  Dart_EnterIsolate(self->previous_isolate);
-}
-
-// FIXME: Move into window_helper.cc
-static gboolean window_delete_event_cb(GtkWindow* window,
-                                       GdkEvent* event,
-                                       gpointer user_data) {
-  FlWindowMonitor* request = reinterpret_cast<FlWindowMonitor*>(user_data);
-
-  enter_isolate(request);
-  request->on_close();
-  leave_isolate(request);
+static gboolean delete_event_cb(FlWindowMonitor* self, GdkEvent* event) {
+  flutter::IsolateScope scope(self->isolate);
+  self->on_close();
 
   // Stop default behaviour of destroying the window.
   return TRUE;
 }
 
-static void window_destroy_cb(GtkWidget* widget, gpointer user_data) {
-  FlWindowMonitor* request = reinterpret_cast<FlWindowMonitor*>(user_data);
-
-  enter_isolate(request);
-  request->on_destroy();
-  leave_isolate(request);
+static void destroy_cb(FlWindowMonitor* self) {
+  flutter::IsolateScope scope(self->isolate);
+  self->on_destroy();
 }
 
 static void fl_window_monitor_dispose(GObject* object) {
   FlWindowMonitor* self = FL_WINDOW_MONITOR(object);
 
-  g_signal_handler_disconnect(self->window, self->window_delete_event_cb_id);
-  g_signal_handler_disconnect(self->window, self->window_destroy_cb_id);
+  g_clear_object(&self->window);
+  g_signal_handler_disconnect(self->window, self->window_state_event_cb_id);
+  g_signal_handler_disconnect(self->window, self->delete_event_cb_id);
+  g_signal_handler_disconnect(self->window, self->destroy_cb_id);
 
   G_OBJECT_CLASS(fl_window_monitor_parent_class)->dispose(object);
 }
@@ -78,18 +69,23 @@ static void fl_window_monitor_init(FlWindowMonitor* self) {}
 
 G_MODULE_EXPORT FlWindowMonitor* fl_window_monitor_new(
     GtkWindow* window,
+    void (*on_state_changed)(void),
     void (*on_close)(void),
     void (*on_destroy)(void)) {
   FlWindowMonitor* self =
       FL_WINDOW_MONITOR(g_object_new(fl_window_monitor_get_type(), nullptr));
 
-  self->window = window;
-  self->isolate = Dart_CurrentIsolate();
-  self->previous_isolate = nullptr;
-  self->window_delete_event_cb_id = g_signal_connect(
-      window, "delete-event", G_CALLBACK(window_delete_event_cb), self);
-  self->window_destroy_cb_id =
-      g_signal_connect(window, "destroy", G_CALLBACK(window_destroy_cb), self);
+  self->window = GTK_WINDOW(g_object_ref(window));
+  self->isolate = flutter::Isolate::Current();
+  self->on_state_changed = on_state_changed;
+  self->on_close = on_close;
+  self->on_destroy = on_destroy;
+  self->window_state_event_cb_id = g_signal_connect_swapped(
+      window, "window-state-event", G_CALLBACK(window_state_event_cb), self);
+  self->delete_event_cb_id = g_signal_connect_swapped(
+      window, "delete-event", G_CALLBACK(delete_event_cb), self);
+  self->destroy_cb_id =
+      g_signal_connect_swapped(window, "destroy", G_CALLBACK(destroy_cb), self);
 
   return self;
 }

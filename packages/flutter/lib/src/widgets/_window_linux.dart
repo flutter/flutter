@@ -305,23 +305,53 @@ class _FlView extends _GtkWidget {
 }
 
 class _FlWindowMonitor extends _GObject {
-  @ffi.Native<ffi.Pointer Function(ffi.Pointer, ffi.Pointer, ffi.Pointer)>(
+  final ffi.NativeCallable<ffi.Void Function()> _onStateChangedFunction;
+  final ffi.NativeCallable<ffi.Void Function()> _onCloseFunction;
+  final ffi.NativeCallable<ffi.Void Function()> _onDestroyFunction;
+
+  @ffi.Native<ffi.Pointer Function(ffi.Pointer, ffi.Pointer, ffi.Pointer, ffi.Pointer)>(
     symbol: 'fl_window_monitor_new',
   )
   external static ffi.Pointer _flWindowMonitorNew(
     ffi.Pointer window,
+    ffi.Pointer onStateChanged,
     ffi.Pointer onClose,
     ffi.Pointer onDestroy,
   );
 
-  _FlWindowMonitor(_GtkWindow window, Function() onClose, Function() onDestroy)
-    : super(
+  factory _FlWindowMonitor(
+    _GtkWindow window,
+    Function() onStateChanged,
+    Function() onClose,
+    Function() onDestroy,
+  ) {
+    return _FlWindowMonitor._internal(
+      window.instance,
+      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onStateChanged),
+      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onClose),
+      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onDestroy),
+    );
+  }
+
+  _FlWindowMonitor._internal(
+    ffi.Pointer window,
+    this._onStateChangedFunction,
+    this._onCloseFunction,
+    this._onDestroyFunction,
+  ) : super(
         _flWindowMonitorNew(
-          window.instance,
-          ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onClose).nativeFunction,
-          ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onDestroy).nativeFunction,
+          window,
+          _onStateChangedFunction.nativeFunction,
+          _onCloseFunction.nativeFunction,
+          _onDestroyFunction.nativeFunction,
         ),
       );
+
+  void close() {
+    _onStateChangedFunction.close();
+    _onCloseFunction.close();
+    _onDestroyFunction.close();
+  }
 }
 
 /// [WindowingOwner] implementation for Linux.
@@ -394,7 +424,7 @@ class WindowingOwnerLinux extends WindowingOwner {
   @internal
   @override
   bool hasTopLevelWindows() {
-    // FIXME
+    // FIXME(robert-ancell):
     return false;
   }
 }
@@ -409,7 +439,7 @@ class WindowingOwnerLinux extends WindowingOwner {
 class RegularWindowControllerLinux extends RegularWindowController {
   final RegularWindowControllerDelegate _delegate;
   final _GtkWindow _window;
-  late final _FlWindowMonitor _windowMonitor;
+  late final _FlWindowMonitor _windowMonitor; // FIXME: unref and close
 
   /// Creates a new regular window controller for Linux.
   ///
@@ -436,9 +466,15 @@ class RegularWindowControllerLinux extends RegularWindowController {
 
     _windowMonitor = _FlWindowMonitor(
       _window,
+      // onStateChanged
+      () {
+        notifyListeners();
+      },
+      // onClose
       () {
         _delegate.onWindowCloseRequested(this);
       },
+      // onDestroy
       () {
         _delegate.onWindowDestroyed();
       },
@@ -485,6 +521,7 @@ class RegularWindowControllerLinux extends RegularWindowController {
 
   @override
   @internal
+  // NOTE: On Wayland this is never set, see https://gitlab.gnome.org/GNOME/gtk/-/issues/67
   bool get isMinimized => (_window.getWindow().getState() & _GDK_WINDOW_STATE_ICONIFIED) != 0;
 
   @override
@@ -512,6 +549,7 @@ class RegularWindowControllerLinux extends RegularWindowController {
   @internal
   void setTitle(String title) {
     _window.setTitle(title);
+    notifyListeners();
   }
 
   @override
