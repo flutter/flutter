@@ -639,6 +639,14 @@ class _LocalizationsState extends State<Localizations> {
 
   Locale? get locale => _locale;
   Locale? _locale;
+  set locale(Locale? locale) {
+    assert(locale != null);
+    if (_locale == locale) {
+      return;
+    }
+    WidgetsBinding.instance.platformDispatcher.setApplicationLocale(locale!);
+    _locale = locale;
+  }
 
   @override
   void initState() {
@@ -673,7 +681,7 @@ class _LocalizationsState extends State<Localizations> {
   void load(Locale locale) {
     final Iterable<LocalizationsDelegate<dynamic>> delegates = widget.delegates;
     if (delegates.isEmpty) {
-      _locale = locale;
+      this.locale = locale;
       return;
     }
 
@@ -686,7 +694,7 @@ class _LocalizationsState extends State<Localizations> {
     if (typeToResources != null) {
       // All of the delegates' resources loaded synchronously.
       _typeToResources = typeToResources!;
-      _locale = locale;
+      this.locale = locale;
     } else {
       // - Don't rebuild the dependent widgets until the resources for the new locale
       // have finished loading. Until then the old locale will continue to be used.
@@ -697,7 +705,7 @@ class _LocalizationsState extends State<Localizations> {
         if (mounted) {
           setState(() {
             _typeToResources = value;
-            _locale = locale;
+            this.locale = locale;
           });
         }
         RendererBinding.instance.allowFirstFrame();
