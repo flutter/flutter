@@ -1459,4 +1459,30 @@ void main() {
 
     expect(tester.getCenter(find.text(labelText)).dy, tester.getCenter(find.byType(Icon).last).dy);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/176696.
+  testWidgets('DropdownButtonFormField can be nested in an InputDecorator', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: InputDecorator(
+              decoration: const InputDecoration(),
+              child: DropdownButtonFormField<String>(
+                decoration: const InputDecoration(labelText: 'Label'),
+                items: <String>['One', 'Two'].map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(value: value, child: Text(value));
+                }).toList(),
+                onChanged: (String? value) {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), null);
+  });
 }

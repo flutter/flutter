@@ -1562,9 +1562,12 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
     // If value is null (then _selectedIndex is null) then we
     // display the hint or nothing at all.
+    final int? effectiveSelectedIndex = _selectedIndex ?? hintIndex;
     final Widget innerItemsWidget;
-    if (items.isEmpty) {
-      innerItemsWidget = const SizedBox.shrink();
+    if (items.isEmpty || effectiveSelectedIndex == null) {
+      // TODO(bleroux): replace the empty text with SizedBox.shrink once
+      // https://github.com/flutter/flutter/issues/157915 is solved.
+      innerItemsWidget = const Text('');
     } else {
       innerItemsWidget = IndexedStack(
         index: _selectedIndex ?? hintIndex,
@@ -1654,7 +1657,6 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
           minWidth: widget.iconSize + suffixIconEndMargin,
           minHeight: widget.iconSize,
         ),
-        // suffixIconGap: 0.0,
         suffixIcon: Padding(
           padding: EdgeInsetsGeometry.directional(end: suffixIconEndMargin),
           child: effectiveSuffixIcon,
