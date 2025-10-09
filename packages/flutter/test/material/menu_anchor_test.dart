@@ -4247,7 +4247,9 @@ void main() {
     });
 
     group('Semantics', () {
-      testWidgets('MenuItemButton is not a semantic button', (WidgetTester tester) async {
+      testWidgets('MenuItemButton has platform-adaptive button semantics', (
+        WidgetTester tester,
+      ) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         await tester.pumpWidget(
           Directionality(
@@ -4262,7 +4264,8 @@ void main() {
           ),
         );
 
-        // The flags should not have SemanticsFlag.isButton.
+        // On web, menu items should have SemanticsFlag.isButton.
+        // On other platforms, they should NOT have the isButton flag.
         expect(
           semantics,
           hasSemantics(
@@ -4274,6 +4277,7 @@ void main() {
                   rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
                   transform: Matrix4.translationValues(356.0, 276.0, 0.0),
                   flags: <SemanticsFlag>[
+                    if (kIsWeb) SemanticsFlag.isButton,
                     SemanticsFlag.hasEnabledState,
                     SemanticsFlag.isEnabled,
                     SemanticsFlag.isFocusable,
@@ -4309,7 +4313,9 @@ void main() {
         semantics.dispose();
       }, variant: TargetPlatformVariant.desktop());
 
-      testWidgets('SubMenuButton is not a semantic button', (WidgetTester tester) async {
+      testWidgets('SubmenuButton has platform-adaptive button semantics', (
+        WidgetTester tester,
+      ) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         await tester.pumpWidget(
           Directionality(
@@ -4325,7 +4331,8 @@ void main() {
           ),
         );
 
-        // The flags should not have SemanticsFlag.isButton.
+        // On web, submenu buttons should have SemanticsFlag.isButton.
+        // On other platforms, they should NOT have the isButton flag.
         expect(
           semantics,
           hasSemantics(
@@ -4334,6 +4341,7 @@ void main() {
                 TestSemantics(
                   rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
                   flags: <SemanticsFlag>[
+                    if (kIsWeb) SemanticsFlag.isButton,
                     SemanticsFlag.hasEnabledState,
                     SemanticsFlag.hasExpandedState,
                   ],
@@ -4394,6 +4402,7 @@ void main() {
                             TestSemantics(
                               id: 4,
                               flags: <SemanticsFlag>[
+                                if (kIsWeb) SemanticsFlag.isButton,
                                 SemanticsFlag.isFocused,
                                 SemanticsFlag.hasEnabledState,
                                 SemanticsFlag.isEnabled,
@@ -4422,6 +4431,7 @@ void main() {
                                       label: 'Item 0',
                                       rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 48.0),
                                       flags: <SemanticsFlag>[
+                                        if (kIsWeb) SemanticsFlag.isButton,
                                         SemanticsFlag.hasEnabledState,
                                         SemanticsFlag.isEnabled,
                                         SemanticsFlag.isFocusable,
@@ -4471,6 +4481,7 @@ void main() {
                             TestSemantics(
                               id: 4,
                               flags: <SemanticsFlag>[
+                                if (kIsWeb) SemanticsFlag.isButton,
                                 SemanticsFlag.hasExpandedState,
                                 SemanticsFlag.isFocused,
                                 SemanticsFlag.hasEnabledState,
@@ -5095,6 +5106,50 @@ void main() {
     await tester.pump();
 
     expect(tester.getRect(findMenuPanels()).width, 800.0 - reservedPadding.horizontal);
+  });
+
+  testWidgets('MenuItemButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(child: SizedBox.shrink(child: MenuItemButton())),
+      ),
+    );
+    expect(tester.getSize(find.byType(MenuItemButton)), Size.zero);
+  });
+
+  testWidgets('CheckboxMenuButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: CheckboxMenuButton(
+              value: true,
+              onChanged: (bool? value) {},
+              child: const Text('X'),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CheckboxMenuButton)), Size.zero);
+  });
+
+  testWidgets('RadioMenuButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: RadioMenuButton<bool>(
+              value: true,
+              groupValue: true,
+              onChanged: (bool? value) {},
+              child: null,
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(RadioMenuButton<bool>)), Size.zero);
   });
 
   testWidgets('Layout updates when reserved padding changes', (WidgetTester tester) async {
