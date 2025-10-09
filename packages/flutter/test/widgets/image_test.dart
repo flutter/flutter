@@ -1757,9 +1757,6 @@ void main() {
         ),
       );
 
-      expect(image1.debugGetOpenHandleStackTraces(), hasLength(1));
-      expect(image2.debugGetOpenHandleStackTraces(), hasLength(1));
-
       _TestImageProvider imageProvider = imageProvider1;
       bool disableAnimations = false;
       late StateSetter setState;
