@@ -1221,16 +1221,22 @@ void main() {
       expect(properties.properties.first.value, colorToPaint);
     });
 
-    testWidgets('ColoredBox - paint uses isAntiAlias = false', (WidgetTester tester) async {
+    testWidgets('ColoredBox - default isAntiAlias', (WidgetTester tester) async {
       await tester.pumpWidget(const ColoredBox(color: colorToPaint));
-
+      expect(find.byType(ColoredBox), findsOneWidget);
       final RenderObject renderColoredBox = tester.renderObject(find.byType(ColoredBox));
-      expect(renderColoredBox, isA<RenderProxyBoxWithHitTestBehavior>());
 
       renderColoredBox.paint(mockContext, Offset.zero);
+      expect(mockCanvas.paints.single.isAntiAlias, isTrue);
+    });
 
-      expect(mockCanvas.paints, isNotEmpty);
-      expect(mockCanvas.paints.first.isAntiAlias, false);
+    testWidgets('ColoredBox - passing isAntiAlias = false', (WidgetTester tester) async {
+      await tester.pumpWidget(const ColoredBox(color: colorToPaint, isAntiAlias: false));
+      expect(find.byType(ColoredBox), findsOneWidget);
+      final RenderObject renderColoredBox = tester.renderObject(find.byType(ColoredBox));
+
+      renderColoredBox.paint(mockContext, Offset.zero);
+      expect(mockCanvas.paints.single.isAntiAlias, isFalse);
     });
   });
 
