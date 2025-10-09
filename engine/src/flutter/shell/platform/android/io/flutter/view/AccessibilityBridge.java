@@ -575,6 +575,16 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     return stringIndex == EMPTY_STRING_INDEX ? null : strings[stringIndex];
   }
 
+  private static float[] getMatrix4FromBuffer(@NonNull ByteBuffer buffer, float[] transform) {
+    if (transform == null) {
+      transform = new float[16];
+    }
+    for (int i = 0; i < 16; ++i) {
+      transform[i] = buffer.getFloat();
+    }
+    return transform;
+  }
+
   /**
    * Disconnects any listeners and/or delegates that were initialized in {@code
    * AccessibilityBridge}'s constructor, or added after.
@@ -2640,18 +2650,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       right = buffer.getFloat();
       bottom = buffer.getFloat();
 
-      if (transform == null) {
-        transform = new float[16];
-      }
-      for (int i = 0; i < 16; ++i) {
-        transform[i] = buffer.getFloat();
-      }
-      if (hitTestTransform == null) {
-        hitTestTransform = new float[16];
-      }
-      for (int i = 0; i < 16; ++i) {
-        hitTestTransform[i] = buffer.getFloat();
-      }
+      transform = getMatrix4FromBuffer(buffer, transform);
+      hitTestTransform = getMatrix4FromBuffer(buffer, hitTestTransform);
+
       inverseTransformDirty = true;
       globalGeometryDirty = true;
 
