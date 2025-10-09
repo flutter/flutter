@@ -47,7 +47,7 @@ void main() async {
 
   test('verify that HCPP is supported and enabled', () async {
     final Map<String, Object?> response =
-    json.decode(await flutterDriver.requestData('')) as Map<String, Object?>;
+        json.decode(await flutterDriver.requestData('')) as Map<String, Object?>;
 
     expect(response['supported'], true);
   }, timeout: Timeout.none);
@@ -55,6 +55,9 @@ void main() async {
   test('should start with texture, and toggle to no texture', () async {
     await expectLater(nativeDriver.screenshot(), matchesGoldenFile('$goldenPrefix.two_boxes.png'));
     await flutterDriver.tap(find.byValueKey('ToggleRightView'));
-    await expectLater(nativeDriver.screenshot(), matchesGoldenFile('$goldenPrefix.only_one_box.png'));
+    await expectLater(
+      nativeDriver.screenshot(),
+      matchesGoldenFile('$goldenPrefix.only_one_box.png'),
+    );
   }, timeout: Timeout.none);
 }

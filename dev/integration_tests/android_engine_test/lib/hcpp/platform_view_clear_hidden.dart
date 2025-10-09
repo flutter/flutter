@@ -40,8 +40,7 @@ class PlatformViewWidget extends StatelessWidget {
         height: 200,
         child: PlatformViewLink(
           viewType: 'changing_color_button_platform_view',
-          surfaceFactory:
-              (BuildContext context, PlatformViewController controller) {
+          surfaceFactory: (BuildContext context, PlatformViewController controller) {
             return AndroidViewSurface(
               controller: controller as AndroidViewController,
               hitTestBehavior: PlatformViewHitTestBehavior.transparent,
@@ -50,11 +49,11 @@ class PlatformViewWidget extends StatelessWidget {
           },
           onCreatePlatformView: (PlatformViewCreationParams params) {
             return PlatformViewsService.initHybridAndroidView(
-              id: params.id,
-              viewType: 'changing_color_button_platform_view',
-              layoutDirection: TextDirection.ltr,
-              creationParamsCodec: const StandardMessageCodec(),
-            )
+                id: params.id,
+                viewType: 'changing_color_button_platform_view',
+                layoutDirection: TextDirection.ltr,
+                creationParamsCodec: const StandardMessageCodec(),
+              )
               ..addOnPlatformViewCreatedListener(params.onPlatformViewCreated)
               ..create();
           },
@@ -92,8 +91,7 @@ class _MyAppState extends State<MyApp> {
               child: ElevatedButton(
                 key: const ValueKey<String>('ToggleRightView'),
                 onPressed: _toggleRightView,
-                child:
-                Text(_showRightView ? 'Hide Right View' : 'Show Right View'),
+                child: Text(_showRightView ? 'Hide Right View' : 'Show Right View'),
               ),
             ),
             Expanded(
