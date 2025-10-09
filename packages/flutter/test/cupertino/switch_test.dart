@@ -518,6 +518,8 @@ void main() {
                   value: value,
                   onChanged: (bool newValue) {
                     setState(() {
+                      // Once the value is true, it remains true, meaning the
+                      // switch cannot be toggled off.
                       value = value || newValue;
                     });
                   },
@@ -542,11 +544,10 @@ void main() {
     expect(value, isFalse);
     final CurvedAnimation position =
         (tester.state(find.byType(CupertinoSwitch)) as dynamic).position as CurvedAnimation;
-    expect(position.value, lessThan(0.5));
-    await tester.pump();
+    expect(position.value, 0.0);
     await tester.pumpAndSettle();
     expect(value, isFalse);
-    expect(position.value, 0);
+    expect(position.value, 0.0);
 
     // Move past the middle.
     gesture = await tester.startGesture(tester.getRect(find.byType(CupertinoSwitch)).center);
@@ -555,9 +556,9 @@ void main() {
     await gesture.up();
     await tester.pump();
     expect(value, isTrue);
-    expect(position.value, greaterThan(0.5));
+    expect(position.value, 0.0);
 
-    await tester.pump();
+    // Wait for the toggle animation to finish.
     await tester.pumpAndSettle();
     expect(value, isTrue);
     expect(position.value, 1.0);
@@ -569,12 +570,101 @@ void main() {
     await gesture.up();
     await tester.pump();
     expect(value, isTrue);
-    expect(position.value, lessThan(0.5));
+    expect(position.value, 1.0);
 
-    await tester.pump();
+    // Wait for the revert animation to finish.
     await tester.pumpAndSettle();
     expect(value, isTrue);
     expect(position.value, 1.0);
+  });
+
+  testWidgets('Switch thumb snaps to the side on drag', (WidgetTester tester) async {
+    bool value = false;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Material(
+              child: Center(
+                child: CupertinoSwitch(
+                  dragStartBehavior: DragStartBehavior.down,
+                  value: value,
+                  onChanged: (bool newValue) {
+                    setState(() => value = newValue);
+                  },
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    Future<void> dragBy(TestGesture gesture, Offset offset) async {
+      // The distance required for a gesture to be considered a drag.
+      const double dragActivationDistance = kTouchSlop + 0.1;
+      await gesture.moveBy(const Offset(dragActivationDistance, 0));
+      await gesture.moveBy(const Offset(-dragActivationDistance, 0));
+      await gesture.moveBy(offset);
+    }
+
+    final Rect switchRect = tester.getRect(find.byType(CupertinoSwitch));
+    final CurvedAnimation position =
+        (tester.state(find.byType(CupertinoSwitch)) as dynamic).position as CurvedAnimation;
+
+    // Move to the right, not past the middle.
+    TestGesture gesture = await tester.startGesture(switchRect.center);
+    await dragBy(gesture, const Offset(9, 0));
+    expect(position.value, 0);
+    expect(value, false);
+    await tester.pumpAndSettle();
+    expect(position.value, 0);
+    expect(value, false);
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(position.value, 0);
+    expect(value, false);
+
+    // Move to the right, past the middle.
+    gesture = await tester.startGesture(switchRect.center);
+    await dragBy(gesture, const Offset(11, 0));
+    expect(position.value, 0);
+    expect(value, false);
+    await tester.pumpAndSettle();
+    expect(position.value, 1);
+    expect(value, false);
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(position.value, 1);
+    expect(value, true);
+
+    // Move to the left, not past the middle.
+    gesture = await tester.startGesture(switchRect.center);
+    await dragBy(gesture, const Offset(-9, 0));
+    expect(position.value, 1);
+    expect(value, true);
+    await tester.pumpAndSettle();
+    expect(position.value, 1);
+    expect(value, true);
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(position.value, 1);
+    expect(value, true);
+
+    // Move to the left, past the middle.
+    gesture = await tester.startGesture(switchRect.center);
+    await dragBy(gesture, const Offset(-11, 0));
+    expect(position.value, 1);
+    expect(value, true);
+    await tester.pumpAndSettle();
+    expect(position.value, 0);
+    expect(value, true);
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(position.value, 0);
+    expect(value, false);
   });
 
   testWidgets('Switch is translucent when disabled', (WidgetTester tester) async {

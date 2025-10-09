@@ -474,20 +474,23 @@ class _CupertinoSwitchState extends State<CupertinoSwitch>
     with TickerProviderStateMixin, ToggleableStateMixin {
   final _SwitchPainter _painter = _SwitchPainter();
 
+  double _dragPosition = 0;
+  bool? _dragValue;
+
   @override
   void initState() {
     super.initState();
     positionController.duration = const Duration(milliseconds: 200);
     reactionController.duration = const Duration(milliseconds: 300);
+    position
+      ..curve = Curves.ease
+      ..reverseCurve = Curves.ease.flipped;
   }
 
   @override
   void didUpdateWidget(CupertinoSwitch oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.value != widget.value) {
-      position
-        ..curve = Curves.ease
-        ..reverseCurve = Curves.ease.flipped;
       animateToValue();
     }
   }
@@ -557,35 +560,45 @@ class _CupertinoSwitchState extends State<CupertinoSwitch>
   void _handleDragStart(DragStartDetails details) {
     if (isInteractive) {
       reactionController.forward();
-      _emitVibration();
+      _dragPosition = positionController.value;
+      _dragValue = value;
     }
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
     if (isInteractive) {
-      position
-        ..curve = Curves.linear
-        ..reverseCurve = Curves.linear;
       final double delta = details.primaryDelta! / _trackInnerLength;
-      positionController.value += switch (Directionality.of(context)) {
+      _dragPosition += switch (Directionality.of(context)) {
         TextDirection.rtl => -delta,
         TextDirection.ltr => delta,
       };
+
+      final bool currentDragValue = _dragPosition >= 0.5;
+
+      if (_dragValue != currentDragValue) {
+        _emitVibration();
+
+        if (currentDragValue) {
+          positionController.forward();
+        } else {
+          positionController.reverse();
+        }
+
+        _dragValue = currentDragValue;
+      }
     }
   }
 
   bool _needsPositionAnimation = false;
 
   void _handleDragEnd(DragEndDetails details) {
-    if (position.value >= 0.5 != widget.value) {
+    if (_dragValue != widget.value) {
       widget.onChanged?.call(!widget.value);
       // Wait to finish the animation until widget.value has changed to
       // !widget.value as part of the widget.onChanged call above.
       setState(() {
         _needsPositionAnimation = true;
       });
-    } else {
-      animateToValue();
     }
     reactionController.reverse();
   }
