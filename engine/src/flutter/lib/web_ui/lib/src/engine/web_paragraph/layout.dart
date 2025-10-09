@@ -49,8 +49,8 @@ class TextLayout {
       return;
     }
     */
-    // TODO(mdebbar=>jlavrova): Skip layout if `width` is the same as the last layout.
-    // TODO(mdebbar=>jlavrova): Skip layout if `width` is greater than `maxIntrinsicWidth`.
+    // TODO(jlavrova): Skip layout if `width` is the same as the last layout.
+    // TODO(jlavrova): Skip layout if `width` is greater than `maxIntrinsicWidth`.
 
     // Some things are only computed once, and reused in future layouts.
     if (_isFirstLayout) {
@@ -134,23 +134,6 @@ class TextLayout {
         'region ${region.level.isEven ? 'ltr' : 'rtl'} [${region.start}:${region.end}) => $clusterRange',
       );
       bidiRuns.add(run);
-    }
-  }
-
-  void _debugPrintSpans(String header) {
-    WebParagraphDebug.log('Text Spans ($header): ${paragraph.spans.length}');
-    for (int i = 0; i < paragraph.spans.length; i++) {
-      final span = paragraph.spans[i];
-      if (span is TextSpan) {
-        final ClusterRange clusterRange = _mapping.toClusterRange(span.start, span.end);
-        WebParagraphDebug.log('span[$i]: [${span.start}:${span.end}) $clusterRange');
-        for (int c = clusterRange.start; c < clusterRange.end; c++) {
-          final cluster = _mapping._clusters[c];
-          WebParagraphDebug.log('cluster[$c]: [${cluster.start}:[${cluster.end})');
-        }
-      } else if (span is PlaceholderSpan) {
-        WebParagraphDebug.log('spans[$i]: PLACEHOLDER ${span.width}x${span.height}');
-      }
     }
   }
 
@@ -292,8 +275,8 @@ class TextLayout {
         );
       }
 
-      // TODO(mdebbar=>jlavrova): This loop seems excessive. We are iterating over all spans of the
-      //                          paragraph. Can we try to iterate less?
+      // TODO(jlavrova): This loop seems excessive. We are iterating over all spans of the
+      //                 paragraph. Can we try to iterate less?
       for (final span in paragraph.spans) {
         final bool isOverlapping = bidiLineTextRange.overlapsWith(span.start, span.end);
 
@@ -661,7 +644,6 @@ class TextLayout {
 
         WebParagraphDebug.log('found block: $block $blockRect vs $offset');
         // Found the block; let's go through all the clusters IN VISUAL ORDER to find the position
-        // TODO(mdebbar=>jlavrova): Do we have to iterate in visual order?
         final int start = block.isLtr ? block.clusterRange.start : block.clusterRange.end - 1;
         final int end = block.isLtr ? block.clusterRange.end : block.clusterRange.start - 1;
         final int step = block.isLtr ? 1 : -1;
@@ -736,8 +718,6 @@ class TextLayout {
       }
 
       assert(visualBlock.clusterRange.overlapsWith(clusterRange.start, clusterRange.end));
-
-      // TODO(mdebbar=>jlavrova): Please review the code below, I made significant changes (I removed a for loop).
 
       final ClusterRange intersection = visualBlock.clusterRange.intersect(clusterRange);
       assert(intersection.isNotEmpty);
@@ -1097,7 +1077,7 @@ class TextBlock extends LineBlock {
   final double spanShiftFromLineStart;
 
   @override
-  // TODO(mdebbar=>jlavrova): Why are we defaulting to 1.0? In Chrome, the default line-height is `1.2` most of the time.
+  // TODO(jlavrova): Why are we defaulting to 1.0? In Chrome, the default line-height is `1.2` most of the time.
   double get _heightMultiplier => style.height == null ? 1.0 : style.height!;
 
   ClusterRange clusterRangeWithoutWhitespaces;
@@ -1178,7 +1158,7 @@ class PlaceholderBlock extends LineBlock {
     WebParagraphDebug.log('PlaceholderBlock calculated advance: $advance $ascent $descent');
   }
 
-  // TODO(mdebbar=>jlavrova): Why are we using separate properties instead of `rawFontBoundingBoxAscent` and `rawFontBoundingBoxDescent`?
+  // TODO(jlavrova): Why are we using separate properties instead of `rawFontBoundingBoxAscent` and `rawFontBoundingBoxDescent`?
   late final double ascent;
   late final double descent;
 }

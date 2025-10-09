@@ -69,7 +69,7 @@ class CanvasKitPainter extends Painter {
         continue;
       }
 
-      // TODO(mdebbar=>jlavrova): Why using these instead of multiplied values?
+      // TODO(jlavrova): Why using these instead of multiplied values?
       final double height = block.rawFontBoundingBoxAscent + block.rawFontBoundingBoxDescent;
       final double ascent = block.rawFontBoundingBoxAscent;
       final double position = calculatePosition(decoration, thickness, height, ascent);

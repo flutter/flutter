@@ -135,7 +135,7 @@ class TextWrapper {
     _maxLineWidthWithTrailingSpaces = math.max(_longestLine, line._maxLineWidthWithTrailingSpaces);
     _height = line._top;
 
-    // TODO(mdebbar=>jlavrova): Discuss with Mouad
+    // TODO(jlavrova): Discuss with Mouad
     // Flutter wants to have another (empty) line if \n is the last codepoint in the text
     // This empty line gets in a way of detecting line visual runs (there isn't any)
     /*

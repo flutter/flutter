@@ -531,11 +531,6 @@ bool paintEquals(ui.Paint? a, ui.Paint? b) {
   if (a == null || b == null) {
     return false;
   }
-  // TODO(mdebbar=>jlavrova): Explain this?
-  // if (a == ui.Paint() && b == ui.Paint()) {
-  //   WebParagraphDebug.log('Paint() are equal');
-  //   return true;
-  // }
   return a.blendMode == b.blendMode &&
       a.color == b.color &&
       a.colorFilter == b.colorFilter &&

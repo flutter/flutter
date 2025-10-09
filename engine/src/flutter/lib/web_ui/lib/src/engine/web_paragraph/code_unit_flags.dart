@@ -25,10 +25,10 @@ class AllCodeUnitFlags {
   }
 
   void _extract() {
-    // TODO(mdebbar=>jlavrova): 1. This call to CanvasKit is not going to work with Skwasm.
-    //                          2. We are only using `whitespace` flags from CanvasKit. Can we
-    //                             hardcode them here to avoid calling CanvasKit?
-    //                          3. Do we need other flags like `control` and `space`?
+    // TODO(jlavrova): 1. This call to CanvasKit is not going to work with Skwasm.
+    //                 2. We are only using `whitespace` flags from CanvasKit. Can we hardcode them
+    //                    here to avoid calling CanvasKit?
+    //                 3. Do we need other flags like `control` and `space`?
     final List<CodeUnitInfo> ckFlags = canvasKit.CodeUnits.compute(_text);
     assert(ckFlags.length == _allFlags.length);
 

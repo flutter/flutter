@@ -34,7 +34,6 @@ Future<void> testMain() async {
       20,
       20,
       PlaceholderAlignment.baseline,
-      scale: 1.0,
       baselineOffset: 0.0,
       baseline: TextBaseline.ideographic,
     );
@@ -97,7 +96,6 @@ Future<void> testMain() async {
       20,
       20,
       PlaceholderAlignment.baseline,
-      scale: 1.0,
       baselineOffset: 0.0,
       baseline: TextBaseline.alphabetic,
     );
@@ -110,7 +108,6 @@ Future<void> testMain() async {
       20,
       20,
       PlaceholderAlignment.aboveBaseline,
-      scale: 1.0,
       baselineOffset: 0.0,
       baseline: TextBaseline.alphabetic,
     );
@@ -123,7 +120,6 @@ Future<void> testMain() async {
       20,
       20,
       PlaceholderAlignment.belowBaseline,
-      scale: 1.0,
       baselineOffset: 0.0,
       baseline: TextBaseline.alphabetic,
     );
@@ -136,7 +132,6 @@ Future<void> testMain() async {
       20,
       20,
       PlaceholderAlignment.middle,
-      scale: 1.0,
       baselineOffset: 0.0,
       baseline: TextBaseline.alphabetic,
     );
@@ -149,7 +144,6 @@ Future<void> testMain() async {
       20,
       20,
       PlaceholderAlignment.top,
-      scale: 1.0,
       baselineOffset: 0.0,
       baseline: TextBaseline.alphabetic,
     );
@@ -162,7 +156,6 @@ Future<void> testMain() async {
       20,
       20,
       PlaceholderAlignment.bottom,
-      scale: 1.0,
       baselineOffset: 0.0,
       baseline: TextBaseline.alphabetic,
     );

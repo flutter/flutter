@@ -451,7 +451,7 @@ class WebTextStyle implements ui.TextStyle {
     }
 
     if (fontFeatureSettings.isNotEmpty) {
-      // TODO(mdebbar=>jlavrova): I wonder if this is causing text to look worse?
+      // TODO(jlavrova): Do we really need to set this?
       context.textRendering = optimizeLegibility ? 'optimizeLegibility' : 'optimizeSpeed';
       context.canvas!.style.fontFeatureSettings = fontFeatureListToCss(fontFeatureSettings);
     }
@@ -623,7 +623,7 @@ class TextSpan extends ParagraphSpan {
   late final double fontBoundingBoxDescent = _metrics.fontBoundingBoxDescent;
 
   DomTextMetrics _getMetrics() {
-    // TODO(mdebbar=>jlavrova): Is this necessary?
+    // TODO(jlavrova): Is this necessary?
     // layoutContext.direction = isDefaultLtr ? 'ltr' : 'rtl';
 
     style.applyToContext(layoutContext);

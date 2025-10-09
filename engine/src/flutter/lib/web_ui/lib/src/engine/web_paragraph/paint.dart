@@ -82,7 +82,7 @@ class TextPaint {
       }
 
       WebParagraphDebug.log(
-        '+paintByClusters: ${block.textRange} ${block.clusterRange} ${(block as TextBlock).clusterRangeWithoutWhitespaces} ${(block as TextBlock).whitespacesWidth} ${block.isLtr} ${line.advance.left} + ${line.formattingShift} + ${block.shiftFromLineStart}',
+        '+paintByClusters: ${block.textRange} ${block.clusterRange} ${(block as TextBlock).clusterRangeWithoutWhitespaces} ${block.whitespacesWidth} ${block.isLtr} ${line.advance.left} + ${line.formattingShift} + ${block.shiftFromLineStart}',
       );
       // We are painting clusters in visual order so that if they step on each other, the paint
       // order is correct.
@@ -171,9 +171,6 @@ class TextPaint {
   ) {
     final ui.Rect advance = block.advance;
 
-    final int start = block.isLtr ? block.clusterRange.start : block.clusterRange.end - 1;
-    final WebCluster startCluster = layout.allClusters[start];
-
     // Define the text clusters rect (using advances, not selected rects)
     final ui.Rect zeroRect = ui.Rect.fromLTWH(0, 0, advance.width, advance.height);
     final ui.Rect sourceRect = zeroRect;
@@ -183,8 +180,8 @@ class TextPaint {
     // (and then to the paragraph.paint x and y)
     // TODO(jlavrova): Make translation in a single operation so it's actually an integer
     final ui.Rect targetRect = zeroRect
-        // TODO(mdebbar=>jlavrova): Can we use `block.advance.left` instead of the cluster? That way
-        //                          we don't have to worry about LTR vs RTL to get first cluster.
+        // TODO(jlavrova): Can we use `block.advance.left` instead of the cluster? That way
+        //                 we don't have to worry about LTR vs RTL to get first cluster.
         .translate(blockOffset.dx + block.advance.left, blockOffset.dy)
         .translate(paragraphOffset.dx, paragraphOffset.dy);
 
