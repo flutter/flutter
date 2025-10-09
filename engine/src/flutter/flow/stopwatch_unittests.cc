@@ -51,15 +51,33 @@ TEST(Instrumentation, GetLapByIndexTest) {
   fml::Milliseconds frame_budget_90fps = fml::RefreshRateToFrameBudget(90);
   FixedRefreshRateStopwatch stopwatch(frame_budget_90fps);
   stopwatch.SetLapTime(fml::TimeDelta::FromMilliseconds(10));
-  EXPECT_EQ(stopwatch.GetLap(1), fml::TimeDelta::FromMilliseconds(10));
+  EXPECT_EQ(stopwatch.GetLap(0), fml::TimeDelta::FromMilliseconds(10));
 }
 
-TEST(Instrumentation, GetCurrentSampleTest) {
+TEST(Instrumentation, GetCurrentSampleStartStopTest) {
   fml::Milliseconds frame_budget_90fps = fml::RefreshRateToFrameBudget(90);
   FixedRefreshRateStopwatch stopwatch(frame_budget_90fps);
+  // Stopwatch starts primed to place the first sample in slot 0 when
+  // the actual time is available.
+  EXPECT_EQ(stopwatch.GetCurrentSample(), size_t(Stopwatch::kMaxSamples - 1u));
   stopwatch.Start();
+  // CurrentSample still not updated because we are still measuring
+  // this frame.
+  EXPECT_EQ(stopwatch.GetCurrentSample(), size_t(Stopwatch::kMaxSamples - 1u));
   stopwatch.Stop();
-  EXPECT_EQ(stopwatch.GetCurrentSample(), size_t(1));
+  // The most current sample is placed in slot #0.
+  EXPECT_EQ(stopwatch.GetCurrentSample(), size_t(0));
+}
+
+TEST(Instrumentation, GetCurrentSampleSetLapTimeTest) {
+  fml::Milliseconds frame_budget_90fps = fml::RefreshRateToFrameBudget(90);
+  FixedRefreshRateStopwatch stopwatch(frame_budget_90fps);
+  // Stopwatch starts primed to place the first sample in slot 0 when
+  // the actual time is available.
+  EXPECT_EQ(stopwatch.GetCurrentSample(), size_t(Stopwatch::kMaxSamples - 1u));
+  stopwatch.SetLapTime(fml::TimeDelta::FromMilliseconds(10));
+  // The most current sample is placed in slot #0.
+  EXPECT_EQ(stopwatch.GetCurrentSample(), size_t(0));
 }
 
 TEST(Instrumentation, GetLapsCount) {
