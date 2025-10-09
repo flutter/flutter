@@ -55,7 +55,7 @@ Dart_Handle ConvertUniformDescriptionToMap(
     Dart_Handle name =
         Dart_NewStringFromCString(uniform_description.name.c_str());
     FML_DCHECK(!Dart_IsError(name));
-    Dart_Handle result =
+    [[maybe_unused]] Dart_Handle result =
         Dart_ListSetAt(keys, 0, Dart_NewStringFromCString("name"));
     FML_DCHECK(!Dart_IsError(result));
     result = Dart_ListSetAt(values, 0, name);
@@ -75,7 +75,7 @@ Dart_Handle ConvertUniformDescriptionToMap(
         break;
     }
     FML_DCHECK(!Dart_IsError(type));
-    Dart_Handle result =
+    [[maybe_unused]] Dart_Handle result =
         Dart_ListSetAt(keys, 1, Dart_NewStringFromCString("type"));
     FML_DCHECK(!Dart_IsError(result));
     result = Dart_ListSetAt(values, 1, type);
@@ -84,7 +84,7 @@ Dart_Handle ConvertUniformDescriptionToMap(
   {  // 2
     Dart_Handle size = Dart_NewIntegerFromUint64(uniform_description.GetSize());
     FML_DCHECK(!Dart_IsError(size));
-    Dart_Handle result =
+    [[maybe_unused]] Dart_Handle result =
         Dart_ListSetAt(keys, 2, Dart_NewStringFromCString("size"));
     FML_DCHECK(!Dart_IsError(result));
     result = Dart_ListSetAt(values, 2, size);
