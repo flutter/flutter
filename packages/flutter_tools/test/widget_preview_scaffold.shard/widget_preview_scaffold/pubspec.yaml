@@ -46,7 +46,7 @@ dependencies:
   test_api: 0.7.7
   typed_data: 1.4.0
   unified_analytics: 8.0.5
-  url_launcher_android: 6.3.23
+  url_launcher_android: 6.3.24
   url_launcher_ios: 6.3.4
   url_launcher_linux: 3.2.1
   url_launcher_macos: 3.2.3
@@ -66,4 +66,4 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-# PUBSPEC CHECKSUM: 130obr
+# PUBSPEC CHECKSUM: dap0e
