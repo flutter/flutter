@@ -7,6 +7,7 @@ library;
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -1160,12 +1161,9 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         );
 
         final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+        final bool isButton = !canRequestFocus();
         final Widget textField = Semantics(
-          button: !canRequestFocus(),
-          // Some platforms may still treat this as text field if both `textField`
-          // and `button` are true. So manually set `textField` to false when
-          // `button` is true.
-          textField: canRequestFocus(),
+          button: isButton,
           // This is set specificly for iOS because iOS does not have any native
           // APIs to show whether the menu is expanded or collapsed.
           hint: Theme.of(context).platform == TargetPlatform.iOS

@@ -3829,7 +3829,17 @@ void main() {
 
     expect(
       tester.getSemantics(find.byType(TextField)),
-      matchesSemantics(hasExpandedState: true, isTextField: true),
+      matchesSemantics(
+        hasFocusAction: true,
+        hasTapAction: true,
+        isTextField: true,
+        isFocusable: true,
+        hasEnabledState: true,
+        isEnabled: true,
+        label: 'Test',
+        textDirection: TextDirection.ltr,
+        hasExpandedState: true,
+      ),
     );
 
     await tester.pumpWidget(buildDropdownMenu(requestFocusOnTap: false));
