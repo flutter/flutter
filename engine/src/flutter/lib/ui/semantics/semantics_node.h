@@ -141,7 +141,7 @@ struct SemanticsNode {
   int32_t platformViewId = -1;
   int32_t scrollChildren = 0;
   int32_t scrollIndex = 0;
-  int32_t traversalOwner = 0;
+  int32_t traversalParent = 0;
   double scrollPosition = std::nan("");
   double scrollExtentMax = std::nan("");
   double scrollExtentMin = std::nan("");

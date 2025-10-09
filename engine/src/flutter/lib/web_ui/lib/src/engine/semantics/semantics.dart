@@ -244,7 +244,7 @@ class SemanticsNodeUpdate {
     required this.platformViewId,
     required this.scrollChildren,
     required this.scrollIndex,
-    required this.traversalOwner,
+    required this.traversalParent,
     required this.scrollPosition,
     required this.scrollExtentMax,
     required this.scrollExtentMin,
@@ -308,7 +308,7 @@ class SemanticsNodeUpdate {
   final int scrollIndex;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
-  final int? traversalOwner;
+  final int? traversalParent;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final double scrollPosition;
@@ -833,8 +833,8 @@ abstract class SemanticRole {
       semanticsObject.owner.addOneTimePostUpdateCallback(_updateLocale);
     }
 
-    if (semanticsObject.isTraversalOwnerDirty) {
-      _updateTraversalOwner();
+    if (semanticsObject.isTraversalParentDirty) {
+      _updateTraversalParent();
     }
   }
 
@@ -876,11 +876,11 @@ abstract class SemanticRole {
     setAttribute('lang', locale);
   }
 
-  void _updateTraversalOwner() {
+  void _updateTraversalParent() {
     // Set up aria-owns relationship for traversal order.
-    if (semanticsObject.traversalOwner != -1) {
+    if (semanticsObject.traversalParent != -1) {
       final SemanticsObject? parent =
-          semanticsObject.owner._semanticsTree[semanticsObject.traversalOwner!];
+          semanticsObject.owner._semanticsTree[semanticsObject.traversalParent!];
       if (parent != null && parent.semanticRole != null) {
         parent.element.setAttribute(
           'aria-owns',
@@ -889,10 +889,10 @@ abstract class SemanticRole {
       }
     }
     // Clean up aria-owns relationship.
-    if (semanticsObject._previousTraversalOwner != null &&
-        semanticsObject._previousTraversalOwner != -1) {
+    if (semanticsObject._previousTraversalParent != null &&
+        semanticsObject._previousTraversalParent != -1) {
       final SemanticsObject? parent =
-          semanticsObject.owner._semanticsTree[semanticsObject._previousTraversalOwner!];
+          semanticsObject.owner._semanticsTree[semanticsObject._previousTraversalParent!];
       if (parent != null) {
         parent.element.removeAttribute('aria-owns');
       }
@@ -1583,17 +1583,17 @@ class SemanticsObject {
   }
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
-  int? get traversalOwner => _traversalOwner;
-  int? _traversalOwner;
-  int? _previousTraversalOwner;
+  int? get traversalParent => _traversalParent;
+  int? _traversalParent;
+  int? _previousTraversalParent;
 
-  static const int _traversalOwnerIndex = 1 << 29;
+  static const int _traversalParentIndex = 1 << 29;
 
-  /// Whether the [traversalOwner] field has been updated but has not been
+  /// Whether the [traversalParent] field has been updated but has not been
   /// applied to the DOM yet.
-  bool get isTraversalOwnerDirty => _isDirty(_traversalOwnerIndex);
-  void _markTraversalOwnerDirty() {
-    _dirtyFields |= _traversalOwnerIndex;
+  bool get isTraversalParentDirty => _isDirty(_traversalParentIndex);
+  void _markTraversalParentDirty() {
+    _dirtyFields |= _traversalParentIndex;
   }
 
   /// Bitfield showing which fields have been updated but have not yet been
@@ -1783,10 +1783,10 @@ class SemanticsObject {
       _markScrollIndexDirty();
     }
 
-    if (_traversalOwner != update.traversalOwner) {
-      _previousTraversalOwner = _traversalOwner;
-      _traversalOwner = update.traversalOwner;
-      _markTraversalOwnerDirty();
+    if (_traversalParent != update.traversalParent) {
+      _previousTraversalParent = _traversalParent;
+      _traversalParent = update.traversalParent;
+      _markTraversalParentDirty();
     }
 
     if (_scrollExtentMax != update.scrollExtentMax) {

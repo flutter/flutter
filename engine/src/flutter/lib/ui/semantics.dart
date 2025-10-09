@@ -1817,11 +1817,11 @@ abstract class SemanticsUpdateBuilder {
   /// total number of child nodes that contribute semantics and `scrollIndex`
   /// is the index of the first visible child node that contributes semantics.
   ///
-  /// The `traversalOwner` specifies the ID of the semantics node that serves as
+  /// The `traversalParent` specifies the ID of the semantics node that serves as
   /// the logical parent of this node for accessibility traversal. This
   /// parameter is only used by the web engine to establish parent-child
   /// relationships between nodes that are not directly connected in paint order.
-  /// To ensure correct accessibility traversal, `traversalOwner` should be set
+  /// To ensure correct accessibility traversal, `traversalParent` should be set
   /// to the logical traversal parent node ID. This parameter is web-specific
   /// because other platforms can complete grafting when generating the
   /// semantics tree in traversal order. After grafting, the traversal order and
@@ -1890,7 +1890,7 @@ abstract class SemanticsUpdateBuilder {
     required int platformViewId,
     required int scrollChildren,
     required int scrollIndex,
-    required int traversalOwner,
+    required int traversalParent,
     required double scrollPosition,
     required double scrollExtentMax,
     required double scrollExtentMin,
@@ -1971,7 +1971,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     required int platformViewId,
     required int scrollChildren,
     required int scrollIndex,
-    required int traversalOwner,
+    required int traversalParent,
     required double scrollPosition,
     required double scrollExtentMax,
     required double scrollExtentMin,
@@ -2019,7 +2019,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       platformViewId,
       scrollChildren,
       scrollIndex,
-      traversalOwner,
+      traversalParent,
       scrollPosition,
       scrollExtentMax,
       scrollExtentMin,
@@ -2116,7 +2116,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     int platformViewId,
     int scrollChildren,
     int scrollIndex,
-    int traversalOwner,
+    int traversalParent,
     double scrollPosition,
     double scrollExtentMax,
     double scrollExtentMin,
