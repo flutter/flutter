@@ -1,0 +1,29 @@
+name: my_module
+description: "A new Flutter module project."
+publish_to: none
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.0-206.0.dev
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  my_plugin:
+    path: ../my_plugin
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  module:
+    androidX: true
+    androidPackage: com.example.my_module
+    iosBundleIdentifier: com.example.my_module

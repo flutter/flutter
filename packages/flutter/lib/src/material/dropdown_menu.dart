@@ -197,6 +197,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.textInputAction,
     this.cursorHeight,
     this.restorationId,
+    this.menuController,
   }) : assert(filterCallback == null || enableFilter),
        assert(
          inputDecorationTheme == null ||
@@ -595,6 +596,10 @@ class DropdownMenu<T> extends StatefulWidget {
   /// {@macro flutter.material.textfield.restorationId}
   final String? restorationId;
 
+  /// An optional controller that allows opening and closing of the menu from
+  /// other widgets.
+  final MenuController? menuController;
+
   @override
   State<DropdownMenu<T>> createState() => _DropdownMenuState<T>();
 }
@@ -603,7 +608,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   final GlobalKey _anchorKey = GlobalKey();
   final GlobalKey _leadingKey = GlobalKey();
   late List<GlobalKey> buttonItemKeys;
-  final MenuController _controller = MenuController();
+  late MenuController _controller;
   bool _enableFilter = false;
   late bool _enableSearch;
   late List<DropdownMenuEntry<T>> filteredEntries;
@@ -642,6 +647,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       _selectedEntryIndex = index;
     }
     refreshLeadingPadding();
+    _controller = widget.menuController ?? MenuController();
   }
 
   @override
@@ -711,6 +717,9 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         );
         _selectedEntryIndex = index;
       }
+    }
+    if (oldWidget.menuController != widget.menuController) {
+      _controller = widget.menuController ?? MenuController();
     }
   }
 

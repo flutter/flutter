@@ -89,9 +89,7 @@ public class DartMessengerTest {
     final String channel = "foobar";
     final boolean[] wasDirect = {false};
     final BinaryMessenger.BinaryMessageHandler handler =
-        (message, reply) -> {
-          wasDirect[0] = message.isDirect();
-        };
+        (message, reply) -> wasDirect[0] = message.isDirect();
     BinaryMessenger.TaskQueue taskQueue = messenger.makeBackgroundTaskQueue();
     messenger.setMessageHandler(channel, handler, taskQueue);
     final ByteBuffer message = ByteBuffer.allocateDirect(4 * 2);
@@ -175,9 +173,7 @@ public class DartMessengerTest {
     BinaryMessenger.TaskQueue taskQueue = messenger.makeBackgroundTaskQueue();
     String channel = "foobar";
     BinaryMessenger.BinaryMessageHandler handler =
-        (ByteBuffer message, BinaryMessenger.BinaryReply reply) -> {
-          reply.reply(null);
-        };
+        (ByteBuffer message, BinaryMessenger.BinaryReply reply) -> reply.reply(null);
     messenger.setMessageHandler(channel, handler, taskQueue);
     final ByteBuffer message = ByteBuffer.allocateDirect(4 * 2);
     final int replyId = 1;
@@ -239,9 +235,8 @@ public class DartMessengerTest {
     verify(fakeFlutterJni, never()).invokePlatformMessageEmptyResponseCallback(eq(replyId));
 
     final BinaryMessenger.BinaryMessageHandler handler =
-        (ByteBuffer msg, BinaryMessenger.BinaryReply reply) -> {
-          reply.reply(ByteBuffer.wrap("done".getBytes()));
-        };
+        (ByteBuffer msg, BinaryMessenger.BinaryReply reply) ->
+            reply.reply(ByteBuffer.wrap("done".getBytes()));
     messenger.setMessageHandler(channel, handler, taskQueue);
 
     shadowOf(getMainLooper()).idle();
@@ -292,9 +287,8 @@ public class DartMessengerTest {
     verify(fakeFlutterJni, never()).invokePlatformMessageEmptyResponseCallback(eq(replyId));
 
     final BinaryMessenger.BinaryMessageHandler handler =
-        (ByteBuffer msg, BinaryMessenger.BinaryReply reply) -> {
-          reply.reply(ByteBuffer.wrap("done".getBytes()));
-        };
+        (ByteBuffer msg, BinaryMessenger.BinaryReply reply) ->
+            reply.reply(ByteBuffer.wrap("done".getBytes()));
     messenger.setMessageHandler(channel, handler, taskQueue);
 
     shadowOf(getMainLooper()).idle();
@@ -344,10 +338,7 @@ public class DartMessengerTest {
           });
     }
     CountDownLatch latch = new CountDownLatch(1);
-    taskQueue.dispatch(
-        () -> {
-          latch.countDown();
-        });
+    taskQueue.dispatch(latch::countDown);
     latch.await();
     assertEquals(count, ints.size());
     for (int i = 0; i < count - 1; ++i) {

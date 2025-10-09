@@ -473,7 +473,7 @@ class RenderSliverMainAxisGroup extends RenderSliver
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
     RenderSliver? child = firstChild;
     while (child != null) {
-      if (child.geometry!.visible) {
+      if (child.geometry!.visible || child.geometry!.cacheExtent > 0.0 || child.ensureSemantics) {
         visitor(child);
       }
       child = childAfter(child);

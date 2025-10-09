@@ -31,6 +31,8 @@ class FontLoader {
   ///
   /// The [bytes] argument specifies the actual font asset bytes. Currently,
   /// only OpenType (OTF) and TrueType (TTF) fonts are supported.
+  ///
+  /// The [load] method will load fonts in the order this is called.
   void addFont(Future<ByteData> bytes) {
     if (_loaded) {
       throw StateError('FontLoader is already loaded');
@@ -59,10 +61,9 @@ class FontLoader {
     }
     _loaded = true;
 
-    final Iterable<Future<void>> loadFutures = _fontFutures.map(
-      (Future<Uint8List> f) => f.then<void>((Uint8List list) => loadFont(list, family)),
-    );
-    await Future.wait(loadFutures.toList());
+    for (final Future<Uint8List> fontFuture in _fontFutures) {
+      await loadFont(await fontFuture, family);
+    }
   }
 
   /// Hook called to load a font asset into the engine.

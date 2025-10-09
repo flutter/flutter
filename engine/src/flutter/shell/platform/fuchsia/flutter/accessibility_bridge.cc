@@ -179,6 +179,12 @@ std::string NodeActionsToString(const flutter::SemanticsNode& node) {
   if (node.HasAction(flutter::SemanticsAction::kFocus)) {
     output += "kFocus|";
   }
+  if (node.HasAction(flutter::SemanticsAction::kExpand)) {
+    output += "kExpand|";
+  }
+  if (node.HasAction(flutter::SemanticsAction::kCollapse)) {
+    output += "kCollapse|";
+  }
 
   return output;
 }

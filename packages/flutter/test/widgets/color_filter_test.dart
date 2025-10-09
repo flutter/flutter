@@ -56,6 +56,18 @@ void main() {
     await expectLater(find.byType(ColorFiltered), matchesGoldenFile('color_filter_sepia.png'));
   });
 
+  testWidgets('ColorFilter.saturation', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      RepaintBoundary(
+        child: ColorFiltered(
+          colorFilter: ColorFilter.saturation(0),
+          child: const ColoredBox(color: Colors.white, child: FlutterLogo()),
+        ),
+      ),
+    );
+    await expectLater(find.byType(ColorFiltered), matchesGoldenFile('color_filter_saturation.png'));
+  });
+
   testWidgets('Color filter - reuses its layer', (WidgetTester tester) async {
     Future<void> pumpWithColor(Color color) async {
       await tester.pumpWidget(

@@ -287,7 +287,7 @@ void main() {
   });
 
   testWidgets('SnackBarAction uses actionBackgroundColor', (WidgetTester tester) async {
-    final MaterialStateColor actionBackgroundColor = MaterialStateColor.resolveWith((
+    final WidgetStateColor actionBackgroundColor = WidgetStateColor.resolveWith((
       Set<WidgetState> states,
     ) {
       if (states.contains(WidgetState.disabled)) {
@@ -347,7 +347,7 @@ void main() {
   testWidgets('SnackBarAction backgroundColor overrides SnackBarThemeData actionBackgroundColor', (
     WidgetTester tester,
   ) async {
-    final MaterialStateColor snackBarActionBackgroundColor = MaterialStateColor.resolveWith((
+    final WidgetStateColor snackBarActionBackgroundColor = WidgetStateColor.resolveWith((
       Set<WidgetState> states,
     ) {
       if (states.contains(WidgetState.disabled)) {
@@ -356,7 +356,7 @@ void main() {
       return Colors.cyan;
     });
 
-    final MaterialStateColor actionBackgroundColor = MaterialStateColor.resolveWith((
+    final WidgetStateColor actionBackgroundColor = WidgetStateColor.resolveWith((
       Set<WidgetState> states,
     ) {
       if (states.contains(WidgetState.disabled)) {
@@ -418,9 +418,9 @@ void main() {
   });
 
   testWidgets(
-    'SnackBarThemeData asserts when actionBackgroundColor is a MaterialStateColor and disabledActionBackgroundColor is also provided',
+    'SnackBarThemeData asserts when actionBackgroundColor is a WidgetStateColor and disabledActionBackgroundColor is also provided',
     (WidgetTester tester) async {
-      final MaterialStateColor actionBackgroundColor = MaterialStateColor.resolveWith((
+      final WidgetStateColor actionBackgroundColor = WidgetStateColor.resolveWith((
         Set<WidgetState> states,
       ) {
         if (states.contains(WidgetState.disabled)) {
@@ -462,7 +462,7 @@ void main() {
             (AssertionError e) => e.toString(),
             'description',
             contains(
-              'disabledBackgroundColor must not be provided when background color is a MaterialStateColor',
+              'disabledBackgroundColor must not be provided when background color is a WidgetStateColor',
             ),
           ),
         ),

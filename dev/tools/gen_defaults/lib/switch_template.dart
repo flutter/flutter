@@ -133,7 +133,7 @@ class _${blockName}DefaultsM3 extends SwitchThemeData {
   @override
   WidgetStateProperty<MouseCursor> get mouseCursor {
     return WidgetStateProperty.resolveWith((Set<WidgetState> states)
-      => MaterialStateMouseCursor.clickable.resolve(states));
+      => WidgetStateMouseCursor.clickable.resolve(states));
   }
 
   @override

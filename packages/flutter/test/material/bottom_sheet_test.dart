@@ -1312,7 +1312,7 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           bottomSheetTheme: BottomSheetThemeData(
-            dragHandleColor: MaterialStateColor.resolveWith((Set<WidgetState> states) {
+            dragHandleColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
               if (states.contains(WidgetState.hovered)) {
                 return hoveringColor;
               }

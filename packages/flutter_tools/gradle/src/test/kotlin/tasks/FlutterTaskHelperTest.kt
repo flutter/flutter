@@ -24,8 +24,8 @@ class FlutterTaskHelperTest {
     fun `getAssetsDirectory returns correct path`() {
         val flutterTask = mockk<FlutterTask>()
         val mockFile = mockk<File>()
-        val flutterTaskOutputDirectory = "/path/to/assets"
-        val expectedPath = "$flutterTaskOutputDirectory/flutter_assets"
+        val flutterTaskOutputDirectory = "${File.separator}path${File.separator}to${File.separator}assets"
+        val expectedPath = "$flutterTaskOutputDirectory${File.separator}flutter_assets"
 
         every { flutterTask.outputDirectory } returns mockFile
         every { mockFile.toString() } returns flutterTaskOutputDirectory
@@ -40,7 +40,7 @@ class FlutterTaskHelperTest {
         val mockFile = mockk<File>()
         val mockCopySpec = mockk<CopySpec>()
         val copySpecActionSlot = slot<Action<in CopySpec>>()
-        val fakeFromPath = "/path/to/intermediate"
+        val fakeFromPath = "${File.separator}path${File.separator}to${File.separator}intermediate"
 
         every { flutterTask.intermediateDir } returns mockFile
         every { mockFile.toString() } returns fakeFromPath
@@ -61,7 +61,7 @@ class FlutterTaskHelperTest {
         val mockCopySpec = mockk<CopySpec>()
         val copySpecActionSlot = slot<Action<in CopySpec>>()
         val fakeIntermediateDirectory = mockk<File>()
-        val fakeIntermediateDirectoryPath = "/path/to/intermediate"
+        val fakeIntermediateDirectoryPath = "${File.separator}path${File.separator}to${File.separator}intermediate"
 
         every { flutterTask.intermediateDir } returns fakeIntermediateDirectory
         every { flutterTask.buildMode } returns "release"
@@ -75,8 +75,8 @@ class FlutterTaskHelperTest {
         copySpecActionSlot.captured.execute(mockCopySpec)
 
         verify { mockCopySpec.from(fakeIntermediateDirectoryPath) }
-        verify { mockCopySpec.include("${FlutterPluginConstants.PLATFORM_ARCH_MAP["arm64-v8a"]}/app.so") }
-        verify { mockCopySpec.include("${FlutterPluginConstants.PLATFORM_ARCH_MAP["x64"]}/app.so") }
+        verify { mockCopySpec.include("${FlutterPluginConstants.PLATFORM_ARCH_MAP["arm64-v8a"]}${File.separator}app.so") }
+        verify { mockCopySpec.include("${FlutterPluginConstants.PLATFORM_ARCH_MAP["x64"]}${File.separator}app.so") }
     }
 
     @Test
@@ -86,7 +86,7 @@ class FlutterTaskHelperTest {
         val mockCopySpec = mockk<CopySpec>()
         val copySpecActionSlot = slot<Action<in CopySpec>>()
         val fakeIntermediateDirectory = mockk<File>()
-        val fakeIntermediateDirectoryPath = "/path/to/intermediate"
+        val fakeIntermediateDirectoryPath = "${File.separator}path${File.separator}to${File.separator}intermediate"
 
         every { flutterTask.intermediateDir } returns fakeIntermediateDirectory
         every { flutterTask.buildMode } returns "debug"
@@ -119,10 +119,10 @@ class FlutterTaskHelperTest {
         every { mockFlutterTask.getDependenciesFiles() } returns mockDependenciesFileCollection
         val dependenciesFile =
             tempDir
-                .resolve("${mockFlutterTask.intermediateDir}/flutter_build.d")
+                .resolve("${mockFlutterTask.intermediateDir}${File.separator}flutter_build.d")
                 .toFile()
         dependenciesFile.writeText(
-            " ${tempDir.toFile().path}/pre/delimiter/one ${tempDir.toFile().path}/pre/delimiter/two: ${tempDir.toFile().path}/post/delimiter/one ${tempDir.toFile().path}/post/delimiter/two"
+            " ${tempDir.toFile().path}${File.separator}pre${File.separator}delimiter${File.separator}one ${tempDir.toFile().path}${File.separator}pre${File.separator}delimiter${File.separator}two: ${tempDir.toFile().path}${File.separator}post${File.separator}delimiter${File.separator}one ${tempDir.toFile().path}${File.separator}post${File.separator}delimiter${File.separator}two"
         )
         every { mockDependenciesFileCollection.iterator() } returns (mutableListOf(dependenciesFile).iterator())
 
@@ -131,8 +131,44 @@ class FlutterTaskHelperTest {
         verify {
             project.files(
                 listOf(
-                    "${tempDir.toFile().path}/post/delimiter/one",
-                    "${tempDir.toFile().path}/post/delimiter/two"
+                    "${tempDir.toFile().path}${File.separator}post${File.separator}delimiter${File.separator}one",
+                    "${tempDir.toFile().path}${File.separator}post${File.separator}delimiter${File.separator}two"
+                )
+            )
+        }
+
+        verify { project.files("pubspec.yaml") }
+    }
+
+    @Test
+    fun `getSourceFiles correctly replaces escaped spaces`(
+        @TempDir tempDir: Path
+    ) {
+        val mockProjectFileCollection = mockk<ConfigurableFileCollection>(relaxed = true)
+        val mockDependenciesFileCollection = mockk<FileCollection>()
+        val project = mockk<Project>()
+        val mockFlutterTask = mockk<FlutterTask>()
+
+        every { project.files() } returns mockProjectFileCollection
+        every { project.files(any()) } returns mockProjectFileCollection
+
+        every { mockFlutterTask.intermediateDir } returns tempDir.toFile()
+        every { mockFlutterTask.getDependenciesFiles() } returns mockDependenciesFileCollection
+        val dependenciesFile =
+            tempDir
+                .resolve("${mockFlutterTask.intermediateDir}${File.separator}flutter_build.d")
+                .toFile()
+        dependenciesFile.writeText(
+            " ${tempDir.toFile().path}${File.separator}pre${File.separator}delimiter\\ space${File.separator}one: ${tempDir.toFile().path}${File.separator}post${File.separator}delimiter\\ space${File.separator}one"
+        )
+        every { mockDependenciesFileCollection.iterator() } returns (mutableListOf(dependenciesFile).iterator())
+
+        FlutterTaskHelper.getSourceFiles(project, mockFlutterTask)
+
+        verify {
+            project.files(
+                listOf(
+                    "${tempDir.toFile().path}${File.separator}post${File.separator}delimiter space${File.separator}one"
                 )
             )
         }
@@ -156,10 +192,10 @@ class FlutterTaskHelperTest {
         every { mockFlutterTask.getDependenciesFiles() } returns mockDependenciesFileCollection
         val dependenciesFile =
             tempDir
-                .resolve("${mockFlutterTask.intermediateDir}/flutter_build.d")
+                .resolve("${mockFlutterTask.intermediateDir}${File.separator}flutter_build.d")
                 .toFile()
         dependenciesFile.writeText(
-            " ${tempDir.toFile().path}/pre/delimiter/one ${tempDir.toFile().path}/pre/delimiter/two: ${tempDir.toFile().path}/post/delimiter/one ${tempDir.toFile().path}/post/delimiter/two"
+            " ${tempDir.toFile().path}${File.separator}pre${File.separator}delimiter${File.separator}one ${tempDir.toFile().path}${File.separator}pre${File.separator}delimiter${File.separator}two: ${tempDir.toFile().path}${File.separator}post${File.separator}delimiter${File.separator}one ${tempDir.toFile().path}${File.separator}post${File.separator}delimiter${File.separator}two"
         )
         every { mockDependenciesFileCollection.iterator() } returns (mutableListOf(dependenciesFile).iterator())
 
@@ -168,8 +204,8 @@ class FlutterTaskHelperTest {
         verify {
             project.files(
                 listOf(
-                    "${tempDir.toFile().path}/pre/delimiter/one",
-                    "${tempDir.toFile().path}/pre/delimiter/two"
+                    "${tempDir.toFile().path}${File.separator}pre${File.separator}delimiter${File.separator}one",
+                    "${tempDir.toFile().path}${File.separator}pre${File.separator}delimiter${File.separator}two"
                 )
             )
         }

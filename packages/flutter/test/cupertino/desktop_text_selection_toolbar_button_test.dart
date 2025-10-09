@@ -127,4 +127,19 @@ void main() {
     final CupertinoButton button = tester.widget(find.byType(CupertinoButton));
     expect(button.enabled, isFalse);
   });
+
+  testWidgets('CupertinoDesktopTextSelectionToolbarButton does not crash at zero area', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: CupertinoDesktopTextSelectionToolbarButton(onPressed: null, child: Text('X')),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoDesktopTextSelectionToolbarButton)), Size.zero);
+  });
 }
