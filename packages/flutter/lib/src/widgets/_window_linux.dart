@@ -453,6 +453,9 @@ class _FlWindowMonitor extends _GObject {
 ///  * [WindowingOwner], the abstract class that manages native windows.
 @internal
 class WindowingOwnerLinux extends WindowingOwner {
+  /// Number of windows being managed by Flutter.
+  int _windowCount = 0;
+
   /// Creates a new [WindowingOwnerLinux] instance.
   ///
   /// If [Platform.isLinux] is false, then this constructor will throw an
@@ -488,7 +491,9 @@ class WindowingOwnerLinux extends WindowingOwner {
     String? title,
     required RegularWindowControllerDelegate delegate,
   }) {
+    _windowCount++;
     return RegularWindowControllerLinux(
+      owner: this,
       delegate: delegate,
       preferredSize: preferredSize,
       preferredConstraints: preferredConstraints,
@@ -511,8 +516,7 @@ class WindowingOwnerLinux extends WindowingOwner {
   @internal
   @override
   bool hasTopLevelWindows() {
-    // FIXME(robert-ancell):
-    return false;
+    return _windowCount > 0;
   }
 }
 
@@ -524,9 +528,11 @@ class WindowingOwnerLinux extends WindowingOwner {
 ///
 ///  * [RegularWindowController], the base class for regular windows.
 class RegularWindowControllerLinux extends RegularWindowController {
+  final WindowingOwnerLinux _owner;
   final RegularWindowControllerDelegate _delegate;
   final _GtkWindow _window;
   late final _FlWindowMonitor _windowMonitor;
+  bool _destroyed = false;
 
   /// Creates a new regular window controller for Linux.
   ///
@@ -540,11 +546,13 @@ class RegularWindowControllerLinux extends RegularWindowController {
   ///  * [RegularWindowController], the base class for regular windows.
   @internal
   RegularWindowControllerLinux({
+    required WindowingOwnerLinux owner,
     required RegularWindowControllerDelegate delegate,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
-  }) : _delegate = delegate,
+  }) : _owner = owner,
+       _delegate = delegate,
        _window = _GtkWindow(),
        super.empty() {
     if (!isWindowingEnabled) {
@@ -593,9 +601,14 @@ class RegularWindowControllerLinux extends RegularWindowController {
 
   @override
   void destroy() {
+    if (_destroyed) {
+      return;
+    }
     _window.destroy();
     _windowMonitor.close();
     _windowMonitor.unref();
+    _destroyed = true;
+    _owner._windowCount--;
   }
 
   @override
