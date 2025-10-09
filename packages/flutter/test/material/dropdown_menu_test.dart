@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -3807,7 +3808,7 @@ void main() {
   });
 
   // This is a regression test for https://github.com/flutter/flutter/issues/151686.
-  testWidgets('Setting DropdownMenu.requestFocusOnTap to false makes TextField read only', (
+  testWidgets('Setting DropdownMenu.requestFocusOnTap to false makes TextField a button', (
     WidgetTester tester,
   ) async {
     const String label = 'Test';
@@ -3846,18 +3847,20 @@ void main() {
 
     expect(
       tester.getSemantics(find.byType(TextField)),
-      matchesSemantics(
-        isButton: true,
-        hasExpandedState: true,
-        hasFocusAction: true,
-        isTextField: true,
-        isFocusable: true,
-        hasEnabledState: true,
-        isEnabled: true,
-        label: 'Test',
-        isReadOnly: true,
-        textDirection: TextDirection.ltr,
-      ),
+      kIsWeb
+          ? matchesSemantics(isButton: true, hasExpandedState: true)
+          : matchesSemantics(
+              isButton: true,
+              hasExpandedState: true,
+              hasFocusAction: true,
+              isTextField: true,
+              isFocusable: true,
+              hasEnabledState: true,
+              isEnabled: true,
+              label: 'Test',
+              isReadOnly: true,
+              textDirection: TextDirection.ltr,
+            ),
     );
   });
 
@@ -4429,22 +4432,34 @@ void main() {
                       id: 3,
                       flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
-                        TestSemantics(
-                          id: 5,
-                          inputType: SemanticsInputType.text,
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.isTextField,
-                            SemanticsFlag.isFocusable,
-                            SemanticsFlag.hasEnabledState,
-                            SemanticsFlag.isEnabled,
-                            SemanticsFlag.isReadOnly,
-                            SemanticsFlag.isButton,
-                            SemanticsFlag.hasExpandedState,
-                          ],
-                          actions: <SemanticsAction>[SemanticsAction.focus, SemanticsAction.expand],
-                          textDirection: TextDirection.ltr,
-                          currentValueLength: 0,
-                        ),
+                        if (kIsWeb)
+                          TestSemantics(
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.isButton,
+                              SemanticsFlag.hasExpandedState,
+                            ],
+                            actions: <SemanticsAction>[SemanticsAction.expand],
+                          )
+                        else
+                          TestSemantics(
+                            id: 5,
+                            inputType: SemanticsInputType.text,
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.isTextField,
+                              SemanticsFlag.isFocusable,
+                              SemanticsFlag.hasEnabledState,
+                              SemanticsFlag.isEnabled,
+                              SemanticsFlag.isReadOnly,
+                              SemanticsFlag.isButton,
+                              SemanticsFlag.hasExpandedState,
+                            ],
+                            actions: <SemanticsAction>[
+                              SemanticsAction.focus,
+                              SemanticsAction.expand,
+                            ],
+                            textDirection: TextDirection.ltr,
+                            currentValueLength: 0,
+                          ),
                       ],
                     ),
                   ],
