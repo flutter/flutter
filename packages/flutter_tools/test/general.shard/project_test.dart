@@ -192,8 +192,10 @@ void main() {
       _testInMemory('checkForDeprecation fails on invalid android app manifest file', () async {
         // This is not a valid Xml document
         const invalidManifest = '<manifest></application>';
-        final FlutterProject project = await someProject(androidManifestOverride: invalidManifest);
-
+        final FlutterProject project = await someProject(
+          androidManifestOverride: invalidManifest,
+          isUsingGradle: true,
+        );
         expect(
           () => project.checkForDeprecation(deprecationBehavior: DeprecationBehavior.ignore),
           throwsToolExit(
@@ -910,7 +912,7 @@ apply plugin: 'kotlin-android'
       testUsingContext(
         'kotlin host app language with Gradle Kotlin DSL',
         () async {
-          final FlutterProject project = await someProject();
+          final FlutterProject project = await someProject(kotlinDsl: true);
 
           addAndroidGradleFile(
             project.directory,
@@ -938,7 +940,7 @@ plugins {
       testUsingContext(
         'kotlin host app language with Gradle Kotlin DSL and typesafe plugin id',
         () async {
-          final FlutterProject project = await someProject();
+          final FlutterProject project = await someProject(kotlinDsl: true);
 
           addAndroidGradleFile(
             project.directory,
@@ -1812,7 +1814,6 @@ plugins {
             ..createSync(recursive: true);
 
           final FlutterProject project = FlutterProject.fromDirectory(tempDir);
-
           expect(project.android.appManifestFile.path, expected.path);
         },
       );
@@ -2171,6 +2172,8 @@ resolution: workspace
 Future<FlutterProject> someProject({
   String? androidManifestOverride,
   bool includePubspec = true,
+  bool kotlinDsl = false,
+  bool isUsingGradle = false,
 }) async {
   final Directory directory = globals.fs.directory('some_project');
   writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'hello');
@@ -2182,9 +2185,27 @@ Future<FlutterProject> someProject({
   directory.childDirectory('ios').createSync(recursive: true);
   final Directory androidDirectory = directory.childDirectory('android')
     ..createSync(recursive: true);
-  androidDirectory
-      .childFile('AndroidManifest.xml')
-      .writeAsStringSync(androidManifestOverride ?? '<manifest></manifest>');
+  if (isUsingGradle) {
+    final File manifest =
+        androidDirectory
+            .childDirectory('app')
+            .childDirectory('src')
+            .childDirectory('main')
+            .childFile('AndroidManifest.xml')
+          ..createSync(recursive: true);
+    manifest.writeAsStringSync(androidManifestOverride ?? '<manifest></manifest>');
+  } else {
+    androidDirectory
+        .childFile('AndroidManifest.xml')
+        .writeAsStringSync(androidManifestOverride ?? '<manifest></manifest>');
+  }
+  androidDirectory.childFile(kotlinDsl ? 'build.gradle.kts' : 'build.gradle').writeAsStringSync('');
+  final Directory androidAppDirectory = androidDirectory.childDirectory('app')
+    ..createSync(recursive: true);
+
+  androidAppDirectory
+      .childFile(kotlinDsl ? 'build.gradle.kts' : 'build.gradle')
+      .writeAsStringSync('');
   return FlutterProject.fromDirectory(directory);
 }
 
