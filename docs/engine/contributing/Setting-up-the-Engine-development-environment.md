@@ -53,7 +53,7 @@ Clone the Flutter source code. As of late 2024, the engine source is part of the
 Flutter engine uses `gclient` to manage dependencies.
 
 1. Copy one of the `engine/scripts/*.gclient` to the repository root as `.gclient`:
-    1. Googlers: copy `rbe.gclient` to enable faster builds with RBE. Follow [RBE Getting started](https://github.com/flutter/flutter/blob/master/docs/engine/rbe/rbe.md#getting-started) to set up RBE.
+    1. Googlers: copy `rbe.gclient` to enable faster builds with RBE. Follow [RBE Getting started](https://github.com/flutter/flutter/blob/main/docs/engine/rbe/rbe.md#getting-started) to set up RBE.
     2. Everyone else: copy `standard.gclient`
 2. Run `gclient sync` from the root folder
 
