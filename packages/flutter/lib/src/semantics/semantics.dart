@@ -1511,7 +1511,7 @@ class SemanticsProperties extends DiagnosticableTree {
     )
     this.focusable,
     this.focused,
-    this.accessibilityFocusable,
+    this.subTreeAccessibilityFocusable,
     this.inMutuallyExclusiveGroup,
     this.hidden,
     this.obscured,
@@ -1724,7 +1724,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// This is for accessibility focus, which is the focus used by screen readers
   /// like TalkBack and VoiceOver. It is different from input focus, which is
   /// usually held by the element that currently responds to keyboard inputs.
-  final bool? accessibilityFocusable;
+  final bool? subTreeAccessibilityFocusable;
 
   /// If non-null, whether a semantic node is in a mutually exclusive group.
   ///
@@ -5729,9 +5729,10 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
-  /// Whether the owning [RenderObject] can hold the a11y focus (different from input focus).
-  bool? get isAccessibilityFocusable => _flags.isAccessibilityFocusable.toBoolOrNull();
-  set isAccessibilityFocusable(bool? value) {
+  /// Whether the owning [RenderObject] and its subtree
+  /// can hold the a11y focus (different from input focus).
+  bool? get isSubTreeAccessibilityFocusable => _flags.isAccessibilityFocusable.toBoolOrNull();
+  set isSubTreeAccessibilityFocusable(bool? value) {
     _flags = _flags.copyWith(isAccessibilityFocusable: _tristateFromBoolOrNull(value));
     _hasBeenAnnotated = true;
   }
