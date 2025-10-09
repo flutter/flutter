@@ -1640,10 +1640,10 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     // https://m2.material.io/components/menus#dropdown-menu
     if (widget._inputDecoration != null) {
       final bool filled =
-          widget._inputDecoration?.filled ?? Theme.of(context).inputDecorationTheme.filled;
+          widget._inputDecoration?.filled ?? InputDecorationTheme.of(context).filled;
       final bool oulined =
           widget._inputDecoration?.border?.isOutline ??
-          Theme.of(context).inputDecorationTheme.border?.isOutline ??
+          InputDecorationTheme.of(context).border?.isOutline ??
           false;
 
       final double suffixIconEndMargin = (filled || oulined) ? 12.0 : 0.0;
@@ -1812,7 +1812,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
          builder: (FormFieldState<T> field) {
            final _DropdownButtonFormFieldState<T> state = field as _DropdownButtonFormFieldState<T>;
            InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
-               .applyDefaults(Theme.of(field.context).inputDecorationTheme);
+               .applyDefaults(InputDecorationTheme.of(field.context));
 
            final bool showSelectedItem =
                items != null &&
