@@ -19,6 +19,7 @@ if (enable_unittests) {
     "uniform_ordering.frag",
     "uniform_arrays.frag",
     "uniforms_reordered.frag",
+    "uniforms_inserted.frag",
     "filter_shader.frag",
     "missing_size.frag",
     "missing_texture.frag",
