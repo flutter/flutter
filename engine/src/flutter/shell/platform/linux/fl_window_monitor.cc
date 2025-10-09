@@ -23,14 +23,6 @@ struct _FlWindowMonitor {
   void (*on_title_notify)(void);
   void (*on_close)(void);
   void (*on_destroy)(void);
-
-  // Signal subscriptions.
-  gulong configure_event_cb_id;
-  gulong window_state_event_cb_id;
-  gulong is_active_notify_cb_id;
-  gulong title_notify_cb_id;
-  gulong delete_event_cb_id;
-  gulong destroy_cb_id;
 };
 
 G_DEFINE_TYPE(FlWindowMonitor, fl_window_monitor, G_TYPE_OBJECT)
@@ -77,13 +69,10 @@ static void destroy_cb(FlWindowMonitor* self) {
 static void fl_window_monitor_dispose(GObject* object) {
   FlWindowMonitor* self = FL_WINDOW_MONITOR(object);
 
+  // Disconnect all handlers using data. If we try and disconnect them
+  // individually they generated warnings after the widget has been destroyed.
+  g_signal_handlers_disconnect_by_data(self->window, self);
   g_clear_object(&self->window);
-  g_signal_handler_disconnect(self->window, self->configure_event_cb_id);
-  g_signal_handler_disconnect(self->window, self->window_state_event_cb_id);
-  g_signal_handler_disconnect(self->window, self->is_active_notify_cb_id);
-  g_signal_handler_disconnect(self->window, self->title_notify_cb_id);
-  g_signal_handler_disconnect(self->window, self->delete_event_cb_id);
-  g_signal_handler_disconnect(self->window, self->destroy_cb_id);
 
   G_OBJECT_CLASS(fl_window_monitor_parent_class)->dispose(object);
 }
@@ -113,18 +102,17 @@ G_MODULE_EXPORT FlWindowMonitor* fl_window_monitor_new(
   self->on_title_notify = on_title_notify;
   self->on_close = on_close;
   self->on_destroy = on_destroy;
-  self->configure_event_cb_id = g_signal_connect_swapped(
-      window, "configure-event", G_CALLBACK(configure_event_cb), self);
-  self->window_state_event_cb_id = g_signal_connect_swapped(
-      window, "window-state-event", G_CALLBACK(window_state_event_cb), self);
-  self->is_active_notify_cb_id = g_signal_connect_swapped(
-      window, "notify::is-active", G_CALLBACK(is_active_notify_cb), self);
-  self->title_notify_cb_id = g_signal_connect_swapped(
-      window, "notify::title", G_CALLBACK(title_notify_cb), self);
-  self->delete_event_cb_id = g_signal_connect_swapped(
-      window, "delete-event", G_CALLBACK(delete_event_cb), self);
-  self->destroy_cb_id =
-      g_signal_connect_swapped(window, "destroy", G_CALLBACK(destroy_cb), self);
+  g_signal_connect_swapped(window, "configure-event",
+                           G_CALLBACK(configure_event_cb), self);
+  g_signal_connect_swapped(window, "window-state-event",
+                           G_CALLBACK(window_state_event_cb), self);
+  g_signal_connect_swapped(window, "notify::is-active",
+                           G_CALLBACK(is_active_notify_cb), self);
+  g_signal_connect_swapped(window, "notify::title", G_CALLBACK(title_notify_cb),
+                           self);
+  g_signal_connect_swapped(window, "delete-event", G_CALLBACK(delete_event_cb),
+                           self);
+  g_signal_connect_swapped(window, "destroy", G_CALLBACK(destroy_cb), self);
 
   return self;
 }

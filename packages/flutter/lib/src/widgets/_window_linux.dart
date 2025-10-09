@@ -468,7 +468,7 @@ class WindowingOwnerLinux extends WindowingOwner {
 class RegularWindowControllerLinux extends RegularWindowController {
   final RegularWindowControllerDelegate _delegate;
   final _GtkWindow _window;
-  late final _FlWindowMonitor _windowMonitor; // FIXME: unref and close
+  late final _FlWindowMonitor _windowMonitor;
 
   /// Creates a new regular window controller for Linux.
   ///
@@ -536,6 +536,8 @@ class RegularWindowControllerLinux extends RegularWindowController {
   @override
   void destroy() {
     _window.destroy();
+    _windowMonitor.close();
+    _windowMonitor.unref();
   }
 
   @override
