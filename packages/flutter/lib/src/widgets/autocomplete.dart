@@ -118,7 +118,7 @@ enum OptionsViewOpenDirection {
   ///
   /// If both directions have the same available space, the options view opens
   /// downward.
-  automatic,
+  mostSpace,
 }
 
 // TODO(justinmc): Mention AutocompleteCupertino when it is implemented.
@@ -559,7 +559,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     final bool opensUp = switch (widget.optionsViewOpenDirection) {
       OptionsViewOpenDirection.up => true,
       OptionsViewOpenDirection.down => false,
-      OptionsViewOpenDirection.automatic => spaceAbove > spaceBelow,
+      OptionsViewOpenDirection.mostSpace => spaceAbove > spaceBelow,
     };
 
     final double optionsViewMaxHeight = opensUp

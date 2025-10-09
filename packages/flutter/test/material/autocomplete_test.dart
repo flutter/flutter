@@ -610,7 +610,7 @@ void main() {
                 return Align(
                   alignment: alignment,
                   child: Autocomplete<String>(
-                    optionsViewOpenDirection: OptionsViewOpenDirection.automatic,
+                    optionsViewOpenDirection: OptionsViewOpenDirection.mostSpace,
                     optionsBuilder: (TextEditingValue textEditingValue) => <String>['a', 'b', 'c'],
                     fieldViewBuilder:
                         (
