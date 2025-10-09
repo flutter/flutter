@@ -102,14 +102,11 @@ typedef ExpansionTileController = ExpansibleController;
 ///
 /// ## Accessibility
 ///
-/// [ExpansionTile] uses the device's platform (via [defaultTargetPlatform])
-/// rather than [ThemeData.platform] to determine platform-specific accessibility
-/// behavior. This ensures that assistive technologies like VoiceOver on iOS and
-/// macOS receive correct semantics hints, even when the app's theme is configured
-/// to use a different platform's visual appearance. For example, if an app uses
-/// `ThemeData(platform: TargetPlatform.android)` on an iOS device to achieve an
-/// Android look and feel, VoiceOver will still receive iOS-appropriate semantics
-/// hints to work properly.
+/// The accessibility behavior of [ExpansionTile] is platform adaptive, based on
+/// the device's actual platform rather than the theme's platform setting. This
+/// ensures that assistive technologies like VoiceOver on iOS and macOS receive
+/// the correct platform-specific semantics hints, even when the app's theme is
+/// configured to mimic a different platform's appearance.
 ///
 /// See also:
 ///
