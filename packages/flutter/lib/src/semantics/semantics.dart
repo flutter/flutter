@@ -3849,6 +3849,13 @@ class SemanticsNode with DiagnosticableTreeMixin {
       traversalOwnerId = owner!._traversalParentNodes[data.traversalChildIdentifier]?.id;
     }
 
+    final Float64List updatedTransform;
+    if (kIsWeb) {
+      updatedTransform = data.transform?.storage ?? _kIdentityTransform;
+    } else {
+      updatedTransform = transform?.storage ?? data.transform?.storage ?? _kIdentityTransform;
+    }
+
     builder.updateNode(
       id: id,
       flags: data.flagsCollection,
@@ -3877,9 +3884,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       scrollPosition: data.scrollPosition ?? double.nan,
       scrollExtentMax: data.scrollExtentMax ?? double.nan,
       scrollExtentMin: data.scrollExtentMin ?? double.nan,
-      transform: kIsWeb
-          ? data.transform?.storage ?? _kIdentityTransform
-          : transform?.storage ?? data.transform?.storage ?? _kIdentityTransform,
+      transform: updatedTransform,
       traversalOwner: traversalOwnerId ?? -1,
       hitTestTransform: data.transform?.storage ?? _kIdentityTransform,
       childrenInTraversalOrder: childrenInTraversalOrder,
