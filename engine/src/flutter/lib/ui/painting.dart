@@ -5204,6 +5204,7 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
   }
 
   String? _debugName;
+  final List<WeakReference<FragmentShader>> _shaders = <WeakReference<FragmentShader>>[];
 
   /// Creates a fragment program from the asset with key [assetKey].
   ///
@@ -5249,6 +5250,55 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
     if (result.isNotEmpty) {
       throw result; // ignore: only_throw_errors
     }
+
+    // Update all the named bindings.
+    program._shaders.removeWhere((WeakReference<FragmentShader> shaderReference) {
+      final FragmentShader? shader = shaderReference.target;
+      if (shader == null) {
+        return true;
+      }
+
+      shader._reinitialize();
+      shader._slots.removeWhere((WeakReference<UniformFloatSlot> slotReference) {
+        final UniformFloatSlot? slot = slotReference.target;
+        if (slot == null) {
+          return true;
+        }
+
+        slot._shaderIndex = program._getUniformFloatIndex(slot.name, slot.index);
+        return false;
+      });
+
+      return false;
+    });
+  }
+
+  int _getUniformFloatIndex(String name, int index) {
+    if (index < 0) {
+      throw ArgumentError('Index `$index` out of bounds for `$name`.');
+    }
+
+    int offset = 0;
+    bool found = false;
+    const int sizeOfFloat = 4;
+    for (final dynamic entryDynamic in _uniformInfo) {
+      final Map<String, Object> entry = entryDynamic as Map<String, Object>;
+      final int sizeInFloats = (entry['size'] as int? ?? 0) ~/ sizeOfFloat;
+      if (entry['name'] == name) {
+        if (index + 1 > sizeInFloats) {
+          throw ArgumentError('Index `$index` out of bounds for `$name`.');
+        }
+        found = true;
+        break;
+      }
+      offset += sizeInFloats;
+    }
+
+    if (!found) {
+      throw ArgumentError('No uniform named "$name".');
+    }
+
+    return offset + index;
   }
 
   @pragma('vm:entry-point')
@@ -5267,7 +5317,11 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
   external String _initFromAsset(String assetKey);
 
   /// Returns a fresh instance of [FragmentShader].
-  FragmentShader fragmentShader() => FragmentShader._(this, debugName: _debugName);
+  FragmentShader fragmentShader() {
+    final FragmentShader result = FragmentShader._(this, debugName: _debugName);
+    _shaders.add(WeakReference<FragmentShader>(result));
+    return result;
+  }
 }
 
 /// A binding to a uniform of type float. Calling [set] on this object updates
@@ -5285,27 +5339,27 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
 ///   [FragmentShader.getUniformFloat] - How [UniformFloatSlot] instances are acquired.
 ///
 base class UniformFloatSlot {
-  UniformFloatSlot._(this._shader, this.name, this.offset, this._index);
+  UniformFloatSlot._(this._shader, this.name, this.index, this._shaderIndex);
 
   /// Set the float value of the bound uniform.
   void set(double val) {
-    _shader.setFloat(_index, val);
+    _shader.setFloat(_shaderIndex, val);
   }
 
   /// VisibleForTesting: This is the index one would use with
   /// [FragmentShader.setFloat] for this uniform.
-  int get index {
-    return _index;
+  int get shaderIndex {
+    return _shaderIndex;
   }
 
   final FragmentShader _shader;
-  final int _index;
+  int _shaderIndex;
 
   /// The name of the bound uniform.
   final String name;
 
   /// The offset into the bound uniform. For example, 1 for `.y` or 2 for `.b`.
-  final int offset;
+  final int index;
 }
 
 /// A [Shader] generated from a [FragmentProgram].
@@ -5332,6 +5386,11 @@ base class FragmentShader extends Shader {
 
   static final Float32List _kEmptyFloat32List = Float32List(0);
   Float32List _floats = _kEmptyFloat32List;
+  final List<WeakReference<UniformFloatSlot>> _slots = <WeakReference<UniformFloatSlot>>[];
+
+  void _reinitialize() {
+    _floats = _constructor(_program, _program._uniformFloatCount, _program._samplerCount);
+  }
 
   /// Sets the float uniform at [index] to [value].
   ///
@@ -5404,32 +5463,10 @@ base class FragmentShader extends Shader {
   /// ```
   UniformFloatSlot getUniformFloat(String name, [int? index]) {
     index ??= 0;
-
-    if (index < 0) {
-      throw ArgumentError('Index `$index` out of bounds for `$name`.');
-    }
-
-    int offset = 0;
-    bool found = false;
-    const int sizeOfFloat = 4;
-    for (final dynamic entryDynamic in _program._uniformInfo) {
-      final Map<String, Object> entry = entryDynamic as Map<String, Object>;
-      final int sizeInFloats = (entry['size'] as int? ?? 0) ~/ sizeOfFloat;
-      if (entry['name'] == name) {
-        if (index + 1 > sizeInFloats) {
-          throw ArgumentError('Index `$index` out of bounds for `$name`.');
-        }
-        found = true;
-        break;
-      }
-      offset += sizeInFloats;
-    }
-
-    if (!found) {
-      throw ArgumentError('No uniform named "$name".');
-    }
-
-    return UniformFloatSlot._(this, name, index, offset + index);
+    final int shaderIndex = _program._getUniformFloatIndex(name, index);
+    final UniformFloatSlot result = UniformFloatSlot._(this, name, index, shaderIndex);
+    _slots.add(WeakReference<UniformFloatSlot>(result));
+    return result;
   }
 
   /// Sets the sampler uniform at [index] to [image].

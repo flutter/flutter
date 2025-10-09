@@ -69,7 +69,7 @@ void main() async {
       shader.getUniformFloat('iMat2Uniform', 3),
     ];
     for (int i = 0; i < slots.length; ++i) {
-      expect(slots[i].index, equals(i));
+      expect(slots[i].shaderIndex, equals(i));
     }
   });
 
