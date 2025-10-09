@@ -451,7 +451,7 @@ Future<void> sendSemanticsTreeInfo() async {
       platformViewId: -1,
       scrollChildren: 0,
       scrollIndex: 0,
-      traversalOwner: -1,
+      traversalParent: -1,
       scrollPosition: 0,
       scrollExtentMax: 0,
       scrollExtentMin: 0,

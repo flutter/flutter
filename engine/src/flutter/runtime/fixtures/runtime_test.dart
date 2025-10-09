@@ -290,7 +290,7 @@ void sendSemanticsUpdate() {
     platformViewId: -1,
     scrollChildren: 0,
     scrollIndex: 0,
-    traversalOwner: 0,
+    traversalParent: 0,
     scrollPosition: 0,
     scrollExtentMax: 0,
     scrollExtentMin: 0,
