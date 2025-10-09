@@ -83,7 +83,7 @@ public class FlutterShellArgs {
     }
     int vmServicePort = intent.getIntExtra(ARG_KEY_VM_SERVICE_PORT, 0);
     if (vmServicePort > 0) {
-      args.add(ARG_VM_SERVICE_PORT + Integer.toString(vmServicePort));
+      args.add(ARG_VM_SERVICE_PORT + vmServicePort);
     }
     if (intent.getBooleanExtra(ARG_KEY_DISABLE_SERVICE_AUTH_CODES, false)) {
       args.add(ARG_DISABLE_SERVICE_AUTH_CODES);
