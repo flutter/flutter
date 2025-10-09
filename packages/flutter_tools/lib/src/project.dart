@@ -588,7 +588,17 @@ class AndroidProject extends FlutterProjectPlatform {
   /// See https://developer.android.com/build#top-level.
   ///
   /// The file must exist and it must be written in either Groovy (build.gradle)
-  /// or Kotlin (build.gradle.kts).
+  /// or Kotlin (build.gradle.kts), this getter will not throw
+  bool get hostAppGradleFileSafe {
+    return getGroovyOrKolinExists(hostAppGradleRoot, 'build.gradle');
+  }
+
+  /// Gets top-level Gradle build file.
+  /// See https://developer.android.com/build#top-level.
+  ///
+  /// The file must exist and it must be written in either Groovy (build.gradle)
+  /// or Kotlin (build.gradle.kts), this getter will throw if neither build.gradle
+  /// and build.gradle.kts exists
   File get hostAppGradleFile {
     return getGroovyOrKotlin(hostAppGradleRoot, 'build.gradle');
   }
@@ -601,7 +611,7 @@ class AndroidProject extends FlutterProjectPlatform {
     return getGroovyOrKotlin(hostAppGradleRoot, 'settings.gradle');
   }
 
-  File getGroovyOrKotlin(Directory directory, String baseFilename) {
+  File getGroovyOrKotlin(Directory directory, String baseFilename, {bool safe = false}) {
     final File groovyFile = directory.childFile(baseFilename);
     final File kotlinFile = directory.childFile('$baseFilename.kts');
 
@@ -616,7 +626,15 @@ class AndroidProject extends FlutterProjectPlatform {
     // TODO(bartekpacia): An exception should be thrown when neither
     // the Groovy or Kotlin file exists, instead of falling back to the
     // Groovy file. See #141180.
-    return groovyFile;
+    throwToolExit('Neither build.gradle nor build.gradle.kts exist. This is an error');
+    // return groovyFile;
+  }
+
+  bool getGroovyOrKolinExists(Directory directory, String baseFilename, {bool safe = false}) {
+    final File groovyFile = directory.childFile(baseFilename);
+    final File kotlinFile = directory.childFile('$baseFilename.kts');
+
+    return groovyFile.existsSync() || kotlinFile.existsSync();
   }
 
   /// Gets the module-level build.gradle file.
@@ -637,7 +655,6 @@ class AndroidProject extends FlutterProjectPlatform {
           .childDirectory('main')
           .childFile('AndroidManifest.xml');
     }
-
     return hostAppGradleRoot.childFile('AndroidManifest.xml');
   }
 
@@ -795,7 +812,7 @@ See the link below for more information:
   }
 
   bool get isUsingGradle {
-    return hostAppGradleFile.existsSync();
+    return hostAppGradleFileSafe;
   }
 
   String? get applicationId {
