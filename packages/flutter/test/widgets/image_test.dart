@@ -1757,8 +1757,8 @@ void main() {
         ),
       );
 
-      expect(image1.debugGetOpenHandleStackTraces()!.length, 1);
-      expect(image2.debugGetOpenHandleStackTraces()!.length, 1);
+      expect(image1.debugGetOpenHandleStackTraces(), hasLength(1));
+      expect(image2.debugGetOpenHandleStackTraces(), hasLength(1));
 
       _TestImageProvider imageProvider = imageProvider1;
       bool disableAnimations = false;
@@ -1782,13 +1782,13 @@ void main() {
       );
 
       // Image widget + 1, render object + 1 for the active image.
-      expect(image1.debugGetOpenHandleStackTraces()!.length, 3);
-      expect(image2.debugGetOpenHandleStackTraces()!.length, 1);
+      expect(image1.debugGetOpenHandleStackTraces(), hasLength(3));
+      expect(image2.debugGetOpenHandleStackTraces(), hasLength(1));
 
       // Pumping another frame doesn't change anything.
       await tester.pump();
-      expect(image1.debugGetOpenHandleStackTraces()!.length, 3);
-      expect(image2.debugGetOpenHandleStackTraces()!.length, 1);
+      expect(image1.debugGetOpenHandleStackTraces(), hasLength(3));
+      expect(image2.debugGetOpenHandleStackTraces(), hasLength(1));
 
       // Swap the image source and pump a frame.
       // Image widget + 1, render object + 1 for the active image.
@@ -1797,16 +1797,16 @@ void main() {
         imageProvider = imageProvider2;
       });
       await tester.pump();
-      expect(image1.debugGetOpenHandleStackTraces()!.length, 2);
-      expect(image2.debugGetOpenHandleStackTraces()!.length, 3);
+      expect(image1.debugGetOpenHandleStackTraces(), hasLength(2));
+      expect(image2.debugGetOpenHandleStackTraces(), hasLength(3));
 
       // Disable animations.
       setState(() {
         disableAnimations = true;
       });
       await tester.pump();
-      expect(image1.debugGetOpenHandleStackTraces()!.length, 2);
-      expect(image2.debugGetOpenHandleStackTraces()!.length, 3);
+      expect(image1.debugGetOpenHandleStackTraces(), hasLength(2));
+      expect(image2.debugGetOpenHandleStackTraces(), hasLength(3));
 
       // Swapping the image source back.
       // Image widget + 1 for the active image.
@@ -1815,31 +1815,31 @@ void main() {
         imageProvider = imageProvider1;
       });
       await tester.pump();
-      expect(image1.debugGetOpenHandleStackTraces()!.length, 3);
-      expect(image2.debugGetOpenHandleStackTraces()!.length, 2);
+      expect(image1.debugGetOpenHandleStackTraces(), hasLength(3));
+      expect(image2.debugGetOpenHandleStackTraces(), hasLength(2));
 
       // Re-enable animations.
       setState(() {
         disableAnimations = false;
       });
       await tester.pump();
-      expect(image1.debugGetOpenHandleStackTraces()!.length, 3);
-      expect(image2.debugGetOpenHandleStackTraces()!.length, 2);
+      expect(image1.debugGetOpenHandleStackTraces(), hasLength(3));
+      expect(image2.debugGetOpenHandleStackTraces(), hasLength(2));
 
       // Disposing disposes both the active and inactive images.
       await tester.pumpWidget(const SizedBox());
 
       // Image widget and render object go away.
-      expect(image1.debugGetOpenHandleStackTraces()!.length, 1);
-      expect(image2.debugGetOpenHandleStackTraces()!.length, 1);
+      expect(image1.debugGetOpenHandleStackTraces(), hasLength(1));
+      expect(image2.debugGetOpenHandleStackTraces(), hasLength(1));
 
       await imageProvider1.evict();
       await imageProvider2.evict();
 
       tester.binding.scheduleFrame();
       await tester.pump();
-      expect(image1.debugGetOpenHandleStackTraces()!.length, 0);
-      expect(image2.debugGetOpenHandleStackTraces()!.length, 0);
+      expect(image1.debugGetOpenHandleStackTraces(), hasLength(0));
+      expect(image2.debugGetOpenHandleStackTraces(), hasLength(0));
     });
   }
 
