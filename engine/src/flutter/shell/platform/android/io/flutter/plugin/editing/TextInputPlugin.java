@@ -93,15 +93,12 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
       imeSyncCallback = new ImeSyncDeferringInsetsCallback(view);
       imeSyncCallback.install();
 
-      // When the IME is hidden, we need to restart the input method manager to accomodate
+      // When the IME is hidden, we need to restart the input method manager to accommodate
       // some keyboards like the Samsung keyboard that may be caching old state.
       imeSyncCallback.setImeVisibilityListener(
-          new ImeSyncDeferringInsetsCallback.ImeVisibilityListener() {
-            @Override
-            public void onImeVisibilityChanged(boolean visible) {
-              if (!visible) {
-                mImm.restartInput(mView);
-              }
+          visible -> {
+            if (!visible) {
+              mImm.restartInput(mView);
             }
           });
     }
@@ -538,24 +535,21 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     minMax[2] = minMax[3] = matrix[13] / matrix[15]; // minY and maxY.
 
     final MinMax finder =
-        new MinMax() {
-          @Override
-          public void inspect(double x, double y) {
-            final double w = isAffine ? 1 : 1 / (matrix[3] * x + matrix[7] * y + matrix[15]);
-            final double tx = (matrix[0] * x + matrix[4] * y + matrix[12]) * w;
-            final double ty = (matrix[1] * x + matrix[5] * y + matrix[13]) * w;
+        (x, y) -> {
+          final double w = isAffine ? 1 : 1 / (matrix[3] * x + matrix[7] * y + matrix[15]);
+          final double tx = (matrix[0] * x + matrix[4] * y + matrix[12]) * w;
+          final double ty = (matrix[1] * x + matrix[5] * y + matrix[13]) * w;
 
-            if (tx < minMax[0]) {
-              minMax[0] = tx;
-            } else if (tx > minMax[1]) {
-              minMax[1] = tx;
-            }
+          if (tx < minMax[0]) {
+            minMax[0] = tx;
+          } else if (tx > minMax[1]) {
+            minMax[1] = tx;
+          }
 
-            if (ty < minMax[2]) {
-              minMax[2] = ty;
-            } else if (ty > minMax[3]) {
-              minMax[3] = ty;
-            }
+          if (ty < minMax[2]) {
+            minMax[2] = ty;
+          } else if (ty > minMax[3]) {
+            minMax[3] = ty;
           }
         };
 
@@ -597,7 +591,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     inputTarget = new InputTarget(InputTarget.Type.NO_TARGET, 0);
     unlockPlatformViewInputConnection();
     lastClientRect = null;
-    // When the IME is hidden, we need to restart the input method manager to accomodate
+    // When the IME is hidden, we need to restart the input method manager to accommodate
     // some keyboards like the Samsung keyboard that may be caching old state.
     WindowInsetsCompat insets = ViewCompat.getRootWindowInsets(mView);
     if (insets != null && !insets.isVisible(WindowInsetsCompat.Type.ime())) {
@@ -614,7 +608,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
       // InputConnection is managed by a platform view that is presented on a virtual display.
       VIRTUAL_DISPLAY_PLATFORM_VIEW,
       // InputConnection is managed by a platform view that is embedded in the activity's view
-      // hierarchy. This view hierarchy is displayed in a physical display within the aplication
+      // hierarchy. This view hierarchy is displayed in a physical display within the application
       // display area.
       PHYSICAL_DISPLAY_PLATFORM_VIEW,
     }
@@ -675,7 +669,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
                 && composingStart == mLastKnownFrameworkTextEditingState.composingStart
                 && composingEnd == mLastKnownFrameworkTextEditingState.composingEnd);
     if (!skipFrameworkUpdate) {
-      Log.v(TAG, "send EditingState to flutter: " + mEditable.toString());
+      Log.v(TAG, "send EditingState to flutter: " + mEditable);
 
       if (configuration.enableDeltaModel) {
         textInputChannel.updateEditingStateWithDeltas(inputTarget.id, batchTextEditingDeltas);
