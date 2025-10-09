@@ -2762,7 +2762,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       if (hasFlag(Flag.IS_FOCUSABLE)) {
         return true;
       }
-      if (hasFlag(Flag.IS_ACCESSIBILITY_FOCUSABLE_SET) && !hasFlag(Flag.IS_ACCESSIBILITY_FOCUSABLE)) {
+      if (hasFlag(Flag.IS_ACCESSIBILITY_FOCUSABLE_SET)
+          && !hasFlag(Flag.IS_ACCESSIBILITY_FOCUSABLE)) {
         return false;
       }
       // If not explicitly set as focusable, then use our legacy
