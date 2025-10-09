@@ -2762,6 +2762,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       if (hasFlag(Flag.IS_FOCUSABLE)) {
         return true;
       }
+      if (hasFlag(Flag.IS_ACCESSIBILITY_FOCUSABLE_SET) && !hasFlag(Flag.IS_ACCESSIBILITY_FOCUSABLE)) {
+        return false;
+      }
       // If not explicitly set as focusable, then use our legacy
       // algorithm. Once all focusable widgets have a Focus widget, then
       // this won't be needed.
@@ -2778,10 +2781,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     // a focusable unit. Screen readers should generally use other signals, such as
     // isFocusable(), or the presence of text in a node, to determine what should
     // receive focus.
-    //
-    // TODO(hangyujin): To explictly make a node a11y non-focusable,
-    // might also need to mark the keyboard `focusable` to false. But we need to make sure
-    // it doesnt break existing behaviours.
     private boolean isScreenReaderFocusable() {
       if (hasFlag(Flag.IS_ACCESSIBILITY_FOCUSABLE_SET)) {
         return hasFlag(Flag.IS_ACCESSIBILITY_FOCUSABLE);

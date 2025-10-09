@@ -489,6 +489,10 @@ sealed class _DebugSemanticsRoleChecks {
         return FlutterError('A collapsed node cannot have a collapse action.');
       }
     }
+    if (data.flagsCollection.isFocused != Tristate.none &&
+        data.flagsCollection.isAccessibilityFocusable == Tristate.isFalse) {
+      return FlutterError('A node that is keyboard focusable cannot be set to accessibility unfocusable');
+    }
 
     return null;
   }
