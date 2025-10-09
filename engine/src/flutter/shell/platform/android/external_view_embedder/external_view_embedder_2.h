@@ -115,7 +115,7 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
   const TaskRunners task_runners_;
 
   // If the overlay layer is currently shown.
-  std::atomic_bool overlay_layer_is_shown_{false};;
+  std::atomic_bool overlay_layer_is_shown_{false};
 
   // The size of the root canvas.
   DlISize frame_size_;
