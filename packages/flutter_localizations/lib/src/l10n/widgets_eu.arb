@@ -13,5 +13,7 @@
   "pasteButtonLabel": "Itsatsi",
   "selectAllButtonLabel": "Hautatu guztiak",
   "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found"
+  "noResultsFound": "No results found",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }
