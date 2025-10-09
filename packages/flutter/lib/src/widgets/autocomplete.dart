@@ -111,10 +111,9 @@ enum OptionsViewOpenDirection {
 
   /// Open in the direction with the most available space within the overlay.
   ///
-  /// The available space for the options view is calculated based on the size
-  /// of the [Overlay] that contains the autocomplete widget, not the visible
-  /// screen space. This means the options view will be constrained by any
-  /// surrounding widgets that limit the overlay's bounds.
+  /// The available space is calculated as the distance from the field's top
+  /// edge to the overlay's top edge (for upward opening) or from the field's
+  /// bottom edge to the overlay's bottom edge (for downward opening).
   ///
   /// If both directions have the same available space, the options view opens
   /// downward.
