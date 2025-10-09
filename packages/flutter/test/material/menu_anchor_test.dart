@@ -5107,6 +5107,78 @@ void main() {
     );
     expect(tester.getSize(find.byType(MenuBar)), Size.zero);
   });
+
+  testWidgets('MenuItemButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(child: SizedBox.shrink(child: MenuItemButton())),
+      ),
+    );
+    expect(tester.getSize(find.byType(MenuItemButton)), Size.zero);
+  });
+
+  testWidgets('CheckboxMenuButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: CheckboxMenuButton(
+              value: true,
+              onChanged: (bool? value) {},
+              child: const Text('X'),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CheckboxMenuButton)), Size.zero);
+  });
+
+  testWidgets('RadioMenuButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: RadioMenuButton<bool>(
+              value: true,
+              groupValue: true,
+              onChanged: (bool? value) {},
+              child: null,
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(RadioMenuButton<bool>)), Size.zero);
+  });
+
+  testWidgets('Layout updates when reserved padding changes', (WidgetTester tester) async {
+    const EdgeInsetsGeometry reservedPadding = EdgeInsets.symmetric(horizontal: 13.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MenuAnchor(
+          controller: controller,
+          menuChildren: const <Widget>[SizedBox(width: 800, height: 24)],
+        ),
+      ),
+    );
+
+    controller.open(position: Offset.zero);
+    await tester.pump();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MenuAnchor(
+          controller: controller,
+          reservedPadding: reservedPadding,
+          menuChildren: const <Widget>[SizedBox(width: 800, height: 24)],
+        ),
+      ),
+    );
+
+    expect(tester.getRect(findMenuPanels()).width, 800.0 - reservedPadding.horizontal);
+  });
 }
 
 List<Widget> createTestMenus({
