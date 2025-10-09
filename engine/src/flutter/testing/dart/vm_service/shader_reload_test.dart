@@ -3,13 +3,44 @@
 // found in the LICENSE file.
 
 import 'dart:developer' as developer;
+import 'dart:io' show File, Platform;
+import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 import 'package:vm_service/vm_service.dart' as vms;
 import 'package:vm_service/vm_service_io.dart';
 
 import '../impeller_enabled.dart';
+
+Future<void> _performReload(String assetKey) async {
+  final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
+  vms.VmService? vmService;
+
+  try {
+    if (info.serverUri == null) {
+      fail('This test must not be run with --disable-vm-service.');
+    }
+
+    vmService = await vmServiceConnectUri(
+      'ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws',
+    );
+    final vms.VM vm = await vmService.getVM();
+
+    expect(vm.isolates!.isNotEmpty, true);
+    for (final vms.IsolateRef isolateRef in vm.isolates!) {
+      final vms.Response response = await vmService.callServiceExtension(
+        'ext.ui.window.reinitializeShader',
+        isolateId: isolateRef.id,
+        args: <String, Object>{'assetKey': assetKey},
+      );
+      expect(response.type == 'Success', true);
+    }
+  } finally {
+    await vmService?.dispose();
+  }
+}
 
 void main() {
   test('simple iplr shader can be re-initialized', () async {
@@ -17,36 +48,52 @@ void main() {
       // Needs https://github.com/flutter/flutter/issues/129659
       return;
     }
-    vms.VmService? vmService;
     FragmentShader? shader;
     try {
       final FragmentProgram program = await FragmentProgram.fromAsset('functions.frag.iplr');
       shader = program.fragmentShader()..setFloat(0, 1.0);
       _use(shader);
-
-      final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
-
-      if (info.serverUri == null) {
-        fail('This test must not be run with --disable-vm-service.');
-      }
-
-      vmService = await vmServiceConnectUri(
-        'ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws',
-      );
-      final vms.VM vm = await vmService.getVM();
-
-      expect(vm.isolates!.isNotEmpty, true);
-      for (final vms.IsolateRef isolateRef in vm.isolates!) {
-        final vms.Response response = await vmService.callServiceExtension(
-          'ext.ui.window.reinitializeShader',
-          isolateId: isolateRef.id,
-          args: <String, Object>{'assetKey': 'functions.frag.iplr'},
-        );
-        expect(response.type == 'Success', true);
-      }
+      await _performReload('functions.frag.iplr');
     } finally {
-      await vmService?.dispose();
       shader?.dispose();
+    }
+  });
+
+  test('reorder uniforms', () async {
+    if (impellerEnabled) {
+      // Needs https://github.com/flutter/flutter/issues/129659
+      return;
+    }
+    final String buildDir = Platform.environment['FLUTTER_BUILD_DIRECTORY']!;
+    final String assetsDir = path.join(buildDir, 'gen/flutter/lib/ui/assets');
+    final String shaderSrcA = path.join(assetsDir, 'uniforms.frag.iplr');
+    final String shaderSrcB = path.join(assetsDir, 'uniforms_reordered.frag.iplr');
+    final String shaderSrcC = path.join(assetsDir, 'test_reorder_uniforms.frag.iplr');
+
+    final File fileC = File(shaderSrcC);
+    final Uint8List sourceA = File(shaderSrcA).readAsBytesSync();
+    final Uint8List sourceB = File(shaderSrcB).readAsBytesSync();
+
+    fileC.writeAsBytesSync(sourceA);
+
+    try {
+      final FragmentProgram program = await FragmentProgram.fromAsset(
+        'test_reorder_uniforms.frag.iplr',
+      );
+      final FragmentShader shader = program.fragmentShader();
+      final UniformFloatSlot slot = shader.getUniformFloat('iVec2Uniform');
+      expect(slot.shaderIndex, 1);
+
+      fileC.writeAsBytesSync(sourceB);
+      await _performReload('test_reorder_uniforms.frag.iplr');
+      // TODO(tbd): The reload future returns when the vm service has been sent,
+      // not when it's executed.  Find a way to remove this.
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      expect(slot.shaderIndex, 5);
+    } finally {
+      if (fileC.existsSync()) {
+        fileC.deleteSync();
+      }
     }
   });
 }
