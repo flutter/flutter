@@ -533,8 +533,15 @@ static BOOL _preparedOnce = NO;
                                                           action:nil
                                             forwardingRecognizer:forwardingRecognizer];
     _blockingPolicy = blockingPolicy;
+    _overlays = [NSArray array];
 
-    [self addGestureRecognizer:_delayingRecognizer];
+    // For hit test approach, we don't need to block gestures using delaying recognizer, but we
+    // still forward touches so Flutter can process it in its gesture arena (e.g. dismiss a
+    // drop-down menu when tapping outside of the menu but inside the platform view).
+    if (blockingPolicy !=
+        FlutterPlatformViewGestureRecognizersBlockingPolicyNaiveHitTestByOverlay) {
+      [self addGestureRecognizer:_delayingRecognizer];
+    }
     [self addGestureRecognizer:forwardingRecognizer];
   }
   return self;
@@ -573,8 +580,30 @@ static BOOL _preparedOnce = NO;
   return NO;
 }
 
+- (UIView*)hitTest:(CGPoint)point withEvent:(UIEvent*)event {
+  if (_blockingPolicy == FlutterPlatformViewGestureRecognizersBlockingPolicyNaiveHitTestByOverlay) {
+    BOOL touchInsideOverlay = NO;
+    for (UIView* overlay in self.overlays) {
+      CGRect overlayFrame = [self convertRect:overlay.frame fromView:overlay.superview];
+      if (CGRectContainsPoint(overlayFrame, point)) {
+        touchInsideOverlay = YES;
+        break;
+      }
+    }
+    if (touchInsideOverlay) {
+      return self;
+    }
+  }
+
+  return [super hitTest:point withEvent:event];
+}
+
 - (void)blockGesture {
   switch (_blockingPolicy) {
+    case FlutterPlatformViewGestureRecognizersBlockingPolicyNaiveHitTestByOverlay:
+      // No-op. Handled by hit test.
+      break;
+
     case FlutterPlatformViewGestureRecognizersBlockingPolicyEager:
       // We block all other gesture recognizers immediately in this policy.
       self.delayingRecognizer.state = UIGestureRecognizerStateEnded;

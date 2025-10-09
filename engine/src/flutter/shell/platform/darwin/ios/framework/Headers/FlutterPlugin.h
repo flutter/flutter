@@ -267,6 +267,23 @@ typedef enum {
    * but never recognizing the gesture (and never invoking actions).
    */
   FlutterPlatformViewGestureRecognizersBlockingPolicyWaitUntilTouchesEnded,
+
+  // TODO(hellohuanlin): a complete solution should rely on FFI to query from Flutter's gesture
+  // arena to decide whether to block the gesture or not.
+  /**
+   * Flutter blocks gestures on the platform view if touch location is inside the overlaps between
+   * Flutter widgets and the platform view, and allows them if touch location is outside the
+   * overlaps.
+   *
+   * This may not always be desired behavior, because in some
+   * scenarios, we may still want to block a gesture even if touch outside the overlap.
+   *
+   * Multiple overlaps are merged to a single touch blocking area as of current
+   * implementation. Therefore, use this policy when there can only be one overlap. Otherwise, the
+   * blocking area will be a bounding box containing all the overlaps.
+   */
+  FlutterPlatformViewGestureRecognizersBlockingPolicyNaiveHitTestByOverlay,
+
   // NOLINTEND(readability-identifier-naming)
 } FlutterPlatformViewGestureRecognizersBlockingPolicy;
 
