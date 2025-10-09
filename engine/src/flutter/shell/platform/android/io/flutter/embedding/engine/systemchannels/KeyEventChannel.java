@@ -34,7 +34,7 @@ public class KeyEventChannel {
      *
      * @param isEventHandled whether the framework decides to handle the event.
      */
-    public void onFrameworkResponse(boolean isEventHandled);
+    void onFrameworkResponse(boolean isEventHandled);
   }
 
   /**
