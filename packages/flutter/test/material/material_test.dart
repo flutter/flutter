@@ -1241,6 +1241,15 @@ void main() {
     expect(outsideView, isNull);
     expect(insideView, isNull);
   });
+
+  testWidgets('Material does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(child: SizedBox(child: Material())),
+      ),
+    );
+    expect(tester.getSize(find.byType(Material)), Size.zero);
+  });
 }
 
 class TrackPaintInkFeature extends InkFeature {
