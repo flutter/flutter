@@ -474,7 +474,10 @@ class _CupertinoSwitchState extends State<CupertinoSwitch>
     with TickerProviderStateMixin, ToggleableStateMixin {
   final _SwitchPainter _painter = _SwitchPainter();
 
+  // The fractional position of the thumb during a drag.
   double _dragPosition = 0;
+  // The transient value of the switch determined by _dragPosition during a
+  // drag.
   bool? _dragValue;
 
   @override
