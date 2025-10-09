@@ -34,7 +34,7 @@ void AndroidExternalViewEmbedderWrapper::EnsureInitialized() {
       android_context_.RenderingApi() == AndroidRenderingAPI::kImpellerVulkan &&
       impeller::ContextVK::Cast(*android_context_.GetImpellerContext())
           .GetShouldEnableSurfaceControlSwapchain()) {
-    hcpp_view_embedder_ = std::make_unique<AndroidExternalViewEmbedder2>(
+    hcpp_view_embedder_ = std::make_shared<AndroidExternalViewEmbedder2>(
         android_context_, jni_facade_, surface_factory_, task_runners_);
   } else {
     non_hcpp_view_embedder_ = std::make_unique<AndroidExternalViewEmbedder>(
