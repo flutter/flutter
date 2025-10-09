@@ -1195,7 +1195,7 @@ void main() {
       expect(adaptiveSwitch.activeColor, activeTrackColor, reason: 'on ${platform.name}');
       expect(adaptiveSwitch.inactiveTrackColor, inactiveTrackColor, reason: 'on ${platform.name}');
       expect(
-        adaptiveSwitch.thumbColor?.resolve(<MaterialState>{}),
+        adaptiveSwitch.thumbColor?.resolve(<WidgetState>{}),
         thumbColor,
         reason: 'on ${platform.name}',
       );
@@ -2260,20 +2260,20 @@ void main() {
     const Color inactiveEnabledThumbColor = Color(0xFF000003);
     const Color inactiveDisabledThumbColor = Color(0xFF000004);
 
-    Color getThumbColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        if (states.contains(MaterialState.selected)) {
+    Color getThumbColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
+        if (states.contains(WidgetState.selected)) {
           return activeDisabledThumbColor;
         }
         return inactiveDisabledThumbColor;
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return activeEnabledThumbColor;
       }
       return inactiveEnabledThumbColor;
     }
 
-    final WidgetStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
+    final WidgetStateProperty<Color> thumbColor = WidgetStateColor.resolveWith(getThumbColor);
 
     Widget buildSwitch({required bool enabled, required bool active}) {
       return MaterialApp(
@@ -2375,20 +2375,20 @@ void main() {
     const Color inactiveEnabledThumbColor = Color(0xFF000003);
     const Color inactiveDisabledThumbColor = Color(0xFF000004);
 
-    Color getThumbColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        if (states.contains(MaterialState.selected)) {
+    Color getThumbColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
+        if (states.contains(WidgetState.selected)) {
           return activeDisabledThumbColor;
         }
         return inactiveDisabledThumbColor;
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return activeEnabledThumbColor;
       }
       return inactiveEnabledThumbColor;
     }
 
-    final WidgetStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
+    final WidgetStateProperty<Color> thumbColor = WidgetStateColor.resolveWith(getThumbColor);
 
     Widget buildSwitch({required bool enabled, required bool active}) {
       return Theme(
@@ -2484,17 +2484,17 @@ void main() {
     const Color hoveredThumbColor = Color(0xFF000001);
     const Color focusedThumbColor = Color(0xFF000002);
 
-    Color getThumbColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.hovered)) {
+    Color getThumbColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.hovered)) {
         return hoveredThumbColor;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return focusedThumbColor;
       }
       return Colors.transparent;
     }
 
-    final WidgetStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
+    final WidgetStateProperty<Color> thumbColor = WidgetStateColor.resolveWith(getThumbColor);
 
     Widget buildSwitch() {
       return MaterialApp(
@@ -2566,17 +2566,17 @@ void main() {
     const Color hoveredThumbColor = Color(0xFF000001);
     const Color focusedThumbColor = Color(0xFF000002);
 
-    Color getThumbColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.hovered)) {
+    Color getThumbColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.hovered)) {
         return hoveredThumbColor;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return focusedThumbColor;
       }
       return Colors.transparent;
     }
 
-    final WidgetStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
+    final WidgetStateProperty<Color> thumbColor = WidgetStateColor.resolveWith(getThumbColor);
 
     Widget buildSwitch() {
       return MaterialApp(
@@ -2645,20 +2645,20 @@ void main() {
     const Color inactiveEnabledTrackColor = Color(0xFF000003);
     const Color inactiveDisabledTrackColor = Color(0xFF000004);
 
-    Color getTrackColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        if (states.contains(MaterialState.selected)) {
+    Color getTrackColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
+        if (states.contains(WidgetState.selected)) {
           return activeDisabledTrackColor;
         }
         return inactiveDisabledTrackColor;
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return activeEnabledTrackColor;
       }
       return inactiveEnabledTrackColor;
     }
 
-    final WidgetStateProperty<Color> trackColor = MaterialStateColor.resolveWith(getTrackColor);
+    final WidgetStateProperty<Color> trackColor = WidgetStateColor.resolveWith(getTrackColor);
 
     Widget buildSwitch({required bool enabled, required bool active}) {
       return MaterialApp(
@@ -2732,20 +2732,20 @@ void main() {
     const Color inactiveEnabledTrackColor = Color(0xFF000003);
     const Color inactiveDisabledTrackColor = Color(0xFF000004);
 
-    Color getTrackColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        if (states.contains(MaterialState.selected)) {
+    Color getTrackColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
+        if (states.contains(WidgetState.selected)) {
           return activeDisabledTrackColor;
         }
         return inactiveDisabledTrackColor;
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return activeEnabledTrackColor;
       }
       return inactiveEnabledTrackColor;
     }
 
-    final WidgetStateProperty<Color> trackColor = MaterialStateColor.resolveWith(getTrackColor);
+    final WidgetStateProperty<Color> trackColor = WidgetStateColor.resolveWith(getTrackColor);
 
     Widget buildSwitch({required bool enabled, required bool active}) {
       return Theme(
@@ -2821,17 +2821,17 @@ void main() {
     const Color hoveredTrackColor = Color(0xFF000001);
     const Color focusedTrackColor = Color(0xFF000002);
 
-    Color getTrackColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.hovered)) {
+    Color getTrackColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.hovered)) {
         return hoveredTrackColor;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return focusedTrackColor;
       }
       return Colors.transparent;
     }
 
-    final WidgetStateProperty<Color> trackColor = MaterialStateColor.resolveWith(getTrackColor);
+    final WidgetStateProperty<Color> trackColor = WidgetStateColor.resolveWith(getTrackColor);
 
     Widget buildSwitch() {
       return MaterialApp(
@@ -2893,17 +2893,17 @@ void main() {
     const Color hoveredTrackColor = Color(0xFF000001);
     const Color focusedTrackColor = Color(0xFF000002);
 
-    Color getTrackColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.hovered)) {
+    Color getTrackColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.hovered)) {
         return hoveredTrackColor;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return focusedTrackColor;
       }
       return Colors.transparent;
     }
 
-    final WidgetStateProperty<Color> trackColor = MaterialStateColor.resolveWith(getTrackColor);
+    final WidgetStateProperty<Color> trackColor = WidgetStateColor.resolveWith(getTrackColor);
 
     Widget buildSwitch() {
       return Theme(
@@ -2962,14 +2962,14 @@ void main() {
     final Color activeDisabledThumbColor = Colors.blue.withOpacity(.60);
     final ThemeData theme = ThemeData.light(useMaterial3: false);
 
-    Color getThumbColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    Color getThumbColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return activeDisabledThumbColor;
       }
       return Colors.black;
     }
 
-    final WidgetStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
+    final WidgetStateProperty<Color> thumbColor = WidgetStateColor.resolveWith(getThumbColor);
 
     Widget buildSwitch({required bool enabled, required bool active}) {
       return Directionality(
@@ -3019,14 +3019,14 @@ void main() {
     final ThemeData theme = ThemeData();
     final ColorScheme colors = theme.colorScheme;
 
-    Color getThumbColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    Color getThumbColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return activeDisabledThumbColor;
       }
       return Colors.black;
     }
 
-    final WidgetStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
+    final WidgetStateProperty<Color> thumbColor = WidgetStateColor.resolveWith(getThumbColor);
 
     Widget buildSwitch({required bool enabled, required bool active}) {
       return Directionality(
@@ -3081,17 +3081,17 @@ void main() {
     const Color hoverColor = Color(0xFF000005);
     const Color focusColor = Color(0xFF000006);
 
-    Color? getOverlayColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
-        if (states.contains(MaterialState.selected)) {
+    Color? getOverlayColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
+        if (states.contains(WidgetState.selected)) {
           return activePressedOverlayColor;
         }
         return inactivePressedOverlayColor;
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return hoverOverlayColor;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return focusOverlayColor;
       }
       return null;
@@ -3108,8 +3108,8 @@ void main() {
             autofocus: focused,
             value: active,
             onChanged: (_) {},
-            thumbColor: WidgetStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
+            thumbColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
                 return activeThumbColor;
               }
               return inactiveThumbColor;
@@ -3640,20 +3640,20 @@ void main() {
       const Color inactiveEnabledTrackOutlineColor = Color(0xFF000003);
       const Color inactiveDisabledTrackOutlineColor = Color(0xFF000004);
 
-      Color getTrackOutlineColor(Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
-          if (states.contains(MaterialState.selected)) {
+      Color getTrackOutlineColor(Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
+          if (states.contains(WidgetState.selected)) {
             return activeDisabledTrackOutlineColor;
           }
           return inactiveDisabledTrackOutlineColor;
         }
-        if (states.contains(MaterialState.selected)) {
+        if (states.contains(WidgetState.selected)) {
           return activeEnabledTrackOutlineColor;
         }
         return inactiveEnabledTrackOutlineColor;
       }
 
-      final WidgetStateProperty<Color> trackOutlineColor = MaterialStateColor.resolveWith(
+      final WidgetStateProperty<Color> trackOutlineColor = WidgetStateColor.resolveWith(
         getTrackOutlineColor,
       );
 
@@ -3724,17 +3724,17 @@ void main() {
       const Color hoveredTrackOutlineColor = Color(0xFF000001);
       const Color focusedTrackOutlineColor = Color(0xFF000002);
 
-      Color getTrackOutlineColor(Set<MaterialState> states) {
-        if (states.contains(MaterialState.hovered)) {
+      Color getTrackOutlineColor(Set<WidgetState> states) {
+        if (states.contains(WidgetState.hovered)) {
           return hoveredTrackOutlineColor;
         }
-        if (states.contains(MaterialState.focused)) {
+        if (states.contains(WidgetState.focused)) {
           return focusedTrackOutlineColor;
         }
         return Colors.transparent;
       }
 
-      final WidgetStateProperty<Color> trackOutlineColor = MaterialStateColor.resolveWith(
+      final WidgetStateProperty<Color> trackOutlineColor = WidgetStateColor.resolveWith(
         getTrackOutlineColor,
       );
 
@@ -3792,14 +3792,14 @@ void main() {
       const double inactiveEnabledTrackOutlineWidth = 3.0;
       const double inactiveDisabledTrackOutlineWidth = 4.0;
 
-      double getTrackOutlineWidth(Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
-          if (states.contains(MaterialState.selected)) {
+      double getTrackOutlineWidth(Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
+          if (states.contains(WidgetState.selected)) {
             return activeDisabledTrackOutlineWidth;
           }
           return inactiveDisabledTrackOutlineWidth;
         }
-        if (states.contains(MaterialState.selected)) {
+        if (states.contains(WidgetState.selected)) {
           return activeEnabledTrackOutlineWidth;
         }
         return inactiveEnabledTrackOutlineWidth;
@@ -3875,11 +3875,11 @@ void main() {
       const double hoveredTrackOutlineWidth = 4.0;
       const double focusedTrackOutlineWidth = 6.0;
 
-      double getTrackOutlineWidth(Set<MaterialState> states) {
-        if (states.contains(MaterialState.hovered)) {
+      double getTrackOutlineWidth(Set<WidgetState> states) {
+        if (states.contains(WidgetState.hovered)) {
           return hoveredTrackOutlineWidth;
         }
-        if (states.contains(MaterialState.focused)) {
+        if (states.contains(WidgetState.focused)) {
           return focusedTrackOutlineWidth;
         }
         return 8.0;
@@ -3941,8 +3941,8 @@ void main() {
       );
 
       WidgetStateProperty<Icon?> thumbIcon(Icon? activeIcon, Icon? inactiveIcon) {
-        return WidgetStateProperty.resolveWith<Icon?>((Set<MaterialState> states) {
-          if (states.contains(MaterialState.selected)) {
+        return WidgetStateProperty.resolveWith<Icon?>((Set<WidgetState> states) {
+          if (states.contains(WidgetState.selected)) {
             return activeIcon;
           }
           return inactiveIcon;
