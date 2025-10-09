@@ -442,8 +442,7 @@ TEST(FlEngineTest, EngineId) {
 TEST(FlEngineTest, UIIsolateDefaultThreadPolicy) {
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
-  fl_dart_project_set_ui_thread_policy(
-      project, FL_UI_THREAD_POLICY_DEFAULT);
+  fl_dart_project_set_ui_thread_policy(project, FL_UI_THREAD_POLICY_DEFAULT);
 
   bool same_task_runner = false;
 
