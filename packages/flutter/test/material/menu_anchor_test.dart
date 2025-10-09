@@ -5108,6 +5108,17 @@ void main() {
     expect(tester.getRect(findMenuPanels()).width, 800.0 - reservedPadding.horizontal);
   });
 
+  testWidgets('MenuBar does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: MenuBar(children: <Widget>[Text('X')])),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(MenuBar)), Size.zero);
+  });
+
   testWidgets('MenuItemButton does not crash at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
