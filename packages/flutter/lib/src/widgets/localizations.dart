@@ -223,6 +223,9 @@ abstract class WidgetsLocalizations {
   /// Label for "share" edit buttons and menu items.
   String get shareButtonLabel;
 
+  /// The accessibility hint for an unselected radio button.
+  String get radioButtonUnselectedLabel;
+
   /// The `WidgetsLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
   ///
@@ -319,6 +322,8 @@ class DefaultWidgetsLocalizations implements WidgetsLocalizations {
   @override
   String get shareButtonLabel => 'Share';
 
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
   @override
   TextDirection get textDirection => TextDirection.ltr;
 
