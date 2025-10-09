@@ -163,7 +163,7 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
       }
       // skip node if it is touching the edge scrollable, since it might
       // be partially scrolled offscreen.
-      if (current.hasFlag(SemanticsFlag.hasImplicitScrolling) &&
+      if (current.flagsCollection.hasImplicitScrolling &&
           _isAtBoundary(paintBounds, current.rect)) {
         return result;
       }
@@ -207,11 +207,11 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
     // Skip node if it has no actions, or is marked as hidden.
     if ((!data.hasAction(ui.SemanticsAction.longPress) &&
             !data.hasAction(ui.SemanticsAction.tap)) ||
-        data.hasFlag(ui.SemanticsFlag.isHidden)) {
+        data.flagsCollection.isHidden) {
       return true;
     }
     // Skip links https://www.w3.org/WAI/WCAG21/Understanding/target-size.html
-    if (data.hasFlag(ui.SemanticsFlag.isLink)) {
+    if (data.flagsCollection.isLink) {
       return true;
     }
     return false;
@@ -253,8 +253,8 @@ class LabeledTapTargetGuideline extends AccessibilityGuideline {
     });
     if (node.isMergedIntoParent ||
         node.isInvisible ||
-        node.hasFlag(ui.SemanticsFlag.isHidden) ||
-        node.hasFlag(ui.SemanticsFlag.isTextField)) {
+        node.flagsCollection.isHidden ||
+        node.flagsCollection.isTextField) {
       return result;
     }
     final SemanticsData data = node.getSemanticsData();
@@ -346,12 +346,11 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     Evaluation result = const Evaluation.pass();
 
     // Skip disabled nodes, as they not required to pass contrast check.
-    final bool isDisabled =
-        node.hasFlag(ui.SemanticsFlag.hasEnabledState) && !node.hasFlag(ui.SemanticsFlag.isEnabled);
+    final bool isDisabled = node.flagsCollection.isEnabled == ui.Tristate.isFalse;
 
     if (node.isInvisible ||
         node.isMergedIntoParent ||
-        node.hasFlag(ui.SemanticsFlag.isHidden) ||
+        node.flagsCollection.isHidden ||
         isDisabled) {
       return result;
     }
@@ -481,8 +480,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
   ///
   /// Skip routes which might have labels, and nodes without any text.
   bool shouldSkipNode(SemanticsData data) =>
-      data.hasFlag(ui.SemanticsFlag.scopesRoute) ||
-      (data.label.trim().isEmpty && data.value.trim().isEmpty);
+      data.flagsCollection.scopesRoute || (data.label.trim().isEmpty && data.value.trim().isEmpty);
 
   /// Returns if a rectangle of node is off the screen.
   ///

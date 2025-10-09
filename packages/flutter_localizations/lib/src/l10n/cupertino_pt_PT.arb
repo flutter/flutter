@@ -1,4 +1,10 @@
 {
+  "expansionTileExpandedHint": "toque duas vezes para reduzir",
+  "collapsedHint": "Expandido",
+  "expandedHint": "Reduzido",
+  "expansionTileCollapsedTapHint": "Expandir para obter mais detalhes",
+  "expansionTileExpandedTapHint": "Reduzir",
+  "expansionTileCollapsedHint": "toque duas vezes para expandir",
   "cancelButtonLabel": "Cancelar",
   "backButtonLabel": "Anterior",
   "clearButtonLabel": "Limpar",
