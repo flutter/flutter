@@ -1182,48 +1182,51 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
               : () {
                   _controller.close();
                 },
-          child: TextField(
-            key: _anchorKey,
-            enabled: widget.enabled,
-            mouseCursor: effectiveMouseCursor,
-            focusNode: widget.focusNode,
-            canRequestFocus: canRequestFocus(),
-            enableInteractiveSelection: canRequestFocus(),
-            readOnly: !canRequestFocus(),
-            keyboardType: widget.keyboardType,
-            textAlign: widget.textAlign,
-            textAlignVertical: TextAlignVertical.center,
-            maxLines: widget.maxLines,
-            textInputAction: widget.textInputAction,
-            cursorHeight: widget.cursorHeight,
-            style: effectiveTextStyle,
-            controller: _effectiveTextEditingController,
-            onEditingComplete: _handleEditingComplete,
-            onTap: !widget.enabled
-                ? null
-                : () {
-                    handlePressed(controller, focusForKeyboard: !canRequestFocus());
-                  },
-            onChanged: (String text) {
-              controller.open();
-              setState(() {
-                filteredEntries = widget.dropdownMenuEntries;
-                _enableFilter = widget.enableFilter;
-                _enableSearch = widget.enableSearch;
-              });
-            },
-            inputFormatters: widget.inputFormatters,
-            decoration: InputDecoration(
-              label: widget.label,
-              hintText: widget.hintText,
-              helperText: widget.helperText,
-              errorText: widget.errorText,
-              prefixIcon: widget.leadingIcon != null
-                  ? SizedBox(key: _leadingKey, child: widget.leadingIcon)
-                  : null,
-              suffixIcon: widget.showTrailingIcon ? trailingButton : null,
-            ).applyDefaults(effectiveInputDecorationTheme),
-            restorationId: widget.restorationId,
+          child: ExcludeSemantics(
+            excluding: isButton && kIsWeb,
+            child: TextField(
+              key: _anchorKey,
+              enabled: widget.enabled,
+              mouseCursor: effectiveMouseCursor,
+              focusNode: widget.focusNode,
+              canRequestFocus: canRequestFocus(),
+              enableInteractiveSelection: canRequestFocus(),
+              readOnly: !canRequestFocus(),
+              keyboardType: widget.keyboardType,
+              textAlign: widget.textAlign,
+              textAlignVertical: TextAlignVertical.center,
+              maxLines: widget.maxLines,
+              textInputAction: widget.textInputAction,
+              cursorHeight: widget.cursorHeight,
+              style: effectiveTextStyle,
+              controller: _effectiveTextEditingController,
+              onEditingComplete: _handleEditingComplete,
+              onTap: !widget.enabled
+                  ? null
+                  : () {
+                      handlePressed(controller, focusForKeyboard: !canRequestFocus());
+                    },
+              onChanged: (String text) {
+                controller.open();
+                setState(() {
+                  filteredEntries = widget.dropdownMenuEntries;
+                  _enableFilter = widget.enableFilter;
+                  _enableSearch = widget.enableSearch;
+                });
+              },
+              inputFormatters: widget.inputFormatters,
+              decoration: InputDecoration(
+                label: widget.label,
+                hintText: widget.hintText,
+                helperText: widget.helperText,
+                errorText: widget.errorText,
+                prefixIcon: widget.leadingIcon != null
+                    ? SizedBox(key: _leadingKey, child: widget.leadingIcon)
+                    : null,
+                suffixIcon: widget.showTrailingIcon ? trailingButton : null,
+              ).applyDefaults(effectiveInputDecorationTheme),
+              restorationId: widget.restorationId,
+            ),
           ),
         );
 
