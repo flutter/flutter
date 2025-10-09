@@ -196,7 +196,6 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
         }
         // Hide views that were visible last frame, but not in this frame.
         for (int64_t view_id : views_visible_last_frame) {
-          FML_LOG(ERROR) << "Hiding platform view: " << view_id;
           jni_facade->hidePlatformView2(view_id);
         }
 
