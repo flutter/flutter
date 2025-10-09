@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_WRAPPER_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_WRAPPER_H_
 
+#include <memory>
 #include "flutter/common/task_runners.h"
 #include "flutter/flow/embedded_views.h"
 #include "flutter/shell/platform/android/context/android_context.h"
@@ -86,7 +87,7 @@ class AndroidExternalViewEmbedderWrapper final : public ExternalViewEmbedder {
   std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
   std::shared_ptr<AndroidSurfaceFactory> surface_factory_;
   std::unique_ptr<AndroidExternalViewEmbedder> non_hcpp_view_embedder_;
-  std::shared_ptr<AndroidExternalViewEmbedder2> hcpp_view_embedder_;
+  std::unique_ptr<AndroidExternalViewEmbedder2> hcpp_view_embedder_;
 };
 
 }  // namespace flutter
