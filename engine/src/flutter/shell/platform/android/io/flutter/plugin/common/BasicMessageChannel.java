@@ -259,13 +259,7 @@ public final class BasicMessageChannel<T> {
     public void onMessage(@Nullable ByteBuffer message, @NonNull final BinaryReply callback) {
       try {
         handler.onMessage(
-            codec.decodeMessage(message),
-            new Reply<T>() {
-              @Override
-              public void reply(T reply) {
-                callback.reply(codec.encodeMessage(reply));
-              }
-            });
+            codec.decodeMessage(message), reply -> callback.reply(codec.encodeMessage(reply)));
       } catch (RuntimeException e) {
         Log.e(TAG + name, "Failed to handle message", e);
         callback.reply(null);
