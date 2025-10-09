@@ -1696,7 +1696,7 @@ typedef struct {
   /// An identifier for the semantics node in native accessibility hierarchy.
   /// This value should not be exposed to the users of the app.
   /// This is usually used for UI testing with tools that work by querying the
-  /// native accessibility, like UIAutomator, XCUITest, or Appium.
+  /// native accessibility, like UI Automator, XCUITest, or Appium.
   const char* identifier;
 } FlutterSemanticsNode2;
 
