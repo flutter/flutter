@@ -15,57 +15,111 @@ FLUTTER_ASSERT_ARC
 @interface FlutterPluginSceneLifeCycleDelegate ()
 
 /**
- * An array of weak pointers to `FlutterEngine`s that have views within this scene.
+ * An array of weak pointers to `FlutterEngine`s that have views within this scene. Flutter
+ * automatically adds engines to this array.
  *
- * This array is lazily cleaned up. `updateEnginesInScene:` should be called before use to ensure it
- * is up-to-date.
+ * This array is lazily cleaned up. `updateFlutterManagedEnginesInScene:` should be called before
+ * use to ensure it is up-to-date.
  */
-@property(nonatomic, strong) NSPointerArray* engines;
+@property(nonatomic, strong) NSPointerArray* flutterManagedEngines;
+
+/**
+ * An array of weak pointers to `FlutterEngine`s that have views within this scene. Developers
+ * manually add engines to this array.
+ *
+ * It is up to the developer to keep this list up-to-date.
+ */
+@property(nonatomic, strong) NSPointerArray* developerManagedEngines;
 
 @property(nonatomic, strong) UISceneConnectionOptions* connectionOptions;
+@property(nonatomic, assign) BOOL sceneWillConnectEventHandledByPlugin;
+@property(nonatomic, assign) BOOL sceneWillConnectFallbackCalled;
+
 @end
 
 @implementation FlutterPluginSceneLifeCycleDelegate
 - (instancetype)init {
   if (self = [super init]) {
-    _engines = [NSPointerArray weakObjectsPointerArray];
+    _flutterManagedEngines = [NSPointerArray weakObjectsPointerArray];
+    _developerManagedEngines = [NSPointerArray weakObjectsPointerArray];
+    _sceneWillConnectFallbackCalled = NO;
+    _sceneWillConnectEventHandledByPlugin = NO;
   }
   return self;
 }
 
-- (void)addFlutterEngine:(FlutterEngine*)engine {
+#pragma mark - Manual Engine Registration
+
+- (BOOL)registerSceneLifeCycleWithFlutterEngine:(FlutterEngine*)engine {
+  // If the engine is Flutter-managed, remove it, since the developer as opted to manually register
+  // it
+  [self removeFlutterManagedEngine:engine];
+
   // Check if the engine is already in the array to avoid duplicates.
-  if ([self.engines.allObjects containsObject:engine]) {
-    return;
+  if ([self manuallyRegisteredEngine:engine]) {
+    return NO;
   }
 
-  [self.engines addPointer:(__bridge void*)engine];
+  [self.developerManagedEngines addPointer:(__bridge void*)engine];
 
-  // NSPointerArray is clever and assumes that unless a mutation operation has occurred on it that
-  // has set one of its values to nil, nothing could have changed and it can skip compaction.
-  // That's reasonable behaviour on a regular NSPointerArray but not for a weakObjectPointerArray.
-  // As a workaround, we mutate it first. See: http://www.openradar.me/15396578
-  [self.engines addPointer:nil];
-  [self.engines compact];
+  [self compactNSPointerArray:self.developerManagedEngines];
+
+  engine.manuallyRegisteredToScene = YES;
+
+  return YES;
 }
 
-- (void)removeFlutterEngine:(FlutterEngine*)engine {
-  NSUInteger index = [self.engines.allObjects indexOfObject:engine];
+- (BOOL)unregisterSceneLifeCycleWithFlutterEngine:(FlutterEngine*)engine {
+  NSUInteger index = [self.developerManagedEngines.allObjects indexOfObject:engine];
   if (index != NSNotFound) {
-    [self.engines removePointerAtIndex:index];
+    [self.developerManagedEngines removePointerAtIndex:index];
+    return YES;
   }
+  return NO;
 }
 
-- (void)updateEnginesInScene:(UIScene*)scene {
+- (BOOL)manuallyRegisteredEngine:(FlutterEngine*)engine {
+  return [self.developerManagedEngines.allObjects containsObject:engine];
+}
+
+#pragma mark - Automatic Flutter Engine Registration
+
+- (BOOL)addFlutterManagedEngine:(FlutterEngine*)engine {
+  // Check if the engine is already in the array to avoid duplicates.
+  if ([self.flutterManagedEngines.allObjects containsObject:engine]) {
+    return NO;
+  }
+
+  // If a manually registered engine, do not add, as it is being handled manually.
+  if (engine.manuallyRegisteredToScene) {
+    return NO;
+  }
+
+  [self.flutterManagedEngines addPointer:(__bridge void*)engine];
+
+  [self compactNSPointerArray:self.flutterManagedEngines];
+  return YES;
+}
+
+- (BOOL)removeFlutterManagedEngine:(FlutterEngine*)engine {
+  NSUInteger index = [self.flutterManagedEngines.allObjects indexOfObject:engine];
+  if (index != NSNotFound) {
+    [self.flutterManagedEngines removePointerAtIndex:index];
+    return YES;
+  }
+  return NO;
+}
+
+- (void)updateFlutterManagedEnginesInScene:(UIScene*)scene {
   // Removes engines that are no longer in the scene or have been deallocated.
   //
   // This also handles the case where a FlutterEngine's view has been moved to a different scene.
-  for (NSUInteger i = 0; i < self.engines.count; i++) {
-    FlutterEngine* engine = (FlutterEngine*)[self.engines pointerAtIndex:i];
+  for (NSUInteger i = 0; i < self.flutterManagedEngines.count; i++) {
+    FlutterEngine* engine = (FlutterEngine*)[self.flutterManagedEngines pointerAtIndex:i];
 
     // The engine may be nil if it has been deallocated.
     if (engine == nil) {
-      [self.engines removePointerAtIndex:i];
+      [self.flutterManagedEngines removePointerAtIndex:i];
       i--;
       continue;
     }
@@ -81,17 +135,22 @@ FLUTTER_ASSERT_ARC
     // the scene.
     UIWindowScene* actualScene = engine.viewController.view.window.windowScene;
     if (actualScene != nil && actualScene != scene) {
-      [self.engines removePointerAtIndex:i];
+      [self.flutterManagedEngines removePointerAtIndex:i];
       i--;
 
       if ([actualScene.delegate conformsToProtocol:@protocol(FlutterSceneLifeCycleProvider)]) {
         id<FlutterSceneLifeCycleProvider> lifeCycleProvider =
             (id<FlutterSceneLifeCycleProvider>)actualScene.delegate;
-        [lifeCycleProvider.sceneLifeCycleDelegate addFlutterEngine:engine];
+        [lifeCycleProvider.sceneLifeCycleDelegate addFlutterManagedEngine:engine];
       }
       continue;
     }
   }
+}
+
+- (NSArray*)allEngines {
+  return [_flutterManagedEngines.allObjects
+      arrayByAddingObjectsFromArray:_developerManagedEngines.allObjects];
 }
 
 /**
@@ -115,7 +174,12 @@ FLUTTER_ASSERT_ARC
 - (void)engine:(FlutterEngine*)engine receivedConnectNotificationFor:(UIScene*)scene {
   // Connection options may be nil if the notification was received before the
   // `scene:willConnectToSession:options:` event. In which case, we can wait for the actual event.
-  [self addFlutterEngine:engine];
+  BOOL added = [self addFlutterManagedEngine:engine];
+  if (!added) {
+    // Don't send willConnectToSession event if engine is already tracked as it will be handled by
+    // the actual event.
+    return;
+  }
   if (self.connectionOptions != nil) {
     [self scene:scene
         willConnectToSession:scene.session
@@ -128,10 +192,19 @@ FLUTTER_ASSERT_ARC
     willConnectToSession:(UISceneSession*)session
                  options:(UISceneConnectionOptions*)connectionOptions {
   self.connectionOptions = connectionOptions;
+  if ([scene.delegate conformsToProtocol:@protocol(UIWindowSceneDelegate)]) {
+    NSObject<UIWindowSceneDelegate>* sceneDelegate =
+        (NSObject<UIWindowSceneDelegate>*)scene.delegate;
+    if ([sceneDelegate.window.rootViewController isKindOfClass:[FlutterViewController class]]) {
+      FlutterViewController* rootViewController =
+          (FlutterViewController*)sceneDelegate.window.rootViewController;
+      [self addFlutterManagedEngine:rootViewController.engine];
+    }
+  }
 
-  [self updateEnginesInScene:scene];
+  [self updateFlutterManagedEnginesInScene:scene];
 
-  for (FlutterEngine* engine in _engines.allObjects) {
+  for (FlutterEngine* engine in [self allEngines]) {
     [self scene:scene willConnectToSession:session flutterEngine:engine options:connectionOptions];
   }
 }
@@ -140,18 +213,36 @@ FLUTTER_ASSERT_ARC
     willConnectToSession:(UISceneSession*)session
            flutterEngine:(FlutterEngine*)engine
                  options:(UISceneConnectionOptions*)connectionOptions {
+  // Don't send connection options if a plugin has already used them.
+  UISceneConnectionOptions* availableOptions = connectionOptions;
+  if (self.sceneWillConnectEventHandledByPlugin) {
+    availableOptions = nil;
+  }
   BOOL handledByPlugin = [engine.sceneLifeCycleDelegate scene:scene
                                          willConnectToSession:session
-                                                      options:connectionOptions];
-  if (!handledByPlugin) {
+                                                      options:availableOptions];
+
+  // If no plugins handled this, give the application fallback a chance to handle it.
+  // Only call the fallback once since it's per application.
+  if (!handledByPlugin && !self.sceneWillConnectFallbackCalled) {
+    self.sceneWillConnectFallbackCalled = YES;
+    if ([[self applicationLifeCycleDelegate] sceneWillConnectFallback:connectionOptions]) {
+      handledByPlugin = YES;
+    }
+  }
+  if (handledByPlugin) {
+    self.sceneWillConnectEventHandledByPlugin = YES;
+  }
+
+  if (!self.sceneWillConnectEventHandledByPlugin) {
     // Only process deeplinks if a plugin has not already done something to handle this event.
     [self handleDeeplinkingForEngine:engine options:connectionOptions];
   }
 }
 
 - (void)sceneDidDisconnect:(UIScene*)scene {
-  [self updateEnginesInScene:scene];
-  for (FlutterEngine* engine in _engines.allObjects) {
+  [self updateFlutterManagedEnginesInScene:scene];
+  for (FlutterEngine* engine in [self allEngines]) {
     [engine.sceneLifeCycleDelegate sceneDidDisconnect:scene];
   }
   // There is no application equivalent for this event and therefore no fallback.
@@ -160,16 +251,16 @@ FLUTTER_ASSERT_ARC
 #pragma mark - Transitioning to the foreground
 
 - (void)sceneWillEnterForeground:(UIScene*)scene {
-  [self updateEnginesInScene:scene];
-  for (FlutterEngine* engine in _engines.allObjects) {
+  [self updateFlutterManagedEnginesInScene:scene];
+  for (FlutterEngine* engine in [self allEngines]) {
     [engine.sceneLifeCycleDelegate sceneWillEnterForeground:scene];
   }
   [[self applicationLifeCycleDelegate] sceneWillEnterForegroundFallback];
 }
 
 - (void)sceneDidBecomeActive:(UIScene*)scene {
-  [self updateEnginesInScene:scene];
-  for (FlutterEngine* engine in _engines.allObjects) {
+  [self updateFlutterManagedEnginesInScene:scene];
+  for (FlutterEngine* engine in [self allEngines]) {
     [engine.sceneLifeCycleDelegate sceneDidBecomeActive:scene];
   }
   [[self applicationLifeCycleDelegate] sceneDidBecomeActiveFallback];
@@ -178,16 +269,16 @@ FLUTTER_ASSERT_ARC
 #pragma mark - Transitioning to the background
 
 - (void)sceneWillResignActive:(UIScene*)scene {
-  [self updateEnginesInScene:scene];
-  for (FlutterEngine* engine in _engines.allObjects) {
+  [self updateFlutterManagedEnginesInScene:scene];
+  for (FlutterEngine* engine in [self allEngines]) {
     [engine.sceneLifeCycleDelegate sceneWillResignActive:scene];
   }
   [[self applicationLifeCycleDelegate] sceneWillResignActiveFallback];
 }
 
 - (void)sceneDidEnterBackground:(UIScene*)scene {
-  [self updateEnginesInScene:scene];
-  for (FlutterEngine* engine in _engines.allObjects) {
+  [self updateFlutterManagedEnginesInScene:scene];
+  for (FlutterEngine* engine in [self allEngines]) {
     [engine.sceneLifeCycleDelegate sceneDidEnterBackground:scene];
   }
   [[self applicationLifeCycleDelegate] sceneDidEnterBackgroundFallback];
@@ -196,11 +287,11 @@ FLUTTER_ASSERT_ARC
 #pragma mark - Opening URLs
 
 - (void)scene:(UIScene*)scene openURLContexts:(NSSet<UIOpenURLContext*>*)URLContexts {
-  [self updateEnginesInScene:scene];
+  [self updateFlutterManagedEnginesInScene:scene];
 
   // Track engines that had this event handled by a plugin.
   NSMutableSet<FlutterEngine*>* enginesHandledByPlugin = [NSMutableSet set];
-  for (FlutterEngine* engine in _engines.allObjects) {
+  for (FlutterEngine* engine in [self allEngines]) {
     if ([engine.sceneLifeCycleDelegate scene:scene openURLContexts:URLContexts]) {
       [enginesHandledByPlugin addObject:engine];
     }
@@ -215,7 +306,7 @@ FLUTTER_ASSERT_ARC
   }
 
   // For any engine that was not handled by a plugin, do deeplinking.
-  for (FlutterEngine* engine in _engines.allObjects) {
+  for (FlutterEngine* engine in [self allEngines]) {
     if ([enginesHandledByPlugin containsObject:engine]) {
       continue;
     }
@@ -230,11 +321,11 @@ FLUTTER_ASSERT_ARC
 #pragma mark - Continuing user activities
 
 - (void)scene:(UIScene*)scene continueUserActivity:(NSUserActivity*)userActivity {
-  [self updateEnginesInScene:scene];
+  [self updateFlutterManagedEnginesInScene:scene];
 
   // Track engines that had this event handled by a plugin.
   NSMutableSet<FlutterEngine*>* enginesHandledByPlugin = [NSMutableSet set];
-  for (FlutterEngine* engine in _engines.allObjects) {
+  for (FlutterEngine* engine in [self allEngines]) {
     if ([engine.sceneLifeCycleDelegate scene:scene continueUserActivity:userActivity]) {
       [enginesHandledByPlugin addObject:engine];
     }
@@ -249,7 +340,7 @@ FLUTTER_ASSERT_ARC
   }
 
   // For any engine that was not handled by a plugin, do deeplinking.
-  for (FlutterEngine* engine in _engines.allObjects) {
+  for (FlutterEngine* engine in [self allEngines]) {
     if ([enginesHandledByPlugin containsObject:engine]) {
       continue;
     }
@@ -266,9 +357,9 @@ FLUTTER_ASSERT_ARC
     activity = [[NSUserActivity alloc] initWithActivityType:scene.session.configuration.name];
   }
 
-  [self updateEnginesInScene:scene];
+  [self updateFlutterManagedEnginesInScene:scene];
   int64_t appBundleModifiedTime = FlutterSharedApplication.lastAppModificationTime;
-  for (FlutterEngine* engine in [_engines allObjects]) {
+  for (FlutterEngine* engine in [self allEngines]) {
     FlutterViewController* vc = (FlutterViewController*)engine.viewController;
     NSString* restorationId = vc.restorationIdentifier;
     if (restorationId) {
@@ -289,7 +380,7 @@ FLUTTER_ASSERT_ARC
     restoreInteractionStateWithUserActivity:(NSUserActivity*)stateRestorationActivity {
   // Restores state per FlutterViewController.
   NSDictionary<NSString*, id>* userInfo = stateRestorationActivity.userInfo;
-  [self updateEnginesInScene:scene];
+  [self updateFlutterManagedEnginesInScene:scene];
   int64_t appBundleModifiedTime = FlutterSharedApplication.lastAppModificationTime;
   NSNumber* stateDateNumber = userInfo[kRestorationStateAppModificationKey];
   int64_t stateDate = 0;
@@ -301,7 +392,7 @@ FLUTTER_ASSERT_ARC
     return;
   }
 
-  for (FlutterEngine* engine in [_engines allObjects]) {
+  for (FlutterEngine* engine in [self allEngines]) {
     UIViewController* vc = (UIViewController*)engine.viewController;
     NSString* restorationId = vc.restorationIdentifier;
     if (restorationId) {
@@ -318,10 +409,10 @@ FLUTTER_ASSERT_ARC
 - (void)windowScene:(UIWindowScene*)windowScene
     performActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
                completionHandler:(void (^)(BOOL succeeded))completionHandler {
-  [self updateEnginesInScene:windowScene];
+  [self updateFlutterManagedEnginesInScene:windowScene];
 
   BOOL handledByPlugin = NO;
-  for (FlutterEngine* engine in _engines.allObjects) {
+  for (FlutterEngine* engine in [self allEngines]) {
     BOOL result = [engine.sceneLifeCycleDelegate windowScene:windowScene
                                 performActionForShortcutItem:shortcutItem
                                            completionHandler:completionHandler];
@@ -405,6 +496,15 @@ FLUTTER_ASSERT_ARC
     }
   }
   return nil;
+}
+
+- (void)compactNSPointerArray:(NSPointerArray*)array {
+  // NSPointerArray is clever and assumes that unless a mutation operation has occurred on it that
+  // has set one of its values to nil, nothing could have changed and it can skip compaction.
+  // That's reasonable behaviour on a regular NSPointerArray but not for a weakObjectPointerArray.
+  // As a workaround, we mutate it first. See: http://www.openradar.me/15396578
+  [array addPointer:nil];
+  [array compact];
 }
 @end
 

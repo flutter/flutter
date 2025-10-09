@@ -52,6 +52,18 @@ void main() {
     }
   });
 
+  testWithoutContext('flutter run outputs DTD and DevTools events', () async {
+    await flutter.run(startPaused: true, withDebugger: true);
+    expect(flutter.devToolsUri, isNotNull);
+    expect(flutter.dtdUri, isNotNull);
+  });
+
+  testWithoutContext('flutter run does not output DTD and DevTools events', () async {
+    await flutter.run(startPaused: true, withDebugger: true, noDevtools: true);
+    expect(flutter.devToolsUri, isNull);
+    expect(flutter.dtdUri, isNull);
+  });
+
   testWithoutContext('sets activeDevToolsServerAddress extension', () async {
     await flutter.run(
       startPaused: true,

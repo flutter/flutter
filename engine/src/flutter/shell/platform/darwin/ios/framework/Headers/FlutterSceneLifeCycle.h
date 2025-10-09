@@ -10,6 +10,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class FlutterEngine;
+
 /**
  * A protocol for delegates that handle `UISceneDelegate` and `UIWindowSceneDelegate` life-cycle
  * events.
@@ -97,6 +99,45 @@ API_AVAILABLE(ios(13.0))
 @end
 
 /**
+ * A protocol for manually registering a `FlutterEngine` to receive scene life cycle events.
+ */
+@protocol FlutterSceneLifeCycleEngineRegistration
+/**
+ * Registers a `FlutterEngine` to receive scene life cycle events.
+ *
+ * This method is **only** necessary when the following conditions are true:
+ * 1. Multiple Scenes (UIApplicationSupportsMultipleScenes) is enabled.
+ * 2. The `UIWindowSceneDelegate` `window.rootViewController` is not a `FlutterViewController`
+ *    initialized with the target `FlutterEngine`.
+ *
+ * When multiple scenes is enabled (UIApplicationSupportsMultipleScenes), Flutter cannot
+ * automatically associate a `FlutterEngine` with a scene during the scene connection phase. In
+ * order for plugins to receive launch connection information, the `FlutterEngine` must be manually
+ * registered with either the `FlutterSceneDelegate` or `FlutterPluginSceneLifeCycleDelegate` during
+ * `scene:willConnectToSession:options:`.
+ *
+ * In all other cases, or once the `FlutterViewController.view` associated with the `FlutterEngine`
+ * is added to the view hierarchy, Flutter will automatically handle registration for scene events.
+ *
+ * Manually registered engines must also be manually deregistered and re-registered if they
+ * switch scenes. Use `unregisterSceneLifeCycleWithFlutterEngine:`.
+ *
+ * @param engine The `FlutterEngine` to register for scene life cycle events.
+ * @return `NO` if already manually registered.
+ */
+- (BOOL)registerSceneLifeCycleWithFlutterEngine:(FlutterEngine*)engine;
+
+/**
+ * Use this method to unregister a `FlutterEngine` from the scene's life cycle events.
+ *
+ * @param engine The `FlutterEngine` to unregister for scene life cycle events.
+ * @return `NO` if the engine was not found among the manually registered engines and could not be
+ * unregistered.
+ */
+- (BOOL)unregisterSceneLifeCycleWithFlutterEngine:(FlutterEngine*)engine;
+@end
+
+/**
  * Forwards `UISceneDelegate` and `UIWindowSceneDelegate` callbacks to plugins that register for
  * them.
  *
@@ -105,7 +146,7 @@ API_AVAILABLE(ios(13.0))
  */
 FLUTTER_DARWIN_EXPORT
 API_AVAILABLE(ios(13.0))
-@interface FlutterPluginSceneLifeCycleDelegate : NSObject
+@interface FlutterPluginSceneLifeCycleDelegate : NSObject <FlutterSceneLifeCycleEngineRegistration>
 
 #pragma mark - Connecting and disconnecting the scene
 
