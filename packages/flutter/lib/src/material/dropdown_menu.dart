@@ -389,7 +389,7 @@ class DropdownMenu<T extends Object> extends StatefulWidget {
   /// selection was cleared / that no item was chosen.
   ///
   /// Defaults to null. If this callback itself is null, the widget still updates
-  /// the text field with the selected label but does not notify the caller.
+  /// the text field with the selected label.
   final ValueChanged<T?>? onSelected;
 
   /// Defines the keyboard focus for this widget.
