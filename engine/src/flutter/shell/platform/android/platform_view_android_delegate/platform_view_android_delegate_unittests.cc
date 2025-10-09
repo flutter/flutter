@@ -41,7 +41,7 @@ TEST(PlatformViewShell, UpdateSemanticsDoesFlutterViewUpdateSemantics) {
   buffer_int32[position++] = node0.platformViewId;
   buffer_int32[position++] = node0.scrollChildren;
   buffer_int32[position++] = node0.scrollIndex;
-  buffer_int32[position++] = node0.traversalOwner;
+  buffer_int32[position++] = node0.traversalParent;
   buffer_float32[position++] = static_cast<float>(node0.scrollPosition);
   buffer_float32[position++] = static_cast<float>(node0.scrollExtentMax);
   buffer_float32[position++] = static_cast<float>(node0.scrollExtentMin);
@@ -112,7 +112,7 @@ TEST(PlatformViewShell, UpdateSemanticsDoesUpdateLinkUrl) {
   buffer_int32[position++] = node0.platformViewId;
   buffer_int32[position++] = node0.scrollChildren;
   buffer_int32[position++] = node0.scrollIndex;
-  buffer_int32[position++] = node0.traversalOwner;
+  buffer_int32[position++] = node0.traversalParent;
   buffer_float32[position++] = static_cast<float>(node0.scrollPosition);
   buffer_float32[position++] = static_cast<float>(node0.scrollExtentMax);
   buffer_float32[position++] = static_cast<float>(node0.scrollExtentMin);
@@ -163,7 +163,7 @@ TEST(PlatformViewShell, UpdateSemanticsDoesUpdateLocale) {
   node0.identifier = "identifier";
   node0.label = "label";
   node0.locale = "es-MX";
-  node0.traversalOwner = -1;
+  node0.traversalParent = -1;
   update.insert(std::make_pair(0, node0));
 
   std::vector<uint8_t> expected_buffer(
@@ -184,7 +184,7 @@ TEST(PlatformViewShell, UpdateSemanticsDoesUpdateLocale) {
   buffer_int32[position++] = node0.platformViewId;
   buffer_int32[position++] = node0.scrollChildren;
   buffer_int32[position++] = node0.scrollIndex;
-  buffer_int32[position++] = node0.traversalOwner;
+  buffer_int32[position++] = node0.traversalParent;
   buffer_float32[position++] = static_cast<float>(node0.scrollPosition);
   buffer_float32[position++] = static_cast<float>(node0.scrollExtentMax);
   buffer_float32[position++] = static_cast<float>(node0.scrollExtentMin);
@@ -271,7 +271,7 @@ TEST(PlatformViewShell,
   buffer_int32[position++] = node0.platformViewId;
   buffer_int32[position++] = node0.scrollChildren;
   buffer_int32[position++] = node0.scrollIndex;
-  buffer_int32[position++] = node0.traversalOwner;
+  buffer_int32[position++] = node0.traversalParent;
   buffer_float32[position++] = static_cast<float>(node0.scrollPosition);
   buffer_float32[position++] = static_cast<float>(node0.scrollExtentMax);
   buffer_float32[position++] = static_cast<float>(node0.scrollExtentMin);
