@@ -86,7 +86,7 @@ class AndroidExternalViewEmbedderWrapper final : public ExternalViewEmbedder {
   std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
   std::shared_ptr<AndroidSurfaceFactory> surface_factory_;
   std::unique_ptr<AndroidExternalViewEmbedder> non_hcpp_view_embedder_;
-  std::unique_ptr<AndroidExternalViewEmbedder2> hcpp_view_embedder_;
+  std::shared_ptr<AndroidExternalViewEmbedder2> hcpp_view_embedder_;
 };
 
 }  // namespace flutter

@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_2_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_2_H_
 
+#include <memory>
 #include <unordered_map>
 
 #include "flutter/common/task_runners.h"
@@ -30,7 +31,9 @@ namespace flutter {
 /// This implementation of the external view embedder is designed only to use
 /// HC++ mode. Mixing old HC modes is not supported, but either of the texture
 /// composition based platform views can be used with either mode.
-class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
+class AndroidExternalViewEmbedder2 final
+    : public ExternalViewEmbedder,
+      public std::enable_shared_from_this<AndroidExternalViewEmbedder2> {
  public:
   AndroidExternalViewEmbedder2(
       const AndroidContext& android_context,
