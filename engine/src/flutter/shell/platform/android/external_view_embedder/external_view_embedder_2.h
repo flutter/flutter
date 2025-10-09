@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_2_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_2_H_
 
+#include <atomic>
 #include <unordered_map>
 
 #include "flutter/common/task_runners.h"
@@ -114,7 +115,7 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
   const TaskRunners task_runners_;
 
   // If the overlay layer is currently shown.
-  bool overlay_layer_is_shown_ = false;
+  std::atomic_bool overlay_layer_is_shown_{false};;
 
   // The size of the root canvas.
   DlISize frame_size_;

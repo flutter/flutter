@@ -282,20 +282,20 @@ void AndroidExternalViewEmbedder2::DestroySurfaces() {
                                       latch.Signal();
                                     });
   latch.Wait();
-  overlay_layer_is_shown_ = false;
+  overlay_layer_is_shown_.store(false);
 }
 
 void AndroidExternalViewEmbedder2::ShowOverlayLayerIfNeeded() {
-  if (!overlay_layer_is_shown_) {
+  if (!overlay_layer_is_shown_.load()) {
     jni_facade_->showOverlaySurface2();
-    overlay_layer_is_shown_ = true;
+    overlay_layer_is_shown_.store(true);
   }
 }
 
 void AndroidExternalViewEmbedder2::HideOverlayLayerIfNeeded() {
-  if (overlay_layer_is_shown_) {
+  if (overlay_layer_is_shown_.load()) {
     jni_facade_->hideOverlaySurface2();
-    overlay_layer_is_shown_ = false;
+    overlay_layer_is_shown_.store(false);
   }
 }
 
