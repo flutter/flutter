@@ -13,6 +13,7 @@ library;
 import 'dart:ui' show SemanticsRole, clampDouble, lerpDouble;
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 
 import 'color_scheme.dart';
 import 'colors.dart';
@@ -405,6 +406,14 @@ class Dialog extends StatelessWidget {
 /// For finer-grained control over the sizing of a dialog, consider using
 /// [Dialog] directly.
 ///
+/// ## Accessibility
+///
+/// The accessibility behavior of [AlertDialog] is platform adaptive, based on
+/// the device's actual platform rather than the theme's platform setting. This
+/// ensures that assistive technologies like VoiceOver on iOS and macOS receive
+/// the correct platform-specific semantics label and appropriate flags, even
+/// when the app's theme is configured to mimic a different platform's appearance.
+///
 /// See also:
 ///
 ///  * [SimpleDialog], which handles the scrolling of the contents but has no [actions].
@@ -771,7 +780,7 @@ class AlertDialog extends StatelessWidget {
         : _DialogDefaultsM2(context);
 
     String? label = semanticLabel;
-    switch (theme.platform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         break;
@@ -848,7 +857,7 @@ class AlertDialog extends StatelessWidget {
           child: Semantics(
             // For iOS platform, the focus always lands on the title.
             // Set nameRoute to false to avoid title being announce twice.
-            namesRoute: label == null && theme.platform != TargetPlatform.iOS,
+            namesRoute: label == null && defaultTargetPlatform != TargetPlatform.iOS,
             container: true,
             child: title,
           ),
@@ -1154,6 +1163,14 @@ class SimpleDialogOption extends StatelessWidget {
 /// ```
 /// {@end-tool}
 ///
+/// ## Accessibility
+///
+/// The accessibility behavior of [SimpleDialog] is platform adaptive, based on
+/// the device's actual platform rather than the theme's platform setting. This
+/// ensures that assistive technologies like VoiceOver on iOS and macOS receive
+/// the correct platform-specific semantics label and appropriate flags, even
+/// when the app's theme is configured to mimic a different platform's appearance.
+///
 /// See also:
 ///
 ///  * [SimpleDialogOption], which are options used in this type of dialog.
@@ -1273,7 +1290,7 @@ class SimpleDialog extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
 
     String? label = semanticLabel;
-    switch (theme.platform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.macOS:
       case TargetPlatform.iOS:
         break;
@@ -1312,7 +1329,7 @@ class SimpleDialog extends StatelessWidget {
           child: Semantics(
             // For iOS platform, the focus always lands on the title.
             // Set nameRoute to false to avoid title being announce twice.
-            namesRoute: label == null && theme.platform != TargetPlatform.iOS,
+            namesRoute: label == null && defaultTargetPlatform != TargetPlatform.iOS,
             container: true,
             child: title,
           ),
