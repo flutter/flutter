@@ -3715,7 +3715,7 @@ targets:
     properties:
       task_name: basic_material_app_macos__compile
 
-  - name: Mac build_ios_framework_module_test
+  - name: Mac_x64 build_ios_framework_module_test
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -3727,6 +3727,7 @@ targets:
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: build_ios_framework_module_test
+      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
