@@ -1183,6 +1183,9 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
                   _controller.close();
                 },
           child: ExcludeSemantics(
+            // When both `isTextField` and `isButton` are true, this widget will
+            // still be treated as a text field on web. So excluding the semantics
+            // of the `TextField` on web is needed.
             excluding: isButton && kIsWeb,
             child: TextField(
               key: _anchorKey,
