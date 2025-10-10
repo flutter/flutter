@@ -86,13 +86,14 @@ class OutlinedButton extends ButtonStyleButton {
     required super.child,
   }) : _addPadding = false;
 
-  /// Create a text button from a pair of widgets that serve as the button's
+  /// Create an outlined button from a pair of widgets that serve as the button's
   /// [icon] and [label].
   ///
   /// The icon and label are arranged in a row and padded by 12 logical pixels
   /// at the start, and 16 at the end, with an 8 pixel gap in between.
   ///
-  /// If [icon] is null, will create an [OutlinedButton] instead.
+  /// If [icon] is null, this constructor will create an outlined button
+  /// that doesn't display an icon.
   ///
   /// {@macro flutter.material.ButtonStyleButton.iconAlignment}
   ///
@@ -114,10 +115,10 @@ class OutlinedButton extends ButtonStyleButton {
        super(
          child: icon != null
              ? _OutlinedButtonWithIconChild(
-                 iconAlignment: iconAlignment,
                  label: label,
-                 buttonStyle: style,
                  icon: icon,
+                 buttonStyle: style,
+                 iconAlignment: iconAlignment,
                )
              : label,
        );
@@ -419,13 +420,13 @@ EdgeInsetsGeometry _scaledPadding(BuildContext context) {
 class _OutlinedButtonWithIconChild extends StatelessWidget {
   const _OutlinedButtonWithIconChild({
     required this.label,
-    this.icon,
+    required this.icon,
     required this.buttonStyle,
     required this.iconAlignment,
   });
 
   final Widget label;
-  final Widget? icon;
+  final Widget icon;
   final ButtonStyle? buttonStyle;
   final IconAlignment? iconAlignment;
 
@@ -442,12 +443,6 @@ class _OutlinedButtonWithIconChild extends StatelessWidget {
         outlinedButtonTheme.style?.iconAlignment ??
         buttonStyle?.iconAlignment ??
         IconAlignment.start;
-    final Widget? icon = this.icon;
-
-    if (icon == null) {
-      return label;
-    }
-
     return Row(
       mainAxisSize: MainAxisSize.min,
       spacing: lerpDouble(8, 4, scale)!,
