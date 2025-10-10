@@ -40,10 +40,10 @@
   "clearButtonLabel": "Wyczyść",
   "cancelButtonLabel": "Anuluj",
   "backButtonLabel": "Wstecz",
-  "expansionTileExpandedHint": "double tap to collapse",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "kliknij dwukrotnie, aby zwinąć",
+  "expansionTileCollapsedHint": "kliknij dwukrotnie, aby rozwinąć",
+  "expansionTileExpandedTapHint": "Zwiń",
+  "expansionTileCollapsedTapHint": "Rozwiń, aby wyświetlić więcej informacji",
+  "expandedHint": "Zwinięto",
+  "collapsedHint": "Rozwinięto"
 }
