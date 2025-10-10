@@ -1125,16 +1125,9 @@ class SelectableRegionState extends State<SelectableRegion>
     final bool draggingHandles =
         _selectionOverlay != null &&
         (_selectionOverlay!.isDraggingStartHandle || _selectionOverlay!.isDraggingEndHandle);
-    if (widget.selectionControls is! TextSelectionHandleControls) {
-      if (!draggingHandles) {
-        _selectionOverlay!.hideMagnifier();
-        _showToolbar();
-      }
-    } else {
-      if (!draggingHandles) {
-        _selectionOverlay!.hideMagnifier();
-        _showToolbar();
-      }
+    if (!draggingHandles) {
+      _selectionOverlay!.hideMagnifier();
+      _showToolbar();
     }
     _finalizeSelection();
     _updateSelectedContentIfNeeded();
