@@ -181,7 +181,7 @@ class _TestParagraphStyleBuilder {
   ui.TextDirection? textDirection;
   ui.FontWeight? fontWeight;
   ui.FontStyle? fontStyle;
-  int? maxLines;
+  double? maxLines;
   String? fontFamily;
   double? fontSize;
   double? height;
