@@ -1467,6 +1467,19 @@ void main() {
       },
     );
   });
+
+  testWidgets('FloatingActionButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          floatingActionButton: Center(
+            child: SizedBox.shrink(child: FloatingActionButton(onPressed: () {})),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(FloatingActionButton)), Size.zero);
+  });
 }
 
 Offset _rightEdgeOfFab(WidgetTester tester) {
