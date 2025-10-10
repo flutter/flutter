@@ -5098,14 +5098,21 @@ void main() {
   });
 
   testWidgets('MenuAnchor does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final MenuController menuController = MenuController();
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Center(
-          child: SizedBox.shrink(child: MenuAnchor(menuChildren: <Widget>[Text('X')])),
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: MenuAnchor(menuChildren: const <Widget>[Text('X')], controller: menuController),
+          ),
         ),
       ),
     );
     expect(tester.getSize(find.byType(MenuAnchor)), Size.zero);
+    menuController.open();
+    await tester.pump();
+    expect(find.text('X'), findsOne);
   });
 }
 
